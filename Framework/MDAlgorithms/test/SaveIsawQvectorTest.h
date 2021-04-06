@@ -21,9 +21,7 @@ class SaveIsawQvectorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SaveIsawQvectorTest *createSuite() {
-    return new SaveIsawQvectorTest();
-  }
+  static SaveIsawQvectorTest *createSuite() { return new SaveIsawQvectorTest(); }
   static void destroySuite(SaveIsawQvectorTest *suite) { delete suite; }
 
   void test_Init() {
@@ -39,8 +37,8 @@ public:
 
     // create the test workspace
     int numEventsPer = 100;
-    Mantid::DataObjects::EventWorkspace_sptr inputW = Mantid::DataObjects::
-        MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer);
+    Mantid::DataObjects::EventWorkspace_sptr inputW =
+        Mantid::DataObjects::MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer);
     AnalysisDataService::Instance().addOrReplace(inWSName, inputW);
     size_t nevents = inputW->getNumberEvents();
 

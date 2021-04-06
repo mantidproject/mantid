@@ -59,17 +59,14 @@ public:
   /// ParameterType<T>
   template <class T> const T &value();
   /// set description:
-  virtual void setDescription(const std::string &source) {
-    m_description.assign(source);
-  }
+  virtual void setDescription(const std::string &source) { m_description.assign(source); }
   /// get description
   virtual const std::string &getDescription() const { return m_description; }
   /// get short description
   virtual std::string getShortDescription() const;
   /// Equality operator
   bool operator==(const Parameter &rhs) const {
-    if (this->name() == rhs.name() && this->type() == rhs.type() &&
-        this->asString() == rhs.asString())
+    if (this->name() == rhs.name() && this->type() == rhs.type() && this->asString() == rhs.asString())
       return true;
     else
       return false;
@@ -165,8 +162,7 @@ template <class T> void Parameter::set(const T &t) {
  * @tparam T The type of the parameter
  * @param value :: A string representation of the parameter's value
  */
-template <class Type>
-void ParameterType<Type>::fromString(const std::string &value) {
+template <class Type> void ParameterType<Type>::fromString(const std::string &value) {
   std::istringstream istr(value);
   istr >> m_value;
 }
@@ -174,25 +170,19 @@ void ParameterType<Type>::fromString(const std::string &value) {
 /**
  * Specialization for a string.
  */
-template <>
-inline void ParameterType<std::string>::fromString(const std::string &value) {
-  m_value = value;
-}
+template <> inline void ParameterType<std::string>::fromString(const std::string &value) { m_value = value; }
 
 /** Set the value of the parameter via the assignment operator
  * @tparam The parameter type
  * @param value :: The vlue of the parameter
  */
-template <class Type> void ParameterType<Type>::setValue(const Type &value) {
-  m_value = value;
-}
+template <class Type> void ParameterType<Type>::setValue(const Type &value) { m_value = value; }
 
 /** Set the value of the parameter via the assignment operator
  * @param value :: The value of the parameter
  * @returns A reference to the parameter
  */
-template <class Type>
-ParameterType<Type> &ParameterType<Type>::operator=(const Type &value) {
+template <class Type> ParameterType<Type> &ParameterType<Type>::operator=(const Type &value) {
   setValue(value);
   return *this;
 }

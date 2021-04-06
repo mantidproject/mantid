@@ -24,26 +24,19 @@ Mantid::Kernel::Logger g_log("ContainerSubtraction");
 
 namespace MantidQt {
 namespace CustomInterfaces {
-ContainerSubtraction::ContainerSubtraction(QWidget *parent)
-    : CorrectionsTab(parent), m_spectra(0) {
+ContainerSubtraction::ContainerSubtraction(QWidget *parent) : CorrectionsTab(parent), m_spectra(0) {
   m_uiForm.setupUi(parent);
-  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
-      m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraContour));
+  setOutputPlotOptionsPresenter(
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraContour));
 
-  connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
-          SLOT(newSample(const QString &)));
-  connect(m_uiForm.dsContainer, SIGNAL(dataReady(const QString &)), this,
-          SLOT(newContainer(const QString &)));
-  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
-          SLOT(plotPreview(int)));
-  connect(m_uiForm.spCanScale, SIGNAL(valueChanged(double)), this,
-          SLOT(updateCan()));
-  connect(m_uiForm.spShift, SIGNAL(valueChanged(double)), this,
-          SLOT(updateCan()));
+  connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this, SLOT(newSample(const QString &)));
+  connect(m_uiForm.dsContainer, SIGNAL(dataReady(const QString &)), this, SLOT(newContainer(const QString &)));
+  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(plotPreview(int)));
+  connect(m_uiForm.spCanScale, SIGNAL(valueChanged(double)), this, SLOT(updateCan()));
+  connect(m_uiForm.spShift, SIGNAL(valueChanged(double)), this, SLOT(updateCan()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
-          SLOT(plotCurrentPreview()));
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsSample->isOptional(true);
@@ -59,17 +52,14 @@ ContainerSubtraction::~ContainerSubtraction() {
     AnalysisDataService::Instance().remove(m_transformedContainerWS->getName());
 }
 
-void ContainerSubtraction::setTransformedContainer(
-    MatrixWorkspace_sptr workspace, const std::string &name) {
+void ContainerSubtraction::setTransformedContainer(MatrixWorkspace_sptr workspace, const std::string &name) {
   m_transformedContainerWS = std::move(workspace);
   AnalysisDataService::Instance().addOrReplace(name, m_transformedContainerWS);
 }
 
-void ContainerSubtraction::setTransformedContainer(
-    const MatrixWorkspace_sptr &workspace) {
+void ContainerSubtraction::setTransformedContainer(const MatrixWorkspace_sptr &workspace) {
   m_transformedContainerWS = workspace;
-  AnalysisDataService::Instance().addOrReplace(workspace->getName(),
-                                               m_transformedContainerWS);
+  AnalysisDataService::Instance().addOrReplace(workspace->getName(), m_transformedContainerWS);
 }
 
 void ContainerSubtraction::setup() {}
@@ -105,8 +95,7 @@ void ContainerSubtraction::run() {
 
     m_csSubtractedWS = minusWorkspace(m_csSampleWS, containerWs);
     m_pythonExportWsName = createOutputName();
-    AnalysisDataService::Instance().addOrReplace(m_pythonExportWsName,
-                                                 m_csSubtractedWS);
+    AnalysisDataService::Instance().addOrReplace(m_pythonExportWsName, m_csSubtractedWS);
     containerSubtractionComplete();
   }
   setRunIsRunning(false);
@@ -167,23 +156,16 @@ bool ContainerSubtraction::validate() {
   const auto sampleName = m_uiForm.dsSample->getCurrentDataName();
   const auto sampleWsName = sampleName.toStdString();
   bool sampleExists = AnalysisDataService::Instance().doesExist(sampleWsName);
-  if (sampleExists &&
-      !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          sampleWsName)) {
-    uiv.addErrorMessage(
-        "Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
+  if (sampleExists && !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleWsName)) {
+    uiv.addErrorMessage("Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
   }
 
   // Check container is a matrix workspace
   const auto containerName = m_uiForm.dsContainer->getCurrentDataName();
   const auto containerWsName = containerName.toStdString();
-  bool containerExists =
-      AnalysisDataService::Instance().doesExist(containerWsName);
-  if (containerExists &&
-      !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          containerWsName)) {
-    uiv.addErrorMessage(
-        "Invalid container workspace. Ensure a MatrixWorkspace is provided.");
+  bool containerExists = AnalysisDataService::Instance().doesExist(containerWsName);
+  if (containerExists && !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(containerWsName)) {
+    uiv.addErrorMessage("Invalid container workspace. Ensure a MatrixWorkspace is provided.");
   }
 
   if (m_csSampleWS && m_csContainerWS) {
@@ -203,8 +185,7 @@ bool ContainerSubtraction::validate() {
     const size_t containerHist = m_csContainerWS->getNumberHistograms();
 
     if (sampleHist != containerHist) {
-      uiv.addErrorMessage(
-          " Sample and Container do not have a matching number of Histograms.");
+      uiv.addErrorMessage(" Sample and Container do not have a matching number of Histograms.");
     }
   }
 
@@ -223,14 +204,10 @@ void ContainerSubtraction::loadSettings(const QSettings &settings) {
 void ContainerSubtraction::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("ContainerSubtraction");
-  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
-                                          : getExtensions(tabName));
-  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
-                                          : noSuffixes);
-  m_uiForm.dsContainer->setFBSuffixes(filter ? getContainerFBSuffixes(tabName)
-                                             : getExtensions(tabName));
-  m_uiForm.dsContainer->setWSSuffixes(filter ? getContainerWSSuffixes(tabName)
-                                             : noSuffixes);
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsContainer->setFBSuffixes(filter ? getContainerFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsContainer->setWSSuffixes(filter ? getContainerWSSuffixes(tabName) : noSuffixes);
 }
 
 /**
@@ -244,13 +221,11 @@ void ContainerSubtraction::newSample(const QString &dataName) {
   // Remove the subtracted workspace as it is no longer valid
   removeOutput();
 
-  m_csSampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      dataName.toStdString());
+  m_csSampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(dataName.toStdString());
   // Get new workspace
   if (m_csSampleWS) {
     m_csSampleWS = convertToHistogram(m_csSampleWS);
-    m_uiForm.spPreviewSpec->setMaximum(
-        static_cast<int>(m_csSampleWS->getNumberHistograms()) - 1);
+    m_uiForm.spPreviewSpec->setMaximum(static_cast<int>(m_csSampleWS->getNumberHistograms()) - 1);
 
     // Plot the sample curve
     plotInPreview("Sample", m_csSampleWS, Qt::black);
@@ -278,8 +253,7 @@ void ContainerSubtraction::newContainer(const QString &dataName) {
   removeOutput();
 
   // Get new workspace
-  m_csContainerWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      dataName.toStdString());
+  m_csContainerWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(dataName.toStdString());
 
   if (m_csContainerWS) {
     m_csContainerWS = convertToHistogram(m_csContainerWS);
@@ -305,15 +279,13 @@ void ContainerSubtraction::updateCan() {
     if (shift) {
       transformed = shiftWorkspace(transformed, m_uiForm.spShift->value());
       transformed = rebinToWorkspace(transformed, m_csSampleWS);
-    } else if (m_csSampleWS &&
-               !checkWorkspaceBinningMatches(m_csSampleWS, m_csContainerWS)) {
+    } else if (m_csSampleWS && !checkWorkspaceBinningMatches(m_csSampleWS, m_csContainerWS)) {
       transformed = rebinToWorkspace(transformed, m_csSampleWS);
     }
 
     if (scale)
       transformed = scaleWorkspace(transformed, m_uiForm.spCanScale->value());
-    setTransformedContainer(transformed,
-                            "__" + m_csContainerWS->getName() + "_transformed");
+    setTransformedContainer(transformed, "__" + m_csContainerWS->getName() + "_transformed");
   }
   plotPreview(m_uiForm.spPreviewSpec->value());
 }
@@ -329,8 +301,7 @@ void ContainerSubtraction::plotPreview(int wsIndex) {
 
   // Plot container
   if (m_csContainerWS) {
-    m_uiForm.ppPreview->addSpectrum("Container", m_transformedContainerWS,
-                                    wsIndex, Qt::red);
+    m_uiForm.ppPreview->addSpectrum("Container", m_transformedContainerWS, wsIndex, Qt::red);
   }
 
   // Plot sample
@@ -340,9 +311,7 @@ void ContainerSubtraction::plotPreview(int wsIndex) {
 
   // Plot result
   if (!m_pythonExportWsName.empty()) {
-    m_uiForm.ppPreview->addSpectrum(
-        "Subtracted", QString::fromStdString(m_pythonExportWsName), wsIndex,
-        Qt::blue);
+    m_uiForm.ppPreview->addSpectrum("Subtracted", QString::fromStdString(m_pythonExportWsName), wsIndex, Qt::blue);
   }
   m_uiForm.ppPreview->setUpdatesEnabled(true);
   m_spectra = boost::numeric_cast<size_t>(wsIndex);
@@ -358,8 +327,7 @@ void ContainerSubtraction::containerSubtractionComplete() {
 
   if (m_uiForm.ckShiftCan->isChecked()) {
     auto logText = boost::lexical_cast<std::string>(m_uiForm.spShift->value());
-    auto shiftLog = addSampleLogAlgorithm(m_csSubtractedWS, "container_shift",
-                                          "Number", logText);
+    auto shiftLog = addSampleLogAlgorithm(m_csSubtractedWS, "container_shift", "Number", logText);
     m_batchAlgoRunner->addAlgorithm(shiftLog);
   }
 }
@@ -414,9 +382,7 @@ void ContainerSubtraction::plotCurrentPreview() {
  * @param ws          The workspace whose spectra to plot in the preview.
  * @param curveColor  The color of the curve to plot in the preview.
  */
-void ContainerSubtraction::plotInPreview(const QString &curveName,
-                                         MatrixWorkspace_sptr &ws,
-                                         const QColor &curveColor) {
+void ContainerSubtraction::plotInPreview(const QString &curveName, MatrixWorkspace_sptr &ws, const QColor &curveColor) {
 
   // Check whether the selected spectra is now out of bounds with
   // respect to the specified workspace.
@@ -426,13 +392,9 @@ void ContainerSubtraction::plotInPreview(const QString &curveName,
     size_t specNo = 0;
 
     if (m_csSampleWS) {
-      specNo = std::min(ws->getNumberHistograms(),
-                        m_csSampleWS->getNumberHistograms()) -
-               1;
+      specNo = std::min(ws->getNumberHistograms(), m_csSampleWS->getNumberHistograms()) - 1;
     } else if (m_csContainerWS) {
-      specNo = std::min(ws->getNumberHistograms(),
-                        m_csContainerWS->getNumberHistograms()) -
-               1;
+      specNo = std::min(ws->getNumberHistograms(), m_csContainerWS->getNumberHistograms()) - 1;
     }
 
     m_uiForm.ppPreview->addSpectrum(curveName, ws, specNo, curveColor);
@@ -442,14 +404,11 @@ void ContainerSubtraction::plotInPreview(const QString &curveName,
   }
 }
 
-MatrixWorkspace_sptr ContainerSubtraction::requestRebinToSample(
-    MatrixWorkspace_sptr workspace) const {
-  const char *text =
-      "Binning on sample and container does not match."
-      "Would you like to rebin the container to match the sample?";
+MatrixWorkspace_sptr ContainerSubtraction::requestRebinToSample(MatrixWorkspace_sptr workspace) const {
+  const char *text = "Binning on sample and container does not match."
+                     "Would you like to rebin the container to match the sample?";
 
-  int result = QMessageBox::question(nullptr, tr("Rebin sample?"), tr(text),
-                                     QMessageBox::Yes, QMessageBox::No,
+  int result = QMessageBox::question(nullptr, tr("Rebin sample?"), tr(text), QMessageBox::Yes, QMessageBox::No,
                                      QMessageBox::NoButton);
 
   if (result == QMessageBox::Yes)
@@ -458,50 +417,41 @@ MatrixWorkspace_sptr ContainerSubtraction::requestRebinToSample(
     return workspace;
 }
 
-MatrixWorkspace_sptr
-ContainerSubtraction::shiftWorkspace(const MatrixWorkspace_sptr &workspace,
-                                     double shiftValue) const {
+MatrixWorkspace_sptr ContainerSubtraction::shiftWorkspace(const MatrixWorkspace_sptr &workspace,
+                                                          double shiftValue) const {
   auto shiftAlg = shiftAlgorithm(std::move(workspace), shiftValue);
   shiftAlg->execute();
   return shiftAlg->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr
-ContainerSubtraction::scaleWorkspace(const MatrixWorkspace_sptr &workspace,
-                                     double scaleValue) const {
+MatrixWorkspace_sptr ContainerSubtraction::scaleWorkspace(const MatrixWorkspace_sptr &workspace,
+                                                          double scaleValue) const {
   auto scaleAlg = scaleAlgorithm(std::move(workspace), scaleValue);
   scaleAlg->execute();
   return scaleAlg->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr ContainerSubtraction::minusWorkspace(
-    const MatrixWorkspace_sptr &lhsWorkspace,
-    const MatrixWorkspace_sptr &rhsWorkspace) const {
-  auto minusAlg =
-      minusAlgorithm(std::move(lhsWorkspace), std::move(rhsWorkspace));
+MatrixWorkspace_sptr ContainerSubtraction::minusWorkspace(const MatrixWorkspace_sptr &lhsWorkspace,
+                                                          const MatrixWorkspace_sptr &rhsWorkspace) const {
+  auto minusAlg = minusAlgorithm(std::move(lhsWorkspace), std::move(rhsWorkspace));
   minusAlg->execute();
   return minusAlg->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr ContainerSubtraction::rebinToWorkspace(
-    const MatrixWorkspace_sptr &workspaceToRebin,
-    const MatrixWorkspace_sptr &workspaceToMatch) const {
-  auto rebinAlg = rebinToWorkspaceAlgorithm(std::move(workspaceToRebin),
-                                            std::move(workspaceToMatch));
+MatrixWorkspace_sptr ContainerSubtraction::rebinToWorkspace(const MatrixWorkspace_sptr &workspaceToRebin,
+                                                            const MatrixWorkspace_sptr &workspaceToMatch) const {
+  auto rebinAlg = rebinToWorkspaceAlgorithm(std::move(workspaceToRebin), std::move(workspaceToMatch));
   rebinAlg->execute();
   return rebinAlg->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr ContainerSubtraction::convertToHistogram(
-    const MatrixWorkspace_sptr &workspace) const {
+MatrixWorkspace_sptr ContainerSubtraction::convertToHistogram(const MatrixWorkspace_sptr &workspace) const {
   auto convertAlg = convertToHistogramAlgorithm(std::move(workspace));
   convertAlg->execute();
   return convertAlg->getProperty("OutputWorkspace");
 }
 
-IAlgorithm_sptr
-ContainerSubtraction::shiftAlgorithm(const MatrixWorkspace_sptr &workspace,
-                                     double shiftValue) const {
+IAlgorithm_sptr ContainerSubtraction::shiftAlgorithm(const MatrixWorkspace_sptr &workspace, double shiftValue) const {
   IAlgorithm_sptr shift = AlgorithmManager::Instance().create("ScaleX");
   shift->initialize();
   shift->setChild(true);
@@ -513,9 +463,7 @@ ContainerSubtraction::shiftAlgorithm(const MatrixWorkspace_sptr &workspace,
   return shift;
 }
 
-IAlgorithm_sptr
-ContainerSubtraction::scaleAlgorithm(const MatrixWorkspace_sptr &workspace,
-                                     double scaleValue) const {
+IAlgorithm_sptr ContainerSubtraction::scaleAlgorithm(const MatrixWorkspace_sptr &workspace, double scaleValue) const {
   IAlgorithm_sptr scale = AlgorithmManager::Instance().create("Scale");
   scale->initialize();
   scale->setChild(true);
@@ -527,9 +475,8 @@ ContainerSubtraction::scaleAlgorithm(const MatrixWorkspace_sptr &workspace,
   return scale;
 }
 
-IAlgorithm_sptr ContainerSubtraction::minusAlgorithm(
-    const MatrixWorkspace_sptr &lhsWorkspace,
-    const MatrixWorkspace_sptr &rhsWorkspace) const {
+IAlgorithm_sptr ContainerSubtraction::minusAlgorithm(const MatrixWorkspace_sptr &lhsWorkspace,
+                                                     const MatrixWorkspace_sptr &rhsWorkspace) const {
   IAlgorithm_sptr minus = AlgorithmManager::Instance().create("Minus");
   minus->initialize();
   minus->setChild(true);
@@ -540,11 +487,9 @@ IAlgorithm_sptr ContainerSubtraction::minusAlgorithm(
   return minus;
 }
 
-IAlgorithm_sptr ContainerSubtraction::rebinToWorkspaceAlgorithm(
-    const MatrixWorkspace_sptr &workspaceToRebin,
-    const MatrixWorkspace_sptr &workspaceToMatch) const {
-  IAlgorithm_sptr rebin =
-      AlgorithmManager::Instance().create("RebinToWorkspace");
+IAlgorithm_sptr ContainerSubtraction::rebinToWorkspaceAlgorithm(const MatrixWorkspace_sptr &workspaceToRebin,
+                                                                const MatrixWorkspace_sptr &workspaceToMatch) const {
+  IAlgorithm_sptr rebin = AlgorithmManager::Instance().create("RebinToWorkspace");
   rebin->initialize();
   rebin->setChild(true);
   rebin->setLogging(false);
@@ -554,10 +499,8 @@ IAlgorithm_sptr ContainerSubtraction::rebinToWorkspaceAlgorithm(
   return rebin;
 }
 
-IAlgorithm_sptr ContainerSubtraction::convertToHistogramAlgorithm(
-    const MatrixWorkspace_sptr &workspace) const {
-  IAlgorithm_sptr convert =
-      AlgorithmManager::Instance().create("ConvertToHistogram");
+IAlgorithm_sptr ContainerSubtraction::convertToHistogramAlgorithm(const MatrixWorkspace_sptr &workspace) const {
+  IAlgorithm_sptr convert = AlgorithmManager::Instance().create("ConvertToHistogram");
   convert->initialize();
   convert->setChild(true);
   convert->setLogging(false);
@@ -566,11 +509,10 @@ IAlgorithm_sptr ContainerSubtraction::convertToHistogramAlgorithm(
   return convert;
 }
 
-IAlgorithm_sptr ContainerSubtraction::addSampleLogAlgorithm(
-    const MatrixWorkspace_sptr &workspace, const std::string &name,
-    const std::string &type, const std::string &value) const {
-  IAlgorithm_sptr shiftLog =
-      AlgorithmManager::Instance().create("AddSampleLog");
+IAlgorithm_sptr ContainerSubtraction::addSampleLogAlgorithm(const MatrixWorkspace_sptr &workspace,
+                                                            const std::string &name, const std::string &type,
+                                                            const std::string &value) const {
+  IAlgorithm_sptr shiftLog = AlgorithmManager::Instance().create("AddSampleLog");
   shiftLog->initialize();
   shiftLog->setProperty("Workspace", workspace);
   shiftLog->setProperty("LogName", name);
@@ -579,13 +521,9 @@ IAlgorithm_sptr ContainerSubtraction::addSampleLogAlgorithm(
   return shiftLog;
 }
 
-void ContainerSubtraction::setRunEnabled(bool enabled) {
-  m_uiForm.pbRun->setEnabled(enabled);
-}
+void ContainerSubtraction::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void ContainerSubtraction::setSaveResultEnabled(bool enabled) {
-  m_uiForm.pbSave->setEnabled(enabled);
-}
+void ContainerSubtraction::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
 void ContainerSubtraction::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);

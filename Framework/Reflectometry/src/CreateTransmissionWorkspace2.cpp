@@ -29,9 +29,7 @@ std::string const TRANS_LAM_PREFIX("TRANS_LAM_");
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string CreateTransmissionWorkspace2::name() const {
-  return "CreateTransmissionWorkspace";
-}
+const std::string CreateTransmissionWorkspace2::name() const { return "CreateTransmissionWorkspace"; }
 /// Summary of algorithm's purpose
 const std::string CreateTransmissionWorkspace2::summary() const {
   return "Creates a transmission run workspace in wavelength from one or two "
@@ -41,9 +39,7 @@ const std::string CreateTransmissionWorkspace2::summary() const {
 int CreateTransmissionWorkspace2::version() const { return 2; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CreateTransmissionWorkspace2::category() const {
-  return "Reflectometry";
-}
+const std::string CreateTransmissionWorkspace2::category() const { return "Reflectometry"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -54,74 +50,62 @@ void CreateTransmissionWorkspace2::init() {
   auto inputValidator = std::make_shared<WorkspaceUnitValidator>("TOF");
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "FirstTransmissionRun", "", Direction::Input,
-                      PropertyMode::Mandatory, inputValidator->clone()),
+                      "FirstTransmissionRun", "", Direction::Input, PropertyMode::Mandatory, inputValidator->clone()),
                   "First transmission run. Corresponds to the low wavelength "
                   "transmission run if a SecondTransmissionRun is also "
                   "provided.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "SecondTransmissionRun", "", Direction::Input,
-                      PropertyMode::Optional, inputValidator->clone()),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("SecondTransmissionRun", "", Direction::Input,
+                                                                       PropertyMode::Optional, inputValidator->clone()),
                   "High wavelength transmission run. Optional. Causes the "
                   "first transmission run to be treated as the low wavelength "
                   "transmission run.");
 
-  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
-                      "ProcessingInstructions", "",
-                      std::make_shared<MandatoryValidator<std::string>>(),
-                      Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("ProcessingInstructions", "",
+                                                                   std::make_shared<MandatoryValidator<std::string>>(),
+                                                                   Direction::Input),
                   "Grouping pattern on spectrum numbers to yield only "
                   "the detectors of interest. See GroupDetectors for details.");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "WavelengthMin", Mantid::EMPTY_DBL(),
-                      std::make_shared<MandatoryValidator<double>>(),
-                      Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("WavelengthMin", Mantid::EMPTY_DBL(),
+                                                              std::make_shared<MandatoryValidator<double>>(),
+                                                              Direction::Input),
                   "Wavelength minimum in angstroms");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "WavelengthMax", Mantid::EMPTY_DBL(),
-                      std::make_shared<MandatoryValidator<double>>(),
-                      Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("WavelengthMax", Mantid::EMPTY_DBL(),
+                                                              std::make_shared<MandatoryValidator<double>>(),
+                                                              Direction::Input),
                   "Wavelength maximum in angstroms");
 
   initMonitorProperties();
 
   initStitchProperties();
 
-  declareProperty("Debug", false,
-                  "Whether to enable the output of extra workspaces.");
+  declareProperty("Debug", false, "Whether to enable the output of extra workspaces.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
-      "Output workspace in wavelength.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output,
+                                                                       PropertyMode::Optional),
+                  "Output workspace in wavelength.");
 
   // Declare Debug output workspaces
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspaceFirstTransmission", "", Direction::Output,
-                      PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspaceFirstTransmission", "",
+                                                                       Direction::Output, PropertyMode::Optional),
                   "Output workspace in wavelength for first transmission run");
-  setPropertySettings(
-      "OutputWorkspaceFirstTransmission",
-      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
+  setPropertySettings("OutputWorkspaceFirstTransmission",
+                      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspaceSecondTransmission", "",
-                      Direction::Output, PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspaceSecondTransmission", "",
+                                                                       Direction::Output, PropertyMode::Optional),
                   "Output workspace in wavelength for second transmission run");
-  setPropertySettings(
-      "OutputWorkspaceSecondTransmission",
-      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
+  setPropertySettings("OutputWorkspaceSecondTransmission",
+                      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
 }
 
 /** Validate inputs
  * @return :: error message to show
  */
-std::map<std::string, std::string>
-CreateTransmissionWorkspace2::validateInputs() {
+std::map<std::string, std::string> CreateTransmissionWorkspace2::validateInputs() {
 
   std::map<std::string, std::string> results;
 
@@ -166,8 +150,7 @@ void CreateTransmissionWorkspace2::exec() {
   stitch->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
   stitch->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
   stitch->setPropertyValue("Params", getPropertyValue("Params"));
-  stitch->setProperty("ScaleRHSWorkspace",
-                      getPropertyValue("ScaleRHSWorkspace"));
+  stitch->setProperty("ScaleRHSWorkspace", getPropertyValue("ScaleRHSWorkspace"));
   stitch->execute();
   MatrixWorkspace_sptr stitchedWS = stitch->getProperty("OutputWorkspace");
 
@@ -182,8 +165,7 @@ void CreateTransmissionWorkspace2::exec() {
  * monitors and detectors
  * @return :: the normalized workspace in Wavelength
  */
-MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
-    const MatrixWorkspace_sptr &IvsTOF) {
+MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(const MatrixWorkspace_sptr &IvsTOF) {
 
   // Detector workspace
   MatrixWorkspace_sptr detectorWS = makeDetectorWS(IvsTOF);
@@ -193,19 +175,15 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
   // and MonitorBackgroundWavelengthMax have been given
 
   Property *monProperty = getProperty("I0MonitorIndex");
-  Property *backgroundMinProperty =
-      getProperty("MonitorBackgroundWavelengthMin");
-  Property *backgroundMaxProperty =
-      getProperty("MonitorBackgroundWavelengthMin");
-  if (monProperty->isDefault() || backgroundMinProperty->isDefault() ||
-      backgroundMaxProperty->isDefault()) {
+  Property *backgroundMinProperty = getProperty("MonitorBackgroundWavelengthMin");
+  Property *backgroundMaxProperty = getProperty("MonitorBackgroundWavelengthMin");
+  if (monProperty->isDefault() || backgroundMinProperty->isDefault() || backgroundMaxProperty->isDefault()) {
     return detectorWS;
   }
 
   // Normalization by integrated monitors
   // Only if defined by property
-  const bool normalizeByIntegratedMonitors =
-      getProperty("NormalizeByIntegratedMonitors");
+  const bool normalizeByIntegratedMonitors = getProperty("NormalizeByIntegratedMonitors");
 
   auto monitorWS = makeMonitorWS(IvsTOF, normalizeByIntegratedMonitors);
   if (!normalizeByIntegratedMonitors)
@@ -227,8 +205,7 @@ void CreateTransmissionWorkspace2::getRunNumbers() {
  * @returns : the run number as a string, or an empty string if it was not
  * fouind
  */
-std::string
-CreateTransmissionWorkspace2::getRunNumber(std::string const &propertyName) {
+std::string CreateTransmissionWorkspace2::getRunNumber(std::string const &propertyName) {
   auto runNumber = std::string();
   MatrixWorkspace_sptr transWS = getProperty(propertyName);
   if (transWS) {
@@ -248,8 +225,7 @@ CreateTransmissionWorkspace2::getRunNumber(std::string const &propertyName) {
  * @param which Which of the runs to store: 1 - first, 2 - second.
  * @param ws A workspace to store.
  */
-void CreateTransmissionWorkspace2::setOutputTransmissionRun(
-    int which, const MatrixWorkspace_sptr &ws) {
+void CreateTransmissionWorkspace2::setOutputTransmissionRun(int which, const MatrixWorkspace_sptr &ws) {
   bool const isDebug = getProperty("Debug");
   if (!isDebug)
     return;
@@ -259,8 +235,7 @@ void CreateTransmissionWorkspace2::setOutputTransmissionRun(
   }
 
   // Set the output property
-  auto const runDescription =
-      which == 1 ? "FirstTransmission" : "SecondTransmission";
+  auto const runDescription = which == 1 ? "FirstTransmission" : "SecondTransmission";
   auto const propertyName = std::string("OutputWorkspace") + runDescription;
 
   // If the user provided an output name, just set the value
@@ -270,14 +245,12 @@ void CreateTransmissionWorkspace2::setOutputTransmissionRun(
   }
 
   // Otherwise try to set a default name based on the run number
-  auto const &runNumber =
-      which == 1 ? m_firstTransmissionRunNumber : m_secondTransmissionRunNumber;
+  auto const &runNumber = which == 1 ? m_firstTransmissionRunNumber : m_secondTransmissionRunNumber;
   if (runNumber.empty()) {
-    throw std::runtime_error(
-        std::string("Input workspace has no run number; cannot set default "
-                    "name for the "
-                    "output workspace. Please specify a name using the ") +
-        propertyName + std::string(" property."));
+    throw std::runtime_error(std::string("Input workspace has no run number; cannot set default "
+                                         "name for the "
+                                         "output workspace. Please specify a name using the ") +
+                             propertyName + std::string(" property."));
   }
 
   auto const defaultName = TRANS_LAM_PREFIX + runNumber;
@@ -290,8 +263,7 @@ void CreateTransmissionWorkspace2::setOutputTransmissionRun(
  * @throws If the output workspace does not have a name and a default could not
  * be found
  */
-void CreateTransmissionWorkspace2::setOutputWorkspace(
-    const API::MatrixWorkspace_sptr &ws) {
+void CreateTransmissionWorkspace2::setOutputWorkspace(const API::MatrixWorkspace_sptr &ws) {
   // If the user provided an output name, just set the value
   if (!isDefault("OutputWorkspace")) {
     setProperty("OutputWorkspace", ws);
@@ -304,10 +276,9 @@ void CreateTransmissionWorkspace2::setOutputWorkspace(
       setProperty("OutputWorkspace", ws);
       return;
     } else {
-      throw std::runtime_error(
-          "Input workspace has no run number; cannot set default name for the "
-          "output workspace. Please specify a name using the OutputWorkspace "
-          "property.");
+      throw std::runtime_error("Input workspace has no run number; cannot set default name for the "
+                               "output workspace. Please specify a name using the OutputWorkspace "
+                               "property.");
     }
   }
 

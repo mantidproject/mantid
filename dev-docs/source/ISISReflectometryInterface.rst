@@ -37,7 +37,7 @@ Briefly the structure is as follows:
 .. figure:: images/ISISReflectometryInterface_structure.png
    :figwidth: 70%
    :align: center
-    
+
 :code:`Reduction`
 #################
 
@@ -103,7 +103,7 @@ Avoid use of Qt types outside of Qt classes
 
 Qt-specific types such as :code:`QString`, :code:`QColor` and subclasses of :code:`QWidget` should be kept out of the presenters and models. This avoids confusion over which types should be used and a potentially messy situation where we are always having to convert back and forth between Qt types and :code:`std` types. It also avoids an over-reliance on Qt, so that the view could be swapped out in future to one using a different framework, with little or no changes to the presenters and models.
 
-To help make it clear where Qt is used, all classes that use Qt (namely the views, along with a few supporting classes which wrap or subclass :code:`QObject`) are named with a :code:`Qt` prefix in their file and class names. Conversion from types like :code:`QString` to :code:`std::string` is performed within the views, and no Qt types are present in their interfaces. 
+To help make it clear where Qt is used, all classes that use Qt (namely the views, along with a few supporting classes which wrap or subclass :code:`QObject`) are named with a :code:`Qt` prefix in their file and class names. Conversion from types like :code:`QString` to :code:`std::string` is performed within the views, and no Qt types are present in their interfaces.
 
 Keep the reduction configuration up to date
 ###########################################
@@ -258,7 +258,7 @@ The :code:`MainWindowPresenter` constructs the child Batch presenters on demand.
     - it returns the result as an :code:`IBatchPresenter`.
 
   - The :code:`IBatchPresenter` is then added to the :code:`MainWindowPresenter`'s list of child presenters.
-    
+
 The :code:`MainWindowPresenter` therefore creates, and owns, the :code:`BatchPresenter`, but does not need to know its concrete type. In turn, the :code:`BatchPresenterFactory` creates the child :code:`EventPresenter` and injects this into the :code:`BatchPresenter`, also without knowing the child's concrete type. As mentioned in the `Dependency inversion`_ section, this helps testability by allowing us to replace the real dependencies with mock objects.
 
 Testing
@@ -284,7 +284,7 @@ Let's look at the presenter-view interactions in the :code:`Event` component as 
     class MockEventView : public IEventView {
     public:
       MOCK_METHOD1(subscribe, void(EventViewSubscriber *));
-  
+
 - The presenter then uses :code:`EXPECT_CALL` to check that the method was called. Note that for :code:`subscribe` it is difficult to check that the correct presenter pointer is passed because of the two-way dependency in the construction, so we just check that it is called with any argument; for other methods we typically want to check the exact arguments.
 
   .. code-block:: c++
@@ -310,7 +310,7 @@ Let's look at the presenter-view interactions in the :code:`Event` component as 
                 UniformSlicingByNumberOfSlices(expectedSliceCount));
       verifyAndClear();
     }
-  
+
   .. code-block:: c++
 
     void testChangingSliceCountNotifiesMainPresenter() {

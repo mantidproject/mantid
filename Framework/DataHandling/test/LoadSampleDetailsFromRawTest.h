@@ -20,12 +20,8 @@ class LoadSampleDetailsFromRawTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadSampleDetailsFromRawTest *createSuite() {
-    return new LoadSampleDetailsFromRawTest();
-  }
-  static void destroySuite(LoadSampleDetailsFromRawTest *suite) {
-    delete suite;
-  }
+  static LoadSampleDetailsFromRawTest *createSuite() { return new LoadSampleDetailsFromRawTest(); }
+  static void destroySuite(LoadSampleDetailsFromRawTest *suite) { delete suite; }
 
   void testExec() {
     // setup and run the algorithm (includes basic checks)
@@ -49,8 +45,7 @@ private:
 
   // Initialise the algorithm and set the properties. Creates a fake
   // workspace for the input and returns it.
-  const MatrixWorkspace_sptr setupAlgorithm(LoadSampleDetailsFromRaw &alg,
-                                            const std::string &filename) {
+  const MatrixWorkspace_sptr setupAlgorithm(LoadSampleDetailsFromRaw &alg, const std::string &filename) {
     // create the workspace
     const MatrixWorkspace_sptr inWS = makeFakeWorkspace();
 

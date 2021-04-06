@@ -18,19 +18,15 @@ class ProcessingAlgorithmBaseTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ProcessingAlgorithmBaseTest *createSuite() {
-    return new ProcessingAlgorithmBaseTest();
-  }
+  static ProcessingAlgorithmBaseTest *createSuite() { return new ProcessingAlgorithmBaseTest(); }
   static void destroySuite(ProcessingAlgorithmBaseTest *suite) { delete suite; }
   ProcessingAlgorithmBaseTest() { FrameworkManager::Instance(); };
 
   void test_MatrixWorkspace_properties() {
     // Test MatrixWorkspace properties
     ProcessingAlgorithmBase alg("MultiplyRange");
-    TS_ASSERT_EQUALS(alg.getInputWsProperties(),
-                     std::vector<QString>{"InputWorkspace"});
-    TS_ASSERT_EQUALS(alg.getOutputWsProperties(),
-                     std::vector<QString>{"OutputWorkspace"});
+    TS_ASSERT_EQUALS(alg.getInputWsProperties(), std::vector<QString>{"InputWorkspace"});
+    TS_ASSERT_EQUALS(alg.getOutputWsProperties(), std::vector<QString>{"OutputWorkspace"});
     TS_ASSERT_EQUALS(alg.getInputStrListProperties(), std::vector<QString>());
 
     // Add more algorithms to test if needed
@@ -47,10 +43,8 @@ public:
 
   void test_StrList_properties() {
     ProcessingAlgorithmBase alg("Stitch1DMany");
-    TS_ASSERT_EQUALS(alg.getInputStrListProperties(),
-                     std::vector<QString>{"InputWorkspaces"});
-    TS_ASSERT_EQUALS(alg.getOutputWsProperties(),
-                     std::vector<QString>{"OutputWorkspace"});
+    TS_ASSERT_EQUALS(alg.getInputStrListProperties(), std::vector<QString>{"InputWorkspaces"});
+    TS_ASSERT_EQUALS(alg.getOutputWsProperties(), std::vector<QString>{"OutputWorkspace"});
     TS_ASSERT_EQUALS(alg.getInputWsProperties(), std::vector<QString>());
   }
 };

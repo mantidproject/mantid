@@ -106,8 +106,7 @@ GNU_DIAG_OFF("unused-local-typedef")
 GNU_DIAG_OFF("conversion")
 
 // Define an overload to handle the default argument
-BOOST_PYTHON_FUNCTION_OVERLOADS(getStatisticsOverloads, getStatisticsNumpy, 1,
-                                2)
+BOOST_PYTHON_FUNCTION_OVERLOADS(getStatisticsOverloads, getStatisticsNumpy, 1, 2)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 //============================ Z score
@@ -134,11 +133,9 @@ std::vector<double> getZscoreNumpy(const NDArray &data) {
  * @param data The input array
  * @param sorted True if the data is sorted (deprecated)
  */
-std::vector<double> getZscoreNumpyDeprecated(const NDArray &data,
-                                             const bool sorted) {
+std::vector<double> getZscoreNumpyDeprecated(const NDArray &data, const bool sorted) {
   UNUSED_ARG(sorted);
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "getZScore no longer requires the second sorted argument.");
+  PyErr_Warn(PyExc_DeprecationWarning, "getZScore no longer requires the second sorted argument.");
   return getZscoreNumpy(data);
 }
 
@@ -146,8 +143,7 @@ std::vector<double> getZscoreNumpyDeprecated(const NDArray &data,
  * Proxy for @see Mantid::Kernel::getModifiedZscore so that it can accept numpy
  * arrays,
  */
-std::vector<double> getModifiedZscoreNumpy(const NDArray &data,
-                                           const bool sorted = false) {
+std::vector<double> getModifiedZscoreNumpy(const NDArray &data, const bool sorted = false) {
   using Converters::NDArrayToVector;
   using Mantid::Kernel::getModifiedZscore;
 
@@ -164,8 +160,7 @@ GNU_DIAG_OFF("unused-local-typedef")
 GNU_DIAG_OFF("conversion")
 
 // Define an overload to handle the default argument
-BOOST_PYTHON_FUNCTION_OVERLOADS(getModifiedZscoreOverloads,
-                                getModifiedZscoreNumpy, 1, 2)
+BOOST_PYTHON_FUNCTION_OVERLOADS(getModifiedZscoreOverloads, getModifiedZscoreNumpy, 1, 2)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
@@ -173,9 +168,7 @@ GNU_DIAG_ON("unused-local-typedef")
 //============================================
 
 // Function pointer to real implementation of getMoments
-using MomentsFunction = std::vector<double> (*)(const std::vector<double> &,
-                                                const std::vector<double> &,
-                                                const int);
+using MomentsFunction = std::vector<double> (*)(const std::vector<double> &, const std::vector<double> &, const int);
 
 /**
  * The implementation for getMomentsAboutOrigin & getMomentsAboutOriginMean for
@@ -188,9 +181,7 @@ using MomentsFunction = std::vector<double> (*)(const std::vector<double> &,
  * @param depend Numpy array of dependent variables
  * @param maxMoment Maximum number of moments to return
  */
-std::vector<double> getMomentsNumpyImpl(MomentsFunction momentsFunc,
-                                        const NDArray &indep,
-                                        const NDArray &depend,
+std::vector<double> getMomentsNumpyImpl(MomentsFunction momentsFunc, const NDArray &indep, const NDArray &depend,
                                         const int maxMoment) {
   using Converters::NDArrayToVector;
 
@@ -200,8 +191,7 @@ std::vector<double> getMomentsNumpyImpl(MomentsFunction momentsFunc,
   }
 
   if (isFloatArray(indep.ptr()) && isFloatArray(indep.ptr())) {
-    return momentsFunc(NDArrayToVector<double>(indep)(),
-                       NDArrayToVector<double>(depend)(), maxMoment);
+    return momentsFunc(NDArrayToVector<double>(indep)(), NDArrayToVector<double>(depend)(), maxMoment);
   } else {
     throw UnknownDataType();
   }
@@ -211,9 +201,7 @@ std::vector<double> getMomentsNumpyImpl(MomentsFunction momentsFunc,
  * Proxy for @see Mantid::Kernel::getMomentsAboutOrigin so that it can accept
  * numpy arrays
  */
-std::vector<double> getMomentsAboutOriginNumpy(const NDArray &indep,
-                                               const NDArray &depend,
-                                               const int maxMoment = 3) {
+std::vector<double> getMomentsAboutOriginNumpy(const NDArray &indep, const NDArray &depend, const int maxMoment = 3) {
   using Mantid::Kernel::getMomentsAboutOrigin;
   return getMomentsNumpyImpl(&getMomentsAboutOrigin, indep, depend, maxMoment);
 }
@@ -223,17 +211,14 @@ GNU_DIAG_OFF("unused-local-typedef")
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
 // Define an overload to handle the default argument
-BOOST_PYTHON_FUNCTION_OVERLOADS(getMomentsAboutOriginOverloads,
-                                getMomentsAboutOriginNumpy, 2, 3)
+BOOST_PYTHON_FUNCTION_OVERLOADS(getMomentsAboutOriginOverloads, getMomentsAboutOriginNumpy, 2, 3)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 /**
  * Proxy for @see Mantid::Kernel::getMomentsAboutMean so that it can accept
  * numpy arrays
  */
-std::vector<double> getMomentsAboutMeanNumpy(const NDArray &indep,
-                                             NDArray &depend,
-                                             const int maxMoment = 3) {
+std::vector<double> getMomentsAboutMeanNumpy(const NDArray &indep, NDArray &depend, const int maxMoment = 3) {
   using Mantid::Kernel::getMomentsAboutMean;
   return getMomentsNumpyImpl(&getMomentsAboutMean, indep, depend, maxMoment);
 }
@@ -243,8 +228,7 @@ GNU_DIAG_OFF("unused-local-typedef")
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
 // Define an overload to handle the default argument
-BOOST_PYTHON_FUNCTION_OVERLOADS(getMomentsAboutMeanOverloads,
-                                getMomentsAboutMeanNumpy, 2, 3)
+BOOST_PYTHON_FUNCTION_OVERLOADS(getMomentsAboutMeanOverloads, getMomentsAboutMeanNumpy, 2, 3)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
@@ -264,49 +248,37 @@ void export_Statistics() {
   scope stats =
       class_<Stats>("Stats", no_init)
           .def("getStatistics", &getStatisticsNumpy,
-               getStatisticsOverloads(
-                   (arg("data"), arg("sorted")),
-                   "Determine the statistics for an array of data"))
+               getStatisticsOverloads((arg("data"), arg("sorted")), "Determine the statistics for an array of data"))
           .staticmethod("getStatistics")
 
-          .def("getZscore", &getZscoreNumpy, arg("data"),
-               "Determine the Z score for an array of data")
-          .def("getZscore", &getZscoreNumpyDeprecated,
-               (arg("data"), arg("sorted")),
+          .def("getZscore", &getZscoreNumpy, arg("data"), "Determine the Z score for an array of data")
+          .def("getZscore", &getZscoreNumpyDeprecated, (arg("data"), arg("sorted")),
                "Determine the Z score for an array of "
                "data (deprecated sorted argument)")
           .staticmethod("getZscore")
 
           .def("getModifiedZscore", &getModifiedZscoreNumpy,
-               getModifiedZscoreOverloads(
-                   (arg("data"), arg("sorted")),
-                   "Determine the modified Z score for an array of data"))
+               getModifiedZscoreOverloads((arg("data"), arg("sorted")),
+                                          "Determine the modified Z score for an array of data"))
           .staticmethod("getModifiedZscore")
 
           .def("getMomentsAboutOrigin", &getMomentsAboutOriginNumpy,
                getMomentsAboutOriginOverloads(
                    (arg("indep"), arg("depend"), arg("maxMoment")),
-                   "Calculate the first n-moments (inclusive) about the origin")
-                   [ReturnNumpyArray()])
+                   "Calculate the first n-moments (inclusive) about the origin")[ReturnNumpyArray()])
           .staticmethod("getMomentsAboutOrigin")
 
           .def("getMomentsAboutMean", &getMomentsAboutMeanNumpy,
                getMomentsAboutMeanOverloads(
                    (arg("indep"), arg("depend"), arg("maxMoment")),
-                   "Calculate the first n-moments (inclusive) about the mean")
-                   [ReturnNumpyArray()])
+                   "Calculate the first n-moments (inclusive) about the mean")[ReturnNumpyArray()])
           .staticmethod("getMomentsAboutMean");
 
   // Want this in the same scope as above so must be here
   class_<Statistics>("Statistics")
-      .add_property("minimum", &Statistics::minimum,
-                    "Minimum value of the data set")
-      .add_property("maximum", &Statistics::maximum,
-                    "Maximum value of the data set")
-      .add_property("mean", &Statistics::mean,
-                    "Simple mean, sum(data)/nvalues, of the data set")
-      .add_property("median", &Statistics::median,
-                    "Middle value of the data set")
-      .add_property("standard_deviation", &Statistics::standard_deviation,
-                    "Standard width of distribution");
+      .add_property("minimum", &Statistics::minimum, "Minimum value of the data set")
+      .add_property("maximum", &Statistics::maximum, "Maximum value of the data set")
+      .add_property("mean", &Statistics::mean, "Simple mean, sum(data)/nvalues, of the data set")
+      .add_property("median", &Statistics::median, "Middle value of the data set")
+      .add_property("standard_deviation", &Statistics::standard_deviation, "Standard width of distribution");
 }

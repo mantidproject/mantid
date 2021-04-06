@@ -26,18 +26,14 @@ namespace API {
 class MANTID_API_DLL ImplicitFunctionParameterParserFactoryImpl
     : public Kernel::DynamicFactory<ImplicitFunctionParameterParser> {
 public:
-  ImplicitFunctionParameterParserFactoryImpl(
-      const ImplicitFunctionParameterParserFactoryImpl &) = delete;
-  ImplicitFunctionParameterParserFactoryImpl &
-  operator=(const ImplicitFunctionParameterParserFactoryImpl &) = delete;
-  std::shared_ptr<ImplicitFunctionParameterParser>
-  create(const std::string &xmlString) const override;
-  ImplicitFunctionParameterParser *createImplicitFunctionParameterParserFromXML(
-      Poco::XML::Element *parametersElement) const;
+  ImplicitFunctionParameterParserFactoryImpl(const ImplicitFunctionParameterParserFactoryImpl &) = delete;
+  ImplicitFunctionParameterParserFactoryImpl &operator=(const ImplicitFunctionParameterParserFactoryImpl &) = delete;
+  std::shared_ptr<ImplicitFunctionParameterParser> create(const std::string &xmlString) const override;
+  ImplicitFunctionParameterParser *
+  createImplicitFunctionParameterParserFromXML(Poco::XML::Element *parametersElement) const;
 
 private:
-  friend struct Mantid::Kernel::CreateUsingNew<
-      ImplicitFunctionParameterParserFactoryImpl>;
+  friend struct Mantid::Kernel::CreateUsingNew<ImplicitFunctionParameterParserFactoryImpl>;
 
   /// Private Constructor for singleton class
   ImplicitFunctionParameterParserFactoryImpl() = default;
@@ -53,7 +49,7 @@ using ImplicitFunctionParameterParserFactory =
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<
-    Mantid::API::ImplicitFunctionParameterParserFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::ImplicitFunctionParameterParserFactoryImpl>;
 }
 } // namespace Mantid

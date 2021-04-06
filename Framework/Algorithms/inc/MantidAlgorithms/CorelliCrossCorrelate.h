@@ -19,9 +19,7 @@ class MANTID_ALGORITHMS_DLL CorelliCrossCorrelate : public API::Algorithm {
 public:
   const std::string name() const override { return "CorelliCrossCorrelate"; };
   int version() const override { return 1; };
-  const std::string category() const override {
-    return "Diffraction\\Calibration;Events";
-  };
+  const std::string category() const override { return "Diffraction\\Calibration;Events"; };
   const std::string summary() const override {
     return "Cross-correlation calculation for the elastic signal from Corelli.";
   };

@@ -87,24 +87,10 @@ class DifferenceTableView(QtWidgets.QWidget):
 
     def set_up_table(self):
         self.diff_table.setColumnCount(4)
-        self.diff_table.setHorizontalHeaderLabels(["diff Name", "Analyse (plot/fit)", "Group 1", " Group 2"])
-        header = self.diff_table.horizontalHeader()
-        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
-
         vertical_headers = self.diff_table.verticalHeader()
         vertical_headers.setSectionsMovable(False)
         vertical_headers.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         vertical_headers.setVisible(True)
-
-        self.diff_table.horizontalHeaderItem(0).setToolTip("The name of the diff :"
-                                                           "\n    - The name must be unique across all groups/diffs"
-                                                           "\n    - The name can only use digits, characters and _")
-        self.diff_table.horizontalHeaderItem(2).setToolTip("Group 1 of the diff, selected from the grouping table")
-        self.diff_table.horizontalHeaderItem(3).setToolTip("Group 2 of the diff, selected from the grouping table")
-        self.diff_table.horizontalHeaderItem(1).setToolTip("Whether to include this diff in the analysis")
 
     def num_rows(self):
         return self.diff_table.rowCount()
@@ -359,3 +345,35 @@ class DifferenceTableView(QtWidgets.QWidget):
         self.diff_table.blockSignals(True)
         item.setCheckState(checked_state)
         self.diff_table.blockSignals(False)
+
+    def set_table_headers_pairs(self):
+        self.diff_table.setHorizontalHeaderLabels(["Diff Name", "Analyse (plot/fit)", "Pair 1", "Pair 2"])
+
+        header = self.diff_table.horizontalHeader()
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
+
+        self.diff_table.horizontalHeaderItem(0).setToolTip("The name of the diff :"
+                                                           "\n    - The name must be unique across all groups/diffs"
+                                                           "\n    - The name can only use digits, characters and _")
+        self.diff_table.horizontalHeaderItem(2).setToolTip("Pair 1 of the diff, selected from the pair table")
+        self.diff_table.horizontalHeaderItem(3).setToolTip("Pair 2 of the diff, selected from the pair table")
+        self.diff_table.horizontalHeaderItem(1).setToolTip("Whether to include this diff in the analysis")
+
+    def set_table_headers_groups(self):
+        self.diff_table.setHorizontalHeaderLabels(["Diff Name", "Analyse (plot/fit)", "Group 1", "Group 2"])
+
+        header = self.diff_table.horizontalHeader()
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
+
+        self.diff_table.horizontalHeaderItem(0).setToolTip("The name of the diff :"
+                                                           "\n    - The name must be unique across all groups/diffs"
+                                                           "\n    - The name can only use digits, characters and _")
+        self.diff_table.horizontalHeaderItem(2).setToolTip("Group 1 of the diff, selected from the group table")
+        self.diff_table.horizontalHeaderItem(3).setToolTip("Group 2 of the diff, selected from the group table")
+        self.diff_table.horizontalHeaderItem(1).setToolTip("Whether to include this diff in the analysis")

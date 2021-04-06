@@ -25,9 +25,7 @@ void UnGroupWorkspace::init() {
   std::unordered_set<std::string> groupWorkspaceList;
   // Not iterate over, removing all those which are not group workspaces
   for (const auto &name : workspaceList) {
-    WorkspaceGroup_const_sptr group =
-        std::dynamic_pointer_cast<const WorkspaceGroup>(
-            data_store.retrieve(name));
+    WorkspaceGroup_const_sptr group = std::dynamic_pointer_cast<const WorkspaceGroup>(data_store.retrieve(name));
     // RNT: VC returns bad pointer after erase
     // if ( !group ) workspaceList.erase(it);
     if (group) {
@@ -36,8 +34,7 @@ void UnGroupWorkspace::init() {
   }
   // Declare a text property with the list of group workspaces as its allowed
   // values
-  declareProperty("InputWorkspace", "",
-                  "Name of the input workspace to ungroup",
+  declareProperty("InputWorkspace", "", "Name of the input workspace to ungroup",
                   std::make_shared<StringListValidator>(groupWorkspaceList));
 }
 
@@ -46,22 +43,19 @@ void UnGroupWorkspace::init() {
  */
 void UnGroupWorkspace::exec() {
   const std::string inputws = getProperty("InputWorkspace");
-  AnalysisDataServiceImpl &data_store =
-      Mantid::API::AnalysisDataService::Instance();
+  AnalysisDataServiceImpl &data_store = Mantid::API::AnalysisDataService::Instance();
 
   // Retrieve the input workspace
   Workspace_sptr wsSptr = data_store.retrieve(inputws);
   // Try to cast it to a WorkspaceGroup
-  WorkspaceGroup_sptr wsGrpSptr =
-      std::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
+  WorkspaceGroup_sptr wsGrpSptr = std::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
   // Test the cast succeeded - it always should because of ListValidator on
   // input property
   if (!wsGrpSptr) {
     throw std::runtime_error("Selected Workspace is not a WorkspaceGroup");
   }
   // Notify observers that a WorkspaceGroup is about to be unrolled
-  data_store.notificationCenter.postNotification(
-      new Mantid::API::WorkspaceUnGroupingNotification(inputws, wsSptr));
+  data_store.notificationCenter.postNotification(new Mantid::API::WorkspaceUnGroupingNotification(inputws, wsSptr));
   // Now remove the WorkspaceGroup from the ADS
   data_store.remove(inputws);
 }

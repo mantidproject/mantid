@@ -22,13 +22,11 @@ public:
   /// Constructor
   PeakTransformQLab();
   /// Constructor
-  PeakTransformQLab(const std::string &xPlotLabel,
-                    const std::string &yPlotLabel);
+  PeakTransformQLab(const std::string &xPlotLabel, const std::string &yPlotLabel);
   /// Virtual constructor
   PeakTransform_sptr clone() const override;
   /// Transform peak.
-  Mantid::Kernel::V3D
-  transformPeak(const Mantid::Geometry::IPeak &peak) const override;
+  Mantid::Kernel::V3D transformPeak(const Mantid::Geometry::IPeak &peak) const override;
   /// Get the transform friendly name.
   std::string getFriendlyName() const override { return name(); }
   /// Getter for the special coordinate representation of this transform type.
@@ -36,7 +34,6 @@ public:
 };
 
 /// Typedef a factory for type of PeaksTransform.
-using PeakTransformQLabFactory =
-    ConcretePeakTransformFactory<PeakTransformQLab>;
+using PeakTransformQLabFactory = ConcretePeakTransformFactory<PeakTransformQLab>;
 } // namespace Geometry
 } // namespace Mantid

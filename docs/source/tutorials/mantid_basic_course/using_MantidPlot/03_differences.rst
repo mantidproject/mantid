@@ -14,7 +14,7 @@ While we are working to bring Workbench functionality in line with Mantid Plot, 
 Interfaces
 ----------
 
-Almost all interfaces have been moved over to Workbench, with the exception of the 
+Almost all interfaces have been moved over to Workbench, with the exception of the
 General category.
 
 

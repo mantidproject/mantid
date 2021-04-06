@@ -24,14 +24,11 @@ namespace MDAlgorithms {
 @date 01/10/2010
 */
 
-class DLLExport InvalidParameterParser
-    : public Mantid::API::ImplicitFunctionParameterParser {
+class DLLExport InvalidParameterParser : public Mantid::API::ImplicitFunctionParameterParser {
 public:
   InvalidParameterParser();
-  Mantid::API::ImplicitFunctionParameter *
-  createParameter(Poco::XML::Element *parameterElement) override;
-  void setSuccessorParser(
-      Mantid::API::ImplicitFunctionParameterParser *parser) override;
+  Mantid::API::ImplicitFunctionParameter *createParameter(Poco::XML::Element *parameterElement) override;
+  void setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser *parser) override;
 
 protected:
   ImplicitFunctionParameterParser::SuccessorType m_successor;

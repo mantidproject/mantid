@@ -89,7 +89,7 @@ For more advice: :ref:`02_scripting_plots`
 |
 |
 
-Wireframe Plots 
+Wireframe Plots
 ===============
 
 |
@@ -146,7 +146,7 @@ Basic example of plotting a `Wireframe <https://matplotlib.org/mpl_toolkits/mplo
     import matplotlib.pyplot as plt
 
     data = Load('MAR11060.nxs')
-    
+
     fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})
     ax.plot_wireframe(data, color='#1f77b4')
     plt.show()
@@ -193,7 +193,7 @@ File > Settings
 
 * :ref:`plotting`
 * `Matplotlib Keyboard Shortcuts <https://matplotlib.org/3.1.1/users/navigation_toolbar.html#navigation-keyboard-shortcuts>`_
-* See :ref:`here <plotting>` for custom color cycles and colormaps 
+* See :ref:`here <plotting>` for custom color cycles and colormaps
 
 .. |FigureOptionsGear.png| image:: /images/FigureOptionsGear.png
    :width: 150px

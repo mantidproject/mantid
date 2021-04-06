@@ -24,9 +24,7 @@ class MANTIDQT_INDIRECT_DLL IndirectFitPlotPresenter : public QObject {
   Q_OBJECT
 
 public:
-  IndirectFitPlotPresenter(IndirectFittingModel *model,
-                           IIndirectFitPlotView *view,
-                           IPyRunner *pythonRunner = nullptr);
+  IndirectFitPlotPresenter(IndirectFittingModel *model, IIndirectFitPlotView *view, IPyRunner *pythonRunner = nullptr);
 
   void watchADS(bool watch);
 
@@ -34,8 +32,7 @@ public:
   WorkspaceIndex getSelectedSpectrum() const;
   FitDomainIndex getSelectedSpectrumIndex() const;
   FitDomainIndex getSelectedDomainIndex() const;
-  bool isCurrentlySelected(TableDatasetIndex dataIndex,
-                           WorkspaceIndex spectrum) const;
+  bool isCurrentlySelected(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const;
 
   void setFitSingleSpectrumIsFitting(bool fitting);
   void setFitSingleSpectrumEnabled(bool enable);
@@ -91,19 +88,15 @@ private:
   void disableAllDataSelection();
   void enableAllDataSelection();
   void plotInput(Mantid::API::MatrixWorkspace_sptr workspace);
-  void plotInput(Mantid::API::MatrixWorkspace_sptr workspace,
-                 WorkspaceIndex spectrum);
+  void plotInput(Mantid::API::MatrixWorkspace_sptr workspace, WorkspaceIndex spectrum);
   void plotFit(const Mantid::API::MatrixWorkspace_sptr &workspace);
-  void plotFit(Mantid::API::MatrixWorkspace_sptr workspace,
-               WorkspaceIndex spectrum);
-  void plotDifference(Mantid::API::MatrixWorkspace_sptr workspace,
-                      WorkspaceIndex spectrum);
+  void plotFit(Mantid::API::MatrixWorkspace_sptr workspace, WorkspaceIndex spectrum);
+  void plotDifference(Mantid::API::MatrixWorkspace_sptr workspace, WorkspaceIndex spectrum);
   void clearInput();
   void clearFit();
   void clearDifference();
   void plotGuess(Mantid::API::MatrixWorkspace_sptr workspace);
-  void
-  plotGuessInSeparateWindow(const Mantid::API::MatrixWorkspace_sptr &workspace);
+  void plotGuessInSeparateWindow(const Mantid::API::MatrixWorkspace_sptr &workspace);
   void plotLines();
   void updatePlotRange(const std::pair<double, double> &range);
   void clearGuess();

@@ -100,8 +100,7 @@ class QGroupBox;
 class QGridLayout;
 class QFrame;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtGroupBoxPropertyBrowser
-    : public QtAbstractPropertyBrowser {
+class EXPORT_OPT_MANTIDQT_COMMON QtGroupBoxPropertyBrowser : public QtAbstractPropertyBrowser {
   Q_OBJECT
 public:
   QtGroupBoxPropertyBrowser(QWidget *parent = nullptr);
@@ -129,17 +128,15 @@ public:
   void propertyInserted(QtBrowserItem *index, QtBrowserItem *afterIndex);
   void propertyRemoved(QtBrowserItem *index);
   void propertyChanged(QtBrowserItem *index);
-  QWidget *createEditor(QtProperty *property, QWidget *parent) const {
-    return q_ptr->createEditor(property, parent);
-  }
+  QWidget *createEditor(QtProperty *property, QWidget *parent) const { return q_ptr->createEditor(property, parent); }
 
   void slotEditorDestroyed();
   void slotUpdate();
 
   struct WidgetItem {
     WidgetItem()
-        : widget(nullptr), label(nullptr), widgetLabel(nullptr),
-          groupBox(nullptr), layout(nullptr), line(nullptr), parent(nullptr) {}
+        : widget(nullptr), label(nullptr), widgetLabel(nullptr), groupBox(nullptr), layout(nullptr), line(nullptr),
+          parent(nullptr) {}
     QWidget *widget; // can be null
     QLabel *label;
     QLabel *widgetLabel;

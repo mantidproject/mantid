@@ -33,9 +33,7 @@ class ConvertToYSpaceTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertToYSpaceTest *createSuite() {
-    return new ConvertToYSpaceTest();
-  }
+  static ConvertToYSpaceTest *createSuite() { return new ConvertToYSpaceTest(); }
   static void destroySuite(ConvertToYSpaceTest *suite) { delete suite; }
 
   void test_Init() {
@@ -62,14 +60,12 @@ public:
     // Get the y-Space output workspace
     MatrixWorkspace_sptr ySpOutputWs = alg->getProperty("OutputWorkspace");
     TS_ASSERT(ySpOutputWs != nullptr)
-    TS_ASSERT_EQUALS(testWS->getNumberHistograms(),
-                     ySpOutputWs->getNumberHistograms());
+    TS_ASSERT_EQUALS(testWS->getNumberHistograms(), ySpOutputWs->getNumberHistograms());
 
     // Get the q-Space output workspace
     MatrixWorkspace_sptr qSpOutputWs = alg->getProperty("QWorkspace");
     TS_ASSERT(qSpOutputWs != nullptr)
-    TS_ASSERT_EQUALS(testWS->getNumberHistograms(),
-                     qSpOutputWs->getNumberHistograms());
+    TS_ASSERT_EQUALS(testWS->getNumberHistograms(), qSpOutputWs->getNumberHistograms());
 
     const size_t npts = ySpOutputWs->blocksize();
 
@@ -117,11 +113,9 @@ public:
     auto alg = createAlgorithm();
 
     // Zero
-    TS_ASSERT_THROWS(alg->setProperty("Mass", 0.0),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg->setProperty("Mass", 0.0), const std::invalid_argument &);
     // Negative
-    TS_ASSERT_THROWS(alg->setProperty("Mass", -0.1),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg->setProperty("Mass", -0.1), const std::invalid_argument &);
   }
 
   void test_Input_Workspace_Not_In_TOF_Throws_Error() {
@@ -129,8 +123,7 @@ public:
     auto testWS = WorkspaceCreationHelper::create2DWorkspace123(1, 10);
     testWS->getAxis(0)->setUnit("Wavelength");
 
-    TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", testWS),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", testWS), const std::invalid_argument &);
   }
 
   void test_Input_Workspace_In_TOF_Without_Instrument_Throws_Error() {
@@ -138,15 +131,12 @@ public:
     auto testWS = WorkspaceCreationHelper::create2DWorkspace123(1, 10);
     testWS->getAxis(0)->setUnit("TOF");
 
-    TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", testWS),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", testWS), const std::invalid_argument &);
   }
 
-  void
-  test_Input_Workspace_In_TOF_With_Instrument_But_No_Detector_Parameters_Throws_Error_On_Execution() {
+  void test_Input_Workspace_In_TOF_With_Instrument_But_No_Detector_Parameters_Throws_Error_On_Execution() {
     auto alg = createAlgorithm();
-    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        1, 10, false, false, false);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10, false, false, false);
     testWS->getAxis(0)->setUnit("TOF");
 
     alg->setProperty("InputWorkspace", testWS);
@@ -159,29 +149,21 @@ public:
 
 class ConvertToYSpaceTestPerformance : public CxxTest::TestSuite {
 public:
-  static ConvertToYSpaceTestPerformance *createSuite() {
-    return new ConvertToYSpaceTestPerformance();
-  }
-  static void destroySuite(ConvertToYSpaceTestPerformance *suite) {
-    delete suite;
-  }
+  static ConvertToYSpaceTestPerformance *createSuite() { return new ConvertToYSpaceTestPerformance(); }
+  static void destroySuite(ConvertToYSpaceTestPerformance *suite) { delete suite; }
 
   void setUp() override {
     convertToYSpaceAlg = createAlgorithm();
     double x0(50.0), x1(300.0), dx(0.5);
     auto testWS = ComptonProfileTestHelpers::createTestWorkspace(
-        1000, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None, true,
-        true);
+        1000, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None, true, true);
     convertToYSpaceAlg->setChild(false);
     convertToYSpaceAlg->setProperty("InputWorkspace", testWS);
     convertToYSpaceAlg->setProperty("Mass", 1.0097);
-    convertToYSpaceAlg->setProperty("QWorkspace",
-                                    "ConvertToYSpace_Test_qSpace");
+    convertToYSpaceAlg->setProperty("QWorkspace", "ConvertToYSpace_Test_qSpace");
   }
 
-  void testConvertToYSpaceTestPerformance() {
-    TS_ASSERT_THROWS_NOTHING(convertToYSpaceAlg->execute());
-  }
+  void testConvertToYSpaceTestPerformance() { TS_ASSERT_THROWS_NOTHING(convertToYSpaceAlg->execute()); }
 
 private:
   IAlgorithm_sptr convertToYSpaceAlg;

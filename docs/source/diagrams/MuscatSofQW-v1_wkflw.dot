@@ -36,7 +36,7 @@ digraph MuscatSofQW {
     CreateWorkspace
     CopyLogs
   }
-  
+
   subgraph decisions  {
     $decision_style
     isConvFitProg [label="ConvFit Fit Program"]
@@ -51,7 +51,7 @@ digraph MuscatSofQW {
   ParameterWorkspace1           -> hasLor
   hasLor                        -> End                            [label="0 : Must have Lorentzians"]
   hasLor                        -> Lorentzians                    [label="1 or 2"]
-  
+
   //initial processing
   EnergyMax                     -> rebinParam
   EnergyInc                     -> rebinParam
@@ -67,7 +67,7 @@ digraph MuscatSofQW {
   ParameterWorkspace2           -> qValues
   qValues                       -> SpecMax                         [label="Length of qValues"]
   SpecMax                       -> CurrentSpec
-  
+
   //Start of fit loop
   CurrentSpec                   -> ConstructConvFitFunction
   Delta                         -> ConstructConvFitFunction

@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::API::IMDHistoWorkspaceProperty
 
 .. module:`mantid.api`
 
-.. autoclass:: mantid.api.IMDHistoWorkspacePropertyPropertyWithValue 
+.. autoclass:: mantid.api.IMDHistoWorkspacePropertyPropertyWithValue
     :members:
     :undoc-members:
     :inherited-members:

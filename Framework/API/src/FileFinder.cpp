@@ -42,9 +42,7 @@ Mantid::Kernel::Logger g_log("FileFinder");
  *
  * @returns true if extension contains a "*", else false.
  */
-bool containsWildCard(const std::string &ext) {
-  return std::string::npos != ext.find('*');
-}
+bool containsWildCard(const std::string &ext) { return std::string::npos != ext.find('*'); }
 } // namespace
 
 namespace Mantid {
@@ -68,9 +66,7 @@ FileFinderImpl::FileFinderImpl() {
 #ifdef _WIN32
   m_globOption = Poco::Glob::GLOB_DEFAULT;
 #else
-  setCaseSensitive(Kernel::ConfigService::Instance()
-                       .getValue<bool>("filefinder.casesensitive")
-                       .get_value_or(false));
+  setCaseSensitive(Kernel::ConfigService::Instance().getValue<bool>("filefinder.casesensitive").get_value_or(false));
 #endif
 }
 
@@ -90,9 +86,7 @@ void FileFinderImpl::setCaseSensitive(const bool cs) {
  * @return cs :: If case sensitive return true, if not case sensitive return
  * false
  */
-bool FileFinderImpl::getCaseSensitive() const {
-  return (m_globOption == Poco::Glob::GLOB_DEFAULT);
-}
+bool FileFinderImpl::getCaseSensitive() const { return (m_globOption == Poco::Glob::GLOB_DEFAULT); }
 
 /**
  * Return the full path to the file given its name
@@ -104,10 +98,8 @@ bool FileFinderImpl::getCaseSensitive() const {
  *  or an empty string otherwise.
  */
 
-std::string FileFinderImpl::getFullPath(const std::string &filename,
-                                        const bool ignoreDirs) const {
-  return Kernel::ConfigService::Instance().getFullPath(filename, ignoreDirs,
-                                                       m_globOption);
+std::string FileFinderImpl::getFullPath(const std::string &filename, const bool ignoreDirs) const {
+  return Kernel::ConfigService::Instance().getFullPath(filename, ignoreDirs, m_globOption);
 }
 
 /** Run numbers can be followed by an allowed string. Check if there is
@@ -115,8 +107,7 @@ std::string FileFinderImpl::getFullPath(const std::string &filename,
  *  @param userString run number that may have a suffix
  *  @return the suffix, if there was one
  */
-std::string
-FileFinderImpl::extractAllowedSuffix(std::string &userString) const {
+std::string FileFinderImpl::extractAllowedSuffix(std::string &userString) const {
   if (userString.find(ALLOWED_SUFFIX) == std::string::npos) {
     // short cut processing as normally there is no suffix
     return "";
@@ -139,8 +130,7 @@ FileFinderImpl::extractAllowedSuffix(std::string &userString) const {
  * @param hint :: The name hint.
  * @return This will return the default instrument if it cannot be determined.
  */
-const Kernel::InstrumentInfo
-FileFinderImpl::getInstrument(const string &hint) const {
+const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint) const {
   if ((!hint.empty()) && (!isdigit(hint[0]))) {
     string instrName(hint);
     Poco::Path path(instrName);
@@ -157,14 +147,12 @@ FileFinderImpl::getInstrument(const string &hint) const {
     // code gets an overhaul as part of that ticket.  Please think twice before
     // adding
     // any more instruments to this list.
-    else if ((instrName.find("SANS2D") == 0) ||
-             (instrName.find("sans2d") == 0)) {
+    else if ((instrName.find("SANS2D") == 0) || (instrName.find("sans2d") == 0)) {
       instrName = "SANS2D";
     } else {
       // go forwards looking for the run number to start
       {
-        const auto it =
-            std::find_if(instrName.begin(), instrName.end(), isdigit);
+        const auto it = std::find_if(instrName.begin(), instrName.end(), isdigit);
         const auto nChars = std::distance(instrName.begin(), it);
         instrName = instrName.substr(0, nChars);
       }
@@ -172,15 +160,13 @@ FileFinderImpl::getInstrument(const string &hint) const {
       // go backwards looking for the instrument name to end - gets around
       // delimiters
       if (!instrName.empty()) {
-        const auto it =
-            std::find_if(instrName.rbegin(), instrName.rend(), isalpha);
+        const auto it = std::find_if(instrName.rbegin(), instrName.rend(), isalpha);
         const auto nChars = std::distance(it, instrName.rend());
         instrName = instrName.substr(0, nChars);
       }
     }
     try {
-      const Kernel::InstrumentInfo instrument =
-          Kernel::ConfigService::Instance().getInstrument(instrName);
+      const Kernel::InstrumentInfo instrument = Kernel::ConfigService::Instance().getInstrument(instrName);
       return instrument;
     } catch (Kernel::Exception::NotFoundError &e) {
       g_log.debug() << e.what() << "\n";
@@ -194,8 +180,7 @@ FileFinderImpl::getInstrument(const string &hint) const {
  * @param hint :: The name hint
  * @return A pair of instrument name and run number
  */
-std::pair<std::string, std::string>
-FileFinderImpl::toInstrumentAndNumber(const std::string &hint) const {
+std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const std::string &hint) const {
   // g_log.debug() << "toInstrumentAndNumber(" << hint << ")\n";
   std::string instrPart;
   std::string runPart;
@@ -205,12 +190,10 @@ FileFinderImpl::toInstrumentAndNumber(const std::string &hint) const {
     runPart = hint;
   } else {
     /// Find the last non-digit as the instrument name can contain numbers
-    std::string::const_reverse_iterator it =
-        std::find_if(hint.rbegin(), hint.rend(), std::not_fn(isdigit));
+    std::string::const_reverse_iterator it = std::find_if(hint.rbegin(), hint.rend(), std::not_fn(isdigit));
     // No non-digit or all non-digits
     if (it == hint.rend() || it == hint.rbegin()) {
-      throw std::invalid_argument(
-          "Malformed hint to FileFinderImpl::makeFileName: " + hint);
+      throw std::invalid_argument("Malformed hint to FileFinderImpl::makeFileName: " + hint);
     }
     std::string::size_type nChars = std::distance(it, hint.rend());
 
@@ -238,8 +221,7 @@ FileFinderImpl::toInstrumentAndNumber(const std::string &hint) const {
     os << "Cannot convert '" << runPart << "' to run number.";
     throw std::invalid_argument(os.str());
   }
-  Kernel::InstrumentInfo instr =
-      Kernel::ConfigService::Instance().getInstrument(instrPart);
+  Kernel::InstrumentInfo instr = Kernel::ConfigService::Instance().getInstrument(instrPart);
   size_t nZero = instr.zeroPadding(irunPart);
   // remove any leading zeros in case there are too many of them
   std::string::size_type i = runPart.find_first_not_of('0');
@@ -247,8 +229,7 @@ FileFinderImpl::toInstrumentAndNumber(const std::string &hint) const {
   while (runPart.size() < nZero)
     runPart.insert(0, "0");
   if (runPart.size() > nZero && nZero != 0) {
-    throw std::invalid_argument(
-        "Run number does not match instrument's zero padding");
+    throw std::invalid_argument("Run number does not match instrument's zero padding");
   }
 
   instrPart = instr.filePrefix(irunPart);
@@ -268,9 +249,7 @@ FileFinderImpl::toInstrumentAndNumber(const std::string &hint) const {
  * @throw std::invalid_argument if the argument is malformed or run number is
  * too long
  */
-std::string
-FileFinderImpl::makeFileName(const std::string &hint,
-                             const Kernel::InstrumentInfo &instrument) const {
+std::string FileFinderImpl::makeFileName(const std::string &hint, const Kernel::InstrumentInfo &instrument) const {
   // g_log.debug() << "makeFileName(" << hint << ", " << instrument.shortName()
   // << ")\n";
   if (hint.empty())
@@ -284,8 +263,7 @@ FileFinderImpl::makeFileName(const std::string &hint,
   // see if starts with the provided instrument name
   if (filename.substr(0, shortName.size()) == shortName) {
     filename = filename.substr(shortName.size());
-    if ((!delimiter.empty()) &&
-        (filename.substr(0, delimiter.size()) == delimiter))
+    if ((!delimiter.empty()) && (filename.substr(0, delimiter.size()) == delimiter))
       filename = filename.substr(delimiter.size());
 
     filename = shortName + filename;
@@ -315,25 +293,20 @@ FileFinderImpl::makeFileName(const std::string &hint,
  *
  * @return The extension. If one isn't determined it is an empty string.
  */
-std::string
-FileFinderImpl::getExtension(const std::string &filename,
-                             const std::vector<std::string> &exts) const {
-  g_log.debug() << "getExtension(" << filename << ", exts[" << exts.size()
-                << "])\n";
+std::string FileFinderImpl::getExtension(const std::string &filename, const std::vector<std::string> &exts) const {
+  g_log.debug() << "getExtension(" << filename << ", exts[" << exts.size() << "])\n";
 
   // go through the list of supplied extensions
   for (const auto &ext : exts) {
     std::string extension = toUpper(ext);
-    if (extension.rfind('*') ==
-        extension.size() - 1) // there is a wildcard at play
+    if (extension.rfind('*') == extension.size() - 1) // there is a wildcard at play
     {
       extension = extension.substr(0, extension.rfind('*'));
     }
 
     std::size_t found = toUpper(filename).rfind(extension);
     if (found != std::string::npos) {
-      g_log.debug() << "matched extension \"" << extension << "\" based on \""
-                    << ext << "\"\n";
+      g_log.debug() << "matched extension \"" << extension << "\" based on \"" << ext << "\"\n";
       return filename.substr(found); // grab the actual extensions found
     }
   }
@@ -348,20 +321,16 @@ FileFinderImpl::getExtension(const std::string &filename,
   return "";
 }
 
-std::vector<IArchiveSearch_sptr>
-FileFinderImpl::getArchiveSearch(const Kernel::FacilityInfo &facility) const {
+std::vector<IArchiveSearch_sptr> FileFinderImpl::getArchiveSearch(const Kernel::FacilityInfo &facility) const {
   std::vector<IArchiveSearch_sptr> archs;
 
   // get the searchive option from config service and format it
-  std::string archiveOpt =
-      Kernel::ConfigService::Instance().getString("datasearch.searcharchive");
-  std::transform(archiveOpt.begin(), archiveOpt.end(), archiveOpt.begin(),
-                 tolower);
+  std::string archiveOpt = Kernel::ConfigService::Instance().getString("datasearch.searcharchive");
+  std::transform(archiveOpt.begin(), archiveOpt.end(), archiveOpt.begin(), tolower);
 
   // if it is turned off, not specified, or the facility doesn't have
   // IArchiveSearch defined, return an empty vector
-  if (archiveOpt.empty() || archiveOpt == "off" ||
-      facility.archiveSearch().empty())
+  if (archiveOpt.empty() || archiveOpt == "off" || facility.archiveSearch().empty())
     return archs;
 
   // determine if the user wants archive search for this facility
@@ -371,37 +340,30 @@ FileFinderImpl::getArchiveSearch(const Kernel::FacilityInfo &facility) const {
   // default facility
   if (!createArchiveSearch) {
     std::string faciltyName = facility.name();
-    std::transform(faciltyName.begin(), faciltyName.end(), faciltyName.begin(),
-                   tolower);
+    std::transform(faciltyName.begin(), faciltyName.end(), faciltyName.begin(), tolower);
     if (archiveOpt == "on") { // only default facilty
-      std::string defaultFacility =
-          Kernel::ConfigService::Instance().getString("default.facility");
-      std::transform(defaultFacility.begin(), defaultFacility.end(),
-                     defaultFacility.begin(), tolower);
+      std::string defaultFacility = Kernel::ConfigService::Instance().getString("default.facility");
+      std::transform(defaultFacility.begin(), defaultFacility.end(), defaultFacility.begin(), tolower);
       createArchiveSearch = bool(faciltyName == defaultFacility);
     } else { // everything in the list
-      createArchiveSearch =
-          bool(archiveOpt.find(faciltyName) != std::string::npos);
+      createArchiveSearch = bool(archiveOpt.find(faciltyName) != std::string::npos);
     }
   }
 
   // put together the list of IArchiveSearch to use
   if (createArchiveSearch) {
     for (const auto &facilityname : facility.archiveSearch()) {
-      g_log.debug() << "get archive search for the facility..." << facilityname
-                    << "\n";
+      g_log.debug() << "get archive search for the facility..." << facilityname << "\n";
       archs.emplace_back(ArchiveSearchFactory::Instance().create(facilityname));
     }
   }
   return archs;
 }
 
-std::string FileFinderImpl::findRun(const std::string &hintstr,
-                                    const std::vector<std::string> &exts,
+std::string FileFinderImpl::findRun(const std::string &hintstr, const std::vector<std::string> &exts,
                                     const bool useExtsOnly) const {
   std::string hint = Kernel::Strings::strip(hintstr);
-  g_log.debug() << "vector findRun(\'" << hint << "\', exts[" << exts.size()
-                << "])\n";
+  g_log.debug() << "vector findRun(\'" << hint << "\', exts[" << exts.size() << "])\n";
 
   // if partial filename or run number is not supplied, return here
   if (hint.empty())
@@ -453,8 +415,7 @@ std::string FileFinderImpl::findRun(const std::string &hintstr,
       }
     } catch (std::invalid_argument &) {
       if (filename.length() >= hint.length()) {
-        g_log.information() << "Could not form filename from standard rules '"
-                            << filename << "'\n";
+        g_log.information() << "Could not form filename from standard rules '" << filename << "'\n";
       }
     }
   }
@@ -470,11 +431,9 @@ std::string FileFinderImpl::findRun(const std::string &hintstr,
   filenames.insert(filename);
   if (!getCaseSensitive()) {
     std::string transformed(filename);
-    std::transform(filename.begin(), filename.end(), transformed.begin(),
-                   toupper);
+    std::transform(filename.begin(), filename.end(), transformed.begin(), toupper);
     filenames.insert(transformed);
-    std::transform(filename.begin(), filename.end(), transformed.begin(),
-                   tolower);
+    std::transform(filename.begin(), filename.end(), transformed.begin(), tolower);
     filenames.insert(transformed);
   }
 
@@ -516,17 +475,15 @@ std::string FileFinderImpl::findRun(const std::string &hintstr,
  * @param extensionsToAdd :: a vector of extensions to add
  * @param uniqueExts :: a vector of currently included extensions
  */
-void FileFinderImpl::getUniqueExtensions(
-    const std::vector<std::string> &extensionsToAdd,
-    std::vector<std::string> &uniqueExts) const {
+void FileFinderImpl::getUniqueExtensions(const std::vector<std::string> &extensionsToAdd,
+                                         std::vector<std::string> &uniqueExts) const {
   const bool isCaseSensitive = getCaseSensitive();
   for (const auto &cit : extensionsToAdd) {
     std::string transformed(cit);
     if (!isCaseSensitive) {
       std::transform(cit.begin(), cit.end(), transformed.begin(), tolower);
     }
-    const auto searchItr =
-        std::find(uniqueExts.begin(), uniqueExts.end(), transformed);
+    const auto searchItr = std::find(uniqueExts.begin(), uniqueExts.end(), transformed);
     if (searchItr == uniqueExts.end()) {
       uniqueExts.emplace_back(transformed);
     }
@@ -548,17 +505,13 @@ void FileFinderImpl::getUniqueExtensions(
  * @throw std::invalid_argument if the argument is malformed
  * @throw Exception::NotFoundError if a file could not be found
  */
-std::vector<std::string>
-FileFinderImpl::findRuns(const std::string &hintstr,
-                         const std::vector<std::string> &exts,
-                         const bool useExtsOnly) const {
+std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, const std::vector<std::string> &exts,
+                                                  const bool useExtsOnly) const {
   std::string hint = Kernel::Strings::strip(hintstr);
   g_log.debug() << "findRuns hint = " << hint << "\n";
   std::vector<std::string> res;
   Mantid::Kernel::StringTokenizer hints(
-      hint, ",",
-      Mantid::Kernel::StringTokenizer::TOK_TRIM |
-          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      hint, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM | Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   static const boost::regex digits("[0-9]+");
   auto h = hints.begin();
 
@@ -577,9 +530,7 @@ FileFinderImpl::findRuns(const std::string &hintstr,
     }
 
     Mantid::Kernel::StringTokenizer range(
-        *h, "-",
-        Mantid::Kernel::StringTokenizer::TOK_TRIM |
-            Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+        *h, "-", Mantid::Kernel::StringTokenizer::TOK_TRIM | Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     if ((range.count() > 2) && (!fileSuspected)) {
       throw std::invalid_argument("Malformed range of runs: " + *h);
     } else if ((range.count() == 2) && (!fileSuspected)) {
@@ -660,10 +611,9 @@ FileFinderImpl::findRuns(const std::string &hintstr,
  * search locations
  *  or an empty string otherwise.
  */
-std::string
-FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
-                               const std::set<std::string> &filenames,
-                               const std::vector<std::string> &exts) const {
+std::string FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
+                                           const std::set<std::string> &filenames,
+                                           const std::vector<std::string> &exts) const {
   g_log.debug() << "getArchivePath([IArchiveSearch_sptr], [ ";
   for (const auto &iter : filenames)
     g_log.debug() << iter << " ";
@@ -697,22 +647,18 @@ FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
  * search locations
  *  or an empty string otherwise.
  */
-std::string
-FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &archs,
-                        const std::set<std::string> &filenames,
-                        const std::vector<std::string> &exts) const {
+std::string FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &archs,
+                                    const std::set<std::string> &filenames,
+                                    const std::vector<std::string> &exts) const {
   std::string path;
 
   std::vector<std::string> extensions;
   extensions.assign(exts.begin(), exts.end());
 
   // Remove wild cards.
-  extensions.erase(
-      std::remove_if(extensions.begin(), extensions.end(), containsWildCard),
-      extensions.end());
+  extensions.erase(std::remove_if(extensions.begin(), extensions.end(), containsWildCard), extensions.end());
 
-  const std::vector<std::string> &searchPaths =
-      Kernel::ConfigService::Instance().getDataSearchDirs();
+  const std::vector<std::string> &searchPaths = Kernel::ConfigService::Instance().getDataSearchDirs();
 
   // Before we try any globbing, make sure we exhaust all reasonable attempts at
   // constructing the possible filename.
@@ -740,13 +686,11 @@ FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &archs,
       path = getFullPath(filename + extension);
       try {
         if (!path.empty() && Poco::File(path).exists()) {
-          g_log.debug() << "path returned from getFullPath() = " << path
-                        << '\n';
+          g_log.debug() << "path returned from getFullPath() = " << path << '\n';
           return path;
         }
       } catch (std::exception &e) {
-        g_log.error() << "Cannot open file " << path << ": " << e.what()
-                      << '\n';
+        g_log.error() << "Cannot open file " << path << ": " << e.what() << '\n';
         return "";
       }
     }
@@ -761,8 +705,7 @@ FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &archs,
         return archivePath;
       }
     } catch (std::exception &e) {
-      g_log.error() << "Cannot open file " << archivePath << ": " << e.what()
-                    << '\n';
+      g_log.error() << "Cannot open file " << archivePath << ": " << e.what() << '\n';
       return "";
     }
 

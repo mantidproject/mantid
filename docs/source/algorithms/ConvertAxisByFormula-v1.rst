@@ -11,7 +11,7 @@ Description
 
 This algorithm allows users to adjust the axes of a workspace by a user
 defined math formula. It will adjust the data values
-(other than in one case the X values) of a workspace, although it will 
+(other than in one case the X values) of a workspace, although it will
 reverse the spectra if needed to keep the X values increasing across the workspace.
 This only works for MatrixWorkspaces, so will not work on
 Multi Dimensional Workspaces or Table Workspaces. If you specify one of the

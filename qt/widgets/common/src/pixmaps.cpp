@@ -12222,7 +12222,7 @@ static const char * magnifier_xpm[] = {
 "                                      o+p+q+    "};
 
 
-/* "Manage User Directories" Icon */ 
+/* "Manage User Directories" Icon */
 static const char * managefolders_xpm[] = {
 "32 32 534 2",
 "  	c None",

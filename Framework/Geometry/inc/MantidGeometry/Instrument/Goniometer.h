@@ -40,14 +40,12 @@ struct GoniometerAxis {
   Kernel::V3D rotationaxis; /// GoniometerAxis direction
   double angle;             /// Rotation angle
   int sense;                /// Rotation sense (1 for CCW, -1 for CW)
-  int angleunit; /// angle units are angDegrees or angRadians (see AngleUnits.h)
+  int angleunit;            /// angle units are angDegrees or angRadians (see AngleUnits.h)
   /// Constructor
-  GoniometerAxis(std::string initname, Kernel::V3D initrotationaxis,
-                 double initangle, int initsense, int initangleunit)
-      : name(std::move(initname)), rotationaxis(initrotationaxis),
-        angle(initangle), sense(initsense), angleunit(initangleunit) {}
-  GoniometerAxis()
-      : name(""), rotationaxis(), angle(0.), sense(0), angleunit(0) {}
+  GoniometerAxis(std::string initname, Kernel::V3D initrotationaxis, double initangle, int initsense, int initangleunit)
+      : name(std::move(initname)), rotationaxis(initrotationaxis), angle(initangle), sense(initsense),
+        angleunit(initangleunit) {}
+  GoniometerAxis() : name(""), rotationaxis(), angle(0.), sense(0), angleunit(0) {}
 
   void saveNexus(::NeXus::File *file, const std::string &group) const;
   void loadNexus(::NeXus::File *file, const std::string &group);
@@ -68,8 +66,7 @@ public:
   // Return information about axes
   std::string axesInfo();
   // Add axis to goniometer
-  void pushAxis(const std::string &name, double axisx, double axisy,
-                double axisz, double angle = 0., int sense = CCW,
+  void pushAxis(const std::string &name, double axisx, double axisy, double axisz, double angle = 0., int sense = CCW,
                 int angUnit = angDegrees);
   // Set rotation angle for an axis in the units the angle is set (default --
   // degrees)
@@ -79,8 +76,7 @@ public:
   void setRotationAngle(size_t axisnumber, double value);
   // Calculate goniometer for rotation around y-axis for constant wavelength
   // from Q Sample
-  void calcFromQSampleAndWavelength(const Mantid::Kernel::V3D &Q,
-                                    double wavelength, bool flip_x = false,
+  void calcFromQSampleAndWavelength(const Mantid::Kernel::V3D &Q, double wavelength, bool flip_x = false,
                                     bool inner = false);
   // Get axis object
   const GoniometerAxis &getAxis(size_t axisnumber) const;

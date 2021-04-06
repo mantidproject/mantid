@@ -39,8 +39,7 @@ DECLARE_ALGORITHM(EstimateMuonAsymmetryFromCounts)
  */
 void EstimateMuonAsymmetryFromCounts::init() {
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
       "The name of the input 2D workspace.");
   declareProperty("WorkspaceName", "",
                   "The name used in the normalization "
@@ -48,39 +47,27 @@ void EstimateMuonAsymmetryFromCounts::init() {
                   "InputWorkspace's name will be used.");
 
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
       "The name of the output 2D workspace.");
-  declareProperty(
-      "OutputUnNormData", false,
-      "If to output the data with just the exponential decay removed.");
+  declareProperty("OutputUnNormData", false, "If to output the data with just the exponential decay removed.");
 
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "OutputUnNormWorkspace", "unNormalisedData", Direction::Output,
-          API::PropertyMode::Optional),
-      "The name of the output unnormalized workspace.");
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+                      "OutputUnNormWorkspace", "unNormalisedData", Direction::Output, API::PropertyMode::Optional),
+                  "The name of the output unnormalized workspace.");
 
   std::vector<int> empty;
-  declareProperty(
-      std::make_unique<Kernel::ArrayProperty<int>>("Spectra", std::move(empty)),
-      "The workspace indices to remove the exponential decay from.");
-  declareProperty(
-      "StartX", 0.1,
-      "The lower limit for calculating the asymmetry (an X value).");
-  declareProperty(
-      "EndX", 15.0,
-      "The upper limit for calculating the asymmetry  (an X value).");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<int>>("Spectra", std::move(empty)),
+                  "The workspace indices to remove the exponential decay from.");
+  declareProperty("StartX", 0.1, "The lower limit for calculating the asymmetry (an X value).");
+  declareProperty("EndX", 15.0, "The upper limit for calculating the asymmetry  (an X value).");
   declareProperty("NormalizationIn", 0.0,
                   "If this value is non-zero then this "
                   "is used for the normalization, "
                   "instead of being estimated.");
 
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "NormalizationTable", "", Direction::InOut,
-          API::PropertyMode::Optional),
-      "Name of the table containing the normalizations for the asymmetries.");
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+                      "NormalizationTable", "", Direction::InOut, API::PropertyMode::Optional),
+                  "Name of the table containing the normalizations for the asymmetries.");
 }
 
 /*
@@ -88,8 +75,7 @@ void EstimateMuonAsymmetryFromCounts::init() {
  * @returns map with keys corresponding to properties with errors and values
  * containing the error messages.
  */
-std::map<std::string, std::string>
-EstimateMuonAsymmetryFromCounts::validateInputs() {
+std::map<std::string, std::string> EstimateMuonAsymmetryFromCounts::validateInputs() {
   // create the map
   std::map<std::string, std::string> validationOutput;
   // check start and end times
@@ -103,8 +89,7 @@ EstimateMuonAsymmetryFromCounts::validateInputs() {
   }
   double norm = getProperty("NormalizationIn");
   if (norm < 0.0) {
-    validationOutput["NormalizationIn"] =
-        "Normalization to use must be positive.";
+    validationOutput["NormalizationIn"] = "Normalization to use must be positive.";
   }
   return validationOutput;
 }
@@ -180,24 +165,20 @@ void EstimateMuonAsymmetryFromCounts::exec() {
     const auto specNum = static_cast<size_t>(spectra[i]);
 
     if (spectra[i] > static_cast<int>(numSpectra)) {
-      g_log.error("The spectral index " + std::to_string(spectra[i]) +
-                  " is greater than the number of spectra!");
-      throw std::invalid_argument("The spectral index " +
-                                  std::to_string(spectra[i]) +
+      g_log.error("The spectral index " + std::to_string(spectra[i]) + " is greater than the number of spectra!");
+      throw std::invalid_argument("The spectral index " + std::to_string(spectra[i]) +
                                   " is greater than the number of spectra!");
     }
     // Calculate the normalised counts
     if (normConst == 0.0) {
-      normConst = estimateNormalisationConst(inputWS->histogram(specNum),
-                                             numGoodFrames, startX, endX);
+      normConst = estimateNormalisationConst(inputWS->histogram(specNum), numGoodFrames, startX, endX);
     }
     if (spectra.size() > 1) {
       wsNames[i] += std::to_string(spectra[i]);
     }
 
     // Calculate the asymmetry
-    outputWS->setHistogram(
-        specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
+    outputWS->setHistogram(specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
     if (extraData) {
       unnormWS->setSharedX(specNum, outputWS->sharedX(specNum));
       unnormWS->mutableY(specNum) = outputWS->y(specNum);
@@ -224,13 +205,11 @@ void EstimateMuonAsymmetryFromCounts::exec() {
   // Update Y axis units
   outputWS->setYUnit("Asymmetry");
 
-  std::string normString = std::accumulate(
-      norm.begin() + 1, norm.end(), std::to_string(norm[0]),
-      [](const std::string &currentString, double valueToAppend) {
-        return currentString + ',' + std::to_string(valueToAppend);
-      });
-  MuonAlgorithmHelper::addSampleLog(outputWS, "analysis_asymmetry_norm",
-                                    normString);
+  std::string normString = std::accumulate(norm.begin() + 1, norm.end(), std::to_string(norm[0]),
+                                           [](const std::string &currentString, double valueToAppend) {
+                                             return currentString + ',' + std::to_string(valueToAppend);
+                                           });
+  MuonAlgorithmHelper::addSampleLog(outputWS, "analysis_asymmetry_norm", normString);
 
   setProperty("OutputWorkspace", outputWS);
 }

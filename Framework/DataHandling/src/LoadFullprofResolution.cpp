@@ -50,36 +50,30 @@ std::map<std::string, size_t> LoadFullprofResolution::m_rowNumbers;
  */
 void LoadFullprofResolution::init() {
   // Input file name
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                 FileProperty::Load, ".irf"),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".irf"),
                   "Path to an Fullprof .irf file to load.");
 
   // Output table workspace
-  auto wsprop = std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-      "OutputTableWorkspace", "", Direction::Output, PropertyMode::Optional);
-  declareProperty(std::move(wsprop),
-                  "Name of the output TableWorkspace containing "
-                  "profile parameters or bank information. ");
+  auto wsprop = std::make_unique<WorkspaceProperty<API::ITableWorkspace>>("OutputTableWorkspace", "", Direction::Output,
+                                                                          PropertyMode::Optional);
+  declareProperty(std::move(wsprop), "Name of the output TableWorkspace containing "
+                                     "profile parameters or bank information. ");
 
   // Use bank numbers as given in file
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("UseBankIDsInFile", true,
-                                                Direction::Input),
-      "Use bank IDs as given in file rather than ordinal number of bank."
-      "If the bank IDs in the file are not unique, it is advised to set this "
-      "to false.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("UseBankIDsInFile", true, Direction::Input),
+                  "Use bank IDs as given in file rather than ordinal number of bank."
+                  "If the bank IDs in the file are not unique, it is advised to set this "
+                  "to false.");
 
   // Bank to import
-  declareProperty(std::make_unique<ArrayProperty<int>>("Banks"),
-                  "ID(s) of specified bank(s) to load, "
-                  "The IDs are as specified by UseBankIDsInFile."
-                  "Default is all banks contained in input .irf file.");
+  declareProperty(std::make_unique<ArrayProperty<int>>("Banks"), "ID(s) of specified bank(s) to load, "
+                                                                 "The IDs are as specified by UseBankIDsInFile."
+                                                                 "Default is all banks contained in input .irf file.");
 
   // Workspace to put parameters into. It must be a workspace group with one
   // workpace per bank from the IRF file
   declareProperty(
-      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-          "Workspace", "", Direction::InOut, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>("Workspace", "", Direction::InOut, PropertyMode::Optional),
       "A workspace group with the instrument to which we add the "
       "parameters from the Fullprof .irf file with one workspace "
       "for each bank of the .irf file");
@@ -117,8 +111,7 @@ void LoadFullprofResolution::exec() {
   // Examine bank information
   vector<int> vec_bankinirf;
   map<int, int> bankstartindexmap, bankendindexmap;
-  scanBanks(lines, useBankIDsInFile, vec_bankinirf, bankstartindexmap,
-            bankendindexmap);
+  scanBanks(lines, useBankIDsInFile, vec_bankinirf, bankstartindexmap, bankendindexmap);
   if (useBankIDsInFile)
     sort(vec_bankinirf.begin(), vec_bankinirf.end());
 
@@ -147,17 +140,14 @@ void LoadFullprofResolution::exec() {
     sort(outputbankids.begin(), outputbankids.end());
     for (auto outputbankid : outputbankids) {
       if (outputbankid < 0) {
-        g_log.warning() << "Input bank ID (" << outputbankid
-                        << ") is negative.  It is not allowed and is  ignored. "
+        g_log.warning() << "Input bank ID (" << outputbankid << ") is negative.  It is not allowed and is  ignored. "
                         << ".\n";
       } else {
-        auto fiter = lower_bound(vec_bankinirf.begin(), vec_bankinirf.end(),
-                                 outputbankid);
+        auto fiter = lower_bound(vec_bankinirf.begin(), vec_bankinirf.end(), outputbankid);
         if (fiter == vec_bankinirf.end() || *fiter != outputbankid) {
           // Specified bank ID does not exist.
           stringstream errmsg;
-          errmsg << "Specified output bank (ID = " << outputbankid
-                 << ") cannot be found in input " << datafile
+          errmsg << "Specified output bank (ID = " << outputbankid << ") cannot be found in input " << datafile
                  << ", which includes bank : ";
           for (size_t i = 0; i < vec_bankinirf.size(); ++i) {
             errmsg << vec_bankinirf[i];
@@ -180,12 +170,10 @@ void LoadFullprofResolution::exec() {
   // Parse .irf and export profile parameters
   map<int, map<string, double>> bankparammap;
   for (int bankid : vec_bankids) {
-    g_log.debug() << "Parse bank " << bankid << " of total "
-                  << vec_bankids.size() << ".\n";
+    g_log.debug() << "Parse bank " << bankid << " of total " << vec_bankids.size() << ".\n";
     map<string, double> parammap;
-    parseResolutionStrings(parammap, lines, useBankIDsInFile, bankid,
-                           bankstartindexmap[bankid], bankendindexmap[bankid],
-                           nProf);
+    parseResolutionStrings(parammap, lines, useBankIDsInFile, bankid, bankstartindexmap[bankid],
+                           bankendindexmap[bankid], nProf);
     bankparammap.emplace(bankid, parammap);
   }
 
@@ -203,8 +191,7 @@ void LoadFullprofResolution::exec() {
     // if no WorkspacesForBanks is specified.
     if ((outputwsids.empty()) && (wsg->size() != vec_bankids.size())) {
       std::ostringstream mess;
-      mess << "Number of banks (" << vec_bankids.size()
-           << ") does not match number of workspaces (" << wsg->size()
+      mess << "Number of banks (" << vec_bankids.size() << ") does not match number of workspaces (" << wsg->size()
            << ") in group. Parameters not put into workspaces.";
       g_log.error(mess.str());
     } else // Numbers match, so put parameters into workspaces.
@@ -218,8 +205,7 @@ void LoadFullprofResolution::exec() {
         // Get column from table workspace
         API::Column_const_sptr OutTabColumn = outTabWs->getColumn(i + 1);
         std::string parameterXMLString;
-        putParametersIntoWorkspace(OutTabColumn, workspace, nProf,
-                                   parameterXMLString);
+        putParametersIntoWorkspace(OutTabColumn, workspace, nProf, parameterXMLString);
 
         // Load the string into the workspace
         Algorithm_sptr loadParamAlg = createChildAlgorithm("LoadParameterFile");
@@ -230,8 +216,7 @@ void LoadFullprofResolution::exec() {
     }
   } else if (getPropertyValue("OutputTableWorkspace").empty()) {
     // We don't know where to output
-    throw std::runtime_error(
-        "Either the OutputTableWorkspace or Workspace property must be set.");
+    throw std::runtime_error("Either the OutputTableWorkspace or Workspace property must be set.");
   }
 }
 
@@ -240,8 +225,7 @@ void LoadFullprofResolution::exec() {
  * @param filename :: string for name of the .irf file
  * @param lines :: vector of strings for each non-empty line in .irf file
  */
-void LoadFullprofResolution::loadFile(const string &filename,
-                                      vector<string> &lines) {
+void LoadFullprofResolution::loadFile(const string &filename, vector<string> &lines) {
   string line;
 
   // the variable of type ifstream:
@@ -282,8 +266,7 @@ int LoadFullprofResolution::getProfNumber(const vector<string> &lines) {
     // Split line to get the NPROF number
     size_t nStart = lines[1].find("NPROF");
     size_t nEq = lines[1].find('=', nStart);
-    size_t nEnd = lines[1].find(
-        ' ', nStart); // Assume the NRPOF number is followed by space
+    size_t nEnd = lines[1].find(' ', nStart); // Assume the NRPOF number is followed by space
     if (nEq == string::npos || nEnd == string::npos)
       return (-1);
     size_t nNumber = nEq + 1;
@@ -304,11 +287,8 @@ int LoadFullprofResolution::getProfNumber(const vector<string> &lines) {
  * @param bankendindexmap :: [output] map to indicate the last line of each
  * bank in vector lines
  */
-void LoadFullprofResolution::scanBanks(const vector<string> &lines,
-                                       const bool useFileBankIDs,
-                                       vector<int> &banks,
-                                       map<int, int> &bankstartindexmap,
-                                       map<int, int> &bankendindexmap) {
+void LoadFullprofResolution::scanBanks(const vector<string> &lines, const bool useFileBankIDs, vector<int> &banks,
+                                       map<int, int> &bankstartindexmap, map<int, int> &bankendindexmap) {
   int startindex = -1;
   int endindex;
   int bankid = 0;
@@ -352,8 +332,8 @@ void LoadFullprofResolution::scanBanks(const vector<string> &lines,
   g_log.debug() << "[DB1112] Number of bank IDs = " << banks.size() << ", "
                 << "Number of ranges = " << bankstartindexmap.size() << '\n';
   for (auto &bank : banks) {
-    g_log.debug() << "Bank " << bank << " From line " << bankstartindexmap[bank]
-                  << " to " << bankendindexmap[bank] << '\n';
+    g_log.debug() << "Bank " << bank << " From line " << bankstartindexmap[bank] << " to " << bankendindexmap[bank]
+                  << '\n';
   }
 }
 
@@ -370,25 +350,23 @@ void LoadFullprofResolution::scanBanks(const vector<string> &lines,
  * of lines
  * @param profNumber :: [input] index of the profile number
  */
-void LoadFullprofResolution::parseResolutionStrings(
-    map<string, double> &parammap, const vector<string> &lines,
-    const bool useFileBankIDs, int bankid, int startlineindex, int endlineindex,
-    int profNumber) {
+void LoadFullprofResolution::parseResolutionStrings(map<string, double> &parammap, const vector<string> &lines,
+                                                    const bool useFileBankIDs, int bankid, int startlineindex,
+                                                    int endlineindex, int profNumber) {
   string bankline = lines[startlineindex];
   double cwl;
   int tmpbankid;
   parseBankLine(bankline, cwl, tmpbankid);
   if (tmpbankid != -1) {
-    g_log.debug() << "Found CWL = " << cwl << ", Bank ID = " << tmpbankid
-                  << "\n";
+    g_log.debug() << "Found CWL = " << cwl << ", Bank ID = " << tmpbankid << "\n";
   } else {
     g_log.warning() << "No CWL found for bank " << bankid;
     tmpbankid = bankid;
   }
   if (useFileBankIDs && (bankid != tmpbankid)) {
     stringstream errss;
-    errss << "Input bank ID (" << bankid << ") is not same as the bank ID ("
-          << tmpbankid << ") found in the specified region from input. ";
+    errss << "Input bank ID (" << bankid << ") is not same as the bank ID (" << tmpbankid
+          << ") found in the specified region from input. ";
     throw runtime_error(errss.str());
   }
 
@@ -412,12 +390,10 @@ void LoadFullprofResolution::parseResolutionStrings(
     if (boost::starts_with(line, "TOFRG")) {
       // TOFRG tof-min step tof-max
       vector<string> terms;
-      boost::split(terms, line, boost::is_any_of(" "),
-                   boost::token_compress_on);
+      boost::split(terms, line, boost::is_any_of(" "), boost::token_compress_on);
       if (terms.size() != 4) {
         stringstream errmsg;
-        errmsg << "Line TOFRG has " << terms.size()
-               << " terms.  Different from 4 terms in definition.";
+        errmsg << "Line TOFRG has " << terms.size() << " terms.  Different from 4 terms in definition.";
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
@@ -428,12 +404,10 @@ void LoadFullprofResolution::parseResolutionStrings(
     } else if (boost::starts_with(line, "D2TOF")) {
       // D2TOF Dtt1 Dtt2 Zero
       vector<string> terms;
-      boost::split(terms, line, boost::is_any_of(" "),
-                   boost::token_compress_on);
+      boost::split(terms, line, boost::is_any_of(" "), boost::token_compress_on);
       if (terms.size() != 2 && terms.size() != 4) {
         stringstream errmsg;
-        errmsg << "Line D2TOF has " << terms.size()
-               << " terms.  Different from 2/4 terms in definition.";
+        errmsg << "Line D2TOF has " << terms.size() << " terms.  Different from 2/4 terms in definition.";
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
@@ -449,12 +423,10 @@ void LoadFullprofResolution::parseResolutionStrings(
     } // "D2TOF"
     else if (boost::starts_with(line, "ZD2TOF")) {
       vector<string> terms;
-      boost::split(terms, line, boost::is_any_of(" "),
-                   boost::token_compress_on);
+      boost::split(terms, line, boost::is_any_of(" "), boost::token_compress_on);
       if (terms.size() != 3) {
         stringstream errmsg;
-        errmsg << "Line ZD2TOF has " << terms.size()
-               << " terms.  Different from 4 terms in definition.";
+        errmsg << "Line ZD2TOF has " << terms.size() << " terms.  Different from 4 terms in definition.";
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
@@ -465,12 +437,10 @@ void LoadFullprofResolution::parseResolutionStrings(
     } // "ZD2TOF"
     else if (boost::starts_with(line, "D2TOT")) {
       vector<string> terms;
-      boost::split(terms, line, boost::is_any_of(" "),
-                   boost::token_compress_on);
+      boost::split(terms, line, boost::is_any_of(" "), boost::token_compress_on);
       if (terms.size() != 6) {
         stringstream errmsg;
-        errmsg << "Line TOFRG has " << terms.size()
-               << " terms.  Different from 4 terms in definition.";
+        errmsg << "Line TOFRG has " << terms.size() << " terms.  Different from 4 terms in definition.";
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
@@ -483,12 +453,10 @@ void LoadFullprofResolution::parseResolutionStrings(
     } // "D2TOT"
     else if (boost::starts_with(line, "ZD2TOT")) {
       vector<string> terms;
-      boost::split(terms, line, boost::is_any_of(" "),
-                   boost::token_compress_on);
+      boost::split(terms, line, boost::is_any_of(" "), boost::token_compress_on);
       if (terms.size() != 6) {
         stringstream errmsg;
-        errmsg << "Line TOFRG has " << terms.size()
-               << " terms.  Different from 4 terms in definition.";
+        errmsg << "Line TOFRG has " << terms.size() << " terms.  Different from 4 terms in definition.";
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
@@ -501,12 +469,10 @@ void LoadFullprofResolution::parseResolutionStrings(
     } // "ZD2TOT"
     else if (boost::starts_with(line, "TWOTH")) {
       vector<string> terms;
-      boost::split(terms, line, boost::is_any_of(" "),
-                   boost::token_compress_on);
+      boost::split(terms, line, boost::is_any_of(" "), boost::token_compress_on);
       if (terms.size() != 2) {
         stringstream errmsg;
-        errmsg << "Line TOFRG has " << terms.size()
-               << " terms.  Different from 4 terms in definition.";
+        errmsg << "Line TOFRG has " << terms.size() << " terms.  Different from 4 terms in definition.";
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
@@ -515,12 +481,10 @@ void LoadFullprofResolution::parseResolutionStrings(
     } // "TWOTH"
     else if (boost::starts_with(line, "SIGMA")) {
       vector<string> terms;
-      boost::split(terms, line, boost::is_any_of(" "),
-                   boost::token_compress_on);
+      boost::split(terms, line, boost::is_any_of(" "), boost::token_compress_on);
       if (terms.size() != 4) {
         stringstream errmsg;
-        errmsg << "Line TOFRG has " << terms.size()
-               << " terms.  Different from 4 terms in definition.";
+        errmsg << "Line TOFRG has " << terms.size() << " terms.  Different from 4 terms in definition.";
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
@@ -531,12 +495,10 @@ void LoadFullprofResolution::parseResolutionStrings(
     } // "SIGMA"
     else if (boost::starts_with(line, "GAMMA")) {
       vector<string> terms;
-      boost::split(terms, line, boost::is_any_of(" "),
-                   boost::token_compress_on);
+      boost::split(terms, line, boost::is_any_of(" "), boost::token_compress_on);
       if (terms.size() != 4) {
         stringstream errmsg;
-        errmsg << "Line TOFRG has " << terms.size()
-               << " terms.  Different from 4 terms in definition.";
+        errmsg << "Line TOFRG has " << terms.size() << " terms.  Different from 4 terms in definition.";
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
@@ -548,12 +510,10 @@ void LoadFullprofResolution::parseResolutionStrings(
     else if (boost::starts_with(line, "ALFBE")) {
       // ALFBE alph0 beta0 alph1 beta1
       vector<string> terms;
-      boost::split(terms, line, boost::is_any_of(" "),
-                   boost::token_compress_on);
+      boost::split(terms, line, boost::is_any_of(" "), boost::token_compress_on);
       if (terms.size() != 5) {
         stringstream errmsg;
-        errmsg << "Line ALFBE has " << terms.size()
-               << " terms.  Different from 4 terms in definition.";
+        errmsg << "Line ALFBE has " << terms.size() << " terms.  Different from 4 terms in definition.";
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
@@ -565,12 +525,10 @@ void LoadFullprofResolution::parseResolutionStrings(
     } // "ALFBE"
     else if (boost::starts_with(line, "ALFBT")) {
       vector<string> terms;
-      boost::split(terms, line, boost::is_any_of(" "),
-                   boost::token_compress_on);
+      boost::split(terms, line, boost::is_any_of(" "), boost::token_compress_on);
       if (terms.size() != 5) {
         stringstream errmsg;
-        errmsg << "Line ALFBT has " << terms.size()
-               << " terms.  Different from 4 terms in definition.";
+        errmsg << "Line ALFBT has " << terms.size() << " terms.  Different from 4 terms in definition.";
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
@@ -593,8 +551,7 @@ void LoadFullprofResolution::parseResolutionStrings(
 //----------------------------------------------------------------------------------------------
 /** Parse a line containig bank information
  */
-void LoadFullprofResolution::parseBankLine(string line, double &cwl,
-                                           int &bankid) {
+void LoadFullprofResolution::parseBankLine(string line, double &cwl, int &bankid) {
   // 1. Split along 'Bank'
   std::vector<std::string> v;
   iter_split(v, line, boost::algorithm::first_finder("Bank"));
@@ -631,8 +588,7 @@ void LoadFullprofResolution::parseBankLine(string line, double &cwl,
   }
 }
 
-double LoadFullprofResolution::parseDoubleValue(const std::string &value,
-                                                const std::string &label) {
+double LoadFullprofResolution::parseDoubleValue(const std::string &value, const std::string &label) {
   if (!value.empty()) {
     try {
       return std::stod(value);
@@ -652,8 +608,7 @@ double LoadFullprofResolution::parseDoubleValue(const std::string &value,
 //----------------------------------------------------------------------------------------------
 /** Generate output workspace
  */
-TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(
-    map<int, map<string, double>> bankparammap) {
+TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(map<int, map<string, double>> bankparammap) {
   g_log.notice() << "Start to generate table workspace ...."
                  << ".\n";
 
@@ -670,14 +625,12 @@ TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(
   vector<int> vec_bankids;
 
   map<string, double>::iterator parmapiter;
-  for (parmapiter = bankmapiter->second.begin();
-       parmapiter != bankmapiter->second.end(); ++parmapiter) {
+  for (parmapiter = bankmapiter->second.begin(); parmapiter != bankmapiter->second.end(); ++parmapiter) {
     string parname = parmapiter->first;
     vec_parname.emplace_back(parname);
   }
 
-  for (bankmapiter = bankparammap.begin(); bankmapiter != bankparammap.end();
-       ++bankmapiter) {
+  for (bankmapiter = bankparammap.begin(); bankmapiter != bankparammap.end(); ++bankmapiter) {
     int bankid = bankmapiter->first;
     vec_bankids.emplace_back(bankid);
   }
@@ -750,9 +703,8 @@ TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(
  * @param workspaceOfBank :: [output] map to indicate the workspace that a
  * bank's parameters will be put in
  */
-void LoadFullprofResolution::createBankToWorkspaceMap(
-    const std::vector<int> &banks, const std::vector<int> &workspaces,
-    std::map<int, size_t> &workspaceOfBank) {
+void LoadFullprofResolution::createBankToWorkspaceMap(const std::vector<int> &banks, const std::vector<int> &workspaces,
+                                                      std::map<int, size_t> &workspaceOfBank) {
   if (workspaces.empty()) {
     for (size_t i = 0; i < banks.size(); i++) {
       workspaceOfBank.emplace(banks[i], i + 1);
@@ -773,9 +725,9 @@ void LoadFullprofResolution::createBankToWorkspaceMap(
  * @param parameterXMLString :: string where the XML document filename is
  * stored
  */
-void LoadFullprofResolution::putParametersIntoWorkspace(
-    const API::Column_const_sptr &column, const API::MatrixWorkspace_sptr &ws,
-    int nProf, std::string &parameterXMLString) {
+void LoadFullprofResolution::putParametersIntoWorkspace(const API::Column_const_sptr &column,
+                                                        const API::MatrixWorkspace_sptr &ws, int nProf,
+                                                        std::string &parameterXMLString) {
 
   // Get instrument name from matrix workspace
   std::string instrumentName = ws->getInstrument()->getName();
@@ -789,8 +741,7 @@ void LoadFullprofResolution::putParametersIntoWorkspace(
   //   Get current time
   Types::Core::DateAndTime date = Types::Core::DateAndTime::getCurrentTime();
   std::string ISOdate = date.toISO8601String();
-  std::string ISOdateShort =
-      ISOdate.substr(0, 19); // Remove fraction of seconds
+  std::string ISOdateShort = ISOdate.substr(0, 19); // Remove fraction of seconds
 
   //   Create document
   AutoPtr<Document> mDoc = new Document();
@@ -833,9 +784,8 @@ void LoadFullprofResolution::putParametersIntoWorkspace(
  *
  *  paramName is the name of the parameter as it appears in the table workspace
  */
-void LoadFullprofResolution::addALFBEParameter(
-    const API::Column_const_sptr &column, Poco::XML::Document *mDoc,
-    Element *parent, const std::string &paramName) {
+void LoadFullprofResolution::addALFBEParameter(const API::Column_const_sptr &column, Poco::XML::Document *mDoc,
+                                               Element *parent, const std::string &paramName) {
   AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
   parameterElem->setAttribute("name", getXMLParameterName(paramName));
   parameterElem->setAttribute("type", "fitting");
@@ -856,16 +806,14 @@ void LoadFullprofResolution::addALFBEParameter(
  * according to the table workspace
  * for the bank at the given column of the table workspace
  */
-void LoadFullprofResolution::addSigmaParameters(
-    const API::Column_const_sptr &column, Poco::XML::Document *mDoc,
-    Poco::XML::Element *parent) {
+void LoadFullprofResolution::addSigmaParameters(const API::Column_const_sptr &column, Poco::XML::Document *mDoc,
+                                                Poco::XML::Element *parent) {
   AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
   parameterElem->setAttribute("name", "IkedaCarpenterPV:SigmaSquared");
   parameterElem->setAttribute("type", "fitting");
 
   AutoPtr<Element> formulaElem = mDoc->createElement("formula");
-  std::string eqValue = getXMLSquaredEqValue(column, "Sig1") + "*centre^2+" +
-                        getXMLSquaredEqValue(column, "Sig0");
+  std::string eqValue = getXMLSquaredEqValue(column, "Sig1") + "*centre^2+" + getXMLSquaredEqValue(column, "Sig0");
   formulaElem->setAttribute("eq", eqValue);
   formulaElem->setAttribute("unit", "dSpacing");
   formulaElem->setAttribute("result-unit", "TOF^2");
@@ -878,9 +826,8 @@ void LoadFullprofResolution::addSigmaParameters(
  * according to the table workspace
  * for the bank at the given column of the table workspace
  */
-void LoadFullprofResolution::addGammaParameters(
-    const API::Column_const_sptr &column, Poco::XML::Document *mDoc,
-    Poco::XML::Element *parent) {
+void LoadFullprofResolution::addGammaParameters(const API::Column_const_sptr &column, Poco::XML::Document *mDoc,
+                                                Poco::XML::Element *parent) {
   AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
   parameterElem->setAttribute("name", "IkedaCarpenterPV:Gamma");
   parameterElem->setAttribute("type", "fitting");
@@ -899,17 +846,15 @@ void LoadFullprofResolution::addGammaParameters(
  * to the table workspace
  * for the bank at the given column of the table workspace
  */
-void LoadFullprofResolution::addBBX_S_Parameters(
-    const API::Column_const_sptr &column, Poco::XML::Document *mDoc,
-    Poco::XML::Element *parent) {
+void LoadFullprofResolution::addBBX_S_Parameters(const API::Column_const_sptr &column, Poco::XML::Document *mDoc,
+                                                 Poco::XML::Element *parent) {
   AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
   parameterElem->setAttribute("name", "BackToBackExponential:S");
   parameterElem->setAttribute("type", "fitting");
 
   AutoPtr<Element> formulaElem = mDoc->createElement("formula");
-  std::string eqValue = "sqrt(" + getXMLSquaredEqValue(column, "Sig2") +
-                        "*centre^4 + " + getXMLSquaredEqValue(column, "Sig1") +
-                        "*centre^2 + " + getXMLSquaredEqValue(column, "Sig0") +
+  std::string eqValue = "sqrt(" + getXMLSquaredEqValue(column, "Sig2") + "*centre^4 + " +
+                        getXMLSquaredEqValue(column, "Sig1") + "*centre^2 + " + getXMLSquaredEqValue(column, "Sig0") +
                         ")";
   formulaElem->setAttribute("eq", eqValue);
   formulaElem->setAttribute("unit", "dSpacing");
@@ -923,16 +868,14 @@ void LoadFullprofResolution::addBBX_S_Parameters(
  * to the table workspace
  * for the bank at the given column of the table workspace
  */
-void LoadFullprofResolution::addBBX_A_Parameters(
-    const API::Column_const_sptr &column, Poco::XML::Document *mDoc,
-    Poco::XML::Element *parent) {
+void LoadFullprofResolution::addBBX_A_Parameters(const API::Column_const_sptr &column, Poco::XML::Document *mDoc,
+                                                 Poco::XML::Element *parent) {
   AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
   parameterElem->setAttribute("name", "BackToBackExponential:A");
   parameterElem->setAttribute("type", "fitting");
 
   AutoPtr<Element> formulaElem = mDoc->createElement("formula");
-  std::string eqValue = "(" + getXMLEqValue(column, "Alph1") + "/centre) + " +
-                        getXMLEqValue(column, "Alph0");
+  std::string eqValue = "(" + getXMLEqValue(column, "Alph1") + "/centre) + " + getXMLEqValue(column, "Alph0");
   formulaElem->setAttribute("eq", eqValue);
   formulaElem->setAttribute("unit", "dSpacing");
   formulaElem->setAttribute("result-unit", "TOF");
@@ -948,16 +891,14 @@ void LoadFullprofResolution::addBBX_A_Parameters(
  * to the table workspace
  * for the bank at the given column of the table workspace
  */
-void LoadFullprofResolution::addBBX_B_Parameters(
-    const API::Column_const_sptr &column, Poco::XML::Document *mDoc,
-    Poco::XML::Element *parent) {
+void LoadFullprofResolution::addBBX_B_Parameters(const API::Column_const_sptr &column, Poco::XML::Document *mDoc,
+                                                 Poco::XML::Element *parent) {
   AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
   parameterElem->setAttribute("name", "BackToBackExponential:B");
   parameterElem->setAttribute("type", "fitting");
 
   AutoPtr<Element> formulaElem = mDoc->createElement("formula");
-  std::string eqValue = "(" + getXMLEqValue(column, "Beta1") + "/centre^4) + " +
-                        getXMLEqValue(column, "Beta0");
+  std::string eqValue = "(" + getXMLEqValue(column, "Beta1") + "/centre^4) + " + getXMLEqValue(column, "Beta0");
   formulaElem->setAttribute("eq", eqValue);
   formulaElem->setAttribute("unit", "dSpacing");
   formulaElem->setAttribute("result-unit", "TOF");
@@ -972,8 +913,7 @@ void LoadFullprofResolution::addBBX_B_Parameters(
 /*
  *  Get the XML name of a parameter given its Table Workspace name
  */
-std::string
-LoadFullprofResolution::getXMLParameterName(const std::string &name) {
+std::string LoadFullprofResolution::getXMLParameterName(const std::string &name) {
   // Only used for ALFBE parameters
   std::string prefix = "IkedaCarpenterPV:";
   if (name == "Alph0")
@@ -992,9 +932,7 @@ LoadFullprofResolution::getXMLParameterName(const std::string &name) {
  * the paramenter element
  * given the name of the parameter in the table workspace.
  */
-std::string
-LoadFullprofResolution::getXMLEqValue(const API::Column_const_sptr &column,
-                                      const std::string &name) {
+std::string LoadFullprofResolution::getXMLEqValue(const API::Column_const_sptr &column, const std::string &name) {
   size_t paramNumber = LoadFullprofResolution::m_rowNumbers[name];
   // API::Column_const_sptr column = tablews->getColumn( columnIndex );
   double eqValue = column->cell<double>(paramNumber);
@@ -1006,8 +944,8 @@ LoadFullprofResolution::getXMLEqValue(const API::Column_const_sptr &column,
  * the SQUARED paramenter element
  * given the name of the parameter in the table workspace.
  */
-std::string LoadFullprofResolution::getXMLSquaredEqValue(
-    const API::Column_const_sptr &column, const std::string &name) {
+std::string LoadFullprofResolution::getXMLSquaredEqValue(const API::Column_const_sptr &column,
+                                                         const std::string &name) {
   size_t paramNumber = LoadFullprofResolution::m_rowNumbers[name];
   // API::Column_const_sptr column = tablews->getColumn( columnIndex );
   double eqValue = column->cell<double>(paramNumber);
@@ -1018,9 +956,8 @@ std::string LoadFullprofResolution::getXMLSquaredEqValue(
    in the table workspace, so one can find the position in a column of
    the value of the given parameter.
 */
-void LoadFullprofResolution::getTableRowNumbers(
-    const API::ITableWorkspace_sptr &tablews,
-    std::map<std::string, size_t> &parammap) {
+void LoadFullprofResolution::getTableRowNumbers(const API::ITableWorkspace_sptr &tablews,
+                                                std::map<std::string, size_t> &parammap) {
   parammap.clear();
 
   size_t numrows = tablews->rowCount();

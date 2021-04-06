@@ -12,7 +12,7 @@ Description
 Loads an ILL TOF NeXus file into a :ref:`Workspace2D <Workspace2D>` with
 the given name.
 
-To date this algorithm only supports: IN4, IN5, IN6 and PANTHER.
+To date this algorithm only supports: IN4, IN5, IN6, PANTHER, and SHARP.
 
 By default, this algorithm loads the data indexed by channels. To convert to time-of-flight, use the ConvertToTOF option.
 

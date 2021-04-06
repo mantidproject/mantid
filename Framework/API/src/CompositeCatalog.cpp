@@ -16,9 +16,7 @@ CompositeCatalog::CompositeCatalog() : m_catalogs() {}
  * Add a catalog to the catalog container.
  * @param catalog :: The catalog to add to the container.
  */
-void CompositeCatalog::add(const ICatalog_sptr &catalog) {
-  m_catalogs.emplace_back(catalog);
-}
+void CompositeCatalog::add(const ICatalog_sptr &catalog) { m_catalogs.emplace_back(catalog); }
 
 /**
  * Authenticate the user against all catalogues in the container.
@@ -27,16 +25,13 @@ void CompositeCatalog::add(const ICatalog_sptr &catalog) {
  * @param endpoint :: The endpoint url of the catalog to log in to.
  * @param facility :: The facility of the catalog to log in to.
  */
-CatalogSession_sptr CompositeCatalog::login(const std::string &username,
-                                            const std::string &password,
-                                            const std::string &endpoint,
-                                            const std::string &facility) {
+CatalogSession_sptr CompositeCatalog::login(const std::string &username, const std::string &password,
+                                            const std::string &endpoint, const std::string &facility) {
   UNUSED_ARG(username);
   UNUSED_ARG(password);
   UNUSED_ARG(endpoint);
   UNUSED_ARG(facility);
-  throw std::runtime_error(
-      "You cannot log into multiple catalogs at the same time.");
+  throw std::runtime_error("You cannot log into multiple catalogs at the same time.");
 }
 
 /**
@@ -57,8 +52,7 @@ void CompositeCatalog::logout() {
  * point.
  * @param limit    :: The limit of the number of rows returned by the query.
  */
-void CompositeCatalog::search(const ICat::CatalogSearchParam &inputs,
-                              ITableWorkspace_sptr &outputws, const int &offset,
+void CompositeCatalog::search(const ICat::CatalogSearchParam &inputs, ITableWorkspace_sptr &outputws, const int &offset,
                               const int &limit) {
   for (auto &catalog : m_catalogs) {
     catalog->search(inputs, outputws, offset, limit);
@@ -69,8 +63,7 @@ void CompositeCatalog::search(const ICat::CatalogSearchParam &inputs,
  * Obtain the number of investigations to be returned by the catalog.
  * @return The number of investigations from the search performed.
  */
-int64_t CompositeCatalog::getNumberOfSearchResults(
-    const ICat::CatalogSearchParam &inputs) {
+int64_t CompositeCatalog::getNumberOfSearchResults(const ICat::CatalogSearchParam &inputs) {
   int64_t numberOfSearchResults = 0;
   for (auto &catalog : m_catalogs) {
     numberOfSearchResults += catalog->getNumberOfSearchResults(inputs);
@@ -95,8 +88,7 @@ void CompositeCatalog::myData(ITableWorkspace_sptr &outputws) {
  * @param investigationId :: A unique identifier of the investigation.
  * @param outputws        :: The workspace to store the results.
  */
-void CompositeCatalog::getDataSets(const std::string &investigationId,
-                                   ITableWorkspace_sptr &outputws) {
+void CompositeCatalog::getDataSets(const std::string &investigationId, ITableWorkspace_sptr &outputws) {
   for (auto &catalog : m_catalogs) {
     catalog->getDataSets(investigationId, outputws);
   }
@@ -108,8 +100,7 @@ void CompositeCatalog::getDataSets(const std::string &investigationId,
  * @param investigationId :: A unique identifier of the investigation.
  * @param outputws        :: The workspace to store the results.
  */
-void CompositeCatalog::getDataFiles(const std::string &investigationId,
-                                    ITableWorkspace_sptr &outputws) {
+void CompositeCatalog::getDataFiles(const std::string &investigationId, ITableWorkspace_sptr &outputws) {
   for (auto &catalog : m_catalogs) {
     catalog->getDataFiles(investigationId, outputws);
   }
@@ -129,8 +120,7 @@ void CompositeCatalog::listInstruments(std::vector<std::string> &instruments) {
  * Obtain a list of investigations from each catalog in the container.
  * @param invstTypes :: A reference to the vector to store the results.
  */
-void CompositeCatalog::listInvestigationTypes(
-    std::vector<std::string> &invstTypes) {
+void CompositeCatalog::listInvestigationTypes(std::vector<std::string> &invstTypes) {
   for (auto &catalog : m_catalogs) {
     catalog->listInvestigationTypes(invstTypes);
   }

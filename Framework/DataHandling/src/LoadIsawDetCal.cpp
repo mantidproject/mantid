@@ -45,19 +45,16 @@ using namespace DataObjects;
 /** Initialisation method
  */
 void LoadIsawDetCal::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "InputWorkspace", "", Direction::InOut,
-                      std::make_shared<InstrumentValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::InOut,
+                                                                 std::make_shared<InstrumentValidator>()),
                   "The workspace containing the geometry to be calibrated.");
 
-  const auto exts =
-      std::vector<std::string>({".DetCal", ".detcal", ".peaks", ".integrate"});
+  const auto exts = std::vector<std::string>({".DetCal", ".detcal", ".peaks", ".integrate"});
   declareProperty(std::make_unique<API::MultipleFileProperty>("Filename", exts),
                   "The input filename of the ISAW DetCal file (Two files "
                   "allowed for SNAP) ");
 
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename2", "", API::FileProperty::OptionalLoad, exts),
+  declareProperty(std::make_unique<API::FileProperty>("Filename2", "", API::FileProperty::OptionalLoad, exts),
                   "The input filename of the second ISAW DetCal file (West "
                   "banks for SNAP) ");
 
@@ -76,14 +73,12 @@ std::string getBankName(const std::string &bankPart, const int idnum) {
 }
 
 std::string getInstName(const API::Workspace_const_sptr &wksp) {
-  MatrixWorkspace_const_sptr matrixWksp =
-      std::dynamic_pointer_cast<const MatrixWorkspace>(wksp);
+  MatrixWorkspace_const_sptr matrixWksp = std::dynamic_pointer_cast<const MatrixWorkspace>(wksp);
   if (matrixWksp) {
     return matrixWksp->getInstrument()->getName();
   }
 
-  PeaksWorkspace_const_sptr peaksWksp =
-      std::dynamic_pointer_cast<const PeaksWorkspace>(wksp);
+  PeaksWorkspace_const_sptr peaksWksp = std::dynamic_pointer_cast<const PeaksWorkspace>(wksp);
   if (peaksWksp) {
     return peaksWksp->getInstrument()->getName();
   }
@@ -131,8 +126,7 @@ void LoadIsawDetCal::exec() {
 
   // Output summary to log file
   int count, id, nrows, ncols;
-  double width, height, depth, detd, x, y, z, base_x, base_y, base_z, up_x,
-      up_y, up_z;
+  double width, height, depth, detd, x, y, z, base_x, base_y, base_z, up_x, up_y, up_z;
   std::ifstream input(filenames[0].c_str(), std::ios_base::in);
   std::string line;
   std::string detname;
@@ -165,8 +159,7 @@ void LoadIsawDetCal::exec() {
             assem2 = std::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
             if (assem2) {
               for (int k = 0; k < assem2->nelements(); k++) {
-                det = std::dynamic_pointer_cast<RectangularDetector>(
-                    (*assem2)[k]);
+                det = std::dynamic_pointer_cast<RectangularDetector>((*assem2)[k]);
                 if (det) {
                   detList.emplace_back(det);
                 }
@@ -242,9 +235,8 @@ void LoadIsawDetCal::exec() {
     if (line[0] != '5')
       continue;
 
-    std::stringstream(line) >> count >> id >> nrows >> ncols >> width >>
-        height >> depth >> detd >> x >> y >> z >> base_x >> base_y >> base_z >>
-        up_x >> up_y >> up_z;
+    std::stringstream(line) >> count >> id >> nrows >> ncols >> width >> height >> depth >> detd >> x >> y >> z >>
+        base_x >> base_y >> base_z >> up_x >> up_y >> up_z;
     if (id == 10 && filenames.size() == 2 && instname == "SNAP") {
       input.close();
       input.open(filenames[1].c_str());
@@ -252,18 +244,16 @@ void LoadIsawDetCal::exec() {
         if (line[0] != '5')
           continue;
 
-        std::stringstream(line) >> count >> id >> nrows >> ncols >> width >>
-            height >> depth >> detd >> x >> y >> z >> base_x >> base_y >>
-            base_z >> up_x >> up_y >> up_z;
+        std::stringstream(line) >> count >> id >> nrows >> ncols >> width >> height >> depth >> detd >> x >> y >> z >>
+            base_x >> base_y >> base_z >> up_x >> up_y >> up_z;
         if (id == 10)
           break;
       }
     }
     std::shared_ptr<RectangularDetector> det;
     std::string bankName = getBankName(bankPart, id);
-    auto matchingDetector = std::find_if(
-        detList.begin(), detList.end(),
-        [&bankName](const std::shared_ptr<RectangularDetector> &detector) {
+    auto matchingDetector =
+        std::find_if(detList.begin(), detList.end(), [&bankName](const std::shared_ptr<RectangularDetector> &detector) {
           return detector->getName() == bankName;
         });
     if (matchingDetector != detList.end()) {
@@ -319,8 +309,7 @@ void LoadIsawDetCal::exec() {
     if (instname == "CORELLI") {
       std::vector<Geometry::IComponent_const_sptr> children;
       std::shared_ptr<const Geometry::ICompAssembly> asmb =
-          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-              inst->getComponentByName(bankName));
+          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst->getComponentByName(bankName));
       asmb->getChildren(children, false);
       comp = children[0];
     }
@@ -329,8 +318,7 @@ void LoadIsawDetCal::exec() {
       detname = comp->getFullName();
       center(x, y, z, detname, ws, componentInfo);
 
-      bool doWishCorrection =
-          (instname == "WISH"); // TODO: find out why this is needed for WISH
+      bool doWishCorrection = (instname == "WISH"); // TODO: find out why this is needed for WISH
       doRotation(rX, rY, componentInfo, comp, doWishCorrection);
     }
   }
@@ -351,17 +339,14 @@ void LoadIsawDetCal::exec() {
  * @param ws :: The workspace
  * @param componentInfo :: The component info object for the workspace
  */
-void LoadIsawDetCal::center(const double x, const double y, const double z,
-                            const std::string &detname,
-                            const API::Workspace_sptr &ws,
-                            Geometry::ComponentInfo &componentInfo) {
+void LoadIsawDetCal::center(const double x, const double y, const double z, const std::string &detname,
+                            const API::Workspace_sptr &ws, Geometry::ComponentInfo &componentInfo) {
 
   Instrument_sptr inst = getCheckInst(std::move(ws));
 
   IComponent_const_sptr comp = inst->getComponentByName(detname);
   if (comp == nullptr) {
-    throw std::runtime_error("Component with name " + detname +
-                             " was not found.");
+    throw std::runtime_error("Component with name " + detname + " was not found.");
   }
 
   const V3D position(x * CM_TO_M, y * CM_TO_M, z * CM_TO_M);
@@ -407,11 +392,9 @@ Instrument_sptr LoadIsawDetCal::getCheckInst(const API::Workspace_sptr &ws) {
 
 std::vector<std::string> LoadIsawDetCal::getFilenames() {
   std::vector<std::string> filenamesFromPropertyUnraveld;
-  std::vector<std::vector<std::string>> filenamesFromProperty =
-      this->getProperty("Filename");
+  std::vector<std::vector<std::string>> filenamesFromProperty = this->getProperty("Filename");
   for (const auto &outer : filenamesFromProperty) {
-    std::copy(outer.begin(), outer.end(),
-              std::back_inserter(filenamesFromPropertyUnraveld));
+    std::copy(outer.begin(), outer.end(), std::back_inserter(filenamesFromPropertyUnraveld));
   }
 
   // shouldn't be used except for legacy cases
@@ -432,8 +415,7 @@ std::vector<std::string> LoadIsawDetCal::getFilenames() {
  * @param doWishCorrection if true apply a special correction for WISH
  */
 void LoadIsawDetCal::doRotation(V3D rX, V3D rY, ComponentInfo &componentInfo,
-                                const std::shared_ptr<const IComponent> &comp,
-                                bool doWishCorrection) {
+                                const std::shared_ptr<const IComponent> &comp, bool doWishCorrection) {
   // These are the ISAW axes
   rX.normalize();
   rY.normalize();
@@ -482,9 +464,8 @@ void LoadIsawDetCal::doRotation(V3D rX, V3D rY, ComponentInfo &componentInfo,
  * @param rectangularDetectorScalings a vector containing a component ID, and
  *values for scalex and scaley
  */
-void LoadIsawDetCal::applyScalings(
-    Workspace_sptr &ws,
-    const std::vector<ComponentScaling> &rectangularDetectorScalings) {
+void LoadIsawDetCal::applyScalings(Workspace_sptr &ws,
+                                   const std::vector<ComponentScaling> &rectangularDetectorScalings) {
 
   for (const auto &scaling : rectangularDetectorScalings) {
     IAlgorithm_sptr alg1 = createChildAlgorithm("ResizeRectangularDetector");

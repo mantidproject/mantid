@@ -14,44 +14,38 @@
 namespace Mantid {
 namespace API {
 
-std::shared_ptr<ImplicitFunctionParser>
-ImplicitFunctionParserFactoryImpl::create(const std::string &xmlString) const {
+std::shared_ptr<ImplicitFunctionParser> ImplicitFunctionParserFactoryImpl::create(const std::string &xmlString) const {
   UNUSED_ARG(xmlString);
   throw std::runtime_error("Use of create in this context is forbidden. Use "
                            "createUnwrappedInstead.");
 }
 
 ImplicitFunctionParser *
-ImplicitFunctionParserFactoryImpl::createImplicitFunctionParserFromXML(
-    Poco::XML::Element *functionElement) const {
+ImplicitFunctionParserFactoryImpl::createImplicitFunctionParserFromXML(Poco::XML::Element *functionElement) const {
   const std::string &name = functionElement->localName();
   if (name != "Function") {
-    throw std::runtime_error(
-        "Root node must be a Funtion element. Unable to determine parsers.");
+    throw std::runtime_error("Root node must be a Funtion element. Unable to determine parsers.");
   }
 
   Poco::XML::Element *typeElement = functionElement->getChildElement("Type");
   std::string functionParserName = typeElement->innerText() + "Parser";
-  ImplicitFunctionParser *functionParser =
-      this->createUnwrapped(functionParserName);
+  ImplicitFunctionParser *functionParser = this->createUnwrapped(functionParserName);
 
-  Poco::XML::Element *parametersElement =
-      functionElement->getChildElement("ParameterList");
+  Poco::XML::Element *parametersElement = functionElement->getChildElement("ParameterList");
 
   // Get the parameter parser for the current function parser and append that to
   // the function parser.
   ImplicitFunctionParameterParser *paramParser =
-      Mantid::API::ImplicitFunctionParameterParserFactory::Instance()
-          .createImplicitFunctionParameterParserFromXML(parametersElement);
+      Mantid::API::ImplicitFunctionParameterParserFactory::Instance().createImplicitFunctionParameterParserFromXML(
+          parametersElement);
   functionParser->setParameterParser(paramParser);
 
-  Poco::AutoPtr<Poco::XML::NodeList> childFunctions =
-      functionElement->getElementsByTagName("Function");
+  Poco::AutoPtr<Poco::XML::NodeList> childFunctions = functionElement->getElementsByTagName("Function");
   ImplicitFunctionParser *childParser = nullptr;
   for (unsigned long i = 0; i < childFunctions->length(); i++) {
     // Recursive call to handle nested parameters.
-    ImplicitFunctionParser *tempParser = createImplicitFunctionParserFromXML(
-        dynamic_cast<Poco::XML::Element *>(childFunctions->item(i)));
+    ImplicitFunctionParser *tempParser =
+        createImplicitFunctionParserFromXML(dynamic_cast<Poco::XML::Element *>(childFunctions->item(i)));
     if (i == 0) {
       childParser = tempParser;
       // Add the first child function parser to the parent (composite) directly.
@@ -68,8 +62,7 @@ ImplicitFunctionParserFactoryImpl::createImplicitFunctionParserFromXML(
 }
 
 ImplicitFunctionParser *
-ImplicitFunctionParserFactoryImpl::createImplicitFunctionParserFromXML(
-    const std::string &functionXML) const {
+ImplicitFunctionParserFactoryImpl::createImplicitFunctionParserFromXML(const std::string &functionXML) const {
   using namespace Poco::XML;
   DOMParser pParser;
   AutoPtr<Document> pDoc = pParser.parseString(functionXML);

@@ -24,8 +24,7 @@ using namespace Mantid::Geometry;
  */
 class CompareFailsException : public std::runtime_error {
 public:
-  explicit CompareFailsException(const std::string &msg)
-      : std::runtime_error(msg) {}
+  explicit CompareFailsException(const std::string &msg) : std::runtime_error(msg) {}
   std::string getMessage() const { return this->what(); }
 };
 
@@ -37,17 +36,13 @@ DECLARE_ALGORITHM(CompareMDWorkspaces)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string CompareMDWorkspaces::name() const {
-  return "CompareMDWorkspaces";
-}
+const std::string CompareMDWorkspaces::name() const { return "CompareMDWorkspaces"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int CompareMDWorkspaces::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CompareMDWorkspaces::category() const {
-  return "MDAlgorithms\\Utility\\Workspaces";
-}
+const std::string CompareMDWorkspaces::category() const { return "MDAlgorithms\\Utility\\Workspaces"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -55,28 +50,21 @@ const std::string CompareMDWorkspaces::category() const {
 /** Initialize the algorithm's properties.
  */
 void CompareMDWorkspaces::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      "Workspace1", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>("Workspace1", "", Direction::Input),
                   "First MDWorkspace to compare.");
-  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      "Workspace2", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>("Workspace2", "", Direction::Input),
                   "Second MDWorkspace to compare.");
 
-  declareProperty(
-      "Tolerance", 0.0,
-      "The maximum amount by which values may differ between the workspaces.");
+  declareProperty("Tolerance", 0.0, "The maximum amount by which values may differ between the workspaces.");
   declareProperty("CheckEvents", true,
                   "Whether to compare each MDEvent. If "
                   "False, will only look at the box "
                   "structure.");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("Equals", false,
-                                                            Direction::Output),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("Equals", false, Direction::Output),
                   "Boolean set to true if the workspaces match.");
-  declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>("Result", "",
-                                                       Direction::Output),
-      "String describing the difference found between the workspaces");
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("Result", "", Direction::Output),
+                  "String describing the difference found between the workspaces");
   declareProperty("IgnoreBoxID", false,
                   "To ignore box ID-s when comparing MD "
                   "boxes as Multithreaded splitting "
@@ -97,8 +85,7 @@ template <typename T> std::string versus(T a, T b) {
  * @param message :: message for result
  * @throw CompareFailsException if the two DONT match
  */
-template <typename T>
-void CompareMDWorkspaces::compare(T a, T b, const std::string &message) {
+template <typename T> void CompareMDWorkspaces::compare(T a, T b, const std::string &message) {
   if (a != b)
     throw CompareFailsException(message + " " + versus(a, b));
 }
@@ -111,8 +98,7 @@ void CompareMDWorkspaces::compare(T a, T b, const std::string &message) {
  * @param message :: message for result
  * @throw CompareFailsException if the two DONT match
  */
-template <class T>
-void CompareMDWorkspaces::compareTol(T a, T b, const std::string &message) {
+template <class T> void CompareMDWorkspaces::compareTol(T a, T b, const std::string &message) {
   double diff = fabs(a - b);
   if (diff > m_tolerance) {
     double pa = fabs(a);
@@ -129,54 +115,40 @@ void CompareMDWorkspaces::compareTol(T a, T b, const std::string &message) {
 //----------------------------------------------------------------------------------------------
 /** Compare the dimensions etc. of two MDWorkspaces
  */
-void CompareMDWorkspaces::compareMDGeometry(
-    const Mantid::API::IMDWorkspace_sptr &ws1,
-    const Mantid::API::IMDWorkspace_sptr &ws2) {
-  compare(ws1->getNumDims(), ws2->getNumDims(),
-          "Workspaces have a different number of dimensions");
+void CompareMDWorkspaces::compareMDGeometry(const Mantid::API::IMDWorkspace_sptr &ws1,
+                                            const Mantid::API::IMDWorkspace_sptr &ws2) {
+  compare(ws1->getNumDims(), ws2->getNumDims(), "Workspaces have a different number of dimensions");
   for (size_t d = 0; d < ws1->getNumDims(); d++) {
     IMDDimension_const_sptr dim1 = ws1->getDimension(d);
     IMDDimension_const_sptr dim2 = ws2->getDimension(d);
-    compare(dim1->getName(), dim2->getName(),
-            "Dimension #" + Strings::toString(d) + " has a different name");
-    compare(dim1->getUnits(), dim2->getUnits(),
-            "Dimension #" + Strings::toString(d) + " has different units");
+    compare(dim1->getName(), dim2->getName(), "Dimension #" + Strings::toString(d) + " has a different name");
+    compare(dim1->getUnits(), dim2->getUnits(), "Dimension #" + Strings::toString(d) + " has different units");
     compare(dim1->getNBins(), dim2->getNBins(),
-            "Dimension #" + Strings::toString(d) +
-                " has a different number of bins");
+            "Dimension #" + Strings::toString(d) + " has a different number of bins");
     compareTol(dim1->getMinimum(), dim2->getMinimum(),
-               "Dimension #" + Strings::toString(d) +
-                   " has a different minimum");
+               "Dimension #" + Strings::toString(d) + " has a different minimum");
     compareTol(dim1->getMaximum(), dim2->getMaximum(),
-               "Dimension #" + Strings::toString(d) +
-                   " has a different maximum");
+               "Dimension #" + Strings::toString(d) + " has a different maximum");
   }
 }
 
 //----------------------------------------------------------------------------------------------
 /** Compare the dimensions etc. of two MDWorkspaces
  */
-void CompareMDWorkspaces::compareMDHistoWorkspaces(
-    const Mantid::DataObjects::MDHistoWorkspace_sptr &ws1,
-    const Mantid::DataObjects::MDHistoWorkspace_sptr &ws2) {
-  compare(ws1->getNumDims(), ws2->getNumDims(),
-          "Workspaces have a different number of dimensions");
-  compare(ws1->getNPoints(), ws2->getNPoints(),
-          "Workspaces have a different number of points");
+void CompareMDWorkspaces::compareMDHistoWorkspaces(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws1,
+                                                   const Mantid::DataObjects::MDHistoWorkspace_sptr &ws2) {
+  compare(ws1->getNumDims(), ws2->getNumDims(), "Workspaces have a different number of dimensions");
+  compare(ws1->getNPoints(), ws2->getNPoints(), "Workspaces have a different number of points");
   for (size_t i = 0; i < ws1->getNPoints(); i++) {
     double diff = fabs(ws1->getSignalAt(i) - ws2->getSignalAt(i));
     if (diff > m_tolerance)
-      throw CompareFailsException(
-          "MDHistoWorkspaces have a different signal at index " +
-          Strings::toString(i) + " " +
-          versus(ws1->getSignalAt(i), ws2->getSignalAt(i)));
+      throw CompareFailsException("MDHistoWorkspaces have a different signal at index " + Strings::toString(i) + " " +
+                                  versus(ws1->getSignalAt(i), ws2->getSignalAt(i)));
 
     double diffErr = fabs(ws1->getErrorAt(i) - ws2->getErrorAt(i));
     if (diffErr > m_tolerance)
-      throw CompareFailsException(
-          "MDHistoWorkspaces have a different error at index " +
-          Strings::toString(i) + " " +
-          versus(ws1->getErrorAt(i), ws2->getErrorAt(i)));
+      throw CompareFailsException("MDHistoWorkspaces have a different error at index " + Strings::toString(i) + " " +
+                                  versus(ws1->getErrorAt(i), ws2->getErrorAt(i)));
   }
 }
 
@@ -186,10 +158,8 @@ void CompareMDWorkspaces::compareMDHistoWorkspaces(
  * @param ws ::  MDEventWorkspace to compare
  */
 template <typename MDE, size_t nd>
-void CompareMDWorkspaces::compareMDWorkspaces(
-    typename MDEventWorkspace<MDE, nd>::sptr ws1) {
-  typename MDEventWorkspace<MDE, nd>::sptr ws2 =
-      std::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(inWS2);
+void CompareMDWorkspaces::compareMDWorkspaces(typename MDEventWorkspace<MDE, nd>::sptr ws1) {
+  typename MDEventWorkspace<MDE, nd>::sptr ws2 = std::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(inWS2);
   if (!ws1 || !ws2)
     throw std::runtime_error("Incompatible workspace types passed to PlusMD.");
 
@@ -199,8 +169,7 @@ void CompareMDWorkspaces::compareMDWorkspaces(
   ws1->getBox()->getBoxes(boxes1, 1000, false);
   ws2->getBox()->getBoxes(boxes2, 1000, false);
 
-  this->compare(boxes1.size(), boxes2.size(),
-                "Workspaces do not have the same number of boxes");
+  this->compare(boxes1.size(), boxes2.size(), "Workspaces do not have the same number of boxes");
 
   for (size_t j = 0; j < boxes1.size(); j++) {
 
@@ -211,52 +180,38 @@ void CompareMDWorkspaces::compareMDWorkspaces(
       this->compare(box1->getID(), box2->getID(), "Boxes have different ID");
     else {
       if (box1->getID() != box2->getID())
-        g_log.debug() << " Boxes N: " << j << " have box ID: " << box1->getID()
-                      << " and " << box2->getID() << " correspondingly\n";
+        g_log.debug() << " Boxes N: " << j << " have box ID: " << box1->getID() << " and " << box2->getID()
+                      << " correspondingly\n";
     }
-    this->compare(size_t(box1->getDepth()), size_t(box2->getDepth()),
-                  "Boxes are at a different depth");
-    this->compare(box1->getNumChildren(), box2->getNumChildren(),
-                  "Boxes do not have the same number of children");
+    this->compare(size_t(box1->getDepth()), size_t(box2->getDepth()), "Boxes are at a different depth");
+    this->compare(box1->getNumChildren(), box2->getNumChildren(), "Boxes do not have the same number of children");
 
     for (size_t i = 0; i < box1->getNumChildren(); i++) {
       if (m_CompareBoxID)
-        this->compare(box1->getChild(i)->getID(), box2->getChild(i)->getID(),
-                      "Child of boxes do not match IDs");
+        this->compare(box1->getChild(i)->getID(), box2->getChild(i)->getID(), "Child of boxes do not match IDs");
       else {
         if (box1->getID() != box2->getID())
-          g_log.debug() << " Boxes N: " << j << " children N: " << i
-                        << " have box ID: " << box1->getChild(i)->getID()
-                        << " and " << box2->getChild(i)->getID()
-                        << " correspondingly\n";
+          g_log.debug() << " Boxes N: " << j << " children N: " << i << " have box ID: " << box1->getChild(i)->getID()
+                        << " and " << box2->getChild(i)->getID() << " correspondingly\n";
       }
     }
 
     for (size_t d = 0; d < nd; d++) {
-      this->compareTol(box1->getExtents(d).getMin(),
-                       box2->getExtents(d).getMin(),
-                       "Extents of box do not match");
-      this->compareTol(box1->getExtents(d).getMax(),
-                       box2->getExtents(d).getMax(),
-                       "Extents of box do not match");
+      this->compareTol(box1->getExtents(d).getMin(), box2->getExtents(d).getMin(), "Extents of box do not match");
+      this->compareTol(box1->getExtents(d).getMax(), box2->getExtents(d).getMax(), "Extents of box do not match");
     }
-    this->compareTol(box1->getInverseVolume(), box2->getInverseVolume(),
-                     "Box inverse volume does not match");
-    this->compareTol(box1->getSignal(), box2->getSignal(),
-                     "Box signal does not match");
-    this->compareTol(box1->getErrorSquared(), box2->getErrorSquared(),
-                     "Box error squared does not match");
+    this->compareTol(box1->getInverseVolume(), box2->getInverseVolume(), "Box inverse volume does not match");
+    this->compareTol(box1->getSignal(), box2->getSignal(), "Box signal does not match");
+    this->compareTol(box1->getErrorSquared(), box2->getErrorSquared(), "Box error squared does not match");
     if (m_CheckEvents)
-      this->compare(box1->getNPoints(), box2->getNPoints(),
-                    "Number of points in box does not match");
+      this->compare(box1->getNPoints(), box2->getNPoints(), "Number of points in box does not match");
 
     // Are both MDGridBoxes ?
     auto *gridbox1 = dynamic_cast<MDGridBox<MDE, nd> *>(box1);
     auto *gridbox2 = dynamic_cast<MDGridBox<MDE, nd> *>(box2);
     if (gridbox1 && gridbox2) {
       for (size_t d = 0; d < nd; d++)
-        this->compareTol(gridbox1->getBoxSize(d), gridbox2->getBoxSize(d),
-                         "Box sizes do not match");
+        this->compareTol(gridbox1->getBoxSize(d), gridbox2->getBoxSize(d), "Box sizes do not match");
     }
 
     // Are both MDBoxes (with events)
@@ -267,20 +222,15 @@ void CompareMDWorkspaces::compareMDWorkspaces(
         const std::vector<MDE> &events1 = mdbox1->getConstEvents();
         const std::vector<MDE> &events2 = mdbox2->getConstEvents();
         try {
-          this->compare(events1.size(), events2.size(),
-                        "Box event vectors are not the same length");
+          this->compare(events1.size(), events2.size(), "Box event vectors are not the same length");
           if (events1.size() == events2.size() && events1.size() > 2) {
             // Check first and last event
             for (size_t i = 0; i < events1.size(); i++) {
               for (size_t d = 0; d < nd; d++) {
-                this->compareTol(events1[i].getCenter(d),
-                                 events2[i].getCenter(d),
-                                 "Event center does not match");
+                this->compareTol(events1[i].getCenter(d), events2[i].getCenter(d), "Event center does not match");
               }
-              this->compareTol(events1[i].getSignal(), events2[i].getSignal(),
-                               "Event signal does not match");
-              this->compareTol(events1[i].getErrorSquared(),
-                               events2[i].getErrorSquared(),
+              this->compareTol(events1[i].getSignal(), events2[i].getSignal(), "Event signal does not match");
+              this->compareTol(events1[i].getErrorSquared(), events2[i].getErrorSquared(),
                                "Event error does not match");
             }
           }
@@ -316,14 +266,10 @@ void CompareMDWorkspaces::doComparison() {
     throw std::invalid_argument("Cannot compare MatrixWorkspaces. Please use "
                                 "CompareWorkspaces algorithm instead.");
 
-  MDHistoWorkspace_sptr histo1 =
-      std::dynamic_pointer_cast<MDHistoWorkspace>(ws1);
-  MDHistoWorkspace_sptr histo2 =
-      std::dynamic_pointer_cast<MDHistoWorkspace>(ws2);
-  IMDEventWorkspace_sptr event1 =
-      std::dynamic_pointer_cast<IMDEventWorkspace>(ws1);
-  IMDEventWorkspace_sptr event2 =
-      std::dynamic_pointer_cast<IMDEventWorkspace>(ws2);
+  MDHistoWorkspace_sptr histo1 = std::dynamic_pointer_cast<MDHistoWorkspace>(ws1);
+  MDHistoWorkspace_sptr histo2 = std::dynamic_pointer_cast<MDHistoWorkspace>(ws2);
+  IMDEventWorkspace_sptr event1 = std::dynamic_pointer_cast<IMDEventWorkspace>(ws1);
+  IMDEventWorkspace_sptr event2 = std::dynamic_pointer_cast<IMDEventWorkspace>(ws2);
 
   try {
     compare(ws1->id(), ws2->id(), "Workspaces are of different types");

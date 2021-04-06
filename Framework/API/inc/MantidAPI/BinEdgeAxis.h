@@ -23,8 +23,7 @@ public:
   BinEdgeAxis(const std::vector<double> &edges);
 
   Axis *clone(const MatrixWorkspace *const parentWorkspace) override;
-  Axis *clone(const std::size_t length,
-              const MatrixWorkspace *const parentWorkspace) override;
+  Axis *clone(const std::size_t length, const MatrixWorkspace *const parentWorkspace) override;
 
   std::vector<double> createBinBoundaries() const override;
   void setValue(const std::size_t &index, const double &value) override;

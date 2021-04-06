@@ -48,9 +48,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(IndexSet set({}, 3));
   }
 
-  void test_indexListConstructorErrorCases() {
-    TS_ASSERT_THROWS(IndexSet set({3}, 3), const Exception::IndexError &);
-  }
+  void test_indexListConstructorErrorCases() { TS_ASSERT_THROWS(IndexSet set({3}, 3), const Exception::IndexError &); }
 
   void test_size() {
     size_t fullRange = 5;

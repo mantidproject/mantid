@@ -43,27 +43,22 @@ DECLARE_ALGORITHM(SaveSPE)
 // use macro on platforms without variadic templates.
 #if defined(__INTEL_COMPILER) || (defined(_MSC_VER) && _MSC_VER < 1800)
 
-#define FPRINTF_WITH_EXCEPTION(stream, format, ...)                            \
-  if (fprintf(stream, format, ##__VA_ARGS__) <= 0) {                           \
-    throw std::runtime_error(                                                  \
-        "Error writing to file. Check folder permissions and disk space.");    \
+#define FPRINTF_WITH_EXCEPTION(stream, format, ...)                                                                    \
+  if (fprintf(stream, format, ##__VA_ARGS__) <= 0) {                                                                   \
+    throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");                       \
   }
 
 #else
 namespace {
 
-template <typename... vargs>
-void FPRINTF_WITH_EXCEPTION(FILE *stream, const char *format, vargs... args) {
+template <typename... vargs> void FPRINTF_WITH_EXCEPTION(FILE *stream, const char *format, vargs... args) {
   if (fprintf(stream, format, args...) <= 0) {
-    throw std::runtime_error(
-        "Error writing to file. Check folder permissions and disk space.");
+    throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
   }
 }
 
 // special case needed for case with only two arguments.
-void FPRINTF_WITH_EXCEPTION(FILE *stream, const char *format) {
-  FPRINTF_WITH_EXCEPTION(stream, format, "");
-}
+void FPRINTF_WITH_EXCEPTION(FILE *stream, const char *format) { FPRINTF_WITH_EXCEPTION(stream, format, ""); }
 } // namespace
 #endif
 
@@ -72,8 +67,7 @@ using namespace API;
 
 ///@cond
 const char NUM_FORM[] = "%-10.4G";
-const char NUMS_FORM[] =
-    "%-10.4G%-10.4G%-10.4G%-10.4G%-10.4G%-10.4G%-10.4G%-10.4G\n";
+const char NUMS_FORM[] = "%-10.4G%-10.4G%-10.4G%-10.4G%-10.4G%-10.4G%-10.4G%-10.4G\n";
 static const char Y_HEADER[] = "### S(Phi,w)\n";
 static const char E_HEADER[] = "### Errors\n";
 ///@endcond
@@ -98,11 +92,9 @@ void SaveSPE::init() {
   auto wsValidator = std::make_shared<Kernel::CompositeValidator>();
   wsValidator->add<API::CommonBinsValidator>();
   wsValidator->add<API::HistogramValidator>();
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
                   "The input workspace, which must be in Energy Transfer");
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                 FileProperty::Save, ".spe"),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ".spe"),
                   "The filename to use for the saved data");
 }
 
@@ -139,14 +131,11 @@ void SaveSPE::exec() {
  *  @param outSPEFile :: the file object to write to
  *  @param inputWS :: the workspace to be saved
  */
-void SaveSPE::writeSPEFile(FILE *outSPEFile,
-                           const API::MatrixWorkspace_const_sptr &inputWS) {
+void SaveSPE::writeSPEFile(FILE *outSPEFile, const API::MatrixWorkspace_const_sptr &inputWS) {
   const size_t nHist = inputWS->getNumberHistograms();
   m_nBins = inputWS->blocksize();
   // Number of Workspaces and Number of Energy Bins
-  FPRINTF_WITH_EXCEPTION(outSPEFile, "%8u%8u\n",
-                         static_cast<unsigned int>(nHist),
-                         static_cast<unsigned int>(m_nBins));
+  FPRINTF_WITH_EXCEPTION(outSPEFile, "%8u%8u\n", static_cast<unsigned int>(nHist), static_cast<unsigned int>(m_nBins));
   // Write the angle grid (dummy if no 'vertical' axis)
   size_t phiPoints(0);
   if (inputWS->axes() > 1 && inputWS->getAxis(1)->isNumeric()) {
@@ -156,8 +145,7 @@ void SaveSPE::writeSPEFile(FILE *outSPEFile,
     const size_t axisLength = axis.length();
     phiPoints = (axisLength == nHist) ? axisLength + 1 : axisLength;
     for (size_t i = 0; i < phiPoints; i++) {
-      const double value =
-          (i < axisLength) ? axis(i) : axis(axisLength - 1) + 1;
+      const double value = (i < axisLength) ? axis(i) : axis(axisLength - 1) + 1;
       FPRINTF_WITH_EXCEPTION(outSPEFile, NUM_FORM, value);
       if ((i + 1) % 8 == 0) {
         FPRINTF_WITH_EXCEPTION(outSPEFile, "\n");
@@ -188,10 +176,9 @@ void SaveSPE::writeSPEFile(FILE *outSPEFile,
   FPRINTF_WITH_EXCEPTION(outSPEFile, "### Energy Grid\n");
   const size_t energyPoints = m_nBins + 1; // Validator enforces binned data
   size_t i = NUM_PER_LINE - 1;
-  for (; i < energyPoints;
-       i += NUM_PER_LINE) { // output a whole line of numbers at once
-    FPRINTF_WITH_EXCEPTION(outSPEFile, NUMS_FORM, X[i - 7], X[i - 6], X[i - 5],
-                           X[i - 4], X[i - 3], X[i - 2], X[i - 1], X[i]);
+  for (; i < energyPoints; i += NUM_PER_LINE) { // output a whole line of numbers at once
+    FPRINTF_WITH_EXCEPTION(outSPEFile, NUMS_FORM, X[i - 7], X[i - 6], X[i - 5], X[i - 4], X[i - 3], X[i - 2], X[i - 1],
+                           X[i]);
   }
   // if the last line is not a full line enter them individually
   if (energyPoints % NUM_PER_LINE != 0) { // the condition above means that the
@@ -210,8 +197,7 @@ void SaveSPE::writeSPEFile(FILE *outSPEFile,
  *  @param WS :: the workspace to be saved
  *  @param outFile :: the file object to write to
  */
-void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr &WS,
-                         FILE *const outFile) {
+void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr &WS, FILE *const outFile) {
   // We write out values NUM_PER_LINE at a time, so will need to do extra work
   // if nBins isn't a factor of NUM_PER_LINE
   m_remainder = m_nBins % NUM_PER_LINE;
@@ -262,10 +248,8 @@ void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr &WS,
   values in place of NaN-s and Inf-S of the correspondent signal
 
 */
-void SaveSPE::check_and_copy_spectra(const HistogramData::HistogramY &inSignal,
-                                     const HistogramData::HistogramE &inErr,
-                                     std::vector<double> &Signal,
-                                     std::vector<double> &Error) const {
+void SaveSPE::check_and_copy_spectra(const HistogramData::HistogramY &inSignal, const HistogramData::HistogramE &inErr,
+                                     std::vector<double> &Signal, std::vector<double> &Error) const {
   if (Signal.size() != inSignal.size()) {
     Signal.resize(inSignal.size());
     Error.resize(inSignal.size());
@@ -286,8 +270,7 @@ void SaveSPE::check_and_copy_spectra(const HistogramData::HistogramY &inSignal,
  *  @param outFile :: the file object to write to
  *  @param wsIn :: the index number of the histogram to write
  */
-void SaveSPE::writeHist(const API::MatrixWorkspace_const_sptr &WS,
-                        FILE *const outFile, const int wsIn) const {
+void SaveSPE::writeHist(const API::MatrixWorkspace_const_sptr &WS, FILE *const outFile, const int wsIn) const {
   check_and_copy_spectra(WS->y(wsIn), WS->e(wsIn), m_tSignal, m_tError);
   FPRINTF_WITH_EXCEPTION(outFile, "%s", Y_HEADER);
   writeBins(m_tSignal, outFile);
@@ -310,13 +293,11 @@ void SaveSPE::writeMaskFlags(FILE *const outFile) const {
  * m_nbins)
  *  @param outFile :: the file object to write to
  */
-void SaveSPE::writeBins(const std::vector<double> &Vs,
-                        FILE *const outFile) const {
+void SaveSPE::writeBins(const std::vector<double> &Vs, FILE *const outFile) const {
 
-  for (size_t j = NUM_PER_LINE - 1; j < m_nBins;
-       j += NUM_PER_LINE) { // output a whole line of numbers at once
-    FPRINTF_WITH_EXCEPTION(outFile, NUMS_FORM, Vs[j - 7], Vs[j - 6], Vs[j - 5],
-                           Vs[j - 4], Vs[j - 3], Vs[j - 2], Vs[j - 1], Vs[j]);
+  for (size_t j = NUM_PER_LINE - 1; j < m_nBins; j += NUM_PER_LINE) { // output a whole line of numbers at once
+    FPRINTF_WITH_EXCEPTION(outFile, NUMS_FORM, Vs[j - 7], Vs[j - 6], Vs[j - 5], Vs[j - 4], Vs[j - 3], Vs[j - 2],
+                           Vs[j - 1], Vs[j]);
   }
   if (m_remainder) {
     for (size_t l = m_nBins - m_remainder; l < m_nBins; ++l) {
@@ -330,10 +311,8 @@ void SaveSPE::writeBins(const std::vector<double> &Vs,
  *  @param outFile :: the file object to write to
  */
 void SaveSPE::writeValue(const double value, FILE *const outFile) const {
-  for (size_t j = NUM_PER_LINE - 1; j < m_nBins;
-       j += NUM_PER_LINE) { // output a whole line of numbers at once
-    FPRINTF_WITH_EXCEPTION(outFile, NUMS_FORM, value, value, value, value,
-                           value, value, value, value);
+  for (size_t j = NUM_PER_LINE - 1; j < m_nBins; j += NUM_PER_LINE) { // output a whole line of numbers at once
+    FPRINTF_WITH_EXCEPTION(outFile, NUMS_FORM, value, value, value, value, value, value, value, value);
   }
   if (m_remainder) {
     for (size_t l = m_nBins - m_remainder; l < m_nBins; ++l) {
@@ -349,8 +328,7 @@ void SaveSPE::writeValue(const double value, FILE *const outFile) const {
  *  @param nonMasked :: the number of histograms saved successfully
  *  @param masked :: the number of histograms for which mask values were written
  */
-void SaveSPE::logMissingMasked(const std::vector<int> &inds,
-                               const size_t nonMasked, const int masked) const {
+void SaveSPE::logMissingMasked(const std::vector<int> &inds, const size_t nonMasked, const int masked) const {
   if (inds.cbegin() != inds.cend()) {
     g_log.information() << "Found " << inds.size()
                         << " spectra without associated detectors, probably "

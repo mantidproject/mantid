@@ -61,10 +61,10 @@ chopper_system:
   overlap_ei_frac: 0.9          # Fraction of energy loss Ei to plot ToF lines in time-distance plots
   ei_limits: [7, 2000]          # Limits on ei for multirep calculations (reps outside range ignored)
 
-sample: 
+sample:
   name: MERLIN Sample Can
   isam: 0                       # Sample type: 0==flat plate, 1==ellipse, 2==annulus, 3==sphere, 4==solid cylinder
-  sx: 2.0                       # Thickness (mm) 
+  sx: 2.0                       # Thickness (mm)
   sy: 40.0                      # Width (mm)
   sz: 40.0                      # Height (mm)
   gamma: 0.0                    # Angle of x-axis to ki (degrees)

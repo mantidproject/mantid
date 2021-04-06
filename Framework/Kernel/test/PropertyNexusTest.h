@@ -44,8 +44,7 @@ public:
     PropertyWithValue<double> pd("double_val", 456.78);
     PropertyWithValue<float> pf("float_val", float(987.56));
     PropertyWithValue<std::string> ps("string_val", "supercallifragalistic");
-    PropertyWithValue<std::vector<double>> pvd("vector_double_val",
-                                               std::vector<double>(2, 1.4));
+    PropertyWithValue<std::vector<double>> pvd("vector_double_val", std::vector<double>(2, 1.4));
 
     pi.saveProperty(th.file.get());
     pu.saveProperty(th.file.get());
@@ -79,29 +78,16 @@ public:
     // ----------------------------
     th.reopenFile();
 
-    check_prop(PropertyNexus::loadProperty(th.file.get(), "int_val").get(),
-               &pi);
-    check_prop(PropertyNexus::loadProperty(th.file.get(), "uint_val").get(),
-               &pu);
-    check_prop(PropertyNexus::loadProperty(th.file.get(), "double_val").get(),
-               &pd);
-    check_prop(PropertyNexus::loadProperty(th.file.get(), "float_val").get(),
-               &pf);
-    check_prop(PropertyNexus::loadProperty(th.file.get(), "string_val").get(),
-               &ps);
-    check_prop(
-        PropertyNexus::loadProperty(th.file.get(), "vector_double_val").get(),
-        &pvd);
+    check_prop(PropertyNexus::loadProperty(th.file.get(), "int_val").get(), &pi);
+    check_prop(PropertyNexus::loadProperty(th.file.get(), "uint_val").get(), &pu);
+    check_prop(PropertyNexus::loadProperty(th.file.get(), "double_val").get(), &pd);
+    check_prop(PropertyNexus::loadProperty(th.file.get(), "float_val").get(), &pf);
+    check_prop(PropertyNexus::loadProperty(th.file.get(), "string_val").get(), &ps);
+    check_prop(PropertyNexus::loadProperty(th.file.get(), "vector_double_val").get(), &pvd);
 
-    check_prop(PropertyNexus::loadProperty(th.file.get(), "int_series").get(),
-               &tspi);
-    check_prop(
-        PropertyNexus::loadProperty(th.file.get(), "double_series").get(),
-        &tspd);
-    check_prop(PropertyNexus::loadProperty(th.file.get(), "bool_series").get(),
-               &tspb);
-    check_prop(
-        PropertyNexus::loadProperty(th.file.get(), "string_series").get(),
-        &tsps);
+    check_prop(PropertyNexus::loadProperty(th.file.get(), "int_series").get(), &tspi);
+    check_prop(PropertyNexus::loadProperty(th.file.get(), "double_series").get(), &tspd);
+    check_prop(PropertyNexus::loadProperty(th.file.get(), "bool_series").get(), &tspb);
+    check_prop(PropertyNexus::loadProperty(th.file.get(), "string_series").get(), &tsps);
   }
 };

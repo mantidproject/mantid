@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from mantid.kernel import config
 from mantid.api import mtd
 from mantid.simpleapi import ReflectometryILLPreprocess
 import numpy.testing
@@ -15,6 +16,20 @@ import math
 
 
 class ReflectometryILLPreprocessTest(unittest.TestCase):
+    def setUp(self):
+        self._facility = config['default.facility']
+        self._instrument = config['default.instrument']
+
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D17'
+
+    def tearDown(self):
+        if self._facility:
+            config['default.facility'] = self._facility
+        if self._instrument:
+            config['default.instrument'] = self._instrument
+        mtd.clear()
+
     def tearDown(self):
         mtd.clear()
 
@@ -131,6 +146,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         outWS = alg.getProperty('OutputWorkspace').value
         self.assertEqual(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
         self.assertEqual(mtd.getObjectNames(), [])
+
 
 if __name__ == "__main__":
     unittest.main()

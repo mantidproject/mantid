@@ -28,45 +28,32 @@ private:
     MOCK_CONST_METHOD0(getNPoints, uint64_t());
     MOCK_CONST_METHOD0(getNEvents, uint64_t());
     MOCK_CONST_METHOD2(createIterators,
-                       std::vector<std::unique_ptr<Mantid::API::IMDIterator>>(
-                           size_t, Mantid::Geometry::MDImplicitFunction *));
+                       std::vector<std::unique_ptr<Mantid::API::IMDIterator>>(size_t,
+                                                                              Mantid::Geometry::MDImplicitFunction *));
     MOCK_CONST_METHOD2(getSignalAtCoord,
-                       Mantid::signal_t(const Mantid::coord_t *,
-                                        const Mantid::API::MDNormalization &));
+                       Mantid::signal_t(const Mantid::coord_t *, const Mantid::API::MDNormalization &));
     MOCK_CONST_METHOD2(getSignalWithMaskAtCoord,
-                       Mantid::signal_t(const Mantid::coord_t *,
-                                        const Mantid::API::MDNormalization &));
-    MOCK_CONST_METHOD3(getLinePlot, Mantid::API::IMDWorkspace::LinePlot(
-                                        const Mantid::Kernel::VMD &,
-                                        const Mantid::Kernel::VMD &,
-                                        Mantid::API::MDNormalization));
-    MOCK_CONST_METHOD1(
-        createIterator,
-        Mantid::API::IMDIterator *(Mantid::Geometry::MDImplicitFunction *));
+                       Mantid::signal_t(const Mantid::coord_t *, const Mantid::API::MDNormalization &));
+    MOCK_CONST_METHOD3(getLinePlot,
+                       Mantid::API::IMDWorkspace::LinePlot(const Mantid::Kernel::VMD &, const Mantid::Kernel::VMD &,
+                                                           Mantid::API::MDNormalization));
+    MOCK_CONST_METHOD1(createIterator, Mantid::API::IMDIterator *(Mantid::Geometry::MDImplicitFunction *));
     MOCK_CONST_METHOD2(getSignalAtVMD,
-                       Mantid::signal_t(const Mantid::Kernel::VMD &,
-                                        const Mantid::API::MDNormalization &));
+                       Mantid::signal_t(const Mantid::Kernel::VMD &, const Mantid::API::MDNormalization &));
 
-    MOCK_METHOD1(mockSetMDMasking,
-                 void(Mantid::Geometry::MDImplicitFunction *func));
-    void
-    setMDMasking(std::unique_ptr<Mantid::Geometry::MDImplicitFunction> func) {
-      mockSetMDMasking(func.get());
-    }
+    MOCK_METHOD1(mockSetMDMasking, void(Mantid::Geometry::MDImplicitFunction *func));
+    void setMDMasking(std::unique_ptr<Mantid::Geometry::MDImplicitFunction> func) { mockSetMDMasking(func.get()); }
     MOCK_METHOD0(clearMDMasking, void());
-    MOCK_CONST_METHOD0(getSpecialCoordinateSystem,
-                       Mantid::Kernel::SpecialCoordinateSystem());
+    MOCK_CONST_METHOD0(getSpecialCoordinateSystem, Mantid::Kernel::SpecialCoordinateSystem());
     MOCK_CONST_METHOD0(isMDHistoWorkspace, bool());
     MOCK_CONST_METHOD0(hasOrientedLattice, bool());
 
   private:
     MockMDWorkspace *doClone() const override {
-      throw std::runtime_error(
-          "Cloning of MockMDWorkspace is not implemented.");
+      throw std::runtime_error("Cloning of MockMDWorkspace is not implemented.");
     }
     MockMDWorkspace *doCloneEmpty() const override {
-      throw std::runtime_error(
-          "Cloning of MockMDWorkspace is not implemented.");
+      throw std::runtime_error("Cloning of MockMDWorkspace is not implemented.");
     }
   };
 
@@ -82,12 +69,8 @@ private:
     MOCK_CONST_METHOD0(getNormalizedSignalWithMask, Mantid::signal_t());
     MOCK_CONST_METHOD0(getSignal, Mantid::signal_t());
     MOCK_CONST_METHOD0(getError, Mantid::signal_t());
-    MOCK_CONST_METHOD1(getVertexesArray,
-                       std::unique_ptr<Mantid::coord_t[]>(size_t &));
-    MOCK_CONST_METHOD3(getVertexesArray,
-                       std::unique_ptr<Mantid::coord_t[]>(size_t &,
-                                                          const size_t,
-                                                          const bool *));
+    MOCK_CONST_METHOD1(getVertexesArray, std::unique_ptr<Mantid::coord_t[]>(size_t &));
+    MOCK_CONST_METHOD3(getVertexesArray, std::unique_ptr<Mantid::coord_t[]>(size_t &, const size_t, const bool *));
     MOCK_CONST_METHOD0(getCenter, Mantid::Kernel::VMD());
     MOCK_CONST_METHOD0(getNumEvents, size_t());
     MOCK_CONST_METHOD1(getInnerRunIndex, uint16_t(size_t));
@@ -115,8 +98,7 @@ public:
   static SignalRangeTest *createSuite() { return new SignalRangeTest(); }
   static void destroySuite(SignalRangeTest *suite) { delete suite; }
 
-  void
-  test_IMDWorkspace_Without_Function_Or_Normalization_Gives_Expected_Full_Range() {
+  void test_IMDWorkspace_Without_Function_Or_Normalization_Gives_Expected_Full_Range() {
     using namespace ::testing;
 
     int nthreads = PARALLEL_GET_MAX_THREADS;
@@ -125,19 +107,13 @@ public:
     for (int i = 0; i < nthreads; ++i) {
       auto iterator = std::make_unique<MockMDIterator>();
       EXPECT_CALL(*iterator, valid()).WillRepeatedly(Return(true));
-      EXPECT_CALL(*iterator, next())
-          .WillOnce(Return(true))
-          .WillRepeatedly(Return(false));
-      EXPECT_CALL(*iterator, getNormalizedSignal())
-          .WillOnce(Return(-1.5))
-          .WillRepeatedly(Return(10.0));
+      EXPECT_CALL(*iterator, next()).WillOnce(Return(true)).WillRepeatedly(Return(false));
+      EXPECT_CALL(*iterator, getNormalizedSignal()).WillOnce(Return(-1.5)).WillRepeatedly(Return(10.0));
       iterators.emplace_back(std::move(iterator));
     }
 
     MockMDWorkspace data;
-    EXPECT_CALL(data, createIterators(nthreads, NULL))
-        .Times(Exactly(1))
-        .WillOnce(Return(ByMove(std::move(iterators))));
+    EXPECT_CALL(data, createIterators(nthreads, NULL)).Times(Exactly(1)).WillOnce(Return(ByMove(std::move(iterators))));
 
     MantidQt::API::SignalRange sr(data);
     QwtDoubleInterval range = sr.interval();
@@ -156,23 +132,15 @@ public:
     iterators.reserve(nthreads);
     for (int i = 0; i < nthreads; ++i) {
       auto iterator = std::make_unique<NormalizableMockIterator>();
-      EXPECT_CALL(*iterator, getNumEvents())
-          .Times(Exactly(2))
-          .WillRepeatedly(Return(2));
+      EXPECT_CALL(*iterator, getNumEvents()).Times(Exactly(2)).WillRepeatedly(Return(2));
       EXPECT_CALL(*iterator, valid()).WillRepeatedly(Return(true));
-      EXPECT_CALL(*iterator, next())
-          .WillOnce(Return(true))
-          .WillRepeatedly(Return(false));
-      EXPECT_CALL(*iterator, getSignal())
-          .WillOnce(Return(1.5))
-          .WillRepeatedly(Return(10.0));
+      EXPECT_CALL(*iterator, next()).WillOnce(Return(true)).WillRepeatedly(Return(false));
+      EXPECT_CALL(*iterator, getSignal()).WillOnce(Return(1.5)).WillRepeatedly(Return(10.0));
       iterators.emplace_back(std::move(iterator));
     }
 
     MockMDWorkspace data;
-    EXPECT_CALL(data, createIterators(nthreads, NULL))
-        .Times(Exactly(1))
-        .WillOnce(Return(ByMove(std::move(iterators))));
+    EXPECT_CALL(data, createIterators(nthreads, NULL)).Times(Exactly(1)).WillOnce(Return(ByMove(std::move(iterators))));
 
     MantidQt::API::SignalRange sr(data, Mantid::API::NumEventsNormalization);
     QwtDoubleInterval range = sr.interval();
@@ -191,16 +159,10 @@ public:
     iterators.reserve(nthreads);
     for (int i = 0; i < nthreads; ++i) {
       auto iterator = std::make_unique<NormalizableMockIterator>();
-      EXPECT_CALL(*iterator, getNumEvents())
-          .Times(Exactly(2))
-          .WillRepeatedly(Return(2));
+      EXPECT_CALL(*iterator, getNumEvents()).Times(Exactly(2)).WillRepeatedly(Return(2));
       EXPECT_CALL(*iterator, valid()).WillRepeatedly(Return(true));
-      EXPECT_CALL(*iterator, next())
-          .WillOnce(Return(true))
-          .WillRepeatedly(Return(false));
-      EXPECT_CALL(*iterator, getSignal())
-          .WillOnce(Return(1.5))
-          .WillRepeatedly(Return(10.0));
+      EXPECT_CALL(*iterator, next()).WillOnce(Return(true)).WillRepeatedly(Return(false));
+      EXPECT_CALL(*iterator, getSignal()).WillOnce(Return(1.5)).WillRepeatedly(Return(10.0));
       iterators.emplace_back(std::move(iterator));
     }
 

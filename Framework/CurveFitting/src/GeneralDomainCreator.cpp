@@ -25,11 +25,9 @@ using namespace API;
  * @param workspacePropertyName :: Name of the output property for a created
  * workspace in case a PropertyManager is used.
  */
-GeneralDomainCreator::GeneralDomainCreator(
-    const API::IFunctionGeneral &fun, Kernel::IPropertyManager &manager,
-    const std::string &workspacePropertyName)
-    : IDomainCreator(&manager,
-                     std::vector<std::string>(1, workspacePropertyName)) {
+GeneralDomainCreator::GeneralDomainCreator(const API::IFunctionGeneral &fun, Kernel::IPropertyManager &manager,
+                                           const std::string &workspacePropertyName)
+    : IDomainCreator(&manager, std::vector<std::string>(1, workspacePropertyName)) {
 
   m_defaultValuesSize = fun.getDefaultDomainSize();
 
@@ -37,8 +35,7 @@ GeneralDomainCreator::GeneralDomainCreator(
   if (nDomainColumns > 0) {
     m_domainColumnNames.emplace_back("ArgumentColumn");
     for (size_t i = 1; i < nDomainColumns; ++i) {
-      m_domainColumnNames.emplace_back(m_domainColumnNames.front() + "_" +
-                                       std::to_string(i));
+      m_domainColumnNames.emplace_back(m_domainColumnNames.front() + "_" + std::to_string(i));
     }
   }
 
@@ -59,28 +56,23 @@ GeneralDomainCreator::GeneralDomainCreator(
 /// @param suffix :: A suffix to give to all new properties.
 /// @param addProp :: If false don't actually declare new properties but do
 /// other stuff if needed
-void GeneralDomainCreator::declareDatasetProperties(const std::string &suffix,
-                                                    bool addProp) {
+void GeneralDomainCreator::declareDatasetProperties(const std::string &suffix, bool addProp) {
   UNUSED_ARG(suffix);
   if (addProp) {
     for (auto &propName : m_domainColumnNames) {
-      declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""),
-                      "A name of a domain column.");
+      declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""), "A name of a domain column.");
     }
     for (auto &propName : m_dataColumnNames) {
-      declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""),
-                      "A name of a fitting data column.");
+      declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""), "A name of a fitting data column.");
     }
     for (auto &propName : m_weightsColumnNames) {
-      declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""),
-                      "A name of a fitting weights column.");
+      declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""), "A name of a fitting weights column.");
     }
   }
 }
 
 /// Retrive the input workspace from the property manager.
-std::shared_ptr<API::ITableWorkspace>
-GeneralDomainCreator::getInputWorkspace() const {
+std::shared_ptr<API::ITableWorkspace> GeneralDomainCreator::getInputWorkspace() const {
   auto workspacePropertyName = m_workspacePropertyNames.front();
   if (!m_manager->existsProperty(workspacePropertyName)) {
     return API::ITableWorkspace_sptr();
@@ -101,8 +93,7 @@ GeneralDomainCreator::getInputWorkspace() const {
  * @param i0 :: Size offset for values object if it already contains data.
  */
 void GeneralDomainCreator::createDomain(std::shared_ptr<FunctionDomain> &domain,
-                                        std::shared_ptr<FunctionValues> &values,
-                                        size_t i0) {
+                                        std::shared_ptr<FunctionValues> &values, size_t i0) {
 
   // Create the values object
   if (!values) {
@@ -180,11 +171,10 @@ void GeneralDomainCreator::createDomain(std::shared_ptr<FunctionDomain> &domain,
  * @return Workspace with calculated values.
  */
 
-Workspace_sptr GeneralDomainCreator::createOutputWorkspace(
-    const std::string &baseName, IFunction_sptr function,
-    std::shared_ptr<FunctionDomain> domain,
-    std::shared_ptr<FunctionValues> values,
-    const std::string &outputWorkspacePropertyName) {
+Workspace_sptr GeneralDomainCreator::createOutputWorkspace(const std::string &baseName, IFunction_sptr function,
+                                                           std::shared_ptr<FunctionDomain> domain,
+                                                           std::shared_ptr<FunctionValues> values,
+                                                           const std::string &outputWorkspacePropertyName) {
   if (function->getValuesSize(*domain) != values->size()) {
     throw std::runtime_error("Failed to create output workspace: domain and "
                              "values object don't match.");
@@ -247,11 +237,9 @@ Workspace_sptr GeneralDomainCreator::createOutputWorkspace(
 
   if (!outputWorkspacePropertyName.empty()) {
     declareProperty(
-        new API::WorkspaceProperty<API::ITableWorkspace>(
-            outputWorkspacePropertyName, "", Kernel::Direction::Output),
+        new API::WorkspaceProperty<API::ITableWorkspace>(outputWorkspacePropertyName, "", Kernel::Direction::Output),
         "Name of the output Workspace holding resulting simulated values");
-    m_manager->setPropertyValue(outputWorkspacePropertyName,
-                                baseName + "Workspace");
+    m_manager->setPropertyValue(outputWorkspacePropertyName, baseName + "Workspace");
     m_manager->setProperty(outputWorkspacePropertyName, outputWorkspace);
   }
 

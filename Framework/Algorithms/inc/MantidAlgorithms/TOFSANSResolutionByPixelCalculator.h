@@ -14,12 +14,9 @@ TOFSANSResolutionByPixel class
 */
 class MANTID_ALGORITHMS_DLL TOFSANSResolutionByPixelCalculator {
 public:
-  double getWavelengthIndependentFactor(double r1, double r2, double deltaR,
-                                        double lCollim, double l2) const;
-  double getSigmaQValue(double moderatorValue,
-                        double wavlengthIndependentFactor, double q,
-                        double wavelength, double deltaWavelength, double l1,
-                        double l2) const;
+  double getWavelengthIndependentFactor(double r1, double r2, double deltaR, double lCollim, double l2) const;
+  double getSigmaQValue(double moderatorValue, double wavlengthIndependentFactor, double q, double wavelength,
+                        double deltaWavelength, double l1, double l2) const;
 };
 } // namespace Algorithms
 } // namespace Mantid

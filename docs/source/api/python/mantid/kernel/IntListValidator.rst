@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::Kernel::IntListValidator.
 
 .. module:`mantid.kernel`
 
-.. autoclass:: mantid.kernel.IntListValidator 
+.. autoclass:: mantid.kernel.IntListValidator
     :members:
     :undoc-members:
     :inherited-members:

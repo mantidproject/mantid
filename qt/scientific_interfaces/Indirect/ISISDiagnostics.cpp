@@ -27,8 +27,8 @@ namespace CustomInterfaces {
 ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
-  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
-      m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra));
+  setOutputPlotOptionsPresenter(
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra));
 
   m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
   m_uiForm.ppSlicePreview->setCanvasColour(QColor(240, 240, 240));
@@ -41,10 +41,8 @@ ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
   // Editor Factories
   auto *doubleEditorFactory = new DoubleEditorFactory();
   auto *checkboxFactory = new QtCheckBoxFactory();
-  m_propTrees["SlicePropTree"]->setFactoryForManager(m_dblManager,
-                                                     doubleEditorFactory);
-  m_propTrees["SlicePropTree"]->setFactoryForManager(m_blnManager,
-                                                     checkboxFactory);
+  m_propTrees["SlicePropTree"]->setFactoryForManager(m_dblManager, doubleEditorFactory);
+  m_propTrees["SlicePropTree"]->setFactoryForManager(m_blnManager, checkboxFactory);
 
   // Create Properties
   m_properties["PreviewSpec"] = m_dblManager->addProperty("Preview Spectrum");
@@ -72,10 +70,8 @@ ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
   m_properties["PeakRange"]->addSubProperty(m_properties["PeakEnd"]);
 
   m_properties["BackgroundRange"] = m_grpManager->addProperty("Background");
-  m_properties["BackgroundRange"]->addSubProperty(
-      m_properties["BackgroundStart"]);
-  m_properties["BackgroundRange"]->addSubProperty(
-      m_properties["BackgroundEnd"]);
+  m_properties["BackgroundRange"]->addSubProperty(m_properties["BackgroundStart"]);
+  m_properties["BackgroundRange"]->addSubProperty(m_properties["BackgroundEnd"]);
 
   m_propTrees["SlicePropTree"]->addProperty(m_properties["PreviewSpec"]);
   m_propTrees["SlicePropTree"]->addProperty(m_properties["SpecMin"]);
@@ -86,59 +82,46 @@ ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
 
   // Slice plot
   auto peakRangeSelector = m_uiForm.ppRawPlot->addRangeSelector("SlicePeak");
-  auto backgroundRangeSelector =
-      m_uiForm.ppRawPlot->addRangeSelector("SliceBackground");
+  auto backgroundRangeSelector = m_uiForm.ppRawPlot->addRangeSelector("SliceBackground");
 
   // Setup second range
-  backgroundRangeSelector->setColour(
-      Qt::darkGreen); // Dark green for background
+  backgroundRangeSelector->setColour(Qt::darkGreen); // Dark green for background
 
   // SIGNAL/SLOT CONNECTIONS
 
   // Update instrument information when a new instrument config is selected
-  connect(this, SIGNAL(newInstrumentConfiguration()), this,
-          SLOT(setDefaultInstDetails()));
+  connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setDefaultInstDetails()));
 
   // Update properties when a range selector is changed
   connect(peakRangeSelector, SIGNAL(selectionChanged(double, double)), this,
           SLOT(rangeSelectorDropped(double, double)));
-  connect(backgroundRangeSelector, SIGNAL(selectionChanged(double, double)),
-          this, SLOT(rangeSelectorDropped(double, double)));
+  connect(backgroundRangeSelector, SIGNAL(selectionChanged(double, double)), this,
+          SLOT(rangeSelectorDropped(double, double)));
 
   // Update range selctors when a property is changed
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(doublePropertyChanged(QtProperty *, double)));
   // Enable/disable second range options when checkbox is toggled
-  connect(m_blnManager, SIGNAL(valueChanged(QtProperty *, bool)), this,
-          SLOT(sliceTwoRanges(QtProperty *, bool)));
+  connect(m_blnManager, SIGNAL(valueChanged(QtProperty *, bool)), this, SLOT(sliceTwoRanges(QtProperty *, bool)));
   // Enables/disables calibration file selection when user toggles Use
   // Calibratin File checkbox
-  connect(m_uiForm.ckUseCalibration, SIGNAL(toggled(bool)), this,
-          SLOT(sliceCalib(bool)));
+  connect(m_uiForm.ckUseCalibration, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
 
   // Plot slice miniplot when file has finished loading
-  connect(m_uiForm.dsInputFiles, SIGNAL(filesFoundChanged()), this,
-          SLOT(handleNewFile()));
+  connect(m_uiForm.dsInputFiles, SIGNAL(filesFoundChanged()), this, SLOT(handleNewFile()));
   // Shows message on run buton when user is inputting a run number
-  connect(m_uiForm.dsInputFiles, SIGNAL(fileTextChanged(const QString &)), this,
-          SLOT(pbRunEditing()));
+  connect(m_uiForm.dsInputFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(pbRunEditing()));
   // Shows message on run button when Mantid is finding the file for a given run
   // number
-  connect(m_uiForm.dsInputFiles, SIGNAL(findingFiles()), this,
-          SLOT(pbRunFinding()));
+  connect(m_uiForm.dsInputFiles, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
   // Reverts run button back to normal when file finding has finished
-  connect(m_uiForm.dsInputFiles, SIGNAL(fileFindingFinished()), this,
-          SLOT(pbRunFinished()));
+  connect(m_uiForm.dsInputFiles, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
   // Handles running, plotting and saving
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
-  connect(this,
-          SIGNAL(updateRunButton(bool, std::string const &, QString const &,
-                                 QString const &)),
-          this,
-          SLOT(updateRunButton(bool, std::string const &, QString const &,
-                               QString const &)));
+  connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), this,
+          SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
 
   // Set default UI state
   sliceTwoRanges(nullptr, false);
@@ -161,10 +144,8 @@ void ISISDiagnostics::run() {
   QString filenames = m_uiForm.dsInputFiles->getFilenames().join(",");
 
   std::vector<long> spectraRange;
-  spectraRange.emplace_back(
-      static_cast<long>(m_dblManager->value(m_properties["SpecMin"])));
-  spectraRange.emplace_back(
-      static_cast<long>(m_dblManager->value(m_properties["SpecMax"])));
+  spectraRange.emplace_back(static_cast<long>(m_dblManager->value(m_properties["SpecMin"])));
+  spectraRange.emplace_back(static_cast<long>(m_dblManager->value(m_properties["SpecMax"])));
 
   std::vector<double> peakRange;
   peakRange.emplace_back(m_dblManager->value(m_properties["PeakStart"]));
@@ -186,15 +167,12 @@ void ISISDiagnostics::run() {
 
   if (m_blnManager->value(m_properties["UseTwoRanges"])) {
     std::vector<double> backgroundRange;
-    backgroundRange.emplace_back(
-        m_dblManager->value(m_properties["BackgroundStart"]));
-    backgroundRange.emplace_back(
-        m_dblManager->value(m_properties["BackgroundEnd"]));
+    backgroundRange.emplace_back(m_dblManager->value(m_properties["BackgroundStart"]));
+    backgroundRange.emplace_back(m_dblManager->value(m_properties["BackgroundEnd"]));
     sliceAlg->setProperty("BackgroundRange", backgroundRange);
   }
 
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(algorithmComplete(bool)));
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   runAlgorithm(sliceAlg);
 }
 
@@ -207,16 +185,15 @@ bool ISISDiagnostics::validate() {
     uiv.checkFileFinderWidgetIsValid("Calibration", m_uiForm.dsInputFiles);
 
   // Check peak range
-  auto rangeOne = std::make_pair(m_dblManager->value(m_properties["PeakStart"]),
-                                 m_dblManager->value(m_properties["PeakEnd"]));
+  auto rangeOne =
+      std::make_pair(m_dblManager->value(m_properties["PeakStart"]), m_dblManager->value(m_properties["PeakEnd"]));
   uiv.checkValidRange("Range One", rangeOne);
 
   // Check background range
   bool useTwoRanges = m_blnManager->value(m_properties["UseTwoRanges"]);
   if (useTwoRanges) {
-    auto rangeTwo =
-        std::make_pair(m_dblManager->value(m_properties["BackgroundStart"]),
-                       m_dblManager->value(m_properties["BackgroundEnd"]));
+    auto rangeTwo = std::make_pair(m_dblManager->value(m_properties["BackgroundStart"]),
+                                   m_dblManager->value(m_properties["BackgroundEnd"]));
     uiv.checkValidRange("Range Two", rangeTwo);
 
     uiv.checkRangesDontOverlap(rangeOne, rangeTwo);
@@ -224,8 +201,7 @@ bool ISISDiagnostics::validate() {
 
   // Check spectra range
   auto specRange =
-      std::make_pair(m_dblManager->value(m_properties["SpecMin"]),
-                     m_dblManager->value(m_properties["SpecMax"]) + 1);
+      std::make_pair(m_dblManager->value(m_properties["SpecMin"]), m_dblManager->value(m_properties["SpecMax"]) + 1);
   uiv.checkValidRange("Spectra Range", specRange);
 
   QString error = uiv.generateErrorMessage();
@@ -243,15 +219,13 @@ bool ISISDiagnostics::validate() {
  * @param error If the algorithm failed
  */
 void ISISDiagnostics::algorithmComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(algorithmComplete(bool)));
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
   if (error)
     return;
 
   WorkspaceGroup_sptr sliceOutputGroup =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          "IndirectDiagnostics_Workspaces");
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IndirectDiagnostics_Workspaces");
   if (sliceOutputGroup->size() == 0) {
     g_log.warning("No result workspaces, cannot plot preview.");
     return;
@@ -277,13 +251,10 @@ void ISISDiagnostics::setDefaultInstDetails() {
   }
 }
 
-void ISISDiagnostics::setDefaultInstDetails(
-    QMap<QString, QString> const &instrumentDetails) {
+void ISISDiagnostics::setDefaultInstDetails(QMap<QString, QString> const &instrumentDetails) {
   auto const instrument = getInstrumentDetail(instrumentDetails, "instrument");
-  auto const spectraMin =
-      getInstrumentDetail(instrumentDetails, "spectra-min").toDouble();
-  auto const spectraMax =
-      getInstrumentDetail(instrumentDetails, "spectra-max").toDouble();
+  auto const spectraMin = getInstrumentDetail(instrumentDetails, "spectra-min").toDouble();
+  auto const spectraMax = getInstrumentDetail(instrumentDetails, "spectra-max").toDouble();
 
   // Set the search instrument for runs
   m_uiForm.dsInputFiles->setInstrumentOverride(instrument);
@@ -316,13 +287,9 @@ void ISISDiagnostics::handleNewFile() {
     return;
   }
 
-  auto const inputWorkspace =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          wsname.toStdString());
+  auto const inputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname.toStdString());
 
-  auto const previewSpec =
-      static_cast<int>(m_dblManager->value(m_properties["PreviewSpec"])) -
-      specMin;
+  auto const previewSpec = static_cast<int>(m_dblManager->value(m_properties["PreviewSpec"])) - specMin;
 
   m_uiForm.ppRawPlot->clear();
   m_uiForm.ppRawPlot->addSpectrum("Raw", inputWorkspace->clone(), previewSpec);
@@ -331,10 +298,8 @@ void ISISDiagnostics::handleNewFile() {
   setPeakRangeLimits(xLimits.first, xLimits.second);
   setBackgroundRangeLimits(xLimits.first, xLimits.second);
 
-  setPeakRange(getInstrumentDetail("peak-start").toDouble(),
-               getInstrumentDetail("peak-end").toDouble());
-  setBackgroundRange(getInstrumentDetail("back-start").toDouble(),
-                     getInstrumentDetail("back-end").toDouble());
+  setPeakRange(getInstrumentDetail("peak-start").toDouble(), getInstrumentDetail("peak-end").toDouble());
+  setBackgroundRange(getInstrumentDetail("back-start").toDouble(), getInstrumentDetail("back-end").toDouble());
 
   m_uiForm.ppRawPlot->resizeX();
   m_uiForm.ppRawPlot->replot();
@@ -345,33 +310,26 @@ void ISISDiagnostics::setPeakRangeLimits(double peakMin, double peakMax) {
   setRangeLimits(slicePeak, peakMin, peakMax, "PeakStart", "PeakEnd");
 }
 
-void ISISDiagnostics::setBackgroundRangeLimits(double backgroundMin,
-                                               double backgroundMax) {
-  auto sliceBackground =
-      m_uiForm.ppRawPlot->getRangeSelector("SliceBackground");
-  setRangeLimits(sliceBackground, backgroundMin, backgroundMax,
-                 "BackgroundStart", "BackgroundEnd");
+void ISISDiagnostics::setBackgroundRangeLimits(double backgroundMin, double backgroundMax) {
+  auto sliceBackground = m_uiForm.ppRawPlot->getRangeSelector("SliceBackground");
+  setRangeLimits(sliceBackground, backgroundMin, backgroundMax, "BackgroundStart", "BackgroundEnd");
 }
 
-void ISISDiagnostics::setRangeLimits(
-    MantidWidgets::RangeSelector *rangeSelector, double minimum, double maximum,
-    QString const &minPropertyName, QString const &maxPropertyName) {
-  setPlotPropertyRange(rangeSelector, m_properties[minPropertyName],
-                       m_properties[maxPropertyName],
+void ISISDiagnostics::setRangeLimits(MantidWidgets::RangeSelector *rangeSelector, double minimum, double maximum,
+                                     QString const &minPropertyName, QString const &maxPropertyName) {
+  setPlotPropertyRange(rangeSelector, m_properties[minPropertyName], m_properties[maxPropertyName],
                        qMakePair(minimum, maximum));
 }
 
 void ISISDiagnostics::setPeakRange(double minimum, double maximum) {
   auto slicePeak = m_uiForm.ppRawPlot->getRangeSelector("SlicePeak");
-  setRangeSelector(slicePeak, m_properties["PeakStart"],
-                   m_properties["PeakEnd"], qMakePair(minimum, maximum));
+  setRangeSelector(slicePeak, m_properties["PeakStart"], m_properties["PeakEnd"], qMakePair(minimum, maximum));
 }
 
 void ISISDiagnostics::setBackgroundRange(double minimum, double maximum) {
-  auto sliceBackground =
-      m_uiForm.ppRawPlot->getRangeSelector("SliceBackground");
-  setRangeSelector(sliceBackground, m_properties["BackgroundStart"],
-                   m_properties["BackgroundEnd"], qMakePair(minimum, maximum));
+  auto sliceBackground = m_uiForm.ppRawPlot->getRangeSelector("SliceBackground");
+  setRangeSelector(sliceBackground, m_properties["BackgroundStart"], m_properties["BackgroundEnd"],
+                   qMakePair(minimum, maximum));
 }
 
 /**
@@ -388,13 +346,10 @@ void ISISDiagnostics::sliceTwoRanges(QtProperty * /*unused*/, bool state) {
  *
  * @param state :: True to enable calibration file, false otherwise
  */
-void ISISDiagnostics::sliceCalib(bool state) {
-  m_uiForm.dsCalibration->setEnabled(state);
-}
+void ISISDiagnostics::sliceCalib(bool state) { m_uiForm.dsCalibration->setEnabled(state); }
 
 void ISISDiagnostics::rangeSelectorDropped(double min, double max) {
-  MantidWidgets::RangeSelector *from =
-      qobject_cast<MantidWidgets::RangeSelector *>(sender());
+  MantidWidgets::RangeSelector *from = qobject_cast<MantidWidgets::RangeSelector *>(sender());
 
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(doublePropertyChanged(QtProperty *, double)));
@@ -419,26 +374,19 @@ void ISISDiagnostics::rangeSelectorDropped(double min, double max) {
  */
 void ISISDiagnostics::doublePropertyChanged(QtProperty *prop, double val) {
   auto peakRangeSelector = m_uiForm.ppRawPlot->getRangeSelector("SlicePeak");
-  auto backgroundRangeSelector =
-      m_uiForm.ppRawPlot->getRangeSelector("SliceBackground");
+  auto backgroundRangeSelector = m_uiForm.ppRawPlot->getRangeSelector("SliceBackground");
 
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(doublePropertyChanged(QtProperty *, double)));
 
   if (prop == m_properties["PeakStart"]) {
-    setRangeSelectorMin(m_properties["PeakStart"], m_properties["PeakEnd"],
-                        peakRangeSelector, val);
+    setRangeSelectorMin(m_properties["PeakStart"], m_properties["PeakEnd"], peakRangeSelector, val);
   } else if (prop == m_properties["PeakEnd"]) {
-    setRangeSelectorMax(m_properties["PeakStart"], m_properties["PeakEnd"],
-                        peakRangeSelector, val);
+    setRangeSelectorMax(m_properties["PeakStart"], m_properties["PeakEnd"], peakRangeSelector, val);
   } else if (prop == m_properties["BackgroundStart"]) {
-    setRangeSelectorMin(m_properties["BackgroundStart"],
-                        m_properties["BackgroundEnd"], backgroundRangeSelector,
-                        val);
+    setRangeSelectorMin(m_properties["BackgroundStart"], m_properties["BackgroundEnd"], backgroundRangeSelector, val);
   } else if (prop == m_properties["BackgroundEnd"]) {
-    setRangeSelectorMax(m_properties["BackgroundStart"],
-                        m_properties["BackgroundEnd"], backgroundRangeSelector,
-                        val);
+    setRangeSelectorMax(m_properties["BackgroundStart"], m_properties["BackgroundEnd"], backgroundRangeSelector, val);
   } else if (prop == m_properties["PreviewSpec"])
     handleNewFile();
   else if (prop == m_properties["SpecMin"]) {
@@ -459,8 +407,7 @@ void ISISDiagnostics::doublePropertyChanged(QtProperty *prop, double val) {
  * @param error True if the algorithm was stopped due to error, false otherwise
  */
 void ISISDiagnostics::sliceAlgDone(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(sliceAlgDone(bool)));
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(sliceAlgDone(bool)));
 
   if (error)
     return;
@@ -470,15 +417,13 @@ void ISISDiagnostics::sliceAlgDone(bool error) {
     return;
 
   WorkspaceGroup_sptr sliceOutputGroup =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          "IndirectDiagnostics_Workspaces");
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IndirectDiagnostics_Workspaces");
   if (sliceOutputGroup->size() == 0) {
     g_log.warning("No result workspaces, cannot plot preview.");
     return;
   }
 
-  MatrixWorkspace_sptr sliceWs =
-      std::dynamic_pointer_cast<MatrixWorkspace>(sliceOutputGroup->getItem(0));
+  MatrixWorkspace_sptr sliceWs = std::dynamic_pointer_cast<MatrixWorkspace>(sliceOutputGroup->getItem(0));
   if (!sliceWs) {
     g_log.warning("No result workspaces, cannot plot preview.");
     return;
@@ -502,27 +447,22 @@ void ISISDiagnostics::sliceAlgDone(bool error) {
 void ISISDiagnostics::setFileExtensionsByName(bool filter) {
   QStringList const noSuffices{""};
   auto const tabName("ISISDiagnostics");
-  m_uiForm.dsCalibration->setFBSuffixes(
-      filter ? getCalibrationFBSuffixes(tabName)
-             : getCalibrationExtensions(tabName));
-  m_uiForm.dsCalibration->setWSSuffixes(
-      filter ? getCalibrationWSSuffixes(tabName) : noSuffices);
+  m_uiForm.dsCalibration->setFBSuffixes(filter ? getCalibrationFBSuffixes(tabName) : getCalibrationExtensions(tabName));
+  m_uiForm.dsCalibration->setWSSuffixes(filter ? getCalibrationWSSuffixes(tabName) : noSuffices);
 }
 
 /**
  * Called when a user starts to type / edit the runs to load.
  */
 void ISISDiagnostics::pbRunEditing() {
-  updateRunButton(false, "unchanged", "Editing...",
-                  "Run numbers are curently being edited.");
+  updateRunButton(false, "unchanged", "Editing...", "Run numbers are curently being edited.");
 }
 
 /**
  * Called when the FileFinder starts finding the files.
  */
 void ISISDiagnostics::pbRunFinding() {
-  updateRunButton(false, "unchanged", "Finding files...",
-                  "Searchig for data files for the run numbers entered...");
+  updateRunButton(false, "unchanged", "Finding files...", "Searchig for data files for the run numbers entered...");
   m_uiForm.dsInputFiles->setEnabled(false);
 }
 
@@ -531,9 +471,8 @@ void ISISDiagnostics::pbRunFinding() {
  */
 void ISISDiagnostics::pbRunFinished() {
   if (!m_uiForm.dsInputFiles->isValid())
-    updateRunButton(
-        false, "unchanged", "Invalid Run(s)",
-        "Cannot find data files for some of the run numbers enetered.");
+    updateRunButton(false, "unchanged", "Invalid Run(s)",
+                    "Cannot find data files for some of the run numbers enetered.");
   else
     updateRunButton();
 
@@ -554,17 +493,11 @@ void ISISDiagnostics::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void ISISDiagnostics::setRunEnabled(bool enabled) {
-  m_uiForm.pbRun->setEnabled(enabled);
-}
+void ISISDiagnostics::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void ISISDiagnostics::setSaveEnabled(bool enabled) {
-  m_uiForm.pbSave->setEnabled(enabled);
-}
+void ISISDiagnostics::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
-void ISISDiagnostics::updateRunButton(bool enabled,
-                                      std::string const &enableOutputButtons,
-                                      QString const &message,
+void ISISDiagnostics::updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
                                       QString const &tooltip) {
   setRunEnabled(enabled);
   m_uiForm.pbRun->setText(message);

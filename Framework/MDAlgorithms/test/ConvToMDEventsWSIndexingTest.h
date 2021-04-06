@@ -38,18 +38,15 @@ public:
     std::array<double, 3> lowerLeft;
     std::array<double, 3> upperRight;
     std::array<double, 3> center() const {
-      return std::array<double, 3>{{(lowerLeft[0] + upperRight[0]) / 2,
-                                    (lowerLeft[1] + upperRight[1]) / 2,
-                                    (lowerLeft[2] + upperRight[2]) / 2}};
+      return std::array<double, 3>{
+          {(lowerLeft[0] + upperRight[0]) / 2, (lowerLeft[1] + upperRight[1]) / 2, (lowerLeft[2] + upperRight[2]) / 2}};
     }
 
     Box() {}
-    Box(const std::array<double, 3> &ll, const std::array<double, 3> &ur)
-        : lowerLeft(ll), upperRight(ur) {}
+    Box(const std::array<double, 3> &ll, const std::array<double, 3> &ur) : lowerLeft(ll), upperRight(ur) {}
 
     template <typename T> bool contains(const std::array<T, 3> &pt) const {
-      return (lowerLeft[0] <= pt[0] && pt[0] <= upperRight[0]) &&
-             (lowerLeft[1] <= pt[1] && pt[1] <= upperRight[1]) &&
+      return (lowerLeft[0] <= pt[0] && pt[0] <= upperRight[0]) && (lowerLeft[1] <= pt[1] && pt[1] <= upperRight[1]) &&
              (lowerLeft[2] <= pt[2] && pt[2] <= upperRight[2]);
     }
     friend std::ostream &operator<<(std::ostream &os, const Box &box) {
@@ -64,29 +61,22 @@ public:
   };
 
 public:
-  FullTree3D3L(const std::array<double, 3> &ll,
-               const std::array<double, 3> &ur) {
+  FullTree3D3L(const std::array<double, 3> &ll, const std::array<double, 3> &ur) {
     store[0].lowerLeft = ll;
     store[0].upperRight = ur;
     createBoxes(1, 0, ll, ur);
   }
 
-  static void print3d(const std::array<double, 3> arr) {
-    std::cout << arr[0] << "; " << arr[1] << "; " << arr[2];
-  }
+  static void print3d(const std::array<double, 3> arr) { std::cout << arr[0] << "; " << arr[1] << "; " << arr[2]; }
 
-  static size_t getChildIdx(size_t parent, size_t child) {
-    return 8 * parent + child + 1;
-  }
+  static size_t getChildIdx(size_t parent, size_t child) { return 8 * parent + child + 1; }
 
   const Box &getChild(size_t parent, size_t child) const {
     if (child > 7)
-      throw std::logic_error(std::string(__PRETTY_FUNCTION__) +
-                             " node has only 8 children.");
+      throw std::logic_error(std::string(__PRETTY_FUNCTION__) + " node has only 8 children.");
     size_t idx = 8 * parent + child + 1;
     if (idx >= nodesCount)
-      throw std::logic_error(std::string(__PRETTY_FUNCTION__) +
-                             " no children for " + std::to_string(parent) +
+      throw std::logic_error(std::string(__PRETTY_FUNCTION__) + " no children for " + std::to_string(parent) +
                              " node.");
     return store[idx];
   }
@@ -95,10 +85,8 @@ public:
 
   // leafes starts vit ind 72
   bool isLeaf(size_t ind) { return ind > 72; }
-  using PtDistr =
-      std::array<std::vector<std::array<Mantid::coord_t, 3>>, nodesCount>;
-  PtDistr distribute(const std::vector<std::array<Mantid::coord_t, 3>> &points,
-                     size_t threshold) {
+  using PtDistr = std::array<std::vector<std::array<Mantid::coord_t, 3>>, nodesCount>;
+  PtDistr distribute(const std::vector<std::array<Mantid::coord_t, 3>> &points, size_t threshold) {
     PtDistr res;
 
     // set all points to leaf nodes
@@ -153,54 +141,39 @@ public:
   }
 
 private:
-  static double nextBigger(const double &in) {
-    return std::nextafter(in, std::numeric_limits<double>::max());
-  }
-  void putChilds(const size_t &beforeStart, const std::array<double, 3> &ll,
-                 const std::array<double, 3> &ur) {
+  static double nextBigger(const double &in) { return std::nextafter(in, std::numeric_limits<double>::max()); }
+  void putChilds(const size_t &beforeStart, const std::array<double, 3> &ll, const std::array<double, 3> &ur) {
     auto curIdx = beforeStart;
     std::array<double, 3> ctrUp = Box(ll, ur).center();
-    std::array<double, 3> ctrLow{
-        {nextBigger(ctrUp[0]), nextBigger(ctrUp[1]), nextBigger(ctrUp[2])}};
-    store[++curIdx] =
-        Box{{{ll[0], ll[1], ll[2]}}, {{ctrUp[0], ctrUp[1], ctrUp[2]}}};
-    store[++curIdx] =
-        Box{{{ctrLow[0], ll[1], ll[2]}}, {{ur[0], ctrUp[1], ctrUp[2]}}};
-    store[++curIdx] =
-        Box{{{ll[0], ctrLow[1], ll[2]}}, {{ctrUp[0], ur[1], ctrUp[2]}}};
-    store[++curIdx] =
-        Box{{{ll[0], ll[1], ctrLow[2]}}, {{ctrUp[0], ctrUp[1], ur[2]}}};
-    store[++curIdx] =
-        Box{{{ctrLow[0], ctrLow[1], ll[2]}}, {{ur[0], ur[1], ctrUp[2]}}};
-    store[++curIdx] =
-        Box{{{ll[0], ctrLow[1], ctrLow[2]}}, {{ctrUp[0], ur[1], ur[2]}}};
-    store[++curIdx] =
-        Box{{{ctrLow[0], ll[1], ctrLow[2]}}, {{ur[0], ctrUp[1], ur[2]}}};
-    store[++curIdx] =
-        Box{{{ctrLow[0], ctrLow[1], ctrLow[2]}}, {{ur[0], ur[1], ur[2]}}};
-    std::sort(store.begin() + curIdx - 7, store.begin() + 1 + curIdx,
-              [](Box &a, Box &b) {
-                unsigned i = 3;
-                while (i-- > 0) {
-                  const auto &ac = a.lowerLeft[i];
-                  const auto &bc = b.lowerLeft[i];
-                  if (ac < bc)
-                    return true;
-                  if (ac > bc)
-                    return false;
-                }
-                return true;
-              });
+    std::array<double, 3> ctrLow{{nextBigger(ctrUp[0]), nextBigger(ctrUp[1]), nextBigger(ctrUp[2])}};
+    store[++curIdx] = Box{{{ll[0], ll[1], ll[2]}}, {{ctrUp[0], ctrUp[1], ctrUp[2]}}};
+    store[++curIdx] = Box{{{ctrLow[0], ll[1], ll[2]}}, {{ur[0], ctrUp[1], ctrUp[2]}}};
+    store[++curIdx] = Box{{{ll[0], ctrLow[1], ll[2]}}, {{ctrUp[0], ur[1], ctrUp[2]}}};
+    store[++curIdx] = Box{{{ll[0], ll[1], ctrLow[2]}}, {{ctrUp[0], ctrUp[1], ur[2]}}};
+    store[++curIdx] = Box{{{ctrLow[0], ctrLow[1], ll[2]}}, {{ur[0], ur[1], ctrUp[2]}}};
+    store[++curIdx] = Box{{{ll[0], ctrLow[1], ctrLow[2]}}, {{ctrUp[0], ur[1], ur[2]}}};
+    store[++curIdx] = Box{{{ctrLow[0], ll[1], ctrLow[2]}}, {{ur[0], ctrUp[1], ur[2]}}};
+    store[++curIdx] = Box{{{ctrLow[0], ctrLow[1], ctrLow[2]}}, {{ur[0], ur[1], ur[2]}}};
+    std::sort(store.begin() + curIdx - 7, store.begin() + 1 + curIdx, [](Box &a, Box &b) {
+      unsigned i = 3;
+      while (i-- > 0) {
+        const auto &ac = a.lowerLeft[i];
+        const auto &bc = b.lowerLeft[i];
+        if (ac < bc)
+          return true;
+        if (ac > bc)
+          return false;
+      }
+      return true;
+    });
   }
 
-  void createBoxes(uint32_t lvl, size_t id, const std::array<double, 3> &ll,
-                   const std::array<double, 3> &ur) {
+  void createBoxes(uint32_t lvl, size_t id, const std::array<double, 3> &ll, const std::array<double, 3> &ur) {
     if (lvl > level)
       return;
     putChilds(id, ll, ur);
     for (uint8_t i = 1; i <= 8; ++i) {
-      createBoxes(lvl + 1, (id + i) * 8, store[id + i].lowerLeft,
-                  store[id + i].upperRight);
+      createBoxes(lvl + 1, (id + i) * 8, store[id + i].lowerLeft, store[id + i].upperRight);
     }
   }
 
@@ -214,14 +187,12 @@ class ConvToMDEventsWSIndexingTest : public CxxTest::TestSuite {
   static constexpr size_t ND = 3;
   using Point = std::array<Mantid::coord_t, ND>;
   using Points = std::vector<Point>;
-  template <size_t nd>
-  using MDEventTml = typename Mantid::DataObjects::MDLeanEvent<nd>;
+  template <size_t nd> using MDEventTml = typename Mantid::DataObjects::MDLeanEvent<nd>;
   using MDEvent = MDEventTml<ND>;
   using MDNode = Mantid::API::IMDNode;
   using MDEventStore = std::vector<MDEvent>;
   using MDEventIterator = MDEventStore ::iterator;
-  using TreeBuilder =
-      Mantid::MDAlgorithms::MDEventTreeBuilder<ND, MDEventTml, MDEventIterator>;
+  using TreeBuilder = Mantid::MDAlgorithms::MDEventTreeBuilder<ND, MDEventTml, MDEventIterator>;
 
   const std::array<double, 3> lowerLeft = {{0, 0, 0}};
   const std::array<double, 3> upperRight = {{8, 8, 8}};
@@ -276,8 +247,7 @@ class ConvToMDEventsWSIndexingTest : public CxxTest::TestSuite {
 
   class CheckBasicSplitting : public InputGenerator {
   public:
-    CheckBasicSplitting(size_t N, const std::array<double, 3> &ll,
-                        const std::array<double, 3> &ur)
+    CheckBasicSplitting(size_t N, const std::array<double, 3> &ll, const std::array<double, 3> &ur)
         : nPerLeaf(N), lowerLeft(ll), upperRight(ur) {}
 
     std::string description() const override {
@@ -292,8 +262,7 @@ class ConvToMDEventsWSIndexingTest : public CxxTest::TestSuite {
         for (size_t _ = 0; _ < nPerLeaf; ++_) {
           auto ctr = justForBoxes.getBox(i).center();
           points.emplace_back(
-              Point{{static_cast<float>(ctr[0]), static_cast<float>(ctr[1]),
-                     static_cast<float>(ctr[2])}});
+              Point{{static_cast<float>(ctr[0]), static_cast<float>(ctr[1]), static_cast<float>(ctr[2])}});
         }
       return points;
     }
@@ -306,8 +275,7 @@ class ConvToMDEventsWSIndexingTest : public CxxTest::TestSuite {
 
   class CheckPreciseSplitting : public CheckBasicSplitting {
   public:
-    CheckPreciseSplitting(size_t N, const std::array<double, 3> &ll,
-                          const std::array<double, 3> &ur, double e)
+    CheckPreciseSplitting(size_t N, const std::array<double, 3> &ll, const std::array<double, 3> &ur, double e)
         : CheckBasicSplitting(N, ll, ur), eps(e) {}
 
     std::string description() const override final {
@@ -324,13 +292,10 @@ class ConvToMDEventsWSIndexingTest : public CxxTest::TestSuite {
           Point lower, upper;
           for (int d = 0; d < 3; ++d) {
             if (fabs(bx.upperRight[d] - bx.lowerLeft[d]) < 2 * eps) {
-              lower[d] = (smallerClosestFloat(
-                  biggerClosestFloat(bx.lowerLeft[d]) + eps));
-              upper[d] = (biggerClosestFloat(
-                  smallerClosestFloat(bx.upperRight[d]) - eps));
+              lower[d] = (smallerClosestFloat(biggerClosestFloat(bx.lowerLeft[d]) + eps));
+              upper[d] = (biggerClosestFloat(smallerClosestFloat(bx.upperRight[d]) - eps));
             } else {
-              lower[d] =
-                  static_cast<float>(bx.upperRight[d] + bx.lowerLeft[d]) / 2;
+              lower[d] = static_cast<float>(bx.upperRight[d] + bx.lowerLeft[d]) / 2;
               upper[d] = lower[d];
             }
           }
@@ -347,24 +312,18 @@ class ConvToMDEventsWSIndexingTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvToMDEventsWSIndexingTest *createSuite() {
-    return new ConvToMDEventsWSIndexingTest();
-  }
-  static void destroySuite(ConvToMDEventsWSIndexingTest *suite) {
-    delete suite;
-  }
+  static ConvToMDEventsWSIndexingTest *createSuite() { return new ConvToMDEventsWSIndexingTest(); }
+  static void destroySuite(ConvToMDEventsWSIndexingTest *suite) { delete suite; }
 
   void test_multithreading() {
     std::cout << sizeof(morton_index::uint128_t) << "   sizeof\n";
     std::cout << "Start test1." << std::endl;
-    std::array<float, 3> curPt{{static_cast<float>(lowerLeft[0]),
-                                static_cast<float>(lowerLeft[1]),
-                                static_cast<float>(lowerLeft[2])}};
+    std::array<float, 3> curPt{
+        {static_cast<float>(lowerLeft[0]), static_cast<float>(lowerLeft[1]), static_cast<float>(lowerLeft[2])}};
     std::array<float, 3> gridStep{{0.13f, 0.14f, 0.15f}};
     MDEventStore mdEvents(10000);
-    std::array<float, 3> bound = {{smallerClosestFloat(upperRight[0]),
-                                   smallerClosestFloat(upperRight[1]),
-                                   smallerClosestFloat(upperRight[2])}};
+    std::array<float, 3> bound = {
+        {smallerClosestFloat(upperRight[0]), smallerClosestFloat(upperRight[1]), smallerClosestFloat(upperRight[2])}};
     for (size_t k = 0; k < mdEvents.size(); ++k)
       for (size_t d = 0; d < ND; ++d) {
         curPt[d] += gridStep[d];
@@ -374,8 +333,7 @@ public:
       }
     std::cout << "Prepare for tree builder." << std::endl;
     Mantid::API::BoxController_sptr bc =
-        std::shared_ptr<Mantid::API::BoxController>(
-            new Mantid::API::BoxController(ND));
+        std::shared_ptr<Mantid::API::BoxController>(new Mantid::API::BoxController(ND));
     bc->setMaxDepth(20);
     bc->setSplitInto(2);
     bc->setSplitThreshold(splitTreshold);
@@ -394,8 +352,7 @@ public:
     auto topNodeWithErrorMulti = tbMulti.distribute(mdEvents);
 
     std::cout << "Compare trees." << std::endl;
-    bool check =
-        compareTrees(topNodeWithErrorSingle.root, topNodeWithErrorMulti.root);
+    bool check = compareTrees(topNodeWithErrorSingle.root, topNodeWithErrorMulti.root);
     delete topNodeWithErrorSingle.root;
     delete topNodeWithErrorMulti.root;
     TS_ASSERT_EQUALS(check, true);
@@ -412,21 +369,17 @@ public:
     // Every leaf has 2 points in it
     generators.emplace_back(new CheckBasicSplitting(2, lowerLeft, upperRight));
     // Every leaf has 2 points close to boundaries in it
-    generators.emplace_back(
-        new CheckPreciseSplitting(4, lowerLeft, upperRight, 0.000001));
+    generators.emplace_back(new CheckPreciseSplitting(4, lowerLeft, upperRight, 0.000001));
 
     for (auto &gen : generators) {
       std::cout << gen->description() << "\n" << std::endl;
-      TSM_ASSERT_EQUALS(
-          gen->description().c_str(),
-          checkStructure(gen->generate(), lowerLeft, upperRight, splitTreshold),
-          true);
+      TSM_ASSERT_EQUALS(gen->description().c_str(),
+                        checkStructure(gen->generate(), lowerLeft, upperRight, splitTreshold), true);
     }
   }
 
 private:
-  bool compareWithFullTreeRecursive(FullTree3D3L::PtDistr &distr, size_t id,
-                                    Mantid::API::IMDNode *nd) {
+  bool compareWithFullTreeRecursive(FullTree3D3L::PtDistr &distr, size_t id, Mantid::API::IMDNode *nd) {
     if (id >= FullTree3D3L::nodesCount)
       return false;
     bool res = distr[id].empty();
@@ -434,14 +387,12 @@ private:
       res = (distr[id].size() == nd->getNPoints());
     } else {
       for (int i = 0; i < 8; ++i)
-        res &= compareWithFullTreeRecursive(
-            distr, FullTree3D3L::getChildIdx(id, i), nd->getChild(i));
+        res &= compareWithFullTreeRecursive(distr, FullTree3D3L::getChildIdx(id, i), nd->getChild(i));
     }
 
     return res;
   }
-  bool compareWithFullTree(FullTree3D3L::PtDistr &distr,
-                           Mantid::API::IMDNode *root) {
+  bool compareWithFullTree(FullTree3D3L::PtDistr &distr, Mantid::API::IMDNode *root) {
     return compareWithFullTreeRecursive(distr, 0, root);
   }
 
@@ -483,16 +434,13 @@ private:
       return false;
   }
 
-  bool checkStructure(
-      const Points &points,
-      const std::array<double, 3> &ll, // lower left bound of global space
-      const std::array<double, 3> &ur,
-      size_t splitTreshold) { // upper right bound of global space
+  bool checkStructure(const Points &points, const std::array<double, 3> &ll, // lower left bound of global space
+                      const std::array<double, 3> &ur,
+                      size_t splitTreshold) { // upper right bound of global space
     std::cout << "Start check." << std::endl;
     FullTree3D3L t3d(ll, ur);
     Mantid::API::BoxController_sptr bc =
-        std::shared_ptr<Mantid::API::BoxController>(
-            new Mantid::API::BoxController(ND));
+        std::shared_ptr<Mantid::API::BoxController>(new Mantid::API::BoxController(ND));
     bc->setMaxDepth(3);
     bc->setSplitInto(2);
     bc->setSplitThreshold(splitTreshold);

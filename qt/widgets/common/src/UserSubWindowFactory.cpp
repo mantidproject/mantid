@@ -32,29 +32,24 @@ Mantid::Kernel::Logger g_log("UserSubWindowFactoryImpl");
  * @param name :: The name of the interface that should have been registered
  * into the factory
  */
-UserSubWindow *
-UserSubWindowFactoryImpl::createUnwrapped(const std::string &name) const {
+UserSubWindow *UserSubWindowFactoryImpl::createUnwrapped(const std::string &name) const {
   // Try primary name as a start
   UserSubWindow *window;
   try {
-    window =
-        Mantid::Kernel::DynamicFactory<UserSubWindow>::createUnwrapped(name);
+    window = Mantid::Kernel::DynamicFactory<UserSubWindow>::createUnwrapped(name);
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    g_log.debug() << "\"" << name
-                  << "\" not registered as a real name, trying an alias.\n";
+    g_log.debug() << "\"" << name << "\" not registered as a real name, trying an alias.\n";
     window = nullptr;
   }
   if (!window) {
     window = createFromAlias(name);
   }
   if (!window) {
-    g_log.error() << "UserSubWindowFactory: \"" + name +
-                         "\" is not registered as an interface name.\n";
-    throw Mantid::Kernel::Exception::NotFoundError(
-        "UserSubWindowFactory:" + name +
-            " is not registered or recognised as "
-            "an alias of a known interface.\n",
-        name);
+    g_log.error() << "UserSubWindowFactory: \"" + name + "\" is not registered as an interface name.\n";
+    throw Mantid::Kernel::Exception::NotFoundError("UserSubWindowFactory:" + name +
+                                                       " is not registered or recognised as "
+                                                       "an alias of a known interface.\n",
+                                                   name);
   }
   return window;
 }
@@ -68,8 +63,7 @@ UserSubWindowFactoryImpl::createUnwrapped(const std::string &name) const {
  *been registered,
  *          else an empty set.
  */
-QSet<QString>
-UserSubWindowFactoryImpl::categories(const QString &interfaceName) const {
+QSet<QString> UserSubWindowFactoryImpl::categories(const QString &interfaceName) const {
   if (!m_categoryLookup.contains(interfaceName))
     return QSet<QString>();
 
@@ -81,8 +75,7 @@ UserSubWindowFactoryImpl::categories(const QString &interfaceName) const {
 //----------------------------------------
 
 /// Default constructor
-UserSubWindowFactoryImpl::UserSubWindowFactoryImpl()
-    : m_aliasLookup(), m_badAliases(), m_encoders(), m_decoders() {}
+UserSubWindowFactoryImpl::UserSubWindowFactoryImpl() : m_aliasLookup(), m_badAliases(), m_encoders(), m_decoders() {}
 
 /**
  * Create a user sub window by searching for an alias name
@@ -90,12 +83,10 @@ UserSubWindowFactoryImpl::UserSubWindowFactoryImpl()
  * @returns A pointer to a created interface pointer if this alias exists and is
  * not multiply defined
  */
-UserSubWindow *
-UserSubWindowFactoryImpl::createFromAlias(const std::string &name) const {
+UserSubWindow *UserSubWindowFactoryImpl::createFromAlias(const std::string &name) const {
   QString alias = QString::fromStdString(name);
   if (m_badAliases.contains(alias)) {
-    std::string error =
-        "Alias \"" + name + "\" is defined for multiple real interfaces: \"";
+    std::string error = "Alias \"" + name + "\" is defined for multiple real interfaces: \"";
     QListIterator<std::string> itr(m_badAliases.value(alias));
     while (itr.hasNext()) {
       error += itr.next();
@@ -154,8 +145,7 @@ BaseEncoder *UserSubWindowFactoryImpl::findEncoder(QWidget *window) {
  * @return BaseDecoder* Need to return a raw pointer so sip can understand and
  * then wrap the function for use in python
  */
-BaseDecoder *
-UserSubWindowFactoryImpl::findDecoder(const std::string &decodeString) {
+BaseDecoder *UserSubWindowFactoryImpl::findDecoder(const std::string &decodeString) {
   auto itemIt = m_decoders.find(decodeString);
   if (itemIt != m_decoders.end()) {
     auto item = itemIt->second->createUnwrappedInstance();

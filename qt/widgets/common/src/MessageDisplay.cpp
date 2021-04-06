@@ -62,8 +62,7 @@ void MessageDisplay::readSettings(const QSettings &storage) {
   if (logLevel > 0) {
     ConfigService::Instance().setLogLevel(logLevel, true);
   }
-  setMaximumLineCount(
-      storage.value(LINE_COUNT_MAX_KEY_NAME, DEFAULT_LINE_COUNT_MAX).toInt());
+  setMaximumLineCount(storage.value(LINE_COUNT_MAX_KEY_NAME, DEFAULT_LINE_COUNT_MAX).toInt());
 }
 
 /**
@@ -81,8 +80,7 @@ void MessageDisplay::writeSettings(QSettings &storage) const {
  * Construct a MessageDisplay with the default font
  * @param parent An optional parent widget
  */
-MessageDisplay::MessageDisplay(QWidget *parent)
-    : MessageDisplay(QFont(), parent) {}
+MessageDisplay::MessageDisplay(QWidget *parent) : MessageDisplay(QFont(), parent) {}
 
 /**
  * Construct a MessageDisplay using the given font
@@ -90,14 +88,10 @@ MessageDisplay::MessageDisplay(QWidget *parent)
  * @param parent An optional parent widget
  */
 MessageDisplay::MessageDisplay(const QFont &font, QWidget *parent)
-    : QWidget(parent), m_logChannel(new QtSignalChannel),
-      m_textDisplay(new QPlainTextEdit(this)), m_formats(),
-      m_loglevels(new QActionGroup(this)),
-      m_logLevelMapping(new QSignalMapper(this)),
-      m_error(new QAction(tr("&Error"), this)),
-      m_warning(new QAction(tr("&Warning"), this)),
-      m_notice(new QAction(tr("&Notice"), this)),
-      m_information(new QAction(tr("&Information"), this)),
+    : QWidget(parent), m_logChannel(new QtSignalChannel), m_textDisplay(new QPlainTextEdit(this)), m_formats(),
+      m_loglevels(new QActionGroup(this)), m_logLevelMapping(new QSignalMapper(this)),
+      m_error(new QAction(tr("&Error"), this)), m_warning(new QAction(tr("&Warning"), this)),
+      m_notice(new QAction(tr("&Notice"), this)), m_information(new QAction(tr("&Information"), this)),
       m_debug(new QAction(tr("&Debug"), this)) {
   initActions();
   initFormats();
@@ -125,8 +119,7 @@ void MessageDisplay::attachLoggingChannel(int logLevel) {
   auto rootChannel = Poco::Logger::root().getChannel();
 #if POCO_VERSION > 0x01090400
   // getChannel changed to return an AutoPtr
-  if (auto *splitChannel =
-          dynamic_cast<Poco::SplitterChannel *>(rootChannel.get())) {
+  if (auto *splitChannel = dynamic_cast<Poco::SplitterChannel *>(rootChannel.get())) {
 #else
   if (auto *splitChannel = dynamic_cast<Poco::SplitterChannel *>(rootChannel)) {
 #endif
@@ -134,8 +127,7 @@ void MessageDisplay::attachLoggingChannel(int logLevel) {
   } else {
     Poco::Logger::setChannel(rootLogger.name(), m_logChannel);
   }
-  connect(m_logChannel, SIGNAL(messageReceived(const Message &)), this,
-          SLOT(append(const Message &)));
+  connect(m_logChannel, SIGNAL(messageReceived(const Message &)), this, SLOT(append(const Message &)));
   if (logLevel > 0) {
     configSvc.setLogLevel(logLevel, true);
   }
@@ -146,9 +138,7 @@ void MessageDisplay::attachLoggingChannel(int logLevel) {
  * @param source A string specifying the required source for messages
  * that will be emitted
  */
-void MessageDisplay::setSource(const QString &source) {
-  m_logChannel->setSource(source);
-}
+void MessageDisplay::setSource(const QString &source) { m_logChannel->setSource(source); }
 
 /**
  * Filter messages, either by Framework or all/individual scripts
@@ -157,8 +147,7 @@ void MessageDisplay::filterMessages() {
   m_textDisplay->clear();
   for (auto &msg : getHistory()) {
     if (shouldBeDisplayed(msg)) {
-      m_textDisplay->textCursor().insertText(msg.text(),
-                                             format(msg.priority()));
+      m_textDisplay->textCursor().insertText(msg.text(), format(msg.priority()));
     }
   }
   moveCursorToEnd();
@@ -170,8 +159,7 @@ void MessageDisplay::filterMessages() {
  * @param oldPath The path of the file being renamed
  * @param newPath The new path of the file
  */
-void MessageDisplay::filePathModified(const QString &oldPath,
-                                      const QString &newPath) {
+void MessageDisplay::filePathModified(const QString &oldPath, const QString &newPath) {
   for (auto &msg : m_messageHistory) {
     if (msg.scriptPath() == oldPath)
       msg.setScriptPath(newPath);
@@ -196,16 +184,12 @@ void MessageDisplay::appendToHistory(const Message &msg) {
 /**
  * @param text The text string to append at PRIO_FATAL level
  */
-void MessageDisplay::appendFatal(const QString &text) {
-  this->append(Message(text, Message::Priority::PRIO_FATAL));
-}
+void MessageDisplay::appendFatal(const QString &text) { this->append(Message(text, Message::Priority::PRIO_FATAL)); }
 
 /**
  * @param text The text string to append at PRIO_ERROR level
  */
-void MessageDisplay::appendError(const QString &text) {
-  this->append(Message(text, Message::Priority::PRIO_ERROR));
-}
+void MessageDisplay::appendError(const QString &text) { this->append(Message(text, Message::Priority::PRIO_ERROR)); }
 
 /**
  * @param text The text string to append at PRIO_WARNING level
@@ -217,9 +201,7 @@ void MessageDisplay::appendWarning(const QString &text) {
 /**
  * @param text The text string to append at PRIO_NOTICE level
  */
-void MessageDisplay::appendNotice(const QString &text) {
-  this->append(Message(text, Message::Priority::PRIO_NOTICE));
-}
+void MessageDisplay::appendNotice(const QString &text) { this->append(Message(text, Message::Priority::PRIO_NOTICE)); }
 
 /**
  * @param text The text string to append at PRIO_INFORMATION level
@@ -231,9 +213,7 @@ void MessageDisplay::appendInformation(const QString &text) {
 /**
  * @param text The text string to append at PRIO_DEBUG level
  */
-void MessageDisplay::appendDebug(const QString &text) {
-  this->append(Message(text, Message::Priority::PRIO_DEBUG));
-}
+void MessageDisplay::appendDebug(const QString &text) { this->append(Message(text, Message::Priority::PRIO_DEBUG)); }
 
 /**
  * @param msg A message that is echoed to the display after the
@@ -241,19 +221,17 @@ void MessageDisplay::appendDebug(const QString &text) {
  */
 void MessageDisplay::append(const Message &msg) {
   appendToHistory(msg);
-  if (shouldBeDisplayed(msg) ||
-      msg.priority() <= Message::Priority::PRIO_WARNING) {
+  if (shouldBeDisplayed(msg) || msg.priority() <= Message::Priority::PRIO_WARNING) {
     QTextCursor cursor = moveCursorToEnd();
     cursor.insertText(msg.text(), format(msg.priority()));
     moveCursorToEnd();
 
     if (msg.priority() <= Message::Priority::PRIO_ERROR) {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-      NotificationService::showMessage(
-          parentWidget() ? parentWidget()->windowTitle() : "Mantid",
-          "Sorry, there was an error, please look at the message display for "
-          "details.",
-          NotificationService::MessageIcon::Critical);
+      NotificationService::showMessage(parentWidget() ? parentWidget()->windowTitle() : "Mantid",
+                                       "Sorry, there was an error, please look at the message display for "
+                                       "details.",
+                                       NotificationService::MessageIcon::Critical);
 #endif
       emit errorReceived(msg.text());
     }
@@ -269,10 +247,8 @@ void MessageDisplay::append(const Message &msg) {
  * @param priority The priority level of the message
  * @param filePath The path of the Python script being executed
  */
-void MessageDisplay::appendPython(const QString &text, const int &priority,
-                                  const QString &filePath) {
-  Message msg =
-      Message(text, static_cast<Message::Priority>(priority), filePath);
+void MessageDisplay::appendPython(const QString &text, const int &priority, const QString &filePath) {
+  Message msg = Message(text, static_cast<Message::Priority>(priority), filePath);
   append(msg);
 }
 
@@ -306,8 +282,7 @@ QTextCursor MessageDisplay::moveCursorToEnd() {
  * @return True if scroll bar is at bottom, false otherwise
  */
 bool MessageDisplay::isScrollbarAtBottom() const {
-  return m_textDisplay->verticalScrollBar()->value() ==
-         m_textDisplay->verticalScrollBar()->maximum();
+  return m_textDisplay->verticalScrollBar()->value() == m_textDisplay->verticalScrollBar()->maximum();
 }
 
 /**
@@ -315,13 +290,11 @@ bool MessageDisplay::isScrollbarAtBottom() const {
  */
 void MessageDisplay::scrollToTop() {
   // Code taken from QtCreator source
-  m_textDisplay->verticalScrollBar()->setValue(
-      m_textDisplay->verticalScrollBar()->minimum());
+  m_textDisplay->verticalScrollBar()->setValue(m_textDisplay->verticalScrollBar()->minimum());
   // QPlainTextEdit destroys the first calls value in case of multiline
   // text, so make sure that the scroll bar actually gets the value set.
   // Is a noop if the first call succeeded.
-  m_textDisplay->verticalScrollBar()->setValue(
-      m_textDisplay->verticalScrollBar()->minimum());
+  m_textDisplay->verticalScrollBar()->setValue(m_textDisplay->verticalScrollBar()->minimum());
 }
 
 /**
@@ -329,13 +302,11 @@ void MessageDisplay::scrollToTop() {
  */
 void MessageDisplay::scrollToBottom() {
   // Code taken from QtCreator source
-  m_textDisplay->verticalScrollBar()->setValue(
-      m_textDisplay->verticalScrollBar()->maximum());
+  m_textDisplay->verticalScrollBar()->setValue(m_textDisplay->verticalScrollBar()->maximum());
   // QPlainTextEdit destroys the first calls value in case of multiline
   // text, so make sure that the scroll bar actually gets the value set.
   // Is a noop if the first call succeeded.
-  m_textDisplay->verticalScrollBar()->setValue(
-      m_textDisplay->verticalScrollBar()->maximum());
+  m_textDisplay->verticalScrollBar()->setValue(m_textDisplay->verticalScrollBar()->maximum());
 }
 
 //-----------------------------------------------------------------------------
@@ -352,9 +323,7 @@ void MessageDisplay::showContextMenu(const QPoint &mousePos) {
  * @param priority An integer that must match the Poco::Message priority
  * enumeration
  */
-void MessageDisplay::setLogLevel(int priority) {
-  ConfigService::Instance().setLogLevel(priority);
-}
+void MessageDisplay::setLogLevel(int priority) { ConfigService::Instance().setLogLevel(priority); }
 
 /**
  * Set the maximum number of blocks kept by the text edit
@@ -362,8 +331,7 @@ void MessageDisplay::setLogLevel(int priority) {
 void MessageDisplay::setScrollbackLimit() {
   constexpr int minLineCountAllowed(-1);
   setMaximumLineCount(
-      QInputDialog::getInt(this, "", "No. of lines\n(-1 keeps all content)",
-                           maximumLineCount(), minLineCountAllowed));
+      QInputDialog::getInt(this, "", "No. of lines\n(-1 keeps all content)", maximumLineCount(), minLineCountAllowed));
 }
 
 // The text edit works in blocks but it is not entirely clear what a block
@@ -376,17 +344,13 @@ void MessageDisplay::setScrollbackLimit() {
 /**
  * @return The maximum number of lines displayed in the text edit
  */
-int MessageDisplay::maximumLineCount() const {
-  return m_textDisplay->maximumBlockCount() - 1;
-}
+int MessageDisplay::maximumLineCount() const { return m_textDisplay->maximumBlockCount() - 1; }
 
 /**
  * The maximum number of lines that are to be displayed in the text edit
  * @param count The new maximum number of lines to retain.
  */
-void MessageDisplay::setMaximumLineCount(int count) {
-  m_textDisplay->setMaximumBlockCount(count + 1);
-}
+void MessageDisplay::setMaximumLineCount(int count) { m_textDisplay->setMaximumBlockCount(count + 1); }
 
 //-----------------------------------------------------------------------------
 // Private non-slot member functions
@@ -491,8 +455,8 @@ void MessageDisplay::setupTextArea(const QFont &font) {
 
   this->setFocusProxy(m_textDisplay);
   m_textDisplay->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(m_textDisplay, SIGNAL(customContextMenuRequested(const QPoint &)),
-          this, SLOT(showContextMenu(const QPoint &)));
+  connect(m_textDisplay, SIGNAL(customContextMenuRequested(const QPoint &)), this,
+          SLOT(showContextMenu(const QPoint &)));
 }
 
 /**

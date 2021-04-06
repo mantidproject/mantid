@@ -68,9 +68,7 @@ public:
   /// (Empty) Constructor
   SphericalAbsorption();
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "CorrectionFunctions\\AbsorptionCorrections";
-  }
+  const std::string category() const override { return "CorrectionFunctions\\AbsorptionCorrections"; }
   /// Algorithm's name
   const std::string name() const override { return "SphericalAbsorption"; }
   /// Summary of algorithms purpose
@@ -81,19 +79,17 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"AbsorptionCorrection"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"AbsorptionCorrection"}; }
 
 protected:
-  API::MatrixWorkspace_sptr m_inputWS;     ///< A pointer to the input workspace
-  const Geometry::IObject *m_sampleObject; ///< Local cache of sample object.
-  Kernel::V3D m_beamDirection;             ///< The direction of the beam.
-  std::vector<double> m_L1s,               ///< Cached L1 distances
-      m_elementVolumes;                    ///< Cached element volumes
+  API::MatrixWorkspace_sptr m_inputWS;         ///< A pointer to the input workspace
+  const Geometry::IObject *m_sampleObject;     ///< Local cache of sample object.
+  Kernel::V3D m_beamDirection;                 ///< The direction of the beam.
+  std::vector<double> m_L1s,                   ///< Cached L1 distances
+      m_elementVolumes;                        ///< Cached element volumes
   std::vector<Kernel::V3D> m_elementPositions; ///< Cached element positions
-  size_t m_numVolumeElements; ///< The number of volume elements
-  double m_sampleVolume;      ///< The total volume of the sample
+  size_t m_numVolumeElements;                  ///< The number of volume elements
+  double m_sampleVolume;                       ///< The total volume of the sample
 
 private:
   /// Initialisation code
@@ -103,19 +99,16 @@ private:
 
   void retrieveBaseProperties();
   void constructSample(API::Sample &sample);
-  void calculateDistances(const Geometry::IDetector_const_sptr &detector,
-                          std::vector<double> &L2s) const;
-  inline double doIntegration(const double &lambda,
-                              const std::vector<double> &L2s) const;
-  inline double doIntegration(const double &lambda_i, const double &lambda_f,
-                              const std::vector<double> &L2s) const;
+  void calculateDistances(const Geometry::IDetector_const_sptr &detector, std::vector<double> &L2s) const;
+  inline double doIntegration(const double &lambda, const std::vector<double> &L2s) const;
+  inline double doIntegration(const double &lambda_i, const double &lambda_f, const std::vector<double> &L2s) const;
 
   double m_refAtten;   ///< The attenuation cross-section in 1/m at 1.8A
   double m_scattering; ///< The scattering cross-section in 1/m
   int64_t n_lambda;    ///< The number of points in wavelength, the rest is
   /// interpolated linearly
-  int64_t x_step;  ///< The step in bin number between adjacent points
-  int64_t m_emode; ///< The energy mode: 0 - elastic, 1 - direct, 2 - indirect
+  int64_t x_step;       ///< The step in bin number between adjacent points
+  int64_t m_emode;      ///< The energy mode: 0 - elastic, 1 - direct, 2 - indirect
   double m_lambdaFixed; ///< The wavelength corresponding to the fixed energy,
                         /// if provided
 };

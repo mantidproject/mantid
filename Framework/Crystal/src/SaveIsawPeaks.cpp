@@ -37,9 +37,8 @@ DECLARE_ALGORITHM(SaveIsawPeaks)
 /** Initialize the algorithm's properties.
  */
 void SaveIsawPeaks::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<InstrumentValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("InputWorkspace", "", Direction::Input,
+                                                                      std::make_shared<InstrumentValidator>()),
                   "An input PeaksWorkspace with an instrument.");
 
   declareProperty("AppendFile", false,
@@ -47,14 +46,12 @@ void SaveIsawPeaks::init() {
                   "If false, new file (default).");
 
   const std::vector<std::string> exts{".peaks", ".integrate"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Save, exts),
-      "Path to an ISAW-style peaks or integrate file to save.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save, exts),
+                  "Path to an ISAW-style peaks or integrate file to save.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace2D>>(
-          "ProfileWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "An optional Workspace2D of profiles from integrating cylinder.");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("ProfileWorkspace", "", Direction::Input,
+                                                                   PropertyMode::Optional),
+                  "An optional Workspace2D of profiles from integrating cylinder.");
 
   declareProperty("RenumberPeaks", false,
                   "If true, sequential peak numbers\n"
@@ -74,8 +71,7 @@ void SaveIsawPeaks::exec() {
   const auto &peaks = ws->getPeaks();
   inst = ws->getInstrument();
   if (!inst)
-    throw std::runtime_error(
-        "No instrument in the Workspace. Cannot save DetCal file.");
+    throw std::runtime_error("No instrument in the Workspace. Cannot save DetCal file.");
   const auto &detectorInfo = ws->detectorInfo();
 
   // We must sort the peaks first by run, then bank #, and save the list of
@@ -115,8 +111,7 @@ void SaveIsawPeaks::exec() {
     int bank = 0;
     std::string bankName = p.getBankName();
     if (bankName.size() <= 4) {
-      g_log.information() << "Could not interpret bank number of peak " << i
-                          << "(" << bankName << ")\n";
+      g_log.information() << "Could not interpret bank number of peak " << i << "(" << bankName << ")\n";
       continue;
     }
     // Save the "bank" part once to check whether it really is a bank
@@ -133,19 +128,16 @@ void SaveIsawPeaks::exec() {
     runMap[run][bank].emplace_back(i);
   }
   if (m_isModulatedStructure)
-    header =
-        "2   SEQN    H    K    L    M    N    P     COL      ROW     CHAN      "
-        "  L2   2_THETA        AZ         WL         D      IPK "
-        "      INTI    SIGI  RFLG";
+    header = "2   SEQN    H    K    L    M    N    P     COL      ROW     CHAN      "
+             "  L2   2_THETA        AZ         WL         D      IPK "
+             "      INTI    SIGI  RFLG";
 
   if (!inst)
-    throw std::runtime_error(
-        "No instrument in PeaksWorkspace. Cannot save peaks file.");
+    throw std::runtime_error("No instrument in PeaksWorkspace. Cannot save peaks file.");
 
   if (bankPart != "bank" && bankPart != "WISHpanel" && bankPart != "?") {
     std::ostringstream mess;
-    mess << "Detector module of type " << bankPart
-         << " not supported in ISAWPeaks. Cannot save peaks file";
+    mess << "Detector module of type " << bankPart << " not supported in ISAWPeaks. Cannot save peaks file";
     throw std::runtime_error(mess.str());
   }
 
@@ -191,10 +183,7 @@ void SaveIsawPeaks::exec() {
     const auto instrumentName = inst->getName();
     std::string facilityName;
     try {
-      facilityName = ConfigService::Instance()
-                         .getInstrument(instrumentName)
-                         .facility()
-                         .name();
+      facilityName = ConfigService::Instance().getInstrument(instrumentName).facility().name();
     } catch (Exception::NotFoundError &) {
       g_log.warning() << "Instrument " << instrumentName
                       << " not found at any defined facility. Setting facility "
@@ -244,14 +233,11 @@ void SaveIsawPeaks::exec() {
 
       std::string bankName = mess.str();
       // Retrieve it
-      std::shared_ptr<const IComponent> det =
-          inst->getComponentByName(bankName);
-      if (inst->getName() ==
-          "CORELLI") // for Corelli with sixteenpack under bank
+      std::shared_ptr<const IComponent> det = inst->getComponentByName(bankName);
+      if (inst->getName() == "CORELLI") // for Corelli with sixteenpack under bank
       {
         std::vector<Geometry::IComponent_const_sptr> children;
-        auto asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-            inst->getComponentByName(bankName));
+        auto asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst->getComponentByName(bankName));
         asmb->getChildren(children, false);
         det = children[0];
       }
@@ -267,41 +253,30 @@ void SaveIsawPeaks::exec() {
         // Base unit vector (along the horizontal, X axis)
         int midX = NCOLS / 2;
         int midY = NROWS / 2;
-        V3D base = findPixelPos(bankName, midX + 1, midY) -
-                   findPixelPos(bankName, midX, midY);
+        V3D base = findPixelPos(bankName, midX + 1, midY) - findPixelPos(bankName, midX, midY);
         base.normalize();
 
         // Up unit vector (along the vertical, Y axis)
-        V3D up = findPixelPos(bankName, midX, midY + 1) -
-                 findPixelPos(bankName, midX, midY);
+        V3D up = findPixelPos(bankName, midX, midY + 1) - findPixelPos(bankName, midX, midY);
         up.normalize();
 
         // Write the line
-        out << "5 " << std::setw(6) << std::right << bank << " " << std::setw(6)
-            << std::right << NROWS << " " << std::setw(6) << std::right << NCOLS
-            << " " << std::setw(7) << std::right << std::fixed
-            << std::setprecision(4) << 100.0 * xsize << " " << std::setw(7)
-            << std::right << std::fixed << std::setprecision(4) << 100.0 * ysize
-            << " "
-            << "  0.2000 " << std::setw(6) << std::right << std::fixed
-            << std::setprecision(2) << 100.0 * detd << " " << std::setw(9)
-            << std::right << std::fixed << std::setprecision(4)
-            << 100.0 * center.X() << " " << std::setw(9) << std::right
-            << std::fixed << std::setprecision(4) << 100.0 * center.Y() << " "
-            << std::setw(9) << std::right << std::fixed << std::setprecision(4)
-            << 100.0 * center.Z() << " " << std::setw(8) << std::right
-            << std::fixed << std::setprecision(5) << base.X() << " "
-            << std::setw(8) << std::right << std::fixed << std::setprecision(5)
-            << base.Y() << " " << std::setw(8) << std::right << std::fixed
-            << std::setprecision(5) << base.Z() << " " << std::setw(8)
-            << std::right << std::fixed << std::setprecision(5) << up.X() << " "
-            << std::setw(8) << std::right << std::fixed << std::setprecision(5)
-            << up.Y() << " " << std::setw(8) << std::right << std::fixed
-            << std::setprecision(5) << up.Z() << " \n";
+        out << "5 " << std::setw(6) << std::right << bank << " " << std::setw(6) << std::right << NROWS << " "
+            << std::setw(6) << std::right << NCOLS << " " << std::setw(7) << std::right << std::fixed
+            << std::setprecision(4) << 100.0 * xsize << " " << std::setw(7) << std::right << std::fixed
+            << std::setprecision(4) << 100.0 * ysize << " "
+            << "  0.2000 " << std::setw(6) << std::right << std::fixed << std::setprecision(2) << 100.0 * detd << " "
+            << std::setw(9) << std::right << std::fixed << std::setprecision(4) << 100.0 * center.X() << " "
+            << std::setw(9) << std::right << std::fixed << std::setprecision(4) << 100.0 * center.Y() << " "
+            << std::setw(9) << std::right << std::fixed << std::setprecision(4) << 100.0 * center.Z() << " "
+            << std::setw(8) << std::right << std::fixed << std::setprecision(5) << base.X() << " " << std::setw(8)
+            << std::right << std::fixed << std::setprecision(5) << base.Y() << " " << std::setw(8) << std::right
+            << std::fixed << std::setprecision(5) << base.Z() << " " << std::setw(8) << std::right << std::fixed
+            << std::setprecision(5) << up.X() << " " << std::setw(8) << std::right << std::fixed << std::setprecision(5)
+            << up.Y() << " " << std::setw(8) << std::right << std::fixed << std::setprecision(5) << up.Z() << " \n";
 
       } else
-        g_log.warning() << "Information about detector module " << bankName
-                        << " not found and recognised\n";
+        g_log.warning() << "Information about detector module " << bankName << " not found and recognised\n";
     }
   }
   // HKL's are flipped by -1 because of the internal Q convention
@@ -326,8 +301,7 @@ void SaveIsawPeaks::exec() {
       if (!ids.empty()) {
         // Write the bank header
         out << "0  NRUN DETNUM     CHI      PHI    OMEGA       MONCNT\n";
-        out << "1 " << std::setw(5) << run << std::setw(7) << std::right
-            << bank;
+        out << "1 " << std::setw(5) << run << std::setw(7) << std::right << bank;
 
         // Determine goniometer angles by calculating from the goniometer matrix
         // of a peak in the list
@@ -340,8 +314,7 @@ void SaveIsawPeaks::exec() {
 
         out << std::setw(8) << std::fixed << std::setprecision(2) << chi << " ";
         out << std::setw(8) << std::fixed << std::setprecision(2) << phi << " ";
-        out << std::setw(8) << std::fixed << std::setprecision(2) << omega
-            << " ";
+        out << std::setw(8) << std::fixed << std::setprecision(2) << omega << " ";
 
         // Get the monitor count from the first peak (should all be the same for
         // one run)
@@ -364,8 +337,7 @@ void SaveIsawPeaks::exec() {
             out << firstNumber << std::setw(7) << sequenceNumber;
             sequenceNumber++;
           } else {
-            out << firstNumber << std::setw(7)
-                << peak.getPeakNumber() + appendPeakNumb;
+            out << firstNumber << std::setw(7) << peak.getPeakNumber() + appendPeakNumb;
           }
 
           // HKL's are flipped by -1 because of the internal Q convention
@@ -373,31 +345,24 @@ void SaveIsawPeaks::exec() {
           if (m_isModulatedStructure) {
             const V3D mod = peak.getIntMNP();
             const auto intHKL = peak.getIntHKL();
-            out << std::setw(5) << Utils::round(qSign * intHKL.X())
-                << std::setw(5) << Utils::round(qSign * intHKL.Y())
+            out << std::setw(5) << Utils::round(qSign * intHKL.X()) << std::setw(5) << Utils::round(qSign * intHKL.Y())
                 << std::setw(5) << Utils::round(qSign * intHKL.Z());
 
-            out << std::setw(5) << Utils::round(qSign * mod[0]) << std::setw(5)
-                << Utils::round(qSign * mod[1]) << std::setw(5)
-                << Utils::round(qSign * mod[2]);
+            out << std::setw(5) << Utils::round(qSign * mod[0]) << std::setw(5) << Utils::round(qSign * mod[1])
+                << std::setw(5) << Utils::round(qSign * mod[2]);
           } else {
-            out << std::setw(5) << Utils::round(qSign * peak.getH())
-                << std::setw(5) << Utils::round(qSign * peak.getK())
-                << std::setw(5) << Utils::round(qSign * peak.getL());
+            out << std::setw(5) << Utils::round(qSign * peak.getH()) << std::setw(5)
+                << Utils::round(qSign * peak.getK()) << std::setw(5) << Utils::round(qSign * peak.getL());
           }
 
           // Row/column
-          out << std::setw(8) << std::fixed << std::setprecision(2)
-              << static_cast<double>(peak.getCol()) << " ";
+          out << std::setw(8) << std::fixed << std::setprecision(2) << static_cast<double>(peak.getCol()) << " ";
 
-          out << std::setw(8) << std::fixed << std::setprecision(2)
-              << static_cast<double>(peak.getRow()) << " ";
+          out << std::setw(8) << std::fixed << std::setprecision(2) << static_cast<double>(peak.getRow()) << " ";
 
-          out << std::setw(8) << std::fixed << std::setprecision(0)
-              << peak.getTOF() << " ";
+          out << std::setw(8) << std::fixed << std::setprecision(0) << peak.getTOF() << " ";
 
-          out << std::setw(9) << std::fixed << std::setprecision(3)
-              << (peak.getL2() * 100.0) << " ";
+          out << std::setw(9) << std::fixed << std::setprecision(3) << (peak.getL2() * 100.0) << " ";
 
           // This is the scattered beam direction
           const V3D dir = peak.getDetPos() - inst->getSample()->getPos();
@@ -412,26 +377,19 @@ void SaveIsawPeaks::exec() {
           // and calculate the angle between that and the +X axis (right-handed)
           azimuth = atan2(dir.Y(), dir.X());
 
-          out << std::setw(9) << std::fixed << std::setprecision(5)
-              << scattering << " "; // two-theta scattering
+          out << std::setw(9) << std::fixed << std::setprecision(5) << scattering << " "; // two-theta scattering
 
-          out << std::setw(9) << std::fixed << std::setprecision(5) << azimuth
-              << " ";
+          out << std::setw(9) << std::fixed << std::setprecision(5) << azimuth << " ";
 
-          out << std::setw(10) << std::fixed << std::setprecision(6)
-              << peak.getWavelength() << " ";
+          out << std::setw(10) << std::fixed << std::setprecision(6) << peak.getWavelength() << " ";
 
-          out << std::setw(9) << std::fixed << std::setprecision(4)
-              << peak.getDSpacing() << " ";
+          out << std::setw(9) << std::fixed << std::setprecision(4) << peak.getDSpacing() << " ";
 
-          out << std::setw(8) << std::fixed << std::setprecision(0)
-              << int(peak.getBinCount()) << " ";
+          out << std::setw(8) << std::fixed << std::setprecision(0) << int(peak.getBinCount()) << " ";
 
-          out << std::setw(10) << std::fixed << std::setprecision(2)
-              << peak.getIntensity() << " ";
+          out << std::setw(10) << std::fixed << std::setprecision(2) << peak.getIntensity() << " ";
 
-          out << std::setw(7) << std::fixed << std::setprecision(2)
-              << peak.getSigmaIntensity() << " ";
+          out << std::setw(7) << std::fixed << std::setprecision(2) << peak.getSigmaIntensity() << " ";
 
           int thisReflag = 310;
           out << std::setw(5) << thisReflag;
@@ -460,14 +418,12 @@ void SaveIsawPeaks::exec() {
   out.close();
 }
 
-bool SaveIsawPeaks::bankMasked(const IComponent_const_sptr &parent,
-                               const Geometry::DetectorInfo &detectorInfo) {
+bool SaveIsawPeaks::bankMasked(const IComponent_const_sptr &parent, const Geometry::DetectorInfo &detectorInfo) {
   std::vector<Geometry::IComponent_const_sptr> children;
   auto asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
   asmb->getChildren(children, false);
   if (children[0]->getName() == "sixteenpack") {
-    asmb =
-        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+    asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
     children.clear();
     asmb->getChildren(children, false);
   }
@@ -494,18 +450,15 @@ bool SaveIsawPeaks::bankMasked(const IComponent_const_sptr &parent,
 V3D SaveIsawPeaks::findPixelPos(const std::string &bankName, int col, int row) {
   auto parent = inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
-    const auto RDet =
-        std::dynamic_pointer_cast<const RectangularDetector>(parent);
+    const auto RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
     const auto pixel = RDet->getAtXY(col, row);
     return pixel->getPos();
   } else {
     std::vector<Geometry::IComponent_const_sptr> children;
-    auto asmb =
-        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+    auto asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
     if (children[0]->getName() == "sixteenpack") {
-      asmb =
-          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+      asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
       children.clear();
       asmb->getChildren(children, false);
     }
@@ -513,22 +466,19 @@ V3D SaveIsawPeaks::findPixelPos(const std::string &bankName, int col, int row) {
     // WISH detectors are in bank in this order in instrument
     if (inst->getName() == "WISH")
       col0 = (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
-    auto asmb2 = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-        children[col0]);
+    auto asmb2 = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[col0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
     auto first = grandchildren[row - 1];
     return first->getPos();
   }
 }
-void SaveIsawPeaks::sizeBanks(const std::string &bankName, int &NCOLS,
-                              int &NROWS, double &xsize, double &ysize) {
+void SaveIsawPeaks::sizeBanks(const std::string &bankName, int &NCOLS, int &NROWS, double &xsize, double &ysize) {
   if (bankName == "None")
     return;
   const auto parent = inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
-    const auto RDet =
-        std::dynamic_pointer_cast<const RectangularDetector>(parent);
+    const auto RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
 
     NCOLS = RDet->xpixels();
     NROWS = RDet->ypixels();
@@ -536,17 +486,14 @@ void SaveIsawPeaks::sizeBanks(const std::string &bankName, int &NCOLS,
     ysize = RDet->ysize();
   } else {
     std::vector<Geometry::IComponent_const_sptr> children;
-    auto asmb =
-        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+    auto asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
     if (children[0]->getName() == "sixteenpack") {
-      asmb =
-          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+      asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
       children.clear();
       asmb->getChildren(children, false);
     }
-    const auto asmb2 =
-        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+    const auto asmb2 = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
     NROWS = static_cast<int>(grandchildren.size());
@@ -559,11 +506,9 @@ void SaveIsawPeaks::sizeBanks(const std::string &bankName, int &NCOLS,
     ysize = first->getDistance(*last);
   }
 }
-void SaveIsawPeaks::writeOffsets(std::ofstream &out, double qSign,
-                                 std::vector<double> offset) {
+void SaveIsawPeaks::writeOffsets(std::ofstream &out, double qSign, std::vector<double> offset) {
   for (size_t i = 0; i < 3; i++) {
-    out << std::setw(12) << std::fixed << std::setprecision(6)
-        << qSign * offset[i] << " ";
+    out << std::setw(12) << std::fixed << std::setprecision(6) << qSign * offset[i] << " ";
   }
 }
 } // namespace Crystal

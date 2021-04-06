@@ -61,14 +61,12 @@ public:
 
   /// @return the MDImplicitFunction type name.
   virtual std::string getName() const {
-    throw std::runtime_error(
-        "Cannot call MDImplicitFunction does not implement getName()");
+    throw std::runtime_error("Cannot call MDImplicitFunction does not implement getName()");
   }
 
   /// @return the XML string.
   virtual std::string toXMLString() const {
-    throw std::runtime_error(
-        "Cannot call MDImplicitFunction does not implement toXMLString()");
+    throw std::runtime_error("Cannot call MDImplicitFunction does not implement toXMLString()");
   }
 
   //----------------------------------------------------------------------------------------------

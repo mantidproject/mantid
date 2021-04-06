@@ -28,24 +28,18 @@ public:
   MDBoxBaseTester() : MDBoxBase<MDE, nd>() {}
   ~MDBoxBaseTester() override {}
   MDBoxBaseTester(uint64_t /*filePos*/) : MDBoxBase<MDE, nd>() {}
-  MDBoxBaseTester(const MDBoxBaseTester &source)
-      : MDBoxBase<MDE, nd>(source, source.getBoxController()) {}
+  MDBoxBaseTester(const MDBoxBaseTester &source) : MDBoxBase<MDE, nd>(source, source.getBoxController()) {}
 
-  MDBoxBaseTester(
-      const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-          &extentsVector)
+  MDBoxBaseTester(const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &extentsVector)
       : MDBoxBase<MDE, nd>(nullptr, 0, 0, extentsVector) {}
   //-----------------------------------------------------------------------------------------------
   Kernel::ISaveable *getISaveable() override { return nullptr; }
   Kernel::ISaveable *getISaveable() const override { return nullptr; }
-  void setFileBacked(const uint64_t /*fileLocation*/, const size_t /*fileSize*/,
-                     const bool /*markSaved*/) override{};
+  void setFileBacked(const uint64_t /*fileLocation*/, const size_t /*fileSize*/, const bool /*markSaved*/) override{};
   void clearFileBacked(bool /* loadData*/) override{/**does nothing*/};
   void setFileBacked() override{};
-  void saveAt(API::IBoxControllerIO *const,
-              uint64_t /*position*/) const override{/*Not saveable */};
-  void loadAndAddFrom(API::IBoxControllerIO *const, uint64_t /*position*/,
-                      size_t /* Size */) override{};
+  void saveAt(API::IBoxControllerIO *const, uint64_t /*position*/) const override{/*Not saveable */};
+  void loadAndAddFrom(API::IBoxControllerIO *const, uint64_t /*position*/, size_t /* Size */) override{};
   void reserveMemoryForLoad(uint64_t /* Size */) override{};
   // regardless of what is actually instantiated, base tester would call itself
   // gridbox
@@ -55,8 +49,7 @@ public:
   void clear() override {}
 
   // Not to be pure virtual
-  void getBoxes(std::vector<API::IMDNode *> &,
-                const std::function<bool(API::IMDNode *)> &) override {}
+  void getBoxes(std::vector<API::IMDNode *> &, const std::function<bool(API::IMDNode *)> &) override {}
 
   uint64_t getNPoints() const override {
     return 0;
@@ -74,13 +67,10 @@ public:
 
   size_t getNumChildren() const override { return 0; }
 
-  MDBoxBase<MDE, nd> *getChild(size_t /*index*/) override {
-    throw std::runtime_error("MDBox does not have children.");
-  }
+  MDBoxBase<MDE, nd> *getChild(size_t /*index*/) override { throw std::runtime_error("MDBox does not have children."); }
 
   /// Sets the children from a vector of children
-  void setChildren(const std::vector<API::IMDNode *> & /*boxes*/,
-                   const size_t /*indexStart*/,
+  void setChildren(const std::vector<API::IMDNode *> & /*boxes*/, const size_t /*indexStart*/,
                    const size_t /*indexEnd*/) override {
     throw std::runtime_error("MDBox cannot have children.");
   }
@@ -96,71 +86,49 @@ public:
 
   /// Add a single event
   size_t addEventUnsafe(const MDE & /*point*/) override { return 0; }
-  size_t
-  buildAndAddEvents(const std::vector<signal_t> & /*sigErrSq*/,
-                    const std::vector<coord_t> & /*Coord*/,
-                    const std::vector<uint16_t> & /*runIndex*/,
-                    const std::vector<uint16_t> & /*goniometerIndex*/,
-                    const std::vector<uint32_t> & /*detectorId*/) override {
+  size_t buildAndAddEvents(const std::vector<signal_t> & /*sigErrSq*/, const std::vector<coord_t> & /*Coord*/,
+                           const std::vector<uint16_t> & /*runIndex*/,
+                           const std::vector<uint16_t> & /*goniometerIndex*/,
+                           const std::vector<uint32_t> & /*detectorId*/) override {
     return 0;
   }
-  void buildAndAddEvent(const Mantid::signal_t, const Mantid::signal_t,
-                        const std::vector<coord_t> &, uint16_t, uint16_t,
-                        uint32_t) override{};
-  virtual void buildAndTraceEvent(const Mantid::signal_t,
-                                  const Mantid::signal_t,
-                                  const std::vector<coord_t> &, uint16_t,
-                                  uint16_t, uint32_t, size_t){};
-  void buildAndAddEventUnsafe(const Mantid::signal_t, const Mantid::signal_t,
-                              const std::vector<coord_t> &, uint16_t, uint16_t,
-                              uint32_t) override{};
+  void buildAndAddEvent(const Mantid::signal_t, const Mantid::signal_t, const std::vector<coord_t> &, uint16_t,
+                        uint16_t, uint32_t) override{};
+  virtual void buildAndTraceEvent(const Mantid::signal_t, const Mantid::signal_t, const std::vector<coord_t> &,
+                                  uint16_t, uint16_t, uint32_t, size_t){};
+  void buildAndAddEventUnsafe(const Mantid::signal_t, const Mantid::signal_t, const std::vector<coord_t> &, uint16_t,
+                              uint16_t, uint32_t) override{};
 
   /** Perform centerpoint binning of events
    * @param bin :: MDBin object giving the limits of events to accept.
    */
   void centerpointBin(MDBin<MDE, nd> & /*bin*/, bool *) const override {}
-  void splitAllIfNeeded(
-      Mantid::Kernel::ThreadScheduler * /*ts*/ = nullptr) override{};
+  void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = nullptr) override{};
   void refreshCache(Kernel::ThreadScheduler * /*ts*/ = nullptr) override{};
   // virtual void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL){};
   void calculateCentroid(coord_t * /*centroid*/) const override{};
-  void calculateCentroid(coord_t * /*centroid*/,
-                         const int /*runindex*/) const override{};
+  void calculateCentroid(coord_t * /*centroid*/, const int /*runindex*/) const override{};
   coord_t *getCentroid() const override { return nullptr; };
-  void integrateSphere(
-      Mantid::API::CoordTransform & /*radiusTransform*/,
-      const coord_t /*radiusSquared*/, signal_t & /*signal*/,
-      signal_t & /*errorSquared*/, const coord_t /*innerRadiusSquared*/,
-      const bool /*useOnePercentBackgroundCorrection*/) const override{};
-  void centroidSphere(Mantid::API::CoordTransform & /*radiusTransform*/,
-                      const coord_t /*radiusSquared*/, coord_t *,
+  void integrateSphere(Mantid::API::CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/,
+                       signal_t & /*signal*/, signal_t & /*errorSquared*/, const coord_t /*innerRadiusSquared*/,
+                       const bool /*useOnePercentBackgroundCorrection*/) const override{};
+  void centroidSphere(Mantid::API::CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, coord_t *,
                       signal_t &) const override{};
-  void
-  integrateCylinder(Mantid::API::CoordTransform & /*radiusTransform*/,
-                    const coord_t /*radius*/, const coord_t /*length*/,
-                    signal_t & /*signal*/, signal_t & /*errorSquared*/,
-                    std::vector<signal_t> & /*signal_fit*/) const override{};
-  void getBoxes(std::vector<API::IMDNode *> & /*boxes*/, size_t /*maxDepth*/,
-                bool) override{};
-  void getBoxes(std::vector<API::IMDNode *> & /*boxes*/, size_t /*maxDepth*/,
-                bool, Mantid::Geometry::MDImplicitFunction *) override{};
+  void integrateCylinder(Mantid::API::CoordTransform & /*radiusTransform*/, const coord_t /*radius*/,
+                         const coord_t /*length*/, signal_t & /*signal*/, signal_t & /*errorSquared*/,
+                         std::vector<signal_t> & /*signal_fit*/) const override{};
+  void getBoxes(std::vector<API::IMDNode *> & /*boxes*/, size_t /*maxDepth*/, bool) override{};
+  void getBoxes(std::vector<API::IMDNode *> & /*boxes*/, size_t /*maxDepth*/, bool,
+                Mantid::Geometry::MDImplicitFunction *) override{};
 
-  void generalBin(
-      MDBin<MDE, nd> & /*bin*/,
-      Mantid::Geometry::MDImplicitFunction & /*function*/) const override {}
+  void generalBin(MDBin<MDE, nd> & /*bin*/, Mantid::Geometry::MDImplicitFunction & /*function*/) const override {}
   void clearDataFromMemory() override{};
 
-  bool getIsMasked() const override {
-    throw std::runtime_error("MDBoxBaseTester does not implement getIsMasked");
-  }
+  bool getIsMasked() const override { throw std::runtime_error("MDBoxBaseTester does not implement getIsMasked"); }
 
-  void mask() override {
-    throw std::runtime_error("MDBoxBaseTester does not implement mask");
-  }
+  void mask() override { throw std::runtime_error("MDBoxBaseTester does not implement mask"); }
 
-  void unmask() override {
-    throw std::runtime_error("MDBoxBaseTester does not implement unmask");
-  }
+  void unmask() override { throw std::runtime_error("MDBoxBaseTester does not implement unmask"); }
 };
 
 class MDBoxBaseTest : public CxxTest::TestSuite {
@@ -177,8 +145,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(ibox3 box(extentsVector));
     extentsVector.resize(3);
     for (size_t d = 0; d < 3; d++) {
-      extentsVector[d].setExtents(static_cast<double>(d) + 0.1,
-                                  static_cast<double>(d + 1));
+      extentsVector[d].setExtents(static_cast<double>(d) + 0.1, static_cast<double>(d + 1));
     }
     MDBoxBaseTester<MDLeanEvent<3>, 3> box(extentsVector);
     TS_ASSERT_DELTA(box.getExtents(0).getMin(), 0.1, 1e-4);
@@ -236,15 +203,13 @@ public:
   void test_getBoxAtCoord() {
     coord_t dummy[3] = {1, 2, 3};
     MDBoxBaseTester<MDLeanEvent<3>, 3> b;
-    TSM_ASSERT_EQUALS("MDBoxBase->getBoxAtCoord() always returns this.",
-                      b.getBoxAtCoord(dummy), &b);
+    TSM_ASSERT_EQUALS("MDBoxBase->getBoxAtCoord() always returns this.", b.getBoxAtCoord(dummy), &b);
   }
 
   void test_getParent_and_setParent() {
     MDBoxBaseTester<MDLeanEvent<3>, 3> b;
     TSM_ASSERT("Default parent is NULL", !b.getParent());
-    MDBoxBaseTester<MDLeanEvent<3>, 3> *daddy =
-        new MDBoxBaseTester<MDLeanEvent<3>, 3>;
+    MDBoxBaseTester<MDLeanEvent<3>, 3> *daddy = new MDBoxBaseTester<MDLeanEvent<3>, 3>;
     b.setParent(daddy);
     TS_ASSERT_EQUALS(b.getParent(), daddy);
     // Copy ctor

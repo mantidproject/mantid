@@ -109,8 +109,7 @@ public:
     double val = 0.1 * M_SQRT1_2;
     TS_ASSERT_DELTA(A.distance(V3D(0.1, val, val)), 0.0, 0.00001);
     // Inside
-    TS_ASSERT_DELTA(A.distance(V3D(0.0, val * 10, val * 10)), M_SQRT1_2,
-                    0.00001);
+    TS_ASSERT_DELTA(A.distance(V3D(0.0, val * 10, val * 10)), M_SQRT1_2, 0.00001);
     TS_ASSERT_DELTA(A.distance(V3D(1, 0.0, 0.0)), -1 * M_SQRT1_2, 0.00001);
   }
 

@@ -21,8 +21,8 @@ using Mantid::Kernel::V3D;
 class UnitCellTest : public CxxTest::TestSuite {
 public:
   void testInvalidParametersThrow() {
-    TSM_ASSERT_THROWS("Should throw if matrix is not invertible!",
-                      UnitCell(0, 0, 0, 0, 0, 0), const std::range_error &);
+    TSM_ASSERT_THROWS("Should throw if matrix is not invertible!", UnitCell(0, 0, 0, 0, 0, 0),
+                      const std::range_error &);
   }
 
   void test_Simple() {
@@ -89,8 +89,7 @@ public:
     TS_ASSERT_DELTA(u.d(1., 1., 1.), 2.1227107587, 1e-10);
     TS_ASSERT_DELTA(u.d(V3D(1., 1., 1.)), 2.1227107587, 1e-10);
     // angle
-    TS_ASSERT_DELTA(u.recAngle(1, 1, 1, 1, 0, 0, angRadians), 0.471054990614,
-                    1e-10);
+    TS_ASSERT_DELTA(u.recAngle(1, 1, 1, 1, 0, 0, angRadians), 0.471054990614, 1e-10);
   }
 
   void test_Advanced() {
@@ -118,8 +117,7 @@ public:
     checkCell(u2);
   }
   void test_UnitCellCrash() {
-    TS_ASSERT_THROWS(UnitCell(10.4165, 3.4165, 10.4165, 30, 45, 80);
-                     , const std::invalid_argument &);
+    TS_ASSERT_THROWS(UnitCell(10.4165, 3.4165, 10.4165, 30, 45, 80);, const std::invalid_argument &);
   }
 
   void test_printing() {
@@ -138,12 +136,11 @@ public:
     {
       std::stringstream msg;
       msg << cell;
-      TS_ASSERT_EQUALS(
-          msg.str(), "Lattice Parameters:    2.000000    3.000000 "
-                     "   4.000000   80.000000   90.000000  "
-                     "100.000000    23.265059\nParameter Errors  :    1.000000 "
-                     "   2.000000    3.000000    4.000000    "
-                     "5.000000    6.000000   26.088800");
+      TS_ASSERT_EQUALS(msg.str(), "Lattice Parameters:    2.000000    3.000000 "
+                                  "   4.000000   80.000000   90.000000  "
+                                  "100.000000    23.265059\nParameter Errors  :    1.000000 "
+                                  "   2.000000    3.000000    4.000000    "
+                                  "5.000000    6.000000   26.088800");
     }
   }
 

@@ -27,8 +27,7 @@ namespace Geometry {
  Outputs xml.
 
  */
-template <typename CheckDimensionPolicy>
-class MANTID_GEOMETRY_DLL MDGeometryBuilderXML {
+template <typename CheckDimensionPolicy> class MANTID_GEOMETRY_DLL MDGeometryBuilderXML {
 
 public:
   /// Constructor

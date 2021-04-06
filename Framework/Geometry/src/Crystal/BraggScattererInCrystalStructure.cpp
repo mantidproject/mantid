@@ -35,46 +35,36 @@ BraggScattererInCrystalStructure::BraggScattererInCrystalStructure()
 
 /// Sets the position of the scatterer to the supplied coordinates - vector is
 /// wrapped to [0, 1).
-void BraggScattererInCrystalStructure::setPosition(
-    const Kernel::V3D &position) {
+void BraggScattererInCrystalStructure::setPosition(const Kernel::V3D &position) {
   m_position = getWrappedVector(position);
 }
 
 /// Returns the position of the scatterer.
-Kernel::V3D BraggScattererInCrystalStructure::getPosition() const {
-  return m_position;
-}
+Kernel::V3D BraggScattererInCrystalStructure::getPosition() const { return m_position; }
 
 /// Returns the cell which is currently set.
 UnitCell BraggScattererInCrystalStructure::getCell() const { return m_cell; }
 
 /// Assigns a unit cell, which may be required for certain calculations.
-void BraggScattererInCrystalStructure::setCell(const UnitCell &cell) {
-  m_cell = cell;
-}
+void BraggScattererInCrystalStructure::setCell(const UnitCell &cell) { m_cell = cell; }
 
 /// Declares basic properties, should not be overridden by subclasses, use
 /// declareScattererProperties instead.
 void BraggScattererInCrystalStructure::declareProperties() {
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<std::string>>(
-                      "Position", "[0, 0, 0]"),
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<std::string>>("Position", "[0, 0, 0]"),
                   "Position of the scatterer");
 
-  IValidator_sptr unitCellStringValidator =
-      std::make_shared<UnitCellStringValidator>();
-  declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<std::string>>(
-          "UnitCell", "1.0 1.0 1.0 90.0 90.0 90.0", unitCellStringValidator),
-      "Unit cell.");
+  IValidator_sptr unitCellStringValidator = std::make_shared<UnitCellStringValidator>();
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<std::string>>("UnitCell", "1.0 1.0 1.0 90.0 90.0 90.0",
+                                                                           unitCellStringValidator),
+                  "Unit cell.");
   exposePropertyToComposite("UnitCell");
 
   declareScattererProperties();
 }
 
-V3D BraggScattererInCrystalStructure::getPositionFromString(
-    const std::string &positionString) const {
-  std::vector<std::string> numberParts =
-      getTokenizedPositionString(positionString);
+V3D BraggScattererInCrystalStructure::getPositionFromString(const std::string &positionString) const {
+  std::vector<std::string> numberParts = getTokenizedPositionString(positionString);
 
   mu::Parser parser;
 
@@ -97,8 +87,7 @@ V3D BraggScattererInCrystalStructure::getPositionFromString(
  * deriving classes should override the method afterScattererPropertySet,
  * which is called from this method.
  */
-void BraggScattererInCrystalStructure::afterPropertySet(
-    const std::string &propertyName) {
+void BraggScattererInCrystalStructure::afterPropertySet(const std::string &propertyName) {
   if (propertyName == "Position") {
     std::string position = getProperty("Position");
 
@@ -111,13 +100,10 @@ void BraggScattererInCrystalStructure::afterPropertySet(
 }
 
 /// Return a clone of the validator.
-IValidator_sptr UnitCellStringValidator::clone() const {
-  return std::make_shared<UnitCellStringValidator>(*this);
-}
+IValidator_sptr UnitCellStringValidator::clone() const { return std::make_shared<UnitCellStringValidator>(*this); }
 
 /// Check if the string is valid input for Geometry::strToUnitCell.
-std::string UnitCellStringValidator::checkValidity(
-    const std::string &unitCellString) const {
+std::string UnitCellStringValidator::checkValidity(const std::string &unitCellString) const {
   boost::regex unitCellRegex("((\\d+(\\.\\d+){0,1}\\s+){2}|(\\d+(\\.\\d+){0,1}"
                              "\\s+){5})(\\d+(\\.\\d+){0,1}\\s*)");
 
@@ -129,20 +115,17 @@ std::string UnitCellStringValidator::checkValidity(
 }
 
 /// Returns components of comma-separated position string, cleaned from [ and ].
-std::vector<std::string>
-getTokenizedPositionString(const std::string &position) {
+std::vector<std::string> getTokenizedPositionString(const std::string &position) {
   std::string positionStringClean = position;
-  positionStringClean.erase(std::remove_if(positionStringClean.begin(),
-                                           positionStringClean.end(),
-                                           boost::is_any_of("[]")),
-                            positionStringClean.end());
+  positionStringClean.erase(
+      std::remove_if(positionStringClean.begin(), positionStringClean.end(), boost::is_any_of("[]")),
+      positionStringClean.end());
 
   std::vector<std::string> numberParts;
   boost::split(numberParts, positionStringClean, boost::is_any_of(","));
 
   if (numberParts.size() != 3) {
-    throw std::invalid_argument("Cannot parse '" + position +
-                                "' as a position.");
+    throw std::invalid_argument("Cannot parse '" + position + "' as a position.");
   }
 
   return numberParts;

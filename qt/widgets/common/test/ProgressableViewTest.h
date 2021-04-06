@@ -19,9 +19,7 @@ class ProgressableViewTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ProgressableViewTest *createSuite() {
-    return new ProgressableViewTest();
-  }
+  static ProgressableViewTest *createSuite() { return new ProgressableViewTest(); }
   static void destroySuite(ProgressableViewTest *suite) { delete suite; }
 
   ProgressableViewTest() {}

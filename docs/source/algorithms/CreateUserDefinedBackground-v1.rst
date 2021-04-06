@@ -10,8 +10,8 @@
 Description
 -----------
 
-Given an input workspace containing data with a background and a table of 
-user-selected points defining the background, creates a new workspace 
+Given an input workspace containing data with a background and a table of
+user-selected points defining the background, creates a new workspace
 containing background data that can be subtracted from the original data.
 
 The background is constructed using linear interpolation at the same X values as the input workspace.
@@ -25,7 +25,7 @@ Typical use case
 #. Convert table to a TableWorkspace (*Table > Convert to TableWorkspace*)
 #. Run this algorithm, giving it the original data and the background table.
    It will return a workspace filled with background data.
-#. Use :ref:`algm-Minus` to subtract the returned workspace from the original data workspace. 
+#. Use :ref:`algm-Minus` to subtract the returned workspace from the original data workspace.
 
 
 Usage

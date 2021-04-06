@@ -53,8 +53,7 @@ std::string createAbsoluteDirectory(const std::string &dirPath) {
  * @param filenames :: the names of the files to create.
  * @param dirPath   :: the directory in which to create the files.
  */
-void createFilesInDirectory(const std::unordered_set<std::string> &filenames,
-                            const std::string &dirPath) {
+void createFilesInDirectory(const std::unordered_set<std::string> &filenames, const std::string &dirPath) {
   for (const auto &filename : filenames) {
     Poco::File file(dirPath + "/" + filename);
     file.createFile();
@@ -68,9 +67,7 @@ public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor (& destructor) isn't called when running other
   // tests
-  static MultipleFilePropertyTest *createSuite() {
-    return new MultipleFilePropertyTest();
-  }
+  static MultipleFilePropertyTest *createSuite() { return new MultipleFilePropertyTest(); }
   static void destroySuite(MultipleFilePropertyTest *suite) { delete suite; }
 
 private:
@@ -100,38 +97,29 @@ public:
    *directories.
    */
   MultipleFilePropertyTest()
-      : m_multiFileLoadingSetting(), m_oldDataSearchDirectories(),
-        m_oldDefaultFacility(), m_oldDefaultInstrument(), m_dummyFilesDir(),
-        m_dirWithWhitespace(), m_tempDirs(), m_exts{".raw", ".nxs"},
-        m_oldArchiveSearchSetting(),
+      : m_multiFileLoadingSetting(), m_oldDataSearchDirectories(), m_oldDefaultFacility(), m_oldDefaultInstrument(),
+        m_dummyFilesDir(), m_dirWithWhitespace(), m_tempDirs(), m_exts{".raw", ".nxs"}, m_oldArchiveSearchSetting(),
         g_config(Mantid::Kernel::ConfigService::Instance()) {
-    m_dummyFilesDir =
-        createAbsoluteDirectory("_MultipleFilePropertyTestDummyFiles");
-    m_dirWithWhitespace = createAbsoluteDirectory(
-        "_MultipleFilePropertyTest Folder With Whitespace");
+    m_dummyFilesDir = createAbsoluteDirectory("_MultipleFilePropertyTestDummyFiles");
+    m_dirWithWhitespace = createAbsoluteDirectory("_MultipleFilePropertyTest Folder With Whitespace");
 
     m_tempDirs.insert(m_dummyFilesDir);
     m_tempDirs.insert(m_dirWithWhitespace);
 
     std::unordered_set<std::string> dummyFilenames = {
         // Standard raw file runs.
-        "TSC00001.raw", "TSC00002.raw", "TSC00003.raw", "TSC00004.raw",
-        "TSC00005.raw",
+        "TSC00001.raw", "TSC00002.raw", "TSC00003.raw", "TSC00004.raw", "TSC00005.raw",
         // Duplicates, but in NeXuS format.
-        "TSC00001.nxs", "TSC00002.nxs", "TSC00003.nxs", "TSC00004.nxs",
-        "TSC00005.nxs",
+        "TSC00001.nxs", "TSC00002.nxs", "TSC00003.nxs", "TSC00004.nxs", "TSC00005.nxs",
         // Standard NeXuS runs for another instrument.
-        "IRS00001.raw", "IRS00002.raw", "IRS00003.raw", "IRS00004.raw",
-        "IRS00005.raw",
+        "IRS00001.raw", "IRS00002.raw", "IRS00003.raw", "IRS00004.raw", "IRS00005.raw",
         // Duplicates, but in NeXuS format.
-        "IRS00001.nxs", "IRS00002.nxs", "IRS00003.nxs", "IRS00004.nxs",
-        "IRS00005.nxs",
+        "IRS00001.nxs", "IRS00002.nxs", "IRS00003.nxs", "IRS00004.nxs", "IRS00005.nxs",
         // "Incorrect" zero padding file.
         "TSC9999999.raw",
         // "Non-run" files.
-        "IRS10001_graphite002_info.nxs", "IRS10002_graphite002_info.nxs",
-        "IRS10003_graphite002_info.nxs", "IRS10004_graphite002_info.nxs",
-        "IRS10005_graphite002_info.nxs",
+        "IRS10001_graphite002_info.nxs", "IRS10002_graphite002_info.nxs", "IRS10003_graphite002_info.nxs",
+        "IRS10004_graphite002_info.nxs", "IRS10005_graphite002_info.nxs",
         // File with no extension.
         "bl6_flux_at_sample",
         // A single "non-run" file, that we should be able to load.
@@ -142,8 +130,7 @@ public:
         // Runs with no instrument name as prefix, commonplace at the ILL
         "111213.nxs", "141516.nxs", "171819.nxs"};
 
-    std::unordered_set<std::string> whiteSpaceDirFilenames = {
-        "file with whitespace.txt"};
+    std::unordered_set<std::string> whiteSpaceDirFilenames = {"file with whitespace.txt"};
 
     createFilesInDirectory(dummyFilenames, m_dummyFilesDir);
     createFilesInDirectory(whiteSpaceDirFilenames, m_dummyFilesDir);
@@ -168,15 +155,13 @@ public:
     m_oldDefaultInstrument = g_config.getString("default.instrument");
     m_oldArchiveSearchSetting = g_config.getString("datasearch.searcharchive");
 
-    g_config.setString("datasearch.directories",
-                       m_dummyFilesDir + ";" + m_dirWithWhitespace + ";");
+    g_config.setString("datasearch.directories", m_dummyFilesDir + ";" + m_dirWithWhitespace + ";");
     g_config.setString("default.facility", "ISIS");
     g_config.setString("default.instrument", "TOSCA");
     g_config.setString("datasearch.searcharchive", "Off");
 
     // Make sure that multi file loading is enabled for each test.
-    m_multiFileLoadingSetting =
-        Kernel::ConfigService::Instance().getString("loading.multifile");
+    m_multiFileLoadingSetting = Kernel::ConfigService::Instance().getString("loading.multifile");
     Kernel::ConfigService::Instance().setString("loading.multifile", "On");
   }
 
@@ -187,8 +172,7 @@ public:
     g_config.setString("datasearch.searcharchive", m_oldArchiveSearchSetting);
 
     // Replace user's preference after the test has run.
-    Kernel::ConfigService::Instance().setString("loading.multifile",
-                                                m_multiFileLoadingSetting);
+    Kernel::ConfigService::Instance().setString("loading.multifile", m_multiFileLoadingSetting);
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////
@@ -306,8 +290,7 @@ public:
     p.setValue("IRS10001-10005_graphite002_info.nxs");
     std::vector<std::vector<std::string>> fileNames = p();
 
-    TS_ASSERT_EQUALS(fileNames[0][0],
-                     dummyFile("IRS10001-10005_graphite002_info.nxs"));
+    TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("IRS10001-10005_graphite002_info.nxs"));
   }
 
   void test_singleFile_fileThatHasNoExtension() {
@@ -465,12 +448,9 @@ public:
                "IRS10003_graphite002_info.nxs");
     std::vector<std::vector<std::string>> fileNames = p();
 
-    TS_ASSERT_EQUALS(fileNames[0][0],
-                     dummyFile("IRS10001_graphite002_info.nxs"));
-    TS_ASSERT_EQUALS(fileNames[0][1],
-                     dummyFile("IRS10002_graphite002_info.nxs"));
-    TS_ASSERT_EQUALS(fileNames[1][0],
-                     dummyFile("IRS10003_graphite002_info.nxs"));
+    TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("IRS10001_graphite002_info.nxs"));
+    TS_ASSERT_EQUALS(fileNames[0][1], dummyFile("IRS10002_graphite002_info.nxs"));
+    TS_ASSERT_EQUALS(fileNames[1][0], dummyFile("IRS10003_graphite002_info.nxs"));
   }
 
   void test_multipleFiles_mixedForm_1() {
@@ -518,8 +498,7 @@ public:
     TS_ASSERT_EQUALS(fileNames[1][4], dummyFile("IRS00005.nxs"));
   }
 
-  void
-  test_multipleFiles_mixedForm_missingExtensionsMeansFirstDefaultExtIsUsed() {
+  void test_multipleFiles_mixedForm_missingExtensionsMeansFirstDefaultExtIsUsed() {
     // ".raw" appears first in m_exts, so raw files will be found.
     MultipleFileProperty p("Filename", m_exts);
     p.setValue("TSC1-5:1,IRS1-5:1");
@@ -537,8 +516,7 @@ public:
     TS_ASSERT_EQUALS(fileNames[1][4], dummyFile("IRS00005.raw"));
   }
 
-  void
-  test_multipleFiles_mixedForm_someMissingExtensionsMeansFirstSpecifiedIsUsed() {
+  void test_multipleFiles_mixedForm_someMissingExtensionsMeansFirstSpecifiedIsUsed() {
     MultipleFileProperty p("Filename", m_exts);
     p.setValue("IRS1-5:1,TSC1-5:1.nxs");
     std::vector<std::vector<std::string>> fileNames = p();
@@ -583,8 +561,7 @@ public:
     TS_ASSERT_EQUALS(fileNames[2][0], dummyFile("TSC00003.raw"));
     TS_ASSERT_EQUALS(fileNames[3][0], dummyFile("TSC00004.raw"));
     TS_ASSERT_EQUALS(fileNames[4][0], dummyFile("TSC00005.raw"));
-    TS_ASSERT_EQUALS(fileNames[5][0],
-                     dummyFile("IRS10001_graphite002_info.nxs"));
+    TS_ASSERT_EQUALS(fileNames[5][0], dummyFile("IRS10001_graphite002_info.nxs"));
     TS_ASSERT_EQUALS(fileNames[6][0], dummyFile("TSC00001.raw"));
     TS_ASSERT_EQUALS(fileNames[6][1], dummyFile("TSC00002.raw"));
     TS_ASSERT_EQUALS(fileNames[6][2], dummyFile("TSC00003.raw"));
@@ -615,8 +592,7 @@ public:
   void test_allowEmptyTokenOptionalLoad() {
     g_config.setString("default.facility", "ILL");
     g_config.setString("default.instrument", "IN16B");
-    MultipleFileProperty p("Filename", FileProperty::FileAction::OptionalLoad,
-                           {".nxs"}, true);
+    MultipleFileProperty p("Filename", FileProperty::FileAction::OptionalLoad, {".nxs"}, true);
     p.setValue("111213,0,171819");
     std::vector<std::vector<std::string>> fileNames = p();
     TS_ASSERT_EQUALS(fileNames.size(), 3);
@@ -630,11 +606,8 @@ public:
   void test_allowEmptyTokenLoad() {
     g_config.setString("default.facility", "ILL");
     g_config.setString("default.instrument", "IN16B");
-    MultipleFileProperty p("Filename", FileProperty::FileAction::Load, {".nxs"},
-                           true);
-    TS_ASSERT_THROWS_EQUALS(p.setValue("111213,0,171819"),
-                            const std::invalid_argument &err,
-                            std::string(err.what()),
+    MultipleFileProperty p("Filename", FileProperty::FileAction::Load, {".nxs"}, true);
+    TS_ASSERT_THROWS_EQUALS(p.setValue("111213,0,171819"), const std::invalid_argument &err, std::string(err.what()),
                             "When setting value of property \"Filename\": "
                             "Could not validate the following file(s): 000000");
     g_config.setString("default.facility", "ISIS");
@@ -703,8 +676,7 @@ public:
     g_config.setString("loading.multifile", "Off");
 
     MultipleFileProperty p("Filename");
-    p.setValue(
-        "_test_multiFileLoadingSwitchedOff_tempFileWithA+AndA,InTheName.txt");
+    p.setValue("_test_multiFileLoadingSwitchedOff_tempFileWithA+AndA,InTheName.txt");
     std::vector<std::vector<std::string>> fileNames = p();
 
     TS_ASSERT_EQUALS(fileNames.size(), 1);
@@ -759,7 +731,5 @@ private:
   //////////////////////////////////////////////////////////////////////////////////////////////
   // Private helper functions.
   //////////////////////////////////////////////////////////////////////////////////////////////
-  std::string dummyFile(const std::string &filename) {
-    return m_dummyFilesDir + Poco::Path::separator() + filename;
-  }
+  std::string dummyFile(const std::string &filename) { return m_dummyFilesDir + Poco::Path::separator() + filename; }
 };

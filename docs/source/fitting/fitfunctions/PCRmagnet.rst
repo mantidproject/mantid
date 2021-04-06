@@ -30,7 +30,7 @@ H0 (G) is the local magnetic field,
 and :math:`t_\text{off}` (microsecs) is the time offset.
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np

@@ -12,21 +12,21 @@ Description
 Input
 #####
 
-This algorithm can be used to create a powder pattern 2d (".p2d") output file as useable for 
-multidimensional Rietveld refinements. 
-The input for this algorithm needs to be a 2D workspace containing information about dSpacing and 
+This algorithm can be used to create a powder pattern 2d (".p2d") output file as useable for
+multidimensional Rietveld refinements.
+The input for this algorithm needs to be a 2D workspace containing information about dSpacing and
 dSpacingPerpendicular. A 2D workspace can be created using the :ref:`Bin2DPowderDiffraction
-<algm-Bin2DPowderDiffraction>` algorithm. 
-The input values ``removeNaN`` and ``removeNegatives`` control whether intensity values that are negative 
-or NaN, respectively, are automatically removed from the dataset. 
+<algm-Bin2DPowderDiffraction>` algorithm.
+The input values ``removeNaN`` and ``removeNegatives`` control whether intensity values that are negative
+or NaN, respectively, are automatically removed from the dataset.
 ``RemoveNegatives`` also removes intensities equal to zero.
-Turning ``cutDdata`` on, allows to cut the measuring data to the specified ranges of 
-theta, lambda, dSpacing and dSpacingPerpendicular. 
+Turning ``cutDdata`` on, allows to cut the measuring data to the specified ranges of
+theta, lambda, dSpacing and dSpacingPerpendicular.
 
 Output
 ######
 
-The output file contains a short comment header giving the title, the instrument parameter file, 
+The output file contains a short comment header giving the title, the instrument parameter file,
 the binning parameters of the workspace and the used instrument/detector bank.
 Thereafter the measuring data is written into 5 columns, namely, 2theta, lambda, dSpacing,
 dSpacingPerpendicular and intensity.
@@ -64,7 +64,7 @@ Usage
     file_name = "Usage_Example"
     path = os.path.join(os.path.expanduser("~"), file_name)
 
-    # Create a .p2d file containing the testdata	
+    # Create a .p2d file containing the testdata
     SaveP2D(Workspace = "Usage_Example", OutputFile = path, RemoveNaN = False, RemoveNegatives = False, CutData = False)
 
     # Does the file exist? If it exists, print it!

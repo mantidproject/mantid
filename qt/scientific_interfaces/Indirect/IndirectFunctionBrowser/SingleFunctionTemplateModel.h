@@ -30,11 +30,9 @@ using namespace MantidWidgets;
 class MANTIDQT_INDIRECT_DLL SingleFunctionTemplateModel : public FunctionModel {
 public:
   SingleFunctionTemplateModel();
-  SingleFunctionTemplateModel(
-      std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation);
+  SingleFunctionTemplateModel(std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation);
   void setFunction(IFunction_sptr fun) override;
-  void updateAvailableFunctions(
-      const std::map<std::string, std::string> &functionInitialisationStrings);
+  void updateAvailableFunctions(const std::map<std::string, std::string> &functionInitialisationStrings);
 
   void setFitType(const QString &name);
   QString getFitType();
@@ -43,8 +41,7 @@ public:
   int getEnumIndex();
   void setGlobal(const QString &name, bool isGlobal);
 
-  void
-  updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
 
   void estimateFunctionParameters();
 
@@ -56,8 +53,7 @@ private:
   QStringList m_fitTypeList;
   std::string m_resolutionName;
   TableDatasetIndex m_resolutionIndex;
-  boost::optional<QString>
-  findFitTypeForFunctionName(const QString &name) const;
+  boost::optional<QString> findFitTypeForFunctionName(const QString &name) const;
   // Parameter estimation
   std::unique_ptr<IDAFunctionParameterEstimation> m_parameterEstimation;
 };

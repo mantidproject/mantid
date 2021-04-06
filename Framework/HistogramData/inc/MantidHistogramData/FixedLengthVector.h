@@ -34,16 +34,11 @@ public:
   FixedLengthVector() = default;
   FixedLengthVector(size_t count, const double &value) : m_data(count, value) {}
   explicit FixedLengthVector(size_t count) : m_data(count) {}
-  FixedLengthVector(std::initializer_list<double> init) : m_data(init) {
-    Validator<T>::checkValidity(m_data);
-  }
+  FixedLengthVector(std::initializer_list<double> init) : m_data(init) { Validator<T>::checkValidity(m_data); }
   FixedLengthVector(const std::vector<double> &other) : m_data(other) {}
   FixedLengthVector(std::vector<double> &&other) : m_data(std::move(other)) {}
-  template <class InputIt>
-  FixedLengthVector(InputIt first, InputIt last) : m_data(first, last) {}
-  template <class Generator,
-            class = typename std::enable_if<
-                !std::is_convertible<Generator, double>::value>::type>
+  template <class InputIt> FixedLengthVector(InputIt first, InputIt last) : m_data(first, last) {}
+  template <class Generator, class = typename std::enable_if<!std::is_convertible<Generator, double>::value>::type>
   FixedLengthVector(size_t count, const Generator &g) : m_data(count) {
     std::generate(m_data.begin(), m_data.end(), g);
   }
@@ -88,13 +83,9 @@ public:
     m_data.assign(count, value);
   }
 
-  bool operator==(const FixedLengthVector<T> &rhs) const {
-    return this->rawData() == rhs.rawData();
-  }
+  bool operator==(const FixedLengthVector<T> &rhs) const { return this->rawData() == rhs.rawData(); }
 
-  bool operator!=(const FixedLengthVector<T> &rhs) const {
-    return !(*this == rhs);
-  }
+  bool operator!=(const FixedLengthVector<T> &rhs) const { return !(*this == rhs); }
 
   bool empty() const { return m_data.empty(); }
   size_t size() const { return m_data.size(); }
@@ -107,8 +98,7 @@ public:
 
   /// Returns the sum over a range of values from min (inclusive) to max
   /// (exclusive)
-  double sum(size_t min = 0, size_t max = std::numeric_limits<size_t>::max(),
-             double initialValue = 0.0) const {
+  double sum(size_t min = 0, size_t max = std::numeric_limits<size_t>::max(), double initialValue = 0.0) const {
     max = std::min(max, size());
     return std::accumulate(begin() + min, begin() + max, initialValue);
   }
@@ -144,9 +134,7 @@ public:
   auto rend() -> decltype(m_data.rend()) { return m_data.rend(); }
   auto rbegin() const -> decltype(m_data.rbegin()) { return m_data.rbegin(); }
   auto rend() const -> decltype(m_data.rend()) { return m_data.rend(); }
-  auto crbegin() const -> decltype(m_data.crbegin()) {
-    return m_data.crbegin();
-  }
+  auto crbegin() const -> decltype(m_data.crbegin()) { return m_data.crbegin(); }
   auto crend() const -> decltype(m_data.crend()) { return m_data.crend(); }
   double &front() { return m_data.front(); }
   double &back() { return m_data.back(); }

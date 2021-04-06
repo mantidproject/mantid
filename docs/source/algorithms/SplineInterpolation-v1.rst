@@ -46,7 +46,7 @@ boundaries are used.
 Usage
 -----
 
-**Example - interpolate between points in one workspace to match a reference workspace:**  
+**Example - interpolate between points in one workspace to match a reference workspace:**
 
 .. testcode:: ExSplineInterpolationSimple
 
@@ -59,13 +59,13 @@ Usage
 
     #create some random points to interpolate between
     dataX2 = np.arange(1,110,10) * 0.07
-    dataY2 = np.random.random_sample(dataX2.size) 
+    dataY2 = np.random.random_sample(dataX2.size)
     ws = CreateWorkspace(dataX2, dataY2)
 
     #interpolate using the reference workspace
     interpolated_ws = SplineInterpolation(WorkspaceToMatch=spline_ws, WorkspaceToInterpolate=ws, DerivOrder=0)
-    
-**Example - output the derivatives of the interpolated workspace:**  
+
+**Example - output the derivatives of the interpolated workspace:**
 
 .. testcode:: ExSplineInterpolationDeriv
 
@@ -78,7 +78,7 @@ Usage
 
     #create some random points to interpolate between
     dataX2 = np.arange(1,110,10) * 0.07
-    dataY2 = np.random.random_sample(dataX2.size) 
+    dataY2 = np.random.random_sample(dataX2.size)
     ws = CreateWorkspace(dataX2, dataY2)
 
     #interpolate using the reference workspace and output a group workspace of derivatives for each spectrum

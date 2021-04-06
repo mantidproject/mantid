@@ -32,17 +32,13 @@ using namespace Poco;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string SaveParameterFile::name() const {
-  return "SaveParameterFile";
-}
+const std::string SaveParameterFile::name() const { return "SaveParameterFile"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int SaveParameterFile::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SaveParameterFile::category() const {
-  return "DataHandling\\Instrument";
-}
+const std::string SaveParameterFile::category() const { return "DataHandling\\Instrument"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -50,21 +46,16 @@ const std::string SaveParameterFile::category() const {
 /** Initialize the algorithm's properties.
  */
 void SaveParameterFile::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "Workspace", "", Direction::Input,
-                      std::make_shared<InstrumentValidator>()),
-                  "Workspace to save the instrument parameters from.");
-
   declareProperty(
-      std::make_unique<API::FileProperty>("Filename", "",
-                                          API::FileProperty::Save, ".xml"),
-      "The name of the file into which the instrument parameters will be "
-      "saved.");
+      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::Input, std::make_shared<InstrumentValidator>()),
+      "Workspace to save the instrument parameters from.");
 
-  declareProperty(
-      "LocationParameters", false,
-      "Save the location parameters used to calibrate the instrument.",
-      Direction::Input);
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Save, ".xml"),
+                  "The name of the file into which the instrument parameters will be "
+                  "saved.");
+
+  declareProperty("LocationParameters", false, "Save the location parameters used to calibrate the instrument.",
+                  Direction::Input);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -81,9 +72,7 @@ void SaveParameterFile::exec() {
   const ParameterMap_sptr params = instrument->makeLegacyParameterMap();
 
   // maps components to a tuple of parameters' name, type, and value
-  std::map<ComponentID,
-           std::vector<boost::tuple<std::string, std::string, std::string>>>
-      toSave;
+  std::map<ComponentID, std::vector<boost::tuple<std::string, std::string, std::string>>> toSave;
 
   // Set up a progress bar
   Progress prog(this, 0.0, 0.3, params->size());
@@ -98,11 +87,9 @@ void SaveParameterFile::exec() {
     const std::string pType = paramsIt.second->type();
     const std::string pValue = paramsIt.second->asString();
 
-    if (pName == "x" || pName == "y" || pName == "z" || pName == "r-position" ||
-        pName == "t-position" || pName == "p-position" || pName == "rotx" ||
-        pName == "roty" || pName == "rotz") {
-      g_log.warning() << "The parameter name '" << pName
-                      << "' is reserved and has not been saved. "
+    if (pName == "x" || pName == "y" || pName == "z" || pName == "r-position" || pName == "t-position" ||
+        pName == "p-position" || pName == "rotx" || pName == "roty" || pName == "rotz") {
+      g_log.warning() << "The parameter name '" << pName << "' is reserved and has not been saved. "
                       << "Please contact the Mantid team for more information.";
       continue;
     }
@@ -112,24 +99,18 @@ void SaveParameterFile::exec() {
         V3D pos;
         std::istringstream pValueSS(pValue);
         pos.readPrinted(pValueSS);
-        toSave[cID].emplace_back("x", "double",
-                                 boost::lexical_cast<std::string>(pos.X()));
-        toSave[cID].emplace_back("y", "double",
-                                 boost::lexical_cast<std::string>(pos.Y()));
-        toSave[cID].emplace_back("z", "double",
-                                 boost::lexical_cast<std::string>(pos.Z()));
+        toSave[cID].emplace_back("x", "double", boost::lexical_cast<std::string>(pos.X()));
+        toSave[cID].emplace_back("y", "double", boost::lexical_cast<std::string>(pos.Y()));
+        toSave[cID].emplace_back("z", "double", boost::lexical_cast<std::string>(pos.Z()));
       }
     } else if (pName == "rot") {
       if (saveLocationParams) {
         V3D rot;
         std::istringstream pValueSS(pValue);
         rot.readPrinted(pValueSS);
-        toSave[cID].emplace_back("rotx", "double",
-                                 boost::lexical_cast<std::string>(rot.X()));
-        toSave[cID].emplace_back("roty", "double",
-                                 boost::lexical_cast<std::string>(rot.Y()));
-        toSave[cID].emplace_back("rotz", "double",
-                                 boost::lexical_cast<std::string>(rot.Z()));
+        toSave[cID].emplace_back("rotx", "double", boost::lexical_cast<std::string>(rot.X()));
+        toSave[cID].emplace_back("roty", "double", boost::lexical_cast<std::string>(rot.Y()));
+        toSave[cID].emplace_back("rotz", "double", boost::lexical_cast<std::string>(rot.Z()));
       }
     }
     // If it isn't a position or rotation parameter, we can just add it to the
@@ -140,16 +121,14 @@ void SaveParameterFile::exec() {
         // We create an entire XML element to be inserted into the output,
         // instead of just giving a single fixed value
         const auto &fitParam = paramsIt.second->value<FitParameter>();
-        const std::string fpName =
-            fitParam.getFunction() + ":" + fitParam.getName();
+        const std::string fpName = fitParam.getFunction() + ":" + fitParam.getName();
         std::stringstream fpValue;
         fpValue << "<formula";
         fpValue << " eq=\"" << fitParam.getFormula() << "\"";
         fpValue << " unit=\"" << fitParam.getFormulaUnit() << "\"";
         fpValue << " result-unit=\"" << fitParam.getResultUnit() << "\"";
         fpValue << "/>";
-        toSave[cID].emplace_back(
-            boost::make_tuple(fpName, "fitting", fpValue.str()));
+        toSave[cID].emplace_back(boost::make_tuple(fpName, "fitting", fpValue.str()));
       } else
         toSave[cID].emplace_back(boost::make_tuple(pName, pType, pValue));
     }
@@ -159,8 +138,7 @@ void SaveParameterFile::exec() {
   std::ofstream file(filename.c_str(), std::ofstream::trunc);
   file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
   file << "<parameter-file instrument=\"" << instrument->getName() << "\"";
-  file << " valid-from=\"" << instrument->getValidFromDate().toISO8601String()
-       << "\">\n";
+  file << " valid-from=\"" << instrument->getValidFromDate().toISO8601String() << "\">\n";
 
   prog.resetNumSteps(static_cast<int64_t>(toSave.size()), 0.6, 1.0);
   // Iterate through all the parameters we want to save and build an XML
@@ -187,13 +165,12 @@ void SaveParameterFile::exec() {
       // With fitting parameters, we're actually inserting an entire element, as
       // constructed above
       if (pType == "fitting") {
-        file << "		<parameter name=\"" << pName
-             << "\" type=\"fitting\" >\n";
+        file << "		<parameter name=\"" << pName << "\" type=\"fitting\" >\n";
         file << "   " << pValue << "\n";
         file << "		</parameter>\n";
       } else {
-        file << "		<parameter name=\"" << pName << "\""
-             << (pType == "string" ? " type=\"string\"" : "") << ">\n";
+        file << "		<parameter name=\"" << pName << "\"" << (pType == "string" ? " type=\"string\"" : "")
+             << ">\n";
         file << "			<value val=\"" << pValue << "\"/>\n";
         file << "		</parameter>\n";
       }

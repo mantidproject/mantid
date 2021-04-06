@@ -39,8 +39,7 @@ public:
   }
 
   /** Make a HKL peaks workspace */
-  PeaksWorkspace_sptr getHKLpw(const Instrument_sptr &inst,
-                               const std::vector<V3D> &hkls, detid_t detid) {
+  PeaksWorkspace_sptr getHKLpw(const Instrument_sptr &inst, const std::vector<V3D> &hkls, detid_t detid) {
     PeaksWorkspace_sptr hklPW;
     if (hkls.size() > 0) {
       hklPW = PeaksWorkspace_sptr(new PeaksWorkspace());
@@ -53,23 +52,19 @@ public:
     return hklPW;
   }
 
-  void do_test_exec(const std::string &reflectionCondition,
-                    size_t expectedNumber, const std::vector<V3D> &hkls,
+  void do_test_exec(const std::string &reflectionCondition, size_t expectedNumber, const std::vector<V3D> &hkls,
                     int convention = 1, bool useExtendedDetectorSpace = false,
                     bool addExtendedDetectorDefinition = false, int edge = 0) {
     // Name of the output workspace.
     std::string outWSName("PredictPeaksTest_OutputWS");
 
     // Make the fake input workspace
-    MatrixWorkspace_sptr inWS =
-        WorkspaceCreationHelper::create2DWorkspace(10000, 1);
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
+    MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::create2DWorkspace(10000, 1);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
 
     if (addExtendedDetectorDefinition) {
       auto extendedSpaceObj = ComponentCreationHelper::createCuboid(5., 5., 5.);
-      auto extendedSpace = new ObjComponent("extended-detector-space",
-                                            extendedSpaceObj, inst.get());
+      auto extendedSpace = new ObjComponent("extended-detector-space", extendedSpaceObj, inst.get());
       extendedSpace->setPos(V3D(0.0, 0.0, 0.0));
       inst->add(extendedSpace);
     }
@@ -85,27 +80,21 @@ public:
     PredictPeaks alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("WavelengthMin", "0.1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("WavelengthMax", "10.0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MinDSpacing", "1.0"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ReflectionCondition", reflectionCondition));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ReflectionCondition", reflectionCondition));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HKLPeaksWorkspace", hklPW));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PredictPeaksOutsideDetectors",
-                                             useExtendedDetectorSpace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PredictPeaksOutsideDetectors", useExtendedDetectorSpace));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EdgePixels", edge));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     PeaksWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -124,13 +113,9 @@ public:
   void test_exec() { do_test_exec("Primitive", 10, std::vector<V3D>()); }
 
   /** Fewer HKLs if they are not allowed */
-  void test_exec_withReflectionCondition() {
-    do_test_exec("C-face centred", 6, std::vector<V3D>());
-  }
+  void test_exec_withReflectionCondition() { do_test_exec("C-face centred", 6, std::vector<V3D>()); }
 
-  void test_exec_withExtendedDetectorSpace() {
-    do_test_exec("Primitive", 3350, std::vector<V3D>(), 1, true, true);
-  }
+  void test_exec_withExtendedDetectorSpace() { do_test_exec("Primitive", 3350, std::vector<V3D>(), 1, true, true); }
 
   void test_exec_withReflectionConditionAndExtendedDetectorSpace() {
     do_test_exec("C-face centred", 1690, std::vector<V3D>(), 1, true, true);
@@ -140,8 +125,7 @@ public:
     std::string outWSName("PredictPeaksTest_OutputWS");
     // Make the fake input workspace
     auto inWS = WorkspaceCreationHelper::create2DWorkspace(10000, 1);
-    auto inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
+    auto inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
     inWS->setInstrument(inst);
 
     // Set ub and Goniometer rotation
@@ -151,17 +135,13 @@ public:
     PredictPeaks alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("WavelengthMin", "0.1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("WavelengthMax", "10.0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MinDSpacing", "1.0"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ReflectionCondition", "Primitive"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("PredictPeaksOutsideDetectors", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ReflectionCondition", "Primitive"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PredictPeaksOutsideDetectors", true));
     alg.execute();
 
     // should fail to execute and throw a runtime error
@@ -186,10 +166,8 @@ public:
     std::string outWSName("PredictPeaksTest_OutputWS");
 
     // Make the fake input workspace
-    MatrixWorkspace_sptr inWS =
-        WorkspaceCreationHelper::create2DWorkspace(10000, 1);
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
+    MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::create2DWorkspace(10000, 1);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
     inWS->setInstrument(inst);
 
     // Set ub and Goniometer rotation
@@ -213,19 +191,15 @@ public:
     PredictPeaks alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HKLPeaksWorkspace", hklPW));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     PeaksWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -251,9 +225,7 @@ public:
     do_test_exec("Primitive", 10, std::vector<V3D>(), -1);
     ConfigService::Instance().setString("Q.convention", origQConv);
   }
-  void test_edge() {
-    do_test_exec("Primitive", 5, std::vector<V3D>(), 1, false, false, 10);
-  }
+  void test_edge() { do_test_exec("Primitive", 5, std::vector<V3D>(), 1, false, false, 10); }
 
   void test_exec_with_CalculateGoniometerForCW() {
     using Kernel::ConfigService;
@@ -264,10 +236,8 @@ public:
     std::string outWSName("PredictPeaksTest_OutputWS");
 
     // Make the fake input workspace
-    MatrixWorkspace_sptr inWS =
-        WorkspaceCreationHelper::create2DWorkspace(10000, 1);
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
+    MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::create2DWorkspace(10000, 1);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
     inWS->setInstrument(inst);
 
     // Set ub and Goniometer rotation
@@ -277,10 +247,8 @@ public:
     PredictPeaks alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("CalculateGoniometerForCW", true));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Wavelength", "1.5"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MinAngle", "0"));
@@ -290,9 +258,7 @@ public:
 
     // Retrieve the workspace from data service.
     PeaksWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -311,10 +277,8 @@ public:
 class PredictPeaksTestPerformance : public CxxTest::TestSuite {
 public:
   void test_manyPeaksRectangular() {
-    MatrixWorkspace_sptr inWS =
-        WorkspaceCreationHelper::create2DWorkspace(10000, 1);
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
+    MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::create2DWorkspace(10000, 1);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
     inWS->setInstrument(inst);
 
     // Set ub and Goniometer rotation
@@ -323,8 +287,7 @@ public:
 
     PredictPeaks alg;
     alg.initialize();
-    alg.setProperty("InputWorkspace",
-                    std::dynamic_pointer_cast<Workspace>(inWS));
+    alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS));
     alg.setPropertyValue("OutputWorkspace", "predict_peaks_performance");
     alg.setPropertyValue("WavelengthMin", ".5");
     alg.setPropertyValue("WavelengthMax", "15.0");
@@ -334,11 +297,9 @@ public:
   }
 
   void test_manyPeaks() {
-    MatrixWorkspace_sptr inWS =
-        WorkspaceCreationHelper::create2DWorkspace(10000, 1);
+    MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::create2DWorkspace(10000, 1);
     Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentCylindrical(
-            3, V3D(0, 0, -1), V3D(0, 0, 0), 1.6, 1.0);
+        ComponentCreationHelper::createTestInstrumentCylindrical(3, V3D(0, 0, -1), V3D(0, 0, 0), 1.6, 1.0);
     inWS->setInstrument(inst);
 
     // Set UB matrix and Goniometer rotation
@@ -347,8 +308,7 @@ public:
 
     PredictPeaks alg;
     alg.initialize();
-    alg.setProperty("InputWorkspace",
-                    std::dynamic_pointer_cast<Workspace>(inWS));
+    alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS));
     alg.setPropertyValue("OutputWorkspace", "predict_peaks_performance");
     alg.setPropertyValue("WavelengthMin", ".5");
     alg.setPropertyValue("WavelengthMax", "15.0");

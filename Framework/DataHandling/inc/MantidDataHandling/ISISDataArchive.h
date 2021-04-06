@@ -27,14 +27,11 @@ This class is for searching the ISIS data archive
 class DLLExport ISISDataArchive : public API::IArchiveSearch {
 public:
   /// Returns the path to a filename given the list of extensions to try
-  std::string
-  getArchivePath(const std::set<std::string> &filenames,
-                 const std::vector<std::string> &exts) const override;
+  std::string getArchivePath(const std::set<std::string> &filenames,
+                             const std::vector<std::string> &exts) const override;
 
   /// Public and virtual for testing purposes
-  virtual std::string
-  getCorrectExtension(const std::string &path,
-                      const std::vector<std::string> &exts) const;
+  virtual std::string getCorrectExtension(const std::string &path, const std::vector<std::string> &exts) const;
   std::string getPath(const std::string &fName) const;
 
 protected:

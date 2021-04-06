@@ -56,19 +56,14 @@ class SpectrumNumberTranslator;
 */
 class MANTID_INDEXING_DLL IndexInfo {
 public:
-  explicit IndexInfo(
-      const size_t globalSize,
-      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
+  explicit IndexInfo(const size_t globalSize, const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
   IndexInfo(const size_t globalSize, const Parallel::StorageMode storageMode,
             const Parallel::Communicator &communicator);
-  explicit IndexInfo(
-      std::vector<SpectrumNumber> spectrumNumbers,
-      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
-  IndexInfo(std::vector<SpectrumNumber> spectrumNumbers,
-            const Parallel::StorageMode storageMode,
+  explicit IndexInfo(std::vector<SpectrumNumber> spectrumNumbers,
+                     const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
+  IndexInfo(std::vector<SpectrumNumber> spectrumNumbers, const Parallel::StorageMode storageMode,
             const Parallel::Communicator &communicator);
-  template <class IndexType>
-  IndexInfo(std::vector<IndexType> indices, const IndexInfo &parent);
+  template <class IndexType> IndexInfo(std::vector<IndexType> indices, const IndexInfo &parent);
 
   IndexInfo(const IndexInfo &other);
   IndexInfo(IndexInfo &&other) noexcept;
@@ -85,25 +80,18 @@ public:
   void setSpectrumNumbers(std::vector<SpectrumNumber> &&spectrumNumbers);
   void setSpectrumNumbers(const SpectrumNumber min, const SpectrumNumber max);
 
-  void
-  setSpectrumDefinitions(std::vector<SpectrumDefinition> spectrumDefinitions);
-  void
-  setSpectrumDefinitions(const Kernel::cow_ptr<std::vector<SpectrumDefinition>>
-                             &spectrumDefinitions);
-  const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
-  spectrumDefinitions() const;
+  void setSpectrumDefinitions(std::vector<SpectrumDefinition> spectrumDefinitions);
+  void setSpectrumDefinitions(const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &spectrumDefinitions);
+  const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &spectrumDefinitions() const;
 
   SpectrumIndexSet makeIndexSet() const;
   SpectrumIndexSet makeIndexSet(SpectrumNumber min, SpectrumNumber max) const;
-  SpectrumIndexSet makeIndexSet(GlobalSpectrumIndex min,
-                                GlobalSpectrumIndex max) const;
-  SpectrumIndexSet
-  makeIndexSet(const std::vector<SpectrumNumber> &spectrumNumbers) const;
-  SpectrumIndexSet
-  makeIndexSet(const std::vector<GlobalSpectrumIndex> &globalIndices) const;
+  SpectrumIndexSet makeIndexSet(GlobalSpectrumIndex min, GlobalSpectrumIndex max) const;
+  SpectrumIndexSet makeIndexSet(const std::vector<SpectrumNumber> &spectrumNumbers) const;
+  SpectrumIndexSet makeIndexSet(const std::vector<GlobalSpectrumIndex> &globalIndices) const;
 
-  std::vector<GlobalSpectrumIndex> globalSpectrumIndicesFromDetectorIndices(
-      const std::vector<size_t> &detectorIndices) const;
+  std::vector<GlobalSpectrumIndex>
+  globalSpectrumIndicesFromDetectorIndices(const std::vector<size_t> &detectorIndices) const;
 
   bool isOnThisPartition(GlobalSpectrumIndex globalIndex) const;
 
@@ -111,16 +99,13 @@ public:
   const Parallel::Communicator &communicator() const;
 
 private:
-  void makeSpectrumNumberTranslator(
-      std::vector<SpectrumNumber> &&spectrumNumbers) const;
+  void makeSpectrumNumberTranslator(std::vector<SpectrumNumber> &&spectrumNumbers) const;
 
   Parallel::StorageMode m_storageMode;
   std::unique_ptr<Parallel::Communicator> m_communicator;
 
-  Kernel::cow_ptr<std::vector<SpectrumDefinition>> m_spectrumDefinitions{
-      nullptr};
-  mutable Kernel::cow_ptr<SpectrumNumberTranslator> m_spectrumNumberTranslator{
-      nullptr};
+  Kernel::cow_ptr<std::vector<SpectrumDefinition>> m_spectrumDefinitions{nullptr};
+  mutable Kernel::cow_ptr<SpectrumNumberTranslator> m_spectrumNumberTranslator{nullptr};
 };
 
 } // namespace Indexing

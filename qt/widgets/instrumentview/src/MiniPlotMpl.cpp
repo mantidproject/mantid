@@ -265,8 +265,9 @@ void MiniPlotMpl::setYLinearScale() {
 void MiniPlotMpl::clearAll() {
   // active curve, labels etc
   clearCurve();
-  // any stored curves
+  // any stored curves and labels
   m_lines.clear();
+  m_storedCurveLabels.clear();
   replot();
 }
 

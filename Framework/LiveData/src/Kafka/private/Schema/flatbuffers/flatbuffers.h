@@ -507,7 +507,7 @@ public:
     return flatbuffers::GetRoot<T>(data());
   }
   #endif
- 
+
 
   // These may change access mode, leave these at end of public section
   FLATBUFFERS_DELETE_FUNC(DetachedBuffer(const DetachedBuffer &other))

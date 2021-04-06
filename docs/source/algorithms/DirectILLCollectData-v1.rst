@@ -34,7 +34,7 @@ Some basic reduction steps are done to the input data.
 More detailed description of some of these steps is given below.
 
 .. note::
-    The initial time-of-flight axis of ILL's spectrometers has an arbitrary starting point. Therefore, the TOF values in the intermediate workspaces do not correspond to any physical flight distances until they are corrected at step 6. 
+    The initial time-of-flight axis of ILL's spectrometers has an arbitrary starting point. Therefore, the TOF values in the intermediate workspaces do not correspond to any physical flight distances until they are corrected at step 6.
 
 Normalisation to monitor
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -59,7 +59,7 @@ A flat time-independent background for subtraction can be given by *FlatBkgWorks
 
 Before subtraction, the background workspace is multiplied by *FlatBkgScaling*.
 
-The background used for the subtraction can be retrieved using the *OutputFlatBkgWorkspace* property. This property holds either the same workspace as *FlatBkgWorkspace*, or a workspace created by :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>`. Note that no *FlatBkgScaling* is applied to this workspace. 
+The background used for the subtraction can be retrieved using the *OutputFlatBkgWorkspace* property. This property holds either the same workspace as *FlatBkgWorkspace*, or a workspace created by :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>`. Note that no *FlatBkgScaling* is applied to this workspace.
 
 Elastic peak positions (EPP)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

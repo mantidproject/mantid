@@ -30,10 +30,8 @@ public:
     if (!pbpv.isInitialized())
       pbpv.initialize();
 
-    MatrixWorkspace_sptr testSample =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 5, 0.5, 1.5);
-    MatrixWorkspace_sptr testVanadium =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 5, 0.5, 1.5);
+    MatrixWorkspace_sptr testSample = WorkspaceCreationHelper::create2DWorkspaceBinned(2, 5, 0.5, 1.5);
+    MatrixWorkspace_sptr testVanadium = WorkspaceCreationHelper::create2DWorkspaceBinned(2, 5, 0.5, 1.5);
     // Make the instruments match
     Mantid::Geometry::Instrument_sptr inst(new Mantid::Geometry::Instrument);
     testSample->setInstrument(inst);
@@ -49,9 +47,7 @@ public:
     TS_ASSERT(pbpv.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output =
-            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out"));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out"));
 
     // Check a few values
     TS_ASSERT_DELTA(output->x(1)[4], 6.5, 0.0001);
@@ -76,19 +72,13 @@ class PointByPointVCorrectionTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PointByPointVCorrectionTestPerformance *createSuite() {
-    return new PointByPointVCorrectionTestPerformance();
-  }
+  static PointByPointVCorrectionTestPerformance *createSuite() { return new PointByPointVCorrectionTestPerformance(); }
 
-  static void destroySuite(PointByPointVCorrectionTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(PointByPointVCorrectionTestPerformance *suite) { delete suite; }
 
   void setUp() override {
-    MatrixWorkspace_sptr testSample =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(20000, 5, 0.5, 1.5);
-    MatrixWorkspace_sptr testVanadium =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(20000, 5, 0.5, 1.5);
+    MatrixWorkspace_sptr testSample = WorkspaceCreationHelper::create2DWorkspaceBinned(20000, 5, 0.5, 1.5);
+    MatrixWorkspace_sptr testVanadium = WorkspaceCreationHelper::create2DWorkspaceBinned(20000, 5, 0.5, 1.5);
     // Make the instruments match
     Mantid::Geometry::Instrument_sptr inst(new Mantid::Geometry::Instrument);
     testSample->setInstrument(inst);
@@ -103,9 +93,7 @@ public:
     pbpv.setPropertyValue("OutputWorkspace", "outputWS");
   }
 
-  void tearDown() override {
-    Mantid::API::AnalysisDataService::Instance().remove("outputWS");
-  }
+  void tearDown() override { Mantid::API::AnalysisDataService::Instance().remove("outputWS"); }
 
   void testPerformanceWS() { pbpv.execute(); }
 

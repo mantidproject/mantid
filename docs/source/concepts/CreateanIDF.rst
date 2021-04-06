@@ -16,8 +16,8 @@ The recommended set of steps to get started is to:
 - Use an editor, which is :ref:`XML schema aware  <Using_XML_Schema>`
 - Use the full :ref:`IDF <InstrumentDefinitionFile>` page for detailed documentation
 
-The above are suggestive steps for generating an IDF. In addition there have 
-been created several scripts for automatic the creation of IDFs. Such scripts 
+The above are suggestive steps for generating an IDF. In addition there have
+been created several scripts for automatic the creation of IDFs. Such scripts
 can be found `here <https://github.com/mantidproject/mantidgeometry>`__.
 
 Using the Schema
