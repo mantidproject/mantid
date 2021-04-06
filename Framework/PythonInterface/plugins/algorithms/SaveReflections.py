@@ -150,7 +150,11 @@ class FullprofFormat(object):
         title = workspace.getTitle() if workspace.getTitle() else workspace.name()
         f_handle.write(title + '\n')
         f_handle.write("({}i4,2f12.2,i5,4f10.4)\n".format(num_hkl))
-        f_handle.write("  0 0 0\n")
+        wavelength = '0'  # if TOF Laue this is ignored
+        if np.std([pk.getWavelength() for pk in workspace]) < 0.01:
+            # check for constant wavelength (same as in SaveHKLCW)
+            wavelength = f"{workspace.getPeak(0).getWavelength():.5f}"
+        f_handle.write("  {} 0 0\n".format(wavelength))
         mod_colname = ""
         if has_modulated_indexing(workspace):
             # num_rows = 2*num_vecs (separate rows for +/- q)
