@@ -1465,11 +1465,13 @@ inline void MDNorm::calcDiffractionIntersectionIntegral(std::vector<std::array<d
  * in 1 specific SpectrumInfo/ExperimentInfo
  * @param intersections: intersections
  * @param solid: proton charge
- * @param yValues: original signal values
+ * @param yValues: diffraction intersection integral and common to sample and background
  * @param vmdDims: MD dimensions
- * @param pos: positions from intersections for memory efficiency
+ * @param pos: position from intersecton for memory efficiency
  * @param posNew: transformed positions
- * @param signalArray: (output) signals
+ * @param signalArray: (output) normalization
+ * @param solidBkgd: background proton charge
+ * @param bkgdSignalArray: (output) background normalization
  */
 inline void MDNorm::calcSingleDetectorNorm(const std::vector<std::array<double, 4>> &intersections, const double &solid,
                                            std::vector<double> &yValues, const size_t &vmdDims,
