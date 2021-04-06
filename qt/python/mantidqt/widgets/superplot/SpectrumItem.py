@@ -14,7 +14,7 @@ class SpectrumItem(QTreeWidgetItem):
     """
     Index of the spectrum represented by this item.
     """
-    _spectrumName = None
+    _spectrumIndex = None
 
     def __init__(self, treeWidget, index):
         super().__init__(treeWidget)
