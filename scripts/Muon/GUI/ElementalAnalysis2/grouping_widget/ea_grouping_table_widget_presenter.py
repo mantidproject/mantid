@@ -35,7 +35,10 @@ class EAGroupingTablePresenter(object):
 
         self.rebin_notifier = GenericObservable()
 
+        self.data_changed_notifier = GenericObservable()
+
     def notify_data_changed(self):
+        self.data_changed_notifier.notify_subscribers()
         self._dataChangedNotifier()
 
     def _is_edited_name_duplicated(self, new_name):

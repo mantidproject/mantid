@@ -18,6 +18,7 @@ class EAAutoTabView(QtWidgets.QWidget):
         self.find_peaks_notifier = GenericObservable()
         self.show_peaks_table_notifier = GenericObservable()
         self.show_match_table_notifier = GenericObservable()
+        self.clear_match_table_notifier = GenericObservable()
 
         self.setup_interface_layout()
         self.setup_horizontal_layouts()
@@ -34,23 +35,40 @@ class EAAutoTabView(QtWidgets.QWidget):
         self.select_workspace_hlayout = QtWidgets.QHBoxLayout()
         self.select_workspace_hlayout.setObjectName("horizontalLayout1")
 
-        self.find_peaks_parameter_hlayout = QtWidgets.QHBoxLayout()
-        self.find_peaks_parameter_hlayout.setObjectName("horizontalLayout2")
+        self.find_peaks_parameter_hlayout1 = QtWidgets.QHBoxLayout()
+        self.find_peaks_parameter_hlayout1.setObjectName("horizontalLayout2")
+
+        self.find_peaks_parameter_hlayout2 = QtWidgets.QHBoxLayout()
+        self.find_peaks_parameter_hlayout2.setObjectName("horizontalLayout3")
+
+        self.find_peaks_parameter_hlayout3 = QtWidgets.QHBoxLayout()
+        self.find_peaks_parameter_hlayout3.setObjectName("horizontalLayout4")
 
         self.show_peaks_hlayout = QtWidgets.QHBoxLayout()
-        self.show_peaks_hlayout.setObjectName("horizontalLayout3")
+        self.show_peaks_hlayout.setObjectName("horizontalLayout5")
 
         self.show_matches_hlayout = QtWidgets.QHBoxLayout()
-        self.show_matches_hlayout.setObjectName("horizontalLayout4")
+        self.show_matches_hlayout.setObjectName("horizontalLayout6")
 
         self.vertical_layout = QtWidgets.QVBoxLayout(self)
         self.vertical_layout.setObjectName("verticalLayout")
 
+        self.clear_match_table_button = QtWidgets.QPushButton("Clear Table", self)
+        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        size_policy.setHorizontalStretch(0)
+        size_policy.setVerticalStretch(0)
+        size_policy.setHeightForWidth(self.clear_match_table_button.sizePolicy().hasHeightForWidth())
+        self.clear_match_table_button.setSizePolicy(size_policy)
+        self.clear_match_table_button.setToolTip("Removes all rows in table")
+
         self.vertical_layout.addItem(self.select_workspace_hlayout)
-        self.vertical_layout.addItem(self.find_peaks_parameter_hlayout)
+        self.vertical_layout.addItem(self.find_peaks_parameter_hlayout1)
+        self.vertical_layout.addItem(self.find_peaks_parameter_hlayout2)
+        self.vertical_layout.addItem(self.find_peaks_parameter_hlayout3)
         self.vertical_layout.addWidget(self.peak_info_label)
         self.vertical_layout.addItem(self.show_peaks_hlayout)
         self.vertical_layout.addWidget(self.match_table)
+        self.vertical_layout.addWidget(self.clear_match_table_button)
         self.vertical_layout.addItem(self.show_matches_hlayout)
 
         self.setLayout(self.vertical_layout)
@@ -62,10 +80,10 @@ class EAAutoTabView(QtWidgets.QWidget):
         self.select_workspace_hlayout.addWidget(self.find_peaks_button)
         self.select_workspace_hlayout.addWidget(self.find_peaks_combobox)
 
-        self.min_energy_label = QtWidgets.QLabel("Min Energy (KeV) ", self)
+        self.min_energy_label = QtWidgets.QLabel("Minimum Energy (KeV) ", self)
         self.min_energy_line_edit = QtWidgets.QLineEdit(self)
 
-        self.max_energy_label = QtWidgets.QLabel(" Max Energy (KeV) ", self)
+        self.max_energy_label = QtWidgets.QLabel(" Maximum Energy (KeV) ", self)
         self.max_energy_line_edit = QtWidgets.QLineEdit(self)
 
         self.plot_peaks_label = QtWidgets.QLabel(" Plot Peaks ", self)
@@ -74,14 +92,42 @@ class EAAutoTabView(QtWidgets.QWidget):
         self.threshold_label = QtWidgets.QLabel(" Acceptance Threshold ", self)
         self.threshold_line_edit = QtWidgets.QLineEdit(self)
 
-        self.find_peaks_parameter_hlayout.addWidget(self.min_energy_label)
-        self.find_peaks_parameter_hlayout.addWidget(self.min_energy_line_edit)
-        self.find_peaks_parameter_hlayout.addWidget(self.max_energy_label)
-        self.find_peaks_parameter_hlayout.addWidget(self.max_energy_line_edit)
-        self.find_peaks_parameter_hlayout.addWidget(self.plot_peaks_label)
-        self.find_peaks_parameter_hlayout.addWidget(self.plot_peaks_checkbox)
-        self.find_peaks_parameter_hlayout.addWidget(self.threshold_label)
-        self.find_peaks_parameter_hlayout.addWidget(self.threshold_line_edit)
+        self.find_peaks_parameter_hlayout1.addWidget(self.min_energy_label)
+        self.find_peaks_parameter_hlayout1.addWidget(self.min_energy_line_edit)
+        self.find_peaks_parameter_hlayout1.addWidget(self.max_energy_label)
+        self.find_peaks_parameter_hlayout1.addWidget(self.max_energy_line_edit)
+        self.find_peaks_parameter_hlayout1.addWidget(self.plot_peaks_label)
+        self.find_peaks_parameter_hlayout1.addWidget(self.plot_peaks_checkbox)
+        self.find_peaks_parameter_hlayout1.addWidget(self.threshold_label)
+        self.find_peaks_parameter_hlayout1.addWidget(self.threshold_line_edit)
+
+        self.default_peak_label = QtWidgets.QLabel(" Use default peak widths ? ", self)
+        self.default_peak_checkbox = QtWidgets.QCheckBox(self)
+        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        size_policy.setHorizontalStretch(0)
+        size_policy.setVerticalStretch(0)
+        # size_policy.setHeightForWidth(self.default_peak_checkbox.sizePolicy().hasHeightForWidth())
+        self.default_peak_label.setSizePolicy(size_policy)
+        self.default_peak_checkbox.setSizePolicy(size_policy)
+
+        self.find_peaks_parameter_hlayout2.addWidget(self.default_peak_checkbox)
+        self.find_peaks_parameter_hlayout2.addWidget(self.default_peak_label)
+
+        self.min_width_label = QtWidgets.QLabel("Minimum peak width (KeV) ", self)
+        self.min_width_line_edit = QtWidgets.QLineEdit(self)
+
+        self.max_width_label = QtWidgets.QLabel(" Maximum peak width (KeV) ", self)
+        self.max_width_line_edit = QtWidgets.QLineEdit(self)
+
+        self.estimate_width_label = QtWidgets.QLabel(" Estimate peak width (KeV) ", self)
+        self.estimate_width_line_edit = QtWidgets.QLineEdit(self)
+
+        self.find_peaks_parameter_hlayout3.addWidget(self.min_width_label)
+        self.find_peaks_parameter_hlayout3.addWidget(self.min_width_line_edit)
+        self.find_peaks_parameter_hlayout3.addWidget(self.max_width_label)
+        self.find_peaks_parameter_hlayout3.addWidget(self.max_width_line_edit)
+        self.find_peaks_parameter_hlayout3.addWidget(self.estimate_width_label)
+        self.find_peaks_parameter_hlayout3.addWidget(self.estimate_width_line_edit)
 
         self.show_peaks_table_combobox = QtWidgets.QComboBox(self)
         self.show_peaks_table_button = QtWidgets.QPushButton(" Show peaks ", self)
@@ -99,6 +145,8 @@ class EAAutoTabView(QtWidgets.QWidget):
         self.find_peaks_button.clicked.connect(self.find_peaks_notifier.notify_subscribers)
         self.show_peaks_table_button.clicked.connect(self.show_peaks_table_notifier.notify_subscribers)
         self.show_match_table_button.clicked.connect(self.show_match_table_notifier.notify_subscribers)
+        self.clear_match_table_button.clicked.connect(self.clear_match_table_notifier.notify_subscribers)
+        self.default_peak_checkbox.clicked.connect(self.default_peak_checkbox_changed)
 
     def get_parameters_for_find_peaks(self):
         parameters = {}
@@ -106,6 +154,12 @@ class EAAutoTabView(QtWidgets.QWidget):
             parameters["min_energy"] = float(self.min_energy_line_edit.text())
             parameters["max_energy"] = float(self.max_energy_line_edit.text())
             parameters["threshold"] = float(self.threshold_line_edit.text())
+            parameters["default_width"] = True
+            if not self.default_peak_checkbox.isChecked():
+                parameters["default_width"] = False
+                parameters["min_width"] = float(self.min_width_line_edit.text())
+                parameters["max_width"] = float(self.max_width_line_edit.text())
+                parameters["estimate_width"] = float(self.estimate_width_line_edit.text())
 
         except ValueError:
             message_box.warning("ERROR: Invalid arguments for peak finding")
@@ -135,6 +189,19 @@ class EAAutoTabView(QtWidgets.QWidget):
         self.min_energy_line_edit.setText("50")
         self.max_energy_line_edit.setText("1000")
         self.threshold_line_edit.setText("0.01")
+        self.min_width_line_edit.setText("0.5")
+        self.max_width_line_edit.setText("30")
+        self.estimate_width_line_edit.setText("3")
+        self.default_peak_checkbox.setChecked(True)
+        self.set_peak_width_visible(False)
+
+    def set_peak_width_visible(self, arg):
+        self.min_width_label.setVisible(arg)
+        self.min_width_line_edit.setVisible(arg)
+        self.max_width_label.setVisible(arg)
+        self.max_width_line_edit.setVisible(arg)
+        self.estimate_width_label.setVisible(arg)
+        self.estimate_width_line_edit.setVisible(arg)
 
     def enable(self):
         self.setEnabled(True)
@@ -149,3 +216,9 @@ class EAAutoTabView(QtWidgets.QWidget):
             label_text = f"{number_of_peaks} peaks found in {workspace}"
         self.peak_info_label.setText(label_text)
         self.peak_info_label.setVisible(True)
+
+    def default_peak_checkbox_changed(self):
+        if not self.default_peak_checkbox.isChecked():
+            self.set_peak_width_visible(True)
+        else:
+            self.set_peak_width_visible(False)

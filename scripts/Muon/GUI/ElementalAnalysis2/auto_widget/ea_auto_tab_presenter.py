@@ -21,14 +21,7 @@ class EAAutoTabPresenter(object):
         self.popup_match_table = None
         self.popup_peak_table = None
 
-        self.find_peaks_observer = GenericObserver(self.run_find_peak_algorithms)
-        self.show_peaks_table_observer = GenericObserver(self.show_peaks_table)
-        self.show_match_table_observer = GenericObserver(self.show_match_table)
-        self.update_match_table_observer = GenericObserver(self.update_match_table)
-        self.update_view_observer = GenericObserver(self.update_view)
-
-        self.enable_tab_observer = GenericObserver(self.enable_tab)
-        self.disable_tab_observer = GenericObserver(self.disable_tab)
+        self.setup_observers()
 
         self.setup_notifier()
 
@@ -36,8 +29,21 @@ class EAAutoTabPresenter(object):
         self.view.find_peaks_notifier.add_subscriber(self.find_peaks_observer)
         self.view.show_peaks_table_notifier.add_subscriber(self.show_peaks_table_observer)
         self.view.show_match_table_notifier.add_subscriber(self.show_match_table_observer)
+        self.view.clear_match_table_notifier.add_subscriber(self.clear_match_table_observer)
         self.model.update_match_table_notifier.add_subscriber(self.update_match_table_observer)
         self.model.update_view_notifier.add_subscriber(self.update_view_observer)
+
+    def setup_observers(self):
+        self.find_peaks_observer = GenericObserver(self.run_find_peak_algorithms)
+        self.show_peaks_table_observer = GenericObserver(self.show_peaks_table)
+        self.show_match_table_observer = GenericObserver(self.show_match_table)
+        self.clear_match_table_observer = GenericObserver(self.clear_match_table)
+        self.update_match_table_observer = GenericObserver(self.update_match_table)
+        self.update_view_observer = GenericObserver(self.update_view)
+
+        self.enable_tab_observer = GenericObserver(self.enable_tab)
+        self.disable_tab_observer = GenericObserver(self.disable_tab)
+        self.group_change_observer = GenericObserver(self.update_view)
 
     def run_find_peak_algorithms(self):
         parameters = self.view.get_parameters_for_find_peaks()
@@ -53,29 +59,35 @@ class EAAutoTabPresenter(object):
         elif not check_if_workspace_exist(parameter):
             message_box.warning(f"ERROR : {parameter} Table does not exist", None)
             return
-        if self.popup_peak_table is not None:
-            del self.popup_peak_table
-            self.popup_peak_table = EAAutoPopupTable(parameter)
-            self.popup_peak_table.show()
-        else:
-            self.popup_peak_table = EAAutoPopupTable(parameter)
-            self.popup_peak_table.show()
+
+        self.popup_peak_table = EAAutoPopupTable(parameter)
+
+        table = retrieve_ws(parameter)
+        columns = table.getColumnNames()
+        self.popup_peak_table.create_table(columns)
+        table_entries = self.extract_rows(parameter)
+        for entry in table_entries:
+            self.popup_peak_table.add_entry_to_table(entry)
+        self.popup_peak_table.show()
 
     def show_match_table(self):
-        parameter = self.view.show_match_table_combobox.currentText()
+        parameter = self.view.show_peaks_table_combobox.currentText()
         if parameter == "":
             message_box.warning("ERROR : No selected table", None)
             return
         elif not check_if_workspace_exist(parameter):
             message_box.warning(f"ERROR : {parameter} Table does not exist", None)
             return
-        if self.popup_match_table is not None:
-            del self.popup_match_table
-            self.popup_match_table = EAAutoPopupTable(parameter)
-            self.popup_match_table.show()
-        else:
-            self.popup_match_table = EAAutoPopupTable(parameter)
-            self.popup_match_table.show()
+
+        self.popup_match_table = EAAutoPopupTable(parameter)
+
+        table = retrieve_ws(parameter)
+        columns = table.getColumnNames()
+        self.popup_peak_table.create_table(columns)
+        table_entries = self.extract_rows(parameter)
+        for entry in table_entries:
+            self.popup_match_table.add_entry_to_table(entry)
+        self.popup_match_table.show()
 
     def update_match_table(self):
         while not self.model.table_entries.empty():
@@ -83,8 +95,8 @@ class EAAutoTabPresenter(object):
 
     def update_view(self):
         # Check context for loaded workspaces and add to values find peak combobox
-        # check all tables in ads or in context and add to show peaks and show matches combobox
-        print("update view")
+        # check all tables in load run's groups and add to show peaks and show matches combobox
+
         group_names = self.context.group_context.group_names
         self.view.add_options_to_find_peak_combobox(group_names)
         all_runs = []
@@ -124,3 +136,17 @@ class EAAutoTabPresenter(object):
 
     def disable_tab(self):
         self.view.disable()
+
+    def clear_match_table(self):
+        self.match_table_presenter.clear_table()
+
+    def extract_rows(self, table_name):
+        table = retrieve_ws(table_name)
+        table_data = table.toDict()
+        table_entries = []
+
+        for i in range(table.rowCount()):
+            table_entries.append([])
+            for column in table_data:
+                table_entries[-1].append(str(table_data[column][i]))
+        return table_entries

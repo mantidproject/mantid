@@ -35,4 +35,4 @@ class EAMatchTablePresenter(object):
 
     def clear_table(self):
         self.table_entries = []
-        self.view.table.clearContents()
+        self.view.clear_table()

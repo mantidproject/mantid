@@ -52,5 +52,8 @@ class EAMatchTableView(QtWidgets.QWidget):
             self.table.setItem(row_position, i, table_item)
 
     def remove_row(self, row_index):
-        print("in_remove")
         self.table.removeRow(row_index)
+
+    def clear_table(self):
+        for i in range(self.table.rowCount() - 1, -1, -1):
+            self.remove_row(i)

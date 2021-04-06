@@ -11,6 +11,12 @@ from Muon.GUI.Common import thread_model, message_box
 from mantidqt.utils.observer_pattern import GenericObservable
 from queue import Queue
 
+# Peak width for detectors are defined below for each detector data was extracted from run 2749
+PEAK_WIDTH = {"Detector 1": [0.5, 1, 2.5],
+              "Detector 2": [0.5, 1, 3],
+              "Detector 3": [0.1, 0.5, 1.5],
+              "Detector 4": [0.1, 0.7, 1.5]}
+
 
 class EAAutoTabModel(object):
 
@@ -21,7 +27,6 @@ class EAAutoTabModel(object):
         self.update_view_notifier = GenericObservable()
         self.calculation_started_notifier = GenericObservable()
         self.calculation_finished_notifier = GenericObservable()
-        self.warnings = Queue()
         self.current_peak_table_info = {"workspace": None, "number_of_peaks": None}
 
     def split_run_and_detector(self, workspace_name):
@@ -41,34 +46,35 @@ class EAAutoTabModel(object):
 
     def calculation_success(self):
         self.calculation_finished_notifier.notify_subscribers()
-        self.handle_warnings()
         self.update_view_notifier.notify_subscribers()
         self.update_match_table_notifier.notify_subscribers()
 
     def handle_calculation_error(self, error):
         message_box.warning("ERROR: " + str(error), None)
         self.calculation_finished_notifier.notify_subscribers()
-        self.handle_warnings()
         self.update_view_notifier.notify_subscribers()
         self.update_match_table_notifier.notify_subscribers()
 
-    def handle_warnings(self):
-        while not self.warnings.empty():
-            message_box.warning("Warning: " + self.warnings.get(), None)
-
     def _run_peak_algorithms(self, parameters):
-        # Run FindPeaksAutomatic algorithm
         workspace = parameters["workspace"]
         min_energy = parameters["min_energy"]
         max_energy = parameters["max_energy"]
         threshold = parameters["threshold"]
         run, detector = self.split_run_and_detector(workspace)
+        group = retrieve_ws(run)
+
+        self.run_find_peak_algorithm(workspace, min_energy, max_energy, threshold, detector, group)
+        self.run_peak_matchiing_algorithm(workspace, group)
+
+    def run_find_peak_algorithm(self, workspace, min_energy, max_energy, threshold, detector, group):
+        # Run FindPeaksAutomatic algorithm
         FindPeaksAutomatic(InputWorkspace=retrieve_ws(workspace), SpectrumNumber=3, StartXValue=min_energy,
                            EndXValue=max_energy, AcceptanceThreshold=threshold,
                            PeakPropertiesTableName=workspace + "_peaks",
-                           RefitPeakPropertiesTableName=workspace + "_refitted_peaks")
+                           RefitPeakPropertiesTableName=workspace + "_refitted_peaks",
+                           MinPeakSigma=PEAK_WIDTH[detector][0], EstimatePeakSigma=PEAK_WIDTH[detector][1],
+                           MaxPeakSigma=PEAK_WIDTH[detector][2])
 
-        group = retrieve_ws(run)
         group.add(workspace + "_with_errors")
 
         refit_peak_table = retrieve_ws(workspace + "_refitted_peaks")
@@ -87,7 +93,8 @@ class EAAutoTabModel(object):
             peak_table.delete()
             raise RuntimeError(f"No peaks found in {workspace} try reducing acceptance threshold")
 
-        # Run PeakMatching workspace
+    def run_peak_matchiing_algorithm(self, workspace, group):
+        # Run PeakMatching algorithm
         match_table_names = [workspace + "_all_matches", workspace + "_primary_matches",
                              workspace + "_secondary_matches",
                              workspace + "_all_matches_sorted_by_energy", workspace + "_likelihood"]
