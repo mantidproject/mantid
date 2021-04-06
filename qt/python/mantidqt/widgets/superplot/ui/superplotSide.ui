@@ -18,35 +18,6 @@
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="1">
-     <widget class="QToolButton" name="addButton">
-      <property name="minimumSize">
-       <size>
-        <width>27</width>
-        <height>27</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>+</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <widget class="WorkspaceSelector" name="workspaceSelector"/>
-    </item>
-    <item row="0" column="2">
-     <widget class="QToolButton" name="delButton">
-      <property name="minimumSize">
-       <size>
-        <width>27</width>
-        <height>27</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>-</string>
-      </property>
-     </widget>
-    </item>
     <item row="1" column="0" colspan="3">
      <widget class="QTreeWidget" name="workspacesList">
       <property name="selectionMode">
@@ -69,6 +40,22 @@
        </property>
       </column>
      </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QToolButton" name="addButton">
+      <property name="minimumSize">
+       <size>
+        <width>27</width>
+        <height>27</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>+</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0" colspan="2">
+     <widget class="WorkspaceSelector" name="workspaceSelector"/>
     </item>
    </layout>
   </widget>
