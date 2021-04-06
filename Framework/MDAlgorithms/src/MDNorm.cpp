@@ -1207,8 +1207,8 @@ MDNorm::binBackgroundWS(const std::vector<Geometry::SymmetryOperation> &symmetry
                 << " Total binning count = " << bincount << " @ Exp info (index) " << i_expinfo
                 << ", symmetry operation (index) " << soIndex << "\n";
 
-      soIndex += 1;
-      bincount += 1;
+      soIndex++;
+      bincount++;
     }
   }
   auto outputMDHWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
