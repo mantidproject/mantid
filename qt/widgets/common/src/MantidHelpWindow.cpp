@@ -65,10 +65,8 @@ const QString COLLECTION_FILE("MantidProject.qhc");
 /**
  * Default constructor shows the @link DEFAULT_URL @endlink.
  */
-MantidHelpWindow::MantidHelpWindow(QWidget *parent,
-                                   const Qt::WindowFlags &flags)
-    : MantidHelpInterface(), m_collectionFile(""), m_cacheFile(""),
-      m_firstRun(true) {
+MantidHelpWindow::MantidHelpWindow(QWidget *parent, const Qt::WindowFlags &flags)
+    : MantidHelpInterface(), m_collectionFile(""), m_cacheFile(""), m_firstRun(true) {
   // find the collection and delete the cache file if this is the first run
   if (!bool(g_helpWindow)) {
     this->determineFileLocs();
@@ -80,8 +78,7 @@ MantidHelpWindow::MantidHelpWindow(QWidget *parent,
         g_log.debug() << "Removing help cache file \"" << m_cacheFile << "\"\n";
         Poco::File(m_cacheFile).remove();
       } else {
-        Poco::Path direcPath =
-            Poco::Path(m_cacheFile).parent(); // drop off the filename
+        Poco::Path direcPath = Poco::Path(m_cacheFile).parent(); // drop off the filename
         Poco::File direcFile(direcPath.absolute().toString());
         if (!direcFile.exists()) {
           direcFile.createDirectories();
@@ -91,12 +88,9 @@ MantidHelpWindow::MantidHelpWindow(QWidget *parent,
 
     // create the help engine with the found location
     g_log.debug() << "Loading " << m_collectionFile << "\n";
-    auto helpEngine =
-        new QHelpEngine(QString(m_collectionFile.c_str()), parent);
-    QObject::connect(helpEngine, SIGNAL(warning(QString)), this,
-                     SLOT(warning(QString)));
-    g_log.debug() << "Making local cache copy for saving information at "
-                  << m_cacheFile << "\n";
+    auto helpEngine = new QHelpEngine(QString(m_collectionFile.c_str()), parent);
+    QObject::connect(helpEngine, SIGNAL(warning(QString)), this, SLOT(warning(QString)));
+    g_log.debug() << "Making local cache copy for saving information at " << m_cacheFile << "\n";
 
     if (helpEngine->copyCollectionFile(QString(m_cacheFile.c_str()))) {
       helpEngine->setCollectionFile(QString(m_cacheFile.c_str()));
@@ -104,8 +98,7 @@ MantidHelpWindow::MantidHelpWindow(QWidget *parent,
       g_log.warning("Failed to copy collection file");
       g_log.debug(helpEngine->error().toStdString());
     }
-    g_log.debug() << "helpengine.setupData() returned "
-                  << helpEngine->setupData() << "\n";
+    g_log.debug() << "helpengine.setupData() returned " << helpEngine->setupData() << "\n";
 
     // create a new help window
     g_helpWindow = new pqHelpWindow(helpEngine, parent, flags);
@@ -140,9 +133,7 @@ void MantidHelpWindow::openWebpage(const QUrl &url) {
   MantidDesktopServices::openUrl(url);
 }
 
-void MantidHelpWindow::showPage(const QString &url) {
-  this->showPage(QUrl(url));
-}
+void MantidHelpWindow::showPage(const QString &url) { this->showPage(QUrl(url)); }
 
 void MantidHelpWindow::showPage(const QUrl &url) {
   if (bool(g_helpWindow)) {
@@ -166,9 +157,7 @@ void MantidHelpWindow::showPage(const QUrl &url) {
  * @param url The url to open. This should start with @link BASE_URL @endlink.
  * If it is empty show the default page.
  */
-void MantidHelpWindow::showPage(const string &url) {
-  this->showPage(QUrl(QString(url.c_str())));
-}
+void MantidHelpWindow::showPage(const string &url) { this->showPage(QUrl(QString(url.c_str()))); }
 
 void MantidHelpWindow::showWikiPage(const string &page) {
   if (page.empty())
@@ -183,9 +172,7 @@ void MantidHelpWindow::showWikiPage(const string &page) {
  * @param page The name of the wiki page to show. If this is empty show
  * the wiki homepage.
  */
-void MantidHelpWindow::showWikiPage(const QString &page) {
-  this->showWikiPage(page.toStdString());
-}
+void MantidHelpWindow::showWikiPage(const QString &page) { this->showWikiPage(page.toStdString()); }
 
 /**
  * Show the help page for a particular algorithm. The page is picked
@@ -276,9 +263,7 @@ void MantidHelpWindow::showConcept(const string &name) {
  * @param name The name of the concept to show. If this is empty show
  * the concept index.
  */
-void MantidHelpWindow::showConcept(const QString &name) {
-  this->showConcept(name.toStdString());
-}
+void MantidHelpWindow::showConcept(const QString &name) { this->showConcept(name.toStdString()); }
 
 /**
  * Show the help page for a particular fit function. The page is
@@ -314,8 +299,17 @@ void MantidHelpWindow::showFitFunction(const std::string &name) {
  * @param name The name of the fit function to show. If it is empty show
  * the fit function index.
  */
-void MantidHelpWindow::showFitFunction(const QString &name) {
-  this->showFitFunction(name.toStdString());
+void MantidHelpWindow::showFitFunction(const QString &name) { this->showFitFunction(name.toStdString()); }
+
+/**
+ * Show the help page for a given custom interface.
+ *
+ * @param name The name of the interface to show
+ * @param area :: the folder in the custom interface documentation directory
+ * @param section :: the section of the interface to show
+ */
+void MantidHelpWindow::showCustomInterface(const QString &name, const QString &area, const QString &section) {
+  this->showCustomInterface(name.toStdString(), area.toStdString(), section.toStdString());
 }
 
 /**
@@ -325,22 +319,7 @@ void MantidHelpWindow::showFitFunction(const QString &name) {
  * @param area :: the folder in the custom interface documentation directory
  * @param section :: the section of the interface to show
  */
-void MantidHelpWindow::showCustomInterface(const QString &name,
-                                           const QString &area,
-                                           const QString &section) {
-  this->showCustomInterface(name.toStdString(), area.toStdString(),
-                            section.toStdString());
-}
-
-/**
- * Show the help page for a given custom interface.
- *
- * @param name The name of the interface to show
- * @param area :: the folder in the custom interface documentation directory
- * @param section :: the section of the interface to show
- */
-void MantidHelpWindow::showCustomInterface(const std::string &name,
-                                           const std::string &area,
+void MantidHelpWindow::showCustomInterface(const std::string &name, const std::string &area,
                                            const std::string &section) {
   if (bool(g_helpWindow)) {
     QString url(BASE_URL);
@@ -393,8 +372,7 @@ void MantidHelpWindow::findCollectionFile(std::string &binDir) {
     m_collectionFile = path.toStdString();
     return;
   } else {
-    g_log.debug() << "QHelp Collection file " << path.toStdString()
-                  << " not found\n";
+    g_log.debug() << "QHelp Collection file " << path.toStdString() << " not found\n";
   }
 
   // try where the builds will put it for a single configuration build
@@ -446,8 +424,7 @@ void MantidHelpWindow::findCollectionFile(std::string &binDir) {
   }
 
   // all tries have failed
-  g_log.information("Failed to find help system collection file \"" +
-                    COLLECTION_FILE.toStdString() + "\"");
+  g_log.information("Failed to find help system collection file \"" + COLLECTION_FILE.toStdString() + "\"");
 }
 
 /**
@@ -468,19 +445,15 @@ void MantidHelpWindow::determineFileLocs() {
   // determine cache file location
   m_cacheFile = COLLECTION_FILE.toStdString();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  QString dataLoc =
-      QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+  QString dataLoc = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
 #else
-  QString dataLoc =
-      QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) +
-      "/data";
+  QString dataLoc = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/data";
 #endif
 
   if (dataLoc.endsWith("mantidproject")) {
     Poco::Path path(dataLoc.toStdString(), m_cacheFile);
     m_cacheFile = path.absolute().toString();
-  } else if (dataLoc.endsWith(
-                 "MantidPlot")) // understood to end in "Mantid/MantidPlot"
+  } else if (dataLoc.endsWith("MantidPlot")) // understood to end in "Mantid/MantidPlot"
   {
     Poco::Path path(dataLoc.toStdString());
     path = path.parent(); // drop off "MantidPlot"
@@ -496,9 +469,7 @@ void MantidHelpWindow::determineFileLocs() {
   }
 }
 
-void MantidHelpWindow::warning(const QString &msg) {
-  g_log.warning(msg.toStdString());
-}
+void MantidHelpWindow::warning(const QString &msg) { g_log.warning(msg.toStdString()); }
 
 } // namespace MantidWidgets
 } // namespace MantidQt

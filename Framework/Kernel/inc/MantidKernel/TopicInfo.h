@@ -42,8 +42,7 @@ private:
 };
 
 /// Allow this object to be printed to a stream
-MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &buffer,
-                                           const TopicInfo &topic);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &buffer, const TopicInfo &topic);
 
 } // namespace Kernel
 } // namespace Mantid

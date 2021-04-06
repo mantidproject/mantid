@@ -24,9 +24,7 @@ namespace LiveData {
    Management
     Service and receives events from it.
  */
-class SNSLiveEventDataListener : public API::LiveListener,
-                                 public Poco::Runnable,
-                                 public ADARA::Parser {
+class SNSLiveEventDataListener : public API::LiveListener, public Poco::Runnable, public ADARA::Parser {
 public:
   SNSLiveEventDataListener();
   ~SNSLiveEventDataListener() override;
@@ -36,8 +34,7 @@ public:
   bool buffersEvents() const override { return true; }
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void start(const Types::Core::DateAndTime startTime =
-                 Types::Core::DateAndTime()) override;
+  void start(const Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
   std::shared_ptr<API::Workspace> extractData() override;
 
   ILiveListener::RunStatus runStatus() override;
@@ -100,8 +97,7 @@ private:
   // Returns true if we've got a value for every log listed in m_requiredLogs
   bool haveRequiredLogs();
 
-  void appendEvent(const uint32_t pixelId, const double tof,
-                   const Mantid::Types::Core::DateAndTime pulseTime);
+  void appendEvent(const uint32_t pixelId, const double tof, const Mantid::Types::Core::DateAndTime pulseTime);
   // tof is "Time Of Flight" and is in units of microsecondss relative to the
   // start of the pulse
   // (There's some documentation that says nanoseconds, but Russell Taylor
@@ -152,9 +148,9 @@ private:
 
   // These 2 determine whether or not we filter out events that arrive when
   // the run is paused.
-  bool m_runPaused{false}; // Set to true or false when we receive a
-                           // pause/resume marker in an annotation packet. (See
-                           // rxPacket( const ADARA::AnnotationPkt &pkt))
+  bool m_runPaused{false};        // Set to true or false when we receive a
+                                  // pause/resume marker in an annotation packet. (See
+                                  // rxPacket( const ADARA::AnnotationPkt &pkt))
   bool m_keepPausedEvents{false}; // Set from a configuration property
 
   // Holds on to any exceptions that were thrown in the background thread so
@@ -166,8 +162,7 @@ private:
 
   // maps <device id, variable id> to variable name
   // (variable names are unique, so we don't need to worry about device names.)
-  using NameMapType =
-      std::map<std::pair<unsigned int, unsigned int>, std::string>;
+  using NameMapType = std::map<std::pair<unsigned int, unsigned int>, std::string>;
   NameMapType m_nameMap;
 
   // ---------------------------------------------------------------------------
@@ -182,8 +177,7 @@ private:
 
   // Maps the device ID / variable ID pair to the actual packet.  Using a map
   // means we will only keep one packet (the most recent one) for each variable
-  using VariableMapType = std::map<std::pair<unsigned int, unsigned int>,
-                                   std::shared_ptr<ADARA::Packet>>;
+  using VariableMapType = std::map<std::pair<unsigned int, unsigned int>, std::shared_ptr<ADARA::Packet>>;
   VariableMapType m_variableMap;
 
   // Process all the variable value packets stored in m_variableMap
@@ -198,9 +192,7 @@ private:
   // packets that are older than we requested.)
   // Returns false if the packet should be processed, true if is should be
   // ignored
-  bool
-  ignorePacket(const ADARA::PacketHeader &hdr,
-               const ADARA::RunStatus::Enum status = ADARA::RunStatus::NO_RUN);
+  bool ignorePacket(const ADARA::PacketHeader &hdr, const ADARA::RunStatus::Enum status = ADARA::RunStatus::NO_RUN);
   void setRunDetails(const ADARA::RunStatusPkt &pkt);
 
   // We have to defer calling setRunDetails() at the start of a run until the

@@ -54,12 +54,10 @@ const double LOW_JUMP_LIMIT = 1e-25;
 // random number generator
 std::mt19937 rng;
 
-API::MatrixWorkspace_sptr
-createWorkspace(std::vector<double> const &xValues,
-                std::vector<double> const &yValues, int const numberOfSpectra,
-                std::vector<std::string> const &verticalAxisNames) {
-  auto createWorkspaceAlgorithm =
-      AlgorithmManager::Instance().createUnmanaged("CreateWorkspace");
+API::MatrixWorkspace_sptr createWorkspace(std::vector<double> const &xValues, std::vector<double> const &yValues,
+                                          int const numberOfSpectra,
+                                          std::vector<std::string> const &verticalAxisNames) {
+  auto createWorkspaceAlgorithm = AlgorithmManager::Instance().createUnmanaged("CreateWorkspace");
   createWorkspaceAlgorithm->initialize();
   createWorkspaceAlgorithm->setChild(true);
   createWorkspaceAlgorithm->setLogging(false);
@@ -67,8 +65,7 @@ createWorkspace(std::vector<double> const &xValues,
   createWorkspaceAlgorithm->setProperty("DataY", yValues);
   createWorkspaceAlgorithm->setProperty("NSpec", numberOfSpectra);
   createWorkspaceAlgorithm->setProperty("VerticalAxisUnit", "Text");
-  createWorkspaceAlgorithm->setProperty("VerticalAxisValues",
-                                        verticalAxisNames);
+  createWorkspaceAlgorithm->setProperty("VerticalAxisValues", verticalAxisNames);
   createWorkspaceAlgorithm->setProperty("OutputWorkspace", "__PDF");
   createWorkspaceAlgorithm->execute();
   return createWorkspaceAlgorithm->getProperty("OutputWorkspace");
@@ -80,33 +77,25 @@ DECLARE_FUNCMINIMIZER(FABADAMinimizer, FABADA)
 
 /// Constructor
 FABADAMinimizer::FABADAMinimizer()
-    : m_counter(0), m_chainIterations(0), m_changes(), m_jump(), m_parameters(),
-      m_chain(), m_chi2(0.), m_converged(false), m_convPoint(0),
-      m_parConverged(), m_criteria(), m_maxIter(0), m_parChanged(),
-      m_temperature(0.), m_counterGlobal(0), m_simAnnealingItStep(0),
-      m_leftRefrPoints(0), m_tempStep(0.), m_overexploration(false),
-      m_nParams(0), m_numInactiveRegenerations(), m_changesOld() {
-  declareProperty("ChainLength", static_cast<size_t>(10000),
-                  "Length of the converged chain.");
+    : m_counter(0), m_chainIterations(0), m_changes(), m_jump(), m_parameters(), m_chain(), m_chi2(0.),
+      m_converged(false), m_convPoint(0), m_parConverged(), m_criteria(), m_maxIter(0), m_parChanged(),
+      m_temperature(0.), m_counterGlobal(0), m_simAnnealingItStep(0), m_leftRefrPoints(0), m_tempStep(0.),
+      m_overexploration(false), m_nParams(0), m_numInactiveRegenerations(), m_changesOld() {
+  declareProperty("ChainLength", static_cast<size_t>(10000), "Length of the converged chain.");
   declareProperty("StepsBetweenValues", 10,
                   "Steps done between chain points to avoid correlation"
                   " between them.");
-  declareProperty(
-      "ConvergenceCriteria", 0.01,
-      "Variance in Cost Function for considering convergence reached.");
+  declareProperty("ConvergenceCriteria", 0.01, "Variance in Cost Function for considering convergence reached.");
   declareProperty("InnactiveConvergenceCriterion", static_cast<size_t>(5),
                   "Number of Innactive Regenerations to consider"
                   " a certain parameter to be converged");
-  declareProperty("JumpAcceptanceRate", 0.6666666,
-                  "Desired jumping acceptance rate");
+  declareProperty("JumpAcceptanceRate", 0.6666666, "Desired jumping acceptance rate");
   // Simulated Annealing properties
   declareProperty("SimAnnealingApplied", false,
                   "If minimization should be run with Simulated"
                   " Annealing or not");
-  declareProperty("MaximumTemperature", 10.0,
-                  "Simulated Annealing maximum temperature");
-  declareProperty("NumRefrigerationSteps", static_cast<size_t>(5),
-                  "Simulated Annealing number of temperature changes");
+  declareProperty("MaximumTemperature", 10.0, "Simulated Annealing maximum temperature");
+  declareProperty("NumRefrigerationSteps", static_cast<size_t>(5), "Simulated Annealing number of temperature changes");
   declareProperty("SimAnnealingIterations", static_cast<size_t>(10000),
                   "Number of iterations for the Simulated Annealig");
   declareProperty("Overexploration", false,
@@ -116,24 +105,19 @@ FABADAMinimizer::FABADAMinimizer()
                   " Useful to find the exact minimum.");
   // Output Properties
   declareProperty("PDF", true, "If the PDF's should be calculated or not.");
-  declareProperty("NumberBinsPDF", 20,
-                  "Number of bins used for the output PDFs");
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "Chains", "", Kernel::Direction::Output),
+  declareProperty("NumberBinsPDF", 20, "Number of bins used for the output PDFs");
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("Chains", "", Kernel::Direction::Output),
                   "The name to give the output workspace for the"
                   " complete chains.");
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "ConvergedChain", "", Kernel::Direction::Output,
-                      API::PropertyMode::Optional),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("ConvergedChain", "", Kernel::Direction::Output,
+                                                             API::PropertyMode::Optional),
                   "The name to give the output workspace for just the"
                   "converged chain");
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("CostFunctionTable", "",
+                                                                                 Kernel::Direction::Output),
+                  "The name to give the output workspace");
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "CostFunctionTable", "", Kernel::Direction::Output),
-      "The name to give the output workspace");
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "Parameters", "", Kernel::Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("Parameters", "", Kernel::Direction::Output),
       "The name to give the output workspace (Parameter values and errors)");
 
   // To be implemented in the future
@@ -149,11 +133,9 @@ FABADAMinimizer::FABADAMinimizer()
  * @param function :: the fit function
  * @param maxIterations :: maximum number of iterations
  */
-void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
-                                 size_t maxIterations) {
+void FABADAMinimizer::initialize(API::ICostFunction_sptr function, size_t maxIterations) {
 
-  m_leastSquares =
-      std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(function);
+  m_leastSquares = std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(function);
   if (!m_leastSquares) {
     throw std::invalid_argument("FABADA works only with least squares."
                                 " Different function was given.");
@@ -182,11 +164,10 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
 
   // Throw error if there are not enough iterations
   if (totalRequiredIterations >= maxIterations) {
-    throw std::length_error(
-        "Too few iterations to perform the"
-        " Simulated Annealing and/or the posterior chain plus"
-        " 350 iterations for the burn-in period. Increase"
-        " MaxIterations property");
+    throw std::length_error("Too few iterations to perform the"
+                            " Simulated Annealing and/or the posterior chain plus"
+                            " 350 iterations for the burn-in period. Increase"
+                            " MaxIterations property");
   }
 }
 
@@ -274,12 +255,10 @@ bool FABADAMinimizer::iterate(size_t /*iteration*/) {
     // since it starts to check if convergence is reached)
 
     // Take the unmovable parameters to be converged
-    if (m_leftRefrPoints == 0 && !m_parChanged[i] &&
-        m_counter > LOWER_CONVERGENCE_LIMIT)
+    if (m_leftRefrPoints == 0 && !m_parChanged[i] && m_counter > LOWER_CONVERGENCE_LIMIT)
       m_parConverged[i] = true;
 
-    if (m_leftRefrPoints == 0 && !m_parConverged[i] &&
-        m_counter > LOWER_CONVERGENCE_LIMIT) {
+    if (m_leftRefrPoints == 0 && !m_parConverged[i] && m_counter > LOWER_CONVERGENCE_LIMIT) {
       if (oldChi2 != m_chi2) {
         double chi2Quotient = fabs(m_chi2 - oldChi2) / oldChi2;
         if (chi2Quotient < m_criteria[i]) {
@@ -333,8 +312,7 @@ void FABADAMinimizer::finalize() {
   std::vector<double> errorLeft(m_nParams);
   std::vector<double> errorRight(m_nParams);
 
-  calculateConvChainAndBestParameters(convLength, nSteps, reducedConvergedChain,
-                                      bestParameters, errorLeft, errorRight);
+  calculateConvChainAndBestParameters(convLength, nSteps, reducedConvergedChain, bestParameters, errorLeft, errorRight);
 
   if (!getPropertyValue("Parameters").empty()) {
     outputParameterTable(bestParameters, errorLeft, errorRight);
@@ -351,9 +329,7 @@ void FABADAMinimizer::finalize() {
       std::static_pointer_cast<MaleableCostFunction>(m_leastSquares);
   leastSquaresMaleable->setDirtyInherited();
   // Convert back to base class
-  m_leastSquares =
-      std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
-          leastSquaresMaleable);
+  m_leastSquares = std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(leastSquaresMaleable);
 
   // If required, output the complete chain
   if (!getPropertyValue("Chains").empty()) {
@@ -394,8 +370,7 @@ double FABADAMinimizer::gaussianStep(const double &jump) {
  * @param newValue :: the value of the parameter
  * @param step :: the step used to modify the parameter value
  */
-void FABADAMinimizer::boundApplication(const size_t &parameterIndex,
-                                       double &newValue, double &step) {
+void FABADAMinimizer::boundApplication(const size_t &parameterIndex, double &newValue, double &step) {
   API::IConstraint *iConstraint = m_fitFunction->getConstraint(parameterIndex);
   if (!iConstraint)
     return;
@@ -414,8 +389,7 @@ void FABADAMinimizer::boundApplication(const size_t &parameterIndex,
       step = step / 10;
       m_jump[parameterIndex] = m_jump[parameterIndex] / 10;
     } else {
-      newValue =
-          lower + std::abs(step) - (m_parameters.get(parameterIndex) - lower);
+      newValue = lower + std::abs(step) - (m_parameters.get(parameterIndex) - lower);
     }
   }
   // Upper
@@ -425,8 +399,7 @@ void FABADAMinimizer::boundApplication(const size_t &parameterIndex,
       step = step / 10;
       m_jump[parameterIndex] = m_jump[parameterIndex] / 10;
     } else {
-      newValue =
-          upper - (std::abs(step) + m_parameters.get(parameterIndex) - upper);
+      newValue = upper - (std::abs(step) + m_parameters.get(parameterIndex) - upper);
     }
   }
 }
@@ -438,9 +411,7 @@ void FABADAMinimizer::boundApplication(const size_t &parameterIndex,
  * @param newParameters :: the value of the parameters after applying ties
  * @param newValue :: new value of the current parameter
  */
-void FABADAMinimizer::tieApplication(const size_t &parameterIndex,
-                                     GSLVector &newParameters,
-                                     double &newValue) {
+void FABADAMinimizer::tieApplication(const size_t &parameterIndex, GSLVector &newParameters, double &newValue) {
   // Fulfill the ties of the other parameters
   for (size_t j = 0; j < m_nParams; ++j) {
     if (j != parameterIndex) {
@@ -474,9 +445,7 @@ void FABADAMinimizer::tieApplication(const size_t &parameterIndex,
   leastSquaresMaleable->setDirtyInherited();
 
   // Convert back to base class
-  m_leastSquares =
-      std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
-          leastSquaresMaleable);
+  m_leastSquares = std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(leastSquaresMaleable);
 }
 
 /** Given the new chi2, next position is calculated and updated.
@@ -485,8 +454,7 @@ void FABADAMinimizer::tieApplication(const size_t &parameterIndex,
  * @param chi2New :: the new value of chi2
  * @param newParameters :: new value of the fitting parameters
  */
-void FABADAMinimizer::algorithmDisplacement(const size_t &parameterIndex,
-                                            const double &chi2New,
+void FABADAMinimizer::algorithmDisplacement(const size_t &parameterIndex, const double &chi2New,
                                             GSLVector &newParameters) {
 
   // If new Chi square value is lower, jumping directly to new parameter
@@ -532,9 +500,7 @@ void FABADAMinimizer::algorithmDisplacement(const size_t &parameterIndex,
       leastSquaresMaleable->setDirtyInherited();
 
       // Convert back to base class
-      m_leastSquares =
-          std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
-              leastSquaresMaleable);
+      m_leastSquares = std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(leastSquaresMaleable);
     }
   }
 }
@@ -547,8 +513,7 @@ void FABADAMinimizer::jumpUpdate(const size_t &parameterIndex) {
   const double jumpAR = getProperty("JumpAcceptanceRate");
   double newJump;
 
-  if (m_leftRefrPoints == 0 &&
-      m_changes[parameterIndex] == m_changesOld[parameterIndex])
+  if (m_leftRefrPoints == 0 && m_changes[parameterIndex] == m_changesOld[parameterIndex])
     ++m_numInactiveRegenerations[parameterIndex];
   else
     m_changesOld[parameterIndex] = m_changes[parameterIndex];
@@ -579,10 +544,9 @@ void FABADAMinimizer::jumpUpdate(const size_t &parameterIndex) {
   // Check if the new jump is too small. It means that it has been a wrong
   // convergence.
   if (std::abs(m_jump[parameterIndex]) < LOW_JUMP_LIMIT) {
-    g_log.warning()
-        << "Wrong convergence might be reached for parameter " +
-               m_fitFunction->parameterName(parameterIndex) +
-               ". Try to set a proper initial value for this parameter\n";
+    g_log.warning() << "Wrong convergence might be reached for parameter " +
+                           m_fitFunction->parameterName(parameterIndex) +
+                           ". Try to set a proper initial value for this parameter\n";
   }
 }
 
@@ -593,8 +557,7 @@ void FABADAMinimizer::jumpUpdate(const size_t &parameterIndex) {
 void FABADAMinimizer::convergenceCheck() {
   size_t innactConvCriterion = getProperty("InnactiveConvergenceCriterion");
 
-  if (m_leftRefrPoints == 0 && m_counter > LOWER_CONVERGENCE_LIMIT &&
-      !m_converged) {
+  if (m_leftRefrPoints == 0 && m_counter > LOWER_CONVERGENCE_LIMIT && !m_converged) {
     size_t t = 0;
     bool ImmobilityConv = false;
     for (size_t i = 0; i < m_nParams; i++) {
@@ -689,13 +652,10 @@ bool FABADAMinimizer::iterationContinuation() {
         }
       }
       failed.replace(failed.end() - 2, failed.end(), ".");
-      throw std::runtime_error(
-          "Convegence NOT reached after " +
-          std::to_string(m_maxIter - m_chainIterations) +
-          " iterations.\n   Try to set better initial values for parameters: " +
-          failed +
-          " Or increase the maximum number of iterations "
-          "(MaxIterations property).");
+      throw std::runtime_error("Convegence NOT reached after " + std::to_string(m_maxIter - m_chainIterations) +
+                               " iterations.\n   Try to set better initial values for parameters: " + failed +
+                               " Or increase the maximum number of iterations "
+                               "(MaxIterations property).");
     }
   } else {
     // If convergence has been reached, continue until we complete the chain
@@ -714,8 +674,8 @@ bool FABADAMinimizer::iterationContinuation() {
 void FABADAMinimizer::outputChains() {
 
   size_t chainLength = m_chain[0].size();
-  API::MatrixWorkspace_sptr wsC = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", m_nParams + 1, chainLength, chainLength);
+  API::MatrixWorkspace_sptr wsC =
+      API::WorkspaceFactory::Instance().create("Workspace2D", m_nParams + 1, chainLength, chainLength);
 
   // Do one iteration for each parameter plus one for Chi square.
   for (size_t j = 0; j < m_nParams + 1; ++j) {
@@ -742,18 +702,15 @@ void FABADAMinimizer::outputConvergedChains(size_t convLength, int nSteps) {
   // Create the workspace for the converged part of the chain.
   API::MatrixWorkspace_sptr wsConv;
   if (convLength > 0) {
-    wsConv = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", m_nParams + 1, convLength, convLength);
+    wsConv = API::WorkspaceFactory::Instance().create("Workspace2D", m_nParams + 1, convLength, convLength);
   } else {
     g_log.warning() << "Empty converged chain, empty Workspace returned.";
-    wsConv = API::WorkspaceFactory::Instance().create("Workspace2D",
-                                                      m_nParams + 1, 1, 1);
+    wsConv = API::WorkspaceFactory::Instance().create("Workspace2D", m_nParams + 1, 1, 1);
   }
 
   // Do one iteration for each parameter plus one for Chi square.
   for (size_t j = 0; j < m_nParams + 1; ++j) {
-    std::vector<double>::const_iterator first =
-        m_chain[j].begin() + m_convPoint;
+    std::vector<double>::const_iterator first = m_chain[j].begin() + m_convPoint;
     std::vector<double>::const_iterator last = m_chain[j].end();
     std::vector<double> convChain(first, last);
     auto &X = wsConv->mutableX(j);
@@ -774,11 +731,9 @@ void FABADAMinimizer::outputConvergedChains(size_t convLength, int nSteps) {
  * @param mostProbableChi2 :: most probable chi2 value
  *correlation
  */
-void FABADAMinimizer::outputCostFunctionTable(size_t convLength,
-                                              double mostProbableChi2) {
+void FABADAMinimizer::outputCostFunctionTable(size_t convLength, double mostProbableChi2) {
   // Create the workspace for the Chi square values.
-  API::ITableWorkspace_sptr wsChi2 =
-      API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+  API::ITableWorkspace_sptr wsChi2 = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
   wsChi2->addColumn("double", "Chi2 Minimum");
   wsChi2->addColumn("double", "Most Probable Chi2");
   wsChi2->addColumn("double", "reduced Chi2 Minimum");
@@ -789,16 +744,14 @@ void FABADAMinimizer::outputCostFunctionTable(size_t convLength,
   size_t dataSize = domain->size();
 
   // Calculate the value for the reduced Chi square.
-  double minimumChi2Red =
-      m_chi2 / (double(dataSize - m_nParams)); // For de minimum value.
+  double minimumChi2Red = m_chi2 / (double(dataSize - m_nParams)); // For de minimum value.
   double mostProbableChi2Red;
   if (convLength > 0)
     mostProbableChi2Red = mostProbableChi2 / (double(dataSize - m_nParams));
   else {
-    g_log.warning()
-        << "Most probable chi square not calculated. -1 is returned.\n"
-        << "Most probable reduced chi square not calculated. -1 is "
-           "returned.\n";
+    g_log.warning() << "Most probable chi square not calculated. -1 is returned.\n"
+                    << "Most probable reduced chi square not calculated. -1 is "
+                       "returned.\n";
     mostProbableChi2Red = -1;
   }
 
@@ -814,16 +767,13 @@ void FABADAMinimizer::outputCostFunctionTable(size_t convLength,
  * @param reducedChain :: the reduced chain (will be sorted)
  * @return :: most probable chi square value
  */
-double
-FABADAMinimizer::outputPDF(std::size_t const &convLength,
-                           std::vector<std::vector<double>> &reducedChain) {
+double FABADAMinimizer::outputPDF(std::size_t const &convLength, std::vector<std::vector<double>> &reducedChain) {
 
   // To store the most probable chi square value
   double mostPchi2;
 
   // Create the workspace for the Probability Density Functions
-  int pdfLength = getProperty(
-      "NumberBinsPDF"); // histogram length for the PDF output workspace
+  int pdfLength = getProperty("NumberBinsPDF"); // histogram length for the PDF output workspace
   if (pdfLength <= 0) {
     g_log.warning() << "Non valid Number of bins for the PDF (<= 0)."
                        " Default value (20 bins) taken\n";
@@ -837,12 +787,9 @@ FABADAMinimizer::outputPDF(std::size_t const &convLength,
     std::vector<double> yValues((m_nParams + 1) * pdfLength);
     std::vector<double> PDFYAxis(pdfLength, 0);
     double const start = reducedChain[m_nParams][0];
-    double const bin =
-        (reducedChain[m_nParams][convLength - 1] - start) / double(pdfLength);
+    double const bin = (reducedChain[m_nParams][convLength - 1] - start) / double(pdfLength);
 
-    mostPchi2 =
-        getMostProbableChiSquared(convLength, reducedChain, pdfLength, xValues,
-                                  yValues, PDFYAxis, start, bin);
+    mostPchi2 = getMostProbableChiSquared(convLength, reducedChain, pdfLength, xValues, yValues, PDFYAxis, start, bin);
 
     if (getProperty("PDF"))
       outputPDF(xValues, yValues, reducedChain, convLength, pdfLength);
@@ -856,21 +803,16 @@ FABADAMinimizer::outputPDF(std::size_t const &convLength,
   return mostPchi2;
 }
 
-void FABADAMinimizer::outputPDF(std::vector<double> &xValues,
-                                std::vector<double> &yValues,
-                                std::vector<std::vector<double>> &reducedChain,
-                                std::size_t const &convLength,
+void FABADAMinimizer::outputPDF(std::vector<double> &xValues, std::vector<double> &yValues,
+                                std::vector<std::vector<double>> &reducedChain, std::size_t const &convLength,
                                 int const &pdfLength) {
-  setParameterXAndYValuesForPDF(xValues, yValues, reducedChain, convLength,
-                                pdfLength);
+  setParameterXAndYValuesForPDF(xValues, yValues, reducedChain, convLength, pdfLength);
   auto parameterNames = m_fitFunction->getParameterNames();
   parameterNames.emplace_back("Chi Squared");
-  auto const workspace =
-      createWorkspace(xValues, yValues, int(m_nParams) + 1, parameterNames);
+  auto const workspace = createWorkspace(xValues, yValues, int(m_nParams) + 1, parameterNames);
 
   if (AnalysisDataService::Instance().doesExist(PDF_GROUP_NAME)) {
-    auto groupPDF = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-        PDF_GROUP_NAME);
+    auto groupPDF = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(PDF_GROUP_NAME);
     groupPDF->addWorkspace(workspace);
     AnalysisDataService::Instance().addOrReplace(PDF_GROUP_NAME, groupPDF);
   } else {
@@ -880,11 +822,11 @@ void FABADAMinimizer::outputPDF(std::vector<double> &xValues,
   }
 }
 
-double FABADAMinimizer::getMostProbableChiSquared(
-    std::size_t const &convLength,
-    std::vector<std::vector<double>> &reducedChain, int const &pdfLength,
-    std::vector<double> &xValues, std::vector<double> &yValues,
-    std::vector<double> &PDFYAxis, double const &start, double const &bin) {
+double FABADAMinimizer::getMostProbableChiSquared(std::size_t const &convLength,
+                                                  std::vector<std::vector<double>> &reducedChain, int const &pdfLength,
+                                                  std::vector<double> &xValues, std::vector<double> &yValues,
+                                                  std::vector<double> &PDFYAxis, double const &start,
+                                                  double const &bin) {
   std::size_t step = 0;
   std::size_t const chiXStartPos = m_nParams * (pdfLength + 1);
   std::size_t const chiYStartPos = m_nParams * pdfLength;
@@ -898,20 +840,17 @@ double FABADAMinimizer::getMostProbableChiSquared(
       ++step;
     }
     // Divided by convLength * bin to normalize
-    yValues[chiYStartPos + i - 1] =
-        PDFYAxis[i - 1] / (double(convLength) * bin);
+    yValues[chiYStartPos + i - 1] = PDFYAxis[i - 1] / (double(convLength) * bin);
   }
 
-  auto indexMostProbableChi2 =
-      std::max_element(PDFYAxis.begin(), PDFYAxis.end());
+  auto indexMostProbableChi2 = std::max_element(PDFYAxis.begin(), PDFYAxis.end());
 
   return xValues[indexMostProbableChi2 - PDFYAxis.begin()] + (bin / 2.0);
 }
 
-void FABADAMinimizer::setParameterXAndYValuesForPDF(
-    std::vector<double> &xValues, std::vector<double> &yValues,
-    std::vector<std::vector<double>> &reducedChain,
-    std::size_t const &convLength, int const &pdfLength) {
+void FABADAMinimizer::setParameterXAndYValuesForPDF(std::vector<double> &xValues, std::vector<double> &yValues,
+                                                    std::vector<std::vector<double>> &reducedChain,
+                                                    std::size_t const &convLength, int const &pdfLength) {
   for (std::size_t j = 0; j < m_nParams; ++j) {
 
     // Calculate the Probability Density Function
@@ -943,14 +882,12 @@ void FABADAMinimizer::setParameterXAndYValuesForPDF(
  * @param errorRight :: [output] vector containing the sqrt of the mean square
  *right deviation
  */
-void FABADAMinimizer::outputParameterTable(
-    const std::vector<double> &bestParameters,
-    const std::vector<double> &errorLeft,
-    const std::vector<double> &errorRight) {
+void FABADAMinimizer::outputParameterTable(const std::vector<double> &bestParameters,
+                                           const std::vector<double> &errorLeft,
+                                           const std::vector<double> &errorRight) {
 
   // Create the workspace for the parameters' value and errors.
-  API::ITableWorkspace_sptr wsPdfE =
-      API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+  API::ITableWorkspace_sptr wsPdfE = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
   wsPdfE->addColumn("str", "Name");
   wsPdfE->addColumn("double", "Value");
   wsPdfE->addColumn("double", "Left's error");
@@ -958,8 +895,7 @@ void FABADAMinimizer::outputParameterTable(
 
   for (size_t j = 0; j < m_nParams; ++j) {
     API::TableRow row = wsPdfE->appendRow();
-    row << m_fitFunction->parameterName(j) << bestParameters[j] << errorLeft[j]
-        << errorRight[j];
+    row << m_fitFunction->parameterName(j) << bestParameters[j] << errorLeft[j] << errorRight[j];
   }
   // Set and name the Parameter Errors workspace.
   setProperty("Parameters", wsPdfE);
@@ -978,11 +914,11 @@ void FABADAMinimizer::outputParameterTable(
  * @param errorRight :: [output] vector containing the sqrt of the mean square
  *right deviation
  */
-void FABADAMinimizer::calculateConvChainAndBestParameters(
-    size_t convLength, int nSteps,
-    std::vector<std::vector<double>> &reducedChain,
-    std::vector<double> &bestParameters, std::vector<double> &errorLeft,
-    std::vector<double> &errorRight) {
+void FABADAMinimizer::calculateConvChainAndBestParameters(size_t convLength, int nSteps,
+                                                          std::vector<std::vector<double>> &reducedChain,
+                                                          std::vector<double> &bestParameters,
+                                                          std::vector<double> &errorLeft,
+                                                          std::vector<double> &errorRight) {
 
   // In case of reduced chain
   if (convLength > 0) {
@@ -995,13 +931,11 @@ void FABADAMinimizer::calculateConvChainAndBestParameters(
 
     // Calculate the reducedConvergedChain for the cost fuction.
     for (size_t k = 1; k < convLength; ++k) {
-      reducedChain[m_nParams].emplace_back(
-          m_chain[m_nParams][nSteps * k + m_convPoint]);
+      reducedChain[m_nParams].emplace_back(m_chain[m_nParams][nSteps * k + m_convPoint]);
     }
 
     // Calculate the position of the minimum Chi square value
-    auto positionMinChi2 = std::min_element(reducedChain[m_nParams].begin(),
-                                            reducedChain[m_nParams].end());
+    auto positionMinChi2 = std::min_element(reducedChain[m_nParams].begin(), reducedChain[m_nParams].end());
     m_chi2 = *positionMinChi2;
 
     // Calculate the parameter value and the errors
@@ -1011,14 +945,11 @@ void FABADAMinimizer::calculateConvChainAndBestParameters(
         reducedChain[j].emplace_back(m_chain[j][m_convPoint + nSteps * k]);
       }
       // best fit parameters taken
-      bestParameters[j] =
-          reducedChain[j][positionMinChi2 - reducedChain[m_nParams].begin()];
+      bestParameters[j] = reducedChain[j][positionMinChi2 - reducedChain[m_nParams].begin()];
       std::sort(reducedChain[j].begin(), reducedChain[j].end());
-      auto posBestPar = std::find(reducedChain[j].begin(),
-                                  reducedChain[j].end(), bestParameters[j]);
+      auto posBestPar = std::find(reducedChain[j].begin(), reducedChain[j].end(), bestParameters[j]);
       double varLeft = 0, varRight = 0;
-      for (auto k = reducedChain[j].begin(); k < reducedChain[j].end();
-           k += 2) {
+      for (auto k = reducedChain[j].begin(); k < reducedChain[j].end(); k += 2) {
         if (k < posBestPar)
           varLeft += (*k - bestParameters[j]) * (*k - bestParameters[j]);
         else if (k > posBestPar)
@@ -1095,8 +1026,7 @@ void FABADAMinimizer::initChainsAndParameters() {
   m_changesOld = m_changes;
   m_numInactiveRegenerations = std::vector<size_t>(m_nParams, 0);
   m_parConverged = std::vector<bool>(m_nParams, false);
-  m_criteria =
-      std::vector<double>(m_nParams, getProperty("ConvergenceCriteria"));
+  m_criteria = std::vector<double>(m_nParams, getProperty("ConvergenceCriteria"));
 }
 
 /** Initialize member variables used for simulated annealing
@@ -1129,18 +1059,16 @@ void FABADAMinimizer::initSimulatedAnnealing() {
     }
     if (m_overexploration && m_temperature > 1) {
       m_overexploration = false;
-      g_log.warning()
-          << "Overexploration wrong temperature. Not"
-             " overexploring. Applying usual Simulated Annealing.\n";
+      g_log.warning() << "Overexploration wrong temperature. Not"
+                         " overexploring. Applying usual Simulated Annealing.\n";
     }
     // Obs: The result is truncated to not have more iterations than
     // the chosen by the user and for all temperatures have the same
     // number of iterations
     m_leftRefrPoints = getProperty("NumRefrigerationSteps");
     if (m_leftRefrPoints <= 0) {
-      g_log.warning()
-          << "Wrong value for the number of refrigeration"
-             " points (<= 0). Therefore, default value (5 points) taken.\n";
+      g_log.warning() << "Wrong value for the number of refrigeration"
+                         " points (<= 0). Therefore, default value (5 points) taken.\n";
       m_leftRefrPoints = 5;
     }
 
@@ -1153,9 +1081,8 @@ void FABADAMinimizer::initSimulatedAnnealing() {
     // 50 for pseudo-continuous temperature decrease
     // without hindering the fitting algorithm itself
     if (m_simAnnealingItStep < 50 && !m_overexploration) {
-      g_log.warning()
-          << "SimAnnealingIterations/NumRefrigerationSteps too small"
-             " (< 50 it). Simulated Annealing not applied\n";
+      g_log.warning() << "SimAnnealingIterations/NumRefrigerationSteps too small"
+                         " (< 50 it). Simulated Annealing not applied\n";
       m_leftRefrPoints = 0;
       m_temperature = 1.0;
     }

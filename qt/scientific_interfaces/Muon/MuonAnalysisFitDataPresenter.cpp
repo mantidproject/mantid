@@ -29,8 +29,7 @@ using Mantid::API::WorkspaceGroup;
 using MantidQt::MantidWidgets::IMuonFitDataModel;
 using MantidQt::MantidWidgets::IMuonFitDataSelector;
 using MantidQt::MantidWidgets::IWorkspaceFitControl;
-using RebinType =
-    MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::RebinType;
+using RebinType = MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::RebinType;
 
 namespace {
 /// static logger
@@ -46,8 +45,7 @@ const size_t RAW_SUFFIX_LENGTH(4);
 bool isRawData(const std::string &name) {
   const size_t nameLength = name.length();
   if (nameLength > RAW_SUFFIX_LENGTH) {
-    return 0 == name.compare(nameLength - RAW_SUFFIX_LENGTH, RAW_SUFFIX_LENGTH,
-                             RAW_DATA_SUFFIX);
+    return 0 == name.compare(nameLength - RAW_SUFFIX_LENGTH, RAW_SUFFIX_LENGTH, RAW_DATA_SUFFIX);
   } else {
     return false;
   }
@@ -75,12 +73,12 @@ namespace CustomInterfaces {
  * @param grouping :: [input] Grouping set in interface for data
  * @param plotType :: [input] Plot type set in interface
  */
-MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
-    IWorkspaceFitControl *fitBrowser, IMuonFitDataSelector *dataSelector,
-    MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
-    const Muon::PlotType &plotType)
-    : MuonAnalysisFitDataPresenter(fitBrowser, dataSelector, dataLoader,
-                                   grouping, plotType, 0.0,
+MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(IWorkspaceFitControl *fitBrowser,
+                                                           IMuonFitDataSelector *dataSelector,
+                                                           MuonAnalysisDataLoader &dataLoader,
+                                                           const Mantid::API::Grouping &grouping,
+                                                           const Muon::PlotType &plotType)
+    : MuonAnalysisFitDataPresenter(fitBrowser, dataSelector, dataLoader, grouping, plotType, 0.0,
                                    RebinOptions(RebinType::NoRebin, "")) {}
 
 /**
@@ -93,12 +91,12 @@ MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
  * @param timeZero :: [input] Time zero from MuonAnalysis interface (optional)
  * @param plotType :: [input] Plot type set in interface
  */
-MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
-    IWorkspaceFitControl *fitBrowser, IMuonFitDataSelector *dataSelector,
-    MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
-    const Muon::PlotType &plotType, double timeZero)
-    : MuonAnalysisFitDataPresenter(fitBrowser, dataSelector, dataLoader,
-                                   grouping, plotType, timeZero,
+MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(IWorkspaceFitControl *fitBrowser,
+                                                           IMuonFitDataSelector *dataSelector,
+                                                           MuonAnalysisDataLoader &dataLoader,
+                                                           const Mantid::API::Grouping &grouping,
+                                                           const Muon::PlotType &plotType, double timeZero)
+    : MuonAnalysisFitDataPresenter(fitBrowser, dataSelector, dataLoader, grouping, plotType, timeZero,
                                    RebinOptions(RebinType::NoRebin, "")) {}
 
 /**
@@ -111,22 +109,20 @@ MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
  * @param timeZero :: [input] Time zero from MuonAnalysis interface (optional)
  * @param rebinArgs :: [input] Rebin args from MuonAnalysis interface (optional)
  */
-MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
-    IWorkspaceFitControl *fitBrowser, IMuonFitDataSelector *dataSelector,
-    MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
-    const Muon::PlotType &plotType, double timeZero,
-    const RebinOptions &rebinArgs)
-    : m_fitBrowser(fitBrowser), m_fitModel(nullptr),
-      m_dataSelector(dataSelector), m_dataLoader(dataLoader),
-      m_timeZero(timeZero), m_rebinArgs(rebinArgs), m_grouping(grouping),
-      m_plotType(plotType), m_fitRawData(fitBrowser->rawData()),
-      m_overwrite(false) {
+MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(IWorkspaceFitControl *fitBrowser,
+                                                           IMuonFitDataSelector *dataSelector,
+                                                           MuonAnalysisDataLoader &dataLoader,
+                                                           const Mantid::API::Grouping &grouping,
+                                                           const Muon::PlotType &plotType, double timeZero,
+                                                           const RebinOptions &rebinArgs)
+    : m_fitBrowser(fitBrowser), m_fitModel(nullptr), m_dataSelector(dataSelector), m_dataLoader(dataLoader),
+      m_timeZero(timeZero), m_rebinArgs(rebinArgs), m_grouping(grouping), m_plotType(plotType),
+      m_fitRawData(fitBrowser->rawData()), m_overwrite(false) {
   // Make sure the FitPropertyBrowser passed in implements the required
   // interfaces
   m_fitModel = dynamic_cast<IMuonFitDataModel *>(m_fitBrowser);
   if (!m_fitModel) {
-    throw std::invalid_argument(
-        "Fit property browser does not implement required interface");
+    throw std::invalid_argument("Fit property browser does not implement required interface");
   }
 
   // Ensure this is set correctly at the start
@@ -141,24 +137,17 @@ MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
  */
 void MuonAnalysisFitDataPresenter::doConnect() {
   if (const QObject *fitBrowser = dynamic_cast<QObject *>(m_fitBrowser)) {
-    connect(fitBrowser, SIGNAL(fittingDone(const QString &)), this,
-            SLOT(handleFitFinished(const QString &)));
+    connect(fitBrowser, SIGNAL(fittingDone(const QString &)), this, SLOT(handleFitFinished(const QString &)));
     connect(fitBrowser, SIGNAL(xRangeChanged(double, double)), this,
             SLOT(handleXRangeChangedGraphically(double, double)));
-    connect(fitBrowser, SIGNAL(sequentialFitRequested()), this,
-            SLOT(openSequentialFitDialog()));
-    connect(fitBrowser, SIGNAL(preFitChecksRequested(bool)), this,
-            SLOT(doPreFitChecks(bool)));
-    connect(fitBrowser, SIGNAL(fitRawDataClicked(bool)), this,
-            SLOT(handleFitRawData(bool)));
+    connect(fitBrowser, SIGNAL(sequentialFitRequested()), this, SLOT(openSequentialFitDialog()));
+    connect(fitBrowser, SIGNAL(preFitChecksRequested(bool)), this, SLOT(doPreFitChecks(bool)));
+    connect(fitBrowser, SIGNAL(fitRawDataClicked(bool)), this, SLOT(handleFitRawData(bool)));
   }
   if (const QObject *dataSelector = dynamic_cast<QObject *>(m_dataSelector)) {
-    connect(dataSelector, SIGNAL(dataPropertiesChanged()), this,
-            SLOT(handleDataPropertiesChanged()));
-    connect(dataSelector, SIGNAL(simulLabelChanged()), this,
-            SLOT(handleSimultaneousFitLabelChanged()));
-    connect(dataSelector, SIGNAL(datasetIndexChanged(int)), this,
-            SLOT(handleDatasetIndexChanged(int)));
+    connect(dataSelector, SIGNAL(dataPropertiesChanged()), this, SLOT(handleDataPropertiesChanged()));
+    connect(dataSelector, SIGNAL(simulLabelChanged()), this, SLOT(handleSimultaneousFitLabelChanged()));
+    connect(dataSelector, SIGNAL(datasetIndexChanged(int)), this, SLOT(handleDatasetIndexChanged(int)));
   }
 }
 
@@ -198,8 +187,7 @@ void MuonAnalysisFitDataPresenter::handleSelectedDataChanged(bool overwrite) {
  * @param start :: [input] start of fit range
  * @param end :: [input] end of fit range
  */
-void MuonAnalysisFitDataPresenter::handleXRangeChangedGraphically(double start,
-                                                                  double end) {
+void MuonAnalysisFitDataPresenter::handleXRangeChangedGraphically(double start, double end) {
   m_dataSelector->setStartTimeQuietly(start);
   m_dataSelector->setEndTimeQuietly(end);
 }
@@ -213,8 +201,8 @@ void MuonAnalysisFitDataPresenter::handleXRangeChangedGraphically(double start,
  * @param filePath :: [input] Optional path to workspace in case of load current
  * run, when it has a temporary name like MUSRauto_E.tmp
  */
-void MuonAnalysisFitDataPresenter::setAssignedFirstRun(
-    const QString &wsName, const boost::optional<QString> &filePath) {
+void MuonAnalysisFitDataPresenter::setAssignedFirstRun(const QString &wsName,
+                                                       const boost::optional<QString> &filePath) {
   if (wsName == m_PPAssignedFirstRun)
     return;
 
@@ -226,8 +214,7 @@ void MuonAnalysisFitDataPresenter::setAssignedFirstRun(
  * Creates all workspaces that don't yet exist in the ADS and adds them.
  * @param names :: [input] Names of workspaces to create
  */
-void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
-    const std::vector<std::string> &names) const {
+void MuonAnalysisFitDataPresenter::createWorkspacesToFit(const std::vector<std::string> &names) const {
   // For each name, if not in the ADS, create it
   for (const auto &name : names) {
     if (AnalysisDataService::Instance().doesExist(name)) {
@@ -240,8 +227,7 @@ void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
         AnalysisDataService::Instance().add(name, ws);
         if (!groupLabel.empty()) {
           MuonAnalysisHelper::groupWorkspaces(groupLabel, {name});
-          if (Mantid::API::AnalysisDataService::Instance().doesExist(
-                  "tmp_unNorm")) {
+          if (Mantid::API::AnalysisDataService::Instance().doesExist("tmp_unNorm")) {
             const std::string unnorm = "_unNorm";
             std::string wsName = name;
             auto raw = wsName.find("_Raw");
@@ -252,8 +238,7 @@ void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
               wsName.insert(raw, unnorm);
             }
 
-            Mantid::API::AnalysisDataService::Instance().rename("tmp_unNorm",
-                                                                wsName);
+            Mantid::API::AnalysisDataService::Instance().rename("tmp_unNorm", wsName);
             MuonAnalysisHelper::groupWorkspaces(groupLabel, {wsName});
           }
         }
@@ -268,12 +253,10 @@ void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
  * sends a signal to update the peak picker.
  * @param names :: [input] List of workspace names
  */
-void MuonAnalysisFitDataPresenter::updateWorkspaceNames(
-    const std::vector<std::string> &names) const {
+void MuonAnalysisFitDataPresenter::updateWorkspaceNames(const std::vector<std::string> &names) const {
   QStringList qNames;
-  std::transform(
-      names.begin(), names.end(), std::back_inserter(qNames),
-      [](const std::string &s) { return QString::fromStdString(s); });
+  std::transform(names.begin(), names.end(), std::back_inserter(qNames),
+                 [](const std::string &s) { return QString::fromStdString(s); });
   m_fitModel->setWorkspaceNames(qNames);
   m_dataSelector->setDatasetNames(qNames);
 
@@ -295,8 +278,7 @@ void MuonAnalysisFitDataPresenter::updateWorkspaceNames(
  * @param overwrite :: [input] Whether overwrite is on or off in interface
  * @returns :: list of workspace names
  */
-std::vector<std::string>
-MuonAnalysisFitDataPresenter::generateWorkspaceNames(bool overwrite) const {
+std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(bool overwrite) const {
   const auto instrument = m_dataSelector->getInstrumentName().toStdString();
   const auto runs = m_dataSelector->getRuns().toStdString();
   return generateWorkspaceNames(instrument, runs, overwrite);
@@ -310,9 +292,9 @@ MuonAnalysisFitDataPresenter::generateWorkspaceNames(bool overwrite) const {
  * @param overwrite :: [input] Whether overwrite is on or off in interface
  * @returns :: list of workspace names
  */
-std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
-    const std::string &instrument, const std::string &runString,
-    bool overwrite) const {
+std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(const std::string &instrument,
+                                                                              const std::string &runString,
+                                                                              bool overwrite) const {
   // If no instrument or runs, no workspaces needed
   if (instrument.empty() || runString.empty()) {
     return {};
@@ -335,13 +317,11 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
   const std::string instRuns = instrument + runNumber;
   std::vector<int> selectedRuns;
   try {
-    MuonAnalysisHelper::parseRunLabel(instRuns, params.instrument,
-                                      selectedRuns);
+    MuonAnalysisHelper::parseRunLabel(instRuns, params.instrument, selectedRuns);
   } catch (...) {
     params.instrument = instrument;
     try {
-      MuonAnalysisHelper::parseRunLabel(instRuns, params.instrument,
-                                        selectedRuns);
+      MuonAnalysisHelper::parseRunLabel(instRuns, params.instrument, selectedRuns);
     } catch (...) {
       g_log.error("Cannot Parse workspace " + instRuns);
     }
@@ -354,8 +334,7 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
   // with "Group" in it rather than throwing.
   const auto grouping = m_grouping;
   const auto getItemType = [&grouping](const std::string &name) {
-    if (std::find(grouping.pairNames.begin(), grouping.pairNames.end(), name) !=
-        grouping.pairNames.end()) {
+    if (std::find(grouping.pairNames.begin(), grouping.pairNames.end(), name) != grouping.pairNames.end()) {
       return Muon::ItemType::Pair;
     } else { // If it's not a pair, assume it's a group
       return Muon::ItemType::Group;
@@ -364,8 +343,7 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
 
   // Generate a unique name from the given parameters
   const auto getUniqueName = [](Muon::DatasetParams &params) {
-    std::string workspaceName =
-        MuonAnalysisHelper::generateWorkspaceName(params);
+    std::string workspaceName = MuonAnalysisHelper::generateWorkspaceName(params);
     while (AnalysisDataService::Instance().doesExist(workspaceName)) {
       params.version++;
       workspaceName = MuonAnalysisHelper::generateWorkspaceName(params);
@@ -393,10 +371,8 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
       for (const auto &period : periods) {
         params.periods = period.toStdString();
         const std::string wsName =
-            overwrite ? MuonAnalysisHelper::generateWorkspaceName(params)
-                      : getUniqueName(params);
-        workspaceNames.emplace_back(m_fitRawData ? wsName + RAW_DATA_SUFFIX
-                                                 : wsName);
+            overwrite ? MuonAnalysisHelper::generateWorkspaceName(params) : getUniqueName(params);
+        workspaceNames.emplace_back(m_fitRawData ? wsName + RAW_DATA_SUFFIX : wsName);
       }
     }
   }
@@ -411,9 +387,8 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
  * @param groupLabel :: [output] Label to group workspace under
  * @returns :: workspace
  */
-Mantid::API::Workspace_sptr
-MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
-                                              std::string &groupLabel) const {
+Mantid::API::Workspace_sptr MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
+                                                                          std::string &groupLabel) const {
   Mantid::API::Workspace_sptr outputWS;
 
   // parse name to get runs, periods, groups etc
@@ -426,9 +401,8 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     if (m_currentRun && m_currentRun->run == run) {
       filenames.append(m_currentRun->filePath);
     } else {
-      filenames.append(QString::fromStdString(MuonAnalysisHelper::getRunLabel(
-                                                  params.instrument, {run}))
-                           .append(".nxs"));
+      filenames.append(
+          QString::fromStdString(MuonAnalysisHelper::getRunLabel(params.instrument, {run})).append(".nxs"));
     }
   }
   try {
@@ -436,8 +410,7 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     const auto loadedData = m_dataLoader.loadFiles(filenames);
     groupLabel = loadedData.label;
     // correct and group the data
-    const auto correctedData =
-        m_dataLoader.correctAndGroup(loadedData, m_grouping);
+    const auto correctedData = m_dataLoader.correctAndGroup(loadedData, m_grouping);
 
     // run analysis to generate workspace
     Muon::AnalysisOptions analysisOptions(m_grouping);
@@ -450,13 +423,11 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
       const size_t minus = params.periods.find('-');
       analysisOptions.summedPeriods = params.periods.substr(0, minus);
       if (minus != std::string::npos && minus != params.periods.size()) {
-        analysisOptions.subtractedPeriods =
-            params.periods.substr(minus + 1, std::string::npos);
+        analysisOptions.subtractedPeriods = params.periods.substr(minus + 1, std::string::npos);
       }
     }
     // Rebin params: use the same as MuonAnalysis uses, UNLESS this is raw data
-    analysisOptions.rebinArgs =
-        isRawData(name) ? "" : getRebinParams(correctedData);
+    analysisOptions.rebinArgs = isRawData(name) ? "" : getRebinParams(correctedData);
     analysisOptions.loadedTimeZero = loadedData.timeZero;
     analysisOptions.timeZero = m_timeZero;
     analysisOptions.timeLimits.first = m_dataSelector->getStartTime();
@@ -464,8 +435,7 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     analysisOptions.groupPairName = params.itemName;
     analysisOptions.plotType = params.plotType;
     analysisOptions.wsName = name;
-    outputWS =
-        m_dataLoader.createAnalysisWorkspace(correctedData, analysisOptions);
+    outputWS = m_dataLoader.createAnalysisWorkspace(correctedData, analysisOptions);
 
   } catch (const std::exception &ex) {
     std::ostringstream err;
@@ -482,8 +452,7 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
  * @param ws :: [input] Workspace to get bin size from
  * @returns :: parameter string for rebinning
  */
-std::string MuonAnalysisFitDataPresenter::getRebinParams(
-    const Mantid::API::Workspace_sptr &ws) const {
+std::string MuonAnalysisFitDataPresenter::getRebinParams(const Mantid::API::Workspace_sptr &ws) const {
   // First check for workspace group. If it is, use first entry
   if (const auto &group = std::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
     if (group->size() > 0) {
@@ -529,23 +498,18 @@ void MuonAnalysisFitDataPresenter::handleSimultaneousFitLabelChanged() const {
  * - split parameter table
  * @param status :: [input] Fit status (unused)
  */
-void MuonAnalysisFitDataPresenter::handleFitFinished(
-    const QString &status) const {
+void MuonAnalysisFitDataPresenter::handleFitFinished(const QString &status) const {
   Q_UNUSED(status);
   // If fitting was simultaneous, transform the results.
   if (isSimultaneousFit()) {
     const auto label = m_dataSelector->getSimultaneousFitLabel();
-    const auto groupName =
-        MantidWidgets::MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX +
-        label.toStdString();
+    const auto groupName = MantidWidgets::MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX + label.toStdString();
     try {
       handleFittedWorkspaces(groupName);
       extractFittedWorkspaces(groupName);
     } catch (const Mantid::Kernel::Exception::NotFoundError &notFound) {
-      g_log.error()
-          << "Failed to process fitted workspaces as they could not be found ("
-          << groupName << ").\n"
-          << notFound.what();
+      g_log.error() << "Failed to process fitted workspaces as they could not be found (" << groupName << ").\n"
+                    << notFound.what();
     }
   }
 }
@@ -559,13 +523,11 @@ void MuonAnalysisFitDataPresenter::handleFitFinished(
  * @throws Mantid::Kernel::Exception::NotFoundError if _Workspaces or
  * _Parameters are not in the ADS
  */
-void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
-    const std::string &baseName, const std::string &groupName) const {
+void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(const std::string &baseName,
+                                                          const std::string &groupName) const {
   auto &ads = AnalysisDataService::Instance();
-  const auto resultsGroup =
-      ads.retrieveWS<WorkspaceGroup>(baseName + "_Workspaces");
-  const auto paramsTable =
-      ads.retrieveWS<ITableWorkspace>(baseName + "_Parameters");
+  const auto resultsGroup = ads.retrieveWS<WorkspaceGroup>(baseName + "_Workspaces");
+  const auto paramsTable = ads.retrieveWS<ITableWorkspace>(baseName + "_Parameters");
   if (resultsGroup && paramsTable) {
     const size_t offset = paramsTable->rowCount() - resultsGroup->size();
     for (size_t i = 0; i < resultsGroup->size(); i++) {
@@ -577,8 +539,7 @@ void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
       addSpecialLogs(oldName, wsDetails);
       // Generate new name and rename workspace
       std::ostringstream newName;
-      newName << baseName << "_" << wsDetails.label << "_"
-              << wsDetails.itemName;
+      newName << baseName << "_" << wsDetails.label << "_" << wsDetails.itemName;
       if (!wsDetails.periods.empty()) {
         newName << "_" << wsDetails.periods;
       }
@@ -590,8 +551,7 @@ void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
         ads.addOrReplace(fitTableName, fitTable);
         // If user has specified a group to add to, add to that.
         // Otherwise the group is called the same thing as the base name.
-        const std::string groupToAddTo =
-            groupName.empty() ? baseName : groupName;
+        const std::string groupToAddTo = groupName.empty() ? baseName : groupName;
         ads.addToGroup(groupToAddTo, fitTableName);
       }
     }
@@ -609,8 +569,8 @@ void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
  * @throws Mantid::Kernel::Exception::NotFoundError if _Workspaces is not in the
  * ADS
  */
-void MuonAnalysisFitDataPresenter::extractFittedWorkspaces(
-    const std::string &baseName, const std::string &groupName) const {
+void MuonAnalysisFitDataPresenter::extractFittedWorkspaces(const std::string &baseName,
+                                                           const std::string &groupName) const {
   auto &ads = AnalysisDataService::Instance();
   const std::string resultsGroupName = baseName + "_Workspaces";
   const auto resultsGroup = ads.retrieveWS<WorkspaceGroup>(resultsGroupName);
@@ -636,10 +596,9 @@ void MuonAnalysisFitDataPresenter::extractFittedWorkspaces(
  * @param wsParams :: [input] Parameters to get log values from
  * @throws Mantid::Kernel::Exception::NotFoundError if wsName not in ADS
  */
-void MuonAnalysisFitDataPresenter::addSpecialLogs(
-    const std::string &wsName, const Muon::DatasetParams &wsParams) const {
-  auto matrixWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+void MuonAnalysisFitDataPresenter::addSpecialLogs(const std::string &wsName,
+                                                  const Muon::DatasetParams &wsParams) const {
+  auto matrixWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
   if (matrixWs) {
     matrixWs->mutableRun().addProperty<std::string>("group", wsParams.itemName);
     matrixWs->mutableRun().addProperty<std::string>("period", wsParams.periods);
@@ -654,11 +613,9 @@ void MuonAnalysisFitDataPresenter::addSpecialLogs(
  * @returns :: individual table for the given workspace
  */
 Mantid::API::ITableWorkspace_sptr
-MuonAnalysisFitDataPresenter::generateParametersTable(
-    const std::string &wsName,
-    Mantid::API::ITableWorkspace_sptr inputTable) const {
-  Mantid::API::ITableWorkspace_sptr fitTable =
-      Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+MuonAnalysisFitDataPresenter::generateParametersTable(const std::string &wsName,
+                                                      Mantid::API::ITableWorkspace_sptr inputTable) const {
+  Mantid::API::ITableWorkspace_sptr fitTable = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
   auto nameCol = fitTable->addColumn("str", "Name");
   nameCol->setPlotType(6); // label
   auto valCol = fitTable->addColumn("double", "Value");
@@ -705,9 +662,7 @@ MuonAnalysisFitDataPresenter::generateParametersTable(
  * Notify model of this change, which will update function browser
  * @param index :: [input] Selected dataset index
  */
-void MuonAnalysisFitDataPresenter::handleDatasetIndexChanged(int index) {
-  m_fitModel->userChangedDataset(index);
-}
+void MuonAnalysisFitDataPresenter::handleDatasetIndexChanged(int index) { m_fitModel->userChangedDataset(index); }
 
 /**
  * Called when user requests a sequential fit.
@@ -715,8 +670,7 @@ void MuonAnalysisFitDataPresenter::handleDatasetIndexChanged(int index) {
  */
 void MuonAnalysisFitDataPresenter::openSequentialFitDialog() {
   // Make sure we have a real fit browser, not a testing mock
-  auto *fitBrowser =
-      dynamic_cast<MantidWidgets::MuonFitPropertyBrowser *>(m_fitBrowser);
+  auto *fitBrowser = dynamic_cast<MantidWidgets::MuonFitPropertyBrowser *>(m_fitBrowser);
   if (!fitBrowser) {
     return;
   }
@@ -757,9 +711,7 @@ void MuonAnalysisFitDataPresenter::checkAndUpdateFitLabel(bool sequentialFit) {
     const auto &label = m_dataSelector->getSimultaneousFitLabel().toStdString();
 
     std::string uniqueName = label;
-    if (ads.doesExist(
-            MantidWidgets::MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX +
-            label)) {
+    if (ads.doesExist(MantidWidgets::MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX + label)) {
       const bool overwrite = m_dataSelector->askUserWhetherToOverwrite();
       if (!overwrite) {
         // Take off '#n' suffix if already present, otherwise add one
@@ -770,9 +722,8 @@ void MuonAnalysisFitDataPresenter::checkAndUpdateFitLabel(bool sequentialFit) {
           uniqueName.erase(pos + 1);
         }
         size_t version(2);
-        while (ads.doesExist(
-            MantidWidgets::MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX +
-            uniqueName + std::to_string(version))) {
+        while (ads.doesExist(MantidWidgets::MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX + uniqueName +
+                             std::to_string(version))) {
           ++version;
         }
         uniqueName += std::to_string(version);
@@ -791,12 +742,10 @@ void MuonAnalysisFitDataPresenter::checkAndUpdateFitLabel(bool sequentialFit) {
  * @returns :: True for simultaneous fit, else false
  */
 bool MuonAnalysisFitDataPresenter::isSimultaneousFit() const {
-  if (m_dataSelector->getFitType() ==
-      IMuonFitDataSelector::FitType::Simultaneous) {
+  if (m_dataSelector->getFitType() == IMuonFitDataSelector::FitType::Simultaneous) {
     return true;
   } else {
-    return m_dataSelector->getChosenGroups().size() > 1 ||
-           m_dataSelector->getPeriodSelections().size() > 1;
+    return m_dataSelector->getChosenGroups().size() > 1 || m_dataSelector->getPeriodSelections().size() > 1;
   }
 }
 
@@ -809,8 +758,8 @@ bool MuonAnalysisFitDataPresenter::isSimultaneousFit() const {
  * case of "load current run" when the file may have a special name like
  * MUSRauto_E.tmp
  */
-void MuonAnalysisFitDataPresenter::setSelectedWorkspace(
-    const QString &wsName, const boost::optional<QString> &filePath) {
+void MuonAnalysisFitDataPresenter::setSelectedWorkspace(const QString &wsName,
+                                                        const boost::optional<QString> &filePath) {
   updateWorkspaceNames(std::vector<std::string>{wsName.toStdString()});
   setUpDataSelector(wsName, filePath);
 }
@@ -822,16 +771,13 @@ void MuonAnalysisFitDataPresenter::setSelectedWorkspace(
  * important in the case of "load current run" when the file may have a special
  * name like MUSRauto_E.tmp.
  */
-void MuonAnalysisFitDataPresenter::setUpDataSelector(
-    const QString &wsName, const boost::optional<QString> &filePath) {
+void MuonAnalysisFitDataPresenter::setUpDataSelector(const QString &wsName, const boost::optional<QString> &filePath) {
   // Parse workspace name here for run number and instrument name
-  const auto wsParams =
-      MuonAnalysisHelper::parseWorkspaceName(wsName.toStdString());
+  const auto wsParams = MuonAnalysisHelper::parseWorkspaceName(wsName.toStdString());
   const QString instRun = QString::fromStdString(wsParams.label);
   const int firstZero = instRun.indexOf("0");
   const QString numberString = instRun.right(instRun.size() - firstZero);
-  m_dataSelector->setWorkspaceDetails(
-      numberString, QString::fromStdString(wsParams.instrument), filePath);
+  m_dataSelector->setWorkspaceDetails(numberString, QString::fromStdString(wsParams.instrument), filePath);
 
   // If given an optional file path to "current run", cache it for later use
   if (filePath && !wsParams.runs.empty()) {
@@ -845,9 +791,7 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(
  * Check if multiple runs (co-add or simultaneous) are selected
  * @returns :: True if multiple runs selected
  */
-bool MuonAnalysisFitDataPresenter::isMultipleRuns() const {
-  return m_dataSelector->getRuns().contains(QRegExp("-|,"));
-}
+bool MuonAnalysisFitDataPresenter::isMultipleRuns() const { return m_dataSelector->getRuns().contains(QRegExp("-|,")); }
 
 /**
  * Handle "fit raw data" selected/deselected
@@ -857,8 +801,7 @@ bool MuonAnalysisFitDataPresenter::isMultipleRuns() const {
  * @param updateWorkspaces :: [input] Whether to create workspaces if they don't
  * exist
  */
-void MuonAnalysisFitDataPresenter::handleFitRawData(bool enabled,
-                                                    bool updateWorkspaces) {
+void MuonAnalysisFitDataPresenter::handleFitRawData(bool enabled, bool updateWorkspaces) {
   m_fitRawData = enabled;
   if (updateWorkspaces) {
     handleSelectedDataChanged(m_overwrite);
@@ -876,8 +819,7 @@ void MuonAnalysisFitDataPresenter::handleFitRawData(bool enabled,
 void MuonAnalysisFitDataPresenter::updateFitLabelFromRuns() {
   // Don't change the fit label if it's a user-set one
   const auto &label = m_dataSelector->getSimultaneousFitLabel().toStdString();
-  const bool isDefault =
-      label.find_first_not_of("0123456789-,") == std::string::npos;
+  const bool isDefault = label.find_first_not_of("0123456789-,") == std::string::npos;
   if (isDefault) {
     // replace with current run string
     const auto &runString = m_dataSelector->getRuns();
@@ -909,9 +851,7 @@ void MuonAnalysisFitDataPresenter::doPreFitChecks(bool sequential) {
  * not shown on the interface
  * @returns :: whether the runs are valid or not
  */
-bool MuonAnalysisFitDataPresenter::isRunStringValid() {
-  return !m_dataSelector->getRuns().isEmpty();
-}
+bool MuonAnalysisFitDataPresenter::isRunStringValid() { return !m_dataSelector->getRuns().isEmpty(); }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

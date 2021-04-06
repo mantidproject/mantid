@@ -49,15 +49,11 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "RawFileInfo"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Extract run parameters from a  RAW file as output properties.";
-  }
+  const std::string summary() const override { return "Extract run parameters from a  RAW file as output properties."; }
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadRaw"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadRaw"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "DataHandling\\Raw"; }
 

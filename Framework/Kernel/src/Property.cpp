@@ -26,11 +26,9 @@ namespace Kernel {
  * Direction::InOut (Input & Output) property
  * @throws std::invalid_argument if the name is empty
  */
-Property::Property(std::string name, const std::type_info &type,
-                   const unsigned int direction)
-    : m_name(std::move(name)), m_documentation(""), m_typeinfo(&type),
-      m_direction(direction), m_units(""), m_group(""), m_remember(true),
-      m_autotrim(true) {
+Property::Property(std::string name, const std::type_info &type, const unsigned int direction)
+    : m_name(std::move(name)), m_documentation(""), m_typeinfo(&type), m_direction(direction), m_units(""), m_group(""),
+      m_remember(true), m_autotrim(true) {
   if (m_name.empty()) {
     throw std::invalid_argument("An empty property name is not permitted");
   }
@@ -38,16 +36,14 @@ Property::Property(std::string name, const std::type_info &type,
   // Make sure a random int hasn't been passed in for the direction
   // Property & PropertyWithValue destructors will be called in this case
   if (m_direction > 2)
-    throw std::out_of_range(
-        "direction should be a member of the Direction enum");
+    throw std::out_of_range("direction should be a member of the Direction enum");
 }
 
 /// Copy constructor
 Property::Property(const Property &right)
-    : m_name(right.m_name), m_documentation(right.m_documentation),
-      m_typeinfo(right.m_typeinfo), m_direction(right.m_direction),
-      m_units(right.m_units), m_group(right.m_group),
-      m_remember(right.m_remember), m_autotrim(right.m_autotrim) {
+    : m_name(right.m_name), m_documentation(right.m_documentation), m_typeinfo(right.m_typeinfo),
+      m_direction(right.m_direction), m_units(right.m_units), m_group(right.m_group), m_remember(right.m_remember),
+      m_autotrim(right.m_autotrim) {
   if (m_name.empty()) {
     throw std::invalid_argument("An empty property name is not permitted");
   }
@@ -82,9 +78,7 @@ const std::type_info *Property::type_info() const { return m_typeinfo; }
  *  Note that this is implementation dependent.
  *  @return The property type
  */
-const std::string Property::type() const {
-  return Mantid::Kernel::getUnmangledTypeName(*m_typeinfo);
-}
+const std::string Property::type() const { return Mantid::Kernel::getUnmangledTypeName(*m_typeinfo); }
 
 /** Overridden functions checks whether the property has a valid value.
  *
@@ -100,9 +94,7 @@ std::string Property::isValid() const {
  * Takes ownership of the given object
  * @param settings A pointer to an object specifying the settings type
  */
-void Property::setSettings(std::unique_ptr<IPropertySettings> settings) {
-  m_settings = std::move(settings);
-}
+void Property::setSettings(std::unique_ptr<IPropertySettings> settings) { m_settings = std::move(settings); }
 
 /**
  *
@@ -133,8 +125,7 @@ void Property::setRemember(bool remember) { m_remember = remember; }
  * @param maxLength :: The Max length of the returned string
  * @param collapseLists :: Whether to collapse 1,2,3 into 1-3
  */
-std::string Property::valueAsPrettyStr(const size_t maxLength,
-                                       const bool collapseLists) const {
+std::string Property::valueAsPrettyStr(const size_t maxLength, const bool collapseLists) const {
   UNUSED_ARG(collapseLists);
   return Strings::shorten(value(), maxLength);
 }
@@ -157,23 +148,17 @@ void Property::setDocumentation(const std::string &documentation) {
 /** Sets the
  *
  */
-void Property::setBriefDocumentation(const std::string &documentation) {
-  m_shortDoc = documentation;
-}
+void Property::setBriefDocumentation(const std::string &documentation) { m_shortDoc = documentation; }
 
 /** Returns the set of valid values for this property, if such a set exists.
  *  If not, it returns an empty set.
  * @return the set of valid values for this property or an empty set
  */
-std::vector<std::string> Property::allowedValues() const {
-  return std::vector<std::string>();
-}
+std::vector<std::string> Property::allowedValues() const { return std::vector<std::string>(); }
 
 /// Create a PropertyHistory object representing the current state of the
 /// Property.
-const PropertyHistory Property::createHistory() const {
-  return PropertyHistory(this);
-}
+const PropertyHistory Property::createHistory() const { return PropertyHistory(this); }
 
 /** Creates a temporary property value based on the memory address of
  *  the property.
@@ -223,8 +208,7 @@ void Property::setUnits(const std::string &unit) { m_units = unit; }
  * @param start :: the beginning time to filter from
  * @param stop :: the ending time to filter to
  * */
-void Property::filterByTime(const Types::Core::DateAndTime &start,
-                            const Types::Core::DateAndTime &stop) {
+void Property::filterByTime(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop) {
   UNUSED_ARG(start);
   UNUSED_ARG(stop);
   // Do nothing in general
@@ -238,8 +222,7 @@ void Property::filterByTime(const Types::Core::DateAndTime &start,
  * @param isProtonCharge :: a flag to tell whether the property is periodic or
  * not
  */
-void Property::splitByTime(std::vector<SplittingInterval> &splitter,
-                           std::vector<Property *> outputs,
+void Property::splitByTime(std::vector<SplittingInterval> &splitter, std::vector<Property *> outputs,
                            bool isProtonCharge) const {
   UNUSED_ARG(splitter);
   UNUSED_ARG(outputs);
@@ -305,8 +288,7 @@ bool operator==(const Property &lhs, const Property &rhs) {
   if (lhs_tsp_double)
     return lhs_tsp_double->operator==(rhs);
 
-  auto lhs_tsp_string =
-      dynamic_cast<const TimeSeriesProperty<std::string> *>(&lhs);
+  auto lhs_tsp_string = dynamic_cast<const TimeSeriesProperty<std::string> *>(&lhs);
   if (lhs_tsp_string)
     return lhs_tsp_string->operator==(rhs);
 
@@ -323,9 +305,7 @@ bool operator==(const Property &lhs, const Property &rhs) {
  * @param rhs Thing on the right
  * @return true if they are not equal
  */
-bool operator!=(const Property &lhs, const Property &rhs) {
-  return (!(lhs == rhs));
-}
+bool operator!=(const Property &lhs, const Property &rhs) { return (!(lhs == rhs)); }
 
 /**
  * Get the unmangled name of the given typestring for some common types that we
@@ -353,65 +333,37 @@ std::string getUnmangledTypeName(const std::type_info &type) {
     typestrings.emplace(typeid(std::vector<string>).name(), string("str list"));
     typestrings.emplace(typeid(std::vector<int>).name(), string("int list"));
     typestrings.emplace(typeid(std::vector<long>).name(), string("long list"));
-    typestrings.emplace(typeid(std::vector<int64_t>).name(),
-                        string("int list"));
-    typestrings.emplace(typeid(std::vector<size_t>).name(),
-                        string("unsigned int list"));
+    typestrings.emplace(typeid(std::vector<int64_t>).name(), string("int list"));
+    typestrings.emplace(typeid(std::vector<size_t>).name(), string("unsigned int list"));
     typestrings.emplace(typeid(std::vector<double>).name(), string("dbl list"));
-    typestrings.emplace(typeid(std::vector<std::vector<string>>).name(),
-                        string("list of str lists"));
-    typestrings.emplace(typeid(OptionalBool).name(),
-                        string("optional boolean"));
+    typestrings.emplace(typeid(std::vector<std::vector<string>>).name(), string("list of str lists"));
+    typestrings.emplace(typeid(OptionalBool).name(), string("optional boolean"));
 
     // Workspaces
-    typestrings.emplace(typeid(std::shared_ptr<Workspace>).name(),
-                        string("Workspace"));
-    typestrings.emplace(typeid(std::shared_ptr<MatrixWorkspace>).name(),
-                        string("MatrixWorkspace"));
-    typestrings.emplace(typeid(std::shared_ptr<ITableWorkspace>).name(),
-                        string("TableWorkspace"));
-    typestrings.emplace(typeid(std::shared_ptr<IMDWorkspace>).name(),
-                        string("IMDWorkspace"));
-    typestrings.emplace(typeid(std::shared_ptr<IMDEventWorkspace>).name(),
-                        string("MDEventWorkspace"));
-    typestrings.emplace(typeid(std::shared_ptr<IEventWorkspace>).name(),
-                        string("IEventWorkspace"));
-    typestrings.emplace(typeid(std::shared_ptr<Workspace2D>).name(),
-                        string("Workspace2D"));
-    typestrings.emplace(typeid(std::shared_ptr<EventWorkspace>).name(),
-                        string("EventWorkspace"));
-    typestrings.emplace(typeid(std::shared_ptr<PeaksWorkspace>).name(),
-                        string("PeaksWorkspace"));
-    typestrings.emplace(
-        typeid(std::shared_ptr<LeanElasticPeaksWorkspace>).name(),
-        string("LeanElasticPeaksWorkspace"));
-    typestrings.emplace(typeid(std::shared_ptr<IPeaksWorkspace>).name(),
-                        string("IPeaksWorkspace"));
-    typestrings.emplace(typeid(std::shared_ptr<GroupingWorkspace>).name(),
-                        string("GroupingWorkspace"));
-    typestrings.emplace(typeid(std::shared_ptr<WorkspaceGroup>).name(),
-                        string("WorkspaceGroup"));
-    typestrings.emplace(typeid(std::shared_ptr<OffsetsWorkspace>).name(),
-                        string("OffsetsWorkspace"));
-    typestrings.emplace(typeid(std::shared_ptr<MaskWorkspace>).name(),
-                        string("MaskWorkspace"));
-    typestrings.emplace(typeid(std::shared_ptr<SpecialWorkspace2D>).name(),
-                        string("SpecialWorkspace2D"));
-    typestrings.emplace(typeid(std::shared_ptr<IMDHistoWorkspace>).name(),
-                        string("IMDHistoWorkspace"));
-    typestrings.emplace(typeid(std::shared_ptr<SplittersWorkspace>).name(),
-                        string("SplittersWorkspace"));
-    typestrings.emplace(typeid(std::shared_ptr<SpecialWorkspace2D>).name(),
-                        string("SpecialWorkspace2D"));
-    typestrings.emplace(typeid(std::shared_ptr<TableWorkspace>).name(),
-                        string("TableWorkspace"));
+    typestrings.emplace(typeid(std::shared_ptr<Workspace>).name(), string("Workspace"));
+    typestrings.emplace(typeid(std::shared_ptr<MatrixWorkspace>).name(), string("MatrixWorkspace"));
+    typestrings.emplace(typeid(std::shared_ptr<ITableWorkspace>).name(), string("TableWorkspace"));
+    typestrings.emplace(typeid(std::shared_ptr<IMDWorkspace>).name(), string("IMDWorkspace"));
+    typestrings.emplace(typeid(std::shared_ptr<IMDEventWorkspace>).name(), string("MDEventWorkspace"));
+    typestrings.emplace(typeid(std::shared_ptr<IEventWorkspace>).name(), string("IEventWorkspace"));
+    typestrings.emplace(typeid(std::shared_ptr<Workspace2D>).name(), string("Workspace2D"));
+    typestrings.emplace(typeid(std::shared_ptr<EventWorkspace>).name(), string("EventWorkspace"));
+    typestrings.emplace(typeid(std::shared_ptr<PeaksWorkspace>).name(), string("PeaksWorkspace"));
+    typestrings.emplace(typeid(std::shared_ptr<LeanElasticPeaksWorkspace>).name(), string("LeanElasticPeaksWorkspace"));
+    typestrings.emplace(typeid(std::shared_ptr<IPeaksWorkspace>).name(), string("IPeaksWorkspace"));
+    typestrings.emplace(typeid(std::shared_ptr<GroupingWorkspace>).name(), string("GroupingWorkspace"));
+    typestrings.emplace(typeid(std::shared_ptr<WorkspaceGroup>).name(), string("WorkspaceGroup"));
+    typestrings.emplace(typeid(std::shared_ptr<OffsetsWorkspace>).name(), string("OffsetsWorkspace"));
+    typestrings.emplace(typeid(std::shared_ptr<MaskWorkspace>).name(), string("MaskWorkspace"));
+    typestrings.emplace(typeid(std::shared_ptr<SpecialWorkspace2D>).name(), string("SpecialWorkspace2D"));
+    typestrings.emplace(typeid(std::shared_ptr<IMDHistoWorkspace>).name(), string("IMDHistoWorkspace"));
+    typestrings.emplace(typeid(std::shared_ptr<SplittersWorkspace>).name(), string("SplittersWorkspace"));
+    typestrings.emplace(typeid(std::shared_ptr<SpecialWorkspace2D>).name(), string("SpecialWorkspace2D"));
+    typestrings.emplace(typeid(std::shared_ptr<TableWorkspace>).name(), string("TableWorkspace"));
     // FunctionProperty
-    typestrings.emplace(typeid(std::shared_ptr<IFunction>).name(),
-                        string("Function"));
-    typestrings.emplace(typeid(std::shared_ptr<IAlgorithm>).name(),
-                        string("IAlgorithm"));
-    typestrings.emplace(typeid(std::shared_ptr<PropertyManager>).name(),
-                        string("Dictionary"));
+    typestrings.emplace(typeid(std::shared_ptr<IFunction>).name(), string("Function"));
+    typestrings.emplace(typeid(std::shared_ptr<IAlgorithm>).name(), string("IAlgorithm"));
+    typestrings.emplace(typeid(std::shared_ptr<PropertyManager>).name(), string("Dictionary"));
   }
   auto mitr = typestrings.find(type.name());
   if (mitr != typestrings.end()) {

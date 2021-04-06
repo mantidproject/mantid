@@ -34,21 +34,13 @@ class ConvertMDHistoToMatrixWorkspaceTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertMDHistoToMatrixWorkspaceTest *createSuite() {
-    return new ConvertMDHistoToMatrixWorkspaceTest();
-  }
-  static void destroySuite(ConvertMDHistoToMatrixWorkspaceTest *suite) {
-    delete suite;
-  }
+  static ConvertMDHistoToMatrixWorkspaceTest *createSuite() { return new ConvertMDHistoToMatrixWorkspaceTest(); }
+  static void destroySuite(ConvertMDHistoToMatrixWorkspaceTest *suite) { delete suite; }
 
-  MatrixWorkspace_sptr do_execute_on_1D_directly(const size_t n_dims,
-                                                 const double signal,
-                                                 const double error_sq,
-                                                 size_t *nbins, coord_t *min,
-                                                 coord_t *max) {
+  MatrixWorkspace_sptr do_execute_on_1D_directly(const size_t n_dims, const double signal, const double error_sq,
+                                                 size_t *nbins, coord_t *min, coord_t *max) {
     IMDHistoWorkspace_sptr inWS =
-        MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
-            n_dims, signal, error_sq, nbins, min, max);
+        MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(n_dims, signal, error_sq, nbins, min, max);
 
     ConvertMDHistoToMatrixWorkspace alg;
     alg.setChild(true);
@@ -92,14 +84,11 @@ public:
       }
     }
     signal_t signal(0.f), error(0.f);
-    IMDHistoWorkspace_sptr slice =
-        MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
-            ndims, signal, error, &numberOfBins.front(), &start.front(),
-            &end.front(), names);
+    IMDHistoWorkspace_sptr slice = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
+        ndims, signal, error, &numberOfBins.front(), &start.front(), &end.front(), names);
 
     // test ConvertMDHistoToMatrixWorkspace
-    auto alg =
-        AlgorithmManager::Instance().create("ConvertMDHistoToMatrixWorkspace");
+    auto alg = AlgorithmManager::Instance().create("ConvertMDHistoToMatrixWorkspace");
     alg->initialize();
     alg->setRethrows(true);
     alg->setChild(true);
@@ -142,13 +131,11 @@ public:
 
 public:
   void test_input_workspace_must_be_imdhisto() {
-    MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create1DWorkspaceConstant(1, 1, 0, true);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create1DWorkspaceConstant(1, 1, 0, true);
     ConvertMDHistoToMatrixWorkspace alg;
     alg.setRethrows(true);
     alg.initialize();
-    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", ws),
-                     std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", ws), std::invalid_argument &);
   }
 
   /*
@@ -164,8 +151,7 @@ public:
     coord_t min[1] = {-1};
     coord_t max[1] = {1};
 
-    MatrixWorkspace_sptr out_ws =
-        do_execute_on_1D_directly(n_dims, signal, error_sq, nbins, min, max);
+    MatrixWorkspace_sptr out_ws = do_execute_on_1D_directly(n_dims, signal, error_sq, nbins, min, max);
     TS_ASSERT_EQUALS(out_ws->getNumberHistograms(), 1);
     auto first_x_spectra = out_ws->readX(0);
     TS_ASSERT_EQUALS(first_x_spectra.front(), -1);
@@ -187,22 +173,19 @@ public:
     binMDAlg->setChild(true);
     binMDAlg->setProperty("InputWorkspace", in_ws);
     binMDAlg->setProperty("AxisAligned", false);
-    binMDAlg->setPropertyValue(
-        "BasisVector0", "X,units,0.7071,0.7071"); // cos 45 to in_ws x-axis
-                                                  // (consistent with a 45
-                                                  // degree anti-clockwise
-                                                  // rotation)
-    binMDAlg->setPropertyValue(
-        "BasisVector1", "Y,units,-0.7071,0.7071"); // cos 45 to in_ws y-axis
-                                                   // (consistent with a 45
-                                                   // degree anti-clockwise
-                                                   // rotation)
+    binMDAlg->setPropertyValue("BasisVector0", "X,units,0.7071,0.7071");  // cos 45 to in_ws x-axis
+                                                                          // (consistent with a 45
+                                                                          // degree anti-clockwise
+                                                                          // rotation)
+    binMDAlg->setPropertyValue("BasisVector1", "Y,units,-0.7071,0.7071"); // cos 45 to in_ws y-axis
+                                                                          // (consistent with a 45
+                                                                          // degree anti-clockwise
+                                                                          // rotation)
     binMDAlg->setPropertyValue("Translation", "-10,-10");
-    binMDAlg->setPropertyValue(
-        "OutputExtents", "0,28.284,-1,1"); // x goes from 0 to sqrt((-10-10)^2 +
-                                           // (-10-10)^2) and -1 to 1 in new
-                                           // system, but -10 to 10 in old
-                                           // coordinate axes for both x and y.
+    binMDAlg->setPropertyValue("OutputExtents", "0,28.284,-1,1"); // x goes from 0 to sqrt((-10-10)^2 +
+                                                                  // (-10-10)^2) and -1 to 1 in new
+                                                                  // system, but -10 to 10 in old
+                                                                  // coordinate axes for both x and y.
     binMDAlg->setPropertyValue("OutputBins", "10,1");
     binMDAlg->setPropertyValue("OutputWorkspace",
                                "_"); // Not really required for child algorithm
@@ -215,20 +198,17 @@ public:
     convert_alg.setChild(true);
     convert_alg.initialize();
     convert_alg.setProperty("InputWorkspace", slice);
-    convert_alg.setPropertyValue(
-        "OutputWorkspace", "_"); // Not really required for child algorithm
+    convert_alg.setPropertyValue("OutputWorkspace", "_"); // Not really required for child algorithm
     convert_alg.execute();
     MatrixWorkspace_sptr out_ws = convert_alg.getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(out_ws->getNumberHistograms(), 1);
     auto first_x_spectra = out_ws->readX(0);
 
-    TSM_ASSERT_DELTA(
-        "First coordinate in the incorrect position. Incorrect transformation.",
-        first_x_spectra.front(), -10, 1e-3);
-    TSM_ASSERT_DELTA(
-        "Last coordinate in the incorrect position. Incorrect transformation.",
-        first_x_spectra.back(), 10, 1e-3);
+    TSM_ASSERT_DELTA("First coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.front(),
+                     -10, 1e-3);
+    TSM_ASSERT_DELTA("Last coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.back(), 10,
+                     1e-3);
   }
 
   /*
@@ -255,8 +235,7 @@ public:
  (-10,-5)x      |
 
   */
-  void
-  test_indirect_conversion_axis_selection_where_zeroth_dim_of_original_is_used() {
+  void test_indirect_conversion_axis_selection_where_zeroth_dim_of_original_is_used() {
     auto in_ws = MDEventsTestHelper::makeMDEW<2>(2, -10.0, 10, 3);
 
     // Create a line slice at degrees to the original workspace.
@@ -266,23 +245,20 @@ public:
     binMDAlg->setChild(true);
     binMDAlg->setProperty("InputWorkspace", in_ws);
     binMDAlg->setProperty("AxisAligned", false);
-    binMDAlg->setPropertyValue(
-        "BasisVector0", "X,units,0.6666, 0.3333"); // Line set up to intersects
-                                                   // 0,0 and 10,5 in original
-                                                   // coords. Basis0 vector is
-                                                   // therefore 10/(10+5) and
-                                                   // 5/(10+5)
-    binMDAlg->setPropertyValue(
-        "BasisVector1", "Y,units,-0.3333, 0.6666"); // Line set up to intersects
-                                                    // 0,0 and -10,5 in original
-                                                    // coords. Basis1 vector is
-                                                    // therefore 5/(10+5) and
-                                                    // 10/(10+5)
+    binMDAlg->setPropertyValue("BasisVector0", "X,units,0.6666, 0.3333");  // Line set up to intersects
+                                                                           // 0,0 and 10,5 in original
+                                                                           // coords. Basis0 vector is
+                                                                           // therefore 10/(10+5) and
+                                                                           // 5/(10+5)
+    binMDAlg->setPropertyValue("BasisVector1", "Y,units,-0.3333, 0.6666"); // Line set up to intersects
+                                                                           // 0,0 and -10,5 in original
+                                                                           // coords. Basis1 vector is
+                                                                           // therefore 5/(10+5) and
+                                                                           // 10/(10+5)
     binMDAlg->setPropertyValue("Translation", "-10,-5");
-    binMDAlg->setPropertyValue(
-        "OutputExtents", "0,22.36,-1,1"); // x goes from 0 to sqrt((-10-10)^2 +
-                                          // (-5-5)^2) and -1 to 1 in original
-                                          // coords
+    binMDAlg->setPropertyValue("OutputExtents", "0,22.36,-1,1"); // x goes from 0 to sqrt((-10-10)^2 +
+                                                                 // (-5-5)^2) and -1 to 1 in original
+                                                                 // coords
     binMDAlg->setPropertyValue("OutputBins", "10,1");
     binMDAlg->setPropertyValue("OutputWorkspace",
                                "_"); // Not really required for child algorithm
@@ -295,23 +271,19 @@ public:
     convert_alg.setChild(true);
     convert_alg.initialize();
     convert_alg.setProperty("InputWorkspace", slice);
-    convert_alg.setPropertyValue(
-        "OutputWorkspace", "_"); // Not really required for child algorithm
+    convert_alg.setPropertyValue("OutputWorkspace", "_"); // Not really required for child algorithm
     convert_alg.execute();
     MatrixWorkspace_sptr out_ws = convert_alg.getProperty("OutputWorkspace");
     // Should select the first dimension in this case.
-    TSM_ASSERT_EQUALS("Wrong dimension auto selected for output x-axis",
-                      in_ws->getDimension(0)->getName(),
+    TSM_ASSERT_EQUALS("Wrong dimension auto selected for output x-axis", in_ws->getDimension(0)->getName(),
                       out_ws->getDimension(0)->getName());
     TS_ASSERT_EQUALS(out_ws->getNumberHistograms(), 1);
     auto first_x_spectra = out_ws->readX(0);
 
-    TSM_ASSERT_DELTA(
-        "First coordinate in the incorrect position. Incorrect transformation.",
-        first_x_spectra.front(), -10, 1e-3);
-    TSM_ASSERT_DELTA(
-        "Last coordinate in the incorrect position. Incorrect transformation.",
-        first_x_spectra.back(), 10, 1e-3);
+    TSM_ASSERT_DELTA("First coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.front(),
+                     -10, 1e-3);
+    TSM_ASSERT_DELTA("Last coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.back(), 10,
+                     1e-3);
   }
 
   /*
@@ -337,8 +309,7 @@ public:
  (-5,-8)x      |
 
   */
-  void
-  test_indirect_conversion_axis_selection_where_y_dim_of_original_is_used() {
+  void test_indirect_conversion_axis_selection_where_y_dim_of_original_is_used() {
     auto in_ws = MDEventsTestHelper::makeMDEW<2>(2, -10.0, 10, 3);
 
     // Create a line slice at degrees to the original workspace.
@@ -348,23 +319,20 @@ public:
     binMDAlg->setChild(true);
     binMDAlg->setProperty("InputWorkspace", in_ws);
     binMDAlg->setProperty("AxisAligned", false);
-    binMDAlg->setPropertyValue(
-        "BasisVector0", "X,units,0.3846, 0.6154"); // Line set up to intersect
-                                                   // 0,0 and 5,10 in original
-                                                   // coords. Basis0 vector is
-                                                   // therefore  and 5/(5+8),
-                                                   // 8/(5+8)
-    binMDAlg->setPropertyValue(
-        "BasisVector1", "Y,units,-0.6154, 0.3846"); // Line set up to intersect
-                                                    // 0,0 and -5,10 in original
-                                                    // coords. Basis1 vector is
-                                                    // therefore -8/(5+8) and
-                                                    // 5/(5+8)
+    binMDAlg->setPropertyValue("BasisVector0", "X,units,0.3846, 0.6154");  // Line set up to intersect
+                                                                           // 0,0 and 5,10 in original
+                                                                           // coords. Basis0 vector is
+                                                                           // therefore  and 5/(5+8),
+                                                                           // 8/(5+8)
+    binMDAlg->setPropertyValue("BasisVector1", "Y,units,-0.6154, 0.3846"); // Line set up to intersect
+                                                                           // 0,0 and -5,10 in original
+                                                                           // coords. Basis1 vector is
+                                                                           // therefore -8/(5+8) and
+                                                                           // 5/(5+8)
     binMDAlg->setPropertyValue("Translation", "-5,-8");
-    binMDAlg->setPropertyValue(
-        "OutputExtents", "0,18.867,-1,1"); // x goes from 0 to sqrt((-8-8)^2 +
-                                           // (-5-5)^2) and -1 to 1 in original
-                                           // coords
+    binMDAlg->setPropertyValue("OutputExtents", "0,18.867,-1,1"); // x goes from 0 to sqrt((-8-8)^2 +
+                                                                  // (-5-5)^2) and -1 to 1 in original
+                                                                  // coords
     binMDAlg->setPropertyValue("OutputBins", "10,1");
     binMDAlg->setPropertyValue("OutputWorkspace",
                                "_"); // Not really required for child algorithm
@@ -377,37 +345,30 @@ public:
     convert_alg.setChild(true);
     convert_alg.initialize();
     convert_alg.setProperty("InputWorkspace", slice);
-    convert_alg.setPropertyValue(
-        "OutputWorkspace", "_"); // Not really required for child algorithm
+    convert_alg.setPropertyValue("OutputWorkspace", "_"); // Not really required for child algorithm
     convert_alg.execute();
     MatrixWorkspace_sptr out_ws = convert_alg.getProperty("OutputWorkspace");
     // Should select the 2nd dimension for the x-axis in this case.
-    TSM_ASSERT_EQUALS("Wrong dimension auto selected for output x-axis",
-                      in_ws->getDimension(1)->getName(),
+    TSM_ASSERT_EQUALS("Wrong dimension auto selected for output x-axis", in_ws->getDimension(1)->getName(),
                       out_ws->getDimension(0)->getName());
     TS_ASSERT_EQUALS(out_ws->getNumberHistograms(), 1);
     auto first_x_spectra = out_ws->readX(0);
-    TSM_ASSERT_DELTA(
-        "First coordinate in the incorrect position. Incorrect transformation.",
-        first_x_spectra.front(), -8, 1e-3);
-    TSM_ASSERT_DELTA(
-        "Last coordinate in the incorrect position. Incorrect transformation.",
-        first_x_spectra.back(), 8, 1e-3);
+    TSM_ASSERT_DELTA("First coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.front(),
+                     -8, 1e-3);
+    TSM_ASSERT_DELTA("Last coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.back(), 8,
+                     1e-3);
 
     // Run it again, this time with FindXAxis set off.
     convert_alg.setProperty("FindXAxis", false);
     convert_alg.execute();
     out_ws = convert_alg.getProperty("OutputWorkspace");
-    TSM_ASSERT_EQUALS("FindXAxis if off", "X",
-                      out_ws->getDimension(0)->getName());
+    TSM_ASSERT_EQUALS("FindXAxis if off", "X", out_ws->getDimension(0)->getName());
     TS_ASSERT_EQUALS(out_ws->getNumberHistograms(), 1);
     first_x_spectra = out_ws->readX(0);
-    TSM_ASSERT_DELTA(
-        "First coordinate in the incorrect position. Incorrect transformation.",
-        first_x_spectra.front(), -5, 1e-3);
-    TSM_ASSERT_DELTA(
-        "Last coordinate in the incorrect position. Incorrect transformation.",
-        first_x_spectra.back(), 5, 1e-3);
+    TSM_ASSERT_DELTA("First coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.front(),
+                     -5, 1e-3);
+    TSM_ASSERT_DELTA("Last coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.back(), 5,
+                     1e-3);
   }
 
   void test_2D_slice_0() {

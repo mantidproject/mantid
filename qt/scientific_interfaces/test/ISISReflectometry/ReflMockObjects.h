@@ -51,9 +51,7 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockBatchPresenterFactory : public IBatchPresenterFactory {
 public:
   MOCK_METHOD1(makeProxy, IBatchPresenter *(IBatchView *));
-  std::unique_ptr<IBatchPresenter> make(IBatchView *view) {
-    return std::unique_ptr<IBatchPresenter>(makeProxy(view));
-  }
+  std::unique_ptr<IBatchPresenter> make(IBatchView *view) { return std::unique_ptr<IBatchPresenter>(makeProxy(view)); }
 };
 
 /**** Presenters ****/
@@ -254,8 +252,7 @@ public:
 
 class MockMessageHandler : public IMessageHandler {
 public:
-  MOCK_METHOD2(giveUserCritical,
-               void(const std::string &, const std::string &));
+  MOCK_METHOD2(giveUserCritical, void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
   MOCK_METHOD2(askUserOkCancel, bool(const std::string &, const std::string &));
   MOCK_METHOD1(askUserForLoadFileName, std::string(const std::string &));
@@ -264,21 +261,18 @@ public:
 
 class MockFileHandler : public IFileHandler {
 public:
-  MOCK_METHOD2(saveJSONToFile,
-               void(std::string const &, QMap<QString, QVariant> const &));
+  MOCK_METHOD2(saveJSONToFile, void(std::string const &, QMap<QString, QVariant> const &));
   MOCK_METHOD1(loadJSONFromFile, QMap<QString, QVariant>(const std::string &));
 };
 
 class MockEncoder : public IEncoder {
 public:
-  MOCK_METHOD3(encodeBatch,
-               QMap<QString, QVariant>(const IMainWindowView *, int, bool));
+  MOCK_METHOD3(encodeBatch, QMap<QString, QVariant>(const IMainWindowView *, int, bool));
 };
 
 class MockDecoder : public IDecoder {
 public:
-  MOCK_METHOD3(decodeBatch, void(const IMainWindowView *, int,
-                                 const QMap<QString, QVariant> &));
+  MOCK_METHOD3(decodeBatch, void(const IMainWindowView *, int, const QMap<QString, QVariant> &));
 };
 
 class MockPythonRunner : public IPythonRunner {
@@ -295,10 +289,8 @@ public:
 class MockAsciiSaver : public IAsciiSaver {
 public:
   MOCK_CONST_METHOD1(isValidSaveDirectory, bool(std::string const &));
-  MOCK_CONST_METHOD4(save,
-                     void(std::string const &, std::vector<std::string> const &,
-                          std::vector<std::string> const &,
-                          FileFormatOptions const &));
+  MOCK_CONST_METHOD4(save, void(std::string const &, std::vector<std::string> const &, std::vector<std::string> const &,
+                                FileFormatOptions const &));
   virtual ~MockAsciiSaver() = default;
 };
 
@@ -315,41 +307,29 @@ public:
   MOCK_METHOD0(notifyAutoreductionResumed, void());
   MOCK_METHOD0(notifyAutoreductionPaused, void());
   MOCK_METHOD1(setReprocessFailedItems, void(bool));
-  MOCK_METHOD1(algorithmStarted,
-               Item const &(MantidQt::API::IConfiguredAlgorithm_sptr));
-  MOCK_METHOD1(algorithmComplete,
-               Item const &(MantidQt::API::IConfiguredAlgorithm_sptr));
-  MOCK_METHOD2(algorithmError,
-               Item const &(MantidQt::API::IConfiguredAlgorithm_sptr,
-                            std::string const &));
-  MOCK_CONST_METHOD1(
-      algorithmOutputWorkspacesToSave,
-      std::vector<std::string>(MantidQt::API::IConfiguredAlgorithm_sptr));
-  MOCK_METHOD1(notifyWorkspaceDeleted,
-               boost::optional<Item const &>(std::string const &));
-  MOCK_METHOD2(notifyWorkspaceRenamed,
-               boost::optional<Item const &>(std::string const &,
-                                             std::string const &));
+  MOCK_METHOD1(algorithmStarted, Item const &(MantidQt::API::IConfiguredAlgorithm_sptr));
+  MOCK_METHOD1(algorithmComplete, Item const &(MantidQt::API::IConfiguredAlgorithm_sptr));
+  MOCK_METHOD2(algorithmError, Item const &(MantidQt::API::IConfiguredAlgorithm_sptr, std::string const &));
+  MOCK_CONST_METHOD1(algorithmOutputWorkspacesToSave,
+                     std::vector<std::string>(MantidQt::API::IConfiguredAlgorithm_sptr));
+  MOCK_METHOD1(notifyWorkspaceDeleted, boost::optional<Item const &>(std::string const &));
+  MOCK_METHOD2(notifyWorkspaceRenamed, boost::optional<Item const &>(std::string const &, std::string const &));
   MOCK_METHOD0(notifyAllWorkspacesDeleted, void());
-  MOCK_METHOD0(getAlgorithms,
-               std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>());
+  MOCK_METHOD0(getAlgorithms, std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>());
   MOCK_CONST_METHOD0(rowProcessingProperties, AlgorithmRuntimeProps());
   MOCK_CONST_METHOD0(getProcessPartial, bool());
   MOCK_CONST_METHOD0(getProcessAll, bool());
 };
 
-class MockBatchJobAlgorithm : public IBatchJobAlgorithm,
-                              public MantidQt::API::IConfiguredAlgorithm {
+class MockBatchJobAlgorithm : public IBatchJobAlgorithm, public MantidQt::API::IConfiguredAlgorithm {
 public:
   MockBatchJobAlgorithm() {}
   MOCK_CONST_METHOD0(algorithm, Mantid::API::IAlgorithm_sptr());
-  MOCK_CONST_METHOD0(
-      properties, MantidQt::API::IConfiguredAlgorithm::AlgorithmRuntimeProps());
+  MOCK_CONST_METHOD0(properties, MantidQt::API::IConfiguredAlgorithm::AlgorithmRuntimeProps());
   MOCK_METHOD0(item, Item *());
   MOCK_METHOD0(updateItem, void());
   MOCK_CONST_METHOD0(outputWorkspaceNames, std::vector<std::string>());
-  MOCK_CONST_METHOD0(outputWorkspaceNameToWorkspace,
-                     std::map<std::string, Workspace_sptr>());
+  MOCK_CONST_METHOD0(outputWorkspaceNameToWorkspace, std::map<std::string, Workspace_sptr>());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

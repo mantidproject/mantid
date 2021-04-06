@@ -28,17 +28,12 @@ class TimeAtSampleStrategyElasticTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static TimeAtSampleStrategyElasticTest *createSuite() {
-    return new TimeAtSampleStrategyElasticTest();
-  }
-  static void destroySuite(TimeAtSampleStrategyElasticTest *suite) {
-    delete suite;
-  }
+  static TimeAtSampleStrategyElasticTest *createSuite() { return new TimeAtSampleStrategyElasticTest(); }
+  static void destroySuite(TimeAtSampleStrategyElasticTest *suite) { delete suite; }
 
   void test_L2_detector() {
 
-    auto ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
 
     auto instrument = ws->getInstrument();
 
@@ -56,14 +51,12 @@ public:
 
     const double ratio = correction.factor;
 
-    TSM_ASSERT_EQUALS("L1 / (L1 + L2)",
-                      L1 / (L1 + spectrumInfo.l2(detectorIndex)), ratio);
+    TSM_ASSERT_EQUALS("L1 / (L1 + L2)", L1 / (L1 + spectrumInfo.l2(detectorIndex)), ratio);
   }
 
   void test_L2_monitor() {
 
-    auto ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
 
     auto instrument = ws->getInstrument();
 
@@ -71,8 +64,7 @@ public:
 
     auto source = instrument->getSource();
 
-    const V3D &beamDir =
-        instrument->getReferenceFrame()->vecPointingAlongBeam();
+    const V3D &beamDir = instrument->getReferenceFrame()->vecPointingAlongBeam();
 
     const size_t monitorIndex = 1; // monitor workspace index.
     auto monitor = ws->getDetector(monitorIndex);
@@ -84,9 +76,6 @@ public:
 
     const double ratio = correction.factor;
 
-    TSM_ASSERT_EQUALS("L1/L1m",
-                      std::abs(L1 / beamDir.scalar_prod(source->getPos() -
-                                                        monitor->getPos())),
-                      ratio);
+    TSM_ASSERT_EQUALS("L1/L1m", std::abs(L1 / beamDir.scalar_prod(source->getPos() - monitor->getPos())), ratio);
   }
 };

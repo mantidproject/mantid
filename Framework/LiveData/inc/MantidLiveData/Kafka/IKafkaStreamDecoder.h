@@ -35,10 +35,7 @@ public:
   public:
     using FnType = std::function<void()>;
 
-    explicit Callback(const Callback::FnType &callback)
-        : m_mutex(), m_callback() {
-      setFunction(callback);
-    }
+    explicit Callback(const Callback::FnType &callback) : m_mutex(), m_callback() { setFunction(callback); }
 
     Callback(Callback &&other) noexcept {
       {
@@ -63,12 +60,9 @@ public:
   };
 
 public:
-  IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
-                      const std::string &streamTopic,
-                      const std::string &runInfoTopic,
-                      const std::string &sampleEnvTopic,
-                      const std::string &chopperTopic,
-                      const std::string &monitorTopic);
+  IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker, const std::string &streamTopic,
+                      const std::string &runInfoTopic, const std::string &sampleEnvTopic,
+                      const std::string &chopperTopic, const std::string &monitorTopic);
   virtual ~IKafkaStreamDecoder();
   IKafkaStreamDecoder(const IKafkaStreamDecoder &) = delete;
   IKafkaStreamDecoder &operator=(const IKafkaStreamDecoder &) = delete;
@@ -93,12 +87,8 @@ public:
 
   ///@name Callbacks
   ///@{
-  virtual void registerIterationEndCb(const Callback::FnType &cb) {
-    m_cbIterationEnd.setFunction(cb);
-  }
-  virtual void registerErrorCb(const Callback::FnType &cb) {
-    m_cbError.setFunction(cb);
-  }
+  virtual void registerIterationEndCb(const Callback::FnType &cb) { m_cbIterationEnd.setFunction(cb); }
+  virtual void registerErrorCb(const Callback::FnType &cb) { m_cbError.setFunction(cb); }
   ///@}
 
   ///@name Modifying
@@ -139,8 +129,7 @@ protected:
   /// Populate cache workspaces with data from messages
   virtual void sampleDataFromMessage(const std::string &buffer) = 0;
 
-  template <typename T = API::MatrixWorkspace>
-  void writeChopperTimestampsToWorkspaceLogs(std::vector<T> workspaces);
+  template <typename T = API::MatrixWorkspace> void writeChopperTimestampsToWorkspaceLogs(std::vector<T> workspaces);
 
   /// For LoadLiveData to extract the cached data
   virtual API::Workspace_sptr extractDataImpl() = 0;
@@ -200,43 +189,32 @@ protected:
   void waitForDataExtraction();
   void waitForRunEndObservation();
 
-  static std::map<int32_t, std::set<int32_t>>
-  buildSpectrumToDetectorMap(const int32_t *spec, const int32_t *udet,
-                             uint32_t length);
+  static std::map<int32_t, std::set<int32_t>> buildSpectrumToDetectorMap(const int32_t *spec, const int32_t *udet,
+                                                                         uint32_t length);
 
   template <typename T>
-  std::shared_ptr<T>
-  createBufferWorkspace(const std::string &workspaceClassName, size_t nspectra,
-                        const int32_t *spec, const int32_t *udet,
-                        uint32_t length);
+  std::shared_ptr<T> createBufferWorkspace(const std::string &workspaceClassName, size_t nspectra, const int32_t *spec,
+                                           const int32_t *udet, uint32_t length);
   template <typename T>
-  std::shared_ptr<T>
-  createBufferWorkspace(const std::string &workspaceClassName,
-                        const std::shared_ptr<T> &parent);
+  std::shared_ptr<T> createBufferWorkspace(const std::string &workspaceClassName, const std::shared_ptr<T> &parent);
 
   template <typename T>
-  bool loadInstrument(const std::string &name, std::shared_ptr<T> workspace,
-                      const std::string &jsonGeometry = "");
+  bool loadInstrument(const std::string &name, std::shared_ptr<T> workspace, const std::string &jsonGeometry = "");
 
-  void checkRunMessage(
-      const std::string &buffer, bool &checkOffsets,
-      std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
-      std::unordered_map<std::string, std::vector<bool>> &reachedEnd);
+  void checkRunMessage(const std::string &buffer, bool &checkOffsets,
+                       std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
+                       std::unordered_map<std::string, std::vector<bool>> &reachedEnd);
 
-  void checkRunEnd(
-      const std::string &topicName, bool &checkOffsets, int64_t offset,
-      int32_t partition,
-      std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
-      std::unordered_map<std::string, std::vector<bool>> &reachedEnd);
+  void checkRunEnd(const std::string &topicName, bool &checkOffsets, int64_t offset, int32_t partition,
+                   std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
+                   std::unordered_map<std::string, std::vector<bool>> &reachedEnd);
 
   /// Methods for checking if the end of a run was reached
-  std::unordered_map<std::string, std::vector<int64_t>> getStopOffsets(
-      std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
-      std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
-      uint64_t stopTime) const;
-  void checkIfAllStopOffsetsReached(
-      const std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
-      bool &checkOffsets);
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getStopOffsets(std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
+                 std::unordered_map<std::string, std::vector<bool>> &reachedEnd, uint64_t stopTime) const;
+  void checkIfAllStopOffsetsReached(const std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
+                                    bool &checkOffsets);
 
   /// Callbacks for unit tests
   Callback m_cbIterationEnd;
@@ -249,9 +227,7 @@ protected:
   /// Convert a duration in nanoseconds to milliseconds
   static int64_t nanosecondsToMilliseconds(uint64_t timeNanoseconds);
 
-  static RunStartStruct
-  extractRunStartDataFromMessage(const std::string &messageBuffer,
-                                 int64_t offset);
+  static RunStartStruct extractRunStartDataFromMessage(const std::string &messageBuffer, int64_t offset);
 };
 } // namespace LiveData
 } // namespace Mantid

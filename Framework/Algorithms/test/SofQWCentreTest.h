@@ -67,15 +67,11 @@ class SofQWCentreTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SofQWCentreTestPerformance *createSuite() {
-    return new SofQWCentreTestPerformance();
-  }
+  static SofQWCentreTestPerformance *createSuite() { return new SofQWCentreTestPerformance(); }
   static void destroySuite(SofQWCentreTestPerformance *suite) {
     AnalysisDataService::Instance().clear();
     delete suite;
   }
 
-  void testExec() {
-    auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQWCentre>();
-  }
+  void testExec() { auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQWCentre>(); }
 };

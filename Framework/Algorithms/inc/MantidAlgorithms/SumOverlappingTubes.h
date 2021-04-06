@@ -32,9 +32,7 @@ public:
            "supported.";
   }
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SumSpectra"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SumSpectra"}; }
 
 private:
   void init() override;
@@ -57,8 +55,7 @@ private:
   void getInputParameters();
   void getScatteringAngleBinning();
   void getHeightAxis(const std::string &componentName);
-  std::vector<std::vector<double>>
-  performBinning(API::MatrixWorkspace_sptr &outputWS);
+  std::vector<std::vector<double>> performBinning(API::MatrixWorkspace_sptr &outputWS);
 
   double distanceFromAngle(const int angleIndex, const double angle) const;
 

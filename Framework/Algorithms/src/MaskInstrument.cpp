@@ -34,24 +34,16 @@ const std::string MaskInstrument::name() const { return "MaskInstrument"; }
 int MaskInstrument::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string MaskInstrument::category() const {
-  return "Transforms\\Masking";
-}
+const std::string MaskInstrument::category() const { return "Transforms\\Masking"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string MaskInstrument::summary() const {
-  return "Mask detectors in the instrument";
-}
+const std::string MaskInstrument::summary() const { return "Mask detectors in the instrument"; }
 
 void MaskInstrument::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-      "InputWorkspace", "The input workspace", Direction::Input));
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                            Direction::Output),
-      "Name of the output workspace (can be same as InputWorkspace)");
-  declareProperty(std::make_unique<ArrayProperty<detid_t>>("DetectorIDs"),
-                  "List of detector IDs to mask");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "The input workspace", Direction::Input));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+                  "Name of the output workspace (can be same as InputWorkspace)");
+  declareProperty(std::make_unique<ArrayProperty<detid_t>>("DetectorIDs"), "List of detector IDs to mask");
 }
 
 void MaskInstrument::exec() {

@@ -30,8 +30,7 @@ class IMDWorkspaceTesterIterator : public IMDIterator {
   size_t ix, iy;
 
 public:
-  IMDWorkspaceTesterIterator(const IMDWorkspaceTester *ws)
-      : m_ws(ws), ix(0), iy(0) {}
+  IMDWorkspaceTesterIterator(const IMDWorkspaceTester *ws) : m_ws(ws), ix(0), iy(0) {}
   size_t getDataSize() const override;
   bool valid() const override { return true; }
   void jumpTo(size_t index) override;
@@ -41,13 +40,8 @@ public:
   signal_t getNormalizedError() const override;
   signal_t getSignal() const override { return 0; }
   signal_t getError() const override { return 0; }
-  std::unique_ptr<coord_t[]> getVertexesArray(size_t &) const override {
-    return nullptr;
-  }
-  std::unique_ptr<coord_t[]> getVertexesArray(size_t &, const size_t,
-                                              const bool *) const override {
-    return nullptr;
-  }
+  std::unique_ptr<coord_t[]> getVertexesArray(size_t &) const override { return nullptr; }
+  std::unique_ptr<coord_t[]> getVertexesArray(size_t &, const size_t, const bool *) const override { return nullptr; }
   Mantid::Kernel::VMD getCenter() const override;
   size_t getNumEvents() const override { return 0; }
   uint16_t getInnerRunIndex(size_t) const override { return 0; }
@@ -58,40 +52,32 @@ public:
   signal_t getInnerError(size_t) const override { return 0; }
   bool getIsMasked() const override { return false; }
   std::vector<size_t> findNeighbourIndexes() const override {
-    throw std::runtime_error(
-        "findNeighbourIndexes not implemented on IMDWorkspaceTesterIterator");
+    throw std::runtime_error("findNeighbourIndexes not implemented on IMDWorkspaceTesterIterator");
   }
   std::vector<size_t> findNeighbourIndexesFaceTouching() const override {
-    throw std::runtime_error(
-        "findNeighbourIndexes not implemented on IMDWorkspaceTesterIterator");
+    throw std::runtime_error("findNeighbourIndexes not implemented on IMDWorkspaceTesterIterator");
   }
   size_t getLinearIndex() const override {
-    throw std::runtime_error(
-        "getLinearIndex not implemented on IMDWorkspaceTesterIterator");
+    throw std::runtime_error("getLinearIndex not implemented on IMDWorkspaceTesterIterator");
   }
   bool isWithinBounds(size_t) const override {
-    throw std::runtime_error(
-        "isWithinBounds not implemented on IMDWorkspaceTestIterator");
+    throw std::runtime_error("isWithinBounds not implemented on IMDWorkspaceTestIterator");
   }
 };
 
 class IMDWorkspaceTester : public WorkspaceTester {
 public:
-  std::vector<std::unique_ptr<IMDIterator>>
-  createIterators(size_t,
-                  Mantid::Geometry::MDImplicitFunction *) const override {
+  std::vector<std::unique_ptr<IMDIterator>> createIterators(size_t,
+                                                            Mantid::Geometry::MDImplicitFunction *) const override {
 
     std::vector<std::unique_ptr<IMDIterator>> ret;
-    auto ptr = std::unique_ptr<IMDIterator>{
-        std::make_unique<IMDWorkspaceTesterIterator>(this)};
+    auto ptr = std::unique_ptr<IMDIterator>{std::make_unique<IMDWorkspaceTesterIterator>(this)};
     ret.emplace_back(std::move(ptr));
     return ret;
   }
 };
 
-size_t IMDWorkspaceTesterIterator::getDataSize() const {
-  return m_ws->getNumberHistograms() * m_ws->blocksize();
-}
+size_t IMDWorkspaceTesterIterator::getDataSize() const { return m_ws->getNumberHistograms() * m_ws->blocksize(); }
 
 bool IMDWorkspaceTesterIterator::next() {
   if (ix == m_ws->blocksize() - 1) {
@@ -107,13 +93,9 @@ bool IMDWorkspaceTesterIterator::next() {
   return true;
 }
 
-signal_t IMDWorkspaceTesterIterator::getNormalizedSignal() const {
-  return signal_t(m_ws->readY(iy)[ix]);
-}
+signal_t IMDWorkspaceTesterIterator::getNormalizedSignal() const { return signal_t(m_ws->readY(iy)[ix]); }
 
-signal_t IMDWorkspaceTesterIterator::getNormalizedError() const {
-  return signal_t(m_ws->readE(iy)[ix]);
-}
+signal_t IMDWorkspaceTesterIterator::getNormalizedError() const { return signal_t(m_ws->readE(iy)[ix]); }
 
 void IMDWorkspaceTesterIterator::jumpTo(size_t index) {
   iy = index % m_ws->blocksize();
@@ -207,8 +189,8 @@ public:
     TS_ASSERT_DIFFERS(fun->getError(0), 0.0);
     TS_ASSERT_DIFFERS(fun->getError(1), 0.0);
 
-    ITableWorkspace_sptr params = std::dynamic_pointer_cast<ITableWorkspace>(
-        API::AnalysisDataService::Instance().retrieve("Output_Parameters"));
+    ITableWorkspace_sptr params =
+        std::dynamic_pointer_cast<ITableWorkspace>(API::AnalysisDataService::Instance().retrieve("Output_Parameters"));
 
     TS_ASSERT(params);
     TS_ASSERT_EQUALS(params->columnCount(), 3);
@@ -227,22 +209,17 @@ public:
   }
 
   void test_output_histo_workspace() {
-    auto inputWS = createHistoWorkspace(
-        3, 4, "name=UserFunctionMD,Formula=10 + y + (2 + 0.1*y) * x");
+    auto inputWS = createHistoWorkspace(3, 4, "name=UserFunctionMD,Formula=10 + y + (2 + 0.1*y) * x");
 
     auto fit = API::AlgorithmManager::Instance().create("Fit");
     fit->initialize();
 
-    fit->setProperty(
-        "Function",
-        "name=UserFunctionMD,Formula=h + y + (s + 0.1*y) * x, h = 0, s = 0");
+    fit->setProperty("Function", "name=UserFunctionMD,Formula=h + y + (s + 0.1*y) * x, h = 0, s = 0");
     fit->setProperty("InputWorkspace", inputWS);
     fit->setPropertyValue("Output", "out");
     fit->execute();
 
-    IMDHistoWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
-            "out_Workspace");
+    IMDHistoWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>("out_Workspace");
     TS_ASSERT(outputWS);
     if (!outputWS)
       return;
@@ -252,16 +229,14 @@ public:
     uint64_t n = outputWS->getNPoints();
     coord_t invVolume = inputWS->getInverseVolume();
     for (uint64_t i = 0; i < n; ++i) {
-      TS_ASSERT_DELTA(outputWS->signalAt(i) / inputWS->signalAt(i) / invVolume,
-                      1.0, 0.1);
+      TS_ASSERT_DELTA(outputWS->signalAt(i) / inputWS->signalAt(i) / invVolume, 1.0, 0.1);
     }
 
     AnalysisDataService::Instance().clear();
   }
 
   // ---------------------------------------------------------- //
-  IMDHistoWorkspace_sptr createHistoWorkspace(size_t nx, size_t ny,
-                                              const std::string &function) {
+  IMDHistoWorkspace_sptr createHistoWorkspace(size_t nx, size_t ny, const std::string &function) {
 
     std::vector<double> values(nx * ny, 1.0);
     std::vector<int> dims(2);
@@ -281,8 +256,7 @@ public:
     alg->execute();
     TS_ASSERT(alg->isExecuted());
 
-    IMDHistoWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>("out");
+    IMDHistoWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>("out");
 
     alg = AlgorithmManager::Instance().create("EvaluateMDFunction");
     alg->initialize();

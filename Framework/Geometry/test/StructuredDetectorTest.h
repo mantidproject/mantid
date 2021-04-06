@@ -150,11 +150,10 @@ public:
     std::vector<double> x{0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> y{0, 0, 0, 1, 1, 1, 2, 2, 2};
 
-    TSM_ASSERT_THROWS(
-        "StructuredDetectors created with beams not aligned "
-        "along the z-axis should fail.",
-        det->initialize(2, 2, std::move(x), std::move(y), false, 0, true, 2, 1),
-        const std::invalid_argument &);
+    TSM_ASSERT_THROWS("StructuredDetectors created with beams not aligned "
+                      "along the z-axis should fail.",
+                      det->initialize(2, 2, std::move(x), std::move(y), false, 0, true, 2, 1),
+                      const std::invalid_argument &);
 
     delete det;
   }
@@ -172,23 +171,20 @@ public:
     auto y2 = y;
 
     // Initialize with these parameters
-    TS_ASSERT_THROWS(
-        det->initialize(2, 2, std::move(x), std::move(y), true, 0, true, 2, 1),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(det->initialize(2, 2, std::move(x), std::move(y), true, 0, true, 2, 1),
+                     const std::invalid_argument &);
 
     x2.resize(3);
     auto x3 = x2;
     auto y3 = y2;
 
-    TS_ASSERT_THROWS(det->initialize(2, 2, std::move(x2), std::move(y2), true,
-                                     0, true, 2, 1),
+    TS_ASSERT_THROWS(det->initialize(2, 2, std::move(x2), std::move(y2), true, 0, true, 2, 1),
                      const std::invalid_argument &);
 
     x3.resize(0);
     y3.resize(0);
 
-    TS_ASSERT_THROWS(det->initialize(2, 2, std::move(x3), std::move(y3), true,
-                                     0, true, 2, 1),
+    TS_ASSERT_THROWS(det->initialize(2, 2, std::move(x3), std::move(y3), true, 0, true, 2, 1),
                      const std::invalid_argument &);
 
     delete det;
@@ -240,8 +236,7 @@ public:
     TS_ASSERT_EQUALS(y, 0);
 
     // Name
-    TS_ASSERT_EQUALS(det->getAtXY(0, 1)->getName(),
-                     "MyStructuredDetector(0,1)");
+    TS_ASSERT_EQUALS(det->getAtXY(0, 1)->getName(), "MyStructuredDetector(0,1)");
     TS_ASSERT_EQUALS(det->getChild(1)->getName(), "MyStructuredDetector(x=1)");
   }
 };

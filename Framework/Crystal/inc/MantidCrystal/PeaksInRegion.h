@@ -18,14 +18,10 @@ class MANTID_CRYSTAL_DLL PeaksInRegion : public PeaksIntersection {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Find peaks intersecting a box region.";
-  }
+  const std::string summary() const override { return "Find peaks intersecting a box region."; }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"PeaksOnSurface"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"PeaksOnSurface"}; }
   const std::string category() const override;
 
 private:
@@ -36,13 +32,10 @@ private:
   void validateExtentsInput() const override;
   int numberOfFaces() const override;
   VecVecV3D createFaces() const override;
-  bool
-  pointOutsideAnyExtents(const Mantid::Kernel::V3D &testPoint) const override;
-  bool
-  pointInsideAllExtents(const Mantid::Kernel::V3D &testPoint,
-                        const Mantid::Kernel::V3D &peakCenter) const override;
-  void checkTouchPoint(const Mantid::Kernel::V3D &touchPoint,
-                       const Mantid::Kernel::V3D &normal,
+  bool pointOutsideAnyExtents(const Mantid::Kernel::V3D &testPoint) const override;
+  bool pointInsideAllExtents(const Mantid::Kernel::V3D &testPoint,
+                             const Mantid::Kernel::V3D &peakCenter) const override;
+  void checkTouchPoint(const Mantid::Kernel::V3D &touchPoint, const Mantid::Kernel::V3D &normal,
                        const Mantid::Kernel::V3D &faceVertex) const override;
 
   /// Extents.

@@ -21,12 +21,9 @@ namespace LiveData {
 
 DECLARE_LISTENER(KafkaHistoListener)
 
-KafkaHistoListener::KafkaHistoListener() {
-  declareProperty("InstrumentName", "");
-}
+KafkaHistoListener::KafkaHistoListener() { declareProperty("InstrumentName", ""); }
 
-void KafkaHistoListener::setAlgorithm(
-    const Mantid::API::IAlgorithm &callingAlgorithm) {
+void KafkaHistoListener::setAlgorithm(const Mantid::API::IAlgorithm &callingAlgorithm) {
   this->updatePropertyValues(callingAlgorithm);
   // Get the instrument name from StartLiveData so we can sub to correct topics
   if (callingAlgorithm.existsProperty("Instrument")) {
@@ -40,25 +37,19 @@ void KafkaHistoListener::setAlgorithm(
 /// @copydoc ILiveListener::connect
 bool KafkaHistoListener::connect(const Poco::Net::SocketAddress &address) {
   if (m_instrumentName.empty()) {
-    g_log.error(
-        "KafkaHistoListener::connect requires a non-empty instrument name");
+    g_log.error("KafkaHistoListener::connect requires a non-empty instrument name");
   }
 
   try {
-    const std::string histoTopic(m_instrumentName +
-                                 KafkaTopicSubscriber::HISTO_TOPIC_SUFFIX),
+    const std::string histoTopic(m_instrumentName + KafkaTopicSubscriber::HISTO_TOPIC_SUFFIX),
         runInfoTopic(m_instrumentName + KafkaTopicSubscriber::RUN_TOPIC_SUFFIX),
-        sampleEnvTopic(m_instrumentName +
-                       KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX),
-        chopperTimestampTopic(m_instrumentName +
-                              KafkaTopicSubscriber::CHOPPER_TOPIC_SUFFIX);
+        sampleEnvTopic(m_instrumentName + KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX),
+        chopperTimestampTopic(m_instrumentName + KafkaTopicSubscriber::CHOPPER_TOPIC_SUFFIX);
 
-    m_decoder = std::make_unique<KafkaHistoStreamDecoder>(
-        std::make_shared<KafkaBroker>(address.toString()), histoTopic,
-        runInfoTopic, sampleEnvTopic, chopperTimestampTopic);
+    m_decoder = std::make_unique<KafkaHistoStreamDecoder>(std::make_shared<KafkaBroker>(address.toString()), histoTopic,
+                                                          runInfoTopic, sampleEnvTopic, chopperTimestampTopic);
   } catch (std::exception &exc) {
-    g_log.error() << "KafkaHistoListener::connect - Connection Error: "
-                  << exc.what() << "\n";
+    g_log.error() << "KafkaHistoListener::connect - Connection Error: " << exc.what() << "\n";
     return false;
   }
   return true;
@@ -90,9 +81,7 @@ std::shared_ptr<API::Workspace> KafkaHistoListener::extractData() {
 }
 
 /// @copydoc ILiveListener::isConnected
-bool KafkaHistoListener::isConnected() {
-  return (m_decoder ? m_decoder->isCapturing() : false);
-}
+bool KafkaHistoListener::isConnected() { return (m_decoder ? m_decoder->isCapturing() : false); }
 
 /// @copydoc ILiveListener::runStatus
 API::ILiveListener::RunStatus KafkaHistoListener::runStatus() {
@@ -105,9 +94,7 @@ API::ILiveListener::RunStatus KafkaHistoListener::runStatus() {
 }
 
 /// @copydoc ILiveListener::runNumber
-int KafkaHistoListener::runNumber() const {
-  return (m_decoder ? m_decoder->runNumber() : -1);
-}
+int KafkaHistoListener::runNumber() const { return (m_decoder ? m_decoder->runNumber() : -1); }
 
 } // namespace LiveData
 } // namespace Mantid

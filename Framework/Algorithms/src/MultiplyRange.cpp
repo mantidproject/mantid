@@ -28,12 +28,10 @@ using namespace HistogramData;
 
 void MultiplyRange::init() {
   // Declare an input workspace property.
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "The name of the input workspace.");
   // Declare an output workspace property.
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
@@ -41,11 +39,9 @@ void MultiplyRange::init() {
   // StartBin
   declareProperty("StartBin", 0, mustBePositive, "Bin index to start from");
   // EndBin
-  declareProperty("EndBin", EMPTY_INT(), mustBePositive,
-                  "Bin index to finish at");
+  declareProperty("EndBin", EMPTY_INT(), mustBePositive, "Bin index to finish at");
   // factor
-  declareProperty("Factor", 0.0,
-                  "The value by which to multiply the input data range");
+  declareProperty("Factor", 0.0, "The value by which to multiply the input data range");
 }
 
 /** Executes the algorithm
@@ -91,11 +87,9 @@ void MultiplyRange::exec() {
 
     // Now multiply the requested range
     using std::placeholders::_1;
-    std::transform(newY.begin() + startBin, newY.begin() + endBin + 1,
-                   newY.begin() + startBin,
+    std::transform(newY.begin() + startBin, newY.begin() + endBin + 1, newY.begin() + startBin,
                    std::bind(std::multiplies<double>(), _1, factor));
-    std::transform(newE.begin() + startBin, newE.begin() + endBin + 1,
-                   newE.begin() + startBin,
+    std::transform(newE.begin() + startBin, newE.begin() + endBin + 1, newE.begin() + startBin,
                    std::bind(std::multiplies<double>(), _1, factor));
 
     progress.report();

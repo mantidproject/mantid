@@ -30,9 +30,8 @@ public:
   /// Get the list of cycle names
   virtual std::vector<std::string> getCycleNames() = 0;
   /// Get data for runs that match the given filters
-  virtual std::vector<RunData>
-  getRuns(std::vector<std::string> const &valuesToLookup = {},
-          RunData const &filters = RunData()) = 0;
+  virtual std::vector<RunData> getRuns(std::vector<std::string> const &valuesToLookup = {},
+                                       RunData const &filters = RunData()) = 0;
 };
 } // namespace API
 } // namespace Mantid

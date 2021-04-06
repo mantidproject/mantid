@@ -1,7 +1,7 @@
 digraph IndirectFlatePlateAbsorption {
   label="IndirectFlatePlateAbsorption Flowchart"
   $global_style
-  
+
   subgraph params  {
     $param_style
     SampleWorkspace1        [label="SampleWorkspace"]
@@ -50,7 +50,7 @@ digraph IndirectFlatePlateAbsorption {
     GroupWorkspaces
     Multiply
   }
-  
+
   subgraph decisions {
     $decision_style
     canGiven          [label="Container Workspace?"]
@@ -60,7 +60,7 @@ digraph IndirectFlatePlateAbsorption {
 SampleWorkspace1                 -> GetEFixed
 GetEFixed                        -> ConvertUnits1                   [label="Convert input workspace to Wavelength"]
 ConvertUnits1                    -> SetBeam
-BeamHeight                       -> SetBeam 
+BeamHeight                       -> SetBeam
 BeamWidth                        -> SetBeam
 SetBeam                          -> SetSample
 SampleInnerRadius                -> SetSample

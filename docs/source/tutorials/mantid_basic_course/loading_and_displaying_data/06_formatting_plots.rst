@@ -64,7 +64,7 @@ Click Menus
    :align: center
 
 
-| **TIP**: Change a Legend entry by editing `Set curve label` on the Curves tab. 
+| **TIP**: Change a Legend entry by editing `Set curve label` on the Curves tab.
   Then on the Legend tab there are Color and Font options.
 |
 |

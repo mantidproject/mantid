@@ -19,7 +19,7 @@ average distances to the detector groups, and average scattering angles.
 The x and y extents in the par file are radians(step)\*distance and
 0.01, and are not supposed to be accurate.
 
-The grouping file (.xml) can be used with :ref:`GroupDetectors 
+The grouping file (.xml) can be used with :ref:`GroupDetectors
 <algm-GroupDetectors>` to perform the grouping.
 
 Usage
@@ -32,13 +32,13 @@ Usage
     # create some grouping file
     import mantid
     outputFilename=mantid.config.getString("defaultsave.directory")+"powder.xml"
-        
+
     #load some file
     ws=Load("CNCS_7860")
-    
+
     #generate the files
     GenerateGroupingPowder(ws,10,outputFilename)
-    
+
     #check that it works
     import os.path
     if(os.path.isfile(outputFilename)):
@@ -52,12 +52,12 @@ Usage
 
    DeleteWorkspace(ws)
    DeleteWorkspace(wsg)
-   import os,mantid   
+   import os,mantid
    filename=mantid.config.getString("defaultsave.directory")+"powder.xml"
    os.remove(filename)
    filename=mantid.config.getString("defaultsave.directory")+"powder.par"
    os.remove(filename)
-       
+
 Output:
 
 .. testoutput:: GenerateGroupingPowder
@@ -70,7 +70,7 @@ If one would use LoadDetectorsGroupingFile on powder.xml one would get a workspa
 
 .. figure:: /images/GenerateGroupingPowder.png
    :alt: GenerateGroupingPowder.png
-   
+
 .. categories::
 
 .. sourcelink::

@@ -35,18 +35,15 @@ public:
 
     // 2. Load Data
     DataObjects::Workspace2D_sptr workspace2d =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 100,
-                                                                     false);
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 100, false);
     API::AnalysisDataService::Instance().add("inputWS", workspace2d);
 
     // 3. Set Property
-    TS_ASSERT_THROWS_NOTHING(
-        editdetector.setPropertyValue("Workspace", "inputWS"));
+    TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue("Workspace", "inputWS"));
     TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue("SpectrumIDs", "1"));
     TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue("L2", "3.45"));
     TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue("Polar", "90.09"));
-    TS_ASSERT_THROWS_NOTHING(
-        editdetector.setPropertyValue("Azimuthal", "1.84"));
+    TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue("Azimuthal", "1.84"));
 
     // 4. Run
     TS_ASSERT_THROWS_NOTHING(editdetector.execute());
@@ -54,9 +51,8 @@ public:
 
     // 5. Check result
     Mantid::API::MatrixWorkspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(
-        workspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve("inputWS")));
+    TS_ASSERT_THROWS_NOTHING(workspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve("inputWS")));
 
     const auto &spectrumInfo = workspace->spectrumInfo();
     TS_ASSERT_EQUALS(spectrumInfo.hasUniqueDetector(0), true);
@@ -77,22 +73,17 @@ public:
 
     // 2. Load Data
     DataObjects::Workspace2D_sptr workspace2d =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(6, 100,
-                                                                     false);
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(6, 100, false);
     API::AnalysisDataService::Instance().add("inputWS2", workspace2d);
 
     // 3. Set Property
-    TS_ASSERT_THROWS_NOTHING(
-        editdetector.setPropertyValue("Workspace", "inputWS2"));
+    TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue("Workspace", "inputWS2"));
     // TS_ASSERT_THROWS_NOTHING(
     // editdetector.setPropertyValue("SpectrumIDs","3072,19456,40960,55296,74752,93184")
     // );
-    TS_ASSERT_THROWS_NOTHING(
-        editdetector.setPropertyValue("L2", "1.1,2.2,3.3,4.4,5.5,6.6"));
-    TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue(
-        "Polar", "90.1,90.2,90.3,90.4,90.5,90.6"));
-    TS_ASSERT_THROWS_NOTHING(
-        editdetector.setPropertyValue("Azimuthal", "1,2,3,4,5,6"));
+    TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue("L2", "1.1,2.2,3.3,4.4,5.5,6.6"));
+    TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue("Polar", "90.1,90.2,90.3,90.4,90.5,90.6"));
+    TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue("Azimuthal", "1,2,3,4,5,6"));
 
     // 4. Run
     TS_ASSERT_THROWS_NOTHING(editdetector.execute());
@@ -100,9 +91,8 @@ public:
 
     // 5. Check result
     Mantid::API::MatrixWorkspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(
-        workspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve("inputWS2")));
+    TS_ASSERT_THROWS_NOTHING(workspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve("inputWS2")));
 
     checkDetectorParameters(workspace, 0, 1.1, 90.1, 1.0);
     checkDetectorParameters(workspace, 1, 2.2, 90.2, 2.0);
@@ -121,23 +111,16 @@ public:
 
     // Load Data
     DataObjects::Workspace2D_sptr workspace2d =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(6, 100,
-                                                                     false);
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(6, 100, false);
     API::AnalysisDataService::Instance().addOrReplace("inputWS3", workspace2d);
 
     // Set Property
-    TS_ASSERT_THROWS_NOTHING(
-        editdetector.setPropertyValue("Workspace", "inputWS3"));
-    TS_ASSERT_THROWS_NOTHING(
-        editdetector.setPropertyValue("SpectrumIDs", "1,2,3,4,5,6"));
-    TS_ASSERT_THROWS_NOTHING(
-        editdetector.setPropertyValue("L2", "1.1,2.2,3.3, 4.4, 5.5, 6.6"));
-    TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue(
-        "Polar", "90.1,90.2,90.3, 90.4, 90.5, 90.6"));
-    TS_ASSERT_THROWS_NOTHING(
-        editdetector.setPropertyValue("Azimuthal", "1,2,3,4,5,6"));
-    TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue(
-        "DetectorIDs", "200, 201, 300, 301, 400, 401"));
+    TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue("Workspace", "inputWS3"));
+    TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue("SpectrumIDs", "1,2,3,4,5,6"));
+    TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue("L2", "1.1,2.2,3.3, 4.4, 5.5, 6.6"));
+    TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue("Polar", "90.1,90.2,90.3, 90.4, 90.5, 90.6"));
+    TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue("Azimuthal", "1,2,3,4,5,6"));
+    TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue("DetectorIDs", "200, 201, 300, 301, 400, 401"));
 
     // Run
     editdetector.execute();
@@ -158,8 +141,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Check detector parameter
    */
-  void checkDetectorParameters(const API::MatrixWorkspace_sptr &workspace,
-                               size_t wsindex, double realr, double realtth,
+  void checkDetectorParameters(const API::MatrixWorkspace_sptr &workspace, size_t wsindex, double realr, double realtth,
                                double realphi) {
 
     const auto &spectrumInfo = workspace->spectrumInfo();
@@ -175,8 +157,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Check detector parameter
    */
-  void checkDetectorID(const API::MatrixWorkspace_sptr &workspace,
-                       size_t wsindex, detid_t detid) {
+  void checkDetectorID(const API::MatrixWorkspace_sptr &workspace, size_t wsindex, detid_t detid) {
 
     const auto &spectrumInfo = workspace->spectrumInfo();
     TS_ASSERT_EQUALS(spectrumInfo.hasUniqueDetector(wsindex), true);

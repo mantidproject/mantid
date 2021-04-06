@@ -47,8 +47,7 @@ Axis *BinEdgeAxis::clone(const MatrixWorkspace *const parentWorkspace) {
  * @param parentWorkspace The workspace is not used in this implementation
  * @returns A pointer to a copy of the NumericAxis on which the method is called
  */
-Axis *BinEdgeAxis::clone(const std::size_t length,
-                         const MatrixWorkspace *const parentWorkspace) {
+Axis *BinEdgeAxis::clone(const std::size_t length, const MatrixWorkspace *const parentWorkspace) {
   UNUSED_ARG(parentWorkspace)
   auto *newAxis = new BinEdgeAxis(*this);
   newAxis->m_values.clear();
@@ -60,9 +59,7 @@ Axis *BinEdgeAxis::clone(const std::size_t length,
  * Return the values axis as they are
  * @return A vector containing the bin boundaries
  */
-std::vector<double> BinEdgeAxis::createBinBoundaries() const {
-  return this->getValues();
-}
+std::vector<double> BinEdgeAxis::createBinBoundaries() const { return this->getValues(); }
 
 /** Sets the axis value at a given position
  *  @param index :: The position along the axis for which to set the value
@@ -72,8 +69,7 @@ std::vector<double> BinEdgeAxis::createBinBoundaries() const {
 void BinEdgeAxis::setValue(const std::size_t &index, const double &value) {
   // Avoids setting edge information
   if (index >= length()) {
-    throw Kernel::Exception::IndexError(index, length() - 1,
-                                        "BinEdgeAxis: Index out of range.");
+    throw Kernel::Exception::IndexError(index, length() - 1, "BinEdgeAxis: Index out of range.");
   }
   m_values[index] = value;
 }

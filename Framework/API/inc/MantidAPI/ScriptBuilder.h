@@ -30,31 +30,20 @@ namespace API {
 
 class MANTID_API_DLL ScriptBuilder {
 public:
-  ScriptBuilder(
-      const std::shared_ptr<HistoryView> &view,
-      std::string versionSpecificity = "old", bool appendTimestamp = false,
-      std::vector<std::string> ignoreTheseAlgs = {},
-      std::vector<std::vector<std::string>> ignoreTheseAlgProperties = {},
-      bool appendExecCount = false);
+  ScriptBuilder(const std::shared_ptr<HistoryView> &view, std::string versionSpecificity = "old",
+                bool appendTimestamp = false, std::vector<std::string> ignoreTheseAlgs = {},
+                std::vector<std::vector<std::string>> ignoreTheseAlgProperties = {}, bool appendExecCount = false);
   virtual ~ScriptBuilder() = default;
   /// build a python script from the history view
   const std::string build();
 
 private:
-  void writeHistoryToStream(std::ostringstream &os,
-                            std::vector<HistoryItem>::const_iterator &iter,
-                            int depth = 1);
-  void buildChildren(std::ostringstream &os,
-                     std::vector<HistoryItem>::const_iterator &iter,
-                     int depth = 1);
+  void writeHistoryToStream(std::ostringstream &os, std::vector<HistoryItem>::const_iterator &iter, int depth = 1);
+  void buildChildren(std::ostringstream &os, std::vector<HistoryItem>::const_iterator &iter, int depth = 1);
   const std::string buildCommentString(const AlgorithmHistory &algHistory);
   const std::string buildAlgorithmString(const AlgorithmHistory &algHistory);
-  const std::string
-  buildPropertyString(const Mantid::Kernel::PropertyHistory &propHistory,
-                      const std::string &algName);
-  void createStringForAlg(
-      std::ostringstream &os,
-      std::shared_ptr<const Mantid::API::AlgorithmHistory> &algHistory);
+  const std::string buildPropertyString(const Mantid::Kernel::PropertyHistory &propHistory, const std::string &algName);
+  void createStringForAlg(std::ostringstream &os, std::shared_ptr<const Mantid::API::AlgorithmHistory> &algHistory);
 
   const std::vector<HistoryItem> m_historyItems;
   std::string m_output;

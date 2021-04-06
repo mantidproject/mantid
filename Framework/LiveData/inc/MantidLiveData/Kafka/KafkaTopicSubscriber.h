@@ -25,22 +25,17 @@ namespace LiveData {
 */
 class DLLExport KafkaTopicSubscriber final : public IKafkaStreamSubscriber {
 public:
-  KafkaTopicSubscriber(std::string broker, std::vector<std::string> topics,
-                       SubscribeAtOption subscribeOption);
+  KafkaTopicSubscriber(std::string broker, std::vector<std::string> topics, SubscribeAtOption subscribeOption);
   ~KafkaTopicSubscriber() override;
 
   std::vector<std::string> topics() const;
 
   void subscribe() override;
   void subscribe(int64_t offset) override;
-  void consumeMessage(std::string *payload, int64_t &offset, int32_t &partition,
-                      std::string &topic) override;
-  std::unordered_map<std::string, std::vector<int64_t>>
-  getOffsetsForTimestamp(int64_t timestamp) override;
-  void seek(const std::string &topic, uint32_t partition,
-            int64_t offset) override;
-  std::unordered_map<std::string, std::vector<int64_t>>
-  getCurrentOffsets() override;
+  void consumeMessage(std::string *payload, int64_t &offset, int32_t &partition, std::string &topic) override;
+  std::unordered_map<std::string, std::vector<int64_t>> getOffsetsForTimestamp(int64_t timestamp) override;
+  void seek(const std::string &topic, uint32_t partition, int64_t offset) override;
+  std::unordered_map<std::string, std::vector<int64_t>> getCurrentOffsets() override;
 
   static const std::string EVENT_TOPIC_SUFFIX;
   static const std::string HISTO_TOPIC_SUFFIX;
@@ -58,8 +53,7 @@ private:
   SubscribeAtOption m_subscribeOption = SubscribeAtOption::OFFSET;
 
   void subscribeAtTime(int64_t time);
-  void reportSuccessOrFailure(const RdKafka::ErrorCode &error,
-                              int64_t confOffset) const;
+  void reportSuccessOrFailure(const RdKafka::ErrorCode &error, int64_t confOffset) const;
 
   void subscribeAtOffset(int64_t offset);
   void checkTopicsExist() const;

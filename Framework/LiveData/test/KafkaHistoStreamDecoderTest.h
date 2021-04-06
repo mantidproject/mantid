@@ -32,14 +32,12 @@ public:
     using Mantid::Kernel::ConfigService;
     auto &config = ConfigService::Instance();
     auto baseInstDir = config.getInstrumentDirectory();
-    Poco::Path testFile =
-        Poco::Path(baseInstDir).resolve("unit_testing/UnitTestFacilities.xml");
+    Poco::Path testFile = Poco::Path(baseInstDir).resolve("unit_testing/UnitTestFacilities.xml");
     // Load the test facilities file
     config.updateFacilities(testFile.toString());
     config.setFacility("TEST");
     // Update instrument search directory
-    config.setString("instrumentDefinition.directory",
-                     baseInstDir + "/unit_testing");
+    config.setString("instrumentDefinition.directory", baseInstDir + "/unit_testing");
   }
 
   void tearDown() override {
@@ -64,18 +62,15 @@ public:
         .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)));
 
     KafkaHistoStreamDecoder testInstance(mockBroker, "", "", "", "");
-    KafkaTestThreadHelper<KafkaHistoStreamDecoder> testHolder(
-        std::move(testInstance));
+    KafkaTestThreadHelper<KafkaHistoStreamDecoder> testHolder(std::move(testInstance));
 
     testHolder.runKafkaOneStep(); // Init step
-    TSM_ASSERT("Decoder should not have create data buffers yet",
-               !testHolder->hasData());
+    TSM_ASSERT("Decoder should not have create data buffers yet", !testHolder->hasData());
 
     testHolder.runKafkaOneStep(); // Processing data step
     // Checks
     Workspace_sptr workspace;
-    TSM_ASSERT("Decoder's data buffers should be created now",
-               testHolder->hasData());
+    TSM_ASSERT("Decoder's data buffers should be created now", testHolder->hasData());
     TS_ASSERT_THROWS_NOTHING(workspace = testHolder->extractData());
 
     // Shut down
@@ -83,25 +78,19 @@ public:
     TS_ASSERT(!testHolder->isCapturing());
 
     // -- Workspace checks --
-    TSM_ASSERT("Expected non-null workspace pointer from extractData()",
-               workspace);
+    TSM_ASSERT("Expected non-null workspace pointer from extractData()", workspace);
     auto histoWksp = std::dynamic_pointer_cast<Workspace2D>(workspace);
-    TSM_ASSERT(
-        "Expected a Workspace2D from extractData(). Found something else",
-        histoWksp);
+    TSM_ASSERT("Expected a Workspace2D from extractData(). Found something else", histoWksp);
     checkWorkspaceMetadata(*histoWksp);
     checkWorkspaceHistoData(*histoWksp);
     TS_ASSERT(Mock::VerifyAndClear(mockBroker.get()));
   }
 
 private:
-  void
-  checkWorkspaceMetadata(const Mantid::DataObjects::Workspace2D &histoWksp) {
+  void checkWorkspaceMetadata(const Mantid::DataObjects::Workspace2D &histoWksp) {
     TS_ASSERT(histoWksp.getInstrument());
     TS_ASSERT_EQUALS("HRPDTEST", histoWksp.getInstrument()->getName());
-    TS_ASSERT_EQUALS(
-        "2016-08-31T12:07:42",
-        histoWksp.run().getPropertyValueAsType<std::string>("run_start"));
+    TS_ASSERT_EQUALS("2016-08-31T12:07:42", histoWksp.run().getPropertyValueAsType<std::string>("run_start"));
     std::array<Mantid::specnum_t, 5> specs = {{1, 2, 3, 4, 5}};
     std::array<Mantid::detid_t, 5> ids = {{1001, 1002, 1100, 901000, 10100}};
     TS_ASSERT_EQUALS(specs.size(), histoWksp.getNumberHistograms());
@@ -113,8 +102,7 @@ private:
     }
   }
 
-  void
-  checkWorkspaceHistoData(const Mantid::DataObjects::Workspace2D &histoWksp) {
+  void checkWorkspaceHistoData(const Mantid::DataObjects::Workspace2D &histoWksp) {
     // Inspect all 5 HRPDTEST Spectra
     auto data = histoWksp.histogram(0);
     // std::vector<double> xbins(data.x().cbegin(), data.x().cend());

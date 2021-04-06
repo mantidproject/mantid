@@ -24,46 +24,37 @@ namespace {
 Mantid::Kernel::Logger g_log("Iqt");
 
 MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      workspaceName);
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
 }
 
-std::string checkInstrumentParametersMatch(
-    const Instrument_const_sptr &sampleInstrument,
-    const Instrument_const_sptr &resolutionInstrument,
-    std::string const &parameter) {
+std::string checkInstrumentParametersMatch(const Instrument_const_sptr &sampleInstrument,
+                                           const Instrument_const_sptr &resolutionInstrument,
+                                           std::string const &parameter) {
   if (!sampleInstrument->hasParameter(parameter))
     return "Could not find the " + parameter + " for the sample workspace.";
   if (!resolutionInstrument->hasParameter(parameter))
-    return "Could not find the " + parameter +
-           " for the resolution workspaces.";
-  if (sampleInstrument->getStringParameter(parameter)[0] !=
-      resolutionInstrument->getStringParameter(parameter)[0])
+    return "Could not find the " + parameter + " for the resolution workspaces.";
+  if (sampleInstrument->getStringParameter(parameter)[0] != resolutionInstrument->getStringParameter(parameter)[0])
     return "The sample and resolution must have matching " + parameter + "s.";
   return "";
 }
 
-std::string
-checkParametersMatch(const MatrixWorkspace_const_sptr &sampleWorkspace,
-                     const MatrixWorkspace_const_sptr &resolutionWorkspace,
-                     std::string const &parameter) {
+std::string checkParametersMatch(const MatrixWorkspace_const_sptr &sampleWorkspace,
+                                 const MatrixWorkspace_const_sptr &resolutionWorkspace, std::string const &parameter) {
   auto const sampleInstrument = sampleWorkspace->getInstrument();
   auto const resolutionInstrument = resolutionWorkspace->getInstrument();
-  return checkInstrumentParametersMatch(sampleInstrument, resolutionInstrument,
-                                        parameter);
+  return checkInstrumentParametersMatch(sampleInstrument, resolutionInstrument, parameter);
 }
 
-std::string checkParametersMatch(std::string const &sampleName,
-                                 std::string const &resolutionName,
+std::string checkParametersMatch(std::string const &sampleName, std::string const &resolutionName,
                                  std::string const &parameter) {
   auto const sampleWorkspace = getADSMatrixWorkspace(sampleName);
   auto const resolutionWorkspace = getADSMatrixWorkspace(resolutionName);
   return checkParametersMatch(sampleWorkspace, resolutionWorkspace, parameter);
 }
 
-std::string
-checkInstrumentsMatch(const MatrixWorkspace_const_sptr &sampleWorkspace,
-                      const MatrixWorkspace_const_sptr &resolutionWorkspace) {
+std::string checkInstrumentsMatch(const MatrixWorkspace_const_sptr &sampleWorkspace,
+                                  const MatrixWorkspace_const_sptr &resolutionWorkspace) {
   auto const sampleInstrument = sampleWorkspace->getInstrument();
   auto const resolutionInstrument = resolutionWorkspace->getInstrument();
   if (sampleInstrument->getName() != resolutionInstrument->getName())
@@ -71,9 +62,8 @@ checkInstrumentsMatch(const MatrixWorkspace_const_sptr &sampleWorkspace,
   return "";
 }
 
-std::string validateNumberOfHistograms(
-    const MatrixWorkspace_const_sptr &sampleWorkspace,
-    const MatrixWorkspace_const_sptr &resolutionWorkspace) {
+std::string validateNumberOfHistograms(const MatrixWorkspace_const_sptr &sampleWorkspace,
+                                       const MatrixWorkspace_const_sptr &resolutionWorkspace) {
   auto const sampleSize = sampleWorkspace->getNumberHistograms();
   auto const resolutionSize = resolutionWorkspace->getNumberHistograms();
   if (resolutionSize > 1 && sampleSize != resolutionSize)
@@ -109,10 +99,9 @@ bool isTechniqueDirect(const MatrixWorkspace_const_sptr &sampleWorkspace,
  * are EWidth, SampleBins, ResolutionBins if the calculation succeeded,
  * otherwise they are undefined.
  */
-std::tuple<bool, float, int, int>
-calculateBinParameters(std::string const &wsName, std::string const &resName,
-                       double energyMin, double energyMax,
-                       double binReductionFactor) {
+std::tuple<bool, float, int, int> calculateBinParameters(std::string const &wsName, std::string const &resName,
+                                                         double energyMin, double energyMax,
+                                                         double binReductionFactor) {
   ITableWorkspace_sptr propsTable;
   try {
     const auto paramTableName = "__IqtProperties_temp";
@@ -138,10 +127,9 @@ calculateBinParameters(std::string const &wsName, std::string const &resName,
     return std::make_tuple(false, 0.0f, 0, 0);
   }
   assert(propsTable);
-  return std::make_tuple(
-      true, propsTable->getColumn("EnergyWidth")->cell<float>(0),
-      propsTable->getColumn("SampleOutputBins")->cell<int>(0),
-      propsTable->getColumn("ResolutionBins")->cell<int>(0));
+  return std::make_tuple(true, propsTable->getColumn("EnergyWidth")->cell<float>(0),
+                         propsTable->getColumn("SampleOutputBins")->cell<int>(0),
+                         propsTable->getColumn("ResolutionBins")->cell<int>(0));
 }
 } // namespace
 
@@ -151,13 +139,11 @@ namespace IDA {
 IndirectDataAnalysisIqtTab::IndirectDataAnalysisIqtTab(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_iqtTree(nullptr), m_iqtResFileType() {
   m_uiForm.setupUi(parent);
-  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
-      m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraTiled));
+  setOutputPlotOptionsPresenter(
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraTiled));
 }
 
-IndirectDataAnalysisIqtTab::~IndirectDataAnalysisIqtTab() {
-  m_iqtTree->unsetFactoryForManager(m_dblManager);
-}
+IndirectDataAnalysisIqtTab::~IndirectDataAnalysisIqtTab() { m_iqtTree->unsetFactoryForManager(m_dblManager); }
 
 void IndirectDataAnalysisIqtTab::setup() {
   m_iqtTree = new QtTreePropertyBrowser();
@@ -199,38 +185,28 @@ void IndirectDataAnalysisIqtTab::setup() {
   // Format the tree widget so its easier to read the contents
   m_iqtTree->setIndentation(0);
   for (auto const &item : m_properties)
-    m_iqtTree->setBackgroundColor(m_iqtTree->topLevelItem(item),
-                                  QColor(246, 246, 246));
+    m_iqtTree->setBackgroundColor(m_iqtTree->topLevelItem(item), QColor(246, 246, 246));
 
   setPreviewSpectrumMaximum(0);
 
   auto xRangeSelector = m_uiForm.ppPlot->addRangeSelector("IqtRange");
 
   // signals / slots & validators
-  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this,
-          SLOT(rangeChanged(double, double)));
+  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateRangeSelector(QtProperty *, double)));
-  connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString &)), this,
-          SLOT(plotInput(const QString &)));
-  connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this,
-          SLOT(updateDisplayedBinParameters()));
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(algorithmComplete(bool)));
+  connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString &)), this, SLOT(plotInput(const QString &)));
+  connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this, SLOT(updateDisplayedBinParameters()));
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
-          SLOT(plotCurrentPreview()));
-  connect(m_uiForm.cbCalculateErrors, SIGNAL(clicked()), this,
-          SLOT(errorsClicked()));
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
+  connect(m_uiForm.cbCalculateErrors, SIGNAL(clicked()), this, SLOT(errorsClicked()));
 
-  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
-          SLOT(setSelectedSpectrum(int)));
-  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
-          SLOT(plotInput()));
+  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(setSelectedSpectrum(int)));
+  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
 
-  connect(m_uiForm.ckSymmetricEnergy, SIGNAL(stateChanged(int)), this,
-          SLOT(updateEnergyRange(int)));
+  connect(m_uiForm.ckSymmetricEnergy, SIGNAL(stateChanged(int)), this, SLOT(updateEnergyRange(int)));
 
   m_uiForm.dsInput->isOptional(true);
   m_uiForm.dsResolution->isOptional(true);
@@ -244,8 +220,7 @@ void IndirectDataAnalysisIqtTab::run() {
 
   // Construct the result workspace for Python script export
   QString const sampleName = m_uiForm.dsInput->getCurrentDataName();
-  m_pythonExportWsName =
-      sampleName.left(sampleName.lastIndexOf("_")).toStdString() + "_iqt";
+  m_pythonExportWsName = sampleName.left(sampleName.lastIndexOf("_")).toStdString() + "_iqt";
 
   QString const wsName = m_uiForm.dsInput->getCurrentDataName();
   QString const resName = m_uiForm.dsResolution->getCurrentDataName();
@@ -303,13 +278,9 @@ void IndirectDataAnalysisIqtTab::runClicked() {
   runTab();
 }
 
-void IndirectDataAnalysisIqtTab::errorsClicked() {
-  m_uiForm.spIterations->setEnabled(isErrorsEnabled());
-}
+void IndirectDataAnalysisIqtTab::errorsClicked() { m_uiForm.spIterations->setEnabled(isErrorsEnabled()); }
 
-bool IndirectDataAnalysisIqtTab::isErrorsEnabled() {
-  return m_uiForm.cbCalculateErrors->isChecked();
-}
+bool IndirectDataAnalysisIqtTab::isErrorsEnabled() { return m_uiForm.cbCalculateErrors->isChecked(); }
 
 /**
  * Ensure we have present and valid file/ws inputs.
@@ -330,8 +301,7 @@ bool IndirectDataAnalysisIqtTab::validate() {
     uiv.addErrorMessage("ELow must be less than EHigh.\n");
 
   auto const sampleName = m_uiForm.dsInput->getCurrentDataName().toStdString();
-  auto const resolutionName =
-      m_uiForm.dsResolution->getCurrentDataName().toStdString();
+  auto const resolutionName = m_uiForm.dsResolution->getCurrentDataName().toStdString();
 
   auto &ads = AnalysisDataService::Instance();
   if (ads.doesExist(sampleName) && ads.doesExist(resolutionName)) {
@@ -339,14 +309,11 @@ bool IndirectDataAnalysisIqtTab::validate() {
     auto const resWorkspace = getADSMatrixWorkspace(resolutionName);
 
     addErrorMessage(uiv, checkInstrumentsMatch(sampleWorkspace, resWorkspace));
-    addErrorMessage(uiv,
-                    validateNumberOfHistograms(sampleWorkspace, resWorkspace));
+    addErrorMessage(uiv, validateNumberOfHistograms(sampleWorkspace, resWorkspace));
 
     if (!isTechniqueDirect(sampleWorkspace, resWorkspace)) {
-      addErrorMessage(
-          uiv, checkParametersMatch(sampleWorkspace, resWorkspace, "analyser"));
-      addErrorMessage(uiv, checkParametersMatch(sampleWorkspace, resWorkspace,
-                                                "reflection"));
+      addErrorMessage(uiv, checkParametersMatch(sampleWorkspace, resWorkspace, "analyser"));
+      addErrorMessage(uiv, checkParametersMatch(sampleWorkspace, resWorkspace, "reflection"));
     }
   }
 
@@ -361,8 +328,7 @@ bool IndirectDataAnalysisIqtTab::validate() {
  */
 void IndirectDataAnalysisIqtTab::updateDisplayedBinParameters() {
   auto const sampleName = m_uiForm.dsInput->getCurrentDataName().toStdString();
-  auto const resolutionName =
-      m_uiForm.dsResolution->getCurrentDataName().toStdString();
+  auto const resolutionName = m_uiForm.dsResolution->getCurrentDataName().toStdString();
 
   auto &ads = AnalysisDataService::Instance();
   if (!ads.doesExist(sampleName) || !ads.doesExist(resolutionName))
@@ -385,8 +351,7 @@ void IndirectDataAnalysisIqtTab::updateDisplayedBinParameters() {
   float energyWidth(0.0f);
   int resolutionBins(0), sampleBins(0);
   std::tie(success, energyWidth, sampleBins, resolutionBins) =
-      calculateBinParameters(sampleName, resolutionName, energyMin, energyMax,
-                             numBins);
+      calculateBinParameters(sampleName, resolutionName, energyMin, energyMax, numBins);
   if (success) {
     disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
                SLOT(updateRangeSelector(QtProperty *, double)));
@@ -411,28 +376,21 @@ void IndirectDataAnalysisIqtTab::loadSettings(const QSettings &settings) {
   m_uiForm.dsResolution->readSettings(settings.group());
 }
 
-void IndirectDataAnalysisIqtTab::plotInput() {
-  IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
-}
+void IndirectDataAnalysisIqtTab::plotInput() { IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot); }
 
 void IndirectDataAnalysisIqtTab::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Iqt");
-  m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
-                                         : getExtensions(tabName));
-  m_uiForm.dsInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
-                                         : noSuffixes);
-  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName)
-                                              : getExtensions(tabName));
-  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName)
-                                              : noSuffixes);
+  m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
 void IndirectDataAnalysisIqtTab::plotInput(const QString &wsname) {
   MatrixWorkspace_sptr workspace;
   try {
-    workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        wsname.toStdString());
+    workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname.toStdString());
     setInputWorkspace(workspace);
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     showMessageBox(QString("Unable to retrieve workspace: " + wsname));
@@ -440,8 +398,7 @@ void IndirectDataAnalysisIqtTab::plotInput(const QString &wsname) {
     return;
   }
 
-  setPreviewSpectrumMaximum(
-      static_cast<int>(getInputWorkspace()->getNumberHistograms()) - 1);
+  setPreviewSpectrumMaximum(static_cast<int>(getInputWorkspace()->getNumberHistograms()) - 1);
 
   IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
@@ -490,9 +447,7 @@ void IndirectDataAnalysisIqtTab::plotInput(const QString &wsname) {
   updateDisplayedBinParameters();
 }
 
-void IndirectDataAnalysisIqtTab::setPreviewSpectrumMaximum(int value) {
-  m_uiForm.spPreviewSpec->setMaximum(value);
-}
+void IndirectDataAnalysisIqtTab::setPreviewSpectrumMaximum(int value) { m_uiForm.spPreviewSpec->setMaximum(value); }
 
 /**
  * Updates the range selectors and properties when range selector is moved.
@@ -506,8 +461,7 @@ void IndirectDataAnalysisIqtTab::rangeChanged(double min, double max) {
 
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
 
-  disconnect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this,
-             SLOT(rangeChanged(double, double)));
+  disconnect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(updateRangeSelector(QtProperty *, double)));
 
@@ -529,8 +483,7 @@ void IndirectDataAnalysisIqtTab::rangeChanged(double min, double max) {
     }
   }
 
-  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this,
-          SLOT(rangeChanged(double, double)));
+  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateRangeSelector(QtProperty *, double)));
 }
@@ -542,36 +495,29 @@ void IndirectDataAnalysisIqtTab::rangeChanged(double min, double max) {
  * @param prop The property which has been changed
  * @param val The new position for the range selector
  */
-void IndirectDataAnalysisIqtTab::updateRangeSelector(QtProperty *prop,
-                                                     double val) {
+void IndirectDataAnalysisIqtTab::updateRangeSelector(QtProperty *prop, double val) {
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
 
-  disconnect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this,
-             SLOT(rangeChanged(double, double)));
+  disconnect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(updateRangeSelector(QtProperty *, double)));
 
   if (prop == m_properties["ELow"]) {
-    setRangeSelectorMin(m_properties["ELow"], m_properties["EHigh"],
-                        xRangeSelector, val);
+    setRangeSelectorMin(m_properties["ELow"], m_properties["EHigh"], xRangeSelector, val);
     if (m_uiForm.ckSymmetricEnergy->isChecked()) {
       m_dblManager->setValue(m_properties["EHigh"], -val);
-      setRangeSelectorMax(m_properties["ELow"], m_properties["EHigh"],
-                          xRangeSelector, -val);
+      setRangeSelectorMax(m_properties["ELow"], m_properties["EHigh"], xRangeSelector, -val);
     }
 
   } else if (prop == m_properties["EHigh"]) {
-    setRangeSelectorMax(m_properties["ELow"], m_properties["EHigh"],
-                        xRangeSelector, val);
+    setRangeSelectorMax(m_properties["ELow"], m_properties["EHigh"], xRangeSelector, val);
     if (m_uiForm.ckSymmetricEnergy->isChecked()) {
       m_dblManager->setValue(m_properties["ELow"], -val);
-      setRangeSelectorMin(m_properties["ELow"], m_properties["EHigh"],
-                          xRangeSelector, -val);
+      setRangeSelectorMin(m_properties["ELow"], m_properties["EHigh"], xRangeSelector, -val);
     }
   }
 
-  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this,
-          SLOT(rangeChanged(double, double)));
+  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateRangeSelector(QtProperty *, double)));
 
@@ -585,13 +531,9 @@ void IndirectDataAnalysisIqtTab::updateEnergyRange(int state) {
   }
 }
 
-void IndirectDataAnalysisIqtTab::setRunEnabled(bool enabled) {
-  m_uiForm.pbRun->setEnabled(enabled);
-}
+void IndirectDataAnalysisIqtTab::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void IndirectDataAnalysisIqtTab::setSaveResultEnabled(bool enabled) {
-  m_uiForm.pbSave->setEnabled(enabled);
-}
+void IndirectDataAnalysisIqtTab::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
 void IndirectDataAnalysisIqtTab::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);

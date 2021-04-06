@@ -37,9 +37,8 @@ using namespace API;
 
 /// Empty constructor
 LoadAscii2::LoadAscii2()
-    : m_columnSep(), m_separatorIndex(), m_comment(), m_baseCols(0),
-      m_specNo(0), m_lastBins(0), m_curBins(0), m_spectraStart(),
-      m_spectrumIDcount(0), m_lineNo(0), m_spectra(), m_curSpectra(nullptr) {}
+    : m_columnSep(), m_separatorIndex(), m_comment(), m_baseCols(0), m_specNo(0), m_lastBins(0), m_curBins(0),
+      m_spectraStart(), m_spectrumIDcount(0), m_lineNo(0), m_spectra(), m_curSpectra(nullptr) {}
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -53,14 +52,10 @@ int LoadAscii2::confidence(Kernel::FileDescriptor &descriptor) const {
 
   // Avoid some known file types that have different loaders
   int confidence(0);
-  if (filenameLength > 12
-          ? (filePath.compare(filenameLength - 12, 12, "_runinfo.xml") == 0)
-          : false || filenameLength > 6
-                ? (filePath.compare(filenameLength - 6, 6, ".peaks") == 0)
-                : false || filenameLength > 10
-                      ? (filePath.compare(filenameLength - 10, 10,
-                                          ".integrate") == 0)
-                      : false) {
+  if (filenameLength > 12            ? (filePath.compare(filenameLength - 12, 12, "_runinfo.xml") == 0)
+      : false || filenameLength > 6  ? (filePath.compare(filenameLength - 6, 6, ".peaks") == 0)
+      : false || filenameLength > 10 ? (filePath.compare(filenameLength - 10, 10, ".integrate") == 0)
+                                     : false) {
     confidence = 0;
   } else if (descriptor.isAscii()) {
     confidence = 10; // Low so that others may try
@@ -99,9 +94,8 @@ API::Workspace_sptr LoadAscii2::readData(std::ifstream &file) {
   m_spectrumIDcount = 0;
 
   m_spectra.clear();
-  m_curSpectra = std::make_unique<DataObjects::Histogram1D>(
-      HistogramData::Histogram::XMode::Points,
-      HistogramData::Histogram::YMode::Counts);
+  m_curSpectra = std::make_unique<DataObjects::Histogram1D>(HistogramData::Histogram::XMode::Points,
+                                                            HistogramData::Histogram::YMode::Counts);
   std::string line;
 
   std::list<std::string> columns;
@@ -125,8 +119,7 @@ API::Workspace_sptr LoadAscii2::readData(std::ifstream &file) {
   const size_t numSpectra = m_spectra.size();
   MatrixWorkspace_sptr localWorkspace;
   try {
-    localWorkspace = WorkspaceFactory::Instance().create(
-        "Workspace2D", numSpectra, m_lastBins, m_lastBins);
+    localWorkspace = WorkspaceFactory::Instance().create("Workspace2D", numSpectra, m_lastBins, m_lastBins);
   } catch (std::exception &e) {
     std::ostringstream msg;
     msg << "Failed to create a Workspace2D from the data found in this file. "
@@ -139,8 +132,7 @@ API::Workspace_sptr LoadAscii2::readData(std::ifstream &file) {
     writeToWorkspace(localWorkspace, numSpectra);
   } catch (std::exception &e) {
     std::ostringstream msg;
-    msg << "Failed to write read data into the output Workspace2D. Error: "
-        << e.what();
+    msg << "Failed to write read data into the output Workspace2D. Error: " << e.what();
     throw std::runtime_error(msg.str());
   }
   m_curSpectra.reset();
@@ -287,16 +279,14 @@ API::Workspace_sptr LoadAscii2::readTable(std::ifstream &file) {
  * @param[in] line : The current line of data
  * @param[in] columns : the columns of values in the current line of data
  */
-void LoadAscii2::parseLine(const std::string &line,
-                           std::list<std::string> &columns) {
+void LoadAscii2::parseLine(const std::string &line, std::list<std::string> &columns) {
   if (std::isdigit(line.at(0)) || line.at(0) == '-' || line.at(0) == '+') {
     const int cols = splitIntoColumns(columns, line);
     if (cols > 4 || cols < 0) {
       // there were more separators than there should have been, which isn't
       // right, or something went rather wrong
-      throw std::runtime_error(
-          "Line " + std::to_string(m_lineNo) +
-          ": Sets of values must have between 1 and 3 delimiters");
+      throw std::runtime_error("Line " + std::to_string(m_lineNo) +
+                               ": Sets of values must have between 1 and 3 delimiters");
     } else if (cols == 1) {
       // a size of 1 is a spectra ID as long as there are no alphabetic
       // characters in it. Signifies the start of a new spectra if it wasn't
@@ -310,13 +300,12 @@ void LoadAscii2::parseLine(const std::string &line,
       } else {
         // if not then they've ommitted IDs in the the file previously and just
         // decided to include one (which is wrong and confuses everything)
-        throw std::runtime_error(
-            "Line " + std::to_string(m_lineNo) +
-            ": Inconsistent inclusion of spectra IDs. All spectra must have "
-            "IDs or all spectra must not have IDs. "
-            "Check for blank lines, as they symbolize the end of one spectra "
-            "and the start of another. Also check for spectra IDs with no "
-            "associated bins.");
+        throw std::runtime_error("Line " + std::to_string(m_lineNo) +
+                                 ": Inconsistent inclusion of spectra IDs. All spectra must have "
+                                 "IDs or all spectra must not have IDs. "
+                                 "Check for blank lines, as they symbolize the end of one spectra "
+                                 "and the start of another. Also check for spectra IDs with no "
+                                 "associated bins.");
       }
       const std::string singleNumber = columns.front();
       try {
@@ -325,8 +314,7 @@ void LoadAscii2::parseLine(const std::string &line,
         // the single column number is not the spectrum ID, maybe it is the
         // spectrum axis value
         try {
-          m_spectrumAxis.emplace_back(
-              boost::lexical_cast<double>(singleNumber));
+          m_spectrumAxis.emplace_back(boost::lexical_cast<double>(singleNumber));
         } catch (boost::bad_lexical_cast &) {
           throw std::runtime_error("Unable to read as spectrum ID (int) nor as "
                                    "spectrum axis value (double)" +
@@ -341,20 +329,18 @@ void LoadAscii2::parseLine(const std::string &line,
       addToCurrentSpectra(columns);
     }
   } else if (badLine(line)) {
-    throw std::runtime_error(
-        "Line " + std::to_string(m_lineNo) +
-        ": Unexpected character found at beginning of line. Lines must either "
-        "be a single integer, a list of numeric values, blank, or a text line "
-        "beginning with the specified comment indicator: " +
-        m_comment + ".");
+    throw std::runtime_error("Line " + std::to_string(m_lineNo) +
+                             ": Unexpected character found at beginning of line. Lines must either "
+                             "be a single integer, a list of numeric values, blank, or a text line "
+                             "beginning with the specified comment indicator: " +
+                             m_comment + ".");
   } else {
     // strictly speaking this should never be hit, but just being sure
-    throw std::runtime_error(
-        "Line " + std::to_string(m_lineNo) +
-        ": Unknown format at line. Lines must either be a single integer, a "
-        "list of numeric values, blank, or a text line beginning with the "
-        "specified comment indicator: " +
-        m_comment + ".");
+    throw std::runtime_error("Line " + std::to_string(m_lineNo) +
+                             ": Unknown format at line. Lines must either be a single integer, a "
+                             "list of numeric values, blank, or a text line beginning with the "
+                             "specified comment indicator: " +
+                             m_comment + ".");
   }
 }
 
@@ -363,11 +349,9 @@ void LoadAscii2::parseLine(const std::string &line,
  * @param[out] localWorkspace : the workspace beign constructed
  * @param[in] numSpectra : The number of spectra found in the file
  */
-void LoadAscii2::writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace,
-                                  const size_t &numSpectra) const {
+void LoadAscii2::writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace, const size_t &numSpectra) const {
   try {
-    localWorkspace->getAxis(0)->unit() =
-        UnitFactory::Instance().create(getProperty("Unit"));
+    localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(getProperty("Unit"));
   } catch (Exception::NotFoundError &) {
     // Asked for dimensionless workspace (obviously not in unit factory)
   }
@@ -383,15 +367,12 @@ void LoadAscii2::writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace,
     // DX could be NULL
     localWorkspace->setSharedDx(i, m_spectra[i].sharedDx());
     if (m_spectrumIDcount != 0) {
-      localWorkspace->getSpectrum(i).setSpectrumNo(
-          m_spectra[i].getSpectrumNo());
+      localWorkspace->getSpectrum(i).setSpectrumNo(m_spectra[i].getSpectrumNo());
     } else {
-      localWorkspace->getSpectrum(i).setSpectrumNo(static_cast<specnum_t>(i) +
-                                                   1);
+      localWorkspace->getSpectrum(i).setSpectrumNo(static_cast<specnum_t>(i) + 1);
     }
     if (!m_spectrumAxis.empty()) {
-      localWorkspace->replaceAxis(
-          1, std::make_unique<NumericAxis>(m_spectrumAxis));
+      localWorkspace->replaceAxis(1, std::make_unique<NumericAxis>(m_spectrumAxis));
     }
   }
 }
@@ -405,8 +386,7 @@ void LoadAscii2::writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace,
  * @param[in] line : The current line of data
  * @param[in] columns : the columns of values in the current line of data
  */
-void LoadAscii2::setcolumns(std::ifstream &file, std::string &line,
-                            std::list<std::string> &columns) {
+void LoadAscii2::setcolumns(std::ifstream &file, std::string &line, std::list<std::string> &columns) {
   m_lineNo = 0;
   std::vector<double> values;
   // processheader will also look for a base number of columns, to save time
@@ -417,13 +397,11 @@ void LoadAscii2::setcolumns(std::ifstream &file, std::string &line,
   if (m_baseCols == 0 || m_baseCols > 4 || m_baseCols < 2) {
     // first find the first data set and set that as the template for the number
     // of data columns we expect from this file
-    while (getline(file, line) &&
-           (m_baseCols == 0 || m_baseCols > 4 || m_baseCols < 2)) {
+    while (getline(file, line) && (m_baseCols == 0 || m_baseCols > 4 || m_baseCols < 2)) {
       // std::string line = line;
       boost::trim(line);
       if (!line.empty()) {
-        if (std::isdigit(line.at(0)) || line.at(0) == '-' ||
-            line.at(0) == '+') {
+        if (std::isdigit(line.at(0)) || line.at(0) == '-' || line.at(0) == '+') {
           const int cols = splitIntoColumns(columns, line);
           // we might have the first set of values but there can't be more than
           // 3 commas if it is
@@ -431,9 +409,8 @@ void LoadAscii2::setcolumns(std::ifstream &file, std::string &line,
           if (cols > 4 || cols < 1) {
             // there were more separators than there should have been, which
             // isn't right, or something went rather wrong
-            throw std::runtime_error(
-                "Sets of values must have between 1 and 3 delimiters. Found " +
-                std::to_string(cols) + ".");
+            throw std::runtime_error("Sets of values must have between 1 and 3 delimiters. Found " +
+                                     std::to_string(cols) + ".");
           } else if (cols != 1) {
             try {
               fillInputValues(values, columns);
@@ -504,8 +481,7 @@ void LoadAscii2::processHeader(std::ifstream &file) {
           ++validRows;
           continue;
         }
-        if (std::isdigit(line.at(0)) || line.at(0) == '-' ||
-            line.at(0) == '+') {
+        if (std::isdigit(line.at(0)) || line.at(0) == '-' || line.at(0) == '+') {
           lineCols = this->splitIntoColumns(columns, line);
           // we might have the first set of values but there can't be more than
           // 3 delimiters if it is
@@ -593,8 +569,7 @@ void LoadAscii2::processHeader(std::ifstream &file) {
   while (m_lineNo < static_cast<size_t>(numToSkip) && getline(file, line)) {
     ++m_lineNo;
   }
-  g_log.information() << "Skipped " << numToSkip
-                      << " line(s) of header information()\n";
+  g_log.information() << "Skipped " << numToSkip << " line(s) of header information()\n";
 }
 
 /**
@@ -640,8 +615,7 @@ void LoadAscii2::checkLineColumns(const size_t &cols) const {
   // a size of 2, 3 or 4 is a valid data set, but first see if it's the same as
   // the first observed one
   if (m_baseCols != cols) {
-    throw std::runtime_error(
-        "Number of data columns not consistent throughout file");
+    throw std::runtime_error("Number of data columns not consistent throughout file");
   }
 }
 
@@ -655,8 +629,7 @@ void LoadAscii2::inconsistantIDCheck() const {
   // If the ID vector is completly empty then it's ok we're assigning them later
   // if there are equal or less IDs than there are spectra, then there's been no
   // ID assigned to this spectra and there should be
-  if (m_spectraStart && m_spectrumIDcount != 0 &&
-      !(m_spectra.size() < m_spectrumIDcount)) {
+  if (m_spectraStart && m_spectrumIDcount != 0 && !(m_spectra.size() < m_spectrumIDcount)) {
     throw std::runtime_error("Inconsistent inclusion of spectra IDs. All "
                              "spectra must have IDs or all spectra must not "
                              "have IDs."
@@ -689,9 +662,8 @@ void LoadAscii2::newSpectra() {
       m_curSpectra.reset();
     }
 
-    m_curSpectra = std::make_unique<DataObjects::Histogram1D>(
-        HistogramData::Histogram::XMode::Points,
-        HistogramData::Histogram::YMode::Counts);
+    m_curSpectra = std::make_unique<DataObjects::Histogram1D>(HistogramData::Histogram::XMode::Points,
+                                                              HistogramData::Histogram::YMode::Counts);
     m_curDx.clear();
     m_spectraStart = true;
   }
@@ -718,9 +690,7 @@ bool LoadAscii2::skipLine(const std::string &line, bool header) const {
  */
 bool LoadAscii2::badLine(const std::string &line) const {
   // Empty or comment
-  return (
-      !(std::isdigit(line.at(0)) || line.at(0) == '-' || line.at(0) == '+') &&
-      line.at(0) != m_comment.at(0));
+  return (!(std::isdigit(line.at(0)) || line.at(0) == '-' || line.at(0) == '+') && line.at(0) != m_comment.at(0));
 }
 
 /**
@@ -729,10 +699,8 @@ bool LoadAscii2::badLine(const std::string &line) const {
  * @param[in] str :: The input string
  * @returns The number of columns
  */
-int LoadAscii2::splitIntoColumns(std::list<std::string> &columns,
-                                 const std::string &str) const {
-  boost::split(columns, str, boost::is_any_of(m_columnSep),
-               boost::token_compress_on);
+int LoadAscii2::splitIntoColumns(std::list<std::string> &columns, const std::string &str) const {
+  boost::split(columns, str, boost::is_any_of(m_columnSep), boost::token_compress_on);
   return static_cast<int>(columns.size());
 }
 
@@ -741,8 +709,7 @@ int LoadAscii2::splitIntoColumns(std::list<std::string> &columns,
  * @param[out] values :: The data vector fill
  * @param[in] columns :: The list of strings denoting columns
  */
-void LoadAscii2::fillInputValues(std::vector<double> &values,
-                                 const std::list<std::string> &columns) const {
+void LoadAscii2::fillInputValues(std::vector<double> &values, const std::list<std::string> &columns) const {
   values.resize(columns.size());
   int i = 0;
   for (auto value : columns) {
@@ -766,52 +733,41 @@ void LoadAscii2::fillInputValues(std::vector<double> &values,
 /// Initialisation method.
 void LoadAscii2::init() {
   const std::vector<std::string> exts{".dat", ".txt", ".csv", ""};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "The name of the text file to read, including its full or "
-      "relative path. The file extension must be .txt, .dat, or "
-      ".csv");
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                  "The name of the text file to read, including its full or "
+                  "relative path. The file extension must be .txt, .dat, or "
+                  ".csv");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output),
                   "The name of the workspace that will be created, "
                   "filled with the read-in data and stored in the [[Analysis "
                   "Data Service]].");
 
   const int numSpacers = 7;
-  std::string spacers[numSpacers][2] = {{"Automatic", ",\t:; "},
-                                        {"CSV", ","},
-                                        {"Tab", "\t"},
-                                        {"Space", " "},
-                                        {"Colon", ":"},
-                                        {"SemiColon", ";"},
-                                        {"UserDefined", "UserDefined"}};
+  std::string spacers[numSpacers][2] = {
+      {"Automatic", ",\t:; "},       {"CSV", ","}, {"Tab", "\t"}, {"Space", " "}, {"Colon", ":"}, {"SemiColon", ";"},
+      {"UserDefined", "UserDefined"}};
   // For the ListValidator
   std::array<std::string, numSpacers> sepOptions;
   int sepOptionsIndex = 0;
 
   for (const auto &spacer : spacers) {
     const auto &option = spacer[0];
-    m_separatorIndex.insert(
-        std::pair<std::string, std::string>(option, spacer[1]));
+    m_separatorIndex.insert(std::pair<std::string, std::string>(option, spacer[1]));
     sepOptions[sepOptionsIndex++] = option;
   }
 
-  declareProperty("Separator", "Automatic",
-                  std::make_shared<StringListValidator>(sepOptions),
+  declareProperty("Separator", "Automatic", std::make_shared<StringListValidator>(sepOptions),
                   "The separator between data columns in the data file. The "
                   "possible values are \"CSV\", \"Tab\", "
                   "\"Space\", \"SemiColon\", \"Colon\" or a user defined "
                   "value. (default: Automatic selection from comma,"
                   " tab, space, semicolon or colon.).");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>("CustomSeparator", "",
-                                                       Direction::Input),
-      "If present, will override any specified choice given to Separator.");
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("CustomSeparator", "", Direction::Input),
+                  "If present, will override any specified choice given to Separator.");
 
   setPropertySettings("CustomSeparator",
-                      std::make_unique<VisibleWhenProperty>(
-                          "Separator", IS_EQUAL_TO, "UserDefined"));
+                      std::make_unique<VisibleWhenProperty>("Separator", IS_EQUAL_TO, "UserDefined"));
 
   declareProperty("CommentIndicator", "#",
                   "Character(s) found front of "
@@ -820,16 +776,14 @@ void LoadAscii2::init() {
 
   std::vector<std::string> units = UnitFactory::Instance().getKeys();
   units.insert(units.begin(), "Dimensionless");
-  declareProperty("Unit", "Energy",
-                  std::make_shared<StringListValidator>(units),
+  declareProperty("Unit", "Energy", std::make_shared<StringListValidator>(units),
                   "The unit to assign to the X axis (anything known to the "
                   "[[Unit Factory]] or \"Dimensionless\")");
 
   auto mustBePosInt = std::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);
-  declareProperty(
-      "SkipNumLines", EMPTY_INT(), mustBePosInt,
-      "If given, skip this number of lines at the start of the file.");
+  declareProperty("SkipNumLines", EMPTY_INT(), mustBePosInt,
+                  "If given, skip this number of lines at the start of the file.");
 }
 
 /**
@@ -870,17 +824,15 @@ void LoadAscii2::exec() {
   m_columnSep = sep;
 
   // e + and - are included as they're part of the scientific notation
-  if (!boost::regex_match(m_columnSep.begin(), m_columnSep.end(),
-                          boost::regex("[^0-9e+-]+", boost::regex::perl))) {
+  if (!boost::regex_match(m_columnSep.begin(), m_columnSep.end(), boost::regex("[^0-9e+-]+", boost::regex::perl))) {
     throw std::invalid_argument("Separators cannot contain numeric characters, "
                                 "plus signs, hyphens or 'e'");
   }
 
   std::string tempcomment = getProperty("CommentIndicator");
 
-  if (!boost::regex_match(
-          tempcomment.begin(), tempcomment.end(),
-          boost::regex("[^0-9e" + m_columnSep + "+-]+", boost::regex::perl))) {
+  if (!boost::regex_match(tempcomment.begin(), tempcomment.end(),
+                          boost::regex("[^0-9e" + m_columnSep + "+-]+", boost::regex::perl))) {
     throw std::invalid_argument("Comment markers cannot contain numeric "
                                 "characters, plus signs, hyphens,"
                                 " 'e' or the selected separator character");
@@ -894,13 +846,11 @@ void LoadAscii2::exec() {
   try {
     rd = readData(file);
   } catch (std::exception &e) {
-    g_log.error() << "Failed to read as ASCII this file: '" << filename
-                  << ", error description: " << e.what() << '\n';
+    g_log.error() << "Failed to read as ASCII this file: '" << filename << ", error description: " << e.what() << '\n';
     throw std::runtime_error("Failed to recognize this file as an ASCII file, "
                              "cannot continue.");
   }
-  MatrixWorkspace_sptr outputWS =
-      std::dynamic_pointer_cast<MatrixWorkspace>(rd);
+  MatrixWorkspace_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(rd);
   if (outputWS) {
     outputWS->mutableRun().addProperty("Filename", filename);
   }

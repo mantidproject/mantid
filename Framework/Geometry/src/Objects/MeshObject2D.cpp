@@ -50,8 +50,7 @@ Kernel::V3D surfaceNormal(const std::vector<Kernel::V3D> &vertices) {
  * @param normal : Surface normal
  * @return True only if all vertices are coplanar
  */
-bool allCoplanar(const std::vector<Kernel::V3D> &vertices,
-                 const Kernel::V3D &normal) {
+bool allCoplanar(const std::vector<Kernel::V3D> &vertices, const Kernel::V3D &normal) {
   bool in_plane = true;
   auto v0 = vertices[0];
   const auto nx = normal[0];
@@ -87,8 +86,7 @@ Kernel::V3D validatePointsCoplanar(const std::vector<Kernel::V3D> &vertices) {
   // Check that a valid normal was found amongst collection of vertices
   if (normal.norm2() == 0) {
     // If all points are colinear. Not a plane.
-    throw std::invalid_argument(
-        "All vertices are colinear. This does not define a plane");
+    throw std::invalid_argument("All vertices are colinear. This does not define a plane");
   }
 
   if (!allCoplanar(vertices, normal))
@@ -107,9 +105,8 @@ namespace {
  * @param vertex3 :: Third vertex of triangle
  * @returns true if the specified triangle exists
  */
-bool getTriangle(const size_t index, const std::vector<uint32_t> &triangles,
-                 const std::vector<Kernel::V3D> &vertices, Kernel::V3D &vertex1,
-                 Kernel::V3D &vertex2, Kernel::V3D &vertex3) {
+bool getTriangle(const size_t index, const std::vector<uint32_t> &triangles, const std::vector<Kernel::V3D> &vertices,
+                 Kernel::V3D &vertex1, Kernel::V3D &vertex2, Kernel::V3D &vertex3) {
   bool triangleExists = index < triangles.size() / 3;
   if (triangleExists) {
     vertex1 = vertices[triangles[3 * index]];
@@ -145,8 +142,7 @@ bool MeshObject2D::pointsCoplanar(const std::vector<Kernel::V3D> &vertices) {
 /**
  * Constructor
  */
-MeshObject2D::MeshObject2D(const std::vector<uint32_t> &faces,
-                           const std::vector<Kernel::V3D> &vertices,
+MeshObject2D::MeshObject2D(const std::vector<uint32_t> &faces, const std::vector<Kernel::V3D> &vertices,
                            const Kernel::Material &material)
     : m_triangles(faces), m_vertices(vertices), m_material(material) {
   initialize();
@@ -155,11 +151,9 @@ MeshObject2D::MeshObject2D(const std::vector<uint32_t> &faces,
 /**
  * Move constructor
  */
-MeshObject2D::MeshObject2D(std::vector<uint32_t> &&faces,
-                           std::vector<Kernel::V3D> &&vertices,
+MeshObject2D::MeshObject2D(std::vector<uint32_t> &&faces, std::vector<Kernel::V3D> &&vertices,
                            const Kernel::Material &&material)
-    : m_triangles(std::move(faces)), m_vertices(std::move(vertices)),
-      m_material(std::move(material)) {
+    : m_triangles(std::move(faces)), m_vertices(std::move(vertices)), m_material(std::move(material)) {
   initialize();
 }
 
@@ -174,8 +168,7 @@ void MeshObject2D::initialize() {
   parameters.a = surfaceNormal.X() / n_mag;
   parameters.b = surfaceNormal.Y() / n_mag;
   parameters.c = surfaceNormal.Z() / n_mag;
-  parameters.k =
-      parameters.a * v0.X() + parameters.b * v0.Y() + parameters.c * v0.Z();
+  parameters.k = parameters.a * v0.X() + parameters.b * v0.Y() + parameters.c * v0.Z();
   parameters.normal = surfaceNormal;
   parameters.abs_normal = surfaceNormal.norm();
   parameters.p0 = v0;
@@ -190,9 +183,8 @@ bool MeshObject2D::hasValidShape() const {
 }
 
 double MeshObject2D::distanceToPlane(const Kernel::V3D &point) const {
-  return ((point.X() * m_planeParameters.a) +
-          (point.Y() * m_planeParameters.b) +
-          (point.Z() * m_planeParameters.c) + m_planeParameters.k);
+  return ((point.X() * m_planeParameters.a) + (point.Y() * m_planeParameters.b) + (point.Z() * m_planeParameters.c) +
+          m_planeParameters.k);
 }
 
 /**
@@ -208,8 +200,7 @@ bool MeshObject2D::isValid(const Kernel::V3D &point) const {
   if (distanceToPlane(point) < tolerance) {
     for (size_t i = 0; i < m_triangles.size(); i += 3) {
 
-      if (MeshObjectCommon::isOnTriangle(point, m_vertices[m_triangles[i]],
-                                         m_vertices[m_triangles[i + 1]],
+      if (MeshObjectCommon::isOnTriangle(point, m_vertices[m_triangles[i]], m_vertices[m_triangles[i + 1]],
                                          m_vertices[m_triangles[i + 2]]))
         return true;
     }
@@ -222,9 +213,7 @@ bool MeshObject2D::isValid(const Kernel::V3D &point) const {
  * @param point : Point to test
  * @return : True if the point is on the side
  */
-bool MeshObject2D::isOnSide(const Kernel::V3D &point) const {
-  return isValid(point);
-}
+bool MeshObject2D::isOnSide(const Kernel::V3D &point) const { return isValid(point); }
 
 /**
  * Given a track, fill the track with valid section
@@ -232,13 +221,11 @@ bool MeshObject2D::isOnSide(const Kernel::V3D &point) const {
  * @return Number of segments added
  */
 int MeshObject2D::interceptSurface(Geometry::Track &ut) const {
-  const int originalCount =
-      ut.count(); // Number of intersections original track
+  const int originalCount = ut.count(); // Number of intersections original track
 
   const auto &norm = m_planeParameters.normal;
-  const auto t = -(ut.startPoint().scalar_prod(norm) +
-                   m_planeParameters.p0.scalar_prod(norm)) /
-                 ut.direction().scalar_prod(norm);
+  const auto t =
+      -(ut.startPoint().scalar_prod(norm) + m_planeParameters.p0.scalar_prod(norm)) / ut.direction().scalar_prod(norm);
 
   // Intersects infinite plane. No point evaluating individual segements if this
   // fails
@@ -246,9 +233,8 @@ int MeshObject2D::interceptSurface(Geometry::Track &ut) const {
     Kernel::V3D intersection;
     TrackDirection entryExit;
     for (size_t i = 0; i < m_vertices.size(); i += 3) {
-      if (MeshObjectCommon::rayIntersectsTriangle(
-              ut.startPoint(), ut.direction(), m_vertices[i], m_vertices[i + 1],
-              m_vertices[i + 2], intersection, entryExit)) {
+      if (MeshObjectCommon::rayIntersectsTriangle(ut.startPoint(), ut.direction(), m_vertices[i], m_vertices[i + 1],
+                                                  m_vertices[i + 2], intersection, entryExit)) {
         ut.addPoint(entryExit, intersection, *this);
         ut.buildLink();
         // All vertices on plane. So only one triangle intersection possible
@@ -268,9 +254,8 @@ int MeshObject2D::interceptSurface(Geometry::Track &ut) const {
  */
 double MeshObject2D::distance(const Track &ut) const {
   const auto &norm = m_planeParameters.normal;
-  const auto t = -(ut.startPoint().scalar_prod(norm) +
-                   m_planeParameters.p0.scalar_prod(norm)) /
-                 ut.direction().scalar_prod(norm);
+  const auto t =
+      -(ut.startPoint().scalar_prod(norm) + m_planeParameters.p0.scalar_prod(norm)) / ut.direction().scalar_prod(norm);
 
   // Intersects infinite plane. No point evaluating individual segements if this
   // fails
@@ -278,27 +263,24 @@ double MeshObject2D::distance(const Track &ut) const {
     Kernel::V3D intersection;
     TrackDirection entryExit;
     for (size_t i = 0; i < m_vertices.size(); i += 3) {
-      if (MeshObjectCommon::rayIntersectsTriangle(
-              ut.startPoint(), ut.direction(), m_vertices[i], m_vertices[i + 1],
-              m_vertices[i + 2], intersection, entryExit)) {
+      if (MeshObjectCommon::rayIntersectsTriangle(ut.startPoint(), ut.direction(), m_vertices[i], m_vertices[i + 1],
+                                                  m_vertices[i + 2], intersection, entryExit)) {
         // All vertices on plane. So only one triangle intersection possible
         return intersection.distance(ut.startPoint());
       }
     }
   }
   std::ostringstream os;
-  os << "Unable to find intersection with object with track starting at "
-     << ut.startPoint() << " in direction " << ut.direction() << "\n";
+  os << "Unable to find intersection with object with track starting at " << ut.startPoint() << " in direction "
+     << ut.direction() << "\n";
   throw std::runtime_error(os.str());
 }
 
 MeshObject2D *MeshObject2D::clone() const {
-  return new MeshObject2D(this->m_triangles, this->m_vertices,
-                          this->m_material);
+  return new MeshObject2D(this->m_triangles, this->m_vertices, this->m_material);
 }
 
-MeshObject2D *
-MeshObject2D::cloneWithMaterial(const Kernel::Material &material) const {
+MeshObject2D *MeshObject2D::cloneWithMaterial(const Kernel::Material &material) const {
   return new MeshObject2D(this->m_triangles, this->m_vertices, material);
 }
 
@@ -323,11 +305,8 @@ int MeshObject2D::getName() const {
 double MeshObject2D::solidAngle(const Kernel::V3D &observer) const {
   double solidAngleSum(0);
   Kernel::V3D vertex1, vertex2, vertex3;
-  for (size_t i = 0;
-       getTriangle(i, m_triangles, m_vertices, vertex1, vertex2, vertex3);
-       ++i) {
-    double sa = MeshObjectCommon::getTriangleSolidAngle(vertex1, vertex2,
-                                                        vertex3, observer);
+  for (size_t i = 0; getTriangle(i, m_triangles, m_vertices, vertex1, vertex2, vertex3); ++i) {
+    double sa = MeshObjectCommon::getTriangleSolidAngle(vertex1, vertex2, vertex3, observer);
     if (sa > 0) {
       solidAngleSum += sa;
     }
@@ -335,8 +314,7 @@ double MeshObject2D::solidAngle(const Kernel::V3D &observer) const {
   return solidAngleSum;
 }
 
-double MeshObject2D::solidAngle(const Kernel::V3D &observer,
-                                const Kernel::V3D &scaleFactor) const {
+double MeshObject2D::solidAngle(const Kernel::V3D &observer, const Kernel::V3D &scaleFactor) const {
   std::vector<Kernel::V3D> scaledVertices;
   scaledVertices.reserve(m_vertices.size());
   for (const auto &vertex : m_vertices) {
@@ -347,14 +325,10 @@ double MeshObject2D::solidAngle(const Kernel::V3D &observer,
 }
 
 bool MeshObject2D::operator==(const MeshObject2D &other) const {
-  return m_vertices.size() == other.m_vertices.size() &&
-         m_triangles.size() == other.m_triangles.size() &&
-         m_planeParameters.a == other.m_planeParameters.a &&
-         m_planeParameters.b == other.m_planeParameters.b &&
-         m_planeParameters.c == other.m_planeParameters.c &&
-         m_planeParameters.k == other.m_planeParameters.k &&
-         m_planeParameters.p0 == other.m_planeParameters.p0 &&
-         m_material.name() == other.m_material.name();
+  return m_vertices.size() == other.m_vertices.size() && m_triangles.size() == other.m_triangles.size() &&
+         m_planeParameters.a == other.m_planeParameters.a && m_planeParameters.b == other.m_planeParameters.b &&
+         m_planeParameters.c == other.m_planeParameters.c && m_planeParameters.k == other.m_planeParameters.k &&
+         m_planeParameters.p0 == other.m_planeParameters.p0 && m_material.name() == other.m_material.name();
 }
 
 double MeshObject2D::volume() const {
@@ -372,11 +346,9 @@ const BoundingBox &MeshObject2D::getBoundingBox() const {
   return MeshObjectCommon::getBoundingBox(m_vertices, m_boundingBox);
 }
 
-void MeshObject2D::getBoundingBox(double &xmax, double &ymax, double &zmax,
-                                  double &xmin, double &ymin,
+void MeshObject2D::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin,
                                   double &zmin) const {
-  return MeshObjectCommon::getBoundingBox(m_vertices, m_boundingBox, xmax, ymax,
-                                          zmax, xmin, ymin, zmin);
+  return MeshObjectCommon::getBoundingBox(m_vertices, m_boundingBox, xmax, ymax, zmax, xmin, ymin, zmin);
 }
 
 /**
@@ -384,22 +356,19 @@ Try to find a point that lies within (or on) the object
 @param[out] point :: on exit set to the point value, if found
 @return 1 if point found, 0 otherwise
 */
-int MeshObject2D::getPointInObject(Kernel::V3D &point) const {
-  return this->isValid(point) ? 1 : 0;
-}
+int MeshObject2D::getPointInObject(Kernel::V3D &point) const { return this->isValid(point) ? 1 : 0; }
 
-boost::optional<Kernel::V3D> MeshObject2D::generatePointInObject(
-    Kernel::PseudoRandomNumberGenerator & /*rng*/,
-    const size_t /*unused*/) const {
+boost::optional<Kernel::V3D> MeshObject2D::generatePointInObject(Kernel::PseudoRandomNumberGenerator & /*rng*/,
+                                                                 const size_t /*unused*/) const {
   // How this would work for a finite plane is not clear. Points within the
   // plane can of course be generated, but most implementations of this method
   // use the bounding box
   throw std::runtime_error("Not implemented.");
 }
 
-boost::optional<Kernel::V3D> MeshObject2D::generatePointInObject(
-    Kernel::PseudoRandomNumberGenerator & /*rng*/,
-    const BoundingBox & /*activeRegion*/, const size_t /*unused*/) const {
+boost::optional<Kernel::V3D> MeshObject2D::generatePointInObject(Kernel::PseudoRandomNumberGenerator & /*rng*/,
+                                                                 const BoundingBox & /*activeRegion*/,
+                                                                 const size_t /*unused*/) const {
 
   // How this would work for a finite plane is not clear. Points within the
   // plane can of course be generated, but most implementations of this method
@@ -412,25 +381,17 @@ const Kernel::Material &MeshObject2D::material() const { return m_material; }
 /**
  * @param material :: material that is being set for the object
  */
-void MeshObject2D::setMaterial(const Kernel::Material &material) {
-  m_material = material;
-}
+void MeshObject2D::setMaterial(const Kernel::Material &material) { m_material = material; }
 
 const std::string &MeshObject2D::id() const { return MeshObject2D::Id; }
 
-std::shared_ptr<GeometryHandler> MeshObject2D::getGeometryHandler() const {
-  return m_handler;
-}
+std::shared_ptr<GeometryHandler> MeshObject2D::getGeometryHandler() const { return m_handler; }
 
 size_t MeshObject2D::numberOfVertices() const { return m_vertices.size(); }
 
-size_t MeshObject2D::numberOfTriangles() const {
-  return m_triangles.size() / 3;
-}
+size_t MeshObject2D::numberOfTriangles() const { return m_triangles.size() / 3; }
 
-std::vector<double> MeshObject2D::getVertices() const {
-  return MeshObjectCommon::getVertices(m_vertices);
-}
+std::vector<double> MeshObject2D::getVertices() const { return MeshObjectCommon::getVertices(m_vertices); }
 
 std::vector<uint32_t> MeshObject2D::getTriangles() const { return m_triangles; }
 
@@ -443,8 +404,7 @@ const detail::ShapeInfo &MeshObject2D::shapeInfo() const {
   throw std::runtime_error("MeshObject2D::shapeInfo() is not implemented");
 }
 
-void MeshObject2D::GetObjectGeom(detail::ShapeInfo::GeometryShape &,
-                                 std::vector<Kernel::V3D> &, double &, double &,
+void MeshObject2D::GetObjectGeom(detail::ShapeInfo::GeometryShape &, std::vector<Kernel::V3D> &, double &, double &,
                                  double &) const {
   throw std::runtime_error("MeshObject2D::GetObjectGeom is not implemented");
 }

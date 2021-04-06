@@ -17,8 +17,7 @@ namespace HistogramData {
   @author Simon Heybrock
   @date 2017
 */
-MANTID_HISTOGRAMDATA_DLL Histogram slice(const Histogram &histogram,
-                                         const size_t begin, const size_t end);
+MANTID_HISTOGRAMDATA_DLL Histogram slice(const Histogram &histogram, const size_t begin, const size_t end);
 
 } // namespace HistogramData
 } // namespace Mantid

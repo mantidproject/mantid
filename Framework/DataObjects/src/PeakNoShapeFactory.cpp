@@ -10,17 +10,13 @@
 namespace Mantid {
 namespace DataObjects {
 
-void PeakNoShapeFactory::setSuccessor(
-    std::shared_ptr<const PeakShapeFactory> /*successorFactory*/) {}
+void PeakNoShapeFactory::setSuccessor(std::shared_ptr<const PeakShapeFactory> /*successorFactory*/) {}
 
 /**
  * @brief Creational method
  * @return new NoShape object
  */
-Mantid::Geometry::PeakShape *
-PeakNoShapeFactory::create(const std::string & /*source*/) const {
-  return new NoShape;
-}
+Mantid::Geometry::PeakShape *PeakNoShapeFactory::create(const std::string & /*source*/) const { return new NoShape; }
 
 } // namespace DataObjects
 } // namespace Mantid

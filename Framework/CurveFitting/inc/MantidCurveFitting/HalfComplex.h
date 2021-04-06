@@ -24,8 +24,7 @@ public:
   /// Constructor.
   /// @param data :: A pointer to the transformed complex data
   /// @param n :: The size of untransformed real data
-  HalfComplex(double *data, const size_t &n)
-      : m_size(n / 2 + 1), m_data(data), m_even(n / 2 * 2 == n) {}
+  HalfComplex(double *data, const size_t &n) : m_size(n / 2 + 1), m_data(data), m_even(n / 2 * 2 == n) {}
   /// Returns the size of the transform
   size_t size() const { return m_size; }
 

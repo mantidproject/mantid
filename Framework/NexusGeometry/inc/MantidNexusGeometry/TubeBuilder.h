@@ -24,8 +24,7 @@ Colinear detectors with cylindrical shape.
 */
 class MANTID_NEXUSGEOMETRY_DLL TubeBuilder {
 public:
-  TubeBuilder(const Mantid::Geometry::IObject &pixelShape,
-              const Eigen::Vector3d &firstDetectorPosition,
+  TubeBuilder(const Mantid::Geometry::IObject &pixelShape, const Eigen::Vector3d &firstDetectorPosition,
               int firstDetectorId);
   const Eigen::Vector3d &tubePosition() const;
   const std::vector<Eigen::Vector3d> &detPositions() const;
@@ -45,8 +44,7 @@ private:
   double m_pixelRadius;
   std::vector<Eigen::Vector3d> m_positions;
   std::vector<int> m_detIDs;
-  Eigen::Vector3d
-      m_p1; ///< First point which defines the line in space the tube lies along
+  Eigen::Vector3d m_p1; ///< First point which defines the line in space the tube lies along
   Eigen::Vector3d m_p2; ///< Second point which defines the line in space the
                         ///< tube lies along
 

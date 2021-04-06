@@ -27,7 +27,7 @@ The presenter initialisation should now be:
      def __init__(self, view, data_model, colour_list):
         self.view = view
         self.data_model = data_model
-        
+
         self.view.setColours(colour_list)
         # connect statements
         self.view.plotSignal.connect(self.updatePlot)

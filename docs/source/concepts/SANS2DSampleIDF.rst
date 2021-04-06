@@ -1,6 +1,6 @@
 .. _SANS2D_Sample_IDF:
 
- 
+
 .. role:: xml(literal)
    :class: highlight
 
@@ -34,16 +34,16 @@ A detailed annotated version of the full ISIS SANS2D IDF
 .. code-block:: xml
 
   <!-- Specify name of instrument and date from when this IDF is valid -->
-  <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+  <instrument xmlns="http://www.mantidproject.org/IDF/1.0"
               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd"
-              name="SANS2D" 
+              name="SANS2D"
               valid-from="1900-01-31 23:59:59">
-   
+
   <!-- Specify various optional defaults -->
     <defaults>
       <length unit="meter"/>
-      <angle unit="degree"/>  
+      <angle unit="degree"/>
       <reference-frame>
         <along-beam axis="z"/>
         <pointing-up axis="y"/>
@@ -51,42 +51,42 @@ A detailed annotated version of the full ISIS SANS2D IDF
       </reference-frame>
       <default-view axis-view="z-"/>
     </defaults>
-   
-   
+
+
   <!-- ISIS is a neutron spallation source. Therefore an important
        piece of information is the position the source relative to
-       the sample, which is needed to calculate neutron flightpaths. 
-       The source currently also serves as a point along the beam, and 
-       the source-to-sample direction is used to determine the beam 
+       the sample, which is needed to calculate neutron flightpaths.
+       The source currently also serves as a point along the beam, and
+       the source-to-sample direction is used to determine the beam
        direction in a number of parts of the Mantid code. -->
     <component type="source">
       <location />  <!-- Specify location of this component. Specifying nothing means use defaults are (x=0,y=0,z=0) -->
     </component>
-    <type name="source" is="Source" /> <!-- Specify the type with name "source", which also 'is' marked as the Source --> 
-   
-  <!-- Specify position of the sample. SANS2D scientists here 
+    <type name="source" is="Source" /> <!-- Specify the type with name "source", which also 'is' marked as the Source -->
+
+  <!-- Specify position of the sample. SANS2D scientists here
        chose to specify this at (x=0,y=0,z=19.281) in their preferred coordinates
        system. Another common choice is setting the SamplePos at (0,0,0) -->
     <component type="some-sample-holder">
       <location z="19.281"/>
     </component>
-    <type name="some-sample-holder" is="SamplePos" /> 
-   
-  <!-- Specify monitor components. Monitors collect data hence 
+    <type name="some-sample-holder" is="SamplePos" />
+
+  <!-- Specify monitor components. Monitors collect data hence
        the idlist="monitors", which specify the name of a list of detector/monitor IDs.
        For ISIS data this provides the link between the data and the components
        collecting the data. Even for data not associated with unique IDs,
-       unique ID numbers of your choice are still required, for subsequent 
+       unique ID numbers of your choice are still required, for subsequent
        use by Mantid analysis -->
     <component type="monitors" idlist="monitors">
       <location />
     </component>
-   
+
     <!-- Define the monitor detector IDs. There are 8 of these on SANS2D -->
     <idlist idname="monitors">
-      <id start="1" end="8" />  
-    </idlist> 
-   
+      <id start="1" end="8" />
+    </idlist>
+
     <!-- Specify what a type with name="monitors" is. This type happens to be a container/grouping
          of the monitors of this instrument. This grouping is here entirely optional. Only difference
          it makes is that in the Mantid instrument view tree these will be listed under one node, and
@@ -102,29 +102,29 @@ A detailed annotated version of the full ISIS SANS2D IDF
       </component>
       <component type="monitor-tbd">
         <location z="30.0" name="monitor4"/>
-      </component>       
+      </component>
       <!-- These monitors are defined in the data, but in fact do not exist on
            the instrument at present. So these are just located at dummy locations -->
-      <component type="no shape monitor"> 
+      <component type="no shape monitor">
         <location z="0" name="placeholder monitor"/>
         <location z="0" name="placeholder monitor"/>
         <location z="0" name="placeholder monitor"/>
-        <location z="0" name="placeholder monitor"/>      
-      </component>  
+        <location z="0" name="placeholder monitor"/>
+      </component>
     </type>
-   
+
     <!-- Define one of the monitor types. This monitor is given a physical shape.
          More specifically here a cylindrical shape. See http://www.mantidproject.org/HowToDefineGeometricShape
          for all the options for defining a physical shape -->
     <type name="monitor-tbd" is="monitor">
       <cylinder id="some-shape">
         <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
-        <axis x="0.0" y="0.0" z="1.0" /> 
+        <axis x="0.0" y="0.0" z="1.0" />
         <radius val="0.01" />
         <height val="0.03" />
-      </cylinder>   
+      </cylinder>
     </type>
-   
+
     <!-- Another monitor type -->
     <type name="Moderator-Monitor3" is="monitor">
       <percent-transparency val="99.9" />
@@ -135,32 +135,32 @@ A detailed annotated version of the full ISIS SANS2D IDF
         <right-front-bottom-point  x="0.0125" y="0.0125" z="0.0"  />
       </cuboid>
       <algebra val="shape" />
-    </type>    
-   
+    </type>
+
     <!-- Define a no shape monitor type -->
-    <type name="no shape monitor" is="monitor" /> 
-   
-   
+    <type name="no shape monitor" is="monitor" />
+
+
   <!-- Specify the SANS2D front detector bank, which is a square detector bank of 192 x 192 pixels
        Because this detector bank is described using an optional shortcut notation then an 'idlist' is
        not used to specify the detector IDs. Instead the tags idstart, idfillbyfirst, idstep and idstepbyrow
        which in this particular case means the ID are assigned as shown in the instrument view picture on this page -->
     <component type="detector-bank" idstart="2000000" idfillbyfirst="y" idstep="1000" idstepbyrow="1">
       <location x="1.1" z="23.281" name="front-detector"/>
-    </component>  
-   
-  <!-- Specify the SANS2D rear detector, which is of the same type as the front detector bank -->  
+    </component>
+
+  <!-- Specify the SANS2D rear detector, which is of the same type as the front detector bank -->
     <component type="detector-bank" idstart="1000000" idfillbyfirst="y" idstep="1000" idstepbyrow="1">
       <location z="23.281" name="rear-detector"/>
     </component>
-   
+
     <!-- Specify what a detector bank type is, which is a square array of 192 x 192 pixels, and here
          a shortcut notation is used do define such a bank using is="RectangularDetector" -->
-    <type name="detector-bank" is="RectangularDetector" type="pixel" 
+    <type name="detector-bank" is="RectangularDetector" type="pixel"
       xpixels="192" xstart="-0.48705" xstep="+0.0051"
       ypixels="192" ystart="-0.48705" ystep="+0.0051" >
-    </type>  
-   
+    </type>
+
     <!-- Specify a pixel type -->
     <type name="pixel" is="detector">
       <cuboid id="shape">
@@ -169,9 +169,9 @@ A detailed annotated version of the full ISIS SANS2D IDF
         <left-back-bottom-point  x="-0.005104167" y="-0.005104167" z="0.0"  />
         <right-front-bottom-point  x="0.005104167" y="0.005104167" z="0.0"  />
       </cuboid>
-      <algebra val="shape" /> 
-    </type>      
-   
+      <algebra val="shape" />
+    </type>
+
   </instrument>
 
 

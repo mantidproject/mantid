@@ -33,6 +33,7 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
         return ['out', 'D11_AutoProcess_Reference.nxs']
 
     def runTest(self):
@@ -92,6 +93,7 @@ class D11_AutoProcess_Wedges_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
         return ['out', 'D11_AutoProcess_Wedges_Reference.nxs']
 
     def runTest(self):
@@ -159,6 +161,7 @@ class D11_AutoProcess_IQxQy_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
         return ['iqxy', 'D11_AutoProcess_IQxQy_Reference.nxs']
 
     def runTest(self):
@@ -215,6 +218,7 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
         return ['iq_mult_wavelengths', 'D11_AutoProcess_Multiple_Tr_Reference.nxs']
 
     def runTest(self):
@@ -330,6 +334,7 @@ class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
         return ['out', 'D33_AutoProcess_Reference.nxs']
 
     def runTest(self):
@@ -381,6 +386,7 @@ class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
         return ['out', 'D33_AutoProcess_IPhiQ_Reference.nxs']
 
     def runTest(self):
@@ -522,6 +528,7 @@ class D22_AutoProcess_Single_Sensitivity(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking.append('Instrument')
         return ['d22_single_sens', 'D22_AutoProcess_Single_Sens_Reference.nxs']
 
     def runTest(self):
@@ -573,6 +580,7 @@ class D22_AutoProcess_Multi_Sensitivity(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
         return ['sens', 'D22_AutoProcess_Multi_Sens_Reference.nxs']
 
     def runTest(self):

@@ -15,8 +15,7 @@
 namespace MantidQt {
 namespace API {
 
-class EXPORT_OPT_MANTIDQT_PLOTTING QwtRasterDataMDNonOrthogonal
-    : public QwtRasterDataMD {
+class EXPORT_OPT_MANTIDQT_PLOTTING QwtRasterDataMDNonOrthogonal : public QwtRasterDataMD {
 public:
   QwtRasterDataMDNonOrthogonal();
   QwtRasterDataMDNonOrthogonal *copy() const override;
@@ -25,17 +24,14 @@ public:
 
   double value(double x, double y) const override;
 
-  void setSliceParams(size_t dimX, size_t dimY,
-                      Mantid::Geometry::IMDDimension_const_sptr X,
-                      Mantid::Geometry::IMDDimension_const_sptr Y,
-                      std::vector<Mantid::coord_t> &slicePoint) override;
+  void setSliceParams(size_t dimX, size_t dimY, Mantid::Geometry::IMDDimension_const_sptr X,
+                      Mantid::Geometry::IMDDimension_const_sptr Y, std::vector<Mantid::coord_t> &slicePoint) override;
   mutable std::vector<Mantid::coord_t> m_lookPoint;
   std::array<Mantid::coord_t, 9> m_fromHklToXyz;
   size_t m_missingHKLdim;
 
 protected:
-  void copyFrom(const QwtRasterDataMDNonOrthogonal &source,
-                QwtRasterDataMDNonOrthogonal &dest) const;
+  void copyFrom(const QwtRasterDataMDNonOrthogonal &source, QwtRasterDataMDNonOrthogonal &dest) const;
 };
 
 } // namespace API

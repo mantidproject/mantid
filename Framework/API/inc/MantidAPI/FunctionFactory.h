@@ -40,8 +40,7 @@ class MultiDomainFunction;
     @date 27/10/2009
 */
 
-class MANTID_API_DLL FunctionFactoryImpl final
-    : public Kernel::DynamicFactory<IFunction> {
+class MANTID_API_DLL FunctionFactoryImpl final : public Kernel::DynamicFactory<IFunction> {
 public:
   FunctionFactoryImpl(const FunctionFactoryImpl &) = delete;
   FunctionFactoryImpl &operator=(const FunctionFactoryImpl &) = delete;
@@ -56,21 +55,17 @@ public:
 
   /// Creates an instnce of an inizialised multidomain function where each
   /// domain has the same function.
-  std::shared_ptr<MultiDomainFunction>
-  createInitializedMultiDomainFunction(const std::string &input,
-                                       size_t domainNumber) const;
+  std::shared_ptr<MultiDomainFunction> createInitializedMultiDomainFunction(const std::string &input,
+                                                                            size_t domainNumber) const;
 
   /// Query available functions based on the template type
-  template <typename FunctionType>
-  std::vector<std::string> getFunctionNames() const;
+  template <typename FunctionType> std::vector<std::string> getFunctionNames() const;
   /// Get function names that can be used by generic fitting GUIs
   std::vector<std::string> getFunctionNamesGUI() const;
   // Unhide the base class version (to satisfy the intel compiler)
   using Kernel::DynamicFactory<IFunction>::subscribe;
-  void subscribe(const std::string &className,
-                 std::unique_ptr<AbstractFactory> pAbstractFactory,
-                 Kernel::DynamicFactory<IFunction>::SubscribeAction replace =
-                     ErrorIfExists);
+  void subscribe(const std::string &className, std::unique_ptr<AbstractFactory> pAbstractFactory,
+                 Kernel::DynamicFactory<IFunction>::SubscribeAction replace = ErrorIfExists);
 
   void unsubscribe(const std::string &className);
 
@@ -86,34 +81,26 @@ private:
   using Kernel::DynamicFactory<IFunction>::createUnwrapped;
 
   /// Create a simple function
-  std::shared_ptr<IFunction>
-  createSimple(const Expression &expr,
-               std::map<std::string, std::string> &parentAttributes) const;
-  std::shared_ptr<IPeakFunction>
-  createPeakFunction(const Expression &expr, const std::string &name) const;
+  std::shared_ptr<IFunction> createSimple(const Expression &expr,
+                                          std::map<std::string, std::string> &parentAttributes) const;
+  std::shared_ptr<IPeakFunction> createPeakFunction(const Expression &expr, const std::string &name) const;
   /// Create a composite function
-  std::shared_ptr<CompositeFunction>
-  createComposite(const Expression &expr,
-                  std::map<std::string, std::string> &parentAttributes) const;
+  std::shared_ptr<CompositeFunction> createComposite(const Expression &expr,
+                                                     std::map<std::string, std::string> &parentAttributes) const;
 
   /// Throw an exception
   void inputError(const std::string &str = "") const;
   /// Add constraints to the created function
-  void addConstraints(const std::shared_ptr<IFunction> &fun,
-                      const Expression &expr) const;
+  void addConstraints(const std::shared_ptr<IFunction> &fun, const Expression &expr) const;
   /// Add a single constraint to the created function
-  void addConstraint(const std::shared_ptr<IFunction> &fun,
-                     const Expression &expr) const;
+  void addConstraint(const std::shared_ptr<IFunction> &fun, const Expression &expr) const;
   /// Add a single constraint to the created function with non-default penalty
-  void addConstraint(const std::shared_ptr<IFunction> &fun,
-                     const Expression &constraint_expr,
+  void addConstraint(const std::shared_ptr<IFunction> &fun, const Expression &constraint_expr,
                      const Expression &penalty_expr) const;
   /// Add ties to the created function
-  void addTies(const std::shared_ptr<IFunction> &fun,
-               const Expression &expr) const;
+  void addTies(const std::shared_ptr<IFunction> &fun, const Expression &expr) const;
   /// Add a tie to the created function
-  void addTie(const std::shared_ptr<IFunction> &fun,
-              const Expression &expr) const;
+  void addTie(const std::shared_ptr<IFunction> &fun, const Expression &expr) const;
 
   mutable std::map<std::string, std::vector<std::string>> m_cachedFunctionNames;
   mutable std::mutex m_mutex;
@@ -124,8 +111,7 @@ private:
  * @tparam FunctionType :: The type of the functions to list
  * @returns A vector of the names of the functions matching the template type
  */
-template <typename FunctionType>
-std::vector<std::string> FunctionFactoryImpl::getFunctionNames() const {
+template <typename FunctionType> std::vector<std::string> FunctionFactoryImpl::getFunctionNames() const {
   std::lock_guard<std::mutex> _lock(m_mutex);
 
   const std::string soughtType(typeid(FunctionType).name());
@@ -136,29 +122,25 @@ std::vector<std::string> FunctionFactoryImpl::getFunctionNames() const {
   // Create the entry in the cache and work with it directly
   std::vector<std::string> &typeNames = m_cachedFunctionNames[soughtType];
   const std::vector<std::string> names = this->getKeys();
-  std::copy_if(names.cbegin(), names.cend(), std::back_inserter(typeNames),
-               [this](const std::string &name) {
-                 std::shared_ptr<IFunction> func = this->createFunction(name);
-                 return std::dynamic_pointer_cast<FunctionType>(func);
-               });
+  std::copy_if(names.cbegin(), names.cend(), std::back_inserter(typeNames), [this](const std::string &name) {
+    std::shared_ptr<IFunction> func = this->createFunction(name);
+    return std::dynamic_pointer_cast<FunctionType>(func);
+  });
   return typeNames;
 }
 
 using FunctionFactory = Mantid::Kernel::SingletonHolder<FunctionFactoryImpl>;
 
 /// Convenient typedef for an UpdateNotification
-using FunctionFactoryUpdateNotification =
-    FunctionFactoryImpl::UpdateNotification;
+using FunctionFactoryUpdateNotification = FunctionFactoryImpl::UpdateNotification;
 /// Convenient typedef for an UpdateNotification AutoPtr
-using FunctionFactoryUpdateNotification_ptr =
-    const Poco::AutoPtr<FunctionFactoryUpdateNotification> &;
+using FunctionFactoryUpdateNotification_ptr = const Poco::AutoPtr<FunctionFactoryUpdateNotification> &;
 } // namespace API
 } // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<Mantid::API::FunctionFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::FunctionFactoryImpl>;
 }
 } // namespace Mantid
 
@@ -166,10 +148,8 @@ EXTERN_MANTID_API template class MANTID_API_DLL
  * Macro for declaring a new type of function to be used with the
  * FunctionFactory
  */
-#define DECLARE_FUNCTION(classname)                                            \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper                                           \
-      register_function_##classname(((Mantid::API::FunctionFactory::Instance() \
-                                          .subscribe<classname>(#classname)),  \
-                                     0));                                      \
+#define DECLARE_FUNCTION(classname)                                                                                    \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper                                                                                   \
+      register_function_##classname(((Mantid::API::FunctionFactory::Instance().subscribe<classname>(#classname)), 0)); \
   }

@@ -20,11 +20,9 @@ Kernel::Logger g_log("CostFuncUnweightedLeastSquares");
 
 DECLARE_COSTFUNCTION(CostFuncUnweightedLeastSquares, Unweighted least squares)
 
-CostFuncUnweightedLeastSquares::CostFuncUnweightedLeastSquares()
-    : CostFuncLeastSquares() {}
+CostFuncUnweightedLeastSquares::CostFuncUnweightedLeastSquares() : CostFuncLeastSquares() {}
 
-void CostFuncUnweightedLeastSquares::calActiveCovarianceMatrix(GSLMatrix &covar,
-                                                               double epsrel) {
+void CostFuncUnweightedLeastSquares::calActiveCovarianceMatrix(GSLMatrix &covar, double epsrel) {
   CostFuncLeastSquares::calActiveCovarianceMatrix(covar, epsrel);
 
   double variance = getResidualVariance();
@@ -48,8 +46,7 @@ void CostFuncUnweightedLeastSquares::calActiveCovarianceMatrix(GSLMatrix &covar,
 }
 
 /// Return unit weights for all data points.
-std::vector<double> CostFuncUnweightedLeastSquares::getFitWeights(
-    API::FunctionValues_sptr values) const {
+std::vector<double> CostFuncUnweightedLeastSquares::getFitWeights(API::FunctionValues_sptr values) const {
   std::vector<double> weights(values->size());
   for (size_t i = 0; i < weights.size(); ++i) {
     weights[i] = values->getFitWeight(i) != 0 ? 1 : 0;
@@ -79,10 +76,8 @@ double CostFuncUnweightedLeastSquares::getResidualVariance() const {
     g_log.debug() << std::left << std::fixed << std::setw(10);
     g_log.debug() << "Residual sum of squares: " << sum << '\n';
     g_log.debug() << "Residual variance: " << residualVariance << '\n';
-    g_log.debug() << "Residual standard deviation: " << sqrt(residualVariance)
-                  << '\n';
-    g_log.debug() << "Degrees of freedom: "
-                  << static_cast<size_t>(degreesOfFreedom) << '\n';
+    g_log.debug() << "Residual standard deviation: " << sqrt(residualVariance) << '\n';
+    g_log.debug() << "Degrees of freedom: " << static_cast<size_t>(degreesOfFreedom) << '\n';
     g_log.debug() << "Number of observations: " << m_values->size() << '\n';
     g_log.debug().flags(prevState);
   }

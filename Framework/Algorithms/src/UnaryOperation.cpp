@@ -20,11 +20,9 @@ namespace Algorithms {
  *  Defines input and output workspace properties
  */
 void UnaryOperation::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      inputPropName(), "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(inputPropName(), "", Direction::Input),
                   "The name of the input workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      outputPropName(), "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(outputPropName(), "", Direction::Output),
                   "The name to use for the output workspace (can be the same "
                   "as the input one).");
 
@@ -39,8 +37,7 @@ void UnaryOperation::exec() {
   MatrixWorkspace_const_sptr in_work = getProperty(inputPropName());
 
   // Check if it is an event workspace
-  EventWorkspace_const_sptr eventW =
-      std::dynamic_pointer_cast<const EventWorkspace>(in_work);
+  EventWorkspace_const_sptr eventW = std::dynamic_pointer_cast<const EventWorkspace>(in_work);
   if ((eventW != nullptr) && !(this->useHistogram)) {
     this->execEvent();
     return;
@@ -148,15 +145,13 @@ void UnaryOperation::execEvent() {
 }
 
 /// Helper for events, for use with different types of weighted events
-template <class T>
-void UnaryOperation::unaryOperationEventHelper(std::vector<T> &wevector) {
+template <class T> void UnaryOperation::unaryOperationEventHelper(std::vector<T> &wevector) {
 
   typename std::vector<T>::iterator it;
   for (it = wevector.begin(); it < wevector.end(); ++it) {
     double yout, eout;
     // Call the abstract function, passing in the current values
-    performUnaryOperation(it->tof(), it->weight(),
-                          std::sqrt(it->errorSquared()), yout, eout);
+    performUnaryOperation(it->tof(), it->weight(), std::sqrt(it->errorSquared()), yout, eout);
     it->m_weight = static_cast<float>(yout);
     it->m_errorSquared = static_cast<float>(eout * eout);
   }

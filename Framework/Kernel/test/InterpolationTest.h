@@ -82,8 +82,7 @@ public:
   }
 
   void testResetData() {
-    Interpolation interpolation =
-        getInitializedInterpolation("Wavelength", "dSpacing");
+    Interpolation interpolation = getInitializedInterpolation("Wavelength", "dSpacing");
 
     TS_ASSERT(interpolation.containData());
     interpolation.resetData();
@@ -106,11 +105,9 @@ public:
     Interpolation interpolation;
 
     size_t insertionOrderRaw[] = {1, 0, 3, 4, 2};
-    std::vector<size_t> insertionOrder(insertionOrderRaw,
-                                       insertionOrderRaw + 5);
+    std::vector<size_t> insertionOrder(insertionOrderRaw, insertionOrderRaw + 5);
 
-    for (std::vector<size_t>::const_iterator i = insertionOrder.begin();
-         i != insertionOrder.end(); ++i) {
+    for (std::vector<size_t>::const_iterator i = insertionOrder.begin(); i != insertionOrder.end(); ++i) {
       interpolation.addPoint(m_tableValues[*i].first, m_tableValues[*i].second);
     }
 
@@ -126,8 +123,7 @@ public:
       interpolation.addPoint(m_tableValues[i].first, m_tableValues[i].second);
     }
 
-    TS_ASSERT_EQUALS(
-        std::distance(interpolation.cbegin(), interpolation.cend()), 5);
+    TS_ASSERT_EQUALS(std::distance(interpolation.cbegin(), interpolation.cend()), 5);
   }
 
   void testEmpty() {
@@ -167,8 +163,7 @@ public:
   }
 
   void testStreamOperatorsNonEmpty() {
-    Interpolation interpolation =
-        getInitializedInterpolation("Wavelength", "dSpacing");
+    Interpolation interpolation = getInitializedInterpolation("Wavelength", "dSpacing");
 
     std::stringstream str;
     str << interpolation;
@@ -188,38 +183,17 @@ public:
     }
 
     // lower limit - can be treated like general case
-    TS_ASSERT_EQUALS(
-        std::distance(interpolation.cbegin(),
-                      interpolation.findIndexOfNextLargerValue(200.0)),
-        1);
+    TS_ASSERT_EQUALS(std::distance(interpolation.cbegin(), interpolation.findIndexOfNextLargerValue(200.0)), 1);
 
     // Exact interpolation points
-    TS_ASSERT_EQUALS(
-        std::distance(interpolation.cbegin(),
-                      interpolation.findIndexOfNextLargerValue(201.0)),
-        2);
-    TS_ASSERT_EQUALS(
-        std::distance(interpolation.cbegin(),
-                      interpolation.findIndexOfNextLargerValue(202.0)),
-        3);
-    TS_ASSERT_EQUALS(
-        std::distance(interpolation.cbegin(),
-                      interpolation.findIndexOfNextLargerValue(203.0)),
-        4);
+    TS_ASSERT_EQUALS(std::distance(interpolation.cbegin(), interpolation.findIndexOfNextLargerValue(201.0)), 2);
+    TS_ASSERT_EQUALS(std::distance(interpolation.cbegin(), interpolation.findIndexOfNextLargerValue(202.0)), 3);
+    TS_ASSERT_EQUALS(std::distance(interpolation.cbegin(), interpolation.findIndexOfNextLargerValue(203.0)), 4);
 
     // Arbitrary interpolation points
-    TS_ASSERT_EQUALS(
-        std::distance(interpolation.cbegin(),
-                      interpolation.findIndexOfNextLargerValue(200.5)),
-        1);
-    TS_ASSERT_EQUALS(
-        std::distance(interpolation.cbegin(),
-                      interpolation.findIndexOfNextLargerValue(201.25)),
-        2);
-    TS_ASSERT_EQUALS(
-        std::distance(interpolation.cbegin(),
-                      interpolation.findIndexOfNextLargerValue(203.5)),
-        4);
+    TS_ASSERT_EQUALS(std::distance(interpolation.cbegin(), interpolation.findIndexOfNextLargerValue(200.5)), 1);
+    TS_ASSERT_EQUALS(std::distance(interpolation.cbegin(), interpolation.findIndexOfNextLargerValue(201.25)), 2);
+    TS_ASSERT_EQUALS(std::distance(interpolation.cbegin(), interpolation.findIndexOfNextLargerValue(203.5)), 4);
   }
 
   void testCBegin() {
@@ -247,18 +221,15 @@ public:
 
     for (DataXY m_tableValue : m_tableValues) {
       // When there are zero values in the interpolation, it returns 0.0
-      checkValue(interpolationZero, m_tableValue.first, 0.0,
-                 "zero interpolation values");
+      checkValue(interpolationZero, m_tableValue.first, 0.0, "zero interpolation values");
 
       // With one value, it returns this one value for any x.
-      checkValue(interpolationOne, m_tableValue.first, 2.0,
-                 "one interpolation value");
+      checkValue(interpolationOne, m_tableValue.first, 2.0, "one interpolation value");
     }
   }
 
 private:
-  Interpolation getInitializedInterpolation(const std::string &xUnit,
-                                            const std::string &yUnit) {
+  Interpolation getInitializedInterpolation(const std::string &xUnit, const std::string &yUnit) {
     Interpolation interpolation;
 
     // take values from constructor
@@ -281,42 +252,35 @@ private:
   }
 
   void checkValueAtLowerLimit(const Interpolation &interpolation) {
-    checkValue(interpolation, m_tableValues.front().first,
-               m_tableValues.front().second, "at lower limit");
+    checkValue(interpolation, m_tableValues.front().first, m_tableValues.front().second, "at lower limit");
   }
 
   void checkValueAtUpperLimit(const Interpolation &interpolation) {
-    checkValue(interpolation, m_tableValues.back().first,
-               m_tableValues.back().second, "at upper limit");
+    checkValue(interpolation, m_tableValues.back().first, m_tableValues.back().second, "at upper limit");
   }
 
   void checkValuesAtExactBulkPoints(const Interpolation &interpolation) {
     for (size_t i = 1; i < m_tableValues.size() - 1; ++i) {
-      checkValue(interpolation, m_tableValues[i].first, m_tableValues[i].second,
-                 "at interpolation point");
+      checkValue(interpolation, m_tableValues[i].first, m_tableValues[i].second, "at interpolation point");
     }
   }
 
   void checkValuesInsideInterpolationRange(const Interpolation &interpolation) {
     for (size_t i = 0; i < m_interpolationXValues.size(); ++i) {
-      checkValue(interpolation, m_interpolationXValues[i], m_expectedYValues[i],
-                 "inside interpolation range");
+      checkValue(interpolation, m_interpolationXValues[i], m_expectedYValues[i], "inside interpolation range");
     }
   }
 
-  void
-  checkValuesOutsideInterpolationRange(const Interpolation &interpolation) {
+  void checkValuesOutsideInterpolationRange(const Interpolation &interpolation) {
     for (size_t i = 0; i < m_outsideXValues.size(); ++i) {
-      checkValue(interpolation, m_outsideXValues[i], m_outsideYValues[i],
-                 "outside interpolation range");
+      checkValue(interpolation, m_outsideXValues[i], m_outsideYValues[i], "outside interpolation range");
     }
   }
 
   /* This function performs the actual check.
    * It takes a string argument to make it more obvious where the problem is.
    */
-  void checkValue(const Interpolation &interpolation, double x, double y,
-                  const std::string &testedRange) {
+  void checkValue(const Interpolation &interpolation, double x, double y, const std::string &testedRange) {
     std::ostringstream errorString;
     errorString << "Interpolation error " << testedRange;
 

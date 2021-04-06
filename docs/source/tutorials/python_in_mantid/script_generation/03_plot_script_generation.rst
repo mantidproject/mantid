@@ -20,5 +20,5 @@ A script can also be generated for producing a plot!
 * For advice on how to add more features to a plotting script, see :ref:`02_scripting_plots` in the next section.
 
 
-.. |GenerateAScript.png| image:: /images/GenerateAScript.png  
+.. |GenerateAScript.png| image:: /images/GenerateAScript.png
    :width: 30px

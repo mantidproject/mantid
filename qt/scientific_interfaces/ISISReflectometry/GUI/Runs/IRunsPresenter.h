@@ -28,8 +28,7 @@ public:
   virtual RunsTable const &runsTable() const = 0;
   virtual RunsTable &mutableRunsTable() = 0;
 
-  virtual bool
-  notifyChangeInstrumentRequested(std::string const &instrumentName) = 0;
+  virtual bool notifyChangeInstrumentRequested(std::string const &instrumentName) = 0;
   virtual void notifyResumeReductionRequested() = 0;
   virtual void notifyPauseReductionRequested() = 0;
   virtual void notifyRowStateChanged() = 0;

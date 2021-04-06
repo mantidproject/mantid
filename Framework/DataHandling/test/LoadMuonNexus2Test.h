@@ -81,8 +81,7 @@ public:
     // Test workspace data (copied from LoadRawTest.h)
     //
     MatrixWorkspace_sptr output;
-    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        outputSpace);
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 192 for file inputFile = "argus0026287.nxs";
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 192);
@@ -107,16 +106,13 @@ public:
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Label");
     TS_ASSERT(!output->isDistribution());
 
-    Property *l_property =
-        output->run().getLogData(std::string("temperature_1_log"));
-    TimeSeriesProperty<double> *l_timeSeriesDouble =
-        dynamic_cast<TimeSeriesProperty<double> *>(l_property);
+    Property *l_property = output->run().getLogData(std::string("temperature_1_log"));
+    TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double> *>(l_property);
     std::map<DateAndTime, double> asMap = l_timeSeriesDouble->valueAsMap();
     TS_ASSERT_EQUALS(l_timeSeriesDouble->size(), 37);
     TS_ASSERT_EQUALS(l_timeSeriesDouble->nthValue(10), 180.0);
     std::string timeSeriesString = l_timeSeriesDouble->value();
-    TS_ASSERT_EQUALS(timeSeriesString.substr(0, 25),
-                     "2008-Sep-11 14:17:41  180");
+    TS_ASSERT_EQUALS(timeSeriesString.substr(0, 25), "2008-Sep-11 14:17:41  180");
     // check that sample name has been set correctly
     TS_ASSERT_EQUALS(output->sample().getName(), "GaAs");
 
@@ -145,8 +141,7 @@ public:
     // Test workspace data (copied from LoadRawTest.h)
     //
     MatrixWorkspace_sptr output;
-    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        outputSpace);
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 11);
@@ -182,8 +177,7 @@ public:
     // Test workspace data (copied from LoadRawTest.h)
     //
     MatrixWorkspace_sptr output;
-    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        outputSpace);
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 3);
@@ -221,8 +215,7 @@ public:
     // Test workspace data (copied from LoadRawTest.h)
     //
     MatrixWorkspace_sptr output;
-    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        outputSpace);
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 14);
@@ -257,8 +250,7 @@ public:
     TS_ASSERT(loadedWS);
 
     // Check the right spectra have been loaded
-    const std::vector<Mantid::specnum_t> expectedSpectra{5, 6,  7,  8,
-                                                         9, 10, 29, 31};
+    const std::vector<Mantid::specnum_t> expectedSpectra{5, 6, 7, 8, 9, 10, 29, 31};
     TS_ASSERT_EQUALS(loadedWS->getNumberHistograms(), expectedSpectra.size());
     for (size_t i = 0; i < loadedWS->getNumberHistograms(); ++i) {
       const auto spec = loadedWS->getSpectrum(i);
@@ -290,8 +282,7 @@ public:
     // Test workspace data (copied from LoadRawTest.h)
     //
     MatrixWorkspace_sptr output;
-    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        outputSpace + "_1");
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace + "_1");
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 192 for file inputFile = "argus0026287.nxs";
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 192);
@@ -320,16 +311,13 @@ public:
     // Test code copied from LoadLogTest to check Child Algorithm is running
     // properly
     //----------------------------------------------------------------------
-    Property *l_property =
-        output->run().getLogData(std::string("temperature_1_log"));
-    TimeSeriesProperty<double> *l_timeSeriesDouble =
-        dynamic_cast<TimeSeriesProperty<double> *>(l_property);
+    Property *l_property = output->run().getLogData(std::string("temperature_1_log"));
+    TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double> *>(l_property);
     std::map<DateAndTime, double> asMap = l_timeSeriesDouble->valueAsMap();
     TS_ASSERT_EQUALS(l_timeSeriesDouble->size(), 42);
     TS_ASSERT_DELTA(l_timeSeriesDouble->nthValue(10), 7.3146, 0.0001);
     std::string timeSeriesString = l_timeSeriesDouble->value();
-    TS_ASSERT_EQUALS(timeSeriesString.substr(0, 25),
-                     "2008-Sep-18 00:57:19  7.3");
+    TS_ASSERT_EQUALS(timeSeriesString.substr(0, 25), "2008-Sep-18 00:57:19  7.3");
     // check that sample name has been set correctly
     TS_ASSERT_EQUALS(output->sample().getName(), "GaAs");
 
@@ -358,8 +346,7 @@ public:
     // Test workspace data (copied from LoadRawTest.h)
     //
     MatrixWorkspace_sptr output;
-    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        outputSpace + "_2");
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace + "_2");
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 192 for file inputFile = "argus0026287.nxs";
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 192);
@@ -384,16 +371,13 @@ public:
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Label");
     TS_ASSERT(!output->isDistribution());
 
-    Property *l_property =
-        output->run().getLogData(std::string("temperature_1_log"));
-    TimeSeriesProperty<double> *l_timeSeriesDouble =
-        dynamic_cast<TimeSeriesProperty<double> *>(l_property);
+    Property *l_property = output->run().getLogData(std::string("temperature_1_log"));
+    TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double> *>(l_property);
     std::map<DateAndTime, double> asMap = l_timeSeriesDouble->valueAsMap();
     TS_ASSERT_EQUALS(l_timeSeriesDouble->size(), 31);
     TS_ASSERT_DELTA(l_timeSeriesDouble->nthValue(10), 10.644, 0.0001);
     std::string timeSeriesString = l_timeSeriesDouble->value();
-    TS_ASSERT_EQUALS(timeSeriesString.substr(0, 25),
-                     "2009-Jul-08 10:23:50  10.");
+    TS_ASSERT_EQUALS(timeSeriesString.substr(0, 25), "2009-Jul-08 10:23:50  10.");
     // check that sample name has been set correctly
     TS_ASSERT_EQUALS(output->sample().getName(), "GaAs");
 
@@ -434,8 +418,7 @@ public:
     // Test workspace data
     //
     MatrixWorkspace_sptr output;
-    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        outputSpace);
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 192 for file inputFile = "argus0026287.nxs";
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 2);

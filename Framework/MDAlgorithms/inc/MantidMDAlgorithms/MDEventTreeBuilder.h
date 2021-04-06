@@ -25,9 +25,7 @@ namespace MDAlgorithms {
  * @tparam EventIterator :: Iterator of sorted collection storing the converted
  * events
  */
-template <size_t ND, template <size_t> class MDEventType,
-          typename EventIterator>
-class MDEventTreeBuilder {
+template <size_t ND, template <size_t> class MDEventType, typename EventIterator> class MDEventTreeBuilder {
   using MDEvent = MDEventType<ND>;
   using IntT = typename MDEvent::IntT;
   using MortonT = typename MDEvent::MortonT;
@@ -38,8 +36,7 @@ class MDEventTreeBuilder {
 
 public:
   using EventAccessType = DataObjects::EventAccessor;
-  using IndexCoordinateSwitcher =
-      typename MDEvent::template AccessFor<EventDistributor>;
+  using IndexCoordinateSwitcher = typename MDEvent::template AccessFor<EventDistributor>;
   enum WORKER_TYPE { MASTER, SLAVE };
   /**
    * Structure to store the subtask of creating subtree from the
@@ -56,8 +53,7 @@ public:
   };
 
 public:
-  MDEventTreeBuilder(const int numWorkers, const size_t threshold,
-                     const API::BoxController_sptr &bc,
+  MDEventTreeBuilder(const int numWorkers, const size_t threshold, const API::BoxController_sptr &bc,
                      const morton_index::MDSpaceBounds<ND> &space);
   struct TreeWithIndexError {
     BoxBase *root;
@@ -71,9 +67,8 @@ public:
   TreeWithIndexError distribute(std::vector<MDEventType<ND>> &mdEvents);
 
 private:
-  morton_index::MDCoordinate<ND>
-  convertToIndex(std::vector<MDEventType<ND>> &mdEvents,
-                 const morton_index::MDSpaceBounds<ND> &space);
+  morton_index::MDCoordinate<ND> convertToIndex(std::vector<MDEventType<ND>> &mdEvents,
+                                                const morton_index::MDSpaceBounds<ND> &space);
   void sortEvents(std::vector<MDEventType<ND>> &mdEvents);
   BoxBase *doDistributeEvents(std::vector<MDEventType<ND>> &mdEvents);
   void distributeEvents(Task &tsk, const WORKER_TYPE &wtp);
@@ -96,54 +91,37 @@ private:
   const MortonT m_mortonMax;
 };
 
-template <size_t ND, template <size_t> class MDEventType,
-          typename EventIterator>
-MDEventTreeBuilder<ND, MDEventType, EventIterator>::MDEventTreeBuilder(
-    const int numWorkers, const size_t threshold,
-    const API::BoxController_sptr &bc,
-    const morton_index::MDSpaceBounds<ND> &space)
-    : m_numWorkers(numWorkers), m_eventsThreshold(threshold),
-      m_masterFinished{false}, m_space{space}, m_bc{bc},
-      m_mortonMin{morton_index::calculateDefaultBound<ND, IntT, MortonT>(
-          std::numeric_limits<IntT>::min())},
-      m_mortonMax{morton_index::calculateDefaultBound<ND, IntT, MortonT>(
-          std::numeric_limits<IntT>::max())} {
+template <size_t ND, template <size_t> class MDEventType, typename EventIterator>
+MDEventTreeBuilder<ND, MDEventType, EventIterator>::MDEventTreeBuilder(const int numWorkers, const size_t threshold,
+                                                                       const API::BoxController_sptr &bc,
+                                                                       const morton_index::MDSpaceBounds<ND> &space)
+    : m_numWorkers(numWorkers), m_eventsThreshold(threshold), m_masterFinished{false}, m_space{space}, m_bc{bc},
+      m_mortonMin{morton_index::calculateDefaultBound<ND, IntT, MortonT>(std::numeric_limits<IntT>::min())},
+      m_mortonMax{morton_index::calculateDefaultBound<ND, IntT, MortonT>(std::numeric_limits<IntT>::max())} {
   for (size_t ax = 0; ax < ND; ++ax) {
     m_extents.emplace_back();
     m_extents.back().setExtents(space(ax, 0), space(ax, 1));
   }
 }
 
-template <size_t ND, template <size_t> class MDEventType,
-          typename EventIterator>
+template <size_t ND, template <size_t> class MDEventType, typename EventIterator>
 typename MDEventTreeBuilder<ND, MDEventType, EventIterator>::TreeWithIndexError
-MDEventTreeBuilder<ND, MDEventType, EventIterator>::distribute(
-    std::vector<MDEvent> &mdEvents) {
+MDEventTreeBuilder<ND, MDEventType, EventIterator>::distribute(std::vector<MDEvent> &mdEvents) {
   auto err = convertToIndex(mdEvents, m_space);
   sortEvents(mdEvents);
   auto root = doDistributeEvents(mdEvents);
   return {root, err};
 }
 
-template <size_t ND, template <size_t> class MDEventType,
-          typename EventIterator>
+template <size_t ND, template <size_t> class MDEventType, typename EventIterator>
 DataObjects::MDBoxBase<MDEventType<ND>, ND> *
-MDEventTreeBuilder<ND, MDEventType, EventIterator>::doDistributeEvents(
-    std::vector<MDEventType<ND>> &mdEvents) {
+MDEventTreeBuilder<ND, MDEventType, EventIterator>::doDistributeEvents(std::vector<MDEventType<ND>> &mdEvents) {
   if (mdEvents.size() <= m_bc->getSplitThreshold()) {
     m_bc->incBoxesCounter(0);
-    return new DataObjects::MDBox<MDEvent, ND>(
-        m_bc.get(), 0, m_extents, mdEvents.begin(), mdEvents.end());
+    return new DataObjects::MDBox<MDEvent, ND>(m_bc.get(), 0, m_extents, mdEvents.begin(), mdEvents.end());
   } else {
-    auto root =
-        new DataObjects::MDGridBox<MDEvent, ND>(m_bc.get(), 0, m_extents);
-    Task tsk{root,
-             mdEvents.begin(),
-             mdEvents.end(),
-             m_mortonMin,
-             m_mortonMax,
-             m_bc->getMaxDepth() + 1,
-             1};
+    auto root = new DataObjects::MDGridBox<MDEvent, ND>(m_bc.get(), 0, m_extents);
+    Task tsk{root, mdEvents.begin(), mdEvents.end(), m_mortonMin, m_mortonMax, m_bc->getMaxDepth() + 1, 1};
 
     if (m_numWorkers == 1)
       distributeEvents(tsk, SLAVE);
@@ -163,24 +141,19 @@ MDEventTreeBuilder<ND, MDEventType, EventIterator>::doDistributeEvents(
   }
 }
 
-template <size_t ND, template <size_t> class MDEventType,
-          typename EventIterator>
+template <size_t ND, template <size_t> class MDEventType, typename EventIterator>
 morton_index::MDCoordinate<ND>
-MDEventTreeBuilder<ND, MDEventType, EventIterator>::convertToIndex(
-    std::vector<MDEventType<ND>> &mdEvents,
-    const morton_index::MDSpaceBounds<ND> &space) {
-  std::vector<morton_index::MDCoordinate<ND>> perThread(
-      m_numWorkers, morton_index::MDCoordinate<ND>(0));
+MDEventTreeBuilder<ND, MDEventType, EventIterator>::convertToIndex(std::vector<MDEventType<ND>> &mdEvents,
+                                                                   const morton_index::MDSpaceBounds<ND> &space) {
+  std::vector<morton_index::MDCoordinate<ND>> perThread(m_numWorkers, morton_index::MDCoordinate<ND>(0));
 #pragma omp parallel for num_threads(m_numWorkers)
   for (int64_t i = 0; i < static_cast<int64_t>(mdEvents.size()); ++i) {
     morton_index::MDCoordinate<ND> oldCoord{mdEvents[i].getCenter()};
     IndexCoordinateSwitcher::convertToIndex(mdEvents[i], space);
     morton_index::MDCoordinate<ND> newCoord =
-        morton_index::indexToCoordinates<ND, IntT, MortonT>(
-            IndexCoordinateSwitcher::getIndex(mdEvents[i]), space);
+        morton_index::indexToCoordinates<ND, IntT, MortonT>(IndexCoordinateSwitcher::getIndex(mdEvents[i]), space);
     newCoord -= oldCoord;
-    morton_index::MDCoordinate<ND> &threadErr{
-        perThread[PARALLEL_THREAD_NUMBER]};
+    morton_index::MDCoordinate<ND> &threadErr{perThread[PARALLEL_THREAD_NUMBER]};
     for (size_t d = 0; d < ND; ++d)
       threadErr[d] = std::max(threadErr[d], std::abs(newCoord[d]));
   }
@@ -191,33 +164,26 @@ MDEventTreeBuilder<ND, MDEventType, EventIterator>::convertToIndex(
   return maxErr;
 }
 
-template <size_t ND, template <size_t> class MDEventType,
-          typename EventIterator>
-void MDEventTreeBuilder<ND, MDEventType, EventIterator>::sortEvents(
-    std::vector<MDEventType<ND>> &mdEvents) {
+template <size_t ND, template <size_t> class MDEventType, typename EventIterator>
+void MDEventTreeBuilder<ND, MDEventType, EventIterator>::sortEvents(std::vector<MDEventType<ND>> &mdEvents) {
 
   tbb::task_arena limited_arena(m_numWorkers);
   limited_arena.execute([&]() {
-    tbb::parallel_sort(mdEvents.begin(), mdEvents.end(),
-                       [](const MDEventType<ND> &a, const MDEventType<ND> &b) {
-                         return IndexCoordinateSwitcher::getIndex(a) <
-                                IndexCoordinateSwitcher::getIndex(b);
-                       });
+    tbb::parallel_sort(mdEvents.begin(), mdEvents.end(), [](const MDEventType<ND> &a, const MDEventType<ND> &b) {
+      return IndexCoordinateSwitcher::getIndex(a) < IndexCoordinateSwitcher::getIndex(b);
+    });
   });
 }
 
-template <size_t ND, template <size_t> class MDEventType,
-          typename EventIterator>
+template <size_t ND, template <size_t> class MDEventType, typename EventIterator>
 void MDEventTreeBuilder<ND, MDEventType, EventIterator>::pushTask(
     MDEventTreeBuilder<ND, MDEventType, EventIterator>::Task &&tsk) {
   std::lock_guard<std::mutex> g(m_mutex);
   m_tasks.emplace(tsk);
 }
 
-template <size_t ND, template <size_t> class MDEventType,
-          typename EventIterator>
-std::unique_ptr<
-    typename MDEventTreeBuilder<ND, MDEventType, EventIterator>::Task>
+template <size_t ND, template <size_t> class MDEventType, typename EventIterator>
+std::unique_ptr<typename MDEventTreeBuilder<ND, MDEventType, EventIterator>::Task>
 MDEventTreeBuilder<ND, MDEventType, EventIterator>::popTask() {
   std::lock_guard<std::mutex> g(m_mutex);
   if (m_tasks.empty())
@@ -229,8 +195,7 @@ MDEventTreeBuilder<ND, MDEventType, EventIterator>::popTask() {
   }
 }
 
-template <size_t ND, template <size_t> class MDEventType,
-          typename EventIterator>
+template <size_t ND, template <size_t> class MDEventType, typename EventIterator>
 void MDEventTreeBuilder<ND, MDEventType, EventIterator>::waitAndLaunchSlave() {
   while (true) {
     auto pTsk = popTask();
@@ -247,15 +212,12 @@ void MDEventTreeBuilder<ND, MDEventType, EventIterator>::waitAndLaunchSlave() {
  * Does actual work on creating tasks in MASTER mode and
  * executing tasks in SLAVE mode
  */
-template <size_t ND, template <size_t> class MDEventType,
-          typename EventIterator>
-void MDEventTreeBuilder<ND, MDEventType, EventIterator>::distributeEvents(
-    Task &tsk, const WORKER_TYPE &wtp) {
+template <size_t ND, template <size_t> class MDEventType, typename EventIterator>
+void MDEventTreeBuilder<ND, MDEventType, EventIterator>::distributeEvents(Task &tsk, const WORKER_TYPE &wtp) {
   const size_t childBoxCount = m_bc->getNumSplit();
   const size_t splitThreshold = m_bc->getSplitThreshold();
 
-  if (tsk.maxDepth-- == 1 ||
-      std::distance(tsk.begin, tsk.end) <= static_cast<int>(splitThreshold)) {
+  if (tsk.maxDepth-- == 1 || std::distance(tsk.begin, tsk.end) <= static_cast<int>(splitThreshold)) {
     return;
   }
 
@@ -288,13 +250,10 @@ void MDEventTreeBuilder<ND, MDEventType, EventIterator>::distributeEvents(
     const auto boxEventStart = eventIt;
 
     if (eventIt < tsk.end) {
-      if (morton_index::morton_contains<MortonT>(
-              boxLower, boxUpper, IndexCoordinateSwitcher::getIndex(*eventIt)))
+      if (morton_index::morton_contains<MortonT>(boxLower, boxUpper, IndexCoordinateSwitcher::getIndex(*eventIt)))
         eventIt = std::upper_bound(
             boxEventStart, tsk.end, boxUpper,
-            [](const MortonT &m,
-               const typename std::iterator_traits<EventIterator>::value_type
-                   &event) {
+            [](const MortonT &m, const typename std::iterator_traits<EventIterator>::value_type &event) {
               return m < IndexCoordinateSwitcher::getIndex(event);
             });
     }
@@ -303,18 +262,14 @@ void MDEventTreeBuilder<ND, MDEventType, EventIterator>::distributeEvents(
     /* As we are adding as we iterate over Morton numbers and parent events
      * child boxes are inserted in the correct sorted order. */
     std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extents(ND);
-    auto minCoord =
-        morton_index::indexToCoordinates<ND, IntT, MortonT>(boxLower, m_space);
-    auto maxCoord =
-        morton_index::indexToCoordinates<ND, IntT, MortonT>(boxUpper, m_space);
+    auto minCoord = morton_index::indexToCoordinates<ND, IntT, MortonT>(boxLower, m_space);
+    auto maxCoord = morton_index::indexToCoordinates<ND, IntT, MortonT>(boxUpper, m_space);
     for (unsigned ax = 0; ax < ND; ++ax) {
       extents[ax].setExtents(minCoord[ax], maxCoord[ax]);
     }
 
     BoxBase *newBox;
-    if (std::distance(boxEventStart, eventIt) <=
-            static_cast<int64_t>(splitThreshold) ||
-        tsk.maxDepth == 1) {
+    if (std::distance(boxEventStart, eventIt) <= static_cast<int64_t>(splitThreshold) || tsk.maxDepth == 1) {
       for (auto it = boxEventStart; it < eventIt; ++it)
         IndexCoordinateSwitcher::convertToCoordinates(*it, m_space);
       m_bc->incBoxesCounter(tsk.level);
@@ -324,24 +279,22 @@ void MDEventTreeBuilder<ND, MDEventType, EventIterator>::distributeEvents(
       newBox = new GridBox(m_bc.get(), tsk.level, extents);
     }
 
-    children.emplace_back(RecursionHelper{
-        {boxEventStart, eventIt}, {boxLower, boxUpper}, newBox});
+    children.emplace_back(RecursionHelper{{boxEventStart, eventIt}, {boxLower, boxUpper}, newBox});
   }
   // sorting is needed due to fast finding the proper box for given coordinate,
   // during drawing, for splitInto != 2 Z-curve gives wrong order
-  std::sort(children.begin(), children.end(),
-            [](RecursionHelper &a, RecursionHelper &b) {
-              unsigned i = ND;
-              while (i-- > 0) {
-                const auto &ac = a.box->getExtents(i).getMin();
-                const auto &bc = b.box->getExtents(i).getMin();
-                if (ac < bc)
-                  return true;
-                if (ac > bc)
-                  return false;
-              }
-              return true;
-            });
+  std::sort(children.begin(), children.end(), [](RecursionHelper &a, RecursionHelper &b) {
+    unsigned i = ND;
+    while (i-- > 0) {
+      const auto &ac = a.box->getExtents(i).getMin();
+      const auto &bc = b.box->getExtents(i).getMin();
+      if (ac < bc)
+        return true;
+      if (ac > bc)
+        return false;
+    }
+    return true;
+  });
   std::vector<API::IMDNode *> boxes;
   boxes.reserve(childBoxCount);
   for (auto &ch : children)
@@ -357,8 +310,7 @@ void MDEventTreeBuilder<ND, MDEventType, EventIterator>::distributeEvents(
                  ch.mortonBounds.second,
                  tsk.maxDepth,
                  tsk.level};
-    if (wtp == MASTER &&
-        (size_t)std::distance(newTask.begin, newTask.end) < m_eventsThreshold)
+    if (wtp == MASTER && (size_t)std::distance(newTask.begin, newTask.end) < m_eventsThreshold)
       pushTask(std::move(newTask));
     else
       distributeEvents(newTask, wtp);

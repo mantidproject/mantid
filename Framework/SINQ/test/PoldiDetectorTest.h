@@ -36,12 +36,10 @@ public:
     PoldiHeliumDetector *heliumDetector = new PoldiHeliumDetector();
     TS_ASSERT(heliumDetector);
 
-    PoldiAbstractDetector *abstractDetector =
-        static_cast<PoldiAbstractDetector *>(heliumDetector);
+    PoldiAbstractDetector *abstractDetector = static_cast<PoldiAbstractDetector *>(heliumDetector);
     TS_ASSERT(abstractDetector);
 
-    PoldiHeliumDetector *reCastHeliumDetector =
-        dynamic_cast<PoldiHeliumDetector *>(abstractDetector);
+    PoldiHeliumDetector *reCastHeliumDetector = dynamic_cast<PoldiHeliumDetector *>(abstractDetector);
     TS_ASSERT(reCastHeliumDetector);
 
     delete heliumDetector;
@@ -84,8 +82,7 @@ public:
   void testDistance() {
     ConfiguredHeliumDetector heliumDetector;
 
-    TS_ASSERT_DELTA(heliumDetector.distanceFromSample(199), 1996.017578125,
-                    1e-3);
+    TS_ASSERT_DELTA(heliumDetector.distanceFromSample(199), 1996.017578125, 1e-3);
   }
 
   void testAvailableElements() {

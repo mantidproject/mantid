@@ -41,13 +41,12 @@ ISISRAW::ISISRAW() : m_crpt(nullptr), dat1(nullptr) {
     mdet[i] = i + 1;
     monp[i] = 1;
   }
-  spec = new int[i_det];   // spectrum number table (size NDET)
-  delt = new float[i_det]; // hold off table (size NDET)
-  len2 = new float[i_det]; // L2 table (size NDET)
-  code = new int[i_det];   // code for UTn tables (size NDET)
-  tthe = new float[i_det]; // 2theta scattering angle (size NDET)
-  ut = new float[i_use *
-                 i_det]; // nuse UT* user tables (total size NUSE*NDET) ut01=phi
+  spec = new int[i_det];         // spectrum number table (size NDET)
+  delt = new float[i_det];       // hold off table (size NDET)
+  len2 = new float[i_det];       // L2 table (size NDET)
+  code = new int[i_det];         // code for UTn tables (size NDET)
+  tthe = new float[i_det];       // 2theta scattering angle (size NDET)
+  ut = new float[i_use * i_det]; // nuse UT* user tables (total size NUSE*NDET) ut01=phi
   for (i = 0; i < i_det; i++) {
     spec[i] = i + 1; // we have t_nsp1 = i_det
     delt[i] = static_cast<float>(i);
@@ -92,8 +91,7 @@ ISISRAW::ISISRAW() : m_crpt(nullptr), dat1(nullptr) {
   memset(t_tcm1, 0, sizeof(t_tcm1)); // time channel mode
   memset(t_tcp1, 0, sizeof(t_tcp1)); // time channel parameters
   t_pre1 = 1;                        // prescale for 32MHz clock
-  t_tcb1 = new int[t_ntc1 +
-                   1]; // time channel boundaries in clock pulses (size NTC1+1)
+  t_tcb1 = new int[t_ntc1 + 1];      // time channel boundaries in clock pulses (size NTC1+1)
   for (i = 0; i < t_ntc1 + 1; i++) {
     t_tcb1[i] = i;
   }
@@ -108,11 +106,9 @@ ISISRAW::ISISRAW() : m_crpt(nullptr), dat1(nullptr) {
   // section 8
   ver8 = 2; // data version number (=2)
   // D_DATA points at ddes
-  ddes = new DDES_STRUCT[(t_nsp1 + 1) * t_nper]; // (NSP1+1)*NPER items, totoal
-                                                 // size (NSP1+1)*NPER*2*4 bytes
-  dat1 =
-      new uint32_t[(t_ntc1 + 1) * (t_nsp1 + 1) *
-                   t_nper]; // compressed data for (NTC1+1)*(NSP1+1)*NPER values
+  ddes = new DDES_STRUCT[(t_nsp1 + 1) * t_nper];             // (NSP1+1)*NPER items, totoal
+                                                             // size (NSP1+1)*NPER*2*4 bytes
+  dat1 = new uint32_t[(t_ntc1 + 1) * (t_nsp1 + 1) * t_nper]; // compressed data for (NTC1+1)*(NSP1+1)*NPER values
   for (i = 0; i < (t_ntc1 + 1) * (t_nsp1 + 1) * t_nper; i++) {
     dat1[i] = i;
   }
@@ -135,10 +131,8 @@ int ISISRAW::addItems() {
   static const int hdr_size = sizeof(hdr) / sizeof(char);
   static const int rrpb_size = sizeof(rpb) / sizeof(float);
   static const int irpb_size = sizeof(rpb) / sizeof(int);
-  m_char_items.addItem("HDR", reinterpret_cast<const char *>(&hdr), false,
-                       &hdr_size);
-  m_real_items.addItem("RRPB", reinterpret_cast<float *>(&rpb), false,
-                       &rrpb_size);
+  m_char_items.addItem("HDR", reinterpret_cast<const char *>(&hdr), false, &hdr_size);
+  m_real_items.addItem("RRPB", reinterpret_cast<float *>(&rpb), false, &rrpb_size);
   m_int_items.addItem("IRPB", reinterpret_cast<int *>(&rpb), false, &irpb_size);
   return 0;
 }
@@ -146,13 +140,11 @@ int ISISRAW::addItems() {
 // create one bound to a CRPT
 /// stuff
 ISISRAW::ISISRAW(ISISCRPT_STRUCT *crpt)
-    : m_crpt(crpt), frmt_ver_no(0), data_format(0), ver2(0), r_number(0),
-      ver3(0), i_det(0), i_mon(0), i_use(0), mdet(nullptr), monp(nullptr),
-      spec(nullptr), delt(nullptr), len2(nullptr), code(nullptr), tthe(nullptr),
-      ut(nullptr), ver4(0), ver5(0), crat(nullptr), modn(nullptr),
-      mpos(nullptr), timr(nullptr), udet(nullptr), ver6(0), t_ntrg(0),
-      t_nfpp(0), t_nper(0), t_nsp1(0), t_ntc1(0), t_pre1(0), t_tcb1(nullptr),
-      ver7(0), u_dat(nullptr), ver8(0), ddes(nullptr), dat1(nullptr) {
+    : m_crpt(crpt), frmt_ver_no(0), data_format(0), ver2(0), r_number(0), ver3(0), i_det(0), i_mon(0), i_use(0),
+      mdet(nullptr), monp(nullptr), spec(nullptr), delt(nullptr), len2(nullptr), code(nullptr), tthe(nullptr),
+      ut(nullptr), ver4(0), ver5(0), crat(nullptr), modn(nullptr), mpos(nullptr), timr(nullptr), udet(nullptr), ver6(0),
+      t_ntrg(0), t_nfpp(0), t_nper(0), t_nsp1(0), t_ntc1(0), t_pre1(0), t_tcb1(nullptr), ver7(0), u_dat(nullptr),
+      ver8(0), ddes(nullptr), dat1(nullptr) {
   memset(r_title, ' ', sizeof(r_title));
   memset(i_inst, ' ', sizeof(i_inst));
   for (auto &value : t_pmap) {
@@ -172,13 +164,11 @@ ISISRAW::ISISRAW(ISISCRPT_STRUCT *crpt)
 // create one bound to a CRPT
 /// stuff
 ISISRAW::ISISRAW(ISISCRPT_STRUCT *crpt, bool doUpdateFromCRPT)
-    : m_crpt(crpt), frmt_ver_no(0), data_format(0), ver2(0), r_number(0),
-      ver3(0), i_det(0), i_mon(0), i_use(0), mdet(nullptr), monp(nullptr),
-      spec(nullptr), delt(nullptr), len2(nullptr), code(nullptr), tthe(nullptr),
-      ut(nullptr), ver4(0), ver5(0), crat(nullptr), modn(nullptr),
-      mpos(nullptr), timr(nullptr), udet(nullptr), ver6(0), t_ntrg(0),
-      t_nfpp(0), t_nper(0), t_nsp1(0), t_ntc1(0), t_pre1(0), t_tcb1(nullptr),
-      ver7(0), u_dat(nullptr), ver8(0), ddes(nullptr), dat1(nullptr) {
+    : m_crpt(crpt), frmt_ver_no(0), data_format(0), ver2(0), r_number(0), ver3(0), i_det(0), i_mon(0), i_use(0),
+      mdet(nullptr), monp(nullptr), spec(nullptr), delt(nullptr), len2(nullptr), code(nullptr), tthe(nullptr),
+      ut(nullptr), ver4(0), ver5(0), crat(nullptr), modn(nullptr), mpos(nullptr), timr(nullptr), udet(nullptr), ver6(0),
+      t_ntrg(0), t_nfpp(0), t_nper(0), t_nsp1(0), t_ntc1(0), t_pre1(0), t_tcb1(nullptr), ver7(0), u_dat(nullptr),
+      ver8(0), ddes(nullptr), dat1(nullptr) {
   memset(r_title, ' ', sizeof(r_title));
   memset(i_inst, ' ', sizeof(i_inst));
   for (auto &value : t_pmap) {
@@ -223,8 +213,8 @@ int ISISRAW::updateFromCRPT() {
   frmt_ver_no = 2; // format version number VER1 (=2)
   data_format = 0; // data section format (0 = by TC, 1 = by spectrum)
   // section 2
-  ver2 = 1;                      // run section version number VER2 (=1)
-  r_number = m_crpt->run_number; // run number
+  ver2 = 1;                                                   // run section version number VER2 (=1)
+  r_number = m_crpt->run_number;                              // run number
   spacePadCopy(r_title, m_crpt->long_title, sizeof(r_title)); // run title
   spacePadCopy(user.r_user, m_crpt->user_name, sizeof(user.r_user));
   spacePadCopy(user.r_instit, m_crpt->institute, sizeof(user.r_instit));
@@ -242,12 +232,11 @@ int ISISRAW::updateFromCRPT() {
   rpb.r_mon_sum2 = 0;
   rpb.r_mon_sum3 = 0;
   vmstime(buffer, sizeof(buffer), m_crpt->stop_time);
-  spacePadCopy(rpb.r_enddate, buffer,
-               sizeof(rpb.r_enddate) + sizeof(rpb.r_endtime));
+  spacePadCopy(rpb.r_enddate, buffer, sizeof(rpb.r_enddate) + sizeof(rpb.r_endtime));
   rpb.r_prop = m_crpt->rb_number;
 
   // section 3
-  ver3 = 2; // instrument section version number (=2)
+  ver3 = 2;                                                // instrument section version number (=2)
   spacePadCopy(i_inst, m_crpt->inst_name, sizeof(i_inst)); // instrument name
   ivpb.i_l1 = m_crpt->i_l1;
   if (!strcmp(m_crpt->beamstop_position, "IN")) {
@@ -285,8 +274,7 @@ int ISISRAW::updateFromCRPT() {
     spb.e_type = 1;
   }
 
-  if (!stricmp(m_crpt->sample_geometry, "cylinder") ||
-      !stricmp(m_crpt->sample_geometry, "cylindrical")) {
+  if (!stricmp(m_crpt->sample_geometry, "cylinder") || !stricmp(m_crpt->sample_geometry, "cylindrical")) {
     spb.e_geom = 1;
   } else if (!stricmp(m_crpt->sample_geometry, "flat plate")) {
     spb.e_geom = 2;
@@ -302,15 +290,14 @@ int ISISRAW::updateFromCRPT() {
   i_mon = m_crpt->nmon; // number of monitors NMON
   i_use = m_crpt->nuse; // number of user defined UTn tables NUSE
   // I_TABLES is address of MDET
-  mdet = m_crpt->mdet; // detector number for monitors (size NMON)
-  monp = m_crpt->monp; // prescale value for each monitor (size NMON)
-  spec = m_crpt->spec; // spectrum number table (size NDET)
-  delt = m_crpt->delt; // hold off table (size NDET)
-  len2 = m_crpt->len2; // L2 table (size NDET)
-  code = m_crpt->code; // code for UTn tables (size NDET)
-  tthe = m_crpt->tthe; // 2theta scattering angle (size NDET)
-  ut = (float *)
-           m_crpt->ut; // nuse UT* user tables (total size NUSE*NDET) ut01=phi
+  mdet = m_crpt->mdet;      // detector number for monitors (size NMON)
+  monp = m_crpt->monp;      // prescale value for each monitor (size NMON)
+  spec = m_crpt->spec;      // spectrum number table (size NDET)
+  delt = m_crpt->delt;      // hold off table (size NDET)
+  len2 = m_crpt->len2;      // L2 table (size NDET)
+  code = m_crpt->code;      // code for UTn tables (size NDET)
+  tthe = m_crpt->tthe;      // 2theta scattering angle (size NDET)
+  ut = (float *)m_crpt->ut; // nuse UT* user tables (total size NUSE*NDET) ut01=phi
 
   // section 4
   ver4 = 2;  // SE section version number (=2)
@@ -321,8 +308,7 @@ int ISISRAW::updateFromCRPT() {
   // section 5
   ver5 = 2;        // DAE section version number (=2)
   daep.a_pars = 4; // 32bit dae memory
-  daep.mem_size =
-      daep.a_pars * (m_crpt->nsp1 + 1) * (m_crpt->ntc1 + 1) * m_crpt->nper_daq;
+  daep.mem_size = daep.a_pars * (m_crpt->nsp1 + 1) * (m_crpt->ntc1 + 1) * m_crpt->nper_daq;
 
   daep.ppp_good_high = m_crpt->good_ppp_high;
   daep.ppp_good_low = m_crpt->good_ppp_low;
@@ -374,8 +360,7 @@ int ISISRAW::updateFromCRPT() {
   memset(t_tcm1, 0, sizeof(t_tcm1)); // time channel mode
   memset(t_tcp1, 0, sizeof(t_tcp1)); // time channel parameters
   t_pre1 = 1;                        // prescale for 32MHz clock
-  t_tcb1 =
-      m_crpt->tcb1; // time channel boundaries in clock pulses (size NTC1+1)
+  t_tcb1 = m_crpt->tcb1;             // time channel boundaries in clock pulses (size NTC1+1)
   // section 7
   // write NCHAN = NTC1+1 time channel boundaries
   ver7 = 1; // user version number (=1)
@@ -477,8 +462,7 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
 
     if (u_len < 0 || (add.ad_data < add.ad_user + 2)) {
       // this will/would be used for memory allocation
-      logger.error() << "Error in u_len value read from file, it would be "
-                     << u_len
+      logger.error() << "Error in u_len value read from file, it would be " << u_len
                      << "; where it is calculated as "
                         "u_len = ad_data - ad_user - 2, where ad_data: "
                      << add.ad_data << ", ad_user: " << add.ad_user << '\n';
@@ -502,8 +486,7 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
       for (i = 0; i < ndes; i++) {
         int zero = fseek(file, 4 * ddes[i].nwords, SEEK_CUR);
         if (0 != zero)
-          logger.error() << "Failed to seek position in file for index: " << i
-                         << "\n";
+          logger.error() << "Failed to seek position in file for index: " << i << "\n";
       }
     }
   } else if (dhdr.d_comp == 0) {
@@ -524,12 +507,9 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
       if (from_file) {
         nwords = ddes[i].nwords;
         ioRAW(file, outbuff, 4 * nwords, from_file);
-        byte_rel_expn(outbuff, 4 * nwords, 0,
-                      reinterpret_cast<int *>(&dat1[i * (t_ntc1 + 1)]),
-                      t_ntc1 + 1);
+        byte_rel_expn(outbuff, 4 * nwords, 0, reinterpret_cast<int *>(&dat1[i * (t_ntc1 + 1)]), t_ntc1 + 1);
       } else {
-        byte_rel_comp(reinterpret_cast<int *>(&dat1[i * (t_ntc1 + 1)]),
-                      t_ntc1 + 1, outbuff, outbuff_size, nout);
+        byte_rel_comp(reinterpret_cast<int *>(&dat1[i * (t_ntc1 + 1)]), t_ntc1 + 1, outbuff, outbuff_size, nout);
         nwords = (3 + nout) / 4; // round up to words
         ddes[i].nwords = nwords;
         ddes[i].offset = offset + ndata;
@@ -552,25 +532,19 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
     int uncomp_data_size = 33 + t_nper * (t_nsp1 + 1) * (t_ntc1 + 1);
     int curr_filesize = add.ad_end - 1;
     int uncomp_filesize = add.ad_data - 1 + uncomp_data_size + len_log;
-    dhdr.d_crdata = static_cast<float>(uncomp_data_size) /
-                    static_cast<float>(curr_data_size);
-    dhdr.d_crfile =
-        static_cast<float>(uncomp_filesize) / static_cast<float>(curr_filesize);
-    dhdr.d_exp_filesize =
-        uncomp_filesize /
-        128; // in 512 byte blocks (vms default allocation unit)
+    dhdr.d_crdata = static_cast<float>(uncomp_data_size) / static_cast<float>(curr_data_size);
+    dhdr.d_crfile = static_cast<float>(uncomp_filesize) / static_cast<float>(curr_filesize);
+    dhdr.d_exp_filesize = uncomp_filesize / 128; // in 512 byte blocks (vms default allocation unit)
     int zero = fgetpos(file, &keep_pos);
     if (!zero) {
-      logger.error() << "Error when getting file position: " << strerror(errno)
-                     << '\n';
+      logger.error() << "Error when getting file position: " << strerror(errno) << '\n';
       return -1;
     }
 
     // update section addresses
     zero = fsetpos(file, &add_pos);
     if (!zero) {
-      logger.error() << "Error when setting file position: " << strerror(errno)
-                     << '\n';
+      logger.error() << "Error when setting file position: " << strerror(errno) << '\n';
       return -1;
     }
 
@@ -578,8 +552,7 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
     // update data header and descriptors etc.
     zero = fsetpos(file, &dhdr_pos);
     if (!zero) {
-      logger.error() << "Error when setting file position to header: "
-                     << strerror(errno) << '\n';
+      logger.error() << "Error when setting file position to header: " << strerror(errno) << '\n';
       return -1;
     }
 
@@ -587,8 +560,7 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
     ioRAW(file, &ddes, ndes, from_file);
     zero = fsetpos(file, &keep_pos);
     if (!zero) {
-      logger.error() << "Error when restoring file position: "
-                     << strerror(errno) << '\n';
+      logger.error() << "Error when restoring file position: " << strerror(errno) << '\n';
       return -1;
     }
   }
@@ -603,15 +575,13 @@ int ISISRAW::ioRAW(FILE *file, HDR_STRUCT *s, int len, bool from_file) {
 
 /// stuff
 int ISISRAW::ioRAW(FILE *file, ADD_STRUCT *s, int len, bool from_file) {
-  ioRAW(file, reinterpret_cast<int *>(s),
-        (sizeof(ADD_STRUCT) * len / sizeof(int)), from_file);
+  ioRAW(file, reinterpret_cast<int *>(s), (sizeof(ADD_STRUCT) * len / sizeof(int)), from_file);
   return 0;
 }
 
 /// stuff
 int ISISRAW::ioRAW(FILE *file, USER_STRUCT *s, int len, bool from_file) {
-  ioRAW(file, reinterpret_cast<char *>(s), sizeof(USER_STRUCT) * len,
-        from_file);
+  ioRAW(file, reinterpret_cast<char *>(s), sizeof(USER_STRUCT) * len, from_file);
   return 0;
 }
 
@@ -676,8 +646,7 @@ int ISISRAW::ioRAW(FILE *file, SE_STRUCT *s, int len, bool from_file) {
 
 /// stuff
 int ISISRAW::ioRAW(FILE *file, DAEP_STRUCT *s, int len, bool from_file) {
-  ioRAW(file, reinterpret_cast<int *>(s),
-        sizeof(DAEP_STRUCT) * len / sizeof(int), from_file);
+  ioRAW(file, reinterpret_cast<int *>(s), sizeof(DAEP_STRUCT) * len / sizeof(int), from_file);
   return 0;
 }
 
@@ -919,12 +888,11 @@ int ISISRAW::ioRAW(FILE *file, LOG_LINE **s, int len, bool from_file) {
 
 /// stuff
 int ISISRAW::size_check() {
-  static int size_check_array[] = {
-      sizeof(HDR_STRUCT),  80,     sizeof(ADD_STRUCT),  9 * 4,
-      sizeof(USER_STRUCT), 8 * 20, sizeof(RPB_STRUCT),  32 * 4,
-      sizeof(IVPB_STRUCT), 64 * 4, sizeof(SPB_STRUCT),  64 * 4,
-      sizeof(SE_STRUCT),   32 * 4, sizeof(DAEP_STRUCT), 64 * 4,
-      sizeof(DHDR_STRUCT), 32 * 4, sizeof(DDES_STRUCT), 2 * 4};
+  static int size_check_array[] = {sizeof(HDR_STRUCT),  80,     sizeof(ADD_STRUCT),  9 * 4,
+                                   sizeof(USER_STRUCT), 8 * 20, sizeof(RPB_STRUCT),  32 * 4,
+                                   sizeof(IVPB_STRUCT), 64 * 4, sizeof(SPB_STRUCT),  64 * 4,
+                                   sizeof(SE_STRUCT),   32 * 4, sizeof(DAEP_STRUCT), 64 * 4,
+                                   sizeof(DHDR_STRUCT), 32 * 4, sizeof(DDES_STRUCT), 2 * 4};
   for (unsigned i = 0; i < sizeof(size_check_array) / sizeof(int); i += 2) {
     if (size_check_array[i] != size_check_array[i + 1]) {
       logger.error() << "size check failed\n";
@@ -977,30 +945,20 @@ int ISISRAW::readFromFile(const char *filename, bool read_data) {
 /// stuff
 int ISISRAW::printInfo(std::ostream &os) {
   int i;
-  os << "INST section at " << add.ad_inst << " 0x" << std::hex
-     << 4 * add.ad_inst << std::dec << '\n';
-  os << "SE section at " << add.ad_se << " 0x" << std::hex << 4 * add.ad_se
-     << std::dec << '\n';
-  os << "Dae section at " << add.ad_dae << " 0x" << std::hex << 4 * add.ad_dae
-     << std::dec << '\n';
-  os << "Tcb section at " << add.ad_tcb << " 0x" << std::hex << 4 * add.ad_tcb
-     << std::dec << '\n';
-  os << "User section at " << add.ad_user << " 0x" << std::hex
-     << 4 * add.ad_user << std::dec << '\n';
-  os << "Data section at " << add.ad_data << " 0x" << std::hex
-     << 4 * add.ad_data << std::dec << '\n';
-  os << "Log section at " << add.ad_log << " 0x" << std::hex << 4 * add.ad_log
-     << std::dec << '\n';
-  os << "End section at " << add.ad_end << " 0x" << std::hex << 4 * add.ad_end
-     << std::dec << '\n';
+  os << "INST section at " << add.ad_inst << " 0x" << std::hex << 4 * add.ad_inst << std::dec << '\n';
+  os << "SE section at " << add.ad_se << " 0x" << std::hex << 4 * add.ad_se << std::dec << '\n';
+  os << "Dae section at " << add.ad_dae << " 0x" << std::hex << 4 * add.ad_dae << std::dec << '\n';
+  os << "Tcb section at " << add.ad_tcb << " 0x" << std::hex << 4 * add.ad_tcb << std::dec << '\n';
+  os << "User section at " << add.ad_user << " 0x" << std::hex << 4 * add.ad_user << std::dec << '\n';
+  os << "Data section at " << add.ad_data << " 0x" << std::hex << 4 * add.ad_data << std::dec << '\n';
+  os << "Log section at " << add.ad_log << " 0x" << std::hex << 4 * add.ad_log << std::dec << '\n';
+  os << "End section at " << add.ad_end << " 0x" << std::hex << 4 * add.ad_end << std::dec << '\n';
   os << "User data len " << u_len << '\n';
-  os << "Compression is " << (dhdr.d_comp == 0 ? "NONE" : "BYTE-RELATIVE")
-     << '\n';
+  os << "Compression is " << (dhdr.d_comp == 0 ? "NONE" : "BYTE-RELATIVE") << '\n';
   os << "Compression ratio of data = " << dhdr.d_crdata << '\n';
   os << "Offsets of spectrum data\n";
   for (i = 0; i < ((t_nsp1 + 1) * t_nper); i++) {
-    os << i << " " << ddes[i].nwords << " words at offset " << ddes[i].offset
-       << '\n';
+    os << i << " " << ddes[i].nwords << " words at offset " << ddes[i].offset << '\n';
   }
   return 0;
 }

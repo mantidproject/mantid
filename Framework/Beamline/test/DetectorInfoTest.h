@@ -14,8 +14,7 @@
 using namespace Mantid;
 using Beamline::DetectorInfo;
 using PosVec = std::vector<Eigen::Vector3d>;
-using RotVec = std::vector<Eigen::Quaterniond,
-                           Eigen::aligned_allocator<Eigen::Quaterniond>>;
+using RotVec = std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>;
 
 class DetectorInfoTest : public CxxTest::TestSuite {
 public:
@@ -31,8 +30,7 @@ public:
     TS_ASSERT(!detInfo->isScanning());
     TS_ASSERT(!detInfo->hasComponentInfo());
 
-    TS_ASSERT_THROWS_NOTHING(
-        detInfo = std::make_unique<DetectorInfo>(PosVec(1), RotVec(1)));
+    TS_ASSERT_THROWS_NOTHING(detInfo = std::make_unique<DetectorInfo>(PosVec(1), RotVec(1)));
     TS_ASSERT_EQUALS(detInfo->size(), 1);
     TS_ASSERT(!detInfo->isScanning());
     TS_ASSERT(!detInfo->hasComponentInfo());
@@ -41,20 +39,17 @@ public:
   void test_constructor_with_monitors() {
     std::unique_ptr<DetectorInfo> info;
     std::vector<size_t> mons{0, 2};
-    TS_ASSERT_THROWS_NOTHING(
-        info = std::make_unique<DetectorInfo>(PosVec(3), RotVec(3), mons));
+    TS_ASSERT_THROWS_NOTHING(info = std::make_unique<DetectorInfo>(PosVec(3), RotVec(3), mons));
     TS_ASSERT_EQUALS(info->size(), 3);
     TS_ASSERT_THROWS_NOTHING(DetectorInfo(PosVec(3), RotVec(3), {}));
     TS_ASSERT_THROWS_NOTHING(DetectorInfo(PosVec(3), RotVec(3), {0}));
     TS_ASSERT_THROWS_NOTHING(DetectorInfo(PosVec(3), RotVec(3), {0, 1, 2}));
     TS_ASSERT_THROWS_NOTHING(DetectorInfo(PosVec(3), RotVec(3), {0, 0, 0}));
-    TS_ASSERT_THROWS(DetectorInfo(PosVec(3), RotVec(3), {3}),
-                     const std::out_of_range &);
+    TS_ASSERT_THROWS(DetectorInfo(PosVec(3), RotVec(3), {3}), const std::out_of_range &);
   }
 
   void test_constructor_length_mismatch() {
-    TS_ASSERT_THROWS(DetectorInfo(PosVec(3), RotVec(2)),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(DetectorInfo(PosVec(3), RotVec(2)), const std::runtime_error &);
   }
 
   void test_assign_componentInfo() {
@@ -116,10 +111,8 @@ public:
   }
 
   void test_comparison_rotation() {
-    DetectorInfo a(
-        PosVec(2),
-        RotVec(2, Eigen::Quaterniond(Eigen::AngleAxisd(
-                      30.0, Eigen::Vector3d{1, 2, 3}.normalized()))));
+    DetectorInfo a(PosVec(2),
+                   RotVec(2, Eigen::Quaterniond(Eigen::AngleAxisd(30.0, Eigen::Vector3d{1, 2, 3}.normalized()))));
     DetectorInfo b(a);
     a.setRotation(1, {1, 2, 3, 4});
     TS_ASSERT(!a.isEquivalent(b));
@@ -133,15 +126,13 @@ public:
 
     // Change of 1 um at distance 1000 m is caught.
     Eigen::Quaterniond qmin;
-    qmin.setFromTwoVectors(Eigen::Vector3d({1000, 0, 0}),
-                           Eigen::Vector3d({1000, 1e-9, 0}));
+    qmin.setFromTwoVectors(Eigen::Vector3d({1000, 0, 0}), Eigen::Vector3d({1000, 1e-9, 0}));
     a.setRotation(0, qmin);
     TS_ASSERT(!a.isEquivalent(b));
 
     // Change of 0.1 um at distance 1000 m is allowed.
     Eigen::Quaterniond qepsilon;
-    qepsilon.setFromTwoVectors(Eigen::Vector3d({1000, 0, 0}),
-                               Eigen::Vector3d({1000, 1e-10, 0}));
+    qepsilon.setFromTwoVectors(Eigen::Vector3d({1000, 0, 0}), Eigen::Vector3d({1000, 1e-10, 0}));
     a.setRotation(0, qepsilon);
     TS_ASSERT(a.isEquivalent(b));
   }
@@ -252,12 +243,10 @@ public:
     source.setRotation(0, Eigen::Quaterniond::Identity());
     const auto copy(source);
     source.setPosition(0, {3, 2, 1});
-    source.setRotation(0, Eigen::Quaterniond(Eigen::AngleAxisd(
-                              30.0, Eigen::Vector3d{1, 2, 3})));
+    source.setRotation(0, Eigen::Quaterniond(Eigen::AngleAxisd(30.0, Eigen::Vector3d{1, 2, 3})));
     TS_ASSERT_EQUALS(copy.size(), 7);
     TS_ASSERT_EQUALS(copy.position(0), Eigen::Vector3d(1, 2, 3));
-    TS_ASSERT_EQUALS(copy.rotation(0).coeffs(),
-                     Eigen::Quaterniond::Identity().coeffs());
+    TS_ASSERT_EQUALS(copy.rotation(0).coeffs(), Eigen::Quaterniond::Identity().coeffs());
   }
 
   void test_setPosition() {
@@ -285,7 +274,6 @@ public:
     DetectorInfo detInfo;
     Mantid::Beamline::ComponentInfo compInfo;
     detInfo.setComponentInfo(&compInfo);
-    TS_ASSERT_EQUALS(detInfo.scanIntervals(),
-                     (std::vector<std::pair<int64_t, int64_t>>{{0, 1}}));
+    TS_ASSERT_EQUALS(detInfo.scanIntervals(), (std::vector<std::pair<int64_t, int64_t>>{{0, 1}}));
   }
 };

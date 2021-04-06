@@ -27,7 +27,7 @@ Here is an example of how to fit function's parameters to spectra.
     # Define two single site multi-spectrum functions to generate some data to fit to
     fun1 = "name=CrystalFieldMultiSpectrum,Ion=Ce,Temperatures=(4, 10), FWHMs=2,Background=\"name=LinearBackground,A0=20,A1=-0.11\","\
            "ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,B40=-0.031787,B42=-0.11611,B44=-0.12544,f1.f0.A0=10,f1.f0.A1=0.09"
-           
+
     fun2 = "name=CrystalFieldMultiSpectrum,Ion=Pr, Symmetry=D4h,Temperatures=(4, 10), FWHMs=2,"\
            "ToleranceIntensity=0.001,B20=0.4268, B40=0.001031, B44=-0.01996, B60=0.00005, B64=0.001563"
 

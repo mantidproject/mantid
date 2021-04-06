@@ -55,8 +55,7 @@ public:
 
   //-------------------------------------------------------------
   /// Set the run start and end
-  void setStartAndEndTime(const Types::Core::DateAndTime &start,
-                          const Types::Core::DateAndTime &end);
+  void setStartAndEndTime(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &end);
   /// Return the run start time
   const Types::Core::DateAndTime startTime() const;
   /// Return the run end time
@@ -64,15 +63,12 @@ public:
   //-------------------------------------------------------------
 
   /// Filter the logs by time
-  virtual void filterByTime(const Types::Core::DateAndTime start,
-                            const Types::Core::DateAndTime stop);
+  virtual void filterByTime(const Types::Core::DateAndTime start, const Types::Core::DateAndTime stop);
   /// Split the logs based on the given intervals
-  virtual void splitByTime(Kernel::TimeSplitterType &splitter,
-                           std::vector<LogManager *> outputs) const;
+  virtual void splitByTime(Kernel::TimeSplitterType &splitter, std::vector<LogManager *> outputs) const;
   /// Filter the run by the given boolean log
   void filterByLog(const Kernel::TimeSeriesProperty<bool> &filter,
-                   const std::vector<std::string> &excludedFromFiltering =
-                       std::vector<std::string>());
+                   const std::vector<std::string> &excludedFromFiltering = std::vector<std::string>());
 
   /// Return an approximate memory size for the object in bytes
   virtual size_t getMemorySize() const;
@@ -83,16 +79,12 @@ public:
     addProperty(std::unique_ptr<Kernel::Property>(prop), overwrite);
   };
   /// Add data to the object in the form of a property
-  void addProperty(std::unique_ptr<Kernel::Property> prop,
-                   bool overwrite = false);
+  void addProperty(std::unique_ptr<Kernel::Property> prop, bool overwrite = false);
   /// Add a property of given type
-  template <class TYPE>
-  void addProperty(const std::string &name, const TYPE &value,
-                   bool overwrite = false);
+  template <class TYPE> void addProperty(const std::string &name, const TYPE &value, bool overwrite = false);
 
   template <class TYPE>
-  void addProperty(const std::string &name, const TYPE &value,
-                   const std::string &units, bool overwrite = false);
+  void addProperty(const std::string &name, const TYPE &value, const std::string &units, bool overwrite = false);
 
   /// Does the property exist on the object
   bool hasProperty(const std::string &name) const;
@@ -102,17 +94,13 @@ public:
 
   /// Returns a property as a time series property. It will throw if it is not
   /// valid
-  template <typename T>
-  Kernel::TimeSeriesProperty<T> *
-  getTimeSeriesProperty(const std::string &name) const;
+  template <typename T> Kernel::TimeSeriesProperty<T> *getTimeSeriesProperty(const std::string &name) const;
   /// Get the value of a property as the given TYPE. Throws if the type is not
   /// correct
-  template <typename HeldType>
-  HeldType getPropertyValueAsType(const std::string &name) const;
+  template <typename HeldType> HeldType getPropertyValueAsType(const std::string &name) const;
   /// Returns a property as a single double value from its name
-  double getPropertyAsSingleValue(
-      const std::string &name,
-      Kernel::Math::StatisticType statistic = Kernel::Math::Mean) const;
+  double getPropertyAsSingleValue(const std::string &name,
+                                  Kernel::Math::StatisticType statistic = Kernel::Math::Mean) const;
   /// Returns a property as an integer value
   int getPropertyAsIntegerValue(const std::string &name) const;
   /// Returns the named property as a pointer
@@ -123,34 +111,26 @@ public:
    * @param p :: A pointer to the property containing the log entry
    * @deprecated new code should use smart pointers
    */
-  void addLogData(Kernel::Property *p) {
-    addLogData(std::unique_ptr<Kernel::Property>(p));
-  }
+  void addLogData(Kernel::Property *p) { addLogData(std::unique_ptr<Kernel::Property>(p)); }
 
   /**
    * Add a log entry
    * @param p :: A pointer to the property containing the log entry
    * @param overwrite :: Overwrite existing if requested
    */
-  void addLogData(std::unique_ptr<Kernel::Property> p, bool overwrite = false) {
-    addProperty(std::move(p), overwrite);
-  }
+  void addLogData(std::unique_ptr<Kernel::Property> p, bool overwrite = false) { addProperty(std::move(p), overwrite); }
 
   /**
    * Access a single log entry
    * @param name :: The name of the log entry to retrieve
    * @returns A pointer to a property containing the log entry
    */
-  Kernel::Property *getLogData(const std::string &name) const {
-    return getProperty(name);
-  }
+  Kernel::Property *getLogData(const std::string &name) const { return getProperty(name); }
   /**
    * Access all log entries
    * @returns A list of all of the log entries
    */
-  const std::vector<Kernel::Property *> &getLogData() const {
-    return getProperties();
-  }
+  const std::vector<Kernel::Property *> &getLogData() const { return getProperties(); }
   /**
    * Remove a named log entry
    * @param name :: The name of the entry to remove
@@ -165,9 +145,8 @@ public:
    * (default=Mean)
    * @return A log as a single value using the given statistic type
    */
-  double getLogAsSingleValue(
-      const std::string &name,
-      Kernel::Math::StatisticType statistic = Kernel::Math::Mean) const {
+  double getLogAsSingleValue(const std::string &name,
+                             Kernel::Math::StatisticType statistic = Kernel::Math::Mean) const {
     return getPropertyAsSingleValue(name, statistic);
   }
 
@@ -180,11 +159,9 @@ public:
   void clearOutdatedTimeSeriesLogValues();
 
   /// Save the run to a NeXus file with a given group name
-  virtual void saveNexus(::NeXus::File *file, const std::string &group,
-                         bool keepOpen = false) const;
+  virtual void saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen = false) const;
   /// Load the run from a NeXus file with a given group name
-  virtual void loadNexus(::NeXus::File *file, const std::string &group,
-                         bool keepOpen = false);
+  virtual void loadNexus(::NeXus::File *file, const std::string &group, bool keepOpen = false);
   /// Clear the logs
   void clearLogs();
 
@@ -193,16 +170,14 @@ public:
 
   // returns the invalid values log if the log has a matching invalid values log
   // filter
-  Kernel::TimeSeriesProperty<bool> *
-  getInvalidValuesFilter(const std::string &logName) const;
+  Kernel::TimeSeriesProperty<bool> *getInvalidValuesFilter(const std::string &logName) const;
 
   bool operator==(const LogManager &other) const;
   bool operator!=(const LogManager &other) const;
 
 protected:
   /// Load the run from a NeXus file with a given group name
-  void loadNexus(::NeXus::File *file,
-                 const std::map<std::string, std::string> &entries);
+  void loadNexus(::NeXus::File *file, const std::map<std::string, std::string> &entries);
   /// A pointer to a property manager
   std::unique_ptr<Kernel::PropertyManager> m_manager;
   /// Name of the log entry containing the proton charge when retrieved using
@@ -211,9 +186,7 @@ protected:
 
 private:
   /// Cache for the retrieved single values
-  std::unique_ptr<Kernel::Cache<
-      std::pair<std::string, Kernel::Math::StatisticType>, double>>
-      m_singleValueCache;
+  std::unique_ptr<Kernel::Cache<std::pair<std::string, Kernel::Math::StatisticType>, double>> m_singleValueCache;
 };
 /// shared pointer to the logManager base class
 using LogManager_sptr = std::shared_ptr<LogManager>;
@@ -227,11 +200,8 @@ using LogManager_const_sptr = std::shared_ptr<const LogManager>;
  * @param value :: The value of the property
  * @param overwrite :: If true, a current value is overwritten. (Default: False)
  */
-template <class TYPE>
-void LogManager::addProperty(const std::string &name, const TYPE &value,
-                             bool overwrite) {
-  addProperty(std::make_unique<Kernel::PropertyWithValue<TYPE>>(name, value),
-              overwrite);
+template <class TYPE> void LogManager::addProperty(const std::string &name, const TYPE &value, bool overwrite) {
+  addProperty(std::make_unique<Kernel::PropertyWithValue<TYPE>>(name, value), overwrite);
 }
 
 /**
@@ -244,8 +214,7 @@ void LogManager::addProperty(const std::string &name, const TYPE &value,
  * @param overwrite :: If true, a current value is overwritten. (Default: False)
  */
 template <class TYPE>
-void LogManager::addProperty(const std::string &name, const TYPE &value,
-                             const std::string &units, bool overwrite) {
+void LogManager::addProperty(const std::string &name, const TYPE &value, const std::string &units, bool overwrite) {
   auto newProp = std::make_unique<Kernel::PropertyWithValue<TYPE>>(name, value);
   newProp->setUnits(units);
   addProperty(std::move(newProp), overwrite);

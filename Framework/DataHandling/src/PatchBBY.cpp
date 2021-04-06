@@ -61,8 +61,7 @@ static PropertyInfo PatchableProperties[] = {
 };
 
 // load nx dataset
-template <class T>
-bool loadNXDataSet(NeXus::NXEntry &entry, const std::string &path, T &value) {
+template <class T> bool loadNXDataSet(NeXus::NXEntry &entry, const std::string &path, T &value) {
   try {
     NeXus::NXDataSetTyped<T> dataSet = entry.openNXDataSet<T>(path);
     dataSet.load();
@@ -73,8 +72,7 @@ bool loadNXDataSet(NeXus::NXEntry &entry, const std::string &path, T &value) {
     return false;
   }
 }
-bool loadNXString(NeXus::NXEntry &entry, const std::string &path,
-                  std::string &value) {
+bool loadNXString(NeXus::NXEntry &entry, const std::string &path, std::string &value) {
   try {
     NeXus::NXChar buffer = entry.openNXChar(path);
     buffer.load();
@@ -99,24 +97,22 @@ void PatchBBY::init() {
   // file to load.
   exts.clear();
   exts.emplace_back(".tar");
-  declareProperty(std::make_unique<API::FileProperty>(
-                      FilenameStr, "", API::FileProperty::Load, exts),
+  declareProperty(std::make_unique<API::FileProperty>(FilenameStr, "", API::FileProperty::Load, exts),
                   "The filename of the stored data to be patched");
 
   // patchable properties
-  for (auto itr = std::begin(PatchableProperties);
-       itr != std::end(PatchableProperties); ++itr) {
+  for (auto itr = std::begin(PatchableProperties); itr != std::end(PatchableProperties); ++itr) {
     switch (itr->Type) {
     case TYPE_INT:
-      declareProperty(std::make_unique<Kernel::PropertyWithValue<int>>(
-                          itr->Name, EMPTY_INT(), Kernel::Direction::Input),
-                      "Optional");
+      declareProperty(
+          std::make_unique<Kernel::PropertyWithValue<int>>(itr->Name, EMPTY_INT(), Kernel::Direction::Input),
+          "Optional");
       break;
 
     case TYPE_DBL:
-      declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(
-                          itr->Name, EMPTY_DBL(), Kernel::Direction::Input),
-                      "Optional");
+      declareProperty(
+          std::make_unique<Kernel::PropertyWithValue<double>>(itr->Name, EMPTY_DBL(), Kernel::Direction::Input),
+          "Optional");
       break;
 
     case TYPE_STR:
@@ -124,9 +120,7 @@ void PatchBBY::init() {
         std::array<std::string, 3> keys = {{"", EXTERNAL, INTERNAL}};
         declareProperty(
             std::make_unique<Kernel::PropertyWithValue<std::string>>(
-                itr->Name, "",
-                std::make_shared<Kernel::ListValidator<std::string>>(keys),
-                Kernel::Direction::Input),
+                itr->Name, "", std::make_shared<Kernel::ListValidator<std::string>>(keys), Kernel::Direction::Input),
             "Optional");
       }
       break;
@@ -135,8 +129,7 @@ void PatchBBY::init() {
     setPropertyGroup(itr->Name, itr->Group);
   }
 
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
-                      "Reset", false, Kernel::Direction::Input),
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("Reset", false, Kernel::Direction::Input),
                   "Optional");
 }
 /**
@@ -166,8 +159,7 @@ void PatchBBY::exec() {
         binFiles++;
       else if (*itr == HistoryStr) {
         if (std::distance(itr, files.end()) != 1)
-          throw std::invalid_argument(
-              "invalid BBY file (history has to be at the end)");
+          throw std::invalid_argument("invalid BBY file (history has to be at the end)");
 
         logFiles++;
         tarFile.select(itr->c_str());
@@ -192,8 +184,7 @@ void PatchBBY::exec() {
   int tmp_int;
   double tmp_dbl;
   std::string tmp_str;
-  for (auto itr = std::begin(PatchableProperties);
-       itr != std::end(PatchableProperties); ++itr) {
+  for (auto itr = std::begin(PatchableProperties); itr != std::end(PatchableProperties); ++itr) {
     auto property_value = getProperty(itr->Name);
 
     // if (!isEmpty(property_value))
@@ -212,8 +203,7 @@ void PatchBBY::exec() {
 
     case TYPE_STR:
       if (std::strcmp(itr->Name, "FrameSource") != 0)
-        throw std::invalid_argument(std::string("not implemented: ") +
-                                    itr->Name);
+        throw std::invalid_argument(std::string("not implemented: ") + itr->Name);
 
       tmp_str = static_cast<std::string>(property_value);
       if (!tmp_str.empty()) {
@@ -231,10 +221,8 @@ void PatchBBY::exec() {
   // load original values from hdf
   bool reset = getProperty("Reset");
   if (reset) {
-    const auto file_it =
-        std::find_if(files.cbegin(), files.cend(), [](const std::string &file) {
-          return file.rfind(".hdf") == file.length() - 4;
-        });
+    const auto file_it = std::find_if(files.cbegin(), files.cend(),
+                                      [](const std::string &file) { return file.rfind(".hdf") == file.length() - 4; });
     if (file_it != files.end()) {
       tarFile.select(file_it->c_str());
       // extract hdf file into tmp file
@@ -269,9 +257,7 @@ void PatchBBY::exec() {
         if (loadNXDataSet(entry, "instrument/t0_chopper_freq", tmp_float))
           logContentNewBuffer << "T0ChopperFreq = " << tmp_float << '\n';
         if (loadNXDataSet(entry, "instrument/t0_chopper_phase", tmp_float))
-          logContentNewBuffer
-              << "T0ChopperPhase = " << (tmp_float < 999.0 ? tmp_float : 0.0)
-              << '\n';
+          logContentNewBuffer << "T0ChopperPhase = " << (tmp_float < 999.0 ? tmp_float : 0.0) << '\n';
 
         if (loadNXDataSet(entry, "instrument/L1", tmp_float))
           logContentNewBuffer << "L1 = " << tmp_float << '\n';
@@ -310,8 +296,7 @@ void PatchBBY::exec() {
 
   // append patches to file
   tarFile.close();
-  if (!ANSTO::Tar::File::append(filename, HistoryStr, logContent.c_str(),
-                                logContent.size()))
+  if (!ANSTO::Tar::File::append(filename, HistoryStr, logContent.c_str(), logContent.size()))
     throw std::runtime_error("unable to patch");
 }
 

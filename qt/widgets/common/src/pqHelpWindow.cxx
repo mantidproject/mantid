@@ -74,14 +74,12 @@ class pqHelpWindowNetworkReply : public QNetworkReply {
   using Superclass = QNetworkReply;
 
 public:
-  pqHelpWindowNetworkReply(const QUrl &url, QHelpEngineCore *helpEngine,
-                           QObject *parent = nullptr);
+  pqHelpWindowNetworkReply(const QUrl &url, QHelpEngineCore *helpEngine, QObject *parent = nullptr);
 
   void abort() override {}
 
   qint64 bytesAvailable() const override {
-    return (this->RawData.size() - this->Offset) +
-           this->Superclass::bytesAvailable();
+    return (this->RawData.size() - this->Offset) + this->Superclass::bytesAvailable();
   }
   bool isSequential() const override { return true; }
 
@@ -96,9 +94,7 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-pqHelpWindowNetworkReply::pqHelpWindowNetworkReply(const QUrl &my_url,
-                                                   QHelpEngineCore *engine,
-                                                   QObject *parent)
+pqHelpWindowNetworkReply::pqHelpWindowNetworkReply(const QUrl &my_url, QHelpEngineCore *engine, QObject *parent)
     : Superclass(parent), Offset(0) {
   Q_ASSERT(engine);
 
@@ -121,8 +117,7 @@ pqHelpWindowNetworkReply::pqHelpWindowNetworkReply(const QUrl &my_url,
     content_type = extension_type_map[extension];
   }
 
-  this->setHeader(QNetworkRequest::ContentLengthHeader,
-                  QVariant(this->RawData.size()));
+  this->setHeader(QNetworkRequest::ContentLengthHeader, QVariant(this->RawData.size()));
   this->setHeader(QNetworkRequest::ContentTypeHeader, content_type);
   this->open(QIODevice::ReadOnly | QIODevice::Unbuffered);
   this->setUrl(my_url);
@@ -133,8 +128,7 @@ pqHelpWindowNetworkReply::pqHelpWindowNetworkReply(const QUrl &my_url,
 //-----------------------------------------------------------------------------
 qint64 pqHelpWindowNetworkReply::readData(char *data, qint64 maxSize) {
   if (this->Offset <= this->RawData.size()) {
-    qint64 end =
-        qMin(this->Offset + maxSize, static_cast<qint64>(this->RawData.size()));
+    qint64 end = qMin(this->Offset + maxSize, static_cast<qint64>(this->RawData.size()));
     qint64 delta = end - this->Offset;
     memcpy(data, this->RawData.constData() + this->Offset, delta);
     this->Offset += delta;
@@ -152,8 +146,7 @@ class pqHelpWindow::pqNetworkAccessManager : public QNetworkAccessManager {
   QPointer<QHelpEngineCore> Engine;
 
 public:
-  pqNetworkAccessManager(QHelpEngineCore *helpEngine,
-                         QNetworkAccessManager *manager, QObject *parentObject)
+  pqNetworkAccessManager(QHelpEngineCore *helpEngine, QNetworkAccessManager *manager, QObject *parentObject)
       : Superclass(parentObject), Engine(helpEngine) {
     Q_ASSERT(manager != nullptr && helpEngine != nullptr);
 
@@ -164,9 +157,7 @@ public:
   }
 
 protected:
-  QNetworkReply *createRequest(Operation operation,
-                               const QNetworkRequest &request,
-                               QIODevice *device) override {
+  QNetworkReply *createRequest(Operation operation, const QNetworkRequest &request, QIODevice *device) override {
     if (request.url().scheme() == QTHELP_SCHEME && operation == GetOperation) {
       return new pqHelpWindowNetworkReply(request.url(), this->Engine, this);
     } else {
@@ -194,8 +185,7 @@ private:
 struct QtHelpSchemeRegistration {
   QtHelpSchemeRegistration() {
     auto scheme = QWebEngineUrlScheme(QTHELP_SCHEME);
-    scheme.setFlags(QWebEngineUrlScheme::LocalScheme |
-                    QWebEngineUrlScheme::LocalAccessAllowed);
+    scheme.setFlags(QWebEngineUrlScheme::LocalScheme | QWebEngineUrlScheme::LocalAccessAllowed);
     QWebEngineUrlScheme::registerScheme(scheme);
   }
 };
@@ -228,8 +218,7 @@ private:
    */
   QString contentType(const QUrl &url) {
     QMimeDatabase mimeTypes;
-    return mimeTypes.mimeTypeForFile(url.path(), QMimeDatabase::MatchExtension)
-        .name();
+    return mimeTypes.mimeTypeForFile(url.path(), QMimeDatabase::MatchExtension).name();
   }
 
 private:
@@ -243,8 +232,7 @@ private:
 // ****************************************************************************
 
 //-----------------------------------------------------------------------------
-pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
-                           const Qt::WindowFlags &parentFlags)
+pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject, const Qt::WindowFlags &parentFlags)
     : Superclass(parentObject, parentFlags), m_helpEngine(engine) {
   Q_ASSERT(engine != nullptr);
   // Take ownership of the engine
@@ -254,8 +242,7 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
   ui.setupUi(this);
 
   // all warnings from the help engine get logged
-  QObject::connect(this->m_helpEngine, SIGNAL(warning(const QString &)), this,
-                   SIGNAL(helpWarnings(const QString &)));
+  QObject::connect(this->m_helpEngine, SIGNAL(warning(const QString &)), this, SIGNAL(helpWarnings(const QString &)));
 
   // add a navigation toolbar
   auto *navigation = new QToolBar("Navigation");
@@ -294,19 +281,16 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
   searchPane->setLayout(vbox);
   vbox->addWidget(this->m_helpEngine->searchEngine()->queryWidget());
   vbox->addWidget(this->m_helpEngine->searchEngine()->resultWidget());
-  connect(this->m_helpEngine->searchEngine()->resultWidget(),
-          SIGNAL(requestShowLink(QUrl)), this, SLOT(showPage(QUrl)));
+  connect(this->m_helpEngine->searchEngine()->resultWidget(), SIGNAL(requestShowLink(QUrl)), this,
+          SLOT(showPage(QUrl)));
 
   // set the search connection
   ui.searchDock->setWidget(searchPane);
-  connect(this->m_helpEngine->searchEngine()->queryWidget(), SIGNAL(search()),
-          this, SLOT(search()));
+  connect(this->m_helpEngine->searchEngine()->queryWidget(), SIGNAL(search()), this, SLOT(search()));
 
   // connect the index page to the content pane
-  connect(m_helpEngine->contentWidget(), SIGNAL(linkActivated(QUrl)), this,
-          SLOT(showPage(QUrl)));
-  connect(this->m_helpEngine->indexWidget(),
-          SIGNAL(linkActivated(QUrl, QString)), this, SLOT(showPage(QUrl)));
+  connect(m_helpEngine->contentWidget(), SIGNAL(linkActivated(QUrl)), this, SLOT(showPage(QUrl)));
+  connect(this->m_helpEngine->indexWidget(), SIGNAL(linkActivated(QUrl, QString)), this, SLOT(showPage(QUrl)));
 
 // setup the content pane
 #if defined(USE_QTWEBKIT)
@@ -318,18 +302,15 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
   m_browser->page()->setForwardUnsupportedContent(false);
   connect(m_browser, SIGNAL(linkClicked(QUrl)), this, SLOT(showPage(QUrl)));
   // set up the status bar
-  connect(m_browser->page(), SIGNAL(linkHovered(QString, QString, QString)),
-          this, SLOT(linkHovered(QString, QString, QString)));
+  connect(m_browser->page(), SIGNAL(linkHovered(QString, QString, QString)), this,
+          SLOT(linkHovered(QString, QString, QString)));
 #else
-  QWebEngineProfile::defaultProfile()->installUrlSchemeHandler(
-      QTHELP_SCHEME, new QtHelpUrlHandler(engine));
+  QWebEngineProfile::defaultProfile()->installUrlSchemeHandler(QTHELP_SCHEME, new QtHelpUrlHandler(engine));
   m_browser = new QWebEngineView(this);
   m_browser->setPage(new DelegatingWebPage(m_browser));
-  connect(m_browser->page(), SIGNAL(linkClicked(QUrl)), this,
-          SLOT(showLinkedPage(QUrl)));
+  connect(m_browser->page(), SIGNAL(linkClicked(QUrl)), this, SLOT(showLinkedPage(QUrl)));
   // set up the status bar
-  connect(m_browser->page(), SIGNAL(linkHovered(QString)), this,
-          SLOT(linkHovered(QString)));
+  connect(m_browser->page(), SIGNAL(linkHovered(QString)), this, SLOT(linkHovered(QString)));
 #endif
   this->setCentralWidget(this->m_browser);
 
@@ -353,13 +334,9 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
  */
 void pqHelpWindow::errorMissingPage(const QUrl &url) {
   QString htmlDoc =
-      QString(QLatin1String(
-                  "<html><head><title>Invalid Url - %1</title></head><body>"))
-          .arg(url.toString());
+      QString(QLatin1String("<html><head><title>Invalid Url - %1</title></head><body>")).arg(url.toString());
 
-  htmlDoc +=
-      QString(QLatin1String("<center><h1>Missing page - %1</h1></center>"))
-          .arg(url.toString());
+  htmlDoc += QString(QLatin1String("<center><h1>Missing page - %1</h1></center>")).arg(url.toString());
 
   htmlDoc += QLatin1String("</body></html>");
 
@@ -367,8 +344,7 @@ void pqHelpWindow::errorMissingPage(const QUrl &url) {
 }
 
 //-----------------------------------------------------------------------------
-void pqHelpWindow::showPage(const QString &url,
-                            bool linkClicked /* = false */) {
+void pqHelpWindow::showPage(const QString &url, bool linkClicked /* = false */) {
   this->showPage(QUrl::fromUserInput(url), linkClicked);
 }
 
@@ -391,9 +367,7 @@ void pqHelpWindow::showPage(const QUrl &url, bool linkClicked /* = false */) {
 }
 
 //-----------------------------------------------------------------------------
-void pqHelpWindow::showLinkedPage(const QUrl &url) {
-  this->showPage(url, true);
-}
+void pqHelpWindow::showLinkedPage(const QUrl &url) { this->showPage(url, true); }
 
 //-----------------------------------------------------------------------------
 void pqHelpWindow::printPage() {
@@ -417,27 +391,22 @@ void pqHelpWindow::updateNavButtons() {
 
 //-----------------------------------------------------------------------------
 void pqHelpWindow::search() {
-  QList<QHelpSearchQuery> query =
-      this->m_helpEngine->searchEngine()->queryWidget()->query();
+  QList<QHelpSearchQuery> query = this->m_helpEngine->searchEngine()->queryWidget()->query();
   this->m_helpEngine->searchEngine()->search(query);
 }
 
 //-----------------------------------------------------------------------------
-void pqHelpWindow::linkHovered(const QString &link, const QString &title,
-                               const QString &textContent) {
+void pqHelpWindow::linkHovered(const QString &link, const QString &title, const QString &textContent) {
   (void)title;
   (void)textContent;
   this->statusBar()->showMessage(link);
 }
 
-void pqHelpWindow::showHomePage() {
-  showPage(QString("qthelp://org.mantidproject/doc/index.html"));
-}
+void pqHelpWindow::showHomePage() { showPage(QString("qthelp://org.mantidproject/doc/index.html")); }
 
 //-----------------------------------------------------------------------------
 void pqHelpWindow::showHomePage(const QString &namespace_name) {
-  QList<QUrl> html_pages =
-      this->m_helpEngine->files(namespace_name, QStringList(), "html");
+  QList<QUrl> html_pages = this->m_helpEngine->files(namespace_name, QStringList(), "html");
   // now try to locate a file named index.html in this collection.
   foreach (QUrl url, html_pages) {
     if (url.path().endsWith("index.html")) {
@@ -450,6 +419,5 @@ void pqHelpWindow::showHomePage(const QString &namespace_name) {
 
 //-----------------------------------------------------------------------------
 bool pqHelpWindow::isExistingPage(const QUrl &url) {
-  return (this->m_helpEngine->findFile(url).isValid() &&
-          (this->m_helpEngine->fileData(url).size() > 0));
+  return (this->m_helpEngine->findFile(url).isValid() && (this->m_helpEngine->fileData(url).size() > 0));
 }

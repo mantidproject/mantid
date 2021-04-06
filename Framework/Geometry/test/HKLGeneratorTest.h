@@ -24,12 +24,9 @@ public:
 
     V3D hklMin = *(gen.begin());
 
-    TS_ASSERT_EQUALS(hklMin[0],
-                     static_cast<double>(static_cast<int>(hklMin[0])));
-    TS_ASSERT_EQUALS(hklMin[1],
-                     static_cast<double>(static_cast<int>(hklMin[1])));
-    TS_ASSERT_EQUALS(hklMin[2],
-                     static_cast<double>(static_cast<int>(hklMin[2])));
+    TS_ASSERT_EQUALS(hklMin[0], static_cast<double>(static_cast<int>(hklMin[0])));
+    TS_ASSERT_EQUALS(hklMin[1], static_cast<double>(static_cast<int>(hklMin[1])));
+    TS_ASSERT_EQUALS(hklMin[2], static_cast<double>(static_cast<int>(hklMin[2])));
   }
 
   void test_HKLGeneratorReturnsCorrectSizeSymmetricInt() {

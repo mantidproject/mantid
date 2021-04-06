@@ -33,25 +33,19 @@ public:
   virtual StructureFactor getF(const Kernel::V3D &hkl) const = 0;
   virtual double getFSquared(const Kernel::V3D &hkl) const;
 
-  virtual std::vector<StructureFactor>
-  getFs(const std::vector<Kernel::V3D> &hkls) const;
-  virtual std::vector<double>
-  getFsSquared(const std::vector<Kernel::V3D> &hkls) const;
+  virtual std::vector<StructureFactor> getFs(const std::vector<Kernel::V3D> &hkls) const;
+  virtual std::vector<double> getFsSquared(const std::vector<Kernel::V3D> &hkls) const;
 
 protected:
-  virtual void
-  crystalStructureSetHook(const CrystalStructure &crystalStructure);
+  virtual void crystalStructureSetHook(const CrystalStructure &crystalStructure);
 };
 
-using StructureFactorCalculator_sptr =
-    std::shared_ptr<StructureFactorCalculator>;
+using StructureFactorCalculator_sptr = std::shared_ptr<StructureFactorCalculator>;
 
 namespace StructureFactorCalculatorFactory {
 /// Small templated factory function that creates the desired calculator
 /// and initializes it by setting the crystal structure.
-template <typename T>
-StructureFactorCalculator_sptr
-create(const CrystalStructure &crystalStructure) {
+template <typename T> StructureFactorCalculator_sptr create(const CrystalStructure &crystalStructure) {
   std::shared_ptr<T> calculator = std::make_shared<T>();
   calculator->setCrystalStructure(crystalStructure);
 

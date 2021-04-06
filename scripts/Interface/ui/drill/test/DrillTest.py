@@ -512,11 +512,11 @@ class DrillTest(unittest.TestCase):
 
         # increment
         self.view.increment.setValue(7)
-        self.setCellContents(0, 1, "0")
+        self.setCellContents(0, 1, "1")
         self.selectColumn(1, Qt.NoModifier)
         QTest.mouseClick(self.view.fill, Qt.LeftButton)
         column = self.model.columns[1]
-        value = 0
+        value = 1
         for i in range(10):
             self.assertEqual(self.model.samples[i]._parameters[column],
                              str(value))

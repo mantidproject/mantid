@@ -29,8 +29,7 @@ namespace {
 
 std::string const PDF_GROUP_NAME = "__PDF_Workspace";
 
-MatrixWorkspace_sptr createTestWorkspace(size_t NVectors = 2,
-                                         size_t XYLength = 20) {
+MatrixWorkspace_sptr createTestWorkspace(size_t NVectors = 2, size_t XYLength = 20) {
   MatrixWorkspace_sptr ws2(new WorkspaceTester);
   ws2->initialize(NVectors, XYLength, XYLength);
 
@@ -80,12 +79,9 @@ void doTestExpDecay(const MatrixWorkspace_sptr &ws2) {
   size_t n = fun->nParams();
 
   TS_ASSERT(AnalysisDataService::Instance().doesExist(PDF_GROUP_NAME));
-  auto const pdfGroup =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          PDF_GROUP_NAME);
+  auto const pdfGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(PDF_GROUP_NAME);
   TS_ASSERT(pdfGroup);
-  auto const wsPDF =
-      std::dynamic_pointer_cast<MatrixWorkspace>(pdfGroup->getItem(0));
+  auto const wsPDF = std::dynamic_pointer_cast<MatrixWorkspace>(pdfGroup->getItem(0));
   TS_ASSERT_EQUALS(wsPDF->getNumberHistograms(), n + 1);
 
   const auto &X = wsPDF->mutableX(0);
@@ -95,8 +91,7 @@ void doTestExpDecay(const MatrixWorkspace_sptr &ws2) {
 
   TS_ASSERT(AnalysisDataService::Instance().doesExist("CostFunction"));
   ITableWorkspace_sptr CostFunctionTable =
-      std::dynamic_pointer_cast<ITableWorkspace>(
-          AnalysisDataService::Instance().retrieve("CostFunction"));
+      std::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve("CostFunction"));
 
   TS_ASSERT(CostFunctionTable);
   TS_ASSERT_EQUALS(CostFunctionTable->columnCount(), 4);
@@ -104,14 +99,11 @@ void doTestExpDecay(const MatrixWorkspace_sptr &ws2) {
   TS_ASSERT_EQUALS(CostFunctionTable->getColumn(0)->type(), "double");
   TS_ASSERT_EQUALS(CostFunctionTable->getColumn(0)->name(), "Chi2 Minimum");
   TS_ASSERT_EQUALS(CostFunctionTable->getColumn(1)->type(), "double");
-  TS_ASSERT_EQUALS(CostFunctionTable->getColumn(1)->name(),
-                   "Most Probable Chi2");
+  TS_ASSERT_EQUALS(CostFunctionTable->getColumn(1)->name(), "Most Probable Chi2");
   TS_ASSERT_EQUALS(CostFunctionTable->getColumn(2)->type(), "double");
-  TS_ASSERT_EQUALS(CostFunctionTable->getColumn(2)->name(),
-                   "reduced Chi2 Minimum");
+  TS_ASSERT_EQUALS(CostFunctionTable->getColumn(2)->name(), "reduced Chi2 Minimum");
   TS_ASSERT_EQUALS(CostFunctionTable->getColumn(3)->type(), "double");
-  TS_ASSERT_EQUALS(CostFunctionTable->getColumn(3)->name(),
-                   "Most Probable reduced Chi2");
+  TS_ASSERT_EQUALS(CostFunctionTable->getColumn(3)->name(), "Most Probable reduced Chi2");
   TS_ASSERT(CostFunctionTable->Double(0, 0) <= CostFunctionTable->Double(0, 1));
   TS_ASSERT(CostFunctionTable->Double(0, 2) <= CostFunctionTable->Double(0, 3));
   // TS_ASSERT_DELTA(CostFunctionTable->Double(0, 0),
@@ -119,8 +111,8 @@ void doTestExpDecay(const MatrixWorkspace_sptr &ws2) {
   TS_ASSERT_DELTA(CostFunctionTable->Double(0, 0), 0.0, 1.0);
 
   TS_ASSERT(AnalysisDataService::Instance().doesExist("ConvergedChain"));
-  MatrixWorkspace_sptr wsConv = std::dynamic_pointer_cast<MatrixWorkspace>(
-      AnalysisDataService::Instance().retrieve("ConvergedChain"));
+  MatrixWorkspace_sptr wsConv =
+      std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("ConvergedChain"));
   TS_ASSERT(wsConv);
   TS_ASSERT_EQUALS(wsConv->getNumberHistograms(), n + 1);
 
@@ -129,8 +121,8 @@ void doTestExpDecay(const MatrixWorkspace_sptr &ws2) {
   TS_ASSERT_EQUALS(Xconv[437], 437);
 
   TS_ASSERT(AnalysisDataService::Instance().doesExist("Chain"));
-  MatrixWorkspace_sptr wsChain = std::dynamic_pointer_cast<MatrixWorkspace>(
-      AnalysisDataService::Instance().retrieve("Chain"));
+  MatrixWorkspace_sptr wsChain =
+      std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Chain"));
   TS_ASSERT(wsChain);
   TS_ASSERT_EQUALS(wsChain->getNumberHistograms(), n + 1);
 
@@ -140,8 +132,8 @@ void doTestExpDecay(const MatrixWorkspace_sptr &ws2) {
   TS_ASSERT(Xconv.size() < Xchain.size());
 
   TS_ASSERT(AnalysisDataService::Instance().doesExist("Parameters"));
-  ITableWorkspace_sptr Ptable = std::dynamic_pointer_cast<ITableWorkspace>(
-      AnalysisDataService::Instance().retrieve("Parameters"));
+  ITableWorkspace_sptr Ptable =
+      std::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve("Parameters"));
 
   TS_ASSERT(Ptable);
   TS_ASSERT_EQUALS(Ptable->columnCount(), 4);
@@ -162,9 +154,7 @@ class FABADAMinimizerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FABADAMinimizerTest *createSuite() {
-    return new FABADAMinimizerTest();
-  }
+  static FABADAMinimizerTest *createSuite() { return new FABADAMinimizerTest(); }
   static void destroySuite(FABADAMinimizerTest *suite) { delete suite; }
 
   void test_expDecay() {
@@ -200,12 +190,9 @@ public:
     size_t nParams = fun->nParams();
 
     // Test PDF workspace
-    auto const PDFGroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            PDF_GROUP_NAME);
+    auto const PDFGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(PDF_GROUP_NAME);
     TS_ASSERT(PDFGroup);
-    auto const PDF =
-        std::dynamic_pointer_cast<MatrixWorkspace>(PDFGroup->getItem(0));
+    auto const PDF = std::dynamic_pointer_cast<MatrixWorkspace>(PDFGroup->getItem(0));
     TS_ASSERT_EQUALS(PDF->getNumberHistograms(), nParams + 1);
     TS_ASSERT_EQUALS(PDF->x(0).size(), 21);
     TS_ASSERT_EQUALS(PDF->y(0).size(), 20);
@@ -221,20 +208,14 @@ public:
     TS_ASSERT_EQUALS(costFunctTable->getColumn(0)->type(), "double");
     TS_ASSERT_EQUALS(costFunctTable->getColumn(0)->name(), "Chi2 Minimum");
     TS_ASSERT_EQUALS(costFunctTable->getColumn(1)->type(), "double");
-    TS_ASSERT_EQUALS(costFunctTable->getColumn(1)->name(),
-                     "Most Probable Chi2");
+    TS_ASSERT_EQUALS(costFunctTable->getColumn(1)->name(), "Most Probable Chi2");
     TS_ASSERT_EQUALS(costFunctTable->getColumn(2)->type(), "double");
-    TS_ASSERT_EQUALS(costFunctTable->getColumn(2)->name(),
-                     "reduced Chi2 Minimum");
+    TS_ASSERT_EQUALS(costFunctTable->getColumn(2)->name(), "reduced Chi2 Minimum");
     TS_ASSERT_EQUALS(costFunctTable->getColumn(3)->type(), "double");
-    TS_ASSERT_EQUALS(costFunctTable->getColumn(3)->name(),
-                     "Most Probable reduced Chi2");
-    TS_ASSERT_LESS_THAN_EQUALS(costFunctTable->Double(0, 0),
-                               costFunctTable->Double(0, 1));
-    TS_ASSERT_LESS_THAN_EQUALS(costFunctTable->Double(0, 2),
-                               costFunctTable->Double(0, 3));
-    TS_ASSERT_DELTA(costFunctTable->Double(0, 0), costFunctTable->Double(0, 1),
-                    1.5);
+    TS_ASSERT_EQUALS(costFunctTable->getColumn(3)->name(), "Most Probable reduced Chi2");
+    TS_ASSERT_LESS_THAN_EQUALS(costFunctTable->Double(0, 0), costFunctTable->Double(0, 1));
+    TS_ASSERT_LESS_THAN_EQUALS(costFunctTable->Double(0, 2), costFunctTable->Double(0, 3));
+    TS_ASSERT_DELTA(costFunctTable->Double(0, 0), costFunctTable->Double(0, 1), 1.5);
     TS_ASSERT_DELTA(costFunctTable->Double(0, 0), 0.0, 1.0);
 
     // Test ConvergedChain workspace
@@ -421,12 +402,11 @@ private:
     return ws2;
   }
 
-  std::shared_ptr<CostFuncLeastSquares> createCostFunc(bool constraint = false,
-                                                       bool tie = false) {
+  std::shared_ptr<CostFuncLeastSquares> createCostFunc(bool constraint = false, bool tie = false) {
 
     // Domain
-    auto domain = std::make_shared<Mantid::API::FunctionDomain1DVector>(
-        Mantid::API::FunctionDomain1DVector(0.1, 2.0, 20));
+    auto domain =
+        std::make_shared<Mantid::API::FunctionDomain1DVector>(Mantid::API::FunctionDomain1DVector(0.1, 2.0, 20));
 
     Mantid::API::FunctionValues mockData(*domain);
     ExpDecay dataMaker;
@@ -435,8 +415,7 @@ private:
     dataMaker.function(*domain, mockData);
 
     // Values
-    auto values =
-        std::make_shared<FunctionValues>(Mantid::API::FunctionValues(*domain));
+    auto values = std::make_shared<FunctionValues>(Mantid::API::FunctionValues(*domain));
     values->setFitDataFromCalculated(mockData);
     values->setFitWeights(1.0);
 
@@ -448,10 +427,8 @@ private:
     if (constraint) {
       // Constraint on parameter Height
       Mantid::CurveFitting::Constraints::BoundaryConstraint *constraint =
-          new Mantid::CurveFitting::Constraints::BoundaryConstraint(
-              func.get(), "Height", 0.9, 1.1);
-      func->addConstraint(
-          std::unique_ptr<Mantid::API::IConstraint>(constraint));
+          new Mantid::CurveFitting::Constraints::BoundaryConstraint(func.get(), "Height", 0.9, 1.1);
+      func->addConstraint(std::unique_ptr<Mantid::API::IConstraint>(constraint));
     }
 
     if (tie) {
@@ -460,8 +437,7 @@ private:
     }
 
     // Cost function
-    std::shared_ptr<CostFuncLeastSquares> costFun =
-        std::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun = std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(func, domain, values);
 
     return costFun;

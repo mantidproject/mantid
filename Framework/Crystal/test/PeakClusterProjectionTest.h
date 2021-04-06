@@ -41,17 +41,14 @@ private:
   }
 
   // Helper function to create a MD Image workspace of labels.
-  IMDHistoWorkspace_sptr create_HKL_MDWS(double min = -10, double max = 10,
-                                         int numberOfBins = 3,
-                                         double signalValue = 1,
-                                         double errorValue = 1) const {
+  IMDHistoWorkspace_sptr create_HKL_MDWS(double min = -10, double max = 10, int numberOfBins = 3,
+                                         double signalValue = 1, double errorValue = 1) const {
     const int dimensionality = 3;
     int totalBins = 1;
     for (int i = 0; i < dimensionality; ++i) {
       totalBins *= numberOfBins;
     }
-    auto mdworkspaceAlg =
-        AlgorithmManager::Instance().createUnmanaged("CreateMDHistoWorkspace");
+    auto mdworkspaceAlg = AlgorithmManager::Instance().createUnmanaged("CreateMDHistoWorkspace");
     mdworkspaceAlg->setChild(true);
     mdworkspaceAlg->initialize();
     mdworkspaceAlg->setProperty("Dimensionality", dimensionality);
@@ -64,23 +61,18 @@ private:
     std::vector<double> errorValues(totalBins, errorValue);
     mdworkspaceAlg->setProperty("ErrorInput", errorValues);
     mdworkspaceAlg->setPropertyValue("Names", "H,K,L");
-    std::string units = Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
-                        Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
-                        Mantid::Kernel::Units::Symbol::RLU.ascii();
-    std::string frames = Mantid::Geometry::HKL::HKLName + "," +
-                         Mantid::Geometry::HKL::HKLName + "," +
-                         Mantid::Geometry::HKL::HKLName;
+    std::string units = Mantid::Kernel::Units::Symbol::RLU.ascii() + "," + Mantid::Kernel::Units::Symbol::RLU.ascii() +
+                        "," + Mantid::Kernel::Units::Symbol::RLU.ascii();
+    std::string frames =
+        Mantid::Geometry::HKL::HKLName + "," + Mantid::Geometry::HKL::HKLName + "," + Mantid::Geometry::HKL::HKLName;
     TS_ASSERT_THROWS_NOTHING(mdworkspaceAlg->setProperty("Frames", frames));
     TS_ASSERT_THROWS_NOTHING(mdworkspaceAlg->setProperty("Units", units));
-    mdworkspaceAlg->setPropertyValue("OutputWorkspace",
-                                     "IntegratePeaksMDTest_MDEWS");
+    mdworkspaceAlg->setPropertyValue("OutputWorkspace", "IntegratePeaksMDTest_MDEWS");
     mdworkspaceAlg->execute();
-    IMDHistoWorkspace_sptr inWS =
-        mdworkspaceAlg->getProperty("OutputWorkspace");
+    IMDHistoWorkspace_sptr inWS = mdworkspaceAlg->getProperty("OutputWorkspace");
 
     // --- Set speical coordinates on fake mdworkspace --
-    auto coordsAlg =
-        AlgorithmManager::Instance().createUnmanaged("SetSpecialCoordinates");
+    auto coordsAlg = AlgorithmManager::Instance().createUnmanaged("SetSpecialCoordinates");
     coordsAlg->setChild(true);
     coordsAlg->initialize();
     coordsAlg->setProperty("InputWorkspace", inWS);
@@ -92,37 +84,28 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PeakClusterProjectionTest *createSuite() {
-    return new PeakClusterProjectionTest();
-  }
+  static PeakClusterProjectionTest *createSuite() { return new PeakClusterProjectionTest(); }
   static void destroySuite(PeakClusterProjectionTest *suite) { delete suite; }
 
   PeakClusterProjectionTest() { FrameworkManager::Instance(); }
 
   void test_throws_if_mdws_has_no_coordinate_system() {
     Mantid::Geometry::UnknownFrame frame("testunit");
-    IMDHistoWorkspace_sptr inWS =
-        MDEventsTestHelper::makeFakeMDHistoWorkspaceWithMDFrame(1, 3, frame, 1);
+    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceWithMDFrame(1, 3, frame, 1);
     inWS->setCoordinateSystem(Mantid::Kernel::None);
 
-    TSM_ASSERT_THROWS("Must have a known coordinate system",
-                      PeakClusterProjection object(inWS),
+    TSM_ASSERT_THROWS("Must have a known coordinate system", PeakClusterProjection object(inWS),
                       std::invalid_argument &);
   }
 
   void test_throws_if_mdws_is_less_than_three_dimensional() {
     auto frameFactory = Mantid::Geometry::makeMDFrameFactoryChain();
-    Mantid::Geometry::MDFrameArgument frameArg(
-        Mantid::Geometry::HKL::HKLName, Mantid::Kernel::Units::Symbol::RLU);
+    Mantid::Geometry::MDFrameArgument frameArg(Mantid::Geometry::HKL::HKLName, Mantid::Kernel::Units::Symbol::RLU);
     auto frame = frameFactory->create(frameArg);
-    IMDHistoWorkspace_sptr inWS =
-        MDEventsTestHelper::makeFakeMDHistoWorkspaceWithMDFrame(1, 2, *frame,
-                                                                1);
+    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceWithMDFrame(1, 2, *frame, 1);
     inWS->setCoordinateSystem(Mantid::Kernel::HKL);
 
-    TSM_ASSERT_THROWS("Must be +3 dimensional",
-                      PeakClusterProjection object(inWS),
-                      std::invalid_argument &);
+    TSM_ASSERT_THROWS("Must be +3 dimensional", PeakClusterProjection object(inWS), std::invalid_argument &);
   }
 
   void test_labelAtPeakCenter_nan_if_is_off_image() {
@@ -131,8 +114,7 @@ public:
 
     auto inWS = create_HKL_MDWS(min, max);
 
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
     IPeaksWorkspace_sptr peakWS = create_peaks_WS(inst);
 
     Peak outOfBoundsPeak(inst, 15050, 1.0);
@@ -142,8 +124,7 @@ public:
     PeakClusterProjection projection(inWS);
     Mantid::signal_t value = projection.signalAtPeakCenter(outOfBoundsPeak);
 
-    TSM_ASSERT("Should indicate is out of bounds via a NAN.",
-               std::isnan(value));
+    TSM_ASSERT("Should indicate is out of bounds via a NAN.", std::isnan(value));
   }
 
   void test_labelAtPeakCenter_with_peak_at_0_0_0() {
@@ -156,8 +137,7 @@ public:
     inWS->setSignalAt(static_cast<int>(nBins * nBins * nBins / 2),
                       labelValue); // Set label at 0, 0, 0
 
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
     IPeaksWorkspace_sptr peakWS = create_peaks_WS(inst);
 
     Peak peak(inst, 15050, 1.0);
@@ -179,8 +159,7 @@ public:
     const int index = static_cast<int>((nBins * nBins * nBins) - 1);
     inWS->setSignalAt(index, labelValue); // Set label at 10, 10, 10
 
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
     IPeaksWorkspace_sptr peakWS = create_peaks_WS(inst);
 
     Peak peak(inst, 15050, 1.0);
@@ -202,8 +181,7 @@ public:
     const int index = static_cast<int>((nBins * nBins * nBins) - 1);
     inWS->setSignalAt(index, labelValue); // Set label at 10, 10, 10
 
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
     IPeaksWorkspace_sptr peakWS = create_peaks_WS(inst);
     Peak outOfBoundsPeak(inst, 15050, 1.0);
     outOfBoundsPeak.setHKL(10, 10, 10); // At exactly 10, 10, 10 (offlimits!!!)

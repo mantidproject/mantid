@@ -160,7 +160,7 @@ Output:
     Strong noise
     Peak 1: centre=250.00+/-0.09, height=360.33+/-10.83, sigma=3.11+/-0.08
     Peak 2: centre=749.90+/-0.08, height=194.86+/-7.82, sigma=2.47+/-0.07
-	
+
 
 **Example - Find 2 different gaussian peaks on a flat background with added noise**
 
@@ -237,7 +237,7 @@ Output:
           .format(peak_high2['centre'], peak_high2['error centre'],
                   peak_high2['height'], peak_high2['error height'],
                   peak_high2['sigma'], peak_high2['error sigma']))
-				  
+
 Output:
 
 .. testoutput:: GaussianPeaksFlatBackground

@@ -197,8 +197,7 @@ public:
     TS_ASSERT(nextIs(it.get(), C03));
     TS_ASSERT(nextIs(it.get(), B1));
     TS_ASSERT(nextIs(it.get(), C20));
-    TS_ASSERT(
-        nextIs(it.get(), C21)); // This is now a 'leaf' due to the maxDepth
+    TS_ASSERT(nextIs(it.get(), C21)); // This is now a 'leaf' due to the maxDepth
     TS_ASSERT(nextIs(it.get(), C22));
     TS_ASSERT(nextIs(it.get(), C23));
     TS_ASSERT(nextIs(it.get(), B3));
@@ -308,8 +307,7 @@ public:
     func->addPlane(MDPlane(1, normal, origin));
 
     // Create an iterator
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, false,
-                                                                 func.get());
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, false, func.get());
 
     // Start with the top one
     TS_ASSERT_EQUALS(it->getBox(), A);
@@ -342,8 +340,7 @@ public:
     func->addPlane(MDPlane(1, normal, origin));
 
     // Create an iterator
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true,
-                                                                 func.get());
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true, func.get());
 
     // C00-C01 are outside the range, so the first one is C02
     TS_ASSERT_EQUALS(it->getBox(), C02);
@@ -371,8 +368,7 @@ public:
     func->addPlane(MDPlane(1, normal, origin));
 
     // Create an iterator
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, false,
-                                                                 func.get());
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, false, func.get());
 
     // Start with the top one
     TS_ASSERT_EQUALS(it->getBox(), A);
@@ -404,8 +400,7 @@ public:
     func->addPlane(MDPlane(1, normal2, origin2));
 
     // Create an iterator
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, false,
-                                                                 func.get());
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, false, func.get());
 
     // Go down to the only two leaf boxes that are in range
     TS_ASSERT_EQUALS(it->getBox(), A);
@@ -429,8 +424,7 @@ public:
     func->addPlane(MDPlane(1, normal2, origin2));
 
     // Create an iterator
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true,
-                                                                 func.get());
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true, func.get());
 
     // Only two leaf boxes are in range
     TS_ASSERT_EQUALS(it->getBox(), D211);
@@ -448,8 +442,7 @@ public:
     func->addPlane(MDPlane(1, normal, origin));
 
     // Create an iterator
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, false,
-                                                                 func.get());
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, false, func.get());
 
     // Returns the first box but that's it
     TS_ASSERT_EQUALS(it->getBox(), A);
@@ -465,8 +458,7 @@ public:
     func->addPlane(MDPlane(1, normal, origin));
 
     // Create an iterator
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true,
-                                                                 func.get());
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true, func.get());
 
     // Nothing in the iterator!
     TS_ASSERT_EQUALS(it->getDataSize(), 0);
@@ -481,8 +473,7 @@ public:
 
     public:
       MockMDBox()
-          : MDBox<MDLeanEvent<2>, 2>(new API::BoxController(2)),
-            pBC(MDBox<MDLeanEvent<2>, 2>::getBoxController())
+          : MDBox<MDLeanEvent<2>, 2>(new API::BoxController(2)), pBC(MDBox<MDLeanEvent<2>, 2>::getBoxController())
 
       {}
       GNU_DIAG_OFF_SUGGEST_OVERRIDE
@@ -500,13 +491,11 @@ public:
     EXPECT_CALL(mockBox, getIsMasked()).Times(1);
     it.getIsMasked();
 
-    TSM_ASSERT("Iterator does not use boxes as expected",
-               testing::Mock::VerifyAndClearExpectations(&mockBox));
+    TSM_ASSERT("Iterator does not use boxes as expected", testing::Mock::VerifyAndClearExpectations(&mockBox));
   }
 
   void test_skip_masked_detectors() {
-    auto setupIterator =
-        std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true);
+    auto setupIterator = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true);
 
     // mask box 0, unmask 1 and Mask box 2. From box 3 onwards, boxes will be
     // unmasked.
@@ -517,21 +506,16 @@ public:
     setupIterator->getBox()->mask();
     setupIterator->next(1);
 
-    auto evaluationIterator =
-        std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true);
+    auto evaluationIterator = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true);
     TS_ASSERT_THROWS_NOTHING(evaluationIterator->next());
-    TSM_ASSERT_EQUALS("Should have skipped to the first non-masked box", 1,
-                      evaluationIterator->getPosition());
+    TSM_ASSERT_EQUALS("Should have skipped to the first non-masked box", 1, evaluationIterator->getPosition());
     TS_ASSERT_THROWS_NOTHING(evaluationIterator->next());
-    TSM_ASSERT_EQUALS("Should have skipped to the second non-masked box", 3,
-                      evaluationIterator->getPosition());
-    TSM_ASSERT("The last box should be masked",
-               !evaluationIterator->getIsMasked());
+    TSM_ASSERT_EQUALS("Should have skipped to the second non-masked box", 3, evaluationIterator->getPosition());
+    TSM_ASSERT("The last box should be masked", !evaluationIterator->getIsMasked());
   }
 
   void test_no_skipping_policy() {
-    auto setupIterator =
-        std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true);
+    auto setupIterator = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true);
 
     // mask box 0, unmask 1 and Mask box 2. From box 3 onwards, boxes will be
     // unmasked.
@@ -543,17 +527,13 @@ public:
     setupIterator->next(1);
 
     auto evaluationIterator =
-        std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-            A, 20, true, new SkipNothing); // Using skip nothing policy.
+        std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true, new SkipNothing); // Using skip nothing policy.
     TS_ASSERT_THROWS_NOTHING(evaluationIterator->next());
-    TSM_ASSERT_EQUALS("Should NOT have skipped to the first box", 1,
-                      evaluationIterator->getPosition());
+    TSM_ASSERT_EQUALS("Should NOT have skipped to the first box", 1, evaluationIterator->getPosition());
     TS_ASSERT_THROWS_NOTHING(evaluationIterator->next());
-    TSM_ASSERT_EQUALS("Should NOT have skipped to the second box", 2,
-                      evaluationIterator->getPosition());
+    TSM_ASSERT_EQUALS("Should NOT have skipped to the second box", 2, evaluationIterator->getPosition());
     TS_ASSERT_THROWS_NOTHING(evaluationIterator->next());
-    TSM_ASSERT_EQUALS("Should NOT have skipped to the third box", 3,
-                      evaluationIterator->getPosition());
+    TSM_ASSERT_EQUALS("Should NOT have skipped to the third box", 3, evaluationIterator->getPosition());
   }
 
   void test_custom_skipping_policy() {
@@ -568,16 +548,12 @@ public:
     };
 
     MockSkippingPolicy *mockPolicy = new MockSkippingPolicy;
-    auto evaluationIterator =
-        std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-            A, 20, true,
-            mockPolicy); // Using custom policy
+    auto evaluationIterator = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true,
+                                                                                 mockPolicy); // Using custom policy
 
-    EXPECT_CALL(*mockPolicy, Die())
-        .Times(1); // Should call destructor automatically within MDBoxIterator
+    EXPECT_CALL(*mockPolicy, Die()).Times(1); // Should call destructor automatically within MDBoxIterator
     EXPECT_CALL(*mockPolicy, keepGoing())
-        .Times(static_cast<int>(
-            evaluationIterator->getDataSize())); // Should apply test
+        .Times(static_cast<int>(evaluationIterator->getDataSize())); // Should apply test
 
     while (evaluationIterator->next()) // Keep calling next while true. Will
                                        // iterate through all boxes.
@@ -588,8 +564,7 @@ public:
     // destructor before the end of the function.
     evaluationIterator.reset();
 
-    TSM_ASSERT("Has not used SkippingPolicy as expected.",
-               testing::Mock::VerifyAndClearExpectations(mockPolicy));
+    TSM_ASSERT("Has not used SkippingPolicy as expected.", testing::Mock::VerifyAndClearExpectations(mockPolicy));
   }
 
   void test_getNormalizedSignal_with_mask() {
@@ -619,12 +594,8 @@ class MDBoxIteratorTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MDBoxIteratorTestPerformance *createSuite() {
-    return new MDBoxIteratorTestPerformance();
-  }
-  static void destroySuite(MDBoxIteratorTestPerformance *suite) {
-    delete suite;
-  }
+  static MDBoxIteratorTestPerformance *createSuite() { return new MDBoxIteratorTestPerformance(); }
+  static void destroySuite(MDBoxIteratorTestPerformance *suite) { delete suite; }
 
   MDBoxIteratorTestPerformance() {
     // 1968876 boxes in this. Top box is 5*5*5
@@ -646,8 +617,7 @@ public:
       function = new MDBoxImplicitFunction(min, max);
     }
 
-    MDBoxIterator<MDLeanEvent<3>, 3> it(top, 20, leafOnly, new SkipNothing,
-                                        function);
+    MDBoxIterator<MDLeanEvent<3>, 3> it(top, 20, leafOnly, new SkipNothing, function);
 
     // Count all of them
     while (it.next()) {
@@ -658,21 +628,13 @@ public:
     TS_ASSERT_EQUALS(counter, expected);
   }
 
-  void test_iterator() {
-    do_test_iterator(false, false, 125 * 125 * 125 + 125 * 125 + 125 + 1);
-  }
+  void test_iterator() { do_test_iterator(false, false, 125 * 125 * 125 + 125 * 125 + 125 + 1); }
 
-  void test_iterator_leafOnly() {
-    do_test_iterator(true, false, 125 * 125 * 125);
-  }
+  void test_iterator_leafOnly() { do_test_iterator(true, false, 125 * 125 * 125); }
 
-  void test_iterator_withImplicitFunction() {
-    do_test_iterator(false, true, 1 + 125 * 125 + 125 + 1);
-  }
+  void test_iterator_withImplicitFunction() { do_test_iterator(false, true, 1 + 125 * 125 + 125 + 1); }
 
-  void test_iterator_withImplicitFunction_leafOnly() {
-    do_test_iterator(true, true, 125 * 125);
-  }
+  void test_iterator_withImplicitFunction_leafOnly() { do_test_iterator(true, true, 125 * 125); }
 
   // ---------------------------------------------------------------
   /** This iterator will also take the boxes and fill
@@ -696,13 +658,9 @@ public:
     TS_ASSERT_EQUALS(boxes.size(), expected);
   }
 
-  void test_iterator_that_fills_a_vector() {
-    do_test_iterator_that_fills_a_vector(false);
-  }
+  void test_iterator_that_fills_a_vector() { do_test_iterator_that_fills_a_vector(false); }
 
-  void test_iterator_that_fills_a_vector_leafOnly() {
-    do_test_iterator_that_fills_a_vector(true);
-  }
+  void test_iterator_that_fills_a_vector_leafOnly() { do_test_iterator_that_fills_a_vector(true); }
 
   // ---------------------------------------------------------------
   /** For comparison, let's use getBoxes() that fills a vector directly.
@@ -751,26 +709,16 @@ public:
     TS_ASSERT_EQUALS(counter, expected);
   }
 
-  void test_getBoxes() {
-    do_test_getBoxes(false, 0, 125 * 125 * 125 + 125 * 125 + 125 + 1);
-  }
+  void test_getBoxes() { do_test_getBoxes(false, 0, 125 * 125 * 125 + 125 * 125 + 125 + 1); }
 
   void test_getBoxes_leafOnly() { do_test_getBoxes(true, 0, 125 * 125 * 125); }
 
-  void test_getBoxes_withImplicitFunction() {
-    do_test_getBoxes(false, 1, 1 + 125 * 125 + 125 + 1);
-  }
+  void test_getBoxes_withImplicitFunction() { do_test_getBoxes(false, 1, 1 + 125 * 125 + 125 + 1); }
 
-  void test_getBoxes_withImplicitFunction_leafOnly() {
-    do_test_getBoxes(true, 1, 125 * 125);
-  }
+  void test_getBoxes_withImplicitFunction_leafOnly() { do_test_getBoxes(true, 1, 125 * 125); }
 
-  void test_getBoxes_withPlaneImplicitFunction() {
-    do_test_getBoxes(true, 2, 125 * 125 * 125 / 25);
-  }
+  void test_getBoxes_withPlaneImplicitFunction() { do_test_getBoxes(true, 2, 125 * 125 * 125 / 25); }
 
-  void test_getBoxes_withHugeImplicitFunction() {
-    do_test_getBoxes(true, 3, 125 * 125 * 125);
-  }
+  void test_getBoxes_withHugeImplicitFunction() { do_test_getBoxes(true, 3, 125 * 125 * 125); }
 };
 #undef RUN_CXX_PERFORMANCE_TEST_EMBEDDED

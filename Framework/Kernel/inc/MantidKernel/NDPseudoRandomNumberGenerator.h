@@ -29,12 +29,9 @@ template <typename SingleValueGenerator>
 class DLLExport NDPseudoRandomNumberGenerator : public NDRandomNumberGenerator {
 public:
   /// Constructor
-  NDPseudoRandomNumberGenerator(const unsigned int ndims,
-                                const size_t seedValue);
+  NDPseudoRandomNumberGenerator(const unsigned int ndims, const size_t seedValue);
   /// Constructor taking a range to limit the each evaluation
-  NDPseudoRandomNumberGenerator(const unsigned int ndims,
-                                const size_t seedValue, const double start,
-                                const double end);
+  NDPseudoRandomNumberGenerator(const unsigned int ndims, const size_t seedValue, const double start, const double end);
 
   /// Disable default constructor
   NDPseudoRandomNumberGenerator() = delete;
@@ -43,8 +40,7 @@ public:
   NDPseudoRandomNumberGenerator(const NDPseudoRandomNumberGenerator &) = delete;
 
   /// Disable assignment operator
-  NDPseudoRandomNumberGenerator &
-  operator=(const NDPseudoRandomNumberGenerator &) = delete;
+  NDPseudoRandomNumberGenerator &operator=(const NDPseudoRandomNumberGenerator &) = delete;
 
   /// Set the random number seed
   void setSeed(const size_t seedValue);
@@ -76,9 +72,8 @@ private:
  * @param seedValue :: A seed value
  */
 template <typename SingleValueGenerator>
-NDPseudoRandomNumberGenerator<SingleValueGenerator>::
-    NDPseudoRandomNumberGenerator(const unsigned int ndims,
-                                  const size_t seedValue)
+NDPseudoRandomNumberGenerator<SingleValueGenerator>::NDPseudoRandomNumberGenerator(const unsigned int ndims,
+                                                                                   const size_t seedValue)
     : NDRandomNumberGenerator(ndims), m_singleValueGen(seedValue) {}
 
 /**
@@ -93,10 +88,9 @@ NDPseudoRandomNumberGenerator<SingleValueGenerator>::
  * @param end :: The upper value for the range of generated numbers
  */
 template <typename SingleValueGenerator>
-NDPseudoRandomNumberGenerator<SingleValueGenerator>::
-    NDPseudoRandomNumberGenerator(const unsigned int ndims,
-                                  const size_t seedValue, const double start,
-                                  const double end)
+NDPseudoRandomNumberGenerator<SingleValueGenerator>::NDPseudoRandomNumberGenerator(const unsigned int ndims,
+                                                                                   const size_t seedValue,
+                                                                                   const double start, const double end)
     : NDRandomNumberGenerator(ndims), m_singleValueGen(seedValue, start, end) {}
 
 /**
@@ -104,14 +98,12 @@ NDPseudoRandomNumberGenerator<SingleValueGenerator>::
  * @param seedValue :: (Re-)seed the generator
  */
 template <typename SingleValueGenerator>
-void NDPseudoRandomNumberGenerator<SingleValueGenerator>::setSeed(
-    const size_t seedValue) {
+void NDPseudoRandomNumberGenerator<SingleValueGenerator>::setSeed(const size_t seedValue) {
   m_singleValueGen.setSeed(seedValue);
 }
 
 /// Generates the next point
-template <typename SingleValueGenerator>
-void NDPseudoRandomNumberGenerator<SingleValueGenerator>::generateNextPoint() {
+template <typename SingleValueGenerator> void NDPseudoRandomNumberGenerator<SingleValueGenerator>::generateNextPoint() {
   for (unsigned int i = 0; i < numberOfDimensions(); ++i) {
     this->cacheGeneratedValue(i, m_singleValueGen.nextValue());
   }
@@ -120,21 +112,18 @@ void NDPseudoRandomNumberGenerator<SingleValueGenerator>::generateNextPoint() {
 /**
  * Resets the underlying generator
  */
-template <typename SingleValueGenerator>
-void NDPseudoRandomNumberGenerator<SingleValueGenerator>::restart() {
+template <typename SingleValueGenerator> void NDPseudoRandomNumberGenerator<SingleValueGenerator>::restart() {
   m_singleValueGen.restart();
 }
 
 /// Saves the current state of the generator
-template <typename SingleValueGenerator>
-void NDPseudoRandomNumberGenerator<SingleValueGenerator>::save() {
+template <typename SingleValueGenerator> void NDPseudoRandomNumberGenerator<SingleValueGenerator>::save() {
   m_singleValueGen.save();
 }
 
 /// Restores the generator to the last saved point, or the beginning if nothing
 /// has been saved
-template <typename SingleValueGenerator>
-void NDPseudoRandomNumberGenerator<SingleValueGenerator>::restore() {
+template <typename SingleValueGenerator> void NDPseudoRandomNumberGenerator<SingleValueGenerator>::restore() {
   m_singleValueGen.restore();
 }
 } // namespace Kernel

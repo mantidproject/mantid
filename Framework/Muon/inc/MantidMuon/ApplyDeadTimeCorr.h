@@ -23,19 +23,13 @@ public:
   /// Algorithm's name for identification
   const std::string name() const override { return "ApplyDeadTimeCorr"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Apply deadtime correction to each spectrum of a workspace.";
-  }
+  const std::string summary() const override { return "Apply deadtime correction to each spectrum of a workspace."; }
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"CalMuonDeadTime"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CalMuonDeadTime"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Muon;CorrectionFunctions\\EfficiencyCorrections";
-  }
+  const std::string category() const override { return "Muon;CorrectionFunctions\\EfficiencyCorrections"; }
 
 private:
   /// Initialise the properties

@@ -33,8 +33,7 @@ namespace Geometry {
 class MANTID_GEOMETRY_DLL ConventionalCell {
 public:
   /// Construct a ConventionalCell for the specified UB and form number
-  ConventionalCell(const Kernel::DblMatrix &UB, size_t form_num = 0,
-                   bool allowPermutations = false);
+  ConventionalCell(const Kernel::DblMatrix &UB, size_t form_num = 0, bool allowPermutations = false);
 
   /// get the form number for this conventional cell
   size_t GetFormNum() const;
@@ -64,8 +63,7 @@ public:
   std::string GetDescription() const;
 
 private:
-  void init(const Kernel::DblMatrix &UB, ReducedCell &form_0,
-            ReducedCell &form_i, bool allowPermutations);
+  void init(const Kernel::DblMatrix &UB, ReducedCell &form_0, ReducedCell &form_i, bool allowPermutations);
   void SetSidesIncreasing(Kernel::DblMatrix &UB);
   void StandardizeTetragonal(Kernel::DblMatrix &UB);
   void StandardizeHexagonal(Kernel::DblMatrix &UB);

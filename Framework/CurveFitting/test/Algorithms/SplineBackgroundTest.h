@@ -28,8 +28,7 @@ private:
 
 public:
   void testIt() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        SinFunction(), 1, 0.1, 10.1, 0.1, true);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(SinFunction(), 1, 0.1, 10.1, 0.1, true);
     WorkspaceCreationHelper::addNoise(ws, 0.1);
     // Mask some bins out to test that functionality
     const size_t nbins = 101;
@@ -41,16 +40,14 @@ public:
     const std::string wsName = "SplineBackground_points";
     WorkspaceCreationHelper::storeWS(wsName, ws);
 
-    auto alg =
-        Mantid::API::AlgorithmManager::Instance().create("SplineBackground");
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("SplineBackground");
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", wsName);
     alg->setPropertyValue("OutputWorkspace", "SplineBackground_out");
     alg->setPropertyValue("WorkspaceIndex", "0");
     alg->execute();
 
-    MatrixWorkspace_sptr outWS =
-        WorkspaceCreationHelper::getWS<MatrixWorkspace>("SplineBackground_out");
+    MatrixWorkspace_sptr outWS = WorkspaceCreationHelper::getWS<MatrixWorkspace>("SplineBackground_out");
 
     const auto &X = outWS->x(0);
     const auto &Y = outWS->y(0);
@@ -71,8 +68,8 @@ public:
     constexpr double xRangeEnd = 2500.1;
     constexpr double xRangeStep = 0.1;
 
-    ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        SinFunction(), nspec, xRangeStart, xRangeEnd, xRangeStep, true);
+    ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(SinFunction(), nspec, xRangeStart, xRangeEnd,
+                                                                xRangeStep, true);
     WorkspaceCreationHelper::addNoise(ws, 0.1);
     // Mask some bins out to test that functionality
     const size_t nbins = 101;
@@ -86,8 +83,7 @@ public:
 
     WorkspaceCreationHelper::storeWS(inputWsName, ws);
 
-    SplineBackgroundAlg =
-        Mantid::API::AlgorithmManager::Instance().create("SplineBackground");
+    SplineBackgroundAlg = Mantid::API::AlgorithmManager::Instance().create("SplineBackground");
     SplineBackgroundAlg->initialize();
     SplineBackgroundAlg->setPropertyValue("InputWorkspace", inputWsName);
     SplineBackgroundAlg->setPropertyValue("OutputWorkspace", outputWsName);
@@ -96,9 +92,7 @@ public:
     SplineBackgroundAlg->setRethrows(true);
   }
 
-  void testSplineBackgroundPerformance() {
-    TS_ASSERT_THROWS_NOTHING(SplineBackgroundAlg->execute());
-  }
+  void testSplineBackgroundPerformance() { TS_ASSERT_THROWS_NOTHING(SplineBackgroundAlg->execute()); }
 
   void tearDown() override {
     WorkspaceCreationHelper::removeWS(inputWsName);

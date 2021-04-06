@@ -57,7 +57,7 @@ class ProjectionTest(unittest.TestCase):
 
     def test_setaxis_with_numpy_int64(self):
         p = Projection();
-    
+
         p.setAxis(0, np.array([1,2,3], dtype='int64'))
         p.setAxis(1, np.array([3,4,5], dtype='int64'))
         p.setAxis(2, np.array([6,7,8], dtype='int64'))

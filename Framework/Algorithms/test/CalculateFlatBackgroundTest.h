@@ -53,32 +53,25 @@ private:
 
     if (functindex == 1 || functindex == 2) {
       // exec or execWithReturnBackground
-      TS_ASSERT_THROWS_NOTHING(
-          flatBG.setPropertyValue("InputWorkspace", "calcFlatBG"))
-      TS_ASSERT_THROWS_NOTHING(
-          flatBG.setPropertyValue("OutputWorkspace", "Removed"))
-      TS_ASSERT_THROWS_NOTHING(
-          flatBG.setPropertyValue("WorkspaceIndexList", "0"))
+      TS_ASSERT_THROWS_NOTHING(flatBG.setPropertyValue("InputWorkspace", "calcFlatBG"))
+      TS_ASSERT_THROWS_NOTHING(flatBG.setPropertyValue("OutputWorkspace", "Removed"))
+      TS_ASSERT_THROWS_NOTHING(flatBG.setPropertyValue("WorkspaceIndexList", "0"))
       TS_ASSERT_THROWS_NOTHING(flatBG.setPropertyValue("StartX", "9.5"))
       TS_ASSERT_THROWS_NOTHING(flatBG.setPropertyValue("EndX", "20.5"))
       TS_ASSERT_THROWS_NOTHING(flatBG.setPropertyValue("Mode", "Linear Fit"))
 
       if (functindex == 2) {
         // execWithReturnBackground
-        TS_ASSERT_THROWS_NOTHING(
-            flatBG.setPropertyValue("OutputMode", "Return Background"))
+        TS_ASSERT_THROWS_NOTHING(flatBG.setPropertyValue("OutputMode", "Return Background"))
       }
-    } else if (functindex == 3 || functindex == 4 || functindex == 5 ||
-               functindex == 6) {
-      flatBG.setPropertyValue("InputWorkspace",
-                              "calculateflatbackgroundtest_ramp");
+    } else if (functindex == 3 || functindex == 4 || functindex == 5 || functindex == 6) {
+      flatBG.setPropertyValue("InputWorkspace", "calculateflatbackgroundtest_ramp");
       flatBG.setPropertyValue("WorkspaceIndexList", "");
       flatBG.setPropertyValue("Mode", "Mean");
 
       if (functindex == 3 || functindex == 4) {
         // testMeanFirst or testMeanFirstWithReturnBackground
-        flatBG.setPropertyValue("OutputWorkspace",
-                                "calculateflatbackgroundtest_first");
+        flatBG.setPropertyValue("OutputWorkspace", "calculateflatbackgroundtest_first");
         // remove the first half of the spectrum
         flatBG.setPropertyValue("StartX", "0");
         flatBG.setPropertyValue("EndX", "15");
@@ -88,14 +81,12 @@ private:
         }
       } else if (functindex == 5) {
         // testMeanSecond
-        flatBG.setPropertyValue("OutputWorkspace",
-                                "calculateflatbackgroundtest_second");
+        flatBG.setPropertyValue("OutputWorkspace", "calculateflatbackgroundtest_second");
         // remove the last half of the spectrum
         flatBG.setProperty("StartX", 2 * double(NUMBINS) / 3);
         flatBG.setProperty("EndX", double(NUMBINS));
       } else if (functindex == 6) {
-        flatBG.setPropertyValue("OutputWorkspace",
-                                "calculateflatbackgroundtest_second");
+        flatBG.setPropertyValue("OutputWorkspace", "calculateflatbackgroundtest_second");
 
         flatBG.setProperty("StartX", 2 * double(NUMBINS) / 3);
         flatBG.setProperty("EndX", double(NUMBINS));
@@ -104,12 +95,9 @@ private:
       }
     } else if (functindex == 7) {
       // exec for point data option Linear Fit
-      TS_ASSERT_THROWS_NOTHING(
-          flatBG.setPropertyValue("InputWorkspace", "calcFlatBGpointdata"))
-      TS_ASSERT_THROWS_NOTHING(
-          flatBG.setPropertyValue("OutputWorkspace", "Removed"))
-      TS_ASSERT_THROWS_NOTHING(
-          flatBG.setPropertyValue("WorkspaceIndexList", "0"))
+      TS_ASSERT_THROWS_NOTHING(flatBG.setPropertyValue("InputWorkspace", "calcFlatBGpointdata"))
+      TS_ASSERT_THROWS_NOTHING(flatBG.setPropertyValue("OutputWorkspace", "Removed"))
+      TS_ASSERT_THROWS_NOTHING(flatBG.setPropertyValue("WorkspaceIndexList", "0"))
       TS_ASSERT_THROWS_NOTHING(flatBG.setPropertyValue("StartX", "9.5"))
       TS_ASSERT_THROWS_NOTHING(flatBG.setPropertyValue("EndX", "20.5"))
       TS_ASSERT_THROWS_NOTHING(flatBG.setPropertyValue("Mode", "Linear Fit"))
@@ -121,9 +109,7 @@ private:
   }
 
 public:
-  static CalculateFlatBackgroundTest *createSuite() {
-    return new CalculateFlatBackgroundTest();
-  }
+  static CalculateFlatBackgroundTest *createSuite() { return new CalculateFlatBackgroundTest(); }
   static void destroySuite(CalculateFlatBackgroundTest *suite) { delete suite; }
 
   CalculateFlatBackgroundTest() {
@@ -136,8 +122,7 @@ public:
     MersenneTwister randGen(seed, lower, upper);
 
     // histogram
-    Mantid::DataObjects::Workspace2D_sptr WS(
-        new Mantid::DataObjects::Workspace2D);
+    Mantid::DataObjects::Workspace2D_sptr WS(new Mantid::DataObjects::Workspace2D);
     WS->initialize(1, NUMBINS + 1, NUMBINS);
 
     for (int i = 0; i < NUMBINS; ++i) {
@@ -150,8 +135,7 @@ public:
     AnalysisDataService::Instance().add("calcFlatBG", WS);
 
     // create another test workspace (histogram)
-    Mantid::DataObjects::Workspace2D_sptr WS2D(
-        new Mantid::DataObjects::Workspace2D);
+    Mantid::DataObjects::Workspace2D_sptr WS2D(new Mantid::DataObjects::Workspace2D);
     WS2D->initialize(NUMSPECS, NUMBINS + 1, NUMBINS);
 
     for (int j = 0; j < NUMSPECS; ++j) {
@@ -166,12 +150,10 @@ public:
     // used only in the last test
     this->addInstrument(WS2D);
 
-    AnalysisDataService::Instance().add("calculateflatbackgroundtest_ramp",
-                                        WS2D);
+    AnalysisDataService::Instance().add("calculateflatbackgroundtest_ramp", WS2D);
 
     // test workspace, which contains point data
-    Mantid::DataObjects::Workspace2D_sptr WSpointdata(
-        new Mantid::DataObjects::Workspace2D);
+    Mantid::DataObjects::Workspace2D_sptr WSpointdata(new Mantid::DataObjects::Workspace2D);
     WSpointdata->initialize(1, NUMBINS, NUMBINS);
 
     for (int i = 0; i < NUMBINS; ++i) {
@@ -198,11 +180,8 @@ public:
   void testExec() {
     runCalculateFlatBackground(1);
 
-    MatrixWorkspace_sptr inputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "calcFlatBG");
-    MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed");
+    MatrixWorkspace_sptr inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("calcFlatBG");
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed");
     // The X vectors should be the same
     TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
     // Just do a spot-check on Y & E
@@ -215,11 +194,8 @@ public:
   void testExecPointData() {
     runCalculateFlatBackground(1);
 
-    MatrixWorkspace_sptr inputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "calcFlatBGpointdata");
-    MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed");
+    MatrixWorkspace_sptr inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("calcFlatBGpointdata");
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed");
     // The X vectors should be the same
     // TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
     // Just do a spot-check on Y & E
@@ -232,11 +208,8 @@ public:
   void testExecWithReturnBackground() {
     runCalculateFlatBackground(2);
 
-    MatrixWorkspace_sptr inputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "calcFlatBG");
-    MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed");
+    MatrixWorkspace_sptr inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("calcFlatBG");
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed");
     // The X vectors should be the same
     TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
     // Just do a spot-check on Y & E
@@ -250,11 +223,9 @@ public:
     runCalculateFlatBackground(3);
 
     MatrixWorkspace_sptr inputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "calculateflatbackgroundtest_ramp");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("calculateflatbackgroundtest_ramp");
     MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "calculateflatbackgroundtest_first");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("calculateflatbackgroundtest_first");
     // The X vectors should be the same
     TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
 
@@ -280,9 +251,7 @@ public:
         if (YIn[i] - background < 0) {
           TS_ASSERT_DELTA(EOut[i], background, 1e-6)
         } else {
-          TS_ASSERT_DELTA(
-              EOut[i], std::sqrt((EIn[i] * EIn[i]) + (backError * backError)),
-              1e-6)
+          TS_ASSERT_DELTA(EOut[i], std::sqrt((EIn[i] * EIn[i]) + (backError * backError)), 1e-6)
         }
       }
     }
@@ -292,11 +261,9 @@ public:
     runCalculateFlatBackground(4);
 
     MatrixWorkspace_sptr inputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "calculateflatbackgroundtest_ramp");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("calculateflatbackgroundtest_ramp");
     MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "calculateflatbackgroundtest_first");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("calculateflatbackgroundtest_first");
     // The X vectors should be the same
     TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
 
@@ -335,11 +302,9 @@ public:
     runCalculateFlatBackground(5);
 
     MatrixWorkspace_sptr inputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "calculateflatbackgroundtest_ramp");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("calculateflatbackgroundtest_ramp");
     MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "calculateflatbackgroundtest_second");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("calculateflatbackgroundtest_second");
     // The X vectors should be the same
     TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
 
@@ -363,9 +328,7 @@ public:
         double correct = YIn[i] > background ? YIn[i] - background : 0;
         if (YIn[i] > background) {
           TS_ASSERT_DELTA(YOut[i], correct, 1e-6)
-          TS_ASSERT_DELTA(
-              EOut[i], std::sqrt((EIn[i] * EIn[i]) + (backError * backError)),
-              1e-6)
+          TS_ASSERT_DELTA(EOut[i], std::sqrt((EIn[i] * EIn[i]) + (backError * backError)), 1e-6)
         } else {
           TS_ASSERT_DELTA(YOut[i], 0, 1e-6)
           if (EIn[i] < background) {
@@ -382,11 +345,9 @@ public:
 
     runCalculateFlatBackground(6);
     MatrixWorkspace_sptr inputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "calculateflatbackgroundtest_ramp");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("calculateflatbackgroundtest_ramp");
     MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "calculateflatbackgroundtest_second");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("calculateflatbackgroundtest_second");
     // The X vectors should be the same
     TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
 
@@ -417,8 +378,7 @@ public:
 
   void testVariedWidths() {
     const double YVALUE = 100.0;
-    Mantid::DataObjects::Workspace2D_sptr WS(
-        new Mantid::DataObjects::Workspace2D);
+    Mantid::DataObjects::Workspace2D_sptr WS(new Mantid::DataObjects::Workspace2D);
     WS->initialize(1, NUMBINS + 1, NUMBINS);
 
     for (int i = 0; i < NUMBINS; ++i) {
@@ -431,11 +391,8 @@ public:
     Mantid::Algorithms::CalculateFlatBackground back;
     back.initialize();
 
-    back.setProperty(
-        "InputWorkspace",
-        std::static_pointer_cast<Mantid::API::MatrixWorkspace>(WS));
-    back.setPropertyValue("OutputWorkspace",
-                          "calculateflatbackgroundtest_third");
+    back.setProperty("InputWorkspace", std::static_pointer_cast<Mantid::API::MatrixWorkspace>(WS));
+    back.setPropertyValue("OutputWorkspace", "calculateflatbackgroundtest_third");
     back.setPropertyValue("WorkspaceIndexList", "");
     back.setPropertyValue("Mode", "Mean");
     // sample the background from the last (wider) bin only
@@ -446,8 +403,7 @@ public:
     TS_ASSERT(back.isExecuted())
 
     MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "calculateflatbackgroundtest_third");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("calculateflatbackgroundtest_third");
     // The X vectors should be the same
     TS_ASSERT_DELTA(WS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
 
@@ -467,8 +423,7 @@ public:
     Mantid::Algorithms::CalculateFlatBackground flatBG;
     TS_ASSERT_THROWS_NOTHING(flatBG.initialize())
     TS_ASSERT(flatBG.isInitialized())
-    flatBG.setPropertyValue("InputWorkspace",
-                            "calculateflatbackgroundtest_ramp");
+    flatBG.setPropertyValue("InputWorkspace", "calculateflatbackgroundtest_ramp");
     flatBG.setPropertyValue("OutputWorkspace", "Removed1");
     flatBG.setProperty("StartX", 1.e-6);
     flatBG.setProperty("EndX", double(NUMBINS));
@@ -482,10 +437,8 @@ public:
 
     //------------------------------------------------------------------------------
     MatrixWorkspace_sptr inputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "calculateflatbackgroundtest_ramp");
-    MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed1");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("calculateflatbackgroundtest_ramp");
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed1");
     // The X vectors should be the same
     TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
 
@@ -537,27 +490,19 @@ public:
     const double y1 = -23;
     const double y2 = -42;
     const std::string outWsName("Removed1");
-    const std::vector<std::string> modes{"Linear Fit", "Mean",
-                                         "Moving Average"};
+    const std::vector<std::string> modes{"Linear Fit", "Mean", "Moving Average"};
     const std::array<bool, 2> nullifyOptions{{true, false}};
     for (const auto nullifyNegatives : nullifyOptions) {
       for (const auto &mode : modes) {
-        executeWithTwoBinInputWorkspace(y1, y2, 1, outWsName, mode, "",
-                                        "Subtract Background",
-                                        nullifyNegatives);
-        MatrixWorkspace_sptr outputWS =
-            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-                outWsName);
+        executeWithTwoBinInputWorkspace(y1, y2, 1, outWsName, mode, "", "Subtract Background", nullifyNegatives);
+        MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
         TS_ASSERT_DELTA(outputWS->y(0)[0], y1, 1e-12)
         TS_ASSERT_DELTA(outputWS->y(0)[1], y2, 1e-12)
         AnalysisDataService::Instance().remove(outWsName);
       }
       for (const auto &mode : modes) {
-        executeWithTwoBinInputWorkspace(y1, y2, 1, outWsName, mode, "",
-                                        "Return Background", nullifyNegatives);
-        MatrixWorkspace_sptr outputWS =
-            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-                outWsName);
+        executeWithTwoBinInputWorkspace(y1, y2, 1, outWsName, mode, "", "Return Background", nullifyNegatives);
+        MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
         TS_ASSERT_DELTA(outputWS->y(0)[0], 0, 1e-12)
         TS_ASSERT_DELTA(outputWS->y(0)[1], 0, 1e-12)
         AnalysisDataService::Instance().remove(outWsName);
@@ -571,10 +516,8 @@ public:
     const std::string outWsName("Removed1");
     // Subtract background only from spectrum index 1.
     // The spectrum at index 0 should be left unchanged.
-    executeWithTwoBinInputWorkspace(y1, y2, 2, outWsName, "Mean", "1",
-                                    "Subtract Background", false);
-    MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
+    executeWithTwoBinInputWorkspace(y1, y2, 2, outWsName, "Mean", "1", "Subtract Background", false);
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
     TS_ASSERT_DELTA(outputWS->y(0)[0], y1, 1e-12)
     TS_ASSERT_DELTA(outputWS->y(0)[1], y2, 1e-12)
     TS_ASSERT_DELTA(outputWS->y(1)[0], y1 - (y1 + y2) / 2, 1e-12)
@@ -589,10 +532,8 @@ public:
     const bool nullifyNegatives = false;
     // Return background only for spectrum index 1.
     // The output at spectrum index 0 should be zero.
-    executeWithTwoBinInputWorkspace(y1, y2, 2, outWsName, "Mean", "1",
-                                    "Return Background", nullifyNegatives);
-    MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
+    executeWithTwoBinInputWorkspace(y1, y2, 2, outWsName, "Mean", "1", "Return Background", nullifyNegatives);
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
     TS_ASSERT_DELTA(outputWS->y(0)[0], 0, 1e-12)
     TS_ASSERT_DELTA(outputWS->y(0)[1], 0, 1e-12)
     TS_ASSERT_DELTA(outputWS->y(1)[0], (y1 + y2) / 2, 1e-12)
@@ -606,13 +547,10 @@ public:
     const std::string outBackgroundWSName("background");
     const std::string outSubtractedWSName("subtracted");
     const bool nullifyNegatives = false;
-    executeWithTwoBinInputWorkspace(y1, y2, 1, outBackgroundWSName, "Mean", "",
-                                    "Return Background", nullifyNegatives);
-    MatrixWorkspace_sptr inputWS = executeWithTwoBinInputWorkspace(
-        y1, y2, 1, outSubtractedWSName, "Mean", "", "Subtract Background",
-        nullifyNegatives);
-    compareSubtractedAndBackgroundWorkspaces(inputWS, outSubtractedWSName,
-                                             outBackgroundWSName);
+    executeWithTwoBinInputWorkspace(y1, y2, 1, outBackgroundWSName, "Mean", "", "Return Background", nullifyNegatives);
+    MatrixWorkspace_sptr inputWS = executeWithTwoBinInputWorkspace(y1, y2, 1, outSubtractedWSName, "Mean", "",
+                                                                   "Subtract Background", nullifyNegatives);
+    compareSubtractedAndBackgroundWorkspaces(inputWS, outSubtractedWSName, outBackgroundWSName);
     AnalysisDataService::Instance().remove(outBackgroundWSName);
     AnalysisDataService::Instance().remove(outSubtractedWSName);
   }
@@ -623,14 +561,11 @@ public:
     const std::string outBackgroundWSName("background");
     const std::string outSubtractedWSName("subtracted");
     const bool nullifyNegatives = false;
-    executeWithTwoBinInputWorkspace(y1, y2, 1, outBackgroundWSName,
-                                    "Linear Fit", "", "Return Background",
+    executeWithTwoBinInputWorkspace(y1, y2, 1, outBackgroundWSName, "Linear Fit", "", "Return Background",
                                     nullifyNegatives);
-    MatrixWorkspace_sptr inputWS = executeWithTwoBinInputWorkspace(
-        y1, y2, 1, outSubtractedWSName, "Linear Fit", "", "Subtract Background",
-        nullifyNegatives);
-    compareSubtractedAndBackgroundWorkspaces(inputWS, outSubtractedWSName,
-                                             outBackgroundWSName);
+    MatrixWorkspace_sptr inputWS = executeWithTwoBinInputWorkspace(y1, y2, 1, outSubtractedWSName, "Linear Fit", "",
+                                                                   "Subtract Background", nullifyNegatives);
+    compareSubtractedAndBackgroundWorkspaces(inputWS, outSubtractedWSName, outBackgroundWSName);
     AnalysisDataService::Instance().remove(outBackgroundWSName);
     AnalysisDataService::Instance().remove(outSubtractedWSName);
   }
@@ -641,14 +576,11 @@ public:
     const std::string outBackgroundWSName("background");
     const std::string outSubtractedWSName("subtracted");
     const bool nullifyNegatives = false;
-    executeWithTwoBinInputWorkspace(y1, y2, 1, outBackgroundWSName,
-                                    "Moving Average", "", "Return Background",
+    executeWithTwoBinInputWorkspace(y1, y2, 1, outBackgroundWSName, "Moving Average", "", "Return Background",
                                     nullifyNegatives);
-    MatrixWorkspace_sptr inputWS = executeWithTwoBinInputWorkspace(
-        y1, y2, 1, outSubtractedWSName, "Moving Average", "",
-        "Subtract Background", nullifyNegatives);
-    compareSubtractedAndBackgroundWorkspaces(inputWS, outSubtractedWSName,
-                                             outBackgroundWSName);
+    MatrixWorkspace_sptr inputWS = executeWithTwoBinInputWorkspace(y1, y2, 1, outSubtractedWSName, "Moving Average", "",
+                                                                   "Subtract Background", nullifyNegatives);
+    compareSubtractedAndBackgroundWorkspaces(inputWS, outSubtractedWSName, outBackgroundWSName);
     AnalysisDataService::Instance().remove(outBackgroundWSName);
     AnalysisDataService::Instance().remove(outSubtractedWSName);
   }
@@ -658,10 +590,8 @@ public:
     const double y2 = 42;
     const std::string outWsName("Removed1");
     const bool nullifyNegatives = true;
-    executeWithTwoBinInputWorkspace(y1, y2, 1, outWsName, "Mean", "",
-                                    "Return Background", nullifyNegatives);
-    MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
+    executeWithTwoBinInputWorkspace(y1, y2, 1, outWsName, "Mean", "", "Return Background", nullifyNegatives);
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
     TS_ASSERT_DELTA(outputWS->y(0)[0], y1, 1e-12)
     TS_ASSERT_DELTA(outputWS->y(0)[1], (y1 + y2) / 2, 1e-12)
     AnalysisDataService::Instance().remove(outWsName);
@@ -680,22 +610,20 @@ private:
     WS->getAxis(0)->setUnit("TOF");
     WS->setYUnit("Counts");
 
-    std::shared_ptr<Geometry::Instrument> testInst(
-        new Geometry::Instrument("testInst"));
+    std::shared_ptr<Geometry::Instrument> testInst(new Geometry::Instrument("testInst"));
     // testInst->setReferenceFrame(std::shared_ptr<Geometry::ReferenceFrame>(new
     // Geometry::ReferenceFrame(Geometry::PointingAlong::Y,Geometry::X,Geometry::Left,"")));
 
     const double pixelRadius(0.05);
-    auto pixelShape = ComponentCreationHelper::createCappedCylinder(
-        pixelRadius, 0.02, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
+    auto pixelShape =
+        ComponentCreationHelper::createCappedCylinder(pixelRadius, 0.02, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
 
     const double detXPos(5.0);
     for (int i = 0; i < ndets; ++i) {
       std::ostringstream lexer;
       lexer << "pixel-" << i << ")";
       Geometry::Detector *physicalPixel =
-          new Geometry::Detector(lexer.str(), WS->getAxis(1)->spectraNo(i),
-                                 pixelShape, testInst.get());
+          new Geometry::Detector(lexer.str(), WS->getAxis(1)->spectraNo(i), pixelShape, testInst.get());
       const double ypos = i * 2.0 * pixelRadius;
       physicalPixel->setPos(detXPos, ypos, 0.0);
       testInst->add(physicalPixel);
@@ -706,26 +634,21 @@ private:
   }
 
   /// Creates a  workspace with a single special value in each spectrum.
-  Mantid::DataObjects::Workspace2D_sptr
-  movingAverageCreateWorkspace(const size_t spectraCount, const size_t binCount,
-                               const size_t specialIndex) {
-    Mantid::DataObjects::Workspace2D_sptr WS(
-        new Mantid::DataObjects::Workspace2D);
+  Mantid::DataObjects::Workspace2D_sptr movingAverageCreateWorkspace(const size_t spectraCount, const size_t binCount,
+                                                                     const size_t specialIndex) {
+    Mantid::DataObjects::Workspace2D_sptr WS(new Mantid::DataObjects::Workspace2D);
     WS->initialize(spectraCount, binCount + 1, binCount);
     for (size_t i = 0; i < spectraCount; ++i) {
       for (size_t j = 0; j < binCount; ++j) {
         // Make non-trivial but still linear x axis.
-        WS->mutableX(i)[j] = 0.78 * (static_cast<double>(j) -
-                                     static_cast<double>(binCount) / 3.0) -
-                             0.31 * static_cast<double>(i);
+        WS->mutableX(i)[j] =
+            0.78 * (static_cast<double>(j) - static_cast<double>(binCount) / 3.0) - 0.31 * static_cast<double>(i);
         // Compute some non-trivial y values.
         WS->mutableY(i)[j] = movingAverageStandardY(i);
         WS->mutableE(i)[j] = std::sqrt(WS->y(i)[j]);
       }
       // Add extra x value because histogram.
-      WS->mutableX(i)[binCount] =
-          0.78 * 2.0 / 3.0 * static_cast<double>(binCount) -
-          0.31 * static_cast<double>(i);
+      WS->mutableX(i)[binCount] = 0.78 * 2.0 / 3.0 * static_cast<double>(binCount) - 0.31 * static_cast<double>(i);
       // The special background value is set here.
       WS->mutableY(i)[specialIndex] = movingAverageSpecialY(i);
     }
@@ -738,12 +661,9 @@ private:
     return 0.23 * movingAverageStandardY(wsIndex);
   }
 
-  double movingAverageStandardY(const size_t wsIndex) {
-    return 9.34 + 3.2 * static_cast<double>(wsIndex);
-  }
+  double movingAverageStandardY(const size_t wsIndex) { return 9.34 + 3.2 * static_cast<double>(wsIndex); }
 
-  void movingAverageTest(const size_t windowWidth, const size_t spectraCount,
-                         const size_t binCount) {
+  void movingAverageTest(const size_t windowWidth, const size_t spectraCount, const size_t binCount) {
     Mantid::DataObjects::Workspace2D_sptr WS;
     for (size_t i = 0; i < binCount; ++i) {
       WS = movingAverageCreateWorkspace(spectraCount, binCount, i);
@@ -759,27 +679,22 @@ private:
       flatBG.setProperty("AveragingWindowWidth", static_cast<int>(windowWidth));
       TS_ASSERT_THROWS_NOTHING(flatBG.execute())
       TS_ASSERT(flatBG.isExecuted())
-      MatrixWorkspace_sptr outputWS =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-              "Removed1");
+      MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed1");
       for (size_t j = 0; j < spectraCount; ++j) {
         // cppcheck-suppress unreadVariable
         const double expected =
-            (movingAverageSpecialY(j) + (static_cast<double>(windowWidth) - 1) *
-                                            movingAverageStandardY(j)) /
+            (movingAverageSpecialY(j) + (static_cast<double>(windowWidth) - 1) * movingAverageStandardY(j)) /
             static_cast<double>(windowWidth);
         TS_ASSERT_DELTA(outputWS->y(j)[0], expected, 1e-12)
-        const double expectedError = std::sqrt(
-            static_cast<double>(windowWidth) * movingAverageStandardY(j) /
-            static_cast<double>(windowWidth * windowWidth));
+        const double expectedError = std::sqrt(static_cast<double>(windowWidth) * movingAverageStandardY(j) /
+                                               static_cast<double>(windowWidth * windowWidth));
         TS_ASSERT_DELTA(outputWS->e(j)[0], expectedError, 1e-12)
       }
       AnalysisDataService::Instance().remove("Removed1");
     }
   }
 
-  void movingAverageWindowWidthTest(size_t windowWidth, size_t binCount,
-                                    bool shouldThrow) {
+  void movingAverageWindowWidthTest(size_t windowWidth, size_t binCount, bool shouldThrow) {
     Mantid::DataObjects::Workspace2D_sptr WS;
     WS = movingAverageCreateWorkspace(1, binCount, 0);
     Mantid::Algorithms::CalculateFlatBackground flatBG;
@@ -801,14 +716,12 @@ private:
     AnalysisDataService::Instance().remove("Removed1");
   }
 
-  MatrixWorkspace_sptr executeWithTwoBinInputWorkspace(
-      const double y1, const double y2, const size_t histogramCount,
-      const std::string &outWsName, const std::string &mode,
-      const std::string &wsIndexList, const std::string &outputMode,
-      bool nullifyNegatives) {
+  MatrixWorkspace_sptr executeWithTwoBinInputWorkspace(const double y1, const double y2, const size_t histogramCount,
+                                                       const std::string &outWsName, const std::string &mode,
+                                                       const std::string &wsIndexList, const std::string &outputMode,
+                                                       bool nullifyNegatives) {
     const size_t binCount = 2;
-    Mantid::DataObjects::Workspace2D_sptr WS(
-        new Mantid::DataObjects::Workspace2D);
+    Mantid::DataObjects::Workspace2D_sptr WS(new Mantid::DataObjects::Workspace2D);
     WS->initialize(histogramCount, binCount + 1, binCount);
     const double xBegin = -0.2;
     const double xEnd = 0.6;
@@ -839,26 +752,19 @@ private:
     return WS;
   }
 
-  void compareSubtractedAndBackgroundWorkspaces(
-      const MatrixWorkspace_sptr &originalWS,
-      const std::string &subtractedWSName,
-      const std::string &backgroundWSName) {
+  void compareSubtractedAndBackgroundWorkspaces(const MatrixWorkspace_sptr &originalWS,
+                                                const std::string &subtractedWSName,
+                                                const std::string &backgroundWSName) {
     const std::string minusWSName("minused");
-    MatrixWorkspace_sptr backgroundWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            backgroundWSName);
-    MatrixWorkspace_sptr subtractedWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            subtractedWSName);
+    MatrixWorkspace_sptr backgroundWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(backgroundWSName);
+    MatrixWorkspace_sptr subtractedWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(subtractedWSName);
     Algorithms::Minus minus;
     minus.initialize();
     minus.setProperty("LHSWorkspace", originalWS);
     minus.setProperty("RHSWorkspace", backgroundWS);
     minus.setPropertyValue("OutputWorkspace", minusWSName);
     minus.execute();
-    MatrixWorkspace_sptr minusWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            minusWSName);
+    MatrixWorkspace_sptr minusWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(minusWSName);
     Algorithms::CompareWorkspaces comparison;
     comparison.initialize();
     comparison.setProperty("Workspace1", subtractedWS);

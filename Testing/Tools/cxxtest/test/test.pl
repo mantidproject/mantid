@@ -495,7 +495,7 @@ testCase { 'name' => "GF:TDW throws   ", 'args' => "--error-printer TearDownWorl
 #
 testCase { 'name' => "GUI             ", 'args' => "--gui=DummyGui $guiInputs",
 	     'output' => "gui.out" };
-testCase { 'name' => "GUI + runner    ", 'args' => "--gui=DummyGui --runner=ParenPrinter $guiInputs", 
+testCase { 'name' => "GUI + runner    ", 'args' => "--gui=DummyGui --runner=ParenPrinter $guiInputs",
 	     'output' => "gui_paren.out" };
 testCase { 'name' => "QT GUI          ", 'args' => "--gui=QtGui GoodSuite.h", 'compile' => "$qtFlags" };
 testCase { 'name' => "Win32 GUI       ", 'args' => "--gui=Win32Gui GoodSuite.h", 'compile' => "$w32Flags" };

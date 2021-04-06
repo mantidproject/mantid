@@ -40,7 +40,7 @@ Usage
    # Inspect the result
    isMasked = ws.spectrumInfo().isMasked(badIndex)
    print('Spectrum at index {} is masked? {}'.format(badIndex, isMasked))
-   
+
 Output:
 
 .. testoutput:: MaskDetectorsIfEx

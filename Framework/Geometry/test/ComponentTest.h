@@ -164,8 +164,7 @@ public:
     // name and parent
     Component q("Child", V3D(5, 6, 7), Quat(1, 1, 1, 1), &parent);
 
-    TS_ASSERT_THROWS(parent.setDescription("descr"),
-                     const Mantid::Kernel::Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(parent.setDescription("descr"), const Mantid::Kernel::Exception::NotImplementedError &);
 
     ParameterMap_sptr pmap(new ParameterMap());
     pmap->addString(&q, "ChildMessage", "Message from a child");
@@ -177,17 +176,13 @@ public:
     TS_ASSERT(pq.getParent());
     TS_ASSERT(pq.getParent()->isParametrized());
 
-    TS_ASSERT_THROWS_NOTHING(pq.setDescription(
-        "This is child description. This is long child description."));
+    TS_ASSERT_THROWS_NOTHING(pq.setDescription("This is child description. This is long child description."));
 
     TS_ASSERT_EQUALS(parent.getShortDescription(), "");
     TS_ASSERT_EQUALS(pq.getShortDescription(), "This is child description.");
-    TS_ASSERT_EQUALS(pq.getParamShortDescription("Child"),
-                     "This is child description.");
+    TS_ASSERT_EQUALS(pq.getParamShortDescription("Child"), "This is child description.");
 
-    TS_ASSERT_EQUALS(
-        pq.getDescription(),
-        "This is child description. This is long child description.");
+    TS_ASSERT_EQUALS(pq.getDescription(), "This is child description. This is long child description.");
   }
 
   void testGetFullName() {
@@ -292,8 +287,7 @@ public:
     TS_ASSERT_EQUALS(comp.getRelativeRot(), rot12);
 
     // Rotate by angle+axis not implemented yet. Check for exception throw
-    TS_ASSERT_THROWS(comp.rotate(45, V3D(1, 1, 1)),
-                     const Mantid::Kernel::Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(comp.rotate(45, V3D(1, 1, 1)), const Mantid::Kernel::Exception::NotImplementedError &);
   }
 
   void testRelativeRotate() {

@@ -30,8 +30,7 @@ namespace Algorithms {
 DECLARE_ALGORITHM(CheckWorkspacesMatch)
 
 /// Constructor
-CheckWorkspacesMatch::CheckWorkspacesMatch()
-    : API::Algorithm(), API::DeprecatedAlgorithm() {
+CheckWorkspacesMatch::CheckWorkspacesMatch() : API::Algorithm(), API::DeprecatedAlgorithm() {
   useAlgorithm("CompareWorkspaces");
   deprecatedDate("2015-10-27");
 }
@@ -43,39 +42,30 @@ using namespace Geometry;
 
 //----------------------------------------------------------------------------------------------
 void CheckWorkspacesMatch::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "Workspace1", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("Workspace1", "", Direction::Input),
                   "The name of the first input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "Workspace2", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("Workspace2", "", Direction::Input),
                   "The name of the second input workspace.");
 
-  declareProperty(
-      "Tolerance", 0.0,
-      "The maximum amount by which values may differ between the workspaces.");
+  declareProperty("Tolerance", 0.0, "The maximum amount by which values may differ between the workspaces.");
 
   declareProperty("CheckType", true,
                   "Whether to check that the data types "
                   "(Workspace2D vs EventWorkspace) match.");
   declareProperty("CheckAxes", true, "Whether to check that the axes match.");
-  declareProperty("CheckSpectraMap", true,
-                  "Whether to check that the spectra-detector maps match. ");
-  declareProperty("CheckInstrument", true,
-                  "Whether to check that the instruments match. ");
-  declareProperty("CheckMasking", true,
-                  "Whether to check that the bin masking matches. ");
-  declareProperty(
-      "CheckSample", false,
-      "Whether to check that the sample (e.g. logs)."); // Have this one false
-                                                        // by default - the logs
-                                                        // are brittle
+  declareProperty("CheckSpectraMap", true, "Whether to check that the spectra-detector maps match. ");
+  declareProperty("CheckInstrument", true, "Whether to check that the instruments match. ");
+  declareProperty("CheckMasking", true, "Whether to check that the bin masking matches. ");
+  declareProperty("CheckSample", false,
+                  "Whether to check that the sample (e.g. logs)."); // Have this one false
+                                                                    // by default - the logs
+                                                                    // are brittle
 
   declareProperty("Result", "", Direction::Output);
 
-  declareProperty(
-      "ToleranceRelErr", false,
-      "Treat tolerance as relative error rather then the absolute error.\n"
-      "This is only applicable to Matrix workspaces.");
+  declareProperty("ToleranceRelErr", false,
+                  "Treat tolerance as relative error rather then the absolute error.\n"
+                  "This is only applicable to Matrix workspaces.");
   declareProperty("CheckAllData", false,
                   "Usually checking data ends when first mismatch occurs. This "
                   "forces algorithm to check all data and print mismatch to "
@@ -84,11 +74,9 @@ void CheckWorkspacesMatch::init() {
                   "the last option.");
   // Have this one false by default - it can be a lot of printing.
 
-  declareProperty("NumberMismatchedSpectraToPrint", 1,
-                  "Number of mismatched spectra from lowest to be listed. ");
+  declareProperty("NumberMismatchedSpectraToPrint", 1, "Number of mismatched spectra from lowest to be listed. ");
 
-  declareProperty("DetailedPrintIndex", EMPTY_INT(),
-                  "Mismatched spectra that will be printed out in details. ");
+  declareProperty("DetailedPrintIndex", EMPTY_INT(), "Mismatched spectra that will be printed out in details. ");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -157,8 +145,7 @@ std::string CheckWorkspacesMatch::runCompareWorkspaces(bool group_compare) {
     Property *prop = allProps[i];
     const std::string &pname = prop->name();
 
-    if (!prop->isDefault() && pname != "Workspace1" && pname != "Workspace2" &&
-        pname != "Result")
+    if (!prop->isDefault() && pname != "Workspace1" && pname != "Workspace2" && pname != "Result")
       compare->setPropertyValue(pname, prop->value());
   }
 
@@ -174,12 +161,10 @@ std::string CheckWorkspacesMatch::runCompareWorkspaces(bool group_compare) {
 
       // Emulate special case output format when comparing groups
       if (group_compare &&
-          table->cell<std::string>(i, 0) !=
-              "Type mismatch. One workspace is a group, the other is not." &&
+          table->cell<std::string>(i, 0) != "Type mismatch. One workspace is a group, the other is not." &&
           table->cell<std::string>(i, 0) != "GroupWorkspaces size mismatch.") {
 
-        result += ". Inputs=[" + table->cell<std::string>(i, 1) + "," +
-                  table->cell<std::string>(i, 2) + "]";
+        result += ". Inputs=[" + table->cell<std::string>(i, 1) + "," + table->cell<std::string>(i, 2) + "]";
       }
 
       if (i < (rowcount - 1))

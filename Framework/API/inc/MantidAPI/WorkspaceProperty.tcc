@@ -29,13 +29,11 @@ namespace API {
  * Direction enum (i.e. 0-2)
  */
 template <typename TYPE>
-WorkspaceProperty<TYPE>::WorkspaceProperty(
-    const std::string &name, const std::string &wsName,
-    const unsigned int direction, const Kernel::IValidator_sptr &validator)
-    : Kernel::PropertyWithValue<std::shared_ptr<TYPE>>(
-          name, std::shared_ptr<TYPE>(), validator, direction),
-      m_workspaceName(wsName), m_initialWSName(wsName),
-      m_optional(PropertyMode::Mandatory), m_locking(LockMode::Lock) {}
+WorkspaceProperty<TYPE>::WorkspaceProperty(const std::string &name, const std::string &wsName,
+                                           const unsigned int direction, const Kernel::IValidator_sptr &validator)
+    : Kernel::PropertyWithValue<std::shared_ptr<TYPE>>(name, std::shared_ptr<TYPE>(), validator, direction),
+      m_workspaceName(wsName), m_initialWSName(wsName), m_optional(PropertyMode::Mandatory), m_locking(LockMode::Lock) {
+}
 
 /** Constructor.
  *  Sets the property and workspace names but initializes the workspace pointer
@@ -50,14 +48,11 @@ WorkspaceProperty<TYPE>::WorkspaceProperty(
  * Direction enum (i.e. 0-2)
  */
 template <typename TYPE>
-WorkspaceProperty<TYPE>::WorkspaceProperty(
-    const std::string &name, const std::string &wsName,
-    const unsigned int direction, const PropertyMode::Type optional,
-    const Kernel::IValidator_sptr &validator)
-    : Kernel::PropertyWithValue<std::shared_ptr<TYPE>>(
-          name, std::shared_ptr<TYPE>(), validator, direction),
-      m_workspaceName(wsName), m_initialWSName(wsName), m_optional(optional),
-      m_locking(LockMode::Lock) {}
+WorkspaceProperty<TYPE>::WorkspaceProperty(const std::string &name, const std::string &wsName,
+                                           const unsigned int direction, const PropertyMode::Type optional,
+                                           const Kernel::IValidator_sptr &validator)
+    : Kernel::PropertyWithValue<std::shared_ptr<TYPE>>(name, std::shared_ptr<TYPE>(), validator, direction),
+      m_workspaceName(wsName), m_initialWSName(wsName), m_optional(optional), m_locking(LockMode::Lock) {}
 
 /** Constructor.
  *  Sets the property and workspace names but initializes the workspace pointer
@@ -76,29 +71,22 @@ WorkspaceProperty<TYPE>::WorkspaceProperty(
  * Direction enum (i.e. 0-2)
  */
 template <typename TYPE>
-WorkspaceProperty<TYPE>::WorkspaceProperty(
-    const std::string &name, const std::string &wsName,
-    const unsigned int direction, const PropertyMode::Type optional,
-    const LockMode::Type locking, const Kernel::IValidator_sptr &validator)
-    : Kernel::PropertyWithValue<std::shared_ptr<TYPE>>(
-          name, std::shared_ptr<TYPE>(), validator, direction),
-      m_workspaceName(wsName), m_initialWSName(wsName), m_optional(optional),
-      m_locking(locking) {}
+WorkspaceProperty<TYPE>::WorkspaceProperty(const std::string &name, const std::string &wsName,
+                                           const unsigned int direction, const PropertyMode::Type optional,
+                                           const LockMode::Type locking, const Kernel::IValidator_sptr &validator)
+    : Kernel::PropertyWithValue<std::shared_ptr<TYPE>>(name, std::shared_ptr<TYPE>(), validator, direction),
+      m_workspaceName(wsName), m_initialWSName(wsName), m_optional(optional), m_locking(locking) {}
 
 /// Copy constructor, the default name stored in the new object is the same as
 /// the default name from the original object
 template <typename TYPE>
 WorkspaceProperty<TYPE>::WorkspaceProperty(const WorkspaceProperty &right)
-    : Kernel::PropertyWithValue<std::shared_ptr<TYPE>>(right),
-      m_workspaceName(right.m_workspaceName),
-      m_initialWSName(right.m_initialWSName), m_optional(right.m_optional),
-      m_locking(right.m_locking) {}
+    : Kernel::PropertyWithValue<std::shared_ptr<TYPE>>(right), m_workspaceName(right.m_workspaceName),
+      m_initialWSName(right.m_initialWSName), m_optional(right.m_optional), m_locking(right.m_locking) {}
 
 /// Copy assignment operator. Only copies the value (i.e. the pointer to the
 /// workspace)
-template <typename TYPE>
-WorkspaceProperty<TYPE> &WorkspaceProperty<TYPE>::
-operator=(const WorkspaceProperty &right) {
+template <typename TYPE> WorkspaceProperty<TYPE> &WorkspaceProperty<TYPE>::operator=(const WorkspaceProperty &right) {
   if (&right == this)
     return *this;
   Kernel::PropertyWithValue<std::shared_ptr<TYPE>>::operator=(right);
@@ -111,8 +99,7 @@ operator=(const WorkspaceProperty &right) {
  * @return assigned PropertyWithValue
  */
 template <typename TYPE>
-WorkspaceProperty<TYPE> &WorkspaceProperty<TYPE>::
-operator=(const std::shared_ptr<TYPE> &value) {
+WorkspaceProperty<TYPE> &WorkspaceProperty<TYPE>::operator=(const std::shared_ptr<TYPE> &value) {
   std::string wsName = value->getName();
   if (this->direction() == Kernel::Direction::Input && !wsName.empty()) {
     m_workspaceName = wsName;
@@ -123,50 +110,37 @@ operator=(const std::shared_ptr<TYPE> &value) {
 
 //--------------------------------------------------------------------------------------
 /// Add the value of another property
-template <typename TYPE>
-WorkspaceProperty<TYPE> &WorkspaceProperty<TYPE>::
-operator+=(Kernel::Property const *) {
-  throw Kernel::Exception::NotImplementedError(
-      "+= operator is not implemented for WorkspaceProperty.");
+template <typename TYPE> WorkspaceProperty<TYPE> &WorkspaceProperty<TYPE>::operator+=(Kernel::Property const *) {
+  throw Kernel::Exception::NotImplementedError("+= operator is not implemented for WorkspaceProperty.");
   return *this;
 }
 
 /// 'Virtual copy constructor'
-template <typename TYPE>
-WorkspaceProperty<TYPE> *WorkspaceProperty<TYPE>::clone() const {
+template <typename TYPE> WorkspaceProperty<TYPE> *WorkspaceProperty<TYPE>::clone() const {
   return new WorkspaceProperty<TYPE>(*this);
 }
 
 /** Get the name of the workspace
  *  @return The workspace's name
  */
-template <typename TYPE> std::string WorkspaceProperty<TYPE>::value() const {
-  return m_workspaceName;
-}
+template <typename TYPE> std::string WorkspaceProperty<TYPE>::value() const { return m_workspaceName; }
 
 /**
  * @returns The name of the workspace encode as a Json::Value
  */
-template <typename TYPE>
-Json::Value WorkspaceProperty<TYPE>::valueAsJson() const {
-  return Json::Value(value());
-}
+template <typename TYPE> Json::Value WorkspaceProperty<TYPE>::valueAsJson() const { return Json::Value(value()); }
 
 /** Returns true if the workspace is in the ADS or there is none.
  * @return true if the string returned by value() is valid
  */
-template <typename TYPE>
-bool WorkspaceProperty<TYPE>::isValueSerializable() const {
+template <typename TYPE> bool WorkspaceProperty<TYPE>::isValueSerializable() const {
   return !m_workspaceName.empty() || !this->m_value;
 }
 
 /** Get the value the property was initialised with -its default value
  *  @return The default value
  */
-template <typename TYPE>
-std::string WorkspaceProperty<TYPE>::getDefault() const {
-  return m_initialWSName;
-}
+template <typename TYPE> std::string WorkspaceProperty<TYPE>::getDefault() const { return m_initialWSName; }
 
 /** Set the name of the workspace.
  * Also tries to retrieve it from the AnalysisDataService.
@@ -174,8 +148,7 @@ std::string WorkspaceProperty<TYPE>::getDefault() const {
  * @return An empty string indicating success otherwise a string containing the
  * error
  */
-template <typename TYPE>
-std::string WorkspaceProperty<TYPE>::setValue(const std::string &value) {
+template <typename TYPE> std::string WorkspaceProperty<TYPE>::setValue(const std::string &value) {
   m_workspaceName = value;
   if (Kernel::PropertyWithValue<std::shared_ptr<TYPE>>::autoTrim()) {
     boost::trim(m_workspaceName);
@@ -191,9 +164,7 @@ std::string WorkspaceProperty<TYPE>::setValue(const std::string &value) {
  * @return An empty string indicating success otherwise a string containing the
  * error
  */
-template <typename TYPE>
-std::string
-WorkspaceProperty<TYPE>::setValueFromJson(const Json::Value &value) {
+template <typename TYPE> std::string WorkspaceProperty<TYPE>::setValueFromJson(const Json::Value &value) {
   try {
     return setValue(value.asString());
   } catch (std::exception &exc) {
@@ -207,8 +178,7 @@ WorkspaceProperty<TYPE>::setValueFromJson(const Json::Value &value) {
  *  @return
  */
 template <typename TYPE>
-std::string WorkspaceProperty<TYPE>::setDataItem(
-    const std::shared_ptr<Kernel::DataItem> &value) {
+std::string WorkspaceProperty<TYPE>::setDataItem(const std::shared_ptr<Kernel::DataItem> &value) {
   std::shared_ptr<TYPE> typed = std::dynamic_pointer_cast<TYPE>(value);
   if (typed) {
     if (this->direction() == Kernel::Direction::Input) {
@@ -241,8 +211,7 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValid() const {
   // If an input (or inout) workspace, must point to something, although it
   // doesn't have to have a name
   // unless it's optional
-  if (this->direction() == Kernel::Direction::Input ||
-      this->direction() == Kernel::Direction::InOut) {
+  if (this->direction() == Kernel::Direction::Input || this->direction() == Kernel::Direction::InOut) {
     // Workspace groups will not have a value since they are not of type TYPE
     if (!Kernel::PropertyWithValue<std::shared_ptr<TYPE>>::m_value) {
       Mantid::API::Workspace_sptr wksp;
@@ -274,8 +243,7 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValid() const {
       // At this point we have a valid pointer to a Workspace so we need to
       // test whether it is a group
       if (std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp)) {
-        return isValidGroup(
-            std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp));
+        return isValidGroup(std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp));
       } else {
         error = "Workspace " + this->value() + " is not of the correct type";
       }
@@ -305,22 +273,17 @@ template <typename TYPE> bool WorkspaceProperty<TYPE>::isOptional() const {
 }
 /** Does the workspace need to be locked before starting an algorithm?
  * @return true (default) if the workspace will be locked */
-template <typename TYPE> bool WorkspaceProperty<TYPE>::isLocking() const {
-  return (m_locking == LockMode::Lock);
-}
+template <typename TYPE> bool WorkspaceProperty<TYPE>::isLocking() const { return (m_locking == LockMode::Lock); }
 
 /** Returns the current contents of the AnalysisDataService for input
  * workspaces.
  *  For output workspaces, an empty set is returned
  *  @return set of objects in AnalysisDataService
  */
-template <typename TYPE>
-std::vector<std::string> WorkspaceProperty<TYPE>::allowedValues() const {
-  if (this->direction() == Kernel::Direction::Input ||
-      this->direction() == Kernel::Direction::InOut) {
+template <typename TYPE> std::vector<std::string> WorkspaceProperty<TYPE>::allowedValues() const {
+  if (this->direction() == Kernel::Direction::Input || this->direction() == Kernel::Direction::InOut) {
     // If an input workspace, get the list of workspaces currently in the ADS
-    auto vals = AnalysisDataService::Instance().getObjectNames(
-        Mantid::Kernel::DataServiceSort::Sorted);
+    auto vals = AnalysisDataService::Instance().getObjectNames(Mantid::Kernel::DataServiceSort::Sorted);
     if (isOptional()) // Insert an empty option
     {
       vals.emplace_back("");
@@ -331,9 +294,7 @@ std::vector<std::string> WorkspaceProperty<TYPE>::allowedValues() const {
 
     // Remove any workspace that's not valid for this algorithm
     auto eraseIter = remove_if(vals.begin(), vals.end(),
-                               [&tester](const std::string &wsName) {
-                                 return !tester.setValue(wsName).empty();
-                               });
+                               [&tester](const std::string &wsName) { return !tester.setValue(wsName).empty(); });
     // Erase everything past returned iterator afterwards for readability
     vals.erase(eraseIter, vals.end());
     return vals;
@@ -345,8 +306,7 @@ std::vector<std::string> WorkspaceProperty<TYPE>::allowedValues() const {
 
 /// Create a history record
 /// @return A populated PropertyHistory for this class
-template <typename TYPE>
-const Kernel::PropertyHistory WorkspaceProperty<TYPE>::createHistory() const {
+template <typename TYPE> const Kernel::PropertyHistory WorkspaceProperty<TYPE>::createHistory() const {
   std::string wsName = m_workspaceName;
   bool isdefault = this->isDefault();
 
@@ -357,8 +317,7 @@ const Kernel::PropertyHistory WorkspaceProperty<TYPE>::createHistory() const {
     wsName = os.str();
     isdefault = false;
   }
-  return Kernel::PropertyHistory(this->name(), wsName, this->type(), isdefault,
-                                 this->direction());
+  return Kernel::PropertyHistory(this->name(), wsName, this->type(), isdefault, this->direction());
 }
 
 /** If this is an output workspace, store it into the AnalysisDataService
@@ -374,11 +333,9 @@ template <typename TYPE> bool WorkspaceProperty<TYPE>::store() {
     // Check that workspace exists
     if (this->operator()()) {
       // Note use of addOrReplace rather than add
-      API::AnalysisDataService::Instance().addOrReplace(m_workspaceName,
-                                                        this->operator()());
+      API::AnalysisDataService::Instance().addOrReplace(m_workspaceName, this->operator()());
     } else if (m_isMasterRank) {
-      throw std::runtime_error(
-          "WorkspaceProperty doesn't point to a workspace");
+      throw std::runtime_error("WorkspaceProperty doesn't point to a workspace");
     }
     result = true;
   }
@@ -388,14 +345,10 @@ template <typename TYPE> bool WorkspaceProperty<TYPE>::store() {
   return result;
 }
 
-template <typename TYPE>
-Workspace_sptr WorkspaceProperty<TYPE>::getWorkspace() const {
-  return this->operator()();
-}
+template <typename TYPE> Workspace_sptr WorkspaceProperty<TYPE>::getWorkspace() const { return this->operator()(); }
 
 /// Sets a flag indicating whether this is the master rank in MPI builds.
-template <typename TYPE>
-void WorkspaceProperty<TYPE>::setIsMasterRank(bool isMasterRank) {
+template <typename TYPE> void WorkspaceProperty<TYPE>::setIsMasterRank(bool isMasterRank) {
   m_isMasterRank = isMasterRank;
 }
 
@@ -405,8 +358,7 @@ void WorkspaceProperty<TYPE>::setIsMasterRank(bool isMasterRank) {
  *  @returns A user level description of the problem or "" if it is valid.
  */
 template <typename TYPE>
-std::string WorkspaceProperty<TYPE>::isValidGroup(
-    const std::shared_ptr<WorkspaceGroup> &wsGroup) const {
+std::string WorkspaceProperty<TYPE>::isValidGroup(const std::shared_ptr<WorkspaceGroup> &wsGroup) const {
   g_log.debug() << " Input WorkspaceGroup found \n";
 
   std::vector<std::string> wsGroupNames = wsGroup->getNames();
@@ -414,8 +366,7 @@ std::string WorkspaceProperty<TYPE>::isValidGroup(
 
   // Cycle through each workspace in the group ...
   for (const auto &memberWsName : wsGroupNames) {
-    std::shared_ptr<Workspace> memberWs =
-        AnalysisDataService::Instance().retrieve(memberWsName);
+    std::shared_ptr<Workspace> memberWs = AnalysisDataService::Instance().retrieve(memberWsName);
 
     // Table Workspaces are ignored
     if ("TableWorkspace" == memberWs->id()) {
@@ -455,8 +406,7 @@ std::string WorkspaceProperty<TYPE>::isValidGroup(
  * @see AnalysisDataServiceImpl
  *  @returns A user level description of the problem or "" if it is valid.
  */
-template <typename TYPE>
-std::string WorkspaceProperty<TYPE>::isValidOutputWs() const {
+template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValidOutputWs() const {
   std::string error;
   const std::string value = this->value();
   if (!value.empty()) {
@@ -476,8 +426,7 @@ std::string WorkspaceProperty<TYPE>::isValidOutputWs() const {
  *  is actually an optional workspace and so still valid.
  *  @returns A user level description of the problem or "" if it is valid.
  */
-template <typename TYPE>
-std::string WorkspaceProperty<TYPE>::isOptionalWs() const {
+template <typename TYPE> std::string WorkspaceProperty<TYPE>::isOptionalWs() const {
   std::string error;
 
   if (m_workspaceName.empty()) {
@@ -487,8 +436,7 @@ std::string WorkspaceProperty<TYPE>::isOptionalWs() const {
       error = "Enter a name for the Input/InOut workspace";
     }
   } else {
-    error = "Workspace \"" + this->value() +
-            "\" was not found in the Analysis Data Service";
+    error = "Workspace \"" + this->value() + "\" was not found in the Analysis Data Service";
   }
 
   return error;
@@ -496,15 +444,13 @@ std::string WorkspaceProperty<TYPE>::isOptionalWs() const {
 
 /// Reset the pointer to the workspace
 template <typename TYPE> void WorkspaceProperty<TYPE>::clear() {
-  Kernel::PropertyWithValue<std::shared_ptr<TYPE>>::m_value =
-      std::shared_ptr<TYPE>();
+  Kernel::PropertyWithValue<std::shared_ptr<TYPE>>::m_value = std::shared_ptr<TYPE>();
 }
 
 /** Attempts to retreive the data from the ADS
  *  if the data is not foung the internal pointer is set to null.
  */
-template <typename TYPE>
-void WorkspaceProperty<TYPE>::retrieveWorkspaceFromADS() {
+template <typename TYPE> void WorkspaceProperty<TYPE>::retrieveWorkspaceFromADS() {
   // Try and get the workspace from the ADS, but don't worry if we can't
   try {
     Kernel::PropertyWithValue<std::shared_ptr<TYPE>>::m_value =
