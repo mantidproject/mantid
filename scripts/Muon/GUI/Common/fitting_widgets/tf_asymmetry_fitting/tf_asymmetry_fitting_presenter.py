@@ -95,9 +95,9 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
 
         self.fit_parameter_changed_notifier.notify_subscribers()
 
-    def handle_fix_normalisation_changed(self, is_fixed) -> None:
+    def handle_fix_normalisation_changed(self, is_fixed: bool) -> None:
         """Handles when the value of the current normalisation has been fixed or unfixed."""
-        self.model.fix_current_normalisation(is_fixed)
+        self.model.toggle_fix_current_normalisation(is_fixed)
 
     def handle_sequential_fit_finished(self) -> None:
         """Handles when a sequential fit has been performed and has finished executing in the sequential fitting tab."""
