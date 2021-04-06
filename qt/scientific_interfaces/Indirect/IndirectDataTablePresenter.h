@@ -28,7 +28,7 @@ using DataPositionType = IndexCollectionType<TableDatasetIndex, FitDomainIndex>;
 class MANTIDQT_INDIRECT_DLL IndirectDataTablePresenter : public QObject {
   Q_OBJECT
 public:
-  IndirectDataTablePresenter(IIndirectFitDataModel *model, QTableWidget *dataTable);
+  IndirectDataTablePresenter(IIndirectFitDataTableModel *model, QTableWidget *dataTable);
 
   bool isTableEmpty() const;
 
@@ -48,7 +48,7 @@ private slots:
   // void updateAllFittingRangeFrom(int row, int column);
 
 protected:
-  IndirectDataTablePresenter(IIndirectFitDataModel *model, QTableWidget *dataTable, const QStringList &headers);
+  IndirectDataTablePresenter(IIndirectFitDataTableModel *model, QTableWidget *dataTable, const QStringList &headers);
   std::string getString(FitDomainIndex row, int column) const;
 
   virtual void addTableEntry(FitDomainIndex row);

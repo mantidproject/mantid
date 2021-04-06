@@ -74,11 +74,12 @@ void IndirectDataAnalysisFqFitTab::setupFitTab() {
   connect(this, SIGNAL(functionChanged()), this, SLOT(updateModelFitTypeString()));
 }
 
+void IndirectDataAnalysisFqFitTab::updateModelFitTypeString() {
   m_FqFittingModel->setFitTypeString(getFitTypeString());
+}
 
 std::string IndirectDataAnalysisFqFitTab::getFitTypeString() const {
-  if (!m_FqFittingModel->getFitFunction() ||
-      m_FqFittingModel->getFitFunction()->nFunctions() == 0) {
+  if (!m_FqFittingModel->getFitFunction() || m_FqFittingModel->getFitFunction()->nFunctions() == 0) {
     return "NoCurrentFunction";
   }
 

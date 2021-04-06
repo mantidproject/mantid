@@ -292,8 +292,6 @@ void FqFitModel::setActiveEISF(std::size_t eisfIndex, TableDatasetIndex dataInde
     logger.warning("Invalid EISF index specified.");
 }
 
-void FqFitModel::setFitType(const std::string &fitType) { m_fitString = fitType; }
-
 bool FqFitModel::zeroWidths(TableDatasetIndex dataIndex) const {
   const auto parameters = findFqFitParameters(dataIndex);
   if (parameters != m_fqFitParameters.end())
@@ -346,8 +344,7 @@ std::string FqFitModel::getResultXAxisUnit() const { return ""; }
 
 std::string FqFitModel::getResultLogName() const { return "SourceName"; }
 
-bool FqFitModel::allWorkspacesEqual(
-    const Mantid::API::MatrixWorkspace_sptr &workspace) const {
+bool FqFitModel::allWorkspacesEqual(const Mantid::API::MatrixWorkspace_sptr &workspace) const {
   for (auto i = TableDatasetIndex{1}; i < getNumberOfWorkspaces(); ++i) {
     if (getWorkspace(i) != workspace)
       return false;

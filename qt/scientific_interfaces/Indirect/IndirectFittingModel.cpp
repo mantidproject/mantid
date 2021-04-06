@@ -124,7 +124,7 @@ void addInputDataToSimultaneousFit(const IAlgorithm_sptr &fitAlgorithm, const Ma
     fitAlgorithm->setProperty("Exclude" + suffix, excludeRegions);
 }
 
-void addInputDataToSimultaneousFit(const IAlgorithm_sptr &fitAlgorithm, const IIndirectFitDataModel *fittingData) {
+void addInputDataToSimultaneousFit(const IAlgorithm_sptr &fitAlgorithm, const IIndirectFitDataTableModel *fittingData) {
   for (auto index = FitDomainIndex{0}; index < FitDomainIndex{fittingData->getNumberOfDomains()}; index++) {
     std::string suffix = index == FitDomainIndex{0} ? "" : "_" + std::to_string(index.value);
     addInputDataToSimultaneousFit(fitAlgorithm, fittingData->getWorkspace(index), fittingData->getSpectrum(index),
@@ -239,7 +239,7 @@ std::unordered_map<FittingMode, std::string> fitModeToName = std::unordered_map<
     {{FittingMode::SEQUENTIAL, "Seq"}, {FittingMode::SIMULTANEOUS, "Sim"}});
 
 IndirectFittingModel::IndirectFittingModel()
-    : m_fitDataModel(std::make_unique<IndirectFitDataModel>()), m_previousModelSelected(false),
+    : m_fitDataModel(std::make_unique<IndirectFitDataTableModel>()), m_previousModelSelected(false),
       m_fittingMode(FittingMode::SEQUENTIAL), m_fitOutput(std::make_unique<IndirectFitOutputModel>()) {}
 
 bool IndirectFittingModel::hasWorkspace(std::string const &workspaceName) const {
@@ -270,11 +270,9 @@ std::vector<double> IndirectFittingModel::getExcludeRegionVector(TableDatasetInd
   return m_fitDataModel->getExcludeRegionVector(dataIndex, index);
 }
 
-std::string
-IndirectFittingModel::createDisplayName(TableDatasetIndex dataIndex) const {
+std::string IndirectFittingModel::createDisplayName(TableDatasetIndex dataIndex) const {
   if (m_fitDataModel->getNumberOfWorkspaces() > dataIndex)
-    return getFitDataName(m_fitDataModel->getWorkspaceNames()[dataIndex.value],
-                          m_fitDataModel->getSpectra(dataIndex));
+    return getFitDataName(m_fitDataModel->getWorkspaceNames()[dataIndex.value], m_fitDataModel->getSpectra(dataIndex));
   else
     throw std::runtime_error("Cannot create a display name for a workspace:"
                              "the workspace index provided is too large.");
@@ -292,9 +290,7 @@ std::string IndirectFittingModel::sequentialFitOutputName() const { return creat
 
 std::string IndirectFittingModel::simultaneousFitOutputName() const { return createOutputName(SIM_STRING); }
 
-bool IndirectFittingModel::isMultiFit() const {
-  return getNumberOfWorkspaces().value > 1;
-}
+bool IndirectFittingModel::isMultiFit() const { return getNumberOfWorkspaces().value > 1; }
 
 bool IndirectFittingModel::isPreviouslyFit(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const {
   auto domainIndex = m_fitDataModel->getDomainIndex(dataIndex, spectrum);
@@ -331,10 +327,7 @@ std::vector<std::string> IndirectFittingModel::getFitParameterNames() const {
   return std::vector<std::string>();
 }
 
-Mantid::API::MultiDomainFunction_sptr
-IndirectFittingModel::getFitFunction() const {
-  return m_activeFunction;
-}
+Mantid::API::MultiDomainFunction_sptr IndirectFittingModel::getFitFunction() const { return m_activeFunction; }
 
 void IndirectFittingModel::setSpectra(const std::string &spectra, TableDatasetIndex dataIndex) {
   setSpectra(FunctionModelSpectra(spectra), dataIndex);
@@ -450,8 +443,7 @@ void IndirectFittingModel::addSingleFitOutput(const IAlgorithm_sptr &fitAlgorith
 FittingMode IndirectFittingModel::getFittingMode() const { return m_fittingMode; }
 
 std::unordered_map<std::string, ParameterValue>
-IndirectFittingModel::getParameterValues(TableDatasetIndex index,
-                                         WorkspaceIndex spectrum) const {
+IndirectFittingModel::getParameterValues(TableDatasetIndex index, WorkspaceIndex spectrum) const {
   if (m_fitDataModel->getNumberOfWorkspaces() > index) {
     const auto parameters = getFitParameters(index, spectrum);
     if (m_previousModelSelected)
@@ -505,9 +497,7 @@ WorkspaceGroup_sptr IndirectFittingModel::getResultWorkspace() const { return m_
 WorkspaceGroup_sptr IndirectFittingModel::getResultGroup() const { return m_fitOutput->getLastResultGroup(); }
 
 bool IndirectFittingModel::isPreviousModelSelected() const {
-  return m_fitFunction &&
-         equivalentFunctions(extractFirstInnerFunction(getFitFunction()),
-                             m_fitFunction);
+  return m_fitFunction && equivalentFunctions(extractFirstInnerFunction(getFitFunction()), m_fitFunction);
 }
 
 MultiDomainFunction_sptr IndirectFittingModel::getMultiDomainFunction() const { return m_activeFunction; }
@@ -535,9 +525,8 @@ IAlgorithm_sptr IndirectFittingModel::getSingleFit(TableDatasetIndex dataIndex, 
   return fitAlgorithm;
 }
 
-Mantid::API::IFunction_sptr
-IndirectFittingModel::getSingleFunction(TableDatasetIndex dataIndex,
-                                        WorkspaceIndex spectrum) const {
+Mantid::API::IFunction_sptr IndirectFittingModel::getSingleFunction(TableDatasetIndex dataIndex,
+                                                                    WorkspaceIndex spectrum) const {
   auto function = getFitFunction();
   assert(function->getNumberDomains() == getNumberOfDomains());
   if (function->getNumberDomains() == 0) {
@@ -546,15 +535,13 @@ IndirectFittingModel::getSingleFunction(TableDatasetIndex dataIndex,
   return function->getFunction(getDomainIndex(dataIndex, spectrum).value);
 }
 
-Mantid::API::IAlgorithm_sptr
-IndirectFittingModel::sequentialFitAlgorithm() const {
+Mantid::API::IAlgorithm_sptr IndirectFittingModel::sequentialFitAlgorithm() const {
   auto function = getFitFunction();
   assert(function->getNumberDomains() == getNumberOfDomains());
   return AlgorithmManager::Instance().create("QENSFitSequential");
 }
 
-Mantid::API::IAlgorithm_sptr
-IndirectFittingModel::simultaneousFitAlgorithm() const {
+Mantid::API::IAlgorithm_sptr IndirectFittingModel::simultaneousFitAlgorithm() const {
   auto function = getFitFunction();
   assert(function->getNumberDomains() == getNumberOfDomains());
   return AlgorithmManager::Instance().create("QENSFitSimultaneous");
@@ -614,8 +601,7 @@ std::string IndirectFittingModel::getOutputBasename() const { return cutLastOf(s
 
 void IndirectFittingModel::cleanFailedRun(const IAlgorithm_sptr &fittingAlgorithm) {
   const auto prefix = "__" + fittingAlgorithm->name() + "_ws";
-  for (TableDatasetIndex datasetIndex = 0;
-       datasetIndex < m_fitDataModel->getNumberOfWorkspaces(); ++datasetIndex) {
+  for (TableDatasetIndex datasetIndex = 0; datasetIndex < m_fitDataModel->getNumberOfWorkspaces(); ++datasetIndex) {
     const auto base = prefix + std::to_string(datasetIndex.value + 1);
     removeFromADSIfExists(base);
     for (size_t index = 0; index < m_fitDataModel->getNumberOfSpectra(datasetIndex); index++) {
@@ -633,8 +619,7 @@ void IndirectFittingModel::cleanFailedSingleRun(const IAlgorithm_sptr &fittingAl
 DataForParameterEstimationCollection
 IndirectFittingModel::getDataForParameterEstimation(const EstimationDataSelector &selector) const {
   DataForParameterEstimationCollection dataCollection;
-  for (auto i = TableDatasetIndex{0}; i < m_fitDataModel->getNumberOfWorkspaces();
-       ++i) {
+  for (auto i = TableDatasetIndex{0}; i < m_fitDataModel->getNumberOfWorkspaces(); ++i) {
     auto const ws = m_fitDataModel->getWorkspace(i);
     for (const auto &spectrum : m_fitDataModel->getSpectra(i)) {
       auto const &x = ws->readX(spectrum.value);

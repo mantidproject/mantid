@@ -65,8 +65,7 @@ public:
   void updateMultiDatasetParameters(const IFunction &fun);
   void updateMultiDatasetParameters(const ITableWorkspace &params);
   void updateFitStatus(const FitDomainIndex index);
-  void updateFitStatusData(const std::vector<std::string> &status,
-                           const std::vector<double> &chiSquared);
+  void updateFitStatusData(const std::vector<std::string> &status, const std::vector<double> &chiSquared);
   FittingMode getFittingMode() const;
   QString selectedFitType() const;
   void setConvolveMembers(bool convolveEnabled);
@@ -112,7 +111,6 @@ private:
   IFunction_sptr getSingleFunction() const;
   QStringList getGlobalParameters() const;
   QStringList getLocalParameters() const;
-  void updateFitStatus(const FitDomainIndex index);
   void syncFullBrowserWithTemplate();
   void syncTemplateBrowserWithFull();
 
