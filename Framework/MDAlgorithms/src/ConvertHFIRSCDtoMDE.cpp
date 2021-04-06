@@ -235,6 +235,12 @@ void ConvertHFIRSCDtoMDE::exec() {
 
   outputWS->refreshCache();
   outputWS->copyExperimentInfos(*inputWS);
+  auto &outRun = outputWS->getExperimentInfo(0)->mutableRun();
+  if (outRun.hasProperty("wavelength")) {
+    outRun.removeLogData("wavelength");
+  }
+  outRun.addLogData(new PropertyWithValue<double>("wavelength", wavelength));
+  outRun.getProperty("wavelength")->setUnits("Angstrom");
 
   auto user_convention = Kernel::ConfigService::Instance().getString("Q.convention");
   auto ws_convention = outputWS->getConvention();

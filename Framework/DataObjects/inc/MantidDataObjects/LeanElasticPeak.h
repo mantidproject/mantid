@@ -33,7 +33,7 @@ public:
   LeanElasticPeak();
   LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame);
   LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame, const Mantid::Kernel::Matrix<double> &goniometer,
-                  boost::optional<std::shared_ptr<Geometry::ReferenceFrame>> refFrame = boost::none);
+                  boost::optional<std::shared_ptr<const Geometry::ReferenceFrame>> refFrame = boost::none);
   LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame, double wavelength);
 
   /// Copy constructor
@@ -84,7 +84,7 @@ public:
   LeanElasticPeak &operator=(const LeanElasticPeak &other);
 
 private:
-  void setReferenceFrame(std::shared_ptr<Geometry::ReferenceFrame> frame);
+  void setReferenceFrame(std::shared_ptr<const Geometry::ReferenceFrame> frame);
 
   /// Q_sample vector
   Mantid::Kernel::V3D m_Qsample;
@@ -92,7 +92,7 @@ private:
   /// Wavelength of neutrons at the peak
   double m_wavelength;
 
-  std::shared_ptr<Geometry::ReferenceFrame> m_refFrame;
+  std::shared_ptr<const Geometry::ReferenceFrame> m_refFrame;
 
   /// Static logger
   static Mantid::Kernel::Logger g_log;

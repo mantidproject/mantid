@@ -104,11 +104,14 @@ made to facilitate this.
 - New LeanElasticPeak and LeanElasticPeakWorkspace has been created :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`
 - :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` has been modified to optionally create a :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
 - :ref:`FindPeaksMD <algm-FindPeaksMD>` has been modified to optionally create a :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
+- :ref:`PredictPeaks <algm-PredictPeaks>` has been modified to optionally create a :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
+- New algorithm :ref:`HFIRCalculateGoniometer <algm-HFIRCalculateGoniometer>` allows the goniometer to be found for constant wavelength peaks after creation, work with :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
 - These following other algorithms have either been made to work or confirmed to already work with the LeanElasticPeak:
 
    - :ref:`algm-AddPeakHKL`
    - :ref:`algm-CalculatePeaksHKL`
    - :ref:`algm-CentroidPeaksMD`
+   - :ref:`algm-CompareWorkspaces`
    - :ref:`algm-CombinePeaksWorkspaces`
    - :ref:`algm-FilterPeaks`
    - :ref:`algm-FindUBUsingFFT`
@@ -119,8 +122,10 @@ made to facilitate this.
    - :ref:`algm-IntegratePeaksMD`
    - :ref:`algm-LoadNexusProcessed`
    - :ref:`algm-SaveNexusProcessed`
+   - :ref:`algm-SaveHKLCW`
    - :ref:`algm-SelectCellOfType`
    - :ref:`algm-SelectCellWithForm`
+   - :ref:`algm-SortPeaksWorkspace`
    - :ref:`algm-ShowPossibleCells`
    - :ref:`algm-TransformHKL`
 
