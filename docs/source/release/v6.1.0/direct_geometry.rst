@@ -26,5 +26,4 @@ BugFixes
 - Fixed runtime error when trying to delete workspace for the second time.
 - Fix for colorcycle problem for multiple curves on one plot.
 
-
 :ref:`Release 6.1.0 <v6.1.0>`
