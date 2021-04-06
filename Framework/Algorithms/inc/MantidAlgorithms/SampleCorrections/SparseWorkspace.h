@@ -66,7 +66,7 @@ protected:
   HistogramData::HistogramE esqrt(HistogramData::HistogramE e) const;
 
 private:
-  Workspace2D *doClone() const override;
+  SparseWorkspace *doClone() const override;
 };
 
 /// unique pointer to Mantid::API::SparseWorkspace
