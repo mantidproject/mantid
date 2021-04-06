@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.contexts.muon_data_context import construct_empty_group, construct_empty_pair
-from Muon.GUI.Common.muon_group import MuonGroup, MuonDiff
+from Muon.GUI.Common.muon_diff import MuonDiff
+from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_group import MuonRun
 from enum import Enum
@@ -96,7 +97,7 @@ class GroupingTabModel(object):
 
     @property
     def selected_groups_and_pairs(self):
-        return self.selected_groups+self.selected_pairs+self.selected_diffs
+        return self._groups_and_pairs.selected_groups_and_pairs
 
     def show_all_groups_and_pairs(self):
         self._context.show_all_groups()
@@ -139,24 +140,27 @@ class GroupingTabModel(object):
         for pair in self._groups_and_pairs.pairs:
             if name == pair.forward_group or name == pair.backward_group:
                 used_by += pair.name + ", "
-        for diff in self._groups_and_pairs.diffs:
-            if name == diff.forward_group or name == diff.backward_group:
-                used_by += diff.name +", "
+        # Check diffs
+        used_by_diffs = self.check_if_used_by_diff(name, True)
+        if used_by_diffs:
+            used_by += used_by_diffs + ", "
         if used_by:
             # the -2 removes the space and comma
-            return name + " is used by: "+ used_by[0:-2]
+            return name + " is used by: " + used_by[0:-2]
         else:
             return used_by
 
-    def check_pair_in_use(self, name):
-        used_by = ""
+    def check_if_used_by_diff(self, name, called_from_check_group=False):
         # check diffs
+        used_by = ""
         for diff in self._groups_and_pairs.diffs:
-            if name == diff.forward_group or name == diff.backward_group:
-                used_by += diff.name +", "
+            if name == diff.positive or name == diff.negative:
+                used_by += diff.name + ", "
         if used_by:
             # the -2 removes the space and comma
-            return name + " is used by: "+ used_by[0:-2]
+            if called_from_check_group:
+                return used_by[0:-2]
+            return name + " is used by: " + used_by[0:-2]
         else:
             return used_by
 
@@ -193,12 +197,6 @@ class GroupingTabModel(object):
     def remove_groups_by_name(self, name_list):
         for name in name_list:
             self._groups_and_pairs.remove_group(name)
-            self.remove_pairs_with_removed_name(name)
-
-    def remove_pairs_with_removed_name(self, group_name):
-        for pair in self._groups_and_pairs.pairs:
-            if pair.forward_group == group_name or pair.backward_group == group_name:
-                self._groups_and_pairs.remove_pair(pair.name)
 
     def remove_pairs_by_name(self, name_list):
         for name in name_list:
@@ -260,7 +258,7 @@ class GroupingTabModel(object):
                 self._data.get_loaded_data_for_run(self._data.current_runs[-1])['OutputWorkspace'][0].workspace.dataX(
                     0)), 3)
         else:
-            return 0.0
+            return 1.0
 
     def get_first_good_data_from_file(self):
         if self._data.current_runs:

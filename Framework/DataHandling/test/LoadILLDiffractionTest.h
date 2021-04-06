@@ -29,9 +29,7 @@ class LoadILLDiffractionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadILLDiffractionTest *createSuite() {
-    return new LoadILLDiffractionTest();
-  }
+  static LoadILLDiffractionTest *createSuite() { return new LoadILLDiffractionTest(); }
   static void destroySuite(LoadILLDiffractionTest *suite) { delete suite; }
 
   LoadILLDiffractionTest() {
@@ -53,8 +51,7 @@ public:
       ConfigService::Instance().setFacility(m_oldFacility);
     }
     if (!m_oldInstrument.empty()) {
-      ConfigService::Instance().setString("default.instrument",
-                                          m_oldInstrument);
+      ConfigService::Instance().setString("default.instrument", m_oldInstrument);
     }
   }
 
@@ -72,8 +69,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "170607.nxs"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ConvertAxisAndTranspose", true))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
@@ -97,8 +93,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "967100.nxs"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DataType", "Raw"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
@@ -112,8 +107,7 @@ public:
     TS_ASSERT(!outputWS->isDistribution())
 
     // two theta of the first pixel
-    TS_ASSERT_DELTA(outputWS->detectorInfo().signedTwoTheta(1) * RAD_2_DEG,
-                    -2.79662, 1E-5)
+    TS_ASSERT_DELTA(outputWS->detectorInfo().signedTwoTheta(1) * RAD_2_DEG, -2.79662, 1E-5)
 
     TS_ASSERT_EQUALS(outputWS->x(0)[0], 0.)
     TS_ASSERT_EQUALS(outputWS->y(0)[0], 2685529.)
@@ -169,9 +163,7 @@ public:
     TS_ASSERT_EQUALS(sample->value(), "2017-May-15 14:36:18  4.9681\n")
 
     TS_ASSERT_DELTA(ei, 14.09, 0.01)
-    TS_ASSERT_EQUALS(
-        outputWS->run().getProperty("Detector.calibration_file")->value(),
-        "none")
+    TS_ASSERT_EQUALS(outputWS->run().getProperty("Detector.calibration_file")->value(), "none")
     checkTimeFormat(outputWS);
   }
 
@@ -185,11 +177,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "967100.nxs"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DataType", "Calibrated"))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e, std::string(e.what()),
                             "Some invalid Properties found: [ DataType ]")
   }
 
@@ -207,8 +197,7 @@ public:
     // to match the final configuration having the custom NX_class attribute
     // So this will not run with generic Load
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "000017.nxs"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
@@ -242,21 +231,20 @@ public:
     TS_ASSERT_EQUALS(scanType->value(), "OtherScan")
     TS_ASSERT_DELTA(steps, 21., 1E-10)
 
-    const std::string omegaTimeSeriesValue =
-        "2017-Feb-15 08:58:52  1\n2017-Feb-15 08:58:52.521547000  "
-        "1.2\n2017-Feb-15 08:58:53.043086000  1.4\n2017-Feb-15 "
-        "08:58:53.564674000  1.6\n2017-Feb-15 08:58:54.086244000  "
-        "1.8\n2017-Feb-15 08:58:54.600926000  2\n2017-Feb-15 "
-        "08:58:55.122357000  2.2\n2017-Feb-15 08:58:55.643809000  "
-        "2.4\n2017-Feb-15 08:58:56.165310000  2.6\n2017-Feb-15 "
-        "08:58:56.686815000  2.8\n2017-Feb-15 08:58:57.208370000  "
-        "3\n2017-Feb-15 08:58:57.730012999  3.2\n2017-Feb-15 "
-        "08:58:58.251527998  3.4\n2017-Feb-15 08:58:58.773040998  "
-        "3.6\n2017-Feb-15 08:58:59.294480998  3.8\n2017-Feb-15 "
-        "08:58:59.815922997  4\n2017-Feb-15 08:59:00.337767997  "
-        "4.2\n2017-Feb-15 08:59:00.859268997  4.4\n2017-Feb-15 "
-        "08:59:01.380606996  4.6\n2017-Feb-15 08:59:01.902055996  "
-        "4.8\n2017-Feb-15 08:59:02.423509996  5\n";
+    const std::string omegaTimeSeriesValue = "2017-Feb-15 08:58:52  1\n2017-Feb-15 08:58:52.521547000  "
+                                             "1.2\n2017-Feb-15 08:58:53.043086000  1.4\n2017-Feb-15 "
+                                             "08:58:53.564674000  1.6\n2017-Feb-15 08:58:54.086244000  "
+                                             "1.8\n2017-Feb-15 08:58:54.600926000  2\n2017-Feb-15 "
+                                             "08:58:55.122357000  2.2\n2017-Feb-15 08:58:55.643809000  "
+                                             "2.4\n2017-Feb-15 08:58:56.165310000  2.6\n2017-Feb-15 "
+                                             "08:58:56.686815000  2.8\n2017-Feb-15 08:58:57.208370000  "
+                                             "3\n2017-Feb-15 08:58:57.730012999  3.2\n2017-Feb-15 "
+                                             "08:58:58.251527998  3.4\n2017-Feb-15 08:58:58.773040998  "
+                                             "3.6\n2017-Feb-15 08:58:59.294480998  3.8\n2017-Feb-15 "
+                                             "08:58:59.815922997  4\n2017-Feb-15 08:59:00.337767997  "
+                                             "4.2\n2017-Feb-15 08:59:00.859268997  4.4\n2017-Feb-15 "
+                                             "08:59:01.380606996  4.6\n2017-Feb-15 08:59:01.902055996  "
+                                             "4.8\n2017-Feb-15 08:59:02.423509996  5\n";
 
     TS_ASSERT_EQUALS(omega->value(), omegaTimeSeriesValue)
     checkTimeFormat(outputWS);
@@ -271,14 +259,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
-    MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("_outWS");
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("_outWS");
     TS_ASSERT(outputWS)
 
     const auto detectorInfo = outputWS->detectorInfo();
     const auto indexOfFirstDet = detectorInfo.indexOf(1);
-    const V3D position =
-        detectorInfo.position(std::make_pair(indexOfFirstDet, 0));
+    const V3D position = detectorInfo.position(std::make_pair(indexOfFirstDet, 0));
     double r, theta, phi;
     position.getSpherical(r, theta, phi);
     TS_ASSERT_DELTA(theta, 5.825, 0.001);
@@ -293,14 +279,12 @@ public:
 
     Load alg;
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "967100-967101.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "967100-967101.nxs"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
-    MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("_outWS");
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("_outWS");
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 3073)
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
@@ -380,32 +364,27 @@ public:
     TS_ASSERT(outputWS)
     const auto &detInfo = outputWS->detectorInfo();
     // Number of time indexes * (number of tubes * number of pixels + monitor)
-    TS_ASSERT_EQUALS(
-        outputWS->getNumberHistograms(),
-        SCAN_COUNT * (NUMBER_OF_TUBES * NUMBER_OF_PIXELS + NUMBER_OF_MONITORS))
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(),
+                     SCAN_COUNT * (NUMBER_OF_TUBES * NUMBER_OF_PIXELS + NUMBER_OF_MONITORS))
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
 
     // Check time ranges
     const std::string EXPECTED_START_TIME = "2015-04-16T16:25:31";
     const std::string EXPECTED_SECOND_TIME = "2015-04-16T16:26:08.804000000";
-    const std::string EXPECTED_SECOND_FROM_END_TIME =
-        "2015-04-16T16:40:34.289000000";
+    const std::string EXPECTED_SECOND_FROM_END_TIME = "2015-04-16T16:40:34.289000000";
     const std::string EXPECTED_END_TIME = "2015-04-16T16:41:11.956000000";
 
     TS_ASSERT_EQUALS(detInfo.scanCount(), SCAN_COUNT)
 
     const auto startRange = detInfo.scanIntervals()[0];
     const auto secondRange = detInfo.scanIntervals()[1];
-    const auto secondFromEndRange =
-        detInfo.scanIntervals()[detInfo.scanCount() - 2];
+    const auto secondFromEndRange = detInfo.scanIntervals()[detInfo.scanCount() - 2];
     const auto endRange = detInfo.scanIntervals()[detInfo.scanCount() - 1];
     TS_ASSERT_EQUALS(startRange.first.toISO8601String(), EXPECTED_START_TIME)
     TS_ASSERT_EQUALS(startRange.second.toISO8601String(), EXPECTED_SECOND_TIME)
     TS_ASSERT_EQUALS(secondRange.first.toISO8601String(), EXPECTED_SECOND_TIME)
-    TS_ASSERT_EQUALS(secondFromEndRange.second.toISO8601String(),
-                     EXPECTED_SECOND_FROM_END_TIME)
-    TS_ASSERT_EQUALS(endRange.first.toISO8601String(),
-                     EXPECTED_SECOND_FROM_END_TIME)
+    TS_ASSERT_EQUALS(secondFromEndRange.second.toISO8601String(), EXPECTED_SECOND_FROM_END_TIME)
+    TS_ASSERT_EQUALS(endRange.first.toISO8601String(), EXPECTED_SECOND_FROM_END_TIME)
     TS_ASSERT_EQUALS(endRange.second.toISO8601String(), EXPECTED_END_TIME)
 
     // Check monitor does not move
@@ -427,9 +406,7 @@ public:
         auto aboveCentrePixel = belowCentrePixel + 1;
         TS_ASSERT(!detInfo.isMonitor({belowCentrePixel, j}))
         TS_ASSERT(!detInfo.isMonitor({aboveCentrePixel, j}))
-        auto tubeCentre = (detInfo.position({belowCentrePixel, j}) +
-                           detInfo.position({aboveCentrePixel, j})) /
-                          2;
+        auto tubeCentre = (detInfo.position({belowCentrePixel, j}) + detInfo.position({aboveCentrePixel, j})) / 2;
         // Check the tube centre is 90 degrees from the y-axis
         TS_ASSERT_DELTA(tubeCentre.angle(V3D(0, 1, 0)) * RAD_2_DEG, 90.0, 1e-6)
         // Check the tube centre is at the expected angle from the z-axis
@@ -440,12 +417,11 @@ public:
         //
         // A generous tolerance is required as the NeXus file contains the
         // actual hardware readings, which have a large tolerance.
-        TS_ASSERT_DELTA(
-            tubeCentre.angle(V3D(0, 0, 1)) * RAD_2_DEG,
-            std::abs(ANGULAR_SCAN_INCREMENT * double(j) + TUBE_128_FIRST_ANGLE -
-                     ANGULAR_DETECTOR_SPACING * (NUMBER_OF_TUBES - 1) +
-                     ANGULAR_DETECTOR_SPACING * double(i)),
-            1e-2)
+        TS_ASSERT_DELTA(tubeCentre.angle(V3D(0, 0, 1)) * RAD_2_DEG,
+                        std::abs(ANGULAR_SCAN_INCREMENT * double(j) + TUBE_128_FIRST_ANGLE -
+                                 ANGULAR_DETECTOR_SPACING * (NUMBER_OF_TUBES - 1) +
+                                 ANGULAR_DETECTOR_SPACING * double(i)),
+                        1e-2)
       }
       checkTimeFormat(outputWS);
     }
@@ -454,22 +430,16 @@ public:
 
     if (dataType == "Raw") {
       TS_ASSERT_DELTA(outputWS->y(25)[0], 0, 1e-12)
-      TS_ASSERT_EQUALS(
-          outputWS->run().getProperty("Detector.calibration_file")->value(),
-          "none")
+      TS_ASSERT_EQUALS(outputWS->run().getProperty("Detector.calibration_file")->value(), "none")
     } else {
       TS_ASSERT_DELTA(outputWS->y(25)[0], 1, 1e-12)
-      TS_ASSERT_EQUALS(
-          outputWS->run().getProperty("Detector.calibration_file")->value(),
-          "d2bcal_23Nov16_c.2d")
+      TS_ASSERT_EQUALS(outputWS->run().getProperty("Detector.calibration_file")->value(), "d2bcal_23Nov16_c.2d")
     }
   }
 
   void test_D2B_single_file() { do_test_D2B_single_file("Auto"); }
 
-  void test_D2B_single_file_calibrated() {
-    do_test_D2B_single_file("Calibrated");
-  }
+  void test_D2B_single_file_calibrated() { do_test_D2B_single_file("Calibrated"); }
 
   void test_D2B_single_file_raw() { do_test_D2B_single_file("Raw"); }
 
@@ -492,8 +462,8 @@ public:
 
   void checkTimeFormat(MatrixWorkspace_const_sptr outputWS) {
     TS_ASSERT(outputWS->run().hasProperty("start_time"));
-    TS_ASSERT(Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(
-        outputWS->run().getProperty("start_time")->value()));
+    TS_ASSERT(
+        Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(outputWS->run().getProperty("start_time")->value()));
   }
 
   void test_D1B() {
@@ -513,8 +483,7 @@ public:
     const auto run = outputWS->run();
 
     const auto &detInfo = outputWS->detectorInfo();
-    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(),
-                     NUMBER_OF_TUBES + NUMBER_OF_MONITORS)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), NUMBER_OF_TUBES + NUMBER_OF_MONITORS)
 
     TS_ASSERT(!detInfo.isMonitor({1, 0}))
     auto firstTube = detInfo.position({1, 0});
@@ -532,12 +501,8 @@ private:
 
 class LoadILLDiffractionTestPerformance : public CxxTest::TestSuite {
 public:
-  static LoadILLDiffractionTestPerformance *createSuite() {
-    return new LoadILLDiffractionTestPerformance();
-  }
-  static void destroySuite(LoadILLDiffractionTestPerformance *suite) {
-    delete suite;
-  }
+  static LoadILLDiffractionTestPerformance *createSuite() { return new LoadILLDiffractionTestPerformance(); }
+  static void destroySuite(LoadILLDiffractionTestPerformance *suite) { delete suite; }
 
   LoadILLDiffractionTestPerformance() {}
 

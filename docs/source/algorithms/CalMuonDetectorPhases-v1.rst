@@ -24,8 +24,8 @@ is then treated as a fixed constant when fitting the spectra to the function abo
 
 The algorithm outputs a table workspace containing the spectrum number, the asymmetry and the phase.
 This table is intended to be used as the input
-*PhaseTable* to :ref:`PhaseQuad <algm-PhaseQuad>`. 
-Usually for muon instruments, each spectrum will correspond to one detector (spectrum number = detector ID).If a spectrum is empty (i.e. the detector is dead) then the phase and asymmetry are recorded as zero and :math:`999` respectively. 
+*PhaseTable* to :ref:`PhaseQuad <algm-PhaseQuad>`.
+Usually for muon instruments, each spectrum will correspond to one detector (spectrum number = detector ID).If a spectrum is empty (i.e. the detector is dead) then the phase and asymmetry are recorded as zero and :math:`999` respectively.
 
 In addition, the fitting results are returned
 in a workspace group, where each of the items stores the original data (after removing the
@@ -35,10 +35,10 @@ and fit as spectra 0, 1 and 2 respectively.
 There are five optional input properties: *FirstGoodData* and *LastGoodData* define the fitting range.
 When left blank, *FirstGoodData* is set to the value stored in the input workspace and *LastGoodData*
 is set to the last available bin. The optional property *Frequency* allows the user to select an
-initial value for :math:`\omega` (a starting value for the fit). If this property is not supplied, the 
+initial value for :math:`\omega` (a starting value for the fit). If this property is not supplied, the
 algorithm takes this value from the *sample_magn_field* log multiplied by :math:`2\pi\cdot g_\mu`, where
 :math:`g_\mu` is the muon gyromagnetic ratio (0.01355 MHz/G).
-Finally, the optional properties *ForwardSpectra* and *BackwardSpectra* are the sets of spectra in the 
+Finally, the optional properties *ForwardSpectra* and *BackwardSpectra* are the sets of spectra in the
 forward and backward groups. If these are not supplied, the algorithm will find the instrument from the
 input workspace and use the default grouping for this instrument.
 
@@ -78,7 +78,7 @@ Output:
 
   def isItDead(phase,amplitude):
      if phase == 0.0 and amplitude == 999.0:
-         return True 
+         return True
      else:
          return False
 
@@ -92,7 +92,7 @@ Output:
   #make y data
   def genYData(x,phi):
       return np.sin(5.0*x+phi)
-    
+
   yData = np.append(genYData(x, 0.0), genYData(x, 1.2))
   yData = np.append(yData, np.zeros(len(x))) # dead detector
   yData = np.append(yData, genYData(x, 3.4))
@@ -109,7 +109,7 @@ Output:
           print("Detector {} is dead".format(detectorTable.cell(i,0)))
       else:
           print("Detector {} is working".format(detectorTable.cell(i,0)))
-   
+
 Output:
 
 .. testoutput:: CalMuonDetectorPhasesDeadExample

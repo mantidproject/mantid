@@ -34,17 +34,13 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(ConvertToMDMinMaxGlobal)
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string ConvertToMDMinMaxGlobal::name() const {
-  return "ConvertToMDMinMaxGlobal";
-}
+const std::string ConvertToMDMinMaxGlobal::name() const { return "ConvertToMDMinMaxGlobal"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int ConvertToMDMinMaxGlobal::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ConvertToMDMinMaxGlobal::category() const {
-  return "MDAlgorithms\\Creation";
-}
+const std::string ConvertToMDMinMaxGlobal::category() const { return "MDAlgorithms\\Creation"; }
 
 /** Initialize the algorithm's properties.
  */
@@ -56,25 +52,22 @@ void ConvertToMDMinMaxGlobal::init() {
   // histogram needed by ConvertUnits
   ws_valid->add<HistogramValidator>();
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input, ws_valid),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input, ws_valid),
       "An input Matrix Workspace (Workspace2D or Event workspace) ");
 
-  std::vector<std::string> Q_modes =
-      MDAlgorithms::MDTransfFactory::Instance().getKeys();
+  std::vector<std::string> Q_modes = MDAlgorithms::MDTransfFactory::Instance().getKeys();
   // something to do with different moments of time when algorithm or test loads
   // library. To avoid empty factory always do this.
   if (Q_modes.empty())
     Q_modes.assign(1, "ERROR IN LOADING Q-converters");
 
   /// this variable describes default possible ID-s for Q-dimensions
-  declareProperty(
-      "QDimensions", Q_modes[0], std::make_shared<StringListValidator>(Q_modes),
-      "String, describing MD-analysis modes, this algorithm can process. "
-      "There are 3 modes currently available and described in details on"
-      "*MD Transformation factory* page. "
-      "The modes names are **CopyToMD**, **|Q|** and **Q3D**",
-      Direction::InOut);
+  declareProperty("QDimensions", Q_modes[0], std::make_shared<StringListValidator>(Q_modes),
+                  "String, describing MD-analysis modes, this algorithm can process. "
+                  "There are 3 modes currently available and described in details on"
+                  "*MD Transformation factory* page. "
+                  "The modes names are **CopyToMD**, **|Q|** and **Q3D**",
+                  Direction::InOut);
   /// temporary, until dEMode is not properly defined on Workspace
   std::vector<std::string> dE_modes = Kernel::DeltaEMode::availableTypes();
   declareProperty("dEAnalysisMode", dE_modes[Kernel::DeltaEMode::Direct],
@@ -88,38 +81,30 @@ void ConvertToMDMinMaxGlobal::init() {
                   Direction::InOut);
 
   setPropertySettings("dEAnalysisMode",
-                      std::make_unique<VisibleWhenProperty>(
-                          "QDimensions", IS_NOT_EQUAL_TO, "CopyToMD"));
+                      std::make_unique<VisibleWhenProperty>("QDimensions", IS_NOT_EQUAL_TO, "CopyToMD"));
 
   std::vector<std::string> TargFrames{"AutoSelect", "Q", "HKL"};
-  declareProperty(
-      "Q3DFrames", "AutoSelect",
-      std::make_shared<StringListValidator>(TargFrames),
-      "What will be the Q-dimensions of the output workspace in **Q3D** case?"
-      "  **AutoSelect**: **Q** by default, **HKL** if sample has a UB matrix."
-      "  **Q** - momentum in inverse angstroms. Can be used for both "
-      "laboratory or sample frame."
-      "  **HKL** - reciprocal lattice units");
+  declareProperty("Q3DFrames", "AutoSelect", std::make_shared<StringListValidator>(TargFrames),
+                  "What will be the Q-dimensions of the output workspace in **Q3D** case?"
+                  "  **AutoSelect**: **Q** by default, **HKL** if sample has a UB matrix."
+                  "  **Q** - momentum in inverse angstroms. Can be used for both "
+                  "laboratory or sample frame."
+                  "  **HKL** - reciprocal lattice units");
 
-  setPropertySettings("Q3DFrames", std::make_unique<VisibleWhenProperty>(
-                                       "QDimensions", IS_EQUAL_TO, "Q3D"));
+  setPropertySettings("Q3DFrames", std::make_unique<VisibleWhenProperty>("QDimensions", IS_EQUAL_TO, "Q3D"));
 
-  declareProperty(
-      std::make_unique<ArrayProperty<std::string>>("OtherDimensions",
-                                                   Direction::Input),
-      "List(comma separated) of additional to **Q** and **DeltaE** variables "
-      "which form additional "
-      "(orthogonal) to **Q** dimensions in the target workspace (e.g. "
-      "Temperature or Magnetic field). "
-      "These variables had to be logged during experiment and the names of "
-      "these variables have to coincide "
-      "with the log names for the records of these variables in the source "
-      "workspace.");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("OtherDimensions", Direction::Input),
+                  "List(comma separated) of additional to **Q** and **DeltaE** variables "
+                  "which form additional "
+                  "(orthogonal) to **Q** dimensions in the target workspace (e.g. "
+                  "Temperature or Magnetic field). "
+                  "These variables had to be logged during experiment and the names of "
+                  "these variables have to coincide "
+                  "with the log names for the records of these variables in the source "
+                  "workspace.");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("MinValues", Direction::Output));
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("MaxValues", Direction::Output));
+  declareProperty(std::make_unique<ArrayProperty<double>>("MinValues", Direction::Output));
+  declareProperty(std::make_unique<ArrayProperty<double>>("MaxValues", Direction::Output));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -153,22 +138,18 @@ void ConvertToMDMinMaxGlobal::exec() {
       conv->executeAsChildAlg();
 
       wstemp = conv->getProperty("OutputWorkspace");
-      evWS = std::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
-          wstemp);
+      evWS = std::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(wstemp);
       if (evWS)
-        qmax = evWS->getTofMax() *
-               2; // assumes maximum scattering angle 180 degrees
+        qmax = evWS->getTofMax() * 2; // assumes maximum scattering angle 180 degrees
       else
-        qmax = wstemp->getXMax() *
-               2.; // assumes maximum scattering angle 180 degrees
-    } else         // inelastic
+        qmax = wstemp->getXMax() * 2.; // assumes maximum scattering angle 180 degrees
+    } else                             // inelastic
     {
       conv->setProperty("Target", "DeltaE");
       conv->setProperty("Emode", GeometryMode);
       conv->executeAsChildAlg();
       wstemp = conv->getProperty("OutputWorkspace");
-      evWS = std::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
-          wstemp);
+      evWS = std::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(wstemp);
       if (evWS) {
         deltaEmin = evWS->getTofMin();
         deltaEmax = evWS->getTofMax();
@@ -183,14 +164,11 @@ void ConvertToMDMinMaxGlobal::exec() {
         deltaEmax = -deltaEmin;
 
       // Conversion constant for E->k. k(A^-1) = sqrt(energyToK*E(meV))
-      const double energyToK = 8.0 * M_PI * M_PI *
-                               PhysicalConstants::NeutronMass *
-                               PhysicalConstants::meV * 1e-20 /
+      const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass * PhysicalConstants::meV * 1e-20 /
                                (PhysicalConstants::h * PhysicalConstants::h);
       if (GeometryMode == "Direct") {
         const auto Ei = ws->run().getPropertyValueAsType<double>("Ei");
-        qmax =
-            std::sqrt(energyToK * Ei) + std::sqrt(energyToK * (Ei - deltaEmin));
+        qmax = std::sqrt(energyToK * Ei) + std::sqrt(energyToK * (Ei - deltaEmin));
       } else // indirect
       {
         double Ef = -DBL_MAX, Eftemp = Ef;
@@ -207,8 +185,7 @@ void ConvertToMDMinMaxGlobal::exec() {
             throw std::runtime_error("Could not find a fixed final energy for "
                                      "indirect geometry instrument.");
         }
-        qmax =
-            std::sqrt(energyToK * Ef) + std::sqrt(energyToK * (Ef + deltaEmax));
+        qmax = std::sqrt(energyToK * Ef) + std::sqrt(energyToK * (Ef + deltaEmax));
       }
     }
     // Calculate limits from qmax
@@ -218,8 +195,7 @@ void ConvertToMDMinMaxGlobal::exec() {
     } else // Q3D
     {
       // Q in angstroms
-      if ((Q3DFrames == "Q") || ((Q3DFrames == "AutoSelect") &&
-                                 (!ws->sample().hasOrientedLattice()))) {
+      if ((Q3DFrames == "Q") || ((Q3DFrames == "AutoSelect") && (!ws->sample().hasOrientedLattice()))) {
         MinValues.emplace_back(-qmax);
         MinValues.emplace_back(-qmax);
         MinValues.emplace_back(-qmax);
@@ -232,8 +208,7 @@ void ConvertToMDMinMaxGlobal::exec() {
           g_log.error() << "Sample has no oriented lattice\n";
           throw std::invalid_argument("No UB set");
         }
-        Mantid::Geometry::OrientedLattice ol =
-            ws->sample().getOrientedLattice();
+        Mantid::Geometry::OrientedLattice ol = ws->sample().getOrientedLattice();
         qmax /= (2. * M_PI);
         MinValues.emplace_back(-qmax * ol.a());
         MinValues.emplace_back(-qmax * ol.b());
@@ -253,8 +228,7 @@ void ConvertToMDMinMaxGlobal::exec() {
 
   for (auto &OtherDimension : OtherDimensions) {
     if (!ws->run().hasProperty(OtherDimension)) {
-      g_log.error() << "The workspace does not have a property "
-                    << OtherDimension << '\n';
+      g_log.error() << "The workspace does not have a property " << OtherDimension << '\n';
       throw std::invalid_argument("Property not found. Please see error log.");
     }
     Kernel::Property *pProperty = (ws->run().getProperty(OtherDimension));
@@ -264,14 +238,11 @@ void ConvertToMDMinMaxGlobal::exec() {
       MaxValues.emplace_back(p->getStatistics().maximum);
     } else // it may be not a time series property but just number property
     {
-      auto *property =
-          dynamic_cast<Kernel::PropertyWithValue<double> *>(pProperty);
+      auto *property = dynamic_cast<Kernel::PropertyWithValue<double> *>(pProperty);
       if (!property) {
-        std::string ERR =
-            " Can not interpret property, used as dimension.\n Property: " +
-            OtherDimension +
-            " is neither a time series (run) property nor "
-            "a property with value<double>";
+        std::string ERR = " Can not interpret property, used as dimension.\n Property: " + OtherDimension +
+                          " is neither a time series (run) property nor "
+                          "a property with value<double>";
         throw(std::invalid_argument(ERR));
       }
       double val = *property;

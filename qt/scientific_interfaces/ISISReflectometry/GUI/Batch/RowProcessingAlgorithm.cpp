@@ -24,45 +24,33 @@ using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 namespace { // unnamed namespace
 // These functions update properties in an AlgorithmRuntimeProps for specific
 // properties for the row reduction algorithm
-void updateInputWorkspacesProperties(
-    AlgorithmRuntimeProps &properties,
-    std::vector<std::string> const &inputRunNumbers) {
+void updateInputWorkspacesProperties(AlgorithmRuntimeProps &properties,
+                                     std::vector<std::string> const &inputRunNumbers) {
   AlgorithmProperties::update("InputRunList", inputRunNumbers, properties);
 }
 
-void updateTransmissionWorkspaceProperties(
-    AlgorithmRuntimeProps &properties,
-    TransmissionRunPair const &transmissionRuns) {
-  AlgorithmProperties::update("FirstTransmissionRunList",
-                              transmissionRuns.firstRunList(), properties);
-  AlgorithmProperties::update("SecondTransmissionRunList",
-                              transmissionRuns.secondRunList(), properties);
+void updateTransmissionWorkspaceProperties(AlgorithmRuntimeProps &properties,
+                                           TransmissionRunPair const &transmissionRuns) {
+  AlgorithmProperties::update("FirstTransmissionRunList", transmissionRuns.firstRunList(), properties);
+  AlgorithmProperties::update("SecondTransmissionRunList", transmissionRuns.secondRunList(), properties);
 }
 
-void updateMomentumTransferProperties(AlgorithmRuntimeProps &properties,
-                                      RangeInQ const &rangeInQ) {
-  AlgorithmProperties::update("MomentumTransferMin", rangeInQ.min(),
-                              properties);
-  AlgorithmProperties::update("MomentumTransferMax", rangeInQ.max(),
-                              properties);
-  AlgorithmProperties::update("MomentumTransferStep", rangeInQ.step(),
-                              properties);
+void updateMomentumTransferProperties(AlgorithmRuntimeProps &properties, RangeInQ const &rangeInQ) {
+  AlgorithmProperties::update("MomentumTransferMin", rangeInQ.min(), properties);
+  AlgorithmProperties::update("MomentumTransferMax", rangeInQ.max(), properties);
+  AlgorithmProperties::update("MomentumTransferStep", rangeInQ.step(), properties);
 }
 
 void updateRowProperties(AlgorithmRuntimeProps &properties, Row const &row) {
-  updateInputWorkspacesProperties(
-      properties, row.reducedWorkspaceNames().inputRunNumbers());
-  updateTransmissionWorkspaceProperties(
-      properties, row.reducedWorkspaceNames().transmissionRuns());
+  updateInputWorkspacesProperties(properties, row.reducedWorkspaceNames().inputRunNumbers());
+  updateTransmissionWorkspaceProperties(properties, row.reducedWorkspaceNames().transmissionRuns());
   updateMomentumTransferProperties(properties, row.qRange());
   AlgorithmProperties::update("ThetaIn", row.theta(), properties);
   AlgorithmProperties::update("ScaleFactor", row.scaleFactor(), properties);
   AlgorithmProperties::updateFromMap(properties, row.reductionOptions());
 }
 
-void updateTransmissionStitchProperties(
-    AlgorithmRuntimeProps &properties,
-    TransmissionStitchOptions const &options) {
+void updateTransmissionStitchProperties(AlgorithmRuntimeProps &properties, TransmissionStitchOptions const &options) {
   auto range = options.overlapRange();
   if (range) {
     if (range->minSet())
@@ -73,149 +61,100 @@ void updateTransmissionStitchProperties(
   }
 
   if (!options.rebinParameters().empty()) {
-    AlgorithmProperties::update("Params", options.rebinParameters(),
-                                properties);
+    AlgorithmProperties::update("Params", options.rebinParameters(), properties);
   }
 
-  AlgorithmProperties::update("ScaleRHSWorkspace", options.scaleRHS(),
-                              properties);
+  AlgorithmProperties::update("ScaleRHSWorkspace", options.scaleRHS(), properties);
 }
 
-void updateBackgroundSubtractionProperties(
-    AlgorithmRuntimeProps &properties,
-    BackgroundSubtraction const &subtraction) {
-  AlgorithmProperties::update("SubtractBackground",
-                              subtraction.subtractBackground(), properties);
-  AlgorithmProperties::update(
-      "BackgroundCalculationMethod",
-      backgroundSubtractionTypeToString(subtraction.subtractionType()),
-      properties);
-  AlgorithmProperties::update("DegreeOfPolynomial",
-                              subtraction.degreeOfPolynomial(), properties);
-  AlgorithmProperties::update(
-      "CostFunction", costFunctionTypeToString(subtraction.costFunction()),
-      properties);
+void updateBackgroundSubtractionProperties(AlgorithmRuntimeProps &properties,
+                                           BackgroundSubtraction const &subtraction) {
+  AlgorithmProperties::update("SubtractBackground", subtraction.subtractBackground(), properties);
+  AlgorithmProperties::update("BackgroundCalculationMethod",
+                              backgroundSubtractionTypeToString(subtraction.subtractionType()), properties);
+  AlgorithmProperties::update("DegreeOfPolynomial", subtraction.degreeOfPolynomial(), properties);
+  AlgorithmProperties::update("CostFunction", costFunctionTypeToString(subtraction.costFunction()), properties);
 }
 
-void updatePolarizationCorrectionProperties(
-    AlgorithmRuntimeProps &properties,
-    PolarizationCorrections const &corrections) {
+void updatePolarizationCorrectionProperties(AlgorithmRuntimeProps &properties,
+                                            PolarizationCorrections const &corrections) {
   if (corrections.correctionType() == PolarizationCorrectionType::None)
     return;
 
   AlgorithmProperties::update("PolarizationAnalysis", true, properties);
 }
 
-void updateFloodCorrectionProperties(AlgorithmRuntimeProps &properties,
-                                     FloodCorrections const &corrections) {
-  AlgorithmProperties::update(
-      "FloodCorrection",
-      floodCorrectionTypeToString(corrections.correctionType()), properties);
+void updateFloodCorrectionProperties(AlgorithmRuntimeProps &properties, FloodCorrections const &corrections) {
+  AlgorithmProperties::update("FloodCorrection", floodCorrectionTypeToString(corrections.correctionType()), properties);
 
   if (corrections.correctionType() == FloodCorrectionType::Workspace)
-    AlgorithmProperties::update("FloodWorkspace", corrections.workspace(),
-                                properties);
+    AlgorithmProperties::update("FloodWorkspace", corrections.workspace(), properties);
 }
 
-void updateExperimentProperties(AlgorithmRuntimeProps &properties,
-                                Experiment const &experiment) {
-  AlgorithmProperties::update("AnalysisMode",
-                              analysisModeToString(experiment.analysisMode()),
-                              properties);
+void updateExperimentProperties(AlgorithmRuntimeProps &properties, Experiment const &experiment) {
+  AlgorithmProperties::update("AnalysisMode", analysisModeToString(experiment.analysisMode()), properties);
   AlgorithmProperties::update("Debug", experiment.debug(), properties);
-  AlgorithmProperties::update("SummationType",
-                              summationTypeToString(experiment.summationType()),
-                              properties);
-  AlgorithmProperties::update("ReductionType",
-                              reductionTypeToString(experiment.reductionType()),
-                              properties);
-  AlgorithmProperties::update("IncludePartialBins",
-                              experiment.includePartialBins(), properties);
-  updateTransmissionStitchProperties(properties,
-                                     experiment.transmissionStitchOptions());
-  updateBackgroundSubtractionProperties(properties,
-                                        experiment.backgroundSubtraction());
-  updatePolarizationCorrectionProperties(properties,
-                                         experiment.polarizationCorrections());
+  AlgorithmProperties::update("SummationType", summationTypeToString(experiment.summationType()), properties);
+  AlgorithmProperties::update("ReductionType", reductionTypeToString(experiment.reductionType()), properties);
+  AlgorithmProperties::update("IncludePartialBins", experiment.includePartialBins(), properties);
+  updateTransmissionStitchProperties(properties, experiment.transmissionStitchOptions());
+  updateBackgroundSubtractionProperties(properties, experiment.backgroundSubtraction());
+  updatePolarizationCorrectionProperties(properties, experiment.polarizationCorrections());
   updateFloodCorrectionProperties(properties, experiment.floodCorrections());
 }
 
-void updatePerThetaDefaultProperties(AlgorithmRuntimeProps &properties,
-                                     PerThetaDefaults const *perThetaDefaults) {
+void updatePerThetaDefaultProperties(AlgorithmRuntimeProps &properties, PerThetaDefaults const *perThetaDefaults) {
   if (!perThetaDefaults)
     return;
 
-  updateTransmissionWorkspaceProperties(
-      properties, perThetaDefaults->transmissionWorkspaceNames());
-  AlgorithmProperties::update(
-      "TransmissionProcessingInstructions",
-      perThetaDefaults->transmissionProcessingInstructions(), properties);
+  updateTransmissionWorkspaceProperties(properties, perThetaDefaults->transmissionWorkspaceNames());
+  AlgorithmProperties::update("TransmissionProcessingInstructions",
+                              perThetaDefaults->transmissionProcessingInstructions(), properties);
   updateMomentumTransferProperties(properties, perThetaDefaults->qRange());
-  AlgorithmProperties::update("ScaleFactor", perThetaDefaults->scaleFactor(),
+  AlgorithmProperties::update("ScaleFactor", perThetaDefaults->scaleFactor(), properties);
+  AlgorithmProperties::update("ProcessingInstructions", perThetaDefaults->processingInstructions(), properties);
+  AlgorithmProperties::update("BackgroundProcessingInstructions", perThetaDefaults->backgroundProcessingInstructions(),
                               properties);
-  AlgorithmProperties::update("ProcessingInstructions",
-                              perThetaDefaults->processingInstructions(),
-                              properties);
-  AlgorithmProperties::update(
-      "BackgroundProcessingInstructions",
-      perThetaDefaults->backgroundProcessingInstructions(), properties);
 }
 
-void updateWavelengthRangeProperties(
-    AlgorithmRuntimeProps &properties,
-    boost::optional<RangeInLambda> const &rangeInLambda) {
+void updateWavelengthRangeProperties(AlgorithmRuntimeProps &properties,
+                                     boost::optional<RangeInLambda> const &rangeInLambda) {
   if (!rangeInLambda)
     return;
 
-  AlgorithmProperties::update("WavelengthMin", rangeInLambda->min(),
-                              properties);
-  AlgorithmProperties::update("WavelengthMax", rangeInLambda->max(),
-                              properties);
+  AlgorithmProperties::update("WavelengthMin", rangeInLambda->min(), properties);
+  AlgorithmProperties::update("WavelengthMax", rangeInLambda->max(), properties);
 }
 
-void updateMonitorCorrectionProperties(AlgorithmRuntimeProps &properties,
-                                       MonitorCorrections const &monitor) {
-  AlgorithmProperties::update("I0MonitorIndex", monitor.monitorIndex(),
-                              properties);
-  AlgorithmProperties::update("NormalizeByIntegratedMonitors",
-                              monitor.integrate(), properties);
+void updateMonitorCorrectionProperties(AlgorithmRuntimeProps &properties, MonitorCorrections const &monitor) {
+  AlgorithmProperties::update("I0MonitorIndex", monitor.monitorIndex(), properties);
+  AlgorithmProperties::update("NormalizeByIntegratedMonitors", monitor.integrate(), properties);
   if (monitor.integralRange() && monitor.integralRange()->minSet())
-    AlgorithmProperties::update("MonitorIntegrationWavelengthMin",
-                                monitor.integralRange()->min(), properties);
+    AlgorithmProperties::update("MonitorIntegrationWavelengthMin", monitor.integralRange()->min(), properties);
   if (monitor.integralRange() && monitor.integralRange()->maxSet())
-    AlgorithmProperties::update("MonitorIntegrationWavelengthMax",
-                                monitor.integralRange()->max(), properties);
+    AlgorithmProperties::update("MonitorIntegrationWavelengthMax", monitor.integralRange()->max(), properties);
   if (monitor.backgroundRange() && monitor.backgroundRange()->minSet())
-    AlgorithmProperties::update("MonitorBackgroundWavelengthMin",
-                                monitor.backgroundRange()->min(), properties);
+    AlgorithmProperties::update("MonitorBackgroundWavelengthMin", monitor.backgroundRange()->min(), properties);
   if (monitor.backgroundRange() && monitor.backgroundRange()->maxSet())
-    AlgorithmProperties::update("MonitorBackgroundWavelengthMax",
-                                monitor.backgroundRange()->max(), properties);
+    AlgorithmProperties::update("MonitorBackgroundWavelengthMax", monitor.backgroundRange()->max(), properties);
 }
 
-void updateDetectorCorrectionProperties(AlgorithmRuntimeProps &properties,
-                                        DetectorCorrections const &detector) {
-  AlgorithmProperties::update("CorrectDetectors", detector.correctPositions(),
-                              properties);
+void updateDetectorCorrectionProperties(AlgorithmRuntimeProps &properties, DetectorCorrections const &detector) {
+  AlgorithmProperties::update("CorrectDetectors", detector.correctPositions(), properties);
   if (detector.correctPositions())
-    AlgorithmProperties::update(
-        "DetectorCorrectionType",
-        detectorCorrectionTypeToString(detector.correctionType()), properties);
+    AlgorithmProperties::update("DetectorCorrectionType", detectorCorrectionTypeToString(detector.correctionType()),
+                                properties);
 }
 
-void updateInstrumentProperties(AlgorithmRuntimeProps &properties,
-                                Instrument const &instrument) {
+void updateInstrumentProperties(AlgorithmRuntimeProps &properties, Instrument const &instrument) {
   updateWavelengthRangeProperties(properties, instrument.wavelengthRange());
-  updateMonitorCorrectionProperties(properties,
-                                    instrument.monitorCorrections());
-  updateDetectorCorrectionProperties(properties,
-                                     instrument.detectorCorrections());
+  updateMonitorCorrectionProperties(properties, instrument.monitorCorrections());
+  updateDetectorCorrectionProperties(properties, instrument.detectorCorrections());
 }
 
 class UpdateEventPropertiesVisitor : public boost::static_visitor<> {
 public:
-  explicit UpdateEventPropertiesVisitor(AlgorithmRuntimeProps &properties)
-      : m_properties(properties) {}
+  explicit UpdateEventPropertiesVisitor(AlgorithmRuntimeProps &properties) : m_properties(properties) {}
   void operator()(boost::blank const &) const {
     // No slicing specified so there is nothing to do
   }
@@ -224,65 +163,51 @@ public:
   }
   void operator()(UniformSlicingByTime const &slicing) const {
     enableSlicing();
-    AlgorithmProperties::update("TimeInterval", slicing.sliceLengthInSeconds(),
-                                m_properties);
+    AlgorithmProperties::update("TimeInterval", slicing.sliceLengthInSeconds(), m_properties);
   }
   void operator()(UniformSlicingByNumberOfSlices const &slicing) const {
     enableSlicing();
-    AlgorithmProperties::update("NumberOfSlices", slicing.numberOfSlices(),
-                                m_properties);
+    AlgorithmProperties::update("NumberOfSlices", slicing.numberOfSlices(), m_properties);
   }
   void operator()(CustomSlicingByList const &slicing) const {
     enableSlicing();
-    AlgorithmProperties::update("TimeInterval", slicing.sliceTimes(),
-                                m_properties);
+    AlgorithmProperties::update("TimeInterval", slicing.sliceTimes(), m_properties);
   }
   void operator()(SlicingByEventLog const &slicing) const {
     // If we don't have an interval, there's nothing to do. Also, we don't
     // currently support multiple intervals, so skip that as well.
-    if (slicing.sliceAtValues().size() < 1 ||
-        slicing.sliceAtValues().size() > 1)
+    if (slicing.sliceAtValues().size() < 1 || slicing.sliceAtValues().size() > 1)
       return;
 
     enableSlicing();
     AlgorithmProperties::update("LogName", slicing.blockName(), m_properties);
-    AlgorithmProperties::update("LogValueInterval", slicing.sliceAtValues()[0],
-                                m_properties);
+    AlgorithmProperties::update("LogValueInterval", slicing.sliceAtValues()[0], m_properties);
   }
 
 private:
   AlgorithmRuntimeProps &m_properties;
 
-  void enableSlicing() const {
-    AlgorithmProperties::update("SliceWorkspace", true, m_properties);
-  }
+  void enableSlicing() const { AlgorithmProperties::update("SliceWorkspace", true, m_properties); }
 };
 
-void updateEventProperties(AlgorithmRuntimeProps &properties,
-                           Slicing const &slicing) {
+void updateEventProperties(AlgorithmRuntimeProps &properties, Slicing const &slicing) {
   boost::apply_visitor(UpdateEventPropertiesVisitor(properties), slicing);
 }
 
-boost::optional<double> getDouble(const IAlgorithm_sptr &algorithm,
-                                  std::string const &property) {
+boost::optional<double> getDouble(const IAlgorithm_sptr &algorithm, std::string const &property) {
   double result = algorithm->getProperty(property);
   return result;
 }
 
-void updateRowFromOutputProperties(const IAlgorithm_sptr &algorithm,
-                                   Item &item) {
+void updateRowFromOutputProperties(const IAlgorithm_sptr &algorithm, Item &item) {
   auto &row = dynamic_cast<Row &>(item);
 
-  auto const iVsLam = AlgorithmProperties::getOutputWorkspace(
-      algorithm, "OutputWorkspaceWavelength");
-  auto const iVsQ =
-      AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace");
-  auto const iVsQBin = AlgorithmProperties::getOutputWorkspace(
-      algorithm, "OutputWorkspaceBinned");
+  auto const iVsLam = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspaceWavelength");
+  auto const iVsQ = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace");
+  auto const iVsQBin = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspaceBinned");
   row.setOutputNames(std::vector<std::string>{iVsLam, iVsQ, iVsQBin});
 
-  auto qRange = RangeInQ(getDouble(algorithm, "MomentumTransferMin"),
-                         getDouble(algorithm, "MomentumTransferStep"),
+  auto qRange = RangeInQ(getDouble(algorithm, "MomentumTransferMin"), getDouble(algorithm, "MomentumTransferStep"),
                          getDouble(algorithm, "MomentumTransferMax"));
   row.setOutputQRange(qRange);
 }
@@ -294,30 +219,25 @@ void updateRowFromOutputProperties(const IAlgorithm_sptr &algorithm,
  * @param model : the reduction configuration model
  * @param row : the row from the runs table
  */
-IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model,
-                                                    Row &row) {
+IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model, Row &row) {
   // Create the algorithm
-  auto alg = Mantid::API::AlgorithmManager::Instance().create(
-      "ReflectometryISISLoadAndProcess");
+  auto alg = Mantid::API::AlgorithmManager::Instance().create("ReflectometryISISLoadAndProcess");
   alg->setRethrows(true);
 
   // Set the algorithm properties from the model
   auto properties = createAlgorithmRuntimeProps(model, row);
 
   // Return the configured algorithm
-  auto jobAlgorithm = std::make_shared<BatchJobAlgorithm>(
-      alg, properties, updateRowFromOutputProperties, &row);
+  auto jobAlgorithm = std::make_shared<BatchJobAlgorithm>(alg, properties, updateRowFromOutputProperties, &row);
   return jobAlgorithm;
 }
 
-AlgorithmRuntimeProps createAlgorithmRuntimeProps(Batch const &model,
-                                                  Row const &row) {
+AlgorithmRuntimeProps createAlgorithmRuntimeProps(Batch const &model, Row const &row) {
   // Create properties for the model
   auto properties = createAlgorithmRuntimeProps(model);
   // Update properties specific to this row - the per-angle options based on
   // the known angle, and the values in the table cells in the row
-  updatePerThetaDefaultProperties(properties,
-                                  model.defaultsForTheta(row.theta()));
+  updatePerThetaDefaultProperties(properties, model.defaultsForTheta(row.theta()));
   updateRowProperties(properties, row);
   return properties;
 }

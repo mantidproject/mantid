@@ -38,9 +38,7 @@ public:
   virtual void notifyADSChanged(const QSet<QString> & /*unused*/) {}
 
   /// Return global options for pre-processing
-  virtual ColumnOptionsQMap getPreprocessingOptions() const {
-    return ColumnOptionsQMap();
-  }
+  virtual ColumnOptionsQMap getPreprocessingOptions() const { return ColumnOptionsQMap(); }
   /// Return global options for reduction
   virtual OptionsQMap getProcessingOptions() const { return OptionsQMap(); }
   /// Return global options for post-processing as a string
@@ -50,9 +48,7 @@ public:
   /// Return time-slicing type
   virtual QString getTimeSlicingType() const { return QString(); }
   /// Return transmission runs for a particular angle
-  virtual OptionsQMap getOptionsForAngle(const double) const {
-    return OptionsQMap();
-  }
+  virtual OptionsQMap getOptionsForAngle(const double) const { return OptionsQMap(); }
   /// Return true if there are per-angle transmission runs set
   virtual bool hasPerAngleOptions() const { return false; }
 
@@ -67,12 +63,8 @@ public:
   virtual void confirmReductionCompleted() {}
   virtual void confirmReductionPaused(){};
   virtual void confirmReductionResumed(){};
-  virtual void
-  completedGroupReductionSuccessfully(GroupData const & /*unused*/,
-                                      std::string const & /*unused*/){};
-  virtual void
-  completedRowReductionSuccessfully(GroupData const & /*unused*/,
-                                    std::string const & /*unused*/){};
+  virtual void completedGroupReductionSuccessfully(GroupData const & /*unused*/, std::string const & /*unused*/){};
+  virtual void completedRowReductionSuccessfully(GroupData const & /*unused*/, std::string const & /*unused*/){};
 };
 } // namespace DataProcessor
 } // namespace MantidWidgets

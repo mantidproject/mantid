@@ -52,13 +52,11 @@
  */
 
 namespace {
-void checkForSampleAndRunEntries(
-    const Mantid::API::Sample &sample, const Mantid::API::Run &run,
-    Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem) {
+void checkForSampleAndRunEntries(const Mantid::API::Sample &sample, const Mantid::API::Run &run,
+                                 Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem) {
 
   if (Mantid::Kernel::HKL != specialCoordinateSystem) {
-    throw std::invalid_argument(
-        "Cannot create non-orthogonal view for non-HKL coordinates");
+    throw std::invalid_argument("Cannot create non-orthogonal view for non-HKL coordinates");
   }
 
   if (!sample.hasOrientedLattice()) {
@@ -104,9 +102,7 @@ void stripMatrix(Mantid::Kernel::DblMatrix &matrix) {
   matrix = temp;
 }
 
-template <typename T>
-void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
-                         const T &workspace) {
+template <typename T> void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix, const T &workspace) {
   // The input workspace needs have
   // 1. an HKL frame
   // 2. an oriented lattice
@@ -125,8 +121,7 @@ void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
     else {
       // Create identity matrix of dimension+1
       std::size_t nDims = workspace.getNumDims() + 1;
-      affineMatrix =
-          Mantid::Kernel::Matrix<Mantid::coord_t>(nDims, nDims, true);
+      affineMatrix = Mantid::Kernel::Matrix<Mantid::coord_t>(nDims, nDims, true);
     }
   } catch (std::runtime_error &) {
     // Create identity matrix of dimension+1
@@ -136,8 +131,7 @@ void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
   }
 
   // Extract W Matrix
-  auto wMatrixAsArray =
-      run.template getPropertyValueAsType<std::vector<double>>("W_MATRIX");
+  auto wMatrixAsArray = run.template getPropertyValueAsType<std::vector<double>>("W_MATRIX");
   Mantid::Kernel::DblMatrix wMatrix(wMatrixAsArray);
 
   // Get the B Matrix from the oriented lattice
@@ -157,9 +151,7 @@ void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
   normalizeColumns(skewMatrix);
 
   // Setup basis normalisation array
-  std::vector<double> basisNormalization = {orientedLattice.astar(),
-                                            orientedLattice.bstar(),
-                                            orientedLattice.cstar()};
+  std::vector<double> basisNormalization = {orientedLattice.astar(), orientedLattice.bstar(), orientedLattice.cstar()};
 
   // Expand matrix to 4 dimensions if necessary
   if (4 == workspace.getNumDims()) {
@@ -209,9 +201,8 @@ template <typename T> bool doRequiresSkewMatrix(const T &workspace) {
 }
 
 template <size_t N>
-std::array<Mantid::coord_t, N>
-getTransformedArray(const std::array<Mantid::coord_t, N * N> &skewMatrix,
-                    size_t dimension) {
+std::array<Mantid::coord_t, N> getTransformedArray(const std::array<Mantid::coord_t, N * N> &skewMatrix,
+                                                   size_t dimension) {
   std::array<Mantid::coord_t, N> vec = {{0., 0., 0.}};
   for (size_t index = 0; index < N; ++index) {
     vec[index] = skewMatrix[dimension + index * N];
@@ -231,13 +222,12 @@ template <typename T, size_t N> void normalizeVector(std::array<T, N> &vector) {
  * Gets the normal vector for two specified vectors
  *
  */
-std::array<Mantid::coord_t, 3>
-getNormalVector(std::array<Mantid::coord_t, 3> vector1,
-                std::array<Mantid::coord_t, 3> vector2) {
+std::array<Mantid::coord_t, 3> getNormalVector(std::array<Mantid::coord_t, 3> vector1,
+                                               std::array<Mantid::coord_t, 3> vector2) {
   std::array<Mantid::coord_t, 3> normalVector;
   for (size_t index = 0; index < 3; ++index) {
-    normalVector[index] = vector1[(index + 1) % 3] * vector2[(index + 2) % 3] -
-                          vector1[(index + 2) % 3] * vector2[(index + 1) % 3];
+    normalVector[index] =
+        vector1[(index + 1) % 3] * vector2[(index + 2) % 3] - vector1[(index + 2) % 3] * vector2[(index + 1) % 3];
   }
 
   // Make sure that the output is truely normalized
@@ -261,8 +251,8 @@ std::array<Mantid::coord_t, 3> getNormalVector(size_t dimX, size_t dimY) {
 
   std::array<Mantid::coord_t, 3> normalVector;
   for (size_t index = 0; index < 3; ++index) {
-    normalVector[index] = vector1[(index + 1) % 3] * vector2[(index + 2) % 3] -
-                          vector1[(index + 2) % 3] * vector2[(index + 1) % 3];
+    normalVector[index] =
+        vector1[(index + 1) % 3] * vector2[(index + 2) % 3] - vector1[(index + 2) % 3] * vector2[(index + 1) % 3];
   }
 
   // Make sure that the output is normalized
@@ -274,10 +264,9 @@ std::array<Mantid::coord_t, 3> getNormalVector(size_t dimX, size_t dimY) {
  * all vectors to be normalized.
  */
 template <size_t N>
-double getAngleInRadian(std::array<Mantid::coord_t, N> orthogonalVector,
-                        std::array<Mantid::coord_t, N> nonOrthogonalVector,
-                        const std::array<Mantid::coord_t, N> &normalVector,
-                        size_t currentDimension, size_t otherDimension) {
+double
+getAngleInRadian(std::array<Mantid::coord_t, N> orthogonalVector, std::array<Mantid::coord_t, N> nonOrthogonalVector,
+                 const std::array<Mantid::coord_t, N> &normalVector, size_t currentDimension, size_t otherDimension) {
   // We want to get the angle between an orthogonal basis vector eX, eY, eZ and
   // the corresponding
   // nonorthogonal basis vector H, K, L
@@ -309,10 +298,8 @@ double getAngleInRadian(std::array<Mantid::coord_t, N> orthogonalVector,
     // projecting onto third dimension by setting dimension coming out of screen
     // to zero
     std::array<Mantid::coord_t, 3> temporaryNonOrthogonal{{0.f, 0.f, 0.f}};
-    temporaryNonOrthogonal[currentDimension] =
-        nonOrthogonalVector[currentDimension];
-    temporaryNonOrthogonal[otherDimension] =
-        nonOrthogonalVector[otherDimension];
+    temporaryNonOrthogonal[currentDimension] = nonOrthogonalVector[currentDimension];
+    temporaryNonOrthogonal[otherDimension] = nonOrthogonalVector[otherDimension];
     nonOrthogonalVector = temporaryNonOrthogonal;
   }
 
@@ -320,8 +307,7 @@ double getAngleInRadian(std::array<Mantid::coord_t, N> orthogonalVector,
   normalizeVector<Mantid::coord_t, N>(nonOrthogonalVector);
   // Get the value of the angle from the dot product: v1*v2 = cos (a)*|v1|*|v2|
   auto dotProduct =
-      std::inner_product(orthogonalVector.begin(), orthogonalVector.end(),
-                         nonOrthogonalVector.begin(), 0.f);
+      std::inner_product(orthogonalVector.begin(), orthogonalVector.end(), nonOrthogonalVector.begin(), 0.f);
 
   // Handle case where the dotProduct is 1 or -
   if (dotProduct == 1.) {
@@ -334,11 +320,8 @@ double getAngleInRadian(std::array<Mantid::coord_t, N> orthogonalVector,
     angle = std::acos(dotProduct);
   }
   // Get the direction of the angle
-  auto normalForDirection =
-      getNormalVector(orthogonalVector, nonOrthogonalVector);
-  auto direction =
-      std::inner_product(normalForDirection.begin(), normalForDirection.end(),
-                         normalVector.begin(), 0.f);
+  auto normalForDirection = getNormalVector(orthogonalVector, nonOrthogonalVector);
+  auto direction = std::inner_product(normalForDirection.begin(), normalForDirection.end(), normalVector.begin(), 0.f);
 
   if (direction < 0) {
     angle *= -1.f;
@@ -350,27 +333,21 @@ double getAngleInRadian(std::array<Mantid::coord_t, N> orthogonalVector,
 namespace MantidQt {
 namespace API {
 
-size_t getMissingHKLDimensionIndex(
-    const Mantid::API::IMDWorkspace_const_sptr &workspace, size_t dimX,
-    size_t dimY) {
+size_t getMissingHKLDimensionIndex(const Mantid::API::IMDWorkspace_const_sptr &workspace, size_t dimX, size_t dimY) {
   for (size_t i = 0; i < workspace->getNumDims(); ++i) {
     auto dimension = workspace->getDimension(i);
     const auto &frame = dimension->getMDFrame();
-    if ((frame.name() == Mantid::Geometry::HKL::HKLName) && (i != dimX) &&
-        (i != dimY)) {
+    if ((frame.name() == Mantid::Geometry::HKL::HKLName) && (i != dimX) && (i != dimY)) {
       return i;
     }
   }
   return static_cast<size_t>(NULL);
 }
 
-void provideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
-                       const Mantid::API::IMDWorkspace &workspace) {
-  if (auto mdew =
-          dynamic_cast<const Mantid::API::IMDEventWorkspace *>(&workspace)) {
+void provideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix, const Mantid::API::IMDWorkspace &workspace) {
+  if (auto mdew = dynamic_cast<const Mantid::API::IMDEventWorkspace *>(&workspace)) {
     doProvideSkewMatrix(skewMatrix, *mdew);
-  } else if (auto mdhw = dynamic_cast<const Mantid::API::IMDHistoWorkspace *>(
-                 &workspace)) {
+  } else if (auto mdhw = dynamic_cast<const Mantid::API::IMDHistoWorkspace *>(&workspace)) {
     doProvideSkewMatrix(skewMatrix, *mdhw);
   } else {
     throw std::invalid_argument("NonOrthogonal: The provided workspace "
@@ -380,29 +357,24 @@ void provideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
 }
 
 bool requiresSkewMatrix(const Mantid::API::IMDWorkspace &workspace) {
-  if (auto mdew =
-          dynamic_cast<const Mantid::API::IMDEventWorkspace *>(&workspace)) {
+  if (auto mdew = dynamic_cast<const Mantid::API::IMDEventWorkspace *>(&workspace)) {
     return doRequiresSkewMatrix(*mdew);
-  } else if (auto mdhw = dynamic_cast<const Mantid::API::IMDHistoWorkspace *>(
-                 &workspace)) {
+  } else if (auto mdhw = dynamic_cast<const Mantid::API::IMDHistoWorkspace *>(&workspace)) {
     return doRequiresSkewMatrix(*mdhw);
   } else {
     return false;
   }
 }
 
-bool isHKLDimensions(const Mantid::API::IMDWorkspace &workspace, size_t dimX,
-                     size_t dimY) {
+bool isHKLDimensions(const Mantid::API::IMDWorkspace &workspace, size_t dimX, size_t dimY) {
   auto hklname = [&workspace](size_t index) {
-    return workspace.getDimension(index)->getMDFrame().name() ==
-           Mantid::Geometry::HKL::HKLName;
+    return workspace.getDimension(index)->getMDFrame().name() == Mantid::Geometry::HKL::HKLName;
   };
   return hklname(dimX) && hklname(dimY);
 }
 
-void transformFromDoubleToCoordT(
-    const Mantid::Kernel::DblMatrix &skewMatrix,
-    std::array<Mantid::coord_t, 9> &skewMatrixCoord) {
+void transformFromDoubleToCoordT(const Mantid::Kernel::DblMatrix &skewMatrix,
+                                 std::array<Mantid::coord_t, 9> &skewMatrixCoord) {
   std::size_t index = 0;
   for (std::size_t i = 0; i < skewMatrix.numRows(); ++i) {
     for (std::size_t j = 0; j < skewMatrix.numCols(); ++j) {
@@ -423,15 +395,12 @@ K = M24X + M22Y + M23Z
 L = M31X + M32Y + M33Z
 
 */
-void transformLookpointToWorkspaceCoord(
-    Mantid::coord_t *lookPoint,
-    const std::array<Mantid::coord_t, 9> &skewMatrix, const size_t &dimX,
-    const size_t &dimY, const size_t &dimSlice) {
+void transformLookpointToWorkspaceCoord(Mantid::coord_t *lookPoint, const std::array<Mantid::coord_t, 9> &skewMatrix,
+                                        const size_t &dimX, const size_t &dimY, const size_t &dimSlice) {
 
-  auto sliceDimResult =
-      (lookPoint[dimSlice] - skewMatrix[3 * dimSlice + dimX] * lookPoint[dimX] -
-       skewMatrix[3 * dimSlice + dimY] * lookPoint[dimY]) /
-      skewMatrix[3 * dimSlice + dimSlice];
+  auto sliceDimResult = (lookPoint[dimSlice] - skewMatrix[3 * dimSlice + dimX] * lookPoint[dimX] -
+                         skewMatrix[3 * dimSlice + dimY] * lookPoint[dimY]) /
+                        skewMatrix[3 * dimSlice + dimSlice];
 
   auto OrigDimSliceValue = lookPoint[dimSlice];
   lookPoint[dimSlice] = sliceDimResult;
@@ -440,12 +409,8 @@ void transformLookpointToWorkspaceCoord(
   auto v2 = lookPoint[1];
   auto v3 = lookPoint[2];
 
-  lookPoint[dimX] = v1 * skewMatrix[0 + 3 * dimX] +
-                    v2 * skewMatrix[1 + 3 * dimX] +
-                    v3 * skewMatrix[2 + 3 * dimX];
-  lookPoint[dimY] = v1 * skewMatrix[0 + 3 * dimY] +
-                    v2 * skewMatrix[1 + 3 * dimY] +
-                    v3 * skewMatrix[2 + 3 * dimY];
+  lookPoint[dimX] = v1 * skewMatrix[0 + 3 * dimX] + v2 * skewMatrix[1 + 3 * dimX] + v3 * skewMatrix[2 + 3 * dimX];
+  lookPoint[dimY] = v1 * skewMatrix[0 + 3 * dimY] + v2 * skewMatrix[1 + 3 * dimY] + v3 * skewMatrix[2 + 3 * dimY];
 
   lookPoint[dimSlice] = OrigDimSliceValue;
 }
@@ -472,9 +437,8 @@ void transformLookpointToWorkspaceCoord(
  * @return an angle for the x grid lines and an angle for the y grid lines. Both
  *are measured from the x axis.
  */
-std::pair<double, double>
-getGridLineAnglesInRadian(const std::array<Mantid::coord_t, 9> &skewMatrixCoord,
-                          size_t dimX, size_t dimY) {
+std::pair<double, double> getGridLineAnglesInRadian(const std::array<Mantid::coord_t, 9> &skewMatrixCoord, size_t dimX,
+                                                    size_t dimY) {
   // Get the two vectors for the selected dimensions in the orthogonal axis
   // representation.
 
@@ -489,10 +453,8 @@ getGridLineAnglesInRadian(const std::array<Mantid::coord_t, 9> &skewMatrixCoord,
   auto normalVector = getNormalVector(dimX, dimY);
 
   // Get the angle for dimX and dimY
-  auto angleDimX =
-      getAngleInRadian(dimXOriginal, dimXTransformed, normalVector, dimX, dimY);
-  auto angleDimY =
-      getAngleInRadian(dimYOriginal, dimYTransformed, normalVector, dimY, dimX);
+  auto angleDimX = getAngleInRadian(dimXOriginal, dimXTransformed, normalVector, dimX, dimY);
+  auto angleDimY = getAngleInRadian(dimYOriginal, dimYTransformed, normalVector, dimY, dimX);
   return std::make_pair(angleDimX, angleDimY);
 }
 } // namespace API

@@ -24,17 +24,12 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL RectangularBeamProfile final : public IBeamProfile {
 public:
-  RectangularBeamProfile(const Geometry::ReferenceFrame &frame,
-                         const Kernel::V3D &center, double width,
-                         double height);
+  RectangularBeamProfile(const Geometry::ReferenceFrame &frame, const Kernel::V3D &center, double width, double height);
 
-  IBeamProfile::Ray
-  generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const override;
-  IBeamProfile::Ray
-  generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
-                const Geometry::BoundingBox &bounds) const override;
-  Geometry::BoundingBox
-  defineActiveRegion(const Geometry::BoundingBox &) const override;
+  IBeamProfile::Ray generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const override;
+  IBeamProfile::Ray generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
+                                  const Geometry::BoundingBox &bounds) const override;
+  Geometry::BoundingBox defineActiveRegion(const Geometry::BoundingBox &) const override;
 
 private:
   const unsigned short m_upIdx;

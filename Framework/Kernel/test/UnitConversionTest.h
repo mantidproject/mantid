@@ -23,21 +23,18 @@ public:
   void test_Run_Throws_When_Src_Unit_Is_Unknown() {
     using namespace Mantid::Kernel::Exception;
     using Mantid::Kernel::DeltaEMode;
-    TS_ASSERT_THROWS(UnitConversion::run("zxzxz", "Wavelength", 0.0, 0.0, 0.0,
-                                         0.0, DeltaEMode::Elastic, 0.0),
+    TS_ASSERT_THROWS(UnitConversion::run("zxzxz", "Wavelength", 0.0, 0.0, 0.0, 0.0, DeltaEMode::Elastic, 0.0),
                      const NotFoundError &);
   }
 
   void test_Run_Throws_When_Dest_Unit_Is_Unknown() {
     using namespace Mantid::Kernel::Exception;
     using Mantid::Kernel::DeltaEMode;
-    TS_ASSERT_THROWS(UnitConversion::run("Wavelength", "xszfsdf", 0.0, 0.0, 0.0,
-                                         0.0, DeltaEMode::Elastic, 0.0),
+    TS_ASSERT_THROWS(UnitConversion::run("Wavelength", "xszfsdf", 0.0, 0.0, 0.0, 0.0, DeltaEMode::Elastic, 0.0),
                      const NotFoundError &);
   }
 
-  void
-  test_Run_Gives_Correct_Value_For_Units_That_Can_Be_Converted_By_Simply_Factor_And_Geometry_Is_Ignored() {
+  void test_Run_Gives_Correct_Value_For_Units_That_Can_Be_Converted_By_Simply_Factor_And_Geometry_Is_Ignored() {
     using Mantid::Kernel::DeltaEMode;
 
     const std::string &srcUnit = "Wavelength";
@@ -50,8 +47,7 @@ public:
 
     double result(-1.0);
     TS_ASSERT_THROWS_NOTHING(
-        result = UnitConversion::run(srcUnit, destUnit, srcValue, dummy, dummy,
-                                     dummy, dummyMode, dummy));
+        result = UnitConversion::run(srcUnit, destUnit, srcValue, dummy, dummy, dummy, dummyMode, dummy));
     TS_ASSERT_DELTA(result, expected, 1e-12);
   }
 
@@ -67,9 +63,7 @@ public:
 
     const double expected(0.437943919458);
     double result(-1.0);
-    TS_ASSERT_THROWS_NOTHING(
-        result = UnitConversion::run(srcUnit, destUnit, srcValue, l1, l2, theta,
-                                     emode, efixed));
+    TS_ASSERT_THROWS_NOTHING(result = UnitConversion::run(srcUnit, destUnit, srcValue, l1, l2, theta, emode, efixed));
     TS_ASSERT_DELTA(result, expected, 1e-12);
   }
 };

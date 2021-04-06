@@ -15,12 +15,12 @@ The physics of a system studied by neutron scattering is described by
 the conservation of energy and momentum. In the laboratory frame:
 
 .. math::
-    
+
     Q_l=  \hbar \mathbf{k}_i^{} -  \hbar \mathbf{k}_f
 
 
 .. math::
-    
+
     \Delta E_l= \frac{\hbar^2}{2m} (k_i^2 -  k_f^2)
 
 Note that the left side in the above equations refer to what is
@@ -37,7 +37,7 @@ For such a lattice, the physics will be described in terms of reciprocal
 lattice parameters by
 
 .. math::
-    
+
     Q= 2 \pi\left(h \mathbf{a}^* + k \mathbf{b}^* +l \mathbf{c}^* \right) = \left(\begin{array}{c}
                                                             h \\
                                                             k \\
@@ -65,7 +65,7 @@ Busing and H. A. Levy, Angle calculations for 3- and 4-circle X-ray and
 neutron diffractometers - Acta Cryst. (1967). 22, 457-464):
 
 .. math::
-    
+
     B = \left( \begin{array}{ccc}
         a^* & b^*\cos(\gamma^*) & c^*\cos(\beta^*) \\
         0 & b^*\sin(\gamma^*) & -c^*\sin(\beta^*)\cos(\alpha) \\
@@ -94,10 +94,10 @@ Other useful equations:
         ac\cos(\beta) & bc\cos(\alpha) & cc \end{array} \right)
 
 The distance in reciprocal space to the :math:`\left(h,k,l\right)` plane
-is given by 
+is given by
 
 .. math::
-    
+
     d^* =\left| B \left(\begin{array}{c}
                                                             h \\
                                                             k \\
@@ -114,7 +114,7 @@ Unit cells
 ----------
 
 The :class:`~mantid.geometry.UnitCell` class provides the functions to access direct and
-reciprocal lattices. 
+reciprocal lattices.
 
 Oriented lattices
 -----------------
@@ -133,7 +133,7 @@ direction. For an orthogonal lattice with :math:`\mathbf{a}^*` along
 matrix has the form:
 
 .. math::
-    
+
     U =  \left( \begin{array}{ccc}
         0 & 1 & 0 \\
         0 & 0 & 1 \\

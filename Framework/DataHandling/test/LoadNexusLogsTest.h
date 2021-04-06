@@ -70,9 +70,7 @@ public:
     TS_ASSERT_DELTA(tsp->nthValue(1), 13715.55, 2);
 
     // The time diff between the 0th and 1st entry is 0.328 seconds
-    TS_ASSERT_DELTA(Types::Core::DateAndTime::secondsFromDuration(
-                        tsp->nthInterval(0).length()),
-                    0.328, 0.01);
+    TS_ASSERT_DELTA(Types::Core::DateAndTime::secondsFromDuration(tsp->nthInterval(0).length()), 0.328, 0.01);
 
     // Now the stats
   }
@@ -82,8 +80,7 @@ public:
     loader.initialize();
     MatrixWorkspace_sptr testWS = createTestWorkspace();
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("Workspace", testWS));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", "LOQ49886.nxs"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "LOQ49886.nxs"));
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT(loader.isExecuted());
 
@@ -94,21 +91,17 @@ public:
                           // + 1 proton_charge_by_period log
 
     TimeSeriesProperty<std::string> *slog =
-        dynamic_cast<TimeSeriesProperty<std::string> *>(
-            run.getLogData("icp_event"));
+        dynamic_cast<TimeSeriesProperty<std::string> *>(run.getLogData("icp_event"));
     TS_ASSERT(slog);
     std::string str = slog->value();
     TS_ASSERT_EQUALS(str.size(), 1023);
-    TS_ASSERT_EQUALS(str.substr(0, 37),
-                     "2009-Apr-28 09:20:29  CHANGE_PERIOD 1");
+    TS_ASSERT_EQUALS(str.substr(0, 37), "2009-Apr-28 09:20:29  CHANGE_PERIOD 1");
 
-    slog = dynamic_cast<TimeSeriesProperty<std::string> *>(
-        run.getLogData("icp_debug"));
+    slog = dynamic_cast<TimeSeriesProperty<std::string> *>(run.getLogData("icp_debug"));
     TS_ASSERT(slog);
     TS_ASSERT_EQUALS(slog->size(), 50);
 
-    TimeSeriesProperty<int> *ilog =
-        dynamic_cast<TimeSeriesProperty<int> *>(run.getLogData("total_counts"));
+    TimeSeriesProperty<int> *ilog = dynamic_cast<TimeSeriesProperty<int> *>(run.getLogData("total_counts"));
     TS_ASSERT(ilog);
     TS_ASSERT_EQUALS(ilog->size(), 172);
 
@@ -116,9 +109,7 @@ public:
     TS_ASSERT(ilog);
     TS_ASSERT_EQUALS(ilog->size(), 172);
 
-    TimeSeriesProperty<double> *dlog =
-        dynamic_cast<TimeSeriesProperty<double> *>(
-            run.getLogData("proton_charge"));
+    TimeSeriesProperty<double> *dlog = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData("proton_charge"));
     TS_ASSERT(dlog);
     TS_ASSERT_EQUALS(dlog->size(), 172);
   }
@@ -128,16 +119,14 @@ public:
     loader.initialize();
     MatrixWorkspace_sptr testWS = createTestWorkspace();
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("Workspace", testWS));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", "IMAT00003680.nxs"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "IMAT00003680.nxs"));
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT(loader.isExecuted());
 
     const API::Run &run = testWS->run();
 
     TimeSeriesProperty<std::string> *putLog =
-        dynamic_cast<TimeSeriesProperty<std::string> *>(
-            run.getLogData("EPICS_PUTLOG"));
+        dynamic_cast<TimeSeriesProperty<std::string> *>(run.getLogData("EPICS_PUTLOG"));
     TS_ASSERT(putLog);
     std::string str = putLog->value();
     TS_ASSERT_EQUALS(str.size(), 340);
@@ -150,8 +139,7 @@ public:
 
     auto testWS = createTestWorkspace();
     auto run = testWS->run();
-    TSM_ASSERT("Should not have nperiods until we run LoadNexusLogs",
-               !run.hasProperty("nperiods"));
+    TSM_ASSERT("Should not have nperiods until we run LoadNexusLogs", !run.hasProperty("nperiods"));
     LoadNexusLogs loader;
 
     loader.setChild(true);
@@ -162,8 +150,7 @@ public:
     run = testWS->run();
 
     const bool hasNPeriods = run.hasProperty("nperiods");
-    TSM_ASSERT("Should have nperiods now we have run LoadNexusLogs",
-               hasNPeriods);
+    TSM_ASSERT("Should have nperiods now we have run LoadNexusLogs", hasNPeriods);
     if (hasNPeriods) {
       const int nPeriods = run.getPropertyValueAsType<int>("nperiods");
       TSM_ASSERT_EQUALS("Wrong number of periods extracted", nPeriods, 4);
@@ -174,8 +161,7 @@ public:
 
     auto testWS = createTestWorkspace();
     auto run = testWS->run();
-    TSM_ASSERT("Should not have nperiods until we run LoadNexusLogs",
-               !run.hasProperty("nperiods"));
+    TSM_ASSERT("Should not have nperiods until we run LoadNexusLogs", !run.hasProperty("nperiods"));
     LoadNexusLogs loader;
 
     loader.setChild(true);
@@ -186,24 +172,19 @@ public:
     run = testWS->run();
 
     const bool hasPeriods = run.hasProperty("period_log");
-    TSM_ASSERT("Should have period_log now we have run LoadNexusLogs",
-               hasPeriods);
+    TSM_ASSERT("Should have period_log now we have run LoadNexusLogs", hasPeriods);
 
     auto *temp = run.getProperty("period_log");
     auto *periodLog = dynamic_cast<TimeSeriesProperty<int> *>(temp);
     TSM_ASSERT("Period log should be an int time series property", periodLog);
 
     std::vector<int> periodValues = periodLog->valuesAsVector();
-    std::unordered_set<int> uniquePeriods(periodValues.begin(),
-                                          periodValues.end());
-    TSM_ASSERT_EQUALS("Should have 4 periods in total", 4,
-                      uniquePeriods.size());
+    std::unordered_set<int> uniquePeriods(periodValues.begin(), periodValues.end());
+    TSM_ASSERT_EQUALS("Should have 4 periods in total", 4, uniquePeriods.size());
 
     std::vector<double> protonChargeByPeriod =
-        run.getPropertyValueAsType<std::vector<double>>(
-            "proton_charge_by_period");
-    TSM_ASSERT_EQUALS("Should have four proton charge entries", 4,
-                      protonChargeByPeriod.size());
+        run.getPropertyValueAsType<std::vector<double>>("proton_charge_by_period");
+    TSM_ASSERT_EQUALS("Should have four proton charge entries", 4, protonChargeByPeriod.size());
   }
 
   void test_extract_run_title_from_event_nexus() {
@@ -223,8 +204,7 @@ public:
     TSM_ASSERT("Should have run_title now we have run LoadNexusLogs", hasTitle);
 
     std::string title = run.getPropertyValueAsType<std::string>("run_title");
-    TSM_ASSERT_EQUALS("Run title is not correct",
-                      "3He polariser test 0.9bar Long Polariser 0.75A", title);
+    TSM_ASSERT_EQUALS("Run title is not correct", "3He polariser test 0.9bar Long Polariser 0.75A", title);
   }
 
   void test_log_non_default_entry() {
@@ -238,9 +218,7 @@ public:
     loader.setPropertyValue("Filename", "REF_M_9709_event.nxs");
     loader.execute();
     auto run = testWS->run();
-    TimeSeriesProperty<double> *pclog =
-        dynamic_cast<TimeSeriesProperty<double> *>(
-            run.getLogData("proton_charge"));
+    TimeSeriesProperty<double> *pclog = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData("proton_charge"));
     TS_ASSERT(pclog);
     TS_ASSERT_EQUALS(pclog->size(), 23806);
     TS_ASSERT(pclog->getStatistics().duration > 4e9);
@@ -254,8 +232,7 @@ public:
     loader.setProperty("NXentryName", "entry-On_Off");
     loader.execute();
     run = testWS->run();
-    pclog = dynamic_cast<TimeSeriesProperty<double> *>(
-        run.getLogData("proton_charge"));
+    pclog = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData("proton_charge"));
     TS_ASSERT(pclog);
     TS_ASSERT_EQUALS(pclog->size(), 24150);
     TS_ASSERT(pclog->getStatistics().duration < 3e9);
@@ -282,8 +259,7 @@ public:
     TS_ASSERT(ld.isExecuted());
 
     auto run = ws->run();
-    auto pclog = dynamic_cast<TimeSeriesProperty<double> *>(
-        run.getLogData("PhaseRequest1"));
+    auto pclog = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData("PhaseRequest1"));
 
     TS_ASSERT(pclog);
 
@@ -306,23 +282,21 @@ public:
     auto run = ws->run();
 
     // This one should not be present as there is no invalid data
-    TS_ASSERT_THROWS_ANYTHING(
-        run.getLogData(LogManager::getInvalidValuesFilterLogName("slitpos")));
+    TS_ASSERT_THROWS_ANYTHING(run.getLogData(LogManager::getInvalidValuesFilterLogName("slitpos")));
 
     // This one should not be present as there is no invalid data
-    TS_ASSERT_THROWS_ANYTHING(run.getLogData(
-        LogManager::getInvalidValuesFilterLogName("cryo_Sample")));
+    TS_ASSERT_THROWS_ANYTHING(run.getLogData(LogManager::getInvalidValuesFilterLogName("cryo_Sample")));
 
     // these two both contain invalid data
-    auto pclog1 = dynamic_cast<TimeSeriesProperty<bool> *>(run.getLogData(
-        LogManager::getInvalidValuesFilterLogName("cryo_temp1")));
+    auto pclog1 = dynamic_cast<TimeSeriesProperty<bool> *>(
+        run.getLogData(LogManager::getInvalidValuesFilterLogName("cryo_temp1")));
     TS_ASSERT_EQUALS(pclog1->size(), 3);
     TS_ASSERT_EQUALS(pclog1->nthValue(0), true);
     TS_ASSERT_EQUALS(pclog1->nthValue(1), false);
     TS_ASSERT_EQUALS(pclog1->nthValue(2), true);
 
-    auto pclog2 = dynamic_cast<TimeSeriesProperty<bool> *>(run.getLogData(
-        LogManager::getInvalidValuesFilterLogName("cryo_temp2")));
+    auto pclog2 = dynamic_cast<TimeSeriesProperty<bool> *>(
+        run.getLogData(LogManager::getInvalidValuesFilterLogName("cryo_temp2")));
     TS_ASSERT_EQUALS(pclog2->size(), 3);
     TS_ASSERT_EQUALS(pclog2->nthValue(0), false);
     TS_ASSERT_EQUALS(pclog2->nthValue(1), false);
@@ -332,14 +306,12 @@ public:
     auto emptyProperty = new TimeSeriesProperty<bool>("empty");
     run.filterByLog(*emptyProperty);
 
-    auto pclogFiltered1 = dynamic_cast<TimeSeriesProperty<double> *>(
-        run.getLogData("cryo_temp1"));
+    auto pclogFiltered1 = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData("cryo_temp1"));
     // middle value is invalid and is filtered out
     TS_ASSERT_DELTA(pclogFiltered1->nthValue(0), 3, 1e-5);
     TS_ASSERT_DELTA(pclogFiltered1->nthValue(1), 7, 1e-5);
 
-    auto pclogFiltered2 = dynamic_cast<TimeSeriesProperty<double> *>(
-        run.getLogData("cryo_temp2"));
+    auto pclogFiltered2 = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData("cryo_temp2"));
     std::vector<double> correctFiltered2{3., 5., 7.};
     // Here the entire log is filtered out
     // Our filtering in this case does not filter anything.

@@ -24,9 +24,7 @@ class MuonAlgorithmHelperTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MuonAlgorithmHelperTest *createSuite() {
-    return new MuonAlgorithmHelperTest();
-  }
+  static MuonAlgorithmHelperTest *createSuite() { return new MuonAlgorithmHelperTest(); }
   static void destroySuite(MuonAlgorithmHelperTest *suite) { delete suite; }
 
   MuonAlgorithmHelperTest() {
@@ -76,23 +74,17 @@ public:
   }
 
   void test_getRunLabel_singleWs() {
-    std::string label = getRunLabel(
-        MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun(
-            "MUSR", 15189));
+    std::string label = getRunLabel(MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun("MUSR", 15189));
     TS_ASSERT_EQUALS(label, "MUSR00015189");
   }
 
   void test_getRunLabel_argus() {
-    std::string label = getRunLabel(
-        MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun(
-            "ARGUS", 26577));
+    std::string label = getRunLabel(MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun("ARGUS", 26577));
     TS_ASSERT_EQUALS(label, "ARGUS0026577");
   }
 
   void test_getRunLabel_singleWs_tooBigRunNumber() {
-    std::string label = getRunLabel(
-        MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun(
-            "EMU", 999999999));
+    std::string label = getRunLabel(MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun("EMU", 999999999));
     TS_ASSERT_EQUALS(label, "EMU999999999");
   }
 
@@ -100,9 +92,7 @@ public:
     std::vector<Workspace_sptr> list;
 
     for (int i = 15189; i <= 15193; ++i) {
-      list.emplace_back(
-          MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun(
-              "MUSR", i));
+      list.emplace_back(MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun("MUSR", i));
     }
 
     std::string label = getRunLabel(list);
@@ -114,9 +104,7 @@ public:
     std::vector<Workspace_sptr> list;
 
     for (auto it = runNumbers.begin(); it != runNumbers.end(); ++it) {
-      list.emplace_back(
-          MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun(
-              "EMU", *it));
+      list.emplace_back(MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun("EMU", *it));
     }
 
     std::string label = getRunLabel(list);
@@ -127,9 +115,7 @@ public:
     std::vector<int> runNumbers{1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14};
     std::vector<Workspace_sptr> list;
     for (auto it = runNumbers.begin(); it != runNumbers.end(); it++) {
-      list.emplace_back(
-          MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun(
-              "EMU", *it));
+      list.emplace_back(MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun("EMU", *it));
     }
     std::string label = getRunLabel(list);
     TS_ASSERT_EQUALS(label, "EMU00000001-3, 5-6, 8, 10-4");
@@ -139,9 +125,7 @@ public:
     std::vector<int> runNumbers{5, 14, 8, 1, 11, 3, 10, 6, 13, 12, 2};
     std::vector<Workspace_sptr> list;
     for (auto it = runNumbers.begin(); it != runNumbers.end(); it++) {
-      list.emplace_back(
-          MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun(
-              "EMU", *it));
+      list.emplace_back(MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun("EMU", *it));
     }
     std::string label = getRunLabel(list);
     TS_ASSERT_EQUALS(label, "EMU00000001-3, 5-6, 8, 10-4");
@@ -165,10 +149,8 @@ public:
   }
 
   void test_firstPeriod_singleWorkspace() {
-    MatrixWorkspace_sptr ws =
-        MuonWorkspaceCreationHelper::createCountsWorkspace(2, 10, 0.0);
-    Mantid::API::MatrixWorkspace_sptr wsFirstPeriod =
-        Mantid::MuonAlgorithmHelper::firstPeriod(ws);
+    MatrixWorkspace_sptr ws = MuonWorkspaceCreationHelper::createCountsWorkspace(2, 10, 0.0);
+    Mantid::API::MatrixWorkspace_sptr wsFirstPeriod = Mantid::MuonAlgorithmHelper::firstPeriod(ws);
     AnalysisDataService::Instance().addOrReplace("wsSingle", ws);
     TS_ASSERT(wsFirstPeriod);
     TS_ASSERT_EQUALS(wsFirstPeriod->getName(), "wsSingle");
@@ -176,11 +158,8 @@ public:
   }
 
   void test_firstPeriod_groupWorkspace() {
-    WorkspaceGroup_sptr ws =
-        MuonWorkspaceCreationHelper::createMultiPeriodWorkspaceGroup(
-            3, 1, 10, "MuonAnalysis");
-    Mantid::API::MatrixWorkspace_sptr wsFirstPeriod =
-        Mantid::MuonAlgorithmHelper::firstPeriod(ws);
+    WorkspaceGroup_sptr ws = MuonWorkspaceCreationHelper::createMultiPeriodWorkspaceGroup(3, 1, 10, "MuonAnalysis");
+    Mantid::API::MatrixWorkspace_sptr wsFirstPeriod = Mantid::MuonAlgorithmHelper::firstPeriod(ws);
     TS_ASSERT(wsFirstPeriod);
     TS_ASSERT_EQUALS(wsFirstPeriod->getName(), "MuonDataPeriod_1");
     AnalysisDataService::Instance().clear();
@@ -196,8 +175,7 @@ public:
     params.periods = "1+3-2+4";
     params.version = 2;
     const std::string wsName = generateWorkspaceName(params);
-    const std::string expected =
-        "MUSR00015189-90, 15192; Group; fwd; Counts; 1+3-2+4; #2";
+    const std::string expected = "MUSR00015189-90, 15192; Group; fwd; Counts; 1+3-2+4; #2";
     TS_ASSERT_EQUALS(expected, wsName);
   }
 
@@ -211,8 +189,7 @@ public:
     params.periods = "";
     params.version = 2;
     const std::string wsName = generateWorkspaceName(params);
-    const std::string expected =
-        "MUSR00015189-90, 15192; Group; fwd; Counts; #2";
+    const std::string expected = "MUSR00015189-90, 15192; Group; fwd; Counts; #2";
     TS_ASSERT_EQUALS(expected, wsName);
   }
 
@@ -227,21 +204,17 @@ public:
     params.periods = "1+3-2+4";
     params.version = 2;
     const std::string wsName = generateWorkspaceName(params);
-    const std::string expected =
-        "MyLabel00123; Group; fwd; Counts; 1+3-2+4; #2";
+    const std::string expected = "MyLabel00123; Group; fwd; Counts; 1+3-2+4; #2";
     TS_ASSERT_EQUALS(expected, wsName);
   }
 
   void test_groupWorkspaces_workspacesInGroupAlready() {
 
-    WorkspaceGroup_sptr testGroup =
-        MuonWorkspaceCreationHelper::createMultiPeriodWorkspaceGroup(
-            5, 2, 10, "TestGroup");
+    WorkspaceGroup_sptr testGroup = MuonWorkspaceCreationHelper::createMultiPeriodWorkspaceGroup(5, 2, 10, "TestGroup");
     std::vector<std::string> names = testGroup->getNames();
     groupWorkspaces("TestGroup", names);
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TestGroup"));
-    WorkspaceGroup_sptr checkGroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("TestGroup");
+    WorkspaceGroup_sptr checkGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("TestGroup");
     TS_ASSERT_EQUALS(checkGroup->getNames().size(), 5);
     TS_ASSERT_EQUALS(checkGroup->getNames()[0], names[0]);
     TS_ASSERT_EQUALS(checkGroup->getNames()[4], names[4]);
@@ -255,9 +228,7 @@ public:
     std::string wsName;
     std::vector<std::string> names;
     for (int numWorkspaces = 1; numWorkspaces < 6; numWorkspaces++) {
-      MatrixWorkspace_sptr ws =
-          MuonWorkspaceCreationHelper::createCountsWorkspace(2, 10,
-                                                             numWorkspaces);
+      MatrixWorkspace_sptr ws = MuonWorkspaceCreationHelper::createCountsWorkspace(2, 10, numWorkspaces);
       wsName = wsNameStem + std::to_string(numWorkspaces);
       names.emplace_back(wsName);
       AnalysisDataService::Instance().addOrReplace(wsName, ws);
@@ -266,8 +237,7 @@ public:
     groupWorkspaces("TestGroup", names);
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TestGroup"));
-    WorkspaceGroup_sptr checkGroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("TestGroup");
+    WorkspaceGroup_sptr checkGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("TestGroup");
     TS_ASSERT_EQUALS(checkGroup->getNames().size(), 5);
     TS_ASSERT_EQUALS(checkGroup->getNames()[0], names[0]);
     TS_ASSERT_EQUALS(checkGroup->getNames()[4], names[4]);
@@ -281,23 +251,19 @@ public:
     std::string wsName;
     std::vector<std::string> names;
     for (int numWorkspaces = 1; numWorkspaces < 6; numWorkspaces++) {
-      MatrixWorkspace_sptr ws =
-          MuonWorkspaceCreationHelper::createCountsWorkspace(2, 10,
-                                                             numWorkspaces);
+      MatrixWorkspace_sptr ws = MuonWorkspaceCreationHelper::createCountsWorkspace(2, 10, numWorkspaces);
       wsName = wsNameStem + std::to_string(numWorkspaces);
       names.emplace_back(wsName);
       AnalysisDataService::Instance().addOrReplace(wsName, ws);
     }
 
     // Create a workspace with the same name as the intended group
-    MatrixWorkspace_sptr ws =
-        MuonWorkspaceCreationHelper::createCountsWorkspace(2, 10, 1);
+    MatrixWorkspace_sptr ws = MuonWorkspaceCreationHelper::createCountsWorkspace(2, 10, 1);
     AnalysisDataService::Instance().addOrReplace("TestGroup", ws);
 
     groupWorkspaces("TestGroup", names);
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TestGroup"));
-    WorkspaceGroup_sptr checkGroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("TestGroup");
+    WorkspaceGroup_sptr checkGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("TestGroup");
     TS_ASSERT_EQUALS(checkGroup->getNames().size(), 5);
     TS_ASSERT_EQUALS(checkGroup->getNames()[0], names[0]);
     TS_ASSERT_EQUALS(checkGroup->getNames()[4], names[4]);
@@ -327,8 +293,7 @@ public:
   }
 
   void test_getAllDetectorIDsWorkspace_Matrix() {
-    Workspace_sptr ws =
-        MuonWorkspaceCreationHelper::createCountsWorkspace(5, 3, 0);
+    Workspace_sptr ws = MuonWorkspaceCreationHelper::createCountsWorkspace(5, 3, 0);
     std::set<Mantid::detid_t> ids = getAllDetectorIDsFromWorkspace(ws);
     for (auto i = 1; i < 6; i++) {
       TS_ASSERT_DIFFERS(ids.find(i), ids.end());
@@ -336,9 +301,7 @@ public:
   }
 
   void test_getAllDetectorIDsFromGroupWorkspace() {
-    auto ws =
-        MuonWorkspaceCreationHelper::createWorkspaceGroupConsecutiveDetectorIDs(
-            3, 3, 2, "group");
+    auto ws = MuonWorkspaceCreationHelper::createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 2, "group");
     std::set<Mantid::detid_t> ids = getAllDetectorIDsFromGroupWorkspace(ws);
     for (auto i = 1; i < 10; i++) {
       TS_ASSERT_DIFFERS(ids.find(i), ids.end());
@@ -347,9 +310,7 @@ public:
   }
 
   void test_getAllDetectorIDsWorkspace_Group() {
-    Workspace_sptr ws =
-        MuonWorkspaceCreationHelper::createWorkspaceGroupConsecutiveDetectorIDs(
-            3, 3, 2, "group");
+    Workspace_sptr ws = MuonWorkspaceCreationHelper::createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 2, "group");
     std::set<Mantid::detid_t> ids = getAllDetectorIDsFromWorkspace(ws);
     for (auto i = 1; i < 10; i++) {
       TS_ASSERT_DIFFERS(ids.find(i), ids.end());
@@ -373,9 +334,7 @@ public:
     API::Grouping grouping;
     const std::vector<std::string> groups = {"1", "2", "3,4,5", "6-9"};
     grouping.groups = groups;
-    Workspace_sptr ws =
-        MuonWorkspaceCreationHelper::createWorkspaceGroupConsecutiveDetectorIDs(
-            3, 3, 2, "group");
+    Workspace_sptr ws = MuonWorkspaceCreationHelper::createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 2, "group");
     TS_ASSERT(checkGroupDetectorsInWorkspace(grouping, ws));
 
     AnalysisDataService::Instance().clear();
@@ -385,17 +344,14 @@ public:
     API::Grouping grouping;
     const std::vector<std::string> groups = {"1", "2", "3,4,5", "6-9", "10"};
     grouping.groups = groups;
-    Workspace_sptr ws =
-        MuonWorkspaceCreationHelper::createWorkspaceGroupConsecutiveDetectorIDs(
-            3, 3, 2, "group");
+    Workspace_sptr ws = MuonWorkspaceCreationHelper::createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 2, "group");
     TS_ASSERT(!checkGroupDetectorsInWorkspace(grouping, ws));
 
     AnalysisDataService::Instance().clear();
   };
 
   void test_parseWorkspaceNameParsesCorrectly() {
-    const std::string workspaceName =
-        "MUSR00015189-90, 15192; Group; fwd; Counts; 1+3-2+4; #2";
+    const std::string workspaceName = "MUSR00015189-90, 15192; Group; fwd; Counts; 1+3-2+4; #2";
     const std::vector<int> expectedRuns{15189, 15190, 15192};
     const auto params = parseWorkspaceName(workspaceName);
     TS_ASSERT_EQUALS(params.instrument, "MUSR");
@@ -409,8 +365,7 @@ public:
   }
 
   void test_parseWorkspaceName_noPeriods() {
-    const std::string workspaceName =
-        "MUSR00015189-90, 15192; Group; fwd; Counts; #2";
+    const std::string workspaceName = "MUSR00015189-90, 15192; Group; fwd; Counts; #2";
     const std::vector<int> expectedRuns{15189, 15190, 15192};
     const auto params = parseWorkspaceName(workspaceName);
     TS_ASSERT_EQUALS(params.instrument, "MUSR");
@@ -467,47 +422,34 @@ public:
   }
 
   void test_checkValidPair_throws_if_incorrect_name_format() {
-    const std::string validWorkspaceName =
-        "MUSR00015189; Group; fwd; Counts; 1+2; #1";
-    std::vector<std::string> invalidWorkspaceNames = {
-        "MUSR00015189; Soup; fwd; Counts; 1+2; #1",
-        "MUSR00015189; Group; fwd; Couts; 1+2; #1", "MuonGroupWorkspace"};
+    const std::string validWorkspaceName = "MUSR00015189; Group; fwd; Counts; 1+2; #1";
+    std::vector<std::string> invalidWorkspaceNames = {"MUSR00015189; Soup; fwd; Counts; 1+2; #1",
+                                                      "MUSR00015189; Group; fwd; Couts; 1+2; #1", "MuonGroupWorkspace"};
 
     for (auto &&invalidName : invalidWorkspaceNames)
-      TS_ASSERT_THROWS(checkValidPair(validWorkspaceName, invalidName),
-                       const std::invalid_argument &);
+      TS_ASSERT_THROWS(checkValidPair(validWorkspaceName, invalidName), const std::invalid_argument &);
   }
 
   void test_checkValidPair_throws_if_ItemType_Asym() {
-    const std::string validWorkspaceName =
-        "EMU000015189; Group; fwd; Counts; 1+2; #1";
-    const std::string invalidWorkspaceName =
-        "EMU000015189; Group; fwd; Asym; 1+2; #1";
-    TS_ASSERT_THROWS(checkValidPair(validWorkspaceName, invalidWorkspaceName),
-                     const std::invalid_argument &);
+    const std::string validWorkspaceName = "EMU000015189; Group; fwd; Counts; 1+2; #1";
+    const std::string invalidWorkspaceName = "EMU000015189; Group; fwd; Asym; 1+2; #1";
+    TS_ASSERT_THROWS(checkValidPair(validWorkspaceName, invalidWorkspaceName), const std::invalid_argument &);
   }
 
   void test_checkValidPair_throws_if_different_instruments() {
-    const std::string validWorkspaceName =
-        "EMU000015189; Group; fwd; Counts; 1+2; #1";
-    const std::string invalidWorkspaceName =
-        "MUSR00015189; Group; fwd; Counts; 1+2; #1";
-    TS_ASSERT_THROWS(checkValidPair(validWorkspaceName, invalidWorkspaceName),
-                     const std::invalid_argument &);
+    const std::string validWorkspaceName = "EMU000015189; Group; fwd; Counts; 1+2; #1";
+    const std::string invalidWorkspaceName = "MUSR00015189; Group; fwd; Counts; 1+2; #1";
+    TS_ASSERT_THROWS(checkValidPair(validWorkspaceName, invalidWorkspaceName), const std::invalid_argument &);
   }
 
   void test_checkValidPair_does_not_throw_if_same_group() {
-    const std::string validWorkspaceName =
-        "EMU000015189; Group; fwd; Counts; 1+2; #1";
-    const std::string invalidWorkspaceName =
-        "EMU000015189; Group; fwd; Counts; 1+2; #1";
-    TS_ASSERT_THROWS(checkValidPair(validWorkspaceName, invalidWorkspaceName),
-                     const std::invalid_argument &);
+    const std::string validWorkspaceName = "EMU000015189; Group; fwd; Counts; 1+2; #1";
+    const std::string invalidWorkspaceName = "EMU000015189; Group; fwd; Counts; 1+2; #1";
+    TS_ASSERT_THROWS(checkValidPair(validWorkspaceName, invalidWorkspaceName), const std::invalid_argument &);
   }
 
   void test_checkValidGroupPairName_invalid_names() {
-    std::vector<std::string> badNames = {"",      "_name", "name_", "name;",
-                                         "#name", "Group", "Pair"};
+    std::vector<std::string> badNames = {"", "_name", "name_", "name;", "#name", "Group", "Pair"};
     for (auto &&badName : badNames) {
       TS_ASSERT(!MuonAlgorithmHelper::checkValidGroupPairName(badName));
     }

@@ -33,6 +33,7 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
         return ['out', 'D11_AutoProcess_Reference.nxs']
 
     def runTest(self):
@@ -91,6 +92,7 @@ class D11_AutoProcess_Wedges_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
         return ['out', 'D11_AutoProcess_Wedges_Reference.nxs']
 
     def runTest(self):
@@ -124,9 +126,15 @@ class D11_AutoProcess_Wedges_Test(systemtesting.MantidSystemTest):
             )
 
         GroupWorkspaces(
-            InputWorkspaces=['iq_1', 'iq_2', 'iq_3',
-                             'iq_wedge_1_1', 'iq_wedge_1_2', 'iq_wedge_1_3',
-                             'iq_wedge_2_1', 'iq_wedge_2_2', 'iq_wedge_2_3'],
+            InputWorkspaces=['iq_1_d39.0m_c40.5m_w5.6A',
+                             'iq_2_d8.0m_c8.0m_w5.6A',
+                             'iq_3_d2.0m_c5.5m_w5.6A',
+                             'iq_wedge_1_1_d39.0m_c40.5m_w5.6A',
+                             'iq_wedge_1_2_d8.0m_c8.0m_w5.6A',
+                             'iq_wedge_1_3_d2.0m_c5.5m_w5.6A',
+                             'iq_wedge_2_1_d39.0m_c40.5m_w5.6A',
+                             'iq_wedge_2_2_d8.0m_c8.0m_w5.6A',
+                             'iq_wedge_2_3_d2.0m_c5.5m_w5.6A'],
             OutputWorkspace='out'
             )
 
@@ -152,6 +160,7 @@ class D11_AutoProcess_IQxQy_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
         return ['iqxy', 'D11_AutoProcess_IQxQy_Reference.nxs']
 
     def runTest(self):
@@ -208,6 +217,7 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
         return ['iq_mult_wavelengths', 'D11_AutoProcess_Multiple_Tr_Reference.nxs']
 
     def runTest(self):
@@ -263,6 +273,7 @@ class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
         return ['out', 'D33_AutoProcess_Reference.nxs']
 
     def runTest(self):
@@ -314,6 +325,7 @@ class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
         return ['out', 'D33_AutoProcess_IPhiQ_Reference.nxs']
 
     def runTest(self):
@@ -453,6 +465,7 @@ class D22_AutoProcess_Single_Sensitivity(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking.append('Instrument')
         return ['d22_single_sens', 'D22_AutoProcess_Single_Sens_Reference.nxs']
 
     def runTest(self):
@@ -504,6 +517,7 @@ class D22_AutoProcess_Multi_Sensitivity(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
         return ['sens', 'D22_AutoProcess_Multi_Sens_Reference.nxs']
 
     def runTest(self):

@@ -7,7 +7,7 @@ This is a Python binding to the C++ class Mantid::Kernel::TimeSeriesPropertyStat
 
 .. module:`mantid.kernel`
 
-.. autoclass:: mantid.kernel.TimeSeriesPropertyStatistics 
+.. autoclass:: mantid.kernel.TimeSeriesPropertyStatistics
     :members:
     :undoc-members:
     :inherited-members:

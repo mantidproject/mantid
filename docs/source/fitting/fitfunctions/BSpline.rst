@@ -28,16 +28,16 @@ To demonstrate these conditions we can set up a basic BSpline of order 2 with 3 
 
 Breakpoints : :math:`x_0, x_1, x_2`
 
-Our BSpline will be defined as the following: 
+Our BSpline will be defined as the following:
 
 .. math::
 
-   B(x) = 
+   B(x) =
                                \begin{cases}
                                  f_1(x)& x_0 \leq x \leq x_1 \\
                                  f_2(x)& x_1 \leq x \leq x_2 \\
                                \end{cases}
-                             
+
 We can write our :math:`B(x)` function as a series :math:`B(x) = \sum_{i=0}^{n+k-2} A_i f_i(x)`
 
 where :math:`A_i` is the coefficient of the BSpline. This coefficient maps to our fitting parameters found below.
@@ -49,14 +49,14 @@ as the -2 accounts for our 2 exterior breakpoints at :math:`x_0` and :math:`x_n`
 To make our BSpline piecewise-smooth we must ensure that these conditions are satisfied:
 
 .. math::
-    
+
     f_1(x_0) = y_0\\
     f_2(x_2) = y_2\\
     \frac{df_1}{dx}(x_1) = \frac{df_2}{dx}(x_1)\\
     \frac{d^2 f_1}{dx^2}(x_1) = \frac{d^2 f_2}{dx^2}(x_1)\\
 
 This point of smoothness is represented by the red circle in the graph below of our BSpline function :math:`B(x)`
-      
+
 .. image:: ../../images/BSplineQuadraticExample.jpg
     :width: 800px
     :align: center
@@ -65,7 +65,7 @@ This point of smoothness is represented by the red circle in the graph below of 
 
 BSplines and Interpolation
 --------------------------
-BSplines are commonly used when interpolating between points. An interpolation is different to a fit as 
+BSplines are commonly used when interpolating between points. An interpolation is different to a fit as
 it uses all of the data points to connect a straight line through them. It acts as if all of your data points
 are also breakpoints and a smooth spline of order N will connect the points together.
 

@@ -40,11 +40,10 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMLZ)
 /** Constructor
  */
 LoadMLZ::LoadMLZ()
-    : m_numberOfTubes{0}, m_numberOfPixelsPerTube{0}, m_numberOfChannels{0},
-      m_numberOfHistograms{0}, m_monitorElasticPeakPosition{0},
-      m_wavelength{0.0}, m_channelWidth{0.0}, m_timeOfFlightDelay{0.0},
-      m_monitorCounts{0}, m_chopper_speed{0.0}, m_chopper_ratio{0}, m_l1{0.0},
-      m_l2{0.0}, m_t1{0.0}, m_supportedInstruments{"TOFTOF", "DNS"} {}
+    : m_numberOfTubes{0}, m_numberOfPixelsPerTube{0}, m_numberOfChannels{0}, m_numberOfHistograms{0},
+      m_monitorElasticPeakPosition{0}, m_wavelength{0.0}, m_channelWidth{0.0}, m_timeOfFlightDelay{0.0},
+      m_monitorCounts{0}, m_chopper_speed{0.0}, m_chopper_ratio{0}, m_l1{0.0}, m_l2{0.0}, m_t1{0.0},
+      m_supportedInstruments{"TOFTOF", "DNS"} {}
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string LoadMLZ::name() const { return "LoadMLZ"; }
@@ -59,12 +58,10 @@ const std::string LoadMLZ::category() const { return "DataHandling\\Nexus"; }
  */
 void LoadMLZ::init() {
   const std::vector<std::string> exts{".nxs", ".hdf", ".hd5"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "File path of the Data file to load");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                  "File path of the Data file to load");
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 }
 
@@ -103,8 +100,7 @@ void LoadMLZ::exec() {
  */
 int LoadMLZ::confidence(Kernel::NexusDescriptor &descriptor) const {
   // fields existent only at the MLZ
-  if (descriptor.pathExists("/Scan/wavelength") &&
-      descriptor.pathExists("/Scan/title") &&
+  if (descriptor.pathExists("/Scan/wavelength") && descriptor.pathExists("/Scan/title") &&
       descriptor.pathExists("/Scan/mode")) {
     return 80;
   } else {
@@ -125,8 +121,7 @@ void LoadMLZ::maskDetectors(NeXus::NXEntry &entry) {
   g_log.debug() << "PMdata size: " << pmdata.size() << '\n';
   std::vector<int> masked_detectors(pmdata(), pmdata() + pmdata.size());
 
-  g_log.debug() << "Number of masked detectors: " << masked_detectors.size()
-                << '\n';
+  g_log.debug() << "Number of masked detectors: " << masked_detectors.size() << '\n';
 
   auto &detInfo = m_localWorkspace->mutableDetectorInfo();
   std::vector<size_t> indicesToMask;
@@ -137,8 +132,7 @@ void LoadMLZ::maskDetectors(NeXus::NXEntry &entry) {
     try {
       indicesToMask.emplace_back(detInfo.indexOf(masked_detector));
     } catch (std::out_of_range &) {
-      g_log.warning() << "Invalid detector ID " << masked_detector
-                      << ". Found while running LoadMLZ\n";
+      g_log.warning() << "Invalid detector ID " << masked_detector << ". Found while running LoadMLZ\n";
     }
   }
   g_log.debug() << '\n';
@@ -155,17 +149,14 @@ void LoadMLZ::loadInstrumentDetails(NeXus::NXEntry &firstEntry) {
   m_instrumentPath = m_mlzloader.findInstrumentNexusPath(firstEntry);
 
   if (m_instrumentPath.empty()) {
-    throw std::runtime_error(
-        "Cannot set the instrument name from the Nexus file!");
+    throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
   }
 
-  m_instrumentName = m_mlzloader.getStringFromNexusPath(
-      firstEntry, m_instrumentPath + "/name");
+  m_instrumentName = m_mlzloader.getStringFromNexusPath(firstEntry, m_instrumentPath + "/name");
 
-  if (std::find(m_supportedInstruments.begin(), m_supportedInstruments.end(),
-                m_instrumentName) == m_supportedInstruments.end()) {
-    std::string message =
-        "The instrument " + m_instrumentName + " is not valid for this loader!";
+  if (std::find(m_supportedInstruments.begin(), m_supportedInstruments.end(), m_instrumentName) ==
+      m_supportedInstruments.end()) {
+    std::string message = "The instrument " + m_instrumentName + " is not valid for this loader!";
     throw std::runtime_error(message);
   }
 
@@ -179,8 +170,7 @@ void LoadMLZ::loadInstrumentDetails(NeXus::NXEntry &firstEntry) {
  * @param entry :: The Nexus entry
  *
  */
-void LoadMLZ::initWorkSpace(
-    NeXus::NXEntry &entry) //, const std::vector<std::vector<int> >&monitors)
+void LoadMLZ::initWorkSpace(NeXus::NXEntry &entry) //, const std::vector<std::vector<int> >&monitors)
 {
   // read in the data
   NXData dataGroup = entry.openNXData("data");
@@ -196,9 +186,8 @@ void LoadMLZ::initWorkSpace(
   g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << '\n';
 
   // Now create the output workspace
-  m_localWorkspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", m_numberOfHistograms, m_numberOfChannels + 1,
-      m_numberOfChannels);
+  m_localWorkspace = WorkspaceFactory::Instance().create("Workspace2D", m_numberOfHistograms, m_numberOfChannels + 1,
+                                                         m_numberOfChannels);
   m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   m_localWorkspace->setYUnitLabel("Counts");
 }
@@ -239,8 +228,7 @@ void LoadMLZ::loadTimeDetails(NeXus::NXEntry &entry) {
 
   m_monitorElasticPeakPosition = entry.getInt(monitorName + "/elastic_peak");
 
-  NXFloat time_of_flight_data =
-      entry.openNXFloat(monitorName + "/time_of_flight");
+  NXFloat time_of_flight_data = entry.openNXFloat(monitorName + "/time_of_flight");
   time_of_flight_data.load();
 
   // The entry "monitor/time_of_flight", has 3 fields:
@@ -252,10 +240,8 @@ void LoadMLZ::loadTimeDetails(NeXus::NXEntry &entry) {
   g_log.debug() << " MonitorCounts: " << m_monitorCounts << '\n';
   g_log.debug() << " ChannelWidth (microseconds): " << m_channelWidth << '\n';
   g_log.debug() << " Wavelength (angstroems): " << m_wavelength << '\n';
-  g_log.debug() << " ElasticPeakPosition: " << m_monitorElasticPeakPosition
-                << '\n';
-  g_log.debug() << " TimeOfFlightDelay (microseconds): " << m_timeOfFlightDelay
-                << '\n';
+  g_log.debug() << " ElasticPeakPosition: " << m_monitorElasticPeakPosition << '\n';
+  g_log.debug() << " TimeOfFlightDelay (microseconds): " << m_timeOfFlightDelay << '\n';
 
   m_chopper_speed = entry.getFloat("instrument/chopper/rotation_speed");
 
@@ -307,16 +293,15 @@ void LoadMLZ::loadRunDetails(NXEntry &entry) {
     runDetails.addProperty("temperature", temperature, "K", true);
   }
 
-  runDetails.addProperty("monitor_counts",
-                         static_cast<double>(m_monitorCounts));
+  runDetails.addProperty("monitor_counts", static_cast<double>(m_monitorCounts));
   runDetails.addProperty("chopper_speed", m_chopper_speed);
   runDetails.addProperty("chopper_ratio", m_chopper_ratio);
   runDetails.addProperty("channel_width", m_channelWidth, "microseconds", true);
 
   // Calculate number of full time channels - use to crop workspace - S. Busch's
   // method
-  double full_channels = floor(30. * m_chopper_ratio / (m_chopper_speed)*1.e6 /
-                               m_channelWidth); // channelWidth in microsec.
+  double full_channels =
+      floor(30. * m_chopper_ratio / (m_chopper_speed)*1.e6 / m_channelWidth); // channelWidth in microsec.
   runDetails.addProperty("full_channels", full_channels);
 
   // Proposal title
@@ -358,8 +343,7 @@ void LoadMLZ::loadExperimentDetails(NXEntry &entry) {
   // TODO: Do the rest
   // Pick out the geometry information
 
-  std::string description =
-      boost::lexical_cast<std::string>(entry.getFloat("sample/description"));
+  std::string description = boost::lexical_cast<std::string>(entry.getFloat("sample/description"));
 
   m_localWorkspace->mutableSample().setName(description);
 }
@@ -380,9 +364,7 @@ void LoadMLZ::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
 
   std::vector<double> detectorTofBins(m_numberOfChannels + 1);
   for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
-    detectorTofBins[i] =
-        m_channelWidth * static_cast<double>(static_cast<int>(i)) + m_t1 +
-        m_channelWidth / 2;
+    detectorTofBins[i] = m_channelWidth * static_cast<double>(static_cast<int>(i)) + m_t1 + m_channelWidth / 2;
   }
 
   // Assign calculated bins to first X axis
@@ -395,8 +377,7 @@ void LoadMLZ::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
 
-      m_localWorkspace->setHistogram(
-          spec, edges, Counts(data_p, data_p + m_numberOfChannels));
+      m_localWorkspace->setHistogram(spec, edges, Counts(data_p, data_p + m_numberOfChannels));
 
       ++spec;
       progress.report();
@@ -415,8 +396,7 @@ void LoadMLZ::runLoadInstrument() {
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
     g_log.debug() << "InstrumentName" << m_instrumentName << '\n';
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(true));
+    loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
   } catch (...) {
     g_log.warning("Cannot load the instrument definition.");

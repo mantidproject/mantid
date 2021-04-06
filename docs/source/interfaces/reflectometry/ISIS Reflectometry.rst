@@ -123,7 +123,7 @@ tab, and tick the ``Debug`` option. Then re-process the group.
   :alt: Editing experiment settings
 
   *Editing experiment settings*
-  
+
 Viewing Results
 ~~~~~~~~~~~~~~~
 
@@ -168,7 +168,7 @@ plots the stitched output for the selected group(s)
 
   *Plotting the results of the reduction*
 
-       
+
 Layout
 ------
 
@@ -831,7 +831,7 @@ and separate spectra, if required, can be specified for the transmission runs -
 if the latter are not specified then the ``Run Spectra`` will also be used for
 the transmission runs. If both a First and Second tranmission input is
 specified, then they will be stitched using the options specified.
-  
+
 .. figure:: /images/ISISReflectometryInterface/transmission_runs.png
   :class: screenshot
   :width: 600px

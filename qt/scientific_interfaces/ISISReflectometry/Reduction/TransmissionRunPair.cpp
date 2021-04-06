@@ -11,15 +11,14 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-TransmissionRunPair::TransmissionRunPair()
-    : m_firstTransmissionRunNumbers(), m_secondTransmissionRunNumbers() {}
+TransmissionRunPair::TransmissionRunPair() : m_firstTransmissionRunNumbers(), m_secondTransmissionRunNumbers() {}
 
 TransmissionRunPair::TransmissionRunPair( // cppcheck-suppress passedByValue
     std::string firstTransmissionRun,
     // cppcheck-suppress passedByValue
     std::string secondTransmissionRun)
-    : m_firstTransmissionRunNumbers{std::move(firstTransmissionRun)},
-      m_secondTransmissionRunNumbers{std::move(secondTransmissionRun)} {}
+    : m_firstTransmissionRunNumbers{std::move(firstTransmissionRun)}, m_secondTransmissionRunNumbers{
+                                                                          std::move(secondTransmissionRun)} {}
 
 TransmissionRunPair::TransmissionRunPair(
     // cppcheck-suppress passedByValue
@@ -29,12 +28,10 @@ TransmissionRunPair::TransmissionRunPair(
     : m_firstTransmissionRunNumbers(std::move(firstTransmissionRunNumbers)),
       m_secondTransmissionRunNumbers(std::move(secondTransmissionRunNumbers)) {}
 
-std::vector<std::string> const &
-TransmissionRunPair::firstTransmissionRunNumbers() const {
+std::vector<std::string> const &TransmissionRunPair::firstTransmissionRunNumbers() const {
   return m_firstTransmissionRunNumbers;
 }
-std::vector<std::string> const &
-TransmissionRunPair::secondTransmissionRunNumbers() const {
+std::vector<std::string> const &TransmissionRunPair::secondTransmissionRunNumbers() const {
   return m_secondTransmissionRunNumbers;
 }
 
@@ -46,18 +43,12 @@ std::string TransmissionRunPair::secondRunList() const {
   return boost::algorithm::join(m_secondTransmissionRunNumbers, ", ");
 }
 
-bool operator==(TransmissionRunPair const &lhs,
-                TransmissionRunPair const &rhs) {
-  return lhs.firstTransmissionRunNumbers() ==
-             rhs.firstTransmissionRunNumbers() &&
-         lhs.secondTransmissionRunNumbers() ==
-             rhs.secondTransmissionRunNumbers();
+bool operator==(TransmissionRunPair const &lhs, TransmissionRunPair const &rhs) {
+  return lhs.firstTransmissionRunNumbers() == rhs.firstTransmissionRunNumbers() &&
+         lhs.secondTransmissionRunNumbers() == rhs.secondTransmissionRunNumbers();
 }
 
-bool operator!=(TransmissionRunPair const &lhs,
-                TransmissionRunPair const &rhs) {
-  return !(lhs == rhs);
-}
+bool operator!=(TransmissionRunPair const &lhs, TransmissionRunPair const &rhs) { return !(lhs == rhs); }
 
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

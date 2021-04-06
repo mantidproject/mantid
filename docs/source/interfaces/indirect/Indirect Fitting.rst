@@ -10,11 +10,11 @@ QENS Fitting
    :height: 400px
    :align: center
 
-There are four QENS fitting interfaces:  
+There are four QENS fitting interfaces:
 
 * MSD Fit
-* I(Q,t) Fit, 
-* Conv Fit 
+* I(Q,t) Fit,
+* Conv Fit
 * F(Q)
 
 These fitting interfaces share common features, with a few unique options in each.
@@ -40,13 +40,13 @@ plots there is a drop-down menu with which can be used to select the active data
 Sequential and Simultaneous fits
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-There are options to fit your selected spectra either Sequentially or Simultaneously. 
+There are options to fit your selected spectra either Sequentially or Simultaneously.
 
-A :ref:`sequential fit <algm-IqtFitSequential>` will fit each spectra one after another. By default this will use the end values of one fit as the starting values of the next. This behaviour can be toggled 
-using the sequential/individual option. 
+A :ref:`sequential fit <algm-IqtFitSequential>` will fit each spectra one after another. By default this will use the end values of one fit as the starting values of the next. This behaviour can be toggled
+using the sequential/individual option.
 
 A :ref:`simultaneous fit <algm-IqtFitSimultaneous>` will fit all the selected spectra against one cost function. The primary advantage of this method is that
-parameters which are expected to be constant across the data range can be tied across all the spectra. This leads to these parameters being 
+parameters which are expected to be constant across the data range can be tied across all the spectra. This leads to these parameters being
 fitted with better statistics and hence reduced errors.
 
 Fit Function
@@ -58,9 +58,9 @@ Fit Function
 
 Under 'Fit Function', you can view the selected model and associated parameters as well as make modifications.
 
-There are two modes which can be used to select functions. The default version allows easy selection of the most commonly used function models. The options 
+There are two modes which can be used to select functions. The default version allows easy selection of the most commonly used function models. The options
 in this mode differ for each of the four fitting tabs so more detailed information is given in the specific sections below. The other mode, which may be switched to
-bu ticking the `See full function` box, displays the generic function browser in which any function model can be specified. 
+bu ticking the `See full function` box, displays the generic function browser in which any function model can be specified.
 This generic browser functions in a very similar way to the one in :ref:`Multi-dataset Fitting Interface <Multi-dataset-Fitting-Interface>`.
 
 Parameters may be tied by right-clicking on a parameter and selecting either 'Tie > To Function' to tie the parameter
@@ -120,7 +120,7 @@ The 'Plot Guess' check-box can be used to enable/disable the guess curve in the 
 Spectrum Selection
 ~~~~~~~~~~~~~~~~~~
 
-In MsdFit, IqtFit and ConvFit below the fit model selection and preview plots, the spectra to be fit can be selected. 
+In MsdFit, IqtFit and ConvFit below the fit model selection and preview plots, the spectra to be fit can be selected.
 The 'Fit Spectra' drop-down menu provides two options ('Range' and 'String') to specificity the fit spectra. If 'Range' is selected, you are able to select a range of spectra to fit by
 providing the upper and lower bounds. If 'String' is selected you can provide the spectra to fit in a text form.
 When selecting spectra using text, you can use '-' to identify a range and ',' to separate each spectrum/range.
@@ -133,15 +133,15 @@ Output
 
 The results of the fit may be plotted and saved under the 'Output' section of the fitting interfaces.
 
-Next to the 'Plot' label, you can select a parameter to plot and then click 'Plot' to plot it with error 
-bars across the fit spectra (if multiple data-sets have been used, a separate plot will be produced for each data-set). 
+Next to the 'Plot' label, you can select a parameter to plot and then click 'Plot' to plot it with error
+bars across the fit spectra (if multiple data-sets have been used, a separate plot will be produced for each data-set).
 The 'Plot Output' options will be disabled after a fit if there is only one data point for the parameters.
 
-During a sequential fit, the parameters calculated for one spectrum are used as the initial parameters for the next spectrum to be fitted. 
+During a sequential fit, the parameters calculated for one spectrum are used as the initial parameters for the next spectrum to be fitted.
 Although this normally yields better parameter values for the later spectra, it can also lead to poorly fitted parameters if the
-next spectrum is not 'related' to the previous spectrum. It may be useful to replace this poorly fitted spectrum with the results 
-from a single fit using the 'Edit Result' option. 
-Clicking the 'Edit Result' button will allow you to modify the data within your *_Results* workspace using the results 
+next spectrum is not 'related' to the previous spectrum. It may be useful to replace this poorly fitted spectrum with the results
+from a single fit using the 'Edit Result' option.
+Clicking the 'Edit Result' button will allow you to modify the data within your *_Results* workspace using the results
 produced from a fit to a single spectrum. See the algorithm :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>`.
 
 Clicking the 'Save Result' button will save the result of the fit to your default save location.
@@ -156,9 +156,9 @@ as function of run number. This is done using the
 :ref:`QENSFitSequential <algm-QENSFitSequential>` algorithm.
 
 MSDFit searches for the log files named <runnumber>_sample.txt in your chosen
-raw file directory (the name ‘sample’ is for OSIRIS). These log files will exist 
-if the correct temperature was loaded using SE-log-name in the Elwin tab. If they 
-exist the temperature is read and the MSD is plotted versus temperature; if they do 
+raw file directory (the name ‘sample’ is for OSIRIS). These log files will exist
+if the correct temperature was loaded using SE-log-name in the Elwin tab. If they
+exist the temperature is read and the MSD is plotted versus temperature; if they do
 not exist the MSD is plotted versus run number (last 3 digits).
 
 The fitted parameters for all runs are in _msd_Table and the <u2> in _msd. To
@@ -168,11 +168,11 @@ this may be of interest.
 
 A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be performed using the Fit Single Spectrum button underneath the
-preview plot. A simultaneous fit may be performed in a very similar fashion by changeing the Fit Type to Simultaneous 
+preview plot. A simultaneous fit may be performed in a very similar fashion by changeing the Fit Type to Simultaneous
 and the clicking run.
 
-The :ref:`Peters model <func-MsdPeters>` [1] reduces to a :ref:`Gaussian <func-MsdGauss>` at large 
-(towards infinity) beta. The :ref:`Yi Model <func-MsdYi>` [2] reduces to a :ref:`Gaussian <func-MsdGauss>` at sigma 
+The :ref:`Peters model <func-MsdPeters>` [1] reduces to a :ref:`Gaussian <func-MsdGauss>` at large
+(towards infinity) beta. The :ref:`Yi Model <func-MsdYi>` [2] reduces to a :ref:`Gaussian <func-MsdGauss>` at sigma
 equal to zero.
 
 .. interface:: Data Analysis
@@ -196,7 +196,7 @@ tab as seen in the :ref:`elwin-example-workflow`.
 4. Choose the **Fit Type** to be Gaussian. The parameters for this function can be seen if you
    expand the row labelled **f0-MsdGauss**. Choose appropriate starting values for these parameters.
    As well as being able to change the value of the parameters, Two additional options are available.
-   Clicking on the button with `...` will bring up more options to set constraints and ties on the parameters. The checkbox will toggle 
+   Clicking on the button with `...` will bring up more options to set constraints and ties on the parameters. The checkbox will toggle
    whether the parameter is local or global. You need to click on the parameter value to see these options.
 
 5. Tick **Plot Guess** to get a prediction of what the fit will look like.
@@ -207,7 +207,7 @@ tab as seen in the :ref:`elwin-example-workflow`.
    calculated fit and the lower mini-plot displaying the difference between the input data and the
    fit.
 
-7. Alternatively, you can click **Fit Single Spectrum** to perform a fit on just the currently displayed spectrum. 
+7. Alternatively, you can click **Fit Single Spectrum** to perform a fit on just the currently displayed spectrum.
    Do not click this for the purposes of this demonstration.
 
 8. In the **Output** section, select the **Msd** parameter and then click **Plot**. This plots the
@@ -222,7 +222,7 @@ I(Q, t) Fit provides a simplified interface for controlling various fitting
 functions (see the :ref:`Fit <algm-Fit>` algorithm for more info). The functions
 are also available via the fit wizard.
 
-The fit types available for use in IqtFit are :ref:`Exponentials <func-ExpDecay>` and 
+The fit types available for use in IqtFit are :ref:`Exponentials <func-ExpDecay>` and
 :ref:`Stretched Exponential <func-StretchExp>`.
 
 .. interface:: Data Analysis
@@ -236,7 +236,7 @@ I(Q, t) Fit Example Workflow
 The I(Q, t) Fit tab operates on ``_iqt`` files. The files used in this workflow are produced on the
 I(Q, t) tab as seen in the :ref:`iqt-example-workflow`.
 
-1. Click **Browse** and select the file ``irs26176_graphite002_iqt``. 
+1. Click **Browse** and select the file ``irs26176_graphite002_iqt``.
 
 2. Change the **EndX** variable to be around 0.2 in order to change the time range. Alternatively, drag
    the **EndX** blue line seen on the upper mini-plot using the cursor.
@@ -256,7 +256,7 @@ I(Q, t) tab as seen in the :ref:`iqt-example-workflow`.
 
 7. Click **Fit Single Spectrum** to produce a fit result for the first spectrum.
 
-8. In the **Output** section, click **Edit Result** and then select the _Result workspace containing 
+8. In the **Output** section, click **Edit Result** and then select the _Result workspace containing
    multiple fits (1), and in the second combobox select the _Result workspace containing the single fit
    (2). Choose an output name and click **Replace Fit Result**. This will replace the corresponding fit result
    in (1) with the fit result found in (2). See the :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>`
@@ -280,9 +280,9 @@ A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be done using the Fit Single Spectrum button underneath the
 preview plot.
 
-The fit types available in ConvFit are One :ref:`Lorentzian <func-Lorentzian>`, Two Lorentzian, 
-:ref:`TeixeiraWater (SQE) <func-TeixeiraWaterSQE>`, :ref:`InelasticDiffSphere <func-InelasticDiffSphere>`, 
-:ref:`InelasticDiffRotDiscreteCircle <func-InelasticDiffRotDiscreteCircle>`, :ref:`ElasticDiffSphere <func-ElasticDiffSphere>`, 
+The fit types available in ConvFit are One :ref:`Lorentzian <func-Lorentzian>`, Two Lorentzian,
+:ref:`TeixeiraWater (SQE) <func-TeixeiraWaterSQE>`, :ref:`InelasticDiffSphere <func-InelasticDiffSphere>`,
+:ref:`InelasticDiffRotDiscreteCircle <func-InelasticDiffRotDiscreteCircle>`, :ref:`ElasticDiffSphere <func-ElasticDiffSphere>`,
 :ref:`ElasticDiffRotDiscreteCircle <func-ElasticDiffRotDiscreteCircle>` and :ref:`StretchedExpFT <func-StretchedExpFT>`.
 
 .. interface:: Data Analysis
@@ -329,7 +329,7 @@ and the reflection is 002.
    calculated fit and the lower mini-plot displaying the difference between the input data and the
    fit.
 
-6. Choose a default save directory and then click **Save Result** to save the _result workspaces 
+6. Choose a default save directory and then click **Save Result** to save the _result workspaces
    found inside of the group workspace ending with _Results. The saved workspace will be used in
    the :ref:`fqfit-example-workflow`.
 
@@ -377,22 +377,22 @@ and *Use Delta Function* options in the interface.
 
       - :ref:`ProductFunction <func-ProductFunction>` (InelasticDiffRotDiscreteCircle)
 
-        - :ref:`Inelastic Diff Rot Discrete Circle <func-DiffRotDiscreteCircle>` 
+        - :ref:`Inelastic Diff Rot Discrete Circle <func-DiffRotDiscreteCircle>`
 
         - Temperature Correction
-		
+
       - :ref:`ProductFunction <func-ProductFunction>` (ElasticDiffSphere)
 
         - :ref:`Elastic Diff Sphere <func-DiffSphere>`
 
         - Temperature Correction
-		
+
       - :ref:`ProductFunction <func-ProductFunction>` (ElasticDiffRotDiscreteCircle)
 
         - :ref:`Elastic Diff Rot Discrete Circle <func-DiffRotDiscreteCircle>`
 
         - Temperature Correction
-		
+
       - :ref:`ProductFunction <func-ProductFunction>` (StretchedExpFT)
 
         - :ref:`StretchedExpFT <func-StretchedExpFT>`
@@ -414,8 +414,8 @@ This interface can be used for a jump diffusion fit as well as fitting across
 EISF. This is done by means of the
 :ref:`QENSFitSequential <algm-QENSFitSequential>` algorithm.
 
-The fit types available in F(Q)Fit are :ref:`ChudleyElliot <func-ChudleyElliot>`, :ref:`HallRoss <func-Hall-Ross>`, 
-:ref:`FickDiffusion <func-FickDiffusion>`, :ref:`TeixeiraWater <func-TeixeiraWater>`, :ref:`EISFDiffCylinder <func-EISFDiffCylinder>`, 
+The fit types available in F(Q)Fit are :ref:`ChudleyElliot <func-ChudleyElliot>`, :ref:`HallRoss <func-Hall-Ross>`,
+:ref:`FickDiffusion <func-FickDiffusion>`, :ref:`TeixeiraWater <func-TeixeiraWater>`, :ref:`EISFDiffCylinder <func-EISFDiffCylinder>`,
 :ref:`EISFDiffSphere <func-EISFDiffSphere>` and :ref:`EISFDiffSphereAlkyl <func-EISFDiffSphereAlkyl>`.
 
 .. interface:: Data Analysis
@@ -480,14 +480,14 @@ Convergence Criteria
 Acceptance Rate
   The desired percentage acceptance of new parameters (see *JumpAcceptanceRate*
   in :ref:`FABADA` documentation)
-  
+
 The FABADA minimizer can output a PDF group workspace when the PDF option is ticked. If this happens,
 then it is possible to plot this PDF data using the output options at the bottom of the tabs.
 
 **References**
 
 1. Peters & Kneller, Journal of Chemical Physics, 139, 165102 (2013)
-2. Yi et al, J Phys Chem B 116, 5028 (2012) 
+2. Yi et al, J Phys Chem B 116, 5028 (2012)
 
 :ref:`Indirect Data Analysis <interface-indirect-data-analysis>`
 

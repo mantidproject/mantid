@@ -27,8 +27,7 @@ namespace Algorithms {
 
 /** PDDetermineCharacterizations
  */
-class MANTID_ALGORITHMS_DLL PDDetermineCharacterizations
-    : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL PDDetermineCharacterizations : public API::DistributedAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -38,11 +37,9 @@ public:
 
 private:
   double getLogValue(API::Run &run, const std::string &propName);
-  void getInformationFromTable(const double frequency, const double wavelength,
-                               const std::string &canName);
+  void getInformationFromTable(const double frequency, const double wavelength, const std::string &canName);
   void setDefaultsInPropManager();
-  void overrideRunNumProperty(const std::string &inputName,
-                              const std::string &propName);
+  void overrideRunNumProperty(const std::string &inputName, const std::string &propName);
   void init() override;
   void exec() override;
 

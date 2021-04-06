@@ -29,18 +29,16 @@ enum class ScaleUnits;
  */
 class DLLExport SaveStl : public MeshFileIO {
 public:
-  SaveStl(const std::string &filename, const std::vector<uint32_t> &triangle,
-          std::vector<Kernel::V3D> vertices, ScaleUnits scaleType)
-      : MeshFileIO(scaleType, triangle, std::move(std::move(vertices))),
-        m_filename(filename) {}
+  SaveStl(const std::string &filename, const std::vector<uint32_t> &triangle, std::vector<Kernel::V3D> vertices,
+          ScaleUnits scaleType)
+      : MeshFileIO(scaleType, triangle, std::move(std::move(vertices))), m_filename(filename) {}
 
   void writeStl();
 
 private:
   const std::string m_filename;
   void writeHeader(Kernel::BinaryStreamWriter streamWriter);
-  void writeTriangle(Kernel::BinaryStreamWriter streamWriter,
-                     uint32_t triangle);
+  void writeTriangle(Kernel::BinaryStreamWriter streamWriter, uint32_t triangle);
 };
 
 } // namespace DataHandling

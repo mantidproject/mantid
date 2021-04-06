@@ -49,9 +49,7 @@ private:
     int version() const override { return 1; }
     const std::string category() const override { return "Dummy"; }
     const std::string summary() const override { return "Test summary"; }
-    void init() override {
-      declareProperty(std::make_unique<AlgorithmProperty>("CalculateStep"));
-    }
+    void init() override { declareProperty(std::make_unique<AlgorithmProperty>("CalculateStep")); }
     void exec() override {}
   };
 
@@ -62,8 +60,8 @@ private:
     const std::string category() const override { return "Dummy"; }
     const std::string summary() const override { return "Test summary"; }
     void init() override {
-      declareProperty(std::make_unique<AlgorithmProperty>(
-          "CalculateStep", std::make_shared<AlgorithmHasProperty>("Output1")));
+      declareProperty(
+          std::make_unique<AlgorithmProperty>("CalculateStep", std::make_shared<AlgorithmHasProperty>("Output1")));
     }
     void exec() override {}
   };
@@ -71,9 +69,7 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static AlgorithmPropertyTest *createSuite() {
-    return new AlgorithmPropertyTest();
-  }
+  static AlgorithmPropertyTest *createSuite() { return new AlgorithmPropertyTest(); }
   static void destroySuite(AlgorithmPropertyTest *suite) { delete suite; }
 
   AlgorithmPropertyTest() {
@@ -104,43 +100,36 @@ public:
 
   void test_An_Invalid_String_Returns_An_Appropriate_Error() {
     AlgorithmProperty testProp("CalculateStep");
-    TS_ASSERT_EQUALS(
-        testProp.setValue("{\"name\":\"ComplexSum\"}"),
-        "AlgorithmFactory::highestVersion() - Unknown algorithm 'ComplexSum'");
+    TS_ASSERT_EQUALS(testProp.setValue("{\"name\":\"ComplexSum\"}"),
+                     "AlgorithmFactory::highestVersion() - Unknown algorithm 'ComplexSum'");
   }
 
   void test_Alg_With_An_AlgorithmProperty_Accepts_Another_Algorithm() {
     HasAlgProp testAlg;
     testAlg.initialize();
 
-    IAlgorithm_sptr adder =
-        Mantid::API::AlgorithmFactory::Instance().create("SimpleSum", 1);
+    IAlgorithm_sptr adder = Mantid::API::AlgorithmFactory::Instance().create("SimpleSum", 1);
     adder->initialize();
     adder->execute();
 
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("CalculateStep", adder));
     // Can we retrieve it again
-    TS_ASSERT_THROWS_NOTHING(IAlgorithm_sptr calcStep =
-                                 testAlg.getProperty("CalculateStep"));
+    TS_ASSERT_THROWS_NOTHING(IAlgorithm_sptr calcStep = testAlg.getProperty("CalculateStep"));
     // (And const) Can we retrieve it again
-    TS_ASSERT_THROWS_NOTHING(IAlgorithm_const_sptr calcStep =
-                                 testAlg.getProperty("CalculateStep"));
+    TS_ASSERT_THROWS_NOTHING(IAlgorithm_const_sptr calcStep = testAlg.getProperty("CalculateStep"));
 
     // Is it correct?
     IAlgorithm_sptr calcStep = testAlg.getProperty("CalculateStep");
     TS_ASSERT_EQUALS(calcStep->getPropertyValue("Output1"), "3");
   }
 
-  void
-  test_Alg_With_AlgorithmProperty_And_Validator_Fails_If_Input_Is_Invalid() {
+  void test_Alg_With_AlgorithmProperty_And_Validator_Fails_If_Input_Is_Invalid() {
     HasAlgPropAndValidator testAlg;
     testAlg.initialize();
 
     // Without initialize it has no properties
-    IAlgorithm_sptr adder =
-        Mantid::API::AlgorithmFactory::Instance().create("SimpleSum", 1);
-    TS_ASSERT_THROWS(testAlg.setProperty("CalculateStep", adder),
-                     const std::invalid_argument &);
+    IAlgorithm_sptr adder = Mantid::API::AlgorithmFactory::Instance().create("SimpleSum", 1);
+    TS_ASSERT_THROWS(testAlg.setProperty("CalculateStep", adder), const std::invalid_argument &);
     // Add the required property so now it should pass
     adder->initialize();
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("CalculateStep", adder));

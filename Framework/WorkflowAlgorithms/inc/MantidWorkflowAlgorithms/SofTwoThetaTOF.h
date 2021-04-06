@@ -27,11 +27,8 @@ private:
   double clarifyAngleStep(API::MatrixWorkspace const &ws);
   API::MatrixWorkspace_sptr convertToConstantL2(API::MatrixWorkspace_sptr &ws);
   API::MatrixWorkspace_sptr convertToTwoTheta(API::MatrixWorkspace_sptr &ws);
-  API::MatrixWorkspace_sptr groupByTwoTheta(API::MatrixWorkspace_sptr &ws,
-                                            double const twoThetaStep);
-  API::MatrixWorkspace_sptr
-  maskEmptyBins(API::MatrixWorkspace_sptr &maskable,
-                API::MatrixWorkspace_sptr &comparison);
+  API::MatrixWorkspace_sptr groupByTwoTheta(API::MatrixWorkspace_sptr &ws, double const twoThetaStep);
+  API::MatrixWorkspace_sptr maskEmptyBins(API::MatrixWorkspace_sptr &maskable, API::MatrixWorkspace_sptr &comparison);
   API::MatrixWorkspace_sptr rebinToNonRagged(API::MatrixWorkspace_sptr &ws);
 };
 

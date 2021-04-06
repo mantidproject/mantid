@@ -241,33 +241,6 @@ class DrillViewTest(unittest.TestCase):
                  mock.call(6, "B2", True,  "This is the master row of the group B")]
         self.view.table.setRowLabel.assert_has_calls(calls)
 
-    def test_automaticFilling(self):
-        self.view.increment = mock.Mock()
-        # positive increment
-        self.view.table.getSelectedCells.return_value = [(0, 0),
-                                                         (0, 1)]
-        self.view.table.getCellContents.return_value = "1000,2000,3000"
-        self.view.table.getRowsFromSelectedCells.return_value = [0]
-        self.view.increment.value.return_value = 1
-        self.view.automatic_filling()
-        calls = [mock.call(0, 1, "1001,2001,3001")]
-        self.view.table.setCellContents.assert_has_calls(calls)
-
-        # negative increment
-        self.view.table.setCellContents.reset_mock()
-        self.view.increment.value.return_value = -1
-        self.view.automatic_filling()
-        calls = [mock.call(0, 1, "999,1999,2999")]
-        self.view.table.setCellContents.assert_has_calls(calls)
-
-        # ranges
-        self.view.table.setCellContents.reset_mock()
-        self.view.table.getCellContents.return_value = "1000-2000,2000:3000,3000"
-        self.view.increment.value.return_value = 1
-        self.view.automatic_filling()
-        calls = [mock.call(0, 1, "2001-3001,3001:4001,3001")]
-        self.view.table.setCellContents.assert_has_calls(calls)
-
     def test_keyPressEvent(self):
         self.view.copySelectedCells = mock.Mock()
         self.view.cutSelectedCells = mock.Mock()

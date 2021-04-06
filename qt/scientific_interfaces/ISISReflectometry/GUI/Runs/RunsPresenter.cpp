@@ -42,16 +42,12 @@ namespace ISISReflectometry {
  * search.
  * @param messageHandler :: A handler to pass messages to the user
  */
-RunsPresenter::RunsPresenter(
-    IRunsView *mainView, ProgressableView *progressableView,
-    const RunsTablePresenterFactory &makeRunsTablePresenter,
-    double thetaTolerance, std::vector<std::string> const &instruments,
-    IMessageHandler *messageHandler)
+RunsPresenter::RunsPresenter(IRunsView *mainView, ProgressableView *progressableView,
+                             const RunsTablePresenterFactory &makeRunsTablePresenter, double thetaTolerance,
+                             std::vector<std::string> const &instruments, IMessageHandler *messageHandler)
     : m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
-      m_searcher(std::make_unique<QtCatalogSearcher>(mainView)),
-      m_view(mainView), m_progressView(progressableView),
-      m_mainPresenter(nullptr), m_messageHandler(messageHandler),
-      m_instruments(instruments),
+      m_searcher(std::make_unique<QtCatalogSearcher>(mainView)), m_view(mainView), m_progressView(progressableView),
+      m_mainPresenter(nullptr), m_messageHandler(messageHandler), m_instruments(instruments),
       m_thetaTolerance(thetaTolerance), m_tableUnsaved{false} {
 
   assert(m_view != nullptr);
@@ -72,28 +68,18 @@ RunsPresenter::~RunsPresenter() {
 /** Accept a main presenter
  * @param mainPresenter :: [input] A main presenter
  */
-void RunsPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
-  m_mainPresenter = mainPresenter;
-}
+void RunsPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) { m_mainPresenter = mainPresenter; }
 
-void RunsPresenter::initInstrumentList() {
-  m_view->setInstrumentList(m_instruments);
-}
+void RunsPresenter::initInstrumentList() { m_view->setInstrumentList(m_instruments); }
 
-RunsTable const &RunsPresenter::runsTable() const {
-  return tablePresenter()->runsTable();
-}
+RunsTable const &RunsPresenter::runsTable() const { return tablePresenter()->runsTable(); }
 
-RunsTable &RunsPresenter::mutableRunsTable() {
-  return tablePresenter()->mutableRunsTable();
-}
+RunsTable &RunsPresenter::mutableRunsTable() { return tablePresenter()->mutableRunsTable(); }
 
 /** Returns true if performing a new search i.e. with different criteria to any
  * previous search
  */
-bool RunsPresenter::newSearchCriteria() const {
-  return searchCriteria() != m_searcher->searchCriteria();
-}
+bool RunsPresenter::newSearchCriteria() const { return searchCriteria() != m_searcher->searchCriteria(); }
 
 void RunsPresenter::notifySearch() {
   updateWidgetEnabledState();
@@ -150,8 +136,7 @@ void RunsPresenter::notifyChangeInstrumentRequested() {
 // Notification from a child presenter that the instrument needs to be changed
 // Returns true and continues to change the instrument if possible; returns
 // false if not
-bool RunsPresenter::notifyChangeInstrumentRequested(
-    std::string const &instrumentName) {
+bool RunsPresenter::notifyChangeInstrumentRequested(std::string const &instrumentName) {
   if (changeInstrumentPrevented(instrumentName))
     return false;
 
@@ -159,21 +144,13 @@ bool RunsPresenter::notifyChangeInstrumentRequested(
   return true;
 }
 
-void RunsPresenter::notifyResumeReductionRequested() {
-  m_mainPresenter->notifyResumeReductionRequested();
-}
+void RunsPresenter::notifyResumeReductionRequested() { m_mainPresenter->notifyResumeReductionRequested(); }
 
-void RunsPresenter::notifyPauseReductionRequested() {
-  m_mainPresenter->notifyPauseReductionRequested();
-}
+void RunsPresenter::notifyPauseReductionRequested() { m_mainPresenter->notifyPauseReductionRequested(); }
 
-void RunsPresenter::notifyResumeAutoreductionRequested() {
-  m_mainPresenter->notifyResumeAutoreductionRequested();
-}
+void RunsPresenter::notifyResumeAutoreductionRequested() { m_mainPresenter->notifyResumeAutoreductionRequested(); }
 
-void RunsPresenter::notifyPauseAutoreductionRequested() {
-  m_mainPresenter->notifyPauseAutoreductionRequested();
-}
+void RunsPresenter::notifyPauseAutoreductionRequested() { m_mainPresenter->notifyPauseAutoreductionRequested(); }
 
 void RunsPresenter::notifyStartMonitor() { startMonitor(); }
 
@@ -181,20 +158,15 @@ void RunsPresenter::notifyStopMonitor() { stopMonitor(); }
 
 void RunsPresenter::notifyStartMonitorComplete() { startMonitorComplete(); }
 
-void RunsPresenter::notifyRowStateChanged() {
-  tablePresenter()->notifyRowStateChanged();
-}
+void RunsPresenter::notifyRowStateChanged() { tablePresenter()->notifyRowStateChanged(); }
 
 void RunsPresenter::notifyRowStateChanged(boost::optional<Item const &> item) {
   tablePresenter()->notifyRowStateChanged(item);
 }
 
-void RunsPresenter::notifyRowOutputsChanged() {
-  tablePresenter()->notifyRowOutputsChanged();
-}
+void RunsPresenter::notifyRowOutputsChanged() { tablePresenter()->notifyRowOutputsChanged(); }
 
-void RunsPresenter::notifyRowOutputsChanged(
-    boost::optional<Item const &> item) {
+void RunsPresenter::notifyRowOutputsChanged(boost::optional<Item const &> item) {
   tablePresenter()->notifyRowOutputsChanged(item);
 }
 
@@ -212,9 +184,7 @@ void RunsPresenter::notifyReductionPaused() {
 /** Returns true if performing a new autoreduction search i.e. with different
  * criteria to any previous autoreduction
  */
-bool RunsPresenter::newAutoreductionCriteria() const {
-  return searchCriteria() != m_lastAutoreductionSearch;
-}
+bool RunsPresenter::newAutoreductionCriteria() const { return searchCriteria() != m_lastAutoreductionSearch; }
 
 /** Return true if starting a new autoreduction (with new criteria) is
  * prevented e.g. if the user does not want to discard changes
@@ -222,8 +192,7 @@ bool RunsPresenter::newAutoreductionCriteria() const {
 bool RunsPresenter::autoreductionPrevented() const {
   // There's slight duplication in the checks here to ensure the user gets an
   // informative warning message
-  if (newAutoreductionCriteria() && newSearchCriteria() && m_tableUnsaved &&
-      m_searcher->hasUnsavedChanges())
+  if (newAutoreductionCriteria() && newSearchCriteria() && m_tableUnsaved && m_searcher->hasUnsavedChanges())
     return overwriteSearchResultsAndTablePrevented();
   else if (newAutoreductionCriteria() && m_tableUnsaved)
     return overwriteTablePrevented();
@@ -305,9 +274,7 @@ void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
   tablePresenter()->notifyInstrumentChanged(instrumentName);
 }
 
-std::string RunsPresenter::instrumentName() const {
-  return m_mainPresenter->instrumentName();
-}
+std::string RunsPresenter::instrumentName() const { return m_mainPresenter->instrumentName(); }
 
 void RunsPresenter::notifyTableChanged() { m_tableUnsaved = true; }
 
@@ -338,11 +305,9 @@ void RunsPresenter::resizeSearchResultsColumns() {
 
   // Limit columns' widths to a sensible maximum, based on a % of the table
   // width
-  static auto constexpr numColumns =
-      static_cast<int>(ISearchModel::Column::NUM_COLUMNS);
+  static auto constexpr numColumns = static_cast<int>(ISearchModel::Column::NUM_COLUMNS);
   auto const factor = 0.4;
-  auto const maxWidth =
-      static_cast<int>(m_view->getSearchResultsTableWidth() * factor);
+  auto const maxWidth = static_cast<int>(m_view->getSearchResultsTableWidth() * factor);
   for (auto column = 0; column < numColumns; ++column) {
     if (m_view->getSearchResultsColumnWidth(column) > maxWidth)
       m_view->setSearchResultsColumnWidth(column, maxWidth);
@@ -373,58 +338,41 @@ void RunsPresenter::autoreduceNewRuns() {
   m_mainPresenter->notifyResumeReductionRequested();
 }
 
-bool RunsPresenter::isProcessing() const {
-  return m_mainPresenter->isProcessing();
-}
+bool RunsPresenter::isProcessing() const { return m_mainPresenter->isProcessing(); }
 
-bool RunsPresenter::isAutoreducing() const {
-  return m_mainPresenter->isAutoreducing();
-}
+bool RunsPresenter::isAutoreducing() const { return m_mainPresenter->isAutoreducing(); }
 
-bool RunsPresenter::isAnyBatchProcessing() const {
-  return m_mainPresenter->isAnyBatchProcessing();
-}
+bool RunsPresenter::isAnyBatchProcessing() const { return m_mainPresenter->isAnyBatchProcessing(); }
 
-bool RunsPresenter::isAnyBatchAutoreducing() const {
-  return m_mainPresenter->isAnyBatchAutoreducing();
-}
+bool RunsPresenter::isAnyBatchAutoreducing() const { return m_mainPresenter->isAnyBatchAutoreducing(); }
 
-bool RunsPresenter::changeInstrumentPrevented(
-    std::string const &newName) const {
+bool RunsPresenter::changeInstrumentPrevented(std::string const &newName) const {
   return newName != instrumentName() && overwriteSearchResultsPrevented();
 }
 
-bool RunsPresenter::hasUnsavedChanges() const {
-  return m_tableUnsaved || m_searcher->hasUnsavedChanges();
-}
+bool RunsPresenter::hasUnsavedChanges() const { return m_tableUnsaved || m_searcher->hasUnsavedChanges(); }
 
 bool RunsPresenter::overwriteSearchResultsAndTablePrevented() const {
   return hasUnsavedChanges() &&
-         !m_mainPresenter->discardChanges(
-             "This will cause unsaved changes in the search results "
-             "and main table to be lost. Continue?");
+         !m_mainPresenter->discardChanges("This will cause unsaved changes in the search results "
+                                          "and main table to be lost. Continue?");
 }
 
 bool RunsPresenter::overwriteTablePrevented() const {
-  return m_tableUnsaved &&
-         !m_mainPresenter->discardChanges("This will cause unsaved changes in "
-                                          "the table to be lost. Continue?");
+  return m_tableUnsaved && !m_mainPresenter->discardChanges("This will cause unsaved changes in "
+                                                            "the table to be lost. Continue?");
 }
 
 bool RunsPresenter::overwriteSearchResultsPrevented() const {
   return m_searcher->hasUnsavedChanges() &&
-         !m_mainPresenter->discardChanges(
-             "This will cause unsaved changes in the search results to be "
-             "lost. Continue?");
+         !m_mainPresenter->discardChanges("This will cause unsaved changes in the search results to be "
+                                          "lost. Continue?");
 }
 
-bool RunsPresenter::searchInProgress() const {
-  return m_searcher->searchInProgress();
-}
+bool RunsPresenter::searchInProgress() const { return m_searcher->searchInProgress(); }
 
 SearchCriteria RunsPresenter::searchCriteria() const {
-  return SearchCriteria{m_view->getSearchInstrument(), m_view->getSearchCycle(),
-                        m_view->getSearchString()};
+  return SearchCriteria{m_view->getSearchInstrument(), m_view->getSearchCycle(), m_view->getSearchString()};
 }
 
 int RunsPresenter::percentComplete() const {
@@ -433,28 +381,20 @@ int RunsPresenter::percentComplete() const {
   return m_mainPresenter->percentComplete();
 }
 
-void RunsPresenter::setRoundPrecision(int &precision) {
-  m_tablePresenter->setTablePrecision(precision);
-}
+void RunsPresenter::setRoundPrecision(int &precision) { m_tablePresenter->setTablePrecision(precision); }
 
-void RunsPresenter::resetRoundPrecision() {
-  m_tablePresenter->resetTablePrecision();
-}
+void RunsPresenter::resetRoundPrecision() { m_tablePresenter->resetTablePrecision(); }
 
-IRunsTablePresenter *RunsPresenter::tablePresenter() const {
-  return m_tablePresenter.get();
-}
+IRunsTablePresenter *RunsPresenter::tablePresenter() const { return m_tablePresenter.get(); }
 
 /** Check that the given rows are valid for a transfer and warn the user if not
  * @param rowsToTransfer : a set of row indices to transfer
  * @return : true if valid, false if not
  */
-bool RunsPresenter::validateRowsToTransfer(
-    const std::set<int> &rowsToTransfer) {
+bool RunsPresenter::validateRowsToTransfer(const std::set<int> &rowsToTransfer) {
   // Check that we have something to transfer
   if (rowsToTransfer.size() == 0) {
-    m_messageHandler->giveUserCritical(
-        "Please select at least one run to transfer.", "No runs selected");
+    m_messageHandler->giveUserCritical("Please select at least one run to transfer.", "No runs selected");
     return false;
   }
   return true;
@@ -462,8 +402,7 @@ bool RunsPresenter::validateRowsToTransfer(
 
 /** Set up the progress bar
  */
-ProgressPresenter
-RunsPresenter::setupProgressBar(const std::set<int> &rowsToTransfer) {
+ProgressPresenter RunsPresenter::setupProgressBar(const std::set<int> &rowsToTransfer) {
 
   auto start = double(0.0);
   auto end = static_cast<double>(rowsToTransfer.size());
@@ -485,8 +424,7 @@ RunsPresenter::setupProgressBar(const std::set<int> &rowsToTransfer) {
  * the transfer criteria
  * @return : The runs to transfer as a vector of maps
  */
-void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
-                             const TransferMatch matchType) {
+void RunsPresenter::transfer(const std::set<int> &rowsToTransfer, const TransferMatch matchType) {
   UNUSED_ARG(matchType);
   if (validateRowsToTransfer(rowsToTransfer)) {
     auto progress = setupProgressBar(rowsToTransfer);
@@ -513,34 +451,24 @@ void RunsPresenter::updateWidgetEnabledState() const {
   m_view->updateMenuEnabledState(isProcessing());
 
   // Update components
-  m_view->setInstrumentComboEnabled(!isAnyBatchProcessing() &&
-                                    !isAnyBatchAutoreducing());
+  m_view->setInstrumentComboEnabled(!isAnyBatchProcessing() && !isAnyBatchAutoreducing());
   m_view->setSearchTextEntryEnabled(!isAutoreducing() && !searchInProgress());
   m_view->setSearchButtonEnabled(!isAutoreducing() && !searchInProgress());
   m_view->setSearchResultsEnabled(!isAutoreducing() && !searchInProgress());
-  m_view->setAutoreduceButtonEnabled(!isAnyBatchAutoreducing() &&
-                                     !isProcessing() && !searchInProgress());
+  m_view->setAutoreduceButtonEnabled(!isAnyBatchAutoreducing() && !isProcessing() && !searchInProgress());
   m_view->setAutoreducePauseButtonEnabled(isAutoreducing());
   m_view->setTransferButtonEnabled(!isProcessing() && !isAutoreducing());
 }
 
-void RunsPresenter::handleError(const std::string &message,
-                                const std::exception &e) {
-  m_messageHandler->giveUserCritical(message + ": " + std::string(e.what()),
-                                     "Error");
+void RunsPresenter::handleError(const std::string &message, const std::exception &e) {
+  m_messageHandler->giveUserCritical(message + ": " + std::string(e.what()), "Error");
 }
 
-void RunsPresenter::handleError(const std::string &message) {
-  m_messageHandler->giveUserCritical(message, "Error");
-}
+void RunsPresenter::handleError(const std::string &message) { m_messageHandler->giveUserCritical(message, "Error"); }
 
-std::string RunsPresenter::liveDataReductionAlgorithm() {
-  return "ReflectometryReductionOneLiveData";
-}
+std::string RunsPresenter::liveDataReductionAlgorithm() { return "ReflectometryReductionOneLiveData"; }
 
-std::string
-RunsPresenter::liveDataReductionOptions(const std::string &inputWorkspace,
-                                        const std::string &instrument) {
+std::string RunsPresenter::liveDataReductionOptions(const std::string &inputWorkspace, const std::string &instrument) {
   // Get the properties for the reduction algorithm from the settings tabs
   AlgorithmRuntimeProps options = m_mainPresenter->rowProcessingProperties();
   // Add other required input properties to the live data reduction algorithnm
@@ -566,8 +494,7 @@ IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
   alg->setProperty("AccumulationMethod", "Replace");
   alg->setProperty("UpdateEvery", static_cast<double>(updateInterval));
   alg->setProperty("PostProcessingAlgorithm", liveDataReductionAlgorithm());
-  alg->setProperty("PostProcessingProperties",
-                   liveDataReductionOptions(inputWorkspace, instrument));
+  alg->setProperty("PostProcessingProperties", liveDataReductionOptions(inputWorkspace, instrument));
   alg->setProperty("RunTransitionBehavior", "Restart");
   auto errorMap = alg->validateInputs();
   if (!errorMap.empty()) {
@@ -651,8 +578,7 @@ void RunsPresenter::finishHandle(const IAlgorithm *alg) {
 
 /** Handler called when the monitor algorithm errors
  */
-void RunsPresenter::errorHandle(const IAlgorithm *alg,
-                                const std::string &what) {
+void RunsPresenter::errorHandle(const IAlgorithm *alg, const std::string &what) {
   UNUSED_ARG(alg);
   UNUSED_ARG(what);
   stopObserving(m_monitorAlg);

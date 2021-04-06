@@ -34,12 +34,8 @@ public:
   double centre() const override { return getParameter("Center"); }
   void setCentre(const double c) override { setParameter("Center", c); }
 
-  double fwhm() const override {
-    return getParameter("Sigma") * (2.0 * sqrt(2.0 * M_LN2));
-  }
-  void setFwhm(const double w) override {
-    setParameter("Sigma", w / (2.0 * sqrt(2.0 * M_LN2)));
-  }
+  double fwhm() const override { return getParameter("Sigma") * (2.0 * sqrt(2.0 * M_LN2)); }
+  void setFwhm(const double w) override { setParameter("Sigma", w / (2.0 * sqrt(2.0 * M_LN2))); }
 
   double height() const override { return getParameter("Height"); }
   void setHeight(const double h) override { setParameter("Height", h); }
@@ -50,8 +46,7 @@ public:
     declareParameter("Height");
   }
 
-  void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const override {
+  void functionLocal(double *out, const double *xValues, const size_t nData) const override {
     double h = getParameter("Height");
     double s = getParameter("Sigma");
     double c = getParameter("Center");
@@ -61,8 +56,7 @@ public:
     }
   }
 
-  void functionDerivLocal(Jacobian *out, const double *xValues,
-                          const size_t nData) override {
+  void functionDerivLocal(Jacobian *out, const double *xValues, const size_t nData) override {
     UNUSED_ARG(out);
     UNUSED_ARG(xValues);
     UNUSED_ARG(nData);
@@ -84,18 +78,14 @@ private:
     return gaussian;
   }
 
-  double
-  getGaussianAnalyticalInfiniteIntegral(const IPeakFunction_sptr &gaussian) {
-    return gaussian->height() * gaussian->fwhm() / (2.0 * sqrt(M_LN2)) *
-           sqrt(M_PI);
+  double getGaussianAnalyticalInfiniteIntegral(const IPeakFunction_sptr &gaussian) {
+    return gaussian->height() * gaussian->fwhm() / (2.0 * sqrt(M_LN2)) * sqrt(M_PI);
   }
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PeakFunctionIntegratorTest *createSuite() {
-    return new PeakFunctionIntegratorTest();
-  }
+  static PeakFunctionIntegratorTest *createSuite() { return new PeakFunctionIntegratorTest(); }
   static void destroySuite(PeakFunctionIntegratorTest *suite) { delete suite; }
 
   void testDefaultConstruction() {
@@ -131,8 +121,7 @@ public:
     PeakFunctionIntegrator integrator;
     IntegrationResult result = integrator.integrateInfinity(*gaussian);
     TS_ASSERT_EQUALS(result.errorCode, static_cast<int>(GSL_SUCCESS));
-    TS_ASSERT_DELTA(result.result,
-                    getGaussianAnalyticalInfiniteIntegral(gaussian),
+    TS_ASSERT_DELTA(result.result, getGaussianAnalyticalInfiniteIntegral(gaussian),
                     integrator.requiredRelativePrecision());
     TS_ASSERT_DELTA(result.error, 0.0, integrator.requiredRelativePrecision());
 
@@ -146,24 +135,20 @@ public:
   void testIntegratePositiveInfinityGaussian() {
     IPeakFunction_sptr gaussian = getGaussian(0.0, 1.0, 1.0);
     PeakFunctionIntegrator integrator;
-    IntegrationResult result =
-        integrator.integratePositiveInfinity(*gaussian, 0.0);
+    IntegrationResult result = integrator.integratePositiveInfinity(*gaussian, 0.0);
 
     TS_ASSERT_EQUALS(result.errorCode, static_cast<int>(GSL_SUCCESS));
-    TS_ASSERT_DELTA(result.result,
-                    getGaussianAnalyticalInfiniteIntegral(gaussian) / 2.0,
+    TS_ASSERT_DELTA(result.result, getGaussianAnalyticalInfiniteIntegral(gaussian) / 2.0,
                     integrator.requiredRelativePrecision());
   }
 
   void testIntegrateNegativeInfinityGaussian() {
     IPeakFunction_sptr gaussian = getGaussian(0.0, 1.0, 1.0);
     PeakFunctionIntegrator integrator;
-    IntegrationResult result =
-        integrator.integrateNegativeInfinity(*gaussian, 0.0);
+    IntegrationResult result = integrator.integrateNegativeInfinity(*gaussian, 0.0);
 
     TS_ASSERT_EQUALS(result.errorCode, static_cast<int>(GSL_SUCCESS));
-    TS_ASSERT_DELTA(result.result,
-                    getGaussianAnalyticalInfiniteIntegral(gaussian) / 2.0,
+    TS_ASSERT_DELTA(result.result, getGaussianAnalyticalInfiniteIntegral(gaussian) / 2.0,
                     integrator.requiredRelativePrecision());
   }
 
@@ -174,23 +159,19 @@ public:
      *  -integral from -2 to 2 should give approx. 0.954
      *  -integral from -3 to 3 should give approx. 0.997
      */
-    IPeakFunction_sptr gaussian =
-        getGaussian(0.0, 2.0 * sqrt(2.0 * M_LN2), 1.0 / sqrt(2.0 * M_PI));
+    IPeakFunction_sptr gaussian = getGaussian(0.0, 2.0 * sqrt(2.0 * M_LN2), 1.0 / sqrt(2.0 * M_PI));
     PeakFunctionIntegrator integrator(1e-10);
 
     IntegrationResult rOneSigma = integrator.integrate(*gaussian, -1.0, 1.0);
     TS_ASSERT_EQUALS(rOneSigma.errorCode, static_cast<int>(GSL_SUCCESS));
-    TS_ASSERT_DELTA(rOneSigma.result, 0.682689492137086,
-                    integrator.requiredRelativePrecision());
+    TS_ASSERT_DELTA(rOneSigma.result, 0.682689492137086, integrator.requiredRelativePrecision());
 
     IntegrationResult rTwoSigma = integrator.integrate(*gaussian, -2.0, 2.0);
     TS_ASSERT_EQUALS(rTwoSigma.errorCode, static_cast<int>(GSL_SUCCESS));
-    TS_ASSERT_DELTA(rTwoSigma.result, 0.954499736103642,
-                    integrator.requiredRelativePrecision());
+    TS_ASSERT_DELTA(rTwoSigma.result, 0.954499736103642, integrator.requiredRelativePrecision());
 
     IntegrationResult rThreeSigma = integrator.integrate(*gaussian, -3.0, 3.0);
     TS_ASSERT_EQUALS(rThreeSigma.errorCode, static_cast<int>(GSL_SUCCESS));
-    TS_ASSERT_DELTA(rThreeSigma.result, 0.997300203936740,
-                    integrator.requiredRelativePrecision());
+    TS_ASSERT_DELTA(rThreeSigma.result, 0.997300203936740, integrator.requiredRelativePrecision());
   }
 };

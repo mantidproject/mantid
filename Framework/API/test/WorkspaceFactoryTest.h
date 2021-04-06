@@ -33,8 +33,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite {
   public:
     const std::string id() const override { return "Workspace2DTest"; }
 
-    void init(const size_t &NVectors, const size_t &XLength,
-              const size_t &YLength) override {
+    void init(const size_t &NVectors, const size_t &XLength, const size_t &YLength) override {
       size.emplace_back(NVectors);
       size.emplace_back(XLength);
       size.emplace_back(YLength);
@@ -59,8 +58,7 @@ public:
   void testReturnType() {
     WorkspaceFactory::Instance().subscribe<WorkspaceTester>("work");
     MatrixWorkspace_sptr space;
-    TS_ASSERT_THROWS_NOTHING(
-        space = WorkspaceFactory::Instance().create("work", 1, 1, 1));
+    TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create("work", 1, 1, 1));
     GNU_DIAG_OFF("unused-value")
     TS_ASSERT_THROWS_NOTHING(dynamic_cast<WorkspaceTester *>(space.get()));
     GNU_DIAG_ON("unused-value")
@@ -80,8 +78,7 @@ public:
     ws_child->setMonitorWorkspace(std::make_shared<Workspace1DTest>());
 
     MatrixWorkspace_sptr child;
-    TS_ASSERT_THROWS_NOTHING(child =
-                                 WorkspaceFactory::Instance().create(ws_child));
+    TS_ASSERT_THROWS_NOTHING(child = WorkspaceFactory::Instance().create(ws_child));
     TS_ASSERT_EQUALS(child->id(), "Workspace1DTest");
     TS_ASSERT_EQUALS(child->getSpectrum(0).getSpectrumNo(), 123);
     TS_ASSERT_EQUALS(*child->getSpectrum(1).getDetectorIDs().begin(), 456);
@@ -89,8 +86,7 @@ public:
 
     // run/logs
     double ei(0.0);
-    TS_ASSERT_THROWS_NOTHING(
-        ei = child->run().getPropertyValueAsType<double>("Ei"));
+    TS_ASSERT_THROWS_NOTHING(ei = child->run().getPropertyValueAsType<double>("Ei"));
     TS_ASSERT_DELTA(ei, 12.0, 1e-12);
 
     // sample
@@ -98,11 +94,9 @@ public:
 
     // Test change in child does not affect parent
     child->mutableRun().addProperty("Ei", 15.0, true);
-    TS_ASSERT_THROWS_NOTHING(
-        ei = child->run().getPropertyValueAsType<double>("Ei"));
+    TS_ASSERT_THROWS_NOTHING(ei = child->run().getPropertyValueAsType<double>("Ei"));
     TS_ASSERT_DELTA(ei, 15.0, 1e-12)
-    TS_ASSERT_THROWS_NOTHING(
-        ei = ws_child->run().getPropertyValueAsType<double>("Ei"));
+    TS_ASSERT_THROWS_NOTHING(ei = ws_child->run().getPropertyValueAsType<double>("Ei"));
     TS_ASSERT_DELTA(ei, 12.0, 1e-12);
 
     // sample
@@ -111,42 +105,33 @@ public:
     TS_ASSERT_EQUALS("MySampleChild", child->sample().getName());
 
     // Monitor workspace
-    TSM_ASSERT("The workspace factory should not propagate a monitor workspace",
-               !child->monitorWorkspace());
+    TSM_ASSERT("The workspace factory should not propagate a monitor workspace", !child->monitorWorkspace());
 
     MatrixWorkspace_sptr ws2D(new Workspace2DTest);
     ws2D->initialize(3, 1, 1);
     MatrixWorkspace_sptr child2;
-    TS_ASSERT_THROWS_NOTHING(child2 =
-                                 WorkspaceFactory::Instance().create(ws2D));
+    TS_ASSERT_THROWS_NOTHING(child2 = WorkspaceFactory::Instance().create(ws2D));
     TS_ASSERT(child2);
     TS_ASSERT_EQUALS(child2->id(), "Workspace2DTest");
 
     MatrixWorkspace_sptr nif(new NotInFactory);
     nif->initialize(1, 1, 1);
-    TS_ASSERT_THROWS(child = WorkspaceFactory::Instance().create(nif),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(child = WorkspaceFactory::Instance().create(nif), const std::runtime_error &);
   }
 
   void testAccordingToSize() {
     MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = WorkspaceFactory::Instance().create("Workspace2DTest", 1, 3, 2));
+    TS_ASSERT_THROWS_NOTHING(ws = WorkspaceFactory::Instance().create("Workspace2DTest", 1, 3, 2));
     TS_ASSERT(!ws->id().compare("Workspace2DTest"));
     Workspace2DTest &space = dynamic_cast<Workspace2DTest &>(*ws);
     TS_ASSERT_EQUALS(space.size[0], 1);
     TS_ASSERT_EQUALS(space.size[1], 3);
     TS_ASSERT_EQUALS(space.size[2], 2);
 
-    TS_ASSERT_THROWS_NOTHING(
-        ws = WorkspaceFactory::Instance().create("Workspace1DTest", 1, 1, 1));
+    TS_ASSERT_THROWS_NOTHING(ws = WorkspaceFactory::Instance().create("Workspace1DTest", 1, 1, 1));
     TS_ASSERT(!ws->id().compare("Workspace1DTest"));
 
-    TS_ASSERT_THROWS(
-        WorkspaceFactory::Instance().create("NotInFactory", 1, 1, 1),
-        const std::runtime_error &);
-    TS_ASSERT_THROWS(
-        WorkspaceFactory::Instance().create("NotInFactory", 10, 10, 10),
-        const std::runtime_error &);
+    TS_ASSERT_THROWS(WorkspaceFactory::Instance().create("NotInFactory", 1, 1, 1), const std::runtime_error &);
+    TS_ASSERT_THROWS(WorkspaceFactory::Instance().create("NotInFactory", 10, 10, 10), const std::runtime_error &);
   }
 };

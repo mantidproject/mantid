@@ -495,6 +495,9 @@ def load_calibration_set(input_workspace: Union[str, Workspace],
                 # the correct calibration is the one with a date previous to `run_start`
                 filename = date_to_file[available_dates[available_dates_index - 1]]
                 break
+        # final boundary case: run_start > latest available_date
+        if len(available_dates) > 0 and available_dates[-1] < run_start:
+            filename = date_to_file[available_dates[-1]]
         if filename is not None:
             logger.notice(f'Found {filename} for {str(input_workspace)} with run start {run_start}')
             instrument_tables[table_type] = LoadNexusProcessed(Filename=filename,

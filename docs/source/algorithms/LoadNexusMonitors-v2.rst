@@ -48,10 +48,10 @@ For most files, the ``LoadOnly`` option can be set to an empty string
 (the default) and the correct form of the data will be loaded
 (i.e. events for event monitors and histograms for histogram
 monitors). In some NeXus files, both histograms and events are
-provided. In this case, if ``LoadOnly`` is not defined, then histogram 
+provided. In this case, if ``LoadOnly`` is not defined, then histogram
 monitors will be loaded and a warning will be outputted to the Log.
 
-To suppress the warning, or to select which form of logs to load the 
+To suppress the warning, or to select which form of logs to load the
 user **must** use the ``LoadOnly``
 option to specify what is desired.
 

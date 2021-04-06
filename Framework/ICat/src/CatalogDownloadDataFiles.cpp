@@ -47,11 +47,9 @@ void CatalogDownloadDataFiles::init() {
   declareProperty(std::make_unique<ArrayProperty<std::string>>("FileNames"),
                   "List of filenames to download from the data server");
   declareProperty("DownloadPath", "", "The path to save the downloaded files.");
-  declareProperty("Session", "",
-                  "The session information of the catalog to use.");
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "FileLocations", std::vector<std::string>(),
-                      std::make_shared<NullValidator>(), Direction::Output),
+  declareProperty("Session", "", "The session information of the catalog to use.");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("FileLocations", std::vector<std::string>(),
+                                                               std::make_shared<NullValidator>(), Direction::Output),
                   "A list of file locations to the catalog datafiles.");
 }
 
@@ -65,10 +63,8 @@ void CatalogDownloadDataFiles::exec() {
     throw std::runtime_error("The catalog that you are using does not support "
                              "external downloading.");
 
-  std::unique_ptr<CatalogConfigService> catConfigService(
-      makeCatalogConfigServiceAdapter(ConfigService::Instance()));
-  UserCatalogInfo catalogInfo(
-      ConfigService::Instance().getFacility().catalogInfo(), *catConfigService);
+  std::unique_ptr<CatalogConfigService> catConfigService(makeCatalogConfigServiceAdapter(ConfigService::Instance()));
+  UserCatalogInfo catalogInfo(ConfigService::Instance().getFacility().catalogInfo(), *catConfigService);
 
   std::vector<int64_t> fileIDs = getProperty("FileIds");
   std::vector<std::string> fileNames = getProperty("FileNames");
@@ -93,31 +89,25 @@ void CatalogDownloadDataFiles::exec() {
     // The location of the file (on the server) stored in the archives.
     std::string fileLocation = catalogInfoService->getFileLocation(*fileID);
 
-    g_log.debug()
-        << "CatalogDownloadDataFiles -> File location before transform is: "
-        << fileLocation << " mac path is : " << catalogInfo.macPrefix() << '\n';
+    g_log.debug() << "CatalogDownloadDataFiles -> File location before transform is: " << fileLocation
+                  << " mac path is : " << catalogInfo.macPrefix() << '\n';
     // Transform the archive path to the path of the user's operating system.
     fileLocation = catalogInfo.transformArchivePath(fileLocation);
-    g_log.debug()
-        << "CatalogDownloadDataFiles -> File location after transform is:  "
-        << fileLocation << '\n';
+    g_log.debug() << "CatalogDownloadDataFiles -> File location after transform is:  " << fileLocation << '\n';
 
     // Can we open the file (Hence, have access to the archives?)
     std::ifstream hasAccessToArchives(fileLocation.c_str());
     if (hasAccessToArchives) {
-      g_log.information() << "File (" << *fileName << ") located in archives ("
-                          << fileLocation << ").\n";
+      g_log.information() << "File (" << *fileName << ") located in archives (" << fileLocation << ").\n";
       fileLocations.emplace_back(fileLocation);
     } else {
-      g_log.information()
-          << "Unable to open file (" << *fileName
-          << ") from archive. Beginning to download over Internet.\n";
+      g_log.information() << "Unable to open file (" << *fileName
+                          << ") from archive. Beginning to download over Internet.\n";
       progress(prog / 2, "getting the url ....");
       // Obtain URL for related file to download from net.
       const std::string url = catalogInfoService->getDownloadURL(*fileID);
       progress(prog, "downloading over internet...");
-      const std::string fullPathDownloadedFile =
-          doDownloadandSavetoLocalDrive(url, *fileName);
+      const std::string fullPathDownloadedFile = doDownloadandSavetoLocalDrive(url, *fileName);
       fileLocations.emplace_back(fullPathDownloadedFile);
     }
   }
@@ -133,8 +123,7 @@ void CatalogDownloadDataFiles::exec() {
  */
 bool CatalogDownloadDataFiles::isDataFile(const std::string &fileName) {
   std::string extension = Poco::Path(fileName).getExtension();
-  std::transform(extension.begin(), extension.end(), extension.begin(),
-                 tolower);
+  std::transform(extension.begin(), extension.end(), extension.begin(), tolower);
   return (extension == "raw" || extension == "nxs");
 }
 
@@ -145,8 +134,8 @@ bool CatalogDownloadDataFiles::isDataFile(const std::string &fileName) {
  * @param fileName :: The name of the file to save to disk.
  * @return The full path to the saved file.
  */
-std::string CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(
-    const std::string &URL, const std::string &fileName) {
+std::string CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(const std::string &URL,
+                                                                    const std::string &fileName) {
   std::string pathToDownloadedDatafile;
 
   try {
@@ -160,12 +149,10 @@ std::string CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(
     // Currently do not use any means of authentication. This should be updated
     // IDS has signed certificate.
     const Poco::Net::Context::Ptr context =
-        new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "",
-                               Poco::Net::Context::VERIFY_NONE);
+        new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE);
     // Create a singleton for holding the default context. E.g. any future
     // requests to publish are made to this certificate and context.
-    Poco::Net::SSLManager::instance().initializeClient(
-        nullptr, certificateHandler, context);
+    Poco::Net::SSLManager::instance().initializeClient(nullptr, certificateHandler, context);
 
     // Session takes ownership of socket
     Poco::Net::SecureStreamSocket socket{context};
@@ -173,8 +160,7 @@ std::string CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(
     session.setHost(uri.getHost());
     session.setPort(uri.getPort());
 
-    Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path,
-                                   Poco::Net::HTTPMessage::HTTP_1_1);
+    Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path, Poco::Net::HTTPMessage::HTTP_1_1);
     session.sendRequest(request);
 
     // Close the request by requesting a response.
@@ -185,8 +171,7 @@ std::string CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(
     // Obtain the status returned by the server to verify if it was a success.
     Poco::Net::HTTPResponse::HTTPStatus HTTPStatus = response.getStatus();
     // The error message returned by the IDS (if one exists).
-    std::string IDSError =
-        CatalogAlgorithmHelper().getIDSError(HTTPStatus, responseStream);
+    std::string IDSError = CatalogAlgorithmHelper().getIDSError(HTTPStatus, responseStream);
     // Cancel the algorithm and display the message if it exists.
     if (!IDSError.empty()) {
       // As an error occurred we must cancel the algorithm to prevent success
@@ -203,9 +188,8 @@ std::string CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(
 
     clock_t end = clock();
     float diff = float(end - start) / CLOCKS_PER_SEC;
-    g_log.information() << "Time taken to download file " << fileName << " is "
-                        << std::fixed << std::setprecision(2) << diff
-                        << " seconds\n";
+    g_log.information() << "Time taken to download file " << fileName << " is " << std::fixed << std::setprecision(2)
+                        << diff << " seconds\n";
 
   } catch (Poco::Net::SSLException &error) {
     throw std::runtime_error(error.displayText());
@@ -231,13 +215,9 @@ std::string CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(
  * @param fileName :: name of the output file
  * @return Full path of where file is saved to
  */
-std::string
-CatalogDownloadDataFiles::saveFiletoDisk(std::istream &rs,
-                                         const std::string &fileName) {
-  std::string filepath =
-      Poco::Path(getPropertyValue("DownloadPath"), fileName).toString();
-  std::ios_base::openmode mode =
-      isDataFile(fileName) ? std::ios_base::binary : std::ios_base::out;
+std::string CatalogDownloadDataFiles::saveFiletoDisk(std::istream &rs, const std::string &fileName) {
+  std::string filepath = Poco::Path(getPropertyValue("DownloadPath"), fileName).toString();
+  std::ios_base::openmode mode = isDataFile(fileName) ? std::ios_base::binary : std::ios_base::out;
 
   std::ofstream ofs(filepath.c_str(), mode);
   if (ofs.rdstate() & std::ios::failbit)
@@ -260,9 +240,7 @@ CatalogDownloadDataFiles::saveFiletoDisk(std::istream &rs,
  * @param fileName :: name of the file
  * @return Full path of where file is saved to
  */
-std::string
-CatalogDownloadDataFiles::testDownload(const std::string &URL,
-                                       const std::string &fileName) {
+std::string CatalogDownloadDataFiles::testDownload(const std::string &URL, const std::string &fileName) {
   return doDownloadandSavetoLocalDrive(URL, fileName);
 }
 } // namespace ICat

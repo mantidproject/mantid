@@ -20,33 +20,22 @@ IndirectSpectrumSelectionView::IndirectSpectrumSelectionView(QWidget *parent)
     : API::MantidWidget(parent), m_selector(new Ui::IndirectSpectrumSelector) {
   m_selector->setupUi(this);
 
-  connect(m_selector->cbMaskSpectrum, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(enableMaskLineEdit(int)));
+  connect(m_selector->cbMaskSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(enableMaskLineEdit(int)));
 
-  connect(m_selector->spMaximumSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(setSpectraRangeMaxiMin(int)));
-  connect(m_selector->spMinimumSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(setSpectraRangeMiniMax(int)));
+  connect(m_selector->spMaximumSpectrum, SIGNAL(valueChanged(int)), this, SLOT(setSpectraRangeMaxiMin(int)));
+  connect(m_selector->spMinimumSpectrum, SIGNAL(valueChanged(int)), this, SLOT(setSpectraRangeMiniMax(int)));
 
-  connect(m_selector->spMaximumSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(emitSpectraRangeChanged()));
-  connect(m_selector->spMinimumSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(emitSpectraRangeChanged()));
-  connect(m_selector->leSpectra, SIGNAL(editingFinished()), this,
-          SLOT(emitSpectraStringChanged()));
+  connect(m_selector->spMaximumSpectrum, SIGNAL(valueChanged(int)), this, SLOT(emitSpectraRangeChanged()));
+  connect(m_selector->spMinimumSpectrum, SIGNAL(valueChanged(int)), this, SLOT(emitSpectraRangeChanged()));
+  connect(m_selector->leSpectra, SIGNAL(editingFinished()), this, SLOT(emitSpectraStringChanged()));
 
-  connect(m_selector->spMaskSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(emitMaskSpectrumChanged(int)));
-  connect(m_selector->cbMaskSpectrum,
-          SIGNAL(currentIndexChanged(const QString &)), this,
+  connect(m_selector->spMaskSpectrum, SIGNAL(valueChanged(int)), this, SLOT(emitMaskSpectrumChanged(int)));
+  connect(m_selector->cbMaskSpectrum, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(emitMaskSpectrumChanged(const QString &)));
-  connect(m_selector->leMaskBins, SIGNAL(editingFinished()), this,
-          SLOT(emitMaskChanged()));
+  connect(m_selector->leMaskBins, SIGNAL(editingFinished()), this, SLOT(emitMaskChanged()));
 
-  connect(m_selector->cbSelectionMode, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(emitSpectraChanged(int)));
-  connect(m_selector->cbSelectionMode, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(clearMaskString()));
+  connect(m_selector->cbSelectionMode, SIGNAL(currentIndexChanged(int)), this, SLOT(emitSpectraChanged(int)));
+  connect(m_selector->cbSelectionMode, SIGNAL(currentIndexChanged(int)), this, SLOT(clearMaskString()));
 
   connect(m_selector->swSpectraSelection, SIGNAL(currentChanged(int)), this,
           SIGNAL(spectraSelectionWidgetChanged(int)));
@@ -55,65 +44,50 @@ IndirectSpectrumSelectionView::IndirectSpectrumSelectionView(QWidget *parent)
 IndirectSpectrumSelectionView::~IndirectSpectrumSelectionView() {}
 
 SpectrumSelectionMode IndirectSpectrumSelectionView::selectionMode() const {
-  return static_cast<SpectrumSelectionMode>(
-      m_selector->swSpectraSelection->currentIndex());
+  return static_cast<SpectrumSelectionMode>(m_selector->swSpectraSelection->currentIndex());
 }
 
 WorkspaceIndex IndirectSpectrumSelectionView::minimumSpectrum() const {
-  return WorkspaceIndex{
-      static_cast<size_t>(m_selector->spMinimumSpectrum->value())};
+  return WorkspaceIndex{static_cast<size_t>(m_selector->spMinimumSpectrum->value())};
 }
 
 WorkspaceIndex IndirectSpectrumSelectionView::maximumSpectrum() const {
-  return WorkspaceIndex{
-      static_cast<size_t>(m_selector->spMaximumSpectrum->value())};
+  return WorkspaceIndex{static_cast<size_t>(m_selector->spMaximumSpectrum->value())};
 }
 
-std::string IndirectSpectrumSelectionView::spectraString() const {
-  return m_selector->leSpectra->text().toStdString();
-}
+std::string IndirectSpectrumSelectionView::spectraString() const { return m_selector->leSpectra->text().toStdString(); }
 
-std::string IndirectSpectrumSelectionView::maskString() const {
-  return m_selector->leMaskBins->text().toStdString();
-}
+std::string IndirectSpectrumSelectionView::maskString() const { return m_selector->leMaskBins->text().toStdString(); }
 
-void IndirectSpectrumSelectionView::displaySpectra(
-    const std::string &spectraString) {
+void IndirectSpectrumSelectionView::displaySpectra(const std::string &spectraString) {
   setSpectraString(spectraString);
-  m_selector->cbSelectionMode->setCurrentIndex(
-      static_cast<int>(SpectrumSelectionMode::STRING));
+  m_selector->cbSelectionMode->setCurrentIndex(static_cast<int>(SpectrumSelectionMode::STRING));
 }
 
-void IndirectSpectrumSelectionView::displaySpectra(
-    std::pair<WorkspaceIndex, WorkspaceIndex> minmax) {
+void IndirectSpectrumSelectionView::displaySpectra(std::pair<WorkspaceIndex, WorkspaceIndex> minmax) {
   setMinimumSpectrum(minmax.first);
   setMaximumSpectrum(minmax.second);
-  m_selector->cbSelectionMode->setCurrentIndex(
-      static_cast<int>(SpectrumSelectionMode::RANGE));
+  m_selector->cbSelectionMode->setCurrentIndex(static_cast<int>(SpectrumSelectionMode::RANGE));
 }
 
-void IndirectSpectrumSelectionView::setSpectraRange(WorkspaceIndex minimum,
-                                                    WorkspaceIndex maximum) {
+void IndirectSpectrumSelectionView::setSpectraRange(WorkspaceIndex minimum, WorkspaceIndex maximum) {
   setSpectraRangeMinimum(minimum);
   setSpectraRangeMaximum(maximum);
 }
 
-void IndirectSpectrumSelectionView::setSpectraRangeMinimum(
-    WorkspaceIndex minimum) {
+void IndirectSpectrumSelectionView::setSpectraRangeMinimum(WorkspaceIndex minimum) {
   MantidQt::API::SignalBlocker blocker(m_selector->spMinimumSpectrum);
   m_selector->spMinimumSpectrum->setMinimum(static_cast<int>(minimum.value));
   setSpectraRangeMiniMax(static_cast<int>(minimum.value));
 }
 
-void IndirectSpectrumSelectionView::setSpectraRangeMaximum(
-    WorkspaceIndex maximum) {
+void IndirectSpectrumSelectionView::setSpectraRangeMaximum(WorkspaceIndex maximum) {
   MantidQt::API::SignalBlocker blocker(m_selector->spMaximumSpectrum);
   m_selector->spMaximumSpectrum->setMaximum(static_cast<int>(maximum.value));
   setSpectraRangeMaxiMin(static_cast<int>(maximum.value));
 }
 
-void IndirectSpectrumSelectionView::setMaskSpectraList(
-    const std::vector<WorkspaceIndex> &spectra) {
+void IndirectSpectrumSelectionView::setMaskSpectraList(const std::vector<WorkspaceIndex> &spectra) {
   m_selector->cbMaskSpectrum->clear();
   for (const auto &spectrum : spectra)
     m_selector->cbMaskSpectrum->addItem(QString::number(spectrum.value));
@@ -133,43 +107,34 @@ void IndirectSpectrumSelectionView::clear() {
 }
 
 void IndirectSpectrumSelectionView::setSpectraRegex(const std::string &regex) {
-  m_selector->leSpectra->setValidator(
-      createValidator(QString::fromStdString(regex)));
+  m_selector->leSpectra->setValidator(createValidator(QString::fromStdString(regex)));
 }
 
 void IndirectSpectrumSelectionView::setMaskBinsRegex(const std::string &regex) {
-  m_selector->leMaskBins->setValidator(
-      createValidator(QString::fromStdString(regex)));
+  m_selector->leMaskBins->setValidator(createValidator(QString::fromStdString(regex)));
 }
 
-void IndirectSpectrumSelectionView::setMinimumSpectrum(
-    WorkspaceIndex spectrum) {
+void IndirectSpectrumSelectionView::setMinimumSpectrum(WorkspaceIndex spectrum) {
   MantidQt::API::SignalBlocker blocker(m_selector->spMinimumSpectrum);
-  m_selector->spMinimumSpectrum->setValue(
-      boost::numeric_cast<int>(spectrum.value));
+  m_selector->spMinimumSpectrum->setValue(boost::numeric_cast<int>(spectrum.value));
 }
 
-void IndirectSpectrumSelectionView::setMaximumSpectrum(
-    WorkspaceIndex spectrum) {
+void IndirectSpectrumSelectionView::setMaximumSpectrum(WorkspaceIndex spectrum) {
   MantidQt::API::SignalBlocker blocker(m_selector->spMaximumSpectrum);
-  m_selector->spMaximumSpectrum->setValue(
-      boost::numeric_cast<int>(spectrum.value));
+  m_selector->spMaximumSpectrum->setValue(boost::numeric_cast<int>(spectrum.value));
 }
 
 void IndirectSpectrumSelectionView::setMaskSpectrum(WorkspaceIndex spectrum) {
   MantidQt::API::SignalBlocker blocker(m_selector->spMaskSpectrum);
-  m_selector->spMaskSpectrum->setValue(
-      boost::numeric_cast<int>(spectrum.value));
+  m_selector->spMaskSpectrum->setValue(boost::numeric_cast<int>(spectrum.value));
 }
 
-void IndirectSpectrumSelectionView::setSpectraString(
-    const std::string &spectraString) {
+void IndirectSpectrumSelectionView::setSpectraString(const std::string &spectraString) {
   MantidQt::API::SignalBlocker blocker(m_selector->leSpectra);
   m_selector->leSpectra->setText(QString::fromStdString(spectraString));
 }
 
-void IndirectSpectrumSelectionView::setMaskString(
-    const std::string &maskString) {
+void IndirectSpectrumSelectionView::setMaskString(const std::string &maskString) {
   MantidQt::API::SignalBlocker blocker(m_selector->leMaskBins);
   m_selector->leMaskBins->setText(QString::fromStdString(maskString));
 }
@@ -204,23 +169,18 @@ void IndirectSpectrumSelectionView::hideMaskBinErrorLabel() {
   m_selector->lbMaskBinsError->setVisible(false);
 }
 
-QValidator *
-IndirectSpectrumSelectionView::createValidator(const QString &regex) {
+QValidator *IndirectSpectrumSelectionView::createValidator(const QString &regex) {
   return new QRegExpValidator(QRegExp(regex), this);
 }
 
-UserInputValidator &IndirectSpectrumSelectionView::validateSpectraString(
-    UserInputValidator &uiv) const {
+UserInputValidator &IndirectSpectrumSelectionView::validateSpectraString(UserInputValidator &uiv) const {
   if (selectionMode() == SpectrumSelectionMode::STRING)
-    uiv.checkFieldIsValid("Spectra", m_selector->leSpectra,
-                          m_selector->lbSpectraError);
+    uiv.checkFieldIsValid("Spectra", m_selector->leSpectra, m_selector->lbSpectraError);
   return uiv;
 }
 
-UserInputValidator &IndirectSpectrumSelectionView::validateMaskBinsString(
-    UserInputValidator &uiv) const {
-  uiv.checkFieldIsValid("Mask Bins", m_selector->leMaskBins,
-                        m_selector->lbMaskBinsError);
+UserInputValidator &IndirectSpectrumSelectionView::validateMaskBinsString(UserInputValidator &uiv) const {
+  uiv.checkFieldIsValid("Mask Bins", m_selector->leMaskBins, m_selector->lbMaskBinsError);
   return uiv;
 }
 
@@ -238,17 +198,11 @@ void IndirectSpectrumSelectionView::showSpectrumSelector() {
   m_selector->lbColon->show();
 }
 
-void IndirectSpectrumSelectionView::hideMaskSpectrumSelector() {
-  m_selector->swMaskSpectrumSelection->hide();
-}
+void IndirectSpectrumSelectionView::hideMaskSpectrumSelector() { m_selector->swMaskSpectrumSelection->hide(); }
 
-void IndirectSpectrumSelectionView::showMaskSpectrumSelector() {
-  m_selector->swMaskSpectrumSelection->show();
-}
+void IndirectSpectrumSelectionView::showMaskSpectrumSelector() { m_selector->swMaskSpectrumSelection->show(); }
 
-void IndirectSpectrumSelectionView::clearMaskString() {
-  m_selector->leMaskBins->clear();
-}
+void IndirectSpectrumSelectionView::clearMaskString() { m_selector->leMaskBins->clear(); }
 
 void IndirectSpectrumSelectionView::enableMaskLineEdit(int doEnable) {
   if (doEnable >= 0 || selectionMode() == SpectrumSelectionMode::RANGE)
@@ -277,10 +231,8 @@ void IndirectSpectrumSelectionView::emitMaskChanged() {
   emit maskChanged(m_selector->leMaskBins->text().toStdString());
 }
 
-void IndirectSpectrumSelectionView::emitMaskSpectrumChanged(
-    const QString &spectrum) {
-  emit maskSpectrumChanged(
-      WorkspaceIndex{static_cast<size_t>(spectrum.toInt())});
+void IndirectSpectrumSelectionView::emitMaskSpectrumChanged(const QString &spectrum) {
+  emit maskSpectrumChanged(WorkspaceIndex{static_cast<size_t>(spectrum.toInt())});
 }
 
 void IndirectSpectrumSelectionView::emitMaskSpectrumChanged(int spectrum) {

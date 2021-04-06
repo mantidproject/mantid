@@ -1,7 +1,7 @@
 .. _03_displaying_1D_data:
 
 ==================
-Displaying 1D Data 
+Displaying 1D Data
 ==================
 
 .. figure:: /images/SimpleGraph.png
@@ -68,11 +68,11 @@ Adding a curve to an existing plot
 There are two ways to add spectra to an already existing graph, either
 from the same workspace or from another.
 
-A. Drag the Workspace from the Workspace List and drop it onto the 
+A. Drag the Workspace from the Workspace List and drop it onto the
 graph you want to add the curve to.
 
 B. Right-click the Workspace from the Workspace list and Select "Plot > Overplot spectrum ...". This will attach your additional spectra to your last active plot.
 
-* In both cases, if the Workspace contains more than one spectra you will 
+* In both cases, if the Workspace contains more than one spectra you will
   be asked which spectra you wish to add to the plot.
 

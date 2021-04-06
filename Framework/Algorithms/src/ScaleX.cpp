@@ -32,18 +32,16 @@ DECLARE_ALGORITHM(ScaleX)
  * Default constructor
  */
 ScaleX::ScaleX()
-    : API::Algorithm(), m_progress(nullptr), m_algFactor(1.0), m_parname(),
-      m_combine(false), m_binOp(), m_wi_min(-1), m_wi_max(-1) {}
+    : API::Algorithm(), m_progress(nullptr), m_algFactor(1.0), m_parname(), m_combine(false), m_binOp(), m_wi_min(-1),
+      m_wi_max(-1) {}
 
 /**
  * Initialisation method. Declares properties to be used in algorithm.
  */
 void ScaleX::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
   auto isDouble = std::make_shared<BoundedValidator<double>>();
   declareProperty("Factor", m_algFactor, isDouble,
@@ -52,8 +50,7 @@ void ScaleX::init() {
   std::vector<std::string> op(2);
   op[0] = "Multiply";
   op[1] = "Add";
-  declareProperty("Operation", "Multiply",
-                  std::make_shared<StringListValidator>(op),
+  declareProperty("Operation", "Multiply", std::make_shared<StringListValidator>(op),
                   "Whether to multiply by, or add factor");
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
@@ -68,12 +65,11 @@ void ScaleX::init() {
   declareProperty("InstrumentParameter", m_parname,
                   "The name of an instrument parameter whose value is used to "
                   "scale as the input factor");
-  declareProperty(
-      "Combine", m_combine,
-      "If true, combine the value given in the Factor property with the value "
-      "obtained from the instrument parameter. The factors are combined using "
-      "the operation specified "
-      "in the Operation parameter");
+  declareProperty("Combine", m_combine,
+                  "If true, combine the value given in the Factor property with the value "
+                  "obtained from the instrument parameter. The factors are combined using "
+                  "the operation specified "
+                  "in the Operation parameter");
 }
 
 /**
@@ -102,8 +98,7 @@ void ScaleX::exec() {
   int tempwi_min = getProperty("IndexMin");
   int tempwi_max = getProperty("IndexMax");
   if (tempwi_max != Mantid::EMPTY_INT()) {
-    if ((m_wi_min <= tempwi_min) && (tempwi_min <= tempwi_max) &&
-        (tempwi_max <= m_wi_max)) {
+    if ((m_wi_min <= tempwi_min) && (tempwi_min <= tempwi_max) && (tempwi_max <= m_wi_max)) {
       m_wi_min = tempwi_min;
       m_wi_max = tempwi_max;
     } else {
@@ -119,8 +114,7 @@ void ScaleX::exec() {
     m_binOp = std::plus<double>();
 
   // Check if its an event workspace
-  EventWorkspace_const_sptr eventWS =
-      std::dynamic_pointer_cast<const EventWorkspace>(inputW);
+  EventWorkspace_const_sptr eventWS = std::dynamic_pointer_cast<const EventWorkspace>(inputW);
   if (eventWS != nullptr) {
     this->execEvent();
     return;
@@ -144,8 +138,7 @@ void ScaleX::exec() {
       double factor = getScaleFactor(inputW, i);
       // Do the offsetting
       using std::placeholders::_1;
-      std::transform(inX.begin(), inX.end(), outX.begin(),
-                     std::bind(m_binOp, _1, factor));
+      std::transform(inX.begin(), inX.end(), outX.begin(), std::bind(m_binOp, _1, factor));
       // reverse the vector if multiplicative factor was negative
       if (multiply && factor < 0.0) {
         std::reverse(outX.begin(), outX.end());
@@ -175,8 +168,7 @@ void ScaleX::exec() {
 
 void ScaleX::execEvent() {
   g_log.information("Processing event workspace");
-  const MatrixWorkspace_const_sptr matrixInputWS =
-      this->getProperty("InputWorkspace");
+  const MatrixWorkspace_const_sptr matrixInputWS = this->getProperty("InputWorkspace");
   // generate the output workspace pointer
   API::MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
   if (matrixOutputWS != matrixInputWS) {
@@ -209,8 +201,7 @@ void ScaleX::execEvent() {
   outputWS->clearMRU();
 }
 
-API::MatrixWorkspace_sptr
-ScaleX::createOutputWS(const API::MatrixWorkspace_sptr &input) {
+API::MatrixWorkspace_sptr ScaleX::createOutputWS(const API::MatrixWorkspace_sptr &input) {
   // Check whether input = output to see whether a new workspace is required.
   MatrixWorkspace_sptr output = getProperty("OutputWorkspace");
   if (input != output) {
@@ -228,8 +219,7 @@ ScaleX::createOutputWS(const API::MatrixWorkspace_sptr &input) {
  * @param index The current index to inspect
  * @return Value for the scale factor
  */
-double ScaleX::getScaleFactor(const API::MatrixWorkspace_const_sptr &inputWS,
-                              const size_t index) {
+double ScaleX::getScaleFactor(const API::MatrixWorkspace_const_sptr &inputWS, const size_t index) {
   if (m_parname.empty())
     return m_algFactor;
 
@@ -252,8 +242,7 @@ double ScaleX::getScaleFactor(const API::MatrixWorkspace_const_sptr &inputWS,
       return m_binOp(m_algFactor, par->value<double>());
   } else {
     std::ostringstream os;
-    os << "Spectrum at index '" << index << "' has no parameter named '"
-       << m_parname << "'\n";
+    os << "Spectrum at index '" << index << "' has no parameter named '" << m_parname << "'\n";
     throw std::runtime_error(os.str());
   }
 }

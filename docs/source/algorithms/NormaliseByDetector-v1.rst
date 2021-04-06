@@ -159,7 +159,7 @@ definitions on different components in the tree.
 Usage
 -----
 
-**Example - A simple linear correction**  
+**Example - A simple linear correction**
 
 .. testcode:: ExLinear
 
@@ -212,7 +212,7 @@ Usage
 Output:
 
 .. testoutput:: ExLinear
-   
+
   The correction will divide the data by an increasing linear function.
   f(x) = 2x + 1
   The correct value in bin 0 is 0.28 compared to 0.30

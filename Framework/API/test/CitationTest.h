@@ -20,70 +20,54 @@ public:
   static void destroySuite(CitationTest *suite) { delete suite; }
 
   void test_citation_constructor() {
-    TS_ASSERT_THROWS_NOTHING(Mantid::API::Citation("doi", "bibtex", "endnote",
-                                                   "url", "description"));
+    TS_ASSERT_THROWS_NOTHING(Mantid::API::Citation("doi", "bibtex", "endnote", "url", "description"));
   }
 
   void test_citation_constructor_accepts_none_for_some_variables() {
-    TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::Citation("doi", "bibtex", "endnote", "url", ""));
+    TS_ASSERT_THROWS_NOTHING(Mantid::API::Citation("doi", "bibtex", "endnote", "url", ""));
   }
 
   void test_citation_constructor_throws_when_bibtex_given_but_endnote_isnt() {
-    TS_ASSERT_THROWS(Mantid::API::Citation("", "bibtex"),
-                     const std::invalid_argument &)
+    TS_ASSERT_THROWS(Mantid::API::Citation("", "bibtex"), const std::invalid_argument &)
   }
 
   void test_citation_constructor_throws_when_endnote_given_but_bibtex_isnt() {
-    TS_ASSERT_THROWS(Mantid::API::Citation("", "", "endnote"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(Mantid::API::Citation("", "", "endnote"), const std::invalid_argument &);
   }
 
   void test_citation_constructor_throws_when_doi_is_given_but_endnote_isnt() {
-    TS_ASSERT_THROWS(Mantid::API::Citation("doi", "bibtex", "", "url"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(Mantid::API::Citation("doi", "bibtex", "", "url"), const std::invalid_argument &);
   }
 
   void test_citation_constructor_throws_when_doi_is_given_but_bibtex_isnt() {
-    TS_ASSERT_THROWS(Mantid::API::Citation("doi", "", "endnote", "url"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(Mantid::API::Citation("doi", "", "endnote", "url"), const std::invalid_argument &);
   }
 
-  void
-  test_citation_constructor_throws_when_doi_is_given_but_endnote_and_bibtex_isnt() {
-    TS_ASSERT_THROWS(Mantid::API::Citation("doi", "", "", "url"),
-                     const std::invalid_argument &);
+  void test_citation_constructor_throws_when_doi_is_given_but_endnote_and_bibtex_isnt() {
+    TS_ASSERT_THROWS(Mantid::API::Citation("doi", "", "", "url"), const std::invalid_argument &);
   }
 
   void test_citation_constructor_throws_when_doi_is_given_but_url_isnt() {
-    TS_ASSERT_THROWS(Mantid::API::Citation("doi", "bibtex", "endnote", ""),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(Mantid::API::Citation("doi", "bibtex", "endnote", ""), const std::invalid_argument &);
   }
 
-  void
-  test_citation_constructor_throws_when_url_is_not_given_when_bibtex_endnote_and_doi_is_not_given() {
-    TS_ASSERT_THROWS(Mantid::API::Citation("", "", "", "", ""),
-                     const std::invalid_argument &);
+  void test_citation_constructor_throws_when_url_is_not_given_when_bibtex_endnote_and_doi_is_not_given() {
+    TS_ASSERT_THROWS(Mantid::API::Citation("", "", "", "", ""), const std::invalid_argument &);
   }
 
-  void
-  test_citation_constructor_doesnt_throw_when_url_is_given_when_bibtex_endnote_and_doi_is_not_given() {
+  void test_citation_constructor_doesnt_throw_when_url_is_given_when_bibtex_endnote_and_doi_is_not_given() {
     TS_ASSERT_THROWS_NOTHING(Mantid::API::Citation("", "", "", "url"));
   }
 
   void test_citation_equivelancy_operator_is_true_on_equal() {
-    auto cite1 =
-        Mantid::API::Citation("doi", "bibtex", "endnote", "url", "description");
-    auto cite2 =
-        Mantid::API::Citation("doi", "bibtex", "endnote", "url", "description");
+    auto cite1 = Mantid::API::Citation("doi", "bibtex", "endnote", "url", "description");
+    auto cite2 = Mantid::API::Citation("doi", "bibtex", "endnote", "url", "description");
     TS_ASSERT(cite1 == cite2);
   }
 
   void test_citation_equivelancy_operator_is_false_on_not_equal() {
-    auto cite1 =
-        Mantid::API::Citation("doi", "bibtex", "endnote", "url", "description");
-    auto cite2 = Mantid::API::Citation("doi", "bibtex", "endnote", "url",
-                                       "not description");
+    auto cite1 = Mantid::API::Citation("doi", "bibtex", "endnote", "url", "description");
+    auto cite2 = Mantid::API::Citation("doi", "bibtex", "endnote", "url", "not description");
     TS_ASSERT(!(cite1 == cite2));
   }
 
@@ -92,8 +76,7 @@ public:
     const std::string filename = "saveNexusCitation1.nxs";
     NexusTestHelper th(true);
     th.createFile(filename);
-    auto cite =
-        Mantid::API::Citation("doi", "bibtex", "endnote", "url", "description");
+    auto cite = Mantid::API::Citation("doi", "bibtex", "endnote", "url", "description");
 
     TS_ASSERT_THROWS_NOTHING(cite.saveNexus(th.file.get(), "group"))
   }
@@ -104,8 +87,7 @@ public:
     const std::string group = "group";
     NexusTestHelper th(true);
     th.createFile(filename);
-    auto cite1 =
-        Mantid::API::Citation("doi", "bibtex", "endnote", "url", "description");
+    auto cite1 = Mantid::API::Citation("doi", "bibtex", "endnote", "url", "description");
 
     cite1.saveNexus(th.file.get(), group);
 

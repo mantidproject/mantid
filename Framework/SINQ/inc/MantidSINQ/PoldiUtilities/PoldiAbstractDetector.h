@@ -31,8 +31,7 @@ class MANTID_SINQ_DLL PoldiAbstractDetector {
 public:
   virtual ~PoldiAbstractDetector() = default;
 
-  virtual void
-  loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) = 0;
+  virtual void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) = 0;
 
   virtual double efficiency() = 0;
 
@@ -44,8 +43,7 @@ public:
 
   virtual const std::vector<int> &availableElements() = 0;
 
-  virtual std::pair<double, double> qLimits(double lambdaMin,
-                                            double lambdaMax) = 0;
+  virtual std::pair<double, double> qLimits(double lambdaMin, double lambdaMax) = 0;
 
 protected:
   PoldiAbstractDetector() = default;

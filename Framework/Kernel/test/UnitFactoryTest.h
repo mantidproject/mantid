@@ -19,14 +19,11 @@ public:
   void test_Create_With_Valid_Unit_Gives_Valid_Pointer() {
     std::shared_ptr<Unit> first;
     TS_ASSERT_THROWS_NOTHING(first = UnitFactory::Instance().create("TOF"));
-    TSM_ASSERT(
-        "UnitFactory::create did not throw but it returned an empty pointer",
-        first);
+    TSM_ASSERT("UnitFactory::create did not throw but it returned an empty pointer", first);
   }
 
   void test_Create_With_Unknown_Unit_Throws_Exception() {
-    TS_ASSERT_THROWS(UnitFactory::Instance().create("_NOT_A_REAL_UNIT"),
-                     const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(UnitFactory::Instance().create("_NOT_A_REAL_UNIT"), const Exception::NotFoundError &);
   }
 
   void test_getKeys_Includes_Label_and_TOF() {

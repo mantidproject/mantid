@@ -59,8 +59,7 @@ public:
 
     UncertainValue invalid(2.0, 0.0);
 
-    TS_ASSERT_THROWS(UncertainValue::valueToErrorRatio(invalid),
-                     const std::domain_error &);
+    TS_ASSERT_THROWS(UncertainValue::valueToErrorRatio(invalid), const std::domain_error &);
   }
 
   void testErrorToValueRatio() {
@@ -71,8 +70,7 @@ public:
     TS_ASSERT_EQUALS(UncertainValue::errorToValueRatio(valueWithoutError), 0.0);
 
     UncertainValue invalid(0.0, 2.0);
-    TS_ASSERT_THROWS(UncertainValue::errorToValueRatio(invalid),
-                     const std::domain_error &);
+    TS_ASSERT_THROWS(UncertainValue::errorToValueRatio(invalid), const std::domain_error &);
   }
 
   void testdoubleOperator() {

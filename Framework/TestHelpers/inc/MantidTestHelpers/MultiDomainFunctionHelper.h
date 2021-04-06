@@ -16,21 +16,16 @@ namespace Mantid {
 
 namespace TestHelpers {
 
-class MultiDomainFunctionTest_Function : public Mantid::API::IFunction1D,
-                                         public Mantid::API::ParamFunction {
+class MultiDomainFunctionTest_Function : public Mantid::API::IFunction1D, public Mantid::API::ParamFunction {
 public:
   MultiDomainFunctionTest_Function();
 
-  std::string name() const override {
-    return "MultiDomainFunctionTest_Function";
-  }
+  std::string name() const override { return "MultiDomainFunctionTest_Function"; }
 
 protected:
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
 
-  void functionDeriv1D(Mantid::API::Jacobian *out, const double *xValues,
-                       const size_t nData) override;
+  void functionDeriv1D(Mantid::API::Jacobian *out, const double *xValues, const size_t nData) override;
 };
 
 std::shared_ptr<Mantid::API::MultiDomainFunction> makeMultiDomainFunction3();

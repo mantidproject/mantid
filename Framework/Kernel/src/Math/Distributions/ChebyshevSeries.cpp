@@ -40,8 +40,7 @@ ChebyshevSeries::ChebyshevSeries(const size_t degree) : m_bk(degree + 3, 0.0) {
  * @return Value of the polynomial. The value is undefined if x or n are
  * out of range
  */
-double ChebyshevSeries::operator()(const std::vector<double> &c,
-                                   const double x) {
+double ChebyshevSeries::operator()(const std::vector<double> &c, const double x) {
   const size_t degree(m_bk.size() - 3);
   assert(c.size() >= degree + 1);
 

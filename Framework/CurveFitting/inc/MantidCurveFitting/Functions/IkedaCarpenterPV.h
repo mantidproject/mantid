@@ -24,9 +24,7 @@ page www.mantidproject.org/IkedaCarpenterPV for documentation for this function.
 @author Anders Markvardsen, ISIS, RAL
 @date 3/11/2009
 */
-class MANTID_CURVEFITTING_DLL IkedaCarpenterPV
-    : virtual public API::IPeakFunction,
-      virtual public API::IFunctionMW {
+class MANTID_CURVEFITTING_DLL IkedaCarpenterPV : virtual public API::IPeakFunction, virtual public API::IFunctionMW {
 public:
   /// overwrite IPeakFunction base class methods
   double centre() const override;
@@ -43,16 +41,13 @@ public:
   /// Returns the integral intensity of the peak
   double intensity() const override;
 
-  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace,
-                          size_t wi, double startX, double endX) override;
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX,
+                          double endX) override;
 
 protected:
-  void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const override;
-  void functionDerivLocal(API::Jacobian *out, const double *xValues,
-                          const size_t nData) override;
-  void functionDeriv(const API::FunctionDomain &domain,
-                     API::Jacobian &jacobian) override;
+  void functionLocal(double *out, const double *xValues, const size_t nData) const override;
+  void functionDerivLocal(API::Jacobian *out, const double *xValues, const size_t nData) override;
+  void functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) override;
 
   /// overwrite IFunction base class method, which declare function parameters
   void init() override;
@@ -62,17 +57,13 @@ private:
   mutable std::vector<double> m_waveLength;
 
   /// calculate the const function
-  void constFunction(double *out, const double *xValues,
-                     const int &nData) const;
+  void constFunction(double *out, const double *xValues, const int &nData) const;
 
   /// method for updating m_waveLength
-  void calWavelengthAtEachDataPoint(const double *xValues,
-                                    const size_t &nData) const;
+  void calWavelengthAtEachDataPoint(const double *xValues, const size_t &nData) const;
 
   /// convert voigt params to pseudo voigt params
-  void convertVoigtToPseudo(const double &voigtSigmaSq,
-                            const double &voigtGamma, double &H,
-                            double &eta) const;
+  void convertVoigtToPseudo(const double &voigtSigmaSq, const double &voigtGamma, double &H, double &eta) const;
 
   /// constrain all parameters to be non-negative
   void lowerConstraint0(const std::string &paramName);

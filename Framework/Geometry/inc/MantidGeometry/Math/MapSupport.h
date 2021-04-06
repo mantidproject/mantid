@@ -74,9 +74,7 @@ public:
   valEqual(const NumPart &V) : value(V) {}
 
   /// Equality operator vs Map second object
-  bool operator()(const std::pair<KeyPart, NumPart> &A) const {
-    return A.second == value;
-  }
+  bool operator()(const std::pair<KeyPart, NumPart> &A) const { return A.second == value; }
 };
 /**
   \class mapClone
@@ -95,8 +93,7 @@ public:
 template <typename KeyPart, typename PtrPart> class mapClone {
 public:
   /// clone function to return insert object
-  std::pair<KeyPart, PtrPart>
-  operator()(const std::pair<KeyPart, PtrPart> &A) const {
+  std::pair<KeyPart, PtrPart> operator()(const std::pair<KeyPart, PtrPart> &A) const {
     return std::pair<KeyPart, PtrPart>(A.first, A.second->clone());
   }
 };
@@ -134,8 +131,7 @@ public:
 template <typename KeyPart, typename BodyPart> class mapSwap {
 public:
   /// Operator()
-  std::pair<BodyPart, KeyPart>
-  operator()(const std::pair<KeyPart, BodyPart> &A) const {
+  std::pair<BodyPart, KeyPart> operator()(const std::pair<KeyPart, BodyPart> &A) const {
     return std::pair<BodyPart, KeyPart>(A.second, A.first);
   }
 };
@@ -153,9 +149,7 @@ public:
 template <typename PartA, typename PartB> class mapWrite {
 public:
   /// Write both the key and object
-  void operator()(const std::pair<PartA, PartB> &A) const {
-    logger.debug() << A.first << " " << A.second << '\n';
-  }
+  void operator()(const std::pair<PartA, PartB> &A) const { logger.debug() << A.first << " " << A.second << '\n'; }
 };
 
 /**

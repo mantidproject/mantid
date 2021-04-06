@@ -13,7 +13,8 @@ from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DistributedDa
     ITableWorkspace, MatrixWorkspace
 from mantid.kernel import (
     ConfigService, Direction, EnabledWhenProperty, FloatArrayProperty, FloatBoundedValidator, IntArrayBoundedValidator,
-    IntArrayProperty, Property, PropertyCriterion, PropertyManagerDataService, StringListValidator, StringTimeSeriesProperty)
+    IntArrayProperty, MaterialBuilder, Property, PropertyCriterion, PropertyManagerDataService, StringListValidator,
+    StringTimeSeriesProperty)
 from mantid.dataobjects import SplittersWorkspace  # SplittersWorkspace
 from mantid.utils import absorptioncorrutils
 if AlgorithmFactory.exists('GatherWorkspaces'):
@@ -271,8 +272,11 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
         # If doing absorption correction, make sure the sample formula is correct
         if self.getProperty("TypeOfCorrection").value != "None":
-            if self.getProperty("SampleFormula").value == '':
-                issues['SampleFormula'] = "A sample formula must be provided."
+            if self.getProperty("SampleFormula").value.strip() != '':
+                try:
+                    MaterialBuilder().setFormula(self.getProperty("SampleFormula").value.strip())
+                except ValueError as ex:
+                    issues['SampleFormula'] = "Invalid SampleFormula: '{}'".format(str(ex))
 
         # The provided cache directory does not exist
         cache_dir_string = self.getProperty('CacheDir').value  # comma-delimited string representation of list
@@ -322,7 +326,8 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self._offsetFactor = self.getProperty("OffsetData").value
         self._outDir = self.getProperty("OutputDirectory").value
         # Caching options
-        self._cache_dirs = [os.path.abspath(me.strip()) for me in self.getProperty("CacheDir").value.split(',')]
+        self._cache_dirs = [os.path.abspath(me.strip()) for me in self.getProperty("CacheDir").value.split(',')
+                            if me.strip()]  # filter out empty elements
         self._cache_dir = self._cache_dirs[0] if self._cache_dirs else ""
         self._clean_cache = self.getProperty("CleanCache").value
 
@@ -410,6 +415,15 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             api.Load(Filename=samRuns[0], OutputWorkspace=absName, MetaDataOnly=True)
             self._info = self._getinfo(absName)
             metaws = absName
+            if self._sampleFormula == '' and "SampleFormula" in mtd[metaws].run():
+                # Do a quick check to see if the sample formula in the logs is correct
+                try:
+                    MaterialBuilder().setFormula(mtd[metaws].run()["SampleFormula"].lastValue().strip())
+                except ValueError:
+                    self.log().warning(
+                        "Sample formula '{}' found in sample logs does not have a valid format - specify manually in "
+                        "algorithm input.".format(mtd[metaws].run()["SampleFormula"].lastValue().strip()))
+
         # NOTE: inconsistent naming among different methods
         #       -> adding more comments to help clarify
         a_sample, a_container = absorptioncorrutils.calculate_absorption_correction(

@@ -27,25 +27,16 @@ DECLARE_LISTENER(TestDataListener)
 /// Constructor
 TestDataListener::TestDataListener()
     : LiveListener(), m_buffer(),
-      m_rand(new Kernel::MersenneTwister(
-          Types::Core::DateAndTime::getCurrentTime().totalNanoseconds(), 40000,
-          60000)),
+      m_rand(new Kernel::MersenneTwister(Types::Core::DateAndTime::getCurrentTime().totalNanoseconds(), 40000, 60000)),
       m_changeStatusAfter(0), m_newStatus(ILiveListener::EndRun) {
   // Set up the first workspace buffer
   this->createEmptyWorkspace();
 
   m_dataReset = false;
   m_timesCalled = 0;
-  m_resetAfter = ConfigService::Instance()
-                     .getValue<int>("testdatalistener.reset_after")
-                     .get_value_or(0);
-  m_changeStatusAfter =
-      ConfigService::Instance()
-          .getValue<int>("testdatalistener.m_changeStatusAfter")
-          .get_value_or(0);
-  int temp = ConfigService::Instance()
-                 .getValue<int>("testdatalistener.m_newStatus")
-                 .get_value_or(0);
+  m_resetAfter = ConfigService::Instance().getValue<int>("testdatalistener.reset_after").get_value_or(0);
+  m_changeStatusAfter = ConfigService::Instance().getValue<int>("testdatalistener.m_changeStatusAfter").get_value_or(0);
+  int temp = ConfigService::Instance().getValue<int>("testdatalistener.m_newStatus").get_value_or(0);
 
   switch (temp) {
   case 0:
@@ -92,32 +83,27 @@ ILiveListener::RunStatus TestDataListener::runStatus() {
 
 int TestDataListener::runNumber() const { return 999; }
 
-void TestDataListener::start(
-    Types::Core::DateAndTime /*startTime*/) // Ignore the start time
+void TestDataListener::start(Types::Core::DateAndTime /*startTime*/) // Ignore the start time
 {}
 
 /** Create the default empty event workspace */
 void TestDataListener::createEmptyWorkspace() {
   // Create a new, empty workspace of the same dimensions and assign to the
   // buffer variable
-  m_buffer = std::dynamic_pointer_cast<EventWorkspace>(
-      WorkspaceFactory::Instance().create("EventWorkspace", 2, 2, 1));
+  m_buffer = std::dynamic_pointer_cast<EventWorkspace>(WorkspaceFactory::Instance().create("EventWorkspace", 2, 2, 1));
   // Give detector IDs
   for (size_t i = 0; i < m_buffer->getNumberHistograms(); i++)
     m_buffer->getSpectrum(i).setDetectorID(detid_t(i));
   // Create in TOF units
   m_buffer->getAxis(0)->setUnit("TOF");
   // Load a fake instrument
-  Instrument_sptr inst =
-      ComponentCreationHelper::createTestInstrumentRectangular2(1, 10, 0.1);
+  Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10, 0.1);
   m_buffer->setInstrument(inst);
   // Set a run number
   m_buffer->mutableRun().addProperty("run_number", std::string("999"));
   // Add a monitor workspace
-  auto monitorWS =
-      WorkspaceFactory::Instance().create("EventWorkspace", 1, 2, 1);
-  WorkspaceFactory::Instance().initializeFromParent(*m_buffer, *monitorWS,
-                                                    true);
+  auto monitorWS = WorkspaceFactory::Instance().create("EventWorkspace", 1, 2, 1);
+  WorkspaceFactory::Instance().initializeFromParent(*m_buffer, *monitorWS, true);
   monitorWS->dataX(0)[0] = 40000;
   monitorWS->dataX(0)[1] = 60000;
   m_buffer->setMonitorWorkspace(monitorWS);
@@ -133,8 +119,7 @@ std::shared_ptr<Workspace> TestDataListener::extractData() {
     el1.addEventQuickly(TofEvent(m_rand->nextValue()));
     el2.addEventQuickly(TofEvent(m_rand->nextValue()));
   }
-  auto mon_buffer =
-      std::dynamic_pointer_cast<EventWorkspace>(m_buffer->monitorWorkspace());
+  auto mon_buffer = std::dynamic_pointer_cast<EventWorkspace>(m_buffer->monitorWorkspace());
   mon_buffer->getSpectrum(0).addEventQuickly(TofEvent(m_rand->nextValue()));
 
   // Copy the workspace pointer to a temporary variable

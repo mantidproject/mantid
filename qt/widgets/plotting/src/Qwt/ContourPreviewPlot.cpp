@@ -30,14 +30,11 @@ using namespace MantidQt::API;
 namespace {
 Mantid::Kernel::Logger g_log("ContourPreviewPlot");
 
-MatrixWorkspace_sptr
-convertToMatrixWorkspace(std::shared_ptr<Workspace> const &workspace) {
+MatrixWorkspace_sptr convertToMatrixWorkspace(std::shared_ptr<Workspace> const &workspace) {
   return std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
-template <typename T>
-auto getValueFromSettings(QSettings const &settings, QString const &key,
-                          T const &defaultValue) {
+template <typename T> auto getValueFromSettings(QSettings const &settings, QString const &key, T const &defaultValue) {
   return settings.value(key, defaultValue);
 }
 
@@ -70,9 +67,7 @@ ContourPreviewPlot::~ContourPreviewPlot() {
   m_spectrogram.reset();
 }
 
-MatrixWorkspace_sptr ContourPreviewPlot::getActiveWorkspace() const {
-  return m_workspace;
-}
+MatrixWorkspace_sptr ContourPreviewPlot::getActiveWorkspace() const { return m_workspace; }
 
 /**
  * Initialize objects after loading the workspace
@@ -90,8 +85,7 @@ void ContourPreviewPlot::setWorkspace(MatrixWorkspace_sptr const &workspace) {
   this->findFullRange();
 
   m_uiForm.plot2D->setWorkspace(workspace);
-  m_spectrogram->setColorMap(
-      MantidColorMap("", MantidColorMap::ScaleType::Linear));
+  m_spectrogram->setColorMap(MantidColorMap("", MantidColorMap::ScaleType::Linear));
 
   this->updateDisplay();
 }
@@ -102,33 +96,25 @@ SafeQwtPlot *ContourPreviewPlot::getPlot2D() { return m_uiForm.plot2D; }
  * Set the plot to be visible or hidden
  * @param visible :: false to hide the plot
  */
-void ContourPreviewPlot::setPlotVisible(bool const &visible) {
-  m_uiForm.plot2D->setVisible(visible);
-}
+void ContourPreviewPlot::setPlotVisible(bool const &visible) { m_uiForm.plot2D->setVisible(visible); }
 
 /**
  * Checks if the plot is currently visible
  * @returns true if the plot is visible
  */
-bool ContourPreviewPlot::isPlotVisible() const {
-  return m_uiForm.plot2D->isVisible();
-}
+bool ContourPreviewPlot::isPlotVisible() const { return m_uiForm.plot2D->isVisible(); }
 
 /**
  * Sets the label for the x axis
  * @param label :: the label given to the axis
  */
-void ContourPreviewPlot::setXAxisLabel(QString const &label) {
-  m_uiForm.lbXAxis->setText(label);
-}
+void ContourPreviewPlot::setXAxisLabel(QString const &label) { m_uiForm.lbXAxis->setText(label); }
 
 /**
  * Sets the label for the y axis
  * @param label :: the label given to the axis
  */
-void ContourPreviewPlot::setYAxisLabel(QString const &label) {
-  m_uiForm.lbYAxis->setText(label);
-}
+void ContourPreviewPlot::setYAxisLabel(QString const &label) { m_uiForm.lbYAxis->setText(label); }
 
 /**
  * Set whether to display 0 signal as "transparent" colour.
@@ -142,9 +128,8 @@ void ContourPreviewPlot::handleSetTransparentZeros(bool const &transparent) {
 /**
  * Remove the displayed data when the associated workspace is deleted
  */
-void ContourPreviewPlot::preDeleteHandle(
-    std::string const &workspaceName,
-    std::shared_ptr<Workspace> const &workspace) {
+void ContourPreviewPlot::preDeleteHandle(std::string const &workspaceName,
+                                         std::shared_ptr<Workspace> const &workspace) {
   UNUSED_ARG(workspaceName);
   auto const deletedWorkspace = convertToMatrixWorkspace(workspace);
   if (deletedWorkspace && deletedWorkspace == m_workspace)
@@ -161,8 +146,7 @@ void ContourPreviewPlot::clearPlot() { m_uiForm.plot2D->clear(); }
  */
 void ContourPreviewPlot::setupPlot() {
   m_spectrogram->attach(m_uiForm.plot2D);
-  m_spectrogram->setColorMap(
-      MantidColorMap("", MantidColorMap::ScaleType::Linear));
+  m_spectrogram->setColorMap(MantidColorMap("", MantidColorMap::ScaleType::Linear));
   m_uiForm.plot2D->autoRefresh();
 }
 
@@ -203,8 +187,7 @@ void ContourPreviewPlot::updateDisplay() {
     QwtDoubleRect const bounds{left, top, width, height};
     m_data->setBoundingRect(bounds.normalized());
 
-    m_spectrogram->setColorMap(
-        MantidColorMap("", MantidColorMap::ScaleType::Linear));
+    m_spectrogram->setColorMap(MantidColorMap("", MantidColorMap::ScaleType::Linear));
     m_spectrogram->setData(*m_data);
     m_spectrogram->itemChanged();
     m_uiForm.plot2D->replot();
@@ -229,43 +212,35 @@ void ContourPreviewPlot::checkRangeLimits() const {
 /**
  * Produces an error message if either of the limits are infinite
  */
-void ContourPreviewPlot::checkForInfiniteLimits(
-    DimensionRange const &range, std::size_t const &index,
-    std::ostringstream &message) const {
+void ContourPreviewPlot::checkForInfiniteLimits(DimensionRange const &range, std::size_t const &index,
+                                                std::ostringstream &message) const {
   if (!std::isfinite(range.first) || !std::isfinite(range.second))
-    message << "Dimension " << m_workspace->getDimension(index)->getName()
-            << " has a bad range: (" << range.first << ", " << range.second
-            << ")\n";
+    message << "Dimension " << m_workspace->getDimension(index)->getName() << " has a bad range: (" << range.first
+            << ", " << range.second << ")\n";
 }
 
-std::tuple<double, double>
-ContourPreviewPlot::getAxisRange(AxisID axisID) const {
+std::tuple<double, double> ContourPreviewPlot::getAxisRange(AxisID axisID) const {
   switch (axisID) {
   case AxisID::XBottom:
     return std::make_tuple(dimensionMinimum(0), dimensionMaximum(0));
   case AxisID::YLeft:
     return std::make_tuple(dimensionMinimum(1), dimensionMaximum(1));
   }
-  throw std::runtime_error(
-      "Incorrect AxisID provided. Axis types are XBottom and YLeft");
+  throw std::runtime_error("Incorrect AxisID provided. Axis types are XBottom and YLeft");
 }
 
-DimensionRange
-ContourPreviewPlot::dimensionRange(std::size_t const &index) const {
-  DimensionRange range =
-      std::make_pair(dimensionMinimum(index), dimensionMaximum(index));
+DimensionRange ContourPreviewPlot::dimensionRange(std::size_t const &index) const {
+  DimensionRange range = std::make_pair(dimensionMinimum(index), dimensionMaximum(index));
   if (range.second < range.first)
     range.swap(range);
   return range;
 }
 
-Mantid::coord_t
-ContourPreviewPlot::dimensionMinimum(std::size_t const &index) const {
+Mantid::coord_t ContourPreviewPlot::dimensionMinimum(std::size_t const &index) const {
   return m_workspace->getDimension(index)->getMinimum();
 }
 
-Mantid::coord_t
-ContourPreviewPlot::dimensionMaximum(std::size_t const &index) const {
+Mantid::coord_t ContourPreviewPlot::dimensionMaximum(std::size_t const &index) const {
   return m_workspace->getDimension(index)->getMaximum();
 }
 
@@ -277,8 +252,7 @@ void ContourPreviewPlot::findFullRange() {
     auto const workspace = m_workspace;
     Mantid::Kernel::ReadLock lock(*workspace);
 
-    m_colourRangeFull =
-        API::SignalRange(*workspace, m_normalization).interval();
+    m_colourRangeFull = API::SignalRange(*workspace, m_normalization).interval();
     double minimum = m_colourRangeFull.minValue();
 
     if (minimum <= 0) {
@@ -297,8 +271,7 @@ void ContourPreviewPlot::setVectorDimensions() {
     m_dimensions.clear();
 
     for (auto i = 0u; i < m_workspace->getNumDims(); ++i) {
-      MDHistoDimension_sptr dimension(std::make_unique<MDHistoDimension>(
-          m_workspace->getDimension(i).get()));
+      MDHistoDimension_sptr dimension(std::make_unique<MDHistoDimension>(m_workspace->getDimension(i).get()));
       m_dimensions.emplace_back(dimension);
     }
   }

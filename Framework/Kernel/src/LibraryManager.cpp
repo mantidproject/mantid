@@ -23,9 +23,7 @@ Logger g_log("LibraryManager");
 } // namespace
 
 /// Constructor
-LibraryManagerImpl::LibraryManagerImpl() : m_openedLibs() {
-  g_log.debug("LibraryManager created.");
-}
+LibraryManagerImpl::LibraryManagerImpl() : m_openedLibs() { g_log.debug("LibraryManager created."); }
 
 /**
  * Opens suitable DLLs on a given path.
@@ -36,15 +34,13 @@ LibraryManagerImpl::LibraryManagerImpl() : m_openedLibs() {
  * the library is not opened.
  *  @return The number of libraries opened.
  */
-int LibraryManagerImpl::openLibraries(
-    const std::string &filepath, LoadLibraries loadingBehaviour,
-    const std::vector<std::string> &excludes) {
+int LibraryManagerImpl::openLibraries(const std::string &filepath, LoadLibraries loadingBehaviour,
+                                      const std::vector<std::string> &excludes) {
   g_log.debug("Opening all libraries in " + filepath + "\n");
   try {
     return openLibraries(Poco::File(filepath), loadingBehaviour, excludes);
   } catch (std::exception &exc) {
-    g_log.debug() << "Error occurred while opening libraries: " << exc.what()
-                  << "\n";
+    g_log.debug() << "Error occurred while opening libraries: " << exc.what() << "\n";
     return 0;
   } catch (...) {
     g_log.error("An unknown error occurred while opening libraries.");
@@ -65,10 +61,8 @@ int LibraryManagerImpl::openLibraries(
  * the library is not opened.
  *  @return The number of libraries opened.
  */
-int LibraryManagerImpl::openLibraries(
-    const Poco::File &libpath,
-    LibraryManagerImpl::LoadLibraries loadingBehaviour,
-    const std::vector<std::string> &excludes) {
+int LibraryManagerImpl::openLibraries(const Poco::File &libpath, LibraryManagerImpl::LoadLibraries loadingBehaviour,
+                                      const std::vector<std::string> &excludes) {
   int libCount(0);
   if (libpath.exists() && libpath.isDirectory()) {
     // Iterate over the available files
@@ -86,8 +80,7 @@ int LibraryManagerImpl::openLibraries(
       }
     }
   } else {
-    g_log.error("In OpenAllLibraries: " + libpath.path() +
-                " must be a directory.");
+    g_log.error("In OpenAllLibraries: " + libpath.path() + " must be a directory.");
   }
   return libCount;
 }
@@ -100,11 +93,8 @@ int LibraryManagerImpl::openLibraries(
  * the library is not opened.
  * @return True if loading should be attempted
  */
-bool LibraryManagerImpl::shouldBeLoaded(
-    const std::string &filename,
-    const std::vector<std::string> &excludes) const {
-  return !isLoaded(filename) && DllOpen::isValidFilename(filename) &&
-         !isExcluded(filename, excludes);
+bool LibraryManagerImpl::shouldBeLoaded(const std::string &filename, const std::vector<std::string> &excludes) const {
+  return !isLoaded(filename) && DllOpen::isValidFilename(filename) && !isExcluded(filename, excludes);
 }
 
 /**
@@ -126,9 +116,7 @@ bool LibraryManagerImpl::isLoaded(const std::string &filename) const {
  * @param excludes A list of substrings to exclude library from loading
  * @return True if the library should be skipped
  */
-bool LibraryManagerImpl::isExcluded(
-    const std::string &filename,
-    const std::vector<std::string> &excludes) const {
+bool LibraryManagerImpl::isExcluded(const std::string &filename, const std::vector<std::string> &excludes) const {
   for (const auto &exclude : excludes) {
     if (filename.find(exclude) != std::string::npos) {
       return true;
@@ -143,8 +131,7 @@ bool LibraryManagerImpl::isExcluded(
  * @param cacheKey :: An identifier for the cache if loading is successful
  * @return 1 if the file loaded successfully, 0 otherwise
  */
-int LibraryManagerImpl::openLibrary(const Poco::File &filepath,
-                                    const std::string &cacheKey) {
+int LibraryManagerImpl::openLibrary(const Poco::File &filepath, const std::string &cacheKey) {
   // Try to open the library. The wrapper will unload the library when it
   // is deleted
   LibraryWrapper dlwrap;

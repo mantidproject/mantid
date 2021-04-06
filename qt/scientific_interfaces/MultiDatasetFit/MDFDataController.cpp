@@ -33,10 +33,8 @@ namespace MDF {
 /// Constructor.
 DataController::DataController(MultiDatasetFit *parent, QTableWidget *dataTable)
     : QObject(parent), m_dataTable(dataTable), m_isFittingRangeGlobal(false) {
-  connect(dataTable, SIGNAL(itemSelectionChanged()), this,
-          SLOT(workspaceSelectionChanged()));
-  connect(dataTable, SIGNAL(cellChanged(int, int)), this,
-          SLOT(updateDataset(int, int)));
+  connect(dataTable, SIGNAL(itemSelectionChanged()), this, SLOT(workspaceSelectionChanged()));
+  connect(dataTable, SIGNAL(cellChanged(int, int)), this, SLOT(updateDataset(int, int)));
 }
 
 /// Show a dialog to select a workspace from the ADS.
@@ -47,24 +45,19 @@ void DataController::addWorkspace() {
     // if name is empty assume that there are no workspaces in the ADS
     if (wsName.isEmpty())
       return;
-    if (Mantid::API::AnalysisDataService::Instance().doesExist(
-            wsName.toStdString())) {
+    if (Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString())) {
       auto indices = dialog.workspaceIndices();
       std::vector<Mantid::API::MatrixWorkspace_sptr> matrixWorkspaces;
       auto mws =
-          Mantid::API::AnalysisDataService::Instance()
-              .retrieveWS<Mantid::API::MatrixWorkspace>(wsName.toStdString());
+          Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(wsName.toStdString());
       if (mws) {
         matrixWorkspaces.emplace_back(mws);
       } else {
         auto grp =
-            Mantid::API::AnalysisDataService::Instance()
-                .retrieveWS<Mantid::API::WorkspaceGroup>(wsName.toStdString());
+            Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>(wsName.toStdString());
         if (grp) {
-          for (size_t i = 0; i < static_cast<size_t>(grp->getNumberOfEntries());
-               ++i) {
-            mws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-                grp->getItem(i));
+          for (size_t i = 0; i < static_cast<size_t>(grp->getNumberOfEntries()); ++i) {
+            mws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(grp->getItem(i));
             if (mws) {
               matrixWorkspaces.emplace_back(mws);
             }
@@ -85,9 +78,7 @@ void DataController::addWorkspace() {
         emit dataTableUpdated();
       }
     } else {
-      QMessageBox::warning(
-          owner(), "Mantid - Warning",
-          QString("Workspace \"%1\" doesn't exist.").arg(wsName));
+      QMessageBox::warning(owner(), "Mantid - Warning", QString("Workspace \"%1\" doesn't exist.").arg(wsName));
     }
   }
 }
@@ -96,9 +87,7 @@ void DataController::addWorkspace() {
 /// @param wsName :: Name of a workspace.
 /// @param wsIndex :: Index of a spectrum in the workspace (workspace index).
 /// @param ws :: The workspace.
-void DataController::addWorkspaceSpectrum(
-    const QString &wsName, int wsIndex,
-    const Mantid::API::MatrixWorkspace &ws) {
+void DataController::addWorkspaceSpectrum(const QString &wsName, int wsIndex, const Mantid::API::MatrixWorkspace &ws) {
   int row = m_dataTable->rowCount();
   m_dataTable->insertRow(row);
 
@@ -182,27 +171,19 @@ void DataController::checkSpectra() {
 
 /// Get the workspace name of the i-th spectrum.
 /// @param i :: Index of a spectrum in the data table.
-QString DataController::getWorkspaceName(int i) const {
-  return m_dataTable->item(i, wsColumn)->text();
-}
+QString DataController::getWorkspaceName(int i) const { return m_dataTable->item(i, wsColumn)->text(); }
 
 /// Get the workspace index of the i-th spectrum.
 /// @param i :: Index of a spectrum in the data table.
-int DataController::getWorkspaceIndex(int i) const {
-  return m_dataTable->item(i, wsIndexColumn)->text().toInt();
-}
+int DataController::getWorkspaceIndex(int i) const { return m_dataTable->item(i, wsIndexColumn)->text().toInt(); }
 
 /// Get the number of spectra to fit to.
-int DataController::getNumberOfSpectra() const {
-  return m_dataTable->rowCount();
-}
+int DataController::getNumberOfSpectra() const { return m_dataTable->rowCount(); }
 
 /// Enable global setting of fitting range (calls to setFittingRage(...)
 /// will set ranges of all datasets.)
 /// @param on :: True for global setting, false for individual.
-void DataController::setFittingRangeGlobal(bool on) {
-  m_isFittingRangeGlobal = on;
-}
+void DataController::setFittingRangeGlobal(bool on) { m_isFittingRangeGlobal = on; }
 
 /// Set the fitting range for a data set or all data sets.
 /// @param i :: Index of a data set (spectrum). If m_isFittingRangeGlobal ==
@@ -235,14 +216,10 @@ std::pair<double, double> DataController::getFittingRange(int i) const {
 }
 
 /// Inform the others that a dataset was updated.
-void DataController::updateDataset(int row, int /*unused*/) {
-  emit dataSetUpdated(row);
-}
+void DataController::updateDataset(int row, int /*unused*/) { emit dataSetUpdated(row); }
 
 /// Object's parent cast to MultiDatasetFit.
-MultiDatasetFit *DataController::owner() const {
-  return static_cast<MultiDatasetFit *>(parent());
-}
+MultiDatasetFit *DataController::owner() const { return static_cast<MultiDatasetFit *>(parent()); }
 
 } // namespace MDF
 } // namespace CustomInterfaces

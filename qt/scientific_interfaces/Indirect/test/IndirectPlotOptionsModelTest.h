@@ -32,30 +32,21 @@ std::string const GROUP_NAME = "GroupName";
 std::string const WORKSPACE_NAME = "WorkspaceName";
 std::string const WORKSPACE_INDICES = "0-2,4";
 
-MatrixWorkspace_sptr
-convertWorkspace2DToMatrix(const Workspace2D_sptr &workspace) {
+MatrixWorkspace_sptr convertWorkspace2DToMatrix(const Workspace2D_sptr &workspace) {
   return std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
-MatrixWorkspace_sptr
-createMatrixWorkspace(std::size_t const &numberOfHistograms,
-                      std::size_t const &numberOfBins) {
-  return convertWorkspace2DToMatrix(WorkspaceCreationHelper::create2DWorkspace(
-      numberOfHistograms, numberOfBins));
+MatrixWorkspace_sptr createMatrixWorkspace(std::size_t const &numberOfHistograms, std::size_t const &numberOfBins) {
+  return convertWorkspace2DToMatrix(WorkspaceCreationHelper::create2DWorkspace(numberOfHistograms, numberOfBins));
 }
 
-TableWorkspace_sptr createTableWorkspace(std::size_t const &size) {
-  return std::make_shared<TableWorkspace>(size);
-}
+TableWorkspace_sptr createTableWorkspace(std::size_t const &size) { return std::make_shared<TableWorkspace>(size); }
 
-void createWorkspaceGroup(std::vector<std::string> const &workspaceNames,
-                          std::size_t const &numberOfHistograms,
+void createWorkspaceGroup(std::vector<std::string> const &workspaceNames, std::size_t const &numberOfHistograms,
                           std::size_t const &numberOfBins) {
-  auto const workspace =
-      createMatrixWorkspace(numberOfHistograms, numberOfBins);
+  auto const workspace = createMatrixWorkspace(numberOfHistograms, numberOfBins);
   for (auto const &workspaceName : workspaceNames)
-    AnalysisDataService::Instance().addOrReplace(workspaceName,
-                                                 workspace->clone());
+    AnalysisDataService::Instance().addOrReplace(workspaceName, workspace->clone());
 
   const auto groupAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
   groupAlg->setProperty("InputWorkspaces", workspaceNames);
@@ -64,8 +55,7 @@ void createWorkspaceGroup(std::vector<std::string> const &workspaceNames,
 }
 
 std::map<std::string, std::string>
-constructActions(boost::optional<std::map<std::string, std::string>> const
-                     &availableActions) {
+constructActions(boost::optional<std::map<std::string, std::string>> const &availableActions) {
   std::map<std::string, std::string> actions;
   if (availableActions)
     actions = availableActions.get();
@@ -95,13 +85,10 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockIndirectPlotter : public IndirectPlotter {
 public:
   /// Public Methods
-  MOCK_METHOD2(plotSpectra, void(std::string const &workspaceName,
-                                 std::string const &workspaceIndices));
-  MOCK_METHOD2(plotBins, void(std::string const &workspaceName,
-                              std::string const &binIndices));
+  MOCK_METHOD2(plotSpectra, void(std::string const &workspaceName, std::string const &workspaceIndices));
+  MOCK_METHOD2(plotBins, void(std::string const &workspaceName, std::string const &binIndices));
   MOCK_METHOD1(plotContour, void(std::string const &workspaceName));
-  MOCK_METHOD2(plotTiled, void(std::string const &workspaceName,
-                               std::string const &workspaceIndices));
+  MOCK_METHOD2(plotTiled, void(std::string const &workspaceName, std::string const &workspaceIndices));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
@@ -113,13 +100,9 @@ public:
     m_ads.clear();
   }
 
-  static IndirectPlotOptionsModelTest *createSuite() {
-    return new IndirectPlotOptionsModelTest();
-  }
+  static IndirectPlotOptionsModelTest *createSuite() { return new IndirectPlotOptionsModelTest(); }
 
-  static void destroySuite(IndirectPlotOptionsModelTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(IndirectPlotOptionsModelTest *suite) { delete suite; }
 
   void setUp() override {
     m_plotter = new NiceMock<MockIndirectPlotter>();
@@ -138,8 +121,7 @@ public:
     TS_ASSERT(m_model);
   }
 
-  void
-  test_that_setWorkspace_will_set_the_workspace_if_the_matrix_workspace_provided_exists_in_the_ADS() {
+  void test_that_setWorkspace_will_set_the_workspace_if_the_matrix_workspace_provided_exists_in_the_ADS() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
 
     TS_ASSERT(m_model->setWorkspace(WORKSPACE_NAME));
@@ -147,8 +129,7 @@ public:
     TS_ASSERT_EQUALS(m_model->workspace().get(), WORKSPACE_NAME);
   }
 
-  void
-  test_that_setWorkspace_will_not_set_the_workspace_if_the_workspace_provided_does_not_exist_in_the_ADS() {
+  void test_that_setWorkspace_will_not_set_the_workspace_if_the_workspace_provided_does_not_exist_in_the_ADS() {
     TS_ASSERT(!m_model->setWorkspace(WORKSPACE_NAME));
     TS_ASSERT(!m_model->workspace());
   }
@@ -178,28 +159,24 @@ public:
     TS_ASSERT_EQUALS(m_model->indices().get(), WORKSPACE_INDICES);
   }
 
-  void
-  test_that_setFixedIndices_will_not_set_the_indices_as_being_fixed_if_the_indices_are_empty() {
+  void test_that_setFixedIndices_will_not_set_the_indices_as_being_fixed_if_the_indices_are_empty() {
     m_model->setFixedIndices("");
 
     TS_ASSERT(!m_model->indicesFixed());
     TS_ASSERT(!m_model->indices());
   }
 
-  void
-  test_that_formatIndices_will_format_a_range_of_workspace_indices_when_provided_as_a_comma_list() {
+  void test_that_formatIndices_will_format_a_range_of_workspace_indices_when_provided_as_a_comma_list() {
     auto const unformattedIndices("0,1,2,3,4");
     TS_ASSERT_EQUALS(m_model->formatIndices(unformattedIndices), "0-4");
   }
 
-  void
-  test_that_formatIndices_will_format_a_range_of_workspace_indices_when_provided_as_an_unordered_comma_list() {
+  void test_that_formatIndices_will_format_a_range_of_workspace_indices_when_provided_as_an_unordered_comma_list() {
     auto const unformattedIndices("4,2,0,3,1");
     TS_ASSERT_EQUALS(m_model->formatIndices(unformattedIndices), "0-4");
   }
 
-  void
-  test_that_formatIndices_will_format_a_workspace_indices_string_with_large_spaces() {
+  void test_that_formatIndices_will_format_a_workspace_indices_string_with_large_spaces() {
     auto const unformattedIndices("    1-   2,  4,3");
     TS_ASSERT_EQUALS(m_model->formatIndices(unformattedIndices), "1-4");
   }
@@ -212,18 +189,15 @@ public:
     TS_ASSERT_EQUALS(m_model->formatIndices("0-1,2-3,4-5,9"), "0-5,9");
   }
 
-  void
-  test_that_validateIndices_will_return_true_if_the_matrix_workspace_and_workspace_indices_exist() {
+  void test_that_validateIndices_will_return_true_if_the_matrix_workspace_and_workspace_indices_exist() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
 
     m_model->setWorkspace(WORKSPACE_NAME);
 
-    TS_ASSERT(
-        m_model->validateIndices(WORKSPACE_INDICES, MantidAxis::Spectrum));
+    TS_ASSERT(m_model->validateIndices(WORKSPACE_INDICES, MantidAxis::Spectrum));
   }
 
-  void
-  test_that_validateIndices_will_return_true_if_the_matrix_workspace_and_bin_indices_exist() {
+  void test_that_validateIndices_will_return_true_if_the_matrix_workspace_and_bin_indices_exist() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
 
     m_model->setWorkspace(WORKSPACE_NAME);
@@ -237,12 +211,10 @@ public:
 
     m_model->setWorkspace(WORKSPACE_NAME);
 
-    TS_ASSERT(
-        !m_model->validateIndices(WORKSPACE_INDICES, MantidAxis::Spectrum));
+    TS_ASSERT(!m_model->validateIndices(WORKSPACE_INDICES, MantidAxis::Spectrum));
   }
 
-  void
-  test_that_validateIndices_will_return_false_if_the_matrix_workspace_exists_but_the_bin_indices_do_not_exist() {
+  void test_that_validateIndices_will_return_false_if_the_matrix_workspace_exists_but_the_bin_indices_do_not_exist() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 2));
 
     m_model->setWorkspace(WORKSPACE_NAME);
@@ -250,15 +222,13 @@ public:
     TS_ASSERT(!m_model->validateIndices(WORKSPACE_INDICES, MantidAxis::Bin));
   }
 
-  void
-  test_that_validateIndices_will_return_false_if_the_workspace_does_not_exist_in_the_ADS() {
+  void test_that_validateIndices_will_return_false_if_the_workspace_does_not_exist_in_the_ADS() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
 
     m_model->setWorkspace(WORKSPACE_NAME);
     m_ads.clear();
 
-    TS_ASSERT(
-        !m_model->validateIndices(WORKSPACE_INDICES, MantidAxis::Spectrum));
+    TS_ASSERT(!m_model->validateIndices(WORKSPACE_INDICES, MantidAxis::Spectrum));
   }
 
   void test_that_setIndices_will_set_the_indices_if_they_are_valid() {
@@ -284,25 +254,21 @@ public:
     m_model->setWorkspace(WORKSPACE_NAME);
     m_model->setIndices(WORKSPACE_INDICES);
 
-    EXPECT_CALL(*m_plotter, plotSpectra(WORKSPACE_NAME, WORKSPACE_INDICES))
-        .Times(1);
+    EXPECT_CALL(*m_plotter, plotSpectra(WORKSPACE_NAME, WORKSPACE_INDICES)).Times(1);
 
     m_model->plotSpectra();
   }
 
-  void
-  test_that_plotBins_will_call_the_plotter_plotBins_method_when_a_valid_workspace_and_bin_indices_have_been_set() {
+  void test_that_plotBins_will_call_the_plotter_plotBins_method_when_a_valid_workspace_and_bin_indices_have_been_set() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
     m_model->setWorkspace(WORKSPACE_NAME);
 
-    EXPECT_CALL(*m_plotter, plotBins(WORKSPACE_NAME, WORKSPACE_INDICES))
-        .Times(1);
+    EXPECT_CALL(*m_plotter, plotBins(WORKSPACE_NAME, WORKSPACE_INDICES)).Times(1);
 
     m_model->plotBins(WORKSPACE_INDICES);
   }
 
-  void
-  test_that_plotContour_will_call_the_plotter_plotContour_method_when_a_valid_workspace_has_been_set() {
+  void test_that_plotContour_will_call_the_plotter_plotContour_method_when_a_valid_workspace_has_been_set() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
     m_model->setWorkspace(WORKSPACE_NAME);
 
@@ -311,14 +277,12 @@ public:
     m_model->plotContour();
   }
 
-  void
-  test_that_plotTiled_will_call_the_plotter_plotTiled_method_when_a_valid_workspace_and_indices_have_been_set() {
+  void test_that_plotTiled_will_call_the_plotter_plotTiled_method_when_a_valid_workspace_and_indices_have_been_set() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
     m_model->setWorkspace(WORKSPACE_NAME);
     m_model->setIndices(WORKSPACE_INDICES);
 
-    EXPECT_CALL(*m_plotter, plotTiled(WORKSPACE_NAME, WORKSPACE_INDICES))
-        .Times(1);
+    EXPECT_CALL(*m_plotter, plotTiled(WORKSPACE_NAME, WORKSPACE_INDICES)).Times(1);
 
     m_model->plotTiled();
   }
@@ -328,11 +292,9 @@ public:
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
     createWorkspaceGroup({"Workspace1", "Workspace2", "Workspace3"}, 5, 5);
 
-    auto const allWorkspaces =
-        m_model->getAllWorkspaceNames({GROUP_NAME, WORKSPACE_NAME});
+    auto const allWorkspaces = m_model->getAllWorkspaceNames({GROUP_NAME, WORKSPACE_NAME});
 
-    std::vector<std::string> const expectedWorkspaces{
-        "Workspace1", "Workspace2", "Workspace3", WORKSPACE_NAME};
+    std::vector<std::string> const expectedWorkspaces{"Workspace1", "Workspace2", "Workspace3", WORKSPACE_NAME};
     TS_ASSERT_EQUALS(allWorkspaces, expectedWorkspaces);
   }
 
@@ -368,14 +330,11 @@ public:
     TS_ASSERT(m_model->singleDataPoint(MantidAxis::Bin));
   }
 
-  void
-  test_that_availableActions_will_return_the_default_actions_when_none_are_set() {
-    TS_ASSERT_EQUALS(m_model->availableActions(),
-                     constructActions(boost::none));
+  void test_that_availableActions_will_return_the_default_actions_when_none_are_set() {
+    TS_ASSERT_EQUALS(m_model->availableActions(), constructActions(boost::none));
   }
 
-  void
-  test_that_availableActions_will_return_the_correct_actions_when_they_have_been_set() {
+  void test_that_availableActions_will_return_the_correct_actions_when_they_have_been_set() {
     auto actions = customActions();
 
     tearDown();

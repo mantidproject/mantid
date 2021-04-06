@@ -30,34 +30,27 @@ void Authenticate2::init() {
   auto requireValue = std::make_shared<MandatoryValidator<std::string>>();
 
   // Compute Resources
-  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
-                                          .getFacility()
-                                          .computeResources();
-  declareProperty("ComputeResource", "",
-                  std::make_shared<StringListValidator>(computes),
+  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
+  declareProperty("ComputeResource", "", std::make_shared<StringListValidator>(computes),
                   "The remote computer to authenticate to", Direction::Input);
 
   // Say who we are (or at least, who we want to execute the remote python code)
-  declareProperty("UserName", "", requireValue,
-                  "Name of the user to authenticate as", Direction::Input);
+  declareProperty("UserName", "", requireValue, "Name of the user to authenticate as", Direction::Input);
 
   // Password doesn't get echoed to the screen...
-  declareProperty(std::make_unique<MaskedProperty<std::string>>(
-                      "Password", "", requireValue, Direction::Input),
+  declareProperty(std::make_unique<MaskedProperty<std::string>>("Password", "", requireValue, Direction::Input),
                   "The password associated with the specified user");
 }
 
 void Authenticate2::exec() {
 
   const std::string comp = getPropertyValue("ComputeResource");
-  Mantid::API::IRemoteJobManager_sptr jobManager =
-      Mantid::API::RemoteJobManagerFactory::Instance().create(comp);
+  Mantid::API::IRemoteJobManager_sptr jobManager = Mantid::API::RemoteJobManagerFactory::Instance().create(comp);
 
   const std::string user = getPropertyValue("UserName");
   jobManager->authenticate(user, getPropertyValue("Password"));
 
-  g_log.information() << "Authenticate as user " << user
-                      << " in the compute resource " << comp << '\n';
+  g_log.information() << "Authenticate as user " << user << " in the compute resource " << comp << '\n';
 }
 
 } // end namespace RemoteAlgorithms

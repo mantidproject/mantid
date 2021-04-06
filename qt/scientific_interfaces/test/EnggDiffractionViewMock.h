@@ -15,32 +15,27 @@ class QwtData;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockEnggDiffractionView
-    : public MantidQt::CustomInterfaces::IEnggDiffractionView {
+class MockEnggDiffractionView : public MantidQt::CustomInterfaces::IEnggDiffractionView {
 
 public:
   // virtual void splashMessage(bool visible, const std::string &shortMsg,
   // const std::string &description);
-  MOCK_METHOD3(splashMessage, void(bool visible, const std::string &shortMsg,
-                                   const std::string &description));
+  MOCK_METHOD3(splashMessage, void(bool visible, const std::string &shortMsg, const std::string &description));
 
   // virtual void showStatus(const std::string &sts);
   MOCK_METHOD1(showStatus, void(const std::string &sts));
 
   // virtual void userWarning(const std::string &warn, const std::string
   // &description);
-  MOCK_METHOD2(userWarning,
-               void(const std::string &warn, const std::string &description));
+  MOCK_METHOD2(userWarning, void(const std::string &warn, const std::string &description));
 
   // virtual void userError(const std::string &err, const std::string
   // &description);
-  MOCK_METHOD2(userError,
-               void(const std::string &err, const std::string &description));
+  MOCK_METHOD2(userError, void(const std::string &err, const std::string &description));
 
   // virtual std::string askNewCalibrationFilename(const std::string
   // &suggestedFname);
-  MOCK_METHOD1(askNewCalibrationFilename,
-               std::string(const std::string &suggestedFname));
+  MOCK_METHOD1(askNewCalibrationFilename, std::string(const std::string &suggestedFname));
 
   // std::string askExistingCalibFilename();
   MOCK_METHOD0(askExistingCalibFilename, std::string());
@@ -52,8 +47,7 @@ public:
   MOCK_CONST_METHOD0(getRBNumber, std::string());
 
   // virtual EnggDiffCalibSettings currentCalibSettings() const;
-  MOCK_CONST_METHOD0(currentCalibSettings,
-                     MantidQt::CustomInterfaces::EnggDiffCalibSettings());
+  MOCK_CONST_METHOD0(currentCalibSettings, MantidQt::CustomInterfaces::EnggDiffCalibSettings());
 
   // std::string currentInstrument() const;
   MOCK_CONST_METHOD0(currentInstrument, std::string());
@@ -93,13 +87,10 @@ public:
 
   // virtual void newCalibLoaded(const std::string &vanadiumNo, const
   // std::string &ceriaNo, std::string &fname);
-  MOCK_METHOD3(newCalibLoaded, void(const std::string &, const std::string &,
-                                    const std::string &));
+  MOCK_METHOD3(newCalibLoaded, void(const std::string &, const std::string &, const std::string &));
 
   // virtual std::vector<GSASCalibrationParms> currentCalibration() const
-  MOCK_CONST_METHOD0(
-      currentCalibration,
-      std::vector<MantidQt::CustomInterfaces::GSASCalibrationParms>());
+  MOCK_CONST_METHOD0(currentCalibration, std::vector<MantidQt::CustomInterfaces::GSASCalibrationParms>());
 
   // virtual std::string enggRunPythonCode(const std::string &pyCode)
   MOCK_METHOD1(enggRunPythonCode, std::string(const std::string &));
@@ -175,12 +166,10 @@ public:
 
   // virtual void plotReplacingWindow
   MOCK_METHOD3(plotReplacingWindow,
-               void(const std::string &wsName, const std::string &spectrum,
-                    const std::string &type));
+               void(const std::string &wsName, const std::string &spectrum, const std::string &type));
 
   // virtual void setDataVector
-  MOCK_METHOD3(setDataVector, void(std::vector<std::shared_ptr<QwtData>> &data,
-                                   bool focused, bool plotSinglePeaks));
+  MOCK_METHOD3(setDataVector, void(std::vector<std::shared_ptr<QwtData>> &data, bool focused, bool plotSinglePeaks));
 
   // virtual void plotCalibOutput();
   MOCK_METHOD1(plotCalibOutput, void(const std::string &pyCode));

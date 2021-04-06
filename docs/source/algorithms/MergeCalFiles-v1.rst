@@ -18,7 +18,7 @@ file.
 Usage
 -----
 
-**Example - Merging and appending files**  
+**Example - Merging and appending files**
 
 .. testcode:: merge
 
@@ -39,10 +39,10 @@ Usage
                 (line_no,
                  line_no + 100,
                  (line_no / 1000.0) if inc_offset else 0.0,
-                 (line_no % 2) if inc_selected else 0, 
+                 (line_no % 2) if inc_selected else 0,
                  (line_no % 3) if inc_group else 1) )
-        return file_path  
- 
+        return file_path
+
     calFile_master = writeCalFile("masterCal",6)
     calFile_updates = writeCalFile("updateCal",3,
         inc_group=False, inc_offset=False, inc_selected=False)
@@ -80,7 +80,7 @@ Output:
             5             105       0.0050000        1        2
 
 
-**Example - Appending files**  
+**Example - Appending files**
 
 .. testcode:: append
 
@@ -101,10 +101,10 @@ Output:
                 (line_no,
                  line_no + 100,
                  (line_no / 1000.0) if inc_offset else 0.0,
-                 (line_no % 2) if inc_selected else 0, 
+                 (line_no % 2) if inc_selected else 0,
                  (line_no % 3) if inc_group else 1) )
-        return file_path  
- 
+        return file_path
+
     calFile_master = writeCalFile("masterCal",6)
     calFile_updates = writeCalFile("updateCal",8,
         inc_group=False, inc_offset=False, inc_selected=False)

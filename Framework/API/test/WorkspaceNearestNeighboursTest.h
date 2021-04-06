@@ -29,8 +29,7 @@ using Mantid::Kernel::V3D;
  */
 
 namespace {
-std::shared_ptr<MatrixWorkspace> makeWorkspace(const specnum_t start,
-                                               const specnum_t end) {
+std::shared_ptr<MatrixWorkspace> makeWorkspace(const specnum_t start, const specnum_t end) {
   auto ws = std::make_shared<WorkspaceTester>();
   ws->initialize(end - start + 1, 2, 1);
   for (specnum_t i = start; i <= end; ++i) {
@@ -55,31 +54,23 @@ class WorkspaceNearestNeighboursTest : public CxxTest::TestSuite {
 private:
   /// Helper type giving access to protected methods. Makes testing of NN
   /// internals possible.
-  class ExposedNearestNeighbours
-      : public Mantid::API::WorkspaceNearestNeighbours {
+  class ExposedNearestNeighbours : public Mantid::API::WorkspaceNearestNeighbours {
   public:
-    ExposedNearestNeighbours(const SpectrumInfo &spectrumInfo,
-                             const std::vector<specnum_t> &spectrumNumbers,
+    ExposedNearestNeighbours(const SpectrumInfo &spectrumInfo, const std::vector<specnum_t> &spectrumNumbers,
                              bool ignoreMasked = false)
-        : WorkspaceNearestNeighbours(8, spectrumInfo, spectrumNumbers,
-                                     ignoreMasked) {}
+        : WorkspaceNearestNeighbours(8, spectrumInfo, spectrumNumbers, ignoreMasked) {}
 
     // Direct access to intermdiate spectra detectors
-    std::vector<size_t> getSpectraDetectors() {
-      return WorkspaceNearestNeighbours::getSpectraDetectors();
-    }
+    std::vector<size_t> getSpectraDetectors() { return WorkspaceNearestNeighbours::getSpectraDetectors(); }
   };
 
 public:
-  void doTestWithNeighbourNumbers(int actualNeighboursNumber,
-                                  int expectedNeighboursNumber) {
+  void doTestWithNeighbourNumbers(int actualNeighboursNumber, int expectedNeighboursNumber) {
     const auto ws = makeWorkspace(1, 18);
-    ws->setInstrument(
-        ComponentCreationHelper::createTestInstrumentCylindrical(2));
+    ws->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(2));
 
     // Create the NearestNeighbours object directly.
-    WorkspaceNearestNeighbours nn(actualNeighboursNumber, ws->spectrumInfo(),
-                                  getSpectrumNumbers(*ws));
+    WorkspaceNearestNeighbours nn(actualNeighboursNumber, ws->spectrumInfo(), getSpectrumNumbers(*ws));
 
     // Check distances calculated in NearestNeighbours compare with those using
     // getDistance on component
@@ -91,23 +82,19 @@ public:
 
   void testNeighbourFindingWithRadius() {
     const auto ws = makeWorkspace(1, 18);
-    ws->setInstrument(
-        ComponentCreationHelper::createTestInstrumentCylindrical(2));
+    ws->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(2));
 
     // Create the NearestNeighbours object directly.
-    WorkspaceNearestNeighbours nn(8, ws->spectrumInfo(),
-                                  getSpectrumNumbers(*ws));
+    WorkspaceNearestNeighbours nn(8, ws->spectrumInfo(), getSpectrumNumbers(*ws));
 
     detid2det_map m_detectors;
     ws->getInstrument()->getDetectors(m_detectors);
 
     // Need scaling vector since changes to NN ( 22/12/10 )
     Mantid::Geometry::BoundingBox bbox = Mantid::Geometry::BoundingBox();
-    std::shared_ptr<const Detector> det =
-        std::dynamic_pointer_cast<const Detector>(m_detectors[3]);
+    std::shared_ptr<const Detector> det = std::dynamic_pointer_cast<const Detector>(m_detectors[3]);
     det->getBoundingBox(bbox);
-    V3D scale((bbox.xMax() - bbox.xMin()), (bbox.yMax() - bbox.yMin()),
-              (bbox.zMax() - bbox.zMin()));
+    V3D scale((bbox.xMax() - bbox.xMin()), (bbox.yMax() - bbox.yMin()), (bbox.zMax() - bbox.zMin()));
 
     // Check instrument was created to our expectations
     TS_ASSERT_EQUALS(m_detectors.size(), 18);
@@ -122,8 +109,7 @@ public:
 
     for (distIt = distances.begin(); distIt != distances.end(); ++distIt) {
       double nnDist = distIt->second.norm();
-      V3D delta =
-          m_detectors[distIt->first]->getPos() - m_detectors[5]->getPos();
+      V3D delta = m_detectors[distIt->first]->getPos() - m_detectors[5]->getPos();
       double gmDist = delta.norm();
       TS_ASSERT_DELTA(nnDist, gmDist, 1e-12);
     }
@@ -148,27 +134,23 @@ public:
   void testNeighbours_RectangularDetector() {
     const auto ws = makeWorkspace(256, 767);
     // 2 Rectangular detectors, 16x16
-    ws->setInstrument(
-        ComponentCreationHelper::createTestInstrumentRectangular(2, 16));
+    ws->setInstrument(ComponentCreationHelper::createTestInstrumentRectangular(2, 16));
 
     // Create the NearestNeighbours object directly.
-    WorkspaceNearestNeighbours nn(8, ws->spectrumInfo(),
-                                  getSpectrumNumbers(*ws));
+    WorkspaceNearestNeighbours nn(8, ws->spectrumInfo(), getSpectrumNumbers(*ws));
 
     const auto &m_instrument = ws->getInstrument();
     // Correct # of detectors
     TS_ASSERT_EQUALS(m_instrument->getDetectorIDs().size(), 512);
 
     RectangularDetector_const_sptr bank1 =
-        std::dynamic_pointer_cast<const RectangularDetector>(
-            m_instrument->getComponentByName("bank1"));
+        std::dynamic_pointer_cast<const RectangularDetector>(m_instrument->getComponentByName("bank1"));
     std::shared_ptr<const Detector> det = bank1->getAtXY(2, 3);
     TS_ASSERT(det);
     std::map<specnum_t, V3D> nb;
 
     // Too close!
-    specnum_t spec =
-        256 + 2 * 16 + 3; // This gives the spectrum number for this detector
+    specnum_t spec = 256 + 2 * 16 + 3; // This gives the spectrum number for this detector
     nb = nn.neighboursInRadius(spec, 0.003);
     TS_ASSERT_EQUALS(nb.size(), 0);
 
@@ -179,8 +161,7 @@ public:
 
   void testIgnoreAndApplyMasking() {
     const auto ws = makeWorkspace(1, 18);
-    ws->setInstrument(
-        ComponentCreationHelper::createTestInstrumentCylindrical(2));
+    ws->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(2));
 
     // Mask the first 2 detectors
     auto &spectrumInfo = ws->mutableSpectrumInfo();
@@ -188,21 +169,16 @@ public:
     spectrumInfo.setMasked(1, true);
 
     // Create the NearestNeighbours object directly. Ignore any masking.
-    ExposedNearestNeighbours ignoreMaskedNN(ws->spectrumInfo(),
-                                            getSpectrumNumbers(*ws), true);
+    ExposedNearestNeighbours ignoreMaskedNN(ws->spectrumInfo(), getSpectrumNumbers(*ws), true);
     // Create the NearestNeighbours object directly. Account for any masking.
-    ExposedNearestNeighbours accountForMaskedNN(ws->spectrumInfo(),
-                                                getSpectrumNumbers(*ws), false);
+    ExposedNearestNeighbours accountForMaskedNN(ws->spectrumInfo(), getSpectrumNumbers(*ws), false);
 
     size_t sizeWithoutMasked = ignoreMaskedNN.getSpectraDetectors().size();
     size_t sizeWithMasked = accountForMaskedNN.getSpectraDetectors().size();
 
-    TSM_ASSERT_EQUALS("With masked should get 18 spectra back", 18,
-                      sizeWithMasked);
-    TSM_ASSERT_EQUALS("Without masked should get 16 spectra back", 16,
-                      sizeWithoutMasked);
-    TSM_ASSERT("Must have less detectors available after applying masking",
-               sizeWithoutMasked < sizeWithMasked);
+    TSM_ASSERT_EQUALS("With masked should get 18 spectra back", 18, sizeWithMasked);
+    TSM_ASSERT_EQUALS("Without masked should get 16 spectra back", 16, sizeWithoutMasked);
+    TSM_ASSERT("Must have less detectors available after applying masking", sizeWithoutMasked < sizeWithMasked);
   }
 };
 
@@ -214,12 +190,10 @@ class NearestNeighboursTestPerformance : public CxxTest::TestSuite {
 public:
   void testUsingRadius() {
     const auto ws = makeWorkspace(1, 18);
-    ws->setInstrument(
-        ComponentCreationHelper::createTestInstrumentCylindrical(2));
+    ws->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(2));
 
     // Create the NearestNeighbours object directly.
-    WorkspaceNearestNeighbours nn(8, ws->spectrumInfo(),
-                                  getSpectrumNumbers(*ws));
+    WorkspaceNearestNeighbours nn(8, ws->spectrumInfo(), getSpectrumNumbers(*ws));
     for (size_t i = 0; i < 2000; i++) {
       nn.neighboursInRadius(1, 5.0);
     }
@@ -227,8 +201,7 @@ public:
 
   void testUsingNumberOfNeighbours() {
     const auto ws = makeWorkspace(1, 18);
-    ws->setInstrument(
-        ComponentCreationHelper::createTestInstrumentCylindrical(2));
+    ws->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(2));
 
     // Create the NearestNeighbours object directly.
     const auto &spectrumInfo = ws->spectrumInfo();

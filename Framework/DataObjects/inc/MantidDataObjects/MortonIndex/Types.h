@@ -24,24 +24,17 @@ using uint256_t = std::uint256_t;
 
 namespace morton_index {
 
-template <size_t ND, typename IntT>
-using IntArray = Eigen::Array<IntT, static_cast<int>(ND), 1>;
+template <size_t ND, typename IntT> using IntArray = Eigen::Array<IntT, static_cast<int>(ND), 1>;
 
-template <size_t ND>
-using MDCoordinate = Eigen::Array<float, static_cast<int>(ND), 1>;
+template <size_t ND> using MDCoordinate = Eigen::Array<float, static_cast<int>(ND), 1>;
 
-template <size_t ND>
-using MDSpaceBounds = Eigen::Array<float, static_cast<int>(ND), 2>;
-template <size_t ND>
-using MDSpaceDimensions = Eigen::Array<float, static_cast<int>(ND), 1>;
-template <size_t ND>
-using MDSpaceSteps = Eigen::Array<float, static_cast<int>(ND), 1>;
+template <size_t ND> using MDSpaceBounds = Eigen::Array<float, static_cast<int>(ND), 2>;
+template <size_t ND> using MDSpaceDimensions = Eigen::Array<float, static_cast<int>(ND), 1>;
+template <size_t ND> using MDSpaceSteps = Eigen::Array<float, static_cast<int>(ND), 1>;
 
-template <typename CoordT, size_t ND>
-using AffineND = Eigen::Transform<CoordT, static_cast<int>(ND), Eigen::Affine>;
+template <typename CoordT, size_t ND> using AffineND = Eigen::Transform<CoordT, static_cast<int>(ND), Eigen::Affine>;
 
-template <size_t ND>
-using BinIndices = Eigen::Matrix<size_t, 1, static_cast<int>(ND)>;
+template <size_t ND> using BinIndices = Eigen::Matrix<size_t, 1, static_cast<int>(ND)>;
 
 /**
  * This class implements the structure of size 96bit, that can be used

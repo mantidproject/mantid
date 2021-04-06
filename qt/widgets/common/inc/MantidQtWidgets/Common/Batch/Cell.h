@@ -25,9 +25,8 @@ public:
   static constexpr const char *OUTPUT_FOREGROUND_COLOR = "#808080";
 
   Cell(std::string const &contentText);
-  Cell(std::string const &contentText, std::string const &backgroundColor,
-       int borderThickness, std::string const &color, int borderOpacity,
-       bool isEditable);
+  Cell(std::string const &contentText, std::string const &backgroundColor, int borderThickness,
+       std::string const &color, int borderOpacity, bool isEditable);
 
   void setContentText(std::string const &contentText);
   std::string const &contentText() const;
@@ -75,13 +74,11 @@ private:
   Direction m_direction;
 };
 
-EXPORT_OPT_MANTIDQT_COMMON std::ostream &operator<<(std::ostream &os,
-                                                    Cell const &cell);
+EXPORT_OPT_MANTIDQT_COMMON std::ostream &operator<<(std::ostream &os, Cell const &cell);
 EXPORT_OPT_MANTIDQT_COMMON bool operator==(Cell const &lhs, Cell const &rhs);
 EXPORT_OPT_MANTIDQT_COMMON bool operator!=(Cell const &lhs, Cell const &rhs);
-EXPORT_OPT_MANTIDQT_COMMON std::vector<Cell>
-paddedCellsToWidth(std::vector<Cell> const &cells, Cell const &paddingCell,
-                   int paddedWidth);
+EXPORT_OPT_MANTIDQT_COMMON std::vector<Cell> paddedCellsToWidth(std::vector<Cell> const &cells, Cell const &paddingCell,
+                                                                int paddedWidth);
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt

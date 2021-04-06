@@ -52,15 +52,12 @@ int General::setSurface(const std::string &Pstr)
   std::string Line = Pstr;
   std::string item;
   if (!Mantid::Kernel::Strings::section(Line, item) || item.length() != 2 ||
-      (tolower(item[0]) != 'g' && tolower(item[0] != 's')) ||
-      tolower(item[1]) != 'q')
+      (tolower(item[0]) != 'g' && tolower(item[0] != 's')) || tolower(item[1]) != 'q')
     return -1;
 
   double num[10];
   int index;
-  for (index = 0;
-       index < 10 && Mantid::Kernel::Strings::section(Line, num[index]);
-       index++)
+  for (index = 0; index < 10 && Mantid::Kernel::Strings::section(Line, num[index]); index++)
     ;
   if (index != 10)
     return -2;
@@ -81,10 +78,8 @@ int General::setSurface(const std::string &Pstr)
     Quadratic::BaseEqn[6] = 2 * (num[3] - num[7] * num[0]);
     Quadratic::BaseEqn[7] = 2 * (num[4] - num[8] * num[1]);
     Quadratic::BaseEqn[8] = 2 * (num[5] - num[9] * num[2]);
-    Quadratic::BaseEqn[9] =
-        num[0] * num[7] * num[7] + num[1] * num[8] * num[8] +
-        num[2] * num[9] * num[9] -
-        2.0 * (num[3] * num[7] + num[4] * num[8] + num[5] * num[9]) + num[6];
+    Quadratic::BaseEqn[9] = num[0] * num[7] * num[7] + num[1] * num[8] * num[8] + num[2] * num[9] * num[9] -
+                            2.0 * (num[3] * num[7] + num[4] * num[8] + num[5] * num[9]) + num[6];
   }
   return 0;
 }
@@ -96,8 +91,7 @@ void General::setBaseEqn()
 */
 {}
 
-void General::getBoundingBox(double &xmax, double &ymax, double &zmax,
-                             double &xmin, double &ymin, double &zmin) {
+void General::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) {
   /**
      General bounding box
      Intended to improve bounding box for a general quadratic surface

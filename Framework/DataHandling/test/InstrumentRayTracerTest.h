@@ -42,12 +42,8 @@ public:
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static InstrumentRayTracerTestPerformance *createSuite() {
-    return new InstrumentRayTracerTestPerformance();
-  }
-  static void destroySuite(InstrumentRayTracerTestPerformance *suite) {
-    delete suite;
-  }
+  static InstrumentRayTracerTestPerformance *createSuite() { return new InstrumentRayTracerTestPerformance(); }
+  static void destroySuite(InstrumentRayTracerTestPerformance *suite) { delete suite; }
 
   InstrumentRayTracerTestPerformance() {
     m_inst = ComponentCreationHelper::createTestInstrumentRectangular(2, 100);
@@ -55,14 +51,11 @@ public:
     topazWS = WorkspaceCreationHelper::create2DWorkspace(1, 2);
     AnalysisDataService::Instance().add("TOPAZ_2010", topazWS);
     // Load a small test file
-    FrameworkManager::Instance().exec(
-        "LoadInstrument", 6, "Filename", "TOPAZ_Definition_2010.xml",
-        "Workspace", "TOPAZ_2010", "RewriteSpectraMap", "True");
+    FrameworkManager::Instance().exec("LoadInstrument", 6, "Filename", "TOPAZ_Definition_2010.xml", "Workspace",
+                                      "TOPAZ_2010", "RewriteSpectraMap", "True");
   }
 
-  ~InstrumentRayTracerTestPerformance() override {
-    AnalysisDataService::Instance().remove("TOPAZ_2010");
-  }
+  ~InstrumentRayTracerTestPerformance() override { AnalysisDataService::Instance().remove("TOPAZ_2010"); }
 
   void test_RectangularDetector() {
     // Directly in Z+ = towards the detector center
@@ -101,8 +94,7 @@ private:
   void showResults(Links &results, const Instrument_const_sptr &inst) {
     Links::const_iterator resultItr = results.begin();
     for (; resultItr != results.end(); ++resultItr) {
-      IComponent_const_sptr component =
-          inst->getComponentByID(resultItr->componentID);
+      IComponent_const_sptr component = inst->getComponentByID(resultItr->componentID);
       std::cout << component->getName() << ", ";
     }
     std::cout << "\n";

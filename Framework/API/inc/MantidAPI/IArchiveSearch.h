@@ -18,12 +18,10 @@
 #include <string>
 #include <vector>
 
-#define DECLARE_ARCHIVESEARCH(classname, facility)                             \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_archive_##facility(              \
-      ((Mantid::API::ArchiveSearchFactory::Instance().subscribe<classname>(    \
-           #facility)),                                                        \
-       0));                                                                    \
+#define DECLARE_ARCHIVESEARCH(classname, facility)                                                                     \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper register_archive_##facility(                                                      \
+      ((Mantid::API::ArchiveSearchFactory::Instance().subscribe<classname>(#facility)), 0));                           \
   }
 
 namespace Mantid {
@@ -46,9 +44,8 @@ public:
    * the archive
    * @param exts :: A list of extensions to check for in turn against each file
    */
-  virtual std::string
-  getArchivePath(const std::set<std::string> &filenames,
-                 const std::vector<std::string> &exts) const = 0;
+  virtual std::string getArchivePath(const std::set<std::string> &filenames,
+                                     const std::vector<std::string> &exts) const = 0;
 };
 
 /// Typedef for a shared pointer to an IArchiveSearch

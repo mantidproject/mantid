@@ -67,8 +67,8 @@ std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
   triangles.insert(triangles.end(), {3, 6, 2});
 
   // Use efficient constructor
-  std::unique_ptr<MeshObject> retVal = std::make_unique<MeshObject>(
-      std::move(triangles), std::move(vertices), Mantid::Kernel::Material());
+  std::unique_ptr<MeshObject> retVal =
+      std::make_unique<MeshObject>(std::move(triangles), std::move(vertices), Mantid::Kernel::Material());
   return retVal;
 }
 
@@ -115,8 +115,7 @@ std::unique_ptr<MeshObject> createOctahedron() {
   triangles.insert(triangles.end(), {3, 1, 5});
 
   // Use flexible constructor
-  std::unique_ptr<MeshObject> retVal = std::make_unique<MeshObject>(
-      triangles, vertices, Mantid::Kernel::Material());
+  std::unique_ptr<MeshObject> retVal = std::make_unique<MeshObject>(triangles, vertices, Mantid::Kernel::Material());
   return retVal;
 }
 
@@ -169,8 +168,8 @@ std::unique_ptr<MeshObject> createLShape() {
   triangles.insert(triangles.end(), {11, 0, 6});
 
   // Use efficient constructor
-  std::unique_ptr<MeshObject> retVal = std::make_unique<MeshObject>(
-      std::move(triangles), std::move(vertices), Mantid::Kernel::Material());
+  std::unique_ptr<MeshObject> retVal =
+      std::make_unique<MeshObject>(std::move(triangles), std::move(vertices), Mantid::Kernel::Material());
   return retVal;
 }
 } // namespace
@@ -193,11 +192,9 @@ public:
     triangles.insert(triangles.end(), {0, 3, 2});
 
     // Test flexible constructor
-    TS_ASSERT_THROWS_NOTHING(
-        MeshObject(triangles, vertices, Mantid::Kernel::Material()));
+    TS_ASSERT_THROWS_NOTHING(MeshObject(triangles, vertices, Mantid::Kernel::Material()));
     // Test eficient constructor
-    TS_ASSERT_THROWS_NOTHING(MeshObject(
-        std::move(triangles), std::move(vertices), Mantid::Kernel::Material()));
+    TS_ASSERT_THROWS_NOTHING(MeshObject(std::move(triangles), std::move(vertices), Mantid::Kernel::Material()));
   }
 
   void testClone() {
@@ -221,30 +218,23 @@ public:
     triangles.insert(triangles.end(), {3, 0, 1});
     triangles.insert(triangles.end(), {0, 3, 2});
 
-    auto testMaterial =
-        Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
+    auto testMaterial = Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
 
     // Test material through flexible constructor
     auto obj1 = std::make_unique<MeshObject>(triangles, vertices, testMaterial);
-    TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
-                     obj1->material().numberDensity(), 1e-12);
+    TSM_ASSERT_DELTA("Expected a number density of 45", 45.0, obj1->material().numberDensity(), 1e-12);
     // Test material through efficient constructor
-    auto obj2 = std::make_unique<MeshObject>(std::move(triangles),
-                                             std::move(vertices), testMaterial);
-    TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
-                     obj2->material().numberDensity(), 1e-12);
+    auto obj2 = std::make_unique<MeshObject>(std::move(triangles), std::move(vertices), testMaterial);
+    TSM_ASSERT_DELTA("Expected a number density of 45", 45.0, obj2->material().numberDensity(), 1e-12);
   }
 
   void testCloneWithMaterial() {
     using Mantid::Kernel::Material;
-    auto testMaterial =
-        Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
+    auto testMaterial = Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
     auto geom_obj = createOctahedron();
     std::unique_ptr<IObject> cloned_obj;
-    TS_ASSERT_THROWS_NOTHING(
-        cloned_obj.reset(geom_obj->cloneWithMaterial(testMaterial)));
-    TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
-                     cloned_obj->material().numberDensity(), 1e-12);
+    TS_ASSERT_THROWS_NOTHING(cloned_obj.reset(geom_obj->cloneWithMaterial(testMaterial)));
+    TSM_ASSERT_DELTA("Expected a number density of 45", 45.0, cloned_obj->material().numberDensity(), 1e-12);
   }
 
   void testHasValidShape() {
@@ -300,8 +290,7 @@ public:
     Track track(V3D(-10, 1, 1), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.emplace_back(
-        Link(V3D(0, 1, 1), V3D(4, 1, 1), 14.0, *geom_obj));
+    expectedResults.emplace_back(Link(V3D(0, 1, 1), V3D(4, 1, 1), 14.0, *geom_obj));
     checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
 
@@ -311,14 +300,12 @@ public:
     Track track(V3D(-8, -6, 1), V3D(0.8, 0.6, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.emplace_back(
-        Link(V3D(0, 0, 1), V3D(4, 3, 1), 15.0, *geom_obj));
+    expectedResults.emplace_back(Link(V3D(0, 0, 1), V3D(4, 3, 1), 15.0, *geom_obj));
     checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
 
   void testInterceptCubeMiss() {
-    std::vector<Link>
-        expectedResults; // left empty as there are no expected results
+    std::vector<Link> expectedResults; // left empty as there are no expected results
     auto geom_obj = createCube(4.0);
     V3D dir(1., 1., 0.);
     dir.normalize();
@@ -333,8 +320,7 @@ public:
     Track track(V3D(-10, 0.2, 0.2), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.emplace_back(
-        Link(V3D(-0.6, 0.2, 0.2), V3D(0.6, 0.2, 0.2), 10.6, *geom_obj));
+    expectedResults.emplace_back(Link(V3D(-0.6, 0.2, 0.2), V3D(0.6, 0.2, 0.2), 10.6, *geom_obj));
     checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
 
@@ -344,8 +330,7 @@ public:
     Track track(V3D(-10, 0.2, 0.0), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.emplace_back(
-        Link(V3D(-0.8, 0.2, 0.0), V3D(0.8, 0.2, 0.0), 10.8, *geom_obj));
+    expectedResults.emplace_back(Link(V3D(-0.8, 0.2, 0.0), V3D(0.8, 0.2, 0.0), 10.8, *geom_obj));
     checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
 
@@ -355,8 +340,7 @@ public:
     Track track(V3D(-10, 0.0, 0.0), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.emplace_back(
-        Link(V3D(-1.0, 0.0, 0.0), V3D(1.0, 0.0, 0.0), 11.0, *geom_obj));
+    expectedResults.emplace_back(Link(V3D(-1.0, 0.0, 0.0), V3D(1.0, 0.0, 0.0), 11.0, *geom_obj));
     checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
 
@@ -368,16 +352,13 @@ public:
     Track track(V3D(0, 2.5, 0.5), dir);
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.emplace_back(
-        Link(V3D(0.5, 2, 0.5), V3D(1, 1.5, 0.5), 1.4142135, *geom_obj));
-    expectedResults.emplace_back(
-        Link(V3D(1.5, 1, 0.5), V3D(2, 0.5, 0.5), 2.828427, *geom_obj));
+    expectedResults.emplace_back(Link(V3D(0.5, 2, 0.5), V3D(1, 1.5, 0.5), 1.4142135, *geom_obj));
+    expectedResults.emplace_back(Link(V3D(1.5, 1, 0.5), V3D(2, 0.5, 0.5), 2.828427, *geom_obj));
     checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
 
   void testInterceptLShapeMiss() {
-    std::vector<Link>
-        expectedResults; // left empty as there are no expected results
+    std::vector<Link> expectedResults; // left empty as there are no expected results
     auto geom_obj = createLShape();
     // Passes through convex hull of L-Shape
     Track track(V3D(1.1, 1.1, -1), V3D(0, 0, 1));
@@ -419,10 +400,8 @@ public:
     TS_ASSERT(object2->interceptSurface(TL) != 0);
 
     std::vector<Link> expectedResults;
-    expectedResults.emplace_back(
-        Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
-    expectedResults.emplace_back(
-        Link(V3D(4.5, 0, 0), V3D(6.5, 0, 0), 11.5, *object2));
+    expectedResults.emplace_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
+    expectedResults.emplace_back(Link(V3D(4.5, 0, 0), V3D(6.5, 0, 0), 11.5, *object2));
     checkTrackIntercept(TL, expectedResults);
   }
 
@@ -442,22 +421,17 @@ public:
     TS_ASSERT(object2->interceptSurface(TL) != 0);
 
     std::vector<Link> expectedResults;
-    expectedResults.emplace_back(
-        Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
-    expectedResults.emplace_back(
-        Link(V3D(1, 0, 0), V3D(5, 0, 0), 10.0, *object2));
+    expectedResults.emplace_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
+    expectedResults.emplace_back(Link(V3D(1, 0, 0), V3D(5, 0, 0), 10.0, *object2));
     checkTrackIntercept(TL, expectedResults);
   }
 
-  void checkTrackIntercept(Track &track,
-                           const std::vector<Link> &expectedResults) {
+  void checkTrackIntercept(Track &track, const std::vector<Link> &expectedResults) {
     size_t index = 0;
     for (auto it = track.cbegin(); it != track.cend(); ++it) {
       if (index < expectedResults.size()) {
-        TS_ASSERT_DELTA(it->distFromStart, expectedResults[index].distFromStart,
-                        1e-6);
-        TS_ASSERT_DELTA(it->distInsideObject,
-                        expectedResults[index].distInsideObject, 1e-6);
+        TS_ASSERT_DELTA(it->distFromStart, expectedResults[index].distFromStart, 1e-6);
+        TS_ASSERT_DELTA(it->distInsideObject, expectedResults[index].distInsideObject, 1e-6);
         TS_ASSERT_EQUALS(it->componentID, expectedResults[index].componentID);
         TS_ASSERT_EQUALS(it->entryPoint, expectedResults[index].entryPoint);
         TS_ASSERT_EQUALS(it->exitPoint, expectedResults[index].exitPoint);
@@ -467,8 +441,7 @@ public:
     TS_ASSERT_EQUALS(index, expectedResults.size());
   }
 
-  void checkTrackIntercept(IObject_uptr obj, Track &track,
-                           const std::vector<Link> &expectedResults) {
+  void checkTrackIntercept(IObject_uptr obj, Track &track, const std::vector<Link> &expectedResults) {
     int unitCount = obj->interceptSurface(track);
     TS_ASSERT_EQUALS(unitCount, expectedResults.size());
     checkTrackIntercept(track, expectedResults);
@@ -697,109 +670,70 @@ public:
   void testCalcValidTypeCube() {
     auto geom_obj = createCube(1.0);
     // entry or exit on the normal
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.5, 0.5), V3D(1, 0, 0)),
-                     1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.5, 0.5), V3D(-1, 0, 0)),
-                     -1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 0.5, 0.5), V3D(1, 0, 0)),
-                     -1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 0.5, 0.5), V3D(-1, 0, 0)),
-                     1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 0.0, 0.5), V3D(0, 1, 0)),
-                     1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 0.0, 0.5), V3D(0, -1, 0)),
-                     -1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 1.0, 0.5), V3D(0, 1, 0)),
-                     -1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 1.0, 0.5), V3D(0, -1, 0)),
-                     1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.5, 0.5), V3D(1, 0, 0)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.5, 0.5), V3D(-1, 0, 0)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 0.5, 0.5), V3D(1, 0, 0)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 0.5, 0.5), V3D(-1, 0, 0)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 0.0, 0.5), V3D(0, 1, 0)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 0.0, 0.5), V3D(0, -1, 0)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 1.0, 0.5), V3D(0, 1, 0)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 1.0, 0.5), V3D(0, -1, 0)), 1);
 
     // glancing blow on edge
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.0, 0.5), V3D(1, -1, 0)),
-                     0);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 0.0, 0.0), V3D(0, -1, 1)),
-                     0);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.0, 0.5), V3D(1, -1, 0)), 0);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 0.0, 0.0), V3D(0, -1, 1)), 0);
     // entry of exit on edge
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.0, 0.5), V3D(1, 1, 0)),
-                     1);
-    TS_ASSERT_EQUALS(
-        geom_obj->calcValidType(V3D(0.0, 0.0, 0.5), V3D(-1, -1, 0)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.0, 0.5), V3D(1, 1, 0)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.0, 0.5), V3D(-1, -1, 0)), -1);
 
     // not on the normal
-    TS_ASSERT_EQUALS(
-        geom_obj->calcValidType(V3D(0.0, 0.5, 0.5), V3D(0.5, 0.5, 0)), 1);
-    TS_ASSERT_EQUALS(
-        geom_obj->calcValidType(V3D(1.0, 0.5, 0.5), V3D(0.5, 0.5, 0)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.5, 0.5), V3D(0.5, 0.5, 0)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 0.5, 0.5), V3D(0.5, 0.5, 0)), -1);
   }
 
   void testCalcValidOctahedron() {
     auto geom_obj = createOctahedron();
     // entry or exit on the normal
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.2, 0.3, 0.5), V3D(1, 1, 1)),
-                     -1);
-    TS_ASSERT_EQUALS(
-        geom_obj->calcValidType(V3D(0.2, 0.3, 0.5), V3D(-1, -1, -1)), 1);
-    TS_ASSERT_EQUALS(
-        geom_obj->calcValidType(V3D(-0.2, -0.3, -0.5), V3D(1, 1, 1)), 1);
-    TS_ASSERT_EQUALS(
-        geom_obj->calcValidType(V3D(-0.2, -0.3, -0.5), V3D(-1, -1, -1)), -1);
-    TS_ASSERT_EQUALS(
-        geom_obj->calcValidType(V3D(0.5, 0.2, -0.3), V3D(1, 1, -1)), -1);
-    TS_ASSERT_EQUALS(
-        geom_obj->calcValidType(V3D(0.5, 0.2, -0.3), V3D(-1, -1, 1)), 1);
-    TS_ASSERT_EQUALS(
-        geom_obj->calcValidType(V3D(-0.5, -0.2, 0.3), V3D(1, 1, -1)), 1);
-    TS_ASSERT_EQUALS(
-        geom_obj->calcValidType(V3D(-0.5, -0.2, 0.3), V3D(-1, -1, 1)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.2, 0.3, 0.5), V3D(1, 1, 1)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.2, 0.3, 0.5), V3D(-1, -1, -1)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-0.2, -0.3, -0.5), V3D(1, 1, 1)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-0.2, -0.3, -0.5), V3D(-1, -1, -1)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 0.2, -0.3), V3D(1, 1, -1)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 0.2, -0.3), V3D(-1, -1, 1)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-0.5, -0.2, 0.3), V3D(1, 1, -1)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-0.5, -0.2, 0.3), V3D(-1, -1, 1)), -1);
 
     // glancing blow on edge
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.5, 0.5), V3D(1, 0, 0)),
-                     0);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.5, 0.5), V3D(1, 0, 0)), 0);
     // entry or exit at edge
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, -0.5, 0.5), V3D(0, 1, 0)),
-                     1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.5, 0.5), V3D(0, 1, 0)),
-                     -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, -0.5, 0.5), V3D(0, 1, 0)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.5, 0.5), V3D(0, 1, 0)), -1);
 
     // not on the normal
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.2, 0.3, 0.5), V3D(0, 1, 0)),
-                     -1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.2, -0.3, 0.5), V3D(0, 1, 0)),
-                     1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.2, 0.3, 0.5), V3D(0, 1, 0)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.2, -0.3, 0.5), V3D(0, 1, 0)), 1);
   }
 
   void testCalcValidTypeLShape() {
     auto geom_obj = createLShape();
     // entry or exit on the normal
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 1.5, 0.5), V3D(1, 0, 0)),
-                     1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 1.5, 0.5), V3D(-1, 0, 0)),
-                     -1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 1.5, 0.5), V3D(1, 0, 0)),
-                     -1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 1.5, 0.5), V3D(-1, 0, 0)),
-                     1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 2.0, 0.5), V3D(0, 1, 0)),
-                     -1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 2.0, 0.5), V3D(0, -1, 0)),
-                     1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 0.0, 0.5), V3D(0, 1, 0)),
-                     1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 0.0, 0.5), V3D(0, -1, 0)),
-                     -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 1.5, 0.5), V3D(1, 0, 0)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 1.5, 0.5), V3D(-1, 0, 0)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 1.5, 0.5), V3D(1, 0, 0)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 1.5, 0.5), V3D(-1, 0, 0)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 2.0, 0.5), V3D(0, 1, 0)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 2.0, 0.5), V3D(0, -1, 0)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 0.0, 0.5), V3D(0, 1, 0)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 0.0, 0.5), V3D(0, -1, 0)), -1);
 
     // glancing blow on edge
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.0, 0.5), V3D(1, -1, 0)),
-                     0);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.0, 0.5), V3D(1, -1, 0)), 0);
     // glancing blow on edge from inside
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 1.0, 0.5), V3D(1, -1, 0)),
-                     0);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 1.0, 0.5), V3D(1, -1, 0)), 0);
 
     // not on the normal
-    TS_ASSERT_EQUALS(
-        geom_obj->calcValidType(V3D(1.0, 1.5, 0.5), V3D(0.5, 0.5, 0)), -1);
-    TS_ASSERT_EQUALS(
-        geom_obj->calcValidType(V3D(1.0, 1.5, 0.5), V3D(-0.5, 0.5, 0)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 1.5, 0.5), V3D(0.5, 0.5, 0)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 1.5, 0.5), V3D(-0.5, 0.5, 0)), 1);
   }
 
   void testFindPointInCube() {
@@ -848,8 +782,7 @@ public:
     auto geom_obj = createLShape();
     size_t maxAttempts(1);
     boost::optional<Kernel::V3D> point;
-    TS_ASSERT_THROWS_NOTHING(
-        point = geom_obj->generatePointInObject(rng, maxAttempts));
+    TS_ASSERT_THROWS_NOTHING(point = geom_obj->generatePointInObject(rng, maxAttempts));
 
     const double tolerance(1e-10);
     TS_ASSERT_DELTA(0.90, point->X(), tolerance);
@@ -903,18 +836,12 @@ public:
     double satol = 1e-3;             // tolerance for solid angle
     // solid angle at distance 0.5 should be 4pi/6 by symmetry
 
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(1.5, 0.5, 0.5)), M_PI * 2.0 / 3.0,
-                    satol);
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(-0.5, 0.5, 0.5)), M_PI * 2.0 / 3.0,
-                    satol);
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, 1.5, 0.5)), M_PI * 2.0 / 3.0,
-                    satol);
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, -0.5, 0.5)), M_PI * 2.0 / 3.0,
-                    satol);
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, 0.5, 1.5)), M_PI * 2.0 / 3.0,
-                    satol);
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, 0.5, -0.5)), M_PI * 2.0 / 3.0,
-                    satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(1.5, 0.5, 0.5)), M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(-0.5, 0.5, 0.5)), M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, 1.5, 0.5)), M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, -0.5, 0.5)), M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, 0.5, 1.5)), M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, 0.5, -0.5)), M_PI * 2.0 / 3.0, satol);
   }
 
   void testSolidAngleScaledCube()
@@ -927,18 +854,12 @@ public:
     double satol = 1e-3; // tolerance for solid angle
     // solid angle at distance 0.5 should be 4pi/6 by symmetry
 
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(1.5, 0.5, 0.5), scale),
-                    M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(-0.5, 0.5, 0.5), scale),
-                    M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, 1.5, 0.5), scale),
-                    M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, -0.5, 0.5), scale),
-                    M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, 0.5, 1.5), scale),
-                    M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, 0.5, -0.5), scale),
-                    M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(1.5, 0.5, 0.5), scale), M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(-0.5, 0.5, 0.5), scale), M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, 1.5, 0.5), scale), M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, -0.5, 0.5), scale), M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, 0.5, 1.5), scale), M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0.5, 0.5, -0.5), scale), M_PI * 2.0 / 3.0, satol);
   }
 
   void testOutputForRendering()
@@ -956,16 +877,12 @@ public:
   {
     auto lShape = createLShape();
     const double valueList[] = {0, -1, 0, 1, 0, 0, 0, 0, 1};
-    const std::vector<double> rotationMatrix =
-        std::vector<double>(std::begin(valueList), std::end(valueList));
-    const Kernel::Matrix<double> rotation =
-        Kernel::Matrix<double>(rotationMatrix);
+    const std::vector<double> rotationMatrix = std::vector<double>(std::begin(valueList), std::end(valueList));
+    const Kernel::Matrix<double> rotation = Kernel::Matrix<double>(rotationMatrix);
 
-    const double checkList[] = {0,  0, 0, 0,  2, 0, -1, 2, 0, -1, 1, 0,
-                                -2, 1, 0, -2, 0, 0, 0,  0, 1, 0,  2, 1,
-                                -1, 2, 1, -1, 1, 1, -2, 1, 1, -2, 0, 1};
-    auto checkVector =
-        std::vector<double>(std::begin(checkList), std::end(checkList));
+    const double checkList[] = {0, 0, 0, 0, 2, 0, -1, 2, 0, -1, 1, 0, -2, 1, 0, -2, 0, 0,
+                                0, 0, 1, 0, 2, 1, -1, 2, 1, -1, 1, 1, -2, 1, 1, -2, 0, 1};
+    auto checkVector = std::vector<double>(std::begin(checkList), std::end(checkList));
 
     TS_ASSERT_THROWS_NOTHING(lShape->rotate(rotation));
     auto rotated = lShape->getVertices();
@@ -976,10 +893,8 @@ public:
   {
     auto octahedron = createOctahedron();
     V3D translation = V3D(1, 2, 3);
-    const double checkList[] = {2, 2, 3, 1, 3, 3, 1, 2, 4,
-                                0, 2, 3, 1, 1, 3, 1, 2, 2};
-    auto checkVector =
-        std::vector<double>(std::begin(checkList), std::end(checkList));
+    const double checkList[] = {2, 2, 3, 1, 3, 3, 1, 2, 4, 0, 2, 3, 1, 1, 3, 1, 2, 2};
+    auto checkVector = std::vector<double>(std::begin(checkList), std::end(checkList));
     TS_ASSERT_THROWS_NOTHING(octahedron->translate(translation));
     auto moved = octahedron->getVertices();
     TS_ASSERT_DELTA(moved, checkVector, 1e-8);
@@ -993,14 +908,11 @@ class MeshObjectTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MeshObjectTestPerformance *createSuite() {
-    return new MeshObjectTestPerformance();
-  }
+  static MeshObjectTestPerformance *createSuite() { return new MeshObjectTestPerformance(); }
   static void destroySuite(MeshObjectTestPerformance *suite) { delete suite; }
 
   MeshObjectTestPerformance()
-      : rng(200000), octahedron(createOctahedron()), lShape(createLShape()),
-        smallCube(createCube(0.2)) {
+      : rng(200000), octahedron(createOctahedron()), lShape(createLShape()), smallCube(createCube(0.2)) {
     testPoints = create_test_points();
     testRays = create_test_rays();
     translation = create_translation_vector();
@@ -1039,8 +951,7 @@ public:
     const size_t number(10000);
     for (size_t i = 0; i < number; ++i) {
       size_t j = i % testRays.size();
-      octahedron->calcValidType(testRays[j].startPoint(),
-                                testRays[j].direction());
+      octahedron->calcValidType(testRays[j].startPoint(), testRays[j].direction());
     }
   }
 
@@ -1062,8 +973,7 @@ public:
   void test_solid_angle_scaled() {
     const size_t number(10000);
     for (size_t i = 0; i < number; ++i) {
-      smallCube->solidAngle(testPoints[i % testPoints.size()],
-                            V3D(0.5, 1.33, 1.5));
+      smallCube->solidAngle(testPoints[i % testPoints.size()], V3D(0.5, 1.33, 1.5));
     }
   }
 
@@ -1167,8 +1077,7 @@ public:
 
   Kernel::Matrix<double> create_rotation_matrix() {
     double valueList[] = {0, -1, 0, 1, 0, 0, 0, 0, 1};
-    const std::vector<double> rotationMatrix =
-        std::vector<double>(std::begin(valueList), std::end(valueList));
+    const std::vector<double> rotationMatrix = std::vector<double>(std::begin(valueList), std::end(valueList));
     Kernel::Matrix<double> rotation = Kernel::Matrix<double>(rotationMatrix);
     return rotation;
   }
