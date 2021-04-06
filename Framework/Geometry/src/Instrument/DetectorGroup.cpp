@@ -26,8 +26,7 @@ using Kernel::V3D;
 /**
  * Default constructor
  */
-DetectorGroup::DetectorGroup()
-    : IDetector(), m_id(), m_detectors(), group_topology(undef) {}
+DetectorGroup::DetectorGroup() : IDetector(), m_id(), m_detectors(), group_topology(undef) {}
 
 /** Constructor that takes a list of detectors to add
  *  @param dets :: The vector of IDetector pointers that this virtual detector
@@ -88,8 +87,7 @@ V3D DetectorGroup::getPos() const {
   if (std::abs(newPos[2]) < Mantid::Kernel::Tolerance)
     newPos[2] = 0.0;
 
-  return newPos /= static_cast<double>(
-             m_detectors.size()); // protection against divide by zero in V3D
+  return newPos /= static_cast<double>(m_detectors.size()); // protection against divide by zero in V3D
 }
 
 /// Gives the average distance of a group of detectors from the given component
@@ -124,8 +122,7 @@ axis and the instrument up direction.
 @param instrumentUp : Instrument up direction
 @return signed theta
 */
-double DetectorGroup::getSignedTwoTheta(const Kernel::V3D &observer,
-                                        const Kernel::V3D &axis,
+double DetectorGroup::getSignedTwoTheta(const Kernel::V3D &observer, const Kernel::V3D &axis,
                                         const Kernel::V3D &instrumentUp) const {
   double result = 0.0;
   DetCollection::const_iterator it;
@@ -201,9 +198,7 @@ std::vector<IDetector_const_sptr> DetectorGroup::getDetectors() const {
 double DetectorGroup::solidAngle(const V3D &observer) const {
   double result =
       std::accumulate(m_detectors.cbegin(), m_detectors.cend(), 0.0,
-                      [&observer](double angle, const auto &det) {
-                        return angle + det.second->solidAngle(observer);
-                      });
+                      [&observer](double angle, const auto &det) { return angle + det.second->solidAngle(observer); });
   return result;
 }
 
@@ -279,8 +274,7 @@ std::set<std::string> DetectorGroup::getParameterNames(bool recursive) const {
  * are from, warning this contains shared pointers keeping transient objects
  * alive, do not keep longer than needed
  */
-std::map<std::string, ComponentID>
-DetectorGroup::getParameterNamesByComponent() const {
+std::map<std::string, ComponentID> DetectorGroup::getParameterNamesByComponent() const {
   return std::map<std::string, ComponentID>();
 }
 
@@ -291,8 +285,7 @@ DetectorGroup::getParameterNamesByComponent() const {
  * components
  * @returns A empty string as this is not a parameterized component
  */
-std::string DetectorGroup::getParameterAsString(const std::string &pname,
-                                                bool recursive) const {
+std::string DetectorGroup::getParameterAsString(const std::string &pname, bool recursive) const {
   (void)pname;     // Avoid compiler warning
   (void)recursive; // Avoid compiler warning
   return "";
@@ -325,55 +318,43 @@ void DetectorGroup::getBoundingBox(BoundingBox &boundingBox) const {
  *@returns A boolean indicating if the search was successful or not. Always
  *false as this is not parameterized
  */
-bool DetectorGroup::hasParameter(const std::string &name,
-                                 bool recursive) const {
+bool DetectorGroup::hasParameter(const std::string &name, bool recursive) const {
   (void)recursive; // Avoid compiler warning
   (void)name;      // Avoid compiler warning
   return false;
 }
 /** Detectors group assumed to be non-parameterized */
-std::string DetectorGroup::getParameterType(const std::string & /*name*/,
-                                            bool /*recursive = true*/) const {
+std::string DetectorGroup::getParameterType(const std::string & /*name*/, bool /*recursive = true*/) const {
   return std::string("");
 }
 
 /// Default implementation
-std::vector<double>
-DetectorGroup::getNumberParameter(const std::string & /*pname*/,
-                                  bool /*recursive*/) const {
+std::vector<double> DetectorGroup::getNumberParameter(const std::string & /*pname*/, bool /*recursive*/) const {
   return std::vector<double>(0);
 }
 
 /// Default implementation
-std::vector<V3D>
-DetectorGroup::getPositionParameter(const std::string & /*pname*/,
-                                    bool /*recursive*/) const {
+std::vector<V3D> DetectorGroup::getPositionParameter(const std::string & /*pname*/, bool /*recursive*/) const {
   return std::vector<V3D>(0);
 }
 
 /// Default implementation
-std::vector<Quat>
-DetectorGroup::getRotationParameter(const std::string & /*pname*/,
-                                    bool /*recursive*/) const {
+std::vector<Quat> DetectorGroup::getRotationParameter(const std::string & /*pname*/, bool /*recursive*/) const {
   return std::vector<Quat>(0);
 }
 
 /// Default implementation
-std::vector<std::string>
-DetectorGroup::getStringParameter(const std::string & /*pname*/,
-                                  bool /*recursive*/) const {
+std::vector<std::string> DetectorGroup::getStringParameter(const std::string & /*pname*/, bool /*recursive*/) const {
   return std::vector<std::string>(0);
 }
 
 /// Default implementation
-std::vector<int> DetectorGroup::getIntParameter(const std::string & /*pname*/,
-                                                bool /*recursive*/) const {
+std::vector<int> DetectorGroup::getIntParameter(const std::string & /*pname*/, bool /*recursive*/) const {
   return std::vector<int>(0);
 }
 
 /// Default implementation
-std::vector<bool> DetectorGroup::getBoolParameter(const std::string & /*pname*/,
-                                                  bool /*recursive*/) const {
+std::vector<bool> DetectorGroup::getBoolParameter(const std::string & /*pname*/, bool /*recursive*/) const {
   return std::vector<bool>(0);
 }
 
@@ -450,9 +431,7 @@ std::string DetectorGroup::getFullName() const {
   return result;
 }
 
-const Kernel::Material DetectorGroup::material() const {
-  return Kernel::Material();
-}
+const Kernel::Material DetectorGroup::material() const { return Kernel::Material(); }
 
 /// Helper for legacy access mode. Always throws for DetectorGroup.
 const ParameterMap &DetectorGroup::parameterMap() const {
@@ -460,12 +439,9 @@ const ParameterMap &DetectorGroup::parameterMap() const {
 }
 
 /// Helper for legacy access mode. Always throws for DetectorGroup.
-size_t DetectorGroup::index() const {
-  throw std::runtime_error("A DetectorGroup cannot have an index");
-}
+size_t DetectorGroup::index() const { throw std::runtime_error("A DetectorGroup cannot have an index"); }
 
-size_t
-DetectorGroup::registerContents(class ComponentVisitor & /*component*/) const {
+size_t DetectorGroup::registerContents(class ComponentVisitor & /*component*/) const {
   throw std::runtime_error("DetectorGroup::registerContents. This should not "
                            "be called. DetectorGroups are not part of the "
                            "instrument. On-the-fly only.");

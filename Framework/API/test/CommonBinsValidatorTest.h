@@ -17,9 +17,7 @@ class CommonBinsValidatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CommonBinsValidatorTest *createSuite() {
-    return new CommonBinsValidatorTest();
-  }
+  static CommonBinsValidatorTest *createSuite() { return new CommonBinsValidatorTest(); }
   static void destroySuite(CommonBinsValidatorTest *suite) { delete suite; }
 
   void test_empty() {
@@ -56,8 +54,6 @@ public:
         ws->dataX(k)[i] = di * (1.0 + 0.001 * di);
       }
     CommonBinsValidator validator;
-    TS_ASSERT_EQUALS(
-        validator.isValid(ws),
-        "The workspace must have common bin boundaries for all histograms");
+    TS_ASSERT_EQUALS(validator.isValid(ws), "The workspace must have common bin boundaries for all histograms");
   }
 };

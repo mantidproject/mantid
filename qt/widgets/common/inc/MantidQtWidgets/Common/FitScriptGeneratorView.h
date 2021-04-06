@@ -35,22 +35,18 @@ class IFitScriptGeneratorPresenter;
 struct GlobalParameter;
 struct GlobalTie;
 
-class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorView
-    : public IFitScriptGeneratorView {
+class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorView : public IFitScriptGeneratorView {
   Q_OBJECT
 
 public:
-  FitScriptGeneratorView(
-      QWidget *parent = nullptr,
-      FittingMode fittingMode = FittingMode::SEQUENTIAL,
-      QMap<QString, QString> const &fitOptions = QMap<QString, QString>());
+  FitScriptGeneratorView(QWidget *parent = nullptr, FittingMode fittingMode = FittingMode::SEQUENTIAL,
+                         QMap<QString, QString> const &fitOptions = QMap<QString, QString>());
   ~FitScriptGeneratorView() override;
 
   void subscribePresenter(IFitScriptGeneratorPresenter *presenter) override;
 
   [[nodiscard]] std::string workspaceName(FitDomainIndex index) const override;
-  [[nodiscard]] WorkspaceIndex
-  workspaceIndex(FitDomainIndex index) const override;
+  [[nodiscard]] WorkspaceIndex workspaceIndex(FitDomainIndex index) const override;
   [[nodiscard]] double startX(FitDomainIndex index) const override;
   [[nodiscard]] double endX(FitDomainIndex index) const override;
 
@@ -60,22 +56,16 @@ public:
 
   [[nodiscard]] bool hasLoadedData() const override;
 
-  [[nodiscard]] double
-  parameterValue(std::string const &parameter) const override;
-  [[nodiscard]] Mantid::API::IFunction::Attribute
-  attributeValue(std::string const &attribute) const override;
+  [[nodiscard]] double parameterValue(std::string const &parameter) const override;
+  [[nodiscard]] Mantid::API::IFunction::Attribute attributeValue(std::string const &attribute) const override;
 
-  void removeWorkspaceDomain(std::string const &workspaceName,
-                             WorkspaceIndex workspaceIndex) override;
-  void addWorkspaceDomain(std::string const &workspaceName,
-                          WorkspaceIndex workspaceIndex, double startX,
+  void removeWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) override;
+  void addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX,
                           double endX) override;
 
   [[nodiscard]] bool openAddWorkspaceDialog() override;
-  [[nodiscard]] std::vector<Mantid::API::MatrixWorkspace_const_sptr>
-  getDialogWorkspaces() override;
-  [[nodiscard]] std::vector<WorkspaceIndex>
-  getDialogWorkspaceIndices() const override;
+  [[nodiscard]] std::vector<Mantid::API::MatrixWorkspace_const_sptr> getDialogWorkspaces() override;
+  [[nodiscard]] std::vector<WorkspaceIndex> getDialogWorkspaceIndices() const override;
 
   void resetSelection() override;
 
@@ -87,23 +77,16 @@ public:
   void setSimultaneousMode(bool simultaneousMode) override;
 
   void setGlobalTies(std::vector<GlobalTie> const &globalTies) override;
-  void setGlobalParameters(
-      std::vector<GlobalParameter> const &globalParameter) override;
+  void setGlobalParameters(std::vector<GlobalParameter> const &globalParameter) override;
 
   void displayWarning(std::string const &message) override;
 
 public:
   /// Testing accessors
-  FitScriptGeneratorDataTable *tableWidget() const override {
-    return m_dataTable.get();
-  }
+  FitScriptGeneratorDataTable *tableWidget() const override { return m_dataTable.get(); }
   QPushButton *removeButton() const override { return m_ui.pbRemove; }
-  QPushButton *addWorkspaceButton() const override {
-    return m_ui.pbAddWorkspace;
-  }
-  AddWorkspaceDialog *addWorkspaceDialog() const override {
-    return m_dialog.get();
-  }
+  QPushButton *addWorkspaceButton() const override { return m_ui.pbAddWorkspace; }
+  AddWorkspaceDialog *addWorkspaceDialog() const override { return m_dialog.get(); }
 
 private slots:
   void onRemoveClicked();
@@ -117,8 +100,7 @@ private slots:
   void onAttributeChanged(QString const &attribute);
   void onParameterTieChanged(QString const &parameter, QString const &tie);
   void onParameterConstraintRemoved(QString const &parameter);
-  void onParameterConstraintChanged(QString const &functionIndex,
-                                    QString const &constraint);
+  void onParameterConstraintChanged(QString const &functionIndex, QString const &constraint);
   void onGlobalParametersChanged(QStringList const &globalParameters);
   void onCopyFunctionToClipboard();
   void onFunctionHelpRequested();

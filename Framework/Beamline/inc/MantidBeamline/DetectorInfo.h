@@ -46,13 +46,9 @@ class MANTID_BEAMLINE_DLL DetectorInfo {
 public:
   DetectorInfo() = default;
   DetectorInfo(std::vector<Eigen::Vector3d> positions,
-               std::vector<Eigen::Quaterniond,
-                           Eigen::aligned_allocator<Eigen::Quaterniond>>
-                   rotations);
+               std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>> rotations);
   DetectorInfo(std::vector<Eigen::Vector3d> positions,
-               std::vector<Eigen::Quaterniond,
-                           Eigen::aligned_allocator<Eigen::Quaterniond>>
-                   rotations,
+               std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>> rotations,
                const std::vector<size_t> &monitorIndices);
 
   bool isEquivalent(const DetectorInfo &other) const;
@@ -70,14 +66,11 @@ public:
   const Eigen::Vector3d &position(const size_t index) const;
   const Eigen::Vector3d &position(const std::pair<size_t, size_t> &index) const;
   const Eigen::Quaterniond &rotation(const size_t index) const;
-  const Eigen::Quaterniond &
-  rotation(const std::pair<size_t, size_t> &index) const;
+  const Eigen::Quaterniond &rotation(const std::pair<size_t, size_t> &index) const;
   void setPosition(const size_t index, const Eigen::Vector3d &position);
-  void setPosition(const std::pair<size_t, size_t> &index,
-                   const Eigen::Vector3d &position);
+  void setPosition(const std::pair<size_t, size_t> &index, const Eigen::Vector3d &position);
   void setRotation(const size_t index, const Eigen::Quaterniond &rotation);
-  void setRotation(const std::pair<size_t, size_t> &index,
-                   const Eigen::Quaterniond &rotation);
+  void setRotation(const std::pair<size_t, size_t> &index, const Eigen::Quaterniond &rotation);
 
   size_t scanCount() const;
   const std::vector<std::pair<int64_t, int64_t>> scanIntervals() const;
@@ -106,9 +99,7 @@ private:
   Kernel::cow_ptr<std::vector<bool>> m_isMonitor{nullptr};
   Kernel::cow_ptr<std::vector<bool>> m_isMasked{nullptr};
   Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions{nullptr};
-  Kernel::cow_ptr<std::vector<Eigen::Quaterniond,
-                              Eigen::aligned_allocator<Eigen::Quaterniond>>>
-      m_rotations{nullptr};
+  Kernel::cow_ptr<std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>> m_rotations{nullptr};
 
   ComponentInfo *m_componentInfo = nullptr; // Geometry::ComponentInfo owner
 };
@@ -140,8 +131,7 @@ inline const Eigen::Vector3d &DetectorInfo::position(const size_t index) const {
 }
 
 /// Returns the position of the detector with given index.
-inline const Eigen::Vector3d &
-DetectorInfo::position(const std::pair<size_t, size_t> &index) const {
+inline const Eigen::Vector3d &DetectorInfo::position(const std::pair<size_t, size_t> &index) const {
   return (*m_positions)[linearIndex(index)];
 }
 
@@ -149,15 +139,13 @@ DetectorInfo::position(const std::pair<size_t, size_t> &index) const {
  *
  * Convenience method for beamlines with static (non-moving) detectors.
  * Throws if there are time-dependent detectors. */
-inline const Eigen::Quaterniond &
-DetectorInfo::rotation(const size_t index) const {
+inline const Eigen::Quaterniond &DetectorInfo::rotation(const size_t index) const {
   checkNoTimeDependence();
   return (*m_rotations)[index];
 }
 
 /// Returns the rotation of the detector with given index.
-inline const Eigen::Quaterniond &
-DetectorInfo::rotation(const std::pair<size_t, size_t> &index) const {
+inline const Eigen::Quaterniond &DetectorInfo::rotation(const std::pair<size_t, size_t> &index) const {
   return (*m_rotations)[linearIndex(index)];
 }
 
@@ -165,15 +153,13 @@ DetectorInfo::rotation(const std::pair<size_t, size_t> &index) const {
  *
  * Convenience method for beamlines with static (non-moving) detectors.
  * Throws if there are time-dependent detectors. */
-inline void DetectorInfo::setPosition(const size_t index,
-                                      const Eigen::Vector3d &position) {
+inline void DetectorInfo::setPosition(const size_t index, const Eigen::Vector3d &position) {
   checkNoTimeDependence();
   m_positions.access()[index] = position;
 }
 
 /// Set the position of the detector with given index.
-inline void DetectorInfo::setPosition(const std::pair<size_t, size_t> &index,
-                                      const Eigen::Vector3d &position) {
+inline void DetectorInfo::setPosition(const std::pair<size_t, size_t> &index, const Eigen::Vector3d &position) {
   m_positions.access()[linearIndex(index)] = position;
 }
 
@@ -181,15 +167,13 @@ inline void DetectorInfo::setPosition(const std::pair<size_t, size_t> &index,
  *
  * Convenience method for beamlines with static (non-moving) detectors.
  * Throws if there are time-dependent detectors. */
-inline void DetectorInfo::setRotation(const size_t index,
-                                      const Eigen::Quaterniond &rotation) {
+inline void DetectorInfo::setRotation(const size_t index, const Eigen::Quaterniond &rotation) {
   checkNoTimeDependence();
   m_rotations.access()[index] = rotation.normalized();
 }
 
 /// Set the rotation of the detector with given index.
-inline void DetectorInfo::setRotation(const std::pair<size_t, size_t> &index,
-                                      const Eigen::Quaterniond &rotation) {
+inline void DetectorInfo::setRotation(const std::pair<size_t, size_t> &index, const Eigen::Quaterniond &rotation) {
   m_rotations.access()[linearIndex(index)] = rotation.normalized();
 }
 
@@ -201,8 +185,7 @@ inline void DetectorInfo::checkNoTimeDependence() const {
 }
 
 /// Returns the linear index for a pair of detector index and time index.
-inline size_t
-DetectorInfo::linearIndex(const std::pair<size_t, size_t> &index) const {
+inline size_t DetectorInfo::linearIndex(const std::pair<size_t, size_t> &index) const {
   // The most common case are beamlines with static detectors. In that case the
   // time index is always 0 and we avoid expensive map lookups. Linear indices
   // are ordered such that the first block contains everything for time index 0
@@ -215,8 +198,7 @@ DetectorInfo::linearIndex(const std::pair<size_t, size_t> &index) const {
 
 /// Returns if there are masked detectors
 inline bool DetectorInfo::hasMaskedDetectors() const {
-  return std::any_of(m_isMasked->cbegin(), m_isMasked->cend(),
-                     [](const auto flag) { return flag; });
+  return std::any_of(m_isMasked->cbegin(), m_isMasked->cend(), [](const auto flag) { return flag; });
 }
 
 } // namespace Beamline

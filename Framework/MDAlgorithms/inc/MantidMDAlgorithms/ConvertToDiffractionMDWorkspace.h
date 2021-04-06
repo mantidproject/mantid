@@ -24,15 +24,12 @@ namespace MDAlgorithms {
  * @author Janik Zikovsky, SNS
  * @date 2011-03-01 13:14:48.236513
  */
-class DLLExport ConvertToDiffractionMDWorkspace
-    : public API::BoxControllerSettingsAlgorithm {
+class DLLExport ConvertToDiffractionMDWorkspace : public API::BoxControllerSettingsAlgorithm {
 public:
   ConvertToDiffractionMDWorkspace();
 
   /// Algorithm's name for identification
-  const std::string name() const override {
-    return "ConvertToDiffractionMDWorkspace";
-  };
+  const std::string name() const override { return "ConvertToDiffractionMDWorkspace"; };
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, "
@@ -42,17 +39,14 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "MDAlgorithms\\Creation";
-  }
+  const std::string category() const override { return "MDAlgorithms\\Creation"; }
 
 private:
   void init() override;
   void exec() override;
 
   template <class T>
-  void convertEventList(int workspaceIndex, const API::SpectrumInfo &specInfo,
-                        DataObjects::EventList &el);
+  void convertEventList(int workspaceIndex, const API::SpectrumInfo &specInfo, DataObjects::EventList &el);
 
   void convertSpectrum(const API::SpectrumInfo &specInfo, int workspaceIndex);
 

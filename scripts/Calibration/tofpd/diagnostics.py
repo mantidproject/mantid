@@ -125,6 +125,27 @@ def __get_bad_counts(y, mean=None, band=0.01):
     return len(y[(y > top) | (y < bot)])
 
 
+def get_peakwindows(peakpositions: np.ndarray):
+    """
+    Calculates the peak windows for the given peak positions used for FitPeaks
+    :param peakpositions: List of peak positions in d-space
+    :return: List of peak windows (left and right) for each peak position
+    """
+    peakwindows = []
+    deltas = 0.5 * (peakpositions[1:] - peakpositions[:-1])
+    # first left and right
+    peakwindows.append(peakpositions[0] - deltas[0])
+    peakwindows.append(peakpositions[0] + deltas[0])
+    # ones in the middle
+    for i in range(1, len(peakpositions) - 1):
+        peakwindows.append(peakpositions[i] - deltas[i - 1])
+        peakwindows.append(peakpositions[i] + deltas[i])
+    # last one
+    peakwindows.append(peakpositions[-1] - deltas[-1])
+    peakwindows.append(peakpositions[-1] + deltas[-1])
+    return peakwindows
+
+
 def plot2d(workspace, tolerance: float=0.001, peakpositions: np.ndarray=DIAMOND,
            xmin: float=np.nan, xmax: float=np.nan, horiz_markers=[]):
     TOLERANCE_COLOR = 'w'  # color to mark the area within tolerance
@@ -571,6 +592,106 @@ def plot_peakd(wksp: Union[str, Workspace2D], peak_positions: Union[float, list]
     stat_str = "Mean = {:0.6f} Stdev = {:1.5e}".format(total_mean, total_stddev)
     plt_text = pltbox.AnchoredText(stat_str, loc="upper center", frameon=True)
     ax.add_artist(plt_text)
+
+    plt.show()
+
+    return fig, ax
+
+def plot_corr(tof_ws):
+    """
+    Plots Pearson correlation coefficient for each detector
+    :param tof_ws: Workspace returned from collect_fit_result
+    :return: plot, plot axes
+    """
+    if not mtd.doesExist(str(tof_ws)):
+        raise ValueError("Could not find the provided workspace in ADS")
+
+    tof_ws = mtd[str(tof_ws)]
+
+    numHist = tof_ws.getNumberHistograms()
+
+    # Create an array for Pearson corr coef
+    r_vals = np.empty((numHist,), dtype=float)
+    r_vals.fill(np.nan)
+
+    # Create an array for detector IDs
+    detectors = tof_ws.detectorInfo().detectorIDs()
+    detID = np.empty((numHist,), dtype=float)
+    detID.fill(np.nan)
+
+    for workspaceIndex in range(numHist):
+        # Get Pearson correlation coefficient for each detector
+        x = tof_ws.dataY(workspaceIndex)
+        y = tof_ws.dataX(workspaceIndex)
+
+        mask = np.logical_not(np.isnan(x))
+        if np.sum(mask) > 1:
+            r, p = np.corrcoef(x[mask], y[mask])
+            # Use r[1] because the corr coef is always the off-diagonal element here
+            r_vals[workspaceIndex] = r[1]
+        else:
+            r_vals[workspaceIndex] = np.nan
+
+        # Get detector ID for this spectrum
+        detID[workspaceIndex] = detectors[workspaceIndex]
+
+    fig, ax = plt.subplots()
+    ax.set_xlabel("det IDs")
+    ax.set_ylabel("Pearson correlation coefficient (TOF, d)")
+
+    ax.plot(detID, r_vals, marker="x", linestyle="None")
+
+def plot_peak_info(wksp: Union[str, TableWorkspace], peak_positions: Union[float, list], donor=None):
+    """
+    Generates a plot using the PeakParameter Workspace returned from FitPeaks to show peak information
+    (center, width, height, and intensity) for each bank at different peak positions.
+    :param wksp: Peak Parameter TableWorkspace returned from FitPeaks
+    :param peak_positions: List of peak positions to plot peak info at
+    :param donor: Optional donor Workspace2D to use for collect_fit_result
+    :return: plot, plot axes for each information type
+    """
+    wksp = mtd[str(wksp)]
+
+    if not mtd.doesExist(str(wksp)):
+        raise ValueError("Could not find provided workspace in ADS")
+
+    peaks = peak_positions
+    if isinstance(peak_positions, float):
+        peaks = [peak_positions]
+
+    if len(peaks) == 0:
+        raise ValueError("Expected one or more peak positions")
+
+    # Generate workspaces for each kind of peak info
+    center = collect_fit_result(wksp, 'center', peaks, donor=donor, infotype='centre')
+    width = collect_fit_result(wksp, 'width', peaks, donor=donor, infotype='width')
+    height = collect_fit_result(wksp, 'height', peaks, donor=donor, infotype='height')
+    intensity = collect_fit_result(wksp, 'intensity', peaks, donor=donor,
+        infotype='intensity')
+
+    nbanks = center.getNumberHistograms()
+    workspaces = [center, width, height, intensity]
+    labels = ['center', 'width', 'height', 'intensity']
+
+    fig, ax = plt.subplots(len(workspaces), 1, sharex="all")
+    for i in range(len(workspaces)):
+        ax[i].set_ylabel(labels[i])
+
+    # Show small ticks on x axis at peak positions
+    ax[-1].set_xticks(peaks, True)
+    ax[-1].set_xlabel(r"peak position ($\AA$)")
+
+    markers = ["x", ".", "^", "s", "d", "h", "p", "v"]
+    for i in range(nbanks):
+        for j in range(len(workspaces)):
+            x = workspaces[j].dataX(i)
+            data = workspaces[j].dataY(i)
+            # Cycle through marker list if there are too many banks
+            marker = i % len(markers)
+            ax[j].plot(x, data, marker=markers[marker], ls="None", label="bank{}".format(i))
+
+    ax[0].legend()
+    fig.tight_layout()
 
     plt.show()
 

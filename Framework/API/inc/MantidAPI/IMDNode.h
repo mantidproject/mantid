@@ -48,9 +48,7 @@ public:
   virtual Kernel::ISaveable *getISaveable() const = 0;
   /** initiate the structure responsible for swapping the box on HDD if out of
    * memory. */
-  virtual void setFileBacked(const uint64_t /*fileLocation*/,
-                             const size_t /*fileSize*/,
-                             const bool /*markSaved*/) = 0;
+  virtual void setFileBacked(const uint64_t /*fileLocation*/, const size_t /*fileSize*/, const bool /*markSaved*/) = 0;
   /** initiate the structure responsible for swapping the box on HDD if out of
    * memory with default parameters (it does not know its place on HDD and was
    * not saved). */
@@ -65,13 +63,11 @@ public:
 
   /**Save the box at specific disk position using the class, respoinsible for
    * the file IO. */
-  virtual void saveAt(API::IBoxControllerIO *const /*saver */,
-                      uint64_t /*position*/) const = 0;
+  virtual void saveAt(API::IBoxControllerIO *const /*saver */, uint64_t /*position*/) const = 0;
   /**Load the additional box data of specified size from the disk location
    * provided using the class, respoinsible for the file IO and append them to
    * the box */
-  virtual void loadAndAddFrom(API::IBoxControllerIO *const /*saver */,
-                              uint64_t /*position*/, size_t /* Size */) = 0;
+  virtual void loadAndAddFrom(API::IBoxControllerIO *const /*saver */, uint64_t /*position*/, size_t /* Size */) = 0;
   /// drop event data from memory but keep averages
   virtual void clearDataFromMemory() = 0;
   //-------------------------------------------------------------
@@ -116,8 +112,7 @@ public:
   /// Return the indexth child MDBoxBase.
   virtual IMDNode *getChild(size_t index) = 0;
   /// Sets the children from a vector of children
-  virtual void setChildren(const std::vector<IMDNode *> &boxes,
-                           const size_t indexStart, const size_t indexEnd) = 0;
+  virtual void setChildren(const std::vector<IMDNode *> &boxes, const size_t indexStart, const size_t indexEnd) = 0;
   /// Return a pointer to the parent box
   virtual void setParent(IMDNode *parent) = 0;
   /// Return a pointer to the parent box
@@ -128,17 +123,14 @@ public:
   // box-related
   /// Fill a vector with all the boxes who are the childred of this one up to a
   /// certain depth
-  virtual void getBoxes(std::vector<IMDNode *> &boxes, size_t maxDepth,
-                        bool leafOnly) = 0;
+  virtual void getBoxes(std::vector<IMDNode *> &boxes, size_t maxDepth, bool leafOnly) = 0;
   /// Fill a vector with all the boxes who are the childred of this one  up to a
   /// certain depth and selected by the function.
-  virtual void getBoxes(std::vector<IMDNode *> &boxes, size_t maxDepth,
-                        bool leafOnly,
+  virtual void getBoxes(std::vector<IMDNode *> &boxes, size_t maxDepth, bool leafOnly,
                         Mantid::Geometry::MDImplicitFunction *function) = 0;
 
   /// Fill a vector with all the boxes who are satisfying the condition
-  virtual void getBoxes(std::vector<IMDNode *> &outBoxes,
-                        const std::function<bool(IMDNode *)> &cond) = 0;
+  virtual void getBoxes(std::vector<IMDNode *> &outBoxes, const std::function<bool(IMDNode *)> &cond) = 0;
 
   // -------------------------------- Events-Related
   // -------------------------------------------
@@ -156,8 +148,7 @@ public:
    *   @returns coordTable -- vector of events parameters
    *   @return nColumns    -- number of parameters for each event
    */
-  virtual void getEventsData(std::vector<coord_t> &coordTable,
-                             size_t &nColumns) const = 0;
+  virtual void getEventsData(std::vector<coord_t> &coordTable, size_t &nColumns) const = 0;
   /** The method to convert the table of data into vector of events
    *   Used to load events from plain binary file
    *   @param coordTable -- vector of events data, which would be packed into
@@ -166,20 +157,14 @@ public:
   virtual void setEventsData(const std::vector<coord_t> &coordTable) = 0;
 
   /// Add a single event defined by its components
-  virtual void buildAndAddEvent(const signal_t Signal, const signal_t errorSq,
-                                const std::vector<coord_t> &point,
-                                uint16_t runIndex, uint16_t goniometerIndex,
-                                uint32_t detectorId) = 0;
+  virtual void buildAndAddEvent(const signal_t Signal, const signal_t errorSq, const std::vector<coord_t> &point,
+                                uint16_t runIndex, uint16_t goniometerIndex, uint32_t detectorId) = 0;
   /// Add a single event, with no mutex locking
-  virtual void
-  buildAndAddEventUnsafe(const signal_t Signal, const signal_t errorSq,
-                         const std::vector<coord_t> &point, uint16_t runIndex,
-                         uint16_t goniometerIndex, uint32_t detectorId) = 0;
+  virtual void buildAndAddEventUnsafe(const signal_t Signal, const signal_t errorSq, const std::vector<coord_t> &point,
+                                      uint16_t runIndex, uint16_t goniometerIndex, uint32_t detectorId) = 0;
   /// Add several events from the vector of event parameters
-  virtual size_t buildAndAddEvents(const std::vector<signal_t> &sigErrSq,
-                                   const std::vector<coord_t> &Coord,
-                                   const std::vector<uint16_t> &runIndex,
-                                   const std::vector<uint16_t> &goniometerIndex,
+  virtual size_t buildAndAddEvents(const std::vector<signal_t> &sigErrSq, const std::vector<coord_t> &Coord,
+                                   const std::vector<uint16_t> &runIndex, const std::vector<uint16_t> &goniometerIndex,
                                    const std::vector<uint32_t> &detectorId) = 0;
 
   // -------------------------------------------------------------------------------------------
@@ -199,11 +184,9 @@ public:
    * @param useOnePercentBackgroundCorrection :: if one percent correction
    *should be applied to background.
    */
-  virtual void integrateSphere(
-      Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared,
-      signal_t &signal, signal_t &errorSquared,
-      const coord_t innerRadiusSquared = 0.0,
-      const bool useOnePercentBackgroundCorrection = true) const = 0;
+  virtual void integrateSphere(Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared,
+                               signal_t &signal, signal_t &errorSquared, const coord_t innerRadiusSquared = 0.0,
+                               const bool useOnePercentBackgroundCorrection = true) const = 0;
   /** Find the centroid of all events contained within by doing a weighted
    *average
    * of their coordinates.
@@ -215,9 +198,8 @@ public:
    * @param[out] centroid :: array of size [nd]; its centroid will be added
    * @param[out] signal :: set to the integrated signal
    */
-  virtual void centroidSphere(Mantid::API::CoordTransform &radiusTransform,
-                              const coord_t radiusSquared, coord_t *centroid,
-                              signal_t &signal) const = 0;
+  virtual void centroidSphere(Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared,
+                              coord_t *centroid, signal_t &signal) const = 0;
   /** Cylinder (peak) integration
    * The CoordTransform object could be used for more cylinder
    * reduces the dimensions to two values.
@@ -231,21 +213,18 @@ public:
    * @param errorSquared [out] :: set to the integrated squared error.
    * @param signal_fit [out] :: array of values for the fit.
    */
-  virtual void integrateCylinder(Mantid::API::CoordTransform &radiusTransform,
-                                 const coord_t radius, const coord_t length,
-                                 signal_t &signal, signal_t &errorSquared,
+  virtual void integrateCylinder(Mantid::API::CoordTransform &radiusTransform, const coord_t radius,
+                                 const coord_t length, signal_t &signal, signal_t &errorSquared,
                                  std::vector<signal_t> &signal_fit) const = 0;
 
   /** Split sub-boxes, if this is possible and neede for this box */
-  virtual void
-  splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = nullptr) = 0;
+  virtual void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = nullptr) = 0;
   /** Recalculate signal etc. */
   virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = nullptr) = 0;
   /** Calculate the centroid of this box and all sub-boxes. */
   virtual void calculateCentroid(coord_t * /*centroid*/) const = 0;
   /** Calculate the centroid of this box and all sub-boxes. */
-  virtual void calculateCentroid(coord_t * /*centroid*/,
-                                 const int /*runindex*/) const = 0;
+  virtual void calculateCentroid(coord_t * /*centroid*/, const int /*runindex*/) const = 0;
   /** Get the centroid of this box and all sub-boxes. */
   virtual coord_t *getCentroid() const = 0;
   //----------------------------------------------------------------------------------------------------------------------------------
@@ -254,8 +233,7 @@ public:
   virtual signal_t getError() const = 0;
   virtual signal_t getErrorSquared() const = 0;
   virtual coord_t getInverseVolume() const = 0;
-  virtual Mantid::Geometry::MDDimensionExtents<coord_t> &
-  getExtents(size_t dim) = 0;
+  virtual Mantid::Geometry::MDDimensionExtents<coord_t> &getExtents(size_t dim) = 0;
   virtual const IMDNode *getBoxAtCoord(const coord_t * /*coords*/) = 0;
   virtual void getCenter(coord_t *const /*boxCenter*/) const = 0;
   virtual uint32_t getDepth() const = 0;
@@ -269,21 +247,16 @@ public:
   // -------------------------------- Geometry/vertexes-Related
   // -------------------------------------------
   virtual std::vector<Mantid::Kernel::VMD> getVertexes() const = 0;
-  virtual std::unique_ptr<coord_t[]>
-  getVertexesArray(size_t &numVertices) const = 0;
-  virtual std::unique_ptr<coord_t[]>
-  getVertexesArray(size_t &numVertices, const size_t outDimensions,
-                   const bool *maskDim) const = 0;
-  virtual void transformDimensions(std::vector<double> &scaling,
-                                   std::vector<double> &offset) = 0;
+  virtual std::unique_ptr<coord_t[]> getVertexesArray(size_t &numVertices) const = 0;
+  virtual std::unique_ptr<coord_t[]> getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                                                      const bool *maskDim) const = 0;
+  virtual void transformDimensions(std::vector<double> &scaling, std::vector<double> &offset) = 0;
 
   // to avoid casting (which need also the number of dimensions) method say if
   // Node is a box. if not, it is gridbox
   virtual bool isBox() const = 0;
 
-  virtual signal_t getSignalByNEvents() const {
-    return this->getSignal() / static_cast<signal_t>(this->getNPoints());
-  }
+  virtual signal_t getSignalByNEvents() const { return this->getSignal() / static_cast<signal_t>(this->getNPoints()); }
 
   // ----------------------------- Helper Methods
   // --------------------------------------------------------
@@ -296,8 +269,7 @@ public:
    * @return
    */
 
-  static inline bool CompareFilePosition(const IMDNode *const a,
-                                         const IMDNode *const b) {
+  static inline bool CompareFilePosition(const IMDNode *const a, const IMDNode *const b) {
 
     return (a->getID() < b->getID());
   }
@@ -310,9 +282,7 @@ public:
    *
    * @param boxes :: ref to a vector of boxes. It will be sorted in-place.
    */
-  static void sortObjByID(std::vector<IMDNode *> &boxes) {
-    std::sort(boxes.begin(), boxes.end(), CompareFilePosition);
-  }
+  static void sortObjByID(std::vector<IMDNode *> &boxes) { std::sort(boxes.begin(), boxes.end(), CompareFilePosition); }
 };
 } // namespace API
 } // namespace Mantid

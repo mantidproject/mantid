@@ -23,8 +23,7 @@ public:
   static void destroySuite(Authenticate2Test *suite) { delete suite; }
 
   void test_algorithm() {
-    testAlg =
-        Mantid::API::AlgorithmManager::Instance().create("Authenticate", 2);
+    testAlg = Mantid::API::AlgorithmManager::Instance().create("Authenticate", 2);
     TS_ASSERT(testAlg);
     TS_ASSERT_EQUALS(testAlg->name(), "Authenticate");
     TS_ASSERT_EQUALS(testAlg->version(), 2);
@@ -61,8 +60,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg1.initialize());
     // password missing
     TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("UserName", "john_missing"));
-    TS_ASSERT_THROWS(alg1.setPropertyValue("ComputeResource", "missing!"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg1.setPropertyValue("ComputeResource", "missing!"), const std::invalid_argument &);
 
     TS_ASSERT_THROWS(alg1.execute(), const std::runtime_error &);
     TS_ASSERT(!alg1.isExecuted());
@@ -71,8 +69,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     // username missing
     TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("Password", "LogIn"));
-    TS_ASSERT_THROWS(alg2.setPropertyValue("ComputeResource", "missing!"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg2.setPropertyValue("ComputeResource", "missing!"), const std::invalid_argument &);
 
     TS_ASSERT_THROWS(alg2.execute(), const std::runtime_error &);
     TS_ASSERT(!alg2.isExecuted());
@@ -90,19 +87,15 @@ public:
   void test_wrongProperty() {
     Authenticate2 auth;
     TS_ASSERT_THROWS_NOTHING(auth.initialize());
-    TS_ASSERT_THROWS(auth.setPropertyValue("usernam", "anything"),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(auth.setPropertyValue("sername", "anything"),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(auth.setPropertyValue("Passwo", "anything"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(auth.setPropertyValue("usernam", "anything"), const std::runtime_error &);
+    TS_ASSERT_THROWS(auth.setPropertyValue("sername", "anything"), const std::runtime_error &);
+    TS_ASSERT_THROWS(auth.setPropertyValue("Passwo", "anything"), const std::runtime_error &);
   }
 
   void test_propertiesOK() {
     testFacilities.emplace_back("SNS", "Fermi");
 
-    const Mantid::Kernel::FacilityInfo &prevFac =
-        Mantid::Kernel::ConfigService::Instance().getFacility();
+    const Mantid::Kernel::FacilityInfo &prevFac = Mantid::Kernel::ConfigService::Instance().getFacility();
     for (auto &testFacility : testFacilities) {
       const std::string facName = testFacility.first;
       const std::string compName = testFacility.second;
@@ -110,10 +103,8 @@ public:
       Mantid::Kernel::ConfigService::Instance().setFacility(facName);
       Authenticate2 auth;
       TS_ASSERT_THROWS_NOTHING(auth.initialize());
-      TS_ASSERT_THROWS_NOTHING(
-          auth.setPropertyValue("ComputeResource", compName));
-      TS_ASSERT_THROWS_NOTHING(
-          auth.setPropertyValue("UserName", "john_missing"));
+      TS_ASSERT_THROWS_NOTHING(auth.setPropertyValue("ComputeResource", compName));
+      TS_ASSERT_THROWS_NOTHING(auth.setPropertyValue("UserName", "john_missing"));
       TS_ASSERT_THROWS_NOTHING(auth.setPropertyValue("Password", "LogIn"));
       // TODO: this would run the algorithm and do a remote
       // connection. uncomment only when/if we have a mock up for this

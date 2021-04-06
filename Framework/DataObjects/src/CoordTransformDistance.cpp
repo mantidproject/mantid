@@ -32,10 +32,9 @@ namespace DataObjects {
  * @param eigenvals :: variances along each eigenvector (if used)
  * @return
  */
-CoordTransformDistance::CoordTransformDistance(
-    const size_t inD, const coord_t *center, const bool *dimensionsUsed,
-    const size_t outD, const std::vector<Kernel::V3D> &eigenvects,
-    const std::vector<double> &eigenvals)
+CoordTransformDistance::CoordTransformDistance(const size_t inD, const coord_t *center, const bool *dimensionsUsed,
+                                               const size_t outD, const std::vector<Kernel::V3D> &eigenvects,
+                                               const std::vector<double> &eigenvals)
     : CoordTransform(inD, outD) {
 
   m_center.reserve(inD);
@@ -57,9 +56,7 @@ CoordTransformDistance::CoordTransformDistance(
 //----------------------------------------------------------------------------------------------
 /** Virtual cloner
  * @return a copy of this object  */
-CoordTransform *CoordTransformDistance::clone() const {
-  return new CoordTransformDistance(*this);
-}
+CoordTransform *CoordTransformDistance::clone() const { return new CoordTransformDistance(*this); }
 
 //----------------------------------------------------------------------------------------------
 /** Apply the coordinate transformation.
@@ -71,8 +68,7 @@ CoordTransform *CoordTransformDistance::clone() const {
  * @param inputVector :: fixed-size array of input coordinates, of size inD
  * @param outVector :: fixed-size array of output coordinates, of size 1
  */
-void CoordTransformDistance::apply(const coord_t *inputVector,
-                                   coord_t *outVector) const {
+void CoordTransformDistance::apply(const coord_t *inputVector, coord_t *outVector) const {
   if (outD == 1) {
     coord_t distanceSquared = 0;
     if (m_eigenvals.size() == 3) {
@@ -84,12 +80,10 @@ void CoordTransformDistance::apply(const coord_t *inputVector,
         // calculate the covariance of the delta vector using
         // the three eigen vector as the new base
         for (size_t dd = 0; dd < inD; dd++) {
-          dist += static_cast<coord_t>(m_eigenvects[d][dd]) *
-                  (inputVector[dd] - m_center[dd]);
+          dist += static_cast<coord_t>(m_eigenvects[d][dd]) * (inputVector[dd] - m_center[dd]);
         }
 
-        distanceSquared += (dist * dist) *
-                           static_cast<coord_t>(m_maxEigenval / m_eigenvals[d]);
+        distanceSquared += (dist * dist) * static_cast<coord_t>(m_maxEigenval / m_eigenvals[d]);
       }
       // debug output
       // std::cout << "[CoordTransFormDistance]\n"
@@ -138,13 +132,11 @@ std::string CoordTransformDistance::toXMLString() const {
   using namespace Poco::XML;
 
   AutoPtr<Document> pDoc = new Document;
-  AutoPtr<Element> coordTransformElement =
-      pDoc->createElement("CoordTransform");
+  AutoPtr<Element> coordTransformElement = pDoc->createElement("CoordTransform");
   pDoc->appendChild(coordTransformElement);
 
   AutoPtr<Element> coordTransformTypeElement = pDoc->createElement("Type");
-  coordTransformTypeElement->appendChild(
-      AutoPtr<Text>(pDoc->createTextNode("CoordTransformDistance")));
+  coordTransformTypeElement->appendChild(AutoPtr<Text>(pDoc->createTextNode("CoordTransformDistance")));
   coordTransformElement->appendChild(coordTransformTypeElement);
 
   AutoPtr<Element> paramListElement = pDoc->createElement("ParameterList");
@@ -170,10 +162,9 @@ std::string CoordTransformDistance::toXMLString() const {
     m_dimensionsUsed_param.addValue(d, m_dimensionsUsed[d]);
   }
 
-  std::string formattedXMLString = boost::str(
-      boost::format(xmlstream.str().c_str()) % inD_param.toXMLString().c_str() %
-      outD_param.toXMLString().c_str() % m_center_param.toXMLString().c_str() %
-      m_dimensionsUsed_param.toXMLString().c_str());
+  std::string formattedXMLString = boost::str(boost::format(xmlstream.str().c_str()) % inD_param.toXMLString().c_str() %
+                                              outD_param.toXMLString().c_str() % m_center_param.toXMLString().c_str() %
+                                              m_dimensionsUsed_param.toXMLString().c_str());
 
   return formattedXMLString;
 }
@@ -182,9 +173,7 @@ std::string CoordTransformDistance::toXMLString() const {
  * Coordinate transform id
  * @return the type of coordinate transform
  */
-std::string CoordTransformDistance::id() const {
-  return "CoordTransformDistance";
-}
+std::string CoordTransformDistance::id() const { return "CoordTransformDistance"; }
 
 } // namespace DataObjects
 } // namespace Mantid

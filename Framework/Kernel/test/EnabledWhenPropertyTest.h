@@ -28,8 +28,7 @@ public:
     // Make a property with its validator. Will be enabled when that other one
     // is NOT the default
     auto enabledWhenNotDefault = [this] {
-      return std::make_unique<EnabledWhenProperty>(m_propertyOneName.c_str(),
-                                                   IS_NOT_DEFAULT);
+      return std::make_unique<EnabledWhenProperty>(m_propertyOneName.c_str(), IS_NOT_DEFAULT);
     };
     alg.declareProperty(m_resultPropName, 456);
     alg.setPropertySettings(m_resultPropName, enabledWhenNotDefault());
@@ -37,15 +36,13 @@ public:
     Property *prop = alg.getPointerToProperty(m_resultPropName);
     TS_ASSERT(prop);
 
-    TSM_ASSERT("Property always returns visible.",
-               prop->getSettings()->isVisible(&alg))
+    TSM_ASSERT("Property always returns visible.", prop->getSettings()->isVisible(&alg))
     TSM_ASSERT("Property always returns valid.", prop->isValid().empty())
 
     TSM_ASSERT("Starts off NOT enabled", !prop->getSettings()->isEnabled(&alg));
     // Change the property so it is no longer default
     alg.setProperty(m_propertyOneName, 234);
-    TSM_ASSERT("Becomes enabled when another property has been changed",
-               prop->getSettings()->isEnabled(&alg));
+    TSM_ASSERT("Becomes enabled when another property has been changed", prop->getSettings()->isEnabled(&alg));
 
     alg.declareProperty(m_propertyTwoName, 456);
     alg.setPropertySettings(m_propertyTwoName, enabledWhenNotDefault());
@@ -62,16 +59,14 @@ public:
     // is the default
     alg.declareProperty(m_resultPropName, 456);
     alg.setPropertySettings(m_resultPropName,
-                            std::make_unique<EnabledWhenProperty>(
-                                m_propertyOneName.c_str(), IS_DEFAULT));
+                            std::make_unique<EnabledWhenProperty>(m_propertyOneName.c_str(), IS_DEFAULT));
     Property *prop = alg.getPointerToProperty(m_resultPropName);
     TS_ASSERT(prop);
     if (!prop)
       return;
     TSM_ASSERT("Starts off enabled", prop->getSettings()->isEnabled(&alg));
     alg.setProperty(m_propertyOneName, -1);
-    TSM_ASSERT("Becomes disabled when another property has been changed",
-               !prop->getSettings()->isEnabled(&alg));
+    TSM_ASSERT("Becomes disabled when another property has been changed", !prop->getSettings()->isEnabled(&alg));
   }
 
   void test_when_IS_EQUAL_TO() {
@@ -79,36 +74,31 @@ public:
     alg.declareProperty(m_propertyOneName, 123);
     alg.declareProperty(m_resultPropName, 456);
     alg.setPropertySettings(m_resultPropName,
-                            std::make_unique<EnabledWhenProperty>(
-                                m_propertyOneName.c_str(), IS_EQUAL_TO, "234"));
+                            std::make_unique<EnabledWhenProperty>(m_propertyOneName.c_str(), IS_EQUAL_TO, "234"));
     Property *prop = alg.getPointerToProperty(m_resultPropName);
     TS_ASSERT(prop);
     if (!prop)
       return;
     TSM_ASSERT("Starts off disabled", !prop->getSettings()->isEnabled(&alg));
     alg.setProperty(m_propertyOneName, 234);
-    TSM_ASSERT(
-        "Becomes enabled when the other property is equal to the given string",
-        prop->getSettings()->isEnabled(&alg));
+    TSM_ASSERT("Becomes enabled when the other property is equal to the given string",
+               prop->getSettings()->isEnabled(&alg));
   }
 
   void test_when_IS_NOT_EQUAL_TO() {
     PropertyManagerOwner alg;
     alg.declareProperty(m_propertyOneName, 123);
     alg.declareProperty(m_resultPropName, 456);
-    alg.setPropertySettings(
-        m_resultPropName,
-        std::make_unique<EnabledWhenProperty>(m_propertyOneName.c_str(),
-                                              IS_NOT_EQUAL_TO, "234"));
+    alg.setPropertySettings(m_resultPropName,
+                            std::make_unique<EnabledWhenProperty>(m_propertyOneName.c_str(), IS_NOT_EQUAL_TO, "234"));
     Property *prop = alg.getPointerToProperty(m_resultPropName);
     TS_ASSERT(prop);
     if (!prop)
       return;
     TSM_ASSERT("Starts off enabled", prop->getSettings()->isEnabled(&alg));
     alg.setProperty(m_propertyOneName, 234);
-    TSM_ASSERT(
-        "Becomes disabled when the other property is equal to the given string",
-        !prop->getSettings()->isEnabled(&alg));
+    TSM_ASSERT("Becomes disabled when the other property is equal to the given string",
+               !prop->getSettings()->isEnabled(&alg));
   }
 
   void test_combination_AND() {
@@ -186,14 +176,10 @@ private:
   const std::string m_propertyTwoName = "PropTwo";
   const std::string m_resultPropName = "ResultProp";
 
-  PropertyManagerOwner setupCombinationTest(eLogicOperator logicOperation,
-                                            bool secondPropertyIsTrue) {
-    auto propOne =
-        getEnabledWhenProp(m_propertyOneName, IS_EQUAL_TO, m_propertyTrueValue);
-    auto propTwo =
-        getEnabledWhenProp(m_propertyTwoName, IS_EQUAL_TO, m_propertyTrueValue);
-    auto combination = getCombinationProperty(
-        std::move(propOne), std::move(propTwo), logicOperation);
+  PropertyManagerOwner setupCombinationTest(eLogicOperator logicOperation, bool secondPropertyIsTrue) {
+    auto propOne = getEnabledWhenProp(m_propertyOneName, IS_EQUAL_TO, m_propertyTrueValue);
+    auto propTwo = getEnabledWhenProp(m_propertyTwoName, IS_EQUAL_TO, m_propertyTrueValue);
+    auto combination = getCombinationProperty(std::move(propOne), std::move(propTwo), logicOperation);
     // Set both to the same value to check
     PropertyManagerOwner alg;
     alg.declareProperty(m_propertyOneName, m_propertyTrueValue);
@@ -207,9 +193,8 @@ private:
     return alg;
   }
 
-  std::unique_ptr<EnabledWhenProperty>
-  getEnabledWhenProp(const std::string &propName, ePropertyCriterion criterion,
-                     const std::string &value = "") {
+  std::unique_ptr<EnabledWhenProperty> getEnabledWhenProp(const std::string &propName, ePropertyCriterion criterion,
+                                                          const std::string &value = "") {
     if (value.length() == 0) {
       return std::make_unique<EnabledWhenProperty>(propName, criterion);
     } else {
@@ -218,10 +203,8 @@ private:
   }
 
   using EnabledPropPtr = std::unique_ptr<EnabledWhenProperty>;
-  std::unique_ptr<IPropertySettings>
-  getCombinationProperty(EnabledPropPtr &&condOne, EnabledPropPtr &&condTwo,
-                         eLogicOperator logicalOperator) {
-    return std::make_unique<EnabledWhenProperty>(
-        std::move(condOne), std::move(condTwo), logicalOperator);
+  std::unique_ptr<IPropertySettings> getCombinationProperty(EnabledPropPtr &&condOne, EnabledPropPtr &&condTwo,
+                                                            eLogicOperator logicalOperator) {
+    return std::make_unique<EnabledWhenProperty>(std::move(condOne), std::move(condTwo), logicalOperator);
   }
 };

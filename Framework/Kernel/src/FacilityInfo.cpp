@@ -38,9 +38,8 @@ Logger g_log("FacilityInfo");
  * @throw std::runtime_error if name or file extensions are not defined
  */
 FacilityInfo::FacilityInfo(const Poco::XML::Element *elem)
-    : m_catalogs(elem), m_name(elem->getAttribute("name")), m_timezone(),
-      m_zeroPadding(0), m_delimiter(), m_extensions(), m_archiveSearch(),
-      m_instruments(), m_noFilePrefix(), m_multiFileLimit(100),
+    : m_catalogs(elem), m_name(elem->getAttribute("name")), m_timezone(), m_zeroPadding(0), m_delimiter(),
+      m_extensions(), m_archiveSearch(), m_instruments(), m_noFilePrefix(), m_multiFileLimit(100),
       m_computeResources() {
 
   // Fill the various fields from the XML
@@ -59,8 +58,7 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element *elem)
 /// Called from constructor to fill zero padding field
 void FacilityInfo::fillZeroPadding(const Poco::XML::Element *elem) {
   std::string paddingStr = elem->getAttribute("zeropadding");
-  if (paddingStr.empty() ||
-      !Mantid::Kernel::Strings::convert(paddingStr, m_zeroPadding)) {
+  if (paddingStr.empty() || !Mantid::Kernel::Strings::convert(paddingStr, m_zeroPadding)) {
     m_zeroPadding = 0;
   }
 }
@@ -96,8 +94,7 @@ void FacilityInfo::fillExtensions(const Poco::XML::Element *elem) {
     throw std::runtime_error("No file extensions defined");
   }
   using tokenizer = Mantid::Kernel::StringTokenizer;
-  tokenizer exts(extsStr, ",",
-                 tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+  tokenizer exts(extsStr, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
   for (const auto &ext : exts) {
     addExtension(ext);
   }
@@ -115,14 +112,12 @@ void FacilityInfo::addExtension(const std::string &ext) {
 
 /// Called from constructor to fill archive interface names
 void FacilityInfo::fillArchiveNames(const Poco::XML::Element *elem) {
-  Poco::AutoPtr<Poco::XML::NodeList> pNL_archives =
-      elem->getElementsByTagName("archive");
+  Poco::AutoPtr<Poco::XML::NodeList> pNL_archives = elem->getElementsByTagName("archive");
   if (pNL_archives->length() > 1) {
     g_log.error("Facility must have only one archive tag");
     throw std::runtime_error("Facility must have only one archive tag");
   } else if (pNL_archives->length() == 1) {
-    Poco::AutoPtr<Poco::XML::NodeList> pNL_interfaces =
-        elem->getElementsByTagName("archiveSearch");
+    Poco::AutoPtr<Poco::XML::NodeList> pNL_interfaces = elem->getElementsByTagName("archiveSearch");
     for (unsigned int i = 0; i < pNL_interfaces->length(); ++i) {
       auto *elem = dynamic_cast<Poco::XML::Element *>(pNL_interfaces->item(i));
       std::string plugin = elem->getAttribute("plugin");
@@ -134,11 +129,9 @@ void FacilityInfo::fillArchiveNames(const Poco::XML::Element *elem) {
 }
 
 void FacilityInfo::fillTimezone(const Poco::XML::Element *elem) {
-  Poco::AutoPtr<Poco::XML::NodeList> pNL_timezones =
-      elem->getElementsByTagName("timezone");
+  Poco::AutoPtr<Poco::XML::NodeList> pNL_timezones = elem->getElementsByTagName("timezone");
   if (pNL_timezones->length() == 0) {
-    g_log.notice() << "No timezone specified for " << m_name
-                   << " in Facilities.xml\n";
+    g_log.notice() << "No timezone specified for " << m_name << " in Facilities.xml\n";
   } else if (pNL_timezones->length() == 1) {
     pNL_timezones = pNL_timezones->item(0)->childNodes();
     if (pNL_timezones->length() > 0) {
@@ -146,15 +139,13 @@ void FacilityInfo::fillTimezone(const Poco::XML::Element *elem) {
       m_timezone = txt->getData();
     }
   } else {
-    throw std::runtime_error("Facility " + m_name +
-                             " has more than one timezone specified");
+    throw std::runtime_error("Facility " + m_name + " has more than one timezone specified");
   }
 }
 
 /// Called from constructor to fill instrument list
 void FacilityInfo::fillInstruments(const Poco::XML::Element *elem) {
-  Poco::AutoPtr<Poco::XML::NodeList> pNL_instrument =
-      elem->getElementsByTagName("instrument");
+  Poco::AutoPtr<Poco::XML::NodeList> pNL_instrument = elem->getElementsByTagName("instrument");
   unsigned long n = pNL_instrument->length();
   m_instruments.reserve(n);
 
@@ -165,22 +156,19 @@ void FacilityInfo::fillInstruments(const Poco::XML::Element *elem) {
         InstrumentInfo instr(this, elem);
         m_instruments.emplace_back(instr);
       } catch (std::runtime_error &e) { /*skip this instrument*/
-        g_log.warning("Failed to load instument for: " + m_name + ": " +
-                      e.what());
+        g_log.warning("Failed to load instument for: " + m_name + ": " + e.what());
       }
     }
   }
 
   if (m_instruments.empty()) {
-    throw std::runtime_error("Facility " + m_name +
-                             " does not have any instruments;");
+    throw std::runtime_error("Facility " + m_name + " does not have any instruments;");
   }
 }
 
 /// Called from constructor to fill compute resources map
 void FacilityInfo::fillComputeResources(const Poco::XML::Element *elem) {
-  Poco::AutoPtr<Poco::XML::NodeList> pNL_compute =
-      elem->getElementsByTagName("computeResource");
+  Poco::AutoPtr<Poco::XML::NodeList> pNL_compute = elem->getElementsByTagName("computeResource");
   unsigned long n = pNL_compute->length();
   for (unsigned long i = 0; i < n; i++) {
     auto *elem = dynamic_cast<Poco::XML::Element *>(pNL_compute->item(i));
@@ -192,16 +180,14 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element *elem) {
 
         g_log.debug() << "Compute resource found: " << cr << '\n';
       } catch (std::runtime_error &e) { // next resource...
-        g_log.warning("Failed to load compute resource for: " + m_name + ": " +
-                      e.what());
+        g_log.warning("Failed to load compute resource for: " + m_name + ": " + e.what());
       }
 
       std::string name = elem->getAttribute("name");
       // TODO: this is a bit of duplicate effort at the moment, until
       // RemoteJobManager goes away from here (then this would be
       // removed), see header for details.
-      m_computeResources.emplace(name,
-                                 std::make_shared<RemoteJobManager>(elem));
+      m_computeResources.emplace(name, std::make_shared<RemoteJobManager>(elem));
     }
   }
 }
@@ -215,29 +201,23 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element *elem) {
 const InstrumentInfo &FacilityInfo::instrument(std::string iName) const {
   if (iName.empty()) {
     iName = ConfigService::Instance().getString("default.instrument");
-    g_log.debug() << "Blank instrument specified, using default instrument of "
-                  << iName << ".\n";
+    g_log.debug() << "Blank instrument specified, using default instrument of " << iName << ".\n";
     if (iName.empty()) {
       return m_instruments.front();
     }
   }
 
   auto instrument = std::find_if(m_instruments.cbegin(), m_instruments.cend(),
-                                 [&iName](const auto &inst) {
-                                   return boost::iequals(inst.name(), iName);
-                                 });
+                                 [&iName](const auto &inst) { return boost::iequals(inst.name(), iName); });
 
   // if unsuccessful try lookup by short name
   if (instrument == m_instruments.cend()) {
     instrument = std::find_if(m_instruments.cbegin(), m_instruments.cend(),
-                              [&iName](const auto &inst) {
-                                return boost::iequals(inst.shortName(), iName);
-                              });
+                              [&iName](const auto &inst) { return boost::iequals(inst.shortName(), iName); });
   }
 
   if (instrument != m_instruments.cend()) {
-    g_log.debug() << "Instrument '" << iName << "' found as "
-                  << instrument->name() << " at " << name() << ".\n";
+    g_log.debug() << "Instrument '" << iName << "' found as " << instrument->name() << " at " << name() << ".\n";
     return *instrument;
   }
 
@@ -249,17 +229,14 @@ const InstrumentInfo &FacilityInfo::instrument(std::string iName) const {
  * Get the vector of available compute resources
  * @return vector of ComputeResourInfo for the current facility
  */
-std::vector<ComputeResourceInfo> FacilityInfo::computeResInfos() const {
-  return m_computeResInfos;
-}
+std::vector<ComputeResourceInfo> FacilityInfo::computeResInfos() const { return m_computeResInfos; }
 
 /**
  * Returns a list of instruments of given technique
  * @param tech :: Technique name
  * @return a list of instrument information objects
  */
-std::vector<InstrumentInfo>
-FacilityInfo::instruments(const std::string &tech) const {
+std::vector<InstrumentInfo> FacilityInfo::instruments(const std::string &tech) const {
   std::vector<InstrumentInfo> out;
   auto it = m_instruments.begin();
   for (; it != m_instruments.end(); ++it) {
@@ -294,31 +271,26 @@ std::vector<std::string> FacilityInfo::computeResources() const {
  *
  * @throws NotFoundError if the resource is not found/available.
  */
-const ComputeResourceInfo &
-FacilityInfo::computeResource(const std::string &name) const {
+const ComputeResourceInfo &FacilityInfo::computeResource(const std::string &name) const {
   if (name.empty()) {
     g_log.debug("Cannot find a compute resource without name "
                 "(empty).");
-    throw Exception::NotFoundError("FacilityInfo, empty compute resource name",
-                                   name);
+    throw Exception::NotFoundError("FacilityInfo, empty compute resource name", name);
   }
 
   auto it = m_computeResInfos.begin();
   for (; it != m_computeResInfos.end(); ++it) {
     if (it->name() == name) {
-      g_log.debug() << "Compute resource '" << name << "' found at facility "
-                    << this->name() << ".\n";
+      g_log.debug() << "Compute resource '" << name << "' found at facility " << this->name() << ".\n";
       return *it;
     }
   }
 
-  g_log.debug() << "Could not find requested compute resource: " << name
-                << " in facility " << this->name() << ".\n";
-  throw Exception::NotFoundError(
-      "FacilityInfo, missing compute resource, it does not seem to be defined "
-      "in the facility '" +
-          this->name() + "' - ",
-      name);
+  g_log.debug() << "Could not find requested compute resource: " << name << " in facility " << this->name() << ".\n";
+  throw Exception::NotFoundError("FacilityInfo, missing compute resource, it does not seem to be defined "
+                                 "in the facility '" +
+                                     this->name() + "' - ",
+                                 name);
 }
 
 /**
@@ -327,8 +299,7 @@ FacilityInfo::computeResource(const std::string &name) const {
  * @return a shared pointer to the RemoteJobManager instance (or
  * Null if the name wasn't recognized)
  */
-std::shared_ptr<RemoteJobManager>
-FacilityInfo::getRemoteJobManager(const std::string &name) const {
+std::shared_ptr<RemoteJobManager> FacilityInfo::getRemoteJobManager(const std::string &name) const {
   auto it = m_computeResources.find(name);
   if (it == m_computeResources.end()) {
     return std::shared_ptr<RemoteJobManager>(); // TODO: should we throw an

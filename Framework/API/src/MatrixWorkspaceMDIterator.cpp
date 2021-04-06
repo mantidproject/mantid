@@ -27,15 +27,13 @@ namespace API {
  * @param beginWI :: first workspace index to iterate
  * @param endWI :: end when you reach this workspace index
  */
-MatrixWorkspaceMDIterator::MatrixWorkspaceMDIterator(
-    const MatrixWorkspace *workspace,
-    Mantid::Geometry::MDImplicitFunction *function, size_t beginWI,
-    size_t endWI)
-    : m_ws(workspace), m_pos(0), m_max(0), m_function(function),
-      m_errorIsCached(false), m_spectrumInfo(m_ws->spectrumInfo()) {
+MatrixWorkspaceMDIterator::MatrixWorkspaceMDIterator(const MatrixWorkspace *workspace,
+                                                     Mantid::Geometry::MDImplicitFunction *function, size_t beginWI,
+                                                     size_t endWI)
+    : m_ws(workspace), m_pos(0), m_max(0), m_function(function), m_errorIsCached(false),
+      m_spectrumInfo(m_ws->spectrumInfo()) {
   if (!m_ws)
-    throw std::runtime_error(
-        "MatrixWorkspaceMDIterator::ctor() NULL MatrixWorkspace");
+    throw std::runtime_error("MatrixWorkspaceMDIterator::ctor() NULL MatrixWorkspace");
   m_center = VMD(2);
   m_isBinnedData = m_ws->isHistogramData();
   m_dimY = m_ws->getDimension(1);
@@ -50,8 +48,7 @@ MatrixWorkspaceMDIterator::MatrixWorkspaceMDIterator(
   if (m_endWI > m_ws->getNumberHistograms())
     m_endWI = m_ws->getNumberHistograms();
   if (m_endWI < m_beginWI)
-    throw std::runtime_error(
-        "MatrixWorkspaceMDIterator: End point is before the start point.");
+    throw std::runtime_error("MatrixWorkspaceMDIterator: End point is before the start point.");
 
   // calculate the indices and the largest index we accept
   m_max = 0;
@@ -79,8 +76,7 @@ size_t MatrixWorkspaceMDIterator::getDataSize() const { return size_t(m_max); }
  */
 void MatrixWorkspaceMDIterator::jumpTo(size_t index) {
   m_pos = static_cast<uint64_t>(index); // index into the unraveled workspace
-  const auto lower =
-      std::lower_bound(m_startIndices.begin(), m_startIndices.end(), index);
+  const auto lower = std::lower_bound(m_startIndices.begin(), m_startIndices.end(), index);
   m_xIndex = m_pos - (*lower); // index into the Y[] array of the spectrum
   size_t newWI = m_beginWI + std::distance(m_startIndices.begin(), lower);
   calcWorkspacePos(newWI);
@@ -107,11 +103,9 @@ inline void MatrixWorkspaceMDIterator::calcWorkspacePos(size_t newWI) {
       const MantidVec &yVals = ax1->getValues();
       if (yVals.size() > 1) {
         if (m_workspaceIndex < yVals.size() - 1)
-          m_verticalBinSize =
-              yVals[m_workspaceIndex + 1] - yVals[m_workspaceIndex];
+          m_verticalBinSize = yVals[m_workspaceIndex + 1] - yVals[m_workspaceIndex];
         else
-          m_verticalBinSize =
-              yVals[m_workspaceIndex] - yVals[m_workspaceIndex - 1];
+          m_verticalBinSize = yVals[m_workspaceIndex] - yVals[m_workspaceIndex - 1];
       }
     }
   }
@@ -171,8 +165,7 @@ signal_t MatrixWorkspaceMDIterator::getNormalizedSignal() const {
   case NoNormalization:
     return m_Y[m_xIndex];
   case VolumeNormalization:
-    return m_Y[m_xIndex] /
-           (m_verticalBinSize * (m_X[m_xIndex + 1] - m_X[m_xIndex]));
+    return m_Y[m_xIndex] / (m_verticalBinSize * (m_X[m_xIndex + 1] - m_X[m_xIndex]));
   case NumEventsNormalization:
     return m_Y[m_xIndex];
   }
@@ -187,8 +180,7 @@ signal_t MatrixWorkspaceMDIterator::getNormalizedError() const {
   case NoNormalization:
     return getError();
   case VolumeNormalization:
-    return getError() /
-           (m_verticalBinSize * (m_X[m_xIndex + 1] - m_X[m_xIndex]));
+    return getError() / (m_verticalBinSize * (m_X[m_xIndex + 1] - m_X[m_xIndex]));
   case NumEventsNormalization:
     return getError();
   }
@@ -210,18 +202,14 @@ signal_t MatrixWorkspaceMDIterator::getError() const {
 
 //----------------------------------------------------------------------------------------------
 /// Return a list of vertexes defining the volume pointed to
-std::unique_ptr<coord_t[]>
-MatrixWorkspaceMDIterator::getVertexesArray(size_t & /*numVertices*/) const {
-  throw std::runtime_error(
-      "MatrixWorkspaceMDIterator::getVertexesArray() not implemented yet");
+std::unique_ptr<coord_t[]> MatrixWorkspaceMDIterator::getVertexesArray(size_t & /*numVertices*/) const {
+  throw std::runtime_error("MatrixWorkspaceMDIterator::getVertexesArray() not implemented yet");
 }
 
-std::unique_ptr<coord_t[]>
-MatrixWorkspaceMDIterator::getVertexesArray(size_t & /*numVertices*/,
-                                            const size_t /*outDimensions*/,
-                                            const bool * /*maskDim*/) const {
-  throw std::runtime_error(
-      "MatrixWorkspaceMDIterator::getVertexesArray() not implemented yet");
+std::unique_ptr<coord_t[]> MatrixWorkspaceMDIterator::getVertexesArray(size_t & /*numVertices*/,
+                                                                       const size_t /*outDimensions*/,
+                                                                       const bool * /*maskDim*/) const {
+  throw std::runtime_error("MatrixWorkspaceMDIterator::getVertexesArray() not implemented yet");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -242,36 +230,24 @@ size_t MatrixWorkspaceMDIterator::getNumEvents() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 /// For a given event/point in this box, return the run index
-uint16_t MatrixWorkspaceMDIterator::getInnerRunIndex(size_t /*index*/) const {
-  return 0;
-}
+uint16_t MatrixWorkspaceMDIterator::getInnerRunIndex(size_t /*index*/) const { return 0; }
 
 /// For a given event/point in this box, return the run index
-uint16_t
-MatrixWorkspaceMDIterator::getInnerGoniometerIndex(size_t /*index*/) const {
-  return 0;
-}
+uint16_t MatrixWorkspaceMDIterator::getInnerGoniometerIndex(size_t /*index*/) const { return 0; }
 
 /// For a given event/point in this box, return the detector ID
-int32_t MatrixWorkspaceMDIterator::getInnerDetectorID(size_t /*index*/) const {
-  return 0;
-}
+int32_t MatrixWorkspaceMDIterator::getInnerDetectorID(size_t /*index*/) const { return 0; }
 
 /// Returns the position of a given event for a given dimension
-coord_t MatrixWorkspaceMDIterator::getInnerPosition(size_t /*index*/,
-                                                    size_t dimension) const {
+coord_t MatrixWorkspaceMDIterator::getInnerPosition(size_t /*index*/, size_t dimension) const {
   return this->getCenter()[dimension];
 }
 
 /// Returns the signal of a given event
-signal_t MatrixWorkspaceMDIterator::getInnerSignal(size_t /*index*/) const {
-  return this->getSignal();
-}
+signal_t MatrixWorkspaceMDIterator::getInnerSignal(size_t /*index*/) const { return this->getSignal(); }
 
 /// Returns the error of a given event
-signal_t MatrixWorkspaceMDIterator::getInnerError(size_t /*index*/) const {
-  return this->getError();
-}
+signal_t MatrixWorkspaceMDIterator::getInnerError(size_t /*index*/) const { return this->getError(); }
 
 /**
  * Getter for the masked state of the workspace.
@@ -290,28 +266,24 @@ bool MatrixWorkspaceMDIterator::getIsMasked() const {
  * @return Neighbour indexes to the current index.
  */
 std::vector<size_t> MatrixWorkspaceMDIterator::findNeighbourIndexes() const {
-  throw std::runtime_error(
-      "MatrixWorkspaceMDIterator does not implement findNeighbourIndexes");
+  throw std::runtime_error("MatrixWorkspaceMDIterator does not implement findNeighbourIndexes");
 }
 
 /**
  * Find neighbour indexes face touching.
  * @return Neighbour indexes to the current index.
  */
-std::vector<size_t>
-MatrixWorkspaceMDIterator::findNeighbourIndexesFaceTouching() const {
+std::vector<size_t> MatrixWorkspaceMDIterator::findNeighbourIndexesFaceTouching() const {
   throw std::runtime_error("MatrixWorkspaceMDIterator does not implement "
                            "findNeighbourIndexesFaceTouching");
 }
 
 size_t MatrixWorkspaceMDIterator::getLinearIndex() const {
-  throw std::runtime_error(
-      "MatrixWorkspaceMDIterator does not implement getLinearIndex");
+  throw std::runtime_error("MatrixWorkspaceMDIterator does not implement getLinearIndex");
 }
 
 bool MatrixWorkspaceMDIterator::isWithinBounds(const size_t /*index*/) const {
-  throw std::runtime_error(
-      "MatrixWorkspaceMDIterator does not implement isWithinBounds");
+  throw std::runtime_error("MatrixWorkspaceMDIterator does not implement isWithinBounds");
 }
 
 } // namespace API

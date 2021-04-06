@@ -24,19 +24,16 @@ class GenericDataProcessorPresenterGroupReducerWorker : public QObject {
   Q_OBJECT
 
 public:
-  GenericDataProcessorPresenterGroupReducerWorker(
-      GenericDataProcessorPresenter *presenter, const GroupData &groupData,
-      int groupIndex)
-      : m_presenter(presenter), m_groupData(groupData),
-        m_groupIndex(groupIndex) {}
+  GenericDataProcessorPresenterGroupReducerWorker(GenericDataProcessorPresenter *presenter, const GroupData &groupData,
+                                                  int groupIndex)
+      : m_presenter(presenter), m_groupData(groupData), m_groupIndex(groupIndex) {}
 
 private slots:
   void startWorker() {
     try {
       m_presenter->postProcessGroup(m_groupData);
       // Group is set processed if all constituent rows are processed
-      if (m_presenter->m_manager->rowCount(m_groupIndex) ==
-          static_cast<int>(m_groupData.size()))
+      if (m_presenter->m_manager->rowCount(m_groupIndex) == static_cast<int>(m_groupData.size()))
         m_presenter->m_manager->setProcessed(true, m_groupIndex);
       emit finished(0);
     } catch (std::exception &ex) {
@@ -56,10 +53,8 @@ private:
   int m_groupIndex;
 
   void handleError(const std::string &errorMessage) {
-    m_presenter->m_manager->setError(
-        std::string("Group processing failed: ") + errorMessage, m_groupIndex);
-    if (m_presenter->m_manager->rowCount(m_groupIndex) ==
-        static_cast<int>(m_groupData.size()))
+    m_presenter->m_manager->setError(std::string("Group processing failed: ") + errorMessage, m_groupIndex);
+    if (m_presenter->m_manager->rowCount(m_groupIndex) == static_cast<int>(m_groupData.size()))
       m_presenter->m_manager->setProcessed(true, m_groupIndex);
     emit reductionErrorSignal(QString::fromStdString(errorMessage));
     emit finished(1);

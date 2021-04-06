@@ -37,12 +37,59 @@
       <value val="5"/>
     </parameter>
 
+    <!-- These parameters are used to define headers and entries for GenerateLogbook algorithm -->
+    <parameter name="logbook_default_parameters" type="string">
+      <value val="SampleDescription:/entry0/sample_description,
+		  TotalTime:/entry0/duration,
+		  RateMonitor1:/entry0/monitor1/monrate,
+		  TotalCountsDetAll:/entry0/D33/detector/detsum,
+		  RateCountsDetAll:/entry0/D33/detector/detrate,
+		  StartTime:/entry0/start_time,
+		  Wavelength:/entry0/D33/selector/wavelength,
+		  Attenuator:/entry0/D33/attenuator/attenuation_value,
+		  Collimation:/entry0/D33/collimation/actual_position,
+		  SD1:/entry0/D33/detector/det1_actual,
+		  SD2:/entry0/D33/detector/det2_actual,
+		  BeamStopY:/entry0/D33/beamstop/by_actual" />
+    </parameter>
+    <parameter name="logbook_optional_parameters" type="string">
+      <value val="AcquisitionMode:/entry0/mode,
+		  VelocitySelectorSpeed:/entry0/D33/selector/rotation_speed,
+		  VelocitySelectorTilt:/entry0/D33/selector/selrot_actual,
+		  Diaphragm1:/entry0/D33/collimation/Dia1_actual_position,
+		  Diaphragm2:/entry0/D33/collimation/Dia2_actual_position,
+		  Diaphragm3:/entry0/D33/collimation/Dia3_actual_position,
+		  Diaphragm4:/entry0/D33/collimation/Dia4_actual_position,
+		  Diaphragm5:/entry0/D33/collimation/Dia5_actual_position,
+		  Guide1:/entry0/D33/collimation/Coll1_actual_position,
+		  Guide2:/entry0/D33/collimation/Coll2_actual_position,
+		  Guide3:/entry0/D33/collimation/Coll3_actual_position,
+		  Guide4:/entry0/D33/collimation/Coll4_actual_position,
+		  TotalCountsMonitor1:/entry0/monitor1/monsum,
+		  ReactorPower:/entry0/reactor_power,
+		  BeamstopX:/entry0/D33/beamstop/bx_actual,
+		  san:/entry0/sample/san_actual,
+		  omega:/entry0/sample/omega_actual,
+		  phi:/entry0/sample/phi_actual,
+		  sdi1:/entry0/sample/sdi1_actual,
+		  sdi2:/entry0/sample/sdi2_actual,
+		  sht:/entry0/sample/sht_actual,
+		  str:/entry0/sample/str_actual,
+		  trs:/entry0/sample/trs_actual,
+		  SampleTemperature:/entry0/sample/temperature,
+		  AirTemperature:/entry0/sample/air_temperature,
+		  RackTemperature:/entry0/sample/rack_temperature,
+		  Bath1Temperature:/entry0/sample/bath1_regulation_temperature,
+		  Bath2Temperature:/entry0/sample/bath2_regulation_temperature,
+		  Position:/entry0/sample/sample_changer_value,
+		  SampleApertureWidth:/entry0/D33/Beam/sample_ap_x_or_diam,
+		  SampleApertureHeight:/entry0/D33/Beam/sample_ap_y" />
+    </parameter>
     <parameter name="log_list_to_save" type="string">
       <value val="facility,instrument.name,experiment_identifier,
 		  start_time,end_time,numor_list,processedAs,
 		  wavelength,sample_transmission,L2"/>
     </parameter>
-
   </component-link>
 
   <!-- These parameters are used in ParallaxCorrection algorithm -->

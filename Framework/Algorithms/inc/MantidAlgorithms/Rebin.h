@@ -54,30 +54,23 @@ public:
   const std::string alias() const override { return "rebin"; }
   /// Algorithm's seeAlso
   const std::vector<std::string> seeAlso() const override {
-    return {"RebinToWorkspace", "Rebin2D",           "Rebunch",
-            "Regroup",          "RebinByPulseTimes", "RebinByTimeAtSample"};
+    return {"RebinToWorkspace", "Rebin2D", "Rebunch", "Regroup", "RebinByPulseTimes", "RebinByTimeAtSample"};
   }
 
-  static std::vector<double>
-  rebinParamsFromInput(const std::vector<double> &inParams,
-                       const API::MatrixWorkspace &inputWS,
-                       Kernel::Logger &logger);
+  static std::vector<double> rebinParamsFromInput(const std::vector<double> &inParams,
+                                                  const API::MatrixWorkspace &inputWS, Kernel::Logger &logger);
 
 protected:
   const std::string workspaceMethodName() const override { return "rebin"; }
-  const std::string workspaceMethodOnTypes() const override {
-    return "MatrixWorkspace";
-  }
-  const std::string workspaceMethodInputProperty() const override {
-    return "InputWorkspace";
-  }
+  const std::string workspaceMethodOnTypes() const override { return "MatrixWorkspace"; }
+  const std::string workspaceMethodInputProperty() const override { return "InputWorkspace"; }
 
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
 
-  void propagateMasks(const API::MatrixWorkspace_const_sptr &inputWS,
-                      const API::MatrixWorkspace_sptr &outputWS, int hist);
+  void propagateMasks(const API::MatrixWorkspace_const_sptr &inputWS, const API::MatrixWorkspace_sptr &outputWS,
+                      int hist);
 };
 
 } // namespace Algorithms

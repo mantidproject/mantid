@@ -40,8 +40,7 @@ namespace LiveData {
     instrument data acquisition systems (DAS) for retrieval of 'live' data into
    Mantid.
  */
-class ISISLiveEventDataListener : public API::LiveListener,
-                                  public Poco::Runnable {
+class ISISLiveEventDataListener : public API::LiveListener, public Poco::Runnable {
 public:
   /// Constructor.
   ISISLiveEventDataListener();
@@ -82,8 +81,7 @@ public:
    *                   The value of 'now' is zero for compatibility with the SNS
    * live stream.
    */
-  void start(
-      Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
+  void start(Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
 
   /** Get the data that's been buffered since the last call to this method
    *  (or since start() was called).
@@ -122,9 +120,7 @@ public:
    * spectra.
    * @param specList :: A vector with spectra indices.
    */
-  void setSpectra(const std::vector<specnum_t> &specList) override {
-    (void)specList;
-  }
+  void setSpectra(const std::vector<specnum_t> &specList) override { (void)specList; }
 
   /// the background thread.  What gets executed when we call
   /// POCO::Thread::start()
@@ -134,8 +130,8 @@ protected:
   // Initialize the event buffer
   void initEventBuffer(const TCPStreamEventDataSetup &setup);
   // Save received event data in the buffer workspace
-  void saveEvents(const std::vector<TCPStreamEventNeutron> &data,
-                  const Types::Core::DateAndTime &pulseTime, size_t period);
+  void saveEvents(const std::vector<TCPStreamEventNeutron> &data, const Types::Core::DateAndTime &pulseTime,
+                  size_t period);
   // Set the spectra-detector map
   void loadSpectraMap();
   // Load the instrument
@@ -143,12 +139,10 @@ protected:
   // Get an integer value ising the IDC interface
   int getInt(const std::string &par) const;
   // Get an integer array ising the IDC interface
-  void getIntArray(const std::string &par, std::vector<int> &arr,
-                   const size_t dim);
+  void getIntArray(const std::string &par, std::vector<int> &arr, const size_t dim);
 
   // receive a header and check if it's valid
-  template <typename T>
-  void Receive(T &buffer, const std::string &head, const std::string &msg) {
+  template <typename T> void Receive(T &buffer, const std::string &head, const std::string &msg) {
     long timeout = 0;
     while (m_socket.available() < static_cast<int>(sizeof(buffer))) {
       if (m_stopThread)
@@ -156,8 +150,7 @@ protected:
       Poco::Thread::sleep(RECV_WAIT);
       timeout += RECV_WAIT;
       if (timeout > RECV_TIMEOUT * 1000)
-        throw std::runtime_error("Operation of receiving " + head +
-                                 " timed out.");
+        throw std::runtime_error("Operation of receiving " + head + " timed out.");
     }
     m_socket.receiveBytes(&buffer, sizeof(buffer));
     if (!buffer.isValid()) {
@@ -167,8 +160,7 @@ protected:
 
   // receive data that cannot be processed
   template <typename T> void CollectJunk(T head) {
-    m_socket.receiveBytes(junk_buffer,
-                          head.length - static_cast<uint32_t>(sizeof(head)));
+    m_socket.receiveBytes(junk_buffer, head.length - static_cast<uint32_t>(sizeof(head)));
   }
 
   /// The socket communicating with the DAE

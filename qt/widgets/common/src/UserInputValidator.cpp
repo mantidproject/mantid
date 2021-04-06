@@ -32,15 +32,13 @@ bool doesExistInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
 }
 
-boost::optional<std::string>
-containsInvalidWorkspace(const WorkspaceGroup_const_sptr &group) {
+boost::optional<std::string> containsInvalidWorkspace(const WorkspaceGroup_const_sptr &group) {
   if (group->isEmpty())
     return "The group workspace " + group->getName() + " is empty.";
 
   for (auto workspace : *group)
     if (!workspace)
-      return "The group workspace " + group->getName() +
-             " contains an invalid workspace.";
+      return "The group workspace " + group->getName() + " contains an invalid workspace.";
   return boost::none;
 }
 
@@ -61,9 +59,7 @@ UserInputValidator::UserInputValidator() : m_errorMessages(), m_error(false) {}
  * @param errorLabel :: the "*" or "" label.
  * @returns True if the input was valid
  */
-bool UserInputValidator::checkFieldIsNotEmpty(const QString &name,
-                                              QLineEdit *field,
-                                              QLabel *errorLabel) {
+bool UserInputValidator::checkFieldIsNotEmpty(const QString &name, QLineEdit *field, QLabel *errorLabel) {
   if (field->text().trimmed().isEmpty()) {
     setErrorLabel(errorLabel, false);
     addErrorMessage(name + " has been left blank.");
@@ -83,9 +79,7 @@ bool UserInputValidator::checkFieldIsNotEmpty(const QString &name,
  * @param errorMessage :: the message to log if invalid
  * @returns True if the input was valid
  */
-bool UserInputValidator::checkFieldIsValid(const QString &errorMessage,
-                                           QLineEdit *field,
-                                           QLabel *errorLabel) {
+bool UserInputValidator::checkFieldIsValid(const QString &errorMessage, QLineEdit *field, QLabel *errorLabel) {
   int dummyPos = 0;
   QString text = field->text();
   QValidator::State fieldState = field->validator()->validate(text, dummyPos);
@@ -109,8 +103,7 @@ bool UserInputValidator::checkFieldIsValid(const QString &errorMessage,
  * @param workspaceSelector :: the workspace selector to check
  * @returns True if the input was valid
  */
-bool UserInputValidator::checkWorkspaceSelectorIsNotEmpty(
-    const QString &name, WorkspaceSelector *workspaceSelector) {
+bool UserInputValidator::checkWorkspaceSelectorIsNotEmpty(const QString &name, WorkspaceSelector *workspaceSelector) {
   if (workspaceSelector->currentText() == "") {
     addErrorMessage("No " + name + " workspace has been selected.");
     return false;
@@ -126,8 +119,7 @@ bool UserInputValidator::checkWorkspaceSelectorIsNotEmpty(
  * @param widget :: the widget to check
  * @returns True if the input was valid
  */
-bool UserInputValidator::checkFileFinderWidgetIsValid(
-    const QString &name, FileFinderWidget *widget) {
+bool UserInputValidator::checkFileFinderWidgetIsValid(const QString &name, FileFinderWidget *widget) {
   if (!widget->isValid()) {
     addErrorMessage(name + " file error: " + widget->getFileProblem());
     return false;
@@ -144,9 +136,7 @@ bool UserInputValidator::checkFileFinderWidgetIsValid(
  * @param silent True if an error should not be added to the validator.
  * @returns True if the input was valid
  */
-bool UserInputValidator::checkDataSelectorIsValid(const QString &name,
-                                                  DataSelector *widget,
-                                                  bool silent) {
+bool UserInputValidator::checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool silent) {
   if (!widget->isValid()) {
     addErrorMessage(name + " error: " + widget->getProblem(), silent);
     return false;
@@ -162,8 +152,7 @@ bool UserInputValidator::checkDataSelectorIsValid(const QString &name,
  * @param range :: the range
  * @returns True if the input was valid
  */
-bool UserInputValidator::checkValidRange(const QString &name,
-                                         std::pair<double, double> range) {
+bool UserInputValidator::checkValidRange(const QString &name, std::pair<double, double> range) {
   if (range.second == range.first) {
     addErrorMessage(name + " must have a non-zero width.");
     return false;
@@ -184,8 +173,7 @@ bool UserInputValidator::checkValidRange(const QString &name,
  * @param rangeB :: the end of the range
  * @returns True if the input was valid
  */
-bool UserInputValidator::checkRangesDontOverlap(
-    std::pair<double, double> rangeA, std::pair<double, double> rangeB) {
+bool UserInputValidator::checkRangesDontOverlap(std::pair<double, double> rangeA, std::pair<double, double> rangeB) {
   sortPair(rangeA);
   sortPair(rangeB);
 
@@ -212,10 +200,8 @@ bool UserInputValidator::checkRangesDontOverlap(
  * @param inner :: pair of range bounds
  * @returns True if the input was valid
  */
-bool UserInputValidator::checkRangeIsEnclosed(const QString &outerName,
-                                              std::pair<double, double> outer,
-                                              const QString &innerName,
-                                              std::pair<double, double> inner) {
+bool UserInputValidator::checkRangeIsEnclosed(const QString &outerName, std::pair<double, double> outer,
+                                              const QString &innerName, std::pair<double, double> inner) {
   sortPair(inner);
   sortPair(outer);
 
@@ -239,8 +225,7 @@ bool UserInputValidator::checkRangeIsEnclosed(const QString &outerName,
  *suitablility
  * @returns True if the input was valid
  */
-bool UserInputValidator::checkBins(double lower, double binWidth, double upper,
-                                   double tolerance) {
+bool UserInputValidator::checkBins(double lower, double binWidth, double upper, double tolerance) {
   double range = upper - lower;
   if (range < 0) {
     addErrorMessage("The start of a binning range must be less than the end.");
@@ -279,8 +264,7 @@ bool UserInputValidator::checkBins(double lower, double binWidth, double upper,
  * @param tolerance Tolerance to which to compare
  * @return True if input was valid
  */
-bool UserInputValidator::checkNotEqual(const QString &name, double x, double y,
-                                       double tolerance) {
+bool UserInputValidator::checkNotEqual(const QString &name, double x, double y, double tolerance) {
   double delta = x - y;
 
   if (std::abs(delta) <= tolerance) {
@@ -302,8 +286,7 @@ bool UserInputValidator::checkNotEqual(const QString &name, double x, double y,
  * @param silent True if an error should not be added to the validator.
  * @return True if the workspace is in the ADS
  */
-bool UserInputValidator::checkWorkspaceExists(QString const &workspaceName,
-                                              bool silent) {
+bool UserInputValidator::checkWorkspaceExists(QString const &workspaceName, bool silent) {
   if (workspaceName.isEmpty())
     return false;
 
@@ -321,11 +304,9 @@ bool UserInputValidator::checkWorkspaceExists(QString const &workspaceName,
  * @param validSize The valid number of histograms
  * @return True if the workspace has the correct size
  */
-bool UserInputValidator::checkWorkspaceNumberOfHistograms(
-    QString const &workspaceName, std::size_t const &validSize) {
+bool UserInputValidator::checkWorkspaceNumberOfHistograms(QString const &workspaceName, std::size_t const &validSize) {
   if (checkWorkspaceExists(workspaceName))
-    return checkWorkspaceNumberOfHistograms(
-        getADSWorkspace(workspaceName.toStdString()), validSize);
+    return checkWorkspaceNumberOfHistograms(getADSWorkspace(workspaceName.toStdString()), validSize);
   return false;
 }
 
@@ -336,12 +317,11 @@ bool UserInputValidator::checkWorkspaceNumberOfHistograms(
  * @param validSize The valid number of histograms
  * @return True if the workspace has the correct size
  */
-bool UserInputValidator::checkWorkspaceNumberOfHistograms(
-    const MatrixWorkspace_sptr &workspace, std::size_t const &validSize) {
+bool UserInputValidator::checkWorkspaceNumberOfHistograms(const MatrixWorkspace_sptr &workspace,
+                                                          std::size_t const &validSize) {
   if (workspace->getNumberHistograms() != validSize) {
-    addErrorMessage(
-        QString::fromStdString(workspace->getName()) + " should contain " +
-        QString::fromStdString(std::to_string(validSize)) + " spectra.");
+    addErrorMessage(QString::fromStdString(workspace->getName()) + " should contain " +
+                    QString::fromStdString(std::to_string(validSize)) + " spectra.");
     return false;
   }
   return true;
@@ -354,11 +334,9 @@ bool UserInputValidator::checkWorkspaceNumberOfHistograms(
  * @param validSize The valid number of bins
  * @return True if the workspace has the correct size
  */
-bool UserInputValidator::checkWorkspaceNumberOfBins(
-    QString const &workspaceName, std::size_t const &validSize) {
+bool UserInputValidator::checkWorkspaceNumberOfBins(QString const &workspaceName, std::size_t const &validSize) {
   if (checkWorkspaceExists(workspaceName))
-    return checkWorkspaceNumberOfBins(
-        getADSWorkspace(workspaceName.toStdString()), validSize);
+    return checkWorkspaceNumberOfBins(getADSWorkspace(workspaceName.toStdString()), validSize);
   return false;
 }
 
@@ -369,12 +347,11 @@ bool UserInputValidator::checkWorkspaceNumberOfBins(
  * @param validSize The valid number of bins
  * @return True if the workspace has the correct size
  */
-bool UserInputValidator::checkWorkspaceNumberOfBins(
-    const MatrixWorkspace_sptr &workspace, std::size_t const &validSize) {
+bool UserInputValidator::checkWorkspaceNumberOfBins(const MatrixWorkspace_sptr &workspace,
+                                                    std::size_t const &validSize) {
   if (workspace->x(0).size() != validSize) {
-    addErrorMessage(
-        QString::fromStdString(workspace->getName()) + " should contain " +
-        QString::fromStdString(std::to_string(validSize)) + " bins.");
+    addErrorMessage(QString::fromStdString(workspace->getName()) + " should contain " +
+                    QString::fromStdString(std::to_string(validSize)) + " bins.");
     return false;
   }
   return true;
@@ -389,13 +366,9 @@ bool UserInputValidator::checkWorkspaceNumberOfBins(
  * @param silent True if an error should not be added to the validator.
  * @return True if the workspace group is valid
  */
-bool UserInputValidator::checkWorkspaceGroupIsValid(QString const &groupName,
-                                                    QString const &inputType,
-                                                    bool silent) {
-  if (checkWorkspaceType<WorkspaceGroup>(groupName, inputType, "WorkspaceGroup",
-                                         silent)) {
-    if (auto const group =
-            getADSWorkspace<WorkspaceGroup>(groupName.toStdString())) {
+bool UserInputValidator::checkWorkspaceGroupIsValid(QString const &groupName, QString const &inputType, bool silent) {
+  if (checkWorkspaceType<WorkspaceGroup>(groupName, inputType, "WorkspaceGroup", silent)) {
+    if (auto const group = getADSWorkspace<WorkspaceGroup>(groupName.toStdString())) {
       if (auto const error = containsInvalidWorkspace(group)) {
         addErrorMessage(QString::fromStdString(error.get()), silent);
         return false;

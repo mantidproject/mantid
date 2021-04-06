@@ -8,11 +8,9 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-SANSBackgroundCorrectionSettings::SANSBackgroundCorrectionSettings(
-    const QString &runNumber, bool useMean, bool useMon,
-    const QString &monNumber)
-    : m_runNumber(runNumber), m_useMean(useMean), m_useMon(useMon),
-      m_monNumber(monNumber) {
+SANSBackgroundCorrectionSettings::SANSBackgroundCorrectionSettings(const QString &runNumber, bool useMean, bool useMon,
+                                                                   const QString &monNumber)
+    : m_runNumber(runNumber), m_useMean(useMean), m_useMon(useMon), m_monNumber(monNumber) {
   hasValidSettings();
 }
 
@@ -33,32 +31,24 @@ bool SANSBackgroundCorrectionSettings::hasValidSettings() {
  * Get the run number
  * @returns a run number or an empty string
  */
-QString SANSBackgroundCorrectionSettings::getRunNumber() const {
-  return m_hasValidSettings ? m_runNumber : QString();
-}
+QString SANSBackgroundCorrectionSettings::getRunNumber() const { return m_hasValidSettings ? m_runNumber : QString(); }
 
 /**
  * Get a string list with monitor numbers
  * @returns a run number or an empty string
  */
-QString SANSBackgroundCorrectionSettings::getMonNumber() const {
-  return m_hasValidSettings ? m_monNumber : QString();
-}
+QString SANSBackgroundCorrectionSettings::getMonNumber() const { return m_hasValidSettings ? m_monNumber : QString(); }
 
 /**
  * Get the setting if mean is to be used
  * @returns the setting or default to false
  */
-bool SANSBackgroundCorrectionSettings::getUseMean() const {
-  return m_hasValidSettings ? m_useMean : false;
-}
+bool SANSBackgroundCorrectionSettings::getUseMean() const { return m_hasValidSettings ? m_useMean : false; }
 
 /**
  * Get the setting if monitors or detectors are to be used
  * @returns the setting or default to false
  */
-bool SANSBackgroundCorrectionSettings::getUseMon() const {
-  return m_hasValidSettings ? m_useMon : false;
-}
+bool SANSBackgroundCorrectionSettings::getUseMon() const { return m_hasValidSettings ? m_useMon : false; }
 } // namespace CustomInterfaces
 } // namespace MantidQt

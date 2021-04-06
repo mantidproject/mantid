@@ -8,15 +8,6 @@
 
 namespace Mantid {
 namespace Beamline {
-enum class ComponentType {
-  Generic,
-  Infinite,
-  Grid,
-  Rectangular,
-  Structured,
-  Unstructured,
-  Detector,
-  OutlineComposite
-};
+enum class ComponentType { Generic, Infinite, Grid, Rectangular, Structured, Unstructured, Detector, OutlineComposite };
 }
 } // namespace Mantid

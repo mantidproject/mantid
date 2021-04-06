@@ -26,33 +26,23 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 FunctionMultiDomainPresenter::FunctionMultiDomainPresenter(IFunctionView *view)
-    : m_view(view), m_model(std::make_unique<FunctionModel>()),
-      m_editLocalParameterDialog(nullptr) {
-  connect(m_view, SIGNAL(parameterChanged(const QString &)), this,
-          SLOT(viewChangedParameter(const QString &)));
-  connect(m_view, SIGNAL(functionReplaced(const QString &)), this,
-          SLOT(viewPastedFunction(const QString &)));
-  connect(m_view, SIGNAL(functionAdded(const QString &)), this,
-          SLOT(viewAddedFunction(const QString &)));
-  connect(m_view, SIGNAL(functionRemoved(const QString &)), this,
-          SLOT(viewRemovedFunction(const QString &)));
-  connect(m_view, SIGNAL(parameterTieChanged(const QString &, const QString &)),
-          this, SLOT(viewChangedTie(const QString &, const QString &)));
-  connect(m_view,
-          SIGNAL(parameterConstraintAdded(const QString &, const QString &)),
-          this, SLOT(viewAddedConstraint(const QString &, const QString &)));
+    : m_view(view), m_model(std::make_unique<FunctionModel>()), m_editLocalParameterDialog(nullptr) {
+  connect(m_view, SIGNAL(parameterChanged(const QString &)), this, SLOT(viewChangedParameter(const QString &)));
+  connect(m_view, SIGNAL(functionReplaced(const QString &)), this, SLOT(viewPastedFunction(const QString &)));
+  connect(m_view, SIGNAL(functionAdded(const QString &)), this, SLOT(viewAddedFunction(const QString &)));
+  connect(m_view, SIGNAL(functionRemoved(const QString &)), this, SLOT(viewRemovedFunction(const QString &)));
+  connect(m_view, SIGNAL(parameterTieChanged(const QString &, const QString &)), this,
+          SLOT(viewChangedTie(const QString &, const QString &)));
+  connect(m_view, SIGNAL(parameterConstraintAdded(const QString &, const QString &)), this,
+          SLOT(viewAddedConstraint(const QString &, const QString &)));
   connect(m_view, SIGNAL(parameterConstraintRemoved(const QString &)), this,
           SLOT(viewRemovedConstraint(const QString &)));
   connect(m_view, SIGNAL(localParameterButtonClicked(const QString &)), this,
           SLOT(editLocalParameter(const QString &)));
-  connect(m_view, SIGNAL(copyToClipboardRequest()), this,
-          SLOT(viewRequestedCopyToClipboard()));
-  connect(m_view, SIGNAL(globalsChanged(const QStringList &)), this,
-          SLOT(viewChangedGlobals(const QStringList &)));
-  connect(m_view, SIGNAL(functionHelpRequest()), this,
-          SLOT(viewRequestedFunctionHelp()));
-  connect(m_view, SIGNAL(attributePropertyChanged(const QString &)), this,
-          SLOT(viewChangedAttribute(const QString &)));
+  connect(m_view, SIGNAL(copyToClipboardRequest()), this, SLOT(viewRequestedCopyToClipboard()));
+  connect(m_view, SIGNAL(globalsChanged(const QStringList &)), this, SLOT(viewChangedGlobals(const QStringList &)));
+  connect(m_view, SIGNAL(functionHelpRequest()), this, SLOT(viewRequestedFunctionHelp()));
+  connect(m_view, SIGNAL(attributePropertyChanged(const QString &)), this, SLOT(viewChangedAttribute(const QString &)));
 }
 
 void FunctionMultiDomainPresenter::setFunction(IFunction_sptr fun) {
@@ -67,46 +57,33 @@ void FunctionMultiDomainPresenter::setFunctionString(const QString &funStr) {
   emit functionStructureChanged();
 }
 
-IFunction_sptr FunctionMultiDomainPresenter::getFitFunction() const {
-  return m_model->getFitFunction();
-}
+IFunction_sptr FunctionMultiDomainPresenter::getFitFunction() const { return m_model->getFitFunction(); }
 
-QString FunctionMultiDomainPresenter::getFitFunctionString() const {
-  return m_model->getFitFunctionString();
-}
+QString FunctionMultiDomainPresenter::getFitFunctionString() const { return m_model->getFitFunctionString(); }
 
-bool FunctionMultiDomainPresenter::hasFunction() const {
-  return m_model->hasFunction();
-}
+bool FunctionMultiDomainPresenter::hasFunction() const { return m_model->hasFunction(); }
 
-IFunction_sptr
-FunctionMultiDomainPresenter::getFunctionByIndex(const QString &index) {
+IFunction_sptr FunctionMultiDomainPresenter::getFunctionByIndex(const QString &index) {
   return getFunctionWithPrefix(index, m_model->getCurrentFunction());
 }
 
-void FunctionMultiDomainPresenter::setParameter(const QString &paramName,
-                                                double value) {
+void FunctionMultiDomainPresenter::setParameter(const QString &paramName, double value) {
   m_model->setParameter(paramName, value);
   m_view->setParameter(paramName, value);
 }
 
-void FunctionMultiDomainPresenter::setParameterError(const QString &paramName,
-                                                     double value) {
+void FunctionMultiDomainPresenter::setParameterError(const QString &paramName, double value) {
   m_model->setParameterError(paramName, value);
   m_view->setParameterError(paramName, value);
 }
 
-double FunctionMultiDomainPresenter::getParameter(const QString &paramName) {
-  return m_model->getParameter(paramName);
-}
+double FunctionMultiDomainPresenter::getParameter(const QString &paramName) { return m_model->getParameter(paramName); }
 
-bool FunctionMultiDomainPresenter::isParameterFixed(
-    const QString &parName) const {
+bool FunctionMultiDomainPresenter::isParameterFixed(const QString &parName) const {
   return m_model->isParameterFixed(parName);
 }
 
-QString
-FunctionMultiDomainPresenter::getParameterTie(const QString &parName) const {
+QString FunctionMultiDomainPresenter::getParameterTie(const QString &parName) const {
   return m_model->getParameterTie(parName);
 }
 
@@ -115,59 +92,39 @@ void FunctionMultiDomainPresenter::updateParameters(const IFunction &fun) {
   updateViewFromModel();
 }
 
-void FunctionMultiDomainPresenter::updateMultiDatasetParameters(
-    const IFunction &fun) {
+void FunctionMultiDomainPresenter::updateMultiDatasetParameters(const IFunction &fun) {
   m_model->updateMultiDatasetParameters(fun);
   updateViewFromModel();
 }
 
-void FunctionMultiDomainPresenter::updateMultiDatasetAttributes(
-    const IFunction &fun) {
+void FunctionMultiDomainPresenter::updateMultiDatasetAttributes(const IFunction &fun) {
   m_model->updateMultiDatasetAttributes(fun);
   updateViewFromModel();
 }
 
 void FunctionMultiDomainPresenter::clearErrors() { m_view->clearErrors(); }
 
-boost::optional<QString>
-FunctionMultiDomainPresenter::currentFunctionIndex() const {
+boost::optional<QString> FunctionMultiDomainPresenter::currentFunctionIndex() const {
   return m_view->currentFunctionIndex();
 }
 
-void FunctionMultiDomainPresenter::setNumberOfDatasets(int n) {
-  m_model->setNumberDomains(n);
-}
+void FunctionMultiDomainPresenter::setNumberOfDatasets(int n) { m_model->setNumberDomains(n); }
 
-void FunctionMultiDomainPresenter::setDatasets(
-    const QStringList &datasetNames) {
-  m_model->setDatasets(datasetNames);
-}
+void FunctionMultiDomainPresenter::setDatasets(const QStringList &datasetNames) { m_model->setDatasets(datasetNames); }
 
-void FunctionMultiDomainPresenter::setDatasets(
-    const QList<FunctionModelDataset> &datasets) {
+void FunctionMultiDomainPresenter::setDatasets(const QList<FunctionModelDataset> &datasets) {
   m_model->setDatasets(datasets);
 }
 
-void FunctionMultiDomainPresenter::addDatasets(
-    const QStringList &datasetNames) {
-  m_model->addDatasets(datasetNames);
-}
+void FunctionMultiDomainPresenter::addDatasets(const QStringList &datasetNames) { m_model->addDatasets(datasetNames); }
 
-QStringList FunctionMultiDomainPresenter::getDatasetNames() const {
-  return m_model->getDatasetNames();
-}
+QStringList FunctionMultiDomainPresenter::getDatasetNames() const { return m_model->getDatasetNames(); }
 
-QStringList FunctionMultiDomainPresenter::getDatasetDomainNames() const {
-  return m_model->getDatasetDomainNames();
-}
+QStringList FunctionMultiDomainPresenter::getDatasetDomainNames() const { return m_model->getDatasetDomainNames(); }
 
-int FunctionMultiDomainPresenter::getNumberOfDatasets() const {
-  return m_model->getNumberDomains();
-}
+int FunctionMultiDomainPresenter::getNumberOfDatasets() const { return m_model->getNumberDomains(); }
 
-int FunctionMultiDomainPresenter::getCurrentDataset() const {
-  return m_model->currentDomainIndex();
-}
+int FunctionMultiDomainPresenter::getCurrentDataset() const { return m_model->currentDomainIndex(); }
 
 void FunctionMultiDomainPresenter::setCurrentDataset(int index) {
   if (!m_model->hasFunction())
@@ -181,38 +138,30 @@ void FunctionMultiDomainPresenter::removeDatasets(QList<int> indices) {
   setCurrentDataset(m_model->currentDomainIndex());
 }
 
-double
-FunctionMultiDomainPresenter::getLocalParameterValue(const QString &parName,
-                                                     int i) const {
+double FunctionMultiDomainPresenter::getLocalParameterValue(const QString &parName, int i) const {
   return m_model->getLocalParameterValue(parName, i);
 }
 
-bool FunctionMultiDomainPresenter::isLocalParameterFixed(const QString &parName,
-                                                         int i) const {
+bool FunctionMultiDomainPresenter::isLocalParameterFixed(const QString &parName, int i) const {
   return m_model->isLocalParameterFixed(parName, i);
 }
 
-QString
-FunctionMultiDomainPresenter::getLocalParameterTie(const QString &parName,
-                                                   int i) const {
+QString FunctionMultiDomainPresenter::getLocalParameterTie(const QString &parName, int i) const {
   return m_model->getLocalParameterTie(parName, i);
 }
 
-QString FunctionMultiDomainPresenter::getLocalParameterConstraint(
-    const QString &parName, int i) const {
+QString FunctionMultiDomainPresenter::getLocalParameterConstraint(const QString &parName, int i) const {
   return m_model->getLocalParameterConstraint(parName, i);
 }
 
-void FunctionMultiDomainPresenter::setLocalParameterValue(
-    const QString &parName, int i, double value) {
+void FunctionMultiDomainPresenter::setLocalParameterValue(const QString &parName, int i, double value) {
   m_model->setLocalParameterValue(parName, i, value);
   if (m_model->currentDomainIndex() == i) {
     m_view->setParameter(parName, value);
   }
 }
 
-void FunctionMultiDomainPresenter::setLocalParameterValue(
-    const QString &parName, int i, double value, double error) {
+void FunctionMultiDomainPresenter::setLocalParameterValue(const QString &parName, int i, double value, double error) {
   m_model->setLocalParameterValue(parName, i, value, error);
   if (m_model->currentDomainIndex() == i) {
     m_view->setParameter(parName, value);
@@ -220,49 +169,40 @@ void FunctionMultiDomainPresenter::setLocalParameterValue(
   }
 }
 
-void FunctionMultiDomainPresenter::setLocalParameterFixed(
-    const QString &parName, int i, bool fixed) {
+void FunctionMultiDomainPresenter::setLocalParameterFixed(const QString &parName, int i, bool fixed) {
   m_model->setLocalParameterFixed(parName, i, fixed);
   if (m_model->currentDomainIndex() == i) {
     if (fixed) {
-      m_view->setParameterTie(parName,
-                              QString::number(m_model->getParameter(parName)));
+      m_view->setParameterTie(parName, QString::number(m_model->getParameter(parName)));
     } else {
       m_view->setParameterTie(parName, "");
     }
   }
 }
 
-void FunctionMultiDomainPresenter::setLocalParameterTie(const QString &parName,
-                                                        int i,
-                                                        const QString &tie) {
+void FunctionMultiDomainPresenter::setLocalParameterTie(const QString &parName, int i, const QString &tie) {
   m_model->setLocalParameterTie(parName, i, tie);
   if (m_model->currentDomainIndex() == i) {
     m_view->setParameterTie(parName, tie);
   }
 }
 
-void FunctionMultiDomainPresenter::setLocalParameterConstraint(
-    const QString &parName, int i, const QString &constraint) {
+void FunctionMultiDomainPresenter::setLocalParameterConstraint(const QString &parName, int i,
+                                                               const QString &constraint) {
   m_model->setLocalParameterConstraint(parName, i, constraint);
   if (m_model->currentDomainIndex() == i) {
     m_view->setParameterConstraint(parName, constraint);
   }
 }
 
-QStringList FunctionMultiDomainPresenter::getGlobalParameters() const {
-  return m_model->getGlobalParameters();
-}
+QStringList FunctionMultiDomainPresenter::getGlobalParameters() const { return m_model->getGlobalParameters(); }
 
-void FunctionMultiDomainPresenter::setGlobalParameters(
-    const QStringList &globals) {
+void FunctionMultiDomainPresenter::setGlobalParameters(const QStringList &globals) {
   m_model->setGlobalParameters(globals);
   m_view->setGlobalParameters(m_model->getGlobalParameters());
 }
 
-QStringList FunctionMultiDomainPresenter::getLocalParameters() const {
-  return m_model->getLocalParameters();
-}
+QStringList FunctionMultiDomainPresenter::getLocalParameters() const { return m_model->getLocalParameters(); }
 
 void FunctionMultiDomainPresenter::setBackgroundA0(double value) {
   auto const paramName = m_model->setBackgroundA0(value);
@@ -283,27 +223,23 @@ void FunctionMultiDomainPresenter::viewAddedFunction(const QString &funStr) {
   emit functionStructureChanged();
 }
 
-void FunctionMultiDomainPresenter::viewRemovedFunction(
-    const QString &functionIndex) {
+void FunctionMultiDomainPresenter::viewRemovedFunction(const QString &functionIndex) {
   m_model->removeFunction(functionIndex);
   m_view->setGlobalParameters(m_model->getGlobalParameters());
   emit functionStructureChanged();
 }
 
-void FunctionMultiDomainPresenter::viewChangedTie(const QString &paramName,
-                                                  const QString &tie) {
+void FunctionMultiDomainPresenter::viewChangedTie(const QString &paramName, const QString &tie) {
   m_model->changeTie(paramName, tie);
   emit functionStructureChanged();
 }
 
-void FunctionMultiDomainPresenter::viewAddedConstraint(
-    const QString &functionIndex, const QString &constraint) {
+void FunctionMultiDomainPresenter::viewAddedConstraint(const QString &functionIndex, const QString &constraint) {
   m_model->addConstraint(functionIndex, constraint);
   emit functionStructureChanged();
 }
 
-void FunctionMultiDomainPresenter::viewRemovedConstraint(
-    const QString &parName) {
+void FunctionMultiDomainPresenter::viewRemovedConstraint(const QString &parName) {
   m_model->removeConstraint(parName);
   emit functionStructureChanged();
 }
@@ -315,8 +251,7 @@ void FunctionMultiDomainPresenter::viewRequestedCopyToClipboard() {
   }
 }
 
-void FunctionMultiDomainPresenter::viewChangedGlobals(
-    const QStringList &globalParameters) {
+void FunctionMultiDomainPresenter::viewChangedGlobals(const QStringList &globalParameters) {
   m_model->setGlobalParameters(globalParameters);
   emit functionStructureChanged();
 }
@@ -327,13 +262,9 @@ void FunctionMultiDomainPresenter::viewRequestedFunctionHelp() {
     m_view->showFunctionHelp(QString::fromStdString(func->name()));
 }
 
-QString FunctionMultiDomainPresenter::getFunctionString() const {
-  return m_model->getFunctionString();
-}
+QString FunctionMultiDomainPresenter::getFunctionString() const { return m_model->getFunctionString(); }
 
-IFunction_sptr FunctionMultiDomainPresenter::getFunction() const {
-  return m_model->getCurrentFunction();
-}
+IFunction_sptr FunctionMultiDomainPresenter::getFunction() const { return m_model->getCurrentFunction(); }
 
 void FunctionMultiDomainPresenter::clear() {
   m_model->clear();
@@ -346,20 +277,16 @@ void FunctionMultiDomainPresenter::setColumnSizes(int s0, int s1, int s2) {
     treeView->setColumnSizes(s0, s1, s2);
 }
 
-void FunctionMultiDomainPresenter::setErrorsEnabled(bool enabled) {
-  m_view->setErrorsEnabled(enabled);
-}
+void FunctionMultiDomainPresenter::setErrorsEnabled(bool enabled) { m_view->setErrorsEnabled(enabled); }
 
-void FunctionMultiDomainPresenter::viewChangedParameter(
-    const QString &paramName) {
+void FunctionMultiDomainPresenter::viewChangedParameter(const QString &paramName) {
   auto const value = m_view->getParameter(paramName);
   m_model->setParameter(paramName, value);
   auto const parts = splitParameterName(paramName);
   emit parameterChanged(parts.first, parts.second);
 }
 
-void FunctionMultiDomainPresenter::viewChangedAttribute(
-    const QString &attrName) {
+void FunctionMultiDomainPresenter::viewChangedAttribute(const QString &attrName) {
   auto value = m_view->getAttribute(attrName);
   m_model->setAttribute(attrName, value);
 }
@@ -388,10 +315,8 @@ void FunctionMultiDomainPresenter::editLocalParameter(const QString &parName) {
   }
 
   m_editLocalParameterDialog =
-      new EditLocalParameterDialog(m_view, parName, datasetNames, domainNames,
-                                   values, fixes, ties, constraints);
-  connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this,
-          SLOT(editLocalParameterFinish(int)));
+      new EditLocalParameterDialog(m_view, parName, datasetNames, domainNames, values, fixes, ties, constraints);
+  connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this, SLOT(editLocalParameterFinish(int)));
   m_editLocalParameterDialog->open();
 }
 
@@ -430,8 +355,7 @@ void FunctionMultiDomainPresenter::updateViewFromModel() {
     } else {
       m_view->setParameterTie(name, m_model->getLocalParameterTie(name, index));
     }
-    m_view->setParameterConstraint(
-        name, m_model->getLocalParameterConstraint(name, index));
+    m_view->setParameterConstraint(name, m_model->getLocalParameterConstraint(name, index));
   }
   updateViewAttributesFromModel();
 }
@@ -439,9 +363,7 @@ void FunctionMultiDomainPresenter::updateViewFromModel() {
 void FunctionMultiDomainPresenter::updateViewAttributesFromModel() {
   for (const auto &name : m_model->getAttributeNames()) {
     // Create a single lambda expression capable of visiting each attribute
-    auto visitAttribute = [&](auto val) {
-      m_view->setAttributeValue(name, val);
-    };
+    auto visitAttribute = [&](auto val) { m_view->setAttributeValue(name, val); };
     auto value = m_model->getAttribute(name);
     auto visitor = AttributeLambdaVisitor{visitAttribute};
     value.apply(visitor);

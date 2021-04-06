@@ -49,29 +49,24 @@ ReadGroupsFromFile::ReadGroupsFromFile() : API::Algorithm(), calibration() {}
 void ReadGroupsFromFile::init() {
 
   // The name of the instrument
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InstrumentWorkspace", "", Direction::Input,
-                      std::make_shared<InstrumentValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InstrumentWorkspace", "", Direction::Input,
+                                                                       std::make_shared<InstrumentValidator>()),
                   "A workspace that refers to the instrument of interest. You "
                   "can use [[LoadEmptyInstrument]] to create such a "
                   "workspace.");
 
   // The calibration file that contains the grouping information
   const std::vector<std::string> exts{".cal", ".xml"};
-  declareProperty(
-      std::make_unique<FileProperty>("GroupingFileName", "", FileProperty::Load,
-                                     exts),
-      "Either as a XML grouping file (see [[GroupDetectors]]) or as a "
-      "[[CalFile]] (.cal extension).");
+  declareProperty(std::make_unique<FileProperty>("GroupingFileName", "", FileProperty::Load, exts),
+                  "Either as a XML grouping file (see [[GroupDetectors]]) or as a "
+                  "[[CalFile]] (.cal extension).");
   // Flag to consider unselected detectors in the cal file
   std::vector<std::string> select{"True", "False"};
-  declareProperty("ShowUnselected", "True",
-                  std::make_shared<StringListValidator>(select),
+  declareProperty("ShowUnselected", "True", std::make_shared<StringListValidator>(select),
                   "Whether to show detectors that are not in any group");
   // The output workspace (2D) that will contain the group information
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<DataObjects::Workspace2D>>(
-          "OutputWorkspace", "", Direction::Output),
+      std::make_unique<API::WorkspaceProperty<DataObjects::Workspace2D>>("OutputWorkspace", "", Direction::Output),
       "The name of the output workspace");
 }
 
@@ -90,11 +85,10 @@ void ReadGroupsFromFile::exec() {
   Instrument_const_sptr inst = ws->getInstrument();
 
   // Create a copy (without the data) of the workspace - it will contain the
-  Workspace2D_sptr localWorkspace = std::dynamic_pointer_cast<Workspace2D>(
-      WorkspaceFactory::Instance().create(ws, ws->getNumberHistograms(), 2, 1));
+  Workspace2D_sptr localWorkspace =
+      std::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create(ws, ws->getNumberHistograms(), 2, 1));
   if (!localWorkspace)
-    throw std::runtime_error(
-        "Failed when creating a Workspace2D from the input!");
+    throw std::runtime_error("Failed when creating a Workspace2D from the input!");
 
   const std::string groupfile = getProperty("GroupingFilename");
 
@@ -147,8 +141,7 @@ void ReadGroupsFromFile::exec() {
   if (!success) // Do some cleanup
   {
     localWorkspace.reset();
-    throw std::runtime_error("Fail to found a detector in " + groupfile +
-                             " existing in instrument " + inst->getName());
+    throw std::runtime_error("Fail to found a detector in " + groupfile + " existing in instrument " + inst->getName());
   }
   setProperty("OutputWorkspace", localWorkspace);
 }
@@ -199,16 +192,13 @@ void ReadGroupsFromFile::readXMLGroupingFile(const std::string &filename) {
   Poco::XML::Element *root = file->documentElement();
 
   if (!root->hasChildNodes()) {
-    throw Kernel::Exception::FileError("No root element in XML grouping file: ",
-                                       filename);
+    throw Kernel::Exception::FileError("No root element in XML grouping file: ", filename);
   }
 
-  Poco::AutoPtr<Poco::XML::NodeList> groups =
-      root->getElementsByTagName("group");
+  Poco::AutoPtr<Poco::XML::NodeList> groups = root->getElementsByTagName("group");
 
   if (groups->length() == 0) {
-    throw Kernel::Exception::FileError(
-        "XML group file contains no group elements:", filename);
+    throw Kernel::Exception::FileError("XML group file contains no group elements:", filename);
   }
 
   auto nGroups = static_cast<unsigned int>(groups->length());
@@ -218,14 +208,12 @@ void ReadGroupsFromFile::readXMLGroupingFile(const std::string &filename) {
     Poco::XML::Element *group = elem->getChildElement("detids");
 
     if (!group) {
-      throw Mantid::Kernel::Exception::FileError(
-          "XML Group File, group contains no <detids> element:", filename);
+      throw Mantid::Kernel::Exception::FileError("XML Group File, group contains no <detids> element:", filename);
     }
 
     std::string ids = group->getAttribute("val");
 
-    Mantid::Kernel::StringTokenizer data(
-        ids, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+    Mantid::Kernel::StringTokenizer data(ids, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
 
     if (data.begin() != data.end()) {
       for (const auto &value : data) {
@@ -234,8 +222,7 @@ void ReadGroupsFromFile::readXMLGroupingFile(const std::string &filename) {
         try {
           detID = boost::lexical_cast<int>(value);
         } catch (boost::bad_lexical_cast &) {
-          throw Mantid::Kernel::Exception::FileError(
-              "Could cast string to integer in input XML file", filename);
+          throw Mantid::Kernel::Exception::FileError("Could cast string to integer in input XML file", filename);
         }
 
         if (calibration.find(detID) == calibration.end()) {

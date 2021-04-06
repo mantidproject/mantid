@@ -35,14 +35,11 @@ PointByPointVCorrection::PointByPointVCorrection() : Algorithm() {}
 PointByPointVCorrection::~PointByPointVCorrection() = default;
 
 void PointByPointVCorrection::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputW1", "", Direction::Input),
-      "Name of the Sample workspace.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputW2", "", Direction::Input),
-      "Name of the Vanadium workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputW1", "", Direction::Input),
+                  "Name of the Sample workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputW2", "", Direction::Input),
+                  "Name of the Vanadium workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace.");
 }
 
@@ -80,8 +77,8 @@ void PointByPointVCorrection::exec() {
     MantidVec errors(size - 1); // MantidVec for temporary errors
     std::adjacent_difference(X.begin(), X.end(),
                              binwidths.begin()); // Calculate the binwidths
-    std::transform(binwidths.begin() + 1, binwidths.end(), Y2.begin(),
-                   resultY.begin(), VectorHelper::DividesNonNull<double>());
+    std::transform(binwidths.begin() + 1, binwidths.end(), Y2.begin(), resultY.begin(),
+                   VectorHelper::DividesNonNull<double>());
     std::transform(Y1.begin(), Y1.end(), resultY.begin(), resultY.begin(),
                    std::multiplies<double>()); // Now resultY contains the
                                                // A_i=s_i/v_i*Dlam_i
@@ -104,8 +101,7 @@ void PointByPointVCorrection::exec() {
     double factor = factor1 / factor2;
 
     // Now propagate the error bars due to the normaliser
-    double error2_factor1 =
-        std::inner_product(E1.begin(), E1.end(), E1.begin(), 0.0);
+    double error2_factor1 = std::inner_product(E1.begin(), E1.end(), E1.begin(), 0.0);
     double error2_factor2 = 0;
 
     for (int j = 0; j < size - 1; j++) {
@@ -114,8 +110,7 @@ void PointByPointVCorrection::exec() {
         test = 0;
       error2_factor2 += errors[j] * test / factor2 / factor2;
     }
-    double error2_factor =
-        (error2_factor1 / factor1 / factor1 + error2_factor2);
+    double error2_factor = (error2_factor1 / factor1 / factor1 + error2_factor2);
 
     // Calculate the normalized Y values
     using std::placeholders::_1;
@@ -127,8 +122,7 @@ void PointByPointVCorrection::exec() {
     //       using bind2nd within the parrallel macros.
 
     // Now result is s_i/v_i*Dlam_i*(sum_i s_i)/(sum_i S_i/v_i*Dlam_i)
-    std::transform(resultY.begin(), resultY.end(), resultY.begin(),
-                   [&factor](double rY) { return rY * factor; });
+    std::transform(resultY.begin(), resultY.end(), resultY.begin(), [&factor](double rY) { return rY * factor; });
 
     // Finally get the normalized errors
     for (int j = 0; j < size - 1; j++)
@@ -152,14 +146,12 @@ void PointByPointVCorrection::exec() {
  *  @param w2 ::  The second input workspace
  *  @param out :: Pointer to the output workspace
  */
-void PointByPointVCorrection::check_validity(
-    API::MatrixWorkspace_const_sptr &w1, API::MatrixWorkspace_const_sptr &w2,
-    API::MatrixWorkspace_sptr &out) {
+void PointByPointVCorrection::check_validity(API::MatrixWorkspace_const_sptr &w1, API::MatrixWorkspace_const_sptr &w2,
+                                             API::MatrixWorkspace_sptr &out) {
   // First check that the instrument matches for both input workspaces
   if (w1->getInstrument()->getName() != w2->getInstrument()->getName()) {
     g_log.error("The input workspaces have different instrument definitions");
-    throw std::runtime_error(
-        "The input workspaces have different instrument definitions");
+    throw std::runtime_error("The input workspaces have different instrument definitions");
   }
   // Check that the two workspaces are the same size
   if (w1->size() != w2->size()) {
@@ -176,10 +168,8 @@ void PointByPointVCorrection::check_validity(
   if (!((*axis1) == (*axis2))) // Spectra axis are different, so division does
                                // not make any sense
   {
-    g_log.error(
-        "The two workspaces InputW1 and InputW2 have different spectra list");
-    throw std::runtime_error(
-        "The two workspaces InputW1 and InputW2 have different spectra list");
+    g_log.error("The two workspaces InputW1 and InputW2 have different spectra list");
+    throw std::runtime_error("The two workspaces InputW1 and InputW2 have different spectra list");
   }
 
   if (out != w1 && out != w2) // Create a new workspace only if it is different
@@ -199,16 +189,14 @@ void PointByPointVCorrection::check_validity(
  *  @param w2 :: The second (vanadium) input workspace
  *  @param index :: The workspace index to check
  */
-void PointByPointVCorrection::check_masks(
-    const API::MatrixWorkspace_const_sptr &w1,
-    const API::MatrixWorkspace_const_sptr &w2, const int &index) const {
+void PointByPointVCorrection::check_masks(const API::MatrixWorkspace_const_sptr &w1,
+                                          const API::MatrixWorkspace_const_sptr &w2, const int &index) const {
   static bool warned = false;
   if (!warned) {
     const bool w1masked = w1->hasMaskedBins(index);
     const bool w2masked = w2->hasMaskedBins(index);
-    if ((w1masked && w2masked &&
-         (w1->maskedBins(index) != w2->maskedBins(index))) ||
-        (w1masked && !w2masked) || (!w1masked && w2masked)) {
+    if ((w1masked && w2masked && (w1->maskedBins(index) != w2->maskedBins(index))) || (w1masked && !w2masked) ||
+        (!w1masked && w2masked)) {
       g_log.warning("The input workspaces do not have matching bin masking");
       warned = true;
     }

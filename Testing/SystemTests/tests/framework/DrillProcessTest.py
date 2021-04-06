@@ -30,6 +30,7 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
         super().__init__()
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'D11'
+        self.disableChecking = ['Instrument']
         config.appendDataSearchSubDir('ILL/D11/')
 
     def validate(self):

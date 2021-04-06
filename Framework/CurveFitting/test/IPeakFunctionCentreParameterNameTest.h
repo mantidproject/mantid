@@ -18,12 +18,8 @@ class IPeakFunctionCentreParameterNameTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static IPeakFunctionCentreParameterNameTest *createSuite() {
-    return new IPeakFunctionCentreParameterNameTest();
-  }
-  static void destroySuite(IPeakFunctionCentreParameterNameTest *suite) {
-    delete suite;
-  }
+  static IPeakFunctionCentreParameterNameTest *createSuite() { return new IPeakFunctionCentreParameterNameTest(); }
+  static void destroySuite(IPeakFunctionCentreParameterNameTest *suite) { delete suite; }
 
   IPeakFunctionCentreParameterNameTest() {
     FrameworkManager::Instance();
@@ -42,8 +38,8 @@ public:
       const std::string &peakFunctionName = expectedResult.first;
       const std::string &centreParameterName = expectedResult.second;
 
-      IPeakFunction_sptr fn = std::dynamic_pointer_cast<IPeakFunction>(
-          FunctionFactory::Instance().createFunction(peakFunctionName));
+      IPeakFunction_sptr fn =
+          std::dynamic_pointer_cast<IPeakFunction>(FunctionFactory::Instance().createFunction(peakFunctionName));
 
       TS_ASSERT(fn);
       TSM_ASSERT_EQUALS("IPeakFunction " + peakFunctionName +

@@ -44,8 +44,7 @@ template <typename TYPE> VMDBase<TYPE>::VMDBase(size_t nd) : nd(nd) {
  * @param val0 :: value at first dimension
  * @param val1 :: value at second dimension
  */
-template <typename TYPE>
-VMDBase<TYPE>::VMDBase(double val0, double val1) : nd(2) {
+template <typename TYPE> VMDBase<TYPE>::VMDBase(double val0, double val1) : nd(2) {
   data = new TYPE[nd];
   data[0] = TYPE(val0);
   data[1] = TYPE(val1);
@@ -56,8 +55,7 @@ VMDBase<TYPE>::VMDBase(double val0, double val1) : nd(2) {
  * @param val1 :: value at second dimension
  * @param val2 :: value at third dimension
  */
-template <typename TYPE>
-VMDBase<TYPE>::VMDBase(double val0, double val1, double val2) : nd(3) {
+template <typename TYPE> VMDBase<TYPE>::VMDBase(double val0, double val1, double val2) : nd(3) {
   data = new TYPE[nd];
   data[0] = TYPE(val0);
   data[1] = TYPE(val1);
@@ -70,9 +68,7 @@ VMDBase<TYPE>::VMDBase(double val0, double val1, double val2) : nd(3) {
  * @param val2 :: value at third dimension
  * @param val3 :: value at fourth dimension
  */
-template <typename TYPE>
-VMDBase<TYPE>::VMDBase(double val0, double val1, double val2, double val3)
-    : nd(4) {
+template <typename TYPE> VMDBase<TYPE>::VMDBase(double val0, double val1, double val2, double val3) : nd(4) {
   data = new TYPE[nd];
   data[0] = TYPE(val0);
   data[1] = TYPE(val1);
@@ -88,9 +84,7 @@ VMDBase<TYPE>::VMDBase(double val0, double val1, double val2, double val3)
  * @param val4 :: value at fifth dimension
  */
 template <typename TYPE>
-VMDBase<TYPE>::VMDBase(double val0, double val1, double val2, double val3,
-                       double val4)
-    : nd(5) {
+VMDBase<TYPE>::VMDBase(double val0, double val1, double val2, double val3, double val4) : nd(5) {
   data = new TYPE[nd];
   data[0] = TYPE(val0);
   data[1] = TYPE(val1);
@@ -108,9 +102,7 @@ VMDBase<TYPE>::VMDBase(double val0, double val1, double val2, double val3,
  * @param val5 :: value at sixth dimension
  */
 template <typename TYPE>
-VMDBase<TYPE>::VMDBase(double val0, double val1, double val2, double val3,
-                       double val4, double val5)
-    : nd(6) {
+VMDBase<TYPE>::VMDBase(double val0, double val1, double val2, double val3, double val4, double val5) : nd(6) {
   data = new TYPE[nd];
   data[0] = TYPE(val0);
   data[1] = TYPE(val1);
@@ -122,8 +114,7 @@ VMDBase<TYPE>::VMDBase(double val0, double val1, double val2, double val3,
 
 /** Copy constructor
  * @param other :: other to copy */
-template <typename TYPE>
-VMDBase<TYPE>::VMDBase(const VMDBase &other) : nd(other.nd) {
+template <typename TYPE> VMDBase<TYPE>::VMDBase(const VMDBase &other) : nd(other.nd) {
   if (nd <= 0)
     throw std::invalid_argument("nd must be > 0");
   data = new TYPE[nd];
@@ -134,8 +125,7 @@ VMDBase<TYPE>::VMDBase(const VMDBase &other) : nd(other.nd) {
 /** Assignment operator
  * @param other :: copy into this
  */
-template <typename TYPE>
-VMDBase<TYPE> &VMDBase<TYPE>::operator=(const VMDBase &other) {
+template <typename TYPE> VMDBase<TYPE> &VMDBase<TYPE>::operator=(const VMDBase &other) {
   if ((other.nd) != nd) {
     nd = other.nd;
     delete[] data;
@@ -149,9 +139,7 @@ VMDBase<TYPE> &VMDBase<TYPE>::operator=(const VMDBase &other) {
 /** Move constructor
  * @param other :: move into this
  */
-template <typename TYPE>
-VMDBase<TYPE>::VMDBase(VMDBase &&other) noexcept
-    : nd(other.nd), data(other.data) {
+template <typename TYPE> VMDBase<TYPE>::VMDBase(VMDBase &&other) noexcept : nd(other.nd), data(other.data) {
   other.data = nullptr;
   other.nd = 0;
 }
@@ -159,8 +147,7 @@ VMDBase<TYPE>::VMDBase(VMDBase &&other) noexcept
 /** Move assignment
  * @param other :: move into this
  */
-template <typename TYPE>
-VMDBase<TYPE> &VMDBase<TYPE>::operator=(VMDBase &&other) noexcept {
+template <typename TYPE> VMDBase<TYPE> &VMDBase<TYPE>::operator=(VMDBase &&other) noexcept {
   if (this != &other) {
     this->nd = other.nd;
     other.nd = 0;
@@ -174,8 +161,7 @@ VMDBase<TYPE> &VMDBase<TYPE>::operator=(VMDBase &&other) noexcept {
 /** Constructor
  * @param nd :: number of dimensions
  * @param bareData :: pointer to a nd-sized bare data array */
-template <typename TYPE>
-VMDBase<TYPE>::VMDBase(size_t nd, const double *bareData) : nd(nd) {
+template <typename TYPE> VMDBase<TYPE>::VMDBase(size_t nd, const double *bareData) : nd(nd) {
   if (nd <= 0)
     throw std::invalid_argument("nd must be > 0");
   data = new TYPE[nd];
@@ -186,8 +172,7 @@ VMDBase<TYPE>::VMDBase(size_t nd, const double *bareData) : nd(nd) {
 /** Constructor
  * @param nd :: number of dimensions
  * @param bareData :: pointer to a nd-sized bare data array */
-template <typename TYPE>
-VMDBase<TYPE>::VMDBase(size_t nd, const float *bareData) : nd(nd) {
+template <typename TYPE> VMDBase<TYPE>::VMDBase(size_t nd, const float *bareData) : nd(nd) {
   if (nd <= 0)
     throw std::invalid_argument("nd must be > 0");
   data = new TYPE[nd];
@@ -205,8 +190,7 @@ template <typename TYPE> VMDBase<TYPE>::VMDBase(const V3D &vector) : nd(3) {
 
 /** Constructor
  * @param vector :: vector of doubles */
-template <typename TYPE>
-VMDBase<TYPE>::VMDBase(const std::vector<double> &vector) : nd(vector.size()) {
+template <typename TYPE> VMDBase<TYPE>::VMDBase(const std::vector<double> &vector) : nd(vector.size()) {
   if (nd <= 0)
     throw std::invalid_argument("nd must be > 0");
   data = new TYPE[nd];
@@ -216,8 +200,7 @@ VMDBase<TYPE>::VMDBase(const std::vector<double> &vector) : nd(vector.size()) {
 
 /** Constructor
  * @param vector :: vector of floats */
-template <typename TYPE>
-VMDBase<TYPE>::VMDBase(const std::vector<float> &vector) : nd(vector.size()) {
+template <typename TYPE> VMDBase<TYPE>::VMDBase(const std::vector<float> &vector) : nd(vector.size()) {
   if (nd <= 0)
     throw std::invalid_argument("nd must be > 0");
   data = new TYPE[nd];
@@ -233,15 +216,12 @@ template <typename TYPE> VMDBase<TYPE>::VMDBase(const std::string &str) {
   StringTokenizer strs(str, ", ", StringTokenizer::TOK_IGNORE_EMPTY);
 
   std::vector<TYPE> vals;
-  std::transform(strs.cbegin(), strs.cend(), std::back_inserter(vals),
-                 [](const std::string &token) {
-                   TYPE v;
-                   if (!Strings::convert(token, v))
-                     throw std::invalid_argument(
-                         "VMDBase: Unable to convert the string '" + token +
-                         "' to a number.");
-                   return v;
-                 });
+  std::transform(strs.cbegin(), strs.cend(), std::back_inserter(vals), [](const std::string &token) {
+    TYPE v;
+    if (!Strings::convert(token, v))
+      throw std::invalid_argument("VMDBase: Unable to convert the string '" + token + "' to a number.");
+    return v;
+  });
 
   nd = vals.size();
   if (nd <= 0)
@@ -260,27 +240,19 @@ template <typename TYPE> size_t VMDBase<TYPE>::getNumDims() const { return nd; }
 template <typename TYPE> size_t VMDBase<TYPE>::size() const { return nd; }
 
 /** @return the value at the index */
-template <typename TYPE>
-const TYPE &VMDBase<TYPE>::operator[](const size_t index) const {
-  return data[index];
-}
+template <typename TYPE> const TYPE &VMDBase<TYPE>::operator[](const size_t index) const { return data[index]; }
 
 /** @return the value at the index */
-template <typename TYPE> TYPE &VMDBase<TYPE>::operator[](const size_t index) {
-  return data[index];
-}
+template <typename TYPE> TYPE &VMDBase<TYPE>::operator[](const size_t index) { return data[index]; }
 
 /** @return the bare data array directly. */
-template <typename TYPE> const TYPE *VMDBase<TYPE>::getBareArray() const {
-  return data;
-}
+template <typename TYPE> const TYPE *VMDBase<TYPE>::getBareArray() const { return data; }
 
 /** Return a simple string representation of the vector
  * @param separator :: string to place between values, one space is the
  * default
  */
-template <typename TYPE>
-std::string VMDBase<TYPE>::toString(const std::string &separator) const {
+template <typename TYPE> std::string VMDBase<TYPE>::toString(const std::string &separator) const {
   std::ostringstream mess;
   for (size_t d = 0; d < nd; d++)
     mess << (d > 0 ? separator : "") << data[d];
@@ -291,8 +263,7 @@ std::string VMDBase<TYPE>::toString(const std::string &separator) const {
   @param v :: VMDBase for comparison
   @return true if the items are equal
  */
-template <typename TYPE>
-bool VMDBase<TYPE>::operator==(const VMDBase &v) const {
+template <typename TYPE> bool VMDBase<TYPE>::operator==(const VMDBase &v) const {
   if (v.nd != nd)
     return false;
   for (size_t d = 0; d < nd; d++)
@@ -305,15 +276,11 @@ bool VMDBase<TYPE>::operator==(const VMDBase &v) const {
   @param v :: VMDBase for comparison
   @return true if the items are equal
  */
-template <typename TYPE>
-bool VMDBase<TYPE>::operator!=(const VMDBase &v) const {
-  return !operator==(v);
-}
+template <typename TYPE> bool VMDBase<TYPE>::operator!=(const VMDBase &v) const { return !operator==(v); }
 
 /** Add two vectors together
  * @param v :: other vector, must match number of dimensions  */
-template <typename TYPE>
-VMDBase<TYPE> VMDBase<TYPE>::operator+(const VMDBase &v) const {
+template <typename TYPE> VMDBase<TYPE> VMDBase<TYPE>::operator+(const VMDBase &v) const {
   VMDBase out(*this);
   out += v;
   return out;
@@ -321,8 +288,7 @@ VMDBase<TYPE> VMDBase<TYPE>::operator+(const VMDBase &v) const {
 
 /** Add two vectors together
  * @param v :: other vector, must match number of dimensions  */
-template <typename TYPE>
-VMDBase<TYPE> &VMDBase<TYPE>::operator+=(const VMDBase &v) {
+template <typename TYPE> VMDBase<TYPE> &VMDBase<TYPE>::operator+=(const VMDBase &v) {
   if (v.nd != this->nd)
     throw std::runtime_error("Mismatch in number of dimensions in operation "
                              "between two VMDBase vectors.");
@@ -334,8 +300,7 @@ VMDBase<TYPE> &VMDBase<TYPE>::operator+=(const VMDBase &v) {
 /** Subtract two vectors
  * @param v
  *  :: other vector, must match number of dimensions  */
-template <typename TYPE>
-VMDBase<TYPE> VMDBase<TYPE>::operator-(const VMDBase &v) const {
+template <typename TYPE> VMDBase<TYPE> VMDBase<TYPE>::operator-(const VMDBase &v) const {
   VMDBase out(*this);
   out -= v;
   return out;
@@ -343,8 +308,7 @@ VMDBase<TYPE> VMDBase<TYPE>::operator-(const VMDBase &v) const {
 
 /** Subtract two vectors
  * @param v :: other vector, must match number of dimensions  */
-template <typename TYPE>
-VMDBase<TYPE> &VMDBase<TYPE>::operator-=(const VMDBase &v) {
+template <typename TYPE> VMDBase<TYPE> &VMDBase<TYPE>::operator-=(const VMDBase &v) {
   if (v.nd != this->nd)
     throw std::runtime_error("Mismatch in number of dimensions in operation "
                              "between two VMDBase vectors.");
@@ -355,8 +319,7 @@ VMDBase<TYPE> &VMDBase<TYPE>::operator-=(const VMDBase &v) {
 
 /** Inner product of two vectors (element-by-element)
  * @param v :: other vector, must match number of dimensions  */
-template <typename TYPE>
-VMDBase<TYPE> VMDBase<TYPE>::operator*(const VMDBase &v) const {
+template <typename TYPE> VMDBase<TYPE> VMDBase<TYPE>::operator*(const VMDBase &v) const {
   VMDBase out(*this);
   out *= v;
   return out;
@@ -364,8 +327,7 @@ VMDBase<TYPE> VMDBase<TYPE>::operator*(const VMDBase &v) const {
 
 /** Inner product of two vectors (element-by-element)
  * @param v :: other vector, must match number of dimensions  */
-template <typename TYPE>
-VMDBase<TYPE> &VMDBase<TYPE>::operator*=(const VMDBase &v) {
+template <typename TYPE> VMDBase<TYPE> &VMDBase<TYPE>::operator*=(const VMDBase &v) {
   if (v.nd != this->nd)
     throw std::runtime_error("Mismatch in number of dimensions in operation "
                              "between two VMDBase vectors.");
@@ -376,8 +338,7 @@ VMDBase<TYPE> &VMDBase<TYPE>::operator*=(const VMDBase &v) {
 
 /** Inner division of two vectors (element-by-element)
  * @param v :: other vector, must match number of dimensions  */
-template <typename TYPE>
-VMDBase<TYPE> VMDBase<TYPE>::operator/(const VMDBase &v) const {
+template <typename TYPE> VMDBase<TYPE> VMDBase<TYPE>::operator/(const VMDBase &v) const {
   VMDBase out(*this);
   out /= v;
   return out;
@@ -385,8 +346,7 @@ VMDBase<TYPE> VMDBase<TYPE>::operator/(const VMDBase &v) const {
 
 /** Inner division of two vectors (element-by-element)
  * @param v :: other vector, must match number of dimensions  */
-template <typename TYPE>
-VMDBase<TYPE> &VMDBase<TYPE>::operator/=(const VMDBase &v) {
+template <typename TYPE> VMDBase<TYPE> &VMDBase<TYPE>::operator/=(const VMDBase &v) {
   if (v.nd != this->nd)
     throw std::runtime_error("Mismatch in number of dimensions in operation "
                              "between two VMDBase vectors.");
@@ -397,8 +357,7 @@ VMDBase<TYPE> &VMDBase<TYPE>::operator/=(const VMDBase &v) {
 
 /** Multiply by a scalar
  * @param scalar :: double scalar to multiply each element  */
-template <typename TYPE>
-VMDBase<TYPE> VMDBase<TYPE>::operator*(const double scalar) const {
+template <typename TYPE> VMDBase<TYPE> VMDBase<TYPE>::operator*(const double scalar) const {
   VMDBase out(*this);
   out *= scalar;
   return out;
@@ -406,8 +365,7 @@ VMDBase<TYPE> VMDBase<TYPE>::operator*(const double scalar) const {
 
 /** Multiply by a scalar
  * @param scalar :: double scalar to multiply each element  */
-template <typename TYPE>
-VMDBase<TYPE> &VMDBase<TYPE>::operator*=(const double scalar) {
+template <typename TYPE> VMDBase<TYPE> &VMDBase<TYPE>::operator*=(const double scalar) {
   for (size_t d = 0; d < nd; d++)
     data[d] *= TYPE(scalar);
   return *this;
@@ -415,8 +373,7 @@ VMDBase<TYPE> &VMDBase<TYPE>::operator*=(const double scalar) {
 
 /** Divide by a scalar
  * @param scalar :: double scalar to Divide each element  */
-template <typename TYPE>
-VMDBase<TYPE> VMDBase<TYPE>::operator/(const double scalar) const {
+template <typename TYPE> VMDBase<TYPE> VMDBase<TYPE>::operator/(const double scalar) const {
   VMDBase out(*this);
   out /= scalar;
   return out;
@@ -424,8 +381,7 @@ VMDBase<TYPE> VMDBase<TYPE>::operator/(const double scalar) const {
 
 /** Divide by a scalar
  * @param scalar :: double scalar to Divide each element  */
-template <typename TYPE>
-VMDBase<TYPE> &VMDBase<TYPE>::operator/=(const double scalar) {
+template <typename TYPE> VMDBase<TYPE> &VMDBase<TYPE>::operator/=(const double scalar) {
   for (size_t d = 0; d < nd; d++)
     data[d] /= TYPE(scalar);
   return *this;
@@ -433,8 +389,7 @@ VMDBase<TYPE> &VMDBase<TYPE>::operator/=(const double scalar) {
 
 /** Scalar product of two vectors
  * @param v :: other vector, must match number of dimensions  */
-template <typename TYPE>
-TYPE VMDBase<TYPE>::scalar_prod(const VMDBase &v) const {
+template <typename TYPE> TYPE VMDBase<TYPE>::scalar_prod(const VMDBase &v) const {
   TYPE out = 0;
   if (v.nd != this->nd)
     throw std::runtime_error("Mismatch in number of dimensions in operation "
@@ -446,14 +401,12 @@ TYPE VMDBase<TYPE>::scalar_prod(const VMDBase &v) const {
 
 /** Cross product of two vectors. Only works in 3D
  * @param v :: other vector, also 3D  */
-template <typename TYPE>
-VMDBase<TYPE> VMDBase<TYPE>::cross_prod(const VMDBase &v) const {
+template <typename TYPE> VMDBase<TYPE> VMDBase<TYPE>::cross_prod(const VMDBase &v) const {
   if (v.nd != this->nd)
     throw std::runtime_error("Mismatch in number of dimensions in operation "
                              "between two VMDBase vectors.");
   if (v.nd != 3)
-    throw std::runtime_error(
-        "Cross product of vectors only works in 3 dimensions.");
+    throw std::runtime_error("Cross product of vectors only works in 3 dimensions.");
   V3D a(data[0], data[1], data[2]);
   V3D b(v.data[0], v.data[1], v.data[2]);
   V3D c = a.cross_prod(b);
@@ -462,19 +415,13 @@ VMDBase<TYPE> VMDBase<TYPE>::cross_prod(const VMDBase &v) const {
 }
 
 /** @return the length of this vector */
-template <typename TYPE> TYPE VMDBase<TYPE>::length() const {
-  return TYPE(std::sqrt(this->norm2()));
-}
+template <typename TYPE> TYPE VMDBase<TYPE>::length() const { return TYPE(std::sqrt(this->norm2())); }
 
 /** @return the length of this vector */
-template <typename TYPE> TYPE VMDBase<TYPE>::norm() const {
-  return this->length();
-}
+template <typename TYPE> TYPE VMDBase<TYPE>::norm() const { return this->length(); }
 
 /** @return the length of this vector */
-template <typename TYPE> TYPE VMDBase<TYPE>::norm2() const {
-  return this->scalar_prod(*this);
-}
+template <typename TYPE> TYPE VMDBase<TYPE>::norm2() const { return this->scalar_prod(*this); }
 
 /** Normalize this vector to unity length
  * @return the length of this vector BEFORE normalizing */
@@ -501,22 +448,18 @@ template <typename TYPE> TYPE VMDBase<TYPE>::angle(const VMDBase &v) const {
  * @return list of 3 vectors
  */
 template <typename TYPE>
-std::vector<VMDBase<TYPE>>
-VMDBase<TYPE>::makeVectorsOrthogonal(std::vector<VMDBase> &vectors) {
+std::vector<VMDBase<TYPE>> VMDBase<TYPE>::makeVectorsOrthogonal(std::vector<VMDBase> &vectors) {
   if (vectors.size() != 2)
-    throw std::runtime_error(
-        "VMDBase::makeVectorsOrthogonal(): Need 2 input vectors.");
+    throw std::runtime_error("VMDBase::makeVectorsOrthogonal(): Need 2 input vectors.");
   if (vectors[0].getNumDims() != 3 || vectors[1].getNumDims() != 3)
-    throw std::runtime_error(
-        "VMDBase::makeVectorsOrthogonal(): Need 3D input vectors.");
+    throw std::runtime_error("VMDBase::makeVectorsOrthogonal(): Need 3D input vectors.");
   std::vector<V3D> in, out;
   for (size_t i = 0; i < vectors.size(); i++)
     in.emplace_back(vectors[i][0], vectors[i][1], vectors[i][2]);
   out = V3D::makeVectorsOrthogonal(in);
   std::vector<VMDBase> retVal;
   retVal.reserve(out.size());
-  std::copy(std::make_move_iterator(out.begin()),
-            std::make_move_iterator(out.end()), std::back_inserter(retVal));
+  std::copy(std::make_move_iterator(out.begin()), std::make_move_iterator(out.end()), std::back_inserter(retVal));
   return retVal;
 }
 
@@ -549,16 +492,12 @@ VMDBase<TYPE>::makeVectorsOrthogonal(std::vector<VMDBase> &vectors) {
  * @throw if the vectors are collinear
  * @return the normal vector
  */
-template <typename TYPE>
-VMDBase<TYPE>
-VMDBase<TYPE>::getNormalVector(const std::vector<VMDBase<TYPE>> &vectors) {
+template <typename TYPE> VMDBase<TYPE> VMDBase<TYPE>::getNormalVector(const std::vector<VMDBase<TYPE>> &vectors) {
   if (vectors.empty())
-    throw std::invalid_argument(
-        "VMDBase::getNormalVector: Must give at least 1 vector");
+    throw std::invalid_argument("VMDBase::getNormalVector: Must give at least 1 vector");
   size_t nd = vectors[0].getNumDims();
   if (nd < 2)
-    throw std::invalid_argument(
-        "VMDBase::getNormalVector: Must have at least 2 dimensions!");
+    throw std::invalid_argument("VMDBase::getNormalVector: Must have at least 2 dimensions!");
   if (vectors.size() != nd - 1)
     throw std::invalid_argument("VMDBase::getNormalVector: Must have as many "
                                 "N-1 vectors if there are N dimensions.");

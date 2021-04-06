@@ -17,18 +17,14 @@ using namespace MantidQt::Widgets::MplCpp;
 
 namespace {
 
-Python::Object
-newMarker(FigureCanvasQt *canvas, QString const &colour, double minimum,
-          double maximum, QString const &rangeType,
-          boost::optional<QHash<QString, QVariant>> const &otherKwargs) {
+Python::Object newMarker(FigureCanvasQt *canvas, QString const &colour, double minimum, double maximum,
+                         QString const &rangeType, boost::optional<QHash<QString, QVariant>> const &otherKwargs) {
   GlobalInterpreterLock lock;
 
-  Python::Object markersModule{
-      Python::NewRef(PyImport_ImportModule("mantidqt.plotting.markers"))};
+  Python::Object markersModule{Python::NewRef(PyImport_ImportModule("mantidqt.plotting.markers"))};
 
-  auto const args = Python::NewRef(Py_BuildValue(
-      "(Osdds)", canvas->pyobj().ptr(), colour.toLatin1().constData(), minimum,
-      maximum, rangeType.toLatin1().constData()));
+  auto const args = Python::NewRef(Py_BuildValue("(Osdds)", canvas->pyobj().ptr(), colour.toLatin1().constData(),
+                                                 minimum, maximum, rangeType.toLatin1().constData()));
   Python::Dict kwargs = Python::qHashToDict(otherKwargs.get());
 
   auto const marker = markersModule.attr("RangeMarker")(*args, **kwargs);
@@ -48,12 +44,9 @@ namespace MplCpp {
  * @param minimum The coordinate of the minimum marker
  * @param maximum The coordinate of the maximum marker
  */
-RangeMarker::RangeMarker(FigureCanvasQt *canvas, QString const &color,
-                         double minimum, double maximum,
-                         QString const &rangeType,
-                         QHash<QString, QVariant> const &otherKwargs)
-    : InstanceHolder(
-          newMarker(canvas, color, minimum, maximum, rangeType, otherKwargs)) {}
+RangeMarker::RangeMarker(FigureCanvasQt *canvas, QString const &color, double minimum, double maximum,
+                         QString const &rangeType, QHash<QString, QVariant> const &otherKwargs)
+    : InstanceHolder(newMarker(canvas, color, minimum, maximum, rangeType, otherKwargs)) {}
 
 /**
  * @brief Redraw the RangeMarker
@@ -92,17 +85,13 @@ void RangeMarker::setBounds(double lowerBound, double upperBound) {
  * @brief Sets the lower bound of the RangeMarker.
  * @param minimum The lower bound.
  */
-void RangeMarker::setLowerBound(double lowerBound) {
-  callMethodNoCheck<void>(pyobj(), "set_lower_bound", lowerBound);
-}
+void RangeMarker::setLowerBound(double lowerBound) { callMethodNoCheck<void>(pyobj(), "set_lower_bound", lowerBound); }
 
 /**
  * @brief Sets the upper bound of the RangeMarker.
  * @param upperBound The upper bound.
  */
-void RangeMarker::setUpperBound(double upperBound) {
-  callMethodNoCheck<void>(pyobj(), "set_upper_bound", upperBound);
-}
+void RangeMarker::setUpperBound(double upperBound) { callMethodNoCheck<void>(pyobj(), "set_upper_bound", upperBound); }
 
 /**
  * @brief Sets the range marked by the RangeMarker.
@@ -120,30 +109,23 @@ void RangeMarker::setRange(double minimum, double maximum) {
 std::tuple<double, double> RangeMarker::getRange() const {
   GlobalInterpreterLock lock;
 
-  auto const toDouble = [](Python::Object const &value) {
-    return PyFloat_AsDouble(value.ptr());
-  };
+  auto const toDouble = [](Python::Object const &value) { return PyFloat_AsDouble(value.ptr()); };
 
   auto const coords = pyobj().attr("get_range")();
-  return std::make_tuple<double, double>(toDouble(coords[0]),
-                                         toDouble(coords[1]));
+  return std::make_tuple<double, double>(toDouble(coords[0]), toDouble(coords[1]));
 }
 
 /**
  * @brief Sets the minimum the RangeMarker.
  * @param minimum The minimum of the range.
  */
-void RangeMarker::setMinimum(double minimum) {
-  callMethodNoCheck<void>(pyobj(), "set_minimum", minimum);
-}
+void RangeMarker::setMinimum(double minimum) { callMethodNoCheck<void>(pyobj(), "set_minimum", minimum); }
 
 /**
  * @brief Sets the minimum the RangeMarker.
  * @param minimum The minimum of the range.
  */
-void RangeMarker::setMaximum(double maximum) {
-  callMethodNoCheck<void>(pyobj(), "set_maximum", maximum);
-}
+void RangeMarker::setMaximum(double maximum) { callMethodNoCheck<void>(pyobj(), "set_maximum", maximum); }
 
 /**
  * @brief Gets minimum of the RangeMarker.
@@ -168,16 +150,12 @@ double RangeMarker::getMaximum() const {
  * @param x The x position of the mouse press in axes coords.
  * @param y The y position of the mouse press in axes coords.
  */
-void RangeMarker::mouseMoveStart(double x, double y) {
-  callMethodNoCheck<void>(pyobj(), "mouse_move_start", x, y);
-}
+void RangeMarker::mouseMoveStart(double x, double y) { callMethodNoCheck<void>(pyobj(), "mouse_move_start", x, y); }
 
 /**
  * @brief Notifies the relevant marker to stop moving.
  */
-void RangeMarker::mouseMoveStop() {
-  callMethodNoCheck<void>(pyobj(), "mouse_move_stop");
-}
+void RangeMarker::mouseMoveStop() { callMethodNoCheck<void>(pyobj(), "mouse_move_stop"); }
 
 /**
  * @brief Notifies the relevant marker to start moving.

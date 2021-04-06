@@ -26,13 +26,10 @@ template <class TimeOffsetType> class NXEventDataSource {
 public:
   virtual ~NXEventDataSource() = default;
 
-  virtual std::unique_ptr<AbstractEventDataPartitioner<TimeOffsetType>>
-  setBankIndex(const size_t bank) = 0;
+  virtual std::unique_ptr<AbstractEventDataPartitioner<TimeOffsetType>> setBankIndex(const size_t bank) = 0;
 
-  virtual void readEventID(int32_t *event_id, size_t start,
-                           size_t count) const = 0;
-  virtual void readEventTimeOffset(TimeOffsetType *event_time_offset,
-                                   size_t start, size_t count) const = 0;
+  virtual void readEventID(int32_t *event_id, size_t start, size_t count) const = 0;
+  virtual void readEventTimeOffset(TimeOffsetType *event_time_offset, size_t start, size_t count) const = 0;
   virtual std::string readEventTimeOffsetUnit() const = 0;
 };
 

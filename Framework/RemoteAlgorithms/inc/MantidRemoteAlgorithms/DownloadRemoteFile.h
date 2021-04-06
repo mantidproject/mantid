@@ -12,8 +12,7 @@
 namespace Mantid {
 namespace RemoteAlgorithms {
 
-class DLLExport DownloadRemoteFile : public Mantid::API::Algorithm,
-                                     public API::DeprecatedAlgorithm {
+class DLLExport DownloadRemoteFile : public Mantid::API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// constructor
   DownloadRemoteFile();
@@ -21,9 +20,7 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "DownloadRemoteFile"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Download a file from a remote compute resource.";
-  }
+  const std::string summary() const override { return "Download a file from a remote compute resource."; }
 
   /// Algorithm's version
   int version() const override { return (1); }

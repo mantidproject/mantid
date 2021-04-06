@@ -20,11 +20,9 @@ namespace Algorithms {
 
 /** TimeAtSampleStrategyElastic : Time at sample stragegy for elastic scattering
  */
-class MANTID_ALGORITHMS_DLL TimeAtSampleStrategyElastic
-    : public Mantid::Algorithms::TimeAtSampleStrategy {
+class MANTID_ALGORITHMS_DLL TimeAtSampleStrategyElastic : public Mantid::Algorithms::TimeAtSampleStrategy {
 public:
-  TimeAtSampleStrategyElastic(
-      std::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
+  TimeAtSampleStrategyElastic(std::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
   Correction calculate(const size_t &workspace_index) const override;
 
 private:

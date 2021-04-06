@@ -104,9 +104,7 @@ public:
   /// Constructor
   InputWorkspaceWidget(FitDialog *parent, int domainIndex = 0);
   /// Return property value stored in history
-  QString getStoredPropertyValue(const QString &propName) const {
-    return m_fitDialog->getPreviousValue(propName);
-  }
+  QString getStoredPropertyValue(const QString &propName) const { return m_fitDialog->getPreviousValue(propName); }
   /// Get allowed values for a property
   QStringList getAllowedPropertyValues(const QString &propName) const {
     return m_fitDialog->getAllowedPropertyValues(propName);
@@ -159,8 +157,7 @@ protected:
 class DynamicPropertiesWidget : public QWidget {
 public:
   /// Constructor
-  DynamicPropertiesWidget(InputWorkspaceWidget *parent)
-      : QWidget(parent), m_wsWidget(parent) {}
+  DynamicPropertiesWidget(InputWorkspaceWidget *parent) : QWidget(parent), m_wsWidget(parent) {}
   /// Initialize the child widgets with stored and allowed values
   virtual void init() = 0;
   /// Set all workspace properties

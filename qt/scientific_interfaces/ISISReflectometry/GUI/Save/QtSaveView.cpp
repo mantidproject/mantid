@@ -18,13 +18,9 @@ namespace ISISReflectometry {
 /** Constructor
  * @param parent :: The parent of this view
  */
-QtSaveView::QtSaveView(QWidget *parent) : QWidget(parent), m_notifyee(nullptr) {
-  initLayout();
-}
+QtSaveView::QtSaveView(QWidget *parent) : QWidget(parent), m_notifyee(nullptr) { initLayout(); }
 
-void QtSaveView::subscribe(SaveViewSubscriber *notifyee) {
-  m_notifyee = notifyee;
-}
+void QtSaveView::subscribe(SaveViewSubscriber *notifyee) { m_notifyee = notifyee; }
 
 /** Destructor
  */
@@ -35,29 +31,21 @@ Initialize the Interface
 */
 void QtSaveView::initLayout() {
   m_ui.setupUi(this);
-  connect(m_ui.refreshButton, SIGNAL(clicked()), this,
-          SLOT(populateListOfWorkspaces()));
+  connect(m_ui.refreshButton, SIGNAL(clicked()), this, SLOT(populateListOfWorkspaces()));
   connect(m_ui.saveButton, SIGNAL(clicked()), this, SLOT(saveWorkspaces()));
-  connect(m_ui.filterEdit, SIGNAL(textChanged(const QString &)), this,
-          SLOT(filterWorkspaceList()));
-  connect(m_ui.listOfWorkspaces, SIGNAL(itemDoubleClicked(QListWidgetItem *)),
-          this, SLOT(requestWorkspaceParams()));
-  connect(m_ui.saveReductionResultsCheckBox, SIGNAL(stateChanged(int)), this,
-          SLOT(onAutosaveChanged(int)));
-  connect(m_ui.savePathEdit, SIGNAL(editingFinished()), this,
-          SLOT(onSavePathChanged()));
-  connect(m_ui.savePathBrowseButton, SIGNAL(clicked()), this,
-          SLOT(browseToSaveDirectory()));
+  connect(m_ui.filterEdit, SIGNAL(textChanged(const QString &)), this, SLOT(filterWorkspaceList()));
+  connect(m_ui.listOfWorkspaces, SIGNAL(itemDoubleClicked(QListWidgetItem *)), this, SLOT(requestWorkspaceParams()));
+  connect(m_ui.saveReductionResultsCheckBox, SIGNAL(stateChanged(int)), this, SLOT(onAutosaveChanged(int)));
+  connect(m_ui.savePathEdit, SIGNAL(editingFinished()), this, SLOT(onSavePathChanged()));
+  connect(m_ui.savePathBrowseButton, SIGNAL(clicked()), this, SLOT(browseToSaveDirectory()));
 }
 
 void QtSaveView::connectSettingsChange(QLineEdit &edit) {
-  connect(&edit, SIGNAL(textChanged(QString const &)), this,
-          SLOT(onSettingsChanged()));
+  connect(&edit, SIGNAL(textChanged(QString const &)), this, SLOT(onSettingsChanged()));
 }
 
 void QtSaveView::connectSettingsChange(QComboBox &edit) {
-  connect(&edit, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(onSettingsChanged()));
+  connect(&edit, SIGNAL(currentIndexChanged(int)), this, SLOT(onSettingsChanged()));
 }
 
 void QtSaveView::connectSettingsChange(QCheckBox &edit) {
@@ -85,8 +73,7 @@ void QtSaveView::connectSaveSettingsWidgets() {
 }
 
 void QtSaveView::browseToSaveDirectory() {
-  auto savePath = QFileDialog::getExistingDirectory(
-      this, "Select the directory to save to.");
+  auto savePath = QFileDialog::getExistingDirectory(this, "Select the directory to save to.");
   if (!savePath.isEmpty()) {
     m_ui.savePathEdit->setText(savePath);
     onSavePathChanged();
@@ -95,72 +82,45 @@ void QtSaveView::browseToSaveDirectory() {
 
 void QtSaveView::onSavePathChanged() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      Mantid::Kernel::FeatureType::Feature,
-      {"ISIS Reflectometry", "SaveTab", "SavePathChanged"}, false);
+      Mantid::Kernel::FeatureType::Feature, {"ISIS Reflectometry", "SaveTab", "SavePathChanged"}, false);
   m_notifyee->notifySavePathChanged();
 }
 
 void QtSaveView::onAutosaveChanged(int state) {
   if (state == Qt::CheckState::Checked) {
     Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-        Mantid::Kernel::FeatureType::Feature,
-        {"ISIS Reflectometry", "SaveTab", "EnableAutosave"}, false);
+        Mantid::Kernel::FeatureType::Feature, {"ISIS Reflectometry", "SaveTab", "EnableAutosave"}, false);
     m_notifyee->notifyAutosaveEnabled();
   } else {
     Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-        Mantid::Kernel::FeatureType::Feature,
-        {"ISIS Reflectometry", "SaveTab", "DisableAutosave"}, false);
+        Mantid::Kernel::FeatureType::Feature, {"ISIS Reflectometry", "SaveTab", "DisableAutosave"}, false);
     m_notifyee->notifyAutosaveDisabled();
   }
 }
 
-void QtSaveView::disableAutosaveControls() {
-  m_ui.autosaveGroup->setEnabled(false);
-}
+void QtSaveView::disableAutosaveControls() { m_ui.autosaveGroup->setEnabled(false); }
 
-void QtSaveView::enableAutosaveControls() {
-  m_ui.autosaveGroup->setEnabled(true);
-}
+void QtSaveView::enableAutosaveControls() { m_ui.autosaveGroup->setEnabled(true); }
 
-void QtSaveView::enableFileFormatControls() {
-  m_ui.fileFormatGroup->setEnabled(true);
-}
+void QtSaveView::enableFileFormatControls() { m_ui.fileFormatGroup->setEnabled(true); }
 
-void QtSaveView::disableFileFormatControls() {
-  m_ui.fileFormatGroup->setEnabled(false);
-}
+void QtSaveView::disableFileFormatControls() { m_ui.fileFormatGroup->setEnabled(false); }
 
-void QtSaveView::enableLocationControls() {
-  m_ui.fileLocationGroup->setEnabled(true);
-}
+void QtSaveView::enableLocationControls() { m_ui.fileLocationGroup->setEnabled(true); }
 
-void QtSaveView::disableLocationControls() {
-  m_ui.fileLocationGroup->setEnabled(false);
-}
+void QtSaveView::disableLocationControls() { m_ui.fileLocationGroup->setEnabled(false); }
 
-void QtSaveView::enableLogList() {
-  m_ui.listOfLoggedParameters->setEnabled(true);
-}
+void QtSaveView::enableLogList() { m_ui.listOfLoggedParameters->setEnabled(true); }
 
-void QtSaveView::disableLogList() {
-  m_ui.listOfLoggedParameters->setEnabled(false);
-}
+void QtSaveView::disableLogList() { m_ui.listOfLoggedParameters->setEnabled(false); }
 
-void QtSaveView::enableHeaderCheckBox() {
-  m_ui.headerCheckBox->setEnabled(true);
-}
+void QtSaveView::enableHeaderCheckBox() { m_ui.headerCheckBox->setEnabled(true); }
 
-void QtSaveView::disableHeaderCheckBox() {
-  m_ui.headerCheckBox->setEnabled(false);
-}
+void QtSaveView::disableHeaderCheckBox() { m_ui.headerCheckBox->setEnabled(false); }
 
-void QtSaveView::enableQResolutionCheckBox() {
-  m_ui.qResolutionCheckBox->setEnabled(true);
-}
+void QtSaveView::enableQResolutionCheckBox() { m_ui.qResolutionCheckBox->setEnabled(true); }
 
-void QtSaveView::disableQResolutionCheckBox() {
-  m_ui.qResolutionCheckBox->setEnabled(false);
-}
+void QtSaveView::disableQResolutionCheckBox() { m_ui.qResolutionCheckBox->setEnabled(false); }
 
 void QtSaveView::enableSeparatorButtonGroup() {
   m_ui.commaRadioButton->setEnabled(true);
@@ -177,9 +137,7 @@ void QtSaveView::disableSeparatorButtonGroup() {
 /** Returns the save path
  * @return :: The save path
  */
-std::string QtSaveView::getSavePath() const {
-  return m_ui.savePathEdit->text().toStdString();
-}
+std::string QtSaveView::getSavePath() const { return m_ui.savePathEdit->text().toStdString(); }
 
 /** Sets the save path
  */
@@ -190,23 +148,17 @@ void QtSaveView::setSavePath(const std::string &path) const {
 /** Returns the file name prefix
  * @return :: The prefix
  */
-std::string QtSaveView::getPrefix() const {
-  return m_ui.prefixEdit->text().toStdString();
-}
+std::string QtSaveView::getPrefix() const { return m_ui.prefixEdit->text().toStdString(); }
 
 /** Returns the workspace list filter
  * @return :: The filter
  */
-std::string QtSaveView::getFilter() const {
-  return m_ui.filterEdit->text().toStdString();
-}
+std::string QtSaveView::getFilter() const { return m_ui.filterEdit->text().toStdString(); }
 
 /** Returns the regular expression check value
  * @return :: The regex check
  */
-bool QtSaveView::getRegexCheck() const {
-  return m_ui.regexCheckBox->isChecked();
-}
+bool QtSaveView::getRegexCheck() const { return m_ui.regexCheckBox->isChecked(); }
 
 /** Returns the name of the currently selected workspace from the 'List of
  * workspaces' widget
@@ -243,27 +195,19 @@ std::vector<std::string> QtSaveView::getSelectedParameters() const {
 /** Returns the index of the selected file format
  * @return :: File format index
  */
-int QtSaveView::getFileFormatIndex() const {
-  return m_ui.fileFormatComboBox->currentIndex();
-}
+int QtSaveView::getFileFormatIndex() const { return m_ui.fileFormatComboBox->currentIndex(); }
 
 /** Returns the header check value
  * @return :: The header check
  */
-bool QtSaveView::getHeaderCheck() const {
-  return m_ui.headerCheckBox->isChecked();
-}
+bool QtSaveView::getHeaderCheck() const { return m_ui.headerCheckBox->isChecked(); }
 
 /** Returns the Q resolution check value
  * @return :: The Q resolution check
  */
-bool QtSaveView::getQResolutionCheck() const {
-  return m_ui.qResolutionCheckBox->isChecked();
-}
+bool QtSaveView::getQResolutionCheck() const { return m_ui.qResolutionCheckBox->isChecked(); }
 
-void QtSaveView::disallowAutosave() {
-  m_ui.saveReductionResultsCheckBox->setCheckState(Qt::CheckState::Unchecked);
-}
+void QtSaveView::disallowAutosave() { m_ui.saveReductionResultsCheckBox->setCheckState(Qt::CheckState::Unchecked); }
 
 /** Returns the separator type
  * @return :: The separator
@@ -280,9 +224,7 @@ void QtSaveView::clearWorkspaceList() const { m_ui.listOfWorkspaces->clear(); }
 
 /** Clear the 'List of Logged Parameters' widget
  */
-void QtSaveView::clearParametersList() const {
-  m_ui.listOfLoggedParameters->clear();
-}
+void QtSaveView::clearParametersList() const { m_ui.listOfLoggedParameters->clear(); }
 
 /** Set the 'List of workspaces' widget with workspace names
  * @param names :: The list of workspace names
@@ -306,23 +248,19 @@ void QtSaveView::setParametersList(const std::vector<std::string> &logs) const {
  */
 void QtSaveView::populateListOfWorkspaces() const {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      Mantid::Kernel::FeatureType::Feature,
-      {"ISIS Reflectometry", "SaveTab", "PopulateWorkspaces"}, false);
+      Mantid::Kernel::FeatureType::Feature, {"ISIS Reflectometry", "SaveTab", "PopulateWorkspaces"}, false);
   m_notifyee->notifyPopulateWorkspaceList();
 }
 
 /** Filter the 'List of workspaces' widget
  */
-void QtSaveView::filterWorkspaceList() const {
-  m_notifyee->notifyFilterWorkspaceList();
-}
+void QtSaveView::filterWorkspaceList() const { m_notifyee->notifyFilterWorkspaceList(); }
 
 /** Request for the parameters of a workspace
  */
 void QtSaveView::requestWorkspaceParams() const {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      Mantid::Kernel::FeatureType::Feature,
-      {"ISIS Reflectometry", "SaveTab", "PopulateParameters"}, false);
+      Mantid::Kernel::FeatureType::Feature, {"ISIS Reflectometry", "SaveTab", "PopulateParameters"}, false);
   m_notifyee->notifyPopulateParametersList();
 }
 
@@ -330,19 +268,16 @@ void QtSaveView::requestWorkspaceParams() const {
  */
 void QtSaveView::saveWorkspaces() const {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      Mantid::Kernel::FeatureType::Feature,
-      {"ISIS Reflectometry", "SaveTab", "SaveWorkspaces"}, false);
+      Mantid::Kernel::FeatureType::Feature, {"ISIS Reflectometry", "SaveTab", "SaveWorkspaces"}, false);
   m_notifyee->notifySaveSelectedWorkspaces();
 }
 
 void QtSaveView::error(const std::string &title, const std::string &prompt) {
-  QMessageBox::critical(this, QString::fromStdString(title),
-                        QString::fromStdString(prompt));
+  QMessageBox::critical(this, QString::fromStdString(title), QString::fromStdString(prompt));
 }
 
 void QtSaveView::warning(const std::string &title, const std::string &prompt) {
-  QMessageBox::critical(this, QString::fromStdString(title),
-                        QString::fromStdString(prompt));
+  QMessageBox::critical(this, QString::fromStdString(title), QString::fromStdString(prompt));
 }
 
 void QtSaveView::showFilterEditValid() {
@@ -363,23 +298,17 @@ void QtSaveView::errorInvalidSaveDirectory() {
 }
 
 void QtSaveView::warnInvalidSaveDirectory() {
-  warning("Invalid directory",
-          "You just changed the save path to a directory which "
-          "doesn't exist or is not writable.");
+  warning("Invalid directory", "You just changed the save path to a directory which "
+                               "doesn't exist or is not writable.");
 }
 
 void QtSaveView::noWorkspacesSelected() {
-  error("No workspaces selected.",
-        "You must select the workspaces in order to save.");
+  error("No workspaces selected.", "You must select the workspaces in order to save.");
 }
 
-void QtSaveView::cannotSaveWorkspaces() {
-  error("Error", "Unknown error while saving workspaces");
-}
+void QtSaveView::cannotSaveWorkspaces() { error("Error", "Unknown error while saving workspaces"); }
 
-void QtSaveView::cannotSaveWorkspaces(std::string const &fullError) {
-  error("Error", fullError);
-}
+void QtSaveView::cannotSaveWorkspaces(std::string const &fullError) { error("Error", fullError); }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -28,8 +28,7 @@ public:
   void testDetTopology() {
     V3D center;
     Detector det("det1", 0, nullptr);
-    TSM_ASSERT_EQUALS("single detector should have rectangular topology", rect,
-                      det.getTopology(center));
+    TSM_ASSERT_EQUALS("single detector should have rectangular topology", rect, det.getTopology(center));
   }
 
   void testNameParentConstructor() {
@@ -84,19 +83,15 @@ public:
     double theta = det.getTwoTheta(observer, axis);
     double signedTheta = det.getSignedTwoTheta(observer, axis, up);
 
-    TSM_ASSERT_EQUALS("Absolute theta values should be identical", theta,
-                      std::abs(signedTheta));
-    TSM_ASSERT_LESS_THAN("Defined to give a positive theta value", 0,
-                         signedTheta);
+    TSM_ASSERT_EQUALS("Absolute theta values should be identical", theta, std::abs(signedTheta));
+    TSM_ASSERT_LESS_THAN("Defined to give a positive theta value", 0, signedTheta);
 
     det.setPos(1, 0, -1); // Move the detector round 180 degrees
     theta = det.getTwoTheta(observer, axis);
     signedTheta = det.getSignedTwoTheta(observer, axis, up);
 
-    TSM_ASSERT_EQUALS("Absolute theta values should be identical", theta,
-                      std::abs(signedTheta));
-    TSM_ASSERT_LESS_THAN("Defined to give a negative theta value", signedTheta,
-                         0);
+    TSM_ASSERT_EQUALS("Absolute theta values should be identical", theta, std::abs(signedTheta));
+    TSM_ASSERT_LESS_THAN("Defined to give a negative theta value", signedTheta, 0);
   }
 
   void testCalculateTwoThetaBoundaries() {
@@ -151,23 +146,19 @@ public:
     V3D aboveOrigin(1, 0, 0); // phi = 0
     det.setPos(aboveOrigin);
     det.getPhiOffset(offset);
-    TS_ASSERT_EQUALS(std::abs(det.getPhi()),
-                     std::abs(det.getPhiOffset(offset)));
+    TS_ASSERT_EQUALS(std::abs(det.getPhi()), std::abs(det.getPhiOffset(offset)));
 
     V3D leftOfOrigin(0, 1, 0); // phi = pi/2
     det.setPos(leftOfOrigin);
-    TS_ASSERT_EQUALS(std::abs(det.getPhi()),
-                     std::abs(det.getPhiOffset(offset)));
+    TS_ASSERT_EQUALS(std::abs(det.getPhi()), std::abs(det.getPhiOffset(offset)));
 
     V3D belowOrigin(-1, 0, 0); // phi = pi
     det.setPos(belowOrigin);
-    TS_ASSERT_EQUALS(std::abs(det.getPhi()),
-                     std::abs(det.getPhiOffset(offset)));
+    TS_ASSERT_EQUALS(std::abs(det.getPhi()), std::abs(det.getPhiOffset(offset)));
 
     V3D rightOfOrigin(0, -1, 0); // phi = 3pi/2
     det.setPos(rightOfOrigin);
-    TS_ASSERT_EQUALS(std::abs(det.getPhi()),
-                     std::abs(det.getPhiOffset(offset)));
+    TS_ASSERT_EQUALS(std::abs(det.getPhi()), std::abs(det.getPhiOffset(offset)));
   }
 
   void test_phi_offset_with_phi_greater_than_zero() {

@@ -32,8 +32,7 @@ DECLARE_WORKSPACE(SpecialWorkspace2D)
  * @param includeMonitors :: If false the monitors are not included
  * @return created SpecialWorkspace2D
  */
-SpecialWorkspace2D::SpecialWorkspace2D(
-    const Geometry::Instrument_const_sptr &inst, const bool includeMonitors) {
+SpecialWorkspace2D::SpecialWorkspace2D(const Geometry::Instrument_const_sptr &inst, const bool includeMonitors) {
   // Init the Workspace2D with one spectrum per detector, in the same order.
   this->initialize(inst->getNumberDetectors(!includeMonitors), 1, 1);
 
@@ -59,8 +58,7 @@ SpecialWorkspace2D::SpecialWorkspace2D(
  * @param parent :: input workspace that is the base for this workspace
  * @return created SpecialWorkspace2D
  */
-SpecialWorkspace2D::SpecialWorkspace2D(
-    const API::MatrixWorkspace_const_sptr &parent) {
+SpecialWorkspace2D::SpecialWorkspace2D(const API::MatrixWorkspace_const_sptr &parent) {
   this->initialize(parent->getNumberHistograms(), 1, 1);
   API::WorkspaceFactory::Instance().initializeFromParent(*parent, *this, false);
   // Make the mapping, which will be used for speed later.
@@ -80,22 +78,18 @@ SpecialWorkspace2D::SpecialWorkspace2D(
  *  @param XLength :: Must be 1
  *  @param YLength :: Must be 1
  */
-void SpecialWorkspace2D::init(const size_t &NVectors, const size_t &XLength,
-                              const size_t &YLength) {
+void SpecialWorkspace2D::init(const size_t &NVectors, const size_t &XLength, const size_t &YLength) {
   if ((XLength != 1) || (YLength != 1))
-    throw std::invalid_argument(
-        "SpecialWorkspace2D must have 'spectra' of length 1 only.");
+    throw std::invalid_argument("SpecialWorkspace2D must have 'spectra' of length 1 only.");
   // Continue with standard initialization
   Workspace2D::init(NVectors, XLength, YLength);
 }
 
 void SpecialWorkspace2D::init(const HistogramData::Histogram &histogram) {
   if (histogram.xMode() != HistogramData::Histogram::XMode::Points)
-    throw std::runtime_error(
-        "SpecialWorkspace2D can only be initialized with XMode::Points");
+    throw std::runtime_error("SpecialWorkspace2D can only be initialized with XMode::Points");
   if (histogram.x().size() != 1)
-    throw std::runtime_error(
-        "SpecialWorkspace2D can only be initialized with length 1");
+    throw std::runtime_error("SpecialWorkspace2D can only be initialized with length 1");
   Workspace2D::init(histogram);
 }
 
@@ -121,8 +115,7 @@ double SpecialWorkspace2D::getValue(const detid_t detectorID) const {
 
   if (it == detID_to_WI.end()) {
     std::ostringstream os;
-    os << "SpecialWorkspace2D: " << this->getName()
-       << "  Detector ID = " << detectorID
+    os << "SpecialWorkspace2D: " << this->getName() << "  Detector ID = " << detectorID
        << "  Size(Map) = " << this->detID_to_WI.size() << '\n';
     throw std::invalid_argument(os.str());
   } else {
@@ -138,19 +131,17 @@ double SpecialWorkspace2D::getValue(const detid_t detectorID) const {
  * @param defaultValue :: value returned if the ID is not found.
  * @return the Y value for that detector ID.
  */
-double SpecialWorkspace2D::getValue(const detid_t detectorID,
-                                    const double defaultValue) const {
+double SpecialWorkspace2D::getValue(const detid_t detectorID, const double defaultValue) const {
   auto it = detID_to_WI.find(detectorID);
   if (it == detID_to_WI.end())
     return defaultValue;
   else {
-    if (it->second <
-        getNumberHistograms()) // don't let it generate an exception
+    if (it->second < getNumberHistograms()) // don't let it generate an exception
     {
       return this->dataY(it->second)[0];
     } else {
-      g_log.debug() << "getValue(" << detectorID << "->" << (it->second) << ", "
-                    << defaultValue << ") index out of range\n";
+      g_log.debug() << "getValue(" << detectorID << "->" << (it->second) << ", " << defaultValue
+                    << ") index out of range\n";
       return defaultValue;
     }
   }
@@ -164,13 +155,11 @@ double SpecialWorkspace2D::getValue(const detid_t detectorID,
  * @param error :: the Y value for that detector ID.
  * @throw std::invalid_argument if the detector ID was not found
  */
-void SpecialWorkspace2D::setValue(const detid_t detectorID, const double value,
-                                  const double error) {
+void SpecialWorkspace2D::setValue(const detid_t detectorID, const double value, const double error) {
   auto it = detID_to_WI.find(detectorID);
   if (it == detID_to_WI.end()) {
     std::stringstream msg;
-    msg << "SpecialWorkspace2D::setValue(): Input Detector ID = " << detectorID
-        << " Is Invalid";
+    msg << "SpecialWorkspace2D::setValue(): Input Detector ID = " << detectorID << " Is Invalid";
     throw std::invalid_argument(msg.str());
   } else {
     this->dataY(it->second)[0] = value;
@@ -188,8 +177,7 @@ void SpecialWorkspace2D::setValue(const detid_t detectorID, const double value,
  * @param error :: the Y value for the detector IDs.
  * @throw std::invalid_argument if any of the detector IDs are not found
  */
-void SpecialWorkspace2D::setValue(const set<detid_t> &detectorIDs,
-                                  const double value, const double error) {
+void SpecialWorkspace2D::setValue(const set<detid_t> &detectorIDs, const double value, const double error) {
   for (auto detectorID : detectorIDs) {
     this->setValue(detectorID, value, error);
   }
@@ -202,11 +190,9 @@ void SpecialWorkspace2D::setValue(const set<detid_t> &detectorIDs,
  * @param workspaceIndex
  * @return
  */
-set<detid_t>
-SpecialWorkspace2D::getDetectorIDs(const std::size_t workspaceIndex) const {
+set<detid_t> SpecialWorkspace2D::getDetectorIDs(const std::size_t workspaceIndex) const {
   if (size_t(workspaceIndex) > this->getNumberHistograms())
-    throw std::invalid_argument(
-        "SpecialWorkspace2D::getDetectorIDs(): Invalid workspaceIndex given.");
+    throw std::invalid_argument("SpecialWorkspace2D::getDetectorIDs(): Invalid workspaceIndex given.");
   return this->getSpectrum(workspaceIndex).getDetectorIDs();
 }
 
@@ -215,14 +201,12 @@ SpecialWorkspace2D::getDetectorIDs(const std::size_t workspaceIndex) const {
  * @ parameter
  * @ return
  */
-void SpecialWorkspace2D::binaryOperation(
-    std::shared_ptr<const SpecialWorkspace2D> &ws,
-    const unsigned int operatortype) {
+void SpecialWorkspace2D::binaryOperation(std::shared_ptr<const SpecialWorkspace2D> &ws,
+                                         const unsigned int operatortype) {
 
   // 1. Check compatibility between this and input workspace
   if (!this->isCompatible(ws)) {
-    throw std::invalid_argument(
-        "Two SpecialWorkspace2D objects are not compatible!");
+    throw std::invalid_argument("Two SpecialWorkspace2D objects are not compatible!");
   }
 
   switch (operatortype) {
@@ -253,8 +237,7 @@ void SpecialWorkspace2D::binaryOperation(const unsigned int operatortype) {
     this->binaryNOT();
     break;
   default:
-    g_log.error() << "Operator " << operatortype
-                  << " Is Not Valid In BinaryOperation(operatortype)\n";
+    g_log.error() << "Operator " << operatortype << " Is Not Valid In BinaryOperation(operatortype)\n";
     throw std::invalid_argument("Invalid Operator");
     break;
   }
@@ -263,8 +246,7 @@ void SpecialWorkspace2D::binaryOperation(const unsigned int operatortype) {
 /** AND operator
  *
  */
-void SpecialWorkspace2D::binaryAND(
-    const std::shared_ptr<const SpecialWorkspace2D> &ws) {
+void SpecialWorkspace2D::binaryAND(const std::shared_ptr<const SpecialWorkspace2D> &ws) {
 
   for (size_t i = 0; i < this->getNumberHistograms(); i++) {
     double y1 = this->dataY(i)[0];
@@ -281,8 +263,7 @@ void SpecialWorkspace2D::binaryAND(
 /** OR operator
  *
  */
-void SpecialWorkspace2D::binaryOR(
-    const std::shared_ptr<const SpecialWorkspace2D> &ws) {
+void SpecialWorkspace2D::binaryOR(const std::shared_ptr<const SpecialWorkspace2D> &ws) {
 
   for (size_t i = 0; i < this->getNumberHistograms(); i++) {
     double y1 = this->dataY(i)[0];
@@ -307,8 +288,7 @@ if (y1 < 1.0E-10 && y2 < 1.0E-10){
 /** Excluded Or operator
  *
  */
-void SpecialWorkspace2D::binaryXOR(
-    const std::shared_ptr<const SpecialWorkspace2D> &ws) {
+void SpecialWorkspace2D::binaryXOR(const std::shared_ptr<const SpecialWorkspace2D> &ws) {
 
   for (size_t i = 0; i < this->getNumberHistograms(); i++) {
     double y1 = this->dataY(i)[0];
@@ -343,15 +323,13 @@ void SpecialWorkspace2D::binaryNOT() {
  * @ parameter
  * @ return
  */
-bool SpecialWorkspace2D::isCompatible(
-    const std::shared_ptr<const SpecialWorkspace2D> &ws) {
+bool SpecialWorkspace2D::isCompatible(const std::shared_ptr<const SpecialWorkspace2D> &ws) {
 
   // 1. Check number of histogram
   size_t numhist1 = this->getNumberHistograms();
   size_t numhist2 = ws->getNumberHistograms();
   if (numhist1 != numhist2) {
-    g_log.debug() << "2 Workspaces have different number of histograms:  "
-                  << numhist1 << "  vs. " << numhist2 << '\n';
+    g_log.debug() << "2 Workspaces have different number of histograms:  " << numhist1 << "  vs. " << numhist2 << '\n';
     return false;
   }
 
@@ -361,18 +339,15 @@ bool SpecialWorkspace2D::isCompatible(
     set<detid_t> ids2 = ws->getSpectrum(ispec).getDetectorIDs();
 
     if (ids1.size() != ids2.size()) {
-      g_log.debug() << "Spectra " << ispec
-                    << ": 2 Workspaces have different number of detectors "
-                    << ids1.size() << " vs. " << ids2.size() << '\n';
+      g_log.debug() << "Spectra " << ispec << ": 2 Workspaces have different number of detectors " << ids1.size()
+                    << " vs. " << ids2.size() << '\n';
       return false;
     } else if (ids1.empty()) {
-      g_log.debug() << "Spectra " << ispec
-                    << ": 2 Workspaces both have 0 detectors. \n";
+      g_log.debug() << "Spectra " << ispec << ": 2 Workspaces both have 0 detectors. \n";
       return false;
     } else if (*ids1.begin() != *ids2.begin()) {
-      g_log.debug() << "Spectra " << ispec
-                    << ": 2 Workspaces have different Detector ID "
-                    << *ids1.begin() << " vs. " << *ids2.begin() << '\n';
+      g_log.debug() << "Spectra " << ispec << ": 2 Workspaces have different Detector ID " << *ids1.begin() << " vs. "
+                    << *ids2.begin() << '\n';
       return false;
     }
   } // false
@@ -383,8 +358,7 @@ bool SpecialWorkspace2D::isCompatible(
 //----------------------------------------------------------------------------------------------
 /** Duplicate SpecialWorkspace2D
  */
-void SpecialWorkspace2D::copyFrom(
-    std::shared_ptr<const SpecialWorkspace2D> sourcews) {
+void SpecialWorkspace2D::copyFrom(std::shared_ptr<const SpecialWorkspace2D> sourcews) {
   // Check
   if (this->getNumberHistograms() != sourcews->getNumberHistograms()) {
     throw std::invalid_argument("Incompatible number of histograms");
@@ -402,8 +376,7 @@ void SpecialWorkspace2D::copyFrom(
     MantidVec &outy = this->dataY(ispec);
     MantidVec &oute = this->dataE(ispec);
 
-    if (inx.size() != outx.size() || iny.size() != outy.size() ||
-        ine.size() != oute.size()) {
+    if (inx.size() != outx.size() || iny.size() != outy.size() || ine.size() != oute.size()) {
       throw std::invalid_argument("X, Y, E size different within spectrum");
     }
 
@@ -431,34 +404,28 @@ namespace Kernel {
 
 template <>
 DLLExport Mantid::DataObjects::SpecialWorkspace2D_sptr
-IPropertyManager::getValue<Mantid::DataObjects::SpecialWorkspace2D_sptr>(
-    const std::string &name) const {
-  auto *prop = dynamic_cast<
-      PropertyWithValue<Mantid::DataObjects::SpecialWorkspace2D_sptr> *>(
-      getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::DataObjects::SpecialWorkspace2D_sptr>(const std::string &name) const {
+  auto *prop =
+      dynamic_cast<PropertyWithValue<Mantid::DataObjects::SpecialWorkspace2D_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected shared_ptr<SpecialWorkspace2D>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected shared_ptr<SpecialWorkspace2D>.";
     throw std::runtime_error(message);
   }
 }
 
 template <>
 DLLExport Mantid::DataObjects::SpecialWorkspace2D_const_sptr
-IPropertyManager::getValue<Mantid::DataObjects::SpecialWorkspace2D_const_sptr>(
-    const std::string &name) const {
-  auto *prop = dynamic_cast<
-      PropertyWithValue<Mantid::DataObjects::SpecialWorkspace2D_sptr> *>(
-      getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::DataObjects::SpecialWorkspace2D_const_sptr>(const std::string &name) const {
+  auto *prop =
+      dynamic_cast<PropertyWithValue<Mantid::DataObjects::SpecialWorkspace2D_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected const shared_ptr<SpecialWorkspace2D>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected const shared_ptr<SpecialWorkspace2D>.";
     throw std::runtime_error(message);
   }
 }

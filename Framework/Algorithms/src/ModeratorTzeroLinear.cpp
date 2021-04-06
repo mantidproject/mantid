@@ -32,12 +32,9 @@ using namespace Mantid::HistogramData;
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
 
-ModeratorTzeroLinear::ModeratorTzeroLinear()
-    : API::Algorithm(), m_gradient(0.), m_intercept(0.), m_instrument() {}
+ModeratorTzeroLinear::ModeratorTzeroLinear() : API::Algorithm(), m_gradient(0.), m_intercept(0.), m_instrument() {}
 
-const std::string ModeratorTzeroLinear::name() const {
-  return "ModeratorTzeroLinear";
-}
+const std::string ModeratorTzeroLinear::name() const { return "ModeratorTzeroLinear"; }
 
 const std::string ModeratorTzeroLinear::summary() const {
   return "Corrects the time of flight of an indirect geometry instrument by a "
@@ -47,14 +44,11 @@ const std::string ModeratorTzeroLinear::summary() const {
 
 int ModeratorTzeroLinear::version() const { return 1; }
 
-const std::string ModeratorTzeroLinear::category() const {
-  return "CorrectionFunctions\\InstrumentCorrections";
-}
+const std::string ModeratorTzeroLinear::category() const { return "CorrectionFunctions\\InstrumentCorrections"; }
 
 void ModeratorTzeroLinear::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<WorkspaceUnitValidator>("TOF")),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input,
+                                                                       std::make_shared<WorkspaceUnitValidator>("TOF")),
                   "The name of the input workspace, containing events and/or "
                   "histogram data, in units of time-of-flight");
   declareProperty("Gradient", EMPTY_DBL(),
@@ -64,8 +58,7 @@ void ModeratorTzeroLinear::init() {
                   "TOF shift, units in microseconds. Overrides the value"
                   "stored in the instrument object");
   // declare the output workspace
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace");
 
 } // end of void ModeratorTzeroLinear::init()
@@ -79,61 +72,52 @@ void ModeratorTzeroLinear::exec() {
 
   // deltaE-mode (should be "indirect")
   try {
-    const std::vector<std::string> Emode =
-        m_instrument->getStringParameter("deltaE-mode");
+    const std::vector<std::string> Emode = m_instrument->getStringParameter("deltaE-mode");
     if (Emode.empty())
       throw Exception::InstrumentDefinitionError("Unable to retrieve "
                                                  "instrument geometry (direct "
                                                  "or indirect) parameter",
                                                  inputWS->getTitle());
     if (Emode[0] != "indirect")
-      throw Exception::InstrumentDefinitionError(
-          "Instrument geometry must be of type indirect.");
+      throw Exception::InstrumentDefinitionError("Instrument geometry must be of type indirect.");
   } catch (Exception::NotFoundError &) {
     g_log.error("Unable to retrieve instrument geometry (direct or indirect) "
                 "parameter");
-    throw Exception::InstrumentDefinitionError(
-        "Unable to retrieve instrument geometry (direct or indirect) parameter",
-        inputWS->getTitle());
+    throw Exception::InstrumentDefinitionError("Unable to retrieve instrument geometry (direct or indirect) parameter",
+                                               inputWS->getTitle());
   }
 
   // gradient, intercept constants
   try {
 
     // determine which Gradient to use
-    const std::vector<double> gradientParam =
-        m_instrument->getNumberParameter("Moderator.TimeZero.gradient");
+    const std::vector<double> gradientParam = m_instrument->getNumberParameter("Moderator.TimeZero.gradient");
     const double gradientParamManual = getProperty("Gradient");
     if (gradientParam.empty() && gradientParamManual == EMPTY_DBL())
-      throw Exception::InstrumentDefinitionError(
-          "Unable to retrieve Moderator Time Zero parameters (gradient)",
-          inputWS->getTitle());
+      throw Exception::InstrumentDefinitionError("Unable to retrieve Moderator Time Zero parameters (gradient)",
+                                                 inputWS->getTitle());
     if (gradientParamManual != EMPTY_DBL()) {
       m_gradient = gradientParamManual;
     } else {
       m_gradient = gradientParam[0]; //[gradient]=microsecond/Angstrom
     }
     // conversion factor for gradient from microsecond/Angstrom to meters
-    double convfactor =
-        1.0e4 * PhysicalConstants::h / PhysicalConstants::NeutronMass;
+    double convfactor = 1.0e4 * PhysicalConstants::h / PhysicalConstants::NeutronMass;
     m_gradient *= convfactor; //[gradient] = meter
 
     // determine which Intercept to use
-    const std::vector<double> interceptParam =
-        m_instrument->getNumberParameter("Moderator.TimeZero.intercept");
+    const std::vector<double> interceptParam = m_instrument->getNumberParameter("Moderator.TimeZero.intercept");
     const double interceptParamManual = getProperty("Intercept");
     if (interceptParam.empty() && interceptParamManual == EMPTY_DBL())
-      throw Exception::InstrumentDefinitionError(
-          "Unable to retrieve Moderator Time Zero parameters (intercept)",
-          inputWS->getTitle());
+      throw Exception::InstrumentDefinitionError("Unable to retrieve Moderator Time Zero parameters (intercept)",
+                                                 inputWS->getTitle());
     if (interceptParamManual != EMPTY_DBL()) {
       m_intercept = interceptParamManual;
     } else {
       m_intercept = interceptParam[0]; //[intercept]=microsecond
     }
 
-    g_log.debug() << "Moderator Time Zero: gradient=" << m_gradient
-                  << "intercept=" << m_intercept << '\n';
+    g_log.debug() << "Moderator Time Zero: gradient=" << m_gradient << "intercept=" << m_intercept << '\n';
   } catch (Exception::NotFoundError &) {
     g_log.error("Unable to retrieve Moderator Time Zero parameters (gradient "
                 "and intercept)");
@@ -144,8 +128,7 @@ void ModeratorTzeroLinear::exec() {
   }
 
   // Run execEvent if eventWorkSpace
-  EventWorkspace_const_sptr eventWS =
-      std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+  EventWorkspace_const_sptr eventWS = std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (eventWS != nullptr) {
     execEvent();
     return;
@@ -203,8 +186,7 @@ void ModeratorTzeroLinear::exec() {
 void ModeratorTzeroLinear::execEvent() {
   g_log.information("Processing event workspace");
 
-  const MatrixWorkspace_const_sptr matrixInputWS =
-      getProperty("InputWorkspace");
+  const MatrixWorkspace_const_sptr matrixInputWS = getProperty("InputWorkspace");
 
   // generate the output workspace pointer
   MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
@@ -243,10 +225,8 @@ void ModeratorTzeroLinear::execEvent() {
 } // end of void ModeratorTzeroLinear::execEvent()
 
 // calculate time from sample to detector
-void ModeratorTzeroLinear::calculateTfLi(const SpectrumInfo &spectrumInfo,
-                                         size_t i, double &t_f, double &L_i) {
-  static const double convFact = 1.0e-6 * sqrt(2 * PhysicalConstants::meV /
-                                               PhysicalConstants::NeutronMass);
+void ModeratorTzeroLinear::calculateTfLi(const SpectrumInfo &spectrumInfo, size_t i, double &t_f, double &L_i) {
+  static const double convFact = 1.0e-6 * sqrt(2 * PhysicalConstants::meV / PhysicalConstants::NeutronMass);
   static const double TfError = -1.0; // signal error when calculating final
                                       // time
 

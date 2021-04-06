@@ -48,18 +48,13 @@ public:
     loader.setPropertyValue("OutputWorkspace", WSName);
     // Execute and fetch the workspace
     loader.execute();
-    m_masterPeaks = std::dynamic_pointer_cast<PeaksWorkspace>(
-        AnalysisDataService::Instance().retrieve(WSName));
+    m_masterPeaks = std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(WSName));
   }
 
-  ~IndexSXPeaksTest() override {
-    AnalysisDataService::Instance().remove("master_peaks");
-  }
+  ~IndexSXPeaksTest() override { AnalysisDataService::Instance().remove("master_peaks"); }
 
-  void doTest(int nPixels, const std::string &peakIndexes, double a, double b,
-              double c, double alpha, double beta, double gamma,
-              const std::string &searchExtents = "-20,20,-20,20,-20,20",
-              double dTolerance = 0.01) {
+  void doTest(int nPixels, const std::string &peakIndexes, double a, double b, double c, double alpha, double beta,
+              double gamma, const std::string &searchExtents = "-20,20,-20,20,-20,20", double dTolerance = 0.01) {
 
     // Take a copy of the original peaks workspace.
     PeaksWorkspace_sptr local(m_masterPeaks->clone());
@@ -87,8 +82,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("gamma", gamma));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakIndices", peakIndexes));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("dTolerance", dTolerance));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("SearchExtents", searchExtents));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("SearchExtents", searchExtents));
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
@@ -97,12 +91,9 @@ public:
     for (int i = 0; i < nPixels; i++) {
       IPeak &peakMaster = m_masterPeaks->getPeak(i);
       IPeak &peakModified = local->getPeak(i);
-      TSM_ASSERT_EQUALS("Wrong H value", peakMaster.getH(),
-                        peakModified.getH());
-      TSM_ASSERT_EQUALS("Wrong K value", peakMaster.getK(),
-                        peakModified.getK());
-      TSM_ASSERT_EQUALS("Wrong L value", peakMaster.getL(),
-                        peakModified.getL());
+      TSM_ASSERT_EQUALS("Wrong H value", peakMaster.getH(), peakModified.getH());
+      TSM_ASSERT_EQUALS("Wrong K value", peakMaster.getK(), peakModified.getK());
+      TSM_ASSERT_EQUALS("Wrong L value", peakMaster.getL(), peakModified.getL());
     }
 
     // Clean-up
@@ -110,14 +101,11 @@ public:
   }
 
   void test_lessThanTwoPeaksThrows() {
-    TS_ASSERT_THROWS(doTest(1, "1", 14.131, 19.247, 8.606, 90.0, 105.071, 90.0),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(doTest(1, "1", 14.131, 19.247, 8.606, 90.0, 105.071, 90.0), const std::runtime_error &);
   }
 
   void test_zeroBasedIndexingThrows() {
-    TS_ASSERT_THROWS(
-        doTest(1, "0, 1, 2", 14.131, 19.247, 8.606, 90.0, 105.071, 90.0),
-        const std::runtime_error &);
+    TS_ASSERT_THROWS(doTest(1, "0, 1, 2", 14.131, 19.247, 8.606, 90.0, 105.071, 90.0), const std::runtime_error &);
   }
 
   void test_colinearPeaksThrows() {
@@ -131,52 +119,42 @@ public:
                                             // co-linear.
     }
 
-    TS_ASSERT_THROWS(doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0,
-                            105.071, 90.0),
+    TS_ASSERT_THROWS(doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0, 105.071, 90.0),
                      const std::runtime_error &);
 
     // Restore master. peaks workspace.
     m_masterPeaks = temp;
   }
 
-  void test_exec() {
-    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0, 105.071, 90.0,
-           "-20,20,0,20,-20,20");
-  }
+  void test_exec() { doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0, 105.071, 90.0, "-20,20,0,20,-20,20"); }
 
   void test_perturbateA() {
     // a increased
-    doTest(6, "1, 2, 3, 4, 5, 6", 14.2, 19.247, 8.606, 90.0, 105.071, 90.0,
-           "-20,20,0,20,-20,20");
+    doTest(6, "1, 2, 3, 4, 5, 6", 14.2, 19.247, 8.606, 90.0, 105.071, 90.0, "-20,20,0,20,-20,20");
   }
 
   void test_perturbateB() {
     // b increased
-    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.3, 8.606, 90.0, 105.071, 90.0,
-           "-20,20,0,20,-20,20");
+    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.3, 8.606, 90.0, 105.071, 90.0, "-20,20,0,20,-20,20");
   }
 
   void test_perturbateC() {
     // c increased
-    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.65, 90.0, 105.071, 90.0,
-           "-20,20,0,20,-20,20");
+    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.65, 90.0, 105.071, 90.0, "-20,20,0,20,-20,20");
   }
 
   void test_perturbateAlpha() {
     // Alpha decreased
-    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 89.8, 105.071, 90.0,
-           "-20,20,0,20,-20,20");
+    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 89.8, 105.071, 90.0, "-20,20,0,20,-20,20");
   }
 
   void test_perturbateBeta() {
     // Beta increased
-    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0, 105.1, 90.0,
-           "-20,20,0,20,-20,20");
+    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0, 105.1, 90.0, "-20,20,0,20,-20,20");
   }
 
   void test_perturbateGamma() {
     // Gamma decreased
-    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0, 105.071, 89.8,
-           "-20,20,0,20,-20,20");
+    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0, 105.071, 89.8, "-20,20,0,20,-20,20");
   }
 };

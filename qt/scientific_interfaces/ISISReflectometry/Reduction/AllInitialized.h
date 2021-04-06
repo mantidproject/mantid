@@ -11,21 +11,16 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-template <typename Param>
-bool allInitialized(boost::optional<Param> const &param) {
-  return param.is_initialized();
-}
+template <typename Param> bool allInitialized(boost::optional<Param> const &param) { return param.is_initialized(); }
 
 template <typename FirstParam, typename SecondParam, typename... Params>
-bool allInitialized(boost::optional<FirstParam> const &first,
-                    boost::optional<SecondParam> const &second,
-                    boost::optional<Params> const &... params) {
+bool allInitialized(boost::optional<FirstParam> const &first, boost::optional<SecondParam> const &second,
+                    boost::optional<Params> const &...params) {
   return first.is_initialized() && allInitialized(second, params...);
 }
 
 template <typename Result, typename... Params>
-boost::optional<Result>
-makeIfAllInitialized(boost::optional<Params> const &... params) {
+boost::optional<Result> makeIfAllInitialized(boost::optional<Params> const &...params) {
   if (allInitialized(params...))
     return Result(params.get()...);
   else

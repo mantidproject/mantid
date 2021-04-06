@@ -34,14 +34,12 @@ private:
   /// hideous typedef for the container holding the list
   using item_list = typename boost::multi_index::multi_index_container<
       std::shared_ptr<T>,
-      boost::multi_index::indexed_by<
-          boost::multi_index::sequenced<>,
-          boost::multi_index::hashed_unique<::boost::multi_index::const_mem_fun<
-              T, std::uintptr_t, &T::hashIndexFunction>>>>;
+      boost::multi_index::indexed_by<boost::multi_index::sequenced<>,
+                                     boost::multi_index::hashed_unique<::boost::multi_index::const_mem_fun<
+                                         T, std::uintptr_t, &T::hashIndexFunction>>>>;
 
   /// This typedef makes an ordered item list (you access it by the 1st index)
-  using ordered_item_list =
-      typename boost::multi_index::nth_index<item_list, 1>::type;
+  using ordered_item_list = typename boost::multi_index::nth_index<item_list, 1>::type;
 
   /// The most recently used list
   mutable item_list il;

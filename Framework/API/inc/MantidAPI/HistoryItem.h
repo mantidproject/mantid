@@ -30,12 +30,8 @@ public:
   virtual ~HistoryItem() = default;
   bool isUnrolled() const { return m_unrolled; }
   void unrolled(bool unrolled) { m_unrolled = unrolled; }
-  AlgorithmHistory_const_sptr getAlgorithmHistory() const {
-    return m_algorithmHistory;
-  }
-  size_t numberOfChildren() const {
-    return m_algorithmHistory->childHistorySize();
-  }
+  AlgorithmHistory_const_sptr getAlgorithmHistory() const { return m_algorithmHistory; }
+  size_t numberOfChildren() const { return m_algorithmHistory->childHistorySize(); }
 
 private:
   AlgorithmHistory_const_sptr m_algorithmHistory;

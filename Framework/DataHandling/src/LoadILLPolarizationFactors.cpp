@@ -52,9 +52,7 @@ Factor factor(const std::string &l) {
 }
 
 /// Returns a list of all available Factor tags.
-const std::array<Factor, 5> factor_list() {
-  return {{Factor::F1, Factor::F2, Factor::P1, Factor::P2, Factor::Phi}};
-}
+const std::array<Factor, 5> factor_list() { return {{Factor::F1, Factor::F2, Factor::P1, Factor::P2, Factor::Phi}}; }
 
 /// Returns the string presentation of tag f.
 std::string to_string(const Factor f) {
@@ -93,9 +91,7 @@ std::string cleanse_whitespace(const std::string &l) {
 }
 
 /// Returns true if `l` contains the limits array.
-bool contains_limits(const std::string &l) {
-  return l.find("_limits") != std::string::npos;
-}
+bool contains_limits(const std::string &l) { return l.find("_limits") != std::string::npos; }
 
 /// Converts the IDL array in `l` to std::vector.
 std::vector<double> extract_values(const std::string &l) {
@@ -126,12 +122,10 @@ std::vector<double> extract_values(const std::string &l) {
 }
 
 /// Returns a histogram with X set to [0, ...points..., maxWavelength)].
-Mantid::HistogramData::Histogram
-make_histogram(const std::vector<double> &points, const double maxWavelength) {
+Mantid::HistogramData::Histogram make_histogram(const std::vector<double> &points, const double maxWavelength) {
   Mantid::HistogramData::Points p(points.size() + 2);
   p.mutableRawData().front() = 0;
-  p.mutableRawData().back() =
-      maxWavelength > points.back() ? maxWavelength : 2 * points.back();
+  p.mutableRawData().back() = maxWavelength > points.back() ? maxWavelength : 2 * points.back();
   for (size_t i = 1; i != p.size() - 1; ++i) {
     p.mutableData()[i] = points[i - 1];
   }
@@ -140,8 +134,7 @@ make_histogram(const std::vector<double> &points, const double maxWavelength) {
 }
 
 /// Fills `h` with the efficiency factors.
-void calculate_factors_in_place(Mantid::HistogramData::Histogram &h,
-                                const std::vector<double> &piecewiseFactors) {
+void calculate_factors_in_place(Mantid::HistogramData::Histogram &h, const std::vector<double> &piecewiseFactors) {
   const auto &xs = h.x();
   auto &ys = h.mutableY();
   ys[0] = piecewiseFactors.front();
@@ -191,8 +184,7 @@ void definition_map_sanity_check(const std::map<Factor, FactorDefinition> &m) {
       throw std::runtime_error("No fitting information defined for a factor.");
     }
     if (fDef.limits.size() + 2 != fDef.fitFactors.size()) {
-      throw std::runtime_error(
-          "Size mismatch between limits and fitting information.");
+      throw std::runtime_error("Size mismatch between limits and fitting information.");
     }
   }
 }
@@ -236,17 +228,13 @@ DECLARE_ALGORITHM(LoadILLPolarizationFactors)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string LoadILLPolarizationFactors::name() const {
-  return "LoadILLPolarizationFactors";
-}
+const std::string LoadILLPolarizationFactors::name() const { return "LoadILLPolarizationFactors"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int LoadILLPolarizationFactors::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadILLPolarizationFactors::category() const {
-  return "DataHandling\\Text;ILL\\Reflectometry";
-}
+const std::string LoadILLPolarizationFactors::category() const { return "DataHandling\\Text;ILL\\Reflectometry"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string LoadILLPolarizationFactors::summary() const {
@@ -257,16 +245,14 @@ const std::string LoadILLPolarizationFactors::summary() const {
 /** Initialize the algorithm's properties.
  */
 void LoadILLPolarizationFactors::init() {
-  declareProperty(std::make_unique<API::FileProperty>(Prop::FILENAME, "",
-                                                      API::FileProperty::Load),
+  declareProperty(std::make_unique<API::FileProperty>(Prop::FILENAME, "", API::FileProperty::Load),
                   "Path to the polarization efficiency file.");
   const auto refWSValidator = std::make_shared<API::IncreasingAxisValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      Prop::OUT_WS, "", Direction::Output, refWSValidator),
-                  "An output workspace containing the efficiencies at the "
-                  "reference workspace's wavelength points.");
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      Prop::REF_WS, "", Direction::Input),
+  declareProperty(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(Prop::OUT_WS, "", Direction::Output, refWSValidator),
+      "An output workspace containing the efficiencies at the "
+      "reference workspace's wavelength points.");
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(Prop::REF_WS, "", Direction::Input),
                   "A reference workspace to get the wavelength axis from.");
 }
 
@@ -276,8 +262,7 @@ void LoadILLPolarizationFactors::init() {
 void LoadILLPolarizationFactors::exec() {
   API::MatrixWorkspace_const_sptr refWS = getProperty(Prop::REF_WS);
   HistogramData::Histogram tmplHist{refWS->histogram(0).points()};
-  API::MatrixWorkspace_sptr outWS =
-      DataObjects::create<DataObjects::Workspace2D>(5, tmplHist);
+  API::MatrixWorkspace_sptr outWS = DataObjects::create<DataObjects::Workspace2D>(5, tmplHist);
   auto outVertAxis = std::make_unique<API::TextAxis>(5);
   const auto maxWavelength = tmplHist.x().back();
 
@@ -292,8 +277,7 @@ void LoadILLPolarizationFactors::exec() {
       definition_map_sanity_check(data);
       return data;
     } catch (std::exception &e) {
-      throw std::runtime_error("Error while reading " + filename + ": " +
-                               e.what());
+      throw std::runtime_error("Error while reading " + filename + ": " + e.what());
     }
   }();
   const auto factorTags = factor_list();
@@ -324,20 +308,17 @@ void LoadILLPolarizationFactors::exec() {
 /** Validates the algorithm's inputs.
  * @return a map from property names to discovered issues.
  */
-std::map<std::string, std::string>
-LoadILLPolarizationFactors::validateInputs() {
+std::map<std::string, std::string> LoadILLPolarizationFactors::validateInputs() {
   std::map<std::string, std::string> issues;
   API::MatrixWorkspace_const_sptr refWS = getProperty(Prop::REF_WS);
   if (refWS->getNumberHistograms() == 0) {
-    issues[Prop::REF_WS] =
-        "The reference workspace does not contain any histograms.";
+    issues[Prop::REF_WS] = "The reference workspace does not contain any histograms.";
     return issues;
   }
   const auto &xs = refWS->x(0);
   // A validator should have checked that xs is ordered.
   if (xs.front() < 0) {
-    issues[Prop::REF_WS] =
-        "The reference workspace contains negative X values.";
+    issues[Prop::REF_WS] = "The reference workspace contains negative X values.";
   }
   return issues;
 }

@@ -48,8 +48,7 @@ QList<QPointer<UserSubWindow>> &existingInterfaces() {
 } // namespace
 
 // initialise HelpWindow factory
-Mantid::Kernel::AbstractInstantiator<MantidHelpInterface>
-    *InterfaceManager::m_helpViewer = nullptr;
+Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *InterfaceManager::m_helpViewer = nullptr;
 
 //----------------------------------
 // Public member functions
@@ -69,17 +68,14 @@ Mantid::Kernel::AbstractInstantiator<MantidHelpInterface>
  * @param disabled :: These properties will be left disabled
  * @returns An AlgorithmDialog object
  */
-AlgorithmDialog *InterfaceManager::createDialog(
-    const std::shared_ptr<Mantid::API::IAlgorithm> &alg, QWidget *parent,
-    bool forScript, const QHash<QString, QString> &presetValues,
-    const QString &optionalMsg, const QStringList &enabled,
-    const QStringList &disabled) {
+AlgorithmDialog *InterfaceManager::createDialog(const std::shared_ptr<Mantid::API::IAlgorithm> &alg, QWidget *parent,
+                                                bool forScript, const QHash<QString, QString> &presetValues,
+                                                const QString &optionalMsg, const QStringList &enabled,
+                                                const QStringList &disabled) {
   AlgorithmDialog *dlg = nullptr;
   if (AlgorithmDialogFactory::Instance().exists(alg->name() + "Dialog")) {
-    g_log.debug() << "Creating a specialised dialog for " << alg->name()
-                  << '\n';
-    dlg = AlgorithmDialogFactory::Instance().createUnwrapped(alg->name() +
-                                                             "Dialog");
+    g_log.debug() << "Creating a specialised dialog for " << alg->name() << '\n';
+    dlg = AlgorithmDialogFactory::Instance().createUnwrapped(alg->name() + "Dialog");
   } else {
     dlg = new GenericDialog;
     g_log.debug() << "No specialised dialog exists for the " << alg->name()
@@ -134,18 +130,16 @@ AlgorithmDialog *InterfaceManager::createDialog(
  * @param enabled :: These properties will be left enabled
  * @param disabled :: These properties will be left disabled
  */
-AlgorithmDialog *InterfaceManager::createDialogFromName(
-    const QString &algorithmName, const int version, QWidget *parent,
-    bool forScript, const QHash<QString, QString> &presetValues,
-    const QString &optionalMsg, const QStringList &enabled,
-    const QStringList &disabled) {
+AlgorithmDialog *InterfaceManager::createDialogFromName(const QString &algorithmName, const int version,
+                                                        QWidget *parent, bool forScript,
+                                                        const QHash<QString, QString> &presetValues,
+                                                        const QString &optionalMsg, const QStringList &enabled,
+                                                        const QStringList &disabled) {
   // Create the algorithm. This should throw if the algorithm can't be found.
-  auto alg = Mantid::API::AlgorithmManager::Instance().create(
-      algorithmName.toStdString(), version);
+  auto alg = Mantid::API::AlgorithmManager::Instance().create(algorithmName.toStdString(), version);
 
   // Forward call.
-  return createDialog(alg, parent, forScript, presetValues, optionalMsg,
-                      enabled, disabled);
+  return createDialog(alg, parent, forScript, presetValues, optionalMsg, enabled, disabled);
 }
 
 /**
@@ -154,9 +148,7 @@ AlgorithmDialog *InterfaceManager::createDialogFromName(
  * @param parent :: The parent widget
  * @param isWindow :: Should the widget be an independent window
  */
-UserSubWindow *InterfaceManager::createSubWindow(const QString &interface_name,
-                                                 QWidget *parent,
-                                                 bool isWindow) {
+UserSubWindow *InterfaceManager::createSubWindow(const QString &interface_name, QWidget *parent, bool isWindow) {
   UserSubWindow *user_win = nullptr;
   std::string iname = interface_name.toStdString();
   try {
@@ -196,11 +188,8 @@ UserSubWindow *InterfaceManager::createSubWindow(const QString &interface_name,
  */
 void InterfaceManager::notifyExistingInterfaces(UserSubWindow *newWindow) {
   auto &existingWindows = existingInterfaces();
-  existingWindows.erase(std::remove_if(existingWindows.begin(),
-                                       existingWindows.end(),
-                                       [](QPointer<UserSubWindow> &window) {
-                                         return window.isNull();
-                                       }),
+  existingWindows.erase(std::remove_if(existingWindows.begin(), existingWindows.end(),
+                                       [](QPointer<UserSubWindow> &window) { return window.isNull(); }),
                         existingWindows.end());
 
   for (auto &window : existingWindows)
@@ -216,9 +205,7 @@ void InterfaceManager::notifyExistingInterfaces(UserSubWindow *newWindow) {
  * @returns A QStringList containing the keys from the InterfaceFactory that
  * refer to UserSubWindow classes
  */
-QStringList InterfaceManager::getUserSubWindowKeys() const {
-  return UserSubWindowFactory::Instance().keys();
-}
+QStringList InterfaceManager::getUserSubWindowKeys() const { return UserSubWindowFactory::Instance().keys(); }
 
 //----------------------------------
 // Private member functions
@@ -226,30 +213,25 @@ QStringList InterfaceManager::getUserSubWindowKeys() const {
 /// Default Constructor
 InterfaceManager::InterfaceManager() {
   // Attempt to load libraries that may contain custom interface classes
-  std::call_once(DLLS_LOADED, []() {
-    loadPluginsFromCfgPath("mantidqt.plugins.directory");
-  });
+  std::call_once(DLLS_LOADED, []() { loadPluginsFromCfgPath("mantidqt.plugins.directory"); });
 }
 
 /// Destructor
 InterfaceManager::~InterfaceManager() {}
 
-void InterfaceManager::registerHelpWindowFactory(
-    Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *factory) {
+void InterfaceManager::registerHelpWindowFactory(Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *factory) {
   m_helpViewer = factory;
 }
 
 MantidHelpInterface *InterfaceManager::createHelpWindow() const {
   if (m_helpViewer == nullptr) {
     if (!offlineHelpMsgDisplayed) {
-      g_log.information(
-          "Offline help is not available in this version of Workbench.");
+      g_log.information("Offline help is not available in this version of Workbench.");
       offlineHelpMsgDisplayed = true;
     }
     return nullptr;
   } else {
-    MantidHelpInterface *interface =
-        this->m_helpViewer->createUnwrappedInstance();
+    MantidHelpInterface *interface = this->m_helpViewer->createUnwrappedInstance();
     if (!interface) {
       g_log.error("Error creating help window");
     }
@@ -267,8 +249,7 @@ void InterfaceManager::showWikiPage(const QString &page) {
   window->showWikiPage(page);
 }
 
-void InterfaceManager::showAlgorithmHelp(const QString &name,
-                                         const int version) {
+void InterfaceManager::showAlgorithmHelp(const QString &name, const int version) {
   auto window = createHelpWindow();
   window->showAlgorithm(name, version);
 }
@@ -283,16 +264,12 @@ void InterfaceManager::showFitFunctionHelp(const QString &name) {
   window->showFitFunction(name);
 }
 
-void InterfaceManager::showCustomInterfaceHelp(const QString &name,
-                                               const QString &area,
-                                               const QString &section) {
+void InterfaceManager::showCustomInterfaceHelp(const QString &name, const QString &area, const QString &section) {
   auto window = createHelpWindow();
   window->showCustomInterface(name, area, section);
 }
 
-void InterfaceManager::showWebPage(const QString &url) {
-  MantidDesktopServices::openUrl(url);
-}
+void InterfaceManager::showWebPage(const QString &url) { MantidDesktopServices::openUrl(url); }
 
 void InterfaceManager::closeHelpWindow() {
   if (MantidHelpWindow::helpWindowExists()) {

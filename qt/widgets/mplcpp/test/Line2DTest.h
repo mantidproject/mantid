@@ -67,8 +67,7 @@ public:
   }
 
 private:
-  void assertDataMatches(const Line2D &line,
-                         const std::vector<double> &expectedX,
+  void assertDataMatches(const Line2D &line, const std::vector<double> &expectedX,
                          const std::vector<double> &expectedY) {
     // check owned vector mathces
     TS_ASSERT_EQUALS(expectedX, line.rawData().xaxis)
@@ -87,8 +86,7 @@ private:
   Python::Object rawMplLine2D() {
     // A Line2D requires x and y data sequences
     const Python::Object data{Python::NewRef(Py_BuildValue("(f, f)", 0., 1.))};
-    const Python::Object linesModule{
-        Python::NewRef(PyImport_ImportModule("matplotlib.lines"))};
+    const Python::Object linesModule{Python::NewRef(PyImport_ImportModule("matplotlib.lines"))};
     return linesModule.attr("Line2D")(data, data);
   }
 };

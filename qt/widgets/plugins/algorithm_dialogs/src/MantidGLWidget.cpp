@@ -25,11 +25,9 @@ using namespace MantidQt::CustomDialogs;
  * Constructor
  */
 MantidGLWidget::MantidGLWidget(QWidget *parent)
-    : QGLWidget(QGLFormat(QGL::DepthBuffer | QGL::NoAlphaChannel |
-                          QGL::SampleBuffers),
-                parent),
-      m_display_object(std::shared_ptr<Mantid::Geometry::CSGObject>()),
-      m_x_rot(0.0), m_y_rot(0.0), m_z_rot(0.0), m_scale_factor(1.0) {
+    : QGLWidget(QGLFormat(QGL::DepthBuffer | QGL::NoAlphaChannel | QGL::SampleBuffers), parent),
+      m_display_object(std::shared_ptr<Mantid::Geometry::CSGObject>()), m_x_rot(0.0), m_y_rot(0.0), m_z_rot(0.0),
+      m_scale_factor(1.0) {
   setAutoFillBackground(false);
   m_bb_widths[0] = 0.0;
   m_bb_widths[1] = 0.0;
@@ -49,8 +47,7 @@ MantidGLWidget::~MantidGLWidget() { makeCurrent(); }
  * Set the shape object
  * @param object :: A pointer to the Mantid::Geometry::Object
  */
-void MantidGLWidget::setDisplayObject(
-    std::shared_ptr<Mantid::Geometry::IObject> object) {
+void MantidGLWidget::setDisplayObject(std::shared_ptr<Mantid::Geometry::IObject> object) {
   m_display_object = std::move(object);
   m_x_rot = 0.0;
   m_y_rot = 0.0;
@@ -95,11 +92,9 @@ void MantidGLWidget::initializeGL() {
 
   setCursor(Qt::PointingHandCursor); // This is to set the initial window mouse
                                      // cursor to Hand icon
-  glEnable(
-      GL_DEPTH_TEST); // Enable opengl depth test to render 3D object properly
-  glShadeModel(
-      GL_SMOOTH); // Shade model is smooth (expensive but looks pleasing)
-  glEnable(GL_LINE_SMOOTH); // Set line should be drawn smoothly
+  glEnable(GL_DEPTH_TEST);           // Enable opengl depth test to render 3D object properly
+  glShadeModel(GL_SMOOTH);           // Shade model is smooth (expensive but looks pleasing)
+  glEnable(GL_LINE_SMOOTH);          // Set line should be drawn smoothly
 
   // glEnable(GL_NORMALIZE);
 
@@ -142,10 +137,9 @@ void MantidGLWidget::paintGL() {
   try {
     m_display_object->draw();
   } catch (...) {
-    QMessageBox::information(
-        this, "MantidGLWidget",
-        QString("An error occurred while attempting to render the shape.\n") +
-            "Please check that all objects intersect each other.");
+    QMessageBox::information(this, "MantidGLWidget",
+                             QString("An error occurred while attempting to render the shape.\n") +
+                                 "Please check that all objects intersect each other.");
   }
   glPopMatrix();
 }
@@ -168,9 +162,7 @@ void MantidGLWidget::resizeGL(int width, int height) {
  * Handle an event when a mouse button is pressed.
  * @param event A pointer to the QMouseEvent
  */
-void MantidGLWidget::mousePressEvent(QMouseEvent *event) {
-  m_click_point = event->pos();
-}
+void MantidGLWidget::mousePressEvent(QMouseEvent *event) { m_click_point = event->pos(); }
 
 /**
  * Handle an event where the cursor is moved with the mouse

@@ -21,9 +21,7 @@ class MaterialBuilderTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MaterialBuilderTest *createSuite() {
-    return new MaterialBuilderTest();
-  }
+  static MaterialBuilderTest *createSuite() { return new MaterialBuilderTest(); }
   static void destroySuite(MaterialBuilderTest *suite) { delete suite; }
 
   //----------------------------------------------------------------------------
@@ -59,10 +57,7 @@ public:
 
   void test_Build_From_Name_And_Chemical_Formula_MultiAtom() {
     MaterialBuilder builder;
-    Material mat = builder.setName("Nickel")
-                       .setFormula("Al2-O3")
-                       .setNumberDensity(0.1)
-                       .build();
+    Material mat = builder.setName("Nickel").setFormula("Al2-O3").setNumberDensity(0.1).build();
     TS_ASSERT_DELTA(mat.numberDensity(), 0.1, 0.0001);
     TS_ASSERT_DELTA(mat.totalScatterXSection(), 3.1404, 0.0001);
     TS_ASSERT_DELTA(mat.absorbXSection(), 0.092514, 0.0001);
@@ -70,10 +65,7 @@ public:
 
   void test_Build_From_Atomic_Number() {
     MaterialBuilder builder;
-    Material mat = builder.setName("Nickel")
-                       .setAtomicNumber(28)
-                       .setNumberDensity(0.1)
-                       .build();
+    Material mat = builder.setName("Nickel").setAtomicNumber(28).setNumberDensity(0.1).build();
     // Default isotope
     TS_ASSERT_DELTA(mat.totalScatterXSection(), 18.5, 0.0001);
     TS_ASSERT_DELTA(mat.absorbXSection(), 4.49, 0.0001);
@@ -103,53 +95,39 @@ public:
 
   void test_Number_Density_Set_By_Formula_ZParameter_And_Cell_Volume() {
     MaterialBuilder builder;
-    auto mat = builder.setName("Nickel")
-                   .setFormula("Al2-O3")
-                   .setZParameter(6)
-                   .setUnitCellVolume(253.54)
-                   .build();
+    auto mat = builder.setName("Nickel").setFormula("Al2-O3").setZParameter(6).setUnitCellVolume(253.54).build();
 
     TS_ASSERT_DELTA(mat.numberDensity(), 0.1183245, 0.001);
   }
 
   void test_Number_Density_Set_By_Formula_MassDensity() {
     MaterialBuilder builder;
-    auto mat = builder.setName("Nickel")
-                   .setFormula("Al2-O3")
-                   .setMassDensity(4)
-                   .build();
+    auto mat = builder.setName("Nickel").setFormula("Al2-O3").setMassDensity(4).build();
 
     TS_ASSERT_DELTA(mat.numberDensity(), 0.0236252 * 5, 0.001);
   }
 
   void test_Number_Density_Set_By_AtomicNumber_MassDensity() {
     MaterialBuilder builder;
-    auto mat =
-        builder.setName("Nickel").setAtomicNumber(28).setMassDensity(4).build();
+    auto mat = builder.setName("Nickel").setAtomicNumber(28).setMassDensity(4).build();
 
     TS_ASSERT_DELTA(mat.numberDensity(), 0.0410414, 0.001);
   }
 
   void test_Number_Density_Set_By_AtomicNumber_ZParameter_And_Cell_Volume() {
     MaterialBuilder builder;
-    auto mat = builder.setName("Nickel")
-                   .setAtomicNumber(28)
-                   .setZParameter(6)
-                   .setUnitCellVolume(253)
-                   .build();
+    auto mat = builder.setName("Nickel").setAtomicNumber(28).setZParameter(6).setUnitCellVolume(253).build();
 
     TS_ASSERT_DELTA(mat.numberDensity(), 0.0237154, 0.001);
   }
 
   void test_Number_Density_By_Formula_Unit() {
     MaterialBuilder builder;
-    const auto material =
-        builder.setName("Strange oxide")
-            .setFormula("Al2 O3")
-            .setNumberDensity(0.23)
-            .setNumberDensityUnit(
-                MaterialBuilder::NumberDensityUnit::FormulaUnits)
-            .build();
+    const auto material = builder.setName("Strange oxide")
+                              .setFormula("Al2 O3")
+                              .setNumberDensity(0.23)
+                              .setNumberDensityUnit(MaterialBuilder::NumberDensityUnit::FormulaUnits)
+                              .build();
     TS_ASSERT_DELTA(material.numberDensity(), (2. + 3.) * 0.23, 1e-12)
   }
 
@@ -169,16 +147,13 @@ public:
 
   void test_Setting_Neither_ChemicalFormula_And_AtomicNumber_Throws_Error() {
     MaterialBuilder builder;
-    TS_ASSERT_THROWS(builder.setName("Nickel").build(),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(builder.setName("Nickel").build(), const std::runtime_error &);
   }
 
   void test_Setting_Both_ChemicalFormula_And_AtomicNumber_Throws_Error() {
     MaterialBuilder builder;
-    TS_ASSERT_THROWS(builder.setFormula("Al2-O3").setAtomicNumber(28),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(builder.setAtomicNumber(28).setFormula("Al2-O3"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(builder.setFormula("Al2-O3").setAtomicNumber(28), const std::runtime_error &);
+    TS_ASSERT_THROWS(builder.setAtomicNumber(28).setFormula("Al2-O3"), const std::runtime_error &);
   }
 
   void test_Setting_ZParameter_UnitCell_And_MassDensity_Throws_Error() {
@@ -193,55 +168,46 @@ public:
   void test_MultiAtom_with_no_number_density_throws() {
     MaterialBuilder builder;
     builder.setName("Nickel").setFormula("Al2-O3");
-    TS_ASSERT_THROWS_EQUALS(
-        builder.build(), const std::runtime_error &e, std::string(e.what()),
-        "The number density could not be determined. Please "
-        "provide the number density, ZParameter and unit "
-        "cell volume or mass density.")
+    TS_ASSERT_THROWS_EQUALS(builder.build(), const std::runtime_error &e, std::string(e.what()),
+                            "The number density could not be determined. Please "
+                            "provide the number density, ZParameter and unit "
+                            "cell volume or mass density.")
   }
 
   void test_User_Defined_Material_Without_NumberDensity_Throws() {
     MaterialBuilder builder;
-    builder = builder.setTotalScatterXSection(2.3)
-                  .setCoherentXSection(0.5)
-                  .setIncoherentXSection(5.0)
-                  .setAbsorptionXSection(0.23);
+    builder =
+        builder.setTotalScatterXSection(2.3).setCoherentXSection(0.5).setIncoherentXSection(5.0).setAbsorptionXSection(
+            0.23);
     TS_ASSERT_THROWS(builder.build(), const std::runtime_error &)
   }
 
   void test_User_Defined_Material_Without_TotalScatterXSection_Throws() {
     MaterialBuilder builder;
-    builder = builder.setNumberDensity(0.1)
-                  .setCoherentXSection(0.5)
-                  .setIncoherentXSection(5.0)
-                  .setAbsorptionXSection(0.23);
+    builder =
+        builder.setNumberDensity(0.1).setCoherentXSection(0.5).setIncoherentXSection(5.0).setAbsorptionXSection(0.23);
     TS_ASSERT_THROWS(builder.build(), const std::runtime_error &)
   }
 
   void test_User_Defined_Material_Without_CoherentXSection_Throws() {
     MaterialBuilder builder;
-    builder = builder.setNumberDensity(0.1)
-                  .setTotalScatterXSection(2.3)
-                  .setIncoherentXSection(5.0)
-                  .setAbsorptionXSection(0.23);
+    builder =
+        builder.setNumberDensity(0.1).setTotalScatterXSection(2.3).setIncoherentXSection(5.0).setAbsorptionXSection(
+            0.23);
     TS_ASSERT_THROWS(builder.build(), const std::runtime_error &)
   }
 
   void test_User_Defined_Material_Without_IncoherentXSection_Throws() {
     MaterialBuilder builder;
-    builder = builder.setNumberDensity(0.1)
-                  .setTotalScatterXSection(2.3)
-                  .setCoherentXSection(5.0)
-                  .setAbsorptionXSection(0.23);
+    builder =
+        builder.setNumberDensity(0.1).setTotalScatterXSection(2.3).setCoherentXSection(5.0).setAbsorptionXSection(0.23);
     TS_ASSERT_THROWS(builder.build(), const std::runtime_error &)
   }
 
   void test_User_Defined_Material_Without_AbsorptionXSection_Throws() {
     MaterialBuilder builder;
-    builder = builder.setNumberDensity(0.1)
-                  .setTotalScatterXSection(2.3)
-                  .setCoherentXSection(5.0)
-                  .setIncoherentXSection(5.0);
+    builder =
+        builder.setNumberDensity(0.1).setTotalScatterXSection(2.3).setCoherentXSection(5.0).setIncoherentXSection(5.0);
     TS_ASSERT_THROWS(builder.build(), const std::runtime_error &)
   }
 };

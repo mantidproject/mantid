@@ -24,15 +24,11 @@ using Mantid::DataObjects::EventWorkspace;
 using Mantid::DataObjects::EventWorkspace_sptr;
 using namespace Geometry;
 
-const std::string CarpenterSampleCorrection::name() const {
-  return "CarpenterSampleCorrection";
-}
+const std::string CarpenterSampleCorrection::name() const { return "CarpenterSampleCorrection"; }
 
 int CarpenterSampleCorrection::version() const { return 1; }
 
-const std::string CarpenterSampleCorrection::category() const {
-  return "CorrectionFunctions\\AbsorptionCorrections";
-}
+const std::string CarpenterSampleCorrection::category() const { return "CorrectionFunctions\\AbsorptionCorrections"; }
 
 /**
  * Initialize the properties to default values
@@ -43,15 +39,13 @@ void CarpenterSampleCorrection::init() {
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
 
-  auto algCalcCarpenter = AlgorithmManager::Instance().createUnmanaged(
-      "CalculateCarpenterSampleCorrection");
+  auto algCalcCarpenter = AlgorithmManager::Instance().createUnmanaged("CalculateCarpenterSampleCorrection");
   algCalcCarpenter->initialize();
 
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
-                  "The name of the input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input, wsValidator),
+      "The name of the input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace.");
 
   copyProperty(algCalcCarpenter, "AttenuationXSection");
@@ -72,15 +66,13 @@ void CarpenterSampleCorrection::exec() {
   double coeff3 = getProperty("ScatteringXSection");
 
   // Calculate the absorption and multiple scattering corrections
-  WorkspaceGroup_sptr calcOutput = calculateCorrection(
-      inputWksp, radius, coeff1, coeff2, coeff3, true, true);
+  WorkspaceGroup_sptr calcOutput = calculateCorrection(inputWksp, radius, coeff1, coeff2, coeff3, true, true);
   Workspace_sptr absPtr = calcOutput->getItem(0);
   Workspace_sptr msPtr = calcOutput->getItem(1);
   auto absWksp = std::dynamic_pointer_cast<MatrixWorkspace>(absPtr);
   auto msWksp = std::dynamic_pointer_cast<MatrixWorkspace>(msPtr);
 
-  EventWorkspace_sptr inputWkspEvent =
-      std::dynamic_pointer_cast<EventWorkspace>(inputWksp);
+  EventWorkspace_sptr inputWkspEvent = std::dynamic_pointer_cast<EventWorkspace>(inputWksp);
 
   // Inverse the absorption correction ( 1/A)
   const auto NUM_HIST = static_cast<int64_t>(inputWksp->getNumberHistograms());
@@ -105,18 +97,16 @@ void CarpenterSampleCorrection::exec() {
 
   // Output workspace
   if (inputWkspEvent) {
-    auto outputWkspEvent =
-        std::dynamic_pointer_cast<EventWorkspace>(outputWksp);
+    auto outputWkspEvent = std::dynamic_pointer_cast<EventWorkspace>(outputWksp);
     setProperty("OutputWorkspace", outputWkspEvent);
   }
   setProperty("OutputWorkspace", outputWksp);
 }
 
-WorkspaceGroup_sptr CarpenterSampleCorrection::calculateCorrection(
-    MatrixWorkspace_sptr &inputWksp, double radius, double coeff1,
-    double coeff2, double coeff3, bool doAbs, bool doMS) {
-  auto calculate = this->createChildAlgorithm(
-      "CalculateCarpenterSampleCorrection", 0.0, 0.25);
+WorkspaceGroup_sptr CarpenterSampleCorrection::calculateCorrection(MatrixWorkspace_sptr &inputWksp, double radius,
+                                                                   double coeff1, double coeff2, double coeff3,
+                                                                   bool doAbs, bool doMS) {
+  auto calculate = this->createChildAlgorithm("CalculateCarpenterSampleCorrection", 0.0, 0.25);
   calculate->setProperty("InputWorkspace", inputWksp);
   calculate->setProperty("CylinderSampleRadius", radius);
   calculate->setProperty("AttenuationXSection", coeff1);
@@ -125,14 +115,12 @@ WorkspaceGroup_sptr CarpenterSampleCorrection::calculateCorrection(
   calculate->setProperty("Absorption", doAbs);
   calculate->setProperty("MultipleScattering", doMS);
   calculate->execute();
-  WorkspaceGroup_sptr calcOutput =
-      calculate->getProperty("OutputWorkspaceBaseName");
+  WorkspaceGroup_sptr calcOutput = calculate->getProperty("OutputWorkspaceBaseName");
   return calcOutput;
 }
 
-MatrixWorkspace_sptr
-CarpenterSampleCorrection::minus(const MatrixWorkspace_sptr &lhsWS,
-                                 const MatrixWorkspace_sptr &rhsWS) {
+MatrixWorkspace_sptr CarpenterSampleCorrection::minus(const MatrixWorkspace_sptr &lhsWS,
+                                                      const MatrixWorkspace_sptr &rhsWS) {
   auto minus = this->createChildAlgorithm("Minus", 0.5, 0.75);
   minus->setProperty("LHSWorkspace", lhsWS);
   minus->setProperty("RHSWorkspace", rhsWS);
@@ -141,9 +129,8 @@ CarpenterSampleCorrection::minus(const MatrixWorkspace_sptr &lhsWS,
   return outWS;
 }
 
-MatrixWorkspace_sptr
-CarpenterSampleCorrection::multiply(const MatrixWorkspace_sptr &lhsWS,
-                                    const MatrixWorkspace_sptr &rhsWS) {
+MatrixWorkspace_sptr CarpenterSampleCorrection::multiply(const MatrixWorkspace_sptr &lhsWS,
+                                                         const MatrixWorkspace_sptr &rhsWS) {
   auto multiply = this->createChildAlgorithm("Multiply", 0.75, 1.0);
   multiply->setProperty("LHSWorkspace", lhsWS);
   multiply->setProperty("RHSWorkspace", rhsWS);

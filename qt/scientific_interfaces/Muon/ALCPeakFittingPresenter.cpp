@@ -15,27 +15,23 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALCPeakFittingPresenter::ALCPeakFittingPresenter(IALCPeakFittingView *view,
-                                                 IALCPeakFittingModel *model)
+ALCPeakFittingPresenter::ALCPeakFittingPresenter(IALCPeakFittingView *view, IALCPeakFittingModel *model)
     : m_view(view), m_model(model), m_guessPlotted(false) {}
 
 void ALCPeakFittingPresenter::initialize() {
   m_view->initialize();
 
   connect(m_view, SIGNAL(fitRequested()), SLOT(fit()));
-  connect(m_view, SIGNAL(currentFunctionChanged()),
-          SLOT(onCurrentFunctionChanged()));
+  connect(m_view, SIGNAL(currentFunctionChanged()), SLOT(onCurrentFunctionChanged()));
   connect(m_view, SIGNAL(peakPickerChanged()), SLOT(onPeakPickerChanged()));
 
   // We are updating the whole function anyway, so paramName if left out
-  connect(m_view, SIGNAL(parameterChanged(QString, QString)),
-          SLOT(onParameterChanged(QString)));
+  connect(m_view, SIGNAL(parameterChanged(QString, QString)), SLOT(onParameterChanged(QString)));
 
   connect(m_model, SIGNAL(fittedPeaksChanged()), SLOT(onFittedPeaksChanged()));
   connect(m_model, SIGNAL(dataChanged()), SLOT(onDataChanged()));
   connect(m_view, SIGNAL(plotGuessClicked()), SLOT(onPlotGuessClicked()));
-  connect(m_model, SIGNAL(errorInModel(const QString &)), m_view,
-          SLOT(displayError(const QString &)));
+  connect(m_model, SIGNAL(errorInModel(const QString &)), m_view, SLOT(displayError(const QString &)));
 }
 
 void ALCPeakFittingPresenter::fit() {
@@ -54,8 +50,7 @@ void ALCPeakFittingPresenter::onCurrentFunctionChanged() {
   {
     IFunction_const_sptr currentFunc = m_view->function(*index);
 
-    if (auto peakFunc =
-            std::dynamic_pointer_cast<const IPeakFunction>(currentFunc)) {
+    if (auto peakFunc = std::dynamic_pointer_cast<const IPeakFunction>(currentFunc)) {
       // If peak function selected - update and enable
       m_view->setPeakPicker(peakFunc);
       m_view->setPeakPickerEnabled(true);
@@ -81,8 +76,7 @@ void ALCPeakFittingPresenter::onPeakPickerChanged() {
   // Update all the defined parameters of the peak function
   for (size_t i = 0; i < peakFunc->nParams(); ++i) {
     QString paramName = QString::fromStdString(peakFunc->parameterName(i));
-    m_view->setParameter(*index, paramName,
-                         peakFunc->getParameter(paramName.toStdString()));
+    m_view->setParameter(*index, paramName, peakFunc->getParameter(paramName.toStdString()));
   }
 }
 
@@ -93,8 +87,7 @@ void ALCPeakFittingPresenter::onParameterChanged(const QString &funcIndex) {
   // only - that's what
   // PeakPicker is showing
   if (currentIndex && *currentIndex == funcIndex) {
-    if (auto peak = std::dynamic_pointer_cast<const IPeakFunction>(
-            m_view->function(funcIndex))) {
+    if (auto peak = std::dynamic_pointer_cast<const IPeakFunction>(m_view->function(funcIndex))) {
       m_view->setPeakPicker(peak);
     }
   }

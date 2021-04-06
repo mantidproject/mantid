@@ -254,7 +254,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                     strongPeakParamsToSend = strongPeakParams
 
                 # Will allow forced weak and edge peaks to be fit using a neighboring peak profile
-                Y3D, goodIDX, pp_lambda, params = BVGFT.get3DPeak(peak, peaks_ws, box, padeCoefficients,qMask,
+                Y3D, goodIDX, pp_lambda, params = BVGFT.get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask,
                                                                   nTheta=nTheta, nPhi=nPhi, plotResults=False,
                                                                   zBG=zBG,fracBoxToHistogram=1.0,bgPolyOrder=1,
                                                                   strongPeakParams=strongPeakParamsToSend,

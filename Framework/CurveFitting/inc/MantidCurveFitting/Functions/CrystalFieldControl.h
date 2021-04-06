@@ -17,8 +17,7 @@ namespace Functions {
 /**
   A function that controls creation of the source of CrystalFieldFunction.
 */
-class MANTID_CURVEFITTING_DLL CrystalFieldControl
-    : public API::CompositeFunction {
+class MANTID_CURVEFITTING_DLL CrystalFieldControl : public API::CompositeFunction {
 public:
   CrystalFieldControl();
   /// Set a value to attribute
@@ -59,9 +58,7 @@ private:
   /// Check that everything is consistent
   void checkConsistent();
   /// Parse a comma-separated list attribute
-  void parseStringListAttribute(const std::string &attName,
-                                const std::string &value,
-                                std::vector<std::string> &cache);
+  void parseStringListAttribute(const std::string &attName, const std::string &value, std::vector<std::string> &cache);
   ///// @name Attribute caches
   ////@{
   /// The ion names
@@ -80,22 +77,18 @@ private:
   //@}
 };
 
-class MANTID_CURVEFITTING_DLL CrystalFieldSpectrumControl
-    : public API::ParamFunction {
+class MANTID_CURVEFITTING_DLL CrystalFieldSpectrumControl : public API::ParamFunction {
 public:
   CrystalFieldSpectrumControl();
   std::string name() const override;
-  void function(const API::FunctionDomain &,
-                API::FunctionValues &) const override;
+  void function(const API::FunctionDomain &, API::FunctionValues &) const override;
 };
 
-class MANTID_CURVEFITTING_DLL CrystalFieldPhysPropControl
-    : public API::ParamFunction {
+class MANTID_CURVEFITTING_DLL CrystalFieldPhysPropControl : public API::ParamFunction {
 public:
   CrystalFieldPhysPropControl();
   std::string name() const override;
-  void function(const API::FunctionDomain &,
-                API::FunctionValues &) const override;
+  void function(const API::FunctionDomain &, API::FunctionValues &) const override;
 };
 
 } // namespace Functions

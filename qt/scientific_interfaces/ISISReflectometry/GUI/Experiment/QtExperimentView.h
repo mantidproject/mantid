@@ -21,18 +21,15 @@ namespace ISISReflectometry {
 /** ExperiementView : Provides an interface for the "Experiement" tab in the
 ISIS Reflectometry interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtExperimentView : public QWidget,
-                                                        public IExperimentView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtExperimentView : public QWidget, public IExperimentView {
   Q_OBJECT
 public:
-  QtExperimentView(const Mantid::API::IAlgorithm_sptr &algorithmForTooltips,
-                   QWidget *parent = nullptr);
+  QtExperimentView(const Mantid::API::IAlgorithm_sptr &algorithmForTooltips, QWidget *parent = nullptr);
   void subscribe(ExperimentViewSubscriber *notifyee) override;
   void connectExperimentSettingsWidgets() override;
   void disconnectExperimentSettingsWidgets() override;
 
-  void
-  createStitchHints(const std::vector<MantidWidgets::Hint> &hints) override;
+  void createStitchHints(const std::vector<MantidWidgets::Hint> &hints) override;
 
   std::string getAnalysisMode() const override;
   void setAnalysisMode(std::string const &analysisMode) override;
@@ -54,8 +51,7 @@ public:
   void setDebugOption(bool enable) override;
 
   std::vector<PerThetaDefaults::ValueArray> getPerAngleOptions() const override;
-  void
-  setPerAngleOptions(std::vector<PerThetaDefaults::ValueArray> rows) override;
+  void setPerAngleOptions(std::vector<PerThetaDefaults::ValueArray> rows) override;
   void showPerAngleOptionsAsInvalid(int row, int column) override;
   void showPerAngleOptionsAsValid(int row) override;
   void showPerAngleThetasNonUnique(double thetaTolerance) override;
@@ -86,10 +82,8 @@ public:
   std::string getStitchOptions() const override;
   void setStitchOptions(std::string const &stitchOptions) override;
 
-  void showOptionLoadErrors(
-      std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
-      std::vector<MissingInstrumentParameterValue> const &missingValues)
-      override;
+  void showOptionLoadErrors(std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
+                            std::vector<MissingInstrumentParameterValue> const &missingValues) override;
 
   void showAllPerAngleOptionsAsValid() override;
 
@@ -133,35 +127,25 @@ public slots:
   void onPerAngleDefaultsChanged(int row, int column);
 
 private:
-  void initializeTableColumns(
-      QTableWidget &table,
-      const Mantid::API::IAlgorithm_sptr &algorithmForTooltips);
+  void initializeTableColumns(QTableWidget &table, const Mantid::API::IAlgorithm_sptr &algorithmForTooltips);
   void initializeTableItems(QTableWidget &table);
   void initializeTableRow(QTableWidget &table, int row);
-  void initializeTableRow(QTableWidget &table, int row,
-                          PerThetaDefaults::ValueArray rowValues);
-  QString messageFor(
-      std::vector<MissingInstrumentParameterValue> const &missingValues) const;
+  void initializeTableRow(QTableWidget &table, int row, PerThetaDefaults::ValueArray rowValues);
+  QString messageFor(std::vector<MissingInstrumentParameterValue> const &missingValues) const;
   QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;
 
   /// Initialise the interface
   void initLayout(Mantid::API::IAlgorithm_sptr algorithmForTooltips);
-  void
-  initOptionsTable(const Mantid::API::IAlgorithm_sptr &algorithmForTooltips);
+  void initOptionsTable(const Mantid::API::IAlgorithm_sptr &algorithmForTooltips);
   void initFloodControls();
   void registerSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg);
-  void
-  registerExperimentSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg);
-  void
-  setToolTipAsPropertyDocumentation(QWidget &widget,
-                                    std::string const &propertyName,
-                                    const Mantid::API::IAlgorithm_sptr &alg);
+  void registerExperimentSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg);
+  void setToolTipAsPropertyDocumentation(QWidget &widget, std::string const &propertyName,
+                                         const Mantid::API::IAlgorithm_sptr &alg);
 
   template <typename Widget>
-  void registerSettingWidget(Widget &widget, std::string const &propertyName,
-                             const Mantid::API::IAlgorithm_sptr &alg);
-  template <typename Widget>
-  void registerSettingWidget(Widget &widget, std::string const &tooltip);
+  void registerSettingWidget(Widget &widget, std::string const &propertyName, const Mantid::API::IAlgorithm_sptr &alg);
+  template <typename Widget> void registerSettingWidget(Widget &widget, std::string const &tooltip);
   void connectSettingsChange(QLineEdit &edit);
   void connectSettingsChange(QComboBox &edit);
   void connectSettingsChange(QCheckBox &edit);
@@ -203,8 +187,7 @@ private:
   std::unique_ptr<QShortcut> m_deleteShortcut;
   Ui::ExperimentWidget m_ui;
   ExperimentViewSubscriber *m_notifyee;
-  std::array<QString, PerThetaDefaults::OPTIONS_TABLE_COLUMN_COUNT>
-      m_columnToolTips;
+  std::array<QString, PerThetaDefaults::OPTIONS_TABLE_COLUMN_COUNT> m_columnToolTips;
 
   friend class Encoder;
   friend class Decoder;

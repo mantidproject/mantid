@@ -59,18 +59,15 @@ struct SpectraMappings {
  * @param childGroupName : intended name of the child goup.
  * @return : new H5 Group object with name <childGroupName> if did not throw.
  */
-inline H5::Group tryCreateGroup(const H5::Group &parentGroup,
-                                const std::string &childGroupName) {
+inline H5::Group tryCreateGroup(const H5::Group &parentGroup, const std::string &childGroupName) {
   H5std_string parentGroupName = H5_OBJ_NAME(parentGroup);
   for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
     if (parentGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
       H5std_string child = parentGroup.getObjnameByIdx(i);
       if (childGroupName == child) {
         // TODO: runtime error instead?
-        throw std::invalid_argument(
-            "Cannot create group with name " + childGroupName +
-            " inside parent group " + parentGroupName +
-            " because a group with this name already exists.");
+        throw std::invalid_argument("Cannot create group with name " + childGroupName + " inside parent group " +
+                                    parentGroupName + " because a group with this name already exists.");
       }
     }
   }
@@ -103,9 +100,7 @@ std::vector<double> toStdVector(const V3D &data) {
  * @return std::vector<double> vector containing data values in
  * Eigen::Vector3d format
  */
-std::vector<double> toStdVector(const Eigen::Vector3d &data) {
-  return toStdVector(Kernel::toV3D(data));
-}
+std::vector<double> toStdVector(const Eigen::Vector3d &data) { return toStdVector(Kernel::toV3D(data)); }
 
 /*
  * Function: isApproxZero. returns true if all values in an variable-sized
@@ -120,9 +115,7 @@ std::vector<double> toStdVector(const Eigen::Vector3d &data) {
 bool isApproxZero(const std::vector<double> &data, const double &precision) {
 
   return std::all_of(data.begin(), data.end(),
-                     [&precision](const double &element) {
-                       return std::abs(element) < precision;
-                     });
+                     [&precision](const double &element) { return std::abs(element) < precision; });
 }
 
 // overload. return true if vector is approx to zero
@@ -156,8 +149,7 @@ H5::StrType strTypeOfSize(const std::string &str) {
  * @param attrname : attribute name.
  * @param attrVal : string attribute value to be stored in attribute.
  */
-void writeStrDataset(H5::Group &grp, const std::string &dSetName,
-                     const std::string &dSetVal,
+void writeStrDataset(H5::Group &grp, const std::string &dSetName, const std::string &dSetVal,
                      const H5::DataSpace &dataSpace = SCALAR) {
   // TODO. may need to review if we shoud in fact replace.
   if (!utilities::findDataset(grp, dSetName)) {
@@ -175,13 +167,11 @@ void writeStrDataset(H5::Group &grp, const std::string &dSetName,
  * @param attrname : attribute name.
  * @param attrVal : string attribute value to be stored in attribute.
  */
-void writeStrAttribute(H5::Group &grp, const std::string &attrName,
-                       const std::string &attrVal,
+void writeStrAttribute(H5::Group &grp, const std::string &attrName, const std::string &attrVal,
                        const H5::DataSpace &dataSpace = SCALAR) {
   if (!grp.attrExists(attrName)) {
     H5::StrType dataType = strTypeOfSize(attrVal);
-    H5::Attribute attribute =
-        grp.createAttribute(attrName, dataType, dataSpace);
+    H5::Attribute attribute = grp.createAttribute(attrName, dataType, dataSpace);
     attribute.write(dataType, attrVal);
   }
 }
@@ -195,8 +185,7 @@ void writeStrAttribute(H5::Group &grp, const std::string &attrName,
  * @param attrname : attribute name.
  * @param attrVal : string attribute value to be stored in attribute.
  */
-void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName,
-                       const std::string &attrVal,
+void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName, const std::string &attrVal,
                        const H5::DataSpace &dataSpace = SCALAR) {
   if (!dSet.attrExists(attrName)) {
     H5::StrType dataType = strTypeOfSize(attrVal);
@@ -214,9 +203,7 @@ void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName,
  * @param compInfo : Component Info Instrument cache
  * @param idx : index of bank in cache.
  */
-void writeXYZPixeloffset(H5::Group &grp,
-                         const Geometry::ComponentInfo &compInfo,
-                         const size_t idx) {
+void writeXYZPixeloffset(H5::Group &grp, const Geometry::ComponentInfo &compInfo, const size_t idx) {
 
   H5::DataSet xPixelOffset, yPixelOffset, zPixelOffset;
   auto childrenDetectors = compInfo.detectorsInSubtree(idx);
@@ -231,8 +218,7 @@ void writeXYZPixeloffset(H5::Group &grp,
 
   for (const size_t &i : childrenDetectors) {
 
-    auto offset = Geometry::ComponentInfoBankHelpers::offsetFromAncestor(
-        compInfo, idx, i);
+    auto offset = Geometry::ComponentInfoBankHelpers::offsetFromAncestor(compInfo, idx, i);
 
     posx.emplace_back(offset[0]);
     posy.emplace_back(offset[1]);
@@ -253,30 +239,26 @@ void writeXYZPixeloffset(H5::Group &grp,
   H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
 
   if (!xIsZero) {
-    xPixelOffset =
-        grp.createDataSet(X_PIXEL_OFFSET, H5::PredType::NATIVE_DOUBLE, space);
+    xPixelOffset = grp.createDataSet(X_PIXEL_OFFSET, H5::PredType::NATIVE_DOUBLE, space);
     xPixelOffset.write(posx.data(), H5::PredType::NATIVE_DOUBLE, space);
     writeStrAttribute(xPixelOffset, UNITS, METRES);
   }
 
   if (!yIsZero) {
-    yPixelOffset =
-        grp.createDataSet(Y_PIXEL_OFFSET, H5::PredType::NATIVE_DOUBLE, space);
+    yPixelOffset = grp.createDataSet(Y_PIXEL_OFFSET, H5::PredType::NATIVE_DOUBLE, space);
     yPixelOffset.write(posy.data(), H5::PredType::NATIVE_DOUBLE);
     writeStrAttribute(yPixelOffset, UNITS, METRES);
   }
 
   if (!zIsZero) {
-    zPixelOffset =
-        grp.createDataSet(Z_PIXEL_OFFSET, H5::PredType::NATIVE_DOUBLE, space);
+    zPixelOffset = grp.createDataSet(Z_PIXEL_OFFSET, H5::PredType::NATIVE_DOUBLE, space);
     zPixelOffset.write(posz.data(), H5::PredType::NATIVE_DOUBLE);
     writeStrAttribute(zPixelOffset, UNITS, METRES);
   }
 }
 
 template <typename T>
-void write1DIntDataset(H5::Group &grp, const H5std_string &name,
-                       const std::vector<T> &container) {
+void write1DIntDataset(H5::Group &grp, const H5std_string &name, const std::vector<T> &container) {
   const int rank = 1;
   hsize_t dims[1] = {static_cast<hsize_t>(container.size())};
 
@@ -297,24 +279,19 @@ void write1DIntDataset(H5::Group &grp, const H5std_string &name,
  * @param compInfo : instrument cache with component info.
  * @idx : size_t index of bank in compInfo.
  */
-void writeNXDetectorNumber(H5::Group &grp,
-                           const Geometry::ComponentInfo &compInfo,
-                           const std::vector<int> &detectorIDs,
+void writeNXDetectorNumber(H5::Group &grp, const Geometry::ComponentInfo &compInfo, const std::vector<int> &detectorIDs,
                            const size_t idx) {
 
   H5::DataSet detectorNumber;
 
-  std::vector<int> bankDetIDs; // IDs of detectors beloning to bank
-  std::vector<size_t> bankDetectors =
-      compInfo.detectorsInSubtree(idx); // Indexes of children detectors in bank
+  std::vector<int> bankDetIDs;                                          // IDs of detectors beloning to bank
+  std::vector<size_t> bankDetectors = compInfo.detectorsInSubtree(idx); // Indexes of children detectors in bank
   bankDetIDs.reserve(bankDetectors.size());
 
   // write the ID for each child detector to std::vector to be written to
   // dataset
   std::for_each(bankDetectors.begin(), bankDetectors.end(),
-                [&bankDetIDs, &detectorIDs](const size_t index) {
-                  bankDetIDs.emplace_back(detectorIDs[index]);
-                });
+                [&bankDetIDs, &detectorIDs](const size_t index) { bankDetIDs.emplace_back(detectorIDs[index]); });
 
   write1DIntDataset(grp, DETECTOR_IDS, bankDetIDs);
 }
@@ -365,14 +342,12 @@ void writeNXMonitorNumber(H5::Group &grp, const int monitorID) {
   // these DataSets are duplicates of each other. written to the group to
   // handle the naming inconsistency. probably temporary.
   if (!utilities::findDataset(grp, DETECTOR_IDS)) {
-    detectorNumber =
-        grp.createDataSet(DETECTOR_IDS, H5::PredType::NATIVE_INT, space);
+    detectorNumber = grp.createDataSet(DETECTOR_IDS, H5::PredType::NATIVE_INT, space);
     detectorNumber.write(&monitorID, H5::PredType::NATIVE_INT, space);
   }
   if (!utilities::findDataset(grp, DETECTOR_ID)) {
 
-    detector_id =
-        grp.createDataSet(DETECTOR_ID, H5::PredType::NATIVE_INT, space);
+    detector_id = grp.createDataSet(DETECTOR_ID, H5::PredType::NATIVE_INT, space);
     detector_id.write(&monitorID, H5::PredType::NATIVE_INT, space);
   }
 }
@@ -406,10 +381,9 @@ inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position) {
   hsize_t ddims[static_cast<hsize_t>(1)]; // dimensions of dataset
   ddims[0] = static_cast<hsize_t>(1);     // datapoints in dataset dimension 0
 
-  norm = position.norm();               // norm od the position vector
-  auto unitVec = position.normalized(); // unit vector of the position vector
-  std::vector<double> stdNormPos =
-      toStdVector(unitVec); // convert to std::vector
+  norm = position.norm();                                // norm od the position vector
+  auto unitVec = position.normalized();                  // unit vector of the position vector
+  std::vector<double> stdNormPos = toStdVector(unitVec); // convert to std::vector
 
   dspace = H5Screate_simple(drank, ddims, nullptr); // dataspace for dataset
   location = grp.createDataSet(LOCATION, H5::PredType::NATIVE_DOUBLE,
@@ -434,8 +408,7 @@ inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position) {
 
   // transformation-type attribute
   strSize = strTypeOfSize(TRANSLATION);
-  transformationType =
-      location.createAttribute(TRANSFORMATION_TYPE, strSize, SCALAR);
+  transformationType = location.createAttribute(TRANSFORMATION_TYPE, strSize, SCALAR);
   transformationType.write(strSize, TRANSLATION);
 
   // dependency attribute
@@ -457,8 +430,7 @@ inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position) {
  * exists, it precedes a rotation.
  * https://docs.mantidproject.org/nightly/concepts/InstrumentDefinitionFile.html
  */
-inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation,
-                             const std::string &dependency) {
+inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation, const std::string &dependency) {
 
   // dependency for orientation defaults to self-dependent. If Location
   // dataset exists, the orientation will depend on it instead.
@@ -480,10 +452,9 @@ inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation,
   hsize_t ddims[static_cast<hsize_t>(1)]; // dimensions of dataset
   ddims[0] = static_cast<hsize_t>(1);     // datapoints in dataset dimension 0
 
-  angle = std::acos(rotation.w()) * (360.0 / M_PI); // angle magnitude
-  Eigen::Vector3d axisOfRotation = rotation.vec().normalized(); // angle axis
-  std::vector<double> stdNormAxis =
-      toStdVector(axisOfRotation); // convert to std::vector
+  angle = std::acos(rotation.w()) * (360.0 / M_PI);              // angle magnitude
+  Eigen::Vector3d axisOfRotation = rotation.vec().normalized();  // angle axis
+  std::vector<double> stdNormAxis = toStdVector(axisOfRotation); // convert to std::vector
 
   dspace = H5Screate_simple(drank, ddims, nullptr); // dataspace for dataset
   orientation = grp.createDataSet(ORIENTATION, H5::PredType::NATIVE_DOUBLE,
@@ -508,8 +479,7 @@ inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation,
 
   // transformation-type attribute
   strSize = strTypeOfSize(ROTATION);
-  transformationType =
-      orientation.createAttribute(TRANSFORMATION_TYPE, strSize, SCALAR);
+  transformationType = orientation.createAttribute(TRANSFORMATION_TYPE, strSize, SCALAR);
   transformationType.write(strSize, ROTATION);
 
   // dependency attribute
@@ -518,16 +488,12 @@ inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation,
   dependsOn.write(strSize, dependency);
 }
 
-SpectraMappings makeMappings(const Geometry::ComponentInfo &compInfo,
-                             const detid2index_map &detToIndexMap,
-                             const Indexing::IndexInfo &indexInfo,
-                             const API::SpectrumInfo &specInfo,
-                             const std::vector<Mantid::detid_t> &detIds,
-                             size_t index) {
+SpectraMappings makeMappings(const Geometry::ComponentInfo &compInfo, const detid2index_map &detToIndexMap,
+                             const Indexing::IndexInfo &indexInfo, const API::SpectrumInfo &specInfo,
+                             const std::vector<Mantid::detid_t> &detIds, size_t index) {
   auto childrenDetectors = compInfo.detectorsInSubtree(index);
-  size_t nChildDetectors =
-      childrenDetectors.size(); // Number of detectors actually considered in
-                                // spectra-detector map for this NXdetector
+  size_t nChildDetectors = childrenDetectors.size(); // Number of detectors actually considered in
+                                                     // spectra-detector map for this NXdetector
   // local to this nxdetector
   std::map<size_t, int> detector_count_map;
   // We start knowing only the detector index, we have to establish spectra from
@@ -560,10 +526,8 @@ SpectraMappings makeMappings(const Geometry::ComponentInfo &compInfo,
     // using sort order of map to ensure we are ordered by lowest to highest
     // spectrum index
     mappings.detector_count[specCounter] = (pair.second); // Counts
-    mappings.detector_index[specCounter + 1] =
-        mappings.detector_index[specCounter] + (pair.second);
-    mappings.spectra_ids[specCounter] =
-        int32_t(indexInfo.spectrumNumber(pair.first));
+    mappings.detector_index[specCounter + 1] = mappings.detector_index[specCounter] + (pair.second);
+    mappings.spectra_ids[specCounter] = int32_t(indexInfo.spectrumNumber(pair.first));
 
     // We will list everything by spectrum index, so we need to add the detector
     // ids in the same order.
@@ -574,57 +538,47 @@ SpectraMappings makeMappings(const Geometry::ComponentInfo &compInfo,
     }
     ++specCounter;
   }
-  mappings.detector_index.resize(
-      detector_count_map.size()); // cut-off last item
+  mappings.detector_index.resize(detector_count_map.size()); // cut-off last item
 
   return mappings;
 }
 
-void validateInputs(AbstractLogger &logger, const std::string &fullPath,
-                    const Geometry::ComponentInfo &compInfo) {
+void validateInputs(AbstractLogger &logger, const std::string &fullPath, const Geometry::ComponentInfo &compInfo) {
   boost::filesystem::path tmp(fullPath);
   if (!boost::filesystem::is_directory(tmp.root_directory())) {
-    throw std::invalid_argument(
-        "The path provided for saving the file is invalid: " + fullPath + "\n");
+    throw std::invalid_argument("The path provided for saving the file is invalid: " + fullPath + "\n");
   }
 
   // check the file extension matches any of the valid extensions defined in
   // nexus_geometry_extensions
   const auto ext = boost::filesystem::path(tmp).extension();
-  bool isValidExt = std::any_of(
-      nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
-      [&ext](const std::string &str) { return ext.generic_string() == str; });
+  bool isValidExt = std::any_of(nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
+                                [&ext](const std::string &str) { return ext.generic_string() == str; });
 
   // throw if the file extension is invalid
   if (!isValidExt) {
     // string of valid extensions to output in exception
     std::string extensions;
-    std::for_each(
-        nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
-        [&extensions](const std::string &str) { extensions += " " + str; });
-    std::string message = "invalid extension for file: '" +
-                          ext.generic_string() +
-                          "'. Expected any of: " + extensions;
+    std::for_each(nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
+                  [&extensions](const std::string &str) { extensions += " " + str; });
+    std::string message = "invalid extension for file: '" + ext.generic_string() + "'. Expected any of: " + extensions;
     logger.error(message);
     throw std::invalid_argument(message);
   }
 
   if (!compInfo.hasDetectorInfo()) {
-    logger.error(
-        "No detector info was found in the Instrument. Instrument not saved.");
+    logger.error("No detector info was found in the Instrument. Instrument not saved.");
     throw std::invalid_argument("No detector info was found in the Instrument");
   }
   if (!compInfo.hasSample()) {
-    logger.error(
-        "No sample was found in the Instrument. Instrument not saved.");
+    logger.error("No sample was found in the Instrument. Instrument not saved.");
     throw std::invalid_argument("No sample was found in the Instrument");
   }
 
   if (Mantid::Kernel::V3D{0, 0, 0} != compInfo.samplePosition()) {
     logger.error("The sample positon is required to be at the origin. "
                  "Instrument not saved.");
-    throw std::invalid_argument(
-        "The sample positon is required to be at the origin");
+    throw std::invalid_argument("The sample positon is required to be at the origin");
   }
 
   if (!compInfo.hasSource()) {
@@ -640,13 +594,10 @@ void validateInputs(AbstractLogger &logger, const std::string &fullPath,
  * could be considered NXDetectors
  */
 template <typename T>
-bool isDesiredNXDetector(size_t index, const T &saved_indices,
-                         const Geometry::ComponentInfo &compInfo) {
+bool isDesiredNXDetector(size_t index, const T &saved_indices, const Geometry::ComponentInfo &compInfo) {
   return saved_indices.end() ==
          std::find_if(saved_indices.begin(), saved_indices.end(),
-                      [&compInfo, &index](const size_t idx) {
-                        return isAncestorOf(compInfo, idx, index);
-                      });
+                      [&compInfo, &index](const size_t idx) { return isAncestorOf(compInfo, idx, index); });
 }
 
 /**
@@ -660,8 +611,7 @@ public:
   enum class Mode { Trunc, Append };
 
   explicit NexusGeometrySaveImpl(Mode mode) : m_mode(mode) {}
-  NexusGeometrySaveImpl(const NexusGeometrySaveImpl &) =
-      delete; // No intention to suport copies
+  NexusGeometrySaveImpl(const NexusGeometrySaveImpl &) = delete; // No intention to suport copies
 
   /*
    * Function: NXInstrument
@@ -673,12 +623,10 @@ public:
    * @param compInfo : componentinfo
    * @return NXinstrument group, to be passed into children save methods.
    */
-  H5::Group instrument(const H5::Group &parent,
-                       const Geometry::ComponentInfo &compInfo) {
+  H5::Group instrument(const H5::Group &parent, const Geometry::ComponentInfo &compInfo) {
 
     std::string nameInCache = compInfo.name(compInfo.root());
-    std::string instrName =
-        nameInCache.empty() ? "unspecified_instrument" : nameInCache;
+    std::string instrName = nameInCache.empty() ? "unspecified_instrument" : nameInCache;
 
     H5::Group childGroup = openOrCreateGroup(parent, instrName, NX_INSTRUMENT);
 
@@ -700,15 +648,12 @@ public:
    * @param parent : parent group in which to write the NXinstrument group.
    * @param compInfo : componentInfo object.
    */
-  void sample(const H5::Group &parentGroup,
-              const Geometry::ComponentInfo &compInfo) {
+  void sample(const H5::Group &parentGroup, const Geometry::ComponentInfo &compInfo) {
 
     std::string nameInCache = compInfo.name(compInfo.sample());
-    std::string sampleName =
-        nameInCache.empty() ? "unspecified_sample" : nameInCache;
+    std::string sampleName = nameInCache.empty() ? "unspecified_sample" : nameInCache;
 
-    H5::Group childGroup =
-        openOrCreateGroup(parentGroup, sampleName, NX_SAMPLE);
+    H5::Group childGroup = openOrCreateGroup(parentGroup, sampleName, NX_SAMPLE);
     writeStrAttribute(childGroup, NX_CLASS, NX_SAMPLE);
     writeStrDataset(childGroup, NAME, sampleName);
   }
@@ -722,33 +667,27 @@ public:
    * @param parent : parent group in which to write the NXinstrument group.
    * @param compInfo : componentInfo object.
    */
-  void source(const H5::Group &parentGroup,
-              const Geometry::ComponentInfo &compInfo) {
+  void source(const H5::Group &parentGroup, const Geometry::ComponentInfo &compInfo) {
 
     size_t index = compInfo.source();
 
     std::string nameInCache = compInfo.name(index);
-    std::string sourceName =
-        nameInCache.empty() ? "unspecified_source" : nameInCache;
+    std::string sourceName = nameInCache.empty() ? "unspecified_source" : nameInCache;
 
     std::string dependency = NO_DEPENDENCY;
 
-    Eigen::Vector3d position =
-        Mantid::Kernel::toVector3d(compInfo.position(index));
-    Eigen::Quaterniond rotation =
-        Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
+    Eigen::Vector3d position = Mantid::Kernel::toVector3d(compInfo.position(index));
+    Eigen::Quaterniond rotation = Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
 
     bool locationIsOrigin = isApproxZero(position, PRECISION);
     bool orientationIsZero = isApproxZero(rotation, PRECISION);
 
-    H5::Group childGroup =
-        openOrCreateGroup(parentGroup, sourceName, NX_SOURCE);
+    H5::Group childGroup = openOrCreateGroup(parentGroup, sourceName, NX_SOURCE);
     writeStrAttribute(childGroup, NX_CLASS, NX_SOURCE);
 
     // do not write NXtransformations if there is no translation or rotation
     if (!(locationIsOrigin && orientationIsZero)) {
-      H5::Group transformations =
-          simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
+      H5::Group transformations = simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
 
       // self, ".", is the default first NXsource dependency in the chain.
       // first check translation in NXsource is non-zero, and set dependency
@@ -767,8 +706,7 @@ public:
         // orientation dataset containg the rotation transformation will be
         // location. Else dependency for orientation is self.
         std::string rotationDependency =
-            locationIsOrigin ? NO_DEPENDENCY
-                             : H5_OBJ_NAME(transformations) + "/" + LOCATION;
+            locationIsOrigin ? NO_DEPENDENCY : H5_OBJ_NAME(transformations) + "/" + LOCATION;
         writeOrientation(transformations, rotation, rotationDependency);
       }
     }
@@ -791,35 +729,28 @@ public:
    * @param index :  index of the specific monitor in the Instrument cache.
    * @return child group for further additions
    */
-  H5::Group monitor(const H5::Group &parentGroup,
-                    const Geometry::ComponentInfo &compInfo,
-                    const int monitorId, const size_t index) {
+  H5::Group monitor(const H5::Group &parentGroup, const Geometry::ComponentInfo &compInfo, const int monitorId,
+                    const size_t index) {
 
     // if the component is unnamed sets the name as unspecified with the
     // location of the component in the cache
     std::string nameInCache = compInfo.name(index);
-    std::string monitorName =
-        nameInCache.empty() ? "unspecified_monitor_" + std::to_string(index)
-                            : nameInCache;
+    std::string monitorName = nameInCache.empty() ? "unspecified_monitor_" + std::to_string(index) : nameInCache;
 
-    Eigen::Vector3d position =
-        Mantid::Kernel::toVector3d(compInfo.position(index));
-    Eigen::Quaterniond rotation =
-        Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
+    Eigen::Vector3d position = Mantid::Kernel::toVector3d(compInfo.position(index));
+    Eigen::Quaterniond rotation = Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
 
     std::string dependency = NO_DEPENDENCY; // dependency initialiser
 
     bool locationIsOrigin = isApproxZero(position, PRECISION);
     bool orientationIsZero = isApproxZero(rotation, PRECISION);
 
-    H5::Group childGroup =
-        openOrCreateGroup(parentGroup, monitorName, NX_MONITOR);
+    H5::Group childGroup = openOrCreateGroup(parentGroup, monitorName, NX_MONITOR);
     writeStrAttribute(childGroup, NX_CLASS, NX_MONITOR);
 
     // do not write NXtransformations if there is no translation or rotation
     if (!(locationIsOrigin && orientationIsZero)) {
-      H5::Group transformations =
-          simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
+      H5::Group transformations = simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
 
       // self, ".", is the default first NXmonitor dependency in the chain.
       // first check translation in NXmonitor is non-zero, and set dependency
@@ -838,8 +769,7 @@ public:
         // orientation dataset containg the rotation transformation will be
         // location. Else dependency for orientation is self.
         std::string rotationDependency =
-            locationIsOrigin ? NO_DEPENDENCY
-                             : H5_OBJ_NAME(transformations) + "/" + LOCATION;
+            locationIsOrigin ? NO_DEPENDENCY : H5_OBJ_NAME(transformations) + "/" + LOCATION;
         writeOrientation(transformations, rotation, rotationDependency);
       }
     }
@@ -866,8 +796,7 @@ public:
    * @param index :  index of the specific monitor in the Instrument cache.
    * @param mappings : Spectra to detector mappings
    */
-  void monitor(const H5::Group &parentGroup,
-               const Geometry::ComponentInfo &compInfo, const int monitorId,
+  void monitor(const H5::Group &parentGroup, const Geometry::ComponentInfo &compInfo, const int monitorId,
                const size_t index, SpectraMappings &mappings) {
 
     auto childGroup = monitor(parentGroup, compInfo, monitorId, index);
@@ -895,35 +824,28 @@ public:
    * NXdetector will be extracted.
    * @return childGroup for futher additions
    */
-  H5::Group detector(const H5::Group &parentGroup,
-                     const Geometry::ComponentInfo &compInfo,
+  H5::Group detector(const H5::Group &parentGroup, const Geometry::ComponentInfo &compInfo,
                      const std::vector<int> &detIds, const size_t index) {
 
     // if the component is unnamed sets the name as unspecified with the
     // location of the component in the cache
     std::string nameInCache = compInfo.name(index);
-    std::string detectorName =
-        nameInCache.empty() ? "unspecified_detector_at_" + std::to_string(index)
-                            : nameInCache;
+    std::string detectorName = nameInCache.empty() ? "unspecified_detector_at_" + std::to_string(index) : nameInCache;
 
-    Eigen::Vector3d position =
-        Mantid::Kernel::toVector3d(compInfo.position(index));
-    Eigen::Quaterniond rotation =
-        Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
+    Eigen::Vector3d position = Mantid::Kernel::toVector3d(compInfo.position(index));
+    Eigen::Quaterniond rotation = Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
 
     std::string dependency = NO_DEPENDENCY; // dependency initialiser
 
     bool locationIsOrigin = isApproxZero(position, PRECISION);
     bool orientationIsZero = isApproxZero(rotation, PRECISION);
 
-    H5::Group childGroup =
-        openOrCreateGroup(parentGroup, detectorName, NX_DETECTOR);
+    H5::Group childGroup = openOrCreateGroup(parentGroup, detectorName, NX_DETECTOR);
     writeStrAttribute(childGroup, NX_CLASS, NX_DETECTOR);
 
     // do not write NXtransformations if there is no translation or rotation
     if (!(locationIsOrigin && orientationIsZero)) {
-      H5::Group transformations =
-          simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
+      H5::Group transformations = simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
 
       // self, ".", is the default first NXdetector dependency in the chain.
       // first check translation in NXdetector is non-zero, and set dependency
@@ -942,8 +864,7 @@ public:
         // orientation dataset containg the rotation transformation will be
         // location. Else dependency for orientation is self.
         std::string rotationDependency =
-            locationIsOrigin ? NO_DEPENDENCY
-                             : H5_OBJ_NAME(transformations) + "/" + LOCATION;
+            locationIsOrigin ? NO_DEPENDENCY : H5_OBJ_NAME(transformations) + "/" + LOCATION;
         writeOrientation(transformations, rotation, rotationDependency);
       }
     }
@@ -972,10 +893,8 @@ public:
    * @param mappings : Spectra to detector mappings
    * NXdetector will be extracted.
    */
-  void detector(const H5::Group &parentGroup,
-                const Geometry::ComponentInfo &compInfo,
-                const std::vector<int> &detIds, const size_t index,
-                SpectraMappings &mappings) {
+  void detector(const H5::Group &parentGroup, const Geometry::ComponentInfo &compInfo, const std::vector<int> &detIds,
+                const size_t index, SpectraMappings &mappings) {
 
     auto childGroup = detector(parentGroup, compInfo, detIds, index);
 
@@ -992,8 +911,7 @@ public:
 private:
   const Mode m_mode;
 
-  H5::Group openOrCreateGroup(const H5::Group &parent, const std::string &name,
-                              const std::string &classType) {
+  H5::Group openOrCreateGroup(const H5::Group &parent, const std::string &name, const std::string &classType) {
 
     if (m_mode == Mode::Append) {
       // Find by class and by name
@@ -1009,8 +927,7 @@ private:
 
   // function to create a simple sub-group that has a nexus class attribute,
   // inside a parent group.
-  H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
-                             const std::string &nexusAttribute) {
+  H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name, const std::string &nexusAttribute) {
     H5::Group subGroup = openOrCreateGroup(parent, name, nexusAttribute);
     writeStrAttribute(subGroup, NX_CLASS, nexusAttribute);
     return subGroup;
@@ -1032,10 +949,8 @@ private:
  * If false, creates new file.
  * @param reporter : (optional) report to progressBase.
  */
-void saveInstrument(const Geometry::ComponentInfo &compInfo,
-                    const Geometry::DetectorInfo &detInfo,
-                    const std::string &fullPath, const std::string &rootName,
-                    AbstractLogger &logger, bool append,
+void saveInstrument(const Geometry::ComponentInfo &compInfo, const Geometry::DetectorInfo &detInfo,
+                    const std::string &fullPath, const std::string &rootName, AbstractLogger &logger, bool append,
                     Kernel::ProgressBase *reporter) {
 
   validateInputs(logger, fullPath, compInfo);
@@ -1068,15 +983,13 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   std::list<size_t> saved_indices;
   // Looping from highest to lowest component index is critical
   for (size_t index = compInfo.root() - 1; index >= detInfo.size(); --index) {
-    if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, detInfo,
-                                                           index)) {
+    if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, detInfo, index)) {
       if (isDesiredNXDetector(index, saved_indices, compInfo)) {
         if (reporter != nullptr)
           reporter->report();
         writer.detector(instrument, compInfo, detIds, index);
-        saved_indices.emplace_back(
-            index); // Now record the fact that children of
-                    // this are not needed as NXdetectors
+        saved_indices.emplace_back(index); // Now record the fact that children of
+                                           // this are not needed as NXdetectors
       }
     }
   }
@@ -1109,22 +1022,18 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
  * @param reporter : (optional) report to progressBase.
  */
 void saveInstrument(
-    const std::pair<std::unique_ptr<Geometry::ComponentInfo>,
-                    std::unique_ptr<Geometry::DetectorInfo>> &instrPair,
-    const std::string &fullPath, const std::string &rootName,
-    AbstractLogger &logger, bool append, Kernel::ProgressBase *reporter) {
+    const std::pair<std::unique_ptr<Geometry::ComponentInfo>, std::unique_ptr<Geometry::DetectorInfo>> &instrPair,
+    const std::string &fullPath, const std::string &rootName, AbstractLogger &logger, bool append,
+    Kernel::ProgressBase *reporter) {
 
   const Geometry::ComponentInfo &compInfo = (*instrPair.first);
   const Geometry::DetectorInfo &detInfo = (*instrPair.second);
 
-  return saveInstrument(compInfo, detInfo, fullPath, rootName, logger, append,
-                        reporter);
+  return saveInstrument(compInfo, detInfo, fullPath, rootName, logger, append, reporter);
 }
 
-void saveInstrument(const Mantid::API::MatrixWorkspace &ws,
-                    const std::string &fullPath, const std::string &rootName,
-                    AbstractLogger &logger, bool append,
-                    Kernel::ProgressBase *reporter) {
+void saveInstrument(const Mantid::API::MatrixWorkspace &ws, const std::string &fullPath, const std::string &rootName,
+                    AbstractLogger &logger, bool append, Kernel::ProgressBase *reporter) {
 
   const auto &detInfo = ws.detectorInfo();
   const auto &compInfo = ws.componentInfo();
@@ -1158,26 +1067,22 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws,
   writer.sample(rootGroup, compInfo);
 
   // save NXdetectors
-  auto detToIndexMap =
-      ws.getDetectorIDToWorkspaceIndexMap(false /*do not throw if multiples*/);
+  auto detToIndexMap = ws.getDetectorIDToWorkspaceIndexMap(false /*do not throw if multiples*/);
   std::list<size_t> saved_indices;
   // Looping from highest to lowest component index is critical
   for (size_t index = compInfo.root() - 1; index >= detInfo.size(); --index) {
-    if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, detInfo,
-                                                           index)) {
+    if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, detInfo, index)) {
 
       if (isDesiredNXDetector(index, saved_indices, compInfo)) {
         // Make spectra detector mappings that can be used
         SpectraMappings mappings =
-            makeMappings(compInfo, detToIndexMap, ws.indexInfo(),
-                         ws.spectrumInfo(), detIds, index);
+            makeMappings(compInfo, detToIndexMap, ws.indexInfo(), ws.spectrumInfo(), detIds, index);
 
         if (reporter != nullptr)
           reporter->report();
         writer.detector(instrument, compInfo, detIds, index, mappings);
-        saved_indices.emplace_back(
-            index); // Now record the fact that children of
-                    // this are not needed as NXdetectors
+        saved_indices.emplace_back(index); // Now record the fact that children of
+                                           // this are not needed as NXdetectors
       }
     }
   }
@@ -1187,8 +1092,7 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws,
     if (detInfo.isMonitor(index)) {
       // Make spectra detector mappings that can be used
       SpectraMappings mappings =
-          makeMappings(compInfo, detToIndexMap, ws.indexInfo(),
-                       ws.spectrumInfo(), detIds, index);
+          makeMappings(compInfo, detToIndexMap, ws.indexInfo(), ws.spectrumInfo(), detIds, index);
 
       if (reporter != nullptr)
         reporter->report();

@@ -82,7 +82,7 @@ class CalculateSansTransmissionTest(unittest.TestCase):
 
     # Function is too complex, but it can be tided when state is tamed
     @staticmethod  # noqa: C901
-    def _get_state(transmission_radius_on_detector=None, transmission_roi_files=None, transmission_mask_files=None,
+    def _get_state(transmission_radius_on_detector=None, transmission_roi_files=None, transmission_mask_files=None,  # noqa: C901
                    transmission_monitor=None, incident_monitor=None, rebin_type=None, wavelength_low=None,
                    wavelength_high=None, wavelength_step=None, wavelength_step_type=None,
                    use_full_wavelength_range=None,

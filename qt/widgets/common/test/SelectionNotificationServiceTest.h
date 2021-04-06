@@ -15,7 +15,6 @@ public:
   /// signal
   void test_sendQSelection() {
     TS_ASSERT_THROWS_NOTHING(
-        MantidQt::API::SelectionNotificationService::Instance()
-            .sendQPointSelection(false, 1, 2, 3));
+        MantidQt::API::SelectionNotificationService::Instance().sendQPointSelection(false, 1, 2, 3));
   }
 };

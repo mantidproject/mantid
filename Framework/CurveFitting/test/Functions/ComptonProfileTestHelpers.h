@@ -24,32 +24,25 @@ namespace ComptonProfileTestHelpers {
 enum class NoiseType { None = 0, Full = 1 };
 
 // Forward declare all functions
-static Mantid::API::MatrixWorkspace_sptr
-createTestWorkspace(const size_t nhist, const double x0, const double x1,
-                    const double dx, const NoiseType noise,
-                    const bool singleMassSpectrum = false,
-                    const bool addFoilChanger = false);
-static Mantid::Geometry::Instrument_sptr
-createTestInstrumentWithFoilChanger(const Mantid::detid_t id,
-                                    const Mantid::Kernel::V3D &,
-                                    const std::string &detShapeXML = "");
-static Mantid::Geometry::Instrument_sptr
-createTestInstrumentWithNoFoilChanger(const Mantid::detid_t id,
-                                      const Mantid::Kernel::V3D &,
-                                      const std::string &detShape = "");
-static void addResolutionParameters(const Mantid::API::MatrixWorkspace_sptr &ws,
-                                    const Mantid::detid_t detID);
-static void addFoilResolution(const Mantid::API::MatrixWorkspace_sptr &ws,
-                              const std::string &name);
+static Mantid::API::MatrixWorkspace_sptr createTestWorkspace(const size_t nhist, const double x0, const double x1,
+                                                             const double dx, const NoiseType noise,
+                                                             const bool singleMassSpectrum = false,
+                                                             const bool addFoilChanger = false);
+static Mantid::Geometry::Instrument_sptr createTestInstrumentWithFoilChanger(const Mantid::detid_t id,
+                                                                             const Mantid::Kernel::V3D &,
+                                                                             const std::string &detShapeXML = "");
+static Mantid::Geometry::Instrument_sptr createTestInstrumentWithNoFoilChanger(const Mantid::detid_t id,
+                                                                               const Mantid::Kernel::V3D &,
+                                                                               const std::string &detShape = "");
+static void addResolutionParameters(const Mantid::API::MatrixWorkspace_sptr &ws, const Mantid::detid_t detID);
+static void addFoilResolution(const Mantid::API::MatrixWorkspace_sptr &ws, const std::string &name);
 
-static Mantid::API::MatrixWorkspace_sptr
-createTestWorkspace(const size_t nhist, const double x0, const double x1,
-                    const double dx, const NoiseType noise,
-                    const bool singleMassSpectrum, const bool addFoilChanger) {
+static Mantid::API::MatrixWorkspace_sptr createTestWorkspace(const size_t nhist, const double x0, const double x1,
+                                                             const double dx, const NoiseType noise,
+                                                             const bool singleMassSpectrum, const bool addFoilChanger) {
   bool isHist(false);
-  auto ws2d = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-      [](const double, std::size_t) { return 1.0; }, static_cast<int>(nhist),
-      x0, x1, dx, isHist);
+  auto ws2d = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](const double, std::size_t) { return 1.0; },
+                                                                     static_cast<int>(nhist), x0, x1, dx, isHist);
   ws2d->getAxis(0)->setUnit("TOF");
   if (singleMassSpectrum) {
     // Generate a test mass profile with some noise so any calculated spectrum
@@ -58,8 +51,7 @@ createTestWorkspace(const size_t nhist, const double x0, const double x1,
     for (size_t i = 0; i < nhist; ++i) {
       auto &dataXi = ws2d->mutableX(i);
       auto &dataYi = ws2d->mutableY(i);
-      for (auto xit = std::begin(dataXi), yit = std::begin(dataYi);
-           xit != std::end(dataXi); ++xit, ++yit) {
+      for (auto xit = std::begin(dataXi), yit = std::begin(dataYi); xit != std::end(dataXi); ++xit, ++yit) {
         *yit = peakHeight * exp(-0.5 * pow(*xit - peakCentre, 2.) / sigmaSq);
       }
     }
@@ -103,24 +95,22 @@ createTestWorkspace(const size_t nhist, const double x0, const double x1,
   Mantid::Indexing::IndexInfo indexInfo(nhist);
   Mantid::SpectrumDefinition specDef;
   specDef.add(0); // id 1
-  indexInfo.setSpectrumDefinitions(
-      std::vector<Mantid::SpectrumDefinition>(nhist, specDef));
+  indexInfo.setSpectrumDefinitions(std::vector<Mantid::SpectrumDefinition>(nhist, specDef));
   ws2d->setIndexInfo(indexInfo);
 
   return ws2d;
 }
 
-static Mantid::Geometry::Instrument_sptr
-createTestInstrumentWithFoilChanger(const Mantid::detid_t id,
-                                    const Mantid::Kernel::V3D &detPos,
-                                    const std::string &detShapeXML) {
+static Mantid::Geometry::Instrument_sptr createTestInstrumentWithFoilChanger(const Mantid::detid_t id,
+                                                                             const Mantid::Kernel::V3D &detPos,
+                                                                             const std::string &detShapeXML) {
   using Mantid::Kernel::V3D;
   using namespace Mantid::Geometry;
 
   auto inst = createTestInstrumentWithNoFoilChanger(id, detPos, detShapeXML);
   // add changer
-  auto changerShape = ComponentCreationHelper::createCappedCylinder(
-      0.05, 0.4, V3D(0.0, -0.2, 0.0), V3D(0.0, 1, 0.0), "cylinder");
+  auto changerShape =
+      ComponentCreationHelper::createCappedCylinder(0.05, 0.4, V3D(0.0, -0.2, 0.0), V3D(0.0, 1, 0.0), "cylinder");
   auto *changer = new ObjComponent("foil-changer", changerShape);
   changer->setPos(V3D(0.0, 0.0, 0.0));
   inst->add(changer);
@@ -142,10 +132,9 @@ createTestInstrumentWithFoilChanger(const Mantid::detid_t id,
   return inst;
 }
 
-static Mantid::Geometry::Instrument_sptr
-createTestInstrumentWithNoFoilChanger(const Mantid::detid_t id,
-                                      const Mantid::Kernel::V3D &detPos,
-                                      const std::string &detShapeXML) {
+static Mantid::Geometry::Instrument_sptr createTestInstrumentWithNoFoilChanger(const Mantid::detid_t id,
+                                                                               const Mantid::Kernel::V3D &detPos,
+                                                                               const std::string &detShapeXML) {
   using Mantid::Kernel::V3D;
   using namespace Mantid::Geometry;
 
@@ -177,8 +166,7 @@ createTestInstrumentWithNoFoilChanger(const Mantid::detid_t id,
   return inst;
 }
 
-static void addResolutionParameters(const Mantid::API::MatrixWorkspace_sptr &ws,
-                                    const Mantid::detid_t detID) {
+static void addResolutionParameters(const Mantid::API::MatrixWorkspace_sptr &ws, const Mantid::detid_t detID) {
   // Parameters
   auto &pmap = ws->instrumentParameters();
   const auto &detectorInfo = ws->detectorInfo();
@@ -195,8 +183,7 @@ static void addResolutionParameters(const Mantid::API::MatrixWorkspace_sptr &ws,
   pmap.addDouble(compID, "sigma_tof", 0.3);
 }
 
-static void addFoilResolution(const Mantid::API::MatrixWorkspace_sptr &ws,
-                              const std::string &name) {
+static void addFoilResolution(const Mantid::API::MatrixWorkspace_sptr &ws, const std::string &name) {
   // Parameters
   auto &pmap = ws->instrumentParameters();
   auto comp = ws->getInstrument()->getComponentByName(name);

@@ -17,15 +17,10 @@ class FitResolutionConvolvedModelTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FitResolutionConvolvedModelTest *createSuite() {
-    return new FitResolutionConvolvedModelTest();
-  }
-  static void destroySuite(FitResolutionConvolvedModelTest *suite) {
-    delete suite;
-  }
+  static FitResolutionConvolvedModelTest *createSuite() { return new FitResolutionConvolvedModelTest(); }
+  static void destroySuite(FitResolutionConvolvedModelTest *suite) { delete suite; }
 
-  FitResolutionConvolvedModelTest()
-      : m_inputName("FitResolutionConvolvedModelTest") {}
+  FitResolutionConvolvedModelTest() : m_inputName("FitResolutionConvolvedModelTest") {}
 
   void test_Init_Does_Not_Throw() {
     Mantid::API::IAlgorithm_sptr alg;
@@ -36,13 +31,10 @@ public:
   void test_Algorithm_Does_Not_Allow_Standard_MatrixWorkspaces() {
     using namespace Mantid::API;
     IAlgorithm_sptr alg = createAlgorithm();
-    MatrixWorkspace_sptr testMatrixWS =
-        WorkspaceCreationHelper::create2DWorkspace(1, 10);
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(m_inputName,
-                                                              testMatrixWS);
+    MatrixWorkspace_sptr testMatrixWS = WorkspaceCreationHelper::create2DWorkspace(1, 10);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(m_inputName, testMatrixWS);
 
-    TS_ASSERT_THROWS(alg->setPropertyValue("InputWorkspace", m_inputName),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg->setPropertyValue("InputWorkspace", m_inputName), const std::invalid_argument &);
 
     Mantid::API::AnalysisDataService::Instance().remove(m_inputName);
   }

@@ -56,9 +56,7 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MDEventWorkspaceTest *createSuite() {
-    return new MDEventWorkspaceTest();
-  }
+  static MDEventWorkspaceTest *createSuite() { return new MDEventWorkspaceTest(); }
   static void destroySuite(MDEventWorkspaceTest *suite) { delete suite; }
 
   void test_constructor() {
@@ -94,8 +92,7 @@ public:
     MDEventWorkspace<MDLeanEvent<3>, 3> ew3;
     Mantid::Geometry::GeneralFrame frame("m", "m");
     for (size_t i = 0; i < 3; i++) {
-      ew3.addDimension(MDHistoDimension_sptr(
-          new MDHistoDimension("x", "x", frame, -1, 1, 0)));
+      ew3.addDimension(MDHistoDimension_sptr(new MDHistoDimension("x", "x", frame, -1, 1, 0)));
     }
     ew3.initialize();
     ew3.getBoxController()->setSplitThreshold(1);
@@ -112,12 +109,9 @@ public:
     TS_ASSERT_EQUALS(copy.getNumDims(), 3);
     TS_ASSERT_EQUALS(copy.getDimension(0)->getName(), "x");
     TS_ASSERT_EQUALS(copy.getNumExperimentInfo(), 1);
-    TSM_ASSERT_DIFFERS("ExperimentInfo's were not deep-copied",
-                       copy.getExperimentInfo(0), ew3.getExperimentInfo(0));
-    TSM_ASSERT_DIFFERS("BoxController was not deep-copied",
-                       copy.getBoxController(), ew3.getBoxController());
-    TSM_ASSERT_DIFFERS("Dimensions were not deep-copied", copy.getDimension(0),
-                       ew3.getDimension(0));
+    TSM_ASSERT_DIFFERS("ExperimentInfo's were not deep-copied", copy.getExperimentInfo(0), ew3.getExperimentInfo(0));
+    TSM_ASSERT_DIFFERS("BoxController was not deep-copied", copy.getBoxController(), ew3.getBoxController());
+    TSM_ASSERT_DIFFERS("Dimensions were not deep-copied", copy.getDimension(0), ew3.getDimension(0));
 
     /*Test that the boxes were deep copied and that their BoxController pointers
      * have been updated too.*/
@@ -128,9 +122,8 @@ public:
     copy.getBox()->getBoxes(copiedBoxes, 10000, false);
 
     // Quick check.
-    TSM_ASSERT_EQUALS(
-        "Number of boxes should be the same before and after the copy.",
-        originalBoxes.size(), copiedBoxes.size());
+    TSM_ASSERT_EQUALS("Number of boxes should be the same before and after the copy.", originalBoxes.size(),
+                      copiedBoxes.size());
     for (size_t i = 0; i < originalBoxes.size(); ++i) {
       API::IMDNode *originalMDBox = originalBoxes[i];
       API::IMDNode *copiedMDBox = copiedBoxes[i];
@@ -140,15 +133,12 @@ public:
 
       // Check the types
       TSM_ASSERT("Box types are not the same",
-                 originalBoxTypeName.compare(copiedBoxTypeName) ==
-                     0); // Comparing them this way will at least produce a
-                         // useful error if type matching fails.
-      TSM_ASSERT_DIFFERS(
-          "BoxController should be different between original and copied boxes",
-          originalMDBox->getBoxController(), copiedMDBox->getBoxController());
-      TSM_ASSERT_EQUALS(
-          "BoxController on copied box does not match that in copied workspace",
-          copy.getBoxController().get(), copiedMDBox->getBoxController());
+                 originalBoxTypeName.compare(copiedBoxTypeName) == 0); // Comparing them this way will at least produce
+                                                                       // a useful error if type matching fails.
+      TSM_ASSERT_DIFFERS("BoxController should be different between original and copied boxes",
+                         originalMDBox->getBoxController(), copiedMDBox->getBoxController());
+      TSM_ASSERT_EQUALS("BoxController on copied box does not match that in copied workspace",
+                        copy.getBoxController().get(), copiedMDBox->getBoxController());
     }
   }
 
@@ -156,8 +146,7 @@ public:
     auto ws = std::make_shared<MDEventWorkspace<MDLeanEvent<3>, 3>>();
     Mantid::Geometry::GeneralFrame frame("m", "m");
     for (size_t i = 0; i < 3; i++) {
-      ws->addDimension(MDHistoDimension_sptr(
-          new MDHistoDimension("x", "x", frame, -1, 1, 0)));
+      ws->addDimension(MDHistoDimension_sptr(new MDHistoDimension("x", "x", frame, -1, 1, 0)));
     }
     ws->initialize();
     const std::string name{"MatrixWorkspace_testCloneClearsWorkspaceName"};
@@ -173,8 +162,7 @@ public:
     Mantid::Geometry::GeneralFrame frame("m", "m");
     TS_ASSERT_THROWS(ew->initialize(), const std::runtime_error &);
     for (size_t i = 0; i < 5; i++)
-      ew->addDimension(MDHistoDimension_sptr(
-          new MDHistoDimension("x", "x", frame, -1, 1, 0)));
+      ew->addDimension(MDHistoDimension_sptr(new MDHistoDimension("x", "x", frame, -1, 1, 0)));
     TS_ASSERT_THROWS(ew->initialize(), const std::runtime_error &);
     delete ew;
   }
@@ -184,8 +172,7 @@ public:
     Mantid::Geometry::GeneralFrame frame("m", "m");
     TS_ASSERT_THROWS(ew->initialize(), const std::runtime_error &);
     for (size_t i = 0; i < 3; i++)
-      ew->addDimension(MDHistoDimension_sptr(
-          new MDHistoDimension("x", "x", frame, -1, 1, 0)));
+      ew->addDimension(MDHistoDimension_sptr(new MDHistoDimension("x", "x", frame, -1, 1, 0)));
     TS_ASSERT_THROWS_NOTHING(ew->initialize());
     delete ew;
   }
@@ -269,8 +256,7 @@ public:
   //-------------------------------------------------------------------------------------
   /** Method that makes a table workspace for use in MantidPlot */
   void test_makeBoxTable() {
-    MDEventWorkspace3Lean::sptr ew =
-        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
+    MDEventWorkspace3Lean::sptr ew = MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
     ITableWorkspace_sptr itab = ew->makeBoxTable(0, 0);
     TS_ASSERT_EQUALS(itab->rowCount(), 4 * 4 * 4 + 1);
     TS_ASSERT_EQUALS(itab->cell<int>(3, 0), 3);
@@ -279,31 +265,22 @@ public:
   //-------------------------------------------------------------------------------------
   /** Get the signal at a given coord */
   void test_getSignalAtCoord() {
-    MDEventWorkspace3Lean::sptr ew =
-        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
+    MDEventWorkspace3Lean::sptr ew = MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
     coord_t coords1[3] = {1.5, 1.5, 1.5};
     coord_t coords2[3] = {2.5, 2.5, 2.5};
     coord_t coords3[3] = {-0.1f, 2, 2};
     coord_t coords4[3] = {2, 2, 4.1f};
     ew->addEvent(MDLeanEvent<3>(2.0, 2.0, coords2));
     ew->refreshCache();
-    TSM_ASSERT_DELTA(
-        "A regular box with a single event",
-        ew->getSignalAtCoord(coords1, Mantid::API::NoNormalization), 1.0, 1e-5);
-    TSM_ASSERT_DELTA(
-        "The box with 2 events",
-        ew->getSignalAtCoord(coords2, Mantid::API::NoNormalization), 3.0, 1e-5);
-    TSM_ASSERT("Out of bounds returns NAN",
-               std::isnan(ew->getSignalAtCoord(coords3,
-                                               Mantid::API::NoNormalization)));
-    TSM_ASSERT("Out of bounds returns NAN",
-               std::isnan(ew->getSignalAtCoord(coords4,
-                                               Mantid::API::NoNormalization)));
+    TSM_ASSERT_DELTA("A regular box with a single event", ew->getSignalAtCoord(coords1, Mantid::API::NoNormalization),
+                     1.0, 1e-5);
+    TSM_ASSERT_DELTA("The box with 2 events", ew->getSignalAtCoord(coords2, Mantid::API::NoNormalization), 3.0, 1e-5);
+    TSM_ASSERT("Out of bounds returns NAN", std::isnan(ew->getSignalAtCoord(coords3, Mantid::API::NoNormalization)));
+    TSM_ASSERT("Out of bounds returns NAN", std::isnan(ew->getSignalAtCoord(coords4, Mantid::API::NoNormalization)));
   }
 
   void test_getBoxBoundaryBisectsOnLine() {
-    MDEventWorkspace3Lean::sptr ew =
-        MDEventsTestHelper::makeMDEW<3>(8, 0.0, 4.0, 1);
+    MDEventWorkspace3Lean::sptr ew = MDEventsTestHelper::makeMDEW<3>(8, 0.0, 4.0, 1);
 
     // Create a diagonal line through the workspace
     Mantid::Kernel::VMD start(0.0, 0, 0);
@@ -311,25 +288,20 @@ public:
     Mantid::Kernel::VMD dir = end - start;
     const auto length = dir.normalize();
 
-    auto box_mid_points =
-        ew->getBoxBoundaryBisectsOnLine(start, end, 3, dir, length);
+    auto box_mid_points = ew->getBoxBoundaryBisectsOnLine(start, end, 3, dir, length);
 
     // Copy set to vector for test
-    TSM_ASSERT_EQUALS("8 box boundary bisections should be found",
-                      box_mid_points.size(), 8);
-    std::vector<double> mid_points_vect(box_mid_points.begin(),
-                                        box_mid_points.end());
+    TSM_ASSERT_EQUALS("8 box boundary bisections should be found", box_mid_points.size(), 8);
+    std::vector<double> mid_points_vect(box_mid_points.begin(), box_mid_points.end());
 
     // Each box (cube) has edges 0.5 long, so a face diagonal is sqrt(2)/2
     for (size_t i = 0; i < mid_points_vect.size(); ++i) {
-      TS_ASSERT_DELTA(mid_points_vect[i],
-                      (static_cast<double>(i) + 0.5) * 0.5 * M_SQRT2, 1e-5);
+      TS_ASSERT_DELTA(mid_points_vect[i], (static_cast<double>(i) + 0.5) * 0.5 * M_SQRT2, 1e-5);
     }
   }
 
   void test_getBoxBoundaryBisectsOnLine_crossing_zero() {
-    MDEventWorkspace3Lean::sptr ew =
-        MDEventsTestHelper::makeMDEW<3>(8, -4.0, 4.0, 1);
+    MDEventWorkspace3Lean::sptr ew = MDEventsTestHelper::makeMDEW<3>(8, -4.0, 4.0, 1);
 
     // Create a diagonal line through the workspace
     Mantid::Kernel::VMD start(-4.0, 0, 0);
@@ -337,14 +309,11 @@ public:
     Mantid::Kernel::VMD dir = end - start;
     const auto length = dir.normalize();
 
-    auto box_mid_points =
-        ew->getBoxBoundaryBisectsOnLine(start, end, 3, dir, length);
+    auto box_mid_points = ew->getBoxBoundaryBisectsOnLine(start, end, 3, dir, length);
 
     // Copy set to vector for test
-    TSM_ASSERT_EQUALS("8 box boundary bisections should be found",
-                      box_mid_points.size(), 8);
-    std::vector<double> mid_points_vect(box_mid_points.begin(),
-                                        box_mid_points.end());
+    TSM_ASSERT_EQUALS("8 box boundary bisections should be found", box_mid_points.size(), 8);
+    std::vector<double> mid_points_vect(box_mid_points.begin(), box_mid_points.end());
 
     // Each box (cube) has edges 1.0 long
     for (size_t i = 0; i < mid_points_vect.size(); ++i) {
@@ -353,8 +322,7 @@ public:
   }
 
   void test_getBoxBoundaryBisectsOnLine_with_variable_box_size() {
-    MDEventWorkspace3Lean::sptr ew =
-        MDEventsTestHelper::makeMDEW<3>(8, 0.0, 4.0, 1);
+    MDEventWorkspace3Lean::sptr ew = MDEventsTestHelper::makeMDEW<3>(8, 0.0, 4.0, 1);
 
     // Distribute some events so that one of the boxes will split into 8
     // along each dimension
@@ -378,14 +346,11 @@ public:
     Mantid::Kernel::VMD dir = end - start;
     const auto length = dir.normalize();
 
-    auto box_mid_points =
-        ew->getBoxBoundaryBisectsOnLine(start, end, 3, dir, length);
+    auto box_mid_points = ew->getBoxBoundaryBisectsOnLine(start, end, 3, dir, length);
 
     // Copy set to vector for test
-    TSM_ASSERT_EQUALS("15 box boundary bisections should be found",
-                      box_mid_points.size(), 15);
-    std::vector<double> mid_points_vect(box_mid_points.begin(),
-                                        box_mid_points.end());
+    TSM_ASSERT_EQUALS("15 box boundary bisections should be found", box_mid_points.size(), 15);
+    std::vector<double> mid_points_vect(box_mid_points.begin(), box_mid_points.end());
 
     TS_ASSERT_DELTA(mid_points_vect[0], 0.25, 1e-4);
     TS_ASSERT_DELTA(mid_points_vect[1], 0.75, 1e-4);
@@ -398,8 +363,7 @@ public:
   //-------------------------------------------------------------------------------------
   /** Get the signal at a given coord or 0 if masked */
   void test_getSignalWithMaskAtCoord() {
-    MDEventWorkspace3Lean::sptr ew =
-        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
+    MDEventWorkspace3Lean::sptr ew = MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
     coord_t coords1[3] = {0.5, 0.5, 0.5};
     coord_t coords2[3] = {2.5, 2.5, 2.5};
     ew->addEvent(MDLeanEvent<3>(2.0, 2.0, coords2));
@@ -419,18 +383,14 @@ public:
     ew->setMDMasking(std::move(function));
     ew->refreshCache();
 
-    TSM_ASSERT_DELTA(
-        "Value ignoring mask is 0.0 as masking deletes the events",
-        ew->getSignalAtCoord(coords1, Mantid::API::NoNormalization), 0.0, 1e-5);
-    TSM_ASSERT("Masked returns NaN",
-               std::isnan(ew->getSignalWithMaskAtCoord(
-                   coords1, Mantid::API::NoNormalization)));
+    TSM_ASSERT_DELTA("Value ignoring mask is 0.0 as masking deletes the events",
+                     ew->getSignalAtCoord(coords1, Mantid::API::NoNormalization), 0.0, 1e-5);
+    TSM_ASSERT("Masked returns NaN", std::isnan(ew->getSignalWithMaskAtCoord(coords1, Mantid::API::NoNormalization)));
   }
 
   //-------------------------------------------------------------------------------------
   void test_estimateResolution() {
-    MDEventWorkspace2Lean::sptr b =
-        MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
+    MDEventWorkspace2Lean::sptr b = MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
     std::vector<coord_t> binSizes;
     // First, before any splitting
     binSizes = b->estimateResolution();
@@ -448,8 +408,7 @@ public:
 
   //-------------------------------------------------------------------------------------
   void test_estimateResolution_with_top_level_splitting() {
-    MDEventWorkspace2Lean::sptr b =
-        MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
+    MDEventWorkspace2Lean::sptr b = MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
     std::vector<coord_t> binSizes;
     // First, before any splitting
     binSizes = b->estimateResolution();
@@ -470,9 +429,8 @@ public:
 
   ////-------------------------------------------------------------------------------------
 
-  void
-  checkExtents(std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &ext,
-               coord_t xmin, coord_t xmax, coord_t ymin, coord_t ymax) {
+  void checkExtents(std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &ext, coord_t xmin, coord_t xmax,
+                    coord_t ymin, coord_t ymax) {
     TS_ASSERT_DELTA(ext[0].getMin(), xmin, 1e-4);
     TS_ASSERT_DELTA(ext[0].getMax(), xmax, 1e-4);
     TS_ASSERT_DELTA(ext[1].getMin(), ymin, 1e-4);
@@ -485,8 +443,7 @@ public:
   }
 
   void test_getMinimumExtents() {
-    MDEventWorkspace2Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
+    MDEventWorkspace2Lean::sptr ws = MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
 
     // If nothing in the workspace, the extents given are the dimensions in the
     // workspace
@@ -531,8 +488,7 @@ public:
 
   void test_integrateSphere() {
     // 10x10x10 eventWorkspace
-    MDEventWorkspace3Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1 /*event per box*/);
+    MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1 /*event per box*/);
     TS_ASSERT_EQUALS(ws->getNPoints(), 1000);
 
     // The sphere transformation
@@ -552,17 +508,14 @@ public:
   /*
   Generic masking checking helper method.
   */
-  void doTestMasking(std::unique_ptr<MDImplicitFunction> function,
-                     size_t expectedNumberMasked) {
+  void doTestMasking(std::unique_ptr<MDImplicitFunction> function, size_t expectedNumberMasked) {
     // 10x10x10 eventWorkspace
-    MDEventWorkspace3Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1 /*event per box*/);
+    MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1 /*event per box*/);
 
     ws->setMDMasking(std::move(function));
 
     size_t numberMasked = getNumberMasked(ws);
-    TSM_ASSERT_EQUALS("Didn't perform the masking as expected",
-                      expectedNumberMasked, numberMasked);
+    TSM_ASSERT_EQUALS("Didn't perform the masking as expected", expectedNumberMasked, numberMasked);
   }
 
   void test_maskEverything() {
@@ -635,39 +588,33 @@ public:
     max.emplace_back(10.f);
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
 
-    MDEventWorkspace3Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1 /*event per box*/);
+    MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1 /*event per box*/);
     ws->setMDMasking(std::move(function));
 
-    TSM_ASSERT_EQUALS("Everything should be masked.", 1000,
-                      getNumberMasked(ws));
+    TSM_ASSERT_EQUALS("Everything should be masked.", 1000, getNumberMasked(ws));
     TS_ASSERT_THROWS_NOTHING(ws->clearMDMasking());
     TSM_ASSERT_EQUALS("Nothing should be masked.", 0, getNumberMasked(ws));
   }
 
   void test_getSpecialCoordinateSystem_default() {
-    MDEventWorkspace1Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 1 /*event per box*/);
-    TSM_ASSERT_EQUALS("Should default to no special coordinate system.",
-                      Mantid::Kernel::None, ws->getSpecialCoordinateSystem());
+    MDEventWorkspace1Lean::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 1 /*event per box*/);
+    TSM_ASSERT_EQUALS("Should default to no special coordinate system.", Mantid::Kernel::None,
+                      ws->getSpecialCoordinateSystem());
   }
 
   void test_getSpecialCoordinateSystem_when_MDFrames_are_set() {
     // Arrange
     const Mantid::Geometry::QSample frame;
-    auto ws = MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<2>, 2>(
-        10, 0.0, 10.0, frame, 1);
+    auto ws = MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<2>, 2>(10, 0.0, 10.0, frame, 1);
     // Act
     auto specialCoordinateSystem = ws->getSpecialCoordinateSystem();
     // Assert
-    TSM_ASSERT_EQUALS("Should detect QSample as the SpecialCoordinate",
-                      specialCoordinateSystem,
+    TSM_ASSERT_EQUALS("Should detect QSample as the SpecialCoordinate", specialCoordinateSystem,
                       Mantid::Kernel::SpecialCoordinateSystem::QSample);
   }
 
   void test_getLinePlot() {
-    MDEventWorkspace3Lean::sptr ew =
-        MDEventsTestHelper::makeMDEW<3>(12, 0.0, 8.0, 3);
+    MDEventWorkspace3Lean::sptr ew = MDEventsTestHelper::makeMDEW<3>(12, 0.0, 8.0, 3);
 
     double volume = pow(8.0 / 12.0, 3);
     double signal = 3.0;
@@ -692,8 +639,7 @@ public:
   }
 
   void test_getLinePlotWithMaskedData() {
-    MDEventWorkspace3Lean::sptr ew =
-        MDEventsTestHelper::makeMDEW<3>(12, 0.0, 8.0, 3);
+    MDEventWorkspace3Lean::sptr ew = MDEventsTestHelper::makeMDEW<3>(12, 0.0, 8.0, 3);
 
     // Mask some of the workspace
     std::vector<coord_t> min{0, 0, 0};
@@ -716,14 +662,11 @@ public:
 
   void test_that_sets_default_normalization_flags_to_volume_normalization() {
     // Arrange + Act
-    MDEventWorkspace3Lean::sptr ew =
-        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 7.0, 3);
+    MDEventWorkspace3Lean::sptr ew = MDEventsTestHelper::makeMDEW<3>(4, 0.0, 7.0, 3);
     // Assert
-    TSM_ASSERT_EQUALS("Should default to volume normalization",
-                      ew->displayNormalization(),
+    TSM_ASSERT_EQUALS("Should default to volume normalization", ew->displayNormalization(),
                       Mantid::API::VolumeNormalization);
-    TSM_ASSERT_EQUALS("Should default to volume normalization",
-                      ew->displayNormalizationHisto(),
+    TSM_ASSERT_EQUALS("Should default to volume normalization", ew->displayNormalizationHisto(),
                       Mantid::API::VolumeNormalization);
   }
 
@@ -732,39 +675,31 @@ public:
     auto eventSetting = Mantid::API::NoNormalization;
     auto histoSetting = Mantid::API::NumEventsNormalization;
     // Act
-    std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDLeanEvent<3>, 3>>
-        ew(new Mantid::DataObjects::MDEventWorkspace<MDLeanEvent<3>, 3>(
-            eventSetting, histoSetting));
+    std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDLeanEvent<3>, 3>> ew(
+        new Mantid::DataObjects::MDEventWorkspace<MDLeanEvent<3>, 3>(eventSetting, histoSetting));
     // Assert
-    TSM_ASSERT_EQUALS("Should be set to nonormalization",
-                      ew->displayNormalization(), eventSetting);
-    TSM_ASSERT_EQUALS(
-        "Should be set to number of events normalizationnormalization",
-        ew->displayNormalizationHisto(), histoSetting);
+    TSM_ASSERT_EQUALS("Should be set to nonormalization", ew->displayNormalization(), eventSetting);
+    TSM_ASSERT_EQUALS("Should be set to number of events normalizationnormalization", ew->displayNormalizationHisto(),
+                      histoSetting);
   }
 
   void test_that_sets_normalization_correctly() {
     // Arrange
-    MDEventWorkspace3Lean::sptr ew =
-        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 7.0, 3);
+    MDEventWorkspace3Lean::sptr ew = MDEventsTestHelper::makeMDEW<3>(4, 0.0, 7.0, 3);
     auto eventSetting = Mantid::API::NoNormalization;
     auto histoSetting = Mantid::API::NumEventsNormalization;
     // Act
     ew->setDisplayNormalization(eventSetting);
     ew->setDisplayNormalizationHisto(histoSetting);
     // Assert
-    TSM_ASSERT_EQUALS("Should be set to nonormalization",
-                      ew->displayNormalization(), eventSetting);
-    TSM_ASSERT_EQUALS(
-        "Should be set to number of events normalizationnormalization",
-        ew->displayNormalizationHisto(), histoSetting);
+    TSM_ASSERT_EQUALS("Should be set to nonormalization", ew->displayNormalization(), eventSetting);
+    TSM_ASSERT_EQUALS("Should be set to number of events normalizationnormalization", ew->displayNormalizationHisto(),
+                      histoSetting);
   }
 
   void test_is_histogram_is_false() {
-    MDEventWorkspace3Lean::sptr ew =
-        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 7.0, 3);
-    TSM_ASSERT("Should always be false for event workspace",
-               !ew->isMDHistoWorkspace());
+    MDEventWorkspace3Lean::sptr ew = MDEventsTestHelper::makeMDEW<3>(4, 0.0, 7.0, 3);
+    TSM_ASSERT("Should always be false for event workspace", !ew->isMDHistoWorkspace());
   }
 
   /**
@@ -780,11 +715,9 @@ public:
     // Check property can be obtained as const_sptr or sptr
     IMDEventWorkspace_const_sptr wsConst;
     IMDEventWorkspace_sptr wsNonConst;
-    TS_ASSERT_THROWS_NOTHING(
-        wsConst = manager.getValue<IMDEventWorkspace_const_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsConst = manager.getValue<IMDEventWorkspace_const_sptr>(wsName));
     TS_ASSERT(wsConst != nullptr);
-    TS_ASSERT_THROWS_NOTHING(
-        wsNonConst = manager.getValue<IMDEventWorkspace_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsNonConst = manager.getValue<IMDEventWorkspace_sptr>(wsName));
     TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
@@ -805,12 +738,8 @@ class MDEventWorkspaceTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MDEventWorkspaceTestPerformance *createSuite() {
-    return new MDEventWorkspaceTestPerformance();
-  }
-  static void destroySuite(MDEventWorkspaceTestPerformance *suite) {
-    delete suite;
-  }
+  static MDEventWorkspaceTestPerformance *createSuite() { return new MDEventWorkspaceTestPerformance(); }
+  static void destroySuite(MDEventWorkspaceTestPerformance *suite) { delete suite; }
 
   MDEventWorkspaceTestPerformance() {}
 
@@ -822,8 +751,7 @@ public:
   void setUp() override {
     size_t dim_size = 20;
     size_t sq_dim_size = dim_size * dim_size;
-    m_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, (Mantid::coord_t)dim_size,
-                                           10 /*event per box*/);
+    m_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, (Mantid::coord_t)dim_size, 10 /*event per box*/);
     m_ws->getBoxController()->setSplitThreshold(10);
     nBoxes = dim_size * dim_size * dim_size;
     std::vector<MDLeanEvent<3>> vecEvents(nBoxes);
@@ -832,8 +760,7 @@ public:
       for (size_t j = 0; j < dim_size; ++j) {
         for (size_t k = 0; k < dim_size; ++k) {
           double centers[3] = {(double)i, (double)j, (double)k};
-          vecEvents[i + j * dim_size + k * sq_dim_size] =
-              MDLeanEvent<3>(1, 1, centers);
+          vecEvents[i + j * dim_size + k * sq_dim_size] = MDLeanEvent<3>(1, 1, centers);
         }
       }
     }
@@ -847,20 +774,16 @@ public:
               << nBoxes << " events \n";
     Kernel::Timer clock;
     m_ws->splitAllIfNeeded(nullptr);
-    std::cout
-        << "Finished Workspace splitting performance test, single threaded in "
-        << clock.elapsed() << " sec\n";
+    std::cout << "Finished Workspace splitting performance test, single threaded in " << clock.elapsed() << " sec\n";
   }
 
   void test_splitting_performance_parallel() {
     auto ts_splitter = new ThreadSchedulerFIFO();
     ThreadPool tp_splitter(ts_splitter, 4);
-    std::cout << "Starting Workspace splitting performance test, 4 thread with "
-              << nBoxes << " events \n";
+    std::cout << "Starting Workspace splitting performance test, 4 thread with " << nBoxes << " events \n";
     Kernel::Timer clock;
     m_ws->splitAllIfNeeded(ts_splitter);
     tp_splitter.joinAll();
-    std::cout << "Finished Workspace splitting performance test, 4 threads in "
-              << clock.elapsed() << " sec\n";
+    std::cout << "Finished Workspace splitting performance test, 4 threads in " << clock.elapsed() << " sec\n";
   }
 };

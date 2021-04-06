@@ -51,18 +51,15 @@ bool isTimeSeries(Mantid::Kernel::Property *prop) {
 /** Initialize the algorithm's properties.
  */
 void ChangeTimeZero::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input workspace.");
-  declareProperty<double>("RelativeTimeOffset", m_defaultTimeShift,
-                          "A relative time offset in seconds.");
+  declareProperty<double>("RelativeTimeOffset", m_defaultTimeShift, "A relative time offset in seconds.");
 
   declareProperty("AbsoluteTimeOffset", m_defaultAbsoluteTimeShift,
                   "An absolute time offset as an ISO8601 string "
                   "(YYYY-MM-DDTHH:MM::SS, eg 2013-10-25T13:58:03).");
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -75,8 +72,7 @@ void ChangeTimeZero::exec() {
   const double progressStartCreateOutputWs = 0.0;
   const double progressStopCreateOutputWs = 0.3;
 
-  MatrixWorkspace_sptr out_ws = createOutputWS(
-      in_ws, progressStartCreateOutputWs, progressStopCreateOutputWs);
+  MatrixWorkspace_sptr out_ws = createOutputWS(in_ws, progressStartCreateOutputWs, progressStopCreateOutputWs);
 
   // Get the time shift in seconds
   auto timeShift = getTimeShift(out_ws);
@@ -85,21 +81,17 @@ void ChangeTimeZero::exec() {
   const double progressStartShiftTimeLogs = progressStopCreateOutputWs;
 
   double progressStopShiftTimeLogs =
-      std::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(out_ws)
-          ? progressStartShiftTimeLogs + 0.1
-          : 1.0;
+      std::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(out_ws) ? progressStartShiftTimeLogs + 0.1 : 1.0;
 
   const double progressStartShiftNeutrons = progressStopShiftTimeLogs;
   const double progressStopShiftNeutrons = 1.0;
 
   // Change the time of the logs.
   // Initialize progress reporting.
-  shiftTimeOfLogs(out_ws, timeShift, progressStartShiftTimeLogs,
-                  progressStopShiftTimeLogs);
+  shiftTimeOfLogs(out_ws, timeShift, progressStartShiftTimeLogs, progressStopShiftTimeLogs);
 
   // Change the time stamps on the neutrons
-  shiftTimeOfNeutrons(out_ws, timeShift, progressStartShiftNeutrons,
-                      progressStopShiftNeutrons);
+  shiftTimeOfNeutrons(out_ws, timeShift, progressStartShiftNeutrons, progressStopShiftNeutrons);
 
   setProperty("OutputWorkspace", out_ws);
 }
@@ -111,17 +103,14 @@ void ChangeTimeZero::exec() {
  * @param stopProgress :: end point of the progress
  * @returns :: pointer to the outputworkspace
  */
-API::MatrixWorkspace_sptr
-ChangeTimeZero::createOutputWS(const API::MatrixWorkspace_sptr &input,
-                               double startProgress, double stopProgress) {
+API::MatrixWorkspace_sptr ChangeTimeZero::createOutputWS(const API::MatrixWorkspace_sptr &input, double startProgress,
+                                                         double stopProgress) {
   MatrixWorkspace_sptr output = getProperty("OutputWorkspace");
   // Check whether input == output to see whether a new workspace is required.
   if (input != output) {
-    IAlgorithm_sptr duplicate =
-        createChildAlgorithm("CloneWorkspace", startProgress, stopProgress);
+    IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace", startProgress, stopProgress);
     duplicate->initialize();
-    duplicate->setProperty<API::Workspace_sptr>(
-        "InputWorkspace", std::dynamic_pointer_cast<API::Workspace>(input));
+    duplicate->setProperty<API::Workspace_sptr>("InputWorkspace", std::dynamic_pointer_cast<API::Workspace>(input));
     duplicate->execute();
     API::Workspace_sptr temp = duplicate->getProperty("OutputWorkspace");
     output = std::dynamic_pointer_cast<API::MatrixWorkspace>(temp);
@@ -156,9 +145,8 @@ double ChangeTimeZero::getTimeShift(const API::MatrixWorkspace_sptr &ws) const {
  * @param startProgress :: start point of the progress
  * @param stopProgress :: end point of the progress
  */
-void ChangeTimeZero::shiftTimeOfLogs(
-    const Mantid::API::MatrixWorkspace_sptr &ws, double timeShift,
-    double startProgress, double stopProgress) {
+void ChangeTimeZero::shiftTimeOfLogs(const Mantid::API::MatrixWorkspace_sptr &ws, double timeShift,
+                                     double startProgress, double stopProgress) {
   // We need to change the entries for each log which can be:
   // 1. any time series: here we change the time values
   // 2. string properties: here we change the values if they are ISO8601 times
@@ -168,8 +156,7 @@ void ChangeTimeZero::shiftTimeOfLogs(
     if (isTimeSeries(log)) {
       shiftTimeInLogForTimeSeries(ws, log, timeShift);
 
-    } else if (auto stringProperty =
-                   dynamic_cast<PropertyWithValue<std::string> *>(log)) {
+    } else if (auto stringProperty = dynamic_cast<PropertyWithValue<std::string> *>(log)) {
       shiftTimeOfLogForStringProperty(stringProperty, timeShift);
     }
 
@@ -183,11 +170,9 @@ void ChangeTimeZero::shiftTimeOfLogs(
  * @param prop :: a time series log
  * @param timeShift :: the time shift in seconds
  */
-void ChangeTimeZero::shiftTimeInLogForTimeSeries(
-    const Mantid::API::MatrixWorkspace_sptr &ws, Mantid::Kernel::Property *prop,
-    double timeShift) const {
-  if (auto timeSeries =
-          dynamic_cast<Mantid::Kernel::ITimeSeriesProperty *>(prop)) {
+void ChangeTimeZero::shiftTimeInLogForTimeSeries(const Mantid::API::MatrixWorkspace_sptr &ws,
+                                                 Mantid::Kernel::Property *prop, double timeShift) const {
+  if (auto timeSeries = dynamic_cast<Mantid::Kernel::ITimeSeriesProperty *>(prop)) {
     auto newlog = timeSeries->cloneWithTimeShift(timeShift);
     ws->mutableRun().addProperty(newlog, true);
   }
@@ -198,8 +183,7 @@ void ChangeTimeZero::shiftTimeInLogForTimeSeries(
  * @param logEntry :: the string property
  * @param timeShift :: the time shift.
  */
-void ChangeTimeZero::shiftTimeOfLogForStringProperty(
-    PropertyWithValue<std::string> *logEntry, double timeShift) const {
+void ChangeTimeZero::shiftTimeOfLogForStringProperty(PropertyWithValue<std::string> *logEntry, double timeShift) const {
   // Parse the log entry and replace all ISO8601 strings with an adjusted value
   auto value = logEntry->value();
   if (checkForDateTime(value)) {
@@ -216,14 +200,11 @@ void ChangeTimeZero::shiftTimeOfLogForStringProperty(
  * @param startProgress :: start point of the progress
  * @param stopProgress :: end point of the progress
  */
-void ChangeTimeZero::shiftTimeOfNeutrons(
-    const Mantid::API::MatrixWorkspace_sptr &ws, double timeShift,
-    double startProgress, double stopProgress) {
-  if (auto eventWs =
-          std::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(ws)) {
+void ChangeTimeZero::shiftTimeOfNeutrons(const Mantid::API::MatrixWorkspace_sptr &ws, double timeShift,
+                                         double startProgress, double stopProgress) {
+  if (auto eventWs = std::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(ws)) {
     // Use the change pulse time algorithm to change the neutron time stamp
-    auto alg =
-        createChildAlgorithm("ChangePulsetime", startProgress, stopProgress);
+    auto alg = createChildAlgorithm("ChangePulsetime", startProgress, stopProgress);
     alg->initialize();
     alg->setProperty("InputWorkspace", eventWs);
     alg->setProperty("OutputWorkspace", eventWs);
@@ -237,8 +218,7 @@ void ChangeTimeZero::shiftTimeOfNeutrons(
  * @param ws :: a workspace
  * @returns the date and time of the first good frame
  */
-DateAndTime ChangeTimeZero::getStartTimeFromWorkspace(
-    const API::MatrixWorkspace_sptr &ws) const {
+DateAndTime ChangeTimeZero::getStartTimeFromWorkspace(const API::MatrixWorkspace_sptr &ws) const {
   auto run = ws->run();
   // Check for the first good frame in the log
   Mantid::Kernel::TimeSeriesProperty<double> *goodFrame = nullptr;
@@ -274,23 +254,17 @@ std::map<std::string, std::string> ChangeTimeZero::validateInputs() {
 
   // If both inputs are being used, then return straight away.
   if (isRelative && absoluteTimeInput) {
-    invalidProperties.emplace("RelativeTimeOffset",
-                              "You can either specify a relative time shift or "
-                              "an absolute time shift.");
-    invalidProperties.emplace("AbsoluteTimeOffset",
-                              "You can either specify a relative time shift or "
-                              "an absolute time shift.");
+    invalidProperties.emplace("RelativeTimeOffset", "You can either specify a relative time shift or "
+                                                    "an absolute time shift.");
+    invalidProperties.emplace("AbsoluteTimeOffset", "You can either specify a relative time shift or "
+                                                    "an absolute time shift.");
 
     return invalidProperties;
   } else if (!isRelative && !isAbsolute) {
-    invalidProperties.emplace(
-        "RelativeTimeOffset",
-        "TimeOffset must either be a numeric "
-        "value or a ISO8601 (YYYY-MM-DDTHH:MM::SS) date-time stamp.");
-    invalidProperties.emplace(
-        "AbsoluteTimeOffset",
-        "TimeOffset must either be a numeric "
-        "value or a ISO8601 (YYYY-MM-DDTHH:MM::SS) date-time stamp.");
+    invalidProperties.emplace("RelativeTimeOffset", "TimeOffset must either be a numeric "
+                                                    "value or a ISO8601 (YYYY-MM-DDTHH:MM::SS) date-time stamp.");
+    invalidProperties.emplace("AbsoluteTimeOffset", "TimeOffset must either be a numeric "
+                                                    "value or a ISO8601 (YYYY-MM-DDTHH:MM::SS) date-time stamp.");
   }
 
   // If we are dealing with an absolute time we need to ensure that the
@@ -302,11 +276,9 @@ std::map<std::string, std::string> ChangeTimeZero::validateInputs() {
       try {
         run.getTimeSeriesProperty<double>("proton_charge");
       } catch (...) {
-        invalidProperties.emplace(
-            "InputWorkspace",
-            "A TimeOffset with an absolute time requires the "
-            "input workspace to have a proton_charge property in "
-            "its log.");
+        invalidProperties.emplace("InputWorkspace", "A TimeOffset with an absolute time requires the "
+                                                    "input workspace to have a proton_charge property in "
+                                                    "its log.");
       }
     }
   }
@@ -350,9 +322,7 @@ bool ChangeTimeZero::checkForDateTime(const std::string &val) const {
  * @param offset :: the offset
  * @returns true if the offset has been set
  */
-bool ChangeTimeZero::isRelativeTimeShift(double offset) const {
-  return offset != m_defaultTimeShift;
-}
+bool ChangeTimeZero::isRelativeTimeShift(double offset) const { return offset != m_defaultTimeShift; }
 
 /**
  * Checks if an absolute offset has been set

@@ -48,9 +48,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    const auto outWS =
-        API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
-            outWSname);
+    const auto outWS = API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(outWSname);
     TS_ASSERT(bool(outWS)); // non-null pointer
     return outWS;
   }
@@ -80,22 +78,18 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    const auto outWS =
-        API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
-            outWSname);
+    const auto outWS = API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(outWSname);
     TS_ASSERT(bool(outWS)); // non-null pointer
     return outWS;
   }
 
-  API::MatrixWorkspace_sptr
-  runAlgCustom(const double toSet, const double toReplace,
-               const double errorVal, const int precision, const int position) {
+  API::MatrixWorkspace_sptr runAlgCustom(const double toSet, const double toReplace, const double errorVal,
+                                         const int precision, const int position) {
 
     const std::string mode = "custom";
     std::string outWSname = "SetUncertainties_" + mode;
 
-    auto inWksp =
-        WorkspaceCreationHelper::create1DWorkspaceConstant(10, 1, 0., true);
+    auto inWksp = WorkspaceCreationHelper::create1DWorkspaceConstant(10, 1, 0., true);
     // Set random element to value to replace
     auto &E = inWksp->mutableE(0);
     E[position] = double(errorVal);
@@ -111,9 +105,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    const auto outWS =
-        API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
-            outWSname);
+    const auto outWS = API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(outWSname);
     TS_ASSERT(bool(outWS)); // non-null pointer
     return outWS;
   }
@@ -221,8 +213,7 @@ public:
     const int precision = 3;
     const unsigned position = rand() % 10;
 
-    const auto outWS =
-        runAlgCustom(toSet, toReplace, errorVal, precision, position);
+    const auto outWS = runAlgCustom(toSet, toReplace, errorVal, precision, position);
 
     const auto &E = outWS->e(0);
     for (size_t i = 0; i < E.size(); ++i) {
@@ -244,8 +235,7 @@ public:
     const int precision = 3;
     const unsigned position = rand() % 10;
 
-    const auto outWS =
-        runAlgCustom(toSet, toReplace, errorVal, precision, position);
+    const auto outWS = runAlgCustom(toSet, toReplace, errorVal, precision, position);
 
     const auto &E = outWS->e(0);
     for (size_t i = 0; i < E.size(); ++i) {
@@ -266,8 +256,7 @@ public:
     const int precision = 1;
     const unsigned position = rand() % 10;
 
-    const auto outWS =
-        runAlgCustom(toSet, toReplace, errorVal, precision, position);
+    const auto outWS = runAlgCustom(toSet, toReplace, errorVal, precision, position);
 
     const auto &E = outWS->e(0);
     for (size_t i = 0; i < E.size(); ++i) {
@@ -288,9 +277,7 @@ public:
    */
   void test_EventWorkspacePlace() {
     // random data mostly works
-    auto inWksp =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument2(10,
-                                                                         10);
+    auto inWksp = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument2(10, 10);
     std::string outWSname = "SetUncertainties_oneIfZero";
     WorkspaceCreationHelper::storeWS(outWSname, inWksp);
     SetUncertainties alg;
@@ -301,9 +288,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    const auto outWS =
-        API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
-            outWSname);
+    const auto outWS = API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(outWSname);
     TS_ASSERT(bool(outWS)); // non-null pointer
 
     const auto &E = outWS->e(0);

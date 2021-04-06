@@ -55,9 +55,7 @@ class AtomTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static AtomTestPerformance *createSuite() {
-    return new AtomTestPerformance();
-  }
+  static AtomTestPerformance *createSuite() { return new AtomTestPerformance(); }
   static void destroySuite(AtomTestPerformance *suite) { delete suite; }
 
   /// Set up all the test workspaces

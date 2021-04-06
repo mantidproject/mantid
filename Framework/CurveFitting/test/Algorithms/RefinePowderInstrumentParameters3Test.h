@@ -40,23 +40,18 @@ Workspace2D_sptr generatePeakPositionWorkspace(int bankid) {
 
   // 1. Generate vectors, bank 1's peak positions
   const size_t size = 16;
-  std::array<double, size> vecDsp = {{0.907108, 0.929509, 0.953656, 0.979788,
-                                      1.008190, 1.039220, 1.110980, 1.152910,
-                                      1.199990, 1.253350, 1.314520, 1.385630,
-                                      1.469680, 1.697040, 1.859020, 2.078440}};
+  std::array<double, size> vecDsp = {{0.907108, 0.929509, 0.953656, 0.979788, 1.008190, 1.039220, 1.110980, 1.152910,
+                                      1.199990, 1.253350, 1.314520, 1.385630, 1.469680, 1.697040, 1.859020, 2.078440}};
   std::array<double, size> vecTof = {
-      {20487.600000, 20994.700000, 21537.400000, 22128.800000, 22769.200000,
-       23469.400000, 25083.600000, 26048.100000, 27097.600000, 28272.200000,
-       29684.700000, 31291.500000, 33394.000000, 38326.300000, 41989.800000,
-       46921.700000}};
-  std::array<double, size> vecError = {
-      {0.350582, 0.597347, 0.644844, 0.879349, 0.417830, 0.481466, 0.527287,
-       0.554732, 0.363456, 0.614706, 0.468477, 0.785721, 0.555938, 0.728131,
-       0.390796, 0.997644}};
+      {20487.600000, 20994.700000, 21537.400000, 22128.800000, 22769.200000, 23469.400000, 25083.600000, 26048.100000,
+       27097.600000, 28272.200000, 29684.700000, 31291.500000, 33394.000000, 38326.300000, 41989.800000, 46921.700000}};
+  std::array<double, size> vecError = {{0.350582, 0.597347, 0.644844, 0.879349, 0.417830, 0.481466, 0.527287, 0.554732,
+                                        0.363456, 0.614706, 0.468477, 0.785721, 0.555938, 0.728131, 0.390796,
+                                        0.997644}};
 
   // 2. Generate workspace
-  Workspace2D_sptr dataws = std::dynamic_pointer_cast<Workspace2D>(
-      WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
+  Workspace2D_sptr dataws =
+      std::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
   // 3. Put data
   auto &vecX = dataws->mutableX(0);
@@ -77,8 +72,7 @@ Workspace2D_sptr generatePeakPositionWorkspace(int bankid) {
  */
 TableWorkspace_sptr generateInstrumentProfileTableBank1() {
   DataObjects::TableWorkspace *tablews = new DataObjects::TableWorkspace();
-  DataObjects::TableWorkspace_sptr geomws =
-      DataObjects::TableWorkspace_sptr(tablews);
+  DataObjects::TableWorkspace_sptr geomws = DataObjects::TableWorkspace_sptr(tablews);
 
   tablews->addColumn("str", "Name");
   tablews->addColumn("double", "Value");
@@ -117,8 +111,7 @@ TableWorkspace_sptr generateInstrumentProfileTableBank1() {
 //----------------------------------------------------------------------------------------------
 /** Parse Table Workspace to a map of string, double pair
  */
-void parseParameterTableWorkspace(const TableWorkspace_sptr &paramws,
-                                  map<string, double> &paramvalues) {
+void parseParameterTableWorkspace(const TableWorkspace_sptr &paramws, map<string, double> &paramvalues) {
   for (size_t irow = 0; irow < paramws->rowCount(); ++irow) {
     Mantid::API::TableRow row = paramws->getRow(irow);
     std::string parname;
@@ -136,12 +129,8 @@ class RefinePowderInstrumentParameters3Test : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RefinePowderInstrumentParameters3Test *createSuite() {
-    return new RefinePowderInstrumentParameters3Test();
-  }
-  static void destroySuite(RefinePowderInstrumentParameters3Test *suite) {
-    delete suite;
-  }
+  static RefinePowderInstrumentParameters3Test *createSuite() { return new RefinePowderInstrumentParameters3Test(); }
+  static void destroySuite(RefinePowderInstrumentParameters3Test *suite) { delete suite; }
 
   //----------------------------------------------------------------------------------------------
   /** Fit with non Monte Carlo method.
@@ -157,8 +146,7 @@ public:
 
     // z) Set to data service
     AnalysisDataService::Instance().addOrReplace("Bank1PeakPositions", posWS);
-    AnalysisDataService::Instance().addOrReplace("Bank1ProfileParameters",
-                                                 profWS);
+    AnalysisDataService::Instance().addOrReplace("Bank1ProfileParameters", profWS);
 
     // 2. Initialization
     RefinePowderInstrumentParameters3 alg;
@@ -170,10 +158,8 @@ public:
     alg.setProperty("WorkspaceIndex", 0);
     alg.setProperty("OutputPeakPositionWorkspace", "Bank1FittedPositions");
 
-    alg.setProperty("InputInstrumentParameterWorkspace",
-                    "Bank1ProfileParameters");
-    alg.setProperty("OutputInstrumentParameterWorkspace",
-                    "Bank1FittedProfileParameters");
+    alg.setProperty("InputInstrumentParameterWorkspace", "Bank1ProfileParameters");
+    alg.setProperty("OutputInstrumentParameterWorkspace", "Bank1FittedProfileParameters");
 
     alg.setProperty("RefinementAlgorithm", "OneStepFit");
     alg.setProperty("StandardError", "UseInputValue");
@@ -184,10 +170,8 @@ public:
 
     // 5. Check result
     // a) Profile parameter table
-    TableWorkspace_sptr newgeomparamws =
-        std::dynamic_pointer_cast<TableWorkspace>(
-            AnalysisDataService::Instance().retrieve(
-                "Bank1FittedProfileParameters"));
+    TableWorkspace_sptr newgeomparamws = std::dynamic_pointer_cast<TableWorkspace>(
+        AnalysisDataService::Instance().retrieve("Bank1FittedProfileParameters"));
     TS_ASSERT(newgeomparamws);
     if (newgeomparamws) {
       std::map<std::string, double> fitparamvalues;
@@ -205,8 +189,8 @@ public:
     }
 
     // b) Data
-    Workspace2D_sptr outdataws = std::dynamic_pointer_cast<Workspace2D>(
-        AnalysisDataService::Instance().retrieve("Bank1FittedPositions"));
+    Workspace2D_sptr outdataws =
+        std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("Bank1FittedPositions"));
     TS_ASSERT(outdataws);
 
     // 4. Clean
@@ -232,8 +216,7 @@ public:
 
     // z) Set to data service
     AnalysisDataService::Instance().addOrReplace("Bank1PeakPositions", posWS);
-    AnalysisDataService::Instance().addOrReplace("Bank1ProfileParameters",
-                                                 profWS);
+    AnalysisDataService::Instance().addOrReplace("Bank1ProfileParameters", profWS);
 
     // 2. Initialization
     RefinePowderInstrumentParameters3 alg;
@@ -245,10 +228,8 @@ public:
     alg.setProperty("WorkspaceIndex", 0);
     alg.setProperty("OutputPeakPositionWorkspace", "Bank1FittedPositions");
 
-    alg.setProperty("InputInstrumentParameterWorkspace",
-                    "Bank1ProfileParameters");
-    alg.setProperty("OutputInstrumentParameterWorkspace",
-                    "Bank1FittedProfileParameters");
+    alg.setProperty("InputInstrumentParameterWorkspace", "Bank1ProfileParameters");
+    alg.setProperty("OutputInstrumentParameterWorkspace", "Bank1FittedProfileParameters");
 
     alg.setProperty("RefinementAlgorithm", "MonteCarlo");
     alg.setProperty("StandardError", "UseInputValue");
@@ -263,10 +244,8 @@ public:
 
     // 5. Check result
     // a) Profile parameter table
-    TableWorkspace_sptr newgeomparamws =
-        std::dynamic_pointer_cast<TableWorkspace>(
-            AnalysisDataService::Instance().retrieve(
-                "Bank1FittedProfileParameters"));
+    TableWorkspace_sptr newgeomparamws = std::dynamic_pointer_cast<TableWorkspace>(
+        AnalysisDataService::Instance().retrieve("Bank1FittedProfileParameters"));
     TS_ASSERT(newgeomparamws);
     if (newgeomparamws) {
       std::map<std::string, double> fitparamvalues;
@@ -284,8 +263,8 @@ public:
     }
 
     // b) Data
-    Workspace2D_sptr outdataws = std::dynamic_pointer_cast<Workspace2D>(
-        AnalysisDataService::Instance().retrieve("Bank1FittedPositions"));
+    Workspace2D_sptr outdataws =
+        std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("Bank1FittedPositions"));
     TS_ASSERT(outdataws);
 
     // 4. Clean
@@ -308,21 +287,16 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RefinePowderInstParams3TestPerformance *createSuite() {
-    return new RefinePowderInstParams3TestPerformance();
-  }
+  static RefinePowderInstParams3TestPerformance *createSuite() { return new RefinePowderInstParams3TestPerformance(); }
 
-  static void destroySuite(RefinePowderInstParams3TestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(RefinePowderInstParams3TestPerformance *suite) { delete suite; }
 
   void setUp() override {
     posWS = generatePeakPositionWorkspace(1);
     profWS = generateInstrumentProfileTableBank1();
 
     AnalysisDataService::Instance().addOrReplace("Bank1PeakPositions", posWS);
-    AnalysisDataService::Instance().addOrReplace("Bank1ProfileParameters",
-                                                 profWS);
+    AnalysisDataService::Instance().addOrReplace("Bank1ProfileParameters", profWS);
   }
 
   void tearDown() override {
@@ -340,10 +314,8 @@ public:
     alg.setPropertyValue("InputPeakPositionWorkspace", "Bank1PeakPositions");
     alg.setProperty("WorkspaceIndex", 0);
     alg.setProperty("OutputPeakPositionWorkspace", "Bank1FittedPositions");
-    alg.setProperty("InputInstrumentParameterWorkspace",
-                    "Bank1ProfileParameters");
-    alg.setProperty("OutputInstrumentParameterWorkspace",
-                    "Bank1FittedProfileParameters");
+    alg.setProperty("InputInstrumentParameterWorkspace", "Bank1ProfileParameters");
+    alg.setProperty("OutputInstrumentParameterWorkspace", "Bank1FittedProfileParameters");
     alg.setProperty("RefinementAlgorithm", "OneStepFit");
     alg.setProperty("StandardError", "UseInputValue");
     alg.execute();
@@ -356,10 +328,8 @@ public:
     alg.setPropertyValue("InputPeakPositionWorkspace", "Bank1PeakPositions");
     alg.setProperty("WorkspaceIndex", 0);
     alg.setProperty("OutputPeakPositionWorkspace", "Bank1FittedPositions");
-    alg.setProperty("InputInstrumentParameterWorkspace",
-                    "Bank1ProfileParameters");
-    alg.setProperty("OutputInstrumentParameterWorkspace",
-                    "Bank1FittedProfileParameters");
+    alg.setProperty("InputInstrumentParameterWorkspace", "Bank1ProfileParameters");
+    alg.setProperty("OutputInstrumentParameterWorkspace", "Bank1FittedProfileParameters");
     alg.setProperty("RefinementAlgorithm", "MonteCarlo");
     alg.setProperty("StandardError", "UseInputValue");
     alg.setProperty("AnnealingTemperature", 100.0);
