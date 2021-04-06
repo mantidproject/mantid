@@ -26,17 +26,14 @@
       <property name="columnCount">
        <number>2</number>
       </property>
-      <attribute name="headerVisible">
-       <bool>false</bool>
-      </attribute>
       <column>
        <property name="text">
-        <string notr="true">1</string>
+        <string notr="true">Workspace/curve</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string notr="true">2</string>
+        <string notr="true">Unhold</string>
        </property>
       </column>
      </widget>
