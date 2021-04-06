@@ -119,6 +119,7 @@ made to facilitate this.
    - :ref:`algm-IntegratePeaksMD`
    - :ref:`algm-LoadNexusProcessed`
    - :ref:`algm-SaveNexusProcessed`
+   - :ref:`algm-SaveHKLCW`
    - :ref:`algm-SelectCellOfType`
    - :ref:`algm-SelectCellWithForm`
    - :ref:`algm-ShowPossibleCells`
