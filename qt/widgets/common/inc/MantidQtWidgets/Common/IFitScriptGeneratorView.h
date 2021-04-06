@@ -51,7 +51,8 @@ public:
     GlobalParametersChanged,
     EditLocalParameterClicked,
     EditLocalParameterFinished,
-    FittingModeChanged
+    FittingModeChanged,
+    GenerateFitScriptClicked
   };
 
   IFitScriptGeneratorView(QWidget *parent = nullptr) : API::MantidWidget(parent) {}
@@ -90,6 +91,13 @@ public:
   virtual std::tuple<std::string, std::vector<double>, std::vector<bool>, std::vector<std::string>,
                      std::vector<std::string>>
   getEditLocalParameterResults() const = 0;
+
+  [[nodiscard]] virtual std::string maxIterations() const = 0;
+  [[nodiscard]] virtual std::string minimizer() const = 0;
+  [[nodiscard]] virtual std::string costFunction() const = 0;
+  [[nodiscard]] virtual std::string evaluationType() const = 0;
+
+  [[nodiscard]] virtual std::string filename() const = 0;
 
   virtual void resetSelection() = 0;
 

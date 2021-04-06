@@ -86,6 +86,9 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event, std::s
   case ViewEvent::EditLocalParameterFinished:
     handleEditLocalParameterFinished();
     return;
+  case ViewEvent::GenerateFitScriptClicked:
+    handleGenerateFitScriptClicked();
+    return;
   default:
     throw std::runtime_error("Failed to notify the FitScriptGeneratorPresenter.");
   }
@@ -228,6 +231,18 @@ void FitScriptGeneratorPresenter::handleEditLocalParameterFinished() {
 void FitScriptGeneratorPresenter::handleFittingModeChanged(FittingMode fittingMode) {
   m_model->setFittingMode(fittingMode);
   handleSelectionChanged();
+}
+
+void FitScriptGeneratorPresenter::handleGenerateFitScriptClicked() {
+  auto const [valid, message] = m_model->isValid();
+
+  if (!message.empty())
+    m_view->displayWarning(message);
+
+  if (valid) {
+    m_model->generatePythonFitScript(m_view->maxIterations(), m_view->minimizer(), m_view->costFunction(),
+                                     m_view->evaluationType(), m_view->filename());
+  }
 }
 
 void FitScriptGeneratorPresenter::setGlobalTies(std::vector<GlobalTie> const &globalTies) {

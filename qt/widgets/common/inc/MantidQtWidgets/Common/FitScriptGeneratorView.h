@@ -76,6 +76,13 @@ public:
   std::tuple<std::string, std::vector<double>, std::vector<bool>, std::vector<std::string>, std::vector<std::string>>
   getEditLocalParameterResults() const override;
 
+  [[nodiscard]] std::string maxIterations() const override;
+  [[nodiscard]] std::string minimizer() const override;
+  [[nodiscard]] std::string costFunction() const override;
+  [[nodiscard]] std::string evaluationType() const override;
+
+  [[nodiscard]] std::string filename() const override;
+
   void resetSelection() override;
 
   bool applyFunctionChangesToAll() const override;
@@ -116,6 +123,7 @@ private slots:
   void onFittingModeChanged(FittingMode fittingMode);
   void onEditLocalParameterClicked(QString const &parameter);
   void onEditLocalParameterFinished(int result);
+  void onGenerateFitScriptClicked();
 
 private:
   void connectUiSignals();

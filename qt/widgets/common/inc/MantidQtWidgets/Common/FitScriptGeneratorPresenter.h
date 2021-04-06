@@ -61,6 +61,11 @@ private:
   void handleEditLocalParameterClicked(std::string const &parameter);
   void handleEditLocalParameterFinished();
   void handleFittingModeChanged(FittingMode fittingMode);
+  void handleMaxIterationsChanged(std::string const &maxIterations);
+  void handleMinimizerChanged(std::string const &minimizer);
+  void handleCostFunctionChanged(std::string const &costFunction);
+  void handleEvaluationTypeChanged(std::string const &evaluationType);
+  void handleGenerateFitScriptClicked();
 
   void setWorkspaces(QStringList const &workspaceNames, double startX, double endX);
   void addWorkspaces(std::vector<Mantid::API::MatrixWorkspace_const_sptr> const &workspaces,

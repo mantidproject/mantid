@@ -12,6 +12,7 @@
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include <string>
+#include <tuple>
 #include <vector>
 
 namespace MantidQt {
@@ -103,6 +104,12 @@ public:
                                                            std::string const &fullParameter) const = 0;
 
   [[nodiscard]] virtual std::size_t numberOfDomains() const = 0;
+
+  [[nodiscard]] virtual std::tuple<bool, std::string> isValid() const = 0;
+
+  virtual void generatePythonFitScript(std::string const &maxIterations, std::string const &minimizer,
+                                       std::string const &costFunction, std::string const &evaluationType,
+                                       std::string const &filename) = 0;
 };
 
 } // namespace MantidWidgets

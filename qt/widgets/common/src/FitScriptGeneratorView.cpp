@@ -133,6 +133,8 @@ void FitScriptGeneratorView::connectUiSignals() {
   connect(m_fitOptionsBrowser.get(), SIGNAL(fittingModeChanged(FittingMode)), this,
           SLOT(onFittingModeChanged(FittingMode)));
 
+  connect(m_ui.pbGenerateFitScript, SIGNAL(clicked()), this, SLOT(onGenerateFitScriptClicked()));
+
   /// Disconnected because it causes a crash when selecting a table row while
   /// editing a parameters value. This is because selecting a different row will
   /// change the current function in the FunctionTreeView. The closeEditor slot
@@ -234,6 +236,10 @@ void FitScriptGeneratorView::onEditLocalParameterFinished(int result) {
   m_editLocalParameterDialog = nullptr;
 }
 
+void FitScriptGeneratorView::onGenerateFitScriptClicked() {
+  m_presenter->notifyPresenter(ViewEvent::GenerateFitScriptClicked);
+}
+
 std::string FitScriptGeneratorView::workspaceName(FitDomainIndex index) const {
   return m_dataTable->workspaceName(index);
 }
@@ -306,6 +312,18 @@ FitScriptGeneratorView::getEditLocalParameterResults() const {
           convertToStdVector(m_editLocalParameterDialog->getTies()),
           convertToStdVector(m_editLocalParameterDialog->getConstraints())};
 }
+
+std::string FitScriptGeneratorView::maxIterations() const { return m_fitOptionsBrowser->getProperty("Max Iterations"); }
+
+std::string FitScriptGeneratorView::minimizer() const { return m_fitOptionsBrowser->getProperty("Minimizer"); }
+
+std::string FitScriptGeneratorView::costFunction() const { return m_fitOptionsBrowser->getProperty("Cost Function"); }
+
+std::string FitScriptGeneratorView::evaluationType() const {
+  return m_fitOptionsBrowser->getProperty("Evaluation Type");
+}
+
+std::string FitScriptGeneratorView::filename() const { return m_ui.leScriptName->text().toStdString(); }
 
 void FitScriptGeneratorView::resetSelection() { m_dataTable->resetSelection(); }
 
