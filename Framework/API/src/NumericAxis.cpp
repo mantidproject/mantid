@@ -135,9 +135,7 @@ bool NumericAxis::equalWithinTolerance(const Axis &axis2, const double tolerance
  *  @param index :: The index of the bin, matches with the index of the value
  *  @return the formatted string
  */
-std::string NumericAxis::label(const std::size_t &index) const {
-  return formatLabel((*this)(index));
-}
+std::string NumericAxis::label(const std::size_t &index) const { return formatLabel((*this)(index)); }
 
 /**
  * @brief Formats a numeric label to a string

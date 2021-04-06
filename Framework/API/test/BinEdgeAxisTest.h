@@ -31,8 +31,7 @@ public:
     delete copy;
   }
 
-  void
-  test_Clone_With_Only_Length_And_Workspace_Returns_BinEdgeAxis_With_New_Length() {
+  void test_Clone_With_Only_Length_And_Workspace_Returns_BinEdgeAxis_With_New_Length() {
     BinEdgeAxis ax1(10);
     Mantid::API::Axis *copy = ax1.clone(20, nullptr);
     auto *typedCopy = dynamic_cast<BinEdgeAxis *>(copy);
@@ -96,10 +95,8 @@ public:
     auto edges = ax1.createBinBoundaries();
     TS_ASSERT_EQUALS(length, edges.size());
     // label index can be [0,8]
-    TS_ASSERT_THROWS_EQUALS(
-        ax1.label(9), const Mantid::Kernel::Exception::IndexError &re,
-        std::string(re.what()),
-        "IndexError: BinEdgeAxis: Bin index out of range. 9 :: 0 <==> 8");
+    TS_ASSERT_THROWS_EQUALS(ax1.label(9), const Mantid::Kernel::Exception::IndexError &re, std::string(re.what()),
+                            "IndexError: BinEdgeAxis: Bin index out of range. 9 :: 0 <==> 8");
   }
 
   void test_indexOfValue_Throws_OutOfRange_For_Invalid_Value() {

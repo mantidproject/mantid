@@ -93,8 +93,7 @@ size_t BinEdgeAxis::indexOfValue(const double value) const {
  */
 std::string BinEdgeAxis::label(const std::size_t &index) const {
   if (index >= length() - 1) {
-    throw Kernel::Exception::IndexError(index, length() - 2,
-                                        "BinEdgeAxis: Bin index out of range.");
+    throw Kernel::Exception::IndexError(index, length() - 2, "BinEdgeAxis: Bin index out of range.");
   }
   return formatLabel(((*this)(index) + (*this)(index + 1)) / 2);
 }
