@@ -23,6 +23,7 @@ OrientedLattice::OrientedLattice(const DblMatrix &Umatrix) : UnitCell() {
   if (Umatrix.isRotation()) {
     U = Umatrix;
     UB = U * getB();
+    ModUB = UB * getModHKL();
   } else
     throw std::invalid_argument("U is not a proper rotation");
 }
@@ -41,6 +42,7 @@ OrientedLattice::OrientedLattice(const double _a, const double _b, const double 
   if (Umatrix.isRotation()) {
     U = Umatrix;
     UB = U * getB();
+    ModUB = UB * getModHKL();
   } else
     throw std::invalid_argument("U is not a proper rotation");
 }
@@ -61,6 +63,7 @@ OrientedLattice::OrientedLattice(const double _a, const double _b, const double 
   if (Umatrix.isRotation()) {
     U = Umatrix;
     UB = U * getB();
+    ModUB = UB * getModHKL();
   } else
     throw std::invalid_argument("U is not a proper rotation");
 }
@@ -73,6 +76,7 @@ OrientedLattice::OrientedLattice(const UnitCell &uc, const DblMatrix &Umatrix) :
   if (Umatrix.isRotation()) {
     U = Umatrix;
     UB = U * getB();
+    ModUB = UB * getModHKL();
   } else
     throw std::invalid_argument("U is not a proper rotation");
 }

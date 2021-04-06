@@ -7,7 +7,7 @@
 import unittest
 from unittest import mock
 
-from Muon.GUI.ElementalAnalysis2.context.context import RunObject
+from Muon.GUI.ElementalAnalysis2.context.data_context import RunObject
 from mantidqt.utils.qt.testing import start_qapplication
 
 from Muon.GUI.ElementalAnalysis2.load_widget.load_models import LoadRunWidgetModel

@@ -55,9 +55,9 @@ BasePeak::BasePeak(const Mantid::Kernel::Matrix<double> &goniometer)
 }
 
 BasePeak::BasePeak(const BasePeak &other)
-    : convention(other.convention), m_samplePos(other.m_samplePos), m_bankName(other.m_bankName), m_H(other.m_H),
-      m_K(other.m_K), m_L(other.m_L), m_intensity(other.m_intensity), m_sigmaIntensity(other.m_sigmaIntensity),
-      m_binCount(other.m_binCount), m_absorptionWeightedPathLength(other.m_absorptionWeightedPathLength),
+    : convention(other.convention), m_samplePos(other.m_samplePos), m_H(other.m_H), m_K(other.m_K), m_L(other.m_L),
+      m_intensity(other.m_intensity), m_sigmaIntensity(other.m_sigmaIntensity), m_binCount(other.m_binCount),
+      m_absorptionWeightedPathLength(other.m_absorptionWeightedPathLength),
       m_GoniometerMatrix(other.m_GoniometerMatrix), m_InverseGoniometerMatrix(other.m_InverseGoniometerMatrix),
       m_runNumber(other.m_runNumber), m_monitorCount(other.m_monitorCount), m_row(other.m_row), m_col(other.m_col),
       m_peakNumber(other.m_peakNumber), m_intHKL(other.m_intHKL), m_intMNP(other.m_intMNP),
@@ -136,10 +136,6 @@ void BasePeak::setK(double m_K) { this->m_K = m_K; }
 /** Set the L index of this peak
  * @param m_L :: index to set   */
 void BasePeak::setL(double m_L) { this->m_L = m_L; }
-
-/** Set the BankName of this peak
- * @param m_bankName :: index to set   */
-void BasePeak::setBankName(std::string m_bankName) { this->m_bankName = std::move(m_bankName); }
 
 /** Set all three H,K,L indices of the peak */
 void BasePeak::setHKL(double H, double K, double L) {
@@ -240,13 +236,6 @@ void BasePeak::setGoniometerMatrix(const Mantid::Kernel::Matrix<double> &goniome
     throw std::invalid_argument("BasePeak::setGoniometerMatrix(): Goniometer "
                                 "matrix must be non-singular.");
 }
-
-// -------------------------------------------------------------------------------------
-/** Find the name of the bank that is the parent of the detector. This works
- * best for RectangularDetector instruments (goes up two levels)
- * @return name of the bank.
- */
-std::string BasePeak::getBankName() const { return m_bankName; }
 
 // -------------------------------------------------------------------------------------
 /** For RectangularDetectors only, returns the row (y) of the pixel of the
@@ -356,7 +345,6 @@ void BasePeak::setPeakShape(Mantid::Geometry::PeakShape_const_sptr shape) { this
  */
 BasePeak &BasePeak::operator=(const BasePeak &other) {
   if (&other != this) {
-    m_bankName = other.m_bankName;
     m_H = other.m_H;
     m_K = other.m_K;
     m_L = other.m_L;
