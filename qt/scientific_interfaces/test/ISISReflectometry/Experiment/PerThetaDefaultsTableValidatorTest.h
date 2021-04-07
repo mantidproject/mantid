@@ -20,12 +20,8 @@ class PerThetaDefaultsTableValidatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PerThetaDefaultsTableValidatorTest *createSuite() {
-    return new PerThetaDefaultsTableValidatorTest();
-  }
-  static void destroySuite(PerThetaDefaultsTableValidatorTest *suite) {
-    delete suite;
-  }
+  static PerThetaDefaultsTableValidatorTest *createSuite() { return new PerThetaDefaultsTableValidatorTest(); }
+  static void destroySuite(PerThetaDefaultsTableValidatorTest *suite) { delete suite; }
   static auto constexpr TOLERANCE = 0.001;
   using Cells = PerThetaDefaults::ValueArray;
   using Table = std::vector<Cells>;
@@ -44,8 +40,7 @@ public:
 
   void testTwoWildcardRowsIsInvalid() {
     auto table = Table({emptyRow(), emptyRow()});
-    runTestInvalidThetas(table, ThetaValuesValidationError::MultipleWildcards,
-                         expectedErrors({0, 1}, {0}));
+    runTestInvalidThetas(table, ThetaValuesValidationError::MultipleWildcards, expectedErrors({0, 1}, {0}));
   }
 
   void testOneAngleRow() {
@@ -68,8 +63,7 @@ public:
 
   void testTwoNonUniqueAngleRowsIsInvalid() {
     auto table = Table({Cells({"0.5"}), Cells({"0.5"})});
-    runTestInvalidThetas(table, ThetaValuesValidationError::NonUniqueTheta,
-                         expectedErrors({0, 1}, {0}));
+    runTestInvalidThetas(table, ThetaValuesValidationError::NonUniqueTheta, expectedErrors({0, 1}, {0}));
   }
 
   void testInvalidAngle() {
@@ -81,17 +75,15 @@ public:
     auto table = Table({Cells({"", "13463", "13464"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 1);
-    TS_ASSERT_EQUALS(results[0].transmissionWorkspaceNames(),
-                     TransmissionRunPair("13463", "13464"));
+    TS_ASSERT_EQUALS(results[0].transmissionWorkspaceNames(), TransmissionRunPair("13463", "13464"));
   }
 
   void testTransmissionRunsAreWorkspaceNames() {
     auto table = Table({Cells({"", "some workspace", "another_workspace"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 1);
-    TS_ASSERT_EQUALS(
-        results[0].transmissionWorkspaceNames(),
-        TransmissionRunPair("some workspace", "another_workspace"));
+    TS_ASSERT_EQUALS(results[0].transmissionWorkspaceNames(),
+                     TransmissionRunPair("some workspace", "another_workspace"));
   }
 
   void testValidTransmissionProcessingInstructions() {
@@ -99,8 +91,7 @@ public:
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 1);
     TS_ASSERT(results[0].transmissionProcessingInstructions().is_initialized());
-    TS_ASSERT_EQUALS(results[0].transmissionProcessingInstructions().get(),
-                     "1-3");
+    TS_ASSERT_EQUALS(results[0].transmissionProcessingInstructions().get(), "1-3");
   }
 
   void testInvalidTransmissionProcessingInstructions() {
@@ -150,8 +141,7 @@ public:
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 1);
     TS_ASSERT(results[0].backgroundProcessingInstructions().is_initialized());
-    TS_ASSERT_EQUALS(results[0].backgroundProcessingInstructions().get(),
-                     "1-3");
+    TS_ASSERT_EQUALS(results[0].backgroundProcessingInstructions().get(), "1-3");
   }
 
   void testInvalidBackgroundProcessingInstructions() {
@@ -171,8 +161,7 @@ public:
 
   void testAnglesThatDifferByLessThanTolerance() {
     auto table = Table({Cells({"0.5"}), Cells({"0.5009"})});
-    runTestInvalidThetas(table, ThetaValuesValidationError::NonUniqueTheta,
-                         expectedErrors({0, 1}, {0}));
+    runTestInvalidThetas(table, ThetaValuesValidationError::NonUniqueTheta, expectedErrors({0, 1}, {0}));
   }
 
   void testCorrectRowMarkedAsInvalidInMultiRowTable() {
@@ -187,9 +176,7 @@ private:
   Table emptyTable() { return Table(); }
   Cells emptyRow() { return Cells(); }
 
-  std::vector<InvalidDefaultsError>
-  expectedErrors(const std::vector<int> &rows,
-                 const std::vector<int> &columns) {
+  std::vector<InvalidDefaultsError> expectedErrors(const std::vector<int> &rows, const std::vector<int> &columns) {
     std::vector<InvalidDefaultsError> errors;
     for (auto row : rows)
       errors.emplace_back(InvalidDefaultsError(row, columns));
@@ -203,8 +190,7 @@ private:
     return result.assertValid();
   }
 
-  void runTestInvalidThetas(const Table &table,
-                            ThetaValuesValidationError thetaValuesError,
+  void runTestInvalidThetas(const Table &table, ThetaValuesValidationError thetaValuesError,
                             std::vector<InvalidDefaultsError> expectedErrors) {
     PerThetaDefaultsTableValidator validator;
     auto result = validator(table, TOLERANCE);
@@ -215,8 +201,7 @@ private:
     TS_ASSERT_EQUALS(validationError.errors(), expectedErrors);
   }
 
-  void runTestInvalidCells(const Table &table,
-                           std::vector<InvalidDefaultsError> expectedErrors) {
+  void runTestInvalidCells(const Table &table, std::vector<InvalidDefaultsError> expectedErrors) {
     PerThetaDefaultsTableValidator validator;
     auto result = validator(table, TOLERANCE);
     TS_ASSERT(result.isError());

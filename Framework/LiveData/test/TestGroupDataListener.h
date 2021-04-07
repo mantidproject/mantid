@@ -27,8 +27,7 @@ public:
   bool buffersEvents() const override { return true; }
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void start(
-      Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
+  void start(Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
   std::shared_ptr<API::Workspace> extractData() override;
 
   bool isConnected() override;
@@ -37,8 +36,7 @@ public:
   int runNumber() const override;
 
   void setSpectra(const std::vector<specnum_t> &) override;
-  void
-  setAlgorithm(const class Mantid::API::IAlgorithm &callingAlgorithm) override;
+  void setAlgorithm(const class Mantid::API::IAlgorithm &callingAlgorithm) override;
 
 private:
   API::WorkspaceGroup_sptr m_buffer;

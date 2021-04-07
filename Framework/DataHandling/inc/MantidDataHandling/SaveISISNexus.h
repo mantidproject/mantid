@@ -41,9 +41,7 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveNexusProcessed", "SaveNexus", "LoadNexus"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveNexusProcessed", "SaveNexus", "LoadNexus"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
@@ -82,9 +80,7 @@ private:
   void saveIntOpen(const char *name, void *data, int size = 1);
   void saveCharOpen(const char *name, void *data, int size);
   void saveFloatOpen(const char *name, void *data, int size);
-  int saveStringVectorOpen(const char *name,
-                           const std::vector<std::string> &str_vec,
-                           int max_str_size = -1);
+  int saveStringVectorOpen(const char *name, const std::vector<std::string> &str_vec, int max_str_size = -1);
   void saveString(const char *name, const std::string &str);
   void saveStringOpen(const char *name, const std::string &str);
   inline void close() { NXclosedata(handle); }       ///< close an open dataset.
@@ -121,11 +117,9 @@ private:
   /// Write runlog
   void runlog();
   /// write one run log
-  void write_runlog(const char *name, void *times, void *data, int type,
-                    int size, const std::string &units);
+  void write_runlog(const char *name, void *times, void *data, int type, int size, const std::string &units);
   /// write NXlog
-  void write_logOpen(const char *name, void *times, void *data, int type,
-                     int size, const std::string &units);
+  void write_logOpen(const char *name, void *times, void *data, int type, int size, const std::string &units);
   /// Write selog
   void selog();
   /// Write notes from LOG_STRUCT

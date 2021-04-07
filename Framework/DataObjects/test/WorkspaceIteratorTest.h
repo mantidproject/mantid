@@ -46,18 +46,15 @@ public:
   void testIteratorWorkspace2DAsBase() {
     int size = 57;
     int histogramCount = 100;
-    Wbase workspace =
-        WorkspaceCreationHelper::Create2DWorkspace(histogramCount, size);
+    Wbase workspace = WorkspaceCreationHelper::Create2DWorkspace(histogramCount, size);
     // workspace->dataX(0) // this is the first spectrum in the workspace with
     // real data
     int count = 0;
     for (MatrixWorkspace::const_iterator ti(*workspace); ti != ti.end(); ++ti) {
-      TS_ASSERT_THROWS_NOTHING(
-          LocatedDataRef tr = *ti; int datablock = count / size;
-          int blockindex = count % size;
-          TS_ASSERT_EQUALS(tr.X(), workspace->dataX(datablock)[blockindex]);
-          TS_ASSERT_EQUALS(tr.Y(), workspace->dataY(datablock)[blockindex]);
-          TS_ASSERT_EQUALS(tr.E(), workspace->dataE(datablock)[blockindex]);)
+      TS_ASSERT_THROWS_NOTHING(LocatedDataRef tr = *ti; int datablock = count / size; int blockindex = count % size;
+                               TS_ASSERT_EQUALS(tr.X(), workspace->dataX(datablock)[blockindex]);
+                               TS_ASSERT_EQUALS(tr.Y(), workspace->dataY(datablock)[blockindex]);
+                               TS_ASSERT_EQUALS(tr.E(), workspace->dataE(datablock)[blockindex]);)
       count++;
     }
     TS_ASSERT_EQUALS(count, size * histogramCount);
@@ -66,8 +63,7 @@ public:
   void testHorizontalLoopIteratorWorkspace2D() {
     int size = 57;
     int histogramCount = 100;
-    Wbase workspace =
-        WorkspaceCreationHelper::Create2DWorkspace(histogramCount, size);
+    Wbase workspace = WorkspaceCreationHelper::Create2DWorkspace(histogramCount, size);
 
     const int loopCountArrayLength = 4;
     int loopCountArray[loopCountArrayLength];
@@ -79,16 +75,12 @@ public:
     for (int i = 0; i < loopCountArrayLength; i++) {
       int loopCount = loopCountArray[i];
       int count = 0;
-      for (MatrixWorkspace::const_iterator ti(*workspace, loopCount);
-           ti != ti.end(); ++ti) {
-        TS_ASSERT_THROWS_NOTHING(
-            LocatedDataRef tr = *ti;
-            int indexPosition = count % (size * histogramCount);
-            int datablock = indexPosition / size;
-            int blockindex = indexPosition % size;
-            TS_ASSERT_EQUALS(tr.X(), workspace->dataX(datablock)[blockindex]);
-            TS_ASSERT_EQUALS(tr.Y(), workspace->dataY(datablock)[blockindex]);
-            TS_ASSERT_EQUALS(tr.E(), workspace->dataE(datablock)[blockindex]);)
+      for (MatrixWorkspace::const_iterator ti(*workspace, loopCount); ti != ti.end(); ++ti) {
+        TS_ASSERT_THROWS_NOTHING(LocatedDataRef tr = *ti; int indexPosition = count % (size * histogramCount);
+                                 int datablock = indexPosition / size; int blockindex = indexPosition % size;
+                                 TS_ASSERT_EQUALS(tr.X(), workspace->dataX(datablock)[blockindex]);
+                                 TS_ASSERT_EQUALS(tr.Y(), workspace->dataY(datablock)[blockindex]);
+                                 TS_ASSERT_EQUALS(tr.E(), workspace->dataE(datablock)[blockindex]);)
         count++;
       }
       TS_ASSERT_EQUALS(count, size * histogramCount * loopCount);
@@ -98,8 +90,7 @@ public:
   void testVerticalLoopIteratorWorkspace2D() {
     int size = 50;
     int histogramCount = 100;
-    Wbase workspace =
-        WorkspaceCreationHelper::Create2DWorkspace(histogramCount, size);
+    Wbase workspace = WorkspaceCreationHelper::Create2DWorkspace(histogramCount, size);
 
     const int loopCountArrayLength = 4;
     int loopCountArray[loopCountArrayLength];
@@ -111,9 +102,7 @@ public:
     for (int i = 0; i < loopCountArrayLength; i++) {
       int loopCount = loopCountArray[i];
       int count = 0;
-      for (MatrixWorkspace::const_iterator ti(*workspace, loopCount,
-                                              LoopOrientation::Vertical);
-           ti != ti.end(); ++ti) {
+      for (MatrixWorkspace::const_iterator ti(*workspace, loopCount, LoopOrientation::Vertical); ti != ti.end(); ++ti) {
         // TS_ASSERT_THROWS_NOTHING
         //(
         //  //LocatedDataRef tr = *ti;
@@ -134,11 +123,9 @@ public:
 
     int count = 0;
     for (MatrixWorkspace::const_iterator ti(*workspace); ti != ti.end(); ++ti) {
-      TS_ASSERT_THROWS_NOTHING(
-          LocatedDataRef tr = *ti;
-          TS_ASSERT_EQUALS(tr.X(), workspace->dataX(0)[count]);
-          TS_ASSERT_EQUALS(tr.Y(), workspace->dataY(0)[count]);
-          TS_ASSERT_EQUALS(tr.E(), workspace->dataE(0)[count]);)
+      TS_ASSERT_THROWS_NOTHING(LocatedDataRef tr = *ti; TS_ASSERT_EQUALS(tr.X(), workspace->dataX(0)[count]);
+                               TS_ASSERT_EQUALS(tr.Y(), workspace->dataY(0)[count]);
+                               TS_ASSERT_EQUALS(tr.E(), workspace->dataE(0)[count]);)
       count++;
     }
     TS_ASSERT_EQUALS(count, 1);
@@ -159,16 +146,12 @@ public:
     for (int i = 0; i < loopCountArrayLength; i++) {
       int loopCount = loopCountArray[i];
       int count = 0;
-      for (MatrixWorkspace::const_iterator ti(*workspace, loopCount);
-           ti != ti.end(); ++ti) {
-        TS_ASSERT_THROWS_NOTHING(
-            LocatedDataRef tr = *ti;
-            int indexPosition = count % (size * histogramCount);
-            int datablock = indexPosition / size;
-            int blockindex = indexPosition % size;
-            TS_ASSERT_EQUALS(tr.X(), workspace->dataX(datablock)[blockindex]);
-            TS_ASSERT_EQUALS(tr.Y(), workspace->dataY(datablock)[blockindex]);
-            TS_ASSERT_EQUALS(tr.E(), workspace->dataE(datablock)[blockindex]);)
+      for (MatrixWorkspace::const_iterator ti(*workspace, loopCount); ti != ti.end(); ++ti) {
+        TS_ASSERT_THROWS_NOTHING(LocatedDataRef tr = *ti; int indexPosition = count % (size * histogramCount);
+                                 int datablock = indexPosition / size; int blockindex = indexPosition % size;
+                                 TS_ASSERT_EQUALS(tr.X(), workspace->dataX(datablock)[blockindex]);
+                                 TS_ASSERT_EQUALS(tr.Y(), workspace->dataY(datablock)[blockindex]);
+                                 TS_ASSERT_EQUALS(tr.E(), workspace->dataE(datablock)[blockindex]);)
         count++;
       }
       TS_ASSERT_EQUALS(count, size * histogramCount * loopCount);

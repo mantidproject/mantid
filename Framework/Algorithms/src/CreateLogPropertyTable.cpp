@@ -35,9 +35,8 @@ namespace {
 enum GroupPolicy { ALL, FIRST, NONE };
 
 // Forward declarations.
-std::vector<MatrixWorkspace_sptr>
-retrieveMatrixWsList(const std::vector<std::string> &wsNames,
-                     GroupPolicy groupPolicy);
+std::vector<MatrixWorkspace_sptr> retrieveMatrixWsList(const std::vector<std::string> &wsNames,
+                                                       GroupPolicy groupPolicy);
 GroupPolicy getGroupPolicyByName(const std::string &name);
 std::set<std::string> getAllGroupPolicyNames();
 Math::StatisticType getStatisticTypeByName(const std::string &name);
@@ -49,34 +48,27 @@ std::set<std::string> getAllStatisticTypeNames();
  */
 void CreateLogPropertyTable::init() {
   // Input workspaces
-  declareProperty(
-      std::make_unique<ArrayProperty<std::string>>(
-          "InputWorkspaces",
-          std::make_shared<MandatoryValidator<std::vector<std::string>>>()),
-      "Name of the Input Workspaces from which to get log properties.");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
+                      "InputWorkspaces", std::make_shared<MandatoryValidator<std::vector<std::string>>>()),
+                  "Name of the Input Workspaces from which to get log properties.");
 
   // Output workspace
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output ITableWorkspace.");
 
   // Which log properties to use
-  declareProperty(
-      std::make_unique<ArrayProperty<std::string>>(
-          "LogPropertyNames",
-          std::make_shared<MandatoryValidator<std::vector<std::string>>>()),
-      "The names of the log properties to place in table.");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
+                      "LogPropertyNames", std::make_shared<MandatoryValidator<std::vector<std::string>>>()),
+                  "The names of the log properties to place in table.");
 
   // How to handle time series logs
   const std::set<std::string> statisticNames = getAllStatisticTypeNames();
-  declareProperty("TimeSeriesStatistic", "Mean",
-                  std::make_shared<StringListValidator>(statisticNames),
+  declareProperty("TimeSeriesStatistic", "Mean", std::make_shared<StringListValidator>(statisticNames),
                   "The statistic to use when adding a time series log.");
 
   // How to handle workspace groups
   const std::set<std::string> groupPolicies = getAllGroupPolicyNames();
-  declareProperty("GroupPolicy", "First",
-                  std::make_shared<StringListValidator>(groupPolicies),
+  declareProperty("GroupPolicy", "First", std::make_shared<StringListValidator>(groupPolicies),
                   "The policy by which to handle GroupWorkspaces.  \"All\" "
                   "will include all children in the table, \"First\" will "
                   "include "
@@ -92,12 +84,10 @@ void CreateLogPropertyTable::exec() {
   // Retrieve a list of MatrixWorkspace pointers, using the given "GroupPolicy".
   const std::string groupPolicyName = this->getPropertyValue("GroupPolicy");
   const GroupPolicy groupPolicy = getGroupPolicyByName(groupPolicyName);
-  const std::vector<MatrixWorkspace_sptr> matrixWsList =
-      retrieveMatrixWsList(wsNames, groupPolicy);
+  const std::vector<MatrixWorkspace_sptr> matrixWsList = retrieveMatrixWsList(wsNames, groupPolicy);
 
   // Get the names of the properties that will be stored.
-  const std::vector<std::string> propNames =
-      this->getProperty("LogPropertyNames");
+  const std::vector<std::string> propNames = this->getProperty("LogPropertyNames");
 
   // Make sure all workspaces contain the properties.
   for (const auto &matrixWs : matrixWsList) {
@@ -107,9 +97,7 @@ void CreateLogPropertyTable::exec() {
     // Throw if a run does not have a property.
     for (const auto &propName : propNames)
       if (!run.hasProperty(propName))
-        throw std::runtime_error("\"" + wsName +
-                                 "\" does not have a run property of \"" +
-                                 propName + "\".");
+        throw std::runtime_error("\"" + wsName + "\" does not have a run property of \"" + propName + "\".");
   }
 
   // Set up output table.
@@ -126,10 +114,8 @@ void CreateLogPropertyTable::exec() {
   for (size_t i = 0; i < outputTable->columnCount(); ++i)
     outputTable->getColumn(i)->setPlotType(i == 0 ? 1 : 2);
 
-  const std::string timeSeriesStatName =
-      this->getPropertyValue("TimeSeriesStatistic");
-  const Math::StatisticType timeSeriesStat =
-      getStatisticTypeByName(timeSeriesStatName);
+  const std::string timeSeriesStatName = this->getPropertyValue("TimeSeriesStatistic");
+  const Math::StatisticType timeSeriesStat = getStatisticTypeByName(timeSeriesStatName);
   // Populate output table with the requested run properties.
   for (size_t i = 0; i < outputTable->rowCount(); ++i) {
     TableRow row = outputTable->getRow(i);
@@ -140,8 +126,7 @@ void CreateLogPropertyTable::exec() {
       std::stringstream propValue;
 
       if (prop->type().find("TimeValue") != std::string::npos) {
-        propValue << matrixWs->run().getLogAsSingleValue(propName,
-                                                         timeSeriesStat);
+        propValue << matrixWs->run().getLogAsSingleValue(propName, timeSeriesStat);
       } else {
         propValue << prop->value();
       }
@@ -170,19 +155,16 @@ namespace {
  *
  * @return the retrieved MatrixWorkspace pointers
  */
-std::vector<MatrixWorkspace_sptr>
-retrieveMatrixWsList(const std::vector<std::string> &wsNames,
-                     GroupPolicy groupPolicy) {
+std::vector<MatrixWorkspace_sptr> retrieveMatrixWsList(const std::vector<std::string> &wsNames,
+                                                       GroupPolicy groupPolicy) {
   std::vector<MatrixWorkspace_sptr> matrixWsList;
 
   // Get all the workspaces which are to be inspected for log proeprties.
   auto &ADS = AnalysisDataService::Instance();
   for (const auto &wsName : wsNames) {
 
-    WorkspaceGroup_sptr wsGroup =
-        std::dynamic_pointer_cast<WorkspaceGroup>(ADS.retrieve(wsName));
-    MatrixWorkspace_sptr matrixWs =
-        std::dynamic_pointer_cast<MatrixWorkspace>(ADS.retrieve(wsName));
+    WorkspaceGroup_sptr wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(ADS.retrieve(wsName));
+    MatrixWorkspace_sptr matrixWs = std::dynamic_pointer_cast<MatrixWorkspace>(ADS.retrieve(wsName));
 
     if (wsGroup) {
       const std::vector<std::string> childNames = wsGroup->getNames();
@@ -196,18 +178,14 @@ retrieveMatrixWsList(const std::vector<std::string> &wsNames,
       std::vector<MatrixWorkspace_sptr> childWsList;
       childWsList.reserve(childNames.size());
 
-      std::transform(childNames.begin(), childNames.end(),
-                     std::back_inserter(childWsList),
-                     [&ADS](const auto &childName) {
-                       return ADS.retrieveWS<MatrixWorkspace>(childName);
-                     });
+      std::transform(childNames.begin(), childNames.end(), std::back_inserter(childWsList),
+                     [&ADS](const auto &childName) { return ADS.retrieveWS<MatrixWorkspace>(childName); });
 
       // Deal with child workspaces according to policy.
       switch (groupPolicy) {
       case ALL: {
         // Append all the children to the list.
-        std::move(childWsList.cbegin(), childWsList.cend(),
-                  std::back_inserter(matrixWsList));
+        std::move(childWsList.cbegin(), childWsList.cend(), std::back_inserter(matrixWsList));
         break;
       }
       case FIRST:

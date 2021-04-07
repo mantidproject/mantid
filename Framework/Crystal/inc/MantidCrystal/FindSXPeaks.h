@@ -50,13 +50,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"IndexSXPeaks"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"IndexSXPeaks"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Crystal\\Peaks;Optimization\\PeakFinding";
-  }
+  const std::string category() const override { return "Crystal\\Peaks;Optimization\\PeakFinding"; }
 
   static const std::string strongestPeakStrategy;
   static const std::string allPeaksStrategy;
@@ -70,33 +66,26 @@ private:
   std::map<std::string, std::string> validateInputs() override;
 
   /// Selects a background strategy
-  std::unique_ptr<FindSXPeaksHelper::BackgroundStrategy>
-  getBackgroundStrategy() const;
+  std::unique_ptr<FindSXPeaksHelper::BackgroundStrategy> getBackgroundStrategy() const;
 
   /// Selects a peak finding strategy
   std::unique_ptr<FindSXPeaksHelper::PeakFindingStrategy>
-  getPeakFindingStrategy(
-      const FindSXPeaksHelper::BackgroundStrategy *backgroundStrategy,
-      const API::SpectrumInfo &spectrumInfo, const double minValue,
-      const double maxValue,
-      const FindSXPeaksHelper::XAxisUnit tofUnits =
-          FindSXPeaksHelper::XAxisUnit::TOF) const;
+  getPeakFindingStrategy(const FindSXPeaksHelper::BackgroundStrategy *backgroundStrategy,
+                         const API::SpectrumInfo &spectrumInfo, const double minValue, const double maxValue,
+                         const FindSXPeaksHelper::XAxisUnit tofUnits = FindSXPeaksHelper::XAxisUnit::TOF) const;
 
   /// Selects a peak finding strategy
   std::unique_ptr<FindSXPeaksHelper::ReducePeakListStrategy>
-  getReducePeakListStrategy(
-      const FindSXPeaksHelper::CompareStrategy *compareStrategy) const;
+  getReducePeakListStrategy(const FindSXPeaksHelper::CompareStrategy *compareStrategy) const;
 
   /// Selects a comparison strategy
-  std::unique_ptr<FindSXPeaksHelper::CompareStrategy>
-  getCompareStrategy() const;
+  std::unique_ptr<FindSXPeaksHelper::CompareStrategy> getCompareStrategy() const;
 
   //
   void reducePeakList(const peakvector &, Mantid::API::Progress &progress);
 
   /// Check what x units this workspace has
-  FindSXPeaksHelper::XAxisUnit getWorkspaceXAxisUnit(
-      const Mantid::API::MatrixWorkspace_const_sptr &workspace) const;
+  FindSXPeaksHelper::XAxisUnit getWorkspaceXAxisUnit(const Mantid::API::MatrixWorkspace_const_sptr &workspace) const;
 
   /// The value in X to start the search from
   double m_MinRange;

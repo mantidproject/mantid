@@ -65,8 +65,7 @@ public:
     geometry.setTransformToOriginal(new NullCoordTransform, 1);
     TS_ASSERT_EQUALS(2, geometry.getNumberTransformsToOriginal());
     TS_ASSERT_THROWS_NOTHING(geometry.clearTransforms());
-    TSM_ASSERT_EQUALS("Should have no transforms", 0,
-                      geometry.getNumberTransformsToOriginal());
+    TSM_ASSERT_EQUALS("Should have no transforms", 0, geometry.getNumberTransformsToOriginal());
   }
 
   void test_clear_transforms_from_original() {
@@ -75,8 +74,7 @@ public:
     geometry.setTransformFromOriginal(new NullCoordTransform, 1);
     TS_ASSERT_EQUALS(2, geometry.getNumberTransformsFromOriginal());
     TS_ASSERT_THROWS_NOTHING(geometry.clearTransforms());
-    TSM_ASSERT_EQUALS("Should have no transforms", 0,
-                      geometry.getNumberTransformsFromOriginal());
+    TSM_ASSERT_EQUALS("Should have no transforms", 0, geometry.getNumberTransformsFromOriginal());
   }
 
   void test_clear_original_workspaces() {
@@ -128,14 +126,10 @@ public:
     TS_ASSERT_EQUALS(g2.getOriginalWorkspace(0), ws0);
     TS_ASSERT_EQUALS(g2.getOriginalWorkspace(1), ws1);
     // But transforms are deep-copied
-    TS_ASSERT_DIFFERS(g2.getTransformFromOriginal(0),
-                      g.getTransformFromOriginal(0));
-    TS_ASSERT_DIFFERS(g2.getTransformFromOriginal(1),
-                      g.getTransformFromOriginal(1));
-    TS_ASSERT_DIFFERS(g2.getTransformToOriginal(0),
-                      g.getTransformToOriginal(0));
-    TS_ASSERT_DIFFERS(g2.getTransformToOriginal(1),
-                      g.getTransformToOriginal(1));
+    TS_ASSERT_DIFFERS(g2.getTransformFromOriginal(0), g.getTransformFromOriginal(0));
+    TS_ASSERT_DIFFERS(g2.getTransformFromOriginal(1), g.getTransformFromOriginal(1));
+    TS_ASSERT_DIFFERS(g2.getTransformToOriginal(0), g.getTransformToOriginal(0));
+    TS_ASSERT_DIFFERS(g2.getTransformToOriginal(1), g.getTransformToOriginal(1));
     TS_ASSERT(g2.getTransformFromOriginal(0) != nullptr);
     TS_ASSERT(g2.getTransformFromOriginal(1) != nullptr);
     TS_ASSERT(g2.getTransformToOriginal(0) != nullptr);
@@ -146,11 +140,9 @@ public:
   void test_addDimension_getDimension() {
     MDGeometry g;
     const Mantid::Geometry::QSample frame;
-    MDHistoDimension_sptr dim(
-        new MDHistoDimension("Qx", "Qx", frame, -1, +1, 0));
+    MDHistoDimension_sptr dim(new MDHistoDimension("Qx", "Qx", frame, -1, +1, 0));
     TS_ASSERT_THROWS_NOTHING(g.addDimension(dim);)
-    MDHistoDimension_sptr dim2(
-        new MDHistoDimension("Qy", "Qy", frame, -1, +1, 0));
+    MDHistoDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", frame, -1, +1, 0));
     TS_ASSERT_THROWS_NOTHING(g.addDimension(dim2);)
     TS_ASSERT_EQUALS(g.getNumDims(), 2);
     TS_ASSERT_EQUALS(g.getNumNonIntegratedDims(), 2);
@@ -164,11 +156,9 @@ public:
   void test_transformDimensions() {
     MDGeometry g;
     const Mantid::Geometry::QSample frame;
-    MDHistoDimension_sptr dim(
-        new MDHistoDimension("Qx", "Qx", frame, -1, +1, 0));
+    MDHistoDimension_sptr dim(new MDHistoDimension("Qx", "Qx", frame, -1, +1, 0));
     TS_ASSERT_THROWS_NOTHING(g.addDimension(dim);)
-    MDHistoDimension_sptr dim2(
-        new MDHistoDimension("Qy", "Qy", frame, -2, +2, 0));
+    MDHistoDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", frame, -2, +2, 0));
     TS_ASSERT_THROWS_NOTHING(g.addDimension(dim2);)
     TS_ASSERT_EQUALS(g.getNumDims(), 2);
     TS_ASSERT_EQUALS(g.getNumNonIntegratedDims(), 2);
@@ -232,8 +222,7 @@ public:
     MDGeometry g;
     {
       std::shared_ptr<WorkspaceTester> ws = std::make_shared<WorkspaceTester>();
-      AnalysisDataService::Instance().addOrReplace("MDGeometryTest_originalWS",
-                                                   ws);
+      AnalysisDataService::Instance().addOrReplace("MDGeometryTest_originalWS", ws);
       g.setOriginalWorkspace(ws);
       TS_ASSERT(g.hasOriginalWorkspace());
     }
@@ -242,34 +231,28 @@ public:
 
     // Create a different workspace and delete that
     std::shared_ptr<WorkspaceTester> ws2 = std::make_shared<WorkspaceTester>();
-    AnalysisDataService::Instance().addOrReplace("MDGeometryTest_some_other_ws",
-                                                 ws2);
+    AnalysisDataService::Instance().addOrReplace("MDGeometryTest_some_other_ws", ws2);
     AnalysisDataService::Instance().remove("MDGeometryTest_some_other_ws");
-    TSM_ASSERT("Different workspace does not get deleted incorrectly",
-               g.hasOriginalWorkspace())
+    TSM_ASSERT("Different workspace does not get deleted incorrectly", g.hasOriginalWorkspace())
 
     // Delete the right workspace (e.g. DeleteWorkspace algo)
     AnalysisDataService::Instance().remove("MDGeometryTest_originalWS");
-    TSM_ASSERT("Original workspace reference was deleted.",
-               !g.hasOriginalWorkspace());
-    TSM_ASSERT("Original workspace reference is cleared.",
-               !g.getOriginalWorkspace());
+    TSM_ASSERT("Original workspace reference was deleted.", !g.hasOriginalWorkspace());
+    TSM_ASSERT("Original workspace reference is cleared.", !g.getOriginalWorkspace());
   }
 
   void test_transforms_to_original() {
     MDGeometry g;
     g.setTransformFromOriginal(new NullCoordTransform, 0);
     g.setTransformFromOriginal(new NullCoordTransform, 1);
-    TSM_ASSERT_EQUALS("Wrong number of transforms from original reported.", 2,
-                      g.getNumberTransformsFromOriginal());
+    TSM_ASSERT_EQUALS("Wrong number of transforms from original reported.", 2, g.getNumberTransformsFromOriginal());
   }
 
   void test_transforms_from_original() {
     MDGeometry g;
     g.setTransformToOriginal(new NullCoordTransform, 0);
     g.setTransformToOriginal(new NullCoordTransform, 1);
-    TSM_ASSERT_EQUALS("Wrong number of transforms to original reported.", 2,
-                      g.getNumberTransformsToOriginal());
+    TSM_ASSERT_EQUALS("Wrong number of transforms to original reported.", 2, g.getNumberTransformsToOriginal());
   }
 
   void test_all_normalized() {
@@ -285,18 +268,15 @@ public:
     //  Both basis vectors are not normalized
     geometry.setBasisVector(0, VMD(2.0, 0.0));
     geometry.setBasisVector(1, VMD(0.0, 4.0));
-    TSM_ASSERT("All Not all basis vectors are normalized",
-               !geometry.allBasisNormalized());
+    TSM_ASSERT("All Not all basis vectors are normalized", !geometry.allBasisNormalized());
 
     //  First basis vector is now normalized. The other is not.
     geometry.setBasisVector(1, VMD(0.0, 1.0));
-    TSM_ASSERT("Not all basis vectors are normalized",
-               !geometry.allBasisNormalized());
+    TSM_ASSERT("Not all basis vectors are normalized", !geometry.allBasisNormalized());
 
     // We overwrite the zeroth basis vector to be normalized. Now both are
     // normalized
     geometry.setBasisVector(0, VMD(1.0, 0.0));
-    TSM_ASSERT("All basis vectors are normalized",
-               geometry.allBasisNormalized());
+    TSM_ASSERT("All basis vectors are normalized", geometry.allBasisNormalized());
   }
 };

@@ -22,12 +22,12 @@ Loading a Workspace2D and extracting some basic details:
 
     ws2D = Load(Filename="LOQ49886.nxs")
 
-    # Basic queries 
+    # Basic queries
     print("Number of histograms: " + str(ws2D.getNumberHistograms()))
     print("Is histogram data: " + str(ws2D.isHistogramData()))
     print("Number of bins: " + str(ws2D.blocksize()))
 
-    # More advanced queries 
+    # More advanced queries
     spectrumAxis = ws2D.getAxis(1)
     print("Is spectra axis: " + str(spectrumAxis.isSpectra()))
     print("Number of spectra: " + str(spectrumAxis.length()))

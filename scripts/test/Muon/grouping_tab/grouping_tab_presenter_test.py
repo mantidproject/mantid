@@ -21,12 +21,20 @@ from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter, MuonPair
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
+from Muon.GUI.Common.difference_table_widget.difference_widget_presenter import DifferencePresenter
 
 
 def pair_name():
     name = []
     for i in range(21):
         name.append("pair_" + str(i + 1))
+    return name
+
+
+def diff_name():
+    name = []
+    for i in range(21):
+        name.append("diff_" + str(i + 1))
     return name
 
 
@@ -64,16 +72,20 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.pairing_table_view = PairingTableView()
         self.pairing_table_widget = PairingTablePresenter(self.pairing_table_view, self.model)
 
+        self.diff_widget = DifferencePresenter(self.model)
+        self.diff_widget.group_view.enter_diff_name = mock.Mock(side_effect=diff_name())
+        self.diff_widget.pair_view.enter_diff_name = mock.Mock(side_effect=diff_name())
+
         self.grouping_table_view.warning_popup = mock.MagicMock()
         self.pairing_table_view.warning_popup = mock.MagicMock()
 
         self.add_three_groups()
         self.add_two_pairs()
 
-        self.view = GroupingTabView(self.grouping_table_view, self.pairing_table_view)
+        self.view = GroupingTabView(self.grouping_table_view, self.pairing_table_view, self.diff_widget.view)
         self.presenter = GroupingTabPresenter(self.view, self.model,
                                               self.grouping_table_widget,
-                                              self.pairing_table_widget)
+                                              self.pairing_table_widget, self.diff_widget)
 
         self.presenter.create_update_thread = mock.MagicMock(return_value=mock.MagicMock())
         self.presenter.pairing_table_widget.handle_add_pair_button_clicked = mock.MagicMock()
@@ -94,6 +106,12 @@ class GroupingTabPresenterTest(unittest.TestCase):
         testpair2 = MuonPair(pair_name="long2", forward_group_name="fwd", backward_group_name="top")
         self.pairing_table_widget.add_pair(testpair1)
         self.pairing_table_widget.add_pair(testpair2)
+
+    def add_group_diff(self):
+        self.diff_widget.group_widget.handle_add_diff_button_clicked('fwd', 'top')
+
+    def add_pair_diff(self):
+        self.diff_widget.pair_widget.handle_add_diff_button_clicked('long1', 'long2')
 
     def tearDown(self):
         self.obj = None
@@ -123,7 +141,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
         groups = [MuonGroup(group_name="grp1", detector_ids=[1, 2, 3, 4, 5]),
                   MuonGroup(group_name="grp2", detector_ids=[6, 7, 8, 9, 10])]
         pairs = [MuonPair(pair_name="pair1", forward_group_name="grp1", backward_group_name="grp2")]
-        mock_load.return_value = (groups, pairs, 'description', 'pair1')
+        mock_load.return_value = (groups, pairs, [], 'description', 'pair1')
 
         self.view.load_grouping_button.clicked.emit(True)
 
@@ -216,16 +234,6 @@ class GroupingTabPresenterTest(unittest.TestCase):
                                                                                 self.presenter.error_callback)
         self.presenter.update_thread.start.assert_called_once_with()
 
-    def test_removing_group_removes_linked_pairs(self):
-        self.group_context.clear_pairs()
-        self.group_context.clear_groups()
-        self.add_three_groups()
-        self.add_two_pairs()
-
-        self.presenter.grouping_table_widget.remove_last_row_in_view_and_model()
-
-        self.assertEqual(self.model.pair_names, ['long1'])
-
     def test_that_adding_pair_with_context_menu_allows_for_name_specification(self):
         self.presenter.add_pair_from_grouping_table("first", "second")
         self.pairing_table_widget.handle_add_pair_button_clicked.assert_called_once_with("first", "second")
@@ -235,7 +243,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
         with mock.patch(
                 "Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.load_grouping_from_XML") as mock_load:
             # mock the loading to return set groups/pairs
-            mock_load.return_value = (groups, pairs, 'description', default)
+            mock_load.return_value = (groups, pairs, [], 'description', default)
             self.presenter.handle_load_grouping_from_file()
 
     def test_default_clicked(self):
@@ -247,6 +255,57 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.presenter._model.reset_groups_and_pairs_to_default = mock.MagicMock(return_value="failed")
         self.presenter.handle_default_grouping_button_clicked()
         self.assertEqual(self.view.display_warning_box.call_count, 1)
+
+    def test_update_description_to_empty_on_clear_all(self):
+        self.presenter.on_clear_requested()
+        self.assertEqual('', self.view.get_description_text())
+
+    def test_cannot_remove_last_row_group_table_if_used_by_pair(self):
+        self.grouping_table_widget.handle_remove_group_button_clicked()
+
+        self.assertEqual(1, self.grouping_table_view.warning_popup.call_count)
+        self.assertEqual('top is used by: long2',
+                         self.grouping_table_view.warning_popup.call_args_list[0][0][0])
+
+    def test_cannot_remove_last_row_group_table_if_used_by_diff(self):
+        self.add_group_diff()
+        self.grouping_table_widget.handle_remove_group_button_clicked()
+
+        self.assertEqual(1, self.grouping_table_view.warning_popup.call_count)
+        self.assertEqual('top is used by: long2, diff_1',
+                         self.grouping_table_view.warning_popup.call_args_list[0][0][0])
+
+    def test_cannot_remove_a_selected_group_used_by_pair(self):
+        self.grouping_table_view.get_selected_group_names_and_indexes = mock.Mock(return_value=[['fwd',0]])
+        self.grouping_table_widget.handle_remove_group_button_clicked()
+
+        self.assertEqual(1, self.grouping_table_view.warning_popup.call_count)
+        self.assertEqual('fwd is used by: long1, long2\n', self.grouping_table_view.warning_popup.call_args_list[0][0][0])
+
+    def test_cannot_remove_a_selected_group_used_by_diff(self):
+        self.add_group_diff()
+        self.grouping_table_view.get_selected_group_names_and_indexes = mock.Mock(return_value=[['fwd', 0]])
+        self.grouping_table_widget.handle_remove_group_button_clicked()
+
+        self.assertEqual(1, self.grouping_table_view.warning_popup.call_count)
+        self.assertEqual('fwd is used by: long1, long2, diff_1\n', self.grouping_table_view.warning_popup.call_args_list[0][0][0])
+
+    def test_cannot_remove_last_row_pair_table_if_used_by_diff(self):
+        self.add_pair_diff()
+        self.pairing_table_widget.handle_remove_pair_button_clicked()
+
+        self.assertEqual(1, self.pairing_table_view.warning_popup.call_count)
+        self.assertEqual('long2 is used by: diff_1',
+                         self.pairing_table_view.warning_popup.call_args_list[0][0][0])
+
+    def test_cannot_remove_a_selected_pair_used_by_diff(self):
+        self.add_pair_diff()
+        self.pairing_table_view.get_selected_pair_names_and_indexes = mock.Mock(return_value=[['long1', 0]])
+        self.pairing_table_widget.handle_remove_pair_button_clicked()
+
+        self.assertEqual(1, self.pairing_table_view.warning_popup.call_count)
+        self.assertEqual('long1 is used by: diff_1\n',
+                         self.pairing_table_view.warning_popup.call_args_list[0][0][0])
 
 
 if __name__ == '__main__':

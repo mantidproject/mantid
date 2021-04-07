@@ -17,10 +17,10 @@ We are proud to announce version 5.1.0 of Mantid.
 :doc:`MantidWorkbench <mantidworkbench>` **is replacing MantidPlot**. While :doc:`MantidPlot <mantidplot>` is still fully functional for this release,
 **MantidPlot will not be included in future releases**.
 
-:doc:`Sliceviewer <sliceviewer>` has been majorly updated this release, with advanced features for peak finding in Single Crystal Diffraction data. 
+:doc:`Sliceviewer <sliceviewer>` has been majorly updated this release, with advanced features for peak finding in Single Crystal Diffraction data.
 On top of this, taking slices of data is now possible and there is an interactive data table last seen in the Spectrum Viewer in MantidPlot. **Workbench now also supports 3D and Advanced plotting!**
 
-Check out the brand new :ref:`DrILL interface <DrILL-ref>` for Workbench, that currently supports SANS and Reflectometry at ILL. 
+Check out the brand new :ref:`DrILL interface <DrILL-ref>` for Workbench, that currently supports SANS and Reflectometry at ILL.
 There have also been many upgrades to our existing interfaces, such as providing background subtraction for ISIS Reflectometry and significant  speed up for the Muon and Indirect interfaces.
 
 These are just some of the many improvements in this release, so please take a

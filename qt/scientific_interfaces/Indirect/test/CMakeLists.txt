@@ -4,6 +4,9 @@ set(
   ConvFitDataPresenterTest.h
   ConvFitModelTest.h
   ConvFunctionModelTest.h
+  FqFitDataPresenterTest.h
+  FqFitModelTest.h
+  IDAFunctionParameterEstimationTest.h
   IndirectDataValidationHelperTest.h
   IndirectDataTablePresenterTest.h
   IndirectFitAnalysisTabTest.h
@@ -22,9 +25,6 @@ set(
   IndirectSettingsPresenterTest.h
   IndirectSpectrumSelectionPresenterTest.h
   IqtFitModelTest.h
-  FqFitDataPresenterTest.h
-  FqFitModelTest.h
-  IDAFunctionParameterEstimationTest.h
 )
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE
@@ -32,7 +32,7 @@ set(CXXTEST_EXTRA_HEADER_INCLUDE
 
 mtd_add_qt_tests(
   TARGET_NAME MantidQtInterfacesIndirectTest
-  QT_VERSION 4
+  QT_VERSION 5
   SRC ${TEST_FILES}
   INCLUDE_DIRS
     ../../../../Framework/CurveFitting/inc
@@ -53,11 +53,16 @@ mtd_add_qt_tests(
     gmock
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
-  QT4_LINK_LIBS
-    Qwt5
+    PythonInterfaceCore
+    ${PYTHON_LIBRARIES}
+  QT5_LINK_LIBS
+    Qt5::OpenGL
+    Qt5::Concurrent
   MTD_QT_LINK_LIBS
     MantidScientificInterfacesIndirect
     MantidQtWidgetsCommon
     MantidQtWidgetsPlotting
+    MantidQtWidgetsMplCpp
   PARENT_DEPENDENCIES
     GUITests)
+

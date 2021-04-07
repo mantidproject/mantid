@@ -87,23 +87,19 @@ AlgorithmPropertiesWidget::~AlgorithmPropertiesWidget() {}
  *
  * @param inputHistory :: AlgorithmInputHistoryImpl ptr
  */
-void AlgorithmPropertiesWidget::setInputHistory(
-    MantidQt::API::AbstractAlgorithmInputHistory *inputHistory) {
+void AlgorithmPropertiesWidget::setInputHistory(MantidQt::API::AbstractAlgorithmInputHistory *inputHistory) {
   m_inputHistory = inputHistory;
 }
 
 //----------------------------------------------------------------------------------------------
 ///@return the algorithm being viewed
-Mantid::API::IAlgorithm_sptr AlgorithmPropertiesWidget::getAlgorithm() {
-  return m_algo;
-}
+Mantid::API::IAlgorithm_sptr AlgorithmPropertiesWidget::getAlgorithm() { return m_algo; }
 
 //----------------------------------------------------------------------------------------------
 /** Directly set the algorithm to view. Sets the name to match
  *
  * @param algo :: IAlgorithm bare ptr */
-void AlgorithmPropertiesWidget::setAlgorithm(
-    const Mantid::API::IAlgorithm_sptr &algo) {
+void AlgorithmPropertiesWidget::setAlgorithm(const Mantid::API::IAlgorithm_sptr &algo) {
   if (!algo)
     return;
   saveInput();
@@ -114,9 +110,7 @@ void AlgorithmPropertiesWidget::setAlgorithm(
 
 //----------------------------------------------------------------------------------------------
 ///@return the name of the algorithm being displayed
-QString AlgorithmPropertiesWidget::getAlgorithmName() const {
-  return m_algoName;
-}
+QString AlgorithmPropertiesWidget::getAlgorithmName() const { return m_algoName; }
 
 /** Set the algorithm to view using its name
  *
@@ -125,8 +119,7 @@ void AlgorithmPropertiesWidget::setAlgorithmName(QString name) {
   FrameworkManager::Instance();
   m_algoName = std::move(name);
   try {
-    Algorithm_sptr alg =
-        AlgorithmManager::Instance().createUnmanaged(m_algoName.toStdString());
+    Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(m_algoName.toStdString());
     alg->initialize();
 
     // Set the algorithm ptr. This will redo the layout
@@ -137,8 +130,7 @@ void AlgorithmPropertiesWidget::setAlgorithmName(QString name) {
 
 //---------------------------------------------------------------------------------------------------------------
 /** Sets the properties to force as enabled/disabled */
-void AlgorithmPropertiesWidget::addEnabledAndDisableLists(
-    const QStringList &enabled, const QStringList &disabled) {
+void AlgorithmPropertiesWidget::addEnabledAndDisableLists(const QStringList &enabled, const QStringList &disabled) {
   this->m_enabled = enabled;
   this->m_disabled = disabled;
 }
@@ -152,11 +144,9 @@ bool haveInputWS(const std::vector<Property *> &prop_list) {
   // check.
   // Also the ones that don't have a set of allowed values as input workspace
   std::vector<Property *>::const_iterator pEnd = prop_list.end();
-  for (std::vector<Property *>::const_iterator pIter = prop_list.begin();
-       pIter != pEnd; ++pIter) {
+  for (std::vector<Property *>::const_iterator pIter = prop_list.begin(); pIter != pEnd; ++pIter) {
     Property *prop = *pIter;
-    if (prop->direction() == Direction::Input &&
-        dynamic_cast<IWorkspaceProperty *>(prop)) {
+    if (prop->direction() == Direction::Input && dynamic_cast<IWorkspaceProperty *>(prop)) {
       return true;
     }
   }
@@ -214,13 +204,12 @@ void AlgorithmPropertiesWidget::initLayout() {
           // Make a groupbox with a border and a light background
           QGroupBox *grpBox = new QGroupBox(QString::fromStdString(group));
           grpBox->setAutoFillBackground(true);
-          grpBox->setStyleSheet(
-              "QGroupBox { border: 1px solid gray;  border-radius: 4px; "
-              "font-weight: bold; margin-top: 4px; margin-bottom: 4px; "
-              "padding-top: 16px; }"
-              "QGroupBox::title { background-color: transparent;  "
-              "subcontrol-position: top center;  padding-top:4px; "
-              "padding-bottom:4px; } ");
+          grpBox->setStyleSheet("QGroupBox { border: 1px solid gray;  border-radius: 4px; "
+                                "font-weight: bold; margin-top: 4px; margin-bottom: 4px; "
+                                "padding-top: 16px; }"
+                                "QGroupBox::title { background-color: transparent;  "
+                                "subcontrol-position: top center;  padding-top:4px; "
+                                "padding-bottom:4px; } ");
           QPalette pal = grpBox->palette();
           pal.setColor(grpBox->backgroundRole(), pal.alternateBase().color());
           grpBox->setPalette(pal);
@@ -244,8 +233,7 @@ void AlgorithmPropertiesWidget::initLayout() {
         continue;
 
       // Create the appropriate widget at this row in the grid.
-      PropertyWidget *widget =
-          PropertyWidgetFactory::createWidget(prop, this, m_currentGrid, row);
+      PropertyWidget *widget = PropertyWidgetFactory::createWidget(prop, this, m_currentGrid, row);
 
       // Set the previous input value, if any
       if (m_inputHistory) {
@@ -261,12 +249,10 @@ void AlgorithmPropertiesWidget::initLayout() {
       m_propWidgets[propName] = widget;
 
       // Whenever the value changes in the widget, this fires propertyChanged()
-      connect(widget, SIGNAL(valueChanged(const QString &)), this,
-              SLOT(propertyChanged(const QString &)));
+      connect(widget, SIGNAL(valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
 
       // For clicking the "Replace Workspace" button (if any)
-      connect(widget, SIGNAL(replaceWorkspaceName(const QString &)), this,
-              SLOT(replaceWSClicked(const QString &)));
+      connect(widget, SIGNAL(replaceWorkspaceName(const QString &)), this, SLOT(replaceWSClicked(const QString &)));
 
       // Only show the "Replace Workspace" button if the algorithm has an input
       // workspace.
@@ -330,8 +316,7 @@ void AlgorithmPropertiesWidget::replaceWSClicked(const QString &propName) {
       // from.
       if (candidateReplacementSources.size() > 0) {
         CollectionOfPropertyWidget::iterator selectedIt = std::find_if(
-            candidateReplacementSources.begin(),
-            candidateReplacementSources.end(), isCalledInputWorkspace);
+            candidateReplacementSources.begin(), candidateReplacementSources.end(), isCalledInputWorkspace);
         if (selectedIt != candidateReplacementSources.end()) {
           // Use the InputWorkspace property called "InputWorkspace" as the
           // source for the OutputWorkspace.
@@ -352,8 +337,7 @@ void AlgorithmPropertiesWidget::replaceWSClicked(const QString &propName) {
  * @param property :: the property that allows to check for the settings.
  * @param propName :: The name of the property
  */
-bool AlgorithmPropertiesWidget::isWidgetEnabled(Property *property,
-                                                const QString &propName) const {
+bool AlgorithmPropertiesWidget::isWidgetEnabled(Property *property, const QString &propName) const {
   // To avoid errors
   if (propName.isEmpty())
     return true;
@@ -424,8 +408,7 @@ void AlgorithmPropertiesWidget::hideOrDisableProperties() {
 
         // Whenever the value changes in the widget, this fires
         // propertyChanged()
-        connect(widget, SIGNAL(valueChanged(const QString &)), this,
-                SLOT(propertyChanged(const QString &)));
+        connect(widget, SIGNAL(valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
       }
     }
 
@@ -451,15 +434,13 @@ void AlgorithmPropertiesWidget::hideOrDisableProperties() {
  */
 void AlgorithmPropertiesWidget::saveInput() {
   if (m_inputHistory) {
-    for (auto pitr = m_propWidgets.begin(); pitr != m_propWidgets.end();
-         ++pitr) {
+    for (auto pitr = m_propWidgets.begin(); pitr != m_propWidgets.end(); ++pitr) {
       PropertyWidget *widget = pitr.value();
       const QString &propName = pitr.key();
       QString value = widget->getValue();
       //        Mantid::Kernel::Property *prop = widget->getProperty();
       //        if (!prop || prop->remember())
-      m_inputHistory->storeNewValue(m_algoName,
-                                    QPair<QString, QString>(propName, value));
+      m_inputHistory->storeNewValue(m_algoName, QPair<QString, QString>(propName, value));
     }
   }
 }

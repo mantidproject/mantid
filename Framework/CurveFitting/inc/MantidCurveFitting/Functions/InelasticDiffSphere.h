@@ -58,8 +58,7 @@ public:
   std::vector<double> LorentzianCoefficients(double a) const;
 
 protected:
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
 
 private:
   /// initialize the Xnl coefficients

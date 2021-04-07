@@ -15,6 +15,7 @@ class ConvertHFIRSCDtoMDETest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         LoadMD('HB2C_WANDSCD_data.nxs', OutputWorkspace='ConvertHFIRSCDtoMDETest_data')
+        SetGoniometer('ConvertHFIRSCDtoMDETest_data', Axis0='s1,0,1,0,1', Average=False)
 
         ConvertHFIRSCDtoMDETest_Q = ConvertHFIRSCDtoMDE(InputWorkspace='ConvertHFIRSCDtoMDETest_data', Wavelength=1.488)
 
@@ -30,8 +31,37 @@ class ConvertHFIRSCDtoMDETest(systemtesting.MantidSystemTest):
         self.assertDelta(peak.getWavelength(), 1.488, 1e-5)
 
         peak = ConvertHFIRSCDtoMDETest_peaks.getPeak(13)
-        np.testing.assert_allclose(peak.getQSampleFrame(), [6.754011, 0.001306865, 1.918834], rtol=1e-05)
+        np.testing.assert_allclose(peak.getQSampleFrame(), [6.754011, 0.003572579, 1.918834], rtol=1e-05)
         self.assertDelta(peak.getWavelength(), 1.488, 1e-5)
+
+        # new method using multiple goniometers, compare peak q_sample to old method
+        ConvertHFIRSCDtoMDETest_peaks2 = FindPeaksMD(InputWorkspace=ConvertHFIRSCDtoMDETest_Q, PeakDistanceThreshold=2.2)
+
+        self.assertEqual(ConvertHFIRSCDtoMDETest_peaks2.getNumberPeaks(), 14)
+
+        for p in range(14):
+            np.testing.assert_allclose(ConvertHFIRSCDtoMDETest_peaks2.getPeak(p).getQSampleFrame(),
+                                       ConvertHFIRSCDtoMDETest_peaks.getPeak(p).getQSampleFrame(),
+                                       atol=0.005,
+                                       err_msg=f"mismatch for peak {p}")
+
+        # now try using LeanElasticPeak
+        ConvertHFIRSCDtoMDETest_peaks3 = FindPeaksMD(InputWorkspace=ConvertHFIRSCDtoMDETest_Q, PeakDistanceThreshold=2.2,
+                                                     OutputType='LeanElasticPeak')
+
+        self.assertEqual(ConvertHFIRSCDtoMDETest_peaks3.getNumberPeaks(), 14)
+
+        for p in range(14):
+            np.testing.assert_allclose(ConvertHFIRSCDtoMDETest_peaks3.getPeak(p).getQSampleFrame(),
+                                       ConvertHFIRSCDtoMDETest_peaks.getPeak(p).getQSampleFrame(),
+                                       atol=0.005,
+                                       err_msg=f"mismatch for peak {p}")
+
+        HFIRCalculateGoniometer(ConvertHFIRSCDtoMDETest_peaks3)
+        peak0 = ConvertHFIRSCDtoMDETest_peaks3.getPeak(0)
+        self.assertDelta(peak0.getWavelength(), 1.488, 1e-8)
+        g=peak0.getGoniometerMatrix()
+        self.assertDelta(np.rad2deg(np.arccos(g[0][0])), 77.5, 1e-2)
 
 
 class ConvertHFIRSCDtoMDE_HB3A_Test(systemtesting.MantidSystemTest):
@@ -44,7 +74,8 @@ class ConvertHFIRSCDtoMDE_HB3A_Test(systemtesting.MantidSystemTest):
         SetGoniometer('ConvertHFIRSCDtoMDE_HB3ATest_data',
                       Axis0='omega,0,1,0,-1',
                       Axis1='chi,0,0,1,-1',
-                      Axis2='phi,0,1,0,-1')
+                      Axis2='phi,0,1,0,-1',
+                      Average=False)
 
         ConvertHFIRSCDtoMDETest_Q = ConvertHFIRSCDtoMDE(InputWorkspace='ConvertHFIRSCDtoMDE_HB3ATest_data',
                                                         Wavelength=1.008)
@@ -67,6 +98,15 @@ class ConvertHFIRSCDtoMDE_HB3A_Test(systemtesting.MantidSystemTest):
         self.assertDelta(peak.getWavelength(), 1.008, 1e-7)
         np.testing.assert_allclose(peak.getQSampleFrame(), [-0.417683, 1.792265, 2.238072], rtol=1e-5)
         np.testing.assert_array_equal(peak.getHKL(), [0, 0, 6])
+
+        # new method using multiple goniometers, q_sample should be the same as above method
+        ConvertHFIRSCDtoMDETest_peaks2 = FindPeaksMD(InputWorkspace='ConvertHFIRSCDtoMDETest_Q',
+                                                     PeakDistanceThreshold=0.25,
+                                                     DensityThresholdFactor=20000)
+
+        self.assertEqual(ConvertHFIRSCDtoMDETest_peaks2.getNumberPeaks(), 1)
+        np.testing.assert_allclose(ConvertHFIRSCDtoMDETest_peaks2.getPeak(0).getQSampleFrame(),
+                                   [-0.417683, 1.792265, 2.238072], rtol=1e-3)
 
     def validate(self):
         results = 'ConvertHFIRSCDtoMDETest_Q'

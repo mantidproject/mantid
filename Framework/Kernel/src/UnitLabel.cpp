@@ -15,8 +15,7 @@ namespace Kernel {
  * @param unicode A label that can contain unicode characters
  * @param latex A text label containg the ascii characters with latex formatting
  */
-UnitLabel::UnitLabel(const AsciiString &ascii, const Utf8String &unicode,
-                     const AsciiString &latex)
+UnitLabel::UnitLabel(const AsciiString &ascii, const Utf8String &unicode, const AsciiString &latex)
     : m_ascii(ascii), m_utf8(unicode), m_latex(latex) {}
 
 /**
@@ -31,8 +30,7 @@ UnitLabel::UnitLabel(const UnitLabel::AsciiString &ascii)
  * as a C-style string
  * @param ascii A plain-text label
  */
-UnitLabel::UnitLabel(const char *ascii)
-    : m_ascii(ascii), m_utf8(m_ascii.begin(), m_ascii.end()), m_latex(ascii) {}
+UnitLabel::UnitLabel(const char *ascii) : m_ascii(ascii), m_utf8(m_ascii.begin(), m_ascii.end()), m_latex(ascii) {}
 
 /**
  * Test if two objects are considered equal
@@ -49,9 +47,7 @@ bool UnitLabel::operator==(const UnitLabel &rhs) const {
  * @param rhs A string to compare
  * @return True if they are conisdered equal, false otherwise
  */
-bool UnitLabel::operator==(const std::string &rhs) const {
-  return (this->ascii() == rhs);
-}
+bool UnitLabel::operator==(const std::string &rhs) const { return (this->ascii() == rhs); }
 
 /**
  * Test if this object is considered equal to another c-style string.
@@ -59,9 +55,7 @@ bool UnitLabel::operator==(const std::string &rhs) const {
  * @param rhs A string to compare
  * @return True if they are conisdered equal, false otherwise
  */
-bool UnitLabel::operator==(const char *rhs) const {
-  return (strcmp(ascii().c_str(), rhs) == 0);
-}
+bool UnitLabel::operator==(const char *rhs) const { return (strcmp(ascii().c_str(), rhs) == 0); }
 
 /**
  * Test if this object is considered equal to another std::wstring.
@@ -69,18 +63,14 @@ bool UnitLabel::operator==(const char *rhs) const {
  * @param rhs A string to compare
  * @return True if they are conisdered equal, false otherwise
  */
-bool UnitLabel::operator==(const std::wstring &rhs) const {
-  return (this->utf8() == rhs);
-}
+bool UnitLabel::operator==(const std::wstring &rhs) const { return (this->utf8() == rhs); }
 
 /**
  * Test if two objects are not considered equal
  * @param rhs A second label object
  * @return True if they are conisdered equal, false otherwise
  */
-bool UnitLabel::operator!=(const UnitLabel &rhs) const {
-  return !(*this == rhs);
-}
+bool UnitLabel::operator!=(const UnitLabel &rhs) const { return !(*this == rhs); }
 
 /**
  * Test if this object is not considered equal to another std::string.
@@ -88,9 +78,7 @@ bool UnitLabel::operator!=(const UnitLabel &rhs) const {
  * @param rhs A string to compare
  * @return True if they are conisdered equal, false otherwise
  */
-bool UnitLabel::operator!=(const std::string &rhs) const {
-  return !(*this == rhs);
-}
+bool UnitLabel::operator!=(const std::string &rhs) const { return !(*this == rhs); }
 
 /**
  * Test if this object is not considered equal to another c-style string
@@ -106,9 +94,7 @@ bool UnitLabel::operator!=(const char *rhs) const { return !(*this == rhs); }
  * @param rhs A string to compare
  * @return True if they are conisdered equal, false otherwise
  */
-bool UnitLabel::operator!=(const std::wstring &rhs) const {
-  return !(*this == rhs);
-}
+bool UnitLabel::operator!=(const std::wstring &rhs) const { return !(*this == rhs); }
 
 /**
  * @return A std::string containing the plain-text label

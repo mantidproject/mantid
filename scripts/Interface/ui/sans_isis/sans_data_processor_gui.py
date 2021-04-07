@@ -154,12 +154,13 @@ class SANSDataProcessorGui(QMainWindow,
             """
             pass
 
-    def __init__(self):
+    def __init__(self, parent=None, window_flags=None):
         """
         Initialise the interface
         """
-        super(QMainWindow, self).__init__()
-
+        super(QMainWindow, self).__init__(parent)
+        if window_flags:
+            self.setWindowFlags(window_flags)
         self.setupUi(self)
 
         # Listeners allow us to to notify all presenters
@@ -959,9 +960,8 @@ class SANSDataProcessorGui(QMainWindow,
         return expected_type(value_as_string) if value_as_string else None
 
     def update_simple_line_edit_field(self, line_edit, value):
-        if value:
-            gui_element = getattr(self, line_edit)
-            gui_element.setText(str(value))
+        gui_element = getattr(self, line_edit)
+        gui_element.setText(str(value))
 
     def is_multi_period_view(self):
         return self.multi_period_check_box.isChecked()

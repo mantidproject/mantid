@@ -7,8 +7,11 @@
 #  This file is part of the mantid workbench.
 
 # 3rdparty imports
+from qtpy.QtCore import Qt
+
 import mantid.api
 import mantid.kernel
+import sip
 
 # local imports
 from .lineplots import PixelLinePlot, RectangleSelectionLinePlot
@@ -24,18 +27,18 @@ from ..observers.observing_presenter import ObservingPresenter
 class SliceViewer(ObservingPresenter):
     TEMPORARY_STATUS_TIMEOUT = 2000
 
-    def __init__(self, ws, parent=None, model=None, view=None, conf=None):
+    def __init__(self, ws, parent=None, window_flags=Qt.Window, model=None, view=None, conf=None):
         """
         Create a presenter for controlling the slice display for a workspace
         :param ws: Workspace containing data to display and slice
         :param parent: An optional parent widget
+        :param window_flags: An optional set of window flags
         :param model: A model to define slicing operations. If None uses SliceViewerModel
         :param view: A view to display the operations. If None uses SliceViewerView
         """
         self._logger = mantid.kernel.Logger("SliceViewer")
         self._peaks_presenter = None
         self.model = model if model else SliceViewerModel(ws)
-        self.parent = parent
         self.conf = conf
 
         # Acts as a 'time capsule' to the properties of the model at this
@@ -48,7 +51,7 @@ class SliceViewer(ObservingPresenter):
 
         self.view = view if view else SliceViewerView(self, self.model.get_dimensions_info(),
                                                       self.model.can_normalize_workspace(), parent,
-                                                      conf)
+                                                      window_flags, conf)
         self.view.setWindowTitle(self.model.get_title())
         self.view.data_view.create_axes_orthogonal(
             redraw_on_zoom=not self.model.can_support_dynamic_rebinning())
@@ -61,14 +64,15 @@ class SliceViewer(ObservingPresenter):
         if not self.model.can_support_nonorthogonal_axes():
             self.view.data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
 
-        self._update_view()
+        self.refresh_view()
 
         # Start the GUI with zoom selected.
         self.view.data_view.activate_tool(ToolItemText.ZOOM)
 
-        self.ads_observer = SliceViewerADSObserver(
-            self.replace_workspace, self.rename_workspace, self.ADS_cleared, self.delete_workspace
-        )
+        self.ads_observer = SliceViewerADSObserver(self.replace_workspace, self.rename_workspace,
+                                                   self.ADS_cleared, self.delete_workspace)
+
+        self.view.destroyed.connect(self._on_view_destroyed)
 
     def new_plot_MDH(self):
         """
@@ -96,8 +100,9 @@ class SliceViewer(ObservingPresenter):
             # model frame
             if data_view.nonorthogonal_mode:
                 inv_tr = data_view.nonortho_transform.inv_tr
-                xmin_p, ymin_p = inv_tr(xlim[0], ylim[0])
-                xmax_p, ymax_p = inv_tr(xlim[1], ylim[1])
+                # viewing axis y not aligned with plot axis
+                xmin_p, ymax_p = inv_tr(xlim[0], ylim[1])
+                xmax_p, ymin_p = inv_tr(xlim[1], ylim[0])
                 xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
             if data_view.dimensions.transpose:
                 limits = ylim, xlim
@@ -120,7 +125,8 @@ class SliceViewer(ObservingPresenter):
         """
         self.view.data_view.update_plot_data(
             self.model.get_data(self.get_slicepoint(),
-                                transpose=self.view.data_view.dimensions.transpose))
+                                transpose=self.view.data_view.dimensions.transpose),
+            self.view.data_view.dimensions.transpose)
 
     def update_plot_data_MDE(self):
         """
@@ -131,7 +137,8 @@ class SliceViewer(ObservingPresenter):
             self.model.get_data(self.get_slicepoint(),
                                 bin_params=data_view.dimensions.get_bin_params(),
                                 limits=data_view.get_axes_limits(),
-                                transpose=self.view.data_view.dimensions.transpose))
+                                transpose=self.view.data_view.dimensions.transpose),
+            self.view.data_view.dimensions.transpose)
 
     def update_plot_data_matrix(self):
         # should never be called, since this workspace type is only 2D the plot dimensions never change
@@ -317,6 +324,7 @@ class SliceViewer(ObservingPresenter):
             data_view.disable_tool_button(ToolItemText.LINEPLOTS)
             data_view.create_axes_nonorthogonal(
                 self.model.create_nonorthogonal_transform(self.get_sliceinfo()))
+            self.show_all_data_requested()
         else:
             data_view.create_axes_orthogonal()
             data_view.enable_tool_button(ToolItemText.LINEPLOTS)
@@ -367,12 +375,25 @@ class SliceViewer(ObservingPresenter):
             # New model is OK, proceed with updating Slice Viewer
             self.model = candidate_model
             self.new_plot, self.update_plot_data = self._decide_plot_update_methods()
-            self._update_view()
+            self.view.delayed_refresh()
         except ValueError as err:
             self._close_view_with_message(
-                f"Closing Sliceviewer as the underlying workspace was changed: {str(err)}"
-            )
+                f"Closing Sliceviewer as the underlying workspace was changed: {str(err)}")
             return
+
+    def refresh_view(self):
+        """
+        Updates the view to enable/disable certain options depending on the model.
+        """
+        # The view currently introduces a delay before calling this function, which
+        # causes a race condition where it's possible the view could be closed in
+        # the meantime, so check it still exists. See github issue #30406 for detail.
+        if sip.isdeleted(self.view):
+            return
+        # we don't want to use model.get_ws for the image info widget as this needs
+        # extra arguments depending on workspace type.
+        self.view.data_view.image_info_widget.setWorkspace(self.model._get_ws())
+        self.new_plot()
 
     def rename_workspace(self, old_name, new_name):
         if str(self.model._get_ws()) == old_name:
@@ -387,6 +408,8 @@ class SliceViewer(ObservingPresenter):
 
     def clear_observer(self):
         self.ads_observer = None
+        if self._peaks_presenter is not None:
+            self._peaks_presenter.clear_observer()
 
     # private api
     def _create_peaks_presenter_if_necessary(self):
@@ -435,15 +458,9 @@ class SliceViewer(ObservingPresenter):
         else:
             return self.new_plot_matrix, self.update_plot_data_matrix
 
-    def _update_view(self):
-        """
-        Updates the view to enable/disable certain options depending on the model.
-        """
-        # we don't want to use model.get_ws for the image info widget as this needs
-        # extra arguments depending on workspace type.
-        self.view.data_view.image_info_widget.setWorkspace(self.model._get_ws())
-        self.new_plot()
-
     def _close_view_with_message(self, message: str):
         self.view.emit_close()  # inherited from ObservingView
         self._logger.warning(message)
+
+    def _on_view_destroyed(self):
+        self.clear_observer()

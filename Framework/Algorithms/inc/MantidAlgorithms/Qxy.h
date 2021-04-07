@@ -54,8 +54,7 @@ private:
   void exec() override;
 
   std::vector<double> logBinning(double min, double max, int num);
-  API::MatrixWorkspace_sptr
-  setUpOutputWorkspace(const API::MatrixWorkspace_const_sptr &inputWorkspace);
+  API::MatrixWorkspace_sptr setUpOutputWorkspace(const API::MatrixWorkspace_const_sptr &inputWorkspace);
   double getQminFromWs(const API::MatrixWorkspace &inputWorkspace);
 };
 

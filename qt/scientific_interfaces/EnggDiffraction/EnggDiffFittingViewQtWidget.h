@@ -35,29 +35,24 @@ the only one that will be implemented in a foreseeable horizon. The
 interface of this class is given by IEnggDiffFittingView so that it
 fits in the MVP (Model-View-Presenter) design of this GUI.
 */
-class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffFittingViewQtWidget
-    : public QWidget,
-      public IEnggDiffFittingView {
+class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffFittingViewQtWidget : public QWidget, public IEnggDiffFittingView {
   Q_OBJECT
 
 public:
-  EnggDiffFittingViewQtWidget(
-      QWidget *parent, std::shared_ptr<IEnggDiffractionUserMsg> mainMsg,
-      std::shared_ptr<IEnggDiffractionSettings> mainSettings,
-      std::shared_ptr<IEnggDiffractionCalibration> mainCalib,
-      std::shared_ptr<IEnggDiffractionParam> mainParam,
-      std::shared_ptr<IEnggDiffractionPythonRunner> mainPyhonRunner,
-      std::shared_ptr<IEnggDiffractionParam> fileSettings);
+  EnggDiffFittingViewQtWidget(QWidget *parent, std::shared_ptr<IEnggDiffractionUserMsg> mainMsg,
+                              std::shared_ptr<IEnggDiffractionSettings> mainSettings,
+                              std::shared_ptr<IEnggDiffractionCalibration> mainCalib,
+                              std::shared_ptr<IEnggDiffractionParam> mainParam,
+                              std::shared_ptr<IEnggDiffractionPythonRunner> mainPyhonRunner,
+                              std::shared_ptr<IEnggDiffractionParam> fileSettings);
   ~EnggDiffFittingViewQtWidget() override;
 
   /// From the IEnggDiffractionUserMsg interface
   void showStatus(const std::string &sts) override;
 
-  void userWarning(const std::string &warn,
-                   const std::string &description) override;
+  void userWarning(const std::string &warn, const std::string &description) override;
 
-  void userError(const std::string &err,
-                 const std::string &description) override;
+  void userError(const std::string &err, const std::string &description) override;
   void enableCalibrateFocusFitUserActions(bool enable) override;
 
   /// From the IEnggDiffractionSettings interface
@@ -82,8 +77,7 @@ public:
 
   int getFittingListWidgetCurrentRow() const override;
 
-  boost::optional<std::string>
-  getFittingListWidgetCurrentValue() const override;
+  boost::optional<std::string> getFittingListWidgetCurrentValue() const override;
 
   bool listWidgetHasSelectedRow() const override;
 
@@ -97,8 +91,7 @@ public:
 
   void resetCanvas() override;
 
-  void setDataVector(std::vector<std::shared_ptr<QwtData>> &data, bool focused,
-                     bool plotSinglePeaks,
+  void setDataVector(std::vector<std::shared_ptr<QwtData>> &data, bool focused, bool plotSinglePeaks,
                      const std::string &xAxisLabel) override;
 
   void addRunNoItem(std::string runNo) override;
@@ -119,8 +112,8 @@ public:
 
   std::string getSaveFile(const std::string &prevPath) override;
 
-  void dataCurvesFactory(std::vector<std::shared_ptr<QwtData>> &data,
-                         std::vector<QwtPlotCurve *> &dataVector, bool focused);
+  void dataCurvesFactory(std::vector<std::shared_ptr<QwtData>> &data, std::vector<QwtPlotCurve *> &dataVector,
+                         bool focused);
 
   void setPeakPickerEnabled(bool enabled);
 
@@ -132,9 +125,7 @@ public:
 
   std::string getCurrentInstrument() const override { return m_currentInst; }
 
-  void setCurrentInstrument(const std::string &newInstrument) override {
-    m_currentInst = newInstrument;
-  }
+  void setCurrentInstrument(const std::string &newInstrument) override { m_currentInst = newInstrument; }
 
   bool plotFittedPeaksEnabled() const override;
 
@@ -172,8 +163,7 @@ private:
   void saveSettings() const override;
 
   /// converts QList to a vector
-  std::vector<std::string> qListToVector(QStringList list,
-                                         bool validator) const;
+  std::vector<std::string> qListToVector(QStringList list, bool validator) const;
 
   // path/name for the persistent settings group of this interface
   static const std::string g_settingsGroup;

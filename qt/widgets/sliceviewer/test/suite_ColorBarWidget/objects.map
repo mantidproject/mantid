@@ -1,6 +1,0 @@
-:ColorBarWidget_ColorBarWidget	{name='ColorBarWidgetClass' type='ColorBarWidget' visible='1' window=':_QMainWindow' windowTitle='ColorBarWidget'}
-:Log_QCheckBox	{name='checkLog' text='Log' type='QCheckBox' visible='1' window=':_QMainWindow'}
-:_QMainWindow	{type='QMainWindow' unnamed='1' visible='1'}
-:qt_spinbox_lineedit_QLineEdit	{name='qt_spinbox_lineedit' type='QLineEdit' visible='1' window=':_QMainWindow'}
-:valMax_QScienceSpinBox	{name='valMax' type='QScienceSpinBox' visible='1' window=':_QMainWindow'}
-:valMin_QScienceSpinBox	{name='valMin' type='QScienceSpinBox' visible='1' window=':_QMainWindow'}

@@ -16,9 +16,7 @@ using namespace Mantid::PythonInterface::Converters;
 
 class PySequenceToVectorTest : public CxxTest::TestSuite {
 public:
-  static PySequenceToVectorTest *createSuite() {
-    return new PySequenceToVectorTest();
-  }
+  static PySequenceToVectorTest *createSuite() { return new PySequenceToVectorTest(); }
   static void destroySuite(PySequenceToVectorTest *suite) { delete suite; }
 
 private:
@@ -46,14 +44,12 @@ public:
     }
   }
 
-  void
-  test_that_trying_to_convert_a_list_of_incompatible_types_throws_error_already_set() {
+  void test_that_trying_to_convert_a_list_of_incompatible_types_throws_error_already_set() {
     // Double->int is not generally safe so should not be allowed
     boost::python::list testlist = createHomogeneousPythonList();
     using PySequenceToVectorInt = PySequenceToVector<int>;
     std::vector<int> cvector;
-    TS_ASSERT_THROWS(cvector = PySequenceToVectorInt(testlist)(),
-                     const boost::python::error_already_set &);
+    TS_ASSERT_THROWS(cvector = PySequenceToVectorInt(testlist)(), const boost::python::error_already_set &);
   }
 
   /// Creates a python list where all of the types are the same

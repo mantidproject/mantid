@@ -138,8 +138,6 @@ class SANSILLReductionTest(unittest.TestCase):
             self.assertTrue(ws.getRun().hasProperty('qmin'))
             self.assertTrue(ws.getRun().hasProperty('qmax'))
             self.assertTrue(ws.getRun().hasProperty('l2'))
-            self.assertTrue(ws.getRun().hasProperty('pixel_height'))
-            self.assertTrue(ws.getRun().hasProperty('pixel_width'))
             self.assertTrue(ws.getRun().hasProperty('collimation.actual_position'))
 
 if __name__ == '__main__':

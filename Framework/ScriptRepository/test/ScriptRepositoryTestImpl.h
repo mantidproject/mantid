@@ -24,38 +24,37 @@ using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::ConfigServiceImpl;
 using Mantid::Types::Core::DateAndTime;
 
-constexpr auto REPOSITORYJSON =
-    "{\n"
-    "\"TofConv\":\n"
-    "{\n"
-    " \"pub_date\": \"2012-Feb-13 10:00:50\",\n"
-    " \"description\": \"the description\",\n"
-    " \"directory\": true \n"
-    "},\n"
-    "\"TofConv/README.txt\":\n"
-    "{\n"
-    " \"pub_date\": \"2012-Feb-13 10:02:50\",\n"
-    " \"description\": \"tofconv description\",\n"
-    " \"directory\": false \n"
-    "},\n"
-    "\"TofConv/TofConverter.py\":\n"
-    "{\n"
-    "  \"pub_date\": \"2012-Feb-10 10:00:50\",\n"
-    "  \"description\": \"tofconverter description\",\n"
-    "  \"directory\": false	\n"
-    "},\n"
-    "\"reflectometry\":\n"
-    "{\n"
-    "	\"pub_date\": \"2012-Jan-13 10:00:50\",\n"
-    "  \"directory\": true	\n"
-    "},\n"
-    "\"reflectometry/Quick.py\":\n"
-    "{\n"
-    "  \"pub_date\": \"2012-Feb-13 10:00:00\",\n"
-    "  \"description\": \"quick description\",\n"
-    "\"directory\": false	\n"
-    "}\n"
-    "}\n";
+constexpr auto REPOSITORYJSON = "{\n"
+                                "\"TofConv\":\n"
+                                "{\n"
+                                " \"pub_date\": \"2012-Feb-13 10:00:50\",\n"
+                                " \"description\": \"the description\",\n"
+                                " \"directory\": true \n"
+                                "},\n"
+                                "\"TofConv/README.txt\":\n"
+                                "{\n"
+                                " \"pub_date\": \"2012-Feb-13 10:02:50\",\n"
+                                " \"description\": \"tofconv description\",\n"
+                                " \"directory\": false \n"
+                                "},\n"
+                                "\"TofConv/TofConverter.py\":\n"
+                                "{\n"
+                                "  \"pub_date\": \"2012-Feb-10 10:00:50\",\n"
+                                "  \"description\": \"tofconverter description\",\n"
+                                "  \"directory\": false	\n"
+                                "},\n"
+                                "\"reflectometry\":\n"
+                                "{\n"
+                                "	\"pub_date\": \"2012-Jan-13 10:00:50\",\n"
+                                "  \"directory\": true	\n"
+                                "},\n"
+                                "\"reflectometry/Quick.py\":\n"
+                                "{\n"
+                                "  \"pub_date\": \"2012-Feb-13 10:00:00\",\n"
+                                "  \"description\": \"quick description\",\n"
+                                "\"directory\": false	\n"
+                                "}\n"
+                                "}\n";
 
 constexpr auto TOFCONV_README = "This is the content of TOFCONV_README";
 constexpr auto TOFCONV_CONVERTER = "print 'hello world'";
@@ -83,9 +82,7 @@ to simulate changes and new values for the downloading.
 
 class ScriptRepositoryImplLocal : public ScriptRepositoryImpl {
 public:
-  ScriptRepositoryImplLocal(const std::string &a = "",
-                            const std::string &b = "")
-      : ScriptRepositoryImpl(a, b) {
+  ScriptRepositoryImplLocal(const std::string &a = "", const std::string &b = "") : ScriptRepositoryImpl(a, b) {
     repository_json_content = REPOSITORYJSON;
     tofconv_readme_content = TOFCONV_README;
     tofconv_tofconverter_content = TOFCONV_CONVERTER;
@@ -114,8 +111,7 @@ public:
 
       It also make it public, in order to be able to test this method itself.
    */
-  void doDownloadFile(const std::string &url_file,
-                      const std::string &local_file_path) override {
+  void doDownloadFile(const std::string &url_file, const std::string &local_file_path) override {
 
     // answer when the download it to 'forget' the downloaded file
     // request to ping the site
@@ -155,8 +151,7 @@ public:
     }
 
     std::stringstream ss;
-    ss << "Failed to download this file : " << url_file << " to "
-       << local_file_path << std::ends;
+    ss << "Failed to download this file : " << url_file << " to " << local_file_path << std::ends;
     throw ScriptRepoException(ss.str());
   };
 
@@ -188,10 +183,8 @@ public:
       It also make it public, in order to be able to test this method itself.
    */
   bool fail;
-  std::string doDeleteRemoteFile(const std::string & /*url*/,
-                                 const std::string & /*file_path*/,
-                                 const std::string & /*author*/,
-                                 const std::string & /*email*/,
+  std::string doDeleteRemoteFile(const std::string & /*url*/, const std::string & /*file_path*/,
+                                 const std::string & /*author*/, const std::string & /*email*/,
                                  const std::string & /*comment*/) override {
     if (fail)
       return "{\n  \"message\": \"Invalid author: \"\n}";
@@ -213,9 +206,7 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite {
   std::string backup_local_repository_path;
 
 public:
-  static ScriptRepositoryTestImpl *createSuite() {
-    return new ScriptRepositoryTestImpl();
-  }
+  static ScriptRepositoryTestImpl *createSuite() { return new ScriptRepositoryTestImpl(); }
   static void destroySuite(ScriptRepositoryTestImpl *suite) { delete suite; }
 
   // ensure that all tests will be perfomed in a fresh repository
@@ -223,8 +214,7 @@ public:
     ConfigServiceImpl &config = ConfigService::Instance();
     backup_local_repository_path = config.getString("ScriptLocalRepository");
     local_rep = std::string(Poco::Path::current()).append("mytemprepository/");
-    TS_ASSERT_THROWS_NOTHING(repo = std::make_unique<ScriptRepositoryImplLocal>(
-                                 local_rep, WEBSERVER_URL));
+    TS_ASSERT_THROWS_NOTHING(repo = std::make_unique<ScriptRepositoryImplLocal>(local_rep, WEBSERVER_URL));
   }
 
   // ensure that the local files are free from the test created.
@@ -254,20 +244,17 @@ public:
 
     {
       // ensure it can download repository.json
-      std::string local_j_file =
-          std::string(local_rep).append("/.repository.json");
-      TS_ASSERT_THROWS_NOTHING(repo->doDownloadFile(
-          std::string(WEBSERVER_URL).append("/repository.json"), local_j_file));
+      std::string local_j_file = std::string(local_rep).append("/.repository.json");
+      TS_ASSERT_THROWS_NOTHING(
+          repo->doDownloadFile(std::string(WEBSERVER_URL).append("/repository.json"), local_j_file));
     }
     {
       // ensure it can download TofConv/README.txt
-      std::string local_j_file =
-          std::string(local_rep).append("/TofConv/README.txt");
+      std::string local_j_file = std::string(local_rep).append("/TofConv/README.txt");
       Poco::File dir(std::string(local_rep).append("/TofConv"));
       dir.createDirectories();
-      TS_ASSERT_THROWS_NOTHING(repo->doDownloadFile(
-          std::string(WEBSERVER_URL).append("/TofConv/README.txt"),
-          local_j_file));
+      TS_ASSERT_THROWS_NOTHING(
+          repo->doDownloadFile(std::string(WEBSERVER_URL).append("/TofConv/README.txt"), local_j_file));
       Poco::File f(local_j_file);
       TS_ASSERT(f.exists());
     }
@@ -289,8 +276,7 @@ public:
     // invalid
     TSM_ASSERT("Why valid?", !repo->isValid());
     // the installation should throw nothing
-    TSM_ASSERT_THROWS_NOTHING("Installation should not throw",
-                              repo->install(local_rep));
+    TSM_ASSERT_THROWS_NOTHING("Installation should not throw", repo->install(local_rep));
     // the repository must be valid
     TSM_ASSERT("Now should be valid!", repo->isValid());
     // checking that repository.json and local.json exists
@@ -305,9 +291,7 @@ public:
     // should be valid,
     // by geting the information from the ScriptRepository settings.
     auto other = std::make_unique<ScriptRepositoryImplLocal>();
-    TSM_ASSERT(
-        "All the others should recognize that this is a valid repository",
-        other->isValid());
+    TSM_ASSERT("All the others should recognize that this is a valid repository", other->isValid());
   }
 
   /**
@@ -341,8 +325,7 @@ public:
      List Files must list all the files at central repository
    */
   void test_listFiles_must_list_all_files_at_central_repository() {
-    const char *test_entries[] = {"TofConv", "TofConv/README.txt",
-                                  "TofConv/TofConverter.py", "reflectometry",
+    const char *test_entries[] = {"TofConv", "TofConv/README.txt", "TofConv/TofConverter.py", "reflectometry",
                                   "reflectometry/Quick.py"};
     std::vector<std::string> list_files;
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
@@ -384,11 +367,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());
     ScriptInfo information = repo->info("TofConv/TofConverter.py");
-    TS_ASSERT(repo->description("TofConv/TofConverter.py") ==
-              "tofconverter description");
+    TS_ASSERT(repo->description("TofConv/TofConverter.py") == "tofconverter description");
     TS_ASSERT(information.author.empty());
-    TSM_ASSERT("check time",
-               information.pub_date == DateAndTime("2012-02-10 10:00:50"));
+    TSM_ASSERT("check time", information.pub_date == DateAndTime("2012-02-10 10:00:50"));
     TS_ASSERT(!information.auto_update);
   }
 
@@ -435,8 +416,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());
     // there is no new version, so there is no point to download it again.
     // it throws that the file has not changed.
-    TS_ASSERT_THROWS(repo->download("TofConv/README.txt"),
-                     const ScriptRepoException &);
+    TS_ASSERT_THROWS(repo->download("TofConv/README.txt"), const ScriptRepoException &);
   }
 
   /*************************************
@@ -451,15 +431,14 @@ public:
     // simulate remove of cleaning up the repository, and having just a
     // README.md file
     //
-    repo->repository_json_content =
-        "{\n"
-        "\"README.md\":\n"
-        "{\n"
-        " \"pub_date\": \"2012-02-20 10:00:50\",\n"
-        " \"description\": \"Script Repository Script\",\n"
-        " \"directory\": false \n"
-        "}\n"
-        "}\n";
+    repo->repository_json_content = "{\n"
+                                    "\"README.md\":\n"
+                                    "{\n"
+                                    " \"pub_date\": \"2012-02-20 10:00:50\",\n"
+                                    " \"description\": \"Script Repository Script\",\n"
+                                    " \"directory\": false \n"
+                                    "}\n"
+                                    "}\n";
 
     TS_ASSERT_THROWS_NOTHING(repo->check4Update());
     TS_ASSERT_THROWS_NOTHING(list_of_files = repo->listFiles());
@@ -499,8 +478,7 @@ public:
     std::string change_to_ = "2012-Mar-13 10:02:50";
 
     // simulate new version of the file
-    boost::replace_all(repo->repository_json_content, original_time,
-                       change_to_);
+    boost::replace_all(repo->repository_json_content, original_time, change_to_);
 
     // execute a check4updte
     TS_ASSERT_THROWS_NOTHING(list_of_files = repo->check4Update());
@@ -527,8 +505,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());
 
     // after downloading the file is BOTH_UNCHANGED
-    TS_ASSERT(repo->fileStatus(file_name_readme) ==
-              Mantid::API::BOTH_UNCHANGED);
+    TS_ASSERT(repo->fileStatus(file_name_readme) == Mantid::API::BOTH_UNCHANGED);
     TS_ASSERT(repo->fileStatus(file_name_conv) == Mantid::API::BOTH_UNCHANGED);
 
     TS_ASSERT(repo->setAutoUpdate(file_name_readme, true) == 1);
@@ -578,14 +555,12 @@ public:
     {
 
       {
-        std::string path_to_readme =
-            std::string(local_rep).append(file_name_readme);
+        std::string path_to_readme = std::string(local_rep).append(file_name_readme);
         Poco::File f(path_to_readme);
         f.remove();
       }
       {
-        std::string path_to_conv =
-            std::string(local_rep).append(file_name_conv);
+        std::string path_to_conv = std::string(local_rep).append(file_name_conv);
         Poco::File f(path_to_conv);
         f.remove();
       }
@@ -631,8 +606,7 @@ public:
     std::string change_to_ = "2012-Mar-13 10:02:50";
 
     // simulate new version of the file
-    boost::replace_all(repo->repository_json_content, original_time,
-                       change_to_);
+    boost::replace_all(repo->repository_json_content, original_time, change_to_);
 
     TS_ASSERT_THROWS_NOTHING(repo->check4Update());
 
@@ -681,8 +655,7 @@ public:
     TS_ASSERT(repo->fileStatus(dir_name) == Mantid::API::LOCAL_CHANGED);
 
     // simulate new version of the file
-    boost::replace_all(repo->repository_json_content, original_time,
-                       change_to_);
+    boost::replace_all(repo->repository_json_content, original_time, change_to_);
 
     TS_ASSERT_THROWS_NOTHING(repo->check4Update());
 
@@ -785,8 +758,7 @@ public:
     std::string change_to_ = "2012-Mar-13 10:02:50";
 
     // simulate new version of the file
-    boost::replace_all(repo->repository_json_content, original_time,
-                       change_to_);
+    boost::replace_all(repo->repository_json_content, original_time, change_to_);
 
     TS_ASSERT_THROWS_NOTHING(repo->check4Update());
 
@@ -813,15 +785,13 @@ public:
 
   void test_download_add_folder_to_python_scripts() {
     ConfigServiceImpl &config = ConfigService::Instance();
-    std::string backup_python_directories =
-        config.getString("pythonscripts.directories");
+    std::string backup_python_directories = config.getString("pythonscripts.directories");
 
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());
     TS_ASSERT_THROWS_NOTHING(repo->download("TofConv/TofConverter.py"));
 
-    std::string curr_python_direc =
-        config.getString("pythonscripts.directories");
+    std::string curr_python_direc = config.getString("pythonscripts.directories");
     std::string direc = std::string(local_rep).append("TofConv/");
     // make all the back slashs direct slashs, for comparing the path
     // required for windows.
@@ -866,8 +836,7 @@ public:
   }
 
   void test_construct_without_parameters() {
-    TS_ASSERT_THROWS_NOTHING(repo =
-                                 std::make_unique<ScriptRepositoryImplLocal>());
+    TS_ASSERT_THROWS_NOTHING(repo = std::make_unique<ScriptRepositoryImplLocal>());
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());
   }
@@ -887,8 +856,7 @@ public:
     TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_UNCHANGED);
 
     // now, lets delete this file from the central repository
-    TS_ASSERT_THROWS_NOTHING(
-        repo->remove(file_name, "please remove it", "noauthor", "noemail"));
+    TS_ASSERT_THROWS_NOTHING(repo->remove(file_name, "please remove it", "noauthor", "noemail"));
 
     // you should not find the file, so fileStatus should throw exception entry
     // not inside repository
@@ -909,8 +877,7 @@ public:
      repository
       fails.
    */
-  void
-  test_delete_remove_valid_file_from_central_repository_simulate_server_rejection() {
+  void test_delete_remove_valid_file_from_central_repository_simulate_server_rejection() {
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());
     std::string file_name = "TofConv/TofConverter.py";
@@ -922,9 +889,7 @@ public:
     repo->fail = true;
     // now, lets delete this file from the repository
     // it must throw exception describing the reason for failuring.
-    TS_ASSERT_THROWS(
-        repo->remove(file_name, "please remove it", "noauthor", "noemail"),
-        const ScriptRepoException &);
+    TS_ASSERT_THROWS(repo->remove(file_name, "please remove it", "noauthor", "noemail"), const ScriptRepoException &);
 
     // you should find the file internally and externally
     TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_UNCHANGED);
@@ -948,9 +913,7 @@ public:
 
     // attempt to remove file that is not local (no download was done)
     // it must throw exception, to inform that it is not allowed to remove it.
-    TS_ASSERT_THROWS(
-        repo->remove(file_name, "please remove it", "noauthor", "noemail"),
-        const ScriptRepoException &);
+    TS_ASSERT_THROWS(repo->remove(file_name, "please remove it", "noauthor", "noemail"), const ScriptRepoException &);
     // the state is still remote-only
     TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::REMOTE_ONLY);
   }

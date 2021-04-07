@@ -93,15 +93,16 @@ class PhaseTablePresenterTest(unittest.TestCase):
         workspace_wrapper.show.assert_called_once_with()
 
     @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.run_CalMuonDetectorPhases')
-    def test_handle_calculate_phase_table_clicked_behaves_correctly_for_succesful_calculation(self, run_algorith_mock):
+    def test_handle_calculate_phase_table_clicked_behaves_correctly_for_succesful_calculation(self, run_algorithm_mock):
         detector_table_mock = mock.MagicMock()
         self.view.set_input_combo_box(['MUSR22222_raw_data_period_1'])
         self.context.getGroupedWorkspaceNames = mock.MagicMock(return_value=['MUSR22222_raw_data_period_1'])
         self.context.phase_context.options_dict['input_workspace'] = 'MUSR22222_raw_data_period_1'
         self.presenter.update_view_from_model()
-        run_algorith_mock.return_value = (detector_table_mock, mock.MagicMock())
+        run_algorithm_mock.return_value = (detector_table_mock, mock.MagicMock())
         self.presenter.add_phase_table_to_ADS = mock.MagicMock()
 
+        self.presenter.update_current_run_list()
         self.presenter.handle_calulate_phase_table_clicked()
         self.wait_for_thread(self.presenter.calculation_thread)
 
@@ -109,14 +110,16 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.assertTrue(self.view.isEnabled())
 
     @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.run_CalMuonDetectorPhases')
-    def test_handle_calculate_phase_table_clicked_behaves_correctly_for_error_in_calculation(self, run_algorith_mock):
+    def test_handle_calculate_phase_table_clicked_behaves_correctly_for_error_in_calculation(self, run_algorithm_mock):
+        self.context.getGroupedWorkspaceNames = mock.MagicMock(return_value=['MUSR22222_raw_data_period_1'])
         self.context.phase_context.options_dict['input_workspace'] = 'MUSR22222_raw_data_period_1'
         self.presenter.update_view_from_model()
-        run_algorith_mock.side_effect = RuntimeError('CalMuonDetectorPhases has failed')
+        run_algorithm_mock.side_effect = RuntimeError('CalMuonDetectorPhases has failed')
         self.presenter.add_phase_table_to_ADS = mock.MagicMock()
         self.presenter.calculate_base_name_and_group = mock.MagicMock(
             return_value=('MUSR22222_raw_data_period_1', 'MUSR22222 PhaseTable'))
 
+        self.presenter.update_current_run_list()
         self.presenter.handle_calulate_phase_table_clicked()
         self.wait_for_thread(self.presenter.calculation_thread)
 
@@ -160,8 +163,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.presenter.add_fitting_info_to_ADS_if_required('MUSR22222_PhaseTable',
                                                            'MUSR22222_PhaseTable; fit_information')
 
-        workspace_wrapper_mock.assert_called_once_with(
-            'MUSR22222 MA/MUSR22222 Phase Tab MA/MUSR22222_PhaseTable; fit_information')
+        workspace_wrapper_mock.assert_called_once_with('MUSR22222_PhaseTable; fit_information')
         workspace_wrapper_mock.return_value.show.assert_called_once_with()
 
     def test_that_disable_observer_calls_on_view_when_triggered(self):
@@ -231,6 +233,74 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.context.group_pair_context.add_pair_to_selected_pairs.assert_any_call("test_Im_")
         self.presenter.selected_phasequad_changed_notifier.notify_subscribers.assert_any_call({"is_added":True, "name":"test_Re_"})
         self.presenter.selected_phasequad_changed_notifier.notify_subscribers.assert_any_call({"is_added":True, "name":"test_Im_"})
+
+    def test_handle_first_good_data_too_small(self):
+        self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
+        self.context.data_context.instrument = 'MUSR'
+        self.view.first_good_time = 0.0
+        self.context.first_good_data = mock.Mock(return_value=0.102)
+        self.presenter.handle_first_good_data_changed()
+
+        self.view.warning_popup.assert_called_once_with('First Good Data cannot be smaller than 0.102')
+
+    def test_handle_first_good_data_too_big(self):
+        self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
+        self.context.data_context.instrument = 'MUSR'
+        self.view.first_good_time = 40.0
+        self.view.last_good_time = 41.0
+        self.context.last_good_data = mock.Mock(return_value=32.29)
+        self.presenter.handle_first_good_data_changed()
+
+        self.view.warning_popup.assert_called_once_with('First Good Data cannot be greater than 32.29')
+
+    def test_handle_last_good_data_too_small(self):
+        self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
+        self.context.data_context.instrument = 'MUSR'
+        self.view.first_good_time = -1.0
+        self.view.last_good_time = 0.0
+        self.context.first_good_data = mock.Mock(return_value=0.102)
+        self.presenter.handle_last_good_data_changed()
+
+        self.view.warning_popup.assert_called_once_with('Last Good Data cannot be smaller than 0.102')
+
+    def test_handle_last_good_data_too_big(self):
+        self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
+        self.context.data_context.instrument = 'MUSR'
+        self.view.last_good_time = 41.0
+        self.context.last_good_data = mock.Mock(return_value=32.29)
+        self.presenter.handle_last_good_data_changed()
+
+        self.view.warning_popup.assert_called_once_with('Last Good Data cannot be greater than 32.29')
+
+    def test_handle_first_good_greater_than_last_good(self):
+        self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
+        self.context.data_context.instrument = 'MUSR'
+        self.view.first_good_time = 20.0
+        self.view.last_good_time = 10.0
+        self.presenter.handle_first_good_data_changed()
+
+        self.view.warning_popup.assert_called_once_with('First Good Data cannot be greater than Last Good Data')
+
+    def test_handle_last_good_less_than_first_good(self):
+        self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
+        self.context.data_context.instrument = 'MUSR'
+        self.view.first_good_time = 20.0
+        self.view.last_good_time = 10.0
+        self.presenter.handle_last_good_data_changed()
+
+        self.view.warning_popup.assert_called_once_with('First Good Data cannot be greater than Last Good Data')
+
+    def test_handle_first_good_and_last_good_pass_validation(self):
+        self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
+        self.context.data_context.instrument = 'MUSR'
+        self.context.first_good_data = mock.Mock(return_value=0.102)
+        self.context.last_good_data = mock.Mock(return_value=32.29)
+        self.view.first_good_time = 10.0
+        self.view.last_good_time = 20.0
+        self.presenter.handle_first_good_data_changed()
+        self.presenter.handle_last_good_data_changed()
+
+        self.view.warning_popup.assert_not_called()
 
 
 if __name__ == '__main__':

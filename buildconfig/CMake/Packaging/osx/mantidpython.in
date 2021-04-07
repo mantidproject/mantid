@@ -20,7 +20,7 @@ INSTALLDIR=${SCRIPT_PATH%/*}
 PYTHONHOME=@PYTHONHOME@
 if [ -z "${PYTHONHOME}" ]; then
   # assume dev build
-  PYTHONEXE=@PYTHON_EXECUTABLE@    
+  PYTHONEXE=@PYTHON_EXECUTABLE@
 else
   # assume installed bundle
   export PYTHONHOME
@@ -29,7 +29,6 @@ fi
 
 # Define extra libraries for python
 LOCAL_PYTHONPATH=${SCRIPT_PATH}
-LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}@PARAVIEW_PYTHON_PATHS@
 if [ -n "${PYTHONPATH}" ]; then
   LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
 fi
@@ -44,7 +43,7 @@ fi
 # Find private sip module for PyQt4 or qtpy fails to import
 if [ "$QT_API" = "pyqt" ] || [ "$QT_API" = "pyqt4" ]; then
   SIP_SO=`${PYTHONEXE} -c"import PyQt4.sip as sip;print(sip.__file__)"`
-  LOCAL_PYTHONPATH=`dirname ${SIP_SO}`:${LOCAL_PYTHONPATH}  
+  LOCAL_PYTHONPATH=`dirname ${SIP_SO}`:${LOCAL_PYTHONPATH}
 fi
 
 if [ -n "$1" ] && [ "$1" = "--classic" ]; then
@@ -55,5 +54,4 @@ else
   set -- ${PYTHONEXE} -c "${IPYTHON_STARTUP}" $*
 fi
 
-PYTHONPATH=${LOCAL_PYTHONPATH} \
-  @PV_PLUGIN_INSTALL_PATH@ exec "$@"
+PYTHONPATH=${LOCAL_PYTHONPATH} exec "$@"

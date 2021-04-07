@@ -24,5 +24,6 @@ Submodules
    geometry/index
    api/index
    plots/index
+   utils/index
    simpleapi
    fitfunctions

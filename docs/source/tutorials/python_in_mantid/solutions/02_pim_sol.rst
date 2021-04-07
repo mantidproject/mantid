@@ -93,7 +93,7 @@ B - Plotting ILL Data
     axes.legend() #.set_draggable(True)
 
     #plt.show()
-   
+
 
 C - Processing and Plotting SNS Data
 ====================================
@@ -129,7 +129,7 @@ C - Processing and Plotting SNS Data
     axes.set_ylabel('($\AA$)$^{-1}$')
     axes.set_xlim([2.405, 4.5])
     axes.set_yscale('log')
-    axes.legend() #.set_draggable(True) 
+    axes.legend() #.set_draggable(True)
 
     #plt.show()
 

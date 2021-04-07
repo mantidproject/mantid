@@ -28,23 +28,19 @@ using namespace Mantid::Kernel;
  * list (default = true)
  */
 InstrumentSelector::InstrumentSelector(QWidget *parent, bool init)
-    : QComboBox(parent),
-      m_changeObserver(*this, &InstrumentSelector::handleConfigChange),
-      m_techniques(), m_currentFacility(nullptr), m_init(init),
-      m_storeChanges(false), m_updateOnFacilityChange(true),
+    : QComboBox(parent), m_changeObserver(*this, &InstrumentSelector::handleConfigChange), m_techniques(),
+      m_currentFacility(nullptr), m_init(init), m_storeChanges(false), m_updateOnFacilityChange(true),
       m_selectedInstrument() {
   setEditable(false);
 
   if (init) {
     fillWithInstrumentsFromFacility();
 
-    Mantid::Kernel::ConfigServiceImpl &config =
-        Mantid::Kernel::ConfigService::Instance();
+    Mantid::Kernel::ConfigServiceImpl &config = Mantid::Kernel::ConfigService::Instance();
     config.addObserver(m_changeObserver);
   }
 
-  connect(this, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(updateInstrument(const QString &)));
+  connect(this, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(updateInstrument(const QString &)));
 }
 
 /**
@@ -75,9 +71,7 @@ bool InstrumentSelector::getAutoUpdate() { return m_updateOnFacilityChange; }
  * Sets if the list of instruments should be updated folowing a facility change.
  * @param autoUpdate If instruments are to be updated
  */
-void InstrumentSelector::setAutoUpdate(bool autoUpdate) {
-  m_updateOnFacilityChange = autoUpdate;
-}
+void InstrumentSelector::setAutoUpdate(bool autoUpdate) { m_updateOnFacilityChange = autoUpdate; }
 
 /**
  * Set the list of techniques
@@ -95,20 +89,15 @@ void InstrumentSelector::setTechniques(const QStringList &techniques) {
  * Returns the name of the facility from which instruments are listed.
  * @return Facility name
  */
-QString InstrumentSelector::getFacility() {
-  return QString::fromStdString(m_currentFacility->name());
-}
+QString InstrumentSelector::getFacility() { return QString::fromStdString(m_currentFacility->name()); }
 
 /**
  * Sets the facility instruments should be loaded from and refeshes the list.
  * @param facilityName Name of facilty
  */
-void InstrumentSelector::setFacility(const QString &facilityName) {
-  fillWithInstrumentsFromFacility(facilityName);
-}
+void InstrumentSelector::setFacility(const QString &facilityName) { fillWithInstrumentsFromFacility(facilityName); }
 
-void InstrumentSelector::handleConfigChange(
-    Mantid::Kernel::ConfigValChangeNotification_ptr pNf) {
+void InstrumentSelector::handleConfigChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf) {
   if (!m_updateOnFacilityChange)
     return;
 
@@ -117,11 +106,9 @@ void InstrumentSelector::handleConfigChange(
   QString oldV = QString::fromStdString(pNf->preValue());
 
   if (newV != oldV) {
-    if ((prop == "default.facility") &&
-        (newV != QString::fromStdString(m_currentFacility->name()))) {
+    if ((prop == "default.facility") && (newV != QString::fromStdString(m_currentFacility->name()))) {
       fillWithInstrumentsFromFacility(newV);
-    } else if ((prop == "default.instrument") &&
-               (newV != this->currentText())) {
+    } else if ((prop == "default.instrument") && (newV != this->currentText())) {
       this->setCurrentIndex(this->findText(newV));
     }
   }
@@ -153,8 +140,7 @@ void InstrumentSelector::fillWithInstrumentsFromFacility(const QString &name) {
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     // could not find the facility
     // pick the first facility from the valid list
-    m_currentFacility =
-        &(mantidSettings.getFacility(mantidSettings.getFacilityNames()[0]));
+    m_currentFacility = &(mantidSettings.getFacility(mantidSettings.getFacilityNames()[0]));
   }
 
   const auto &instruments = m_currentFacility->instruments();
@@ -164,8 +150,7 @@ void InstrumentSelector::fillWithInstrumentsFromFacility(const QString &name) {
   }
   for (const auto &name_std_str : alphabetizedNames) {
     QString name = QString::fromStdString(name_std_str);
-    std::string prefix =
-        m_currentFacility->instrument(name_std_str).shortName();
+    std::string prefix = m_currentFacility->instrument(name_std_str).shortName();
     QString shortName = QString::fromStdString(prefix);
     this->addItem(name, QVariant(shortName));
   }
@@ -173,8 +158,7 @@ void InstrumentSelector::fillWithInstrumentsFromFacility(const QString &name) {
 
   QString defaultName;
   try {
-    defaultName = QString::fromStdString(
-        ConfigService::Instance().getString("default.instrument"));
+    defaultName = QString::fromStdString(ConfigService::Instance().getString("default.instrument"));
   } catch (Exception::NotFoundError &) {
     defaultName = "";
   }
@@ -195,9 +179,7 @@ void InstrumentSelector::fillWithInstrumentsFromFacility(const QString &name) {
  * Sets whether to update the default instrument on selection change
  * @param storeChanges :: True = store change on selection change
  */
-void InstrumentSelector::updateInstrumentOnSelection(const bool storeChanges) {
-  m_storeChanges = storeChanges;
-}
+void InstrumentSelector::updateInstrumentOnSelection(const bool storeChanges) { m_storeChanges = storeChanges; }
 
 //------------------------------------------------------
 // Private slot member functions
@@ -212,15 +194,13 @@ void InstrumentSelector::updateInstrumentOnSelection(const bool storeChanges) {
 void InstrumentSelector::updateInstrument(const QString &name) {
   // If enabled, set instrument default
   if (!name.isEmpty() && m_storeChanges) {
-    ConfigService::Instance().setString("default.instrument",
-                                        name.toStdString());
+    ConfigService::Instance().setString("default.instrument", name.toStdString());
   }
 
   // If this instrument is different emit the changed signal
   if (name != m_selectedInstrument) {
     m_selectedInstrument = name;
-    g_log.debug() << "New instrument selected: "
-                  << m_selectedInstrument.toStdString() << '\n';
+    g_log.debug() << "New instrument selected: " << m_selectedInstrument.toStdString() << '\n';
     emit instrumentSelectionChanged(m_selectedInstrument);
   }
 }
@@ -235,9 +215,8 @@ void InstrumentSelector::updateInstrument(const QString &name) {
  * filter the instrument list by
  * @param facility :: A FacilityInfo object
  */
-void InstrumentSelector::filterByTechniquesAtFacility(
-    const QStringList &techniques,
-    const Mantid::Kernel::FacilityInfo &facility) {
+void InstrumentSelector::filterByTechniquesAtFacility(const QStringList &techniques,
+                                                      const Mantid::Kernel::FacilityInfo &facility) {
   if (techniques.isEmpty())
     return;
 
@@ -246,12 +225,10 @@ void InstrumentSelector::filterByTechniquesAtFacility(
   QStringList supportedInstruments;
   QStringListIterator techItr(techniques);
   while (techItr.hasNext()) {
-    const std::vector<InstrumentInfo> instruments =
-        facility.instruments(techItr.next().toStdString());
+    const std::vector<InstrumentInfo> instruments = facility.instruments(techItr.next().toStdString());
     const size_t nInstrs = instruments.size();
     for (size_t i = 0; i < nInstrs; ++i) {
-      supportedInstruments.append(
-          QString::fromStdString(instruments[i].name()));
+      supportedInstruments.append(QString::fromStdString(instruments[i].name()));
     }
   }
 

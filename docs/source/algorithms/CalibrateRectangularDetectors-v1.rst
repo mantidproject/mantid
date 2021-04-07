@@ -25,7 +25,7 @@ detectors to be calibrated with one peak and the next n detectors to be
 calibrated with the second peak. If a color fill plot of the calibrated
 workspace does not look good, do a color fill plot of the workspace that
 ends in cc (cross correlation) to see if the ``CrossCorrelationPoints``
-and/or ``PeakHalfWidth`` should be increased or decreased. Also plot the 
+and/or ``PeakHalfWidth`` should be increased or decreased. Also plot the
 reference spectra from the cc workspace.
 
 Features to improve performance of peak finding
@@ -36,9 +36,9 @@ Define peak fit-window
 
 There are two exclusive approaches to define peak's fit-window.
 
-- ``PeakWindowMax`` All peaks will use this value to define their fitting 
+- ``PeakWindowMax`` All peaks will use this value to define their fitting
   range.
-- ``FitwindowTableWorkspace`` This is a table workspace by which each peak 
+- ``FitwindowTableWorkspace`` This is a table workspace by which each peak
   will have its individual fit window defined.
 
 Define accepted range of peak's width

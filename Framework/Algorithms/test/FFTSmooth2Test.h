@@ -70,14 +70,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.initialize());
     TS_ASSERT(fftsmooth2_c.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(
-        fftsmooth2_c.setPropertyValue("InputWorkspace", "TestInputWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        fftsmooth2_c.setPropertyValue("OutputWorkspace", "SmoothedWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        fftsmooth2_c.setPropertyValue("WorkspaceIndex", "0"));
-    TS_ASSERT_THROWS_NOTHING(
-        fftsmooth2_c.setPropertyValue("Filter", "Zeroing"));
+    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue("InputWorkspace", "TestInputWS"));
+    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue("OutputWorkspace", "SmoothedWS"));
+    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue("WorkspaceIndex", "0"));
+    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue("Filter", "Zeroing"));
     TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue("Params", "100"));
     TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.execute());
     TS_ASSERT(fftsmooth2_c.isExecuted());
@@ -85,23 +81,18 @@ public:
     MatrixWorkspace_sptr test_output_WS;
     MatrixWorkspace_sptr gold_output_WS;
 
-    TS_ASSERT_THROWS_NOTHING(
-        test_output_WS =
-            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-                "SmoothedWS"));
+    TS_ASSERT_THROWS_NOTHING(test_output_WS =
+                                 AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("SmoothedWS"));
     TS_ASSERT(test_output_WS);
 
-    TS_ASSERT_THROWS_NOTHING(
-        gold_output_WS =
-            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-                "ZeroingGoldWS"));
+    TS_ASSERT_THROWS_NOTHING(gold_output_WS =
+                                 AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ZeroingGoldWS"));
     TS_ASSERT(gold_output_WS);
 
     TS_ASSERT_EQUALS(test_output_WS->size(), gold_output_WS->size());
 
     for (size_t i = 0; i < test_output_WS->size(); i++) {
-      TS_ASSERT_DELTA(test_output_WS->y(0)[i], gold_output_WS->y(0)[i],
-                      0.00001);
+      TS_ASSERT_DELTA(test_output_WS->y(0)[i], gold_output_WS->y(0)[i], 0.00001);
     }
 
     AnalysisDataService::Instance().remove("TestInputWS");
@@ -127,14 +118,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.initialize());
     TS_ASSERT(fftsmooth2_c.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(
-        fftsmooth2_c.setPropertyValue("InputWorkspace", "TestInputWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        fftsmooth2_c.setPropertyValue("OutputWorkspace", "SmoothedWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        fftsmooth2_c.setPropertyValue("WorkspaceIndex", "0"));
-    TS_ASSERT_THROWS_NOTHING(
-        fftsmooth2_c.setPropertyValue("Filter", "Butterworth"));
+    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue("InputWorkspace", "TestInputWS"));
+    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue("OutputWorkspace", "SmoothedWS"));
+    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue("WorkspaceIndex", "0"));
+    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue("Filter", "Butterworth"));
     TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue("Params", "100,2"));
     TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.execute());
     TS_ASSERT(fftsmooth2_c.isExecuted());
@@ -142,23 +129,18 @@ public:
     MatrixWorkspace_sptr test_output_WS;
     MatrixWorkspace_sptr gold_output_WS;
 
-    TS_ASSERT_THROWS_NOTHING(
-        test_output_WS =
-            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-                "SmoothedWS"));
+    TS_ASSERT_THROWS_NOTHING(test_output_WS =
+                                 AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("SmoothedWS"));
     TS_ASSERT(test_output_WS);
 
-    TS_ASSERT_THROWS_NOTHING(
-        gold_output_WS =
-            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-                "ButterworthGoldWS"));
+    TS_ASSERT_THROWS_NOTHING(gold_output_WS =
+                                 AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ButterworthGoldWS"));
     TS_ASSERT(gold_output_WS);
 
     TS_ASSERT_EQUALS(test_output_WS->size(), gold_output_WS->size());
 
     for (size_t i = 0; i < test_output_WS->size(); i++) {
-      TS_ASSERT_DELTA(test_output_WS->y(0)[i], gold_output_WS->y(0)[i],
-                      0.00001);
+      TS_ASSERT_DELTA(test_output_WS->y(0)[i], gold_output_WS->y(0)[i], 0.00001);
     }
 
     AnalysisDataService::Instance().remove("TestInputWS");
@@ -169,8 +151,7 @@ public:
   }
 
   //-------------------------------------------------------------------------------------------------
-  void performTest(bool event, const std::string &filter,
-                   const std::string &params, bool AllSpectra,
+  void performTest(bool event, const std::string &filter, const std::string &params, bool AllSpectra,
                    int WorkspaceIndex, bool inPlace = false) {
     MatrixWorkspace_sptr ws1, out;
     int numPixels = 10;
@@ -178,11 +159,9 @@ public:
 
     // Make workspaces where Y value == workspace index
     if (event)
-      ws1 = WorkspaceCreationHelper::createEventWorkspace(10, numBins, numBins,
-                                                          0, 1.0, 4);
+      ws1 = WorkspaceCreationHelper::createEventWorkspace(10, numBins, numBins, 0, 1.0, 4);
     else
-      ws1 = WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(
-          numPixels, numBins);
+      ws1 = WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(numPixels, numBins);
 
     std::string outName = "SmoothedWS";
 
@@ -192,8 +171,7 @@ public:
 
     if (inPlace) {
       AnalysisDataService::Instance().addOrReplace("FFTSmooth2WsInput", ws1);
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setPropertyValue("InputWorkspace", "FFTSmooth2WsInput"));
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "FFTSmooth2WsInput"));
       outName = "FFTSmooth2WsInput";
     } else {
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws1));
@@ -207,9 +185,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TS_ASSERT_THROWS_NOTHING(
-        out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outName));
+    TS_ASSERT_THROWS_NOTHING(out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outName));
     TS_ASSERT(out);
     if (!out)
       return;
@@ -236,29 +212,17 @@ public:
 
   //-------------------------------------------------------------------------------------------------
   // Some specific tests
-  void test_Event_Butterworth_AllSpectra() {
-    performTest(true, "Butterworth", "100,2", true, 1);
-  }
+  void test_Event_Butterworth_AllSpectra() { performTest(true, "Butterworth", "100,2", true, 1); }
 
-  void test_2D_Butterworth_AllSpectra() {
-    performTest(false, "Butterworth", "100,2", true, 2);
-  }
+  void test_2D_Butterworth_AllSpectra() { performTest(false, "Butterworth", "100,2", true, 2); }
 
-  void test_Event_Zeroing_AllSpectra() {
-    performTest(true, "Zeroing", "100", true, 3);
-  }
+  void test_Event_Zeroing_AllSpectra() { performTest(true, "Zeroing", "100", true, 3); }
 
-  void test_2D_Zeroing_AllSpectra() {
-    performTest(false, "Zeroing", "100", true, 4);
-  }
+  void test_2D_Zeroing_AllSpectra() { performTest(false, "Zeroing", "100", true, 4); }
 
-  void test_Event_Butterworth_SingleSpectrum() {
-    performTest(true, "Butterworth", "100,2", false, 4);
-  }
+  void test_Event_Butterworth_SingleSpectrum() { performTest(true, "Butterworth", "100,2", false, 4); }
 
-  void test_Event_Zeroing_SingleSpectrum() {
-    performTest(true, "Zeroing", "100", false, 6);
-  }
+  void test_Event_Zeroing_SingleSpectrum() { performTest(true, "Zeroing", "100", false, 6); }
 
   //-------------------------------------------------------------------------------------------------
   /** Complete test of all possible inputs!
@@ -279,14 +243,11 @@ public:
             if (!AllSpectra) {
               bool allSpectraGtZero = false;
 
-              for (int WorkspaceIndex = 0; WorkspaceIndex < 10;
-                   WorkspaceIndex++) {
-                performTest((event > 0), filter, params, allSpectraGtZero,
-                            WorkspaceIndex, (inPlace > 0));
+              for (int WorkspaceIndex = 0; WorkspaceIndex < 10; WorkspaceIndex++) {
+                performTest((event > 0), filter, params, allSpectraGtZero, WorkspaceIndex, (inPlace > 0));
               }
             } else {
-              performTest((event > 0), filter, params, (AllSpectra > 0), 0,
-                          (inPlace > 0));
+              performTest((event > 0), filter, params, (AllSpectra > 0), 0, (inPlace > 0));
             }
           }
   }

@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -8,13 +8,17 @@
 
 import systemtesting
 import os.path
+
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.kernel import config
 from mantid.api import FileFinder
 from mantid.simpleapi import (LoadNexus, Plus)
 from sans.command_interface.ISISCommandInterface import (LOQ, Detector, Set1D, MaskFile, Gravity,
                                                          BatchReduce, UseCompatibilityMode)
+from sans.common.enums import SANSInstrument
 
 
+@ISISSansSystemTest(SANSInstrument.LOQ)
 class SANSLOQBatchTest_V2(systemtesting.MantidSystemTest):
 
     def runTest(self):

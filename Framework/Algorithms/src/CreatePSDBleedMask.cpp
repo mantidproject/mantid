@@ -39,26 +39,19 @@ void CreatePSDBleedMask::init() {
   using Kernel::BoundedValidator;
   using Kernel::Direction;
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "The name of the input workspace.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                            Direction::Output),
-      "The name of the output MaskWorkspace which will contain the result "
-      "masks.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+                  "The name of the output MaskWorkspace which will contain the result "
+                  "masks.");
   auto mustBePosDbl = std::make_shared<BoundedValidator<double>>();
   mustBePosDbl->setLower(0.0);
-  declareProperty("MaxTubeFramerate", -1.0, mustBePosDbl,
-                  "The maximum rate allowed for a tube in counts/us/frame.");
+  declareProperty("MaxTubeFramerate", -1.0, mustBePosDbl, "The maximum rate allowed for a tube in counts/us/frame.");
   auto mustBePosInt = std::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);
-  declareProperty("NIgnoredCentralPixels", 80, mustBePosInt,
-                  "The number of pixels about the centre to ignore.");
-  declareProperty("NumberOfFailures", 0,
-                  std::make_shared<Kernel::NullValidator>(),
-                  "An output property containing the number of masked tubes",
-                  Direction::Output);
+  declareProperty("NIgnoredCentralPixels", 80, mustBePosInt, "The number of pixels about the centre to ignore.");
+  declareProperty("NumberOfFailures", 0, std::make_shared<Kernel::NullValidator>(),
+                  "An output property containing the number of masked tubes", Direction::Output);
 }
 
 /// Execute the algorithm
@@ -68,14 +61,12 @@ void CreatePSDBleedMask::exec() {
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   // We require the number of good frames. Check that we have this
   if (!inputWorkspace->run().hasProperty("goodfrm")) {
-    throw std::invalid_argument(
-        "InputWorkspace does not contain the number of \"good frames\".\n"
-        "(The sample log named: goodfrm with value, specifying number of good "
-        "frames)");
+    throw std::invalid_argument("InputWorkspace does not contain the number of \"good frames\".\n"
+                                "(The sample log named: goodfrm with value, specifying number of good "
+                                "frames)");
   }
   Kernel::PropertyWithValue<int> *frameProp =
-      dynamic_cast<Kernel::PropertyWithValue<int> *>(
-          inputWorkspace->run().getProperty("goodfrm"));
+      dynamic_cast<Kernel::PropertyWithValue<int> *>(inputWorkspace->run().getProperty("goodfrm"));
   if (!frameProp) {
     throw std::invalid_argument("InputWorkspace has the number of \"good "
                                 "frames\" property (goodfrm log value)"
@@ -97,8 +88,7 @@ void CreatePSDBleedMask::exec() {
   // of the lowest detector in the tree is a "tube" and that all pixels in a
   // tube are consecutively ordered
   // with respect to spectra number
-  const auto numSpectra =
-      static_cast<int>(inputWorkspace->getNumberHistograms());
+  const auto numSpectra = static_cast<int>(inputWorkspace->getNumberHistograms());
   // Keep track of a map of tubes to lists of indices
   using TubeIndex = std::map<Geometry::ComponentID, std::vector<int>>;
   TubeIndex tubeMap;
@@ -161,8 +151,7 @@ void CreatePSDBleedMask::exec() {
     PARALLEL_START_INTERUPT_REGION
     auto current = std::next(tubeMap.begin(), i);
     const TubeIndex::mapped_type tubeIndices = current->second;
-    bool mask = performBleedTest(tubeIndices, inputWorkspace, maxRate,
-                                 numIgnoredPixels);
+    bool mask = performBleedTest(tubeIndices, inputWorkspace, maxRate, numIgnoredPixels);
     if (mask) {
       maskTube(tubeIndices, outputWorkspace);
       PARALLEL_ATOMIC
@@ -179,9 +168,7 @@ void CreatePSDBleedMask::exec() {
 
   g_log.information() << numTubesMasked << " tube(s) failed the bleed tests.";
   if (numTubesMasked > 0) {
-    g_log.information()
-        << " The " << numSpectraMasked
-        << " spectra have been masked on the output workspace.\n";
+    g_log.information() << " The " << numSpectraMasked << " spectra have been masked on the output workspace.\n";
   } else {
     g_log.information() << '\n';
   }
@@ -199,10 +186,9 @@ void CreatePSDBleedMask::exec() {
  * @param numIgnoredPixels :: Number of ignored pixels
  * @returns True if the tube is to be masked, false otherwise
  */
-bool CreatePSDBleedMask::performBleedTest(
-    const std::vector<int> &tubeIndices,
-    const API::MatrixWorkspace_const_sptr &inputWS, double maxRate,
-    int numIgnoredPixels) {
+bool CreatePSDBleedMask::performBleedTest(const std::vector<int> &tubeIndices,
+                                          const API::MatrixWorkspace_const_sptr &inputWS, double maxRate,
+                                          int numIgnoredPixels) {
 
   // Require ordered pixels so that we can define the centre.
   // This of course assumes that the pixel IDs increase monotonically with the
@@ -242,16 +228,12 @@ bool CreatePSDBleedMask::performBleedTest(
   }
 
   if (top != topEnd) {
-    g_log.error()
-        << "Error in tube processing, loop variable has an unexpected value.\n";
-    throw std::runtime_error(
-        "top != topEnd in CreatePSDBleedMask::performBleedTest()");
+    g_log.error() << "Error in tube processing, loop variable has an unexpected value.\n";
+    throw std::runtime_error("top != topEnd in CreatePSDBleedMask::performBleedTest()");
   }
   if (bot != numSpectra) {
-    g_log.error()
-        << "Error in tube processing, loop variable has an unexpected value.\n";
-    throw std::runtime_error(
-        "bot != numSpectra  in CreatePSDBleedMask::performBleedTest()");
+    g_log.error() << "Error in tube processing, loop variable has an unexpected value.\n";
+    throw std::runtime_error("bot != numSpectra  in CreatePSDBleedMask::performBleedTest()");
   }
 
   return false;
@@ -262,8 +244,7 @@ bool CreatePSDBleedMask::performBleedTest(
  * @param tubeIndices :: A list of the workspaces indices for the tube
  * @param workspace :: The workspace to accumulate the masking
  */
-void CreatePSDBleedMask::maskTube(const std::vector<int> &tubeIndices,
-                                  const API::MatrixWorkspace_sptr &workspace) {
+void CreatePSDBleedMask::maskTube(const std::vector<int> &tubeIndices, const API::MatrixWorkspace_sptr &workspace) {
   const double deadValue(1.0); // delete the data
   for (auto tubeIndice : tubeIndices) {
     workspace->mutableY(tubeIndice)[0] = deadValue;

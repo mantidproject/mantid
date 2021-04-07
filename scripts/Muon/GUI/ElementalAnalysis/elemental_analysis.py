@@ -67,8 +67,10 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     ORANGE = 'C1'
     GREEN = 'C2'
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, window_flags=None):
         super(ElementalAnalysisGui, self).__init__(parent)
+        if window_flags:
+            self.setWindowFlags(window_flags)
         # set menu
         self.menu = self.menuBar()
         self.menu.addAction("File")
@@ -357,6 +359,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # not using load_last_run prevents two calls to last_loaded_run()
         if last_run is not None:
             self.load_run(detector, last_run)
+            self._update_checked_data()
 
     def del_plot(self, checkbox):
         if self.load_widget.last_loaded_run() is not None:

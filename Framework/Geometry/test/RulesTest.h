@@ -67,8 +67,7 @@ public:
 
   void testSubstituteSurf() {
     auto uTree = createAUnionTree();
-    TS_ASSERT_EQUALS(uTree->substituteSurf(11, 13, std::make_shared<Cone>()),
-                     1);
+    TS_ASSERT_EQUALS(uTree->substituteSurf(11, 13, std::make_shared<Cone>()), 1);
     TS_ASSERT_EQUALS(uTree->display(), "10 : 10 : 12 : 13");
     TS_ASSERT_EQUALS(uTree->substituteSurf(10, 14, std::make_shared<Sphere>()),
                      2); // its suppose to return 2

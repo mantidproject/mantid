@@ -31,7 +31,7 @@ endif()
 if(APPLE OR WIN32)
   # development version
   add_executable(MantidWorkbench mantidworkbench.cpp)
-  target_compile_definitions(MantidWorkbench 
+  target_compile_definitions(MantidWorkbench
     PRIVATE
     -DPYTHON_EXECUTABLE_PATH="${Python_EXECUTABLE}")
   target_link_libraries(MantidWorkbench PRIVATE Boost::filesystem)
@@ -43,16 +43,19 @@ if(APPLE OR WIN32)
   if(WIN32)
     set(_py_exe "pythonw.exe")
     set(_qt_plugins "..\\\\plugins\\\\qt5")
+    set(PACKAGE_EXECUTABLE MantidWorkbench)
   else()
     set(_py_exe "python")
     set(_qt_plugins "../PlugIns")
+    # appears in the unified menu bar and helps distiguish from other packages
+    set(PACKAGE_EXECUTABLE MantidWorkbench${CPACK_PACKAGE_SUFFIX_CAMELCASE})
   endif()
   set_target_properties(MantidWorkbenchInstalled
                         PROPERTIES
-                        OUTPUT_NAME MantidWorkbench
+                        OUTPUT_NAME ${PACKAGE_EXECUTABLE}
                         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
   target_compile_definitions(MantidWorkbenchInstalled
-    PRIVATE 
+    PRIVATE
     -DPYTHON_EXECUTABLE_PATH="${_py_exe}"
     -DQT_PLUGIN_PATH="${_qt_plugins}")
   target_link_libraries(MantidWorkbenchInstalled PRIVATE Boost::filesystem)
@@ -63,7 +66,7 @@ if(APPLE OR WIN32)
           DESTINATION ${WORKBENCH_BIN_DIR})
 endif()
 
-# process resources files 
+# process resources files
 set(_images_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
 if (WIN32)
   function (CREATE_QRC_FILE_TEMPLATE BUILD_TYPE)
@@ -116,18 +119,18 @@ add_dependencies(workbench workbench_resources mantidqt)
 # macOS package fixes
 if(APPLE)
   # create Info.plist
-  set ( MAC_BUNDLE_EXECUTABLE MantidWorkbench )
-  set ( MAC_BUNDLE_IDENTIFIER "org.mantidproject.MantidWorkbench" )
-  set ( MAC_BUNDLE_ICON MantidWorkbench.icns )
-  set ( MAC_BUNDLE_NAME MantidWorkbench )
+  set ( MAC_BUNDLE_EXECUTABLE ${PACKAGE_EXECUTABLE})
+  set ( MAC_BUNDLE_IDENTIFIER "org.mantidproject.${PACKAGE_EXECUTABLE}" )
+  set ( MAC_BUNDLE_ICON mantid_workbench${CPACK_PACKAGE_SUFFIX}.icns )
+  set ( MAC_BUNDLE_NAME ${PACKAGE_EXECUTABLE} )
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../../../installers/MacInstaller/Info.plist.in
                    ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
                    @ONLY )
 
-install (FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist DESTINATION MantidWorkbench.app/Contents/ )
+install (FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist DESTINATION ${WORKBENCH_BUNDLE} )
 install (CODE "
     execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
-                            \${CMAKE_INSTALL_PREFIX}/MantidWorkbench.app ${Python_EXECUTABLE} ${ParaView_DIR}
+                            \${CMAKE_INSTALL_PREFIX}/${WORKBENCH_APP} ${Python_EXECUTABLE}
                     RESULT_VARIABLE install_name_tool_result OUTPUT_VARIABLE _out ERROR_VARIABLE _out COMMAND_ECHO STDOUT)
     if(NOT install_name_tool_result EQUAL 0)
       message(\"\${_out}\")

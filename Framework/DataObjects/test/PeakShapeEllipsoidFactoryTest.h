@@ -36,12 +36,8 @@ class PeakShapeEllipsoidFactoryTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PeakShapeEllipsoidFactoryTest *createSuite() {
-    return new PeakShapeEllipsoidFactoryTest();
-  }
-  static void destroySuite(PeakShapeEllipsoidFactoryTest *suite) {
-    delete suite;
-  }
+  static PeakShapeEllipsoidFactoryTest *createSuite() { return new PeakShapeEllipsoidFactoryTest(); }
+  static void destroySuite(PeakShapeEllipsoidFactoryTest *suite) { delete suite; }
 
   void test_invalid_json_with_no_successor() {
     PeakShapeEllipsoidFactory factory;
@@ -81,16 +77,13 @@ public:
     const int algorithmVersion = 3;
 
     // Make a source shape
-    PeakShapeEllipsoid sourceShape(directions, abcRadii, abcInnerRadii,
-                                   abcOuterRadii, frame, algorithmName,
+    PeakShapeEllipsoid sourceShape(directions, abcRadii, abcInnerRadii, abcOuterRadii, frame, algorithmName,
                                    algorithmVersion);
 
     PeakShapeEllipsoidFactory factory;
-    Mantid::Geometry::PeakShape *productShape =
-        factory.create(sourceShape.toJSON());
+    Mantid::Geometry::PeakShape *productShape = factory.create(sourceShape.toJSON());
 
-    PeakShapeEllipsoid *ellipsoidShapeProduct =
-        dynamic_cast<PeakShapeEllipsoid *>(productShape);
+    PeakShapeEllipsoid *ellipsoidShapeProduct = dynamic_cast<PeakShapeEllipsoid *>(productShape);
     TS_ASSERT(ellipsoidShapeProduct);
 
     TS_ASSERT_EQUALS(sourceShape, *ellipsoidShapeProduct);

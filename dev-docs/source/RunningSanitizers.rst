@@ -96,7 +96,7 @@ variables in the console before running in each mode.
 Visual Studio Address Sanitizer
 ===============================
 
-The Visual Studio address sanitizer raises exceptions with code 0xC0000005 as part of its normal operation. 
+The Visual Studio address sanitizer raises exceptions with code 0xC0000005 as part of its normal operation.
 The exceptions are handled but they cause the debugger to stop. These exceptions need to be ignored in the Debug, Windows, Exception Settings dialog
 
 Genuine sanitizer issues cause an unhandled exception and the debugger will stop at the relevant unit\line.

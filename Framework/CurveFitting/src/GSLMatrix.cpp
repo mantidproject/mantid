@@ -29,8 +29,7 @@ GSLMatrix::GSLMatrix(std::initializer_list<std::initializer_list<double>> ilist)
     : GSLMatrix(ilist.size(), ilist.begin()->size()) {
   for (auto row = ilist.begin(); row != ilist.end(); ++row) {
     if (row->size() != size2()) {
-      throw std::runtime_error(
-          "All rows in initializer list must have the same size.");
+      throw std::runtime_error("All rows in initializer list must have the same size.");
     }
     auto i = static_cast<size_t>(std::distance(ilist.begin(), row));
     for (auto cell = row->begin(); cell != row->end(); ++cell) {
@@ -43,8 +42,7 @@ GSLMatrix::GSLMatrix(std::initializer_list<std::initializer_list<double>> ilist)
 /// Copy constructor
 /// @param M :: The other matrix.
 GSLMatrix::GSLMatrix(const GSLMatrix &M)
-    : m_data(M.m_data),
-      m_view(gsl_matrix_view_array(m_data.data(), M.size1(), M.size2())) {}
+    : m_data(M.m_data), m_view(gsl_matrix_view_array(m_data.data(), M.size1(), M.size2())) {}
 
 /// Create a submatrix. A submatrix is a copy of the parent matrix.
 /// @param M :: The parent matrix.
@@ -52,8 +50,7 @@ GSLMatrix::GSLMatrix(const GSLMatrix &M)
 /// @param col :: The first column in the submatrix.
 /// @param nRows :: The number of rows in the submatrix.
 /// @param nCols :: The number of columns in the submatrix.
-GSLMatrix::GSLMatrix(const GSLMatrix &M, size_t row, size_t col, size_t nRows,
-                     size_t nCols) {
+GSLMatrix::GSLMatrix(const GSLMatrix &M, size_t row, size_t col, size_t nRows, size_t nCols) {
   if (row + nRows > M.size1() || col + nCols > M.size2()) {
     throw std::runtime_error("Submatrix exceeds matrix size.");
   }
@@ -66,8 +63,7 @@ GSLMatrix::GSLMatrix(const GSLMatrix &M, size_t row, size_t col, size_t nRows,
 /// Constructor
 /// @param M :: A matrix to copy.
 GSLMatrix::GSLMatrix(const Kernel::Matrix<double> &M)
-    : m_data(M.getVector()),
-      m_view(gsl_matrix_view_array(m_data.data(), M.numRows(), M.numCols())) {}
+    : m_data(M.getVector()), m_view(gsl_matrix_view_array(m_data.data(), M.numRows(), M.numCols())) {}
 
 /// Create this matrix from a product of two other matrices
 /// @param mult2 :: Matrix multiplication helper object.
@@ -79,8 +75,7 @@ GSLMatrix::GSLMatrix(const GSLMatrixMult3 &mult3) { *this = mult3; }
 
 /// "Move" constructor
 GSLMatrix::GSLMatrix(std::vector<double> &&data, size_t nx, size_t ny)
-    : m_data(std::move(data)),
-      m_view(gsl_matrix_view_array(m_data.data(), nx, ny)) {}
+    : m_data(std::move(data)), m_view(gsl_matrix_view_array(m_data.data(), nx, ny)) {}
 
 /// Copy assignment operator
 GSLMatrix &GSLMatrix::operator=(const GSLMatrix &M) {
@@ -198,12 +193,10 @@ GSLMatrix &GSLMatrix::operator*=(const double &d) {
 /// @throws std::runtime_error if the underlying GSL routine fails.
 GSLVector GSLMatrix::operator*(const GSLVector &v) const {
   if (v.size() != size2()) {
-    throw std::invalid_argument(
-        "Matrix by vector multiplication: wrong size of vector.");
+    throw std::invalid_argument("Matrix by vector multiplication: wrong size of vector.");
   }
   GSLVector res(size1());
-  auto status =
-      gsl_blas_dgemv(CblasNoTrans, 1.0, gsl(), v.gsl(), 0.0, res.gsl());
+  auto status = gsl_blas_dgemv(CblasNoTrans, 1.0, gsl(), v.gsl(), 0.0, res.gsl());
   if (status != GSL_SUCCESS) {
     std::string message = "Failed to multiply matrix by a vector.\n"
                           "Error message returned by the GSL:\n" +
@@ -248,8 +241,7 @@ GSLMatrix &GSLMatrix::operator=(const GSLMatrixMult3 &mult3) {
   CBLAS_TRANSPOSE tr3 = mult3.tr3 ? CblasTrans : CblasNoTrans;
 
   // AB = m_1 * m_2
-  gsl_blas_dgemm(tr1, tr2, 1.0, mult3.m_1.gsl(), mult3.m_2.gsl(), 0.0,
-                 AB.gsl());
+  gsl_blas_dgemm(tr1, tr2, 1.0, mult3.m_1.gsl(), mult3.m_2.gsl(), 0.0, AB.gsl());
 
   // this = AB * m_3
   gsl_blas_dgemm(CblasNoTrans, tr3, 1.0, AB.gsl(), mult3.m_3.gsl(), 0.0, gsl());
@@ -265,13 +257,11 @@ GSLMatrix &GSLMatrix::operator=(const GSLMatrixMult3 &mult3) {
 /// @throws std::runtime_error if the GSL fails to solve the equations.
 void GSLMatrix::solve(const GSLVector &rhs, GSLVector &x) {
   if (size1() != size2()) {
-    throw std::invalid_argument(
-        "System of linear equations: the matrix must be square.");
+    throw std::invalid_argument("System of linear equations: the matrix must be square.");
   }
   size_t n = size1();
   if (rhs.size() != n) {
-    throw std::invalid_argument(
-        "System of linear equations: right-hand side vector has wrong size.");
+    throw std::invalid_argument("System of linear equations: right-hand side vector has wrong size.");
   }
   x.resize(n);
   int s;
@@ -354,9 +344,7 @@ GSLVector GSLMatrix::copyColumn(size_t i) const {
 }
 
 /// Create a new matrix and move the data to it.
-GSLMatrix GSLMatrix::move() {
-  return GSLMatrix(std::move(m_data), size1(), size2());
-}
+GSLMatrix GSLMatrix::move() { return GSLMatrix(std::move(m_data), size1(), size2()); }
 
 GSLVector GSLMatrix::multiplyByVector(const GSLVector &v) const {
   GSLVector res(size2());

@@ -80,8 +80,7 @@ public:
     TS_ASSERT_EQUALS(A.leaf(10), (Rule *)nullptr);
   }
 
-  void
-  testSetLeaves() { // This should not enabled as surfpoint cannot have leaves
+  void testSetLeaves() { // This should not enabled as surfpoint cannot have leaves
     // TODO:disable setleaves function
     SurfPoint A;
     auto P1 = std::make_shared<Plane>();

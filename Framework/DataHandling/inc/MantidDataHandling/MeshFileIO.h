@@ -23,28 +23,24 @@ enum class ScaleUnits { undefined, metres, centimetres, millimetres };
 
 class DLLExport MeshFileIO {
 public:
-  Kernel::Matrix<double> generateMatrix(double xRotation, double yRotation,
-                                        double zRotation);
+  Kernel::Matrix<double> generateMatrix(double xRotation, double yRotation, double zRotation);
 
-  std::shared_ptr<Geometry::MeshObject>
-  rotate(std::shared_ptr<Geometry::MeshObject> environmentMesh,
-         double xRotation, double yRotation, double zRotation);
+  std::shared_ptr<Geometry::MeshObject> rotate(std::shared_ptr<Geometry::MeshObject> environmentMesh, double xRotation,
+                                               double yRotation, double zRotation);
 
   Kernel::Matrix<double> generateXRotation(double xRotation);
   Kernel::Matrix<double> generateYRotation(double yRotation);
   Kernel::Matrix<double> generateZRotation(double zRotation);
 
-  std::shared_ptr<Geometry::MeshObject>
-  translate(std::shared_ptr<Geometry::MeshObject> environmentMesh,
-            const std::vector<double> &translationVector);
+  std::shared_ptr<Geometry::MeshObject> translate(std::shared_ptr<Geometry::MeshObject> environmentMesh,
+                                                  const std::vector<double> &translationVector);
 
   Kernel::V3D createScaledV3D(double xVal, double yVal, double zVal);
   ScaleUnits getScaleType() { return m_scaleType; }
 
 protected:
   MeshFileIO(ScaleUnits scaleType) : m_scaleType(scaleType) {}
-  MeshFileIO(ScaleUnits scaleType, std::vector<uint32_t> triangles,
-             std::vector<Kernel::V3D> vertices)
+  MeshFileIO(ScaleUnits scaleType, std::vector<uint32_t> triangles, std::vector<Kernel::V3D> vertices)
       : m_scaleType(scaleType), m_triangle(std::move(std::move(triangles))),
         m_vertices(std::move(std::move(vertices))) {}
   double scaleValue(double val) {
@@ -90,8 +86,7 @@ inline ScaleUnits getScaleTypeFromStr(const std::string &scaleProperty) {
   } else if (scaleProperty == "mm") {
     scaleType = ScaleUnits::millimetres;
   } else {
-    throw std::invalid_argument(
-        scaleProperty + " is not an accepted scale of stl or 3mf file.");
+    throw std::invalid_argument(scaleProperty + " is not an accepted scale of stl or 3mf file.");
   }
   return scaleType;
 }

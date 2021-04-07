@@ -29,8 +29,7 @@ using namespace API;
 
 /// Default constructor
 UnwrapMonitor::UnwrapMonitor()
-    : m_conversionConstant(0.), m_inputWS(), m_LRef(0.), m_Tmin(0.), m_Tmax(0.),
-      m_XSize(0) {}
+    : m_conversionConstant(0.), m_inputWS(), m_LRef(0.), m_Tmin(0.), m_Tmax(0.), m_XSize(0) {}
 
 /// Initialisation method
 void UnwrapMonitor::init() {
@@ -40,26 +39,21 @@ void UnwrapMonitor::init() {
   wsValidator->add<RawCountValidator>();
   wsValidator->add<InstrumentValidator>();
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input, wsValidator),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input, wsValidator),
       "A workspace with x values in units of TOF and y values in counts");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
-      "The name of the workspace to be created as the output of the algorithm");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
+                  "The name of the workspace to be created as the output of the algorithm");
 
   auto validator = std::make_shared<BoundedValidator<double>>();
   validator->setLower(0.01);
-  declareProperty("LRef", 0.0, validator,
-                  "The length of the reference flight path (in metres)");
+  declareProperty("LRef", 0.0, validator, "The length of the reference flight path (in metres)");
 
   declareProperty("JoinWavelength", 0.0, Direction::Output);
 
   // Calculate and set the constant factor for the conversion to wavelength
   const double TOFisinMicroseconds = 1e6;
   const double toAngstroms = 1e10;
-  m_conversionConstant = (PhysicalConstants::h * toAngstroms) /
-                         (PhysicalConstants::NeutronMass * TOFisinMicroseconds);
+  m_conversionConstant = (PhysicalConstants::h * toAngstroms) / (PhysicalConstants::NeutronMass * TOFisinMicroseconds);
 }
 
 /** Executes the algorithm
@@ -73,24 +67,20 @@ void UnwrapMonitor::exec() {
   // Get the input workspace
   m_inputWS = getProperty("InputWorkspace");
   // Get the number of spectra in this workspace
-  const auto numberOfSpectra =
-      static_cast<int>(m_inputWS->getNumberHistograms());
-  g_log.debug() << "Number of spectra in input workspace: " << numberOfSpectra
-                << '\n';
+  const auto numberOfSpectra = static_cast<int>(m_inputWS->getNumberHistograms());
+  g_log.debug() << "Number of spectra in input workspace: " << numberOfSpectra << '\n';
 
   // Get the "reference" flightpath (currently passed in as a property)
   m_LRef = getProperty("LRef");
   // Get the min & max frame values
   m_Tmin = m_inputWS->x(0).front();
   m_Tmax = m_inputWS->x(0).back();
-  g_log.debug() << "Frame range in microseconds is: " << m_Tmin << " - "
-                << m_Tmax << '\n';
+  g_log.debug() << "Frame range in microseconds is: " << m_Tmin << " - " << m_Tmax << '\n';
   m_XSize = m_inputWS->x(0).size();
 
   // Need a new workspace. Will just be used temporarily until the data is
   // rebinned.
-  MatrixWorkspace_sptr tempWS = WorkspaceFactory::Instance().create(
-      m_inputWS, numberOfSpectra, m_XSize, m_XSize - 1);
+  MatrixWorkspace_sptr tempWS = WorkspaceFactory::Instance().create(m_inputWS, numberOfSpectra, m_XSize, m_XSize - 1);
   // Set the correct X unit on the output workspace
   tempWS->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
 
@@ -106,8 +96,7 @@ void UnwrapMonitor::exec() {
   for (int i = 0; i < numberOfSpectra; ++i) {
     if (!spectrumInfo.hasDetectors(i)) {
       // If the detector flightpath is missing, zero the data
-      g_log.debug() << "Detector information for workspace index " << i
-                    << " is not available.\n";
+      g_log.debug() << "Detector information for workspace index " << i << " is not available.\n";
       tempWS->mutableX(i) = 0.0;
       tempWS->mutableY(i) = 0.0;
       tempWS->mutableE(i) = 0.0;
@@ -133,10 +122,9 @@ void UnwrapMonitor::exec() {
 
     // Now set the new X, Y and E values on the Histogram
     auto histogram = tempWS->histogram(i);
-    tempWS->setHistogram(
-        i, Mantid::HistogramData::BinEdges(std::move(newX)),
-        Mantid::HistogramData::Counts(std::move(newY)),
-        Mantid::HistogramData::CountStandardDeviations(std::move(newE)));
+    tempWS->setHistogram(i, Mantid::HistogramData::BinEdges(std::move(newX)),
+                         Mantid::HistogramData::Counts(std::move(newY)),
+                         Mantid::HistogramData::CountStandardDeviations(std::move(newE)));
 
     // Get the maximum number of bins (excluding monitors) for the rebinning
     // below
@@ -154,11 +142,9 @@ void UnwrapMonitor::exec() {
     const double minLambda = (m_conversionConstant * m_Tmin) / m_LRef;
     const double maxLambda = (m_conversionConstant * m_Tmax) / m_LRef;
     // Rebin the data into common wavelength bins
-    MatrixWorkspace_sptr outputWS =
-        this->rebin(tempWS, minLambda, maxLambda, max_bins - 1);
+    MatrixWorkspace_sptr outputWS = this->rebin(tempWS, minLambda, maxLambda, max_bins - 1);
 
-    g_log.debug() << "Rebinned workspace has "
-                  << outputWS->getNumberHistograms() << " histograms of "
+    g_log.debug() << "Rebinned workspace has " << outputWS->getNumberHistograms() << " histograms of "
                   << outputWS->blocksize() << " bins each\n";
     setProperty("OutputWorkspace", outputWS);
   } else
@@ -175,9 +161,7 @@ void UnwrapMonitor::exec() {
  *  @return A 3-element vector containing the bins at which the upper and lower
  * ranges start & end
  */
-const std::vector<int> UnwrapMonitor::unwrapX(std::vector<double> &newX,
-                                              const int &spectrum,
-                                              const double &Ld) {
+const std::vector<int> UnwrapMonitor::unwrapX(std::vector<double> &newX, const int &spectrum, const double &Ld) {
   // Create and initalise the vector that will store the bin ranges, and will be
   // returned
   // Elements are: 0 - Lower range start, 1 - Lower range end, 2 - Upper range
@@ -191,8 +175,7 @@ const std::vector<int> UnwrapMonitor::unwrapX(std::vector<double> &newX,
   // Create a temporary vector to store the lower range of the unwrapped
   // histograms
   std::vector<double> tempX_L;
-  tempX_L.reserve(
-      m_XSize); // Doing this possible gives a small efficiency increase
+  tempX_L.reserve(m_XSize); // Doing this possible gives a small efficiency increase
   // Create a vector for the upper range. Make it a reference to the output
   // histogram to save an assignment later
   newX.clear();
@@ -234,8 +217,7 @@ const std::vector<int> UnwrapMonitor::unwrapX(std::vector<double> &newX,
   // Deal with the (rare) case that a detector (e.g. downstream monitor) is at a
   // longer flightpath than m_LRef
   if (Ld > m_LRef) {
-    std::pair<int, int> binLimits =
-        this->handleFrameOverlapped(xdata, Ld, tempX_L);
+    std::pair<int, int> binLimits = this->handleFrameOverlapped(xdata, Ld, tempX_L);
     binRange[0] = binLimits.first;
     binRange[1] = binLimits.second;
   }
@@ -244,8 +226,7 @@ const std::vector<int> UnwrapMonitor::unwrapX(std::vector<double> &newX,
   // through only
   Property *join = getProperty("JoinWavelength");
   if (join->isDefault()) {
-    g_log.information() << "Joining wavelength: " << tempX_L.front()
-                        << " Angstrom\n";
+    g_log.information() << "Joining wavelength: " << tempX_L.front() << " Angstrom\n";
     setProperty("JoinWavelength", tempX_L.front());
   }
 
@@ -258,9 +239,8 @@ const std::vector<int> UnwrapMonitor::unwrapX(std::vector<double> &newX,
 /** Deals with the (rare) case where the flightpath is longer than the reference
  *  Note that in this case both T1 & T2 will be greater than Tmax
  */
-std::pair<int, int> UnwrapMonitor::handleFrameOverlapped(
-    const Mantid::HistogramData::HistogramX &xdata, const double &Ld,
-    std::vector<double> &tempX) {
+std::pair<int, int> UnwrapMonitor::handleFrameOverlapped(const Mantid::HistogramData::HistogramX &xdata,
+                                                         const double &Ld, std::vector<double> &tempX) {
   // Calculate the interval to exclude
   const double Dt = (m_Tmax - m_Tmin) * (1 - (m_LRef / Ld));
   // This gives us new minimum & maximum tof values
@@ -299,10 +279,8 @@ std::pair<int, int> UnwrapMonitor::handleFrameOverlapped(
  *  @param newY :: A reference to a container which stores our unwrapped y data.
  *  @param newE :: A reference to a container which stores our unwrapped e data.
  */
-void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
-                                const int &spectrum,
-                                const std::vector<int> &rangeBounds,
-                                std::vector<double> &newY,
+void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS, const int &spectrum,
+                                const std::vector<int> &rangeBounds, std::vector<double> &newY,
                                 std::vector<double> &newE) {
   // Copy over the relevant ranges of Y & E data
   std::vector<double> &Y = newY;
@@ -316,13 +294,11 @@ void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
     E.assign(EIn.begin() + rangeBounds[2], EIn.end());
     // Propagate masking, if necessary
     if (m_inputWS->hasMaskedBins(spectrum)) {
-      const MatrixWorkspace::MaskList &inputMasks =
-          m_inputWS->maskedBins(spectrum);
+      const MatrixWorkspace::MaskList &inputMasks = m_inputWS->maskedBins(spectrum);
       MatrixWorkspace::MaskList::const_iterator it;
       for (it = inputMasks.begin(); it != inputMasks.end(); ++it) {
         if (static_cast<int>((*it).first) >= rangeBounds[2])
-          tempWS->flagMasked(spectrum, (*it).first - rangeBounds[2],
-                             (*it).second);
+          tempWS->flagMasked(spectrum, (*it).first - rangeBounds[2], (*it).second);
       }
     }
   } else {
@@ -339,13 +315,11 @@ void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
     E.insert(E.end(), EStart + rangeBounds[0], EStart + rangeBounds[1]);
     // Propagate masking, if necessary
     if (m_inputWS->hasMaskedBins(spectrum)) {
-      const MatrixWorkspace::MaskList &inputMasks =
-          m_inputWS->maskedBins(spectrum);
+      const MatrixWorkspace::MaskList &inputMasks = m_inputWS->maskedBins(spectrum);
       for (const auto &inputMask : inputMasks) {
         const auto maskIndex = static_cast<int>(inputMask.first);
         if (maskIndex >= rangeBounds[0] && maskIndex < rangeBounds[1])
-          tempWS->flagMasked(spectrum, maskIndex - rangeBounds[0],
-                             inputMask.second);
+          tempWS->flagMasked(spectrum, maskIndex - rangeBounds[0], inputMask.second);
       }
     }
   }
@@ -359,10 +333,8 @@ void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
  *  @return A pointer to the workspace containing the rebinned data
  *  @throw std::runtime_error If the Rebin child algorithm fails
  */
-API::MatrixWorkspace_sptr
-UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr &workspace,
-                     const double &min, const double &max,
-                     const size_t &numBins) {
+API::MatrixWorkspace_sptr UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr &workspace, const double &min,
+                                               const double &max, const size_t &numBins) {
   // Calculate the width of a bin
   const double step = (max - min) / static_cast<double>(numBins);
 
@@ -374,9 +346,8 @@ UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr &workspace,
   // Construct the vector that holds the rebin parameters and set the property
   std::vector<double> paramArray = {min, step, max};
   childAlg->setProperty<std::vector<double>>("Params", paramArray);
-  g_log.debug() << "Rebinning unwrapped data into " << numBins
-                << " bins of width " << step << " Angstroms, running from "
-                << min << " to " << max << '\n';
+  g_log.debug() << "Rebinning unwrapped data into " << numBins << " bins of width " << step
+                << " Angstroms, running from " << min << " to " << max << '\n';
 
   childAlg->executeAsChildAlg();
   return childAlg->getProperty("OutputWorkspace");

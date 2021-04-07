@@ -38,12 +38,12 @@ class PlotConfigDialogPresenter:
             self.tab_widget_views[0] = (axes_tab.view, "Axes")
         # Legend tab
         if legend_in_figure(self.fig):
-            legend_tab = LegendTabWidgetPresenter(self.fig, parent=self.view)
+            legend_tab = LegendTabWidgetPresenter(self.fig, parent_view=self.view, parent_presenter=self)
             self.tab_widget_presenters[0] = legend_tab
             self.tab_widget_views[3] = (legend_tab.view, "Legend")
         # Curves tab
         if curve_in_figure(self.fig):
-            curves_tab = CurvesTabWidgetPresenter(self.fig, parent=self.view, legend_tab=legend_tab)
+            curves_tab = CurvesTabWidgetPresenter(self.fig, parent_view=self.view, parent_presenter=self, legend_tab=legend_tab)
             self.tab_widget_presenters[2] = curves_tab
             self.tab_widget_views[1] = (curves_tab.view, "Curves")
         # Images tab
@@ -93,3 +93,42 @@ class PlotConfigDialogPresenter:
             InterfaceManager().showHelpPage(HELP_URL + '#image-plots')
         else:
             InterfaceManager().showHelpPage(HELP_URL + '#figureoptionsgear-png-ptions-menu')
+
+    def forget_tab_from_presenter(self, tab_presenter):
+        """Given the presenter of a tab, forgets the tab's presenter and view
+        by setting them to none, for example when the tab view is closed."""
+        for index, view_name_pair in enumerate(self.tab_widget_views):
+            if view_name_pair:
+                view, name = view_name_pair
+                if view == tab_presenter.view:
+                    self.tab_widget_views[index] = None
+                    break
+
+        for index, presenter in enumerate(self.tab_widget_presenters):
+            if presenter == tab_presenter:
+                self.tab_widget_presenters[index] = None
+                return
+
+    def configure_curves_tab(self, axes, curve):
+        curves_tab_presenter = self.tab_widget_presenters[2]
+        if not curves_tab_presenter:
+            return
+        curves_tab_widget, _ = self.tab_widget_views[1]
+
+        try:
+            curves_tab_presenter.set_axes_from_object(axes)
+        except ValueError as err:
+            if str(err) == "Axes object does not exist in curves tab":
+                # This can happen when there are no curves on the given axes.
+                return
+            raise err
+
+        self.view.set_current_tab_widget(curves_tab_widget)
+
+        if curve:
+            try:
+                curves_tab_presenter.set_curve_from_object(curve)
+            except ValueError as err:
+                if str(err) == "Curve object does not exist in curves tab":
+                    return
+                raise err

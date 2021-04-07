@@ -9,7 +9,7 @@
 Description
 -----------
 
-This is a hybrid between :ref:`algm-IntegratePeaksMD` and :ref:`algm-IntegratePeaksUsingClusters`. Each peak region is treated as a separate image and rebinned accordingly. The background threshold is automatically determined around each peak, by averaging over all pixels in that region. 
+This is a hybrid between :ref:`algm-IntegratePeaksMD` and :ref:`algm-IntegratePeaksUsingClusters`. Each peak region is treated as a separate image and rebinned accordingly. The background threshold is automatically determined around each peak, by averaging over all pixels in that region.
 The NumberOfBins and BackgroundOuterRadius are global to all Peaks. The actual background threshold is calculated independently for each peak based on NumberOfBins, BackgroundOuterRadius and the signal values in that region. This algorithm is in general faster than :ref:`algm-IntegratePeaksUsingClusters` and has a better ability to distinguish peaks from the background because each peak is treated independently.
 
 Integrates arbitrary shaped single crystal peaks defined on an
@@ -72,11 +72,11 @@ Usage
       # Predict peaks
       predicted = PredictPeaks(sxd)
       # Keep every 20th predicted peak for speed
-      rows_to_delete = set(range(predicted.getNumberPeaks())) - set([i for i in range(predicted.getNumberPeaks()) if i % 20 == 0]) 
+      rows_to_delete = set(range(predicted.getNumberPeaks())) - set([i for i in range(predicted.getNumberPeaks()) if i % 20 == 0])
       DeleteTableRows(predicted, Rows=list(rows_to_delete))
 
       # Set the Frame to QLab
-      mdws = CreateMDWorkspace(Dimensions=3, Extents='-10,10,-10,10,-10,10', 
+      mdws = CreateMDWorkspace(Dimensions=3, Extents='-10,10,-10,10,-10,10',
                                              Names='Q_lab_x,Q_lab_y,Q_lab_z', Frames = "QLab,QLab,QLab",
                                              Units='U,U,U')
       qlab = predicted.column('QLab')

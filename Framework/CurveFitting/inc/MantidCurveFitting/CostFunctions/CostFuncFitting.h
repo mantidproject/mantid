@@ -54,8 +54,7 @@ public:
   virtual double valAndDeriv(std::vector<double> &der) const override;
   /// Calculate the value, the first and the second derivatives of the cost
   /// function
-  virtual double valDerivHessian(bool evalDeriv = true,
-                                 bool evalHessian = true) const;
+  virtual double valDerivHessian(bool evalDeriv = true, bool evalHessian = true) const;
   const GSLVector &getDeriv() const;
   const GSLMatrix &getHessian() const;
   void push();
@@ -63,8 +62,7 @@ public:
   void drop();
 
   /// Set fitting function.
-  virtual void setFittingFunction(API::IFunction_sptr function,
-                                  API::FunctionDomain_sptr domain,
+  virtual void setFittingFunction(API::IFunction_sptr function, API::FunctionDomain_sptr domain,
                                   API::FunctionValues_sptr values);
   /// Get fitting function.
   virtual API::IFunction_sptr getFittingFunction() const { return m_function; }
@@ -87,18 +85,14 @@ public:
 
 protected:
   /// Calculates covariance matrix for fitting function's active parameters.
-  virtual void calActiveCovarianceMatrix(GSLMatrix &covar,
-                                         double epsrel = 1e-8);
+  virtual void calActiveCovarianceMatrix(GSLMatrix &covar, double epsrel = 1e-8);
   /// Increment to the cost function by evaluating it on a domain
-  virtual void addVal(API::FunctionDomain_sptr domain,
-                      API::FunctionValues_sptr values) const = 0;
+  virtual void addVal(API::FunctionDomain_sptr domain, API::FunctionValues_sptr values) const = 0;
 
   /// Increments the cost function and its derivatives by evaluating them on a
   /// domain
-  virtual void addValDerivHessian(API::IFunction_sptr function,
-                                  API::FunctionDomain_sptr domain,
-                                  API::FunctionValues_sptr values,
-                                  bool evalDeriv = true,
+  virtual void addValDerivHessian(API::IFunction_sptr function, API::FunctionDomain_sptr domain,
+                                  API::FunctionValues_sptr values, bool evalDeriv = true,
                                   bool evalHessian = true) const = 0;
 
   bool isValid() const;

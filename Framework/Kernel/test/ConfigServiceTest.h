@@ -42,19 +42,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(log1.error("an error string"));
     TS_ASSERT_THROWS_NOTHING(log1.fatal("a fatal string"));
 
-    TS_ASSERT_THROWS_NOTHING(
-        log1.fatal() << "A fatal message from the stream operators " << 4.5
-                     << '\n';
-        log1.error() << "A error message from the stream operators " << -0.2
-                     << '\n';
-        log1.warning() << "A warning message from the stream operators "
-                       << 999.99 << '\n';
-        log1.notice() << "A notice message from the stream operators " << 0.0
-                      << '\n';
-        log1.information() << "A information message from the stream operators "
-                           << -999.99 << '\n';
-        log1.debug() << "A debug message from the stream operators " << 5684568
-                     << '\n';
+    TS_ASSERT_THROWS_NOTHING(log1.fatal() << "A fatal message from the stream operators " << 4.5 << '\n';
+                             log1.error() << "A error message from the stream operators " << -0.2 << '\n';
+                             log1.warning() << "A warning message from the stream operators " << 999.99 << '\n';
+                             log1.notice() << "A notice message from the stream operators " << 0.0 << '\n';
+                             log1.information()
+                             << "A information message from the stream operators " << -999.99 << '\n';
+                             log1.debug() << "A debug message from the stream operators " << 5684568 << '\n';
 
     );
 
@@ -72,22 +66,18 @@ public:
     Logger log1("logTestEnabled");
     TS_ASSERT(log1.getEnabled());
     TS_ASSERT_THROWS_NOTHING(log1.fatal("a fatal string with enabled=true"));
-    TS_ASSERT_THROWS_NOTHING(
-        log1.fatal()
-            << "A fatal message from the stream operators with enabled=true "
-            << 4.5 << '\n';);
+    TS_ASSERT_THROWS_NOTHING(log1.fatal()
+                                 << "A fatal message from the stream operators with enabled=true " << 4.5 << '\n';);
 
     TS_ASSERT_THROWS_NOTHING(log1.setEnabled(false));
     TS_ASSERT(!log1.getEnabled());
     TS_ASSERT_THROWS_NOTHING(log1.fatal("YOU SHOULD NEVER SEE THIS"));
-    TS_ASSERT_THROWS_NOTHING(
-        log1.fatal() << "YOU SHOULD NEVER SEE THIS VIA A STREAM\n";);
+    TS_ASSERT_THROWS_NOTHING(log1.fatal() << "YOU SHOULD NEVER SEE THIS VIA A STREAM\n";);
 
     TS_ASSERT_THROWS_NOTHING(log1.setEnabled(true));
     TS_ASSERT(log1.getEnabled());
     TS_ASSERT_THROWS_NOTHING(log1.fatal("you are allowed to see this"));
-    TS_ASSERT_THROWS_NOTHING(
-        log1.fatal() << "you are allowed to see this via a stream\n";);
+    TS_ASSERT_THROWS_NOTHING(log1.fatal() << "you are allowed to see this via a stream\n";);
   }
 
   void testLogLevelOffset() {
@@ -96,35 +86,25 @@ public:
     log1.setLevelOffset(0);
     TS_ASSERT_THROWS_NOTHING(log1.fatal("a fatal string with offset 0"));
     log1.setLevelOffset(-1);
-    TS_ASSERT_THROWS_NOTHING(
-        log1.fatal("a fatal string with offset -1 should still be fatal"));
-    TS_ASSERT_THROWS_NOTHING(log1.information(
-        "a information string with offset -1 should be notice"));
+    TS_ASSERT_THROWS_NOTHING(log1.fatal("a fatal string with offset -1 should still be fatal"));
+    TS_ASSERT_THROWS_NOTHING(log1.information("a information string with offset -1 should be notice"));
     log1.setLevelOffset(1);
-    TS_ASSERT_THROWS_NOTHING(
-        log1.fatal("a fatal string with offset 1 should be critical"));
-    TS_ASSERT_THROWS_NOTHING(
-        log1.notice("a notice string with offset 1 should be information"));
-    TS_ASSERT_THROWS_NOTHING(
-        log1.debug("a debug string with offset 1 should be debug"));
+    TS_ASSERT_THROWS_NOTHING(log1.fatal("a fatal string with offset 1 should be critical"));
+    TS_ASSERT_THROWS_NOTHING(log1.notice("a notice string with offset 1 should be information"));
+    TS_ASSERT_THROWS_NOTHING(log1.debug("a debug string with offset 1 should be debug"));
     log1.setLevelOffset(999);
-    TS_ASSERT_THROWS_NOTHING(
-        log1.fatal("a fatal string with offset 999 should  be trace"));
-    TS_ASSERT_THROWS_NOTHING(
-        log1.notice("a notice string with offset 999 should be trace"));
-    TS_ASSERT_THROWS_NOTHING(
-        log1.debug("a debug string with offset 999 should be trace"));
+    TS_ASSERT_THROWS_NOTHING(log1.fatal("a fatal string with offset 999 should  be trace"));
+    TS_ASSERT_THROWS_NOTHING(log1.notice("a notice string with offset 999 should be trace"));
+    TS_ASSERT_THROWS_NOTHING(log1.debug("a debug string with offset 999 should be trace"));
   }
 
   void testLogLevelChanges() {
     Logger log1("testLogLevelChangesWithFilteringLevels");
     TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setLogLevel(4));
-    TSM_ASSERT("The log level should be 4 after the filters are set to 4",
-               log1.is(4));
+    TSM_ASSERT("The log level should be 4 after the filters are set to 4", log1.is(4));
 
     TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setLogLevel(3));
-    TSM_ASSERT("The log level should be 3 after the filters are set to 3",
-               log1.is(3));
+    TSM_ASSERT("The log level should be 3 after the filters are set to 3", log1.is(3));
 
     // return back to previous values
     TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setLogLevel(4));
@@ -159,10 +139,8 @@ public:
   }
 
   void testFacilityList() {
-    std::vector<FacilityInfo *> facilities =
-        ConfigService::Instance().getFacilities();
-    std::vector<std::string> names =
-        ConfigService::Instance().getFacilityNames();
+    std::vector<FacilityInfo *> facilities = ConfigService::Instance().getFacilities();
+    std::vector<std::string> names = ConfigService::Instance().getFacilityNames();
 
     TS_ASSERT_LESS_THAN(0, names.size());
     TS_ASSERT_EQUALS(facilities.size(), names.size());
@@ -178,51 +156,36 @@ public:
     ConfigService::Instance().setFacility("SNS");
 
     // Try and find some instruments from a facility
-    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("BASIS").name(),
-                     "BASIS");
-    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("REF_L").name(),
-                     "REF_L");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("BASIS").name(), "BASIS");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("REF_L").name(), "REF_L");
 
     // Now find some from other facilities
-    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("OSIRIS").name(),
-                     "OSIRIS");
-    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("BIOSANS").name(),
-                     "BIOSANS");
-    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("NGSANS").name(),
-                     "NGSANS");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("OSIRIS").name(), "OSIRIS");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("BIOSANS").name(), "BIOSANS");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("NGSANS").name(), "NGSANS");
 
     // Check we throw the correct error for a nonsense beamline.
     // TS_ASSERT_THROWS(ConfigService::Instance().getInstrument("MyBeamline").name(),
     // const NotFoundError &);
 
     // Now find by using short name
-    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("BSS").name(),
-                     "BASIS");
-    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("MAR").name(),
-                     "MARI");
-    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("PG3").name(),
-                     "POWGEN");
-    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("OSI").name(),
-                     "OSIRIS");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("BSS").name(), "BASIS");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("MAR").name(), "MARI");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("PG3").name(), "POWGEN");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("OSI").name(), "OSIRIS");
     //    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("HiResSANS").name(),
     //    "GPSANS");
 
     // Now find some with the wrong case
-    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("baSis").name(),
-                     "BASIS");
-    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("TOPaZ").name(),
-                     "TOPAZ");
-    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("Seq").name(),
-                     "SEQUOIA");
-    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("eqsans").name(),
-                     "EQ-SANS");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("baSis").name(), "BASIS");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("TOPaZ").name(), "TOPAZ");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("Seq").name(), "SEQUOIA");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("eqsans").name(), "EQ-SANS");
 
     // Set the default instrument
     ConfigService::Instance().setString("default.instrument", "OSIRIS");
-    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("").name(),
-                     "OSIRIS");
-    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument().name(),
-                     "OSIRIS");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("").name(), "OSIRIS");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument().name(), "OSIRIS");
   }
 
   void testSystemValues() {
@@ -236,36 +199,25 @@ public:
     TS_ASSERT_LESS_THAN(0,
                         osArch.length()); // check that the string is not empty
     std::string osCompName = ConfigService::Instance().getComputerName();
-    TS_ASSERT_LESS_THAN(
-        0, osCompName.length()); // check that the string is not empty
+    TS_ASSERT_LESS_THAN(0, osCompName.length()); // check that the string is not empty
     std::string username = ConfigService::Instance().getUsername();
     TS_ASSERT_LESS_THAN(0, username.length());
-    TS_ASSERT_LESS_THAN(0, ConfigService::Instance()
-                               .getOSVersion()
-                               .length()); // check that the string is not empty
-    TS_ASSERT_LESS_THAN(
-        0, ConfigService::Instance().getOSVersionReadable().length());
-    TS_ASSERT_LESS_THAN(0, ConfigService::Instance()
-                               .getCurrentDir()
-                               .length()); // check that the string is not empty
+    TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getOSVersion().length()); // check that the string is not empty
+    TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getOSVersionReadable().length());
+    TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getCurrentDir().length()); // check that the string is not empty
     //        TS_ASSERT_LESS_THAN(0,
     //        ConfigService::Instance().getHomeDir().length()); //check that the
     //        string is not empty
-    TS_ASSERT_LESS_THAN(0, ConfigService::Instance()
-                               .getTempDir()
-                               .length()); // check that the string is not empty
+    TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getTempDir().length()); // check that the string is not empty
 
     std::string appdataDir = ConfigService::Instance().getAppDataDir();
     TS_ASSERT_LESS_THAN(0, appdataDir.length());
 #ifdef _WIN32
-    std::string::size_type index =
-        appdataDir.find("\\AppData\\Roaming\\mantidproject\\mantid");
-    TSM_ASSERT_LESS_THAN("Could not find correct path in getAppDataDir()",
-                         index, appdataDir.size());
+    std::string::size_type index = appdataDir.find("\\AppData\\Roaming\\mantidproject\\mantid");
+    TSM_ASSERT_LESS_THAN("Could not find correct path in getAppDataDir()", index, appdataDir.size());
 #else
     std::string::size_type index = appdataDir.find("/.mantid");
-    TSM_ASSERT_LESS_THAN("Could not find correct path in getAppDataDir()",
-                         index, appdataDir.size());
+    TSM_ASSERT_LESS_THAN("Could not find correct path in getAppDataDir()", index, appdataDir.size());
 #endif
   }
 
@@ -274,26 +226,21 @@ public:
     auto directories = ConfigService::Instance().getInstrumentDirectories();
     TS_ASSERT_LESS_THAN(1, directories.size());
     // the first entry should be the AppDataDir + instrument
-    TSM_ASSERT_LESS_THAN(
-        "Could not find the appData directory in getInstrumentDirectories()[0]",
-        directories[0].find(ConfigService::Instance().getAppDataDir()),
-        directories[0].size());
+    TSM_ASSERT_LESS_THAN("Could not find the appData directory in getInstrumentDirectories()[0]",
+                         directories[0].find(ConfigService::Instance().getAppDataDir()), directories[0].size());
     TSM_ASSERT_LESS_THAN("Could not find the 'instrument' directory in "
                          "getInstrumentDirectories()[0]",
-                         directories[0].find("instrument"),
-                         directories[0].size());
+                         directories[0].find("instrument"), directories[0].size());
 
     if (directories.size() == 3) {
       // The middle entry should be /etc/mantid/instrument
       TSM_ASSERT_LESS_THAN("Could not find /etc/mantid/instrument path in "
                            "getInstrumentDirectories()[1]",
-                           directories[1].find("etc/mantid/instrument"),
-                           directories[1].size());
+                           directories[1].find("etc/mantid/instrument"), directories[1].size());
     }
     // Check that the last directory matches that returned by
     // getInstrumentDirectory
-    TS_ASSERT_EQUALS(directories.back(),
-                     ConfigService::Instance().getInstrumentDirectory());
+    TS_ASSERT_EQUALS(directories.back(), ConfigService::Instance().getInstrumentDirectory());
 
     // check all of the directory entries actually exist
     for (auto &directoryPath : directories) {
@@ -304,8 +251,7 @@ public:
 
   void testSetInstrumentDirectory() {
 
-    auto originalDirectories =
-        ConfigService::Instance().getInstrumentDirectories();
+    auto originalDirectories = ConfigService::Instance().getInstrumentDirectories();
     std::vector<std::string> testDirectories;
     testDirectories.emplace_back("Test Directory 1");
     testDirectories.emplace_back("Test Directory 2");
@@ -323,19 +269,14 @@ public:
   }
 
   void testCustomProperty() {
-    std::string countString =
-        ConfigService::Instance().getString("projectRecovery.secondsBetween");
+    std::string countString = ConfigService::Instance().getString("projectRecovery.secondsBetween");
     TS_ASSERT_EQUALS(countString, "60");
   }
 
   void testCustomPropertyAsValue() {
     // Mantid.legs is defined in the properties script as 6
-    int value = ConfigService::Instance()
-                    .getValue<int>("projectRecovery.secondsBetween")
-                    .get_value_or(0);
-    double dblValue = ConfigService::Instance()
-                          .getValue<double>("projectRecovery.secondsBetween")
-                          .get_value_or(0);
+    int value = ConfigService::Instance().getValue<int>("projectRecovery.secondsBetween").get_value_or(0);
+    double dblValue = ConfigService::Instance().getValue<double>("projectRecovery.secondsBetween").get_value_or(0);
 
     TS_ASSERT_EQUALS(value, 60);
     TS_ASSERT_EQUALS(dblValue, 60.0);
@@ -343,8 +284,7 @@ public:
 
   void testMissingProperty() {
     // Mantid.noses is not defined in the properties script
-    std::string noseCountString =
-        ConfigService::Instance().getString("mantid.noses");
+    std::string noseCountString = ConfigService::Instance().getString("mantid.noses");
     // this should return an empty string
 
     TS_ASSERT_EQUALS(noseCountString, "");
@@ -353,8 +293,7 @@ public:
   void testAppendProperties() {
 
     // This should clear out all old properties
-    const std::string propfilePath =
-        ConfigService::Instance().getDirectoryOfExecutable();
+    const std::string propfilePath = ConfigService::Instance().getDirectoryOfExecutable();
     const std::string propfile = propfilePath + "MantidTest.properties";
     ConfigService::Instance().updateConfig(propfile);
     // this should return an empty string
@@ -364,8 +303,7 @@ public:
     TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.thorax"), "1");
 
     // This should append a new properties file properties
-    ConfigService::Instance().updateConfig(
-        propfilePath + "MantidTest.user.properties", true);
+    ConfigService::Instance().updateConfig(propfilePath + "MantidTest.user.properties", true);
     // this should now be valid
     TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.noses"), "5");
     // this should have been overridden
@@ -383,9 +321,7 @@ public:
   }
 
   void testSaveConfigCleanFile() {
-    const std::string propfile =
-        ConfigService::Instance().getDirectoryOfExecutable() +
-        "MantidTest.properties";
+    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
     ConfigService::Instance().updateConfig(propfile);
 
     const std::string filename("user.settings");
@@ -433,9 +369,7 @@ public:
     writer << "mantid.legs = " << value << "\n";
     writer.close();
 
-    const std::string propfile =
-        ConfigService::Instance().getDirectoryOfExecutable() +
-        "MantidTest.properties";
+    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
     ConfigService::Instance().updateConfig(propfile);
     ConfigService::Instance().setString("mantid.legs", value);
     ConfigService::Instance().updateConfig(propfile, false, false);
@@ -458,9 +392,7 @@ public:
     } catch (Poco::Exception &) {
     }
 
-    const std::string propfile =
-        ConfigService::Instance().getDirectoryOfExecutable() +
-        "MantidTest.properties";
+    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
     settings.updateConfig(propfile);
     settings.setString("mantid.legs", "15");
 
@@ -479,8 +411,7 @@ public:
   }
 
   void testSaveConfigWithPropertyRemoved() {
-    const std::string filename(
-        "user.settings.testSaveConfigWithPropertyRemoved");
+    const std::string filename("user.settings.testSaveConfigWithPropertyRemoved");
     Poco::File prop_file(filename);
     if (prop_file.exists())
       prop_file.remove();
@@ -577,8 +508,7 @@ public:
     TS_ASSERT_EQUALS(prop_lines.size(), 3);
     TS_ASSERT_EQUALS(prop_lines[0], "mantid.legs=15");
     TS_ASSERT_EQUALS(prop_lines[1], "");
-    TS_ASSERT_EQUALS(prop_lines[2],
-                     "search.directories=/test1;/test2;/test3;/test4");
+    TS_ASSERT_EQUALS(prop_lines[2], "search.directories=/test1;/test2;/test3;/test4");
 
     // Clean up
     // prop_file.remove();
@@ -586,8 +516,8 @@ public:
 
   // Test that the ValueChanged notification is sent
   void testNotifications() {
-    Poco::NObserver<ConfigServiceTest, ConfigServiceImpl::ValueChanged>
-        changeObserver(*this, &ConfigServiceTest::handleConfigChange);
+    Poco::NObserver<ConfigServiceTest, ConfigServiceImpl::ValueChanged> changeObserver(
+        *this, &ConfigServiceTest::handleConfigChange);
     m_valueChangedSent = false;
 
     ConfigServiceImpl &settings = ConfigService::Instance();
@@ -603,14 +533,11 @@ public:
   }
 
   void testGetKeysWithValidInput() {
-    const std::string propfile =
-        ConfigService::Instance().getDirectoryOfExecutable() +
-        "MantidTest.properties";
+    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
     ConfigService::Instance().updateConfig(propfile);
 
     // Returns all subkeys with the given root key
-    std::vector<std::string> keyVector =
-        ConfigService::Instance().getKeys("workspace.sendto");
+    std::vector<std::string> keyVector = ConfigService::Instance().getKeys("workspace.sendto");
     TS_ASSERT_EQUALS(keyVector.size(), 4);
     TS_ASSERT_EQUALS(keyVector[0], "1");
     TS_ASSERT_EQUALS(keyVector[1], "2");
@@ -619,23 +546,17 @@ public:
   }
 
   void testGetKeysWithZeroSubKeys() {
-    const std::string propfile =
-        ConfigService::Instance().getDirectoryOfExecutable() +
-        "MantidTest.properties";
+    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
     ConfigService::Instance().updateConfig(propfile);
 
-    std::vector<std::string> keyVector =
-        ConfigService::Instance().getKeys("mantid.legs");
+    std::vector<std::string> keyVector = ConfigService::Instance().getKeys("mantid.legs");
     TS_ASSERT_EQUALS(keyVector.size(), 0);
-    std::vector<std::string> keyVector2 =
-        ConfigService::Instance().getKeys("mantidlegs");
+    std::vector<std::string> keyVector2 = ConfigService::Instance().getKeys("mantidlegs");
     TS_ASSERT_EQUALS(keyVector2.size(), 0);
   }
 
   void testGetKeysWithEmptyPrefix() {
-    const std::string propfile =
-        ConfigService::Instance().getDirectoryOfExecutable() +
-        "MantidTest.properties";
+    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
     ConfigService::Instance().updateConfig(propfile);
 
     // Returns all *root* keys, i.e. unique keys left of the first period
@@ -644,8 +565,7 @@ public:
   }
 
   void testGetAllKeys() {
-    const std::string propfilePath =
-        ConfigService::Instance().getDirectoryOfExecutable();
+    const std::string propfilePath = ConfigService::Instance().getDirectoryOfExecutable();
     const std::string propfile = propfilePath + "MantidTest.properties";
     ConfigService::Instance().updateConfig(propfile);
 
@@ -655,9 +575,7 @@ public:
   }
 
   void testRemovingProperty() {
-    const std::string propfile =
-        ConfigService::Instance().getDirectoryOfExecutable() +
-        "MantidTest.properties";
+    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
     ConfigService::Instance().updateConfig(propfile);
 
     std::string rootName = "mantid.legs";
@@ -675,9 +593,7 @@ protected:
   std::string m_key;
   std::string m_preValue;
   std::string m_curValue;
-  void handleConfigChange(
-      const Poco::AutoPtr<Mantid::Kernel::ConfigServiceImpl::ValueChanged>
-          &pNf) {
+  void handleConfigChange(const Poco::AutoPtr<Mantid::Kernel::ConfigServiceImpl::ValueChanged> &pNf) {
     m_valueChangedSent = true;
     m_key = pNf->key();
     m_preValue = pNf->preValue();
@@ -720,7 +636,6 @@ private:
 
   std::string readFile(const std::string &filename) {
     std::ifstream reader(filename.c_str());
-    return std::string((std::istreambuf_iterator<char>(reader)),
-                       std::istreambuf_iterator<char>());
+    return std::string((std::istreambuf_iterator<char>(reader)), std::istreambuf_iterator<char>());
   }
 };

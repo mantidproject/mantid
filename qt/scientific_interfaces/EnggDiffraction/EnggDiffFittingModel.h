@@ -17,24 +17,18 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffFittingModel
-    : public IEnggDiffFittingModel {
+class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffFittingModel : public IEnggDiffFittingModel {
 
 public:
-  Mantid::API::MatrixWorkspace_sptr
-  getFocusedWorkspace(const RunLabel &runLabel) const override;
+  Mantid::API::MatrixWorkspace_sptr getFocusedWorkspace(const RunLabel &runLabel) const override;
 
-  Mantid::API::MatrixWorkspace_sptr
-  getAlignedWorkspace(const RunLabel &runLabel) const override;
+  Mantid::API::MatrixWorkspace_sptr getAlignedWorkspace(const RunLabel &runLabel) const override;
 
-  Mantid::API::MatrixWorkspace_sptr
-  getFittedPeaksWS(const RunLabel &runLabel) const override;
+  Mantid::API::MatrixWorkspace_sptr getFittedPeaksWS(const RunLabel &runLabel) const override;
 
-  Mantid::API::ITableWorkspace_sptr
-  getFitResults(const RunLabel &runLabel) const override;
+  Mantid::API::ITableWorkspace_sptr getFitResults(const RunLabel &runLabel) const override;
 
-  const std::string &
-  getWorkspaceFilename(const RunLabel &runLabel) const override;
+  const std::string &getWorkspaceFilename(const RunLabel &runLabel) const override;
 
   void removeRun(const RunLabel &runLabel) override;
 
@@ -42,15 +36,11 @@ public:
 
   std::vector<RunLabel> getRunLabels() const override;
 
-  void
-  setDifcTzero(const RunLabel &runLabel,
-               const std::vector<GSASCalibrationParms> &calibParams) override;
+  void setDifcTzero(const RunLabel &runLabel, const std::vector<GSASCalibrationParms> &calibParams) override;
 
-  void enggFitPeaks(const RunLabel &runLabel,
-                    const std::string &expectedPeaks) override;
+  void enggFitPeaks(const RunLabel &runLabel, const std::string &expectedPeaks) override;
 
-  void saveFitResultsToHDF5(const std::vector<RunLabel> &runLabels,
-                            const std::string &filename) const override;
+  void saveFitResultsToHDF5(const std::vector<RunLabel> &runLabels, const std::string &filename) const override;
 
   void createFittedPeaksWS(const RunLabel &runLabel) override;
 
@@ -63,12 +53,10 @@ public:
   bool hasFittedPeaksForRun(const RunLabel &runLabel) const override;
 
 protected:
-  void addFocusedWorkspace(const RunLabel &runLabel,
-                           const Mantid::API::MatrixWorkspace_sptr &ws,
+  void addFocusedWorkspace(const RunLabel &runLabel, const Mantid::API::MatrixWorkspace_sptr &ws,
                            const std::string &filename);
 
-  void addFitResults(const RunLabel &runLabel,
-                     const Mantid::API::ITableWorkspace_sptr &ws);
+  void addFitResults(const RunLabel &runLabel, const Mantid::API::ITableWorkspace_sptr &ws);
 
   void mergeTables(const Mantid::API::ITableWorkspace_sptr &tableToCopy,
                    const Mantid::API::ITableWorkspace_sptr &targetTable) const;
@@ -88,64 +76,46 @@ private:
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_fittedPeaksMap;
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_alignedWorkspaceMap;
 
-  std::string createFunctionString(
-      const Mantid::API::ITableWorkspace_sptr &fitFunctionParams,
-      const size_t row);
+  std::string createFunctionString(const Mantid::API::ITableWorkspace_sptr &fitFunctionParams, const size_t row);
 
-  std::pair<double, double> getStartAndEndXFromFitParams(
-      const Mantid::API::ITableWorkspace_sptr &fitFunctionParams,
-      const size_t row);
+  std::pair<double, double> getStartAndEndXFromFitParams(const Mantid::API::ITableWorkspace_sptr &fitFunctionParams,
+                                                         const size_t row);
 
-  void evaluateFunction(const std::string &function,
-                        const Mantid::API::MatrixWorkspace_sptr &inputWS,
-                        const std::string &outputWSName, const double startX,
-                        const double endX);
+  void evaluateFunction(const std::string &function, const Mantid::API::MatrixWorkspace_sptr &inputWS,
+                        const std::string &outputWSName, const double startX, const double endX);
 
-  void cropWorkspace(const std::string &inputWSName,
-                     const std::string &outputWSName, const int startWSIndex,
+  void cropWorkspace(const std::string &inputWSName, const std::string &outputWSName, const int startWSIndex,
                      const int endWSIndex);
 
-  void rebinToFocusedWorkspace(const std::string &wsToRebinName,
-                               const RunLabel &runLabelToMatch,
+  void rebinToFocusedWorkspace(const std::string &wsToRebinName, const RunLabel &runLabelToMatch,
                                const std::string &outputWSName);
 
-  void cloneWorkspace(const Mantid::API::MatrixWorkspace_sptr &inputWorkspace,
-                      const std::string &outputWSName) const;
+  void cloneWorkspace(const Mantid::API::MatrixWorkspace_sptr &inputWorkspace, const std::string &outputWSName) const;
 
-  void cloneWorkspace(const Mantid::API::ITableWorkspace_sptr &inputWorkspace,
-                      const std::string &outputWSName) const;
+  void cloneWorkspace(const Mantid::API::ITableWorkspace_sptr &inputWorkspace, const std::string &outputWSName) const;
 
-  void setDataToClonedWS(const std::string &wsToCopyName,
-                         const std::string &targetWSName);
+  void setDataToClonedWS(const std::string &wsToCopyName, const std::string &targetWSName);
 
-  void appendSpectra(const std::string &ws1Name,
-                     const std::string &ws2Name) const;
+  void appendSpectra(const std::string &ws1Name, const std::string &ws2Name) const;
 
-  std::tuple<double, double, double>
-  getDifcDifaTzero(const Mantid::API::MatrixWorkspace_const_sptr &ws);
+  std::tuple<double, double, double> getDifcDifaTzero(const Mantid::API::MatrixWorkspace_const_sptr &ws);
 
-  Mantid::API::ITableWorkspace_sptr createCalibrationParamsTable(
-      const Mantid::API::MatrixWorkspace_const_sptr &inputWS);
+  Mantid::API::ITableWorkspace_sptr
+  createCalibrationParamsTable(const Mantid::API::MatrixWorkspace_const_sptr &inputWS);
 
-  void
-  convertFromDistribution(const Mantid::API::MatrixWorkspace_sptr &inputWS);
+  void convertFromDistribution(const Mantid::API::MatrixWorkspace_sptr &inputWS);
 
-  void alignDetectors(const std::string &inputWSName,
-                      const std::string &outputWSName);
+  void alignDetectors(const std::string &inputWSName, const std::string &outputWSName);
 
-  void alignDetectors(const Mantid::API::MatrixWorkspace_sptr &inputWS,
-                      const std::string &outputWSName);
+  void alignDetectors(const Mantid::API::MatrixWorkspace_sptr &inputWS, const std::string &outputWSName);
 
   void loadWorkspace(const std::string &filename, const std::string &wsName);
 
-  void renameWorkspace(const Mantid::API::Workspace_sptr &inputWS,
-                       const std::string &newName) const;
+  void renameWorkspace(const Mantid::API::Workspace_sptr &inputWS, const std::string &newName) const;
 
-  void groupWorkspaces(const std::vector<std::string> &workspaceNames,
-                       const std::string &outputWSName);
+  void groupWorkspaces(const std::vector<std::string> &workspaceNames, const std::string &outputWSName);
 
-  size_t
-  guessBankID(const Mantid::API::MatrixWorkspace_const_sptr & /*ws*/) const;
+  size_t guessBankID(const Mantid::API::MatrixWorkspace_const_sptr & /*ws*/) const;
 };
 
 } // namespace CustomInterfaces

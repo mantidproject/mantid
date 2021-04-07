@@ -1,7 +1,7 @@
 .. _sequence_data_types:
 
 ===================
-Sequence Data Types 
+Sequence Data Types
 ===================
 
 -  Python supports a range of types to store sequences. Here we will
@@ -34,13 +34,13 @@ Sequence Data Types
    lottery_numbers.append(bonus)
 
    # print the first element
-   print(lottery_numbers[0])  
+   print(lottery_numbers[0])
    # print the last element
-   print(lottery_numbers[6])  
-   print(lottery_numbers) 
+   print(lottery_numbers[6])
+   print(lottery_numbers)
    lottery_numbers.remove(5) # Removes first occurrence of value 5 in list
    del lottery_numbers[0]  # Removes the 0th element of the list
-   print(lottery_numbers) 
+   print(lottery_numbers)
 
    lottery_numbers[3] = 42
    print(lottery_numbers)
@@ -78,10 +78,10 @@ Givest the output:
 .. testcode:: slice1
 
    my_list = ['M','A', 'N', 'T', 'I', 'D']
-   print(my_list[1:4])  
+   print(my_list[1:4])
 
    my_string = 'MANTID'
-   print(my_string[1:4])  
+   print(my_string[1:4])
 
 Gives the output:
 
@@ -96,9 +96,9 @@ Gives the output:
 .. testcode:: sort1
 
    my_list = [5,4,3,2,7]
-   print(my_list)   
+   print(my_list)
    my_list.sort()
-   print(my_list)  
+   print(my_list)
 
 Gives the output:
 
@@ -115,7 +115,7 @@ Gives the output:
 
    l = [5,4,3,2,7]
    l.sort(reverse=True)
-   print(l)  #prints list in descending order 
+   print(l)  #prints list in descending order
 
 Gives the output:
 

@@ -19,6 +19,11 @@ This algorithm adjusts the position of the moderator as well as the position and
 of detector pixels. The goal of these adjustments is to produce neutron paths and scattering angles that lead
 to optimal comparison between observed and reference lattice plane spacings
 
+It is recommended *not* to adjust the position of the moderator, but only that of the banks. By setting
+all calibrations at a fixed source-to-sample distance, calibrations taken at different times
+and with different samples can be combined. the default value (`SourceSampleDistance=20.004`) is
+the result of adjusting the position of the moderator with three different samples (Si, LaB6, and CsLaNb2O7).
+
 The execution workflow is as follows:
 
 .. diagram:: CorelliPowderCalibrationCreate-v1_wkflw.dot
@@ -70,16 +75,16 @@ Workspace ``LaB6_adjustments`` is the main result, a table containing adjustment
 In our example, we have adjusted the moderator and banks 42 and 87.
 
 +--------------------+------------+-----------+-----------+------------------+------------------+------------------+---------------+
-| Component          | Xposition  | Yposition | Zposition | XdirectionCosine | YdirectionCosine | ZdirectionCosine | RotationAngle |
+| ComponentName      | Xposition  | Yposition | Zposition | XdirectionCosine | YdirectionCosine | ZdirectionCosine | RotationAngle |
 +====================+============+===========+===========+==================+==================+==================+===============+
 | moderator          | 0.0        | 0.0       | -19.9944  |      0.0         |      0.0         |      0.0         |      0.0      |
 +--------------------+------------+-----------+-----------+------------------+------------------+------------------+---------------+
 | bank42/sixteenpack | 2.5941     | 0.0625    | 0.0870    | 0.0009           | -0.9997          | 0.0210           |       92.3187 |
 +--------------------+------------+-----------+-----------+------------------+------------------+------------------+---------------+
 
-- ``Xposition``, ``Yposition``, ``Zposition``: coordinates for the center of ``Component`` in the lab's frame of reference. Units are in Angstroms.
-- ``XdirectionCosine``, ``YdirectionCosine``, ``ZdirectionCosine``: direction cosines in the lab's frame of reference. They define a rotation axis to set the orientation of ``Component``.
-- ``RotationAngle``: rotate this many degrees around the previous rotation axis to set the orientation of ``Component``.
+- ``Xposition``, ``Yposition``, ``Zposition``: coordinates for the center of ``ComponentName`` in the lab's frame of reference. Units are in Angstroms.
+- ``XdirectionCosine``, ``YdirectionCosine``, ``ZdirectionCosine``: direction cosines in the lab's frame of reference. They define a rotation axis to set the orientation of ``ComponentName``.
+- ``RotationAngle``: rotate this many degrees around the previous rotation axis to set the orientation of ``ComponentName``.
 
 The diagnostics workspaces are stored within ``WorkspaceGroup LaB6_bank_adjustment_diagnostics``. These are:
 

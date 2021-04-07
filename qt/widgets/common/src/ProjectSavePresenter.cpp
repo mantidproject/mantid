@@ -24,8 +24,7 @@ using namespace Mantid::API;
  * @param view :: a handle to a view for this presenter
  */
 ProjectSavePresenter::ProjectSavePresenter(IProjectSaveView *view)
-    : m_view(view),
-      m_model(m_view->getWindows(), m_view->getAllPythonInterfaces()) {
+    : m_view(view), m_model(m_view->getWindows(), m_view->getAllPythonInterfaces()) {
   auto workspaceNames = m_model.getWorkspaceNames();
   auto info = m_model.getWorkspaceInformation();
   auto winInfo = m_model.getWindowInformation(workspaceNames, true);
@@ -58,8 +57,7 @@ void ProjectSavePresenter::notify(Notification notification) {
  * @return true If a warning is required.
  * @return false If a warning is not neccessary.
  */
-bool ProjectSavePresenter::needsSizeWarning(
-    const std::vector<std::string> &wsNames) {
+bool ProjectSavePresenter::needsSizeWarning(const std::vector<std::string> &wsNames) {
   if (!wsNames.empty()) {
     return m_model.needsSizeWarning(wsNames);
   }
@@ -100,8 +98,7 @@ void ProjectSavePresenter::prepareProjectFolder() {
   auto path = m_view->getProjectPath();
 
   QFileInfo fileInfo(path);
-  bool isFile = fileInfo.filePath().endsWith(".mantid") ||
-                fileInfo.filePath().endsWith(".mantid.gz");
+  bool isFile = fileInfo.filePath().endsWith(".mantid") || fileInfo.filePath().endsWith(".mantid.gz");
 
   if (!isFile) {
     QDir directory(path);

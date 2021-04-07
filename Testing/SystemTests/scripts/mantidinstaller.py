@@ -52,7 +52,6 @@ def failure(installer):
         installer.uninstall()
     except Exception as exc:
         log("Could not uninstall package %s: %s" % (installer.mantidInstaller, str(exc)))
-        pass
 
     log('Tests failed')
     print('Tests failed')
@@ -143,10 +142,6 @@ class MantidInstaller(object):
             # This will put the release mantid packages at the start and the nightly ones at the end
             # with increasing version numbers
             matches.sort()
-            # Make sure we don't get Vates
-            for match in matches:
-                if 'vates'in match:
-                    matches.remove(match)
         # Take the last one as it will have the highest version number
         if len(matches) > 0:
             self.mantidInstaller = os.path.join(os.getcwd(), matches[-1])
@@ -287,9 +282,16 @@ class DMGInstaller(MantidInstaller):
     """Uses an OS X dmg file to install mantid
     """
     def __init__(self, package_dir, do_install):
-        MantidInstaller.__init__(self, package_dir, 'mantid-*.dmg', do_install)
-        bin_dir = '/Applications/MantidWorkbench.app/Contents/MacOS'
-        self.python_cmd = bin_dir + '/mantidpython'
+        MantidInstaller.__init__(self, package_dir, 'mantid*.dmg', do_install)
+        package = os.path.basename(self.mantidInstaller)
+        if 'mantidnightly' in package:
+            self.bundle_name = 'MantidWorkbenchNightly.app'
+        elif 'mantidunstable' in package:
+            self.bundle_name = 'MantidWorkbenchUnstable.app'
+        else:
+            self.bundle_name = 'MantidWorkbench.app'
+
+        self.python_cmd = f'/Applications/{self.bundle_name}/Contents/MacOS/mantidpython'
 
     def do_install(self):
         """Mounts the dmg and copies the application into the right place.
@@ -301,12 +303,14 @@ class DMGInstaller(MantidInstaller):
         mantidInstallerName = os.path.basename(self.mantidInstaller)
         mantidInstallerName = mantidInstallerName.replace('.dmg','')
         try:
-            run('sudo cp -a /Volumes/'+ mantidInstallerName + '/MantidWorkbench.app /Applications/')
+            run(f'sudo cp -a /Volumes/{mantidInstallerName}/{self.bundle_name} /Applications/')
         finally:
-            run('hdiutil detach /Volumes/'+ mantidInstallerName + '/')
+            run(f'hdiutil detach /Volumes/{mantidInstallerName}/')
 
     def do_uninstall(self):
-        run('sudo rm -fr /Applications/MantidWorkbench.app/')
+        # protect against empty bundle name removing /Applications
+        if self.bundle_name:
+            run(f'sudo rm -fr /Applications/{self.bundle_name}')
 
 
 class CondaInstaller(MantidInstaller):

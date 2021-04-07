@@ -9,6 +9,7 @@ from importlib import import_module
 
 __all__ = ['is_required_version', 'import_mantid_cext']
 
+
 def is_required_version(required_version, version):
     for version_part, required_version_part in zip(version.split('.'), required_version.split('.')):
         if int(version_part) < int(required_version_part):

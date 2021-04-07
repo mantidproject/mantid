@@ -1,6 +1,6 @@
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' Launch script for launch_mantidplot.bat
-' 
+'
 ' This is primarily used when launching via an icon. It ensures that the main
 ' launch_mantiplot.bat script is started with a hidden cmd window and only the
 ' MantidPlot application is visible.

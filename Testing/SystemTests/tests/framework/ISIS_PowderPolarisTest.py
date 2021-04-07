@@ -63,8 +63,8 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
         splined_ws, unsplined_ws = self.calibration_results
         for ws in splined_ws+unsplined_ws:
             self.assertEqual(ws.sample().getMaterial().name(), 'V')
-        return (unsplined_ws.name(), "ISIS_Powder-POLARIS00098533_unsplined.nxs",
-                splined_ws.name(), "ISIS_Powder-POLARIS00098533_splined.nxs")
+        return (unsplined_ws.name(), "ISIS_Powder-POLARIS00098532_unsplined.nxs",
+                splined_ws.name(), "ISIS_Powder-POLARIS00098532_splined.nxs")
 
     def cleanup(self):
         try:
@@ -108,7 +108,8 @@ class FocusTest(systemtesting.MantidSystemTest):
 
         for ws in self.focus_results:
             self.assertEqual(ws.sample().getMaterial().name(), 'Si')
-        self.tolerance = 1e-7
+        self.tolerance_is_rel_err = True
+        self.tolerance = 1e-6
         return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusSempty.nxs"
 
     def cleanup(self):
@@ -157,7 +158,7 @@ class TotalScatteringTest(systemtesting.MantidSystemTest):
     def runTest(self):
         setup_mantid_paths()
         # Load Focused ws
-        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace='98533-Results-TOF-Grp')
+        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace='98533-ResultTOF')
         self.pdf_output = run_total_scattering('98533', False)
 
     def validate(self):
@@ -180,7 +181,7 @@ class TotalScatteringMergedTest(systemtesting.MantidSystemTest):
     def runTest(self):
         setup_mantid_paths()
         # Load Focused ws
-        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace='98533-Results-TOF-Grp')
+        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace='98533-ResultTOF')
         q_lims = np.array([2.5, 3, 4, 6, 7, 3.5, 5, 7, 11, 40]).reshape((2, 5))
         self.pdf_output = run_total_scattering('98533', True, q_lims=q_lims)
 
@@ -198,7 +199,7 @@ class TotalScatteringPDFRebinTest(systemtesting.MantidSystemTest):
     def runTest(self):
         setup_mantid_paths()
         # Load Focused ws
-        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace='98533-Results-TOF-Grp')
+        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace='98533-ResultTOF')
         q_lims = np.array([2.5, 3, 4, 6, 7, 3.5, 5, 7, 11, 40]).reshape((2, 5))
         self.pdf_output = run_total_scattering('98533', True, q_lims=q_lims, delta_r=0.1)
 
@@ -216,7 +217,7 @@ class TotalScatteringMergedRebinTest(systemtesting.MantidSystemTest):
     def runTest(self):
         setup_mantid_paths()
         # Load Focused ws
-        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace='98533-Results-TOF-Grp')
+        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace='98533-ResultTOF')
         q_lims = np.array([2.5, 3, 4, 6, 7, 3.5, 5, 7, 11, 40]).reshape((2, 5))
         self.pdf_output = run_total_scattering('98533', True, q_lims=q_lims, delta_q=0.1)
 
@@ -234,7 +235,7 @@ class TotalScatteringPdfTypeTest(systemtesting.MantidSystemTest):
     def runTest(self):
         setup_mantid_paths()
         # Load Focused ws
-        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace='98533-Results-TOF-Grp')
+        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace='98533-ResultTOF')
         q_lims = np.array([2.5, 3, 4, 6, 7, 3.5, 5, 7, 11, 40]).reshape((2, 5))
         self.pdf_output = run_total_scattering('98533', True, q_lims=q_lims, pdf_type="g(r)")
 
@@ -252,7 +253,7 @@ class TotalScatteringFilterTest(systemtesting.MantidSystemTest):
     def runTest(self):
         setup_mantid_paths()
         # Load Focused ws
-        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace='98533-Results-TOF-Grp')
+        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace='98533-ResultTOF')
         q_lims = np.array([2.5, 3, 4, 6, 7, 3.5, 5, 7, 11, 40]).reshape((2, 5))
         self.pdf_output = run_total_scattering('98533', True, q_lims=q_lims, freq_params=[1])
 
@@ -270,7 +271,7 @@ class TotalScatteringLorchFilterTest(systemtesting.MantidSystemTest):
     def runTest(self):
         setup_mantid_paths()
         # Load Focused ws
-        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace='98533-Results-TOF-Grp')
+        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace='98533-ResultTOF')
         q_lims = np.array([2.5, 3, 4, 6, 7, 3.5, 5, 7, 11, 40]).reshape((2, 5))
         self.pdf_output = run_total_scattering('98533', True, q_lims=q_lims, lorch_filter=False)
 

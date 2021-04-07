@@ -19,13 +19,14 @@
 
 using namespace Mantid::API;
 
-const std::vector<std::string> INSTRUMENTS{"ARGUS", "CHRONUS", "EMU", "HIFI",
-                                           "MUSR"};
+const QString DEFAULT_LOG("run_number");
+const std::vector<std::string> INSTRUMENTS{"ARGUS", "CHRONUS", "EMU", "HIFI", "MUSR"};
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALCDataLoadingView::ALCDataLoadingView(QWidget *widget) : m_widget(widget) {}
+ALCDataLoadingView::ALCDataLoadingView(QWidget *widget)
+    : m_widget(widget), m_selectedLog(DEFAULT_LOG), m_numPeriods(0) {}
 
 ALCDataLoadingView::~ALCDataLoadingView() {}
 
@@ -41,14 +42,12 @@ void ALCDataLoadingView::initialize() {
   showAlphaMessage(false);
   connect(m_ui.load, SIGNAL(clicked()), SIGNAL(loadRequested()));
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
-  connect(m_ui.instrument, SIGNAL(currentTextChanged(QString)), this,
-          SLOT(instrumentChanged(QString)));
-  connect(m_ui.runs, SIGNAL(findingFiles()), SIGNAL(runsChangedSignal()));
+  connect(m_ui.instrument, SIGNAL(currentTextChanged(QString)), this, SLOT(instrumentChanged(QString)));
+  connect(m_ui.runs, SIGNAL(fileTextChanged(const QString &)), SIGNAL(runsEditingSignal()));
+  connect(m_ui.runs, SIGNAL(findingFiles()), SIGNAL(runsEditingFinishedSignal()));
   connect(m_ui.runs, SIGNAL(fileFindingFinished()), SIGNAL(runsFoundSignal()));
-  connect(m_ui.manageDirectoriesButton, SIGNAL(clicked()),
-          SIGNAL(manageDirectoriesClicked()));
-  connect(m_ui.runsAutoAdd, SIGNAL(toggled(bool)), this,
-          SLOT(runsAutoAddToggled(bool)));
+  connect(m_ui.manageDirectoriesButton, SIGNAL(clicked()), SIGNAL(manageDirectoriesClicked()));
+  connect(m_ui.runsAutoAdd, SIGNAL(toggled(bool)), this, SLOT(runsAutoAddToggled(bool)));
 
   m_ui.dataPlot->setCanvasColour(QColor(240, 240, 240));
 
@@ -59,9 +58,8 @@ void ALCDataLoadingView::initialize() {
   // The following lines disable the groups' titles when the
   // group is disabled
   QPalette palette;
-  palette.setColor(
-      QPalette::Disabled, QPalette::WindowText,
-      QApplication::palette().color(QPalette::Disabled, QPalette::WindowText));
+  palette.setColor(QPalette::Disabled, QPalette::WindowText,
+                   QApplication::palette().color(QPalette::Disabled, QPalette::WindowText));
   m_ui.dataGroup->setPalette(palette);
   m_ui.deadTimeGroup->setPalette(palette);
   m_ui.detectorGroupingGroup->setPalette(palette);
@@ -90,10 +88,8 @@ void ALCDataLoadingView::initInstruments() {
   for (const auto &instrument : INSTRUMENTS) {
     m_ui.instrument->addItem(QString::fromStdString(instrument));
   }
-  const auto userInstrument =
-      Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
-  const auto index =
-      m_ui.instrument->findText(QString::fromStdString(userInstrument));
+  const auto userInstrument = Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
+  const auto index = m_ui.instrument->findText(QString::fromStdString(userInstrument));
   if (index != -1)
     m_ui.instrument->setCurrentIndex(index);
   else
@@ -105,24 +101,16 @@ void ALCDataLoadingView::initInstruments() {
 /**
  * Returns string of selected instrument
  */
-std::string ALCDataLoadingView::getInstrument() const {
-  return m_ui.instrument->currentText().toStdString();
-}
+std::string ALCDataLoadingView::getInstrument() const { return m_ui.instrument->currentText().toStdString(); }
 
 /**
  * Returns string of path
  */
-std::string ALCDataLoadingView::getPath() const {
-  return m_ui.path->text().toStdString();
-}
+std::string ALCDataLoadingView::getPath() const { return m_ui.path->text().toStdString(); }
 
-std::string ALCDataLoadingView::log() const {
-  return m_ui.logValueSelector->getLog().toStdString();
-}
+std::string ALCDataLoadingView::log() const { return m_ui.logValueSelector->getLog().toStdString(); }
 
-std::string ALCDataLoadingView::function() const {
-  return m_ui.logValueSelector->getFunctionText().toStdString();
-}
+std::string ALCDataLoadingView::function() const { return m_ui.logValueSelector->getFunctionText().toStdString(); }
 
 std::string ALCDataLoadingView::calculationType() const {
   // XXX: "text" property of the buttons should be set correctly, as accepted by
@@ -131,8 +119,7 @@ std::string ALCDataLoadingView::calculationType() const {
 }
 
 std::string ALCDataLoadingView::deadTimeType() const {
-  std::string checkedButton =
-      m_ui.deadTimeCorrType->checkedButton()->text().toStdString();
+  std::string checkedButton = m_ui.deadTimeCorrType->checkedButton()->text().toStdString();
   if (checkedButton == "From Data File") {
     return std::string("FromRunData");
   } else if (checkedButton == "From Custom File") {
@@ -151,72 +138,50 @@ std::string ALCDataLoadingView::deadTimeFile() const {
 }
 
 std::string ALCDataLoadingView::detectorGroupingType() const {
-  std::string checkedButton =
-      m_ui.detectorGroupingType->checkedButton()->text().toStdString();
+  std::string checkedButton = m_ui.detectorGroupingType->checkedButton()->text().toStdString();
   return checkedButton;
 }
 
-std::string ALCDataLoadingView::getForwardGrouping() const {
-  return m_ui.forwardEdit->text().toStdString();
-}
+std::string ALCDataLoadingView::getForwardGrouping() const { return m_ui.forwardEdit->text().toStdString(); }
 
-std::string ALCDataLoadingView::getBackwardGrouping() const {
-  return m_ui.backwardEdit->text().toStdString();
-}
+std::string ALCDataLoadingView::getBackwardGrouping() const { return m_ui.backwardEdit->text().toStdString(); }
 
-std::string ALCDataLoadingView::redPeriod() const {
-  return m_ui.redPeriod->currentText().toStdString();
-}
+std::string ALCDataLoadingView::redPeriod() const { return m_ui.redPeriod->currentText().toStdString(); }
 
-std::string ALCDataLoadingView::greenPeriod() const {
-  return m_ui.greenPeriod->currentText().toStdString();
-}
+std::string ALCDataLoadingView::greenPeriod() const { return m_ui.greenPeriod->currentText().toStdString(); }
 
-bool ALCDataLoadingView::subtractIsChecked() const {
-  return m_ui.subtractCheckbox->isChecked();
-}
+bool ALCDataLoadingView::subtractIsChecked() const { return m_ui.subtractCheckbox->isChecked(); }
 
-boost::optional<std::pair<double, double>>
-ALCDataLoadingView::timeRange() const {
+boost::optional<std::pair<double, double>> ALCDataLoadingView::timeRange() const {
   auto range = std::make_pair(m_ui.minTime->value(), m_ui.maxTime->value());
   return boost::make_optional(range);
 }
 
-void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr workspace,
-                                      std::size_t const &workspaceIndex) {
+void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {
   // These kwargs ensure only the data points are plotted with no line
   QHash<QString, QVariant> kwargs;
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  m_ui.dataPlot->setCurveStyle("Data", -1);
-  m_ui.dataPlot->setCurveSymbol("Data", 0);
-#else
   kwargs.insert("linestyle", QString("None").toLatin1().constData());
   kwargs.insert("marker", QString(".").toLatin1().constData());
-#endif
 
   m_ui.dataPlot->clear();
   auto _log = log();
-  m_ui.dataPlot->setOverrideAxisLabel(MantidQt::MantidWidgets::AxisID::XBottom,
-                                      _log.c_str());
+  m_ui.dataPlot->setOverrideAxisLabel(MantidQt::MantidWidgets::AxisID::XBottom, _log.c_str());
   // If x scale is run number, ensure plain format
   if (log() == "run_number")
     m_ui.dataPlot->tickLabelFormat("x", "plain", false);
   else
     m_ui.dataPlot->tickLabelFormat("x", "sci", true);
 
-  m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black,
-                             kwargs);
+  m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black, kwargs);
 }
 
 void ALCDataLoadingView::displayError(const std::string &error) {
-  QMessageBox::critical(m_widget, "ALC Loading error",
-                        QString::fromStdString(error));
+  QMessageBox::critical(m_widget, "ALC Loading error", QString::fromStdString(error));
 }
 
 bool ALCDataLoadingView::displayWarning(const std::string &warning) {
-  auto reply = QMessageBox::warning(
-      m_widget, "ALC Warning", QString::fromStdString(warning),
-      QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+  auto reply = QMessageBox::warning(m_widget, "ALC Warning", QString::fromStdString(warning),
+                                    QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
   if (reply == QMessageBox::Yes)
     return true;
   else
@@ -227,31 +192,56 @@ bool ALCDataLoadingView::displayWarning(const std::string &warning) {
  * Set list of available log values
  * @param logs :: [input] List of log values
  */
-void ALCDataLoadingView::setAvailableLogs(
-    const std::vector<std::string> &logs) {
+void ALCDataLoadingView::setAvailableLogs(const std::vector<std::string> &logs) {
+  const auto currentLog = m_ui.logValueSelector->getLog();
+  if (!currentLog.isEmpty())
+    m_selectedLog = currentLog;
+
   setAvailableItems(m_ui.logValueSelector->getLogComboBox(), logs);
-  // Set defualt as run number
-  if (!logs.empty()) {
-    auto index =
-        m_ui.logValueSelector->getLogComboBox()->findText("run_number");
-    if (index >= 0)
-      m_ui.logValueSelector->getLogComboBox()->setCurrentIndex(index);
+
+  if (!setCurrentLog(m_selectedLog))
+    setCurrentLog(DEFAULT_LOG);
+}
+
+/**
+ * Set the currently selected log
+ * @param log :: The log to search for and select.
+ * @returns true if the log was found and selected.
+ */
+bool ALCDataLoadingView::setCurrentLog(const QString &log) {
+  const auto index = m_ui.logValueSelector->getLogComboBox()->findText(log);
+  if (index >= 0) {
+    m_ui.logValueSelector->getLogComboBox()->setCurrentIndex(index);
+    m_selectedLog = log;
   }
+  return index >= 0;
 }
 
 /**
  * Set list of available periods in both boxes
  * @param periods :: [input] List of periods
  */
-void ALCDataLoadingView::setAvailablePeriods(
-    const std::vector<std::string> &periods) {
+void ALCDataLoadingView::setAvailablePeriods(const std::vector<std::string> &periods) {
   setAvailableItems(m_ui.redPeriod, periods);
   setAvailableItems(m_ui.greenPeriod, periods);
+
+  // Reset subtraction if single period as not possible
+  if (periods.size() < 2)
+    m_ui.subtractCheckbox->setChecked(false);
 
   // If single period, disable "Subtract" checkbox and green period box
   const bool multiPeriod = periods.size() > 1;
   m_ui.subtractCheckbox->setEnabled(multiPeriod);
   m_ui.greenPeriod->setEnabled(multiPeriod);
+
+  // If two or more periods and number of periods has changed, default to 1
+  // minus 2
+  if (periods.size() >= 2 && m_numPeriods != periods.size()) {
+    m_ui.subtractCheckbox->setChecked(true);
+    m_ui.redPeriod->setCurrentText("1");
+    m_ui.greenPeriod->setCurrentText("2");
+  }
+  m_numPeriods = periods.size();
 }
 
 /**
@@ -260,11 +250,9 @@ void ALCDataLoadingView::setAvailablePeriods(
  * @param comboBox :: [input] Pointer to combo box to populate
  * @param items :: [input] Vector of items to populate box with
  */
-void ALCDataLoadingView::setAvailableItems(
-    QComboBox *comboBox, const std::vector<std::string> &items) {
+void ALCDataLoadingView::setAvailableItems(QComboBox *comboBox, const std::vector<std::string> &items) {
   if (!comboBox) {
-    throw std::invalid_argument(
-        "No combobox to set items in: this should never happen");
+    throw std::invalid_argument("No combobox to set items in: this should never happen");
   }
 
   // Keep the current value
@@ -302,12 +290,13 @@ void ALCDataLoadingView::setTimeRange(double tMin, double tMax) {
 }
 
 void ALCDataLoadingView::help() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"), QString("muon"));
 }
 
 void ALCDataLoadingView::disableAll() {
 
   // Disable all the widgets in the view
+  m_ui.plotByLogGroup->setEnabled(false);
   m_ui.dataGroup->setEnabled(false);
   m_ui.deadTimeGroup->setEnabled(false);
   m_ui.detectorGroupingGroup->setEnabled(false);
@@ -319,6 +308,7 @@ void ALCDataLoadingView::disableAll() {
 void ALCDataLoadingView::enableAll() {
 
   // Enable all the widgets in the view
+  m_ui.plotByLogGroup->setEnabled(true);
   m_ui.deadTimeGroup->setEnabled(true);
   m_ui.dataGroup->setEnabled(true);
   m_ui.detectorGroupingGroup->setEnabled(true);
@@ -334,25 +324,17 @@ void ALCDataLoadingView::instrumentChanged(QString instrument) {
   }
 }
 
-void ALCDataLoadingView::enableLoad(bool enable) {
-  m_ui.load->setEnabled(enable);
-}
+void ALCDataLoadingView::enableLoad(bool enable) { m_ui.load->setEnabled(enable); }
 
-void ALCDataLoadingView::setPath(const std::string &path) {
-  m_ui.path->setText(QString::fromStdString(path));
-}
+void ALCDataLoadingView::setPath(const std::string &path) { m_ui.path->setText(QString::fromStdString(path)); }
 
-void ALCDataLoadingView::enableRunsAutoAdd(bool enable) {
-  m_ui.runsAutoAdd->setEnabled(enable);
-}
+void ALCDataLoadingView::enableRunsAutoAdd(bool enable) { m_ui.runsAutoAdd->setEnabled(enable); }
 
 void ALCDataLoadingView::setInstrument(const std::string &instrument) {
   m_ui.runs->setInstrumentOverride(QString::fromStdString(instrument));
 }
 
-std::string ALCDataLoadingView::getRunsError() {
-  return m_ui.runs->getFileProblem().toStdString();
-}
+std::string ALCDataLoadingView::getRunsError() { return m_ui.runs->getFileProblem().toStdString(); }
 
 std::vector<std::string> ALCDataLoadingView::getFiles() {
   const auto QFiles = m_ui.runs->getFilenames();
@@ -362,9 +344,7 @@ std::vector<std::string> ALCDataLoadingView::getFiles() {
   return files;
 }
 
-std::string ALCDataLoadingView::getFirstFile() {
-  return m_ui.runs->getFirstFilename().toStdString();
-}
+std::string ALCDataLoadingView::getFirstFile() { return m_ui.runs->getFirstFilename().toStdString(); }
 
 void ALCDataLoadingView::setAvailableInfoToEmpty() {
   setAvailableLogs(std::vector<std::string>());    // Empty logs list
@@ -372,15 +352,12 @@ void ALCDataLoadingView::setAvailableInfoToEmpty() {
   setTimeLimits(0, 0);                             // "Empty" time limits
 }
 
-std::string ALCDataLoadingView::getRunsText() const {
-  return m_ui.runs->getText().toStdString();
-}
+std::string ALCDataLoadingView::getRunsText() const { return m_ui.runs->getText().toStdString(); }
 
-void ALCDataLoadingView::setLoadStatus(const std::string &status,
-                                       const std::string &colour) {
+void ALCDataLoadingView::setLoadStatus(const std::string &status, const std::string &colour) {
   m_ui.loadStatusLabel->setText(QString::fromStdString("Status: " + status));
-  m_ui.loadStatusLabel->setStyleSheet(
-      QString::fromStdString("color: " + colour));
+  m_ui.loadStatusLabel->setStyleSheet(QString::fromStdString("color: " + colour));
+  m_ui.loadStatusLabel->adjustSize();
 }
 
 void ALCDataLoadingView::runsAutoAddToggled(bool on) {
@@ -401,9 +378,7 @@ void ALCDataLoadingView::setRunsTextWithoutSearch(const std::string &text) {
   m_ui.runs->setFileTextWithoutSearch(QString::fromStdString(text));
 }
 
-void ALCDataLoadingView::toggleRunsAutoAdd(const bool autoAdd) {
-  m_ui.runsAutoAdd->setChecked(autoAdd);
-}
+void ALCDataLoadingView::toggleRunsAutoAdd(const bool autoAdd) { m_ui.runsAutoAdd->setChecked(autoAdd); }
 
 std::string ALCDataLoadingView::getRunsFirstRunText() const {
   std::string text = m_ui.runs->getText().toStdString();
@@ -411,8 +386,7 @@ std::string ALCDataLoadingView::getRunsFirstRunText() const {
   auto commaSearchResult = text.find_first_of(",");
   auto rangeSearchResult = text.find_first_of("-");
 
-  if (commaSearchResult == std::string::npos &&
-      rangeSearchResult == std::string::npos) {
+  if (commaSearchResult == std::string::npos && rangeSearchResult == std::string::npos) {
     return text; // Only one run
   }
 
@@ -426,13 +400,9 @@ void ALCDataLoadingView::enableAlpha(const bool alpha) {
   m_ui.alphaLabel->setEnabled(alpha);
 }
 
-bool ALCDataLoadingView::isAlphaEnabled() const {
-  return m_ui.alpha->isEnabled();
-}
+bool ALCDataLoadingView::isAlphaEnabled() const { return m_ui.alpha->isEnabled(); }
 
-void ALCDataLoadingView::setAlphaValue(const std::string &alpha) {
-  m_ui.alpha->setText(QString::fromStdString(alpha));
-}
+void ALCDataLoadingView::setAlphaValue(const std::string &alpha) { m_ui.alpha->setText(QString::fromStdString(alpha)); }
 
 // Get alpha value, defualt value 1
 std::string ALCDataLoadingView::getAlphaValue() const {
@@ -441,9 +411,7 @@ std::string ALCDataLoadingView::getAlphaValue() const {
   return "1.0";
 }
 
-void ALCDataLoadingView::showAlphaMessage(const bool alpha) {
-  m_ui.alphaMessage->setVisible(alpha);
-}
+void ALCDataLoadingView::showAlphaMessage(const bool alpha) { m_ui.alphaMessage->setVisible(alpha); }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

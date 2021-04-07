@@ -49,20 +49,15 @@ public:
 
   void test_nonpositive_order() {
     BSpline bsp;
-    TS_ASSERT_THROWS(bsp.setAttributeValue("Order", -3),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(bsp.setAttributeValue("Order", 0),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(bsp.setAttributeValue("Order", -3), const std::invalid_argument &);
+    TS_ASSERT_THROWS(bsp.setAttributeValue("Order", 0), const std::invalid_argument &);
   }
 
   void test_nbreak_too_small() {
     BSpline bsp;
-    TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", 1),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", 0),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", -3),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", 1), const std::invalid_argument &);
+    TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", 0), const std::invalid_argument &);
+    TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", -3), const std::invalid_argument &);
   }
 
   void test_set_uniform_break_points() {
@@ -126,8 +121,7 @@ public:
     inputBreaks[5] = 7.0;
     inputBreaks[6] = 18.0;
     inputBreaks[7] = 30.0;
-    TS_ASSERT_THROWS(bsp.setAttributeValue("BreakPoints", inputBreaks),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(bsp.setAttributeValue("BreakPoints", inputBreaks), const std::invalid_argument &);
   }
 
   void test_set_wrong_startx_endx() {

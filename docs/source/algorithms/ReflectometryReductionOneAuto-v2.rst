@@ -101,7 +101,7 @@ Polarization Analysis Off
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If :literal:`PolarizationAnalysis = None` the reduction stops. Note that if
-transmission runs are given in the form of a workspace group, then the first 
+transmission runs are given in the form of a workspace group, then the first
 element in the group will be used on every input workspace. If transmission runs
 are provided as matrix workspaces the specified runs will be used for all members
 of the input workspace group.
@@ -128,11 +128,11 @@ The result will be a new workspace in wavelength, which will override the
 previous one, that will be used as input to
 :ref:`algm-ReflectometryReductionOne` to calculate the new output workspaces in
 Q, which in turn will override the existing workspaces in Q. Note that if
-transmission runs are provided in the form of workspace groups, then the 
-first workspace in the group workspaces will be summed to produce a matrix 
-workspace that will be used as the transmission run for all items in the input 
-workspace group, as illustrated in the diagram below (note that, for the sake of 
-clarity, the rebinned output workspace in Q, :literal:`OutputWorkspaceBinned`, is 
+transmission runs are provided in the form of workspace groups, then the
+first workspace in the group workspaces will be summed to produce a matrix
+workspace that will be used as the transmission run for all items in the input
+workspace group, as illustrated in the diagram below (note that, for the sake of
+clarity, the rebinned output workspace in Q, :literal:`OutputWorkspaceBinned`, is
 not represented but it is handled analogously to :literal:`OutputWorkspace`).
 
 Previous Versions

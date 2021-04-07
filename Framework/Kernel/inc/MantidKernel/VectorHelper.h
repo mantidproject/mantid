@@ -24,42 +24,32 @@ namespace Kernel {
     @date 16/12/2008
  */
 namespace VectorHelper {
-int MANTID_KERNEL_DLL createAxisFromRebinParams(
-    const std::vector<double> &params, std::vector<double> &xnew,
-    const bool resize_xnew = true, const bool full_bins_only = false,
-    const double xMinHint = std::nan(""), const double xMaxHint = std::nan(""));
+int MANTID_KERNEL_DLL createAxisFromRebinParams(const std::vector<double> &params, std::vector<double> &xnew,
+                                                const bool resize_xnew = true, const bool full_bins_only = false,
+                                                const double xMinHint = std::nan(""),
+                                                const double xMaxHint = std::nan(""));
 
-void MANTID_KERNEL_DLL rebin(const std::vector<double> &xold,
-                             const std::vector<double> &yold,
-                             const std::vector<double> &eold,
-                             const std::vector<double> &xnew,
-                             std::vector<double> &ynew,
-                             std::vector<double> &enew, bool distribution,
+void MANTID_KERNEL_DLL rebin(const std::vector<double> &xold, const std::vector<double> &yold,
+                             const std::vector<double> &eold, const std::vector<double> &xnew,
+                             std::vector<double> &ynew, std::vector<double> &enew, bool distribution,
                              bool addition = false);
 
 // New method to rebin Histogram data, should be faster than previous one
-void MANTID_KERNEL_DLL rebinHistogram(const std::vector<double> &xold,
-                                      const std::vector<double> &yold,
-                                      const std::vector<double> &eold,
-                                      const std::vector<double> &xnew,
-                                      std::vector<double> &ynew,
-                                      std::vector<double> &enew, bool addition);
+void MANTID_KERNEL_DLL rebinHistogram(const std::vector<double> &xold, const std::vector<double> &yold,
+                                      const std::vector<double> &eold, const std::vector<double> &xnew,
+                                      std::vector<double> &ynew, std::vector<double> &enew, bool addition);
 
 /// Convert an array of bin boundaries to bin center values.
-void MANTID_KERNEL_DLL convertToBinCentre(const std::vector<double> &bin_edges,
-                                          std::vector<double> &bin_centres);
+void MANTID_KERNEL_DLL convertToBinCentre(const std::vector<double> &bin_edges, std::vector<double> &bin_centres);
 
 /// Convert an array of bin centers to bin boundary values.
-void MANTID_KERNEL_DLL convertToBinBoundary(
-    const std::vector<double> &bin_centers, std::vector<double> &bin_edges);
+void MANTID_KERNEL_DLL convertToBinBoundary(const std::vector<double> &bin_centers, std::vector<double> &bin_edges);
 
 /// Gets the bin of a value from a vector of bin centers
-size_t MANTID_KERNEL_DLL indexOfValueFromCenters(
-    const std::vector<double> &bin_centers, const double value);
+size_t MANTID_KERNEL_DLL indexOfValueFromCenters(const std::vector<double> &bin_centers, const double value);
 
 /// Gets the bin of a value from a vector of bin edges
-size_t MANTID_KERNEL_DLL
-indexOfValueFromEdges(const std::vector<double> &bin_edges, const double value);
+size_t MANTID_KERNEL_DLL indexOfValueFromEdges(const std::vector<double> &bin_edges, const double value);
 
 bool MANTID_KERNEL_DLL isConstantValue(const std::vector<double> &arra);
 
@@ -72,8 +62,7 @@ bool MANTID_KERNEL_DLL isConstantValue(const std::vector<double> &arra);
  * @param v :: the vector of vectors to be flattened.
  * @return a single vector containing all elements in v.
  */
-template <typename T>
-std::vector<T> flattenVector(const std::vector<std::vector<T>> &v) {
+template <typename T> std::vector<T> flattenVector(const std::vector<std::vector<T>> &v) {
   std::vector<T> flattened;
 
   for (const auto &subVector : v) {
@@ -83,22 +72,16 @@ std::vector<T> flattenVector(const std::vector<std::vector<T>> &v) {
   return flattened;
 }
 
-template <typename NumT>
-MANTID_KERNEL_DLL std::vector<NumT>
-splitStringIntoVector(std::string listString);
+template <typename NumT> MANTID_KERNEL_DLL std::vector<NumT> splitStringIntoVector(std::string listString);
 
-MANTID_KERNEL_DLL int getBinIndex(const std::vector<double> &bins,
-                                  const double value);
+MANTID_KERNEL_DLL int getBinIndex(const std::vector<double> &bins, const double value);
 
 // Do running average of input vector within specified range, considering
 // heterogeneous bin-boundaries
 // if such boundaries are provided
-MANTID_KERNEL_DLL void
-smoothInRange(const std::vector<double> &input, std::vector<double> &output,
-              double avrgInterval,
-              std::vector<double> const *const binBndrs = nullptr,
-              size_t startIndex = 0, size_t endIndex = 0,
-              std::vector<double> *const outBins = nullptr);
+MANTID_KERNEL_DLL void smoothInRange(const std::vector<double> &input, std::vector<double> &output, double avrgInterval,
+                                     std::vector<double> const *const binBndrs = nullptr, size_t startIndex = 0,
+                                     size_t endIndex = 0, std::vector<double> *const outBins = nullptr);
 
 //-------------------------------------------------------------------------------------
 /** Return the length of the vector (in the physical sense),
@@ -116,8 +99,7 @@ template <typename T> T lengthVector(const std::vector<T> &x) {
   return total;
 }
 // Scalar product of two vectors
-template <typename T>
-T scalar_prod(const std::vector<T> &v1, const std::vector<T> &v2) {
+template <typename T> T scalar_prod(const std::vector<T> &v1, const std::vector<T> &v2) {
   if (v1.size() != v2.size())
     throw std::invalid_argument(" scalar product is defined only for the "
                                 "vectors of the equivalent length");
@@ -129,8 +111,7 @@ T scalar_prod(const std::vector<T> &v1, const std::vector<T> &v2) {
 }
 // Scalar product of two different type vectors which allow static cast to
 // double
-template <typename T, typename U>
-double scalar_prod(const std::vector<T> &v1, const std::vector<U> &v2) {
+template <typename T, typename U> double scalar_prod(const std::vector<T> &v1, const std::vector<U> &v2) {
   if (v1.size() != v2.size())
     throw std::invalid_argument(" scalar product is defined only for the "
                                 "vectors of the equivalient length");
@@ -165,9 +146,7 @@ template <typename T> std::vector<T> normalizeVector(const std::vector<T> &x) {
 template <class T> struct SumGaussError {
   SumGaussError() = default;
   /// Sums the arguments in quadrature
-  inline T operator()(const T &l, const T &r) const {
-    return sqrt(l * l + r * r);
-  }
+  inline T operator()(const T &l, const T &r) const { return sqrt(l * l + r * r); }
 };
 
 /**
@@ -211,8 +190,7 @@ template <class T> struct Log {
   /// @throws std::range_error if x <= 0
   T operator()(const T &x) const {
     if (x <= 0)
-      throw std::range_error(
-          "Attempt to take logarithm of zero or negative number.");
+      throw std::range_error("Attempt to take logarithm of zero or negative number.");
     return std::log(x);
   }
 };
@@ -239,9 +217,7 @@ template <class T> struct DividesNonNull {
 template <class T> struct SimpleAverage {
   SimpleAverage() = default;
   /// Return the average of the two arguments
-  T operator()(const T &x, const T &y) const {
-    return static_cast<T>(0.5) * (x + y);
-  }
+  T operator()(const T &x, const T &y) const { return static_cast<T>(0.5) * (x + y); }
 };
 
 } // namespace VectorHelper

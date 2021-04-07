@@ -76,10 +76,8 @@ private:
    * @param wsName :: Name of the workspace to retrieve
    * @return Retrieved workspace
    */
-  template <typename T>
-  static std::shared_ptr<T> retrieveWSChecked(const std::string &wsName) {
-    auto ws =
-        Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(wsName);
+  template <typename T> static std::shared_ptr<T> retrieveWSChecked(const std::string &wsName) {
+    auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(wsName);
 
     if (!ws)
       throw Mantid::Kernel::Exception::NotFoundError("Incorrect type", wsName);
@@ -96,10 +94,8 @@ private:
   void storeUserSettings();
   void applyUserSettings();
   void populateLogsAndValues(const QStringList &fittedWsList);
-  void populateFittings(
-      const QStringList &names,
-      const std::function<Mantid::API::Workspace_sptr(const QString &)>
-          &wsFromName);
+  void populateFittings(const QStringList &names,
+                        const std::function<Mantid::API::Workspace_sptr(const QString &)> &wsFromName);
 
   /// Creates the results table
   void createTable(bool multipleFits);

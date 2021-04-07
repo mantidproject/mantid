@@ -12,6 +12,7 @@ from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QApplication
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 EXAMPLE_TF_ASYMMETRY_FUNCTION = '(composite=ProductFunction,NumDeriv=false;name=FlatBackground,A0=1.02709;' \
                                 '(name=FlatBackground,A0=1,ties=(A0=1);name=ExpDecayOsc,A=0.2,Lambda=0.2,Frequency=0.1,Phi=0))' \
@@ -66,23 +67,6 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.presenter.model = mock.MagicMock()
         self.presenter.model.context = self.context
         self.presenter.model.get_function_name.return_value = 'GausOsc'
-
-    @mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_presenter.WorkspaceSelectorView.get_selected_data')
-    def test_handle_select_fit_data_clicked_updates_current_run_list(self, dialog_mock):
-        dialog_mock.return_value = (['MUSR62260; Group; bkwd; Asymmetry; #1', 'MUSR62260; Group; bottom; Asymmetry; #1',
-                                     'MUSR62260; Group; fwd; Asymmetry; #1', 'MUSR62260; Group; top; Asymmetry; #1',
-                                     'MUSR62260; Pair Asym; long; #1', 'MUSR62260; PhaseQuad; PhaseTable MUSR62260',
-                                     'MUSR62260; PhaseQuad; PhaseTable MUSR62261'], True)
-        self.presenter._plot_type = "Time"
-
-        self.presenter.handle_select_fit_data_clicked()
-
-        dialog_mock.assert_called_once_with([[62260]], 'MUSR', [], True, "Time", self.context, self.view)
-        self.assertEqual(retrieve_combobox_info(self.view.parameter_display_combo),
-                         ['MUSR62260; Group; bkwd; Asymmetry; #1', 'MUSR62260; Group; bottom; Asymmetry; #1',
-                          'MUSR62260; Group; fwd; Asymmetry; #1', 'MUSR62260; Group; top; Asymmetry; #1',
-                          'MUSR62260; Pair Asym; long; #1', 'MUSR62260; PhaseQuad; PhaseTable MUSR62260',
-                          'MUSR62260; PhaseQuad; PhaseTable MUSR62261'])
 
     def test_that_changing_fitting_type_to_multiple_fit_changes_workspace_selector_combo_label(
             self):
@@ -336,6 +320,8 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
         fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.5,Sigma=0.5,Frequency=1,Phi=0')
         self.view.is_simul_fit = mock.MagicMock(return_value=False)
+        function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.presenter._get_fit_function = mock.Mock(return_value=[function]*3)
         self.presenter.fitting_calculation_model = mock.MagicMock()
         self.presenter.model.evaluate_single_fit.return_value = (fit_function, 'Fit Succeeded', 0.5)
 
@@ -433,6 +419,11 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.assertEqual(-1, self.view.minimizer_combo.findText('FABADA'))
 
     def test_simul_fit_by_specifier_updates_correctly_when_fit_change_to_simultanenous(self):
+        # set up current data
+        ws = MuonWorkspaceWrapper("MUSR62260 MA/MUSR62260_raw_data MA")
+        self.context.data_context._loaded_data.add_data(workspace={"OutputWorkspace": [ws]}, run=[62260], filename="",
+                                                        instrument="MUSR")
+
         self.view.simul_fit_by_combo.setCurrentIndex(SIMUL_FIT_BY_COMBO_MAP["Run"])
 
         self.view.simul_fit_checkbox.setChecked(True)
@@ -773,6 +764,40 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.assertEqual(4.0, self.presenter.end_x[0])
         calls = [mock.call(startX=2.0), mock.call(endX=4.0)]
         self.presenter.model.update_model_fit_options.assert_has_calls(calls)
+
+    def test_update_fit_specifiers_list_one_run_fit_by_run(self):
+        # set up current data
+        ws = MuonWorkspaceWrapper("MUSR62260 MA/MUSR62260_raw_data MA")
+        self.context.data_context._loaded_data.add_data(workspace={"OutputWorkspace": [ws]}, run=[62260], filename="",
+                                                        instrument="MUSR")
+        self.view.simul_fit_by_combo.currentText = mock.MagicMock(return_value="Run")
+        self.view.setup_fit_by_specifier = mock.MagicMock()
+
+        self.presenter.update_fit_specifier_list()
+
+        self.view.setup_fit_by_specifier.assert_called_once_with(["62260"])
+
+    def test_update_fit_specifiers_list_multiple_runs_fit_by_run(self):
+        self.view.simul_fit_by_combo.currentText = mock.MagicMock(return_value="Run")
+        self.view.setup_fit_by_specifier = mock.MagicMock()
+        self.context.data_context.current_runs = [[62260],[62261],[62263]]
+
+        self.presenter.update_fit_specifier_list()
+
+        self.view.setup_fit_by_specifier.assert_called_once_with(["62260","62261","62263"])
+
+    def test_update_fit_specifiers_list_co_added_runs_fit_by_run(self):
+        # set up current data
+        ws = MuonWorkspaceWrapper("MUSR62260-62261,62263 MA/MUSR62260-62261,62263_raw_data MA")
+        self.context.data_context._loaded_data.add_data(workspace={"OutputWorkspace": [ws]}, run=[62260-62261,62263], filename="",
+                                                        instrument="MUSR")
+        self.context.data_context.current_runs = [[62260-62261,62263]]
+        self.view.simul_fit_by_combo.currentText = mock.MagicMock(return_value="Run")
+        self.view.setup_fit_by_specifier = mock.MagicMock()
+
+        self.presenter.update_fit_specifier_list()
+
+        self.view.setup_fit_by_specifier.assert_called_once_with(["62260-62261,62263"])
 
 
 if __name__ == '__main__':

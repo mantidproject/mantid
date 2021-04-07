@@ -22,8 +22,7 @@ public:
   const std::string name() const override;
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return {"RebinToWorkspace", "Rebin2D",           "Rebunch",
-            "Regroup",          "RebinByPulseTimes", "RebinByTimeAtSample"};
+    return {"RebinToWorkspace", "Rebin2D", "Rebunch", "Regroup", "RebinByPulseTimes", "RebinByTimeAtSample"};
   }
   const std::string category() const override;
   const std::string alias() const override;
@@ -35,15 +34,12 @@ public:
   }
 
   /// MADE PUBLIC FOR TESTING ONLY - DO NOT USE
-  double determineBinning(MantidVec &xValues, const double xmin,
-                          const double xmax);
+  double determineBinning(MantidVec &xValues, const double xmin, const double xmax);
   /// MADE PUBLIC FOR TESTING ONLY - DO NOT USE
   void setOptions(const int numBins, const bool useLogBins, const bool isDist);
 
 private:
-  const std::string workspaceMethodName() const override {
-    return "";
-  } // Override the one from Rebin to ignore us
+  const std::string workspaceMethodName() const override { return ""; } // Override the one from Rebin to ignore us
 
   void init() override;
   void exec() override;

@@ -43,8 +43,7 @@ class EXPORT_OPT_MANTIDQT_PLOTTING PreviewPlot : public QWidget {
 
   Q_PROPERTY(QColor canvasColour READ canvasColour WRITE setCanvasColour)
   Q_PROPERTY(bool showLegend READ legendIsVisible WRITE showLegend)
-  Q_PROPERTY(
-      QStringList curveErrorBars READ linesWithErrors WRITE setLinesWithErrors)
+  Q_PROPERTY(QStringList curveErrorBars READ linesWithErrors WRITE setLinesWithErrors)
 
 public:
   PreviewPlot(QWidget *parent = nullptr, bool observeADS = true);
@@ -57,25 +56,19 @@ public:
 
   void setTightLayout(QHash<QString, QVariant> const &args);
 
-  void addSpectrum(
-      const QString &lineLabel, const Mantid::API::MatrixWorkspace_sptr &ws,
-      const size_t wsIndex = 0, const QColor &lineColour = QColor(),
-      const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
-  void addSpectrum(
-      const QString &lineName, const QString &wsName, const size_t wsIndex = 0,
-      const QColor &lineColour = QColor(),
-      const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
+  void addSpectrum(const QString &lineLabel, const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex = 0,
+                   const QColor &lineColour = QColor(),
+                   const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
+  void addSpectrum(const QString &lineName, const QString &wsName, const size_t wsIndex = 0,
+                   const QColor &lineColour = QColor(),
+                   const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
   void removeSpectrum(const QString &lineName);
 
-  RangeSelector *
-  addRangeSelector(const QString &name,
-                   RangeSelector::SelectType type = RangeSelector::XMINMAX);
+  RangeSelector *addRangeSelector(const QString &name, RangeSelector::SelectType type = RangeSelector::XMINMAX);
   RangeSelector *getRangeSelector(const QString &name) const;
 
-  SingleSelector *
-  addSingleSelector(const QString &name,
-                    SingleSelector::SelectType type = SingleSelector::XSINGLE,
-                    double position = 0.0);
+  SingleSelector *addSingleSelector(const QString &name, SingleSelector::SelectType type = SingleSelector::XSINGLE,
+                                    double position = 0.0);
   SingleSelector *getSingleSelector(const QString &name) const;
 
   void setSelectorActive(bool active);
@@ -85,8 +78,7 @@ public:
 
   void setOverrideAxisLabel(AxisID const &axisID, char const *const label);
   void tickLabelFormat(char *axis, char *style, bool useOffset);
-  void setAxisRange(const QPair<double, double> &range,
-                    AxisID axisID = AxisID::XBottom);
+  void setAxisRange(const QPair<double, double> &range, AxisID axisID = AxisID::XBottom);
   std::tuple<double, double> getAxisRange(AxisID axisID = AxisID::XBottom);
 
   void allowRedraws(bool state);
@@ -130,8 +122,7 @@ private:
   void createActions();
 
   void onWorkspaceRemoved(Mantid::API::WorkspacePreDeleteNotification_ptr nf);
-  void
-  onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf);
+  void onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf);
 
   void regenerateLegend();
   void removeLegend();
@@ -157,11 +148,9 @@ private:
     QColor lineColour;
     QHash<QString, QVariant> plotKwargs;
 
-    PlotCurveConfiguration(Mantid::API::MatrixWorkspace_sptr ws,
-                           QString lineName, size_t wsIndex, QColor lineColour,
+    PlotCurveConfiguration(Mantid::API::MatrixWorkspace_sptr ws, QString lineName, size_t wsIndex, QColor lineColour,
                            QHash<QString, QVariant> plotKwargs)
-        : ws(ws), lineName(lineName), wsIndex(wsIndex), lineColour(lineColour),
-          plotKwargs(plotKwargs){};
+        : ws(ws), lineName(lineName), wsIndex(wsIndex), lineColour(lineColour), plotKwargs(plotKwargs){};
   };
 
   // Canvas objects
@@ -185,10 +174,8 @@ private:
   Widgets::MplCpp::PanZoomTool m_panZoomTool;
 
   // Observers for ADS Notifications
-  Poco::NObserver<PreviewPlot, Mantid::API::WorkspacePreDeleteNotification>
-      m_wsRemovedObserver;
-  Poco::NObserver<PreviewPlot, Mantid::API::WorkspaceBeforeReplaceNotification>
-      m_wsReplacedObserver;
+  Poco::NObserver<PreviewPlot, Mantid::API::WorkspacePreDeleteNotification> m_wsRemovedObserver;
+  Poco::NObserver<PreviewPlot, Mantid::API::WorkspaceBeforeReplaceNotification> m_wsReplacedObserver;
 
   // Tick label style
   char *m_axis;

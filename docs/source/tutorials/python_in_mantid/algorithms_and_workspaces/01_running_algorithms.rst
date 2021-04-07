@@ -26,7 +26,7 @@ The simplest exercise is to load a data file. This is done using the :ref:`algm-
 .. code-block:: python
 
     from mantid.simpleapi import *
-    # This example just has .RAW extension but it is able to load all 
+    # This example just has .RAW extension but it is able to load all
     # file types that Mantid is aware of.
     # run = Load('filename.nxs')
     run = Load('HRP39182.RAW')

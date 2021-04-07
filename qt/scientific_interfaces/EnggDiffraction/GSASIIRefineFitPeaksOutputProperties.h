@@ -18,11 +18,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 struct MANTIDQT_ENGGDIFFRACTION_DLL GSASIIRefineFitPeaksOutputProperties {
-  GSASIIRefineFitPeaksOutputProperties(
-      const double _rwp, const double _sigma, const double _gamma,
-      const Mantid::API::MatrixWorkspace_sptr &_fittedPeaksWS,
-      const Mantid::API::ITableWorkspace_sptr &_latticeParamsWS,
-      const RunLabel &_runLabel);
+  GSASIIRefineFitPeaksOutputProperties(const double _rwp, const double _sigma, const double _gamma,
+                                       const Mantid::API::MatrixWorkspace_sptr &_fittedPeaksWS,
+                                       const Mantid::API::ITableWorkspace_sptr &_latticeParamsWS,
+                                       const RunLabel &_runLabel);
 
   GSASIIRefineFitPeaksOutputProperties() = default;
 
@@ -34,16 +33,13 @@ struct MANTIDQT_ENGGDIFFRACTION_DLL GSASIIRefineFitPeaksOutputProperties {
   RunLabel runLabel;
 };
 
-MANTIDQT_ENGGDIFFRACTION_DLL bool
-operator==(const GSASIIRefineFitPeaksOutputProperties &lhs,
-           const GSASIIRefineFitPeaksOutputProperties &rhs);
+MANTIDQT_ENGGDIFFRACTION_DLL bool operator==(const GSASIIRefineFitPeaksOutputProperties &lhs,
+                                             const GSASIIRefineFitPeaksOutputProperties &rhs);
 
-MANTIDQT_ENGGDIFFRACTION_DLL bool
-operator!=(const GSASIIRefineFitPeaksOutputProperties &lhs,
-           const GSASIIRefineFitPeaksOutputProperties &rhs);
+MANTIDQT_ENGGDIFFRACTION_DLL bool operator!=(const GSASIIRefineFitPeaksOutputProperties &lhs,
+                                             const GSASIIRefineFitPeaksOutputProperties &rhs);
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-Q_DECLARE_METATYPE(
-    MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties)
+Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties)

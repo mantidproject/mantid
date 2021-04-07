@@ -10,13 +10,16 @@ class RundexSettings(object):
 
     # instruments
     D11 =    "D11"
+    D11B =   "D11B"
     D16 =    "D16"
     D22 =    "D22"
+    D22B =   "D22B"
     D33 =    "D33"
     D17 =    "D17"
     FIGARO = "FIGARO"
     D2B =    "D2B"
     D20 =    "D20"
+    D1B =    "D1B"
 
     # techniques (see instrument/Facilities.xml)
     SANS =   "SANS"
@@ -25,33 +28,40 @@ class RundexSettings(object):
 
     # acquisition modes
     SANS_ACQ =     "SANS"
+    SANS_PSCAN =   "Sample scan"
     REFL_POL =     "Polarized"
     REFL_NPOL =    "Unpolarized"
     POWDER_DSCAN = "Detector scan"
-    POWDER_PSCAN = "Parameter scan"
+    POWDER_PSCAN = "Sample scan"
 
     # correspondance between instrument and technique
     TECHNIQUE = {
             D11:    SANS,
+            D11B:    SANS,
             D16:    SANS,
             D22:    SANS,
+            D22B:    SANS,
             D33:    SANS,
             D17:    REFL,
             FIGARO: REFL,
             D2B:    POWDER,
             D20:    POWDER,
+            D1B:    POWDER
             }
 
     # correspondance between instrument and acquisition mode
     ACQUISITION_MODES = {
             D11:    [SANS_ACQ],
-            D16:    [SANS_ACQ],
+            D11B:    [SANS_ACQ],
+            D16:    [SANS_ACQ, SANS_PSCAN],
             D22:    [SANS_ACQ],
+            D22B:    [SANS_ACQ],
             D33:    [SANS_ACQ],
             D17:    [REFL_POL, REFL_NPOL],
             FIGARO: [REFL_NPOL],
             D2B:    [POWDER_DSCAN],
             D20:    [POWDER_DSCAN, POWDER_PSCAN],
+            D1B:    [POWDER_PSCAN]
             }
 
     # parameters for each acquisition mode
@@ -70,6 +80,14 @@ class RundexSettings(object):
                 "ReferenceFiles",
                 "OutputWorkspace",
                 "SampleThickness",
+                "CustomOptions"
+                ],
+            SANS_PSCAN: [
+                "SampleRuns",
+                "AbsorberRuns",
+                "ContainerRuns",
+                "OutputWorkspace",
+                "OutputJoinedWorkspace",
                 "CustomOptions"
                 ],
             REFL_POL: [
@@ -114,16 +132,64 @@ class RundexSettings(object):
     # algo name for each acquisition mode
     ALGORITHM = {
             SANS_ACQ:     "SANSILLAutoProcess",
+            SANS_PSCAN:   "SANSILLParameterScan",
             REFL_POL:     "ReflectometryILLAutoProcess",
             REFL_NPOL:    "ReflectometryILLAutoProcess",
             POWDER_DSCAN: "PowderILLDetectorScan",
             POWDER_PSCAN: "PowderILLParameterScan",
             }
 
-    # ideal number of threads for each acquisition mode (optional).
-    # If not provided, Qt will decide
+    # export algos for each acquisition mode. Each algo has a boolean to set
+    # it as activated or not
+    EXPORT_ALGORITHMS = {
+            SANS_ACQ: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveCanSAS1D": True,
+                "SaveNISTDAT": True
+                },
+            REFL_POL: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveReflectometryAscii": True
+                },
+            REFL_NPOL: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveReflectometryAscii": True
+                },
+            POWDER_DSCAN: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveFocusedXYE": True
+                },
+            POWDER_PSCAN: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveFocussedXYE": True
+                }
+            }
+
+    EXPORT_ALGO_CRITERIA = {
+            "SaveCanSAS1D": "%OutputType% == 'I(Q)'",
+            "SaveNISTDAT": "%OutputType% == 'I(Qx,Qy)'",
+            }
+
+    EXPORT_ALGO_EXTENSION = {
+            "SaveNexusProcessed": ".nxs",
+            "SaveAscii": ".txt",
+            "SaveCanSAS1D": ".xml",
+            "SaveNISTDAT": ".dat",
+            "SaveReflectometryAscii": ".mft",
+            "SaveFocussedXYE": ".dat"
+            }
+
+    # ideal number of threads for each acquisition mode (optional)
+    # if not provided, Qt will decide, which will likely be the number of cores
+    # for the moment, limit those to 1 until the algorithms are made truly thread safe
     THREADS_NUMBER = {
             SANS_ACQ:     1,
+            SANS_PSCAN:   1,
             REFL_POL:     1,
             REFL_NPOL:    1,
             POWDER_DSCAN: 1,
@@ -154,7 +220,19 @@ class RundexSettings(object):
                 "MaxQxy",
                 "DeltaQ",
                 "IQxQyLogBinning",
-                "OutputPanels"
+                "OutputPanels",
+                "WavelengthRange",
+                "StitchReferenceIndex",
+                "ClearCorrected2DWorkspace"
+                ],
+            SANS_PSCAN : [
+                "SensitivityMap",
+                "DefaultMaskFile",
+                "NormaliseBy",
+                "Observable",
+                "PixelYMin",
+                "PixelYMax",
+                "Wavelength"
                 ],
             REFL_POL : [
                 "PolarizationEfficiencyFile",
@@ -272,3 +350,4 @@ class RundexSettings(object):
     SAMPLES_JSON_KEY = "Samples"
     CUSTOM_OPT_JSON_KEY = "CustomOptions"
     VISUAL_SETTINGS_JSON_KEY = "VisualSettings"
+    EXPORT_JSON_KEY = "ExportAlgorithms"

@@ -13,112 +13,70 @@
 
 namespace NXcanSASTestHelper {
 struct NXcanSASTestParameters {
-  NXcanSASTestParameters() { initParameters(); }
-
-  void initParameters() {
+  NXcanSASTestParameters() {
     Poco::TemporaryFile tmpFile;
     tmpFile.keep();
     filename = tmpFile.path();
-    size = 10;
-    value = 10.23;
-    error = 3.45;
-    xerror = 2.3759 / 3.6;
-    hasDx = true;
-    xmin = 1.0;
-    xmax = 10.0;
-    runNumber = "1234";
-    userFile = "my_user_file";
-    workspaceTitle = "sample_worksapce";
-    instrumentName = "SANS2D";
-    radiationSource = "Spallation Neutron Source";
-    invalidDetectors = false;
-    ymin = 1.0;
-    ymax = 12.0;
-    is2dData = false;
-    isHistogram = false;
-    sampleTransmissionRun = "";
-    sampleDirectRun = "";
-    canScatterRun = "";
-    canDirectRun = "";
-    hasCanRuns = false;
-    hasSampleRuns = false;
   }
 
   std::string filename;
-  int size;
-  double value;
-  double error;
-  double xerror;
-  bool hasDx;
-  double xmin;
-  double xmax;
-  double ymin;
-  double ymax;
-  std::string runNumber;
-  std::string userFile;
-  std::string workspaceTitle;
-  std::string instrumentName;
-  std::string radiationSource;
+  int size{10};
+  double value{10.23};
+  double error{3.45};
+  double xerror{2.3759 / 3.6};
+  bool hasDx{true};
+  double xmin{1.0};
+  double xmax{10.0};
+  double ymin{1.0};
+  double ymax{12.0};
+  std::string runNumber{"1234"};
+  std::string userFile{"my_user_file"};
+  std::string workspaceTitle{"sample_workspace"};
+  std::string instrumentName{"SANS2D"};
+  std::string radiationSource{"Spallation Neutron Source"};
   std::vector<std::string> detectors;
-  bool invalidDetectors;
-  bool is2dData;
+  bool invalidDetectors{false};
+  bool is2dData{false};
   std::string idf;
-  bool isHistogram;
+  bool isHistogram{false};
   std::string sampleTransmissionRun;
   std::string sampleDirectRun;
   std::string canScatterRun;
   std::string canDirectRun;
-  bool hasCanRuns;
-  bool hasSampleRuns;
+  bool hasCanRuns{false};
+  bool hasSampleRuns{false};
 };
 
 struct NXcanSASTestTransmissionParameters {
-  NXcanSASTestTransmissionParameters() { initParameters(); }
-  void initParameters() {
-    size = 10;
-    value = 12.34;
-    error = 3.2345;
-    xmin = 1.0;
-    xmax = 10.0;
-    usesTransmission = false;
-  }
-
-  int size;
-  double value;
-  double error;
-  double xmin;
-  double xmax;
+  int size{10};
+  double value{12.34};
+  double error{3.2345};
+  double xmin{1.0};
+  double xmax{10.0};
   std::string name;
-  bool usesTransmission;
+  bool usesTransmission{false};
+  bool isHistogram{false};
 };
 
-std::string
-concatenateStringVector(const std::vector<std::string> &stringVector);
+std::string concatenateStringVector(const std::vector<std::string> &stringVector);
 
-std::string
-getIDFfromWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace);
+std::string getIDFfromWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace);
 
-void setXValuesOn1DWorkspaceWithPointData(
-    const Mantid::API::MatrixWorkspace_sptr &workspace, double xmin,
-    double xmax);
+void setXValuesOn1DWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace, double xmin, double xmax);
 
-void add_sample_log(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                    const std::string &logName, const std::string &logValue);
+void add_sample_log(const Mantid::API::MatrixWorkspace_sptr &workspace, const std::string &logName,
+                    const std::string &logValue);
 
-void set_logs(const Mantid::API::MatrixWorkspace_sptr &workspace,
-              const std::string &runNumber, const std::string &userFile);
+void set_logs(const Mantid::API::MatrixWorkspace_sptr &workspace, const std::string &runNumber,
+              const std::string &userFile);
 
-void set_instrument(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                    const std::string &instrumentName);
+void set_instrument(const Mantid::API::MatrixWorkspace_sptr &workspace, const std::string &instrumentName);
 
-Mantid::API::MatrixWorkspace_sptr
-provide1DWorkspace(NXcanSASTestParameters &parameters);
+Mantid::API::MatrixWorkspace_sptr provide1DWorkspace(NXcanSASTestParameters &parameters);
 
-Mantid::API::MatrixWorkspace_sptr
-getTransmissionWorkspace(NXcanSASTestTransmissionParameters &parameters);
+Mantid::API::MatrixWorkspace_sptr getTransmissionWorkspace(NXcanSASTestTransmissionParameters &parameters);
 
-Mantid::API::MatrixWorkspace_sptr
-provide2DWorkspace(NXcanSASTestParameters &parameters);
+Mantid::API::MatrixWorkspace_sptr provide2DWorkspace(NXcanSASTestParameters &parameters);
 
 void set2DValues(const Mantid::API::MatrixWorkspace_sptr &ws);
 

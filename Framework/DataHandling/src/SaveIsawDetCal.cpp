@@ -35,18 +35,15 @@ DECLARE_ALGORITHM(SaveIsawDetCal)
 /** Initialize the algorithm's properties.
  */
 void SaveIsawDetCal::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                 FileProperty::Save, ".DetCal"),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ".DetCal"),
                   "Path to an ISAW-style .detcal file to save.");
 
   declareProperty("TimeOffset", 0.0, "Offsets to be applied to times");
-  declareProperty(
-      std::make_unique<ArrayProperty<string>>("BankNames", Direction::Input),
-      "Optional: Only select the specified banks");
+  declareProperty(std::make_unique<ArrayProperty<string>>("BankNames", Direction::Input),
+                  "Optional: Only select the specified banks");
   declareProperty("AppendFile", false,
                   "Append to file if true.\n"
                   "If false, new file (default).");
@@ -75,8 +72,7 @@ void SaveIsawDetCal::exec() {
 
   inst = ws->getInstrument();
   if (!inst)
-    throw std::runtime_error(
-        "No instrument in the Workspace. Cannot save DetCal file.");
+    throw std::runtime_error("No instrument in the Workspace. Cannot save DetCal file.");
   // We cannot assume the peaks have bank type detector modules, so we have a
   // string to check this
   std::string bankPart = "bank";
@@ -113,8 +109,7 @@ void SaveIsawDetCal::exec() {
     }
   }
   if (!inst)
-    throw std::runtime_error(
-        "No instrument in PeaksWorkspace. Cannot save peaks file.");
+    throw std::runtime_error("No instrument in PeaksWorkspace. Cannot save peaks file.");
 
   double l1;
   V3D beamline;
@@ -168,8 +163,7 @@ void SaveIsawDetCal::exec() {
     {
       std::vector<Geometry::IComponent_const_sptr> children;
       std::shared_ptr<const Geometry::ICompAssembly> asmb =
-          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-              inst->getComponentByName(bankName));
+          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst->getComponentByName(bankName));
       asmb->getChildren(children, false);
       det = children[0];
     }
@@ -186,52 +180,39 @@ void SaveIsawDetCal::exec() {
       // Since WISH banks are curved use center and increment 2 for tubedown
       int midX = NCOLS / 2;
       int midY = NROWS / 2;
-      V3D base = findPixelPos(bankName, midX + 2, midY) -
-                 findPixelPos(bankName, midX, midY);
+      V3D base = findPixelPos(bankName, midX + 2, midY) - findPixelPos(bankName, midX, midY);
       base.normalize();
 
       // Up unit vector (along the vertical, Y axis)
-      V3D up = findPixelPos(bankName, midX, midY + 1) -
-               findPixelPos(bankName, midX, midY);
+      V3D up = findPixelPos(bankName, midX, midY + 1) - findPixelPos(bankName, midX, midY);
       up.normalize();
 
       // Write the line
-      out << "5 " << std::setw(6) << std::right << bank << " " << std::setw(6)
-          << std::right << NROWS << " " << std::setw(6) << std::right << NCOLS
-          << " " << std::setw(7) << std::right << std::fixed
-          << std::setprecision(4) << 100.0 * xsize << " " << std::setw(7)
-          << std::right << std::fixed << std::setprecision(4) << 100.0 * ysize
-          << " "
-          << "  0.2000 " << std::setw(6) << std::right << std::fixed
-          << std::setprecision(2) << 100.0 * detd << " " << std::setw(9)
-          << std::right << std::fixed << std::setprecision(4)
-          << 100.0 * center.X() << " " << std::setw(9) << std::right
-          << std::fixed << std::setprecision(4) << 100.0 * center.Y() << " "
-          << std::setw(9) << std::right << std::fixed << std::setprecision(4)
-          << 100.0 * center.Z() << " " << std::setw(8) << std::right
-          << std::fixed << std::setprecision(5) << base.X() << " "
-          << std::setw(8) << std::right << std::fixed << std::setprecision(5)
-          << base.Y() << " " << std::setw(8) << std::right << std::fixed
-          << std::setprecision(5) << base.Z() << " " << std::setw(8)
-          << std::right << std::fixed << std::setprecision(5) << up.X() << " "
-          << std::setw(8) << std::right << std::fixed << std::setprecision(5)
-          << up.Y() << " " << std::setw(8) << std::right << std::fixed
-          << std::setprecision(5) << up.Z() << " \n";
+      out << "5 " << std::setw(6) << std::right << bank << " " << std::setw(6) << std::right << NROWS << " "
+          << std::setw(6) << std::right << NCOLS << " " << std::setw(7) << std::right << std::fixed
+          << std::setprecision(4) << 100.0 * xsize << " " << std::setw(7) << std::right << std::fixed
+          << std::setprecision(4) << 100.0 * ysize << " "
+          << "  0.2000 " << std::setw(6) << std::right << std::fixed << std::setprecision(2) << 100.0 * detd << " "
+          << std::setw(9) << std::right << std::fixed << std::setprecision(4) << 100.0 * center.X() << " "
+          << std::setw(9) << std::right << std::fixed << std::setprecision(4) << 100.0 * center.Y() << " "
+          << std::setw(9) << std::right << std::fixed << std::setprecision(4) << 100.0 * center.Z() << " "
+          << std::setw(8) << std::right << std::fixed << std::setprecision(5) << base.X() << " " << std::setw(8)
+          << std::right << std::fixed << std::setprecision(5) << base.Y() << " " << std::setw(8) << std::right
+          << std::fixed << std::setprecision(5) << base.Z() << " " << std::setw(8) << std::right << std::fixed
+          << std::setprecision(5) << up.X() << " " << std::setw(8) << std::right << std::fixed << std::setprecision(5)
+          << up.Y() << " " << std::setw(8) << std::right << std::fixed << std::setprecision(5) << up.Z() << " \n";
 
     } else
-      g_log.warning() << "Information about detector module " << bankName
-                      << " not found and recognised\n";
+      g_log.warning() << "Information about detector module " << bankName << " not found and recognised\n";
   }
 
   out.close();
 }
 
-V3D SaveIsawDetCal::findPixelPos(const std::string &bankName, int col,
-                                 int row) {
+V3D SaveIsawDetCal::findPixelPos(const std::string &bankName, int col, int row) {
   std::shared_ptr<const IComponent> parent = inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
-    std::shared_ptr<const RectangularDetector> RDet =
-        std::dynamic_pointer_cast<const RectangularDetector>(parent);
+    std::shared_ptr<const RectangularDetector> RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
 
     std::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
     return pixel->getPos();
@@ -241,8 +222,7 @@ V3D SaveIsawDetCal::findPixelPos(const std::string &bankName, int col,
         std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
     if (children[0]->getName() == "sixteenpack") {
-      asmb =
-          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+      asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
       children.clear();
       asmb->getChildren(children, false);
     }
@@ -251,8 +231,7 @@ V3D SaveIsawDetCal::findPixelPos(const std::string &bankName, int col,
     if (inst->getName() == "WISH")
       col0 = (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
     std::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-            children[col0]);
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[col0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
     Geometry::IComponent_const_sptr first = grandchildren[row - 1];
@@ -260,14 +239,12 @@ V3D SaveIsawDetCal::findPixelPos(const std::string &bankName, int col,
   }
 }
 
-void SaveIsawDetCal::sizeBanks(const std::string &bankName, int &NCOLS,
-                               int &NROWS, double &xsize, double &ysize) {
+void SaveIsawDetCal::sizeBanks(const std::string &bankName, int &NCOLS, int &NROWS, double &xsize, double &ysize) {
   if (bankName == "None")
     return;
   std::shared_ptr<const IComponent> parent = inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
-    std::shared_ptr<const RectangularDetector> RDet =
-        std::dynamic_pointer_cast<const RectangularDetector>(parent);
+    std::shared_ptr<const RectangularDetector> RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
 
     NCOLS = RDet->xpixels();
     NROWS = RDet->ypixels();
@@ -279,8 +256,7 @@ void SaveIsawDetCal::sizeBanks(const std::string &bankName, int &NCOLS,
         std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
     if (children[0]->getName() == "sixteenpack") {
-      asmb =
-          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+      asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
       children.clear();
       asmb->getChildren(children, false);
     }

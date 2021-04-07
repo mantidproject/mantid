@@ -9,15 +9,15 @@ BivariateGaussian
 Description
 -----------
 
-This function provides a Bivariate Gaussian distribution by acting as a wrapper to matplotlib.mlab.bivariate_normal.  
-It differs from :ref:`func-BivariateNormal` in that it does not require any detector-space-specific input and 
+This function provides a Bivariate Gaussian distribution by acting as a wrapper to matplotlib.mlab.bivariate_normal.
+It differs from :ref:`func-BivariateNormal` in that it does not require any detector-space-specific input and
 allows for a correlation term.
 
 .. math:: V= \frac{A}{2 \pi \sigma_x \sigma_y \sqrt{1-\rho^2}} \times \exp \bigg[- \frac{1}{2(1-\rho^2)} \bigg( \frac{(x-\mu_x)^2}{\sigma_x^2} + \frac{(y-\mu_y)^2}{\sigma_y^2}  - \frac{2 \rho (x-\mu_x) (y-\mu_y)} {\sigma_x \sigma_y} \bigg) \bigg] + bg
 
 .. attributes::
 
-The attributes **nX** and **nY** store the dimension of the two histogram.  This is useful when reconstructing 
+The attributes **nX** and **nY** store the dimension of the two histogram.  This is useful when reconstructing
 a 2D histogram from a fit, which reduces the data 1D.
 
 .. properties::

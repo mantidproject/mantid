@@ -11,7 +11,7 @@ Description
 
 When interacting with the :ref:`Muon_Analysis-ref` interface, operations such as detector grouping, group and pair asymmetry are performed on data. This algorithm performs a "grouping asymmetry" operation, in other words it provides a numerical estimation (without fitting) of the asymmetry. More details can be found at :ref:`algm-EstimateMuonAsymmetryFromCounts`.
 
-This algorithm is part of a set of four; with :ref:`algm-MuonPreProcess` being run first; and the output being fed into this one. This allows the replication of the workflow used by the muon analysis interface to produce group data. 
+This algorithm is part of a set of four; with :ref:`algm-MuonPreProcess` being run first; and the output being fed into this one. This allows the replication of the workflow used by the muon analysis interface to produce group data.
 
 Analysis
 ########
@@ -20,7 +20,7 @@ A workspace has one or more *spectra* contained within it; each spectra has a un
 
 The **InputWorkspace** must be a :ref:`WorkspaceGroup <WorkspaceGroup>`, where each workspace within the group represents a single period. Thus, single period data is just a *WorkspaceGroup* with a single workspace within it.
 
-The group must be given a name via **GroupName** which can consist of letters, numbers and underscores. 
+The group must be given a name via **GroupName** which can consist of letters, numbers and underscores.
 
 #. Valid names : "fwd", "fwd2", "fwd_2", "1234"
 #. Invalid names : "", "fwd!", "fwd "
@@ -31,11 +31,11 @@ After the grouping is performed, the analysis described in :ref:`algm-EstimateMu
 
 **Note** : The workspaces supplied to the algorithm must have a number of good frames set in their sample logs. The sample log is called "goodfrm" and can be set using;
 
-.. code:: 
+.. code::
 
     AddSampleLog(workspace=workspace, LogName="goodfram", LogText ="10")
 
-Multi period data 
+Multi period data
 #################
 
 Both single and multi period data are supported by the algorithm.
@@ -43,7 +43,7 @@ Both single and multi period data are supported by the algorithm.
 The **SummedPeriods** and **SubtractedPeriods** inputs are used to control the way that periods are combined. so for example;
 
 #. SummedPeriods = 1,2
-#. SubtractedPeriods = 3,4 
+#. SubtractedPeriods = 3,4
 
 would combine periods in the combination :math:`(1+2)-(3+4)`.
 
@@ -119,7 +119,7 @@ Output:
     # We have asked for periods 1+2, with each period summing detectors 1,2
     print("X values are : {}".format([round(float(i), 3) for i in output_workspace.readX(0)]))
     print("Y values are : {}".format([round(float(i), 3) for i in output_workspace.readY(0)]))
-    
+
 
 Output:
 

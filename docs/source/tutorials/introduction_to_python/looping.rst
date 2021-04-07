@@ -1,7 +1,7 @@
 .. _looping:
 
 =======
-Looping 
+Looping
 =======
 
 -  Executing a given block of code a number of times is achieved using
@@ -158,7 +158,7 @@ While
    sum = 0
    while sum < 10:
        sum += 1   # ALWAYS remember to update the loop test or it will
-                          # run forever!! 
+                          # run forever!!
 
    print(sum)      # Gives value 10
 

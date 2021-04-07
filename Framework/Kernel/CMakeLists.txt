@@ -23,7 +23,6 @@ set(SRC_FILES
     src/DateTimeValidator.cpp
     src/DateValidator.cpp
     src/DeltaEMode.cpp
-    src/Diffraction.cpp
     src/DirectoryValidator.cpp
     src/DiskBuffer.cpp
     src/DllOpen.cpp
@@ -80,7 +79,6 @@ set(SRC_FILES
     src/NexusHDF5Descriptor.cpp
     src/NullValidator.cpp
     src/OptionalBool.cpp
-    src/ParaViewVersion.cpp
     src/ProgressBase.cpp
     src/Property.cpp
     src/PropertyHistory.cpp
@@ -174,7 +172,6 @@ set(INC_FILES
     inc/MantidKernel/DateTimeValidator.h
     inc/MantidKernel/DateValidator.h
     inc/MantidKernel/DeltaEMode.h
-    inc/MantidKernel/Diffraction.h
     inc/MantidKernel/DirectoryValidator.h
     inc/MantidKernel/DiskBuffer.h
     inc/MantidKernel/DllConfig.h
@@ -247,7 +244,6 @@ set(INC_FILES
     inc/MantidKernel/NexusHDF5Descriptor.h
     inc/MantidKernel/NullValidator.h
     inc/MantidKernel/OptionalBool.h
-    inc/MantidKernel/ParaViewVersion.h
     inc/MantidKernel/PhysicalConstants.h
     inc/MantidKernel/PocoVersion.h
     inc/MantidKernel/ProgressBase.h
@@ -345,7 +341,6 @@ set(TEST_FILES
     DateTimeValidatorTest.h
     DateValidatorTest.h
     DeltaEModeTest.h
-    DiffractionTest.h
     DirectoryValidatorTest.h
     DiskBufferISaveableTest.h
     DiskBufferTest.h
@@ -546,18 +541,9 @@ endif()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h.in
                ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h)
 
-# This section deals with creating the ParaViewVersion implementation
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp)
 # This section deals with creating the GithubApiHelper implementation
-
-if(WIN32)
-  set(GITHUB_AUTHORIZATION_TOKEN "8ec7afc857540ee60af78cba1cf7779a6ed0b6b9")
-elseif(APPLE)
-  set(GITHUB_AUTHORIZATION_TOKEN "9f1c1acd61ecb87b21ad0382f6b403c8294992c5")
-else()
-  set(GITHUB_AUTHORIZATION_TOKEN "ccacbaf39a7ad8151fca03b4ea99a29b28f0993b")
-endif()
+set (GITHUB_AUTHORIZATION_TOKEN ""
+     CACHE STRING "token used for authenticated read access to github")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/GitHubApiHelper.h.in
                ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/GitHubApiHelper.h)
 
@@ -574,22 +560,7 @@ endif()
 set(FRAMEWORK_PLUGINS_DIR ".")
 set(QT_PLUGINS_DIR ".")
 # %V will be replaced with the major version of Qt at runtime
-if(MAKE_VATES)
-  set(PV_PLUGINS_DIR "./plugins/paraview/qt%V")
-  if(MSVC)
-    set(
-      PARAVIEW_PYTHON_PATHS
-      "${ParaView_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/site-packages;"
-      )
-  else()
-    set(PARAVIEW_PYTHON_PATHS
-        "${ParaView_DIR}/lib;${ParaView_DIR}/lib/site-packages;")
-  endif()
-else()
-  set(PV_PLUGINS_DIR "")
-  set(PARAVIEW_PYTHON_PATHS "")
-endif()
-set(IGNORE_PARAVIEW "0")
+set(PV_PLUGINS_DIR "")
 set(UPDATE_INSTRUMENT_DEFINTITIONS "0")
 set(CHECK_FOR_NEW_MANTID_VERSION "0")
 set(ENABLE_USAGE_REPORTS "0")
@@ -608,8 +579,6 @@ set(HTML_ROOT ${DOCS_BUILDDIR}/html)
 # configuration below
 if(MPI_BUILD)
   set(CONSOLEPATTERN "%H:%M:%S,%i [%N:%P] %p %s - %t")
-  set(PV_PLUGINS_DIR "")
-  set(IGNORE_PARAVIEW "1")
 else()
   set(CONSOLEPATTERN "%s-[%p] %t")
 endif()
@@ -650,20 +619,6 @@ endif()
 set(FRAMEWORK_PLUGINS_DIR ${MANTID_ROOT}/plugins)
 set(PYTHONPLUGIN_DIRS "${FRAMEWORK_PLUGINS_DIR}/python")
 set(PYTHONPLUGIN_MANIFEST "${PYTHONPLUGIN_DIRS}/python-plugin-manifest.txt")
-if(MAKE_VATES)
-  if(APPLE)
-    set(PARAVIEW_PYTHON_PATHS "../Libraries;../Python;")
-  elseif(WIN32)
-    set(PV_LIBS
-        "../lib/paraview-${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}")
-    set(PARAVIEW_PYTHON_PATHS "${PV_LIBS}/site-packages;")
-  else() # Linux
-    set(PV_LIBS "${CMAKE_INSTALL_PREFIX}/lib/paraview-${PARAVIEW_VERSION}")
-    set(PARAVIEW_PYTHON_PATHS "${PV_LIBS};${PV_LIBS}/site-packages;")
-  endif()
-else()
-  set(PARAVIEW_PYTHON_PATHS "")
-endif()
 set(UPDATE_INSTRUMENT_DEFINTITIONS "${ENABLE_NETWORK_ACCESS}")
 set(CHECK_FOR_NEW_MANTID_VERSION "${ENABLE_NETWORK_ACCESS}")
 set(ENABLE_USAGE_REPORTS "${ENABLE_NETWORK_ACCESS}")
@@ -676,11 +631,8 @@ set(HTML_ROOT ../share/doc/html)
 if(${CMAKE_PROJECT_NAME} MATCHES "MantidFramework")
   set(QT_PLUGINS_DIR "")
   set(COLORMAPS_FOLDER "")
-  set(PV_PLUGINS_DIR "")
-  set(IGNORE_PARAVIEW "1")
 else()
   set(QT_PLUGINS_DIR "${MANTID_ROOT}/plugins/qt%V")
-  set(PV_PLUGINS_DIR "${MANTID_ROOT}/plugins/${PVPLUGINS_SUBDIR}/qt%V")
   set(COLORMAPS_FOLDER ${MANTID_ROOT}/colormaps)
 endif()
 

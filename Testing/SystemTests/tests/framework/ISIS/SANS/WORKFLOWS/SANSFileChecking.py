@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -12,10 +12,12 @@ Check that file manipulation works fine
 
 import unittest
 import systemtesting
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.simpleapi import *
 import SANSUtility as su
 import os
 from ISISCommandInterface import *
+from sans.common.enums import SANSInstrument
 
 
 def get_full_path_SANS_system_test(filename):
@@ -220,6 +222,7 @@ class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
         self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_after))
 
 
+@ISISSansSystemTest(SANSInstrument.LARMOR, SANSInstrument.LOQ, SANSInstrument.SANS2D)
 class SANSSwitchIDFTestRunner(systemtesting.MantidSystemTest):
     def __init__(self):
         systemtesting.MantidSystemTest.__init__(self)

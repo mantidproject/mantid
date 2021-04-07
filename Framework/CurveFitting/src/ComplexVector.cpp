@@ -29,9 +29,7 @@ ComplexVector::~ComplexVector() { gsl_vector_complex_free(m_vector); }
 
 /// Constructor
 /// @param n :: The length of the vector.
-ComplexVector::ComplexVector(const size_t n) {
-  m_vector = gsl_vector_complex_alloc(n);
-}
+ComplexVector::ComplexVector(const size_t n) { m_vector = gsl_vector_complex_alloc(n); }
 
 /// Copy constructor.
 /// @param v :: The other vector
@@ -106,14 +104,11 @@ size_t ComplexVector::size() const { return m_vector->size; }
 /// @param value :: The new value
 void ComplexVector::set(size_t i, const ComplexType &value) {
   if (i < m_vector->size) {
-    gsl_vector_complex_set(m_vector, i,
-                           gsl_complex{{value.real(), value.imag()}});
+    gsl_vector_complex_set(m_vector, i, gsl_complex{{value.real(), value.imag()}});
 
   } else {
     std::stringstream errmsg;
-    errmsg << "ComplexVector index = " << i
-           << " is out of range = " << m_vector->size
-           << " in ComplexVector.set()";
+    errmsg << "ComplexVector index = " << i << " is out of range = " << m_vector->size << " in ComplexVector.set()";
     throw std::out_of_range(errmsg.str());
   }
 }
@@ -126,9 +121,7 @@ ComplexType ComplexVector::get(size_t i) const {
   }
 
   std::stringstream errmsg;
-  errmsg << "ComplexVector index = " << i
-         << " is out of range = " << m_vector->size
-         << " in ComplexVector.get()";
+  errmsg << "ComplexVector index = " << i << " is out of range = " << m_vector->size << " in ComplexVector.get()";
   throw std::out_of_range(errmsg.str());
 }
 
@@ -164,9 +157,7 @@ ComplexVector &ComplexVector::operator*=(const ComplexType d) {
 
 /// Create a new ComplexVector and move all data to it.
 /// Destroys this vector.
-ComplexVector ComplexVector::move() {
-  return ComplexVector(std::move(m_vector));
-}
+ComplexVector ComplexVector::move() { return ComplexVector(std::move(m_vector)); }
 
 /// The << operator.
 std::ostream &operator<<(std::ostream &ostr, const ComplexVector &v) {

@@ -105,7 +105,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
         # Adjust icon size or they are too small in PyQt5 by default
         dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX() / 100
-        self.setIconSize(QtCore.QSize(24 * dpi_ratio, 24 * dpi_ratio))
+        self.setIconSize(QtCore.QSize(int(24 * dpi_ratio), int(24 * dpi_ratio)))
 
     def copy_to_clipboard(self):
         self.sig_copy_to_clipboard_triggered.emit()
@@ -113,8 +113,13 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     def launch_plot_options(self):
         self.sig_plot_options_triggered.emit()
 
-    def toggle_grid(self):
-        enable = self._actions['toggle_grid'].isChecked()
+    def toggle_grid(self, enable=None):
+        if enable is None:
+            # Toggle grid to whatever state the toolbar button is in
+            enable = self._actions['toggle_grid'].isChecked()
+        else:
+            # Otherwise toggle grid to whatever state we were given
+            self._actions['toggle_grid'].setChecked(enable)
         self.sig_grid_toggle_triggered.emit(enable)
 
     def toggle_fit(self):

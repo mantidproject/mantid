@@ -35,14 +35,13 @@ namespace API {
 class MANTID_API_DLL ParameterTie final : public ParameterReference {
 public:
   /// Constructor
-  ParameterTie(IFunction *funct, const std::string &parName,
-               const std::string &expr = "", bool isDefault = false);
+  ParameterTie(IFunction *funct, const std::string &parName, const std::string &expr = "", bool isDefault = false);
   /// Destructor
   ~ParameterTie() override;
   /// Set the tie expression
   virtual void set(const std::string &expr);
   /// Evaluate the expression
-  virtual double eval();
+  virtual double eval(bool setParameterValue = true);
   /// Return the string that can be used to recreate this tie
   virtual std::string asString(const IFunction *fun = nullptr) const;
 

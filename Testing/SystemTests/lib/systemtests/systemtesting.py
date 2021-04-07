@@ -34,7 +34,7 @@ import importlib.util
 import inspect
 from mantid.api import FileFinder
 from mantid.api import FrameworkManager
-from mantid.kernel import config, MemoryStats
+from mantid.kernel import config, MemoryStats, ConfigService
 from mantid.simpleapi import AlgorithmManager, Load, SaveNexus
 import numpy
 import platform
@@ -234,17 +234,22 @@ class MantidSystemTest(unittest.TestCase):
         if self.excludeInPullRequests():
             sys.exit(TestRunner.SKIP_TEST)
 
-        # Start timer
-        start = time.time()
-        countmax = self.maxIterations() + 1
-        for i in range(1, countmax):
-            istart = time.time()
-            self.runTest()
-            delta_t = time.time() - istart
-            self.reportResult('iteration time_taken', str(i) + ' %.2f' % delta_t)
-        delta_t = float(time.time() - start)
-        # Finish
-        self.reportResult('time_taken', '%.2f' % delta_t)
+        self.setUp()
+
+        try:
+            # Start timer
+            start = time.time()
+            countmax = self.maxIterations() + 1
+            for i in range(1, countmax):
+                istart = time.time()
+                self.runTest()
+                delta_t = time.time() - istart
+                self.reportResult('iteration time_taken', str(i) + ' %.2f' % delta_t)
+            delta_t = float(time.time() - start)
+            # Finish
+            self.reportResult('time_taken', '%.2f' % delta_t)
+        finally:
+            self.tearDown()
 
     def __prepASCIIFile(self, filename):
         """Prepare an ascii file for comparison using difflib."""
@@ -671,21 +676,20 @@ class TestScript(object):
         self._exclude_in_pr_builds = not exclude_in_pr_builds
 
     def asString(self, clean=False):
-        code = """
+        code = f"""
 import sys
-for p in ('{test_framework}', '{pythoninterface_test_dir}', '{test_dir}'):
+for p in ('{TESTING_FRAMEWORK_DIR}', '{FRAMEWORK_PYTHONINTERFACE_TEST_DIR}', '{self._test_dir}'):
     sys.path.append(p)
-from {test_modname} import {test_cls}
-systest = {test_cls}()
-if {exclude_in_pr}:
+
+# Ensure sys path matches current to avoid weird import errors
+sys.path.extend({sys.path})
+from {self._modname} import {self._test_cls_name}
+systest = {self._test_cls_name}()
+if {self._exclude_in_pr_builds}:
     systest.excludeInPullRequests = lambda: False
-""".format(test_framework=TESTING_FRAMEWORK_DIR,
-           pythoninterface_test_dir=FRAMEWORK_PYTHONINTERFACE_TEST_DIR,
-           test_dir=self._test_dir,
-           test_modname=self._modname,
-           test_cls=self._test_cls_name,
-           exclude_in_pr=self._exclude_in_pr_builds)
-        if (not clean):
+"""
+
+        if not clean:
             code += "systest.execute()\n" + \
                     "exitcode = systest.returnValidationCode({})\n".format(TestRunner.VALIDATION_FAIL_CODE)
         else:
@@ -1195,6 +1199,10 @@ class MantidFrameworkConfig:
         # Make sure we only save these keys here
         config.reset()
 
+        # With the default facility changed from ISIS to nothing (EMPTY),
+        # the following setting is put in place to avoid failure of tests
+        ConfigService.Instance().setString("default.facility", "ISIS")
+
         # Up the log level so that failures can give useful information
         config['logging.loggers.root.level'] = self.__loglevel
         # Set the correct search path
@@ -1202,9 +1210,6 @@ class MantidFrameworkConfig:
 
         # Save path
         config['defaultsave.directory'] = self.__saveDir
-
-        # Do not show paraview dialog
-        config['paraview.ignore'] = "1"
 
         # Do not update instrument definitions
         config['UpdateInstrumentDefinitions.OnStartup'] = "0"

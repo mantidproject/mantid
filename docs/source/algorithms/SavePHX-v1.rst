@@ -68,7 +68,7 @@ Usage
 
    DeleteWorkspace("ws")
    os.remove(file_name)
-  
+
 **Output:**
 
 .. testoutput:: exSavePHX

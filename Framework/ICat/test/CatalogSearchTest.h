@@ -104,10 +104,8 @@ public:
     if (!searchobj.isInitialized())
       searchobj.initialize();
 
-    TS_ASSERT_THROWS(searchobj.setPropertyValue("StartDate", "sssss"),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(searchobj.setPropertyValue("EndDate", "aaaaa"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(searchobj.setPropertyValue("StartDate", "sssss"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(searchobj.setPropertyValue("EndDate", "aaaaa"), const std::invalid_argument &);
   }
 
   void testSearchByInvalidDates2() {
@@ -116,10 +114,8 @@ public:
     if (!searchobj.isInitialized())
       searchobj.initialize();
 
-    TS_ASSERT_THROWS(searchobj.setPropertyValue("StartDate", "39/22/2009"),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(searchobj.setPropertyValue("EndDate", "1/22/2009"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(searchobj.setPropertyValue("StartDate", "39/22/2009"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(searchobj.setPropertyValue("EndDate", "1/22/2009"), const std::invalid_argument &);
   }
 
 private:

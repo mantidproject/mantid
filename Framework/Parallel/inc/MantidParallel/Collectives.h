@@ -26,9 +26,7 @@ namespace Parallel {
 */
 
 namespace detail {
-template <typename T>
-void gather(const Communicator &comm, const T &in_value,
-            std::vector<T> &out_values, int root) {
+template <typename T> void gather(const Communicator &comm, const T &in_value, std::vector<T> &out_values, int root) {
   int tag{0};
   if (comm.rank() != root) {
     comm.send(root, tag, in_value);
@@ -43,26 +41,22 @@ void gather(const Communicator &comm, const T &in_value,
   }
 }
 
-template <typename T>
-void gather(const Communicator &comm, const T &in_value, int root) {
+template <typename T> void gather(const Communicator &comm, const T &in_value, int root) {
   int tag{0};
   if (comm.rank() != root) {
     comm.send(root, tag, in_value);
   } else {
-    throw std::logic_error(
-        "Parallel::gather on root rank without output argument.");
+    throw std::logic_error("Parallel::gather on root rank without output argument.");
   }
 }
 
-template <typename... T>
-void all_gather(const Communicator &comm, T &&... args) {
+template <typename... T> void all_gather(const Communicator &comm, T &&...args) {
   for (int root = 0; root < comm.size(); ++root)
     gather(comm, std::forward<T>(args)..., root);
 }
 
 template <typename T>
-void all_to_all(const Communicator &comm, const std::vector<T> &in_values,
-                std::vector<T> &out_values) {
+void all_to_all(const Communicator &comm, const std::vector<T> &in_values, std::vector<T> &out_values) {
   int tag{0};
   out_values.resize(comm.size());
   std::vector<Request> requests;
@@ -74,7 +68,7 @@ void all_to_all(const Communicator &comm, const std::vector<T> &in_values,
 }
 } // namespace detail
 
-template <typename... T> void gather(const Communicator &comm, T &&... args) {
+template <typename... T> void gather(const Communicator &comm, T &&...args) {
 #ifdef MPI_EXPERIMENTAL
   if (!comm.hasBackend())
     return boost::mpi::gather(comm, std::forward<T>(args)...);
@@ -82,8 +76,7 @@ template <typename... T> void gather(const Communicator &comm, T &&... args) {
   detail::gather(comm, std::forward<T>(args)...);
 }
 
-template <typename... T>
-void all_gather(const Communicator &comm, T &&... args) {
+template <typename... T> void all_gather(const Communicator &comm, T &&...args) {
 #ifdef MPI_EXPERIMENTAL
   if (!comm.hasBackend())
     return boost::mpi::all_gather(comm, std::forward<T>(args)...);
@@ -91,8 +84,7 @@ void all_gather(const Communicator &comm, T &&... args) {
   detail::all_gather(comm, std::forward<T>(args)...);
 }
 
-template <typename... T>
-void all_to_all(const Communicator &comm, T &&... args) {
+template <typename... T> void all_to_all(const Communicator &comm, T &&...args) {
 #ifdef MPI_EXPERIMENTAL
   if (!comm.hasBackend())
     return boost::mpi::all_to_all(comm, std::forward<T>(args)...);

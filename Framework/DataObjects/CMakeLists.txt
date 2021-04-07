@@ -28,6 +28,8 @@ set(SRC_FILES
     src/NoShape.cpp
     src/OffsetsWorkspace.cpp
     src/Peak.cpp
+    src/LeanElasticPeak.cpp
+    src/BasePeak.cpp
     src/PeakColumn.cpp
     src/PeakNoShapeFactory.cpp
     src/PeakShapeBase.cpp
@@ -36,6 +38,7 @@ set(SRC_FILES
     src/PeakShapeSpherical.cpp
     src/PeakShapeSphericalFactory.cpp
     src/PeaksWorkspace.cpp
+    src/LeanElasticPeaksWorkspace.cpp
     src/PropertyWithValue.cpp
     src/RebinnedOutput.cpp
     src/ReflectometryTransform.cpp
@@ -108,6 +111,8 @@ set(INC_FILES
     inc/MantidDataObjects/NoShape.h
     inc/MantidDataObjects/OffsetsWorkspace.h
     inc/MantidDataObjects/Peak.h
+    inc/MantidDataObjects/LeanElasticPeak.h
+    inc/MantidDataObjects/BasePeak.h
     inc/MantidDataObjects/PeakColumn.h
     inc/MantidDataObjects/PeakNoShapeFactory.h
     inc/MantidDataObjects/PeakShapeBase.h
@@ -117,6 +122,7 @@ set(INC_FILES
     inc/MantidDataObjects/PeakShapeSpherical.h
     inc/MantidDataObjects/PeakShapeSphericalFactory.h
     inc/MantidDataObjects/PeaksWorkspace.h
+    inc/MantidDataObjects/LeanElasticPeaksWorkspace.h
     inc/MantidDataObjects/RebinnedOutput.h
     inc/MantidDataObjects/ReflectometryTransform.h
     inc/MantidDataObjects/ScanningWorkspaceBuilder.h
@@ -175,7 +181,9 @@ set(TEST_FILES
     PeakShapeSphericalFactoryTest.h
     PeakShapeSphericalTest.h
     PeakTest.h
+    LeanElasticPeakTest.h
     PeaksWorkspaceTest.h
+    LeanElasticPeaksWorkspaceTest.h
     RebinnedOutputTest.h
     RefAxisTest.h
     ReflectometryTransformTest.h
@@ -238,11 +246,15 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET DataObjects PROPERTY FOLDER "MantidFramework")
 
+target_include_directories(DataObjects SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS})
+
 target_link_libraries(DataObjects
                       LINK_PRIVATE
                       ${MANTIDLIBS}
                       ${JSONCPP_LIBRARIES}
-                      ${NEXUS_LIBRARIES})
+                      ${NEXUS_LIBRARIES}
+                      ${HDF5_LIBRARIES}
+                      ${HDF5_HL_LIBRARIES})
 
 # Add the unit tests directory
 add_subdirectory(test)

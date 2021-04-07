@@ -28,6 +28,7 @@ set(TEST_PY_FILES
     IndirectFlatPlateAbsorptionTest.py
     IndirectFlatPlateAbsorption2Test.py
     IndirectILLEnergyTransferTest.py
+    IndirectILLReductionDIFFTest.py
     IndirectILLReductionFWSTest.py
     IndirectILLReductionQENSTest.py
     IndirectReplaceFitResultTest.py
@@ -41,12 +42,14 @@ set(TEST_PY_FILES
     ISISIndirectEnergyTransferTest.py
     ISISIndirectEnergyTransferWrapperTest.py
     D7YIGPositionCalibrationTest.py
+    D7AbsoluteCrossSectionsTest.py
     LoadWANDTest.py
     MDNormSCDPreprocessIncoherentTest.py
     MolDynTest.py
     MSDFitTest.py
     OSIRISDiffractionReductionTest.py
     PaalmanPingsMonteCarloAbsorptionTest.py
+    PolDiffILLReductionTest.py
     PowderILLDetectorScanTest.py
     PowderILLParameterScanTest.py
     ReflectometryILLAutoProcessTest.py

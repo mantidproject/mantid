@@ -46,13 +46,10 @@ static boost::uuids::random_generator uuidGen;
  * (optional)
  *  @param uexeccount :: an  unsigned int for algorithm execution order
  */
-AlgorithmHistory::AlgorithmHistory(const Algorithm *const alg,
-                                   const Types::Core::DateAndTime &start,
-                                   const double &duration,
-                                   std::size_t uexeccount)
-    : m_name(alg->name()), m_version(alg->version()), m_executionDate(start),
-      m_executionDuration(duration), m_execCount(uexeccount),
-      m_childHistories() {
+AlgorithmHistory::AlgorithmHistory(const Algorithm *const alg, const Types::Core::DateAndTime &start,
+                                   const double &duration, std::size_t uexeccount)
+    : m_name(alg->name()), m_version(alg->version()), m_executionDate(start), m_executionDuration(duration),
+      m_execCount(uexeccount), m_childHistories() {
   // Now go through the algorithm's properties and create the PropertyHistory
   // objects.
   setProperties(alg);
@@ -60,9 +57,7 @@ AlgorithmHistory::AlgorithmHistory(const Algorithm *const alg,
 }
 
 /// Default constructor
-AlgorithmHistory::AlgorithmHistory() {
-  m_uuid = boost::uuids::to_string(uuidGen());
-}
+AlgorithmHistory::AlgorithmHistory() { m_uuid = boost::uuids::to_string(uuidGen()); }
 
 /// Destructor
 AlgorithmHistory::~AlgorithmHistory() = default;
@@ -79,13 +74,10 @@ AlgorithmHistory::~AlgorithmHistory() = default;
    (optional).
    @param uexeccount ::  an  unsigned int for algorithm execution order
  */
-AlgorithmHistory::AlgorithmHistory(const std::string &name, int vers,
-                                   std::string uuid,
-                                   const Types::Core::DateAndTime &start,
-                                   const double &duration,
+AlgorithmHistory::AlgorithmHistory(const std::string &name, int vers, std::string uuid,
+                                   const Types::Core::DateAndTime &start, const double &duration,
                                    std::size_t uexeccount)
-    : m_name(name), m_version(vers), m_executionDate(start),
-      m_executionDuration(duration), m_execCount(uexeccount),
+    : m_name(name), m_version(vers), m_executionDate(start), m_executionDuration(duration), m_execCount(uexeccount),
       m_childHistories(), m_uuid(std::move(uuid)) {}
 
 /**
@@ -100,8 +92,7 @@ void AlgorithmHistory::setProperties(const Algorithm *const alg) {
   // objects.
   const std::vector<Property *> &properties = alg->getProperties();
   for (const auto &property : properties) {
-    m_properties.emplace_back(
-        std::make_shared<PropertyHistory>(property->createHistory()));
+    m_properties.emplace_back(std::make_shared<PropertyHistory>(property->createHistory()));
   }
 }
 
@@ -114,9 +105,8 @@ void AlgorithmHistory::setProperties(const Algorithm *const alg) {
  * (optional)
  *  @param uexeccount :: an  unsigned int for algorithm execution order
  */
-void AlgorithmHistory::fillAlgorithmHistory(
-    const Algorithm *const alg, const Types::Core::DateAndTime &start,
-    const double &duration, std::size_t uexeccount) {
+void AlgorithmHistory::fillAlgorithmHistory(const Algorithm *const alg, const Types::Core::DateAndTime &start,
+                                            const double &duration, std::size_t uexeccount) {
   m_name = alg->name();
   m_version = alg->version();
   m_executionDate = start;
@@ -130,10 +120,9 @@ void AlgorithmHistory::fillAlgorithmHistory(
     @param A :: AlgorithmHistory Item to copy
  */
 AlgorithmHistory::AlgorithmHistory(const AlgorithmHistory &A)
-    : m_name(A.m_name), m_version(A.m_version),
-      m_executionDate(A.m_executionDate),
-      m_executionDuration(A.m_executionDuration), m_properties(A.m_properties),
-      m_execCount(A.m_execCount), m_uuid(A.m_uuid) {
+    : m_name(A.m_name), m_version(A.m_version), m_executionDate(A.m_executionDate),
+      m_executionDuration(A.m_executionDuration), m_properties(A.m_properties), m_execCount(A.m_execCount),
+      m_uuid(A.m_uuid) {
   m_childHistories = A.m_childHistories;
 }
 
@@ -141,8 +130,7 @@ AlgorithmHistory::AlgorithmHistory(const AlgorithmHistory &A)
  *  @param start ::    The start time of the algorithm execution
  *  @param duration :: The time (in seconds) that it took to run this algorithm
  */
-void AlgorithmHistory::addExecutionInfo(const DateAndTime &start,
-                                        const double &duration) {
+void AlgorithmHistory::addExecutionInfo(const DateAndTime &start, const double &duration) {
   m_executionDate = start;
   m_executionDuration = duration;
 }
@@ -153,11 +141,9 @@ void AlgorithmHistory::addExecutionInfo(const DateAndTime &start,
     @param isdefault :: True if the property is default
     @param direction :: The direction of the property
  */
-void AlgorithmHistory::addProperty(const std::string &name,
-                                   const std::string &value, bool isdefault,
+void AlgorithmHistory::addProperty(const std::string &name, const std::string &value, bool isdefault,
                                    const unsigned int &direction) {
-  m_properties.emplace_back(
-      std::make_shared<PropertyHistory>(name, value, "", isdefault, direction));
+  m_properties.emplace_back(std::make_shared<PropertyHistory>(name, value, "", isdefault, direction));
 }
 
 /** Add a child algorithm history to history
@@ -175,9 +161,7 @@ void AlgorithmHistory::addChildHistory(const AlgorithmHistory_sptr &childHist) {
 /*
  Return the child history length
  */
-size_t AlgorithmHistory::childHistorySize() const {
-  return m_childHistories.size();
-}
+size_t AlgorithmHistory::childHistorySize() const { return m_childHistories.size(); }
 
 /**
  * Retrieve a child algorithm history by index
@@ -185,11 +169,9 @@ size_t AlgorithmHistory::childHistorySize() const {
  * @returns A pointer to an AlgorithmHistory object
  * @throws std::out_of_range error if the index is invalid
  */
-AlgorithmHistory_sptr
-AlgorithmHistory::getChildAlgorithmHistory(const size_t index) const {
+AlgorithmHistory_sptr AlgorithmHistory::getChildAlgorithmHistory(const size_t index) const {
   if (index >= this->getChildHistories().size()) {
-    throw std::out_of_range(
-        "AlgorithmHistory::getAlgorithmHistory() - Index out of range");
+    throw std::out_of_range("AlgorithmHistory::getAlgorithmHistory() - Index out of range");
   }
   return *std::next(m_childHistories.cbegin(), index);
 }
@@ -200,9 +182,7 @@ AlgorithmHistory::getChildAlgorithmHistory(const size_t index) const {
  * @returns A pointer to an AlgorithmHistory object
  * @throws std::out_of_range error if the index is invalid
  */
-AlgorithmHistory_sptr AlgorithmHistory::operator[](const size_t index) const {
-  return getChildAlgorithmHistory(index);
-}
+AlgorithmHistory_sptr AlgorithmHistory::operator[](const size_t index) const { return getChildAlgorithmHistory(index); }
 
 /**
  * Gets the value of a specified algorithm property
@@ -210,14 +190,11 @@ AlgorithmHistory_sptr AlgorithmHistory::operator[](const size_t index) const {
  * @returns The string value of the property
  * @throw Exception::NotFoundError if the named property is unknown
  */
-const std::string &
-AlgorithmHistory::getPropertyValue(const std::string &name) const {
-  const auto found = std::find_if(
-      m_properties.cbegin(), m_properties.cend(),
-      [&name](const auto &history) { return history->name() == name; });
+const std::string &AlgorithmHistory::getPropertyValue(const std::string &name) const {
+  const auto found = std::find_if(m_properties.cbegin(), m_properties.cend(),
+                                  [&name](const auto &history) { return history->name() == name; });
   if (found == m_properties.cend()) {
-    throw Kernel::Exception::NotFoundError(
-        "Could not find the specified property", name);
+    throw Kernel::Exception::NotFoundError("Could not find the specified property", name);
   }
   return (*found)->value();
 }
@@ -227,8 +204,7 @@ AlgorithmHistory::getPropertyValue(const std::string &name) const {
  * @param index :: An index within the workspace history
  * @returns A shared pointer to an algorithm object
  */
-std::shared_ptr<IAlgorithm>
-AlgorithmHistory::getChildAlgorithm(const size_t index) const {
+std::shared_ptr<IAlgorithm> AlgorithmHistory::getChildAlgorithm(const size_t index) const {
   return Algorithm::fromHistory(*(this->getChildAlgorithmHistory(index)));
 }
 
@@ -239,16 +215,14 @@ AlgorithmHistory::getChildAlgorithm(const size_t index) const {
  *  @param maxPropertyLength :: the max length for any property value string (0
  * = full length)
  */
-void AlgorithmHistory::printSelf(std::ostream &os, const int indent,
-                                 const size_t maxPropertyLength) const {
+void AlgorithmHistory::printSelf(std::ostream &os, const int indent, const size_t maxPropertyLength) const {
   auto execDate = m_executionDate.toISO8601String();
   execDate.replace(execDate.find("T"), 1, " ");
   os << std::string(indent, ' ') << "Algorithm: " << m_name;
   os << std::string(indent, ' ') << " v" << m_version << '\n';
 
   os << std::string(indent, ' ') << "Execution Date: " << execDate << '\n';
-  os << std::string(indent, ' ')
-     << "Execution Duration: " << m_executionDuration << " seconds\n";
+  os << std::string(indent, ' ') << "Execution Duration: " << m_executionDuration << " seconds\n";
   os << std::string(indent, ' ') << "UUID: " << m_uuid << '\n';
   os << std::string(indent, ' ') << "Parameters:\n";
 
@@ -261,9 +235,7 @@ void AlgorithmHistory::printSelf(std::ostream &os, const int indent,
  * Create a concrete algorithm based on a history record
  * @returns An algorithm object constructed from this history record
  */
-std::shared_ptr<IAlgorithm> AlgorithmHistory::createAlgorithm() const {
-  return Algorithm::fromHistory(*this);
-}
+std::shared_ptr<IAlgorithm> AlgorithmHistory::createAlgorithm() const { return Algorithm::fromHistory(*this); }
 
 /**
     Standard Assignment operator
@@ -302,8 +274,7 @@ std::ostream &operator<<(std::ostream &os, const AlgorithmHistory &AH) {
 void AlgorithmHistory::saveNexus(::NeXus::File *file, int &algCount) const {
   std::stringstream algNumber;
   ++algCount;
-  algNumber << "MantidAlgorithm_"
-            << algCount; // history entry names start at 1 not 0
+  algNumber << "MantidAlgorithm_" << algCount; // history entry names start at 1 not 0
 
   std::stringstream algData;
   printSelf(algData);

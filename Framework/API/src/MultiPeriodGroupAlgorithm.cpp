@@ -15,8 +15,7 @@ namespace API {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-MultiPeriodGroupAlgorithm::MultiPeriodGroupAlgorithm()
-    : m_worker(new MultiPeriodGroupWorker) {}
+MultiPeriodGroupAlgorithm::MultiPeriodGroupAlgorithm() : m_worker(new MultiPeriodGroupWorker) {}
 
 /** Check the input workspace properties for groups.
  *

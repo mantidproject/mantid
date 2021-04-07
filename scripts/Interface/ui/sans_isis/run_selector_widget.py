@@ -35,7 +35,7 @@ class RunSelectorWidget(QtWidgets.QWidget, Ui_RunSelectorWidget):
         default_directory = search_directories[0]
         directory = self._previous_or_default_directory(previous_directories, default_directory)
         file_filter = self._filter_for_extensions(extensions)
-        chosen_files = QtWidgets.QFileDialog.getOpenFileNames(self, "Select files", directory, file_filter)
+        chosen_files, _ = QtWidgets.QFileDialog.getOpenFileNames(self, "Select files", directory, file_filter)
         if chosen_files:
             self._store_previous_directory(previous_directories, chosen_files[0])
         return [str(chosen_file) for chosen_file in chosen_files]

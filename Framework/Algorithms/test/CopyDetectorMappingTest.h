@@ -39,14 +39,11 @@ public:
 
     // Add workspaces to ADS
     AnalysisDataService::Instance().add("to_match", toMatch);
-    AnalysisDataService::Instance().add(
-        "to_remap", WorkspaceCreationHelper::create2DWorkspace(10, 10));
+    AnalysisDataService::Instance().add("to_remap", WorkspaceCreationHelper::create2DWorkspace(10, 10));
 
     // Run algorithm
-    TS_ASSERT_THROWS_NOTHING(
-        copyMapping.setPropertyValue("WorkspaceToMatch", "to_match"));
-    TS_ASSERT_THROWS_NOTHING(
-        copyMapping.setPropertyValue("WorkspaceToRemap", "to_remap"));
+    TS_ASSERT_THROWS_NOTHING(copyMapping.setPropertyValue("WorkspaceToMatch", "to_match"));
+    TS_ASSERT_THROWS_NOTHING(copyMapping.setPropertyValue("WorkspaceToRemap", "to_remap"));
 
     TS_ASSERT_THROWS_NOTHING(copyMapping.execute());
     TS_ASSERT(copyMapping.isExecuted());
@@ -55,8 +52,7 @@ public:
     // match workspace
     MatrixWorkspace_const_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("to_remap")));
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("to_remap")));
     auto resultDetIDs = result->getSpectrum(0).getDetectorIDs();
     TS_ASSERT(detIDs == resultDetIDs);
 
@@ -70,16 +66,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(copyMapping.initialize())
 
     // Add workspaces to ADS
-    AnalysisDataService::Instance().add(
-        "to_match", WorkspaceCreationHelper::create2DWorkspace(10, 10));
-    AnalysisDataService::Instance().add(
-        "to_remap", WorkspaceCreationHelper::create2DWorkspace(20, 10));
+    AnalysisDataService::Instance().add("to_match", WorkspaceCreationHelper::create2DWorkspace(10, 10));
+    AnalysisDataService::Instance().add("to_remap", WorkspaceCreationHelper::create2DWorkspace(20, 10));
 
     // Run algorithm
-    TS_ASSERT_THROWS_NOTHING(
-        copyMapping.setPropertyValue("WorkspaceToMatch", "to_match"));
-    TS_ASSERT_THROWS_NOTHING(
-        copyMapping.setPropertyValue("WorkspaceToRemap", "to_remap"));
+    TS_ASSERT_THROWS_NOTHING(copyMapping.setPropertyValue("WorkspaceToMatch", "to_match"));
+    TS_ASSERT_THROWS_NOTHING(copyMapping.setPropertyValue("WorkspaceToRemap", "to_remap"));
 
     auto validationIssues = copyMapping.validateInputs();
     TS_ASSERT_DIFFERS(validationIssues.size(), 0);

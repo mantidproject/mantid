@@ -10,14 +10,15 @@ import string
 from typing import List, Optional, Union
 
 from mantid.api import (
-    AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, IEventWorkspaceProperty, mtd, Progress, TextAxis,
+    AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, WorkspaceProperty, mtd, Progress, TextAxis,
     Workspace, WorkspaceGroup, WorkspaceUnitValidator)
 from mantid.dataobjects import TableWorkspace, Workspace2D
+from mantid.kernel import StringListValidator
 from mantid.simpleapi import (
     CalculateDIFC, CloneWorkspace, CopyInstrumentParameters, ConvertUnits, CreateEmptyTableWorkspace,
     CreateGroupingWorkspace, CreateWorkspace, DeleteWorkspace, GroupDetectors, GroupWorkspaces, Multiply,
-    PDCalibration, Rebin, RenameWorkspace)
-from mantid.kernel import Direction, logger, StringArrayProperty
+    MoveInstrumentComponent, PDCalibration, Rebin)
+from mantid.kernel import Direction, EnabledWhenProperty, logger, PropertyCriterion, StringArrayProperty
 
 
 def unique_workspace_name(n: int = 5, prefix: Optional[str] = '',
@@ -84,7 +85,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
     #: - Xposition, YPosition, ZPosition: location of the instrument component in the lab frame (units in meters)
     #: - XdirectionCosine, YdirectionCosine, ZdirectionCosine, RotationAngle: direction cosines and rotation angle
     #: (in degress) defining a rotation in the lab frame that orients the instrument component
-    adjustment_items = ['Component', 'Xposition', 'Yposition', 'Zposition',
+    adjustment_items = ['ComponentName', 'Xposition', 'Yposition', 'Zposition',
                         'XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine', 'RotationAngle']
 
     def name(self):
@@ -94,46 +95,71 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         return 'Diffraction\\Reduction'
 
     def seeAlso(self):
-        return ['PDCalibration', 'AlignDetectors', 'AlignComponents',
-                'CORELLIPowderCalibrationDatabase', 'CORELLIPowderCalibrationLoad', 'CORELLIPowderCalibrationApply']
+        return ['PDCalibration', 'AlignDetectors', 'AlignComponents']
 
     def summary(self):
         return "Adjust bank positions and orientations to optimize peak determination in d-spacing"
 
     def validateInputs(self):
         issues = dict()
+
+        if self.getProperty('FixSource').value == self.getProperty('AdjustSource').value:
+            issues['FixSource'] = f'Either "FixSource" or "AdjustSource" must be set to True, but not both.'
+
         return issues
 
     def PyInit(self):
         self.declareProperty(
-            IEventWorkspaceProperty('InputWorkspace', '',
-                                    direction=Direction.Input,
-                                    validator=WorkspaceUnitValidator('TOF')),
+            WorkspaceProperty('InputWorkspace', '',
+                              direction=Direction.Input,
+                              validator=WorkspaceUnitValidator('TOF')),
             doc='Powder event data, ideally from a highly symmetric space group',
         )
         self.declareProperty(name='OutputWorkspacesPrefix', defaultValue='pdcal_', direction=Direction.Input,
                              doc="Prefix to be added to output workspaces")
-        # Tube Calibration properties
-        self.declareProperty(name='TubeDatabaseDir', defaultValue='', direction=Direction.Input,
-                             doc='path to database containing detector heights')
+
         # PDCalibration properties exposed, grouped
         property_names = ['TofBinning', 'PeakFunction', 'PeakPositions']
         self.copyProperties('PDCalibration', property_names)
         [self.setPropertyGroup(name, 'PDCalibration') for name in property_names]
-        # AlignComponents properties exposed, grouped
-        property_names = ['AdjustSource', 'SourceMaxTranslation', 'ComponentList', 'ComponentMaxTranslation',
-                          'ComponentMaxRotation']
-        self.declareProperty(name='AdjustSource', defaultValue=True,
+
+        # "Source Position" properties
+        self.declareProperty(name='FixSource', defaultValue=True,
+                             doc="Fix source's distance from the sample")
+        self.declareProperty(name='SourceToSampleDistance', defaultValue=20.004,
+                             doc='Set this value for a fixed distance from source to sample, in meters')
+        self.setPropertySettings('SourceToSampleDistance',
+                                 EnabledWhenProperty("FixSource", PropertyCriterion.IsDefault))
+        self.declareProperty(name='AdjustSource', defaultValue=False,
                              doc='Adjust Z-coordinate of the source')
         self.declareProperty(name='SourceMaxTranslation', defaultValue=0.1,
                              doc='Maximum adjustment of source position along the beam (Z) axis (m)')
+        self.setPropertySettings("SourceMaxTranslation",
+                                 EnabledWhenProperty("AdjustSource", PropertyCriterion.IsNotDefault))
+        property_names = ['FixSource', 'SourceToSampleDistance', 'AdjustSource', 'SourceMaxTranslation']
+        [self.setPropertyGroup(name, 'Source Calibration') for name in property_names]
+
+        # AlignComponents properties
+        self.declareProperty(name='FixY', defaultValue=True, doc="Vertical bank position is left unchanged")
         self.declareProperty(StringArrayProperty('ComponentList', values=self._banks, direction=Direction.Input),
                              doc='Comma separated list on banks to refine')
         self.declareProperty(name='ComponentMaxTranslation', defaultValue=0.02,
                              doc='Maximum translation of each component along either of the X, Y, Z axes (m)')
         self.declareProperty(name='ComponentMaxRotation', defaultValue=3.0,
                              doc='Maximum rotation of each component along either of the X, Y, Z axes (deg)')
-        [self.setPropertyGroup(name, 'AlignComponents') for name in property_names]
+        property_names = ['ComponentList', 'ComponentMaxTranslation', 'ComponentMaxRotation']
+        [self.setPropertyGroup(name, 'Banks Calibration') for name in property_names]
+
+        #
+        # Minimization Properties
+        self.declareProperty(name='Minimizer', defaultValue='L-BFGS-B', direction=Direction.Input,
+                             validator=StringListValidator(['L-BFGS-B', 'differential_evolution']),
+                             doc='Minimizer to use, differential_evolution is more accurate and slower.')
+        self.declareProperty(name='MaxIterations', defaultValue=20, direction=Direction.Input,
+                             doc='Maximum number of iterations for minimizer differential_evolution')
+
+        properties = ['Minimizer', 'MaxIterations']
+        [self.setPropertyGroup(name, "Minimization") for name in properties]
 
     def PyExec(self):
         temporary_workspaces = []
@@ -142,7 +168,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         prefix_output = self.getProperty('OutputWorkspacesPrefix').value
         progress_percent_start, progress_percent_end, reports_count = 0.0, 0.01, 5
         progress = Progress(self, progress_percent_start, progress_percent_end, reports_count)
-        input_workspace = self.getProperty('InputWorkspace').value
+        input_workspace = self.getPropertyValue('InputWorkspace')  # name of the input workspace
         adjustment_diagnostics = list()  # list workspace names that analyze the orientation of the banks
 
         # Create a grouping workspace whereby we group detectors by banks
@@ -210,46 +236,49 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
             dz = self.getProperty('SourceMaxTranslation').value
             kwargs = dict(InputWorkspace=input_workspace,
                           OutputWorkspace=input_workspace,
-                          CalibrationTable=difc_table,
+                          PeakCentersTofTable=peak_centers_in_tof,
+                          PeakPositions=self.getProperty('PeakPositions').value,
                           MaskWorkspace=f'{difc_table}_mask',
                           AdjustmentsTable=adjustments_table_name,
                           FitSourcePosition=True,
                           FitSamplePosition=False,
-                          Zposition=True, MinZPosition=-dz, MaxZPosition=dz)
+                          Zposition=True, MinZPosition=-dz, MaxZPosition=dz,
+                          Minimizer='L-BFGS-B')
             self.run_algorithm('AlignComponents', 0.1, 0.2, **kwargs)
-
+        else:
+            # Impose the fixed position of the source and save into the adjustments table
+            self._fixed_source_set_and_table(adjustments_table_name)
         # Translate and rotate the each bank, only after the source has been adjusted
         # The instrument in `input_workspace` is adjusted in-place
         dt = self.getProperty('ComponentMaxTranslation').value  # maximum translation along either axis
         dr = self.getProperty('ComponentMaxRotation').value  # maximum rotation along either axis
+        move_y = False if self.getProperty('FixY').value is True else True
         kwargs = dict(InputWorkspace=input_workspace,
                       OutputWorkspace=input_workspace,
-                      CalibrationTable=difc_table,
+                      PeakCentersTofTable=peak_centers_in_tof,
+                      PeakPositions=self.getProperty('PeakPositions').value,
                       MaskWorkspace=f'{difc_table}_mask',
                       AdjustmentsTable=adjustments_table_name + '_banks',
                       FitSourcePosition=False,
                       FitSamplePosition=False,
                       ComponentList=self.getProperty('ComponentList').value,
                       Xposition=True, MinXPosition=-dt, MaxXPosition=dt,
-                      Yposition=True, MinYPosition=-dt, MaxYPosition=dt,
+                      Yposition=move_y, MinYPosition=-dt, MaxYPosition=dt,
                       Zposition=True, MinZPosition=-dt, MaxZPosition=dt,
                       AlphaRotation=True, MinAlphaRotation=-dr, MaxAlphaRotation=dr,
                       BetaRotation=True, MinBetaRotation=-dr, MaxBetaRotation=dr,
                       GammaRotation=True, MinGammaRotation=-dr, MaxGammaRotation=dr,
-                      EulerConvention='YXZ')
+                      EulerConvention='YXZ',
+                      Minimizer=self.getProperty('Minimizer').value,
+                      MaxIterations=self.getProperty('MaxIterations').value)
         self.run_algorithm('AlignComponents', 0.2, 0.97, **kwargs)
         progress.report('AlignComponents has been applied')
 
         # AlignComponents produces two unwanted workspaces
         temporary_workspaces.append('calWS')
 
-        # If we adjusted the source, then append the banks table to the source table, then delete the banks table.
-        # Otherwise just rename the table containing the bank adjustments
-        if self.getProperty('AdjustSource').value is True:
-            self._append_second_to_first(adjustments_table_name, adjustments_table_name + '_banks')
-        else:
-            RenameWorkspace(InputWorkspace=adjustments_table_name + '_banks',
-                            OutputWorkspace=adjustments_table_name)
+        # Append the banks table to the source table, then delete the banks table.
+        self._append_second_to_first(adjustments_table_name, adjustments_table_name + '_banks')
 
         # Create one spectra in d-spacing for each bank using the adjusted instrument geometry.
         # The spectra can be compare to those of prefix_output + 'PDCalibration_peaks_original'
@@ -320,6 +349,34 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
             first_workspace.addRow(row_values)
         if delete_second:
             DeleteWorkspace(second)
+
+    def _fixed_source_set_and_table(self, table_name):
+        r"""Create a table with appropriate column names for saving the location of the source"""
+        # collect info on the source
+        input_workspace = self.getPropertyValue('InputWorkspace')  # name of the input workspace
+        source = mtd[self.getPropertyValue('InputWorkspace')].getInstrument().getSource()
+        source_name, source_full_name = source.getName(), source.getFullName()
+
+        # Update the position of the source
+        z_position = -abs(self.getProperty('SourceToSampleDistance').value)
+        MoveInstrumentComponent(input_workspace, source_full_name, X=0.0, Y=0.0, Z=z_position, RelativePosition=False)
+
+        # Initialize the table of adjustments for the source
+        table = CreateEmptyTableWorkspace(OutputWorkspace=table_name)
+        item_types = ['str',
+                      'double', 'double', 'double',
+                      'double', 'double', 'double', 'double']
+        item_names = ['ComponentName', 'Xposition', 'Yposition', 'Zposition',
+                      'XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine', 'RotationAngle']
+        for column_name, column_type in zip(item_names, item_types):
+            table.addColumn(name=column_name, type=column_type)
+
+        # Add the appropriate row in the table for the source
+        table.addRow([source_name,
+                      0.0, 0.0, z_position,  # new position for the source
+                      0.0, 0.0, 0.0,  # no rotation axis
+                      0.0])  # no rotation angle
+        return table
 
     @staticmethod
     def fitted_in_tof(fitted_in_dspacing: Union[str, Workspace2D],

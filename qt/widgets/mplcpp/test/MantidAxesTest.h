@@ -27,14 +27,11 @@ public:
 
 public:
   // ----------------- success tests ---------------------
-  void testConstructWithPyObjectAxes() {
-    TS_ASSERT_THROWS_NOTHING(MantidAxes axes(pyAxes()));
-  }
+  void testConstructWithPyObjectAxes() { TS_ASSERT_THROWS_NOTHING(MantidAxes axes(pyAxes())); }
 
   void testPlotWithWorkspaceReturnsLineForValidWsIndex() {
     using Mantid::DataObjects::create;
-    const auto ws = std::shared_ptr<Workspace2D>(
-        create<Workspace2D>(2, Histogram(BinEdges{1, 2, 4})).release());
+    const auto ws = std::shared_ptr<Workspace2D>(create<Workspace2D>(2, Histogram(BinEdges{1, 2, 4})).release());
     MantidAxes axes{pyAxes()};
     auto line = axes.plot(ws, 0, "red", "mylabel");
     TS_ASSERT_EQUALS(1.5, line.pyobj().attr("get_xdata")()[0]);
@@ -43,8 +40,7 @@ public:
 
   void testErrorbarWithWorkspaceReturnsLineForValidWsIndex() {
     using Mantid::DataObjects::create;
-    const auto ws = std::shared_ptr<Workspace2D>(
-        create<Workspace2D>(2, Histogram(BinEdges{1, 2, 4})).release());
+    const auto ws = std::shared_ptr<Workspace2D>(create<Workspace2D>(2, Histogram(BinEdges{1, 2, 4})).release());
     MantidAxes axes{pyAxes()};
     auto errbar = axes.errorbar(ws, 0, "red", "mylabel");
     TS_ASSERT_EQUALS(true, errbar.pyobj().attr("has_yerr"));
@@ -112,32 +108,24 @@ public:
   // ----------------- failure tests ----------------------
   void testPlotWithWorkspaceInvalidWsIndexThrows() {
     using Mantid::DataObjects::create;
-    const auto ws = std::shared_ptr<Workspace2D>(
-        create<Workspace2D>(2, Histogram(BinEdges{1, 2, 4})).release());
+    const auto ws = std::shared_ptr<Workspace2D>(create<Workspace2D>(2, Histogram(BinEdges{1, 2, 4})).release());
     MantidAxes axes{pyAxes()};
-    TS_ASSERT_THROWS(axes.plot(ws, 2, "red", "mylabel"),
-                     const Python::ErrorAlreadySet &);
+    TS_ASSERT_THROWS(axes.plot(ws, 2, "red", "mylabel"), const Python::ErrorAlreadySet &);
   }
 
 private:
   Python::Object pyAxes() {
     // An Axes requires a figure and rectangle definition
     // to be constructible
-    const Python::Object figureModule{
-        Python::NewRef(PyImport_ImportModule("matplotlib.figure"))};
+    const Python::Object figureModule{Python::NewRef(PyImport_ImportModule("matplotlib.figure"))};
     const Python::Object figure{figureModule.attr("Figure")()};
-    const Python::Object rect{
-        Python::NewRef(Py_BuildValue("(iiii)", 0, 0, 1, 1))};
-    const Python::Object plotsModule{
-        Python::NewRef(PyImport_ImportModule("mantid.plots"))};
+    const Python::Object rect{Python::NewRef(Py_BuildValue("(iiii)", 0, 0, 1, 1))};
+    const Python::Object plotsModule{Python::NewRef(PyImport_ImportModule("mantid.plots"))};
     return plotsModule.attr("MantidAxes")(figure, rect);
   }
 
-  Workspace2D_sptr
-  createWorkspaceInADS(const std::string &name,
-                       const std::initializer_list<double> &binEdges) {
-    const auto ws = std::shared_ptr<Workspace2D>(
-        create<Workspace2D>(2, Histogram(BinEdges{binEdges})).release());
+  Workspace2D_sptr createWorkspaceInADS(const std::string &name, const std::initializer_list<double> &binEdges) {
+    const auto ws = std::shared_ptr<Workspace2D>(create<Workspace2D>(2, Histogram(BinEdges{binEdges})).release());
     // replacement is based on names and the only way to set a name is to
     // add the object to the ADS
     AnalysisDataService::Instance().addOrReplace(name, ws);

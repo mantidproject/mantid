@@ -23,11 +23,6 @@ set ( WORKBENCH_LIB_DIR ${LIB_DIR} )
 set ( WORKBENCH_SITE_PACKAGES ${LIB_DIR} )
 set ( WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR} )
 
-# Separate directory of plugins to be discovered by the ParaView framework
-# These cannot be mixed with our other plugins. Further sub-directories
-# based on the Qt version will also be created by the installation targets
-set ( PVPLUGINS_DIR "plugins/paraview/qt4/" )
-
 if ( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
   set ( CMAKE_INSTALL_PREFIX /opt/mantid${CPACK_PACKAGE_SUFFIX} CACHE PATH "Install path" FORCE )
 endif()
@@ -42,37 +37,19 @@ set ( CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION /opt /usr/share/applications
 ###########################################################################
 # Environment scripts (profile.d)
 ###########################################################################
-if(MAKE_VATES)
-  # default shell (bash-like)
-  file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
-    "#!/bin/sh\n"
-    "PV_PLUGIN_PATH=${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}\n"
-    "PATH=$PATH:${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
+# default shell (bash-like)
+file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
+  "#!/bin/sh\n"
+  "PATH=$PATH:${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
 
-    "export PV_PLUGIN_PATH PATH\n"
-  )
+  "export PATH\n"
+)
 
-  # c-shell
-  file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
-    "#!/bin/csh\n"
-    "setenv PV_PLUGIN_PATH \"${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}\"\n"
-    "setenv PATH \"\${PATH}:${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\"\n"
-  )
-else()
-  # default shell (bash-like)
-  file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
-    "#!/bin/sh\n"
-    "PATH=$PATH:${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
-
-    "export PATH\n"
-  )
-
-  # c-shell
-  file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
-    "#!/bin/csh\n"
-    "setenv PATH \"\${PATH}:${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\"\n"
-  )
-endif()
+# c-shell
+file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
+  "#!/bin/csh\n"
+  "setenv PATH \"\${PATH}:${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\"\n"
+)
 
 install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
   ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
@@ -223,27 +200,11 @@ fi" )
 set ( ERROR_CMD "-m mantidqt.dialogs.errorreports.main --exitcode=\$?" )
 
 ##### Local dev version
-set ( PYTHON_ARGS "-Wdefault::DeprecationWarning" )
-if ( MAKE_VATES )
-  set ( PARAVIEW_PYTHON_PATHS ":${ParaView_DIR}/lib:${ParaView_DIR}/lib/site-packages" )
-else ()
-  set ( PARAVIEW_PYTHON_PATHS "" )
-endif ()
+set ( PYTHON_ARGS "-Wdefault::DeprecationWarning -Werror:::mantid -Werror:::mantidqt" )
 
 set ( LOCAL_PYPATH "\${INSTALLDIR}/bin" )
 
-# used by mantidplot and mantidworkbench
-if (ENABLE_MANTIDPLOT)
-  set ( MANTIDPLOT_EXEC MantidPlot )
-  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in
-                   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh @ONLY )
-  # Needs to be executable
-  execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh"
-                    OUTPUT_QUIET ERROR_QUIET )
-  if(MAKE_VATES)
-    set(PV_PLUGIN_INSTALL_PATH "PV_PLUGIN_PATH=\"${INSTALLDIR}/plugins/paraview/qt4\"")
-  endif()
-endif ()
+# used by mantidworkbench
 if (ENABLE_WORKBENCH)
   set ( MANTIDWORKBENCH_EXEC workbench ) # what the actual thing is called
   configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidworkbench.sh.in
@@ -265,24 +226,10 @@ execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AddPyt
 
 ##### Package version
 unset ( PYTHON_ARGS )
-if ( MAKE_VATES )
-  set ( EXTRA_LDPATH "\${INSTALLDIR}/lib/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR}" )
-  set ( PV_PYTHON_PATH "\${INSTALLDIR}/lib/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR}" )
-  set ( PARAVIEW_PYTHON_PATHS ":${PV_PYTHON_PATH}:${PV_PYTHON_PATH}/site-packages:${PV_PYTHON_PATH}/site-packages/vtk" )
-else ()
-  set ( PARAVIEW_PYTHON_PATHS "" )
-endif ()
 
 # used by mantidplot and mantidworkbench
 set ( LOCAL_PYPATH "\${INSTALLDIR}/bin:\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins" )
 
-if (ENABLE_MANTIDPLOT)
-  set ( MANTIDPLOT_EXEC MantidPlot_exe )
-  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install @ONLY )
-  install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install
-            DESTINATION ${BIN_DIR} RENAME launch_mantidplot.sh )
-endif ()
 if (ENABLE_WORKBENCH)
   set ( MANTIDWORKBENCH_EXEC workbench ) # what the actual thing is called
   configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidworkbench.sh.in

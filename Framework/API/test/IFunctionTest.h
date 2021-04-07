@@ -15,63 +15,39 @@ using namespace Mantid::API;
 class MockFunction : public IFunction {
 public:
   MockFunction()
-      : IFunction(), m_parameterValues(4), m_parameterIndexes{{"A", 0},
-                                                              {"B", 1},
-                                                              {"C", 2},
-                                                              {"D", 3}},
-        m_parameterNames{{0, "A"}, {1, "B"}, {2, "C"}, {3, "D"}},
-        m_parameterStatus{Active, Active, Active, Active} {}
+      : IFunction(), m_parameterValues(4), m_parameterIndexes{{"A", 0}, {"B", 1}, {"C", 2}, {"D", 3}},
+        m_parameterNames{{0, "A"}, {1, "B"}, {2, "C"}, {3, "D"}}, m_parameterStatus{Active, Active, Active, Active} {}
   std::string name() const override { return "MockFunction"; }
-  void function(const Mantid::API::FunctionDomain &,
-                Mantid::API::FunctionValues &) const override {}
-  void setParameter(const std::string &parName, const double &value,
-                    bool = true) override {
+  void function(const Mantid::API::FunctionDomain &, Mantid::API::FunctionValues &) const override {}
+  void setParameter(const std::string &parName, const double &value, bool = true) override {
     m_parameterValues[m_parameterIndexes.find(parName)->second] = value;
   }
-  void setParameter(std::size_t index, const double &value,
-                    bool = true) override {
-    m_parameterValues[index] = value;
-  }
-  void setParameterDescription(const std::string &,
-                               const std::string &) override {}
+  void setParameter(std::size_t index, const double &value, bool = true) override { m_parameterValues[index] = value; }
+  void setParameterDescription(const std::string &, const std::string &) override {}
   void setParameterDescription(std::size_t, const std::string &) override {}
   double getParameter(const std::string &parName) const override {
     return m_parameterValues[m_parameterIndexes.find(parName)->second];
   }
-  double getParameter(std::size_t index) const override {
-    return m_parameterValues[index];
-  }
-  bool hasParameter(const std::string &parName) const override {
-    return m_parameterIndexes.count(parName) > 0;
-  }
+  double getParameter(std::size_t index) const override { return m_parameterValues[index]; }
+  bool hasParameter(const std::string &parName) const override { return m_parameterIndexes.count(parName) > 0; }
   size_t nParams() const override { return m_parameterValues.size(); }
-  size_t parameterIndex(const std::string &parName) const override {
-    return m_parameterIndexes.find(parName)->second;
-  }
-  std::string parameterName(std::size_t index) const override {
-    return m_parameterNames.find(index)->second;
-  }
+  size_t parameterIndex(const std::string &parName) const override { return m_parameterIndexes.find(parName)->second; }
+  std::string parameterName(std::size_t index) const override { return m_parameterNames.find(index)->second; }
   std::string parameterDescription(std::size_t) const override { return ""; }
   bool isExplicitlySet(std::size_t) const override { return true; }
   double getError(std::size_t) const override { return 0.0; }
   double getError(const std::string &) const override { return 0.0; }
   void setError(std::size_t, double) override {}
   void setError(const std::string &, double) override {}
-  size_t
-  getParameterIndex(const Mantid::API::ParameterReference &ref) const override {
+  size_t getParameterIndex(const Mantid::API::ParameterReference &ref) const override {
     if (ref.getLocalFunction() == this && ref.getLocalIndex() < nParams()) {
       return ref.getLocalIndex();
     }
     return nParams();
   }
-  void setParameterStatus(std::size_t index, ParameterStatus status) override {
-    m_parameterStatus[index] = status;
-  }
-  ParameterStatus getParameterStatus(std::size_t index) const override {
-    return m_parameterStatus[index];
-  }
-  void declareParameter(const std::string &, double,
-                        const std::string &) override {}
+  void setParameterStatus(std::size_t index, ParameterStatus status) override { m_parameterStatus[index] = status; }
+  ParameterStatus getParameterStatus(std::size_t index) const override { return m_parameterStatus[index]; }
+  void declareParameter(const std::string &, double, const std::string &) override {}
 
 private:
   std::vector<double> m_parameterValues;

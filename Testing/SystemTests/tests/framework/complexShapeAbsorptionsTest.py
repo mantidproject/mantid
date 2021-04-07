@@ -30,6 +30,7 @@ class SampleShapeBase(systemtesting.MantidSystemTest):
         mantid.MonteCarloAbsorption(InputWorkspace="ws", OutputWorkspace="ws", EventsPerPoint=5000)
 
     def validate(self):
+        self.disableChecking.append('Instrument')
         self.tolerance = 1e-3
         return "ws", "complexShapeAbsorb.nxs"
 
@@ -42,6 +43,7 @@ class RotatedSampleShape(SampleShapeBase):
 
     def validate(self):
         self.tolerance=1e-3
+        self.disableChecking.append('Instrument')
         return "ws", "complexShapeAbsorbRotated.nxs"
 
 
@@ -62,6 +64,7 @@ class SampleEnvironment(SampleShapeBase):
 
     def validate(self):
         self.tolerance = 1e-3
+        self.disableChecking.append('Instrument')
         return "ws", "complexEnvironmentAbsorb.nxs"
 
 
@@ -74,6 +77,7 @@ class RotatedSampleEnvironment(SampleEnvironment):
 
     def validate(self):
         self.tolerance = 1e-3
+        self.disableChecking.append('Instrument')
         return "ws", "complexEnvironmentRotatedAbsorb.nxs"
 
 
@@ -91,6 +95,7 @@ class RotatedSampleShapeAndSampleEnvironment(RotatedSampleShape):
 
     def validate(self):
         self.tolerance = 1e-3
+        self.disableChecking.append('Instrument')
         return "ws", "complexShapeRotatedAbsorbEnvironment.nxs"
 
 
@@ -103,6 +108,7 @@ class TranslatedSampleEnvironment(SampleEnvironment):
 
     def validate(self):
         self.tolerance = 1e-3
+        self.disableChecking.append('Instrument')
         return "ws", "complexEnvironmentTranslatedAbsorb.nxs"
 
 
@@ -116,6 +122,7 @@ class TranslatedAndRotatedSampleEnvironment(SampleEnvironment):
 
     def validate(self):
         self.tolerance = 1e-3
+        self.disableChecking.append('Instrument')
         return "ws", "complexEnvironmentRotatedTranslatedAbsorb.nxs"
 
 
@@ -133,6 +140,7 @@ class MultiPartEnvironmentTranslate(SampleEnvironment):
 
     def validate(self):
         self.tolerance = 1e-3
+        self.disableChecking.append('Instrument')
         return "ws", "complexEnvironmentMultiPartTranslated.nxs"
 
 
@@ -150,4 +158,5 @@ class MultiPartEnvironmentRotate(SampleEnvironment):
 
     def validate(self):
         self.tolerance = 1e-3
+        self.disableChecking.append('Instrument')
         return "ws", "complexEnvironmentMultiPartRotated.nxs"

@@ -641,7 +641,7 @@ class FittingTabModel(object):
         groups_and_pairs = []
         if self.fitting_options["fit_type"] == "Single":
             for workspace in selected_workspaces:
-                runs += [get_run_number_from_workspace_name(workspace, self.context.data_context.instrument)]
+                runs += [get_run_numbers_as_string_from_workspace_name(workspace, self.context.data_context.instrument)]
                 groups_and_pairs += [get_group_or_pair_from_name(workspace)]
             run_groups_and_pairs = list(zip(runs, groups_and_pairs))
             groups_and_pairs = [grp_pair for _, grp_pair in run_groups_and_pairs]
@@ -650,7 +650,7 @@ class FittingTabModel(object):
             fit_workspaces = {}
             if self.fitting_options["fit_by"] == "Run":
                 for workspace in selected_workspaces:
-                    run = get_run_number_from_workspace_name(workspace, self.context.data_context.instrument)
+                    run = get_run_numbers_as_string_from_workspace_name(workspace, self.context.data_context.instrument)
                     if run not in fit_workspaces:
                         fit_workspaces[run] = get_group_or_pair_from_name(workspace)
                     else:
@@ -661,7 +661,7 @@ class FittingTabModel(object):
             elif self.fitting_options["fit_by"] == "Group/Pair":
                 for workspace in selected_workspaces:
                     group_or_pair = get_group_or_pair_from_name(workspace)
-                    run = get_run_number_from_workspace_name(workspace, self.context.data_context.instrument)
+                    run = get_run_numbers_as_string_from_workspace_name(workspace, self.context.data_context.instrument)
                     if group_or_pair not in fit_workspaces:
                         fit_workspaces[group_or_pair] = run
                     else:
@@ -684,12 +684,14 @@ class FittingTabModel(object):
                 elif group_or_pair in self.context.group_pair_context.selected_pairs:
                     workspace_names += [get_pair_asymmetry_name(self.context, group_or_pair, run,
                                                                 not self.fitting_options["fit_to_raw"])]
+                elif group_or_pair in self.context.group_pair_context.selected_diffs:
+                    workspace_names += [get_diff_asymmetry_name(self.context, group_or_pair, run,
+                                                                not self.fitting_options["fit_to_raw"])]
                 elif group_or_pair in self.context.group_pair_context.selected_groups:
                     period_string = run_list_to_string(
                         self.context.group_pair_context[group_or_pair].periods)
                     workspace_names += [get_group_asymmetry_name(self.context, group_or_pair, run, period_string,
                                                                  not self.fitting_options["fit_to_raw"])]
-
         return workspace_names
 
     def workspace_list_sorter(self, workspace_name):
@@ -712,7 +714,7 @@ class FittingTabModel(object):
             return 0
 
     def _get_selected_groups_and_pairs(self):
-        return self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs
+        return self.context.group_pair_context.selected_groups_and_pairs
 
     @staticmethod
     def get_fit_function_parameter_values(fit_function):

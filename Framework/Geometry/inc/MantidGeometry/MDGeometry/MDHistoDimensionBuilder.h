@@ -35,8 +35,7 @@ public:
    * @param min A reference to the minimum value [InOut]
    * @param max A reference to the maximum value [InOut]
    */
-  template <typename CoordT>
-  static void resizeToFitMDBox(CoordT &min, CoordT &max) {
+  template <typename CoordT> static void resizeToFitMDBox(CoordT &min, CoordT &max) {
     // Always use minimum float value as DBL_EPS is always too small
     static constexpr CoordT twoEps = 2 * std::numeric_limits<float>::epsilon();
     if (std::fabs(min) > twoEps)

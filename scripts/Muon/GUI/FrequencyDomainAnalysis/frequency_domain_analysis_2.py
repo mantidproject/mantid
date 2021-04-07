@@ -61,8 +61,10 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
     def warning_popup(message):
         message_box.warning(str(message))
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, window_flags=None):
         super(FrequencyAnalysisGui, self).__init__(parent)
+        if window_flags:
+            self.setWindowFlags(window_flags)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
@@ -252,10 +254,15 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.phase_tab.phase_table_presenter.run_change_observer)
 
+        self.load_widget.load_widget.loadNotifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.disable_tab_observer)
+
+        self.load_widget.load_widget.loadNotifier.add_subscriber(
+            self.plot_widget.presenter.new_data_loaded_observer)
+
     def setup_gui_variable_observers(self):
         self.context.gui_context.gui_variables_notifier.add_subscriber(
-            self.grouping_tab_widget.group_tab_presenter.gui_variables_observer
-        )
+            self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
 
         self.context.gui_context.gui_variables_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.gui_context_observer)
@@ -263,6 +270,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.context.gui_context.gui_variable_non_calulation_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.gui_context_observer)
 
+        self.context.gui_context.gui_variables_notifier.add_subscriber(
+            self.plot_widget.presenter.rebin_options_set_observer)
+
         self.grouping_tab_widget.pairing_table_widget.selected_pair_changed_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer)
 
@@ -280,6 +290,11 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.grouping_tab_widget.grouping_table_widget.selected_group_changed_notifier.add_subscriber(
             self.plot_widget.presenter.added_group_or_pair_observer)
+
+        # differences
+        self.grouping_tab_widget.diff_table.add_subscribers(
+            [self.transform.GroupPairObserver,
+             self.plot_widget.presenter.added_group_or_pair_observer])
 
         self.plot_widget.presenter.plot_type_changed_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.selected_plot_type_observer)

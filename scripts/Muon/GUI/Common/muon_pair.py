@@ -21,8 +21,8 @@ class MuonPair(MuonBasePair):
     def __init__(self, pair_name,
                  forward_group_name="",
                  backward_group_name="",
-                 alpha=1.0):
-        super().__init__(pair_name)
+                 alpha=1.0, periods=[1]):
+        super().__init__(pair_name, periods)
         self._forward_group_name = forward_group_name
         self._backward_group_name = backward_group_name
         self._alpha = float(alpha)

@@ -51,7 +51,7 @@ Usage
   convolution.add(innerFunction)
   convolution.add(deltaFunctions)
   innerFunctionSingle = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0')
-  
+
   DoublePulseFit(Function=innerFunctionSingle, InputWorkspace=ws,  PulseOffset = delta, StartX=0.0, EndX=15.0, Output='DoublePulseFit')
   Fit(Function=convolution, InputWorkspace=ws, CreateOutput = True, StartX=0.0, EndX=15.0, Output='Fit')
 
@@ -60,7 +60,7 @@ Usage
 
   single_parameter_workspace = AnalysisDataService.retrieve('Fit_Parameters')
   col_values = single_parameter_workspace.column(1)
-  
+
   print('Fitted value of A from DoublePulseFit is {:.2g}'.format(double_col_values[0]))
   print('Fitted value of Frequency from DoublePulseFit is {:.2g}'.format(double_col_values[2]))
   print('Fitted value of A from Fit is {:.2g}'.format(col_values[0]))

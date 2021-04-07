@@ -37,8 +37,7 @@ public:
   }
 
   void do_test(int numRuns, size_t numBanks, size_t numPeaksPerBank) {
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(4, 10, 1.0);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(4, 10, 1.0);
     PeaksWorkspace_sptr ws(new PeaksWorkspace());
     ws->setInstrument(inst);
 
@@ -51,11 +50,9 @@ public:
     for (int run = 1000; run < numRuns + 1000; run++)
       for (size_t b = 1; b <= numBanks; b++)
         for (size_t i = 0; i < numPeaksPerBank; i++) {
-          V3D hkl(static_cast<double>(i), static_cast<double>(i),
-                  static_cast<double>(i));
+          V3D hkl(static_cast<double>(i), static_cast<double>(i), static_cast<double>(i));
           DblMatrix gon(3, 3, true);
-          Peak p(inst, static_cast<detid_t>(b * 100 + i + 1 + i * 10),
-                 static_cast<double>(i) * 1.0 + 0.5, hkl, gon);
+          Peak p(inst, static_cast<detid_t>(b * 100 + i + 1 + i * 10), static_cast<double>(i) * 1.0 + 0.5, hkl, gon);
           p.setRunNumber(run);
           p.setBankName("bank1");
           p.setIntensity(static_cast<double>(i) + 0.1);
@@ -77,8 +74,7 @@ public:
 
     ITableWorkspace_sptr tableOut;
     TS_ASSERT_THROWS_NOTHING(
-        tableOut = std::dynamic_pointer_cast<ITableWorkspace>(
-            AnalysisDataService::Instance().retrieve("stat")));
+        tableOut = std::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve("stat")));
     TS_ASSERT(tableOut);
     if (!tableOut)
       return;
@@ -94,8 +90,7 @@ public:
 
     PeaksWorkspace_sptr wsout;
     TS_ASSERT_THROWS_NOTHING(
-        wsout = std::dynamic_pointer_cast<PeaksWorkspace>(
-            AnalysisDataService::Instance().retrieve("TOPAZ_peaks")));
+        wsout = std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve("TOPAZ_peaks")));
     TS_ASSERT(wsout);
     if (!wsout)
       return;

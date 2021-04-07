@@ -30,14 +30,11 @@ public:
     Poco::AutoPtr<Document> pDoc = pParser.parseString(xmlToParse);
 
     InvalidParameterParser parser;
-    Mantid::API::ImplicitFunctionParameter *iparam =
-        parser.createParameter(pDoc->documentElement());
+    Mantid::API::ImplicitFunctionParameter *iparam = parser.createParameter(pDoc->documentElement());
     InvalidParameter *pInvalidParam = dynamic_cast<InvalidParameter *>(iparam);
     boost::scoped_ptr<InvalidParameter> invalparam(pInvalidParam);
 
-    TSM_ASSERT("The paramter generated should be an InvalidParamter",
-               nullptr != pInvalidParam);
-    TSM_ASSERT_EQUALS("The invalid parameter has not been parsed correctly.",
-                      "x", invalparam->getValue());
+    TSM_ASSERT("The paramter generated should be an InvalidParamter", nullptr != pInvalidParam);
+    TSM_ASSERT_EQUALS("The invalid parameter has not been parsed correctly.", "x", invalparam->getValue());
   }
 };

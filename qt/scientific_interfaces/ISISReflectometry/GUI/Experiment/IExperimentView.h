@@ -42,8 +42,7 @@ public:
   virtual void subscribe(ExperimentViewSubscriber *notifyee) = 0;
   virtual void connectExperimentSettingsWidgets() = 0;
   virtual void disconnectExperimentSettingsWidgets() = 0;
-  virtual void
-  createStitchHints(const std::vector<MantidWidgets::Hint> &hints) = 0;
+  virtual void createStitchHints(const std::vector<MantidWidgets::Hint> &hints) = 0;
 
   virtual std::string getAnalysisMode() const = 0;
   virtual void setAnalysisMode(std::string const &analysisMode) = 0;
@@ -64,10 +63,8 @@ public:
   virtual bool getDebugOption() const = 0;
   virtual void setDebugOption(bool enable) = 0;
 
-  virtual std::vector<PerThetaDefaults::ValueArray>
-  getPerAngleOptions() const = 0;
-  virtual void
-  setPerAngleOptions(std::vector<PerThetaDefaults::ValueArray> rows) = 0;
+  virtual std::vector<PerThetaDefaults::ValueArray> getPerAngleOptions() const = 0;
+  virtual void setPerAngleOptions(std::vector<PerThetaDefaults::ValueArray> rows) = 0;
   virtual void showPerAngleOptionsAsInvalid(int row, int column) = 0;
   virtual void showPerAngleOptionsAsValid(int row) = 0;
   virtual void showAllPerAngleOptionsAsValid() = 0;
@@ -117,9 +114,8 @@ public:
   virtual std::string getStitchOptions() const = 0;
   virtual void setStitchOptions(std::string const &stitchOptions) = 0;
 
-  virtual void showOptionLoadErrors(
-      std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
-      std::vector<MissingInstrumentParameterValue> const &missingValues) = 0;
+  virtual void showOptionLoadErrors(std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
+                                    std::vector<MissingInstrumentParameterValue> const &missingValues) = 0;
 
   virtual void disableAll() = 0;
   virtual void enableAll() = 0;

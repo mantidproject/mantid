@@ -6,8 +6,8 @@
 #
 # WORKSPACE, JOB_NAME, NODE_LABEL, PACKAGE_SUFFIX, GIT_COMMIT are
 # environment variables that are set by Jenkins. The last one
-# corresponds to any labels set on a slave.  BUILD_THREADS &
-# PARAVIEW_DIR should be set in the configuration of each slave.
+# corresponds to any labels set on a slave.  BUILD_THREADS should
+# be set in the configuration of each slave.
 ###############################################################################
 # Set all string comparisons to case insensitive (i.e. Release == release)
 shopt -s nocasematch
@@ -78,11 +78,6 @@ fi
 trap onexit INT TERM EXIT
 
 ###############################################################################
-# All nodes currently have PARAVIEW_DIR and PARAVIEW_NEXT_DIR set
-###############################################################################
-export PARAVIEW_DIR=${PARAVIEW_DIR}
-
-###############################################################################
 # Some preprocessing steps on the workspace
 ###############################################################################
 BUILD_DIR_REL=build
@@ -134,9 +129,6 @@ else
     SCL_ENABLE="eval"
 fi
 
-# Use Python 3 build of ParaView
-PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
-
 # For pull requests decide on what to build based on changeset and Jenkins
 # parameters.
 DO_BUILD_CODE=true
@@ -185,8 +177,6 @@ fi
 #                            the links helps keep it fresh
 #   - build/Testing/**: old ctest xml files will change over time and removing
 #                       the links helps keep it fresh
-#   - build/qt/**/ui_*.h: Header files produced from .ui files can remain stale
-#                         if a .ui file is removed from a CMakeLists.txt file
 ###############################################################################
 if [ -z "$BUILD_DIR" ]; then
     echo "Build directory not set. Cannot continue"
@@ -201,7 +191,7 @@ mkdir -p $BUILD_DIR
 
 # Tidy build dir
 rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData ${BUILD_DIR:?}/Testing
-find ${BUILD_DIR:?} \( -name 'ui_*.h' -o -name 'TEST-*.xml' -o -name 'Test.xml' \) -delete
+find ${BUILD_DIR:?} \( -name 'TEST-*.xml' -o -name 'Test.xml' \) -delete
 
 if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
     rm -rf $BUILD_DIR/eigen-*
@@ -265,29 +255,27 @@ fi
 ###############################################################################
 if [[ ${DO_BUILD_PKG} == true ]]; then
     PACKAGINGVARS="-DPACKAGE_DOCS=ON -DDOCS_DOTDIAGRAMS=ON -DDOCS_SCREENSHOTS=ON -DDOCS_MATH_EXT=sphinx.ext.imgmath -DDOCS_PLOTDIRECTIVE=ON"
-    # Set some variables relating to the linux packages
-    if [[ "${ON_MACOS}" == true ]]; then
-        PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_PACKAGE_SUFFIX="
+    # Use different suffix if parameter is not defined
+    if [[ -n "${PACKAGE_SUFFIX}" ]]; then
+        echo "Using PACKAGE_SUFFIX=${PACKAGE_SUFFIX} from job parameter"
+    elif [[ ${JOB_NAME} == release* ]]; then  # starts with "release"
+        PACKAGE_SUFFIX=""
+    elif [[ ${JOB_NAME} == ornl-stable ]]; then
+        PACKAGE_SUFFIX=""
+    elif [[ ${JOB_NAME} == ornl-qa ]]; then
+        PACKAGE_SUFFIX="qa"
+    elif [[ ${JOB_NAME} == master* ]]; then
+        PACKAGE_SUFFIX="nightly"
     else
-        # Use different suffix for linux builds if parameter is not defined
-        if [[ -n "${PACKAGE_SUFFIX}" ]]; then
-            echo "Using PACKAGE_SUFFIX=${PACKAGE_SUFFIX} from job parameter"
-        elif [[ ${JOB_NAME} == release* ]]; then  # starts with "release"
-            PACKAGE_SUFFIX=""
-        elif [[ ${JOB_NAME} == ornl-stable ]]; then
-            PACKAGE_SUFFIX=""
-        elif [[ ${JOB_NAME} == ornl-qa ]]; then
-            PACKAGE_SUFFIX="qa"
-        elif [[ ${JOB_NAME} == master* ]]; then
-            PACKAGE_SUFFIX="nightly"
-        else
-            PACKAGE_SUFFIX="unstable"
-        fi
-
+        PACKAGE_SUFFIX="unstable"
+    fi
+    if [[ "${ON_MACOS}" == true ]]; then
+        PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_PACKAGE_SUFFIX=${PACKAGE_SUFFIX}"
+    else
         if [[ ${JOB_NAME} == release* ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
             # Traditional install path for release build
             PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
-        elif [[ ${JOB_NAME} == ornl ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
+        elif [[ ${JOB_NAME} == ornl-stable ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
             # Traditional install path for release build
             PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
         else
@@ -296,10 +284,14 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
         fi
 
         if [[ ${ON_RHEL7} == true ]]; then
-            if [[ -n "${RELEASE_NUMBER}" ]]; then
+            if [[ -z "${RELEASE_NUMBER}" ]]; then
                 RELEASE_NUMBER="1"
             fi
             PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_RPM_PACKAGE_RELEASE=${RELEASE_NUMBER}"
+        fi
+
+        if [[ -n "${GITHUB_AUTHORIZATION_TOKEN}" ]]; then
+            PACKAGINGVARS="${PACKAGINGVARS} -DGITHUB_AUTHORIZATION_TOKEN=${GITHUB_AUTHORIZATION_TOKEN}"
         fi
     fi
 fi
@@ -350,17 +342,10 @@ cd $BUILD_DIR
 ###############################################################################
 rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz
 
-# if the last build had vates enabled then remove a problematic moc artifact
-# that is not regenerated. Temporary fix while we transition MantidPlot/Vates out
-if [[ -e $BUILD_DIR/CMakeCache.txt ]] && [[ ${JOB_NAME} != *clean* ]]; then
-    VATES_FLAG=$(grep 'MAKE_VATES:BOOL' $BUILD_DIR/CMakeCache.txt)
-    find $BUILD_DIR/qt/widgets/common -name moc_MantidTreeModel.cpp -delete
-fi
-
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DENABLE_MANTIDPLOT=OFF -DMAKE_VATES=OFF -DParaView_DIR= -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} .."
+$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_PRECOMMIT=OFF -DENABLE_CPACK=ON -DENABLE_MANTIDPLOT=OFF -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} .."
 
 ###############################################################################
 # Coverity build should exit early
@@ -406,14 +391,15 @@ fi
 # Prevent race conditions when creating the user config directory
 userconfig_dir=$HOME/.mantid
 rm -fr $userconfig_dir
-# Remove GUI qsettings files
+# Remove old application saved state & crash reports on mac.
+# If we don't do this then when a previous test has crashed macOS
+# will pop up a dialog box and wait for clicking okay. We are heavy
+# handed but builders tend not to be used for anything else.
 if [[ ${ON_MACOS} == true ]] ; then
-    rm -f $HOME/Library/Preferences/com.mantid.MantidPlot.plist
-    rm -f $HOME/Library/Preferences/org.mantidproject.MantidPlot.plist
-    rm -f "$HOME/Library/Saved Application State/org.mantidproject.MantidPlot.savedState/windows.plist"
-else
-    rm -f ~/.config/Mantid/MantidPlot.conf
+    rm -fr "$HOME/Library/Saved Application State/org.python.python"
+    rm -f $HOME/Library/Application\ Support/CrashReporter/*
 fi
+# Remove GUI qsettings files
 rm -f ~/.config/mantidproject/mantidworkbench.ini
 
 mkdir -p $userconfig_dir

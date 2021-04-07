@@ -78,6 +78,35 @@
 		<parameter name="temperature_sample_log" type="string">
 			<value val="sample.temperature" />
 		</parameter>
+
+
+		<!-- These parameters are used to define headers and entries for GenerateLogbook algorithm -->
+		<parameter name="logbook_default_parameters" type="string">
+		  <value val="acq_mode:/entry0/acquisition_mode,
+			      start_time:/entry0/start_time,
+			      end_time:/entry0/end_time,
+			      SRot:/entry0/instrument/SRot/value,
+			      CO:/entry0/instrument/CO/rotation_speed,
+			      PhC:/entry0/instrument/CO/setpoint_phase,
+			      FO:/entry0/instrument/FO/rotation_speed,
+			      PhF:/entry0/instrument/FO/setpoint_phase,
+			      Monrate:/entry0/monitor/monrate,
+			      cps:/entry0/instrument/Detector/detrate,
+			      Treg:/entry0/sample/regulation_temperature,
+			      Tsamp:/entry0/sample/temperature,
+			      subtitle:/entry0/experiment_identifier" />
+		</parameter>
+		<parameter name="logbook_optional_parameters" type="string">
+		  <value val="lambda:/entry0/wavelength,
+			      NCH:/entry0/monitor/time_of_flight/1,
+			      CHW:/entry0/monitor/time_of_flight/0,
+			      delay:/entry0/monitor/time_of_flight/2,
+			      duration:/entry0/duration,
+			      Tset:/entry0/sample/setpoint_temperature,
+			      Monsum:/entry0/monitor/monsum,
+			      ReactorPower:/entry0/reactor_power,
+			      ScannedVariables:/entry0/data_scan/scanned_variables/variables_names/name" />
+		</parameter>
 	</component-link>
 
 </parameter-file>

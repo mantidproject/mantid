@@ -9,9 +9,6 @@
 This is a Python algorithm, with profile
 fitting for integrating peaks.
 """
-
-# This __future__ import is for Python 2/3 compatibility
-import sys
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -80,10 +77,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
 
         # Either load the provided strong peaks file or set the flag to generate it as we go
         if strongPeaksParamsFile != "":
-            if sys.version_info[0] == 3:
-                strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'),encoding='latin1')
-            else:
-                strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'))
+            strongPeakParams = pickle.load(open(strongPeaksParamsFile, 'rb'),encoding='latin1')
             generateStrongPeakParams = False
             # A strong peaks file was provided - we don't need to generate it on the fly so we can fit in order
             runNumbers = np.array(peaks_ws.column('RunNumber'))
@@ -125,7 +119,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             # instrument defaults until we have fit >=30 peaks.
             strongPeakParams = np.empty([numPeaksCanFit, 9])
             #sigX0Params, sigY0, sigP0Params = None, None, None
-        peaksToFit = np.append(peaksToFit, np.where(runNumbers!=sampleRun)[0])
+        peaksToFit = np.append(peaksToFit, np.where(runNumbers != sampleRun)[0])
         return generateStrongPeakParams, strongPeakParams, strongPeakParams_ws, needsForcedProfile,\
             needsForcedProfileIDX, canFitProfileIDX, numPeaksCanFit, peaksToFit
 
@@ -225,7 +219,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             self.initializeStrongPeakSettings(strongPeaksParamsFile, peaks_ws, sampleRun, forceCutoff, edgeCutoff, numDetRows,
                                               numDetCols)
 
-        if peakNumberToFit>-1:
+        if peakNumberToFit > -1:
             peaksToFit = [peakNumberToFit]
 
         # Create the parameters workspace
@@ -260,17 +254,13 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                     strongPeakParamsToSend = strongPeakParams
 
                 # Will allow forced weak and edge peaks to be fit using a neighboring peak profile
-                Y3D, goodIDX, pp_lambda, params = BVGFT.get3DPeak(peak, peaks_ws, box, padeCoefficients,qMask,
-                                                                  nTheta=nTheta, nPhi=nPhi, plotResults=False,
-                                                                  zBG=zBG,fracBoxToHistogram=1.0,bgPolyOrder=1,
-                                                                  strongPeakParams=strongPeakParamsToSend,
-                                                                  q_frame=q_frame, mindtBinWidth=mindtBinWidth,
-                                                                  maxdtBinWidth=maxdtBinWidth,
-                                                                  pplmin_frac=pplmin_frac, pplmax_frac=pplmax_frac,
-                                                                  forceCutoff=forceCutoff, edgeCutoff=edgeCutoff,
-                                                                  peakMaskSize=peakMaskSize,
-                                                                  iccFitDict=iccFitDict, sigX0Params=sigX0Params,
-                                                                  sigY0=sigY0, sigP0Params=sigP0Params, fitPenalty=1.e7)
+                Y3D, goodIDX, pp_lambda, params = BVGFT.get3DPeak(
+                    peak, peakNumber, peaks_ws, box, padeCoefficients, qMask, nTheta=nTheta, nPhi=nPhi,
+                    plotResults=False, zBG=zBG, fracBoxToHistogram=1.0,bgPolyOrder=1,
+                    strongPeakParams=strongPeakParamsToSend, q_frame=q_frame, mindtBinWidth=mindtBinWidth,
+                    maxdtBinWidth=maxdtBinWidth, pplmin_frac=pplmin_frac, pplmax_frac=pplmax_frac,
+                    forceCutoff=forceCutoff, edgeCutoff=edgeCutoff, peakMaskSize=peakMaskSize, iccFitDict=iccFitDict,
+                    sigX0Params=sigX0Params, sigY0=sigY0, sigP0Params=sigP0Params, fitPenalty=1.e7)
                 # First we get the peak intensity
                 peakIDX = Y3D/Y3D.max() > fracStop
                 intensity = np.sum(Y3D[peakIDX])

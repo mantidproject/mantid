@@ -60,12 +60,10 @@ private:
 
   void lubcmp(int *, int &); ///< starts inversion process
   void lubksb(int const *, double *);
-  void rotate(double const, double const, int const, int const, int const,
-              int const);
+  void rotate(double const, double const, int const, int const, int const, int const);
 
 public:
-  Matrix(const size_t nrow = 0, const size_t ncol = 0,
-         bool const makeIdentity = false);
+  Matrix(const size_t nrow = 0, const size_t ncol = 0, bool const makeIdentity = false);
   /** Constructor to take two vectors and multiply them to  construct a matrix.
    * (assuming that we have columns x row vector. */
   Matrix(const std::vector<T> &, const std::vector<T> &);
@@ -94,12 +92,12 @@ public:
   Matrix<T> &operator-=(const Matrix<T> &);     ///< Basic subtraction operator
   Matrix<T> operator-(const Matrix<T> &) const; ///< Basic subtraction operator
 
-  Matrix<T> operator*(const Matrix<T> &)const; ///< Basic matrix multiply
-  std::vector<T> operator*(const std::vector<T> &)const; ///< Multiply M*Vec
+  Matrix<T> operator*(const Matrix<T> &) const;           ///< Basic matrix multiply
+  std::vector<T> operator*(const std::vector<T> &) const; ///< Multiply M*Vec
   void multiplyPoint(const std::vector<T> &in,
                      std::vector<T> &out) const; ///< Multiply M*Vec
-  V3D operator*(const V3D &)const;               ///< Multiply M*Vec
-  Matrix<T> operator*(const T &)const;           ///< Multiply by constant
+  V3D operator*(const V3D &) const;              ///< Multiply M*Vec
+  Matrix<T> operator*(const T &) const;          ///< Multiply by constant
 
   Matrix<T> &operator*=(const Matrix<T> &); ///< Basic matrix multipy
   Matrix<T> &operator*=(const T &);         ///< Multiply by constant
@@ -133,18 +131,14 @@ public:
   void normVert();                 ///< Vertical normalisation
   T Trace() const;                 ///< Trace of the matrix
 
-  std::vector<T> Diagonal() const; ///< Returns a vector of the diagonal
-  Matrix<T>
-  preMultiplyByDiagonal(const std::vector<T> &) const; ///< pre-multiply D*this
-  Matrix<T> postMultiplyByDiagonal(
-      const std::vector<T> &) const; ///< post-multiply this*D
+  std::vector<T> Diagonal() const;                                ///< Returns a vector of the diagonal
+  Matrix<T> preMultiplyByDiagonal(const std::vector<T> &) const;  ///< pre-multiply D*this
+  Matrix<T> postMultiplyByDiagonal(const std::vector<T> &) const; ///< post-multiply this*D
 
   void setMem(const size_t, const size_t);
 
   /// Access matrix sizes
-  std::pair<size_t, size_t> size() const {
-    return std::pair<size_t, size_t>(m_numRows, m_numColumns);
-  }
+  std::pair<size_t, size_t> size() const { return std::pair<size_t, size_t>(m_numRows, m_numColumns); }
 
   /// Return the number of rows in the matrix
   size_t numRows() const { return m_numRows; }
@@ -153,9 +147,7 @@ public:
   size_t numCols() const { return m_numColumns; }
 
   /// Return the smallest matrix size
-  size_t Ssize() const {
-    return (m_numRows > m_numColumns) ? m_numColumns : m_numRows;
-  }
+  size_t Ssize() const { return (m_numRows > m_numColumns) ? m_numColumns : m_numRows; }
 
   void swapRows(const size_t, const size_t); ///< Swap rows (first V index)
   void swapCols(const size_t, const size_t); ///< Swap cols (second V index)
@@ -183,12 +175,8 @@ public:
   std::vector<T> toRotation();
 
 private:
-  template <typename TYPE>
-  friend void dumpToStream(std::ostream &, const Kernel::Matrix<TYPE> &,
-                           const char);
-  template <typename TYPE>
-  friend void fillFromStream(std::istream &, Kernel::Matrix<TYPE> &,
-                             const char);
+  template <typename TYPE> friend void dumpToStream(std::ostream &, const Kernel::Matrix<TYPE> &, const char);
+  template <typename TYPE> friend void fillFromStream(std::istream &, Kernel::Matrix<TYPE> &, const char);
 };
 
 template <>
@@ -198,8 +186,7 @@ Not valid for Integer
 @throw std::invalid_argument
 */
 {
-  throw std::invalid_argument(
-      "Gauss-Jordan inversion not valid for integer matrix");
+  throw std::invalid_argument("Gauss-Jordan inversion not valid for integer matrix");
 }
 
 // Explicit declarations required by Visual C++. Symbols provided by matching
@@ -223,14 +210,10 @@ using FloatMatrix = Mantid::Kernel::Matrix<float>;
 //-------------------------------------------------------------------------
 // Utility methods
 //-------------------------------------------------------------------------
-template <typename T>
-std::ostream &operator<<(std::ostream &, const Kernel::Matrix<T> &);
-template <typename T>
-void dumpToStream(std::ostream &, const Kernel::Matrix<T> &, const char);
+template <typename T> std::ostream &operator<<(std::ostream &, const Kernel::Matrix<T> &);
+template <typename T> void dumpToStream(std::ostream &, const Kernel::Matrix<T> &, const char);
 
-template <typename T>
-std::istream &operator>>(std::istream &, Kernel::Matrix<T> &);
-template <typename T>
-void fillFromStream(std::istream &, Kernel::Matrix<T> &, const char);
+template <typename T> std::istream &operator>>(std::istream &, Kernel::Matrix<T> &);
+template <typename T> void fillFromStream(std::istream &, Kernel::Matrix<T> &, const char);
 } // namespace Kernel
 } // namespace Mantid

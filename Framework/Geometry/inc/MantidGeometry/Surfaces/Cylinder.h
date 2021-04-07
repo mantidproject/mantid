@@ -37,7 +37,7 @@ private:
   Kernel::V3D m_normal;  ///< Direction of centre line
   std::size_t m_normVec; ///< Normal vector is x,y or z :: (1-3) (0 if general)
   double m_oneoverradius;
-  double m_radius;       ///< Radius of cylinder
+  double m_radius; ///< Radius of cylinder
 
   void rotate(const Kernel::Matrix<double> &) override;
   void displace(const Kernel::V3D &) override;
@@ -83,8 +83,7 @@ public:
 
   void write(std::ostream &) const override;
   void print() const override;
-  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
-                      double &ymin, double &zmin) override;
+  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) override;
 
   /// The number of slices to approximate a cylinder
   constexpr static int g_NSLICES = 10;

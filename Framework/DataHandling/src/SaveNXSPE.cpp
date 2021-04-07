@@ -53,28 +53,22 @@ void SaveNXSPE::init() {
   wsValidator->add<API::CommonBinsValidator>();
   wsValidator->add<API::HistogramValidator>();
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
-                  "The name of the workspace to save.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input, wsValidator),
+      "The name of the workspace to save.");
 
   declareProperty(
-      std::make_unique<API::FileProperty>(
-          "Filename", "", FileProperty::Save,
-          std::vector<std::string>(1, ".nxspe")),
+      std::make_unique<API::FileProperty>("Filename", "", FileProperty::Save, std::vector<std::string>(1, ".nxspe")),
       "The name of the NXSPE file to write, as a full or relative path");
 
-  declareProperty("Efixed", EMPTY_DBL(),
-                  "Value of the fixed energy to write into NXSPE file.");
+  declareProperty("Efixed", EMPTY_DBL(), "Value of the fixed energy to write into NXSPE file.");
   declareProperty("Psi", EMPTY_DBL(), "Value of PSI to write into NXSPE file.");
-  declareProperty(
-      "KiOverKfScaling", true,
-      "Flags in the file whether Ki/Kf scaling has been done or not.");
+  declareProperty("KiOverKfScaling", true, "Flags in the file whether Ki/Kf scaling has been done or not.");
 
   // optional par or phx file
   std::vector<std::string> fileExts{".par", ".phx"};
   declareProperty(
-      std::make_unique<FileProperty>("ParFile", "not_used.par",
-                                     FileProperty::OptionalLoad, fileExts),
+      std::make_unique<FileProperty>("ParFile", "not_used.par", FileProperty::OptionalLoad, fileExts),
       "If provided, will replace detectors parameters in resulting nxspe file with the values taken from the file. \n\
         Should be used only if the parameters, calculated by the [[FindDetectorsPar]] algorithm are not suitable for some reason. \n\
         See [[FindDetectorsPar]] description for the details.");
@@ -209,8 +203,7 @@ void SaveNXSPE::exec() {
   // Use an intermediate in-memory buffer to reduce the number
   // of calls to putslab, i.e disk writes but still write whole rows
   Dimensions slabStart(2, 0), slabSize(2, 0);
-  auto chunkRows =
-      static_cast<Dimensions::value_type>(MAX_CHUNK_SIZE / 8 / nBins);
+  auto chunkRows = static_cast<Dimensions::value_type>(MAX_CHUNK_SIZE / 8 / nBins);
   if (nHist < chunkRows) {
     chunkRows = nHist;
   }
@@ -236,10 +229,8 @@ void SaveNXSPE::exec() {
     if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i)) {
       // a detector but not a monitor
       if (!spectrumInfo.isMasked(i)) {
-        std::copy(inputWS->y(i).cbegin(), inputWS->y(i).cend(),
-                  signalBufferStart);
-        std::copy(inputWS->e(i).cbegin(), inputWS->e(i).cend(),
-                  errorBufferStart);
+        std::copy(inputWS->y(i).cbegin(), inputWS->y(i).cend(), signalBufferStart);
+        std::copy(inputWS->e(i).cbegin(), inputWS->e(i).cend(), errorBufferStart);
       } else {
         std::fill_n(signalBufferStart, nBins, MASK_FLAG);
         std::fill_n(errorBufferStart, nBins, MASK_ERROR);
@@ -274,8 +265,7 @@ void SaveNXSPE::exec() {
   }
 
   // execute the algorithm to calculate the detector's parameters;
-  IAlgorithm_sptr spCalcDetPar =
-      this->createChildAlgorithm("FindDetectorsPar", 0, 1, true, 1);
+  IAlgorithm_sptr spCalcDetPar = this->createChildAlgorithm("FindDetectorsPar", 0, 1, true, 1);
 
   spCalcDetPar->initialize();
   spCalcDetPar->setProperty("InputWorkspace", inputWS);
@@ -294,8 +284,7 @@ void SaveNXSPE::exec() {
   const std::vector<double> &polar = pCalcDetPar->getPolar();
   const std::vector<double> &azimuthal_width = pCalcDetPar->getAzimWidth();
   const std::vector<double> &polar_width = pCalcDetPar->getPolarWidth();
-  const std::vector<double> &secondary_flightpath =
-      pCalcDetPar->getFlightPath();
+  const std::vector<double> &secondary_flightpath = pCalcDetPar->getFlightPath();
 
   // Write the Polar (2Theta) angles
   nxFile.writeData("polar", polar);
