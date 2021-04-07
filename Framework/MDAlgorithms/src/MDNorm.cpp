@@ -1506,7 +1506,7 @@ inline void MDNorm::calcSingleDetectorNorm(const std::vector<std::array<double, 
     std::transform(curIntSec.data(), curIntSec.data() + vmdDims, prevIntSec.data(), pos.begin(),
                    [](const double rhs, const double lhs) { return static_cast<coord_t>(0.5 * (rhs + lhs)); });
     signal_t signal;
-    signal_t bkgdSignal;
+    signal_t bkgdSignal(0.);
     if (m_diffraction) {
       // Diffraction
       // index of the current intersection
