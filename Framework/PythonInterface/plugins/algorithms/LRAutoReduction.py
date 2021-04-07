@@ -97,6 +97,8 @@ class LRAutoReduction(PythonAlgorithm):
         filename = self.getProperty("Filename").value
         ws_event_data = self.getProperty("InputWorkspace").value
 
+        print(f'[DEBUG] load_data: file name = {filename}')
+
         if len(filename) > 0:
             ws_event_data = LoadEventNexus(Filename=filename, MetaDataOnly=False)
         elif ws_event_data is None:
@@ -456,7 +458,12 @@ class LRAutoReduction(PythonAlgorithm):
 
         # For each run, load and compare the wavelength
         direct_beam_found = None
+        print(f'[DEBUG INFO] direct beam runs: {direct_beam_runs}')
+        raise
         for r in direct_beam_runs:
+            direct_beam_nexus = "REF_L_%s" % r
+            print(f'[DEBUG INFO] direct beam runs: {direct_beam_runs}')
+            print(f'[DEBUG] load_direct beam run: file name = {direct_beam_nexus}')
             direct_beam_data = LoadEventNexus(Filename="REF_L_%s" % r)
             # Only consider zero-attenuator runs
             att = direct_beam_data.getRun().getProperty('vAtt').value[0]-1
@@ -615,6 +622,10 @@ class LRAutoReduction(PythonAlgorithm):
 
         # Determine where we are in the scan
         run_number, first_run_of_set, sequence_number, do_reduction, is_direct_beam = self._get_series_info()
+        # FIXME: Need input property
+        sequence_number = 2
+
+        print('[..........  DEBUG]   ........ : ', run_number, first_run_of_set, sequence_number)
         logger.information("Run %s - Sequence %s [%s/%s]" % (run_number, first_run_of_set,
                                                              sequence_number,
                                                              self._get_sequence_total(default=-1)))
@@ -622,8 +633,11 @@ class LRAutoReduction(PythonAlgorithm):
         # If we have a direct beam, compute the scaling factors
         if is_direct_beam:
             sequence_total = self._get_sequence_total(default=10)
+            # FIXME DEBUG: Need input property
+            sequence_total = sequence_number
+
             if sequence_number < sequence_total:
-                logger.notice("Waiting for at least %s runs to compute scaling factors" % sequence_total)
+                logger.notice(f"Waiting for at least {sequence_total} runs to compute scaling factors.  Only {sequence_number} given now.")
                 return
             logger.notice("Using automated scaling factor calculator")
             output_dir = self.getProperty("OutputDirectory").value
@@ -637,6 +651,9 @@ class LRAutoReduction(PythonAlgorithm):
             incident_medium = self._read_property(meta_data_run, "incident_medium",
                                                   _incident_medium, is_string=True)
             file_id = incident_medium.replace("medium", "")
+            print(f'[.............DEBUG.........] Run list: {list(range(first_run_of_set, first_run_of_set + sequence_number))}')
+            scale_factor_file = os.path.join(output_dir, "sf_%s_%s_auto.cfg" % (first_run_of_set, file_id))
+            print(f'[.............DEBUG.........] Scale factor file: {scale_factor_file}')
             LRDirectBeamSort(RunList=list(range(first_run_of_set, first_run_of_set + sequence_number)),
                              UseLowResCut=True, ComputeScalingFactors=True, TOFSteps=sf_tof_step,
                              IncidentMedium=incident_medium,
