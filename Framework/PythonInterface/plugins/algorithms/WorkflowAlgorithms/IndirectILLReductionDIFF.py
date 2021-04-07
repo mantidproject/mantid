@@ -95,7 +95,7 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
             raise RuntimeError("Unable to find incident energy for Doppler mode")
 
         Integration(InputWorkspace=ws, OutputWorkspace=self.output)
-        
+
         ConvertToPointData(InputWorkspace=self.output, OutputWorkspace=self.output)
         ConjoinXRuns(InputWorkspaces=self.output,
                      SampleLogAsXAxis=self.scan_parameter,
