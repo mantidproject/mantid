@@ -33,8 +33,8 @@ namespace DataObjects {
 BasePeak::BasePeak()
     : m_samplePos(V3D(0, 0, 0)), m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0), m_binCount(0),
       m_absorptionWeightedPathLength(0), m_GoniometerMatrix(3, 3, true), m_InverseGoniometerMatrix(3, 3, true),
-      m_runNumber(0), m_monitorCount(0), m_row(-1), m_col(-1), m_peakNumber(0), m_intHKL(V3D(0, 0, 0)),
-      m_intMNP(V3D(0, 0, 0)), m_peakShape(std::make_shared<NoShape>()) {
+      m_runNumber(0), m_monitorCount(0), m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
+      m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
 
@@ -46,8 +46,7 @@ BasePeak::BasePeak()
 BasePeak::BasePeak(const Mantid::Kernel::Matrix<double> &goniometer)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0), m_binCount(0), m_absorptionWeightedPathLength(0),
       m_GoniometerMatrix(goniometer), m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
-      m_row(-1), m_col(-1), m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
-      m_peakShape(std::make_shared<NoShape>()) {
+      m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)), m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
 
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
@@ -59,9 +58,8 @@ BasePeak::BasePeak(const BasePeak &other)
       m_intensity(other.m_intensity), m_sigmaIntensity(other.m_sigmaIntensity), m_binCount(other.m_binCount),
       m_absorptionWeightedPathLength(other.m_absorptionWeightedPathLength),
       m_GoniometerMatrix(other.m_GoniometerMatrix), m_InverseGoniometerMatrix(other.m_InverseGoniometerMatrix),
-      m_runNumber(other.m_runNumber), m_monitorCount(other.m_monitorCount), m_row(other.m_row), m_col(other.m_col),
-      m_peakNumber(other.m_peakNumber), m_intHKL(other.m_intHKL), m_intMNP(other.m_intMNP),
-      m_peakShape(other.m_peakShape->clone()) {}
+      m_runNumber(other.m_runNumber), m_monitorCount(other.m_monitorCount), m_peakNumber(other.m_peakNumber),
+      m_intHKL(other.m_intHKL), m_intMNP(other.m_intMNP), m_peakShape(other.m_peakShape->clone()) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor making a LeanPeak from IPeak interface
@@ -73,9 +71,8 @@ BasePeak::BasePeak(const Geometry::IPeak &ipeak)
       m_sigmaIntensity(ipeak.getSigmaIntensity()), m_binCount(ipeak.getBinCount()),
       m_absorptionWeightedPathLength(ipeak.getAbsorptionWeightedPathLength()),
       m_GoniometerMatrix(ipeak.getGoniometerMatrix()), m_InverseGoniometerMatrix(ipeak.getGoniometerMatrix()),
-      m_runNumber(ipeak.getRunNumber()), m_monitorCount(ipeak.getMonitorCount()), m_row(ipeak.getRow()),
-      m_col(ipeak.getCol()), m_peakNumber(ipeak.getPeakNumber()), m_intHKL(ipeak.getIntHKL()),
-      m_intMNP(ipeak.getIntMNP()), m_peakShape(std::make_shared<NoShape>()) {
+      m_runNumber(ipeak.getRunNumber()), m_monitorCount(ipeak.getMonitorCount()), m_peakNumber(ipeak.getPeakNumber()),
+      m_intHKL(ipeak.getIntHKL()), m_intMNP(ipeak.getIntMNP()), m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
 
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
@@ -238,33 +235,9 @@ void BasePeak::setGoniometerMatrix(const Mantid::Kernel::Matrix<double> &goniome
 }
 
 // -------------------------------------------------------------------------------------
-/** For RectangularDetectors only, returns the row (y) of the pixel of the
- * detector.
- * Returns -1 if it could not find it. */
-int BasePeak::getRow() const { return m_row; }
-
-// -------------------------------------------------------------------------------------
-/** For RectangularDetectors only, returns the column (x) of the pixel of the
- * detector.
- * Returns -1 if it could not find it. */
-int BasePeak::getCol() const { return m_col; }
-
-// -------------------------------------------------------------------------------------
 /**Returns the unique peak number
  * Returns -1 if it could not find it. */
 int BasePeak::getPeakNumber() const { return m_peakNumber; }
-
-// -------------------------------------------------------------------------------------
-/** For RectangularDetectors only, sets the row (y) of the pixel of the
- * detector.
- * @param m_row :: row value   */
-void BasePeak::setRow(int m_row) { this->m_row = m_row; }
-
-// -------------------------------------------------------------------------------------
-/** For RectangularDetectors only, sets the column (x) of the pixel of the
- * detector.
- * @param m_col :: col value   */
-void BasePeak::setCol(int m_col) { this->m_col = m_col; }
 
 // -------------------------------------------------------------------------------------
 /** Sets the unique peak number
@@ -306,10 +279,6 @@ double BasePeak::getValueByColName(std::string name) const {
     return this->getIntensityOverSigma();
   else if (name == "bincount")
     return this->getBinCount();
-  else if (name == "row")
-    return this->getRow();
-  else if (name == "col")
-    return this->getCol();
   else if (name == "peaknumber")
     return double(this->getPeakNumber());
   else if (name == "tbar")
@@ -355,8 +324,6 @@ BasePeak &BasePeak::operator=(const BasePeak &other) {
     m_InverseGoniometerMatrix = other.m_InverseGoniometerMatrix;
     m_runNumber = other.m_runNumber;
     m_monitorCount = other.m_monitorCount;
-    m_row = other.m_row;
-    m_col = other.m_col;
     m_intHKL = other.m_intHKL;
     m_intMNP = other.m_intMNP;
     m_peakShape.reset(other.m_peakShape->clone());

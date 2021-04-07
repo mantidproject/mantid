@@ -28,6 +28,7 @@ set(TEST_PY_FILES
     IndirectFlatPlateAbsorptionTest.py
     IndirectFlatPlateAbsorption2Test.py
     IndirectILLEnergyTransferTest.py
+    IndirectILLReductionDIFFTest.py
     IndirectILLReductionFWSTest.py
     IndirectILLReductionQENSTest.py
     IndirectReplaceFitResultTest.py

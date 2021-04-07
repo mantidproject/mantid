@@ -51,7 +51,7 @@ LeanElasticPeak::LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame)
  */
 LeanElasticPeak::LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame,
                                  const Mantid::Kernel::Matrix<double> &goniometer,
-                                 boost::optional<std::shared_ptr<Geometry::ReferenceFrame>> refFrame)
+                                 boost::optional<std::shared_ptr<const Geometry::ReferenceFrame>> refFrame)
     : BasePeak() {
   if (refFrame.is_initialized())
     setReferenceFrame(refFrame.get());
@@ -101,7 +101,7 @@ std::shared_ptr<const Geometry::ReferenceFrame> LeanElasticPeak::getReferenceFra
 Setter for the reference frame.
 @param frame : reference frame object to use.
 */
-void LeanElasticPeak::setReferenceFrame(std::shared_ptr<ReferenceFrame> frame) { m_refFrame = std::move(frame); }
+void LeanElasticPeak::setReferenceFrame(std::shared_ptr<const ReferenceFrame> frame) { m_refFrame = std::move(frame); }
 
 // -------------------------------------------------------------------------------------
 /** Return the neutron wavelength (in angstroms) */
@@ -172,7 +172,8 @@ void LeanElasticPeak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
     double wl = calculateWavelengthFromQLab(qLab);
     setWavelength(wl);
   } catch (std::exception &e) {
-    g_log.warning() << "Unable to determine wavelength from q-lab\n" << e.what() << '\n';
+    g_log.information() << "Unable to automatically determine wavelength from q-lab\n"
+                        << e.what() << ", goniometer is likely not correct\n";
   }
 }
 

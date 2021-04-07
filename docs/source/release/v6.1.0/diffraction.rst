@@ -21,6 +21,7 @@ New features
 - New diagnostic plotting tool `Calibration.tofpd.diagnostics.plot_peakd` which plots the d-spacing relative strain of peak positions.
 - New diagnostic plotting tool `Calibration.tofpd.diagnostics.plot_corr` which plots the Pearson correlation coefficient for time-of-flight and d-spacing for each detector.
 - New diagnostic plotting tool `Calibration.tofpd.diagnostics.plot_peak_info` which plots fitted peak parameters for instrument banks.
+- New algorithm :ref:`IndirectILLReductionDIFF <algm-IndirectILLReductionDIFF>` to reduce Doppler diffraction data for ILL's IN16B instrument.
 
 Improvements
 ############
@@ -104,11 +105,14 @@ made to facilitate this.
 - New LeanElasticPeak and LeanElasticPeakWorkspace has been created :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`
 - :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` has been modified to optionally create a :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
 - :ref:`FindPeaksMD <algm-FindPeaksMD>` has been modified to optionally create a :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
+- :ref:`PredictPeaks <algm-PredictPeaks>` has been modified to optionally create a :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
+- New algorithm :ref:`HFIRCalculateGoniometer <algm-HFIRCalculateGoniometer>` allows the goniometer to be found for constant wavelength peaks after creation, work with :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
 - These following other algorithms have either been made to work or confirmed to already work with the LeanElasticPeak:
 
    - :ref:`algm-AddPeakHKL`
    - :ref:`algm-CalculatePeaksHKL`
    - :ref:`algm-CentroidPeaksMD`
+   - :ref:`algm-CompareWorkspaces`
    - :ref:`algm-CombinePeaksWorkspaces`
    - :ref:`algm-FilterPeaks`
    - :ref:`algm-FindUBUsingFFT`
@@ -122,6 +126,7 @@ made to facilitate this.
    - :ref:`algm-SaveHKLCW`
    - :ref:`algm-SelectCellOfType`
    - :ref:`algm-SelectCellWithForm`
+   - :ref:`algm-SortPeaksWorkspace`
    - :ref:`algm-ShowPossibleCells`
    - :ref:`algm-TransformHKL`
 

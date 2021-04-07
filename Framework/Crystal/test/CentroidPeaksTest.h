@@ -158,7 +158,7 @@ public:
     TS_ASSERT(ws);
     if (!ws)
       return;
-    IPeak &peak = ws->getPeak(0);
+    Peak &peak = ws->getPeak(0);
 
     double row = peak.getRow();
     TS_ASSERT_DELTA(row, 50, 1.0);
