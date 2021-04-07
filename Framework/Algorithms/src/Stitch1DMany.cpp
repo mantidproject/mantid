@@ -291,13 +291,11 @@ void Stitch1DMany::doStitch1D(std::vector<MatrixWorkspace_sptr> &toStitch,
   for (size_t i = 1; i < toStitch.size(); i++) {
     auto rhsWS = toStitch[i];
     outName += "_" + rhsWS->getName();
-    if (i >= m_indexOfReference) {
-      if (i == m_indexOfReference) {
-        // don't scale the RHS unless the desired index is the first ws
-        scaleRHSWorkspace = false;
-      } else { // after scaling to the desired ws, keep the scaling
-        scaleRHSWorkspace = true;
-      }
+    if (i == m_indexOfReference) {
+      // don't scale the RHS unless the desired index is the first ws
+      scaleRHSWorkspace = false;
+    } else if (i > m_indexOfReference) {
+      scaleRHSWorkspace = true; // after scaling to the desired ws, keep the scaling
     }
 
     IAlgorithm_sptr alg = createChildAlgorithm("Stitch1D");
