@@ -51,38 +51,31 @@ void Muscat::init() {
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                            Direction::Input, wsValidator),
-      "The name of the input workspace.  The input workspace must "
-      "have X units of wavelength. This is used to supply the detector "
-      "positions and the x axis range to calculate corrections for");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
+                  "The name of the input workspace.  The input workspace must "
+                  "have X units of wavelength. This is used to supply the detector "
+                  "positions and the x axis range to calculate corrections for");
 
   auto wsQValidator = std::make_shared<CompositeValidator>();
   wsQValidator->add<WorkspaceUnitValidator>("MomentumTransfer");
   wsQValidator->add<EqualBinSizesValidator>(1.0E-07);
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "SofqWorkspace", "", Direction::Input, wsQValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("SofqWorkspace", "", Direction::Input, wsQValidator),
                   "The name of the workspace containing S'(q).  The input "
                   "workspace must contain a single spectrum and "
                   "have X units of momentum transfer.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "",
-                                                          Direction::Output),
-      "Name for the WorkspaceGroup that will be created. Each workspace in the "
-      "group contains a calculated weight for a particular number of "
-      "scattering events. The number of scattering events varies from 1 up to "
-      "the number supplied in the NumberOfScatterings parameter. The group "
-      "will also include an additional workspace for a calculation with a "
-      "single scattering event where the absorption post scattering has been "
-      "set to zero");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "ScatteringCrossSection", "", Direction::Input,
-          PropertyMode::Optional, wsQValidator),
-      "A workspace containing the scattering cross section as a function of "
-      "k.");
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "", Direction::Output),
+                  "Name for the WorkspaceGroup that will be created. Each workspace in the "
+                  "group contains a calculated weight for a particular number of "
+                  "scattering events. The number of scattering events varies from 1 up to "
+                  "the number supplied in the NumberOfScatterings parameter. The group "
+                  "will also include an additional workspace for a calculation with a "
+                  "single scattering event where the absorption post scattering has been "
+                  "set to zero");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("ScatteringCrossSection", "", Direction::Input,
+                                                        PropertyMode::Optional, wsQValidator),
+                  "A workspace containing the scattering cross section as a function of "
+                  "k.");
 
   auto positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
@@ -91,24 +84,18 @@ void Muscat::init() {
                   "attempted if ResimulateTracksForDifferentWavelengths=true");
 
   std::vector<std::string> propOptions{"Elastic", "Direct", "Indirect"};
-  declareProperty("EMode", "Elastic",
-                  std::make_shared<Kernel::StringListValidator>(propOptions),
+  declareProperty("EMode", "Elastic", std::make_shared<Kernel::StringListValidator>(propOptions),
                   "The energy mode (default: Elastic)");
 
-  declareProperty(
-      "NeutronPathsSingle", DEFAULT_NPATHS, positiveInt,
-      "The number of \"neutron\" paths to generate for single scattering");
-  declareProperty(
-      "NeutronPathsMultiple", DEFAULT_NPATHS, positiveInt,
-      "The number of \"neutron\" paths to generate for multiple scattering");
-  declareProperty("SeedValue", DEFAULT_SEED, positiveInt,
-                  "Seed the random number generator with this value");
-  auto nScatteringsValidator =
-      std::make_shared<Kernel::BoundedValidator<size_t>>();
+  declareProperty("NeutronPathsSingle", DEFAULT_NPATHS, positiveInt,
+                  "The number of \"neutron\" paths to generate for single scattering");
+  declareProperty("NeutronPathsMultiple", DEFAULT_NPATHS, positiveInt,
+                  "The number of \"neutron\" paths to generate for multiple scattering");
+  declareProperty("SeedValue", DEFAULT_SEED, positiveInt, "Seed the random number generator with this value");
+  auto nScatteringsValidator = std::make_shared<Kernel::BoundedValidator<size_t>>();
   nScatteringsValidator->setLower(1);
   nScatteringsValidator->setUpper(5);
-  declareProperty("NumberScatterings", DEFAULT_NSCATTERINGS,
-                  nScatteringsValidator, "Number of scatterings");
+  declareProperty("NumberScatterings", DEFAULT_NSCATTERINGS, nScatteringsValidator, "Number of scatterings");
 
   auto interpolateOpt = createInterpolateOption();
   declareProperty(interpolateOpt->property(), interpolateOpt->propertyDoc());
@@ -119,23 +106,17 @@ void Muscat::init() {
                   "results to the real instrument.");
   auto threeOrMore = std::make_shared<Kernel::BoundedValidator<int>>();
   threeOrMore->setLower(3);
-  declareProperty(
-      "NumberOfDetectorRows", DEFAULT_LATITUDINAL_DETS, threeOrMore,
-      "Number of detector rows in the detector grid of the sparse instrument.");
-  setPropertySettings(
-      "NumberOfDetectorRows",
-      std::make_unique<EnabledWhenProperty>(
-          "SparseInstrument", ePropertyCriterion::IS_NOT_DEFAULT));
+  declareProperty("NumberOfDetectorRows", DEFAULT_LATITUDINAL_DETS, threeOrMore,
+                  "Number of detector rows in the detector grid of the sparse instrument.");
+  setPropertySettings("NumberOfDetectorRows",
+                      std::make_unique<EnabledWhenProperty>("SparseInstrument", ePropertyCriterion::IS_NOT_DEFAULT));
   auto twoOrMore = std::make_shared<Kernel::BoundedValidator<int>>();
   twoOrMore->setLower(2);
-  declareProperty("NumberOfDetectorColumns", DEFAULT_LONGITUDINAL_DETS,
-                  twoOrMore,
+  declareProperty("NumberOfDetectorColumns", DEFAULT_LONGITUDINAL_DETS, twoOrMore,
                   "Number of detector columns in the detector grid "
                   "of the sparse instrument.");
-  setPropertySettings(
-      "NumberOfDetectorColumns",
-      std::make_unique<EnabledWhenProperty>(
-          "SparseInstrument", ePropertyCriterion::IS_NOT_DEFAULT));
+  setPropertySettings("NumberOfDetectorColumns",
+                      std::make_unique<EnabledWhenProperty>("SparseInstrument", ePropertyCriterion::IS_NOT_DEFAULT));
 }
 
 /**
@@ -145,8 +126,7 @@ void Muscat::init() {
 std::map<std::string, std::string> Muscat::validateInputs() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   std::map<std::string, std::string> issues;
-  Geometry::IComponent_const_sptr sample =
-      inputWS->getInstrument()->getSample();
+  Geometry::IComponent_const_sptr sample = inputWS->getInstrument()->getSample();
   if (!sample) {
     issues["InputWorkspace"] = "Input workspace does not have a Sample";
   } else {
@@ -155,8 +135,7 @@ std::map<std::string, std::string> Muscat::validateInputs() {
     }
 
     if (inputWS->sample().getMaterial().numberDensity() == 0) {
-      issues["InputWorkspace"] =
-          "Sample must have a material set up with a non-zero number density";
+      issues["InputWorkspace"] = "Sample must have a material set up with a non-zero number density";
     }
   }
   MatrixWorkspace_sptr SQWS = getProperty("SofqWorkspace");
@@ -164,8 +143,7 @@ std::map<std::string, std::string> Muscat::validateInputs() {
     issues["SofqWorkspace"] = "S(Q) workspace must contain a single spectrum";
   }
   auto y = SQWS->y(0);
-  if (std::any_of(y.cbegin(), y.cend(),
-                  [](const auto yval) { return (yval <= 0); })) {
+  if (std::any_of(y.cbegin(), y.cend(), [](const auto yval) { return (yval <= 0); })) {
     issues["SofqWorkspace"] = "S(Q) workspace must have all y > 0";
   }
 
@@ -186,16 +164,14 @@ void Muscat::exec() {
   // take log of S(Q) and store it this way
   SQWS = SQWS->clone();
   auto &y = SQWS->mutableY(0);
-  std::transform(y.begin(), y.end(), y.begin(),
-                 static_cast<double (*)(double)>(std::log));
+  std::transform(y.begin(), y.end(), y.begin(), static_cast<double (*)(double)>(std::log));
 
   MatrixWorkspace_sptr sigmaSSWS = getProperty("ScatteringCrossSection");
   if (sigmaSSWS) {
     sigmaSSWS = sigmaSSWS->clone();
     // take log of sigmaSSWS and store it this way
     auto &y = sigmaSSWS->mutableY(0);
-    std::transform(y.begin(), y.end(), y.begin(),
-                   static_cast<double (*)(double)>(std::log));
+    std::transform(y.begin(), y.end(), y.begin(), static_cast<double (*)(double)>(std::log));
   }
   const auto inputNbins = static_cast<int>(inputWS->blocksize());
   int nlambda = getProperty("NumberOfWavelengthPoints");
@@ -213,31 +189,25 @@ void Muscat::exec() {
   if (useSparseInstrument) {
     const int latitudinalDets = getProperty("NumberOfDetectorRows");
     const int longitudinalDets = getProperty("NumberOfDetectorColumns");
-    sparseWS = createSparseWorkspace(*inputWS, nlambda, latitudinalDets,
-                                     longitudinalDets);
+    sparseWS = createSparseWorkspace(*inputWS, nlambda, latitudinalDets, longitudinalDets);
   }
   const size_t nScatters = getProperty("NumberScatterings");
   std::vector<MatrixWorkspace_sptr> simulationWSs;
   std::vector<MatrixWorkspace_sptr> outputWSs;
 
   auto noAbsOutputWS = createOutputWorkspace(*inputWS);
-  auto noAbsSimulationWS =
-      useSparseInstrument ? sparseWS->clone() : noAbsOutputWS;
+  auto noAbsSimulationWS = useSparseInstrument ? sparseWS->clone() : noAbsOutputWS;
   for (auto i = 0; i < nScatters; i++) {
     auto outputWS = createOutputWorkspace(*inputWS);
-    MatrixWorkspace_sptr simulationWS =
-        useSparseInstrument ? sparseWS->clone() : outputWS;
+    MatrixWorkspace_sptr simulationWS = useSparseInstrument ? sparseWS->clone() : outputWS;
     simulationWSs.push_back(simulationWS);
     outputWSs.push_back(outputWS);
   }
-  const MatrixWorkspace &instrumentWS =
-      useSparseInstrument ? *sparseWS : *inputWS;
+  const MatrixWorkspace &instrumentWS = useSparseInstrument ? *sparseWS : *inputWS;
 
   auto instrument = inputWS->getInstrument();
-  const auto nhists =
-      useSparseInstrument
-          ? static_cast<int64_t>(sparseWS->getNumberHistograms())
-          : static_cast<int64_t>(inputWS->getNumberHistograms());
+  const auto nhists = useSparseInstrument ? static_cast<int64_t>(sparseWS->getNumberHistograms())
+                                          : static_cast<int64_t>(inputWS->getNumberHistograms());
 
   auto &sample = inputWS->sample();
 
@@ -279,23 +249,20 @@ void Muscat::exec() {
         auto detPos = instrumentWS.detectorInfo().position(i);
 
         double total(0);
-        total = simulatePaths(nSingleScatterEvents, 1, sample, *instrument, rng,
-                              sigmaSSWS, SQWS, kinc, detPos, true);
+        total = simulatePaths(nSingleScatterEvents, 1, sample, *instrument, rng, sigmaSSWS, SQWS, kinc, detPos, true);
         noAbsSimulationWS->getSpectrum(i).dataY()[bin] = total;
 
         for (size_t ne = 0; ne < nScatters; ne++) {
           int nEvents = ne == 0 ? nSingleScatterEvents : nMultiScatterEvents;
 
-          total = simulatePaths(nEvents, ne + 1, sample, *instrument, rng,
-                                sigmaSSWS, SQWS, kinc, detPos, false);
+          total = simulatePaths(nEvents, ne + 1, sample, *instrument, rng, sigmaSSWS, SQWS, kinc, detPos, false);
           simulationWSs[ne]->getSpectrum(i).dataY()[bin] = total;
         }
 
         prog.report(reportMsg);
 
         // Ensure we have the last point for the interpolation
-        if (lambdaStepSize > 1 && bin + lambdaStepSize >= nbins &&
-            bin + 1 != nbins) {
+        if (lambdaStepSize > 1 && bin + lambdaStepSize >= nbins && bin + 1 != nbins) {
           bin = nbins - lambdaStepSize - 1;
         }
       } // bins
@@ -308,8 +275,7 @@ void Muscat::exec() {
         if (lambdaStepSize < nbins) {
           interpolateOpt.applyInplace(histnew, lambdaStepSize);
         } else {
-          std::fill(histnew.mutableY().begin() + 1, histnew.mutableY().end(),
-                    histnew.y()[0]);
+          std::fill(histnew.mutableY().begin() + 1, histnew.mutableY().end(), histnew.y()[0]);
         }
         noAbsOutputWS->setHistogram(i, histnew);
 
@@ -318,8 +284,7 @@ void Muscat::exec() {
           if (lambdaStepSize < nbins) {
             interpolateOpt.applyInplace(histnew, lambdaStepSize);
           } else {
-            std::fill(histnew.mutableY().begin() + 1, histnew.mutableY().end(),
-                      histnew.y()[0]);
+            std::fill(histnew.mutableY().begin() + 1, histnew.mutableY().end(), histnew.y()[0]);
           }
           outputWSs[ne]->setHistogram(i, histnew);
         }
@@ -332,15 +297,11 @@ void Muscat::exec() {
 
   if (useSparseInstrument) {
     const std::string reportMsg = "Interpolating";
-    interpolateFromSparse(
-        *noAbsOutputWS,
-        *std::dynamic_pointer_cast<SparseWorkspace>(noAbsSimulationWS),
-        interpolateOpt);
+    interpolateFromSparse(*noAbsOutputWS, *std::dynamic_pointer_cast<SparseWorkspace>(noAbsSimulationWS),
+                          interpolateOpt);
     for (size_t ne = 0; ne < nScatters; ne++) {
-      interpolateFromSparse(
-          *outputWSs[ne],
-          *std::dynamic_pointer_cast<SparseWorkspace>(simulationWSs[ne]),
-          interpolateOpt);
+      interpolateFromSparse(*outputWSs[ne], *std::dynamic_pointer_cast<SparseWorkspace>(simulationWSs[ne]),
+                            interpolateOpt);
     }
   }
 
@@ -361,16 +322,14 @@ void Muscat::exec() {
   for (auto i = 0; i < outputWSs.size(); i++) {
     summedOutput = summedOutput + outputWSs[i];
   }
-  API::AnalysisDataService::Instance().addOrReplace(
-      "Scatter_1_" + std::to_string(outputWSs.size()) + "_Summed",
-      summedOutput);
+  API::AnalysisDataService::Instance().addOrReplace("Scatter_1_" + std::to_string(outputWSs.size()) + "_Summed",
+                                                    summedOutput);
   wsgroup->addWorkspace(summedOutput);
 
   // set the output property
   setProperty("OutputWorkspace", wsgroup);
 
-  g_log.warning() << "Calls to interceptSurface= " +
-                         std::to_string(m_callsToInterceptSurface) + "\n";
+  g_log.warning() << "Calls to interceptSurface= " + std::to_string(m_callsToInterceptSurface) + "\n";
 }
 
 /**
@@ -386,8 +345,7 @@ void Muscat::exec() {
  * @return A tuple containing the mean free path (metres), the total cross
  * section (barns)
  */
-double Muscat::new_vector(const MatrixWorkspace_sptr sigmaSSWS,
-                          const Material &material, double kinc,
+double Muscat::new_vector(const MatrixWorkspace_sptr sigmaSSWS, const Material &material, double kinc,
                           bool specialSingleScatterCalc) {
   double scatteringXSection, absorbXsection;
   if (specialSingleScatterCalc) {
@@ -414,8 +372,7 @@ double Muscat::new_vector(const MatrixWorkspace_sptr sigmaSSWS,
  * @param x The x value to interpolate at
  * @return The interpolated value
  */
-double Muscat::interpolateLogQuadratic(
-    const MatrixWorkspace_sptr &workspaceToInterpolate, double x) {
+double Muscat::interpolateLogQuadratic(const MatrixWorkspace_sptr &workspaceToInterpolate, double x) {
   if (x > workspaceToInterpolate->points(0).back()) {
     return exp(workspaceToInterpolate->y(0).back());
   }
@@ -424,15 +381,13 @@ double Muscat::interpolateLogQuadratic(
   }
   // assume log(cross section) is quadratic in k
   size_t idx;
-  auto binWidth =
-      workspaceToInterpolate->x(0)[1] - workspaceToInterpolate->x(0)[0];
+  auto binWidth = workspaceToInterpolate->x(0)[1] - workspaceToInterpolate->x(0)[0];
   idx = workspaceToInterpolate->yIndexOfX(x, 0, 0.5 * binWidth);
   // need at least two points to the right of the x value for the quadratic
   // interpolation to work
   auto ny = workspaceToInterpolate->blocksize();
   if (ny < 3) {
-    throw std::runtime_error(
-        "Need at least 3 y values to perform quadratic interpolation");
+    throw std::runtime_error("Need at least 3 y values to perform quadratic interpolation");
   }
   if (idx > ny - 3) {
     idx = ny - 3;
@@ -465,26 +420,20 @@ double Muscat::interpolateLogQuadratic(
  * @param specialSingleScatterCalc
  * @return An average weight across all of the paths
  */
-double Muscat::simulatePaths(const int nPaths, const size_t nScatters,
-                             const Sample &sample,
-                             const Geometry::Instrument &instrument,
-                             Kernel::PseudoRandomNumberGenerator &rng,
-                             const MatrixWorkspace_sptr sigmaSSWS,
-                             const MatrixWorkspace_sptr SOfQ, const double kinc,
-                             Kernel::V3D detPos,
-                             bool specialSingleScatterCalc) {
+double Muscat::simulatePaths(const int nPaths, const size_t nScatters, const Sample &sample,
+                             const Geometry::Instrument &instrument, Kernel::PseudoRandomNumberGenerator &rng,
+                             const MatrixWorkspace_sptr sigmaSSWS, const MatrixWorkspace_sptr SOfQ, const double kinc,
+                             Kernel::V3D detPos, bool specialSingleScatterCalc) {
   double sumOfWeights = 0, sumOfQSS = 0.;
   auto sourcePos = instrument.getSource()->getPos();
 
   double sigma_total;
   double scatteringXSection = sample.getMaterial().totalScatterXSection();
-  sigma_total = new_vector(sigmaSSWS, sample.getMaterial(), kinc,
-                           specialSingleScatterCalc);
+  sigma_total = new_vector(sigmaSSWS, sample.getMaterial(), kinc, specialSingleScatterCalc);
 
   for (int ie = 0; ie < nPaths; ie++) {
-    auto [success, weight, QSS] = scatter(
-        nScatters, sample, instrument, sourcePos, rng, sigma_total,
-        scatteringXSection, SOfQ, kinc, detPos, specialSingleScatterCalc);
+    auto [success, weight, QSS] = scatter(nScatters, sample, instrument, sourcePos, rng, sigma_total,
+                                          scatteringXSection, SOfQ, kinc, detPos, specialSingleScatterCalc);
     if (success) {
       sumOfWeights += weight;
       sumOfQSS += QSS;
@@ -494,8 +443,7 @@ double Muscat::simulatePaths(const int nPaths, const size_t nScatters,
 
   // divide by the mean of Q*S(Q) for each of the n-1 terms representing a
   // multiple scatter
-  sumOfWeights =
-      sumOfWeights / pow(sumOfQSS / (nPaths * (nScatters - 1)), nScatters - 1);
+  sumOfWeights = sumOfWeights / pow(sumOfQSS / (nPaths * (nScatters - 1)), nScatters - 1);
 
   return sumOfWeights / nPaths;
 }
@@ -521,20 +469,17 @@ double Muscat::simulatePaths(const int nPaths, const size_t nScatters,
  * @return A tuple containing a success\fail boolean, the calculated weight and
  * a sum of the QSS values across the n-1 multiple scatters
  */
-std::tuple<bool, double, double>
-Muscat::scatter(const size_t nScatters, const Sample &sample,
-                const Geometry::Instrument &instrument, const V3D sourcePos,
-                Kernel::PseudoRandomNumberGenerator &rng,
-                const double sigma_total, double scatteringXSection,
-                const MatrixWorkspace_sptr SOfQ, const double kinc,
-                Kernel::V3D detPos, bool specialSingleScatterCalc) {
+std::tuple<bool, double, double> Muscat::scatter(const size_t nScatters, const Sample &sample,
+                                                 const Geometry::Instrument &instrument, const V3D sourcePos,
+                                                 Kernel::PseudoRandomNumberGenerator &rng, const double sigma_total,
+                                                 double scatteringXSection, const MatrixWorkspace_sptr SOfQ,
+                                                 const double kinc, Kernel::V3D detPos, bool specialSingleScatterCalc) {
   double weight = 1;
   double numberDensity = sample.getMaterial().numberDensityEffective();
   // if scale up scatteringXSection by 100*numberDensity then may not need
   // sigma_total any more but leave it alone now to align with original code
   double vmu = 100 * numberDensity * sigma_total;
-  auto track = start_point(sample.getShape(), instrument.getReferenceFrame(),
-                           sourcePos, rng);
+  auto track = start_point(sample.getShape(), instrument.getReferenceFrame(), sourcePos, rng);
   updateWeightAndPosition(track, weight, vmu, sigma_total, rng);
 
   double QSS = 0;
@@ -571,9 +516,8 @@ Muscat::scatter(const size_t nScatters, const Sample &sample,
 }
 
 // update track direction, QSS and weight
-void Muscat::q_dir(Geometry::Track &track, const MatrixWorkspace_sptr SOfQ,
-                   const double kinc, const double scatteringXSection,
-                   Kernel::PseudoRandomNumberGenerator &rng, double &QSS,
+void Muscat::q_dir(Geometry::Track &track, const MatrixWorkspace_sptr SOfQ, const double kinc,
+                   const double scatteringXSection, Kernel::PseudoRandomNumberGenerator &rng, double &QSS,
                    double &weight) {
   auto qvalues = SOfQ->histogram(0).x().rawData();
   // For elastic just select a q value in range 0 to 2k
@@ -590,8 +534,7 @@ void Muscat::q_dir(Geometry::Track &track, const MatrixWorkspace_sptr SOfQ,
     }
   }
   if (!foundQ) {
-    throw std::runtime_error("Unable to select a new q for kinc=" +
-                             std::to_string(kinc));
+    throw std::runtime_error("Unable to select a new q for kinc=" + std::to_string(kinc));
   } else {
     double SQ = interpolateLogQuadratic(SOfQ, QQ);
     QSS += QQ * SQ;
@@ -629,11 +572,9 @@ void Muscat::q_dir(Geometry::Track &track, const MatrixWorkspace_sptr SOfQ,
   }
 }
 
-Geometry::Track
-Muscat::start_point(const Geometry::IObject &shape,
-                    std::shared_ptr<const Geometry::ReferenceFrame> frame,
-                    const V3D sourcePos,
-                    Kernel::PseudoRandomNumberGenerator &rng) {
+Geometry::Track Muscat::start_point(const Geometry::IObject &shape,
+                                    std::shared_ptr<const Geometry::ReferenceFrame> frame, const V3D sourcePos,
+                                    Kernel::PseudoRandomNumberGenerator &rng) {
   int MAX_ATTEMPTS = 100;
   for (int i = 0; i < MAX_ATTEMPTS; i++) {
     auto t = generateInitialTrack(shape, frame, sourcePos, rng);
@@ -641,8 +582,7 @@ Muscat::start_point(const Geometry::IObject &shape,
     m_callsToInterceptSurface++;
     if (nlinks > 0) {
       if (i > 0) {
-        g_log.warning() << "Generating initial track required " +
-                               std::to_string(i + 1) + " attempts.\n";
+        g_log.warning() << "Generating initial track required " + std::to_string(i + 1) + " attempts.\n";
       }
       return t;
     }
@@ -652,8 +592,7 @@ Muscat::start_point(const Geometry::IObject &shape,
 }
 
 // update track start point and weight
-void Muscat::updateWeightAndPosition(Geometry::Track &track, double &weight,
-                                     const double vmu, const double sigma_total,
+void Muscat::updateWeightAndPosition(Geometry::Track &track, double &weight, const double vmu, const double sigma_total,
                                      Kernel::PseudoRandomNumberGenerator &rng) {
   double dl = track.front().distInsideObject;
   double b4 = (1.0 - exp(-dl * vmu));
@@ -672,10 +611,9 @@ void Muscat::updateWeightAndPosition(Geometry::Track &track, double &weight,
  * @param rng Random number generator
  * @return a track
  */
-Geometry::Track Muscat::generateInitialTrack(
-    const Geometry::IObject &shape,
-    std::shared_ptr<const Geometry::ReferenceFrame> frame, const V3D sourcePos,
-    Kernel::PseudoRandomNumberGenerator &rng) {
+Geometry::Track Muscat::generateInitialTrack(const Geometry::IObject &shape,
+                                             std::shared_ptr<const Geometry::ReferenceFrame> frame, const V3D sourcePos,
+                                             Kernel::PseudoRandomNumberGenerator &rng) {
   auto sampleBox = shape.getBoundingBox();
   // generate random point on front surface of sample bounding box
   // I'm not 100% sure this sampling is correct because for a sample with
@@ -683,14 +621,12 @@ Geometry::Track Muscat::generateInitialTrack(
   // thin part of the cylinder
   auto ptx = sampleBox.minPoint()[frame->pointingHorizontal()] +
              rng.nextValue() * sampleBox.width()[frame->pointingHorizontal()];
-  auto pty = sampleBox.minPoint()[frame->pointingUp()] +
-             rng.nextValue() * sampleBox.width()[frame->pointingUp()];
+  auto pty = sampleBox.minPoint()[frame->pointingUp()] + rng.nextValue() * sampleBox.width()[frame->pointingUp()];
   // perhaps eventually also generate random point on the beam profile?
   auto ptOnBeamProfile = Kernel::V3D();
   ptOnBeamProfile[frame->pointingHorizontal()] = ptx;
   ptOnBeamProfile[frame->pointingUp()] = pty;
-  ptOnBeamProfile[frame->pointingAlongBeam()] =
-      sourcePos[frame->pointingAlongBeam()];
+  ptOnBeamProfile[frame->pointingAlongBeam()] = sourcePos[frame->pointingAlongBeam()];
   auto toSample = Kernel::V3D();
   toSample[frame->pointingAlongBeam()] = 1.;
   Geometry::Track trackToSample = Geometry::Track(ptOnBeamProfile, toSample);
@@ -725,17 +661,14 @@ void Muscat::inc_xyz(Geometry::Track &track, double vl) {
  * @param columns The number of columns of detectors to create
  * @return a pointer to an SparseInstrument object
  */
-std::shared_ptr<SparseWorkspace>
-Muscat::createSparseWorkspace(const API::MatrixWorkspace &modelWS,
-                              const size_t wavelengthPoints, const size_t rows,
-                              const size_t columns) {
-  auto sparseWS = std::make_shared<SparseWorkspace>(modelWS, wavelengthPoints,
-                                                    rows, columns);
+std::shared_ptr<SparseWorkspace> Muscat::createSparseWorkspace(const API::MatrixWorkspace &modelWS,
+                                                               const size_t wavelengthPoints, const size_t rows,
+                                                               const size_t columns) {
+  auto sparseWS = std::make_shared<SparseWorkspace>(modelWS, wavelengthPoints, rows, columns);
   return sparseWS;
 }
 
-MatrixWorkspace_sptr
-Muscat::createOutputWorkspace(const MatrixWorkspace &inputWS) const {
+MatrixWorkspace_sptr Muscat::createOutputWorkspace(const MatrixWorkspace &inputWS) const {
   MatrixWorkspace_uptr outputWS = DataObjects::create<Workspace2D>(inputWS);
   // The algorithm computes the signal values at bin centres so they should
   // be treated as a distribution
@@ -755,9 +688,8 @@ std::unique_ptr<InterpolationOption> Muscat::createInterpolateOption() {
   return interpolationOpt;
 }
 
-void Muscat::interpolateFromSparse(
-    MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
-    const Mantid::Algorithms::InterpolationOption &interpOpt) {
+void Muscat::interpolateFromSparse(MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
+                                   const Mantid::Algorithms::InterpolationOption &interpOpt) {
   const auto &spectrumInfo = targetWS.spectrumInfo();
   const auto refFrame = targetWS.getInstrument()->getReferenceFrame();
   PARALLEL_FOR_IF(Kernel::threadSafe(targetWS, sparseWS))
@@ -766,8 +698,7 @@ void Muscat::interpolateFromSparse(
     if (!spectrumInfo.isMonitor(i)) {
       double lat, lon;
       std::tie(lat, lon) = spectrumInfo.geographicalAngles(i);
-      const auto spatiallyInterpHisto =
-          sparseWS.bilinearInterpolateFromDetectorGrid(lat, lon);
+      const auto spatiallyInterpHisto = sparseWS.bilinearInterpolateFromDetectorGrid(lat, lon);
       if (spatiallyInterpHisto.size() > 1) {
         auto targetHisto = targetWS.histogram(i);
         interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);

@@ -111,7 +111,7 @@ References
 
 
 Usage
------ 
+-----
 
 
 .. categories::

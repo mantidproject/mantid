@@ -1,13 +1,17 @@
 from mantid.simpleapi import *
-from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
-                        Progress, WorkspaceGroupProperty)
+from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
+                        Progress)
 from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBoundedValidator,
                            FloatBoundedValidator, Direction, logger, MaterialBuilder)
 from mantid import config
-import sys, os.path, math, random, numpy as np
+import os.path
+import math
+import random
+import numpy as np
+
 
 class MuscatElasticReactor(DataProcessorAlgorithm):
- 
+
     _sample_ws_name = None
     _sample_chemical_formula = None
     _sample_number_density = None
@@ -50,7 +54,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('SofqWorkspace', '', direction=Direction.Input),
-                            doc="Name for the input Sample workspace.")
+                             doc="Name for the input Sample workspace.")
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
                              validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
@@ -61,7 +65,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample number density')
 
-        self.declareProperty(name='Geometry', defaultValue='Flat', 
+        self.declareProperty(name='Geometry', defaultValue='Flat',
                              validator=StringListValidator(['Flat','Cylinder']),
                              doc='Sample geometry')
         self.declareProperty(name='NeutronsSingle', defaultValue=1000,
@@ -93,7 +97,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
                              doc='Switch Plot Off/On')
         self.declareProperty(name='Save', defaultValue=False,
                              doc='Switch Save result to nxs file Off/On')
- 
+
     def PyExec(self):
         # Set up progress reporting
         prog = Progress(self, 0.0, 1.0, 2)
@@ -142,7 +146,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
                 self._QSS = 0.0
                 QS_sum[ne] = 0.0
 # new neutrons start here
-                if ne <=1:              #if ms 
+                if ne <=1:              #if ms
                     for neut in range(0,self._nrun1):    # no. of 1st scatterings
                         self._scatter(ne)
                 else:
@@ -278,7 +282,6 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
                 self._B1 = self._B1*AT2                #b1=atten to 1st scatt
                 self._att += self._B1               #final attenution
 
-
     def _setup(self):
         self._sample_ws_name = self.getPropertyValue('SofqWorkspace')
         logger.information('SofQ : ' + self._sample_ws_name)
@@ -354,13 +357,12 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
         self._angles = np.zeros(self._number_angles)
         for idx_ang in range(self._number_angles):
             self._angles[idx_ang] = theta_d[0] + idx_ang*ang_inc
-        logger.information('Number of angles : %i ; from %f to %f ' % 
+        logger.information('Number of angles : %i ; from %f to %f ' %
                            (self._number_angles, self._angles[0], self._angles[self._number_angles -1]))
-
 
     def _unit_vector(self, vector):
 # unit vector
-        one = math.sqrt(vector[0]*vector[0] + vector[1]*vector[1] + vector[2]*vector[2])    #unit vector 
+        one = math.sqrt(vector[0]*vector[0] + vector[1]*vector[1] + vector[2]*vector[2])    #unit vector
         vx = vector[0]/one                   #direction
         vy = vector[1]/one
         vz = vector[2]/one
@@ -477,13 +479,12 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
             return [UKX, UKY, UKZ]
 
     def _q_calc(self):
-        for m in range(0,1000):   
+        for m in range(0,1000):
             QQ = self._q_values[self._number_q -1]*random.random()            #random q_value
             CosT = 1. - QQ*QQ/(2.*self._vkinc*self._vkinc)
             if CosT > -1.0 and CosT < 1.0:
                 return m, QQ, CosT
         return m, QQ, 0.0
-
 
 #   Geometry routines
 
@@ -647,8 +648,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
         if DIST <= 0.0:
             DIST = BB + DD
         return DIST
-	
-	
+
 #   general routines
 
     def _save_output(self, workspaces):
