@@ -38,5 +38,6 @@ Bugfixes
 - First time dialog box will not appear recurrently, if user selected their choice of facility
   and instrument at least once and checked "Do not show again until next version".
 - Fixed a bug that would cause a crash if the user right clicked on the plot in the instrument view pick tab after the stored curves were cleared.
+- The y-axis in the instrument view's pick tab will now rescale if the range changes.
 
 :ref:`Release 6.1.0 <v6.1.0>`
