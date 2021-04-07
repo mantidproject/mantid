@@ -222,7 +222,8 @@ class RundexSettings(object):
                 "IQxQyLogBinning",
                 "OutputPanels",
                 "WavelengthRange",
-                "StitchReferenceIndex"
+                "StitchReferenceIndex",
+                "ClearCorrected2DWorkspace"
                 ],
             SANS_PSCAN : [
                 "SensitivityMap",
