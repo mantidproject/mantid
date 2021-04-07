@@ -335,7 +335,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             # It seems that when the python session is killed,
             # Gcf can get destroyed before the Gcf.destroy
             # line is run, leading to a useless AttributeError.
-        self.deleteLater()
 
     def launch_plot_options(self):
         self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure, parent=self.window)

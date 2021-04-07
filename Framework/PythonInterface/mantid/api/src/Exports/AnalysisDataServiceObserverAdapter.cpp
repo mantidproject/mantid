@@ -7,7 +7,6 @@
 #include "MantidPythonInterface/api/AnalysisDataServiceObserverAdapter.h"
 #include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidPythonInterface/core/CallMethod.h"
-#include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 
 namespace Mantid {
 namespace PythonInterface {
