@@ -22,7 +22,6 @@ class EAAutoTabPresenter(object):
         self.popup_peak_table = None
 
         self.setup_observers()
-
         self.setup_notifier()
 
     def setup_notifier(self):
@@ -71,7 +70,7 @@ class EAAutoTabPresenter(object):
         self.popup_peak_table.show()
 
     def show_match_table(self):
-        parameter = self.view.show_peaks_table_combobox.currentText()
+        parameter = self.view.show_match_table_combobox.currentText()
         if parameter == "":
             message_box.warning("ERROR : No selected table", None)
             return
@@ -83,7 +82,7 @@ class EAAutoTabPresenter(object):
 
         table = retrieve_ws(parameter)
         columns = table.getColumnNames()
-        self.popup_peak_table.create_table(columns)
+        self.popup_match_table.create_table(columns)
         table_entries = self.extract_rows(parameter)
         for entry in table_entries:
             self.popup_match_table.add_entry_to_table(entry)
@@ -98,7 +97,6 @@ class EAAutoTabPresenter(object):
         # check all tables in load run's groups and add to show peaks and show matches combobox
 
         group_names = self.context.group_context.group_names
-        self.view.add_options_to_find_peak_combobox(group_names)
         all_runs = []
         for group in group_names:
             all_runs.append(self.model.split_run_and_detector(group)[0])
@@ -123,8 +121,9 @@ class EAAutoTabPresenter(object):
                         matches_group = retrieve_ws(name)
                         show_matches_option += matches_group.getNames()
 
-        self.view.add_options_to_show_peak_combobox(show_peaks_options)
-        self.view.add_options_to_show_matches_combobox(show_matches_option)
+        self.view.add_options_to_find_peak_combobox(sorted(group_names + all_runs))
+        self.view.add_options_to_show_peak_combobox(sorted(show_peaks_options))
+        self.view.add_options_to_show_matches_combobox(sorted(show_matches_option))
 
         peak_label_info = self.model.current_peak_table_info
         # Update peak info label
