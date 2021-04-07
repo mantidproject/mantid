@@ -11,6 +11,7 @@ New and Improved
 - Added Floating/On Top setting for all the windows that are opened by workbench (plots, interfaces, etc.)
 - New plot interactions: Double click a legend to hide it, double click a curve to open it in the plot config dialog.
 - It is now possible to overplot bin data from the matrix workspace view.
+- New command line options ``--version`` will print the version on mantid and exit. ``--error-on-warning`` will convert python warnings into exceptions. This is intended for developers so they can find deprecation warnings more easily.
 - Improved the performance of the table workspace display for large datasets
 - Added a sample material dialog that is accessed via the context menu in the workspace widget.
 - When a workspace is renamed it now updates the relevant plot labels with the new workspace name.
@@ -38,5 +39,6 @@ Bugfixes
   and instrument at least once and checked "Do not show again until next version".
 - Fixed a bug that would cause a crash if the user right clicked on the plot in the instrument view pick tab after the stored curves were cleared.
 - Fixed a crash that happens when multiple plot windows are open, and the users closes one of them.
+- The y-axis in the instrument view's pick tab will now rescale if the range changes.
 
 :ref:`Release 6.1.0 <v6.1.0>`

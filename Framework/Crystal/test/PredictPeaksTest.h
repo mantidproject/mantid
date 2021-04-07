@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/PredictPeaks.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDTypes.h"
@@ -271,6 +272,82 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
 
     ConfigService::Instance().setString("Q.convention", origQConv);
+  }
+
+  void test_exec_with_CalculateGoniometerForCW_LeanElasticPeak() {
+    using Kernel::ConfigService;
+    auto origQConv = ConfigService::Instance().getString("Q.convention");
+    ConfigService::Instance().setString("Q.convention", "Crystallography");
+
+    // Name of the output workspace.
+    std::string outWSName("PredictPeaksTest_OutputWS");
+
+    // Make the fake input workspace
+    MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::create2DWorkspace(10000, 1);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
+    inWS->setInstrument(inst);
+
+    // Set ub and Goniometer rotation
+    WorkspaceCreationHelper::setOrientedLattice(inWS, 12.0, 12.0, 12.0);
+    WorkspaceCreationHelper::setGoniometer(inWS, 0., 0., 0.);
+
+    PredictPeaks alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CalculateGoniometerForCW", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Wavelength", "1.5"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MinAngle", "0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MaxAngle", "5.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputType", "LeanElasticPeak"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    LeanElasticPeaksWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<LeanElasticPeaksWorkspace>(outWSName));
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    TS_ASSERT_EQUALS(ws->getNumberPeaks(), 1);
+    TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), V3D(1, 0, 0));
+    TS_ASSERT_DELTA(ws->getPeak(0).getWavelength(), 1.5, 1e-6);
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+
+    ConfigService::Instance().setString("Q.convention", origQConv);
+  }
+
+  void test_exec_LeanElasticPeak_no_instrument() {
+    auto inWS = WorkspaceFactory::Instance().createPeaks();
+    inWS->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>(2., 2., 2., 90., 90., 90.));
+    PredictPeaks alg;
+    std::string outWSName("PredictPeaksTest_OutputWS");
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputType", "LeanElasticPeak"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CalculateWavelength", false));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    LeanElasticPeaksWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<LeanElasticPeaksWorkspace>(outWSName));
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    TS_ASSERT_EQUALS(ws->getNumberPeaks(), 32);
+    TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), V3D(-2, 0, 0));
+    TS_ASSERT_EQUALS(ws->getPeak(31).getHKL(), V3D(2, 0, 0));
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
   }
 };
 

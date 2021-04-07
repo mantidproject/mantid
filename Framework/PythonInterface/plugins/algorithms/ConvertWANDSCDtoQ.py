@@ -355,6 +355,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
 
         outWS.getExperimentInfo(0).run().addProperty('RUBW_MATRIX', list(UBW.flatten()), True)
         outWS.getExperimentInfo(0).run().addProperty('W_MATRIX', list(W.flatten()), True)
+        outWS.getExperimentInfo(0).run().addProperty('wavelength', self.getProperty("Wavelength").value, True)
         try:
             if outWS.getExperimentInfo(0).sample().hasOrientedLattice():
                 outWS.getExperimentInfo(0).sample().getOrientedLattice().setUB(UB)
