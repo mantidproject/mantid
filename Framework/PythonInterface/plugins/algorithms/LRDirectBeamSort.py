@@ -9,6 +9,8 @@ from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
 import functools
+from scipy.signal import find_peaks, peak_widths
+import numpy as np
 
 THI_TOLERANCE = 0.002
 
@@ -204,30 +206,47 @@ class LRDirectBeamSort(PythonAlgorithm):
             bck_ranges = []
 
             for run in g:
-                # Create peak workspace
-                number_of_pixels_x = int(run.getInstrument().getNumberParameter("number-of-x-pixels")[0])
-                number_of_pixels_y = int(run.getInstrument().getNumberParameter("number-of-y-pixels")[0])
+                SaveNexusProcessed(InputWorkspace=run, Filename=f'/tmp/LRD{run}.nxs')
+                # # Create peak workspace
+                # number_of_pixels_x = int(run.getInstrument().getNumberParameter("number-of-x-pixels")[0])
+                # number_of_pixels_y = int(run.getInstrument().getNumberParameter("number-of-y-pixels")[0])
 
-                # Direct beam signal
-                workspace = RefRoi(InputWorkspace=run, ConvertToQ=False,
-                                   NXPixel=number_of_pixels_x,
-                                   NYPixel=number_of_pixels_y,
-                                   IntegrateY=False,
-                                   OutputWorkspace="__ref_peak")
-                workspace = Transpose(InputWorkspace=workspace)
-                peak, _, _ = LRPeakSelection(InputWorkspace=workspace)
+                # # Direct beam signal
+                # workspace = RefRoi(InputWorkspace=run, ConvertToQ=False,
+                #                    NXPixel=number_of_pixels_x,
+                #                    NYPixel=number_of_pixels_y,
+                #                    IntegrateY=False,
+                #                    OutputWorkspace="__ref_peak")
+                # workspace = Transpose(InputWorkspace=workspace)
+                # peak, _, _ = LRPeakSelection(InputWorkspace=workspace)
 
-                # Low resolution cut
-                if use_low_res_cut:
-                    workspace = RefRoi(InputWorkspace=run, ConvertToQ=False,
-                                       NXPixel=number_of_pixels_x,
-                                       NYPixel=number_of_pixels_y,
-                                       IntegrateY=True,
-                                       OutputWorkspace="__ref_peak")
-                    workspace = Transpose(InputWorkspace=workspace)
-                    _, low_res, _ = LRPeakSelection(InputWorkspace=workspace)
+                # # Low resolution cut
+                # if use_low_res_cut:
+                #     workspace = RefRoi(InputWorkspace=run, ConvertToQ=False,
+                #                        NXPixel=number_of_pixels_x,
+                #                        NYPixel=number_of_pixels_y,
+                #                        IntegrateY=True,
+                #                        OutputWorkspace="__ref_peak")
+                #     workspace = Transpose(InputWorkspace=workspace)
+                #     _, low_res, _ = LRPeakSelection(InputWorkspace=workspace)
+                # else:
+                #     low_res = [0, number_of_pixels_x]
+
+                # #  att = run.getRun().getProperty('vAtt').value[0]-1
+                # #  wl = run.getRun().getProperty('LambdaRequest').value[0]
+                # #  thi = run.getRun().getProperty('thi').value[0]
+                # #  direct_beam_runs.append(run.getRunNumber())
+                # #  peak_ranges.append(int(peak[0]))
+                # #  peak_ranges.append(int(peak[1]))
+                # #  x_ranges.append(int(low_res[0]))
+                # #  x_ranges.append(int(low_res[1]))
+                # # bck_ranges.append(int(peak[0])-3)
+                # # bck_ranges.append(int(peak[1])+3)
+
+                if False:
+                    peak, low_res = self._find_peak_old(run, use_low_res_cut)
                 else:
-                    low_res = [0, number_of_pixels_x]
+                    peak, low_res = self._find_peak(run)
 
                 att = run.getRun().getProperty('vAtt').value[0]-1
                 wl = run.getRun().getProperty('LambdaRequest').value[0]
@@ -240,7 +259,7 @@ class LRDirectBeamSort(PythonAlgorithm):
                 bck_ranges.append(int(peak[0])-3)
                 bck_ranges.append(int(peak[1])+3)
 
-                summary += "%10s wl=%5s thi=%5s att=%s %5s,%5s %5s,%5s\n" % \
+                summary += "Find Peak: %10s wl=%5s thi=%5s att=%s %5s,%5s %5s,%5s\n" % \
                     (run.getRunNumber(), wl, thi, att, peak[0], peak[1], low_res[0], low_res[1])
 
             # Determine TOF range from first file
@@ -273,6 +292,91 @@ class LRDirectBeamSort(PythonAlgorithm):
                              SlitTolerance=slit_tolerance,
                              ScalingFactorFile=scaling_file)
         logger.notice(summary)
+
+    def _find_peak_old(self, run, use_low_res_cut):
+
+        # Create peak workspace
+        number_of_pixels_x = int(run.getInstrument().getNumberParameter("number-of-x-pixels")[0])
+        number_of_pixels_y = int(run.getInstrument().getNumberParameter("number-of-y-pixels")[0])
+
+        # Direct beam signal
+        workspace = RefRoi(InputWorkspace=run, ConvertToQ=False,
+                           NXPixel=number_of_pixels_x,
+                           NYPixel=number_of_pixels_y,
+                           IntegrateY=False,
+                           OutputWorkspace="__ref_peak")
+        workspace = Transpose(InputWorkspace=workspace)
+        peak, _, _ = LRPeakSelection(InputWorkspace=workspace)
+
+        # Low resolution cut
+        if use_low_res_cut:
+            workspace = RefRoi(InputWorkspace=run, ConvertToQ=False,
+                               NXPixel=number_of_pixels_x,
+                               NYPixel=number_of_pixels_y,
+                               IntegrateY=True,
+                               OutputWorkspace="__ref_peak")
+            workspace = Transpose(InputWorkspace=workspace)
+            _, low_res, _ = LRPeakSelection(InputWorkspace=workspace)
+        else:
+            low_res = [0, number_of_pixels_x]
+
+        # att = run.getRun().getProperty('vAtt').value[0]-1
+        # wl = run.getRun().getProperty('LambdaRequest').value[0]
+        # thi = run.getRun().getProperty('thi').value[0]
+        # direct_beam_runs.append(run.getRunNumber())
+        # peak_ranges.append(int(peak[0]))
+        # peak_ranges.append(int(peak[1]))
+        # x_ranges.append(int(low_res[0]))
+        # x_ranges.append(int(low_res[1]))
+        # bck_ranges.append(int(peak[0])-3)
+        # bck_ranges.append(int(peak[1])+3)
+
+        return peak, low_res
+
+    def _find_peak(self, ws):
+        """
+            Find the peak in y
+            TODO: find peak in x
+        """
+        SaveNexusProcessed(InputWorkspace=ws, Filename=f'/tmp/{ws}.nxs')
+        y = ws.extractY()
+        # x=ws.extractX()
+        y = np.reshape(y, (256, 304, y.shape[1]))
+
+        p_vs_t = np.sum(y, axis=0)
+        counts = np.sum(p_vs_t, axis=1)
+
+        avg = np.average(counts)
+
+        # Crop pixels on each side where background can create a peak
+        # call scipy.signal.find_peaks and scipy.signal.peak_width to
+        # find peaks and properties
+        _crop = 25
+        peaks, props = find_peaks(counts[_crop:-_crop],
+                                  threshold=None,
+                                  width=3,
+                                  prominence=0.5*avg)
+        width = peak_widths(counts[_crop:-_crop], peaks, rel_height=0.05)
+
+        _peak_index = 0
+        _peak_max = 0
+        if len(peaks)>0:
+            for i in range(len(peaks)):
+                if counts[peaks[i]+_crop] > _peak_max:
+                    _peak_index = i
+                    _peak_max = counts[peaks[i]+_crop]
+
+        try:
+            peak = [np.int(np.floor(peaks[_peak_index]+_crop-2.0*width[0][_peak_index])),
+                    np.int(np.floor(peaks[_peak_index]+_crop+2.0*width[0][_peak_index]))]
+        except:
+            print(counts)
+            print(avg)
+            print(peaks)
+            print(props)
+            raise
+
+        return peak, [0, 255]
 
 
 AlgorithmFactory.subscribe(LRDirectBeamSort)
