@@ -10,6 +10,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/PeakAlgorithmHelpers.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/EdgePixel.h"
 #include "MantidGeometry/Crystal/HKLFilterWavelength.h"
@@ -113,8 +115,8 @@ void PredictPeaks::init() {
                   "option only works if the sample of the input workspace has "
                   "a crystal structure assigned.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("HKLPeaksWorkspace", "", Direction::Input,
-                                                                      PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("HKLPeaksWorkspace", "", Direction::Input,
+                                                                       PropertyMode::Optional),
                   "Optional: An input PeaksWorkspace with the HKL of the peaks "
                   "that we should predict. \n"
                   "The WavelengthMin/Max and Min/MaxDSpacing parameters are "
@@ -139,7 +141,17 @@ void PredictPeaks::init() {
   setPropertySettings("MaxDSpacing", makeSet());
   setPropertySettings("ReflectionCondition", makeSet());
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
+  std::vector<std::string> peakTypes = {"Peak", "LeanElasticPeak"};
+  declareProperty("OutputType", "Peak", std::make_shared<StringListValidator>(peakTypes),
+                  "Type of Peak in OutputWorkspace");
+  declareProperty(
+      "CalculateWavelength", true,
+      "When OutputType is LeanElasticPeak you can choose to calculate the wavelength of the peak using the instrument "
+      "and check it is in the valid range or alternatively just accept every peak while not setting the goniometer "
+      "(Q-lab will be incorrect).");
+  setPropertySettings("CalculateWavelength", std::make_unique<EnabledWhenProperty>("OutputType", IS_NOT_DEFAULT));
+
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output PeaksWorkspace.");
 
   declareProperty("PredictPeaksOutsideDetectors", false,
@@ -158,6 +170,8 @@ void PredictPeaks::exec() {
   // Get the input properties
   Workspace_sptr rawInputWorkspace = getProperty("InputWorkspace");
   m_edge = this->getProperty("EdgePixels");
+  m_leanElasticPeak = (getPropertyValue("OutputType") == "LeanElasticPeak");
+  bool usingInstrument = !(m_leanElasticPeak && !getProperty("CalculateWavelength"));
 
   ExperimentInfo_sptr inputExperimentInfo = std::dynamic_pointer_cast<ExperimentInfo>(rawInputWorkspace);
 
@@ -228,14 +242,19 @@ void PredictPeaks::exec() {
     gonioVec.emplace_back(DblMatrix(3, 3, true));
   }
 
-  setInstrumentFromInputWorkspace(inputExperimentInfo);
-  setRunNumberFromInputWorkspace(inputExperimentInfo);
-  setReferenceFrameAndBeamDirection();
-  checkBeamDirection();
+  if (usingInstrument) {
+    setInstrumentFromInputWorkspace(inputExperimentInfo);
+    setRunNumberFromInputWorkspace(inputExperimentInfo);
+    setReferenceFrameAndBeamDirection();
+    checkBeamDirection();
+  }
 
   // Create the output
-  m_pw = std::make_shared<PeaksWorkspace>();
-
+  if (m_leanElasticPeak) {
+    m_pw = std::make_shared<LeanElasticPeaksWorkspace>();
+  } else {
+    m_pw = std::make_shared<PeaksWorkspace>();
+  }
   // Copy instrument, sample, etc.
   m_pw->copyExperimentInfoFrom(inputExperimentInfo.get());
 
@@ -249,7 +268,7 @@ void PredictPeaks::exec() {
   ub = orientedLattice.getUB();
 
   std::vector<V3D> possibleHKLs;
-  PeaksWorkspace_sptr possibleHKLWorkspace = getProperty("HKLPeaksWorkspace");
+  IPeaksWorkspace_sptr possibleHKLWorkspace = getProperty("HKLPeaksWorkspace");
 
   if (!possibleHKLWorkspace) {
     fillPossibleHKLsUsingGenerator(orientedLattice, possibleHKLs);
@@ -268,9 +287,14 @@ void PredictPeaks::exec() {
   Progress prog(this, 0.0, 1.0, possibleHKLs.size() * gonioVec.size());
   prog.setNotifyStep(0.01);
 
-  m_detectorCacheSearch = std::make_unique<DetectorSearcher>(m_inst, m_pw->detectorInfo());
+  if (usingInstrument)
+    m_detectorCacheSearch = std::make_unique<DetectorSearcher>(m_inst, m_pw->detectorInfo());
 
-  if (getProperty("CalculateGoniometerForCW")) {
+  if (!usingInstrument) {
+    for (auto &possibleHKL : possibleHKLs) {
+      calculateQAndAddToOutputLeanElastic(possibleHKL, ub);
+    }
+  } else if (getProperty("CalculateGoniometerForCW")) {
     size_t allowedPeakCount = 0;
 
     double wavelength = getProperty("Wavelength");
@@ -341,14 +365,14 @@ void PredictPeaks::exec() {
   // adjacent
   std::vector<std::pair<std::string, bool>> criteria;
   criteria.emplace_back("RunNumber", true);
-  criteria.emplace_back("BankName", true);
+  if (!m_leanElasticPeak)
+    criteria.emplace_back("BankName", true);
   m_pw->sort(criteria);
 
-  auto &peaks = m_pw->getPeaks();
   for (int i = 0; i < static_cast<int>(m_pw->getNumberPeaks()); ++i) {
-    peaks[i].setPeakNumber(i);
+    m_pw->getPeak(i).setPeakNumber(i);
   }
-  setProperty<PeaksWorkspace_sptr>("OutputWorkspace", m_pw);
+  setProperty<IPeaksWorkspace_sptr>("OutputWorkspace", m_pw);
 }
 
 /**
@@ -357,28 +381,29 @@ void PredictPeaks::exec() {
  * @param allowedPeakCount :: number of candidate peaks found
  */
 void PredictPeaks::logNumberOfPeaksFound(size_t allowedPeakCount) const {
-  const bool usingExtendedDetectorSpace = getProperty("PredictPeaksOutsideDetectors");
-  const auto &peaks = m_pw->getPeaks();
-  size_t offDetectorPeakCount = 0;
-  size_t onDetectorPeakCount = 0;
+  if (auto pw = std::dynamic_pointer_cast<PeaksWorkspace>(m_pw)) {
+    const bool usingExtendedDetectorSpace = getProperty("PredictPeaksOutsideDetectors");
+    const auto &peaks = pw->getPeaks();
+    size_t offDetectorPeakCount = 0;
+    size_t onDetectorPeakCount = 0;
 
-  for (const auto &peak : peaks) {
-    if (peak.getDetectorID() == -1) {
-      offDetectorPeakCount++;
-    } else {
-      onDetectorPeakCount++;
+    for (const auto &peak : peaks) {
+      if (peak.getDetectorID() == -1) {
+        offDetectorPeakCount++;
+      } else {
+        onDetectorPeakCount++;
+      }
     }
+
+    g_log.notice() << "Out of " << allowedPeakCount << " allowed peaks within parameters, " << onDetectorPeakCount
+                   << " were found to hit a detector";
+    if (usingExtendedDetectorSpace) {
+      g_log.notice() << " and " << offDetectorPeakCount << " were found in "
+                     << "extended detector space.";
+    }
+
+    g_log.notice() << "\n";
   }
-
-  g_log.notice() << "Out of " << allowedPeakCount << " allowed peaks within parameters, " << onDetectorPeakCount
-                 << " were found to hit a detector";
-
-  if (usingExtendedDetectorSpace) {
-    g_log.notice() << " and " << offDetectorPeakCount << " were found in "
-                   << "extended detector space.";
-  }
-
-  g_log.notice() << "\n";
 }
 
 /// Tries to set the internally stored instrument from an ExperimentInfo-object.
@@ -451,7 +476,7 @@ void PredictPeaks::fillPossibleHKLsUsingGenerator(const OrientedLattice &oriente
 }
 
 /// Fills possibleHKLs with all HKLs from the supplied PeaksWorkspace.
-void PredictPeaks::fillPossibleHKLsUsingPeaksWorkspace(const PeaksWorkspace_sptr &peaksWorkspace,
+void PredictPeaks::fillPossibleHKLsUsingPeaksWorkspace(const IPeaksWorkspace_sptr &peaksWorkspace,
                                                        std::vector<V3D> &possibleHKLs) const {
   possibleHKLs.clear();
   possibleHKLs.reserve(peaksWorkspace->getNumberPeaks());
@@ -569,6 +594,36 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl, const DblMatrix &ori
 
   // Only add peaks that hit the detector
   peak->setGoniometerMatrix(goniometerMatrix);
+  // Save the run number found before.
+  peak->setRunNumber(m_runNumber);
+  peak->setHKL(hkl * m_qConventionFactor);
+  peak->setIntHKL(hkl * m_qConventionFactor);
+
+  if (m_sfCalculator) {
+    peak->setIntensity(m_sfCalculator->getFSquared(hkl));
+  }
+
+  // Add it to the workspace
+  m_pw->addPeak(*peak);
+}
+
+/**
+ * @brief Calculates Q from HKL and adds a peak to the output workspace
+ *
+ * This method takes HKL and uses the UB multiplied to calculate Q
+ * sample. It then creates a LeanElasticPeak-object using that
+ * Q-vector.
+ *
+ * @param hkl
+ * @param UB
+ */
+void PredictPeaks::calculateQAndAddToOutputLeanElastic(const V3D &hkl, const DblMatrix &UB) {
+  // The q-vector direction of the peak is = goniometer * ub * hkl_vector
+  // This is in inelastic convention: momentum transfer of the LATTICE!
+  // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
+  const auto q = UB * hkl * (2.0 * M_PI * m_qConventionFactor);
+  auto peak = std::make_unique<LeanElasticPeak>(q);
+
   // Save the run number found before.
   peak->setRunNumber(m_runNumber);
   peak->setHKL(hkl * m_qConventionFactor);

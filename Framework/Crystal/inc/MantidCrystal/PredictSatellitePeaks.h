@@ -53,10 +53,14 @@ private:
   void exec() override;
   void exec_peaks();
   Kernel::V3D getOffsetVector(const std::string &label);
-  void predictOffsets(int iVector, Kernel::V3D offsets, int &maxOrder, Kernel::V3D &hkl,
+
+  void predictOffsets(int iVector, Kernel::V3D offsets, int &maxOrder, int RunNumber,
+                      Kernel::Matrix<double> const &goniometer, Kernel::V3D &hkl,
                       Geometry::HKLFilterWavelength &lambdaFilter, bool &includePeaksInRange, bool &includeOrderZero,
                       std::vector<std::vector<int>> &AlreadyDonePeaks);
+
   void predictOffsetsWithCrossTerms(Kernel::V3D offsets1, Kernel::V3D offsets2, Kernel::V3D offsets3, int &maxOrder,
+                                    int RunNumber, Kernel::Matrix<double> const &peak_goniometer_matrix,
                                     Kernel::V3D &hkl, Geometry::HKLFilterWavelength &lambdaFilter,
                                     bool &includePeaksInRange, bool &includeOrderZero,
                                     std::vector<std::vector<int>> &AlreadyDonePeaks);

@@ -830,10 +830,12 @@ void FindPeaksMD::exec() {
                              "not work on a regular MatrixWorkspace.");
   }
 
-  // Do a sort by bank name and then descending bin count (intensity)
+  // Do a sort by bank name (if peaks of class "Peak") and then descending bin count (intensity)
   std::vector<std::pair<std::string, bool>> criteria;
   criteria.emplace_back("RunNumber", true);
-  criteria.emplace_back("BankName", true);
+  auto isPeaksWorkspace = std::dynamic_pointer_cast<PeaksWorkspace>(peakWS);
+  if (isPeaksWorkspace)
+    criteria.emplace_back("BankName", true);
   criteria.emplace_back("bincount", false);
   peakWS->sort(criteria);
 

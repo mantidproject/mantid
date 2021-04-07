@@ -5,17 +5,21 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidPythonInterface/core/Converters/CloneToNDArray.h"
 #include "MantidPythonInterface/core/Converters/PyObjectToMatrix.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/Policies/MatrixToNumpy.h"
+#include "MantidPythonInterface/core/Policies/RemoveConst.h"
 #include <boost/optional.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Geometry::IPeak;
+using Mantid::Geometry::ReferenceFrame;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
+using Mantid::PythonInterface::Policies::RemoveConstSharedPtr;
 
 GET_POINTER_SPECIALIZATION(IPeak)
 
@@ -60,7 +64,6 @@ void export_IPeak() {
       .def("getRunNumber", &IPeak::getRunNumber, arg("self"), "Return the run number this peak was measured at")
       .def("getIntMNP", &IPeak::getIntMNP, arg("self"), "Return the modulated scructure for this peak")
       .def("getPeakNumber", &IPeak::getPeakNumber, arg("self"), "Return the peak number for this peak")
-      .def("getBankName", &IPeak::getBankName, arg("self"), "Return the bank name for this peak")
       .def("setRunNumber", &IPeak::setRunNumber, (arg("self"), arg("run_number")),
            "Set the run number that measured this peak")
       .def("setIntMNP", &IPeak::setIntMNP, (arg("self"), arg("modulated_structure")),
@@ -162,14 +165,6 @@ void export_IPeak() {
       .def("setGoniometerMatrix", &setGoniometerMatrix, (arg("self"), arg("goniometerMatrix")),
            "Set the :class:`~mantid.geometry.Goniometer` rotation matrix of "
            "this peak.")
-      .def("getRow", &IPeak::getRow, arg("self"),
-           "For :class:`~mantid.geometry.RectangularDetector` s only, returns "
-           "the row (y) of the pixel of the "
-           "detector.")
-      .def("getCol", &IPeak::getCol, arg("self"),
-           "For :class:`~mantid.geometry.RectangularDetector` s only, returns "
-           "the column (x) of the pixel of the "
-           ":class:`~mantid.geometry.Detector`.")
       .def("getL1", &IPeak::getL1, arg("self"),
            "Return the L1 flight path length (source to "
            ":class:`~mantid.api.Sample`), in meters. ")
@@ -178,5 +173,9 @@ void export_IPeak() {
            ":class:`~mantid.geometry.Detector`), in meters.")
       .def("getPeakShape", getPeakShape, arg("self"), "Get the peak shape")
       .def("getAbsorptionWeightedPathLength", &IPeak::getAbsorptionWeightedPathLength, arg("self"),
-           "Get the absorption weighted path length");
+           "Get the absorption weighted path length")
+      .def("getReferenceFrame", (std::shared_ptr<const ReferenceFrame>(IPeak::*)()) & IPeak::getReferenceFrame,
+           arg("self"), return_value_policy<RemoveConstSharedPtr>(),
+           "Returns the :class:`~mantid.geometry.ReferenceFrame` attached that "
+           "defines the instrument axes");
 }
