@@ -392,40 +392,43 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice_o
         # so the reload flag must be broadcasted from rank 0.
         must_reload = mpisetup.boost.mpi.broadcast(mpisetup.boost.mpi.world, must_reload, 0)
 
-    if must_reload:
-        # if output_bundle.output_workspace is None or partial_output_require_reload:
-        if not event_slice_optimisation:
-            reduced_slices = run_core_reduction(reduction_alg, reduction_setting_bundle)
-        else:
-            reduced_slices = run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle)
+    if not must_reload:
+        # Return the cached can without doing anything else
+        return reduced_slices
 
-        # Now we need to tag the workspaces and add it to the ADS
-        for completed_slice in reduced_slices:
-            out_bundle = completed_slice.output_bundle
-            write_hash_into_reduced_can_workspace(state=out_bundle.state,
-                                                  workspace=out_bundle.output_workspace,
-                                                  partial_type=None,
+    # We can't used a cached can, lets re-process
+    if not event_slice_optimisation:
+        reduced_slices = run_core_reduction(reduction_alg, reduction_setting_bundle)
+    else:
+        reduced_slices = run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle)
+
+    # Now we need to tag the workspaces and add it to the ADS
+    for completed_slice in reduced_slices:
+        out_bundle = completed_slice.output_bundle
+        write_hash_into_reduced_can_workspace(state=out_bundle.state,
+                                              workspace=out_bundle.output_workspace,
+                                              partial_type=None,
+                                              reduction_mode=reduction_mode)
+        trans_bundle = completed_slice.transmission_bundle
+        if trans_bundle.calculated_transmission_workspace and trans_bundle.unfitted_transmission_workspace:
+            write_hash_into_reduced_can_workspace(state=trans_bundle.state,
+                                                  workspace=trans_bundle.calculated_transmission_workspace,
+                                                  partial_type=TransmissionType.CALCULATED,
                                                   reduction_mode=reduction_mode)
-            trans_bundle = completed_slice.transmission_bundle
-            if trans_bundle.calculated_transmission_workspace and trans_bundle.unfitted_transmission_workspace:
-                write_hash_into_reduced_can_workspace(state=trans_bundle.state,
-                                                      workspace=trans_bundle.calculated_transmission_workspace,
-                                                      partial_type=TransmissionType.CALCULATED,
-                                                      reduction_mode=reduction_mode)
-                write_hash_into_reduced_can_workspace(state=trans_bundle.state,
-                                                      workspace=trans_bundle.unfitted_transmission_workspace,
-                                                      partial_type=TransmissionType.UNFITTED,
-                                                      reduction_mode=reduction_mode)
-            parts_bundle = completed_slice.parts_bundle
-            if parts_bundle.output_workspace_count and parts_bundle.output_workspace_norm:
-                write_hash_into_reduced_can_workspace(state=parts_bundle.state,
-                                                      workspace=parts_bundle.output_workspace_count,
-                                                      partial_type=OutputParts.COUNT,
-                                                      reduction_mode=reduction_mode)
+            write_hash_into_reduced_can_workspace(state=trans_bundle.state,
+                                                  workspace=trans_bundle.unfitted_transmission_workspace,
+                                                  partial_type=TransmissionType.UNFITTED,
+                                                  reduction_mode=reduction_mode)
+        parts_bundle = completed_slice.parts_bundle
+        if parts_bundle.output_workspace_count and parts_bundle.output_workspace_norm:
+            write_hash_into_reduced_can_workspace(state=parts_bundle.state,
+                                                  workspace=parts_bundle.output_workspace_count,
+                                                  partial_type=OutputParts.COUNT,
+                                                  reduction_mode=reduction_mode)
 
-                write_hash_into_reduced_can_workspace(state=parts_bundle.state,
-                                                      workspace=parts_bundle.output_workspace_norm,
-                                                      partial_type=OutputParts.NORM,
-                                                      reduction_mode=reduction_mode)
+            write_hash_into_reduced_can_workspace(state=parts_bundle.state,
+                                                  workspace=parts_bundle.output_workspace_norm,
+                                                  partial_type=OutputParts.NORM,
+                                                  reduction_mode=reduction_mode)
 
     return reduced_slices
