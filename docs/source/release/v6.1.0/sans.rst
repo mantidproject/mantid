@@ -10,7 +10,7 @@ SANS Changes
     improvements, followed by bug fixes.
 
 Bugfixes
-----------
+--------
 
 - Fix a bug that made it impossible to process flux in SANSILLAutoprocess.
 - On D16 using :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, now use the correct monitor for normalization,
