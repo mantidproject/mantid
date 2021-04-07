@@ -600,23 +600,6 @@ void MDNorm::exec() {
 
   // Set output workspace
   this->setProperty("OutputWorkspace", out);
-
-  // [DEBUG VZ] Now it is a good place to output some helpful information
-  // 1. type of output
-  // 2. number of ExpInfo
-  // 3. dimension
-  // 4. ...
-  std::cout << "Data Workspace " << outputDataWS->getName() << ": "
-            << "Number of ExpInfo = " << outputDataWS->getNumExperimentInfo()
-            << "  Number of Dimension = " << outputDataWS->getNumDims() << "\n";
-  std::cout << "Normalization Workspace " << m_normWS->getName() << ": "
-            << "Number of ExpInfo = " << m_normWS->getNumExperimentInfo()
-            << "  Number of Dimension = " << m_normWS->getNumDims() << "\n";
-  if (m_backgroundWS) {
-    std::cout << "Background normalization Workspace " << m_bkgdNormWS->getName() << ": "
-              << "Number of ExpInfo = " << m_bkgdNormWS->getNumExperimentInfo()
-              << "  Number of Dimension = " << m_bkgdNormWS->getNumDims() << "\n";
-  }
 }
 
 /**
@@ -1118,11 +1101,7 @@ MDNorm::binBackgroundWS(const std::vector<Geometry::SymmetryOperation> &symmetry
     validateBinningForTemporaryDataWorkspace(parameters, tempBkgdDataWS);
   }
 
-  std::cout << "[DEBUG VZ] Number of symmetry operaton = " << symmetryOps.size() << "\n";
-
   // For each symmetry operation, do binning MD once
-  // FIXME - The matrix is not correct!  The number of ExpInfo is not correct!
-  // FIXME - FOUND OUT how to accumulate binned MD to a same MDHistoWorkspace
   std::vector<size_t> qDimensionIndices;
   uint16_t numexpinfo = static_cast<uint16_t>(m_inputWS->getNumExperimentInfo());
   if (m_numSymmOps != symmetryOps.size())
@@ -1414,20 +1393,6 @@ inline Mantid::Kernel::DblMatrix MDNorm::calQTransform(const ExperimentInfo &cur
   DblMatrix Qtransform = R * m_UB * soMatrix * m_W;
   Qtransform.Invert();
 
-  //  //
-  //  ...................................................................................
-  //  std::cout << "[UNDERSTAND 1B] m_W = "
-  //            << "\n";
-  //  m_W.print();
-  //  std::cout << "[......... ..] R =   "
-  //            << "\n";
-  //  R.print();
-  //  std::cout << "[........  ..] Qtransform = "
-  //            << "\n";
-  //  Qtransform.print();
-  //  std::cout << "[UNDERSTAND 1B] m_W = "
-  //            << "\n";
-
   return Qtransform;
 }
 
@@ -1457,7 +1422,6 @@ inline void MDNorm::calcDiffractionIntersectionIntegral(std::vector<std::array<d
   // points in spectrum sp
   // of workspace integrFlux. The result is stored in yValues
   calcIntegralsForIntersections(xValues, integrFlux, wsIdx, yValues);
-  // [VZ QUESTION] Shall background be duplicated here? (Answer: No)
 }
 
 /**
@@ -1603,9 +1567,6 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues, con
   std::vector<double> xValues, yValues;
   std::vector<coord_t> pos, posNew;
 
-  //  std::cout << "[INFO] Normalization: signal array size = " <<
-  //  signalArray.size() << "\n";
-
   // Progress report
   double progStep = 0.7 / static_cast<double>(m_numExptInfos * m_numSymmOps);
   auto progIndex = static_cast<double>(soIndex + expInfoIndex * m_numSymmOps);
@@ -1634,7 +1595,6 @@ for (int64_t i = 0; i < ndets; i++) {
   const auto detID = detector.getID();
 
   // get the flux spectrum number: this is for diffraction only!
-  // VZ: confirm with Andrei that only diffraction can have flux run
   size_t wsIdx = 0;
   if (m_diffraction) {
     auto index = fluxDetToIdx.find(detID);
@@ -1671,14 +1631,8 @@ for (int64_t i = 0; i < ndets; i++) {
 
   // Compute final position in HKL
   // pre-allocate for efficiency and copy non-hkl dim values into place
-  // [VZ QUESTION] pos and posNew are instrument geometry related.
   pos.resize(vmdDims + otherValues.size());
   std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims);
-
-  // auto intersectionsBegin = intersections.begin();
-  // ...................................................................................
-  //  std::cout << "[INFO]  Detector " << i
-  //            << " Number of intersecton = " << intersections.size() << "\n";
 
   calcSingleDetectorNorm(intersections, solid, yValues, vmdDims, pos, posNew, signalArray, bkgdSolid,
                          bkgdSignalArray); // [Task 89] ADD solidBkgd, bkgdYValues, bkgdSignalArray
