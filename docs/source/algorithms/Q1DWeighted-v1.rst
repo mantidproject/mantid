@@ -71,8 +71,10 @@ Drawing sectors
 ~~~~~~~~~~~~~~~
 
 It is also possible to use the instrument viewer to draw the shape of the angular sector. Only sector shapes are currently supported,
-and they must be drawn in the Full 3D, Z- projection, without any rotation (translation and zoom are supported). Once the shapes are
-drawn, they must be saved using the ``Save shapes to table`` button.
+and they must be drawn in the Full 3D, Z- projection, without any rotation (translation and zoom are supported). Please
+note that in this projection, the X-axis points to the left. When doing the wedges without the table, trigonometric azimuthal
+angle opens at positive ray of the x-axis.
+Once the shapes are drawn, they must be saved using the ``Save shapes to table`` button.
 
 .. figure:: /images/Q1DWeightedShapeIntegration.png
     :align: center

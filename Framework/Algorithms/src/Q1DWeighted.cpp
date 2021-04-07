@@ -99,8 +99,9 @@ void Q1DWeighted::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "ShapeTable", "", Direction::Input, PropertyMode::Optional),
-      "Table containing the shapes for integration. Only sectors supported. If "
-      "provided, wedges properties defined above are not taken into account.");
+      "Table workspace containing the shapes (sectors only) drawn in the "
+      "instrument viewer; if specified, the wedges properties defined above "
+      "are not taken into account.");
 }
 
 void Q1DWeighted::exec() {
@@ -184,11 +185,11 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
 
     for (size_t i = 0; i < m_nWedges; ++i) {
       if (!m_asymmWedges && m_wedgesIsAsymmetric[i]) {
-        std::stringstream ss;
-        ss << "No symmetric counterpart provided for a shape. Wedge " << i + 1
-           << " will have results asymmetricaly computed (i.e. only on the "
-              "provided sector).";
-        g_log.warning(ss.str());
+        g_log.warning()
+            << "No symmetric counterpart provided for a shape. Wedge " << i + 1
+            << " will have results asymmetricaly computed (i.e. only on the "
+               "provided sector)."
+            << std::endl;
       }
     }
   }
@@ -227,7 +228,6 @@ void Q1DWeighted::getTableShapes() {
     boost::algorithm::split(splitParams, shapeWs->String(i, 1),
                             boost::algorithm::is_any_of("\n"));
     std::vector<std::string> params;
-
     for (std::string val : splitParams) {
       if (val.empty())
         continue;
@@ -240,7 +240,10 @@ void Q1DWeighted::getTableShapes() {
     if (paramMap["Type"][1] == "sector")
       getSectorParams(paramMap["Parameters"], viewportParams);
     else
-      g_log.information("Non-supported shape found in the table. Ignored.");
+      g_log.information() << "Shape " << i + 1 << " is of type "
+                          << paramMap["Type"][1]
+                          << " which is not supported. This shape is ignored."
+                          << std::endl;
   }
 }
 
@@ -287,7 +290,8 @@ void Q1DWeighted::getViewportParams(
       std::fabs(viewportParams["Rotation"][2] - 1) > epsilon) {
     g_log.warning("The shapes were created using a rotated viewport not using "
                   "Z- projection, which is not supported. Results are likely "
-                  "to be erroneous.");
+                  "to be erroneous. Consider freezing the rotation in the "
+                  "instrument viewer.");
   }
 }
 

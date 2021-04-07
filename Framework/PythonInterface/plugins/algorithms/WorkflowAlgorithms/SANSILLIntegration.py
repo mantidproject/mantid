@@ -170,7 +170,7 @@ class SANSILLIntegration(PythonAlgorithm):
                              doc='The name of the output workspace group for detector panels.')
         self.declareProperty(ITableWorkspaceProperty('ShapeTable', '', direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
-                             doc='The name opf the table workspace containing drawn shapes on which to integrate. '
+                             doc='The name of the table workspace containing drawn shapes on which to integrate. '
                                  'If provided, NumberOfWedges, WedgeOffset and WedgeAngle arguments are ignored. ')
 
         self.setPropertyGroup('PanelOutputWorkspaces', 'I(Q) Options')
