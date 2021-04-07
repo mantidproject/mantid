@@ -240,8 +240,8 @@ void FitScriptGeneratorPresenter::handleGenerateFitScriptClicked() {
     m_view->displayWarning(message);
 
   if (valid) {
-    m_model->generatePythonFitScript(m_view->maxIterations(), m_view->minimizer(), m_view->costFunction(),
-                                     m_view->evaluationType(), m_view->filename());
+    auto const filepath = m_model->generatePythonFitScript(m_view->fitOptions(), m_view->filename());
+    m_view->setSuccessMessage(filepath);
   }
 }
 

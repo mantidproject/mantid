@@ -79,11 +79,7 @@ public:
   std::tuple<std::string, std::vector<double>, std::vector<bool>, std::vector<std::string>, std::vector<std::string>>
   getEditLocalParameterResults() const override;
 
-  [[nodiscard]] std::string maxIterations() const override;
-  [[nodiscard]] std::string minimizer() const override;
-  [[nodiscard]] std::string costFunction() const override;
-  [[nodiscard]] std::string evaluationType() const override;
-
+  [[nodiscard]] std::tuple<std::string, std::string, std::string, std::string> fitOptions() const override;
   [[nodiscard]] std::string filename() const override;
 
   void resetSelection() override;
@@ -99,6 +95,8 @@ public:
   void setGlobalParameters(std::vector<GlobalParameter> const &globalParameter) override;
 
   void displayWarning(std::string const &message) override;
+
+  void setSuccessMessage(std::string const &filepath) override;
 
 public:
   /// Testing accessors

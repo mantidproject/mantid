@@ -15,6 +15,7 @@
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include <QObject>
@@ -92,11 +93,7 @@ public:
                      std::vector<std::string>>
   getEditLocalParameterResults() const = 0;
 
-  [[nodiscard]] virtual std::string maxIterations() const = 0;
-  [[nodiscard]] virtual std::string minimizer() const = 0;
-  [[nodiscard]] virtual std::string costFunction() const = 0;
-  [[nodiscard]] virtual std::string evaluationType() const = 0;
-
+  [[nodiscard]] virtual std::tuple<std::string, std::string, std::string, std::string> fitOptions() const = 0;
   [[nodiscard]] virtual std::string filename() const = 0;
 
   virtual void resetSelection() = 0;
@@ -112,6 +109,8 @@ public:
   virtual void setGlobalParameters(std::vector<GlobalParameter> const &globalParameter) = 0;
 
   virtual void displayWarning(std::string const &message) = 0;
+
+  virtual void setSuccessMessage(std::string const &filepath) = 0;
 
 public:
   /// Testing accessors

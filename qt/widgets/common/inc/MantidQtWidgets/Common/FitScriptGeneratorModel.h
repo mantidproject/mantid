@@ -116,9 +116,9 @@ public:
 
   std::tuple<bool, std::string> isValid() const override;
 
-  void generatePythonFitScript(std::string const &maxIterations, std::string const &minimizer,
-                               std::string const &costFunction, std::string const &evaluationType,
-                               std::string const &filename) override;
+  [[nodiscard]] std::string
+  generatePythonFitScript(std::tuple<std::string, std::string, std::string, std::string> const &fitOptions,
+                          std::string const &filename) override;
 
 private:
   [[nodiscard]] FitDomainIndex findDomainIndex(std::string const &workspaceName, WorkspaceIndex workspaceIndex) const;

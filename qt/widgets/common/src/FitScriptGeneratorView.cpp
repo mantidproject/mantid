@@ -320,14 +320,9 @@ FitScriptGeneratorView::getEditLocalParameterResults() const {
           convertToStdVector(m_editLocalParameterDialog->getConstraints())};
 }
 
-std::string FitScriptGeneratorView::maxIterations() const { return m_fitOptionsBrowser->getProperty("Max Iterations"); }
-
-std::string FitScriptGeneratorView::minimizer() const { return m_fitOptionsBrowser->getProperty("Minimizer"); }
-
-std::string FitScriptGeneratorView::costFunction() const { return m_fitOptionsBrowser->getProperty("Cost Function"); }
-
-std::string FitScriptGeneratorView::evaluationType() const {
-  return m_fitOptionsBrowser->getProperty("Evaluation Type");
+std::tuple<std::string, std::string, std::string, std::string> FitScriptGeneratorView::fitOptions() const {
+  return {m_fitOptionsBrowser->getProperty("Max Iterations"), m_fitOptionsBrowser->getProperty("Minimizer"),
+          m_fitOptionsBrowser->getProperty("Cost Function"), m_fitOptionsBrowser->getProperty("Evaluation Type")};
 }
 
 std::string FitScriptGeneratorView::filename() const { return m_ui.leScriptName->text().toStdString(); }
@@ -378,6 +373,11 @@ void FitScriptGeneratorView::setSaveDirectoryMessage(std::string const &saveDire
     m_ui.lbSaveDirectory->setText("The default save directory must be set before generating a python script.");
     m_ui.lbSaveDirectory->setStyleSheet("QLabel { color : red; }");
   }
+}
+
+void FitScriptGeneratorView::setSuccessMessage(std::string const &filepath) {
+  m_ui.lbSaveDirectory->setText("Successfully generated fit script '" + QString::fromStdString(filepath) + "'");
+  m_ui.lbSaveDirectory->setStyleSheet("QLabel { color : green; }");
 }
 
 void FitScriptGeneratorView::displayWarning(std::string const &message) {
