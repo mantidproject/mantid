@@ -9,13 +9,10 @@
 #
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
 import copy
-import time
 from distutils.version import LooseVersion
 import io
 import sys
 from functools import wraps
-import sip
-import gc
 
 import matplotlib
 from matplotlib._pylab_helpers import Gcf
