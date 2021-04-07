@@ -11,12 +11,15 @@
 
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/BasicFitOptionsBrowser.h"
 #include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/FunctionTreeView.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorView.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
+
+#include <Poco/NObserver.h>
 
 #include <memory>
 #include <string>
@@ -131,12 +134,16 @@ private:
   void setFitBrowserOptions(QMap<QString, QString> const &fitOptions);
   void setFittingMode(FittingMode fittingMode);
 
+  void handleConfigChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
+  void setSaveDirectoryMessage(std::string const &saveDirectory);
+
   IFitScriptGeneratorPresenter *m_presenter;
   std::unique_ptr<AddWorkspaceDialog> m_dialog;
   std::unique_ptr<FitScriptGeneratorDataTable> m_dataTable;
   std::unique_ptr<FunctionTreeView> m_functionTreeView;
   std::unique_ptr<BasicFitOptionsBrowser> m_fitOptionsBrowser;
   EditLocalParameterDialog *m_editLocalParameterDialog;
+  Poco::NObserver<FitScriptGeneratorView, Mantid::Kernel::ConfigValChangeNotification> m_configObserver;
   Ui::FitScriptGenerator m_ui;
 };
 

@@ -604,7 +604,9 @@ bool FitScriptGeneratorModel::checkFunctionIsSameForAllDomains() const {
 
 std::tuple<bool, std::string> FitScriptGeneratorModel::isValid() const {
   std::string message;
-  if (numberOfDomains() == 0)
+  if (ConfigService::Instance().getString("defaultsave.directory").empty())
+    message = "A default save directory must be set before a python script is generated.";
+  else if (numberOfDomains() == 0)
     message = "Domain data must be loaded before generating a python script.";
   else if (!checkFunctionExistsInAllDomains())
     message = "A function must exist in ALL domains to generate a python script.";
@@ -642,7 +644,7 @@ void FitScriptGeneratorModel::generatePythonFitScript(std::string const &maxIter
   generateScript->setProperty("CostFunction", costFunction);
   generateScript->setProperty("EvaluationType", evaluationType);
 
-  generateScript->setProperty("Filename", ConfigService::Instance().getString("defaultsave.directory") + filename);
+  generateScript->setProperty("Filename", constructFilepath(filename));
   generateScript->execute();
 }
 
@@ -681,6 +683,11 @@ IFunction_sptr FitScriptGeneratorModel::getFunction() const {
   default:
     throw std::runtime_error("getFunction is not implemented for the simultaneous FittingMode.");
   }
+}
+
+std::string FitScriptGeneratorModel::constructFilepath(std::string const &filename) const {
+  auto const filepath = ConfigService::Instance().getString("defaultsave.directory") + filename;
+  return filepath.substr(filepath.size() - 3) == ".py" ? filepath : filepath + ".py";
 }
 
 } // namespace MantidWidgets

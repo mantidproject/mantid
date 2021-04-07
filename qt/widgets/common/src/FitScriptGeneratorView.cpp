@@ -72,6 +72,7 @@ template <typename T> QList<T> convertToQList(std::vector<T> const &vec) {
 
 namespace MantidQt {
 namespace MantidWidgets {
+using namespace Mantid::Kernel;
 
 using ColumnIndex = FitScriptGeneratorDataTable::ColumnIndex;
 using ViewEvent = IFitScriptGeneratorView::Event;
@@ -81,7 +82,8 @@ FitScriptGeneratorView::FitScriptGeneratorView(QWidget *parent, FittingMode fitt
     : IFitScriptGeneratorView(parent), m_presenter(), m_dialog(std::make_unique<AddWorkspaceDialog>(this)),
       m_dataTable(std::make_unique<FitScriptGeneratorDataTable>()),
       m_functionTreeView(std::make_unique<FunctionTreeView>(nullptr, true)),
-      m_fitOptionsBrowser(std::make_unique<BasicFitOptionsBrowser>(nullptr)), m_editLocalParameterDialog(nullptr) {
+      m_fitOptionsBrowser(std::make_unique<BasicFitOptionsBrowser>(nullptr)), m_editLocalParameterDialog(nullptr),
+      m_configObserver(*this, &FitScriptGeneratorView::handleConfigChange) {
   m_ui.setupUi(this);
 
   m_ui.fDataTable->layout()->addWidget(m_dataTable.get());
@@ -92,9 +94,14 @@ FitScriptGeneratorView::FitScriptGeneratorView(QWidget *parent, FittingMode fitt
   setFittingMode(fittingMode);
   setFitBrowserOptions(fitOptions);
   connectUiSignals();
+
+  auto &configService = ConfigService::Instance();
+  configService.addObserver(m_configObserver);
+  setSaveDirectoryMessage(configService.getString("defaultsave.directory"));
 }
 
 FitScriptGeneratorView::~FitScriptGeneratorView() {
+  ConfigService::Instance().removeObserver(m_configObserver);
   m_dialog.reset();
   m_dataTable.reset();
   m_functionTreeView.reset();
@@ -356,6 +363,21 @@ void FitScriptGeneratorView::setGlobalTies(std::vector<GlobalTie> const &globalT
 
 void FitScriptGeneratorView::setGlobalParameters(std::vector<GlobalParameter> const &globalParameters) {
   m_functionTreeView->setGlobalParameters(convertToQStringList(globalToQString, globalParameters));
+}
+
+void FitScriptGeneratorView::handleConfigChange(ConfigValChangeNotification_ptr pNf) {
+  if (pNf->key() == "defaultsave.directory")
+    setSaveDirectoryMessage(pNf->curValue());
+}
+
+void FitScriptGeneratorView::setSaveDirectoryMessage(std::string const &saveDirectory) {
+  if (!saveDirectory.empty()) {
+    m_ui.lbSaveDirectory->setText(QString::fromStdString(saveDirectory));
+    m_ui.lbSaveDirectory->setStyleSheet("QLabel { color : black; }");
+  } else {
+    m_ui.lbSaveDirectory->setText("The default save directory must be set before generating a python script.");
+    m_ui.lbSaveDirectory->setStyleSheet("QLabel { color : red; }");
+  }
 }
 
 void FitScriptGeneratorView::displayWarning(std::string const &message) {
