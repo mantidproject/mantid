@@ -140,8 +140,10 @@ void GeneratePythonFitScript::exec() {
 
   std::string generatedScript;
   generatedScript += generateVariableSetupCode(inputWorkspaces, workspaceIndices, startXs, endXs, function);
+  generatedScript += generateLoadingWorkspacesCode();
   generatedScript += generateSequentialFittingCode();
   generatedScript += generateCodeForTidyingFitOutput();
+  generatedScript += generateCodeForPlottingFitOutput();
 
   savePythonScript(generatedScript);
 }
@@ -152,20 +154,30 @@ std::string GeneratePythonFitScript::generateVariableSetupCode(std::vector<std::
                                                                std::vector<double> const &endXs,
                                                                IFunction_const_sptr function) const {
   std::string code = "# A python script generated to perform a sequential fit\n";
+  code += "import matplotlib.pyplot as plt\n";
   code += "from mantid.simpleapi import *\n";
   code += "\n";
   code += "input_workspaces = " + constructPythonStringList(inputWorkspaces) + "\n";
   code += "workspace_indices = " + constructPythonList(workspaceIndices) + "\n";
   code += "start_xs = " + constructPythonList(startXs) + "\n";
-  code += "end_xs = " + constructPythonList(endXs) + "\n\n";
+  code += "end_xs = " + constructPythonList(endXs) + "\n";
+  code += "n_workspaces = len(input_workspaces)\n\n";
   code += "function = \"" + function->asString() + "\"\n\n";
   return code;
 }
 
+std::string GeneratePythonFitScript::generateLoadingWorkspacesCode() const {
+  std::string code = "# Attempt to load the input workspaces if they are not already loaded\n";
+  code += "for workspace_name in input_workspaces:\n";
+  code += "    if not AnalysisDataService.doesExist(workspace_name):\n";
+  code += "        Load(Filename=workspace_name, OutputWorkspace=workspace_name)\n\n";
+  return code;
+}
+
 std::string GeneratePythonFitScript::generateSequentialFittingCode() const {
-  std::string code = "# Perform a sequential fit.\n";
+  std::string code = "# Perform a sequential fit\n";
   code += "output_workspaces, parameter_tables, normalised_matrices = [], [], []\n";
-  code += "for i in range(len(input_workspaces)):\n";
+  code += "for i in range(n_workspaces):\n";
   code += "    fit_output = Fit(Function=function, InputWorkspace=input_workspaces[i], ";
   code += "WorkspaceIndex=workspace_indices[i], \n                     ";
   code += "StartX=start_xs[i], EndX=end_xs[i], ";
@@ -175,9 +187,8 @@ std::string GeneratePythonFitScript::generateSequentialFittingCode() const {
   code += "    parameter_tables.append(fit_output.OutputParameters)\n";
   code += "    normalised_matrices.append(fit_output.OutputNormalisedCovarianceMatrix)\n";
   code += "\n";
-  code += "    # Use the parameters in the previous function as the start parameters of the next fit.\n";
-  code += "    function = fit_output.Function\n";
-  code += "\n";
+  code += "    # Use the parameters in the previous function as the start parameters of the next fit\n";
+  code += "    function = fit_output.Function\n\n";
   return code;
 }
 
@@ -195,12 +206,26 @@ std::string GeneratePythonFitScript::generateFitOptionsString() const {
 }
 
 std::string GeneratePythonFitScript::generateCodeForTidyingFitOutput() const {
-  std::string code = "# Group the output workspaces from the sequential fit.\n";
+  std::string code = "# Group the output workspaces from the sequential fit\n";
   code += "base_name = input_workspaces[0] + \"_Sequential_\"\n";
   code += "GroupWorkspaces(InputWorkspaces=output_workspaces, OutputWorkspace=base_name + \"Workspaces\")\n";
   code += "GroupWorkspaces(InputWorkspaces=parameter_tables, OutputWorkspace=base_name + \"Parameters\")\n";
   code += "GroupWorkspaces(InputWorkspaces=normalised_matrices, OutputWorkspace=base_name + "
-          "\"NormalisedCovarianceMatrices\")\n";
+          "\"NormalisedCovarianceMatrices\")\n\n";
+  return code;
+}
+
+std::string GeneratePythonFitScript::generateCodeForPlottingFitOutput() const {
+  std::string code = "# Plot the results of the sequential fit\n";
+  code += "fig, axes = plt.subplots(1, n_workspaces)\n";
+  code += "for j, workspace in enumerate(output_workspaces):\n";
+  code += "    last_index = len(workspace.dataY(0))\n";
+  code += "    axes[j].set_title(workspace.name())\n";
+  code += "    axes[j].plot(workspace.dataX(0)[:last_index], workspace.dataY(0), label=\"Data\")\n";
+  code += "    axes[j].plot(workspace.dataX(1)[:last_index], workspace.dataY(1), label=\"Calc\")\n";
+  code += "    axes[j].plot(workspace.dataX(2)[:last_index], workspace.dataY(2), label=\"Diff\")\n";
+  code += "    axes[j].legend()\n\n";
+  code += "plt.show()\n";
   return code;
 }
 

@@ -36,9 +36,11 @@ private:
                                         std::vector<std::size_t> const &workspaceIndices,
                                         std::vector<double> const &startXs, std::vector<double> const &endXs,
                                         Mantid::API::IFunction_const_sptr function) const;
+  std::string generateLoadingWorkspacesCode() const;
   std::string generateSequentialFittingCode() const;
   std::string generateFitOptionsString() const;
   std::string generateCodeForTidyingFitOutput() const;
+  std::string generateCodeForPlottingFitOutput() const;
 
   void savePythonScript(std::string const &contents) const;
 };
