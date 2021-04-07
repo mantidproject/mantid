@@ -185,7 +185,7 @@ class GenerateLogbook(PythonAlgorithm):
                 else:
                     # always use two strings around the final '/' for more informative header
                     logbook_custom_headers[entry_no] = \
-                        (vartype, (entry_content[0])[entry_content[0].rfind('/', 0, entry_content[0].rfind('/') - 1) + 1:])
+                        (columnType, (entry_content[0])[entry_content[0].rfind('/', 0, entry_content[0].rfind('/') - 1) + 1:])
         else:
             logbook_custom_headers = self.getPropertyValue('CustomHeaders')
             logbook_custom_headers = [(columnType, header) for header in logbook_custom_headers.split(',')]
