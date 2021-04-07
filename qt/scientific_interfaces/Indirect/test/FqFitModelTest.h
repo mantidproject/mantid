@@ -21,9 +21,7 @@ using namespace MantidQt::CustomInterfaces::IDA;
 
 namespace {
 
-std::vector<std::string> getParameterLabels() {
-  return {"f0.EISF", "f1.Width", "f1.FWHM", "f1.EISF"};
-}
+std::vector<std::string> getParameterLabels() { return {"f0.EISF", "f1.Width", "f1.FWHM", "f1.EISF"}; }
 
 std::vector<std::string> getNoWidthLabels() { return {"f0.EISF", "f1.EISF"}; }
 
@@ -62,8 +60,7 @@ public:
     TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{1});
   }
 
-  void
-  test_that_removeWorkspace_will_remove_the_specified_workspace_from_the_model() {
+  void test_that_removeWorkspace_will_remove_the_specified_workspace_from_the_model() {
     FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
@@ -108,8 +105,7 @@ public:
     TS_ASSERT(m_model->zeroEISF(TableDatasetIndex{1}));
   }
 
-  void
-  test_that_isMultiFit_returns_false_if_the_model_contains_one_workspace() {
+  void test_that_isMultiFit_returns_false_if_the_model_contains_one_workspace() {
     FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
@@ -117,8 +113,7 @@ public:
     TS_ASSERT(!m_model->isMultiFit());
   }
 
-  void
-  test_that_isMultiFit_returns_true_if_the_model_contains_multiple_workspace() {
+  void test_that_isMultiFit_returns_true_if_the_model_contains_multiple_workspace() {
     FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
     auto const workspace2 = createWorkspaceWithTextAxis(2, getNoEISFLabels());
     m_ads->addOrReplace("Name2", workspace2);
@@ -128,8 +123,7 @@ public:
     TS_ASSERT(m_model->isMultiFit());
   }
 
-  void
-  test_that_isMultiFit_returns_false_if_the_model_contains_multiple_workspace_which_are_identical() {
+  void test_that_isMultiFit_returns_false_if_the_model_contains_multiple_workspace_which_are_identical() {
     FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace, m_workspace);
@@ -137,24 +131,20 @@ public:
     TS_ASSERT(!m_model->isMultiFit());
   }
 
-  void
-  test_that_getFitParameterName_will_return_the_name_of_the_expected_parameter() {
+  void test_that_getFitParameterName_will_return_the_name_of_the_expected_parameter() {
     FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
 
-    TS_ASSERT_EQUALS(m_model->getFitParameterName(
-                         TableDatasetIndex{0},
-                         MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0}),
-                     "f0.EISF");
-    TS_ASSERT_EQUALS(m_model->getFitParameterName(
-                         TableDatasetIndex{0},
-                         MantidQt::CustomInterfaces::IDA::WorkspaceIndex{2}),
-                     "f1.FWHM");
+    TS_ASSERT_EQUALS(
+        m_model->getFitParameterName(TableDatasetIndex{0}, MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0}),
+        "f0.EISF");
+    TS_ASSERT_EQUALS(
+        m_model->getFitParameterName(TableDatasetIndex{0}, MantidQt::CustomInterfaces::IDA::WorkspaceIndex{2}),
+        "f1.FWHM");
   }
 
-  void
-  test_that_getWidths_will_return_an_empty_vector_if_there_are_no_widths() {
+  void test_that_getWidths_will_return_an_empty_vector_if_there_are_no_widths() {
     FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
     auto const workspace2 = createWorkspaceWithTextAxis(2, getNoWidthLabels());
     m_ads->addOrReplace("Name2", workspace2);
@@ -207,10 +197,8 @@ public:
 
     addWorkspacesToModel(spectra, m_workspace);
 
-    TS_ASSERT_EQUALS(m_model->getWidthSpectrum(0, TableDatasetIndex{0}).get(),
-                     1);
-    TS_ASSERT_EQUALS(m_model->getWidthSpectrum(1, TableDatasetIndex{0}).get(),
-                     2);
+    TS_ASSERT_EQUALS(m_model->getWidthSpectrum(0, TableDatasetIndex{0}).get(), 1);
+    TS_ASSERT_EQUALS(m_model->getWidthSpectrum(1, TableDatasetIndex{0}).get(), 2);
   }
 
   void test_that_getEISFSpectrum_will_return_none_when_there_are_no_EISFs() {
@@ -228,10 +216,8 @@ public:
 
     addWorkspacesToModel(spectra, m_workspace);
 
-    TS_ASSERT_EQUALS(m_model->getEISFSpectrum(0, TableDatasetIndex{0}).get(),
-                     0);
-    TS_ASSERT_EQUALS(m_model->getEISFSpectrum(1, TableDatasetIndex{0}).get(),
-                     3);
+    TS_ASSERT_EQUALS(m_model->getEISFSpectrum(0, TableDatasetIndex{0}).get(), 0);
+    TS_ASSERT_EQUALS(m_model->getEISFSpectrum(1, TableDatasetIndex{0}).get(), 3);
   }
 
   /// TODO: Add unittests for setActiveWidth and setActiveELSF when mainanence
@@ -239,15 +225,13 @@ public:
 
 private:
   template <typename Workspace, typename... Workspaces>
-  void addWorkspacesToModel(FunctionModelSpectra const &spectra,
-                            Workspace const &workspace,
-                            Workspaces const &... workspaces) {
+  void addWorkspacesToModel(FunctionModelSpectra const &spectra, Workspace const &workspace,
+                            Workspaces const &...workspaces) {
     m_model->addWorkspace(workspace->getName());
     addWorkspacesToModel(spectra, workspaces...);
   }
 
-  void addWorkspacesToModel(FunctionModelSpectra const &,
-                            MatrixWorkspace_sptr const &workspace) {
+  void addWorkspacesToModel(FunctionModelSpectra const &, MatrixWorkspace_sptr const &workspace) {
     m_model->addWorkspace(workspace->getName());
   }
 

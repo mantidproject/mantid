@@ -63,8 +63,7 @@ public:
    *  @param axis ::     The axis to which the required angle is relative
    *  @return The angle in radians
    */
-  virtual double getTwoTheta(const Kernel::V3D &observer,
-                             const Kernel::V3D &axis) const = 0;
+  virtual double getTwoTheta(const Kernel::V3D &observer, const Kernel::V3D &axis) const = 0;
 
   /** Gives the signed angle of this detector object with respect to an axis
    *  @param observer :: The point to calculate the angle relative to (typically
@@ -74,8 +73,7 @@ public:
    * direction. Used to determine signs.
    *  @return The angle in radians
    */
-  virtual double getSignedTwoTheta(const Kernel::V3D &observer,
-                                   const Kernel::V3D &axis,
+  virtual double getSignedTwoTheta(const Kernel::V3D &observer, const Kernel::V3D &axis,
                                    const Kernel::V3D &instrumentUp) const = 0;
 
   /// Gives the phi of this detector object in radians

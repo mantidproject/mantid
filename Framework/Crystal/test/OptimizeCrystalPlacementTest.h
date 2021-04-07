@@ -37,14 +37,11 @@ using ResultType = std::pair<PeaksWorkspace_sptr, ITableWorkspace_sptr>;
  * @param peaksWS Passed to the "PeaksWorkspace" property
  * @param args Additional vector of arguments.
  */
-ResultType
-runOptimizePlacement(const PeaksWorkspace_sptr &peaksWS,
-                     const StringPairVector &args = StringPairVector()) {
+ResultType runOptimizePlacement(const PeaksWorkspace_sptr &peaksWS, const StringPairVector &args = StringPairVector()) {
   // This algorithm can not currently run without the ADS so add them and remove
   // after
   const std::string inputName("__runOptimizePlacement_PeaksWorkspace"),
-      modPeaksName("__runOptimizePlacement_ModPeaksWorkspace"),
-      fitTableName("__runOptimizePlacement_FitInfoTable");
+      modPeaksName("__runOptimizePlacement_ModPeaksWorkspace"), fitTableName("__runOptimizePlacement_FitInfoTable");
   auto &ads = AnalysisDataService::Instance();
   ads.add(inputName, peaksWS);
 
@@ -71,12 +68,8 @@ class OptimizeCrystalPlacementTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static OptimizeCrystalPlacementTest *createSuite() {
-    return new OptimizeCrystalPlacementTest();
-  }
-  static void destroySuite(OptimizeCrystalPlacementTest *suite) {
-    delete suite;
-  }
+  static OptimizeCrystalPlacementTest *createSuite() { return new OptimizeCrystalPlacementTest(); }
+  static void destroySuite(OptimizeCrystalPlacementTest *suite) { delete suite; }
 
   void test_basic() {
     auto modPeaksNoFix = calculateBasicPlacement();
@@ -96,8 +89,7 @@ public:
       }
     }
     Goniometer instGoniom(goniomMat);
-    auto resultsFix5637 = runOptimizePlacement(
-        modPeaksNoFix, {{"KeepGoniometerFixedfor", "5637"}});
+    auto resultsFix5637 = runOptimizePlacement(modPeaksNoFix, {{"KeepGoniometerFixedfor", "5637"}});
     auto fitInfoFix5637 = resultsFix5637.second;
     const auto angles5638 = Goniometer(origGon5638Mat).getEulerAngles("YZY");
 
@@ -153,8 +145,7 @@ public:
     const auto angles5638 = Goniometer(origGon5638Mat).getEulerAngles("YZY");
     const auto angles5637 = Goniometer(origGon5637Mat).getEulerAngles("YZY");
     const auto resultsTiltFixBoth = runOptimizePlacement(
-        modPeaksNoFix, {{"KeepGoniometerFixedfor", "5637, 5638"},
-                        {"OptimizeGoniometerTilt", "1"}});
+        modPeaksNoFix, {{"KeepGoniometerFixedfor", "5637, 5638"}, {"OptimizeGoniometerTilt", "1"}});
 
     const auto table = resultsTiltFixBoth.second;
     V3D rotXYZ;
@@ -168,15 +159,12 @@ public:
         rotXYZ[2] = table->Double(i, 1);
     }
 
-    const auto tilt2 =
-        PeakHKLErrors::RotationMatrixAboutRegAxis(rotXYZ[0], 'x') *
-        PeakHKLErrors::RotationMatrixAboutRegAxis(rotXYZ[1], 'y') *
-        PeakHKLErrors::RotationMatrixAboutRegAxis(rotXYZ[2], 'z');
+    const auto tilt2 = PeakHKLErrors::RotationMatrixAboutRegAxis(rotXYZ[0], 'x') *
+                       PeakHKLErrors::RotationMatrixAboutRegAxis(rotXYZ[1], 'y') *
+                       PeakHKLErrors::RotationMatrixAboutRegAxis(rotXYZ[2], 'z');
     const auto tiltChange = tilt2 * tilt;
-    const auto angles5637a =
-        Goniometer(tiltChange * origGon5637Mat).getEulerAngles("YZY");
-    const auto angles5638a =
-        Goniometer(tiltChange * origGon5638Mat).getEulerAngles("YZY");
+    const auto angles5637a = Goniometer(tiltChange * origGon5637Mat).getEulerAngles("YZY");
+    const auto angles5638a = Goniometer(tiltChange * origGon5638Mat).getEulerAngles("YZY");
 
     for (int i = 0; i < 3; i++) {
       TS_ASSERT_DELTA(angles5637[i], angles5637a[i], .3);
@@ -196,17 +184,15 @@ public:
     pmap->addPositionCoordinate(sample.get(), "x", sampPos.X());
     pmap->addPositionCoordinate(sample.get(), "y", sampPos.Y());
     pmap->addPositionCoordinate(sample.get(), "z", sampPos.Z());
-    auto newInst =
-        std::make_shared<const Instrument>(inst->baseInstrument(), pmap);
+    auto newInst = std::make_shared<const Instrument>(inst->baseInstrument(), pmap);
 
     for (int i = 0; i < modPeaksNoFix->getNumberPeaks(); ++i) {
       modPeaksNoFix->getPeak(i).setInstrument(newInst);
     }
 
     // optimize
-    const auto resultsSamplePos = runOptimizePlacement(
-        modPeaksNoFix, {{"KeepGoniometerFixedfor", "5637, 5638"},
-                        {"AdjustSampleOffsets", "1"}});
+    const auto resultsSamplePos =
+        runOptimizePlacement(modPeaksNoFix, {{"KeepGoniometerFixedfor", "5637, 5638"}, {"AdjustSampleOffsets", "1"}});
     const auto table = resultsSamplePos.second;
     TS_ASSERT_DELTA(table->Double(0, 1), -0.0003377231, 1.e-4);
     TS_ASSERT_DELTA(table->Double(1, 1), 0.0000897573, 1.e-4);

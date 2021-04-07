@@ -33,7 +33,7 @@ digraph ReflectometryILLPreprocess {
   angleOption           -> san
   angleOption           -> dan
   uan                   -> load
-  san                   -> load 
+  san                   -> load
   dan                   -> load
   run                   -> load
   load                  -> extractMonitors

@@ -17,9 +17,7 @@ class NumericAxisValidatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static NumericAxisValidatorTest *createSuite() {
-    return new NumericAxisValidatorTest();
-  }
+  static NumericAxisValidatorTest *createSuite() { return new NumericAxisValidatorTest(); }
   static void destroySuite(NumericAxisValidatorTest *suite) { delete suite; }
 
   void test_success() {
@@ -35,9 +33,7 @@ public:
     auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 11, 10);
     NumericAxisValidator validator;
-    TS_ASSERT_EQUALS(
-        validator.isValid(ws),
-        "A workspace with axis being a Numeric Axis is required here.");
+    TS_ASSERT_EQUALS(validator.isValid(ws), "A workspace with axis being a Numeric Axis is required here.");
   }
 
   void test_axesless_workspace() {

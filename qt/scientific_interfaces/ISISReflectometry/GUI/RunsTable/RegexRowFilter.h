@@ -19,11 +19,9 @@ namespace ISISReflectometry {
 
 class RegexFilter : public MantidQt::MantidWidgets::Batch::RowPredicate {
 public:
-  RegexFilter(const boost::regex &regex,
-              MantidQt::MantidWidgets::Batch::IJobTreeView const &view,
+  RegexFilter(const boost::regex &regex, MantidQt::MantidWidgets::Batch::IJobTreeView const &view,
               ReductionJobs const &jobs);
-  bool rowMeetsCriteria(
-      MantidQt::MantidWidgets::Batch::RowLocation const &row) const override;
+  bool rowMeetsCriteria(MantidQt::MantidWidgets::Batch::RowLocation const &row) const override;
 
 private:
   static auto constexpr RUNS_COLUMN_INDEX = 0;
@@ -32,10 +30,9 @@ private:
   ReductionJobs const &m_jobs;
 };
 
-std::unique_ptr<RegexFilter>
-filterFromRegexString(std::string const &regex,
-                      MantidQt::MantidWidgets::Batch::IJobTreeView const &view,
-                      ReductionJobs const &jobs);
+std::unique_ptr<RegexFilter> filterFromRegexString(std::string const &regex,
+                                                   MantidQt::MantidWidgets::Batch::IJobTreeView const &view,
+                                                   ReductionJobs const &jobs);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

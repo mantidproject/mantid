@@ -21,9 +21,7 @@ class DataNotCopiedValidator : public Mantid::Kernel::IValidator {
 public:
   DataNotCopiedValidator() : Mantid::Kernel::IValidator(), m_head(nullptr) {}
 
-  Mantid::Kernel::IValidator_sptr clone() const override {
-    return std::make_shared<DataNotCopiedValidator>();
-  }
+  Mantid::Kernel::IValidator_sptr clone() const override { return std::make_shared<DataNotCopiedValidator>(); }
 
   /// Return the stored head pointer
   const double *head() const { return m_head; }

@@ -63,7 +63,7 @@ Documentation
 
 Options Window
 ###############
-- Within Preferences->Mantid->Options ticking a category off/on will now untick/tick all subcategories. Also having some subcategories on and off will now show a partially ticked box for that category. 
+- Within Preferences->Mantid->Options ticking a category off/on will now untick/tick all subcategories. Also having some subcategories on and off will now show a partially ticked box for that category.
 
 
 SliceViewer Improvements

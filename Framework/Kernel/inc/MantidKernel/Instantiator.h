@@ -50,8 +50,7 @@ private:
 // For the Instantiator to work, the class of which
 // instances are to be instantiated must have a no-argument
 // constructor.
-template <class C, class Base>
-class DLLExport Instantiator : public AbstractInstantiator<Base> {
+template <class C, class Base> class DLLExport Instantiator : public AbstractInstantiator<Base> {
 public:
   /// Creates the Instantiator.
   Instantiator() = default;
@@ -59,17 +58,13 @@ public:
   /** Creates an instance of a concrete subclass of Base.
    *  @return A pointer to the base type
    */
-  std::shared_ptr<Base> createInstance() const override {
-    return std::make_shared<C>();
-  }
+  std::shared_ptr<Base> createInstance() const override { return std::make_shared<C>(); }
 
   /** Creates an instance of a concrete subclass of Base that is not wrapped in
    * a shared_ptr.
    *  @return A bare pointer to the base type
    */
-  Base *createUnwrappedInstance() const override {
-    return static_cast<Base *>(new C());
-  }
+  Base *createUnwrappedInstance() const override { return static_cast<Base *>(new C()); }
 };
 
 } // namespace Kernel

@@ -29,8 +29,7 @@ Python side.
 class ComponentInfoPythonIterator {
 public:
   explicit ComponentInfoPythonIterator(ComponentInfo &detectorInfo)
-      : m_begin(detectorInfo.begin()), m_end(detectorInfo.end()),
-        m_firstOrDone(true) {}
+      : m_begin(detectorInfo.begin()), m_end(detectorInfo.end()), m_firstOrDone(true) {}
 
   ComponentInfoItem<ComponentInfo> next() {
     if (!m_firstOrDone)

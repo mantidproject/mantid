@@ -30,9 +30,7 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; };
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Events;Transforms\\Axes";
-  }
+  const std::string category() const override { return "Events;Transforms\\Axes"; }
 
 private:
   /// Initialise the properties

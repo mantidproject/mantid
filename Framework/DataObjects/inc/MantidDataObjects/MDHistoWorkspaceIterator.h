@@ -22,8 +22,7 @@ namespace DataObjects {
 // needed in the calcualtion.
 using PermutationsMap = std::map<std::vector<int>, std::vector<int64_t>>;
 // Typedef for extents
-using MDExtentPair =
-    boost::tuple<Mantid::coord_t, Mantid::coord_t>; // Min/Max pair
+using MDExtentPair = boost::tuple<Mantid::coord_t, Mantid::coord_t>; // Min/Max pair
 // Typedef for vector of extents
 using VecMDExtents = std::vector<MDExtentPair>;
 
@@ -37,27 +36,20 @@ using VecMDExtents = std::vector<MDExtentPair>;
 */
 class DLLExport MDHistoWorkspaceIterator : public Mantid::API::IMDIterator {
 public:
-  MDHistoWorkspaceIterator(
-      const MDHistoWorkspace_const_sptr &workspace,
-      SkippingPolicy *skippingPolicy,
-      Mantid::Geometry::MDImplicitFunction *function = nullptr,
-      size_t beginPos = 0, size_t endPos = size_t(-1));
-  MDHistoWorkspaceIterator(
-      const MDHistoWorkspace *workspace, SkippingPolicy *skippingPolicy,
-      Mantid::Geometry::MDImplicitFunction *function = nullptr,
-      size_t beginPos = 0, size_t endPos = size_t(-1));
-  MDHistoWorkspaceIterator(
-      const MDHistoWorkspace_const_sptr &workspace,
-      Mantid::Geometry::MDImplicitFunction *function = nullptr,
-      size_t beginPos = 0, size_t endPos = size_t(-1));
-  MDHistoWorkspaceIterator(
-      const MDHistoWorkspace *workspace,
-      Mantid::Geometry::MDImplicitFunction *function = nullptr,
-      size_t beginPos = 0, size_t endPos = size_t(-1));
+  MDHistoWorkspaceIterator(const MDHistoWorkspace_const_sptr &workspace, SkippingPolicy *skippingPolicy,
+                           Mantid::Geometry::MDImplicitFunction *function = nullptr, size_t beginPos = 0,
+                           size_t endPos = size_t(-1));
+  MDHistoWorkspaceIterator(const MDHistoWorkspace *workspace, SkippingPolicy *skippingPolicy,
+                           Mantid::Geometry::MDImplicitFunction *function = nullptr, size_t beginPos = 0,
+                           size_t endPos = size_t(-1));
+  MDHistoWorkspaceIterator(const MDHistoWorkspace_const_sptr &workspace,
+                           Mantid::Geometry::MDImplicitFunction *function = nullptr, size_t beginPos = 0,
+                           size_t endPos = size_t(-1));
+  MDHistoWorkspaceIterator(const MDHistoWorkspace *workspace, Mantid::Geometry::MDImplicitFunction *function = nullptr,
+                           size_t beginPos = 0, size_t endPos = size_t(-1));
   ~MDHistoWorkspaceIterator() override;
 
-  void init(const MDHistoWorkspace *workspace,
-            Mantid::Geometry::MDImplicitFunction *function, size_t beginPos = 0,
+  void init(const MDHistoWorkspace *workspace, Mantid::Geometry::MDImplicitFunction *function, size_t beginPos = 0,
             size_t endPos = size_t(-1));
 
   size_t getDataSize() const override;
@@ -80,12 +72,10 @@ public:
 
   signal_t getError() const override;
 
-  std::unique_ptr<coord_t[]>
-  getVertexesArray(size_t &numVertices) const override;
+  std::unique_ptr<coord_t[]> getVertexesArray(size_t &numVertices) const override;
 
-  std::unique_ptr<coord_t[]>
-  getVertexesArray(size_t &numVertices, const size_t outDimensions,
-                   const bool *maskDim) const override;
+  std::unique_ptr<coord_t[]> getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                                              const bool *maskDim) const override;
 
   Mantid::Kernel::VMD getCenter() const override;
 
@@ -115,12 +105,10 @@ public:
 
   std::vector<size_t> findNeighbourIndexesByWidth(const int &width) const;
 
-  std::pair<std::vector<size_t>, std::vector<bool>>
-  findNeighbourIndexesByWidth1D(const int &width,
-                                const int &width_dimension) const;
+  std::pair<std::vector<size_t>, std::vector<bool>> findNeighbourIndexesByWidth1D(const int &width,
+                                                                                  const int &width_dimension) const;
 
-  std::vector<size_t>
-  findNeighbourIndexesByWidth(const std::vector<int> &widths) const;
+  std::vector<size_t> findNeighbourIndexesByWidth(const std::vector<int> &widths) const;
 
   bool isWithinBounds(size_t index) const override;
 

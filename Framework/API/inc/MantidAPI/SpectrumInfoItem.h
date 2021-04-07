@@ -49,28 +49,19 @@ public:
 
   double twoTheta() const { return m_spectrumInfo->twoTheta(m_index); }
 
-  double signedTwoTheta() const {
-    return m_spectrumInfo->signedTwoTheta(m_index);
-  }
+  double signedTwoTheta() const { return m_spectrumInfo->signedTwoTheta(m_index); }
 
   double l2() const { return m_spectrumInfo->l2(m_index); }
 
-  bool hasUniqueDetector() const {
-    return m_spectrumInfo->hasUniqueDetector(m_index);
-  }
+  bool hasUniqueDetector() const { return m_spectrumInfo->hasUniqueDetector(m_index); }
 
   bool hasDetectors() const { return m_spectrumInfo->hasDetectors(m_index); }
 
-  const Mantid::SpectrumDefinition &spectrumDefinition() const {
-    return m_spectrumInfo->spectrumDefinition(m_index);
-  }
+  const Mantid::SpectrumDefinition &spectrumDefinition() const { return m_spectrumInfo->spectrumDefinition(m_index); }
 
-  Mantid::Kernel::V3D position() const {
-    return m_spectrumInfo->position(m_index);
-  }
+  Mantid::Kernel::V3D position() const { return m_spectrumInfo->position(m_index); }
 
-  SpectrumInfoItem(T &spectrumInfo, const size_t index)
-      : m_spectrumInfo(&spectrumInfo), m_index(index) {}
+  SpectrumInfoItem(T &spectrumInfo, const size_t index) : m_spectrumInfo(&spectrumInfo), m_index(index) {}
 
   // Non-owning pointer. A reference makes the class unable to define an
   // assignment operator that we need.

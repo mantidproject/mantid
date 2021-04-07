@@ -108,8 +108,7 @@ public:
     pv->function(domain, valuesPV);
 
     // check integration between numerical and analytical
-    double num_intensity =
-        numerical_integrate_pv(center, intensity, fwhm, mixing);
+    double num_intensity = numerical_integrate_pv(center, intensity, fwhm, mixing);
     TS_ASSERT_DELTA(num_intensity, 2.0, 1.E-5);
 
     // check with Gaussian at same center value, same intensity and peak width
@@ -147,8 +146,7 @@ public:
     pv->function(domain, valuesPV);
 
     // check integration
-    double num_intensity =
-        numerical_integrate_pv(center, intensity, fwhm, mixing);
+    double num_intensity = numerical_integrate_pv(center, intensity, fwhm, mixing);
     TS_ASSERT_DELTA(num_intensity, intensity, 2.0E-2);
 
     Lorentzian lorentzian;
@@ -190,8 +188,7 @@ public:
     pv->function(domain, values);
 
     // check integration
-    double num_intensity =
-        numerical_integrate_pv(center, intensity, fwhm, mixing);
+    double num_intensity = numerical_integrate_pv(center, intensity, fwhm, mixing);
     TS_ASSERT_DELTA(num_intensity, intensity, 1.);
 
     // calculate Gaussian and Lorentzian
@@ -218,8 +215,7 @@ public:
     // Compare each data point
     double ag = 2. / fwhm * sqrt(M_LN2 / M_PI);
     for (size_t i = 0; i < values.size(); ++i) {
-      TS_ASSERT_DELTA(values[i], ag * valuesGaussian[i] + valuesLorentzian[i],
-                      1e-8);
+      TS_ASSERT_DELTA(values[i], ag * valuesGaussian[i] + valuesLorentzian[i], 1e-8);
     }
   }
 
@@ -262,9 +258,7 @@ public:
       // calculate numerically
       std::vector<double> vec_eta;
       std::vector<double> vec_numeric_deriv;
-      numerical_param_partial_derivative(pv, 0, min_eta, max_eta,
-                                         eta_resolution, x, vec_eta,
-                                         vec_numeric_deriv);
+      numerical_param_partial_derivative(pv, 0, min_eta, max_eta, eta_resolution, x, vec_eta, vec_numeric_deriv);
 
       // compare
       for (size_t i = 0; i < vec_eta.size(); ++i) {
@@ -313,8 +307,7 @@ public:
       // calculate numerically
       std::vector<double> vec_intensity;
       std::vector<double> vec_numeric_deriv;
-      numerical_param_partial_derivative(pv, 1, min_intensity, max_intensity,
-                                         intensity_resolution, x, vec_intensity,
+      numerical_param_partial_derivative(pv, 1, min_intensity, max_intensity, intensity_resolution, x, vec_intensity,
                                          vec_numeric_deriv);
 
       // compare
@@ -362,8 +355,7 @@ public:
       // calculate numerically
       std::vector<double> vec_x0;
       std::vector<double> vec_numeric_deriv;
-      numerical_param_partial_derivative(pv, 2, min_x0, max_x0, x0_resolution,
-                                         x, vec_x0, vec_numeric_deriv);
+      numerical_param_partial_derivative(pv, 2, min_x0, max_x0, x0_resolution, x, vec_x0, vec_numeric_deriv);
 
       // compare
       for (size_t i = 0; i < vec_x0.size(); ++i) {
@@ -410,9 +402,7 @@ public:
       // calculate numerically
       std::vector<double> vec_fwhm;
       std::vector<double> vec_numeric_deriv;
-      numerical_param_partial_derivative(pv, 3, min_fwhm, max_fwhm,
-                                         fwhm_resolution, x, vec_fwhm,
-                                         vec_numeric_deriv);
+      numerical_param_partial_derivative(pv, 3, min_fwhm, max_fwhm, fwhm_resolution, x, vec_fwhm, vec_numeric_deriv);
 
       // compare
       for (size_t i = 0; i < vec_fwhm.size(); ++i) {
@@ -423,8 +413,7 @@ public:
   }
 
 private:
-  IPeakFunction_sptr getInitializedPV(double center, double intensity,
-                                      double fwhm, double mixing) {
+  IPeakFunction_sptr getInitializedPV(double center, double intensity, double fwhm, double mixing) {
     IPeakFunction_sptr pv = std::make_shared<PseudoVoigt>();
     pv->initialize();
     pv->setParameter("PeakCentre", center);
@@ -443,8 +432,7 @@ private:
    * @param mixing: eta/mixing ratio of Gaussian
    * @return
    */
-  double numerical_integrate_pv(double center, double peak_intensity,
-                                double fwhm, double mixing) {
+  double numerical_integrate_pv(double center, double peak_intensity, double fwhm, double mixing) {
     PseudoVoigt pv;
     pv.initialize();
     pv.setParameter(0, mixing);
@@ -472,11 +460,8 @@ private:
    * @param param_vec: (output) parameter value vector
    * @param deriv_vec: (output) derivative vector
    */
-  void numerical_param_partial_derivative(IPeakFunction_sptr &pv,
-                                          size_t param_index, double min_value,
-                                          double max_value, double resolution,
-                                          double x,
-                                          std::vector<double> &param_vec,
+  void numerical_param_partial_derivative(IPeakFunction_sptr &pv, size_t param_index, double min_value,
+                                          double max_value, double resolution, double x, std::vector<double> &param_vec,
                                           std::vector<double> &deriv_vec) {
     // create a single value vector for domain
     std::vector<double> vec_x{x};

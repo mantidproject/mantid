@@ -33,17 +33,14 @@ std::string cutLastOf(const std::string &str, const std::string &delimiter) {
   return str;
 }
 
-std::string extractLastOf(const std::string &str,
-                          const std::string &delimiter) {
+std::string extractLastOf(const std::string &str, const std::string &delimiter) {
   const auto cutIndex = str.rfind(delimiter);
   if (cutIndex != std::string::npos)
     return str.substr(cutIndex + 1, str.size() - cutIndex);
   return str;
 }
 
-bool fileFound(std::string const &file) {
-  return !FileFinder::Instance().getFullPath(file).empty();
-}
+bool fileFound(std::string const &file) { return !FileFinder::Instance().getFullPath(file).empty(); }
 
 std::string loadAlgName(const std::string &filePath) {
   const auto suffix = extractLastOf(filePath, ".");
@@ -51,8 +48,7 @@ std::string loadAlgName(const std::string &filePath) {
 }
 
 void loadFile(std::string const &filename, std::string const &workspaceName) {
-  auto const loadAlg =
-      AlgorithmManager::Instance().createUnmanaged(loadAlgName(filename));
+  auto const loadAlg = AlgorithmManager::Instance().createUnmanaged(loadAlgName(filename));
   loadAlg->initialize();
   loadAlg->setProperty("Filename", filename);
   loadAlg->setProperty("OutputWorkspace", workspaceName);
@@ -65,23 +61,17 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 DataSelector::DataSelector(QWidget *parent)
-    : API::MantidWidget(parent), m_algRunner(), m_autoLoad(true),
-      m_showLoad(true) {
+    : API::MantidWidget(parent), m_algRunner(), m_autoLoad(true), m_showLoad(true) {
   m_uiForm.setupUi(this);
-  connect(m_uiForm.cbInputType, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(handleViewChanged(int)));
+  connect(m_uiForm.cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(handleViewChanged(int)));
   connect(m_uiForm.pbLoadFile, SIGNAL(clicked()), this, SIGNAL(loadClicked()));
 
   // data selected changes
-  connect(m_uiForm.rfFileInput, SIGNAL(filesFoundChanged()), this,
-          SLOT(handleFileInput()));
-  connect(m_uiForm.wsWorkspaceInput, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(handleWorkspaceInput()));
-  connect(m_uiForm.pbLoadFile, SIGNAL(clicked()), this,
-          SLOT(handleFileInput()));
+  connect(m_uiForm.rfFileInput, SIGNAL(filesFoundChanged()), this, SLOT(handleFileInput()));
+  connect(m_uiForm.wsWorkspaceInput, SIGNAL(currentIndexChanged(int)), this, SLOT(handleWorkspaceInput()));
+  connect(m_uiForm.pbLoadFile, SIGNAL(clicked()), this, SLOT(handleFileInput()));
 
-  connect(&m_algRunner, SIGNAL(algorithmComplete(bool)), this,
-          SLOT(handleAutoLoadComplete(bool)));
+  connect(&m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(handleAutoLoadComplete(bool)));
   this->setAcceptDrops(true);
   m_uiForm.rfFileInput->setAcceptDrops(false);
 }
@@ -127,16 +117,12 @@ void DataSelector::handleFileInput() {
 /**
  * Sets whether the file or workspace selector is visible
  */
-void DataSelector::setSelectorIndex(int index) {
-  m_uiForm.cbInputType->setCurrentIndex(index);
-}
+void DataSelector::setSelectorIndex(int index) { m_uiForm.cbInputType->setCurrentIndex(index); }
 
 /**
  * Sets whether the file or workspace type selector is visible
  */
-void DataSelector::setTypeSelectorVisible(bool visible) {
-  m_uiForm.cbInputType->setVisible(visible);
-}
+void DataSelector::setTypeSelectorVisible(bool visible) { m_uiForm.cbInputType->setVisible(visible); }
 
 /**
  * Get if the file selector is currently being shown.
@@ -153,9 +139,7 @@ bool DataSelector::isFileSelectorVisible() const {
  *
  * @return :: true if it is visible, otherwise false
  */
-bool DataSelector::isWorkspaceSelectorVisible() const {
-  return !isFileSelectorVisible();
-}
+bool DataSelector::isWorkspaceSelectorVisible() const { return !isFileSelectorVisible(); }
 
 /**
  * Check if the data selector is in a valid state
@@ -180,8 +164,7 @@ bool DataSelector::isValid() {
       if (isValid && !doesExistInADS(wsName)) {
         // attempt to reload if we can
         // don't use algorithm runner because we need to know instantly.
-        auto const filepath =
-            m_uiForm.rfFileInput->getUserInput().toString().toStdString();
+        auto const filepath = m_uiForm.rfFileInput->getUserInput().toString().toStdString();
         if (!filepath.empty())
           loadFile(filepath, wsName);
 
@@ -231,8 +214,7 @@ void DataSelector::autoLoadFile(const QString &filepath) {
   const auto baseName = getWsNameFromFiles().toStdString();
 
   // create instance of load algorithm
-  const auto loadAlg = AlgorithmManager::Instance().createUnmanaged(
-      loadAlgName(filepath.toStdString()));
+  const auto loadAlg = AlgorithmManager::Instance().createUnmanaged(loadAlgName(filepath.toStdString()));
   loadAlg->initialize();
   loadAlg->setProperty("Filename", filepath.toStdString());
   loadAlg->setProperty("OutputWorkspace", baseName);
@@ -251,8 +233,7 @@ void DataSelector::handleAutoLoadComplete(bool error) {
     // emit that we got a valid workspace/file to work with
     emit dataReady(getWsNameFromFiles());
   } else {
-    m_uiForm.rfFileInput->setFileProblem(
-        "Could not load file. See log for details.");
+    m_uiForm.rfFileInput->setFileProblem("Could not load file. See log for details.");
   }
 }
 
@@ -297,9 +278,7 @@ void DataSelector::handleViewChanged(int index) {
  *
  * @return The full file path
  */
-QString DataSelector::getFullFilePath() const {
-  return m_uiForm.rfFileInput->getUserInput().toString();
-}
+QString DataSelector::getFullFilePath() const { return m_uiForm.rfFileInput->getUserInput().toString(); }
 
 /**
  * Gets the workspace name that is created after loading the files
@@ -377,34 +356,26 @@ void DataSelector::setAutoLoad(bool load) { m_autoLoad = load; }
  *
  * @return The text on the load button
  */
-QString DataSelector::getLoadBtnText() const {
-  return m_uiForm.pbLoadFile->text();
-}
+QString DataSelector::getLoadBtnText() const { return m_uiForm.pbLoadFile->text(); }
 
 /**
  * Sets the text shown on the load button.
  *
  * @param text :: The text to display on the button
  */
-void DataSelector::setLoadBtnText(const QString &text) {
-  m_uiForm.pbLoadFile->setText(text);
-}
+void DataSelector::setLoadBtnText(const QString &text) { m_uiForm.pbLoadFile->setText(text); }
 
 /**
  * Read settings from the given group
  * @param group :: The name of the group key to retrieve data from
  */
-void DataSelector::readSettings(const QString &group) {
-  m_uiForm.rfFileInput->readSettings(group);
-}
+void DataSelector::readSettings(const QString &group) { m_uiForm.rfFileInput->readSettings(group); }
 
 /**
  * Save settings to the given group
  * @param group :: The name of the group key to save to
  */
-void DataSelector::saveSettings(const QString &group) {
-  m_uiForm.rfFileInput->saveSettings(group);
-}
+void DataSelector::saveSettings(const QString &group) { m_uiForm.rfFileInput->saveSettings(group); }
 
 /**
  * Check if the load button will be shown on the interface

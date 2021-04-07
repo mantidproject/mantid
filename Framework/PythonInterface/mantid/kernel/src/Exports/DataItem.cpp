@@ -28,9 +28,7 @@ void export_DataItem() {
            "Returns true if the object "
            "can be accessed safely from "
            "multiple threads")
-      .def("__str__", &DataItem::getName, arg("self"),
-           "Returns the string name of the object if it has been stored",
+      .def("__str__", &DataItem::getName, arg("self"), "Returns the string name of the object if it has been stored",
            return_value_policy<copy_const_reference>())
-      .def("__repr__", &DataItem::toString, arg("self"),
-           "Returns a description of the object");
+      .def("__repr__", &DataItem::toString, arg("self"), "Returns a description of the object");
 }

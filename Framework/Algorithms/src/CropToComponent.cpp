@@ -15,9 +15,8 @@
 #include "MantidKernel/ArrayProperty.h"
 
 namespace {
-std::vector<size_t>
-getDetectorIndices(const Mantid::API::MatrixWorkspace &workspace,
-                   const std::vector<std::string> &componentNames) {
+std::vector<size_t> getDetectorIndices(const Mantid::API::MatrixWorkspace &workspace,
+                                       const std::vector<std::string> &componentNames) {
   const auto &compInfo = workspace.componentInfo();
   const auto instrument = workspace.getInstrument();
   std::vector<size_t> detIndices;
@@ -49,32 +48,24 @@ const std::string CropToComponent::name() const { return "CropToComponent"; }
 int CropToComponent::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CropToComponent::category() const {
-  return "Transforms\\Splitting";
-}
+const std::string CropToComponent::category() const { return "Transforms\\Splitting"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string CropToComponent::summary() const {
-  return "Crops a workspace to a set of components.";
-}
+const std::string CropToComponent::summary() const { return "Crops a workspace to a set of components."; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CropToComponent::init() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
   declareProperty(
-      std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
+      std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
       "An output workspace.");
-  declareProperty(
-      std::make_unique<Mantid::Kernel::ArrayProperty<std::string>>(
-          "ComponentNames"),
-      "List of component names which are used to crop the workspace."
-      "to.");
+  declareProperty(std::make_unique<Mantid::Kernel::ArrayProperty<std::string>>("ComponentNames"),
+                  "List of component names which are used to crop the workspace."
+                  "to.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -83,30 +74,23 @@ void CropToComponent::init() {
 void CropToComponent::exec() {
   // Get the names of the components
   std::vector<std::string> componentNames = getProperty("ComponentNames");
-  Mantid::API::MatrixWorkspace_sptr inputWorkspace =
-      getProperty("InputWorkspace");
+  Mantid::API::MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
 
   // Get all detectors
-  const auto &detectorIndices =
-      getDetectorIndices(*inputWorkspace, componentNames);
+  const auto &detectorIndices = getDetectorIndices(*inputWorkspace, componentNames);
 
   // Get the corresponding workspace indices from the detectors
-  const auto &workspaceIndices =
-      inputWorkspace->indexInfo().globalSpectrumIndicesFromDetectorIndices(
-          detectorIndices);
+  const auto &workspaceIndices = inputWorkspace->indexInfo().globalSpectrumIndicesFromDetectorIndices(detectorIndices);
 
   // Run ExtractSpectra in order to obtain the cropped workspace
-  auto extract_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-      "ExtractSpectra");
+  auto extract_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("ExtractSpectra");
   extract_alg->setChild(true);
   extract_alg->initialize();
   extract_alg->setProperty("InputWorkspace", inputWorkspace);
   extract_alg->setProperty("OutputWorkspace", "dummy");
-  extract_alg->setProperty("WorkspaceIndexList",
-                           Indexing::castVector<size_t>(workspaceIndices));
+  extract_alg->setProperty("WorkspaceIndexList", Indexing::castVector<size_t>(workspaceIndices));
   extract_alg->execute();
-  Mantid::API::MatrixWorkspace_sptr outputWorkspace =
-      extract_alg->getProperty("OutputWorkspace");
+  Mantid::API::MatrixWorkspace_sptr outputWorkspace = extract_alg->getProperty("OutputWorkspace");
 
   // Set the output
   setProperty("OutputWorkspace", outputWorkspace);
@@ -114,8 +98,7 @@ void CropToComponent::exec() {
 
 std::map<std::string, std::string> CropToComponent::validateInputs() {
   std::map<std::string, std::string> result;
-  Mantid::API::MatrixWorkspace_sptr inputWorkspace =
-      getProperty("InputWorkspace");
+  Mantid::API::MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
   std::vector<std::string> componentNames = getProperty("ComponentNames");
 
   // Make sure that the component exists on the input workspace
@@ -124,8 +107,7 @@ std::map<std::string, std::string> CropToComponent::validateInputs() {
     auto detector = instrument->getComponentByName(componentName);
     if (!detector) {
       std::string message =
-          "The component name " + componentName +
-          " does not exist on the workspace. Specify a valid component.";
+          "The component name " + componentName + " does not exist on the workspace. Specify a valid component.";
       result["ComponentNames"] = message;
       break;
     }

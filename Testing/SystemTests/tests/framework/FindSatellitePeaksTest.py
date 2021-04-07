@@ -40,7 +40,7 @@ class FindSatellitePeaksTestFixedNumQ(systemtesting.MantidSystemTest):
                                                       NumOfQs=k, **fixed_params)
 
     def validate(self):
-        return self._satellites_refined.name(), 'refine_satellites_fixed_q_test.nxs'
+        return self._satellites_refined.name(), 'refine_satellites_fixed_q_test_04012021.nxs'
 
 
 class FindSatellitePeaksTestAutoFindQ(systemtesting.MantidSystemTest):
@@ -63,7 +63,7 @@ class FindSatellitePeaksTestAutoFindQ(systemtesting.MantidSystemTest):
                                                       ClusterThreshold=threshold, **fixed_params)
 
     def validate(self):
-        return self._satellites_refined.name(), 'refine_satellites_auto_q_test.nxs'
+        return self._satellites_refined.name(), 'refine_satellites_auto_q_test_04012021.nxs'
 
 
 if __name__ == "__main__":

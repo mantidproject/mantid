@@ -30,8 +30,7 @@ class Objects;
     @author Russell Taylor, Tessella Support Services plc
     @date 26/06/2008
 */
-class MANTID_GEOMETRY_DLL ObjComponent : public virtual IObjComponent,
-                                         public Component {
+class MANTID_GEOMETRY_DLL ObjComponent : public virtual IObjComponent, public Component {
 public:
   /// type string
   std::string type() const override { return "PhysicalComponent"; }
@@ -41,9 +40,7 @@ public:
   // Looking to get rid of the first of these constructors in due course (and
   // probably add others)
   explicit ObjComponent(const std::string &name, IComponent *parent = nullptr);
-  explicit ObjComponent(const std::string &name,
-                        std::shared_ptr<const IObject> shape,
-                        IComponent *parent = nullptr);
+  explicit ObjComponent(const std::string &name, std::shared_ptr<const IObject> shape, IComponent *parent = nullptr);
 
   /** Virtual Copy Constructor
    *  @returns A pointer to a copy of the input ObjComponent
@@ -55,8 +52,7 @@ public:
   int interceptSurface(Track &track) const override;
   double solidAngle(const Kernel::V3D &observer) const override;
   ///@todo This should go in favour of just the class related one.
-  void boundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
-                   double &ymin, double &zmin) const;
+  void boundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const;
   /// get bounding box, which may or may not be axis aligned;
   void getBoundingBox(BoundingBox &absoluteBB) const override;
   /// get Height (Y-dimension) value for component
@@ -80,8 +76,7 @@ public:
   /// Return the material this component is made from
   const Kernel::Material material() const override;
 
-  virtual size_t
-  registerContents(class ComponentVisitor &componentVisitor) const override;
+  virtual size_t registerContents(class ComponentVisitor &componentVisitor) const override;
 
 protected:
   /// The physical geometry representation

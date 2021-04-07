@@ -25,9 +25,7 @@ class FilterByLogValueTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FilterByLogValueTest *createSuite() {
-    return new FilterByLogValueTest();
-  }
+  static FilterByLogValueTest *createSuite() { return new FilterByLogValueTest(); }
   static void destroySuite(FilterByLogValueTest *suite) { delete suite; }
 
   FilterByLogValueTest() {}
@@ -37,28 +35,21 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     // InputWorkspace has to be an EventWorkspace
-    TS_ASSERT_THROWS(
-        alg.setProperty("InputWorkspace",
-                        WorkspaceCreationHelper::create2DWorkspace(1, 1)),
-        const std::invalid_argument &);
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", WorkspaceCreationHelper::createEventWorkspace()));
+    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", WorkspaceCreationHelper::create2DWorkspace(1, 1)),
+                     const std::invalid_argument &);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", WorkspaceCreationHelper::createEventWorkspace()));
 
     // LogName must not be empty
-    TS_ASSERT_THROWS(alg.setProperty("LogName", ""),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("LogName", ""), const std::invalid_argument &);
 
     // TimeTolerance cannot be negative
-    TS_ASSERT_THROWS(alg.setProperty("TimeTolerance", -0.1),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("TimeTolerance", -0.1), const std::invalid_argument &);
     // ... but it can be zero
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeTolerance", 0.0));
 
     // LogBoundary must be one of "Centre" and "Left"
-    TS_ASSERT_THROWS(alg.setProperty("LogBoundary", ""),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(alg.setProperty("LogBoundary", "Middle"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("LogBoundary", ""), const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("LogBoundary", "Middle"), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogBoundary", "Left"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogBoundary", "Centre"));
   }
@@ -135,8 +126,7 @@ public:
     ew->mutableRun().addProperty(press);
 
     if (add_proton_charge) {
-      TimeSeriesProperty<double> *pc =
-          new TimeSeriesProperty<double>("proton_charge");
+      TimeSeriesProperty<double> *pc = new TimeSeriesProperty<double>("proton_charge");
       pc->setUnits("picoCoulomb");
       for (double i = 0; i < 100; i++)
         pc->addValue(run_start + i, 1.0);
@@ -174,20 +164,17 @@ public:
    * @param do_in_place
    * @param PulseFilter :: PulseFilter parameter
    */
-  void do_test_fake(const std::string &log_name, double min, double max,
-                    int seconds_kept, bool add_proton_charge = true,
-                    bool do_in_place = false, bool PulseFilter = false) {
+  void do_test_fake(const std::string &log_name, double min, double max, int seconds_kept,
+                    bool add_proton_charge = true, bool do_in_place = false, bool PulseFilter = false) {
     EventWorkspace_sptr ew = createInputWS(add_proton_charge);
     std::string inputName = "input_filtering";
-    AnalysisDataService::Instance().addOrReplace(
-        inputName, std::dynamic_pointer_cast<MatrixWorkspace>(ew));
+    AnalysisDataService::Instance().addOrReplace(inputName, std::dynamic_pointer_cast<MatrixWorkspace>(ew));
 
     // Save some of the starting values
     size_t start_blocksize = ew->blocksize();
     size_t num_events = ew->getNumberEvents();
     const double CURRENT_CONVERSION = 1.e-6 / 3600.;
-    double start_proton_charge =
-        ew->run().getProtonCharge() / CURRENT_CONVERSION;
+    double start_proton_charge = ew->run().getProtonCharge() / CURRENT_CONVERSION;
     size_t num_sample_logs = ew->run().getProperties().size();
     TS_ASSERT_EQUALS(num_events, 100 * 2 * ew->getNumberHistograms());
     if (add_proton_charge) {
@@ -216,15 +203,13 @@ public:
 
     // Retrieve Workspace changed
     EventWorkspace_sptr outWS;
-    outWS =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputWS);
+    outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputWS);
     TS_ASSERT(outWS); // workspace is loaded
     if (!outWS)
       return;
 
     // The events match the expected number
-    TS_ASSERT_EQUALS(outWS->getNumberEvents(),
-                     seconds_kept * 2 * outWS->getNumberHistograms());
+    TS_ASSERT_EQUALS(outWS->getNumberEvents(), seconds_kept * 2 * outWS->getNumberHistograms());
 
     // Things that haven't changed
     TS_ASSERT_EQUALS(outWS->blocksize(), start_blocksize);
@@ -233,8 +218,7 @@ public:
 
     // Proton charge is lower
     if (add_proton_charge) {
-      TS_ASSERT_EQUALS(outWS->run().getProtonCharge() / CURRENT_CONVERSION,
-                       seconds_kept * 1.0);
+      TS_ASSERT_EQUALS(outWS->run().getProtonCharge() / CURRENT_CONVERSION, seconds_kept * 1.0);
     }
 
     AnalysisDataService::Instance().remove(outputWS);
@@ -283,17 +267,11 @@ public:
   /** Single values are to be considered constant through all time
    * Therefore, all these tests should keep all events:
    */
-  void test_filter_single_value_in_the_middle() {
-    do_test_fake("single_middle", 0, 2.0, 100);
-  }
+  void test_filter_single_value_in_the_middle() { do_test_fake("single_middle", 0, 2.0, 100); }
 
-  void test_filter_single_value_before() {
-    do_test_fake("single_before", 0, 2.0, 100);
-  }
+  void test_filter_single_value_before() { do_test_fake("single_before", 0, 2.0, 100); }
 
-  void test_filter_single_value_after() {
-    do_test_fake("single_after", 0, 2.0, 100);
-  }
+  void test_filter_single_value_after() { do_test_fake("single_after", 0, 2.0, 100); }
 
   /** This test will not keep any events because you are outside the specified
    * range.
@@ -307,13 +285,10 @@ public:
   void test_pulseFilter() {
     // We filter out exactly the times of the temp log.
     // It has 5 entries, leaving 95 seconds of events
-    do_test_fake("temp", 0, 0, 95, true, true /* in place*/,
-                 true /*PulseFilter*/);
-    do_test_fake("temp", 0, 0, 95, true, false /* not in place*/,
-                 true /*PulseFilter*/);
+    do_test_fake("temp", 0, 0, 95, true, true /* in place*/, true /*PulseFilter*/);
+    do_test_fake("temp", 0, 0, 95, true, false /* not in place*/, true /*PulseFilter*/);
     // Filter on an entry with only one point
-    do_test_fake("single_middle", 0, 0, 99, true, false /* not in place*/,
-                 true /*PulseFilter*/);
+    do_test_fake("single_middle", 0, 0, 99, true, false /* not in place*/, true /*PulseFilter*/);
   }
 
   std::size_t min_max_helper(bool useMin, bool useMax, double min, double max) {

@@ -14,9 +14,7 @@ class KafkaTopicSubscriberTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static KafkaTopicSubscriberTest *createSuite() {
-    return new KafkaTopicSubscriberTest();
-  }
+  static KafkaTopicSubscriberTest *createSuite() { return new KafkaTopicSubscriberTest(); }
   static void destroySuite(KafkaTopicSubscriberTest *suite) { delete suite; }
 
   // ---------------------------------------------------------------------------
@@ -29,8 +27,7 @@ public:
 
     // This won't connect yet
     std::vector<std::string> topics = {topic};
-    auto subscriber = std::make_unique<KafkaTopicSubscriber>(
-        broker, topics, SubscribeAtOption::LATEST);
+    auto subscriber = std::make_unique<KafkaTopicSubscriber>(broker, topics, SubscribeAtOption::LATEST);
 
     TS_ASSERT_EQUALS(topic, subscriber->topics()[0]);
   }

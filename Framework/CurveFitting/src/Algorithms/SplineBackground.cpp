@@ -28,16 +28,13 @@ using namespace API;
 
 /// Initialisation method
 void SplineBackground::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "The name of the input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace.");
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty("WorkspaceIndex", 0, mustBePositive,
-                  "The index of the spectrum for fitting.");
+  declareProperty("WorkspaceIndex", 0, mustBePositive, "The index of the spectrum for fitting.");
   declareProperty("NCoeff", 10, "The number of b-spline coefficients.");
 }
 
@@ -75,8 +72,8 @@ void SplineBackground::exec() {
     // Create temporary alias to reduce the size of the call
     bSplinePointers &sp = m_splinePointers;
     // do the fit
-    gsl_multifit_wlinear(sp.fittedWs, sp.binWeights, sp.yData, sp.coefficients,
-                         sp.covariance, &chisq, sp.weightedLinearFitWs);
+    gsl_multifit_wlinear(sp.fittedWs, sp.binWeights, sp.yData, sp.coefficients, sp.covariance, &chisq,
+                         sp.weightedLinearFitWs);
   }
 
   auto outWS = saveSplineOutput(inWS, spec);
@@ -89,8 +86,7 @@ void SplineBackground::exec() {
  *
  * @param ws:: The input workspace to calculate the number of unmasked bins of
  */
-size_t
-SplineBackground::calculateNumBinsToProcess(const API::MatrixWorkspace *ws) {
+size_t SplineBackground::calculateNumBinsToProcess(const API::MatrixWorkspace *ws) {
   const int spec = getProperty("WorkspaceIndex");
   const auto &yInputVals = ws->y(spec);
   size_t ySize = yInputVals.size();
@@ -111,9 +107,7 @@ SplineBackground::calculateNumBinsToProcess(const API::MatrixWorkspace *ws) {
  * @param specNum:: The spectrum number to process from the input WS
  * @param expectedNumBins:: The expected number of unmasked bins to add
  */
-void SplineBackground::addWsDataToSpline(const API::MatrixWorkspace *ws,
-                                         const size_t specNum,
-                                         int expectedNumBins) {
+void SplineBackground::addWsDataToSpline(const API::MatrixWorkspace *ws, const size_t specNum, int expectedNumBins) {
   const auto xPointData = ws->points(specNum);
   const auto &yInputVals = ws->y(specNum);
   const auto &eInputVals = ws->e(specNum);
@@ -134,17 +128,15 @@ void SplineBackground::addWsDataToSpline(const API::MatrixWorkspace *ws,
       continue;
     gsl_vector_set(m_splinePointers.xData, numUnmaskedBins, xPointData[i]);
     gsl_vector_set(m_splinePointers.yData, numUnmaskedBins, yInputVals[i]);
-    gsl_vector_set(m_splinePointers.binWeights, numUnmaskedBins,
-                   calculateBinWeight(eInputVals[i]));
+    gsl_vector_set(m_splinePointers.binWeights, numUnmaskedBins, calculateBinWeight(eInputVals[i]));
 
     ++numUnmaskedBins;
   }
 
   if (expectedNumBins != numUnmaskedBins) {
     freeBSplinePointers();
-    throw std::runtime_error(
-        "Assertion failed: number of unmasked bins found was"
-        " not equal to the number that was calculated");
+    throw std::runtime_error("Assertion failed: number of unmasked bins found was"
+                             " not equal to the number that was calculated");
   }
 }
 
@@ -193,15 +185,13 @@ double SplineBackground::calculateBinWeight(double errValue) {
     // set the bin weight
     outBinWeight = 0;
     if (errValue <= 0) {
-      g_log.warning(
-          "Spline background found an error value of 0 or less on an unmasked"
-          " bin. This bin will have no weight during the fitting process");
+      g_log.warning("Spline background found an error value of 0 or less on an unmasked"
+                    " bin. This bin will have no weight during the fitting process");
     } else {
       // nan / inf
-      g_log.warning(
-          "Spline background found an error value of nan or inf on an"
-          " unmasked bin. This bin will have no weight during the fitting"
-          " process");
+      g_log.warning("Spline background found an error value of nan or inf on an"
+                    " unmasked bin. This bin will have no weight during the fitting"
+                    " process");
     }
   } else {
     // Value is perfectly normal in every way
@@ -246,14 +236,11 @@ void SplineBackground::freeBSplinePointers() {
  *
  * @return:: A shared pointer to the output workspace
  */
-MatrixWorkspace_sptr
-SplineBackground::saveSplineOutput(const API::MatrixWorkspace_sptr &ws,
-                                   const size_t spec) {
+MatrixWorkspace_sptr SplineBackground::saveSplineOutput(const API::MatrixWorkspace_sptr &ws, const size_t spec) {
   const auto &xInputVals = ws->x(spec);
   const auto &yInputVals = ws->y(spec);
   /* output the smoothed curve */
-  API::MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(
-      ws, 1, xInputVals.size(), yInputVals.size());
+  API::MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(ws, 1, xInputVals.size(), yInputVals.size());
 
   outWS->getSpectrum(0).setSpectrumNo(ws->getSpectrum(spec).getSpectrumNo());
 
@@ -263,11 +250,9 @@ SplineBackground::saveSplineOutput(const API::MatrixWorkspace_sptr &ws,
 
   for (size_t i = 0; i < yInputVals.size(); i++) {
     double xi = xInputVals[i];
-    gsl_bspline_eval(xi, m_splinePointers.inputSplineWs,
-                     m_splinePointers.splineToProcess);
-    gsl_multifit_linear_est(m_splinePointers.inputSplineWs,
-                            m_splinePointers.coefficients,
-                            m_splinePointers.covariance, &yi, &yerr);
+    gsl_bspline_eval(xi, m_splinePointers.inputSplineWs, m_splinePointers.splineToProcess);
+    gsl_multifit_linear_est(m_splinePointers.inputSplineWs, m_splinePointers.coefficients, m_splinePointers.covariance,
+                            &yi, &yerr);
     yVals[i] = yi;
     eVals[i] = yerr;
   }
@@ -283,8 +268,7 @@ SplineBackground::saveSplineOutput(const API::MatrixWorkspace_sptr &ws,
  * @param numBins:: The number of unmasked bins in the input workspace
  * @param ncoeff:: The user specified coefficient to use
  */
-void SplineBackground::setupSpline(double xMin, double xMax, int numBins,
-                                   int ncoeff) {
+void SplineBackground::setupSpline(double xMin, double xMax, int numBins, int ncoeff) {
   /* use uniform breakpoints */
   gsl_bspline_knots_uniform(xMin, xMax, m_splinePointers.splineToProcess);
 
@@ -293,8 +277,7 @@ void SplineBackground::setupSpline(double xMin, double xMax, int numBins,
     double xi = gsl_vector_get(m_splinePointers.xData, i);
 
     /* compute B_j(xi) for all j */
-    gsl_bspline_eval(xi, m_splinePointers.inputSplineWs,
-                     m_splinePointers.splineToProcess);
+    gsl_bspline_eval(xi, m_splinePointers.inputSplineWs, m_splinePointers.splineToProcess);
 
     /* fill in row i of X */
     for (int j = 0; j < ncoeff; ++j) {

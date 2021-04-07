@@ -18,19 +18,19 @@ columns...
 Peak profile
 ############
 
-All peak profiles supported by Mantid are supported by FitPeak. 
+All peak profiles supported by Mantid are supported by FitPeak.
 
 Starting parameter values specified by user should be close to the real values,
-unless the automatic starting values determination algorithm works well with that 
-profile type.  
+unless the automatic starting values determination algorithm works well with that
+profile type.
 
-But only [[Gaussian]] has been well tested with this functionalities. 
+But only [[Gaussian]] has been well tested with this functionalities.
 
-Background 
+Background
 ##########
 
 There are only three types of backgrounds that are supported, including
-FlatBackground, LinearBackground and Quadratic. 
+FlatBackground, LinearBackground and Quadratic.
 
 Input and Output
 ################
@@ -43,13 +43,13 @@ implemented.
 Default function parameters' names
 ==================================
 
-Input function parameters' names should be exactly the same as those defined in Mantid.  
-This brings some inconvenience to users through MantidPlot GUI. 
+Input function parameters' names should be exactly the same as those defined in Mantid.
+This brings some inconvenience to users through MantidPlot GUI.
 Thus user can input function parameters values in the default order,
-which is instructed in the list of functions.  
+which is instructed in the list of functions.
 For example, one background function type is defined as 'Linear (A0, A1)'.
-As user chooses this function, he does not need to input background function parameter names, 
-but writes values of A0 and A1, respectively.  
+As user chooses this function, he does not need to input background function parameter names,
+but writes values of A0 and A1, respectively.
 
 Output of function parameters
 =============================
@@ -68,10 +68,10 @@ FindPeaks uses a more complicated approach to fit peaks if '''HighBackground''' 
 Simple fit
 ==========
 In the 'simple fit' mode, the algorithm will make a composite function including
-peak and background function and fit it against the observed data. 
+peak and background function and fit it against the observed data.
 
 It works well with good starting values of the peak and background function,
-especially when the peak is significant with low background. 
+especially when the peak is significant with low background.
 
 
 High background fit
@@ -79,19 +79,19 @@ High background fit
 
 In the 'high background fit' mode, the background will be removed first;
 then the fitting is focussed on the 'pure' peak function;
-and a composite function is fit against the original data as the last step. 
+and a composite function is fit against the original data as the last step.
 
 This approach is developed due to the failure of 'simple fit' mode on the cases
-that background level is much higher than the peak height.  
+that background level is much higher than the peak height.
 Without the background being removed, the optimizer intends to favor the background
-rather than the peak function. 
+rather than the peak function.
 
 
 Starting values of the peak function
 ====================================
 
 * Peak height is estimated by the maximum value, with background removed, inside the peak range;
-* Peak position can be set up either to the X value of the maximum Y value in the peak range, or to the value specified by user accordin to user's selection.  For example, in the case of calibrating the offsets of detectors of powder diffractometers, the peak positions are unknown.  Then it is better to use the X value with the maximum Y value as the starting peak centre.  While in the case of striping vanadium peaks, all peaks' centres should be exactly same as the theortical values.  
+* Peak position can be set up either to the X value of the maximum Y value in the peak range, or to the value specified by user accordin to user's selection.  For example, in the case of calibrating the offsets of detectors of powder diffractometers, the peak positions are unknown.  Then it is better to use the X value with the maximum Y value as the starting peak centre.  While in the case of striping vanadium peaks, all peaks' centres should be exactly same as the theortical values.
 
 
 Criteria To Validate Peaks Found
@@ -108,7 +108,7 @@ fitted peak position must be within a short distance to the give one.
 2. Peak height. In the certain number of trial, peak height can be used
 to select the best fit among various starting sigma values.
 
-3. Peak width: Peak width cannot be equal or wider than the given fit window. 
+3. Peak width: Peak width cannot be equal or wider than the given fit window.
 
 
 Fit Window and Peak Range

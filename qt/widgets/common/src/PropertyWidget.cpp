@@ -57,8 +57,7 @@ double stringToRoundedNumber(const std::string &s) {
  * @param value :: the string to test with
  * @returns     :: true if the value is valid, else false.
  */
-bool isValidPropertyValue(Mantid::Kernel::Property *prop,
-                          const std::string &value) {
+bool isValidPropertyValue(Mantid::Kernel::Property *prop, const std::string &value) {
   const auto guineaPig = std::shared_ptr<Property>(prop->clone());
   return guineaPig->setValue(value).empty();
 }
@@ -81,17 +80,15 @@ bool isEmptyNumMacro(const std::string &value, const double value_d) {
   if (value == "2.14748e+09")
     return true;
 
-  static const std::vector<double> EMPTY_NUM_MACROS = {
-      EMPTY_DBL(),
-      -DBL_MAX,
-      DBL_MAX,
-      static_cast<double>(EMPTY_INT()),
-      static_cast<double>(EMPTY_LONG()),
-      static_cast<double>(-INT_MAX),
-      static_cast<double>(-LONG_MAX)};
+  static const std::vector<double> EMPTY_NUM_MACROS = {EMPTY_DBL(),
+                                                       -DBL_MAX,
+                                                       DBL_MAX,
+                                                       static_cast<double>(EMPTY_INT()),
+                                                       static_cast<double>(EMPTY_LONG()),
+                                                       static_cast<double>(-INT_MAX),
+                                                       static_cast<double>(-LONG_MAX)};
 
-  return std::find(EMPTY_NUM_MACROS.begin(), EMPTY_NUM_MACROS.end(), value_d) !=
-         EMPTY_NUM_MACROS.end();
+  return std::find(EMPTY_NUM_MACROS.begin(), EMPTY_NUM_MACROS.end(), value_d) != EMPTY_NUM_MACROS.end();
 }
 
 /**
@@ -102,8 +99,7 @@ bool isEmptyNumMacro(const std::string &value, const double value_d) {
  * @returns    :: true if can be left blank, else false
  */
 bool isOptionalProperty(Mantid::Kernel::Property *prop) {
-  return isValidPropertyValue(prop, "") ||
-         isValidPropertyValue(prop, prop->getDefault());
+  return isValidPropertyValue(prop, "") || isValidPropertyValue(prop, prop->getDefault());
 }
 
 /**
@@ -182,16 +178,12 @@ void ClickableLabel::mousePressEvent(QMouseEvent *event) {
 
 /** Constructor
  */
-PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent,
-                               QGridLayout *layout, int row)
-    : QWidget(parent), m_prop(prop), m_gridLayout(layout), m_parent(nullptr),
-      m_row(row), // m_info(NULL),
-      m_doc(), m_replaceWSButton(nullptr), m_widgets(), m_error(),
-      m_isOutputWsProp(false), m_previousValue(), m_enteredValue(), m_icons(),
-      m_useHistory(true) {
+PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent, QGridLayout *layout, int row)
+    : QWidget(parent), m_prop(prop), m_gridLayout(layout), m_parent(nullptr), m_row(row), // m_info(NULL),
+      m_doc(), m_replaceWSButton(nullptr), m_widgets(), m_error(), m_isOutputWsProp(false), m_previousValue(),
+      m_enteredValue(), m_icons(), m_useHistory(true) {
   if (!prop)
-    throw std::runtime_error(
-        "NULL Property passed to the PropertyWidget constructor.");
+    throw std::runtime_error("NULL Property passed to the PropertyWidget constructor.");
   setObjectName(QString::fromStdString(prop->name()));
 
   if (!m_gridLayout) {
@@ -221,12 +213,11 @@ PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent,
   m_gridLayout->addWidget(infoWidget, m_row, 4);
 
   QMap<Info, QPair<QString, QString>> pathsAndToolTips;
-  pathsAndToolTips[RESTORE] = QPair<QString, QString>(
-      ":/history.png", "This property had a previously-entered value.  Click "
-                       "to toggle it off and on.");
-  pathsAndToolTips[REPLACE] = QPair<QString, QString>(
-      ":/replace.png",
-      "A workspace with this name already exists and so will be overwritten.");
+  pathsAndToolTips[RESTORE] =
+      QPair<QString, QString>(":/history.png", "This property had a previously-entered value.  Click "
+                                               "to toggle it off and on.");
+  pathsAndToolTips[REPLACE] =
+      QPair<QString, QString>(":/replace.png", "A workspace with this name already exists and so will be overwritten.");
   pathsAndToolTips[INVALID] = QPair<QString, QString>(":/invalid.png", "");
 
   std::vector<Info> labelOrder = {RESTORE, REPLACE, INVALID};
@@ -255,8 +246,7 @@ PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent,
     m_doc += "This property is required.";
   }
 
-  if (prop->direction() == Direction::Output &&
-      dynamic_cast<IWorkspaceProperty *>(prop))
+  if (prop->direction() == Direction::Output && dynamic_cast<IWorkspaceProperty *>(prop))
     m_isOutputWsProp = true;
 }
 
@@ -293,8 +283,7 @@ void PropertyWidget::setPreviousValue(const QString &previousValue) {
 
   // Once we've made the history icon visible, it will stay that way for
   // the lifetime of the property widget.
-  if (m_previousValue.toStdString() != m_prop->getDefault() &&
-      !m_previousValue.isEmpty())
+  if (m_previousValue.toStdString() != m_prop->getDefault() && !m_previousValue.isEmpty())
     m_icons[RESTORE]->setVisible(true);
 }
 
@@ -325,17 +314,13 @@ void PropertyWidget::updateIconVisibility(const QString &error) {
   m_icons[INVALID]->setToolTip(m_error);
   // Show "!" icon if a workspace would be overwritten.
   if (m_isOutputWsProp) {
-    const bool wsExists =
-        Mantid::API::AnalysisDataService::Instance().doesExist(
-            getValue().toStdString());
+    const bool wsExists = Mantid::API::AnalysisDataService::Instance().doesExist(getValue().toStdString());
     m_icons[REPLACE]->setVisible(wsExists);
   }
 }
 
 /** Slot called when someone clicks the "replace ws button" */
-void PropertyWidget::replaceWSButtonClicked() {
-  emit replaceWorkspaceName(QString::fromStdString(m_prop->name()));
-}
+void PropertyWidget::replaceWSButtonClicked() { emit replaceWorkspaceName(QString::fromStdString(m_prop->name())); }
 
 /**
  * Emits a signal that the value of the property was changed.
@@ -394,18 +379,15 @@ void PropertyWidget::addReplaceWSButton() {
 
   auto *wsProp = dynamic_cast<IWorkspaceProperty *>(m_prop);
   if (wsProp && (m_prop->direction() == Direction::Output)) {
-    m_replaceWSButton =
-        new QPushButton(QIcon(":/data_replace.png"), "", m_parent);
+    m_replaceWSButton = new QPushButton(QIcon(":/data_replace.png"), "", m_parent);
     // MG: There is no way with the QIcon class to actually ask what size it is
     // so I had to hard
     // code this number here to get it to a sensible size
     m_replaceWSButton->setMaximumWidth(32);
     // m_wsbtn_tracker[btn ] = 1;
     m_replaceWSButton->setToolTip("Replace input workspace");
-    connect(m_replaceWSButton, SIGNAL(clicked()), this,
-            SLOT(replaceWSButtonClicked()));
-    connect(m_replaceWSButton, SIGNAL(clicked()), this,
-            SLOT(valueChangedSlot()));
+    connect(m_replaceWSButton, SIGNAL(clicked()), this, SLOT(replaceWSButtonClicked()));
+    connect(m_replaceWSButton, SIGNAL(clicked()), this, SLOT(valueChangedSlot()));
     m_widgets.push_back(m_replaceWSButton);
     // Place in the grid on column 2.
     m_gridLayout->addWidget(m_replaceWSButton, m_row, 2);
@@ -417,9 +399,7 @@ void PropertyWidget::addReplaceWSButton() {
  *
  * @param error :: string to show in the star, empty means no error
  */
-void PropertyWidget::setError(const QString &error) {
-  m_error = error.trimmed();
-}
+void PropertyWidget::setError(const QString &error) { m_error = error.trimmed(); }
 
 /** Sets all widgets contained within to Enabled
  * @param val :: enabled or not   */
@@ -445,8 +425,7 @@ void PropertyWidget::setVisible(bool val) {
  * @param prop  :: property to which the label belongs
  * @param label :: widget containing the label
  */
-void PropertyWidget::setLabelFont(Mantid::Kernel::Property *prop,
-                                  QWidget *label) {
+void PropertyWidget::setLabelFont(Mantid::Kernel::Property *prop, QWidget *label) {
   if (!isOptionalProperty(prop)) {
     auto font = label->font();
     font.setBold(true);
@@ -462,10 +441,8 @@ void PropertyWidget::setLabelFont(Mantid::Kernel::Property *prop,
  * @param prop  :: the property who's default value to use
  * @param field :: the associated text field to set the placeholder text of
  */
-void PropertyWidget::setFieldPlaceholderText(Mantid::Kernel::Property *prop,
-                                             QLineEdit *field) {
-  field->setPlaceholderText(
-      QString::fromStdString(createFieldPlaceholderText(prop)));
+void PropertyWidget::setFieldPlaceholderText(Mantid::Kernel::Property *prop, QLineEdit *field) {
+  field->setPlaceholderText(QString::fromStdString(createFieldPlaceholderText(prop)));
 }
 
 } // namespace API

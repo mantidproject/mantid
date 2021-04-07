@@ -26,10 +26,12 @@ from mantidqt.widgets.samplematerialdialog.samplematerial_presenter import Sampl
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 from workbench.config import CONF
 from workbench.plugins.base import PluginWidget
+from workbench.config import get_window_config
 
 
 class WorkspaceWidget(PluginWidget):
     """Provides a Workspace Widget for workspace manipulation"""
+
     def __init__(self, parent):
         super(WorkspaceWidget, self).__init__(parent)
 
@@ -189,9 +191,10 @@ class WorkspaceWidget(PluginWidget):
 
         :param names: A list of workspace names
         """
+        parent, flags = get_window_config()
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             try:
-                SampleLogs(ws=ws, parent=self)
+                SampleLogs(ws=ws, parent=parent, window_flags=flags)
             except Exception as exception:
                 logger.warning("Could not open sample logs for workspace '{}'."
                                "".format(ws.name()))
@@ -203,9 +206,10 @@ class WorkspaceWidget(PluginWidget):
 
         :param names: A list of workspace names
         """
+        parent, flags = get_window_config()
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             try:
-                presenter = SliceViewer(ws=ws, parent=self, conf=CONF)
+                presenter = SliceViewer(ws=ws, conf=CONF, parent=parent, window_flags=flags)
                 presenter.view.show()
             except Exception as exception:
                 logger.warning("Could not open slice viewer for workspace '{}'."
@@ -218,10 +222,11 @@ class WorkspaceWidget(PluginWidget):
 
         :param names: A list of workspace names
         """
+        parent, flags = get_window_config()
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             if ws.getInstrument().getName():
                 try:
-                    presenter = InstrumentViewPresenter(ws, parent=self)
+                    presenter = InstrumentViewPresenter(ws, parent=parent, window_flags=flags)
                     presenter.show_view()
                 except Exception as exception:
                     logger.warning("Could not show instrument for workspace "
@@ -234,17 +239,19 @@ class WorkspaceWidget(PluginWidget):
     def _do_show_data(self, names):
         # local import to allow this module to be imported without pyplot being imported
         import matplotlib.pyplot
+        parent, flags = get_window_config()
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             try:
                 MatrixWorkspaceDisplay.supports(ws)
                 # the plot function is being injected in the presenter
                 # this is done so that the plotting library is mockable in testing
-                presenter = MatrixWorkspaceDisplay(ws, plot=plot, parent=self)
+                presenter = MatrixWorkspaceDisplay(ws, plot=plot, parent=parent, window_flags=flags)
                 presenter.show_view()
             except ValueError:
                 try:
                     TableWorkspaceDisplay.supports(ws)
-                    presenter = TableWorkspaceDisplay(ws, plot=matplotlib.pyplot, parent=self, batch=True)
+                    presenter = TableWorkspaceDisplay(ws, plot=matplotlib.pyplot, parent=parent, window_flags=flags,
+                                                      batch=True)
                     presenter.show_view()
                 except ValueError:
                     logger.error("Could not open workspace: {0} with neither "
@@ -308,7 +315,7 @@ class WorkspaceWidget(PluginWidget):
             self._do_show_data([name])
         except ValueError:
             if hasattr(ws, 'getMaxNumberBins') and ws.getMaxNumberBins() == 1:
-                # If this ws is just a single value show the data, else plot the bin
+                # If this is ws is just a single value show the data, else plot the bin
                 if hasattr(ws, 'getNumberHistograms') and ws.getNumberHistograms() == 1:
                     self._do_show_data([name])
                 else:

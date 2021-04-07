@@ -27,18 +27,18 @@ Usage
   # Create Workspace
   data = '0,1,2,3,4,5'
   ws = CreateWorkspace(DataX=data, DataY=data, DataE=data, Nspec=1)
-  
+
   # Execute algorithm
   out_ws = NormaliseSpectra(InputWorkspace=ws)
-  
+
   # Print resulting y values
   print(out_ws.readY(0))
 
-Output:  
-  
+Output:
+
 .. testoutput:: NormaliseSpectraExample
   :options: +NORMALIZE_WHITESPACE
-  
+
   [ 0. 0.2  0.4  0.6  0.8  1. ]
 
 .. categories::

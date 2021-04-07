@@ -30,9 +30,8 @@ public:
   using pointer = const Column *;
   using value_type = const Column;
   using difference_type = typename QStringIterator::difference_type;
-  ConstColumnIterator(QStringIterator names, QStringIterator descriptions,
-                      QStringIterator algorithmProperties, BoolIterator isShown,
-                      QStringIterator prefixes, BoolIterator isKey);
+  ConstColumnIterator(QStringIterator names, QStringIterator descriptions, QStringIterator algorithmProperties,
+                      BoolIterator isShown, QStringIterator prefixes, BoolIterator isKey);
 
   ConstColumnIterator &operator++();
   ConstColumnIterator operator++(int);
@@ -51,14 +50,14 @@ private:
   BoolIterator m_isKey;
 };
 
-ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON operator+(
-    const ConstColumnIterator &lhs, ConstColumnIterator::difference_type n);
-ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON operator+(
-    ConstColumnIterator::difference_type n, const ConstColumnIterator &rhs);
-ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON operator-(
-    const ConstColumnIterator &lhs, ConstColumnIterator::difference_type n);
-ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON operator-(
-    ConstColumnIterator::difference_type n, const ConstColumnIterator &rhs);
+ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON operator+(const ConstColumnIterator &lhs,
+                                                         ConstColumnIterator::difference_type n);
+ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON operator+(ConstColumnIterator::difference_type n,
+                                                         const ConstColumnIterator &rhs);
+ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON operator-(const ConstColumnIterator &lhs,
+                                                         ConstColumnIterator::difference_type n);
+ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON operator-(ConstColumnIterator::difference_type n,
+                                                         const ConstColumnIterator &rhs);
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace MantidQt

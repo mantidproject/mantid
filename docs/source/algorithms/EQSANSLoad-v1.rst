@@ -24,7 +24,7 @@ corrections to the workspace. The workflow proceeds as follows:
    in the logs so that we can retrieve them later
    (see :ref:`SANSMask <algm-SANSMask>`).
 
-6. Move the detector according to the correct beam center position, 
+6. Move the detector according to the correct beam center position,
    which is either given as input to the algorithm or pre-determined and stored in the input *ReductionProperties*.
 
 7. Apply a TOF correction to take into account frame correction and the neutron flight path using
@@ -35,7 +35,7 @@ corrections to the workspace. The workflow proceeds as follows:
 
 9. Rebin the data according to the input *WavelengthStep*.
 
-This algorithm is rarely called directly. It is called by 
+This algorithm is rarely called directly. It is called by
 :ref:`SANSReduction <algm-SANSReduction>`.
 
 |LoadEQSANS.png|

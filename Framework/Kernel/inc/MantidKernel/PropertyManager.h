@@ -45,8 +45,7 @@ public:
   // Gets the correct log name for the matching invalid values log for a given
   // log name
   static std::string getInvalidValuesFilterLogName(const std::string &logName);
-  static std::string
-  getLogNameFromInvalidValuesFilter(const std::string &logName);
+  static std::string getLogNameFromInvalidValuesFilter(const std::string &logName);
   static bool isAnInvalidValuesFilterLog(const std::string &logName);
 
   PropertyManager();
@@ -54,49 +53,35 @@ public:
   PropertyManager &operator=(const PropertyManager &);
   PropertyManager &operator+=(const PropertyManager &rhs);
 
-  void filterByTime(const Types::Core::DateAndTime &start,
-                    const Types::Core::DateAndTime &stop) override;
-  void splitByTime(std::vector<SplittingInterval> &splitter,
-                   std::vector<PropertyManager *> outputs) const override;
+  void filterByTime(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop) override;
+  void splitByTime(std::vector<SplittingInterval> &splitter, std::vector<PropertyManager *> outputs) const override;
   void filterByProperty(const TimeSeriesProperty<bool> &filter,
-                        const std::vector<std::string> &excludedFromFiltering =
-                            std::vector<std::string>()) override;
+                        const std::vector<std::string> &excludedFromFiltering = std::vector<std::string>()) override;
 
   ~PropertyManager() override;
 
   // Function to declare properties (i.e. store them)
-  void declareProperty(std::unique_ptr<Property> p,
-                       const std::string &doc = "") override;
+  void declareProperty(std::unique_ptr<Property> p, const std::string &doc = "") override;
   using IPropertyManager::declareProperty;
-  void declareOrReplaceProperty(std::unique_ptr<Property> p,
-                                const std::string &doc = "") override;
+  void declareOrReplaceProperty(std::unique_ptr<Property> p, const std::string &doc = "") override;
   void resetProperties() override;
   // Sets all the declare properties
   void setProperties(const std::string &propertiesJson,
-                     const std::unordered_set<std::string> &ignoreProperties =
-                         std::unordered_set<std::string>(),
+                     const std::unordered_set<std::string> &ignoreProperties = std::unordered_set<std::string>(),
                      bool createMissing = false) override;
-  void setProperties(const std::string &propertiesJson,
-                     IPropertyManager *targetPropertyManager,
-                     const std::unordered_set<std::string> &ignoreProperties,
-                     bool createMissing = false);
+  void setProperties(const std::string &propertiesJson, IPropertyManager *targetPropertyManager,
+                     const std::unordered_set<std::string> &ignoreProperties, bool createMissing = false);
   void setProperties(const ::Json::Value &jsonValue,
-                     const std::unordered_set<std::string> &ignoreProperties =
-                         std::unordered_set<std::string>(),
+                     const std::unordered_set<std::string> &ignoreProperties = std::unordered_set<std::string>(),
                      bool createMissing = false) override;
-  void setProperties(const ::Json::Value &jsonValue,
-                     IPropertyManager *targetPropertyManager,
-                     const std::unordered_set<std::string> &ignoreProperties =
-                         std::unordered_set<std::string>(),
+  void setProperties(const ::Json::Value &jsonValue, IPropertyManager *targetPropertyManager,
+                     const std::unordered_set<std::string> &ignoreProperties = std::unordered_set<std::string>(),
                      bool createMissing = false);
   void setPropertiesWithString(
       const std::string &propertiesString,
-      const std::unordered_set<std::string> &ignoreProperties =
-          std::unordered_set<std::string>()) override;
-  void setPropertyValue(const std::string &name,
-                        const std::string &value) override;
-  void setPropertyValueFromJson(const std::string &name,
-                                const Json::Value &value) override;
+      const std::unordered_set<std::string> &ignoreProperties = std::unordered_set<std::string>()) override;
+  void setPropertyValue(const std::string &name, const std::string &value) override;
+  void setPropertyValueFromJson(const std::string &name, const Json::Value &value) override;
   void setPropertyOrdinal(const int &index, const std::string &value) override;
 
   bool existsProperty(const std::string &name) const override;
@@ -106,8 +91,7 @@ public:
   const std::vector<Property *> &getProperties() const override;
 
   /// removes the property from properties map
-  void removeProperty(const std::string &name,
-                      const bool delproperty = true) override;
+  void removeProperty(const std::string &name, const bool delproperty = true) override;
   /// Clears the whole property map
   void clear() override;
 
@@ -129,12 +113,10 @@ protected:
   Property *getPointerToPropertyOrNull(const std::string &name) const;
 
 private:
-  void setPropertiesWithSimpleString(
-      const std::string &propertiesString,
-      const std::unordered_set<std::string> &ignoreProperties);
-  void setPropertiesWithJSONString(
-      const std::string &propertiesString,
-      const std::unordered_set<std::string> &ignoreProperties);
+  void setPropertiesWithSimpleString(const std::string &propertiesString,
+                                     const std::unordered_set<std::string> &ignoreProperties);
+  void setPropertiesWithJSONString(const std::string &propertiesString,
+                                   const std::unordered_set<std::string> &ignoreProperties);
 
   /// typedef for the map holding the properties
   using PropertyMap = std::map<std::string, std::unique_ptr<Property>>;

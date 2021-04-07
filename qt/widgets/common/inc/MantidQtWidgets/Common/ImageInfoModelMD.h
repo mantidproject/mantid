@@ -23,8 +23,7 @@ public:
    * @param signal: the signal value at x, y
    * @return An ImageInfo object describing the point
    */
-  ImageInfoModel::ImageInfo info(const double x, const double y,
-                                 const double signal) const override;
+  ImageInfoModel::ImageInfo info(const double x, const double y, const double signal) const override;
 };
 
 } // namespace MantidWidgets

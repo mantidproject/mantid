@@ -15,31 +15,22 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
-using namespace MantidQt::CustomInterfaces::ISISReflectometry::
-    ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
 
-class RunsTablePresenterRowDeletionTest : public CxxTest::TestSuite,
-                                          RunsTablePresenterTest {
+class RunsTablePresenterRowDeletionTest : public CxxTest::TestSuite, RunsTablePresenterTest {
 public:
-  static RunsTablePresenterRowDeletionTest *createSuite() {
-    return new RunsTablePresenterRowDeletionTest();
-  }
+  static RunsTablePresenterRowDeletionTest *createSuite() { return new RunsTablePresenterRowDeletionTest(); }
 
-  static void destroySuite(RunsTablePresenterRowDeletionTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(RunsTablePresenterRowDeletionTest *suite) { delete suite; }
 
   void testUpdatesViewWhenRowDeletedFromDirectSelection() {
     auto reductionJobs = twoGroupsWithARowModel();
     selectedRowLocationsAre(m_jobs, {location(0, 0)});
 
-    EXPECT_CALL(
-        m_jobs,
-        removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation>(
-            {location(0, 0)})));
+    EXPECT_CALL(m_jobs, removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation>({location(0, 0)})));
 
     auto presenter = makePresenter(m_view, std::move(reductionJobs));
     presenter.notifyDeleteRowRequested();
@@ -76,10 +67,8 @@ public:
     auto reductionJobs = oneGroupWithTwoRowsModel();
     selectedRowLocationsAre(m_jobs, {location(0, 0), location(0, 1)});
 
-    EXPECT_CALL(
-        m_jobs,
-        removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation>(
-            {location(0, 0), location(0, 1)})));
+    EXPECT_CALL(m_jobs,
+                removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation>({location(0, 0), location(0, 1)})));
 
     auto presenter = makePresenter(m_view, std::move(reductionJobs));
     presenter.notifyDeleteRowRequested();

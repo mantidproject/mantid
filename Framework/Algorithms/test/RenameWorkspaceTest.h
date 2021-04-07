@@ -48,23 +48,17 @@ public:
 
     Mantid::Algorithms::RenameWorkspace alg3;
     alg3.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        alg3.setPropertyValue("InputWorkspace", "InputWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg3.setPropertyValue("OutputWorkspace", "WSRenamed"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("InputWorkspace", "InputWS"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("OutputWorkspace", "WSRenamed"));
 
     TS_ASSERT_THROWS_NOTHING(alg3.execute());
     TS_ASSERT(alg3.isExecuted());
 
     Workspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result =
-            AnalysisDataService::Instance().retrieveWS<Workspace>("WSRenamed"));
+    TS_ASSERT_THROWS_NOTHING(result = AnalysisDataService::Instance().retrieveWS<Workspace>("WSRenamed"));
     TS_ASSERT(result);
 
-    TS_ASSERT_THROWS_ANYTHING(
-        result =
-            AnalysisDataService::Instance().retrieveWS<Workspace>("InputWS"));
+    TS_ASSERT_THROWS_ANYTHING(result = AnalysisDataService::Instance().retrieveWS<Workspace>("InputWS"));
 
     AnalysisDataService::Instance().remove("WSRenamed");
   }
@@ -76,18 +70,14 @@ public:
 
     Mantid::Algorithms::RenameWorkspace alg3;
     alg3.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        alg3.setPropertyValue("InputWorkspace", "InputWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg3.setPropertyValue("OutputWorkspace", "InputWS"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("InputWorkspace", "InputWS"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("OutputWorkspace", "InputWS"));
 
     TS_ASSERT_THROWS(alg3.execute(), const std::runtime_error &);
     TS_ASSERT(!alg3.isExecuted());
 
     Workspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result =
-            AnalysisDataService::Instance().retrieveWS<Workspace>("InputWS"));
+    TS_ASSERT_THROWS_NOTHING(result = AnalysisDataService::Instance().retrieveWS<Workspace>("InputWS"));
     TS_ASSERT(result);
 
     AnalysisDataService::Instance().remove("InputWS");
@@ -106,20 +96,16 @@ public:
     Mantid::Algorithms::RenameWorkspace renameAlgorithm;
     renameAlgorithm.initialize();
 
-    TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue(
-        "InputWorkspace", "WorkspaceToRename"));
-    TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue(
-        "OutputWorkspace", "ExistingWorkspace"));
-    TS_ASSERT_THROWS_NOTHING(
-        renameAlgorithm.setProperty("OverwriteExisting", false));
+    TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue("InputWorkspace", "WorkspaceToRename"));
+    TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue("OutputWorkspace", "ExistingWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setProperty("OverwriteExisting", false));
 
     // Try to rename it should throw exception
     renameAlgorithm.setRethrows(true);
     TS_ASSERT_THROWS(renameAlgorithm.execute(), const std::runtime_error &);
     TS_ASSERT_EQUALS(renameAlgorithm.isExecuted(), false);
 
-    TS_ASSERT_THROWS_NOTHING(
-        renameAlgorithm.setProperty("OverwriteExisting", true));
+    TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setProperty("OverwriteExisting", true));
     TS_ASSERT_THROWS_NOTHING(renameAlgorithm.execute());
     TS_ASSERT(renameAlgorithm.isExecuted());
   }
@@ -138,10 +124,8 @@ public:
 
     Mantid::Algorithms::RenameWorkspace renamer;
     renamer.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        renamer.setPropertyValue("InputWorkspace", groupName))
-    TS_ASSERT_THROWS_NOTHING(
-        renamer.setPropertyValue("OutputWorkspace", "newName"));
+    TS_ASSERT_THROWS_NOTHING(renamer.setPropertyValue("InputWorkspace", groupName))
+    TS_ASSERT_THROWS_NOTHING(renamer.setPropertyValue("OutputWorkspace", "newName"));
     TS_ASSERT(renamer.execute())
 
     Workspace_sptr result;
@@ -166,16 +150,12 @@ public:
     // Test that the history has only got the original group command and not
     // child commands
     TS_ASSERT_EQUALS(item1History[0]->name(), "RenameWorkspace")
-    TS_ASSERT_EQUALS(item1History[0]->getPropertyValue("InputWorkspace"),
-                     groupName)
+    TS_ASSERT_EQUALS(item1History[0]->getPropertyValue("InputWorkspace"), groupName)
 
     // The old ones should not be in the ADS
-    TS_ASSERT_THROWS(ads.retrieve("oldName"),
-                     const Mantid::Kernel::Exception::NotFoundError &)
-    TS_ASSERT_THROWS(ads.retrieve("oldName_1"),
-                     const Mantid::Kernel::Exception::NotFoundError &)
-    TS_ASSERT_THROWS(ads.retrieve("oldName_2"),
-                     const Mantid::Kernel::Exception::NotFoundError &)
+    TS_ASSERT_THROWS(ads.retrieve("oldName"), const Mantid::Kernel::Exception::NotFoundError &)
+    TS_ASSERT_THROWS(ads.retrieve("oldName_1"), const Mantid::Kernel::Exception::NotFoundError &)
+    TS_ASSERT_THROWS(ads.retrieve("oldName_2"), const Mantid::Kernel::Exception::NotFoundError &)
     // The new ones should be
     TS_ASSERT_THROWS_NOTHING(ads.retrieve("newName_1"))
     TS_ASSERT_THROWS_NOTHING(ads.retrieve("newName_1"))
@@ -201,30 +181,23 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     Workspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = AnalysisDataService::Instance().retrieveWS<Workspace>("WS"));
+    TS_ASSERT_THROWS_NOTHING(result = AnalysisDataService::Instance().retrieveWS<Workspace>("WS"));
     TS_ASSERT(result);
-    TS_ASSERT_THROWS_NOTHING(
-        result = AnalysisDataService::Instance().retrieveWS<Workspace>(
-            "WS_monitors"));
+    TS_ASSERT_THROWS_NOTHING(result = AnalysisDataService::Instance().retrieveWS<Workspace>("WS_monitors"));
     TS_ASSERT(result);
 
     AnalysisDataService::Instance().remove("WS_monitors");
-    TS_ASSERT_THROWS(
-        AnalysisDataService::Instance().retrieveWS<Workspace>("WS_monitors"),
-        const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(AnalysisDataService::Instance().retrieveWS<Workspace>("WS_monitors"),
+                     const Exception::NotFoundError &);
     // monitors resurrected
     alg.setPropertyValue("InputWorkspace", "WS");
     alg.setPropertyValue("OutputWorkspace", "WS1");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TS_ASSERT_THROWS_NOTHING(
-        result = AnalysisDataService::Instance().retrieveWS<Workspace>("WS1"));
+    TS_ASSERT_THROWS_NOTHING(result = AnalysisDataService::Instance().retrieveWS<Workspace>("WS1"));
     TS_ASSERT(result);
-    TS_ASSERT_THROWS_NOTHING(
-        result = AnalysisDataService::Instance().retrieveWS<Workspace>(
-            "WS1_monitors"));
+    TS_ASSERT_THROWS_NOTHING(result = AnalysisDataService::Instance().retrieveWS<Workspace>("WS1_monitors"));
     TS_ASSERT(result);
     // monitors renamed
     alg.setPropertyValue("InputWorkspace", "WS1");
@@ -232,20 +205,16 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TS_ASSERT_THROWS_NOTHING(
-        result = AnalysisDataService::Instance().retrieveWS<Workspace>("WS2"));
+    TS_ASSERT_THROWS_NOTHING(result = AnalysisDataService::Instance().retrieveWS<Workspace>("WS2"));
     TS_ASSERT(result);
-    TS_ASSERT_THROWS_NOTHING(
-        result = AnalysisDataService::Instance().retrieveWS<Workspace>(
-            "WS2_monitors"));
+    TS_ASSERT_THROWS_NOTHING(result = AnalysisDataService::Instance().retrieveWS<Workspace>("WS2_monitors"));
     TS_ASSERT(result);
 
     AnalysisDataService::Instance().remove("WS2");
     AnalysisDataService::Instance().remove("WS2_monitors");
   }
   MatrixWorkspace_sptr createWorkspace() {
-    MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
+    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
 
     return inputWS;
   }

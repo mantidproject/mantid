@@ -30,13 +30,10 @@ namespace Algorithms {
  @author Roman Tolchenov, Tessella plc
  @date 25/01/2012
  */
-class MANTID_ALGORITHMS_DLL ConvertTableToMatrixWorkspace
-    : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ConvertTableToMatrixWorkspace : public API::Algorithm {
 public:
   /// Algorithm's name
-  const std::string name() const override {
-    return "ConvertTableToMatrixWorkspace";
-  }
+  const std::string name() const override { return "ConvertTableToMatrixWorkspace"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Creates a single spectrum matrix workspace from some columns of a "
@@ -45,9 +42,7 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"ConvertMDHistoToMatrixWorkspace"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ConvertMDHistoToMatrixWorkspace"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "Utility\\Workspaces"; }
 

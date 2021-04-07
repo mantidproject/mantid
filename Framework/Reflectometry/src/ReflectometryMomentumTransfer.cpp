@@ -61,14 +61,12 @@ constexpr double FWHM_GAUSSIAN_EQUIVALENT{0.68};
  */
 double fromLogs(const Mantid::API::Run &run, const std::string &entry) {
   if (!run.hasProperty(entry)) {
-    throw Mantid::Kernel::Exception::NotFoundError(
-        "Could not find sample log entry", entry);
+    throw Mantid::Kernel::Exception::NotFoundError("Could not find sample log entry", entry);
   }
   try {
     return run.getPropertyValueAsType<double>(entry);
   } catch (std::invalid_argument &) {
-    throw std::runtime_error("Could not parse a number from log entry " +
-                             entry);
+    throw std::runtime_error("Could not parse a number from log entry " + entry);
   }
 }
 } // namespace
@@ -82,22 +80,17 @@ DECLARE_ALGORITHM(ReflectometryMomentumTransfer)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string ReflectometryMomentumTransfer::name() const {
-  return "ReflectometryMomentumTransfer";
-}
+const std::string ReflectometryMomentumTransfer::name() const { return "ReflectometryMomentumTransfer"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int ReflectometryMomentumTransfer::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ReflectometryMomentumTransfer::category() const {
-  return "ILL\\Reflectometry;Reflectometry";
-}
+const std::string ReflectometryMomentumTransfer::category() const { return "ILL\\Reflectometry;Reflectometry"; }
 
 /// Return a vector of related algorithms.
 const std::vector<std::string> ReflectometryMomentumTransfer::seeAlso() const {
-  return {"ReflectometryBeamStatistics", "ConvertToReflectometryQ",
-          "ConvertUnits"};
+  return {"ReflectometryBeamStatistics", "ConvertToReflectometryQ", "ConvertUnits"};
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
@@ -109,8 +102,7 @@ const std::string ReflectometryMomentumTransfer::summary() const {
 /** Initialize the algorithm's properties.
  */
 void ReflectometryMomentumTransfer::init() {
-  auto inWavelength =
-      std::make_shared<API::WorkspaceUnitValidator>("Wavelength");
+  auto inWavelength = std::make_shared<API::WorkspaceUnitValidator>("Wavelength");
   auto twoElementArray = std::make_shared<Kernel::ArrayLengthValidator<int>>(2);
   auto mandatoryDouble = std::make_shared<Kernel::MandatoryValidator<double>>();
   auto positiveDouble = std::make_shared<Kernel::BoundedValidator<double>>();
@@ -118,56 +110,41 @@ void ReflectometryMomentumTransfer::init() {
   auto mandatoryPositiveDouble = std::make_shared<Kernel::CompositeValidator>();
   mandatoryPositiveDouble->add(mandatoryDouble);
   mandatoryPositiveDouble->add(positiveDouble);
-  auto mandatoryString =
-      std::make_shared<Kernel::MandatoryValidator<std::string>>();
+  auto mandatoryString = std::make_shared<Kernel::MandatoryValidator<std::string>>();
   std::vector<std::string> sumTypes(2);
   sumTypes.front() = SumTypeChoice::LAMBDA;
   sumTypes.back() = SumTypeChoice::Q;
-  auto acceptableSumTypes =
-      std::make_shared<Kernel::ListValidator<std::string>>(sumTypes);
+  auto acceptableSumTypes = std::make_shared<Kernel::ListValidator<std::string>>(sumTypes);
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+                      Prop::INPUT_WS, "", Kernel::Direction::Input, inWavelength),
+                  "A reflectivity workspace with X units in wavelength.");
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          Prop::INPUT_WS, "", Kernel::Direction::Input, inWavelength),
-      "A reflectivity workspace with X units in wavelength.");
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          Prop::OUTPUT_WS, "", Kernel::Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::OUTPUT_WS, "", Kernel::Direction::Output),
       "The input workspace with X units converted to Q and DX values set to "
       "the Q resolution.");
   declareProperty(Prop::SUM_TYPE, SumTypeChoice::LAMBDA, acceptableSumTypes,
                   "The type of summation performed for the input workspace.");
-  declareProperty(Prop::REFLECTED_FOREGROUND, std::vector<int>(),
-                  twoElementArray,
+  declareProperty(Prop::REFLECTED_FOREGROUND, std::vector<int>(), twoElementArray,
                   "A two element list [start, end] defining the reflected beam "
                   "foreground region in workspace indices.");
-  declareProperty(Prop::PIXEL_SIZE, EMPTY_DBL(), mandatoryPositiveDouble,
-                  "Detector pixel size, in meters.");
-  declareProperty(Prop::DETECTOR_RESOLUTION, EMPTY_DBL(),
-                  mandatoryPositiveDouble,
+  declareProperty(Prop::PIXEL_SIZE, EMPTY_DBL(), mandatoryPositiveDouble, "Detector pixel size, in meters.");
+  declareProperty(Prop::DETECTOR_RESOLUTION, EMPTY_DBL(), mandatoryPositiveDouble,
                   "Detector pixel resolution, in meters.");
-  declareProperty(Prop::CHOPPER_SPEED, EMPTY_DBL(), mandatoryPositiveDouble,
-                  "Chopper speed, in rpm.");
+  declareProperty(Prop::CHOPPER_SPEED, EMPTY_DBL(), mandatoryPositiveDouble, "Chopper speed, in rpm.");
   declareProperty(Prop::CHOPPER_OPENING, EMPTY_DBL(), mandatoryPositiveDouble,
                   "The opening angle between the two choppers, in degrees.");
-  declareProperty(Prop::CHOPPER_RADIUS, EMPTY_DBL(), mandatoryPositiveDouble,
-                  "Chopper radius, in meters.");
+  declareProperty(Prop::CHOPPER_RADIUS, EMPTY_DBL(), mandatoryPositiveDouble, "Chopper radius, in meters.");
   declareProperty(Prop::CHOPPER_PAIR_DIST, EMPTY_DBL(), mandatoryPositiveDouble,
                   "The gap between two choppers, in meters.");
-  declareProperty(Prop::SLIT1_NAME, "", mandatoryString,
-                  "Name of the first slit component.");
-  declareProperty(Prop::SLIT1_SIZE_LOG, "", mandatoryString,
-                  "The sample log entry for the first slit opening.");
-  declareProperty(Prop::SLIT2_NAME, "", mandatoryString,
-                  "Name of the second slit component.");
-  declareProperty(Prop::SLIT2_SIZE_LOG, "", mandatoryString,
-                  "The sample log entry for the second slit opening.");
-  declareProperty(Prop::TOF_CHANNEL_WIDTH, EMPTY_DBL(), mandatoryPositiveDouble,
-                  "TOF bin width, in microseconds.");
+  declareProperty(Prop::SLIT1_NAME, "", mandatoryString, "Name of the first slit component.");
+  declareProperty(Prop::SLIT1_SIZE_LOG, "", mandatoryString, "The sample log entry for the first slit opening.");
+  declareProperty(Prop::SLIT2_NAME, "", mandatoryString, "Name of the second slit component.");
+  declareProperty(Prop::SLIT2_SIZE_LOG, "", mandatoryString, "The sample log entry for the second slit opening.");
+  declareProperty(Prop::TOF_CHANNEL_WIDTH, EMPTY_DBL(), mandatoryPositiveDouble, "TOF bin width, in microseconds.");
 }
 
 /// Validates the algorithm's input properties.
-std::map<std::string, std::string>
-ReflectometryMomentumTransfer::validateInputs() {
+std::map<std::string, std::string> ReflectometryMomentumTransfer::validateInputs() {
   std::map<std::string, std::string> issues;
   API::MatrixWorkspace_const_sptr inWS = getProperty(Prop::INPUT_WS);
   if (inWS->getNumberHistograms() != 1) {
@@ -185,14 +162,12 @@ ReflectometryMomentumTransfer::validateInputs() {
   auto instrument = inWS->getInstrument();
   auto slit = instrument->getComponentByName(slit1Name);
   if (!slit) {
-    issues[Prop::SLIT1_NAME] =
-        "No component called '" + slit1Name + "' found in " + Prop::INPUT_WS;
+    issues[Prop::SLIT1_NAME] = "No component called '" + slit1Name + "' found in " + Prop::INPUT_WS;
   }
   const std::string slit2Name = getProperty(Prop::SLIT1_NAME);
   slit = instrument->getComponentByName(slit2Name);
   if (!slit) {
-    issues[Prop::SLIT2_NAME] =
-        "No component called '" + slit2Name + "' found in " + Prop::INPUT_WS;
+    issues[Prop::SLIT2_NAME] = "No component called '" + slit2Name + "' found in " + Prop::INPUT_WS;
   }
   return issues;
 }
@@ -217,9 +192,8 @@ void ReflectometryMomentumTransfer::exec() {
  * @param setup a setup object
  * @param beam a beam statistics object
  */
-void ReflectometryMomentumTransfer::addResolutionDX(
-    const API::MatrixWorkspace &inWS, API::MatrixWorkspace &outWS,
-    const Setup &setup, const Beam &beam) {
+void ReflectometryMomentumTransfer::addResolutionDX(const API::MatrixWorkspace &inWS, API::MatrixWorkspace &outWS,
+                                                    const Setup &setup, const Beam &beam) {
   const auto deltaThetaSq = angularResolutionSquared(inWS, setup, beam);
   const auto &wavelengths = inWS.points(0);
   const auto &qs = outWS.points(0);
@@ -243,8 +217,8 @@ void ReflectometryMomentumTransfer::addResolutionDX(
  * @param beam a beam statistics object
  * @return the squared fractional angular resolution
  */
-double ReflectometryMomentumTransfer::angularResolutionSquared(
-    const API::MatrixWorkspace &ws, const Setup &setup, const Beam &beam) {
+double ReflectometryMomentumTransfer::angularResolutionSquared(const API::MatrixWorkspace &ws, const Setup &setup,
+                                                               const Beam &beam) {
   using namespace boost::math;
   const auto &spectrumInfo = ws.spectrumInfo();
   const auto l2 = spectrumInfo.l2(0);
@@ -253,46 +227,35 @@ double ReflectometryMomentumTransfer::angularResolutionSquared(
     if (beam.sampleWaviness > 0) {
       // Bent sample resolution
       if (beam.firstSlitAngularSpread >= 2. * beam.sampleWaviness) {
-        return (pow<2>(setup.detectorResolution /
-                       (setup.slit2SampleDistance + l2)) +
-                pow<2>(beam.secondSlitAngularSpread) +
-                pow<2>(beam.sampleWaviness)) /
+        return (pow<2>(setup.detectorResolution / (setup.slit2SampleDistance + l2)) +
+                pow<2>(beam.secondSlitAngularSpread) + pow<2>(beam.sampleWaviness)) /
                pow<2>(braggAngle);
       } else {
-        return (pow<2>(setup.detectorResolution / 2. /
-                       (setup.slit2SampleDistance + l2)) +
-                pow<2>(beam.secondSlitAngularSpread) +
-                pow<2>(beam.firstSlitAngularSpread)) /
+        return (pow<2>(setup.detectorResolution / 2. / (setup.slit2SampleDistance + l2)) +
+                pow<2>(beam.secondSlitAngularSpread) + pow<2>(beam.firstSlitAngularSpread)) /
                pow<2>(braggAngle);
       }
     } else {
       if (beam.firstSlitAngularSpread > setup.detectorResolution / l2) {
         // Divergent beam resolution
-        return (pow<2>(setup.detectorResolution /
-                       (setup.slit2SampleDistance + l2)) +
+        return (pow<2>(setup.detectorResolution / (setup.slit2SampleDistance + l2)) +
                 pow<2>(beam.secondSlitAngularSpread)) /
                pow<2>(braggAngle);
       } else {
         // Detector resolution is worse than the incoming divergence for a flat
         // sample.
         return (pow<2>(beam.incidentAngularSpread) +
-                pow<2>(setup.detectorResolution /
-                       (setup.slit2SampleDistance + l2))) /
+                pow<2>(setup.detectorResolution / (setup.slit2SampleDistance + l2))) /
                pow<2>(braggAngle);
       }
     }
   } else { // SumType::LAMBDA
     // Sample waviness removed as in cosmos
-    const auto angularResolution =
-        pow<2>(beam.incidentAngularSpread) / pow<2>(braggAngle);
+    const auto angularResolution = pow<2>(beam.incidentAngularSpread) / pow<2>(braggAngle);
     // In case foreground width is smaller than incoming angular resolution
-    const auto foregroundWidth =
-        static_cast<double>(setup.foregroundEnd - setup.foregroundStart + 1) *
-        setup.pixelSize;
-    const auto foregroundWidthLimited =
-        pow<2>(FWHM_GAUSSIAN_EQUIVALENT) *
-        (pow<2>(foregroundWidth) + pow<2>(setup.slit2Size)) /
-        pow<2>(l2 * braggAngle);
+    const auto foregroundWidth = static_cast<double>(setup.foregroundEnd - setup.foregroundStart + 1) * setup.pixelSize;
+    const auto foregroundWidthLimited = pow<2>(FWHM_GAUSSIAN_EQUIVALENT) *
+                                        (pow<2>(foregroundWidth) + pow<2>(setup.slit2Size)) / pow<2>(l2 * braggAngle);
     return std::min(angularResolution, foregroundWidthLimited);
   }
 }
@@ -301,8 +264,7 @@ double ReflectometryMomentumTransfer::angularResolutionSquared(
  *
  * @param ws a workspace to convert.
  */
-void ReflectometryMomentumTransfer::convertToMomentumTransfer(
-    API::MatrixWorkspace_sptr &ws) {
+void ReflectometryMomentumTransfer::convertToMomentumTransfer(API::MatrixWorkspace_sptr &ws) {
   auto convert = createChildAlgorithm("ConvertUnits");
   convert->setProperty("InputWorkspace", ws);
   convert->setProperty("OutputWorkspace", "unused_for_child");
@@ -317,18 +279,13 @@ void ReflectometryMomentumTransfer::convertToMomentumTransfer(
  * @return beam statistics
  */
 const ReflectometryMomentumTransfer::Beam
-ReflectometryMomentumTransfer::createBeamStatistics(
-    const API::MatrixWorkspace &ws) {
+ReflectometryMomentumTransfer::createBeamStatistics(const API::MatrixWorkspace &ws) {
   Beam b;
   const auto &run = ws.run();
-  b.incidentAngularSpread = fromLogs(
-      run, ReflectometryBeamStatistics::LogEntry::INCIDENT_ANGULAR_SPREAD);
-  b.firstSlitAngularSpread = fromLogs(
-      run, ReflectometryBeamStatistics::LogEntry::FIRST_SLIT_ANGULAR_SPREAD);
-  b.secondSlitAngularSpread = fromLogs(
-      run, ReflectometryBeamStatistics::LogEntry::SECOND_SLIT_ANGULAR_SPREAD);
-  b.sampleWaviness =
-      fromLogs(run, ReflectometryBeamStatistics::LogEntry::SAMPLE_WAVINESS);
+  b.incidentAngularSpread = fromLogs(run, ReflectometryBeamStatistics::LogEntry::INCIDENT_ANGULAR_SPREAD);
+  b.firstSlitAngularSpread = fromLogs(run, ReflectometryBeamStatistics::LogEntry::FIRST_SLIT_ANGULAR_SPREAD);
+  b.secondSlitAngularSpread = fromLogs(run, ReflectometryBeamStatistics::LogEntry::SECOND_SLIT_ANGULAR_SPREAD);
+  b.sampleWaviness = fromLogs(run, ReflectometryBeamStatistics::LogEntry::SAMPLE_WAVINESS);
   return b;
 }
 
@@ -337,14 +294,11 @@ ReflectometryMomentumTransfer::createBeamStatistics(
  * @param ws the reflectivity workspace
  * @return a setup object
  */
-const ReflectometryMomentumTransfer::Setup
-ReflectometryMomentumTransfer::createSetup(const API::MatrixWorkspace &ws) {
+const ReflectometryMomentumTransfer::Setup ReflectometryMomentumTransfer::createSetup(const API::MatrixWorkspace &ws) {
   Setup s;
-  s.chopperOpening = static_cast<double>(getProperty(Prop::CHOPPER_OPENING)) *
-                     Geometry::deg2rad;
+  s.chopperOpening = static_cast<double>(getProperty(Prop::CHOPPER_OPENING)) * Geometry::deg2rad;
   s.chopperPairDistance = getProperty(Prop::CHOPPER_PAIR_DIST);
-  s.chopperPeriod =
-      1. / (static_cast<double>(getProperty(Prop::CHOPPER_SPEED)) / 60.);
+  s.chopperPeriod = 1. / (static_cast<double>(getProperty(Prop::CHOPPER_SPEED)) / 60.);
   s.chopperRadius = getProperty(Prop::CHOPPER_RADIUS);
   s.detectorResolution = getProperty(Prop::DETECTOR_RESOLUTION);
   std::vector<int> foreground = getProperty(Prop::REFLECTED_FOREGROUND);
@@ -368,8 +322,7 @@ ReflectometryMomentumTransfer::createSetup(const API::MatrixWorkspace &ws) {
   s.slit2Size = slitSize(ws, slit2SizeEntry);
   const std::string sumType = getProperty(Prop::SUM_TYPE);
   s.sumType = sumType == SumTypeChoice::LAMBDA ? SumType::LAMBDA : SumType::Q;
-  s.tofChannelWidth =
-      static_cast<double>(getProperty(Prop::TOF_CHANNEL_WIDTH)) * 1e-6;
+  s.tofChannelWidth = static_cast<double>(getProperty(Prop::TOF_CHANNEL_WIDTH)) * 1e-6;
   return s;
 }
 
@@ -378,13 +331,11 @@ ReflectometryMomentumTransfer::createSetup(const API::MatrixWorkspace &ws) {
  * @param ws the reflectivity workspace
  * @return the slit gap, in meters
  */
-double ReflectometryMomentumTransfer::interslitDistance(
-    const API::MatrixWorkspace &ws) {
+double ReflectometryMomentumTransfer::interslitDistance(const API::MatrixWorkspace &ws) {
   const std::string slit1Name = getProperty(Prop::SLIT1_NAME);
   const std::string slit2Name = getProperty(Prop::SLIT2_NAME);
   auto instrument = ws.getInstrument();
-  return ReflectometryBeamStatistics::slitSeparation(instrument, slit1Name,
-                                                     slit2Name);
+  return ReflectometryBeamStatistics::slitSeparation(instrument, slit1Name, slit2Name);
 }
 
 /** Read the slit size from samle logs.
@@ -393,22 +344,19 @@ double ReflectometryMomentumTransfer::interslitDistance(
  * @param logEntry name of the slit opening sample log
  * @return the slit opening, in meters
  */
-double ReflectometryMomentumTransfer::slitSize(const API::MatrixWorkspace &ws,
-                                               const std::string &logEntry) {
+double ReflectometryMomentumTransfer::slitSize(const API::MatrixWorkspace &ws, const std::string &logEntry) {
   auto &run = ws.run();
   const auto opening = run.getPropertyValueAsType<double>(logEntry);
   const auto &units = run.getProperty(logEntry)->units();
   if (units.empty()) {
-    m_log.warning() << "Slit opening entry " << logEntry
-                    << " has no unit. Assuming meters.\n";
+    m_log.warning() << "Slit opening entry " << logEntry << " has no unit. Assuming meters.\n";
     return opening;
   } else if (units == "m") {
     return opening;
   } else if (units == "mm") {
     return opening * 1e-3;
   } else {
-    m_log.warning() << "Slit opening entry " << logEntry
-                    << " has an unknown unit. Assuming meters.\n";
+    m_log.warning() << "Slit opening entry " << logEntry << " has an unknown unit. Assuming meters.\n";
     return opening;
   }
 }
@@ -419,33 +367,23 @@ double ReflectometryMomentumTransfer::slitSize(const API::MatrixWorkspace &ws,
  * @param wavelength wavelength, in meters
  * @return the fractional resolution squared
  */
-double ReflectometryMomentumTransfer::wavelengthResolutionSquared(
-    const Setup &setup, const double wavelength) {
+double ReflectometryMomentumTransfer::wavelengthResolutionSquared(const Setup &setup, const double wavelength) {
   // err_res in COSMOS
   using namespace boost::math;
   using namespace PhysicalConstants;
   const auto flightDistance = setup.l1 + setup.l2;
-  const auto chopperResolution =
-      setup.chopperPairDistance + h * setup.chopperOpening *
-                                      setup.chopperPeriod /
-                                      (2. * M_PI * NeutronMass * wavelength);
-  const auto detectorResolution =
-      h * setup.tofChannelWidth / (NeutronMass * wavelength);
+  const auto chopperResolution = setup.chopperPairDistance + h * setup.chopperOpening * setup.chopperPeriod /
+                                                                 (2. * M_PI * NeutronMass * wavelength);
+  const auto detectorResolution = h * setup.tofChannelWidth / (NeutronMass * wavelength);
   const auto partialResolution =
       0.49 *
-      (3. * pow<2>(chopperResolution) + pow<2>(detectorResolution) +
-       3. * chopperResolution * detectorResolution) /
+      (3. * pow<2>(chopperResolution) + pow<2>(detectorResolution) + 3. * chopperResolution * detectorResolution) /
       (2. * chopperResolution + detectorResolution) / flightDistance;
-  const auto flightDistRatio =
-      (setup.l1 - setup.slit2SampleDistance) / setup.slit1Slit2Distance;
-  const auto a =
-      flightDistRatio * (setup.slit1Size + setup.slit2Size) + setup.slit1Size;
-  const auto b = flightDistRatio * std::abs(setup.slit1Size - setup.slit2Size) +
-                 setup.slit1Size;
-  const auto wavelengthSmearing =
-      0.49 * (pow<3>(a) - pow<3>(b)) / (pow<2>(a) - pow<2>(b));
-  const auto widthResolution = wavelengthSmearing * setup.chopperPeriod /
-                               (2. * M_PI * setup.chopperRadius) * h /
+  const auto flightDistRatio = (setup.l1 - setup.slit2SampleDistance) / setup.slit1Slit2Distance;
+  const auto a = flightDistRatio * (setup.slit1Size + setup.slit2Size) + setup.slit1Size;
+  const auto b = flightDistRatio * std::abs(setup.slit1Size - setup.slit2Size) + setup.slit1Size;
+  const auto wavelengthSmearing = 0.49 * (pow<3>(a) - pow<3>(b)) / (pow<2>(a) - pow<2>(b));
+  const auto widthResolution = wavelengthSmearing * setup.chopperPeriod / (2. * M_PI * setup.chopperRadius) * h /
                                (NeutronMass * wavelength * flightDistance);
   return pow<2>(partialResolution) + pow<2>(widthResolution);
 }

@@ -40,15 +40,13 @@ public:
       outWSName = inWSName;
 
     // Make a fake file-backed (or not) MDEW
-    MDEventWorkspace3Lean::sptr ws1 =
-        MDAlgorithmsTestHelper::makeFileBackedMDEW(inWSName, fileBacked);
+    MDEventWorkspace3Lean::sptr ws1 = MDAlgorithmsTestHelper::makeFileBackedMDEW(inWSName, fileBacked);
 
     TransformMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Scaling", "2"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Offset", "21"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -56,9 +54,7 @@ public:
 
     // Retrieve the workspace from data service.
     MDEventWorkspace3Lean::sptr ws2;
-    TS_ASSERT_THROWS_NOTHING(
-        ws2 = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws2 = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(outWSName));
     TS_ASSERT(ws2);
     if (!ws2)
       return;
@@ -70,8 +66,7 @@ public:
     std::vector<API::IMDNode *> boxes;
     ws2->getBox()->getBoxes(boxes, 1000, true);
     for (auto box : boxes) {
-      TSM_ASSERT_LESS_THAN("Box extents was offset", 20.0,
-                           box->getExtents(0).getMin());
+      TSM_ASSERT_LESS_THAN("Box extents was offset", 20.0, box->getExtents(0).getMin());
       // More detailed tests are in MDBox, MDBoxBase and MDGridBox.
     }
 
@@ -107,8 +102,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Scaling", "2"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Offset", "21"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -116,9 +110,7 @@ public:
 
     // Retrieve the workspace from data service.
     MDHistoWorkspace_sptr ws2;
-    TS_ASSERT_THROWS_NOTHING(
-        ws2 = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws2 = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(outWSName));
     TS_ASSERT(ws2);
     if (!ws2)
       return;
@@ -130,8 +122,7 @@ public:
 
     TS_ASSERT_DELTA(ws2->getInverseVolume(), 1. / 16., 1e-6);
     coord_t point[2] = {21.1f, 21.1f};
-    TS_ASSERT_DELTA(ws2->getSignalAtCoord(point, Mantid::API::NoNormalization),
-                    1.23, 1e-6);
+    TS_ASSERT_DELTA(ws2->getSignalAtCoord(point, Mantid::API::NoNormalization), 1.23, 1e-6);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(inWSName);
@@ -140,14 +131,12 @@ public:
   }
 
   void test_MDHistoWorkspace_2D() {
-    MDHistoWorkspace_sptr ws1 =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 2.34);
+    MDHistoWorkspace_sptr ws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 2.34);
     do_test_histo(ws1);
   }
 
   void test_MDHistoWorkspace_2D_InPlace() {
-    MDHistoWorkspace_sptr ws1 =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 2.34);
+    MDHistoWorkspace_sptr ws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 2.34);
     do_test_histo(ws1, true);
   }
 };

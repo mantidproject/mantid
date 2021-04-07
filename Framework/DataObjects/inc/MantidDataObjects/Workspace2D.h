@@ -33,20 +33,15 @@ public:
    */
   const std::string id() const override { return "Workspace2D"; }
 
-  Workspace2D(
-      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
+  Workspace2D(const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
   Workspace2D &operator=(const Workspace2D &other) = delete;
   ~Workspace2D() override;
 
   /// Returns a clone of the workspace
-  std::unique_ptr<Workspace2D> clone() const {
-    return std::unique_ptr<Workspace2D>(doClone());
-  }
+  std::unique_ptr<Workspace2D> clone() const { return std::unique_ptr<Workspace2D>(doClone()); }
 
   /// Returns a default-initialized clone of the workspace
-  std::unique_ptr<Workspace2D> cloneEmpty() const {
-    return std::unique_ptr<Workspace2D>(doCloneEmpty());
-  }
+  std::unique_ptr<Workspace2D> cloneEmpty() const { return std::unique_ptr<Workspace2D>(doCloneEmpty()); }
 
   /// Returns true if the workspace is ragged (has differently sized spectra).
   bool isRaggedWorkspace() const override;
@@ -70,8 +65,7 @@ public:
   const Histogram1D &getSpectrum(const size_t index) const override;
 
   /// Generate a new histogram by rebinning the existing histogram.
-  void generateHistogram(const std::size_t index, const MantidVec &X,
-                         MantidVec &Y, MantidVec &E,
+  void generateHistogram(const std::size_t index, const MantidVec &X, MantidVec &Y, MantidVec &E,
                          bool skipError = false) const override;
 
   /** sets the monitorWorkspace indexlist
@@ -80,24 +74,19 @@ public:
   void setMonitorList(std::vector<specnum_t> &mList) { m_monitorList = mList; }
 
   /// Copy the data (Y's) from an image to this workspace.
-  void setImageY(const API::MantidImage &image, size_t start = 0,
-                 bool parallelExecution = true) override;
+  void setImageY(const API::MantidImage &image, size_t start = 0, bool parallelExecution = true) override;
   /// Copy the data from an image to this workspace's errors.
-  void setImageE(const API::MantidImage &image, size_t start = 0,
-                 bool parallelExecution = true) override;
+  void setImageE(const API::MantidImage &image, size_t start = 0, bool parallelExecution = true) override;
   /// Copy the data from an image to this workspace's (Y's) and errors.
-  void setImageYAndE(const API::MantidImage &imageY,
-                     const API::MantidImage &imageE, size_t start = 0,
-                     bool loadAsRectImg = false, double scale_1 = 1.0,
-                     bool parallelExecution = true);
+  void setImageYAndE(const API::MantidImage &imageY, const API::MantidImage &imageE, size_t start = 0,
+                     bool loadAsRectImg = false, double scale_1 = 1.0, bool parallelExecution = true);
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   Workspace2D(const Workspace2D &other);
 
   /// Called by initialize()
-  void init(const std::size_t &NVectors, const std::size_t &XLength,
-            const std::size_t &YLength) override;
+  void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength) override;
   void init(const HistogramData::Histogram &histogram) override;
 
   /// a vector holding workspace index of monitors in the workspace

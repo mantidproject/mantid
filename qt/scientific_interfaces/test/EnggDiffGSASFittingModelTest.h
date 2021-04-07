@@ -25,18 +25,15 @@ using namespace MantidQt::CustomInterfaces;
 namespace { // Helpers
 
 std::vector<GSASIIRefineFitPeaksParameters>
-createGSASIIRefineFitPeaksParameters(
-    const API::MatrixWorkspace_sptr &inputWS, const RunLabel &runLabel,
-    const GSASRefinementMethod &refinementMethod) {
-  return {GSASIIRefineFitPeaksParameters(
-      inputWS, runLabel, refinementMethod, "", std::vector<std::string>({}), "",
-      "", boost::none, boost::none, boost::none, boost::none, false, false)};
+createGSASIIRefineFitPeaksParameters(const API::MatrixWorkspace_sptr &inputWS, const RunLabel &runLabel,
+                                     const GSASRefinementMethod &refinementMethod) {
+  return {GSASIIRefineFitPeaksParameters(inputWS, runLabel, refinementMethod, "", std::vector<std::string>({}), "", "",
+                                         boost::none, boost::none, boost::none, boost::none, false, false)};
 }
 
 template <size_t numColumns, size_t numRows>
-API::ITableWorkspace_sptr createDummyTable(
-    const std::array<std::string, numColumns> &columnHeadings,
-    const std::array<std::array<double, numColumns>, numRows> tableContents) {
+API::ITableWorkspace_sptr createDummyTable(const std::array<std::string, numColumns> &columnHeadings,
+                                           const std::array<std::array<double, numColumns>, numRows> tableContents) {
   auto table = API::WorkspaceFactory::Instance().createTable();
   for (const auto &header : columnHeadings) {
     table->addColumn("double", header);
@@ -55,60 +52,48 @@ class TestEnggDiffGSASFittingModel : public EnggDiffGSASFittingModel {
 public:
   void addGammaValue(const RunLabel &runLabel, const double gamma);
 
-  void addLatticeParamTable(const RunLabel &runLabel,
-                            const API::ITableWorkspace_sptr &table);
+  void addLatticeParamTable(const RunLabel &runLabel, const API::ITableWorkspace_sptr &table);
 
   void addRwpValue(const RunLabel &runLabel, const double rwp);
 
   void addSigmaValue(const RunLabel &runLabel, const double sigma);
 
-  void doRefinements(
-      const std::vector<GSASIIRefineFitPeaksParameters> &params) override;
+  void doRefinements(const std::vector<GSASIIRefineFitPeaksParameters> &params) override;
 };
 
-inline void
-TestEnggDiffGSASFittingModel::addGammaValue(const RunLabel &runLabel,
-                                            const double gamma) {
+inline void TestEnggDiffGSASFittingModel::addGammaValue(const RunLabel &runLabel, const double gamma) {
   addGamma(runLabel, gamma);
 }
 
-inline void TestEnggDiffGSASFittingModel::addLatticeParamTable(
-    const RunLabel &runLabel, const API::ITableWorkspace_sptr &table) {
+inline void TestEnggDiffGSASFittingModel::addLatticeParamTable(const RunLabel &runLabel,
+                                                               const API::ITableWorkspace_sptr &table) {
   addLatticeParams(runLabel, std::move(table));
 }
 
-inline void TestEnggDiffGSASFittingModel::addRwpValue(const RunLabel &runLabel,
-                                                      const double rwp) {
+inline void TestEnggDiffGSASFittingModel::addRwpValue(const RunLabel &runLabel, const double rwp) {
   addRwp(runLabel, rwp);
 }
 
-inline void
-TestEnggDiffGSASFittingModel::addSigmaValue(const RunLabel &runLabel,
-                                            const double sigma) {
+inline void TestEnggDiffGSASFittingModel::addSigmaValue(const RunLabel &runLabel, const double sigma) {
   addSigma(runLabel, sigma);
 }
 
-void TestEnggDiffGSASFittingModel::doRefinements(
-    const std::vector<GSASIIRefineFitPeaksParameters> &params) {
+void TestEnggDiffGSASFittingModel::doRefinements(const std::vector<GSASIIRefineFitPeaksParameters> &params) {
   // Mock method - just create some dummy output and ignore all the parameters
   UNUSED_ARG(params);
 
   const static std::array<std::string, 3> columnHeadings = {{"a", "b", "c"}};
-  const static std::array<std::array<double, 3>, 1> targetTableValues = {
-      {{{1, 2, 3}}}};
-  const auto latticeParams =
-      createDummyTable(columnHeadings, targetTableValues);
+  const static std::array<std::array<double, 3>, 1> targetTableValues = {{{{1, 2, 3}}}};
+  const auto latticeParams = createDummyTable(columnHeadings, targetTableValues);
 
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
   ADS.add("LATTICEPARAMS", latticeParams);
 
-  API::MatrixWorkspace_sptr ws =
-      WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
+  API::MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
   ADS.add("FITTEDPEAKS", ws);
 
-  processRefinementSuccessful(
-      nullptr, GSASIIRefineFitPeaksOutputProperties(1, 2, 3, ws, latticeParams,
-                                                    params[0].runLabel));
+  processRefinementSuccessful(nullptr,
+                              GSASIIRefineFitPeaksOutputProperties(1, 2, 3, ws, latticeParams, params[0].runLabel));
 }
 
 } // Anonymous namespace
@@ -117,12 +102,8 @@ class EnggDiffGSASFittingModelTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static EnggDiffGSASFittingModelTest *createSuite() {
-    return new EnggDiffGSASFittingModelTest();
-  }
-  static void destroySuite(EnggDiffGSASFittingModelTest *suite) {
-    delete suite;
-  }
+  static EnggDiffGSASFittingModelTest *createSuite() { return new EnggDiffGSASFittingModelTest(); }
+  static void destroySuite(EnggDiffGSASFittingModelTest *suite) { delete suite; }
 
   EnggDiffGSASFittingModelTest() { API::FrameworkManager::Instance(); }
 
@@ -197,8 +178,7 @@ public:
 
   void test_getLatticeParams() {
     const std::array<std::string, 3> columnHeadings = {{"a", "b", "c"}};
-    const std::array<std::array<double, 3>, 1> targetTableValues = {
-        {{{1, 2, 3}}}};
+    const std::array<std::array<double, 3>, 1> targetTableValues = {{{{1, 2, 3}}}};
     const auto table = createDummyTable(columnHeadings, targetTableValues);
 
     TestEnggDiffGSASFittingModel model;
@@ -236,12 +216,10 @@ public:
     TestEnggDiffGSASFittingModel model;
     const RunLabel runLabel("123", 1);
 
-    API::MatrixWorkspace_sptr inputWS =
-        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
+    API::MatrixWorkspace_sptr inputWS = API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
 
     TS_ASSERT_THROWS_NOTHING(
-        model.doRefinements(createGSASIIRefineFitPeaksParameters(
-            inputWS, runLabel, GSASRefinementMethod::PAWLEY)));
+        model.doRefinements(createGSASIIRefineFitPeaksParameters(inputWS, runLabel, GSASRefinementMethod::PAWLEY)));
 
     const auto rwp = model.getRwp(runLabel);
     TS_ASSERT(rwp);
@@ -265,12 +243,10 @@ public:
     TestEnggDiffGSASFittingModel model;
     const RunLabel runLabel("123", 1);
 
-    API::MatrixWorkspace_sptr inputWS =
-        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
+    API::MatrixWorkspace_sptr inputWS = API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
 
     TS_ASSERT_THROWS_NOTHING(
-        model.doRefinements(createGSASIIRefineFitPeaksParameters(
-            inputWS, runLabel, GSASRefinementMethod::RIETVELD)));
+        model.doRefinements(createGSASIIRefineFitPeaksParameters(inputWS, runLabel, GSASRefinementMethod::RIETVELD)));
 
     const auto rwp = model.getRwp(runLabel);
     TS_ASSERT(rwp);

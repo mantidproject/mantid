@@ -12,8 +12,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-template <typename Validated, typename Error = boost::blank>
-class ValidationResult {
+template <typename Validated, typename Error = boost::blank> class ValidationResult {
 public:
   explicit ValidationResult(Validated validItem);
   explicit ValidationResult(Error validationErrors);
@@ -30,40 +29,33 @@ private:
 };
 
 template <typename Validated, typename Error>
-ValidationResult<Validated, Error>::ValidationResult()
-    : m_innerResult(boost::blank()) {}
+ValidationResult<Validated, Error>::ValidationResult() : m_innerResult(boost::blank()) {}
 
 template <typename Validated, typename Error>
-ValidationResult<Validated, Error>::ValidationResult(Validated validItem)
-    : m_innerResult(std::move(validItem)) {}
+ValidationResult<Validated, Error>::ValidationResult(Validated validItem) : m_innerResult(std::move(validItem)) {}
 
 template <typename Validated, typename Error>
 ValidationResult<Validated, Error>::ValidationResult(Error validationErrors)
     : m_innerResult(std::move(validationErrors)) {}
 
-template <typename Validated, typename Error>
-bool ValidationResult<Validated, Error>::isValid() const {
+template <typename Validated, typename Error> bool ValidationResult<Validated, Error>::isValid() const {
   return m_innerResult.which() == 0;
 }
 
-template <typename Validated, typename Error>
-bool ValidationResult<Validated, Error>::isError() const {
+template <typename Validated, typename Error> bool ValidationResult<Validated, Error>::isError() const {
   return m_innerResult.which() == 1;
 }
 
-template <typename Validated, typename Error>
-Validated const &ValidationResult<Validated, Error>::assertValid() const {
+template <typename Validated, typename Error> Validated const &ValidationResult<Validated, Error>::assertValid() const {
   return boost::get<Validated>(m_innerResult);
 }
 
-template <typename Validated, typename Error>
-Error const &ValidationResult<Validated, Error>::assertError() const {
+template <typename Validated, typename Error> Error const &ValidationResult<Validated, Error>::assertError() const {
   return boost::get<Error>(m_innerResult);
 }
 
 template <typename Validated, typename Error>
-boost::optional<Validated>
-ValidationResult<Validated, Error>::validElseNone() const {
+boost::optional<Validated> ValidationResult<Validated, Error>::validElseNone() const {
   if (isValid())
     return assertValid();
   else

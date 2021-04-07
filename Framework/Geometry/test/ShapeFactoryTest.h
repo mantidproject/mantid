@@ -29,12 +29,9 @@ public:
   void testCuboid() {
     std::string xmlShape = "<cuboid id=\"shape\"> ";
     xmlShape += R"(<left-front-bottom-point x="0.005" y="-0.1" z="0.0" /> )";
-    xmlShape +=
-        R"(<left-front-top-point x="0.005" y="-0.1" z="0.0001" />  )";
-    xmlShape +=
-        R"(<left-back-bottom-point x="-0.005" y="-0.1" z="0.0" />  )";
-    xmlShape +=
-        R"(<right-front-bottom-point x="0.005" y="0.1" z="0.0" />  )";
+    xmlShape += R"(<left-front-top-point x="0.005" y="-0.1" z="0.0001" />  )";
+    xmlShape += R"(<left-back-bottom-point x="-0.005" y="-0.1" z="0.0" />  )";
+    xmlShape += R"(<right-front-bottom-point x="0.005" y="0.1" z="0.0" />  )";
     xmlShape += "</cuboid> ";
     xmlShape += "<algebra val=\"shape\" /> ";
 
@@ -151,13 +148,11 @@ public:
     xmlShape += "</cuboid> ";
     xmlShape += "<algebra val=\"shape\"/> ";
 
-    std::string expectedXML =
-        "<type name=\"userShape\"> " + xmlShape + " </type>";
+    std::string expectedXML = "<type name=\"userShape\"> " + xmlShape + " </type>";
 
     auto shape_sptr = getObject(xmlShape);
     TSM_ASSERT("Empty shape xml given.", !shape_sptr->getShapeXML().empty());
-    TSM_ASSERT_EQUALS("Shape xml not relayed through to shape object.",
-                      expectedXML, shape_sptr->getShapeXML());
+    TSM_ASSERT_EQUALS("Shape xml not relayed through to shape object.", expectedXML, shape_sptr->getShapeXML());
   }
 
   void testHexahedron() {
@@ -184,22 +179,14 @@ public:
 
   void testHexahedron2() {
     std::string xmlShape = "<hexahedron id=\"shape\"> ";
-    xmlShape +=
-        R"(<left-front-bottom-point x="0.0" y="-0.0031" z="-0.037"  /> )";
-    xmlShape +=
-        R"(<right-front-bottom-point x="0.0" y="0.0031" z="-0.037"  /> )";
-    xmlShape +=
-        R"(<left-front-top-point x="0.0" y="-0.0104" z="0.037"  /> )";
-    xmlShape +=
-        R"(<right-front-top-point x="0.0" y="0.0104" z="0.037"  /> )";
-    xmlShape +=
-        R"(<left-back-bottom-point x="0.005" y="-0.0031" z="-0.037"  /> )";
-    xmlShape +=
-        R"(<right-back-bottom-point x="0.005" y="0.0031" z="-0.037"  /> )";
-    xmlShape +=
-        R"(<left-back-top-point x="0.005" y="-0.0104" z="0.037"  /> )";
-    xmlShape +=
-        R"(<right-back-top-point x="0.005" y="0.0104" z="0.037"  /> )";
+    xmlShape += R"(<left-front-bottom-point x="0.0" y="-0.0031" z="-0.037"  /> )";
+    xmlShape += R"(<right-front-bottom-point x="0.0" y="0.0031" z="-0.037"  /> )";
+    xmlShape += R"(<left-front-top-point x="0.0" y="-0.0104" z="0.037"  /> )";
+    xmlShape += R"(<right-front-top-point x="0.0" y="0.0104" z="0.037"  /> )";
+    xmlShape += R"(<left-back-bottom-point x="0.005" y="-0.0031" z="-0.037"  /> )";
+    xmlShape += R"(<right-back-bottom-point x="0.005" y="0.0031" z="-0.037"  /> )";
+    xmlShape += R"(<left-back-top-point x="0.005" y="-0.0104" z="0.037"  /> )";
+    xmlShape += R"(<right-back-top-point x="0.005" y="0.0104" z="0.037"  /> )";
     xmlShape += "</hexahedron> ";
     xmlShape += "<algebra val=\"shape\" /> ";
 
@@ -423,14 +410,13 @@ public:
   }
 
   void testHollowCylinder() {
-    const std::string xmlShape =
-        "<hollow-cylinder id=\"an-1\">"
-        " <centre-of-bottom-base x=\"0.0\" y=\"-0.025\" z=\"0.0\" />"
-        " <axis x =\"0.0\" y=\"1.0\" z=\"0.0\" />"
-        " <inner-radius val=\"0.006\" />"
-        " <outer-radius val=\"0.0065\" />"
-        " <height val=\"0.05\" />"
-        "</hollow-cylinder> ";
+    const std::string xmlShape = "<hollow-cylinder id=\"an-1\">"
+                                 " <centre-of-bottom-base x=\"0.0\" y=\"-0.025\" z=\"0.0\" />"
+                                 " <axis x =\"0.0\" y=\"1.0\" z=\"0.0\" />"
+                                 " <inner-radius val=\"0.006\" />"
+                                 " <outer-radius val=\"0.0065\" />"
+                                 " <height val=\"0.05\" />"
+                                 "</hollow-cylinder> ";
 
     auto shape_sptr = getObject(xmlShape);
     TS_ASSERT(shape_sptr);
@@ -449,14 +435,13 @@ public:
   }
 
   void testHollowCylinderWithOuterSmallerThanInner() {
-    const std::string xmlShape =
-        "<hollow-cylinder id=\"an-1\">"
-        " <centre-of-bottom-base x=\"0.0\" y=\"-0.025\" z=\"0.0\" />"
-        " <axis x =\"0.0\" y=\"1.0\" z=\"0.0\" />"
-        " <inner-radius val=\"0.0065\" />"
-        " <outer-radius val=\"0.006\" />"
-        " <height val=\"0.05\" />"
-        "</hollow-cylinder> ";
+    const std::string xmlShape = "<hollow-cylinder id=\"an-1\">"
+                                 " <centre-of-bottom-base x=\"0.0\" y=\"-0.025\" z=\"0.0\" />"
+                                 " <axis x =\"0.0\" y=\"1.0\" z=\"0.0\" />"
+                                 " <inner-radius val=\"0.0065\" />"
+                                 " <outer-radius val=\"0.006\" />"
+                                 " <height val=\"0.05\" />"
+                                 "</hollow-cylinder> ";
 
     auto shape_sptr = getObject(xmlShape);
     TS_ASSERT(shape_sptr);
@@ -464,14 +449,13 @@ public:
   }
 
   void testHollowCylinderWithNegativeHeight() {
-    const std::string xmlShape =
-        "<hollow-cylinder id=\"an-1\">"
-        " <centre-of-bottom-base x=\"0.0\" y=\"-0.025\" z=\"0.0\" />"
-        " <axis x =\"0.0\" y=\"1.0\" z=\"0.0\" />"
-        " <inner-radius val=\"0.006\" />"
-        " <outer-radius val=\"0.0065\" />"
-        " <height val=\"-0.05\" />"
-        "</hollow-cylinder> ";
+    const std::string xmlShape = "<hollow-cylinder id=\"an-1\">"
+                                 " <centre-of-bottom-base x=\"0.0\" y=\"-0.025\" z=\"0.0\" />"
+                                 " <axis x =\"0.0\" y=\"1.0\" z=\"0.0\" />"
+                                 " <inner-radius val=\"0.006\" />"
+                                 " <outer-radius val=\"0.0065\" />"
+                                 " <height val=\"-0.05\" />"
+                                 "</hollow-cylinder> ";
 
     auto shape_sptr = getObject(xmlShape);
     TS_ASSERT(shape_sptr);
@@ -479,14 +463,13 @@ public:
   }
 
   void testHollowCylinderWithNegativeOrZeroInnerRadius() {
-    const std::string xmlShape =
-        "<hollow-cylinder id=\"an-1\">"
-        " <centre-of-bottom-base x=\"0.0\" y=\"-0.025\" z=\"0.0\" />"
-        " <axis x =\"0.0\" y=\"1.0\" z=\"0.0\" />"
-        " <inner-radius val=\"-0.0\" />"
-        " <outer-radius val=\"0.0065\" />"
-        " <height val=\"-0.05\" />"
-        "</hollow-cylinder> ";
+    const std::string xmlShape = "<hollow-cylinder id=\"an-1\">"
+                                 " <centre-of-bottom-base x=\"0.0\" y=\"-0.025\" z=\"0.0\" />"
+                                 " <axis x =\"0.0\" y=\"1.0\" z=\"0.0\" />"
+                                 " <inner-radius val=\"-0.0\" />"
+                                 " <outer-radius val=\"0.0065\" />"
+                                 " <height val=\"-0.05\" />"
+                                 "</hollow-cylinder> ";
 
     auto shape_sptr = getObject(xmlShape);
     TS_ASSERT(shape_sptr);
@@ -494,14 +477,13 @@ public:
   }
 
   void testHollowCylinderWithNegativeOuterRadius() {
-    const std::string xmlShape =
-        "<hollow-cylinder id=\"an-1\">"
-        " <centre-of-bottom-base x=\"0.0\" y=\"-0.025\" z=\"0.0\" />"
-        " <axis x =\"0.0\" y=\"1.0\" z=\"0.0\" />"
-        " <inner-radius val=\"0.006\" />"
-        " <outer-radius val=\"-0.0\" />"
-        " <height val=\"-0.05\" />"
-        "</hollow-cylinder> ";
+    const std::string xmlShape = "<hollow-cylinder id=\"an-1\">"
+                                 " <centre-of-bottom-base x=\"0.0\" y=\"-0.025\" z=\"0.0\" />"
+                                 " <axis x =\"0.0\" y=\"1.0\" z=\"0.0\" />"
+                                 " <inner-radius val=\"0.006\" />"
+                                 " <outer-radius val=\"-0.0\" />"
+                                 " <height val=\"-0.05\" />"
+                                 "</hollow-cylinder> ";
 
     auto shape_sptr = getObject(xmlShape);
     TS_ASSERT(shape_sptr);

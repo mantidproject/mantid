@@ -19,15 +19,12 @@ namespace API {
  * Constructor.
  * @param name :: The name of a workspace group.
  */
-AnalysisDataServiceImpl::GroupUpdatedNotification::GroupUpdatedNotification(
-    const std::string &name)
-    : DataServiceNotification(name,
-                              AnalysisDataService::Instance().retrieve(name)) {}
+AnalysisDataServiceImpl::GroupUpdatedNotification::GroupUpdatedNotification(const std::string &name)
+    : DataServiceNotification(name, AnalysisDataService::Instance().retrieve(name)) {}
 /**
  * Returns the workspace pointer cast to WorkspaceGroup
  */
-std::shared_ptr<const WorkspaceGroup>
-AnalysisDataServiceImpl::GroupUpdatedNotification::getWorkspaceGroup() const {
+std::shared_ptr<const WorkspaceGroup> AnalysisDataServiceImpl::GroupUpdatedNotification::getWorkspaceGroup() const {
   return std::dynamic_pointer_cast<const WorkspaceGroup>(this->object());
 }
 
@@ -41,8 +38,7 @@ AnalysisDataServiceImpl::GroupUpdatedNotification::getWorkspaceGroup() const {
  * problem
  * if the name is unacceptable.
  */
-const std::string
-AnalysisDataServiceImpl::isValid(const std::string &name) const {
+const std::string AnalysisDataServiceImpl::isValid(const std::string &name) const {
   std::string error;
   const std::string &illegal = illegalCharacters();
   if (illegal.empty())
@@ -51,9 +47,7 @@ AnalysisDataServiceImpl::isValid(const std::string &name) const {
   for (size_t i = 0; i < length; ++i) {
     if (illegal.find_first_of(name[i]) != std::string::npos) {
       std::ostringstream strm;
-      strm << "Invalid object name '" << name
-           << "'. Names cannot contain any of the following characters: "
-           << illegal;
+      strm << "Invalid object name '" << name << "'. Names cannot contain any of the following characters: " << illegal;
       error = strm.str();
       break;
     }
@@ -70,8 +64,7 @@ AnalysisDataServiceImpl::isValid(const std::string &name) const {
  * @param name The name of the object
  * @param workspace The shared pointer to the workspace to store
  */
-void AnalysisDataServiceImpl::add(
-    const std::string &name, const std::shared_ptr<API::Workspace> &workspace) {
+void AnalysisDataServiceImpl::add(const std::string &name, const std::shared_ptr<API::Workspace> &workspace) {
   auto group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
   verifyName(name, group);
 
@@ -109,8 +102,7 @@ void AnalysisDataServiceImpl::add(
  * @param name The name of the object
  * @param workspace The shared pointer to the workspace to store
  */
-void AnalysisDataServiceImpl::addOrReplace(
-    const std::string &name, const std::shared_ptr<API::Workspace> &workspace) {
+void AnalysisDataServiceImpl::addOrReplace(const std::string &name, const std::shared_ptr<API::Workspace> &workspace) {
   auto group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
   verifyName(name, group);
 
@@ -144,14 +136,12 @@ void AnalysisDataServiceImpl::addOrReplace(
  * @param oldName The old name of the object
  * @param newName The new name of the object
  */
-void AnalysisDataServiceImpl::rename(const std::string &oldName,
-                                     const std::string &newName) {
+void AnalysisDataServiceImpl::rename(const std::string &oldName, const std::string &newName) {
 
   auto oldWorkspace = retrieve(oldName);
   auto group = std::dynamic_pointer_cast<WorkspaceGroup>(oldWorkspace);
   if (group && group->containsInChildren(newName)) {
-    throw std::invalid_argument(
-        "Unable to rename group as the new name matches its members");
+    throw std::invalid_argument("Unable to rename group as the new name matches its members");
   }
 
   Kernel::DataService<API::Workspace>::rename(oldName, newName);
@@ -188,30 +178,25 @@ void AnalysisDataServiceImpl::remove(const std::string &name) {
  * @throws Mantid::Kernel::Exception::NotFoundError if a workspace does not
  * exist within the ADS
  */
-std::vector<Workspace_sptr> AnalysisDataServiceImpl::retrieveWorkspaces(
-    const std::vector<std::string> &names, bool unrollGroups) const {
+std::vector<Workspace_sptr> AnalysisDataServiceImpl::retrieveWorkspaces(const std::vector<std::string> &names,
+                                                                        bool unrollGroups) const {
   using WorkspacesVector = std::vector<Workspace_sptr>;
   WorkspacesVector workspaces;
   workspaces.reserve(names.size());
-  std::transform(
-      std::begin(names), std::end(names), std::back_inserter(workspaces),
-      [this](const std::string &name) { return this->retrieve(name); });
+  std::transform(std::begin(names), std::end(names), std::back_inserter(workspaces),
+                 [this](const std::string &name) { return this->retrieve(name); });
   assert(names.size() == workspaces.size());
   if (unrollGroups) {
-    using IteratorDifference =
-        std::iterator_traits<WorkspacesVector::iterator>::difference_type;
+    using IteratorDifference = std::iterator_traits<WorkspacesVector::iterator>::difference_type;
 
     bool done{workspaces.size() == 0};
     size_t i{0};
     while (!done) {
-      if (auto group =
-              std::dynamic_pointer_cast<WorkspaceGroup>(workspaces.at(i))) {
+      if (auto group = std::dynamic_pointer_cast<WorkspaceGroup>(workspaces.at(i))) {
         const auto groupLength(group->size());
-        workspaces.erase(std::next(std::begin(workspaces),
-                                   static_cast<IteratorDifference>(i)));
+        workspaces.erase(std::next(std::begin(workspaces), static_cast<IteratorDifference>(i)));
         for (size_t j = 0; j < groupLength; ++j) {
-          workspaces.insert(std::next(std::begin(workspaces),
-                                      static_cast<IteratorDifference>(i + j)),
+          workspaces.insert(std::next(std::begin(workspaces), static_cast<IteratorDifference>(i + j)),
                             group->getItem(j));
         }
         i += groupLength;
@@ -234,8 +219,7 @@ std::vector<Workspace_sptr> AnalysisDataServiceImpl::retrieveWorkspaces(
 void AnalysisDataServiceImpl::sortGroupByName(const std::string &groupName) {
   WorkspaceGroup_sptr group = retrieveWS<WorkspaceGroup>(groupName);
   if (!group) {
-    throw std::runtime_error("Workspace " + groupName +
-                             " is not a workspace group.");
+    throw std::runtime_error("Workspace " + groupName + " is not a workspace group.");
   }
   group->sortMembersByName();
   notificationCenter.postNotification(new GroupUpdatedNotification(groupName));
@@ -246,12 +230,10 @@ void AnalysisDataServiceImpl::sortGroupByName(const std::string &groupName) {
  * @param groupName :: A group name.
  * @param wsName :: Name of a workspace to add to the group.
  */
-void AnalysisDataServiceImpl::addToGroup(const std::string &groupName,
-                                         const std::string &wsName) {
+void AnalysisDataServiceImpl::addToGroup(const std::string &groupName, const std::string &wsName) {
   WorkspaceGroup_sptr group = retrieveWS<WorkspaceGroup>(groupName);
   if (!group) {
-    throw std::runtime_error("Workspace " + groupName +
-                             " is not a workspace group.");
+    throw std::runtime_error("Workspace " + groupName + " is not a workspace group.");
   }
 
   if (groupName == wsName) {
@@ -270,8 +252,7 @@ void AnalysisDataServiceImpl::addToGroup(const std::string &groupName,
 void AnalysisDataServiceImpl::deepRemoveGroup(const std::string &name) {
   WorkspaceGroup_sptr group = retrieveWS<WorkspaceGroup>(name);
   if (!group) {
-    throw std::runtime_error("Workspace " + name +
-                             " is not a workspace group.");
+    throw std::runtime_error("Workspace " + name + " is not a workspace group.");
   }
   group->observeADSNotifications(false);
   for (size_t i = 0; i < group->size(); ++i) {
@@ -293,16 +274,13 @@ void AnalysisDataServiceImpl::deepRemoveGroup(const std::string &name) {
  * @param groupName :: Name of a workspace group.
  * @param wsName :: Name of a workspace to remove.
  */
-void AnalysisDataServiceImpl::removeFromGroup(const std::string &groupName,
-                                              const std::string &wsName) {
+void AnalysisDataServiceImpl::removeFromGroup(const std::string &groupName, const std::string &wsName) {
   WorkspaceGroup_sptr group = retrieveWS<WorkspaceGroup>(groupName);
   if (!group) {
-    throw std::runtime_error("Workspace " + groupName +
-                             " is not a workspace group.");
+    throw std::runtime_error("Workspace " + groupName + " is not a workspace group.");
   }
   if (!group->contains(wsName)) {
-    throw std::runtime_error("WorkspaceGroup " + groupName +
-                             " does not containt workspace " + wsName);
+    throw std::runtime_error("WorkspaceGroup " + groupName + " does not containt workspace " + wsName);
   }
   group->removeByADS(wsName);
   notificationCenter.postNotification(new GroupUpdatedNotification(groupName));
@@ -313,8 +291,7 @@ void AnalysisDataServiceImpl::removeFromGroup(const std::string &groupName,
  * items that are part of a WorkspaceGroup already in the list
  * @return A lookup of name to Workspace pointer
  */
-std::map<std::string, Workspace_sptr>
-AnalysisDataServiceImpl::topLevelItems() const {
+std::map<std::string, Workspace_sptr> AnalysisDataServiceImpl::topLevelItems() const {
   std::map<std::string, Workspace_sptr> topLevel;
   auto topLevelNames = this->getObjectNames();
   std::set<Workspace_sptr> groupMembers;
@@ -354,9 +331,7 @@ void AnalysisDataServiceImpl::shutdown() { clear(); }
  * Constructor
  */
 AnalysisDataServiceImpl::AnalysisDataServiceImpl()
-    : Mantid::Kernel::DataService<Mantid::API::Workspace>(
-          "AnalysisDataService"),
-      m_illegalChars() {}
+    : Mantid::Kernel::DataService<Mantid::API::Workspace>("AnalysisDataService"), m_illegalChars() {}
 
 // The following is commented using /// rather than /** to stop the compiler
 // complaining
@@ -365,9 +340,7 @@ AnalysisDataServiceImpl::AnalysisDataServiceImpl()
 /// within ADS
 /// @returns A n array of c strings containing the following characters: "
 /// +-/*\%<>&|^~=!@()[]{},:.`$?"
-const std::string &AnalysisDataServiceImpl::illegalCharacters() const {
-  return m_illegalChars;
-}
+const std::string &AnalysisDataServiceImpl::illegalCharacters() const { return m_illegalChars; }
 
 /**
  * Set the list of illegal characeters
@@ -375,8 +348,7 @@ const std::string &AnalysisDataServiceImpl::illegalCharacters() const {
  * that are not to be accepted by the ADS
  * NOTE: This only affects further additions to the ADS
  */
-void AnalysisDataServiceImpl::setIllegalCharacterList(
-    const std::string &illegalChars) {
+void AnalysisDataServiceImpl::setIllegalCharacterList(const std::string &illegalChars) {
   m_illegalChars = illegalChars;
 }
 
@@ -389,17 +361,14 @@ void AnalysisDataServiceImpl::setIllegalCharacterList(
  * true throws std::runtime_error else nothing.
  */
 
-void AnalysisDataServiceImpl::verifyName(
-    const std::string &name,
-    const std::shared_ptr<API::WorkspaceGroup> &group) {
+void AnalysisDataServiceImpl::verifyName(const std::string &name, const std::shared_ptr<API::WorkspaceGroup> &group) {
   const std::string error = isValid(name);
   if (!error.empty()) {
     throw std::invalid_argument(error);
   }
 
   if (group && group->containsInChildren(name)) {
-    throw std::invalid_argument(
-        "Unable to add group as name matches its members");
+    throw std::invalid_argument("Unable to add group as name matches its members");
   }
 }
 

@@ -36,7 +36,7 @@ Output:
    Max(dT)  53.984
    Min(dT)  29.953
    Sigma(dt)  10.543
-   
+
 .. categories::
 
 .. sourcelink::

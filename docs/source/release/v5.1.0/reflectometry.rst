@@ -30,7 +30,7 @@ Improvements
 - The leading separator is no longer included for Custom and ANSTO formats in the
   :ref:`algm-SaveReflectometryAscii` algorithm; Custom format header now uses the same separator as the
   columns and includes the 4th column header if applicable.
-  
+
 Bug fixes
 #########
 
@@ -45,7 +45,7 @@ Removed
 
 - The following deprecated algorithms have been removed: ``SaveANSTOAscii``, ``SaveILLCosmosAscii``,
   ``SaveReflCustomAscii``, and ``SaveReflThreeColumnAscii``. They have been replaced by :ref:`algm-SaveReflectometryAscii`.
-  
+
 ISIS Reflectometry Interface
 ----------------------------
 

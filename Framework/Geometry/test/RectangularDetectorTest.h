@@ -84,8 +84,7 @@ public:
     det->setPos(1000., 2000., 3000.);
 
     // Initialize with these parameters
-    det->initialize(cuboidShape, 100, -50.0, 1.0, 200, -100.0, 1.0, 1000000,
-                    true, 1000);
+    det->initialize(cuboidShape, 100, -50.0, 1.0, 200, -100.0, 1.0, 1000000, true, 1000);
 
     do_test_on(det);
 
@@ -157,12 +156,9 @@ public:
     TS_ASSERT_EQUALS(y, 12);
 
     // Check some positions
-    TS_ASSERT_EQUALS(det->getAtXY(0, 0)->getPos(),
-                     V3D(1000 - 50., 2000 - 100., 3000.));
-    TS_ASSERT_EQUALS(det->getAtXY(1, 0)->getPos(),
-                     V3D(1000 - 50. + 1., 2000 - 100., 3000.));
-    TS_ASSERT_EQUALS(det->getAtXY(1, 1)->getPos(),
-                     V3D(1000 - 50. + 1., 2000 - 100. + 1., 3000.));
+    TS_ASSERT_EQUALS(det->getAtXY(0, 0)->getPos(), V3D(1000 - 50., 2000 - 100., 3000.));
+    TS_ASSERT_EQUALS(det->getAtXY(1, 0)->getPos(), V3D(1000 - 50. + 1., 2000 - 100., 3000.));
+    TS_ASSERT_EQUALS(det->getAtXY(1, 1)->getPos(), V3D(1000 - 50. + 1., 2000 - 100. + 1., 3000.));
 
     // Name
     TS_ASSERT_EQUALS(det->getAtXY(1, 2)->getName(), "MyRectangle(1,2)");
@@ -197,8 +193,7 @@ public:
 
     RectangularDetector *det = new RectangularDetector("MyRectangle");
     det->setPos(1000., 2000., 3000.);
-    det->initialize(cuboidShape, 100, -50.0, 1.0, 200, -100.0, 1.0, 1000000,
-                    true, 1000);
+    det->initialize(cuboidShape, 100, -50.0, 1.0, 200, -100.0, 1.0, 1000000, true, 1000);
 
     // --- Now make a parametrized version ----
     ParameterMap_sptr pmap(new ParameterMap());
@@ -218,13 +213,9 @@ public:
     TS_ASSERT_EQUALS(pos, V3D((-50 + 1) * 12., (-100 + 1) * 23., 0.));
 
     // Check some positions
-    TS_ASSERT_EQUALS(parDet->getAtXY(0, 0)->getPos(),
-                     V3D(1000 - (50) * 12., 2000 - (100 * 23.), 3000.));
-    TS_ASSERT_EQUALS(parDet->getAtXY(1, 0)->getPos(),
-                     V3D(1000 + (-50. + 1) * 12., 2000 - (100 * 23.), 3000.));
-    TS_ASSERT_EQUALS(
-        parDet->getAtXY(1, 1)->getPos(),
-        V3D(1000 + (-50. + 1) * 12., 2000 + (-100. + 1) * 23., 3000.));
+    TS_ASSERT_EQUALS(parDet->getAtXY(0, 0)->getPos(), V3D(1000 - (50) * 12., 2000 - (100 * 23.), 3000.));
+    TS_ASSERT_EQUALS(parDet->getAtXY(1, 0)->getPos(), V3D(1000 + (-50. + 1) * 12., 2000 - (100 * 23.), 3000.));
+    TS_ASSERT_EQUALS(parDet->getAtXY(1, 1)->getPos(), V3D(1000 + (-50. + 1) * 12., 2000 + (-100. + 1) * 23., 3000.));
 
     delete det;
     delete parDet;

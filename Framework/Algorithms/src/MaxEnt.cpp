@@ -51,10 +51,8 @@ namespace {
 // The output image should be in (Frequency, Hz)
 
 // Defines the new caption
-std::map<std::string, std::string> inverseCaption = {{"Time", "Frequency"},
-                                                     {"Frequency", "Time"},
-                                                     {"d-Spacing", "q"},
-                                                     {"q", "d-Spacing"}};
+std::map<std::string, std::string> inverseCaption = {
+    {"Time", "Frequency"}, {"Frequency", "Time"}, {"d-Spacing", "q"}, {"q", "d-Spacing"}};
 // Defines the new label
 std::map<std::string, std::string> inverseLabel = {{"s", "Hz"},
                                                    {"microsecond", "MHz"},
@@ -74,15 +72,13 @@ const double BIN_WIDTH_ERROR_LEVEL = 0.5;
  * @param yLabel :: [input] y-label to use for returned ws
  * @return : ws cut down in lenght to maxIt
  */
-MatrixWorkspace_sptr removeZeros(MatrixWorkspace_sptr &ws,
-                                 const std::vector<size_t> &itCount,
+MatrixWorkspace_sptr removeZeros(MatrixWorkspace_sptr &ws, const std::vector<size_t> &itCount,
                                  const std::string &yLabel) {
 
   ws->setYUnitLabel(yLabel);
   ws->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
   Unit_sptr unit = ws->getAxis(0)->unit();
-  std::shared_ptr<Units::Label> label =
-      std::dynamic_pointer_cast<Units::Label>(unit);
+  std::shared_ptr<Units::Label> label = std::dynamic_pointer_cast<Units::Label>(unit);
   label->setLabel("Number of Iterations", "");
 
   const size_t nspec = ws->getNumberHistograms();
@@ -126,9 +122,8 @@ void MaxEnt::init() {
 
   // X values in input workspace must be (almost) equally spaced
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "InputWorkspace", "", Direction::Input,
-          std::make_shared<EqualBinSizesValidator>(BIN_WIDTH_ERROR_LEVEL)),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                            std::make_shared<EqualBinSizesValidator>(BIN_WIDTH_ERROR_LEVEL)),
       "An input workspace.");
 
   declareProperty("ComplexData", false,
@@ -159,77 +154,65 @@ void MaxEnt::init() {
 
   auto mustBePositive = std::make_shared<BoundedValidator<size_t>>();
   mustBePositive->setLower(0);
-  declareProperty(std::make_unique<PropertyWithValue<size_t>>(
-                      "ResolutionFactor", 1, mustBePositive, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<size_t>>("ResolutionFactor", 1, mustBePositive, Direction::Input),
                   "An integer number indicating the factor by which the number "
                   "of points will be increased in the image and reconstructed "
                   "data");
 
   auto mustBeNonNegative = std::make_shared<BoundedValidator<double>>();
   mustBeNonNegative->setLower(1E-12);
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("A", 0.4, mustBeNonNegative,
-                                                  Direction::Input),
-      "A maximum entropy constant. This algorithm was first developed for the "
-      "ISIS muon group where the default 0.4 was found to give good "
-      "reconstructions. "
-      "In general the user will need to experiment with this value. Choosing a "
-      "small value may lead to unphysical spiky reconstructions and choosing "
-      "an increasingly large "
-      "value the reconstruction will start to resamble that of a direct "
-      "fourier "
-      "transform reconstruction. However, where the data contain a "
-      "zero Fourier data point with a small error the "
-      "reconstruction will be insensitive to the choice "
-      "of this property (and increasing so the more well determined "
-      "this data point is).");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("A", 0.4, mustBeNonNegative, Direction::Input),
+                  "A maximum entropy constant. This algorithm was first developed for the "
+                  "ISIS muon group where the default 0.4 was found to give good "
+                  "reconstructions. "
+                  "In general the user will need to experiment with this value. Choosing a "
+                  "small value may lead to unphysical spiky reconstructions and choosing "
+                  "an increasingly large "
+                  "value the reconstruction will start to resamble that of a direct "
+                  "fourier "
+                  "transform reconstruction. However, where the data contain a "
+                  "zero Fourier data point with a small error the "
+                  "reconstruction will be insensitive to the choice "
+                  "of this property (and increasing so the more well determined "
+                  "this data point is).");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "ChiTargetOverN", 1.0, mustBeNonNegative, Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("ChiTargetOverN", 1.0, mustBeNonNegative, Direction::Input),
       "Target value of Chi-square divided by the number of data points (N)");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "ChiEps", 0.001, mustBeNonNegative, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("ChiEps", 0.001, mustBeNonNegative, Direction::Input),
                   "Required precision for Chi-square");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "DistancePenalty", 0.1, mustBeNonNegative, Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("DistancePenalty", 0.1, mustBeNonNegative, Direction::Input),
       "Distance penalty applied to the current image at each iteration.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "MaxAngle", 0.001, mustBeNonNegative, Direction::Input),
-      "Maximum degree of non-parallelism between S (the entropy) and C "
-      "(chi-squared). These needs to be parallel. Chosing a smaller "
-      "shouldn't change the output. However, if you find this is the "
-      "case please let the Mantid team know since this indicates that "
-      "the default value of this proporty may need changing or "
-      "other changes to this implementation are required.");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("MaxAngle", 0.001, mustBeNonNegative, Direction::Input),
+                  "Maximum degree of non-parallelism between S (the entropy) and C "
+                  "(chi-squared). These needs to be parallel. Chosing a smaller "
+                  "shouldn't change the output. However, if you find this is the "
+                  "case please let the Mantid team know since this indicates that "
+                  "the default value of this proporty may need changing or "
+                  "other changes to this implementation are required.");
 
   mustBePositive = std::make_shared<BoundedValidator<size_t>>();
   mustBePositive->setLower(1);
-  declareProperty(std::make_unique<PropertyWithValue<size_t>>(
-                      "MaxIterations", 20000, mustBePositive, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<size_t>>("MaxIterations", 20000, mustBePositive, Direction::Input),
                   "Maximum number of iterations.");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<size_t>>(
-          "AlphaChopIterations", 500, mustBePositive, Direction::Input),
+      std::make_unique<PropertyWithValue<size_t>>("AlphaChopIterations", 500, mustBePositive, Direction::Input),
       "Maximum number of iterations in alpha chop.");
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "DataLinearAdj", "", Direction::Input, PropertyMode::Optional,
-          std::make_shared<EqualBinSizesValidator>(BIN_WIDTH_ERROR_LEVEL)),
+      std::make_unique<WorkspaceProperty<>>("DataLinearAdj", "", Direction::Input, PropertyMode::Optional,
+                                            std::make_shared<EqualBinSizesValidator>(BIN_WIDTH_ERROR_LEVEL)),
       "Adjusts the calculated data by multiplying each value by the "
       "corresponding Y value of this workspace. "
       "The data in this workspace is complex in the same manner as complex "
       "input data.");
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "DataConstAdj", "", Direction::Input, PropertyMode::Optional,
-          std::make_shared<EqualBinSizesValidator>(BIN_WIDTH_ERROR_LEVEL)),
+      std::make_unique<WorkspaceProperty<>>("DataConstAdj", "", Direction::Input, PropertyMode::Optional,
+                                            std::make_shared<EqualBinSizesValidator>(BIN_WIDTH_ERROR_LEVEL)),
       "Adjusts the calculated data by adding to each value the corresponding Y "
       "value of this workspace. "
       "If DataLinearAdj is also specified, this addition is done after its "
@@ -238,39 +221,32 @@ void MaxEnt::init() {
       "are applied. "
       "The data in this workspace is complex in the same manner as complex "
       "input data.");
-  declareProperty(
-      "PerSpectrumReconstruction", true,
-      "Reconstruction is done independently on each spectrum. "
-      "If false, all the spectra use one image and the reconstructions "
-      "differ only through their adjustments. "
-      "ComplexData must be set true, when this is false.");
+  declareProperty("PerSpectrumReconstruction", true,
+                  "Reconstruction is done independently on each spectrum. "
+                  "If false, all the spectra use one image and the reconstructions "
+                  "differ only through their adjustments. "
+                  "ComplexData must be set true, when this is false.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("EvolChi", "", Direction::Output),
-      "Output workspace containing the evolution of Chi-sq.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("EvolAngle", "", Direction::Output),
-      "Output workspace containing the evolution of "
-      "non-paralellism between S and C.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("ReconstructedImage",
-                                                        "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("EvolChi", "", Direction::Output),
+                  "Output workspace containing the evolution of Chi-sq.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("EvolAngle", "", Direction::Output),
+                  "Output workspace containing the evolution of "
+                  "non-paralellism between S and C.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("ReconstructedImage", "", Direction::Output),
                   "The output workspace containing the reconstructed image.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("ReconstructedData", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("ReconstructedData", "", Direction::Output),
                   "The output workspace containing the reconstructed data.");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Revisit bin edge validation to write errors/warnings to the log
  */
-void MaxEnt::validateBinEdges(const std::string &wsName,
-                              std::map<std::string, std::string> &messages) {
+void MaxEnt::validateBinEdges(const std::string &wsName, std::map<std::string, std::string> &messages) {
   const double warningLevel = 0.01;
   MatrixWorkspace_const_sptr ws = getProperty(wsName);
   if (ws) {
 
-    Kernel::EqualBinsChecker binChecker(ws->readX(0), BIN_WIDTH_ERROR_LEVEL,
-                                        warningLevel);
+    Kernel::EqualBinsChecker binChecker(ws->readX(0), BIN_WIDTH_ERROR_LEVEL, warningLevel);
     const std::string binError = binChecker.validate();
     if (!binError.empty()) {
       messages[wsName] = binError;
@@ -314,13 +290,11 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
   if (linAdj)
     nAHistograms = linAdj->getNumberHistograms();
   if (nAHistograms % 2)
-    result["DataLinearAdj"] =
-        "The number of histograms in the linear "
-        "adjustments workspace must be even, because they are complex data";
+    result["DataLinearAdj"] = "The number of histograms in the linear "
+                              "adjustments workspace must be even, because they are complex data";
   else if (nAHistograms > 0 && nAHistograms < nHistograms)
-    result["DataLinearAdj"] =
-        "The number of histograms in the linear "
-        "adjustments workspace is insufficient for the input workspace";
+    result["DataLinearAdj"] = "The number of histograms in the linear "
+                              "adjustments workspace is insufficient for the input workspace";
 
   // Check constant adjustments, we expect and even number of histograms
   // and if any, they must be sufficient for all spectra in input workspace,
@@ -330,13 +304,11 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
   if (constAdj)
     nAHistograms = constAdj->getNumberHistograms();
   if (nAHistograms % 2)
-    result["DataConstAdj"] =
-        "The number of histograms in the constant "
-        "adjustments workspace must be even, because they are complex data";
+    result["DataConstAdj"] = "The number of histograms in the constant "
+                             "adjustments workspace must be even, because they are complex data";
   else if (nAHistograms > 0 && nAHistograms < nHistograms)
-    result["DataConstAdj"] =
-        "The number of histograms in the constant "
-        "adjustments workspace is insufficient for the input workspace";
+    result["DataConstAdj"] = "The number of histograms in the constant "
+                             "adjustments workspace is insufficient for the input workspace";
 
   return result;
 }
@@ -386,15 +358,13 @@ void MaxEnt::exec() {
   // Constant adjustment of calculated data
   MatrixWorkspace_const_sptr dataConstAdj = getProperty("DataConstAdj");
   // Add spectra in reconstruction if false
-  const bool perSpectrumReconstruction =
-      getProperty("PerSpectrumReconstruction");
+  const bool perSpectrumReconstruction = getProperty("PerSpectrumReconstruction");
 
   // For now have the requirement that data must have non-zero
   // (and positive!) errors
   for (size_t s = 0; s < nHist; s++) {
     const auto &errors = inWS->e(s);
-    if (std::any_of(errors.cbegin(), errors.cend(),
-                    [](const auto error) { return error <= 0.; })) {
+    if (std::any_of(errors.cbegin(), errors.cend(), [](const auto error) { return error <= 0.; })) {
       throw std::invalid_argument("Input data must have all errors non-zero.");
     }
   }
@@ -420,8 +390,7 @@ void MaxEnt::exec() {
     transform = std::make_shared<MaxentTransformFourier>(dataSpace, imageSpace);
   } else {
     auto complexDataSpace = std::make_shared<MaxentSpaceComplex>();
-    transform = std::make_shared<MaxentTransformMultiFourier>(
-        complexDataSpace, imageSpace, nHist / 2);
+    transform = std::make_shared<MaxentTransformMultiFourier>(complexDataSpace, imageSpace, nHist / 2);
   }
 
   // The type of entropy we are going to use (depends on the type of image,
@@ -485,8 +454,7 @@ void MaxEnt::exec() {
                          !perSpectrumReconstruction); // 3rd arg true -> errors
     } else {
       if (!perSpectrumReconstruction) {
-        throw std::invalid_argument(
-            "ComplexData must be true, if PerSpectrumReconstruction is false.");
+        throw std::invalid_argument("ComplexData must be true, if PerSpectrumReconstruction is false.");
       } else {
         data = inWS->y(spec).rawData();
         errors = inWS->e(spec).rawData();
@@ -496,12 +464,10 @@ void MaxEnt::exec() {
     std::vector<double> linearAdjustments;
     std::vector<double> constAdjustments;
     if (dataLinearAdj) {
-      linearAdjustments =
-          toComplex(dataLinearAdj, spec, false, !perSpectrumReconstruction);
+      linearAdjustments = toComplex(dataLinearAdj, spec, false, !perSpectrumReconstruction);
     }
     if (dataConstAdj) {
-      constAdjustments =
-          toComplex(dataConstAdj, spec, false, !perSpectrumReconstruction);
+      constAdjustments = toComplex(dataConstAdj, spec, false, !perSpectrumReconstruction);
     }
 
     // To record the algorithm's progress
@@ -517,8 +483,7 @@ void MaxEnt::exec() {
 
       // Iterates one step towards the solution. This means calculating
       // quadratic coefficients, search directions, angle and chi-sq
-      maxentCalculator.iterate(data, errors, image, background,
-                               linearAdjustments, constAdjustments);
+      maxentCalculator.iterate(data, errors, image, background, linearAdjustments, constAdjustments);
 
       // Calculate delta to construct new image (SB eq. 25)
       double currChisq = maxentCalculator.getChisq();
@@ -538,12 +503,10 @@ void MaxEnt::exec() {
       evolTest[it] = currAngle;
 
       // Stop condition for convergence, solution found
-      if ((std::abs(currChisq / ChiTargetOverN - 1.) < chiEps) &&
-          (currAngle < angle)) {
+      if ((std::abs(currChisq / ChiTargetOverN - 1.) < chiEps) && (currAngle < angle)) {
 
         // it + 1 iterations have been done because we count from zero
-        g_log.information()
-            << "Converged after " << it + 1 << " iterations" << std::endl;
+        g_log.information() << "Converged after " << it + 1 << " iterations" << std::endl;
         iterationCounts.emplace_back(it + 1);
         converged = true;
         break;
@@ -568,10 +531,8 @@ void MaxEnt::exec() {
     auto solImage = maxentCalculator.getImage();
 
     // Populate the output workspaces
-    populateDataWS(inWS, spec, nDataSpec, solData, !perSpectrumReconstruction,
-                   complexData, outDataWS);
-    populateImageWS(inWS, spec, nImageSpec, solImage, complexImage, outImageWS,
-                    autoShift);
+    populateDataWS(inWS, spec, nDataSpec, solData, !perSpectrumReconstruction, complexData, outDataWS);
+    populateImageWS(inWS, spec, nImageSpec, solImage, complexImage, outImageWS, autoShift);
 
     // Populate workspaces recording the evolution of Chi and Test
     // X values
@@ -584,10 +545,8 @@ void MaxEnt::exec() {
     // No errors
 
   } // Next spectrum
-  setProperty("EvolChi",
-              removeZeros(outEvolChi, iterationCounts, "Chi squared"));
-  setProperty("EvolAngle",
-              removeZeros(outEvolTest, iterationCounts, "Maximum Angle"));
+  setProperty("EvolChi", removeZeros(outEvolChi, iterationCounts, "Chi squared"));
+  setProperty("EvolAngle", removeZeros(outEvolTest, iterationCounts, "Maximum Angle"));
   setProperty("ReconstructedImage", outImageWS);
   setProperty("ReconstructedData", outDataWS);
 }
@@ -603,8 +562,7 @@ void MaxEnt::exec() {
  * (ignoring spec)
  * @return : Spectrum 'spec' as a complex vector
  */
-std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
-                                      size_t spec, bool errors,
+std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS, size_t spec, bool errors,
                                       bool concatSpec) {
   const size_t numBins = inWS->y(0).size();
   size_t nSpec = inWS->getNumberHistograms() / 2;
@@ -612,14 +570,12 @@ std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
   result.reserve(2 * numBins);
 
   if (inWS->getNumberHistograms() % 2)
-    throw std::invalid_argument(
-        "Cannot convert input workspace to complex data");
+    throw std::invalid_argument("Cannot convert input workspace to complex data");
 
   size_t nSpecOfInterest = (concatSpec ? nSpec : 1);
   size_t firstSpecOfInterest = (concatSpec ? 0 : spec);
 
-  for (size_t s = firstSpecOfInterest;
-       s < firstSpecOfInterest + nSpecOfInterest; s++) {
+  for (size_t s = firstSpecOfInterest; s < firstSpecOfInterest + nSpecOfInterest; s++) {
     if (!errors) {
       for (size_t i = 0; i < numBins; i++) {
         result.emplace_back(inWS->y(s)[i]);
@@ -645,8 +601,7 @@ std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
  * method (alpha chop)
  * @return : The increment length to be added to the current image
  */
-std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
-                                 double ChiTargetOverN, double chiEps,
+std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs, double ChiTargetOverN, double chiEps,
                                  size_t alphaIter) {
 
   double aMin = 0.; // Minimum alpha
@@ -719,8 +674,7 @@ std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
  * @param b :: [output] The solution
  * @return :: The calculated chi-square
  */
-double MaxEnt::calculateChi(const QuadraticCoefficients &coeffs, double a,
-                            std::vector<double> &b) {
+double MaxEnt::calculateChi(const QuadraticCoefficients &coeffs, double a, std::vector<double> &b) {
 
   size_t dim = coeffs.c2.size().first;
 
@@ -791,8 +745,7 @@ std::vector<double> MaxEnt::solveSVD(DblMatrix &A, const DblMatrix &B) {
 
   // Apply a threshold to small singular values
   double threshold = THRESHOLD * max;
-  std::transform(sVec.begin(), sVec.end(), sVec.begin(),
-                 [&threshold](double el) { return el > threshold ? el : 0.0; });
+  std::transform(sVec.begin(), sVec.end(), sVec.begin(), [&threshold](double el) { return el > threshold ? el : 0.0; });
 
   // Solve A*x = B
   gsl_linalg_SV_solve(&a.matrix, &v.matrix, &s.vector, &b.vector, &x.vector);
@@ -808,13 +761,11 @@ std::vector<double> MaxEnt::solveSVD(DblMatrix &A, const DblMatrix &B) {
  * @param distEps :: [input] The distance constraint
  * @return :: The new increment
  */
-std::vector<double> MaxEnt::applyDistancePenalty(
-    const std::vector<double> &delta, const QuadraticCoefficients &coeffs,
-    const std::vector<double> &image, double background, double distEps) {
+std::vector<double> MaxEnt::applyDistancePenalty(const std::vector<double> &delta, const QuadraticCoefficients &coeffs,
+                                                 const std::vector<double> &image, double background, double distEps) {
 
-  const double pointSum = std::accumulate(
-      image.cbegin(), image.cend(), 0.,
-      [](const auto sum, const auto point) { return sum + std::abs(point); });
+  const double pointSum = std::accumulate(image.cbegin(), image.cend(), 0.,
+                                          [](const auto sum, const auto point) { return sum + std::abs(point); });
 
   const size_t dim = coeffs.s2.size().first;
 
@@ -845,10 +796,8 @@ std::vector<double> MaxEnt::applyDistancePenalty(
  * @param dirs : [input] The search directions
  * @return : The new image
  */
-std::vector<double>
-MaxEnt::updateImage(const std::vector<double> &image,
-                    const std::vector<double> &delta,
-                    const std::vector<std::vector<double>> &dirs) {
+std::vector<double> MaxEnt::updateImage(const std::vector<double> &image, const std::vector<double> &delta,
+                                        const std::vector<std::vector<double>> &dirs) {
 
   if (image.empty() || dirs.empty() || (delta.size() != dirs.size())) {
     throw std::runtime_error("Cannot calculate new image");
@@ -876,17 +825,14 @@ MaxEnt::updateImage(const std::vector<double> &image,
  * @param outWS :: [input] The output workspace to populate
  * @param autoShift :: [input] Whether or not to correct the phase shift
  */
-void MaxEnt::populateImageWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
-                             size_t nspec, const std::vector<double> &result,
-                             bool complex, MatrixWorkspace_sptr &outWS,
+void MaxEnt::populateImageWS(MatrixWorkspace_const_sptr &inWS, size_t spec, size_t nspec,
+                             const std::vector<double> &result, bool complex, MatrixWorkspace_sptr &outWS,
                              bool autoShift) {
 
   if (complex && result.size() % 2)
-    throw std::invalid_argument(
-        "Cannot write image results to output workspaces");
+    throw std::invalid_argument("Cannot write image results to output workspaces");
 
-  int npoints = complex ? static_cast<int>(result.size() / 2)
-                        : static_cast<int>(result.size());
+  int npoints = complex ? static_cast<int>(result.size() / 2) : static_cast<int>(result.size());
   MantidVec X(npoints);
   MantidVec YR(npoints);
   MantidVec YI(npoints);
@@ -937,13 +883,11 @@ void MaxEnt::populateImageWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
   auto inputUnit = inWS->getAxis(0)->unit();
   if (inputUnit) {
     std::shared_ptr<Kernel::Units::Label> lblUnit =
-        std::dynamic_pointer_cast<Kernel::Units::Label>(
-            UnitFactory::Instance().create("Label"));
+        std::dynamic_pointer_cast<Kernel::Units::Label>(UnitFactory::Instance().create("Label"));
     if (lblUnit) {
 
-      lblUnit->setLabel(
-          inverseCaption[inWS->getAxis(0)->unit()->caption()],
-          inverseLabel[inWS->getAxis(0)->unit()->label().ascii()]);
+      lblUnit->setLabel(inverseCaption[inWS->getAxis(0)->unit()->caption()],
+                        inverseLabel[inWS->getAxis(0)->unit()->label().ascii()]);
       outWS->getAxis(0)->unit() = lblUnit;
     }
   }
@@ -967,28 +911,23 @@ void MaxEnt::populateImageWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
  * then all spectra are analyzed and spec must be 0.
  * @param outWS :: [input] The output workspace to populate
  */
-void MaxEnt::populateDataWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
-                            size_t nspec, const std::vector<double> &result,
-                            bool concatenated, bool complex,
+void MaxEnt::populateDataWS(MatrixWorkspace_const_sptr &inWS, size_t spec, size_t nspec,
+                            const std::vector<double> &result, bool concatenated, bool complex,
                             MatrixWorkspace_sptr &outWS) {
 
   if (complex && result.size() % 2)
-    throw std::invalid_argument(
-        "Cannot write data results to output workspaces");
+    throw std::invalid_argument("Cannot write data results to output workspaces");
   if (concatenated && !complex)
     throw std::invalid_argument("Concatenated data results must be complex");
   if (concatenated && result.size() % (nspec * 2))
-    throw std::invalid_argument(
-        "Cannot write complex concatenated data results to output workspaces");
+    throw std::invalid_argument("Cannot write complex concatenated data results to output workspaces");
   if (concatenated && spec != 0)
     throw std::invalid_argument("Cannot write concatenated data results to "
                                 "output workspaces from non-first spectrum");
 
-  int resultLength = complex ? static_cast<int>(result.size() / 2)
-                             : static_cast<int>(result.size());
+  int resultLength = complex ? static_cast<int>(result.size() / 2) : static_cast<int>(result.size());
   size_t spectrumLength = (concatenated ? resultLength / nspec : resultLength);
-  size_t spectrumLengthX =
-      inWS->isHistogramData() ? spectrumLength + 1 : spectrumLength;
+  size_t spectrumLengthX = inWS->isHistogramData() ? spectrumLength + 1 : spectrumLength;
   size_t nSpecAnalyzed = (concatenated ? nspec : 1);
 
   // Here we assume equal constant binning for all spectra analyzed

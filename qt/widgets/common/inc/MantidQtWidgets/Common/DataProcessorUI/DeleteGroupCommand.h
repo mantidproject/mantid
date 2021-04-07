@@ -18,21 +18,15 @@ DeleteGroupCommand defines the action "Delete Group"
 */
 class DeleteGroupCommand : public CommandBase {
 public:
-  DeleteGroupCommand(DataProcessorPresenter *tablePresenter)
-      : CommandBase(tablePresenter){};
-  DeleteGroupCommand(const QDataProcessorWidget &widget)
-      : CommandBase(widget){};
+  DeleteGroupCommand(DataProcessorPresenter *tablePresenter) : CommandBase(tablePresenter){};
+  DeleteGroupCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~DeleteGroupCommand(){};
 
-  void execute() override {
-    m_presenter->notify(DataProcessorPresenter::DeleteGroupFlag);
-  };
+  void execute() override { m_presenter->notify(DataProcessorPresenter::DeleteGroupFlag); };
   QString name() override { return QString("Delete Group"); }
   QString icon() override { return QString("://delete_group.png"); }
   QString tooltip() override { return QString("Deletes selected group"); }
-  QString whatsthis() override {
-    return QString("Deletes the selected groups");
-  }
+  QString whatsthis() override { return QString("Deletes the selected groups"); }
   QString shortcut() override { return QString(); }
 };
 } // namespace DataProcessor

@@ -24,16 +24,12 @@ using namespace CurveFitting;
 /// @param fun :: A function to approximate.
 /// @param start :: The start (lower bound) of an interval on the x-axis.
 /// @param end :: The end (upper bound) of an interval on the x-axis.
-SimpleChebfun::SimpleChebfun(size_t n, ChebfunFunctionType fun, double start,
-                             double end)
-    : m_badFit(false) {
+SimpleChebfun::SimpleChebfun(size_t n, ChebfunFunctionType fun, double start, double end) : m_badFit(false) {
   m_base = std::make_shared<ChebfunBase>(n, start, end);
   m_P = m_base->fit(std::move(fun));
 }
 
-SimpleChebfun::SimpleChebfun(size_t n, const API::IFunction &fun, double start,
-                             double end)
-    : m_badFit(false) {
+SimpleChebfun::SimpleChebfun(size_t n, const API::IFunction &fun, double start, double end) : m_badFit(false) {
   m_base = std::make_shared<ChebfunBase>(n, start, end);
   m_P = m_base->fit(fun);
 }
@@ -50,11 +46,9 @@ SimpleChebfun::SimpleChebfun(size_t n, const API::IFunction &fun, double start,
 /// @param accuracy :: The accuracy of the approximation.
 /// @param badSize :: If automatic approxiamtion fails the base will have this
 /// size.
-SimpleChebfun::SimpleChebfun(const ChebfunFunctionType &fun, double start,
-                             double end, double accuracy, size_t badSize)
+SimpleChebfun::SimpleChebfun(const ChebfunFunctionType &fun, double start, double end, double accuracy, size_t badSize)
     : m_badFit(false) {
-  m_base = ChebfunBase::bestFitAnyTolerance<ChebfunFunctionType>(
-      start, end, fun, m_P, m_A, accuracy);
+  m_base = ChebfunBase::bestFitAnyTolerance<ChebfunFunctionType>(start, end, fun, m_P, m_A, accuracy);
   if (!m_base) {
     m_base = std::make_shared<ChebfunBase>(badSize - 1, start, end, accuracy);
     m_P = m_base->fit(fun);
@@ -62,11 +56,9 @@ SimpleChebfun::SimpleChebfun(const ChebfunFunctionType &fun, double start,
   }
 }
 
-SimpleChebfun::SimpleChebfun(const API::IFunction &fun, double start,
-                             double end, double accuracy, size_t badSize)
+SimpleChebfun::SimpleChebfun(const API::IFunction &fun, double start, double end, double accuracy, size_t badSize)
     : m_badFit(false) {
-  m_base = ChebfunBase::bestFitAnyTolerance<const API::IFunction &>(
-      start, end, fun, m_P, m_A, accuracy);
+  m_base = ChebfunBase::bestFitAnyTolerance<const API::IFunction &>(start, end, fun, m_P, m_A, accuracy);
   if (!m_base) {
     m_base = std::make_shared<ChebfunBase>(badSize - 1, start, end, accuracy);
     m_P = m_base->fit(fun);
@@ -77,9 +69,7 @@ SimpleChebfun::SimpleChebfun(const API::IFunction &fun, double start,
 /// Construct a SimpleChebfun by smoothing data in vectors with x and y data.
 /// @param x :: A vector of x values.
 /// @param y :: A vector of y values. Must have same size as x.
-SimpleChebfun::SimpleChebfun(const std::vector<double> &x,
-                             const std::vector<double> &y)
-    : m_badFit(false) {
+SimpleChebfun::SimpleChebfun(const std::vector<double> &x, const std::vector<double> &y) : m_badFit(false) {
   m_base = std::make_shared<ChebfunBase>(x.size() - 1, x.front(), x.back());
   m_P = m_base->smooth(x, y);
 }
@@ -101,22 +91,15 @@ const std::vector<double> &SimpleChebfun::coeffs() const {
 
 /// Evaluate the function.
 /// @param x :: Point where the function is evaluated.
-double SimpleChebfun::operator()(double x) const {
-  return m_base->eval(x, m_P);
-}
+double SimpleChebfun::operator()(double x) const { return m_base->eval(x, m_P); }
 
 /// Evaluate the function for each value in a vector.
 /// @param x :: Points where the function is evaluated.
-std::vector<double> SimpleChebfun::
-operator()(const std::vector<double> &x) const {
-  return m_base->evalVector(x, m_P);
-}
+std::vector<double> SimpleChebfun::operator()(const std::vector<double> &x) const { return m_base->evalVector(x, m_P); }
 
 /// Create a vector of x values linearly spaced on the approximation interval.
 /// @param n :: Number of points in the vector.
-std::vector<double> SimpleChebfun::linspace(size_t n) const {
-  return m_base->linspace(n);
-}
+std::vector<double> SimpleChebfun::linspace(size_t n) const { return m_base->linspace(n); }
 
 /// Get the accuracy of the approximation
 double SimpleChebfun::accuracy() const { return m_base->tolerance(); }

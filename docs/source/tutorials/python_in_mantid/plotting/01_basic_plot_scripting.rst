@@ -1,7 +1,7 @@
 .. _01_basic_plot_scripting:
 
 =========================
-Basic 1D, 2D and 3D Plots 
+Basic 1D, 2D and 3D Plots
 =========================
 
 
@@ -22,7 +22,7 @@ Right clicking on a row or a column allows a plot of that spectrum or time bin, 
 .. code-block:: python
 
     RawData = Load("MAR11015")
-    
+
     graph_spec = plotSpectrum(RawData, 0)
     graph_time = plotBin(RawData, 0)
 
@@ -77,7 +77,7 @@ To overplot on the same window:
 .. code-block:: python
 
     RawData = Load("MAR11015")
-    
+
     # Assign original plot to a window called graph_spce
     graph_spec = plotSpectrum(RawData, 0)
 
@@ -181,15 +181,15 @@ To overplot on the same window:
    :include-source:
 
     ''' ----------- Wireframe plot ----------- '''
-    
+
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
 
     data = Load('PG3_733.nxs')
-    
+
     fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})
     ax.plot_wireframe(data, color='green')
     #plt.show()
 
 
-* See :ref:`here <plotting>` for custom color cycles and colormaps 
+* See :ref:`here <plotting>` for custom color cycles and colormaps

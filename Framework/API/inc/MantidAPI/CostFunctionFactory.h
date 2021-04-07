@@ -33,8 +33,7 @@ class ICostFunction;
     @date 20/05/2010
 */
 
-class MANTID_API_DLL CostFunctionFactoryImpl
-    : public Kernel::DynamicFactory<ICostFunction> {
+class MANTID_API_DLL CostFunctionFactoryImpl : public Kernel::DynamicFactory<ICostFunction> {
 public:
   /**Creates an instance of a cost function
    * @param type :: The function's type
@@ -48,15 +47,13 @@ private:
   CostFunctionFactoryImpl();
 };
 
-using CostFunctionFactory =
-    Mantid::Kernel::SingletonHolder<CostFunctionFactoryImpl>;
+using CostFunctionFactory = Mantid::Kernel::SingletonHolder<CostFunctionFactoryImpl>;
 
 } // namespace API
 } // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<Mantid::API::CostFunctionFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::CostFunctionFactoryImpl>;
 }
 } // namespace Mantid

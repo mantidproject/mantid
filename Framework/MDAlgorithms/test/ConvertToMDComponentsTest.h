@@ -28,44 +28,34 @@ using namespace Mantid::MDAlgorithms;
 
 class Convert2MDComponentsTestHelper : public ConvertToMD {
 public:
-  TableWorkspace_const_sptr preprocessDetectorsPositions(
-      const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,
-      const std::string &dEModeRequested = "Direct", bool updateMasks = true) {
+  TableWorkspace_const_sptr preprocessDetectorsPositions(const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,
+                                                         const std::string &dEModeRequested = "Direct",
+                                                         bool updateMasks = true) {
     std::string OutWSName(this->getProperty("PreprocDetectorsWS"));
-    return ConvertToMD::preprocessDetectorsPositions(InWS2D, dEModeRequested,
-                                                     updateMasks, OutWSName);
+    return ConvertToMD::preprocessDetectorsPositions(InWS2D, dEModeRequested, updateMasks, OutWSName);
   }
   void setSourceWS(Mantid::API::MatrixWorkspace_sptr InWS2D) {
     this->m_InWS2D = std::move(InWS2D);
     // and create the class, which will deal with the target workspace
     if (!this->m_OutWSWrapper)
-      this->m_OutWSWrapper = std::shared_ptr<MDAlgorithms::MDEventWSWrapper>(
-          new MDAlgorithms::MDEventWSWrapper());
+      this->m_OutWSWrapper = std::shared_ptr<MDAlgorithms::MDEventWSWrapper>(new MDAlgorithms::MDEventWSWrapper());
   }
   Convert2MDComponentsTestHelper() { ConvertToMD::initialize(); }
-  bool buildTargetWSDescription(const API::IMDEventWorkspace_sptr &spws,
-                                const std::string &Q_mod_req,
-                                const std::string &dEModeRequested,
-                                const std::vector<std::string> &other_dim_names,
-                                const std::string &QFrame,
-                                const std::string &convert_to_,
+  bool buildTargetWSDescription(const API::IMDEventWorkspace_sptr &spws, const std::string &Q_mod_req,
+                                const std::string &dEModeRequested, const std::vector<std::string> &other_dim_names,
+                                const std::string &QFrame, const std::string &convert_to_,
                                 MDAlgorithms::MDWSDescription &targWSDescr) {
     std::vector<double> dimMin = this->getProperty("MinValues");
     std::vector<double> dimMax = this->getProperty("MaxValues");
-    return ConvertToMD::buildTargetWSDescription(
-        std::move(spws), Q_mod_req, dEModeRequested, other_dim_names, dimMin,
-        dimMax, QFrame, convert_to_, targWSDescr);
+    return ConvertToMD::buildTargetWSDescription(std::move(spws), Q_mod_req, dEModeRequested, other_dim_names, dimMin,
+                                                 dimMax, QFrame, convert_to_, targWSDescr);
   }
-  void copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const {
-    ConvertToMD::copyMetaData(mdEventWS);
-  }
-  void addExperimentInfo(API::IMDEventWorkspace_sptr mdEventWS,
-                         MDAlgorithms::MDWSDescription &targWSDescr) const {
+  void copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const { ConvertToMD::copyMetaData(mdEventWS); }
+  void addExperimentInfo(API::IMDEventWorkspace_sptr mdEventWS, MDAlgorithms::MDWSDescription &targWSDescr) const {
     ConvertToMD::addExperimentInfo(mdEventWS, targWSDescr);
   };
 
-  API::IMDEventWorkspace_sptr createNewMDWorkspace(
-      const MDAlgorithms::MDWSDescription &NewMDWSDescription) {
+  API::IMDEventWorkspace_sptr createNewMDWorkspace(const MDAlgorithms::MDWSDescription &NewMDWSDescription) {
     return ConvertToMD::createNewMDWorkspace(NewMDWSDescription, false, "");
   }
 };
@@ -76,22 +66,18 @@ class ConvertToMDComponentsTest : public CxxTest::TestSuite {
   Mantid::API::MatrixWorkspace_sptr ws2D;
 
 public:
-  static ConvertToMDComponentsTest *createSuite() {
-    return new ConvertToMDComponentsTest();
-  }
+  static ConvertToMDComponentsTest *createSuite() { return new ConvertToMDComponentsTest(); }
   static void destroySuite(ConvertToMDComponentsTest *suite) { delete suite; }
 
   void testPreprocDetLogic() {
     Mantid::API::MatrixWorkspace_sptr ws2Dp =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "testWSProcessed");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
     // if workspace name is specified, it has been preprocessed and added to
     // analysis data service:
 
     pAlg->setPropertyValue("PreprocDetectorsWS", "PreprDetWS");
     auto TableWS = pAlg->preprocessDetectorsPositions(ws2Dp);
-    auto TableWSs = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-        "PreprDetWS");
+    auto TableWSs = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("PreprDetWS");
     TS_ASSERT_EQUALS(TableWS.get(), TableWSs.get());
     // does not calculate ws second time:
     auto TableWS2 = pAlg->preprocessDetectorsPositions(ws2Dp);
@@ -102,9 +88,8 @@ public:
     auto TableWS3 = pAlg->preprocessDetectorsPositions(ws2Dp);
     TS_ASSERT(TableWSs.get() != TableWS3.get());
 
-    TS_ASSERT_EQUALS(
-        "",
-        TableWS3->getName()); // if WS isn't in the ADS it doesn't have a name
+    TS_ASSERT_EQUALS("",
+                     TableWS3->getName()); // if WS isn't in the ADS it doesn't have a name
     TSM_ASSERT("Should not add service WS to the data service",
                !AnalysisDataService::Instance().doesExist("ServiceTableWS"));
 
@@ -120,15 +105,14 @@ public:
 
     // workspace with different number of detectors calculated into different
     // workspace, replacing the previous one into dataservice
-    Mantid::API::MatrixWorkspace_sptr ws2DNew = WorkspaceCreationHelper::
-        createProcessedWorkspaceWithCylComplexInstrument(9, 10, true);
+    Mantid::API::MatrixWorkspace_sptr ws2DNew =
+        WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(9, 10, true);
     // this is the problems with alg, as ws has to be added to data service to
     // be avail to algorithm.
     pAlg->setSourceWS(ws2DNew);
 
     // Ei is not defined
-    TSM_ASSERT_THROWS("WS has to have input energy for indirect methods",
-                      pAlg->preprocessDetectorsPositions(ws2DNew),
+    TSM_ASSERT_THROWS("WS has to have input energy for indirect methods", pAlg->preprocessDetectorsPositions(ws2DNew),
                       const std::invalid_argument &);
     ws2DNew->mutableRun().addProperty("Ei", 130., "meV", true);
 
@@ -142,13 +126,11 @@ public:
     ws2DNew->mutableRun().removeProperty("Ei");
     TSM_ASSERT_THROWS("WS has to have input energy for indirect methods "
                       "despite the table workspace is already calculated",
-                      pAlg->preprocessDetectorsPositions(ws2DNew),
-                      const std::invalid_argument &);
+                      pAlg->preprocessDetectorsPositions(ws2DNew), const std::invalid_argument &);
   }
   void testUpdateMasksSkipped() {
     Mantid::API::MatrixWorkspace_sptr ws2Dp =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "testWSProcessed");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
 
     auto clVs = AlgorithmManager::Instance().create("CloneWorkspace");
     TS_ASSERT(clVs);
@@ -167,8 +149,7 @@ public:
 
     pAlg->setPropertyValue("PreprocDetectorsWS", "PreprDetWS");
     // the workspace has t
-    auto TableWS =
-        pAlg->preprocessDetectorsPositions(ws2DCopy, "Direct", false);
+    auto TableWS = pAlg->preprocessDetectorsPositions(ws2DCopy, "Direct", false);
 
     auto &maskCol = TableWS->getColVector<int>("detMask");
     for (size_t i = 0; i < maskCol.size(); i++) {
@@ -178,8 +159,7 @@ public:
     maskAllDetectors("InWSCopy");
     // skip recalculating the detectors masks so the workspace should stay the
     // same (untouched return from DS)
-    auto TableWS1 =
-        pAlg->preprocessDetectorsPositions(ws2DCopy, "Direct", false);
+    auto TableWS1 = pAlg->preprocessDetectorsPositions(ws2DCopy, "Direct", false);
 
     TS_ASSERT(TableWS.get() == TableWS1.get());
     for (size_t i = 0; i < maskCol.size(); i++) {
@@ -190,8 +170,7 @@ public:
 
   void testUpdateMasksWorked() {
     Mantid::API::MatrixWorkspace_sptr ws2Dp =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "testWSProcessed");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
     // if workspace name is specified, it has been preprocessed and added to
     // analysis data service:
 
@@ -216,8 +195,8 @@ public:
 
   void testCalcDECol() {
 
-    auto TableWS7 = pAlg->preprocessDetectorsPositions(
-        ws2D, Kernel::DeltaEMode::asString(Kernel::DeltaEMode::Indirect));
+    auto TableWS7 =
+        pAlg->preprocessDetectorsPositions(ws2D, Kernel::DeltaEMode::asString(Kernel::DeltaEMode::Indirect));
 
     TS_ASSERT_EQUALS(4, TableWS7->rowCount());
 
@@ -233,8 +212,7 @@ public:
 
   void testAddExperimentInfo() {
     Mantid::API::MatrixWorkspace_sptr ws2Dp =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "testWSProcessed");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
 
     API::IMDEventWorkspace_sptr spws;
     // create testing part of the algorithm
@@ -246,24 +224,18 @@ public:
     subAlgo.setPropertyValue("MaxValues", "10");
 
     bool createNewTargetWs(false);
-    std::vector<std::string> Q_modes =
-        MDAlgorithms::MDTransfFactory::Instance().getKeys();
-    std::string dE_mode =
-        Kernel::DeltaEMode().asString(Kernel::DeltaEMode::Elastic);
+    std::vector<std::string> Q_modes = MDAlgorithms::MDTransfFactory::Instance().getKeys();
+    std::string dE_mode = Kernel::DeltaEMode().asString(Kernel::DeltaEMode::Elastic);
     MDWSTransform QScl;
     std::vector<std::string> QScales = QScl.getQScalings();
     std::vector<std::string> Frames = QScl.getTargetFrames();
 
     MDAlgorithms::MDWSDescription targWSDescr;
-    TS_ASSERT_THROWS_NOTHING(
-        createNewTargetWs = subAlgo.buildTargetWSDescription(
-            spws, Q_modes[0], dE_mode, std::vector<std::string>(),
-            Frames[CnvrtToMD::AutoSelect], QScales[CnvrtToMD::NoScaling],
-            targWSDescr));
+    TS_ASSERT_THROWS_NOTHING(createNewTargetWs = subAlgo.buildTargetWSDescription(
+                                 spws, Q_modes[0], dE_mode, std::vector<std::string>(), Frames[CnvrtToMD::AutoSelect],
+                                 QScales[CnvrtToMD::NoScaling], targWSDescr));
 
-    TSM_ASSERT(
-        "as spws is null pointer, this should request creating new workspace ",
-        createNewTargetWs)
+    TSM_ASSERT("as spws is null pointer, this should request creating new workspace ", createNewTargetWs)
 
     TS_ASSERT_THROWS_NOTHING(spws = subAlgo.createNewMDWorkspace(targWSDescr));
     TS_ASSERT(spws);
@@ -275,8 +247,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(subAlgo.addExperimentInfo(spws, targWSDescr));
 
     uint16_t runIndex(1000);
-    TS_ASSERT_THROWS_NOTHING(
-        runIndex = targWSDescr.getPropertyValueAsType<uint16_t>("RUN_INDEX"));
+    TS_ASSERT_THROWS_NOTHING(runIndex = targWSDescr.getPropertyValueAsType<uint16_t>("RUN_INDEX"));
     TS_ASSERT_EQUALS(0, runIndex);
 
     // target workspace has W-matrix, which should be unit matrix
@@ -291,14 +262,10 @@ public:
     std::vector<double> libWMatr;
 
     TS_ASSERT_THROWS_NOTHING(
-        libWMatr =
-            spws->getExperimentInfo(0)
-                ->run()
-                .getPropertyValueAsType<std::vector<double>>("W_MATRIX"));
+        libWMatr = spws->getExperimentInfo(0)->run().getPropertyValueAsType<std::vector<double>>("W_MATRIX"));
 
     Kernel::DblMatrix wMatr(libWMatr);
-    TSM_ASSERT("We have not set up anything so it should be unit matrix",
-               wMatr.equals(UnitMatr));
+    TSM_ASSERT("We have not set up anything so it should be unit matrix", wMatr.equals(UnitMatr));
   }
   void xestCopyMetadata() {
     // this test should be enabled in some form
@@ -307,8 +274,7 @@ public:
 
   ConvertToMDComponentsTest() {
     pAlg = std::make_unique<Convert2MDComponentsTestHelper>();
-    ws2D = WorkspaceCreationHelper::
-        createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);
+    ws2D = WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);
     // rotate the crystal by twenty degrees back;
     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0, 20);
     // add workspace energy
@@ -316,13 +282,11 @@ public:
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
   }
-  ~ConvertToMDComponentsTest() override {
-    AnalysisDataService::Instance().remove("testWSProcessed");
-  }
+  ~ConvertToMDComponentsTest() override { AnalysisDataService::Instance().remove("testWSProcessed"); }
 
   void maskAllDetectors(const std::string &wsName) {
-    auto inputWS = std::dynamic_pointer_cast<API::MatrixWorkspace>(
-        API::AnalysisDataService::Instance().retrieve(wsName));
+    auto inputWS =
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(API::AnalysisDataService::Instance().retrieve(wsName));
     const size_t nRows = inputWS->getNumberHistograms();
     auto &spectrumInfo = inputWS->mutableSpectrumInfo();
     for (size_t i = 0; i < nRows; i++) {

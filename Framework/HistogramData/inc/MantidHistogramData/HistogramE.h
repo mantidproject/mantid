@@ -36,11 +36,10 @@ template <class FrequencyVariances, class HistogramE> class VectorOf;
   @author Simon Heybrock
   @date 2016
 */
-class MANTID_HISTOGRAMDATA_DLL HistogramE
-    : public detail::FixedLengthVector<HistogramE>,
-      public detail::Addable<HistogramE>,
-      public detail::Multipliable<HistogramE>,
-      public detail::Scalable<HistogramE> {
+class MANTID_HISTOGRAMDATA_DLL HistogramE : public detail::FixedLengthVector<HistogramE>,
+                                            public detail::Addable<HistogramE>,
+                                            public detail::Multipliable<HistogramE>,
+                                            public detail::Scalable<HistogramE> {
 public:
   using detail::FixedLengthVector<HistogramE>::FixedLengthVector;
   using detail::FixedLengthVector<HistogramE>::operator=;

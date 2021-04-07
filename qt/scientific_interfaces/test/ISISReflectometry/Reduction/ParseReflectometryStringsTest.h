@@ -14,12 +14,8 @@ class ParseReflectometryStringsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ParseReflectometryStringsTest *createSuite() {
-    return new ParseReflectometryStringsTest();
-  }
-  static void destroySuite(ParseReflectometryStringsTest *suite) {
-    delete suite;
-  }
+  static ParseReflectometryStringsTest *createSuite() { return new ParseReflectometryStringsTest(); }
+  static void destroySuite(ParseReflectometryStringsTest *suite) { delete suite; }
 
   void testParseRunNumber() {
     auto result = parseRunNumber("13460");
@@ -84,16 +80,14 @@ public:
 
   void testParseOptions() {
     auto result = parseOptions("key1=value1, key2=value2");
-    std::map<std::string, std::string> expected = {{"key1", "value1"},
-                                                   {"key2", "value2"}};
+    std::map<std::string, std::string> expected = {{"key1", "value1"}, {"key2", "value2"}};
     TS_ASSERT(result.is_initialized());
     TS_ASSERT_EQUALS(result.get(), expected);
   }
 
   void testParseOptionsHandlesWhitespace() {
     auto result = parseOptions("\t key1=value1,   key2  =value2\t");
-    std::map<std::string, std::string> expected = {{"key1", "value1"},
-                                                   {"key2", "value2"}};
+    std::map<std::string, std::string> expected = {{"key1", "value1"}, {"key2", "value2"}};
     TS_ASSERT(result.is_initialized());
     TS_ASSERT_EQUALS(result.get(), expected);
   }

@@ -1,7 +1,7 @@
 .. _more_sequence_types:
 
 ===================
-More Sequence Types 
+More Sequence Types
 ===================
 
 Tuples
@@ -68,7 +68,7 @@ Dictionaries
    empty_dict = {}      # Empty dictionary
    my_lookup = {'a' : 1, 'b' : 2} # A dictionary with two keys, each
                                   # mapped to the respective value
-   print(my_lookup['b'])  
+   print(my_lookup['b'])
 
 Gives the output:
 
@@ -129,10 +129,10 @@ Sets
 .. code:: python
 
    values = set([1,1,3])
-   print(values) 
+   print(values)
    values.add(4)
    values.remove(1)
-   print(values) 
+   print(values)
 
 Gives the output:
 
@@ -162,13 +162,13 @@ Common Operations
 
 .. testcode:: operations1
 
-   s = [1,2,3,4,5,6]      # Also works with all other sequence types 
-   print(len(s)) 
-    
+   s = [1,2,3,4,5,6]      # Also works with all other sequence types
+   print(len(s))
+
    test = 3 in s
-   print(test)   
+   print(test)
    test = 7 not in s
-   print(test)  
+   print(test)
 
 Gives the output:
 

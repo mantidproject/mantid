@@ -9,7 +9,8 @@ import xml.etree.ElementTree as ET
 import xml.dom.minidom as MD
 import Muon.GUI.Common.utilities.run_string_utils as run_string_utils
 
-from Muon.GUI.Common.muon_group import MuonGroup, MuonDiff
+from Muon.GUI.Common.muon_diff import MuonDiff
+from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 
 
@@ -34,9 +35,11 @@ def _create_XML_subElement_for_pairs(root_node, pairs):
         fwd_group = ET.SubElement(child, 'forward-group', val=pair.forward_group)
         bwd_group = ET.SubElement(child, 'backward-group', val=pair.backward_group)
         alpha = ET.SubElement(child, 'alpha', val=str(pair.alpha))
+        periods = ET.SubElement(child, 'periods', val=pair.periods)
         child.extend(fwd_group)
         child.extend(bwd_group)
         child.extend(alpha)
+        child.extend(periods)
         pair_nodes += [child]
     return pair_nodes
 
@@ -45,12 +48,12 @@ def _create_XML_subElement_for_diffs(root_node, diffs):
     diff_nodes = []
     for diff in diffs:
         child = ET.SubElement(root_node, 'diff', name=diff.name)
-        fwd_group = ET.SubElement(child, 'positive-group', val=diff.forward_group)
-        bwd_group = ET.SubElement(child, 'negative-group', val=diff.backward_group)
+        positive = ET.SubElement(child, 'positive', val=diff.positive)
+        negative = ET.SubElement(child, 'negative', val=diff.negative)
         group_or_pair = ET.SubElement(child, 'group-or-pair', val=diff.group_or_pair)
         periods = ET.SubElement(child, 'periods', val=diff.periods)
-        child.extend(fwd_group)
-        child.extend(bwd_group)
+        child.extend(positive)
+        child.extend(negative)
         child.extend(group_or_pair)
         child.extend(periods)
         diff_nodes += [child]
@@ -116,24 +119,33 @@ def load_grouping_from_XML(filename):
         default = ''
 
     group_names, group_ids, periods = _get_groups_from_XML(root)
-    pair_names, pair_groups, pair_alphas = _get_pairs_from_XML(root)
-    diff_names, diff_groups = _get_diffs_from_XML(root)
+    pair_names, pair_groups, pair_alphas, pair_periods = _get_pairs_from_XML(root)
+    diff_names, diff_groups, diff_periods = _get_diffs_from_XML(root)
     groups, diffs, pairs = [], [], []
 
     for i, group_name in enumerate(group_names):
-        period = periods[i] if periods and i<len(periods) else [1]
+        period = periods[i] if periods and i < len(periods) else [1]
         groups += [MuonGroup(group_name=group_name,
                              detector_ids=group_ids[i], periods=period)]
 
     for i, pair_name in enumerate(pair_names):
+        if pair_periods:
+            pair_periods_converted = _convert_periods_to_int(pair_periods[i])
+        else:
+            pair_periods_converted = [1]
+
         pairs += [MuonPair(pair_name=pair_name,
                            forward_group_name=pair_groups[i][0],
                            backward_group_name=pair_groups[i][1],
-                           alpha=pair_alphas[i])]
+                           alpha=pair_alphas[i],
+                           periods=pair_periods_converted)]
 
     for i, diff_name in enumerate(diff_names):
-        diffs +=[MuonDiff(diff_name,diff_groups[i][0],
-                          diff_groups[i][1], diff_groups[i][2], diff_groups[i][3])]
+        if diff_periods:
+            diff_periods_converted = _convert_periods_to_int(diff_periods[i])
+        else:
+            diff_periods_converted = [1]
+        diffs += [MuonDiff(diff_name, diff_groups[i][0], diff_groups[i][1], diff_groups[i][2], diff_periods_converted)]
 
     return groups, pairs, diffs, description, default
 
@@ -153,20 +165,38 @@ def _get_groups_from_XML(root):
 
 
 def _get_diffs_from_XML(root):
-    names, groups = [], []
+    names, groups, periods = [], [], []
     for child in root:
         if child.tag == "diff":
             names += [child.attrib['name']]
-            groups += [[child.find('positive-group').attrib['val'], child.find('negative-group').attrib['val'],
-                        child.find('group-or-pair').attrib['val'], child.find('periods').attrib['val'] ]]
-    return names, groups
+            groups += [[child.find('positive').attrib['val'], child.find('negative').attrib['val'],
+                        child.find('group-or-pair').attrib['val']]]
+            periods += [child.find('periods').attrib['val']]
+    return names, groups, periods
 
 
 def _get_pairs_from_XML(root):
-    names, groups, alphas = [], [], []
+    names, groups, alphas, periods = [], [], [], []
     for child in root:
         if child.tag == "pair":
             names += [child.attrib['name']]
             groups += [[child.find('forward-group').attrib['val'], child.find('backward-group').attrib['val']]]
             alphas += [child.find('alpha').attrib['val']]
-    return names, groups, alphas
+            try:
+                periods += [child.find('periods').attrib['val']]
+            except AttributeError:
+                pass
+    return names, groups, alphas, periods
+
+
+def _convert_periods_to_int(periods):
+    converted_periods = []
+    if periods:
+        for p in periods:
+            try:
+                converted_periods += [int(p)]
+            except ValueError:
+                continue
+    else:
+        converted_periods = [1]
+    return converted_periods

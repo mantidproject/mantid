@@ -96,9 +96,7 @@ public:
   bool endOfPulse() const { return !!(m_fields[1] & 0x80000000); }
   uint16_t pktSeq() const { return (m_fields[1] >> 16) & 0x7fff; }
   uint16_t dspSeq() const { return m_fields[1] & 0x7fff; }
-  PulseFlavor::Enum flavor() const {
-    return static_cast<PulseFlavor::Enum>((m_fields[2] >> 24) & 0x7);
-  }
+  PulseFlavor::Enum flavor() const { return static_cast<PulseFlavor::Enum>((m_fields[2] >> 24) & 0x7); }
   uint32_t pulseCharge() const { return m_fields[2] & 0x00ffffff; }
   bool badVeto() const { return !!(m_fields[3] & 0x80000000); }
   bool badCycle() const { return !!(m_fields[3] & 0x40000000); }
@@ -111,9 +109,7 @@ public:
   uint32_t tofField() const { return m_fields[5]; }
 
   const Event *events() const { return (const Event *)&m_fields[6]; }
-  uint32_t num_events() const {
-    return (m_payload_len - 24) / (uint32_t)(2 * sizeof(uint32_t));
-  }
+  uint32_t num_events() const { return (m_payload_len - 24) / (uint32_t)(2 * sizeof(uint32_t)); }
 
 private:
   const uint32_t *m_fields;
@@ -136,9 +132,7 @@ class DLLExport RTDLPkt : public Packet {
 public:
   RTDLPkt(const RTDLPkt &pkt);
 
-  PulseFlavor::Enum flavor() const {
-    return static_cast<PulseFlavor::Enum>((m_fields[0] >> 24) & 0x7);
-  }
+  PulseFlavor::Enum flavor() const { return static_cast<PulseFlavor::Enum>((m_fields[0] >> 24) & 0x7); }
 
   uint32_t pulseCharge() const { return m_fields[0] & 0x00ffffff; }
 
@@ -192,12 +186,8 @@ private:
 
 class DLLExport SourceListPkt : public Packet {
 public:
-  const uint32_t *ids() const {
-    return reinterpret_cast<const uint32_t *>(payload());
-  }
-  uint32_t num_ids() const {
-    return (uint32_t)payload_length() / (uint32_t)sizeof(uint32_t);
-  }
+  const uint32_t *ids() const { return reinterpret_cast<const uint32_t *>(payload()); }
+  uint32_t num_ids() const { return (uint32_t)payload_length() / (uint32_t)sizeof(uint32_t); }
 
 private:
   SourceListPkt(const uint8_t *data, uint32_t len);
@@ -325,9 +315,7 @@ public:
   uint32_t runNumber() const { return m_fields[0]; }
   uint32_t runStart() const { return m_fields[1]; }
   uint32_t fileNumber() const { return m_fields[2] & 0xffffff; }
-  RunStatus::Enum status() const {
-    return static_cast<RunStatus::Enum>(m_fields[2] >> 24);
-  }
+  RunStatus::Enum status() const { return static_cast<RunStatus::Enum>(m_fields[2] >> 24); }
 
 private:
   const uint32_t *m_fields;
@@ -540,8 +528,7 @@ public:
     if (index < detBankSetCount()) {
       char name_c[SET_NAME_SIZE + 1]; // give them an inch...
       memset((void *)name_c, '\0', SET_NAME_SIZE + 1);
-      strncpy(name_c, (const char *)&(m_fields[m_sectionOffsets[index]]),
-              SET_NAME_SIZE);
+      strncpy(name_c, (const char *)&(m_fields[m_sectionOffsets[index]]), SET_NAME_SIZE);
       return (std::string(name_c));
     } else {
       return ("<Out Of Range!>");
@@ -564,8 +551,7 @@ public:
 
   const uint32_t *banklist(uint32_t index) const {
     if (index < detBankSetCount()) {
-      return (const uint32_t
-                  *)&m_fields[m_sectionOffsets[index] + m_name_offset + 2];
+      return (const uint32_t *)&m_fields[m_sectionOffsets[index] + m_name_offset + 2];
     } else {
       // Shouldn't be asking for this if bankCount() returned 0...!
       return ((const uint32_t *)nullptr);
@@ -595,8 +581,7 @@ public:
 
   double throttle(uint32_t index) const {
     if (index < detBankSetCount()) {
-      return *reinterpret_cast<const double *>(
-          &m_fields[m_after_banks_offset[index] + 3]);
+      return *reinterpret_cast<const double *>(&m_fields[m_after_banks_offset[index] + 3]);
     } else
       return (0.0);
   }
@@ -605,9 +590,7 @@ public:
     if (index < detBankSetCount()) {
       char suffix_c[THROTTLE_SUFFIX_SIZE + 1]; // give them an inch
       memset((void *)suffix_c, '\0', THROTTLE_SUFFIX_SIZE + 1);
-      strncpy(suffix_c,
-              (const char *)&(m_fields[m_after_banks_offset[index] + 5]),
-              THROTTLE_SUFFIX_SIZE);
+      strncpy(suffix_c, (const char *)&(m_fields[m_after_banks_offset[index] + 5]), THROTTLE_SUFFIX_SIZE);
       return (std::string(suffix_c));
     } else {
       std::stringstream ss;
@@ -622,8 +605,7 @@ private:
 
   static const uint32_t m_name_offset = SET_NAME_SIZE / sizeof(uint32_t);
 
-  static const uint32_t m_suffix_offset =
-      THROTTLE_SUFFIX_SIZE / sizeof(uint32_t);
+  static const uint32_t m_suffix_offset = THROTTLE_SUFFIX_SIZE / sizeof(uint32_t);
 
   uint32_t *m_sectionOffsets;
 
@@ -648,8 +630,7 @@ public:
   const std::string &description() const { return m_desc; }
 
   void remapDevice(uint32_t dev) {
-    uint32_t *fields =
-        reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
+    uint32_t *fields = reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
     fields[0] = dev;
     m_devId = dev;
   };
@@ -669,17 +650,12 @@ public:
 
   uint32_t devId() const { return m_fields[0]; }
   uint32_t varId() const { return m_fields[1]; }
-  VariableStatus::Enum status() const {
-    return static_cast<VariableStatus::Enum>(m_fields[2] >> 16);
-  }
-  VariableSeverity::Enum severity() const {
-    return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff);
-  }
+  VariableStatus::Enum status() const { return static_cast<VariableStatus::Enum>(m_fields[2] >> 16); }
+  VariableSeverity::Enum severity() const { return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff); }
   uint32_t value() const { return m_fields[3]; }
 
   void remapDeviceId(uint32_t dev) {
-    uint32_t *fields =
-        reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
+    uint32_t *fields = reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
     fields[0] = dev;
   };
 
@@ -697,19 +673,12 @@ public:
 
   uint32_t devId() const { return m_fields[0]; }
   uint32_t varId() const { return m_fields[1]; }
-  VariableStatus::Enum status() const {
-    return static_cast<VariableStatus::Enum>(m_fields[2] >> 16);
-  }
-  VariableSeverity::Enum severity() const {
-    return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff);
-  }
-  double value() const {
-    return *reinterpret_cast<const double *>(&m_fields[3]);
-  }
+  VariableStatus::Enum status() const { return static_cast<VariableStatus::Enum>(m_fields[2] >> 16); }
+  VariableSeverity::Enum severity() const { return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff); }
+  double value() const { return *reinterpret_cast<const double *>(&m_fields[3]); }
 
   void remapDeviceId(uint32_t dev) {
-    uint32_t *fields =
-        reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
+    uint32_t *fields = reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
     fields[0] = dev;
   };
 
@@ -727,17 +696,12 @@ public:
 
   uint32_t devId() const { return m_fields[0]; }
   uint32_t varId() const { return m_fields[1]; }
-  VariableStatus::Enum status() const {
-    return static_cast<VariableStatus::Enum>(m_fields[2] >> 16);
-  }
-  VariableSeverity::Enum severity() const {
-    return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff);
-  }
+  VariableStatus::Enum status() const { return static_cast<VariableStatus::Enum>(m_fields[2] >> 16); }
+  VariableSeverity::Enum severity() const { return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff); }
   const std::string &value() const { return m_val; }
 
   void remapDeviceId(uint32_t dev) {
-    uint32_t *fields =
-        reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
+    uint32_t *fields = reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
     fields[0] = dev;
   };
 

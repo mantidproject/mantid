@@ -44,8 +44,8 @@ Usage
     calitable = CreateEmptyTableWorkspace()
 
     headers = [
-        "ComponentName", 
-        "Xposition", "Yposition", "Zposition", 
+        "ComponentName",
+        "Xposition", "Yposition", "Zposition",
         "XdirectionCosine", "YdirectionCosine", "ZdirectionCosine", "RotationAngle",
         ]
     datatypes = ["str"] + ["double"]*7

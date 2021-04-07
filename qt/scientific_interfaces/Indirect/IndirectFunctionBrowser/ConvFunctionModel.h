@@ -52,8 +52,7 @@ public:
   void setCurrentDomainIndex(int i) override;
   int currentDomainIndex() const override;
   void changeTie(const QString &paramName, const QString &tie) override;
-  void addConstraint(const QString &functionIndex,
-                     const QString &constraint) override;
+  void addConstraint(const QString &functionIndex, const QString &constraint) override;
   void removeConstraint(const QString &paramName) override;
   QStringList getGlobalParameters() const override;
   void setGlobalParameters(const QStringList &globals) override;
@@ -66,18 +65,12 @@ public:
   double getLocalParameterValue(const QString &parName, int i) const override;
   bool isLocalParameterFixed(const QString &parName, int i) const override;
   QString getLocalParameterTie(const QString &parName, int i) const override;
-  QString getLocalParameterConstraint(const QString &parName,
-                                      int i) const override;
-  void setLocalParameterValue(const QString &parName, int i,
-                              double value) override;
-  void setLocalParameterValue(const QString &parName, int i, double value,
-                              double error) override;
-  void setLocalParameterFixed(const QString &parName, int i,
-                              bool fixed) override;
-  void setLocalParameterTie(const QString &parName, int i,
-                            const QString &tie) override;
-  void setLocalParameterConstraint(const QString &parName, int i,
-                                   const QString &constraint) override;
+  QString getLocalParameterConstraint(const QString &parName, int i) const override;
+  void setLocalParameterValue(const QString &parName, int i, double value) override;
+  void setLocalParameterValue(const QString &parName, int i, double value, double error) override;
+  void setLocalParameterFixed(const QString &parName, int i, bool fixed) override;
+  void setLocalParameterTie(const QString &parName, int i, const QString &tie) override;
+  void setLocalParameterConstraint(const QString &parName, int i, const QString &constraint) override;
   void setGlobalParameterValue(const QString &paramName, double value) override;
   QString setBackgroundA0(double value) override;
 
@@ -93,11 +86,9 @@ public:
   void setBackground(BackgroundType bgType);
   void removeBackground();
   bool hasBackground() const;
-  void
-  updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void setResolution(std::string const &name, TableDatasetIndex const &index);
-  void setResolution(
-      const std::vector<std::pair<std::string, size_t>> &fitResolutions);
+  void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions);
   void setQValues(const std::vector<double> &qValues);
 
   QMap<ParamID, double> getCurrentValues() const;
@@ -119,8 +110,7 @@ private:
   boost::optional<QString> getParameterDescription(ParamID name) const;
   boost::optional<QString> getPrefix(ParamID name) const;
   void setCurrentValues(const QMap<ParamID, double> &);
-  void
-  applyParameterFunction(const std::function<void(ParamID)> &paramFun) const;
+  void applyParameterFunction(const std::function<void(ParamID)> &paramFun) const;
   boost::optional<ParamID> getParameterId(const QString &parName);
   std::string buildLorentzianFunctionString() const;
   std::string buildTeixeiraFunctionString() const;
@@ -140,8 +130,7 @@ private:
   QStringList makeGlobalList() const;
   int getNumberOfPeaks() const;
   void checkConvolution(const IFunction_sptr &fun);
-  void checkSingleFunction(const IFunction_sptr &fun, bool &isLorentzianTypeSet,
-                           bool &isFiTypeSet);
+  void checkSingleFunction(const IFunction_sptr &fun, bool &isLorentzianTypeSet, bool &isFiTypeSet);
 
   ConvolutionFunctionModel m_model;
   FitType m_fitType = FitType::None;

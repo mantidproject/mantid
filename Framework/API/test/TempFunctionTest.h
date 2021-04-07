@@ -26,8 +26,7 @@ public:
 
   std::string name() const { return "TFT_Funct"; }
 
-  void functionMW(double *out, const double *xValues,
-                  const size_t nData) const {
+  void functionMW(double *out, const double *xValues, const size_t nData) const {
     double c0 = getParameter("c0");
     double c1 = getParameter("c1");
     double c2 = getParameter("c2");
@@ -37,8 +36,7 @@ public:
       out[i] = c0 + x * (c1 + x * (c2 + x * c3));
     }
   }
-  void functionDerivMW(Jacobian *out, const double *xValues,
-                       const size_t nData) {
+  void functionDerivMW(Jacobian *out, const double *xValues, const size_t nData) {
     for (size_t i = 0; i < nData; i++) {
       double x = xValues[i];
       out->set(i, 0, 1.);
@@ -74,10 +72,8 @@ public:
   }
 
   void test_domain_create() {
-    TS_ASSERT_THROWS(Mantid::API::FunctionDomain d(0),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(Mantid::API::FunctionDomain d(-10),
-                     const std::length_error &);
+    TS_ASSERT_THROWS(Mantid::API::FunctionDomain d(0), const std::invalid_argument &);
+    TS_ASSERT_THROWS(Mantid::API::FunctionDomain d(-10), const std::length_error &);
     TS_ASSERT_THROWS_NOTHING(Mantid::API::FunctionDomain d(1));
   }
 };

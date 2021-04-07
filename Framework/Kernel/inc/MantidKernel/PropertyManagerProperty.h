@@ -12,26 +12,21 @@
 namespace Mantid {
 namespace Kernel {
 
-class MANTID_KERNEL_DLL PropertyManagerProperty final
-    : public PropertyWithValue<PropertyManager_sptr> {
+class MANTID_KERNEL_DLL PropertyManagerProperty final : public PropertyWithValue<PropertyManager_sptr> {
 public:
   // Convenience typedefs
   using BaseClass = PropertyWithValue<PropertyManager_sptr>;
   using ValueType = PropertyManager_sptr;
 
-  PropertyManagerProperty(const std::string &name,
-                          unsigned int direction = Direction::Input);
-  PropertyManagerProperty(const std::string &name,
-                          const ValueType &defaultValue,
+  PropertyManagerProperty(const std::string &name, unsigned int direction = Direction::Input);
+  PropertyManagerProperty(const std::string &name, const ValueType &defaultValue,
                           unsigned int direction = Direction::Input);
 
   PropertyManagerProperty(const PropertyManagerProperty &) = default;
   PropertyManagerProperty &operator=(const PropertyManagerProperty &) = default;
   using BaseClass::operator=;
 
-  PropertyManagerProperty *clone() const override {
-    return new PropertyManagerProperty(*this);
-  }
+  PropertyManagerProperty *clone() const override { return new PropertyManagerProperty(*this); }
 
   std::string value() const override;
   Json::Value valueAsJson() const override;

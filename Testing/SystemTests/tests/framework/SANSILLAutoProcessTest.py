@@ -33,6 +33,7 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking.append("Instrument")
         return ['out', 'D11_AutoProcess_Reference.nxs']
 
     def runTest(self):
@@ -64,7 +65,8 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
                 CalculateResolution='MildnerCarpenter',
                 OutputWorkspace='iq_s' + str(i + 1),
                 BeamRadius='0.05,0.05,0.05',
-                TransmissionBeamRadius=0.05
+                TransmissionBeamRadius=0.05,
+                StitchReferenceIndex=0
             )
 
         GroupWorkspaces(InputWorkspaces=['iq_s1', 'iq_s2', 'iq_s3'], OutputWorkspace='out')
@@ -91,6 +93,7 @@ class D11_AutoProcess_Wedges_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking.append("Instrument")
         return ['out', 'D11_AutoProcess_Wedges_Reference.nxs']
 
     def runTest(self):
@@ -124,9 +127,15 @@ class D11_AutoProcess_Wedges_Test(systemtesting.MantidSystemTest):
             )
 
         GroupWorkspaces(
-            InputWorkspaces=['iq_1', 'iq_2', 'iq_3',
-                             'iq_wedge_1_1', 'iq_wedge_1_2', 'iq_wedge_1_3',
-                             'iq_wedge_2_1', 'iq_wedge_2_2', 'iq_wedge_2_3'],
+            InputWorkspaces=['iq_1_d39.0m_c40.5m_w5.6A',
+                             'iq_2_d8.0m_c8.0m_w5.6A',
+                             'iq_3_d2.0m_c5.5m_w5.6A',
+                             'iq_wedge_1_1_d39.0m_c40.5m_w5.6A',
+                             'iq_wedge_1_2_d8.0m_c8.0m_w5.6A',
+                             'iq_wedge_1_3_d2.0m_c5.5m_w5.6A',
+                             'iq_wedge_2_1_d39.0m_c40.5m_w5.6A',
+                             'iq_wedge_2_2_d8.0m_c8.0m_w5.6A',
+                             'iq_wedge_2_3_d2.0m_c5.5m_w5.6A'],
             OutputWorkspace='out'
             )
 
@@ -152,6 +161,7 @@ class D11_AutoProcess_IQxQy_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking.append("Instrument")
         return ['iqxy', 'D11_AutoProcess_IQxQy_Reference.nxs']
 
     def runTest(self):
@@ -208,6 +218,7 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking.append("Instrument")
         return ['iq_mult_wavelengths', 'D11_AutoProcess_Multiple_Tr_Reference.nxs']
 
     def runTest(self):
@@ -236,8 +247,69 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
             CalculateResolution='MildnerCarpenter',
             OutputWorkspace='iq_mult_wavelengths',
             BeamRadius='0.05',
-            TransmissionBeamRadius=0.05
+            TransmissionBeamRadius=0.05,
+            StitchReferenceIndex = 0
         )
+
+
+class D11_AutoProcess_CustomStitching_Test(systemtesting.MantidSystemTest):
+    """
+    Tests auto process for D11 with 3 samples at 3 different distances
+    """
+
+    def __init__(self):
+        super(D11_AutoProcess_CustomStitching_Test, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D11'
+        config['logging.loggers.root.level'] = 'Warning'
+        config.appendDataSearchSubDir('ILL/D11/')
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        self.disableChecking.append("Instrument")
+        return ['out', 'D11_AutoProcess_CustomStitch_Reference.nxs']
+
+    def runTest(self):
+
+        beams = '2866,2867+2868,2878'
+        containers = '2888+2971,2884+2960,2880+2949'
+        container_tr = '2870+2954'
+        beam_tr = '2867+2868'
+        samples = ['2889,2885,2881',
+                   '2887,2883,2879',
+                   '3187,3177,3167']
+        sample_tr = ['2871', '2869', '3172']
+        thick = [0.1, 0.2, 0.2]
+
+        # reduce samples
+        # this also tests that already loaded workspace can be passed instead of a file
+        LoadNexusProcessed(Filename='sens-lamp.nxs', OutputWorkspace='sens-lamp')
+        for i in range(len(samples)):
+            SANSILLAutoProcess(
+                SampleRuns=samples[i],
+                BeamRuns=beams,
+                ContainerRuns=containers,
+                MaskFiles='mask1.nxs,mask2.nxs,mask3.nxs',
+                SensitivityMaps='sens-lamp',
+                SampleTransmissionRuns=sample_tr[i],
+                ContainerTransmissionRuns=container_tr,
+                TransmissionBeamRuns=beam_tr,
+                SampleThickness=thick[i],
+                CalculateResolution='MildnerCarpenter',
+                OutputWorkspace='iq_s' + str(i + 1),
+                BeamRadius='0.05,0.05,0.05',
+                TransmissionBeamRadius=0.05,
+                StitchReferenceIndex=1
+            )
+
+        GroupWorkspaces(InputWorkspaces=['iq_s1', 'iq_s2', 'iq_s3'], OutputWorkspace='out')
 
 
 class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
@@ -263,6 +335,7 @@ class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking.append("Instrument")
         return ['out', 'D33_AutoProcess_Reference.nxs']
 
     def runTest(self):
@@ -314,6 +387,7 @@ class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking.append("Instrument")
         return ['out', 'D33_AutoProcess_IPhiQ_Reference.nxs']
 
     def runTest(self):
@@ -370,7 +444,6 @@ class D16_AutoProcess_Test(systemtesting.MantidSystemTest):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking.append("Instrument")
-
         return ['iq', 'ILL_D16_Gamma_scan.nxs']
 
     def runTest(self):
@@ -425,7 +498,9 @@ class D16_AutoProcess_Test(systemtesting.MantidSystemTest):
                            SampleThickness=0.2,
                            TransmissionBeamRadius=1,
                            BeamRadius=1,
-                           ReferenceFiles=",".join(water_dir))
+                           ReferenceFiles=",".join(water_dir),
+                           StitchReferenceIndex=0
+                           )
 
 
 class D22_AutoProcess_Single_Sensitivity(systemtesting.MantidSystemTest):
@@ -453,6 +528,7 @@ class D22_AutoProcess_Single_Sensitivity(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking.append('Instrument')
         return ['d22_single_sens', 'D22_AutoProcess_Single_Sens_Reference.nxs']
 
     def runTest(self):
@@ -504,6 +580,7 @@ class D22_AutoProcess_Multi_Sensitivity(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking.append("Instrument")
         return ['sens', 'D22_AutoProcess_Multi_Sens_Reference.nxs']
 
     def runTest(self):

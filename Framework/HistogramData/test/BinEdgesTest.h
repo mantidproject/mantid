@@ -23,14 +23,10 @@ public:
 
   void test_has_correct_mixins() {
     BinEdges data;
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(
-        (dynamic_cast<detail::VectorOf<BinEdges, HistogramX> &>(data))));
-    TS_ASSERT_THROWS_NOTHING(
-        UNUSED_ARG(dynamic_cast<detail::Iterable<BinEdges> &>(data)));
-    TS_ASSERT_THROWS_NOTHING(
-        UNUSED_ARG(dynamic_cast<detail::Offsetable<BinEdges> &>(data)));
-    TS_ASSERT_THROWS_NOTHING(
-        UNUSED_ARG(dynamic_cast<detail::Scalable<BinEdges> &>(data)));
+    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG((dynamic_cast<detail::VectorOf<BinEdges, HistogramX> &>(data))));
+    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Iterable<BinEdges> &>(data)));
+    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Offsetable<BinEdges> &>(data)));
+    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Scalable<BinEdges> &>(data)));
   }
 
   void test_default_constructor() {

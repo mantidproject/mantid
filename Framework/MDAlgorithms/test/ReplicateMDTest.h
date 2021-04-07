@@ -23,9 +23,7 @@ using namespace Mantid::API;
 
 namespace {
 
-MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
-                                         bool transpose = false,
-                                         double value = 0.0) {
+MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape, bool transpose = false, double value = 0.0) {
 
   auto create = AlgorithmManager::Instance().create("CreateMDHistoWorkspace");
   create->setChild(true);
@@ -142,24 +140,21 @@ public:
     alg.initialize();
     alg.setProperty("DataWorkspace", dataWSBad);
     alg.setProperty("ShapeWorkspace", shapeWS);
-    TSM_ASSERT_EQUALS("Shape and data are the same size. Should fail.", 1,
-                      alg.validateInputs().size());
+    TSM_ASSERT_EQUALS("Shape and data are the same size. Should fail.", 1, alg.validateInputs().size());
 
     // Try again with different property value
     alg.setProperty("DataWorkspace", dataWSGood);
-    TSM_ASSERT_EQUALS("Interated dim should not be counted.", 0,
-                      alg.validateInputs().size());
+    TSM_ASSERT_EQUALS("Interated dim should not be counted.", 0, alg.validateInputs().size());
   }
 
   void test_basic_shape_check() {
-    auto shapeWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        1 /*signal*/, 3 /*numDims*/, 4 /*numBins in each dimension*/);
+    auto shapeWS =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1 /*signal*/, 3 /*numDims*/, 4 /*numBins in each dimension*/);
 
     // Data workspace is right size (number of dimensions), but wrong shape
     // (number of bins in each)
-    auto dataWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        1 /*signal*/, shapeWS->getNumDims() - 1 /*numDims*/,
-        3 /*numBins in each dimension*/);
+    auto dataWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1 /*signal*/, shapeWS->getNumDims() - 1 /*numDims*/,
+                                                               3 /*numBins in each dimension*/);
 
     ReplicateMD alg;
     alg.setRethrows(true);
@@ -167,16 +162,15 @@ public:
     alg.initialize();
     alg.setProperty("DataWorkspace", dataWS);
     alg.setProperty("ShapeWorkspace", shapeWS);
-    TSM_ASSERT_EQUALS("Shape and data are different shapes. Should fail.", 1,
-                      alg.validateInputs().size());
+    TSM_ASSERT_EQUALS("Shape and data are different shapes. Should fail.", 1, alg.validateInputs().size());
   }
 
   void test_very_simple_exec() {
-    auto shapeWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        1 /*signal*/, 3 /*numDims*/, 4 /*numBins in each dimension*/);
+    auto shapeWS =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1 /*signal*/, 3 /*numDims*/, 4 /*numBins in each dimension*/);
 
-    auto dataWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        2 /*signal*/, 2 /*numDims*/, 4 /*numBins in each dimension*/);
+    auto dataWS =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(2 /*signal*/, 2 /*numDims*/, 4 /*numBins in each dimension*/);
 
     ReplicateMD alg;
     alg.setRethrows(true);
@@ -224,15 +218,11 @@ public:
     // Check the output data. Should be horizontally invariant, but vertically
     // increasing
 
-    TSM_ASSERT_EQUALS("Neighours horizontal. Should be the same.",
-                      outWS->getSignalAt(0), outWS->getSignalAt(1));
-    TSM_ASSERT_DIFFERS(
-        "Neighours vertical. Should be different.", outWS->getSignalAt(0),
-        outWS->getSignalAt(shapeShape[0] /*one row verically down*/));
-    TSM_ASSERT_EQUALS(
-        "Vertical points should be same in data and output",
-        dataWS->getSignalAt(dataShape[0]),
-        outWS->getSignalAt(shapeShape[0] /*one row verically down*/));
+    TSM_ASSERT_EQUALS("Neighours horizontal. Should be the same.", outWS->getSignalAt(0), outWS->getSignalAt(1));
+    TSM_ASSERT_DIFFERS("Neighours vertical. Should be different.", outWS->getSignalAt(0),
+                       outWS->getSignalAt(shapeShape[0] /*one row verically down*/));
+    TSM_ASSERT_EQUALS("Vertical points should be same in data and output", dataWS->getSignalAt(dataShape[0]),
+                      outWS->getSignalAt(shapeShape[0] /*one row verically down*/));
   }
 
   void test_replicate_1d_horizontal() {
@@ -264,13 +254,11 @@ public:
     // Check the output data. Should be horizontally invariant, but vertically
     // increasing
 
-    TSM_ASSERT_EQUALS(
-        "Neighbours vertical. Should be the same.", outWS->getSignalAt(0),
-        outWS->getSignalAt(shapeShape[0] /*one row vertically down*/));
-    TSM_ASSERT_DIFFERS("Neighbours horizontal. Should be different.",
-                       outWS->getSignalAt(0), outWS->getSignalAt(1));
-    TSM_ASSERT_EQUALS("Horizontal points should be same in data and output",
-                      dataWS->getSignalAt(1), outWS->getSignalAt(1));
+    TSM_ASSERT_EQUALS("Neighbours vertical. Should be the same.", outWS->getSignalAt(0),
+                      outWS->getSignalAt(shapeShape[0] /*one row vertically down*/));
+    TSM_ASSERT_DIFFERS("Neighbours horizontal. Should be different.", outWS->getSignalAt(0), outWS->getSignalAt(1));
+    TSM_ASSERT_EQUALS("Horizontal points should be same in data and output", dataWS->getSignalAt(1),
+                      outWS->getSignalAt(1));
   }
 
   void test_auto_transpose_2d() {
@@ -279,8 +267,7 @@ public:
     auto shapeWS = makeHistoWorkspace(shapeShape);
 
     std::vector<int> dataShapePreTranspose = {10, 20};
-    auto dataWSTranspose = makeHistoWorkspace(
-        dataShapePreTranspose, true /*transpose it to make it 20 by 10*/);
+    auto dataWSTranspose = makeHistoWorkspace(dataShapePreTranspose, true /*transpose it to make it 20 by 10*/);
 
     ReplicateMD alg;
     alg.setRethrows(true);
@@ -417,9 +404,7 @@ class ReplicateMDTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ReplicateMDTestPerformance *createSuite() {
-    return new ReplicateMDTestPerformance();
-  }
+  static ReplicateMDTestPerformance *createSuite() { return new ReplicateMDTestPerformance(); }
   static void destroySuite(ReplicateMDTestPerformance *suite) { delete suite; }
 
   void test_performance() {

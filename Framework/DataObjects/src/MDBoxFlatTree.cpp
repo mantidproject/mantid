@@ -35,8 +35,7 @@ MDBoxFlatTree::MDBoxFlatTree() : m_nDim(-1) {}
  * @param fileName -- the name of the file, where this structure should be
  *written. TODO: It is here for the case of file based workspaces
  */
-void MDBoxFlatTree::initFlatStructure(const API::IMDEventWorkspace_sptr &pws,
-                                      const std::string &fileName) {
+void MDBoxFlatTree::initFlatStructure(const API::IMDEventWorkspace_sptr &pws, const std::string &fileName) {
   m_bcXMLDescr = pws->getBoxController()->toXMLString();
   m_FileName = fileName;
 
@@ -169,8 +168,7 @@ void MDBoxFlatTree::setBoxesFilePositions(bool setFileBacked) {
 void MDBoxFlatTree::saveBoxStructure(const std::string &fileName) {
   m_FileName = fileName;
   bool old_group;
-  auto hFile = file_holder_type(createOrOpenMDWSgroup(
-      fileName, m_nDim, m_Boxes[0]->getEventType(), false, old_group));
+  auto hFile = file_holder_type(createOrOpenMDWSgroup(fileName, m_nDim, m_Boxes[0]->getEventType(), false, old_group));
 
   // Save box structure;
   this->saveBoxStructure(hFile.get());
@@ -189,8 +187,7 @@ void MDBoxFlatTree::saveBoxStructure(::NeXus::File *hFile) {
   hFile->getEntries(groupEntries);
 
   bool create(false);
-  if (groupEntries.find("box_structure") ==
-      groupEntries.end()) // dimensions dataset exist
+  if (groupEntries.find("box_structure") == groupEntries.end()) // dimensions dataset exist
     create = true;
 
   // Start the box data group
@@ -226,13 +223,9 @@ void MDBoxFlatTree::saveBoxStructure(::NeXus::File *hFile) {
     hFile->writeExtendibleData("depth", m_Depth);
     hFile->writeExtendibleData("inverse_volume", m_InverseVolume);
     hFile->writeExtendibleData("extents", m_Extents, exents_dims, exents_chunk);
-    hFile->writeExtendibleData("box_children", m_BoxChildren, box_2_dims,
-                               box_2_chunk);
-    hFile->writeExtendibleData("box_signal_errorsquared",
-                               m_BoxSignalErrorsquared, box_2_dims,
-                               box_2_chunk);
-    hFile->writeExtendibleData("box_event_index", m_BoxEventIndex, box_2_dims,
-                               box_2_chunk);
+    hFile->writeExtendibleData("box_children", m_BoxChildren, box_2_dims, box_2_chunk);
+    hFile->writeExtendibleData("box_signal_errorsquared", m_BoxSignalErrorsquared, box_2_dims, box_2_chunk);
+    hFile->writeExtendibleData("box_event_index", m_BoxEventIndex, box_2_dims, box_2_chunk);
   } else {
     // Update the expendable data sets
     hFile->writeUpdatedData("box_type", m_BoxType);
@@ -240,8 +233,7 @@ void MDBoxFlatTree::saveBoxStructure(::NeXus::File *hFile) {
     hFile->writeUpdatedData("inverse_volume", m_InverseVolume);
     hFile->writeUpdatedData("extents", m_Extents, exents_dims);
     hFile->writeUpdatedData("box_children", m_BoxChildren, box_2_dims);
-    hFile->writeUpdatedData("box_signal_errorsquared", m_BoxSignalErrorsquared,
-                            box_2_dims);
+    hFile->writeUpdatedData("box_signal_errorsquared", m_BoxSignalErrorsquared, box_2_dims);
     hFile->writeUpdatedData("box_event_index", m_BoxEventIndex, box_2_dims);
   }
   // close the box group.
@@ -262,10 +254,8 @@ void MDBoxFlatTree::saveBoxStructure(::NeXus::File *hFile) {
  locations -- do not restore boxes themselves
  @param restoreExperimentInfo :: load also experiment information
  */
-void MDBoxFlatTree::loadBoxStructure(const std::string &fileName, int &nDim,
-                                     const std::string &EventType,
-                                     bool onlyEventInfo,
-                                     bool restoreExperimentInfo) {
+void MDBoxFlatTree::loadBoxStructure(const std::string &fileName, int &nDim, const std::string &EventType,
+                                     bool onlyEventInfo, bool restoreExperimentInfo) {
 
   m_FileName = fileName;
   m_nDim = nDim;
@@ -273,12 +263,9 @@ void MDBoxFlatTree::loadBoxStructure(const std::string &fileName, int &nDim,
 
   bool old_group;
   // open the file and the MD workspace group.
-  auto hFile = file_holder_type(
-      createOrOpenMDWSgroup(fileName, nDim, m_eventType, true, old_group));
+  auto hFile = file_holder_type(createOrOpenMDWSgroup(fileName, nDim, m_eventType, true, old_group));
   if (!old_group)
-    throw Kernel::Exception::FileError(
-        "MD workspace box structure data are not present in the file",
-        fileName);
+    throw Kernel::Exception::FileError("MD workspace box structure data are not present in the file", fileName);
 
   m_nDim = nDim;
 
@@ -286,8 +273,7 @@ void MDBoxFlatTree::loadBoxStructure(const std::string &fileName, int &nDim,
 
   if (restoreExperimentInfo) {
     if (!m_mEI)
-      m_mEI = std::make_shared<Mantid::API::MultipleExperimentInfos>(
-          Mantid::API::MultipleExperimentInfos());
+      m_mEI = std::make_shared<Mantid::API::MultipleExperimentInfos>(Mantid::API::MultipleExperimentInfos());
 
     loadExperimentInfos(hFile.get(), fileName, m_mEI);
   }
@@ -343,8 +329,7 @@ void MDBoxFlatTree::loadBoxStructure(::NeXus::File *hFile, bool onlyEventInfo) {
   if (m_BoxEventIndex.size() != numBoxes * 2)
     throw std::runtime_error("Incompatible size for data: box_event_index.");
   if (m_BoxSignalErrorsquared.size() != numBoxes * 2)
-    throw std::runtime_error(
-        "Incompatible size for data: box_signal_errorsquared.");
+    throw std::runtime_error("Incompatible size for data: box_signal_errorsquared.");
 
   hFile->closeGroup();
 }
@@ -355,8 +340,7 @@ void MDBoxFlatTree::loadBoxStructure(::NeXus::File *hFile, bool onlyEventInfo) {
  *@param ws   -- the shared pointer to the workspace with experiment infos to
  *write.
  */
-void MDBoxFlatTree::saveExperimentInfos(
-    ::NeXus::File *const file, const API::IMDEventWorkspace_const_sptr &ws) {
+void MDBoxFlatTree::saveExperimentInfos(::NeXus::File *const file, const API::IMDEventWorkspace_const_sptr &ws) {
 
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
@@ -406,9 +390,8 @@ void MDBoxFlatTree::saveExperimentInfos(
  * @param lazy :: If true, use the FileBackedExperimentInfo class to only load
  * the data from the file when it is requested
  */
-void MDBoxFlatTree::loadExperimentInfos(
-    ::NeXus::File *const file, const std::string &filename,
-    std::shared_ptr<Mantid::API::MultipleExperimentInfos> mei, bool lazy) {
+void MDBoxFlatTree::loadExperimentInfos(::NeXus::File *const file, const std::string &filename,
+                                        std::shared_ptr<Mantid::API::MultipleExperimentInfos> mei, bool lazy) {
   // First, find how many experimentX blocks there are
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
@@ -417,8 +400,7 @@ void MDBoxFlatTree::loadExperimentInfos(
     const std::string &name = entry.first;
     if (boost::starts_with(name, "experiment")) {
       try {
-        auto num =
-            boost::lexical_cast<uint16_t>(name.substr(10, name.size() - 10));
+        auto num = boost::lexical_cast<uint16_t>(name.substr(10, name.size() - 10));
         if (num < std::numeric_limits<uint16_t>::max() - 1) {
           // dublicated experiment info names are impossible due to the
           // structure of the nexus file but missing -- can be found.
@@ -438,8 +420,7 @@ void MDBoxFlatTree::loadExperimentInfos(
     if (*itr != ic) {
       for (size_t i = ic + 1; i < *itr; i++) {
         std::string groupName = "experiment" + Kernel::Strings::toString(i);
-        g_log.warning() << "NXS file is missing a ExperimentInfo block "
-                        << groupName
+        g_log.warning() << "NXS file is missing a ExperimentInfo block " << groupName
                         << ". Workspace will be missing ExperimentInfo.\n";
       }
     }
@@ -451,8 +432,7 @@ void MDBoxFlatTree::loadExperimentInfos(
   for (; itr != ExperimentBlockNum.end(); itr++) {
     std::string groupName = "experiment" + Kernel::Strings::toString(*itr);
     if (lazy) {
-      auto ei = std::make_shared<API::FileBackedExperimentInfo>(
-          filename, file->getPath() + "/" + groupName);
+      auto ei = std::make_shared<API::FileBackedExperimentInfo>(filename, file->getPath() + "/" + groupName);
       // And add it to the mutliple experiment info.
       mei->addExperimentInfo(ei);
     } else {
@@ -471,8 +451,7 @@ void MDBoxFlatTree::loadExperimentInfos(
         // And add it to the mutliple experiment info.
         mei->addExperimentInfo(ei);
       } catch (std::exception &e) {
-        g_log.information("Error loading section '" + groupName +
-                          "' of nxs file.");
+        g_log.information("Error loading section '" + groupName + "' of nxs file.");
         g_log.information(e.what());
       }
       file->closeGroup();
@@ -481,8 +460,7 @@ void MDBoxFlatTree::loadExperimentInfos(
 }
 /**Export existing experiment info defined in the box structure to target
  * workspace (or other experiment info as workspace is an experiment info) */
-void MDBoxFlatTree::exportExperiment(
-    Mantid::API::IMDEventWorkspace_sptr &targetWS) {
+void MDBoxFlatTree::exportExperiment(Mantid::API::IMDEventWorkspace_sptr &targetWS) {
   // copy experiment infos
   targetWS->copyExperimentInfos(*m_mEI);
   // free this Experiment info as it has been already exported
@@ -506,10 +484,8 @@ void MDBoxFlatTree::exportExperiment(
  @returns   totalNumEvents :: total number of events the box structure should
  contain and allocated memory for.
 */
-uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes,
-                                       API::BoxController_sptr &bc,
-                                       bool FileBackEnd,
-                                       bool BoxStructureOnly) {
+uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes, API::BoxController_sptr &bc,
+                                       bool FileBackEnd, bool BoxStructureOnly) {
 
   size_t numBoxes = this->getNBoxes();
   Boxes.assign(numBoxes, nullptr);
@@ -518,8 +494,7 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes,
   m_nDim = static_cast<int>(bc->getNDims());
   auto maxNdim = int(MDEventFactory::getMaxNumDim());
   if (m_nDim <= 0 || m_nDim > maxNdim)
-    throw std::runtime_error(
-        "Workspace dimesnions are not defined properly in the box controller");
+    throw std::runtime_error("Workspace dimesnions are not defined properly in the box controller");
 
   int iEventType(0);
   if (m_eventType == "MDLeanEvent")
@@ -527,8 +502,7 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes,
   else if (m_eventType == "MDEvent")
     iEventType = 2;
   else
-    throw std::invalid_argument(
-        " Unknown event type provided for MDBoxFlatTree::restoreBoxTree");
+    throw std::invalid_argument(" Unknown event type provided for MDBoxFlatTree::restoreBoxTree");
 
   for (size_t i = 0; i < numBoxes; i++) {
 
@@ -539,12 +513,10 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes,
     API::IMDNode *ibox = nullptr;
 
     // Extents of the box, as a vector
-    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extentsVector(
-        m_nDim);
+    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extentsVector(m_nDim);
     for (size_t d = 0; d < size_t(m_nDim); d++)
-      extentsVector[d].setExtents(
-          static_cast<double>(m_Extents[i * m_nDim * 2 + d * 2]),
-          static_cast<double>(m_Extents[i * m_nDim * 2 + d * 2 + 1]));
+      extentsVector[d].setExtents(static_cast<double>(m_Extents[i * m_nDim * 2 + d * 2]),
+                                  static_cast<double>(m_Extents[i * m_nDim * 2 + d * 2 + 1]));
 
     // retrieve initial and file location and the numner of the events which
     // belong to this box stored on the HDD
@@ -557,29 +529,25 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes,
       if (BoxStructureOnly) { // create box with undefined numer of events --
                               // differs from 0 number of events by not calling
                               // reserve(0) on underlying vectors.
-        ibox = MDEventFactory::createBox(size_t(m_nDim),
-                                         MDEventFactory::BoxType(iEventType),
-                                         bc, extentsVector, m_Depth[i]);
+        ibox = MDEventFactory::createBox(size_t(m_nDim), MDEventFactory::BoxType(iEventType), bc, extentsVector,
+                                         m_Depth[i]);
       } else // !BoxStructureOnly)
       {
 
         if (FileBackEnd) {
-          ibox = MDEventFactory::createBox(size_t(m_nDim),
-                                           MDEventFactory::BoxType(iEventType),
-                                           bc, extentsVector, m_Depth[i]);
+          ibox = MDEventFactory::createBox(size_t(m_nDim), MDEventFactory::BoxType(iEventType), bc, extentsVector,
+                                           m_Depth[i]);
           // Mark the box as file backed and indicate that the box was saved
           ibox->setFileBacked(indexStart, numEvents, true);
         } else {
-          ibox = MDEventFactory::createBox(
-              size_t(m_nDim), MDEventFactory::BoxType(iEventType), bc,
-              extentsVector, m_Depth[i], numEvents);
+          ibox = MDEventFactory::createBox(size_t(m_nDim), MDEventFactory::BoxType(iEventType), bc, extentsVector,
+                                           m_Depth[i], numEvents);
         }
       } // ifBoxStructureOnly
     } else if (box_type == 2) {
       // --- Make a MDGridBox -----
-      ibox = MDEventFactory::createBox(size_t(m_nDim),
-                                       MDEventFactory::BoxType(iEventType + 1),
-                                       bc, extentsVector, m_Depth[i]);
+      ibox = MDEventFactory::createBox(size_t(m_nDim), MDEventFactory::BoxType(iEventType + 1), bc, extentsVector,
+                                       m_Depth[i]);
     } else
       continue;
     // Force correct ID
@@ -590,10 +558,8 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes,
     if (vol <= FLT_EPSILON)
       vol = 1;
     if (std::fabs((ibox->getInverseVolume() - vol) / vol) > 1.e-5) {
-      g_log.debug() << " Accuracy warning for box N " << i
-                    << " as stored inverse volume is : " << m_InverseVolume[i]
-                    << " and calculated from extents: "
-                    << ibox->getInverseVolume() << '\n';
+      g_log.debug() << " Accuracy warning for box N " << i << " as stored inverse volume is : " << m_InverseVolume[i]
+                    << " and calculated from extents: " << ibox->getInverseVolume() << '\n';
       ibox->setInverseVolume(coord_t(m_InverseVolume[i]));
     }
 
@@ -633,16 +599,14 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes,
  read-only or if the existing file parameters are not equal to the
             input parameters.
 */
-::NeXus::File *
-MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fileName, int &nDims,
-                                     const std::string &WSEventType,
-                                     bool readOnly, bool &alreadyExists) {
+::NeXus::File *MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fileName, int &nDims,
+                                                    const std::string &WSEventType, bool readOnly,
+                                                    bool &alreadyExists) {
   alreadyExists = false;
   Poco::File oldFile(fileName);
   bool fileExists = oldFile.exists();
   if (!fileExists && readOnly)
-    throw Kernel::Exception::FileError(
-        "Attempt to open non-existing file in read-only mode", fileName);
+    throw Kernel::Exception::FileError("Attempt to open non-existing file in read-only mode", fileName);
 
   NXaccess access(NXACC_RDWR);
   if (readOnly)
@@ -661,8 +625,7 @@ MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fileName, int &nDims,
   std::map<std::string, std::string> groupEntries;
 
   hFile->getEntries(groupEntries);
-  if (groupEntries.find("MDEventWorkspace") !=
-      groupEntries.end()) // WS group exist
+  if (groupEntries.find("MDEventWorkspace") != groupEntries.end()) // WS group exist
   {
     // Open and check ws group
     // -------------------------------------------------------------------------------->>>
@@ -674,25 +637,22 @@ MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fileName, int &nDims,
       hFile->getAttr("event_type", eventType);
 
       if (eventType != WSEventType)
-        throw Kernel::Exception::FileError(
-            "Trying to open MDWorkspace nexus file with the the events: " +
-                eventType + "\n different from workspace type: " + WSEventType,
-            fileName);
+        throw Kernel::Exception::FileError("Trying to open MDWorkspace nexus file with the the events: " + eventType +
+                                               "\n different from workspace type: " + WSEventType,
+                                           fileName);
     } else // it is possible that workspace group has been created by somebody
            // else and there are no this kind of attribute attached to it.
     {
       if (readOnly)
-        throw Kernel::Exception::FileError(
-            "The NXdata group: MDEventWorkspace opened in read-only mode but \n"
-            " does not have necessary attribute describing the event type used",
-            fileName);
+        throw Kernel::Exception::FileError("The NXdata group: MDEventWorkspace opened in read-only mode but \n"
+                                           " does not have necessary attribute describing the event type used",
+                                           fileName);
       hFile->putAttr("event_type", WSEventType);
     }
     // check dimensions dataset
     bool dimDatasetExist(false);
     hFile->getEntries(groupEntries);
-    if (groupEntries.find("dimensions") !=
-        groupEntries.end()) // dimensions dataset exist
+    if (groupEntries.find("dimensions") != groupEntries.end()) // dimensions dataset exist
       dimDatasetExist = true;
 
     if (dimDatasetExist) {
@@ -701,10 +661,9 @@ MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fileName, int &nDims,
       if (nDims != 0) // check against dimensions provided
       {
         if (nFileDims != static_cast<int32_t>(nDims))
-          throw Kernel::Exception::FileError(
-              "The NXdata group: MDEventWorkspace initiated for different "
-              "number of dimensions then requested ",
-              fileName);
+          throw Kernel::Exception::FileError("The NXdata group: MDEventWorkspace initiated for different "
+                                             "number of dimensions then requested ",
+                                             fileName);
       } else // read what is already there
       {
         nDims = static_cast<int>(nFileDims);
@@ -738,8 +697,7 @@ MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fileName, int &nDims,
       // Write out  # of dimensions
       hFile->writeData("dimensions", nDim);
     } catch (...) {
-      throw Kernel::Exception::FileError(
-          "Can not create new NXdata group: MDEventWorkspace", fileName);
+      throw Kernel::Exception::FileError("Can not create new NXdata group: MDEventWorkspace", fileName);
     }
     // END create new WS group
     // -------------------------------------------------------------------------------<<<
@@ -749,11 +707,9 @@ MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fileName, int &nDims,
 
 /**Save workspace generic info like dimension structure, history, title
  * dimensions etc.*/
-void MDBoxFlatTree::saveWSGenericInfo(::NeXus::File *const file,
-                                      const API::IMDWorkspace_const_sptr &ws) {
+void MDBoxFlatTree::saveWSGenericInfo(::NeXus::File *const file, const API::IMDWorkspace_const_sptr &ws) {
   // Write out the coordinate system
-  file->writeData("coordinate_system",
-                  static_cast<uint32_t>(ws->getSpecialCoordinateSystem()));
+  file->writeData("coordinate_system", static_cast<uint32_t>(ws->getSpecialCoordinateSystem()));
 
   // Write out the Qconvention
   // ki-kf for Inelastic convention; kf-ki for Crystallography convention
@@ -761,20 +717,17 @@ void MDBoxFlatTree::saveWSGenericInfo(::NeXus::File *const file,
   file->putAttr("QConvention", m_QConvention);
 
   // Write out the set display normalization
-  file->writeData("visual_normalization",
-                  static_cast<uint32_t>(ws->displayNormalization()));
+  file->writeData("visual_normalization", static_cast<uint32_t>(ws->displayNormalization()));
 
   // Write out the set display normalization carried for spawned histo
   // workspaces.
-  file->writeData("visual_normalization_histo",
-                  static_cast<uint32_t>(ws->displayNormalizationHisto()));
+  file->writeData("visual_normalization_histo", static_cast<uint32_t>(ws->displayNormalizationHisto()));
 
   // Save the algorithm history under "process"
   ws->getHistory().saveNexus(file);
 
   // Write out the affine matrices
-  saveAffineTransformMatricies(
-      file, std::dynamic_pointer_cast<const API::IMDWorkspace>(ws));
+  saveAffineTransformMatricies(file, std::dynamic_pointer_cast<const API::IMDWorkspace>(ws));
 
   // Save some info as attributes. (Note: need to use attributes, not data sets
   // because those cannot be resized).
@@ -795,17 +748,14 @@ void MDBoxFlatTree::saveWSGenericInfo(::NeXus::File *const file,
  * @param file : pointer to the NeXus file
  * @param ws : workspace to get matrix from
  */
-void MDBoxFlatTree::saveAffineTransformMatricies(
-    ::NeXus::File *const file, const API::IMDWorkspace_const_sptr &ws) {
+void MDBoxFlatTree::saveAffineTransformMatricies(::NeXus::File *const file, const API::IMDWorkspace_const_sptr &ws) {
   try {
-    saveAffineTransformMatrix(file, ws->getTransformToOriginal(),
-                              "transform_to_orig");
+    saveAffineTransformMatrix(file, ws->getTransformToOriginal(), "transform_to_orig");
   } catch (std::runtime_error &) {
     // Do nothing
   }
   try {
-    saveAffineTransformMatrix(file, ws->getTransformFromOriginal(),
-                              "transform_from_orig");
+    saveAffineTransformMatrix(file, ws->getTransformFromOriginal(), "transform_from_orig");
   } catch (std::runtime_error &) {
     // Do nothing
   }
@@ -816,15 +766,13 @@ void MDBoxFlatTree::saveAffineTransformMatricies(
  * @param transform : the object to extract the affine matrix from
  * @param entry_name : the tag in the NeXus file to save under
  */
-void MDBoxFlatTree::saveAffineTransformMatrix(
-    ::NeXus::File *const file, API::CoordTransform const *transform,
-    const std::string &entry_name) {
+void MDBoxFlatTree::saveAffineTransformMatrix(::NeXus::File *const file, API::CoordTransform const *transform,
+                                              const std::string &entry_name) {
   if (!transform)
     return;
   Kernel::Matrix<coord_t> matrix = transform->makeAffineMatrix();
   g_log.debug() << "TRFM: " << matrix.str() << '\n';
-  saveMatrix<coord_t>(file, std::move(entry_name), matrix, ::NeXus::FLOAT32,
-                      transform->id());
+  saveMatrix<coord_t>(file, std::move(entry_name), matrix, ::NeXus::FLOAT32, transform->id());
 }
 
 /**
@@ -836,8 +784,7 @@ void MDBoxFlatTree::saveAffineTransformMatrix(
  * @param tag : id for an affine matrix conversion
  */
 template <typename T>
-void saveMatrix(::NeXus::File *const file, const std::string &name,
-                Kernel::Matrix<T> &m, ::NeXus::NXnumtype type,
+void saveMatrix(::NeXus::File *const file, const std::string &name, Kernel::Matrix<T> &m, ::NeXus::NXnumtype type,
                 const std::string &tag) {
   std::vector<T> v = m.getVector();
   // Number of data points

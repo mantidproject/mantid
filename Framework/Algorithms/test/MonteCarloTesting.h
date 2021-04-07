@@ -45,15 +45,9 @@ public:
 // -----------------------------------------------------------------------------
 // Create test samples
 // -----------------------------------------------------------------------------
-enum class TestSampleType {
-  SolidSphere,
-  Annulus,
-  ThinAnnulus,
-  SamplePlusContainer
-};
+enum class TestSampleType { SolidSphere, Annulus, ThinAnnulus, SamplePlusContainer };
 
-inline std::string annulusXML(double innerRadius, double outerRadius,
-                              double height,
+inline std::string annulusXML(double innerRadius, double outerRadius, double height,
                               const Mantid::Kernel::V3D &upAxis) {
   using Mantid::Kernel::V3D;
 
@@ -61,10 +55,8 @@ inline std::string annulusXML(double innerRadius, double outerRadius,
   // Assume upAxis is a unit vector
   V3D centre(upAxis);
   centre *= -0.5 * height;
-  const std::string inner = ComponentCreationHelper::cappedCylinderXML(
-      innerRadius, height, centre, upAxis, "inner");
-  const std::string outer = ComponentCreationHelper::cappedCylinderXML(
-      outerRadius, height, centre, upAxis, "outer");
+  const std::string inner = ComponentCreationHelper::cappedCylinderXML(innerRadius, height, centre, upAxis, "inner");
+  const std::string outer = ComponentCreationHelper::cappedCylinderXML(outerRadius, height, centre, upAxis, "outer");
 
   // Combine shapes
   std::ostringstream os;
@@ -72,12 +64,10 @@ inline std::string annulusXML(double innerRadius, double outerRadius,
   return os.str();
 }
 
-inline Mantid::Geometry::IObject_sptr
-createAnnulus(double innerRadius, double outerRadius, double height,
-              const Mantid::Kernel::V3D &upAxis) {
+inline Mantid::Geometry::IObject_sptr createAnnulus(double innerRadius, double outerRadius, double height,
+                                                    const Mantid::Kernel::V3D &upAxis) {
   using Mantid::Geometry::ShapeFactory;
-  return ShapeFactory().createShape(
-      annulusXML(innerRadius, outerRadius, height, upAxis));
+  return ShapeFactory().createShape(annulusXML(innerRadius, outerRadius, height, upAxis));
 }
 
 inline Mantid::API::Sample createSamplePlusContainer() {
@@ -93,22 +83,17 @@ inline Mantid::API::Sample createSamplePlusContainer() {
   const double height(0.05), innerRadius(0.0046), outerRadius(0.005);
   const V3D centre(0, 0, -0.5 * height), upAxis(0, 0, 1);
   // Container
-  auto canShape = ShapeFactory().createShape(
-      annulusXML(innerRadius, outerRadius, height, upAxis));
+  auto canShape = ShapeFactory().createShape(annulusXML(innerRadius, outerRadius, height, upAxis));
   // CSG Object assumed
-  if (auto csgObj =
-          std::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(canShape)) {
+  if (auto csgObj = std::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(canShape)) {
     csgObj->setMaterial(Material("Vanadium", getNeutronAtom(23), 0.02));
   }
   auto can = std::make_shared<Container>(canShape);
-  auto environment =
-      std::make_unique<SampleEnvironment>("Annulus Container", can);
+  auto environment = std::make_unique<SampleEnvironment>("Annulus Container", can);
   // Sample volume
-  auto sampleCell = ComponentCreationHelper::createCappedCylinder(
-      innerRadius, height, centre, upAxis, "sample");
+  auto sampleCell = ComponentCreationHelper::createCappedCylinder(innerRadius, height, centre, upAxis, "sample");
   // CSG Object assumed
-  if (auto csgObj =
-          std::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(sampleCell)) {
+  if (auto csgObj = std::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(sampleCell)) {
     csgObj->setMaterial(Material("Si", getNeutronAtom(14), 0.15));
   }
 
@@ -143,8 +128,7 @@ inline Mantid::API::Sample createTestSample(TestSampleType sampleType) {
       throw std::invalid_argument("Unknown testing shape type requested");
     }
     // CSG Object assumed
-    if (auto csgObj =
-            std::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(shape)) {
+    if (auto csgObj = std::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(shape)) {
       csgObj->setMaterial(Material("Vanadium", getNeutronAtom(23), 0.02));
     }
     testSample.setShape(shape);
@@ -158,8 +142,8 @@ inline std::shared_ptr<Mantid::Geometry::SampleEnvironment> createTestKit() {
 
   // at centre
   ShapeFactory factory;
-  auto can = std::make_shared<Container>(factory.createShape(
-      ComponentCreationHelper::sphereXML(0.01, V3D(0, 0, 0), "sp-1")));
+  auto can =
+      std::make_shared<Container>(factory.createShape(ComponentCreationHelper::sphereXML(0.01, V3D(0, 0, 0), "sp-1")));
   can->setID("8mm");
   auto kit = std::make_shared<SampleEnvironment>("TestKit", can);
   // before sample

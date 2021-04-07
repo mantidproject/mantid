@@ -26,21 +26,18 @@ using namespace Mantid::API;
 ///   for example: f0.f1.A0
 /// @return :: A pair with the first item is the function index and the
 /// second item is the param local name.
-EXPORT_OPT_MANTIDQT_COMMON std::pair<QString, QString>
-splitParameterName(const QString &paramName);
+EXPORT_OPT_MANTIDQT_COMMON std::pair<QString, QString> splitParameterName(const QString &paramName);
 
 /// Get a child function of a parent function whose parameters start with a
 /// given prefix.
 /// @param prefix :: A prefix of the form f0.f1. If en empty string is given
 /// then the parent function is returned.
 /// @param fun :: The parent function.
-EXPORT_OPT_MANTIDQT_COMMON IFunction_sptr
-getFunctionWithPrefix(const QString &prefix, const IFunction_sptr &fun);
+EXPORT_OPT_MANTIDQT_COMMON IFunction_sptr getFunctionWithPrefix(const QString &prefix, const IFunction_sptr &fun);
 
 /// Split a function (eg f0.f3.f1.) into the parent prefix (f0.f3.) and the
 /// index of the child function (1).
-EXPORT_OPT_MANTIDQT_COMMON std::pair<QString, int>
-splitFunctionPrefix(const QString &prefix);
+EXPORT_OPT_MANTIDQT_COMMON std::pair<QString, int> splitFunctionPrefix(const QString &prefix);
 
 /// Split a constraint definition into a parameter name and a pair of bounds,
 /// for example -1 < f0.A1 < 2 ==> (f0.A1, (-1, 2))
@@ -53,21 +50,17 @@ splitConstraintString(const QString &constraint);
 EXPORT_OPT_MANTIDQT_COMMON bool isNumber(std::string const &str);
 
 /// Splits the string by the given delimiters
-EXPORT_OPT_MANTIDQT_COMMON std::vector<std::string>
-splitStringBy(std::string const &str, std::string const &delimiter);
+EXPORT_OPT_MANTIDQT_COMMON std::vector<std::string> splitStringBy(std::string const &str, std::string const &delimiter);
 
 /// Returns the function index found at index of a parameter
-EXPORT_OPT_MANTIDQT_COMMON std::size_t
-getFunctionIndexAt(std::string const &parameter, std::size_t const &index);
+EXPORT_OPT_MANTIDQT_COMMON std::size_t getFunctionIndexAt(std::string const &parameter, std::size_t const &index);
 
 class ScopedFalse {
   bool &m_ref;
   bool m_oldValue;
 
 public:
-  ScopedFalse(bool &variable) : m_ref(variable), m_oldValue(variable) {
-    m_ref = false;
-  }
+  ScopedFalse(bool &variable) : m_ref(variable), m_oldValue(variable) { m_ref = false; }
   ~ScopedFalse() { m_ref = m_oldValue; }
 };
 

@@ -149,7 +149,7 @@ Quartz
 
 .. diagram:: PolDiffILLReduction-v1_quartz_wkflw.dot
 
-	     
+
 Reference
 #########
 
@@ -236,7 +236,7 @@ This example below performs a complete reduction for D7 data.
         OutputWorkspace='absorber_ws',
         ProcessAs='Absorber'
     )
-    
+
     # Polarisation correction
     PolDiffILLReduction(
         Run='396939',
@@ -257,7 +257,7 @@ This example below performs a complete reduction for D7 data.
         ProcessAs='Transmission'
     )
     print('Vanadium transmission is {0:.3f}'.format(mtd['vanadium_transmission_1'].readY(0)[0]))
-    
+
     # Vanadium reduction
     PolDiffILLReduction(
         Run='396993',

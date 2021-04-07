@@ -72,20 +72,17 @@ public:
   /**
    * Create a PropertyWithValue from the given python object value
    */
-  std::unique_ptr<Mantid::Kernel::Property>
-  create(const std::string &name, const boost::python::object &value,
-         const boost::python::object &validator,
-         const unsigned int direction) const override {
+  std::unique_ptr<Mantid::Kernel::Property> create(const std::string &name, const boost::python::object &value,
+                                                   const boost::python::object &validator,
+                                                   const unsigned int direction) const override {
     using boost::python::extract;
 
     auto optBool = fromPyObj(value);
     if (isNone(validator)) {
-      return std::make_unique<PropertyWithValue<OptionalBool>>(name, optBool,
-                                                               direction);
+      return std::make_unique<PropertyWithValue<OptionalBool>>(name, optBool, direction);
     } else {
       const IValidator *propValidator = extract<IValidator *>(validator);
-      return std::make_unique<PropertyWithValue<OptionalBool>>(
-          name, optBool, propValidator->clone(), direction);
+      return std::make_unique<PropertyWithValue<OptionalBool>>(name, optBool, propValidator->clone(), direction);
     }
   }
 };
@@ -94,17 +91,14 @@ public:
 void export_OptionalBool() {
   // V3D class
   class_<OptionalBool>("OptionalBool")
-      .def("__init__",
-           make_constructor(&createOptionalBool, default_call_policies(),
-                            (arg("value"))))
+      .def("__init__", make_constructor(&createOptionalBool, default_call_policies(), (arg("value"))))
       .def("getValue", &OptionalBool::getValue, arg("self"));
 }
 
 void export_PropertyWithValueOptionalBool() {
   using Mantid::PythonInterface::PropertyWithValueExporter;
   // ints & vectors
-  PropertyWithValueExporter<OptionalBool>::define(
-      "OptionalBoolPropertyWithValue");
+  PropertyWithValueExporter<OptionalBool>::define("OptionalBoolPropertyWithValue");
 
   Registry::TypeRegistry::subscribe<OptionalBoolPropertyValueHandler>();
 }
