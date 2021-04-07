@@ -14,9 +14,9 @@ import re
 from typing import List, Optional, Tuple, Union
 
 from mantid.dataobjects import EventWorkspace, TableWorkspace,  Workspace2D
-from mantid.api import mtd, Workspace, WorkspaceGroup
+from mantid.api import mtd, Workspace, WorkspaceGroup, AnalysisDataService
 from mantid.kernel import logger
-from mantid.simpleapi import CreateEmptyTableWorkspace, SaveNexusProcessed, LoadNexusProcessed
+from mantid.simpleapi import CreateEmptyTableWorkspace, SaveNexusProcessed, LoadNexusProcessed, CloneWorkspace, ClearMaskFlag, MaskDetectors, ExtractMask
 
 # Functions exposed to the general user (public) API
 __all__ = ['day_stamp', 'load_calibration_set', 'new_corelli_calibration', 'save_calibration_set']
@@ -508,4 +508,10 @@ def load_calibration_set(input_workspace: Union[str, Workspace],
                 message += f'Oldest calibration date is {available_dates[0]}'
             logger.warning(message)
 
+    CloneWorkspace(InputWorkspace=input_workspace, OutputWorkspace='masked')  # ensure we're using the right instrument definition
+    ClearMaskFlag(Workspace='masked')
+    detectors_masked = instrument_tables['mask'].column(0)  # list of masked detectors
+    MaskDetectors(Workspace='masked', DetectorList=detectors_masked)
+    ExtractMask(InputWorkspace='masked', OutputWorkspace='masked') # The Y-values of the spectra are now either `0` or `1`
+    instrument_tables['mask'] = AnalysisDataService['masked'] # Fetch the new MaskedWorkspace
     return instrument_tables.values()
