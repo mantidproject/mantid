@@ -160,14 +160,19 @@ class GenerateLogbook(PythonAlgorithm):
     def _get_custom_entries(self):
         logbook_custom_entries = self.getPropertyValue('CustomEntries')
         logbook_custom_entries = logbook_custom_entries.split(',')
-        self._metadata_entries += logbook_custom_entries
+        for entry in logbook_custom_entries:
+            self._metadata_entries.append(entry.split(':')[0])
         logbook_custom_headers = [""] * len(logbook_custom_entries)
         operators = ["+", "-", "*", "//"]
+        columnType = 's'
         if self.getProperty('CustomHeaders').isDefault:
             # derive headers from custom entries:
             for entry_no, entry in enumerate(logbook_custom_entries):
-                if any(op in entry for op in operators):
-                    list_entries, binary_operations = self._process_regex(entry)
+                entry_content = entry.split(':')
+                if len(entry_content) > 1:
+                    columnType = entry_content[1]
+                if any(op in entry_content[0] for op in operators):
+                    list_entries, binary_operations = self._process_regex(entry_content[0])
                     header = ""
                     for split_entry_no, split_entry in enumerate(list_entries):
                         # always use two strings around the final '/' for more informative header
@@ -176,13 +181,14 @@ class GenerateLogbook(PythonAlgorithm):
                         header += partial_header
                         header += binary_operations[split_entry_no] \
                             if split_entry_no < len(binary_operations) else ""
-                    logbook_custom_headers[entry_no] = header
+                    logbook_custom_headers[entry_no] = (columnType, header)
                 else:
                     # always use two strings around the final '/' for more informative header
-                    logbook_custom_headers[entry_no] = ('s', entry[entry.rfind('/', 0, entry.rfind('/') - 1) + 1:])
+                    logbook_custom_headers[entry_no] = \
+                        (vartype, (entry_content[0])[entry_content[0].rfind('/', 0, entry_content[0].rfind('/') - 1) + 1:])
         else:
             logbook_custom_headers = self.getPropertyValue('CustomHeaders')
-            logbook_custom_headers = ('s', logbook_custom_headers.split(','))
+            logbook_custom_headers = [(columnType, header) for header in logbook_custom_headers.split(',')]
         return logbook_custom_headers
 
     def _get_entries(self):
