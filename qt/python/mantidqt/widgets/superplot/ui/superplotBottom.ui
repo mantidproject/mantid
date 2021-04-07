@@ -27,20 +27,7 @@
     <property name="topMargin">
      <number>0</number>
     </property>
-    <item row="1" column="3">
-     <widget class="QComboBox" name="modeComboBox"/>
-    </item>
-    <item row="1" column="0" colspan="2">
-     <widget class="QSlider" name="spectrumSlider">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="2">
-     <widget class="QSpinBox" name="spectrumSpinBox"/>
-    </item>
-    <item row="1" column="4">
+    <item row="1" column="6">
      <widget class="QPushButton" name="holdButton">
       <property name="text">
        <string>Hold</string>
@@ -49,6 +36,19 @@
        <bool>true</bool>
       </property>
      </widget>
+    </item>
+    <item row="1" column="4">
+     <widget class="QSlider" name="spectrumSlider">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="3">
+     <widget class="QComboBox" name="modeComboBox"/>
+    </item>
+    <item row="1" column="5">
+     <widget class="QSpinBox" name="spectrumSpinBox"/>
     </item>
    </layout>
   </widget>
