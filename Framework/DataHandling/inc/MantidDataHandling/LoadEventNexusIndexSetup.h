@@ -26,18 +26,16 @@ namespace DataHandling {
 */
 class MANTID_DATAHANDLING_DLL LoadEventNexusIndexSetup {
 public:
-  LoadEventNexusIndexSetup(
-      API::MatrixWorkspace_const_sptr instrumentWorkspace, const int32_t min,
-      const int32_t max, const std::vector<int32_t> &range,
-      const Parallel::Communicator &communicator = Parallel::Communicator());
+  LoadEventNexusIndexSetup(API::MatrixWorkspace_const_sptr instrumentWorkspace, const int32_t min, const int32_t max,
+                           const std::vector<int32_t> &range,
+                           const Parallel::Communicator &communicator = Parallel::Communicator());
 
   std::pair<int32_t, int32_t> eventIDLimits() const;
 
   Indexing::IndexInfo makeIndexInfo();
   Indexing::IndexInfo makeIndexInfo(const std::vector<std::string> &bankNames);
   Indexing::IndexInfo
-  makeIndexInfo(const std::pair<std::vector<int32_t>, std::vector<int32_t>>
-                    &spectrumDetectorMapping,
+  makeIndexInfo(const std::pair<std::vector<int32_t>, std::vector<int32_t>> &spectrumDetectorMapping,
                 const bool monitorsOnly);
 
 private:

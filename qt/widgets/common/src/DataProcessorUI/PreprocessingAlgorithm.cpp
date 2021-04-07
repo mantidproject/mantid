@@ -18,11 +18,10 @@ namespace DataProcessor {
  * @param blacklist : The list of properties we don't want to show
  * algorithm in the processed workspace's name
  */
-PreprocessingAlgorithm::PreprocessingAlgorithm(
-    const QString &name, const QString &prefix, const QString &separator,
-    const std::set<QString> &blacklist)
-    : ProcessingAlgorithmBase(std::move(name), std::move(blacklist)),
-      m_prefix(std::move(prefix)), m_separator(std::move(separator)) {
+PreprocessingAlgorithm::PreprocessingAlgorithm(const QString &name, const QString &prefix, const QString &separator,
+                                               const std::set<QString> &blacklist)
+    : ProcessingAlgorithmBase(std::move(name), std::move(blacklist)), m_prefix(std::move(prefix)),
+      m_separator(std::move(separator)) {
 
   auto inputWsProperties = getInputWsProperties();
 
@@ -53,18 +52,13 @@ PreprocessingAlgorithm::PreprocessingAlgorithm(
  * @param blacklist : The list of properties we don't want to show, as a string
  * algorithm in the processed workspace's name
  */
-PreprocessingAlgorithm::PreprocessingAlgorithm(const QString &name,
-                                               const QString &prefix,
-                                               const QString &separator,
+PreprocessingAlgorithm::PreprocessingAlgorithm(const QString &name, const QString &prefix, const QString &separator,
                                                const QString &blacklist)
-    : PreprocessingAlgorithm(std::move(name), std::move(prefix),
-                             std::move(separator),
-                             convertStringToSet(blacklist)) {}
+    : PreprocessingAlgorithm(std::move(name), std::move(prefix), std::move(separator), convertStringToSet(blacklist)) {}
 
 /** Default constructor: do nothing
  */
-PreprocessingAlgorithm::PreprocessingAlgorithm()
-    : m_prefix(), m_separator(), m_lhs(), m_rhs(), m_outProperty() {}
+PreprocessingAlgorithm::PreprocessingAlgorithm() : m_prefix(), m_separator(), m_lhs(), m_rhs(), m_outProperty() {}
 
 // Destructor
 PreprocessingAlgorithm::~PreprocessingAlgorithm() {}

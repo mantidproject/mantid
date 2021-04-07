@@ -82,7 +82,7 @@ class ProjectSaver(object):
                 # Catch any exception and log it
                 if isinstance(e, KeyboardInterrupt):
                     raise
-                logger.warning("Project Saver: An interface could not be saver error: " + str(e))
+                logger.warning("Project Saver: An interface could not be saved error: " + str(e))
         return interfaces
 
 

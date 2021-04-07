@@ -18,10 +18,8 @@ Group::Group() : m_allOperations(), m_operationSet(), m_axisSystem() {
 
 /// Uses SymmetryOperationFactory to create a vector of symmetry operations from
 /// the string.
-Group::Group(const std::string &symmetryOperationString)
-    : m_allOperations(), m_operationSet(), m_axisSystem() {
-  setSymmetryOperations(SymmetryOperationFactory::Instance().createSymOps(
-      symmetryOperationString));
+Group::Group(const std::string &symmetryOperationString) : m_allOperations(), m_operationSet(), m_axisSystem() {
+  setSymmetryOperations(SymmetryOperationFactory::Instance().createSymOps(symmetryOperationString));
 }
 
 /// Constructs a group from the symmetry operations in the vector, duplicates
@@ -35,19 +33,14 @@ Group::Group(const std::vector<SymmetryOperation> &symmetryOperations)
 size_t Group::order() const { return m_allOperations.size(); }
 
 /// Returns the axis system of the group (either orthogonal or hexagonal).
-Group::CoordinateSystem Group::getCoordinateSystem() const {
-  return m_axisSystem;
-}
+Group::CoordinateSystem Group::getCoordinateSystem() const { return m_axisSystem; }
 
 /// Returns a vector with all symmetry operations.
-std::vector<SymmetryOperation> Group::getSymmetryOperations() const {
-  return m_allOperations;
-}
+std::vector<SymmetryOperation> Group::getSymmetryOperations() const { return m_allOperations; }
 
 /// Returns true if the group contains the supplied operation.
 bool Group::containsOperation(const SymmetryOperation &operation) const {
-  return std::find(m_allOperations.begin(), m_allOperations.end(), operation) !=
-         m_allOperations.end();
+  return std::find(m_allOperations.begin(), m_allOperations.end(), operation) != m_allOperations.end();
 }
 
 /**
@@ -119,30 +112,21 @@ std::vector<Kernel::V3D> Group::operator*(const Kernel::V3D &vector) const {
  * @param tolerance :: Tolerance for comparison of tensor equality.
  * @return :: True if tensor is invariant.
  */
-bool Group::isInvariant(const Kernel::DblMatrix &tensor,
-                        double tolerance) const {
-  auto transformTensor = [](const Kernel::DblMatrix &opMatrix,
-                            const Kernel::DblMatrix &tensor) {
+bool Group::isInvariant(const Kernel::DblMatrix &tensor, double tolerance) const {
+  auto transformTensor = [](const Kernel::DblMatrix &opMatrix, const Kernel::DblMatrix &tensor) {
     return opMatrix.Tprime() * tensor * opMatrix;
   };
 
-  return std::all_of(m_allOperations.cbegin(), m_allOperations.cend(),
-                     [&](const SymmetryOperation &op) {
-                       return transformTensor(
-                                  convertMatrix<double>(op.matrix()), tensor)
-                           .equals(tensor, tolerance);
-                     });
+  return std::all_of(m_allOperations.cbegin(), m_allOperations.cend(), [&](const SymmetryOperation &op) {
+    return transformTensor(convertMatrix<double>(op.matrix()), tensor).equals(tensor, tolerance);
+  });
 }
 
 /// Returns true if both groups contain the same set of symmetry operations.
-bool Group::operator==(const Group &other) const {
-  return m_operationSet == other.m_operationSet;
-}
+bool Group::operator==(const Group &other) const { return m_operationSet == other.m_operationSet; }
 
 /// Returns true if groups are different from eachother.
-bool Group::operator!=(const Group &other) const {
-  return !(this->operator==(other));
-}
+bool Group::operator!=(const Group &other) const { return !(this->operator==(other)); }
 
 /// Checks whether a certain group axiom is fulfilled, can be used as a more
 /// fine-grained alternative to isGroup().
@@ -172,33 +156,27 @@ bool Group::fulfillsAxiom(GroupAxiom axiom) const {
  *
  * @return True if group axioms are fulfilled, false otherwise.
  */
-bool Group::isGroup() const {
-  return isClosed() && hasIdentity() && eachElementHasInverse() &&
-         associativityHolds();
-}
+bool Group::isGroup() const { return isClosed() && hasIdentity() && eachElementHasInverse() && associativityHolds(); }
 
 /// Assigns symmetry operations, throws std::invalid_argument if vector is
 /// empty.
-void Group::setSymmetryOperations(
-    const std::vector<SymmetryOperation> &symmetryOperations) {
+void Group::setSymmetryOperations(const std::vector<SymmetryOperation> &symmetryOperations) {
   if (symmetryOperations.empty()) {
     throw std::invalid_argument("Group needs at least one element.");
   }
 
   m_operationSet.clear();
   std::transform(symmetryOperations.cbegin(), symmetryOperations.cend(),
-                 std::inserter(m_operationSet, m_operationSet.begin()),
-                 &getUnitCellIntervalOperation);
+                 std::inserter(m_operationSet, m_operationSet.begin()), &getUnitCellIntervalOperation);
 
-  m_allOperations = std::vector<SymmetryOperation>(m_operationSet.begin(),
-                                                   m_operationSet.end());
+  m_allOperations = std::vector<SymmetryOperation>(m_operationSet.begin(), m_operationSet.end());
   m_axisSystem = getCoordinateSystemFromOperations(m_allOperations);
 }
 
 /// Returns the axis system based on the given symmetry operations. Hexagonal
 /// systems have 4 non-zero elements in the matrix, orthogonal have 6.
-Group::CoordinateSystem Group::getCoordinateSystemFromOperations(
-    const std::vector<SymmetryOperation> &symmetryOperations) const {
+Group::CoordinateSystem
+Group::getCoordinateSystemFromOperations(const std::vector<SymmetryOperation> &symmetryOperations) const {
   for (const auto &symmetryOperation : symmetryOperations) {
     std::vector<int> matrix = symmetryOperation.matrix();
     if (std::count(matrix.begin(), matrix.end(), 0) == 5) {
@@ -237,11 +215,9 @@ bool Group::hasIdentity() const {
 
 /// Returns true if the inverse of each element is in the group
 bool Group::eachElementHasInverse() const {
-  return std::all_of(m_allOperations.cbegin(), m_allOperations.cend(),
-                     [this](const auto &operation) {
-                       return this->containsOperation(
-                           getUnitCellIntervalOperation(operation.inverse()));
-                     });
+  return std::all_of(m_allOperations.cbegin(), m_allOperations.cend(), [this](const auto &operation) {
+    return this->containsOperation(getUnitCellIntervalOperation(operation.inverse()));
+  });
 }
 
 /**
@@ -267,8 +243,7 @@ bool Group::associativityHolds() const { return true; }
 
 /// Convenience operator* for directly multiplying groups using shared
 /// pointers.
-Group_const_sptr operator*(const Group_const_sptr &lhs,
-                           const Group_const_sptr &rhs) {
+Group_const_sptr operator*(const Group_const_sptr &lhs, const Group_const_sptr &rhs) {
   if (!lhs || !rhs) {
     throw std::invalid_argument("One of the operands is null. Aborting.");
   }
@@ -277,8 +252,7 @@ Group_const_sptr operator*(const Group_const_sptr &lhs,
 }
 
 /// Convenience operator* for getting a vector of V3D using shared pointers.
-std::vector<Kernel::V3D> operator*(const Group_const_sptr &lhs,
-                                   const Kernel::V3D &rhs) {
+std::vector<Kernel::V3D> operator*(const Group_const_sptr &lhs, const Kernel::V3D &rhs) {
   if (!lhs) {
     throw std::invalid_argument("Cannot use null pointer for multiplication.");
   }
@@ -296,9 +270,7 @@ bool operator==(const Group_const_sptr &lhs, const Group_const_sptr &rhs) {
 }
 
 /// Inequality operator for shared pointers.
-bool operator!=(const Group_const_sptr &lhs, const Group_const_sptr &rhs) {
-  return !(operator==(lhs, rhs));
-}
+bool operator!=(const Group_const_sptr &lhs, const Group_const_sptr &rhs) { return !(operator==(lhs, rhs)); }
 
 } // namespace Geometry
 } // namespace Mantid

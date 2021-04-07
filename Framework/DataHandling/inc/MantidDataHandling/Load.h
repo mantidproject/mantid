@@ -31,22 +31,18 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadNexus", "LoadRaw", "LoadBBY"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadNexus", "LoadRaw", "LoadBBY"}; }
 
   /// Category
   const std::string category() const override { return "DataHandling"; }
   /// Aliases
   const std::string alias() const override { return "load"; }
   /// Override setPropertyValue
-  void setPropertyValue(const std::string &name,
-                        const std::string &value) override;
+  void setPropertyValue(const std::string &name, const std::string &value) override;
 
 protected:
-  Parallel::ExecutionMode getParallelExecutionMode(
-      const std::map<std::string, Parallel::StorageMode> &storageModes)
-      const override;
+  Parallel::ExecutionMode
+  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
 
 private:
   /// This method returns shared pointer to a load algorithm which got
@@ -69,30 +65,22 @@ private:
   /// Overrides the cancel() method to call m_loader->cancel()
   void cancel() override;
   /// Create the concrete instance use for the actual loading.
-  API::IAlgorithm_sptr createLoader(const double startProgress = -1.0,
-                                    const double endProgress = -1.0,
+  API::IAlgorithm_sptr createLoader(const double startProgress = -1.0, const double endProgress = -1.0,
                                     const bool logging = true) const;
   /// Set the loader option for use as a Child Algorithm.
-  void setUpLoader(API::IAlgorithm_sptr &loader,
-                   const double startProgress = -1.0,
-                   const double endProgress = -1.0,
+  void setUpLoader(API::IAlgorithm_sptr &loader, const double startProgress = -1.0, const double endProgress = -1.0,
                    const bool logging = true) const;
   /// Set the output workspace(s)
   void setOutputWorkspace(const API::IAlgorithm_sptr &loader);
   /// Retrieve a pointer to the output workspace from the Child Algorithm
-  API::Workspace_sptr
-  getOutputWorkspace(const std::string &propName,
-                     const API::IAlgorithm_sptr &loader) const;
+  API::Workspace_sptr getOutputWorkspace(const std::string &propName, const API::IAlgorithm_sptr &loader) const;
 
   /// Load a file to a given workspace name.
-  API::Workspace_sptr loadFileToWs(const std::string &fileName,
-                                   const std::string &wsName);
+  API::Workspace_sptr loadFileToWs(const std::string &fileName, const std::string &wsName);
   /// Plus two workspaces together, "in place".
-  API::Workspace_sptr plusWs(API::Workspace_sptr ws1,
-                             const API::Workspace_sptr &ws2);
+  API::Workspace_sptr plusWs(API::Workspace_sptr ws1, const API::Workspace_sptr &ws2);
   /// Manually group workspaces.
-  API::WorkspaceGroup_sptr
-  groupWsList(const std::vector<API::Workspace_sptr> &wsList);
+  API::WorkspaceGroup_sptr groupWsList(const std::vector<API::Workspace_sptr> &wsList);
 
   /// The base properties
   std::unordered_set<std::string> m_baseProps;

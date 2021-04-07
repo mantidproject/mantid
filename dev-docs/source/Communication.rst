@@ -2,7 +2,7 @@
 
 .. toctree::
    :hidden:
-   
+
    DevelopmentTeam
 
 Communication

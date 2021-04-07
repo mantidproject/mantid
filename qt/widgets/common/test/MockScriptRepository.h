@@ -24,10 +24,8 @@ public:
   MOCK_METHOD1(install, void(const std::string &));
   MOCK_METHOD1(connect, void(const std::string &));
   MOCK_METHOD0(check4Update, std::vector<std::string>());
-  MOCK_METHOD4(upload, void(const std::string &, const std::string &,
-                            const std::string &, const std::string &));
-  MOCK_METHOD4(remove, void(const std::string &, const std::string &,
-                            const std::string &, const std::string &));
+  MOCK_METHOD4(upload, void(const std::string &, const std::string &, const std::string &, const std::string &));
+  MOCK_METHOD4(remove, void(const std::string &, const std::string &, const std::string &, const std::string &));
   MOCK_METHOD1(setIgnorePatterns, void(const std::string &));
   MOCK_METHOD0(ignorePatterns, std::string());
 
@@ -44,17 +42,13 @@ public:
     return 1;
   }
 
-  const std::string &description(const std::string &path) override {
-    return path;
-  }
+  const std::string &description(const std::string &path) override { return path; }
 
   bool isValid() override { return true; }
 
   std::vector<std::string> listFiles() override { return filePaths; }
 
-  SCRIPTSTATUS fileStatus(const std::string &file_path) {
-    return std::get<0>(testFiles[file_path]);
-  }
+  SCRIPTSTATUS fileStatus(const std::string &file_path) { return std::get<0>(testFiles[file_path]); }
 
 private:
   // contains fake file entries: path, status, autoupdate, directory
@@ -67,18 +61,12 @@ private:
                                         "Repo/reflectometry/Reduction.py",
                                         "Repo/reflectometry/script.py"};
   void addFakeFiles() {
-    testFiles.insert(
-        fileType(filePaths[0], std::make_tuple(LOCAL_ONLY, false, true)));
-    testFiles.insert(
-        fileType(filePaths[1], std::make_tuple(BOTH_UNCHANGED, false, false)));
-    testFiles.insert(
-        fileType(filePaths[2], std::make_tuple(REMOTE_ONLY, false, false)));
-    testFiles.insert(
-        fileType(filePaths[3], std::make_tuple(BOTH_CHANGED, false, true)));
-    testFiles.insert(
-        fileType(filePaths[4], std::make_tuple(REMOTE_CHANGED, true, false)));
-    testFiles.insert(
-        fileType(filePaths[5], std::make_tuple(LOCAL_CHANGED, true, false)));
+    testFiles.insert(fileType(filePaths[0], std::make_tuple(LOCAL_ONLY, false, true)));
+    testFiles.insert(fileType(filePaths[1], std::make_tuple(BOTH_UNCHANGED, false, false)));
+    testFiles.insert(fileType(filePaths[2], std::make_tuple(REMOTE_ONLY, false, false)));
+    testFiles.insert(fileType(filePaths[3], std::make_tuple(BOTH_CHANGED, false, true)));
+    testFiles.insert(fileType(filePaths[4], std::make_tuple(REMOTE_CHANGED, true, false)));
+    testFiles.insert(fileType(filePaths[5], std::make_tuple(LOCAL_CHANGED, true, false)));
   }
 };
 

@@ -30,12 +30,8 @@ class ALCBaselineModellingModelTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ALCBaselineModellingModelTest *createSuite() {
-    return new ALCBaselineModellingModelTest();
-  }
-  static void destroySuite(ALCBaselineModellingModelTest *suite) {
-    delete suite;
-  }
+  static ALCBaselineModellingModelTest *createSuite() { return new ALCBaselineModellingModelTest(); }
+  static void destroySuite(ALCBaselineModellingModelTest *suite) { delete suite; }
 
   ALCBaselineModellingModelTest() {
     FrameworkManager::Instance(); // To make sure everything is initialized
@@ -47,10 +43,8 @@ public:
 
   void test_setData() {
 
-    MatrixWorkspace_sptr data =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 9, 9);
-    data->setHistogram(0, Points{1, 2, 3, 4, 5, 6, 7, 8, 9},
-                       Counts{100, 1, 2, 100, 100, 3, 4, 5, 100});
+    MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create("Workspace2D", 1, 9, 9);
+    data->setHistogram(0, Points{1, 2, 3, 4, 5, 6, 7, 8, 9}, Counts{100, 1, 2, 100, 100, 3, 4, 5, 100});
     QSignalSpy spy(m_model, SIGNAL(dataChanged()));
 
     TS_ASSERT_THROWS_NOTHING(m_model->setData(data));
@@ -65,17 +59,13 @@ public:
   }
 
   void test_fit() {
-    MatrixWorkspace_sptr data =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 9, 9);
-    data->setHistogram(0, Points{1, 2, 3, 4, 5, 6, 7, 8, 9},
-                       Counts{100, 1, 2, 100, 100, 3, 4, 5, 100},
-                       CountStandardDeviations{10.0, 1.0, 1.41, 10.0, 10.0,
-                                               1.73, 2.0, 2.5, 10.0});
+    MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create("Workspace2D", 1, 9, 9);
+    data->setHistogram(0, Points{1, 2, 3, 4, 5, 6, 7, 8, 9}, Counts{100, 1, 2, 100, 100, 3, 4, 5, 100},
+                       CountStandardDeviations{10.0, 1.0, 1.41, 10.0, 10.0, 1.73, 2.0, 2.5, 10.0});
 
     m_model->setData(data);
 
-    IFunction_const_sptr func = FunctionFactory::Instance().createInitialized(
-        "name=FlatBackground,A0=0");
+    IFunction_const_sptr func = FunctionFactory::Instance().createInitialized("name=FlatBackground,A0=0");
 
     std::vector<IALCBaselineModellingModel::Section> sections;
     sections.emplace_back(2, 3);
@@ -128,13 +118,9 @@ public:
     TS_ASSERT_EQUALS(m_model->sections(), sections);
   }
 
-  void test_exportWorkspace() {
-    TS_ASSERT_THROWS_NOTHING(m_model->exportWorkspace());
-  }
+  void test_exportWorkspace() { TS_ASSERT_THROWS_NOTHING(m_model->exportWorkspace()); }
 
-  void test_exportTable() {
-    TS_ASSERT_THROWS_NOTHING(m_model->exportSections());
-  }
+  void test_exportTable() { TS_ASSERT_THROWS_NOTHING(m_model->exportSections()); }
 
   void test_exportModel() { TS_ASSERT_THROWS_NOTHING(m_model->exportModel()); }
 

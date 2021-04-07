@@ -31,8 +31,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
 
-bool cmp_Events(const std::vector<coord_t> &ev1,
-                const std::vector<coord_t> &ev2) {
+bool cmp_Events(const std::vector<coord_t> &ev1, const std::vector<coord_t> &ev2) {
   // event1 < event2 if it has smaller det_id and dE
   assert(ev1.size() == 9);
   assert(ev2.size() == 9);
@@ -93,10 +92,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filenames", m_fileName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("NormalizationWorkspace", normWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizationWorkspace", normWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Normalization", "monitor"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadAs", "raw"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -104,9 +101,7 @@ public:
 
     // Retrieve the workspace from data service.
     IMDEventWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING(
-        iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName));
     TS_ASSERT(iws);
     TS_ASSERT_EQUALS(iws->getNumExperimentInfo(), 1);
 
@@ -114,8 +109,7 @@ public:
     auto &run = expinfo->run();
     double d(1e-05);
     TS_ASSERT_DELTA(run.getPropertyValueAsType<double>("wavelength"), 4.2, d);
-    TimeSeriesProperty<double> *p =
-        dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("Lambda"));
+    TimeSeriesProperty<double> *p = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("Lambda"));
     TS_ASSERT_DELTA(p->firstValue(), 0.42, d);
     p = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("Energy"));
     TS_ASSERT_DELTA(p->firstValue(), 4.640, d);
@@ -125,11 +119,9 @@ public:
     TS_ASSERT_DELTA(p->firstValue(), -8.54, d);
     p = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("Huber"));
     TS_ASSERT_DELTA(p->firstValue(), 79.0, d);
-    p = dynamic_cast<TimeSeriesProperty<double> *>(
-        run.getProperty("Flipper_precession"));
+    p = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("Flipper_precession"));
     TS_ASSERT_DELTA(p->firstValue(), 0.970, d);
-    p = dynamic_cast<TimeSeriesProperty<double> *>(
-        run.getProperty("Flipper_z_compensation"));
+    p = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("Flipper_z_compensation"));
     TS_ASSERT_DELTA(p->firstValue(), 0.400, d);
     p = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("C_a"));
     TS_ASSERT_DELTA(p->firstValue(), 0.0, d);
@@ -143,22 +135,17 @@ public:
     TS_ASSERT_DELTA(p->firstValue(), 295.0, d);
     p = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("T2"));
     TS_ASSERT_DELTA(p->firstValue(), 296.477, d);
-    p = dynamic_cast<TimeSeriesProperty<double> *>(
-        run.getProperty("sample_setpoint"));
+    p = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("sample_setpoint"));
     TS_ASSERT_DELTA(p->firstValue(), 295.0, d);
     p = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("Timer"));
     TS_ASSERT_DELTA(p->firstValue(), 600.0, d);
     p = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("Monitor"));
     TS_ASSERT_DELTA(p->firstValue(), 8332872, d);
-    p = dynamic_cast<TimeSeriesProperty<double> *>(
-        run.getProperty("TOF channels"));
+    p = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("TOF channels"));
     TS_ASSERT_DELTA(p->firstValue(), 1.0, d);
-    TimeSeriesProperty<std::string> *s =
-        dynamic_cast<TimeSeriesProperty<std::string> *>(
-            run.getProperty("start_time"));
+    TimeSeriesProperty<std::string> *s = dynamic_cast<TimeSeriesProperty<std::string> *>(run.getProperty("start_time"));
     TS_ASSERT_EQUALS(s->firstValue(), "2013-04-16T16:11:02");
-    s = dynamic_cast<TimeSeriesProperty<std::string> *>(
-        run.getProperty("stop_time"));
+    s = dynamic_cast<TimeSeriesProperty<std::string> *>(run.getProperty("stop_time"));
     TS_ASSERT_EQUALS(s->firstValue(), "2013-04-16T16:21:03");
     AnalysisDataService::Instance().remove(outWSName);
   }
@@ -172,8 +159,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filenames", m_fileName))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("NormalizationWorkspace", normWSName))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizationWorkspace", normWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Normalization", "monitor"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeltaEmin", "-2.991993"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -181,9 +167,7 @@ public:
 
     // Retrieve the workspace from data service.
     IMDEventWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING(
-        iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            outWSName))
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName))
     TS_ASSERT(iws)
 
     TS_ASSERT_EQUALS(iws->getNumDims(), 4)
@@ -222,8 +206,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filenames", m_fileName))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("NormalizationWorkspace", normWSName))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizationWorkspace", normWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Normalization", "monitor"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadAs", "raw"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TwoThetaLimits", "20.0,55.0"))
@@ -232,9 +215,7 @@ public:
 
     // Retrieve the workspace from data service.
     IMDEventWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING(
-        iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            outWSName))
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName))
     TS_ASSERT(iws)
 
     TS_ASSERT_EQUALS(iws->getNumDims(), 3)
@@ -248,8 +229,7 @@ public:
 
     // test dimensions
     std::vector<std::string> v = {"Scattering Angle", "Omega", "TOF"};
-    std::vector<double> extentMins = {
-        20.0 / 2.0, 0.0, 424.668}; // this might fail if L1 will change
+    std::vector<double> extentMins = {20.0 / 2.0, 0.0, 424.668}; // this might fail if L1 will change
     std::vector<double> extentMaxs = {55.0 / 2.0, 360.0, 20000};
     for (auto i = 0; i < 3; i++) {
       auto dim = iws->getDimension(i);
@@ -273,10 +253,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filenames", m_fileName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("NormalizationWorkspace", normWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizationWorkspace", normWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Normalization", "monitor"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("a", 6.84));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("b", 6.84));
@@ -292,9 +270,7 @@ public:
 
     // Retrieve the workspace from data service.
     IMDEventWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING(
-        iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName));
     TS_ASSERT(iws);
 
     std::vector<API::IMDNode *> boxes(0, nullptr);
@@ -329,10 +305,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filenames", m_fileName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("NormalizationWorkspace", normWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizationWorkspace", normWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Normalization", "monitor"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadAs", "raw"))
     // TS_ASSERT_THROWS_NOTHING(alg.setProperty("OmegaOffset", -43.0));
@@ -341,9 +315,7 @@ public:
 
     // Retrieve the workspace from data service.
     IMDEventWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING(
-        iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName));
     TS_ASSERT(iws);
 
     std::vector<API::IMDNode *> boxes(0, nullptr);
@@ -375,10 +347,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filenames", m_fileName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("NormalizationWorkspace", normWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizationWorkspace", normWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Normalization", "monitor"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeltaEmin", "-2.991993"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -386,9 +356,7 @@ public:
 
     // Retrieve the workspace from data service.
     IMDEventWorkspace_sptr nws;
-    TS_ASSERT_THROWS_NOTHING(
-        nws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            normWSName));
+    TS_ASSERT_THROWS_NOTHING(nws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(normWSName));
     TS_ASSERT(nws);
 
     TS_ASSERT_EQUALS(nws->getNumDims(), 4);
@@ -428,10 +396,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filenames", m_fileName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("NormalizationWorkspace", normWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizationWorkspace", normWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Normalization", "monitor"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("a", 6.84));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("b", 6.84));
@@ -447,9 +413,7 @@ public:
 
     // Retrieve the workspace from data service.
     IMDEventWorkspace_sptr nws;
-    TS_ASSERT_THROWS_NOTHING(
-        nws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            normWSName));
+    TS_ASSERT_THROWS_NOTHING(nws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(normWSName));
     TS_ASSERT(nws);
 
     std::vector<API::IMDNode *> boxes(0, nullptr);
@@ -483,10 +447,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filenames", m_fileName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("NormalizationWorkspace", normWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizationWorkspace", normWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Normalization", "time"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("a", 6.84));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("b", 6.84));
@@ -502,9 +464,7 @@ public:
 
     // Retrieve the workspace from data service.
     IMDEventWorkspace_sptr nws;
-    TS_ASSERT_THROWS_NOTHING(
-        nws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            normWSName));
+    TS_ASSERT_THROWS_NOTHING(nws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(normWSName));
     TS_ASSERT(nws);
 
     std::vector<API::IMDNode *> boxes(0, nullptr);
@@ -537,10 +497,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filenames", m_fileName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("NormalizationWorkspace", normWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizationWorkspace", normWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Normalization", "monitor"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SaveHuberTo", tWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -548,9 +506,7 @@ public:
 
     // Retrieve the workspace from data service.
     ITableWorkspace_sptr tws;
-    TS_ASSERT_THROWS_NOTHING(
-        tws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            tWSName));
+    TS_ASSERT_THROWS_NOTHING(tws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(tWSName));
     TS_ASSERT(tws);
 
     // check that workspace has 1 row and 1 column
@@ -571,8 +527,7 @@ public:
     std::string tWSName1("LoadDNSSCDTest_Huber_load");
 
     // create a test table workspace
-    ITableWorkspace_sptr huberWS =
-        WorkspaceFactory::Instance().createTable("TableWorkspace");
+    ITableWorkspace_sptr huberWS = WorkspaceFactory::Instance().createTable("TableWorkspace");
     huberWS->addColumn("double", "Huber(degrees)");
     const std::vector<double> vals = {77.0, 92.0, 122.0};
     auto n = vals.size();
@@ -587,10 +542,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filenames", m_fileName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("NormalizationWorkspace", normWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizationWorkspace", normWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Normalization", "monitor"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadHuberFrom", tWSName1));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SaveHuberTo", tWSName2));
@@ -599,9 +552,7 @@ public:
 
     // Retrieve the workspace from data service.
     IMDEventWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING(
-        iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName));
     TS_ASSERT(iws);
 
     TS_ASSERT_EQUALS(iws->getNumDims(), 4);
@@ -610,9 +561,7 @@ public:
 
     // Retrieve the table workspace from data service.
     ITableWorkspace_sptr tws;
-    TS_ASSERT_THROWS_NOTHING(
-        tws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            tWSName2));
+    TS_ASSERT_THROWS_NOTHING(tws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(tWSName2));
     TS_ASSERT(tws);
 
     // check that workspace has 1 row and 1 column
@@ -639,10 +588,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filenames", m_fileName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("NormalizationWorkspace", normWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizationWorkspace", normWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Normalization", "monitor"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("a", 6.84));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("b", 6.84));
@@ -659,9 +606,7 @@ public:
 
     // Retrieve the workspace from data service.
     IMDEventWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING(
-        iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName));
     TS_ASSERT(iws);
 
     std::vector<API::IMDNode *> boxes(0, nullptr);
@@ -686,9 +631,7 @@ public:
 
     // test the normalization workspace as well
     IMDEventWorkspace_sptr nws;
-    TS_ASSERT_THROWS_NOTHING(
-        nws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            normWSName));
+    TS_ASSERT_THROWS_NOTHING(nws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(normWSName));
     TS_ASSERT(nws);
     // there are 7 points (the rest is outside of 2theta limits)
     TS_ASSERT_EQUALS(nws->getNPoints(), 7);
@@ -704,10 +647,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filenames", "dnstof.d_dat"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("NormalizationWorkspace", normWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizationWorkspace", normWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Normalization", "monitor"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeltaEmin", "-2.991993"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -715,9 +656,7 @@ public:
 
     // Retrieve the workspace from data service.
     IMDEventWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING(
-        iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName));
     TS_ASSERT(iws);
 
     TS_ASSERT_EQUALS(iws->getNumDims(), 4);
@@ -727,11 +666,9 @@ public:
     TS_ASSERT_EQUALS(iws->getNumExperimentInfo(), 1);
     ExperimentInfo_sptr expinfo = iws->getExperimentInfo(0);
     auto &run = expinfo->run();
-    TimeSeriesProperty<double> *p = dynamic_cast<TimeSeriesProperty<double> *>(
-        run.getProperty("TOF channels"));
+    TimeSeriesProperty<double> *p = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("TOF channels"));
     TS_ASSERT_DELTA(p->firstValue(), 100, 1.0e-05);
-    p = dynamic_cast<TimeSeriesProperty<double> *>(
-        run.getProperty("Time per channel"));
+    p = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("Time per channel"));
     TS_ASSERT_DELTA(p->firstValue(), 40.1, 1.0e-05);
     // test box controller
     BoxController_sptr bc = iws->getBoxController();
@@ -766,10 +703,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filenames", "dnstof.d_dat"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("NormalizationWorkspace", normWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizationWorkspace", normWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Normalization", "monitor"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("a", 3.55));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("b", 3.55));
@@ -787,9 +722,7 @@ public:
 
     // Retrieve the workspace from data service.
     IMDEventWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING(
-        iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName));
     TS_ASSERT(iws);
 
     std::vector<API::IMDNode *> boxes(0, NULL);
@@ -815,9 +748,7 @@ public:
 
     // test the normalization workspace as well
     IMDEventWorkspace_sptr nws;
-    TS_ASSERT_THROWS_NOTHING(
-        nws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            normWSName));
+    TS_ASSERT_THROWS_NOTHING(nws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(normWSName));
     TS_ASSERT(nws);
     // there are 7 histograms (the rest is outside of 2theta limits)
     TS_ASSERT_EQUALS(nws->getNPoints(), 574);
@@ -835,10 +766,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filenames", "dnstof.d_dat"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("NormalizationWorkspace", normWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizationWorkspace", normWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Normalization", "monitor"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("a", 3.55));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("b", 3.55));
@@ -857,9 +786,7 @@ public:
 
     // Retrieve the workspace from data service.
     IMDEventWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING(
-        iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName));
     TS_ASSERT(iws);
 
     std::vector<API::IMDNode *> boxes(0, NULL);
@@ -885,9 +812,7 @@ public:
 
     // test the normalization workspace as well
     IMDEventWorkspace_sptr nws;
-    TS_ASSERT_THROWS_NOTHING(
-        nws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            normWSName));
+    TS_ASSERT_THROWS_NOTHING(nws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(normWSName));
     TS_ASSERT(nws);
     // there are 7 points (the rest is outside of 2theta limits)
     TS_ASSERT_EQUALS(nws->getNPoints(), 574);
@@ -908,10 +833,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filenames", filenames));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("NormalizationWorkspace", normWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizationWorkspace", normWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Normalization", "monitor"));
 
     // algorithm should throw if no valid files is provided

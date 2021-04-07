@@ -37,14 +37,10 @@ DECLARE_ALGORITHM(IntegratePeaksMDHKL)
  * Initialize the algorithm's properties.
  */
 void IntegratePeaksMDHKL::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<IMDWorkspace>>("InputWorkspace", "",
-                                                        Direction::Input),
-      "An input Sample MDHistoWorkspace or MDEventWorkspace in HKL.");
-  declareProperty("DeltaHKL", 0.5,
-                  "Distance from integer HKL to integrate peak.");
-  declareProperty("GridPoints", 201,
-                  "Number of grid points for each dimension of HKL box.");
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>("InputWorkspace", "", Direction::Input),
+                  "An input Sample MDHistoWorkspace or MDEventWorkspace in HKL.");
+  declareProperty("DeltaHKL", 0.5, "Distance from integer HKL to integrate peak.");
+  declareProperty("GridPoints", 201, "Number of grid points for each dimension of HKL box.");
   declareProperty("NeighborPoints", 10,
                   "Number of points in 5^3 surrounding "
                   "points above intensity threshold for "
@@ -55,42 +51,32 @@ void IntegratePeaksMDHKL::init() {
   fluxValidator->add<CommonBinsValidator>();
   auto solidAngleValidator = fluxValidator->clone();
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "FluxWorkspace", "", Direction::Input, PropertyMode::Optional,
-          fluxValidator),
-      "An optional input workspace containing momentum dependent flux for "
-      "normalization.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "SolidAngleWorkspace", "", Direction::Input,
-                      PropertyMode::Optional, solidAngleValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("FluxWorkspace", "", Direction::Input, PropertyMode::Optional,
+                                                        fluxValidator),
+                  "An optional input workspace containing momentum dependent flux for "
+                  "normalization.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("SolidAngleWorkspace", "", Direction::Input,
+                                                        PropertyMode::Optional, solidAngleValidator),
                   "An optional input workspace containing momentum integrated "
                   "vanadium for normalization "
                   "(a measure of the solid angle).");
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "PeaksWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                          Direction::Output),
-      "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
-      "with the peaks' integrated intensities.");
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "BackgroundInnerRadius", EMPTY_DBL(), Direction::Input),
-      "Optional:Inner radius to use to evaluate the background of the peak.\n"
-      "If omitted background is region of HKL box - peak. ");
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
+                  "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
+                  "with the peaks' integrated intensities.");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("BackgroundInnerRadius", EMPTY_DBL(), Direction::Input),
+                  "Optional:Inner radius to use to evaluate the background of the peak.\n"
+                  "If omitted background is region of HKL box - peak. ");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "BackgroundOuterRadius", EMPTY_DBL(), Direction::Input),
-      "Optional:Outer radius to use to evaluate the background of the peak.\n"
-      "The signal density around the peak (BackgroundInnerRadius < r < "
-      "BackgroundOuterRadius) is used to estimate the background under the "
-      "peak.\n"
-      "If omitted background is region of HKL box - peak.");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("BackgroundOuterRadius", EMPTY_DBL(), Direction::Input),
+                  "Optional:Outer radius to use to evaluate the background of the peak.\n"
+                  "The signal density around the peak (BackgroundInnerRadius < r < "
+                  "BackgroundOuterRadius) is used to estimate the background under the "
+                  "peak.\n"
+                  "If omitted background is region of HKL box - peak.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -100,8 +86,7 @@ void IntegratePeaksMDHKL::init() {
 void IntegratePeaksMDHKL::exec() {
   IMDWorkspace_sptr m_inputWS = getProperty("InputWorkspace");
   Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
-  boost::optional<Mantid::Kernel::SpecialCoordinateSystem> coordinateSystem =
-      converter(m_inputWS.get());
+  boost::optional<Mantid::Kernel::SpecialCoordinateSystem> coordinateSystem = converter(m_inputWS.get());
   if (*coordinateSystem != Mantid::Kernel::SpecialCoordinateSystem::HKL) {
     std::stringstream errmsg;
     errmsg << "Input MDWorkspace's coordinate system is not HKL.";
@@ -121,10 +106,8 @@ void IntegratePeaksMDHKL::exec() {
   MatrixWorkspace_sptr flux = getProperty("FluxWorkspace");
   MatrixWorkspace_sptr sa = getProperty("SolidAngleWorkspace");
 
-  IMDEventWorkspace_sptr m_eventWS =
-      std::dynamic_pointer_cast<IMDEventWorkspace>(m_inputWS);
-  IMDHistoWorkspace_sptr m_histoWS =
-      std::dynamic_pointer_cast<IMDHistoWorkspace>(m_inputWS);
+  IMDEventWorkspace_sptr m_eventWS = std::dynamic_pointer_cast<IMDEventWorkspace>(m_inputWS);
+  IMDHistoWorkspace_sptr m_histoWS = std::dynamic_pointer_cast<IMDHistoWorkspace>(m_inputWS);
   int npeaks = peakWS->getNumberPeaks();
 
   auto prog = std::make_unique<Progress>(this, 0.3, 1.0, npeaks);
@@ -158,25 +141,17 @@ void IntegratePeaksMDHKL::exec() {
   setProperty("OutputWorkspace", peakWS);
 }
 
-MDHistoWorkspace_sptr
-IntegratePeaksMDHKL::normalize(int h, int k, int l, double box, int gridPts,
-                               const MatrixWorkspace_sptr &flux,
-                               const MatrixWorkspace_sptr &sa,
-                               const IMDEventWorkspace_sptr &ws) {
+MDHistoWorkspace_sptr IntegratePeaksMDHKL::normalize(int h, int k, int l, double box, int gridPts,
+                                                     const MatrixWorkspace_sptr &flux, const MatrixWorkspace_sptr &sa,
+                                                     const IMDEventWorkspace_sptr &ws) {
   IAlgorithm_sptr normAlg = createChildAlgorithm("MDNormSCD");
   normAlg->setProperty("InputWorkspace", ws);
-  normAlg->setProperty("AlignedDim0",
-                       "[H,0,0]," + boost::lexical_cast<std::string>(h - box) +
-                           "," + boost::lexical_cast<std::string>(h + box) +
-                           "," + std::to_string(gridPts));
-  normAlg->setProperty("AlignedDim1",
-                       "[0,K,0]," + boost::lexical_cast<std::string>(k - box) +
-                           "," + boost::lexical_cast<std::string>(k + box) +
-                           "," + std::to_string(gridPts));
-  normAlg->setProperty("AlignedDim2",
-                       "[0,0,L]," + boost::lexical_cast<std::string>(l - box) +
-                           "," + boost::lexical_cast<std::string>(l + box) +
-                           "," + std::to_string(gridPts));
+  normAlg->setProperty("AlignedDim0", "[H,0,0]," + boost::lexical_cast<std::string>(h - box) + "," +
+                                          boost::lexical_cast<std::string>(h + box) + "," + std::to_string(gridPts));
+  normAlg->setProperty("AlignedDim1", "[0,K,0]," + boost::lexical_cast<std::string>(k - box) + "," +
+                                          boost::lexical_cast<std::string>(k + box) + "," + std::to_string(gridPts));
+  normAlg->setProperty("AlignedDim2", "[0,0,L]," + boost::lexical_cast<std::string>(l - box) + "," +
+                                          boost::lexical_cast<std::string>(l + box) + "," + std::to_string(gridPts));
   normAlg->setProperty("FluxWorkspace", flux);
   normAlg->setProperty("SolidAngleWorkspace", sa);
   normAlg->setProperty("OutputWorkspace", "mdout");
@@ -194,9 +169,7 @@ IntegratePeaksMDHKL::normalize(int h, int k, int l, double box, int gridPts,
   return std::dynamic_pointer_cast<MDHistoWorkspace>(out);
 }
 
-void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
-                                        const MDHistoWorkspace_sptr &out,
-                                        double &intensity,
+void IntegratePeaksMDHKL::integratePeak(const int neighborPts, const MDHistoWorkspace_sptr &out, double &intensity,
                                         double &errorSquared) {
   std::vector<int> gridPts;
   /// Background (end) radius
@@ -245,8 +218,7 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
           double radius2 = pow((double(Hindex) - Hcenter) / gridPts[0], 2) +
                            pow((double(Kindex) - Kcenter) / gridPts[1], 2) +
                            pow((double(Lindex) - Lcenter) / gridPts[2], 2);
-          if (radius2 < BackgroundOuterRadius2 &&
-              BackgroundInnerRadius2 < radius2) {
+          if (radius2 < BackgroundOuterRadius2 && BackgroundInnerRadius2 < radius2) {
             backgroundPoints = backgroundPoints + 1;
             backgroundSum = backgroundSum + F[iHKL];
             backgroundErrSqSum = backgroundErrSqSum + SqError[iHKL];
@@ -261,13 +233,9 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
             for (int Hj = -2; Hj < 3; Hj++) {
               for (int Kj = -2; Kj < 3; Kj++) {
                 for (int Lj = -2; Lj < 3; Lj++) {
-                  int jHKL =
-                      Hindex + Hj +
-                      gridPts[0] * (Kindex + Kj + gridPts[1] * (Lindex + Lj));
-                  if (Lindex + Lj >= 0 && Lindex + Lj < gridPts[2] &&
-                      Kindex + Kj >= 0 && Kindex + Kj < gridPts[1] &&
-                      Hindex + Hj >= 0 && Hindex + Hj < gridPts[0] &&
-                      F[jHKL] > minIntensity) {
+                  int jHKL = Hindex + Hj + gridPts[0] * (Kindex + Kj + gridPts[1] * (Lindex + Lj));
+                  if (Lindex + Lj >= 0 && Lindex + Lj < gridPts[2] && Kindex + Kj >= 0 && Kindex + Kj < gridPts[1] &&
+                      Hindex + Hj >= 0 && Hindex + Hj < gridPts[0] && F[jHKL] > minIntensity) {
                     neighborPoints = neighborPoints + 1;
                   }
                 }
@@ -280,10 +248,9 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
             }
           }
         } else {
-          double minR =
-              sqrt(std::pow(float(Hindex) / float(gridPts[0]) - 0.5, 2) +
-                   std::pow(float(Kindex) / float(gridPts[1]) - 0.5, 2) +
-                   std::pow(float(Lindex) / float(gridPts[0]) - 0.5, 2));
+          double minR = sqrt(std::pow(float(Hindex) / float(gridPts[0]) - 0.5, 2) +
+                             std::pow(float(Kindex) / float(gridPts[1]) - 0.5, 2) +
+                             std::pow(float(Lindex) / float(gridPts[0]) - 0.5, 2));
           if (minR < 0.05) {
             intensity = 0.0;
             errorSquared = 0.0;
@@ -313,23 +280,16 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
  * All slicing algorithm properties are passed along
  * @return MDHistoWorkspace as a result of the binning
  */
-MDHistoWorkspace_sptr
-IntegratePeaksMDHKL::binEvent(int h, int k, int l, double box, int gridPts,
-                              const IMDWorkspace_sptr &ws) {
+MDHistoWorkspace_sptr IntegratePeaksMDHKL::binEvent(int h, int k, int l, double box, int gridPts,
+                                                    const IMDWorkspace_sptr &ws) {
   IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", 0.0, 0.3);
   binMD->setProperty("InputWorkspace", ws);
-  binMD->setProperty("AlignedDim0",
-                     "[H,0,0]," + boost::lexical_cast<std::string>(h - box) +
-                         "," + boost::lexical_cast<std::string>(h + box) + "," +
-                         std::to_string(gridPts));
-  binMD->setProperty("AlignedDim1",
-                     "[0,K,0]," + boost::lexical_cast<std::string>(k - box) +
-                         "," + boost::lexical_cast<std::string>(k + box) + "," +
-                         std::to_string(gridPts));
-  binMD->setProperty("AlignedDim2",
-                     "[0,0,L]," + boost::lexical_cast<std::string>(l - box) +
-                         "," + boost::lexical_cast<std::string>(l + box) + "," +
-                         std::to_string(gridPts));
+  binMD->setProperty("AlignedDim0", "[H,0,0]," + boost::lexical_cast<std::string>(h - box) + "," +
+                                        boost::lexical_cast<std::string>(h + box) + "," + std::to_string(gridPts));
+  binMD->setProperty("AlignedDim1", "[0,K,0]," + boost::lexical_cast<std::string>(k - box) + "," +
+                                        boost::lexical_cast<std::string>(k + box) + "," + std::to_string(gridPts));
+  binMD->setProperty("AlignedDim2", "[0,0,L]," + boost::lexical_cast<std::string>(l - box) + "," +
+                                        boost::lexical_cast<std::string>(l + box) + "," + std::to_string(gridPts));
   binMD->setPropertyValue("AxisAligned", "1");
   binMD->setPropertyValue("OutputWorkspace", "out");
   binMD->executeAsChildAlg();
@@ -342,22 +302,16 @@ IntegratePeaksMDHKL::binEvent(int h, int k, int l, double box, int gridPts,
  * All slicing algorithm properties are passed along
  * @return MDHistoWorkspace as a result of the binning
  */
-MDHistoWorkspace_sptr
-IntegratePeaksMDHKL::cropHisto(int h, int k, int l, double box,
-                               const IMDWorkspace_sptr &ws) {
-  IAlgorithm_sptr cropMD =
-      createChildAlgorithm("IntegrateMDHistoWorkspace", 0.0, 0.3);
+MDHistoWorkspace_sptr IntegratePeaksMDHKL::cropHisto(int h, int k, int l, double box, const IMDWorkspace_sptr &ws) {
+  IAlgorithm_sptr cropMD = createChildAlgorithm("IntegrateMDHistoWorkspace", 0.0, 0.3);
   cropMD->setProperty("InputWorkspace", ws);
 
-  cropMD->setProperty("P1Bin", boost::lexical_cast<std::string>(h - box) +
-                                   ",0," +
-                                   boost::lexical_cast<std::string>(h + box));
-  cropMD->setProperty("P2Bin", boost::lexical_cast<std::string>(k - box) +
-                                   ",0," +
-                                   boost::lexical_cast<std::string>(k + box));
-  cropMD->setProperty("P3Bin", boost::lexical_cast<std::string>(l - box) +
-                                   ",0," +
-                                   boost::lexical_cast<std::string>(l + box));
+  cropMD->setProperty("P1Bin",
+                      boost::lexical_cast<std::string>(h - box) + ",0," + boost::lexical_cast<std::string>(h + box));
+  cropMD->setProperty("P2Bin",
+                      boost::lexical_cast<std::string>(k - box) + ",0," + boost::lexical_cast<std::string>(k + box));
+  cropMD->setProperty("P3Bin",
+                      boost::lexical_cast<std::string>(l - box) + ",0," + boost::lexical_cast<std::string>(l + box));
 
   cropMD->setPropertyValue("OutputWorkspace", "out");
   cropMD->executeAsChildAlg();

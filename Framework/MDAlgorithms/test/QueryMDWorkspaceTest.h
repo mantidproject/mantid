@@ -23,56 +23,45 @@ class QueryMDWorkspaceTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static QueryMDWorkspaceTest *createSuite() {
-    return new QueryMDWorkspaceTest();
-  }
+  static QueryMDWorkspaceTest *createSuite() { return new QueryMDWorkspaceTest(); }
   static void destroySuite(QueryMDWorkspaceTest *suite) { delete suite; }
 
   QueryMDWorkspaceTest() { FrameworkManager::Instance(); }
 
   void checkInputs(const std::string &strNormalisation) {
-    MDEventWorkspace3Lean::sptr in_ws =
-        MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 3);
+    MDEventWorkspace3Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 3);
     QueryMDWorkspace query;
     query.initialize();
     query.setRethrows(true);
     query.setProperty("InputWorkspace", in_ws);
     query.setProperty("OutputWorkspace", "QueryWS");
     query.setProperty("Normalisation", strNormalisation);
-    TSM_ASSERT_EQUALS("Invalid property setup", true,
-                      query.validateProperties());
+    TSM_ASSERT_EQUALS("Invalid property setup", true, query.validateProperties());
   }
 
   void testDefaultInputs() {
-    MDEventWorkspace3Lean::sptr in_ws =
-        MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 3);
+    MDEventWorkspace3Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 3);
     QueryMDWorkspace query;
     query.initialize();
     query.setProperty("InputWorkspace", in_ws);
     query.setProperty("OutputWorkspace", "QueryWS");
-    TSM_ASSERT_EQUALS("Invalid property setup", true,
-                      query.validateProperties());
+    TSM_ASSERT_EQUALS("Invalid property setup", true, query.validateProperties());
     TSM_ASSERT("Should limit rows by default", query.getProperty("LimitRows"));
     const int expectedRowLimit = 100000;
     const int actualRowLimit = query.getProperty("MaximumRows");
-    TSM_ASSERT_EQUALS("Wrong default number of rows", expectedRowLimit,
-                      actualRowLimit);
+    TSM_ASSERT_EQUALS("Wrong default number of rows", expectedRowLimit, actualRowLimit);
     std::string defaultNormalisation = query.getProperty("Normalisation");
-    TSM_ASSERT_EQUALS("Wrong default normalisation", "none",
-                      defaultNormalisation);
+    TSM_ASSERT_EQUALS("Wrong default normalisation", "none", defaultNormalisation);
   }
 
   void testCheckInputsWithNoNormalisation() { checkInputs("none"); }
 
   void testCheckInputsWithVolumeNormalisation() { checkInputs("volume"); }
 
-  void testCheckInputsWithNumberOfEventsNormalisation() {
-    checkInputs("number of events");
-  }
+  void testCheckInputsWithNumberOfEventsNormalisation() { checkInputs("number of events"); }
 
   void testExecution() {
-    MDEventWorkspace3Lean::sptr in_ws =
-        MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 3);
+    MDEventWorkspace3Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 3);
     QueryMDWorkspace query;
     query.initialize();
     query.setProperty("InputWorkspace", in_ws);
@@ -82,8 +71,7 @@ public:
   }
 
   void testDifferentNormalisation() {
-    MDEventWorkspace3Lean::sptr in_ws =
-        MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 3);
+    MDEventWorkspace3Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 3);
     std::shared_ptr<IMDIterator> it(in_ws->createIterator());
 
     QueryMDWorkspace A;
@@ -103,10 +91,8 @@ public:
 
     AnalysisDataServiceImpl &ADS = AnalysisDataService::Instance();
 
-    TableWorkspace_sptr queryA =
-        std::dynamic_pointer_cast<TableWorkspace>(ADS.retrieve("QueryWS_A"));
-    TableWorkspace_sptr queryB =
-        std::dynamic_pointer_cast<TableWorkspace>(ADS.retrieve("QueryWS_B"));
+    TableWorkspace_sptr queryA = std::dynamic_pointer_cast<TableWorkspace>(ADS.retrieve("QueryWS_A"));
+    TableWorkspace_sptr queryB = std::dynamic_pointer_cast<TableWorkspace>(ADS.retrieve("QueryWS_B"));
 
     TS_ASSERT_EQUALS(queryA->rowCount(), queryB->rowCount());
 
@@ -123,10 +109,8 @@ public:
       const size_t nEvents = it->getNumEvents();
 
       // Compare each signal and error result.
-      TS_ASSERT_DELTA(signalNotNormalised,
-                      signalNormalisedByNumEvents * double(nEvents), 0.0001);
-      TS_ASSERT_DELTA(errorNotNormalised,
-                      errorNormalisedByNumEvents * double(nEvents), 0.0001);
+      TS_ASSERT_DELTA(signalNotNormalised, signalNormalisedByNumEvents * double(nEvents), 0.0001);
+      TS_ASSERT_DELTA(errorNotNormalised, errorNormalisedByNumEvents * double(nEvents), 0.0001);
     }
 
     ADS.remove("QueryWS_A");
@@ -134,8 +118,7 @@ public:
   }
 
   void testExecution_BoxData() {
-    MDEventWorkspace3Lean::sptr in_ws =
-        MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 3);
+    MDEventWorkspace3Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 3);
     QueryMDWorkspace query;
     query.initialize();
     query.setProperty("InputWorkspace", in_ws);
@@ -146,8 +129,7 @@ public:
   }
 
   void testTableGenerated() {
-    MDEventWorkspace3Lean::sptr in_ws =
-        MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 3);
+    MDEventWorkspace3Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 3);
     QueryMDWorkspace query;
     query.initialize();
     query.setProperty("InputWorkspace", in_ws);
@@ -156,20 +138,16 @@ public:
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("QueryWS"));
 
-    ITableWorkspace_sptr table =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("QueryWS");
+    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("QueryWS");
 
     TSM_ASSERT("Workspace output is not an ITableWorkspace", table != nullptr);
-    size_t expectedCount =
-        3 + in_ws->getNumDims(); // 3 fixed columns are Signal, Error, nEvents
-    TSM_ASSERT_EQUALS("Four columns expected", expectedCount,
-                      table->columnCount());
+    size_t expectedCount = 3 + in_ws->getNumDims(); // 3 fixed columns are Signal, Error, nEvents
+    TSM_ASSERT_EQUALS("Four columns expected", expectedCount, table->columnCount());
     TSM_ASSERT_EQUALS("Wrong number of rows", 1000, table->rowCount());
   }
 
   void testNumberOfColumnsDependsOnDimensionality() {
-    MDEventWorkspace2Lean::sptr in_ws =
-        MDEventsTestHelper::makeMDEW<2>(10, -10.0, 20.0, 3);
+    MDEventWorkspace2Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<2>(10, -10.0, 20.0, 3);
     QueryMDWorkspace query;
     query.initialize();
     query.setProperty("InputWorkspace", in_ws);
@@ -178,19 +156,15 @@ public:
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("QueryWS"));
 
-    ITableWorkspace_sptr table =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("QueryWS");
+    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("QueryWS");
 
     TSM_ASSERT("Workspace output is not an ITableWorkspace", table != nullptr);
-    size_t expectedCount =
-        3 + in_ws->getNumDims(); // 3 fixed columns are Signal, Error, nEvents
-    TSM_ASSERT_EQUALS("Five columns expected", expectedCount,
-                      table->columnCount());
+    size_t expectedCount = 3 + in_ws->getNumDims(); // 3 fixed columns are Signal, Error, nEvents
+    TSM_ASSERT_EQUALS("Five columns expected", expectedCount, table->columnCount());
   }
 
   void testLimitRows() {
-    MDEventWorkspace3Lean::sptr in_ws =
-        MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 3);
+    MDEventWorkspace3Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 3);
     QueryMDWorkspace query;
     query.initialize();
     query.setProperty("InputWorkspace", in_ws);
@@ -201,14 +175,11 @@ public:
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("QueryWS"));
 
-    ITableWorkspace_sptr table =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("QueryWS");
+    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("QueryWS");
 
     TSM_ASSERT("Workspace output is not an ITableWorkspace", table != nullptr);
-    size_t expectedCount =
-        3 + in_ws->getNumDims(); // 3 fixed columns are Signal, Error, nEvents
-    TSM_ASSERT_EQUALS("Five columns expected", expectedCount,
-                      table->columnCount());
+    size_t expectedCount = 3 + in_ws->getNumDims(); // 3 fixed columns are Signal, Error, nEvents
+    TSM_ASSERT_EQUALS("Five columns expected", expectedCount, table->columnCount());
     TSM_ASSERT_EQUALS("Wrong number of rows", 3, table->rowCount());
   }
 
@@ -223,16 +194,14 @@ public:
     binMDAlg->setChild(true);
     binMDAlg->setProperty("InputWorkspace", in_ws);
     binMDAlg->setProperty("AxisAligned", false);
-    binMDAlg->setPropertyValue(
-        "BasisVector0", "X,units,0.7071,0.7071"); // cos 45 to in_ws x-axis
-                                                  // (consistent with a 45
-                                                  // degree anti-clockwise
-                                                  // rotation)
-    binMDAlg->setPropertyValue(
-        "BasisVector1", "Y,units,-0.7071,0.7071"); // cos 45 to in_ws y-axis
-                                                   // (consistent with a 45
-                                                   // degree anti-clockwise
-                                                   // rotation)
+    binMDAlg->setPropertyValue("BasisVector0", "X,units,0.7071,0.7071");  // cos 45 to in_ws x-axis
+                                                                          // (consistent with a 45
+                                                                          // degree anti-clockwise
+                                                                          // rotation)
+    binMDAlg->setPropertyValue("BasisVector1", "Y,units,-0.7071,0.7071"); // cos 45 to in_ws y-axis
+                                                                          // (consistent with a 45
+                                                                          // degree anti-clockwise
+                                                                          // rotation)
     binMDAlg->setPropertyValue("OutputExtents",
                                "0,28.284,-1,1"); // 0 to sqrt((-10-10)^2 +
                                                  // (-10-10)^2), -1 to 1 (in new
@@ -259,10 +228,8 @@ public:
     ITableWorkspace_sptr table = query.getProperty("OutputWorkspace");
 
     TSM_ASSERT("Workspace output is not an ITableWorkspace", table != nullptr);
-    size_t expectedCount =
-        3 + 2; // 3 fixed columns are Signal, Error, nEvents and then data is 2D
-    TSM_ASSERT_EQUALS("Six columns expected", expectedCount,
-                      table->columnCount());
+    size_t expectedCount = 3 + 2; // 3 fixed columns are Signal, Error, nEvents and then data is 2D
+    TSM_ASSERT_EQUALS("Six columns expected", expectedCount, table->columnCount());
     TSM_ASSERT_EQUALS("Wrong number of rows", 10, table->rowCount());
 
     /*
@@ -298,10 +265,8 @@ public:
     ITableWorkspace_sptr table = query.getProperty("OutputWorkspace");
 
     TSM_ASSERT("Workspace output is not an ITableWorkspace", table != nullptr);
-    size_t expectedCount =
-        3 + 2; // 3 fixed columns are Signal, Error, nEvents and then data is 2D
-    TSM_ASSERT_EQUALS("Six columns expected", expectedCount,
-                      table->columnCount());
+    size_t expectedCount = 3 + 2; // 3 fixed columns are Signal, Error, nEvents and then data is 2D
+    TSM_ASSERT_EQUALS("Six columns expected", expectedCount, table->columnCount());
     TSM_ASSERT_EQUALS("Wrong number of rows", 10, table->rowCount());
 
     /*
@@ -322,10 +287,8 @@ public:
     TS_ASSERT_EQUALS(0, yColumn->toDouble(table->rowCount() - 1));
 
     const double binHalfWidth = 1.5;
-    TSM_ASSERT_DELTA("From zero", xMin, xColumn->toDouble(0),
-                     binHalfWidth /*account for bin widths*/);
-    TSM_ASSERT_DELTA("To max", xMax, xColumn->toDouble(table->rowCount() - 1),
-                     binHalfWidth /*account for bin widths*/);
+    TSM_ASSERT_DELTA("From zero", xMin, xColumn->toDouble(0), binHalfWidth /*account for bin widths*/);
+    TSM_ASSERT_DELTA("To max", xMax, xColumn->toDouble(table->rowCount() - 1), binHalfWidth /*account for bin widths*/);
   }
 
   void test_query_large_masked_workspace() {
@@ -333,8 +296,7 @@ public:
      Regression test for a stack overflow bug caused by high recursion depth
      when workspace iterator skips over many masked cells
      */
-    MDEventWorkspace3Lean::sptr in_ws =
-        MDEventsTestHelper::makeMDEW<3>(64, 0.0, 10.0, 3);
+    MDEventWorkspace3Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<3>(64, 0.0, 10.0, 3);
 
     IAlgorithm_sptr binMDAlg = AlgorithmManager::Instance().create("BinMD");
     binMDAlg->initialize();
@@ -347,8 +309,7 @@ public:
     binMDAlg->setPropertyValue("OutputWorkspace", "temp_out_ws");
     binMDAlg->execute();
     Workspace_sptr binned_temp = binMDAlg->getProperty("OutputWorkspace");
-    IMDWorkspace_sptr binned_md_temp =
-        std::dynamic_pointer_cast<IMDWorkspace>(binned_temp);
+    IMDWorkspace_sptr binned_md_temp = std::dynamic_pointer_cast<IMDWorkspace>(binned_temp);
 
     IAlgorithm_sptr maskMDAlg = AlgorithmManager::Instance().create("MaskMD");
     maskMDAlg->initialize();

@@ -21,14 +21,11 @@ using namespace Mantid::Kernel;
 class InstrumentInfoTest : public CxxTest::TestSuite {
 public:
   void test_throws_if_unnamed_instrument() {
-    TS_ASSERT_THROWS(createInstInfoInMinimalFacility("<instrument />"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(createInstInfoInMinimalFacility("<instrument />"), const std::runtime_error &);
   }
 
   void test_throws_if_no_techinque_given() {
-    TS_ASSERT_THROWS(
-        createInstInfoInMinimalFacility("<instrument name=\"inst\"/>"),
-        const std::runtime_error &);
+    TS_ASSERT_THROWS(createInstInfoInMinimalFacility("<instrument name=\"inst\"/>"), const std::runtime_error &);
   }
 
   void test_mostly_default_instrument() {
@@ -55,16 +52,15 @@ public:
   }
 
   void test_picks_up_facilityinfo_defaults() {
-    const std::string xmlStr =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        "<facilities>"
-        "  <facility name=\"MyFacility\" zeropadding=\"99\" delimiter=\"!\" "
-        "FileExtensions=\".xyz\">"
-        "    <instrument name=\"AnInst\">"
-        "      <technique>Measuring Stuff</technique>"
-        "    </instrument>"
-        "  </facility>"
-        "</facilities>";
+    const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                               "<facilities>"
+                               "  <facility name=\"MyFacility\" zeropadding=\"99\" delimiter=\"!\" "
+                               "FileExtensions=\".xyz\">"
+                               "    <instrument name=\"AnInst\">"
+                               "      <technique>Measuring Stuff</technique>"
+                               "    </instrument>"
+                               "  </facility>"
+                               "</facilities>";
 
     FacilityInfo *fac = nullptr;
     TS_ASSERT_THROWS_NOTHING(fac = createFacility(xmlStr));
@@ -78,17 +74,16 @@ public:
   }
 
   void test_instrument_values_override_facilityinfo_defaults() {
-    const std::string xmlStr =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        "<facilities>"
-        "  <facility name=\"MyFacility\" zeropadding=\"99\" delimiter=\"!\" "
-        "FileExtensions=\".xyz\">"
-        "    <instrument name=\"AnInst\" delimiter=\"?\" >"
-        "      <zeropadding size=\"66\"/>"
-        "      <technique>Measuring Stuff</technique>"
-        "    </instrument>"
-        "  </facility>"
-        "</facilities>";
+    const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                               "<facilities>"
+                               "  <facility name=\"MyFacility\" zeropadding=\"99\" delimiter=\"!\" "
+                               "FileExtensions=\".xyz\">"
+                               "    <instrument name=\"AnInst\" delimiter=\"?\" >"
+                               "      <zeropadding size=\"66\"/>"
+                               "      <technique>Measuring Stuff</technique>"
+                               "    </instrument>"
+                               "  </facility>"
+                               "</facilities>";
 
     FacilityInfo *fac = nullptr;
     TS_ASSERT_THROWS_NOTHING(fac = createFacility(xmlStr));
@@ -102,17 +97,16 @@ public:
   }
 
   void test_setting_all_aspects_of_instrument() {
-    const std::string instStr =
-        "<instrument name=\"MyInst\" shortname=\"mine\" delimiter=\":\" >"
-        "  <zeropadding size=\"8\"/>"
-        "  <livedata>"
-        "    <connection name=\"default\" "
-        "                listener=\"AListener\" "
-        "                address=\"myinst.facility.gov:99\" />"
-        "  </livedata>"
-        "  <technique>Measuring Stuff</technique>"
-        "  <technique>Doing Stuff</technique>"
-        "</instrument>";
+    const std::string instStr = "<instrument name=\"MyInst\" shortname=\"mine\" delimiter=\":\" >"
+                                "  <zeropadding size=\"8\"/>"
+                                "  <livedata>"
+                                "    <connection name=\"default\" "
+                                "                listener=\"AListener\" "
+                                "                address=\"myinst.facility.gov:99\" />"
+                                "  </livedata>"
+                                "  <technique>Measuring Stuff</technique>"
+                                "  <technique>Doing Stuff</technique>"
+                                "</instrument>";
 
     FacilityInfo *fac = nullptr;
     TS_ASSERT_THROWS_NOTHING(fac = createInstInfoInMinimalFacility(instStr));
@@ -128,10 +122,8 @@ public:
     auto techniques = inst.techniques();
     auto tech_it_end = techniques.end();
     TS_ASSERT_EQUALS(techniques.size(), 2);
-    TSM_ASSERT_DIFFERS("Techniques should contain 'Doing Stuff'",
-                       techniques.find("Doing Stuff"), tech_it_end)
-    TSM_ASSERT_DIFFERS("Techniques should contain 'Measuring Stuff'",
-                       techniques.find("Measuring Stuff"), tech_it_end)
+    TSM_ASSERT_DIFFERS("Techniques should contain 'Doing Stuff'", techniques.find("Doing Stuff"), tech_it_end)
+    TSM_ASSERT_DIFFERS("Techniques should contain 'Measuring Stuff'", techniques.find("Measuring Stuff"), tech_it_end)
     TS_ASSERT_EQUALS(&inst.facility(), fac);
 
     std::stringstream ss;
@@ -142,14 +134,13 @@ public:
   }
 
   void test_multiple_zeropadding() {
-    const std::string instStr =
-        "<instrument name=\"MyInst\" shortname=\"mine\" delimiter=\":\" >"
-        "  <technique>Measuring Stuff</technique>"
-        "  <zeropadding size=\"8\"/>"
-        "  <zeropadding size=\"15\" startRunNumber=\"123\" "
-        "prefix=\"MyNewInstrument\"/>"
-        "  <zeropadding size=\"20\" startRunNumber=\"321\"/>"
-        "</instrument>";
+    const std::string instStr = "<instrument name=\"MyInst\" shortname=\"mine\" delimiter=\":\" >"
+                                "  <technique>Measuring Stuff</technique>"
+                                "  <zeropadding size=\"8\"/>"
+                                "  <zeropadding size=\"15\" startRunNumber=\"123\" "
+                                "prefix=\"MyNewInstrument\"/>"
+                                "  <zeropadding size=\"20\" startRunNumber=\"321\"/>"
+                                "</instrument>";
 
     FacilityInfo *fac = nullptr;
     TS_ASSERT_THROWS_NOTHING(fac = createInstInfoInMinimalFacility(instStr));
@@ -178,64 +169,55 @@ public:
   }
 
   void test_error_in_multiple_zeropadding() {
-    const std::string instStr =
-        "<instrument name=\"MyInst\" shortname=\"mine\" delimiter=\":\" >"
-        "  <technique>Measuring Stuff</technique>"
-        "  <zeropadding size=\"8\"/>"
-        "  <zeropadding size=\"15\"/>"
-        "</instrument>";
+    const std::string instStr = "<instrument name=\"MyInst\" shortname=\"mine\" delimiter=\":\" >"
+                                "  <technique>Measuring Stuff</technique>"
+                                "  <zeropadding size=\"8\"/>"
+                                "  <zeropadding size=\"15\"/>"
+                                "</instrument>";
 
-    TS_ASSERT_THROWS(createInstInfoInMinimalFacility(instStr),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(createInstInfoInMinimalFacility(instStr), const std::runtime_error &);
   }
 
   void test_error_1_in_multiple_zeropadding() {
-    const std::string instStr =
-        "<instrument name=\"MyInst\" shortname=\"mine\" delimiter=\":\" >"
-        "  <technique>Measuring Stuff</technique>"
-        "  <zeropadding size=\"nan\"/>"
-        "</instrument>";
+    const std::string instStr = "<instrument name=\"MyInst\" shortname=\"mine\" delimiter=\":\" >"
+                                "  <technique>Measuring Stuff</technique>"
+                                "  <zeropadding size=\"nan\"/>"
+                                "</instrument>";
 
-    TS_ASSERT_THROWS(createInstInfoInMinimalFacility(instStr),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(createInstInfoInMinimalFacility(instStr), const std::runtime_error &);
   }
 
   void test_error_2_in_multiple_zeropadding() {
-    const std::string instStr =
-        "<instrument name=\"MyInst\" shortname=\"mine\" delimiter=\":\" >"
-        "  <technique>Measuring Stuff</technique>"
-        "  <zeropadding size=\"8\" startRunNumber=\"nan\"/>"
-        "</instrument>";
+    const std::string instStr = "<instrument name=\"MyInst\" shortname=\"mine\" delimiter=\":\" >"
+                                "  <technique>Measuring Stuff</technique>"
+                                "  <zeropadding size=\"8\" startRunNumber=\"nan\"/>"
+                                "</instrument>";
 
-    TS_ASSERT_THROWS(createInstInfoInMinimalFacility(instStr),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(createInstInfoInMinimalFacility(instStr), const std::runtime_error &);
   }
 
   void test_error_3_in_multiple_zeropadding() {
-    const std::string instStr =
-        "<instrument name=\"MyInst\" shortname=\"mine\" delimiter=\":\" >"
-        "  <technique>Measuring Stuff</technique>"
-        "  <zeropadding startRunNumber=\"333\"/>"
-        "</instrument>";
+    const std::string instStr = "<instrument name=\"MyInst\" shortname=\"mine\" delimiter=\":\" >"
+                                "  <technique>Measuring Stuff</technique>"
+                                "  <zeropadding startRunNumber=\"333\"/>"
+                                "</instrument>";
 
-    TS_ASSERT_THROWS(createInstInfoInMinimalFacility(instStr),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(createInstInfoInMinimalFacility(instStr), const std::runtime_error &);
   }
 
   void test_equality_operator() {
-    const std::string instStr =
-        "<instrument name=\"AnInst\">"
-        "  <technique>Measuring Stuff</technique>"
-        "</instrument>"
-        "<instrument name=\"AnInst\" shortname=\"inst\">"
-        "  <livedata listener=\"AListener\" address=\"127.0.0.1:99\" />"
-        "  <technique>Doing Stuff</technique>"
-        "</instrument>"
-        "<instrument name=\"AnInst\" shortname=\"inst\" zeropadding=\"8\" "
-        "delimiter=\":\">"
-        "  <technique>Measuring Stuff</technique>"
-        "  <technique>Doing Stuff</technique>"
-        "</instrument>";
+    const std::string instStr = "<instrument name=\"AnInst\">"
+                                "  <technique>Measuring Stuff</technique>"
+                                "</instrument>"
+                                "<instrument name=\"AnInst\" shortname=\"inst\">"
+                                "  <livedata listener=\"AListener\" address=\"127.0.0.1:99\" />"
+                                "  <technique>Doing Stuff</technique>"
+                                "</instrument>"
+                                "<instrument name=\"AnInst\" shortname=\"inst\" zeropadding=\"8\" "
+                                "delimiter=\":\">"
+                                "  <technique>Measuring Stuff</technique>"
+                                "  <technique>Doing Stuff</technique>"
+                                "</instrument>";
 
     FacilityInfo *fac = nullptr;
     TS_ASSERT_THROWS_NOTHING(fac = createInstInfoInMinimalFacility(instStr));
@@ -251,13 +233,12 @@ public:
 
 private:
   FacilityInfo *createInstInfoInMinimalFacility(const std::string &instStr) {
-    const std::string xmlStr =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        "<facilities>"
-        "  <facility name=\"MyFacility\" FileExtensions=\".xyz\">" +
-        instStr +
-        "  </facility>"
-        "</facilities>";
+    const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                               "<facilities>"
+                               "  <facility name=\"MyFacility\" FileExtensions=\".xyz\">" +
+                               instStr +
+                               "  </facility>"
+                               "</facilities>";
 
     return createFacility(xmlStr);
   }

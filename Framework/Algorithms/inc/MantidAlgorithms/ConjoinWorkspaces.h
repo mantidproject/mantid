@@ -48,25 +48,18 @@ public:
   const std::string name() const override { return "ConjoinWorkspaces"; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"ConjoinSpectra", "ConjoinXRuns", "MergeRuns"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ConjoinSpectra", "ConjoinXRuns", "MergeRuns"}; }
 
 private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
 
-  void checkForOverlap(const API::MatrixWorkspace &ws1,
-                       const API::MatrixWorkspace &ws2,
-                       bool checkSpectra) const;
-  API::MatrixWorkspace_sptr
-  conjoinEvents(const DataObjects::EventWorkspace &ws1,
-                const DataObjects::EventWorkspace &ws2);
-  API::MatrixWorkspace_sptr conjoinHistograms(const API::MatrixWorkspace &ws1,
-                                              const API::MatrixWorkspace &ws2);
-  void fixSpectrumNumbers(const API::MatrixWorkspace &ws1,
-                          const API::MatrixWorkspace &ws2,
+  void checkForOverlap(const API::MatrixWorkspace &ws1, const API::MatrixWorkspace &ws2, bool checkSpectra) const;
+  API::MatrixWorkspace_sptr conjoinEvents(const DataObjects::EventWorkspace &ws1,
+                                          const DataObjects::EventWorkspace &ws2);
+  API::MatrixWorkspace_sptr conjoinHistograms(const API::MatrixWorkspace &ws1, const API::MatrixWorkspace &ws2);
+  void fixSpectrumNumbers(const API::MatrixWorkspace &ws1, const API::MatrixWorkspace &ws2,
                           API::MatrixWorkspace &output) override;
   bool processGroups() override;
   void setYUnitAndLabel(API::MatrixWorkspace &ws) const;

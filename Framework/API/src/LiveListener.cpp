@@ -22,17 +22,13 @@ bool LiveListener::dataReset() {
  * Default behaviour reads all spectrum numbers
  * @param specList :: A vector with spectra numbers (ignored)
  */
-void LiveListener::setSpectra(const std::vector<specnum_t> &specList) {
-  UNUSED_ARG(specList);
-}
+void LiveListener::setSpectra(const std::vector<specnum_t> &specList) { UNUSED_ARG(specList); }
 
 /**
  * Default behaviour updates property values on Listener
  * using those on calling algorithm.
  */
-void LiveListener::setAlgorithm(const IAlgorithm &callingAlgorithm) {
-  this->updatePropertyValues(callingAlgorithm);
-}
+void LiveListener::setAlgorithm(const IAlgorithm &callingAlgorithm) { this->updatePropertyValues(callingAlgorithm); }
 
 } // namespace API
 } // namespace Mantid

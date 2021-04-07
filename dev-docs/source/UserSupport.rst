@@ -10,9 +10,9 @@ User Support
 Introduction
 ############
 
-As Mantid continues to facilitate cutting-edge scientific research, for an 
-increasing number of users, the support side of Mantid is growing more 
-and more important. This can be in many circumstances and through 
+As Mantid continues to facilitate cutting-edge scientific research, for an
+increasing number of users, the support side of Mantid is growing more
+and more important. This can be in many circumstances and through
 different avenues; therefore, below is detailed our support procedures.
 
 The main purpose of user support for the Mantid project, is to aide contact between the users and developers.
@@ -22,7 +22,7 @@ The main purpose of user support for the Mantid project, is to aide contact betw
    :width: 700px
    :align: right
    :alt: Error reporter
-        
+
    *Error reporter sends details directly to Mantid support*
 
 Bugs and Error Reports
@@ -41,7 +41,7 @@ Troubleshooting
 
 This is a list designed to take a user through how to gain diagnostic information, particularly when Mantid (Workbench) fails to **launch**.
 
-For performance profiling check out our `recommended tools <http://developer.mantidproject.org/ToolsOverview.html#profiling>`_. 
+For performance profiling check out our `recommended tools <http://developer.mantidproject.org/ToolsOverview.html#profiling>`_.
 
 
 .. _Trouble_Windows:
@@ -63,7 +63,7 @@ For a full release, ``C:\MantidInstall\`` is likely the correct install path. Ta
 
 	C:\MantidInstall\bin\MantidWorkbench
 
-If this does not work, try launching with: 
+If this does not work, try launching with:
 
 .. code-block:: python
 
@@ -103,7 +103,7 @@ If this does not work, try launching with:
 	cd %APPDATA%\mantidproject
 	mv mantidproject.ini mantidproject.ini.backup
 	# Try again to start workbench, if that doesn't work ...
-	
+
 	cd %APPDATA%\mantidproject
 	mv mantid mantidbackup
 	# Try again to start workbench
@@ -225,7 +225,7 @@ MacOS
 
 	/Applications/MantidWorkbench.app/Contents/MacOS/MantidWorkbench
 
-If this does not work, try launching with: 
+If this does not work, try launching with:
 
 .. code-block:: python
 
@@ -235,7 +235,7 @@ If this does not work, try launching with:
 	python3 -m workbench.app.main
 
 
-4. Does **Qt** import correctly? 
+4. Does **Qt** import correctly?
 
 .. code-block:: python
 

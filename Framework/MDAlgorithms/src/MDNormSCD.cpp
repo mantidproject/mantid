@@ -33,10 +33,7 @@ using namespace Mantid::Kernel;
 
 namespace {
 // function to  compare two intersections (h,k,l,Momentum) by Momentum
-bool compareMomentum(const std::array<double, 4> &v1,
-                     const std::array<double, 4> &v2) {
-  return (v1[3] < v2[3]);
-}
+bool compareMomentum(const std::array<double, 4> &v1, const std::array<double, 4> &v2) { return (v1[3] < v2[3]); }
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
@@ -46,19 +43,15 @@ DECLARE_ALGORITHM(MDNormSCD)
  * Constructor
  */
 MDNormSCD::MDNormSCD()
-    : m_normWS(), m_inputWS(), m_hmin(0.0f), m_hmax(0.0f), m_kmin(0.0f),
-      m_kmax(0.0f), m_lmin(0.0f), m_lmax(0.0f), m_hIntegrated(true),
-      m_kIntegrated(true), m_lIntegrated(true), m_rubw(3, 3), m_kiMin(0.0),
-      m_kiMax(EMPTY_DBL()), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_hX(), m_kX(),
-      m_lX(), m_samplePos(), m_beamDir() {}
+    : m_normWS(), m_inputWS(), m_hmin(0.0f), m_hmax(0.0f), m_kmin(0.0f), m_kmax(0.0f), m_lmin(0.0f), m_lmax(0.0f),
+      m_hIntegrated(true), m_kIntegrated(true), m_lIntegrated(true), m_rubw(3, 3), m_kiMin(0.0), m_kiMax(EMPTY_DBL()),
+      m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_hX(), m_kX(), m_lX(), m_samplePos(), m_beamDir() {}
 
 /// Algorithm's version for identification. @see Algorithm::version
 int MDNormSCD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string MDNormSCD::category() const {
-  return "MDAlgorithms\\Normalisation";
-}
+const std::string MDNormSCD::category() const { return "MDAlgorithms\\Normalisation"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string MDNormSCD::summary() const {
@@ -73,8 +66,7 @@ const std::string MDNormSCD::name() const { return "MDNormSCD"; }
  * Initialize the algorithm's properties.
  */
 void MDNormSCD::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input MDWorkspace.");
 
   std::string dimChars = getDimensionChars();
@@ -84,13 +76,11 @@ void MDNormSCD::init() {
     std::string dim(" ");
     dim[0] = dimChars[i];
     std::string propName = "AlignedDim" + dim;
-    declareProperty(
-        std::make_unique<PropertyWithValue<std::string>>(propName, "",
-                                                         Direction::Input),
-        "Binning parameters for the " + Strings::toString(i) +
-            "th dimension.\n"
-            "Enter it as a comma-separated list of values with the format: "
-            "'name,minimum,maximum,number_of_bins'. Leave blank for NONE.");
+    declareProperty(std::make_unique<PropertyWithValue<std::string>>(propName, "", Direction::Input),
+                    "Binning parameters for the " + Strings::toString(i) +
+                        "th dimension.\n"
+                        "Enter it as a comma-separated list of values with the format: "
+                        "'name,minimum,maximum,number_of_bins'. Leave blank for NONE.");
   }
 
   auto fluxValidator = std::make_shared<CompositeValidator>();
@@ -99,41 +89,34 @@ void MDNormSCD::init() {
   fluxValidator->add<CommonBinsValidator>();
   auto solidAngleValidator = fluxValidator->clone();
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "FluxWorkspace", "", Direction::Input, fluxValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("FluxWorkspace", "", Direction::Input, fluxValidator),
                   "An input workspace containing momentum dependent flux.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("SolidAngleWorkspace",
-                                                        "", Direction::Input,
-                                                        solidAngleValidator),
-                  "An input workspace containing momentum integrated vanadium "
-                  "(a measure of the solid angle).");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("SolidAngleWorkspace", "", Direction::Input, solidAngleValidator),
+      "An input workspace containing momentum integrated vanadium "
+      "(a measure of the solid angle).");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>(
-                      "SkipSafetyCheck", false, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("SkipSafetyCheck", false, Direction::Input),
                   "If set to true, the algorithm does "
                   "not check history if the workspace was modified since the"
                   "ConvertToMD algorithm was run, and assume that the elastic "
                   "mode is used.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "TemporaryNormalizationWorkspace", "", Direction::Input,
-                      PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("TemporaryNormalizationWorkspace", "",
+                                                                         Direction::Input, PropertyMode::Optional),
                   "An input MDHistoWorkspace used to accumulate normalization "
                   "from multiple MDEventWorkspaces. "
                   "If unspecified a blank MDHistoWorkspace will be created.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "TemporaryDataWorkspace", "", Direction::Input,
-                      PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("TemporaryDataWorkspace", "", Direction::Input,
+                                                                         PropertyMode::Optional),
                   "An input MDHistoWorkspace used to accumulate data from "
                   "multiple MDEventWorkspaces. If "
                   "unspecified a blank MDHistoWorkspace will be created.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output),
                   "A name for the output data MDHistoWorkspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "OutputNormalizationWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputNormalizationWorkspace", "", Direction::Output),
                   "A name for the output normalization MDHistoWorkspace.");
 }
 
@@ -152,15 +135,12 @@ void MDNormSCD::exec() {
 
   m_numExptInfos = outputWS->getNumExperimentInfo();
   // loop over all experiment infos
-  for (uint16_t expInfoIndex = 0; expInfoIndex < m_numExptInfos;
-       expInfoIndex++) {
+  for (uint16_t expInfoIndex = 0; expInfoIndex < m_numExptInfos; expInfoIndex++) {
     // Check for other dimensions if we could measure anything in the original
     // data
     bool skipNormalization = false;
-    const std::vector<coord_t> otherValues =
-        getValuesFromOtherDimensions(skipNormalization, expInfoIndex);
-    const auto affineTrans =
-        findIntergratedDimensions(otherValues, skipNormalization);
+    const std::vector<coord_t> otherValues = getValuesFromOtherDimensions(skipNormalization, expInfoIndex);
+    const auto affineTrans = findIntergratedDimensions(otherValues, skipNormalization);
     cacheDimensionXValues();
 
     if (!skipNormalization) {
@@ -184,8 +164,7 @@ void MDNormSCD::cacheInputs() {
                                 "currently only supports elastic data.");
   }
   // Min/max dimension values
-  const auto hdim(m_inputWS->getDimension(0)), kdim(m_inputWS->getDimension(1)),
-      ldim(m_inputWS->getDimension(2));
+  const auto hdim(m_inputWS->getDimension(0)), kdim(m_inputWS->getDimension(1)), ldim(m_inputWS->getDimension(2));
   m_hmin = hdim->getMinimum();
   m_kmin = kdim->getMinimum();
   m_lmin = ldim->getMinimum();
@@ -217,12 +196,10 @@ std::string MDNormSCD::inputEnergyMode() const {
   std::string emode;
   if (lastAlgorithm->name() == "ConvertToMD") {
     emode = lastAlgorithm->getPropertyValue("dEAnalysisMode");
-  } else if ((lastAlgorithm->name() == "Load" ||
-              hist.lastAlgorithm()->name() == "LoadMD") &&
+  } else if ((lastAlgorithm->name() == "Load" || hist.lastAlgorithm()->name() == "LoadMD") &&
              hist.getAlgorithmHistory(nalgs - 2)->name() == "ConvertToMD") {
     // get dEAnalysisMode
-    PropertyHistories histvec =
-        hist.getAlgorithmHistory(nalgs - 2)->getProperties();
+    PropertyHistories histvec = hist.getAlgorithmHistory(nalgs - 2)->getProperties();
     for (auto &hist : histvec) {
       if (hist->name() == "dEAnalysisMode") {
         emode = hist->value();
@@ -248,8 +225,7 @@ MDHistoWorkspace_sptr MDNormSCD::binInputWS() {
   for (auto prop : props) {
     const auto &propName = prop->name();
     if (propName != "FluxWorkspace" && propName != "SolidAngleWorkspace" &&
-        propName != "TemporaryNormalizationWorkspace" &&
-        propName != "OutputNormalizationWorkspace" &&
+        propName != "TemporaryNormalizationWorkspace" && propName != "OutputNormalizationWorkspace" &&
         propName != "SkipSafetyCheck") {
       binMD->setPropertyValue(propName, prop->value());
     }
@@ -265,8 +241,7 @@ MDHistoWorkspace_sptr MDNormSCD::binInputWS() {
  */
 void MDNormSCD::createNormalizationWS(const MDHistoWorkspace &dataWS) {
   // Copy the MDHisto workspace, and change signals and errors to 0.
-  std::shared_ptr<IMDHistoWorkspace> tmp =
-      this->getProperty("TemporaryNormalizationWorkspace");
+  std::shared_ptr<IMDHistoWorkspace> tmp = this->getProperty("TemporaryNormalizationWorkspace");
   m_normWS = std::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
   if (!m_normWS) {
     m_normWS = dataWS.clone();
@@ -284,9 +259,7 @@ void MDNormSCD::createNormalizationWS(const MDHistoWorkspace &dataWS) {
  * @return A vector of values from other dimensions to be include in normalized
  * MD position calculation
  */
-std::vector<coord_t>
-MDNormSCD::getValuesFromOtherDimensions(bool &skipNormalization,
-                                        uint16_t expInfoIndex) const {
+std::vector<coord_t> MDNormSCD::getValuesFromOtherDimensions(bool &skipNormalization, uint16_t expInfoIndex) const {
   const auto &currentRun = m_inputWS->getExperimentInfo(expInfoIndex)->run();
 
   std::vector<coord_t> otherDimValues;
@@ -294,8 +267,7 @@ MDNormSCD::getValuesFromOtherDimensions(bool &skipNormalization,
     const auto dimension = m_inputWS->getDimension(i);
     auto dimMin = static_cast<float>(dimension->getMinimum());
     auto dimMax = static_cast<float>(dimension->getMaximum());
-    auto *dimProp = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-        currentRun.getProperty(dimension->getName()));
+    auto *dimProp = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(currentRun.getProperty(dimension->getName()));
     if (dimProp) {
       auto value = static_cast<coord_t>(dimProp->firstValue());
       otherDimValues.emplace_back(value);
@@ -318,13 +290,11 @@ MDNormSCD::getValuesFromOtherDimensions(bool &skipNormalization,
  * are outside of original inputs
  * @return Affine trasform matrix
  */
-Kernel::Matrix<coord_t>
-MDNormSCD::findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
-                                     bool &skipNormalization) {
+Kernel::Matrix<coord_t> MDNormSCD::findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
+                                                             bool &skipNormalization) {
   // Get indices of the original dimensions in the output workspace,
   // and if not found, the corresponding dimension is integrated
-  Kernel::Matrix<coord_t> affineMat =
-      m_normWS->getTransformFromOriginal(0)->makeAffineMatrix();
+  Kernel::Matrix<coord_t> affineMat = m_normWS->getTransformFromOriginal(0)->makeAffineMatrix();
 
   const size_t nrm1 = affineMat.numRows() - 1;
   const size_t ncm1 = affineMat.numCols() - 1;
@@ -408,25 +378,20 @@ void MDNormSCD::cacheDimensionXValues() {
  * @param affineTrans
  * @param expInfoIndex current experiment info index
  */
-void MDNormSCD::calculateNormalization(
-    const std::vector<coord_t> &otherValues,
-    const Kernel::Matrix<coord_t> &affineTrans, uint16_t expInfoIndex) {
+void MDNormSCD::calculateNormalization(const std::vector<coord_t> &otherValues,
+                                       const Kernel::Matrix<coord_t> &affineTrans, uint16_t expInfoIndex) {
   API::MatrixWorkspace_const_sptr integrFlux = getProperty("FluxWorkspace");
   integrFlux->getXMinMax(m_kiMin, m_kiMax);
-  API::MatrixWorkspace_const_sptr solidAngleWS =
-      getProperty("SolidAngleWorkspace");
+  API::MatrixWorkspace_const_sptr solidAngleWS = getProperty("SolidAngleWorkspace");
 
   const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
   using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
-  auto *rubwLog = dynamic_cast<VectorDoubleProperty *>(
-      currentExptInfo.getLog("RUBW_MATRIX"));
+  auto *rubwLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("RUBW_MATRIX"));
   if (!rubwLog) {
-    throw std::runtime_error(
-        "Wokspace does not contain a log entry for the RUBW matrix."
-        "Cannot continue.");
+    throw std::runtime_error("Wokspace does not contain a log entry for the RUBW matrix."
+                             "Cannot continue.");
   } else {
-    Kernel::DblMatrix rubwValue(
-        (*rubwLog)()); // includes the 2*pi factor but not goniometer for now :)
+    Kernel::DblMatrix rubwValue((*rubwLog)()); // includes the 2*pi factor but not goniometer for now :)
     m_rubw = currentExptInfo.run().getGoniometerMatrix() * rubwValue;
     m_rubw.Invert();
   }
@@ -436,10 +401,8 @@ void MDNormSCD::calculateNormalization(
 
   // Mappings
   const auto ndets = static_cast<int64_t>(spectrumInfo.size());
-  const detid2index_map fluxDetToIdx =
-      integrFlux->getDetectorIDToWorkspaceIndexMap();
-  const detid2index_map solidAngDetToIdx =
-      solidAngleWS->getDetectorIDToWorkspaceIndexMap();
+  const detid2index_map fluxDetToIdx = integrFlux->getDetectorIDToWorkspaceIndexMap();
+  const detid2index_map solidAngDetToIdx = solidAngleWS->getDetectorIDToWorkspaceIndexMap();
 
   const size_t vmdDims = 4;
   std::vector<std::atomic<signal_t>> signalArray(m_normWS->getNPoints());
@@ -447,16 +410,14 @@ void MDNormSCD::calculateNormalization(
   std::vector<double> xValues, yValues;
   std::vector<coord_t> pos, posNew;
   double progStep = 0.7 / m_numExptInfos;
-  auto prog = std::make_unique<API::Progress>(
-      this, 0.3 + progStep * expInfoIndex, 0.3 + progStep * (expInfoIndex + 1.),
-      ndets);
+  auto prog =
+      std::make_unique<API::Progress>(this, 0.3 + progStep * expInfoIndex, 0.3 + progStep * (expInfoIndex + 1.), ndets);
   // cppcheck-suppress syntaxError
 PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if (Kernel::threadSafe(*integrFlux)))
 for (int64_t i = 0; i < ndets; i++) {
   PARALLEL_START_INTERUPT_REGION
 
-  if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) ||
-      spectrumInfo.isMasked(i)) {
+  if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i)) {
     continue;
   }
   const auto &detector = spectrumInfo.detector(i);
@@ -473,8 +434,7 @@ for (int64_t i = 0; i < ndets; i++) {
   // get the flux spetrum number
   size_t wsIdx = fluxDetToIdx.find(detID)->second;
   // Get solid angle for this contribution
-  double solid =
-      solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] * protonCharge;
+  double solid = solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] * protonCharge;
 
   // -- calculate integrals for the intersection --
   // momentum values at intersections
@@ -506,11 +466,8 @@ for (int64_t i = 0; i < ndets; i++) {
       continue; // Assume zero contribution if difference is small
 
     // Average between two intersections for final position
-    std::transform(curIntSec.begin(), curIntSec.begin() + vmdDims - 1,
-                   prevIntSec.begin(), pos.begin(),
-                   [](const double lhs, const double rhs) {
-                     return static_cast<coord_t>(0.5 * (lhs + rhs));
-                   });
+    std::transform(curIntSec.begin(), curIntSec.begin() + vmdDims - 1, prevIntSec.begin(), pos.begin(),
+                   [](const double lhs, const double rhs) { return static_cast<coord_t>(0.5 * (lhs + rhs)); });
     affineTrans.multiplyPoint(pos, posNew);
     size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
     if (linIndex == size_t(-1))
@@ -520,8 +477,7 @@ for (int64_t i = 0; i < ndets; i++) {
     auto k = static_cast<size_t>(std::distance(intersectionsBegin, it));
     // signal = integral between two consecutive intersections
     signal_t signal = (yValues[k] - yValues[k - 1]) * solid;
-    Mantid::Kernel::AtomicOp(signalArray[linIndex], signal,
-                             std::plus<signal_t>());
+    Mantid::Kernel::AtomicOp(signalArray[linIndex], signal, std::plus<signal_t>());
   }
   prog->report();
 
@@ -529,13 +485,10 @@ for (int64_t i = 0; i < ndets; i++) {
 }
 PARALLEL_CHECK_INTERUPT_REGION
 if (m_accumulate) {
-  std::transform(
-      signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(),
-      m_normWS->mutableSignalArray(),
-      [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
+  std::transform(signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(), m_normWS->mutableSignalArray(),
+                 [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
 } else {
-  std::copy(signalArray.cbegin(), signalArray.cend(),
-            m_normWS->mutableSignalArray());
+  std::copy(signalArray.cbegin(), signalArray.cend(), m_normWS->mutableSignalArray());
 }
 }
 
@@ -547,9 +500,9 @@ if (m_accumulate) {
  * @param sp :: A workspace index for a spectrum in integrFlux to interpolate.
  * @param yValues :: A vector to save the results.
  */
-void MDNormSCD::calcIntegralsForIntersections(
-    const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux,
-    size_t sp, std::vector<double> &yValues) const {
+void MDNormSCD::calcIntegralsForIntersections(const std::vector<double> &xValues,
+                                              const API::MatrixWorkspace &integrFlux, size_t sp,
+                                              std::vector<double> &yValues) const {
   assert(xValues.size() == yValues.size());
 
   // the x-data from the workspace
@@ -623,9 +576,8 @@ void MDNormSCD::calcIntegralsForIntersections(
  * @param theta Polar angle withd detector
  * @param phi Azimuthal angle with detector
  */
-void MDNormSCD::calculateIntersections(
-    std::vector<std::array<double, 4>> &intersections, const double theta,
-    const double phi) {
+void MDNormSCD::calculateIntersections(std::vector<std::array<double, 4>> &intersections, const double theta,
+                                       const double phi) {
   V3D q(-sin(theta) * cos(phi), -sin(theta) * sin(phi), 1. - cos(theta));
   q = m_rubw * q;
   if (convention == "Crystallography") {
@@ -652,15 +604,13 @@ void MDNormSCD::calculateIntersections(
     if (!m_hIntegrated) {
       for (size_t i = 0; i < hNBins; i++) {
         double hi = m_hX[i];
-        if ((hi >= m_hmin) && (hi <= m_hmax) &&
-            ((hStart - hi) * (hEnd - hi) < 0)) {
+        if ((hi >= m_hmin) && (hi <= m_hmax) && ((hStart - hi) * (hEnd - hi) < 0)) {
           // if hi is between hStart and hEnd, then ki and li will be between
           // kStart, kEnd and lStart, lEnd and momi will be between m_kiMin and
           // KnincidemtmMax
           double ki = fk * (hi - hStart) + kStart;
           double li = fl * (hi - hStart) + lStart;
-          if ((ki >= m_kmin) && (ki <= m_kmax) && (li >= m_lmin) &&
-              (li <= m_lmax)) {
+          if ((ki >= m_kmin) && (ki <= m_kmax) && (li >= m_lmin) && (li <= m_lmax)) {
             double momi = fmom * (hi - hStart) + m_kiMin;
             intersections.push_back({{hi, ki, li, momi}});
           }
@@ -673,8 +623,7 @@ void MDNormSCD::calculateIntersections(
       // khmin and lhmin
       double khmin = fk * (m_hmin - hStart) + kStart;
       double lhmin = fl * (m_hmin - hStart) + lStart;
-      if ((khmin >= m_kmin) && (khmin <= m_kmax) && (lhmin >= m_lmin) &&
-          (lhmin <= m_lmax)) {
+      if ((khmin >= m_kmin) && (khmin <= m_kmax) && (lhmin >= m_lmin) && (lhmin <= m_lmax)) {
         intersections.push_back({{m_hmin, khmin, lhmin, momhMin}});
       }
     }
@@ -683,8 +632,7 @@ void MDNormSCD::calculateIntersections(
       // khmax and lhmax
       double khmax = fk * (m_hmax - hStart) + kStart;
       double lhmax = fl * (m_hmax - hStart) + lStart;
-      if ((khmax >= m_kmin) && (khmax <= m_kmax) && (lhmax >= m_lmin) &&
-          (lhmax <= m_lmax)) {
+      if ((khmax >= m_kmin) && (khmax <= m_kmax) && (lhmax >= m_lmin) && (lhmax <= m_lmax)) {
         intersections.push_back({{m_hmax, khmax, lhmax, momhMax}});
       }
     }
@@ -698,14 +646,12 @@ void MDNormSCD::calculateIntersections(
     if (!m_kIntegrated) {
       for (size_t i = 0; i < kNBins; i++) {
         double ki = m_kX[i];
-        if ((ki >= m_kmin) && (ki <= m_kmax) &&
-            ((kStart - ki) * (kEnd - ki) < 0)) {
+        if ((ki >= m_kmin) && (ki <= m_kmax) && ((kStart - ki) * (kEnd - ki) < 0)) {
           // if ki is between kStart and kEnd, then hi and li will be between
           // hStart, hEnd and lStart, lEnd
           double hi = fh * (ki - kStart) + hStart;
           double li = fl * (ki - kStart) + lStart;
-          if ((hi >= m_hmin) && (hi <= m_hmax) && (li >= m_lmin) &&
-              (li <= m_lmax)) {
+          if ((hi >= m_hmin) && (hi <= m_hmax) && (li >= m_lmin) && (li <= m_lmax)) {
             double momi = fmom * (ki - kStart) + m_kiMin;
             intersections.push_back({{hi, ki, li, momi}});
           }
@@ -718,8 +664,7 @@ void MDNormSCD::calculateIntersections(
       // hkmin and lkmin
       double hkmin = fh * (m_kmin - kStart) + hStart;
       double lkmin = fl * (m_kmin - kStart) + lStart;
-      if ((hkmin >= m_hmin) && (hkmin <= m_hmax) && (lkmin >= m_lmin) &&
-          (lkmin <= m_lmax)) {
+      if ((hkmin >= m_hmin) && (hkmin <= m_hmax) && (lkmin >= m_lmin) && (lkmin <= m_lmax)) {
         intersections.push_back({{hkmin, m_kmin, lkmin, momkMin}});
       }
     }
@@ -728,8 +673,7 @@ void MDNormSCD::calculateIntersections(
       // hkmax and lkmax
       double hkmax = fh * (m_kmax - kStart) + hStart;
       double lkmax = fl * (m_kmax - kStart) + lStart;
-      if ((hkmax >= m_hmin) && (hkmax <= m_hmax) && (lkmax >= m_lmin) &&
-          (lkmax <= m_lmax)) {
+      if ((hkmax >= m_hmin) && (hkmax <= m_hmax) && (lkmax >= m_lmin) && (lkmax <= m_lmax)) {
         intersections.push_back({{hkmax, m_kmax, lkmax, momkMax}});
       }
     }
@@ -743,14 +687,12 @@ void MDNormSCD::calculateIntersections(
     if (!m_lIntegrated) {
       for (size_t i = 0; i < lNBins; i++) {
         double li = m_lX[i];
-        if ((li >= m_lmin) && (li <= m_lmax) &&
-            ((lStart - li) * (lEnd - li) < 0)) {
+        if ((li >= m_lmin) && (li <= m_lmax) && ((lStart - li) * (lEnd - li) < 0)) {
           // if li is between lStart and lEnd, then hi and ki will be between
           // hStart, hEnd and kStart, kEnd
           double hi = fh * (li - lStart) + hStart;
           double ki = fk * (li - lStart) + kStart;
-          if ((hi >= m_hmin) && (hi <= m_hmax) && (ki >= m_kmin) &&
-              (ki <= m_kmax)) {
+          if ((hi >= m_hmin) && (hi <= m_hmax) && (ki >= m_kmin) && (ki <= m_kmax)) {
             double momi = fmom * (li - lStart) + m_kiMin;
             intersections.push_back({{hi, ki, li, momi}});
           }
@@ -763,8 +705,7 @@ void MDNormSCD::calculateIntersections(
       // hlmin and klmin
       double hlmin = fh * (m_lmin - lStart) + hStart;
       double klmin = fk * (m_lmin - lStart) + kStart;
-      if ((hlmin >= m_hmin) && (hlmin <= m_hmax) && (klmin >= m_kmin) &&
-          (klmin <= m_kmax)) {
+      if ((hlmin >= m_hmin) && (hlmin <= m_hmax) && (klmin >= m_kmin) && (klmin <= m_kmax)) {
         intersections.push_back({{hlmin, klmin, m_lmin, momlMin}});
       }
     }
@@ -773,20 +714,19 @@ void MDNormSCD::calculateIntersections(
       // khmax and lhmax
       double hlmax = fh * (m_lmax - lStart) + hStart;
       double klmax = fk * (m_lmax - lStart) + kStart;
-      if ((hlmax >= m_hmin) && (hlmax <= m_hmax) && (klmax >= m_kmin) &&
-          (klmax <= m_kmax)) {
+      if ((hlmax >= m_hmin) && (hlmax <= m_hmax) && (klmax >= m_kmin) && (klmax <= m_kmax)) {
         intersections.push_back({{hlmax, klmax, m_lmax, momlMax}});
       }
     }
   }
 
   // add endpoints
-  if ((hStart >= m_hmin) && (hStart <= m_hmax) && (kStart >= m_kmin) &&
-      (kStart <= m_kmax) && (lStart >= m_lmin) && (lStart <= m_lmax)) {
+  if ((hStart >= m_hmin) && (hStart <= m_hmax) && (kStart >= m_kmin) && (kStart <= m_kmax) && (lStart >= m_lmin) &&
+      (lStart <= m_lmax)) {
     intersections.push_back({{hStart, kStart, lStart, m_kiMin}});
   }
-  if ((hEnd >= m_hmin) && (hEnd <= m_hmax) && (kEnd >= m_kmin) &&
-      (kEnd <= m_kmax) && (lEnd >= m_lmin) && (lEnd <= m_lmax)) {
+  if ((hEnd >= m_hmin) && (hEnd <= m_hmax) && (kEnd >= m_kmin) && (kEnd <= m_kmax) && (lEnd >= m_lmin) &&
+      (lEnd <= m_lmax)) {
     intersections.push_back({{hEnd, kEnd, lEnd, m_kiMax}});
   }
 

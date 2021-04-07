@@ -41,9 +41,7 @@ public:
    * @param iP :: The parameter index of an individual function.
    * @param value :: The derivative value
    */
-  void set(size_t iY, size_t iP, double value) override {
-    m_J->set(m_iY0 + iY, iP, value);
-  }
+  void set(size_t iY, size_t iP, double value) override { m_J->set(m_iY0 + iY, iP, value); }
   /**
    * Overridden Jacobian::get(...).
    * @param iY :: The index of the data point
@@ -53,17 +51,14 @@ public:
   /** Zero all matrix elements.
    */
   void zero() override {
-    throw Kernel::Exception::NotImplementedError(
-        "zero() is not implemented for PartialJacobian1");
+    throw Kernel::Exception::NotImplementedError("zero() is not implemented for PartialJacobian1");
   }
 };
 
 class TempJacobian : public Jacobian {
 public:
   TempJacobian(size_t y, size_t p) : m_y(y), m_p(p), m_J(y * p) {}
-  void set(size_t iY, size_t iP, double value) override {
-    m_J[iY * m_p + iP] = value;
-  }
+  void set(size_t iY, size_t iP, double value) override { m_J[iY * m_p + iP] = value; }
   double get(size_t iY, size_t iP) override { return m_J[iY * m_p + iP]; }
   size_t maxParam(size_t iY) {
     double max = -DBL_MAX;
@@ -98,10 +93,8 @@ const int MAX_PEAK_RADIUS = std::numeric_limits<int>::max();
  */
 IPeakFunction::IPeakFunction() : m_peakRadius(MAX_PEAK_RADIUS) {}
 
-void IPeakFunction::function(const FunctionDomain &domain,
-                             FunctionValues &values) const {
-  auto peakRadius =
-      dynamic_cast<const FunctionDomain1D &>(domain).getPeakRadius();
+void IPeakFunction::function(const FunctionDomain &domain, FunctionValues &values) const {
+  auto peakRadius = dynamic_cast<const FunctionDomain1D &>(domain).getPeakRadius();
   setPeakRadius(peakRadius);
   IFunction1D::function(domain, values);
 }
@@ -116,8 +109,7 @@ void IPeakFunction::function(const FunctionDomain &domain,
  * @param xValues :: X values for data points
  * @param nData :: Number of data points
  */
-void IPeakFunction::function1D(double *out, const double *xValues,
-                               const size_t nData) const {
+void IPeakFunction::function1D(double *out, const double *xValues, const size_t nData) const {
   double c = this->centre();
   double dx = fabs(m_peakRadius * this->fwhm());
   int i0 = -1;
@@ -147,8 +139,7 @@ void IPeakFunction::function1D(double *out, const double *xValues,
  * @param xValues :: X values for data points
  * @param nData :: Number of data points
  */
-void IPeakFunction::functionDeriv1D(Jacobian *out, const double *xValues,
-                                    const size_t nData) {
+void IPeakFunction::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
   double c = this->centre();
   double dx = fabs(m_peakRadius * this->fwhm());
   int i0 = -1;
@@ -184,8 +175,7 @@ double IPeakFunction::intensity() const {
   auto interval = getDomainInterval();
 
   PeakFunctionIntegrator integrator;
-  IntegrationResult result =
-      integrator.integrate(*this, interval.first, interval.second);
+  IntegrationResult result = integrator.integrate(*this, interval.first, interval.second);
 
   if (!result.success) {
     return 0.0;
@@ -208,8 +198,7 @@ void IPeakFunction::setIntensity(const double newIntensity) {
 
     // If the current intensity is still 0, there's nothing left to do.
     if (currentIntensity == 0.0) {
-      throw std::invalid_argument(
-          "Cannot set new intensity, not enough information available.");
+      throw std::invalid_argument("Cannot set new intensity, not enough information available.");
     }
   }
 
@@ -217,13 +206,11 @@ void IPeakFunction::setIntensity(const double newIntensity) {
 }
 
 std::string IPeakFunction::getCentreParameterName() const {
-  FunctionParameterDecorator_sptr fn =
-      std::dynamic_pointer_cast<FunctionParameterDecorator>(
-          FunctionFactory::Instance().createFunction("PeakParameterFunction"));
+  FunctionParameterDecorator_sptr fn = std::dynamic_pointer_cast<FunctionParameterDecorator>(
+      FunctionFactory::Instance().createFunction("PeakParameterFunction"));
 
   if (!fn) {
-    throw std::runtime_error(
-        "PeakParameterFunction could not be created successfully.");
+    throw std::runtime_error("PeakParameterFunction could not be created successfully.");
   }
 
   fn->setDecoratedFunction(this->name());
@@ -277,15 +264,11 @@ std::pair<double, double> IPeakFunction::getDomainInterval(double level) const {
  * @param xValues An input array of X data
  * @param nData The number of X values provided
  */
-void IPeakFunction::functionDerivLocal(Jacobian *jacobian,
-                                       const double *xValues,
-                                       const size_t nData) {
-  auto evalMethod = [this](double *out, const double *xValues,
-                           const size_t nData) {
+void IPeakFunction::functionDerivLocal(Jacobian *jacobian, const double *xValues, const size_t nData) {
+  auto evalMethod = [this](double *out, const double *xValues, const size_t nData) {
     this->functionLocal(out, xValues, nData);
   };
-  this->calcNumericalDerivative1D(jacobian, std::move(evalMethod), xValues,
-                                  nData);
+  this->calcNumericalDerivative1D(jacobian, std::move(evalMethod), xValues, nData);
 }
 
 } // namespace API

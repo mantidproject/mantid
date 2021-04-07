@@ -38,28 +38,21 @@ Mantid::API::ITableWorkspace_sptr createSampleTableWorkspace() {
 /// Helper class to allow us to fake EnggVanadiumCorrections
 class TestEnggVanadiumCorrectionsModel : public EnggVanadiumCorrectionsModel {
 public:
-  TestEnggVanadiumCorrectionsModel(const EnggDiffCalibSettings &calibSettings,
-                                   const std::string &currentInstrument);
+  TestEnggVanadiumCorrectionsModel(const EnggDiffCalibSettings &calibSettings, const std::string &currentInstrument);
 
   mutable bool m_calculateCorrectionsCalled;
 
 private:
-  std::pair<Mantid::API::ITableWorkspace_sptr,
-            Mantid::API::MatrixWorkspace_sptr>
-  calculateCorrectionWorkspaces(
-      const std::string &vanadiumRunNumber) const override;
+  std::pair<Mantid::API::ITableWorkspace_sptr, Mantid::API::MatrixWorkspace_sptr>
+  calculateCorrectionWorkspaces(const std::string &vanadiumRunNumber) const override;
 };
 
-inline TestEnggVanadiumCorrectionsModel::TestEnggVanadiumCorrectionsModel(
-    const EnggDiffCalibSettings &calibSettings,
-    const std::string &currentInstrument)
-    : EnggVanadiumCorrectionsModel(calibSettings, currentInstrument),
-      m_calculateCorrectionsCalled(false) {}
+inline TestEnggVanadiumCorrectionsModel::TestEnggVanadiumCorrectionsModel(const EnggDiffCalibSettings &calibSettings,
+                                                                          const std::string &currentInstrument)
+    : EnggVanadiumCorrectionsModel(calibSettings, currentInstrument), m_calculateCorrectionsCalled(false) {}
 
-inline std::pair<Mantid::API::ITableWorkspace_sptr,
-                 Mantid::API::MatrixWorkspace_sptr>
-TestEnggVanadiumCorrectionsModel::calculateCorrectionWorkspaces(
-    const std::string &) const {
+inline std::pair<Mantid::API::ITableWorkspace_sptr, Mantid::API::MatrixWorkspace_sptr>
+TestEnggVanadiumCorrectionsModel::calculateCorrectionWorkspaces(const std::string &) const {
   m_calculateCorrectionsCalled = true;
 
   auto &ADS = Mantid::API::AnalysisDataService::Instance();
@@ -78,13 +71,9 @@ TestEnggVanadiumCorrectionsModel::calculateCorrectionWorkspaces(
 class EnggVanadiumCorrectionsModelTest : public CxxTest::TestSuite {
 
 public:
-  static EnggVanadiumCorrectionsModelTest *createSuite() {
-    return new EnggVanadiumCorrectionsModelTest();
-  }
+  static EnggVanadiumCorrectionsModelTest *createSuite() { return new EnggVanadiumCorrectionsModelTest(); }
 
-  static void destroySuite(EnggVanadiumCorrectionsModelTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(EnggVanadiumCorrectionsModelTest *suite) { delete suite; }
 
   EnggVanadiumCorrectionsModelTest() {
     Poco::Path tempDir(Poco::Path::temp());
@@ -111,11 +100,8 @@ public:
     }
 
     TestEnggVanadiumCorrectionsModel model(calibSettings, CURRENT_INSTRUMENT);
-    std::pair<Mantid::API::ITableWorkspace_sptr,
-              Mantid::API::MatrixWorkspace_sptr>
-        correctionWorkspaces;
-    TS_ASSERT_THROWS_NOTHING(correctionWorkspaces =
-                                 model.fetchCorrectionWorkspaces("123"));
+    std::pair<Mantid::API::ITableWorkspace_sptr, Mantid::API::MatrixWorkspace_sptr> correctionWorkspaces;
+    TS_ASSERT_THROWS_NOTHING(correctionWorkspaces = model.fetchCorrectionWorkspaces("123"));
     TS_ASSERT(model.m_calculateCorrectionsCalled);
     TS_ASSERT(correctionWorkspaces.first);
     TS_ASSERT(correctionWorkspaces.second);
@@ -139,11 +125,8 @@ public:
     calibSettings.m_forceRecalcOverwrite = false;
     TestEnggVanadiumCorrectionsModel model(calibSettings, CURRENT_INSTRUMENT);
 
-    std::pair<Mantid::API::ITableWorkspace_sptr,
-              Mantid::API::MatrixWorkspace_sptr>
-        correctionWorkspaces;
-    TS_ASSERT_THROWS_NOTHING(correctionWorkspaces =
-                                 model.fetchCorrectionWorkspaces("123"));
+    std::pair<Mantid::API::ITableWorkspace_sptr, Mantid::API::MatrixWorkspace_sptr> correctionWorkspaces;
+    TS_ASSERT_THROWS_NOTHING(correctionWorkspaces = model.fetchCorrectionWorkspaces("123"));
     TS_ASSERT(!model.m_calculateCorrectionsCalled);
 
     TS_ASSERT_EQUALS(curvesWS->y(0), correctionWorkspaces.second->y(0));
@@ -163,11 +146,8 @@ public:
     calibSettings.m_forceRecalcOverwrite = true;
     TestEnggVanadiumCorrectionsModel model(calibSettings, CURRENT_INSTRUMENT);
 
-    std::pair<Mantid::API::ITableWorkspace_sptr,
-              Mantid::API::MatrixWorkspace_sptr>
-        correctionWorkspaces;
-    TS_ASSERT_THROWS_NOTHING(correctionWorkspaces =
-                                 model.fetchCorrectionWorkspaces("123"));
+    std::pair<Mantid::API::ITableWorkspace_sptr, Mantid::API::MatrixWorkspace_sptr> correctionWorkspaces;
+    TS_ASSERT_THROWS_NOTHING(correctionWorkspaces = model.fetchCorrectionWorkspaces("123"));
     TS_ASSERT(model.m_calculateCorrectionsCalled);
   }
 
@@ -177,8 +157,7 @@ private:
 
   Poco::File m_inputDir;
 
-  void saveNexus(const std::string &filename,
-                 const Mantid::API::Workspace_sptr &workspace) const {
+  void saveNexus(const std::string &filename, const Mantid::API::Workspace_sptr &workspace) const {
     auto save = Mantid::API::AlgorithmManager::Instance().create("SaveNexus");
     save->initialize();
     save->setProperty("InputWorkspace", workspace);
@@ -186,9 +165,8 @@ private:
     save->execute();
   }
 
-  void writeOutSampleCorrectionWorkspaces(
-      const Mantid::API::ITableWorkspace_sptr &integratedWS,
-      const Mantid::API::MatrixWorkspace_sptr &curvesWS) {
+  void writeOutSampleCorrectionWorkspaces(const Mantid::API::ITableWorkspace_sptr &integratedWS,
+                                          const Mantid::API::MatrixWorkspace_sptr &curvesWS) {
     Poco::Path curvesWSPath(m_inputDir.path());
     curvesWSPath.append("123_precalculated_vanadium_run_bank_curves.nxs");
     saveNexus(curvesWSPath.toString(), curvesWS);
@@ -199,8 +177,6 @@ private:
   }
 };
 
-const std::string EnggVanadiumCorrectionsModelTest::CURRENT_INSTRUMENT =
-    "TESTINST";
+const std::string EnggVanadiumCorrectionsModelTest::CURRENT_INSTRUMENT = "TESTINST";
 
-const std::string EnggVanadiumCorrectionsModelTest::INPUT_DIR_NAME(
-    "EnggVanadiumCorrectionsModelTestData");
+const std::string EnggVanadiumCorrectionsModelTest::INPUT_DIR_NAME("EnggVanadiumCorrectionsModelTestData");

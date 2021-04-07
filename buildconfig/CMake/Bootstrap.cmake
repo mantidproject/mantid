@@ -15,7 +15,7 @@ if(MSVC)
   set(THIRD_PARTY_GIT_URL
       "https://github.com/mantidproject/thirdparty-msvc2015.git"
   )
-  set(THIRD_PARTY_GIT_SHA1 f834a89d01957e28e28443f132e1d7d546972ebc)
+  set(THIRD_PARTY_GIT_SHA1 f28751b9093bdc767fe9cfe619ec12b7d715b7a5)
   set(THIRD_PARTY_DIR ${EXTERNAL_ROOT}/src/ThirdParty)
   # Generates a script to do the clone/update in tmp
   set(_project_name ThirdParty)
@@ -127,6 +127,7 @@ if(MSVC)
   set(BOOST_INCLUDEDIR "${CMAKE_INCLUDE_PATH}")
   set(BOOST_LIBRARYDIR "${CMAKE_LIBRARY_PATH}")
   set(Boost_NO_SYSTEM_PATHS TRUE)
+
 else()
   if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     # Homebrew adds qt4 here and we require it to be unlinked from /usr/local to

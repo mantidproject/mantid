@@ -17,8 +17,7 @@ namespace DataObjects {
  * @author Owen Arnold
  * @date 20/07/2011
  */
-class DLLExport AffineMatrixParameterParser
-    : public Mantid::API::ImplicitFunctionParameterParser {
+class DLLExport AffineMatrixParameterParser : public Mantid::API::ImplicitFunctionParameterParser {
 public:
   /// Constructor
   AffineMatrixParameterParser();
@@ -26,8 +25,7 @@ public:
    * @param parameterElement : xml element to parser from.
    * @return Fully constructed AffineMatrixParameter.
    */
-  AffineMatrixParameter *
-  createParameter(Poco::XML::Element *parameterElement) override;
+  AffineMatrixParameter *createParameter(Poco::XML::Element *parameterElement) override;
   /// Set a successor parser for chain-of-responsibility type reading.
   void setSuccessorParser(ImplicitFunctionParameterParser *) override;
 

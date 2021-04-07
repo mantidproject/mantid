@@ -23,7 +23,7 @@ digraph SNSPowderReductionContainer {
     $decision_style
     isSum [label="Is Sum True?"]
   }
-  
+
   subgraph values {
     $value_style
     CanRunWorkspace [label="ContainerRunWorkspace"]

@@ -34,26 +34,19 @@ void UploadRemoteFile::init() {
   auto requireValue = std::make_shared<MandatoryValidator<std::string>>();
 
   // Compute Resources
-  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
-                                          .getFacility()
-                                          .computeResources();
-  declareProperty("ComputeResource", "",
-                  std::make_shared<StringListValidator>(computes),
-                  "The name of the remote computer to upload the file to",
-                  Direction::Input);
+  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
+  declareProperty("ComputeResource", "", std::make_shared<StringListValidator>(computes),
+                  "The name of the remote computer to upload the file to", Direction::Input);
 
   // The transaction ID comes from the StartRemoteTransaction algortithm
-  declareProperty("TransactionID", "", requireValue,
-                  "The transaction the file will be associated with",
+  declareProperty("TransactionID", "", requireValue, "The transaction the file will be associated with",
                   Direction::Input);
   declareProperty("RemoteFileName", "", requireValue,
                   "The name to save the file as on the remote computer. "
                   "(Filename only; no path information)",
                   Direction::Input);
-  declareProperty(
-      "LocalFileName", "", requireValue,
-      "The full pathname (on the local machine) of the file to upload",
-      Direction::Input);
+  declareProperty("LocalFileName", "", requireValue, "The full pathname (on the local machine) of the file to upload",
+                  Direction::Input);
   // Note: 'RemoteFileName' is just the name.  The remote server figures out the
   // full path
   // from the transaction ID.  'LocalFileName' *IS* the full pathname (on the
@@ -62,17 +55,14 @@ void UploadRemoteFile::init() {
 
 void UploadRemoteFile::exec() {
   std::shared_ptr<RemoteJobManager> jobManager =
-      Mantid::Kernel::ConfigService::Instance()
-          .getFacility()
-          .getRemoteJobManager(getPropertyValue("ComputeResource"));
+      Mantid::Kernel::ConfigService::Instance().getFacility().getRemoteJobManager(getPropertyValue("ComputeResource"));
 
   // jobManager is a std::shared_ptr...
   if (!jobManager) {
     // Requested compute resource doesn't exist
     // TODO: should we create our own exception class for this??
     throw(std::runtime_error(
-        std::string("Unable to create a compute resource named " +
-                    getPropertyValue("ComputeResource"))));
+        std::string("Unable to create a compute resource named " + getPropertyValue("ComputeResource"))));
   }
 
   RemoteJobManager::PostDataMap postData;
@@ -85,19 +75,15 @@ void UploadRemoteFile::exec() {
     // feasible for fairly small files...
     RemoteJobManager::PostDataMap fileData;
     fileData[getPropertyValue("RemoteFileName")] =
-        std::string(std::istreambuf_iterator<char>(infile),
-                    std::istreambuf_iterator<char>());
+        std::string(std::istreambuf_iterator<char>(infile), std::istreambuf_iterator<char>());
     infile.close();
 
-    std::istream &respStream =
-        jobManager->httpPost("/upload", postData, fileData);
-    if (jobManager->lastStatus() ==
-        Poco::Net::HTTPResponse::HTTP_CREATED) // Upload returns a "201 -
-                                               // Created" code on success
+    std::istream &respStream = jobManager->httpPost("/upload", postData, fileData);
+    if (jobManager->lastStatus() == Poco::Net::HTTPResponse::HTTP_CREATED) // Upload returns a "201 -
+                                                                           // Created" code on success
     {
-      g_log.information() << "Uploaded '" << getPropertyValue("RemoteFileName")
-                          << "' to '" << getPropertyValue("LocalFileName")
-                          << "'\n";
+      g_log.information() << "Uploaded '" << getPropertyValue("RemoteFileName") << "' to '"
+                          << getPropertyValue("LocalFileName") << "'\n";
     } else {
       JSONObject resp;
       initFromStream(resp, respStream);
@@ -106,8 +92,7 @@ void UploadRemoteFile::exec() {
       throw(std::runtime_error(errMsg));
     }
   } else {
-    throw(std::runtime_error(
-        std::string("Failed to open " + getPropertyValue("LocalFileName"))));
+    throw(std::runtime_error(std::string("Failed to open " + getPropertyValue("LocalFileName"))));
   }
 }
 

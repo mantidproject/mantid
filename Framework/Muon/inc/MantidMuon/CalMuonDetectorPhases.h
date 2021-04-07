@@ -36,9 +36,7 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Muon"; }
   /// See also
-  const std::vector<std::string> seeAlso() const override {
-    return {"PhaseQuad"};
-  };
+  const std::vector<std::string> seeAlso() const override { return {"PhaseQuad"}; };
 
 protected:
   /// Validate the inputs
@@ -50,21 +48,16 @@ private:
   /// Execute the algorithm
   void exec() override;
   /// Prepare workspace for fit by extracting data
-  API::MatrixWorkspace_sptr extractDataFromWorkspace(double startTime,
-                                                     double endTime);
+  API::MatrixWorkspace_sptr extractDataFromWorkspace(double startTime, double endTime);
   /// Remove exponential data from workspace
-  API::MatrixWorkspace_sptr
-  removeExpDecay(const API::MatrixWorkspace_sptr &wsInput);
+  API::MatrixWorkspace_sptr removeExpDecay(const API::MatrixWorkspace_sptr &wsInput);
   /// Fit the workspace
-  void fitWorkspace(const API::MatrixWorkspace_sptr &ws, double freq,
-                    const std::string &groupName,
-                    const API::ITableWorkspace_sptr &resTab,
-                    API::WorkspaceGroup_sptr &resGroup);
+  void fitWorkspace(const API::MatrixWorkspace_sptr &ws, double freq, const std::string &groupName,
+                    const API::ITableWorkspace_sptr &resTab, API::WorkspaceGroup_sptr &resGroup);
   /// Create the fitting function as string
   std::string createFittingFunction(double freq, bool fixFreq);
   /// Extract asymmetry and phase from fitting results
-  void extractDetectorInfo(API::ITableWorkspace &paramTab,
-                           API::ITableWorkspace &resultsTab,
+  void extractDetectorInfo(API::ITableWorkspace &paramTab, API::ITableWorkspace &resultsTab,
                            const Indexing::SpectrumNumber spectrumNumber);
   /// Find frequency to use in sequential fit
   double getFrequency(const API::MatrixWorkspace_sptr &ws);
@@ -75,19 +68,15 @@ private:
   /// Get end time for fit
   double getEndTime() const;
   /// Calculate detector efficiency (alpha)
-  double getAlpha(const API::MatrixWorkspace_sptr &ws,
-                  const std::vector<int> &forward,
+  double getAlpha(const API::MatrixWorkspace_sptr &ws, const std::vector<int> &forward,
                   const std::vector<int> &backward);
   /// Calculate asymmetry
-  API::MatrixWorkspace_sptr getAsymmetry(const API::MatrixWorkspace_sptr &ws,
-                                         const std::vector<int> &forward,
-                                         const std::vector<int> &backward,
-                                         const double alpha);
+  API::MatrixWorkspace_sptr getAsymmetry(const API::MatrixWorkspace_sptr &ws, const std::vector<int> &forward,
+                                         const std::vector<int> &backward, const double alpha);
   /// Fit asymmetry to get frequency
   double fitFrequencyFromAsymmetry(const API::MatrixWorkspace_sptr &wsAsym);
   /// Find the grouping from the instrument
-  void getGroupingFromInstrument(const API::MatrixWorkspace_sptr &ws,
-                                 std::vector<int> &forward,
+  void getGroupingFromInstrument(const API::MatrixWorkspace_sptr &ws, std::vector<int> &forward,
                                  std::vector<int> &backward);
   /// Report progress in GUI
   void reportProgress(const int thisSpectrum, const int totalSpectra);

@@ -35,18 +35,13 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; };
   const std::vector<std::string> seeAlso() const override {
-    return {"SaveDiffCal",        "ReadGroupsFromFile",
-            "CreateDummyCalFile", "CreateCalFileByNames",
-            "AlignDetectors",     "DiffractionFocussing",
-            "LoadCalFile",        "MergeCalFiles"};
+    return {"SaveDiffCal",    "ReadGroupsFromFile",   "CreateDummyCalFile", "CreateCalFileByNames",
+            "AlignDetectors", "DiffractionFocussing", "LoadCalFile",        "MergeCalFiles"};
   }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return R"(DataHandling\Text;Diffraction\DataHandling\CalFiles)";
-  }
+  const std::string category() const override { return R"(DataHandling\Text;Diffraction\DataHandling\CalFiles)"; }
 
-  void saveCalFile(const std::string &calFileName,
-                   const Mantid::DataObjects::GroupingWorkspace_sptr &groupWS,
+  void saveCalFile(const std::string &calFileName, const Mantid::DataObjects::GroupingWorkspace_sptr &groupWS,
                    const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS,
                    const Mantid::DataObjects::MaskWorkspace_sptr &maskWS);
 

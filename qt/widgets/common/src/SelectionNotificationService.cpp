@@ -31,9 +31,7 @@ SelectionNotificationServiceImpl::~SelectionNotificationServiceImpl() {}
  *  @param qy            The y-component of the Mantid Q-vector.
  *  @param qz            The z-component of the Mantid Q-vector.
  */
-void SelectionNotificationServiceImpl::sendQPointSelection(bool lab_coords,
-                                                           double qx, double qy,
-                                                           double qz) {
+void SelectionNotificationServiceImpl::sendQPointSelection(bool lab_coords, double qx, double qy, double qz) {
   emit QPointSelection_signal(lab_coords, qx, qy, qz);
   //  std::cout << "QPointSelection_signal emitted\n";
 }

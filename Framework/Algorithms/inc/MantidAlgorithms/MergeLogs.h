@@ -17,14 +17,10 @@ public:
   /// Algorithm's name for identification
   const std::string name() const override { return "MergeLogs"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Merge 2 TimeSeries logs in a given Workspace.";
-  }
+  const std::string summary() const override { return "Merge 2 TimeSeries logs in a given Workspace."; }
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"AddTimeSeriesLog"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"AddTimeSeriesLog"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "DataHandling\\Logs"; }
   /// Cross-check properties with each other

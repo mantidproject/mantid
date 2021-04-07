@@ -27,45 +27,31 @@ private:
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
   std::string rebinParamsAsString();
-  API::MatrixWorkspace_sptr
-  monteCarloErrorCalculation(const API::MatrixWorkspace_sptr &sample,
-                             const API::MatrixWorkspace_sptr &resolution,
-                             const std::string &rebinParams, const int seed,
-                             const bool calculateErrors, const int nIterations);
+  API::MatrixWorkspace_sptr monteCarloErrorCalculation(const API::MatrixWorkspace_sptr &sample,
+                                                       const API::MatrixWorkspace_sptr &resolution,
+                                                       const std::string &rebinParams, const int seed,
+                                                       const bool calculateErrors, const int nIterations);
 
-  API::MatrixWorkspace_sptr rebin(const API::MatrixWorkspace_sptr &workspace,
-                                  const std::string &params);
-  API::MatrixWorkspace_sptr
-  integration(const API::MatrixWorkspace_sptr &workspace);
-  API::MatrixWorkspace_sptr
-  convertToPointData(const API::MatrixWorkspace_sptr &workspace);
-  API::MatrixWorkspace_sptr
-  extractFFTSpectrum(const API::MatrixWorkspace_sptr &workspace);
-  API::MatrixWorkspace_sptr
-  divide(const API::MatrixWorkspace_sptr &lhsWorkspace,
-         const API::MatrixWorkspace_sptr &rhsWorkspace);
-  API::MatrixWorkspace_sptr
-  cropWorkspace(const API::MatrixWorkspace_sptr &workspace, const double xMax);
-  API::MatrixWorkspace_sptr
-  replaceSpecialValues(const API::MatrixWorkspace_sptr &workspace);
+  API::MatrixWorkspace_sptr rebin(const API::MatrixWorkspace_sptr &workspace, const std::string &params);
+  API::MatrixWorkspace_sptr integration(const API::MatrixWorkspace_sptr &workspace);
+  API::MatrixWorkspace_sptr convertToPointData(const API::MatrixWorkspace_sptr &workspace);
+  API::MatrixWorkspace_sptr extractFFTSpectrum(const API::MatrixWorkspace_sptr &workspace);
+  API::MatrixWorkspace_sptr divide(const API::MatrixWorkspace_sptr &lhsWorkspace,
+                                   const API::MatrixWorkspace_sptr &rhsWorkspace);
+  API::MatrixWorkspace_sptr cropWorkspace(const API::MatrixWorkspace_sptr &workspace, const double xMax);
+  API::MatrixWorkspace_sptr replaceSpecialValues(const API::MatrixWorkspace_sptr &workspace);
 
+  API::MatrixWorkspace_sptr removeInvalidData(API::MatrixWorkspace_sptr workspace);
+  API::MatrixWorkspace_sptr normalizedFourierTransform(API::MatrixWorkspace_sptr workspace,
+                                                       const std::string &rebinParams);
+  API::MatrixWorkspace_sptr calculateIqt(API::MatrixWorkspace_sptr workspace,
+                                         const API::MatrixWorkspace_sptr &resolutionWorkspace,
+                                         const std::string &rebinParams);
+  API::MatrixWorkspace_sptr doSimulation(API::MatrixWorkspace_sptr sample, API::MatrixWorkspace_sptr resolution,
+                                         const std::string &rebinParams, Kernel::MersenneTwister &mTwister);
   API::MatrixWorkspace_sptr
-  removeInvalidData(API::MatrixWorkspace_sptr workspace);
-  API::MatrixWorkspace_sptr
-  normalizedFourierTransform(API::MatrixWorkspace_sptr workspace,
-                             const std::string &rebinParams);
-  API::MatrixWorkspace_sptr
-  calculateIqt(API::MatrixWorkspace_sptr workspace,
-               const API::MatrixWorkspace_sptr &resolutionWorkspace,
-               const std::string &rebinParams);
-  API::MatrixWorkspace_sptr doSimulation(API::MatrixWorkspace_sptr sample,
-                                         API::MatrixWorkspace_sptr resolution,
-                                         const std::string &rebinParams,
-                                         Kernel::MersenneTwister &mTwister);
-  API::MatrixWorkspace_sptr setErrorsToStandardDeviation(
-      const std::vector<API::MatrixWorkspace_sptr> &simulatedWorkspaces);
-  API::MatrixWorkspace_sptr setErrorsToZero(
-      const std::vector<API::MatrixWorkspace_sptr> &simulatedWorkspaces);
+  setErrorsToStandardDeviation(const std::vector<API::MatrixWorkspace_sptr> &simulatedWorkspaces);
+  API::MatrixWorkspace_sptr setErrorsToZero(const std::vector<API::MatrixWorkspace_sptr> &simulatedWorkspaces);
 };
 
 } // namespace Algorithms

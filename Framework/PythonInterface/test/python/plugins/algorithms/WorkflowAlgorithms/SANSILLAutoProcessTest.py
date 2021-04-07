@@ -105,6 +105,12 @@ class SANSILLAutoProcessTest(unittest.TestCase):
                           TransmissionAbsorberRuns="010462,010462",
                           OutputWorkspace="ws")
 
+    def test_flux(self):
+        ws = SANSILLAutoProcess(SampleRuns="010462",
+                                FluxRuns='010462')
+
+        self.assertTrue(isinstance(ws, WorkspaceGroup))
+
     def test_minimalProcessing(self):
         ws = SANSILLAutoProcess(SampleRuns="010462")
 

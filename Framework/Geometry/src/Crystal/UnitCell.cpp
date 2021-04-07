@@ -22,13 +22,10 @@ using Mantid::Kernel::V3D;
 
 /** Default constructor.
  \f$ a = b = c =  1 \mbox{\AA, } \alpha = \beta = \gamma = 90^\circ \f$ */
-UnitCell::UnitCell()
-    : da(6), ra(6), errorda(6), G(3, 3), Gstar(3, 3), B(3, 3), ModHKL(3, 3),
-      errorModHKL(3, 3) {
+UnitCell::UnitCell() : da(6), ra(6), errorda(6), G(3, 3), Gstar(3, 3), B(3, 3), ModHKL(3, 3), errorModHKL(3, 3) {
   da[0] = da[1] = da[2] = 1.;
   da[3] = da[4] = da[5] = M_PI_2;
-  errorda[0] = errorda[1] = errorda[2] = errorda[3] = errorda[4] = errorda[5] =
-      0.0;
+  errorda[0] = errorda[1] = errorda[2] = errorda[3] = errorda[4] = errorda[5] = 0.0;
   MaxOrder = 0;
   CrossTerm = false;
   recalculate();
@@ -38,15 +35,13 @@ UnitCell::UnitCell()
  @param _a, _b, _c :: lattice parameters \f$ a, b, c \f$ \n
  with \f$\alpha = \beta = \gamma = 90^\circ \f$*/
 UnitCell::UnitCell(double _a, double _b, double _c)
-    : da(6), ra(6), errorda(6), G(3, 3), Gstar(3, 3), B(3, 3), ModHKL(3, 3),
-      errorModHKL(3, 3) {
+    : da(6), ra(6), errorda(6), G(3, 3), Gstar(3, 3), B(3, 3), ModHKL(3, 3), errorModHKL(3, 3) {
   da[0] = _a;
   da[1] = _b;
   da[2] = _c;
   // Angles are 90 degrees in radians ->Pi/2
   da[3] = da[4] = da[5] = M_PI_2;
-  errorda[0] = errorda[1] = errorda[2] = errorda[3] = errorda[4] = errorda[5] =
-      0.0;
+  errorda[0] = errorda[1] = errorda[2] = errorda[3] = errorda[4] = errorda[5] = 0.0;
   MaxOrder = 0;
   CrossTerm = false;
   recalculate();
@@ -56,10 +51,8 @@ UnitCell::UnitCell(double _a, double _b, double _c)
  @param _a, _b, _c, _alpha, _beta, _gamma :: lattice parameters\n
  @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
  */
-UnitCell::UnitCell(double _a, double _b, double _c, double _alpha, double _beta,
-                   double _gamma, const int angleunit)
-    : da(6), ra(6), errorda(6), G(3, 3), Gstar(3, 3), B(3, 3), ModHKL(3, 3),
-      errorModHKL(3, 3) {
+UnitCell::UnitCell(double _a, double _b, double _c, double _alpha, double _beta, double _gamma, const int angleunit)
+    : da(6), ra(6), errorda(6), G(3, 3), Gstar(3, 3), B(3, 3), ModHKL(3, 3), errorModHKL(3, 3) {
   da[0] = _a;
   da[1] = _b;
   da[2] = _c;
@@ -73,8 +66,7 @@ UnitCell::UnitCell(double _a, double _b, double _c, double _alpha, double _beta,
     da[4] = _beta;
     da[5] = _gamma;
   }
-  errorda[0] = errorda[1] = errorda[2] = errorda[3] = errorda[4] = errorda[5] =
-      0.0;
+  errorda[0] = errorda[1] = errorda[2] = errorda[3] = errorda[4] = errorda[5] = 0.0;
   MaxOrder = 0;
   CrossTerm = false;
   recalculate();
@@ -100,8 +92,7 @@ double UnitCell::a3() const { return da[2]; }
  */
 double UnitCell::a(int nd) const {
   if (nd < 0 || nd > 2)
-    throw(std::invalid_argument(
-        "lattice parameter index can change from 0 to 2 "));
+    throw(std::invalid_argument("lattice parameter index can change from 0 to 2 "));
   return da[nd];
 }
 
@@ -299,9 +290,8 @@ double UnitCell::errorvolume() const {
     delta_V_gammaV = (Va2 - Va1) / V;
   }
 
-  return V * sqrt(std::pow(errora() / a(), 2) + std::pow(errorb() / b(), 2) +
-                  std::pow(errorc() / c(), 2) + std::pow(delta_V_alphaV, 2) +
-                  std::pow(delta_V_betaV, 2) + std::pow(delta_V_gammaV, 2));
+  return V * sqrt(std::pow(errora() / a(), 2) + std::pow(errorb() / b(), 2) + std::pow(errorc() / c(), 2) +
+                  std::pow(delta_V_alphaV, 2) + std::pow(delta_V_betaV, 2) + std::pow(delta_V_gammaV, 2));
 }
 
 /** Set lattice parameters
@@ -309,8 +299,7 @@ double UnitCell::errorvolume() const {
  @param angleunit :: units for angle, of type #AngleUnits . Default is degrees.
  */
 
-void UnitCell::set(double _a, double _b, double _c, double _alpha, double _beta,
-                   double _gamma, const int angleunit) {
+void UnitCell::set(double _a, double _b, double _c, double _alpha, double _beta, double _gamma, const int angleunit) {
   da[0] = _a;
   da[1] = _b;
   da[2] = _c;
@@ -332,8 +321,7 @@ void UnitCell::set(double _a, double _b, double _c, double _alpha, double _beta,
  @param angleunit :: units for angle, of type #AngleUnits . Default is degrees.
  */
 
-void UnitCell::setError(double _aerr, double _berr, double _cerr,
-                        double _alphaerr, double _betaerr, double _gammaerr,
+void UnitCell::setError(double _aerr, double _berr, double _cerr, double _alphaerr, double _betaerr, double _gammaerr,
                         const int angleunit) {
   errorda[0] = _aerr;
   errorda[1] = _berr;
@@ -361,9 +349,8 @@ void UnitCell::setError(double _aerr, double _berr, double _cerr,
  @param _dl3	offset for l for third vector
  */
 
-void UnitCell::setModHKL(double _dh1, double _dk1, double _dl1, double _dh2,
-                         double _dk2, double _dl2, double _dh3, double _dk3,
-                         double _dl3) {
+void UnitCell::setModHKL(double _dh1, double _dk1, double _dl1, double _dh2, double _dk2, double _dl2, double _dh3,
+                         double _dk3, double _dl3) {
   ModHKL[0][0] = _dh1;
   ModHKL[1][0] = _dk1;
   ModHKL[2][0] = _dl1;
@@ -385,9 +372,7 @@ void UnitCell::setModHKL(const DblMatrix &newModHKL) { ModHKL = newModHKL; }
  @param newErrorModHKL errors for modulation vectors for HKL for three vectors
  */
 
-void UnitCell::setErrorModHKL(const DblMatrix &newErrorModHKL) {
-  errorModHKL = newErrorModHKL;
-}
+void UnitCell::setErrorModHKL(const DblMatrix &newErrorModHKL) { errorModHKL = newErrorModHKL; }
 
 /** Set modulation vectors for satellites
  @param _dh1err	error for offset for H for first vector
@@ -401,9 +386,8 @@ void UnitCell::setErrorModHKL(const DblMatrix &newErrorModHKL) {
  @param _dl3err	error for offset for l for third vector
  */
 
-void UnitCell::setErrorModHKL(double _dh1err, double _dk1err, double _dl1err,
-                              double _dh2err, double _dk2err, double _dl2err,
-                              double _dh3err, double _dk3err, double _dl3err) {
+void UnitCell::setErrorModHKL(double _dh1err, double _dk1err, double _dl1err, double _dh2err, double _dk2err,
+                              double _dl2err, double _dh3err, double _dk3err, double _dl3err) {
   errorModHKL[0][0] = _dh1err;
   errorModHKL[1][0] = _dk1err;
   errorModHKL[2][0] = _dl1err;
@@ -547,18 +531,14 @@ void UnitCell::setCrossTerm(bool CT) { CrossTerm = CT; }
  @return ModVec :: modulation vector
  */
 
-const Kernel::V3D UnitCell::getModVec(int j) const {
-  return V3D(getdh(j), getdk(j), getdl(j));
-}
+const Kernel::V3D UnitCell::getModVec(int j) const { return V3D(getdh(j), getdk(j), getdl(j)); }
 
 /** Get errors for modulation vectors for satellites
  @param j       index of vector to get
  @return VecErr :: error of modulation vector
  */
 
-const Kernel::V3D UnitCell::getVecErr(int j) const {
-  return V3D(getdherr(j), getdkerr(j), getdlerr(j));
-}
+const Kernel::V3D UnitCell::getVecErr(int j) const { return V3D(getdherr(j), getdkerr(j), getdlerr(j)); }
 
 /** Get modulation vectors for satellites
  @return ModHKL :: modulation vectors
@@ -716,9 +696,7 @@ void UnitCell::setErrorgamma(double _gammaerr, const int angleunit) {
 }
 
 /// Return d-spacing (\f$ \mbox{ \AA } \f$) for a given h,k,l coordinate
-double UnitCell::d(double h, double k, double l) const {
-  return 1.0 / dstar(V3D(h, k, l));
-}
+double UnitCell::d(double h, double k, double l) const { return 1.0 / dstar(V3D(h, k, l)); }
 
 /// Return d-spacing (\f$ \mbox{ \AA } \f$) for a given h,k,l coordinate
 double UnitCell::d(const V3D &hkl) const { return 1.0 / dstar(hkl); }
@@ -736,8 +714,7 @@ double UnitCell::dstar(const V3D &hkl) const {
 
 /// Calculate the angle in degrees or radians between two reciprocal vectors
 /// (h1,k1,l1) and (h2,k2,l2)
-double UnitCell::recAngle(double h1, double k1, double l1, double h2, double k2,
-                          double l2, const int angleunit) const {
+double UnitCell::recAngle(double h1, double k1, double l1, double h2, double k2, double l2, const int angleunit) const {
   V3D Q1(h1, k1, l1), Q2(h2, k2, l2);
   double E, ang;
   Q1 = Gstar * Q1;
@@ -786,8 +763,7 @@ const Kernel::DblMatrix &UnitCell::getBinv() const { return Binv; }
 /// Private function, called at initialization or whenever lattice parameters
 /// are changed
 void UnitCell::recalculate() {
-  if ((da[3] > da[4] + da[5]) || (da[4] > da[3] + da[5]) ||
-      (da[5] > da[4] + da[3])) {
+  if ((da[3] > da[4] + da[5]) || (da[4] > da[3] + da[5]) || (da[5] > da[4] + da[3])) {
     throw std::invalid_argument("Invalid angles");
   }
   calculateG();
@@ -826,9 +802,7 @@ void UnitCell::calculateReciprocalLattice() {
   ra[0] = sqrt(Gstar[0][0]); // a*
   ra[1] = sqrt(Gstar[1][1]); // b*
   ra[2] = sqrt(Gstar[2][2]); // c*
-  auto acosThreshold = [](double x) {
-    return std::abs(x) > 1e-15 ? acos(x) : M_PI_2;
-  };
+  auto acosThreshold = [](double x) { return std::abs(x) > 1e-15 ? acos(x) : M_PI_2; };
   ra[3] = acosThreshold(Gstar[1][2] / ra[1] / ra[2]); // alpha*
   ra[4] = acosThreshold(Gstar[0][2] / ra[0] / ra[2]); // beta*
   ra[5] = acosThreshold(Gstar[0][1] / ra[0] / ra[1]); // gamma*
@@ -885,35 +859,25 @@ void UnitCell::recalculateFromGstar(const DblMatrix &NewGstar) {
 bool UnitCell::operator==(const UnitCell &other) const {
   return da == other.da; // da error not used in comparison
 }
-bool UnitCell::operator!=(const UnitCell &other) const {
-  return !this->operator==(other);
-}
+bool UnitCell::operator!=(const UnitCell &other) const { return !this->operator==(other); }
 
 std::ostream &operator<<(std::ostream &out, const UnitCell &unitCell) {
   // always show the lattice constants
-  out << "Lattice Parameters:" << std::fixed << std::setprecision(6)
-      << std::setw(12) << unitCell.a() << std::fixed << std::setprecision(6)
-      << std::setw(12) << unitCell.b() << std::fixed << std::setprecision(6)
-      << std::setw(12) << unitCell.c() << std::fixed << std::setprecision(6)
-      << std::setw(12) << unitCell.alpha() << std::fixed << std::setprecision(6)
-      << std::setw(12) << unitCell.beta() << std::fixed << std::setprecision(6)
-      << std::setw(12) << unitCell.gamma() << std::fixed << std::setprecision(6)
-      << " " << std::setw(12) << unitCell.volume();
+  out << "Lattice Parameters:" << std::fixed << std::setprecision(6) << std::setw(12) << unitCell.a() << std::fixed
+      << std::setprecision(6) << std::setw(12) << unitCell.b() << std::fixed << std::setprecision(6) << std::setw(12)
+      << unitCell.c() << std::fixed << std::setprecision(6) << std::setw(12) << unitCell.alpha() << std::fixed
+      << std::setprecision(6) << std::setw(12) << unitCell.beta() << std::fixed << std::setprecision(6) << std::setw(12)
+      << unitCell.gamma() << std::fixed << std::setprecision(6) << " " << std::setw(12) << unitCell.volume();
 
   // write out the uncertainty if there is a positive one somewhere
-  if ((unitCell.errora() > 0) || (unitCell.errorb() > 0) ||
-      (unitCell.errorc() > 0) || (unitCell.erroralpha() > 0) ||
+  if ((unitCell.errora() > 0) || (unitCell.errorb() > 0) || (unitCell.errorc() > 0) || (unitCell.erroralpha() > 0) ||
       (unitCell.errorbeta() > 0) || (unitCell.errorgamma() > 0))
-    out << "\nParameter Errors  :" << std::fixed << std::setprecision(6)
-        << std::setw(12) << unitCell.errora() << std::fixed
-        << std::setprecision(6) << std::setw(12) << unitCell.errorb()
-        << std::fixed << std::setprecision(6) << std::setw(12)
-        << unitCell.errorc() << std::fixed << std::setprecision(6)
-        << std::setw(12) << unitCell.erroralpha() << std::fixed
-        << std::setprecision(6) << std::setw(12) << unitCell.errorbeta()
-        << std::fixed << std::setprecision(6) << std::setw(12)
-        << unitCell.errorgamma() << std::fixed << std::setprecision(6)
-        << std::setw(12) << unitCell.errorvolume();
+    out << "\nParameter Errors  :" << std::fixed << std::setprecision(6) << std::setw(12) << unitCell.errora()
+        << std::fixed << std::setprecision(6) << std::setw(12) << unitCell.errorb() << std::fixed
+        << std::setprecision(6) << std::setw(12) << unitCell.errorc() << std::fixed << std::setprecision(6)
+        << std::setw(12) << unitCell.erroralpha() << std::fixed << std::setprecision(6) << std::setw(12)
+        << unitCell.errorbeta() << std::fixed << std::setprecision(6) << std::setw(12) << unitCell.errorgamma()
+        << std::fixed << std::setprecision(6) << std::setw(12) << unitCell.errorvolume();
 
   return out;
 }
@@ -922,17 +886,15 @@ std::string unitCellToStr(const UnitCell &unitCell) {
   std::ostringstream stream;
   stream << std::setprecision(9);
 
-  stream << unitCell.a() << " " << unitCell.b() << " " << unitCell.c() << " "
-         << unitCell.alpha() << " " << unitCell.beta() << " "
-         << unitCell.gamma();
+  stream << unitCell.a() << " " << unitCell.b() << " " << unitCell.c() << " " << unitCell.alpha() << " "
+         << unitCell.beta() << " " << unitCell.gamma();
 
   return stream.str();
 }
 
 UnitCell strToUnitCell(const std::string &unitCellString) {
 
-  Mantid::Kernel::StringTokenizer cellTokens(
-      unitCellString, " ", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  Mantid::Kernel::StringTokenizer cellTokens(unitCellString, " ", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
 
   std::vector<double> components;
   components.reserve(cellTokens.size());
@@ -944,11 +906,9 @@ UnitCell strToUnitCell(const std::string &unitCellString) {
   case 3:
     return UnitCell(components[0], components[1], components[2]);
   case 6:
-    return UnitCell(components[0], components[1], components[2], components[3],
-                    components[4], components[5]);
+    return UnitCell(components[0], components[1], components[2], components[3], components[4], components[5]);
   default:
-    throw std::runtime_error("Failed to parse unit cell input string: " +
-                             unitCellString);
+    throw std::runtime_error("Failed to parse unit cell input string: " + unitCellString);
   }
 }
 

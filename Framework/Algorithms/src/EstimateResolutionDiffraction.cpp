@@ -39,19 +39,14 @@ namespace { // hide these constants
 ///
 const double MICROSEC_TO_SEC = 1.0E-6;
 ///
-const double WAVELENGTH_TO_VELOCITY =
-    1.0E10 * PhysicalConstants::h / PhysicalConstants::NeutronMass;
+const double WAVELENGTH_TO_VELOCITY = 1.0E10 * PhysicalConstants::h / PhysicalConstants::NeutronMass;
 /// This is an absurd number for even ultra cold neutrons
 const double WAVELENGTH_MAX = 1000.;
 } // namespace
 
-const std::string EstimateResolutionDiffraction::name() const {
-  return "EstimateResolutionDiffraction";
-}
+const std::string EstimateResolutionDiffraction::name() const { return "EstimateResolutionDiffraction"; }
 
-const std::string EstimateResolutionDiffraction::alias() const {
-  return "EstimatePDDetectorResolution";
-}
+const std::string EstimateResolutionDiffraction::alias() const { return "EstimatePDDetectorResolution"; }
 
 const std::string EstimateResolutionDiffraction::summary() const {
   return "Estimate the resolution of each detector pixel for a powder "
@@ -60,29 +55,22 @@ const std::string EstimateResolutionDiffraction::summary() const {
 
 int EstimateResolutionDiffraction::version() const { return 1; }
 
-const std::string EstimateResolutionDiffraction::category() const {
-  return "Diffraction\\Utility";
-}
+const std::string EstimateResolutionDiffraction::category() const { return "Diffraction\\Utility"; }
 
 void EstimateResolutionDiffraction::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
-                                                           Direction::Input),
-      "Name of the workspace to have detector resolution calculated");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "DivergenceWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Workspace containing the divergence");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
+                  "Name of the workspace to have detector resolution calculated");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("DivergenceWorkspace", "", Direction::Input,
+                                                                       PropertyMode::Optional),
+                  "Workspace containing the divergence");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace containing delta(d)/d of each "
                   "detector/spectrum");
 
   auto positiveDeltaTOF = std::make_shared<BoundedValidator<double>>();
   positiveDeltaTOF->setLower(0.);
   positiveDeltaTOF->setLowerExclusive(true);
-  declareProperty("DeltaTOF", 0., positiveDeltaTOF,
-                  "DeltaT as the resolution of TOF with unit microsecond");
+  declareProperty("DeltaTOF", 0., positiveDeltaTOF, "DeltaT as the resolution of TOF with unit microsecond");
 
   auto positiveWavelength = std::make_shared<BoundedValidator<double>>();
   positiveWavelength->setLower(0.);
@@ -91,9 +79,9 @@ void EstimateResolutionDiffraction::init() {
                   "Wavelength setting in Angstroms. This overrides what is in "
                   "the dataset.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-                      "PartialResolutionWorkspaces", "", Direction::Output),
-                  "Workspaces created showing the various resolution terms");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>("PartialResolutionWorkspaces", "", Direction::Output),
+      "Workspaces created showing the various resolution terms");
 }
 
 void EstimateResolutionDiffraction::exec() {
@@ -103,14 +91,10 @@ void EstimateResolutionDiffraction::exec() {
 
   // create all of the output workspaces
   std::string partials_prefix = getPropertyValue("PartialResolutionWorkspaces");
-  m_resTof = DataObjects::create<DataObjects::Workspace2D>(
-      *m_inputWS, HistogramData::Points(1));
-  m_resPathLength = DataObjects::create<DataObjects::Workspace2D>(
-      *m_inputWS, HistogramData::Points(1));
-  m_resAngle = DataObjects::create<DataObjects::Workspace2D>(
-      *m_inputWS, HistogramData::Points(1));
-  m_outputWS = DataObjects::create<DataObjects::Workspace2D>(
-      *m_inputWS, HistogramData::Points(1));
+  m_resTof = DataObjects::create<DataObjects::Workspace2D>(*m_inputWS, HistogramData::Points(1));
+  m_resPathLength = DataObjects::create<DataObjects::Workspace2D>(*m_inputWS, HistogramData::Points(1));
+  m_resAngle = DataObjects::create<DataObjects::Workspace2D>(*m_inputWS, HistogramData::Points(1));
+  m_outputWS = DataObjects::create<DataObjects::Workspace2D>(*m_inputWS, HistogramData::Points(1));
 
   estimateDetectorResolution();
 
@@ -118,12 +102,9 @@ void EstimateResolutionDiffraction::exec() {
 
   // put together the output group
   auto partialsGroup = std::make_shared<WorkspaceGroup>();
-  API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_tof",
-                                                    m_resTof);
-  API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_length",
-                                                    m_resPathLength);
-  API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_angle",
-                                                    m_resAngle);
+  API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_tof", m_resTof);
+  API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_length", m_resPathLength);
+  API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_angle", m_resAngle);
   partialsGroup->addWorkspace(m_resTof);
   partialsGroup->addWorkspace(m_resPathLength);
   partialsGroup->addWorkspace(m_resAngle);
@@ -146,14 +127,12 @@ double EstimateResolutionDiffraction::getWavelength() {
 
   Property *cwlproperty = m_inputWS->run().getProperty("LambdaRequest");
   if (!cwlproperty)
-    throw runtime_error(
-        "Unable to locate property LambdaRequest as central wavelength. ");
+    throw runtime_error("Unable to locate property LambdaRequest as central wavelength. ");
 
   auto *cwltimeseries = dynamic_cast<TimeSeriesProperty<double> *>(cwlproperty);
 
   if (!cwltimeseries)
-    throw runtime_error(
-        "LambdaReqeust is not a TimeSeriesProperty in double. ");
+    throw runtime_error("LambdaReqeust is not a TimeSeriesProperty in double. ");
 
   string unit = cwltimeseries->units();
   if ((unit != "Angstrom") && (unit != "A")) {
@@ -214,8 +193,7 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     const double centraltof = (l1 + l2) / m_centreVelocity;
 
     // Angle
-    const double twotheta =
-        spectrumInfo.isMonitor(i) ? 0.0 : spectrumInfo.twoTheta(i);
+    const double twotheta = spectrumInfo.isMonitor(i) ? 0.0 : spectrumInfo.twoTheta(i);
     const double theta = 0.5 * twotheta;
 
     double deltatheta = 0.;
@@ -223,16 +201,15 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
       deltatheta = m_divergenceWS->y(i)[0];
     } else {
       auto &spectrumDefinition = spectrumInfo.spectrumDefinition(i);
-      const double solidangle = std::accumulate(
-          spectrumDefinition.cbegin(), spectrumDefinition.cend(), 0.,
-          [&componentInfo, &detectorInfo, &samplepos](const auto sum,
-                                                      const auto &index) {
-            if (!detectorInfo.isMasked(index.first)) {
-              return sum + componentInfo.solidAngle(index.first, samplepos);
-            } else {
-              return sum;
-            }
-          });
+      const double solidangle =
+          std::accumulate(spectrumDefinition.cbegin(), spectrumDefinition.cend(), 0.,
+                          [&componentInfo, &detectorInfo, &samplepos](const auto sum, const auto &index) {
+                            if (!detectorInfo.isMasked(index.first)) {
+                              return sum + componentInfo.solidAngle(index.first, samplepos);
+                            } else {
+                              return sum;
+                            }
+                          });
       deltatheta = sqrt(solidangle);
     }
 
@@ -267,16 +244,13 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     else if (fabs(t3) > maxt3)
       maxt3 = fabs(t3);
 
-    g_log.debug() << det.type() << " " << i << "\t\t" << twotheta
-                  << "\t\tdT/T = " << t1 * t1 << "\t\tdL/L = " << t2
+    g_log.debug() << det.type() << " " << i << "\t\t" << twotheta << "\t\tdT/T = " << t1 * t1 << "\t\tdL/L = " << t2
                   << "\t\tdTheta*cotTheta = " << t3 << "\n";
   }
 
-  g_log.notice() << "2theta range: " << mintwotheta << ", " << maxtwotheta
-                 << "\n";
+  g_log.notice() << "2theta range: " << mintwotheta << ", " << maxtwotheta << "\n";
   g_log.notice() << "t3 range: " << mint3 << ", " << maxt3 << "\n";
-  g_log.notice() << "Number of detector having NO size information = "
-                 << count_nodetsize << "\n";
+  g_log.notice() << "Number of detector having NO size information = " << count_nodetsize << "\n";
 }
 
 } // namespace Algorithms

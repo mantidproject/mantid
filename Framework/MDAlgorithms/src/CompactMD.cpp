@@ -27,21 +27,16 @@ namespace {
  * @return : a string vector of binning parameters for IntegrateMDHistoWorkspace
  * to take as input.
  */
-std::vector<std::string>
-createPBinStringVector(std::vector<Mantid::coord_t> minVector,
-                       std::vector<Mantid::coord_t> maxVector,
-                       const IMDHistoWorkspace_sptr &inputWs) {
+std::vector<std::string> createPBinStringVector(std::vector<Mantid::coord_t> minVector,
+                                                std::vector<Mantid::coord_t> maxVector,
+                                                const IMDHistoWorkspace_sptr &inputWs) {
   size_t numDims = inputWs->getNumDims();
   std::vector<std::string> pBinStrVector;
   for (size_t iter = 0; iter < numDims; iter++) {
     // creating pbin string using Min and Max Centre positions
-    auto pBinStr = boost::lexical_cast<std::string>(
-                       minVector[iter] -
-                       (inputWs->getDimension(iter)->getBinWidth() * 0.5)) +
-                   ",0," +
-                   boost::lexical_cast<std::string>(
-                       maxVector[iter] +
-                       (inputWs->getDimension(iter)->getBinWidth() * 0.5));
+    auto pBinStr =
+        boost::lexical_cast<std::string>(minVector[iter] - (inputWs->getDimension(iter)->getBinWidth() * 0.5)) + ",0," +
+        boost::lexical_cast<std::string>(maxVector[iter] + (inputWs->getDimension(iter)->getBinWidth() * 0.5));
     pBinStrVector.emplace_back(pBinStr);
   }
   return pBinStrVector;
@@ -64,9 +59,9 @@ DECLARE_ALGORITHM(CompactMD)
  * @param maxVec : Vector used to stored the maximum extents in each dimension
  */
 
-void CompactMD::findFirstNonZeroMinMaxExtents(
-    const IMDHistoWorkspace_sptr &inputWs, std::vector<Mantid::coord_t> &minVec,
-    std::vector<Mantid::coord_t> &maxVec) {
+void CompactMD::findFirstNonZeroMinMaxExtents(const IMDHistoWorkspace_sptr &inputWs,
+                                              std::vector<Mantid::coord_t> &minVec,
+                                              std::vector<Mantid::coord_t> &maxVec) {
   auto ws_iter = inputWs->createIterator();
   do {
     if (ws_iter->getSignal() == 0) {
@@ -111,12 +106,10 @@ void CompactMD::findFirstNonZeroMinMaxExtents(
  */
 void CompactMD::init() {
   // input workspace to compact
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("InputWorkspace", "", Direction::Input),
                   "MDHistoWorkspace to compact");
   // output workspace that will have been compacted
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Output compacted workspace");
 }
 /**

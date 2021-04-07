@@ -25,18 +25,10 @@ public:
     ImageInfo(StringItems names);
 
     inline bool empty() const noexcept { return m_names.empty(); }
-    inline int size() const noexcept {
-      return static_cast<int>(m_names.size());
-    }
-    inline const QString &name(int index) const noexcept {
-      return m_names[index];
-    }
-    inline const QString &value(int index) const noexcept {
-      return m_values[index];
-    }
-    inline void setValue(int index, const QString &value) noexcept {
-      m_values[index] = value;
-    }
+    inline int size() const noexcept { return static_cast<int>(m_names.size()); }
+    inline const QString &name(int index) const noexcept { return m_names[index]; }
+    inline const QString &value(int index) const noexcept { return m_values[index]; }
+    inline void setValue(int index, const QString &value) noexcept { m_values[index] = value; }
     StringItems m_names;
     StringItems m_values;
   };
@@ -51,13 +43,10 @@ public:
   static inline const QString MissingValue = QString("-");
 
   static inline const QString defaultFormat(const double x) {
-    return QString::number(x, ImageInfoModel::DecimalFormat,
-                           ImageInfoModel::FourDigitPrecision);
+    return QString::number(x, ImageInfoModel::DecimalFormat, ImageInfoModel::FourDigitPrecision);
   }
 
-  static inline const QString defaultFormat(const int x) {
-    return QString::number(x);
-  }
+  static inline const QString defaultFormat(const int x) { return QString::number(x); }
 
 public:
   virtual ~ImageInfoModel() = default;
@@ -69,8 +58,7 @@ public:
   @param signal: the signal value at x, y
   @return An ImageInfo object
   */
-  virtual ImageInfoModel::ImageInfo info(const double x, const double y,
-                                         const double signal) const = 0;
+  virtual ImageInfoModel::ImageInfo info(const double x, const double y, const double signal) const = 0;
 };
 
 } // namespace MantidWidgets

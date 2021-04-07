@@ -22,8 +22,7 @@ using namespace Mantid::API;
 
 namespace {
 
-MatrixWorkspace_sptr extractSpectrum(const MatrixWorkspace_sptr &inputWorkspace,
-                                     const int workspaceIndex) {
+MatrixWorkspace_sptr extractSpectrum(const MatrixWorkspace_sptr &inputWorkspace, const int workspaceIndex) {
   auto extracter = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
   extracter->setAlwaysStoreInADS(false);
   extracter->setProperty("InputWorkspace", inputWorkspace);
@@ -34,9 +33,8 @@ MatrixWorkspace_sptr extractSpectrum(const MatrixWorkspace_sptr &inputWorkspace,
   return output;
 }
 
-MatrixWorkspace_sptr
-evaluateFunction(const IFunction_const_sptr &function,
-                 const MatrixWorkspace_sptr &inputWorkspace) {
+MatrixWorkspace_sptr evaluateFunction(const IFunction_const_sptr &function,
+                                      const MatrixWorkspace_sptr &inputWorkspace) {
   auto fit = AlgorithmManager::Instance().create("Fit");
   fit->setAlwaysStoreInADS(false);
   fit->setProperty("Function", function->asString());
@@ -89,8 +87,7 @@ void ALCPeakFittingModel::fitPeaks(IFunction_const_sptr peaks) {
   IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
   fit->setAlwaysStoreInADS(false);
   fit->setProperty("Function", peaks->asString());
-  fit->setProperty("InputWorkspace",
-                   std::const_pointer_cast<MatrixWorkspace>(m_data));
+  fit->setProperty("InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(m_data));
   fit->setProperty("CreateOutput", true);
   fit->setProperty("OutputCompositeMembers", true);
 
@@ -100,8 +97,7 @@ void ALCPeakFittingModel::fitPeaks(IFunction_const_sptr peaks) {
     QCoreApplication::processEvents();
   }
   if (!result.error().empty()) {
-    QString msg =
-        "Fit algorithm failed.\n\n" + QString(result.error().c_str()) + "\n";
+    QString msg = "Fit algorithm failed.\n\n" + QString(result.error().c_str()) + "\n";
     emit errorInModel(msg);
   }
 
@@ -110,12 +106,9 @@ void ALCPeakFittingModel::fitPeaks(IFunction_const_sptr peaks) {
   setFittedPeaks(static_cast<IFunction_sptr>(fit->getProperty("Function")));
 }
 
-MatrixWorkspace_sptr
-ALCPeakFittingModel::guessData(IFunction_const_sptr function,
-                               const std::vector<double> &xValues) {
+MatrixWorkspace_sptr ALCPeakFittingModel::guessData(IFunction_const_sptr function, const std::vector<double> &xValues) {
   const auto inputWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
-      WorkspaceFactory::Instance().create("Workspace2D", 1, xValues.size(),
-                                          xValues.size()));
+      WorkspaceFactory::Instance().create("Workspace2D", 1, xValues.size(), xValues.size()));
   inputWorkspace->mutableX(0) = xValues;
   return extractSpectrum(evaluateFunction(function, inputWorkspace), 1);
 }

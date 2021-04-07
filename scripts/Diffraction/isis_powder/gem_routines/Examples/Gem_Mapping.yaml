@@ -34,7 +34,7 @@
     vanadium_run_numbers: "83883" #VNb
     empty_run_numbers: "83884"
 
-  PDF:    
+  PDF:
     vanadium_run_numbers: "83883" #VNb
     empty_run_numbers: "83884"
 
@@ -46,7 +46,7 @@
     vanadium_run_numbers: "84288" #VNb
     empty_run_numbers: "84278"
 
-  PDF:    
+  PDF:
     vanadium_run_numbers: "83883" #VNb
     empty_run_numbers: "83884"
 
@@ -70,7 +70,7 @@
     vanadium_run_numbers: "85590" #VNb
     empty_run_numbers: "85591"
 
-#86001-86093:
+86001-86093:
   label: "cycle_18_2"
   offset_file_name: "offsets_2011_cycle111b.cal"
   Rietveld:
@@ -80,7 +80,7 @@
     empty_run_numbers: "86018"
 
 
-  PDF:    
+  PDF:
 #    vanadium_run_numbers: "83883" #VNb
 #    empty_run_numbers: "83884"
 #    vanadium_run_numbers: "84856-84858" #VNb
@@ -101,7 +101,7 @@
     vanadium_run_numbers: "86100" #VNb
     empty_run_numbers: "86101"
 
-  PDF:   
+  PDF:
     vanadium_run_numbers: "86333,86344,86355" #VNb
     empty_run_numbers: "86343,86354"
 
@@ -112,7 +112,7 @@
     vanadium_run_numbers: "86576,86580" #VNb
     empty_run_numbers: "86577"
 
-  PDF:   
+  PDF:
 #    vanadium_run_numbers: "86581,86583,86584" #VNb
 #    empty_run_numbers: "86582,86585,86586"
 #    vanadium_run_numbers: "87154" #VNb
@@ -128,7 +128,7 @@
     vanadium_run_numbers: "87568" #VNb
     empty_run_numbers: "87569"
 
-  PDF:   
+  PDF:
 #    vanadium_run_numbers: "86581,86583,86584" #VNb
 #    empty_run_numbers: "86582,86585,86586"
 #    vanadium_run_numbers: "87154" #VNb

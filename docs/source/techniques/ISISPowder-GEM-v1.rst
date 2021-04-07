@@ -195,8 +195,8 @@ Example
 
   # Notice how the filename ends with .yaml
   cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
-  
-  gem_example.create_cal(run_number=87618, 
+
+  gem_example.create_cal(run_number=87618,
                            calibration_mapping_file=cal_mapping_file)
 
 
@@ -267,7 +267,7 @@ calibration_to_adjust
 ^^^^^^^^^^^^^^^^^^^^^
 *Optional*
 
-This Parameter contains the path to an offsets .cal file to adjust using 
+This Parameter contains the path to an offsets .cal file to adjust using
 the automatic cal file generation.
 
 .. _calibration_directory_gem_isis-powder-diffraction-ref:
@@ -567,7 +567,7 @@ save_all
 *Optional*
 
 This parameter specifies whether or not all files should be saved on
-texture mode, if this is set to false then the .nxs and .gsas files will not be 
+texture mode, if this is set to false then the .nxs and .gsas files will not be
 saved out. If unset then this defaults to True.
 
 Example Input:
@@ -725,7 +725,7 @@ set to the following:
 
   cross_corr_reference_spectra: 5000
 
-  
+
 .. _cross_corr_ws_index_max_gem_isis-powder-diffraction-ref:
 
 cross_corr_ws_index_max
@@ -739,7 +739,7 @@ set to the following:
 
   cross_corr_ws_index_max: 6450
 
-  
+
 .. _cross_corr_ws_index_min_gem_isis-powder-diffraction-ref:
 
 cross_corr_ws_index_min
@@ -753,7 +753,7 @@ set to the following:
 
   cross_corr_ws_index_min: 11
 
-  
+
 .. _cros_cor_x_max_gem_isis-powder-diffraction-ref:
 
 cross_cor_x_max
@@ -817,7 +817,7 @@ is set to the following:
 
   get_det_offsets_x_max: 200
 
-  
+
 .. _get_det_offsets_x_min_gem_isis-powder-diffraction-ref:
 
 get_det_offsets_x_min
@@ -829,7 +829,7 @@ is set to the following:
 .. code-block:: python
 
   get_det_offsets_x_min: -200
-		
+
 
 
 .. _focused_cropping_values_gem_isis-powder-diffraction-ref:

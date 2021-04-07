@@ -21,6 +21,5 @@ void export_Progress() {
       "Make a Progress object that is attached to the given algorithm, "
       "with progress between fractions [start,end] notifying a total of "
       "nreports times",
-      init<Algorithm *, double, double, size_t>(
-          (arg("alg"), arg("start"), arg("end"), arg("nreports"))));
+      init<Algorithm *, double, double, size_t>((arg("alg"), arg("start"), arg("end"), arg("nreports"))));
 }

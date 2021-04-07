@@ -23,17 +23,14 @@ class CropWorkspaceRaggedTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CropWorkspaceRaggedTest *createSuite() {
-    return new CropWorkspaceRaggedTest();
-  }
+  static CropWorkspaceRaggedTest *createSuite() { return new CropWorkspaceRaggedTest(); }
   static void destroySuite(CropWorkspaceRaggedTest *suite) { delete suite; }
 
   void createInputWorkspace() {
     std::string name = "toCrop";
     // Set up a small workspace for testing
-    Workspace_sptr space = WorkspaceFactory::Instance().create(
-        "Workspace2D", m_numberOfSpectra, m_numberOfYPoints + 1,
-        m_numberOfYPoints);
+    Workspace_sptr space =
+        WorkspaceFactory::Instance().create("Workspace2D", m_numberOfSpectra, m_numberOfYPoints + 1, m_numberOfYPoints);
     m_ws = std::dynamic_pointer_cast<Workspace2D>(space);
     std::vector<double> ydata, errors;
     for (int j = 0; j < m_numberOfSpectra; ++j) {
@@ -72,8 +69,7 @@ public:
   }
   void test_XMinLarger() {
     TS_ASSERT_THROWS_NOTHING(m_alg.setProperty("InputWorkspace", m_ws));
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("OutputWorkspace", "nothing"));
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "5."));
 
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "10."));
@@ -81,8 +77,7 @@ public:
   }
   void test_XMinListBug() {
     TS_ASSERT_THROWS_NOTHING(m_alg.setProperty("InputWorkspace", m_ws));
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("OutputWorkspace", "nothing"));
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "10"));
 
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "1.,2.,3.,20.,5."));
@@ -90,51 +85,42 @@ public:
   }
   void test_XMaxListBug() {
     TS_ASSERT_THROWS_NOTHING(m_alg.setProperty("InputWorkspace", m_ws));
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("OutputWorkspace", "nothing"));
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "1."));
 
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("XMax", "10.,20.,30.,0.4,50."));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "10.,20.,30.,0.4,50."));
     TS_ASSERT_THROWS(m_alg.execute(), const std::runtime_error &);
   }
   void test_ListsBug() {
     TS_ASSERT_THROWS_NOTHING(m_alg.setProperty("InputWorkspace", m_ws));
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("OutputWorkspace", "nothing"));
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "1.,2.,3.,20.,5."));
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("XMax", "10.,20.,30.,0.4,50."));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "10.,20.,30.,0.4,50."));
     TS_ASSERT_THROWS(m_alg.execute(), const std::runtime_error &);
   }
   void test_TooFewXMins() {
     TS_ASSERT_THROWS_NOTHING(m_alg.setProperty("InputWorkspace", m_ws));
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("OutputWorkspace", "nothing"));
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "5."));
 
-    TS_ASSERT_THROWS(m_alg.setPropertyValue("XMin", ""),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(m_alg.setPropertyValue("XMin", ""), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "1,2"));
     TS_ASSERT_THROWS(m_alg.execute(), const std::runtime_error &);
   }
 
   void test_TooFewXMaxs() {
     TS_ASSERT_THROWS_NOTHING(m_alg.setProperty("InputWorkspace", m_ws));
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("OutputWorkspace", "nothing"));
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "1."));
 
-    TS_ASSERT_THROWS(m_alg.setPropertyValue("XMax", ""),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(m_alg.setPropertyValue("XMax", ""), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "11,12"));
     TS_ASSERT_THROWS(m_alg.execute(), const std::runtime_error &);
   }
 
   void test_TooManyMins() {
     TS_ASSERT_THROWS_NOTHING(m_alg.setProperty("InputWorkspace", m_ws));
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("OutputWorkspace", "nothing"));
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "11."));
 
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "1,2,3,4,5,6"));
@@ -143,25 +129,21 @@ public:
 
   void test_TooManyXMaxs() {
     TS_ASSERT_THROWS_NOTHING(m_alg.setProperty("InputWorkspace", m_ws));
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("OutputWorkspace", "nothing"));
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "1."));
 
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("XMax", "11,12,13,14,15,16"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "11,12,13,14,15,16"));
     TS_ASSERT_THROWS(m_alg.execute(), const std::runtime_error &);
   }
 
   void test_SingleValueCrop() {
     TS_ASSERT_THROWS_NOTHING(m_alg.setProperty("InputWorkspace", m_ws));
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("OutputWorkspace", "nothing"));
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "2."));
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "11"));
     TS_ASSERT_THROWS_NOTHING(m_alg.execute());
 
-    MatrixWorkspace_sptr out =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
     for (int spec = 0; spec < m_numberOfSpectra; spec++) {
       TS_ASSERT_DELTA(out->readX(spec)[0], 2.0, 1e-6);
       TS_ASSERT_DELTA(out->readY(spec)[0], 3.0, 1e-6);
@@ -175,17 +157,14 @@ public:
 
   void test_MinListCrop() {
     TS_ASSERT_THROWS_NOTHING(m_alg.setProperty("InputWorkspace", m_ws));
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("OutputWorkspace", "nothing"));
     std::vector<double> xMin{2., 5., 6., 7., 1.};
 
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("XMin", "2., 5., 6., 7., 1."));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "2., 5., 6., 7., 1."));
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "11"));
     TS_ASSERT_THROWS_NOTHING(m_alg.execute());
 
-    MatrixWorkspace_sptr out =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
     for (int spec = 0; spec < m_numberOfSpectra; spec++) {
       TS_ASSERT_DELTA(out->readX(spec)[0], xMin[spec], 1e-6);
       TS_ASSERT_DELTA(out->readY(spec)[0], xMin[spec] + 1., 1e-6);
@@ -198,17 +177,14 @@ public:
   }
   void test_MaxListCrop() {
     TS_ASSERT_THROWS_NOTHING(m_alg.setProperty("InputWorkspace", m_ws));
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("OutputWorkspace", "nothing"));
     std::vector<double> xMax{12., 13., 11., 8., 9.};
 
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "2."));
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("XMax", "12, 13, 11, 8, 9"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "12, 13, 11, 8, 9"));
     TS_ASSERT_THROWS_NOTHING(m_alg.execute());
 
-    MatrixWorkspace_sptr out =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
     for (int spec = 0; spec < m_numberOfSpectra; spec++) {
       TS_ASSERT_DELTA(out->readX(spec)[0], 2.0, 1e-6);
       TS_ASSERT_DELTA(out->readY(spec)[0], 3.0, 1e-6);
@@ -223,14 +199,12 @@ public:
   void test_preservesHist() {
     TS_ASSERT(m_ws->isHistogramData());
     TS_ASSERT_THROWS_NOTHING(m_alg.setProperty("InputWorkspace", m_ws));
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("OutputWorkspace", "nothing"));
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "2."));
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "11"));
     TS_ASSERT_THROWS_NOTHING(m_alg.execute());
 
-    MatrixWorkspace_sptr out =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
     TS_ASSERT(out->isHistogramData());
   }
 
@@ -241,32 +215,27 @@ public:
     alg.setProperty("InputWorkspace", m_ws);
     alg.setProperty("OutputWorkspace", "points");
     alg.execute();
-    MatrixWorkspace_sptr points =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("points");
+    MatrixWorkspace_sptr points = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("points");
 
     TS_ASSERT_EQUALS(points->isHistogramData(), false);
     TS_ASSERT_THROWS_NOTHING(m_alg.setProperty("InputWorkspace", points));
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("OutputWorkspace", "nothing"));
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "2."));
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "11"));
     TS_ASSERT_THROWS_NOTHING(m_alg.execute());
 
-    MatrixWorkspace_sptr out =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
     TS_ASSERT_EQUALS(out->isHistogramData(), false);
   }
 
   void test_xMaxMoreThanData() {
     TS_ASSERT_THROWS_NOTHING(m_alg.setProperty("InputWorkspace", m_ws));
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("OutputWorkspace", "nothing"));
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "2."));
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "111"));
     TS_ASSERT_THROWS_NOTHING(m_alg.execute());
 
-    MatrixWorkspace_sptr out =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
 
     for (int spec = 0; spec < m_numberOfSpectra; spec++) {
       TS_ASSERT_DELTA(out->readX(spec)[0], 2.0, 1e-6);
@@ -281,14 +250,12 @@ public:
 
   void test_xMinLessThanData() {
     TS_ASSERT_THROWS_NOTHING(m_alg.setProperty("InputWorkspace", m_ws));
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("OutputWorkspace", "nothing"));
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "-2."));
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "11"));
     TS_ASSERT_THROWS_NOTHING(m_alg.execute());
 
-    MatrixWorkspace_sptr out =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
     for (int spec = 0; spec < m_numberOfSpectra; spec++) {
       TS_ASSERT_DELTA(out->readX(spec)[0], m_ws->readX(spec)[0], 1e-6);
       TS_ASSERT_DELTA(out->readY(spec)[0], m_ws->readY(spec)[0], 1e-6);

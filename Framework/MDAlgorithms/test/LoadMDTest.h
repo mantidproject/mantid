@@ -66,19 +66,16 @@ public:
    */
   template <typename MDE, size_t nd>
   static void do_compare_MDEW(std::shared_ptr<MDEventWorkspace<MDE, nd>> ws1,
-                              std::shared_ptr<MDEventWorkspace<MDE, nd>> ws2,
-                              bool BoxStructureOnly = false) {
+                              std::shared_ptr<MDEventWorkspace<MDE, nd>> ws2, bool BoxStructureOnly = false) {
     TS_ASSERT(ws1->getBox());
 
     // Compare the initial to the final workspace
-    TS_ASSERT_EQUALS(ws1->getBox()->getNumChildren(),
-                     ws2->getBox()->getNumChildren());
+    TS_ASSERT_EQUALS(ws1->getBox()->getNumChildren(), ws2->getBox()->getNumChildren());
     if (!BoxStructureOnly) {
       TS_ASSERT_EQUALS(ws1->getNPoints(), ws2->getNPoints());
     }
 
-    TS_ASSERT_EQUALS(ws1->getBoxController()->getMaxId(),
-                     ws2->getBoxController()->getMaxId());
+    TS_ASSERT_EQUALS(ws1->getBoxController()->getMaxId(), ws2->getBoxController()->getMaxId());
     // Compare all the details of the box1 controllers
     compareBoxControllers(*ws1->getBoxController(), *ws2->getBoxController());
 
@@ -102,14 +99,11 @@ public:
       TS_ASSERT_EQUALS(box1->getDepth(), box2->getDepth());
       TS_ASSERT_EQUALS(box1->getNumChildren(), box2->getNumChildren());
       for (size_t i = 0; i < box1->getNumChildren(); i++) {
-        TS_ASSERT_EQUALS(box1->getChild(i)->getID(),
-                         box2->getChild(i)->getID());
+        TS_ASSERT_EQUALS(box1->getChild(i)->getID(), box2->getChild(i)->getID());
       }
       for (size_t d = 0; d < nd; d++) {
-        TS_ASSERT_DELTA(box1->getExtents(d).getMin(),
-                        box2->getExtents(d).getMin(), 1e-5);
-        TS_ASSERT_DELTA(box1->getExtents(d).getMax(),
-                        box2->getExtents(d).getMax(), 1e-5);
+        TS_ASSERT_DELTA(box1->getExtents(d).getMin(), box2->getExtents(d).getMin(), 1e-5);
+        TS_ASSERT_DELTA(box1->getExtents(d).getMax(), box2->getExtents(d).getMax(), 1e-5);
       }
       double vol = box1->getInverseVolume();
       if (vol == 0)
@@ -129,8 +123,7 @@ public:
       MDGridBox<MDE, nd> *gridbox2 = dynamic_cast<MDGridBox<MDE, nd> *>(box2);
       if (gridbox1) {
         for (size_t d = 0; d < nd; d++) {
-          TS_ASSERT_DELTA(gridbox1->getBoxSize(d), gridbox2->getBoxSize(d),
-                          1e-4);
+          TS_ASSERT_DELTA(gridbox1->getBoxSize(d), gridbox2->getBoxSize(d), 1e-4);
         }
       }
 
@@ -147,13 +140,10 @@ public:
             // Check first and last event
             for (size_t i = 0; i < events1.size(); i += events1.size() - 1) {
               for (size_t d = 0; d < nd; d++) {
-                TS_ASSERT_DELTA(events1[i].getCenter(d),
-                                events2[i].getCenter(d), 1e-4);
+                TS_ASSERT_DELTA(events1[i].getCenter(d), events2[i].getCenter(d), 1e-4);
               }
-              TS_ASSERT_DELTA(events1[i].getSignal(), events2[i].getSignal(),
-                              1e-4);
-              TS_ASSERT_DELTA(events1[i].getErrorSquared(),
-                              events2[i].getErrorSquared(), 1e-4);
+              TS_ASSERT_DELTA(events1[i].getSignal(), events2[i].getSignal(), 1e-4);
+              TS_ASSERT_DELTA(events1[i].getErrorSquared(), events2[i].getErrorSquared(), 1e-4);
             }
           }
           mdbox1->releaseEvents();
@@ -175,21 +165,17 @@ public:
 
   //=================================================================================================================
   template <size_t nd>
-  void do_test_exec(bool FileBackEnd, bool deleteWorkspace = true,
-                    double memory = 0, bool BoxStructureOnly = false) {
+  void do_test_exec(bool FileBackEnd, bool deleteWorkspace = true, double memory = 0, bool BoxStructureOnly = false) {
     using MDE = MDLeanEvent<nd>;
 
     //------ Start by creating the file
     //----------------------------------------------
     // Make a 1D MDEventWorkspace
-    std::shared_ptr<MDEventWorkspace<MDE, nd>> ws1 =
-        MDEventsTestHelper::makeMDEW<nd>(10, 0.0, 10.0, 0);
+    std::shared_ptr<MDEventWorkspace<MDE, nd>> ws1 = MDEventsTestHelper::makeMDEW<nd>(10, 0.0, 10.0, 0);
     ws1->getBoxController()->setSplitThreshold(100);
     // Put in ADS so we can use fake data
-    AnalysisDataService::Instance().addOrReplace(
-        "LoadMDTest_ws", std::dynamic_pointer_cast<IMDEventWorkspace>(ws1));
-    FrameworkManager::Instance().exec("FakeMDEventData", 6, "InputWorkspace",
-                                      "LoadMDTest_ws", "UniformParams", "10000",
+    AnalysisDataService::Instance().addOrReplace("LoadMDTest_ws", std::dynamic_pointer_cast<IMDEventWorkspace>(ws1));
+    FrameworkManager::Instance().exec("FakeMDEventData", 6, "InputWorkspace", "LoadMDTest_ws", "UniformParams", "10000",
                                       "RandomizeSignal", "1");
     //    FrameworkManager::Instance().exec("FakeMDEventData", 6,
     //        "InputWorkspace", "LoadMDTest_ws", "PeakParams", "30000, 5.0,
@@ -205,10 +191,8 @@ public:
     SaveMD2 saver;
     TS_ASSERT_THROWS_NOTHING(saver.initialize())
     TS_ASSERT(saver.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        saver.setProperty("InputWorkspace", "LoadMDTest_ws"));
-    TS_ASSERT_THROWS_NOTHING(saver.setPropertyValue(
-        "Filename", "LoadMDTest" + Strings::toString(nd) + ".nxs"));
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("InputWorkspace", "LoadMDTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(saver.setPropertyValue("Filename", "LoadMDTest" + Strings::toString(nd) + ".nxs"));
 
     // Retrieve the full path; delete any pre-existing file
     std::string filename = saver.getPropertyValue("Filename");
@@ -228,26 +212,21 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileBackEnd", FileBackEnd));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Memory", memory));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MetadataOnly", false));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("BoxStructureOnly", BoxStructureOnly));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BoxStructureOnly", BoxStructureOnly));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     IMDEventWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING(
-        iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName));
     TS_ASSERT(iws);
     if (!iws)
       return;
 
     // Perform the full comparison
-    auto ws =
-        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>, nd>>(iws);
+    auto ws = std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>, nd>>(iws);
     do_compare_MDEW(ws, ws1, BoxStructureOnly);
 
     // Look for the not-disk-cached-cause-they-are-too-small
@@ -262,10 +241,8 @@ public:
       for (auto &boxIt : boxes) {
         MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxIt);
         if (box) {
-          TSM_ASSERT("Large box should not be in memory",
-                     box->getISaveable()->getDataMemorySize() == 0);
-          TSM_ASSERT("Large box should be cached to disk",
-                     box->getISaveable()->wasSaved());
+          TSM_ASSERT("Large box should not be in memory", box->getISaveable()->getDataMemorySize() == 0);
+          TSM_ASSERT("Large box should be cached to disk", box->getISaveable()->wasSaved());
         }
       }
     }
@@ -286,9 +263,7 @@ public:
   template <size_t nd> void do_test_UpdateFileBackEnd() {
     std::string outWSName("LoadMDTest_OutputWS");
     IMDEventWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING(
-        iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName));
     TS_ASSERT(iws);
     if (!iws)
       return;
@@ -296,8 +271,7 @@ public:
         std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>, nd>>(iws);
 
     // Modify that by adding some boxes
-    MDGridBox<MDLeanEvent<nd>, nd> *box =
-        dynamic_cast<MDGridBox<MDLeanEvent<nd>, nd> *>(ws2->getBox());
+    MDGridBox<MDLeanEvent<nd>, nd> *box = dynamic_cast<MDGridBox<MDLeanEvent<nd>, nd> *>(ws2->getBox());
     // Now there are 1000+1000 boxes (the box 12 was split into 10x10x10)
     box->splitContents(12);
 
@@ -316,8 +290,7 @@ public:
     box->splitAllIfNeeded(nullptr);
 
     // Modify a different box by accessing the events
-    MDBox<MDLeanEvent<nd>, nd> *box8 =
-        dynamic_cast<MDBox<MDLeanEvent<nd>, nd> *>(box->getChild(8));
+    MDBox<MDLeanEvent<nd>, nd> *box8 = dynamic_cast<MDBox<MDLeanEvent<nd>, nd> *>(box->getChild(8));
     std::vector<MDLeanEvent<nd>> &events = box8->getEvents();
     // Add 10 to this signal
     signal_t newSignal = events[0].getSignal() + 10.0;
@@ -342,24 +315,21 @@ public:
     SaveMD2 saver;
     TS_ASSERT_THROWS_NOTHING(saver.initialize())
     TS_ASSERT(saver.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        saver.setPropertyValue("InputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(saver.setPropertyValue("InputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(saver.setPropertyValue("Filename", ""));
     TS_ASSERT_THROWS_NOTHING(saver.setPropertyValue("UpdateFileBackEnd", "1"));
     TS_ASSERT_THROWS_NOTHING(saver.execute(););
     TS_ASSERT(saver.isExecuted());
 
     // Now we look at the file that's currently open
-    auto loader = dynamic_cast<BoxControllerNeXusIO *>(
-        ws2->getBoxController()->getFileIO());
+    auto loader = dynamic_cast<BoxControllerNeXusIO *>(ws2->getBoxController()->getFileIO());
     TS_ASSERT(loader);
     if (!loader)
       return;
 
     ::NeXus::File *file = loader->getFile();
-    TSM_ASSERT_LESS_THAN(
-        "The event_data field in the file must be at least 10002 long.", 10002,
-        file->getInfo().dims[0]);
+    TSM_ASSERT_LESS_THAN("The event_data field in the file must be at least 10002 long.", 10002,
+                         file->getInfo().dims[0]);
 
     // The file should have been modified but that's tricky to check directly.
     std::string filename = ws2->getBoxController()->getFileIO()->getFileName();
@@ -369,14 +339,11 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileBackEnd", false));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "reloaded_again"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "reloaded_again"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    TS_ASSERT_THROWS_NOTHING(
-        iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            "reloaded_again"));
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("reloaded_again"));
     std::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>, nd>> ws3 =
         std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>, nd>>(iws);
     TS_ASSERT(ws3);
@@ -408,9 +375,7 @@ public:
   void test_exec_3D_with_FileBackEnd() { do_test_exec<3>(true); }
 
   /// Run the loading but keep the events on file and load on demand
-  void test_exec_3D_with_FileBackEnd_andSmallBuffer() {
-    do_test_exec<3>(true, true, 1.0);
-  }
+  void test_exec_3D_with_FileBackEnd_andSmallBuffer() { do_test_exec<3>(true, true, 1.0); }
 
   /** Use the file back end,
    * then change it and save to update the file at the back end.
@@ -423,9 +388,7 @@ public:
   }
 
   /// Only load the box structure, no events
-  void test_exec_3D_BoxStructureOnly() {
-    do_test_exec<3>(false, true, 0.0, true);
-  }
+  void test_exec_3D_BoxStructureOnly() { do_test_exec<3>(false, true, 0.0, true); }
 
   //=================================================================================================================
 
@@ -433,20 +396,16 @@ public:
     //------ Start by creating the file
     //----------------------------------------------
     // Make a 1D MDEventWorkspace
-    std::shared_ptr<MDEventWorkspace<MDLeanEvent<2>, 2>> ws1 =
-        MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0, 0);
+    std::shared_ptr<MDEventWorkspace<MDLeanEvent<2>, 2>> ws1 = MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0, 0);
     ws1->getBoxController()->setSplitThreshold(100);
-    AnalysisDataService::Instance().addOrReplace(
-        "LoadMDTest_ws", std::dynamic_pointer_cast<IMDEventWorkspace>(ws1));
+    AnalysisDataService::Instance().addOrReplace("LoadMDTest_ws", std::dynamic_pointer_cast<IMDEventWorkspace>(ws1));
 
     // Save it
     SaveMD2 saver;
     TS_ASSERT_THROWS_NOTHING(saver.initialize())
     TS_ASSERT(saver.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        saver.setProperty("InputWorkspace", "LoadMDTest_ws"));
-    TS_ASSERT_THROWS_NOTHING(
-        saver.setPropertyValue("Filename", "LoadMDTest2.nxs"));
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("InputWorkspace", "LoadMDTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(saver.setPropertyValue("Filename", "LoadMDTest2.nxs"));
     // clean up possible rubbish from the previous runs
     std::string fullName = saver.getPropertyValue("Filename");
     if (Poco::File(fullName).exists())
@@ -467,14 +426,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileBackEnd", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Memory", 0.0));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MetadataOnly", true));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
     std::shared_ptr<MDEventWorkspace<MDLeanEvent<2>, 2>> ws =
-        AnalysisDataService::Instance()
-            .retrieveWS<MDEventWorkspace<MDLeanEvent<2>, 2>>(outWSName);
+        AnalysisDataService::Instance().retrieveWS<MDEventWorkspace<MDLeanEvent<2>, 2>>(outWSName);
 
     TSM_ASSERT_EQUALS("Should have no events!", 0, ws->getNPoints());
     TSM_ASSERT_EQUALS("Wrong number of dimensions", 2, ws->getNumDims());
@@ -509,9 +466,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     MDHistoWorkspace_sptr newWS;
-    TS_ASSERT_THROWS_NOTHING(
-        newWS = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(
-            "loaded"));
+    TS_ASSERT_THROWS_NOTHING(newWS = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>("loaded"));
     TS_ASSERT(newWS);
     if (!newWS)
       return;
@@ -552,9 +507,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     MDHistoWorkspace_sptr newWS;
-    TS_ASSERT_THROWS_NOTHING(
-        newWS = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(
-            "loaded"));
+    TS_ASSERT_THROWS_NOTHING(newWS = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>("loaded"));
     TS_ASSERT(newWS);
     if (!newWS)
       return;
@@ -576,28 +529,23 @@ public:
   void test_histo1D() {
     Mantid::coord_t min(-10.0);
     Mantid::coord_t max(10.0);
-    Mantid::Geometry::GeneralFrame frame(
-        Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+    Mantid::Geometry::GeneralFrame frame(Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
     std::vector<Geometry::IMDDimension_sptr> dims(
-        1, std::make_shared<Geometry::MDHistoDimension>("X", "x", frame, min,
-                                                        max, 5));
-    MDHistoWorkspace_sptr ws =
-        std::make_shared<MDHistoWorkspace>(dims, API::VolumeNormalization);
+        1, std::make_shared<Geometry::MDHistoDimension>("X", "x", frame, min, max, 5));
+    MDHistoWorkspace_sptr ws = std::make_shared<MDHistoWorkspace>(dims, API::VolumeNormalization);
     ws->setTo(1.0, 1.0, 1);
     doTestHistoV1(ws);
     doTestHisto(ws);
   }
 
   void test_histo2D() {
-    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        2.5, 2, 10, 10.0, 3.5, "histo2", 4.5);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.5, 2, 10, 10.0, 3.5, "histo2", 4.5);
     doTestHistoV1(ws);
     doTestHisto(ws);
   }
 
   void test_histo3D() {
-    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        2.5, 3, 4, 10.0, 3.5, "histo3", 4.5);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.5, 3, 4, 10.0, 3.5, "histo3", 4.5);
     doTestHistoV1(ws);
     doTestHisto(ws);
   }
@@ -605,8 +553,7 @@ public:
   /// More of an integration test as it uses both load and save.
   void test_save_and_load_special_coordinates_MDEventWorkspace() {
     Mantid::Geometry::QSample frame;
-    MDEventWorkspace1Lean::sptr mdeventWS =
-        MDEventsTestHelper::makeMDEWWithFrames<1>(10, 0.0, 10.0, frame, 2);
+    MDEventWorkspace1Lean::sptr mdeventWS = MDEventsTestHelper::makeMDEWWithFrames<1>(10, 0.0, 10.0, frame, 2);
     const Mantid::Kernel::SpecialCoordinateSystem appliedCoordinateSystem =
         Mantid::Kernel::SpecialCoordinateSystem::QSample;
     mdeventWS->setCoordinateSystem(appliedCoordinateSystem);
@@ -614,15 +561,13 @@ public:
     auto loadedWS = testSaveAndLoadWorkspace(mdeventWS, "MDEventWorkspace");
     // Check that the special coordinate system is the same before the save-load
     // cycle.
-    TS_ASSERT_EQUALS(appliedCoordinateSystem,
-                     loadedWS->getSpecialCoordinateSystem());
+    TS_ASSERT_EQUALS(appliedCoordinateSystem, loadedWS->getSpecialCoordinateSystem());
   }
 
   // backwards-compatability check for coordinate in log
   void test_load_coordinate_system_MDEventWorkspace_from_experiment_info() {
     Mantid::Geometry::QSample frame;
-    MDEventWorkspace1Lean::sptr mdeventWS =
-        MDEventsTestHelper::makeMDEWWithFrames<1>(10, 0.0, 10.0, frame, 2);
+    MDEventWorkspace1Lean::sptr mdeventWS = MDEventsTestHelper::makeMDEWWithFrames<1>(10, 0.0, 10.0, frame, 2);
     const Mantid::Kernel::SpecialCoordinateSystem appliedCoordinateSystem =
         Mantid::Kernel::SpecialCoordinateSystem::QSample;
     mdeventWS->setCoordinateSystem(appliedCoordinateSystem);
@@ -630,22 +575,18 @@ public:
     // Create a log in the first experiment info to simulated an old version of
     // the file
     auto expt0 = mdeventWS->getExperimentInfo(0);
-    expt0->mutableRun().addProperty("CoordinateSystem",
-                                    static_cast<int>(appliedCoordinateSystem));
+    expt0->mutableRun().addProperty("CoordinateSystem", static_cast<int>(appliedCoordinateSystem));
 
     const bool rmCoordField(true);
-    auto loadedWS =
-        testSaveAndLoadWorkspace(mdeventWS, "MDEventWorkspace", rmCoordField);
+    auto loadedWS = testSaveAndLoadWorkspace(mdeventWS, "MDEventWorkspace", rmCoordField);
     // Check that the special coordinate system is the same before the save-load
     // cycle.
-    TS_ASSERT_EQUALS(appliedCoordinateSystem,
-                     loadedWS->getSpecialCoordinateSystem());
+    TS_ASSERT_EQUALS(appliedCoordinateSystem, loadedWS->getSpecialCoordinateSystem());
   }
 
   void test_save_and_load_special_coordinates_MDHistoWorkspace() {
     Mantid::Geometry::QSample frame;
-    auto mdhistoWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceWithMDFrame(
-        2.5, 2, frame, 10, 10.0, 3.5, "", 4.5);
+    auto mdhistoWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceWithMDFrame(2.5, 2, frame, 10, 10.0, 3.5, "", 4.5);
     const Mantid::Kernel::SpecialCoordinateSystem appliedCoordinateSystem =
         Mantid::Kernel::SpecialCoordinateSystem::QSample;
     mdhistoWS->setCoordinateSystem(appliedCoordinateSystem);
@@ -653,15 +594,13 @@ public:
     auto loadedWS = testSaveAndLoadWorkspace(mdhistoWS, "MDHistoWorkspace");
     // Check that the special coordinate system is the same before the save-load
     // cycle.
-    TS_ASSERT_EQUALS(appliedCoordinateSystem,
-                     loadedWS->getSpecialCoordinateSystem());
+    TS_ASSERT_EQUALS(appliedCoordinateSystem, loadedWS->getSpecialCoordinateSystem());
   }
 
   // backwards-compatability check for coordinate in log
   void test_load_coordinate_system_MDHistoWorkspace_from_experiment_info() {
     Mantid::Geometry::QSample frame;
-    auto mdhistoWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceWithMDFrame(
-        2.5, 2, frame, 10, 10.0, 3.5, "", 4.5);
+    auto mdhistoWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceWithMDFrame(2.5, 2, frame, 10, 10.0, 3.5, "", 4.5);
     const Mantid::Kernel::SpecialCoordinateSystem appliedCoordinateSystem =
         Mantid::Kernel::SpecialCoordinateSystem::QSample;
     mdhistoWS->setCoordinateSystem(appliedCoordinateSystem);
@@ -669,22 +608,17 @@ public:
     // Create a log in the first experiment info to simulated an old version of
     // the file
     auto expt0 = mdhistoWS->getExperimentInfo(0);
-    expt0->mutableRun().addProperty("CoordinateSystem",
-                                    static_cast<int>(appliedCoordinateSystem));
+    expt0->mutableRun().addProperty("CoordinateSystem", static_cast<int>(appliedCoordinateSystem));
 
     const bool rmCoordField(true);
-    auto loadedWS =
-        testSaveAndLoadWorkspace(mdhistoWS, "MDHistoWorkspace", rmCoordField);
+    auto loadedWS = testSaveAndLoadWorkspace(mdhistoWS, "MDHistoWorkspace", rmCoordField);
     // Check that the special coordinate system is the same before the save-load
     // cycle.
-    TS_ASSERT_EQUALS(appliedCoordinateSystem,
-                     loadedWS->getSpecialCoordinateSystem());
+    TS_ASSERT_EQUALS(appliedCoordinateSystem, loadedWS->getSpecialCoordinateSystem());
   }
 
-  Mantid::API::IMDWorkspace_sptr
-  testSaveAndLoadWorkspace(const Mantid::API::IMDWorkspace_sptr &inputWS,
-                           const char *rootGroup,
-                           const bool rmCoordField = false) {
+  Mantid::API::IMDWorkspace_sptr testSaveAndLoadWorkspace(const Mantid::API::IMDWorkspace_sptr &inputWS,
+                                                          const char *rootGroup, const bool rmCoordField = false) {
     const std::string fileName = "SaveMDSpecialCoordinatesTest.nxs";
     SaveMD2 saveAlg;
     saveAlg.setChild(true);
@@ -731,8 +665,7 @@ public:
   void test_loadAffine() {
     std::string filename("SaveMDAffineTest.nxs");
     // Make a 4D MDEventWorkspace
-    MDEventWorkspace4Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<4>(10, 0.0, 10.0, 2);
+    MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(10, 0.0, 10.0, 2);
     AnalysisDataService::Instance().addOrReplace("SaveMDAffineTest_ws", ws);
 
     // Bin data to get affine matrix
@@ -765,11 +698,8 @@ public:
     TS_ASSERT(loadAlg.isExecuted());
 
     // Check the affine matrix over at a couple of locations
-    MDHistoWorkspace_sptr newWS =
-        AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(
-            "reloaded_affine");
-    Matrix<coord_t> affMat =
-        newWS->getTransformToOriginal()->makeAffineMatrix();
+    MDHistoWorkspace_sptr newWS = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>("reloaded_affine");
+    Matrix<coord_t> affMat = newWS->getTransformToOriginal()->makeAffineMatrix();
     TS_ASSERT_EQUALS(affMat[0][1], 1.0);
     TS_ASSERT_EQUALS(affMat[2][0], 1.0);
 
@@ -785,8 +715,7 @@ public:
   void test_loadHistory() {
     std::string filename("History.nxs");
     // Make a 4D MDEventWorkspace
-    MDEventWorkspace4Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<4>(10, 0.0, 10.0, 2);
+    MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(10, 0.0, 10.0, 2);
     AnalysisDataService::Instance().addOrReplace("HistoryEvTest_ws", ws);
 
     // Bin data
@@ -819,9 +748,7 @@ public:
     TS_ASSERT(loadAlg.isExecuted());
 
     // Check the affine matrix over at a couple of locations
-    MDHistoWorkspace_sptr newWSh =
-        AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(
-            "withHisto");
+    MDHistoWorkspace_sptr newWSh = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>("withHisto");
 
     // BinMD and LoadMD should be in the history
     TS_ASSERT_EQUALS(newWSh->getHistory().size(), 2);
@@ -836,8 +763,7 @@ public:
     TS_ASSERT(loadAlg.isExecuted());
 
     // Check the affine matrix over at a couple of locations
-    MDHistoWorkspace_sptr newWSnh =
-        AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>("noHisto");
+    MDHistoWorkspace_sptr newWSnh = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>("noHisto");
 
     // Only LoadMD should be in the history
     TS_ASSERT_EQUALS(newWSnh->getHistory().size(), 1);
@@ -855,10 +781,8 @@ public:
   void test_MDEventWorkspace_contains_normalization_flags() {
     // Arrange
     std::string filename("SaveMDEventNormalizationFlagTest.nxs");
-    MDEventWorkspace4Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<4>(10, 0.0, 10.0, 2);
-    AnalysisDataService::Instance().addOrReplace(
-        "SaveMDEventNormalizationFlagTest_ws", ws);
+    MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(10, 0.0, 10.0, 2);
+    AnalysisDataService::Instance().addOrReplace("SaveMDEventNormalizationFlagTest_ws", ws);
 
     auto eventNormalization = Mantid::API::NoNormalization;
     auto histoNormalization = Mantid::API::NumEventsNormalization;
@@ -868,8 +792,7 @@ public:
     // Act
     SaveMD2 alg;
     alg.initialize();
-    alg.setPropertyValue("InputWorkspace",
-                         "SaveMDEventNormalizationFlagTest_ws");
+    alg.setPropertyValue("InputWorkspace", "SaveMDEventNormalizationFlagTest_ws");
     alg.setPropertyValue("Filename", filename);
     alg.setProperty("MakeFileBacked", "0");
     alg.execute();
@@ -881,26 +804,22 @@ public:
     loadAlg.isInitialized();
     loadAlg.setPropertyValue("Filename", filename);
     loadAlg.setProperty("FileBackEnd", false);
-    loadAlg.setPropertyValue("OutputWorkspace",
-                             "reloaded_MDEventNormalization");
+    loadAlg.setPropertyValue("OutputWorkspace", "reloaded_MDEventNormalization");
     loadAlg.execute();
     TS_ASSERT(loadAlg.isExecuted());
-    auto newWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-        "reloaded_MDEventNormalization");
+    auto newWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("reloaded_MDEventNormalization");
 
     // Assert
-    TSM_ASSERT_EQUALS("Should have no normalization set",
-                      newWS->displayNormalization(), eventNormalization);
-    TSM_ASSERT_EQUALS("Should have number events normalization set",
-                      newWS->displayNormalizationHisto(), histoNormalization);
+    TSM_ASSERT_EQUALS("Should have no normalization set", newWS->displayNormalization(), eventNormalization);
+    TSM_ASSERT_EQUALS("Should have number events normalization set", newWS->displayNormalizationHisto(),
+                      histoNormalization);
 
     // Clean up
     if (Poco::File(this_filename).exists()) {
       Poco::File(this_filename).remove();
     }
 
-    AnalysisDataService::Instance().remove(
-        "SaveMDEventNormalizationFlagTest_ws");
+    AnalysisDataService::Instance().remove("SaveMDEventNormalizationFlagTest_ws");
     AnalysisDataService::Instance().remove("reloaded_MDEventNormalization");
   }
 
@@ -915,17 +834,14 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileBackEnd", false));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MetadataOnly", false));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     IMDEventWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING(
-        iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName));
     TS_ASSERT(iws);
 
     if (!iws) {
@@ -936,14 +852,11 @@ public:
     // We expect the first three dimensions to be QSample and the fourth to be a
     // GeneralFrame
     for (int index = 0; index < 3; ++index) {
-      TSM_ASSERT_EQUALS(
-          "The first three dimension should contain a QSample Frame",
-          iws->getDimension(index)->getMDFrame().name(),
-          Mantid::Geometry::QSample::QSampleName);
+      TSM_ASSERT_EQUALS("The first three dimension should contain a QSample Frame",
+                        iws->getDimension(index)->getMDFrame().name(), Mantid::Geometry::QSample::QSampleName);
     }
 
-    TSM_ASSERT_EQUALS("The fourth dimension should contain a General Frame",
-                      iws->getDimension(3)->getMDFrame().name(),
+    TSM_ASSERT_EQUALS("The fourth dimension should contain a General Frame", iws->getDimension(3)->getMDFrame().name(),
                       Mantid::Geometry::GeneralFrame::GeneralFrameName);
     // Clean up
     if (iws) {
@@ -962,17 +875,14 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileBackEnd", false));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MetadataOnly", false));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     IMDHistoWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING(
-        iws = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(outWSName));
     TS_ASSERT(iws);
 
     if (!iws) {
@@ -984,12 +894,10 @@ public:
     // GeneralFrame
     for (int index = 0; index < 3; ++index) {
       TSM_ASSERT_EQUALS("The first three dimension should contain an HKL Frame",
-                        iws->getDimension(index)->getMDFrame().name(),
-                        Mantid::Geometry::HKL::HKLName);
+                        iws->getDimension(index)->getMDFrame().name(), Mantid::Geometry::HKL::HKLName);
     }
 
-    TSM_ASSERT_EQUALS("The fourth dimension should contain a General Frame",
-                      iws->getDimension(3)->getMDFrame().name(),
+    TSM_ASSERT_EQUALS("The fourth dimension should contain a General Frame", iws->getDimension(3)->getMDFrame().name(),
                       Mantid::Geometry::GeneralFrame::GeneralFrameName);
     // Clean up
     if (iws) {
@@ -997,11 +905,9 @@ public:
     }
   }
 
-  void
-  test_loading_legacy_HKL_file_with_MDHisto_with_incorrect_HKLUnits_doesnt_make_changes() {
+  void test_loading_legacy_HKL_file_with_MDHisto_with_incorrect_HKLUnits_doesnt_make_changes() {
     // Arrange
-    std::string filename(
-        "MDHisto_wo_MDFrames_w_HKL_flag_w_invalid_HKLUnits.nxs");
+    std::string filename("MDHisto_wo_MDFrames_w_HKL_flag_w_invalid_HKLUnits.nxs");
     std::string outWSName("LoadMD_legacy_test_file");
 
     // Act
@@ -1011,17 +917,14 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileBackEnd", false));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MetadataOnly", false));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     IMDHistoWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING(
-        iws = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(outWSName));
     TS_ASSERT(iws);
 
     if (!iws) {
@@ -1032,14 +935,12 @@ public:
     // We expect the first three dimensions to be QSample and the fourth to be a
     // GeneralFrame
     for (int index = 0; index < 3; ++index) {
-      TSM_ASSERT_EQUALS(
-          "The first three dimension should contain an Unkown frame",
-          iws->getDimension(index)->getMDFrame().name(),
-          Mantid::Geometry::UnknownFrame::UnknownFrameName);
+      TSM_ASSERT_EQUALS("The first three dimension should contain an Unkown frame",
+                        iws->getDimension(index)->getMDFrame().name(),
+                        Mantid::Geometry::UnknownFrame::UnknownFrameName);
     }
 
-    TSM_ASSERT_EQUALS("The fourth dimension should contain an Unkown frame",
-                      iws->getDimension(3)->getMDFrame().name(),
+    TSM_ASSERT_EQUALS("The fourth dimension should contain an Unkown frame", iws->getDimension(3)->getMDFrame().name(),
                       Mantid::Geometry::UnknownFrame::UnknownFrameName);
     // Clean up
     if (iws) {
@@ -1058,17 +959,14 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileBackEnd", false));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MetadataOnly", false));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     IMDHistoWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING(
-        iws = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(outWSName));
     TS_ASSERT(iws);
 
     if (!iws) {
@@ -1100,8 +998,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileBackEnd", fileBackEnd));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Memory", memory));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MetadataOnly", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BoxStructureOnly", false));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -1109,9 +1006,7 @@ public:
 
     // Retrieve the workspace from data service.
     IMDEventWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING(
-        iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName));
     TS_ASSERT(iws);
   }
 };

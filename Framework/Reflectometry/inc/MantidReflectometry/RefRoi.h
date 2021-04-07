@@ -37,9 +37,7 @@ public:
   int version() const override { return (1); }
 
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Workflow\\Reflectometry";
-  }
+  const std::string category() const override { return "Workflow\\Reflectometry"; }
 
 private:
   /// Initialisation code

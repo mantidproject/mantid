@@ -90,9 +90,7 @@ public: // for the time being
   bool isQ3DMode() const;
   bool hasLattice() const;
 
-  std::shared_ptr<Geometry::OrientedLattice> getLattice() const {
-    return getOrientedLattice(m_InWS);
-  }
+  std::shared_ptr<Geometry::OrientedLattice> getLattice() const { return getOrientedLattice(m_InWS); }
   Kernel::Matrix<double> getGoniometerMatr() const;
   bool hasGoniometer() const;
 
@@ -107,16 +105,13 @@ public: // for the time being
 
   /// method builds MD Event ws description from a matrix workspace and the
   /// transformations, requested to be performed on the workspace
-  void buildFromMatrixWS(const API::MatrixWorkspace_sptr &pWS,
-                         const std::string &QMode, const std::string &dEMode,
-                         const std::vector<std::string> &dimPropertyNames =
-                             std::vector<std::string>());
+  void buildFromMatrixWS(const API::MatrixWorkspace_sptr &pWS, const std::string &QMode, const std::string &dEMode,
+                         const std::vector<std::string> &dimPropertyNames = std::vector<std::string>());
 
   /// compare two descriptions and select the complimentary result.
   void checkWSCorresponsMDWorkspace(MDWSDescription &NewMDWorkspaceD);
 
-  void setMinMax(const std::vector<double> &minVal,
-                 const std::vector<double> &maxVal);
+  void setMinMax(const std::vector<double> &minVal, const std::vector<double> &maxVal);
   void setDimName(unsigned int nDim, const std::string &Name);
   // this is rather misleading function, as MD workspace do not have dimension
   // units
@@ -127,21 +122,17 @@ public: // for the time being
   // static helper functions:
   /// helper function checks if min values are less them max values and are
   /// consistent between each other
-  static void checkMinMaxNdimConsistent(const std::vector<double> &minVal,
-                                        const std::vector<double> &maxVal);
+  static void checkMinMaxNdimConsistent(const std::vector<double> &minVal, const std::vector<double> &maxVal);
   /** function extracts the coordinates from additional workspace properties and
    * places them to AddCoord vector for further usage*/
-  static void
-  fillAddProperties(const Mantid::API::MatrixWorkspace_const_sptr &inWS2D,
-                    const std::vector<std::string> &dimPropertyNames,
-                    std::vector<coord_t> &AddCoord);
+  static void fillAddProperties(const Mantid::API::MatrixWorkspace_const_sptr &inWS2D,
+                                const std::vector<std::string> &dimPropertyNames, std::vector<coord_t> &AddCoord);
 
   static std::shared_ptr<Geometry::OrientedLattice>
   getOrientedLattice(const Mantid::API::MatrixWorkspace_const_sptr &inWS2D);
 
   /// Set the special coordinate system if any.
-  void
-  setCoordinateSystem(const Mantid::Kernel::SpecialCoordinateSystem system);
+  void setCoordinateSystem(const Mantid::Kernel::SpecialCoordinateSystem system);
   /// @return the special coordinate system if any.
   Mantid::Kernel::SpecialCoordinateSystem getCoordinateSystem() const;
   /// Set the md frame

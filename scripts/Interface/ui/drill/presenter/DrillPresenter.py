@@ -29,6 +29,11 @@ class DrillPresenter:
     """
     _processError = set()
 
+    """
+    Set of custom options. Used to keep an history of the previous values.
+    """
+    _customOptions = set()
+
     def __init__(self, view):
         """
         Initialize the presenter by giving a view and a model. This method
@@ -42,6 +47,7 @@ class DrillPresenter:
         self.view = view
         self._invalidCells = set()
         self._processError = set()
+        self._customOptions = set()
 
         # view signals connection
         self.view.instrumentChanged.connect(self.instrumentChanged)
@@ -98,6 +104,9 @@ class DrillPresenter:
             params = {}
             if not contents:
                 self.onParamOk(row, column)
+                for name in self._customOptions:
+                    self.model.changeParameter(row, name, "")
+                self._customOptions = set()
                 return
             for option in contents.split(';'):
                 if option and '=' not in option:
@@ -105,8 +114,8 @@ class DrillPresenter:
                                       "separated key=value pairs.")
                     return
                 try:
-                    name = option.split("=")[0]
-                    value = option.split("=")[1]
+                    name = option.split("=")[0].strip()
+                    value = option.split("=")[1].strip()
                 except:
                     self.onParamError(row, column, "Please provide semicolon "
                                       "separated key=value pairs.")
@@ -121,8 +130,13 @@ class DrillPresenter:
                 if value in ['false', 'False', 'FALSE']:
                     value = False
                 params[name] = value
+                currentOptions = set()
             for name,value in params.items():
+                currentOptions.add(name)
                 self.model.changeParameter(row, name, value)
+            for name in self._customOptions.difference(currentOptions):
+                self.model.changeParameter(row, name, "")
+            self._customOptions = currentOptions
         else:
             self.model.changeParameter(row, column, contents)
 
@@ -176,6 +190,10 @@ class DrillPresenter:
                     return value
 
             if re.match("^-{,1}\d+$", value):
+                if int(value) == 0:
+                    return value
+                if int(value) + i == 0:
+                    return value
                 return str(int(value) + i)
             suffix = re.search("\d+$", value)
             if suffix:
@@ -519,6 +537,8 @@ class DrillPresenter:
 
     def _syncViewTable(self):
         columns, tooltips = self.model.getColumnHeaderData()
+        if tooltips and tooltips[-1] == "CustomOptions":
+            tooltips[-1] = "Provide semicolon (;) separated key=value pairs"
         samples = self.model.getSamples()
         groups = self.model.getSamplesGroups()
         masters = self.model.getMasterSamples()
@@ -526,11 +546,11 @@ class DrillPresenter:
         self.view.blockSignals(True)
         self.view.set_table(columns, tooltips)
         if not samples:
-            self.view.add_row_after()
+            self.view.add_row_after(1)
             self.model.addSample(-1, DrillSample())
         else:
             for i in range(len(samples)):
-                self.view.add_row_after()
+                self.view.add_row_after(1)
                 params = samples[i].getParameters()
                 for k,v in params.items():
                     if k not in self.view.columns:

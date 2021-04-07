@@ -28,16 +28,13 @@ namespace Geometry {
  @return true if addition does not cause an overwrite successful.
  */
 template <typename CheckDimensionPolicy>
-bool MDGeometryBuilderXML<CheckDimensionPolicy>::addOrdinaryDimension(
-    IMDDimension_const_sptr dimensionToAdd) const {
+bool MDGeometryBuilderXML<CheckDimensionPolicy>::addOrdinaryDimension(IMDDimension_const_sptr dimensionToAdd) const {
   bool bAdded = false; // Addition fails by default.
   if (dimensionToAdd) {
     const std::string dimensionId = dimensionToAdd->getDimensionId();
     auto location =
         std::find_if(m_vecDimensions.cbegin(), m_vecDimensions.cend(),
-                     [&dimensionId](const IMDDimension_const_sptr &b) {
-                       return dimensionId == b->getDimensionId();
-                     });
+                     [&dimensionId](const IMDDimension_const_sptr &b) { return dimensionId == b->getDimensionId(); });
     if (location == m_vecDimensions.cend()) {
       m_vecDimensions.emplace_back(std::move(dimensionToAdd));
       bAdded = true;
@@ -52,8 +49,7 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addOrdinaryDimension(
  @param manyDims :: Collection of dimensions to add as ordinary dimensions.
  */
 template <typename CheckDimensionPolicy>
-void MDGeometryBuilderXML<CheckDimensionPolicy>::addManyOrdinaryDimensions(
-    const VecIMDDimension_sptr &manyDims) const {
+void MDGeometryBuilderXML<CheckDimensionPolicy>::addManyOrdinaryDimensions(const VecIMDDimension_sptr &manyDims) const {
   for (auto &manyDim : manyDims) {
     addOrdinaryDimension(manyDim);
   }
@@ -73,8 +69,7 @@ MDGeometryBuilderXML<CheckDimensionPolicy>::MDGeometryBuilderXML(
 
 template <typename CheckDimensionPolicy>
 MDGeometryBuilderXML<CheckDimensionPolicy> &
-MDGeometryBuilderXML<CheckDimensionPolicy>::
-operator=(const MDGeometryBuilderXML<CheckDimensionPolicy> &other) {
+MDGeometryBuilderXML<CheckDimensionPolicy>::operator=(const MDGeometryBuilderXML<CheckDimensionPolicy> &other) {
   if (this != &other) {
     m_vecDimensions = other.m_vecDimensions;
     m_spXDimension = other.m_spXDimension;
@@ -93,8 +88,7 @@ operator=(const MDGeometryBuilderXML<CheckDimensionPolicy> &other) {
  @return nothing. Throws on failure.
  */
 template <typename CheckDimensionPolicy>
-void MDGeometryBuilderXML<CheckDimensionPolicy>::applyPolicyChecking(
-    const IMDDimension &dimensionToAdd) const {
+void MDGeometryBuilderXML<CheckDimensionPolicy>::applyPolicyChecking(const IMDDimension &dimensionToAdd) const {
   CheckDimensionPolicy policy;
   policy(dimensionToAdd);
 }
@@ -105,8 +99,7 @@ void MDGeometryBuilderXML<CheckDimensionPolicy>::applyPolicyChecking(
  @return true if addition was successful.
  */
 template <typename CheckDimensionPolicy>
-bool MDGeometryBuilderXML<CheckDimensionPolicy>::addXDimension(
-    const IMDDimension_const_sptr &dimension) const {
+bool MDGeometryBuilderXML<CheckDimensionPolicy>::addXDimension(const IMDDimension_const_sptr &dimension) const {
 
   bool bAdded = false;
   if (dimension) {
@@ -125,8 +118,7 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addXDimension(
  @return true if addition was successful.
  */
 template <typename CheckDimensionPolicy>
-bool MDGeometryBuilderXML<CheckDimensionPolicy>::addYDimension(
-    const IMDDimension_const_sptr &dimension) const {
+bool MDGeometryBuilderXML<CheckDimensionPolicy>::addYDimension(const IMDDimension_const_sptr &dimension) const {
 
   bool bAdded = false;
   if (dimension) {
@@ -145,8 +137,7 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addYDimension(
  @return true if addition was successful.
  */
 template <typename CheckDimensionPolicy>
-bool MDGeometryBuilderXML<CheckDimensionPolicy>::addZDimension(
-    const IMDDimension_const_sptr &dimension) const {
+bool MDGeometryBuilderXML<CheckDimensionPolicy>::addZDimension(const IMDDimension_const_sptr &dimension) const {
   bool bAdded = false;
   if (dimension) {
     applyPolicyChecking(*dimension);
@@ -164,8 +155,7 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addZDimension(
  @return true if addition was successful.
  */
 template <typename CheckDimensionPolicy>
-bool MDGeometryBuilderXML<CheckDimensionPolicy>::addTDimension(
-    const IMDDimension_const_sptr &dimension) const {
+bool MDGeometryBuilderXML<CheckDimensionPolicy>::addTDimension(const IMDDimension_const_sptr &dimension) const {
 
   bool bAdded = false;
   if (dimension) {
@@ -182,8 +172,7 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addTDimension(
 Builder creational method. Processes added dimensions. creates xml string.
 @return xmlstring.
 */
-template <typename CheckDimensionPolicy>
-const std::string &MDGeometryBuilderXML<CheckDimensionPolicy>::create() const {
+template <typename CheckDimensionPolicy> const std::string &MDGeometryBuilderXML<CheckDimensionPolicy>::create() const {
   using namespace Poco::XML;
   if (m_changed) {
     // Create the root element for this fragment.
@@ -204,8 +193,7 @@ const std::string &MDGeometryBuilderXML<CheckDimensionPolicy>::create() const {
 
     // x-dimension mapping.
     AutoPtr<Element> xDimensionElement = pDoc->createElement("XDimension");
-    AutoPtr<Element> xDimensionIdElement =
-        pDoc->createElement("RefDimensionId");
+    AutoPtr<Element> xDimensionIdElement = pDoc->createElement("RefDimensionId");
     if (hasXDimension()) {
       std::string xDimensionId = this->m_spXDimension->getDimensionId();
       AutoPtr<Text> idXText = pDoc->createTextNode(xDimensionId);
@@ -216,8 +204,7 @@ const std::string &MDGeometryBuilderXML<CheckDimensionPolicy>::create() const {
 
     // y-dimension mapping.
     AutoPtr<Element> yDimensionElement = pDoc->createElement("YDimension");
-    AutoPtr<Element> yDimensionIdElement =
-        pDoc->createElement("RefDimensionId");
+    AutoPtr<Element> yDimensionIdElement = pDoc->createElement("RefDimensionId");
     if (hasYDimension()) {
       std::string yDimensionId = this->m_spYDimension->getDimensionId();
       AutoPtr<Text> idYText = pDoc->createTextNode(yDimensionId);
@@ -228,8 +215,7 @@ const std::string &MDGeometryBuilderXML<CheckDimensionPolicy>::create() const {
 
     // z-dimension mapping.
     AutoPtr<Element> zDimensionElement = pDoc->createElement("ZDimension");
-    AutoPtr<Element> zDimensionIdElement =
-        pDoc->createElement("RefDimensionId");
+    AutoPtr<Element> zDimensionIdElement = pDoc->createElement("RefDimensionId");
     if (hasZDimension()) {
       std::string zDimensionId = this->m_spZDimension->getDimensionId();
       AutoPtr<Text> idZText = pDoc->createTextNode(zDimensionId);
@@ -240,8 +226,7 @@ const std::string &MDGeometryBuilderXML<CheckDimensionPolicy>::create() const {
 
     // t-dimension mapping.
     AutoPtr<Element> tDimensionElement = pDoc->createElement("TDimension");
-    AutoPtr<Element> tDimensionIdElement =
-        pDoc->createElement("RefDimensionId");
+    AutoPtr<Element> tDimensionIdElement = pDoc->createElement("RefDimensionId");
     if (hasTDimension()) {
       std::string tDimensionId = this->m_spTDimension->getDimensionId();
       AutoPtr<Text> idTText = pDoc->createTextNode(tDimensionId);
@@ -254,36 +239,30 @@ const std::string &MDGeometryBuilderXML<CheckDimensionPolicy>::create() const {
     DOMWriter writer;
     writer.writeNode(xmlstream, pDoc);
 
-    m_lastResult = boost::str(boost::format(xmlstream.str().c_str()) %
-                              dimensionXMLString.c_str());
+    m_lastResult = boost::str(boost::format(xmlstream.str().c_str()) % dimensionXMLString.c_str());
     m_changed = false;
   }
   return m_lastResult;
 }
 
-template <typename CheckDimensionPolicy>
-bool MDGeometryBuilderXML<CheckDimensionPolicy>::hasXDimension() const {
+template <typename CheckDimensionPolicy> bool MDGeometryBuilderXML<CheckDimensionPolicy>::hasXDimension() const {
   return nullptr != this->m_spXDimension.get();
 }
 
-template <typename CheckDimensionPolicy>
-bool MDGeometryBuilderXML<CheckDimensionPolicy>::hasYDimension() const {
+template <typename CheckDimensionPolicy> bool MDGeometryBuilderXML<CheckDimensionPolicy>::hasYDimension() const {
   return nullptr != this->m_spYDimension.get();
 }
 
-template <typename CheckDimensionPolicy>
-bool MDGeometryBuilderXML<CheckDimensionPolicy>::hasZDimension() const {
+template <typename CheckDimensionPolicy> bool MDGeometryBuilderXML<CheckDimensionPolicy>::hasZDimension() const {
   return nullptr != this->m_spZDimension.get();
 }
 
-template <typename CheckDimensionPolicy>
-bool MDGeometryBuilderXML<CheckDimensionPolicy>::hasTDimension() const {
+template <typename CheckDimensionPolicy> bool MDGeometryBuilderXML<CheckDimensionPolicy>::hasTDimension() const {
   return nullptr != this->m_spTDimension.get();
 }
 
 template <typename CheckDimensionPolicy>
-bool MDGeometryBuilderXML<CheckDimensionPolicy>::hasIntegratedTDimension()
-    const {
+bool MDGeometryBuilderXML<CheckDimensionPolicy>::hasIntegratedTDimension() const {
   return hasTDimension() && this->m_spTDimension->getIsIntegrated();
 }
 
@@ -291,14 +270,12 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::hasIntegratedTDimension()
  Constructor
  */
 template <typename CheckDimensionPolicy>
-MDGeometryBuilderXML<CheckDimensionPolicy>::MDGeometryBuilderXML()
-    : m_changed(true) {}
+MDGeometryBuilderXML<CheckDimensionPolicy>::MDGeometryBuilderXML() : m_changed(true) {}
 
 /**
  Destructor
  */
-template <typename CheckDimensionPolicy>
-MDGeometryBuilderXML<CheckDimensionPolicy>::~MDGeometryBuilderXML() {}
+template <typename CheckDimensionPolicy> MDGeometryBuilderXML<CheckDimensionPolicy>::~MDGeometryBuilderXML() {}
 
 // Create a builder that blocks the creation when a integrated dimension is used
 // in x, y, z, t mappings.

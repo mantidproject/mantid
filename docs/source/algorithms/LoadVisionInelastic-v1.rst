@@ -23,7 +23,7 @@ Usage
 
    print("Number of spectra: {}".format(w1.getNumberHistograms()))
 
-.. testoutput:: 
+.. testoutput::
 
    Number of spectra: 14336
 

@@ -16,15 +16,11 @@ namespace Mantid {
 
 /// Solve a Quadratic equation
 template <typename InputIter>
-MANTID_GEOMETRY_DLL int
-solveQuadratic(InputIter,
-               std::pair<std::complex<double>, std::complex<double>> &);
+MANTID_GEOMETRY_DLL int solveQuadratic(InputIter, std::pair<std::complex<double>, std::complex<double>> &);
 
 /// Solve a Cubic equation
 template <typename InputIter>
-MANTID_GEOMETRY_DLL int solveCubic(InputIter, std::complex<double> &,
-                                   std::complex<double> &,
-                                   std::complex<double> &);
+MANTID_GEOMETRY_DLL int solveCubic(InputIter, std::complex<double> &, std::complex<double> &, std::complex<double> &);
 
 namespace mathSupport {}
 } // namespace Mantid

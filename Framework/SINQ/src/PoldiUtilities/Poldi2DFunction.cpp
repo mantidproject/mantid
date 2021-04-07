@@ -11,8 +11,7 @@ namespace Mantid {
 namespace Poldi {
 using namespace API;
 
-Poldi2DFunction::Poldi2DFunction()
-    : IFunction1DSpectrum(), CompositeFunction(), m_iteration(0) {}
+Poldi2DFunction::Poldi2DFunction() : IFunction1DSpectrum(), CompositeFunction(), m_iteration(0) {}
 
 /**
  * Calculates function values for domain. In contrast to CompositeFunction, the
@@ -26,8 +25,7 @@ Poldi2DFunction::Poldi2DFunction()
  * @param domain :: Function domain which is passed on to the member functions.
  * @param values :: Function values.
  */
-void Poldi2DFunction::function(const FunctionDomain &domain,
-                               FunctionValues &values) const {
+void Poldi2DFunction::function(const FunctionDomain &domain, FunctionValues &values) const {
   CompositeFunction::function(domain, values);
 
   if (m_iteration > 0) {
@@ -44,8 +42,7 @@ void Poldi2DFunction::function(const FunctionDomain &domain,
  * @param domain :: Function domain which is passed on to the member functions.
  * @param jacobian :: Jacobian.
  */
-void Poldi2DFunction::functionDeriv(const FunctionDomain &domain,
-                                    Jacobian &jacobian) {
+void Poldi2DFunction::functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) {
   CompositeFunction::functionDeriv(domain, jacobian);
 }
 
@@ -57,8 +54,7 @@ void Poldi2DFunction::functionDeriv(const FunctionDomain &domain,
  * @param domain :: Unused domain.
  * @param values :: Unused function values.
  */
-void Poldi2DFunction::function1DSpectrum(const FunctionDomain1DSpectrum &domain,
-                                         FunctionValues &values) const {
+void Poldi2DFunction::function1DSpectrum(const FunctionDomain1DSpectrum &domain, FunctionValues &values) const {
   UNUSED_ARG(domain);
   UNUSED_ARG(values);
 }
@@ -74,13 +70,11 @@ void Poldi2DFunction::function1DSpectrum(const FunctionDomain1DSpectrum &domain,
  * @param domain :: d-based 1D-domain.
  * @param values :: Function values.
  */
-void Poldi2DFunction::poldiFunction1D(const std::vector<int> &indices,
-                                      const FunctionDomain1D &domain,
+void Poldi2DFunction::poldiFunction1D(const std::vector<int> &indices, const FunctionDomain1D &domain,
                                       FunctionValues &values) const {
   for (size_t i = 0; i < nFunctions(); ++i) {
     IFunction_sptr currentFunction = getFunction(i);
-    std::shared_ptr<IPoldiFunction1D> spectrumFunction =
-        std::dynamic_pointer_cast<IPoldiFunction1D>(currentFunction);
+    std::shared_ptr<IPoldiFunction1D> spectrumFunction = std::dynamic_pointer_cast<IPoldiFunction1D>(currentFunction);
 
     if (spectrumFunction) {
       spectrumFunction->poldiFunction1D(indices, domain, values);

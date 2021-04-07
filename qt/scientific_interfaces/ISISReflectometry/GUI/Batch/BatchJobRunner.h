@@ -36,21 +36,15 @@ public:
 
   void setReprocessFailedItems(bool reprocessFailed) override;
 
-  Item const &
-  algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
-  Item const &algorithmComplete(
-      MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
-  Item const &algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
-                             std::string const &message) override;
+  Item const &algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
+  Item const &algorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
+  Item const &algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) override;
 
-  std::vector<std::string> algorithmOutputWorkspacesToSave(
-      MantidQt::API::IConfiguredAlgorithm_sptr algorithm) const override;
+  std::vector<std::string>
+  algorithmOutputWorkspacesToSave(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) const override;
 
-  boost::optional<Item const &>
-  notifyWorkspaceDeleted(std::string const &wsName) override;
-  boost::optional<Item const &>
-  notifyWorkspaceRenamed(std::string const &oldName,
-                         std::string const &newName) override;
+  boost::optional<Item const &> notifyWorkspaceDeleted(std::string const &wsName) override;
+  boost::optional<Item const &> notifyWorkspaceRenamed(std::string const &oldName, std::string const &newName) override;
   void notifyAllWorkspacesDeleted() override;
 
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> getAlgorithms() override;
@@ -76,13 +70,10 @@ private:
   size_t getNumberOfInitialisedRowsInGroup(const int groupIndex) const;
   template <typename T> bool isSelected(T const &item);
   bool hasSelectedRowsRequiringProcessing(Group const &group);
-  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
-  algorithmForPostprocessingGroup(Group &group);
-  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
-  algorithmsForProcessingRowsInGroup(Group &group, bool processAll);
-  void addAlgorithmForProcessingRow(
-      Row &row,
-      std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> &algorithms);
+  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithmForPostprocessingGroup(Group &group);
+  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithmsForProcessingRowsInGroup(Group &group,
+                                                                                          bool processAll);
+  void addAlgorithmForProcessingRow(Row &row, std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> &algorithms);
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

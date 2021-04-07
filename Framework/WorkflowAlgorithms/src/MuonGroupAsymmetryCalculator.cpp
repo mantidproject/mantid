@@ -32,13 +32,12 @@ namespace WorkflowAlgorithms {
  * @param groupIndex :: [input] Workspace index of the group to analyse
  * @param wsName :: the name of the workspace (for normalization table)
  */
-MuonGroupAsymmetryCalculator::MuonGroupAsymmetryCalculator(
-    const Mantid::API::WorkspaceGroup_sptr &inputWS,
-    const std::vector<int> &summedPeriods,
-    const std::vector<int> &subtractedPeriods, const int groupIndex,
-    const double start, const double end, const std::string &wsName)
-    : MuonGroupCalculator(inputWS, summedPeriods, subtractedPeriods,
-                          groupIndex) {
+MuonGroupAsymmetryCalculator::MuonGroupAsymmetryCalculator(const Mantid::API::WorkspaceGroup_sptr &inputWS,
+                                                           const std::vector<int> &summedPeriods,
+                                                           const std::vector<int> &subtractedPeriods,
+                                                           const int groupIndex, const double start, const double end,
+                                                           const std::string &wsName)
+    : MuonGroupCalculator(inputWS, summedPeriods, subtractedPeriods, groupIndex) {
   MuonGroupCalculator::setStartEnd(start, end);
   MuonGroupCalculator::setWSName(wsName);
 }
@@ -60,13 +59,11 @@ MatrixWorkspace_sptr MuonGroupAsymmetryCalculator::calculate() const {
     auto subtractedWS = sumPeriods(m_subtractedPeriods);
 
     // Remove decay (summed periods ws)
-    MatrixWorkspace_sptr asymSummedPeriods =
-        estimateAsymmetry(summedWS, m_groupIndex);
+    MatrixWorkspace_sptr asymSummedPeriods = estimateAsymmetry(summedWS, m_groupIndex);
 
     if (!m_subtractedPeriods.empty()) {
       // Remove decay (subtracted periods ws)
-      MatrixWorkspace_sptr asymSubtractedPeriods =
-          estimateAsymmetry(subtractedWS, m_groupIndex);
+      MatrixWorkspace_sptr asymSubtractedPeriods = estimateAsymmetry(subtractedWS, m_groupIndex);
 
       // Now subtract
       tempWS = subtractWorkspaces(asymSummedPeriods, asymSubtractedPeriods);
@@ -93,14 +90,12 @@ MatrixWorkspace_sptr MuonGroupAsymmetryCalculator::calculate() const {
  * for "unset"
  * @returns Result of the removal
  */
-MatrixWorkspace_sptr
-MuonGroupAsymmetryCalculator::removeExpDecay(const Workspace_sptr &inputWS,
-                                             const int index) const {
+MatrixWorkspace_sptr MuonGroupAsymmetryCalculator::removeExpDecay(const Workspace_sptr &inputWS,
+                                                                  const int index) const {
   MatrixWorkspace_sptr outWS;
   // Remove decay
   if (inputWS) {
-    IAlgorithm_sptr asym =
-        AlgorithmManager::Instance().create("RemoveExpDecay");
+    IAlgorithm_sptr asym = AlgorithmManager::Instance().create("RemoveExpDecay");
     asym->setChild(true);
     asym->setProperty("InputWorkspace", inputWS);
     if (index > 0) {
@@ -123,16 +118,13 @@ MuonGroupAsymmetryCalculator::removeExpDecay(const Workspace_sptr &inputWS,
  * for "unset"
  * @returns Result of the removal
  */
-MatrixWorkspace_sptr
-MuonGroupAsymmetryCalculator::estimateAsymmetry(const Workspace_sptr &inputWS,
-                                                const int index) const {
+MatrixWorkspace_sptr MuonGroupAsymmetryCalculator::estimateAsymmetry(const Workspace_sptr &inputWS,
+                                                                     const int index) const {
   const std::string normTableName = "MuonAnalysisTFNormalizations";
   API::AnalysisDataServiceImpl &ads = API::AnalysisDataService::Instance();
   if (!ads.doesExist(normTableName)) {
-    Mantid::API::ITableWorkspace_sptr table =
-        Mantid::API::WorkspaceFactory::Instance().createTable();
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(normTableName,
-                                                              table);
+    Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable();
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(normTableName, table);
     table->addColumn("double", "norm");
     table->addColumn("str", "name");
     table->addColumn("str", "method");
@@ -141,8 +133,7 @@ MuonGroupAsymmetryCalculator::estimateAsymmetry(const Workspace_sptr &inputWS,
   MatrixWorkspace_sptr outWS;
   // calculate asymmetry
   if (inputWS) {
-    IAlgorithm_sptr asym =
-        AlgorithmManager::Instance().create("EstimateMuonAsymmetryFromCounts");
+    IAlgorithm_sptr asym = AlgorithmManager::Instance().create("EstimateMuonAsymmetryFromCounts");
     asym->setChild(true);
 
     asym->setProperty("InputWorkspace", inputWS);
@@ -160,8 +151,7 @@ MuonGroupAsymmetryCalculator::estimateAsymmetry(const Workspace_sptr &inputWS,
     asym->setProperty("NormalizationTable", normTableName);
     asym->execute();
 
-    API::MatrixWorkspace_sptr unnorm =
-        asym->getProperty("OutputUnNormWorkspace");
+    API::MatrixWorkspace_sptr unnorm = asym->getProperty("OutputUnNormWorkspace");
     MatrixWorkspace_sptr singleWS = extractSpectrum(unnorm, index);
     ads.addOrReplace("tmp_unNorm", singleWS);
 
@@ -179,8 +169,7 @@ double getStoredNorm() {
     return 0.0;
   } else {
     API::ITableWorkspace_sptr table =
-        std::dynamic_pointer_cast<API::ITableWorkspace>(
-            API::AnalysisDataService::Instance().retrieve("__keepNorm__"));
+        std::dynamic_pointer_cast<API::ITableWorkspace>(API::AnalysisDataService::Instance().retrieve("__keepNorm__"));
     auto colNorm = table->getColumn("norm");
     return (*colNorm)[0];
   }

@@ -18,7 +18,7 @@ You may consider to run :ref:`algm-ConvertToHistogram` on workspaces prior to pa
 
 The algorithm expects pairs of :literal:`StartOverlaps` and
 :literal:`EndOverlaps` values. The order in which these are provided determines
-the pairing. There should be N entries in each of these lists, where N = 1 - 
+the pairing. There should be N entries in each of these lists, where N = 1 -
 (No. of workspaces to stitch). StartOverlaps and EndOverlaps are in the same
 units as the X-axis for the workspace and are optional. For each pair of these
 values, the :literal:`StartOverlaps` value cannot exceed its corresponding

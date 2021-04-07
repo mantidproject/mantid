@@ -51,8 +51,7 @@ private:
   }
 
   IMDWorkspace::LinePlot getLinePlotData(const bool mask) {
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
 
@@ -60,8 +59,7 @@ private:
       // Mask part of the workspace
       std::vector<coord_t> min_mask{0, 0};
       std::vector<coord_t> max_mask{5, 5};
-      auto function =
-          std::make_unique<MDBoxImplicitFunction>(min_mask, max_mask);
+      auto function = std::make_unique<MDBoxImplicitFunction>(min_mask, max_mask);
       ws->setMDMasking(std::move(function));
     }
 
@@ -78,9 +76,7 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MDHistoWorkspaceTest *createSuite() {
-    return new MDHistoWorkspaceTest();
-  }
+  static MDHistoWorkspaceTest *createSuite() { return new MDHistoWorkspaceTest(); }
   static void destroySuite(MDHistoWorkspaceTest *suite) { delete suite; }
 
   MDHistoWorkspace_sptr two;
@@ -93,8 +89,7 @@ public:
   }
 
   /** Check that a workspace has the right signal/error*/
-  void checkWorkspace(const MDHistoWorkspace_sptr &ws, double expectedSignal,
-                      double expectedErrorSquared,
+  void checkWorkspace(const MDHistoWorkspace_sptr &ws, double expectedSignal, double expectedErrorSquared,
                       double expectedNumEvents = 1.0) {
     for (size_t i = 0; i < ws->getNPoints(); i++) {
       TS_ASSERT_DELTA(ws->getSignalAt(i), expectedSignal, 1e-5);
@@ -106,14 +101,10 @@ public:
   //--------------------------------------------------------------------------------------
   void test_constructor() {
     Mantid::Geometry::GeneralFrame frame("m", "m");
-    MDHistoDimension_sptr dimX(
-        new MDHistoDimension("X", "x", frame, -10, 10, 5));
-    MDHistoDimension_sptr dimY(
-        new MDHistoDimension("Y", "y", frame, -10, 10, 5));
-    MDHistoDimension_sptr dimZ(
-        new MDHistoDimension("Z", "z", frame, -10, 10, 5));
-    MDHistoDimension_sptr dimT(
-        new MDHistoDimension("T", "t", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimT(new MDHistoDimension("T", "t", frame, -10, 10, 5));
 
     MDHistoWorkspace ws(dimX, dimY, dimZ, dimT);
 
@@ -159,38 +150,27 @@ public:
     TS_ASSERT_DELTA(ws.getSignalAt(1), 1.0, 1e-4);
     TS_ASSERT_DELTA(ws.getSignalAt(1, 2), 1.0 + 2 * 5.0, 1e-4);
     TS_ASSERT_DELTA(ws.getSignalAt(1, 2, 3), 1.0 + 2 * 5.0 + 3 * 25.0, 1e-4);
-    TS_ASSERT_DELTA(ws.getSignalAt(1, 2, 3, 4),
-                    1.0 + 2 * 5.0 + 3 * 25.0 + 4 * 125.0, 1e-4);
+    TS_ASSERT_DELTA(ws.getSignalAt(1, 2, 3, 4), 1.0 + 2 * 5.0 + 3 * 25.0 + 4 * 125.0, 1e-4);
     TS_ASSERT_DELTA(ws.getErrorAt(1), sqrt(1.0), 1e-4);
     TS_ASSERT_DELTA(ws.getErrorAt(1, 2), sqrt(1.0 + 2 * 5.0), 1e-4);
-    TS_ASSERT_DELTA(ws.getErrorAt(1, 2, 3), sqrt(1.0 + 2 * 5.0 + 3 * 25.0),
-                    1e-4);
-    TS_ASSERT_DELTA(ws.getErrorAt(1, 2, 3, 4),
-                    sqrt(1.0 + 2 * 5.0 + 3 * 25.0 + 4 * 125.0), 1e-4);
+    TS_ASSERT_DELTA(ws.getErrorAt(1, 2, 3), sqrt(1.0 + 2 * 5.0 + 3 * 25.0), 1e-4);
+    TS_ASSERT_DELTA(ws.getErrorAt(1, 2, 3, 4), sqrt(1.0 + 2 * 5.0 + 3 * 25.0 + 4 * 125.0), 1e-4);
     TS_ASSERT_DELTA(ws.getSignalNormalizedAt(1) * 256.0, 1.0, 1e-4);
-    TS_ASSERT_DELTA(ws.getSignalNormalizedAt(1, 2) * 256.0, 1.0 + 2 * 5.0,
-                    1e-4);
-    TS_ASSERT_DELTA(ws.getSignalNormalizedAt(1, 2, 3) * 256.0,
-                    1.0 + 2 * 5.0 + 3 * 25.0, 1e-4);
-    TS_ASSERT_DELTA(ws.getSignalNormalizedAt(1, 2, 3, 4) * 256.0,
-                    1.0 + 2 * 5.0 + 3 * 25.0 + 4 * 125.0, 1e-4);
+    TS_ASSERT_DELTA(ws.getSignalNormalizedAt(1, 2) * 256.0, 1.0 + 2 * 5.0, 1e-4);
+    TS_ASSERT_DELTA(ws.getSignalNormalizedAt(1, 2, 3) * 256.0, 1.0 + 2 * 5.0 + 3 * 25.0, 1e-4);
+    TS_ASSERT_DELTA(ws.getSignalNormalizedAt(1, 2, 3, 4) * 256.0, 1.0 + 2 * 5.0 + 3 * 25.0 + 4 * 125.0, 1e-4);
     TS_ASSERT_DELTA(ws.getErrorNormalizedAt(1) * 256.0, sqrt(1.0), 1e-4);
-    TS_ASSERT_DELTA(ws.getErrorNormalizedAt(1, 2) * 256.0, sqrt(1.0 + 2 * 5.0),
-                    1e-4);
-    TS_ASSERT_DELTA(ws.getErrorNormalizedAt(1, 2, 3) * 256.0,
-                    sqrt(1.0 + 2 * 5.0 + 3 * 25.0), 1e-4);
-    TS_ASSERT_DELTA(ws.getErrorNormalizedAt(1, 2, 3, 4) * 256.0,
-                    sqrt(1.0 + 2 * 5.0 + 3 * 25.0 + 4 * 125.0), 1e-4);
+    TS_ASSERT_DELTA(ws.getErrorNormalizedAt(1, 2) * 256.0, sqrt(1.0 + 2 * 5.0), 1e-4);
+    TS_ASSERT_DELTA(ws.getErrorNormalizedAt(1, 2, 3) * 256.0, sqrt(1.0 + 2 * 5.0 + 3 * 25.0), 1e-4);
+    TS_ASSERT_DELTA(ws.getErrorNormalizedAt(1, 2, 3, 4) * 256.0, sqrt(1.0 + 2 * 5.0 + 3 * 25.0 + 4 * 125.0), 1e-4);
   }
 
   //---------------------------------------------------------------------------------------------------
   /** Create a dense histogram with only 2 dimensions */
   void test_constructor_fewerDimensions() {
     Mantid::Geometry::GeneralFrame frame("m", "m");
-    MDHistoDimension_sptr dimX(
-        new MDHistoDimension("X", "x", frame, -10, 10, 5));
-    MDHistoDimension_sptr dimY(
-        new MDHistoDimension("Y", "y", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", frame, -10, 10, 5));
 
     MDHistoWorkspace ws(dimX, dimY);
 
@@ -220,8 +200,7 @@ public:
     std::vector<MDHistoDimension_sptr> dimensions;
     Mantid::Geometry::GeneralFrame frame("m", "m");
     for (size_t i = 0; i < 7; i++) {
-      dimensions.emplace_back(MDHistoDimension_sptr(
-          new MDHistoDimension("Dim", "Dim", frame, -10, 10, 3)));
+      dimensions.emplace_back(MDHistoDimension_sptr(new MDHistoDimension("Dim", "Dim", frame, -10, 10, 3)));
     }
 
     MDHistoWorkspace ws(dimensions);
@@ -244,14 +223,12 @@ public:
 
   class TestableMDHistoWorkspace : public MDHistoWorkspace {
   public:
-    TestableMDHistoWorkspace(const MDHistoWorkspace &other)
-        : MDHistoWorkspace(other) {}
+    TestableMDHistoWorkspace(const MDHistoWorkspace &other) : MDHistoWorkspace(other) {}
   };
 
   //--------------------------------------------------------------------------------------
   void test_copy_constructor() {
-    MDHistoWorkspace_sptr a =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.234);
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.234);
     a->addExperimentInfo(ExperimentInfo_sptr(new ExperimentInfo()));
     for (size_t i = 0; i < a->getNPoints(); i++)
       a->setNumEventsAt(i, 123.);
@@ -265,8 +242,7 @@ public:
 
   //--------------------------------------------------------------------------------------
   void test_clone_clear_workspace_name() {
-    auto ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.234);
+    auto ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.234);
     const std::string name{"MatrixWorkspace_testCloneClearsWorkspaceName"};
     AnalysisDataService::Instance().add(name, ws);
     TS_ASSERT_EQUALS(ws->getName(), name)
@@ -277,8 +253,7 @@ public:
 
   //--------------------------------------------------------------------------------------
   void test_array_operator() {
-    MDHistoWorkspace_sptr a =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.234);
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.234);
     TS_ASSERT_DELTA((*a)[0], 1.23, 1e-5);
     TS_ASSERT_THROWS_ANYTHING((*a)[25]);
     TS_ASSERT_THROWS_ANYTHING((*a)[-1]);
@@ -287,8 +262,7 @@ public:
   //---------------------------------------------------------------------------------------------------
   void test_getVertexesArray_1D() {
     Mantid::Geometry::GeneralFrame frame("m", "m");
-    MDHistoDimension_sptr dimX(
-        new MDHistoDimension("X", "x", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 5));
     MDHistoWorkspace ws(dimX);
     size_t numVertices;
     auto v1 = ws.getVertexesArray(0, numVertices);
@@ -304,10 +278,8 @@ public:
   //---------------------------------------------------------------------------------------------------
   void test_getVertexesArray_2D() {
     Mantid::Geometry::GeneralFrame frame("m", "m");
-    MDHistoDimension_sptr dimX(
-        new MDHistoDimension("X", "x", frame, -10, 10, 5));
-    MDHistoDimension_sptr dimY(
-        new MDHistoDimension("Y", "y", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", frame, -10, 10, 5));
     MDHistoWorkspace ws(dimX, dimY);
     size_t numVertices, i;
 
@@ -332,12 +304,9 @@ public:
   //---------------------------------------------------------------------------------------------------
   void test_getVertexesArray_3D() {
     Mantid::Geometry::GeneralFrame frame("m", "m");
-    MDHistoDimension_sptr dimX(
-        new MDHistoDimension("X", "x", frame, -10, 10, 5));
-    MDHistoDimension_sptr dimY(
-        new MDHistoDimension("Y", "y", frame, -9, 10, 5));
-    MDHistoDimension_sptr dimZ(
-        new MDHistoDimension("Z", "z", frame, -8, 10, 5));
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", frame, -9, 10, 5));
+    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", frame, -8, 10, 5));
     MDHistoWorkspace ws(dimX, dimY, dimZ);
     size_t numVertices, i;
 
@@ -352,12 +321,9 @@ public:
   //---------------------------------------------------------------------------------------------------
   void test_getCenter_3D() {
     Mantid::Geometry::GeneralFrame frame("m", "m");
-    MDHistoDimension_sptr dimX(
-        new MDHistoDimension("X", "x", frame, -10, 10, 20));
-    MDHistoDimension_sptr dimY(
-        new MDHistoDimension("Y", "y", frame, -9, 10, 19));
-    MDHistoDimension_sptr dimZ(
-        new MDHistoDimension("Z", "z", frame, -8, 10, 18));
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 20));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", frame, -9, 10, 19));
+    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", frame, -8, 10, 18));
     MDHistoWorkspace ws(dimX, dimY, dimZ);
     VMD v = ws.getCenter(0);
     TS_ASSERT_DELTA(v[0], -9.5, 1e-5);
@@ -369,14 +335,10 @@ public:
   /** Test for a possible seg-fault if nx != ny etc. */
   void test_uneven_numbers_of_bins() {
     Mantid::Geometry::GeneralFrame frame("m", "m");
-    MDHistoDimension_sptr dimX(
-        new MDHistoDimension("X", "x", frame, -10, 10, 5));
-    MDHistoDimension_sptr dimY(
-        new MDHistoDimension("Y", "y", frame, -10, 10, 10));
-    MDHistoDimension_sptr dimZ(
-        new MDHistoDimension("Z", "z", frame, -10, 10, 20));
-    MDHistoDimension_sptr dimT(
-        new MDHistoDimension("T", "t", frame, -10, 10, 10));
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", frame, -10, 10, 10));
+    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", frame, -10, 10, 20));
+    MDHistoDimension_sptr dimT(new MDHistoDimension("T", "t", frame, -10, 10, 10));
 
     MDHistoWorkspace ws(dimX, dimY, dimZ, dimT);
 
@@ -408,17 +370,13 @@ public:
   //---------------------------------------------------------------------------------------------------
   void test_createIterator() {
     Mantid::Geometry::GeneralFrame frame("m", "m");
-    MDHistoDimension_sptr dimX(
-        new MDHistoDimension("X", "x", frame, -10, 10, 10));
-    MDHistoDimension_sptr dimY(
-        new MDHistoDimension("Y", "y", frame, -9, 10, 10));
-    MDHistoDimension_sptr dimZ(
-        new MDHistoDimension("Z", "z", frame, -8, 10, 10));
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 10));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", frame, -9, 10, 10));
+    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", frame, -8, 10, 10));
     MDHistoWorkspace ws(dimX, dimY, dimZ);
     auto it = ws.createIterator();
     TS_ASSERT(it);
-    MDHistoWorkspaceIterator *hwit =
-        dynamic_cast<MDHistoWorkspaceIterator *>(it.get());
+    MDHistoWorkspaceIterator *hwit = dynamic_cast<MDHistoWorkspaceIterator *>(it.get());
     TS_ASSERT(hwit);
     TS_ASSERT(it->next());
     boost::scoped_ptr<MDImplicitFunction> mdfunction(new MDImplicitFunction);
@@ -430,28 +388,18 @@ public:
   // Test for the IMDWorkspace aspects of MDWorkspace.
   void testGetNonIntegratedDimensions() {
     Mantid::Geometry::GeneralFrame frame("m", "m");
-    MDHistoDimension_sptr dimX(
-        new MDHistoDimension("X", "x", frame, -10, 10, 1)); // Integrated.
-    MDHistoDimension_sptr dimY(
-        new MDHistoDimension("Y", "y", frame, -10, 10, 10));
-    MDHistoDimension_sptr dimZ(
-        new MDHistoDimension("Z", "z", frame, -10, 10, 20));
-    MDHistoDimension_sptr dimT(
-        new MDHistoDimension("T", "t", frame, -10, 10, 10));
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 1)); // Integrated.
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", frame, -10, 10, 10));
+    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", frame, -10, 10, 20));
+    MDHistoDimension_sptr dimT(new MDHistoDimension("T", "t", frame, -10, 10, 10));
 
     MDHistoWorkspace ws(dimX, dimY, dimZ, dimT);
-    TSM_ASSERT_EQUALS("Only 3 of the 4 dimensions should be non-integrated",
-                      ws.getNumNonIntegratedDims(), 3);
-    Mantid::Geometry::VecIMDDimension_const_sptr vecNonIntegratedDims =
-        ws.getNonIntegratedDimensions();
-    TSM_ASSERT_EQUALS("Only 3 of the 4 dimensions should be non-integrated", 3,
-                      vecNonIntegratedDims.size());
-    TSM_ASSERT_EQUALS("First non-integrated dimension should be Y", "y",
-                      vecNonIntegratedDims[0]->getDimensionId());
-    TSM_ASSERT_EQUALS("Second non-integrated dimension should be Z", "z",
-                      vecNonIntegratedDims[1]->getDimensionId());
-    TSM_ASSERT_EQUALS("Third non-integrated dimension should be T", "t",
-                      vecNonIntegratedDims[2]->getDimensionId());
+    TSM_ASSERT_EQUALS("Only 3 of the 4 dimensions should be non-integrated", ws.getNumNonIntegratedDims(), 3);
+    Mantid::Geometry::VecIMDDimension_const_sptr vecNonIntegratedDims = ws.getNonIntegratedDimensions();
+    TSM_ASSERT_EQUALS("Only 3 of the 4 dimensions should be non-integrated", 3, vecNonIntegratedDims.size());
+    TSM_ASSERT_EQUALS("First non-integrated dimension should be Y", "y", vecNonIntegratedDims[0]->getDimensionId());
+    TSM_ASSERT_EQUALS("Second non-integrated dimension should be Z", "z", vecNonIntegratedDims[1]->getDimensionId());
+    TSM_ASSERT_EQUALS("Third non-integrated dimension should be T", "t", vecNonIntegratedDims[2]->getDimensionId());
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -459,42 +407,25 @@ public:
     // If POCO xml supported schema validation, we wouldn't need to check xml
     // outputs like this.
     std::string expectedXML =
-        std::string("<DimensionSet>") + "<Dimension ID=\"x\">" +
-        "<Name>X</Name>" + "<Units>m</Units>" +
-        "<Frame>My General Frame</Frame>" +
-        "<UpperBounds>10.0000</UpperBounds>" +
-        "<LowerBounds>-10.0000</LowerBounds>" +
-        "<NumberOfBins>5</NumberOfBins>" + "</Dimension>" +
-        "<Dimension ID=\"y\">" + "<Name>Y</Name>" + "<Units>m</Units>" +
-        "<Frame>My General Frame</Frame>" +
-        "<UpperBounds>10.0000</UpperBounds>" +
-        "<LowerBounds>-10.0000</LowerBounds>" +
-        "<NumberOfBins>5</NumberOfBins>" + "</Dimension>" +
-        "<Dimension ID=\"z\">" + "<Name>Z</Name>" + "<Units>m</Units>" +
-        "<Frame>My General Frame</Frame>" +
-        "<UpperBounds>10.0000</UpperBounds>" +
-        "<LowerBounds>-10.0000</LowerBounds>" +
-        "<NumberOfBins>5</NumberOfBins>" + "</Dimension>" +
-        "<Dimension ID=\"t\">" + "<Name>T</Name>" + "<Units>m</Units>" +
-        "<Frame>My General Frame</Frame>" +
-        "<UpperBounds>10.0000</UpperBounds>" +
-        "<LowerBounds>-10.0000</LowerBounds>" +
-        "<NumberOfBins>5</NumberOfBins>" + "</Dimension>" + "<XDimension>" +
-        "<RefDimensionId>x</RefDimensionId>" + "</XDimension>" +
-        "<YDimension>" + "<RefDimensionId>y</RefDimensionId>" +
-        "</YDimension>" + "<ZDimension>" +
-        "<RefDimensionId>z</RefDimensionId>" + "</ZDimension>" +
-        "<TDimension>" + "<RefDimensionId>t</RefDimensionId>" +
+        std::string("<DimensionSet>") + "<Dimension ID=\"x\">" + "<Name>X</Name>" + "<Units>m</Units>" +
+        "<Frame>My General Frame</Frame>" + "<UpperBounds>10.0000</UpperBounds>" +
+        "<LowerBounds>-10.0000</LowerBounds>" + "<NumberOfBins>5</NumberOfBins>" + "</Dimension>" +
+        "<Dimension ID=\"y\">" + "<Name>Y</Name>" + "<Units>m</Units>" + "<Frame>My General Frame</Frame>" +
+        "<UpperBounds>10.0000</UpperBounds>" + "<LowerBounds>-10.0000</LowerBounds>" +
+        "<NumberOfBins>5</NumberOfBins>" + "</Dimension>" + "<Dimension ID=\"z\">" + "<Name>Z</Name>" +
+        "<Units>m</Units>" + "<Frame>My General Frame</Frame>" + "<UpperBounds>10.0000</UpperBounds>" +
+        "<LowerBounds>-10.0000</LowerBounds>" + "<NumberOfBins>5</NumberOfBins>" + "</Dimension>" +
+        "<Dimension ID=\"t\">" + "<Name>T</Name>" + "<Units>m</Units>" + "<Frame>My General Frame</Frame>" +
+        "<UpperBounds>10.0000</UpperBounds>" + "<LowerBounds>-10.0000</LowerBounds>" +
+        "<NumberOfBins>5</NumberOfBins>" + "</Dimension>" + "<XDimension>" + "<RefDimensionId>x</RefDimensionId>" +
+        "</XDimension>" + "<YDimension>" + "<RefDimensionId>y</RefDimensionId>" + "</YDimension>" + "<ZDimension>" +
+        "<RefDimensionId>z</RefDimensionId>" + "</ZDimension>" + "<TDimension>" + "<RefDimensionId>t</RefDimensionId>" +
         "</TDimension>" + "</DimensionSet>";
     Mantid::Geometry::GeneralFrame frame("My General Frame", "m");
-    MDHistoDimension_sptr dimX(
-        new MDHistoDimension("X", "x", frame, -10, 10, 5));
-    MDHistoDimension_sptr dimY(
-        new MDHistoDimension("Y", "y", frame, -10, 10, 5));
-    MDHistoDimension_sptr dimZ(
-        new MDHistoDimension("Z", "z", frame, -10, 10, 5));
-    MDHistoDimension_sptr dimT(
-        new MDHistoDimension("T", "t", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimT(new MDHistoDimension("T", "t", frame, -10, 10, 5));
 
     MDHistoWorkspace ws(dimX, dimY, dimZ, dimT);
 
@@ -504,8 +435,7 @@ public:
 
   //---------------------------------------------------------------------------------------------------
   void test_getNumEvents() {
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     ws->setNumEventsAt(0, 123);
     ws->setNumEventsAt(1, 345);
     TS_ASSERT_DELTA(ws->getNumEventsAt(0), 123, 1e-6);
@@ -515,8 +445,7 @@ public:
   //---------------------------------------------------------------------------------------------------
   void test_getSignalAtCoord() {
     // 2D workspace with signal[i] = i (linear index)
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
     IMDWorkspace_sptr iws(ws);
@@ -534,27 +463,22 @@ public:
   //---------------------------------------------------------------------------------------------------
   void test_getSignalAtCoord_withNormalization() {
     // 2D workspace with signal[i] = i (linear index)
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10, 20);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10, 20);
     for (size_t i = 0; i < 100; i++) {
       ws->setSignalAt(i, double(i));
       ws->setNumEventsAt(i, 10.0);
     }
     IMDWorkspace_sptr iws(ws);
     TS_ASSERT_DELTA(iws->getSignalAtVMD(VMD(0.5, 0.5)), 0.0, 1e-6);
-    TS_ASSERT_DELTA(iws->getSignalAtVMD(VMD(3.5, 0.5), NoNormalization), 1.0,
-                    1e-6);
-    TS_ASSERT_DELTA(iws->getSignalAtVMD(VMD(3.5, 0.5), VolumeNormalization),
-                    0.25, 1e-6);
-    TS_ASSERT_DELTA(iws->getSignalAtVMD(VMD(3.5, 0.5), NumEventsNormalization),
-                    0.1, 1e-6);
+    TS_ASSERT_DELTA(iws->getSignalAtVMD(VMD(3.5, 0.5), NoNormalization), 1.0, 1e-6);
+    TS_ASSERT_DELTA(iws->getSignalAtVMD(VMD(3.5, 0.5), VolumeNormalization), 0.25, 1e-6);
+    TS_ASSERT_DELTA(iws->getSignalAtVMD(VMD(3.5, 0.5), NumEventsNormalization), 0.1, 1e-6);
   }
 
   //---------------------------------------------------------------------------------------------------
   void test_getSignalWithMaskAtVMD() {
     // 2D workspace with signal[i] = i (linear index)
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10, 20);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10, 20);
     for (size_t i = 0; i < 100; i++) {
       ws->setSignalAt(i, double(i));
       ws->setNumEventsAt(i, 10.0);
@@ -580,48 +504,37 @@ public:
     TS_ASSERT(std::isnan(iws->getSignalAtVMD(VMD(0.5, 0.5))));
     TS_ASSERT(std::isnan(iws->getSignalWithMaskAtVMD(VMD(0.5, 0.5))));
 
-    TS_ASSERT(
-        std::isnan(iws->getSignalAtVMD(VMD(3.5, 0.5), VolumeNormalization)));
-    TS_ASSERT(std::isnan(
-        iws->getSignalWithMaskAtVMD(VMD(3.5, 0.5), VolumeNormalization)));
+    TS_ASSERT(std::isnan(iws->getSignalAtVMD(VMD(3.5, 0.5), VolumeNormalization)));
+    TS_ASSERT(std::isnan(iws->getSignalWithMaskAtVMD(VMD(3.5, 0.5), VolumeNormalization)));
   }
 
   void test_getLinePlot_same_number_of_x_and_y_values() {
     auto line = this->getLinePlotData(false);
-    TSM_ASSERT_EQUALS("There should be the same number of x and y values",
-                      line.x.size(), line.y.size());
-    TSM_ASSERT_EQUALS("There should be the same number of y and e values",
-                      line.y.size(), line.e.size());
+    TSM_ASSERT_EQUALS("There should be the same number of x and y values", line.x.size(), line.y.size());
+    TSM_ASSERT_EQUALS("There should be the same number of y and e values", line.y.size(), line.e.size());
   }
 
   void test_getLinePlot() {
     auto line = this->getLinePlotData(false);
     TS_ASSERT_EQUALS(line.x.size(), 10);
-    TSM_ASSERT_DELTA("x[0] should be the centre coordinate of the first bin",
-                     line.x[0], 0.5, 1e-5);
+    TSM_ASSERT_DELTA("x[0] should be the centre coordinate of the first bin", line.x[0], 0.5, 1e-5);
     TS_ASSERT_DELTA(line.x[5], 5.5, 1e-5);
-    TSM_ASSERT_DELTA("x[9] should be the centre coordinate of the last bin",
-                     line.x[9], 9.5, 1e-5);
+    TSM_ASSERT_DELTA("x[9] should be the centre coordinate of the last bin", line.x[9], 9.5, 1e-5);
 
     TS_ASSERT_EQUALS(line.y.size(), 10);
-    TSM_ASSERT_DELTA("y[0] should be the signal value of the first bin",
-                     line.y[0], 0.0, 1e-5);
+    TSM_ASSERT_DELTA("y[0] should be the signal value of the first bin", line.y[0], 0.0, 1e-5);
     TS_ASSERT_DELTA(line.y[4], 4.0, 1e-5);
-    TSM_ASSERT_DELTA("y[9] should be the signal value of the last bin",
-                     line.y[9], 9.0, 1e-5);
+    TSM_ASSERT_DELTA("y[9] should be the signal value of the last bin", line.y[9], 9.0, 1e-5);
   }
 
   void test_getLinePlot_masked_same_number_of_x_and_y_values() {
     auto line = this->getLinePlotData(true);
-    TSM_ASSERT_EQUALS("There should be the same number of x and y values",
-                      line.x.size(), line.y.size());
-    TSM_ASSERT_EQUALS("There should be the same number of y and e values",
-                      line.y.size(), line.e.size());
+    TSM_ASSERT_EQUALS("There should be the same number of x and y values", line.x.size(), line.y.size());
+    TSM_ASSERT_EQUALS("There should be the same number of y and e values", line.y.size(), line.e.size());
   }
 
   void test_getLinePlot_all_masked() {
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
 
@@ -652,8 +565,7 @@ public:
   //---------------------------------------------------------------------------------------------------
   /** Line along X, going positive */
   void test_getLineData_horizontal() {
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
     VMD start(0.5, 0.5);
@@ -674,8 +586,7 @@ public:
   //---------------------------------------------------------------------------------------------------
   /** Line along X, going positive */
   void test_getLineData_horizontal_withMask() {
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
 
@@ -700,8 +611,7 @@ public:
   //---------------------------------------------------------------------------------------------------
   /** Line along X, going positive */
   void test_getLineData_3D() {
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 10);
     for (size_t i = 0; i < 1000; i++)
       ws->setSignalAt(i, double(i));
     VMD start(0.5, 0.5, 0.5);
@@ -722,8 +632,7 @@ public:
   //---------------------------------------------------------------------------------------------------
   /** Line along X, going negative */
   void test_getLineData_horizontal_backwards() {
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
     VMD start(9.5, 0.5);
@@ -744,17 +653,14 @@ public:
   //---------------------------------------------------------------------------------------------------
   /** Diagonal line at 45 degrees crosses through 3 bins */
   void test_getLineData_diagonal() {
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
     VMD start(0.9, 0.5);
     VMD end(1.9, 1.5);
     auto line = ws->getLineData(start, end, NoNormalization);
-    std::cout << "X\n"
-              << Strings::join(line.x.begin(), line.x.end(), ",") << '\n';
-    std::cout << "Y\n"
-              << Strings::join(line.y.begin(), line.y.end(), ",") << '\n';
+    std::cout << "X\n" << Strings::join(line.x.begin(), line.x.end(), ",") << '\n';
+    std::cout << "Y\n" << Strings::join(line.y.begin(), line.y.end(), ",") << '\n';
 
     TS_ASSERT_EQUALS(line.x.size(), 4);
     TS_ASSERT_DELTA(line.x[0], 0.0, 1e-5);
@@ -771,8 +677,7 @@ public:
   //---------------------------------------------------------------------------------------------------
   /** Line along X, going positive, starting before and ending after limits */
   void test_getLineData_horizontal_pastEdges() {
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
     VMD start(-0.5, 0.5);
@@ -793,8 +698,7 @@ public:
   //---------------------------------------------------------------------------------------------------
   /** Line that completely misses the workspace */
   void test_getLineData_totallyOutOfBounds() {
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
     VMD start(-5, 5);
@@ -809,57 +713,49 @@ public:
 
   //--------------------------------------------------------------------------------------
   void test_plus_ws() {
-    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        2.0, 2, 5, 10.0, 2.5 /*errorSquared*/);
-    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        3.0, 2, 5, 10.0, 3.5 /*errorSquared*/);
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.5 /*errorSquared*/);
+    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 3.5 /*errorSquared*/);
     *a += *b;
     checkWorkspace(a, 5.0, 6.0, 2.0);
   }
 
   void test_plus_scalar() {
-    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        2.0, 2, 5, 10.0, 2.5 /*errorSquared*/);
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.5 /*errorSquared*/);
     a->add(3.0, sqrt(3.5));
     checkWorkspace(a, 5.0, 6.0, 1.0);
   }
 
   //--------------------------------------------------------------------------------------
   void test_minus_ws() {
-    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        3.0, 2, 5, 10.0, 2.5 /*errorSquared*/);
-    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        2.0, 2, 5, 10.0, 3.5 /*errorSquared*/);
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 2.5 /*errorSquared*/);
+    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 3.5 /*errorSquared*/);
     *a -= *b;
     checkWorkspace(a, 1.0, 6.0, 2.0);
   }
 
   void test_minus_scalar() {
-    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        3.0, 2, 5, 10.0, 2.5 /*errorSquared*/);
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 2.5 /*errorSquared*/);
     a->subtract(2.0, sqrt(3.5));
     checkWorkspace(a, 1.0, 6.0, 1.0);
   }
 
   //--------------------------------------------------------------------------------------
   void test_times_ws() {
-    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        2.0, 2, 5, 10.0, 2.0 /*errorSquared*/, "", 2.0);
-    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        3.0, 2, 5, 10.0, 3.0 /*errorSquared*/, "", 3.0);
+    MDHistoWorkspace_sptr a =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0 /*errorSquared*/, "", 2.0);
+    MDHistoWorkspace_sptr b =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 3.0 /*errorSquared*/, "", 3.0);
     *a *= *b;
     checkWorkspace(a, 6.0, 36. * (.5 + 1. / 3.), 2.0);
   }
 
   //--------------------------------------------------------------------------------------
   void test_times_scalar() {
-    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        2.0, 2, 5, 10.0, 2.0 /*errorSquared*/);
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0 /*errorSquared*/);
     a->multiply(3.0, sqrt(3.0));
     checkWorkspace(a, 6.0, 36. * (.5 + 1. / 3.), 1.0);
     // Scalar without error
-    MDHistoWorkspace_sptr d = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        2.0, 2, 5, 10.0, 2.0 /*errorSquared*/);
+    MDHistoWorkspace_sptr d = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0 /*errorSquared*/);
     WorkspaceSingleValue e(3.0, 0);
     d->multiply(3.0, 0);
     checkWorkspace(d, 6.0, 9 * 2.0, 1.0);
@@ -867,62 +763,52 @@ public:
 
   //--------------------------------------------------------------------------------------
   void test_divide_ws() {
-    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        3.0, 2, 5, 10.0, 3.0 /*errorSquared*/);
-    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        2.0, 2, 5, 10.0, 2.0 /*errorSquared*/);
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 3.0 /*errorSquared*/);
+    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0 /*errorSquared*/);
     *a /= *b;
     checkWorkspace(a, 1.5, 1.5 * 1.5 * (.5 + 1. / 3.));
   }
 
   //--------------------------------------------------------------------------------------
   void test_divide_scalar() {
-    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        3.0, 2, 5, 10.0, 3.0 /*errorSquared*/);
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 3.0 /*errorSquared*/);
     a->divide(2.0, M_SQRT2);
     checkWorkspace(a, 1.5, 1.5 * 1.5 * (.5 + 1. / 3.), 1.0);
   }
 
   //--------------------------------------------------------------------------------------
   void test_exp() {
-    MDHistoWorkspace_sptr a =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 3.0);
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 3.0);
     a->exp();
     checkWorkspace(a, std::exp(2.0), std::exp(2.0) * std::exp(2.0) * 3.0, 1.0);
   }
 
   //--------------------------------------------------------------------------------------
   void test_log() {
-    MDHistoWorkspace_sptr a =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(2.71828, 2, 5, 10.0, 3.0);
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.71828, 2, 5, 10.0, 3.0);
     a->log();
     checkWorkspace(a, 1.0, 3.0 / (2.71828 * 2.71828), 1.0);
   }
 
   //--------------------------------------------------------------------------------------
   void test_log10() {
-    MDHistoWorkspace_sptr a =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(10.0, 2, 5, 10.0, 3.0);
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(10.0, 2, 5, 10.0, 3.0);
     a->log10();
     checkWorkspace(a, 1.0, 0.1886117 * 3. / 100., 1.0);
   }
 
   //--------------------------------------------------------------------------------------
   void test_power() {
-    MDHistoWorkspace_sptr a =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 3.0);
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 3.0);
     a->power(2.);
     checkWorkspace(a, 4.0, 16 * 4 * 3. / 4., 1.0);
   }
 
   //--------------------------------------------------------------------------------------
   void test_boolean_and() {
-    MDHistoWorkspace_sptr a =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
-    MDHistoWorkspace_sptr b =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(2.34, 2, 5, 10.0, 2.0);
-    MDHistoWorkspace_sptr c =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(0.00, 2, 5, 10.0, 2.0);
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
+    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.34, 2, 5, 10.0, 2.0);
+    MDHistoWorkspace_sptr c = MDEventsTestHelper::makeFakeMDHistoWorkspace(0.00, 2, 5, 10.0, 2.0);
     *a &= *b;
     checkWorkspace(a, 1.0, 0.0);
     *b &= *c;
@@ -931,12 +817,9 @@ public:
 
   //--------------------------------------------------------------------------------------
   void test_boolean_or() {
-    MDHistoWorkspace_sptr a =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
-    MDHistoWorkspace_sptr b =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(2.34, 2, 5, 10.0, 2.0);
-    MDHistoWorkspace_sptr c =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(0.00, 2, 5, 10.0, 2.0);
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
+    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.34, 2, 5, 10.0, 2.0);
+    MDHistoWorkspace_sptr c = MDEventsTestHelper::makeFakeMDHistoWorkspace(0.00, 2, 5, 10.0, 2.0);
     *a |= *b;
     checkWorkspace(a, 1.0, 0.0);
     *b |= *c;
@@ -947,12 +830,9 @@ public:
 
   //--------------------------------------------------------------------------------------
   void test_boolean_xor() {
-    MDHistoWorkspace_sptr a =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
-    MDHistoWorkspace_sptr b =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(2.34, 2, 5, 10.0, 2.0);
-    MDHistoWorkspace_sptr c =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(0.00, 2, 5, 10.0, 2.0);
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
+    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.34, 2, 5, 10.0, 2.0);
+    MDHistoWorkspace_sptr c = MDEventsTestHelper::makeFakeMDHistoWorkspace(0.00, 2, 5, 10.0, 2.0);
     *a ^= *b;
     checkWorkspace(a, 0.0, 0.0);
     *b ^= *c;
@@ -963,10 +843,8 @@ public:
 
   //--------------------------------------------------------------------------------------
   void test_boolean_operatorNot() {
-    MDHistoWorkspace_sptr a =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
-    MDHistoWorkspace_sptr b =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(0.00, 2, 5, 10.0, 2.0);
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
+    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(0.00, 2, 5, 10.0, 2.0);
     a->operatorNot();
     checkWorkspace(a, 0.0, 0.0);
     b->operatorNot();
@@ -976,8 +854,7 @@ public:
   //--------------------------------------------------------------------------------------
   void test_boolean_operatorNot_maskedWorkspace() {
     // 4x4x4 histoWorkspace
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1., 3, 4, 10.0);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1., 3, 4, 10.0);
 
     std::vector<coord_t> min;
     std::vector<coord_t> max;
@@ -1040,8 +917,7 @@ public:
   void test_boolean_equalTo() {
     MDHistoWorkspace_sptr a, b, c;
     a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
-    b = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23000001, 2, 5, 10.0,
-                                                     2.0);
+    b = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23000001, 2, 5, 10.0, 2.0);
     a->equalTo(*b);
     checkWorkspace(a, 1.0, 0.0);
 
@@ -1093,17 +969,14 @@ public:
     TS_ASSERT_DELTA(a->getSignalAt(2), 6.78, 1e-5);
   }
 
-  void doTestMasking(std::unique_ptr<MDImplicitFunction> function,
-                     size_t expectedNumberMasked) {
+  void doTestMasking(std::unique_ptr<MDImplicitFunction> function, size_t expectedNumberMasked) {
     // 10x10x10 histoWorkspace
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 3, 10, 10.0);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 3, 10, 10.0);
 
     ws->setMDMasking(std::move(function));
 
     size_t numberMasked = getNumberMasked(ws);
-    TSM_ASSERT_EQUALS("Didn't perform the masking as expected",
-                      expectedNumberMasked, numberMasked);
+    TSM_ASSERT_EQUALS("Didn't perform the masking as expected", expectedNumberMasked, numberMasked);
   }
 
   void test_maskNULL() {
@@ -1156,21 +1029,18 @@ public:
     max.emplace_back(10.f);
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
 
-    MDEventWorkspace3Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1 /*event per box*/);
+    MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1 /*event per box*/);
     ws->setMDMasking(std::move(function));
 
-    TSM_ASSERT_EQUALS("Everything should be masked.", 1000,
-                      getNumberMasked(ws));
+    TSM_ASSERT_EQUALS("Everything should be masked.", 1000, getNumberMasked(ws));
     TS_ASSERT_THROWS_NOTHING(ws->clearMDMasking());
     TSM_ASSERT_EQUALS("Nothing should be masked.", 0, getNumberMasked(ws));
   }
 
   void test_getSpecialCoordinateSystem_default() {
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1);
-    TSM_ASSERT_EQUALS("Should default to no special coordinate system.",
-                      Mantid::Kernel::None, ws->getSpecialCoordinateSystem());
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1);
+    TSM_ASSERT_EQUALS("Should default to no special coordinate system.", Mantid::Kernel::None,
+                      ws->getSpecialCoordinateSystem());
   }
 
   void test_getSpecialCoordinateSystem_when_MDFrames_are_set() {
@@ -1180,26 +1050,21 @@ public:
     Mantid::coord_t min = 0;
     Mantid::coord_t max = 10;
     size_t bins = 2;
-    auto dimension1 = std::make_shared<MDHistoDimension>(
-        "QSampleX", "QSampleX", frame1, min, max, bins);
-    auto dimension2 = std::make_shared<MDHistoDimension>(
-        "QSampleY", "QSampleY", frame2, min, max, bins);
-    auto ws = std::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
-        dimension1, dimension2);
+    auto dimension1 = std::make_shared<MDHistoDimension>("QSampleX", "QSampleX", frame1, min, max, bins);
+    auto dimension2 = std::make_shared<MDHistoDimension>("QSampleY", "QSampleY", frame2, min, max, bins);
+    auto ws = std::make_shared<Mantid::DataObjects::MDHistoWorkspace>(dimension1, dimension2);
 
     // Act
     auto specialCoordinates = ws->getSpecialCoordinateSystem();
 
     // Assert
-    TSM_ASSERT_EQUALS("Should detect QSample as the SpecialCoordinate",
-                      specialCoordinates,
+    TSM_ASSERT_EQUALS("Should detect QSample as the SpecialCoordinate", specialCoordinates,
                       Mantid::Kernel::SpecialCoordinateSystem::QSample);
   }
 
   void test_displayNormalizationDefault() {
     Mantid::Geometry::GeneralFrame frame("m", "m");
-    MDHistoDimension_sptr dimX(
-        new MDHistoDimension("X", "x", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 5));
     // Constructor variant 1.
     MDHistoWorkspace ws1(dimX);
     TS_ASSERT_EQUALS(Mantid::API::NoNormalization, ws1.displayNormalization());
@@ -1218,8 +1083,7 @@ public:
   void test_setDisplayNormalization() {
     auto targetDisplayNormalization = Mantid::API::VolumeNormalization;
     Mantid::Geometry::GeneralFrame frame("m", "m");
-    MDHistoDimension_sptr dimX(
-        new MDHistoDimension("X", "x", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 5));
     // Constructor variant 1.
     MDHistoWorkspace ws1(dimX, dimX, dimX, dimX, targetDisplayNormalization);
     TS_ASSERT_EQUALS(targetDisplayNormalization, ws1.displayNormalization());
@@ -1240,10 +1104,8 @@ public:
   }
 
   void test_is_histogram_is_true() {
-    MDHistoWorkspace_sptr hw =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
-    TSM_ASSERT("Should always be true for histogram workspace",
-               hw->isMDHistoWorkspace());
+    MDHistoWorkspace_sptr hw = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
+    TSM_ASSERT("Should always be true for histogram workspace", hw->isMDHistoWorkspace());
   }
   /**
    * Test declaring an input IMDHistoWorkspace and retrieving as const_sptr or
@@ -1252,21 +1114,17 @@ public:
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     Mantid::Geometry::GeneralFrame frame("m", "m");
-    MDHistoDimension_sptr dimX(
-        new MDHistoDimension("X", "x", frame, -10, 10, 5));
-    IMDHistoWorkspace_sptr wsInput(new MDHistoWorkspace(
-        dimX, dimX, dimX, dimX, Mantid::API::VolumeNormalization));
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 5));
+    IMDHistoWorkspace_sptr wsInput(new MDHistoWorkspace(dimX, dimX, dimX, dimX, Mantid::API::VolumeNormalization));
     PropertyManagerHelper manager;
     manager.declareProperty(wsName, wsInput, Direction::Input);
 
     // Check property can be obtained as const_sptr or sptr
     IMDHistoWorkspace_const_sptr wsConst;
     IMDHistoWorkspace_sptr wsNonConst;
-    TS_ASSERT_THROWS_NOTHING(
-        wsConst = manager.getValue<IMDHistoWorkspace_const_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsConst = manager.getValue<IMDHistoWorkspace_const_sptr>(wsName));
     TS_ASSERT(wsConst != nullptr);
-    TS_ASSERT_THROWS_NOTHING(
-        wsNonConst = manager.getValue<IMDHistoWorkspace_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsNonConst = manager.getValue<IMDHistoWorkspace_sptr>(wsName));
     TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 

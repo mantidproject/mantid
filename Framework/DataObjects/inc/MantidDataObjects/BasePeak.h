@@ -32,9 +32,6 @@ namespace DataObjects {
  */
 class DLLExport BasePeak : public Geometry::IPeak {
 public:
-  /// Allow PeakColumn class to directly access members.
-  friend class PeakColumn;
-
   BasePeak();
   BasePeak(const Mantid::Kernel::Matrix<double> &goniometer);
   /// Copy constructor
@@ -72,11 +69,14 @@ public:
   void setH(double m_H) override;
   void setK(double m_K) override;
   void setL(double m_L) override;
-  void setBankName(std::string m_bankName);
   void setHKL(double H, double K, double L) override;
   void setHKL(const Mantid::Kernel::V3D &HKL) override;
   void setIntHKL(const Kernel::V3D &HKL) override;
   void setIntMNP(const Mantid::Kernel::V3D &MNP) override;
+
+  Mantid::Kernel::V3D getSamplePos() const override;
+  void setSamplePos(double samX, double samY, double samZ) override;
+  void setSamplePos(const Mantid::Kernel::V3D &XYZ) override;
 
   double getIntensity() const override;
   double getSigmaIntensity() const override;
@@ -90,27 +90,21 @@ public:
 
   Mantid::Kernel::Matrix<double> getGoniometerMatrix() const override;
   Mantid::Kernel::Matrix<double> getInverseGoniometerMatrix() const;
-  void setGoniometerMatrix(
-      const Mantid::Kernel::Matrix<double> &goniometerMatrix) override;
+  void setGoniometerMatrix(const Mantid::Kernel::Matrix<double> &goniometerMatrix) override;
 
-  std::string getBankName() const override;
-  int getRow() const override;
-  int getCol() const override;
-  void setRow(int m_row);
-  void setCol(int m_col);
   void setPeakNumber(int m_peakNumber) override;
   int getPeakNumber() const override;
 
-  double getValueByColName(std::string colName) const;
+  virtual double getValueByColName(std::string colName) const;
 
   /// Get the peak shape.
   const Mantid::Geometry::PeakShape &getPeakShape() const override;
 
   /// Set the PeakShape
-  void setPeakShape(Mantid::Geometry::PeakShape *shape);
+  void setPeakShape(Mantid::Geometry::PeakShape *shape) override;
 
   /// Set the PeakShape
-  void setPeakShape(Mantid::Geometry::PeakShape_const_sptr shape);
+  void setPeakShape(Mantid::Geometry::PeakShape_const_sptr shape) override;
 
   /// Assignment
   BasePeak &operator=(const BasePeak &other);
@@ -124,10 +118,10 @@ protected:
   // ki-kf for Inelastic convention; kf-ki for Crystallography convention
   std::string convention;
 
-private:
-  /// Name of the parent bank
-  std::string m_bankName;
+  /// Cached sample position
+  Mantid::Kernel::V3D m_samplePos;
 
+private:
   /// H of the peak
   double m_H;
 
@@ -161,12 +155,6 @@ private:
 
   /// Integrated monitor count over TOF range for this run
   double m_monitorCount;
-
-  /// Cached row in the detector
-  int m_row;
-
-  /// Cached column in the detector
-  int m_col;
 
   int m_peakNumber;
   Mantid::Kernel::V3D m_intHKL;

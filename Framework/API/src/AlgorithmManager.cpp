@@ -20,9 +20,7 @@ Kernel::Logger g_log("AlgorithmManager");
 } // namespace
 
 /// Private Constructor for singleton class
-AlgorithmManagerImpl::AlgorithmManagerImpl() : m_managed_algs() {
-  g_log.debug() << "Algorithm Manager created.\n";
-}
+AlgorithmManagerImpl::AlgorithmManagerImpl() : m_managed_algs() { g_log.debug() << "Algorithm Manager created.\n"; }
 
 /** Private destructor
  *  Prevents client from calling 'delete' on the pointer handed
@@ -38,8 +36,7 @@ AlgorithmManagerImpl::~AlgorithmManagerImpl() = default;
  *  @return A pointer to the created algorithm
  *  @throw  NotFoundError Thrown if algorithm requested is not registered
  */
-Algorithm_sptr AlgorithmManagerImpl::createUnmanaged(const std::string &algName,
-                                                     const int &version) const {
+Algorithm_sptr AlgorithmManagerImpl::createUnmanaged(const std::string &algName, const int &version) const {
   return AlgorithmFactory::Instance().create(algName,
                                              version); // Throws on fail:
 }
@@ -56,27 +53,22 @@ Algorithm_sptr AlgorithmManagerImpl::createUnmanaged(const std::string &algName,
  * @throw  NotFoundError Thrown if algorithm requested is not registered
  * @throw  std::runtime_error Thrown if properties string is ill-formed
  */
-IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName,
-                                             const int &version) {
+IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName, const int &version) {
   std::lock_guard<std::mutex> _lock(this->m_managedMutex);
   IAlgorithm_sptr alg;
   try {
     alg = AlgorithmFactory::Instance().create(algName,
                                               version); // Throws on fail:
     auto count = removeFinishedAlgorithms();
-    g_log.debug()
-        << count
-        << " Finished algorithms removed from the managed algorithms list. "
-        << m_managed_algs.size() << " remaining.\n";
+    g_log.debug() << count << " Finished algorithms removed from the managed algorithms list. " << m_managed_algs.size()
+                  << " remaining.\n";
 
     // Add to list of managed ones
     m_managed_algs.emplace_back(alg);
     alg->initialize();
   } catch (std::runtime_error &ex) {
-    g_log.error() << "AlgorithmManager:: Unable to create algorithm " << algName
-                  << ' ' << ex.what() << '\n';
-    throw std::runtime_error("AlgorithmManager:: Unable to create algorithm " +
-                             algName + ' ' + ex.what());
+    g_log.error() << "AlgorithmManager:: Unable to create algorithm " << algName << ' ' << ex.what() << '\n';
+    throw std::runtime_error("AlgorithmManager:: Unable to create algorithm " + algName + ' ' + ex.what());
   }
   return alg;
 }
@@ -104,11 +96,8 @@ std::size_t AlgorithmManagerImpl::size() const { return m_managed_algs.size(); }
  */
 IAlgorithm_sptr AlgorithmManagerImpl::getAlgorithm(AlgorithmID id) const {
   std::lock_guard<std::mutex> _lock(this->m_managedMutex);
-  const auto found =
-      std::find_if(m_managed_algs.cbegin(), m_managed_algs.cend(),
-                   [id](const auto &algorithm) {
-                     return algorithm->getAlgorithmID() == id;
-                   });
+  const auto found = std::find_if(m_managed_algs.cbegin(), m_managed_algs.cend(),
+                                  [id](const auto &algorithm) { return algorithm->getAlgorithmID() == id; });
   if (found == m_managed_algs.cend()) {
     return IAlgorithm_sptr();
   } else {
@@ -129,8 +118,7 @@ void AlgorithmManagerImpl::removeById(AlgorithmID id) {
         g_log.debug() << "Removing algorithm " << (*it)->name() << '\n';
         m_managed_algs.erase(it);
       } else {
-        g_log.debug() << "Unable to remove algorithm " << (*it)->name()
-                      << ". The algorithm is running.\n";
+        g_log.debug() << "Unable to remove algorithm " << (*it)->name() << ". The algorithm is running.\n";
       }
       break;
     }
@@ -151,27 +139,21 @@ void AlgorithmManagerImpl::notifyAlgorithmStarting(AlgorithmID id) {
 
 /// Returns all running (& managed) occurances of the named algorithm, oldest
 /// first
-std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstancesOf(
-    const std::string &algorithmName) const {
+std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstancesOf(const std::string &algorithmName) const {
   std::vector<IAlgorithm_const_sptr> theRunningInstances;
   std::lock_guard<std::mutex> _lock(this->m_managedMutex);
-  std::copy_if(m_managed_algs.cbegin(), m_managed_algs.cend(),
-               std::back_inserter(theRunningInstances),
-               [&algorithmName](const auto &algorithm) {
-                 return algorithm->name() == algorithmName &&
-                        algorithm->isRunning();
-               });
+  std::copy_if(
+      m_managed_algs.cbegin(), m_managed_algs.cend(), std::back_inserter(theRunningInstances),
+      [&algorithmName](const auto &algorithm) { return algorithm->name() == algorithmName && algorithm->isRunning(); });
   return theRunningInstances;
 }
 
 /// Returns all running (& managed) occurances of any algorithm, oldest
 /// first
-std::vector<IAlgorithm_const_sptr>
-AlgorithmManagerImpl::runningInstances() const {
+std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstances() const {
   std::vector<IAlgorithm_const_sptr> theRunningInstances;
   std::lock_guard<std::mutex> _lock(this->m_managedMutex);
-  std::copy_if(m_managed_algs.cbegin(), m_managed_algs.cend(),
-               std::back_inserter(theRunningInstances),
+  std::copy_if(m_managed_algs.cbegin(), m_managed_algs.cend(), std::back_inserter(theRunningInstances),
                [](const auto &algorithm) { return algorithm->isRunning(); });
   return theRunningInstances;
 }
@@ -190,11 +172,8 @@ void AlgorithmManagerImpl::cancelAll() {
 /// place
 size_t AlgorithmManagerImpl::removeFinishedAlgorithms() {
   std::vector<IAlgorithm_const_sptr> theCompletedInstances;
-  std::copy_if(m_managed_algs.cbegin(), m_managed_algs.cend(),
-               std::back_inserter(theCompletedInstances),
-               [](const auto &algorithm) {
-                 return (algorithm->isReadyForGarbageCollection());
-               });
+  std::copy_if(m_managed_algs.cbegin(), m_managed_algs.cend(), std::back_inserter(theCompletedInstances),
+               [](const auto &algorithm) { return (algorithm->isReadyForGarbageCollection()); });
   for (auto completedAlg : theCompletedInstances) {
     auto itend = m_managed_algs.end();
     for (auto it = m_managed_algs.begin(); it != itend; ++it) {

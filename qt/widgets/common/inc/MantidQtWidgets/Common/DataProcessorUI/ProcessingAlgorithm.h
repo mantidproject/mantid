@@ -20,18 +20,14 @@ ProcessingAlgorithm defines a processing algorithm that will
 perform the
 reduction in a Data ProcessorProcessing UI.
 */
-class EXPORT_OPT_MANTIDQT_COMMON ProcessingAlgorithm
-    : public ProcessingAlgorithmBase {
+class EXPORT_OPT_MANTIDQT_COMMON ProcessingAlgorithm : public ProcessingAlgorithmBase {
 public:
   ProcessingAlgorithm();
   // Constructor
-  ProcessingAlgorithm(const QString &name, std::vector<QString> prefix,
-                      std::size_t postprocessedOutputPrefixIndex,
-                      const std::set<QString> &blacklist = std::set<QString>(),
-                      const int version = -1);
+  ProcessingAlgorithm(const QString &name, std::vector<QString> prefix, std::size_t postprocessedOutputPrefixIndex,
+                      const std::set<QString> &blacklist = std::set<QString>(), const int version = -1);
   // Delegating constructor
-  ProcessingAlgorithm(const QString &name, QString const &prefix,
-                      std::size_t postprocessedOutputPrefixIndex,
+  ProcessingAlgorithm(const QString &name, QString const &prefix, std::size_t postprocessedOutputPrefixIndex,
                       QString const &blacklist = "", const int version = -1);
   // Destructor
   virtual ~ProcessingAlgorithm();

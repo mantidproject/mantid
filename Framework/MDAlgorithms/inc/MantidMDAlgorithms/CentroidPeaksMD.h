@@ -22,8 +22,7 @@ namespace MDAlgorithms {
  * @author Janik Zikovsky
  * @date 2011-06-01
  */
-class DLLExport CentroidPeaksMD : public API::Algorithm,
-                                  public API::DeprecatedAlgorithm {
+class DLLExport CentroidPeaksMD : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   CentroidPeaksMD();
@@ -47,8 +46,7 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  template <typename MDE, size_t nd>
-  void integrate(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  template <typename MDE, size_t nd> void integrate(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Input MDEventWorkspace
   Mantid::API::IMDEventWorkspace_sptr inWS;

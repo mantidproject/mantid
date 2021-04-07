@@ -24,9 +24,7 @@ class LoadILLIndirect2Test : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadILLIndirect2Test *createSuite() {
-    return new LoadILLIndirect2Test();
-  }
+  static LoadILLIndirect2Test *createSuite() { return new LoadILLIndirect2Test(); }
   static void destroySuite(LoadILLIndirect2Test *suite) { delete suite; }
 
   void test_Init() {
@@ -72,14 +70,11 @@ public:
     LoadILLIndirect2 loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT(loader.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", m_bats33degree));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("OutputWorkspace", "__out_ws"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", m_bats33degree));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", "__out_ws"));
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
     TS_ASSERT(loader.isExecuted());
-    MatrixWorkspace_sptr output2D =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__out_ws");
+    MatrixWorkspace_sptr output2D = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__out_ws");
     const Mantid::API::Run &runlogs = output2D->run();
     TS_ASSERT(runlogs.hasProperty("PSD.PSD angle 1"));
     TS_ASSERT_DELTA(runlogs.getLogAsSingleValue("PSD.PSD angle 1"), 33.1, 0.01);
@@ -93,14 +88,11 @@ public:
     LoadILLIndirect2 loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT(loader.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", m_firstTube251));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("OutputWorkspace", "__out_ws"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", m_firstTube251));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", "__out_ws"));
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
     TS_ASSERT(loader.isExecuted());
-    MatrixWorkspace_sptr output2D =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__out_ws");
+    MatrixWorkspace_sptr output2D = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__out_ws");
     const Mantid::API::Run &runlogs = output2D->run();
     TS_ASSERT(runlogs.hasProperty("PSD.PSD angle 1"));
     TS_ASSERT_DELTA(runlogs.getLogAsSingleValue("PSD.PSD angle 1"), 25.1, 0.01);
@@ -119,16 +111,12 @@ public:
     LoadILLIndirect2 loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT(loader.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", m_batsDiffraction));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("OutputWorkspace", "__out_ws"));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setProperty("LoadDetectors", "Diffractometer"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", m_batsDiffraction));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", "__out_ws"));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("LoadDetectors", "Diffractometer"));
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
     TS_ASSERT(loader.isExecuted());
-    MatrixWorkspace_sptr output2D =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__out_ws");
+    MatrixWorkspace_sptr output2D = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__out_ws");
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 2049)
     TS_ASSERT_EQUALS(output2D->blocksize(), 2048)
 
@@ -147,16 +135,12 @@ public:
     LoadILLIndirect2 loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT(loader.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", m_dopplerDiffraction));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("OutputWorkspace", "__out_ws"));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setProperty("LoadDetectors", "Diffractometer"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", m_dopplerDiffraction));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", "__out_ws"));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("LoadDetectors", "Diffractometer"));
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
     TS_ASSERT(loader.isExecuted());
-    MatrixWorkspace_sptr output2D =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__out_ws");
+    MatrixWorkspace_sptr output2D = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__out_ws");
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 2049)
     TS_ASSERT_EQUALS(output2D->blocksize(), 1024)
 
@@ -170,8 +154,7 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void doExecTest(const std::string &file, int numHist = 2051,
-                  int numChannels = 2048) {
+  void doExecTest(const std::string &file, int numHist = 2051, int numChannels = 2048) {
     // Name of the output workspace.
     std::string outWSName("LoadILLIndirectTest_OutputWS");
 
@@ -179,17 +162,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT(loader.isInitialized())
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", file));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
     TS_ASSERT(loader.isExecuted());
 
-    MatrixWorkspace_sptr output =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
+    MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
     TS_ASSERT(output);
 
-    MatrixWorkspace_sptr output2D =
-        std::dynamic_pointer_cast<MatrixWorkspace>(output);
+    MatrixWorkspace_sptr output2D = std::dynamic_pointer_cast<MatrixWorkspace>(output);
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), numHist);
     TS_ASSERT_EQUALS(output2D->blocksize(), numChannels);
 
@@ -204,8 +184,8 @@ public:
 
   void checkTimeFormat(MatrixWorkspace_const_sptr outputWS) {
     TS_ASSERT(outputWS->run().hasProperty("start_time"));
-    TS_ASSERT(Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(
-        outputWS->run().getProperty("start_time")->value()));
+    TS_ASSERT(
+        Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(outputWS->run().getProperty("start_time")->value()));
   }
 
 private:

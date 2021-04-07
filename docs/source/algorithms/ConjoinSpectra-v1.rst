@@ -30,7 +30,7 @@ ConjoinSpectra operation
 Usage
 -----
 
-**Example - Join workspace index 1 from three workspaces**  
+**Example - Join workspace index 1 from three workspaces**
 
 .. testcode:: simple_join
 
@@ -49,7 +49,7 @@ Output:
     Creates a workspace with 3 spectra labelled as
     ['ws_1', 'ws2_1', 'ws3_1']
 
-**Example - Join spectra from three workspaces using a log value**  
+**Example - Join spectra from three workspaces using a log value**
 
 .. testcode:: log
 
@@ -63,7 +63,7 @@ Output:
         wsIndex += 1
         for minute in range(60):
             time_string = "2010-01-01T00:%02i:00" % minute
-            AddTimeSeriesLog(w, Name="myLog", Time=time_string, Value=(wsIndex*100)+minute) 
+            AddTimeSeriesLog(w, Name="myLog", Time=time_string, Value=(wsIndex*100)+minute)
 
     wsOut = ConjoinSpectra("ws,ws2,ws3",WorkspaceIndex=0,LabelUsing="myLog",LabelValue="Mean")
     print("Creates a workspace with {} spectra labelled using the Mean of myLog.".format(wsOut.getNumberHistograms()))

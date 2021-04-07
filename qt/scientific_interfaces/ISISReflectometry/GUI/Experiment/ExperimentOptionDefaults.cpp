@@ -21,65 +21,49 @@ namespace ISISReflectometry {
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry GUI");
 
-std::string stringValueOrEmpty(boost::optional<double> value) {
-  return value ? std::to_string(*value) : "";
-}
+std::string stringValueOrEmpty(boost::optional<double> value) { return value ? std::to_string(*value) : ""; }
 
-Experiment
-getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
+Experiment getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   auto defaults = OptionDefaults(std::move(instrument));
 
-  auto analysisMode = analysisModeFromString(defaults.getStringOrDefault(
-      "AnalysisMode", "AnalysisMode", "PointDetectorAnalysis"));
-  auto reductionType = reductionTypeFromString(
-      defaults.getStringOrDefault("ReductionType", "ReductionType", "Normal"));
-  auto summationType = summationTypeFromString(defaults.getStringOrDefault(
-      "SummationType", "SummationType", "SumInLambda"));
-  auto includePartialBins =
-      defaults.getBoolOrFalse("IncludePartialBins", "IncludePartialBins");
+  auto analysisMode =
+      analysisModeFromString(defaults.getStringOrDefault("AnalysisMode", "AnalysisMode", "PointDetectorAnalysis"));
+  auto reductionType = reductionTypeFromString(defaults.getStringOrDefault("ReductionType", "ReductionType", "Normal"));
+  auto summationType =
+      summationTypeFromString(defaults.getStringOrDefault("SummationType", "SummationType", "SumInLambda"));
+  auto includePartialBins = defaults.getBoolOrFalse("IncludePartialBins", "IncludePartialBins");
   auto debug = defaults.getBoolOrFalse("Debug", "Debug");
 
-  auto backgroundSubtractionMethod = defaults.getStringOrEmpty(
-      "BackgroundCalculationMethod", "BackgroundCalculationMethod");
+  auto backgroundSubtractionMethod =
+      defaults.getStringOrEmpty("BackgroundCalculationMethod", "BackgroundCalculationMethod");
   auto subtractBackground = !backgroundSubtractionMethod.empty();
-  auto backgroundSubtractionType =
-      subtractBackground
-          ? backgroundSubtractionTypeFromString(backgroundSubtractionMethod)
-          : BackgroundSubtractionType::PerDetectorAverage;
-  auto degreeOfPolynomial =
-      defaults.getIntOrZero("DegreeOfPolynomial", "DegreeOfPolynomial");
-  auto costFunction = costFunctionTypeFromString(defaults.getStringOrDefault(
-      "CostFunction", "CostFunction", "Least squares"));
+  auto backgroundSubtractionType = subtractBackground ? backgroundSubtractionTypeFromString(backgroundSubtractionMethod)
+                                                      : BackgroundSubtractionType::PerDetectorAverage;
+  auto degreeOfPolynomial = defaults.getIntOrZero("DegreeOfPolynomial", "DegreeOfPolynomial");
+  auto costFunction =
+      costFunctionTypeFromString(defaults.getStringOrDefault("CostFunction", "CostFunction", "Least squares"));
   auto backgroundSubtraction =
-      BackgroundSubtraction(subtractBackground, backgroundSubtractionType,
-                            degreeOfPolynomial, costFunction);
+      BackgroundSubtraction(subtractBackground, backgroundSubtractionType, degreeOfPolynomial, costFunction);
 
-  auto polarizationCorrectionType =
-      polarizationCorrectionTypeFromString(defaults.getStringOrDefault(
-          "PolarizationAnalysis", "PolarizationAnalysis", "None"));
-  auto polarizationCorrections =
-      PolarizationCorrections(polarizationCorrectionType);
+  auto polarizationCorrectionType = polarizationCorrectionTypeFromString(
+      defaults.getStringOrDefault("PolarizationAnalysis", "PolarizationAnalysis", "None"));
+  auto polarizationCorrections = PolarizationCorrections(polarizationCorrectionType);
 
   auto floodCorrectionType =
-      floodCorrectionTypeFromString(defaults.getStringOrDefault(
-          "FloodCorrection", "FloodCorrection", "Workspace"));
-  auto floodWorkspace = defaults.getOptionalValue<std::string>(
-      "FloodWorkspace", "FloodWorkspace");
+      floodCorrectionTypeFromString(defaults.getStringOrDefault("FloodCorrection", "FloodCorrection", "Workspace"));
+  auto floodWorkspace = defaults.getOptionalValue<std::string>("FloodWorkspace", "FloodWorkspace");
   auto floodCorrections = FloodCorrections(floodCorrectionType, floodWorkspace);
 
-  auto transmissionRunRange = RangeInLambda(
-      defaults.getDoubleOrZero("StartOverlap", "TransRunStartOverlap"),
-      defaults.getDoubleOrZero("EndOverlap", "TransRunEndOverlap"));
+  auto transmissionRunRange = RangeInLambda(defaults.getDoubleOrZero("StartOverlap", "TransRunStartOverlap"),
+                                            defaults.getDoubleOrZero("EndOverlap", "TransRunEndOverlap"));
   if (!transmissionRunRange.isValid(false))
     throw std::invalid_argument("Transmission run overlap range is invalid");
 
-  auto transmissionStitchParams =
-      defaults.getStringOrEmpty("Params", "TransmissionStitchParams");
-  auto transmissionScaleRHS =
-      defaults.getBoolOrTrue("ScaleRHSWorkspace", "TransmissionScaleRHS");
+  auto transmissionStitchParams = defaults.getStringOrEmpty("Params", "TransmissionStitchParams");
+  auto transmissionScaleRHS = defaults.getBoolOrTrue("ScaleRHSWorkspace", "TransmissionScaleRHS");
 
-  auto transmissionStitchOptions = TransmissionStitchOptions(
-      transmissionRunRange, transmissionStitchParams, transmissionScaleRHS);
+  auto transmissionStitchOptions =
+      TransmissionStitchOptions(transmissionRunRange, transmissionStitchParams, transmissionScaleRHS);
 
   // We currently don't specify stitch parameters in the parameters file
   auto stitchParameters = std::map<std::string, std::string>();
@@ -91,45 +75,33 @@ getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   auto const firstTransmissionRun = std::string("");
   auto const secondTransmissionRun = std::string("");
   auto const transmissionProcessingInstructions =
-      defaults.getStringOrEmpty("TransmissionProcessingInstructions",
-                                "TransmissionProcessingInstructions");
-  auto const qMin = stringValueOrEmpty(
-      defaults.getOptionalValue<double>("MomentumTransferMin", "QMin"));
-  auto const qMax = stringValueOrEmpty(
-      defaults.getOptionalValue<double>("MomentumTransferMax", "QMax"));
-  auto const qStep = stringValueOrEmpty(
-      defaults.getOptionalValue<double>("MomentumTransferStep", "dQ/Q"));
-  auto const maybeScaleFactor =
-      defaults.getOptionalValue<double>("ScaleFactor", "ScaleFactor");
+      defaults.getStringOrEmpty("TransmissionProcessingInstructions", "TransmissionProcessingInstructions");
+  auto const qMin = stringValueOrEmpty(defaults.getOptionalValue<double>("MomentumTransferMin", "QMin"));
+  auto const qMax = stringValueOrEmpty(defaults.getOptionalValue<double>("MomentumTransferMax", "QMax"));
+  auto const qStep = stringValueOrEmpty(defaults.getOptionalValue<double>("MomentumTransferStep", "dQ/Q"));
+  auto const maybeScaleFactor = defaults.getOptionalValue<double>("ScaleFactor", "ScaleFactor");
   auto const scaleFactor = stringValueOrEmpty(maybeScaleFactor);
-  auto const processingInstructions = defaults.getStringOrEmpty(
-      "ProcessingInstructions", "ProcessingInstructions");
-  auto const backgroundProcessingInstructions = defaults.getStringOrEmpty(
-      "BackgroundProcessingInstructions", "BackgroundProcessingInstructions");
+  auto const processingInstructions = defaults.getStringOrEmpty("ProcessingInstructions", "ProcessingInstructions");
+  auto const backgroundProcessingInstructions =
+      defaults.getStringOrEmpty("BackgroundProcessingInstructions", "BackgroundProcessingInstructions");
   auto perThetaDefaultsRow = PerThetaDefaults::ValueArray{
-      {theta, firstTransmissionRun, secondTransmissionRun,
-       transmissionProcessingInstructions, qMin, qMax, qStep, scaleFactor,
-       processingInstructions, backgroundProcessingInstructions}};
-  auto perThetaDefaults =
-      std::vector<PerThetaDefaults::ValueArray>{perThetaDefaultsRow};
+      {theta, firstTransmissionRun, secondTransmissionRun, transmissionProcessingInstructions, qMin, qMax, qStep,
+       scaleFactor, processingInstructions, backgroundProcessingInstructions}};
+  auto perThetaDefaults = std::vector<PerThetaDefaults::ValueArray>{perThetaDefaultsRow};
   auto validate = PerThetaDefaultsTableValidator();
   auto const tolerance = 0.0; // irrelevant because theta is empty
   auto perThetaValidationResult = validate(perThetaDefaults, tolerance);
   if (!perThetaValidationResult.isValid())
-    throw std::invalid_argument(
-        "Errors were found in the per-angle default values");
+    throw std::invalid_argument("Errors were found in the per-angle default values");
 
-  return Experiment(
-      analysisMode, reductionType, summationType, includePartialBins, debug,
-      std::move(backgroundSubtraction), std::move(polarizationCorrections),
-      std::move(floodCorrections), std::move(transmissionStitchOptions),
-      std::move(stitchParameters),
-      std::move(perThetaValidationResult.assertValid()));
+  return Experiment(analysisMode, reductionType, summationType, includePartialBins, debug,
+                    std::move(backgroundSubtraction), std::move(polarizationCorrections), std::move(floodCorrections),
+                    std::move(transmissionStitchOptions), std::move(stitchParameters),
+                    std::move(perThetaValidationResult.assertValid()));
 }
 } // unnamed namespace
 
-Experiment ExperimentOptionDefaults::get(
-    Mantid::Geometry::Instrument_const_sptr instrument) {
+Experiment ExperimentOptionDefaults::get(Mantid::Geometry::Instrument_const_sptr instrument) {
   return getExperimentDefaults(instrument);
 }
 } // namespace ISISReflectometry

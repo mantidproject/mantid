@@ -77,9 +77,7 @@ public:
 
   void test_gather() { ParallelTestHelpers::runParallel(run_gather); }
 
-  void test_gather_short_version() {
-    ParallelTestHelpers::runParallel(run_gather_short_version);
-  }
+  void test_gather_short_version() { ParallelTestHelpers::runParallel(run_gather_short_version); }
 
   void test_all_gather() { ParallelTestHelpers::runParallel(run_all_gather); }
 

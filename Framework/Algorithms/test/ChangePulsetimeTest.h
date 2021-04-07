@@ -20,10 +20,8 @@ using namespace Mantid::DataObjects;
 using Mantid::Types::Core::DateAndTime;
 
 namespace {
-EventWorkspace_sptr
-execute_change_of_pulse_times(const EventWorkspace_sptr &in_ws,
-                              const std::string &timeOffset,
-                              const std::string &workspaceIndexList) {
+EventWorkspace_sptr execute_change_of_pulse_times(const EventWorkspace_sptr &in_ws, const std::string &timeOffset,
+                                                  const std::string &workspaceIndexList) {
   // Create and run the algorithm
   ChangePulsetime alg;
   alg.initialize();
@@ -52,8 +50,7 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void do_test(const std::string &in_ws_name, const std::string &out_ws_name,
-               const std::string &WorkspaceIndexList) {
+  void do_test(const std::string &in_ws_name, const std::string &out_ws_name, const std::string &WorkspaceIndexList) {
     ChangePulsetime alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -71,43 +68,37 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(
-        out_ws = std::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve(out_ws_name)));
+        out_ws = std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(out_ws_name)));
     TS_ASSERT(out_ws);
     if (!out_ws)
       return;
 
     for (size_t wi = 10; wi < 20; wi++) {
       double secs;
-      secs = DateAndTime::secondsFromDuration(
-          out_ws->getSpectrum(wi).getEvent(0).pulseTime() -
-          DateAndTime("2010-01-01T00:00:00"));
+      secs = DateAndTime::secondsFromDuration(out_ws->getSpectrum(wi).getEvent(0).pulseTime() -
+                                              DateAndTime("2010-01-01T00:00:00"));
       TS_ASSERT_DELTA(secs, 1000.0, 1e-5);
-      secs = DateAndTime::secondsFromDuration(
-          out_ws->getSpectrum(wi).getEvent(2).pulseTime() -
-          DateAndTime("2010-01-01T00:00:00"));
+      secs = DateAndTime::secondsFromDuration(out_ws->getSpectrum(wi).getEvent(2).pulseTime() -
+                                              DateAndTime("2010-01-01T00:00:00"));
       TS_ASSERT_DELTA(secs, 1001.0, 1e-5);
     }
 
     // If only modifying SOME spectra, check that the others did not change
     if (WorkspaceIndexList != "") {
       double secs;
-      secs = DateAndTime::secondsFromDuration(
-          out_ws->getSpectrum(0).getEvent(2).pulseTime() -
-          DateAndTime("2010-01-01T00:00:00"));
+      secs = DateAndTime::secondsFromDuration(out_ws->getSpectrum(0).getEvent(2).pulseTime() -
+                                              DateAndTime("2010-01-01T00:00:00"));
       TS_ASSERT_DELTA(secs, 1.0, 1e-5);
-      secs = DateAndTime::secondsFromDuration(
-          out_ws->getSpectrum(30).getEvent(2).pulseTime() -
-          DateAndTime("2010-01-01T00:00:00"));
+      secs = DateAndTime::secondsFromDuration(out_ws->getSpectrum(30).getEvent(2).pulseTime() -
+                                              DateAndTime("2010-01-01T00:00:00"));
       TS_ASSERT_DELTA(secs, 1.0, 1e-5);
     }
 
     // If not inplace, then the original did not change
     if (in_ws_name != out_ws_name) {
       double secs;
-      secs = DateAndTime::secondsFromDuration(
-          in_ws->getSpectrum(0).getEvent(2).pulseTime() -
-          DateAndTime("2010-01-01T00:00:00"));
+      secs = DateAndTime::secondsFromDuration(in_ws->getSpectrum(0).getEvent(2).pulseTime() -
+                                              DateAndTime("2010-01-01T00:00:00"));
       TS_ASSERT_DELTA(secs, 1.0, 1e-5);
     }
 
@@ -119,17 +110,13 @@ public:
     do_test("ChangePulsetimeTest_ws", "ChangePulsetimeTest_out_ws", "");
   }
 
-  void test_exec_allSpectra_inplace() {
-    do_test("ChangePulsetimeTest_ws", "ChangePulsetimeTest_ws", "");
-  }
+  void test_exec_allSpectra_inplace() { do_test("ChangePulsetimeTest_ws", "ChangePulsetimeTest_ws", ""); }
 
   void test_exec_someSpectra_copying_the_workspace() {
     do_test("ChangePulsetimeTest_ws", "ChangePulsetimeTest_out_ws", "10-20");
   }
 
-  void test_exec_someSpectra_inplace() {
-    do_test("ChangePulsetimeTest_ws", "ChangePulsetimeTest_ws", "10-20");
-  }
+  void test_exec_someSpectra_inplace() { do_test("ChangePulsetimeTest_ws", "ChangePulsetimeTest_ws", "10-20"); }
 };
 
 //---------------------------------------------------------------------------------
@@ -141,12 +128,9 @@ private:
 
 public:
   void setUp() override {
-    EventWorkspace_sptr in_ws =
-        WorkspaceCreationHelper::createEventWorkspace2(30000, 30000);
+    EventWorkspace_sptr in_ws = WorkspaceCreationHelper::createEventWorkspace2(30000, 30000);
     m_workspace = in_ws;
   }
 
-  void test_change_of_pulse_time() {
-    execute_change_of_pulse_times(m_workspace, "1000", "");
-  }
+  void test_change_of_pulse_time() { execute_change_of_pulse_times(m_workspace, "1000", ""); }
 };

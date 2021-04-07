@@ -17,24 +17,20 @@ using namespace Mantid::API;
 
 namespace MantidQt {
 namespace CustomInterfaces {
-IndirectMolDyn::IndirectMolDyn(QWidget *parent)
-    : IndirectSimulationTab(parent) {
+IndirectMolDyn::IndirectMolDyn(QWidget *parent) : IndirectSimulationTab(parent) {
   m_uiForm.setupUi(parent);
-  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
-      m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraContour, "0"));
+  setOutputPlotOptionsPresenter(
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraContour, "0"));
 
-  connect(m_uiForm.ckCropEnergy, SIGNAL(toggled(bool)), m_uiForm.dspMaxEnergy,
-          SLOT(setEnabled(bool)));
-  connect(m_uiForm.ckResolution, SIGNAL(toggled(bool)), m_uiForm.dsResolution,
-          SLOT(setEnabled(bool)));
-  connect(m_uiForm.cbVersion, SIGNAL(currentIndexChanged(const QString &)),
-          this, SLOT(versionSelected(const QString &)));
+  connect(m_uiForm.ckCropEnergy, SIGNAL(toggled(bool)), m_uiForm.dspMaxEnergy, SLOT(setEnabled(bool)));
+  connect(m_uiForm.ckResolution, SIGNAL(toggled(bool)), m_uiForm.dsResolution, SLOT(setEnabled(bool)));
+  connect(m_uiForm.cbVersion, SIGNAL(currentIndexChanged(const QString &)), this,
+          SLOT(versionSelected(const QString &)));
 
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(algorithmComplete(bool)));
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsResolution->isOptional(true);
@@ -58,13 +54,11 @@ bool IndirectMolDyn::validate() {
 
     if (version == "3") {
       if (ext != "dat" && ext != "cdl")
-        uiv.addErrorMessage(
-            "File is not of expected type.\n File type must be .dat or .cdl");
+        uiv.addErrorMessage("File is not of expected type.\n File type must be .dat or .cdl");
 
       QString functions = m_uiForm.leFunctionNames->text();
       if (ext == "cdl" && functions.isEmpty())
-        uiv.addErrorMessage(
-            "Must specify at least one function when loading CDL file.");
+        uiv.addErrorMessage("Must specify at least one function when loading CDL file.");
     }
   }
 
@@ -127,9 +121,7 @@ void IndirectMolDyn::algorithmComplete(bool error) {
  *
  * @param settings :: The settings to loading into the interface
  */
-void IndirectMolDyn::loadSettings(const QSettings &settings) {
-  m_uiForm.mwRun->readSettings(settings.group());
-}
+void IndirectMolDyn::loadSettings(const QSettings &settings) { m_uiForm.mwRun->readSettings(settings.group()); }
 
 /**
  * Handles the version of nMoldyn being selected.
@@ -170,13 +162,9 @@ void IndirectMolDyn::setButtonsEnabled(bool enabled) {
   setSaveEnabled(enabled);
 }
 
-void IndirectMolDyn::setRunEnabled(bool enabled) {
-  m_uiForm.pbRun->setEnabled(enabled);
-}
+void IndirectMolDyn::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void IndirectMolDyn::setSaveEnabled(bool enabled) {
-  m_uiForm.pbSave->setEnabled(enabled);
-}
+void IndirectMolDyn::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

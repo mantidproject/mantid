@@ -20,11 +20,9 @@ namespace Kernel {
  * progressively covers a d-dimensional space with a set of points that are
  * uniformly distributed.
  */
-class MANTID_KERNEL_DLL QuasiRandomNumberSequence
-    : public NDRandomNumberGenerator {
+class MANTID_KERNEL_DLL QuasiRandomNumberSequence : public NDRandomNumberGenerator {
 public:
-  QuasiRandomNumberSequence(const unsigned int ndims)
-      : NDRandomNumberGenerator(ndims) {}
+  QuasiRandomNumberSequence(const unsigned int ndims) : NDRandomNumberGenerator(ndims) {}
 };
 } // namespace Kernel
 } // namespace Mantid

@@ -27,8 +27,6 @@ struct CaseInsensitiveStringComparator {
 
 /// Alias template for a map data structure that has case insensitive string
 /// comparision with a variable value type.
-template <class T>
-using CaseInsensitiveMap =
-    std::map<std::string, T, CaseInsensitiveStringComparator>;
+template <class T> using CaseInsensitiveMap = std::map<std::string, T, CaseInsensitiveStringComparator>;
 } // namespace Kernel
 } // namespace Mantid

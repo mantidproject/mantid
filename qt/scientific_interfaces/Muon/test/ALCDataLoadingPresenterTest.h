@@ -21,9 +21,8 @@ using namespace testing;
 
 namespace boost {
 template <class CharType, class CharTrait>
-std::basic_ostream<CharType, CharTrait> &
-operator<<(std::basic_ostream<CharType, CharTrait> &out,
-           optional<std::pair<double, double>> const &maybe) {
+std::basic_ostream<CharType, CharTrait> &operator<<(std::basic_ostream<CharType, CharTrait> &out,
+                                                    optional<std::pair<double, double>> const &maybe) {
   if (maybe)
     out << maybe->first << ", " << maybe->second;
   return out;
@@ -58,8 +57,7 @@ public:
   MOCK_CONST_METHOD0(isAlphaEnabled, bool());
 
   MOCK_METHOD0(initialize, void());
-  MOCK_METHOD2(setDataCurve, void(MatrixWorkspace_sptr workspace,
-                                  const std::size_t &workspaceIndex));
+  MOCK_METHOD2(setDataCurve, void(MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex));
   MOCK_METHOD1(displayError, void(const std::string &));
   MOCK_METHOD1(displayWarning, bool(const std::string &));
   MOCK_METHOD1(setAvailableLogs, void(const std::vector<std::string> &));
@@ -94,12 +92,8 @@ public:
   void requestLoading() { emit loadRequested(); }
 };
 
-MATCHER_P4(WorkspaceX, i, j, value, delta, "") {
-  return fabs(arg->x(i)[j] - value) < delta;
-}
-MATCHER_P4(WorkspaceY, i, j, value, delta, "") {
-  return fabs(arg->y(i)[j] - value) < delta;
-}
+MATCHER_P4(WorkspaceX, i, j, value, delta, "") { return fabs(arg->x(i)[j] - value) < delta; }
+MATCHER_P4(WorkspaceY, i, j, value, delta, "") { return fabs(arg->y(i)[j] - value) < delta; }
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 
@@ -108,17 +102,13 @@ class ALCDataLoadingPresenterTest : public CxxTest::TestSuite {
   ALCDataLoadingPresenter *m_presenter;
 
   std::string loadingString = std::string("Loading MUSR15189,15191-92");
-  std::string loadedString =
-      std::string("Successfully loaded MUSR15189,15191-92");
-  std::string foundString =
-      std::string("Successfully found MUSR15189,15191-92");
+  std::string loadedString = std::string("Successfully loaded MUSR15189,15191-92");
+  std::string foundString = std::string("Successfully found MUSR15189,15191-92");
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ALCDataLoadingPresenterTest *createSuite() {
-    return new ALCDataLoadingPresenterTest();
-  }
+  static ALCDataLoadingPresenterTest *createSuite() { return new ALCDataLoadingPresenterTest(); }
   static void destroySuite(ALCDataLoadingPresenterTest *suite) { delete suite; }
 
   ALCDataLoadingPresenterTest() {
@@ -131,22 +121,17 @@ public:
     m_presenter->initialize();
 
     // Set some valid default return values for the view mock object getters
-    std::vector<std::string> defaultFiles = {
-        "MUSR00015189.nxs", "MUSR00015191.nxs", "MUSR00015192.nxs"};
+    std::vector<std::string> defaultFiles = {"MUSR00015189.nxs", "MUSR00015191.nxs", "MUSR00015192.nxs"};
     ON_CALL(*m_view, getFiles()).WillByDefault(Return(defaultFiles));
-    ON_CALL(*m_view, getFirstFile())
-        .WillByDefault(Return(defaultFiles.front()));
+    ON_CALL(*m_view, getFirstFile()).WillByDefault(Return(defaultFiles.front()));
     ON_CALL(*m_view, getRunsText()).WillByDefault(Return("15189,15191-92"));
     ON_CALL(*m_view, getRunsError()).WillByDefault(Return(std::string{}));
-    ON_CALL(*m_view, getRunsFirstRunText())
-        .WillByDefault(Return(std::string{}));
+    ON_CALL(*m_view, getRunsFirstRunText()).WillByDefault(Return(std::string{}));
     ON_CALL(*m_view, getInstrument()).WillByDefault(Return("MUSR"));
     ON_CALL(*m_view, calculationType()).WillByDefault(Return("Integral"));
     ON_CALL(*m_view, log()).WillByDefault(Return("sample_magn_field"));
     ON_CALL(*m_view, function()).WillByDefault(Return("Last"));
-    ON_CALL(*m_view, timeRange())
-        .WillByDefault(
-            Return(boost::make_optional(std::make_pair(-6.0, 32.0))));
+    ON_CALL(*m_view, timeRange()).WillByDefault(Return(boost::make_optional(std::make_pair(-6.0, 32.0))));
     // Add range for integration
     ON_CALL(*m_view, deadTimeType()).WillByDefault(Return("None"));
     ON_CALL(*m_view, detectorGroupingType()).WillByDefault(Return("Auto"));
@@ -173,13 +158,10 @@ public:
 
     EXPECT_CALL(*m_view, setLoadStatus(loadingString, "orange")).Times(1);
     EXPECT_CALL(*m_view, disableAll());
-    EXPECT_CALL(
-        *m_view,
-        setDataCurve(
-            AllOf(WorkspaceX(0, 0, 1350, 1E-8), WorkspaceX(0, 1, 1370, 1E-8),
-                  WorkspaceX(0, 2, 1380, 1E-8), WorkspaceY(0, 0, 0.150, 1E-3),
-                  WorkspaceY(0, 1, 0.128, 1E-3), WorkspaceY(0, 2, 0.109, 1E-3)),
-            0));
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceX(0, 0, 1350, 1E-8), WorkspaceX(0, 1, 1370, 1E-8),
+                                            WorkspaceX(0, 2, 1380, 1E-8), WorkspaceY(0, 0, 0.150, 1E-3),
+                                            WorkspaceY(0, 1, 0.128, 1E-3), WorkspaceY(0, 2, 0.109, 1E-3)),
+                                      0));
     EXPECT_CALL(*m_view, enableAll());
     EXPECT_CALL(*m_view, setLoadStatus(loadedString, "green")).Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
@@ -194,8 +176,7 @@ public:
     EXPECT_CALL(*m_view, setLoadStatus(loadingString, "orange")).Times(1);
     EXPECT_CALL(*m_view, setLoadStatus(loadedString, "green")).Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
-    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceY(0, 0, 3.00349, 1E-3),
-                                            WorkspaceY(0, 1, 2.47935, 1E-3),
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceY(0, 0, 3.00349, 1E-3), WorkspaceY(0, 1, 2.47935, 1E-3),
                                             WorkspaceY(0, 2, 1.85123, 1E-3)),
                                       0));
 
@@ -204,14 +185,12 @@ public:
 
   void test_load_timeLimits() {
     // Set time limit
-    ON_CALL(*m_view, timeRange())
-        .WillByDefault(Return(boost::make_optional(std::make_pair(5.0, 10.0))));
+    ON_CALL(*m_view, timeRange()).WillByDefault(Return(boost::make_optional(std::make_pair(5.0, 10.0))));
 
     EXPECT_CALL(*m_view, setLoadStatus(loadingString, "orange")).Times(1);
     EXPECT_CALL(*m_view, setLoadStatus(loadedString, "green")).Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
-    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceY(0, 0, 0.137, 1E-3),
-                                            WorkspaceY(0, 1, 0.111, 1E-3),
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceY(0, 0, 0.137, 1E-3), WorkspaceY(0, 1, 0.111, 1E-3),
                                             WorkspaceY(0, 2, 0.109, 1E-3)),
                                       0));
 
@@ -221,22 +200,16 @@ public:
   void test_updateAvailableInfo() {
     // Test time limits
     auto timeRange = std::make_pair<double, double>(0.0, 0.0);
-    ON_CALL(*m_view, timeRange())
-        .WillByDefault(Return(boost::make_optional(timeRange)));
+    ON_CALL(*m_view, timeRange()).WillByDefault(Return(boost::make_optional(timeRange)));
 
-    EXPECT_CALL(*m_view, getFirstFile())
-        .WillRepeatedly(Return("MUSR00015189.nxs"));
+    EXPECT_CALL(*m_view, getFirstFile()).WillRepeatedly(Return("MUSR00015189.nxs"));
     // Test logs
-    EXPECT_CALL(*m_view,
-                setAvailableLogs(
-                    AllOf(Property(&std::vector<std::string>::size, 39),
-                          Contains("run_number"), Contains("sample_magn_field"),
-                          Contains("Field_Danfysik"))))
+    EXPECT_CALL(*m_view, setAvailableLogs(AllOf(Property(&std::vector<std::string>::size, 39), Contains("run_number"),
+                                                Contains("sample_magn_field"), Contains("Field_Danfysik"))))
         .Times(1);
     // Test periods
-    EXPECT_CALL(*m_view, setAvailablePeriods(
-                             AllOf(Property(&std::vector<std::string>::size, 2),
-                                   Contains("1"), Contains("2"))))
+    EXPECT_CALL(*m_view,
+                setAvailablePeriods(AllOf(Property(&std::vector<std::string>::size, 2), Contains("1"), Contains("2"))))
         .Times(1);
     EXPECT_CALL(*m_view, setTimeLimits(Le(0.107), Ge(31.44))).Times(1);
 
@@ -245,27 +218,19 @@ public:
 
   void test_updateAvailableInfo_NotFirstRun() {
     // Test time limits
-    auto timeRange =
-        std::make_pair<double, double>(0.1, 10.0); // not the first run loaded
-    ON_CALL(*m_view, timeRange())
-        .WillByDefault(Return(boost::make_optional(timeRange)));
+    auto timeRange = std::make_pair<double, double>(0.1, 10.0); // not the first run loaded
+    ON_CALL(*m_view, timeRange()).WillByDefault(Return(boost::make_optional(timeRange)));
 
-    EXPECT_CALL(*m_view, getFirstFile())
-        .WillRepeatedly(Return("MUSR00015189.nxs"));
+    EXPECT_CALL(*m_view, getFirstFile()).WillRepeatedly(Return("MUSR00015189.nxs"));
     // Test logs
-    EXPECT_CALL(*m_view,
-                setAvailableLogs(
-                    AllOf(Property(&std::vector<std::string>::size, 39),
-                          Contains("run_number"), Contains("sample_magn_field"),
-                          Contains("Field_Danfysik"))))
+    EXPECT_CALL(*m_view, setAvailableLogs(AllOf(Property(&std::vector<std::string>::size, 39), Contains("run_number"),
+                                                Contains("sample_magn_field"), Contains("Field_Danfysik"))))
         .Times(1);
     // Test periods
-    EXPECT_CALL(*m_view, setAvailablePeriods(
-                             AllOf(Property(&std::vector<std::string>::size, 2),
-                                   Contains("1"), Contains("2"))))
+    EXPECT_CALL(*m_view,
+                setAvailablePeriods(AllOf(Property(&std::vector<std::string>::size, 2), Contains("1"), Contains("2"))))
         .Times(1);
-    EXPECT_CALL(*m_view, setTimeLimits(_, _))
-        .Times(0); // shouldn't reset time limits
+    EXPECT_CALL(*m_view, setTimeLimits(_, _)).Times(0); // shouldn't reset time limits
 
     m_view->foundRuns();
   }
@@ -299,8 +264,7 @@ public:
   }
 
   void test_updateAvailableLogs_unsupportedFirstRun() {
-    ON_CALL(*m_view, getFirstFile())
-        .WillByDefault(Return("LOQ49886.nxs")); // XXX: not a Muon file
+    ON_CALL(*m_view, getFirstFile()).WillByDefault(Return("LOQ49886.nxs")); // XXX: not a Muon file
 
     EXPECT_CALL(*m_view, setAvailableInfoToEmpty()).Times(1);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
@@ -330,8 +294,7 @@ public:
     EXPECT_CALL(*m_view, setDataCurve(_, _)).Times(0);
     EXPECT_CALL(*m_view, setLoadStatus("Error", "red")).Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(false)).Times(1);
-    EXPECT_CALL(*m_view, displayError("The list of files to load is empty"))
-        .Times(1);
+    EXPECT_CALL(*m_view, displayError("The list of files to load is empty")).Times(1);
 
     m_view->requestLoading();
   }
@@ -347,8 +310,7 @@ public:
     EXPECT_CALL(*m_view, setLoadStatus(loadingString, "orange")).Times(1);
     EXPECT_CALL(*m_view, setLoadStatus(loadedString, "green")).Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
-    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceY(0, 0, 0.151202, 1E-3),
-                                            WorkspaceY(0, 1, 0.129347, 1E-3),
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceY(0, 0, 0.151202, 1E-3), WorkspaceY(0, 1, 0.129347, 1E-3),
                                             WorkspaceY(0, 2, 0.109803, 1E-3)),
                                       0));
     TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
@@ -381,13 +343,10 @@ public:
     EXPECT_CALL(*m_view, setLoadStatus(loadingString, "orange")).Times(1);
     EXPECT_CALL(*m_view, setLoadStatus(loadedString, "green")).Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
-    EXPECT_CALL(
-        *m_view,
-        setDataCurve(
-            AllOf(WorkspaceX(0, 0, 1350, 1E-8), WorkspaceX(0, 1, 1370, 1E-8),
-                  WorkspaceX(0, 2, 1380, 1E-8), WorkspaceY(0, 0, 0.150, 1E-3),
-                  WorkspaceY(0, 1, 0.128, 1E-3), WorkspaceY(0, 2, 0.109, 1E-3)),
-            0));
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceX(0, 0, 1350, 1E-8), WorkspaceX(0, 1, 1370, 1E-8),
+                                            WorkspaceX(0, 2, 1380, 1E-8), WorkspaceY(0, 0, 0.150, 1E-3),
+                                            WorkspaceY(0, 1, 0.128, 1E-3), WorkspaceY(0, 2, 0.109, 1E-3)),
+                                      0));
 
     m_view->foundRuns();
     TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
@@ -406,12 +365,9 @@ public:
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
     EXPECT_CALL(*m_view, greenPeriod()).Times(1);
     // Check results
-    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceX(0, 0, 1350, 1E-8),
-                                            WorkspaceX(0, 1, 1370, 1E-8),
-                                            WorkspaceX(0, 2, 1380, 1E-8),
-                                            WorkspaceY(0, 0, 0.012884, 1E-6),
-                                            WorkspaceY(0, 1, 0.038717, 1E-6),
-                                            WorkspaceY(0, 2, 0.054546, 1E-6)),
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceX(0, 0, 1350, 1E-8), WorkspaceX(0, 1, 1370, 1E-8),
+                                            WorkspaceX(0, 2, 1380, 1E-8), WorkspaceY(0, 0, 0.012884, 1E-6),
+                                            WorkspaceY(0, 1, 0.038717, 1E-6), WorkspaceY(0, 2, 0.054546, 1E-6)),
                                       0));
     TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
   }
@@ -424,12 +380,9 @@ public:
     EXPECT_CALL(*m_view, setLoadStatus(loadingString, "orange")).Times(1);
     EXPECT_CALL(*m_view, setLoadStatus(loadedString, "green")).Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
-    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceX(0, 0, 1364.520, 1E-3),
-                                            WorkspaceX(0, 1, 1380.000, 1E-3),
-                                            WorkspaceX(0, 2, 1398.090, 1E-3),
-                                            WorkspaceY(0, 0, 0.12838, 1E-5),
-                                            WorkspaceY(0, 1, 0.10900, 1E-5),
-                                            WorkspaceY(0, 2, 0.15004, 1E-5)),
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceX(0, 0, 1364.520, 1E-3), WorkspaceX(0, 1, 1380.000, 1E-3),
+                                            WorkspaceX(0, 2, 1398.090, 1E-3), WorkspaceY(0, 0, 0.12838, 1E-5),
+                                            WorkspaceY(0, 1, 0.10900, 1E-5), WorkspaceY(0, 2, 0.15004, 1E-5)),
                                       0));
 
     TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
@@ -446,8 +399,7 @@ public:
     auto warningMessage = "You are attempting to load 201 runs, are you "
                           "sure you want to do this?";
     ON_CALL(*m_view, getFiles()).WillByDefault(Return(files));
-    ON_CALL(*m_view, displayWarning(warningMessage))
-        .WillByDefault(Return(true));
+    ON_CALL(*m_view, displayWarning(warningMessage)).WillByDefault(Return(true));
 
     EXPECT_CALL(*m_view, getFiles()).Times(1);
     EXPECT_CALL(*m_view, displayWarning(warningMessage)).Times(1);
@@ -464,8 +416,7 @@ public:
     auto warningMessage = "You are attempting to load 201 runs, are you "
                           "sure you want to do this?";
     ON_CALL(*m_view, getFiles()).WillByDefault(Return(files));
-    ON_CALL(*m_view, displayWarning(warningMessage))
-        .WillByDefault(Return(false));
+    ON_CALL(*m_view, displayWarning(warningMessage)).WillByDefault(Return(false));
 
     EXPECT_CALL(*m_view, getFiles()).Times(1);
     EXPECT_CALL(*m_view, displayWarning(warningMessage)).Times(1);
@@ -510,13 +461,10 @@ public:
   void test_alpha_applied_correctly_single_period_data() {
     std::string singlePeriod = "EMU00019489.nxs";
     ON_CALL(*m_view, getFirstFile()).WillByDefault(Return(singlePeriod));
-    ON_CALL(*m_view, getFiles())
-        .WillByDefault(Return(std::vector<std::string>{singlePeriod}));
+    ON_CALL(*m_view, getFiles()).WillByDefault(Return(std::vector<std::string>{singlePeriod}));
     ON_CALL(*m_view, getAlphaValue()).WillByDefault(Return(std::string{"0.9"}));
 
-    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceX(0, 0, 2000, 1E-3),
-                                            WorkspaceY(0, 0, 0.29773, 1E-5)),
-                                      0));
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceX(0, 0, 2000, 1E-3), WorkspaceY(0, 0, 0.29773, 1E-5)), 0));
     TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
   }
 

@@ -200,7 +200,7 @@ fi" )
 set ( ERROR_CMD "-m mantidqt.dialogs.errorreports.main --exitcode=\$?" )
 
 ##### Local dev version
-set ( PYTHON_ARGS "-Wdefault::DeprecationWarning" )
+set ( PYTHON_ARGS "-Wdefault::DeprecationWarning -Werror:::mantid -Werror:::mantidqt" )
 
 set ( LOCAL_PYPATH "\${INSTALLDIR}/bin" )
 

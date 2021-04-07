@@ -46,18 +46,14 @@ public:
     ResetNegatives alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", INPUT_WS_NAME));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", OUTPUT_WS_NAME));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", INPUT_WS_NAME));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", OUTPUT_WS_NAME));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // get the output workspace
     MatrixWorkspace_sptr outputWS;
-    TS_ASSERT_THROWS_NOTHING(
-        outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            OUTPUT_WS_NAME));
+    TS_ASSERT_THROWS_NOTHING(outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OUTPUT_WS_NAME));
     TS_ASSERT(outputWS);
     if (!outputWS)
       return;
@@ -80,19 +76,15 @@ public:
     ResetNegatives alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", INPUT_WS_NAME));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", OUTPUT_WS_NAME));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", INPUT_WS_NAME));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", OUTPUT_WS_NAME));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AddMinimum", true));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // get the output workspace
     MatrixWorkspace_sptr outputWS;
-    TS_ASSERT_THROWS_NOTHING(
-        outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            OUTPUT_WS_NAME));
+    TS_ASSERT_THROWS_NOTHING(outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OUTPUT_WS_NAME));
     TS_ASSERT(outputWS);
     if (!outputWS)
       return;
@@ -116,10 +108,8 @@ public:
     ResetNegatives alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", INPUT_WS_NAME));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", OUTPUT_WS_NAME));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", INPUT_WS_NAME));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", OUTPUT_WS_NAME));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AddMinimum", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ResetValue", resetValue));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -127,9 +117,7 @@ public:
 
     // get the output workspace
     MatrixWorkspace_sptr outputWS;
-    TS_ASSERT_THROWS_NOTHING(
-        outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            OUTPUT_WS_NAME));
+    TS_ASSERT_THROWS_NOTHING(outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OUTPUT_WS_NAME));
     TS_ASSERT(outputWS);
     if (!outputWS)
       return;
@@ -145,12 +133,10 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr generateInput(const double offset,
-                                     const double delta = 0.) {
+  MatrixWorkspace_sptr generateInput(const double offset, const double delta = 0.) {
     constexpr int nhist = 3;
     constexpr int nbins = 256;
-    MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, nbins, 1., .2);
+    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, nbins, 1., .2);
     for (int i = 0; i < nhist; i++) {
       double value = offset + static_cast<double>(i);
       auto &y = inputWS->mutableY(i);
@@ -167,9 +153,7 @@ class ResetNegativesTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ResetNegativesTestPerformance *createSuite() {
-    return new ResetNegativesTestPerformance();
-  }
+  static ResetNegativesTestPerformance *createSuite() { return new ResetNegativesTestPerformance(); }
   static void destroySuite(ResetNegativesTestPerformance *suite) {
     AnalysisDataService::Instance().clear();
     delete suite;
@@ -188,12 +172,10 @@ public:
 
 private:
   MatrixWorkspace_sptr input;
-  MatrixWorkspace_sptr generateInput(const double offset,
-                                     const double delta = 0.) {
+  MatrixWorkspace_sptr generateInput(const double offset, const double delta = 0.) {
     constexpr int nhist = 50000;
     constexpr int nbins = 1000;
-    MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, nbins, 1., .2);
+    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, nbins, 1., .2);
     for (int i = 0; i < nhist; i++) {
       double value = offset + static_cast<double>(i);
       auto &y = inputWS->mutableY(i);

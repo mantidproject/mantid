@@ -37,7 +37,7 @@ Usage
 **Example:**
 
 .. testcode:: ExSimpleSpere
-    
+
     ws = CreateSampleWorkspace("Histogram",NumBanks=1,BankPixelWidth=2)
     ws = ConvertUnits(ws,"Wavelength")
     SetSampleMaterial(ws,ChemicalFormula="V")

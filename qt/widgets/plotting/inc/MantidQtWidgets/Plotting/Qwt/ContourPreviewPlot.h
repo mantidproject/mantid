@@ -39,9 +39,7 @@ using MWDimension_sptr = std::shared_ptr<Mantid::API::MWDimension>;
 using MWDimension_const_sptr = std::shared_ptr<Mantid::API::MWDimension const>;
 using DimensionRange = std::pair<Mantid::coord_t, Mantid::coord_t>;
 
-class EXPORT_OPT_MANTIDQT_PLOTTING ContourPreviewPlot
-    : public QWidget,
-      public MantidQt::API::WorkspaceObserver {
+class EXPORT_OPT_MANTIDQT_PLOTTING ContourPreviewPlot : public QWidget, public MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 
 public:
@@ -62,9 +60,8 @@ public:
   std::tuple<double, double> getAxisRange(AxisID axisID) const;
 
 protected:
-  void preDeleteHandle(
-      std::string const &workspaceName,
-      std::shared_ptr<Mantid::API::Workspace> const &workspace) override;
+  void preDeleteHandle(std::string const &workspaceName,
+                       std::shared_ptr<Mantid::API::Workspace> const &workspace) override;
 
 private slots:
   void handleSetTransparentZeros(bool const &transparent);
@@ -77,9 +74,7 @@ private:
   void updateDisplay();
 
   void checkRangeLimits() const;
-  void checkForInfiniteLimits(DimensionRange const &range,
-                              std::size_t const &index,
-                              std::ostringstream &message) const;
+  void checkForInfiniteLimits(DimensionRange const &range, std::size_t const &index, std::ostringstream &message) const;
   DimensionRange dimensionRange(std::size_t const &index) const;
   Mantid::coord_t dimensionMinimum(std::size_t const &index) const;
   Mantid::coord_t dimensionMaximum(std::size_t const &index) const;

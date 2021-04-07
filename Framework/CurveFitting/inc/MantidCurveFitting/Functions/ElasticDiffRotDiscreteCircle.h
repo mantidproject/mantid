@@ -25,9 +25,7 @@ namespace Functions {
 /* Class representing the elastic portion of DiffRotDiscreteCircle
  * Contains a Delta Dirac.
  */
-class MANTID_CURVEFITTING_DLL ElasticDiffRotDiscreteCircle
-    : public DeltaFunction,
-      public FunctionQDepends {
+class MANTID_CURVEFITTING_DLL ElasticDiffRotDiscreteCircle : public DeltaFunction, public FunctionQDepends {
 public:
   /// Constructor
   ElasticDiffRotDiscreteCircle();
