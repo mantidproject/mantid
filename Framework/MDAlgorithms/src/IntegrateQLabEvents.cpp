@@ -71,6 +71,7 @@ void IntegrateQLabEvents::addEvents(SlimEvents const &event_qs) {
     addEvent(event_q);
 }
 
+// Entry function that perform the integration
 Mantid::Geometry::PeakShape_const_sptr
 IntegrateQLabEvents::ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D const &peak_q, bool specify_size,
                                             double peak_radius, double back_inner_radius, double back_outer_radius,
@@ -147,9 +148,16 @@ std::pair<double, double> IntegrateQLabEvents::numInEllipsoidBkg(SlimEvents cons
       eventVec.emplace_back(event.first);
   }
 
+  // NOTE:
+  //  [for SNS only]
+  //  Some event has weight great than 1, which is corrected using the following prunning
+  //  by removing the top 1% events with higher weights.
+  //  It is worth pointing out that this pruning is (to the best) an rough estimate as it
+  //  will most likely either over-prunning (remove some events with weight of 1) or under-
+  //  pruning (did not remove all events with weights greater than 1).
   auto endIndex = eventVec.size();
   if (useOnePercentBackgroundCorrection) {
-    // Remove top 1% of background
+    // Remove top 1%
     std::sort(eventVec.begin(), eventVec.end(),
               [](const std::pair<double, double> &a, const std::pair<double, double> &b) { return a.first < b.first; });
     endIndex = static_cast<size_t>(0.99 * static_cast<double>(endIndex));
@@ -311,7 +319,9 @@ PeakShapeEllipsoid_const_sptr IntegrateQLabEvents::ellipseIntegrateEvents(
   if (inti < 0) {
     std::ostringstream msg;
     msg << "Negative intensity found: " << inti << "\n"
-        << "You might want to adjust the size of peak and background shell.\n";
+        << "Please use slice viewer to check the peak with negative intensity to decide:\n"
+        << "-- adjust peak and background raidus\n"
+        << "-- prune false positive indexation results\n";
     g_log.notice() << msg.str();
     // debug message
     std::ostringstream debugmsg;
