@@ -26,9 +26,8 @@ using namespace testing;
 
 namespace boost {
 template <class CharType, class CharTrait>
-std::basic_ostream<CharType, CharTrait> &
-operator<<(std::basic_ostream<CharType, CharTrait> &out,
-           optional<QString> const &maybe) {
+std::basic_ostream<CharType, CharTrait> &operator<<(std::basic_ostream<CharType, CharTrait> &out,
+                                                    optional<QString> const &maybe) {
   if (maybe)
     out << maybe->toStdString();
   return out;
@@ -52,12 +51,9 @@ public:
   MOCK_CONST_METHOD0(peakPicker, IPeakFunction_const_sptr());
 
   MOCK_METHOD0(initialize, void());
-  MOCK_METHOD2(setDataCurve, void(MatrixWorkspace_sptr workspace,
-                                  const std::size_t &workspaceIndex));
-  MOCK_METHOD2(setFittedCurve, void(MatrixWorkspace_sptr workspace,
-                                    const std::size_t &workspaceIndex));
-  MOCK_METHOD2(setGuessCurve, void(MatrixWorkspace_sptr workspace,
-                                   const std::size_t &workspaceIndex));
+  MOCK_METHOD2(setDataCurve, void(MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex));
+  MOCK_METHOD2(setFittedCurve, void(MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex));
+  MOCK_METHOD2(setGuessCurve, void(MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex));
   MOCK_METHOD1(setPeakPickerEnabled, void(bool));
   MOCK_METHOD1(setPeakPicker, void(const IPeakFunction_const_sptr &));
   MOCK_METHOD1(setFunction, void(const IFunction_const_sptr &));
@@ -78,9 +74,7 @@ public:
   MOCK_CONST_METHOD0(fittedPeaks, IFunction_const_sptr());
   MOCK_CONST_METHOD0(data, MatrixWorkspace_sptr());
   MOCK_METHOD1(fitPeaks, void(IFunction_const_sptr));
-  MOCK_METHOD2(guessData,
-               MatrixWorkspace_sptr(IFunction_const_sptr function,
-                                    const std::vector<double> &xValues));
+  MOCK_METHOD2(guessData, MatrixWorkspace_sptr(IFunction_const_sptr function, const std::vector<double> &xValues));
 };
 
 // DoubleNear matcher was introduced in gmock 1.7 only
@@ -94,8 +88,7 @@ class ALCPeakFittingPresenterTest : public CxxTest::TestSuite {
   ALCPeakFittingPresenter *m_presenter;
 
   IPeakFunction_sptr createGaussian(double centre, double fwhm, double height) {
-    auto peak = std::dynamic_pointer_cast<IPeakFunction>(
-        API::FunctionFactory::Instance().createFunction("Gaussian"));
+    auto peak = std::dynamic_pointer_cast<IPeakFunction>(API::FunctionFactory::Instance().createFunction("Gaussian"));
     peak->setCentre(centre);
     peak->setFwhm(fwhm);
     peak->setHeight(height);
@@ -105,9 +98,7 @@ class ALCPeakFittingPresenterTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ALCPeakFittingPresenterTest *createSuite() {
-    return new ALCPeakFittingPresenterTest();
-  }
+  static ALCPeakFittingPresenterTest *createSuite() { return new ALCPeakFittingPresenterTest(); }
   static void destroySuite(ALCPeakFittingPresenterTest *suite) { delete suite; }
 
   ALCPeakFittingPresenterTest() {
@@ -142,11 +133,8 @@ public:
   void test_fitEmptyFunction() {
     auto ws = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
     ON_CALL(*m_model, data()).WillByDefault(Return(ws));
-    ON_CALL(*m_view, function(QString("")))
-        .WillByDefault(Return(IFunction_const_sptr()));
-    EXPECT_CALL(*m_view,
-                displayError(QString("Couldn't fit with empty function/data")))
-        .Times(1);
+    ON_CALL(*m_view, function(QString(""))).WillByDefault(Return(IFunction_const_sptr()));
+    EXPECT_CALL(*m_view, displayError(QString("Couldn't fit with empty function/data"))).Times(1);
 
     m_view->requestFit();
   }
@@ -159,16 +147,15 @@ public:
 
     ON_CALL(*m_view, function(QString(""))).WillByDefault(Return(peaks));
 
-    EXPECT_CALL(*m_model, fitPeaks(Property(&IFunction_const_sptr::get,
-                                            Property(&IFunction::asString,
-                                                     peaks->asString()))));
+    EXPECT_CALL(*m_model,
+                fitPeaks(Property(&IFunction_const_sptr::get, Property(&IFunction::asString, peaks->asString()))));
 
     m_view->requestFit();
   }
 
   void test_onDataChanged() {
-    auto dataWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceCreationHelper::create2DWorkspace123(1, 3));
+    auto dataWorkspace =
+        std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::create2DWorkspace123(1, 3));
 
     ON_CALL(*m_model, data()).WillByDefault(Return(dataWorkspace));
 
@@ -178,8 +165,8 @@ public:
 
   void test_onFittedPeaksChanged() {
     IFunction_const_sptr fitFunction = createGaussian(1, 2, 3);
-    auto dataWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceCreationHelper::create2DWorkspace123(1, 3));
+    auto dataWorkspace =
+        std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::create2DWorkspace123(1, 3));
 
     ON_CALL(*m_model, fittedPeaks()).WillByDefault(Return(fitFunction));
     ON_CALL(*m_model, data()).WillByDefault(Return(dataWorkspace));
@@ -192,11 +179,9 @@ public:
   }
 
   void test_onFittedPeaksChanged_toEmpty() {
-    const auto dataWorkspace =
-        WorkspaceCreationHelper::create2DWorkspace123(1, 3);
+    const auto dataWorkspace = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
 
-    ON_CALL(*m_model, fittedPeaks())
-        .WillByDefault(Return(IFunction_const_sptr()));
+    ON_CALL(*m_model, fittedPeaks()).WillByDefault(Return(IFunction_const_sptr()));
     ON_CALL(*m_model, data()).WillByDefault(Return(dataWorkspace));
 
     EXPECT_CALL(*m_view, removePlot(QString("Fit")));
@@ -214,27 +199,22 @@ public:
   }
 
   void test_onCurrentFunctionChanged_peak() {
-    ON_CALL(*m_view, currentFunctionIndex())
-        .WillByDefault(Return(boost::optional<QString>("f1")));
-    ON_CALL(*m_view, function(QString("f1")))
-        .WillByDefault(Return(createGaussian(1, 2, 3)));
+    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(boost::optional<QString>("f1")));
+    ON_CALL(*m_view, function(QString("f1"))).WillByDefault(Return(createGaussian(1, 2, 3)));
 
     EXPECT_CALL(*m_view, setPeakPickerEnabled(true));
-    EXPECT_CALL(*m_view, setPeakPicker(Property(
-                             &IPeakFunction_const_sptr::get,
-                             AllOf(Property(&IPeakFunction::centre, 1),
-                                   Property(&IPeakFunction::fwhm, 2),
-                                   Property(&IPeakFunction::height, 3)))));
+    EXPECT_CALL(*m_view,
+                setPeakPicker(Property(&IPeakFunction_const_sptr::get,
+                                       AllOf(Property(&IPeakFunction::centre, 1), Property(&IPeakFunction::fwhm, 2),
+                                             Property(&IPeakFunction::height, 3)))));
 
     m_view->changeCurrentFunction();
   }
 
   void test_onCurrentFunctionChanged_nonPeak() {
-    ON_CALL(*m_view, currentFunctionIndex())
-        .WillByDefault(Return(boost::optional<QString>("f1")));
+    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(boost::optional<QString>("f1")));
     ON_CALL(*m_view, function(QString("f1")))
-        .WillByDefault(Return(API::FunctionFactory::Instance().createFunction(
-            "LinearBackground")));
+        .WillByDefault(Return(API::FunctionFactory::Instance().createFunction("LinearBackground")));
 
     EXPECT_CALL(*m_view, setPeakPickerEnabled(false));
 
@@ -242,32 +222,25 @@ public:
   }
 
   void test_onPeakPickerChanged() {
-    ON_CALL(*m_view, currentFunctionIndex())
-        .WillByDefault(Return(boost::optional<QString>("f1")));
-    ON_CALL(*m_view, peakPicker())
-        .WillByDefault(Return(createGaussian(4, 5, 6)));
+    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(boost::optional<QString>("f1")));
+    ON_CALL(*m_view, peakPicker()).WillByDefault(Return(createGaussian(4, 5, 6)));
 
     EXPECT_CALL(*m_view, setParameter(QString("f1"), QString("PeakCentre"), 4));
-    EXPECT_CALL(*m_view, setParameter(QString("f1"), QString("Sigma"),
-                                      DoubleDelta(2.123, 1E-3)));
+    EXPECT_CALL(*m_view, setParameter(QString("f1"), QString("Sigma"), DoubleDelta(2.123, 1E-3)));
     EXPECT_CALL(*m_view, setParameter(QString("f1"), QString("Height"), 6));
 
     m_view->changePeakPicker();
   }
 
   void test_onParameterChanged_peak() {
-    ON_CALL(*m_view, currentFunctionIndex())
-        .WillByDefault(Return(boost::optional<QString>("f1")));
-    ON_CALL(*m_view, function(QString("f1")))
-        .WillByDefault(Return(createGaussian(4, 2, 6)));
-    ON_CALL(*m_view, peakPicker())
-        .WillByDefault(Return(createGaussian(4, 5, 6)));
+    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(boost::optional<QString>("f1")));
+    ON_CALL(*m_view, function(QString("f1"))).WillByDefault(Return(createGaussian(4, 2, 6)));
+    ON_CALL(*m_view, peakPicker()).WillByDefault(Return(createGaussian(4, 5, 6)));
 
-    EXPECT_CALL(*m_view, setPeakPicker(Property(
-                             &IPeakFunction_const_sptr::get,
-                             AllOf(Property(&IPeakFunction::centre, 4),
-                                   Property(&IPeakFunction::fwhm, 2),
-                                   Property(&IPeakFunction::height, 6)))));
+    EXPECT_CALL(*m_view,
+                setPeakPicker(Property(&IPeakFunction_const_sptr::get,
+                                       AllOf(Property(&IPeakFunction::centre, 4), Property(&IPeakFunction::fwhm, 2),
+                                             Property(&IPeakFunction::height, 6)))));
 
     m_view->changeParameter(QString("f1"), QString("Sigma"));
   }
@@ -277,8 +250,7 @@ public:
   // if it's thrown for currently selected peak function, because that's when
   // PeakPicker is displayed
   void test_onParameterChanged_notACurrentFunction() {
-    ON_CALL(*m_view, currentFunctionIndex())
-        .WillByDefault(Return(boost::optional<QString>("f2")));
+    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(boost::optional<QString>("f2")));
 
     EXPECT_CALL(*m_view, setPeakPicker(_)).Times(0);
 
@@ -286,11 +258,9 @@ public:
   }
 
   void test_onParameterChanged_nonPeak() {
-    ON_CALL(*m_view, currentFunctionIndex())
-        .WillByDefault(Return(boost::optional<QString>("f1")));
+    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(boost::optional<QString>("f1")));
     ON_CALL(*m_view, function(QString("f1")))
-        .WillByDefault(Return(API::FunctionFactory::Instance().createFunction(
-            "LinearBackground")));
+        .WillByDefault(Return(API::FunctionFactory::Instance().createFunction("LinearBackground")));
 
     EXPECT_CALL(*m_view, setPeakPicker(_)).Times(0);
 
@@ -309,8 +279,7 @@ public:
     auto dataWorkspace = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
 
     ON_CALL(*m_model, data()).WillByDefault(Return(dataWorkspace));
-    ON_CALL(*m_view, function(QString("")))
-        .WillByDefault(Return(IFunction_const_sptr()));
+    ON_CALL(*m_view, function(QString(""))).WillByDefault(Return(IFunction_const_sptr()));
 
     EXPECT_CALL(*m_view, removePlot(QString("Guess")));
     m_view->plotGuess();
@@ -335,17 +304,16 @@ public:
    * Test that "Plot guess" with a function set plots a function
    */
   void test_plotGuess() {
-    auto dataWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceCreationHelper::create2DWorkspace123(1, 3));
-    auto guessWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceCreationHelper::create2DWorkspace123(1, 4));
+    auto dataWorkspace =
+        std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::create2DWorkspace123(1, 3));
+    auto guessWorkspace =
+        std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::create2DWorkspace123(1, 4));
     IFunction_const_sptr peaks = createGaussian(1, 2, 3);
     const auto xValues = dataWorkspace->x(0).rawData();
 
     ON_CALL(*m_model, data()).WillByDefault(Return(dataWorkspace));
     ON_CALL(*m_view, function(QString(""))).WillByDefault(Return(peaks));
-    ON_CALL(*m_model, guessData(peaks, xValues))
-        .WillByDefault(Return(guessWorkspace));
+    ON_CALL(*m_model, guessData(peaks, xValues)).WillByDefault(Return(guessWorkspace));
 
     EXPECT_CALL(*m_view, setGuessCurve(guessWorkspace, 0));
 

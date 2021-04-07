@@ -36,18 +36,12 @@ public:
   IObject_sptr getSampleShape() const;
 
   void setSampleShape(const std::string &sampleShapeXML);
-  void setSampleShape(IObject_sptr sampleShape) {
-    m_sampleShape = std::move(sampleShape);
-  };
+  void setSampleShape(IObject_sptr sampleShape) { m_sampleShape = std::move(sampleShape); };
 
   const IObject &getShape() const { return *m_shape; }
 
-  bool isValid(const Kernel::V3D &p) const override {
-    return m_shape->isValid(p);
-  }
-  bool isOnSide(const Kernel::V3D &p) const override {
-    return m_shape->isOnSide(p);
-  }
+  bool isValid(const Kernel::V3D &p) const override { return m_shape->isValid(p); }
+  bool isOnSide(const Kernel::V3D &p) const override { return m_shape->isOnSide(p); }
   bool hasValidShape() const override { return m_shape->hasValidShape(); }
 
   IObject *clone() const override { return new Container(*this); }
@@ -58,69 +52,44 @@ public:
 
   int getName() const override { return m_shape->getName(); }
 
-  int interceptSurface(Geometry::Track &t) const override {
-    return m_shape->interceptSurface(t);
-  }
-  double distance(const Geometry::Track &t) const override {
-    return m_shape->distance(t);
-  }
-  double solidAngle(const Kernel::V3D &observer) const override {
-    return m_shape->solidAngle(observer);
-  }
-  double solidAngle(const Kernel::V3D &observer,
-                    const Kernel::V3D &scaleFactor) const override {
+  int interceptSurface(Geometry::Track &t) const override { return m_shape->interceptSurface(t); }
+  double distance(const Geometry::Track &t) const override { return m_shape->distance(t); }
+  double solidAngle(const Kernel::V3D &observer) const override { return m_shape->solidAngle(observer); }
+  double solidAngle(const Kernel::V3D &observer, const Kernel::V3D &scaleFactor) const override {
     return m_shape->solidAngle(observer, scaleFactor);
   }
   double volume() const override { return m_shape->volume(); }
-  const BoundingBox &getBoundingBox() const override {
-    return m_shape->getBoundingBox();
-  }
-  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
-                      double &ymin, double &zmin) const override {
+  const BoundingBox &getBoundingBox() const override { return m_shape->getBoundingBox(); }
+  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin,
+                      double &zmin) const override {
     m_shape->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
   }
 
-  int getPointInObject(Kernel::V3D &point) const override {
-    return m_shape->getPointInObject(point);
-  }
-  boost::optional<Kernel::V3D>
-  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                        const size_t i) const override {
+  int getPointInObject(Kernel::V3D &point) const override { return m_shape->getPointInObject(point); }
+  boost::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                                     const size_t i) const override {
     return m_shape->generatePointInObject(rng, i);
   }
-  boost::optional<Kernel::V3D>
-  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                        const BoundingBox &activeRegion,
-                        const size_t i) const override {
+  boost::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                                     const BoundingBox &activeRegion, const size_t i) const override {
     return m_shape->generatePointInObject(rng, activeRegion, i);
   }
 
-  detail::ShapeInfo::GeometryShape shape() const override {
-    return m_shape->shape();
-  }
+  detail::ShapeInfo::GeometryShape shape() const override { return m_shape->shape(); }
 
-  const detail::ShapeInfo &shapeInfo() const override {
-    return m_shape->shapeInfo();
-  }
+  const detail::ShapeInfo &shapeInfo() const override { return m_shape->shapeInfo(); }
 
-  void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
-                     std::vector<Kernel::V3D> &vectors, double &innerRadius,
+  void GetObjectGeom(detail::ShapeInfo::GeometryShape &type, std::vector<Kernel::V3D> &vectors, double &innerRadius,
                      double &radius, double &height) const override {
     m_shape->GetObjectGeom(type, vectors, innerRadius, radius, height);
   }
-  std::shared_ptr<GeometryHandler> getGeometryHandler() const override {
-    return m_shape->getGeometryHandler();
-  }
+  std::shared_ptr<GeometryHandler> getGeometryHandler() const override { return m_shape->getGeometryHandler(); }
 
   void draw() const override { m_shape->draw(); }
   void initDraw() const override { m_shape->initDraw(); }
 
-  const Kernel::Material &material() const override {
-    return m_shape->material();
-  }
-  virtual void setMaterial(const Kernel::Material &material) override {
-    m_shape->setMaterial(material);
-  };
+  const Kernel::Material &material() const override { return m_shape->material(); }
+  virtual void setMaterial(const Kernel::Material &material) override { m_shape->setMaterial(material); };
   void setID(const std::string &id) override;
   const std::string &id() const override { return m_shape->id(); }
 

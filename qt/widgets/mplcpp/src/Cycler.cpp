@@ -15,9 +15,7 @@ namespace Widgets {
 namespace MplCpp {
 
 namespace {
-Python::Object cyclerModule() {
-  return Python::NewRef(PyImport_ImportModule("cycler"));
-}
+Python::Object cyclerModule() { return Python::NewRef(PyImport_ImportModule("cycler")); }
 
 /**
  * Creates an iterable from a plain Cycler object
@@ -40,8 +38,7 @@ Python::Object cycleIterator(const Python::Object &rawCycler) {
  * that produces an iterable
  * @param obj An existing instance of a Cycler object
  */
-Cycler::Cycler(const Python::Object &obj)
-    : Python::InstanceHolder(cycleIterator(std::move(obj))) {}
+Cycler::Cycler(const Python::Object &obj) : Python::InstanceHolder(cycleIterator(std::move(obj))) {}
 
 /**
  * Advance the iterator and return the previous item

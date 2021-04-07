@@ -20,14 +20,10 @@ class DirectILLTubeBackgroundTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DirectILLTubeBackgroundTest *createSuite() {
-    return new DirectILLTubeBackgroundTest();
-  }
+  static DirectILLTubeBackgroundTest *createSuite() { return new DirectILLTubeBackgroundTest(); }
   static void destroySuite(DirectILLTubeBackgroundTest *suite) { delete suite; }
 
-  DirectILLTubeBackgroundTest() : CxxTest::TestSuite() {
-    API::FrameworkManager::Instance();
-  }
+  DirectILLTubeBackgroundTest() : CxxTest::TestSuite() { API::FrameworkManager::Instance(); }
 
   void test_Init() {
     Algorithms::DirectILLTubeBackground alg;
@@ -38,8 +34,7 @@ public:
 
   void test_Nondistribution() {
     API::MatrixWorkspace_sptr inWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            numBanks, numPixels, numBins);
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(numBanks, numPixels, numBins);
     TS_ASSERT(inWS->isHistogramData())
     TS_ASSERT(!inWS->isDistribution())
     std::array<double, numBanks> bankBkgs{{2.33, 4.22}};
@@ -74,8 +69,7 @@ public:
 
   void test_NondistributionNonequidistandBinning() {
     API::MatrixWorkspace_sptr inWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            numBanks, numPixels, numBins);
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(numBanks, numPixels, numBins);
     TS_ASSERT(inWS->isHistogramData())
     TS_ASSERT(!inWS->isDistribution())
     constexpr double startX{9.};
@@ -110,8 +104,7 @@ public:
 
   void test_Distribution() {
     API::MatrixWorkspace_sptr inWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            numBanks, numPixels, numBins);
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(numBanks, numPixels, numBins);
     TS_ASSERT(inWS->isHistogramData())
     TS_ASSERT(!inWS->isDistribution())
     std::array<double, numBanks> bankBkgs{{2.33, 4.22}};
@@ -150,8 +143,7 @@ public:
 
   void test_HigherDegreePolynomial() {
     API::MatrixWorkspace_sptr inWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            numBanks, numPixels, numBins);
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(numBanks, numPixels, numBins);
     for (size_t i = 0; i < inWS->getNumberHistograms(); ++i) {
       auto &Ys = inWS->mutableY(i);
       Ys = static_cast<double>(i);
@@ -184,8 +176,7 @@ public:
 
   void test_DiagnosticsWorkspace() {
     API::MatrixWorkspace_sptr inWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            numBanks, numPixels, numBins);
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(numBanks, numPixels, numBins);
     TS_ASSERT(inWS->isHistogramData())
     TS_ASSERT(!inWS->isDistribution())
     std::array<double, numBanks> bankBkgs{{2.33, 4.22}};
@@ -196,8 +187,7 @@ public:
         Ys[numBins / 2] = 1090.; // Peak.
       }
     }
-    auto maskWS =
-        std::make_unique<DataObjects::MaskWorkspace>(inWS->getInstrument());
+    auto maskWS = std::make_unique<DataObjects::MaskWorkspace>(inWS->getInstrument());
     maskWS->setMaskedIndex(1);
     inWS->mutableY(1) = -600;
     maskWS->setMaskedIndex(6);
@@ -213,8 +203,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Components", components))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EPPWorkspace", eppWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("DiagnosticsWorkspace", diagnosticsWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DiagnosticsWorkspace", diagnosticsWS))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     API::MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
@@ -235,8 +224,7 @@ public:
 
   void test_FailedEPPRowsAreIgnored() {
     API::MatrixWorkspace_sptr inWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            numBanks, numPixels, numBins);
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(numBanks, numPixels, numBins);
     TS_ASSERT(inWS->isHistogramData())
     TS_ASSERT(!inWS->isDistribution())
     std::array<double, numBanks> bankBkgs{{2.33, 4.22}};
@@ -249,18 +237,15 @@ public:
     }
     inWS->mutableY(1) = -600;
     inWS->mutableY(6) = 900;
-    std::vector<WorkspaceCreationHelper::EPPTableRow> eppRows(
-        numBanks * numSpectraPerBank);
+    std::vector<WorkspaceCreationHelper::EPPTableRow> eppRows(numBanks * numSpectraPerBank);
     for (auto &row : eppRows) {
       // Peak covers the middle bin of all histograms.
       row.peakCentre = static_cast<double>(numBins) / 2.;
       row.sigma = 1.1 / 6.;
     }
     // Fail the rows given special Y values above.
-    eppRows[1].fitStatus =
-        WorkspaceCreationHelper::EPPTableRow::FitStatus::FAILURE;
-    eppRows[6].fitStatus =
-        WorkspaceCreationHelper::EPPTableRow::FitStatus::FAILURE;
+    eppRows[1].fitStatus = WorkspaceCreationHelper::EPPTableRow::FitStatus::FAILURE;
+    eppRows[6].fitStatus = WorkspaceCreationHelper::EPPTableRow::FitStatus::FAILURE;
     auto eppWS = createEPPTableWorkspace(eppRows);
     auto outWS = execAlgorithm(inWS, eppWS);
     for (size_t i = 0; i < numBanks; ++i) {
@@ -281,9 +266,7 @@ private:
   constexpr static int numSpectraPerBank{numPixels * numPixels};
   constexpr static int numBins{12};
 
-  static API::MatrixWorkspace_sptr
-  execAlgorithm(API::MatrixWorkspace_sptr &inWS,
-                API::ITableWorkspace_sptr &eppWS) {
+  static API::MatrixWorkspace_sptr execAlgorithm(API::MatrixWorkspace_sptr &inWS, API::ITableWorkspace_sptr &eppWS) {
     std::vector<std::string> const components{"bank1", "bank2"};
     Algorithms::DirectILLTubeBackground alg;
     alg.setChild(true);
@@ -302,10 +285,8 @@ private:
     return outWS;
   }
 
-  static API::ITableWorkspace_sptr
-  makeEPPWorkspace(API::MatrixWorkspace const &ws) {
-    std::vector<WorkspaceCreationHelper::EPPTableRow> eppRows(
-        numBanks * numPixels * numPixels);
+  static API::ITableWorkspace_sptr makeEPPWorkspace(API::MatrixWorkspace const &ws) {
+    std::vector<WorkspaceCreationHelper::EPPTableRow> eppRows(numBanks * numPixels * numPixels);
     auto const centreBin = numBins / 2;
     auto const &Xs = ws.x(0);
     for (auto &row : eppRows) {
@@ -319,26 +300,18 @@ private:
 
 class DirectILLTubeBackgroundTestPerformance : public CxxTest::TestSuite {
 public:
-  static DirectILLTubeBackgroundTestPerformance *createSuite() {
-    return new DirectILLTubeBackgroundTestPerformance();
-  }
-  static void destroySuite(DirectILLTubeBackgroundTestPerformance *suite) {
-    delete suite;
-  }
+  static DirectILLTubeBackgroundTestPerformance *createSuite() { return new DirectILLTubeBackgroundTestPerformance(); }
+  static void destroySuite(DirectILLTubeBackgroundTestPerformance *suite) { delete suite; }
 
-  DirectILLTubeBackgroundTestPerformance() : CxxTest::TestSuite() {
-    API::FrameworkManager::Instance();
-  }
+  DirectILLTubeBackgroundTestPerformance() : CxxTest::TestSuite() { API::FrameworkManager::Instance(); }
 
   void testPerformance() {
     constexpr int numBanks{256};
     constexpr int numPixels{20};
     constexpr int numBins{512};
     API::MatrixWorkspace_sptr inWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            numBanks, numPixels, numBins);
-    std::vector<WorkspaceCreationHelper::EPPTableRow> eppRows(
-        numBanks * numPixels * numPixels);
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(numBanks, numPixels, numBins);
+    std::vector<WorkspaceCreationHelper::EPPTableRow> eppRows(numBanks * numPixels * numPixels);
     for (auto &row : eppRows) {
       row.peakCentre = static_cast<double>(numBins) / 2.;
       row.sigma = 5;

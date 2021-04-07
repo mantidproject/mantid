@@ -78,8 +78,7 @@ public:
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
 
     auto alg = createAlgorithm();
-    TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", inputWS),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", inputWS), const std::invalid_argument &);
   }
 
   void test_No_Geometry_Inputs_Not_Accepted() {
@@ -147,11 +146,9 @@ private:
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
     auto props = std::make_shared<PropertyManager>();
-    props->declareProperty(std::make_unique<StringProperty>("Shape", "Slit"),
-                           "");
+    props->declareProperty(std::make_unique<StringProperty>("Shape", "Slit"), "");
     props->declareProperty(std::make_unique<DoubleProperty>("Width", 1.0), "");
-    props->declareProperty(std::make_unique<DoubleProperty>("Height", 0.75),
-                           "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Height", 0.75), "");
     return props;
   }
 
@@ -161,8 +158,7 @@ private:
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
     auto props = std::make_shared<PropertyManager>();
-    props->declareProperty(std::make_unique<StringProperty>("Shape", "Circle"),
-                           "");
+    props->declareProperty(std::make_unique<StringProperty>("Shape", "Circle"), "");
     props->declareProperty(std::make_unique<DoubleProperty>("Radius", 1.0), "");
     return props;
   }

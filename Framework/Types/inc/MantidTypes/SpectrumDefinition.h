@@ -26,8 +26,7 @@ namespace Mantid {
 class SpectrumDefinition {
 public:
   SpectrumDefinition() = default;
-  explicit SpectrumDefinition(const size_t detectorIndex,
-                              const size_t timeIndex = 0)
+  explicit SpectrumDefinition(const size_t detectorIndex, const size_t timeIndex = 0)
       : m_data{{detectorIndex, timeIndex}} {}
 
   /// Returns the size of the SpectrumDefinition, i.e., the number of detectors
@@ -36,9 +35,7 @@ public:
 
   /// Returns a const reference to the pair of detector index and time index at
   /// the given `index` in the spectrum definition.
-  const std::pair<size_t, size_t> &operator[](const size_t index) const {
-    return m_data[index];
-  }
+  const std::pair<size_t, size_t> &operator[](const size_t index) const { return m_data[index]; }
 
   /// Adds a pair of detector index and time index to the spectrum definition.
   /// The time index defaults to zero when not specified.
@@ -49,9 +46,7 @@ public:
       m_data.emplace(it, index);
   }
 
-  bool operator==(const SpectrumDefinition &other) const {
-    return m_data == other.m_data;
-  }
+  bool operator==(const SpectrumDefinition &other) const { return m_data == other.m_data; }
 
 private:
   std::vector<std::pair<size_t, size_t>> m_data;

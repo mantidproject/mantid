@@ -34,7 +34,7 @@ class SimpleAPIFitTest(unittest.TestCase):
         if  platform.system() == 'Darwin': # crashes
             return
         testhelpers.assertRaisesNothing(self, Fit, "name=FlatBackground", self._raw_ws)
-        
+
     def test_minimal_positional_arguments_with_functionwrapper_work(self):
         if  platform.system() == 'Darwin': # crashes
             return

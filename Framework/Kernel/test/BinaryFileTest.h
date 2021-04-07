@@ -60,10 +60,7 @@ public:
 
   BinaryFileTest() { dummy_file = "dummy.bin"; }
 
-  void testFileNotFound() {
-    TS_ASSERT_THROWS(file.open("nonexistentfile.dat"),
-                     const std::invalid_argument &);
-  }
+  void testFileNotFound() { TS_ASSERT_THROWS(file.open("nonexistentfile.dat"), const std::invalid_argument &); }
 
   void testFileWrongSize() {
 
@@ -175,9 +172,7 @@ public:
     Poco::File(dummy_file).remove();
   }
 
-  void testCallingDestructorOnUnitializedObject() {
-    BinaryFile<DasEvent> file2;
-  }
+  void testCallingDestructorOnUnitializedObject() { BinaryFile<DasEvent> file2; }
 
   void testReadingNotOpenFile() {
     BinaryFile<DasEvent> file2;
@@ -185,8 +180,7 @@ public:
     DasEvent *buffer = nullptr;
     TS_ASSERT_EQUALS(file2.getNumElements(), 0);
     TS_ASSERT_THROWS(file2.loadAll(), const std::runtime_error &);
-    TS_ASSERT_THROWS(data = file2.loadAllIntoVector(),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(data = file2.loadAllIntoVector(), const std::runtime_error &);
     TS_ASSERT_THROWS(file2.loadBlock(buffer, 10), const std::runtime_error &);
   }
 };

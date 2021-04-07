@@ -39,9 +39,7 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Regroup"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Regroups data with new bin boundaries.";
-  }
+  const std::string summary() const override { return "Regroups data with new bin boundaries."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
@@ -49,8 +47,7 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Rebin"; }
 
-  int newAxis(const std::vector<double> &params,
-              const std::vector<double> &xold, std::vector<double> &xnew,
+  int newAxis(const std::vector<double> &params, const std::vector<double> &xold, std::vector<double> &xnew,
               std::vector<int> &xoldIndex);
 
 private:
@@ -58,11 +55,9 @@ private:
   void init() override;
   void exec() override;
 
-  void rebin(const HistogramData::HistogramX &xold,
-             const HistogramData::HistogramY &yold,
-             const HistogramData::HistogramE &eold, std::vector<int> &xoldIndex,
-             HistogramData::HistogramY &ynew, HistogramData::HistogramE &enew,
-             bool distribution);
+  void rebin(const HistogramData::HistogramX &xold, const HistogramData::HistogramY &yold,
+             const HistogramData::HistogramE &eold, std::vector<int> &xoldIndex, HistogramData::HistogramY &ynew,
+             HistogramData::HistogramE &enew, bool distribution);
 };
 
 } // namespace Algorithms

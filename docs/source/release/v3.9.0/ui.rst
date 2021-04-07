@@ -39,7 +39,7 @@ Instrument View
 - New peak comparison tool on the pick tab. The user can select two peaks and information relating to their properties and the angles between them.
 - New tool for computing in-plane and out-of-plane angles in Qlab space for crystal alignment.
 - Added the ability to drag and drop mask workspaces onto the instrument view. This will apply the store workspace to the view.
-- Added the ability to store masking/ROI/grouping shapes to a table workspace, which can be dragged & dropped back onto different instrument views. 
+- Added the ability to store masking/ROI/grouping shapes to a table workspace, which can be dragged & dropped back onto different instrument views.
 
 Plotting Improvements
 #####################
@@ -52,7 +52,7 @@ Plotting Improvements
    :width: 550px
    :align: right
 
-   plotSubplots 
+   plotSubplots
 
 Algorithm Toolbox
 #################
@@ -78,8 +78,8 @@ SliceViewer Improvements
    :width: 450px
    :align: right
 
-   SliceViewer with nonorthogonal view 
-   
+   SliceViewer with nonorthogonal view
+
 - Added the ability to view data using non orthogonal axes. View can be toggled on or off. When non orthogonal view is toggled the peak viewer and line viewer tools are disabled.
 - Setting the thickess now means that the slicing happens between `-0.5*thicness+center` and `+0.5*thicness+center`, instead of `-thicness+center` and `+thicness+center`. For the LineViewer, the python `setPlanarWidth` and `getPlanarWidth` are still having the old behavior, but the constructor is fixed.
 
@@ -87,7 +87,7 @@ VSI Improvements
 ----------------
 
 - ParaView updated to v5.2.0
-- The sources and views more reliably show progress in the VSI status bar. 
+- The sources and views more reliably show progress in the VSI status bar.
 - Added a button to the standard view which applies the threshold filter.
 - Update the cut button to match the equivalent ParaView icon.
 - Changed the fallback for when MDHistoworkspace was opened in the (incompatible) SplatterPlot view to the MultiSlice view.

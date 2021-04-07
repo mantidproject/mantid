@@ -17,8 +17,8 @@ and processed using `Sphinx <http://www.sphinx-doc.org/en/master/>`__ along with
 Configuration
 -------------
 
-The documentation is configured using CMake and assumes the the instructions in the 
-:ref:`Getting Started <GettingStarted>` section have been followed. 
+The documentation is configured using CMake and assumes the the instructions in the
+:ref:`Getting Started <GettingStarted>` section have been followed.
 
 The following settings, relating to the documentation, are available:
 
@@ -42,7 +42,7 @@ A list of the most notable ones can be found `here <https://stackoverflow.com/qu
 
 Other tools:
 
-* `restview <https://pypi.python.org/pypi/restview>`__: which can be easily installed using ``pip``. 
+* `restview <https://pypi.python.org/pypi/restview>`__: which can be easily installed using ``pip``.
   It opens a webpage with the rst file processed and refreshes the page automatically whenever the .rst file is saved.
   This can help you quickly track down that unexpected space or missing newline without having to rebuild the documentation each time.
   It does not support sphinx directives so links will produce errors on the page which need to be checked by building the documentation using Mantid.
@@ -88,7 +88,7 @@ Interfaces
 ##########
 
 For documenting custom interfaces, it is recommended that you consult :ref:`this <InterfaceDocumentation>`  page,
-which explains how to document them, and which directives may be used in more detail. 
+which explains how to document them, and which directives may be used in more detail.
 
 How to define titles, sections etc.
 ###################################
@@ -131,19 +131,19 @@ Sub-sub-sections
 Common Warnings and Fixes
 -------------------------
 
-If you have weird messages about sphinx warnings that happen on “Console output”, 
+If you have weird messages about sphinx warnings that happen on “Console output”,
 those are coming either from summary functions in algorithms or from parameter descriptions.
 In these
 
 * *Do not* use ``*`` in parameter names or summary. This yields “Inline emphasis start-string without end-string” warnings.
 * *Do not* use things like ``|Q|``. This yields sphinx error “Undefined substitution referenced”.
-* When using hyperlinks with a label, try to use anonymous hyperlinks (two underscores instead of one) to avoid name clashes. 
+* When using hyperlinks with a label, try to use anonymous hyperlinks (two underscores instead of one) to avoid name clashes.
    * ```MD <http://mysite.com/MD1.html>`__`` and ```MD <http://mysite.com/MD2.html>`__`` instead of ```MD <http://mysite.com/MD1.html>`_`` and ```MD <http://mysite.com/MD2.html>`_``. The second on will result in a warning.
 
 
 
 While building the final output, Sphinx will emit warning messages if it things the input restructured text is malformed.
-This section lists some more common warnings along with suggestions for fixes. 
+This section lists some more common warnings along with suggestions for fixes.
 
 Explicit markup ends without a blank line; unexpected unindent.
 ###############################################################
@@ -164,7 +164,7 @@ It can be fixed by having a blank line between the indented block and the uninde
 Inline interpreted text or phrase reference start-string without end-string
 ###########################################################################
 
-This is caused by using one of the `inline markup tags <http://www.sphinx-doc.org/en/master/rest.html#inline-markup>`__, where the text being wrapped splits over multiple lines. In these cases the directive variant of the inline markup should be used. One example is the ``:math:`` tag being spread over multiple lines. The tag ``:math:`` must only be used for inline markup, i.e. when there is no newline in the math string. For multi-line maths markup you must use the ``.. math::`` directive instead. 
+This is caused by using one of the `inline markup tags <http://www.sphinx-doc.org/en/master/rest.html#inline-markup>`__, where the text being wrapped splits over multiple lines. In these cases the directive variant of the inline markup should be used. One example is the ``:math:`` tag being spread over multiple lines. The tag ``:math:`` must only be used for inline markup, i.e. when there is no newline in the math string. For multi-line maths markup you must use the ``.. math::`` directive instead.
 
 .. code-block:: rest
 
@@ -200,7 +200,7 @@ This indicates the that image referenced by ``.. image::`` or ``.. figure::`` ca
 Either the image is not there or the reference is incorrect.
 
 Image links in Sphinx are either relative,
-in which case it is relative to the current document or 
+in which case it is relative to the current document or
 absolute in which case the path is assumed relative to the root of the source tree (the directory containing the conf.py)
 
 Unknown directive type "foo"

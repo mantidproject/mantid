@@ -7,20 +7,20 @@ Project Save
 Overview
 ########
 
-Project save is the attempt to allow all parts of a user's project to be saved, namely interfaces (C++ and Python), plots and  workspaces. 
+Project save is the attempt to allow all parts of a user's project to be saved, namely interfaces (C++ and Python), plots and  workspaces.
 
 Handy links
 ###########
 
 - Python JSON Library - https://docs.python.org/2/library/json.html
 - QMap - http://doc.qt.io/qt-5/qmap.html
-- QVariant - http://doc.qt.io/qt-5/QVariant.html 
+- QVariant - http://doc.qt.io/qt-5/QVariant.html
 - SIP (documentation on SIP is relatively limited) - http://pyqt.sourceforge.net/Docs/sip4/using.html
 
 Implementation
 ##############
 
-Project save will save interfaces, plots and workspaces, this is achieved by using either dedicated classes, in the case of plots and workspaces, or by adding a encoder and decoder to the EncoderFactory and the DecoderFactory. The way in which the saving is currently achieved is by returning a dictionary containing only either primitive types (by far the most common approach) or by returning current the python JSON library's serializeable types. Examples of how types are converted to JSON and back can be found at https://docs.python.org/2/library/json.html under section 18.2.2 Encoders and Decoders. 
+Project save will save interfaces, plots and workspaces, this is achieved by using either dedicated classes, in the case of plots and workspaces, or by adding a encoder and decoder to the EncoderFactory and the DecoderFactory. The way in which the saving is currently achieved is by returning a dictionary containing only either primitive types (by far the most common approach) or by returning current the python JSON library's serializeable types. Examples of how types are converted to JSON and back can be found at https://docs.python.org/2/library/json.html under section 18.2.2 Encoders and Decoders.
 
 Saving and loading an interface (Python)
 ########################################
@@ -37,18 +37,18 @@ The basic template for an io file:
   class InterfaceAttributes(object):
       # WARNING: If you delete a tag from here instead of adding a new one, it will make old project files obsolete so
       # just add an extra tag to the list e.g. ["InstrumentWidget", "IWidget"]
-      # This list must contain the name of the class that will be found at the top level of Widgets, this is usually the view 
+      # This list must contain the name of the class that will be found at the top level of Widgets, this is usually the view
       # class
       tags = ["Interface"]
 
   class InterfaceEncoder(InterfaceAttributes):
       def __init__(self):
           super(InterfaceEncoder, self).__init__()
-      
+
       def encode(self, obj, project_path=None):
           presenter = obj.presenter
           return {"info": presenter.getInfo(), "state": presenter.getState()}
-      
+
       @classmethod
       def has_tag(cls, tag):
           return tag in cls.tags
@@ -67,7 +67,7 @@ The basic template for an io file:
 
           # Return the view of the GUI or whatever object can have .show() called on it
           return presenter.view
-      
+
       @classmethod
       def has_tag(cls, tag):
           return tag in cls.tags
@@ -79,7 +79,7 @@ Alongside the io file you will need to register the InterfaceEncoder and Interfa
   from mantidqt.project.encoderfactory import EncoderFactory
   from mantidqt.project.decoderfactory import DecoderFactory
   from mantidqt.widget.interface.io import InterfaceEncoder, InterfaceDecoder
-  
+
   EncoderFactory.register_encoder(InterfaceEncoder)
   DecoderFactory.register_decoder(InterfaceDecoder)
 

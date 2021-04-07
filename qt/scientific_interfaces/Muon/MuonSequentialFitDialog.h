@@ -28,9 +28,8 @@ class MANTIDQT_MUONINTERFACE_DLL MuonSequentialFitDialog : public QDialog {
   Q_OBJECT
 
 public:
-  MuonSequentialFitDialog(
-      MantidQt::MantidWidgets::MuonFitPropertyBrowser *fitPropBrowser,
-      MuonAnalysisFitDataPresenter *dataPresenter);
+  MuonSequentialFitDialog(MantidQt::MantidWidgets::MuonFitPropertyBrowser *fitPropBrowser,
+                          MuonAnalysisFitDataPresenter *dataPresenter);
   ~MuonSequentialFitDialog() override;
 
   enum DialogState { Preparing, Running, Stopped };
@@ -62,9 +61,7 @@ private:
   QTableWidgetItem *createTableWidgetItem(const QString &text);
 
   /// Reorganise workspaces after fit of one run finished
-  void finishAfterRun(const std::string &labelGroupName,
-                      const Mantid::API::IAlgorithm_sptr &fitAlg,
-                      bool simultaneous,
+  void finishAfterRun(const std::string &labelGroupName, const Mantid::API::IAlgorithm_sptr &fitAlg, bool simultaneous,
                       const Mantid::API::MatrixWorkspace_sptr &firstWS) const;
 
   // -- MEMBER VARIABLES -----------------------------------------------

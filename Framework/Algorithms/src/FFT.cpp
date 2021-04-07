@@ -41,29 +41,23 @@ using namespace HistogramData;
 
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFT::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "The name of the input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace.");
   // if desired, provide the imaginary part in a separate workspace.
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputImagWorkspace",
-                                                        "", Direction::Input,
-                                                        PropertyMode::Optional),
-                  "The name of the input workspace for the imaginary part. "
-                  "Leave blank if same as InputWorkspace");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("InputImagWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "The name of the input workspace for the imaginary part. "
+      "Leave blank if same as InputWorkspace");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty("Real", 0, mustBePositive,
-                  "Spectrum number to use as real part for transform");
-  declareProperty("Imaginary", EMPTY_INT(), mustBePositive,
-                  "Spectrum number to use as imaginary part for transform");
+  declareProperty("Real", 0, mustBePositive, "Spectrum number to use as real part for transform");
+  declareProperty("Imaginary", EMPTY_INT(), mustBePositive, "Spectrum number to use as imaginary part for transform");
 
   std::vector<std::string> fft_dir{"Forward", "Backward"};
-  declareProperty("Transform", "Forward",
-                  std::make_shared<StringListValidator>(fft_dir),
+  declareProperty("Transform", "Forward", std::make_shared<StringListValidator>(fft_dir),
                   "Direction of the transform: forward or backward");
   declareProperty("Shift", 0.0,
                   "Apply an extra phase equal to this quantity "
@@ -72,14 +66,11 @@ void FFT::init() {
                   "Automatically calculate and apply phase shift. Zero on the "
                   "X axis is assumed to be in the centre - if it is not, "
                   "setting this property will automatically correct for this.");
-  declareProperty(
-      "AcceptXRoundingErrors", false,
-      "Continue to process the data even if X values are not evenly spaced",
-      Direction::Input);
+  declareProperty("AcceptXRoundingErrors", false, "Continue to process the data even if X values are not evenly spaced",
+                  Direction::Input);
 
   // "Shift" should only be enabled if "AutoShift" is turned off
-  setPropertySettings(
-      "Shift", std::make_unique<EnabledWhenProperty>("AutoShift", IS_DEFAULT));
+  setPropertySettings("Shift", std::make_unique<EnabledWhenProperty>("AutoShift", IS_DEFAULT));
 }
 
 /** Executes the algorithm
@@ -137,11 +128,9 @@ void FFT::exec() {
   const bool centerShift = true;
 
   if (transform == "Forward") {
-    transformForward(data, nPoints, nPoints, dys, addPositiveOnly, centerShift,
-                     isComplex, iReal, iImag, df, dx);
+    transformForward(data, nPoints, nPoints, dys, addPositiveOnly, centerShift, isComplex, iReal, iImag, df, dx);
   } else { // Backward
-    transformBackward(data, nPoints, nPoints, dys, centerShift, isComplex,
-                      iReal, iImag, df);
+    transformBackward(data, nPoints, nPoints, dys, centerShift, isComplex, iReal, iImag, df);
   }
 
   m_outWS->setSharedX(1, m_outWS->sharedX(0));
@@ -158,10 +147,8 @@ void FFT::exec() {
   setProperty("OutputWorkspace", m_outWS);
 }
 
-void FFT::transformForward(std::vector<double> &data, const int xSize,
-                           const int ySize, const int dys,
-                           const bool addPositiveOnly, const bool centerShift,
-                           const bool isComplex, const int iReal,
+void FFT::transformForward(std::vector<double> &data, const int xSize, const int ySize, const int dys,
+                           const bool addPositiveOnly, const bool centerShift, const bool isComplex, const int iReal,
                            const int iImag, const double df, const double dx) {
   /* If we translate the X-axis by -dx*ySize/2 and assume that our function is
    * periodic
@@ -178,14 +165,11 @@ void FFT::transformForward(std::vector<double> &data, const int xSize,
    */
   for (int i = 0; i < ySize; i++) {
     int j = centerShift ? (ySize / 2 + i) % ySize : i;
-    data[2 * i] = m_inWS->y(iReal)[j]; // even indexes filled with the real part
-    data[2 * i + 1] = isComplex
-                          ? m_inImagWS->y(iImag)[j]
-                          : 0.; // odd indexes filled with the imaginary part
+    data[2 * i] = m_inWS->y(iReal)[j];                          // even indexes filled with the real part
+    data[2 * i + 1] = isComplex ? m_inImagWS->y(iImag)[j] : 0.; // odd indexes filled with the imaginary part
   }
 
-  double shift = getPhaseShift(
-      m_inWS->points(iReal)); // extra phase to be applied to the transform
+  double shift = getPhaseShift(m_inWS->points(iReal)); // extra phase to be applied to the transform
 
   gsl_fft_complex_forward(data.data(), 1, ySize, m_wavetable, m_workspace);
 
@@ -201,10 +185,8 @@ void FFT::transformForward(std::vector<double> &data, const int xSize,
    */
   for (int i = 0; i < ySize; i++) {
     int j = (ySize / 2 + i + dys) % ySize;
-    m_outWS->mutableX(m_iRe)[i] =
-        df * (-ySize / 2 + i); // zero frequency at i = ySize/2
-    double re = data[2 * j] *
-                dx; // use j from ySize/2 to ySize for negative frequencies
+    m_outWS->mutableX(m_iRe)[i] = df * (-ySize / 2 + i); // zero frequency at i = ySize/2
+    double re = data[2 * j] * dx;                        // use j from ySize/2 to ySize for negative frequencies
     double im = data[2 * j + 1] * dx;
     // shift
     {
@@ -238,10 +220,9 @@ void FFT::transformForward(std::vector<double> &data, const int xSize,
   }
 }
 
-void FFT::transformBackward(std::vector<double> &data, const int xSize,
-                            const int ySize, const int dys,
-                            const bool centerShift, const bool isComplex,
-                            const int iReal, const int iImag, const double df) {
+void FFT::transformBackward(std::vector<double> &data, const int xSize, const int ySize, const int dys,
+                            const bool centerShift, const bool isComplex, const int iReal, const int iImag,
+                            const double df) {
   for (int i = 0; i < ySize; i++) {
     int j = (ySize / 2 + i) % ySize;
     data[2 * i] = m_inWS->y(iReal)[j];
@@ -293,31 +274,24 @@ void FFT::createUnitsLabels(double &df) {
   auto inputUnit = m_inWS->getAxis(0)->unit();
   if (inputUnit) {
     std::shared_ptr<Kernel::Units::Label> lblUnit =
-        std::dynamic_pointer_cast<Kernel::Units::Label>(
-            UnitFactory::Instance().create("Label"));
+        std::dynamic_pointer_cast<Kernel::Units::Label>(UnitFactory::Instance().create("Label"));
     if (lblUnit) {
 
-      if ((inputUnit->caption() == "Energy" ||
-           inputUnit->caption() == "Energy transfer") &&
+      if ((inputUnit->caption() == "Energy" || inputUnit->caption() == "Energy transfer") &&
           inputUnit->label() == "meV") {
         lblUnit->setLabel("Time", "ns");
         df /= 2.418e2;
       } else if (inputUnit->caption() == "Time" && inputUnit->label() == "s") {
         lblUnit->setLabel("Frequency", "Hz");
-      } else if (inputUnit->caption() == "Frequency" &&
-                 inputUnit->label() == "Hz") {
+      } else if (inputUnit->caption() == "Frequency" && inputUnit->label() == "Hz") {
         lblUnit->setLabel("Time", "s");
-      } else if (inputUnit->caption() == "Time" &&
-                 inputUnit->label() == "microsecond") {
+      } else if (inputUnit->caption() == "Time" && inputUnit->label() == "microsecond") {
         lblUnit->setLabel("Frequency", "MHz");
-      } else if (inputUnit->caption() == "Frequency" &&
-                 inputUnit->label() == "MHz") {
+      } else if (inputUnit->caption() == "Frequency" && inputUnit->label() == "MHz") {
         lblUnit->setLabel("Time", Units::Symbol::Microsecond);
-      } else if (inputUnit->caption() == "d-Spacing" &&
-                 inputUnit->label() == "Angstrom") {
+      } else if (inputUnit->caption() == "d-Spacing" && inputUnit->label() == "Angstrom") {
         lblUnit->setLabel("q", Units::Symbol::InverseAngstrom);
-      } else if (inputUnit->caption() == "q" &&
-                 inputUnit->label() == "Angstrom^-1") {
+      } else if (inputUnit->caption() == "q" && inputUnit->label() == "Angstrom^-1") {
         lblUnit->setLabel("d-Spacing", Units::Symbol::Angstrom);
       }
       m_outWS->getAxis(0)->unit() = lblUnit;
@@ -344,15 +318,13 @@ std::map<std::string, std::string> FFT::validateInputs() {
 
     // check that the workspace isn't empty
     if (X.size() < 2) {
-      errors["InputWorkspace"] =
-          "Input workspace must have at least two values";
+      errors["InputWorkspace"] = "Input workspace must have at least two values";
     } else {
       // Check that the x values are evenly spaced
       // If accepting rounding errors, just give a warning if bins are
       // different.
       if (areBinWidthsUneven(inWS->binEdges(iReal))) {
-        errors["InputWorkspace"] =
-            "X axis must be linear (all bins have same width)";
+        errors["InputWorkspace"] = "X axis must be linear (all bins have same width)";
       }
     }
 

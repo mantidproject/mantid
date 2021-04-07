@@ -25,17 +25,15 @@ int GreaterThanMD::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and operand
-void GreaterThanMD::execHistoHisto(
-    Mantid::DataObjects::MDHistoWorkspace_sptr out,
-    Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
+void GreaterThanMD::execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                                   Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
   out->greaterThan(*operand);
 }
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and a scalar on the RHS
-void GreaterThanMD::execHistoScalar(
-    Mantid::DataObjects::MDHistoWorkspace_sptr out,
-    Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
+void GreaterThanMD::execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                                    Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
   out->greaterThan(scalar->y(0)[0]);
 }
 

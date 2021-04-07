@@ -131,7 +131,7 @@ Output:
 			PairFirstIndex = 1,
 			PairSecondIndex = 0,
 			Alpha = 0.5)
-   
+
    print('Output: {}'.format(output.readY(0)))
 
 Output:

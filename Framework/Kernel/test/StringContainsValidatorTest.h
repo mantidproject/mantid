@@ -17,9 +17,7 @@ class StringContainsValidatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static StringContainsValidatorTest *createSuite() {
-    return new StringContainsValidatorTest();
-  }
+  static StringContainsValidatorTest *createSuite() { return new StringContainsValidatorTest(); }
   static void destroySuite(StringContainsValidatorTest *suite) { delete suite; }
 
   void test_string_is_accepted_with_out_any_requirements() {

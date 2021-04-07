@@ -25,23 +25,18 @@ protected:
   virtual bool rowMeetsCriteria(RowLocation const &row) const = 0;
 };
 
-template <typename LambdaPredicate>
-class LambdaRowPredicate : public RowPredicate {
+template <typename LambdaPredicate> class LambdaRowPredicate : public RowPredicate {
 public:
-  LambdaRowPredicate(LambdaPredicate predicate)
-      : m_predicate(std::move(predicate)) {}
+  LambdaRowPredicate(LambdaPredicate predicate) : m_predicate(std::move(predicate)) {}
 
 protected:
-  bool rowMeetsCriteria(RowLocation const &row) const override {
-    return m_predicate(row);
-  }
+  bool rowMeetsCriteria(RowLocation const &row) const override { return m_predicate(row); }
 
 private:
   LambdaPredicate m_predicate;
 };
 
-template <typename Predicate>
-std::unique_ptr<RowPredicate> makeFilterFromLambda(Predicate predicate) {
+template <typename Predicate> std::unique_ptr<RowPredicate> makeFilterFromLambda(Predicate predicate) {
   return std::make_unique<LambdaRowPredicate<Predicate>>(predicate);
 }
 } // namespace Batch

@@ -14,7 +14,7 @@ the same model and starting parameters for each spectrum. This interface can be
 accessed from the main menu of MantidPlot, in *Interfaces → General →
 Multi-dataset Fitting*. The interface consists of three major parts: The fit
 property window, the spectrum & fit viewer, and the list of spectra to operate
-on. 
+on.
 
 .. figure::  ../../images/multidataset-fitting/multidataset-fitting-labelled.png
    :align: center
@@ -171,14 +171,14 @@ and tied as with the global parameters.
 .. figure::  ../../images/multidataset-fitting/multidataset-edit-local-params.png
    :align: center
    :width: 400px
-     
-   Button to open the window to edit local parameter values. 
+
+   Button to open the window to edit local parameter values.
 
 .. figure::  ../../images/multidataset-fitting/multidataset-local-params.png
    :align: center
    :width: 800px
-     
-   Editing local parameter values for each spectrum. 
+
+   Editing local parameter values for each spectrum.
 
 Spectrum Viewer
 ---------------
@@ -187,7 +187,7 @@ The spectrum viewer is shown in the bottom panel of the interface. This shows a
 plot of a single spectrum from the loaded list. It also shows a plot of the
 model with the current parameters overlaid on the spectrum. Using the buttons
 shown in the screenshot below the user can select which spectrum they wish to
-view. The plot is interactive and can be panned and zoomed. 
+view. The plot is interactive and can be panned and zoomed.
 
 The user can also interactively select `x` bounds either for a single spectrum
 or for all spectra by selecting the "Apply to all spectra option. To select

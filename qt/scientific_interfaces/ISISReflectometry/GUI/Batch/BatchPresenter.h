@@ -29,14 +29,12 @@ class IBatchView;
     BatchPresenter is the concrete main window presenter implementing the
     functionality defined by the interface IBatchPresenter.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenter
-    : public IBatchPresenter,
-      public BatchViewSubscriber,
-      public MantidQt::API::WorkspaceObserver {
+class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenter : public IBatchPresenter,
+                                                      public BatchViewSubscriber,
+                                                      public MantidQt::API::WorkspaceObserver {
 public:
   /// Constructor
-  BatchPresenter(IBatchView *view, Batch model,
-                 std::unique_ptr<IRunsPresenter> runsPresenter,
+  BatchPresenter(IBatchView *view, Batch model, std::unique_ptr<IRunsPresenter> runsPresenter,
                  std::unique_ptr<IEventPresenter> eventPresenter,
                  std::unique_ptr<IExperimentPresenter> experimentPresenter,
                  std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
@@ -49,12 +47,9 @@ public:
   // BatchViewSubscriber overrides
   void notifyBatchComplete(bool error) override;
   void notifyBatchCancelled() override;
-  void notifyAlgorithmStarted(
-      MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
-  void notifyAlgorithmComplete(
-      MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
-  void notifyAlgorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
-                            std::string const &message) override;
+  void notifyAlgorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
+  void notifyAlgorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
+  void notifyAlgorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) override;
 
   // IBatchPresenter overrides
   void acceptMainPresenter(IMainWindowPresenter *mainPresenter) override;
@@ -64,8 +59,7 @@ public:
   void notifyResumeAutoreductionRequested() override;
   void notifyPauseAutoreductionRequested() override;
   void notifyAutoreductionCompleted() override;
-  void
-  notifyChangeInstrumentRequested(const std::string &instrumentName) override;
+  void notifyChangeInstrumentRequested(const std::string &instrumentName) override;
   void notifyInstrumentChanged(const std::string &instrumentName) override;
   void notifyUpdateInstrumentRequested() override;
   void notifySettingsChanged() override;
@@ -93,13 +87,11 @@ public:
 
   // WorkspaceObserver overrides
   void postDeleteHandle(const std::string &wsName) override;
-  void renameHandle(const std::string &oldName,
-                    const std::string &newName) override;
+  void renameHandle(const std::string &oldName, const std::string &newName) override;
   void clearADSHandle() override;
 
 private:
-  bool
-  startBatch(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms);
+  bool startBatch(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms);
   void resumeReduction();
   void notifyReductionResumed();
   void pauseReduction();

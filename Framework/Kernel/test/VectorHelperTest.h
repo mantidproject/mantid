@@ -33,57 +33,41 @@ public:
 
   void test_indexOfFromEdges() {
     std::vector<double> single;
-    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromEdges(single, 7.1),
-                            const std::out_of_range &e, std::string(e.what()),
-                            "indexOfValue - vector is empty");
+    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromEdges(single, 7.1), const std::out_of_range &e,
+                            std::string(e.what()), "indexOfValue - vector is empty");
     single.emplace_back(1.7);
-    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromEdges(single, 4.8),
-                            const std::out_of_range &e, std::string(e.what()),
-                            "indexOfValue - requires at least two bin edges");
+    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromEdges(single, 4.8), const std::out_of_range &e,
+                            std::string(e.what()), "indexOfValue - requires at least two bin edges");
 
-    TS_ASSERT_THROWS_EQUALS(
-        VectorHelper::indexOfValueFromEdges(m_test_bins, -1.2),
-        const std::out_of_range &e, std::string(e.what()),
-        "indexOfValue - value out of range");
+    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromEdges(m_test_bins, -1.2), const std::out_of_range &e,
+                            std::string(e.what()), "indexOfValue - value out of range");
 
-    TS_ASSERT_THROWS_EQUALS(
-        VectorHelper::indexOfValueFromEdges(m_test_bins, 3.3),
-        const std::out_of_range &e, std::string(e.what()),
-        "indexOfValue - value out of range");
+    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromEdges(m_test_bins, 3.3), const std::out_of_range &e,
+                            std::string(e.what()), "indexOfValue - value out of range");
 
     TS_ASSERT_EQUALS(VectorHelper::indexOfValueFromEdges(m_test_bins, 0.55), 1);
   }
 
   void test_indexOfFromCenters() {
     std::vector<double> single;
-    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromCenters(single, 5.9),
-                            const std::out_of_range &e, std::string(e.what()),
-                            "indexOfValue - vector is empty");
+    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromCenters(single, 5.9), const std::out_of_range &e,
+                            std::string(e.what()), "indexOfValue - vector is empty");
     single.emplace_back(2.5);
-    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromCenters(single, 6.1),
-                            const std::out_of_range &e, std::string(e.what()),
-                            "indexOfValue - value out of range");
-    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromCenters(single, 1.9),
-                            const std::out_of_range &e, std::string(e.what()),
-                            "indexOfValue - value out of range");
+    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromCenters(single, 6.1), const std::out_of_range &e,
+                            std::string(e.what()), "indexOfValue - value out of range");
+    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromCenters(single, 1.9), const std::out_of_range &e,
+                            std::string(e.what()), "indexOfValue - value out of range");
     TS_ASSERT_EQUALS(VectorHelper::indexOfValueFromCenters(single, 2.25), 0);
 
-    TS_ASSERT_THROWS_EQUALS(
-        VectorHelper::indexOfValueFromCenters(m_test_bins, -1.56),
-        const std::out_of_range &e, std::string(e.what()),
-        "indexOfValue - value out of range");
+    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromCenters(m_test_bins, -1.56), const std::out_of_range &e,
+                            std::string(e.what()), "indexOfValue - value out of range");
 
-    TS_ASSERT_THROWS_EQUALS(
-        VectorHelper::indexOfValueFromCenters(m_test_bins, 4.1),
-        const std::out_of_range &e, std::string(e.what()),
-        "indexOfValue - value out of range");
+    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromCenters(m_test_bins, 4.1), const std::out_of_range &e,
+                            std::string(e.what()), "indexOfValue - value out of range");
 
-    TS_ASSERT_EQUALS(VectorHelper::indexOfValueFromCenters(m_test_bins, -1.23),
-                     0);
-    TS_ASSERT_EQUALS(VectorHelper::indexOfValueFromCenters(m_test_bins, 3.98),
-                     4);
-    TS_ASSERT_EQUALS(VectorHelper::indexOfValueFromCenters(m_test_bins, 0.8),
-                     2);
+    TS_ASSERT_EQUALS(VectorHelper::indexOfValueFromCenters(m_test_bins, -1.23), 0);
+    TS_ASSERT_EQUALS(VectorHelper::indexOfValueFromCenters(m_test_bins, 3.98), 4);
+    TS_ASSERT_EQUALS(VectorHelper::indexOfValueFromCenters(m_test_bins, 0.8), 2);
   }
 
   void test_CreateAxisFromRebinParams_Gives_Expected_Number_Bins() {
@@ -93,23 +77,20 @@ public:
     rbParams[2] = 10;
 
     std::vector<double> axis;
-    const int numBoundaries =
-        VectorHelper::createAxisFromRebinParams(rbParams, axis);
+    const int numBoundaries = VectorHelper::createAxisFromRebinParams(rbParams, axis);
 
     TS_ASSERT_EQUALS(numBoundaries, 10);
     TS_ASSERT_EQUALS(axis.size(), 10);
   }
 
-  void
-  test_CreateAxisFromRebinParams_Gives_Expected_Number_Bins_But_Not_Resized_Axis_When_Requested() {
+  void test_CreateAxisFromRebinParams_Gives_Expected_Number_Bins_But_Not_Resized_Axis_When_Requested() {
     std::vector<double> rbParams(3);
     rbParams[0] = 1;
     rbParams[1] = 1;
     rbParams[2] = 10;
 
     std::vector<double> axis;
-    const int numBoundaries =
-        VectorHelper::createAxisFromRebinParams(rbParams, axis, false);
+    const int numBoundaries = VectorHelper::createAxisFromRebinParams(rbParams, axis, false);
 
     TS_ASSERT_EQUALS(numBoundaries, 10);
     TS_ASSERT_EQUALS(axis.size(), 0);
@@ -168,29 +149,25 @@ public:
   void test_CreateAxisFromRebinParams_ThrowsIfSingleParamNoHintsProvided() {
     const std::vector<double> rbParams = {1.0};
     std::vector<double> axis;
-    TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(rbParams, axis),
-                     const std::runtime_error &)
+    TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(rbParams, axis), const std::runtime_error &)
   }
 
   void test_createAxisFromRebinParams_throwsOnInfiniteVal() {
     const std::vector<double> params = {1.0, INFINITY};
     std::vector<double> axis;
-    TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(params, axis),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(params, axis), const std::runtime_error &);
   }
 
   void test_createAxisFromRebinParams_throwsOnNaNVal() {
     const std::vector<double> params = {1.0, NAN};
     std::vector<double> axis;
-    TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(params, axis),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(params, axis), const std::runtime_error &);
   }
 
   void test_CreateAxisFromRebinParams_xMinXMaxHints() {
     const std::vector<double> rbParams = {1.0};
     std::vector<double> axis;
-    TS_ASSERT_THROWS_NOTHING(VectorHelper::createAxisFromRebinParams(
-        rbParams, axis, true, true, -5., 3.))
+    TS_ASSERT_THROWS_NOTHING(VectorHelper::createAxisFromRebinParams(rbParams, axis, true, true, -5., 3.))
     const std::vector<double> expectedAxis = {-5, -4, -3, -2, -1, 0, 1, 2, 3};
     TS_ASSERT_EQUALS(axis, expectedAxis);
   }
@@ -275,8 +252,7 @@ public:
   // TODO: More tests of other methods
 
   void test_splitStringIntoVector() {
-    std::vector<int> vec =
-        VectorHelper::splitStringIntoVector<int>("1,2,-5,23");
+    std::vector<int> vec = VectorHelper::splitStringIntoVector<int>("1,2,-5,23");
     TS_ASSERT_EQUALS(vec.size(), 4);
     TS_ASSERT_EQUALS(vec[0], 1);
     TS_ASSERT_EQUALS(vec[1], 2);
@@ -292,16 +268,14 @@ public:
   }
 
   void test_splitStringIntoVector_double() {
-    std::vector<double> vec =
-        VectorHelper::splitStringIntoVector<double>("1.234, 2.456");
+    std::vector<double> vec = VectorHelper::splitStringIntoVector<double>("1.234, 2.456");
     TS_ASSERT_EQUALS(vec.size(), 2);
     TS_ASSERT_DELTA(vec[0], 1.234, 1e-5);
     TS_ASSERT_DELTA(vec[1], 2.456, 1e-5);
   }
 
   void test_splitStringIntoVector_string() {
-    std::vector<std::string> vec =
-        VectorHelper::splitStringIntoVector<std::string>("Hey, Jude");
+    std::vector<std::string> vec = VectorHelper::splitStringIntoVector<std::string>("Hey, Jude");
     TS_ASSERT_EQUALS(vec.size(), 2);
     TS_ASSERT_EQUALS(vec[0], "Hey");
     TS_ASSERT_EQUALS(vec[1], "Jude");
@@ -334,38 +308,31 @@ public:
     const double testValue = m_test_bins.front() - 1.1;
     int index(-1);
 
-    TS_ASSERT_THROWS_NOTHING(
-        index = VectorHelper::getBinIndex(m_test_bins, testValue));
+    TS_ASSERT_THROWS_NOTHING(index = VectorHelper::getBinIndex(m_test_bins, testValue));
     TS_ASSERT_EQUALS(index, 0);
   }
 
-  void
-  test_getBinIndex_Returns_Zero_For_Value_Equal_To_Lowest_In_Input_Range() {
+  void test_getBinIndex_Returns_Zero_For_Value_Equal_To_Lowest_In_Input_Range() {
     const double testValue = m_test_bins.front();
     int index(-1);
 
-    TS_ASSERT_THROWS_NOTHING(
-        index = VectorHelper::getBinIndex(m_test_bins, testValue));
+    TS_ASSERT_THROWS_NOTHING(index = VectorHelper::getBinIndex(m_test_bins, testValue));
     TS_ASSERT_EQUALS(index, 0);
   }
 
-  void
-  test_getBinIndex_Returns_Last_Bin_For_Value_Equal_To_Highest_In_Input_Range() {
+  void test_getBinIndex_Returns_Last_Bin_For_Value_Equal_To_Highest_In_Input_Range() {
     const double testValue = m_test_bins.back();
     int index(-1);
 
-    TS_ASSERT_THROWS_NOTHING(
-        index = VectorHelper::getBinIndex(m_test_bins, testValue));
+    TS_ASSERT_THROWS_NOTHING(index = VectorHelper::getBinIndex(m_test_bins, testValue));
     TS_ASSERT_EQUALS(index, 3);
   }
 
-  void
-  test_getBinIndex_Returns_Index_Of_Last_Bin_For_Value_Greater_Than_Input_Range() {
+  void test_getBinIndex_Returns_Index_Of_Last_Bin_For_Value_Greater_Than_Input_Range() {
     const double testValue = m_test_bins.back() + 10.1;
     int index(-1);
 
-    TS_ASSERT_THROWS_NOTHING(
-        index = VectorHelper::getBinIndex(m_test_bins, testValue));
+    TS_ASSERT_THROWS_NOTHING(index = VectorHelper::getBinIndex(m_test_bins, testValue));
     TS_ASSERT_EQUALS(index, 3);
   }
 
@@ -373,18 +340,15 @@ public:
     const double testValue = m_test_bins[1] + 0.3;
     int index(-1);
 
-    TS_ASSERT_THROWS_NOTHING(
-        index = VectorHelper::getBinIndex(m_test_bins, testValue));
+    TS_ASSERT_THROWS_NOTHING(index = VectorHelper::getBinIndex(m_test_bins, testValue));
     TS_ASSERT_EQUALS(index, 1);
   }
 
-  void
-  test_getBinIndex_Returns_Index_For_Bin_On_RHS_Of_Boundary_When_Given_Value_Is_Equal_To_A_Boundary() {
+  void test_getBinIndex_Returns_Index_For_Bin_On_RHS_Of_Boundary_When_Given_Value_Is_Equal_To_A_Boundary() {
     const double testValue = m_test_bins[2];
     int index(-1);
 
-    TS_ASSERT_THROWS_NOTHING(
-        index = VectorHelper::getBinIndex(m_test_bins, testValue));
+    TS_ASSERT_THROWS_NOTHING(index = VectorHelper::getBinIndex(m_test_bins, testValue));
     TS_ASSERT_EQUALS(index, 2);
   }
   void test_RunningAveraging() {
@@ -394,9 +358,8 @@ public:
     std::vector<double> inputBoundaries(ib, ib + sizeof(ib) / sizeof(double));
 
     std::vector<double> output;
-    TS_ASSERT_THROWS(
-        VectorHelper::smoothInRange(inputData, output, 6, &inputBoundaries),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(VectorHelper::smoothInRange(inputData, output, 6, &inputBoundaries),
+                     const std::invalid_argument &);
     inputBoundaries.emplace_back(6);
     VectorHelper::smoothInRange(inputData, output, 6, &inputBoundaries);
 
@@ -415,8 +378,7 @@ public:
     TS_ASSERT_DELTA(output[5], 6, 1.e-8);
 
     std::vector<double> out_bins;
-    VectorHelper::smoothInRange(inputData, output, 3, &inputBoundaries, 1, 5,
-                                &out_bins);
+    VectorHelper::smoothInRange(inputData, output, 3, &inputBoundaries, 1, 5, &out_bins);
     TS_ASSERT_EQUALS(output.size(), 4);
     TS_ASSERT_DELTA(output[1], 3, 1.e-8);
   }
@@ -439,26 +401,19 @@ public:
     std::vector<double> inputData(20);
     for (size_t i = 0; i < 20; i++) {
       double dev = 0.5 * (inputBoundaries[i] + inputBoundaries[i + 1]) - 50;
-      inputData[i] =
-          exp(-dev * dev / 100) * (inputBoundaries[i + 1] - inputBoundaries[i]);
+      inputData[i] = exp(-dev * dev / 100) * (inputBoundaries[i + 1] - inputBoundaries[i]);
     }
     int indOfMax = VectorHelper::getBinIndex(inputBoundaries, 50.);
-    double fMax = inputData[indOfMax] /
-                  (inputBoundaries[indOfMax + 1] - inputBoundaries[indOfMax]);
-    double iLeft = inputData[indOfMax - 1] /
-                   (inputBoundaries[indOfMax] - inputBoundaries[indOfMax - 1]);
-    double iRight = inputData[indOfMax + 1] / (inputBoundaries[indOfMax + 2] -
-                                               inputBoundaries[indOfMax + 1]);
+    double fMax = inputData[indOfMax] / (inputBoundaries[indOfMax + 1] - inputBoundaries[indOfMax]);
+    double iLeft = inputData[indOfMax - 1] / (inputBoundaries[indOfMax] - inputBoundaries[indOfMax - 1]);
+    double iRight = inputData[indOfMax + 1] / (inputBoundaries[indOfMax + 2] - inputBoundaries[indOfMax + 1]);
 
     TS_ASSERT(iLeft < fMax);
     TS_ASSERT(iRight < fMax);
     VectorHelper::smoothInRange(inputData, output, 10, &inputBoundaries);
-    fMax = output[indOfMax] /
-           (inputBoundaries[indOfMax + 1] - inputBoundaries[indOfMax]);
-    iLeft = inputData[indOfMax - 1] /
-            (inputBoundaries[indOfMax] - inputBoundaries[indOfMax - 1]);
-    iRight = inputData[indOfMax + 1] /
-             (inputBoundaries[indOfMax + 2] - inputBoundaries[indOfMax + 1]);
+    fMax = output[indOfMax] / (inputBoundaries[indOfMax + 1] - inputBoundaries[indOfMax]);
+    iLeft = inputData[indOfMax - 1] / (inputBoundaries[indOfMax] - inputBoundaries[indOfMax - 1]);
+    iRight = inputData[indOfMax + 1] / (inputBoundaries[indOfMax + 2] - inputBoundaries[indOfMax + 1]);
 
     TS_ASSERT(iLeft < fMax);
     TS_ASSERT(iRight < fMax);
@@ -466,12 +421,9 @@ public:
     output.swap(inputData);
     VectorHelper::smoothInRange(inputData, output, 10, &inputBoundaries);
 
-    fMax = output[indOfMax] /
-           (inputBoundaries[indOfMax + 1] - inputBoundaries[indOfMax]);
-    iLeft = inputData[indOfMax - 1] /
-            (inputBoundaries[indOfMax] - inputBoundaries[indOfMax - 1]);
-    iRight = inputData[indOfMax + 1] /
-             (inputBoundaries[indOfMax + 2] - inputBoundaries[indOfMax + 1]);
+    fMax = output[indOfMax] / (inputBoundaries[indOfMax + 1] - inputBoundaries[indOfMax]);
+    iLeft = inputData[indOfMax - 1] / (inputBoundaries[indOfMax] - inputBoundaries[indOfMax - 1]);
+    iRight = inputData[indOfMax + 1] / (inputBoundaries[indOfMax + 2] - inputBoundaries[indOfMax + 1]);
 
     //  TS_ASSERT(iLeft<fMax);
     TS_ASSERT(iRight < fMax);
@@ -479,12 +431,9 @@ public:
     output.swap(inputData);
     VectorHelper::smoothInRange(inputData, output, 10, &inputBoundaries);
 
-    fMax = output[indOfMax] /
-           (inputBoundaries[indOfMax + 1] - inputBoundaries[indOfMax]);
-    iLeft = inputData[indOfMax - 1] /
-            (inputBoundaries[indOfMax] - inputBoundaries[indOfMax - 1]);
-    iRight = inputData[indOfMax + 1] /
-             (inputBoundaries[indOfMax + 2] - inputBoundaries[indOfMax + 1]);
+    fMax = output[indOfMax] / (inputBoundaries[indOfMax + 1] - inputBoundaries[indOfMax]);
+    iLeft = inputData[indOfMax - 1] / (inputBoundaries[indOfMax] - inputBoundaries[indOfMax - 1]);
+    iRight = inputData[indOfMax + 1] / (inputBoundaries[indOfMax + 2] - inputBoundaries[indOfMax + 1]);
 
     // TS_ASSERT(iLeft<fMax);
     TS_ASSERT(iRight < fMax);
@@ -492,12 +441,9 @@ public:
     output.swap(inputData);
     VectorHelper::smoothInRange(inputData, output, 10, &inputBoundaries);
 
-    fMax = output[indOfMax] /
-           (inputBoundaries[indOfMax + 1] - inputBoundaries[indOfMax]);
-    iLeft = inputData[indOfMax - 1] /
-            (inputBoundaries[indOfMax] - inputBoundaries[indOfMax - 1]);
-    iRight = inputData[indOfMax + 1] /
-             (inputBoundaries[indOfMax + 2] - inputBoundaries[indOfMax + 1]);
+    fMax = output[indOfMax] / (inputBoundaries[indOfMax + 1] - inputBoundaries[indOfMax]);
+    iLeft = inputData[indOfMax - 1] / (inputBoundaries[indOfMax] - inputBoundaries[indOfMax - 1]);
+    iRight = inputData[indOfMax + 1] / (inputBoundaries[indOfMax + 2] - inputBoundaries[indOfMax + 1]);
 
     TS_ASSERT(inputData[indOfMax - 1] < output[indOfMax]);
     TS_ASSERT(inputData[indOfMax + 1] < output[indOfMax]);
@@ -510,9 +456,7 @@ private:
 
 class VectorHelperTestPerformance : public CxxTest::TestSuite {
 public:
-  VectorHelperTestPerformance *createSuite() {
-    return new VectorHelperTestPerformance();
-  }
+  VectorHelperTestPerformance *createSuite() { return new VectorHelperTestPerformance(); }
   void destroySuite(VectorHelperTestPerformance *suite) { delete suite; }
 
   VectorHelperTestPerformance() {
@@ -525,8 +469,7 @@ public:
     for (size_t i = 0; i < nIters; i++) {
       std::vector<double> yout(size);
       std::vector<double> eout(size);
-      VectorHelper::rebin(binEdges, counts, errors, smallerBinEdges, yout, eout,
-                          false, false);
+      VectorHelper::rebin(binEdges, counts, errors, smallerBinEdges, yout, eout, false, false);
     }
   }
 
@@ -535,8 +478,7 @@ public:
     for (size_t i = 0; i < nIters; i++) {
       std::vector<double> yout(size);
       std::vector<double> eout(size);
-      VectorHelper::rebin(binEdges, frequencies, frequencyErrors,
-                          smallerBinEdges, yout, eout, true, false);
+      VectorHelper::rebin(binEdges, frequencies, frequencyErrors, smallerBinEdges, yout, eout, true, false);
     }
   }
 
@@ -545,8 +487,7 @@ public:
     for (size_t i = 0; i < nIters; i++) {
       std::vector<double> yout(size);
       std::vector<double> eout(size);
-      VectorHelper::rebin(binEdges, counts, errors, largerBinEdges, yout, eout,
-                          false, false);
+      VectorHelper::rebin(binEdges, counts, errors, largerBinEdges, yout, eout, false, false);
     }
   }
 
@@ -555,8 +496,7 @@ public:
     for (size_t i = 0; i < nIters; i++) {
       std::vector<double> yout(size);
       std::vector<double> eout(size);
-      VectorHelper::rebin(binEdges, frequencies, frequencyErrors,
-                          largerBinEdges, yout, eout, true, false);
+      VectorHelper::rebin(binEdges, frequencies, frequencyErrors, largerBinEdges, yout, eout, true, false);
     }
   }
 
@@ -579,17 +519,14 @@ private:
     errors.resize(binSize - 1);
 
     std::iota(binEdges.begin(), binEdges.end(), 0);
-    std::generate(counts.begin(), counts.end(),
-                  []() { return static_cast<double>(rand() % 1000); });
+    std::generate(counts.begin(), counts.end(), []() { return static_cast<double>(rand() % 1000); });
 
     for (size_t i = 0; i < counts.size(); i++)
       frequencies[i] = counts[i] / (binEdges[i + 1] - binEdges[i]);
 
-    std::transform(counts.cbegin(), counts.cend(), errors.begin(),
-                   [](const double count) { return sqrt(count); });
+    std::transform(counts.cbegin(), counts.cend(), errors.begin(), [](const double count) { return sqrt(count); });
 
-    std::transform(frequencies.cbegin(), frequencies.cend(),
-                   frequencyErrors.begin(),
+    std::transform(frequencies.cbegin(), frequencies.cend(), frequencyErrors.begin(),
                    [](const double freq) { return sqrt(freq); });
   }
 

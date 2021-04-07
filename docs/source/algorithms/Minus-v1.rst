@@ -83,7 +83,7 @@ Output:
     The Y values are: [-2. -1.  0.  1.  2.  3.  4.  5.  6.]
     The updated Error values are: [ 3.          3.16227766  3.60555128  4.24264069  5.          5.83095189
       6.70820393  7.61577311  8.54400375]
-  
+
 **Example - Subtract using in-place operator**
 
 .. testcode:: ExMinusInPlace

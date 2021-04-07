@@ -38,8 +38,8 @@ public:
 
   bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd) override;
   bool calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) override;
-  bool calcMatrixCoord(const double &deltaEOrK0, std::vector<coord_t> &Coord,
-                       double &signal, double &ErrSq) const override;
+  bool calcMatrixCoord(const double &deltaEOrK0, std::vector<coord_t> &Coord, double &signal,
+                       double &ErrSq) const override;
   // constructor;
   MDTransfModQ();
   /* clone method allowing to provide the copy of the particular class */
@@ -47,8 +47,7 @@ public:
   //
   void initialize(const MDWSDescription &ConvParams) override;
 
-  std::vector<double> getExtremumPoints(const double eMin, const double eMax,
-                                        size_t det_num) const override;
+  std::vector<double> getExtremumPoints(const double eMin, const double eMax, size_t det_num) const override;
 
   // WARNING!!!! THESE METHODS ARE USED BEFORE INITIALIZE IS EXECUTED SO THEY
   // CAN NOT RELY ON THE CONTENTS OF THE CLASS TO BE DEFINED (THEY ARE VIRTUAL
@@ -59,28 +58,23 @@ public:
      input workspace*/
   unsigned int
   getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
-                       API::MatrixWorkspace_const_sptr inWS =
-                           API::MatrixWorkspace_const_sptr()) const override;
+                       API::MatrixWorkspace_const_sptr inWS = API::MatrixWorkspace_const_sptr()) const override;
   /**function returns units ID-s which this transformation prodiuces its ouptut.
      It is Momentum and Momentum and DelteE in inelastic modes */
   std::vector<std::string>
   outputUnitID(Kernel::DeltaEMode::Type dEmode,
-               API::MatrixWorkspace_const_sptr inWS =
-                   API::MatrixWorkspace_const_sptr()) const override;
+               API::MatrixWorkspace_const_sptr inWS = API::MatrixWorkspace_const_sptr()) const override;
   /**the default dimID-s in ModQ mode are |Q| and dE if necessary */
   std::vector<std::string>
   getDefaultDimID(Kernel::DeltaEMode::Type dEmode,
-                  API::MatrixWorkspace_const_sptr inWS =
-                      API::MatrixWorkspace_const_sptr()) const override;
+                  API::MatrixWorkspace_const_sptr inWS = API::MatrixWorkspace_const_sptr()) const override;
   /**  returns the units, the transformation expects for input workspace to be
    * expressed in. */
   const std::string
   inputUnitID(Kernel::DeltaEMode::Type dEmode,
-              API::MatrixWorkspace_const_sptr inWS =
-                  API::MatrixWorkspace_const_sptr()) const override;
-  void setDisplayNormalization(
-      Mantid::API::IMDWorkspace_sptr mdWorkspace,
-      Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const override;
+              API::MatrixWorkspace_const_sptr inWS = API::MatrixWorkspace_const_sptr()) const override;
+  void setDisplayNormalization(Mantid::API::IMDWorkspace_sptr mdWorkspace,
+                               Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const override;
 
 protected:
   //  directions to the detectors
@@ -120,11 +114,9 @@ protected:
 
 private:
   /// how to transform workspace data in elastic case
-  inline bool calcMatrixCoordElastic(const double &k0,
-                                     std::vector<coord_t> &Coord) const;
+  inline bool calcMatrixCoordElastic(const double &k0, std::vector<coord_t> &Coord) const;
   /// how to transform workspace data in inelastic case
-  inline bool calcMatrixCoordInelastic(const double &deltaE,
-                                       std::vector<coord_t> &Coord) const;
+  inline bool calcMatrixCoordInelastic(const double &deltaE, std::vector<coord_t> &Coord) const;
 };
 
 } // namespace MDAlgorithms

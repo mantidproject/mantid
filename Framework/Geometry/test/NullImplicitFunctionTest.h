@@ -19,8 +19,8 @@ public:
   void testGetName() {
     NullImplicitFunction function;
 
-    TSM_ASSERT_EQUALS("The static and dynamic names do not align",
-                      NullImplicitFunction::functionName(), function.getName());
+    TSM_ASSERT_EQUALS("The static and dynamic names do not align", NullImplicitFunction::functionName(),
+                      function.getName());
   }
 
   void testEvaluateReturnsTrue() {
@@ -32,8 +32,7 @@ public:
   void testToXMLEmpty() {
     NullImplicitFunction function;
 
-    TSM_ASSERT_EQUALS(
-        "The xml string should be empty for any instance of this type",
-        std::string(), function.toXMLString());
+    TSM_ASSERT_EQUALS("The xml string should be empty for any instance of this type", std::string(),
+                      function.toXMLString());
   }
 };

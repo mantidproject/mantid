@@ -25,13 +25,10 @@
 
 namespace Mantid {
 namespace Crystal {
-class MANTID_CRYSTAL_DLL GoniometerAnglesFromPhiRotation
-    : public API::Algorithm {
+class MANTID_CRYSTAL_DLL GoniometerAnglesFromPhiRotation : public API::Algorithm {
 public:
   /// Algorithm's name for identification
-  const std::string name() const override {
-    return "GoniometerAnglesFromPhiRotation";
-  }
+  const std::string name() const override { return "GoniometerAnglesFromPhiRotation"; }
 
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -41,9 +38,7 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SetGoniometer"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SetGoniometer"}; }
 
   /// Algorithm's category for identification
   const std::string category() const override { return "Crystal\\Goniometer"; }
@@ -51,17 +46,13 @@ public:
 private:
   /// Initialise the properties
   void init() override;
-  Kernel::Matrix<double>
-  getUBRaw(const Kernel::Matrix<double> &UB,
-           const Kernel::Matrix<double> &GoniometerMatrix) const;
+  Kernel::Matrix<double> getUBRaw(const Kernel::Matrix<double> &UB,
+                                  const Kernel::Matrix<double> &GoniometerMatrix) const;
 
-  bool CheckForOneRun(const DataObjects::PeaksWorkspace_sptr &Peaks,
-                      Kernel::Matrix<double> &GoniometerMatrix) const;
+  bool CheckForOneRun(const DataObjects::PeaksWorkspace_sptr &Peaks, Kernel::Matrix<double> &GoniometerMatrix) const;
 
-  void IndexRaw(const DataObjects::PeaksWorkspace_sptr &Peaks,
-                const Kernel::Matrix<double> &UBraw, int &Nindexed,
-                double &AvErrIndexed, double &AvErrorAll,
-                double tolerance) const;
+  void IndexRaw(const DataObjects::PeaksWorkspace_sptr &Peaks, const Kernel::Matrix<double> &UBraw, int &Nindexed,
+                double &AvErrIndexed, double &AvErrorAll, double tolerance) const;
 
   /// Run the algorithm
   void exec() override;

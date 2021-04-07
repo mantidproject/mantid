@@ -24,10 +24,8 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALFCustomInstrumentModel::ALFCustomInstrumentModel()
-    : m_numberOfTubesInAverage(0) {
-  m_base =
-      new MantidWidgets::BaseCustomInstrumentModel("ALF_tmp", "ALF", "ALFData");
+ALFCustomInstrumentModel::ALFCustomInstrumentModel() : m_numberOfTubesInAverage(0) {
+  m_base = new MantidWidgets::BaseCustomInstrumentModel("ALF_tmp", "ALF", "ALFData");
 }
 
 /*
@@ -48,11 +46,9 @@ void ALFCustomInstrumentModel::loadAlg(const std::string &name) {
  * @param name:: string name for ALF data
  * @return std::pair<int,std::string>:: the run number and status
  */
-std::pair<int, std::string>
-ALFCustomInstrumentModel::loadData(const std::string &name) {
+std::pair<int, std::string> ALFCustomInstrumentModel::loadData(const std::string &name) {
   loadAlg(name);
-  auto ws =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(getTmpName());
+  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(getTmpName());
   int runNumber = ws->getRunNumber();
   std::string message = "success";
   auto bools = isDataValid();
@@ -75,8 +71,7 @@ ALFCustomInstrumentModel::loadData(const std::string &name) {
  * @return pair<bool,bool>:: If the instrument is ALF, if it is d-spacing
  */
 std::map<std::string, bool> ALFCustomInstrumentModel::isDataValid() {
-  auto ws =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(getTmpName());
+  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(getTmpName());
   bool isItALF = false;
 
   if (ws->getInstrument()->getName() == getInstrument()) {
@@ -136,8 +131,7 @@ void ALFCustomInstrumentModel::averageTube() {
   const std::string name = getInstrument() + std::to_string(getCurrentRun());
   const int oldTotalNumber = m_numberOfTubesInAverage;
   // multiply up current average
-  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      EXTRACTEDWS + name);
+  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(EXTRACTEDWS + name);
   ws *= double(oldTotalNumber);
 
   // get the data to add
@@ -158,8 +152,7 @@ void ALFCustomInstrumentModel::averageTube() {
   alg->setProperty("OutputWorkspace", EXTRACTEDWS + name);
   alg->execute();
   // do division
-  ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(EXTRACTEDWS +
-                                                                   name);
+  ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(EXTRACTEDWS + name);
   ws->mutableY(0) /= (double(oldTotalNumber) + 1.0);
   AnalysisDataService::Instance().addOrReplace(EXTRACTEDWS + name, ws);
   m_numberOfTubesInAverage++;
@@ -169,28 +162,22 @@ bool ALFCustomInstrumentModel::hasTubeBeenExtracted(const std::string &name) {
   return AnalysisDataService::Instance().doesExist(EXTRACTEDWS + name);
 }
 
-bool ALFCustomInstrumentModel::extractTubeCondition(
-    std::map<std::string, bool> tabBools) {
+bool ALFCustomInstrumentModel::extractTubeCondition(std::map<std::string, bool> tabBools) {
   try {
 
-    bool ifCurve = (tabBools.find("plotStored")->second ||
-                    tabBools.find("hasCurve")->second);
+    bool ifCurve = (tabBools.find("plotStored")->second || tabBools.find("hasCurve")->second);
     return (tabBools.find("isTube")->second && ifCurve);
   } catch (...) {
     return false;
   }
 }
 
-bool ALFCustomInstrumentModel::averageTubeCondition(
-    std::map<std::string, bool> tabBools) {
+bool ALFCustomInstrumentModel::averageTubeCondition(std::map<std::string, bool> tabBools) {
   try {
 
-    bool ifCurve = (tabBools.find("plotStored")->second ||
-                    tabBools.find("hasCurve")->second);
-    return (m_numberOfTubesInAverage > 0 && tabBools.find("isTube")->second &&
-            ifCurve &&
-            hasTubeBeenExtracted(getInstrument() +
-                                 std::to_string(getCurrentRun())));
+    bool ifCurve = (tabBools.find("plotStored")->second || tabBools.find("hasCurve")->second);
+    return (m_numberOfTubesInAverage > 0 && tabBools.find("isTube")->second && ifCurve &&
+            hasTubeBeenExtracted(getInstrument() + std::to_string(getCurrentRun())));
   } catch (...) {
     return false;
   }
@@ -202,16 +189,12 @@ void ALFCustomInstrumentModel::extractSingleTube() {
 
 CompositeFunction_sptr ALFCustomInstrumentModel::getDefaultFunction() {
 
-  CompositeFunction_sptr composite =
-      std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(
-          Mantid::API::FunctionFactory::Instance().createFunction(
-              "CompositeFunction"));
+  CompositeFunction_sptr composite = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(
+      Mantid::API::FunctionFactory::Instance().createFunction("CompositeFunction"));
 
-  auto func = Mantid::API::FunctionFactory::Instance().createInitialized(
-      "name = FlatBackground");
+  auto func = Mantid::API::FunctionFactory::Instance().createInitialized("name = FlatBackground");
   composite->addFunction(func);
-  func = Mantid::API::FunctionFactory::Instance().createInitialized(
-      "name = Gaussian, Height = 3., Sigma= 1.0");
+  func = Mantid::API::FunctionFactory::Instance().createInitialized("name = Gaussian, Height = 3., Sigma= 1.0");
   composite->addFunction(func);
   return composite;
 }

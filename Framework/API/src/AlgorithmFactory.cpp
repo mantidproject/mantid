@@ -24,8 +24,7 @@ namespace {
 Kernel::Logger g_log("AlgorithmFactory");
 } // namespace
 
-AlgorithmFactoryImpl::AlgorithmFactoryImpl()
-    : Kernel::DynamicFactory<Algorithm>(), m_vmap(), m_amap() {
+AlgorithmFactoryImpl::AlgorithmFactoryImpl() : Kernel::DynamicFactory<Algorithm>(), m_vmap(), m_amap() {
   // we need to make sure the library manager has been loaded before we
   // are constructed so that it is destroyed after us and thus does
   // not close any loaded DLLs with loaded algorithms in them
@@ -40,9 +39,7 @@ AlgorithmFactoryImpl::~AlgorithmFactoryImpl() = default;
  * @param version :: the version of the algroithm to create
  * @returns a shared pointer to the created algorithm
  */
-std::shared_ptr<Algorithm>
-AlgorithmFactoryImpl::create(const std::string &name,
-                             const int &version) const {
+std::shared_ptr<Algorithm> AlgorithmFactoryImpl::create(const std::string &name, const int &version) const {
   int local_version = version;
   // Version not supplied
   if (version == -1) {
@@ -64,15 +61,12 @@ AlgorithmFactoryImpl::create(const std::string &name,
       return this->createAlgorithm(realName.get(), local_version);
     } catch (Kernel::Exception::NotFoundError &) {
       // Get highest registered version
-      const auto hVersion =
-          highestVersion(realName.get()); // Throws if not found
+      const auto hVersion = highestVersion(realName.get()); // Throws if not found
 
       // The version registered does not match version supplied
-      g_log.error() << "algorithm " << name << " version " << version
-                    << " is not registered \n";
+      g_log.error() << "algorithm " << name << " version " << version << " is not registered \n";
       g_log.error() << "the latest registered version is " << hVersion << '\n';
-      throw std::runtime_error("algorithm not registered " +
-                               createName(name, local_version));
+      throw std::runtime_error("algorithm not registered " + createName(name, local_version));
     }
   } else {
     throw std::runtime_error("algorithm not registered " + name);
@@ -85,8 +79,7 @@ AlgorithmFactoryImpl::create(const std::string &name,
  * @param algorithmName :: The name of the algorithm to unsubscribe
  * @param version :: The version number of the algorithm to unsubscribe
  */
-void AlgorithmFactoryImpl::unsubscribe(const std::string &algorithmName,
-                                       const int version) {
+void AlgorithmFactoryImpl::unsubscribe(const std::string &algorithmName, const int version) {
   std::string key = this->createName(algorithmName, version);
   try {
     Kernel::DynamicFactory<Algorithm>::unsubscribe(key);
@@ -94,16 +87,14 @@ void AlgorithmFactoryImpl::unsubscribe(const std::string &algorithmName,
     auto it = m_vmap.find(algorithmName);
     if (it != m_vmap.end()) {
       int highest_version = it->second;
-      if (highest_version > 1 &&
-          version == highest_version) // Decrement the highest version
+      if (highest_version > 1 && version == highest_version) // Decrement the highest version
       {
         it->second -= 1;
       } else
         m_vmap.erase(algorithmName);
     }
   } catch (Kernel::Exception::NotFoundError &) {
-    g_log.warning() << "Error unsubscribing algorithm " << algorithmName
-                    << " version " << version
+    g_log.warning() << "Error unsubscribing algorithm " << algorithmName << " version " << version
                     << ". Nothing registered with this name and version.";
   }
 }
@@ -114,8 +105,7 @@ void AlgorithmFactoryImpl::unsubscribe(const std::string &algorithmName,
  * @param version :: The version number. -1 checks whether anything exists
  * @returns True if a matching registration is found
  */
-bool AlgorithmFactoryImpl::exists(const std::string &algorithmName,
-                                  const int version) {
+bool AlgorithmFactoryImpl::exists(const std::string &algorithmName, const int version) {
   if (version == -1) // Find anything
   {
     return (m_vmap.find(algorithmName) != m_vmap.end());
@@ -130,8 +120,7 @@ bool AlgorithmFactoryImpl::exists(const std::string &algorithmName,
  * @param version :: the version of the algroithm
  * @returns a mangled name string
  */
-std::string AlgorithmFactoryImpl::createName(const std::string &name,
-                                             const int &version) const {
+std::string AlgorithmFactoryImpl::createName(const std::string &name, const int &version) const {
   std::ostringstream oss;
   oss << name << "|" << version;
   return (oss.str());
@@ -141,20 +130,17 @@ std::string AlgorithmFactoryImpl::createName(const std::string &name,
  * @param mangledName :: the mangled name of the Algrorithm
  * @returns a pair of the name and version
  */
-std::pair<std::string, int>
-AlgorithmFactoryImpl::decodeName(const std::string &mangledName) const {
+std::pair<std::string, int> AlgorithmFactoryImpl::decodeName(const std::string &mangledName) const {
   std::string::size_type seperatorPosition = mangledName.find('|');
   if (seperatorPosition == std::string::npos) {
-    throw std::invalid_argument(
-        "Cannot decode a Name string without a \"|\" (bar) character ");
+    throw std::invalid_argument("Cannot decode a Name string without a \"|\" (bar) character ");
   }
   std::string name = mangledName.substr(0, seperatorPosition);
   int version;
   std::istringstream ss(mangledName.substr(seperatorPosition + 1));
   ss >> version;
 
-  g_log.debug() << "mangled string:" << mangledName << " name:" << name
-                << " version:" << version << '\n';
+  g_log.debug() << "mangled string:" << mangledName << " name:" << name << " version:" << version << '\n';
   return std::pair<std::string, int>(name, version);
 }
 
@@ -179,8 +165,7 @@ const std::vector<std::string> AlgorithmFactoryImpl::getKeys() const {
  * faster, the default is false
  * @returns The strings used to identify individual algorithms
  */
-const std::vector<std::string>
-AlgorithmFactoryImpl::getKeys(bool includeHidden) const {
+const std::vector<std::string> AlgorithmFactoryImpl::getKeys(bool includeHidden) const {
   // Start with those subscribed with the factory and add the cleanly
   // constructed algorithm keys
   std::vector<std::string> names = Kernel::DynamicFactory<Algorithm>::getKeys();
@@ -195,8 +180,7 @@ AlgorithmFactoryImpl::getKeys(bool includeHidden) const {
     // strip out any algorithms names where all of the categories are hidden
     std::vector<std::string> validNames;
     std::vector<std::string>::const_iterator itr_end = names.end();
-    for (std::vector<std::string>::const_iterator itr = names.begin();
-         itr != itr_end; ++itr) {
+    for (std::vector<std::string>::const_iterator itr = names.begin(); itr != itr_end; ++itr) {
       std::string name = *itr;
       // check the categories
       std::pair<std::string, int> namePair = decodeName(name);
@@ -205,11 +189,9 @@ AlgorithmFactoryImpl::getKeys(bool includeHidden) const {
       bool toBeRemoved = true;
 
       // for each category
-      std::vector<std::string>::const_iterator itCategoriesEnd =
-          categories.end();
-      for (std::vector<std::string>::const_iterator itCategories =
-               categories.begin();
-           itCategories != itCategoriesEnd; ++itCategories) {
+      std::vector<std::string>::const_iterator itCategoriesEnd = categories.end();
+      for (std::vector<std::string>::const_iterator itCategories = categories.begin(); itCategories != itCategoriesEnd;
+           ++itCategories) {
         // if the entry is not in the set of hidden categories
         if (hiddenCategories.find(*itCategories) == hiddenCategories.end()) {
           toBeRemoved = false;
@@ -230,9 +212,7 @@ AlgorithmFactoryImpl::getKeys(bool includeHidden) const {
  * @param alias The name of the algorithm to look up in the alias map
  * @return Real name of algroithm if found
  */
-boost::optional<std::string>
-AlgorithmFactoryImpl::getRealNameFromAlias(const std::string &alias) const
-    noexcept {
+boost::optional<std::string> AlgorithmFactoryImpl::getRealNameFromAlias(const std::string &alias) const noexcept {
   auto a_it = m_amap.find(alias);
   if (a_it == m_amap.end())
     return boost::none;
@@ -245,8 +225,7 @@ AlgorithmFactoryImpl::getRealNameFromAlias(const std::string &alias) const
  * @return An integer corresponding to the highest version registered
  * @throw std::invalid_argument if the algorithm cannot be found
  */
-int AlgorithmFactoryImpl::highestVersion(
-    const std::string &algorithmName) const {
+int AlgorithmFactoryImpl::highestVersion(const std::string &algorithmName) const {
   auto viter = m_vmap.find(algorithmName);
   if (viter != m_vmap.end())
     return viter->second;
@@ -260,9 +239,7 @@ int AlgorithmFactoryImpl::highestVersion(
     if (viter != m_vmap.end())
       return viter->second;
     else {
-      throw std::runtime_error(
-          "AlgorithmFactory::highestVersion() - Unknown algorithm '" +
-          algorithmName + "'");
+      throw std::runtime_error("AlgorithmFactory::highestVersion() - Unknown algorithm '" + algorithmName + "'");
     }
   }
 }
@@ -274,8 +251,7 @@ int AlgorithmFactoryImpl::highestVersion(
  * @returns The map of the categories, together with a true false value
  * difining if they are hidden
  */
-const std::map<std::string, bool>
-AlgorithmFactoryImpl::getCategoriesWithState() const {
+const std::map<std::string, bool> AlgorithmFactoryImpl::getCategoriesWithState() const {
   std::map<std::string, bool> resultCategories;
 
   // hidden categories - empty initially
@@ -288,8 +264,7 @@ AlgorithmFactoryImpl::getCategoriesWithState() const {
 
   std::vector<std::string>::const_iterator itr_end = names.end();
   // for each algorithm
-  for (std::vector<std::string>::const_iterator itr = names.begin();
-       itr != itr_end; ++itr) {
+  for (std::vector<std::string>::const_iterator itr = names.begin(); itr != itr_end; ++itr) {
     std::string name = *itr;
     // decode the name and create an instance
     std::pair<std::string, int> namePair = decodeName(name);
@@ -299,9 +274,8 @@ AlgorithmFactoryImpl::getCategoriesWithState() const {
 
     // for each category of the algorithm
     std::vector<std::string>::const_iterator itCategoriesEnd = categories.end();
-    for (std::vector<std::string>::const_iterator itCategories =
-             categories.begin();
-         itCategories != itCategoriesEnd; ++itCategories) {
+    for (std::vector<std::string>::const_iterator itCategories = categories.begin(); itCategories != itCategoriesEnd;
+         ++itCategories) {
       bool isHidden = true;
       // check if the category is hidden
       if (hiddenCategories.find(*itCategories) == hiddenCategories.end()) {
@@ -321,8 +295,7 @@ AlgorithmFactoryImpl::getCategoriesWithState() const {
  * faster, the default is false
  * @returns The category strings
  */
-const std::unordered_set<std::string>
-AlgorithmFactoryImpl::getCategories(bool includeHidden) const {
+const std::unordered_set<std::string> AlgorithmFactoryImpl::getCategories(bool includeHidden) const {
   std::unordered_set<std::string> validCategories;
 
   // get all of the information we need
@@ -350,9 +323,7 @@ AlgorithmFactoryImpl::getCategories(bool includeHidden) const {
  * empty to the vector of descriptors, the default is true
  * @returns A vector of descriptor objects
  */
-std::vector<AlgorithmDescriptor>
-AlgorithmFactoryImpl::getDescriptors(bool includeHidden,
-                                     bool includeAliases) const {
+std::vector<AlgorithmDescriptor> AlgorithmFactoryImpl::getDescriptors(bool includeHidden, bool includeAliases) const {
   // algorithm names
   auto sv = getKeys(true);
 
@@ -386,8 +357,7 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden,
 
     // For each category
     auto itCategoriesEnd = categories.end();
-    for (auto itCategories = categories.begin();
-         itCategories != itCategoriesEnd; ++itCategories) {
+    for (auto itCategories = categories.begin(); itCategories != itCategoriesEnd; ++itCategories) {
       desc.category = *itCategories;
 
       // Let's check if this category or any of its parents are hidden.
@@ -421,8 +391,7 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden,
           aliasDesc.category = desc.category;
           aliasDesc.version = desc.version;
           res.emplace_back(aliasDesc);*/
-          res.emplace_back(
-              AlgorithmDescriptor{desc.alias, desc.version, desc.category, ""});
+          res.emplace_back(AlgorithmDescriptor{desc.alias, desc.version, desc.category, ""});
         }
       }
     }
@@ -430,24 +399,19 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden,
   return res;
 }
 
-void AlgorithmFactoryImpl::fillHiddenCategories(
-    std::unordered_set<std::string> *categorySet) const {
-  std::string categoryString = Kernel::ConfigService::Instance().getString(
-      "algorithms.categories.hidden");
-  Mantid::Kernel::StringTokenizer tokenizer(
-      categoryString, ";",
-      Mantid::Kernel::StringTokenizer::TOK_TRIM |
-          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-  std::copy(tokenizer.begin(), tokenizer.end(),
-            std::inserter(*categorySet, categorySet->end()));
+void AlgorithmFactoryImpl::fillHiddenCategories(std::unordered_set<std::string> *categorySet) const {
+  std::string categoryString = Kernel::ConfigService::Instance().getString("algorithms.categories.hidden");
+  Mantid::Kernel::StringTokenizer tokenizer(categoryString, ";",
+                                            Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                                                Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  std::copy(tokenizer.begin(), tokenizer.end(), std::inserter(*categorySet, categorySet->end()));
 }
 
 /** Extract the name of an algorithm
  * @param alg :: the Algrorithm to use
  * @returns the name of the algroithm
  */
-const std::string AlgorithmFactoryImpl::extractAlgName(
-    const std::shared_ptr<IAlgorithm> &alg) const {
+const std::string AlgorithmFactoryImpl::extractAlgName(const std::shared_ptr<IAlgorithm> &alg) const {
   return alg->name();
 }
 
@@ -455,17 +419,13 @@ const std::string AlgorithmFactoryImpl::extractAlgName(
  * @param alg :: the Algrorithm to use
  * @returns the version of the algroithm
  */
-int AlgorithmFactoryImpl::extractAlgVersion(
-    const std::shared_ptr<IAlgorithm> &alg) const {
-  return alg->version();
-}
+int AlgorithmFactoryImpl::extractAlgVersion(const std::shared_ptr<IAlgorithm> &alg) const { return alg->version(); }
 
 /** Extract the alias of an algorithm
  * @param alg :: the Algorithm to use
  * @returns the alias of the algorithm
  */
-const std::string AlgorithmFactoryImpl::extractAlgAlias(
-    const std::shared_ptr<IAlgorithm> &alg) const {
+const std::string AlgorithmFactoryImpl::extractAlgAlias(const std::shared_ptr<IAlgorithm> &alg) const {
   return alg->alias();
 }
 
@@ -477,9 +437,7 @@ const std::string AlgorithmFactoryImpl::extractAlgAlias(
  * @param version :: Algorithm version
  * @returns A shared pointer to the algorithm object
  */
-std::shared_ptr<Algorithm>
-AlgorithmFactoryImpl::createAlgorithm(const std::string &name,
-                                      const int version) const {
+std::shared_ptr<Algorithm> AlgorithmFactoryImpl::createAlgorithm(const std::string &name, const int version) const {
   return Kernel::DynamicFactory<Algorithm>::create(createName(name, version));
 }
 

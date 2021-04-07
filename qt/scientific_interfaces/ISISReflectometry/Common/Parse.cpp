@@ -12,8 +12,7 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 bool isEntirelyWhitespace(std::string const &string) {
-  return std::all_of(string.cbegin(), string.cend(),
-                     [](unsigned char c) { return std::isspace(c); });
+  return std::all_of(string.cbegin(), string.cend(), [](unsigned char c) { return std::isspace(c); });
 }
 
 boost::optional<double> parseDouble(std::string string) {

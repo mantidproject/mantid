@@ -30,23 +30,17 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "CloneWorkspace"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Copies an existing workspace into a new one.";
-  }
+  const std::string summary() const override { return "Copies an existing workspace into a new one."; }
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"CompareWorkspaces"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CompareWorkspaces"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "Utility\\Workspaces"; }
 
 private:
   const std::string workspaceMethodName() const override { return "clone"; }
-  const std::string workspaceMethodInputProperty() const override {
-    return "InputWorkspace";
-  }
+  const std::string workspaceMethodInputProperty() const override { return "InputWorkspace"; }
 
   /// Initialisation code
   void init() override;

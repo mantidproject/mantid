@@ -23,14 +23,12 @@ public:
 
   std::string name() const override { return "FitPropertyBrowserTest_Funct"; }
 
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override {
+  void function1D(double *out, const double *xValues, const size_t nData) const override {
     UNUSED_ARG(out);
     UNUSED_ARG(xValues);
     UNUSED_ARG(nData);
   }
-  void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData) override {
+  void functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) override {
     UNUSED_ARG(out);
     UNUSED_ARG(xValues);
     UNUSED_ARG(nData);
@@ -46,15 +44,13 @@ public:
   void test_FunctionFactory_notification_is_released() {
 
     // create a FunctionBrowser
-    auto fpBrowser =
-        std::make_unique<MantidQt::MantidWidgets::FitPropertyBrowser>();
+    auto fpBrowser = std::make_unique<MantidQt::MantidWidgets::FitPropertyBrowser>();
     // initialise it - this adds an observer on the function factory update
     // message
     fpBrowser->init();
     // delete the FunctionBrowser
     fpBrowser.reset();
     // Make sure the FunctionFactory does not have a dead link as an observer
-    TS_ASSERT_THROWS_NOTHING(FunctionFactory::Instance().unsubscribe(
-        "FitPropertyBrowserTest_Funct");)
+    TS_ASSERT_THROWS_NOTHING(FunctionFactory::Instance().unsubscribe("FitPropertyBrowserTest_Funct");)
   }
 };

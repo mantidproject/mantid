@@ -58,10 +58,9 @@ private:
 
 void export_DeprecatedAlgorithmChecker() {
   class_<DeprecatedAlgorithmChecker>("DeprecatedAlgorithmChecker", no_init)
-      .def(init<const std::string &, int>(
-          (arg("algName"), arg("version")),
-          "Constructs a DeprecatedAlgorithmChecker for the given algorithm & "
-          "version. (-1 indicates latest version)"))
+      .def(init<const std::string &, int>((arg("algName"), arg("version")),
+                                          "Constructs a DeprecatedAlgorithmChecker for the given algorithm & "
+                                          "version. (-1 indicates latest version)"))
       .def("isDeprecated", &DeprecatedAlgorithmChecker::isDeprecated,
            "A string containing a deprecation message if the algorithm is "
            "deprecated, empty string otherwise");

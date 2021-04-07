@@ -33,9 +33,7 @@ const std::string TransformMD::name() const { return "TransformMD"; }
 int TransformMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string TransformMD::category() const {
-  return "MDAlgorithms\\Transforms";
-}
+const std::string TransformMD::category() const { return "MDAlgorithms\\Transforms"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -43,24 +41,20 @@ const std::string TransformMD::category() const {
 /** Initialize the algorithm's properties.
  */
 void TransformMD::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Any input MDWorkspace.");
 
   std::vector<double> defaultScaling(1, 1.0);
-  declareProperty(std::make_unique<ArrayProperty<double>>(
-                      "Scaling", std::move(defaultScaling)),
+  declareProperty(std::make_unique<ArrayProperty<double>>("Scaling", std::move(defaultScaling)),
                   "Scaling value multiplying each coordinate. Default "
                   "1.\nEither a single value or a list for each dimension.");
 
   std::vector<double> defaultOffset(1, 0.0);
-  declareProperty(std::make_unique<ArrayProperty<double>>(
-                      "Offset", std::move(defaultOffset)),
+  declareProperty(std::make_unique<ArrayProperty<double>>("Offset", std::move(defaultOffset)),
                   "Offset value to add to each coordinate. Default 0.\nEither "
                   "a single value or a list for each dimension.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output MDWorkspace.");
 }
 
@@ -70,8 +64,7 @@ void TransformMD::init() {
  * @param ws :: MDEventWorkspace
  */
 template <typename MDE, size_t nd>
-void TransformMD::doTransform(
-    typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws) {
+void TransformMD::doTransform(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws) {
   std::vector<API::IMDNode *> boxes;
   // Get ALL the boxes, including MDGridBoxes.
   ws->getBox()->getBoxes(boxes, 1000, false);
@@ -123,8 +116,7 @@ void TransformMD::exec() {
 
   if (outWS != inWS) {
     // NOT in-place. So first we clone inWS into outWS
-    IAlgorithm_sptr clone =
-        this->createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
+    IAlgorithm_sptr clone = this->createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
     clone->setProperty("InputWorkspace", inWS);
     clone->executeAsChildAlg();
     outWS = clone->getProperty("OutputWorkspace");
@@ -154,10 +146,8 @@ void TransformMD::exec() {
   // Transform the dimensions
   outWS->transformDimensions(m_scaling, m_offset);
 
-  MDHistoWorkspace_sptr histo =
-      std::dynamic_pointer_cast<MDHistoWorkspace>(outWS);
-  IMDEventWorkspace_sptr event =
-      std::dynamic_pointer_cast<IMDEventWorkspace>(outWS);
+  MDHistoWorkspace_sptr histo = std::dynamic_pointer_cast<MDHistoWorkspace>(outWS);
+  IMDEventWorkspace_sptr event = std::dynamic_pointer_cast<IMDEventWorkspace>(outWS);
 
   if (histo) {
     // Recalculate all the values since the dimensions changed.
@@ -176,8 +166,7 @@ void TransformMD::exec() {
         signal_t *numEvents = histo->mutableNumEventsArray();
 
         // Find the extents
-        size_t nPoints =
-            static_cast<size_t>(histo->getDimension(0)->getNBins());
+        size_t nPoints = static_cast<size_t>(histo->getDimension(0)->getNBins());
         size_t mPoints = 1;
         for (size_t k = 1; k < histo->getNumDims(); k++) {
           mPoints *= static_cast<size_t>(histo->getDimension(k)->getNBins());
@@ -207,8 +196,7 @@ void TransformMD::exec() {
     tp.joinAll();
     event->refreshCache();
     // Set the special coordinate system.
-    IMDEventWorkspace_sptr inEvent =
-        std::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
+    IMDEventWorkspace_sptr inEvent = std::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
     event->setCoordinateSystem(inEvent->getSpecialCoordinateSystem());
 
     if (m_scaling[0] < 0) {
@@ -243,9 +231,7 @@ void TransformMD::exec() {
       Algorithm_sptr merge_alg = createChildAlgorithm("MergeMD");
       merge_alg->setPropertyValue("InputWorkspaces", outName + ",__none");
       merge_alg->setProperty("SplitInto", splits);
-      merge_alg->setProperty(
-          "SplitThreshold",
-          static_cast<int>(boxController->getSplitThreshold()));
+      merge_alg->setProperty("SplitThreshold", static_cast<int>(boxController->getSplitThreshold()));
       merge_alg->setProperty("MaxRecursionDepth", 13);
       merge_alg->executeAsChildAlg();
       event = merge_alg->getProperty("OutputWorkspace");
@@ -260,9 +246,7 @@ void TransformMD::exec() {
  * @param axes : target axes indexes
  * @return : Transposed workspace.
  */
-MDHistoWorkspace_sptr
-TransformMD::transposeMD(MDHistoWorkspace_sptr &toTranspose,
-                         const std::vector<int> &axes) {
+MDHistoWorkspace_sptr TransformMD::transposeMD(MDHistoWorkspace_sptr &toTranspose, const std::vector<int> &axes) {
 
   auto transposeMD = this->createChildAlgorithm("TransposeMD", 0.0, 0.5);
   transposeMD->setProperty("InputWorkspace", toTranspose);

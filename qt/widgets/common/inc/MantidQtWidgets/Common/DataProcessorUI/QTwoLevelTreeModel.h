@@ -36,33 +36,26 @@ number of items in the WhiteList.
 class EXPORT_OPT_MANTIDQT_COMMON QTwoLevelTreeModel : public AbstractTreeModel {
   Q_OBJECT
 public:
-  QTwoLevelTreeModel(const Mantid::API::ITableWorkspace_sptr &tableWorkspace,
-                     const WhiteList &whitelist);
+  QTwoLevelTreeModel(const Mantid::API::ITableWorkspace_sptr &tableWorkspace, const WhiteList &whitelist);
   ~QTwoLevelTreeModel() override;
 
   // Functions to read data from the model
 
   // Get data for a cell
-  QVariant data(const QModelIndex &index,
-                int role = Qt::DisplayRole) const override;
+  QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
   std::string cellValue(int groupIndex, int rowIndex, int columnIndex) const;
   // Get header data for the table
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role) const override;
+  QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
   // Get row metadata
   RowData_sptr rowData(const QModelIndex &index) const override;
   // Row count
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   // Get the index for a given column, row and parent
-  QModelIndex index(int row, int column,
-                    const QModelIndex &parent = QModelIndex()) const override;
+  QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
   // Get the 'processed' status of a row
-  bool isProcessed(int position,
-                   const QModelIndex &parent = QModelIndex()) const override;
+  bool isProcessed(int position, const QModelIndex &parent = QModelIndex()) const override;
   // Check whether reduction failed for a row/group
-  bool
-  reductionFailed(int position,
-                  const QModelIndex &parent = QModelIndex()) const override;
+  bool reductionFailed(int position, const QModelIndex &parent = QModelIndex()) const override;
   // Get the underlying data structure
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() const;
 
@@ -74,42 +67,32 @@ public:
   // Functions to edit model
 
   // Change or add data to the model
-  bool setData(const QModelIndex &index, const QVariant &value,
-               int role = Qt::EditRole) override;
+  bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
   // Add new rows to the model
-  bool insertRows(int row, int count,
-                  const QModelIndex &parent = QModelIndex()) override;
+  bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
   // Remove rows from the model
-  bool removeRows(int row, int count,
-                  const QModelIndex &parent = QModelIndex()) override;
+  bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
   // Remove all rows from the model
   bool removeAll();
   // Set the 'processed' status of a row / group
-  bool setProcessed(bool processed, int position,
-                    const QModelIndex &parent = QModelIndex()) override;
+  bool setProcessed(bool processed, int position, const QModelIndex &parent = QModelIndex()) override;
   // Set the error message for a row / group
-  bool setError(const std::string &error, int position,
-                const QModelIndex &parent = QModelIndex()) override;
+  bool setError(const std::string &error, int position, const QModelIndex &parent = QModelIndex()) override;
   // Insert rows
   bool insertRows(int position, int count, int parent);
   // Transfer rows into the table
   void transfer(const std::vector<std::map<QString, QString>> &runs) override;
 private slots:
-  void tableDataUpdated(const QModelIndex & /*topLeft*/,
-                        const QModelIndex & /*bottomRight*/);
+  void tableDataUpdated(const QModelIndex & /*topLeft*/, const QModelIndex & /*bottomRight*/);
 
 private:
   void updateGroupData(const int groupIdx, const int start, const int end);
   void updateAllGroupData();
-  bool runListsMatch(const std::string &newValue, const std::string &oldValue,
-                     const bool exactMatch) const;
-  bool rowMatches(int groupIndex, int rowIndex,
-                  const std::map<QString, QString> &rowValues,
+  bool runListsMatch(const std::string &newValue, const std::string &oldValue, const bool exactMatch) const;
+  bool rowMatches(int groupIndex, int rowIndex, const std::map<QString, QString> &rowValues,
                   const bool exactMatch) const;
-  boost::optional<int>
-  findRowIndex(int group, const std::map<QString, QString> &rowValues) const;
-  void insertRowWithValues(int groupIndex, int rowIndex,
-                           const std::map<QString, QString> &rowValues);
+  boost::optional<int> findRowIndex(int group, const std::map<QString, QString> &rowValues) const;
+  void insertRowWithValues(int groupIndex, int rowIndex, const std::map<QString, QString> &rowValues);
   void insertRowAndGroupWithValues(const std::map<QString, QString> &rowValues);
   bool rowIsEmpty(int row, int parent) const;
   void setupModelData(const Mantid::API::ITableWorkspace_sptr &table);
@@ -125,23 +108,19 @@ private:
   QVariant getToolTipRole(const QModelIndex &index) const;
 
   RowData_sptr rowData(int groupIndex, int rowIndex) const;
-  int getPositionToInsertRowInGroup(
-      const int groupIndex, const std::map<QString, QString> &rowValues);
-  bool checkColumnInComparisons(const Column &column,
-                                const bool exactMatch) const;
+  int getPositionToInsertRowInGroup(const int groupIndex, const std::map<QString, QString> &rowValues);
+  bool checkColumnInComparisons(const Column &column, const bool exactMatch) const;
 
   /// List of all groups ordered by the group's position in the tree
   std::vector<GroupInfo> m_groups;
 };
 
-template <typename Action>
-void forEachGroup(QTwoLevelTreeModel &model, Action act) {
+template <typename Action> void forEachGroup(QTwoLevelTreeModel &model, Action act) {
   for (int group = 0; group < model.rowCount(); group++)
     act(group);
 }
 
-template <typename Action>
-void forEachRow(QTwoLevelTreeModel &model, Action act) {
+template <typename Action> void forEachRow(QTwoLevelTreeModel &model, Action act) {
   forEachGroup(model, [&model, &act](int group) -> void {
     for (int row = 0; row < model.rowCount(model.index(group, 0)); row++)
       act(group, row);

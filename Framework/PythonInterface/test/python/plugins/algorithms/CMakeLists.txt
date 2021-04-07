@@ -46,6 +46,7 @@ set(TEST_PY_FILES
     FitGaussianTest.py
     FitIncidentSpectrumTest.py
     FractionalIndexingTest.py
+    GenerateLogbookTest.py
     GetEiT0atSNSTest.py
     HB2AReduceTest.py
     HB3AAdjustSampleNormTest.py
@@ -87,6 +88,7 @@ set(TEST_PY_FILES
     OptimizeCrystalPlacementByRunTest.py
     PDConvertRealSpaceTest.py
     PDConvertReciprocalSpaceTest.py
+    PeakMatchingTest.py
     RebinRaggedTest.py
     ReflectometryReductionOneLiveDataTest.py
     ReflectometrySliceEventWorkspaceTest.py

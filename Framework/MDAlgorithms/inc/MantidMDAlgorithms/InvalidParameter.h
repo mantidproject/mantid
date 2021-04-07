@@ -21,8 +21,7 @@ namespace MDAlgorithms {
 @date 01/10/2010
 */
 
-class DLLExport InvalidParameter
-    : public Mantid::API::ImplicitFunctionParameter {
+class DLLExport InvalidParameter : public Mantid::API::ImplicitFunctionParameter {
 private:
   std::string m_value;
 

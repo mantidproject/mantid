@@ -24,15 +24,6 @@ class IPeakTest(unittest.TestCase):
         # on every call.
         self._tolerance = 1e-2
 
-    def test_set_detector_id_with_valid_id(self):
-        det_id = 101
-        self._peak.setDetectorID(det_id)
-        self.assertEqual(self._peak.getDetectorID(), det_id)
-
-    def test_set_detector_id_with_invalid_id(self):
-        det_id = -1
-        self.assertRaises(RuntimeError, self._peak.setDetectorID, det_id)
-
     def test_set_run_number(self):
         run_number = 101
         self._peak.setRunNumber(run_number)
@@ -93,7 +84,7 @@ class IPeakTest(unittest.TestCase):
         npt.assert_allclose(q_lab, q_sample, atol=self._tolerance)
 
     def test_set_goniometer_matrix_with_singular_matrix(self):
-        rotation = np.zeros((3,3))
+        rotation = np.zeros((3, 3))
         self.assertRaises(ValueError, self._peak.setGoniometerMatrix, rotation)
 
     def test_set_wavelength(self):
@@ -102,26 +93,20 @@ class IPeakTest(unittest.TestCase):
         self.assertAlmostEqual(self._peak.getWavelength(), wavelength)
 
     def test_get_scattering(self):
-        det_id = 101
-        expected_scattering_angle = 2.878973314094696
-        self._peak.setDetectorID(det_id)
-        self.assertAlmostEqual(self._peak.getScattering(), expected_scattering_angle)
+        expected_scattering_angle = 2.7024  # angle subtended by detector with ID=1
+        self.assertAlmostEqual(self._peak.getScattering(), expected_scattering_angle,  places=4)
 
     def test_get_tof(self):
-        det_id = 101
         wavelength = 1.9
-        expected_tof = 4103.70182610731
-        self._peak.setDetectorID(det_id)
+        expected_tof = 4112.53
         self._peak.setWavelength(wavelength)
-        self.assertEqual(self._peak.getTOF(), expected_tof)
+        self.assertAlmostEqual(self._peak.getTOF(), expected_tof, places=2)
 
     def test_get_d_spacing(self):
-        det_id = 101
         wavelength = 1.9
-        expected_d = 0.958249313959493
-        self._peak.setDetectorID(det_id)
+        expected_d = 0.973
         self._peak.setWavelength(wavelength)
-        self.assertEqual(self._peak.getDSpacing(), expected_d)
+        self.assertAlmostEqual(self._peak.getDSpacing(), expected_d, places=3)
 
     def test_set_initial_energy(self):
         initial_energy = 10.0
@@ -163,40 +148,29 @@ class IPeakTest(unittest.TestCase):
         self.assertAlmostEqual(self._peak.getBinCount(), bin_count)
 
     def test_get_row_and_column(self):
-        det_id = 101
-        row, col = 36, 1
-        self._peak.setDetectorID(det_id)
+        row, col = 0, 0  # this is the very first detector
         self.assertEqual(self._peak.getRow(), row)
         self.assertEqual(self._peak.getCol(), col)
 
-    def test_get_det_pos(self):
-        det_id = 101
-        expected_det_pos = np.array([0.061999,  0.0135, -0.236032])
-        self._peak.setDetectorID(det_id)
-        npt.assert_allclose(self._peak.getDetPos(), expected_det_pos, atol=self._tolerance)
-
     def test_get_l1(self):
-        det_id = 101
         expected_l1 = 8.3
-        self._peak.setDetectorID(det_id)
         self.assertEqual(self._peak.getL1(), expected_l1)
 
     def test_get_l2(self):
-        det_id = 101
-        expected_l2 = 0.2444125610784556
-        self._peak.setDetectorID(det_id)
-        self.assertEqual(self._peak.getL2(), expected_l2)
+        expected_l2 = 0.26279
+        self.assertAlmostEqual(self._peak.getL2(), expected_l2, places=4)
 
     def test_set_modulation_vector(self):
-        testVector = V3D(0.5,0,0.2)
-        testVectorOut = V3D(1, 0, 0)
-        self._peak.setIntMNP(testVector)
-        self.assertEqual(self._peak.getIntMNP(), testVectorOut)
+        test_vector = V3D(0.5, 0, 0.2)
+        test_vector_out = V3D(1, 0, 0)
+        self._peak.setIntMNP(test_vector)
+        self.assertEqual(self._peak.getIntMNP(), test_vector_out)
 
     def test_set_get_inthkl(self):
-        testVector = V3D(0.5,0,0.2)
-        self._peak.setIntHKL(testVector)
-        self.assertEqual(self._peak.getIntHKL(), V3D(1,0,0))
+        test_vector = V3D(0.5, 0, 0.2)
+        self._peak.setIntHKL(test_vector)
+        self.assertEqual(self._peak.getIntHKL(), V3D(1, 0, 0))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,7 +1,7 @@
 digraph IqtFitMultiple {
   label="IqtFitMultiple Flowchart"
   $global_style
-  
+
   subgraph params {
     $param_style
     InputWorkspace
@@ -33,18 +33,18 @@ digraph IqtFitMultiple {
     CopyLogs2               [label="Copy logs"]
     ExtractQENSMembers
   }
-  
+
   subgraph decisions {
     $decision_style
   }
-  
+
   subgraph process  {
     $process_style
     ConvertToElasticQ
     TransposeFitParametersTable
     ConvertParametersToWorkspace
   }
-  
+
   InputWorkspace                -> CropWorkspace
   StartX                        -> CropWorkspace
   EndX                          -> CropWorkspace
@@ -66,7 +66,7 @@ digraph IqtFitMultiple {
   ResultWorkspace               -> CopyLogs
   InputWorkspace2               -> CopyLogs2
   FitGroup                      -> CopyLogs2
-  CopyLogs                      -> AddSampleLogMultiple         
+  CopyLogs                      -> AddSampleLogMultiple
   CopyLogs2                     -> AddSampleLogMultiple2
   SampleLogs                    -> AddSampleLogMultiple2
   SampleLogs                    -> AddSampleLogMultiple         [label="Additional SampleLogs based on Fit data"]

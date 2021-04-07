@@ -24,9 +24,7 @@ namespace Algorithms {
 
 DECLARE_ALGORITHM(EditInstrumentGeometry)
 
-const std::string EditInstrumentGeometry::name() const {
-  return "EditInstrumentGeometry";
-}
+const std::string EditInstrumentGeometry::name() const { return "EditInstrumentGeometry"; }
 
 const std::string EditInstrumentGeometry::category() const {
   return "Diffraction\\DataHandling;DataHandling\\Instrument";
@@ -41,28 +39,24 @@ int EditInstrumentGeometry::version() const { return 1; }
  */
 void EditInstrumentGeometry::init() {
   // Input workspace
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
-      "Workspace to edit the detector information");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+                  "Workspace to edit the detector information");
 
   // L1
-  declareProperty("PrimaryFlightPath", EMPTY_DBL(),
-                  "Primary flight path L1 of the powder diffractometer. ");
+  declareProperty("PrimaryFlightPath", EMPTY_DBL(), "Primary flight path L1 of the powder diffractometer. ");
 
   // Spectrum Number for the spectrum to have instrument geometry edited
-  declareProperty(
-      std::make_unique<ArrayProperty<int32_t>>("SpectrumIDs"),
-      "Spectrum Numbers (note that it is not detector ID or workspace "
-      "indices). The list must be either empty or have a size "
-      "equal to input workspace's histogram number. ");
+  declareProperty(std::make_unique<ArrayProperty<int32_t>>("SpectrumIDs"),
+                  "Spectrum Numbers (note that it is not detector ID or workspace "
+                  "indices). The list must be either empty or have a size "
+                  "equal to input workspace's histogram number. ");
 
   auto required = std::make_shared<MandatoryValidator<std::vector<double>>>();
 
   // Vector for L2
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("L2", required),
-      "Secondary flight (L2) paths for each detector.  Number of L2 "
-      "given must be same as number of histogram.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("L2", required),
+                  "Secondary flight (L2) paths for each detector.  Number of L2 "
+                  "given must be same as number of histogram.");
 
   // Vector for 2Theta
   declareProperty(std::make_unique<ArrayProperty<double>>("Polar", required),
@@ -70,10 +64,9 @@ void EditInstrumentGeometry::init() {
                   "given must be same as number of histogram.");
 
   // Vector for Azimuthal angle
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("Azimuthal"),
-      "Azimuthal angles (out-of-plane) for detectors. "
-      "Number of azimuthal angles given must be same as number of histogram.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Azimuthal"),
+                  "Azimuthal angles (out-of-plane) for detectors. "
+                  "Number of azimuthal angles given must be same as number of histogram.");
 
   // Detector IDs
   declareProperty(std::make_unique<ArrayProperty<int>>("DetectorIDs"),
@@ -87,12 +80,10 @@ void EditInstrumentGeometry::init() {
                   "the original instrument will be used. ");
 }
 
-template <typename NumT>
-std::string checkValues(const std::vector<NumT> &thingy, const size_t numHist) {
+template <typename NumT> std::string checkValues(const std::vector<NumT> &thingy, const size_t numHist) {
   if ((!thingy.empty()) && thingy.size() != numHist) {
     stringstream msg;
-    msg << "Must equal number of spectra or be empty (" << numHist
-        << " != " << thingy.size() << ")";
+    msg << "Must equal number of spectra or be empty (" << numHist << " != " << thingy.size() << ")";
     return msg.str();
   } else {
     return "";
@@ -168,9 +159,8 @@ void EditInstrumentGeometry::exec() {
   if (isEmpty(l1)) {
     // Use the original L1
     if (!originstrument) {
-      std::string errmsg(
-          "It is not supported that L1 is not given, ",
-          "while there is no instrument associated to input workspace.");
+      std::string errmsg("It is not supported that L1 is not given, ",
+                         "while there is no instrument associated to input workspace.");
       g_log.error(errmsg);
       throw std::runtime_error(errmsg);
     }
@@ -188,8 +178,7 @@ void EditInstrumentGeometry::exec() {
     size_t numHist = workspace->getNumberHistograms();
     for (size_t i = 0; i < numHist; ++i) {
       specids.emplace_back(workspace->getSpectrum(i).getSpectrumNo());
-      g_log.information() << "Add spectrum "
-                          << workspace->getSpectrum(i).getSpectrumNo() << ".\n";
+      g_log.information() << "Add spectrum " << workspace->getSpectrum(i).getSpectrumNo() << ".\n";
     }
   }
 
@@ -217,8 +206,7 @@ void EditInstrumentGeometry::exec() {
 
   // Validate
   for (size_t ib = 0; ib < l2s.size(); ib++) {
-    g_log.information() << "Detector " << specids[ib] << "  L2 = " << l2s[ib]
-                        << "  2Theta = " << tths[ib] << '\n';
+    g_log.information() << "Detector " << specids[ib] << "  L2 = " << l2s[ib] << "  2Theta = " << tths[ib] << '\n';
     if (specids[ib] < 0) {
       // Invalid spectrum Number : less than 0.
       stringstream errmsgss;
@@ -264,8 +252,7 @@ void EditInstrumentGeometry::exec() {
     if (renameDetID)
       storDetIDs[workspaceindex] = vec_detids[i];
 
-    g_log.debug() << "workspace index = " << workspaceindex
-                  << " is for Spectrum " << specids[i] << '\n';
+    g_log.debug() << "workspace index = " << workspaceindex << " is for Spectrum " << specids[i] << '\n';
   }
 
   // Generate a new instrument
@@ -274,9 +261,8 @@ void EditInstrumentGeometry::exec() {
   if (name.empty()) {
     // Use the original L1
     if (!originstrument) {
-      std::string errmsg(
-          "It is not supported that InstrumentName is not given, ",
-          "while there is no instrument associated to input workspace.");
+      std::string errmsg("It is not supported that InstrumentName is not given, ",
+                         "while there is no instrument associated to input workspace.");
       g_log.error(errmsg);
       throw std::runtime_error(errmsg);
     }
@@ -293,14 +279,12 @@ void EditInstrumentGeometry::exec() {
   }
 
   // Set up source and sample information
-  Geometry::Component *samplepos =
-      new Geometry::Component("Sample", instrument.get());
+  Geometry::Component *samplepos = new Geometry::Component("Sample", instrument.get());
   instrument->add(samplepos);
   instrument->markAsSamplePos(samplepos);
   samplepos->setPos(0.0, 0.0, 0.0);
 
-  Geometry::ObjComponent *source =
-      new Geometry::ObjComponent("Source", instrument.get());
+  Geometry::ObjComponent *source = new Geometry::ObjComponent("Source", instrument.get());
   instrument->add(source);
   instrument->markAsSource(source);
   source->setPos(0.0, 0.0, -1.0 * l1);
@@ -314,8 +298,7 @@ void EditInstrumentGeometry::exec() {
       newdetid = storDetIDs[i];
     else
       newdetid = detid_t(i) + 100;
-    Geometry::Detector *detector =
-        new Geometry::Detector("det", newdetid, samplepos);
+    Geometry::Detector *detector = new Geometry::Detector("det", newdetid, samplepos);
 
     // Set up new detector parameters related to new instrument
     double l2 = storL2s[i];
@@ -329,8 +312,8 @@ void EditInstrumentGeometry::exec() {
     // Add new detector to spectrum and instrument
     auto &spectrum = workspace->getSpectrum(i);
     // Good and do some debug output
-    g_log.debug() << "Orignal spectrum " << spectrum.getSpectrumNo() << "has "
-                  << spectrum.getDetectorIDs().size() << " detectors. \n";
+    g_log.debug() << "Orignal spectrum " << spectrum.getSpectrumNo() << "has " << spectrum.getDetectorIDs().size()
+                  << " detectors. \n";
 
     spectrum.clearDetectorIDs();
     spectrum.addDetectorID(newdetid);

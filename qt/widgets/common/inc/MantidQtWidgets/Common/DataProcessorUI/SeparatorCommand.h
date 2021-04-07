@@ -19,8 +19,7 @@ execute() method
 */
 class SeparatorCommand : public CommandBase {
 public:
-  SeparatorCommand(DataProcessorPresenter *tablePresenter)
-      : CommandBase(tablePresenter){};
+  SeparatorCommand(DataProcessorPresenter *tablePresenter) : CommandBase(tablePresenter){};
   SeparatorCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~SeparatorCommand(){};
 

@@ -117,7 +117,7 @@ Click the generate a script button |GenerateAScript.png| on a `Colorfill Plot <h
 
    plt.show()
 
-For more advice: 
+For more advice:
 
 * :ref:`01_basic_plot_scripting`
 * :ref:`02_scripting_plots`
@@ -125,7 +125,7 @@ For more advice:
 |
 |
 
-Contour Plots 
+Contour Plots
 =============
 
 A Contour Plot is essentially a Colorfill Plot with Contour lines overlaid.
@@ -201,7 +201,7 @@ Basic example of plotting a `Contour Plot <https://matplotlib.org/api/_as_gen/ma
    fig.tight_layout()
    plt.show()
 
-For more advice: 
+For more advice:
 
 * :ref:`01_basic_plot_scripting`
 * :ref:`02_scripting_plots`
@@ -249,5 +249,5 @@ File > Settings
 
 .. |FigureOptionsGear.png| image:: /images/FigureOptionsGear.png
    :width: 150px
-.. |GenerateAScript.png| image:: /images/GenerateAScript.png  
+.. |GenerateAScript.png| image:: /images/GenerateAScript.png
    :width: 30px

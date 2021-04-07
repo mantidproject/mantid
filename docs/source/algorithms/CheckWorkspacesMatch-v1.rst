@@ -26,7 +26,7 @@ Workspace2D always fail.
 Usage
 -----
 
-**Example - check that two workspaces are equal to one another:**  
+**Example - check that two workspaces are equal to one another:**
 
 .. testcode:: ExCheckWorkspacesMatchSimple
 
@@ -43,10 +43,10 @@ Usage
 Output:
 
 .. testoutput:: ExCheckWorkspacesMatchSimple
-   
+
     Success!
 
-**Example - check that two workspaces match within a certain tolerance:**  
+**Example - check that two workspaces match within a certain tolerance:**
 
 .. testcode:: ExCheckWorkspacesMatchTolerance
 
@@ -68,7 +68,7 @@ Output:
 Output:
 
 .. testoutput:: ExCheckWorkspacesMatchTolerance
-   
+
     Data mismatch
     Success!
 

@@ -10,7 +10,7 @@ Overview
 --------
 
 Provides options which allow you to customise and save the behaviour of features on the
-Indirect interfaces. 
+Indirect interfaces.
 
 .. interface:: Settings
   :width: 450
@@ -55,7 +55,7 @@ Restrict allowed input files by name
   the restrictions on data when this option is ticked.
 
 Plot error bars for external plots
-  If ticked, this will ensure that error bars are plotted on any plots which are plotted 
+  If ticked, this will ensure that error bars are plotted on any plots which are plotted
   externally (i.e. in a separate window) from the indirect interfaces.
 
 

@@ -22,21 +22,16 @@ using namespace Mantid::Geometry;
 
 class PointGroupTest : public CxxTest::TestSuite {
 public:
-  void check_point_group(const std::string &name, V3D hkl, size_t numEquiv,
-                         V3D *equiv) {
-    PointGroup_sptr testedPointGroup =
-        PointGroupFactory::Instance().createPointGroup(name);
+  void check_point_group(const std::string &name, V3D hkl, size_t numEquiv, V3D *equiv) {
+    PointGroup_sptr testedPointGroup = PointGroupFactory::Instance().createPointGroup(name);
 
-    TSM_ASSERT(name + ": Does not fulfill group axioms!",
-               testedPointGroup->isGroup());
+    TSM_ASSERT(name + ": Does not fulfill group axioms!", testedPointGroup->isGroup());
 
     std::vector<V3D> equivalents = testedPointGroup->getEquivalents(hkl);
     // check that the number of equivalent reflections is as expected.
-    TSM_ASSERT_EQUALS(
-        name + ": Expected " + boost::lexical_cast<std::string>(numEquiv) +
-            " equivalents, got " +
-            boost::lexical_cast<std::string>(equivalents.size()) + " instead.",
-        equivalents.size(), numEquiv);
+    TSM_ASSERT_EQUALS(name + ": Expected " + boost::lexical_cast<std::string>(numEquiv) + " equivalents, got " +
+                          boost::lexical_cast<std::string>(equivalents.size()) + " instead.",
+                      equivalents.size(), numEquiv);
 
     // get reflection family for this hkl
     V3D family = testedPointGroup->getReflectionFamily(hkl);
@@ -44,18 +39,14 @@ public:
     for (size_t j = 0; j < numEquiv; j++) {
       // std::cout << j << '\n';
       if (!testedPointGroup->isEquivalent(hkl, equiv[j])) {
-        TSM_ASSERT(name + " : " + hkl.toString() + " is not equivalent to " +
-                       equiv[j].toString(),
-                   false);
+        TSM_ASSERT(name + " : " + hkl.toString() + " is not equivalent to " + equiv[j].toString(), false);
       }
 
       // make sure family for equiv[j] is the same as the one for hkl
       TS_ASSERT_EQUALS(testedPointGroup->getReflectionFamily(equiv[j]), family);
       // also make sure that current equivalent is in the collection of
       // equivalents.
-      TS_ASSERT_DIFFERS(
-          std::find(equivalents.begin(), equivalents.end(), equiv[j]),
-          equivalents.end());
+      TS_ASSERT_DIFFERS(std::find(equivalents.begin(), equivalents.end(), equiv[j]), equivalents.end());
     }
 
     return;
@@ -67,96 +58,74 @@ public:
       check_point_group("-1", V3D(1, 2, 3), 2, equiv);
     }
     {
-      V3D equiv[] = {V3D(1, 2, 3), V3D(-1, -2, -3), V3D(-1, 2, -3),
-                     V3D(1, -2, 3)};
+      V3D equiv[] = {V3D(1, 2, 3), V3D(-1, -2, -3), V3D(-1, 2, -3), V3D(1, -2, 3)};
       check_point_group("2/m", V3D(1, 2, 3), 4, equiv);
     }
     {
-      V3D equiv[] = {V3D(1, 2, 3), V3D(-1, -2, 3), V3D(-1, -2, -3),
-                     V3D(1, 2, -3)};
+      V3D equiv[] = {V3D(1, 2, 3), V3D(-1, -2, 3), V3D(-1, -2, -3), V3D(1, 2, -3)};
       check_point_group("112/m", V3D(1, 2, 3), 4, equiv);
     }
     {
-      V3D equiv[] = {V3D(1, 2, 3),   V3D(-1, -2, 3),  V3D(-1, 2, -3),
-                     V3D(1, -2, -3), V3D(-1, -2, -3), V3D(1, 2, -3),
-                     V3D(1, -2, 3),  V3D(-1, 2, 3)};
+      V3D equiv[] = {V3D(1, 2, 3),    V3D(-1, -2, 3), V3D(-1, 2, -3), V3D(1, -2, -3),
+                     V3D(-1, -2, -3), V3D(1, 2, -3),  V3D(1, -2, 3),  V3D(-1, 2, 3)};
       check_point_group("mmm", V3D(1, 2, 3), 8, equiv);
     }
     {
-      V3D equiv[] = {V3D(1, 2, 3),   V3D(-1, -2, 3),  V3D(-2, 1, 3),
-                     V3D(2, -1, 3),  V3D(-1, -2, -3), V3D(1, 2, -3),
-                     V3D(2, -1, -3), V3D(-2, 1, -3)};
+      V3D equiv[] = {V3D(1, 2, 3),    V3D(-1, -2, 3), V3D(-2, 1, 3),  V3D(2, -1, 3),
+                     V3D(-1, -2, -3), V3D(1, 2, -3),  V3D(2, -1, -3), V3D(-2, 1, -3)};
       check_point_group("4/m", V3D(1, 2, 3), 8, equiv);
     }
     {
-      V3D equiv[] = {
-          V3D(1, 2, 3),    V3D(-1, -2, 3), V3D(-2, 1, 3),  V3D(2, -1, 3),
-          V3D(-1, 2, -3),  V3D(1, -2, -3), V3D(2, 1, -3),  V3D(-2, -1, -3),
-          V3D(-1, -2, -3), V3D(1, 2, -3),  V3D(2, -1, -3), V3D(-2, 1, -3),
-          V3D(1, -2, 3),   V3D(-1, 2, 3),  V3D(-2, -1, 3), V3D(2, 1, 3)};
+      V3D equiv[] = {V3D(1, 2, 3),  V3D(-1, -2, 3),  V3D(-2, 1, 3),   V3D(2, -1, 3), V3D(-1, 2, -3), V3D(1, -2, -3),
+                     V3D(2, 1, -3), V3D(-2, -1, -3), V3D(-1, -2, -3), V3D(1, 2, -3), V3D(2, -1, -3), V3D(-2, 1, -3),
+                     V3D(1, -2, 3), V3D(-1, 2, 3),   V3D(-2, -1, 3),  V3D(2, 1, 3)};
       check_point_group("4/mmm", V3D(1, 2, 3), 16, equiv);
     }
     {
-      V3D equiv[] = {V3D(1, 2, 3),    V3D(2, -3, 3),  V3D(-3, 1, 3),
-                     V3D(-1, -2, -3), V3D(-2, 3, -3), V3D(3, -1, -3)};
+      V3D equiv[] = {V3D(1, 2, 3), V3D(2, -3, 3), V3D(-3, 1, 3), V3D(-1, -2, -3), V3D(-2, 3, -3), V3D(3, -1, -3)};
       check_point_group("-3", V3D(1, 2, 3), 6, equiv);
     }
     {
-      V3D equiv[] = {V3D(1, 2, 3),    V3D(2, -3, 3),  V3D(-3, 1, 3),
-                     V3D(2, 1, -3),   V3D(1, -3, -3), V3D(-3, 2, -3),
-                     V3D(-1, -2, -3), V3D(-2, 3, -3), V3D(3, -1, -3),
-                     V3D(-2, -1, 3),  V3D(-1, 3, 3),  V3D(3, -2, 3)};
+      V3D equiv[] = {V3D(1, 2, 3),    V3D(2, -3, 3),  V3D(-3, 1, 3),  V3D(2, 1, -3),  V3D(1, -3, -3), V3D(-3, 2, -3),
+                     V3D(-1, -2, -3), V3D(-2, 3, -3), V3D(3, -1, -3), V3D(-2, -1, 3), V3D(-1, 3, 3),  V3D(3, -2, 3)};
       check_point_group("-3m1", V3D(1, 2, 3), 12, equiv);
     }
     {
       V3D equiv[] = {
-          V3D(1, 2, 3),   V3D(2, -3, 3),  V3D(-3, 1, 3),   V3D(-2, -1, -3),
-          V3D(-1, 3, -3), V3D(3, -2, -3), V3D(-1, -2, -3), V3D(-2, 3, -3),
-          V3D(3, -1, -3), V3D(2, 1, 3),   V3D(1, -3, 3),   V3D(-3, 2, 3),
+          V3D(1, 2, 3),    V3D(2, -3, 3),  V3D(-3, 1, 3),  V3D(-2, -1, -3), V3D(-1, 3, -3), V3D(3, -2, -3),
+          V3D(-1, -2, -3), V3D(-2, 3, -3), V3D(3, -1, -3), V3D(2, 1, 3),    V3D(1, -3, 3),  V3D(-3, 2, 3),
       };
       check_point_group("-31m", V3D(1, 2, 3), 12, equiv);
     }
     {
-      V3D equiv[] = {V3D(1, 2, 3),    V3D(2, -3, 3),  V3D(-3, 1, 3),
-                     V3D(-1, -2, 3),  V3D(-2, 3, 3),  V3D(3, -1, 3),
-                     V3D(-1, -2, -3), V3D(-2, 3, -3), V3D(3, -1, -3),
-                     V3D(1, 2, -3),   V3D(2, -3, -3), V3D(-3, 1, -3)};
+      V3D equiv[] = {V3D(1, 2, 3),    V3D(2, -3, 3),  V3D(-3, 1, 3),  V3D(-1, -2, 3), V3D(-2, 3, 3),  V3D(3, -1, 3),
+                     V3D(-1, -2, -3), V3D(-2, 3, -3), V3D(3, -1, -3), V3D(1, 2, -3),  V3D(2, -3, -3), V3D(-3, 1, -3)};
       check_point_group("6/m", V3D(1, 2, 3), 12, equiv);
     }
     {
-      V3D equiv[] = {
-          V3D(1, 2, 3),    V3D(2, -3, 3),   V3D(-3, 1, 3),  V3D(-1, -2, 3),
-          V3D(-2, 3, 3),   V3D(3, -1, 3),   V3D(2, 1, -3),  V3D(1, -3, -3),
-          V3D(-3, 2, -3),  V3D(-2, -1, -3), V3D(-1, 3, -3), V3D(3, -2, -3),
-          V3D(-1, -2, -3), V3D(-2, 3, -3),  V3D(3, -1, -3), V3D(1, 2, -3),
-          V3D(2, -3, -3),  V3D(-3, 1, -3),  V3D(-2, -1, 3), V3D(-1, 3, 3),
-          V3D(3, -2, 3),   V3D(2, 1, 3),    V3D(1, -3, 3),  V3D(-3, 2, 3)};
+      V3D equiv[] = {V3D(1, 2, 3),    V3D(2, -3, 3),  V3D(-3, 1, 3),  V3D(-1, -2, 3),  V3D(-2, 3, 3),  V3D(3, -1, 3),
+                     V3D(2, 1, -3),   V3D(1, -3, -3), V3D(-3, 2, -3), V3D(-2, -1, -3), V3D(-1, 3, -3), V3D(3, -2, -3),
+                     V3D(-1, -2, -3), V3D(-2, 3, -3), V3D(3, -1, -3), V3D(1, 2, -3),   V3D(2, -3, -3), V3D(-3, 1, -3),
+                     V3D(-2, -1, 3),  V3D(-1, 3, 3),  V3D(3, -2, 3),  V3D(2, 1, 3),    V3D(1, -3, 3),  V3D(-3, 2, 3)};
       check_point_group("6/mmm", V3D(1, 2, 3), 24, equiv);
     }
     {
-      V3D equiv[] = {
-          V3D(1, 2, 3),    V3D(-1, -2, 3), V3D(-1, 2, -3), V3D(1, -2, -3),
-          V3D(3, 1, 2),    V3D(3, -1, -2), V3D(-3, -1, 2), V3D(-3, 1, -2),
-          V3D(2, 3, 1),    V3D(-2, 3, -1), V3D(2, -3, -1), V3D(-2, -3, 1),
-          V3D(-1, -2, -3), V3D(1, 2, -3),  V3D(1, -2, 3),  V3D(-1, 2, 3),
-          V3D(-3, -1, -2), V3D(-3, 1, 2),  V3D(3, 1, -2),  V3D(3, -1, 2),
-          V3D(-2, -3, -1), V3D(2, -3, 1),  V3D(-2, 3, 1),  V3D(2, 3, -1)};
+      V3D equiv[] = {V3D(1, 2, 3),    V3D(-1, -2, 3), V3D(-1, 2, -3),  V3D(1, -2, -3), V3D(3, 1, 2),    V3D(3, -1, -2),
+                     V3D(-3, -1, 2),  V3D(-3, 1, -2), V3D(2, 3, 1),    V3D(-2, 3, -1), V3D(2, -3, -1),  V3D(-2, -3, 1),
+                     V3D(-1, -2, -3), V3D(1, 2, -3),  V3D(1, -2, 3),   V3D(-1, 2, 3),  V3D(-3, -1, -2), V3D(-3, 1, 2),
+                     V3D(3, 1, -2),   V3D(3, -1, 2),  V3D(-2, -3, -1), V3D(2, -3, 1),  V3D(-2, 3, 1),   V3D(2, 3, -1)};
       check_point_group("m-3", V3D(1, 2, 3), 24, equiv);
     }
     {
       V3D equiv[] = {
-          V3D(1, 2, 3),    V3D(-1, -2, 3),  V3D(-1, 2, -3),  V3D(1, -2, -3),
-          V3D(3, 1, 2),    V3D(3, -1, -2),  V3D(-3, -1, 2),  V3D(-3, 1, -2),
-          V3D(2, 3, 1),    V3D(-2, 3, -1),  V3D(2, -3, -1),  V3D(-2, -3, 1),
-          V3D(2, 1, -3),   V3D(-2, -1, -3), V3D(2, -1, 3),   V3D(-2, 1, 3),
-          V3D(1, 3, -2),   V3D(-1, 3, 2),   V3D(-1, -3, -2), V3D(1, -3, 2),
-          V3D(3, 2, -1),   V3D(3, -2, 1),   V3D(-3, 2, 1),   V3D(-3, -2, -1),
-          V3D(-1, -2, -3), V3D(1, 2, -3),   V3D(1, -2, 3),   V3D(-1, 2, 3),
-          V3D(-3, -1, -2), V3D(-3, 1, 2),   V3D(3, 1, -2),   V3D(3, -1, 2),
-          V3D(-2, -3, -1), V3D(2, -3, 1),   V3D(-2, 3, 1),   V3D(2, 3, -1),
-          V3D(-2, -1, 3),  V3D(2, 1, 3),    V3D(-2, 1, -3),  V3D(2, -1, -3),
-          V3D(-1, -3, 2),  V3D(1, -3, -2),  V3D(1, 3, 2),    V3D(-1, 3, -2),
-          V3D(-3, -2, 1),  V3D(-3, 2, -1),  V3D(3, -2, -1),  V3D(3, 2, 1)};
+          V3D(1, 2, 3),    V3D(-1, -2, 3),  V3D(-1, 2, -3),  V3D(1, -2, -3), V3D(3, 1, 2),    V3D(3, -1, -2),
+          V3D(-3, -1, 2),  V3D(-3, 1, -2),  V3D(2, 3, 1),    V3D(-2, 3, -1), V3D(2, -3, -1),  V3D(-2, -3, 1),
+          V3D(2, 1, -3),   V3D(-2, -1, -3), V3D(2, -1, 3),   V3D(-2, 1, 3),  V3D(1, 3, -2),   V3D(-1, 3, 2),
+          V3D(-1, -3, -2), V3D(1, -3, 2),   V3D(3, 2, -1),   V3D(3, -2, 1),  V3D(-3, 2, 1),   V3D(-3, -2, -1),
+          V3D(-1, -2, -3), V3D(1, 2, -3),   V3D(1, -2, 3),   V3D(-1, 2, 3),  V3D(-3, -1, -2), V3D(-3, 1, 2),
+          V3D(3, 1, -2),   V3D(3, -1, 2),   V3D(-2, -3, -1), V3D(2, -3, 1),  V3D(-2, 3, 1),   V3D(2, 3, -1),
+          V3D(-2, -1, 3),  V3D(2, 1, 3),    V3D(-2, 1, -3),  V3D(2, -1, -3), V3D(-1, -3, 2),  V3D(1, -3, -2),
+          V3D(1, 3, 2),    V3D(-1, 3, -2),  V3D(-3, -2, 1),  V3D(-3, 2, -1), V3D(3, -2, -1),  V3D(3, 2, 1)};
       check_point_group("m-3m", V3D(1, 2, 3), 48, equiv);
     }
 
@@ -307,9 +276,7 @@ public:
     std::vector<PointGroup_sptr> pointgroups = getAllPointGroups();
 
     for (auto &pointgroup : pointgroups) {
-      TSM_ASSERT_EQUALS(pointgroup->getSymbol() +
-                            ": Unexpected crystal system.",
-                        pointgroup->crystalSystem(),
+      TSM_ASSERT_EQUALS(pointgroup->getSymbol() + ": Unexpected crystal system.", pointgroup->crystalSystem(),
                         crystalSystemsMap[pointgroup->getSymbol()]);
     }
   }
@@ -330,8 +297,7 @@ public:
     TS_ASSERT_EQUALS(pgMap.count(PointGroup::CrystalSystem::Tetragonal), 8);
 
     // 5 with rhombohedral axes and 8 with hexagonal and 3 for defaults
-    TS_ASSERT_EQUALS(pgMap.count(PointGroup::CrystalSystem::Trigonal),
-                     5 + 8 + 3);
+    TS_ASSERT_EQUALS(pgMap.count(PointGroup::CrystalSystem::Trigonal), 5 + 8 + 3);
     TS_ASSERT_EQUALS(pgMap.count(PointGroup::CrystalSystem::Hexagonal), 8);
     TS_ASSERT_EQUALS(pgMap.count(PointGroup::CrystalSystem::Cubic), 5);
   }
@@ -342,118 +308,77 @@ public:
   }
 
   void testCrystalSystemNames() {
-    TS_ASSERT_EQUALS(getCrystalSystemFromString("Cubic"),
-                     PointGroup::CrystalSystem::Cubic);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString("cubic"),
-                     PointGroup::CrystalSystem::Cubic);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString("CUBIC"),
-                     PointGroup::CrystalSystem::Cubic);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString("CuBiC"),
-                     PointGroup::CrystalSystem::Cubic);
+    TS_ASSERT_EQUALS(getCrystalSystemFromString("Cubic"), PointGroup::CrystalSystem::Cubic);
+    TS_ASSERT_EQUALS(getCrystalSystemFromString("cubic"), PointGroup::CrystalSystem::Cubic);
+    TS_ASSERT_EQUALS(getCrystalSystemFromString("CUBIC"), PointGroup::CrystalSystem::Cubic);
+    TS_ASSERT_EQUALS(getCrystalSystemFromString("CuBiC"), PointGroup::CrystalSystem::Cubic);
 
-    TS_ASSERT_EQUALS(getCrystalSystemFromString("Tetragonal"),
+    TS_ASSERT_EQUALS(getCrystalSystemFromString("Tetragonal"), PointGroup::CrystalSystem::Tetragonal);
+    TS_ASSERT_EQUALS(getCrystalSystemFromString("Hexagonal"), PointGroup::CrystalSystem::Hexagonal);
+    TS_ASSERT_EQUALS(getCrystalSystemFromString("Trigonal"), PointGroup::CrystalSystem::Trigonal);
+    TS_ASSERT_EQUALS(getCrystalSystemFromString("Orthorhombic"), PointGroup::CrystalSystem::Orthorhombic);
+    TS_ASSERT_EQUALS(getCrystalSystemFromString("Monoclinic"), PointGroup::CrystalSystem::Monoclinic);
+    TS_ASSERT_EQUALS(getCrystalSystemFromString("Triclinic"), PointGroup::CrystalSystem::Triclinic);
+
+    TS_ASSERT_THROWS(getCrystalSystemFromString("DoesNotExist"), const std::invalid_argument &);
+
+    TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(PointGroup::CrystalSystem::Cubic)),
+                     PointGroup::CrystalSystem::Cubic);
+    TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(PointGroup::CrystalSystem::Tetragonal)),
                      PointGroup::CrystalSystem::Tetragonal);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString("Hexagonal"),
+    TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(PointGroup::CrystalSystem::Hexagonal)),
                      PointGroup::CrystalSystem::Hexagonal);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString("Trigonal"),
+    TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(PointGroup::CrystalSystem::Trigonal)),
                      PointGroup::CrystalSystem::Trigonal);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString("Orthorhombic"),
+    TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(PointGroup::CrystalSystem::Orthorhombic)),
                      PointGroup::CrystalSystem::Orthorhombic);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString("Monoclinic"),
+    TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(PointGroup::CrystalSystem::Monoclinic)),
                      PointGroup::CrystalSystem::Monoclinic);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString("Triclinic"),
-                     PointGroup::CrystalSystem::Triclinic);
-
-    TS_ASSERT_THROWS(getCrystalSystemFromString("DoesNotExist"),
-                     const std::invalid_argument &);
-
-    TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(
-                         PointGroup::CrystalSystem::Cubic)),
-                     PointGroup::CrystalSystem::Cubic);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(
-                         PointGroup::CrystalSystem::Tetragonal)),
-                     PointGroup::CrystalSystem::Tetragonal);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(
-                         PointGroup::CrystalSystem::Hexagonal)),
-                     PointGroup::CrystalSystem::Hexagonal);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(
-                         PointGroup::CrystalSystem::Trigonal)),
-                     PointGroup::CrystalSystem::Trigonal);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(
-                         PointGroup::CrystalSystem::Orthorhombic)),
-                     PointGroup::CrystalSystem::Orthorhombic);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(
-                         PointGroup::CrystalSystem::Monoclinic)),
-                     PointGroup::CrystalSystem::Monoclinic);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(
-                         PointGroup::CrystalSystem::Triclinic)),
+    TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(PointGroup::CrystalSystem::Triclinic)),
                      PointGroup::CrystalSystem::Triclinic);
   }
 
   void testLatticeSystemNames() {
-    TS_ASSERT_EQUALS(getLatticeSystemFromString("Cubic"),
-                     PointGroup::LatticeSystem::Cubic);
-    TS_ASSERT_EQUALS(getLatticeSystemFromString("cubic"),
-                     PointGroup::LatticeSystem::Cubic);
-    TS_ASSERT_EQUALS(getLatticeSystemFromString("CUBIC"),
-                     PointGroup::LatticeSystem::Cubic);
-    TS_ASSERT_EQUALS(getLatticeSystemFromString("CuBiC"),
-                     PointGroup::LatticeSystem::Cubic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("Cubic"), PointGroup::LatticeSystem::Cubic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("cubic"), PointGroup::LatticeSystem::Cubic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("CUBIC"), PointGroup::LatticeSystem::Cubic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("CuBiC"), PointGroup::LatticeSystem::Cubic);
 
-    TS_ASSERT_EQUALS(getLatticeSystemFromString("Tetragonal"),
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("Tetragonal"), PointGroup::LatticeSystem::Tetragonal);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("Hexagonal"), PointGroup::LatticeSystem::Hexagonal);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("Rhombohedral"), PointGroup::LatticeSystem::Rhombohedral);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("Orthorhombic"), PointGroup::LatticeSystem::Orthorhombic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("Monoclinic"), PointGroup::LatticeSystem::Monoclinic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("Triclinic"), PointGroup::LatticeSystem::Triclinic);
+
+    TS_ASSERT_THROWS(getLatticeSystemFromString("DoesNotExist"), const std::invalid_argument &);
+
+    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(PointGroup::LatticeSystem::Cubic)),
+                     PointGroup::LatticeSystem::Cubic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(PointGroup::LatticeSystem::Tetragonal)),
                      PointGroup::LatticeSystem::Tetragonal);
-    TS_ASSERT_EQUALS(getLatticeSystemFromString("Hexagonal"),
+    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(PointGroup::LatticeSystem::Hexagonal)),
                      PointGroup::LatticeSystem::Hexagonal);
-    TS_ASSERT_EQUALS(getLatticeSystemFromString("Rhombohedral"),
+    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(PointGroup::LatticeSystem::Rhombohedral)),
                      PointGroup::LatticeSystem::Rhombohedral);
-    TS_ASSERT_EQUALS(getLatticeSystemFromString("Orthorhombic"),
+    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(PointGroup::LatticeSystem::Orthorhombic)),
                      PointGroup::LatticeSystem::Orthorhombic);
-    TS_ASSERT_EQUALS(getLatticeSystemFromString("Monoclinic"),
+    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(PointGroup::LatticeSystem::Monoclinic)),
                      PointGroup::LatticeSystem::Monoclinic);
-    TS_ASSERT_EQUALS(getLatticeSystemFromString("Triclinic"),
-                     PointGroup::LatticeSystem::Triclinic);
-
-    TS_ASSERT_THROWS(getLatticeSystemFromString("DoesNotExist"),
-                     const std::invalid_argument &);
-
-    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
-                         PointGroup::LatticeSystem::Cubic)),
-                     PointGroup::LatticeSystem::Cubic);
-    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
-                         PointGroup::LatticeSystem::Tetragonal)),
-                     PointGroup::LatticeSystem::Tetragonal);
-    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
-                         PointGroup::LatticeSystem::Hexagonal)),
-                     PointGroup::LatticeSystem::Hexagonal);
-    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
-                         PointGroup::LatticeSystem::Rhombohedral)),
-                     PointGroup::LatticeSystem::Rhombohedral);
-    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
-                         PointGroup::LatticeSystem::Orthorhombic)),
-                     PointGroup::LatticeSystem::Orthorhombic);
-    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
-                         PointGroup::LatticeSystem::Monoclinic)),
-                     PointGroup::LatticeSystem::Monoclinic);
-    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
-                         PointGroup::LatticeSystem::Triclinic)),
+    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(PointGroup::LatticeSystem::Triclinic)),
                      PointGroup::LatticeSystem::Triclinic);
   }
 
 private:
   void checkPointGroupPerformance(const PointGroup_sptr &pointGroup) {
-    V3D equiv[] = {
-        V3D(1, 2, 3),    V3D(-1, -2, 3),  V3D(-1, 2, -3),  V3D(1, -2, -3),
-        V3D(3, 1, 2),    V3D(3, -1, -2),  V3D(-3, -1, 2),  V3D(-3, 1, -2),
-        V3D(2, 3, 1),    V3D(-2, 3, -1),  V3D(2, -3, -1),  V3D(-2, -3, 1),
-        V3D(2, 1, -3),   V3D(-2, -1, -3), V3D(2, -1, 3),   V3D(-2, 1, 3),
-        V3D(1, 3, -2),   V3D(-1, 3, 2),   V3D(-1, -3, -2), V3D(1, -3, 2),
-        V3D(3, 2, -1),   V3D(3, -2, 1),   V3D(-3, 2, 1),   V3D(-3, -2, -1),
-        V3D(-1, -2, -3), V3D(1, 2, -3),   V3D(1, -2, 3),   V3D(-1, 2, 3),
-        V3D(-3, -1, -2), V3D(-3, 1, 2),   V3D(3, 1, -2),   V3D(3, -1, 2),
-        V3D(-2, -3, -1), V3D(2, -3, 1),   V3D(-2, 3, 1),   V3D(2, 3, -1),
-        V3D(-2, -1, 3),  V3D(2, 1, 3),    V3D(-2, 1, -3),  V3D(2, -1, -3),
-        V3D(-1, -3, 2),  V3D(1, -3, -2),  V3D(1, 3, 2),    V3D(-1, 3, -2),
-        V3D(-3, -2, 1),  V3D(-3, 2, -1),  V3D(3, -2, -1),  V3D(3, 2, 1)};
+    V3D equiv[] = {V3D(1, 2, 3),    V3D(-1, -2, 3),  V3D(-1, 2, -3),  V3D(1, -2, -3), V3D(3, 1, 2),    V3D(3, -1, -2),
+                   V3D(-3, -1, 2),  V3D(-3, 1, -2),  V3D(2, 3, 1),    V3D(-2, 3, -1), V3D(2, -3, -1),  V3D(-2, -3, 1),
+                   V3D(2, 1, -3),   V3D(-2, -1, -3), V3D(2, -1, 3),   V3D(-2, 1, 3),  V3D(1, 3, -2),   V3D(-1, 3, 2),
+                   V3D(-1, -3, -2), V3D(1, -3, 2),   V3D(3, 2, -1),   V3D(3, -2, 1),  V3D(-3, 2, 1),   V3D(-3, -2, -1),
+                   V3D(-1, -2, -3), V3D(1, 2, -3),   V3D(1, -2, 3),   V3D(-1, 2, 3),  V3D(-3, -1, -2), V3D(-3, 1, 2),
+                   V3D(3, 1, -2),   V3D(3, -1, 2),   V3D(-2, -3, -1), V3D(2, -3, 1),  V3D(-2, 3, 1),   V3D(2, 3, -1),
+                   V3D(-2, -1, 3),  V3D(2, 1, 3),    V3D(-2, 1, -3),  V3D(2, -1, -3), V3D(-1, -3, 2),  V3D(1, -3, -2),
+                   V3D(1, 3, 2),    V3D(-1, 3, -2),  V3D(-3, -2, 1),  V3D(-3, 2, -1), V3D(3, -2, -1),  V3D(3, 2, 1)};
     std::vector<V3D> hkls(equiv, equiv + 48);
 
     Timer t;

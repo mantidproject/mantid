@@ -27,11 +27,8 @@ private:
   MatrixWorkspace_sptr m_interWS;
 
   // Initialise the algorithm and set the properties
-  static void setupAlgorithm(SpecularReflectionPositionCorrect2 &alg,
-                             MatrixWorkspace_sptr &inWS, const double twoTheta,
-                             const std::string &correctionType,
-                             const std::string &detectorName,
-                             int detectorID = 0) {
+  static void setupAlgorithm(SpecularReflectionPositionCorrect2 &alg, MatrixWorkspace_sptr &inWS, const double twoTheta,
+                             const std::string &correctionType, const std::string &detectorName, int detectorID = 0) {
     if (!alg.isInitialized())
       alg.initialize();
     alg.setChild(true);
@@ -48,24 +45,21 @@ private:
   }
 
   // Run the algorithm and do some basic checks. Returns the output workspace.
-  static MatrixWorkspace_const_sptr
-  runAlgorithm(SpecularReflectionPositionCorrect2 &alg) {
+  static MatrixWorkspace_const_sptr runAlgorithm(SpecularReflectionPositionCorrect2 &alg) {
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outWS);
     return outWS;
   }
 
-  static void linearDetectorRotationWithFacing(MatrixWorkspace_sptr &inWS,
-                                               const double twoTheta) {
+  static void linearDetectorRotationWithFacing(MatrixWorkspace_sptr &inWS, const double twoTheta) {
     SpecularReflectionPositionCorrect2 alg;
     setupAlgorithm(alg, inWS, twoTheta, "RotateAroundSample", "detector");
     alg.setProperty("DetectorFacesSample", true);
     auto outWS = runAlgorithm(alg);
     const auto &spectrumInfoOut = outWS->spectrumInfo();
     const auto nHisto = spectrumInfoOut.size();
-    TS_ASSERT_DELTA(spectrumInfoOut.l2(0), spectrumInfoOut.l2(nHisto - 1),
-                    1e-10)
+    TS_ASSERT_DELTA(spectrumInfoOut.l2(0), spectrumInfoOut.l2(nHisto - 1), 1e-10)
     auto instrIn = inWS->getInstrument();
     auto detIn = instrIn->getComponentByName("detector");
     const auto posIn = detIn->getPos();
@@ -85,9 +79,8 @@ private:
     TS_ASSERT_DELTA(posOut.Z(), z, 1e-10)
   }
 
-  static void linearDetectorRotationWithFacingAndLinePosition(
-      MatrixWorkspace_sptr &inWS, const double twoTheta, const double linePos,
-      const double pixelSize) {
+  static void linearDetectorRotationWithFacingAndLinePosition(MatrixWorkspace_sptr &inWS, const double twoTheta,
+                                                              const double linePos, const double pixelSize) {
     SpecularReflectionPositionCorrect2 alg;
     setupAlgorithm(alg, inWS, twoTheta, "RotateAroundSample", "detector");
     alg.setProperty("DetectorFacesSample", true);
@@ -96,8 +89,7 @@ private:
     auto outWS = runAlgorithm(alg);
     const auto &spectrumInfoOut = outWS->spectrumInfo();
     const auto nHisto = spectrumInfoOut.size();
-    TS_ASSERT_DELTA(spectrumInfoOut.l2(0), spectrumInfoOut.l2(nHisto - 1),
-                    1e-10)
+    TS_ASSERT_DELTA(spectrumInfoOut.l2(0), spectrumInfoOut.l2(nHisto - 1), 1e-10)
     auto instrIn = inWS->getInstrument();
     auto detIn = instrIn->getComponentByName("detector");
     const auto posIn = detIn->getPos();
@@ -106,20 +98,15 @@ private:
     auto detOut = instrOut->getComponentByName("detector");
     const auto posOut = detOut->getPos();
     TS_ASSERT_DELTA(posOut.norm(), l2, 1e-10)
-    const auto lineTwoTheta =
-        spectrumInfoOut.twoTheta(static_cast<size_t>(linePos));
+    const auto lineTwoTheta = spectrumInfoOut.twoTheta(static_cast<size_t>(linePos));
     TS_ASSERT_DELTA(lineTwoTheta * 180. / M_PI, twoTheta, 1e-10)
   }
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SpecularReflectionPositionCorrect2Test *createSuite() {
-    return new SpecularReflectionPositionCorrect2Test();
-  }
-  static void destroySuite(SpecularReflectionPositionCorrect2Test *suite) {
-    delete suite;
-  }
+  static SpecularReflectionPositionCorrect2Test *createSuite() { return new SpecularReflectionPositionCorrect2Test(); }
+  static void destroySuite(SpecularReflectionPositionCorrect2Test *suite) { delete suite; }
 
   SpecularReflectionPositionCorrect2Test() {
     FrameworkManager::Instance();
@@ -298,8 +285,7 @@ public:
 
   void test_correct_linear_detector_rotation() {
     SpecularReflectionPositionCorrect2 alg;
-    setupAlgorithm(alg, m_interWS, 1.4, "RotateAroundSample",
-                   "linear-detector");
+    setupAlgorithm(alg, m_interWS, 1.4, "RotateAroundSample", "linear-detector");
     MatrixWorkspace_const_sptr outWS = runAlgorithm(alg);
 
     auto instrIn = m_interWS->getInstrument();
@@ -334,15 +320,13 @@ public:
     constexpr double twoTheta{1.4};
     constexpr double linePos{13.};
     constexpr double pixelSize{0.0012};
-    linearDetectorRotationWithFacingAndLinePosition(m_figaroWS, twoTheta,
-                                                    linePos, pixelSize);
+    linearDetectorRotationWithFacingAndLinePosition(m_figaroWS, twoTheta, linePos, pixelSize);
   }
 
   void test_correct_rotation_with_line_position_when_wsindices_run_like_d17() {
     constexpr double twoTheta{1.4};
     constexpr double linePos{189.};
     constexpr double pixelSize{0.001195};
-    linearDetectorRotationWithFacingAndLinePosition(m_d17WS, twoTheta, linePos,
-                                                    pixelSize);
+    linearDetectorRotationWithFacingAndLinePosition(m_d17WS, twoTheta, linePos, pixelSize);
   }
 };

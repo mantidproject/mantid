@@ -16,8 +16,7 @@ using namespace MantidQt::MantidWidgets;
  * @param new_params Renamed parameters
  * @param parent The parent widget for the dialog
  */
-RenameParDialog::RenameParDialog(const std::vector<std::string> &old_params,
-                                 const std::vector<std::string> &new_params,
+RenameParDialog::RenameParDialog(const std::vector<std::string> &old_params, const std::vector<std::string> &new_params,
                                  QWidget *parent)
     : QDialog(parent), m_old_params(old_params), m_new_params(new_params) {
   m_uiForm.setupUi(this);
@@ -31,10 +30,8 @@ RenameParDialog::RenameParDialog(const std::vector<std::string> &old_params,
   }
   connect(m_uiForm.btnRename, SIGNAL(clicked()), this, SLOT(accept()));
   connect(m_uiForm.btnCancel, SIGNAL(clicked()), this, SLOT(reject()));
-  connect(m_uiForm.rbAddIndex, SIGNAL(toggled(bool)), this,
-          SLOT(uniqueIndexedNames(bool)));
-  connect(m_uiForm.rbDoNot, SIGNAL(toggled(bool)), this,
-          SLOT(doNotRename(bool)));
+  connect(m_uiForm.rbAddIndex, SIGNAL(toggled(bool)), this, SLOT(uniqueIndexedNames(bool)));
+  connect(m_uiForm.rbDoNot, SIGNAL(toggled(bool)), this, SLOT(doNotRename(bool)));
 }
 
 /**
@@ -42,8 +39,7 @@ RenameParDialog::RenameParDialog(const std::vector<std::string> &old_params,
  * m_old_names and in column #1 of the table widget
  */
 bool RenameParDialog::isUnique(const QString &name) const {
-  auto it =
-      std::find(m_old_params.begin(), m_old_params.end(), name.toStdString());
+  auto it = std::find(m_old_params.begin(), m_old_params.end(), name.toStdString());
   if (it != m_old_params.end())
     return false;
   QAbstractItemModel *model = m_uiForm.tableWidget->model();
@@ -97,8 +93,7 @@ std::vector<std::string> RenameParDialog::setOutput() const {
   std::vector<std::string> out;
   QAbstractItemModel *model = m_uiForm.tableWidget->model();
   for (int row = 0; row < m_uiForm.tableWidget->rowCount(); ++row) {
-    out.emplace_back(
-        model->data(model->index(row, 1)).toString().toStdString());
+    out.emplace_back(model->data(model->index(row, 1)).toString().toStdString());
   }
   return out;
 }

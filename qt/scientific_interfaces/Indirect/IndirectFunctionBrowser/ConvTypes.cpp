@@ -15,38 +15,35 @@ namespace ConvTypes {
 
 using namespace Mantid::API;
 
-std::map<FitType, bool> FitTypeQDepends =
-    std::map<FitType, bool>({{FitType::None, false},
-                             {FitType::TeixeiraWater, true},
-                             {FitType::StretchedExpFT, false},
-                             {FitType::DiffSphere, true},
-                             {FitType::ElasticDiffSphere, true},
-                             {FitType::InelasticDiffSphere, true},
-                             {FitType::DiffRotDiscreteCircle, true},
-                             {FitType::InelasticDiffRotDiscreteCircle, true},
-                             {FitType::ElasticDiffRotDiscreteCircle, true}});
+std::map<FitType, bool> FitTypeQDepends = std::map<FitType, bool>({{FitType::None, false},
+                                                                   {FitType::TeixeiraWater, true},
+                                                                   {FitType::StretchedExpFT, false},
+                                                                   {FitType::DiffSphere, true},
+                                                                   {FitType::ElasticDiffSphere, true},
+                                                                   {FitType::InelasticDiffSphere, true},
+                                                                   {FitType::DiffRotDiscreteCircle, true},
+                                                                   {FitType::InelasticDiffRotDiscreteCircle, true},
+                                                                   {FitType::ElasticDiffRotDiscreteCircle, true}});
 
-std::unordered_map<FitType, std::string> FitTypeEnumToString(
-    {{FitType::TeixeiraWater, "TeixeiraWaterSQE"},
-     {FitType::StretchedExpFT, "StretchedExpFT"},
-     {FitType::DiffSphere, "DiffSphere"},
-     {FitType::ElasticDiffSphere, "ElasticDiffSphere"},
-     {FitType::InelasticDiffSphere, "InelasticDiffSphere"},
-     {FitType::DiffRotDiscreteCircle, "DiffRotDiscreteCircle"},
-     {FitType::InelasticDiffRotDiscreteCircle,
-      "InelasticDiffRotDiscreteCircle"},
-     {FitType::ElasticDiffRotDiscreteCircle, "ElasticDiffRotDiscreteCircle"}});
+std::unordered_map<FitType, std::string>
+    FitTypeEnumToString({{FitType::TeixeiraWater, "TeixeiraWaterSQE"},
+                         {FitType::StretchedExpFT, "StretchedExpFT"},
+                         {FitType::DiffSphere, "DiffSphere"},
+                         {FitType::ElasticDiffSphere, "ElasticDiffSphere"},
+                         {FitType::InelasticDiffSphere, "InelasticDiffSphere"},
+                         {FitType::DiffRotDiscreteCircle, "DiffRotDiscreteCircle"},
+                         {FitType::InelasticDiffRotDiscreteCircle, "InelasticDiffRotDiscreteCircle"},
+                         {FitType::ElasticDiffRotDiscreteCircle, "ElasticDiffRotDiscreteCircle"}});
 
-std::unordered_map<std::string, FitType> FitTypeStringToEnum(
-    {{"TeixeiraWaterSQE", FitType::TeixeiraWater},
-     {"StretchedExpFT", FitType::StretchedExpFT},
-     {"DiffSphere", FitType::DiffSphere},
-     {"ElasticDiffSphere", FitType::ElasticDiffSphere},
-     {"InelasticDiffSphere", FitType::InelasticDiffSphere},
-     {"DiffRotDiscreteCircle", FitType::DiffRotDiscreteCircle},
-     {"InelasticDiffRotDiscreteCircle",
-      FitType::InelasticDiffRotDiscreteCircle},
-     {"ElasticDiffRotDiscreteCircle", FitType::ElasticDiffRotDiscreteCircle}});
+std::unordered_map<std::string, FitType>
+    FitTypeStringToEnum({{"TeixeiraWaterSQE", FitType::TeixeiraWater},
+                         {"StretchedExpFT", FitType::StretchedExpFT},
+                         {"DiffSphere", FitType::DiffSphere},
+                         {"ElasticDiffSphere", FitType::ElasticDiffSphere},
+                         {"InelasticDiffSphere", FitType::InelasticDiffSphere},
+                         {"DiffRotDiscreteCircle", FitType::DiffRotDiscreteCircle},
+                         {"InelasticDiffRotDiscreteCircle", FitType::InelasticDiffRotDiscreteCircle},
+                         {"ElasticDiffRotDiscreteCircle", FitType::ElasticDiffRotDiscreteCircle}});
 
 std::map<ParamID, QString> g_paramName{
     {ParamID::LOR1_AMPLITUDE, "Amplitude"},
@@ -97,122 +94,77 @@ std::map<ParamID, QString> g_paramName{
 };
 
 template <>
-std::map<FitType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<
-    FitType>::g_typeMap{
+std::map<FitType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<FitType>::g_typeMap{
     {FitType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
-    {FitType::TeixeiraWater,
-     {"Teixeira Water",
-      "TeixeiraWaterSQE",
-      {ParamID::TW_HEIGHT, ParamID::TW_CENTRE}}},
-    {FitType::StretchedExpFT,
-     {"StretchedExpFT",
-      "StretchedExpFT",
-      {ParamID::SE_HEIGHT, ParamID::SE_CENTRE}}},
-    {FitType::DiffSphere,
-     {"DiffSphere", "DiffSphere", {ParamID::DP_INTENSITY, ParamID::DP_SHIFT}}},
+    {FitType::TeixeiraWater, {"Teixeira Water", "TeixeiraWaterSQE", {ParamID::TW_HEIGHT, ParamID::TW_CENTRE}}},
+    {FitType::StretchedExpFT, {"StretchedExpFT", "StretchedExpFT", {ParamID::SE_HEIGHT, ParamID::SE_CENTRE}}},
+    {FitType::DiffSphere, {"DiffSphere", "DiffSphere", {ParamID::DP_INTENSITY, ParamID::DP_SHIFT}}},
     {FitType::ElasticDiffSphere,
-     {"ElasticDiffSphere",
-      "ElasticDiffSphere",
-      {ParamID::EDP_HEIGHT, ParamID::EDP_RADIUS}}},
+     {"ElasticDiffSphere", "ElasticDiffSphere", {ParamID::EDP_HEIGHT, ParamID::EDP_RADIUS}}},
     {FitType::InelasticDiffSphere,
-     {"InelasticDiffSphere",
-      "InelasticDiffSphere",
-      {ParamID::IDP_INTENSITY, ParamID::IDP_SHIFT}}},
+     {"InelasticDiffSphere", "InelasticDiffSphere", {ParamID::IDP_INTENSITY, ParamID::IDP_SHIFT}}},
     {FitType::DiffRotDiscreteCircle,
-     {"DiffRotDiscreteCircle",
-      "DiffRotDiscreteCircle",
-      {ParamID::DRDC_INTENSITY, ParamID::DRDC_SHIFT}}},
+     {"DiffRotDiscreteCircle", "DiffRotDiscreteCircle", {ParamID::DRDC_INTENSITY, ParamID::DRDC_SHIFT}}},
     {FitType::InelasticDiffRotDiscreteCircle,
      {"InelasticDiffRotDiscreteCircle",
       "InelasticDiffRotDiscreteCircle",
       {ParamID::IDRDC_INTENSITY, ParamID::IDRDC_SHIFT}}},
     {FitType::ElasticDiffRotDiscreteCircle,
-     {"ElasticDiffRotDiscreteCircle",
-      "ElasticDiffRotDiscreteCircle",
-      {ParamID::EDRDC_HEIGHT, ParamID::EDRDC_RADIUS}}},
+     {"ElasticDiffRotDiscreteCircle", "ElasticDiffRotDiscreteCircle", {ParamID::EDRDC_HEIGHT, ParamID::EDRDC_RADIUS}}},
 };
 template <>
-std::map<LorentzianType, TemplateSubTypeDescriptor>
-    TemplateSubTypeImpl<LorentzianType>::g_typeMap{
-        {LorentzianType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
-        {LorentzianType::OneLorentzian,
-         {"One Lorentzian",
-          "Lorentzian",
-          {ParamID::LOR1_AMPLITUDE, ParamID::LOR1_FWHM}}},
-        {LorentzianType::TwoLorentzians,
-         {"Two Lorentzians",
-          "Lorentzian",
-          {ParamID::LOR2_AMPLITUDE_1, ParamID::LOR2_FWHM_1,
-           ParamID::LOR2_FWHM_2}}},
-    };
+std::map<LorentzianType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<LorentzianType>::g_typeMap{
+    {LorentzianType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
+    {LorentzianType::OneLorentzian, {"One Lorentzian", "Lorentzian", {ParamID::LOR1_AMPLITUDE, ParamID::LOR1_FWHM}}},
+    {LorentzianType::TwoLorentzians,
+     {"Two Lorentzians", "Lorentzian", {ParamID::LOR2_AMPLITUDE_1, ParamID::LOR2_FWHM_1, ParamID::LOR2_FWHM_2}}},
+};
 
 template <>
-std::map<BackgroundType, TemplateSubTypeDescriptor>
-    TemplateSubTypeImpl<BackgroundType>::g_typeMap{
-        {BackgroundType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
-        {BackgroundType::Flat,
-         {"FlatBackground",
-          "FlatBackground",
-          {ParamID::FLAT_BG_A0, ParamID::FLAT_BG_A0}}},
-        {BackgroundType::Linear,
-         {"LinearBackground",
-          "LinearBackground",
-          {ParamID::LINEAR_BG_A0, ParamID::LINEAR_BG_A1}}},
-    };
+std::map<BackgroundType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<BackgroundType>::g_typeMap{
+    {BackgroundType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
+    {BackgroundType::Flat, {"FlatBackground", "FlatBackground", {ParamID::FLAT_BG_A0, ParamID::FLAT_BG_A0}}},
+    {BackgroundType::Linear, {"LinearBackground", "LinearBackground", {ParamID::LINEAR_BG_A0, ParamID::LINEAR_BG_A1}}},
+};
 
 template <>
 std::map<bool, TemplateSubTypeDescriptor> TemplateSubTypeImpl<bool>::g_typeMap{
     {false, {"None", "", {ParamID::NONE, ParamID::NONE}}},
-    {true,
-     {"DeltaFunction",
-      "DeltaFunction",
-      {ParamID::DELTA_HEIGHT, ParamID::DELTA_CENTER}}},
+    {true, {"DeltaFunction", "DeltaFunction", {ParamID::DELTA_HEIGHT, ParamID::DELTA_CENTER}}},
 };
 
 template <>
-std::map<TempCorrectionType, TemplateSubTypeDescriptor>
-    TemplateSubTypeImpl<TempCorrectionType>::g_typeMap{
-        {TempCorrectionType::None, {"None", "", {ParamID::NONE}}},
-        {TempCorrectionType::Exponential,
-         {"Temp Correction",
-          "ConvTempCorrection",
-          {ParamID::TEMPERATURE, ParamID::TEMPERATURE}}},
-    };
+std::map<TempCorrectionType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<TempCorrectionType>::g_typeMap{
+    {TempCorrectionType::None, {"None", "", {ParamID::NONE}}},
+    {TempCorrectionType::Exponential,
+     {"Temp Correction", "ConvTempCorrection", {ParamID::TEMPERATURE, ParamID::TEMPERATURE}}},
+};
 
 QString paramName(ParamID id) { return g_paramName.at(id); }
 
-void applyToFitType(FitType fitType,
-                    const std::function<void(ParamID)> &paramFun) {
-  applyToParamIDRange(FitSubType::g_typeMap[fitType].blocks.front(),
-                      FitSubType::g_typeMap[fitType].blocks.back(), paramFun);
+void applyToFitType(FitType fitType, const std::function<void(ParamID)> &paramFun) {
+  applyToParamIDRange(FitSubType::g_typeMap[fitType].blocks.front(), FitSubType::g_typeMap[fitType].blocks.back(),
+                      paramFun);
 }
 
-void applyToLorentzianType(LorentzianType lorentzianType,
-                           const std::function<void(ParamID)> &paramFun) {
-  applyToParamIDRange(
-      LorentzianSubType::g_typeMap[lorentzianType].blocks.front(),
-      LorentzianSubType::g_typeMap[lorentzianType].blocks.back(), paramFun);
+void applyToLorentzianType(LorentzianType lorentzianType, const std::function<void(ParamID)> &paramFun) {
+  applyToParamIDRange(LorentzianSubType::g_typeMap[lorentzianType].blocks.front(),
+                      LorentzianSubType::g_typeMap[lorentzianType].blocks.back(), paramFun);
 }
 
-void applyToBackground(BackgroundType bgType,
-                       const std::function<void(ParamID)> &paramFun) {
+void applyToBackground(BackgroundType bgType, const std::function<void(ParamID)> &paramFun) {
   applyToParamIDRange(BackgroundSubType::g_typeMap[bgType].blocks.front(),
-                      BackgroundSubType::g_typeMap[bgType].blocks.back(),
-                      paramFun);
+                      BackgroundSubType::g_typeMap[bgType].blocks.back(), paramFun);
 }
 
-void applyToDelta(bool hasDeltaFunction,
-                  const std::function<void(ParamID)> &paramFun) {
+void applyToDelta(bool hasDeltaFunction, const std::function<void(ParamID)> &paramFun) {
   applyToParamIDRange(DeltaSubType::g_typeMap[hasDeltaFunction].blocks.front(),
-                      DeltaSubType::g_typeMap[hasDeltaFunction].blocks.back(),
-                      paramFun);
+                      DeltaSubType::g_typeMap[hasDeltaFunction].blocks.back(), paramFun);
 }
 
-void applyToTemp(TempCorrectionType tempCorrectionType,
-                 const std::function<void(ParamID)> &paramFun) {
+void applyToTemp(TempCorrectionType tempCorrectionType, const std::function<void(ParamID)> &paramFun) {
   applyToParamIDRange(TempSubType::g_typeMap[tempCorrectionType].blocks.front(),
-                      TempSubType::g_typeMap[tempCorrectionType].blocks.back(),
-                      paramFun);
+                      TempSubType::g_typeMap[tempCorrectionType].blocks.back(), paramFun);
 }
 
 } // namespace ConvTypes

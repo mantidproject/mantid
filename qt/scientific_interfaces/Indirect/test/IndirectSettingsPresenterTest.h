@@ -44,10 +44,8 @@ public:
   MOCK_METHOD1(setPlotErrorBarsChecked, void(bool check));
   MOCK_CONST_METHOD0(isPlotErrorBarsChecked, bool());
 
-  MOCK_METHOD3(setSetting, void(QString const &settingsGroup,
-                                QString const &settingName, bool const &value));
-  MOCK_METHOD2(getSetting, QVariant(QString const &settingsGroup,
-                                    QString const &settingName));
+  MOCK_METHOD3(setSetting, void(QString const &settingsGroup, QString const &settingName, bool const &value));
+  MOCK_METHOD2(getSetting, QVariant(QString const &settingsGroup, QString const &settingName));
 
   MOCK_METHOD1(setApplyText, void(QString const &text));
   MOCK_METHOD1(setApplyEnabled, void(bool enable));
@@ -69,13 +67,9 @@ GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class IndirectSettingsPresenterTest : public CxxTest::TestSuite {
 public:
-  static IndirectSettingsPresenterTest *createSuite() {
-    return new IndirectSettingsPresenterTest();
-  }
+  static IndirectSettingsPresenterTest *createSuite() { return new IndirectSettingsPresenterTest(); }
 
-  static void destroySuite(IndirectSettingsPresenterTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(IndirectSettingsPresenterTest *suite) { delete suite; }
 
   void setUp() override {
     m_view = new NiceMock<MockIIndirectSettingsView>();
@@ -94,8 +88,7 @@ public:
   /// Unit tests to check for successful presenter instantiation
   ///----------------------------------------------------------------------
 
-  void
-  test_that_calling_a_presenter_method_will_invoke_the_relevant_view_and_model_methods() {
+  void test_that_calling_a_presenter_method_will_invoke_the_relevant_view_and_model_methods() {
     checkForLoadingOfSettings();
   }
 
@@ -113,13 +106,10 @@ public:
     m_view->emitApplyClicked();
   }
 
-  void
-  test_that_the_applyClicked_signal_will_disable_the_settings_buttons_while_it_is_applying_the_changes() {
-    Expectation disableApply =
-        EXPECT_CALL(*m_view, setApplyEnabled(false)).Times(1);
+  void test_that_the_applyClicked_signal_will_disable_the_settings_buttons_while_it_is_applying_the_changes() {
+    Expectation disableApply = EXPECT_CALL(*m_view, setApplyEnabled(false)).Times(1);
     Expectation disableOk = EXPECT_CALL(*m_view, setOkEnabled(false)).Times(1);
-    Expectation disableCancel =
-        EXPECT_CALL(*m_view, setCancelEnabled(false)).Times(1);
+    Expectation disableCancel = EXPECT_CALL(*m_view, setCancelEnabled(false)).Times(1);
 
     EXPECT_CALL(*m_view, setApplyEnabled(true)).Times(1).After(disableApply);
     EXPECT_CALL(*m_view, setOkEnabled(true)).Times(1).After(disableOk);
@@ -134,12 +124,8 @@ private:
 
     ON_CALL(*m_model, getFacility()).WillByDefault(Return(facility));
 
-    ExpectationSet expectations =
-        EXPECT_CALL(*m_model, getFacility()).WillOnce(Return(facility));
-    expectations +=
-        EXPECT_CALL(*m_view,
-                    setSelectedFacility(QString::fromStdString(facility)))
-            .Times(1);
+    ExpectationSet expectations = EXPECT_CALL(*m_model, getFacility()).WillOnce(Return(facility));
+    expectations += EXPECT_CALL(*m_view, setSelectedFacility(QString::fromStdString(facility))).Times(1);
 
     m_presenter->loadSettings();
   }
@@ -147,14 +133,11 @@ private:
   void checkForSavingOfSettings() {
     std::string const facility("ISIS");
 
-    ON_CALL(*m_view, getSelectedFacility())
-        .WillByDefault(Return(QString::fromStdString(facility)));
-    ON_CALL(*m_view, isRestrictInputByNameChecked())
-        .WillByDefault(Return(true));
+    ON_CALL(*m_view, getSelectedFacility()).WillByDefault(Return(QString::fromStdString(facility)));
+    ON_CALL(*m_view, isRestrictInputByNameChecked()).WillByDefault(Return(true));
     ON_CALL(*m_view, isPlotErrorBarsChecked()).WillByDefault(Return(true));
 
-    Expectation expectation =
-        EXPECT_CALL(*m_view, getSelectedFacility()).Times(1);
+    Expectation expectation = EXPECT_CALL(*m_view, getSelectedFacility()).Times(1);
     EXPECT_CALL(*m_model, setFacility(facility)).Times(1).After(expectation);
   }
 

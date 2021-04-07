@@ -50,9 +50,8 @@ void populateWorkspaceWithLogData(MatrixWorkspace *wsPointer) {
     auto &mutableEVals = wsPointer->mutableE(iws);
     const double factor = (static_cast<double>(iws) + 1) * 1000.;
     for (size_t i = 0; i < mutableYVals.size(); ++i) {
-      mutableYVals[i] = factor * std::exp(-(xVals[i] - 7000. - factor) *
-                                          (xVals[i] - 7000. - factor) /
-                                          (0.01 * factor * factor));
+      mutableYVals[i] =
+          factor * std::exp(-(xVals[i] - 7000. - factor) * (xVals[i] - 7000. - factor) / (0.01 * factor * factor));
       if (mutableYVals[i] < 0.01)
         mutableEVals[i] = 0.1;
       else
@@ -63,12 +62,10 @@ void populateWorkspaceWithLogData(MatrixWorkspace *wsPointer) {
 
 // Generates a test matrix workspace populated with data and registers it into
 // the ADS
-API::MatrixWorkspace_sptr generateTestMatrixWorkspace(const std::string &wsName,
-                                                      int numHistograms,
-                                                      int numBins) {
+API::MatrixWorkspace_sptr generateTestMatrixWorkspace(const std::string &wsName, int numHistograms, int numBins) {
   // Create workspace
-  MatrixWorkspace_sptr dataws = std::dynamic_pointer_cast<MatrixWorkspace>(
-      WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+  MatrixWorkspace_sptr dataws =
+      std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
           numHistograms, numBins, false, false, true, "TestFake"));
   populateWorkspaceWithLogData(dataws.get());
   AnalysisDataService::Instance().addOrReplace(wsName, dataws);
@@ -77,11 +74,8 @@ API::MatrixWorkspace_sptr generateTestMatrixWorkspace(const std::string &wsName,
 
 // Generates a matrix WS with no instrument but with data and registers it into
 // ADS
-API::MatrixWorkspace_sptr generateNoInstWorkspace(const std::string &wsName,
-                                                  int numHistograms,
-                                                  int numBins) {
-  MatrixWorkspace_sptr dataws =
-      WorkspaceCreationHelper::create2DWorkspace(numHistograms, numBins);
+API::MatrixWorkspace_sptr generateNoInstWorkspace(const std::string &wsName, int numHistograms, int numBins) {
+  MatrixWorkspace_sptr dataws = WorkspaceCreationHelper::create2DWorkspace(numHistograms, numBins);
   populateWorkspaceWithLogData(dataws.get());
   AnalysisDataService::Instance().addOrReplace(wsName, dataws);
   return dataws;
@@ -101,8 +95,7 @@ public:
   void test_2BankInstrumentSLOG() {
     // Save a 2 banks diffraction data with instrument using SLOG format
     const std::string wsName = "SaveGSS_2BankSLOG";
-    auto dataws = generateTestMatrixWorkspace(wsName, m_defaultNumHistograms,
-                                              m_defaultNumBins);
+    auto dataws = generateTestMatrixWorkspace(wsName, m_defaultNumHistograms, m_defaultNumBins);
     // Get the output file handle
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string outPath = outputFileHandle.path();
@@ -113,8 +106,7 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     // Check file is identical
-    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
-        "SaveGSS_test2BankInstSLOG_Ref.gsa", outPath));
+    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile("SaveGSS_test2BankInstSLOG_Ref.gsa", outPath));
 
     // Clean
     AnalysisDataService::Instance().remove(wsName);
@@ -128,8 +120,7 @@ public:
   void test_2BankInstrumentSLOGUserHeader() {
     // Save a 2 banks diffraction data with instrument using SLOG format
     const std::string wsName = "SaveGSS_2BankSLOG";
-    generateTestMatrixWorkspace(wsName, m_defaultNumHistograms,
-                                m_defaultNumBins);
+    generateTestMatrixWorkspace(wsName, m_defaultNumHistograms, m_defaultNumBins);
     // Get the output file handle
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string outPath = outputFileHandle.path();
@@ -150,19 +141,15 @@ public:
 
     // Execute
     auto alg = setupSaveGSSAlg(outPath, wsName, "SLOG");
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("UserSpecifiedGSASHeader", user_header));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("UserSpecifiedGSASHeader", user_header));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("OverwriteStandardHeader", true));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("UserSpecifiedBankHeader", user_bank_headers));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("SLOGXYEPrecision", slog_xye_precision))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("UserSpecifiedBankHeader", user_bank_headers));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("SLOGXYEPrecision", slog_xye_precision))
     alg->execute();
     TS_ASSERT(alg->isExecuted());
 
     // Check file is identical
-    TS_ASSERT(!FileComparisonHelper::isEqualToReferenceFile(
-        "SaveGSS_test2BankInstSLOG_Ref.gsa", outPath));
+    TS_ASSERT(!FileComparisonHelper::isEqualToReferenceFile("SaveGSS_test2BankInstSLOG_Ref.gsa", outPath));
 
     // Clean
     AnalysisDataService::Instance().remove(wsName);
@@ -175,11 +162,9 @@ public:
     if (Poco::File("/usr").exists()) {
       // Save a 2 banks diffraction data with instrument using SLOG format
       const std::string wsName = "unwritablePath";
-      auto dataws = generateTestMatrixWorkspace(wsName, m_defaultNumHistograms,
-                                                m_defaultNumBins);
+      auto dataws = generateTestMatrixWorkspace(wsName, m_defaultNumHistograms, m_defaultNumBins);
       // Get the output file handle
-      const std::string outPath =
-          "/usr/unwritablePath.gss"; // outputFileHandle.path();
+      const std::string outPath = "/usr/unwritablePath.gss"; // outputFileHandle.path();
 
       // Execute
       auto alg = setupSaveGSSAlg(outPath, wsName, "SLOG");
@@ -188,16 +173,14 @@ public:
       // Clean
       AnalysisDataService::Instance().remove(wsName);
     } else {
-      std::cout << "skipping test_unwritablePath because /usr does not exist"
-                << std::endl;
+      std::cout << "skipping test_unwritablePath because /usr does not exist" << std::endl;
     }
   }
 
   void test_2BankInstrumentRALF() {
     // Save a 2 banks diffraction data with RALF format
     const std::string wsName = "SaveGSS_2BankRALF";
-    auto dataws = generateTestMatrixWorkspace(wsName, m_defaultNumHistograms,
-                                              m_defaultNumBins);
+    auto dataws = generateTestMatrixWorkspace(wsName, m_defaultNumHistograms, m_defaultNumBins);
     // Get file handle
     auto outFileHandle = Poco::TemporaryFile();
     const std::string outFilePath = outFileHandle.path();
@@ -208,8 +191,7 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     // Check result
-    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
-        "SaveGSS_test2BankInstRALF_Ref.gsa", outFilePath));
+    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile("SaveGSS_test2BankInstRALF_Ref.gsa", outFilePath));
 
     // Clean
     AnalysisDataService::Instance().remove(wsName);
@@ -219,8 +201,7 @@ public:
     // Test saving a 2 bank workspace in point data format and without
     // instrument
     const std::string wsName = "SaveGSS_NoInstWs";
-    auto dataws = generateNoInstWorkspace(wsName, m_defaultNumHistograms,
-                                          m_defaultNumBins);
+    auto dataws = generateNoInstWorkspace(wsName, m_defaultNumHistograms, m_defaultNumBins);
     // Get file handle
     auto outFileHandle = Poco::TemporaryFile();
     const std::string outFilePath = outFileHandle.path();
@@ -230,8 +211,7 @@ public:
     alg->execute();
     TS_ASSERT(alg->isExecuted());
 
-    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
-        "SaveGSS_test2BankNoInst_Ref.gsa", outFilePath));
+    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile("SaveGSS_test2BankNoInst_Ref.gsa", outFilePath));
 
     // Clean
     AnalysisDataService::Instance().remove(wsName);
@@ -244,8 +224,7 @@ public:
     // Choose a number where mod 4 != 0 to check it handles having
     // not enough data for one line correctly
     const int numBins = 10;
-    auto dataWs =
-        generateTestMatrixWorkspace(wsName, m_defaultNumHistograms, numBins);
+    auto dataWs = generateTestMatrixWorkspace(wsName, m_defaultNumHistograms, numBins);
 
     auto outFileHandle = Poco::TemporaryFile();
     const std::string outFilePath = outFileHandle.path();
@@ -255,8 +234,7 @@ public:
     alg->setProperty("SplitFiles", false);
     alg->execute();
     TS_ASSERT(alg->isExecuted());
-    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
-        "SaveGSS_test2BankRalfAltFormat_ref.gsa", outFilePath));
+    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile("SaveGSS_test2BankRalfAltFormat_ref.gsa", outFilePath));
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -287,10 +265,8 @@ public:
     Poco::TemporaryFile::registerForDeletion(fileOnePath);
     Poco::TemporaryFile::registerForDeletion(fileTwoPath);
 
-    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
-        "SaveGSS-SplitRef-0.gsas", fileOnePath));
-    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
-        "SaveGSS-SplitRef-1.gsas", fileTwoPath));
+    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile("SaveGSS-SplitRef-0.gsas", fileOnePath));
+    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile("SaveGSS-SplitRef-1.gsas", fileTwoPath));
 
     // Use glob to find any files that match the output pattern
     std::set<std::string> returnedFiles;
@@ -307,8 +283,7 @@ private:
   const int m_defaultNumHistograms = 2;
   const int m_defaultNumBins = 100;
 
-  std::unique_ptr<SaveGSS> setupSaveGSSAlg(const std::string &filePath,
-                                           const std::string &wsName,
+  std::unique_ptr<SaveGSS> setupSaveGSSAlg(const std::string &filePath, const std::string &wsName,
                                            const std::string &formatMode) {
     auto saver = std::make_unique<SaveGSS>();
     saver->initialize();
@@ -328,8 +303,7 @@ class SaveGSSTestPerformance : public CxxTest::TestSuite {
 public:
   void setUp() override {
     // Create a workspace for writing out
-    MatrixWorkspace_sptr dataws =
-        generateTestMatrixWorkspace(wsName, 2, m_numberOfBinsToSave);
+    MatrixWorkspace_sptr dataws = generateTestMatrixWorkspace(wsName, 2, m_numberOfBinsToSave);
     AnalysisDataService::Instance().addOrReplace(wsName, dataws);
 
     m_alg = new SaveGSS();

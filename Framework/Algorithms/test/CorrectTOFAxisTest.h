@@ -41,19 +41,15 @@ public:
     auto referenceWs = createInputWorkspace(blocksize, x0, dx, referenceTOF);
     auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("ReferenceWorkspace", referenceWs));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ReferenceWorkspace", referenceWs));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 
     MatrixWorkspace_sptr outputWs = alg->getProperty("OutputWorkspace");
     TS_ASSERT(outputWs);
-    TS_ASSERT_EQUALS(outputWs->run().getPropertyAsSingleValue("EI"),
-                     referenceEi)
-    TS_ASSERT_EQUALS(outputWs->run().getPropertyAsSingleValue("wavelength"),
-                     referenceWavelength)
+    TS_ASSERT_EQUALS(outputWs->run().getPropertyAsSingleValue("EI"), referenceEi)
+    TS_ASSERT_EQUALS(outputWs->run().getPropertyAsSingleValue("wavelength"), referenceWavelength)
     for (size_t i = 0; i < inputWs->getNumberHistograms(); ++i) {
       for (size_t j = 0; j < blocksize; ++j) {
         TS_ASSERT_DELTA(outputWs->x(i)[j], referenceWs->x(i)[j], 1e-6)
@@ -87,11 +83,9 @@ public:
     ITableWorkspace_sptr eppTable = createEPPTableWorkspace(eppRows);
     auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("EPPTable", eppTable));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("IndexType", "Workspace Index"))
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("IndexType", "Workspace Index"))
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("ReferenceSpectra", "1-300"))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("EFixed", actualEi))
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -119,10 +113,8 @@ public:
     const double TOFShift = actualElasticTOF - eppTOF;
     auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("ElasticBinIndex", static_cast<int>(eppIndex)))
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ElasticBinIndex", static_cast<int>(eppIndex)))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("EFixed", actualEi))
     const double l2 = inputWs->spectrumInfo().l2(13);
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("L2", l2))
@@ -151,13 +143,10 @@ public:
     const double TOFShift = actualElasticTOF - eppTOF;
     auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("IndexType", "Workspace Index"))
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("IndexType", "Workspace Index"))
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("ReferenceSpectra", "1-300"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("ElasticBinIndex", static_cast<int>(eppIndex)))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ElasticBinIndex", static_cast<int>(eppIndex)))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("EFixed", actualEi))
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -180,8 +169,7 @@ public:
     auto inputWs = createInputWorkspace(blocksize, x0, dx, eppTOF);
     auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
     TS_ASSERT(!alg->isExecuted());
   }
@@ -195,10 +183,8 @@ public:
     auto referenceWs = createInputWorkspace(blocksize - 1, x0, dx, TOF);
     auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("ReferenceWorkspace", referenceWs));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ReferenceWorkspace", referenceWs));
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
     TS_ASSERT(!alg->isExecuted());
   }
@@ -213,13 +199,10 @@ public:
     inputWs->mutableRun().removeProperty("EI");
     auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("IndexType", "Workspace Index"))
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("IndexType", "Workspace Index"))
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("ReferenceSpectra", "1-300"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("ElasticBinIndex", static_cast<int>(elasticBin)))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ElasticBinIndex", static_cast<int>(elasticBin)))
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
     TS_ASSERT(!alg->isExecuted());
   }
@@ -238,11 +221,9 @@ public:
     ITableWorkspace_sptr eppTable = createEPPTableWorkspace(eppRows);
     auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("EPPTable", eppTable));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("IndexType", "Workspace Index"))
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("IndexType", "Workspace Index"))
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("ReferenceSpectra", "1-300"))
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
     TS_ASSERT(!alg->isExecuted());
@@ -260,16 +241,13 @@ public:
     const double x0 = 23.66;
     const double dx = 0.05;
     const double TOF = x0 + dx * 3 * blocksize / 4;
-    auto inputWs =
-        createInputWorkspaceWithoutSampleLogs(blocksize, x0, dx, TOF);
+    auto inputWs = createInputWorkspaceWithoutSampleLogs(blocksize, x0, dx, TOF);
     const double referenceTOF = 1.06 * TOF;
     auto referenceWs = createInputWorkspace(blocksize, x0, dx, referenceTOF);
     auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("ReferenceWorkspace", referenceWs));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ReferenceWorkspace", referenceWs));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 
@@ -309,11 +287,9 @@ public:
     ITableWorkspace_sptr eppTable = createEPPTableWorkspace(eppRows);
     auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("EPPTable", eppTable));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("IndexType", "Workspace Index"))
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("IndexType", "Workspace Index"))
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("ReferenceSpectra", "1-300"))
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -331,13 +307,11 @@ private:
     ws->mutableRun().addProperty("wavelength", lambda);
   }
 
-  static void assertTOFShift(const MatrixWorkspace_sptr &shiftedWs,
-                             const MatrixWorkspace_sptr &ws, const double ei,
+  static void assertTOFShift(const MatrixWorkspace_sptr &shiftedWs, const MatrixWorkspace_sptr &ws, const double ei,
                              const double wavelength, const double shift) {
     TS_ASSERT(shiftedWs);
     TS_ASSERT_EQUALS(shiftedWs->run().getPropertyAsSingleValue("EI"), ei);
-    TS_ASSERT_DELTA(shiftedWs->run().getPropertyAsSingleValue("wavelength"),
-                    wavelength, 1e-8)
+    TS_ASSERT_DELTA(shiftedWs->run().getPropertyAsSingleValue("wavelength"), wavelength, 1e-8)
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       const size_t numBins = ws->blocksize();
       for (size_t j = 0; j < numBins; ++j) {
@@ -358,8 +332,7 @@ private:
     return alg;
   }
 
-  static MatrixWorkspace_sptr
-  createEmptyIN4Workspace(const std::string &wsName) {
+  static MatrixWorkspace_sptr createEmptyIN4Workspace(const std::string &wsName) {
     Mantid::DataHandling::LoadEmptyInstrument loadInstrument;
     loadInstrument.setChild(true);
     loadInstrument.initialize();
@@ -372,19 +345,15 @@ private:
     return ws;
   }
 
-  static MatrixWorkspace_sptr createInputWorkspace(const size_t blocksize,
-                                                   const double x0,
-                                                   const double dx,
+  static MatrixWorkspace_sptr createInputWorkspace(const size_t blocksize, const double x0, const double dx,
                                                    const double TOF) {
-    auto inputWs =
-        createInputWorkspaceWithoutSampleLogs(blocksize, x0, dx, TOF);
+    auto inputWs = createInputWorkspaceWithoutSampleLogs(blocksize, x0, dx, TOF);
     addSampleLogs(inputWs, TOF);
     return inputWs;
   }
 
-  static MatrixWorkspace_sptr
-  createInputWorkspaceWithoutSampleLogs(const size_t blocksize, const double x0,
-                                        const double dx, const double TOF) {
+  static MatrixWorkspace_sptr createInputWorkspaceWithoutSampleLogs(const size_t blocksize, const double x0,
+                                                                    const double dx, const double TOF) {
     auto inputWs = createEmptyIN4Workspace("_input_ws");
     const double sigma = 3 * dx;
     auto gaussianPeak = [TOF, sigma](const double x) {
@@ -396,10 +365,9 @@ private:
   }
 
   template <typename Function>
-  static void fillWorkspace(MatrixWorkspace_sptr &ws, const size_t nBins,
-                            const double x0, const double dx, Function yFromX) {
-    ws = WorkspaceFactory::Instance().create(ws, ws->getNumberHistograms(),
-                                             nBins + 1, nBins);
+  static void fillWorkspace(MatrixWorkspace_sptr &ws, const size_t nBins, const double x0, const double dx,
+                            Function yFromX) {
+    ws = WorkspaceFactory::Instance().create(ws, ws->getNumberHistograms(), nBins + 1, nBins);
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       for (size_t j = 0; j < nBins; ++j) {
         const double x = x0 + static_cast<double>(j) * dx;
@@ -420,20 +388,16 @@ private:
 
   static double incidentEnergy(const double TOF, const double flightLenght) {
     const double velocity = flightLenght / (TOF * 1e-6);
-    return Mantid::PhysicalConstants::NeutronMass * velocity * velocity / 2 /
-           Mantid::PhysicalConstants::meV;
+    return Mantid::PhysicalConstants::NeutronMass * velocity * velocity / 2 / Mantid::PhysicalConstants::meV;
   }
 
   static double tof(const double Ei, const double flightLength) {
-    return flightLength /
-           std::sqrt(2 * Ei * Mantid::PhysicalConstants::meV /
-                     Mantid::PhysicalConstants::NeutronMass) /
+    return flightLength / std::sqrt(2 * Ei * Mantid::PhysicalConstants::meV / Mantid::PhysicalConstants::NeutronMass) /
            1e-6;
   }
 
   static double wavelength(const double Ei, const double flightLength) {
     const double velocity = flightLength / tof(Ei, flightLength);
-    return Mantid::PhysicalConstants::h / velocity /
-           Mantid::PhysicalConstants::NeutronMass * 1e4;
+    return Mantid::PhysicalConstants::h / velocity / Mantid::PhysicalConstants::NeutronMass * 1e4;
   }
 };

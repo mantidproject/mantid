@@ -25,21 +25,16 @@ class EXPORT_OPT_MANTIDQT_COMMON ExtractSubtrees {
 public:
   using RandomAccessRowIterator = std::vector<Row>::iterator;
   using RandomAccessConstRowIterator = std::vector<Row>::const_iterator;
-  boost::optional<std::vector<Subtree>>
-  operator()(std::vector<Row> region) const;
+  boost::optional<std::vector<Subtree>> operator()(std::vector<Row> region) const;
 
 private:
-  RandomAccessConstRowIterator
-  findEndOfSubtree(RandomAccessConstRowIterator subtreeBegin,
-                   RandomAccessConstRowIterator regionEnd,
-                   int subtreeRootDepth) const;
+  RandomAccessConstRowIterator findEndOfSubtree(RandomAccessConstRowIterator subtreeBegin,
+                                                RandomAccessConstRowIterator regionEnd, int subtreeRootDepth) const;
 
-  Subtree makeSubtreeFromRows(RowLocation subtreeRootLocation,
-                              RandomAccessConstRowIterator subtreeBegin,
+  Subtree makeSubtreeFromRows(RowLocation subtreeRootLocation, RandomAccessConstRowIterator subtreeBegin,
                               RandomAccessConstRowIterator subtreeEnd) const;
 
-  std::vector<Subtree> makeSubtreesFromRows(std::vector<Row> const &rows,
-                                            int subtreeRootDepth) const;
+  std::vector<Subtree> makeSubtreesFromRows(std::vector<Row> const &rows, int subtreeRootDepth) const;
 };
 
 } // namespace Batch

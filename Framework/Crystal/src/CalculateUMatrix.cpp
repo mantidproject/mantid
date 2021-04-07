@@ -24,14 +24,11 @@ using Mantid::Geometry::OrientedLattice;
 /** Initialize the algorithm's properties.
  */
 void CalculateUMatrix::init() {
-  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                            "PeaksWorkspace", "", Direction::InOut),
+  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "", Direction::InOut),
                         "An input workspace.");
-  std::shared_ptr<BoundedValidator<double>> mustBePositive =
-      std::make_shared<BoundedValidator<double>>();
+  std::shared_ptr<BoundedValidator<double>> mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  std::shared_ptr<BoundedValidator<double>> reasonable_angle =
-      std::make_shared<BoundedValidator<double>>();
+  std::shared_ptr<BoundedValidator<double>> reasonable_angle = std::make_shared<BoundedValidator<double>>();
   reasonable_angle->setLower(5.0);
   reasonable_angle->setUpper(175.0);
   // put in negative values, so user is forced to input all parameters. no
@@ -39,12 +36,9 @@ void CalculateUMatrix::init() {
   this->declareProperty("a", -1.0, mustBePositive, "Lattice parameter a");
   this->declareProperty("b", -1.0, mustBePositive, "Lattice parameter b");
   this->declareProperty("c", -1.0, mustBePositive, "Lattice parameter c");
-  this->declareProperty("alpha", -1.0, reasonable_angle,
-                        "Lattice parameter alpha");
-  this->declareProperty("beta", -1.0, reasonable_angle,
-                        "Lattice parameter beta");
-  this->declareProperty("gamma", -1.0, reasonable_angle,
-                        "Lattice parameter gamma");
+  this->declareProperty("alpha", -1.0, reasonable_angle, "Lattice parameter alpha");
+  this->declareProperty("beta", -1.0, reasonable_angle, "Lattice parameter beta");
+  this->declareProperty("gamma", -1.0, reasonable_angle, "Lattice parameter gamma");
 }
 
 /** Execute the algorithm.
@@ -131,9 +125,8 @@ void CalculateUMatrix::exec() {
   Matrix<double> Diag;
   HS.Diagonalise(Eval, Diag);
   Eval.sortEigen(Diag);
-  Mantid::Kernel::Quat qR(
-      Eval[0][0], Eval[1][0], Eval[2][0],
-      Eval[3][0]); // the first column corresponds to the highest eigenvalue
+  Mantid::Kernel::Quat qR(Eval[0][0], Eval[1][0], Eval[2][0],
+                          Eval[3][0]); // the first column corresponds to the highest eigenvalue
   DblMatrix U(qR.getRotation());
   lattice->setU(U);
 

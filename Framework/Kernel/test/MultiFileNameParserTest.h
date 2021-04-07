@@ -20,9 +20,7 @@ using namespace Mantid::Kernel::MultiFileNameParsing;
 
 class MultiFileNameParserTest : public CxxTest::TestSuite {
 public:
-  static MultiFileNameParserTest *createSuite() {
-    return new MultiFileNameParserTest();
-  }
+  static MultiFileNameParserTest *createSuite() { return new MultiFileNameParserTest(); }
   static void destroySuite(MultiFileNameParserTest *suite) { delete suite; }
 
   using ParsedRuns = std::vector<std::vector<unsigned int>>;
@@ -195,9 +193,7 @@ public:
     TS_ASSERT_EQUALS(result[0][3], 5);
   }
 
-  void test_nothingReturnedWhenPassedEmptyString() {
-    TS_ASSERT_EQUALS(parseMultiRunString("").size(), 0);
-  }
+  void test_nothingReturnedWhenPassedEmptyString() { TS_ASSERT_EQUALS(parseMultiRunString("").size(), 0); }
 
   void test_sumTwoAddRanges() {
     ParsedRuns result = parseMultiRunString("1-2+4-6");
@@ -319,66 +315,44 @@ public:
   }
 
   void test_errorThrownWhenPassedUnexpectedChar() {
-    std::string message =
-        "Non-numeric or otherwise unaccetable character(s) detected.";
-    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("#"),
-                            const std::runtime_error &re,
-                            std::string(re.what()), message);
-    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("a"),
-                            const std::runtime_error &re,
-                            std::string(re.what()), message);
-    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("Z"),
-                            const std::runtime_error &re,
-                            std::string(re.what()), message);
-    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("("),
-                            const std::runtime_error &re,
-                            std::string(re.what()), message);
-    TS_ASSERT_THROWS_EQUALS(parseMultiRunString(">"),
-                            const std::runtime_error &re,
-                            std::string(re.what()), message);
+    std::string message = "Non-numeric or otherwise unaccetable character(s) detected.";
+    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("#"), const std::runtime_error &re, std::string(re.what()), message);
+    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("a"), const std::runtime_error &re, std::string(re.what()), message);
+    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("Z"), const std::runtime_error &re, std::string(re.what()), message);
+    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("("), const std::runtime_error &re, std::string(re.what()), message);
+    TS_ASSERT_THROWS_EQUALS(parseMultiRunString(">"), const std::runtime_error &re, std::string(re.what()), message);
 
-    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("1012-n1059:5"),
-                            const std::runtime_error &re,
-                            std::string(re.what()), message);
+    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("1012-n1059:5"), const std::runtime_error &re, std::string(re.what()),
+                            message);
   }
 
   void test_errorThrownOnEmptyToken() {
-    TS_ASSERT_THROWS_EQUALS(
-        parseMultiRunString("1,,3"), const std::runtime_error &re,
-        std::string(re.what()), "A comma-separated token is empty.");
+    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("1,,3"), const std::runtime_error &re, std::string(re.what()),
+                            "A comma-separated token is empty.");
   }
 
   void test_errorThrownWhenStringDoesNotStartAndEndWithNumeral() {
-    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("+2+3"),
-                            const std::runtime_error &re,
-                            std::string(re.what()),
+    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("+2+3"), const std::runtime_error &re, std::string(re.what()),
                             "The token \"+2+3\" is of an incorrect form.  Does "
                             "it begin or end with a plus, minus or colon?");
-    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("2-3:"),
-                            const std::runtime_error &re,
-                            std::string(re.what()),
+    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("2-3:"), const std::runtime_error &re, std::string(re.what()),
                             "The token \"2-3:\" is of an incorrect form.  Does "
                             "it begin or end with a plus, minus or colon?");
   }
 
   void test_errorThrownIfStepSizeEqualsZero() {
-    TS_ASSERT_THROWS_EQUALS(
-        parseMultiRunString("1:3:0"), const std::runtime_error &re,
-        std::string(re.what()),
-        "Unable to generate a range with a step size of zero.");
+    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("1:3:0"), const std::runtime_error &re, std::string(re.what()),
+                            "Unable to generate a range with a step size of zero.");
   }
 
   void test_errorThrownIfAddedStepSizeEqualsZero() {
-    TS_ASSERT_THROWS_EQUALS(
-        parseMultiRunString("1-3:0"), const std::runtime_error &re,
-        std::string(re.what()),
-        "Unable to generate a range with a step size of zero.");
+    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("1-3:0"), const std::runtime_error &re, std::string(re.what()),
+                            "Unable to generate a range with a step size of zero.");
   }
 
   void test_errorThrownIfOfIncorrectForm() {
-    TS_ASSERT_THROWS_EQUALS(
-        parseMultiRunString("1-3-1"), const std::runtime_error &re,
-        std::string(re.what()), "The token \"1-3-1\" is of an incorrect form.");
+    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("1-3-1"), const std::runtime_error &re, std::string(re.what()),
+                            "The token \"1-3-1\" is of an incorrect form.");
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -420,15 +394,14 @@ public:
   void test_errorThrownIfPassedEmptyString() {
     Parser parser;
 
-    TS_ASSERT_THROWS_EQUALS(parser.parse(""), const std::runtime_error &re,
-                            std::string(re.what()), "No file name to parse.");
+    TS_ASSERT_THROWS_EQUALS(parser.parse(""), const std::runtime_error &re, std::string(re.what()),
+                            "No file name to parse.");
   }
 
   void test_defaultInstrumentUsedIfPassedNoInstrumentName() {
     Parser parser;
 
-    Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
-                                                        "TSC");
+    Mantid::Kernel::ConfigService::Instance().setString("default.instrument", "TSC");
 
     parser.parse("c:/2:4.raw");
 
@@ -478,8 +451,7 @@ public:
   }
 
   void test_instrument_with_multiple_padding() {
-    FacilityHelper::ScopedFacilities loadTESTFacility(
-        "unit_testing/UnitTestFacilities.xml", "TEST");
+    FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
     Parser parser;
     parser.parse("TESTHISTOLISTENER123,299-301");

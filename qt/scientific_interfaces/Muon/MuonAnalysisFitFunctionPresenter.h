@@ -25,10 +25,8 @@ class MANTIDQT_MUONINTERFACE_DLL MuonAnalysisFitFunctionPresenter : QObject {
   Q_OBJECT
 public:
   /// Constructor
-  MuonAnalysisFitFunctionPresenter(
-      QObject *parent,
-      MantidQt::MantidWidgets::IMuonFitFunctionModel *fitBrowser,
-      MantidQt::MantidWidgets::IFunctionBrowser *funcBrowser);
+  MuonAnalysisFitFunctionPresenter(QObject *parent, MantidQt::MantidWidgets::IMuonFitFunctionModel *fitBrowser,
+                                   MantidQt::MantidWidgets::IFunctionBrowser *funcBrowser);
   /// Toggle multiple fitting mode
   void setMultiFitState(Muon::MultiFitState state);
 
@@ -42,8 +40,7 @@ public slots:
   /// When fit finished, update parameters in function browser
   void handleFitFinished(const QString &wsName = "");
   /// When parameter edited in function browser, update in fit property browser
-  void handleParameterEdited(const QString &funcIndex,
-                             const QString &paramName);
+  void handleParameterEdited(const QString &funcIndex, const QString &paramName);
   /// When "Clear model" selected, clear function browser
   void handleModelCleared();
   /// Pass show/hide parameter errors to function browser

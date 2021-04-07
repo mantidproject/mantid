@@ -84,18 +84,15 @@ public:
     TS_ASSERT_DELTA(fun.getParameter("f0.f0.A0"), 0.0, 1e-3);
 
     TS_ASSERT_DELTA(fun.getParameter("f0.f1.PeakCentre"), 0.0, 1e-3);
-    TS_ASSERT_DELTA(fun.getParameter("f0.f1.Amplitude"), 2.749 * c_mbsr,
-                    1e-3 * c_mbsr);
+    TS_ASSERT_DELTA(fun.getParameter("f0.f1.Amplitude"), 2.749 * c_mbsr, 1e-3 * c_mbsr);
     TS_ASSERT_DELTA(fun.getParameter("f0.f1.FWHM"), 1.5, 1e-3);
 
     TS_ASSERT_DELTA(fun.getParameter("f0.f2.PeakCentre"), 29.3261, 1e-3);
-    TS_ASSERT_DELTA(fun.getParameter("f0.f2.Amplitude"), 0.7204 * c_mbsr,
-                    1e-3 * c_mbsr);
+    TS_ASSERT_DELTA(fun.getParameter("f0.f2.Amplitude"), 0.7204 * c_mbsr, 1e-3 * c_mbsr);
     TS_ASSERT_DELTA(fun.getParameter("f0.f2.FWHM"), 1.5, 1e-3);
 
     TS_ASSERT_DELTA(fun.getParameter("f0.f3.PeakCentre"), 44.3412, 1e-3);
-    TS_ASSERT_DELTA(fun.getParameter("f0.f3.Amplitude"), 0.4298 * c_mbsr,
-                    1e-3 * c_mbsr);
+    TS_ASSERT_DELTA(fun.getParameter("f0.f3.Amplitude"), 0.4298 * c_mbsr, 1e-3 * c_mbsr);
     TS_ASSERT_DELTA(fun.getParameter("f0.f3.FWHM"), 1.5, 1e-3);
   }
 
@@ -112,8 +109,7 @@ public:
     alg->setProperty("OutputWorkspace", "out");
     alg->execute();
 
-    auto out =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+    auto out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
     TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * c_mbsr, 0.001 * c_mbsr);
@@ -137,15 +133,13 @@ public:
     alg->setProperty("OutputWorkspace", "out");
     alg->execute();
 
-    auto out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "Workspace_0");
+    auto out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Workspace_0");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
     TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * c_mbsr, 0.001 * c_mbsr);
     TS_ASSERT_DELTA(out->readY(1)[1], 0.738 * c_mbsr, 0.001 * c_mbsr);
     TS_ASSERT_DELTA(out->readY(1)[2], 0.373 * c_mbsr, 0.001 * c_mbsr);
-    out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "Workspace_1");
+    out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Workspace_1");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
     TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * c_mbsr, 0.001 * c_mbsr);
@@ -170,15 +164,13 @@ public:
     alg->setProperty("OutputWorkspace", "out");
     alg->execute();
 
-    auto out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "Workspace_0");
+    auto out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Workspace_0");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
     TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * 2.0 * c_mbsr, 0.002 * c_mbsr);
     TS_ASSERT_DELTA(out->readY(1)[1], 0.738 * 2.0 * c_mbsr, 0.002 * c_mbsr);
     TS_ASSERT_DELTA(out->readY(1)[2], 0.373 * 2.0 * c_mbsr, 0.002 * c_mbsr);
-    out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "Workspace_1");
+    out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Workspace_1");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
     TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * 3.3 * c_mbsr, 0.003 * c_mbsr);
@@ -207,24 +199,21 @@ public:
     alg->execute();
 
     // Test the INS spectrum
-    auto out0 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "Workspace_0");
+    auto out0 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Workspace_0");
     TS_ASSERT(out0);
     TS_ASSERT_EQUALS(out0->getNumberHistograms(), 3);
     TS_ASSERT_DELTA(out0->readY(1)[0], 1.094 * c_mbsr, 0.001 * c_mbsr);
     TS_ASSERT_DELTA(out0->readY(1)[1], 0.738 * c_mbsr, 0.001 * c_mbsr);
     TS_ASSERT_DELTA(out0->readY(1)[2], 0.373 * c_mbsr, 0.001 * c_mbsr);
     // Test the heat capacity calculation
-    auto out1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "Workspace_1");
+    auto out1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Workspace_1");
     TS_ASSERT(out1);
     TS_ASSERT_EQUALS(out1->getNumberHistograms(), 3);
     TS_ASSERT_DELTA(out1->readY(1)[50], 0.006, 0.001);
     TS_ASSERT_DELTA(out1->readY(1)[60], 0.032, 0.001);
     TS_ASSERT_DELTA(out1->readY(1)[70], 0.103, 0.001);
     // Test the susceptibility calculation
-    auto out2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "Workspace_2");
+    auto out2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Workspace_2");
     TS_ASSERT(out2);
     TS_ASSERT_EQUALS(out2->getNumberHistograms(), 3);
     // Susceptibility default outputs in cgs units.
@@ -232,16 +221,14 @@ public:
     TS_ASSERT_DELTA(out2->readY(1)[60], 0.00233006, 0.0000001);
     TS_ASSERT_DELTA(out2->readY(1)[70], 0.00230932, 0.0000001);
     // Test the magnetisation calculation
-    auto out3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "Workspace_3");
+    auto out3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Workspace_3");
     TS_ASSERT(out3);
     TS_ASSERT_EQUALS(out3->getNumberHistograms(), 3);
     TS_ASSERT_DELTA(out3->readY(1)[1], 0.05754, 0.0001);
     TS_ASSERT_DELTA(out3->readY(1)[5], 0.28307, 0.0001);
     TS_ASSERT_DELTA(out3->readY(1)[10], 0.53932, 0.0001);
     // Test the moment vs temperature calculation
-    auto out4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "Workspace_4");
+    auto out4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Workspace_4");
     TS_ASSERT(out4);
     TS_ASSERT_EQUALS(out4->getNumberHistograms(), 3);
     // SI and cgs susceptibility differ by factor of 10.
@@ -282,18 +269,16 @@ public:
   }
 
   void test_composite_multispectral() {
-    std::string fun1 =
-        "name=CrystalFieldMultiSpectrum,Ion=Ce,Temperatures=(44, "
-        "50),ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,"
-        "B40=-0.031787,B42=-0.11611,B44=-0.12544,"
-        "f0.f1.FWHM=1.6,f0.f2.FWHM=2.0,f0.f3.FWHM=2.3,f1.f1.FWHM=1.6,"
-        "f1.f2.FWHM=2.0,f1.f3.FWHM=2.3";
-    std::string fun2 =
-        "name=CrystalFieldMultiSpectrum,Ion=Pr,Temperatures=(44, "
-        "50),ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,"
-        "B40=-0.031787,B42=-0.11611,B44=-0.12544,"
-        "f0.f1.FWHM=1.6,f0.f2.FWHM=2.0,f0.f3.FWHM=2.3,f1.f1.FWHM=1.6,"
-        "f1.f2.FWHM=2.0,f1.f3.FWHM=2.3";
+    std::string fun1 = "name=CrystalFieldMultiSpectrum,Ion=Ce,Temperatures=(44, "
+                       "50),ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,"
+                       "B40=-0.031787,B42=-0.11611,B44=-0.12544,"
+                       "f0.f1.FWHM=1.6,f0.f2.FWHM=2.0,f0.f3.FWHM=2.3,f1.f1.FWHM=1.6,"
+                       "f1.f2.FWHM=2.0,f1.f3.FWHM=2.3";
+    std::string fun2 = "name=CrystalFieldMultiSpectrum,Ion=Pr,Temperatures=(44, "
+                       "50),ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,"
+                       "B40=-0.031787,B42=-0.11611,B44=-0.12544,"
+                       "f0.f1.FWHM=1.6,f0.f2.FWHM=2.0,f0.f3.FWHM=2.3,f1.f1.FWHM=1.6,"
+                       "f1.f2.FWHM=2.0,f1.f3.FWHM=2.3";
     auto fun = fun1 + ";" + fun2;
 
     auto ws = createWorkspace();
@@ -306,15 +291,13 @@ public:
     alg->execute();
     TS_ASSERT(alg->isExecuted());
 
-    auto out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "Workspace_0");
+    auto out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Workspace_0");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
     TS_ASSERT_DELTA(out->readY(1)[0], 2.9202 * c_mbsr, 0.001 * c_mbsr);
     TS_ASSERT_DELTA(out->readY(1)[1], 2.4691 * c_mbsr, 0.001 * c_mbsr);
     TS_ASSERT_DELTA(out->readY(1)[2], 1.3817 * c_mbsr, 0.001 * c_mbsr);
-    out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "Workspace_1");
+    out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Workspace_1");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
     TS_ASSERT_DELTA(out->readY(1)[0], 2.9192 * c_mbsr, 0.001 * c_mbsr);
@@ -336,9 +319,7 @@ public:
     std::vector<double> x[2] = {{0.0, 50.0}, {0.0, 50.0}};
     std::vector<double> y[2] = {{1.0, 2.0}, {3.0, 4.0}};
     auto checkW = [&x, &y](size_t i, double c) {
-      return y[i].front() + (y[i].back() - y[i].front()) /
-                                (x[i].back() - x[i].front()) *
-                                (c - x[i].front());
+      return y[i].front() + (y[i].back() - y[i].front()) / (x[i].back() - x[i].front()) * (c - x[i].front());
     };
     fun.setAttributeValue("FWHMX0", x[0]);
     fun.setAttributeValue("FWHMY0", y[0]);
@@ -412,13 +393,11 @@ public:
   }
 
   void test_multispectrum_malformed_resmod() {
-    std::string fun =
-        "name=CrystalFieldMultiSpectrum,Ion=Ce,FWHMX0=(1,2),FWHMY0=(2,3),"
-        "FWHMX1=(0,1),FWHMY2=(5,6),Temperatures=(44,50),B20=0.37737";
+    std::string fun = "name=CrystalFieldMultiSpectrum,Ion=Ce,FWHMX0=(1,2),FWHMY0=(2,3),"
+                      "FWHMX1=(0,1),FWHMY2=(5,6),Temperatures=(44,50),B20=0.37737";
     auto alg = AlgorithmFactory::Instance().create("EvaluateFunction", -1);
     alg->initialize();
-    TS_ASSERT_THROWS(alg->setPropertyValue("Function", fun),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg->setPropertyValue("Function", fun), const std::invalid_argument &);
   }
 
   void test_underdefinded() {
@@ -447,12 +426,10 @@ public:
     auto mc = AlgorithmFactory::Instance().create("EstimateFitParameters", -1);
     mc->initialize();
     mc->setRethrows(true);
-    mc->setPropertyValue(
-        "Function",
-        "name=CrystalFieldMultiSpectrum,Ion=Ce,FixAllPeaks=1,"
-        "Symmetry=C2v,Temperatures=(44.0, 50.0),FWHMs=(1.0, 1.0),NPeaks=3,"
-        "constraints=(0<B20<0.5,3<B22<4,-0.1<B40<0.0,-0.1<B42<0.0,-0.1<B44<0."
-        "0)");
+    mc->setPropertyValue("Function", "name=CrystalFieldMultiSpectrum,Ion=Ce,FixAllPeaks=1,"
+                                     "Symmetry=C2v,Temperatures=(44.0, 50.0),FWHMs=(1.0, 1.0),NPeaks=3,"
+                                     "constraints=(0<B20<0.5,3<B22<4,-0.1<B40<0.0,-0.1<B42<0.0,-0.1<B44<0."
+                                     "0)");
     mc->setProperty("InputWorkspace", ws);
     mc->setProperty("WorkspaceIndex", 0);
     mc->setProperty("InputWorkspace_1", ws);
@@ -476,15 +453,14 @@ public:
   }
 
   void test_ties_in_composite_function() {
-    std::string funDef =
-        "name=CrystalFieldMultiSpectrum,Ion=Ce,Symmetry=C2v,Temperatures=(44.0,"
-        "50),FWHMs=(1.1,0.9),B44=-0.115325956893,B40=0.0844136192563,B42=-0."
-        "459507287606,B22=4.36779676967;name=CrystalFieldMultiSpectrum,Ion=Pr,"
-        "Symmetry=C2v,Temperatures=(44.0,50),FWHMs=(1.1,0.9),B44=-0."
-        "115325956893,B40=0.0844136192563,B42=-0.459507287606,B22=4."
-        "36779676967;ties=(f1.IntensityScaling0=2.0*f0.IntensityScaling0,f1."
-        "IntensityScaling1=2.0*f0.IntensityScaling1,f0.f0.f1.FWHM=f1.f0.f1."
-        "FWHM/2)";
+    std::string funDef = "name=CrystalFieldMultiSpectrum,Ion=Ce,Symmetry=C2v,Temperatures=(44.0,"
+                         "50),FWHMs=(1.1,0.9),B44=-0.115325956893,B40=0.0844136192563,B42=-0."
+                         "459507287606,B22=4.36779676967;name=CrystalFieldMultiSpectrum,Ion=Pr,"
+                         "Symmetry=C2v,Temperatures=(44.0,50),FWHMs=(1.1,0.9),B44=-0."
+                         "115325956893,B40=0.0844136192563,B42=-0.459507287606,B22=4."
+                         "36779676967;ties=(f1.IntensityScaling0=2.0*f0.IntensityScaling0,f1."
+                         "IntensityScaling1=2.0*f0.IntensityScaling1,f0.f0.f1.FWHM=f1.f0.f1."
+                         "FWHM/2)";
     auto fun = FunctionFactory::Instance().createInitialized(funDef);
     {
       auto index = fun->parameterIndex("f1.IntensityScaling0");
@@ -493,8 +469,7 @@ public:
       if (!tie) {
         return;
       }
-      TS_ASSERT_EQUALS(tie->asString(),
-                       "f1.IntensityScaling0=2.0*f0.IntensityScaling0");
+      TS_ASSERT_EQUALS(tie->asString(), "f1.IntensityScaling0=2.0*f0.IntensityScaling0");
     }
     {
       auto index = fun->parameterIndex("f1.IntensityScaling1");
@@ -503,8 +478,7 @@ public:
       if (!tie) {
         return;
       }
-      TS_ASSERT_EQUALS(tie->asString(),
-                       "f1.IntensityScaling1=2.0*f0.IntensityScaling1");
+      TS_ASSERT_EQUALS(tie->asString(), "f1.IntensityScaling1=2.0*f0.IntensityScaling1");
     }
     {
       auto index = fun->parameterIndex("f0.f0.f1.FWHM");
@@ -527,26 +501,21 @@ private:
     return ws;
   }
 
-  std::pair<double, double> getBounds(API::IFunction &fun,
-                                      const std::string &parName) {
+  std::pair<double, double> getBounds(API::IFunction &fun, const std::string &parName) {
     auto ct = fun.getConstraint(fun.parameterIndex(parName));
     if (ct == nullptr) {
-      throw std::runtime_error("Parameter " + parName +
-                               " doesn't have constraint");
+      throw std::runtime_error("Parameter " + parName + " doesn't have constraint");
     }
     auto bc = dynamic_cast<Constraints::BoundaryConstraint *>(ct);
     if (ct == nullptr) {
-      throw std::runtime_error("Parameter " + parName +
-                               " doesn't have boundary constraint");
+      throw std::runtime_error("Parameter " + parName + " doesn't have boundary constraint");
     }
     return std::make_pair(bc->lower(), bc->upper());
   }
 
-  MatrixWorkspace_sptr createWorkspace(const IFunction &fun, double x0,
-                                       double x1, size_t nbins) {
+  MatrixWorkspace_sptr createWorkspace(const IFunction &fun, double x0, double x1, size_t nbins) {
     auto nSpec = fun.getNumberDomains();
-    auto ws =
-        WorkspaceFactory::Instance().create("Workspace2D", nSpec, nbins, nbins);
+    auto ws = WorkspaceFactory::Instance().create("Workspace2D", nSpec, nbins, nbins);
     JointDomain domain;
     for (size_t i = 0; i < nSpec; ++i) {
       auto x = FunctionDomain_sptr(new FunctionDomain1DVector(x0, x1, nbins));

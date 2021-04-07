@@ -40,8 +40,7 @@ QHash<QString, QVariant> decodeInner(const QScriptValue &object) {
     if (it.value().isString())
       map.insert(it.name(), QVariant(it.value().toString()));
     else
-      throw std::runtime_error(
-          "Decoding JSON file not successful as some values are not strings.");
+      throw std::runtime_error("Decoding JSON file not successful as some values are not strings.");
   }
   return map;
 }
@@ -71,8 +70,7 @@ QHash<QString, QVariant> loadJsonFile(const QString &charmapFileName) {
 #endif
 } // namespace
 
-QIcon MantidQt::Icons::getIcon(const QString &iconName, const QString &color,
-                               const double &scaleFactor) {
+QIcon MantidQt::Icons::getIcon(const QString &iconName, const QString &color, const double &scaleFactor) {
   QHash<QString, QVariant> options;
   options.insert(QString("color"), QVariant(color));
   options.insert(QString("scaleFactor"), QVariant(scaleFactor));
@@ -85,8 +83,7 @@ QIcon MantidQt::Icons::getIcon(const QString &iconName, const QString &color,
   return MantidQt::Icons::getIcon(iconNames, optionsList);
 }
 
-QIcon MantidQt::Icons::getIcon(const QStringList &iconNames,
-                               const QList<QVariant> &options) {
+QIcon MantidQt::Icons::getIcon(const QStringList &iconNames, const QList<QVariant> &options) {
   QList<QHash<QString, QVariant>> newOptions;
   for (auto option : options) {
     newOptions.append(option.toHash());
@@ -94,8 +91,7 @@ QIcon MantidQt::Icons::getIcon(const QStringList &iconNames,
   return MantidQt::Icons::getIcon(iconNames, newOptions);
 }
 
-QIcon MantidQt::Icons::getIcon(const QStringList &iconNames,
-                               const QList<QHash<QString, QVariant>> &options) {
+QIcon MantidQt::Icons::getIcon(const QStringList &iconNames, const QList<QHash<QString, QVariant>> &options) {
   auto &iconicFont = iconFontInstance();
   return iconicFont.getIcon(iconNames, options);
 }
@@ -104,18 +100,15 @@ namespace MantidQt {
 namespace Icons {
 
 IconicFont::IconicFont() : m_fontnames(), m_charmap(), m_painter() {
-  this->loadFont(QString("mdi"), QString(":/mdi-font.ttf"),
-                 QString(":/mdi-charmap.json"));
+  this->loadFont(QString("mdi"), QString(":/mdi-font.ttf"), QString(":/mdi-charmap.json"));
 }
 
-QIcon IconicFont::getIcon(const QStringList &iconNames,
-                          const QList<QHash<QString, QVariant>> &options) {
+QIcon IconicFont::getIcon(const QStringList &iconNames, const QList<QHash<QString, QVariant>> &options) {
 
   QList<QHash<QString, QVariant>> actualOptions;
   // Assume there may be mutliple
   if (iconNames.size() != options.size()) {
-    throw std::invalid_argument(
-        "Icon names passed and options are not the same length");
+    throw std::invalid_argument("Icon names passed and options are not the same length");
   }
   actualOptions = options;
   for (auto i = 0; i < iconNames.size(); ++i) {
@@ -125,14 +118,12 @@ QIcon IconicFont::getIcon(const QStringList &iconNames,
   return this->iconByPainter(&m_painter, actualOptions);
 }
 
-QIcon IconicFont::iconByPainter(CharIconPainter *painter,
-                                QList<QHash<QString, QVariant>> &options) {
+QIcon IconicFont::iconByPainter(CharIconPainter *painter, QList<QHash<QString, QVariant>> &options) {
   auto engine = new CharIconEngine(this, painter, options);
   return QIcon(engine);
 }
 
-void IconicFont::loadFont(const QString &prefix, const QString &ttfFilename,
-                          const QString &charmapFilename) {
+void IconicFont::loadFont(const QString &prefix, const QString &ttfFilename, const QString &charmapFilename) {
   const auto id = QFontDatabase::addApplicationFont(ttfFilename);
   const auto loadedFontFamilies = QFontDatabase::applicationFontFamilies(id);
   if (!loadedFontFamilies.empty()) {
@@ -149,13 +140,11 @@ QFont IconicFont::getFont(const QString &prefix, const int drawSize) {
   return font;
 }
 
-QString IconicFont::findCharacterFromCharMap(const QString &prefix,
-                                             const QString &character) const {
+QString IconicFont::findCharacterFromCharMap(const QString &prefix, const QString &character) const {
   return m_charmap[prefix][character].toString();
 }
 
-void IconicFont::addValuesToOptions(QList<QHash<QString, QVariant>> &options,
-                                    const QStringList &iconNames,
+void IconicFont::addValuesToOptions(QList<QHash<QString, QVariant>> &options, const QStringList &iconNames,
                                     unsigned int vectorIndex) {
   const auto iconName = iconNames[vectorIndex];
   auto splitValues = iconName.split('.', QString::SkipEmptyParts);
@@ -165,15 +154,12 @@ void IconicFont::addValuesToOptions(QList<QHash<QString, QVariant>> &options,
   const auto foundFontForPrefix = m_fontnames[prefix];
   if (foundFontForPrefix.isNull()) {
     throw std::invalid_argument(
-        ("The prefix: \"" + prefix +
-         "\" does not represent a set of icons currently availible")
-            .toStdString());
+        ("The prefix: \"" + prefix + "\" does not represent a set of icons currently availible").toStdString());
   }
 
   if (findCharacterFromCharMap(prefix, character).isNull()) {
     throw std::invalid_argument(
-        ("The icon: \"" + prefix + "." + character +
-         "\" is not a icon currently availible in the library")
+        ("The icon: \"" + prefix + "." + character + "\" is not a icon currently availible in the library")
             .toStdString());
   }
 

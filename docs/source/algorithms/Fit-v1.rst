@@ -224,7 +224,7 @@ The "Histogram" evaluation type will typically give more accurate results when f
 histograms with very large bins. It also less sensitive to a particular binning.
 
 For the next example a spectrum was generated and rebinned to different bin sizes.
-Each binned spectrum was fitted using both "CentrePoint" (left column) and "Histogram" 
+Each binned spectrum was fitted using both "CentrePoint" (left column) and "Histogram"
 evaluation (right column). As it can be seen form the plots the "Histogram" fitting
 gives more consistent results which are also closer to the correct values (Amplitude=20.0,
 PeakCentre=0.0, FWHM=1.0).
@@ -324,14 +324,14 @@ Multiple Fit
 It is possible to fit to multiple data sets using the fit algorithm. This
 can be either simultaneously or sequentially. There are a few differences
 to a single fit. Firstly is that the :ref:`CompositeFunction <func-CompositeFunction>`
-must be a :code:`MultiDomainFunction` and each of the individual fitting functions must include 
+must be a :code:`MultiDomainFunction` and each of the individual fitting functions must include
 :code:`$domain=i`. The extra workspaces can be added by placing an :code:`_i` after :code:`InputWorkspace` and
-:code:`InputWorkspaceIndex` starting with :math:`i=1` for the second workspace. It is also possible to 
-set the fitting range for each data set individually in the same way as the :code:`InputWorkspace`. 
-If a variable is to be fitted using data from multiple data sets then a :code:`tie` has 
+:code:`InputWorkspaceIndex` starting with :math:`i=1` for the second workspace. It is also possible to
+set the fitting range for each data set individually in the same way as the :code:`InputWorkspace`.
+If a variable is to be fitted using data from multiple data sets then a :code:`tie` has
 to be used. The values that are tied will have the same value and be calculated from multiple
-data sets. 
- 
+data sets.
+
 Examples
 --------
 
@@ -541,7 +541,7 @@ Output:
 
     Constant 1: 2.00
     Constant 2: 5.00
-   
+
 **Example - Fit to two data sets with shared parameter:**
 
 .. testcode:: shareFit
@@ -571,7 +571,7 @@ Output:
     # print results
     print("Constant 1: {0:.2f}".format(paramTable.column(1)[0]))
     print("Constant 2: {0:.2f}".format(paramTable.column(1)[1]))
-   
+
 Output:
 
 .. testoutput:: shareFit

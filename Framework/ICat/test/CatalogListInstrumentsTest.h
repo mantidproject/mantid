@@ -17,13 +17,10 @@ using namespace ICatTestHelper;
 class CatalogListInstrumentsTest : public CxxTest::TestSuite {
 public:
   // This means the constructor isn't called when running other tests
-  static CatalogListInstrumentsTest *createSuite() {
-    return new CatalogListInstrumentsTest();
-  }
+  static CatalogListInstrumentsTest *createSuite() { return new CatalogListInstrumentsTest(); }
   static void destroySuite(CatalogListInstrumentsTest *suite) { delete suite; }
 
-  CatalogListInstrumentsTest()
-      : m_fakeLogin(std::make_unique<FakeICatLogin>()) {}
+  CatalogListInstrumentsTest() : m_fakeLogin(std::make_unique<FakeICatLogin>()) {}
 
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(instrList.initialize());

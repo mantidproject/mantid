@@ -36,16 +36,14 @@ public:
     M.identityMatrix();
     TS_ASSERT(!G.isDefined());
     TS_ASSERT_EQUALS(G.getR(), M);
-    TS_ASSERT_THROWS(G.setRotationAngle("Axis4", 3),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(G.setRotationAngle("Axis4", 3), const std::invalid_argument &);
     TS_ASSERT_THROWS_ANYTHING(G.setRotationAngle(1, 2));
     TS_ASSERT_EQUALS((G.axesInfo()).compare("No axis is found\n"), 0);
     TS_ASSERT(!G.isDefined());
     TS_ASSERT_THROWS_NOTHING(G.pushAxis("Axis1", 1., 0., 0., 30));
     TS_ASSERT_THROWS_NOTHING(G.pushAxis("Axis2", 0., 0., 1., 30));
     TS_ASSERT(G.isDefined());
-    TS_ASSERT_THROWS(G.pushAxis("Axis2", 0., 0., 1., 30),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(G.pushAxis("Axis2", 0., 0., 1., 30), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(G.setRotationAngle("Axis2", 25));
     TS_ASSERT_THROWS_NOTHING(G.setRotationAngle(0, -17));
     TS_ASSERT_EQUALS(G.getAxis(1).angle, 25.);
@@ -62,10 +60,8 @@ public:
     Goniometer G1(M), G2(G);
     TS_ASSERT(G1.isDefined());
     TS_ASSERT_EQUALS(M, G1.getR());
-    TS_ASSERT_EQUALS(
-        G1.axesInfo(),
-        std::string("Goniometer was initialized from a rotation matrix. No "
-                    "information about axis is available.\n"));
+    TS_ASSERT_EQUALS(G1.axesInfo(), std::string("Goniometer was initialized from a rotation matrix. No "
+                                                "information about axis is available.\n"));
     TS_ASSERT_THROWS_ANYTHING(G.pushAxis("Axis2", 0., 0., 1., 30));
     TS_ASSERT_EQUALS(M, G2.getR());
   }
@@ -257,8 +253,7 @@ public:
   }
 
   void test_equals_when_identical() {
-    Mantid::Kernel::DblMatrix rotation_x{
-        {1, 0, 0, 0, 0, -1, 0, 1, 0}}; // 90 degrees around x axis
+    Mantid::Kernel::DblMatrix rotation_x{{1, 0, 0, 0, 0, -1, 0, 1, 0}}; // 90 degrees around x axis
     Goniometer a(rotation_x);
     Goniometer b(rotation_x);
     TS_ASSERT_EQUALS(a, b);
@@ -266,10 +261,8 @@ public:
   }
 
   void test_not_equals_when_not_identical() {
-    Mantid::Kernel::DblMatrix rotation_x{
-        {1, 0, 0, 0, 0, -1, 0, 1, 0}}; // 90 degrees around x axis
-    Mantid::Kernel::DblMatrix rotation_y{
-        {0, 0, 1, 0, 1, 0, -1, 0, 0}}; // 90 degrees around y axis
+    Mantid::Kernel::DblMatrix rotation_x{{1, 0, 0, 0, 0, -1, 0, 1, 0}}; // 90 degrees around x axis
+    Mantid::Kernel::DblMatrix rotation_y{{0, 0, 1, 0, 1, 0, -1, 0, 0}}; // 90 degrees around y axis
     Goniometer a(rotation_x);
     Goniometer b(rotation_y);
     TS_ASSERT_DIFFERS(a, b);

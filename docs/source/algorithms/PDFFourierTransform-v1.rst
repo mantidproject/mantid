@@ -9,9 +9,9 @@
 Description
 -----------
 
-The algorithm transforms a single spectrum workspace containing 
-spectral density :math:`S(Q)`, :math:`S(Q)-1`, or :math:`Q[S(Q)-1]` 
-(as a function of **MomentumTransfer** or **dSpacing** :ref:`units <Unit Factory>`) to a PDF 
+The algorithm transforms a single spectrum workspace containing
+spectral density :math:`S(Q)`, :math:`S(Q)-1`, or :math:`Q[S(Q)-1]`
+(as a function of **MomentumTransfer** or **dSpacing** :ref:`units <Unit Factory>`) to a PDF
 (pair distribution function) as described below. The available output types are the reduced pair
 distribution function :math:`G(r)`, the pair distribution function :math:`g(r)`, and the radial distribution
 function :math:`RDF(r)`.
@@ -136,8 +136,8 @@ transforms to
 .. raw:: html
 
    </center>
-   
-**Note:** All output forms except :math:`G(r)` are calculated by transforming :math:`G(r)`.   
+
+**Note:** All output forms except :math:`G(r)` are calculated by transforming :math:`G(r)`.
 
 Usage
 -----
@@ -155,14 +155,14 @@ Usage
 
     # Look at sample results:
     print('part of S(Q) and its correlation function')
-    for i in range(10): 
+    for i in range(10):
        print('! {0:4.2f} ! {1:5f} ! {2:f} ! {3:5f} !'.format(xx[i], yy[i], Rt.readX(0)[i], Rt.readY(0)[i]))
 
 
 .. testcleanup:: ExPDFFourierTransform
 
    DeleteWorkspace(ws)
-   DeleteWorkspace(Rt)   
+   DeleteWorkspace(Rt)
 
 **Output:**
 
@@ -180,7 +180,7 @@ Usage
    ! 0.80 ! 0.077305 ! 2.855993 ! 0.940616 !
    ! 0.90 ! 0.039164 ! 3.173326 ! 1.050882 !
 
-   
+
 
 .. categories::
 

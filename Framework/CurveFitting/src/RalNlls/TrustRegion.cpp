@@ -73,8 +73,7 @@ double norm2(const DoubleFortranVector &v) {
  *  @param x :: The vector.
  *  @param Jx :: The result vector.
  */
-void multJ(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
-           DoubleFortranVector &Jx) {
+void multJ(const DoubleFortranMatrix &J, const DoubleFortranVector &x, DoubleFortranVector &Jx) {
   // dgemv('N',m,n,alpha,J,m,x,1,beta,Jx,1);
   if (Jx.len() != J.len1()) {
     Jx.allocate(J.len1());
@@ -87,8 +86,7 @@ void multJ(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
  *  @param x :: The vector.
  *  @param Jtx :: The result vector.
  */
-void multJt(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
-            DoubleFortranVector &Jtx) {
+void multJt(const DoubleFortranMatrix &J, const DoubleFortranVector &x, DoubleFortranVector &Jtx) {
   // dgemv('T',m,n,alpha,J,m,x,1,beta,Jtx,1)
   if (Jtx.len() != J.len2()) {
     Jtx.allocate(J.len2());
@@ -98,9 +96,7 @@ void multJt(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
 
 /** Dot product of two vectors.
  */
-double dotProduct(const DoubleFortranVector &x, const DoubleFortranVector &y) {
-  return x.dot(y);
-}
+double dotProduct(const DoubleFortranVector &x, const DoubleFortranVector &y) { return x.dot(y); }
 
 /** Input:
  *  f = f(x_k), J = J(x_k),
@@ -119,10 +115,8 @@ double dotProduct(const DoubleFortranVector &x, const DoubleFortranVector &y) {
  *  @param options :: The options.
  *  @param w :: The work struct.
  */
-double evaluateModel(const DoubleFortranVector &f, const DoubleFortranMatrix &J,
-                     const DoubleFortranMatrix &hf,
-                     const DoubleFortranVector &d, const nlls_options &options,
-                     evaluate_model_work &w) {
+double evaluateModel(const DoubleFortranVector &f, const DoubleFortranMatrix &J, const DoubleFortranMatrix &hf,
+                     const DoubleFortranVector &d, const nlls_options &options, evaluate_model_work &w) {
 
   // Jd = J*d
   multJ(J, d, w.Jd);
@@ -157,8 +151,7 @@ double evaluateModel(const DoubleFortranVector &f, const DoubleFortranMatrix &J,
  *  @param md :: The value of the model at the same d as normfnew.
  *  @param options :: The options.
  */
-double calculateRho(double normf, double normfnew, double md,
-                    const nlls_options &options) {
+double calculateRho(double normf, double normfnew, double md, const nlls_options &options) {
   UNUSED_ARG(options);
   auto actual_reduction = (0.5 * pow(normf, 2)) - (0.5 * pow(normfnew, 2));
   auto predicted_reduction = ((0.5 * pow(normf, 2)) - md);
@@ -219,25 +212,21 @@ void rankOneUpdate(DoubleFortranMatrix &hf, NLLS_workspace &w) {
  *  @param w :: The work struct containing the radius that is to be updated
  *  (w.Delta).
  */
-void updateTrustRegionRadius(double &rho, const nlls_options &options,
-                             NLLS_workspace &w) {
+void updateTrustRegionRadius(double &rho, const nlls_options &options, NLLS_workspace &w) {
 
   switch (options.tr_update_strategy) {
   case 1: // default, step-function
     if (!std::isfinite(rho)) {
-      w.Delta =
-          std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
+      w.Delta = std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
       rho = -ONE; // set to be negative, so that the logic works....
     } else if (rho < options.eta_success_but_reduce) {
       // unsuccessful....reduce Delta
-      w.Delta =
-          std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
+      w.Delta = std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
     } else if (rho < options.eta_very_successful) {
       //  doing ok...retain status quo
     } else if (rho < options.eta_too_successful) {
       // more than very successful -- increase delta
-      w.Delta =
-          std::min(options.maximum_radius, options.radius_increase * w.normd);
+      w.Delta = std::min(options.maximum_radius, options.radius_increase * w.normd);
       // increase based on normd = ||d||_D
       // if d is on the tr boundary, this is Delta
       // otherwise, point was within the tr, and there's no point
@@ -251,17 +240,14 @@ void updateTrustRegionRadius(double &rho, const nlls_options &options,
           //  IMM-REP-1999-05
           //  http://www2.imm.dtu.dk/documents/ftp/tr99/tr05_99.pdf
     if (!std::isfinite(rho)) {
-      w.Delta =
-          std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
+      w.Delta = std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
       rho = -ONE; // set to be negative, so that the logic works....
     } else if (rho >= options.eta_too_successful) {
       // too successful....accept step, but don't change w.Delta
     } else if (rho > options.eta_successful) {
-      w.Delta =
-          w.Delta * std::min(options.radius_increase,
-                             std::max(options.radius_reduce,
-                                      1 - ((options.radius_increase - 1) *
-                                           (pow((1 - 2 * rho), w.tr_p)))));
+      w.Delta = w.Delta * std::min(options.radius_increase,
+                                   std::max(options.radius_reduce,
+                                            1 - ((options.radius_increase - 1) * (pow((1 - 2 * rho), w.tr_p)))));
       w.tr_nu = options.radius_reduce;
     } else {
       w.Delta = w.Delta * w.tr_nu;
@@ -275,18 +261,15 @@ void updateTrustRegionRadius(double &rho, const nlls_options &options,
 
 /** Test the convergence.
  */
-void testConvergence(double normF, double normJF, double normF0, double normJF0,
-                     const nlls_options &options, nlls_inform &inform) {
+void testConvergence(double normF, double normJF, double normF0, double normJF0, const nlls_options &options,
+                     nlls_inform &inform) {
 
-  if (normF <=
-      std::max(options.stop_g_absolute, options.stop_g_relative * normF0)) {
+  if (normF <= std::max(options.stop_g_absolute, options.stop_g_relative * normF0)) {
     inform.convergence_normf = 1;
     return;
   }
 
-  if ((normJF / normF) <=
-      std::max(options.stop_g_absolute,
-               options.stop_g_relative * (normJF0 / normF0))) {
+  if ((normJF / normF) <= std::max(options.stop_g_absolute, options.stop_g_relative * (normJF0 / normF0))) {
     inform.convergence_normg = 1;
   }
 }
@@ -304,9 +287,8 @@ void testConvergence(double normF, double normJF, double normF0, double normJF0,
  *  @param scale :: Stored scaling data.
  *  @param options :: The options.
  */
-void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
-                  DoubleFortranVector &v, DoubleFortranVector &scale,
-                  const nlls_options &options) {
+void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A, DoubleFortranVector &v,
+                  DoubleFortranVector &scale, const nlls_options &options) {
   auto m = J.len1();
   auto n = J.len2();
   if (scale.len() != n) {
@@ -373,8 +355,7 @@ void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
  *  @param ew :: The output eigenvalues.
  *  @param ev :: The output eigenvectors.
  */
-void allEigSymm(const DoubleFortranMatrix &A, DoubleFortranVector &ew,
-                DoubleFortranMatrix &ev) {
+void allEigSymm(const DoubleFortranMatrix &A, DoubleFortranVector &ew, DoubleFortranMatrix &ev) {
   auto M = A;
   M.eigenSystem(ew, ev);
 }

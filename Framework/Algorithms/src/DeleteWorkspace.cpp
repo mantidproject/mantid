@@ -15,8 +15,7 @@ DECLARE_ALGORITHM(DeleteWorkspace)
 
 /// Initialize the algorithm properties
 void DeleteWorkspace::init() {
-  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
-                      "Workspace", "", Kernel::Direction::Input),
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>("Workspace", "", Kernel::Direction::Input),
                   "Name of the workspace to delete.");
 }
 

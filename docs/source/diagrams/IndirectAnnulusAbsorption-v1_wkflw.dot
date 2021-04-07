@@ -50,7 +50,7 @@ digraph IndirectAnnulusAbsorption {
     AddSampleLogMultiple
     GroupWorkspaces
   }
-  
+
   subgraph decisions {
     $decision_style
     canGiven          [label="Can Workspace?"]
@@ -80,7 +80,7 @@ digraph IndirectAnnulusAbsorption {
     CanWorkspace_Wave                       -> canScale
     canScale                    	        -> Scale                        [label="Not equal to 1"]
         CanScale                                -> Scale
-        Scale                             	    -> useCorrections           
+        Scale                             	    -> useCorrections
     canScale                    	        -> useCorrections               [label="Equal to 1"]
     useCorrections                    	    -> SetSampleMaterial2           [label="Yes"]
         CanChemicalFormula                      -> SetSampleMaterial2

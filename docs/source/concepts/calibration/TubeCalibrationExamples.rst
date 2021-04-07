@@ -90,15 +90,15 @@ calling the functions as in the following example:
 
 The results are, Uncalibrated MAPS B2 window (lower part) instrument:
 
-.. image:: ../../images/UncalibratedMAPS.png 
+.. image:: ../../images/UncalibratedMAPS.png
 			:width: 500px
- 
+
 
 Calibrated MAPS B2 window:
 
-.. image:: ../../images/CalibratedMAPS.png 
+.. image:: ../../images/CalibratedMAPS.png
 			:width: 500px
- 
+
 Running TubeCalibDemoMerlin.py
 ##############################
 
@@ -143,7 +143,7 @@ the panels.
 The picture below show part of two panels that result from the
 calibration (they are rotated):
 
-.. image:: ../../images/CalibratedWish5Panels.jpg 
+.. image:: ../../images/CalibratedWish5Panels.jpg
 			:width: 800px
 
 .. categories:: Calibration

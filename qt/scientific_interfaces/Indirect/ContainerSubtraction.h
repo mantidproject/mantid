@@ -18,10 +18,8 @@ public:
   ContainerSubtraction(QWidget *parent = nullptr);
   ~ContainerSubtraction();
 
-  void setTransformedContainer(Mantid::API::MatrixWorkspace_sptr workspace,
-                               const std::string &name);
-  void
-  setTransformedContainer(const Mantid::API::MatrixWorkspace_sptr &workspace);
+  void setTransformedContainer(Mantid::API::MatrixWorkspace_sptr workspace, const std::string &name);
+  void setTransformedContainer(const Mantid::API::MatrixWorkspace_sptr &workspace);
 
 private slots:
   /// Handles a new sample being loaded
@@ -47,49 +45,36 @@ private:
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
 
-  void plotInPreview(const QString &curveName,
-                     Mantid::API::MatrixWorkspace_sptr &ws,
-                     const QColor &curveColor);
+  void plotInPreview(const QString &curveName, Mantid::API::MatrixWorkspace_sptr &ws, const QColor &curveColor);
 
   std::string createOutputName();
   void removeOutput();
 
-  Mantid::API::MatrixWorkspace_sptr
-  requestRebinToSample(Mantid::API::MatrixWorkspace_sptr workspace) const;
+  Mantid::API::MatrixWorkspace_sptr requestRebinToSample(Mantid::API::MatrixWorkspace_sptr workspace) const;
 
-  Mantid::API::MatrixWorkspace_sptr
-  shiftWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                 double shiftValue) const;
-  Mantid::API::MatrixWorkspace_sptr
-  scaleWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                 double scaleValue) const;
-  Mantid::API::MatrixWorkspace_sptr
-  minusWorkspace(const Mantid::API::MatrixWorkspace_sptr &lhsWorkspace,
-                 const Mantid::API::MatrixWorkspace_sptr &rhsWorkspace) const;
-  Mantid::API::MatrixWorkspace_sptr rebinToWorkspace(
-      const Mantid::API::MatrixWorkspace_sptr &workspaceToRebin,
-      const Mantid::API::MatrixWorkspace_sptr &workspaceToMatch) const;
-  Mantid::API::MatrixWorkspace_sptr
-  convertToHistogram(const Mantid::API::MatrixWorkspace_sptr &workspace) const;
+  Mantid::API::MatrixWorkspace_sptr shiftWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace,
+                                                   double shiftValue) const;
+  Mantid::API::MatrixWorkspace_sptr scaleWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace,
+                                                   double scaleValue) const;
+  Mantid::API::MatrixWorkspace_sptr minusWorkspace(const Mantid::API::MatrixWorkspace_sptr &lhsWorkspace,
+                                                   const Mantid::API::MatrixWorkspace_sptr &rhsWorkspace) const;
+  Mantid::API::MatrixWorkspace_sptr rebinToWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspaceToRebin,
+                                                     const Mantid::API::MatrixWorkspace_sptr &workspaceToMatch) const;
+  Mantid::API::MatrixWorkspace_sptr convertToHistogram(const Mantid::API::MatrixWorkspace_sptr &workspace) const;
 
+  Mantid::API::IAlgorithm_sptr shiftAlgorithm(const Mantid::API::MatrixWorkspace_sptr &workspace,
+                                              double shiftValue) const;
+  Mantid::API::IAlgorithm_sptr scaleAlgorithm(const Mantid::API::MatrixWorkspace_sptr &workspace,
+                                              double scaleValue) const;
+  Mantid::API::IAlgorithm_sptr minusAlgorithm(const Mantid::API::MatrixWorkspace_sptr &lhsWorkspace,
+                                              const Mantid::API::MatrixWorkspace_sptr &rhsWorkspace) const;
   Mantid::API::IAlgorithm_sptr
-  shiftAlgorithm(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                 double shiftValue) const;
-  Mantid::API::IAlgorithm_sptr
-  scaleAlgorithm(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                 double scaleValue) const;
-  Mantid::API::IAlgorithm_sptr
-  minusAlgorithm(const Mantid::API::MatrixWorkspace_sptr &lhsWorkspace,
-                 const Mantid::API::MatrixWorkspace_sptr &rhsWorkspace) const;
-  Mantid::API::IAlgorithm_sptr rebinToWorkspaceAlgorithm(
-      const Mantid::API::MatrixWorkspace_sptr &workspaceToRebin,
-      const Mantid::API::MatrixWorkspace_sptr &workspaceToMatch) const;
-  Mantid::API::IAlgorithm_sptr convertToHistogramAlgorithm(
-      const Mantid::API::MatrixWorkspace_sptr &workspace) const;
-  Mantid::API::IAlgorithm_sptr
-  addSampleLogAlgorithm(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                        const std::string &name, const std::string &type,
-                        const std::string &value) const;
+  rebinToWorkspaceAlgorithm(const Mantid::API::MatrixWorkspace_sptr &workspaceToRebin,
+                            const Mantid::API::MatrixWorkspace_sptr &workspaceToMatch) const;
+  Mantid::API::IAlgorithm_sptr convertToHistogramAlgorithm(const Mantid::API::MatrixWorkspace_sptr &workspace) const;
+  Mantid::API::IAlgorithm_sptr addSampleLogAlgorithm(const Mantid::API::MatrixWorkspace_sptr &workspace,
+                                                     const std::string &name, const std::string &type,
+                                                     const std::string &value) const;
 
   void setRunEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);

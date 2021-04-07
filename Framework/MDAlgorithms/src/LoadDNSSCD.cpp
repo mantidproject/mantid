@@ -63,9 +63,8 @@ std::string parseTime(std::string &str) {
   eraseSubStr(str, "start");
   eraseSubStr(str, "stopped");
   eraseSubStr(str, "at");
-  auto it = std::find_if(str.begin(), str.end(), [](char ch) {
-    return !std::isspace<char>(ch, std::locale::classic());
-  });
+  auto it =
+      std::find_if(str.begin(), str.end(), [](char ch) { return !std::isspace<char>(ch, std::locale::classic()); });
   str.erase(str.begin(), it);
   using namespace boost::posix_time;
   // try to parse as a posix time
@@ -101,8 +100,7 @@ DECLARE_FILELOADER_ALGORITHM(LoadDNSSCD)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadDNSSCD::LoadDNSSCD()
-    : m_columnSep("\t, ;"), m_nDims(4), m_tof_max(20000.0) {}
+LoadDNSSCD::LoadDNSSCD() : m_columnSep("\t, ;"), m_nDims(4), m_tof_max(20000.0) {}
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -128,23 +126,20 @@ void LoadDNSSCD::init() {
                   "Select one or more DNS SCD .d_dat files to load."
                   "Files must be measured at the same conditions.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output MDEventWorkspace.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "NormalizationWorkspace", "", Direction::Output),
-                  "An output normalization MDEventWorkspace.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("NormalizationWorkspace", "", Direction::Output),
+      "An output normalization MDEventWorkspace.");
 
   const std::vector<std::string> normOptions = {"monitor", "time"};
-  declareProperty("Normalization", "monitor",
-                  std::make_shared<StringListValidator>(normOptions),
+  declareProperty("Normalization", "monitor", std::make_shared<StringListValidator>(normOptions),
                   "Algorithm will create a separate normalization workspace. "
                   "Choose whether it should contain monitor counts or time.");
 
   const std::vector<std::string> wsOptions = {"raw", "HKL"};
-  declareProperty("LoadAs", "HKL",
-                  std::make_shared<StringListValidator>(wsOptions),
+  declareProperty("LoadAs", "HKL", std::make_shared<StringListValidator>(wsOptions),
                   "Choose whether the algorithm should load raw data"
                   "or convert to H,K,L,dE space");
 
@@ -162,77 +157,59 @@ void LoadDNSSCD::init() {
   u0[1] = 1.;
   v0[2] = 1.;
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "a", 1.0, mustBePositive->clone(), Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("a", 1.0, mustBePositive->clone(), Direction::Input),
                   "Lattice parameter a in Angstrom");
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "b", 1.0, mustBePositive->clone(), Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("b", 1.0, mustBePositive->clone(), Direction::Input),
                   "Lattice parameter b in Angstrom");
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "c", 1.0, std::move(mustBePositive), Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("c", 1.0, std::move(mustBePositive), Direction::Input),
                   "Lattice parameter c in Angstrom");
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "alpha", 90.0, reasonableAngle->clone(), Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("alpha", 90.0, reasonableAngle->clone(), Direction::Input),
       "Angle between b and c in degrees");
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "beta", 90.0, reasonableAngle->clone(), Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("beta", 90.0, reasonableAngle->clone(), Direction::Input),
                   "Angle between a and c in degrees");
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "gamma", 90.0, std::move(reasonableAngle), Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("gamma", 90.0, std::move(reasonableAngle), Direction::Input),
       "Angle between a and b in degrees");
 
   declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "OmegaOffset", 0.0,
-                      std::make_shared<BoundedValidator<double>>(),
-                      Direction::Input),
+                      "OmegaOffset", 0.0, std::make_shared<BoundedValidator<double>>(), Direction::Input),
                   "Angle in degrees between (HKL1) and the beam axis"
                   "if the goniometer is at zero.");
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("HKL1", std::move(u0),
-                                              mustBe3D->clone()),
-      "Indices of the vector in reciprocal space in the horizontal plane at "
-      "angle Omegaoffset, "
-      "if the goniometer is at zero.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("HKL1", std::move(u0), mustBe3D->clone()),
+                  "Indices of the vector in reciprocal space in the horizontal plane at "
+                  "angle Omegaoffset, "
+                  "if the goniometer is at zero.");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("HKL2", std::move(v0),
-                                              std::move(mustBe3D)),
-      "Indices of a second vector in reciprocal space in the horizontal plane "
-      "not parallel to HKL1");
+  declareProperty(std::make_unique<ArrayProperty<double>>("HKL2", std::move(v0), std::move(mustBe3D)),
+                  "Indices of a second vector in reciprocal space in the horizontal plane "
+                  "not parallel to HKL1");
 
   std::vector<double> ttl(2, 0);
   ttl[1] = 180.0;
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("TwoThetaLimits", std::move(ttl),
-                                              std::move(mustBe2D)),
-      "Range (min, max) of scattering angles (2theta, in degrees) to consider. "
-      "Everything out of this range will be cut.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("TwoThetaLimits", std::move(ttl), std::move(mustBe2D)),
+                  "Range (min, max) of scattering angles (2theta, in degrees) to consider. "
+                  "Everything out of this range will be cut.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-          "LoadHuberFrom", "", Direction::Input, PropertyMode::Optional),
-      "A table workspace to load a list of raw sample rotation angles. "
-      "Huber angles given in the data files will be ignored.");
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>("LoadHuberFrom", "", Direction::Input,
+                                                                            PropertyMode::Optional),
+                  "A table workspace to load a list of raw sample rotation angles. "
+                  "Huber angles given in the data files will be ignored.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-          "SaveHuberTo", "", Direction::Output, PropertyMode::Optional),
-      "A workspace name to save a list of raw sample rotation angles.");
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>("SaveHuberTo", "", Direction::Output,
+                                                                            PropertyMode::Optional),
+                  "A workspace name to save a list of raw sample rotation angles.");
 
   auto mustBeIntPositive = std::make_shared<BoundedValidator<int>>();
   mustBeIntPositive->setLower(0);
   declareProperty(
-      std::make_unique<PropertyWithValue<int>>(
-          "ElasticChannel", 0, std::move(mustBeIntPositive), Direction::Input),
+      std::make_unique<PropertyWithValue<int>>("ElasticChannel", 0, std::move(mustBeIntPositive), Direction::Input),
       "Elastic channel number. Only for TOF data.");
 
   auto mustBeNegative = std::make_shared<BoundedValidator<double>>();
   mustBeNegative->setUpper(0.0);
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "DeltaEmin", -10.0, std::move(mustBeNegative), Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("DeltaEmin", -10.0, std::move(mustBeNegative), Direction::Input),
       "Minimal energy transfer to consider. Should be <=0. Only for TOF data.");
 }
 
@@ -268,8 +245,7 @@ Mantid::API::ITableWorkspace_sptr LoadDNSSCD::saveHuber() {
   std::sort(huber.begin(), huber.end());
   huber.erase(unique(huber.begin(), huber.end()), huber.end());
 
-  Mantid::API::ITableWorkspace_sptr huberWS =
-      WorkspaceFactory::Instance().createTable("TableWorkspace");
+  Mantid::API::ITableWorkspace_sptr huberWS = WorkspaceFactory::Instance().createTable("TableWorkspace");
   huberWS->addColumn("double", "Huber(degrees)");
   for (size_t i = 0; i < huber.size(); i++) {
     huberWS->appendRow();
@@ -281,14 +257,11 @@ Mantid::API::ITableWorkspace_sptr LoadDNSSCD::saveHuber() {
 /** Execute the algorithm.
  */
 void LoadDNSSCD::exec() {
-  MultipleFileProperty *multiFileProp =
-      dynamic_cast<MultipleFileProperty *>(getPointerToProperty("Filenames"));
+  MultipleFileProperty *multiFileProp = dynamic_cast<MultipleFileProperty *>(getPointerToProperty("Filenames"));
   if (!multiFileProp) {
-    throw std::logic_error(
-        "Filenames property must have MultipleFileProperty type.");
+    throw std::logic_error("Filenames property must have MultipleFileProperty type.");
   }
-  std::vector<std::string> filenames =
-      VectorHelper::flattenVector(multiFileProp->operator()());
+  std::vector<std::string> filenames = VectorHelper::flattenVector(multiFileProp->operator()());
   if (filenames.empty())
     throw std::invalid_argument("Must specify at least one filename.");
 
@@ -302,8 +275,7 @@ void LoadDNSSCD::exec() {
     m_normfactor = 0.0; // error for time should be 0
   }
 
-  g_log.notice() << "The normalization workspace will contain " << m_normtype
-                 << ".\n";
+  g_log.notice() << "The normalization workspace will contain " << m_normtype << ".\n";
 
   ExperimentInfo_sptr expinfo = std::make_shared<ExperimentInfo>();
   API::Run &run = expinfo->mutableRun();
@@ -315,9 +287,7 @@ void LoadDNSSCD::exec() {
       // if no stop_time, take file_save_time
       std::string time(str_metadata["stop_time"]);
       if (time.empty()) {
-        g_log.warning()
-            << "stop_time is empty! File save time will be used instead."
-            << std::endl;
+        g_log.warning() << "stop_time is empty! File save time will be used instead." << std::endl;
         time = str_metadata["file_save_time"];
       }
       updateProperties<std::string>(run, str_metadata, time);
@@ -325,23 +295,19 @@ void LoadDNSSCD::exec() {
     } catch (...) {
       g_log.warning() << "Failed to read file " << fname;
       g_log.warning() << ". This file will be ignored. " << std::endl;
-      g_log.debug() << boost::current_exception_diagnostic_information()
-                    << std::endl;
+      g_log.debug() << boost::current_exception_diagnostic_information() << std::endl;
     }
   }
 
   if (m_data.empty())
-    throw std::runtime_error(
-        "No valid DNS files have been provided. Nothing to load.");
+    throw std::runtime_error("No valid DNS files have been provided. Nothing to load.");
 
   // merge data with different time channel number is not allowed
   auto ch_n = m_data.front().nchannels;
   bool same_channel_number =
-      std::all_of(m_data.begin(), m_data.end(),
-                  [ch_n](ExpData &d) { return (d.nchannels == ch_n); });
+      std::all_of(m_data.begin(), m_data.end(), [ch_n](ExpData &d) { return (d.nchannels == ch_n); });
   if (!same_channel_number)
-    throw std::runtime_error(
-        "Error: cannot merge data with different TOF channel numbers.");
+    throw std::runtime_error("Error: cannot merge data with different TOF channel numbers.");
 
   std::string load_as = getProperty("LoadAs");
   if (load_as == "raw")
@@ -353,18 +319,14 @@ void LoadDNSSCD::exec() {
   // load huber angles from a table workspace if given
   ITableWorkspace_sptr huberWS = getProperty("LoadHuberFrom");
   if (huberWS) {
-    g_log.notice() << "Huber angles will be loaded from " << huberWS->getName()
-                   << std::endl;
+    g_log.notice() << "Huber angles will be loaded from " << huberWS->getName() << std::endl;
     loadHuber(huberWS);
   }
 
   // get wavelength
-  TimeSeriesProperty<double> *wlprop =
-      dynamic_cast<TimeSeriesProperty<double> *>(
-          expinfo->run().getProperty("Lambda"));
+  TimeSeriesProperty<double> *wlprop = dynamic_cast<TimeSeriesProperty<double> *>(expinfo->run().getProperty("Lambda"));
   // assume, that lambda is in nm
-  double wavelength =
-      wlprop->minValue() * 10.0; // needed to estimate extents => minValue
+  double wavelength = wlprop->minValue() * 10.0; // needed to estimate extents => minValue
   run.addProperty("wavelength", wavelength);
   run.getProperty("wavelength")->setUnits("Angstrom");
 
@@ -382,19 +344,15 @@ void LoadDNSSCD::exec() {
   setProperty("OutputWorkspace", m_OutWS);
 }
 
-int LoadDNSSCD::splitIntoColumns(std::list<std::string> &columns,
-                                 std::string &str) {
-  boost::split(columns, str, boost::is_any_of(m_columnSep),
-               boost::token_compress_on);
+int LoadDNSSCD::splitIntoColumns(std::list<std::string> &columns, std::string &str) {
+  boost::split(columns, str, boost::is_any_of(m_columnSep), boost::token_compress_on);
   return static_cast<int>(columns.size());
 }
 
 //----------------------------------------------------------------------------------------------
 
 template <class T>
-void LoadDNSSCD::updateProperties(API::Run &run,
-                                  std::map<std::string, T> &metadata,
-                                  std::string time) {
+void LoadDNSSCD::updateProperties(API::Run &run, std::map<std::string, T> &metadata, std::string time) {
   auto it = metadata.begin();
   while (it != metadata.end()) {
     TimeSeriesProperty<T> *timeSeries(nullptr);
@@ -411,9 +369,7 @@ void LoadDNSSCD::updateProperties(API::Run &run,
     if (run.hasProperty(name)) {
       timeSeries = dynamic_cast<TimeSeriesProperty<T> *>(run.getLogData(name));
       if (!timeSeries)
-        throw std::invalid_argument(
-            "Log '" + name +
-            "' already exists but the values are a different type.");
+        throw std::invalid_argument("Log '" + name + "' already exists but the values are a different type.");
     } else {
       timeSeries = new TimeSeriesProperty<T>(name);
       if (!units.empty())
@@ -441,8 +397,7 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
   dimensionNames[2] = "L";
   dimensionNames[3] = "DeltaE";
 
-  Mantid::Kernel::SpecialCoordinateSystem coordinateSystem =
-      Mantid::Kernel::HKL;
+  Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = Mantid::Kernel::HKL;
 
   double a, b, c, alpha, beta, gamma;
   a = getProperty("a");
@@ -455,8 +410,7 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
   std::vector<double> v = getProperty("HKL2");
 
   // load empty DNS instrument to access L1 and L2
-  IAlgorithm_sptr loadAlg =
-      AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
   loadAlg->setChild(true);
   loadAlg->setLogging(false);
   loadAlg->initialize();
@@ -470,13 +424,11 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
   const auto beamVector = samplePosition - sourcePosition;
   const auto l1 = beamVector.norm();
   // calculate tof1
-  auto velocity = PhysicalConstants::h /
-                  (PhysicalConstants::NeutronMass * wavelength * 1e-10); // m/s
-  auto tof1 = 1e+06 * l1 / velocity; // microseconds
+  auto velocity = PhysicalConstants::h / (PhysicalConstants::NeutronMass * wavelength * 1e-10); // m/s
+  auto tof1 = 1e+06 * l1 / velocity;                                                            // microseconds
   g_log.debug() << "TOF1 = " << tof1 << std::endl;
   // calculate incident energy
-  auto Ei = 0.5 * PhysicalConstants::NeutronMass * velocity * velocity /
-            PhysicalConstants::meV;
+  auto Ei = 0.5 * PhysicalConstants::NeutronMass * velocity * velocity / PhysicalConstants::meV;
   g_log.debug() << "Ei = " << Ei << std::endl;
 
   double dEmin = getProperty("DeltaEmin");
@@ -494,10 +446,8 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
   for (size_t i = 0; i < m_nDims; ++i) {
     std::string id = vec_ID[i];
     std::string name = dimensionNames[i];
-    m_OutWS->addDimension(
-        Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
-            id, name, frame, static_cast<coord_t>(extentMins[i]),
-            static_cast<coord_t>(extentMaxs[i]), 5)));
+    m_OutWS->addDimension(Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
+        id, name, frame, static_cast<coord_t>(extentMins[i]), static_cast<coord_t>(extentMaxs[i]), 5)));
   }
 
   // Set coordinate system
@@ -506,8 +456,7 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
   // calculate RUB matrix
   Mantid::Geometry::OrientedLattice o;
   o = Mantid::Geometry::OrientedLattice(a, b, c, alpha, beta, gamma);
-  o.setUFromVectors(Mantid::Kernel::V3D(u[0], u[1], u[2]),
-                    Mantid::Kernel::V3D(v[0], v[1], v[2]));
+  o.setUFromVectors(Mantid::Kernel::V3D(u[0], u[1], u[2]), Mantid::Kernel::V3D(v[0], v[1], v[2]));
 
   double omega_offset = getProperty("OmegaOffset");
   omega_offset *= -1.0 * deg2rad;
@@ -540,8 +489,7 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
   // Creates a new instance of the MDEventInserter to norm workspace
   MDEventWorkspace<MDEvent<4>, 4>::sptr normws_mdevt_4 =
       std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<4>, 4>>(normWS);
-  MDEventInserter<MDEventWorkspace<MDEvent<4>, 4>::sptr> norm_inserter(
-      normws_mdevt_4);
+  MDEventInserter<MDEventWorkspace<MDEvent<4>, 4>::sptr> norm_inserter(normws_mdevt_4);
 
   // scattering angle limits
   std::vector<double> tth_limits = getProperty("TwoThetaLimits");
@@ -564,16 +512,13 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
       const auto l2 = detectorVector.norm();
       auto tof2_elastic = 1e+06 * l2 / velocity;
       // geometric elastic channel
-      auto echannel_geom =
-          static_cast<int>(std::ceil(tof2_elastic / ds.chwidth));
+      auto echannel_geom = static_cast<int>(std::ceil(tof2_elastic / ds.chwidth));
       // rotate the signal array to get elastic peak at right position
       int ch_diff = echannel_geom - echannel_user;
       if ((echannel_user > 0) && (ch_diff < 0)) {
-        std::rotate(ds.signal[i].begin(), ds.signal[i].begin() - ch_diff,
-                    ds.signal[i].end());
+        std::rotate(ds.signal[i].begin(), ds.signal[i].begin() - ch_diff, ds.signal[i].end());
       } else if ((echannel_user > 0) && (ch_diff > 0)) {
-        std::rotate(ds.signal[i].rbegin(), ds.signal[i].rbegin() + ch_diff,
-                    ds.signal[i].rend());
+        std::rotate(ds.signal[i].rbegin(), ds.signal[i].rbegin() + ch_diff, ds.signal[i].rend());
       }
       detid_t detid(ds.detID[i]);
       double theta = 0.5 * (ds.detID[i] * 5.0 - ds.deterota) * deg2rad;
@@ -584,28 +529,19 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
           PARALLEL_START_INTERUPT_REGION
           double signal = ds.signal[i][channel];
           signal_t error = std::sqrt(signal);
-          double tof2 = static_cast<double>(channel) * ds.chwidth +
-                        0.5 * ds.chwidth; // bin centers
+          double tof2 = static_cast<double>(channel) * ds.chwidth + 0.5 * ds.chwidth; // bin centers
           double dE = 0.0;
           if (nchannels > 1) {
             double v2 = 1e+06 * l2 / tof2;
-            dE = Ei - 0.5 * PhysicalConstants::NeutronMass * v2 * v2 /
-                          PhysicalConstants::meV;
+            dE = Ei - 0.5 * PhysicalConstants::NeutronMass * v2 * v2 / PhysicalConstants::meV;
           }
           if (dE > dEmin) {
-            double kf =
-                std::sqrt(ki * ki - 2.0e-20 * PhysicalConstants::NeutronMass *
-                                        dE * PhysicalConstants::meV /
-                                        (PhysicalConstants::h_bar *
-                                         PhysicalConstants::h_bar));
-            double tlab =
-                std::atan2(ki - kf * cos(2.0 * theta), kf * sin(2.0 * theta));
+            double kf = std::sqrt(ki * ki - 2.0e-20 * PhysicalConstants::NeutronMass * dE * PhysicalConstants::meV /
+                                                (PhysicalConstants::h_bar * PhysicalConstants::h_bar));
+            double tlab = std::atan2(ki - kf * cos(2.0 * theta), kf * sin(2.0 * theta));
             double omega = (ds.huber - ds.deterota) * deg2rad - tlab;
             V3D uphi(-cos(omega), 0, -sin(omega));
-            double qabs = 0.5 *
-                          std::sqrt(ki * ki + kf * kf -
-                                    2.0 * ki * kf * cos(2.0 * theta)) /
-                          M_PI;
+            double qabs = 0.5 * std::sqrt(ki * ki + kf * kf - 2.0 * ki * kf * cos(2.0 * theta)) / M_PI;
             V3D hphi = uphi * qabs; // qabs = ki * sin(theta), for elastic case;
             V3D hkl = ub_inv * hphi;
             std::vector<Mantid::coord_t> millerindex(4);
@@ -614,16 +550,11 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
             millerindex[2] = static_cast<float>(hkl.Z());
             millerindex[3] = static_cast<float>(dE);
             PARALLEL_CRITICAL(addValues) {
-              inserter.insertMDEvent(static_cast<float>(signal),
-                                     static_cast<float>(error * error),
-                                     static_cast<uint16_t>(runindex), 0, detid,
-                                     millerindex.data());
+              inserter.insertMDEvent(static_cast<float>(signal), static_cast<float>(error * error),
+                                     static_cast<uint16_t>(runindex), 0, detid, millerindex.data());
 
-              norm_inserter.insertMDEvent(
-                  static_cast<float>(norm_signal),
-                  static_cast<float>(norm_error * norm_error),
-                  static_cast<uint16_t>(runindex), 0, detid,
-                  millerindex.data());
+              norm_inserter.insertMDEvent(static_cast<float>(norm_signal), static_cast<float>(norm_error * norm_error),
+                                          static_cast<uint16_t>(runindex), 0, detid, millerindex.data());
             }
           }
           PARALLEL_END_INTERUPT_REGION
@@ -651,12 +582,10 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
   dimensionNames[1] = "Omega";
   dimensionNames[2] = "TOF";
 
-  Mantid::Kernel::SpecialCoordinateSystem coordinateSystem =
-      Mantid::Kernel::None;
+  Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = Mantid::Kernel::None;
 
   // load empty DNS instrument to access L1 and L2
-  IAlgorithm_sptr loadAlg =
-      AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
   loadAlg->setChild(true);
   loadAlg->setLogging(false);
   loadAlg->initialize();
@@ -670,13 +599,11 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
   const auto beamVector = samplePosition - sourcePosition;
   const auto l1 = beamVector.norm();
   // calculate tof1
-  auto velocity = PhysicalConstants::h /
-                  (PhysicalConstants::NeutronMass * wavelength * 1e-10); // m/s
-  auto tof1 = 1e+06 * l1 / velocity; // microseconds
+  auto velocity = PhysicalConstants::h / (PhysicalConstants::NeutronMass * wavelength * 1e-10); // m/s
+  auto tof1 = 1e+06 * l1 / velocity;                                                            // microseconds
   g_log.debug() << "TOF1 = " << tof1 << std::endl;
   // calculate incident energy
-  auto Ei = 0.5 * PhysicalConstants::NeutronMass * velocity * velocity /
-            PhysicalConstants::meV;
+  auto Ei = 0.5 * PhysicalConstants::NeutronMass * velocity * velocity / PhysicalConstants::meV;
   g_log.debug() << "Ei = " << Ei << std::endl;
 
   // estimate extents
@@ -702,10 +629,8 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
   for (size_t i = 0; i < 3; ++i) {
     std::string id = vec_ID[i];
     std::string name = dimensionNames[i];
-    m_OutWS->addDimension(
-        Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
-            name, id, frame, static_cast<coord_t>(extentMins[i]),
-            static_cast<coord_t>(extentMaxs[i]), 5)));
+    m_OutWS->addDimension(Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
+        name, id, frame, static_cast<coord_t>(extentMins[i]), static_cast<coord_t>(extentMaxs[i]), 5)));
   }
 
   // Set coordinate system
@@ -722,8 +647,7 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
   // Creates a new instance of the MDEventInserter to norm workspace
   MDEventWorkspace<MDEvent<3>, 3>::sptr normws_mdevt_3 =
       std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(normWS);
-  MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> norm_inserter(
-      normws_mdevt_3);
+  MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> norm_inserter(normws_mdevt_3);
 
   // get elastic channel from the user input
   int echannel_user = getProperty("ElasticChannel");
@@ -740,16 +664,13 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
       const auto l2 = detectorVector.norm();
       auto tof2_elastic = 1e+06 * l2 / velocity;
       // geometric elastic channel
-      auto echannel_geom =
-          static_cast<int>(std::ceil(tof2_elastic / ds.chwidth));
+      auto echannel_geom = static_cast<int>(std::ceil(tof2_elastic / ds.chwidth));
       // rotate the signal array to get elastic peak at right position
       int ch_diff = echannel_geom - echannel_user;
       if ((echannel_user > 0) && (ch_diff < 0)) {
-        std::rotate(ds.signal[i].begin(), ds.signal[i].begin() - ch_diff,
-                    ds.signal[i].end());
+        std::rotate(ds.signal[i].begin(), ds.signal[i].begin() - ch_diff, ds.signal[i].end());
       } else if ((echannel_user > 0) && (ch_diff > 0)) {
-        std::rotate(ds.signal[i].rbegin(), ds.signal[i].rbegin() + ch_diff,
-                    ds.signal[i].rend());
+        std::rotate(ds.signal[i].rbegin(), ds.signal[i].rbegin() + ch_diff, ds.signal[i].rend());
       }
 
       detid_t detid(ds.detID[i]);
@@ -763,8 +684,7 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
           signal_t error = std::sqrt(signal);
           double tof2(tof2_elastic);
           if (nchannels > 1) {
-            tof2 = static_cast<double>(channel) * ds.chwidth +
-                   0.5 * ds.chwidth; // bin centers
+            tof2 = static_cast<double>(channel) * ds.chwidth + 0.5 * ds.chwidth; // bin centers
           }
           double omega = (ds.huber - ds.deterota);
 
@@ -773,14 +693,11 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
           datapoint[1] = static_cast<float>(omega);
           datapoint[2] = static_cast<float>(tof1 + tof2);
           PARALLEL_CRITICAL(addValues) {
-            inserter.insertMDEvent(
-                static_cast<float>(signal), static_cast<float>(error * error),
-                static_cast<uint16_t>(runindex), 0, detid, datapoint.data());
+            inserter.insertMDEvent(static_cast<float>(signal), static_cast<float>(error * error),
+                                   static_cast<uint16_t>(runindex), 0, detid, datapoint.data());
 
-            norm_inserter.insertMDEvent(
-                static_cast<float>(norm_signal),
-                static_cast<float>(norm_error * norm_error),
-                static_cast<uint16_t>(runindex), 0, detid, datapoint.data());
+            norm_inserter.insertMDEvent(static_cast<float>(norm_signal), static_cast<float>(norm_error * norm_error),
+                                        static_cast<uint16_t>(runindex), 0, detid, datapoint.data());
           }
           PARALLEL_END_INTERUPT_REGION
         }
@@ -791,8 +708,7 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
   setProperty("NormalizationWorkspace", normWS);
 }
 
-void LoadDNSSCD::read_data(const std::string &fname,
-                           std::map<std::string, std::string> &str_metadata,
+void LoadDNSSCD::read_data(const std::string &fname, std::map<std::string, std::string> &str_metadata,
                            std::map<std::string, double> &num_metadata) {
   std::ifstream file(fname);
   std::string line;
@@ -809,8 +725,7 @@ void LoadDNSSCD::read_data(const std::string &fname,
   // get file save time
   Poco::File pfile(fname);
   Poco::DateTime lastModified = pfile.getLastModified();
-  std::string wtime(
-      Poco::DateTimeFormatter::format(lastModified, "%Y-%m-%dT%H:%M:%S"));
+  std::string wtime(Poco::DateTimeFormatter::format(lastModified, "%Y-%m-%dT%H:%M:%S"));
   str_metadata.insert(std::make_pair("file_save_time", wtime));
 
   // get file basename
@@ -855,8 +770,7 @@ void LoadDNSSCD::read_data(const std::string &fname,
     }
     if (boost::regex_search(line, match, reg2) && match.size() > 2) {
       s = match.str(1);
-      s.erase(std::find_if_not(s.rbegin(), s.rend(), ::isspace).base(),
-              s.end());
+      s.erase(std::find_if_not(s.rbegin(), s.rend(), ::isspace).base(), s.end());
       num_metadata.insert(std::make_pair(s, std::stod(match.str(3))));
     }
     n = line.find("DATA");
@@ -865,11 +779,9 @@ void LoadDNSSCD::read_data(const std::string &fname,
     }
   }
 
-  std::map<std::string, double>::const_iterator m =
-      num_metadata.lower_bound("TOF");
+  std::map<std::string, double>::const_iterator m = num_metadata.lower_bound("TOF");
   g_log.debug() << "TOF Channels number: " << m->second << std::endl;
-  std::map<std::string, double>::const_iterator w =
-      num_metadata.lower_bound("Time");
+  std::map<std::string, double>::const_iterator w = num_metadata.lower_bound("Time");
   g_log.debug() << "Channel width: " << w->second << std::endl;
 
   ExpData ds;

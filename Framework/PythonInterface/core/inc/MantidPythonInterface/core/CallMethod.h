@@ -34,11 +34,9 @@ namespace detail {
  * @param args A list of arguments to forward to call_method
  */
 template <typename ReturnType, typename... Args>
-ReturnType callMethodImpl(PyObject *obj, const char *methodName,
-                          const Args &... args) {
+ReturnType callMethodImpl(PyObject *obj, const char *methodName, const Args &...args) {
   try {
-    return boost::python::call_method<ReturnType, Args...>(obj, methodName,
-                                                           args...);
+    return boost::python::call_method<ReturnType, Args...>(obj, methodName, args...);
   } catch (boost::python::error_already_set &) {
     throw PythonException();
   }
@@ -55,8 +53,7 @@ ReturnType callMethodImpl(PyObject *obj, const char *methodName,
  * @param args A list of arguments to forward to call_method
  */
 template <typename ReturnType, typename... Args>
-ReturnType callMethodNoCheck(PyObject *obj, const char *methodName,
-                             const Args &... args) {
+ReturnType callMethodNoCheck(PyObject *obj, const char *methodName, const Args &...args) {
   GlobalInterpreterLock gil;
   return detail::callMethodImpl<ReturnType, Args...>(obj, methodName, args...);
 }
@@ -71,11 +68,9 @@ ReturnType callMethodNoCheck(PyObject *obj, const char *methodName,
  * @param args A list of arguments to forward to call_method
  */
 template <typename ReturnType, typename... Args>
-ReturnType callMethodNoCheck(const boost::python::object &obj,
-                             const char *methodName, const Args &... args) {
+ReturnType callMethodNoCheck(const boost::python::object &obj, const char *methodName, const Args &...args) {
   GlobalInterpreterLock gil;
-  return detail::callMethodImpl<ReturnType, Args...>(obj.ptr(), methodName,
-                                                     args...);
+  return detail::callMethodImpl<ReturnType, Args...>(obj.ptr(), methodName, args...);
 }
 
 /**
@@ -89,12 +84,10 @@ ReturnType callMethodNoCheck(const boost::python::object &obj,
  * @param args A list of arguments to forward to call_method
  */
 template <typename ReturnType, typename... Args>
-ReturnType callMethod(PyObject *obj, const char *methodName,
-                      const Args &... args) {
+ReturnType callMethod(PyObject *obj, const char *methodName, const Args &...args) {
   GlobalInterpreterLock gil;
   if (typeHasAttribute(obj, methodName)) {
-    return detail::callMethodImpl<ReturnType, Args...>(obj, methodName,
-                                                       args...);
+    return detail::callMethodImpl<ReturnType, Args...>(obj, methodName, args...);
   } else {
     throw UndefinedAttributeError();
   }

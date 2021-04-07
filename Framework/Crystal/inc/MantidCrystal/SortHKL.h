@@ -44,42 +44,33 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"TransformHKL"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"TransformHKL"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return R"(Crystal\Peaks;DataHandling\Text;Utility\Sorting)";
-  }
+  const std::string category() const override { return R"(Crystal\Peaks;DataHandling\Text;Utility\Sorting)"; }
 
 private:
   void init() override;
   void exec() override;
 
-  std::vector<DataObjects::Peak>
-  getNonZeroPeaks(const std::vector<DataObjects::Peak> &inputPeaks) const;
+  std::vector<DataObjects::Peak> getNonZeroPeaks(const std::vector<DataObjects::Peak> &inputPeaks) const;
 
-  PeakStatisticsTools::UniqueReflectionCollection
-  getUniqueReflections(const std::vector<DataObjects::Peak> &peaks,
-                       const Geometry::UnitCell &cell) const;
+  PeakStatisticsTools::UniqueReflectionCollection getUniqueReflections(const std::vector<DataObjects::Peak> &peaks,
+                                                                       const Geometry::UnitCell &cell) const;
 
   Geometry::ReflectionCondition_sptr getCentering() const;
   Geometry::PointGroup_sptr getPointgroup() const;
 
-  std::pair<double, double>
-  getDLimits(const std::vector<DataObjects::Peak> &peaks,
-             const Geometry::UnitCell &cell) const;
+  std::pair<double, double> getDLimits(const std::vector<DataObjects::Peak> &peaks,
+                                       const Geometry::UnitCell &cell) const;
 
   API::ITableWorkspace_sptr getStatisticsTable(const std::string &name) const;
-  void insertStatisticsIntoTable(
-      const API::ITableWorkspace_sptr &table,
-      const PeakStatisticsTools::PeaksStatistics &statistics) const;
+  void insertStatisticsIntoTable(const API::ITableWorkspace_sptr &table,
+                                 const PeakStatisticsTools::PeaksStatistics &statistics) const;
 
-  DataObjects::PeaksWorkspace_sptr getOutputPeaksWorkspace(
-      const DataObjects::PeaksWorkspace_sptr &inputPeaksWorkspace) const;
+  DataObjects::PeaksWorkspace_sptr
+  getOutputPeaksWorkspace(const DataObjects::PeaksWorkspace_sptr &inputPeaksWorkspace) const;
 
-  void
-  sortOutputPeaksByHKL(const API::IPeaksWorkspace_sptr &outputPeaksWorkspace);
+  void sortOutputPeaksByHKL(const API::IPeaksWorkspace_sptr &outputPeaksWorkspace);
 
   /// Point Groups possible
   std::vector<Mantid::Geometry::PointGroup_sptr> m_pointGroups;

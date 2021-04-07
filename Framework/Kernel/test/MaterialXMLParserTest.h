@@ -22,9 +22,7 @@ class MaterialXMLParserTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MaterialXMLParserTest *createSuite() {
-    return new MaterialXMLParserTest();
-  }
+  static MaterialXMLParserTest *createSuite() { return new MaterialXMLParserTest(); }
   static void destroySuite(MaterialXMLParserTest *suite) { delete suite; }
 
   //----------------------------------------------------------------------------
@@ -42,8 +40,7 @@ public:
   }
 
   void test_AtomicNumber_Attribute() {
-    auto mat = parseMaterial(
-        R"(<material id="n" atomicnumber="28" numberdensity="0.12"/>)");
+    auto mat = parseMaterial(R"(<material id="n" atomicnumber="28" numberdensity="0.12"/>)");
 
     TS_ASSERT_DELTA(mat.totalScatterXSection(), 18.5, 0.0001);
     TS_ASSERT_DELTA(mat.absorbXSection(), 4.49, 0.0001);
@@ -79,9 +76,8 @@ public:
   }
 
   void test_TotalScattering_Attribute() {
-    auto mat =
-        parseMaterial("<material id=\"a\" formula=\"Al2-O3\" "
-                      "totalscatterxsec=\"18.1\" numberdensity=\"0.12\"/>");
+    auto mat = parseMaterial("<material id=\"a\" formula=\"Al2-O3\" "
+                             "totalscatterxsec=\"18.1\" numberdensity=\"0.12\"/>");
 
     TS_ASSERT_DELTA(mat.totalScatterXSection(), 18.1, 1e-04);
   }
@@ -94,17 +90,15 @@ public:
   }
 
   void test_IncoherentScattering_Attribute() {
-    auto mat =
-        parseMaterial("<material id=\"a\" formula=\"Al2-O3\" "
-                      "incohscatterxsec=\"0.1\" numberdensity=\"0.12\"/>");
+    auto mat = parseMaterial("<material id=\"a\" formula=\"Al2-O3\" "
+                             "incohscatterxsec=\"0.1\" numberdensity=\"0.12\"/>");
 
     TS_ASSERT_DELTA(mat.incohScatterXSection(), 0.1, 1e-04);
   }
 
   void test_Absorption_Attribute() {
-    auto mat =
-        parseMaterial("<material id=\"a\" formula=\"Al2-O3\" "
-                      "absorptionxsec=\"4.45\" numberdensity=\"0.12\"/>");
+    auto mat = parseMaterial("<material id=\"a\" formula=\"Al2-O3\" "
+                             "absorptionxsec=\"4.45\" numberdensity=\"0.12\"/>");
 
     TS_ASSERT_DELTA(mat.absorbXSection(), 4.45, 1e-04);
   }
@@ -159,8 +153,7 @@ private:
     return parser.parse(static_cast<Element *>(elements->item(0)));
   }
 
-  Poco::AutoPtr<Poco::XML::Document>
-  createXMLDocument(const std::string &text) {
+  Poco::AutoPtr<Poco::XML::Document> createXMLDocument(const std::string &text) {
     using Poco::AutoPtr;
     using namespace Poco::XML;
     std::istringstream instream(text);

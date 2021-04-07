@@ -24,8 +24,7 @@ namespace Kernel {
  * Constructor taking a seed value. Sets the range to [0.0,1.0]
  * @param seedValue :: The initial seed
  */
-MersenneTwister::MersenneTwister(const size_t seedValue)
-    : MersenneTwister(seedValue, 0.0, 1.0) {}
+MersenneTwister::MersenneTwister(const size_t seedValue) : MersenneTwister(seedValue, 0.0, 1.0) {}
 
 /**
  * Construct the generator time stamp for the initial seed.
@@ -47,10 +46,8 @@ MersenneTwister::MersenneTwister(const double start, const double end)
  * @param start :: The minimum value a generated number should take
  * @param end :: The maximum value a generated number should take
  */
-MersenneTwister::MersenneTwister(const size_t seedValue, const double start,
-                                 const double end)
-    : m_engine(), uniformRealDistribution(start, end), m_start(start),
-      m_end(end), m_seed(), m_savedEngine() {
+MersenneTwister::MersenneTwister(const size_t seedValue, const double start, const double end)
+    : m_engine(), uniformRealDistribution(start, end), m_start(start), m_end(end), m_seed(), m_savedEngine() {
   setSeed(seedValue);
 }
 
@@ -92,9 +89,7 @@ int MersenneTwister::nextInt(int start, int end) {
 void MersenneTwister::restart() { setSeed(m_seed); }
 
 /// Saves the current state of the generator
-void MersenneTwister::save() {
-  m_savedEngine = std::make_unique<std::mt19937>(m_engine);
-}
+void MersenneTwister::save() { m_savedEngine = std::make_unique<std::mt19937>(m_engine); }
 
 /// Restores the generator to the last saved point, or the beginning if nothing
 /// has been saved

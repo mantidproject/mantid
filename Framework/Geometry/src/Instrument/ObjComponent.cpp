@@ -26,8 +26,7 @@ using Kernel::V3D;
  * @param base: the base (un-parametrized) IComponent
  * @param map: pointer to the ParameterMap
  * */
-ObjComponent::ObjComponent(const IComponent *base, const ParameterMap *map)
-    : Component(base, map), m_shape() {}
+ObjComponent::ObjComponent(const IComponent *base, const ParameterMap *map) : Component(base, map), m_shape() {}
 
 /** Constructor
  *  @param name ::   The name of the component
@@ -42,9 +41,7 @@ ObjComponent::ObjComponent(const std::string &name, IComponent *parent)
  * component
  *  @param parent :: The Parent geometry object of this component
  */
-ObjComponent::ObjComponent(const std::string &name,
-                           std::shared_ptr<const IObject> shape,
-                           IComponent *parent)
+ObjComponent::ObjComponent(const std::string &name, std::shared_ptr<const IObject> shape, IComponent *parent)
     : IObjComponent(), Component(name, parent), m_shape(std::move(shape)) {}
 
 /** Return the shape of the component
@@ -73,9 +70,7 @@ void ObjComponent::setShape(std::shared_ptr<const IObject> newShape) {
  * Return the material of the component. Currently
  * unaffected by parametrization
  */
-const Kernel::Material ObjComponent::material() const {
-  return m_shape->material();
-}
+const Kernel::Material ObjComponent::material() const { return m_shape->material(); }
 
 /// Does the point given lie within this object component?
 bool ObjComponent::isValid(const V3D &point) const {
@@ -95,8 +90,7 @@ bool ObjComponent::isOnSide(const V3D &point) const {
     return (this->getPos() == point);
   // Otherwise pass through the shifted point to the IObject::isOnSide method
   V3D scaleFactor = this->getScaleFactor();
-  return shape()->isOnSide(factorOutComponentPosition(point) / scaleFactor) !=
-         0;
+  return shape()->isOnSide(factorOutComponentPosition(point) / scaleFactor) != 0;
 }
 
 /** Checks whether the track given will pass through this Component.
@@ -111,8 +105,7 @@ bool ObjComponent::isOnSide(const V3D &point) const {
 int ObjComponent::interceptSurface(Track &track) const {
   // If the form of this component is not defined, throw NullPointerException
   if (!shape())
-    throw Kernel::Exception::NullPointerException(
-        "ObjComponent::interceptSurface", "shape");
+    throw Kernel::Exception::NullPointerException("ObjComponent::interceptSurface", "shape");
 
   // TODO: If scaling parameters are ever enabled, would they need need to be
   // used here?
@@ -134,8 +127,7 @@ int ObjComponent::interceptSurface(Track &track) const {
     // use the scale factor
     out *= getScaleFactor();
     out += this->getPos();
-    track.addLink(in, out, out.distance(track.startPoint()), *(this->shape()),
-                  this->getComponentID());
+    track.addLink(in, out, out.distance(track.startPoint()), *(this->shape()), this->getComponentID());
   }
 
   return intercepts;
@@ -156,8 +148,7 @@ double ObjComponent::solidAngle(const V3D &observer) const {
   }
   // If the form of this component is not defined, throw NullPointerException
   if (!shape())
-    throw Kernel::Exception::NullPointerException("ObjComponent::solidAngle",
-                                                  "shape");
+    throw Kernel::Exception::NullPointerException("ObjComponent::solidAngle", "shape");
   // Otherwise pass through the shifted point to the Object::solidAngle method
   V3D scaleFactor = this->getScaleFactor();
   if ((scaleFactor - V3D(1.0, 1.0, 1.0)).norm() < 1e-12)
@@ -205,8 +196,7 @@ void ObjComponent::getBoundingBox(BoundingBox &absoluteBB) const {
   std::vector<V3D> Coord_system;
   if (!absoluteBB.isAxisAligned()) { // copy coordinate system (it is better
                                      // then copying the whole BB later)
-    Coord_system.assign(absoluteBB.getCoordSystem().begin(),
-                        absoluteBB.getCoordSystem().end());
+    Coord_system.assign(absoluteBB.getCoordSystem().begin(), absoluteBB.getCoordSystem().end());
   }
   absoluteBB = BoundingBox(shapeBox);
   // modify in place for speed
@@ -220,8 +210,8 @@ void ObjComponent::getBoundingBox(BoundingBox &absoluteBB) const {
   absoluteBB.zMax() *= scaleFactor.Z();
   // Rotate
   (this->getRotation())
-      .rotateBB(absoluteBB.xMin(), absoluteBB.yMin(), absoluteBB.zMin(),
-                absoluteBB.xMax(), absoluteBB.yMax(), absoluteBB.zMax());
+      .rotateBB(absoluteBB.xMin(), absoluteBB.yMin(), absoluteBB.zMin(), absoluteBB.xMax(), absoluteBB.yMax(),
+                absoluteBB.zMax());
 
   // Shift
   const V3D localPos = this->getPos();
@@ -272,8 +262,7 @@ double ObjComponent::getDepth() const {
 int ObjComponent::getPointInObject(V3D &point) const {
   // If the form of this component is not defined, throw NullPointerException
   if (!shape())
-    throw Kernel::Exception::NullPointerException(
-        "ObjComponent::getPointInObject", "shape");
+    throw Kernel::Exception::NullPointerException("ObjComponent::getPointInObject", "shape");
   // Call the Object::getPointInObject method, which may give a point in Object
   // coordinates
   int result = shape()->getPointInObject(point);
@@ -348,8 +337,7 @@ void ObjComponent::initDraw() const {
 /**
  * Register the contents of this ObjComponent
  */
-size_t
-ObjComponent::registerContents(class ComponentVisitor &componentVisitor) const {
+size_t ObjComponent::registerContents(class ComponentVisitor &componentVisitor) const {
   if (this->shape() != nullptr && this->shape()->isFiniteGeometry())
     return componentVisitor.registerGenericObjComponent(*this);
   else

@@ -49,8 +49,7 @@ private:
 
   public:
     MockMDBox()
-        : MDBox<MDLeanEvent<1>, 1>(new API::BoxController(1)),
-          pBC(MDBox<MDLeanEvent<1>, 1>::getBoxController()) {}
+        : MDBox<MDLeanEvent<1>, 1>(new API::BoxController(1)), pBC(MDBox<MDLeanEvent<1>, 1>::getBoxController()) {}
     GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(getIsMasked, bool());
     MOCK_METHOD0(mask, void());
@@ -93,14 +92,11 @@ public:
       std::cout << sizeof(MDLeanEvent<3>) << " bytes per MDLeanEvent(3)\n";
       std::cout << sizeof(MDLeanEvent<4>) << " bytes per MDLeanEvent(4)\n";
       std::cout << sizeof(std::mutex) << " bytes per Mutex\n";
-      std::cout << sizeof(MDDimensionExtents<coord_t>)
-                << " bytes per MDDimensionExtents\n";
+      std::cout << sizeof(MDDimensionExtents<coord_t>) << " bytes per MDDimensionExtents\n";
       std::cout << sizeof(MDBox<MDLeanEvent<3>, 3>) << " bytes per MDBox(3)\n";
       std::cout << sizeof(MDBox<MDLeanEvent<4>, 4>) << " bytes per MDBox(4)\n";
-      std::cout << sizeof(MDGridBox<MDLeanEvent<3>, 3>)
-                << " bytes per MDGridBox(3)\n";
-      std::cout << sizeof(MDGridBox<MDLeanEvent<4>, 4>)
-                << " bytes per MDGridBox(4)\n";
+      std::cout << sizeof(MDGridBox<MDLeanEvent<3>, 3>) << " bytes per MDGridBox(3)\n";
+      std::cout << sizeof(MDGridBox<MDLeanEvent<4>, 4>) << " bytes per MDGridBox(4)\n";
 
       MemoryStats mem;
       size_t start = mem.availMem();
@@ -115,8 +111,7 @@ public:
       size_t stop = mem.availMem();
       std::cout << stop << " KB after \n";
       std::cout << start - stop << " KB change \n";
-      std::cout << (start - stop) * 1024 / sizeof(MDBox<MDLeanEvent<3>, 3>)
-                << " times the sizeof MDBox3\n";
+      std::cout << (start - stop) * 1024 / sizeof(MDBox<MDLeanEvent<3>, 3>) << " times the sizeof MDBox3\n";
       delete bcc;
     } else
       delete bcc;
@@ -147,8 +142,7 @@ public:
     for (size_t i = 0; i < boxes.size(); i++) {
       // The get child method is equivalent
       TS_ASSERT_EQUALS(boxes[i], g->getChild(i));
-      MDBox<MDLeanEvent<1>, 1> *box =
-          dynamic_cast<MDBox<MDLeanEvent<1>, 1> *>(boxes[i]);
+      MDBox<MDLeanEvent<1>, 1> *box = dynamic_cast<MDBox<MDLeanEvent<1>, 1> *>(boxes[i]);
 
       // Sequential ID, starting at 1 since 0 was used by the parent.
       TS_ASSERT_EQUALS(box->getID(), i + 1);
@@ -175,8 +169,7 @@ public:
     // Start at ID 0.
     TS_ASSERT_EQUALS(b->getID(), 0);
     // Give it 10 events
-    const std::vector<MDLeanEvent<1>> events =
-        MDEventsTestHelper::makeMDEvents1(10);
+    const std::vector<MDLeanEvent<1>> events = MDEventsTestHelper::makeMDEvents1(10);
     b->addEvents(events);
     TS_ASSERT_EQUALS(b->getNPoints(), 10);
     TS_ASSERT_DELTA(b->getVolume(), 10.0, 1e-5);
@@ -194,8 +187,7 @@ public:
     // And now there should be 2 events per box
     std::vector<MDBoxBase<MDLeanEvent<1>, 1> *> boxes = g->getBoxes();
     for (size_t i = 0; i < 10; i++) {
-      MDBox<MDLeanEvent<1>, 1> *box =
-          dynamic_cast<MDBox<MDLeanEvent<1>, 1> *>(boxes[i]);
+      MDBox<MDLeanEvent<1>, 1> *box = dynamic_cast<MDBox<MDLeanEvent<1>, 1> *>(boxes[i]);
       TS_ASSERT_EQUALS(box->getNPoints(), 2);
     }
 
@@ -214,8 +206,7 @@ public:
     g->buildAndAddEvents(sigErr, coord, runIndex, goniometerIndex, detID);
 
     for (size_t i = 0; i < 10; i++) {
-      MDBox<MDLeanEvent<1>, 1> *box =
-          dynamic_cast<MDBox<MDLeanEvent<1>, 1> *>(boxes[i]);
+      MDBox<MDLeanEvent<1>, 1> *box = dynamic_cast<MDBox<MDLeanEvent<1>, 1> *>(boxes[i]);
       TS_ASSERT_EQUALS(box->getNPoints(), 3);
     }
 
@@ -229,16 +220,14 @@ public:
   void test_MDGridBox_copy_constructor() {
     MDBox<MDLeanEvent<1>, 1> *b = MDEventsTestHelper::makeMDBox1(10);
     TS_ASSERT_EQUALS(b->getID(), 0);
-    const std::vector<MDLeanEvent<1>> events =
-        MDEventsTestHelper::makeMDEvents1(10);
+    const std::vector<MDLeanEvent<1>> events = MDEventsTestHelper::makeMDEvents1(10);
     b->addEvents(events);
     TS_ASSERT_EQUALS(b->getNPoints(), 10);
     TS_ASSERT_DELTA(b->getVolume(), 10.0, 1e-5);
 
     // Build the grid box out of it
     MDGridBox<MDLeanEvent<1>, 1> *g1 = new MDGridBox<MDLeanEvent<1>, 1>(b);
-    MDGridBox<MDLeanEvent<1>, 1> *g2 =
-        new MDGridBox<MDLeanEvent<1>, 1>(*g1, g1->getBoxController());
+    MDGridBox<MDLeanEvent<1>, 1> *g2 = new MDGridBox<MDLeanEvent<1>, 1>(*g1, g1->getBoxController());
 
     // Perform a detailed check
     check_MDGridBox(g2);
@@ -251,21 +240,18 @@ public:
   }
 
   void test_setBoxController() {
-    MDGridBox<MDLeanEvent<1>, 1> *box =
-        MDEventsTestHelper::makeMDGridBox<1>(10, 10, 0.0, 10.0);
+    MDGridBox<MDLeanEvent<1>, 1> *box = MDEventsTestHelper::makeMDGridBox<1>(10, 10, 0.0, 10.0);
     BoxController *originalBoxController = box->getBoxController();
     BoxController *const newBoxController = originalBoxController->clone();
 
     TS_ASSERT_DIFFERS(originalBoxController, newBoxController);
 
-    MDGridBox<MDLeanEvent<1>, 1> *box1 =
-        new MDGridBox<MDLeanEvent<1>, 1>(*box, newBoxController);
+    MDGridBox<MDLeanEvent<1>, 1> *box1 = new MDGridBox<MDLeanEvent<1>, 1>(*box, newBoxController);
 
     auto boxes = box1->getBoxes();
     for (auto &box : boxes) {
-      TSM_ASSERT_EQUALS(
-          "All child boxes should have the same box controller as the parent.",
-          newBoxController, box->getBoxController());
+      TSM_ASSERT_EQUALS("All child boxes should have the same box controller as the parent.", newBoxController,
+                        box->getBoxController());
     }
     delete newBoxController;
     delete box1;
@@ -277,8 +263,7 @@ public:
   /** Manually setting children of a grid box (for NXS file loading) */
   void test_setChildren() {
     // Build the grid box
-    MDGridBox<MDLeanEvent<1>, 1> *g =
-        MDEventsTestHelper::makeMDGridBox<1>(10, 10, 0.0, 10.0);
+    MDGridBox<MDLeanEvent<1>, 1> *g = MDEventsTestHelper::makeMDGridBox<1>(10, 10, 0.0, 10.0);
     // Clear the initial children
     for (size_t i = 0; i < g->getNumChildren(); i++)
       delete g->getChild(i);
@@ -306,8 +291,7 @@ public:
 
   void test_getChildIndexFromID() {
     // Build the grid box
-    MDGridBox<MDLeanEvent<1>, 1> *g =
-        MDEventsTestHelper::makeMDGridBox<1>(10, 10, 0.0, 10.0);
+    MDGridBox<MDLeanEvent<1>, 1> *g = MDEventsTestHelper::makeMDGridBox<1>(10, 10, 0.0, 10.0);
     TS_ASSERT_EQUALS(g->getChildIndexFromID(g->getChild(0)->getID()), 0);
     TS_ASSERT_EQUALS(g->getChildIndexFromID(g->getChild(5)->getID()), 5);
     TS_ASSERT_EQUALS(g->getChildIndexFromID(0), UNDEF_SIZET);
@@ -330,8 +314,7 @@ public:
     std::vector<MDBoxBase<MDLeanEvent<3>, 3> *> boxes = g->getBoxes();
     TS_ASSERT_EQUALS(boxes.size(), 10 * 5 * 2);
     for (auto &boxBase : boxes) {
-      MDBox<MDLeanEvent<3>, 3> *box =
-          dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(boxBase);
+      MDBox<MDLeanEvent<3>, 3> *box = dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(boxBase);
       TS_ASSERT(box);
     }
     MDBox<MDLeanEvent<3>, 3> *box;
@@ -358,8 +341,7 @@ public:
   /** Start with a grid box, split some of its contents into sub-gridded boxes.
    */
   void test_splitContents() {
-    MDGridBox<MDLeanEvent<2>, 2> *superbox =
-        MDEventsTestHelper::makeMDGridBox<2>();
+    MDGridBox<MDLeanEvent<2>, 2> *superbox = MDEventsTestHelper::makeMDGridBox<2>();
     MDGridBox<MDLeanEvent<2>, 2> *gb;
     MDBox<MDLeanEvent<2>, 2> *b;
 
@@ -422,26 +404,22 @@ public:
     std::vector<MDBoxBase<MDLeanEvent<2>, 2> *> boxes;
 
     // 10x10 box, extents 0-10.0
-    MDGridBox<MDLeanEvent<2>, 2> *superbox =
-        MDEventsTestHelper::makeMDGridBox<2>();
+    MDGridBox<MDLeanEvent<2>, 2> *superbox = MDEventsTestHelper::makeMDGridBox<2>();
     // And the 0-th box is further split (
     TS_ASSERT_THROWS_NOTHING(superbox->splitContents(0));
 
     TS_ASSERT_EQUALS(superbox->getNPoints(), 0);
     { // One event in 0th box of the 0th box.
       double centers[2] = {0.05, 0.05};
-      TS_ASSERT_EQUALS(1,
-                       superbox->addEvent(MDLeanEvent<2>(2.0, 2.0, centers)));
+      TS_ASSERT_EQUALS(1, superbox->addEvent(MDLeanEvent<2>(2.0, 2.0, centers)));
     }
     { // One event in 1st box of the 0th box.
       double centers[2] = {0.15, 0.05};
-      TS_ASSERT_EQUALS(1,
-                       superbox->addEvent(MDLeanEvent<2>(2.0, 2.0, centers)));
+      TS_ASSERT_EQUALS(1, superbox->addEvent(MDLeanEvent<2>(2.0, 2.0, centers)));
     }
     { // One event in 99th box.
       double centers[2] = {9.5, 9.5};
-      TS_ASSERT_EQUALS(1,
-                       superbox->addEvent(MDLeanEvent<2>(2.0, 2.0, centers)));
+      TS_ASSERT_EQUALS(1, superbox->addEvent(MDLeanEvent<2>(2.0, 2.0, centers)));
     }
 
     // You must refresh the cache after adding individual events.
@@ -451,8 +429,7 @@ public:
     TS_ASSERT_EQUALS(superbox->getNPoints(), 3);
 
     std::vector<coord_t> cenroid(2, 0);
-    TS_ASSERT_THROWS(superbox->calculateCentroid(&cenroid[0]),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(superbox->calculateCentroid(&cenroid[0]), const std::runtime_error &);
 
     // Check the centroid for these 3 events
     // TS_ASSERT_DELTA( cenroid[0], 3.233, 0.001);
@@ -510,12 +487,10 @@ public:
     MDBox<MDLeanEvent<1>, 1> *b = MDEventsTestHelper::makeMDBox1();
 
     // Give it 10 events
-    const std::vector<MDLeanEvent<1>> events =
-        MDEventsTestHelper::makeMDEvents1(10);
+    const std::vector<MDLeanEvent<1>> events = MDEventsTestHelper::makeMDEvents1(10);
     b->addEvents(events);
     MDGridBox<MDLeanEvent<1>, 1> *g = new MDGridBox<MDLeanEvent<1>, 1>(b);
-    TSM_ASSERT_EQUALS("MDBoxes start with 1 each.",
-                      g->getChild(9)->getNPoints(), 1);
+    TSM_ASSERT_EQUALS("MDBoxes start with 1 each.", g->getChild(9)->getNPoints(), 1);
 
     std::vector<double> scaling(1, 3.0);
     std::vector<double> offset(1, 1.0);
@@ -525,8 +500,7 @@ public:
     MDLeanEvent<1> ev;
     ev.setCenter(0, 30.9f);
     g->addEvent(ev);
-    TSM_ASSERT_EQUALS("New event was added in the right spot.",
-                      g->getChild(9)->getNPoints(), 2);
+    TSM_ASSERT_EQUALS("New event was added in the right spot.", g->getChild(9)->getNPoints(), 2);
 
     BoxController *const bcc = b->getBoxController();
     delete b;
@@ -537,8 +511,7 @@ public:
   //-------------------------------------------------------------------------------------
   /** Recursive getting of a list of MDBoxBase */
   void test_getBoxes() {
-    MDGridBox<MDLeanEvent<1>, 1> *parent =
-        MDEventsTestHelper::makeRecursiveMDGridBox<1>(3, 3);
+    MDGridBox<MDLeanEvent<1>, 1> *parent = MDEventsTestHelper::makeRecursiveMDGridBox<1>(3, 3);
     TS_ASSERT(parent);
     std::vector<API::IMDNode *> boxes;
 
@@ -587,8 +560,7 @@ public:
    * limiting it */
   void test_getBoxes_ImplicitFunction() {
 
-    MDGridBox<MDLeanEvent<1>, 1> *parent =
-        MDEventsTestHelper::makeRecursiveMDGridBox<1>(4, 3);
+    MDGridBox<MDLeanEvent<1>, 1> *parent = MDEventsTestHelper::makeRecursiveMDGridBox<1>(4, 3);
     TS_ASSERT(parent);
     std::vector<API::IMDNode *> boxes;
 
@@ -646,8 +618,7 @@ public:
 
     boxes.clear();
     parent->getBoxes(boxes, 3, true, function);
-    TSM_ASSERT_EQUALS("Only one box is found by an infinitely thin plane",
-                      boxes.size(), 1);
+    TSM_ASSERT_EQUALS("Only one box is found by an infinitely thin plane", boxes.size(), 1);
 
     // clean up  behind
     BoxController *const bcc = parent->getBoxController();
@@ -661,8 +632,7 @@ public:
    * limiting it */
   void test_getBoxes_ImplicitFunction_2D() {
 
-    MDGridBox<MDLeanEvent<2>, 2> *parent =
-        MDEventsTestHelper::makeRecursiveMDGridBox<2>(4, 1);
+    MDGridBox<MDLeanEvent<2>, 2> *parent = MDEventsTestHelper::makeRecursiveMDGridBox<2>(4, 1);
     TS_ASSERT(parent);
     std::vector<API::IMDNode *> boxes;
 
@@ -685,10 +655,8 @@ public:
     // -- Leaf only ---
     boxes.clear();
     parent->getBoxes(boxes, 3, true, function);
-    TS_ASSERT_EQUALS(
-        boxes.size(),
-        16 + 4 * 4 +
-            4); // 16 in the center one + 4x4 at the 4 edges + 4 at the corners
+    TS_ASSERT_EQUALS(boxes.size(),
+                     16 + 4 * 4 + 4); // 16 in the center one + 4x4 at the 4 edges + 4 at the corners
     // The boxes extents make sense
     for (auto &box : boxes) {
       TS_ASSERT(box->getExtents(0).getMax() >= 2.00);
@@ -709,8 +677,7 @@ public:
    * limiting it.
    * This implicit function is a box of size 0. */
   void test_getBoxes_ZeroSizeImplicitFunction_2D() {
-    MDGridBox<MDLeanEvent<2>, 2> *parent =
-        MDEventsTestHelper::makeRecursiveMDGridBox<2>(4, 1);
+    MDGridBox<MDLeanEvent<2>, 2> *parent = MDEventsTestHelper::makeRecursiveMDGridBox<2>(4, 1);
     TS_ASSERT(parent);
     std::vector<API::IMDNode *> boxes;
 
@@ -744,8 +711,7 @@ public:
    * limiting it.
    * This implicit function is a box of size 0. */
   void test_getBoxes_ZeroSizeImplicitFunction_4D() {
-    MDGridBox<MDLeanEvent<4>, 4> *parent =
-        MDEventsTestHelper::makeRecursiveMDGridBox<4>(4, 1);
+    MDGridBox<MDLeanEvent<4>, 4> *parent = MDEventsTestHelper::makeRecursiveMDGridBox<4>(4, 1);
     TS_ASSERT(parent);
     std::vector<API::IMDNode *> boxes;
 
@@ -788,15 +754,12 @@ public:
       // How many times to add the same event
       size_t num_to_repeat = size_t(1e7 / (boxes_per_side * boxes_per_side));
 
-      MDGridBox<MDLeanEvent<2>, 2> *box =
-          MDEventsTestHelper::makeRecursiveMDGridBox<2>(numSplit,
-                                                        recurseLevels);
+      MDGridBox<MDLeanEvent<2>, 2> *box = MDEventsTestHelper::makeRecursiveMDGridBox<2>(numSplit, recurseLevels);
 
       for (double x = 0; x < static_cast<double>(numSplit); x += spacing)
         for (double y = 0; y < static_cast<double>(numSplit); y += spacing) {
           for (size_t i = 0; i < num_to_repeat; i++) {
-            coord_t centers[2] = {static_cast<coord_t>(x),
-                                  static_cast<coord_t>(y)};
+            coord_t centers[2] = {static_cast<coord_t>(x), static_cast<coord_t>(y)};
             box->addEvent(MDLeanEvent<2>(2.0, 2.0, centers));
           }
         }
@@ -867,8 +830,7 @@ public:
   }
 
   //-------------------------------------------------------------------------------------
-  void
-  test_addEvents_min_event_boundary_kept_and_on_max_boxboundary_thrown_away() {
+  void test_addEvents_min_event_boundary_kept_and_on_max_boxboundary_thrown_away() {
     auto b = MDEventsTestHelper::makeMDGridBox<2>();
     std::vector<MDLeanEvent<2>> events;
     coord_t centers[2] = {0.0f, 0.0f};
@@ -973,8 +935,7 @@ public:
     MDGridBox<MDLeanEvent<2>, 2> *b = MDEventsTestHelper::makeMDGridBox<2>();
     coord_t coords[2] = {1.5, 1.5};
     const MDBoxBase<MDLeanEvent<2>, 2> *c =
-        dynamic_cast<const MDBoxBase<MDLeanEvent<2>, 2> *>(
-            b->getBoxAtCoord(coords));
+        dynamic_cast<const MDBoxBase<MDLeanEvent<2>, 2> *>(b->getBoxAtCoord(coords));
     TS_ASSERT_EQUALS(c, b->getChild(11));
     delete b->getBoxController();
     delete b;
@@ -1091,8 +1052,7 @@ public:
       if (numChildren > 0) {
         size_t lastId = box->getChild(0)->getID();
         for (size_t i = 1; i < numChildren; i++) {
-          TSM_ASSERT_EQUALS("Children IDs need to be sequential!",
-                            box->getChild(i)->getID(), lastId + 1);
+          TSM_ASSERT_EQUALS("Children IDs need to be sequential!", box->getChild(i)->getID(), lastId + 1);
           lastId = box->getChild(i)->getID();
         }
       }
@@ -1106,8 +1066,7 @@ public:
 
   //------------------------------------------------------------------------------------------------
   /** Helper to make a 2D MDBin */
-  MDBin<MDLeanEvent<2>, 2> makeMDBin2(double minX, double maxX, double minY,
-                                      double maxY) {
+  MDBin<MDLeanEvent<2>, 2> makeMDBin2(double minX, double maxX, double minY, double maxY) {
     MDBin<MDLeanEvent<2>, 2> bin;
     bin.m_min[0] = static_cast<coord_t>(minX);
     bin.m_max[0] = static_cast<coord_t>(maxX);
@@ -1118,9 +1077,8 @@ public:
 
   //------------------------------------------------------------------------------------------------
   /** Helper to test the binning of a 2D bin */
-  void doTestMDBin2(MDGridBox<MDLeanEvent<2>, 2> *b, const std::string &message,
-                    double minX, double maxX, double minY, double maxY,
-                    double expectedSignal) {
+  void doTestMDBin2(MDGridBox<MDLeanEvent<2>, 2> *b, const std::string &message, double minX, double maxX, double minY,
+                    double maxY, double expectedSignal) {
     //    std::cout << "Bins: X " << std::setw(5) << minX << " to "<<
     //    std::setw(5)  << maxX << ", Y " << std::setw(5) << minY << " to "<<
     //    std::setw(5)  << maxY      << ". " << message << '\n';
@@ -1147,33 +1105,24 @@ public:
 
     doTestMDBin2(b, "Bin that is completely off (2)", 2, 3, -0.6, -0.1, 0.0);
 
-    doTestMDBin2(b, "Bin that holds one entire MDBox (bigger than it)", 0.8,
-                 2.2, 1.9, 3.12, 2.0);
+    doTestMDBin2(b, "Bin that holds one entire MDBox (bigger than it)", 0.8, 2.2, 1.9, 3.12, 2.0);
 
-    doTestMDBin2(b, "Bin that holds one entire MDBox (going off one edge)",
-                 -0.2, 1.2, 1.9, 3.12, 2.0);
+    doTestMDBin2(b, "Bin that holds one entire MDBox (going off one edge)", -0.2, 1.2, 1.9, 3.12, 2.0);
 
-    doTestMDBin2(b,
-                 "Bin that holds one entire MDBox (going off the other edge)",
-                 8.9, 10.2, 1.9, 3.12, 2.0);
+    doTestMDBin2(b, "Bin that holds one entire MDBox (going off the other edge)", 8.9, 10.2, 1.9, 3.12, 2.0);
 
-    doTestMDBin2(b, "Bin that holds one entire MDBox (going off both edge)",
-                 -0.2, 1.2, -0.2, 1.2, 2.0);
+    doTestMDBin2(b, "Bin that holds one entire MDBox (going off both edge)", -0.2, 1.2, -0.2, 1.2, 2.0);
 
     doTestMDBin2(b,
                  "Bin that holds one entire MDBox and a fraction of at "
                  "least one more with something",
                  0.8, 2.7, 1.9, 3.12, 4.0);
 
-    doTestMDBin2(b, "Bin that holds four entire MDBoxes", 0.8, 3.1, 0.9, 3.2,
-                 8.0);
+    doTestMDBin2(b, "Bin that holds four entire MDBoxes", 0.8, 3.1, 0.9, 3.2, 8.0);
 
-    doTestMDBin2(b, "Bin goes off two edges in one direction", -0.3, 10.2, 1.9,
-                 3.1, 10 * 2.0);
+    doTestMDBin2(b, "Bin goes off two edges in one direction", -0.3, 10.2, 1.9, 3.1, 10 * 2.0);
 
-    doTestMDBin2(
-        b, "Bin that fits all within a single MDBox, and contains the center",
-        0.2, 0.8, 0.2, 0.8, 2.0);
+    doTestMDBin2(b, "Bin that fits all within a single MDBox, and contains the center", 0.2, 0.8, 0.2, 0.8, 2.0);
 
     doTestMDBin2(b,
                  "Bin that fits all within a single MDBox, and DOES NOT "
@@ -1185,13 +1134,9 @@ public:
                  "contain anything",
                  0.8, 1.2, 0.1, 0.2, 0.0);
 
-    doTestMDBin2(
-        b, "Bin that fits partially in two MDBox'es, and contains the centers",
-        0.2, 1.8, 0.1, 0.9, 4.0);
+    doTestMDBin2(b, "Bin that fits partially in two MDBox'es, and contains the centers", 0.2, 1.8, 0.1, 0.9, 4.0);
 
-    doTestMDBin2(
-        b, "Bin that fits partially in one MDBox'es, and goes of the edge",
-        -3.2, 0.8, 0.1, 0.9, 2.0);
+    doTestMDBin2(b, "Bin that fits partially in one MDBox'es, and goes of the edge", -3.2, 0.8, 0.1, 0.9, 2.0);
 
     delete b->getBoxController();
     delete b;
@@ -1204,10 +1149,8 @@ public:
    * @param radius :: radius to integrate
    * @param numExpected :: how many events should be in there
    */
-  void do_check_integrateSphere(MDGridBox<MDLeanEvent<2>, 2> &box, double x,
-                                double y, const double radius,
-                                double numExpected,
-                                const std::string &message) {
+  void do_check_integrateSphere(MDGridBox<MDLeanEvent<2>, 2> &box, double x, double y, const double radius,
+                                double numExpected, const std::string &message) {
     // The sphere transformation
     bool dimensionsUsed[2] = {true, true};
     coord_t center[2] = {static_cast<coord_t>(x), static_cast<coord_t>(y)};
@@ -1215,8 +1158,7 @@ public:
 
     signal_t signal = 0;
     signal_t errorSquared = 0;
-    box.integrateSphere(sphere, static_cast<coord_t>(radius * radius), signal,
-                        errorSquared);
+    box.integrateSphere(sphere, static_cast<coord_t>(radius * radius), signal, errorSquared);
     TSM_ASSERT_DELTA(message, signal, 1.0 * numExpected, 1e-5);
     TSM_ASSERT_DELTA(message, errorSquared, 1.0 * numExpected, 1e-5);
   }
@@ -1227,51 +1169,32 @@ public:
     MDGridBox<MDLeanEvent<2>, 2> &box = *box_ptr;
     TS_ASSERT_EQUALS(box.getNPoints(), 10 * 10);
 
-    do_check_integrateSphere(box, 4.5, 4.5, 0.5, 1.0,
-                             "Too small to contain any vertices");
-    do_check_integrateSphere(box, 4.5, 4.5, 0.001, 1.0,
-                             "Tiny but still has an event.");
-    do_check_integrateSphere(box, 4.51, 4.5, 0.001, 0.0,
-                             "Tiny but off the event.");
-    do_check_integrateSphere(box, 2.0, 2.0, 0.49, 0.0,
-                             "At a corner but grabbing nothing");
-    do_check_integrateSphere(box, 4.8, 4.5, 0.35, 1.0,
-                             "Too small to contain any vertices");
-    do_check_integrateSphere(box, 5.0, 5.0, 1.0, 4.0,
-                             "At a corner, containing 4 neighbors");
-    do_check_integrateSphere(box, 4.5, 4.5, 0.9, 1.0,
-                             "Contains one box completely");
-    do_check_integrateSphere(box, 0.5, 0.5, 0.9, 1.0,
-                             "Contains one box completely, at the edges");
-    do_check_integrateSphere(box, 9.5, 0.5, 0.9, 1.0,
-                             "Contains one box completely, at the edges");
-    do_check_integrateSphere(box, 0.5, 9.5, 0.9, 1.0,
-                             "Contains one box completely, at the edges");
-    do_check_integrateSphere(box, 4.5, 9.5, 0.9, 1.0,
-                             "Contains one box completely, at the edges");
-    do_check_integrateSphere(box, 9.5, 9.5, 0.9, 1.0,
-                             "Contains one box completely, at the edges");
-    do_check_integrateSphere(
-        box, 1.5, 1.5, 1.95, 9.0,
-        "Contains 5 boxes completely, and 4 boxes with a point");
-    do_check_integrateSphere(box, -1.0, 0.5, 1.55, 1.0,
-                             "Off an edge but enough to get an event");
+    do_check_integrateSphere(box, 4.5, 4.5, 0.5, 1.0, "Too small to contain any vertices");
+    do_check_integrateSphere(box, 4.5, 4.5, 0.001, 1.0, "Tiny but still has an event.");
+    do_check_integrateSphere(box, 4.51, 4.5, 0.001, 0.0, "Tiny but off the event.");
+    do_check_integrateSphere(box, 2.0, 2.0, 0.49, 0.0, "At a corner but grabbing nothing");
+    do_check_integrateSphere(box, 4.8, 4.5, 0.35, 1.0, "Too small to contain any vertices");
+    do_check_integrateSphere(box, 5.0, 5.0, 1.0, 4.0, "At a corner, containing 4 neighbors");
+    do_check_integrateSphere(box, 4.5, 4.5, 0.9, 1.0, "Contains one box completely");
+    do_check_integrateSphere(box, 0.5, 0.5, 0.9, 1.0, "Contains one box completely, at the edges");
+    do_check_integrateSphere(box, 9.5, 0.5, 0.9, 1.0, "Contains one box completely, at the edges");
+    do_check_integrateSphere(box, 0.5, 9.5, 0.9, 1.0, "Contains one box completely, at the edges");
+    do_check_integrateSphere(box, 4.5, 9.5, 0.9, 1.0, "Contains one box completely, at the edges");
+    do_check_integrateSphere(box, 9.5, 9.5, 0.9, 1.0, "Contains one box completely, at the edges");
+    do_check_integrateSphere(box, 1.5, 1.5, 1.95, 9.0, "Contains 5 boxes completely, and 4 boxes with a point");
+    do_check_integrateSphere(box, -1.0, 0.5, 1.55, 1.0, "Off an edge but enough to get an event");
 
     // Now I add an event very near an edge
     double center[2] = {0.001, 0.5};
     box.addEvent(MDLeanEvent<2>(1.0, 1.0, center));
-    do_check_integrateSphere(
-        box, -1.0, 0.5, 1.01, 1.0,
-        "Off an edge but just barely enough to get an event");
-    do_check_integrateSphere(box, 0.0, 0.5, 0.01, 1.0,
-                             "Tiny, but just barely enough to get an event");
+    do_check_integrateSphere(box, -1.0, 0.5, 1.01, 1.0, "Off an edge but just barely enough to get an event");
+    do_check_integrateSphere(box, 0.0, 0.5, 0.01, 1.0, "Tiny, but just barely enough to get an event");
   }
 
   /** Test of sphere integration with even splitting*/
   void test_integrateSphere() {
     // 10x10 sized box
-    MDGridBox<MDLeanEvent<2>, 2> *box_ptr =
-        MDEventsTestHelper::makeMDGridBox<2>();
+    MDGridBox<MDLeanEvent<2>, 2> *box_ptr = MDEventsTestHelper::makeMDGridBox<2>();
     MDEventsTestHelper::feedMDBox<2>(box_ptr, 1);
     do_test_integrateSphere(box_ptr);
 
@@ -1283,8 +1206,7 @@ public:
 
   void test_integrateSphere_unevenSplit() {
     // 10x5 sized box
-    MDGridBox<MDLeanEvent<2>, 2> *box_ptr =
-        MDEventsTestHelper::makeMDGridBox<2>(10, 5);
+    MDGridBox<MDLeanEvent<2>, 2> *box_ptr = MDEventsTestHelper::makeMDGridBox<2>(10, 5);
     MDEventsTestHelper::feedMDBox<2>(box_ptr, 1);
     do_test_integrateSphere(box_ptr);
     // clean up  behind
@@ -1295,8 +1217,7 @@ public:
 
   void test_integrateSphere_unevenSplit2() {
     // Funnier splitting: 3x7 sized box
-    MDGridBox<MDLeanEvent<2>, 2> *box_ptr =
-        MDEventsTestHelper::makeMDGridBox<2>(3, 7);
+    MDGridBox<MDLeanEvent<2>, 2> *box_ptr = MDEventsTestHelper::makeMDGridBox<2>(3, 7);
     MDEventsTestHelper::feedMDBox<2>(box_ptr, 1);
     do_test_integrateSphere(box_ptr);
 
@@ -1311,17 +1232,14 @@ public:
    * This test has a box from -10.0 to +10.0 to check for that
    */
   void test_integrateSphere_dimensionsDontStartAtZero() {
-    MDGridBox<MDLeanEvent<2>, 2> *box_ptr =
-        MDEventsTestHelper::makeMDGridBox<2>(10, 10, -10.0);
+    MDGridBox<MDLeanEvent<2>, 2> *box_ptr = MDEventsTestHelper::makeMDGridBox<2>(10, 10, -10.0);
     // One event at center of each box
     MDEventsTestHelper::feedMDBox<2>(box_ptr, 1, 10, -9.0, 2.0);
     MDGridBox<MDLeanEvent<2>, 2> &box = *box_ptr;
     TS_ASSERT_EQUALS(box.getNPoints(), 10 * 10);
 
-    do_check_integrateSphere(box, 1.0, 1.0, 1.45, 1.0,
-                             "Contains one box completely");
-    do_check_integrateSphere(box, 9.0, 9.0, 1.45, 1.0,
-                             "Contains one box completely, at the edges");
+    do_check_integrateSphere(box, 1.0, 1.0, 1.45, 1.0, "Contains one box completely");
+    do_check_integrateSphere(box, 9.0, 9.0, 1.45, 1.0, "Contains one box completely, at the edges");
 
     // clean up  behind
     BoxController *const bcc = box_ptr->getBoxController();
@@ -1336,44 +1254,32 @@ public:
    * @param radius :: radius to integrate
    * @param numExpected :: how many events should be in there
    */
-  void do_check_integrateSphere3d(MDGridBox<MDLeanEvent<3>, 3> &box, double x,
-                                  double y, double z, const double radius,
-                                  double numExpected,
-                                  const std::string &message) {
+  void do_check_integrateSphere3d(MDGridBox<MDLeanEvent<3>, 3> &box, double x, double y, double z, const double radius,
+                                  double numExpected, const std::string &message) {
     // The sphere transformation
     bool dimensionsUsed[3] = {true, true, true};
-    coord_t center[3] = {static_cast<coord_t>(x), static_cast<coord_t>(y),
-                         static_cast<coord_t>(z)};
+    coord_t center[3] = {static_cast<coord_t>(x), static_cast<coord_t>(y), static_cast<coord_t>(z)};
     CoordTransformDistance sphere(3, center, dimensionsUsed);
 
     signal_t signal = 0;
     signal_t errorSquared = 0;
-    box.integrateSphere(sphere, static_cast<coord_t>(radius * radius), signal,
-                        errorSquared);
+    box.integrateSphere(sphere, static_cast<coord_t>(radius * radius), signal, errorSquared);
     TSM_ASSERT_DELTA(message, signal, 1.0 * numExpected, 1e-5);
     TSM_ASSERT_DELTA(message, errorSquared, 1.0 * numExpected, 1e-5);
   }
 
   //------------------------------------------------------------------------------------------------
   void test_integrateSphere3d() {
-    MDGridBox<MDLeanEvent<3>, 3> *box_ptr =
-        MDEventsTestHelper::makeMDGridBox<3>();
+    MDGridBox<MDLeanEvent<3>, 3> *box_ptr = MDEventsTestHelper::makeMDGridBox<3>();
     MDEventsTestHelper::feedMDBox<3>(box_ptr, 1);
     MDGridBox<MDLeanEvent<3>, 3> &box = *box_ptr;
     TS_ASSERT_EQUALS(box.getNPoints(), 10 * 10 * 10);
 
-    do_check_integrateSphere3d(box, 0.5, 0.5, 0.5, 0.9, 1.0,
-                               "Contains one box completely, at a corner");
-    do_check_integrateSphere3d(box, 9.5, 9.5, 9.5, 0.9, 1.0,
-                               "Contains one box completely, at a corner");
-    do_check_integrateSphere3d(
-        box, 9.5, 9.5, 9.5, 0.85, 1.0,
-        "Does NOT contain one box completely, at a corner");
-    do_check_integrateSphere3d(box, 9.0, 9.0, 9.0, 1.75, 20.0,
-                               "Contains 8 boxes completely, at a corner");
-    do_check_integrateSphere3d(
-        box, 9.0, 9.0, 9.0, 1.70, 20.0,
-        "Does NOT contains one box completely, at a corner");
+    do_check_integrateSphere3d(box, 0.5, 0.5, 0.5, 0.9, 1.0, "Contains one box completely, at a corner");
+    do_check_integrateSphere3d(box, 9.5, 9.5, 9.5, 0.9, 1.0, "Contains one box completely, at a corner");
+    do_check_integrateSphere3d(box, 9.5, 9.5, 9.5, 0.85, 1.0, "Does NOT contain one box completely, at a corner");
+    do_check_integrateSphere3d(box, 9.0, 9.0, 9.0, 1.75, 20.0, "Contains 8 boxes completely, at a corner");
+    do_check_integrateSphere3d(box, 9.0, 9.0, 9.0, 1.70, 20.0, "Does NOT contains one box completely, at a corner");
 
     // Now I add an event very near an edge
     double center[3] = {0.001, 0.5, 0.5};
@@ -1394,10 +1300,8 @@ public:
    * @param xExpected :: expected centroid
    * @param yExpected :: expected centroid
    */
-  void do_check_centroidSphere(MDGridBox<MDLeanEvent<2>, 2> &box, double x,
-                               double y, const double radius,
-                               double numExpected, double xExpected,
-                               double yExpected, const std::string &message) {
+  void do_check_centroidSphere(MDGridBox<MDLeanEvent<2>, 2> &box, double x, double y, const double radius,
+                               double numExpected, double xExpected, double yExpected, const std::string &message) {
     // The sphere transformation
     bool dimensionsUsed[2] = {true, true};
     coord_t center[2] = {static_cast<coord_t>(x), static_cast<coord_t>(y)};
@@ -1405,8 +1309,7 @@ public:
 
     signal_t signal = 0;
     coord_t centroid[2] = {0., 0.};
-    box.centroidSphere(sphere, static_cast<coord_t>(radius * radius), centroid,
-                       signal);
+    box.centroidSphere(sphere, static_cast<coord_t>(radius * radius), centroid, signal);
     // Normalized
     if (signal != 0.0) {
       for (float &d : centroid)
@@ -1421,51 +1324,33 @@ public:
   /** Re-used suite of tests */
   void test_centroidSphere() {
     // 10x10 sized box
-    MDGridBox<MDLeanEvent<2>, 2> *box_ptr =
-        MDEventsTestHelper::makeMDGridBox<2>();
+    MDGridBox<MDLeanEvent<2>, 2> *box_ptr = MDEventsTestHelper::makeMDGridBox<2>();
     MDEventsTestHelper::feedMDBox<2>(box_ptr, 1);
     // Events are at 0.5, 1.5, etc.
     MDGridBox<MDLeanEvent<2>, 2> &box = *box_ptr;
     TS_ASSERT_EQUALS(box.getNPoints(), 10 * 10);
 
-    do_check_centroidSphere(box, 4.5, 4.5, 0.5, 1.0, 4.5, 4.5,
-                            "Too small to contain any vertices");
-    do_check_centroidSphere(box, 4.5, 4.5, 0.001, 1.0, 4.5, 4.5,
-                            "Tiny but still has an event.");
-    do_check_centroidSphere(box, 4.51, 4.5, 0.001, 0.0, 0.0, 0.0,
-                            "Tiny but off the event.");
-    do_check_centroidSphere(box, 2.0, 2.0, 0.49, 0.0, 0.0, 0.0,
-                            "At a corner but grabbing nothing");
-    do_check_centroidSphere(box, 4.8, 4.5, 0.35, 1.0, 4.5, 4.5,
-                            "Too small to contain any vertices");
-    do_check_centroidSphere(box, 5.0, 5.0, 1.0, 4.0, 5.0, 5.0,
-                            "At a corner, containing 4 neighbors");
-    do_check_centroidSphere(box, 4.5, 4.5, 0.9, 1.0, 4.5, 4.5,
-                            "Contains one box completely");
-    do_check_centroidSphere(box, 0.5, 0.5, 0.9, 1.0, 0.5, 0.5,
-                            "Contains one box completely, at the edges");
-    do_check_centroidSphere(box, 9.5, 0.5, 0.9, 1.0, 9.5, 0.5,
-                            "Contains one box completely, at the edges");
-    do_check_centroidSphere(box, 0.5, 9.5, 0.9, 1.0, 0.5, 9.5,
-                            "Contains one box completely, at the edges");
-    do_check_centroidSphere(box, 4.5, 9.5, 0.9, 1.0, 4.5, 9.5,
-                            "Contains one box completely, at the edges");
-    do_check_centroidSphere(box, 9.5, 9.5, 0.9, 1.0, 9.5, 9.5,
-                            "Contains one box completely, at the edges");
-    do_check_centroidSphere(
-        box, 1.5, 1.5, 1.95, 9.0, 1.5, 1.5,
-        "Contains 5 boxes completely, and 4 boxes with a point");
-    do_check_centroidSphere(box, -1.0, 0.5, 1.55, 1.0, 0.5, 0.5,
-                            "Off an edge but enough to get an event");
+    do_check_centroidSphere(box, 4.5, 4.5, 0.5, 1.0, 4.5, 4.5, "Too small to contain any vertices");
+    do_check_centroidSphere(box, 4.5, 4.5, 0.001, 1.0, 4.5, 4.5, "Tiny but still has an event.");
+    do_check_centroidSphere(box, 4.51, 4.5, 0.001, 0.0, 0.0, 0.0, "Tiny but off the event.");
+    do_check_centroidSphere(box, 2.0, 2.0, 0.49, 0.0, 0.0, 0.0, "At a corner but grabbing nothing");
+    do_check_centroidSphere(box, 4.8, 4.5, 0.35, 1.0, 4.5, 4.5, "Too small to contain any vertices");
+    do_check_centroidSphere(box, 5.0, 5.0, 1.0, 4.0, 5.0, 5.0, "At a corner, containing 4 neighbors");
+    do_check_centroidSphere(box, 4.5, 4.5, 0.9, 1.0, 4.5, 4.5, "Contains one box completely");
+    do_check_centroidSphere(box, 0.5, 0.5, 0.9, 1.0, 0.5, 0.5, "Contains one box completely, at the edges");
+    do_check_centroidSphere(box, 9.5, 0.5, 0.9, 1.0, 9.5, 0.5, "Contains one box completely, at the edges");
+    do_check_centroidSphere(box, 0.5, 9.5, 0.9, 1.0, 0.5, 9.5, "Contains one box completely, at the edges");
+    do_check_centroidSphere(box, 4.5, 9.5, 0.9, 1.0, 4.5, 9.5, "Contains one box completely, at the edges");
+    do_check_centroidSphere(box, 9.5, 9.5, 0.9, 1.0, 9.5, 9.5, "Contains one box completely, at the edges");
+    do_check_centroidSphere(box, 1.5, 1.5, 1.95, 9.0, 1.5, 1.5,
+                            "Contains 5 boxes completely, and 4 boxes with a point");
+    do_check_centroidSphere(box, -1.0, 0.5, 1.55, 1.0, 0.5, 0.5, "Off an edge but enough to get an event");
 
     // Now I add an event very near an edge
     double center[2] = {0.001, 0.5};
     box.addEvent(MDLeanEvent<2>(1.0, 1.0, center));
-    do_check_integrateSphere(
-        box, -1.0, 0.5, 1.01, 1.0,
-        "Off an edge but just barely enough to get an event");
-    do_check_integrateSphere(box, 0.0, 0.5, 0.01, 1.0,
-                             "Tiny, but just barely enough to get an event");
+    do_check_integrateSphere(box, -1.0, 0.5, 1.01, 1.0, "Off an edge but just barely enough to get an event");
+    do_check_integrateSphere(box, 0.0, 0.5, 0.01, 1.0, "Tiny, but just barely enough to get an event");
 
     delete box_ptr->getBoxController();
     delete box_ptr;
@@ -1477,12 +1362,8 @@ public:
     MockMDBox *a = new MockMDBox;
     MockMDBox *b = new MockMDBox;
 
-    EXPECT_CALL(*a, getIsMasked())
-        .Times(1)
-        .WillOnce(Return(false)); // Not masked
-    EXPECT_CALL(*b, getIsMasked())
-        .Times(1)
-        .WillOnce(Return(false)); // Not masked
+    EXPECT_CALL(*a, getIsMasked()).Times(1).WillOnce(Return(false)); // Not masked
+    EXPECT_CALL(*b, getIsMasked()).Times(1).WillOnce(Return(false)); // Not masked
 
     boxes.emplace_back(a);
     boxes.emplace_back(b);
@@ -1506,8 +1387,7 @@ public:
     MockMDBox *b = new MockMDBox;
 
     EXPECT_CALL(*a, getIsMasked()).Times(1).WillOnce(Return(true)); // MASKED
-    EXPECT_CALL(*b, getIsMasked())
-        .Times(0); // Not masked, but will never be called.
+    EXPECT_CALL(*b, getIsMasked()).Times(0);                        // Not masked, but will never be called.
 
     boxes.emplace_back(a);
     boxes.emplace_back(b);
@@ -1517,8 +1397,7 @@ public:
     MDGridBox<MDLeanEvent<1>, 1> g(bc, 0, extentsVector);
     g.setChildren(boxes, 0, 2);
 
-    TSM_ASSERT("First inner box masked, so should return masked",
-               g.getIsMasked());
+    TSM_ASSERT("First inner box masked, so should return masked", g.getIsMasked());
     TS_ASSERT(Mock::VerifyAndClearExpectations(a));
     TS_ASSERT(Mock::VerifyAndClearExpectations(b));
   }
@@ -1529,10 +1408,8 @@ public:
     MockMDBox *a = new MockMDBox;
     MockMDBox *b = new MockMDBox;
 
-    EXPECT_CALL(*a, getIsMasked())
-        .Times(1)
-        .WillOnce(Return(false)); // NOT MASKED
-    EXPECT_CALL(*b, getIsMasked()).Times(1).WillOnce(Return(true)); // MASKED
+    EXPECT_CALL(*a, getIsMasked()).Times(1).WillOnce(Return(false)); // NOT MASKED
+    EXPECT_CALL(*b, getIsMasked()).Times(1).WillOnce(Return(true));  // MASKED
 
     boxes.emplace_back(a);
     boxes.emplace_back(b);
@@ -1543,8 +1420,7 @@ public:
 
     g.setChildren(boxes, 0, 2);
 
-    TSM_ASSERT("Second inner box masked, so should return masked",
-               g.getIsMasked());
+    TSM_ASSERT("Second inner box masked, so should return masked", g.getIsMasked());
     TS_ASSERT(Mock::VerifyAndClearExpectations(a));
     TS_ASSERT(Mock::VerifyAndClearExpectations(b));
   }
@@ -1609,9 +1485,7 @@ class MDGridBoxTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MDGridBoxTestPerformance *createSuite() {
-    return new MDGridBoxTestPerformance();
-  }
+  static MDGridBoxTestPerformance *createSuite() { return new MDGridBoxTestPerformance(); }
   static void destroySuite(MDGridBoxTestPerformance *suite) { delete suite; }
 
   MDGridBox<MDLeanEvent<3>, 3> *box3;
@@ -1678,8 +1552,7 @@ public:
    * @param center :: coordinate of the center
    * @param radius :: radius
    */
-  void do_test_sphereIntegrate(coord_t *center, coord_t radius,
-                               double expectSignal, double tol) {
+  void do_test_sphereIntegrate(coord_t *center, coord_t radius, double expectSignal, double tol) {
     // The sphere transformation
     bool dimensionsUsed[3] = {true, true, true};
     CoordTransformDistance sphere(3, center, dimensionsUsed);
@@ -1699,8 +1572,7 @@ public:
   /** Smallish sphere in the middle goes partially through lots of boxes */
   void test_sphereIntegrate_inTheMiddle() {
     coord_t center[3] = {2.5, 2.5, 2.5};
-    do_test_sphereIntegrate(center, 1.0, (1e6 / 125) * (4.0 * M_PI / 3.0),
-                            2000.0);
+    do_test_sphereIntegrate(center, 1.0, (1e6 / 125) * (4.0 * M_PI / 3.0), 2000.0);
   }
 
   /** Huge sphere containing all within */
@@ -1721,8 +1593,7 @@ public:
    * @param center :: coordinate of the center
    * @param radius :: radius
    */
-  void do_test_sphereCentroid(coord_t *center, coord_t radius,
-                              double expectSignal, double tol) {
+  void do_test_sphereCentroid(coord_t *center, coord_t radius, double expectSignal, double tol) {
     // The sphere transformation
     bool dimensionsUsed[3] = {true, true, true};
     CoordTransformDistance sphere(3, center, dimensionsUsed);

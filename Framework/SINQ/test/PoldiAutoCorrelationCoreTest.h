@@ -32,20 +32,17 @@ using namespace Mantid::DataObjects;
 
 class TestablePoldiAutoCorrelationCore : public PoldiAutoCorrelationCore {
   friend class PoldiAutoCorrelationCoreTest;
-  TestablePoldiAutoCorrelationCore(Mantid::Kernel::Logger &logger)
-      : PoldiAutoCorrelationCore(logger) {}
+  TestablePoldiAutoCorrelationCore(Mantid::Kernel::Logger &logger) : PoldiAutoCorrelationCore(logger) {}
 };
 
 class PoldiAutoCorrelationCoreTest : public CxxTest::TestSuite {
 private:
   TestablePoldiAutoCorrelationCore getCorrelationCoreWithInstrument() {
-    std::shared_ptr<PoldiAbstractDetector> detector(
-        new ConfiguredHeliumDetector);
+    std::shared_ptr<PoldiAbstractDetector> detector(new ConfiguredHeliumDetector);
 
     int deadWires[] = {0, 1, 2, 3, 4, 5, 394, 395, 396, 397, 398, 399};
     std::shared_ptr<PoldiDeadWireDecorator> deadWireDecorator(
-        new PoldiDeadWireDecorator(std::set<int>(deadWires, deadWires + 12),
-                                   detector));
+        new PoldiDeadWireDecorator(std::set<int>(deadWires, deadWires + 12), detector));
 
     std::shared_ptr<MockChopper> mockChopper = std::make_shared<MockChopper>();
 
@@ -58,18 +55,13 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PoldiAutoCorrelationCoreTest *createSuite() {
-    return new PoldiAutoCorrelationCoreTest();
-  }
-  static void destroySuite(PoldiAutoCorrelationCoreTest *suite) {
-    delete suite;
-  }
+  static PoldiAutoCorrelationCoreTest *createSuite() { return new PoldiAutoCorrelationCoreTest(); }
+  static void destroySuite(PoldiAutoCorrelationCoreTest *suite) { delete suite; }
 
   PoldiAutoCorrelationCoreTest() : m_log("PoldiAutoCorrelationCoreTest") {}
 
   void testsetInstrument() {
-    std::shared_ptr<MockDetector> mockDetector =
-        std::make_shared<MockDetector>();
+    std::shared_ptr<MockDetector> mockDetector = std::make_shared<MockDetector>();
     std::shared_ptr<MockChopper> mockChopper = std::make_shared<MockChopper>();
 
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
@@ -88,54 +80,44 @@ public:
   }
 
   void testgetTOFsFor1Angstrom() {
-    std::shared_ptr<PoldiAbstractDetector> detector(
-        new ConfiguredHeliumDetector);
+    std::shared_ptr<PoldiAbstractDetector> detector(new ConfiguredHeliumDetector);
 
     std::shared_ptr<MockChopper> mockChopper = std::make_shared<MockChopper>();
 
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
     autoCorrelationCore.setInstrument(detector, mockChopper);
 
-    EXPECT_CALL(*mockChopper, distanceFromSample())
-        .Times(1)
-        .WillRepeatedly(Return(11800.0));
+    EXPECT_CALL(*mockChopper, distanceFromSample()).Times(1).WillRepeatedly(Return(11800.0));
 
-    std::vector<double> tofsForD1 =
-        autoCorrelationCore.getTofsFor1Angstrom(detector->availableElements());
+    std::vector<double> tofsForD1 = autoCorrelationCore.getTofsFor1Angstrom(detector->availableElements());
 
     TS_ASSERT_DELTA(tofsForD1[0], 4257.66624637, 1e-4);
     TS_ASSERT_DELTA(tofsForD1[399], 5538.73486007, 1e-4);
   }
 
   void testgetDistances() {
-    std::shared_ptr<PoldiAbstractDetector> detector(
-        new ConfiguredHeliumDetector);
+    std::shared_ptr<PoldiAbstractDetector> detector(new ConfiguredHeliumDetector);
 
     std::shared_ptr<MockChopper> mockChopper = std::make_shared<MockChopper>();
 
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
     autoCorrelationCore.setInstrument(detector, mockChopper);
 
-    EXPECT_CALL(*mockChopper, distanceFromSample())
-        .Times(1)
-        .WillRepeatedly(Return(11800.0));
+    EXPECT_CALL(*mockChopper, distanceFromSample()).Times(1).WillRepeatedly(Return(11800.0));
 
-    std::vector<double> distances =
-        autoCorrelationCore.getDistances(detector->availableElements());
+    std::vector<double> distances = autoCorrelationCore.getDistances(detector->availableElements());
 
     TS_ASSERT_DELTA(distances[0] - 11800.0, 1859.41, 1e-2);
     TS_ASSERT_DELTA(distances[399] - 11800.0, 2167.13, 1e-2);
   }
 
   void testcalculateDWeights() {
-    TestablePoldiAutoCorrelationCore autoCorrelationCore =
-        getCorrelationCoreWithInstrument();
-    std::shared_ptr<MockChopper> mockChopper =
-        std::dynamic_pointer_cast<MockChopper>(autoCorrelationCore.m_chopper);
+    TestablePoldiAutoCorrelationCore autoCorrelationCore = getCorrelationCoreWithInstrument();
+    std::shared_ptr<MockChopper> mockChopper = std::dynamic_pointer_cast<MockChopper>(autoCorrelationCore.m_chopper);
     EXPECT_CALL(*mockChopper, distanceFromSample()).WillOnce(Return(11800.0));
 
-    std::vector<double> tofsD1 = autoCorrelationCore.getTofsFor1Angstrom(
-        autoCorrelationCore.m_detector->availableElements());
+    std::vector<double> tofsD1 =
+        autoCorrelationCore.getTofsFor1Angstrom(autoCorrelationCore.m_detector->availableElements());
 
     TS_ASSERT_EQUALS(tofsD1.size(), 388);
 
@@ -143,35 +125,27 @@ public:
     double deltaD = 0.000606307;
     size_t nd = 5531;
 
-    std::vector<double> weights =
-        autoCorrelationCore.calculateDWeights(tofsD1, deltaT, deltaD, nd);
+    std::vector<double> weights = autoCorrelationCore.calculateDWeights(tofsD1, deltaT, deltaD, nd);
 
     TS_ASSERT_EQUALS(weights[0], weights[1]);
   }
 
   void testgetNormalizedTOFSum() {
-    TestablePoldiAutoCorrelationCore autoCorrelationCore =
-        getCorrelationCoreWithInstrument();
-    std::shared_ptr<MockChopper> mockChopper =
-        std::dynamic_pointer_cast<MockChopper>(autoCorrelationCore.m_chopper);
-    EXPECT_CALL(*mockChopper, distanceFromSample())
-        .Times(2)
-        .WillRepeatedly(Return(11800.0));
+    TestablePoldiAutoCorrelationCore autoCorrelationCore = getCorrelationCoreWithInstrument();
+    std::shared_ptr<MockChopper> mockChopper = std::dynamic_pointer_cast<MockChopper>(autoCorrelationCore.m_chopper);
+    EXPECT_CALL(*mockChopper, distanceFromSample()).Times(2).WillRepeatedly(Return(11800.0));
 
-    std::vector<double> tofsD1 = autoCorrelationCore.getTofsFor1Angstrom(
-        autoCorrelationCore.m_detector->availableElements());
+    std::vector<double> tofsD1 =
+        autoCorrelationCore.getTofsFor1Angstrom(autoCorrelationCore.m_detector->availableElements());
     TS_ASSERT_EQUALS(tofsD1.size(), 388);
 
-    PoldiDGrid dGrid(autoCorrelationCore.m_detector,
-                     autoCorrelationCore.m_chopper, 3.0,
-                     std::make_pair(1.1, 5.0));
+    PoldiDGrid dGrid(autoCorrelationCore.m_detector, autoCorrelationCore.m_chopper, 3.0, std::make_pair(1.1, 5.0));
 
     double deltaT = 3.0;
     double deltaD = dGrid.deltaD();
     size_t nd = 5531;
 
-    std::vector<double> weights =
-        autoCorrelationCore.calculateDWeights(tofsD1, deltaT, deltaD, nd);
+    std::vector<double> weights = autoCorrelationCore.calculateDWeights(tofsD1, deltaT, deltaD, nd);
     double sum = autoCorrelationCore.getNormalizedTOFSum(weights);
 
     TS_ASSERT_DELTA(1.0 / 5531.0, weights[0] / sum, 1e-15);
@@ -191,37 +165,30 @@ public:
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
 
     int elements[] = {10, 20, 30, 40};
-    autoCorrelationCore.m_detectorElements =
-        std::vector<int>(elements, elements + 4);
+    autoCorrelationCore.m_detectorElements = std::vector<int>(elements, elements + 4);
 
     TS_ASSERT_EQUALS(autoCorrelationCore.getElementFromIndex(0), 10);
     TS_ASSERT_EQUALS(autoCorrelationCore.getElementFromIndex(3), 40);
 
-    TS_ASSERT_THROWS(autoCorrelationCore.getElementFromIndex(10),
-                     const std::range_error &);
-    TS_ASSERT_THROWS(autoCorrelationCore.getElementFromIndex(-10),
-                     const std::range_error &);
+    TS_ASSERT_THROWS(autoCorrelationCore.getElementFromIndex(10), const std::range_error &);
+    TS_ASSERT_THROWS(autoCorrelationCore.getElementFromIndex(-10), const std::range_error &);
   }
 
   void testgetTofFromIndex() {
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
 
     double elements[] = {345.0, 3123.2, 232.1, 65765.2};
-    autoCorrelationCore.m_tofsFor1Angstrom =
-        std::vector<double>(elements, elements + 4);
+    autoCorrelationCore.m_tofsFor1Angstrom = std::vector<double>(elements, elements + 4);
 
     TS_ASSERT_EQUALS(autoCorrelationCore.getTofFromIndex(0), 345.0);
     TS_ASSERT_EQUALS(autoCorrelationCore.getTofFromIndex(3), 65765.2);
 
-    TS_ASSERT_THROWS(autoCorrelationCore.getTofFromIndex(10),
-                     const std::range_error &);
-    TS_ASSERT_THROWS(autoCorrelationCore.getTofFromIndex(-10),
-                     const std::range_error &);
+    TS_ASSERT_THROWS(autoCorrelationCore.getTofFromIndex(10), const std::range_error &);
+    TS_ASSERT_THROWS(autoCorrelationCore.getTofFromIndex(-10), const std::range_error &);
   }
 
   void testgetCounts() {
-    Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+    Workspace2D_sptr testWorkspace = WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
 
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
     autoCorrelationCore.setCountData(testWorkspace);
@@ -235,8 +202,7 @@ public:
   }
 
   void testgetNormCounts() {
-    Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+    Workspace2D_sptr testWorkspace = WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
 
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
     autoCorrelationCore.setNormCountData(testWorkspace);
@@ -248,8 +214,7 @@ public:
   }
 
   void testgetSumOfCounts() {
-    Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+    Workspace2D_sptr testWorkspace = WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
 
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
     autoCorrelationCore.setCountData(testWorkspace);
@@ -261,13 +226,10 @@ public:
   }
 
   void testgetCMessAndCSigma() {
-    TestablePoldiAutoCorrelationCore autoCorrelationCore =
-        getCorrelationCoreWithInstrument();
-    std::shared_ptr<MockChopper> mockChopper =
-        std::dynamic_pointer_cast<MockChopper>(autoCorrelationCore.m_chopper);
+    TestablePoldiAutoCorrelationCore autoCorrelationCore = getCorrelationCoreWithInstrument();
+    std::shared_ptr<MockChopper> mockChopper = std::dynamic_pointer_cast<MockChopper>(autoCorrelationCore.m_chopper);
 
-    Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+    Workspace2D_sptr testWorkspace = WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
     autoCorrelationCore.setCountData(testWorkspace);
     autoCorrelationCore.setNormCountData(testWorkspace);
 
@@ -278,17 +240,13 @@ public:
     autoCorrelationCore.m_timeBinCount = 2;
 
     double tofElements[] = {1.0, 2.0};
-    autoCorrelationCore.m_tofsFor1Angstrom =
-        std::vector<double>(tofElements, tofElements + 2);
+    autoCorrelationCore.m_tofsFor1Angstrom = std::vector<double>(tofElements, tofElements + 2);
 
     int elements[] = {0, 1};
-    autoCorrelationCore.m_detectorElements =
-        std::vector<int>(elements, elements + 2);
+    autoCorrelationCore.m_detectorElements = std::vector<int>(elements, elements + 2);
 
-    TS_ASSERT_DELTA(autoCorrelationCore.getCMessAndCSigma(1.2, 0.0, 0).value(),
-                    0.0, 1e-6);
-    TS_ASSERT_DELTA(autoCorrelationCore.getCMessAndCSigma(1.2, 0.0, 0).error(),
-                    0.00333333, 1e-6);
+    TS_ASSERT_DELTA(autoCorrelationCore.getCMessAndCSigma(1.2, 0.0, 0).value(), 0.0, 1e-6);
+    TS_ASSERT_DELTA(autoCorrelationCore.getCMessAndCSigma(1.2, 0.0, 0).error(), 0.00333333, 1e-6);
   }
 
   void testreduceChopperList() {
@@ -302,16 +260,14 @@ public:
     goodList.emplace_back(pair0);
     goodList.emplace_back(pair1);
 
-    TS_ASSERT_DELTA(autoCorrelationCore.reduceChopperSlitList(goodList, 1.0),
-                    3.428571428571428, 1e-6);
+    TS_ASSERT_DELTA(autoCorrelationCore.reduceChopperSlitList(goodList, 1.0), 3.428571428571428, 1e-6);
 
     std::vector<UncertainValue> badList;
     badList.emplace_back(pair0);
     badList.emplace_back(pair1);
     badList.emplace_back(pair2);
 
-    TS_ASSERT_EQUALS(autoCorrelationCore.reduceChopperSlitList(badList, 1.0),
-                     0.0);
+    TS_ASSERT_EQUALS(autoCorrelationCore.reduceChopperSlitList(badList, 1.0), 0.0);
   }
 
   void testFinalizeCalculation() {
@@ -320,8 +276,7 @@ public:
     MantidVec dValues = {0.5, 0.6, 0.7, 0.8};
     MantidVec intensities = {1.0, 2.0, 3.0, 4.0};
 
-    DataObjects::Workspace2D_sptr output =
-        core.finalizeCalculation(intensities, dValues);
+    DataObjects::Workspace2D_sptr output = core.finalizeCalculation(intensities, dValues);
 
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
 

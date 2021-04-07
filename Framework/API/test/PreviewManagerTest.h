@@ -26,9 +26,7 @@ public:
   std::string technique() const override { return "SANS"; }
 
 private:
-  Workspace_sptr preview(Workspace_sptr ws) const override {
-    return ws->clone();
-  }
+  Workspace_sptr preview(Workspace_sptr ws) const override { return ws->clone(); }
 };
 
 DECLARE_PREVIEW(BasicPreview)
@@ -51,27 +49,22 @@ public:
     TS_ASSERT(previews.empty());
   }
   void test_get_preview_by_facility_and_technique() {
-    auto previews =
-        PreviewManager::Instance().getPreviews("TestFacility", "SANS");
+    auto previews = PreviewManager::Instance().getPreviews("TestFacility", "SANS");
     TS_ASSERT_EQUALS(previews.size(), 1);
     TS_ASSERT_EQUALS(previews[0], "BasicPreview");
   }
   void test_get_preview_by_facility_and_non_existent_technique() {
-    auto previews =
-        PreviewManager::Instance().getPreviews("TestFacility", "Crystal");
+    auto previews = PreviewManager::Instance().getPreviews("TestFacility", "Crystal");
     TS_ASSERT(previews.empty());
   }
   void test_get_preview_by_name() {
-    auto &preview = PreviewManager::Instance().getPreview(
-        "TestFacility", "SANS", "BasicPreview");
+    auto &preview = PreviewManager::Instance().getPreview("TestFacility", "SANS", "BasicPreview");
     TS_ASSERT_EQUALS(preview.name(), "BasicPreview");
     TS_ASSERT_EQUALS(preview.facility(), "TestFacility");
     TS_ASSERT_EQUALS(preview.technique(), "SANS");
     TS_ASSERT_EQUALS(preview.type(), IPreview::PreviewType::SVIEW);
   }
   void test_get_preview_by_non_existent_name() {
-    TS_ASSERT_THROWS(PreviewManager::Instance().getPreview(
-                         "TestFacility", "SANS", "BasicPreview2"),
-                     std::runtime_error)
+    TS_ASSERT_THROWS(PreviewManager::Instance().getPreview("TestFacility", "SANS", "BasicPreview2"), std::runtime_error)
   }
 };

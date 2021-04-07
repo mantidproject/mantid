@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::API::VectorVectorStringPropert
 
 .. module:`mantid.api`
 
-.. autoclass:: mantid.api.VectorVectorStringPropertyWithValue 
+.. autoclass:: mantid.api.VectorVectorStringPropertyWithValue
     :members:
     :undoc-members:
     :inherited-members:

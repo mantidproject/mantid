@@ -19,17 +19,14 @@ Component *ComponentParser::getComponent() {
     return nullptr;
 }
 
-void ComponentParser::characters(const Poco::XML::XMLChar ch[], int start,
-                                 int length) {
+void ComponentParser::characters(const Poco::XML::XMLChar ch[], int start, int length) {
   m_innerText = std::string(ch + start, length);
 }
 
 //----------------------------------------------------------------------------------------------
 /// Signals start of element
-void ComponentParser::startElement(const Poco::XML::XMLString & /*uri*/,
-                                   const Poco::XML::XMLString &localName,
-                                   const Poco::XML::XMLString & /*qname*/,
-                                   const Poco::XML::Attributes &attr) {
+void ComponentParser::startElement(const Poco::XML::XMLString & /*uri*/, const Poco::XML::XMLString &localName,
+                                   const Poco::XML::XMLString & /*qname*/, const Poco::XML::Attributes &attr) {
   // Find the parent of this new component.
   Component *current = nullptr;
   if (!m_current.empty())
@@ -59,8 +56,7 @@ void ComponentParser::startElement(const Poco::XML::XMLString & /*uri*/,
 
 //----------------------------------------------------------------------------------------------
 /// Signals end of element
-void ComponentParser::endElement(const Poco::XML::XMLString & /*uri*/,
-                                 const Poco::XML::XMLString &localName,
+void ComponentParser::endElement(const Poco::XML::XMLString & /*uri*/, const Poco::XML::XMLString &localName,
                                  const Poco::XML::XMLString & /*qname*/) {
   Component *current = nullptr;
   if (!m_current.empty())

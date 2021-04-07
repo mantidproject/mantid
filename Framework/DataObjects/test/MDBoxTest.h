@@ -380,10 +380,8 @@ public:
   void test_bad_splitter() {
     BoxController_sptr sc(new BoxController(4));
     sc->setSplitThreshold(10);
-    using MACROS_ARE_DUMB =
-        MDBox<MDLeanEvent<3>, 3>; //...since they get confused by commas
-    TS_ASSERT_THROWS(MACROS_ARE_DUMB b3(sc.get()),
-                     const std::invalid_argument &);
+    using MACROS_ARE_DUMB = MDBox<MDLeanEvent<3>, 3>; //...since they get confused by commas
+    TS_ASSERT_THROWS(MACROS_ARE_DUMB b3(sc.get()), const std::invalid_argument &);
   }
 
   void test_splitter() {
@@ -439,8 +437,7 @@ public:
    * @param radius :: radius to integrate
    * @param numExpected :: how many events should be in there
    */
-  void dotest_integrateSphere(MDBox<MDLeanEvent<3>, 3> &box, coord_t x,
-                              coord_t y, coord_t z, const coord_t radius,
+  void dotest_integrateSphere(MDBox<MDLeanEvent<3>, 3> &box, coord_t x, coord_t y, coord_t z, const coord_t radius,
                               double numExpected) {
     // The sphere transformation
     bool dimensionsUsed[3] = {true, true, true};
@@ -454,11 +451,8 @@ public:
     TS_ASSERT_DELTA(errorSquared, 1.5 * numExpected, 1e-5);
   }
 
-  void dotest_integrateSphereWithInnerRadius(MDBox<MDLeanEvent<3>, 3> &box,
-                                             coord_t x, coord_t y, coord_t z,
-                                             const coord_t radius,
-                                             const coord_t innerRadius,
-                                             const bool useOnePercent,
+  void dotest_integrateSphereWithInnerRadius(MDBox<MDLeanEvent<3>, 3> &box, coord_t x, coord_t y, coord_t z,
+                                             const coord_t radius, const coord_t innerRadius, const bool useOnePercent,
                                              double numExpected) {
     // The sphere transformation
     bool dimensionsUsed[3] = {true, true, true};
@@ -467,8 +461,7 @@ public:
 
     signal_t signal = 0;
     signal_t errorSquared = 0;
-    box.integrateSphere(sphere, radius * radius, signal, errorSquared,
-                        innerRadius * innerRadius, useOnePercent);
+    box.integrateSphere(sphere, radius * radius, signal, errorSquared, innerRadius * innerRadius, useOnePercent);
     TS_ASSERT_DELTA(signal, 1.0 * numExpected, 1e-5);
     TS_ASSERT_DELTA(errorSquared, 1.5 * numExpected, 1e-5);
   }
@@ -510,16 +503,13 @@ public:
     TS_ASSERT_EQUALS(box.getNPoints(), 9 * 9 * 9);
 
     // Too small shell
-    dotest_integrateSphereWithInnerRadius(box, 5.0f, 5.0f, 5.0f, 0.5f, 0.4f,
-                                          false, 0.0);
+    dotest_integrateSphereWithInnerRadius(box, 5.0f, 5.0f, 5.0f, 0.5f, 0.4f, false, 0.0);
 
     // The 0.7 shell contains 2 but the 1.15 inner shell excludes one of them
-    dotest_integrateSphereWithInnerRadius(box, 5.6f, 5.0f, 5.0f, 0.7f, 0.5f,
-                                          false, 1.0);
+    dotest_integrateSphereWithInnerRadius(box, 5.6f, 5.0f, 5.0f, 0.7f, 0.5f, false, 1.0);
 
     // The 1.3 shell contains 2 and the 1.05 inner shell contains 2
-    dotest_integrateSphereWithInnerRadius(box, 5.6f, 5.0f, 5.0f, 0.7f, 0.4f,
-                                          false, 2.0);
+    dotest_integrateSphereWithInnerRadius(box, 5.6f, 5.0f, 5.0f, 0.7f, 0.4f, false, 2.0);
   }
 
   //-----------------------------------------------------------------------------------------
@@ -618,8 +608,7 @@ public:
   void test_getIsMasked_Default() {
     BoxController_sptr sc(new BoxController(1));
     MDBox<MDLeanEvent<1>, 1> box(sc.get());
-    TSM_ASSERT("Default should be for a MDBox not to be masked!",
-               !box.getIsMasked());
+    TSM_ASSERT("Default should be for a MDBox not to be masked!", !box.getIsMasked());
   }
 
   void test_mask() {

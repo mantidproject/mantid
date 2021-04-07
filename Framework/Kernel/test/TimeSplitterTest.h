@@ -532,14 +532,12 @@ public:
 
     TimeSplitterType::iterator sit;
 
-    SplittingInterval temp1(DateAndTime("2007-11-30T16:17:00"),
-                            DateAndTime("2007-11-30T16:17:00"), -1);
+    SplittingInterval temp1(DateAndTime("2007-11-30T16:17:00"), DateAndTime("2007-11-30T16:17:00"), -1);
     sit = std::lower_bound(b.begin(), b.end(), temp1);
     int index1 = int(sit - b.begin());
     TS_ASSERT_EQUALS(index1, 1);
 
-    SplittingInterval temp2(DateAndTime("2007-11-30T16:17:10"),
-                            DateAndTime("2007-11-30T16:17:00"), -1);
+    SplittingInterval temp2(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:00"), -1);
     sit = std::lower_bound(b.begin(), b.end(), temp2);
     int index2 = int(sit - b.begin());
     TS_ASSERT_EQUALS(index2, 2);

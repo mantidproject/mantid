@@ -28,7 +28,7 @@ Usage
 
 .. testcode:: ExQueryMDWorkspace
 
-   # create sample inelastic workspace for MARI instrument containing 1 at all spectra 
+   # create sample inelastic workspace for MARI instrument containing 1 at all spectra
    ws1 = CreateSimulationWorkspace(Instrument='MAR', BinParams='-10,1,10', UnitX='DeltaE')
    AddSampleLog(ws1, 'Ei', '12.', 'Number')
    ws2 = ws1 * 2;
@@ -37,7 +37,7 @@ Usage
 
    # get the query
    table = QueryMDWorkspace(InputWorkspace=mdWs1)
-   
+
    # look at the output:
    col_names = table.keys();
    name0 = col_names[0];
@@ -46,18 +46,18 @@ Usage
    print("first 11 of them are:")
    print("--------------------------------------------------------------------------------------------------------------")
    print(' '.join('| {0:19}'.format(name) for name in col_names) + ' |')
-	      
+
    print("--------------------------------------------------------------------------------------------------------------")
    for i in range(0,11):
       print(' '.join('| {0:>19.4f}'.format(table.column(name)[i]) for name in col_names) + ' |')
-    
-    
+
+
 **Output:**
 
 .. testoutput:: ExQueryMDWorkspace
 
    Table contains 100 rows
-   first 11 of them are: 
+   first 11 of them are:
    --------------------------------------------------------------------------------------------------------------
    | Signal/none         | Error/none          | Number of Events    | |Q|/MomentumTransfer | DeltaE/DeltaE       |
    --------------------------------------------------------------------------------------------------------------

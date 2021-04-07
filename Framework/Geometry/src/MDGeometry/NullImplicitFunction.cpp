@@ -9,9 +9,7 @@
 namespace Mantid {
 namespace Geometry {
 
-std::string NullImplicitFunction::getName() const {
-  return NullImplicitFunction::functionName();
-}
+std::string NullImplicitFunction::getName() const { return NullImplicitFunction::functionName(); }
 
 std::string NullImplicitFunction::toXMLString() const { return std::string(); }
 } // namespace Geometry

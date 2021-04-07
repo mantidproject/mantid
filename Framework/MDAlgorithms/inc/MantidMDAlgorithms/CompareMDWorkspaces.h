@@ -23,9 +23,7 @@ class DLLExport CompareMDWorkspaces : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Compare two MDWorkspaces for equality.";
-  }
+  const std::string summary() const override { return "Compare two MDWorkspaces for equality."; }
 
   int version() const override;
   const std::string category() const override;
@@ -34,20 +32,16 @@ private:
   void init() override;
   void exec() override;
   void doComparison();
-  void compareMDGeometry(const Mantid::API::IMDWorkspace_sptr &ws1,
-                         const Mantid::API::IMDWorkspace_sptr &ws2);
-  void compareMDHistoWorkspaces(
-      const Mantid::DataObjects::MDHistoWorkspace_sptr &ws1,
-      const Mantid::DataObjects::MDHistoWorkspace_sptr &ws2);
+  void compareMDGeometry(const Mantid::API::IMDWorkspace_sptr &ws1, const Mantid::API::IMDWorkspace_sptr &ws2);
+  void compareMDHistoWorkspaces(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws1,
+                                const Mantid::DataObjects::MDHistoWorkspace_sptr &ws2);
 
   template <typename MDE, size_t nd>
-  void compareMDWorkspaces(
-      typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  void compareMDWorkspaces(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   template <typename T> void compare(T a, T b, const std::string &message);
 
-  template <typename T>
-  inline void compareTol(T a, T b, const std::string &message);
+  template <typename T> inline void compareTol(T a, T b, const std::string &message);
 
   Mantid::API::IMDWorkspace_sptr inWS2;
 

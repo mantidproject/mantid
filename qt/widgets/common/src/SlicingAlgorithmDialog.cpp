@@ -27,8 +27,7 @@ DECLARE_DIALOG(BinMDDialog)
 Constructor
 @param parent : parent widget
 */
-SlicingAlgorithmDialog::SlicingAlgorithmDialog(QWidget *parent)
-    : AlgorithmDialog(parent) {}
+SlicingAlgorithmDialog::SlicingAlgorithmDialog(QWidget *parent) : AlgorithmDialog(parent) {}
 
 /// Set up the dialog layout
 void SlicingAlgorithmDialog::initLayout() {
@@ -55,18 +54,13 @@ void SlicingAlgorithmDialog::initLayout() {
    the AlgorithmDialog base class
    handles the slots.
    */
-  connect(ui.workspace_selector, SIGNAL(activated(int)), this,
-          SLOT(onWorkspaceChanged()));
-  connect(ui.ck_axis_aligned, SIGNAL(clicked(bool)), this,
-          SLOT(onAxisAlignedChanged(bool)));
-  connect(ui.ck_max_from_input, SIGNAL(clicked(bool)), this,
-          SLOT(onMaxFromInput(bool)));
-  connect(ui.ck_calculate, SIGNAL(clicked(bool)), this,
-          SLOT(onCalculateChanged(bool)));
+  connect(ui.workspace_selector, SIGNAL(activated(int)), this, SLOT(onWorkspaceChanged()));
+  connect(ui.ck_axis_aligned, SIGNAL(clicked(bool)), this, SLOT(onAxisAlignedChanged(bool)));
+  connect(ui.ck_max_from_input, SIGNAL(clicked(bool)), this, SLOT(onMaxFromInput(bool)));
+  connect(ui.ck_calculate, SIGNAL(clicked(bool)), this, SLOT(onCalculateChanged(bool)));
   connect(ui.btn_browse, SIGNAL(clicked()), this, SLOT(onBrowse()));
   connect(ui.btn_help, SIGNAL(clicked()), this, SLOT(helpClicked()));
-  connect(ui.btn_calculate, SIGNAL(clicked()), this,
-          SLOT(onRebuildDimensions()));
+  connect(ui.btn_calculate, SIGNAL(clicked()), this, SLOT(onRebuildDimensions()));
 
   // Configure workspace selector
   ui.workspace_selector->setValidatingAlgorithm(m_algName);
@@ -74,8 +68,8 @@ void SlicingAlgorithmDialog::initLayout() {
   auto names = AnalysisDataService::Instance().getObjectNames();
   auto it = names.begin();
   while (it != names.end()) {
-    IMDEventWorkspace_sptr ws = std::dynamic_pointer_cast<IMDEventWorkspace>(
-        AnalysisDataService::Instance().retrieve(*it));
+    IMDEventWorkspace_sptr ws =
+        std::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(*it));
     if (ws) {
       ui.workspace_selector->addItem((*it).c_str());
     }
@@ -102,20 +96,13 @@ SlicingAlgorithmDialog::~SlicingAlgorithmDialog() { saveSettings(); }
  dimension.
  @param dim : dimension to format to string.
 */
-QString formattedAlignedDimensionInput(
-    const Mantid::Geometry::IMDDimension_const_sptr &dim) {
+QString formattedAlignedDimensionInput(const Mantid::Geometry::IMDDimension_const_sptr &dim) {
   QString min, max, nbins, result;
   QString name(dim->getName().c_str());
   min.setNum(dim->getMinimum());
   max.setNum(dim->getMaximum());
   nbins.setNum(dim->getNBins());
-  result.append(name)
-      .append(",")
-      .append(min)
-      .append(",")
-      .append(max)
-      .append(",")
-      .append(nbins);
+  result.append(name).append(",").append(min).append(",").append(max).append(",").append(nbins);
   return result;
 }
 
@@ -132,8 +119,7 @@ QString formattedAlignedDimensionInput(
 
  @return : empty string.
 */
-QString formatNonAlignedDimensionInput(
-    const Mantid::Geometry::IMDDimension_const_sptr & /*unused*/) {
+QString formatNonAlignedDimensionInput(const Mantid::Geometry::IMDDimension_const_sptr & /*unused*/) {
   // Deliberately return an empty string here, because it's not obvious how the
   // basis vectors could be automatically formed.
   return QString("");
@@ -150,8 +136,7 @@ void SlicingAlgorithmDialog::cleanLayoutOfDimensions(QLayout *layout) {
     QWidget *pWidget = pLayoutItem->widget();
     if (pWidget != nullptr) {
       // The label text contains the property name.
-      auto *propertyLabel =
-          dynamic_cast<QLabel *>(pWidget->layout()->itemAt(0)->widget());
+      auto *propertyLabel = dynamic_cast<QLabel *>(pWidget->layout()->itemAt(0)->widget());
       untie(propertyLabel->text());
       pWidget->setHidden(true);
       this->layout()->removeItem(pLayoutItem);
@@ -174,57 +159,46 @@ void SlicingAlgorithmDialog::clearExistingDimensions() {
 Determine if the inputs should be in an axis aligned form.
 @return : True if axis aligned
 */
-bool SlicingAlgorithmDialog::doAxisAligned() const {
-  return ui.ck_axis_aligned->isChecked();
-}
+bool SlicingAlgorithmDialog::doAxisAligned() const { return ui.ck_axis_aligned->isChecked(); }
 
 /**
 Gets the provided input workspace name
 @return name of the input workspace
 */
-QString SlicingAlgorithmDialog::getCurrentInputWorkspaceName() const {
-  return ui.workspace_selector->currentText();
-}
+QString SlicingAlgorithmDialog::getCurrentInputWorkspaceName() const { return ui.workspace_selector->currentText(); }
 
 /**
 Gets the provided output workspace name
 @return name of the output workspace
 */
-QString SlicingAlgorithmDialog::getCurrentOutputWorkspaceName() const {
-  return ui.txt_output->text();
-}
+QString SlicingAlgorithmDialog::getCurrentOutputWorkspaceName() const { return ui.txt_output->text(); }
 
 /**
 Getter for the historical input workspace name.
 @return old input workspace name.
 */
 QString SlicingAlgorithmDialog::getHistoricalInputWorkspaceName() const {
-  return MantidQt::API::AlgorithmInputHistory::Instance().previousInput(
-      m_algName, "InputWorkspace");
+  return MantidQt::API::AlgorithmInputHistory::Instance().previousInput(m_algName, "InputWorkspace");
 }
 
 /**
 Determine if properties relating to the dimension history have changed.
 @return True if it has changed.
 */
-SlicingAlgorithmDialog::HistoryChanged
-SlicingAlgorithmDialog::hasDimensionHistoryChanged() const {
+SlicingAlgorithmDialog::HistoryChanged SlicingAlgorithmDialog::hasDimensionHistoryChanged() const {
   SlicingAlgorithmDialog::HistoryChanged result = HasNotChanged;
 
   const QString &currentWorkspaceName = getCurrentInputWorkspaceName();
   const QString previousInputWorkspaceName =
-      MantidQt::API::AlgorithmInputHistory::Instance().previousInput(
-          m_algName, "InputWorkspace");
+      MantidQt::API::AlgorithmInputHistory::Instance().previousInput(m_algName, "InputWorkspace");
   if (currentWorkspaceName.isEmpty()) {
     result = HasChanged; // Force a rebuild because the dialog cant find any
                          // eligable input workspaces. That's why there is an
                          // empty entry.
-  } else if (AnalysisDataService::Instance().doesExist(
-                 previousInputWorkspaceName.toStdString())) {
-    const auto oldWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(
-        previousInputWorkspaceName.toStdString());
-    const auto newWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(
-        currentWorkspaceName.toStdString());
+  } else if (AnalysisDataService::Instance().doesExist(previousInputWorkspaceName.toStdString())) {
+    const auto oldWS =
+        AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(previousInputWorkspaceName.toStdString());
+    const auto newWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(currentWorkspaceName.toStdString());
     if (oldWS->getNumDims() != newWS->getNumDims()) {
       result = HasChanged;
     }
@@ -241,9 +215,8 @@ SlicingAlgorithmDialog::hasDimensionHistoryChanged() const {
  * configuring the dialog.
  * @return decision about what to do with history, keep it or ignore it.
  */
-SlicingAlgorithmDialog::History
-SlicingAlgorithmDialog::useHistory(const HistoryChanged &criticalChange,
-                                   const bool bForceForget) {
+SlicingAlgorithmDialog::History SlicingAlgorithmDialog::useHistory(const HistoryChanged &criticalChange,
+                                                                   const bool bForceForget) {
   History history;
   if (criticalChange == HasChanged || bForceForget) {
     history = Forget;
@@ -267,12 +240,11 @@ void SlicingAlgorithmDialog::buildDimensionInputs(const bool bForceForget) {
   History useHistory = this->useHistory(criticalChange, bForceForget);
 
   if (axisAligned) {
-    makeDimensionInputs("AlignedDim", this->ui.axis_aligned_layout->layout(),
-                        formattedAlignedDimensionInput, useHistory);
+    makeDimensionInputs("AlignedDim", this->ui.axis_aligned_layout->layout(), formattedAlignedDimensionInput,
+                        useHistory);
   } else {
-    makeDimensionInputs("BasisVector",
-                        this->ui.non_axis_aligned_layout->layout(),
-                        formatNonAlignedDimensionInput, Remember);
+    makeDimensionInputs("BasisVector", this->ui.non_axis_aligned_layout->layout(), formatNonAlignedDimensionInput,
+                        Remember);
   }
 }
 
@@ -286,16 +258,14 @@ generated.
 @param format: function pointer to the formatting function
 @param history : Whether to remember of forget property history.
 */
-void SlicingAlgorithmDialog::makeDimensionInputs(
-    const QString &propertyPrefix, QLayout *owningLayout,
-    QString (*format)(const IMDDimension_const_sptr &), History history) {
+void SlicingAlgorithmDialog::makeDimensionInputs(const QString &propertyPrefix, QLayout *owningLayout,
+                                                 QString (*format)(const IMDDimension_const_sptr &), History history) {
   // Remove excess dimensions from the tied properties and the stored property
   // values
   size_t indexRemoved = 0;
   QString propertyNameRemoved = propertyPrefix;
   propertyNameRemoved.append(QString().number(indexRemoved));
-  Mantid::Kernel::Property *propertyRemoved =
-      getAlgorithmProperty(propertyNameRemoved);
+  Mantid::Kernel::Property *propertyRemoved = getAlgorithmProperty(propertyNameRemoved);
 
   while (propertyRemoved) {
     untie(propertyNameRemoved);
@@ -309,8 +279,8 @@ void SlicingAlgorithmDialog::makeDimensionInputs(
 
   const QString &txt = getCurrentInputWorkspaceName();
   if (!txt.isEmpty()) {
-    IMDWorkspace_sptr ws = std::dynamic_pointer_cast<IMDWorkspace>(
-        AnalysisDataService::Instance().retrieve(txt.toStdString()));
+    IMDWorkspace_sptr ws =
+        std::dynamic_pointer_cast<IMDWorkspace>(AnalysisDataService::Instance().retrieve(txt.toStdString()));
 
     size_t nDimensions = ws->getNumDims();
 
@@ -348,8 +318,7 @@ void SlicingAlgorithmDialog::makeDimensionInputs(
 void SlicingAlgorithmDialog::saveSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/SlicingAlgorithm");
-  settings.setValue("AlwaysCalculateExtents",
-                    (this->doAutoFillDimensions() ? 1 : 0));
+  settings.setValue("AlwaysCalculateExtents", (this->doAutoFillDimensions() ? 1 : 0));
   settings.endGroup();
 }
 
@@ -360,17 +329,14 @@ void SlicingAlgorithmDialog::loadSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/SlicingAlgorithm");
 
-  const bool alwaysCalculateExtents =
-      settings.value("AlwaysCalculateExtents", 1).toInt();
+  const bool alwaysCalculateExtents = settings.value("AlwaysCalculateExtents", 1).toInt();
   ui.ck_calculate->setChecked(alwaysCalculateExtents);
 
   settings.endGroup();
 }
 
 /// Event handler for the workspace changed event.
-void SlicingAlgorithmDialog::onWorkspaceChanged() {
-  buildDimensionInputs(this->doAutoFillDimensions());
-}
+void SlicingAlgorithmDialog::onWorkspaceChanged() { buildDimensionInputs(this->doAutoFillDimensions()); }
 
 /**
 Event handler for the axis changed event.
@@ -395,9 +361,7 @@ void SlicingAlgorithmDialog::onMaxFromInput(bool /*unused*/) {
 /**
 Event handler for the on-forced dimension rebuild event.
 */
-void SlicingAlgorithmDialog::onRebuildDimensions() {
-  buildDimensionInputs(true);
-}
+void SlicingAlgorithmDialog::onRebuildDimensions() { buildDimensionInputs(true); }
 
 void SlicingAlgorithmDialog::onCalculateChanged(bool /*unused*/) {
   if (ui.ck_axis_aligned->isChecked())
@@ -433,9 +397,7 @@ void SlicingAlgorithmDialog::commonSliceMDSetup(const bool isSliceMD) {
  * Do auto fill dimension inputs on changes.
  * @return True if do auto repair.
  */
-bool SlicingAlgorithmDialog::doAutoFillDimensions() const {
-  return ui.ck_calculate->isChecked();
-}
+bool SlicingAlgorithmDialog::doAutoFillDimensions() const { return ui.ck_calculate->isChecked(); }
 
 /*---------------------------------------------------------------------------------------------
 SliceMDDialog Methods

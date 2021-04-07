@@ -31,8 +31,7 @@ void Gaussian::init() {
   declareParameter("Sigma", 0.0, "Width parameter");
 }
 
-void Gaussian::functionLocal(double *out, const double *xValues,
-                             const size_t nData) const {
+void Gaussian::functionLocal(double *out, const double *xValues, const size_t nData) const {
   const double height = getParameter("Height");
   const double peakCentre = getParameter("PeakCentre");
   const double weight = pow(1 / getParameter("Sigma"), 2);
@@ -43,8 +42,7 @@ void Gaussian::functionLocal(double *out, const double *xValues,
   }
 }
 
-void Gaussian::functionDerivLocal(Jacobian *out, const double *xValues,
-                                  const size_t nData) {
+void Gaussian::functionDerivLocal(Jacobian *out, const double *xValues, const size_t nData) {
   const double height = getParameter("Height");
   const double peakCentre = getParameter("PeakCentre");
   const double weight = pow(1 / getParameter("Sigma"), 2);
@@ -55,8 +53,7 @@ void Gaussian::functionDerivLocal(Jacobian *out, const double *xValues,
     out->set(i, 0, e);
     out->set(i, 1, diff * height * e * weight);
     out->set(i, 2,
-             -0.5 * diff * diff * height *
-                 e); // derivative with respect to weight not sigma
+             -0.5 * diff * diff * height * e); // derivative with respect to weight not sigma
   }
 }
 
@@ -82,9 +79,7 @@ double Gaussian::activeParameter(size_t i) const {
 
 double Gaussian::centre() const { return getParameter("PeakCentre"); }
 double Gaussian::height() const { return getParameter("Height"); }
-double Gaussian::fwhm() const {
-  return 2.0 * sqrt(2.0 * M_LN2) * getParameter("Sigma");
-}
+double Gaussian::fwhm() const { return 2.0 * sqrt(2.0 * M_LN2) * getParameter("Sigma"); }
 double Gaussian::intensity() const {
   auto sigma = getParameter("Sigma");
   if (sigma == 0.0) {
@@ -93,17 +88,14 @@ double Gaussian::intensity() const {
       m_intensityCache = height;
     }
   } else {
-    m_intensityCache =
-        getParameter("Height") * getParameter("Sigma") * sqrt(2.0 * M_PI);
+    m_intensityCache = getParameter("Height") * getParameter("Sigma") * sqrt(2.0 * M_PI);
   }
   return m_intensityCache;
 }
 
 void Gaussian::setCentre(const double c) { setParameter("PeakCentre", c); }
 void Gaussian::setHeight(const double h) { setParameter("Height", h); }
-void Gaussian::setFwhm(const double w) {
-  setParameter("Sigma", w / (2.0 * sqrt(2.0 * M_LN2)));
-}
+void Gaussian::setFwhm(const double w) { setParameter("Sigma", w / (2.0 * sqrt(2.0 * M_LN2))); }
 void Gaussian::setIntensity(const double i) {
   m_intensityCache = i;
   auto sigma = getParameter("Sigma");
@@ -114,15 +106,12 @@ void Gaussian::setIntensity(const double i) {
   }
 }
 
-void Gaussian::fixCentre(bool isDefault) {
-  fixParameter("PeakCentre", isDefault);
-}
+void Gaussian::fixCentre(bool isDefault) { fixParameter("PeakCentre", isDefault); }
 
 void Gaussian::unfixCentre() { unfixParameter("PeakCentre"); }
 
 void Gaussian::fixIntensity(bool isDefault) {
-  std::string formula =
-      std::to_string(intensity() / sqrt(2.0 * M_PI)) + "/Sigma";
+  std::string formula = std::to_string(intensity() / sqrt(2.0 * M_PI)) + "/Sigma";
   tie("Height", formula, isDefault);
 }
 
@@ -135,16 +124,13 @@ void Gaussian::unfixIntensity() { removeTie("Height"); }
 /// @param right :: A pointer to an array of successive right bin boundaries
 /// (size = nBins).
 /// @param nBins :: Number of bins.
-void Gaussian::histogram1D(double *out, double left, const double *right,
-                           const size_t nBins) const {
+void Gaussian::histogram1D(double *out, double left, const double *right, const size_t nBins) const {
 
   double amplitude = intensity();
   const double peakCentre = getParameter("PeakCentre");
   const double sigma2 = getParameter("Sigma") * sqrt(2.0);
 
-  auto cumulFun = [sigma2, peakCentre](double x) {
-    return 0.5 * erf((x - peakCentre) / sigma2);
-  };
+  auto cumulFun = [sigma2, peakCentre](double x) { return 0.5 * erf((x - peakCentre) / sigma2); };
   double cLeft = cumulFun(left);
   for (size_t i = 0; i < nBins; ++i) {
     double cRight = cumulFun(right[i]);
@@ -159,18 +145,14 @@ void Gaussian::histogram1D(double *out, double left, const double *right,
 /// @param right :: A pointer to an array of successive right bin boundaries
 /// (size = nBins).
 /// @param nBins :: Number of bins.
-void Gaussian::histogramDerivative1D(Jacobian *jacobian, double left,
-                                     const double *right,
-                                     const size_t nBins) const {
+void Gaussian::histogramDerivative1D(Jacobian *jacobian, double left, const double *right, const size_t nBins) const {
   const double h = getParameter("Height");
   const double c = getParameter("PeakCentre");
   const double s = getParameter("Sigma");
   const double w = pow(1 / s, 2);
   const double sw = sqrt(w);
 
-  auto cumulFun = [sw, c](double x) {
-    return sqrt(M_PI / 2) / sw * erf(sw / sqrt(2.0) * (x - c));
-  };
+  auto cumulFun = [sw, c](double x) { return sqrt(M_PI / 2) / sw * erf(sw / sqrt(2.0) * (x - c)); };
   auto fun = [w, c](double x) { return exp(-w / 2 * pow(x - c, 2)); };
 
   double xl = left;
@@ -184,8 +166,7 @@ void Gaussian::histogramDerivative1D(Jacobian *jacobian, double left,
     jacobian->set(i, 0, cRight - cLeft);        // height
     jacobian->set(i, 1, -h * (fRight - fLeft)); // centre
     jacobian->set(i, 2,
-                  h_over_2w * ((xr - c) * fRight - (xl - c) * fLeft + cLeft -
-                               cRight)); // weight
+                  h_over_2w * ((xr - c) * fRight - (xl - c) * fLeft + cLeft - cRight)); // weight
     fLeft = fRight;
     cLeft = cRight;
     xl = xr;

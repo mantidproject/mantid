@@ -16,12 +16,8 @@ class MaxentEntropyPositiveValuesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MaxentEntropyPositiveValuesTest *createSuite() {
-    return new MaxentEntropyPositiveValuesTest();
-  }
-  static void destroySuite(MaxentEntropyPositiveValuesTest *suite) {
-    delete suite;
-  }
+  static MaxentEntropyPositiveValuesTest *createSuite() { return new MaxentEntropyPositiveValuesTest(); }
+  static void destroySuite(MaxentEntropyPositiveValuesTest *suite) { delete suite; }
 
   void test_derivative() {
 

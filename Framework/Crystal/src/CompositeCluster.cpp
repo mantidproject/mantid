@@ -18,8 +18,7 @@ private:
 
 public:
   explicit Comparitor(const size_t &label) : m_label(label) {}
-  bool
-  operator()(const std::shared_ptr<Mantid::Crystal::ICluster> &pCluster) const {
+  bool operator()(const std::shared_ptr<Mantid::Crystal::ICluster> &pCluster) const {
     return pCluster->containsLabel(m_label);
   }
 };
@@ -33,8 +32,8 @@ namespace Crystal {
  * @param ws : Workspace to integrate
  * @return Integrated signal and error sq values.
  */
-ICluster::ClusterIntegratedValues CompositeCluster::integrate(
-    std::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const {
+ICluster::ClusterIntegratedValues
+CompositeCluster::integrate(std::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const {
 
   double errorIntSQ = 0;
   double sigInt = 0;
@@ -51,8 +50,7 @@ ICluster::ClusterIntegratedValues CompositeCluster::integrate(
  * Write to an output histo workspace.
  * @param ws
  */
-void CompositeCluster::writeTo(
-    std::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const {
+void CompositeCluster::writeTo(std::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const {
   for (const auto &ownedCluster : m_ownedClusters) {
     ownedCluster->writeTo(ws);
   }
@@ -65,8 +63,7 @@ void CompositeCluster::writeTo(
 size_t CompositeCluster::getLabel() const {
   findMinimum();
   if (!m_label.is_initialized()) {
-    throw std::runtime_error(
-        "No child IClusters. CompositeCluster::getLabel() is not supported.");
+    throw std::runtime_error("No child IClusters. CompositeCluster::getLabel() is not supported.");
   } else {
     return m_label.get(); // Assumes all are uniform.
   }
@@ -84,9 +81,8 @@ size_t CompositeCluster::getOriginalLabel() const { return getLabel(); }
  * @return total size.
  */
 size_t CompositeCluster::size() const {
-  return std::accumulate(
-      m_ownedClusters.cbegin(), m_ownedClusters.cend(), static_cast<size_t>(0),
-      [](auto sum, const auto &cluster) { return sum + cluster->size(); });
+  return std::accumulate(m_ownedClusters.cbegin(), m_ownedClusters.cend(), static_cast<size_t>(0),
+                         [](auto sum, const auto &cluster) { return sum + cluster->size(); });
 }
 
 /// Add an index. This method does not apply to composite clusters.
@@ -115,8 +111,7 @@ void CompositeCluster::findMinimum() const {
  * Convert the disjointSet to a uniform minimum value
  * @param disjointSet : DisjointSets to adapt.
  */
-void CompositeCluster::toUniformMinimum(
-    std::vector<DisjointElement> &disjointSet) {
+void CompositeCluster::toUniformMinimum(std::vector<DisjointElement> &disjointSet) {
   if (!m_ownedClusters.empty()) {
     ICluster *minCluster = m_ownedClusters.front().get();
     size_t minLabel = minCluster->getLabel();
@@ -172,9 +167,7 @@ void CompositeCluster::add(std::shared_ptr<ICluster> &toOwn) {
  */
 bool CompositeCluster::containsLabel(const size_t &label) const {
   Comparitor comparitor(label);
-  return m_ownedClusters.end() != std::find_if(m_ownedClusters.begin(),
-                                               m_ownedClusters.end(),
-                                               comparitor);
+  return m_ownedClusters.end() != std::find_if(m_ownedClusters.begin(), m_ownedClusters.end(), comparitor);
 }
 
 } // namespace Crystal
