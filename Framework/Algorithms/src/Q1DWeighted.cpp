@@ -279,10 +279,12 @@ void Q1DWeighted::getViewportParams(
   viewportParams[params[5]][2] = std::stod(params[8]);
   viewportParams[params[5]][3] = std::stod(params[9]);
 
-  if (fabs(viewportParams["Rotation"][0]) > 1e-10 ||
-      fabs(viewportParams["Rotation"][1]) > 1e-10 ||
-      fabs(viewportParams["Rotation"][3]) > 1e-10 ||
-      viewportParams["Rotation"][2] != 1.) {
+  double epsilon = 1e-10;
+
+  if (std::fabs(viewportParams["Rotation"][0]) > epsilon ||
+      std::fabs(viewportParams["Rotation"][1]) > epsilon ||
+      std::fabs(viewportParams["Rotation"][3]) > epsilon ||
+      std::fabs(viewportParams["Rotation"][2] - 1) > epsilon) {
     g_log.warning("The shapes were created using a rotated viewport not using "
                   "Z- projection, which is not supported. Results are likely "
                   "to be erroneous.");
@@ -307,14 +309,14 @@ void Q1DWeighted::getSectorParams(
 
   double centerAngle = (startAngle + endAngle) / 2;
   if (endAngle < startAngle)
-    centerAngle = fmod(centerAngle + M_PI, 2 * M_PI);
+    centerAngle = std::fmod(centerAngle + M_PI, 2 * M_PI);
 
   double angleRange = std::fmod(endAngle - startAngle, 2 * M_PI);
   angleRange = angleRange >= 0 ? angleRange : angleRange + 2 * M_PI;
 
   // since the viewport was in Z-, the axis are inverted so we have to take the
   // symmetry of the angle
-  centerAngle = fmod(3 * M_PI - centerAngle, 2 * M_PI);
+  centerAngle = std::fmod(3 * M_PI - centerAngle, 2 * M_PI);
 
   double xOffset = viewport["Translation"][0];
   double yOffset = viewport["Translation"][1];
@@ -354,13 +356,15 @@ bool Q1DWeighted::checkIfSymetricalWedge(double innerRadius, double outerRadius,
                                          double angleRange) {
 
   for (size_t i = 0; i < m_wedgesInnerRadius.size(); ++i) {
-    double diffAngle = fabs(fmod(centerAngle - m_wedgesCenterAngle[i], M_PI));
+    double diffAngle =
+        std::fabs(std::fmod(centerAngle - m_wedgesCenterAngle[i], M_PI));
 
+    double epsilon = 1e-3;
     if (innerRadius == m_wedgesInnerRadius[i] &&
         outerRadius == m_wedgesOuterRadius[i] &&
         centerX == m_wedgesCenterX[i] && centerY == m_wedgesCenterY[i] &&
-        fabs(angleRange - m_wedgesAngleRange[i]) < 1e-3 &&
-        (diffAngle < 1e-3 || fabs(diffAngle - M_PI) < 1e-3)) {
+        std::fabs(angleRange - m_wedgesAngleRange[i]) < epsilon &&
+        (diffAngle < epsilon || std::fabs(diffAngle - M_PI) < epsilon)) {
       m_wedgesIsAsymmetric[i] = false;
       return true;
     }
@@ -484,13 +488,13 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
           double centerAngle = m_wedgesCenterAngle[iw];
           const V3D subPix = V3D(position.X(), position.Y(), 0.0);
           const V3D center = V3D(m_wedgesCenterX[iw], m_wedgesCenterY[iw], 0);
-          double angle =
-              fabs((subPix - center)
-                       .angle(V3D(cos(centerAngle), sin(centerAngle), 0.0)));
+          double angle = std::fabs(
+              (subPix - center)
+                  .angle(V3D(cos(centerAngle), sin(centerAngle), 0.0)));
 
           if ((angle < m_wedgesAngleRange[iw] * 0.5 ||
                (!m_wedgesIsAsymmetric[iw] &&
-                fabs(M_PI - angle) < m_wedgesAngleRange[iw] * 0.5)) &&
+                std::fabs(M_PI - angle) < m_wedgesAngleRange[iw] * 0.5)) &&
               subPix.distance(center) > m_wedgesInnerRadius[iw] &&
               (m_wedgesOuterRadius[iw] <= 0 ||
                subPix.distance(center) <= m_wedgesOuterRadius[iw])) {
@@ -508,7 +512,7 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-} // namespace Algorithms
+}
 
 /**
  * @brief Q1DWeighted::finalize
