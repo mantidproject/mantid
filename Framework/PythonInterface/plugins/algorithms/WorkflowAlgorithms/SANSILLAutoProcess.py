@@ -412,7 +412,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 Stitch1DMany(InputWorkspaces=outputSamples,
                              OutputWorkspace=stitched,
                              ScaleRHSWorkspace=True,
-                             indexOfReference=self.stitch_reference_index)
+                             IndexOfReference=self.stitch_reference_index)
                 outputSamples.append(stitched)
             except RuntimeError as re:
                 self.log().warning("Unable to stitch automatically, consider "
@@ -455,13 +455,17 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         # stitch if possible and group
         for i in range(len(outputWedges[0])):
             inWs = [outputWedges[d][i] for d in range(self.dimensionality)]
-            try:
-                stitched = self.output + "_wedge_" + str(i + 1) + "_stitched"
-                Stitch1DMany(InputWorkspaces=inWs, OutputWorkspace=stitched)
-                inWs.append(stitched)
-            except RuntimeError as re:
-                self.log().warning("Unable to stitch automatically, consider "
-                                   "stitching manually: " + str(re))
+            if len(inWs) > 1:
+                try:
+                    stitched = self.output + "_wedge_" + str(i + 1) + "_stitched"
+                    Stitch1DMany(InputWorkspaces=inWs,
+                                 OutputWorkspace=stitched,
+                                 ScaleRHSWorkspace=True,
+                                 IndexOfReference=self.stitch_reference_index)
+                    inWs.append(stitched)
+                except RuntimeError as re:
+                    self.log().warning("Unable to stitch automatically, consider "
+                                       "stitching manually: " + str(re))
             GroupWorkspaces(InputWorkspaces=inWs,
                             OutputWorkspace=self.output + "_wedge_" + str(i + 1))
 
