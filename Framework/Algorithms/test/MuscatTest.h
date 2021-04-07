@@ -5,12 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAlgorithms/MuscatElastic.h"
+#include "MantidAlgorithms/Muscat.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -25,12 +24,12 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-class MuscatElasticTest : public CxxTest::TestSuite {
+class MuscatTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MuscatElasticTest *createSuite() { return new MuscatElasticTest(); }
-  static void destroySuite(MuscatElasticTest *suite) { delete suite; }
+  static MuscatTest *createSuite() { return new MuscatTest(); }
+  static void destroySuite(MuscatTest *suite) { delete suite; }
 
   void test_flat_plate_sample_vs_analytic_result() {
     // generate a result corresponding to Figure 4 in the Mancinelli paper (flat
@@ -78,7 +77,7 @@ public:
     flatPlateShape->setMaterial(mat);
     inputWorkspace->mutableSample().setShape(flatPlateShape);
 
-    Mantid::Algorithms::MuscatElastic alg;
+    Mantid::Algorithms::Muscat alg;
     alg.setAlwaysStoreInADS(false);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());

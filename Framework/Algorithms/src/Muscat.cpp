@@ -1,10 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-//   NScD Oak Ridge National Laboratory, European Spallation MuscatElastic,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAlgorithms/MuscatElastic.h"
+#include "MantidAlgorithms/Muscat.h"
 #include "MantidAPI/EqualBinSizesValidator.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -40,12 +40,12 @@ namespace Mantid {
 namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(MuscatElastic)
+DECLARE_ALGORITHM(Muscat)
 
 /**
  * Initialize the algorithm
  */
-void MuscatElastic::init() {
+void Muscat::init() {
   // The input workspace must have an instrument and units of wavelength
   auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
@@ -93,7 +93,7 @@ void MuscatElastic::init() {
   std::vector<std::string> propOptions{"Elastic", "Direct", "Indirect"};
   declareProperty("EMode", "Elastic",
                   std::make_shared<Kernel::StringListValidator>(propOptions),
-                  "The energy mode (default: elastic)");
+                  "The energy mode (default: Elastic)");
 
   declareProperty(
       "NeutronPathsSingle", DEFAULT_NPATHS, positiveInt,
@@ -142,7 +142,7 @@ void MuscatElastic::init() {
  * Validate the input properties.
  * @return a map where keys are property names and values the found issues
  */
-std::map<std::string, std::string> MuscatElastic::validateInputs() {
+std::map<std::string, std::string> Muscat::validateInputs() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   std::map<std::string, std::string> issues;
   Geometry::IComponent_const_sptr sample =
@@ -180,7 +180,7 @@ std::map<std::string, std::string> MuscatElastic::validateInputs() {
 /**
  * Execution code
  */
-void MuscatElastic::exec() {
+void Muscat::exec() {
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr SQWS = getProperty("SofqWorkspace");
   // take log of S(Q) and store it this way
@@ -356,6 +356,16 @@ void MuscatElastic::exec() {
     API::AnalysisDataService::Instance().addOrReplace(wsname, outputWSs[i]);
     wsgroup->addWorkspace(outputWSs[i]);
   }
+
+  auto summedOutput = createOutputWorkspace(*inputWS);
+  for (auto i = 0; i < outputWSs.size(); i++) {
+    summedOutput = summedOutput + outputWSs[i];
+  }
+  API::AnalysisDataService::Instance().addOrReplace(
+      "Scatter_1_" + std::to_string(outputWSs.size()) + "_Summed",
+      summedOutput);
+  wsgroup->addWorkspace(summedOutput);
+
   // set the output property
   setProperty("OutputWorkspace", wsgroup);
 
@@ -376,9 +386,9 @@ void MuscatElastic::exec() {
  * @return A tuple containing the mean free path (metres), the total cross
  * section (barns)
  */
-double MuscatElastic::new_vector(const MatrixWorkspace_sptr sigmaSSWS,
-                                 const Material &material, double kinc,
-                                 bool specialSingleScatterCalc) {
+double Muscat::new_vector(const MatrixWorkspace_sptr sigmaSSWS,
+                          const Material &material, double kinc,
+                          bool specialSingleScatterCalc) {
   double scatteringXSection, absorbXsection;
   if (specialSingleScatterCalc) {
     absorbXsection = 0;
@@ -404,7 +414,7 @@ double MuscatElastic::new_vector(const MatrixWorkspace_sptr sigmaSSWS,
  * @param x The x value to interpolate at
  * @return The interpolated value
  */
-double MuscatElastic::interpolateLogQuadratic(
+double Muscat::interpolateLogQuadratic(
     const MatrixWorkspace_sptr &workspaceToInterpolate, double x) {
   if (x > workspaceToInterpolate->points(0).back()) {
     return exp(workspaceToInterpolate->y(0).back());
@@ -455,14 +465,14 @@ double MuscatElastic::interpolateLogQuadratic(
  * @param specialSingleScatterCalc
  * @return An average weight across all of the paths
  */
-double MuscatElastic::simulatePaths(const int nPaths, const size_t nScatters,
-                                    const Sample &sample,
-                                    const Geometry::Instrument &instrument,
-                                    Kernel::PseudoRandomNumberGenerator &rng,
-                                    const MatrixWorkspace_sptr sigmaSSWS,
-                                    const MatrixWorkspace_sptr SOfQ,
-                                    const double kinc, Kernel::V3D detPos,
-                                    bool specialSingleScatterCalc) {
+double Muscat::simulatePaths(const int nPaths, const size_t nScatters,
+                             const Sample &sample,
+                             const Geometry::Instrument &instrument,
+                             Kernel::PseudoRandomNumberGenerator &rng,
+                             const MatrixWorkspace_sptr sigmaSSWS,
+                             const MatrixWorkspace_sptr SOfQ, const double kinc,
+                             Kernel::V3D detPos,
+                             bool specialSingleScatterCalc) {
   double sumOfWeights = 0, sumOfQSS = 0.;
   auto sourcePos = instrument.getSource()->getPos();
 
@@ -511,12 +521,13 @@ double MuscatElastic::simulatePaths(const int nPaths, const size_t nScatters,
  * @return A tuple containing a success\fail boolean, the calculated weight and
  * a sum of the QSS values across the n-1 multiple scatters
  */
-std::tuple<bool, double, double> MuscatElastic::scatter(
-    const size_t nScatters, const Sample &sample,
-    const Geometry::Instrument &instrument, const V3D sourcePos,
-    Kernel::PseudoRandomNumberGenerator &rng, const double sigma_total,
-    double scatteringXSection, const MatrixWorkspace_sptr SOfQ,
-    const double kinc, Kernel::V3D detPos, bool specialSingleScatterCalc) {
+std::tuple<bool, double, double>
+Muscat::scatter(const size_t nScatters, const Sample &sample,
+                const Geometry::Instrument &instrument, const V3D sourcePos,
+                Kernel::PseudoRandomNumberGenerator &rng,
+                const double sigma_total, double scatteringXSection,
+                const MatrixWorkspace_sptr SOfQ, const double kinc,
+                Kernel::V3D detPos, bool specialSingleScatterCalc) {
   double weight = 1;
   double numberDensity = sample.getMaterial().numberDensityEffective();
   // if scale up scatteringXSection by 100*numberDensity then may not need
@@ -560,11 +571,10 @@ std::tuple<bool, double, double> MuscatElastic::scatter(
 }
 
 // update track direction, QSS and weight
-void MuscatElastic::q_dir(Geometry::Track &track,
-                          const MatrixWorkspace_sptr SOfQ, const double kinc,
-                          const double scatteringXSection,
-                          Kernel::PseudoRandomNumberGenerator &rng, double &QSS,
-                          double &weight) {
+void Muscat::q_dir(Geometry::Track &track, const MatrixWorkspace_sptr SOfQ,
+                   const double kinc, const double scatteringXSection,
+                   Kernel::PseudoRandomNumberGenerator &rng, double &QSS,
+                   double &weight) {
   auto qvalues = SOfQ->histogram(0).x().rawData();
   // For elastic just select a q value in range 0 to 2k
   // The following will eventually be used for inelastic where it's less trivial
@@ -619,10 +629,11 @@ void MuscatElastic::q_dir(Geometry::Track &track,
   }
 }
 
-Geometry::Track MuscatElastic::start_point(
-    const Geometry::IObject &shape,
-    std::shared_ptr<const Geometry::ReferenceFrame> frame, const V3D sourcePos,
-    Kernel::PseudoRandomNumberGenerator &rng) {
+Geometry::Track
+Muscat::start_point(const Geometry::IObject &shape,
+                    std::shared_ptr<const Geometry::ReferenceFrame> frame,
+                    const V3D sourcePos,
+                    Kernel::PseudoRandomNumberGenerator &rng) {
   int MAX_ATTEMPTS = 100;
   for (int i = 0; i < MAX_ATTEMPTS; i++) {
     auto t = generateInitialTrack(shape, frame, sourcePos, rng);
@@ -636,14 +647,14 @@ Geometry::Track MuscatElastic::start_point(
       return t;
     }
   }
-  throw std::runtime_error("MuscatElastic::start_point() - Unable to "
+  throw std::runtime_error("Muscat::start_point() - Unable to "
                            "generate entry point into sample");
 }
 
 // update track start point and weight
-void MuscatElastic::updateWeightAndPosition(
-    Geometry::Track &track, double &weight, const double vmu,
-    const double sigma_total, Kernel::PseudoRandomNumberGenerator &rng) {
+void Muscat::updateWeightAndPosition(Geometry::Track &track, double &weight,
+                                     const double vmu, const double sigma_total,
+                                     Kernel::PseudoRandomNumberGenerator &rng) {
   double dl = track.front().distInsideObject;
   double b4 = (1.0 - exp(-dl * vmu));
   double vmfp = 1.0 / vmu;
@@ -661,7 +672,7 @@ void MuscatElastic::updateWeightAndPosition(
  * @param rng Random number generator
  * @return a track
  */
-Geometry::Track MuscatElastic::generateInitialTrack(
+Geometry::Track Muscat::generateInitialTrack(
     const Geometry::IObject &shape,
     std::shared_ptr<const Geometry::ReferenceFrame> frame, const V3D sourcePos,
     Kernel::PseudoRandomNumberGenerator &rng) {
@@ -693,7 +704,7 @@ Geometry::Track MuscatElastic::generateInitialTrack(
  * @param track A track defining the current trajectory
  * @param vl A distance to move along the current trajectory
  */
-void MuscatElastic::inc_xyz(Geometry::Track &track, double vl) {
+void Muscat::inc_xyz(Geometry::Track &track, double vl) {
   Kernel::V3D position = track.front().entryPoint;
   Kernel::V3D direction = track.direction();
   auto x = position[0] + vl * direction[0];
@@ -715,16 +726,16 @@ void MuscatElastic::inc_xyz(Geometry::Track &track, double vl) {
  * @return a pointer to an SparseInstrument object
  */
 std::shared_ptr<SparseWorkspace>
-MuscatElastic::createSparseWorkspace(const API::MatrixWorkspace &modelWS,
-                                     const size_t wavelengthPoints,
-                                     const size_t rows, const size_t columns) {
+Muscat::createSparseWorkspace(const API::MatrixWorkspace &modelWS,
+                              const size_t wavelengthPoints, const size_t rows,
+                              const size_t columns) {
   auto sparseWS = std::make_shared<SparseWorkspace>(modelWS, wavelengthPoints,
                                                     rows, columns);
   return sparseWS;
 }
 
 MatrixWorkspace_sptr
-MuscatElastic::createOutputWorkspace(const MatrixWorkspace &inputWS) const {
+Muscat::createOutputWorkspace(const MatrixWorkspace &inputWS) const {
   MatrixWorkspace_uptr outputWS = DataObjects::create<Workspace2D>(inputWS);
   // The algorithm computes the signal values at bin centres so they should
   // be treated as a distribution
@@ -739,12 +750,12 @@ MuscatElastic::createOutputWorkspace(const MatrixWorkspace &inputWS) const {
  * class
  * @return a pointer to an InterpolationOption object
  */
-std::unique_ptr<InterpolationOption> MuscatElastic::createInterpolateOption() {
+std::unique_ptr<InterpolationOption> Muscat::createInterpolateOption() {
   auto interpolationOpt = std::make_unique<InterpolationOption>();
   return interpolationOpt;
 }
 
-void MuscatElastic::interpolateFromSparse(
+void Muscat::interpolateFromSparse(
     MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
     const Mantid::Algorithms::InterpolationOption &interpOpt) {
   const auto &spectrumInfo = targetWS.spectrumInfo();

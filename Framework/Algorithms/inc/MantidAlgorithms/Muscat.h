@@ -32,10 +32,10 @@ namespace Algorithms {
   @author Danny Hindson
   @date 2020-11-10
 */
-class MANTID_ALGORITHMS_DLL MuscatElastic : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Muscat : public API::Algorithm {
 public:
   /// Algorithm's name
-  const std::string name() const override { return "MuscatElastic"; }
+  const std::string name() const override { return "Muscat"; }
   /// Algorithm's version
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
