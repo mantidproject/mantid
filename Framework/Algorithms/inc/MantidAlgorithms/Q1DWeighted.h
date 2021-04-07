@@ -77,14 +77,25 @@ private:
   void calculate(const API::MatrixWorkspace_const_sptr &);
   void finalize(const API::MatrixWorkspace_const_sptr &);
 
+  struct wedgeParameters {
+    wedgeParameters(double innerRadius, double outerRadius, double centerX,
+                    double centerY, double angleMiddle, double angleRange)
+        : innerRadius(innerRadius), outerRadius(outerRadius), centerX(centerX),
+          centerY(centerY), angleMiddle(angleMiddle), angleRange(angleRange) {}
+    double innerRadius;
+    double outerRadius;
+    double centerX;
+    double centerY;
+    double angleMiddle;
+    double angleRange;
+  };
+
   void getTableShapes();
   void getViewportParams(std::string &,
                          std::map<std::string, std::vector<double>> &);
   void getSectorParams(std::vector<std::string> &,
                        std::map<std::string, std::vector<double>> &);
-  bool checkIfSymetricalWedge(double innerRadius, double outerRadius,
-                              double centerX, double centerY,
-                              double centerAngle, double angleRange);
+  bool checkIfSymetricalWedge(wedgeParameters &wedge);
   std::vector<std::vector<std::vector<double>>> m_intensities;
   std::vector<std::vector<std::vector<double>>> m_errors;
   std::vector<std::vector<std::vector<double>>> m_normalisation;
@@ -93,16 +104,7 @@ private:
   size_t m_nLambda;
   size_t m_nWedges;
 
-  std::vector<double> m_wedgesInnerRadius;
-  std::vector<double> m_wedgesOuterRadius;
-  std::vector<double> m_wedgesCenterX;
-  std::vector<double> m_wedgesCenterY;
-  std::vector<double> m_wedgesCenterAngle;
-  std::vector<double> m_wedgesAngleRange;
-
-  // for each wedge, false if the integration should also take its symmetric
-  // into account
-  std::vector<bool> m_wedgesIsAsymmetric;
+  std::vector<wedgeParameters> m_wedgesParameters;
 
   size_t m_nSpec;
   int m_nSubPixels;
@@ -117,6 +119,5 @@ private:
   /// Execution code
   void exec() override;
 };
-
 } // namespace Algorithms
 } // namespace Mantid

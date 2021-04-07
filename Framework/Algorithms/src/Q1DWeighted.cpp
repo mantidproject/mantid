@@ -144,13 +144,8 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
   // histogram
   m_nLambda = inputWS->readY(0).size();
 
-  m_wedgesInnerRadius = std::vector<double>();
-  m_wedgesOuterRadius = std::vector<double>();
-  m_wedgesCenterX = std::vector<double>();
-  m_wedgesCenterY = std::vector<double>();
-  m_wedgesCenterAngle = std::vector<double>();
-  m_wedgesAngleRange = std::vector<double>();
-  m_wedgesIsAsymmetric = std::vector<bool>();
+  m_wedgesParameters = std::vector<Q1DWeighted::wedgeParameters>();
+
   m_asymmWedges = getProperty("AsymmetricWedges");
 
   if (getPropertyValue("ShapeTable").empty()) {
@@ -163,35 +158,25 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
 
     // Define wedges parameters in a general way
     for (size_t iw = 0; iw < m_nWedges; ++iw) {
-      m_wedgesInnerRadius.push_back(0);
-      // Negative outer radius is taken as a convention for infinity
-      m_wedgesOuterRadius.push_back(-1);
-      m_wedgesCenterX.push_back(0);
-      m_wedgesCenterY.push_back(0);
+      double innerRadius = 0.;
 
-      double centerAngle =
+      // Negative outer radius is taken as a convention for infinity
+      double outerRadius = -1.;
+      double centerX = 0.;
+      double centerY = 0.;
+      double angleRange = wedgeAngle * deg2rad;
+      double midAngle =
           M_PI * static_cast<double>(iw) / static_cast<double>(m_nWedges);
       if (m_asymmWedges)
-        centerAngle *= 2;
-      centerAngle += wedgeOffset * deg2rad;
-      m_wedgesCenterAngle.push_back(centerAngle);
-      m_wedgesAngleRange.push_back(wedgeAngle * deg2rad);
+        midAngle *= 2;
+      midAngle += wedgeOffset * deg2rad;
 
-      m_wedgesIsAsymmetric.push_back(m_asymmWedges);
+      m_wedgesParameters.push_back(Q1DWeighted::wedgeParameters(
+          innerRadius, outerRadius, centerX, centerY, midAngle, angleRange));
     }
   } else {
     getTableShapes();
-    m_nWedges = m_wedgesInnerRadius.size();
-
-    for (size_t i = 0; i < m_nWedges; ++i) {
-      if (!m_asymmWedges && m_wedgesIsAsymmetric[i]) {
-        g_log.warning()
-            << "No symmetric counterpart provided for a shape. Wedge " << i + 1
-            << " will have results asymmetricaly computed (i.e. only on the "
-               "provided sector)."
-            << std::endl;
-      }
-    }
+    m_nWedges = m_wedgesParameters.size();
   }
 
   // we store everything in 3D arrays
@@ -255,7 +240,7 @@ void Q1DWeighted::getTableShapes() {
  * @param viewportParams the map to fill
  */
 void Q1DWeighted::getViewportParams(
-    std::string &viewport,
+    const std::string &viewport,
     std::map<std::string, std::vector<double>> &viewportParams) {
   std::vector<std::string> params;
   boost::algorithm::split(params, viewport,
@@ -328,17 +313,11 @@ void Q1DWeighted::getSectorParams(
   double centerX = -(std::stod(params[5]) - xOffset) / zoom;
   double centerY = (std::stod(params[6]) - yOffset) / zoom;
 
-  if (m_asymmWedges ||
-      !checkIfSymetricalWedge(innerRadius, outerRadius, centerX, centerY,
-                              centerAngle, angleRange)) {
+  Q1DWeighted::wedgeParameters wedge = Q1DWeighted::wedgeParameters(
+      innerRadius, outerRadius, centerX, centerY, centerAngle, angleRange);
 
-    m_wedgesInnerRadius.push_back(innerRadius);
-    m_wedgesOuterRadius.push_back(outerRadius);
-    m_wedgesCenterAngle.push_back(centerAngle);
-    m_wedgesAngleRange.push_back(angleRange);
-    m_wedgesCenterX.push_back(centerX);
-    m_wedgesCenterY.push_back(centerY);
-    m_wedgesIsAsymmetric.push_back(true);
+  if (m_asymmWedges || !checkIfSymetricalWedge(wedge)) {
+    m_wedgesParameters.push_back(wedge);
   }
 }
 
@@ -354,22 +333,19 @@ void Q1DWeighted::getSectorParams(
  * @param angleRange the angular range of the wedge
  * @return true if a symetrical wedge already exists
  */
-bool Q1DWeighted::checkIfSymetricalWedge(double innerRadius, double outerRadius,
-                                         double centerX, double centerY,
-                                         double centerAngle,
-                                         double angleRange) {
+bool Q1DWeighted::checkIfSymetricalWedge(Q1DWeighted::wedgeParameters &wedge) {
 
-  for (size_t i = 0; i < m_wedgesInnerRadius.size(); ++i) {
+  for (size_t i = 0; i < m_wedgesParameters.size(); ++i) {
+    Q1DWeighted::wedgeParameters params = m_wedgesParameters[i];
     double diffAngle =
-        std::fabs(std::fmod(centerAngle - m_wedgesCenterAngle[i], M_PI));
+        std::fabs(std::fmod(wedge.angleMiddle - params.angleMiddle, M_PI));
 
     double epsilon = 1e-3;
-    if (innerRadius == m_wedgesInnerRadius[i] &&
-        outerRadius == m_wedgesOuterRadius[i] &&
-        centerX == m_wedgesCenterX[i] && centerY == m_wedgesCenterY[i] &&
-        std::fabs(angleRange - m_wedgesAngleRange[i]) < epsilon &&
-        (diffAngle < epsilon || std::fabs(diffAngle - M_PI) < epsilon)) {
-      m_wedgesIsAsymmetric[i] = false;
+    if (wedge.innerRadius == params.innerRadius &&
+        wedge.outerRadius == params.outerRadius &&
+        wedge.centerX == params.centerX && wedge.centerY == params.centerY &&
+        std::fabs(wedge.angleRange - params.angleRange) < epsilon &&
+        std::fabs(diffAngle - M_PI) < epsilon) {
       return true;
     }
   }
@@ -489,19 +465,27 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
         }
 
         for (size_t iw = 0; iw < m_nWedges; ++iw) {
-          double centerAngle = m_wedgesCenterAngle[iw];
+
+          Q1DWeighted::wedgeParameters wedge = m_wedgesParameters[iw];
+          double centerAngle = wedge.angleMiddle;
           const V3D subPix = V3D(position.X(), position.Y(), 0.0);
-          const V3D center = V3D(m_wedgesCenterX[iw], m_wedgesCenterY[iw], 0);
+          const V3D center = V3D(wedge.centerX, wedge.centerY, 0);
           double angle = std::fabs(
               (subPix - center)
                   .angle(V3D(cos(centerAngle), sin(centerAngle), 0.0)));
 
-          if ((angle < m_wedgesAngleRange[iw] * 0.5 ||
-               (!m_wedgesIsAsymmetric[iw] &&
-                std::fabs(M_PI - angle) < m_wedgesAngleRange[iw] * 0.5)) &&
-              subPix.distance(center) > m_wedgesInnerRadius[iw] &&
-              (m_wedgesOuterRadius[iw] <= 0 ||
-               subPix.distance(center) <= m_wedgesOuterRadius[iw])) {
+          // checks that the pixel is within the angular range or, if the
+          // integration is symmetrical, within the angular range + PI
+          bool isWithinAngularRange =
+              angle < wedge.angleRange * 0.5 ||
+              (!m_asymmWedges &&
+               std::fabs(M_PI - angle) < wedge.angleRange * 0.5);
+
+          bool isWithinRadii = subPix.distance(center) > wedge.innerRadius &&
+                               (wedge.outerRadius <= 0 ||
+                                subPix.distance(center) <= wedge.outerRadius);
+
+          if (isWithinAngularRange && isWithinRadii) {
             PARALLEL_CRITICAL(iqnorm_wedges) {
               // first index 0 is the full azimuth, need to offset+1
               m_intensities[iw + 1][j][k] += YIn[j] * w;
@@ -536,7 +520,8 @@ void Q1DWeighted::finalize(const MatrixWorkspace_const_sptr &inputWS) {
       MatrixWorkspace_sptr wedgeWs =
           createOutputWorkspace(inputWS, m_nQ, m_qBinEdges);
       wedgeWs->mutableRun().addProperty(
-          "wedge_angle", m_wedgesCenterAngle[iw] / deg2rad, "degrees", true);
+          "wedge_angle", m_wedgesParameters[iw].angleMiddle / deg2rad,
+          "degrees", true);
       wsgroup->addWorkspace(wedgeWs);
     }
     // set the output property
