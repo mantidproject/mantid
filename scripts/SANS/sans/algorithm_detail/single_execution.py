@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 import sys
+from collections import OrderedDict
 from typing import List, Tuple
 
 from mantid.kernel import mpisetup
@@ -149,17 +150,17 @@ def _pack_bundles(reduction_alg, reduction_setting_bundle):
         unfit_trans_ws = out_unfit_trans_ws.getItem(i) if out_unfit_trans_ws else None
 
         slice = ReducedSlice(
-            wav_range = reduced_ws.getRun().getProperty("Wavelength Range").valueAsStr,
-            output_bundle = OutputBundle(state=reduction_setting_bundle.state,
-                                         data_type=reduction_setting_bundle.data_type,
-                                         reduction_mode=reduction_setting_bundle.reduction_mode,
-                                         output_workspace=reduced_ws),
-            parts_bundle = OutputPartsBundle(
+            wav_range=reduced_ws.getRun().getProperty("Wavelength Range").valueAsStr,
+            output_bundle=OutputBundle(state=reduction_setting_bundle.state,
+                                       data_type=reduction_setting_bundle.data_type,
+                                       reduction_mode=reduction_setting_bundle.reduction_mode,
+                                       output_workspace=reduced_ws),
+            parts_bundle=OutputPartsBundle(
                 state=reduction_setting_bundle.state, data_type=reduction_setting_bundle.data_type,
                 reduction_mode=reduction_setting_bundle.reduction_mode,
                 output_workspace_count=output_workspace_counts.getItem(i),
                 output_workspace_norm=output_workspace_norms.getItem(i)),
-            transmission_bundle = OutputTransmissionBundle(
+            transmission_bundle=OutputTransmissionBundle(
                 state=reduction_setting_bundle.state, data_type=reduction_setting_bundle.data_type,
                 calculated_transmission_workspace=calc_trans_ws,
                 unfitted_transmission_workspace=unfit_trans_ws)
@@ -169,9 +170,9 @@ def _pack_bundles(reduction_alg, reduction_setting_bundle):
 
 
 def pair_up_wav_ranges(list_to_pair: CompletedSlices) -> List[Tuple[ReducedSlice]]:
-    seen = set()  # Preserve order for system tests so we can't use set directly
-    all_wav_ranges = [k.wav_range for k in list_to_pair if (k.wav_range not in seen or seen.add(k.wav_range))]
-    packed = [tuple(filter(lambda x: x.wav_range == k, list_to_pair)) for k in all_wav_ranges]
+    # We need to preserve order for system tests, so we can't use set directly
+    unique_wav_lengths = list(OrderedDict.fromkeys(map(lambda i: i.wav_range, list_to_pair)))
+    packed = [tuple(filter(lambda x: x.wav_range == k, list_to_pair)) for k in unique_wav_lengths]
     # If we have >2 elements we need to consider another attribute as they aren't unique enough
     assert all(len(i) <= 2 for i in packed)
     return packed
@@ -279,9 +280,11 @@ def get_merge_bundle_for_merge_request(completed_slices: CompletedSlices, parent
         merged = merger.merge(matched_reductions, parent_alg)
         replace_prop = True
         if state.save.user_file:
-            merged.merged_workspace.getRun().addProperty("UserFile", os.path.basename(state.save.user_file), replace_prop)
+            merged.merged_workspace.getRun().addProperty("UserFile", os.path.basename(state.save.user_file),
+                                                         replace_prop)
         if state.save.batch_file:
-            merged.merged_workspace.getRun().addProperty("BatchFile", os.path.basename(state.save.batch_file), replace_prop)
+            merged.merged_workspace.getRun().addProperty("BatchFile", os.path.basename(state.save.batch_file),
+                                                         replace_prop)
         merged_workspaces.append(merged)
     return merged_workspaces
 
@@ -345,15 +348,17 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice_o
     output_calculated_transmission_workspace, output_unfitted_transmission_workspace = \
         get_transmission_workspaces_from_ads(state, reduction_mode)
     # Set the results on the output bundle
-    reduced_slices:CompletedSlices = []
+    reduced_slices: CompletedSlices = []
+    wav_range = reduced_can_workspace.getRun().getProperty(
+        "Wavelength Range").valueAsStr if reduced_can_workspace else None
     reduced_slices.append(ReducedSlice(
-        wav_range = None,
-        output_bundle = OutputBundle(state=state, data_type=data_type, reduction_mode=reduction_mode,
-                                     output_workspace=reduced_can_workspace),
-        parts_bundle = OutputPartsBundle(state=state, data_type=data_type, reduction_mode=reduction_mode,
-                                         output_workspace_count=reduced_can_workspace_count,
-                                         output_workspace_norm=reduced_can_workspace_norm),
-        transmission_bundle = OutputTransmissionBundle(
+        wav_range=wav_range,
+        output_bundle=OutputBundle(state=state, data_type=data_type, reduction_mode=reduction_mode,
+                                   output_workspace=reduced_can_workspace),
+        parts_bundle=OutputPartsBundle(state=state, data_type=data_type, reduction_mode=reduction_mode,
+                                       output_workspace_count=reduced_can_workspace_count,
+                                       output_workspace_norm=reduced_can_workspace_norm),
+        transmission_bundle=OutputTransmissionBundle(
             state=reduction_setting_bundle.state, data_type=data_type,
             calculated_transmission_workspace=output_calculated_transmission_workspace,
             unfitted_transmission_workspace=output_unfitted_transmission_workspace)))
@@ -381,7 +386,7 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice_o
     partial_output_require_reload = output_parts and is_invalid_partial_workspaces
 
     must_reload = reduced_slices[0].output_bundle.output_workspace is None \
-        or partial_output_require_reload or is_invalid_transmission_workspaces
+                  or partial_output_require_reload or is_invalid_transmission_workspaces
     if 'boost.mpi' in sys.modules:
         # In MPI runs the result is only present on rank 0 (result of Q1D2 integration),
         # so the reload flag must be broadcasted from rank 0.

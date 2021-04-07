@@ -124,7 +124,7 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
             # The single reductions represent CAN / sample reductions
             for bundle in event_slice:
                 reduced_slices = self.do_reduction(reduction_alg, bundle, use_optimizations, progress)
-                # Flatten list to keep our lives easier
+                # Merge the list of lists into a single flat list to keep our lives easier
                 completed_event_slices.extend(reduced_slices)
 
         reduction_mode_vs_workspace_names = defaultdict(list)
