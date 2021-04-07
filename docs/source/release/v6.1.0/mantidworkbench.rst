@@ -10,6 +10,7 @@ New and Improved
 
 - New plot interactions: Double click a legend to hide it, double click a curve to open it in the plot config dialog.
 - It is now possible to overplot bin data from the matrix workspace view.
+- New command line options ``--version`` will print the version on mantid and exit. ``--error-on-warning`` will convert python warnings into exceptions. This is intended for developers so they can find deprecation warnings more easily.
 - Improved the performance of the table workspace display for large datasets
 - A new empty facility with empty instrument is the default facility now, and
   user has to select their choice of facility (including ISIS) and instrument for the first time
