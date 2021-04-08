@@ -294,7 +294,7 @@ class BasicFittingPresenter:
 
     def _get_fit_browser_options(self) -> dict:
         """Returns the fitting options to use in the Fit Script Generator interface."""
-        return {"Minimizer": self.model.minimizer, "EvaluationType": self.model.evaluation_type}
+        return {"Minimizer": self.model.minimizer, "Evaluation Type": self.model.evaluation_type}
 
     def _perform_fit(self) -> None:
         """Perform the fit in a thread."""
