@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import AlgorithmManager, logger
-from mantid.api import IFunction, MultiDomainFunction
+from mantid.api import IFunction
 from mantid.simpleapi import CopyLogs, ConvertFitFunctionForMuonTFAsymmetry
 
 from Muon.GUI.Common.ADSHandler.workspace_naming import (check_phasequad_name, create_fitted_workspace_name,
@@ -116,7 +116,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
 
     def get_domain_tf_asymmetry_fit_function(self, tf_simultaneous_function: IFunction, dataset_index: int) -> IFunction:
         """Returns the fit function in the TF Asymmetry simultaneous function corresponding to the specified index."""
-        if not isinstance(tf_simultaneous_function, MultiDomainFunction):
+        if self.number_of_datasets < 2 or tf_simultaneous_function is None:
             return tf_simultaneous_function
 
         index = dataset_index if dataset_index is not None else 0
