@@ -15,7 +15,7 @@ in either reciprocal space of the sample (if `RLU` is selected) or in the goniom
 then it normalizes to get the scattering cross section.
 For diffraction data, the output workspace contains the differential cross section :math:`\frac{d\sigma}{d\Omega}`, while
 for direct geometry inelastic data one obtains the double differential cross section  :math:`\frac{d^2 \sigma}{dE d\Omega}`.
-One can choose any orientation for the momentum axes (to get the first axis to be `[-H,H,0]`, set `QDimension0` to `-1,1,0`.
+One can choose any orientation for the momentum axes (to get the first axis to be `[-H,H,0]`, set `QDimension0` to `-1,1,0`).
 
 **Note:** In order to calculate the trajectories, the algorithm relies on finding information about detector
 trajectories stored in the workspace. The algorithm :ref:`CropWorkspaceForMDNorm <algm-CropWorkspaceForMDNorm>` must
@@ -68,6 +68,19 @@ There are symmetrization options for the data. To achieve this option, one can u
 a space group name, a point group name, or a list of symmetry operations. More information about symmetry operations can be found
 :ref:`here <Symmetry groups>` and :ref:`here <Point and space groups>`
 
+Using Background
+----------------
+Starting with Mantid 6.1, the algorithm allows efficient processing of the background. In previous versions one used to
+create a background :ref:`MD Event workspaces <MDWorkspace>` by replicating data for each goniometer setting in the input workspace.
+The current implementation uses instead an :ref:`MD Event workspace<MDWorkspace>` in the sample frame of the laboratory, so no need
+to replicate the background data.
+
+Similar to the case without background, temporary histogram workspaces are created for the background data and background normalization.
+The output is given by:
+
+.. math::
+
+    OutputWorkspace=\frac{OutputDataWorkspace}{OutputNormalizationWorkspace}-\frac{OutputBackgroundDataWorkspace}{OutputBackgroundNormalizationWorkspace}
 
 **Example - MDNorm**
 
@@ -183,6 +196,93 @@ Here is a sample code for inelastic data:
 and the corresponding output:
 
 .. figure:: /images/MDNorm_inelastic_sym.png
+
+
+To subtract background one must create the background workspace in :math:`Q_{lab}` frame.
+For example, in the previous script one can use `reduced_3` workspace as a background.
+Add the following lines
+
+.. code-block:: python
+
+   ConvertToMD(InputWorkspace='reduced_3',
+               QDimensions='Q3D',
+               dEAnalysisMode='Direct',
+               Q3DFrames="Q_lab",
+               MinValues='-11,-11,-11,-25',
+               MaxValues='11,11,11,49',
+               PreprocDetectorsWS='-',
+               OutputWorkspace='background_MDE_lab')
+
+   MDNorm(InputWorkspace='merged',
+          BackgroundWorkspace='background_MDE_lab',
+          Dimension0Name='QDimension1',
+          Dimension0Binning='-5,0.05,5',
+          Dimension1Name='QDimension2',
+          Dimension1Binning='-5,0.05,5',
+          Dimension2Name='DeltaE',
+          Dimension2Binning='-2,2',
+          Dimension3Name='QDimension0',
+          Dimension3Binning='-0.5,0.5',
+          SymmetryOperations='x,y,z;x,-y,z;x,y,-z;x,-y,-z',
+          OutputWorkspace='result',
+          OutputDataWorkspace='dataMD',
+          OutputNormalizationWorkspace='normMD',
+          OutputBackgroundDataWorkspace='bkgDataMD',
+          OutputBackgroundNormalizationWorkspace='bkgNormMD')
+
+
+Not always can data be processed in one chunk. We sometimes just want to add a few more files to a final image.
+In the previous script, let's assume that the first 30 MDEvent workspaces correspond to data processed in chunk 1,
+and the remaining workspaces correspond to chunk 2. The output histograms for data, normalization,
+background data, and background normalization when running the algorithm on the first chunk will be used as temporary
+workspaces for the second chunk:
+
+.. code-block:: python
+
+   MergeMD(InputWorkspaces=','.join([f'md_{i}' for i in range(1,30)]) , OutputWorkspace='merged_1')
+
+   MDNorm(InputWorkspace='merged_1',
+          BackgroundWorkspace='background_MDE_lab',
+          Dimension0Name='QDimension1',
+          Dimension0Binning='-5,0.05,5',
+          Dimension1Name='QDimension2',
+          Dimension1Binning='-5,0.05,5',
+          Dimension2Name='DeltaE',
+          Dimension2Binning='-2,2',
+          Dimension3Name='QDimension0',
+          Dimension3Binning='-0.5,0.5',
+          SymmetryOperations='x,y,z;x,-y,z;x,y,-z;x,-y,-z',
+          OutputWorkspace='result_1',
+          OutputDataWorkspace='dataMD_1',
+          OutputNormalizationWorkspace='normMD_1',
+          OutputBackgroundDataWorkspace='bkgData_1',
+          OutputBackgroundNormalizationWorkspace='bkgNorm_1')
+
+   MergeMD(InputWorkspaces=','.join([f'md_{i}' for i in range(30,93)]) , OutputWorkspace='merged_2')
+   MDNorm(InputWorkspace='merged_2',
+          BackgroundWorkspace='background_MDE_lab',
+          Dimension0Name='QDimension1',
+          Dimension0Binning='-5,0.05,5',
+          Dimension1Name='QDimension2',
+          Dimension1Binning='-5,0.05,5',
+          Dimension2Name='DeltaE',
+          Dimension2Binning='-2,2',
+          Dimension3Name='QDimension0',
+          Dimension3Binning='-0.5,0.5',
+          SymmetryOperations='x,y,z;x,-y,z;x,y,-z;x,-y,-z',
+          TemporaryDataWorkspace='dataMD_1',
+          TemporaryNormalizationWorkspace='normMD_1',
+          TemporaryBackgroundDataWorkspace='bkgData_1',
+          TemporaryBackgroundNormalizationWorkspace='bkgNorm_1',
+          OutputWorkspace='result_2',
+          OutputDataWorkspace='dataMD_2',
+          OutputNormalizationWorkspace='normMD_2',
+          OutputBackgroundDataWorkspace='bkgData_2',
+          OutputBackgroundNormalizationWorkspace='bkgNorm2')
+
+
+Note that the output workspaces after the second call to the algorithm will contain procesed
+information from both chunks.
 
 .. categories::
 

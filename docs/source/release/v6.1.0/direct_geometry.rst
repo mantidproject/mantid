@@ -15,6 +15,11 @@ New
 * Updated instrument geometry for CHESS
 * Loading of SHARP TOF and single-channel data has been added to :ref:`LoadILLTOF <algm-LoadILLTOF-v2>`
 
+
+Improvements
+############
+* :ref:`MDNorm <algm-MDNorm>` algorithm can now efficiently process background.
+
 MSlice
 ------
 
