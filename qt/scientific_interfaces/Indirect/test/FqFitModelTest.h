@@ -220,9 +220,6 @@ public:
     TS_ASSERT_EQUALS(m_model->getEISFSpectrum(1, TableDatasetIndex{0}).get(), 3);
   }
 
-  /// TODO: Add unittests for setActiveWidth and setActiveELSF when mainanence
-  /// makes tests simpler.
-
   void test_that_setActiveWidth_will_replace_spectrum_in_single_mode() {
     FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
     addWorkspacesToModel(spectra, m_workspace);
@@ -252,7 +249,7 @@ public:
 
   void test_that_setActiveWidth_will_add_separate_spectrum() {
     FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
-    auto const workspace2 = createWorkspaceWithTextAxis(2, getNoEISFLabels());
+    auto const workspace2 = createWorkspaceWithTextAxis(4, getParameterLabels());
     m_ads->addOrReplace("Name2", workspace2);
     addWorkspacesToModel(spectra, m_workspace, workspace2);
 
@@ -260,12 +257,11 @@ public:
     TS_ASSERT_EQUALS(m_model->getSpectra(TableDatasetIndex{0}).size(), 1);
     TS_ASSERT_EQUALS(m_model->getSpectra(TableDatasetIndex{0})[0].value, 1);
     TS_ASSERT_EQUALS(m_model->getSpectra(TableDatasetIndex{1}).size(), 0);
-
     m_model->setActiveWidth(0, TableDatasetIndex{1}, true);
     TS_ASSERT_EQUALS(m_model->getSpectra(TableDatasetIndex{0}).size(), 1);
     TS_ASSERT_EQUALS(m_model->getSpectra(TableDatasetIndex{0})[0].value, 1);
     TS_ASSERT_EQUALS(m_model->getSpectra(TableDatasetIndex{1}).size(), 1);
-    TS_ASSERT_EQUALS(m_model->getSpectra(TableDatasetIndex{1})[0].value, 0);
+    TS_ASSERT_EQUALS(m_model->getSpectra(TableDatasetIndex{1})[0].value, 1);
   }
 
   void test_that_setActiveEISF_will_replace_spectrum_in_single_mode() {
@@ -297,7 +293,7 @@ public:
 
   void test_that_setActiveEISF_will_add_separate_spectrum() {
     FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
-    auto const workspace2 = createWorkspaceWithTextAxis(2, getNoWidthLabels());
+    auto const workspace2 = createWorkspaceWithTextAxis(4, getParameterLabels());
     m_ads->addOrReplace("Name2", workspace2);
     addWorkspacesToModel(spectra, m_workspace, workspace2);
 
