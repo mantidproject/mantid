@@ -145,7 +145,7 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
             ComponentList='bank1', ComponentMaxTranslation=0.2, FixYaw=True, ComponentMaxRotation=10,
             Minimizer='L-BFGS-B')
         # Check no change in the rotations around Z-axis of first bank
-        row = mtd['cal_displacements'].row(1)
+        row = mtd['cal_displacements'].row(0)
         self.assertAlmostEquals(row['DeltaGamma'], 0.0, places=5)
         DeleteWorkspaces(['perturbed'])
 
