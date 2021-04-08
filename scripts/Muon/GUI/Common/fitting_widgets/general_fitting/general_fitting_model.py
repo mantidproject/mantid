@@ -159,10 +159,34 @@ class GeneralFittingModel(BasicFittingModel):
             single_function = self.current_domain_fit_function()
             if single_function is not None:
                 single_function = single_function.clone()
-            self.simultaneous_fit_function = single_function if self.number_of_datasets == 1 else \
-                self._create_multi_domain_function_from(single_function)
+            self._construct_new_simultaneous_function_from(single_function)
 
         super().reset_fit_functions()
+
+    def _construct_new_simultaneous_function_from(self, single_function: IFunction) -> None:
+        """Constructs the new simultaneous function using a single domain function."""
+        if self.number_of_datasets == 1:
+            self.simultaneous_fit_function = single_function
+        else:
+            self.simultaneous_fit_function = self._create_multi_domain_function_from(single_function)
+            self._add_global_ties_to_simultaneous_function()
+
+    def _add_global_ties_to_simultaneous_function(self) -> None:
+        """Creates and adds ties to the simultaneous function to represent the global parameters."""
+        index = self.current_dataset_index if self.current_dataset_index is not None else 0
+        for global_parameter in self.global_parameters:
+            self.simultaneous_fit_function.addTies(self._create_global_tie_string(index, global_parameter))
+
+    def _create_global_tie_string(self, index: int, global_parameter: str) -> str:
+        """Create a string to represent the tying of a global parameter."""
+        ties = ["f" + str(i) + "." + global_parameter
+                for i in range(self.simultaneous_fit_function.nFunctions()) if i != index]
+        ties.append("f" + str(index) + "." + global_parameter)
+        return "=".join(ties)
+
+    def _create_multi_domain_function_from(self, fit_function: IFunction) -> MultiDomainFunction:
+        """Create a MultiDomainFunction containing the same fit function for each domain."""
+        return FunctionFactory.createInitializedMultiDomainFunction(str(fit_function), self.number_of_datasets)
 
     def get_simultaneous_fit_by_specifiers_to_display_from_context(self) -> list:
         """Returns the simultaneous fit by specifiers to display in the view from the context."""
@@ -294,10 +318,6 @@ class GeneralFittingModel(BasicFittingModel):
     def _check_data_exists(workspace_names: list) -> list:
         """Returns only the workspace names that exist in the ADS."""
         return [workspace_name for workspace_name in workspace_names if AnalysisDataService.doesExist(workspace_name)]
-
-    def _create_multi_domain_function_from(self, fit_function: IFunction) -> MultiDomainFunction:
-        """Create a MultiDomainFunction containing the same fit function for each domain."""
-        return FunctionFactory.createInitializedMultiDomainFunction(str(fit_function), self.number_of_datasets)
 
     def perform_fit(self) -> tuple:
         """Performs a single or simultaneous fit and returns the resulting function, status and chi squared."""
