@@ -145,9 +145,10 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
                              doc='Comma separated list on banks to refine')
         self.declareProperty(name='ComponentMaxTranslation', defaultValue=0.02,
                              doc='Maximum translation of each component along either of the X, Y, Z axes (m)')
+        self.declareProperty(name='FixYaw', defaultValue=True, doc="Prevent rotations around the axis normal to the bank")
         self.declareProperty(name='ComponentMaxRotation', defaultValue=3.0,
                              doc='Maximum rotation of each component along either of the X, Y, Z axes (deg)')
-        property_names = ['ComponentList', 'ComponentMaxTranslation', 'ComponentMaxRotation']
+        property_names = ['FixY', 'ComponentList', 'ComponentMaxTranslation', 'FixYaw', 'ComponentMaxRotation']
         [self.setPropertyGroup(name, 'Banks Calibration') for name in property_names]
 
         #
@@ -250,9 +251,23 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
             self._fixed_source_set_and_table(adjustments_table_name)
         # Translate and rotate the each bank, only after the source has been adjusted
         # The instrument in `input_workspace` is adjusted in-place
+
+        # Translation options to AlignComponents
         dt = self.getProperty('ComponentMaxTranslation').value  # maximum translation along either axis
-        dr = self.getProperty('ComponentMaxRotation').value  # maximum rotation along either axis
         move_y = False if self.getProperty('FixY').value is True else True
+        kwargs_transl = dict(Xposition=True, MinXPosition=-dt, MaxXPosition=dt,
+                             Yposition=move_y, MinYPosition=-dt, MaxYPosition=dt,
+                             Zposition=True, MinZPosition=-dt, MaxZPosition=dt)
+
+        # Rotation options for AlignComponents
+        dr = self.getProperty('ComponentMaxRotation').value  # maximum rotation along either axis
+        rot_z = False if self.getProperty('FixYaw').value is True else True
+        kwargs_rotat = dict(AlphaRotation=True, MinAlphaRotation=-dr, MaxAlphaRotation=dr,
+                            BetaRotation=True, MinBetaRotation=-dr, MaxBetaRotation=dr,
+                            GammaRotation=rot_z, MinGammaRotation=-dr, MaxGammaRotation=dr,
+                            EulerConvention='YXZ')
+
+        # Remaining options for AlignComponents
         kwargs = dict(InputWorkspace=input_workspace,
                       OutputWorkspace=input_workspace,
                       PeakCentersTofTable=peak_centers_in_tof,
@@ -262,16 +277,10 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
                       FitSourcePosition=False,
                       FitSamplePosition=False,
                       ComponentList=self.getProperty('ComponentList').value,
-                      Xposition=True, MinXPosition=-dt, MaxXPosition=dt,
-                      Yposition=move_y, MinYPosition=-dt, MaxYPosition=dt,
-                      Zposition=True, MinZPosition=-dt, MaxZPosition=dt,
-                      AlphaRotation=True, MinAlphaRotation=-dr, MaxAlphaRotation=dr,
-                      BetaRotation=True, MinBetaRotation=-dr, MaxBetaRotation=dr,
-                      GammaRotation=True, MinGammaRotation=-dr, MaxGammaRotation=dr,
-                      EulerConvention='YXZ',
                       Minimizer=self.getProperty('Minimizer').value,
                       MaxIterations=self.getProperty('MaxIterations').value)
-        self.run_algorithm('AlignComponents', 0.2, 0.97, **kwargs)
+
+        self.run_algorithm('AlignComponents', 0.2, 0.97, **kwargs, **kwargs_transl, **kwargs_rotat)
         progress.report('AlignComponents has been applied')
 
         # AlignComponents produces two unwanted workspaces
