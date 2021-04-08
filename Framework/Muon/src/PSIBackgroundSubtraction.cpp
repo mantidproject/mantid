@@ -28,15 +28,15 @@ constexpr double FIT_TOLERANCE = 10;
 const std::string FIRST_GOOD = "First good spectra ";
 const std::string LAST_GOOD = "Last good spectra ";
 
-std::pair<double, double> getRangeFromWorkspace(MatrixWorkspace_const_sptr inputWorkspace, const size_t &index) {
-  auto firstGoodIndex = std::stoi(inputWorkspace->getLog(FIRST_GOOD + std::to_string(index))->value());
-  auto lastGoodIndex = std::stoi(inputWorkspace->getLog(LAST_GOOD + std::to_string(index))->value());
+std::pair<double, double> getRangeFromWorkspace(MatrixWorkspace const &inputWorkspace, const size_t &index) {
+  auto firstGoodIndex = std::stoi(inputWorkspace.getLog(FIRST_GOOD + std::to_string(index))->value());
+  auto lastGoodIndex = std::stoi(inputWorkspace.getLog(LAST_GOOD + std::to_string(index))->value());
 
   auto midGoodIndex = int(floor(((double(lastGoodIndex) - double(firstGoodIndex)) / 2.)));
 
-  double midGood = inputWorkspace->readX(index)[midGoodIndex];
+  double midGood = inputWorkspace.readX(index)[midGoodIndex];
 
-  double lastGood = inputWorkspace->readX(index)[lastGoodIndex];
+  double lastGood = inputWorkspace.readX(index)[lastGoodIndex];
 
   return std::make_pair(midGood, lastGood);
 }
@@ -134,7 +134,7 @@ void PSIBackgroundSubtraction::calculateBackgroundUsingFit(MatrixWorkspace_sptr 
   auto numberOfHistograms = inputWorkspace->getNumberHistograms();
   std::vector<double> backgroundValues(numberOfHistograms);
   for (size_t index = 0; index < numberOfHistograms; ++index) {
-    std::pair<double, double> range = getRange(inputWorkspace, index);
+    std::pair<double, double> range = getRange(*inputWorkspace, index);
     auto [background, fitQuality] = calculateBackgroundFromFit(fit, range, static_cast<int>(index));
     // If fit quality is poor, do not subtract the background and instead log
     // a warning
@@ -210,7 +210,7 @@ std::tuple<double, double> PSIBackgroundSubtraction::calculateBackgroundFromFit(
  * @param index :: The workspace index the fit will be performed on.
  * @return An X range to use for the fitting.
  */
-std::pair<double, double> PSIBackgroundSubtraction::getRange(MatrixWorkspace_const_sptr inputWorkspace,
+std::pair<double, double> PSIBackgroundSubtraction::getRange(MatrixWorkspace const &inputWorkspace,
                                                              const std::size_t &index) const {
   double startX = getProperty("StartX");
   double endX = getProperty("EndX");
