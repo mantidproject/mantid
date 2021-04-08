@@ -28,6 +28,16 @@ class AlignComponents(PythonAlgorithm):
     _optionsList = ["Xposition", "Yposition", "Zposition", "AlphaRotation", "BetaRotation", "GammaRotation"]
     adjustment_items = ['ComponentName', 'Xposition', 'Yposition', 'Zposition',
                         'XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine', 'RotationAngle']
+    r"""Items featuring the changes in position and orientation for each bank
+    - DeltaR: change in distance from Component to Sample (in mili-meter)
+    - DeltaX: change in X-coordinate of Component (in mili-meter)
+    - DeltaY: change in Y-coordinate of Component (in mili-meter)
+    - DeltaZ: change in Z-coordinate of Component (in mili-meter)
+    Changes in Euler Angles are understood once a Euler convention is selected. If `YXZ` is selected, then:
+    - DeltaAlpha: change in rotation around the Y-axis (in degrees)
+    - DeltaBeta: change in rotation around the X-axis (in degrees)
+    - DeltaGamma: change in rotation around the Z-axis (in degrees)
+    """
     displacement_items = ['ComponentName', 'DeltaR', 'DeltaX', 'DeltaY', 'DeltaZ', 'DeltaAlpha', 'DeltaBeta', 'DeltaGamma']
     _optionsDict = {}
     _initialPos = None
@@ -344,6 +354,7 @@ class AlignComponents(PythonAlgorithm):
 
         input_workspace = self.getProperty('InputWorkspace').value
 
+        # Table containing the optimized absolute locations and orientations for each component
         adjustments_table_name = self.getProperty('AdjustmentsTable').value
         if len(adjustments_table_name) > 0:
             adjustments_table = self._initialize_adjustments_table(adjustments_table_name)
@@ -351,6 +362,7 @@ class AlignComponents(PythonAlgorithm):
         else:
             saving_adjustments = False
 
+        # Table containing the relative changes in position and euler angles for each bank component
         displacements_table_name = self.getProperty('DisplacementsTable').value
         if len(displacements_table_name) > 0:
             displacements_table = self._initialize_displacements_table(displacements_table_name)

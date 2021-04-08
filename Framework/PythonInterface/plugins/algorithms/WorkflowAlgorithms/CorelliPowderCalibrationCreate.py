@@ -289,7 +289,6 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
 
         # Append the banks table to the source table, then delete the banks table.
         self._append_second_to_first(adjustments_table_name, adjustments_table_name + '_banks')
-
         # Create one spectra in d-spacing for each bank using the adjusted instrument geometry.
         # The spectra can be compare to those of prefix_output + 'PDCalibration_peaks_original'
         self.fitted_in_dspacing(fitted_in_tof=prefix_output + 'PDCalibration_diagnostics_fitted',
