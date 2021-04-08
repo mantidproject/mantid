@@ -101,13 +101,13 @@ public:
 public:
   /// Testing accessors
   FitScriptGeneratorDataTable *tableWidget() const override { return m_dataTable.get(); }
-  QPushButton *removeButton() const override { return m_ui.pbRemove; }
-  QPushButton *addWorkspaceButton() const override { return m_ui.pbAddWorkspace; }
+  QPushButton *removeButton() const override { return m_ui.pbRemoveDomain; }
+  QPushButton *addWorkspaceButton() const override { return m_ui.pbAddDomain; }
   AddWorkspaceDialog *addWorkspaceDialog() const override { return m_dialog.get(); }
 
 private slots:
-  void onRemoveClicked();
-  void onAddWorkspaceClicked();
+  void onRemoveDomainClicked();
+  void onAddDomainClicked();
   void onCellChanged(int row, int column);
   void onItemSelected();
   void onFunctionRemoved(QString const &function);

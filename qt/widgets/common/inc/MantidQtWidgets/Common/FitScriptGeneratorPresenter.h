@@ -44,8 +44,8 @@ public:
   void setGlobalParameters(std::vector<GlobalParameter> const &globalParameters) override;
 
 private:
-  void handleRemoveClicked();
-  void handleAddWorkspaceClicked();
+  void handleRemoveDomainClicked();
+  void handleAddDomainClicked();
   void handleSelectionChanged();
   void handleStartXChanged();
   void handleEndXChanged();

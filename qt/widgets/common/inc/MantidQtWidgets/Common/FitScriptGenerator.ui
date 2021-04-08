@@ -71,16 +71,28 @@
            </spacer>
           </item>
           <item row="0" column="1">
-           <widget class="QPushButton" name="pbAddWorkspace">
+           <widget class="QPushButton" name="pbAddDomain">
+            <property name="minimumSize">
+             <size>
+              <width>90</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="text">
-             <string>Add Workspace</string>
+             <string>Add Domains</string>
             </property>
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QPushButton" name="pbRemove">
+           <widget class="QPushButton" name="pbRemoveDomain">
+            <property name="minimumSize">
+             <size>
+              <width>90</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="text">
-             <string>Remove</string>
+             <string>Remove Domains</string>
             </property>
            </widget>
           </item>

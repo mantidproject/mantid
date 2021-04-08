@@ -41,11 +41,11 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event, std::s
     UNUSED_ARG(arg2);
 
   switch (event) {
-  case ViewEvent::RemoveClicked:
-    handleRemoveClicked();
+  case ViewEvent::RemoveDomainClicked:
+    handleRemoveDomainClicked();
     return;
-  case ViewEvent::AddClicked:
-    handleAddWorkspaceClicked();
+  case ViewEvent::AddDomainClicked:
+    handleAddDomainClicked();
     return;
   case ViewEvent::StartXChanged:
     handleStartXChanged();
@@ -116,7 +116,7 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event, Fittin
 
 void FitScriptGeneratorPresenter::openFitScriptGenerator() { m_view->show(); }
 
-void FitScriptGeneratorPresenter::handleRemoveClicked() {
+void FitScriptGeneratorPresenter::handleRemoveDomainClicked() {
   for (auto const &index : m_view->selectedRows()) {
     auto const workspaceName = m_view->workspaceName(index);
     auto const workspaceIndex = m_view->workspaceIndex(index);
@@ -128,7 +128,7 @@ void FitScriptGeneratorPresenter::handleRemoveClicked() {
   handleSelectionChanged();
 }
 
-void FitScriptGeneratorPresenter::handleAddWorkspaceClicked() {
+void FitScriptGeneratorPresenter::handleAddDomainClicked() {
   if (m_view->openAddWorkspaceDialog()) {
     auto const workspaces = m_view->getDialogWorkspaces();
     auto const workspaceIndices = m_view->getDialogWorkspaceIndices();

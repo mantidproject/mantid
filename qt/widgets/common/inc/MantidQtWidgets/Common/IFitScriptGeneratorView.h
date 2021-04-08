@@ -36,8 +36,8 @@ class EXPORT_OPT_MANTIDQT_COMMON IFitScriptGeneratorView : public API::MantidWid
 
 public:
   enum class Event {
-    RemoveClicked,
-    AddClicked,
+    RemoveDomainClicked,
+    AddDomainClicked,
     StartXChanged,
     EndXChanged,
     SelectionChanged,
