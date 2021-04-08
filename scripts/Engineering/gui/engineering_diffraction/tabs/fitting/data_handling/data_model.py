@@ -136,22 +136,24 @@ class FittingDataModel(object):
                run.getProtonCharge(), ws.getTitle()]
         self.write_table_row(ADS.retrieve("run_info"), row, irow)
         # add log data - loop over existing log workspaces not logs in settings as these might have changed
-        runLogs = [l.name for l in run.getLogData()]
-        for log in self._log_names:
-            avg, stdev = full(2, nan)  # default unless value can be calculated
-            if "proton_charge" in runLogs:
+        currentRunLogs = [l.name for l in run.getLogData()]
+        nullLogValue = full(2, nan)  # default nan if can't read/average log data
+        if run.getProtonCharge() > 0 and "proton_charge" in currentRunLogs:
+            for log in self._log_names:
                 if log in self._log_values[ws_name]:
-                    avg, stdev = self._log_values[ws_name][log]
+                    avg, stdev = self._log_values[ws_name][log]  # already averaged
+                elif log in currentRunLogs:
+                    avg, stdev = AverageLogData(ws_name, LogName=log, FixZero=False)
                 else:
-                    if log in runLogs:
-                        avg, stdev = AverageLogData(ws_name, LogName=log, FixZero=False)
-                    else:
-                        logger.warning(f"File {ws.name()} does not contain log {log}")
-                    self._log_values[ws_name][log] = [avg, stdev]
-            else:
-                logger.warning(
-                    f"Log value {log} could not be averaged as proton_charge not found in file {ws.name()}")
-            self.write_table_row(ADS.retrieve(log), [avg, stdev], irow)
+                    avg, stdev = nullLogValue
+                self._log_values[ws_name][log] = [avg, stdev]  # update model dict (even if nan)
+        else:
+            self._log_values[ws_name] = {log: nullLogValue for log in self._log_names}
+            logger.warning(f"{ws.name()} does not contain a proton charge log - log values cannot be averaged.")
+
+        # write log values to table (nan if log could not be averaged)
+        for log, avg_and_stdev in self._log_values[ws_name].items():
+            self.write_table_row(ADS.retrieve(log), avg_and_stdev, irow)
         self.update_log_group_name()
 
     def remove_log_rows(self, row_numbers):
