@@ -507,18 +507,13 @@ void MDNorm::exec() {
   DataObjects::MDHistoWorkspace_sptr outputBackgroundDataWS(nullptr);
   // Outputs for background related
   if (m_backgroundWS) {
-    // auto outputBkgdWS = binBackgroundWS(symmetryOps);
-    // TODO/FIXME - Implement binBackgroundWS and replace outputDataWS with
-    // outputBkgdDataWS! [Task 88]
     outputBackgroundDataWS = binBackgroundWS(symmetryOps);
     createBackgroundNormalizationWS(*outputBackgroundDataWS);
     this->setProperty("OutputBackgroundNormalizationWorkspace", m_bkgdNormWS);
-    // TODO/FIXME [Task 88] Enable this
     this->setProperty("OutputBackgroundDataWorkspace", outputBackgroundDataWS);
   }
 
   m_numExptInfos = outputDataWS->getNumExperimentInfo();
-  std::cout << "[GLOBAL] Number of Exp Info = " << m_numExptInfos << "\n";
   // loop over all experiment infos
   for (uint16_t expInfoIndex = 0; expInfoIndex < m_numExptInfos; expInfoIndex++) {
     // Check for other dimensions if we could measure anything in the original
@@ -556,7 +551,6 @@ void MDNorm::exec() {
     divideMD->executeAsChildAlg();
 
     out = divideMD->getProperty("OutputWorkspace");
-    g_log.notice("[DEBUG] Divide MD1");
 
     // Normalize background
     IAlgorithm_sptr divideBkgdMD = createChildAlgorithm("DivideMD", 0.98, 0.99);
@@ -567,8 +561,6 @@ void MDNorm::exec() {
     // const std::string normedBkgdWSName(getProperty("OutputWorkspace") + "_normedBkgd");
     const std::string normedBkgdWSName("_normedBkgd");
     const std::string extra(getPropertyValue("OutputWorkspace") + "_normBkgd");
-    g_log.notice() << "[DEBUG] set property OutputWorkspace value to " << normedBkgdWSName << ".  But " << extra
-                   << " does not work\n";
     divideBkgdMD->setPropertyValue("OutputWorkspace", normedBkgdWSName);
     divideBkgdMD->executeAsChildAlg();
 
@@ -1107,8 +1099,6 @@ MDNorm::binBackgroundWS(const std::vector<Geometry::SymmetryOperation> &symmetry
   if (m_numSymmOps != symmetryOps.size())
     throw std::runtime_error("Symmetry operation number m_umSymops is wrong!");
 
-  uint16_t bincount = 1;
-
   for (uint16_t i_expinfo = 0; i_expinfo < numexpinfo; ++i_expinfo) {
 
     auto rotMatrix = m_inputWS->getExperimentInfo(i_expinfo)->run().getGoniometerMatrix();
@@ -1124,9 +1114,6 @@ MDNorm::binBackgroundWS(const std::vector<Geometry::SymmetryOperation> &symmetry
       DblMatrix Qtransform;
       if (m_isRLU) {
         Qtransform = rotMatrix * m_UB * soMatrix * m_W;
-        std::cout << "[DEBUG VZ Background] Index = " << bincount << " RLU Q Transform matrix"
-                  << "\n";
-        Qtransform.print();
       } else {
         Qtransform = rotMatrix * soMatrix * m_W;
       }
@@ -1135,8 +1122,6 @@ MDNorm::binBackgroundWS(const std::vector<Geometry::SymmetryOperation> &symmetry
       double progress_fraction = 1. / static_cast<double>(symmetryOps.size() * numexpinfo);
       IAlgorithm_sptr binMD =
           createChildAlgorithm("BinMD", soIndex * 0.3 * progress_fraction, (soIndex + 1) * 0.3 * progress_fraction);
-      //        createChildAlgorithm("BinMD", static_cast<double>(soIndex) +  * 0.3 / static_cast<double>(numexpinfo) *
-      //        progress_fraction,
 
       binMD->setPropertyValue("AxisAligned", "0");
       binMD->setProperty("InputWorkspace", m_backgroundWS);
@@ -1165,9 +1150,6 @@ MDNorm::binBackgroundWS(const std::vector<Geometry::SymmetryOperation> &symmetry
           value = basisVector.str();
         }
 
-        g_log.debug() << qindex << "-th Binning parameter " << key << " value: " << value << "\n";
-        std::cout << "[DEBUG VZ Background] " << qindex << "-th BinMD parameter to set: " << key << " = " << value
-                  << "\n";
         binMD->setPropertyValue(key, value);
         qindex++;
       }
@@ -1181,19 +1163,11 @@ MDNorm::binBackgroundWS(const std::vector<Geometry::SymmetryOperation> &symmetry
       tempBkgdDataWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
       tempBkgdDataWS->clearOriginalWorkspaces();
       tempBkgdDataWS->clearTransforms();
-
-      std::cout << "[DEBUG VZ Background] Output to " << getPropertyValue("OutputBackgroundDataWorkspace")
-                << " Total binning count = " << bincount << " @ Exp info (index) " << i_expinfo
-                << ", symmetry operation (index) " << soIndex << "\n";
-
-      soIndex++;
-      bincount++;
     }
   }
   auto outputMDHWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
   // set MDUnits for Q dimensions
   if (m_isRLU) {
-    std::cout << "[DEBUG VZ] Background Q dimension indexes size = " << qDimensionIndices.size() << "\n";
     setQUnit(qDimensionIndices, outputMDHWS);
   }
 
@@ -1220,19 +1194,10 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(const std::vector<Geometry
   for (auto so : symmetryOps) {
     // calculate dimensions for binning
     DblMatrix soMatrix = buildSymmetryMatrix(so);
-
     DblMatrix Qtransform;
-    std::cout << "[DEBUG VZ Sample] SO index = " << soIndex << ", isRLU = " << m_isRLU << ", Output to "
-              << getPropertyValue("OutputDataWorkspace") << "\n";
-    //    std::cout << "m_W: "
-    //              << "\n";
-    //    m_W.print();
 
     if (m_isRLU) {
       Qtransform = m_UB * soMatrix * m_W;
-      std::cout << "[DEBUG VZ Sampe] RLU Q Transform: "
-                << "\n";
-      Qtransform.print();
     } else {
       Qtransform = soMatrix * m_W;
     }
@@ -1265,8 +1230,6 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(const std::vector<Geometry
         value = basisVector.str();
       }
 
-      g_log.debug() << "Binning parameter " << key << " value: " << value << "\n";
-      std::cout << "BinMD parameter to set: " << key << " = " << value << "\n";
       binMD->setPropertyValue(key, value);
       qindex++;
     }
@@ -1285,7 +1248,6 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(const std::vector<Geometry
   auto outputMDHWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
   // set MDUnits for Q dimensions
   if (m_isRLU) {
-    std::cout << "[DEBUG VZ Sample] Q dimension size = " << qDimensionIndices.size() << "\n";
     setQUnit(qDimensionIndices, outputMDHWS);
   }
 
@@ -1534,9 +1496,6 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues, con
   // [Task 89]
   const double protonChargeBkgd =
       (m_backgroundWS != nullptr) ? m_backgroundWS->getExperimentInfo(0)->run().getProtonCharge() : 0;
-
-  g_log.notice() << "[DEBUG VZ] Proton charge = " << protonCharge << ", Background proton charge = " << protonChargeBkgd
-                 << "\n";
 
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
 
