@@ -15,15 +15,8 @@ class EAAutoTabModelTest(unittest.TestCase):
         if workspace in mtd:
             DeleteWorkspace(workspace)
 
-    @mock.patch("mantidqt.utils.observer_pattern.GenericObservable.notify_subscribers")
-    def test_update_match_table_when_table_has_more_than_6_rows(self , mock_notify_subscribers):
-        correct_table_entries = [['Ag', 20, 2],
-                                 ['Au', 18, 2],
-                                 ['Fe', 14, 1],
-                                 ['Cu', 10, 0],
-                                 ['Al', 8, 0],
-                                 ['Si', 6, 1]]
-        self.model.table_entries = None
+    def test_update_match_table_when_table_has_more_than_3_rows(self):
+        correct_table_entries = ["9999", "Detector 1", "Ag , Au , Fe"]
         #Create source tables
         likelyhood_table = CreateEmptyTableWorkspace(OutputWorkspace = "likelyhood")
         likelyhood_table.addColumn("str", "Element")
@@ -37,77 +30,209 @@ class EAAutoTabModelTest(unittest.TestCase):
         likelyhood_table.addRow(["C", 4])
         likelyhood_table.addRow(["O", 3])
 
-        all_matches_table = CreateEmptyTableWorkspace(OutputWorkspace = "all_matches")
-        all_matches_table.addColumn("str" , "Element")
-        all_matches_table.addColumn("float" , "Center")
-        all_matches_table.addRow(["Ag" , 4])
-        all_matches_table.addRow(["C", 4])
-        all_matches_table.addRow(["Fe", 4])
-        all_matches_table.addRow(["Si", 4])
-        all_matches_table.addRow(["Ag", 4])
-        all_matches_table.addRow(["Au", 4])
-        all_matches_table.addRow(["Au", 4])
-        all_matches_table.addRow(["O", 4])
-
         #Run function
-        self.model.update_match_table("likelyhood" , "all_matches")
+        self.model.update_match_table("likelyhood", "9999; Detector 1")
 
         #Assert statements
-        self.assertEqual(self.model.table_entries , correct_table_entries)
-        mock_notify_subscribers.assert_called_once()
+        self.assertEqual(self.model.table_entries.get(), correct_table_entries)
 
         #Delete tables from ADS
         self.delete_if_present("likelyhood")
-        self.delete_if_present("all_matches")
 
-    @mock.patch("mantidqt.utils.observer_pattern.GenericObservable.notify_subscribers")
-    def test_update_match_table_when_table_has_less_than_6_rows(self, mock_notify_subscribers):
-        correct_table_entries = [['Ag', 20, 2],
-                                 ['Au', 18, 2],
-                                 ['Fe', 14, 1],
-                                 ['Cu', 10, 2]]
-
-        self.model.table_entries = None
+    def test_update_match_table_when_table_has_less_than_3_rows(self):
+        correct_table_entries = ["9999", "Detector 3", "Al , C"]
         # Create source tables
         likelyhood_table = CreateEmptyTableWorkspace(OutputWorkspace="likelyhood")
         likelyhood_table.addColumn("str", "Element")
         likelyhood_table.addColumn("int", "Likelihood")
-        likelyhood_table.addRow(["Ag", 20])
-        likelyhood_table.addRow(["Au", 18])
-        likelyhood_table.addRow(["Fe", 14])
-        likelyhood_table.addRow(["Cu", 10])
-
-        all_matches_table = CreateEmptyTableWorkspace(OutputWorkspace="all_matches")
-        all_matches_table.addColumn("str", "Element")
-        all_matches_table.addColumn("float", "Center")
-        all_matches_table.addColumn("int", "sigma")
-        all_matches_table.addRow(["Ag", 4, 1])
-        all_matches_table.addRow(["Cu", 4, 2])
-        all_matches_table.addRow(["Fe", 4, 3])
-        all_matches_table.addRow(["Cu", 4, 4])
-        all_matches_table.addRow(["Ag", 4, 5])
-        all_matches_table.addRow(["Au", 4, 6])
-        all_matches_table.addRow(["Au", 4, 7])
+        likelyhood_table.addRow(["Al", 20])
+        likelyhood_table.addRow(["C", 18])
 
         # Run function
-        self.model.update_match_table("likelyhood", "all_matches")
+        self.model.update_match_table("likelyhood", "9999; Detector 3")
 
         # Assert statements
-        self.assertEqual(self.model.table_entries, correct_table_entries)
-        mock_notify_subscribers.assert_called_once_with()
+        self.assertEqual(self.model.table_entries.get(), correct_table_entries)
 
         # Delete tables from ADS
         self.delete_if_present("likelyhood")
-        self.delete_if_present("all_matches")
 
-    @mock.patch("mantidqt.utils.observer_pattern.GenericObservable.notify_subscribers")
-    def test_run_peak_algorithms(self,mock_notify_subscribers):
+    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.retrieve_ws")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.EAAutoTabModel._run_find_peak_algorithm")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.EAAutoTabModel._run_peak_matchiing_algorithm")
+    def test_run_peak_algorithms_with_workspace(self, mock_peak_matching, mock_run_find_peak, mock_retrieve_ws):
+        #setup
+        parameters = {"workspace": "9999; Detector 1"}
+        mock_retrieve_ws.return_value = "mock_group"
 
         # Run function
-        self.model.run_peak_algorithms("a")
+        self.model._run_peak_algorithms(parameters)
 
         # Assert statements
-        mock_notify_subscribers.assert_called_once_with()
+        mock_retrieve_ws.assert_called_with("9999")
+        mock_run_find_peak.assert_called_with(parameters, "mock_group")
+        mock_peak_matching.assert_called_with("9999; Detector 1", "mock_group")
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.retrieve_ws")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.EAAutoTabModel._run_find_peak_algorithm")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.EAAutoTabModel._run_peak_matchiing_algorithm")
+    def test_run_peak_algorithms_with_group(self, mock_peak_matching, mock_run_find_peak, mock_retrieve_ws):
+        # setup
+        mock_group = mock.Mock()
+        mock_group.getNames.return_value = ["9999; Detector 1", "9999; Detector 2"]
+        parameters = {"workspace": "9999"}
+        mock_retrieve_ws.return_value = mock_group
+        mock_run_find_peak.return_value = False
+
+        # Run function
+        self.model._run_peak_algorithms(parameters)
+
+        # Assert statements
+        mock_retrieve_ws.assert_called_with("9999")
+        mock_run_find_peak.assert_has_calls([mock.call({'workspace': '9999; Detector 1'}, mock_group, True),
+                                             mock.call({'workspace': '9999; Detector 2'}, mock_group, True)])
+        mock_peak_matching.assert_has_calls([mock.call("9999; Detector 1", mock_group),
+                                             mock.call("9999; Detector 2", mock_group)])
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.retrieve_ws")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.EAAutoTabModel._run_find_peak_algorithm")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.EAAutoTabModel._run_peak_matchiing_algorithm")
+    def test_run_peak_algorithms_with_group_and_peak_matching_not_run(self, mock_peak_matching, mock_run_find_peak,
+                                                                      mock_retrieve_ws):
+        # setup
+        mock_group = mock.Mock()
+        mock_group.getNames.return_value = ['9997; Detector 3', '9997; Detector 4']
+        parameters = {"workspace": "9997"}
+        mock_retrieve_ws.return_value = mock_group
+        mock_run_find_peak.return_value = True
+
+        # Run function
+        self.model._run_peak_algorithms(parameters)
+
+        # Assert statements
+        mock_retrieve_ws.assert_called_with("9997")
+        mock_run_find_peak.assert_has_calls([mock.call({'workspace': '9997; Detector 3'}, mock_group, True),
+                                             mock.call({'workspace': '9997; Detector 4'}, mock_group, True)])
+        mock_peak_matching.assert_not_called()
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.retrieve_ws")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.find_peak_algorithm")
+    def test_run_find_peak_algo_with_default_peaks_and_no_errors(self, mock_find_peaks, mock_retrieve_ws):
+        #setup
+        workspace = "9997; Detector 1"
+        number_of_peaks = 3
+        mock_group = mock.Mock()
+        mock_table = mock.Mock()
+        mock_table.rowCount.return_value = number_of_peaks
+        mock_retrieve_ws.return_value = mock_table
+
+        param = {"workspace": workspace, "min_energy": 10, "max_energy": 1000, "threshold": 1, "default_width": True}
+        ignore_peak_matching = self.model._run_find_peak_algorithm(param, mock_group)
+
+        #Assert statements
+        mock_find_peaks.assert_called_once_with(workspace, 3, 10, 1000, 1, 0.5, 1, 2.5)
+        mock_group.add.assert_has_calls([mock.call(workspace + "_with_errors"),
+                                         mock.call(workspace + "_refitted_peaks"),
+                                         mock.call(workspace + "_peaks")])
+        self.assertEqual(mock_table.rowCount.call_count, 2)
+        self.assertEqual(self.model.current_peak_table_info["workspace"], workspace)
+        self.assertEqual(self.model.current_peak_table_info["number_of_peaks"], number_of_peaks)
+        self.assertEqual(mock_retrieve_ws.call_count, 2)
+        self.assertEqual(ignore_peak_matching, False)
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.retrieve_ws")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.find_peak_algorithm")
+    def test_run_find_peak_algo_without_default_peaks_and_no_errors(self, mock_find_peaks, mock_retrieve_ws):
+        # setup
+        workspace = "9997; Detector 2"
+        number_of_peaks = 5
+        mock_group = mock.Mock()
+        mock_table = mock.Mock()
+        mock_table.rowCount.return_value = number_of_peaks
+        mock_retrieve_ws.return_value = mock_table
+
+        param = {"workspace": workspace, "min_energy": 1, "max_energy": 200, "threshold": 4, "default_width": False,
+                 "min_width": 0.3, "max_width": 2, "estimate_width": 1.5}
+        ignore_peak_matching = self.model._run_find_peak_algorithm(param, mock_group)
+
+        #Assert statements
+        mock_find_peaks.assert_called_once_with(workspace, 3, 1, 200, 4, 0.3, 1.5, 2)
+        mock_group.add.assert_has_calls([mock.call(workspace + "_with_errors"),
+                                         mock.call(workspace + "_refitted_peaks"),
+                                         mock.call(workspace + "_peaks")])
+        self.assertEqual(mock_table.rowCount.call_count, 2)
+        self.assertEqual(self.model.current_peak_table_info["workspace"], workspace)
+        self.assertEqual(self.model.current_peak_table_info["number_of_peaks"], number_of_peaks)
+        self.assertEqual(mock_retrieve_ws.call_count, 2)
+        self.assertEqual(ignore_peak_matching, False)
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.retrieve_ws")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.find_peak_algorithm")
+    def test_run_find_peak_algo_with_default_peaks_and_errors(self, mock_find_peaks, mock_retrieve_ws):
+        # setup
+        workspace = "9997; Detector 3"
+        number_of_peaks = 0
+        mock_group = mock.Mock()
+        mock_table = mock.Mock()
+        mock_table.rowCount.return_value = number_of_peaks
+        mock_retrieve_ws.return_value = mock_table
+
+        param = {"workspace": workspace, "min_energy": 50, "max_energy": 4000, "threshold": 1.5, "default_width": True}
+        with self.assertRaises(RuntimeError):
+            self.model._run_find_peak_algorithm(param, mock_group)
+
+        #Assert statements
+        mock_find_peaks.assert_called_once_with(workspace, 3, 50, 4000, 1.5, 0.1, 0.5, 1.5)
+        mock_group.add.assert_has_calls([mock.call(workspace + "_with_errors")])
+        self.assertEqual(mock_table.rowCount.call_count, 2)
+        self.assertEqual(mock_table.delete.call_count, 2)
+        self.assertEqual(self.model.current_peak_table_info["workspace"], workspace)
+        self.assertEqual(self.model.current_peak_table_info["number_of_peaks"], number_of_peaks)
+        self.assertEqual(mock_retrieve_ws.call_count, 2)
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.retrieve_ws")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.find_peak_algorithm")
+    def test_run_find_peak_algo_with_default_peaks_and_delay_errors(self, mock_find_peaks, mock_retrieve_ws):
+        # setup
+        workspace = "9997; Detector 4"
+        number_of_peaks = 0
+        mock_group = mock.Mock()
+        mock_table = mock.Mock()
+        mock_table.rowCount.return_value = number_of_peaks
+        mock_retrieve_ws.return_value = mock_table
+
+        param = {"workspace": workspace, "min_energy": 5, "max_energy": 100, "threshold": 1.5, "default_width": True}
+        ignore_peak_matching = self.model._run_find_peak_algorithm(param, mock_group, True)
+
+        # Assert statements
+        mock_find_peaks.assert_called_once_with(workspace, 3, 5, 100, 1.5, 0.1, 0.7, 1.5)
+        mock_group.add.assert_has_calls([mock.call(workspace + "_with_errors")])
+        self.assertEqual(mock_table.rowCount.call_count, 2)
+        self.assertEqual(mock_table.delete.call_count, 2)
+        self.assertEqual(self.model.current_peak_table_info["workspace"], workspace)
+        self.assertEqual(self.model.current_peak_table_info["number_of_peaks"], number_of_peaks)
+        self.assertEqual(mock_retrieve_ws.call_count, 2)
+        self.assertEqual(ignore_peak_matching, True)
+        self.assertEqual(self.model.warnings.get(), f"No peaks found in {workspace} try reducing acceptance threshold")
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.peak_matching_algorithm")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.GroupWorkspaces")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.EAAutoTabModel.update_match_table")
+    def test_run_peak_matching_algo(self, mock_update_match_table, mock_group_workspaces, mock_peak_matching):
+        #setup
+        mock_group = mock.Mock()
+        workspace = "9997; Detector 4"
+        match_table_names = [workspace + "_all_matches", workspace + "_primary_matches",
+                             workspace + "_secondary_matches",
+                             workspace + "_all_matches_sorted_by_energy", workspace + "_likelihood"]
+
+        self.model._run_peak_matchiing_algorithm(workspace, mock_group)
+
+        mock_peak_matching.assert_called_once_with(workspace, match_table_names)
+        mock_group_workspaces.assert_called_once_with(InputWorkspaces=match_table_names,
+                                                      OutputWorkspace=workspace + "_matches")
+        mock_group.add.assert_called_once_with(workspace + "_matches")
+        mock_update_match_table.assert_called_once_with(workspace + "_likelihood", workspace)
 
 
 if __name__ == '__main__':

@@ -11,12 +11,27 @@ from Muon.GUI.Common import thread_model, message_box
 from mantidqt.utils.observer_pattern import GenericObservable
 from queue import Queue
 from Muon.GUI.ElementalAnalysis2.context.ea_group_context import check_if_group_is_valid
+import copy
 
 # Peak width for detectors are defined below for each detector data was extracted from run 2749
 PEAK_WIDTH = {"Detector 1": [0.5, 1, 2.5],
               "Detector 2": [0.5, 1, 3],
               "Detector 3": [0.1, 0.5, 1.5],
               "Detector 4": [0.1, 0.7, 1.5]}
+
+
+def find_peak_algorithm(workspace, spectrum_number, min_energy, max_energy, threshold, min_width, estimate_width, max_width):
+    FindPeaksAutomatic(InputWorkspace=retrieve_ws(workspace), SpectrumNumber=spectrum_number, StartXValue=min_energy,
+                       EndXValue=max_energy, AcceptanceThreshold=threshold,
+                       PeakPropertiesTableName=workspace + "_peaks",
+                       RefitPeakPropertiesTableName=workspace + "_refitted_peaks", MinPeakSigma=min_width,
+                       EstimatePeakSigma=estimate_width, MaxPeakSigma=max_width)
+
+
+def peak_matching_algorithm(workspace, match_table_names):
+    PeakMatching(PeakTable=workspace + "_peaks", AllPeaks=match_table_names[0],
+                 PrimaryPeaks=match_table_names[1], SecondaryPeaks=match_table_names[2],
+                 SortedByEnergy=match_table_names[3], ElementLikelihood=match_table_names[4])
 
 
 class EAAutoTabModel(object):
@@ -75,16 +90,17 @@ class EAAutoTabModel(object):
             group = retrieve_ws(run)
             for workspace_name in group.getNames():
                 if check_if_group_is_valid(workspace_name):
-                    parameters["workspace"] = workspace_name
-                    if not self.run_find_peak_algorithm(parameters, group, True):
-                        self.run_peak_matchiing_algorithm(workspace_name, group)
+                    tmp_parameters = copy.deepcopy(parameters)
+                    tmp_parameters["workspace"] = workspace_name
+                    if not self._run_find_peak_algorithm(tmp_parameters, group, True):
+                        self._run_peak_matchiing_algorithm(workspace_name, group)
         else:
             run, detector = run_and_detector
             group = retrieve_ws(run)
-            self.run_find_peak_algorithm(parameters, group)
-            self.run_peak_matchiing_algorithm(workspace, group)
+            self._run_find_peak_algorithm(parameters, group)
+            self._run_peak_matchiing_algorithm(workspace, group)
 
-    def run_find_peak_algorithm(self, parameters, group, delay_errors=False):
+    def _run_find_peak_algorithm(self, parameters, group, delay_errors=False):
         # Run FindPeaksAutomatic algorithm
         ignore_peak_matching = False
         workspace = parameters["workspace"]
@@ -101,11 +117,7 @@ class EAAutoTabModel(object):
             max_width = parameters["max_width"]
             estimate_width = parameters["estimate_width"]
 
-        FindPeaksAutomatic(InputWorkspace=retrieve_ws(workspace), SpectrumNumber=3, StartXValue=min_energy,
-                           EndXValue=max_energy, AcceptanceThreshold=threshold,
-                           PeakPropertiesTableName=workspace + "_peaks",
-                           RefitPeakPropertiesTableName=workspace + "_refitted_peaks", MinPeakSigma=min_width,
-                           EstimatePeakSigma=estimate_width, MaxPeakSigma=max_width)
+        find_peak_algorithm(workspace, 3, min_energy, max_energy, threshold, min_width, estimate_width, max_width)
 
         group.add(workspace + "_with_errors")
 
@@ -130,15 +142,13 @@ class EAAutoTabModel(object):
                 raise RuntimeError(f"No peaks found in {workspace} try reducing acceptance threshold")
         return ignore_peak_matching
 
-    def run_peak_matchiing_algorithm(self, workspace, group):
+    def _run_peak_matchiing_algorithm(self, workspace, group):
         # Run PeakMatching algorithm
         match_table_names = [workspace + "_all_matches", workspace + "_primary_matches",
                              workspace + "_secondary_matches",
                              workspace + "_all_matches_sorted_by_energy", workspace + "_likelihood"]
 
-        PeakMatching(PeakTable=workspace + "_peaks", AllPeaks=match_table_names[0],
-                     PrimaryPeaks=match_table_names[1], SecondaryPeaks=match_table_names[2],
-                     SortedByEnergy=match_table_names[3], ElementLikelihood=match_table_names[4])
+        peak_matching_algorithm(workspace, match_table_names)
 
         GroupWorkspaces(InputWorkspaces=match_table_names, OutputWorkspace=workspace + "_matches")
 

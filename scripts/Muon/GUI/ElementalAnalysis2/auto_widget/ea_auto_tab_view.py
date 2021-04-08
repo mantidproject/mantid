@@ -160,9 +160,11 @@ class EAAutoTabView(QtWidgets.QWidget):
                 parameters["min_width"] = float(self.min_width_line_edit.text())
                 parameters["max_width"] = float(self.max_width_line_edit.text())
                 parameters["estimate_width"] = float(self.estimate_width_line_edit.text())
+            if parameters["min_energy"] > parameters["max_energy"] or parameters["min_width"] > parameters["max_width"]:
+                raise ValueError()
 
         except ValueError:
-            message_box.warning("ERROR: Invalid arguments for peak finding")
+            message_box.warning("ERROR: Invalid arguments for peak finding", self)
             return None
         workspace_name = self.find_peaks_combobox.currentText()
         if workspace_name == "":
