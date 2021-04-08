@@ -78,6 +78,23 @@ example below).
 The source and sample positions (in that order) are aligned before any
 components are aligned.
 
+Displacements Table
+###################
+This table lists changes in position and orientation for each component
+other than the source and sample.
+
+- `DeltaR`: change in distance from Component to Sample (in mili-meter)
+- `DeltaX`: change in X-coordinate of Component (in mili-meter)
+- `DeltaY`: change in Y-coordinate of Component (in mili-meter)
+- `DeltaZ`: change in Z-coordinate of Component (in mili-meter)
+
+Changes in Euler Angles are understood once a Euler convention is selected. If
+`YXZ` is selected, then:
+
+- `DeltaAlpha`: change in rotation around the Y-axis (in degrees)
+- `DeltaBeta`: change in rotation around the X-axis (in degrees)
+- `DeltaGamma`: change in rotation around the Z-axis (in degrees)
+
 .. categories::
 
 .. sourcelink::

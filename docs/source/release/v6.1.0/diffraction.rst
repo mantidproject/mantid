@@ -31,6 +31,8 @@ Improvements
 - Differential evolution minimizer added to :ref:`AlignComponents <algm-AlignComponents>`.
 - Differential evolution minimizer added to :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>`.
 - Added option to fix banks' vertical coordinate :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>`.
+- :ref:`AlignComponents <algm-AlignComponents>` has option to output a table listing the changes in position and orientation for each component
+- :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>` now outputs a table listing the changes in position and orientation for each bank
 
 Bugfixes
 ########
