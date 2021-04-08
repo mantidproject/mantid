@@ -159,7 +159,7 @@ class SuperplotPresenter:
                 axisType = MantidAxType.SPECTRUM
             else:
                 axisType = MantidAxType.BIN
-            lines = axes.plot(mtd[wsName], wkspIndex=sp)
+            lines = axes.plot(mtd[wsName], wkspIndex=sp, axis=axisType)
             line = lines[0]
             self._view.modifySpectrumLabel(wsName, sp, line.get_label(),
                                            line.get_color())
