@@ -8,8 +8,8 @@
 
 #include "IIndirectFitDataTableModel.h"
 #include "IndirectDataAnalysisTab.h"
-#include "IndirectFitDataTableModel.h"
 #include "IndirectFitDataPresenter.h"
+#include "IndirectFitDataTableModel.h"
 #include "IndirectFitOutputOptionsPresenter.h"
 #include "IndirectFitOutputOptionsView.h"
 #include "IndirectFitPlotPresenter.h"

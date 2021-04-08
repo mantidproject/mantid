@@ -26,8 +26,7 @@ using namespace MantidQt::CustomInterfaces::IDA;
 using namespace MantidQt::MantidWidgets;
 
 using ConvolutionFitSequential =
-    Mantid::CurveFitting::Algorithms::ConvolutionFit<
-        Mantid::CurveFitting::Algorithms::QENSFitSequential>;
+    Mantid::CurveFitting::Algorithms::ConvolutionFit<Mantid::CurveFitting::Algorithms::QENSFitSequential>;
 
 namespace {
 
@@ -48,13 +47,11 @@ MultiDomainFunction_sptr getFunction(std::string const &functionString) {
   return std::dynamic_pointer_cast<MultiDomainFunction>(fun);
 }
 
-void setFittingFunction(std::unique_ptr<ConvFitModel> &model,
-                        std::string const &functionString) {
+void setFittingFunction(std::unique_ptr<ConvFitModel> &model, std::string const &functionString) {
   model->setFitFunction(getFunction(functionString));
 }
 
-IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace,
-                                  std::string const &functionString) {
+IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace, std::string const &functionString) {
   auto alg = std::make_shared<ConvolutionFitSequential>();
   alg->initialize();
   alg->setProperty("InputWorkspace", workspace);
@@ -71,28 +68,23 @@ IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace,
   return alg;
 }
 
-IAlgorithm_sptr getSetupFitAlgorithm(std::unique_ptr<ConvFitModel> &model,
-                                     const MatrixWorkspace_sptr &workspace,
+IAlgorithm_sptr getSetupFitAlgorithm(std::unique_ptr<ConvFitModel> &model, const MatrixWorkspace_sptr &workspace,
                                      std::string const &workspaceName) {
-  std::string const function =
-      "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
-      "(composite=Convolution,FixResolution=true,NumDeriv=true;"
-      "name=Resolution,Workspace=" +
-      workspaceName +
-      ",WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
-      "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
-      "0175)))";
+  std::string const function = "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
+                               "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+                               "name=Resolution,Workspace=" +
+                               workspaceName +
+                               ",WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
+                               "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
+                               "0175)))";
   setFittingFunction(model, function);
   auto alg = setupFitAlgorithm(std::move(workspace), function);
   return alg;
 }
 
-IAlgorithm_sptr
-getExecutedFitAlgorithm(std::unique_ptr<ConvFitModel> &model,
-                        MatrixWorkspace_sptr workspace,
-                        std::string const &workspaceName) {
-  auto const alg =
-      getSetupFitAlgorithm(model, std::move(workspace), workspaceName);
+IAlgorithm_sptr getExecutedFitAlgorithm(std::unique_ptr<ConvFitModel> &model, MatrixWorkspace_sptr workspace,
+                                        std::string const &workspaceName) {
+  auto const alg = getSetupFitAlgorithm(model, std::move(workspace), workspaceName);
   alg->execute();
   return alg;
 }
@@ -134,8 +126,7 @@ public:
     TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), TableDatasetIndex{5});
   }
 
-  void
-  test_that_getFitFunction_will_return_the_fitting_function_which_has_been_set() {
+  void test_that_getFitFunction_will_return_the_fitting_function_which_has_been_set() {
     FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
@@ -235,8 +226,7 @@ public:
 
     m_model->addWorkspace(m_workspace, spectra);
     auto const modelWorkspace = m_model->getWorkspace(0);
-    auto const alg =
-        getSetupFitAlgorithm(m_model, std::move(modelWorkspace), "Name");
+    auto const alg = getSetupFitAlgorithm(m_model, std::move(modelWorkspace), "Name");
     TS_ASSERT_THROWS_ANYTHING(m_model->addOutput(alg));
   }
 
@@ -248,8 +238,7 @@ private:
     addWorkspacesToModel(spectra, workspaces...);
   }
 
-  void addWorkspacesToModel(FunctionModelSpectra const& spectra,
-      MatrixWorkspace_sptr const& workspace) {
+  void addWorkspacesToModel(FunctionModelSpectra const &spectra, MatrixWorkspace_sptr const &workspace) {
     m_model->addWorkspace(workspace, spectra);
   }
 

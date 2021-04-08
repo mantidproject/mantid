@@ -260,9 +260,7 @@ public:
   ///----------------------------------------------------------------------
 
   void test_setPlotType_sets_the_view() {
-    EXPECT_CALL(*m_view,
-                setPlotType(PlotWidget::Spectra, constructActions(boost::none)))
-        .Times(1);
+    EXPECT_CALL(*m_view, setPlotType(PlotWidget::Spectra, constructActions(boost::none))).Times(1);
     m_presenter->setPlotType(PlotWidget::Spectra);
   }
 

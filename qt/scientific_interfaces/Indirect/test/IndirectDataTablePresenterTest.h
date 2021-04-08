@@ -179,13 +179,11 @@ public:
   }
 
   void test_updateTableFromModel_sets_table_to_values_from_model() {
-    std::vector<std::string> labels = {"FWHM", "EISF"}; 
+    std::vector<std::string> labels = {"FWHM", "EISF"};
     auto ws = createWorkspace(2);
     ON_CALL(*m_model, getNumberOfDomains()).WillByDefault(Return(size_t{2}));
-    ON_CALL(*m_model, getWorkspace(FitDomainIndex{0}))
-        .WillByDefault(Return(ws));
-    ON_CALL(*m_model, getWorkspace(FitDomainIndex{1}))
-        .WillByDefault(Return(ws));
+    ON_CALL(*m_model, getWorkspace(FitDomainIndex{0})).WillByDefault(Return(ws));
+    ON_CALL(*m_model, getWorkspace(FitDomainIndex{1})).WillByDefault(Return(ws));
     m_presenter->updateTableFromModel();
     TS_ASSERT_EQUALS(m_table->rowCount(), 2);
   }

@@ -24,12 +24,10 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces::IDA;
 
-using ConvolutionFitSequential =
-    Algorithms::ConvolutionFit<Algorithms::QENSFitSequential>;
+using ConvolutionFitSequential = Algorithms::ConvolutionFit<Algorithms::QENSFitSequential>;
 
 namespace {
-IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace,
-                                  std::string const &functionString) {
+IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace, std::string const &functionString) {
   auto alg = std::make_shared<ConvolutionFitSequential>();
   alg->initialize();
   alg->setProperty("InputWorkspace", workspace);
@@ -46,73 +44,56 @@ IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace,
   return alg;
 }
 
-IAlgorithm_sptr getSetupFitAlgorithm(const MatrixWorkspace_sptr &workspace,
-                                     std::string const &workspaceName) {
-  std::string const function =
-      "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
-      "(composite=Convolution,FixResolution=true,NumDeriv=true;"
-      "name=Resolution,Workspace=" +
-      workspaceName +
-      ",WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
-      "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
-      "0175)))";
+IAlgorithm_sptr getSetupFitAlgorithm(const MatrixWorkspace_sptr &workspace, std::string const &workspaceName) {
+  std::string const function = "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
+                               "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+                               "name=Resolution,Workspace=" +
+                               workspaceName +
+                               ",WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
+                               "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
+                               "0175)))";
   auto alg = setupFitAlgorithm(std::move(workspace), function);
   return alg;
 }
 
-IAlgorithm_sptr getExecutedFitAlgorithm(MatrixWorkspace_sptr workspace,
-                                        std::string const &workspaceName) {
-  auto const alg =
-      getSetupFitAlgorithm(std::move(workspace), workspaceName);
+IAlgorithm_sptr getExecutedFitAlgorithm(MatrixWorkspace_sptr workspace, std::string const &workspaceName) {
+  auto const alg = getSetupFitAlgorithm(std::move(workspace), workspaceName);
   alg->execute();
   return alg;
 }
 
 template <typename WorkspaceType>
-std::shared_ptr<WorkspaceType>
-getWorkspaceOutput(const IAlgorithm_sptr &algorithm,
-                   const std::string &propertyName) {
-  return AnalysisDataService::Instance().retrieveWS<WorkspaceType>(
-      algorithm->getProperty(propertyName));
+std::shared_ptr<WorkspaceType> getWorkspaceOutput(const IAlgorithm_sptr &algorithm, const std::string &propertyName) {
+  return AnalysisDataService::Instance().retrieveWS<WorkspaceType>(algorithm->getProperty(propertyName));
 }
 
-}
-
+} // namespace
 
 class IndirectFitOutputModelTest : public CxxTest::TestSuite {
 public:
   /// WorkflowAlgorithms do not appear in the FrameworkManager without this line
   IndirectFitOutputModelTest() { FrameworkManager::Instance(); }
 
-  static IndirectFitOutputModelTest *createSuite() {
-    return new IndirectFitOutputModelTest();
-  }
+  static IndirectFitOutputModelTest *createSuite() { return new IndirectFitOutputModelTest(); }
 
   static void destroySuite(IndirectFitOutputModelTest *suite) { delete suite; }
 
-  void setUp() override {
-    m_model = std::make_unique<IndirectFitOutputModel>();
-  }
+  void setUp() override { m_model = std::make_unique<IndirectFitOutputModel>(); }
 
   void tearDown() override {
     AnalysisDataService::Instance().clear();
     m_model.reset();
   }
 
-  void test_isEmpty_returns_true_if_no_output_is_set() {
-    TS_ASSERT(m_model->isEmpty());
-  }
+  void test_isEmpty_returns_true_if_no_output_is_set() { TS_ASSERT(m_model->isEmpty()); }
 
   void test_isEmpty_returns_False_if_no_output_has_been_set() {
     auto workspace = createWorkspaceWithInstrument(6, 5);
     SetUpADSWithWorkspace ads("wsName", workspace);
     auto const fitAlgorithm = getExecutedFitAlgorithm(workspace, "wsName");
-    auto group = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm,
-                                                    "OutputWorkspaceGroup");
-    auto parameters = getWorkspaceOutput<ITableWorkspace>(
-        fitAlgorithm, "OutputParameterWorkspace");
-    auto result =
-        getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspace");
+    auto group = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspaceGroup");
+    auto parameters = getWorkspaceOutput<ITableWorkspace>(fitAlgorithm, "OutputParameterWorkspace");
+    auto result = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspace");
     m_model->addOutput(group, parameters, result);
 
     TS_ASSERT(!m_model->isEmpty());
@@ -124,12 +105,9 @@ public:
 
     auto const fitAlgorithm = getExecutedFitAlgorithm(workspace, "wsName");
 
-    auto group = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm,
-                                                    "OutputWorkspaceGroup");
-    auto parameters = getWorkspaceOutput<ITableWorkspace>(
-        fitAlgorithm, "OutputParameterWorkspace");
-    auto result =
-        getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspace");
+    auto group = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspaceGroup");
+    auto parameters = getWorkspaceOutput<ITableWorkspace>(fitAlgorithm, "OutputParameterWorkspace");
+    auto result = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspace");
     m_model->addOutput(group, parameters, result);
     TS_ASSERT(m_model->isSpectrumFit(FitDomainIndex{0}));
   }
@@ -144,12 +122,9 @@ public:
 
     auto const fitAlgorithm = getExecutedFitAlgorithm(workspace, "wsName");
 
-    auto group = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm,
-                                                    "OutputWorkspaceGroup");
-    auto parameters = getWorkspaceOutput<ITableWorkspace>(
-        fitAlgorithm, "OutputParameterWorkspace");
-    auto result =
-        getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspace");
+    auto group = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspaceGroup");
+    auto parameters = getWorkspaceOutput<ITableWorkspace>(fitAlgorithm, "OutputParameterWorkspace");
+    auto result = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspace");
     m_model->addOutput(group, parameters, result);
     TS_ASSERT(!m_model->isSpectrumFit(FitDomainIndex{6}));
   }
@@ -160,22 +135,17 @@ public:
 
     auto const fitAlgorithm = getExecutedFitAlgorithm(workspace, "wsName");
 
-    auto group = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm,
-                                                    "OutputWorkspaceGroup");
-    auto parameters = getWorkspaceOutput<ITableWorkspace>(
-        fitAlgorithm, "OutputParameterWorkspace");
-    auto result =
-        getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspace");
+    auto group = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspaceGroup");
+    auto parameters = getWorkspaceOutput<ITableWorkspace>(fitAlgorithm, "OutputParameterWorkspace");
+    auto result = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspace");
     m_model->addOutput(group, parameters, result);
     auto params = m_model->getParameters(FitDomainIndex{0});
     TS_ASSERT_EQUALS(params["f0.A0"].value, 0.00);
   }
 
   void test_getParameters_throws_if_no_fitted_data_correct_value() {
-    TS_ASSERT_THROWS(m_model->getParameters(FitDomainIndex{0}),
-                     std::invalid_argument);
-    TS_ASSERT_THROWS(m_model->getParameters(FitDomainIndex{6}),
-                     std::invalid_argument);
+    TS_ASSERT_THROWS(m_model->getParameters(FitDomainIndex{0}), std::invalid_argument);
+    TS_ASSERT_THROWS(m_model->getParameters(FitDomainIndex{6}), std::invalid_argument);
   }
 
   void test_getResultLocaton() {
@@ -184,18 +154,13 @@ public:
 
     auto const fitAlgorithm = getExecutedFitAlgorithm(workspace, "wsName");
 
-    auto group = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm,
-                                                    "OutputWorkspaceGroup");
-    auto parameters = getWorkspaceOutput<ITableWorkspace>(
-        fitAlgorithm, "OutputParameterWorkspace");
-    auto result =
-        getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspace");
+    auto group = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspaceGroup");
+    auto parameters = getWorkspaceOutput<ITableWorkspace>(fitAlgorithm, "OutputParameterWorkspace");
+    auto result = getWorkspaceOutput<WorkspaceGroup>(fitAlgorithm, "OutputWorkspace");
     m_model->addOutput(group, parameters, result);
     auto const index = FitDomainIndex{0};
-    auto resultLocation = ResultLocationNew(
-        result, WorkspaceGroupIndex{static_cast<size_t>(index.value)});
-    TS_ASSERT_EQUALS(m_model->getResultLocation(index)->index,
-                     resultLocation.index);
+    auto resultLocation = ResultLocationNew(result, WorkspaceGroupIndex{static_cast<size_t>(index.value)});
+    TS_ASSERT_EQUALS(m_model->getResultLocation(index)->index, resultLocation.index);
   }
 
 private:

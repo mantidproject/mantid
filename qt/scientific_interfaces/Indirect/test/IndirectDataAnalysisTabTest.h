@@ -7,8 +7,8 @@
 #pragma once
 
 #include "IndirectDataAnalysisTab.h"
-#include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
@@ -19,21 +19,15 @@ public:
   /// Needed to make sure everything is initialized
   IndirectDataAnalysisTabTest() = default;
 
-  static IndirectDataAnalysisTabTest *createSuite() {
-    return new IndirectDataAnalysisTabTest();
-  }
+  static IndirectDataAnalysisTabTest *createSuite() { return new IndirectDataAnalysisTabTest(); }
 
-  static void destroySuite(IndirectDataAnalysisTabTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(IndirectDataAnalysisTabTest *suite) { delete suite; }
 
-  void test_updatePlot() { 
+  void test_updatePlot() {
     const std::string wsName = "wsName";
     size_t index = 1;
   }
 
-  //MantidQt::MantidWidgets::PreviewPlot m_fitPreviewPlot;
-  //MantidQt::MantidWidgets::PreviewPlot m_diffPreviewPlot;
-
+  // MantidQt::MantidWidgets::PreviewPlot m_fitPreviewPlot;
+  // MantidQt::MantidWidgets::PreviewPlot m_diffPreviewPlot;
 };
-  

@@ -34,9 +34,8 @@ ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model, IIndirectFitData
 
 void ConvFitDataPresenter::setModelResolution(const QString &name) {
   auto const workspaceCount = m_convModel->getNumberOfWorkspaces();
-  auto const index = m_convModel->getWorkspace(TableDatasetIndex{0})
-                         ? workspaceCount - TableDatasetIndex{1}
-                         : workspaceCount;
+  auto const index =
+      m_convModel->getWorkspace(TableDatasetIndex{0}) ? workspaceCount - TableDatasetIndex{1} : workspaceCount;
   setModelResolution(name.toStdString(), index);
 }
 

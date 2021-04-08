@@ -74,9 +74,7 @@ void FqFitDataPresenter::showParameterComboBoxes() {
 
 void FqFitDataPresenter::setActiveParameterType(const std::string &type) { m_activeParameterType = type; }
 
-void FqFitDataPresenter::updateActiveDataIndex() {
-  m_dataIndex = m_fqFitModel->getNumberOfWorkspaces();
-}
+void FqFitDataPresenter::updateActiveDataIndex() { m_dataIndex = m_fqFitModel->getNumberOfWorkspaces(); }
 
 void FqFitDataPresenter::updateActiveDataIndex(int index) { m_dataIndex = index; }
 
@@ -102,8 +100,7 @@ void FqFitDataPresenter::updateAvailableParameterTypes() {
 }
 
 void FqFitDataPresenter::updateParameterSelectionEnabled() {
-  const auto enabled =
-      m_fqFitModel->getNumberOfWorkspaces() > TableDatasetIndex{0};
+  const auto enabled = m_fqFitModel->getNumberOfWorkspaces() > TableDatasetIndex{0};
   m_cbParameter->setEnabled(enabled);
   m_cbParameterType->setEnabled(enabled);
   m_lbParameter->setEnabled(enabled);
@@ -166,8 +163,7 @@ std::vector<std::string> FqFitDataPresenter::getParameterTypes(TableDatasetIndex
   return types;
 }
 
-void FqFitDataPresenter::addWorkspace(IndirectFittingModel *model,
-                                      const std::string &name) {
+void FqFitDataPresenter::addWorkspace(IndirectFittingModel *model, const std::string &name) {
   if (model->getNumberOfWorkspaces() > m_dataIndex)
     model->removeWorkspace(m_dataIndex);
   model->addWorkspace(name);

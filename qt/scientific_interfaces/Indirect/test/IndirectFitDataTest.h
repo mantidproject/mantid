@@ -444,20 +444,16 @@ public:
     TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
   void test_that_getQValues() {
-    auto const workspace =
-        createWorkspaceWithInelasticInstrument(10,10);
+    auto const workspace = createWorkspaceWithInelasticInstrument(10, 10);
     FunctionModelSpectra const spec =
         FunctionModelSpectra(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0},
-                             MantidQt::CustomInterfaces::IDA::WorkspaceIndex{
-                                 workspace->getNumberHistograms() - 1});
-    auto data =
-        std::make_unique<IndirectFitData>(IndirectFitData(workspace, spec));
+                             MantidQt::CustomInterfaces::IDA::WorkspaceIndex{workspace->getNumberHistograms() - 1});
+    auto data = std::make_unique<IndirectFitData>(IndirectFitData(workspace, spec));
     auto spectrumInfo = workspace->spectrumInfo();
     auto detID = spectrumInfo.detector(0).getID();
     double efixed = workspace->getEFixed(detID);
     double usignTheta = 0.5 * spectrumInfo.twoTheta(0);
-    double q =
-        Mantid::Kernel::UnitConversion::convertToElasticQ(usignTheta, efixed);
+    double q = Mantid::Kernel::UnitConversion::convertToElasticQ(usignTheta, efixed);
     TS_ASSERT_EQUALS(data->getQValues()[0], q);
   }
 };

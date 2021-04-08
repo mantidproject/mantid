@@ -21,8 +21,7 @@ public:
   ~ConvFitModel() override;
 
   Mantid::API::MultiDomainFunction_sptr getFitFunction() const override;
-  boost::optional<double>
-  getInstrumentResolution(TableDatasetIndex dataIndex) const;
+  boost::optional<double> getInstrumentResolution(TableDatasetIndex dataIndex) const;
   std::size_t getNumberHistograms(TableDatasetIndex index) const;
 
   void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) override;

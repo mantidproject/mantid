@@ -138,8 +138,7 @@ void IndirectFitPlotModel::setEndX(double endX) {
 
 void IndirectFitPlotModel::setFWHM(double fwhm) {
   m_fittingModel->setDefaultParameterValue("FWHM", fwhm, m_activeIndex);
-  setFunctionParameters(m_fittingModel->getFitFunction(), "Peak", "FWHM",
-                        fwhm);
+  setFunctionParameters(m_fittingModel->getFitFunction(), "Peak", "FWHM", fwhm);
 }
 
 void IndirectFitPlotModel::setBackground(double background) {
@@ -174,9 +173,7 @@ TableDatasetIndex IndirectFitPlotModel::getActiveDataIndex() const { return m_ac
 
 WorkspaceIndex IndirectFitPlotModel::getActiveSpectrum() const { return m_activeSpectrum; }
 
-TableDatasetIndex IndirectFitPlotModel::numberOfWorkspaces() const {
-  return m_fittingModel->getNumberOfWorkspaces();
-}
+TableDatasetIndex IndirectFitPlotModel::numberOfWorkspaces() const { return m_fittingModel->getNumberOfWorkspaces(); }
 
 FitDomainIndex IndirectFitPlotModel::getActiveDomainIndex() const {
   FitDomainIndex index{0};

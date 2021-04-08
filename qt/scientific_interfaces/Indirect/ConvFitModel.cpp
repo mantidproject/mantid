@@ -230,8 +230,7 @@ Mantid::API::MultiDomainFunction_sptr ConvFitModel::getFitFunction() const {
   return IndirectFittingModel::getFitFunction();
 }
 
-boost::optional<double>
-ConvFitModel::getInstrumentResolution(TableDatasetIndex dataIndex) const {
+boost::optional<double> ConvFitModel::getInstrumentResolution(TableDatasetIndex dataIndex) const {
   if (dataIndex < getNumberOfWorkspaces())
     return instrumentResolution(getWorkspace(dataIndex));
   return boost::none;

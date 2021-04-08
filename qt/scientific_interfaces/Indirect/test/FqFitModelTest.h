@@ -297,8 +297,7 @@ public:
 
   void test_that_setActiveEISF_will_add_separate_spectrum() {
     FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
-    auto const workspace2 =
-        createWorkspaceWithTextAxis(2, getNoWidthLabels());
+    auto const workspace2 = createWorkspaceWithTextAxis(2, getNoWidthLabels());
     m_ads->addOrReplace("Name2", workspace2);
     addWorkspacesToModel(spectra, m_workspace, workspace2);
 

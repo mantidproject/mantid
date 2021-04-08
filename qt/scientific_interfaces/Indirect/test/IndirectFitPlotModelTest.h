@@ -110,8 +110,8 @@ IndirectFittingModel *createModelWithMultipleWorkspaces(int const &numberOfSpect
   for (auto name : workspaceNames) {
     addWorkspaceToModel(model, numberOfSpectra, name);
   }
-  setFittingFunction(model, getFitFunctionString(workspaceNames[0]),
-                     setFitFunction, numberOfSpectra * workspaceNames.size());
+  setFittingFunction(model, getFitFunctionString(workspaceNames[0]), setFitFunction,
+                     numberOfSpectra * workspaceNames.size());
   return model;
 }
 
@@ -143,8 +143,7 @@ IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace, std::st
 IAlgorithm_sptr getSetupFitAlgorithm(IndirectFittingModel *model, const MatrixWorkspace_sptr &workspace,
                                      std::string const &workspaceName) {
   setFittingFunction(model, getFitFunctionString(workspaceName), true, 20);
-  auto alg = setupFitAlgorithm(std::move(workspace),
-                               getFitFunctionString(workspaceName));
+  auto alg = setupFitAlgorithm(std::move(workspace), getFitFunctionString(workspaceName));
   return alg;
 }
 

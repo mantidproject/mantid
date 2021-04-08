@@ -181,8 +181,7 @@ void IndirectFitPropertyBrowser::setFunction(const QString &funStr) {
   }
 }
 
-MultiDomainFunction_sptr
-IndirectFitPropertyBrowser::getFitFunction() const {
+MultiDomainFunction_sptr IndirectFitPropertyBrowser::getFitFunction() const {
   try {
     if (getNumberOfDatasets() > 0) {
       return getGlobalFunction();
@@ -346,11 +345,9 @@ void IndirectFitPropertyBrowser::setCurrentDataset(FitDomainIndex i) {
 
 FitDomainIndex IndirectFitPropertyBrowser::currentDataset() const {
   if (isFullFunctionBrowserActive()) {
-    return FitDomainIndex{
-        static_cast<size_t>(m_functionBrowser->getCurrentDataset())};
+    return FitDomainIndex{static_cast<size_t>(m_functionBrowser->getCurrentDataset())};
   } else {
-    return FitDomainIndex{
-        static_cast<size_t>(m_templateBrowser->getCurrentDataset())};
+    return FitDomainIndex{static_cast<size_t>(m_templateBrowser->getCurrentDataset())};
   }
 }
 
