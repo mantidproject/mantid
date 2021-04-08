@@ -46,6 +46,23 @@ public:
     TS_ASSERT_EQUALS(pw->rowCount(), 1);
     TS_ASSERT_EQUALS(pw->getNumberPeaks(), 1);
     TS_ASSERT_DELTA(pw->getPeak(0).getWavelength(), 3.0, 1e-9);
+
+    // check column printing
+    std::ostringstream s;
+    for (int n = 0; n < 14; n++) {
+      pw->getColumn(n)->print(0, s);
+      s << " ";
+    }
+    TS_ASSERT_EQUALS(s.str(), "0 0.00 0.00 0.00 3 9.1 6.3 0 0 0 0 [1,0,0] [1,0,0] 0 ");
+
+    // check some cell values
+    TS_ASSERT_EQUALS(pw->cell<int>(0, 0), 0);
+    TS_ASSERT_EQUALS(pw->cell<double>(0, 1), 0);
+    TS_ASSERT_EQUALS(pw->cell<double>(0, 2), 0);
+    TS_ASSERT_EQUALS(pw->cell<double>(0, 3), 0);
+    TS_ASSERT_EQUALS(pw->cell<double>(0, 4), 3);
+    TS_ASSERT_DELTA(pw->cell<double>(0, 5), 9.0893558317, 1e-7);
+    TS_ASSERT_DELTA(pw->cell<double>(0, 6), 6.2831853017, 1e-7);
   }
 
   void test_copyConstructor() {

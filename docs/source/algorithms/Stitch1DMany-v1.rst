@@ -40,6 +40,11 @@ We can specify manual scale factors to use by setting
 of scale factors from the selected period. These scale factors are then applied
 to all other periods when stitching.
 
+The workspace that provides the scale for stitching output can be chosen by
+specifying the desired index through :literal:`IndexOfReference` property.
+The reference workspace will not be scaled, and the other workspaces will be scaled
+to match the reference.
+
 Workflow
 --------
 
