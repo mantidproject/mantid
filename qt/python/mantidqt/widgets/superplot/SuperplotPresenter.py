@@ -233,6 +233,27 @@ class SuperplotPresenter:
         self._updateHoldButton(currentWsName, value)
         self._updatePlot()
 
+    def onDelSpectrumButtonClicked(self, wsName, index):
+        """
+        Triggered when the delete button of a selected spectrum has been
+        pressed.
+
+        Args:
+            wsName (str): name of the corresponding workspace
+            index (int): index of the corresponding spectrum
+        """
+        mode = self._view.getMode()
+        self._model.removeData(wsName, index)
+        spectraList = self._view.getSpectraList(wsName)
+        spectraList.remove(index)
+        self._view.setSpectraList(wsName, spectraList)
+        if not self._model.isBinMode() and not self._model.isSpectrumMode():
+            self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
+                                          self.BIN_MODE_TEXT])
+            self._view.setMode(mode)
+        self._view.setSelectedWorkspacesInList([wsName])
+        self._updatePlot()
+
     def onHoldButtonToggled(self, state):
         """
         Add or delete the currently selected workspace, spectrum pairs from the
