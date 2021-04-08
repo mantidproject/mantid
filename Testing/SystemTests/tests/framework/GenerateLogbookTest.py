@@ -37,7 +37,7 @@ class D11_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def validate(self):
-        self.tolerance = 1e-1
+        self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
         return ['d11_logbook', 'D11_Logbook_Reference.nxs']
@@ -74,7 +74,7 @@ class D11B_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def validate(self):
-        self.tolerance = 1e-1
+        self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
         return ['d11b_logbook', 'D11b_Logbook_Reference.nxs']
@@ -112,7 +112,7 @@ class D22_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def validate(self):
-        self.tolerance = 1e-1
+        self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
         return ['d22_logbook', 'D22_Logbook_Reference.nxs']
@@ -150,7 +150,7 @@ class D22B_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def validate(self):
-        self.tolerance = 1e-1
+        self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
         return ['d22b_logbook', 'D22b_Logbook_Reference.nxs']
@@ -188,7 +188,7 @@ class IN4_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def validate(self):
-        self.tolerance = 1e-1
+        self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
         return ['in4_logbook', 'IN4_Logbook_Reference.nxs']
@@ -226,7 +226,7 @@ class IN5_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def validate(self):
-        self.tolerance = 1e-1
+        self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
         return ['in5_logbook', 'IN5_Logbook_Reference.nxs']
@@ -264,7 +264,7 @@ class IN6_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def validate(self):
-        self.tolerance = 1e-1
+        self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
         return ['in6_logbook', 'IN6_Logbook_Reference.nxs']
@@ -302,7 +302,7 @@ class D33_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def validate(self):
-        self.tolerance = 1e-1
+        self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
         return ['d33_logbook', 'D33_Logbook_Reference.nxs']
@@ -340,7 +340,7 @@ class D16_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def validate(self):
-        self.tolerance = 1e-1
+        self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
         return ['d16_logbook', 'D16_Logbook_Reference.nxs']
