@@ -439,9 +439,8 @@ class AlignComponents(PythonAlgorithm):
         self._rotate = any([self._optionsDict[r] for r in ('AlphaRotation', 'BetaRotation', 'GammaRotation')])
 
         prog = Progress(self, start=0, end=1, nreports=len(components))
-        get_component = api.mtd[wks_name].getInstrument().getComponentByName  # shortcut
         for component in components:
-            comp = get_component(component)
+            comp = api.mtd[wks_name].getInstrument().getComponentByName(component)
             firstDetID = self._getFirstDetID(comp)
             firstIndex = detID.index(firstDetID)  # a row index in the input TOFS table
             lastDetID = self._getLastDetID(comp)
@@ -476,12 +475,9 @@ class AlignComponents(PythonAlgorithm):
             minimizer_selection = self.getProperty('Minimizer').value
             if minimizer_selection == 'L-BFGS-B':
                 # scipy.opimize.minimize with the L-BFGS-B algorithm
-                logger.error(f'Setting maxiter to 1')
-                options = dict(maxiter=1)
                 results: OptimizeResult = minimize(self._minimisation_func, x0=x0List, method='L-BFGS-B',
                                                    args=(wks_name, component, firstIndex, lastIndex),
-                                                   bounds=boundsList,
-                                                   options=options)
+                                                   bounds=boundsList)
             elif minimizer_selection == 'differential_evolution':
                 results: OptimizeResult = differential_evolution(self._minimisation_func,
                                                                  bounds=boundsList,
@@ -490,7 +486,7 @@ class AlignComponents(PythonAlgorithm):
             # Apply the results to the output workspace
             xmap = self._mapOptions(results.x)
 
-            comp = get_component(component)  # adjusted component
+            comp = api.mtd[wks_name].getInstrument().getComponentByName(component)  # adjusted component
             # Distance between the adjusted position of the sample and the adjusted position of the component
             comp_sample_distance_end = (comp.getPos() - sample_position_end).norm()
 
@@ -519,7 +515,6 @@ class AlignComponents(PythonAlgorithm):
                 adjustments_table.addRow([component] + component_adjustments)
 
             if saving_displacements and (self._move or self._rotate):
-                logger.error(f'component_displacements = {[component] + component_displacements}')
                 displacements_table.addRow([component] + component_displacements)
 
             # Need to grab the component object again, as things have changed
