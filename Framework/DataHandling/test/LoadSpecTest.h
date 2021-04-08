@@ -30,8 +30,7 @@ public:
 
     std::string outWS("outWS");
 
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", "LoadSNSspec.txt"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "LoadSNSspec.txt"));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", outWS));
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());
@@ -39,8 +38,7 @@ public:
 
     MatrixWorkspace_const_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(outWS)));
+        ws = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outWS)));
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 4); // number of spectrum
     TS_ASSERT_EQUALS(ws->blocksize(), 39);
@@ -68,8 +66,7 @@ public:
 
     std::string outWS("outWS");
 
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", "LoadSpecPoint.txt"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "LoadSpecPoint.txt"));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", outWS));
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());
@@ -77,8 +74,7 @@ public:
 
     MatrixWorkspace_const_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(outWS)));
+        ws = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outWS)));
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 4); // number of spectrum
     TS_ASSERT_EQUALS(ws->blocksize(), 39);

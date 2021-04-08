@@ -147,15 +147,6 @@ class IPeakTest(unittest.TestCase):
         self._peak.setBinCount(bin_count)
         self.assertAlmostEqual(self._peak.getBinCount(), bin_count)
 
-    def test_get_row_and_column(self):
-        row, col = 0, 0  # this is the very first detector
-        self.assertEqual(self._peak.getRow(), row)
-        self.assertEqual(self._peak.getCol(), col)
-
-    def test_get_det_pos(self):
-        expected_det_pos = np.array([0.05962, -0.09450, -0.23786])
-        npt.assert_allclose(self._peak.getDetPos(), expected_det_pos, atol=1e-5)
-
     def test_get_l1(self):
         expected_l1 = 8.3
         self.assertEqual(self._peak.getL1(), expected_l1)

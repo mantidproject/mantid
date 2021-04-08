@@ -17,9 +17,7 @@ namespace IDA {
 struct HoldRedrawing {
   IIndirectFitPlotView *m_view;
 
-  HoldRedrawing(IIndirectFitPlotView *view) : m_view(view) {
-    m_view->allowRedraws(false);
-  }
+  HoldRedrawing(IIndirectFitPlotView *view) : m_view(view) { m_view->allowRedraws(false); }
   ~HoldRedrawing() {
     m_view->allowRedraws(true);
     m_view->redrawPlots();
@@ -28,56 +26,40 @@ struct HoldRedrawing {
 
 using namespace Mantid::API;
 
-IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model,
-                                                   IIndirectFitPlotView *view,
+IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model, IIndirectFitPlotView *view,
                                                    IPyRunner *pythonRunner)
-    : m_model(new IndirectFitPlotModel(model)), m_view(view),
-      m_plotGuessInSeparateWindow(false),
+    : m_model(new IndirectFitPlotModel(model)), m_view(view), m_plotGuessInSeparateWindow(false),
       m_plotter(std::make_unique<IndirectPlotter>(pythonRunner)) {
   connect(m_view, SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
           SLOT(handleSelectedFitDataChanged(TableDatasetIndex)));
 
-  connect(m_view, SIGNAL(plotSpectrumChanged(WorkspaceIndex)), this,
-          SLOT(handlePlotSpectrumChanged(WorkspaceIndex)));
+  connect(m_view, SIGNAL(plotSpectrumChanged(WorkspaceIndex)), this, SLOT(handlePlotSpectrumChanged(WorkspaceIndex)));
 
-  connect(m_view, SIGNAL(plotCurrentPreview()), this,
-          SLOT(plotCurrentPreview()));
+  connect(m_view, SIGNAL(plotCurrentPreview()), this, SLOT(plotCurrentPreview()));
 
-  connect(m_view, SIGNAL(fitSelectedSpectrum()), this,
-          SLOT(emitFitSingleSpectrum()));
+  connect(m_view, SIGNAL(fitSelectedSpectrum()), this, SLOT(emitFitSingleSpectrum()));
 
   connect(m_view, SIGNAL(plotGuessChanged(bool)), this, SLOT(plotGuess(bool)));
 
-  connect(m_view, SIGNAL(startXChanged(double)), this,
-          SLOT(setModelStartX(double)));
-  connect(m_view, SIGNAL(endXChanged(double)), this,
-          SLOT(setModelEndX(double)));
+  connect(m_view, SIGNAL(startXChanged(double)), this, SLOT(setModelStartX(double)));
+  connect(m_view, SIGNAL(endXChanged(double)), this, SLOT(setModelEndX(double)));
 
-  connect(m_view, SIGNAL(startXChanged(double)), this,
-          SIGNAL(startXChanged(double)));
-  connect(m_view, SIGNAL(endXChanged(double)), this,
-          SIGNAL(endXChanged(double)));
+  connect(m_view, SIGNAL(startXChanged(double)), this, SIGNAL(startXChanged(double)));
+  connect(m_view, SIGNAL(endXChanged(double)), this, SIGNAL(endXChanged(double)));
 
-  connect(m_view, SIGNAL(hwhmMaximumChanged(double)), this,
-          SLOT(setHWHMMinimum(double)));
-  connect(m_view, SIGNAL(hwhmMinimumChanged(double)), this,
-          SLOT(setHWHMMaximum(double)));
-  connect(m_view, SIGNAL(hwhmChanged(double, double)), this,
-          SLOT(setModelHWHM(double, double)));
-  connect(m_view, SIGNAL(hwhmChanged(double, double)), this,
-          SLOT(emitFWHMChanged(double, double)));
+  connect(m_view, SIGNAL(hwhmMaximumChanged(double)), this, SLOT(setHWHMMinimum(double)));
+  connect(m_view, SIGNAL(hwhmMinimumChanged(double)), this, SLOT(setHWHMMaximum(double)));
+  connect(m_view, SIGNAL(hwhmChanged(double, double)), this, SLOT(setModelHWHM(double, double)));
+  connect(m_view, SIGNAL(hwhmChanged(double, double)), this, SLOT(emitFWHMChanged(double, double)));
 
-  connect(m_view, SIGNAL(backgroundChanged(double)), this,
-          SLOT(setModelBackground(double)));
-  connect(m_view, SIGNAL(backgroundChanged(double)), this,
-          SIGNAL(backgroundChanged(double)));
+  connect(m_view, SIGNAL(backgroundChanged(double)), this, SLOT(setModelBackground(double)));
+  connect(m_view, SIGNAL(backgroundChanged(double)), this, SIGNAL(backgroundChanged(double)));
 
   updateRangeSelectors();
   updateAvailableSpectra();
 }
 
-void IndirectFitPlotPresenter::handleSelectedFitDataChanged(
-    TableDatasetIndex index) {
+void IndirectFitPlotPresenter::handleSelectedFitDataChanged(TableDatasetIndex index) {
   setActiveIndex(index);
   updateAvailableSpectra();
   updatePlots();
@@ -85,8 +67,7 @@ void IndirectFitPlotPresenter::handleSelectedFitDataChanged(
   emit selectedFitDataChanged(index);
 }
 
-void IndirectFitPlotPresenter::handlePlotSpectrumChanged(
-    WorkspaceIndex spectrum) {
+void IndirectFitPlotPresenter::handlePlotSpectrumChanged(WorkspaceIndex spectrum) {
   setActiveSpectrum(spectrum);
   updatePlots();
   emit plotSpectrumChanged(spectrum);
@@ -94,72 +75,42 @@ void IndirectFitPlotPresenter::handlePlotSpectrumChanged(
 
 void IndirectFitPlotPresenter::watchADS(bool watch) { m_view->watchADS(watch); }
 
-TableDatasetIndex IndirectFitPlotPresenter::getSelectedDataIndex() const {
-  return m_model->getActiveDataIndex();
+TableDatasetIndex IndirectFitPlotPresenter::getSelectedDataIndex() const { return m_model->getActiveDataIndex(); }
+
+WorkspaceIndex IndirectFitPlotPresenter::getSelectedSpectrum() const { return m_model->getActiveSpectrum(); }
+
+FitDomainIndex IndirectFitPlotPresenter::getSelectedSpectrumIndex() const { return m_view->getSelectedSpectrumIndex(); }
+
+FitDomainIndex IndirectFitPlotPresenter::getSelectedDomainIndex() const { return m_model->getActiveDomainIndex(); }
+
+bool IndirectFitPlotPresenter::isCurrentlySelected(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const {
+  return getSelectedDataIndex() == dataIndex && getSelectedSpectrum() == spectrum;
 }
 
-WorkspaceIndex IndirectFitPlotPresenter::getSelectedSpectrum() const {
-  return m_model->getActiveSpectrum();
-}
-
-FitDomainIndex IndirectFitPlotPresenter::getSelectedSpectrumIndex() const {
-  return m_view->getSelectedSpectrumIndex();
-}
-
-FitDomainIndex IndirectFitPlotPresenter::getSelectedDomainIndex() const {
-  return m_model->getActiveDomainIndex();
-}
-
-bool IndirectFitPlotPresenter::isCurrentlySelected(
-    TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const {
-  return getSelectedDataIndex() == dataIndex &&
-         getSelectedSpectrum() == spectrum;
-}
-
-void IndirectFitPlotPresenter::setActiveIndex(TableDatasetIndex index) {
-  m_model->setActiveIndex(index);
-}
+void IndirectFitPlotPresenter::setActiveIndex(TableDatasetIndex index) { m_model->setActiveIndex(index); }
 
 void IndirectFitPlotPresenter::setActiveSpectrum(WorkspaceIndex spectrum) {
   m_model->setActiveSpectrum(spectrum);
   m_view->setPlotSpectrum(spectrum);
 }
 
-void IndirectFitPlotPresenter::disableSpectrumPlotSelection() {
-  m_view->disableSpectrumPlotSelection();
-}
+void IndirectFitPlotPresenter::disableSpectrumPlotSelection() { m_view->disableSpectrumPlotSelection(); }
 
-void IndirectFitPlotPresenter::setModelStartX(double startX) {
-  m_model->setStartX(startX);
-}
+void IndirectFitPlotPresenter::setModelStartX(double startX) { m_model->setStartX(startX); }
 
-void IndirectFitPlotPresenter::setModelEndX(double endX) {
-  m_model->setEndX(endX);
-}
+void IndirectFitPlotPresenter::setModelEndX(double endX) { m_model->setEndX(endX); }
 
-void IndirectFitPlotPresenter::setModelHWHM(double minimum, double maximum) {
-  m_model->setFWHM(maximum - minimum);
-}
+void IndirectFitPlotPresenter::setModelHWHM(double minimum, double maximum) { m_model->setFWHM(maximum - minimum); }
 
-void IndirectFitPlotPresenter::setModelBackground(double background) {
-  m_model->setBackground(background);
-}
+void IndirectFitPlotPresenter::setModelBackground(double background) { m_model->setBackground(background); }
 
-void IndirectFitPlotPresenter::hideMultipleDataSelection() {
-  m_view->hideMultipleDataSelection();
-}
+void IndirectFitPlotPresenter::hideMultipleDataSelection() { m_view->hideMultipleDataSelection(); }
 
-void IndirectFitPlotPresenter::showMultipleDataSelection() {
-  m_view->showMultipleDataSelection();
-}
+void IndirectFitPlotPresenter::showMultipleDataSelection() { m_view->showMultipleDataSelection(); }
 
-void IndirectFitPlotPresenter::setStartX(double startX) {
-  m_view->setFitRangeMinimum(startX);
-}
+void IndirectFitPlotPresenter::setStartX(double startX) { m_view->setFitRangeMinimum(startX); }
 
-void IndirectFitPlotPresenter::setEndX(double endX) {
-  m_view->setFitRangeMaximum(endX);
-}
+void IndirectFitPlotPresenter::setEndX(double endX) { m_view->setFitRangeMaximum(endX); }
 
 void IndirectFitPlotPresenter::updatePlotSpectrum(WorkspaceIndex spectrum) {
   m_view->setPlotSpectrum(spectrum);
@@ -182,8 +133,7 @@ void IndirectFitPlotPresenter::setHWHMMinimum(double maximum) {
 
 void IndirectFitPlotPresenter::enablePlotGuessInSeparateWindow() {
   m_plotGuessInSeparateWindow = true;
-  const auto inputAndGuess =
-      m_model->appendGuessToInput(m_model->getGuessWorkspace());
+  const auto inputAndGuess = m_model->appendGuessToInput(m_model->getGuessWorkspace());
   m_plotter->plotSpectra(inputAndGuess->getName(), "0-1");
 }
 
@@ -198,16 +148,14 @@ void IndirectFitPlotPresenter::appendLastDataToSelection() {
     // if adding a spectra to an existing workspace, update all the combo box
     // entries.
     for (size_t i = 0; i < workspaceCount.value; i++) {
-      m_view->setNameInDataSelection(
-          m_model->getFitDataName(TableDatasetIndex(i)), TableDatasetIndex(i));
+      m_view->setNameInDataSelection(m_model->getFitDataName(TableDatasetIndex(i)), TableDatasetIndex(i));
     }
   } else
     m_view->appendToDataSelection(m_model->getLastFitDataName());
 }
 
 void IndirectFitPlotPresenter::updateSelectedDataName() {
-  m_view->setNameInDataSelection(m_model->getFitDataName(),
-                                 m_model->getActiveDataIndex());
+  m_view->setNameInDataSelection(m_model->getFitDataName(), m_model->getActiveDataIndex());
 }
 
 void IndirectFitPlotPresenter::updateDataSelection() {
@@ -246,13 +194,10 @@ void IndirectFitPlotPresenter::enableAllDataSelection() {
 }
 
 void IndirectFitPlotPresenter::setFitSingleSpectrumIsFitting(bool fitting) {
-  m_view->setFitSingleSpectrumText(fitting ? "Fitting..."
-                                           : "Fit Single Spectrum");
+  m_view->setFitSingleSpectrumText(fitting ? "Fitting..." : "Fit Single Spectrum");
 }
 
-void IndirectFitPlotPresenter::setFitSingleSpectrumEnabled(bool enable) {
-  m_view->setFitSingleSpectrumEnabled(enable);
-}
+void IndirectFitPlotPresenter::setFitSingleSpectrumEnabled(bool enable) { m_view->setFitSingleSpectrumEnabled(enable); }
 
 void IndirectFitPlotPresenter::updatePlots() {
   HoldRedrawing holdRedrawing(m_view);
@@ -285,8 +230,7 @@ void IndirectFitPlotPresenter::plotInput(MatrixWorkspace_sptr workspace) {
     plotGuess(doGuess);
 }
 
-void IndirectFitPlotPresenter::plotInput(MatrixWorkspace_sptr workspace,
-                                         WorkspaceIndex spectrum) {
+void IndirectFitPlotPresenter::plotInput(MatrixWorkspace_sptr workspace, WorkspaceIndex spectrum) {
   m_view->plotInTopPreview("Sample", std::move(workspace), spectrum, Qt::black);
 }
 
@@ -297,19 +241,15 @@ void IndirectFitPlotPresenter::plotFit(const MatrixWorkspace_sptr &workspace) {
   plotDifference(workspace, WorkspaceIndex{2});
 }
 
-void IndirectFitPlotPresenter::plotFit(MatrixWorkspace_sptr workspace,
-                                       WorkspaceIndex spectrum) {
+void IndirectFitPlotPresenter::plotFit(MatrixWorkspace_sptr workspace, WorkspaceIndex spectrum) {
   m_view->plotInTopPreview("Fit", std::move(workspace), spectrum, Qt::red);
 }
 
-void IndirectFitPlotPresenter::plotDifference(MatrixWorkspace_sptr workspace,
-                                              WorkspaceIndex spectrum) {
-  m_view->plotInBottomPreview("Difference", std::move(workspace), spectrum,
-                              Qt::blue);
+void IndirectFitPlotPresenter::plotDifference(MatrixWorkspace_sptr workspace, WorkspaceIndex spectrum) {
+  m_view->plotInBottomPreview("Difference", std::move(workspace), spectrum, Qt::blue);
 }
 
-void IndirectFitPlotPresenter::updatePlotRange(
-    const std::pair<double, double> &range) {
+void IndirectFitPlotPresenter::updatePlotRange(const std::pair<double, double> &range) {
   MantidQt::API::SignalBlocker blocker(m_view);
   m_view->setFitRange(range.first, range.second);
   m_view->setHWHMRange(range.first, range.second);
@@ -360,16 +300,12 @@ void IndirectFitPlotPresenter::plotGuess(bool doPlotGuess) {
     clearGuess();
 }
 
-void IndirectFitPlotPresenter::plotGuess(
-    Mantid::API::MatrixWorkspace_sptr workspace) {
-  m_view->plotInTopPreview("Guess", std::move(workspace), WorkspaceIndex{0},
-                           Qt::green);
+void IndirectFitPlotPresenter::plotGuess(Mantid::API::MatrixWorkspace_sptr workspace) {
+  m_view->plotInTopPreview("Guess", std::move(workspace), WorkspaceIndex{0}, Qt::green);
 }
 
-void IndirectFitPlotPresenter::plotGuessInSeparateWindow(
-    const Mantid::API::MatrixWorkspace_sptr &workspace) {
-  m_plotExternalGuessRunner.addCallback(
-      [this, workspace]() { m_model->appendGuessToInput(workspace); });
+void IndirectFitPlotPresenter::plotGuessInSeparateWindow(const Mantid::API::MatrixWorkspace_sptr &workspace) {
+  m_plotExternalGuessRunner.addCallback([this, workspace]() { m_model->appendGuessToInput(workspace); });
 }
 
 void IndirectFitPlotPresenter::clearGuess() {
@@ -404,18 +340,14 @@ void IndirectFitPlotPresenter::plotSpectrum(WorkspaceIndex spectrum) const {
   if (resultWs)
     m_plotter->plotSpectra(resultWs->getName(), "0-2");
   else
-    m_plotter->plotSpectra(m_model->getWorkspace()->getName(),
-                           std::to_string(spectrum.value));
+    m_plotter->plotSpectra(m_model->getWorkspace()->getName(), std::to_string(spectrum.value));
 }
 
 void IndirectFitPlotPresenter::emitFitSingleSpectrum() {
-  emit fitSingleSpectrum(m_model->getActiveDataIndex(),
-                         m_model->getActiveSpectrum());
+  emit fitSingleSpectrum(m_model->getActiveDataIndex(), m_model->getActiveSpectrum());
 }
 
-void IndirectFitPlotPresenter::emitFWHMChanged(double minimum, double maximum) {
-  emit fwhmChanged(maximum - minimum);
-}
+void IndirectFitPlotPresenter::emitFWHMChanged(double minimum, double maximum) { emit fwhmChanged(maximum - minimum); }
 
 void IndirectFitPlotPresenter::emitSelectedFitDataChanged() {
   const auto index = m_view->getSelectedDataIndex();

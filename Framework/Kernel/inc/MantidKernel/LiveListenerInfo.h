@@ -37,9 +37,7 @@ class InstrumentInfo;
 class MANTID_KERNEL_DLL LiveListenerInfo {
 public:
   LiveListenerInfo(InstrumentInfo *inst, const Poco::XML::Element *elem);
-  LiveListenerInfo(const std::string &listener = "",
-                   const std::string &address = "",
-                   const std::string &name = "");
+  LiveListenerInfo(const std::string &listener = "", const std::string &address = "", const std::string &name = "");
 
   /// Required for Python bindings
   bool operator==(const LiveListenerInfo &rhs) const;
@@ -60,8 +58,7 @@ private:
 };
 
 /// Allow this object to be printed to a stream
-MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &buffer,
-                                           const LiveListenerInfo &listener);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &buffer, const LiveListenerInfo &listener);
 
 } // namespace Kernel
 } // namespace Mantid

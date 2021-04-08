@@ -17,9 +17,8 @@ namespace Kernel {
 /** Default constructor
  */
 ProgressBase::ProgressBase()
-    : m_start(0), m_end(1.0), m_ifirst(0), m_numSteps(1), m_notifyStep(1),
-      m_notifyStepPct(1), m_step(1), m_i(0), m_last_reported(-1),
-      m_timeElapsed(std::make_unique<Timer>()), m_notifyStepPrecision(0) {
+    : m_start(0), m_end(1.0), m_ifirst(0), m_numSteps(1), m_notifyStep(1), m_notifyStepPct(1), m_step(1), m_i(0),
+      m_last_reported(-1), m_timeElapsed(std::make_unique<Timer>()), m_notifyStepPrecision(0) {
   m_timeElapsed->reset();
 }
 
@@ -31,10 +30,8 @@ ProgressBase::ProgressBase()
     @param numSteps :: Number of times report(...) method will be called.
 */
 ProgressBase::ProgressBase(double start, double end, int64_t numSteps)
-    : m_start(start), m_end(end), m_ifirst(0), m_numSteps(numSteps),
-      m_notifyStep(1), m_notifyStepPct(1), m_step(1), m_i(0),
-      m_last_reported(-1), m_timeElapsed(std::make_unique<Timer>()),
-      m_notifyStepPrecision(0) {
+    : m_start(start), m_end(end), m_ifirst(0), m_numSteps(numSteps), m_notifyStep(1), m_notifyStepPct(1), m_step(1),
+      m_i(0), m_last_reported(-1), m_timeElapsed(std::make_unique<Timer>()), m_notifyStepPrecision(0) {
   if (start < 0. || start >= end) {
     std::stringstream msg;
     msg << "Progress range invalid 0 <= start=" << start << " <= end=" << end;
@@ -152,8 +149,7 @@ void ProgressBase::setNumSteps(int64_t nsteps) {
   auto numSteps = static_cast<double>(m_numSteps);
   m_step = (m_end - m_start) / numSteps;
 
-  m_notifyStep = static_cast<int64_t>(numSteps * m_notifyStepPct * 0.01 /
-                                      (m_end - m_start));
+  m_notifyStep = static_cast<int64_t>(numSteps * m_notifyStepPct * 0.01 / (m_end - m_start));
   m_notifyStep = std::max(m_notifyStep, int64_t{1}); // Minimum of 1
 }
 
@@ -188,8 +184,7 @@ void ProgressBase::resetNumSteps(int64_t nsteps, double start, double end) {
  */
 void ProgressBase::setNotifyStep(double notifyStepPct) {
   m_notifyStepPct = notifyStepPct;
-  m_notifyStep = (static_cast<int64_t>(double(m_numSteps) * m_notifyStepPct /
-                                       100 / (m_end - m_start)));
+  m_notifyStep = (static_cast<int64_t>(double(m_numSteps) * m_notifyStepPct / 100 / (m_end - m_start)));
   if (m_notifyStep < 0)
     m_notifyStep = 1;
   m_notifyStepPrecision = 0;

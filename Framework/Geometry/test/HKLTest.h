@@ -23,28 +23,23 @@ public:
 
   void test_check_unit_compatibility() {
 
-    TSM_ASSERT_THROWS("Input unit for this frame must be a QUnit",
-                      HKL(new Mantid::Kernel::LabelUnit("MeV")),
+    TSM_ASSERT_THROWS("Input unit for this frame must be a QUnit", HKL(new Mantid::Kernel::LabelUnit("MeV")),
                       std::invalid_argument &);
   }
 
   void test_check_unit_compatibility_unique_ptr() {
-    std::unique_ptr<Mantid::Kernel::MDUnit> badUnit =
-        std::make_unique<Mantid::Kernel::LabelUnit>("MeV");
+    std::unique_ptr<Mantid::Kernel::MDUnit> badUnit = std::make_unique<Mantid::Kernel::LabelUnit>("MeV");
 
     HKL *testHKL = nullptr;
-    TSM_ASSERT_THROWS("Input unit for this frame must be a QUnit",
-                      testHKL = new HKL(badUnit), std::invalid_argument &);
+    TSM_ASSERT_THROWS("Input unit for this frame must be a QUnit", testHKL = new HKL(badUnit), std::invalid_argument &);
     TSM_ASSERT("Construction should not have succeeded", testHKL == nullptr);
-    TSM_ASSERT("Ownership of input should not have changed",
-               badUnit.get() != nullptr);
+    TSM_ASSERT("Ownership of input should not have changed", badUnit.get() != nullptr);
   }
 
   void test_name() {
     HKL frame(new Mantid::Kernel::ReciprocalLatticeUnit);
     TS_ASSERT_EQUALS(HKL::HKLName, frame.name());
     TSM_ASSERT_EQUALS("The equivalent special coordinate system should be HKL",
-                      frame.equivalientSpecialCoordinateSystem(),
-                      Mantid::Kernel::SpecialCoordinateSystem::HKL);
+                      frame.equivalientSpecialCoordinateSystem(), Mantid::Kernel::SpecialCoordinateSystem::HKL);
   }
 };

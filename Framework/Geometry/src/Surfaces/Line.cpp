@@ -103,10 +103,8 @@ Apply a displacement Pt
   m_origin += Pt;
 }
 
-int Line::lambdaPair(
-    const int ix,
-    const std::pair<std::complex<double>, std::complex<double>> &SQ,
-    std::vector<Kernel::V3D> &PntOut) const
+int Line::lambdaPair(const int ix, const std::pair<std::complex<double>, std::complex<double>> &SQ,
+                     std::vector<Kernel::V3D> &PntOut) const
 /**
 Helper function to decide which roots to take.
 The assumption is that lambda has been solved by quadratic
@@ -153,8 +151,7 @@ cases exist.
   return 0; // both points imaginary
 }
 
-int Line::intersect(std::vector<Kernel::V3D> &VecOut,
-                    const Quadratic &Sur) const
+int Line::intersect(std::vector<Kernel::V3D> &VecOut, const Quadratic &Sur) const
 /**
 For the line that intersects the surfaces
 add the point(s) to the VecOut, return number of points
@@ -168,14 +165,11 @@ added. It does not check the points for validity.
   const double a(m_origin[0]), b(m_origin[1]), c(m_origin[2]);
   const double d(m_direction[0]), e(m_direction[1]), f(m_direction[2]);
   double Coef[3];
-  Coef[0] = BN[0] * d * d + BN[1] * e * e + BN[2] * f * f + BN[3] * d * e +
-            BN[4] * d * f + BN[5] * e * f;
-  Coef[1] = 2 * BN[0] * a * d + 2 * BN[1] * b * e + 2 * BN[2] * c * f +
-            BN[3] * (a * e + b * d) + BN[4] * (a * f + c * d) +
-            BN[5] * (b * f + c * e) + BN[6] * d + BN[7] * e + BN[8] * f;
-  Coef[2] = BN[0] * a * a + BN[1] * b * b + BN[2] * c * c + BN[3] * a * b +
-            BN[4] * a * c + BN[5] * b * c + BN[6] * a + BN[7] * b + BN[8] * c +
-            BN[9];
+  Coef[0] = BN[0] * d * d + BN[1] * e * e + BN[2] * f * f + BN[3] * d * e + BN[4] * d * f + BN[5] * e * f;
+  Coef[1] = 2 * BN[0] * a * d + 2 * BN[1] * b * e + 2 * BN[2] * c * f + BN[3] * (a * e + b * d) +
+            BN[4] * (a * f + c * d) + BN[5] * (b * f + c * e) + BN[6] * d + BN[7] * e + BN[8] * f;
+  Coef[2] = BN[0] * a * a + BN[1] * b * b + BN[2] * c * c + BN[3] * a * b + BN[4] * a * c + BN[5] * b * c + BN[6] * a +
+            BN[7] * b + BN[8] * c + BN[9];
 
   std::pair<std::complex<double>, std::complex<double>> SQ;
   const int ix = solveQuadratic(Coef, SQ);

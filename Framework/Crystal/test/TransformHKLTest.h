@@ -49,8 +49,7 @@ public:
     TS_ASSERT(loader.isExecuted());
     PeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = std::dynamic_pointer_cast<PeaksWorkspace>(
-            AnalysisDataService::Instance().retrieve(WSName)));
+        ws = std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(WSName)));
     TS_ASSERT(ws);
     // make a reasonable UB and
     // put it in the workspace
@@ -91,8 +90,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.1"));
 
     // specify a matrix that will swap H and K and negate L
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("HKLTransform", "0,1,0,1,0,0,0,0,-1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("HKLTransform", "0,1,0,1,0,0,0,0,-1"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -122,8 +120,7 @@ public:
   void test_exec_LeanElasticPeak() {
     auto ws = std::make_shared<LeanElasticPeaksWorkspace>();
     AnalysisDataService::Instance().addOrReplace("ws", ws);
-    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>(
-        5, 6, 7, 90, 90, 120);
+    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>(5, 6, 7, 90, 90, 120);
     ws->mutableSample().setOrientedLattice(std::move(lattice));
     ws->addPeak(V3D(1, 0, 0), SpecialCoordinateSystem::HKL);
     ws->addPeak(V3D(0, 2, 0), SpecialCoordinateSystem::HKL);
@@ -136,8 +133,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.1"));
 
     // specify a matrix that will swap H and K and negate L
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("HKLTransform", "0,1,0,1,0,0,0,0,-1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("HKLTransform", "0,1,0,1,0,0,0,0,-1"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 

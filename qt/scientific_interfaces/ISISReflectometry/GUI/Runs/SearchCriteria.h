@@ -22,8 +22,6 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL SearchCriteria {
   std::string investigation;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(SearchCriteria const &lhs,
-                                               SearchCriteria const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(SearchCriteria const &lhs,
-                                               SearchCriteria const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(SearchCriteria const &lhs, SearchCriteria const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(SearchCriteria const &lhs, SearchCriteria const &rhs);
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

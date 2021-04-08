@@ -26,9 +26,7 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "SetupHFIRReduction"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Set up HFIR SANS reduction options.";
-  }
+  const std::string summary() const override { return "Set up HFIR SANS reduction options."; }
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
@@ -39,12 +37,9 @@ private:
   void init() override;
   /// Execution code
   void exec() override;
-  void setupTransmission(
-      const std::shared_ptr<Kernel::PropertyManager> &reductionManager);
-  void setupBackground(
-      const std::shared_ptr<Kernel::PropertyManager> &reductionManager);
-  void setupSensitivity(
-      const std::shared_ptr<Kernel::PropertyManager> &reductionManager);
+  void setupTransmission(const std::shared_ptr<Kernel::PropertyManager> &reductionManager);
+  void setupBackground(const std::shared_ptr<Kernel::PropertyManager> &reductionManager);
+  void setupSensitivity(const std::shared_ptr<Kernel::PropertyManager> &reductionManager);
 };
 
 } // namespace WorkflowAlgorithms

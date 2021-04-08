@@ -33,9 +33,7 @@ public:
   static SaveDaveGrpTest *createSuite() { return new SaveDaveGrpTest(); }
   static void destroySuite(SaveDaveGrpTest *suite) { delete suite; }
 
-  SaveDaveGrpTest() {
-    saver = AlgorithmManager::Instance().create("SaveDaveGrp");
-  }
+  SaveDaveGrpTest() { saver = AlgorithmManager::Instance().create("SaveDaveGrp"); }
 
   ~SaveDaveGrpTest() override {}
 
@@ -120,13 +118,10 @@ public:
     const std::string WSName("dave_grp");
     LoadDaveGrp loader;
     loader.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", "DaveAscii.grp"));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("OutputWorkspace", WSName));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "DaveAscii.grp"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", WSName));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("XAxisUnits", "DeltaE"));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("YAxisUnits", "MomentumTransfer"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("YAxisUnits", "MomentumTransfer"));
     TS_ASSERT_THROWS_NOTHING(loader.setProperty<bool>("IsMicroEV", true));
     std::string inputFile;
     inputFile = loader.getPropertyValue("Filename"); // get absolute path
@@ -158,10 +153,9 @@ public:
 
         getline(testout, lineout);
         boost::to_upper(lineout);
-        TS_ASSERT_EQUALS(linein.substr(0, 12),
-                         lineout.substr(0, 12)); // We have an extra "transfer"
-                                                 // in "Q transfer", and "(ueV)"
-                                                 // insted of "(micro eV)"
+        TS_ASSERT_EQUALS(linein.substr(0, 12), lineout.substr(0, 12)); // We have an extra "transfer"
+                                                                       // in "Q transfer", and "(ueV)"
+                                                                       // insted of "(micro eV)"
       }
       double din, dout;
       for (i = 0; i < 60; i++) {
@@ -271,10 +265,8 @@ private:
   MatrixWorkspace_sptr makeWorkspace(const std::string &input) {
     // all the Y values in this new workspace are set to DEFAU_Y, which
     // currently = 2
-    MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 3, 1.0);
-    inputWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
+    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(2, 3, 1.0);
+    inputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
     AnalysisDataService::Instance().add(input, inputWS);
     return inputWS;
   }

@@ -26,25 +26,21 @@ int EqualToMD::version() const { return 1; }
 //----------------------------------------------------------------------------------------------
 /// Extra properties
 void EqualToMD::initExtraProperties() {
-  declareProperty(
-      "Tolerance", 1e-5,
-      "Tolerance when performing the == comparison. Default 10^-5.");
+  declareProperty("Tolerance", 1e-5, "Tolerance when performing the == comparison. Default 10^-5.");
 }
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and operand
-void EqualToMD::execHistoHisto(
-    Mantid::DataObjects::MDHistoWorkspace_sptr out,
-    Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
+void EqualToMD::execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                               Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
   double tolerance = getProperty("Tolerance");
   out->equalTo(*operand, tolerance);
 }
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and a scalar on the RHS
-void EqualToMD::execHistoScalar(
-    Mantid::DataObjects::MDHistoWorkspace_sptr out,
-    Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
+void EqualToMD::execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                                Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
   double tolerance = getProperty("Tolerance");
   out->equalTo(scalar->y(0)[0], tolerance);
 }

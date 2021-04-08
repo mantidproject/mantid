@@ -44,8 +44,7 @@ void ThermalNeutronBk2BkExpAlpha::init() {
 //----------------------------------------------------------------------------------------------
 /** Function 1D
  */
-void ThermalNeutronBk2BkExpAlpha::function1D(double *out, const double *xValues,
-                                             const size_t nData) const {
+void ThermalNeutronBk2BkExpAlpha::function1D(double *out, const double *xValues, const size_t nData) const {
   double width = getParameter("Width");
   double tcross = getParameter("Tcross");
   double alph0 = getParameter("Alph0");
@@ -54,28 +53,23 @@ void ThermalNeutronBk2BkExpAlpha::function1D(double *out, const double *xValues,
   double alph1t = getParameter("Alph1t");
 
   for (size_t i = 0; i < nData; ++i) {
-    out[i] =
-        corefunction(xValues[i], width, tcross, alph0, alph1, alph0t, alph1t);
+    out[i] = corefunction(xValues[i], width, tcross, alph0, alph1, alph0t, alph1t);
   }
 }
 
 /** Derivative: use numerical derivative
  */
-void ThermalNeutronBk2BkExpAlpha::functionDeriv(const FunctionDomain &domain,
-                                                Jacobian &jacobian) {
+void ThermalNeutronBk2BkExpAlpha::functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
 }
 
 //----------------------------------------------------------------------------------------------
 /** Core function
  */
-double ThermalNeutronBk2BkExpAlpha::corefunction(double dh, double width,
-                                                 double tcross, double alph0,
-                                                 double alph1, double alph0t,
-                                                 double alph1t) const {
+double ThermalNeutronBk2BkExpAlpha::corefunction(double dh, double width, double tcross, double alph0, double alph1,
+                                                 double alph0t, double alph1t) const {
   double n = 0.5 * gsl_sf_erfc(width * (tcross - 1.0 / dh));
-  double alpha =
-      1.0 / (n * (alph0 + alph1 * dh) + (1.0 - n) * (alph0t - alph1t / dh));
+  double alpha = 1.0 / (n * (alph0 + alph1 * dh) + (1.0 - n) * (alph0t - alph1t / dh));
 
   return alpha;
 }

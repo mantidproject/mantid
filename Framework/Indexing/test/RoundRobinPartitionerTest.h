@@ -16,16 +16,12 @@ class RoundRobinPartitionerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RoundRobinPartitionerTest *createSuite() {
-    return new RoundRobinPartitionerTest();
-  }
+  static RoundRobinPartitionerTest *createSuite() { return new RoundRobinPartitionerTest(); }
   static void destroySuite(RoundRobinPartitionerTest *suite) { delete suite; }
 
   void test_1_rank() {
-    RoundRobinPartitioner partitioner(
-        1, PartitionIndex(0),
-        Partitioner::MonitorStrategy::CloneOnEachPartition,
-        std::vector<GlobalSpectrumIndex>{});
+    RoundRobinPartitioner partitioner(1, PartitionIndex(0), Partitioner::MonitorStrategy::CloneOnEachPartition,
+                                      std::vector<GlobalSpectrumIndex>{});
     TS_ASSERT_EQUALS(partitioner.numberOfPartitions(), 1);
     TS_ASSERT_EQUALS(partitioner.indexOf(GlobalSpectrumIndex(0)), 0);
     TS_ASSERT_EQUALS(partitioner.indexOf(GlobalSpectrumIndex(1)), 0);
@@ -33,10 +29,8 @@ public:
   }
 
   void test_3_ranks() {
-    RoundRobinPartitioner partitioner(
-        3, PartitionIndex(0),
-        Partitioner::MonitorStrategy::CloneOnEachPartition,
-        std::vector<GlobalSpectrumIndex>{});
+    RoundRobinPartitioner partitioner(3, PartitionIndex(0), Partitioner::MonitorStrategy::CloneOnEachPartition,
+                                      std::vector<GlobalSpectrumIndex>{});
     TS_ASSERT_EQUALS(partitioner.numberOfPartitions(), 3);
     TS_ASSERT_EQUALS(partitioner.indexOf(GlobalSpectrumIndex(0)), 0);
     TS_ASSERT_EQUALS(partitioner.indexOf(GlobalSpectrumIndex(1)), 1);

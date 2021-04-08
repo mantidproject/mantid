@@ -67,10 +67,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(align.execute());
     TS_ASSERT(align.isExecuted());
 
-    std::shared_ptr<MatrixWorkspace> inWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
-    std::shared_ptr<MatrixWorkspace> outWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS);
+    std::shared_ptr<MatrixWorkspace> inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
+    std::shared_ptr<MatrixWorkspace> outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS);
 
     TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->unitID(), "dSpacing");
     TS_ASSERT_EQUALS(outWS->size(), inWS->size());
@@ -81,12 +79,9 @@ public:
     TS_ASSERT_EQUALS(outWS->y(2)[50], inWS->y(1)[50]);
 
     for (size_t i = 0; i < outWS->getNumberHistograms(); i++) {
-      TS_ASSERT_EQUALS(outWS->getSpectrum(i).getSpectrumNo(),
-                       inWS->getSpectrum(i).getSpectrumNo());
-      TS_ASSERT_EQUALS(outWS->getSpectrum(i).getDetectorIDs().size(),
-                       inWS->getSpectrum(i).getDetectorIDs().size());
-      TS_ASSERT_EQUALS(*outWS->getSpectrum(i).getDetectorIDs().begin(),
-                       *inWS->getSpectrum(i).getDetectorIDs().begin());
+      TS_ASSERT_EQUALS(outWS->getSpectrum(i).getSpectrumNo(), inWS->getSpectrum(i).getSpectrumNo());
+      TS_ASSERT_EQUALS(outWS->getSpectrum(i).getDetectorIDs().size(), inWS->getSpectrum(i).getDetectorIDs().size());
+      TS_ASSERT_EQUALS(*outWS->getSpectrum(i).getDetectorIDs().begin(), *inWS->getSpectrum(i).getDetectorIDs().begin());
     }
 
     AnalysisDataService::Instance().remove(outputWS);
@@ -95,9 +90,7 @@ public:
   /** Setup for loading raw data */
   void setUp_Event() {
     inputWS = "eventWS";
-    EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10,
-                                                                        false);
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10, false);
     ws->getAxis(0)->setUnit("TOF");
     AnalysisDataService::Instance().addOrReplace(inputWS, ws);
   }
@@ -158,8 +151,7 @@ public:
 
     // Retrieve Workspace changed
     EventWorkspace_sptr outWS;
-    outWS =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputWS);
+    outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputWS);
     TS_ASSERT(outWS); // workspace is loaded
 
     // Things that haven't changed

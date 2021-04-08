@@ -19,18 +19,14 @@ Mantid::Kernel::Logger g_log("ISISRAW2");
 } // namespace
 
 /// No arg Constructor
-ISISRAW2::ISISRAW2()
-    : ISISRAW(nullptr, false), ndes(0), outbuff(nullptr), m_bufferSize(0) {
+ISISRAW2::ISISRAW2() : ISISRAW(nullptr, false), ndes(0), outbuff(nullptr), m_bufferSize(0) {
   // Determine the size of the output buffer to create from the config service.
   g_log.debug("Determining ioRaw buffer size\n");
-  auto bufferSizeConfigVal =
-      Mantid::Kernel::ConfigService::Instance().getValue<int>(
-          "loadraw.readbuffer.size");
+  auto bufferSizeConfigVal = Mantid::Kernel::ConfigService::Instance().getValue<int>("loadraw.readbuffer.size");
 
   if (!bufferSizeConfigVal.is_initialized()) {
     m_bufferSize = 200000;
-    g_log.debug() << "loadraw.readbuffer.size not found, setting to "
-                  << m_bufferSize << "\n";
+    g_log.debug() << "loadraw.readbuffer.size not found, setting to " << m_bufferSize << "\n";
   } else {
     m_bufferSize = bufferSizeConfigVal.get();
     g_log.debug() << "loadraw.readbuffer.size set to " << m_bufferSize << "\n";
@@ -106,8 +102,7 @@ int ISISRAW2::ioRAW(FILE *file, bool from_file, bool read_data) {
 
     if (u_len < 0 || (add.ad_data < add.ad_user + 2)) {
       // this will/would be used for memory allocation
-      g_log.error() << "Error in u_len value read from file, it would be "
-                    << u_len
+      g_log.error() << "Error in u_len value read from file, it would be " << u_len
                     << "; where it is calculated as "
                        "u_len = ad_data - ad_user - 2, where ad_data: "
                     << add.ad_data << ", ad_user: " << add.ad_user << "\n";
@@ -139,8 +134,7 @@ void ISISRAW2::skipData(FILE *file, int i) {
   if (i < ndes) {
     int zero = fseek(file, 4 * ddes[i].nwords, SEEK_CUR);
     if (0 != zero) {
-      g_log.warning() << "Failed to skip data from file, with value: " << i
-                      << "\n";
+      g_log.warning() << "Failed to skip data from file, with value: " << i << "\n";
     }
   }
 }
@@ -154,8 +148,7 @@ bool ISISRAW2::readData(FILE *file, int i) {
     return false;
   int nwords = 4 * ddes[i].nwords;
   if (nwords > m_bufferSize) {
-    g_log.debug() << "Overflow error, nwords > buffer size. nwords = " << nwords
-                  << ", buffer=" << m_bufferSize << "\n";
+    g_log.debug() << "Overflow error, nwords > buffer size. nwords = " << nwords << ", buffer=" << m_bufferSize << "\n";
     throw std::overflow_error("LoadRaw input file buffer too small for "
                               "selected data. Try increasing the "
                               "\"loadraw.readbuffer.size\" user property.");

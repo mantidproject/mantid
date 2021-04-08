@@ -113,6 +113,12 @@ class HB2AReduceTest(unittest.TestCase):
             os.path.exists(os.path.join(self._default_save_directory, f"{HB2AReduce_ws}.gss")))
         HB2AReduce_ws.delete()
 
+    def test_new_convention(self):
+        HB2AReduce_ws = HB2AReduce('HB2A_exp0666_scan0024.dat',
+                                   IndividualDetectors=True,
+                                   SaveData=False)
+        HB2AReduce_ws.delete()
+
 
 if __name__ == '__main__':
     unittest.main()

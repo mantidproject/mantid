@@ -30,24 +30,19 @@ public:
 
   void mask_workspace(const int mask_workspace) {
     if (mask_workspace == 1) {
-      FrameworkManager::Instance().exec(
-          "MaskMD", 6, "Workspace", "PlusMDTest_lhs", "Dimensions",
-          "Axis0,Axis1,Axis2", "Extents", "0,10,0,10,0,10");
+      FrameworkManager::Instance().exec("MaskMD", 6, "Workspace", "PlusMDTest_lhs", "Dimensions", "Axis0,Axis1,Axis2",
+                                        "Extents", "0,10,0,10,0,10");
     } else if (mask_workspace == 2) {
-      FrameworkManager::Instance().exec(
-          "MaskMD", 6, "Workspace", "PlusMDTest_rhs", "Dimensions",
-          "Axis0,Axis1,Axis2", "Extents", "0,10,0,10,0,10");
+      FrameworkManager::Instance().exec("MaskMD", 6, "Workspace", "PlusMDTest_rhs", "Dimensions", "Axis0,Axis1,Axis2",
+                                        "Extents", "0,10,0,10,0,10");
     }
   }
 
-  void do_test(bool lhs_file, bool rhs_file, int inPlace,
-               bool deleteFile = true, int mask_ws_num = 0) {
+  void do_test(bool lhs_file, bool rhs_file, int inPlace, bool deleteFile = true, int mask_ws_num = 0) {
     AnalysisDataService::Instance().clear();
     // Make two input workspaces
-    MDEventWorkspace3Lean::sptr lhs =
-        MDAlgorithmsTestHelper::makeFileBackedMDEW("PlusMDTest_lhs", lhs_file);
-    MDEventWorkspace3Lean::sptr rhs =
-        MDAlgorithmsTestHelper::makeFileBackedMDEW("PlusMDTest_rhs", rhs_file);
+    MDEventWorkspace3Lean::sptr lhs = MDAlgorithmsTestHelper::makeFileBackedMDEW("PlusMDTest_lhs", lhs_file);
+    MDEventWorkspace3Lean::sptr rhs = MDAlgorithmsTestHelper::makeFileBackedMDEW("PlusMDTest_rhs", rhs_file);
     std::string outWSName = "PlusMDTest_out";
     if (inPlace == 1)
       outWSName = "PlusMDTest_lhs";
@@ -59,20 +54,15 @@ public:
     PlusMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("LHSWorkspace", "PlusMDTest_lhs"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("RHSWorkspace", "PlusMDTest_rhs"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("LHSWorkspace", "PlusMDTest_lhs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("RHSWorkspace", "PlusMDTest_rhs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     MDEventWorkspace3Lean::sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -85,9 +75,8 @@ public:
     }
 
     if ((lhs_file || rhs_file) && !((inPlace == 1) && !lhs_file && rhs_file)) {
-      TSM_ASSERT(
-          "If either input WS is file backed, then the output should be too.",
-          ws->getBoxController()->isFileBacked());
+      TSM_ASSERT("If either input WS is file backed, then the output should be too.",
+                 ws->getBoxController()->isFileBacked());
     }
     if (mask_ws_num == 0) {
       TS_ASSERT_EQUALS(ws->getNPoints(), 20000);
@@ -96,20 +85,16 @@ public:
     }
 
     if (mask_ws_num == 0) {
-      TSM_ASSERT("If the workspace is file-backed, then it needs updating.",
-                 ws->fileNeedsUpdating());
+      TSM_ASSERT("If the workspace is file-backed, then it needs updating.", ws->fileNeedsUpdating());
     }
 
     if (ws->isFileBacked()) {
 
       // Run SaveMD so as to update the file in the back
-      FrameworkManager::Instance().exec("SaveMD", 4, "InputWorkspace",
-                                        outWSName.c_str(), "UpdateFileBackEnd",
-                                        "1");
+      FrameworkManager::Instance().exec("SaveMD", 4, "InputWorkspace", outWSName.c_str(), "UpdateFileBackEnd", "1");
 
       Mantid::API::BoxController_sptr bc = ws->getBoxController();
-      std::cout << bc->getFileIO()->getFreeSpaceMap().size()
-                << " entries in the free space map\n";
+      std::cout << bc->getFileIO()->getFreeSpaceMap().size() << " entries in the free space map\n";
 
       auto loader = dynamic_cast<BoxControllerNeXusIO *>(bc->getFileIO());
       TS_ASSERT(loader);
@@ -134,22 +119,19 @@ public:
       // Close the file so you can delete it. Otherwise the following test gets
       // confused.
       if (deleteFile) {
-        std::string fileName =
-            ws->getBoxController()->getFileIO()->getFileName();
+        std::string fileName = ws->getBoxController()->getFileIO()->getFileName();
         ws->clearFileBacked(false);
         Poco::File(fileName).remove();
       }
     }
     // cleanup
     if ((inPlace == 1) && rhs->isFileBacked()) {
-      std::string fileName =
-          rhs->getBoxController()->getFileIO()->getFileName();
+      std::string fileName = rhs->getBoxController()->getFileIO()->getFileName();
       rhs->clearFileBacked(false);
       Poco::File(fileName).remove();
     }
     if ((inPlace == 2) && lhs->isFileBacked()) {
-      std::string fileName =
-          lhs->getBoxController()->getFileIO()->getFileName();
+      std::string fileName = lhs->getBoxController()->getFileIO()->getFileName();
       lhs->clearFileBacked(false);
       Poco::File(fileName).remove();
     }
@@ -188,32 +170,25 @@ public:
 
   void test_histo_histo() {
     MDHistoWorkspace_sptr out;
-    out = BinaryOperationMDTestHelper::doTest("PlusMD", "histo_A", "histo_B",
-                                              "out");
+    out = BinaryOperationMDTestHelper::doTest("PlusMD", "histo_A", "histo_B", "out");
     TS_ASSERT_DELTA(out->getSignalAt(0), 5.0, 1e-5);
   }
 
   void test_histo_scalar() {
     MDHistoWorkspace_sptr out;
-    out = BinaryOperationMDTestHelper::doTest("PlusMD", "histo_A", "scalar",
-                                              "out");
+    out = BinaryOperationMDTestHelper::doTest("PlusMD", "histo_A", "scalar", "out");
     TS_ASSERT_DELTA(out->getSignalAt(0), 5.0, 1e-5);
-    out = BinaryOperationMDTestHelper::doTest("PlusMD", "scalar", "histo_A",
-                                              "out");
+    out = BinaryOperationMDTestHelper::doTest("PlusMD", "scalar", "histo_A", "out");
     TS_ASSERT_DELTA(out->getSignalAt(0), 5.0, 1e-5);
   }
 
   void test_event_scalar_fails() {
-    BinaryOperationMDTestHelper::doTest("PlusMD", "event_A", "scalar", "out",
-                                        false /*fails*/);
-    BinaryOperationMDTestHelper::doTest("PlusMD", "scalar", "event_A", "out",
-                                        false /*fails*/);
+    BinaryOperationMDTestHelper::doTest("PlusMD", "event_A", "scalar", "out", false /*fails*/);
+    BinaryOperationMDTestHelper::doTest("PlusMD", "scalar", "event_A", "out", false /*fails*/);
   }
 
   void test_event_histo_fails() {
-    BinaryOperationMDTestHelper::doTest("PlusMD", "event_A", "histo_A", "out",
-                                        false /*fails*/);
-    BinaryOperationMDTestHelper::doTest("PlusMD", "histo_A", "event_A", "out",
-                                        false /*fails*/);
+    BinaryOperationMDTestHelper::doTest("PlusMD", "event_A", "histo_A", "out", false /*fails*/);
+    BinaryOperationMDTestHelper::doTest("PlusMD", "histo_A", "event_A", "out", false /*fails*/);
   }
 };

@@ -17,10 +17,8 @@ namespace ISISReflectometry {
 class MockOptionsDialogModel : public IOptionsDialogModel {
 public:
   GNU_DIAG_OFF_SUGGEST_OVERRIDE
-  MOCK_METHOD2(applyDefaultOptionsProxy, void(std::map<std::string, bool> &,
-                                              std::map<std::string, int> &));
-  void applyDefaultOptions(std::map<std::string, bool> &boolOptions,
-                           std::map<std::string, int> &intOptions) {
+  MOCK_METHOD2(applyDefaultOptionsProxy, void(std::map<std::string, bool> &, std::map<std::string, int> &));
+  void applyDefaultOptions(std::map<std::string, bool> &boolOptions, std::map<std::string, int> &intOptions) {
     boolOptions["WarnProcessAll"] = false;
     boolOptions["WarnDiscardChanges"] = false;
     boolOptions["WarnProcessPartialGroup"] = false;
@@ -28,10 +26,8 @@ public:
     intOptions["RoundPrecision"] = 5;
     applyDefaultOptionsProxy(boolOptions, intOptions);
   }
-  MOCK_METHOD2(loadSettingsProxy, void(std::map<std::string, bool> &,
-                                       std::map<std::string, int> &));
-  void loadSettings(std::map<std::string, bool> &boolOptions,
-                    std::map<std::string, int> &intOptions) {
+  MOCK_METHOD2(loadSettingsProxy, void(std::map<std::string, bool> &, std::map<std::string, int> &));
+  void loadSettings(std::map<std::string, bool> &boolOptions, std::map<std::string, int> &intOptions) {
     boolOptions["WarnProcessAll"] = false;
     boolOptions["WarnDiscardChanges"] = true;
     boolOptions["WarnProcessPartialGroup"] = false;
@@ -39,26 +35,20 @@ public:
     intOptions["RoundPrecision"] = 2;
     loadSettingsProxy(boolOptions, intOptions);
   }
-  MOCK_METHOD2(saveSettings, void(const std::map<std::string, bool> &,
-                                  const std::map<std::string, int> &));
+  MOCK_METHOD2(saveSettings, void(const std::map<std::string, bool> &, const std::map<std::string, int> &));
 };
 
 class MockOptionsDialogModelUnsuccessfulLoad : public IOptionsDialogModel {
 public:
-  MOCK_METHOD2(applyDefaultOptions, void(std::map<std::string, bool> &,
-                                         std::map<std::string, int> &));
-  MOCK_METHOD2(loadSettings, void(std::map<std::string, bool> &,
-                                  std::map<std::string, int> &));
-  MOCK_METHOD2(saveSettings, void(const std::map<std::string, bool> &,
-                                  const std::map<std::string, int> &));
+  MOCK_METHOD2(applyDefaultOptions, void(std::map<std::string, bool> &, std::map<std::string, int> &));
+  MOCK_METHOD2(loadSettings, void(std::map<std::string, bool> &, std::map<std::string, int> &));
+  MOCK_METHOD2(saveSettings, void(const std::map<std::string, bool> &, const std::map<std::string, int> &));
 };
 
 class MockOptionsDialogModelUnsuccessfulDefaults : public IOptionsDialogModel {
 public:
-  MOCK_METHOD2(applyDefaultOptionsProxy, void(std::map<std::string, bool> &,
-                                              std::map<std::string, int> &));
-  void applyDefaultOptions(std::map<std::string, bool> &boolOptions,
-                           std::map<std::string, int> &intOptions) {
+  MOCK_METHOD2(applyDefaultOptionsProxy, void(std::map<std::string, bool> &, std::map<std::string, int> &));
+  void applyDefaultOptions(std::map<std::string, bool> &boolOptions, std::map<std::string, int> &intOptions) {
     boolOptions["WarnProcessAll"] = false;
     boolOptions["WarnDiscardChanges"] = false;
     boolOptions["WarnProcessPartialGroup"] = false;
@@ -66,11 +56,9 @@ public:
     intOptions["RoundPrecision"] = 5;
     applyDefaultOptionsProxy(boolOptions, intOptions);
   }
-  MOCK_METHOD2(loadSettings, void(std::map<std::string, bool> &,
-                                  std::map<std::string, int> &));
+  MOCK_METHOD2(loadSettings, void(std::map<std::string, bool> &, std::map<std::string, int> &));
 
-  MOCK_METHOD2(saveSettings, void(const std::map<std::string, bool> &,
-                                  const std::map<std::string, int> &));
+  MOCK_METHOD2(saveSettings, void(const std::map<std::string, bool> &, const std::map<std::string, int> &));
 };
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 } // namespace ISISReflectometry

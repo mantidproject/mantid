@@ -31,12 +31,9 @@ CompositeFunction_sptr toComposite(IFunction_sptr function) {
   return std::dynamic_pointer_cast<CompositeFunction>(function);
 }
 
-CompositeFunction_sptr createEmptyComposite() {
-  return toComposite(createIFunction("name=CompositeFunction"));
-}
+CompositeFunction_sptr createEmptyComposite() { return toComposite(createIFunction("name=CompositeFunction")); }
 
-std::vector<std::string>
-getFunctionNamesInString(std::string const &functionString) {
+std::vector<std::string> getFunctionNamesInString(std::string const &functionString) {
   std::vector<std::string> functionNames;
   for (auto const &str : splitStringBy(functionString, ",();"))
     if (str.substr(0, 5) == "name=")
@@ -54,10 +51,9 @@ bool isValueWithinConstraint(std::string const &constraint, double value) {
 namespace MantidQt {
 namespace MantidWidgets {
 
-FitDomain::FitDomain(std::string const &workspaceName,
-                     WorkspaceIndex workspaceIndex, double startX, double endX)
-    : m_workspaceName(workspaceName), m_workspaceIndex(workspaceIndex),
-      m_startX(startX), m_endX(endX), m_function(nullptr) {}
+FitDomain::FitDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX, double endX)
+    : m_workspaceName(workspaceName), m_workspaceIndex(workspaceIndex), m_startX(startX), m_endX(endX),
+      m_function(nullptr) {}
 
 bool FitDomain::setStartX(double startX) {
   auto const validStartX = isValidStartX(startX);
@@ -73,9 +69,7 @@ bool FitDomain::setEndX(double endX) {
   return validEndX;
 }
 
-void FitDomain::setFunction(Mantid::API::IFunction_sptr const &function) {
-  m_function = function;
-}
+void FitDomain::setFunction(Mantid::API::IFunction_sptr const &function) { m_function = function; }
 
 Mantid::API::IFunction_sptr FitDomain::getFunctionCopy() const {
   if (m_function)
@@ -92,8 +86,7 @@ void FitDomain::removeFunction(std::string const &function) {
   }
 }
 
-void FitDomain::removeFunctionFromIFunction(std::string const &function,
-                                            IFunction_sptr &iFunction) {
+void FitDomain::removeFunctionFromIFunction(std::string const &function, IFunction_sptr &iFunction) {
   for (auto const &functionName : getFunctionNamesInString(function)) {
     if (iFunction->name() == functionName) {
       iFunction = nullptr;
@@ -102,8 +95,7 @@ void FitDomain::removeFunctionFromIFunction(std::string const &function,
   }
 }
 
-void FitDomain::removeFunctionFromComposite(std::string const &function,
-                                            CompositeFunction_sptr &composite) {
+void FitDomain::removeFunctionFromComposite(std::string const &function, CompositeFunction_sptr &composite) {
   for (auto const &functionName : getFunctionNamesInString(function)) {
     if (composite->hasFunction(functionName))
       composite->removeFunction(composite->functionIndex(functionName));
@@ -125,8 +117,7 @@ void FitDomain::addFunction(IFunction_sptr const &function) {
 
 void FitDomain::addFunctionToExisting(IFunction_sptr const &function) {
   if (auto const isComposite = toComposite(function)) {
-    g_log.error(
-        "Add function failed: Nested composite functions are not supported.");
+    g_log.error("Add function failed: Nested composite functions are not supported.");
     return;
   }
 
@@ -140,10 +131,8 @@ void FitDomain::addFunctionToExisting(IFunction_sptr const &function) {
   }
 }
 
-void FitDomain::setParameterValue(std::string const &parameter,
-                                  double newValue) {
-  if (hasParameter(parameter) &&
-      isParameterValueWithinConstraints(parameter, newValue)) {
+void FitDomain::setParameterValue(std::string const &parameter, double newValue) {
+  if (hasParameter(parameter) && isParameterValueWithinConstraints(parameter, newValue)) {
     m_function->setParameter(parameter, newValue);
     removeInvalidatedTies();
   }
@@ -162,8 +151,7 @@ void FitDomain::removeInvalidatedTies() {
 double FitDomain::getParameterValue(std::string const &parameter) const {
   if (hasParameter(parameter))
     return m_function->getParameter(parameter);
-  throw std::runtime_error("The function does not contain the parameter " +
-                           parameter + ".");
+  throw std::runtime_error("The function does not contain the parameter " + parameter + ".");
 }
 
 double FitDomain::getTieValue(std::string const &tie) const {
@@ -174,14 +162,12 @@ double FitDomain::getTieValue(std::string const &tie) const {
   return getParameterValue(tie);
 }
 
-void FitDomain::setAttributeValue(std::string const &attribute,
-                                  IFunction::Attribute newValue) {
+void FitDomain::setAttributeValue(std::string const &attribute, IFunction::Attribute newValue) {
   if (m_function && m_function->hasAttribute(attribute))
     m_function->setAttribute(attribute, newValue);
 }
 
-Mantid::API::IFunction::Attribute
-FitDomain::getAttributeValue(std::string const &attribute) const {
+Mantid::API::IFunction::Attribute FitDomain::getAttributeValue(std::string const &attribute) const {
   if (m_function && m_function->hasAttribute(attribute))
     return m_function->getAttribute(attribute);
   throw std::runtime_error("The function does not contain this attribute.");
@@ -195,8 +181,7 @@ bool FitDomain::hasParameter(std::string const &parameter) const {
 
 bool FitDomain::isParameterActive(std::string const &parameter) const {
   if (hasParameter(parameter))
-    return m_function->getParameterStatus(m_function->parameterIndex(
-               parameter)) == IFunction::ParameterStatus::Active;
+    return m_function->getParameterStatus(m_function->parameterIndex(parameter)) == IFunction::ParameterStatus::Active;
   return false;
 }
 
@@ -205,8 +190,7 @@ void FitDomain::clearParameterTie(std::string const &parameter) {
     m_function->removeTie(m_function->parameterIndex(parameter));
 }
 
-bool FitDomain::updateParameterTie(std::string const &parameter,
-                                   std::string const &tie) {
+bool FitDomain::updateParameterTie(std::string const &parameter, std::string const &tie) {
   if (hasParameter(parameter)) {
     if (tie.empty())
       m_function->removeTie(m_function->parameterIndex(parameter));
@@ -217,8 +201,7 @@ bool FitDomain::updateParameterTie(std::string const &parameter,
   return true;
 }
 
-bool FitDomain::setParameterTie(std::string const &parameter,
-                                std::string const &tie) {
+bool FitDomain::setParameterTie(std::string const &parameter, std::string const &tie) {
   try {
     if (isValidParameterTie(parameter, tie)) {
       m_function->tie(parameter, tie);
@@ -239,22 +222,18 @@ void FitDomain::removeParameterConstraint(std::string const &parameter) {
     m_function->removeConstraint(parameter);
 }
 
-void FitDomain::updateParameterConstraint(std::string const &functionIndex,
-                                          std::string const &parameter,
+void FitDomain::updateParameterConstraint(std::string const &functionIndex, std::string const &parameter,
                                           std::string const &constraint) {
   if (isValidParameterConstraint(functionIndex + parameter, constraint)) {
     if (functionIndex.empty())
       m_function->addConstraints(constraint);
     else if (auto composite = toComposite(m_function))
-      updateParameterConstraint(composite, functionIndex, parameter,
-                                constraint);
+      updateParameterConstraint(composite, functionIndex, parameter, constraint);
   }
 }
 
-void FitDomain::updateParameterConstraint(CompositeFunction_sptr &composite,
-                                          std::string const &functionIndex,
-                                          std::string const &parameter,
-                                          std::string const &constraint) {
+void FitDomain::updateParameterConstraint(CompositeFunction_sptr &composite, std::string const &functionIndex,
+                                          std::string const &parameter, std::string const &constraint) {
   auto const index = getFunctionIndexAt(functionIndex, 0);
   if (index < composite->nFunctions()) {
     auto function = composite->getFunction(index);
@@ -263,8 +242,7 @@ void FitDomain::updateParameterConstraint(CompositeFunction_sptr &composite,
   }
 }
 
-std::vector<std::string>
-FitDomain::getParametersTiedTo(std::string const &parameter) const {
+std::vector<std::string> FitDomain::getParametersTiedTo(std::string const &parameter) const {
   std::vector<std::string> tiedParameters;
   if (m_function) {
     for (auto paramIndex = 0u; paramIndex < m_function->nParams(); ++paramIndex)
@@ -273,9 +251,8 @@ FitDomain::getParametersTiedTo(std::string const &parameter) const {
   return tiedParameters;
 }
 
-void FitDomain::appendParametersTiedTo(
-    std::vector<std::string> &tiedParameters, std::string const &parameter,
-    std::size_t const &parameterIndex) const {
+void FitDomain::appendParametersTiedTo(std::vector<std::string> &tiedParameters, std::string const &parameter,
+                                       std::size_t const &parameterIndex) const {
   if (auto const tie = m_function->getTie(parameterIndex)) {
     for (auto rhsParameter : tie->getRHSParameters()) {
       if (parameter == rhsParameter.parameterName())
@@ -284,8 +261,7 @@ void FitDomain::appendParametersTiedTo(
   }
 }
 
-bool FitDomain::isParameterValueWithinConstraints(std::string const &parameter,
-                                                  double value) const {
+bool FitDomain::isParameterValueWithinConstraints(std::string const &parameter, double value) const {
   if (!hasParameter(parameter))
     return false;
 
@@ -296,13 +272,11 @@ bool FitDomain::isParameterValueWithinConstraints(std::string const &parameter,
     isValid = isValueWithinConstraint(constraint->asString(), value);
 
   if (!isValid)
-    g_log.warning("The provided value for '" + parameter +
-                  "' is not within its constraints.");
+    g_log.warning("The provided value for '" + parameter + "' is not within its constraints.");
   return isValid;
 }
 
-bool FitDomain::isValidParameterTie(std::string const &parameter,
-                                    std::string const &tie) const {
+bool FitDomain::isValidParameterTie(std::string const &parameter, std::string const &tie) const {
   if (tie.empty())
     return true;
   else if (isNumber(tie))
@@ -310,15 +284,13 @@ bool FitDomain::isValidParameterTie(std::string const &parameter,
   return isParameterValueWithinConstraints(parameter, getParameterValue(tie));
 }
 
-bool FitDomain::isValidParameterConstraint(
-    std::string const &parameter, std::string const &constraint) const {
+bool FitDomain::isValidParameterConstraint(std::string const &parameter, std::string const &constraint) const {
   auto isValid = false;
   if (hasParameter(parameter)) {
     auto const parameterValue = m_function->getParameter(parameter);
     isValid = isValueWithinConstraint(constraint, parameterValue);
     if (!isValid)
-      g_log.warning("The provided constraint for '" + parameter +
-                    "' does not encompass its current value.");
+      g_log.warning("The provided constraint for '" + parameter + "' does not encompass its current value.");
   }
   return isValid;
 }
@@ -336,24 +308,20 @@ bool FitDomain::isValidEndX(double endX) const {
 std::pair<double, double> FitDomain::xLimits() const {
   auto &ads = AnalysisDataService::Instance();
   if (ads.doesExist(m_workspaceName))
-    return xLimits(ads.retrieveWS<MatrixWorkspace>(m_workspaceName),
-                   m_workspaceIndex);
+    return xLimits(ads.retrieveWS<MatrixWorkspace>(m_workspaceName), m_workspaceIndex);
 
-  throw std::invalid_argument("The domain '" + m_workspaceName + " (" +
-                              std::to_string(m_workspaceIndex.value) +
+  throw std::invalid_argument("The domain '" + m_workspaceName + " (" + std::to_string(m_workspaceIndex.value) +
                               ")' could not be found.");
 }
 
-std::pair<double, double>
-FitDomain::xLimits(MatrixWorkspace_const_sptr const &workspace,
-                   WorkspaceIndex workspaceIndex) const {
+std::pair<double, double> FitDomain::xLimits(MatrixWorkspace_const_sptr const &workspace,
+                                             WorkspaceIndex workspaceIndex) const {
   if (workspace) {
     auto const xData = workspace->x(workspaceIndex.value);
     return std::pair<double, double>(xData.front(), xData.back());
   }
 
-  throw std::invalid_argument("The workspace '" + m_workspaceName +
-                              "' is not a matrix workspace.");
+  throw std::invalid_argument("The workspace '" + m_workspaceName + "' is not a matrix workspace.");
 }
 
 } // namespace MantidWidgets

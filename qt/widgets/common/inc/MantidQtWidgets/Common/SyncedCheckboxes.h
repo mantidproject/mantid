@@ -29,8 +29,7 @@ class EXPORT_OPT_MANTIDQT_COMMON SyncedCheckboxes : public QObject {
   Q_OBJECT
 
 public:
-  SyncedCheckboxes(QAction *menu, QAbstractButton *button,
-                   bool checked = false);
+  SyncedCheckboxes(QAction *menu, QAbstractButton *button, bool checked = false);
   ~SyncedCheckboxes() override;
   void toggle(bool val);
   void setEnabled(bool val);

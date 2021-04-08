@@ -49,10 +49,8 @@ public:
   DataModeHandler() { init(); }
 
   DataModeHandler(const DataModeHandler &handler);
-  DataModeHandler(double baseRCRadius, double lastRCRadius, double lastRow,
-                  double lastCol, double CellWidth, double CellHeight,
-                  bool CalcVariance, int MinCol, int MaxCol, int MinRow,
-                  int MaxRow) {
+  DataModeHandler(double baseRCRadius, double lastRCRadius, double lastRow, double lastCol, double CellWidth,
+                  double CellHeight, bool CalcVariance, int MinCol, int MaxCol, int MinRow, int MaxRow) {
     init();
     this->baseRCRadius = baseRCRadius;
     this->lastRCRadius = lastRCRadius;
@@ -74,8 +72,7 @@ public:
 
   bool isEdgePeak(const double *params, int nparams);
 
-  void setHeightHalfWidthInfo(const MantidVec &xvals, const MantidVec &yvals,
-                              const MantidVec &counts);
+  void setHeightHalfWidthInfo(const MantidVec &xvals, const MantidVec &yvals, const MantidVec &counts);
 
   void setCurrentRadius(double radius) { currentRadius = radius; }
   void setCurrentCenter(const Kernel::V3D newCenter) {
@@ -105,8 +102,7 @@ public:
       EdgeY = newsize;
   }
 
-  void CalcVariancesFromData(double background, double meanx, double meany,
-                             double &Varxx, double &Varxy, double &Varyy,
+  void CalcVariancesFromData(double background, double meanx, double meany, double &Varxx, double &Varxy, double &Varyy,
                              std::vector<double> &StatBase);
 
   bool IsEnoughData(const double *ParameterValues, Kernel::Logger &);
@@ -127,8 +123,7 @@ public:
 
   double getInitVarxy() { return Vxy_calc; }
 
-  std::string CalcConstraints(std::vector<std::pair<double, double>> &Bounds,
-                              bool CalcVariances);
+  std::string CalcConstraints(std::vector<std::pair<double, double>> &Bounds, bool CalcVariances);
   std::string getTies() { return ""; }
 
   bool CalcVariances();
@@ -143,8 +138,7 @@ public:
 
   double CalcISAWIntensity(const double *params);
 
-  double CalcISAWIntensityVariance(const double *params, const double *errs,
-                                   double chiSqOvDOF);
+  double CalcISAWIntensityVariance(const double *params, const double *errs, double chiSqOvDOF);
 
   /**
    * For Edge Peaks
@@ -179,8 +173,7 @@ public:
   double lastISAWIntensity, lastISAWVariance;
   bool CalcVariance;
   bool case4; // if true result of successful merge of dir =1 chan=0 and chan=1
-  double back_calc, Intensity_calc, row_calc, col_calc, Vx_calc, Vy_calc,
-      Vxy_calc;
+  double back_calc, Intensity_calc, row_calc, col_calc, Vx_calc, Vy_calc, Vxy_calc;
 
 private:
   void init() {
@@ -206,13 +199,11 @@ private:
 
     VarxHW = -1;
     VaryHW = -1;
-    back_calc = Intensity_calc = row_calc = col_calc = Vx_calc = Vy_calc =
-        Vxy_calc = -1;
+    back_calc = Intensity_calc = row_calc = col_calc = Vx_calc = Vy_calc = Vxy_calc = -1;
   }
 };
 
-class MANTID_CRYSTAL_DLL IntegratePeakTimeSlices
-    : public Mantid::API::Algorithm {
+class MANTID_CRYSTAL_DLL IntegratePeakTimeSlices : public Mantid::API::Algorithm {
 public:
   /// Default constructor
   IntegratePeakTimeSlices();
@@ -231,9 +222,7 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"PeakIntegration"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"PeakIntegration"}; }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Crystal\\Integration"; }
@@ -254,108 +243,84 @@ private:
   Mantid::detid2index_map m_wi_to_detid_map;
 
   int *m_NeighborIDs; // Stores IDs of nearest neighbors
-  double m_R0; ///< for Weak Peaks, these can be set using info from close
+  double m_R0;        ///< for Weak Peaks, these can be set using info from close
 
   Kernel::V3D m_center; ///< for Describing the Plane at the Peak
   Kernel::V3D m_xvec;   ///< for Describing the Plane at the Peak
   Kernel::V3D m_yvec;   ///< for Describing the Plane at the Peak
-  double
-      m_ROW; ///< for Describing the Row(or 0) describing the center of the Peak
-  double
-      m_COL; ///< for Describing the Column(or 0) describing the center of the
+  double m_ROW;         ///< for Describing the Row(or 0) describing the center of the Peak
+  double m_COL;         ///< for Describing the Column(or 0) describing the center of the
   /// Peak
   double m_cellWidth;  ///< for Describing the Plane at the Peak
   double m_cellHeight; ///< for Describing the Plane at the Peak
   int m_NROWS;
   int m_NCOLS;
 
-  void SetUpData(API::MatrixWorkspace_sptr &Data,
-                 API::MatrixWorkspace_const_sptr const &inpWkSpace,
-                 const std::shared_ptr<Geometry::IComponent> &comp,
-                 const int chanMin, const int chanMax, double CentX,
+  void SetUpData(API::MatrixWorkspace_sptr &Data, API::MatrixWorkspace_const_sptr const &inpWkSpace,
+                 const std::shared_ptr<Geometry::IComponent> &comp, const int chanMin, const int chanMax, double CentX,
                  double CentY, Kernel::V3D &CentNghbr,
 
                  double &neighborRadius, // from CentDet
                  double Radius, std::string &spec_idList);
 
-  bool getNeighborPixIDs(const std::shared_ptr<Geometry::IComponent> &comp,
-                         Kernel::V3D &Center, double &Radius, int *&ArryofID);
+  bool getNeighborPixIDs(const std::shared_ptr<Geometry::IComponent> &comp, Kernel::V3D &Center, double &Radius,
+                         int *&ArryofID);
 
-  int CalculateTimeChannelSpan(Geometry::IPeak const &peak, const double dQ,
-                               const Mantid::HistogramData::HistogramX &X,
+  int CalculateTimeChannelSpan(Geometry::IPeak const &peak, const double dQ, const Mantid::HistogramData::HistogramX &X,
                                const int specNum, int &Centerchan);
 
   double CalculatePositionSpan(DataObjects::Peak const &peak, const double dQ);
 
-  void InitializeColumnNamesInTableWorkspace(
-      DataObjects::TableWorkspace_sptr &TabWS);
+  void InitializeColumnNamesInTableWorkspace(DataObjects::TableWorkspace_sptr &TabWS);
 
   /// Prepares the data for futher analysis adding meta data and marking data on
   /// the edges of detectors
-  void SetUpData1(API::MatrixWorkspace_sptr &Data,
-                  API::MatrixWorkspace_const_sptr const &inpWkSpace,
-                  const int chanMin, const int chanMax, double Radius,
-                  Kernel::V3D CentPos, std::string &spec_idList
+  void SetUpData1(API::MatrixWorkspace_sptr &Data, API::MatrixWorkspace_const_sptr const &inpWkSpace, const int chanMin,
+                  const int chanMax, double Radius, Kernel::V3D CentPos, std::string &spec_idList
 
   );
 
   /**
    *  Tests several starting points in the Marquardt algorithm then calls Fit.
    */
-  void PreFit(API::MatrixWorkspace_sptr &Data, double &chisqOverDOF, bool &done,
-              std::vector<std::string> &names, std::vector<double> &params,
-              std::vector<double> &errs, double lastRow, double lastCol,
+  void PreFit(API::MatrixWorkspace_sptr &Data, double &chisqOverDOF, bool &done, std::vector<std::string> &names,
+              std::vector<double> &params, std::vector<double> &errs, double lastRow, double lastCol,
               double neighborRadius);
 
-  void Fit(API::MatrixWorkspace_sptr &Data, double &chisqOverDOF, bool &done,
-           std::vector<std::string> &names, std::vector<double> &params,
-           std::vector<double> &errs, double lastRow, double lastCol,
+  void Fit(API::MatrixWorkspace_sptr &Data, double &chisqOverDOF, bool &done, std::vector<std::string> &names,
+           std::vector<double> &params, std::vector<double> &errs, double lastRow, double lastCol,
            double neighborRadius);
 
   std::string CalculateFunctionProperty_Fit();
 
-  bool isGoodFit(std::vector<double> const &params,
-                 std::vector<double> const &errs,
+  bool isGoodFit(std::vector<double> const &params, std::vector<double> const &errs,
                  std::vector<std::string> const &names, double chisqOverDOF);
   // returns last row added
-  int UpdateOutputWS(DataObjects::TableWorkspace_sptr &TabWS, const int dir,
-                     const double chan, std::vector<double> const &params,
-                     std::vector<double> const &errs,
-                     std::vector<std::string> const &names, const double Chisq,
-                     const double time, std::string spec_idList);
+  int UpdateOutputWS(DataObjects::TableWorkspace_sptr &TabWS, const int dir, const double chan,
+                     std::vector<double> const &params, std::vector<double> const &errs,
+                     std::vector<std::string> const &names, const double Chisq, const double time,
+                     std::string spec_idList);
 
-  void updatePeakInformation(std::vector<double> const &params,
-                             std::vector<double> const &errs,
-                             std::vector<std::string> const &names,
-                             double &TotVariance, double &TotIntensity,
-                             double const TotSliceIntensity,
-                             double const TotSliceVariance,
-                             double const chisqdivDOF, const int ncells);
+  void updatePeakInformation(std::vector<double> const &params, std::vector<double> const &errs,
+                             std::vector<std::string> const &names, double &TotVariance, double &TotIntensity,
+                             double const TotSliceIntensity, double const TotSliceVariance, double const chisqdivDOF,
+                             const int ncells);
 
-  void updateStats(const double intensity, const double variance,
-                   const double row, const double col,
+  void updateStats(const double intensity, const double variance, const double row, const double col,
                    std::vector<double> &StatBase);
 
-  int findNameInVector(std::string const &oneName,
-                       std::vector<std::string> const &nameList);
+  int findNameInVector(std::string const &oneName, std::vector<std::string> const &nameList);
 
-  double CalculateIsawIntegrateError(const double background,
-                                     const double backError,
-                                     const double ChiSqOverDOF,
-                                     const double TotVariance,
-                                     const int ncells);
+  double CalculateIsawIntegrateError(const double background, const double backError, const double ChiSqOverDOF,
+                                     const double TotVariance, const int ncells);
 
-  void FindPlane(Kernel::V3D &center, Kernel::V3D &xvec, Kernel::V3D &yvec,
-                 double &ROW, double &COL, int &NROWS, int &NCOLS,
-                 double &pixWidthx, double &pixHeighty,
-                 DataObjects::Peak const &peak) const;
+  void FindPlane(Kernel::V3D &center, Kernel::V3D &xvec, Kernel::V3D &yvec, double &ROW, double &COL, int &NROWS,
+                 int &NCOLS, double &pixWidthx, double &pixHeighty, DataObjects::Peak const &peak) const;
 
-  int findTimeChannel(const Mantid::HistogramData::HistogramX &X,
-                      const double time);
+  int findTimeChannel(const Mantid::HistogramData::HistogramX &X, const double time);
 
   // returns true if Neighborhood list is changed
-  bool updateNeighbors(std::shared_ptr<Geometry::IComponent> &comp,
-                       Kernel::V3D CentPos, Kernel::V3D oldCenter,
+  bool updateNeighbors(std::shared_ptr<Geometry::IComponent> &comp, Kernel::V3D CentPos, Kernel::V3D oldCenter,
                        double NewRadius, double &neighborRadius);
   bool m_debug;
 };

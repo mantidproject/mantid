@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, Progress, \
     WorkspaceGroupProperty, FileAction
-from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty
+from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty, IntBoundedValidator
 from mantid.simpleapi import *
 import numpy as np
 from os import path
@@ -225,6 +225,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.maxqxy = self.getPropertyValue('MaxQxy').split(',')
         self.deltaq = self.getPropertyValue('DeltaQ').split(',')
         self.output_type = self.getPropertyValue('OutputType')
+        self.stitch_reference_index = self.getProperty('StitchReferenceIndex').value
 
     def PyInit(self):
 
@@ -368,6 +369,10 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty('SensitivityWithOffsets', False,
                              'Whether the sensitivity data has been measured with different horizontal offsets.')
 
+        self.declareProperty('StitchReferenceIndex', defaultValue=1,
+                             validator=IntBoundedValidator(lower=0),
+                             doc='Index of reference workspace during stitching.')
+
     # flake8: noqa: C901
     def PyExec(self):
 
@@ -416,7 +421,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             try:
                 stitched = self.output + "_stitched"
                 Stitch1DMany(InputWorkspaces=outputSamples,
-                             OutputWorkspace=stitched)
+                             OutputWorkspace=stitched,
+                             ScaleRHSWorkspace=True,
+                             IndexOfReference=self.stitch_reference_index)
                 outputSamples.append(stitched)
             except RuntimeError as re:
                 self.log().warning("Unable to stitch automatically, consider "
@@ -459,13 +466,17 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         # stitch if possible and group
         for i in range(len(outputWedges[0])):
             inWs = [outputWedges[d][i] for d in range(self.dimensionality)]
-            try:
-                stitched = self.output + "_wedge_" + str(i + 1) + "_stitched"
-                Stitch1DMany(InputWorkspaces=inWs, OutputWorkspace=stitched)
-                inWs.append(stitched)
-            except RuntimeError as re:
-                self.log().warning("Unable to stitch automatically, consider "
-                                   "stitching manually: " + str(re))
+            if len(inWs) > 1:
+                try:
+                    stitched = self.output + "_wedge_" + str(i + 1) + "_stitched"
+                    Stitch1DMany(InputWorkspaces=inWs,
+                                 OutputWorkspace=stitched,
+                                 ScaleRHSWorkspace=True,
+                                 IndexOfReference=self.stitch_reference_index)
+                    inWs.append(stitched)
+                except RuntimeError as re:
+                    self.log().warning("Unable to stitch automatically, consider "
+                                       "stitching manually: " + str(re))
             GroupWorkspaces(InputWorkspaces=inWs,
                             OutputWorkspace=self.output + "_wedge_" + str(i + 1))
 

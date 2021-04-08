@@ -29,11 +29,9 @@ namespace {
 using data_modifier = Mantid::MantidVec &(RebinnedOutput::*)(const std::size_t);
 
 /// return_value_policy for read-only numpy array
-using return_readonly_numpy =
-    return_value_policy<VectorRefToNumpy<WrapReadOnly>>;
+using return_readonly_numpy = return_value_policy<VectorRefToNumpy<WrapReadOnly>>;
 /// return_value_policy for read-write numpy array
-using return_readwrite_numpy =
-    return_value_policy<VectorRefToNumpy<WrapReadWrite>>;
+using return_readwrite_numpy = return_value_policy<VectorRefToNumpy<WrapReadWrite>>;
 
 /**
  * Set the F values from an python array-style object
@@ -41,8 +39,7 @@ using return_readwrite_numpy =
  * @param wsIndex :: The workspace index for the spectrum to set
  * @param values :: A numpy array, length must match F array length
  */
-void setFFromPyObject(RebinnedOutput &self, const size_t wsIndex,
-                      const boost::python::object &values) {
+void setFFromPyObject(RebinnedOutput &self, const size_t wsIndex, const boost::python::object &values) {
 
   if (NDArray::check(values)) {
     NDArrayToVector<double> converter(values);
@@ -55,26 +52,20 @@ void setFFromPyObject(RebinnedOutput &self, const size_t wsIndex,
 } // namespace
 
 void export_RebinnedOutput() {
-  class_<RebinnedOutput, bases<Workspace2D>, boost::noncopyable>(
-      "RebinnedOutput", no_init)
-      .def("readF", &RebinnedOutput::readF,
-           (arg("self"), arg("workspaceIndex")), return_readonly_numpy(),
+  class_<RebinnedOutput, bases<Workspace2D>, boost::noncopyable>("RebinnedOutput", no_init)
+      .def("readF", &RebinnedOutput::readF, (arg("self"), arg("workspaceIndex")), return_readonly_numpy(),
            "Creates a read-only numpy wrapper "
            "around the original F data at the "
            "given index")
-      .def("dataF", (data_modifier)&RebinnedOutput::dataF,
-           return_readwrite_numpy(), args("self", "workspaceIndex"),
+      .def("dataF", (data_modifier)&RebinnedOutput::dataF, return_readwrite_numpy(), args("self", "workspaceIndex"),
            "Creates a writable numpy wrapper around the original F data at the "
            "given index")
       .def("setF", &setFFromPyObject, args("self", "workspaceIndex", "x"),
            "Set F values from a python list or numpy array. It performs a "
            "simple copy into the array")
-      .def("scaleF", &RebinnedOutput::scaleF, (arg("self"), arg("scale")),
-           "Scales the fractional area arrays")
-      .def("nonZeroF", &RebinnedOutput::nonZeroF, (arg("self")),
-           "Returns if the fractional area is non zero")
-      .def("finalize", &RebinnedOutput::finalize,
-           (arg("self"), arg("hasSqrdErrs")),
+      .def("scaleF", &RebinnedOutput::scaleF, (arg("self"), arg("scale")), "Scales the fractional area arrays")
+      .def("nonZeroF", &RebinnedOutput::nonZeroF, (arg("self")), "Returns if the fractional area is non zero")
+      .def("finalize", &RebinnedOutput::finalize, (arg("self"), arg("hasSqrdErrs")),
            "Divides the data/error arrays by the corresponding fractional area "
            "array")
       .def("unfinalize", &RebinnedOutput::unfinalize, (arg("self")),
@@ -85,11 +76,9 @@ void export_RebinnedOutput() {
       .def("hasSqrdErrors", &RebinnedOutput::hasSqrdErrors, (arg("self")),
            "Returns if squared errors are used with fractional area "
            "normalization")
-      .def("setFinalized", &RebinnedOutput::setFinalized,
-           (arg("self"), arg("value")),
+      .def("setFinalized", &RebinnedOutput::setFinalized, (arg("self"), arg("value")),
            "Sets the value of the is finalized flag")
-      .def("setSqrdErrors", &RebinnedOutput::setSqrdErrors,
-           (arg("self"), arg("value")),
+      .def("setSqrdErrors", &RebinnedOutput::setSqrdErrors, (arg("self"), arg("value")),
            "Sets the value of the squared errors flag");
   // register pointers
   RegisterWorkspacePtrToPython<RebinnedOutput>();

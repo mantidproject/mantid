@@ -30,11 +30,9 @@ Track::Track() : m_line(V3D(), V3D(0., 0., 1.)) {}
  * @param startPt :: Initial point
  * @param unitVector :: Directional vector. It must be unit vector.
  */
-Track::Track(const V3D &startPt, const V3D &unitVector)
-    : m_line(startPt, unitVector) {
+Track::Track(const V3D &startPt, const V3D &unitVector) : m_line(startPt, unitVector) {
   if (!unitVector.unitVector()) {
-    throw std::invalid_argument(
-        "Failed to construct track: direction is not a unit vector.");
+    throw std::invalid_argument("Failed to construct track: direction is not a unit vector.");
   }
   m_links.reserve(2);
   m_surfPoints.reserve(4);
@@ -47,8 +45,7 @@ Track::Track(const V3D &startPt, const V3D &unitVector)
  */
 void Track::reset(const V3D &startPoint, const V3D &direction) {
   if (!direction.unitVector()) {
-    throw std::invalid_argument(
-        "Failed to reset track: direction is not a unit vector.");
+    throw std::invalid_argument("Failed to reset track: direction is not a unit vector.");
   }
   m_line.setLine(startPoint, direction);
 }
@@ -102,8 +99,7 @@ void Track::removeCojoins() {
   while (nextNode != m_links.end()) {
     if (prevNode->componentID == nextNode->componentID) {
       prevNode->exitPoint = nextNode->exitPoint;
-      prevNode->distFromStart =
-          prevNode->entryPoint.distance(prevNode->exitPoint);
+      prevNode->distFromStart = prevNode->entryPoint.distance(prevNode->exitPoint);
       prevNode->distInsideObject = nextNode->distInsideObject;
       m_links.erase(nextNode);
       nextNode = prevNode;
@@ -126,15 +122,13 @@ void Track::removeCojoins() {
  * @param obj :: A reference to the object that was intersected
  * @param compID :: ID of the component that this link is about (Default=NULL)
  */
-void Track::addPoint(const TrackDirection direction, const V3D &endPoint,
-                     const IObject &obj, const ComponentID compID) {
-  IntersectionPoint newPoint(
-      direction, endPoint, endPoint.distance(m_line.getOrigin()), obj, compID);
+void Track::addPoint(const TrackDirection direction, const V3D &endPoint, const IObject &obj,
+                     const ComponentID compID) {
+  IntersectionPoint newPoint(direction, endPoint, endPoint.distance(m_line.getOrigin()), obj, compID);
   if (m_surfPoints.empty()) {
     m_surfPoints.push_back(newPoint);
   } else {
-    auto lowestPtr =
-        std::lower_bound(m_surfPoints.begin(), m_surfPoints.end(), newPoint);
+    auto lowestPtr = std::lower_bound(m_surfPoints.begin(), m_surfPoints.end(), newPoint);
     if (lowestPtr != m_surfPoints.end()) {
       // Make sure same point isn't added twice
       if (newPoint == *lowestPtr) {
@@ -156,8 +150,7 @@ void Track::addPoint(const TrackDirection direction, const V3D &endPoint,
  * @param compID :: ID of the component that this link is about (Default=NULL)
  * @retval Index of link within the track
  */
-int Track::addLink(const V3D &firstPoint, const V3D &secondPoint,
-                   const double distanceAlongTrack, const IObject &obj,
+int Track::addLink(const V3D &firstPoint, const V3D &secondPoint, const double distanceAlongTrack, const IObject &obj,
                    const ComponentID compID) {
   // Process First Point
   Link newLink(firstPoint, secondPoint, distanceAlongTrack, obj, compID);
@@ -201,8 +194,7 @@ void Track::buildLink() {
   ++bc;
   // First point is not necessarily in an object
   // Process first point:
-  while (ac != m_surfPoints.end() &&
-         ac->direction != TrackDirection::ENTERING) // stepping from an object.
+  while (ac != m_surfPoints.end() && ac->direction != TrackDirection::ENTERING) // stepping from an object.
   {
     if (ac->direction == TrackDirection::LEAVING) {
       addLink(m_line.getOrigin(), ac->endPoint, ac->distFromStart, *ac->object,
@@ -225,18 +217,15 @@ void Track::buildLink() {
   V3D workPt = ac->endPoint;       // last good point
   while (bc != m_surfPoints.end()) // Since bc > ac
   {
-    if (ac->direction == TrackDirection::ENTERING &&
-        bc->direction == TrackDirection::LEAVING) {
+    if (ac->direction == TrackDirection::ENTERING && bc->direction == TrackDirection::LEAVING) {
       // Touching surface / identical surface
       if (fabs(ac->distFromStart - bc->distFromStart) > Tolerance) {
         // track leave ac into bc.
-        addLink(ac->endPoint, bc->endPoint, bc->distFromStart, *ac->object,
-                ac->componentID);
+        addLink(ac->endPoint, bc->endPoint, bc->distFromStart, *ac->object, ac->componentID);
       }
       // Points with intermediate void
       else {
-        addLink(workPt, ac->endPoint, ac->distFromStart, *ac->object,
-                ac->componentID);
+        addLink(workPt, ac->endPoint, ac->distFromStart, *ac->object, ac->componentID);
       }
       workPt = bc->endPoint;
 
@@ -265,9 +254,7 @@ void Track::buildLink() {
  */
 double Track::totalDistInsideObject() const {
   return std::accumulate(m_links.begin(), m_links.end(), 0.,
-                         [](double total, const auto &link) {
-                           return total + link.distInsideObject;
-                         });
+                         [](double total, const auto &link) { return total + link.distInsideObject; });
 }
 
 std::ostream &operator<<(std::ostream &os, TrackDirection direction) {

@@ -34,69 +34,68 @@ public:
     if (m_facFile.exists())
       m_facFile.remove();
 
-    const std::string xmlStr =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        "<facilities>"
-        "  <facility name=\"ISIS\" zeropadding=\"5\" "
-        "FileExtensions=\".nxs,.raw,.sav,.n*,.s*\">"
-        "    <archive>"
-        "      <archiveSearch plugin=\"ISISDataSearch\" />"
-        "    </archive>"
-        "    <instrument name=\"HRPD\" shortname=\"HRP\">"
-        "      <technique>Powder Diffraction</technique>"
-        "    </instrument>"
-        "    <instrument name=\"ABCD\" shortname=\"ABC\" >"
-        "      <zeropadding size=\"8\"/>"
-        "      <technique>Powder Diffraction</technique>"
-        "    </instrument>"
-        "    <instrument name=\"EFG2H\" shortname=\"EFG2H\">"
-        "      <zeropadding size=\"8\"/>"
-        "      <technique>Powder Diffraction</technique>"
-        "    </instrument>"
-        "    <instrument name=\"CRISP\" shortname=\"CSP\">"
-        "      <technique>Technique</technique>"
-        "    </instrument>"
-        "    <instrument name=\"MUSR\">"
-        "      <zeropadding size=\"8\"/>"
-        "      <technique>Powder Diffraction</technique>"
-        "    </instrument>"
-        "    <instrument name=\"LOQ\">"
-        "     <zeropadding size=\"5\"/>"
-        "     <technique>Small Angle Scattering</technique>"
-        "    </instrument>"
-        "    <instrument name=\"OFFSPEC\">"
-        "      <zeropadding size=\"8\"/>"
-        "      <technique>Reflectometer</technique>"
-        "    </instrument>"
-        "    <instrument name=\"SANS2D\">"
-        "      <zeropadding size=\"8\"/>"
-        "      <technique>Small Angle Scattering</technique>"
-        "    </instrument>"
-        "  </facility>"
-        "  <facility name=\"SNS\" delimiter=\"_\" "
-        "FileExtensions=\"_event.nxs,.nxs,.dat\">"
-        "    <archive>"
-        "      <archiveSearch plugin=\"ORNLDataSearch\" />"
-        "    </archive>"
-        "    <instrument name=\"SEQUOIA\" shortname=\"SEQ\">"
-        "      <technique>Inelastic Spectroscopy</technique>"
-        "    </instrument>"
-        "    <instrument name=\"CNCS\" shortname=\"CNCS\">"
-        "      <technique>Inelastic Spectroscopy</technique>"
-        "    </instrument>"
-        "    <instrument name=\"REF_L\" shortname=\"REF_L\">"
-        "      <technique>Reflectometer</technique>"
-        "    </instrument>"
-        "    <instrument name=\"POWGEN\" shortname=\"PG3\">"
-        "      <technique>Reflectometer</technique>"
-        "    </instrument>"
-        "  </facility>"
-        "  <facility name=\"ILL\" delimiter=\"_\" FileExtensions=\".nxs,.dat\">"
-        "    <instrument name=\"IN5\" shortname=\"IN5\">"
-        "      <technique>Inelastic Spectroscopy</technique>"
-        "    </instrument>"
-        "  </facility>"
-        "</facilities>";
+    const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                               "<facilities>"
+                               "  <facility name=\"ISIS\" zeropadding=\"5\" "
+                               "FileExtensions=\".nxs,.raw,.sav,.n*,.s*\">"
+                               "    <archive>"
+                               "      <archiveSearch plugin=\"ISISDataSearch\" />"
+                               "    </archive>"
+                               "    <instrument name=\"HRPD\" shortname=\"HRP\">"
+                               "      <technique>Powder Diffraction</technique>"
+                               "    </instrument>"
+                               "    <instrument name=\"ABCD\" shortname=\"ABC\" >"
+                               "      <zeropadding size=\"8\"/>"
+                               "      <technique>Powder Diffraction</technique>"
+                               "    </instrument>"
+                               "    <instrument name=\"EFG2H\" shortname=\"EFG2H\">"
+                               "      <zeropadding size=\"8\"/>"
+                               "      <technique>Powder Diffraction</technique>"
+                               "    </instrument>"
+                               "    <instrument name=\"CRISP\" shortname=\"CSP\">"
+                               "      <technique>Technique</technique>"
+                               "    </instrument>"
+                               "    <instrument name=\"MUSR\">"
+                               "      <zeropadding size=\"8\"/>"
+                               "      <technique>Powder Diffraction</technique>"
+                               "    </instrument>"
+                               "    <instrument name=\"LOQ\">"
+                               "     <zeropadding size=\"5\"/>"
+                               "     <technique>Small Angle Scattering</technique>"
+                               "    </instrument>"
+                               "    <instrument name=\"OFFSPEC\">"
+                               "      <zeropadding size=\"8\"/>"
+                               "      <technique>Reflectometer</technique>"
+                               "    </instrument>"
+                               "    <instrument name=\"SANS2D\">"
+                               "      <zeropadding size=\"8\"/>"
+                               "      <technique>Small Angle Scattering</technique>"
+                               "    </instrument>"
+                               "  </facility>"
+                               "  <facility name=\"SNS\" delimiter=\"_\" "
+                               "FileExtensions=\"_event.nxs,.nxs,.dat\">"
+                               "    <archive>"
+                               "      <archiveSearch plugin=\"ORNLDataSearch\" />"
+                               "    </archive>"
+                               "    <instrument name=\"SEQUOIA\" shortname=\"SEQ\">"
+                               "      <technique>Inelastic Spectroscopy</technique>"
+                               "    </instrument>"
+                               "    <instrument name=\"CNCS\" shortname=\"CNCS\">"
+                               "      <technique>Inelastic Spectroscopy</technique>"
+                               "    </instrument>"
+                               "    <instrument name=\"REF_L\" shortname=\"REF_L\">"
+                               "      <technique>Reflectometer</technique>"
+                               "    </instrument>"
+                               "    <instrument name=\"POWGEN\" shortname=\"PG3\">"
+                               "      <technique>Reflectometer</technique>"
+                               "    </instrument>"
+                               "  </facility>"
+                               "  <facility name=\"ILL\" delimiter=\"_\" FileExtensions=\".nxs,.dat\">"
+                               "    <instrument name=\"IN5\" shortname=\"IN5\">"
+                               "      <technique>Inelastic Spectroscopy</technique>"
+                               "    </instrument>"
+                               "  </facility>"
+                               "</facilities>";
 
     std::ofstream fil(m_facFile.path().c_str());
     fil << xmlStr;
@@ -157,13 +156,11 @@ public:
     // Set the facility
     ConfigService::Instance().setString("default.facility", "ISIS");
 
-    const FacilityInfo &facility =
-        ConfigService::Instance().getFacility("ISIS");
+    const FacilityInfo &facility = ConfigService::Instance().getFacility("ISIS");
     const InstrumentInfo &instrument = facility.instrument("HRPD");
 
     // Set the default instrument
-    ConfigService::Instance().setString("default.instrument",
-                                        instrument.shortName());
+    ConfigService::Instance().setString("default.instrument", instrument.shortName());
 
     std::string fName = FileFinder::Instance().makeFileName("123", instrument);
     TS_ASSERT_EQUALS(fName, "HRP00123");
@@ -174,18 +171,13 @@ public:
     fName = FileFinder::Instance().makeFileName("ABCD123", instrument);
     TS_ASSERT_EQUALS(fName, "ABC00000123");
 
-    TS_ASSERT_THROWS(
-        fName = FileFinder::Instance().makeFileName("ABCD", instrument),
-        const std::invalid_argument &);
-    TS_ASSERT_THROWS(
-        fName = FileFinder::Instance().makeFileName("123456", instrument),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(fName = FileFinder::Instance().makeFileName("ABCD", instrument), const std::invalid_argument &);
+    TS_ASSERT_THROWS(fName = FileFinder::Instance().makeFileName("123456", instrument), const std::invalid_argument &);
 
     fName = FileFinder::Instance().makeFileName("0", instrument);
     TS_ASSERT_EQUALS(fName, "HRP00000");
 
-    TS_ASSERT_EQUALS("EFG2H00000123", FileFinder::Instance().makeFileName(
-                                          "EFG2H123", instrument));
+    TS_ASSERT_EQUALS("EFG2H00000123", FileFinder::Instance().makeFileName("EFG2H123", instrument));
 
     ConfigService::Instance().setString("default.facility", " ");
   }
@@ -198,26 +190,20 @@ public:
     const InstrumentInfo &instrument = facility.instrument("CNCS");
 
     // Set the default instrument
-    ConfigService::Instance().setString("default.instrument",
-                                        instrument.shortName());
+    ConfigService::Instance().setString("default.instrument", instrument.shortName());
 
     // Check that we remove any leading zeros
-    TS_ASSERT_EQUALS("CNCS_123",
-                     FileFinder::Instance().makeFileName("0123", instrument));
+    TS_ASSERT_EQUALS("CNCS_123", FileFinder::Instance().makeFileName("0123", instrument));
 
     // Test using long and short name
-    TS_ASSERT_EQUALS(
-        "SEQ_21", FileFinder::Instance().makeFileName("SEQUOIA21", instrument));
-    TS_ASSERT_EQUALS("SEQ_21",
-                     FileFinder::Instance().makeFileName("SEQ21", instrument));
+    TS_ASSERT_EQUALS("SEQ_21", FileFinder::Instance().makeFileName("SEQUOIA21", instrument));
+    TS_ASSERT_EQUALS("SEQ_21", FileFinder::Instance().makeFileName("SEQ21", instrument));
 
     // Test for POWGEN with a trailing number in the instrument name.
-    TS_ASSERT_EQUALS("PG3_333",
-                     FileFinder::Instance().makeFileName("PG3333", instrument));
+    TS_ASSERT_EQUALS("PG3_333", FileFinder::Instance().makeFileName("PG3333", instrument));
 
     // Test for REF_L (to check that the extra _ doesn't upset anything)
-    TS_ASSERT_EQUALS("REF_L_666", FileFinder::Instance().makeFileName(
-                                      "REF_L666", instrument));
+    TS_ASSERT_EQUALS("REF_L_666", FileFinder::Instance().makeFileName("REF_L666", instrument));
 
     ConfigService::Instance().setString("default.facility", " ");
   }
@@ -227,32 +213,16 @@ public:
     ConfigService::Instance().setString("default.instrument", "HRPD");
 
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("").name(), "HRPD");
-    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("PG31234").name(),
-                     "POWGEN");
-    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("PG3_1234").name(),
-                     "POWGEN");
-    TS_ASSERT_EQUALS(
-        FileFinder::Instance().getInstrument("PG3_1234_event.nxs").name(),
-        "POWGEN");
-    TS_ASSERT_EQUALS(
-        FileFinder::Instance()
-            .getInstrument("/home/user123/CNCS_234_neutron_event.dat")
-            .name(),
-        "CNCS");
-    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("REF_L1234").name(),
-                     "REF_L");
-    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("REF_L_1234").name(),
-                     "REF_L");
-    TS_ASSERT_EQUALS(
-        FileFinder::Instance().getInstrument("REF_L_1234.nxs.h5").name(),
-        "REF_L");
-    TS_ASSERT_EQUALS(
-        FileFinder::Instance().getInstrument("LOQ16613.n001").name(), "LOQ");
-    TS_ASSERT_EQUALS(
-        FileFinder::Instance().getInstrument("LOQ16613.s01").name(), "LOQ");
-    TS_ASSERT_EQUALS(
-        FileFinder::Instance().getInstrument("SANS2D00032676.nxs").name(),
-        "SANS2D");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("PG31234").name(), "POWGEN");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("PG3_1234").name(), "POWGEN");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("PG3_1234_event.nxs").name(), "POWGEN");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("/home/user123/CNCS_234_neutron_event.dat").name(), "CNCS");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("REF_L1234").name(), "REF_L");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("REF_L_1234").name(), "REF_L");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("REF_L_1234.nxs.h5").name(), "REF_L");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("LOQ16613.n001").name(), "LOQ");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("LOQ16613.s01").name(), "LOQ");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("SANS2D00032676.nxs").name(), "SANS2D");
   }
 
   void testGetExtension() {
@@ -261,23 +231,14 @@ public:
     TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("", exts), "");
     TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("PG31234", exts), "");
     TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("PG3_1234", exts), "");
-    TS_ASSERT_EQUALS(
-        FileFinder::Instance().getExtension("PG3_1234_event.nxs", exts),
-        "_event.nxs");
-    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension(
-                         "/home/user123/CNCS_234_neutron_event.dat", exts),
+    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("PG3_1234_event.nxs", exts), "_event.nxs");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("/home/user123/CNCS_234_neutron_event.dat", exts),
                      ".dat"); // doesn't know about full extension
-    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("REF_L1234", exts),
-                     "");
-    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("REF_L_1234", exts),
-                     "");
-    TS_ASSERT_EQUALS(
-        FileFinder::Instance().getExtension("REF_L_1234.nxs.h5", exts),
-        ".nxs.h5");
-    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("LOQ16613.n001", exts),
-                     ".n001");
-    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("LOQ16613.s01", exts),
-                     ".s01");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("REF_L1234", exts), "");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("REF_L_1234", exts), "");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("REF_L_1234.nxs.h5", exts), ".nxs.h5");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("LOQ16613.n001", exts), ".n001");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("LOQ16613.s01", exts), ".s01");
   }
 
   void testFindRunForSNS() {
@@ -299,8 +260,7 @@ public:
     TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
     Poco::File file(path);
     TS_ASSERT(file.exists());
-    path = FileFinder::Instance().findRun("CSP74683",
-                                          std::vector<std::string>(1, ".s02"));
+    path = FileFinder::Instance().findRun("CSP74683", std::vector<std::string>(1, ".s02"));
     TS_ASSERT(path.size() > 3);
     TS_ASSERT_EQUALS(path.substr(path.size() - 3), "s02");
 
@@ -314,23 +274,12 @@ public:
   void testFindFiles() {
     ConfigService::Instance().setString("default.facility", "ISIS");
     std::vector<std::string> files;
-    TS_ASSERT_THROWS(files =
-                         FileFinder::Instance().findRuns("MUSR15189-n15193"),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(files =
-                         FileFinder::Instance().findRuns("MUSR15189n-15193"),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(files =
-                         FileFinder::Instance().findRuns("MUSR15189-15193n"),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(files =
-                         FileFinder::Instance().findRuns("MUSR15189-151n93"),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(files =
-                         FileFinder::Instance().findRuns("MUSR15n189-151n93"),
-                     const Exception::NotFoundError &);
-    TS_ASSERT_THROWS_NOTHING(
-        files = FileFinder::Instance().findRuns("MUSR15189-15193"));
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-n15193"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189n-15193"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-15193n"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-151n93"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15n189-151n93"), const Exception::NotFoundError &);
+    TS_ASSERT_THROWS_NOTHING(files = FileFinder::Instance().findRuns("MUSR15189-15193"));
     TS_ASSERT_EQUALS(files.size(), 5);
     std::vector<std::string>::iterator it = files.begin();
 
@@ -349,10 +298,8 @@ public:
     const std::vector<std::string> extensions2 = {".a", ".raw", ".txt"};
 
     std::vector<std::string> uniqueExts = {".log"};
-    const std::vector<std::string> expectedExts1 = {".log", ".raw", ".b",
-                                                    ".txt"};
-    const std::vector<std::string> expectedExts2 = {".log", ".raw", ".b",
-                                                    ".txt", ".a"};
+    const std::vector<std::string> expectedExts1 = {".log", ".raw", ".b", ".txt"};
+    const std::vector<std::string> expectedExts2 = {".log", ".raw", ".b", ".txt", ".a"};
 
     fileFinder.getUniqueExtensions(extensions1, uniqueExts);
     TS_ASSERT_EQUALS(uniqueExts.size(), expectedExts1.size());
@@ -376,10 +323,8 @@ public:
     const std::vector<std::string> extensions2 = {".a", ".raw", ".txt"};
 
     std::vector<std::string> uniqueExts = {".log"};
-    const std::vector<std::string> expectedExts1 = {".log", ".RAW", ".b",
-                                                    ".txt"};
-    const std::vector<std::string> expectedExts2 = {".log", ".RAW", ".b",
-                                                    ".txt", ".a",   ".raw"};
+    const std::vector<std::string> expectedExts1 = {".log", ".RAW", ".b", ".txt"};
+    const std::vector<std::string> expectedExts2 = {".log", ".RAW", ".b", ".txt", ".a", ".raw"};
 
     fileFinder.getUniqueExtensions(extensions1, uniqueExts);
     TS_ASSERT_EQUALS(uniqueExts.size(), expectedExts1.size());
@@ -400,8 +345,7 @@ public:
 
     // This file is .nxs or .RAW
     const std::vector<std::string> incorrect_extension = {".txt"};
-    path =
-        FileFinder::Instance().findRun("MUSR15189", incorrect_extension, true);
+    path = FileFinder::Instance().findRun("MUSR15189", incorrect_extension, true);
     TS_ASSERT_EQUALS(path, "");
   }
 
@@ -427,8 +371,7 @@ public:
     fil.close();
 
     ConfigService::Instance().setString("default.facility", "ISIS");
-    std::vector<std::string> files =
-        FileFinder::Instance().findRuns("LOQ111-add");
+    std::vector<std::string> files = FileFinder::Instance().findRuns("LOQ111-add");
     TS_ASSERT_EQUALS(files.size(), 1);
 
     file.remove();
@@ -459,8 +402,7 @@ public:
 
   void testFindRunsDefaultInst() {
     ConfigService::Instance().setString("default.instrument", "MUSR");
-    std::vector<std::string> paths =
-        FileFinder::Instance().findRuns("15189-15190");
+    std::vector<std::string> paths = FileFinder::Instance().findRuns("15189-15190");
     TS_ASSERT(paths.size() == 2);
   }
 
@@ -480,8 +422,7 @@ public:
 #endif
     Poco::File file(path);
     TS_ASSERT(file.exists());
-    std::string path2 =
-        fileFinder.getFullPath("UNiT_TESTiNG/IDF_for_UNiT_TESTiNG.xMl");
+    std::string path2 = fileFinder.getFullPath("UNiT_TESTiNG/IDF_for_UNiT_TESTiNG.xMl");
     Poco::File file2(path2);
     TS_ASSERT(file2.exists());
 
@@ -490,12 +431,10 @@ public:
     std::string pathOn = fileFinder.findRun("CSp78173.Raw");
     Poco::File fileOn(pathOn);
 
-    std::string pathOn2 = FileFinder::Instance().getFullPath(
-        "unit_TeSTinG/IDF_for_UNiT_TESTiNG.xMl");
+    std::string pathOn2 = FileFinder::Instance().getFullPath("unit_TeSTinG/IDF_for_UNiT_TESTiNG.xMl");
     Poco::File fileOn2(pathOn2);
 
-    std::string pathOn3 = FileFinder::Instance().getFullPath(
-        "unit_testing/IDF_for_UNiT_TESTiNG.xMl");
+    std::string pathOn3 = FileFinder::Instance().getFullPath("unit_testing/IDF_for_UNiT_TESTiNG.xMl");
     Poco::File fileOn3(pathOn3);
 
     std::string pathOn4 = FileFinder::Instance().getFullPath("CSp78173.Raw");
@@ -528,14 +467,11 @@ class FileFinderTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FileFinderTestPerformance *createSuite() {
-    return new FileFinderTestPerformance();
-  }
+  static FileFinderTestPerformance *createSuite() { return new FileFinderTestPerformance(); }
   static void destroySuite(FileFinderTestPerformance *suite) { delete suite; }
 
   FileFinderTestPerformance()
-      : m_oldDataSearchDirectories(),
-        m_dirPath("_FileFinderTestPerformanceDummyData"),
+      : m_oldDataSearchDirectories(), m_dirPath("_FileFinderTestPerformanceDummyData"),
         // Keeping these as low as possible so as to keep the time of the test
         // down, but users with 70,000+ files
         // in a single folder looking for a range of hundreds of files are not
@@ -566,24 +502,19 @@ public:
     }
 
     // Set TOSCA as default instrument.
-    Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
-                                                        "TSC");
+    Mantid::Kernel::ConfigService::Instance().setString("default.instrument", "TSC");
 
     // Add dummy directory to search path, saving old search paths to be put
     // back later.
     Poco::Path path(dir.path());
     path = path.makeAbsolute();
-    m_oldDataSearchDirectories =
-        Mantid::Kernel::ConfigService::Instance().getString(
-            "datasearch.directories");
-    Mantid::Kernel::ConfigService::Instance().setString(
-        "datasearch.directories", path.toString());
+    m_oldDataSearchDirectories = Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories");
+    Mantid::Kernel::ConfigService::Instance().setString("datasearch.directories", path.toString());
   }
 
   ~FileFinderTestPerformance() override {
     // Put back the old search paths.
-    Mantid::Kernel::ConfigService::Instance().setString(
-        "datasearch.directories", m_oldDataSearchDirectories);
+    Mantid::Kernel::ConfigService::Instance().setString("datasearch.directories", m_oldDataSearchDirectories);
 
     // Destroy dummy folder and files.
     // Use Poco here so removing works on multiple platforms. Recursive
@@ -623,8 +554,7 @@ public:
     // could reintroduce this problem.
     std::vector<std::string> files;
     std::stringstream range;
-    std::string startOfRange =
-        boost::lexical_cast<std::string>(m_filesInDir - 10);
+    std::string startOfRange = boost::lexical_cast<std::string>(m_filesInDir - 10);
     std::string accidentalEndOfRange = "99999";
     range << startOfRange << "-" << accidentalEndOfRange;
     TS_ASSERT_THROWS(files = fileFinder.findRuns(range.str().c_str()),

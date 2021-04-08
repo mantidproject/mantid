@@ -21,19 +21,16 @@ namespace API {
 /** This abstract class deals with the loading and saving of previous algorithm
     property values to/from MantidPlot's QSettings.
 */
-class EXPORT_OPT_MANTIDQT_COMMON AbstractAlgorithmInputHistory
-    : public MantidWidgets::Configurable {
+class EXPORT_OPT_MANTIDQT_COMMON AbstractAlgorithmInputHistory : public MantidWidgets::Configurable {
 public:
   AbstractAlgorithmInputHistory(const AbstractAlgorithmInputHistory &) = delete;
-  AbstractAlgorithmInputHistory &
-  operator=(const AbstractAlgorithmInputHistory &) = delete;
+  AbstractAlgorithmInputHistory &operator=(const AbstractAlgorithmInputHistory &) = delete;
   /// Abstract destructor
   virtual ~AbstractAlgorithmInputHistory() = 0;
 
   /// Update the old values that are stored here. Only valid
   /// values are stored here
-  void storeNewValue(const QString &algName,
-                     const QPair<QString, QString> &property);
+  void storeNewValue(const QString &algName, const QPair<QString, QString> &property);
 
   /// Clear values for a particular algorithm
   void clearAlgorithmInput(const QString &algName);
@@ -80,19 +77,16 @@ private:
   QString m_dirKey;
 };
 
-class EXPORT_OPT_MANTIDQT_COMMON AlgorithmInputHistoryImpl
-    : public AbstractAlgorithmInputHistory {
+class EXPORT_OPT_MANTIDQT_COMMON AlgorithmInputHistoryImpl : public AbstractAlgorithmInputHistory {
 private:
-  AlgorithmInputHistoryImpl()
-      : AbstractAlgorithmInputHistory("Mantid/Algorithms") {}
+  AlgorithmInputHistoryImpl() : AbstractAlgorithmInputHistory("Mantid/Algorithms") {}
   ~AlgorithmInputHistoryImpl() override {}
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<AlgorithmInputHistoryImpl>;
 };
 
-using AlgorithmInputHistory =
-    Mantid::Kernel::SingletonHolder<AlgorithmInputHistoryImpl>;
+using AlgorithmInputHistory = Mantid::Kernel::SingletonHolder<AlgorithmInputHistoryImpl>;
 } // namespace API
 } // namespace MantidQt
 

@@ -14,14 +14,11 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-FqFitAddWorkspaceDialog::FqFitAddWorkspaceDialog(QWidget *parent)
-    : IAddWorkspaceDialog(parent) {
+FqFitAddWorkspaceDialog::FqFitAddWorkspaceDialog(QWidget *parent) : IAddWorkspaceDialog(parent) {
   m_uiForm.setupUi(this);
 
-  connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this,
-          SLOT(emitWorkspaceChanged(const QString &)));
-  connect(m_uiForm.cbParameterType,
-          SIGNAL(currentIndexChanged(const QString &)), this,
+  connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this, SLOT(emitWorkspaceChanged(const QString &)));
+  connect(m_uiForm.cbParameterType, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(emitParameterTypeChanged(const QString &)));
   connect(m_uiForm.pbAdd, SIGNAL(clicked()), this, SIGNAL(addData()));
   connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SIGNAL(closeDialog()));
@@ -35,20 +32,16 @@ std::string FqFitAddWorkspaceDialog::parameterType() const {
   return m_uiForm.cbParameterType->currentText().toStdString();
 }
 
-int FqFitAddWorkspaceDialog::parameterNameIndex() const {
-  return m_uiForm.cbParameterName->currentIndex();
-}
+int FqFitAddWorkspaceDialog::parameterNameIndex() const { return m_uiForm.cbParameterName->currentIndex(); }
 
-void FqFitAddWorkspaceDialog::setParameterTypes(
-    const std::vector<std::string> &types) {
+void FqFitAddWorkspaceDialog::setParameterTypes(const std::vector<std::string> &types) {
   MantidQt::API::SignalBlocker blocker(m_uiForm.cbParameterType);
   m_uiForm.cbParameterType->clear();
   for (auto &&type : types)
     m_uiForm.cbParameterType->addItem(QString::fromStdString(type));
 }
 
-void FqFitAddWorkspaceDialog::setParameterNames(
-    const std::vector<std::string> &names) {
+void FqFitAddWorkspaceDialog::setParameterNames(const std::vector<std::string> &names) {
   m_uiForm.cbParameterName->clear();
   for (auto &&name : names)
     m_uiForm.cbParameterName->addItem(QString::fromStdString(name));

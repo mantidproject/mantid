@@ -31,14 +31,10 @@ class DLLExport PatchBBY : public API::Algorithm {
 public:
   // description
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadBBY"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadBBY"}; }
   const std::string name() const override { return "PatchBBY"; }
   const std::string category() const override { return "DataHandling\\ANSTO"; }
-  const std::string summary() const override {
-    return "Patches a BilBy data file.";
-  }
+  const std::string summary() const override { return "Patches a BilBy data file."; }
 
 protected:
   // initialisation

@@ -73,6 +73,7 @@ set(PYTHON_PLUGINS
     algorithms/FitIncidentSpectrum.py
     algorithms/GSASIIRefineFitPeaks.py
     algorithms/GenerateGroupingSNSInelastic.py
+    algorithms/GenerateLogbook.py
     algorithms/GetEiT0atSNS.py
     algorithms/GetIPTS.py
     algorithms/GetLiveInstrumentValue.py
@@ -81,6 +82,7 @@ set(PYTHON_PLUGINS
     algorithms/HB3AFindPeaks.py
     algorithms/HB3AIntegratePeaks.py
     algorithms/HB3APredictPeaks.py
+    algorithms/HFIRCalculateGoniometer.py
     algorithms/HFIRSANS2Wavelength.py
     algorithms/IndexSatellitePeaks.py
     algorithms/IndirectTransmission.py
@@ -139,6 +141,7 @@ set(PYTHON_PLUGINS
     algorithms/PDConvertReciprocalSpace.py
     algorithms/PDToGUDRUN.py
     algorithms/PDToPDFgetN.py
+    algorithms/PeakMatching.py
     algorithms/PearlMCAbsorption.py
     algorithms/PEARLTransfit.py
     algorithms/PoldiCreatePeaksFromFile.py
@@ -229,6 +232,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/IndirectFlatPlateAbsorption.py
     algorithms/WorkflowAlgorithms/IndirectFlatPlateAbsorption2.py
     algorithms/WorkflowAlgorithms/IndirectILLEnergyTransfer.py
+    algorithms/WorkflowAlgorithms/IndirectILLReductionDIFF.py
     algorithms/WorkflowAlgorithms/IndirectILLReductionFWS.py
     algorithms/WorkflowAlgorithms/IndirectILLReductionQENS.py
     algorithms/WorkflowAlgorithms/IndirectQuickRun.py

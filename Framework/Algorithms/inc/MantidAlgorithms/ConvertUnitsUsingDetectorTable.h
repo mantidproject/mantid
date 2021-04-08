@@ -19,9 +19,7 @@ namespace Algorithms {
   values
   rather than those given by the instrument geometry.
 */
-class MANTID_ALGORITHMS_DLL ConvertUnitsUsingDetectorTable
-    : public ConvertUnits,
-      public API::DeprecatedAlgorithm {
+class MANTID_ALGORITHMS_DLL ConvertUnitsUsingDetectorTable : public ConvertUnits, public API::DeprecatedAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -39,9 +37,8 @@ private:
 
   /// Convert the workspace units using TOF as an intermediate step in the
   /// conversion
-  API::MatrixWorkspace_sptr
-  convertViaTOF(Kernel::Unit_const_sptr fromUnit,
-                API::MatrixWorkspace_const_sptr inputWS) override;
+  API::MatrixWorkspace_sptr convertViaTOF(Kernel::Unit_const_sptr fromUnit,
+                                          API::MatrixWorkspace_const_sptr inputWS) override;
 };
 
 } // namespace Algorithms

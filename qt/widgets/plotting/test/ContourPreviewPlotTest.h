@@ -17,10 +17,8 @@ using namespace MantidQt::MantidWidgets;
 
 namespace {
 
-MatrixWorkspace_sptr createMatrixWorkspace(int numberOfHistograms,
-                                           int numberOfBoundaries = 4) {
-  return WorkspaceCreationHelper::create2DWorkspace(numberOfHistograms,
-                                                    numberOfBoundaries);
+MatrixWorkspace_sptr createMatrixWorkspace(int numberOfHistograms, int numberOfBoundaries = 4) {
+  return WorkspaceCreationHelper::create2DWorkspace(numberOfHistograms, numberOfBoundaries);
 }
 
 } // namespace
@@ -28,29 +26,21 @@ MatrixWorkspace_sptr createMatrixWorkspace(int numberOfHistograms,
 /// Unit tests for ContourPreviewPlot
 class ContourPreviewPlotTest : public CxxTest::TestSuite {
 public:
-  static ContourPreviewPlotTest *createSuite() {
-    return new ContourPreviewPlotTest();
-  }
+  static ContourPreviewPlotTest *createSuite() { return new ContourPreviewPlotTest(); }
 
   static void destroySuite(ContourPreviewPlotTest *suite) { delete suite; }
 
-  void setUp() override {
-    m_contourPlot = std::make_unique<ContourPreviewPlot>();
-  }
+  void setUp() override { m_contourPlot = std::make_unique<ContourPreviewPlot>(); }
 
   void tearDown() override { m_contourPlot.reset(); }
 
-  void
-  test_that_a_ContourPreviewPlot_is_instantiated_without_an_active_workspace() {
+  void test_that_a_ContourPreviewPlot_is_instantiated_without_an_active_workspace() {
     TS_ASSERT(!m_contourPlot->getActiveWorkspace());
   }
 
-  void test_that_getPlot2D_will_get_the_contour_plot() {
-    TS_ASSERT(m_contourPlot->getPlot2D());
-  }
+  void test_that_getPlot2D_will_get_the_contour_plot() { TS_ASSERT(m_contourPlot->getPlot2D()); }
 
-  void
-  test_that_setWorkspace_will_set_the_active_workspace_for_the_contour_plot() {
+  void test_that_setWorkspace_will_set_the_active_workspace_for_the_contour_plot() {
     auto const workspace = createMatrixWorkspace(3);
 
     m_contourPlot->setWorkspace(workspace);

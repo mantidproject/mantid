@@ -58,9 +58,7 @@ std::string tidyWorkspaceName(const std::string &s) {
  * @param[in] ioMapping input/output property lookup table
  * @throw std::runtime_error in case of errorneous entries in `table`
  */
-template <typename MAP>
-void cleanPropertyTable(const ITableWorkspace_sptr &table,
-                        const MAP &ioMapping) {
+template <typename MAP> void cleanPropertyTable(const ITableWorkspace_sptr &table, const MAP &ioMapping) {
   // Some output columns may be processed several times, but this should
   // not be a serious performance hit.
   for (const auto &ioPair : ioMapping) {
@@ -92,15 +90,14 @@ void cleanPropertyTable(const ITableWorkspace_sptr &table,
 DECLARE_ALGORITHM(WorkflowAlgorithmRunner)
 
 void WorkflowAlgorithmRunner::init() {
-  declareProperty(PropertyNames::ALGORITHM, "",
-                  std::make_shared<MandatoryValidator<std::string>>(),
+  declareProperty(PropertyNames::ALGORITHM, "", std::make_shared<MandatoryValidator<std::string>>(),
                   "Name of the algorithm to run");
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      PropertyNames::SETUP_TABLE.c_str(), "", Direction::Input),
-                  "Table workspace containing the setup of the runs.");
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      PropertyNames::IO_MAP.c_str(), "", Direction::Input),
-                  "Table workspace mapping algorithm outputs to inputs.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(PropertyNames::SETUP_TABLE.c_str(), "", Direction::Input),
+      "Table workspace containing the setup of the runs.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(PropertyNames::IO_MAP.c_str(), "", Direction::Input),
+      "Table workspace mapping algorithm outputs to inputs.");
 }
 
 void WorkflowAlgorithmRunner::exec() {
@@ -110,8 +107,7 @@ void WorkflowAlgorithmRunner::exec() {
   ITableWorkspace_sptr ioMappingTable = getProperty(PropertyNames::IO_MAP);
   if (ioMappingTable->rowCount() != 1) {
     throw std::runtime_error("Row count in " + PropertyNames::IO_MAP + " is " +
-                             std::to_string(ioMappingTable->rowCount()) +
-                             ", not 1.");
+                             std::to_string(ioMappingTable->rowCount()) + ", not 1.");
   }
   // Transform ioMappingTable to a real lookup table (ioMap) and check for
   // consistency.
@@ -121,15 +117,13 @@ void WorkflowAlgorithmRunner::exec() {
     const auto &inputPropertyName = ioMappingTable->getColumn(col)->name();
     const auto &outputPropertyName = ioMappingTable->String(0, col);
     if (!outputPropertyName.empty()) {
-      if (std::find(inputPropertyNames.cbegin(), inputPropertyNames.cend(),
-                    outputPropertyName) != inputPropertyNames.cend()) {
-        throw std::runtime_error("Property " + outputPropertyName +
-                                 " linked to " + inputPropertyName +
+      if (std::find(inputPropertyNames.cbegin(), inputPropertyNames.cend(), outputPropertyName) !=
+          inputPropertyNames.cend()) {
+        throw std::runtime_error("Property " + outputPropertyName + " linked to " + inputPropertyName +
                                  " is also an input property.");
       }
       if (ioMap.find(inputPropertyName) != ioMap.end()) {
-        throw std::runtime_error("Cannot assign more than one output to " +
-                                 inputPropertyName + '.');
+        throw std::runtime_error("Cannot assign more than one output to " + inputPropertyName + '.');
       }
       ioMap[inputPropertyName] = outputPropertyName;
     }
@@ -146,8 +140,7 @@ void WorkflowAlgorithmRunner::exec() {
   auto &algorithmFactory = AlgorithmFactory::Instance();
   while (!queue.empty()) {
     const auto row = queue.front();
-    auto algorithm = algorithmFactory.create(
-        algorithmName, algorithmFactory.highestVersion(algorithmName));
+    auto algorithm = algorithmFactory.create(algorithmName, algorithmFactory.highestVersion(algorithmName));
     algorithm->initialize();
     if (!algorithm->isInitialized()) {
       throw std::runtime_error("Workflow algorithm failed to initialise.");
@@ -177,13 +170,11 @@ void WorkflowAlgorithmRunner::exec() {
           const auto &value = propertyTable->cell<V3D>(row, col);
           algorithm->setProperty(propertyName, value);
         } else {
-          throw std::runtime_error("Unimplemented column type in " +
-                                   PropertyNames::SETUP_TABLE + ": " +
+          throw std::runtime_error("Unimplemented column type in " + PropertyNames::SETUP_TABLE + ": " +
                                    valueType.name() + '.');
         }
       } catch (std::invalid_argument &e) {
-        throw std::runtime_error("While setting properties for algorithm " +
-                                 algorithmName + ": " + e.what());
+        throw std::runtime_error("While setting properties for algorithm " + algorithmName + ": " + e.what());
       }
     }
     algorithm->execute();
@@ -208,15 +199,13 @@ void WorkflowAlgorithmRunner::exec() {
  * @throw std::runtime_error in several errorneous cases
  */
 template <typename QUEUE, typename MAP>
-void WorkflowAlgorithmRunner::configureRow(
-    ITableWorkspace_sptr setupTable, ITableWorkspace_sptr propertyTable,
-    const size_t currentRow, QUEUE &queue, const MAP &ioMap,
-    std::shared_ptr<std::unordered_set<size_t>> rowsBeingQueued) const {
+void WorkflowAlgorithmRunner::configureRow(ITableWorkspace_sptr setupTable, ITableWorkspace_sptr propertyTable,
+                                           const size_t currentRow, QUEUE &queue, const MAP &ioMap,
+                                           std::shared_ptr<std::unordered_set<size_t>> rowsBeingQueued) const {
   // This method works recursively with regards to dependency resolution.
 
   if (currentRow > setupTable->rowCount()) {
-    throw std::runtime_error("Current row " + std::to_string(currentRow) +
-                             " out of task table bounds " +
+    throw std::runtime_error("Current row " + std::to_string(currentRow) + " out of task table bounds " +
                              std::to_string(setupTable->rowCount()) + '.');
   }
 
@@ -242,13 +231,11 @@ void WorkflowAlgorithmRunner::configureRow(
   // 3b. Configure propertyTable for currentRow by adding the correct
   // workspace names to input/output columns.
   for (const auto &ioPair : ioMap) {
-    const auto &outputId =
-        setupTable->getRef<std::string>(ioPair.first, currentRow);
+    const auto &outputId = setupTable->getRef<std::string>(ioPair.first, currentRow);
     if (!outputId.empty()) {
       if (isHardCodedWorkspaceName(outputId)) {
         // Handle hard-coded input.
-        propertyTable->getRef<std::string>(ioPair.first, currentRow) =
-            tidyWorkspaceName(outputId);
+        propertyTable->getRef<std::string>(ioPair.first, currentRow) = tidyWorkspaceName(outputId);
       } else {
         // If input is not hard-coded, we have a dependency.
         // Find the source row.
@@ -256,30 +243,23 @@ void WorkflowAlgorithmRunner::configureRow(
         try {
           setupTable->find(outputId, outputRow, 0);
         } catch (std::out_of_range &) {
-          throw std::runtime_error(
-              "Identifier \"" + outputId + "\" not found in " +
-              PropertyNames::SETUP_TABLE + " (referenced in row " +
-              std::to_string(currentRow) + ", column \"" + ioPair.first +
-              "\").");
+          throw std::runtime_error("Identifier \"" + outputId + "\" not found in " + PropertyNames::SETUP_TABLE +
+                                   " (referenced in row " + std::to_string(currentRow) + ", column \"" + ioPair.first +
+                                   "\").");
         }
         // Configure the source row and recursively the rows it depends on.
-        configureRow(setupTable, propertyTable, outputRow, queue, ioMap,
-                     rowsBeingQueued);
+        configureRow(setupTable, propertyTable, outputRow, queue, ioMap, rowsBeingQueued);
         const auto outputCol = ioPair.second;
-        auto outputWorkspaceName =
-            setupTable->getRef<std::string>(outputCol, outputRow);
+        auto outputWorkspaceName = setupTable->getRef<std::string>(outputCol, outputRow);
         if (outputWorkspaceName.empty()) {
-          throw std::runtime_error("No source workspace name found for " +
-                                   ioPair.first + '.');
+          throw std::runtime_error("No source workspace name found for " + ioPair.first + '.');
         }
         // Handle forced output.
         if (isHardCodedWorkspaceName(outputWorkspaceName)) {
           outputWorkspaceName = tidyWorkspaceName(outputWorkspaceName);
         }
-        propertyTable->getRef<std::string>(ioPair.first, currentRow) =
-            outputWorkspaceName;
-        propertyTable->getRef<std::string>(outputCol, outputRow) =
-            outputWorkspaceName;
+        propertyTable->getRef<std::string>(ioPair.first, currentRow) = outputWorkspaceName;
+        propertyTable->getRef<std::string>(outputCol, outputRow) = outputWorkspaceName;
       }
     }
   }

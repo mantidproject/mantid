@@ -41,7 +41,8 @@ class FlatPlateTest(systemtesting.MantidSystemTest):
             ContainerBackThickness=0.02,
             ContainerChemicalFormula='V',
             ContainerDensity=6.0,
-            CorrectionsWorkspace='flat_plate_corr'
+            CorrectionsWorkspace='flat_plate_corr',
+            EventsPerPoint = 5000
         )
 
 
@@ -76,7 +77,8 @@ class CylinderTest(systemtesting.MantidSystemTest):
             ContainerRadius=0.22,
             ContainerChemicalFormula='V',
             ContainerDensity=6.0,
-            CorrectionsWorkspace='cylinder_corr'
+            CorrectionsWorkspace='cylinder_corr',
+            EventsPerPoint=5000
         )
 
 
@@ -114,5 +116,5 @@ class AnnulusTest(systemtesting.MantidSystemTest):
             ContainerChemicalFormula='V',
             ContainerDensity=6.0,
             CorrectionsWorkspace='annulus_corr',
-            EventsPerPoint=5000
+            EventsPerPoint=10000
         )

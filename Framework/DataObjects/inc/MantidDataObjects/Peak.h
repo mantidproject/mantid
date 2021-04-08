@@ -35,22 +35,16 @@ namespace DataObjects {
 class DLLExport Peak : public BasePeak {
 public:
   Peak();
-  Peak(const Geometry::Instrument_const_sptr &m_inst,
-       const Mantid::Kernel::V3D &QLabFrame,
+  Peak(const Geometry::Instrument_const_sptr &m_inst, const Mantid::Kernel::V3D &QLabFrame,
        boost::optional<double> detectorDistance = boost::none);
-  Peak(const Geometry::Instrument_const_sptr &m_inst,
-       const Mantid::Kernel::V3D &QSampleFrame,
-       const Mantid::Kernel::Matrix<double> &goniometer,
-       boost::optional<double> detectorDistance = boost::none);
-  Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
-       double m_Wavelength);
-  Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
-       double m_Wavelength, const Mantid::Kernel::V3D &HKL);
-  Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
-       double m_Wavelength, const Mantid::Kernel::V3D &HKL,
-       const Mantid::Kernel::Matrix<double> &goniometer);
-  Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering,
-       double m_Wavelength);
+  Peak(const Geometry::Instrument_const_sptr &m_inst, const Mantid::Kernel::V3D &QSampleFrame,
+       const Mantid::Kernel::Matrix<double> &goniometer, boost::optional<double> detectorDistance = boost::none);
+  Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID, double m_Wavelength);
+  Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID, double m_Wavelength,
+       const Mantid::Kernel::V3D &HKL);
+  Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID, double m_Wavelength,
+       const Mantid::Kernel::V3D &HKL, const Mantid::Kernel::Matrix<double> &goniometer);
+  Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering, double m_Wavelength);
 
   /// Copy constructor
   Peak(const Peak &other);
@@ -74,8 +68,7 @@ public:
   explicit Peak(const Geometry::IPeak &ipeak);
 
   // Construct a peak from LeanPeak
-  Peak(const Mantid::DataObjects::LeanElasticPeak &lpeak,
-       const Geometry::Instrument_const_sptr &inst,
+  Peak(const Mantid::DataObjects::LeanElasticPeak &lpeak, const Geometry::Instrument_const_sptr &inst,
        boost::optional<double> detectorDistance = boost::none);
 
   void setDetectorID(int id);
@@ -85,28 +78,30 @@ public:
   const std::set<int> &getContributingDetIDs() const;
 
   void setInstrument(const Geometry::Instrument_const_sptr &inst);
-  Geometry::IDetector_const_sptr getDetector() const override;
+  Geometry::IDetector_const_sptr getDetector() const;
   Geometry::Instrument_const_sptr getInstrument() const;
-  std::shared_ptr<const Geometry::ReferenceFrame>
-  getReferenceFrame() const override;
+  std::shared_ptr<const Geometry::ReferenceFrame> getReferenceFrame() const override;
+
+  int getCol() const;
+  void setCol(int col);
+
+  int getRow() const;
+  void setRow(int row);
+
+  std::string getBankName() const;
+  void setBankName(std::string bankName);
 
   bool findDetector();
   bool findDetector(const Geometry::InstrumentRayTracer &tracer);
 
-  void setSamplePos(double samX, double samY, double samZ) override;
-  void setSamplePos(const Mantid::Kernel::V3D &XYZ) override;
-
   Mantid::Kernel::V3D getQLabFrame() const override;
   Mantid::Kernel::V3D getQSampleFrame() const override;
-  Mantid::Kernel::V3D getDetectorPosition() const override;
-  Mantid::Kernel::V3D getDetectorPositionNoCheck() const override;
+  Mantid::Kernel::V3D getDetectorPosition() const;
+  Mantid::Kernel::V3D getDetectorPositionNoCheck() const;
 
-  void setQSampleFrame(
-      const Mantid::Kernel::V3D &QSampleFrame,
-      boost::optional<double> detectorDistance = boost::none) override;
-  void
-  setQLabFrame(const Mantid::Kernel::V3D &qLab,
-               boost::optional<double> detectorDistance = boost::none) override;
+  void setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
+                       boost::optional<double> detectorDistance = boost::none) override;
+  void setQLabFrame(const Mantid::Kernel::V3D &qLab, boost::optional<double> detectorDistance = boost::none) override;
 
   void setWavelength(double wavelength) override;
   double getWavelength() const override;
@@ -121,8 +116,7 @@ public:
   void setInitialEnergy(double m_initialEnergy) override;
   void setFinalEnergy(double m_finalEnergy) override;
 
-  virtual Mantid::Kernel::V3D getDetPos() const override;
-  virtual Mantid::Kernel::V3D getSamplePos() const override;
+  virtual Mantid::Kernel::V3D getDetPos() const;
   double getL1() const override;
   double getL2() const override;
 
@@ -135,14 +129,22 @@ public:
   double getValueByColName(std::string colName) const override;
 
 private:
-  bool findDetector(const Mantid::Kernel::V3D &beam,
-                    const Geometry::InstrumentRayTracer &tracer);
+  bool findDetector(const Mantid::Kernel::V3D &beam, const Geometry::InstrumentRayTracer &tracer);
 
   /// Shared pointer to the instrument (for calculating some values )
   Geometry::Instrument_const_sptr m_inst;
 
   /// Detector pointed to
   Geometry::IDetector_const_sptr m_det;
+
+  /// Name of the parent bank
+  std::string m_bankName;
+
+  /// Cached row in the detector
+  int m_row;
+
+  /// Cached column in the detector
+  int m_col;
 
   /// ID of the detector
   int m_detectorID;
@@ -155,8 +157,7 @@ private:
 
   /// Cached source position
   Mantid::Kernel::V3D sourcePos;
-  /// Cached sample position
-  Mantid::Kernel::V3D samplePos;
+
   /// Cached detector position
   Mantid::Kernel::V3D detPos;
 

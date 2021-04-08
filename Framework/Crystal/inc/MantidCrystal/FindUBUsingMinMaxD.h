@@ -18,8 +18,7 @@ namespace Crystal {
     @author Dennis Mikkelson(adapted from Andrei Savici's CalculateUMatrix)
     @date   2011-08-17
   */
-class MANTID_CRYSTAL_DLL FindUBUsingMinMaxD : public API::Algorithm,
-                                              public API::DeprecatedAlgorithm {
+class MANTID_CRYSTAL_DLL FindUBUsingMinMaxD : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   FindUBUsingMinMaxD();
 
@@ -29,8 +28,7 @@ public:
   /// Algorithm's version for identification
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return {"SetUB", "FindUBUsingFFT", "FindUBUsingIndexedPeaks",
-            "FindUBUsingLatticeParameters"};
+    return {"SetUB", "FindUBUsingFFT", "FindUBUsingIndexedPeaks", "FindUBUsingLatticeParameters"};
   }
 
   /// Algorithm's category for identification

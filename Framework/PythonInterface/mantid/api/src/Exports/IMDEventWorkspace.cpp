@@ -18,8 +18,8 @@ GET_POINTER_SPECIALIZATION(IMDEventWorkspace)
 
 void export_IMDEventWorkspace() {
   // IMDEventWorkspace class
-  class_<IMDEventWorkspace, bases<IMDWorkspace, MultipleExperimentInfos>,
-         boost::noncopyable>("IMDEventWorkspace", no_init)
+  class_<IMDEventWorkspace, bases<IMDWorkspace, MultipleExperimentInfos>, boost::noncopyable>("IMDEventWorkspace",
+                                                                                              no_init)
       .def("getNPoints", &IMDEventWorkspace::getNPoints, arg("self"),
            "Returns the total number of points (events) in this "
            ":class:`~mantid.api.Workspace`")
@@ -28,19 +28,14 @@ void export_IMDEventWorkspace() {
            "Returns the number of dimensions in this "
            ":class:`~mantid.api.Workspace`")
 
-      .def("getBoxController",
-           (BoxController_sptr(IMDEventWorkspace::*)()) &
-               IMDEventWorkspace::getBoxController,
+      .def("getBoxController", (BoxController_sptr(IMDEventWorkspace::*)()) & IMDEventWorkspace::getBoxController,
            arg("self"),
            "Returns the :class:`~mantid.api.BoxController` used in this "
            ":class:`~mantid.api.Workspace`")
-      .def("setDisplayNormalization",
-           &IMDEventWorkspace::setDisplayNormalization,
-           (arg("self"), arg("normalization")),
+      .def("setDisplayNormalization", &IMDEventWorkspace::setDisplayNormalization, (arg("self"), arg("normalization")),
            "Sets the visual normalization of"
            " the :class:`~mantid.api.Workspace`.")
-      .def("setDisplayNormalizationHisto",
-           &IMDEventWorkspace::setDisplayNormalizationHisto,
+      .def("setDisplayNormalizationHisto", &IMDEventWorkspace::setDisplayNormalizationHisto,
            (arg("self"), arg("normalization")),
            "For :class:`~mantid.api.IMDEventWorkspace` s sets"
            " the visual normalization of dervied "

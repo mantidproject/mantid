@@ -21,8 +21,7 @@ namespace // <anonymous>
 /// Typedef the map of type_info -> handler objects. We store
 /// boost::python::type_info objects so that they work across DLL boundaries
 /// unlike std::type_info objects
-using TypeIDMap = std::map<const boost::python::type_info,
-                           std::shared_ptr<PropertyValueHandler>>;
+using TypeIDMap = std::map<const boost::python::type_info, std::shared_ptr<PropertyValueHandler>>;
 
 /**
  * Returns a reference to the static type map
@@ -42,8 +41,8 @@ void TypeRegistry::registerBuiltins() {
 // -- Register a handler for each basic type and vector of each basic type +
 // std::string --
 // macro helps with keeping information in one place
-#define SUBSCRIBE_HANDLER(Type)                                                \
-  subscribe<TypedPropertyValueHandler<Type>>();                                \
+#define SUBSCRIBE_HANDLER(Type)                                                                                        \
+  subscribe<TypedPropertyValueHandler<Type>>();                                                                        \
   subscribe<SequenceTypeHandler<std::vector<Type>>>();
 
   // unsigned ints
@@ -71,18 +70,15 @@ void TypeRegistry::registerBuiltins() {
  * Ownership is transferred here
  * @throws std::invalid_argument if one already exists
  */
-void TypeRegistry::subscribe(const std::type_info &typeObject,
-                             PropertyValueHandler *handler) {
+void TypeRegistry::subscribe(const std::type_info &typeObject, PropertyValueHandler *handler) {
   TypeIDMap &typeHandlers = typeRegistry();
   boost::python::type_info typeInfo(typeObject);
   if (typeHandlers.find(typeInfo) == typeHandlers.end()) {
-    typeHandlers.emplace(typeInfo,
-                         std::shared_ptr<PropertyValueHandler>(handler));
+    typeHandlers.emplace(typeInfo, std::shared_ptr<PropertyValueHandler>(handler));
   } else {
-    throw std::invalid_argument(
-        std::string("TypeRegistry::subscribe() - A handler has already "
-                    "registered for type '") +
-        typeInfo.name() + "'");
+    throw std::invalid_argument(std::string("TypeRegistry::subscribe() - A handler has already "
+                                            "registered for type '") +
+                                typeInfo.name() + "'");
   }
 }
 
@@ -92,18 +88,15 @@ void TypeRegistry::subscribe(const std::type_info &typeObject,
  * @returns A pointer to a PropertyValueHandler
  * @throws std::invalid_argument if one is not registered
  */
-const PropertyValueHandler &
-TypeRegistry::retrieve(const std::type_info &typeObject) {
+const PropertyValueHandler &TypeRegistry::retrieve(const std::type_info &typeObject) {
   TypeIDMap &typeHandlers = typeRegistry();
-  TypeIDMap::const_iterator itr =
-      typeHandlers.find(boost::python::type_info(typeObject));
+  TypeIDMap::const_iterator itr = typeHandlers.find(boost::python::type_info(typeObject));
   if (itr != typeHandlers.end()) {
     return *(itr->second);
   } else {
-    throw std::invalid_argument(
-        std::string("TypeRegistry::retrieve(): No PropertyValueHandler "
-                    "registered for type '") +
-        boost::python::type_info(typeObject).name() + "'");
+    throw std::invalid_argument(std::string("TypeRegistry::retrieve(): No PropertyValueHandler "
+                                            "registered for type '") +
+                                boost::python::type_info(typeObject).name() + "'");
   }
 }
 } // namespace Registry

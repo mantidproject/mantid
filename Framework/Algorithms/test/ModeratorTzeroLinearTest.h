@@ -26,14 +26,12 @@ using Mantid::HistogramData::LinearGenerator;
 using Mantid::Types::Event::TofEvent;
 
 namespace {
-void addToInstrument(const MatrixWorkspace_sptr &testWS,
-                     const bool &add_deltaE_mode = false,
+void addToInstrument(const MatrixWorkspace_sptr &testWS, const bool &add_deltaE_mode = false,
                      const bool &add_t0_formula = false) {
   const double evalue(2.082); // energy corresponding to the first order Bragg
                               // peak in the analyzers
   if (add_deltaE_mode) {
-    testWS->instrumentParameters().addString(
-        testWS->getInstrument()->getComponentID(), "deltaE-mode", "indirect");
+    testWS->instrumentParameters().addString(testWS->getInstrument()->getComponentID(), "deltaE-mode", "indirect");
     auto &pmap = testWS->instrumentParameters();
     const auto &spectrumInfo = testWS->spectrumInfo();
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
@@ -41,12 +39,10 @@ void addToInstrument(const MatrixWorkspace_sptr &testWS,
     }
   }
   if (add_t0_formula) {
-    testWS->instrumentParameters().addDouble(
-        testWS->getInstrument()->getComponentID(),
-        "Moderator.TimeZero.gradient", 11.0);
-    testWS->instrumentParameters().addDouble(
-        testWS->getInstrument()->getComponentID(),
-        "Moderator.TimeZero.intercept", -5.0);
+    testWS->instrumentParameters().addDouble(testWS->getInstrument()->getComponentID(), "Moderator.TimeZero.gradient",
+                                             11.0);
+    testWS->instrumentParameters().addDouble(testWS->getInstrument()->getComponentID(), "Moderator.TimeZero.intercept",
+                                             -5.0);
   }
 }
 } // namespace
@@ -55,9 +51,7 @@ class ModeratorTzeroLinearTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ModeratorTzeroLinearTest *createSuite() {
-    return new ModeratorTzeroLinearTest();
-  }
+  static ModeratorTzeroLinearTest *createSuite() { return new ModeratorTzeroLinearTest(); }
   static void destroySuite(ModeratorTzeroLinearTest *suite) { delete suite; }
 
   // instruments to test:
@@ -83,8 +77,7 @@ public:
     alg.setProperty("OutputWorkspace", "testWS");
     alg.setRethrows(true); // necessary, otherwise the algorithm will catch all
                            // exceptions and not return them
-    TS_ASSERT_THROWS(alg.execute(),
-                     const Exception::InstrumentDefinitionError &);
+    TS_ASSERT_THROWS(alg.execute(), const Exception::InstrumentDefinitionError &);
     AnalysisDataService::Instance().remove("testWS");
   }
 
@@ -99,8 +92,7 @@ public:
     alg.setProperty("OutputWorkspace", "testWS");
     alg.setRethrows(true); // necessary, otherwise the algorithm will catch all
                            // exceptions and not return them
-    TS_ASSERT_THROWS(alg.execute(),
-                     const Exception::InstrumentDefinitionError &);
+    TS_ASSERT_THROWS(alg.execute(), const Exception::InstrumentDefinitionError &);
     AnalysisDataService::Instance().remove("testWS");
   }
 
@@ -131,8 +123,7 @@ public:
     // Instrument parameters are not used because the manual values override
     // Thus, TOFs in outWS2 should be the same as outWS1.
     // Note: instruments will be different
-    auto checkAlg =
-        AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
+    auto checkAlg = AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
     checkAlg->initialize();
     checkAlg->setChild(true);
     checkAlg->setProperty("Workspace1", "outWS1");
@@ -200,17 +191,13 @@ private:
   MatrixWorkspace_sptr CreateHistogramWorkspace() {
     const int numHists(3);
     const int numBins(4000);
-    MatrixWorkspace_sptr testWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            numHists, numBins, true);
-    testWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    MatrixWorkspace_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(numHists, numBins, true);
+    testWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
     BinEdges xdata(numBins + 1, LinearGenerator(0.0, 4.0));
     const double peakHeight(1000), peakCentre(7000.), sigmaSq(1000 * 1000.);
     auto &Y = testWS->mutableY(0);
     for (int ibin = 0; ibin < numBins; ++ibin) {
-      Y[ibin] =
-          peakHeight * exp(-0.5 * pow(xdata[ibin] - peakCentre, 2.) / sigmaSq);
+      Y[ibin] = peakHeight * exp(-0.5 * pow(xdata[ibin] - peakCentre, 2.) / sigmaSq);
     }
     for (int ihist = 0; ihist < numHists; ihist++)
       testWS->setBinEdges(ihist, xdata);
@@ -221,10 +208,8 @@ private:
     const int numBanks(1), numPixels(1), numBins(4000);
     const bool clearEvents(true);
     EventWorkspace_sptr testWS =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
-            numBanks, numPixels, clearEvents);
-    testWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("TOF");
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(numBanks, numPixels, clearEvents);
+    testWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
     const size_t numHists = testWS->getNumberHistograms();
     for (size_t ihist = 0; ihist < numHists; ++ihist) {
       EventList &evlist = testWS->getSpectrum(ihist);
@@ -245,25 +230,18 @@ class ModeratorTzeroLinearTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ModeratorTzeroLinearTestPerformance *createSuite() {
-    return new ModeratorTzeroLinearTestPerformance();
-  }
+  static ModeratorTzeroLinearTestPerformance *createSuite() { return new ModeratorTzeroLinearTestPerformance(); }
   static void destroySuite(ModeratorTzeroLinearTestPerformance *suite) {
     AnalysisDataService::Instance().clear();
     delete suite;
   }
 
   ModeratorTzeroLinearTestPerformance() {
-    input = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        10000, 1000, true);
-    input->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    input = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10000, 1000, true);
+    input->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
-    inputEvent =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 100,
-                                                                        true);
-    inputEvent->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    inputEvent = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 100, true);
+    inputEvent->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
   }
 
   void testExec() {

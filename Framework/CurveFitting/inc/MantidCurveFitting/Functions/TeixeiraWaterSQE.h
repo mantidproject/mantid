@@ -36,10 +36,8 @@ class MANTID_CURVEFITTING_DLL TeixeiraWaterSQE : public FunctionQDepends {
 public:
   std::string name() const override { return "TeixeiraWaterSQE"; }
   const std::string category() const override { return "QuasiElastic"; }
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
-  void functionDeriv1D(Mantid::API::Jacobian *jacobian, const double *xValues,
-                       const size_t nData) override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
+  void functionDeriv1D(Mantid::API::Jacobian *jacobian, const double *xValues, const size_t nData) override;
 
 protected:
   void declareParameters() override;

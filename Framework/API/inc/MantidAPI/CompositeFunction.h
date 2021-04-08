@@ -53,18 +53,16 @@ public:
   /// Sets the workspace for each member function
   void setWorkspace(std::shared_ptr<const Workspace> ws) override;
   /// Set matrix workspace
-  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace,
-                          size_t wi, double startX, double endX) override;
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX,
+                          double endX) override;
 
   /// Function you want to fit to.
-  void function(const FunctionDomain &domain,
-                FunctionValues &values) const override;
+  void function(const FunctionDomain &domain, FunctionValues &values) const override;
   /// Derivatives of function with respect to active parameters
   void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) override;
 
   /// Set i-th parameter
-  void setParameter(size_t, const double &value,
-                    bool explicitlySet = true) override;
+  void setParameter(size_t, const double &value, bool explicitlySet = true) override;
   /// Set i-th parameter description
   void setParameterDescription(size_t, const std::string &description) override;
   /// Get i-th parameter
@@ -72,11 +70,9 @@ public:
   /// Get parameter from i-th function, j-th local parameter index
   [[nodiscard]] double getParameter(size_t i, size_t j) const;
   /// Set parameter by name.
-  void setParameter(const std::string &name, const double &value,
-                    bool explicitlySet = true) override;
+  void setParameter(const std::string &name, const double &value, bool explicitlySet = true) override;
   /// Set description of parameter by name.
-  void setParameterDescription(const std::string &name,
-                               const std::string &description) override;
+  void setParameterDescription(const std::string &name, const std::string &description) override;
   /// Get parameter by name.
   [[nodiscard]] double getParameter(const std::string &name) const override;
   /// Check if function has a parameter with this name.
@@ -86,8 +82,7 @@ public:
   /// Return a value of attribute attName
   [[nodiscard]] Attribute getAttribute(const std::string &name) const override;
   // Set an attribute value
-  void setAttribute(const std::string &name,
-                    const API::IFunction::Attribute &value) override;
+  void setAttribute(const std::string &name, const API::IFunction::Attribute &value) override;
   // Register the functions usage
   void registerFunctionUsage(bool internal) override;
   /// Total number of parameters
@@ -96,9 +91,7 @@ public:
   // attributes
   [[nodiscard]] size_t nAttributes() const override;
   // Total number of global attributes, defined at the composite function level
-  [[nodiscard]] size_t nGlobalAttributes() const noexcept {
-    return IFunction::nAttributes();
-  }
+  [[nodiscard]] size_t nGlobalAttributes() const noexcept { return IFunction::nAttributes(); }
   /// Returns the index of parameter name
   [[nodiscard]] size_t parameterIndex(const std::string &name) const override;
   /// Returns the name of parameter i
@@ -134,11 +127,9 @@ public:
   [[nodiscard]] std::string descriptionOfActive(size_t i) const override;
 
   /// Return parameter index from a parameter reference.
-  [[nodiscard]] size_t
-  getParameterIndex(const ParameterReference &ref) const override;
+  [[nodiscard]] size_t getParameterIndex(const ParameterReference &ref) const override;
   /// Get the containing function
-  [[nodiscard]] IFunction_sptr
-  getContainingFunction(const ParameterReference &ref) const;
+  [[nodiscard]] IFunction_sptr getContainingFunction(const ParameterReference &ref) const;
 
   /// Apply the ties
   void applyTies() override;
@@ -161,16 +152,13 @@ public:
   /// Get number of domains required by this function
   [[nodiscard]] size_t getNumberDomains() const override;
   /// Split this function (if needed) into a list of independent functions.
-  [[nodiscard]] std::vector<std::shared_ptr<IFunction>>
-  createEquivalentFunctions() const override;
+  [[nodiscard]] std::vector<std::shared_ptr<IFunction>> createEquivalentFunctions() const override;
   /// Returns true if the composite has at least one of this function.
   [[nodiscard]] bool hasFunction(const std::string &functionName) const;
   /// Returns the pointer to i-th function
   [[nodiscard]] IFunction_sptr getFunction(std::size_t i) const override;
   /// Number of functions
-  [[nodiscard]] std::size_t nFunctions() const override {
-    return m_functions.size();
-  }
+  [[nodiscard]] std::size_t nFunctions() const override { return m_functions.size(); }
 
   /* CompositeFunction own methods */
 
@@ -181,20 +169,16 @@ public:
   /// Replace a function
   void replaceFunction(size_t functionIndex, const IFunction_sptr &f);
   /// Replace a function
-  void replaceFunctionPtr(const IFunction_sptr &f_old,
-                          const IFunction_sptr &f_new);
+  void replaceFunctionPtr(const IFunction_sptr &f_old, const IFunction_sptr &f_new);
   /// Get the first function index with a matching function name
-  [[nodiscard]] std::size_t
-  functionIndex(const std::string &functionName) const;
+  [[nodiscard]] std::size_t functionIndex(const std::string &functionName) const;
   /// Get the function index
   [[nodiscard]] std::size_t functionIndex(std::size_t i) const;
   [[nodiscard]] std::size_t attributeFunctionIndex(std::size_t i) const;
   /// Returns the index of parameter i as it declared in its function
-  [[nodiscard]] size_t parameterLocalIndex(size_t i,
-                                           bool recursive = false) const;
+  [[nodiscard]] size_t parameterLocalIndex(size_t i, bool recursive = false) const;
   /// Returns the name of parameter i as it declared in its function
-  [[nodiscard]] std::string parameterLocalName(size_t i,
-                                               bool recursive = false) const;
+  [[nodiscard]] std::string parameterLocalName(size_t i, bool recursive = false) const;
   /// Check the function.
   void checkFunction();
   /// Remove all member functions
@@ -202,32 +186,23 @@ public:
   /// Returns the number of attributes associated with the function
   virtual size_t nLocalAttributes() const { return 0; }
   /// Returns a list of attribute names
-  virtual std::vector<std::string> getLocalAttributeNames() const {
-    return std::vector<std::string>();
-  }
+  virtual std::vector<std::string> getLocalAttributeNames() const { return std::vector<std::string>(); }
   /// Return a value of attribute attName
-  virtual Attribute getLocalAttribute(size_t i,
-                                      const std::string &attName) const {
+  virtual Attribute getLocalAttribute(size_t i, const std::string &attName) const {
     (void)i;
-    throw std::invalid_argument("Attribute " + attName +
-                                " not found in function " + this->name());
+    throw std::invalid_argument("Attribute " + attName + " not found in function " + this->name());
   }
   /// Set a value to attribute attName
-  virtual void setLocalAttribute(size_t i, const std::string &attName,
-                                 const Attribute &) {
+  virtual void setLocalAttribute(size_t i, const std::string &attName, const Attribute &) {
     (void)i;
-    throw std::invalid_argument("Attribute " + attName +
-                                " not found in function " + this->name());
+    throw std::invalid_argument("Attribute " + attName + " not found in function " + this->name());
   }
   /// Check if attribute attName exists
   virtual bool hasLocalAttribute(const std::string &) const { return false; }
-  template <typename T>
-  void setLocalAttributeValue(size_t i, const std::string &attName,
-                              const T &value) {
+  template <typename T> void setLocalAttributeValue(size_t i, const std::string &attName, const T &value) {
     setLocalAttribute(i, attName, Attribute(value));
   }
-  void setLocalAttributeValue(size_t i, const std::string &attName,
-                              const char *value) {
+  void setLocalAttributeValue(size_t i, const std::string &attName, const char *value) {
     setLocalAttribute(i, attName, Attribute(std::string(value)));
   }
   /// Change status of parameter
@@ -239,15 +214,12 @@ protected:
   /// Function initialization. Declare function parameters in this method.
   void init() override;
   /// Declare a new parameter
-  void declareParameter(const std::string &name, double initValue = 0,
-                        const std::string &description = "") override;
+  void declareParameter(const std::string &name, double initValue = 0, const std::string &description = "") override;
 
   /// Declare a single attribute
-  void declareAttribute(const std::string &name,
-                        const API::IFunction::Attribute &defaultValue);
+  void declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue);
   /// Writes itself into a string
-  std::string writeToString(
-      const std::string &parentLocalAttributesStr = "") const override;
+  std::string writeToString(const std::string &parentLocalAttributesStr = "") const override;
 
   size_t paramOffset(size_t i) const { return m_paramOffsets[i]; }
 
@@ -308,38 +280,30 @@ public:
    * @param iY0 :: The data index offset for a particular function
    * @param iP0 :: The parameter index offset for a particular function
    */
-  PartialJacobian(Jacobian *J, size_t iY0, size_t iP0)
-      : m_J(J), m_iY0(iY0), m_iP0(iP0) {}
+  PartialJacobian(Jacobian *J, size_t iY0, size_t iP0) : m_J(J), m_iY0(iY0), m_iP0(iP0) {}
   /**
    * Overridden Jacobian::set(...).
    * @param iY :: The index of the data point
    * @param iP :: The parameter index of an individual function.
    * @param value :: The derivative value
    */
-  void set(size_t iY, size_t iP, double value) override {
-    m_J->set(m_iY0 + iY, m_iP0 + iP, value);
-  }
+  void set(size_t iY, size_t iP, double value) override { m_J->set(m_iY0 + iY, m_iP0 + iP, value); }
   /**
    * Overridden Jacobian::get(...).
    * @param iY :: The index of the data point
    * @param iP :: The parameter index of an individual function.
    */
-  double get(size_t iY, size_t iP) override {
-    return m_J->get(m_iY0 + iY, m_iP0 + iP);
-  }
+  double get(size_t iY, size_t iP) override { return m_J->get(m_iY0 + iY, m_iP0 + iP); }
   /** Zero all matrix elements.
    */
   void zero() override {
-    throw Kernel::Exception::NotImplementedError(
-        "zero() is not implemented for PartialJacobian");
+    throw Kernel::Exception::NotImplementedError("zero() is not implemented for PartialJacobian");
   }
   /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
    *   @param value :: Value to add
    *   @param iP :: The index of an active parameter.
    */
-  void addNumberToColumn(const double &value, const size_t &iP) override {
-    m_J->addNumberToColumn(value, m_iP0 + iP);
-  }
+  void addNumberToColumn(const double &value, const size_t &iP) override { m_J->addNumberToColumn(value, m_iP0 + iP); }
 };
 
 } // namespace API

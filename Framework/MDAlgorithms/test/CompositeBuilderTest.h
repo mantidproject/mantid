@@ -27,9 +27,7 @@ private:
     ~FakeParameter() { ; }
 
   protected:
-    virtual Mantid::API::ImplicitFunctionParameter *clone() const {
-      return new FakeParameter;
-    }
+    virtual Mantid::API::ImplicitFunctionParameter *clone() const { return new FakeParameter; }
   };
 
   class FakeImplicitFunction : public Mantid::Geometry::MDImplicitFunction {
@@ -61,11 +59,9 @@ public:
     CompositeFunctionBuilder *innerCompBuilder = new CompositeFunctionBuilder;
     innerCompBuilder->addFunctionBuilder(builderA);
     innerCompBuilder->addFunctionBuilder(builderB);
-    boost::scoped_ptr<CompositeFunctionBuilder> outterCompBuilder(
-        new CompositeFunctionBuilder);
+    boost::scoped_ptr<CompositeFunctionBuilder> outterCompBuilder(new CompositeFunctionBuilder);
     outterCompBuilder->addFunctionBuilder(innerCompBuilder);
-    Mantid::Geometry::MDImplicitFunction_sptr topFunc(
-        outterCompBuilder->create());
+    Mantid::Geometry::MDImplicitFunction_sptr topFunc(outterCompBuilder->create());
     // CompositeImplicitFunction* topCompFunc =
     // dynamic_cast<CompositeImplicitFunction*>(topFunc.get());
 

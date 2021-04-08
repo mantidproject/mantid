@@ -27,15 +27,12 @@ const std::string EvaluateFunction::name() const { return "EvaluateFunction"; }
 int EvaluateFunction::version() const { return 1; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string EvaluateFunction::summary() const {
-  return "Evaluate a function on a workspace.";
-}
+const std::string EvaluateFunction::summary() const { return "Evaluate a function on a workspace."; }
 
 //----------------------------------------------------------------------------------------------
 /// Initialize the algorithm's properties.
 void EvaluateFunction::initConcrete() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -60,8 +57,7 @@ void EvaluateFunction::execConcrete() {
   m_function->function(*domain, *values);
 
   // Gnegerate the output workspace
-  auto outputWS = m_domainCreator->createOutputWorkspace("", m_function, domain,
-                                                         values, "");
+  auto outputWS = m_domainCreator->createOutputWorkspace("", m_function, domain, values, "");
 
   // Store the result.
   setProperty("OutputWorkspace", outputWS);

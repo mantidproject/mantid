@@ -16,9 +16,7 @@ using Mantid::Kernel::MersenneTwister;
 class MersenneTwisterTest : public CxxTest::TestSuite {
 
 public:
-  void test_That_Object_Construction_Does_Not_Throw() {
-    TS_ASSERT_THROWS_NOTHING(MersenneTwister(1));
-  }
+  void test_That_Object_Construction_Does_Not_Throw() { TS_ASSERT_THROWS_NOTHING(MersenneTwister(1)); }
 
   void test_That_Next_For_Given_Seed_Returns_Same_Value() {
     size_t seed(212437999);
@@ -55,8 +53,7 @@ public:
     assertSequenceCorrectForSeed_39857239(randGen);
   }
 
-  void
-  test_That_Save_Then_Call_Next_Value_And_Restore_Gives_Sequence_From_Saved_Point() {
+  void test_That_Save_Then_Call_Next_Value_And_Restore_Gives_Sequence_From_Saved_Point() {
     MersenneTwister randGen(1);
     doNextValueCalls(10,
                      randGen); // Move away from start so not the same as reset
@@ -72,8 +69,7 @@ public:
     }
   }
 
-  void
-  test_Second_Restore_Without_A_Save_In_Between_Takes_Generator_Back_To_Saved_Point() {
+  void test_Second_Restore_Without_A_Save_In_Between_Takes_Generator_Back_To_Saved_Point() {
     MersenneTwister randGen(1);
     doNextValueCalls(10,
                      randGen); // Move away from start so not the same as reset
@@ -111,8 +107,7 @@ public:
     }
   }
 
-  void
-  test_That_A_Given_Range_Produces_Numbers_Within_That_Range_For_Doubles() {
+  void test_That_A_Given_Range_Produces_Numbers_Within_That_Range_For_Doubles() {
     long seed(15423894);
     const double start(0.), end(1.);
     MersenneTwister randGen(seed, start, end);
@@ -146,10 +141,8 @@ public:
 
 private:
   void assertSequenceCorrectForSeed_39857239(MersenneTwister &randGen) {
-    double expectedValues[10] = {0.597970068269, 0.923726578038, 0.46738053759,
-                                 0.204503614938, 0.885743656775, 0.532315163407,
-                                 0.849185494256, 0.294648804097, 0.435378050559,
-                                 0.222489577528};
+    double expectedValues[10] = {0.597970068269, 0.923726578038, 0.46738053759,  0.204503614938, 0.885743656775,
+                                 0.532315163407, 0.849185494256, 0.294648804097, 0.435378050559, 0.222489577528};
     // Check 10 numbers
     for (std::size_t i = 0; i < 10; ++i) {
       TS_ASSERT_DELTA(randGen.nextValue(), expectedValues[i], 1e-12);
@@ -157,8 +150,7 @@ private:
     std::cerr << "\n";
   }
 
-  std::vector<double> doNextValueCalls(const unsigned int ncalls,
-                                       MersenneTwister &randGen) {
+  std::vector<double> doNextValueCalls(const unsigned int ncalls, MersenneTwister &randGen) {
     std::vector<double> values(ncalls, 0.0);
     for (unsigned int i = 0; i < ncalls; ++i) {
       values[i] = randGen.nextValue();

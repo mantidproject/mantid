@@ -26,10 +26,8 @@ namespace Functions {
 namespace {
 
 // Does the actual calculation of the magnetisation
-void calculate(double *out, const double *xValues, const size_t nData,
-               const ComplexFortranMatrix &ham, const int nre,
-               const DoubleFortranVector &Hmag, const double T,
-               const double convfact, const bool iscgs) {
+void calculate(double *out, const double *xValues, const size_t nData, const ComplexFortranMatrix &ham, const int nre,
+               const DoubleFortranVector &Hmag, const double T, const double convfact, const bool iscgs) {
   const double beta = 1 / (PhysicalConstants::BoltzmannConstant * T);
   // x-data is the applied field magnitude. We need to recalculate
   // the Zeeman term and diagonalise the Hamiltonian at each x-point.
@@ -58,9 +56,8 @@ void calculate(double *out, const double *xValues, const size_t nData,
 }
 
 // Calculate powder average - Mpowder = (Mx + My + Mz)/3
-void calculate_powder(double *out, const double *xValues, const size_t nData,
-                      const ComplexFortranMatrix &ham, const int nre,
-                      const double T, const double convfact, const bool cgs) {
+void calculate_powder(double *out, const double *xValues, const size_t nData, const ComplexFortranMatrix &ham,
+                      const int nre, const double T, const double convfact, const bool cgs) {
   for (size_t j = 0; j < nData; j++) {
     out[j] = 0.;
   }
@@ -81,8 +78,7 @@ void calculate_powder(double *out, const double *xValues, const size_t nData,
 }
 } // namespace
 
-CrystalFieldMagnetisationBase::CrystalFieldMagnetisationBase()
-    : API::IFunction1D(), m_nre(0) {
+CrystalFieldMagnetisationBase::CrystalFieldMagnetisationBase() : API::IFunction1D(), m_nre(0) {
   declareAttribute("Hdir", Attribute(std::vector<double>{0., 0., 1.}));
   declareAttribute("Temperature", Attribute(1.0));
   declareAttribute("Unit", Attribute("bohr")); // others = "SI", "cgs"
@@ -90,9 +86,7 @@ CrystalFieldMagnetisationBase::CrystalFieldMagnetisationBase()
   declareAttribute("ScaleFactor", Attribute(1.0)); // Only for multi-site use
 }
 
-void CrystalFieldMagnetisationBase::function1D(double *out,
-                                               const double *xValues,
-                                               const size_t nData) const {
+void CrystalFieldMagnetisationBase::function1D(double *out, const double *xValues, const size_t nData) const {
   // Get the field direction
   auto Hdir = getAttribute("Hdir").asVector();
   if (Hdir.size() != 3) {
@@ -100,8 +94,7 @@ void CrystalFieldMagnetisationBase::function1D(double *out,
   }
   auto T = getAttribute("Temperature").asDouble();
   auto powder = getAttribute("powder").asBool();
-  double Hnorm =
-      sqrt(Hdir[0] * Hdir[0] + Hdir[1] * Hdir[1] + Hdir[2] * Hdir[2]);
+  double Hnorm = sqrt(Hdir[0] * Hdir[0] + Hdir[1] * Hdir[1] + Hdir[2] * Hdir[2]);
   DoubleFortranVector H(1, 3);
   if (fabs(Hnorm) > 1.e-6) {
     for (auto i = 0; i < 3; i++) {
@@ -114,9 +107,7 @@ void CrystalFieldMagnetisationBase::function1D(double *out,
   // cgs is in erg/Gauss/mol (emu/mol). The value of uB in erg/G is 1000x in J/T
   // NB. Atomic ("bohr") units gives magnetisation in uB/ion, but other units
   // give the molar magnetisation.
-  double convfact = boost::iequals(unit, "SI")
-                        ? NAMUB
-                        : (boost::iequals(unit, "cgs") ? NAMUB * 1000. : 1.);
+  double convfact = boost::iequals(unit, "SI") ? NAMUB : (boost::iequals(unit, "cgs") ? NAMUB * 1000. : 1.);
   const bool iscgs = boost::iequals(unit, "cgs");
   // Use stored values
   if (powder) {
@@ -135,19 +126,16 @@ void CrystalFieldMagnetisationBase::function1D(double *out,
 DECLARE_FUNCTION(CrystalFieldMagnetisation)
 
 CrystalFieldMagnetisation::CrystalFieldMagnetisation()
-    : CrystalFieldPeaksBase(), CrystalFieldMagnetisationBase(),
-      m_setDirect(false) {}
+    : CrystalFieldPeaksBase(), CrystalFieldMagnetisationBase(), m_setDirect(false) {}
 
 // Sets the base crystal field Hamiltonian matrix
-void CrystalFieldMagnetisation::setHamiltonian(const ComplexFortranMatrix &ham,
-                                               const int nre) {
+void CrystalFieldMagnetisation::setHamiltonian(const ComplexFortranMatrix &ham, const int nre) {
   m_setDirect = true;
   m_ham = ham;
   m_nre = nre;
 }
 
-void CrystalFieldMagnetisation::function1D(double *out, const double *xValues,
-                                           const size_t nData) const {
+void CrystalFieldMagnetisation::function1D(double *out, const double *xValues, const size_t nData) const {
   if (!m_setDirect) {
     DoubleFortranVector en;
     ComplexFortranMatrix wf;
@@ -162,8 +150,7 @@ CrystalFieldMagnetisationCalculation::CrystalFieldMagnetisationCalculation()
     : API::ParamFunction(), CrystalFieldMagnetisationBase() {}
 
 // Sets the base crystal field Hamiltonian matrix
-void CrystalFieldMagnetisationCalculation::setHamiltonian(
-    const ComplexFortranMatrix &ham, const int nre) {
+void CrystalFieldMagnetisationCalculation::setHamiltonian(const ComplexFortranMatrix &ham, const int nre) {
   m_ham = ham;
   m_nre = nre;
 }

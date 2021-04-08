@@ -25,10 +25,8 @@ public:
     return {"CalculateCostFunction", "Fit", "ProfileChiSquared1D"};
   }
   const std::string summary() const override;
-  static void calcChiSquared(const API::IFunction &fun, size_t nParams,
-                             const API::FunctionDomain &domain,
-                             API::FunctionValues &values, double &chiSquared,
-                             double &chiSquaredWeighted, double &dof);
+  static void calcChiSquared(const API::IFunction &fun, size_t nParams, const API::FunctionDomain &domain,
+                             API::FunctionValues &values, double &chiSquared, double &chiSquaredWeighted, double &dof);
 
 private:
   void initConcrete() override;

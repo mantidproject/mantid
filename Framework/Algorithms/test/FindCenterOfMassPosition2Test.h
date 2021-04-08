@@ -24,12 +24,8 @@ using namespace Mantid;
 
 class FindCenterOfMassPosition2Test : public CxxTest::TestSuite {
 public:
-  static FindCenterOfMassPosition2Test *createSuite() {
-    return new FindCenterOfMassPosition2Test();
-  }
-  static void destroySuite(FindCenterOfMassPosition2Test *suite) {
-    delete suite;
-  }
+  static FindCenterOfMassPosition2Test *createSuite() { return new FindCenterOfMassPosition2Test(); }
+  static void destroySuite(FindCenterOfMassPosition2Test *suite) { delete suite; }
 
   /*
    * Generate fake data for which we know what the result should be
@@ -45,8 +41,7 @@ public:
     // Generate sample data as a 2D Gaussian around the defined center
     for (int ix = 0; ix < SANSInstrumentCreationHelper::nBins; ix++) {
       for (int iy = 0; iy < SANSInstrumentCreationHelper::nBins; iy++) {
-        int i = ix * SANSInstrumentCreationHelper::nBins + iy +
-                SANSInstrumentCreationHelper::nMonitors;
+        int i = ix * SANSInstrumentCreationHelper::nBins + iy + SANSInstrumentCreationHelper::nMonitors;
         auto &X = ws->mutableX(i);
         auto &Y = ws->mutableY(i);
         auto &E = ws->mutableE(i);
@@ -57,16 +52,13 @@ public:
         Y[0] = exp(-(dx * dx + dy * dy));
         // Set tube extrema to special values
         if (iy == 0 || iy == SANSInstrumentCreationHelper::nBins - 1)
-          Y[0] =
-              (iy % 2) ? std::nan("") : std::numeric_limits<double>::infinity();
+          Y[0] = (iy % 2) ? std::nan("") : std::numeric_limits<double>::infinity();
         E[0] = 1;
       }
     }
   }
 
-  ~FindCenterOfMassPosition2Test() override {
-    AnalysisDataService::Instance().clear();
-  }
+  ~FindCenterOfMassPosition2Test() override { AnalysisDataService::Instance().clear(); }
 
   void testParameters() {
     Mantid::Algorithms::FindCenterOfMassPosition2 center;
@@ -93,8 +85,7 @@ public:
 
     // Get the resulting table workspace
     Mantid::DataObjects::TableWorkspace_sptr table =
-        AnalysisDataService::Instance()
-            .retrieveWS<Mantid::DataObjects::TableWorkspace>(outputWS);
+        AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>(outputWS);
 
     TS_ASSERT_EQUALS(table->rowCount(), 2);
     TS_ASSERT_EQUALS(table->columnCount(), 2);
@@ -119,16 +110,14 @@ public:
     center.setPropertyValue("CenterX", "0");
     center.setPropertyValue("CenterY", "0");
     center.setPropertyValue("DirectBeam", "0");
-    center.setPropertyValue(
-        "BeamRadius", "0.0075"); // 1.5*0.005, now in meters, not in pixels
+    center.setPropertyValue("BeamRadius", "0.0075"); // 1.5*0.005, now in meters, not in pixels
 
     TS_ASSERT_THROWS_NOTHING(center.execute())
     TS_ASSERT(center.isExecuted())
 
     // Get the resulting table workspace
     Mantid::DataObjects::TableWorkspace_sptr table =
-        AnalysisDataService::Instance()
-            .retrieveWS<Mantid::DataObjects::TableWorkspace>(outputWS);
+        AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>(outputWS);
 
     TS_ASSERT_EQUALS(table->rowCount(), 2);
     TS_ASSERT_EQUALS(table->columnCount(), 2);
@@ -189,8 +178,7 @@ public:
 
     // Get the resulting table workspace
     Mantid::DataObjects::TableWorkspace_sptr table =
-        AnalysisDataService::Instance()
-            .retrieveWS<Mantid::DataObjects::TableWorkspace>(outputWS);
+        AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>(outputWS);
 
     TS_ASSERT_EQUALS(table->rowCount(), 2);
     TS_ASSERT_EQUALS(table->columnCount(), 2);

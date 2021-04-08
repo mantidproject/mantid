@@ -41,23 +41,21 @@ private:
 public:
   FileContentsBuilder()
       : m_DimensionBlock(ImportMDEventWorkspace::DimensionBlockFlag()),
-        m_MDEventsBlock(ImportMDEventWorkspace::MDEventBlockFlag()),
-        m_DimensionEntries("a A U 10\nb B U 11"), m_MDEventEntries("1 1 1 1") {}
+        m_MDEventsBlock(ImportMDEventWorkspace::MDEventBlockFlag()), m_DimensionEntries("a A U 10\nb B U 11"),
+        m_MDEventEntries("1 1 1 1") {}
 
   void setDimensionBlock(const std::string &value) { m_DimensionBlock = value; }
 
   void setMDEventBlock(const std::string &value) { m_MDEventsBlock = value; }
 
-  void setDimensionEntries(const std::string &value) {
-    m_DimensionEntries = value;
-  }
+  void setDimensionEntries(const std::string &value) { m_DimensionEntries = value; }
 
   void setMDEventEntries(const std::string &value) { m_MDEventEntries = value; }
 
   std::string create() const {
     const std::string newline = "\n";
-    return m_DimensionBlock + newline + m_DimensionEntries + newline +
-           m_MDEventsBlock + newline + m_MDEventEntries + newline;
+    return m_DimensionBlock + newline + m_DimensionEntries + newline + m_MDEventsBlock + newline + m_MDEventEntries +
+           newline;
   }
 };
 
@@ -70,11 +68,9 @@ Uses a
 class MDFileObject {
 public:
   /// Create a simple input file.
-  MDFileObject(
-      const FileContentsBuilder &builder = FileContentsBuilder(),
-      const std::string &filename = "test_import_md_event_workspace_file.txt") {
-    Poco::Path path(
-        Mantid::Kernel::ConfigService::Instance().getTempDir().c_str());
+  MDFileObject(const FileContentsBuilder &builder = FileContentsBuilder(),
+               const std::string &filename = "test_import_md_event_workspace_file.txt") {
+    Poco::Path path(Mantid::Kernel::ConfigService::Instance().getTempDir().c_str());
     path.append(filename);
     m_filename = path.toString();
     m_file.open(m_filename.c_str(), std::ios_base::out);
@@ -91,8 +87,7 @@ public:
     if (remove(m_filename.c_str()) != 0)
       // destructors shouldn't throw exceptions so we have to resort to printing
       // an error
-      std::cerr << "~MDFileObject() - Error deleting file '" << m_filename
-                << "'\n";
+      std::cerr << "~MDFileObject() - Error deleting file '" << m_filename << "'\n";
   }
 
 private:
@@ -122,9 +117,7 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ImportMDEventWorkspaceTest *createSuite() {
-    return new ImportMDEventWorkspaceTest();
-  }
+  static ImportMDEventWorkspaceTest *createSuite() { return new ImportMDEventWorkspaceTest(); }
   static void destroySuite(ImportMDEventWorkspaceTest *suite) { delete suite; }
 
   void test_name() {
@@ -185,8 +178,7 @@ public:
     FileContentsBuilder fileContents;
     std::string dim1 = "a A U 10\n";
     std::string dim2 = "b B U 11\n";
-    std::string dim3 =
-        "b B U x\n"; // Ooops, correct number of entries, but nbins set to be x!
+    std::string dim3 = "b B U x\n"; // Ooops, correct number of entries, but nbins set to be x!
     fileContents.setDimensionEntries(dim1 + dim2 + dim3);
     MDFileObject infile(fileContents);
     // Run the test.
@@ -196,8 +188,7 @@ public:
   void test_event_type_not_specified_and_mdevent_block_wrong_size_throws() {
     // Setup the corrupt file.
     FileContentsBuilder fileContents;
-    fileContents.setMDEventEntries(
-        "1 1 1 1 1"); // Should have 4 or 6 entries, but 5 given.
+    fileContents.setMDEventEntries("1 1 1 1 1"); // Should have 4 or 6 entries, but 5 given.
     MDFileObject infile(fileContents);
     // Run the test.
     do_check_throws_invalid_alg_upon_execution(infile);
@@ -206,10 +197,9 @@ public:
   void test_mdevent_block_contains_wrong_types_throws() {
     // Setup the corrupt file.
     FileContentsBuilder fileContents;
-    fileContents.setMDEventEntries(
-        "1.0 1.0 2.1 2.1 1.0 1.0"); // The 3rd and 4th entries relate to run_no
-                                    // and detector_no, these should not be
-                                    // doubles!
+    fileContents.setMDEventEntries("1.0 1.0 2.1 2.1 1.0 1.0"); // The 3rd and 4th entries relate to run_no
+                                                               // and detector_no, these should not be
+                                                               // doubles!
     MDFileObject infile(fileContents);
     // Run the test.
     do_check_throws_invalid_alg_upon_execution(infile);
@@ -218,8 +208,7 @@ public:
   void test_loaded_dimensionality() {
     // Setup the corrupt file.
     FileContentsBuilder fileContents;
-    fileContents.setMDEventEntries(
-        "1 1 -1 -2\n1 1 2 3"); // mins -1, -2, maxs 2, 3
+    fileContents.setMDEventEntries("1 1 -1 -2\n1 1 2 3"); // mins -1, -2, maxs 2, 3
     MDFileObject infile(fileContents);
     // Run the algorithm.
     ImportMDEventWorkspace alg;
@@ -229,9 +218,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    IMDEventWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            "test_out");
+    IMDEventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("test_out");
 
     TS_ASSERT_EQUALS(2, outWS->getNumDims());
     IMDDimension_const_sptr dim1 = outWS->getDimension(0);
@@ -253,8 +240,7 @@ public:
   void test_load_lean_mdevents_2d() {
     // Setup the corrupt file.
     FileContentsBuilder fileContents;
-    fileContents.setMDEventEntries(
-        "1 1 -1 -2\n1 1 2 3"); // mins -1, -2, maxs 2, 3
+    fileContents.setMDEventEntries("1 1 -1 -2\n1 1 2 3"); // mins -1, -2, maxs 2, 3
     MDFileObject infile(fileContents);
     // Run the algorithm.
     ImportMDEventWorkspace alg;
@@ -263,9 +249,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "test_out");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    IMDEventWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            "test_out");
+    IMDEventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("test_out");
 
     TS_ASSERT(alg.isExecuted());
     TS_ASSERT_EQUALS(2, outWS->getNumDims());
@@ -277,8 +261,7 @@ public:
   void test_load_full_mdevents_2d() {
     // Setup the corrupt file.
     FileContentsBuilder fileContents;
-    fileContents.setMDEventEntries(
-        "1 1 1 2 -1 -2\n1 1 2 3 2 3\n1 1 3 4 5 6"); // mins -1, -2, maxs 2, 3
+    fileContents.setMDEventEntries("1 1 1 2 -1 -2\n1 1 2 3 2 3\n1 1 3 4 5 6"); // mins -1, -2, maxs 2, 3
     MDFileObject infile(fileContents);
     // Run the algorithm.
     ImportMDEventWorkspace alg;
@@ -288,9 +271,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    IMDEventWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            "test_out");
+    IMDEventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("test_out");
     TS_ASSERT_EQUALS(2, outWS->getNumDims());
 
     TS_ASSERT_EQUALS(3, outWS->getNPoints());
@@ -307,9 +288,8 @@ public:
                                            // of bins for this dimension.
 
     fileContents.setDimensionEntries(dim1 + dim2 + dim3);
-    fileContents.setMDEventEntries(
-        "1 1 1 2 -1 -2 3\n1 1 2 3 2 3 3\n1 1 3 4 5 6 3"); // mins -1, -2, maxs
-                                                          // 2, 3
+    fileContents.setMDEventEntries("1 1 1 2 -1 -2 3\n1 1 2 3 2 3 3\n1 1 3 4 5 6 3"); // mins -1, -2, maxs
+                                                                                     // 2, 3
     MDFileObject infile(fileContents);
     // Run the algorithm.
     ImportMDEventWorkspace alg;
@@ -319,12 +299,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    IMDEventWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            "test_out");
+    IMDEventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("test_out");
     TS_ASSERT_EQUALS(3, outWS->getNumDims());
-    TSM_ASSERT_EQUALS("Should be a general frame",
-                      outWS->getDimension(0)->getMDFrame().name(),
+    TSM_ASSERT_EQUALS("Should be a general frame", outWS->getDimension(0)->getMDFrame().name(),
                       Mantid::Geometry::GeneralFrame::GeneralFrameName);
     TS_ASSERT_EQUALS(3, outWS->getNPoints());
     TS_ASSERT_EQUALS("MDEvent", outWS->getEventTypeName());
@@ -334,10 +311,8 @@ public:
     // Setup the basic file.
     FileContentsBuilder fileContents;
     // Insert a few comment blocks into the file.
-    fileContents.setDimensionBlock(
-        "# Some Comment!\n" + ImportMDEventWorkspace::DimensionBlockFlag());
-    fileContents.setMDEventBlock("# Some Comment!\n" +
-                                 ImportMDEventWorkspace::MDEventBlockFlag());
+    fileContents.setDimensionBlock("# Some Comment!\n" + ImportMDEventWorkspace::DimensionBlockFlag());
+    fileContents.setMDEventBlock("# Some Comment!\n" + ImportMDEventWorkspace::MDEventBlockFlag());
 
     MDFileObject infile(fileContents);
     // Run the algorithm.
@@ -351,9 +326,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Sanity check the defaults for the FileContentsBuilder construction.
-    IMDEventWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            "test_out");
+    IMDEventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("test_out");
     TS_ASSERT_EQUALS(2, outWS->getNumDims());
     TS_ASSERT_EQUALS(1, outWS->getNPoints());
     TS_ASSERT_EQUALS("MDLeanEvent", outWS->getEventTypeName());
@@ -369,12 +342,8 @@ private:
   std::shared_ptr<MDFileObject> infile;
 
 public:
-  static ImportMDEventWorkspaceTestPerformance *createSuite() {
-    return new ImportMDEventWorkspaceTestPerformance();
-  }
-  static void destroySuite(ImportMDEventWorkspaceTestPerformance *suite) {
-    delete suite;
-  }
+  static ImportMDEventWorkspaceTestPerformance *createSuite() { return new ImportMDEventWorkspaceTestPerformance(); }
+  static void destroySuite(ImportMDEventWorkspaceTestPerformance *suite) { delete suite; }
 
   ImportMDEventWorkspaceTestPerformance() : nRows(10000) {}
 
@@ -385,8 +354,7 @@ public:
     for (size_t i = 0; i < nRows; ++i) {
       // Create MDEvents
       std::stringstream stream;
-      stream << i << " " << i << " " << i << " " << i << " " << i << " " << i
-             << "\n";
+      stream << i << " " << i << " " << i << " " << i << " " << i << " " << i << "\n";
       mdData += stream.str();
     }
     // Create a file from the contents.
@@ -402,9 +370,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    IMDEventWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            "test_out");
+    IMDEventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("test_out");
     TS_ASSERT_EQUALS(2, outWS->getNumDims());
 
     TS_ASSERT_EQUALS(nRows, outWS->getNPoints());

@@ -16,9 +16,8 @@ namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaultsTableValidationError {
 public:
-  PerThetaDefaultsTableValidationError(
-      std::vector<InvalidDefaultsError> validationErrors,
-      boost::optional<ThetaValuesValidationError> fullTableError);
+  PerThetaDefaultsTableValidationError(std::vector<InvalidDefaultsError> validationErrors,
+                                       boost::optional<ThetaValuesValidationError> fullTableError);
 
   std::vector<InvalidDefaultsError> const &errors() const;
   boost::optional<ThetaValuesValidationError> fullTableError() const;

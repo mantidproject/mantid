@@ -18,9 +18,7 @@ class WorkspaceHasDxValidatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static WorkspaceHasDxValidatorTest *createSuite() {
-    return new WorkspaceHasDxValidatorTest();
-  }
+  static WorkspaceHasDxValidatorTest *createSuite() { return new WorkspaceHasDxValidatorTest(); }
   static void destroySuite(WorkspaceHasDxValidatorTest *suite) { delete suite; }
 
   void test_returns_empty_string_for_valid_workspaces() {
@@ -36,7 +34,6 @@ public:
     auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(1, 1, 1);
     WorkspaceHasDxValidator validator;
-    TS_ASSERT_EQUALS(validator.isValid(ws),
-                     "The workspace must have Dx values set")
+    TS_ASSERT_EQUALS(validator.isValid(ws), "The workspace must have Dx values set")
   }
 };

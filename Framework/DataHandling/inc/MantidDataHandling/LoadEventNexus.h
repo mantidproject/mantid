@@ -54,8 +54,7 @@ public:
 
 bool exists(::NeXus::File &file, const std::string &name);
 
-bool exists(const std::map<std::string, std::string> &entries,
-            const std::string &name);
+bool exists(const std::map<std::string, std::string> &entries, const std::string &name);
 
 /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
 
@@ -85,9 +84,7 @@ public:
 
   /// Version
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadISISNexus", "LoadEventAndCompress"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadISISNexus", "LoadEventAndCompress"}; }
 
   /// Category
   const std::string category() const override { return "DataHandling\\Nexus"; }
@@ -95,27 +92,22 @@ public:
   int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
 
   template <typename T>
-  static std::shared_ptr<BankPulseTimes> runLoadNexusLogs(
-      const std::string &nexusfilename, T localWorkspace, Algorithm &alg,
-      bool returnpulsetimes, int &nPeriods,
-      std::unique_ptr<const Kernel::TimeSeriesProperty<int>> &periodLog);
+  static std::shared_ptr<BankPulseTimes>
+  runLoadNexusLogs(const std::string &nexusfilename, T localWorkspace, Algorithm &alg, bool returnpulsetimes,
+                   int &nPeriods, std::unique_ptr<const Kernel::TimeSeriesProperty<int>> &periodLog);
 
   template <typename T>
-  static std::shared_ptr<BankPulseTimes> runLoadNexusLogs(
-      const std::string &nexusfilename, T localWorkspace, Algorithm &alg,
-      bool returnpulsetimes, int &nPeriods,
-      std::unique_ptr<const Kernel::TimeSeriesProperty<int>> &periodLog,
-      const std::vector<std::string> &allow_list,
-      const std::vector<std::string> &block_list);
+  static std::shared_ptr<BankPulseTimes>
+  runLoadNexusLogs(const std::string &nexusfilename, T localWorkspace, Algorithm &alg, bool returnpulsetimes,
+                   int &nPeriods, std::unique_ptr<const Kernel::TimeSeriesProperty<int>> &periodLog,
+                   const std::vector<std::string> &allow_list, const std::vector<std::string> &block_list);
 
-  static void checkForCorruptedPeriods(
-      std::unique_ptr<Kernel::TimeSeriesProperty<int>> tempPeriodLog,
-      std::unique_ptr<const Kernel::TimeSeriesProperty<int>> &periodLog,
-      const int &nPeriods, const std::string &nexusfilename);
+  static void checkForCorruptedPeriods(std::unique_ptr<Kernel::TimeSeriesProperty<int>> tempPeriodLog,
+                                       std::unique_ptr<const Kernel::TimeSeriesProperty<int>> &periodLog,
+                                       const int &nPeriods, const std::string &nexusfilename);
 
   template <typename T>
-  static void loadEntryMetadata(const std::string &nexusfilename, T WS,
-                                const std::string &entry_name,
+  static void loadEntryMetadata(const std::string &nexusfilename, T WS, const std::string &entry_name,
                                 const Kernel::NexusHDF5Descriptor &descriptor);
 
   /**
@@ -129,16 +121,13 @@ public:
    * @return true: success, false: failure
    */
   template <typename T>
-  static bool
-  loadInstrument(const std::string &nexusfilename, T localWorkspace,
-                 const std::string &top_entry_name, Algorithm *alg,
-                 const Kernel::NexusHDF5Descriptor *descriptor = nullptr);
+  static bool loadInstrument(const std::string &nexusfilename, T localWorkspace, const std::string &top_entry_name,
+                             Algorithm *alg, const Kernel::NexusHDF5Descriptor *descriptor = nullptr);
 
   /// Load instrument for Nexus file
   template <typename T>
-  static bool
-  runLoadIDFFromNexus(const std::string &nexusfilename, T localWorkspace,
-                      const std::string &top_entry_name, Algorithm *alg);
+  static bool runLoadIDFFromNexus(const std::string &nexusfilename, T localWorkspace, const std::string &top_entry_name,
+                                  Algorithm *alg);
 
   /**
    * Load instrument from IDF file specified by Nexus file
@@ -150,13 +139,10 @@ public:
    * @return true: success, false: failure
    */
   template <typename T>
-  static bool
-  runLoadInstrument(const std::string &nexusfilename, T localWorkspace,
-                    const std::string &top_entry_name, Algorithm *alg,
-                    const Kernel::NexusHDF5Descriptor *descriptor = nullptr);
+  static bool runLoadInstrument(const std::string &nexusfilename, T localWorkspace, const std::string &top_entry_name,
+                                Algorithm *alg, const Kernel::NexusHDF5Descriptor *descriptor = nullptr);
 
-  static void loadSampleDataISIScompatibility(::NeXus::File &file,
-                                              EventWorkspaceCollection &WS);
+  static void loadSampleDataISIScompatibility(::NeXus::File &file, EventWorkspaceCollection &WS);
 
   /// method used to return instrument name for some old ISIS files where it is
   /// not written properly within the instrument
@@ -209,9 +195,8 @@ public:
   std::unique_ptr<::NeXus::File> m_file;
 
 protected:
-  Parallel::ExecutionMode getParallelExecutionMode(
-      const std::map<std::string, Parallel::StorageMode> &storageModes)
-      const override;
+  Parallel::ExecutionMode
+  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
 
 private:
   /// Possible loaders types
@@ -223,18 +208,15 @@ private:
   /// Execution code
   void execLoader() override;
 
-  LoadEventNexus::LoaderType
-  defineLoaderType(const bool haveWeights, const bool oldNeXusFileNames,
-                   const std::string &classType) const;
+  LoadEventNexus::LoaderType defineLoaderType(const bool haveWeights, const bool oldNeXusFileNames,
+                                              const std::string &classType) const;
 
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
 
   void loadEvents(API::Progress *const prog, const bool monitors);
-  void createSpectraMapping(
-      const std::string &nxsfile, const bool monitorsOnly,
-      const std::vector<std::string> &bankNames = std::vector<std::string>());
-  void deleteBanks(const EventWorkspaceCollection_sptr &workspace,
-                   const std::vector<std::string> &bankNames);
+  void createSpectraMapping(const std::string &nxsfile, const bool monitorsOnly,
+                            const std::vector<std::string> &bankNames = std::vector<std::string>());
+  void deleteBanks(const EventWorkspaceCollection_sptr &workspace, const std::vector<std::string> &bankNames);
   void runLoadMonitors();
   /// Set the filters on TOF.
   void setTimeFilters(const bool monitors);
@@ -294,8 +276,7 @@ private:
  * @param end_wi :: Last workspace index to process
  */
 template <typename T>
-void makeTimeOfFlightDataFuzzy(::NeXus::File &file, T localWorkspace,
-                               const std::string &binsName, size_t start_wi = 0,
+void makeTimeOfFlightDataFuzzy(::NeXus::File &file, T localWorkspace, const std::string &binsName, size_t start_wi = 0,
                                size_t end_wi = 0) {
   const std::string EVENT_TIME_SHIFT_TAG("event_time_offset_shift");
   // first check if the data is already randomized
@@ -386,10 +367,9 @@ void makeTimeOfFlightDataFuzzy(::NeXus::File &file, T localWorkspace,
  * @param descriptor :: input descriptor carrying metadata information
  */
 template <typename T>
-void adjustTimeOfFlightISISLegacy(
-    ::NeXus::File &file, T localWorkspace, const std::string &entry_name,
-    const std::string &classType,
-    const Kernel::NexusHDF5Descriptor *descriptor = nullptr) {
+void adjustTimeOfFlightISISLegacy(::NeXus::File &file, T localWorkspace, const std::string &entry_name,
+                                  const std::string &classType,
+                                  const Kernel::NexusHDF5Descriptor *descriptor = nullptr) {
   bool done = false;
   // Go to the root, and then top entry
   file.openPath("/");
@@ -413,8 +393,7 @@ void adjustTimeOfFlightISISLegacy(
   // try if monitors have their own bins
   if (classType == "NXmonitor") {
     std::vector<std::string> bankNames;
-    for (string_map_t::const_iterator it = entries.begin(); it != entries.end();
-         ++it) {
+    for (string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it) {
       std::string entry_name(it->first);
       std::string entry_class(it->second);
       if (entry_class == classType) {
@@ -436,8 +415,7 @@ void adjustTimeOfFlightISISLegacy(
                //}
       }
       done = true;
-      makeTimeOfFlightDataFuzzy(file, localWorkspace, "event_time_bins", i,
-                                i + 1);
+      makeTimeOfFlightDataFuzzy(file, localWorkspace, "event_time_bins", i, i + 1);
       file.closeGroup();
     }
   }
@@ -446,8 +424,7 @@ void adjustTimeOfFlightISISLegacy(
     // first check detector_1_events
     file.openGroup("detector_1_events", "NXevent_data");
     entries = file.getEntries();
-    for (string_map_t::const_iterator it = entries.begin(); it != entries.end();
-         ++it) {
+    for (string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it) {
       if (it->first == "time_of_flight" || it->first == "event_time_bins") {
         makeTimeOfFlightDataFuzzy(file, localWorkspace, it->first);
         done = true;
@@ -461,12 +438,10 @@ void adjustTimeOfFlightISISLegacy(
       file.openGroup("dae", "IXdae");
       entries = file.getEntries();
       size_t time_channels_number = 0;
-      for (string_map_t::const_iterator it = entries.begin();
-           it != entries.end(); ++it) {
+      for (string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it) {
         // check if there are groups with names "time_channels_#" and select the
         // one with the highest number
-        if (it->first.size() > 14 &&
-            it->first.substr(0, 14) == "time_channels_") {
+        if (it->first.size() > 14 && it->first.substr(0, 14) == "time_channels_") {
           size_t n = boost::lexical_cast<size_t>(it->first.substr(14));
           if (n > time_channels_number) {
             time_channels_number = n;
@@ -475,11 +450,9 @@ void adjustTimeOfFlightISISLegacy(
       }
       if (time_channels_number > 0) // the numbers start with 1
       {
-        file.openGroup("time_channels_" + std::to_string(time_channels_number),
-                       "IXtime_channels");
+        file.openGroup("time_channels_" + std::to_string(time_channels_number), "IXtime_channels");
         entries = file.getEntries();
-        for (string_map_t::const_iterator it = entries.begin();
-             it != entries.end(); ++it) {
+        for (string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it) {
           if (it->first == "time_of_flight" || it->first == "event_time_bins") {
             makeTimeOfFlightDataFuzzy(file, localWorkspace, it->first);
           }
@@ -506,17 +479,14 @@ void adjustTimeOfFlightISISLegacy(
  *  @return true if successful
  */
 template <typename T>
-bool LoadEventNexus::runLoadInstrument(
-    const std::string &nexusfilename, T localWorkspace,
-    const std::string &top_entry_name, Algorithm *alg,
-    const Kernel::NexusHDF5Descriptor *descriptor) {
+bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, T localWorkspace,
+                                       const std::string &top_entry_name, Algorithm *alg,
+                                       const Kernel::NexusHDF5Descriptor *descriptor) {
   std::string instrument;
   std::string instFilename;
 
-  const bool isNexus =
-      (descriptor == nullptr)
-          ? LoadGeometry::isNexus(nexusfilename)
-          : LoadGeometry::isNexus(nexusfilename, descriptor->getAllEntries());
+  const bool isNexus = (descriptor == nullptr) ? LoadGeometry::isNexus(nexusfilename)
+                                               : LoadGeometry::isNexus(nexusfilename, descriptor->getAllEntries());
 
   // Check if the geometry can be loaded directly from the Nexus file
   if (isNexus) {
@@ -531,8 +501,7 @@ bool LoadEventNexus::runLoadInstrument(
     try {
       nxfile.openData("name");
       instrument = nxfile.getStrData();
-      alg->getLogger().debug()
-          << "Instrument name read from NeXus file is " << instrument << '\n';
+      alg->getLogger().debug() << "Instrument name read from NeXus file is " << instrument << '\n';
     } catch (::NeXus::Exception &) {
       // Try to fall back to isis compatibility options
       nxfile.closeGroup();
@@ -541,8 +510,7 @@ bool LoadEventNexus::runLoadInstrument(
         // Get the instrument name from the file instead
         size_t n = nexusfilename.rfind('/');
         if (n != std::string::npos) {
-          std::string temp =
-              nexusfilename.substr(n + 1, nexusfilename.size() - n - 1);
+          std::string temp = nexusfilename.substr(n + 1, nexusfilename.size() - n - 1);
           n = temp.find('_');
           if (n != std::string::npos && n > 0) {
             instrument = temp.substr(0, n);
@@ -566,31 +534,25 @@ bool LoadEventNexus::runLoadInstrument(
   }
 
   // do the actual work
-  Mantid::API::IAlgorithm_sptr loadInst =
-      alg->createChildAlgorithm("LoadInstrument");
+  Mantid::API::IAlgorithm_sptr loadInst = alg->createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   bool executionSuccessful(true);
   try {
     loadInst->setPropertyValue("Filename", instFilename);
     loadInst->setPropertyValue("InstrumentName", instrument);
-    loadInst->setProperty<Mantid::API::MatrixWorkspace_sptr>("Workspace",
-                                                             localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(false));
+    loadInst->setProperty<Mantid::API::MatrixWorkspace_sptr>("Workspace", localWorkspace);
+    loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
     loadInst->execute();
 
     // Populate the instrument parameters in this workspace - this works around
     // a bug
     localWorkspace->populateInstrumentParameters();
   } catch (std::invalid_argument &e) {
-    alg->getLogger().information()
-        << "Invalid argument to LoadInstrument Child Algorithm : " << e.what()
-        << '\n';
+    alg->getLogger().information() << "Invalid argument to LoadInstrument Child Algorithm : " << e.what() << '\n';
     executionSuccessful = false;
   } catch (std::runtime_error &e) {
-    alg->getLogger().information(
-        "Unable to successfully run LoadInstrument Child Algorithm");
+    alg->getLogger().information("Unable to successfully run LoadInstrument Child Algorithm");
     alg->getLogger().information(e.what());
     executionSuccessful = false;
   }
@@ -604,18 +566,15 @@ bool LoadEventNexus::runLoadInstrument(
   // Ticket #2049: Cleanup all loadinstrument members to a single instance
   // If requested update the instrument to positions in the data file
   const auto &pmap = localWorkspace->constInstrumentParameters();
-  if (!pmap.contains(localWorkspace->getInstrument()->getComponentID(),
-                     "det-pos-source"))
+  if (!pmap.contains(localWorkspace->getInstrument()->getComponentID(), "det-pos-source"))
     return executionSuccessful;
 
-  std::shared_ptr<Geometry::Parameter> updateDets = pmap.get(
-      localWorkspace->getInstrument()->getComponentID(), "det-pos-source");
+  std::shared_ptr<Geometry::Parameter> updateDets =
+      pmap.get(localWorkspace->getInstrument()->getComponentID(), "det-pos-source");
   std::string value = updateDets->value<std::string>();
   if (value.substr(0, 8) == "datafile") {
-    Mantid::API::IAlgorithm_sptr updateInst =
-        alg->createChildAlgorithm("UpdateInstrumentFromFile");
-    updateInst->setProperty<Mantid::API::MatrixWorkspace_sptr>("Workspace",
-                                                               localWorkspace);
+    Mantid::API::IAlgorithm_sptr updateInst = alg->createChildAlgorithm("UpdateInstrumentFromFile");
+    updateInst->setProperty<Mantid::API::MatrixWorkspace_sptr>("Workspace", localWorkspace);
     updateInst->setPropertyValue("Filename", nexusfilename);
     if (value == "datafile-ignore-phi") {
       updateInst->setProperty("IgnorePhi", true);
@@ -623,8 +582,7 @@ bool LoadEventNexus::runLoadInstrument(
                                    "positions in the data file except for the "
                                    "phi values");
     } else {
-      alg->getLogger().information(
-          "Detector positions in IDF updated with positions in the data file");
+      alg->getLogger().information("Detector positions in IDF updated with positions in the data file");
     }
     // We want this to throw if it fails to warn the user that the information
     // is not correct.
@@ -637,9 +595,8 @@ bool LoadEventNexus::runLoadInstrument(
 //-----------------------------------------------------------------------------
 /** Load the run number and other meta data from the given bank */
 template <typename T>
-void LoadEventNexus::loadEntryMetadata(
-    const std::string &nexusfilename, T WS, const std::string &entry_name,
-    const Kernel::NexusHDF5Descriptor &descriptor) {
+void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, const std::string &entry_name,
+                                       const Kernel::NexusHDF5Descriptor &descriptor) {
   // Open the file
   ::NeXus::File file(nexusfilename);
   file.openGroup(entry_name, "NXentry");
@@ -711,9 +668,8 @@ void LoadEventNexus::loadEntryMetadata(
           if (info.dims.size() == 1) {
             name = file.getStrData();
           } else { // something special for 2-d array
-            const int64_t total_length = std::accumulate(
-                info.dims.begin(), info.dims.end(), static_cast<int64_t>(1),
-                std::multiplies<int64_t>());
+            const int64_t total_length = std::accumulate(info.dims.begin(), info.dims.end(), static_cast<int64_t>(1),
+                                                         std::multiplies<int64_t>());
             boost::scoped_array<char> val_array(new char[total_length]);
             file.getData(val_array.get());
             name = std::string(val_array.get(), total_length);
@@ -772,10 +728,9 @@ void LoadEventNexus::loadEntryMetadata(
  *  @return true if successful
  */
 template <typename T>
-bool LoadEventNexus::loadInstrument(
-    const std::string &nexusfilename, T localWorkspace,
-    const std::string &top_entry_name, Algorithm *alg,
-    const Kernel::NexusHDF5Descriptor *descriptor) {
+bool LoadEventNexus::loadInstrument(const std::string &nexusfilename, T localWorkspace,
+                                    const std::string &top_entry_name, Algorithm *alg,
+                                    const Kernel::NexusHDF5Descriptor *descriptor) {
 
   bool loadNexusInstrumentXML = true;
   if (alg->existsProperty("LoadNexusInstrumentXML"))
@@ -783,11 +738,9 @@ bool LoadEventNexus::loadInstrument(
 
   bool foundInstrument = false;
   if (loadNexusInstrumentXML)
-    foundInstrument = runLoadIDFFromNexus<T>(nexusfilename, localWorkspace,
-                                             top_entry_name, alg);
+    foundInstrument = runLoadIDFFromNexus<T>(nexusfilename, localWorkspace, top_entry_name, alg);
   if (!foundInstrument)
-    foundInstrument = runLoadInstrument<T>(nexusfilename, localWorkspace,
-                                           top_entry_name, alg, descriptor);
+    foundInstrument = runLoadInstrument<T>(nexusfilename, localWorkspace, top_entry_name, alg, descriptor);
   return foundInstrument;
 }
 
@@ -802,38 +755,31 @@ bool LoadEventNexus::loadInstrument(
  *  @return true if successful
  */
 template <typename T>
-bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename,
-                                         T localWorkspace,
-                                         const std::string &top_entry_name,
-                                         Algorithm *alg) {
+bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename, T localWorkspace,
+                                         const std::string &top_entry_name, Algorithm *alg) {
   // Test if IDF exists in file, move on quickly if not
   try {
     ::NeXus::File nxsfile(nexusfilename);
     nxsfile.openPath(top_entry_name + "/instrument/instrument_xml");
   } catch (::NeXus::Exception &) {
-    alg->getLogger().information("No instrument XML definition found in " +
-                                 nexusfilename + " at " + top_entry_name +
+    alg->getLogger().information("No instrument XML definition found in " + nexusfilename + " at " + top_entry_name +
                                  "/instrument");
     return false;
   }
 
-  Mantid::API::IAlgorithm_sptr loadInst =
-      alg->createChildAlgorithm("LoadIDFFromNexus");
+  Mantid::API::IAlgorithm_sptr loadInst = alg->createChildAlgorithm("LoadIDFFromNexus");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
     loadInst->setPropertyValue("Filename", nexusfilename);
-    loadInst->setProperty<Mantid::API::MatrixWorkspace_sptr>("Workspace",
-                                                             localWorkspace);
+    loadInst->setProperty<Mantid::API::MatrixWorkspace_sptr>("Workspace", localWorkspace);
     loadInst->setPropertyValue("InstrumentParentPath", top_entry_name);
     loadInst->execute();
   } catch (std::invalid_argument &) {
-    alg->getLogger().error(
-        "Invalid argument to LoadIDFFromNexus Child Algorithm ");
+    alg->getLogger().error("Invalid argument to LoadIDFFromNexus Child Algorithm ");
   } catch (std::runtime_error &) {
-    alg->getLogger().debug(
-        "No instrument definition found by LoadIDFFromNexus in " +
-        nexusfilename + " at " + top_entry_name + "/instrument");
+    alg->getLogger().debug("No instrument definition found by LoadIDFFromNexus in " + nexusfilename + " at " +
+                           top_entry_name + "/instrument");
   }
 
   if (!loadInst->isExecuted())

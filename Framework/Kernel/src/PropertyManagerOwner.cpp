@@ -22,17 +22,13 @@ Logger g_log("PropertyManagerOwner");
 } // namespace
 
 /// Default constructor
-PropertyManagerOwner::PropertyManagerOwner()
-    : m_properties(new PropertyManager) {}
+PropertyManagerOwner::PropertyManagerOwner() : m_properties(new PropertyManager) {}
 
 /// Copy constructor
-PropertyManagerOwner::PropertyManagerOwner(const PropertyManagerOwner &po) {
-  m_properties = po.m_properties;
-}
+PropertyManagerOwner::PropertyManagerOwner(const PropertyManagerOwner &po) { m_properties = po.m_properties; }
 
 /// Assignment operator
-PropertyManagerOwner &PropertyManagerOwner::
-operator=(const PropertyManagerOwner &po) {
+PropertyManagerOwner &PropertyManagerOwner::operator=(const PropertyManagerOwner &po) {
   m_properties = po.m_properties;
   return *this;
 }
@@ -43,8 +39,7 @@ operator=(const PropertyManagerOwner &po) {
  *  @throw Exception::ExistsError if a property with the given name already
  * exists
  */
-void PropertyManagerOwner::declareProperty(std::unique_ptr<Property> p,
-                                           const std::string &doc) {
+void PropertyManagerOwner::declareProperty(std::unique_ptr<Property> p, const std::string &doc) {
   m_properties->declareProperty(std::move(p), doc);
 }
 
@@ -52,16 +47,13 @@ void PropertyManagerOwner::declareProperty(std::unique_ptr<Property> p,
  *  @param p :: The property object to add
  *  @param doc :: A description of the property that may be displayed to users
  */
-void PropertyManagerOwner::declareOrReplaceProperty(std::unique_ptr<Property> p,
-                                                    const std::string &doc) {
+void PropertyManagerOwner::declareOrReplaceProperty(std::unique_ptr<Property> p, const std::string &doc) {
   m_properties->declareOrReplaceProperty(std::move(p), doc);
 }
 
 /** Reset property values back to initial values (blank or default values)
  */
-void PropertyManagerOwner::resetProperties() {
-  m_properties->resetProperties();
-}
+void PropertyManagerOwner::resetProperties() { m_properties->resetProperties(); }
 
 /** Set the ordered list of properties by one string of values, separated by
  *semicolons.
@@ -74,12 +66,9 @@ void PropertyManagerOwner::resetProperties() {
  *  @param createMissing :: If the property does not exist then create it
  *  @throw invalid_argument if error in parameters
  */
-void PropertyManagerOwner::setProperties(
-    const std::string &propertiesJson,
-    const std::unordered_set<std::string> &ignoreProperties,
-    bool createMissing) {
-  m_properties->setProperties(propertiesJson, this, ignoreProperties,
-                              createMissing);
+void PropertyManagerOwner::setProperties(const std::string &propertiesJson,
+                                         const std::unordered_set<std::string> &ignoreProperties, bool createMissing) {
+  m_properties->setProperties(propertiesJson, this, ignoreProperties, createMissing);
 }
 
 /** Sets all the declared properties from a json object
@@ -88,10 +77,8 @@ void PropertyManagerOwner::setProperties(
   from the propertiesArray
   @param createMissing :: If the property does not exist then create it
 */
-void PropertyManagerOwner::setProperties(
-    const ::Json::Value &jsonValue,
-    const std::unordered_set<std::string> &ignoreProperties,
-    bool createMissing) {
+void PropertyManagerOwner::setProperties(const ::Json::Value &jsonValue,
+                                         const std::unordered_set<std::string> &ignoreProperties, bool createMissing) {
   m_properties->setProperties(jsonValue, this, ignoreProperties, createMissing);
 }
 
@@ -101,9 +88,8 @@ void PropertyManagerOwner::setProperties(
   @param ignoreProperties :: A set of names of any properties NOT to set
   from the propertiesArray
 */
-void PropertyManagerOwner::setPropertiesWithString(
-    const std::string &propertiesString,
-    const std::unordered_set<std::string> &ignoreProperties) {
+void PropertyManagerOwner::setPropertiesWithString(const std::string &propertiesString,
+                                                   const std::unordered_set<std::string> &ignoreProperties) {
   m_properties->setPropertiesWithString(propertiesString, ignoreProperties);
 }
 
@@ -115,8 +101,7 @@ void PropertyManagerOwner::setPropertiesWithString(
  *  @throw std::invalid_argument If the value is not valid for the property
  * given
  */
-void PropertyManagerOwner::setPropertyValue(const std::string &name,
-                                            const std::string &value) {
+void PropertyManagerOwner::setPropertyValue(const std::string &name, const std::string &value) {
   m_properties->setPropertyValue(name, value);
   this->afterPropertySet(name);
 }
@@ -128,8 +113,7 @@ void PropertyManagerOwner::setPropertyValue(const std::string &name,
  *  @throw std::invalid_argument If the value is not valid for the property
  * given
  */
-void PropertyManagerOwner::setPropertyValueFromJson(const std::string &name,
-                                                    const Json::Value &value) {
+void PropertyManagerOwner::setPropertyValueFromJson(const std::string &name, const Json::Value &value) {
   m_properties->setPropertyValueFromJson(name, value);
   this->afterPropertySet(name);
 }
@@ -140,11 +124,9 @@ void PropertyManagerOwner::setPropertyValueFromJson(const std::string &name,
  *  @param value :: The value to assign to the property
  *  @throw std::runtime_error if the property index is too high
  */
-void PropertyManagerOwner::setPropertyOrdinal(const int &index,
-                                              const std::string &value) {
+void PropertyManagerOwner::setPropertyOrdinal(const int &index, const std::string &value) {
   m_properties->setPropertyOrdinal(index, value);
-  this->afterPropertySet(
-      m_properties->getPointerToPropertyOrdinal(index)->name());
+  this->afterPropertySet(m_properties->getPointerToPropertyOrdinal(index)->name());
 }
 
 /** Checks whether the named property is already in the list of managed
@@ -152,32 +134,25 @@ void PropertyManagerOwner::setPropertyOrdinal(const int &index,
  *  @param name :: The name of the property (case insensitive)
  *  @return True if the property is already stored
  */
-bool PropertyManagerOwner::existsProperty(const std::string &name) const {
-  return m_properties->existsProperty(name);
-}
+bool PropertyManagerOwner::existsProperty(const std::string &name) const { return m_properties->existsProperty(name); }
 
 /** Validates all the properties in the collection
  *  @return True if all properties have a valid value
  */
-bool PropertyManagerOwner::validateProperties() const {
-  return m_properties->validateProperties();
-}
+bool PropertyManagerOwner::validateProperties() const { return m_properties->validateProperties(); }
 
 /**
  * Count the number of properties under management
  * @returns The number of properties being managed
  */
-size_t PropertyManagerOwner::propertyCount() const {
-  return m_properties->propertyCount();
-}
+size_t PropertyManagerOwner::propertyCount() const { return m_properties->propertyCount(); }
 
 /** Get the value of a property as a string
  *  @param name :: The name of the property (case insensitive)
  *  @return The value of the named property
  *  @throw Exception::NotFoundError if the named property is unknown
  */
-std::string
-PropertyManagerOwner::getPropertyValue(const std::string &name) const {
+std::string PropertyManagerOwner::getPropertyValue(const std::string &name) const {
   return m_properties->getPropertyValue(name);
 }
 
@@ -186,8 +161,7 @@ PropertyManagerOwner::getPropertyValue(const std::string &name) const {
  *  @return A pointer to the named property
  *  @throw Exception::NotFoundError if the named property is unknown
  */
-Property *
-PropertyManagerOwner::getPointerToProperty(const std::string &name) const {
+Property *PropertyManagerOwner::getPointerToProperty(const std::string &name) const {
   return m_properties->getPointerToProperty(name);
 }
 
@@ -196,8 +170,7 @@ PropertyManagerOwner::getPointerToProperty(const std::string &name) const {
  *  @return A pointer to the named property
  *  @throw std::runtime_error if the property index is too high
  */
-Property *
-PropertyManagerOwner::getPointerToPropertyOrdinal(const int &index) const {
+Property *PropertyManagerOwner::getPointerToPropertyOrdinal(const int &index) const {
   return m_properties->getPointerToPropertyOrdinal(index);
 }
 
@@ -205,9 +178,7 @@ PropertyManagerOwner::getPointerToPropertyOrdinal(const int &index) const {
  *  The properties will be stored in the order that they were declared.
  *  @return A vector holding pointers to the list of properties
  */
-const std::vector<Property *> &PropertyManagerOwner::getProperties() const {
-  return m_properties->getProperties();
-}
+const std::vector<Property *> &PropertyManagerOwner::getProperties() const { return m_properties->getProperties(); }
 
 /** Get the value of a property. Allows you to assign directly to a variable of
  *the property's type
@@ -225,8 +196,7 @@ const std::vector<Property *> &PropertyManagerOwner::getProperties() const {
  *different type
  *  @throw Exception::NotFoundError If the property requested does not exist
  */
-IPropertyManager::TypedValue
-PropertyManagerOwner::getProperty(const std::string &name) const {
+IPropertyManager::TypedValue PropertyManagerOwner::getProperty(const std::string &name) const {
   return m_properties->getProperty(name);
 }
 
@@ -263,8 +233,7 @@ std::string PropertyManagerOwner::asString(bool withDefaultValues) const {
  * @param name :: Name of the property to be removed.
  *  @param delproperty :: if true, delete the named property
  */
-void PropertyManagerOwner::removeProperty(const std::string &name,
-                                          const bool delproperty) {
+void PropertyManagerOwner::removeProperty(const std::string &name, const bool delproperty) {
   m_properties->removeProperty(name, delproperty);
 }
 
@@ -279,9 +248,7 @@ void PropertyManagerOwner::clear() { m_properties->clear(); }
  * The argument is the property name. Default - do nothing.
  * @param name :: A property name.
  */
-void PropertyManagerOwner::afterPropertySet(const std::string &name) {
-  m_properties->afterPropertySet(name);
-}
+void PropertyManagerOwner::afterPropertySet(const std::string &name) { m_properties->afterPropertySet(name); }
 
 } // namespace Kernel
 } // namespace Mantid

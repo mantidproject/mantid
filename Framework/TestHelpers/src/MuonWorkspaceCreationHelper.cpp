@@ -36,8 +36,7 @@ double yDataCounts::operator()(const double, size_t) {
  * in phase and has a different normalization. Counts are capped at zero to
  * prevent negative values.
  */
-yDataAsymmetry::yDataAsymmetry(const double amp, const double phi)
-    : m_amp(amp), m_phi(phi) {}
+yDataAsymmetry::yDataAsymmetry(const double amp, const double phi) : m_amp(amp), m_phi(phi) {}
 yDataAsymmetry::yDataAsymmetry() {
   m_amp = 1.5;
   m_phi = 0.1;
@@ -47,10 +46,7 @@ double yDataAsymmetry::operator()(const double t, size_t spec) {
   double factor = (static_cast<double>(spec) + 1.0) * 0.5;
   double phase_offset = 4 * M_PI / 180;
   return std::max(
-      0.0, (10. * factor *
-            (1.0 + m_amp * cos(m_omega * t + m_phi +
-                               static_cast<double>(spec) * phase_offset)) *
-            e));
+      0.0, (10. * factor * (1.0 + m_amp * cos(m_omega * t + m_phi + static_cast<double>(spec) * phase_offset)) * e));
 }
 
 // Errors are fixed to 0.005
@@ -70,18 +66,13 @@ double eData::operator()(const double, size_t) { return 0.005; }
  * @param xEnd :: The end value of the x-axis.
  * @return Pointer to the workspace.
  */
-MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
-                                           double seed, size_t detectorIDseed,
-                                           bool isHist, double xStart,
-                                           double xEnd) {
+MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt, double seed, size_t detectorIDseed, bool isHist,
+                                           double xStart, double xEnd) {
 
-  MatrixWorkspace_sptr ws =
-      WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-          yDataCounts(), static_cast<int>(nspec), xStart, xEnd,
-          (1.0 / static_cast<double>(maxt)), isHist, eData());
+  MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+      yDataCounts(), static_cast<int>(nspec), xStart, xEnd, (1.0 / static_cast<double>(maxt)), isHist, eData());
 
-  ws->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(
-      static_cast<int>(nspec)));
+  ws->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(static_cast<int>(nspec)));
 
   for (int g = 0; g < static_cast<int>(nspec); g++) {
     auto &spec = ws->getSpectrum(g);
@@ -93,8 +84,7 @@ MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
   // Add number of good frames (required for Asymmetry calculation)
   ws->mutableRun().addProperty("goodfrm", 10);
   // Add instrument and run number
-  std::shared_ptr<Geometry::Instrument> inst1 =
-      std::make_shared<Geometry::Instrument>();
+  std::shared_ptr<Geometry::Instrument> inst1 = std::make_shared<Geometry::Instrument>();
   inst1->setName("EMU");
   ws->setInstrument(inst1);
   ws->mutableRun().addProperty("run_number", 12345);
@@ -102,10 +92,8 @@ MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
   return ws;
 }
 
-MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
-                                           double seed, size_t detectorIDseed) {
-  return createCountsWorkspace(nspec, maxt, seed, detectorIDseed, true, 0.0,
-                               1.0);
+MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt, double seed, size_t detectorIDseed) {
+  return createCountsWorkspace(nspec, maxt, seed, detectorIDseed, true, 0.0, 1.0);
 }
 
 /**
@@ -120,9 +108,8 @@ MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
  * workspaces.
  * @return Pointer to the workspace group.
  */
-WorkspaceGroup_sptr
-createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
-                                const std::string &wsGroupName) {
+WorkspaceGroup_sptr createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
+                                                    const std::string &wsGroupName) {
 
   WorkspaceGroup_sptr wsGroup = std::make_shared<WorkspaceGroup>();
   AnalysisDataService::Instance().addOrReplace(wsGroupName, wsGroup);
@@ -130,8 +117,7 @@ createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
   std::string wsNameStem = "MuonDataPeriod_";
   std::string wsName;
 
-  std::shared_ptr<Geometry::Instrument> inst1 =
-      std::make_shared<Geometry::Instrument>();
+  std::shared_ptr<Geometry::Instrument> inst1 = std::make_shared<Geometry::Instrument>();
   inst1->setName("EMU");
 
   for (int period = 1; period < nPeriods + 1; period++) {
@@ -147,24 +133,20 @@ createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
   return wsGroup;
 }
 
-Mantid::API::WorkspaceGroup_sptr
-createMultiPeriodAsymmetryData(const int &nPeriods, size_t nspec, size_t maxt,
-                               const std::string &wsGroupName) {
-  Mantid::API::WorkspaceGroup_sptr wsGroup =
-      std::make_shared<Mantid::API::WorkspaceGroup>();
-  Mantid::API::AnalysisDataService::Instance().addOrReplace(wsGroupName,
-                                                            wsGroup);
+Mantid::API::WorkspaceGroup_sptr createMultiPeriodAsymmetryData(const int &nPeriods, size_t nspec, size_t maxt,
+                                                                const std::string &wsGroupName) {
+  Mantid::API::WorkspaceGroup_sptr wsGroup = std::make_shared<Mantid::API::WorkspaceGroup>();
+  Mantid::API::AnalysisDataService::Instance().addOrReplace(wsGroupName, wsGroup);
 
   std::string wsNameStem = "MuonDataPeriod_";
   std::string wsName;
 
-  std::shared_ptr<Mantid::Geometry::Instrument> inst1 =
-      std::make_shared<Mantid::Geometry::Instrument>();
+  std::shared_ptr<Mantid::Geometry::Instrument> inst1 = std::make_shared<Mantid::Geometry::Instrument>();
   inst1->setName("EMU");
 
   for (int period = 1; period < nPeriods + 1; period++) {
-    Mantid::API::MatrixWorkspace_sptr ws = createAsymmetryWorkspace(
-        nspec, maxt, yDataAsymmetry(10.0 * period, 0.1 * period));
+    Mantid::API::MatrixWorkspace_sptr ws =
+        createAsymmetryWorkspace(nspec, maxt, yDataAsymmetry(10.0 * period, 0.1 * period));
 
     wsGroup->addWorkspace(ws);
     wsName = wsNameStem + std::to_string(period);
@@ -181,11 +163,10 @@ createMultiPeriodAsymmetryData(const int &nPeriods, size_t nspec, size_t maxt,
  * @param deadTimes ::  The dead times for each spectra.
  * @return TableWorkspace with dead times appropriate for pairing algorithm.
  */
-ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec,
-                                         std::vector<double> &deadTimes) {
+ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec, std::vector<double> &deadTimes) {
 
-  auto deadTimeTable = std::dynamic_pointer_cast<ITableWorkspace>(
-      WorkspaceFactory::Instance().createTable("TableWorkspace"));
+  auto deadTimeTable =
+      std::dynamic_pointer_cast<ITableWorkspace>(WorkspaceFactory::Instance().createTable("TableWorkspace"));
 
   deadTimeTable->addColumn("int", "Spectrum Number");
   deadTimeTable->addColumn("double", "Dead Time");
@@ -209,11 +190,10 @@ ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec,
  * @param timeZeros :: Vector of time zeros for each spectra
  * @return TableWorkspace with time zeros in each row for all spectra
  */
-ITableWorkspace_sptr createTimeZeroTable(const size_t &numSpec,
-                                         std::vector<double> &timeZeros) {
+ITableWorkspace_sptr createTimeZeroTable(const size_t &numSpec, std::vector<double> &timeZeros) {
 
-  auto timeZeroTable = std::dynamic_pointer_cast<ITableWorkspace>(
-      WorkspaceFactory::Instance().createTable("TableWorkspace"));
+  auto timeZeroTable =
+      std::dynamic_pointer_cast<ITableWorkspace>(WorkspaceFactory::Instance().createTable("TableWorkspace"));
 
   timeZeroTable->addColumn("double", "time zero");
 
@@ -236,14 +216,10 @@ ITableWorkspace_sptr createTimeZeroTable(const size_t &numSpec,
  * @param nSpectra :: Number of spectra in the workspace, defaults to 1.
  * @return Pointer to the workspace.
  */
-MatrixWorkspace_sptr
-createWorkspaceWithInstrumentandRun(const std::string &instrName, int runNumber,
-                                    size_t nSpectra) {
+MatrixWorkspace_sptr createWorkspaceWithInstrumentandRun(const std::string &instrName, int runNumber, size_t nSpectra) {
 
-  Geometry::Instrument_const_sptr instr =
-      std::make_shared<Geometry::Instrument>(instrName);
-  MatrixWorkspace_sptr ws =
-      WorkspaceFactory::Instance().create("Workspace2D", nSpectra, 1, 1);
+  Geometry::Instrument_const_sptr instr = std::make_shared<Geometry::Instrument>(instrName);
+  MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", nSpectra, 1, 1);
   ws->setInstrument(instr);
   ws->mutableRun().addProperty("run_number", runNumber);
   return ws;
@@ -258,10 +234,8 @@ createWorkspaceWithInstrumentandRun(const std::string &instrName, int runNumber,
  * Number of bins = maxt - 1 .
  * @param wsGroupName :: Name of the workspace group.
  */
-WorkspaceGroup_sptr
-createWorkspaceGroupConsecutiveDetectorIDs(const int &nWorkspaces, size_t nspec,
-                                           size_t maxt,
-                                           const std::string &wsGroupName) {
+WorkspaceGroup_sptr createWorkspaceGroupConsecutiveDetectorIDs(const int &nWorkspaces, size_t nspec, size_t maxt,
+                                                               const std::string &wsGroupName) {
 
   WorkspaceGroup_sptr wsGroup = std::make_shared<WorkspaceGroup>();
   AnalysisDataService::Instance().addOrReplace(wsGroupName, wsGroup);
@@ -273,8 +247,7 @@ createWorkspaceGroupConsecutiveDetectorIDs(const int &nWorkspaces, size_t nspec,
     // Period 1 yvalues : 1,2,3,4,5,6,7,8,9,10
     // Period 2 yvalues : 2,3,4,5,6,7,8,9,10,11 etc..
     size_t detIDstart = (period - 1) * nspec + 1;
-    MatrixWorkspace_sptr ws =
-        createCountsWorkspace(nspec, maxt, period, detIDstart);
+    MatrixWorkspace_sptr ws = createCountsWorkspace(nspec, maxt, period, detIDstart);
     wsGroup->addWorkspace(ws);
 
     wsName = wsNameStem + std::to_string(period);

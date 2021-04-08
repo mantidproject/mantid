@@ -32,10 +32,8 @@ class DLLExport LeanElasticPeak : public BasePeak {
 public:
   LeanElasticPeak();
   LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame);
-  LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame,
-                  const Mantid::Kernel::Matrix<double> &goniometer,
-                  boost::optional<std::shared_ptr<Geometry::ReferenceFrame>>
-                      refFrame = boost::none);
+  LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame, const Mantid::Kernel::Matrix<double> &goniometer,
+                  boost::optional<std::shared_ptr<const Geometry::ReferenceFrame>> refFrame = boost::none);
   LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame, double wavelength);
 
   /// Copy constructor
@@ -57,24 +55,14 @@ public:
   // Construct a peak from a reference to the interface
   explicit LeanElasticPeak(const Geometry::IPeak &ipeak);
 
-  Geometry::IDetector_const_sptr getDetector() const override;
-  std::shared_ptr<const Geometry::ReferenceFrame>
-  getReferenceFrame() const override;
-
-  void setSamplePos(double, double, double) override;
-  void setSamplePos(const Mantid::Kernel::V3D &) override;
+  std::shared_ptr<const Geometry::ReferenceFrame> getReferenceFrame() const override;
 
   Mantid::Kernel::V3D getQLabFrame() const override;
   Mantid::Kernel::V3D getQSampleFrame() const override;
-  Mantid::Kernel::V3D getDetectorPosition() const override;
-  Mantid::Kernel::V3D getDetectorPositionNoCheck() const override;
 
-  void setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
-                       boost::optional<double> = boost::none) override;
-  void setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
-                       const Mantid::Kernel::Matrix<double> &goniometer);
-  void setQLabFrame(const Mantid::Kernel::V3D &qLab,
-                    boost::optional<double> = boost::none) override;
+  void setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame, boost::optional<double> = boost::none) override;
+  void setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame, const Mantid::Kernel::Matrix<double> &goniometer);
+  void setQLabFrame(const Mantid::Kernel::V3D &qLab, boost::optional<double> = boost::none) override;
 
   void setWavelength(double wavelength) override;
   double getWavelength() const override;
@@ -89,8 +77,6 @@ public:
   void setInitialEnergy(double m_initialEnergy) override;
   void setFinalEnergy(double m_finalEnergy) override;
 
-  virtual Mantid::Kernel::V3D getDetPos() const override;
-  virtual Mantid::Kernel::V3D getSamplePos() const override;
   double getL1() const override;
   double getL2() const override;
 
@@ -98,7 +84,7 @@ public:
   LeanElasticPeak &operator=(const LeanElasticPeak &other);
 
 private:
-  void setReferenceFrame(std::shared_ptr<Geometry::ReferenceFrame> frame);
+  void setReferenceFrame(std::shared_ptr<const Geometry::ReferenceFrame> frame);
 
   /// Q_sample vector
   Mantid::Kernel::V3D m_Qsample;
@@ -106,7 +92,7 @@ private:
   /// Wavelength of neutrons at the peak
   double m_wavelength;
 
-  std::shared_ptr<Geometry::ReferenceFrame> m_refFrame;
+  std::shared_ptr<const Geometry::ReferenceFrame> m_refFrame;
 
   /// Static logger
   static Mantid::Kernel::Logger g_log;

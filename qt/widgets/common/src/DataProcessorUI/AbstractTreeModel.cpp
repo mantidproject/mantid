@@ -21,8 +21,7 @@ using namespace Mantid::API;
  * @param tableWorkspace : The table workspace to wrap
  * @param whitelist : A WhiteList containing the columns
  */
-AbstractTreeModel::AbstractTreeModel(ITableWorkspace_sptr tableWorkspace,
-                                     const WhiteList &whitelist)
+AbstractTreeModel::AbstractTreeModel(ITableWorkspace_sptr tableWorkspace, const WhiteList &whitelist)
     : m_tWS(std::move(tableWorkspace)), m_whitelist(whitelist) {}
 
 AbstractTreeModel::~AbstractTreeModel() {}

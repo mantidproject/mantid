@@ -33,9 +33,7 @@ namespace {
 /**
  * @return A reference to the matplotlib.colors module
  */
-Python::Object colorsModule() {
-  return Python::NewRef(PyImport_ImportModule("matplotlib.colors"));
-}
+Python::Object colorsModule() { return Python::NewRef(PyImport_ImportModule("matplotlib.colors")); }
 
 // Factory function for creating a Normalize instance
 // Holds the GIL
@@ -43,21 +41,18 @@ Python::Object createNormalize(OptionalTupleDouble clim = none) {
   GlobalInterpreterLock lock;
   if (clim.is_initialized()) {
     const auto &range = clim.get();
-    return colorsModule().attr("Normalize")(std::get<0>(range),
-                                            std::get<1>(range));
+    return colorsModule().attr("Normalize")(std::get<0>(range), std::get<1>(range));
   } else
     return colorsModule().attr("Normalize")();
 }
 
 // Factory function for creating a SymLogNorm instance
 // Holds the GIL
-Python::Object createSymLog(double linthresh, double linscale,
-                            OptionalTupleDouble clim = none) {
+Python::Object createSymLog(double linthresh, double linscale, OptionalTupleDouble clim = none) {
   GlobalInterpreterLock lock;
   if (clim.is_initialized()) {
     const auto &range = clim.get();
-    return colorsModule().attr("SymLogNorm")(
-        linthresh, linscale, std::get<0>(range), std::get<1>(range));
+    return colorsModule().attr("SymLogNorm")(linthresh, linscale, std::get<0>(range), std::get<1>(range));
   } else
     return colorsModule().attr("SymLogNorm")(linthresh, linscale);
 }
@@ -68,8 +63,7 @@ Python::Object createPowerNorm(double gamma, OptionalTupleDouble clim = none) {
   GlobalInterpreterLock lock;
   if (clim.is_initialized()) {
     const auto &range = clim.get();
-    return colorsModule().attr("PowerNorm")(gamma, std::get<0>(range),
-                                            std::get<1>(range));
+    return colorsModule().attr("PowerNorm")(gamma, std::get<0>(range), std::get<1>(range));
   } else {
     return colorsModule().attr("PowerNorm")(gamma);
   }
@@ -100,22 +94,18 @@ Python::Object scaleModule() {
  * @param clim A 2-tuple of the scale range
  * @return A 2-tuple of the new scale values
  */
-std::tuple<double, double>
-NormalizeBase::autoscale(std::tuple<double, double> clim) {
+std::tuple<double, double> NormalizeBase::autoscale(std::tuple<double, double> clim) {
   GlobalInterpreterLock lock;
-  pyobj().attr("autoscale")(Python::NewRef(
-      Py_BuildValue("(ff)", std::get<0>(clim), std::get<1>(clim))));
+  pyobj().attr("autoscale")(Python::NewRef(Py_BuildValue("(ff)", std::get<0>(clim), std::get<1>(clim))));
   Python::Object scaleMin(pyobj().attr("vmin")), scaleMax(pyobj().attr("vmax"));
-  return std::make_tuple(PyFloat_AsDouble(scaleMin.ptr()),
-                         PyFloat_AsDouble(scaleMax.ptr()));
+  return std::make_tuple(PyFloat_AsDouble(scaleMin.ptr()), PyFloat_AsDouble(scaleMax.ptr()));
 }
 
 /**
  * Constructor
  * @param obj An existing Normalize instance or subtype
  */
-NormalizeBase::NormalizeBase(Python::Object obj)
-    : Python::InstanceHolder(std::move(obj)) {}
+NormalizeBase::NormalizeBase(Python::Object obj) : Python::InstanceHolder(std::move(obj)) {}
 
 // ------------------------ Normalize ------------------------------------------
 
@@ -131,8 +121,7 @@ Normalize::Normalize() : NormalizeBase(createNormalize()) {}
  * to [0, 1]
  * @param vmin Minimum value of the data interval
  * @param vmax Maximum value of the data interval */
-Normalize::Normalize(double vmin, double vmax)
-    : NormalizeBase(createNormalize(std::make_tuple(vmin, vmax))) {}
+Normalize::Normalize(double vmin, double vmax) : NormalizeBase(createNormalize(std::make_tuple(vmin, vmax))) {}
 
 // ------------------------ SymLogNorm -----------------------------------------
 /// The threshold below which the scale becomes linear
@@ -165,11 +154,8 @@ SymLogNorm::SymLogNorm(double linthresh, double linscale)
  * @param vmin Minimum value of the data interval
  * @param vmax Maximum value of the data interval
  */
-SymLogNorm::SymLogNorm(double linthresh, double linscale, double vmin,
-                       double vmax)
-    : NormalizeBase(
-          createSymLog(linthresh, linscale, std::make_tuple(vmin, vmax))),
-      m_linscale(linscale) {}
+SymLogNorm::SymLogNorm(double linthresh, double linscale, double vmin, double vmax)
+    : NormalizeBase(createSymLog(linthresh, linscale, std::make_tuple(vmin, vmax))), m_linscale(linscale) {}
 
 /**
  * @return An instance of the SymmetricalLogLocator
@@ -177,8 +163,8 @@ SymLogNorm::SymLogNorm(double linthresh, double linscale, double vmin,
 Python::Object SymLogNorm::tickLocator() const {
   GlobalInterpreterLock lock;
   // Create log transform with base=10
-  auto transform = scaleModule().attr("SymmetricalLogTransform")(
-      10, Python::Object(pyobj().attr("linthresh")), m_linscale);
+  auto transform =
+      scaleModule().attr("SymmetricalLogTransform")(10, Python::Object(pyobj().attr("linthresh")), m_linscale);
 
   // Sets the subs parameter to be [1,2,...,10]. The parameter determines where
   // the ticks on the colorbar are placed and setting it to this ensures that
@@ -187,8 +173,7 @@ Python::Object SymLogNorm::tickLocator() const {
   std::iota(subsVector.begin(), subsVector.end(), 1.f);
   auto subs = Converters::ToPyList<float>()(subsVector);
 
-  return Python::Object(
-      tickerModule().attr("SymmetricalLogLocator")(transform, subs));
+  return Python::Object(tickerModule().attr("SymmetricalLogLocator")(transform, subs));
 }
 
 /**
@@ -219,8 +204,7 @@ PowerNorm::PowerNorm(double gamma) : NormalizeBase(createPowerNorm(gamma)) {}
 PowerNorm::PowerNorm(double gamma, double vmin, double vmax)
     : NormalizeBase(createPowerNorm(gamma, std::make_tuple(vmin, vmax))) {}
 
-std::tuple<double, double>
-PowerNorm::autoscale(std::tuple<double, double> clim) {
+std::tuple<double, double> PowerNorm::autoscale(std::tuple<double, double> clim) {
   // Clipping was removed in matplotlib v3.2.0rc2 (Upstream PR #10234) so
   // autoscale will now map [-x,y] -> [0,1] which causes weird color bar scales
   // We now manually clamp min value to 0 so we map from [0,n]->[0,1]

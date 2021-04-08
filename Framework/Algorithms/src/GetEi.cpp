@@ -53,27 +53,22 @@ void GetEi::init() {
   val->add<WorkspaceUnitValidator>("TOF");
   val->add<HistogramValidator>();
   val->add<InstrumentValidator>();
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                            Direction::Input, val),
-      "The X units of this workspace must be time of flight with times in\n"
-      "micro-seconds");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, val),
+                  "The X units of this workspace must be time of flight with times in\n"
+                  "micro-seconds");
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty(
-      "Monitor1Spec", -1, mustBePositive,
-      "The spectrum number of the output of the first monitor, e.g. MAPS\n"
-      "41474, MARI 2, MERLIN 69634");
-  declareProperty(
-      "Monitor2Spec", -1, mustBePositive,
-      "The spectrum number of the output of the second monitor e.g. MAPS\n"
-      "41475, MARI 3, MERLIN 69638");
+  declareProperty("Monitor1Spec", -1, mustBePositive,
+                  "The spectrum number of the output of the first monitor, e.g. MAPS\n"
+                  "41474, MARI 2, MERLIN 69634");
+  declareProperty("Monitor2Spec", -1, mustBePositive,
+                  "The spectrum number of the output of the second monitor e.g. MAPS\n"
+                  "41475, MARI 3, MERLIN 69638");
   auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
-  declareProperty(
-      "EnergyEstimate", -1.0, positiveDouble,
-      "An approximate value for the typical incident energy, energy of\n"
-      "neutrons leaving the source (meV)");
+  declareProperty("EnergyEstimate", -1.0, positiveDouble,
+                  "An approximate value for the typical incident energy, energy of\n"
+                  "neutrons leaving the source (meV)");
   declareProperty("IncidentEnergy", -1.0, Direction::Output);
   declareProperty("FirstMonitorPeak", -1.0, Direction::Output);
 
@@ -107,50 +102,39 @@ void GetEi::exec() {
   // fit routines not to the expected thing
   g_log.information() << "Based on the user selected energy the first peak "
                          "will be searched for at TOF "
-                      << peakLoc0 << " micro seconds +/-"
-                      << boost::lexical_cast<std::string>(100.0 * HALF_WINDOW)
+                      << peakLoc0 << " micro seconds +/-" << boost::lexical_cast<std::string>(100.0 * HALF_WINDOW)
                       << "%\n";
   const double peakLoc1 = 1e6 * timeToFly(dist2moni1, E_est);
   g_log.information() << "Based on the user selected energy the second peak "
                          "will be searched for at TOF "
-                      << peakLoc1 << " micro seconds +/-"
-                      << boost::lexical_cast<std::string>(100.0 * HALF_WINDOW)
+                      << peakLoc1 << " micro seconds +/-" << boost::lexical_cast<std::string>(100.0 * HALF_WINDOW)
                       << "%\n";
 
   // get the histograms created by the monitors
   std::vector<size_t> indexes = getMonitorWsIndexs(inWS, mon1Spec, mon2Spec);
 
-  g_log.information()
-      << "Looking for a peak in the first monitor spectrum, spectra index "
-      << indexes[0] << '\n';
+  g_log.information() << "Looking for a peak in the first monitor spectrum, spectra index " << indexes[0] << '\n';
   double t_monitor0 = getPeakCentre(inWS, indexes[0], peakLoc0);
-  g_log.notice() << "The first peak has been found at TOF = " << t_monitor0
-                 << " microseconds\n";
+  g_log.notice() << "The first peak has been found at TOF = " << t_monitor0 << " microseconds\n";
   setProperty("FirstMonitorPeak", t_monitor0);
 
-  g_log.information()
-      << "Looking for a peak in the second monitor spectrum, spectra index "
-      << indexes[1] << '\n';
+  g_log.information() << "Looking for a peak in the second monitor spectrum, spectra index " << indexes[1] << '\n';
   double t_monitor1 = getPeakCentre(inWS, indexes[1], peakLoc1);
-  g_log.information() << "The second peak has been found at TOF = "
-                      << t_monitor1 << " microseconds\n";
+  g_log.information() << "The second peak has been found at TOF = " << t_monitor1 << " microseconds\n";
 
   // assumes that the source and the both mintors lie on one straight line, the
   // 1e-6 converts microseconds to seconds as the mean speed needs to be in m/s
-  double meanSpeed =
-      (dist2moni1 - dist2moni0) / (1e-6 * (t_monitor1 - t_monitor0));
+  double meanSpeed = (dist2moni1 - dist2moni0) / (1e-6 * (t_monitor1 - t_monitor0));
 
   // uses 0.5mv^2 to get the kinetic energy in joules which we then convert to
   // meV
   double E_i = neutron_E_At(meanSpeed) / PhysicalConstants::meV;
-  g_log.notice() << "The incident energy has been calculated to be " << E_i
-                 << " meV"
+  g_log.notice() << "The incident energy has been calculated to be " << E_i << " meV"
                  << " (your estimate was " << E_est << " meV)\n";
 
   setProperty("IncidentEnergy", E_i);
   // store property in input workspace
-  Property *incident_energy =
-      new PropertyWithValue<double>("Ei", E_i, Direction::Input);
+  Property *incident_energy = new PropertyWithValue<double>("Ei", E_i, Direction::Input);
   inWS->mutableRun().addProperty(incident_energy, true);
 }
 /** Gets the distances between the source and detectors whose IDs you pass to it
@@ -163,8 +147,7 @@ void GetEi::exec() {
  * passed to this function second
  *  @throw NotFoundError if no detector is found for the detector ID given
  */
-void GetEi::getGeometry(const API::MatrixWorkspace_const_sptr &WS,
-                        specnum_t mon0Spec, specnum_t mon1Spec,
+void GetEi::getGeometry(const API::MatrixWorkspace_const_sptr &WS, specnum_t mon0Spec, specnum_t mon1Spec,
                         double &monitor0Dist, double &monitor1Dist) const {
   const IComponent_const_sptr source = WS->getInstrument()->getSource();
 
@@ -173,9 +156,7 @@ void GetEi::getGeometry(const API::MatrixWorkspace_const_sptr &WS,
   try {
     monWI = WS->getIndexFromSpectrumNumber(mon0Spec);
   } catch (std::runtime_error &) {
-    g_log.error()
-        << "Could not find the workspace index for the monitor at spectrum "
-        << mon0Spec << "\n";
+    g_log.error() << "Could not find the workspace index for the monitor at spectrum " << mon0Spec << "\n";
     g_log.error() << "Error retrieving data for the first monitor\n";
     throw std::bad_cast();
   }
@@ -195,9 +176,7 @@ void GetEi::getGeometry(const API::MatrixWorkspace_const_sptr &WS,
   try {
     monWI = WS->getIndexFromSpectrumNumber(mon1Spec);
   } catch (std::runtime_error &) {
-    g_log.error()
-        << "Could not find the workspace index for the monitor at spectrum "
-        << mon0Spec << "\n";
+    g_log.error() << "Could not find the workspace index for the monitor at spectrum " << mon0Spec << "\n";
     g_log.error() << "Error retrieving data for the second monitor\n";
     throw std::bad_cast();
   }
@@ -219,10 +198,10 @@ void GetEi::getGeometry(const API::MatrixWorkspace_const_sptr &WS,
  *  @throw NotFoundError if one of the requested spectrum numbers was not found
  * in the workspace
  */
-std::vector<size_t> GetEi::getMonitorWsIndexs(
-    const API::MatrixWorkspace_const_sptr &WS, specnum_t specNum1,
-    specnum_t specNum2) const { // getting spectra numbers from detector IDs is
-                                // hard because the map works the other way,
+std::vector<size_t>
+GetEi::getMonitorWsIndexs(const API::MatrixWorkspace_const_sptr &WS, specnum_t specNum1,
+                          specnum_t specNum2) const { // getting spectra numbers from detector IDs is
+                                                      // hard because the map works the other way,
   // getting index numbers from spectra numbers has
   // the same problem and we are about to do both
 
@@ -285,8 +264,7 @@ double GetEi::timeToFly(double s, double E_KE) const {
  *  @throw out_of_range if the peak runs off the edge of the histogram
  *  @throw runtime_error a Child Algorithm just falls over
  */
-double GetEi::getPeakCentre(const API::MatrixWorkspace_const_sptr &WS,
-                            const size_t monitIn, const double peakTime) {
+double GetEi::getPeakCentre(const API::MatrixWorkspace_const_sptr &WS, const size_t monitIn, const double peakTime) {
   const auto &timesArray = WS->x(monitIn);
   // we search for the peak only inside some window because there are often more
   // peaks in the monitor histogram
@@ -298,10 +276,9 @@ double GetEi::getPeakCentre(const API::MatrixWorkspace_const_sptr &WS,
     // temporary workspace that will be deleted when this algorithm has finished
     extractSpec(ivsInd, peakTime - halfWin, peakTime + halfWin);
   } else {
-    throw Kernel::Exception::NotImplementedError(
-        "Spectra number exceeds maximal"
-        " integer number defined for this OS."
-        " This behaviour is not yet supported");
+    throw Kernel::Exception::NotImplementedError("Spectra number exceeds maximal"
+                                                 " integer number defined for this OS."
+                                                 " This behaviour is not yet supported");
   }
   // converting the workspace to count rate is required by the fitting algorithm
   // if the bin widths are not all the same
@@ -320,11 +297,9 @@ double GetEi::getPeakCentre(const API::MatrixWorkspace_const_sptr &WS,
   // the peak centre is defined as the centre of the two half maximum points as
   // this is better for asymmetric peaks
   // first loop backwards along the histogram to get the first half height point
-  const double lHalf =
-      findHalfLoc(centreGausInd, height, backGroundlev, GO_LEFT);
+  const double lHalf = findHalfLoc(centreGausInd, height, backGroundlev, GO_LEFT);
   // go forewards to get the half height on the otherside of the peak
-  const double rHalf =
-      findHalfLoc(centreGausInd, height, backGroundlev, GO_RIGHT);
+  const double rHalf = findHalfLoc(centreGausInd, height, backGroundlev, GO_RIGHT);
   // the peak centre is defined as the mean of the two half height times
   return (lHalf + rHalf) / 2;
 }
@@ -341,12 +316,10 @@ double GetEi::getPeakCentre(const API::MatrixWorkspace_const_sptr &WS,
  *  @throw invalid_argument if the input workspace does not have common binning
  */
 void GetEi::extractSpec(int wsInd, double start, double end) {
-  IAlgorithm_sptr childAlg = createChildAlgorithm(
-      "CropWorkspace", 100 * m_fracCompl, 100 * (m_fracCompl + CROP));
+  IAlgorithm_sptr childAlg = createChildAlgorithm("CropWorkspace", 100 * m_fracCompl, 100 * (m_fracCompl + CROP));
   m_fracCompl += CROP;
 
-  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace",
-                                              getProperty("InputWorkspace"));
+  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", getProperty("InputWorkspace"));
 
   childAlg->setProperty("XMin", start);
   childAlg->setProperty("XMax", end);
@@ -373,8 +346,7 @@ void GetEi::extractSpec(int wsInd, double start, double end) {
  * in the spectrum
  * @throw invalid_argument if the peak is not clearly above the background
  */
-void GetEi::getPeakEstimates(double &height, int64_t &centreInd,
-                             double &background) const {
+void GetEi::getPeakEstimates(double &height, int64_t &centreInd, double &background) const {
 
   const auto &X = m_tempWS->x(0);
   const auto &Y = m_tempWS->y(0);
@@ -394,17 +366,15 @@ void GetEi::getPeakEstimates(double &height, int64_t &centreInd,
 
   background = background / static_cast<double>(Y.size());
   if (height < PEAK_THRESH_H * background) {
-    throw std::invalid_argument(
-        "No peak was found or its height is less than the threshold of " +
-        boost::lexical_cast<std::string>(PEAK_THRESH_H) +
-        " times the mean background, was the energy estimate (" +
-        getPropertyValue("EnergyEstimate") + " meV) close enough?");
+    throw std::invalid_argument("No peak was found or its height is less than the threshold of " +
+                                boost::lexical_cast<std::string>(PEAK_THRESH_H) +
+                                " times the mean background, was the energy estimate (" +
+                                getPropertyValue("EnergyEstimate") + " meV) close enough?");
   }
 
   g_log.debug() << "Peak position is the bin that has the maximum Y value in "
                    "the monitor spectrum, which is at TOF "
-                << (X[centreInd] + X[centreInd + 1]) / 2 << " (peak height "
-                << height << " counts/microsecond)\n";
+                << (X[centreInd] + X[centreInd + 1]) / 2 << " (peak height " << height << " counts/microsecond)\n";
 }
 /** Estimates the closest time, looking either or back, when the number of
  * counts is
@@ -420,8 +390,7 @@ void GetEi::getPeakEstimates(double &height, int64_t &centreInd,
  * is found
  *  @throw invalid_argument if the peak is too thin
  */
-double GetEi::findHalfLoc(size_t startInd, const double height,
-                          const double noise, const direction go) const {
+double GetEi::findHalfLoc(size_t startInd, const double height, const double noise, const direction go) const {
   auto endInd = startInd;
 
   const auto &X = m_tempWS->x(0);
@@ -429,41 +398,36 @@ double GetEi::findHalfLoc(size_t startInd, const double height,
   while (Y[endInd] > (height + noise) / 2.0) {
     endInd += go;
     if (endInd < 1) {
-      throw std::out_of_range(
-          "Can't analyse peak, some of the peak is outside the " +
-          boost::lexical_cast<std::string>(HALF_WINDOW * 100) +
-          "% window, at TOF values that are too low. Was the energy estimate "
-          "close enough?");
+      throw std::out_of_range("Can't analyse peak, some of the peak is outside the " +
+                              boost::lexical_cast<std::string>(HALF_WINDOW * 100) +
+                              "% window, at TOF values that are too low. Was the energy estimate "
+                              "close enough?");
     }
     if (endInd > Y.size() - 2) {
-      throw std::out_of_range(
-          "Can't analyse peak, some of the peak is outside the " +
-          boost::lexical_cast<std::string>(HALF_WINDOW * 100) +
-          "% window, at TOF values that are too high. Was the energy estimate "
-          "close enough?");
+      throw std::out_of_range("Can't analyse peak, some of the peak is outside the " +
+                              boost::lexical_cast<std::string>(HALF_WINDOW * 100) +
+                              "% window, at TOF values that are too high. Was the energy estimate "
+                              "close enough?");
     }
   }
 
-  if (std::abs(static_cast<int64_t>(endInd - startInd)) <
-      PEAK_THRESH_W) { // we didn't find a significant peak
+  if (std::abs(static_cast<int64_t>(endInd - startInd)) < PEAK_THRESH_W) { // we didn't find a significant peak
     g_log.error() << "Likely precision problem or error, one half height "
                      "distance is less than the threshold number of bins from "
                      "the central peak: "
-                  << std::abs(static_cast<int>(endInd - startInd)) << "<"
-                  << PEAK_THRESH_W << ". Check the monitor peak\n";
+                  << std::abs(static_cast<int>(endInd - startInd)) << "<" << PEAK_THRESH_W
+                  << ". Check the monitor peak\n";
   }
   // we have a peak in range, do an area check to see if the peak has any
   // significance
   double hOverN = (height - noise) / noise;
   if (hOverN < PEAK_THRESH_A &&
-      std::abs(hOverN * static_cast<double>(endInd - startInd)) <
-          PEAK_THRESH_A) { // the peak could just be noise on the background,
-                           // ignore it
-    throw std::invalid_argument(
-        "No good peak was found. The ratio of the height to the background "
-        "multiplied either half widths must be above the threshold (>" +
-        boost::lexical_cast<std::string>(PEAK_THRESH_A) +
-        " bins). Was the energy estimate close enough?");
+      std::abs(hOverN * static_cast<double>(endInd - startInd)) < PEAK_THRESH_A) { // the peak could just be noise on
+                                                                                   // the background, ignore it
+    throw std::invalid_argument("No good peak was found. The ratio of the height to the background "
+                                "multiplied either half widths must be above the threshold (>" +
+                                boost::lexical_cast<std::string>(PEAK_THRESH_A) +
+                                " bins). Was the energy estimate close enough?");
   }
   // get the TOF value in the middle of the bin with the first value below the
   // half height
@@ -475,8 +439,7 @@ double GetEi::findHalfLoc(size_t startInd, const double height,
                             // from this is (y_1-y_2)/gradient. Gradient =
                             // (y_3-y_1)/(x_3-x_1) where (x_3, y_3) are the
                             // coordinates of the other bin we are using
-    double gradient =
-        (Y[endInd] - Y[endInd - go]) / (X[endInd] - X[endInd - go]);
+    double gradient = (Y[endInd] - Y[endInd - go]) / (X[endInd] - X[endInd - go]);
     // we don't need to check for a zero or negative gradient if we assume the
     // endInd bin was found when the Y-value dropped below the threshold
     double deltaY = Y[endInd] - (height + noise) / 2.0;
@@ -485,8 +448,7 @@ double GetEi::findHalfLoc(size_t startInd, const double height,
     halfTime -= deltaY / gradient;
   }
 
-  g_log.debug() << "One half height point found at TOF = " << halfTime
-                << " microseconds\n";
+  g_log.debug() << "One half height point found at TOF = " << halfTime << " microseconds\n";
   return halfTime;
 }
 /** Get the kinetic energy of a neuton in joules given it speed using E=mv^2/2
