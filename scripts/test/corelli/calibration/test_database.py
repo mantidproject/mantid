@@ -8,6 +8,7 @@
 
 from contextlib import contextmanager
 from datetime import datetime
+import numpy as np
 from numpy.testing import assert_allclose
 from os import path, remove
 import pathlib
@@ -18,13 +19,13 @@ import unittest
 
 from mantid import AnalysisDataService, config
 from mantid.api import mtd, WorkspaceGroup
-from mantid.dataobjects import TableWorkspace
+from mantid.dataobjects import MaskWorkspace, TableWorkspace
 from mantid.simpleapi import CreateEmptyTableWorkspace, CreateSampleWorkspace, DeleteWorkspaces, LoadNexusProcessed
 
 from corelli.calibration.database import (combine_spatial_banks, combine_temporal_banks, day_stamp, filename_bank_table,
                                           has_valid_columns, init_corelli_table, load_bank_table, load_calibration_set,
                                           new_corelli_calibration, save_bank_table, save_calibration_set,
-                                          save_manifest_file, verify_date_format)
+                                          save_manifest_file, _table_to_workspace, verify_date_format)
 from corelli.calibration.bank import calibrate_banks
 
 
@@ -102,7 +103,6 @@ class TestCorelliDatabase(unittest.TestCase):
         self.ws_group.addWorkspace(load_bank_table(40, self.database_path, '20200601'))
 
     def test_init_corelli_table(self):
-
         corelli_table = init_corelli_table()
         assert isinstance(corelli_table, TableWorkspace)
 
@@ -323,6 +323,27 @@ class TestCorelliDatabase(unittest.TestCase):
         assert mask.column(0) == mask_expected.column(0)
 
         database.cleanup()
+
+    def test_table_to_workspace(self) -> None:
+        r"""Test the conversion of a TableWorkspace containing the masked detector ID's to a MaskWorkspace object"""
+        output_workspace = 'masked'
+        # Have a fake mask table, masking bank 42
+        mask_table = CreateEmptyTableWorkspace(OutputWorkspace=output_workspace)
+        mask_table.addColumn(type='int', name='Detector ID')
+        begin, end = 167936, 172030  # # Bank 42 has detector ID's from 167936 to 172030
+        for detector_id in range(begin, 1 + end):
+            mask_table.addRow([detector_id])
+        # Convert to MaskWorkspace
+        mask_table = _table_to_workspace(mask_table)
+        # Check the output workspace is of type MaskWorkspace
+        assert isinstance(mask_table, MaskWorkspace)
+        # Check the output workspace has 1 on workspace indexes for bank 42, and 0 elsewhere
+        mask_flags = mask_table.extractY().flatten()
+        offset = 3  # due to the detector monitors, workspace_index = detector_id + offset
+        masked_workspace_indexes = slice(begin + offset, 1 + end + offset)
+        assert np.all(mask_flags[masked_workspace_indexes])  # all values are 1
+        mask_flags = np.delete(mask_flags, masked_workspace_indexes)
+        assert not np.any(mask_flags)  # no value is 1
 
     def test_load_calibration_set(self) -> None:
         r"""

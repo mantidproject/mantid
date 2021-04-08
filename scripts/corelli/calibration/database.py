@@ -466,11 +466,11 @@ def _table_to_workspace(input_workspace: Union[str, TableWorkspace],
     :return: handle to the MaskWorkspace
     """
     table_handle = mtd[str(input_workspace)]
+    detectors_masked = table_handle.column(0)  # list of masked detectors
     if output_workspace is None:
         output_workspace = str(input_workspace)
     LoadEmptyInstrument(InstrumentName='CORELLI', OutputWorkspace=output_workspace)
     ClearMaskFlag(Workspace=output_workspace)  # for good measure
-    detectors_masked = table_handle.column(0)  # list of masked detectors
     MaskDetectors(Workspace=output_workspace, DetectorList=detectors_masked)  # output_workspace is a Workspace2D
     # output_workspace is converted to a MaskWorkspace, where the Y-values of the spectra are now either 0 or 1
     ExtractMask(InputWorkspace=output_workspace, OutputWorkspace=output_workspace)
