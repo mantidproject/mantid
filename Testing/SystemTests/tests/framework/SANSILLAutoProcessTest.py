@@ -322,7 +322,8 @@ class D11_AutoProcess_Solvent_Test(systemtesting.MantidSystemTest):
             OutputWorkspace='solvents',
             BeamRadius='0.05',
             TransmissionBeamRadius=0.05,
-            ClearCorrected2DWorkspace=False
+            ClearCorrected2DWorkspace=False,
+            StitchReferenceIndex=0
         )
 
         tmp_dir = gettempdir()
@@ -346,7 +347,8 @@ class D11_AutoProcess_Solvent_Test(systemtesting.MantidSystemTest):
             CalculateResolution='MildnerCarpenter',
             OutputWorkspace='iq_mult_solvent',
             BeamRadius='0.05',
-            TransmissionBeamRadius=0.05
+            TransmissionBeamRadius=0.05,
+            StitchReferenceIndex=0
         )
 
 
