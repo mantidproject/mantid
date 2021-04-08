@@ -8,6 +8,7 @@ import argparse
 import os
 import pprint
 import re
+import site
 import sys
 
 QT_TAG_RE = re.compile(r'Qt_\d+_\d+_\d+')
@@ -41,10 +42,8 @@ class PyQtConfig(object):
           if sys.platform == 'darwin':
               prefix = '/usr/local/opt'  # brew Cellar
               possible_sip_dirs = []
-              if qt_maj_version == '4':
-                  possible_sip_dirs.append(os.path.join('pyqt@4', 'share', 'sip'))
-                  possible_sip_dirs.append(os.path.join('mantid-pyqt@4', 'share', 'sip'))
-              elif qt_maj_version == '5':
+              if qt_maj_version == '5':
+                  possible_sip_dirs.append(os.path.join(site.getsitepackages()[0], 'PyQt5', 'bindings'))
                   possible_sip_dirs.append(os.path.join('pyqt', 'share', 'sip', 'Qt5'))
                   possible_sip_dirs.append(os.path.join('mantid-pyqt5', 'share', 'sip', 'Qt5'))
               else:
@@ -57,8 +56,9 @@ class PyQtConfig(object):
                   'python{}-sip/{}'.format(sys.version_info.major, name),
                   'sip/{}'.format(name)
               )
-          for sip_dir in possible_sip_dirs:
-              pyqt_sip_dir = os.path.join(prefix, sip_dir)
+          for pyqt_sip_dir in possible_sip_dirs:
+              if not os.path.isabs(pyqt_sip_dir):
+                  pyqt_sip_dir = os.path.join(prefix, pyqt_sip_dir)
               if os.path.exists(pyqt_sip_dir):
                   self.sip_dir = pyqt_sip_dir
                   break
