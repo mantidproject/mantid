@@ -140,6 +140,7 @@ class EAAutoTabPresenter(object):
         self.match_table_presenter.clear_table()
 
     def extract_rows(self, table_name):
+        # Copies information in a table given the name of the table
         table = retrieve_ws(table_name)
         table_data = table.toDict()
         table_entries = []

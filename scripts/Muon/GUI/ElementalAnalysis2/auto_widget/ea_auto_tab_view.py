@@ -160,7 +160,10 @@ class EAAutoTabView(QtWidgets.QWidget):
                 parameters["min_width"] = float(self.min_width_line_edit.text())
                 parameters["max_width"] = float(self.max_width_line_edit.text())
                 parameters["estimate_width"] = float(self.estimate_width_line_edit.text())
-            if parameters["min_energy"] > parameters["max_energy"] or parameters["min_width"] > parameters["max_width"]:
+                if parameters["min_width"] > parameters["max_width"] and \
+                   parameters["min_width"] > parameters["estimate_width"] > parameters["max_width"]:
+                    raise ValueError()
+            if parameters["min_energy"] > parameters["max_energy"]:
                 raise ValueError()
 
         except ValueError:
