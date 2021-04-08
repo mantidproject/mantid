@@ -32,13 +32,8 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
-  std::string generateVariableSetupCode(std::vector<std::string> const &inputWorkspaces,
-                                        std::vector<std::size_t> const &workspaceIndices,
-                                        std::vector<double> const &startXs, std::vector<double> const &endXs,
-                                        Mantid::API::IFunction_const_sptr function) const;
-  std::string generateLoadingWorkspacesCode() const;
+  std::string generateVariableSetupCode() const;
   std::string generateSequentialFittingCode() const;
-  std::string generateFitOptionsString() const;
   std::string generateCodeForTidyingFitOutput() const;
   std::string generateCodeForPlottingFitOutput() const;
 

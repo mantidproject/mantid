@@ -131,16 +131,8 @@ std::map<std::string, std::string> GeneratePythonFitScript::validateInputs() {
 }
 
 void GeneratePythonFitScript::exec() {
-  std::vector<std::string> const inputWorkspaces = getProperty("InputWorkspaces");
-  std::vector<std::size_t> const workspaceIndices = getProperty("WorkspaceIndices");
-  std::vector<double> const startXs = getProperty("StartXs");
-  std::vector<double> const endXs = getProperty("EndXs");
-
-  IFunction_const_sptr function = getProperty("Function");
-
   std::string generatedScript;
-  generatedScript += generateVariableSetupCode(inputWorkspaces, workspaceIndices, startXs, endXs, function);
-  generatedScript += generateLoadingWorkspacesCode();
+  generatedScript += generateVariableSetupCode();
   generatedScript += generateSequentialFittingCode();
   generatedScript += generateCodeForTidyingFitOutput();
   generatedScript += generateCodeForPlottingFitOutput();
@@ -148,11 +140,19 @@ void GeneratePythonFitScript::exec() {
   savePythonScript(generatedScript);
 }
 
-std::string GeneratePythonFitScript::generateVariableSetupCode(std::vector<std::string> const &inputWorkspaces,
-                                                               std::vector<std::size_t> const &workspaceIndices,
-                                                               std::vector<double> const &startXs,
-                                                               std::vector<double> const &endXs,
-                                                               IFunction_const_sptr function) const {
+std::string GeneratePythonFitScript::generateVariableSetupCode() const {
+  std::vector<std::string> const inputWorkspaces = getProperty("InputWorkspaces");
+  std::vector<std::size_t> const workspaceIndices = getProperty("WorkspaceIndices");
+  std::vector<double> const startXs = getProperty("StartXs");
+  std::vector<double> const endXs = getProperty("EndXs");
+
+  int const maxIterations = getProperty("MaxIterations");
+  std::string const minimizer = getProperty("Minimizer");
+  std::string const costFunction = getProperty("CostFunction");
+  std::string const evaluationType = getProperty("EvaluationType");
+
+  IFunction_const_sptr function = getProperty("Function");
+
   std::string code = "# A python script generated to perform a sequential fit\n";
   code += "import matplotlib.pyplot as plt\n";
   code += "from mantid.simpleapi import *\n";
@@ -163,14 +163,10 @@ std::string GeneratePythonFitScript::generateVariableSetupCode(std::vector<std::
   code += "end_xs = " + constructPythonList(endXs) + "\n";
   code += "n_workspaces = len(input_workspaces)\n\n";
   code += "function = \"" + function->asString() + "\"\n\n";
-  return code;
-}
-
-std::string GeneratePythonFitScript::generateLoadingWorkspacesCode() const {
-  std::string code = "# Attempt to load the input workspaces if they are not already loaded\n";
-  code += "for workspace_name in input_workspaces:\n";
-  code += "    if not AnalysisDataService.doesExist(workspace_name):\n";
-  code += "        Load(Filename=workspace_name, OutputWorkspace=workspace_name)\n\n";
+  code += "max_iterations = " + std::to_string(maxIterations) + "\n";
+  code += "minimizer = \"" + minimizer + "\"\n";
+  code += "cost_function = \"" + costFunction + "\"\n";
+  code += "evaluation_type = \"" + evaluationType + "\"\n\n";
   return code;
 }
 
@@ -181,7 +177,8 @@ std::string GeneratePythonFitScript::generateSequentialFittingCode() const {
   code += "    fit_output = Fit(Function=function, InputWorkspace=input_workspaces[i], ";
   code += "WorkspaceIndex=workspace_indices[i], \n                     ";
   code += "StartX=start_xs[i], EndX=end_xs[i], ";
-  code += generateFitOptionsString();
+  code += "MaxIterations=max_iterations, Minimizer=minimizer, \n                     ";
+  code += "CostFunction=cost_function, EvaluationType=evaluation_type, CreateOutput=True)\n";
   code += "\n";
   code += "    output_workspaces.append(fit_output.OutputWorkspace)\n";
   code += "    parameter_tables.append(fit_output.OutputParameters)\n";
@@ -190,19 +187,6 @@ std::string GeneratePythonFitScript::generateSequentialFittingCode() const {
   code += "    # Use the parameters in the previous function as the start parameters of the next fit\n";
   code += "    function = fit_output.Function\n\n";
   return code;
-}
-
-std::string GeneratePythonFitScript::generateFitOptionsString() const {
-  int const maxIterations = getProperty("MaxIterations");
-  std::string const minimizer = getProperty("Minimizer");
-  std::string const costFunction = getProperty("CostFunction");
-  std::string const evaluationType = getProperty("EvaluationType");
-
-  std::string fitOptionsString = "MaxIterations=" + std::to_string(maxIterations) + ", ";
-  fitOptionsString += "Minimizer=\"" + minimizer + "\", \n                     ";
-  fitOptionsString += "CostFunction=\"" + costFunction + "\", ";
-  fitOptionsString += "EvaluationType=\"" + evaluationType + "\", CreateOutput=True)\n";
-  return fitOptionsString;
 }
 
 std::string GeneratePythonFitScript::generateCodeForTidyingFitOutput() const {
