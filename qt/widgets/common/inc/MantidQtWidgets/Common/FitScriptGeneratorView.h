@@ -19,8 +19,6 @@
 #include "MantidQtWidgets/Common/IFitScriptGeneratorView.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
-#include <Poco/NObserver.h>
-
 #include <memory>
 #include <string>
 #include <tuple>
@@ -96,7 +94,7 @@ public:
 
   void displayWarning(std::string const &message) override;
 
-  void setSuccessMessage(std::string const &filepath) override;
+  void showSuccessMessage(std::string const &filepath) override;
 
 public:
   /// Testing accessors
@@ -124,7 +122,7 @@ private slots:
   void onFittingModeChanged(FittingMode fittingMode);
   void onEditLocalParameterClicked(QString const &parameter);
   void onEditLocalParameterFinished(int result);
-  void onGenerateFitScriptClicked();
+  void onGenerateScriptToFileClicked();
 
 private:
   void connectUiSignals();
@@ -132,16 +130,12 @@ private:
   void setFitBrowserOptions(QMap<QString, QString> const &fitOptions);
   void setFittingMode(FittingMode fittingMode);
 
-  void handleConfigChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
-  void setSaveDirectoryMessage(std::string const &saveDirectory);
-
   IFitScriptGeneratorPresenter *m_presenter;
   std::unique_ptr<AddWorkspaceDialog> m_dialog;
   std::unique_ptr<FitScriptGeneratorDataTable> m_dataTable;
   std::unique_ptr<FunctionTreeView> m_functionTreeView;
   std::unique_ptr<BasicFitOptionsBrowser> m_fitOptionsBrowser;
   EditLocalParameterDialog *m_editLocalParameterDialog;
-  Poco::NObserver<FitScriptGeneratorView, Mantid::Kernel::ConfigValChangeNotification> m_configObserver;
   Ui::FitScriptGenerator m_ui;
 };
 

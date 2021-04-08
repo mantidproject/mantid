@@ -53,7 +53,7 @@ public:
     EditLocalParameterClicked,
     EditLocalParameterFinished,
     FittingModeChanged,
-    GenerateFitScriptClicked
+    GenerateScriptToFileClicked
   };
 
   IFitScriptGeneratorView(QWidget *parent = nullptr) : API::MantidWidget(parent) {}
@@ -110,7 +110,7 @@ public:
 
   virtual void displayWarning(std::string const &message) = 0;
 
-  virtual void setSuccessMessage(std::string const &filepath) = 0;
+  virtual void showSuccessMessage(std::string const &filepath) = 0;
 
 public:
   /// Testing accessors

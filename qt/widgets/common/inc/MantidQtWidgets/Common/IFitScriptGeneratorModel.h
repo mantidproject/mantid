@@ -107,9 +107,8 @@ public:
 
   [[nodiscard]] virtual std::tuple<bool, std::string> isValid() const = 0;
 
-  [[nodiscard]] virtual std::string
-  generatePythonFitScript(std::tuple<std::string, std::string, std::string, std::string> const &fitOptions,
-                          std::string const &filename) = 0;
+  virtual void generatePythonFitScript(std::tuple<std::string, std::string, std::string, std::string> const &fitOptions,
+                                       std::string const &filepath) = 0;
 };
 
 } // namespace MantidWidgets

@@ -627,8 +627,8 @@ std::string FitScriptGeneratorModel::generatePermissibleWarnings() const {
   return "";
 }
 
-std::string FitScriptGeneratorModel::generatePythonFitScript(
-    std::tuple<std::string, std::string, std::string, std::string> const &fitOptions, std::string const &filename) {
+void FitScriptGeneratorModel::generatePythonFitScript(
+    std::tuple<std::string, std::string, std::string, std::string> const &fitOptions, std::string const &filepath) {
   auto generateScript = AlgorithmManager::Instance().create("GeneratePythonFitScript");
   generateScript->initialize();
   generateScript->setProperty("InputWorkspaces", getInputWorkspaces());
@@ -644,10 +644,8 @@ std::string FitScriptGeneratorModel::generatePythonFitScript(
   generateScript->setProperty("CostFunction", costFunction);
   generateScript->setProperty("EvaluationType", evaluationType);
 
-  auto const filepath = constructFilepath(filename);
-  generateScript->setProperty("Filename", filepath);
+  generateScript->setProperty("Filepath", filepath);
   generateScript->execute();
-  return filepath;
 }
 
 std::vector<std::string> FitScriptGeneratorModel::getInputWorkspaces() const {
@@ -685,11 +683,6 @@ IFunction_sptr FitScriptGeneratorModel::getFunction() const {
   default:
     throw std::runtime_error("getFunction is not implemented for the simultaneous FittingMode.");
   }
-}
-
-std::string FitScriptGeneratorModel::constructFilepath(std::string const &filename) const {
-  auto const filepath = ConfigService::Instance().getString("defaultsave.directory") + filename;
-  return filepath.substr(filepath.size() - 3) == ".py" ? filepath : filepath + ".py";
 }
 
 } // namespace MantidWidgets

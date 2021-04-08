@@ -106,7 +106,7 @@ void GeneratePythonFitScript::init() {
       "The EvaluationType to be passed to the Fit algorithm in the Python script.", Kernel::Direction::Input);
 
   std::vector<std::string> extensions{".py"};
-  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save, extensions),
+  declareProperty(std::make_unique<FileProperty>("Filepath", "", FileProperty::Save, extensions),
                   "The name of the Python fit script which will be generated and saved in the selected location.");
 }
 
@@ -115,11 +115,11 @@ std::map<std::string, std::string> GeneratePythonFitScript::validateInputs() {
   std::vector<std::size_t> const workspaceIndices = getProperty("WorkspaceIndices");
   std::vector<double> const startXs = getProperty("StartXs");
   std::vector<double> const endXs = getProperty("EndXs");
-  auto const filename = getPropertyValue("Filename");
+  auto const filepath = getPropertyValue("Filepath");
 
   std::map<std::string, std::string> errors;
-  if (filename.empty())
-    errors["Filename"] = "A name must be provided for the Python fit script to be generated.";
+  if (filepath.empty())
+    errors["Filepath"] = "A filepath must be provided for the Python fit script to be generated.";
   if (workspaceIndices.size() != inputWorkspaces.size())
     errors["WorkspaceIndices"] = "The number of workspace indices must correspond to the number of input workspaces.";
   if (startXs.size() != inputWorkspaces.size())
@@ -214,9 +214,9 @@ std::string GeneratePythonFitScript::generateCodeForPlottingFitOutput() const {
 }
 
 void GeneratePythonFitScript::savePythonScript(std::string const &contents) const {
-  auto const filename = getPropertyValue("Filename");
+  auto const filepath = getPropertyValue("Filepath");
 
-  std::ofstream file(filename.c_str(), std::ofstream::trunc);
+  std::ofstream file(filepath.c_str(), std::ofstream::trunc);
   file << contents;
   file.flush();
   file.close();

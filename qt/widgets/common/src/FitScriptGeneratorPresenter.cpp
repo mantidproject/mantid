@@ -86,8 +86,8 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event, std::s
   case ViewEvent::EditLocalParameterFinished:
     handleEditLocalParameterFinished();
     return;
-  case ViewEvent::GenerateFitScriptClicked:
-    handleGenerateFitScriptClicked();
+  case ViewEvent::GenerateScriptToFileClicked:
+    handleGenerateScriptToFileClicked();
     return;
   default:
     throw std::runtime_error("Failed to notify the FitScriptGeneratorPresenter.");
@@ -233,15 +233,18 @@ void FitScriptGeneratorPresenter::handleFittingModeChanged(FittingMode fittingMo
   handleSelectionChanged();
 }
 
-void FitScriptGeneratorPresenter::handleGenerateFitScriptClicked() {
+void FitScriptGeneratorPresenter::handleGenerateScriptToFileClicked() {
   auto const [valid, message] = m_model->isValid();
 
   if (!message.empty())
     m_view->displayWarning(message);
 
   if (valid) {
-    auto const filepath = m_model->generatePythonFitScript(m_view->fitOptions(), m_view->filename());
-    m_view->setSuccessMessage(filepath);
+    auto const filepath = m_view->filename();
+    if (!filepath.empty()) {
+      m_model->generatePythonFitScript(m_view->fitOptions(), filepath);
+      m_view->showSuccessMessage(filepath);
+    }
   }
 }
 

@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitScriptGeneratorView.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorDataTable.h"
 #include "MantidQtWidgets/Common/FittingGlobals.h"
@@ -19,7 +20,11 @@
 
 #include <QApplication>
 #include <QClipboard>
+#include <QFileDialog>
 #include <QMessageBox>
+
+using namespace Mantid::Kernel;
+using namespace MantidQt::API;
 
 namespace {
 using MantidQt::MantidWidgets::WorkspaceIndex;
@@ -68,11 +73,17 @@ template <typename T> QList<T> convertToQList(std::vector<T> const &vec) {
   return qList;
 }
 
+QString getDefaultScriptDirectory() {
+  auto const previousDirectory = AlgorithmInputHistory::Instance().getPreviousDirectory();
+  if (previousDirectory.isEmpty())
+    return QString::fromStdString(ConfigService::Instance().getString("pythonscripts.directory"));
+  return previousDirectory;
+}
+
 } // namespace
 
 namespace MantidQt {
 namespace MantidWidgets {
-using namespace Mantid::Kernel;
 
 using ColumnIndex = FitScriptGeneratorDataTable::ColumnIndex;
 using ViewEvent = IFitScriptGeneratorView::Event;
@@ -82,8 +93,7 @@ FitScriptGeneratorView::FitScriptGeneratorView(QWidget *parent, FittingMode fitt
     : IFitScriptGeneratorView(parent), m_presenter(), m_dialog(std::make_unique<AddWorkspaceDialog>(this)),
       m_dataTable(std::make_unique<FitScriptGeneratorDataTable>()),
       m_functionTreeView(std::make_unique<FunctionTreeView>(nullptr, true)),
-      m_fitOptionsBrowser(std::make_unique<BasicFitOptionsBrowser>(nullptr)), m_editLocalParameterDialog(nullptr),
-      m_configObserver(*this, &FitScriptGeneratorView::handleConfigChange) {
+      m_fitOptionsBrowser(std::make_unique<BasicFitOptionsBrowser>(nullptr)), m_editLocalParameterDialog(nullptr) {
   m_ui.setupUi(this);
 
   m_ui.fDataTable->layout()->addWidget(m_dataTable.get());
@@ -94,14 +104,9 @@ FitScriptGeneratorView::FitScriptGeneratorView(QWidget *parent, FittingMode fitt
   setFittingMode(fittingMode);
   setFitBrowserOptions(fitOptions);
   connectUiSignals();
-
-  auto &configService = ConfigService::Instance();
-  configService.addObserver(m_configObserver);
-  setSaveDirectoryMessage(configService.getString("defaultsave.directory"));
 }
 
 FitScriptGeneratorView::~FitScriptGeneratorView() {
-  ConfigService::Instance().removeObserver(m_configObserver);
   m_dialog.reset();
   m_dataTable.reset();
   m_functionTreeView.reset();
@@ -140,7 +145,7 @@ void FitScriptGeneratorView::connectUiSignals() {
   connect(m_fitOptionsBrowser.get(), SIGNAL(fittingModeChanged(FittingMode)), this,
           SLOT(onFittingModeChanged(FittingMode)));
 
-  connect(m_ui.pbGenerateFitScript, SIGNAL(clicked()), this, SLOT(onGenerateFitScriptClicked()));
+  connect(m_ui.pbGenerateScriptToFile, SIGNAL(clicked()), this, SLOT(onGenerateScriptToFileClicked()));
 
   /// Disconnected because it causes a crash when selecting a table row while
   /// editing a parameters value. This is because selecting a different row will
@@ -243,8 +248,8 @@ void FitScriptGeneratorView::onEditLocalParameterFinished(int result) {
   m_editLocalParameterDialog = nullptr;
 }
 
-void FitScriptGeneratorView::onGenerateFitScriptClicked() {
-  m_presenter->notifyPresenter(ViewEvent::GenerateFitScriptClicked);
+void FitScriptGeneratorView::onGenerateScriptToFileClicked() {
+  m_presenter->notifyPresenter(ViewEvent::GenerateScriptToFileClicked);
 }
 
 std::string FitScriptGeneratorView::workspaceName(FitDomainIndex index) const {
@@ -325,7 +330,16 @@ std::tuple<std::string, std::string, std::string, std::string> FitScriptGenerato
           m_fitOptionsBrowser->getProperty("Cost Function"), m_fitOptionsBrowser->getProperty("Evaluation Type")};
 }
 
-std::string FitScriptGeneratorView::filename() const { return m_ui.leScriptName->text().toStdString(); }
+std::string FitScriptGeneratorView::filename() const {
+  auto const defaultDirectory = getDefaultScriptDirectory();
+  auto const filePath = QFileDialog::getSaveFileName(this->parentWidget(), tr("Save Script As "), defaultDirectory,
+                                                     tr("Script files (*.py)"));
+
+  if (!filePath.isEmpty())
+    API::AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(filePath).absoluteDir().path());
+
+  return filePath.toStdString();
+}
 
 void FitScriptGeneratorView::resetSelection() { m_dataTable->resetSelection(); }
 
@@ -360,24 +374,9 @@ void FitScriptGeneratorView::setGlobalParameters(std::vector<GlobalParameter> co
   m_functionTreeView->setGlobalParameters(convertToQStringList(globalToQString, globalParameters));
 }
 
-void FitScriptGeneratorView::handleConfigChange(ConfigValChangeNotification_ptr pNf) {
-  if (pNf->key() == "defaultsave.directory")
-    setSaveDirectoryMessage(pNf->curValue());
-}
-
-void FitScriptGeneratorView::setSaveDirectoryMessage(std::string const &saveDirectory) {
-  if (!saveDirectory.empty()) {
-    m_ui.lbSaveDirectory->setText(QString::fromStdString(saveDirectory));
-    m_ui.lbSaveDirectory->setStyleSheet("QLabel { color : black; }");
-  } else {
-    m_ui.lbSaveDirectory->setText("The default save directory must be set before generating a python script.");
-    m_ui.lbSaveDirectory->setStyleSheet("QLabel { color : red; }");
-  }
-}
-
-void FitScriptGeneratorView::setSuccessMessage(std::string const &filepath) {
-  m_ui.lbSaveDirectory->setText("Successfully generated fit script '" + QString::fromStdString(filepath) + "'");
-  m_ui.lbSaveDirectory->setStyleSheet("QLabel { color : green; }");
+void FitScriptGeneratorView::showSuccessMessage(std::string const &filepath) {
+  m_ui.lbMessage->setText("Successfully generated fit script '" + QString::fromStdString(filepath) + "'");
+  m_ui.lbMessage->setStyleSheet("QLabel { color : green; }");
 }
 
 void FitScriptGeneratorView::displayWarning(std::string const &message) {
