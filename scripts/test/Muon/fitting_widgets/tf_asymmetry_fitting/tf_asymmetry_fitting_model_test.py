@@ -249,25 +249,25 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
 
         self.assertEqual(self.model.current_normalisation_error(), normalisation_error)
 
-    def test_that_fix_current_normalisation_will_fix_the_current_normalisation_in_single_fit_mode(self):
+    def test_that_toggle_fix_current_normalisation_will_fix_the_current_normalisation_in_single_fit_mode(self):
         self.model.dataset_names = self.dataset_names
         self.model.tf_asymmetry_mode = True
         self.model.simultaneous_fitting_mode = False
         self.model.tf_asymmetry_single_functions = self.tf_single_fit_functions
 
         self.assertTrue(not self.model.is_current_normalisation_fixed())
-        self.model.fix_current_normalisation(True)
+        self.model.toggle_fix_current_normalisation(True)
 
         self.assertTrue(self.model.is_current_normalisation_fixed())
 
-    def test_that_fix_current_normalisation_will_fix_the_current_normalisation_in_simultaneous_fit_mode(self):
+    def test_that_toggle_fix_current_normalisation_will_fix_the_current_normalisation_in_simultaneous_fit_mode(self):
         self.model.dataset_names = self.dataset_names
         self.model.tf_asymmetry_mode = True
         self.model.simultaneous_fitting_mode = True
         self.model.tf_asymmetry_simultaneous_function = self.tf_simultaneous_fit_function
 
         self.assertTrue(not self.model.is_current_normalisation_fixed())
-        self.model.fix_current_normalisation(True)
+        self.model.toggle_fix_current_normalisation(True)
 
         self.assertTrue(self.model.is_current_normalisation_fixed())
 

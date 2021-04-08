@@ -219,7 +219,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.view.warning_popup.assert_called_once_with(error)
 
     def test_that_handle_fit_generator_clicked_will_attempt_to_open_the_fit_script_generator(self):
-        fit_options = {"Minimizer": self.model.minimizer, "EvaluationType": self.model.evaluation_type}
+        fit_options = {"Minimizer": self.model.minimizer, "Evaluation Type": self.model.evaluation_type}
         self.presenter._open_fit_script_generator_interface = mock.Mock()
 
         self.presenter.handle_fit_generator_clicked()
