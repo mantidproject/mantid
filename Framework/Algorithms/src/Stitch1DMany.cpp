@@ -76,6 +76,10 @@ void Stitch1DMany::init() {
       std::make_unique<VisibleWhenProperty>(useManualScaleFactorsTrue, manualScaleFactorsDefault, AND);
 
   setPropertySettings("ScaleFactorFromPeriod", std::move(scaleFactorFromPeriodVisible));
+
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
+  mustBePositive->setLower(0);
+  declareProperty("IndexOfReference", 0, mustBePositive, "Index of the workspace to be used as reference for scaling.");
 }
 
 /// Load and validate the algorithm's properties.
@@ -109,6 +113,13 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
         } else {
           auto inputMatrix = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(ws);
           column.emplace_back(inputMatrix);
+        }
+      }
+      if (!isDefault("IndexOfReference")) {
+        m_indexOfReference = static_cast<int>(this->getProperty("IndexOfReference"));
+        if (m_indexOfReference >= column.size() && m_indexOfReference >= m_inputWSMatrix.size()) {
+          issues["IndexOfReference"] = "The index of reference workspace is larger than the number of "
+                                       "provided workspaces.";
         }
       }
 
@@ -207,13 +218,12 @@ void Stitch1DMany::exec() {
     // Determine whether or not we are scaling workspaces using scale
     // factors from a specific period
     const bool usingScaleFromPeriod = m_useManualScaleFactors && isDefault("ManualScaleFactors");
-
     if (!usingScaleFromPeriod) {
       for (size_t i = 0; i < m_inputWSMatrix.front().size(); ++i) {
 
         outName = groupName;
         std::vector<double> scaleFactors;
-        doStitch1DMany(i, m_useManualScaleFactors, outName, scaleFactors);
+        doStitch1DMany(i, m_useManualScaleFactors, outName, scaleFactors, static_cast<int>(m_indexOfReference));
 
         // Add the resulting workspace to the list to be grouped together
         toGroup.emplace_back(outName);
@@ -227,7 +237,8 @@ void Stitch1DMany::exec() {
       std::vector<double> periodScaleFactors;
       constexpr bool storeInADS = false;
 
-      doStitch1DMany(m_scaleFactorFromPeriod, false, tempOutName, periodScaleFactors, storeInADS);
+      doStitch1DMany(m_scaleFactorFromPeriod, false, tempOutName, periodScaleFactors,
+                     static_cast<int>(m_indexOfReference), storeInADS);
 
       // Iterate over each period
       for (size_t i = 0; i < m_inputWSMatrix.front().size(); ++i) {
@@ -275,11 +286,17 @@ void Stitch1DMany::doStitch1D(std::vector<MatrixWorkspace_sptr> &toStitch,
 
   auto lhsWS = toStitch.front();
   outName += "_" + lhsWS->getName();
+  auto scaleRHSWorkspace = m_scaleRHSWorkspace;
 
   for (size_t i = 1; i < toStitch.size(); i++) {
-
     auto rhsWS = toStitch[i];
     outName += "_" + rhsWS->getName();
+    if (i == m_indexOfReference) {
+      // don't scale the RHS unless the desired index is the first ws
+      scaleRHSWorkspace = false;
+    } else if (i > m_indexOfReference) {
+      scaleRHSWorkspace = true; // after scaling to the desired ws, keep the scaling
+    }
 
     IAlgorithm_sptr alg = createChildAlgorithm("Stitch1D");
     alg->initialize();
@@ -290,7 +307,7 @@ void Stitch1DMany::doStitch1D(std::vector<MatrixWorkspace_sptr> &toStitch,
       alg->setProperty("EndOverlap", m_endOverlaps[i - 1]);
     }
     alg->setProperty("Params", m_params);
-    alg->setProperty("ScaleRHSWorkspace", m_scaleRHSWorkspace);
+    alg->setProperty("ScaleRHSWorkspace", scaleRHSWorkspace);
     alg->setProperty("UseManualScaleFactor", m_useManualScaleFactors);
     if (m_useManualScaleFactors)
       alg->setProperty("ManualScaleFactor", manualScaleFactors[i - 1]);
@@ -318,10 +335,12 @@ void Stitch1DMany::doStitch1D(std::vector<MatrixWorkspace_sptr> &toStitch,
  * factors
  * @param outName :: Output stitched workspace name
  * @param outScaleFactors :: Actual values used for scale factors
+ * @param indexOfReference :: Index of reference for scaling
  * @param storeInADS :: Whether to store in ADS or not
  */
 void Stitch1DMany::doStitch1DMany(const size_t period, const bool useManualScaleFactors, std::string &outName,
-                                  std::vector<double> &outScaleFactors, const bool storeInADS) {
+                                  std::vector<double> &outScaleFactors, const int indexOfReference,
+                                  const bool storeInADS) {
 
   // List of workspaces to stitch
   std::vector<std::string> toProcess;
@@ -345,6 +364,7 @@ void Stitch1DMany::doStitch1DMany(const size_t period, const bool useManualScale
   alg->setProperty("UseManualScaleFactors", useManualScaleFactors);
   if (useManualScaleFactors)
     alg->setProperty("ManualScaleFactors", m_manualScaleFactors);
+  alg->setProperty("IndexOfReference", indexOfReference);
   alg->execute();
 
   outScaleFactors = alg->getProperty("OutScaleFactors");
