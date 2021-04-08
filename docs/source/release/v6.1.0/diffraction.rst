@@ -82,6 +82,11 @@ Improvements
 - :ref:`FindPeaksMD <algm-FindPeaksMD>` has been modified to make use of the multiple goniometers add to :ref:`Run <mantid.api.Run>` and `goniometerIndex` add to MDEvents.
 - :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>` calculates intensity for satellite peaks with fractional HKL
 
+Bugfixes
+########
+- Correctly format FullProf files in :ref:`SaveReflections <algm-SaveReflections>` - there is now a title line in the header, the multiplicity is by default 1 and there are two rows per modulation vector.
+- :ref:`SaveReflections <algm-SaveReflections>` now determines the parent HKL of a satellite correctly, previously the satellite HKL was rounded.
+
 Instrument Updates
 ##################
 
