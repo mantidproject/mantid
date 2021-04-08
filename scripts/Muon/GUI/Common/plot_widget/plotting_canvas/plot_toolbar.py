@@ -7,11 +7,10 @@
 from mantidqt.icons import get_icon
 from qtpy import QtCore, QtWidgets
 from mantidqt.utils.observer_pattern import GenericObservable
-from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as NavigationToolbar)
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 
 class PlotToolbar(NavigationToolbar):
-
     def __init__(self, figure_canvas, parent=None):
         self.toolitems = (('Home', 'Reset original view', 'mdi.home', 'home'),
                           ('Back', 'Back to previous view', 'mdi.arrow-left', 'back'),
@@ -20,8 +19,8 @@ class PlotToolbar(NavigationToolbar):
                           ('Pan', 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan'),
                           ('Zoom', 'Zoom to rectangle', 'mdi.magnify', 'zoom'),
                           (None, None, None, None),
-                          ('Show major','Show major gridlines','mdi.grid-large','show_major_gridlines'),
-                          ('Show minor','Show minor gridlines','mdi.grid','show_minor_gridlines' ),
+                          ('Show major', 'Show major gridlines', 'mdi.grid-large', 'show_major_gridlines'),
+                          ('Show minor', 'Show minor gridlines', 'mdi.grid', 'show_minor_gridlines'),
                           (None, None, None, None),
                           ('Subplots', 'Edit subplots', 'mdi.settings', 'configure_subplots'),
                           ('Save', 'Save the figure', 'mdi.content-save', 'save_figure'),

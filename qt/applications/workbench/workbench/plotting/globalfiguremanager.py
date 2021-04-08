@@ -272,6 +272,12 @@ class GlobalFigureManager(object):
         """
         cls.notify_observers(FigureAction.VisibilityChanged, figure_number)
 
+    def _set_new_active_manager(self):
+        """
+        Currently overriding a function
+        """
+        pass
+
 
 GlobalFigureManager.initialiseFiguresObserver()
 atexit.register(GlobalFigureManager.destroy_all)

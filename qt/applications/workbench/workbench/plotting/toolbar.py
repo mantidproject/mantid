@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantid workbench.
-#
-#
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 from matplotlib.collections import LineCollection
 from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
@@ -35,7 +33,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     sig_waterfall_conversion = QtCore.Signal(bool)
     sig_change_line_collection_colour_triggered = QtCore.Signal(QtGui.QColor)
 
-    toolitems = (
+    custom_toolitems = (
         ('Home', 'Reset axes limits', 'mdi.home', 'on_home_clicked', None),
         ('Back', 'Back to previous view', 'mdi.arrow-left', 'back', None),
         ('Forward', 'Forward to next view', 'mdi.arrow-right', 'forward', None),
@@ -64,7 +62,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     )
 
     def _init_toolbar(self):
-        for text, tooltip_text, mdi_icon, callback, checked in self.toolitems:
+        for text, tooltip_text, mdi_icon, callback, checked in self.custom_toolitems:
             if text is None:
                 self.addSeparator()
             else:

@@ -6,8 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 import sys
+
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import cm
 from matplotlib.colorbar import Colorbar
 from matplotlib.colors import Normalize, SymLogNorm, PowerNorm, LogNorm
 from matplotlib.figure import Figure
