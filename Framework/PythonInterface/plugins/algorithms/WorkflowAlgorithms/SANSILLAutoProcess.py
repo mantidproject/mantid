@@ -102,6 +102,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
     radius = None
     thickness = None
     theta_dependent = None
+    n_wedges = None
 
     def category(self):
         return 'ILL\\SANS;ILL\\Auto'
@@ -354,7 +355,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup('CalculateResolution', 'Integration Options')
         self.declareProperty('ClearCorrected2DWorkspace', True,
                              'Whether to clear the fully corrected 2D workspace.')
-        self.copyProperties('SANSILLIntegration', ['ShapeTable'])
 
         self.declareProperty('SensitivityWithOffsets', False,
                              'Whether the sensitivity data has been measured with different horizontal offsets.')
@@ -362,6 +362,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty('StitchReferenceIndex', defaultValue=1,
                              validator=IntBoundedValidator(lower=0),
                              doc='Index of reference workspace during stitching.')
+
+        self.copyProperties('SANSILLIntegration', ['ShapeTable'])
 
     # flake8: noqa: C901
     def PyExec(self):
@@ -808,7 +810,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         else:
             panel_ws_group = ""
 
-        if self.n_wedges and self.output_type == "I(Q)":
+        if (self.n_wedges or self.getPropertyValue("ShapeTable")) and self.output_type == "I(Q)":
             output_wedges = self.output + "_wedge_d" + str(i + 1)
         else:
             output_wedges = ""
@@ -839,13 +841,15 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                         if len(self.deltaq) == self.dimensionality
                         else self.deltaq[0]),
                 IQxQyLogBinning=self.getProperty('IQxQyLogBinning').value,
-                WavelengthRange=self.getProperty('WavelengthRange').value
+                WavelengthRange=self.getProperty('WavelengthRange').value,
+                ShapeTable=self.getPropertyValue('ShapeTable')
                 )
 
         ConvertToPointData(InputWorkspace=output_sample, OutputWorkspace=output_sample)
 
         # wedges ungrouping and renaming
         if output_wedges:
+            self.n_wedges = mtd[output_wedges].size()
             wedges_old_names = [output_wedges + "_" + str(w + 1)
                                 for w in range(self.n_wedges)]
             wedges_new_names = [self.output + "_wedge_" + str(w + 1)

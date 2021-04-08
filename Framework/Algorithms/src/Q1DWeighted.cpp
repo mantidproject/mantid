@@ -131,7 +131,7 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
 
   m_asymmWedges = getProperty("AsymmetricWedges");
 
-  if (getPropertyValue("ShapeTable").empty()) {
+  if (isDefault("ShapeTable")) {
     const int wedges = getProperty("NumberOfWedges");
     m_nWedges = static_cast<size_t>(wedges);
 
@@ -219,6 +219,7 @@ void Q1DWeighted::getTableShapes() {
  */
 void Q1DWeighted::getViewportParams(const std::string &viewport,
                                     std::map<std::string, std::vector<double>> &viewportParams) {
+
   std::vector<std::string> params;
   boost::algorithm::split(params, viewport, boost::algorithm::is_any_of("\t, \n"));
 
@@ -298,12 +299,7 @@ void Q1DWeighted::getSectorParams(std::vector<std::string> &params,
  * @brief Q1DWeighted::checkIfSymetricalWedge
  * Check if the symetrical wedge to the one defined by the parameters is already
  * registered in the parameter list
- * @param innerRadius the inner radius
- * @param outerRadius the outer radius
- * @param centerX the x position of the center
- * @param centerY the y position of the center
- * @param centerAngle the center of the wedge
- * @param angleRange the angular range of the wedge
+ * @param wedge the wedge whose symmetrical we are looking for
  * @return true if a symetrical wedge already exists
  */
 bool Q1DWeighted::checkIfSymetricalWedge(Q1DWeighted::wedgeParameters &wedge) {
@@ -312,9 +308,15 @@ bool Q1DWeighted::checkIfSymetricalWedge(Q1DWeighted::wedgeParameters &wedge) {
     double diffAngle = std::fabs(std::fmod(wedge.angleMiddle - params.angleMiddle, M_PI));
 
     double epsilon = 1e-3;
-    if (wedge.innerRadius == params.innerRadius && wedge.outerRadius == params.outerRadius &&
-        wedge.centerX == params.centerX && wedge.centerY == params.centerY &&
-        std::fabs(wedge.angleRange - params.angleRange) < epsilon && std::fabs(diffAngle - M_PI) < epsilon) {
+    bool hasSameRadii = wedge.innerRadius == params.innerRadius && wedge.outerRadius == params.outerRadius;
+
+    bool hasSameCenter = wedge.centerX == params.centerX && wedge.centerY == params.centerY;
+
+    bool hasSameAngleRange = std::fabs(wedge.angleRange - params.angleRange) < epsilon;
+
+    bool hasSymmetricalAngle = std::fabs(diffAngle - M_PI) < epsilon || diffAngle < epsilon;
+
+    if (hasSameRadii && hasSameCenter && hasSameAngleRange && hasSymmetricalAngle) {
       return true;
     }
   }
