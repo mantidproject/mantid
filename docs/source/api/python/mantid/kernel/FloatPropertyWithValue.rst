@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::Kernel::FloatPropertyWithValue
 
 .. module:`mantid.kernel`
 
-.. autoclass:: mantid.kernel.FloatPropertyWithValue 
+.. autoclass:: mantid.kernel.FloatPropertyWithValue
     :members:
     :undoc-members:
     :inherited-members:

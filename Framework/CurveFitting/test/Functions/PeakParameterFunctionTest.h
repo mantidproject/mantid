@@ -25,23 +25,18 @@ public:
   // This means the constructor isn't called when running other tests
   PeakParameterFunctionTest() { FrameworkManager::Instance(); }
 
-  static PeakParameterFunctionTest *createSuite() {
-    return new PeakParameterFunctionTest();
-  }
+  static PeakParameterFunctionTest *createSuite() { return new PeakParameterFunctionTest(); }
   static void destroySuite(PeakParameterFunctionTest *suite) { delete suite; }
 
   void testFunction() {
-    FunctionParameterDecorator_sptr fn =
-        std::dynamic_pointer_cast<FunctionParameterDecorator>(
-            FunctionFactory::Instance().createFunction(
-                "PeakParameterFunction"));
+    FunctionParameterDecorator_sptr fn = std::dynamic_pointer_cast<FunctionParameterDecorator>(
+        FunctionFactory::Instance().createFunction("PeakParameterFunction"));
 
     TS_ASSERT(fn);
 
     fn->setDecoratedFunction("Gaussian");
 
-    IPeakFunction_sptr peakFunction =
-        std::dynamic_pointer_cast<IPeakFunction>(fn->getDecoratedFunction());
+    IPeakFunction_sptr peakFunction = std::dynamic_pointer_cast<IPeakFunction>(fn->getDecoratedFunction());
 
     FunctionDomain1DVector domain(std::vector<double>(4, 0.0));
     FunctionValues values(domain);
@@ -55,10 +50,8 @@ public:
   }
 
   void testFunctionDeriv() {
-    FunctionParameterDecorator_sptr fn =
-        std::dynamic_pointer_cast<FunctionParameterDecorator>(
-            FunctionFactory::Instance().createFunction(
-                "PeakParameterFunction"));
+    FunctionParameterDecorator_sptr fn = std::dynamic_pointer_cast<FunctionParameterDecorator>(
+        FunctionFactory::Instance().createFunction("PeakParameterFunction"));
 
     TS_ASSERT(fn);
 
@@ -87,10 +80,8 @@ public:
   }
 
   void testWrongDomainSize() {
-    FunctionParameterDecorator_sptr fn =
-        std::dynamic_pointer_cast<FunctionParameterDecorator>(
-            FunctionFactory::Instance().createFunction(
-                "PeakParameterFunction"));
+    FunctionParameterDecorator_sptr fn = std::dynamic_pointer_cast<FunctionParameterDecorator>(
+        FunctionFactory::Instance().createFunction("PeakParameterFunction"));
 
     TS_ASSERT(fn);
 
@@ -100,17 +91,13 @@ public:
     FunctionValues values(domain);
     Mantid::CurveFitting::Jacobian jacobian(domain.size(), 3);
 
-    TS_ASSERT_THROWS(fn->function(domain, values),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(fn->functionDeriv(domain, jacobian),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn->function(domain, values), const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn->functionDeriv(domain, jacobian), const std::invalid_argument &);
   }
 
   void testNoFunctionSet() {
-    FunctionParameterDecorator_sptr fn =
-        std::dynamic_pointer_cast<FunctionParameterDecorator>(
-            FunctionFactory::Instance().createFunction(
-                "PeakParameterFunction"));
+    FunctionParameterDecorator_sptr fn = std::dynamic_pointer_cast<FunctionParameterDecorator>(
+        FunctionFactory::Instance().createFunction("PeakParameterFunction"));
 
     TS_ASSERT(fn);
 
@@ -119,20 +106,16 @@ public:
     Mantid::CurveFitting::Jacobian jacobian(domain.size(), 3);
 
     TS_ASSERT_THROWS(fn->function(domain, values), const std::runtime_error &);
-    TS_ASSERT_THROWS(fn->functionDeriv(domain, jacobian),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(fn->functionDeriv(domain, jacobian), const std::runtime_error &);
   }
 
   void testBeforeDecoratedFunctionSet() {
-    FunctionParameterDecorator_sptr fn =
-        std::dynamic_pointer_cast<FunctionParameterDecorator>(
-            FunctionFactory::Instance().createFunction(
-                "PeakParameterFunction"));
+    FunctionParameterDecorator_sptr fn = std::dynamic_pointer_cast<FunctionParameterDecorator>(
+        FunctionFactory::Instance().createFunction("PeakParameterFunction"));
 
     TS_ASSERT(fn);
 
     TS_ASSERT_THROWS_NOTHING(fn->setDecoratedFunction("Gaussian"));
-    TS_ASSERT_THROWS(fn->setDecoratedFunction("Chebyshev"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn->setDecoratedFunction("Chebyshev"), const std::invalid_argument &);
   }
 };

@@ -33,12 +33,12 @@ introduction on event filtering in MantidPlot.
 Usage
 -----
 
-**Example - Using a relative and absolute times**  
+**Example - Using a relative and absolute times**
 
 .. testcode:: ExFilter
 
     ws = CreateSampleWorkspace("Event",BankPixelWidth=1)
-    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:00:00", Value=100) 
+    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:00:00", Value=100)
     AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:10:00", Value=100)
     AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:20:00", Value=100)
     AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:30:00", Value=100)

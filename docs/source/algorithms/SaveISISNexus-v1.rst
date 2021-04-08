@@ -30,7 +30,7 @@ Usage
 .. testcleanup::
 
   os.remove(filePath)
-  
+
 .. categories::
 
 .. sourcelink::

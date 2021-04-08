@@ -63,9 +63,8 @@ public:
     TS_ASSERT(ld.isExecuted());
 
     Mantid::API::MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve("outWS")););
+    TS_ASSERT_THROWS_NOTHING(ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve("outWS")););
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -109,37 +108,30 @@ public:
   /** Compare to LoadEventNexus */
   void xtest_compare_to_event() ///< DISABLED because it takes ~ 4 seconds.
   {
-    FrameworkManager::Instance().exec("LoadTOFRawNexus", 4, "Filename",
-                                      "CNCS_7860.nxs", "OutputWorkspace",
-                                      "outWS");
+    FrameworkManager::Instance().exec("LoadTOFRawNexus", 4, "Filename", "CNCS_7860.nxs", "OutputWorkspace", "outWS");
 
-    FrameworkManager::Instance().exec("LoadEventNexus", 4, "Filename",
-                                      "CNCS_7860_event.nxs", "OutputWorkspace",
+    FrameworkManager::Instance().exec("LoadEventNexus", 4, "Filename", "CNCS_7860_event.nxs", "OutputWorkspace",
                                       "outWS_event");
 
     // Convert to 2D
-    FrameworkManager::Instance().exec(
-        "Rebin", 8, "InputWorkspace", "outWS_event", "Params",
-        "43000, 100, 63000, 1, 63001", "OutputWorkspace", "outWS_event_2D",
-        "PreserveEvents", "0");
+    FrameworkManager::Instance().exec("Rebin", 8, "InputWorkspace", "outWS_event", "Params",
+                                      "43000, 100, 63000, 1, 63001", "OutputWorkspace", "outWS_event_2D",
+                                      "PreserveEvents", "0");
 
     // Compare workspaces
-    Mantid::API::IAlgorithm_sptr alg = FrameworkManager::Instance().exec(
-        "CompareWorkspaces", 8, "Workspace1", "outWS", "Workspace2",
-        "outWS_event_2D", "Tolerance", "1e-4", "CheckAxes", "0");
+    Mantid::API::IAlgorithm_sptr alg =
+        FrameworkManager::Instance().exec("CompareWorkspaces", 8, "Workspace1", "outWS", "Workspace2", "outWS_event_2D",
+                                          "Tolerance", "1e-4", "CheckAxes", "0");
     // We skip Axis check because of floating point imprecision makes a false
     // negative.
 
     TS_ASSERT(alg->getProperty("Result"));
 
     Mantid::API::MatrixWorkspace_sptr ws1, ws2;
-    TS_ASSERT_THROWS_NOTHING(
-        ws1 = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve("outWS")););
-    TS_ASSERT_THROWS_NOTHING(
-        ws2 = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                "outWS_event_2D")););
+    TS_ASSERT_THROWS_NOTHING(ws1 = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve("outWS")););
+    TS_ASSERT_THROWS_NOTHING(ws2 = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve("outWS_event_2D")););
     TS_ASSERT(ws1);
     if (!ws1)
       return;
@@ -155,14 +147,12 @@ public:
   void test_bad_signal_fails() {
     Mantid::API::IAlgorithm_sptr alg;
     // Number points to a 2D data set
-    alg = FrameworkManager::Instance().exec("LoadTOFRawNexus", 6, "Filename",
-                                            "REF_L_32035.nxs", "Signal", "2",
+    alg = FrameworkManager::Instance().exec("LoadTOFRawNexus", 6, "Filename", "REF_L_32035.nxs", "Signal", "2",
                                             "OutputWorkspace", "outWS");
     TS_ASSERT(!alg->isExecuted());
 
     // Number is too big
-    alg = FrameworkManager::Instance().exec("LoadTOFRawNexus", 6, "Filename",
-                                            "REF_L_32035.nxs", "Signal", "6",
+    alg = FrameworkManager::Instance().exec("LoadTOFRawNexus", 6, "Filename", "REF_L_32035.nxs", "Signal", "6",
                                             "OutputWorkspace", "outWS");
     TS_ASSERT(!alg->isExecuted());
   }
@@ -184,8 +174,7 @@ public:
    * @param signal :: signal number to load
    * @param expectedXLength :: # of bins
    * */
-  Mantid::API::MatrixWorkspace_sptr do_test_signal(int signal,
-                                                   size_t expectedXLength) {
+  Mantid::API::MatrixWorkspace_sptr do_test_signal(int signal, size_t expectedXLength) {
     Mantid::API::AnalysisDataService::Instance().remove("outWS");
     std::string filename = "NOM_2011_09_15T16_17_30Z_histo.nxs";
     Mantid::API::FrameworkManager::Instance();
@@ -194,8 +183,7 @@ public:
     try {
       ld.setPropertyValue("Filename", filename);
     } catch (...) {
-      std::cout << "Test not completed due to missing data file " << filename
-                << '\n';
+      std::cout << "Test not completed due to missing data file " << filename << '\n';
       return Mantid::API::MatrixWorkspace_sptr();
     }
     ld.setProperty("Signal", signal);
@@ -204,9 +192,8 @@ public:
     TS_ASSERT(ld.isExecuted());
 
     Mantid::API::MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve("outWS")););
+    TS_ASSERT_THROWS_NOTHING(ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve("outWS")););
     TS_ASSERT(ws);
     if (!ws)
       return ws;

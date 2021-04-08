@@ -30,31 +30,25 @@ DECLARE_ALGORITHM(SliceMD)
 /** Initialize the algorithm's properties.
  */
 void SliceMD::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input MDWorkspace.");
 
   // Properties for specifying the slice to perform.
   this->initSlicingProps();
 
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace.");
 
-  declareProperty(
-      std::make_unique<FileProperty>("OutputFilename", "",
-                                     FileProperty::OptionalSave, ".nxs"),
-      "Optional: Specify a NeXus file to write if you want the output "
-      "workspace to be file-backed.");
+  declareProperty(std::make_unique<FileProperty>("OutputFilename", "", FileProperty::OptionalSave, ".nxs"),
+                  "Optional: Specify a NeXus file to write if you want the output "
+                  "workspace to be file-backed.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<int>>("Memory", -1),
-      "If OutputFilename is specified to use a file back end:\n"
-      "  The amount of memory (in MB) to allocate to the in-memory cache.\n"
-      "  If not specified, a default of 40% of free physical memory is used.");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("Memory", -1),
+                  "If OutputFilename is specified to use a file back end:\n"
+                  "  The amount of memory (in MB) to allocate to the in-memory cache.\n"
+                  "  If not specified, a default of 40% of free physical memory is used.");
 
-  declareProperty("TakeMaxRecursionDepthFromInput", true,
-                  "Copy the maximum recursion depth from the input workspace.");
+  declareProperty("TakeMaxRecursionDepthFromInput", true, "Copy the maximum recursion depth from the input workspace.");
 
   auto mustBePositiveInteger = std::make_shared<BoundedValidator<int>>();
   mustBePositiveInteger->setLower(0);
@@ -63,8 +57,7 @@ void SliceMD::init() {
                   "Sets the maximum recursion depth to use. Can be used to "
                   "constrain the workspaces internal structure");
   setPropertySettings("MaxRecursionDepth",
-                      std::make_unique<EnabledWhenProperty>(
-                          "TakeMaxRecursionDepthFromInput", IS_EQUAL_TO, "0"));
+                      std::make_unique<EnabledWhenProperty>("TakeMaxRecursionDepthFromInput", IS_EQUAL_TO, "0"));
 
   setPropertyGroup("OutputFilename", "File Back-End");
   setPropertyGroup("Memory", "File Back-End");
@@ -78,9 +71,7 @@ void SliceMD::init() {
  * @param srcEvent :: the source event, being copied
  * @param newEvent :: the destination event
  */
-template <size_t nd, size_t ond>
-inline void copyEvent(const MDLeanEvent<nd> &srcEvent,
-                      MDLeanEvent<ond> &newEvent) {
+template <size_t nd, size_t ond> inline void copyEvent(const MDLeanEvent<nd> &srcEvent, MDLeanEvent<ond> &newEvent) {
   // Nothing extra copy - this is no-op
   UNUSED_ARG(srcEvent);
   UNUSED_ARG(newEvent);
@@ -94,8 +85,7 @@ inline void copyEvent(const MDLeanEvent<nd> &srcEvent,
  * @param srcEvent :: the source event, being copied
  * @param newEvent :: the destination event
  */
-template <size_t nd, size_t ond>
-inline void copyEvent(const MDEvent<nd> &srcEvent, MDEvent<ond> &newEvent) {
+template <size_t nd, size_t ond> inline void copyEvent(const MDEvent<nd> &srcEvent, MDEvent<ond> &newEvent) {
   newEvent.setDetectorId(srcEvent.getDetectorID());
   newEvent.setRunIndex(srcEvent.getRunIndex());
 }
@@ -110,8 +100,7 @@ inline void copyEvent(const MDEvent<nd> &srcEvent, MDEvent<ond> &newEvent) {
 template <typename MDE, size_t nd, typename OMDE, size_t ond>
 void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Create the ouput workspace
-  typename MDEventWorkspace<OMDE, ond>::sptr outWS(
-      new MDEventWorkspace<OMDE, ond>());
+  typename MDEventWorkspace<OMDE, ond>::sptr outWS(new MDEventWorkspace<OMDE, ond>());
   for (auto &binDimension : m_binDimensions) {
     outWS->addDimension(binDimension);
   }
@@ -135,11 +124,9 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   }
   obc->setSplitThreshold(bc->getSplitThreshold());
 
-  bool bTakeDepthFromInputWorkspace =
-      getProperty("TakeMaxRecursionDepthFromInput");
+  bool bTakeDepthFromInputWorkspace = getProperty("TakeMaxRecursionDepthFromInput");
   int tempDepth = getProperty("MaxRecursionDepth");
-  size_t maxDepth =
-      bTakeDepthFromInputWorkspace ? bc->getMaxDepth() : size_t(tempDepth);
+  size_t maxDepth = bTakeDepthFromInputWorkspace ? bc->getMaxDepth() : size_t(tempDepth);
   obc->setMaxDepth(maxDepth);
 
   // size_t outputSize = writeBufSize;
@@ -260,8 +247,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   // Account for events that were added after the last split
   totalAdded += numSinceSplit;
-  g_log.notice() << totalAdded << " " << OMDE::getTypeName()
-                 << "s added to the output workspace.\n";
+  g_log.notice() << totalAdded << " " << OMDE::getTypeName() << "s added to the output workspace.\n";
 
   if (outWS->isFileBacked()) {
     // Update the file-back-end
@@ -275,16 +261,13 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   try {
     outWS->copyExperimentInfos(*ws);
   } catch (std::runtime_error &) {
-    g_log.warning()
-        << this->name()
-        << " was not able to copy experiment info to output workspace "
-        << outWS->getName() << '\n';
+    g_log.warning() << this->name() << " was not able to copy experiment info to output workspace " << outWS->getName()
+                    << '\n';
   }
 
   // Pass on the display normalization from the input event workspace to the
   // output event workspace
-  IMDEventWorkspace_sptr outEvent =
-      std::dynamic_pointer_cast<IMDEventWorkspace>(outWS);
+  IMDEventWorkspace_sptr outEvent = std::dynamic_pointer_cast<IMDEventWorkspace>(outWS);
   outEvent->setDisplayNormalization(ws->displayNormalization());
   outEvent->setDisplayNormalizationHisto(ws->displayNormalizationHisto());
   // return the size of the input workspace write buffer to its initial value
@@ -294,8 +277,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
 //----------------------------------------------------------------------------------------------
 /// Helper method
-template <typename MDE, size_t nd>
-void SliceMD::doExec(typename MDEventWorkspace<MDE, nd>::sptr ws) {
+template <typename MDE, size_t nd> void SliceMD::doExec(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (m_outD == 0)
     throw std::runtime_error("No output dimensions specified!");
 
@@ -311,8 +293,7 @@ void SliceMD::doExec(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     else if (m_outD == 4)
       this->slice<MDE, nd, MDLeanEvent<4>, 4>(ws);
     else
-      throw std::runtime_error(
-          "Number of output dimensions > 4. This is not currently handled.");
+      throw std::runtime_error("Number of output dimensions > 4. This is not currently handled.");
   } else if (MDE::getTypeName() == "MDEvent") {
     if (m_outD == 1)
       this->slice<MDE, nd, MDEvent<1>, 1>(ws);
@@ -323,11 +304,9 @@ void SliceMD::doExec(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     else if (m_outD == 4)
       this->slice<MDE, nd, MDEvent<4>, 4>(ws);
     else
-      throw std::runtime_error(
-          "Number of output dimensions > 4. This is not currently handled.");
+      throw std::runtime_error("Number of output dimensions > 4. This is not currently handled.");
   } else
-    throw std::runtime_error("Unexpected MDEvent type '" + MDE::getTypeName() +
-                             "'. This is not currently handled.");
+    throw std::runtime_error("Unexpected MDEvent type '" + MDE::getTypeName() + "'. This is not currently handled.");
 }
 
 //----------------------------------------------------------------------------------------------

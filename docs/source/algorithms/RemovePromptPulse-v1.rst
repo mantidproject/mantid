@@ -21,7 +21,7 @@ Usage
     from numpy import *
     x=arange(0,100000,10)
     y=0*x+1
-    w=CreateWorkspace(x,y[1:],UnitX="TOF")   
+    w=CreateWorkspace(x,y[1:],UnitX="TOF")
 
     #apply algorithm
     w1=RemovePromptPulse(w,Width=5000,Frequency=50)
@@ -30,7 +30,7 @@ Usage
     #do some checks
     x=w1.dataX(0)
     y=w1.dataY(0)
-    
+
     print("Y( {} ) =  {:.1f}".format(x[100], y[100]))
     print("Y( {} ) =  {:.1f}".format(x[1000], y[1000]))
     print("Y( {} ) =  {:.1f}".format(x[4100], y[4100]))
@@ -44,7 +44,7 @@ Usage
 Output:
 
 .. testoutput:: RemovePromptPulse
-    
+
     Y( 1000.0 ) =  0.0
     Y( 10000.0 ) =  1.0
     Y( 41000.0 ) =  0.0

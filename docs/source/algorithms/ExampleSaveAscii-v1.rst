@@ -37,13 +37,13 @@ Usage
     # Get the default save path
     workdir = config['defaultsave.directory']
     filepath = os.path.join(workdir, filename)
-    
+
     # Read and print first 3 lines from file
     with open(filepath, 'r') as f:
         print(f.readline()[:-1])
         print(f.readline()[:-1])
         print(f.readline()[:-1])
-    
+
     # Delete the test file
     os.remove(filepath)
 

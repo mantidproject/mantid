@@ -25,20 +25,20 @@ public:
     double xp1w2[3] = {1, 2, 1}; //(x+1)^2 one solution
     std::pair<std::complex<double>, std::complex<double>> output;
     TS_ASSERT_EQUALS(solveQuadratic(xp1w2, output), 1);
-    std::pair<std::complex<double>, std::complex<double>> result(
-        std::complex<double>(-1.0, 0.0), std::complex<double>(-1.0, 0.0));
+    std::pair<std::complex<double>, std::complex<double>> result(std::complex<double>(-1.0, 0.0),
+                                                                 std::complex<double>(-1.0, 0.0));
     TS_ASSERT_EQUALS(output, result);
 
     double test2[3] = {1, 0, -1}; // two rational roots
     TS_ASSERT_EQUALS(solveQuadratic(test2, output), 2);
-    std::pair<std::complex<double>, std::complex<double>> result2(
-        std::complex<double>(-1.0, 0.0), std::complex<double>(1.0, 0.0));
+    std::pair<std::complex<double>, std::complex<double>> result2(std::complex<double>(-1.0, 0.0),
+                                                                  std::complex<double>(1.0, 0.0));
     TS_ASSERT_EQUALS(output, result2);
 
     double test3[3] = {1, 0, 1}; // two complex roots
     TS_ASSERT_EQUALS(solveQuadratic(test3, output), 2);
-    std::pair<std::complex<double>, std::complex<double>> result3(
-        std::complex<double>(0.0, -1.0), std::complex<double>(0.0, 1.0));
+    std::pair<std::complex<double>, std::complex<double>> result3(std::complex<double>(0.0, -1.0),
+                                                                  std::complex<double>(0.0, 1.0));
     TS_ASSERT_EQUALS(output, result3);
   }
 

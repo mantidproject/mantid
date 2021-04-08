@@ -9,7 +9,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -33,9 +32,7 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 2; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"IntegratePeaksMD", "CentroidPeaks"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"IntegratePeaksMD", "CentroidPeaks"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "MDAlgorithms\\Peaks"; }
 
@@ -45,8 +42,7 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  template <typename MDE, size_t nd>
-  void integrate(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  template <typename MDE, size_t nd> void integrate(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Input MDEventWorkspace
   Mantid::API::IMDEventWorkspace_sptr inWS;

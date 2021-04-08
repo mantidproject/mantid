@@ -31,63 +31,44 @@ namespace Algorithms {
 DECLARE_ALGORITHM(GeneratePythonScript)
 
 // Add alias as Export History
-const std::string GeneratePythonScript::alias() const {
-  return "ExportHistory";
-}
+const std::string GeneratePythonScript::alias() const { return "ExportHistory"; }
 
 /** Initialize the algorithm's properties.
  */
 void GeneratePythonScript::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
   std::vector<std::string> exts{".py"};
 
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::OptionalSave, exts),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::OptionalSave, exts),
                   "The name of the file into which the workspace history will "
                   "be generated.");
 
-  declareProperty("ScriptText", std::string(""),
-                  "Saves the history of the workspace to a variable.",
+  declareProperty("ScriptText", std::string(""), "Saves the history of the workspace to a variable.",
                   Direction::Output);
 
-  declareProperty("UnrollAll", false,
-                  "Unroll all algorithms to show just their child algorithms.",
+  declareProperty("UnrollAll", false, "Unroll all algorithms to show just their child algorithms.", Direction::Input);
+
+  declareProperty("StartTimestamp", std::string(""), "The filter start time in the format YYYY-MM-DD HH:mm:ss",
                   Direction::Input);
 
-  declareProperty("StartTimestamp", std::string(""),
-                  "The filter start time in the format YYYY-MM-DD HH:mm:ss",
+  declareProperty("EndTimestamp", std::string(""), "The filter end time in the format YYYY-MM-DD HH:mm:ss",
                   Direction::Input);
 
-  declareProperty("EndTimestamp", std::string(""),
-                  "The filter end time in the format YYYY-MM-DD HH:mm:ss",
+  declareProperty("AppendTimestamp", false, "Appends the time the command was run as a comment afterwards",
                   Direction::Input);
 
-  declareProperty(
-      "AppendTimestamp", false,
-      "Appends the time the command was run as a comment afterwards",
-      Direction::Input);
-
-  std::vector<std::string> saveVersions{"Specify Old", "Specify All",
-                                        "Specify None"};
-  declareProperty(
-      "SpecifyAlgorithmVersions", "Specify Old",
-      std::make_shared<StringListValidator>(saveVersions),
-      "When to specify which algorithm version was used by Mantid.");
+  std::vector<std::string> saveVersions{"Specify Old", "Specify All", "Specify None"};
+  declareProperty("SpecifyAlgorithmVersions", "Specify Old", std::make_shared<StringListValidator>(saveVersions),
+                  "When to specify which algorithm version was used by Mantid.");
 
   declareProperty("IgnoreTheseAlgs", std::vector<std::string>(),
-                  "A list of algorithms to filter out of the built script",
-                  Direction::Input);
+                  "A list of algorithms to filter out of the built script", Direction::Input);
 
-  declareProperty(
-      "IgnoreTheseAlgProperties", std::vector<std::vector<std::string>>(),
-      "A list of algorithm properties to filter out of the built script",
-      Direction::Input);
-  declareProperty(
-      "AppendExecCount", false,
-      "Whether execCount should be appended to the end of the built string");
+  declareProperty("IgnoreTheseAlgProperties", std::vector<std::vector<std::string>>(),
+                  "A list of algorithm properties to filter out of the built script", Direction::Input);
+  declareProperty("AppendExecCount", false, "Whether execCount should be appended to the end of the built string");
 }
 
 /** Execute the algorithm.
@@ -100,15 +81,12 @@ void GeneratePythonScript::exec() {
   const std::string saveVersions = getProperty("SpecifyAlgorithmVersions");
   const bool appendTimestamp = getProperty("AppendTimestamp");
   const bool appendExecCount = getProperty("AppendExecCount");
-  const std::vector<std::string> ignoreTheseAlgs =
-      getProperty("IgnoreTheseAlgs");
-  const std::vector<std::vector<std::string>> ignoreTheseAlgProperties =
-      getProperty("IgnoreTheseAlgProperties");
+  const std::vector<std::string> ignoreTheseAlgs = getProperty("IgnoreTheseAlgs");
+  const std::vector<std::vector<std::string>> ignoreTheseAlgProperties = getProperty("IgnoreTheseAlgProperties");
 
   // Get the algorithm histories of the workspace.
   const WorkspaceHistory wsHistory = ws->getHistory();
-  g_log.information() << "Number of history items: " << wsHistory.size()
-                      << '\n';
+  g_log.information() << "Number of history items: " << wsHistory.size() << '\n';
 
   auto view = wsHistory.createView();
 
@@ -134,8 +112,7 @@ void GeneratePythonScript::exec() {
   else
     versionSpecificity = "all";
 
-  ScriptBuilder builder(view, versionSpecificity, appendTimestamp,
-                        ignoreTheseAlgs, ignoreTheseAlgProperties,
+  ScriptBuilder builder(view, versionSpecificity, appendTimestamp, ignoreTheseAlgs, ignoreTheseAlgProperties,
                         appendExecCount);
   std::string generatedScript;
   const std::string mantidVersion = std::string(MantidVersion::version());

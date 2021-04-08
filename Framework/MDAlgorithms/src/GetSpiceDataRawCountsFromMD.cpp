@@ -32,46 +32,39 @@ DECLARE_ALGORITHM(GetSpiceDataRawCountsFromMD)
  * @brief GetSpiceDataRawCountsFromMD::init
  */
 void GetSpiceDataRawCountsFromMD::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Name of the input data MDEventWorkspace from which the raw "
                   "values are retrieved.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "MonitorWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("MonitorWorkspace", "", Direction::Input),
                   "Name of the input monitor MDEventWorkspace paired with "
                   "input data workspace. ");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
-      "Name of the output MatrixWorkspace containing the raw data required.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
+                  "Name of the output MatrixWorkspace containing the raw data required.");
 
   std::array<std::string, 3> vecmode = {{"Pt.", "Detector", "Sample Log"}};
   auto modevalidator = std::make_shared<ListValidator<std::string>>(vecmode);
-  declareProperty(
-      "Mode", "Detector", modevalidator,
-      "Mode selector.  (1) Pt.: get the raw detectors' signal of the "
-      "specified Pt.; "
-      "(2) Detector: get one detector's signals along all experiment points; "
-      "(3) Sample Log: get the value of a sample log along all experiment "
-      "points.");
+  declareProperty("Mode", "Detector", modevalidator,
+                  "Mode selector.  (1) Pt.: get the raw detectors' signal of the "
+                  "specified Pt.; "
+                  "(2) Detector: get one detector's signals along all experiment points; "
+                  "(3) Sample Log: get the value of a sample log along all experiment "
+                  "points.");
 
-  declareProperty(
-      "XLabel", "",
-      "Label for the X-values of the output MatrixWorkspace. "
-      "For mode 'Pt.', it won't take value.  The output of X-axis is always "
-      "2-theta. "
-      "For mode 'Detector', if it is left blank, "
-      "the default then will be 2-theta value of detector's position. "
-      "For mode 'Sample Log', the default value is 'Pt.'. "
-      "In the later 2 modes, XLabel can be any supported sample log's name.");
+  declareProperty("XLabel", "",
+                  "Label for the X-values of the output MatrixWorkspace. "
+                  "For mode 'Pt.', it won't take value.  The output of X-axis is always "
+                  "2-theta. "
+                  "For mode 'Detector', if it is left blank, "
+                  "the default then will be 2-theta value of detector's position. "
+                  "For mode 'Sample Log', the default value is 'Pt.'. "
+                  "In the later 2 modes, XLabel can be any supported sample log's name.");
 
-  declareProperty(
-      "Pt", EMPTY_INT(),
-      "Experiment point number (i.e., run_number in MDEventWorkspace "
-      "of the detectors' counts to be exported. "
-      "It is used in mode 'Pt.' only. ");
+  declareProperty("Pt", EMPTY_INT(),
+                  "Experiment point number (i.e., run_number in MDEventWorkspace "
+                  "of the detectors' counts to be exported. "
+                  "It is used in mode 'Pt.' only. ");
 
   declareProperty("DetectorID", EMPTY_INT(),
                   "Detector ID of the detector whose raw counts "
@@ -107,20 +100,16 @@ void GetSpiceDataRawCountsFromMD::exec() {
     int runnumber = getProperty("Pt");
     if (isEmpty(runnumber))
       throw std::runtime_error("For 'Pt.', value of 'Pt.' must be specified.");
-    exportDetCountsOfRun(datamdws, monitormdws, runnumber, vecX, vecY, xlabel,
-                         ylabel, donormalize);
+    exportDetCountsOfRun(datamdws, monitormdws, runnumber, vecX, vecY, xlabel, ylabel, donormalize);
   } else if (mode == "Detector") {
     int detid = getProperty("DetectorID");
     if (isEmpty(detid))
-      throw std::runtime_error(
-          "For mode 'Detector', value of 'DetectorID' must be specified.");
-    exportIndividualDetCounts(datamdws, monitormdws, detid, vecX, vecY, xlabel,
-                              ylabel, donormalize);
+      throw std::runtime_error("For mode 'Detector', value of 'DetectorID' must be specified.");
+    exportIndividualDetCounts(datamdws, monitormdws, detid, vecX, vecY, xlabel, ylabel, donormalize);
   } else if (mode == "Sample Log") {
     std::string samplelogname = getProperty("SampleLogName");
     if (samplelogname.empty())
-      throw std::runtime_error(
-          "For mode 'Sample Log', value of 'SampleLogName' must be specified.");
+      throw std::runtime_error("For mode 'Sample Log', value of 'SampleLogName' must be specified.");
     exportSampleLogValue(datamdws, samplelogname, vecX, vecY, xlabel, ylabel);
   } else {
     // Raise exception
@@ -130,8 +119,7 @@ void GetSpiceDataRawCountsFromMD::exec() {
   }
 
   // Create and export output workspace
-  MatrixWorkspace_sptr outws =
-      createOutputWorkspace(vecX, vecY, xlabel, ylabel);
+  MatrixWorkspace_sptr outws = createOutputWorkspace(vecX, vecY, xlabel, ylabel);
   setProperty("OutputWorkspace", outws);
 }
 
@@ -147,34 +135,30 @@ void GetSpiceDataRawCountsFromMD::exec() {
  * @param ylabel
  * @param donormalize
  */
-void GetSpiceDataRawCountsFromMD::exportDetCountsOfRun(
-    const API::IMDEventWorkspace_const_sptr &datamdws,
-    const API::IMDEventWorkspace_const_sptr &monitormdws, const int runnumber,
-    std::vector<double> &vecX, std::vector<double> &vecY, std::string &xlabel,
-    std::string &ylabel, bool donormalize) {
+void GetSpiceDataRawCountsFromMD::exportDetCountsOfRun(const API::IMDEventWorkspace_const_sptr &datamdws,
+                                                       const API::IMDEventWorkspace_const_sptr &monitormdws,
+                                                       const int runnumber, std::vector<double> &vecX,
+                                                       std::vector<double> &vecY, std::string &xlabel,
+                                                       std::string &ylabel, bool donormalize) {
   // Get detector counts
   std::vector<double> vec2theta;
   std::vector<double> vecDetCounts;
   int detid = -1;
-  getDetCounts(std::move(datamdws), runnumber, detid, vec2theta, vecDetCounts,
-               true);
+  getDetCounts(std::move(datamdws), runnumber, detid, vec2theta, vecDetCounts, true);
   if (vec2theta.size() != vecDetCounts.size())
-    throw std::runtime_error(
-        "Logic error! Vector of 2theta must have same size as "
-        "vector of detectors' counts.");
+    throw std::runtime_error("Logic error! Vector of 2theta must have same size as "
+                             "vector of detectors' counts.");
 
   // Get monitor counts
   std::vector<double> vec2thetaMon;
   std::vector<double> vecMonitorCounts;
   // Normalize if required
   if (donormalize) {
-    getDetCounts(std::move(monitormdws), runnumber, detid, vec2thetaMon,
-                 vecMonitorCounts, false);
+    getDetCounts(std::move(monitormdws), runnumber, detid, vec2thetaMon, vecMonitorCounts, false);
     // check
     if (vecDetCounts.size() != vecMonitorCounts.size())
-      throw std::runtime_error(
-          "Number of detectors' counts' is different from that of "
-          "monitor counts.");
+      throw std::runtime_error("Number of detectors' counts' is different from that of "
+                               "monitor counts.");
 
     for (size_t i = 0; i < vecDetCounts.size(); ++i)
       if (vecMonitorCounts[i] > 1.0E-9)
@@ -219,11 +203,11 @@ void GetSpiceDataRawCountsFromMD::exportDetCountsOfRun(
  * @param ylabel
  * @param donormalize
  */
-void GetSpiceDataRawCountsFromMD::exportIndividualDetCounts(
-    const API::IMDEventWorkspace_const_sptr &datamdws,
-    const API::IMDEventWorkspace_const_sptr &monitormdws, const int detid,
-    std::vector<double> &vecX, std::vector<double> &vecY, std::string &xlabel,
-    std::string &ylabel, const bool &donormalize) {
+void GetSpiceDataRawCountsFromMD::exportIndividualDetCounts(const API::IMDEventWorkspace_const_sptr &datamdws,
+                                                            const API::IMDEventWorkspace_const_sptr &monitormdws,
+                                                            const int detid, std::vector<double> &vecX,
+                                                            std::vector<double> &vecY, std::string &xlabel,
+                                                            std::string &ylabel, const bool &donormalize) {
   // Get detector counts
   std::vector<double> vecSampleLog;
   std::vector<double> vecDetCounts;
@@ -233,8 +217,7 @@ void GetSpiceDataRawCountsFromMD::exportIndividualDetCounts(
     // xlabel is in default and thus use 2-theta for X
     get2theta = true;
   }
-  getDetCounts(datamdws, runnumber, detid, vecSampleLog, vecDetCounts,
-               get2theta);
+  getDetCounts(datamdws, runnumber, detid, vecSampleLog, vecDetCounts, get2theta);
   if (!get2theta) {
     getSampleLogValues(datamdws, xlabel, runnumber, vecSampleLog);
   }
@@ -248,12 +231,10 @@ void GetSpiceDataRawCountsFromMD::exportIndividualDetCounts(
   // FIXME - Consider refactoring in future
   // Normalize if required
   if (donormalize) {
-    getDetCounts(std::move(monitormdws), runnumber, detid, vec2thetaMon,
-                 vecMonitorCounts, false);
+    getDetCounts(std::move(monitormdws), runnumber, detid, vec2thetaMon, vecMonitorCounts, false);
     if (vecDetCounts.size() != vecMonitorCounts.size())
-      throw std::runtime_error(
-          "Number of detectors' counts' is different from that of "
-          "monitor counts.");
+      throw std::runtime_error("Number of detectors' counts' is different from that of "
+                               "monitor counts.");
 
     for (size_t i = 0; i < vecDetCounts.size(); ++i)
       if (vecMonitorCounts[i] > 1.0E-9)
@@ -297,10 +278,10 @@ void GetSpiceDataRawCountsFromMD::exportIndividualDetCounts(
  * @param xlabel :: label of x-axis.  It is the name of another sample log.
  * @param ylabel
  */
-void GetSpiceDataRawCountsFromMD::exportSampleLogValue(
-    const API::IMDEventWorkspace_const_sptr &datamdws,
-    const std::string &samplelogname, std::vector<double> &vecX,
-    std::vector<double> &vecY, std::string &xlabel, std::string &ylabel) {
+void GetSpiceDataRawCountsFromMD::exportSampleLogValue(const API::IMDEventWorkspace_const_sptr &datamdws,
+                                                       const std::string &samplelogname, std::vector<double> &vecX,
+                                                       std::vector<double> &vecY, std::string &xlabel,
+                                                       std::string &ylabel) {
   // prepare
   vecX.clear();
   vecY.clear();
@@ -318,8 +299,7 @@ void GetSpiceDataRawCountsFromMD::exportSampleLogValue(
   getSampleLogValues(datamdws, xlabel, runnumber, vecX);
 
   if (vecX.size() != vecY.size())
-    throw std::runtime_error(
-        "It is not correct to have two different sizes vectors.");
+    throw std::runtime_error("It is not correct to have two different sizes vectors.");
 
   // Sort
   const size_t numpts = vecX.size();
@@ -350,32 +330,26 @@ void GetSpiceDataRawCountsFromMD::exportSampleLogValue(
  * @param vecY :: raw detector's counts
  * @param formX :: flag to set up vecX
  */
-void GetSpiceDataRawCountsFromMD::getDetCounts(
-    const API::IMDEventWorkspace_const_sptr &mdws, const int &runnumber,
-    const int &detid, std::vector<double> &vecX, std::vector<double> &vecY,
-    bool formX) {
+void GetSpiceDataRawCountsFromMD::getDetCounts(const API::IMDEventWorkspace_const_sptr &mdws, const int &runnumber,
+                                               const int &detid, std::vector<double> &vecX, std::vector<double> &vecY,
+                                               bool formX) {
   // Get sample and source position
   if (mdws->getNumExperimentInfo() == 0)
-    throw std::runtime_error(
-        "There is no ExperimentInfo object that has been set to "
-        "input MDEventWorkspace!");
+    throw std::runtime_error("There is no ExperimentInfo object that has been set to "
+                             "input MDEventWorkspace!");
 
   V3D samplepos;
   V3D sourcepos;
 
   if (formX) {
     ExperimentInfo_const_sptr expinfo = mdws->getExperimentInfo(0);
-    Geometry::IComponent_const_sptr sample =
-        expinfo->getInstrument()->getSample();
+    Geometry::IComponent_const_sptr sample = expinfo->getInstrument()->getSample();
     samplepos = sample->getPos();
-    g_log.debug() << "Sample position is " << samplepos.X() << ", "
-                  << samplepos.Y() << ", " << samplepos.Z() << "\n";
+    g_log.debug() << "Sample position is " << samplepos.X() << ", " << samplepos.Y() << ", " << samplepos.Z() << "\n";
 
-    Geometry::IComponent_const_sptr source =
-        expinfo->getInstrument()->getSource();
+    Geometry::IComponent_const_sptr source = expinfo->getInstrument()->getSource();
     sourcepos = source->getPos();
-    g_log.debug() << "Source position is " << sourcepos.X() << ","
-                  << sourcepos.Y() << ", " << sourcepos.Z() << "\n";
+    g_log.debug() << "Source position is " << sourcepos.X() << "," << sourcepos.Y() << ", " << sourcepos.Z() << "\n";
     vecX.clear();
   }
   vecY.clear();
@@ -388,8 +362,7 @@ void GetSpiceDataRawCountsFromMD::getDetCounts(
   while (scancell) {
     // get the number of events of this cell
     size_t numev2 = mditer->getNumEvents();
-    g_log.debug() << "MDWorkspace " << mdws->getName() << " Cell "
-                  << nextindex - 1 << ": Number of events = " << numev2
+    g_log.debug() << "MDWorkspace " << mdws->getName() << " Cell " << nextindex - 1 << ": Number of events = " << numev2
                   << " Does NEXT cell exist = " << mditer->next() << "\n";
 
     // loop over all the events in current cell
@@ -442,9 +415,9 @@ void GetSpiceDataRawCountsFromMD::getDetCounts(
  * @param runnumber
  * @param vecSampleLog
  */
-void GetSpiceDataRawCountsFromMD::getSampleLogValues(
-    const IMDEventWorkspace_const_sptr &mdws, const std::string &samplelogname,
-    const int runnumber, std::vector<double> &vecSampleLog) {
+void GetSpiceDataRawCountsFromMD::getSampleLogValues(const IMDEventWorkspace_const_sptr &mdws,
+                                                     const std::string &samplelogname, const int runnumber,
+                                                     std::vector<double> &vecSampleLog) {
   // Clear input
   vecSampleLog.clear();
 
@@ -467,15 +440,13 @@ void GetSpiceDataRawCountsFromMD::getSampleLogValues(
       ess << "Workspace " << mdws->getName() << "'s " << iexp
           << "-th ExperimentInfo with "
              "run number "
-          << thisrunnumber << " does not have specified property "
-          << samplelogname;
+          << thisrunnumber << " does not have specified property " << samplelogname;
       throw std::runtime_error(ess.str());
     }
     // Get experiment value
     double logvalue = expinfo->run().getPropertyAsSingleValue(samplelogname);
     vecSampleLog.emplace_back(logvalue);
-    g_log.debug() << "Add sample log (" << samplelogname << ") " << logvalue
-                  << " of " << iexp << "-th ExperimentInfo "
+    g_log.debug() << "Add sample log (" << samplelogname << ") " << logvalue << " of " << iexp << "-th ExperimentInfo "
                   << "\n";
   }
 }
@@ -489,25 +460,26 @@ void GetSpiceDataRawCountsFromMD::getSampleLogValues(
  * @param ylabel
  * @return
  */
-MatrixWorkspace_sptr GetSpiceDataRawCountsFromMD::createOutputWorkspace(
-    const std::vector<double> &vecX, const std::vector<double> &vecY,
-    const std::string &xlabel, const std::string &ylabel) {
+MatrixWorkspace_sptr GetSpiceDataRawCountsFromMD::createOutputWorkspace(const std::vector<double> &vecX,
+                                                                        const std::vector<double> &vecY,
+                                                                        const std::string &xlabel,
+                                                                        const std::string &ylabel) {
   // Create MatrixWorkspace
   size_t sizex = vecX.size();
   size_t sizey = vecY.size();
   if (sizex != sizey || sizex == 0)
     throw std::runtime_error("Unable to create output matrix workspace.");
 
-  MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
-      WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey));
+  MatrixWorkspace_sptr outws =
+      std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey));
   if (!outws)
     throw std::runtime_error("Failed to create output matrix workspace.");
 
   // Set data
   outws->setHistogram(0, Points(vecX), Counts(vecY));
   auto &dataE = outws->mutableE(0);
-  std::replace_if(dataE.begin(), dataE.end(),
-                  [](double val) { return val < 1.0; }, 1.0);
+  std::replace_if(
+      dataE.begin(), dataE.end(), [](double val) { return val < 1.0; }, 1.0);
 
   // Set label
   outws->setYUnitLabel(ylabel);

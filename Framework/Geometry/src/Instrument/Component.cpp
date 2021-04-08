@@ -28,29 +28,24 @@ using Kernel::V3D;
  * @param map :: a ParameterMap to parameterize the component
  */
 Component::Component(const IComponent *base, const ParameterMap *map)
-    : m_parent(nullptr), m_base(dynamic_cast<const Component *>(base)),
-      m_map(map) {
+    : m_parent(nullptr), m_base(dynamic_cast<const Component *>(base)), m_map(map) {
   if (!m_base) {
-    throw std::invalid_argument(
-        "Component::Component() - Cannot construct a "
-        "parameterized component from an invalid base component.");
+    throw std::invalid_argument("Component::Component() - Cannot construct a "
+                                "parameterized component from an invalid base component.");
   }
 }
 
 /** Empty constructor
  *  Create a component with null parent
  */
-Component::Component()
-    : m_parent(nullptr), m_base(nullptr), m_map(nullptr), m_name(), m_pos(),
-      m_rot() {}
+Component::Component() : m_parent(nullptr), m_base(nullptr), m_map(nullptr), m_name(), m_pos(), m_rot() {}
 
 /** Constructor by value
  *  @param name :: Component name
  *  @param parent :: parent Component (optional)
  */
 Component::Component(const std::string &name, IComponent *parent)
-    : m_parent(parent), m_base(nullptr), m_map(nullptr), m_name(name), m_pos(),
-      m_rot() {}
+    : m_parent(parent), m_base(nullptr), m_map(nullptr), m_name(name), m_pos(), m_rot() {}
 
 /** Constructor by value
  *  @param name :: Component name
@@ -58,10 +53,8 @@ Component::Component(const std::string &name, IComponent *parent)
  *  absolute or relative if the parent is defined
  *  @param parent :: parent Component
  */
-Component::Component(const std::string &name, const V3D &position,
-                     IComponent *parent)
-    : m_parent(parent), m_base(nullptr), m_map(nullptr), m_name(name),
-      m_pos(position), m_rot() {}
+Component::Component(const std::string &name, const V3D &position, IComponent *parent)
+    : m_parent(parent), m_base(nullptr), m_map(nullptr), m_name(name), m_pos(position), m_rot() {}
 
 /** Constructor
  *  @param name :: Component name
@@ -69,10 +62,8 @@ Component::Component(const std::string &name, const V3D &position,
  *  @param rotation :: orientation quaternion (relative to parent, if present)
  *  @param parent :: parent Component (optional)
  */
-Component::Component(const std::string &name, const V3D &position,
-                     const Quat &rotation, IComponent *parent)
-    : m_parent(parent), m_base(nullptr), m_map(nullptr), m_name(name),
-      m_pos(position), m_rot(rotation) {}
+Component::Component(const std::string &name, const V3D &position, const Quat &rotation, IComponent *parent)
+    : m_parent(parent), m_base(nullptr), m_map(nullptr), m_name(name), m_pos(position), m_rot(rotation) {}
 
 //------------------------------------------------------------------------------------------------
 /** Return true if the Component is, in fact, parametrized
@@ -134,8 +125,7 @@ std::shared_ptr<const IComponent> Component::getParent() const {
  *(default)
  * @return true if a parent matches, false otherwise
  */
-bool Component::isParentNamed(const std::string &expectedName,
-                              int maxDepth) const {
+bool Component::isParentNamed(const std::string &expectedName, int maxDepth) const {
   int depth = 0;
   const IComponent *parent = m_parent;
   while (parent && (depth < maxDepth || maxDepth < 0)) {
@@ -172,8 +162,7 @@ void Component::setName(const std::string &s) {
   if (!m_map)
     this->m_name = s;
   else
-    throw Kernel::Exception::NotImplementedError(
-        "Component::setName (for Parametrized Component)");
+    throw Kernel::Exception::NotImplementedError("Component::setName (for Parametrized Component)");
 }
 
 //--------------------------------------------------------------------------------------------
@@ -191,8 +180,7 @@ std::string Component::getName() const {
  *  @return full path name
  */
 std::string Component::getFullName() const {
-  std::vector<std::shared_ptr<const IComponent>> ancestors =
-      this->getAncestors();
+  std::vector<std::shared_ptr<const IComponent>> ancestors = this->getAncestors();
   if (ancestors.empty()) {
     return this->getName();
   } else {
@@ -216,8 +204,7 @@ void Component::setPos(double x, double y, double z) {
   if (!m_map)
     m_pos = V3D(x, y, z);
   else
-    throw Kernel::Exception::NotImplementedError(
-        "Component::setPos (for Parametrized Component)");
+    throw Kernel::Exception::NotImplementedError("Component::setPos (for Parametrized Component)");
 }
 
 /** Set the position of the Component
@@ -228,8 +215,7 @@ void Component::setPos(const V3D &v) {
   if (!m_map)
     m_pos = v;
   else
-    throw Kernel::Exception::NotImplementedError(
-        "Component::setPos (for Parametrized Component)");
+    throw Kernel::Exception::NotImplementedError("Component::setPos (for Parametrized Component)");
 }
 
 /** Set the orientation of the Component
@@ -240,8 +226,7 @@ void Component::setRot(const Quat &q) {
   if (!m_map)
     m_rot = q;
   else
-    throw Kernel::Exception::NotImplementedError(
-        "Component::setRot (for Parametrized Component)");
+    throw Kernel::Exception::NotImplementedError("Component::setRot (for Parametrized Component)");
 }
 
 /** Translate the Component relative to the parent Component
@@ -255,8 +240,7 @@ void Component::translate(double x, double y, double z) {
     m_pos[1] += y;
     m_pos[2] += z;
   } else
-    throw Kernel::Exception::NotImplementedError(
-        "Component::translate (for Parametrized Component)");
+    throw Kernel::Exception::NotImplementedError("Component::translate (for Parametrized Component)");
 }
 
 /** Translate the Component relative to the parent Component
@@ -266,8 +250,7 @@ void Component::translate(const V3D &v) {
   if (!m_map)
     m_pos += v;
   else
-    throw Kernel::Exception::NotImplementedError(
-        "Component::translate (for Parametrized Component)");
+    throw Kernel::Exception::NotImplementedError("Component::translate (for Parametrized Component)");
 }
 
 /** Rotate the Component relative to the parent Component
@@ -277,8 +260,7 @@ void Component::rotate(const Quat &r) {
   if (!m_map)
     m_rot = m_rot * r;
   else
-    throw Kernel::Exception::NotImplementedError(
-        "Component::rotate (for Parametrized Component)");
+    throw Kernel::Exception::NotImplementedError("Component::rotate (for Parametrized Component)");
 }
 
 /** Rotate the Component by an angle in degrees with respect to an axis.
@@ -288,8 +270,7 @@ void Component::rotate(const Quat &r) {
 void Component::rotate(double angle, const V3D &axis) {
   (void)angle; // Avoid compiler warning
   (void)axis;  // Avoid compiler warning
-  throw Kernel::Exception::NotImplementedError(
-      "Rotate(double angle, const V3D& axis) has not been implemented");
+  throw Kernel::Exception::NotImplementedError("Rotate(double angle, const V3D& axis) has not been implemented");
 }
 
 /** Get ScaleFactor of detector.  Looks at the "sca" parameter in the parameter
@@ -312,9 +293,7 @@ V3D Component::getScaleFactor() const {
 }
 
 /// Helper for legacy access mode. Returns the index of the component.
-size_t Component::index() const {
-  return m_map->componentIndex(this->getComponentID());
-}
+size_t Component::index() const { return m_map->componentIndex(this->getComponentID()); }
 
 bool Component::hasComponentInfo() const {
   const IComponent *root = m_base;
@@ -362,8 +341,7 @@ Kernel::V3D Component::getPos() const {
 
         Quat parentRot;
         V3D parentPos;
-        if (!(m_map->getCachedLocation(baseParent, parentPos) &&
-              m_map->getCachedRotation(baseParent, parentRot))) {
+        if (!(m_map->getCachedLocation(baseParent, parentPos) && m_map->getCachedRotation(baseParent, parentRot))) {
           // Couldn't get them from the cache, so I have to instantiate the
           // class
           std::shared_ptr<const IComponent> parParent = getParent();
@@ -439,18 +417,14 @@ Kernel::Quat Component::getRotation() const {
  *  @param comp :: The Component to measure against
  *  @returns The distance
  */
-double Component::getDistance(const IComponent &comp) const {
-  return getPos().distance(comp.getPos());
-}
+double Component::getDistance(const IComponent &comp) const { return getPos().distance(comp.getPos()); }
 
 /**
  * Get the bounding box for this component. It is no shape so gives an empty
  * box.
  * @param boundingBox :: [Out] The resulting bounding box is stored here.
  */
-void Component::getBoundingBox(BoundingBox &boundingBox) const {
-  boundingBox = BoundingBox();
-}
+void Component::getBoundingBox(BoundingBox &boundingBox) const { boundingBox = BoundingBox(); }
 
 /**
  * Get the names of the parameters for this component.
@@ -481,16 +455,14 @@ std::set<std::string> Component::getParameterNames(bool recursive) const {
  * are from, warning this contains shared pointers keeping transient objects
  * alive, do not keep longer than needed
  */
-std::map<std::string, ComponentID>
-Component::getParameterNamesByComponent() const {
+std::map<std::string, ComponentID> Component::getParameterNamesByComponent() const {
   auto retVal = std::map<std::string, ComponentID>();
   if (!m_map)
     return retVal;
 
   auto names = m_map->names(this);
   for (const auto &name : names) {
-    retVal.insert(
-        std::pair<std::string, ComponentID>(name, this->getComponentID()));
+    retVal.insert(std::pair<std::string, ComponentID>(name, this->getComponentID()));
   }
 
   // Walk up the tree and find the parameters attached to the parent components
@@ -609,8 +581,7 @@ void Component::swap(const Component *base, const ParameterMap *pmap) {
  * or empty string if not.
  */
 
-std::string Component::getParamDescription(const std::string &pname,
-                                           bool recursive) const {
+std::string Component::getParamDescription(const std::string &pname, bool recursive) const {
   if (!m_map) { // no description for non-parameterized components
     return std::string("");
   }
@@ -641,8 +612,7 @@ std::string Component::getDescription() const {
  * @returns std::string describing parameter if such description is defined
  * or empty string if not.
  */
-std::string Component::getParamShortDescription(const std::string &pname,
-                                                bool recursive) const {
+std::string Component::getParamShortDescription(const std::string &pname, bool recursive) const {
   if (!m_map) { // no tooltips for non-parameterized components
     return std::string("");
   }
@@ -684,8 +654,7 @@ void Component::setDescription(const std::string &descr) {
                                                  "non-Parametrized Component)");
 }
 
-size_t
-Component::registerContents(class ComponentVisitor &componentVisitor) const {
+size_t Component::registerContents(class ComponentVisitor &componentVisitor) const {
 
   return componentVisitor.registerGenericComponent(*this);
 }

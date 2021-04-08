@@ -69,19 +69,18 @@ public:
 
 private:
   /// Create an output workspace
-  API::MatrixWorkspace_sptr
-  createOutputWorkspace(const API::MatrixWorkspace_const_sptr &, const size_t,
-                        const std::vector<double> &);
+  API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace_const_sptr &, const size_t,
+                                                  const std::vector<double> &);
 
   void bootstrap(const API::MatrixWorkspace_const_sptr &);
   void calculate(const API::MatrixWorkspace_const_sptr &);
   void finalize(const API::MatrixWorkspace_const_sptr &);
 
   struct wedgeParameters {
-    wedgeParameters(double innerRadius, double outerRadius, double centerX,
-                    double centerY, double angleMiddle, double angleRange)
-        : innerRadius(innerRadius), outerRadius(outerRadius), centerX(centerX),
-          centerY(centerY), angleMiddle(angleMiddle), angleRange(angleRange) {}
+    wedgeParameters(double innerRadius, double outerRadius, double centerX, double centerY, double angleMiddle,
+                    double angleRange)
+        : innerRadius(innerRadius), outerRadius(outerRadius), centerX(centerX), centerY(centerY),
+          angleMiddle(angleMiddle), angleRange(angleRange) {}
     double innerRadius;
     double outerRadius;
     double centerX;
@@ -91,10 +90,8 @@ private:
   };
 
   void getTableShapes();
-  void getViewportParams(std::string &,
-                         std::map<std::string, std::vector<double>> &);
-  void getSectorParams(std::vector<std::string> &,
-                       std::map<std::string, std::vector<double>> &);
+  void getViewportParams(const std::string &, std::map<std::string, std::vector<double>> &);
+  void getSectorParams(std::vector<std::string> &, std::map<std::string, std::vector<double>> &);
   bool checkIfSymetricalWedge(wedgeParameters &wedge);
   std::vector<std::vector<std::vector<double>>> m_intensities;
   std::vector<std::vector<std::vector<double>>> m_errors;

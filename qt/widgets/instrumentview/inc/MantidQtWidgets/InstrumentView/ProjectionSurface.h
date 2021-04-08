@@ -151,6 +151,7 @@ public:
   virtual std::string saveToProject() const;
 
   void setCurrentTab(QString currentTab) { m_currentTab = currentTab; }
+  void freezeRotation(bool freeze);
 
   //-----------------------------------
   //    Mask methods

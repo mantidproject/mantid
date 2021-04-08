@@ -14,8 +14,7 @@ namespace DataHandling {
 
 /** CreatePolarizationEfficiencies
  */
-class DLLExport CreatePolarizationEfficiencies
-    : public CreatePolarizationEfficienciesBase {
+class DLLExport CreatePolarizationEfficiencies : public CreatePolarizationEfficienciesBase {
 public:
   const std::string name() const override;
   int version() const override;
@@ -24,8 +23,7 @@ public:
 
 private:
   void init() override;
-  API::MatrixWorkspace_sptr
-  createEfficiencies(std::vector<std::string> const &labels) override;
+  API::MatrixWorkspace_sptr createEfficiencies(std::vector<std::string> const &labels) override;
 };
 
 } // namespace DataHandling

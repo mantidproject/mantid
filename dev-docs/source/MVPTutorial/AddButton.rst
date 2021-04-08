@@ -69,7 +69,7 @@ all been saved in ``view.py``, the ``main.py`` will contain:
     from qtpy import QtWidgets
 
     import sys
-   
+
     import view
 
     """

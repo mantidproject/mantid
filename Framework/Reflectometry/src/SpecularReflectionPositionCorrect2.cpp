@@ -36,16 +36,14 @@ bool isAngleIncreasingWithIndex(const Mantid::API::SpectrumInfo &spectrumInfo) {
  * @param linePosition pixel's workspace index
  * @return the offset angle, in radians
  */
-double offsetAngleFromCentre(const MatrixWorkspace &ws, const double l2,
-                             const double linePosition,
+double offsetAngleFromCentre(const MatrixWorkspace &ws, const double l2, const double linePosition,
                              const double pixelSize) {
   const auto &spectrumInfo = ws.spectrumInfo();
   const size_t maxWorkspaceIndex = spectrumInfo.size() - 1;
   auto const specSize = static_cast<double>(maxWorkspaceIndex);
   if (linePosition > specSize) {
     std::ostringstream msg;
-    msg << "LinePosition is greater than the maximum workspace index "
-        << linePosition << ">" << maxWorkspaceIndex;
+    msg << "LinePosition is greater than the maximum workspace index " << linePosition << ">" << maxWorkspaceIndex;
     throw std::runtime_error(msg.str());
   }
   auto const centreIndex = specSize / 2.;
@@ -63,9 +61,7 @@ DECLARE_ALGORITHM(SpecularReflectionPositionCorrect2)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string SpecularReflectionPositionCorrect2::name() const {
-  return "SpecularReflectionPositionCorrect";
-}
+const std::string SpecularReflectionPositionCorrect2::name() const { return "SpecularReflectionPositionCorrect"; }
 
 /// Algorithm's summary. @see Algorithm::summary
 const std::string SpecularReflectionPositionCorrect2::summary() const {
@@ -76,9 +72,7 @@ const std::string SpecularReflectionPositionCorrect2::summary() const {
 int SpecularReflectionPositionCorrect2::version() const { return 2; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SpecularReflectionPositionCorrect2::category() const {
-  return "Reflectometry";
-}
+const std::string SpecularReflectionPositionCorrect2::category() const { return "Reflectometry"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -87,28 +81,21 @@ const std::string SpecularReflectionPositionCorrect2::category() const {
  */
 void SpecularReflectionPositionCorrect2::init() {
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input workspace to correct.");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "TwoTheta", Mantid::EMPTY_DBL(), Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("TwoTheta", Mantid::EMPTY_DBL(), Direction::Input),
                   "Angle used to correct the detector component [degrees].");
 
-  const std::vector<std::string> correctionType{"VerticalShift",
-                                                "RotateAroundSample"};
-  auto correctionTypeValidator =
-      std::make_shared<StringListValidator>(correctionType);
-  declareProperty(
-      "DetectorCorrectionType", correctionType[0], correctionTypeValidator,
-      "Whether detectors should be shifted vertically or rotated around the "
-      "sample position.",
-      Direction::Input);
+  const std::vector<std::string> correctionType{"VerticalShift", "RotateAroundSample"};
+  auto correctionTypeValidator = std::make_shared<StringListValidator>(correctionType);
+  declareProperty("DetectorCorrectionType", correctionType[0], correctionTypeValidator,
+                  "Whether detectors should be shifted vertically or rotated around the "
+                  "sample position.",
+                  Direction::Input);
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>("DetectorComponentName",
-                                                       "", Direction::Input),
-      "Name of the detector component to correct, for example point-detector");
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("DetectorComponentName", "", Direction::Input),
+                  "Name of the detector component to correct, for example point-detector");
   auto nonNegativeInt = std::make_shared<Kernel::BoundedValidator<int>>();
   nonNegativeInt->setLower(0);
   declareProperty("DetectorID", EMPTY_INT(), nonNegativeInt,
@@ -117,13 +104,11 @@ void SpecularReflectionPositionCorrect2::init() {
                   "are set the latter will be used.");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>(
-          "SampleComponentName", "some-surface-holder", Direction::Input),
+      std::make_unique<PropertyWithValue<std::string>>("SampleComponentName", "some-surface-holder", Direction::Input),
       "Name of the sample component; if the given name is not found in the "
       "instrument, the default sample is used.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "A workspace with corrected detector position.");
   declareProperty("DetectorFacesSample", false,
                   "If true, a normal vector at the centre of the detector "
@@ -134,24 +119,20 @@ void SpecularReflectionPositionCorrect2::init() {
                   "A fractional workspace index for the specular line centre.");
   auto positiveDouble = std::make_shared<Kernel::BoundedValidator<double>>();
   nonNegativeDouble->setLowerExclusive(0.);
-  declareProperty("PixelSize", EMPTY_DBL(), positiveDouble,
-                  "Size of a detector pixel, in metres.");
+  declareProperty("PixelSize", EMPTY_DBL(), positiveDouble, "Size of a detector pixel, in metres.");
 }
 
 /// Validate the algorithm's inputs.
-std::map<std::string, std::string>
-SpecularReflectionPositionCorrect2::validateInputs() {
+std::map<std::string, std::string> SpecularReflectionPositionCorrect2::validateInputs() {
   std::map<std::string, std::string> issues;
   if (isDefault("DetectorID") && isDefault("DetectorComponentName")) {
-    issues["DetectorID"] =
-        "DetectorID or DetectorComponentName has to be specified.";
+    issues["DetectorID"] = "DetectorID or DetectorComponentName has to be specified.";
   }
   if (isDefault("TwoTheta")) {
     issues["TwoTheta"] = "Two theta value is required.";
   } else {
     if (!isDefault("LinePosition") && isDefault("PixelSize")) {
-      issues["PixelSize"] =
-          "Pixel size is required when line position is given.";
+      issues["PixelSize"] = "Pixel size is required when line position is given.";
     }
   }
   return issues;
@@ -176,8 +157,7 @@ void SpecularReflectionPositionCorrect2::exec() {
   const auto inst = inWS->getInstrument();
   const detid_t detectorID = static_cast<int>(getProperty("DetectorID"));
   const std::string detectorName = getProperty("DetectorComponentName");
-  const V3D detectorPosition =
-      declareDetectorPosition(*inst, detectorName, detectorID);
+  const V3D detectorPosition = declareDetectorPosition(*inst, detectorName, detectorID);
 
   // Sample-to-detector
   const V3D sampleToDetector = detectorPosition - samplePosition;
@@ -188,9 +168,8 @@ void SpecularReflectionPositionCorrect2::exec() {
 
   const double twoThetaInRad = twoThetaFromProperties(*inWS, l2);
 
-  correctDetectorPosition(outWS, detectorName, detectorID, twoThetaInRad,
-                          correctionType, *referenceFrame, samplePosition,
-                          sampleToDetector, beamOffsetOld);
+  correctDetectorPosition(outWS, detectorName, detectorID, twoThetaInRad, correctionType, *referenceFrame,
+                          samplePosition, sampleToDetector, beamOffsetOld);
   setProperty("OutputWorkspace", outWS);
 }
 
@@ -207,18 +186,15 @@ void SpecularReflectionPositionCorrect2::exec() {
  * @param beamOffsetOld sample detector distance on the beam axis
  */
 void SpecularReflectionPositionCorrect2::correctDetectorPosition(
-    MatrixWorkspace_sptr &outWS, const std::string &detectorName,
-    const detid_t detectorID, const double twoThetaInRad,
-    const std::string &correctionType, const ReferenceFrame &referenceFrame,
-    const V3D &samplePosition, const V3D &sampleToDetector,
-    const double beamOffsetOld) {
+    MatrixWorkspace_sptr &outWS, const std::string &detectorName, const detid_t detectorID, const double twoThetaInRad,
+    const std::string &correctionType, const ReferenceFrame &referenceFrame, const V3D &samplePosition,
+    const V3D &sampleToDetector, const double beamOffsetOld) {
   const auto beamAxis = referenceFrame.pointingAlongBeamAxis();
   const auto horizontalAxis = referenceFrame.pointingHorizontalAxis();
   const auto upAxis = referenceFrame.pointingUpAxis();
   const auto thetaSignDir = referenceFrame.vecThetaSign();
   const auto upDir = referenceFrame.vecPointingUp();
-  const auto plane = thetaSignDir.scalar_prod(upDir) == 1. ? Plane::vertical
-                                                           : Plane::horizontal;
+  const auto plane = thetaSignDir.scalar_prod(upDir) == 1. ? Plane::vertical : Plane::horizontal;
 
   // Get the offset from the sample in the beam direction
   double beamOffset = 0.0;
@@ -229,17 +205,14 @@ void SpecularReflectionPositionCorrect2::correctDetectorPosition(
   } else if (correctionType == "RotateAroundSample") {
     // The radius for the rotation is the distance from the sample to
     // the detector in the Beam-Vertical plane
-    const double perpendicularOffsetOld =
-        sampleToDetector.scalar_prod(thetaSignDir);
+    const double perpendicularOffsetOld = sampleToDetector.scalar_prod(thetaSignDir);
     const double radius = std::hypot(beamOffsetOld, perpendicularOffsetOld);
     beamOffset = radius * std::cos(twoThetaInRad);
   }
   // Calculate the offset in the vertical direction, and the total
   // offset in the beam direction
   const double perpendicularOffset = beamOffset * std::tan(twoThetaInRad);
-  const double beamOffsetFromOrigin =
-      beamOffset +
-      samplePosition.scalar_prod(referenceFrame.vecPointingAlongBeam());
+  const double beamOffsetFromOrigin = beamOffset + samplePosition.scalar_prod(referenceFrame.vecPointingAlongBeam());
 
   auto moveAlg = createChildAlgorithm("MoveInstrumentComponent");
   moveAlg->setProperty("Workspace", outWS);
@@ -290,9 +263,9 @@ void SpecularReflectionPositionCorrect2::correctDetectorPosition(
  * @param detectorID detector's id
  * @return a position
  */
-Kernel::V3D SpecularReflectionPositionCorrect2::declareDetectorPosition(
-    const Geometry::Instrument &inst, const std::string &detectorName,
-    const detid_t detectorID) {
+Kernel::V3D SpecularReflectionPositionCorrect2::declareDetectorPosition(const Geometry::Instrument &inst,
+                                                                        const std::string &detectorName,
+                                                                        const detid_t detectorID) {
   // Detector
   IComponent_const_sptr detector;
   if (detectorName.empty()) {
@@ -300,8 +273,7 @@ Kernel::V3D SpecularReflectionPositionCorrect2::declareDetectorPosition(
   } else {
     detector = inst.getComponentByName(detectorName);
     if (!detector)
-      throw Exception::NotFoundError("Detector component not found",
-                                     detectorName);
+      throw Exception::NotFoundError("Detector component not found", detectorName);
   }
   return detector->getPos();
 }
@@ -311,8 +283,7 @@ Kernel::V3D SpecularReflectionPositionCorrect2::declareDetectorPosition(
  * @param ws a workspace
  * @return a position
  */
-V3D SpecularReflectionPositionCorrect2::declareSamplePosition(
-    const MatrixWorkspace &ws) {
+V3D SpecularReflectionPositionCorrect2::declareSamplePosition(const MatrixWorkspace &ws) {
   V3D position;
   const std::string sampleName = getProperty("SampleComponentName");
   const auto inst = ws.getInstrument();
@@ -330,15 +301,12 @@ V3D SpecularReflectionPositionCorrect2::declareSamplePosition(
  * @param l2 sample-to-detector distance
  * @return TwoTheta, in radians
  */
-double SpecularReflectionPositionCorrect2::twoThetaFromProperties(
-    const MatrixWorkspace &inWS, const double l2) {
-  double twoThetaInRad =
-      static_cast<double>(getProperty("TwoTheta")) * M_PI / 180.0;
+double SpecularReflectionPositionCorrect2::twoThetaFromProperties(const MatrixWorkspace &inWS, const double l2) {
+  double twoThetaInRad = static_cast<double>(getProperty("TwoTheta")) * M_PI / 180.0;
   if (!isDefault("LinePosition")) {
     const double linePosition = getProperty("LinePosition");
     const double pixelSize = getProperty("PixelSize");
-    const double offset =
-        offsetAngleFromCentre(inWS, l2, linePosition, pixelSize);
+    const double offset = offsetAngleFromCentre(inWS, l2, linePosition, pixelSize);
     twoThetaInRad -= offset;
   }
   return twoThetaInRad;

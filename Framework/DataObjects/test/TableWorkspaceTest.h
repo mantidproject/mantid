@@ -39,70 +39,48 @@ public:
   void testTCcast() {
     TableColTestHelper<float> Tcf(1.);
     float frez = (float)Tcf[0];
-    TSM_ASSERT_DELTA("1 float not converted, type: " +
-                         std::string(typeid(frez).name()),
-                     1., frez, 1.e-5);
+    TSM_ASSERT_DELTA("1 float not converted, type: " + std::string(typeid(frez).name()), 1., frez, 1.e-5);
 
     TableColTestHelper<double> Tdr(1.);
     double drez = (double)Tcf[0];
-    TSM_ASSERT_DELTA("2 double not converted, type: " +
-                         std::string(typeid(drez).name()),
-                     1., drez, 1.e-5);
+    TSM_ASSERT_DELTA("2 double not converted, type: " + std::string(typeid(drez).name()), 1., drez, 1.e-5);
 
     TableColTestHelper<int> Tci(1);
     int irez = (int)Tci[0];
-    TSM_ASSERT_EQUALS("3 integer not converted, type: " +
-                          std::string(typeid(irez).name()),
-                      1, irez);
+    TSM_ASSERT_EQUALS("3 integer not converted, type: " + std::string(typeid(irez).name()), 1, irez);
 
     TableColTestHelper<int64_t> Tcl(1);
     int64_t lrez = (int64_t)Tcl[0];
-    TSM_ASSERT_EQUALS("4 int64_t not converted, type: " +
-                          std::string(typeid(lrez).name()),
-                      1, lrez);
+    TSM_ASSERT_EQUALS("4 int64_t not converted, type: " + std::string(typeid(lrez).name()), 1, lrez);
 
     TableColTestHelper<long> Tcls(1);
     long lsrez = (long)Tcls[0];
-    TSM_ASSERT_EQUALS("5 long not converted, type: " +
-                          std::string(typeid(lsrez).name()),
-                      1, lsrez);
+    TSM_ASSERT_EQUALS("5 long not converted, type: " + std::string(typeid(lsrez).name()), 1, lsrez);
 
     TableColTestHelper<size_t> Tcst(1);
     size_t strez = (size_t)Tcst[0];
-    TSM_ASSERT_EQUALS("6 size_t not converted, type: " +
-                          std::string(typeid(strez).name()),
-                      1, lsrez);
+    TSM_ASSERT_EQUALS("6 size_t not converted, type: " + std::string(typeid(strez).name()), 1, lsrez);
 
     //
     TableColTestHelper<float> Tcf2(-1.);
     frez = (float)Tcf2[0];
-    TSM_ASSERT_DELTA("7 float not converted, type: " +
-                         std::string(typeid(float).name()),
-                     -1., frez, 1.e-5);
+    TSM_ASSERT_DELTA("7 float not converted, type: " + std::string(typeid(float).name()), -1., frez, 1.e-5);
 
     TableColTestHelper<double> Tdr2(-1.);
     drez = (double)Tcf2[0];
-    TSM_ASSERT_DELTA("8 double not converted, type: " +
-                         std::string(typeid(double).name()),
-                     -1., drez, 1.e-5);
+    TSM_ASSERT_DELTA("8 double not converted, type: " + std::string(typeid(double).name()), -1., drez, 1.e-5);
 
     TableColTestHelper<int> Tci2(-1);
     irez = (int)Tci2[0];
-    TSM_ASSERT_EQUALS("9 integer not converted, type: " +
-                          std::string(typeid(int).name()),
-                      -1, irez);
+    TSM_ASSERT_EQUALS("9 integer not converted, type: " + std::string(typeid(int).name()), -1, irez);
 
     TableColTestHelper<int64_t> Tcl2(-1);
     lrez = (int64_t)Tcl2[0];
-    TSM_ASSERT_EQUALS("10 int64_t not converted, type: " +
-                          std::string(typeid(int64_t).name()),
-                      -1, lrez);
+    TSM_ASSERT_EQUALS("10 int64_t not converted, type: " + std::string(typeid(int64_t).name()), -1, lrez);
 
     TableColTestHelper<long> Tcls2(-1);
     lsrez = (long)Tcls2[0];
-    TSM_ASSERT_EQUALS("11 long not converted, type: " +
-                          std::string(typeid(long).name()),
-                      -1, lsrez);
+    TSM_ASSERT_EQUALS("11 long not converted, type: " + std::string(typeid(long).name()), -1, lsrez);
   }
   void testAll() {
     TableWorkspace tw(3);
@@ -117,8 +95,7 @@ public:
     TS_ASSERT_EQUALS(tw.getColumn("Name"), strCol);
     TS_ASSERT_EQUALS(tw.getColumn("Position"), v3dCol);
     // Test trying to add existing column returns null pointer
-    TS_ASSERT_THROWS(tw.addColumn("int", "Number"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(tw.addColumn("int", "Number"), const std::invalid_argument &);
 
     tw.getRef<int>("Number", 1) = 17;
     tw.cell<std::string>(2, 1) = "STRiNG";
@@ -205,8 +182,7 @@ public:
       TS_ASSERT_EQUALS(str, "Number");
       TS_ASSERT_EQUALS(j, row1.row());
       row1.Bool(3) = !tw.Bool(row1.row(), 3);
-      TS_ASSERT_EQUALS(tw.Bool(row1.row(), 3),
-                       static_cast<Mantid::API::Boolean>(row1.row() % 2 != 0));
+      TS_ASSERT_EQUALS(tw.Bool(row1.row(), 3), static_cast<Mantid::API::Boolean>(row1.row() % 2 != 0));
     } while (row1.next());
   }
 
@@ -344,8 +320,7 @@ public:
 
     std::vector<std::string> colNames{"X", "Z"};
 
-    boost::scoped_ptr<ITableWorkspace> cloned(
-        tw.cloneColumns(colNames).release());
+    boost::scoped_ptr<ITableWorkspace> cloned(tw.cloneColumns(colNames).release());
 
     // Check clone is same as original.
     TS_ASSERT_EQUALS(colNames.size(), cloned->columnCount());
@@ -364,8 +339,7 @@ public:
     tw.addColumn("str", "S");
 
     TableRow row = tw.getFirstRow();
-    row << int(12) << float(25.1) << double(123.456) << false << true
-        << std::string("hello");
+    row << int(12) << float(25.1) << double(123.456) << false << true << std::string("hello");
 
     double d = 100.0;
     TS_ASSERT_THROWS_NOTHING(d = tw.getColumn("X")->toDouble(0));
@@ -378,8 +352,7 @@ public:
     TS_ASSERT_EQUALS(d, 0.0);
     TS_ASSERT_THROWS_NOTHING(d = tw.getColumn("T")->toDouble(0));
     TS_ASSERT_EQUALS(d, 1.0);
-    TS_ASSERT_THROWS(d = tw.getColumn("S")->toDouble(0),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(d = tw.getColumn("S")->toDouble(0), const std::invalid_argument &);
   }
   void testGetVectorSetVectorValues() {
 
@@ -389,8 +362,7 @@ public:
     tw.addColumn("str", "String");
 
     auto &SizeTData = tw.getColVector<size_t>("SizeT");
-    TS_ASSERT_THROWS(tw.getColVector<int>("Double"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(tw.getColVector<int>("Double"), const std::runtime_error &);
     std::vector<double> &DoublData = tw.getColVector<double>("Double");
     std::vector<std::string> &StrData = tw.getColVector<std::string>("String");
 
@@ -463,15 +435,13 @@ public:
     TS_ASSERT_EQUALS(10, tw.getLogs()->getPropertyValueAsType<int>("SomeInt"));
 
     TS_ASSERT_THROWS_NOTHING(tw.logs()->addProperty<double>("SomeDouble", 100));
-    TS_ASSERT_DELTA(
-        100, tw.getLogs()->getPropertyValueAsType<double>("SomeDouble"), 1.e-7);
+    TS_ASSERT_DELTA(100, tw.getLogs()->getPropertyValueAsType<double>("SomeDouble"), 1.e-7);
   }
 
   void test_known_to_property_for_unmangling() {
-    Mantid::API::WorkspaceProperty<TableWorkspace> property(
-        "DummyProperty", "DummyWorkspace", Mantid::Kernel::Direction::Input);
-    TS_ASSERT_EQUALS("TableWorkspace", Mantid::Kernel::getUnmangledTypeName(
-                                           *property.type_info()));
+    Mantid::API::WorkspaceProperty<TableWorkspace> property("DummyProperty", "DummyWorkspace",
+                                                            Mantid::Kernel::Direction::Input);
+    TS_ASSERT_EQUALS("TableWorkspace", Mantid::Kernel::getUnmangledTypeName(*property.type_info()));
   }
 
   void test_sort() {
@@ -481,10 +451,8 @@ public:
     ws.addColumn("str", "col2");
     ws.addColumn("double", "col3");
     auto &data1 = static_cast<TableColumn<int> &>(*ws.getColumn("col1")).data();
-    auto &data2 =
-        static_cast<TableColumn<std::string> &>(*ws.getColumn("col2")).data();
-    auto &data3 =
-        static_cast<TableColumn<double> &>(*ws.getColumn("col3")).data();
+    auto &data2 = static_cast<TableColumn<std::string> &>(*ws.getColumn("col2")).data();
+    auto &data3 = static_cast<TableColumn<double> &>(*ws.getColumn("col3")).data();
 
     data1[0] = 3;
     data2[0] = "three (3)";
@@ -565,10 +533,8 @@ public:
     ws.addColumn("str", "col2");
     ws.addColumn("double", "col3");
     auto &data1 = static_cast<TableColumn<int> &>(*ws.getColumn("col1")).data();
-    auto &data2 =
-        static_cast<TableColumn<std::string> &>(*ws.getColumn("col2")).data();
-    auto &data3 =
-        static_cast<TableColumn<double> &>(*ws.getColumn("col3")).data();
+    auto &data2 = static_cast<TableColumn<std::string> &>(*ws.getColumn("col2")).data();
+    auto &data3 = static_cast<TableColumn<double> &>(*ws.getColumn("col3")).data();
 
     data1[0] = 3;
     data2[0] = "three (3)";
@@ -664,10 +630,8 @@ public:
     ws.addColumn("str", "col2");
     ws.addColumn("double", "col3");
     auto &data1 = static_cast<TableColumn<int> &>(*ws.getColumn("col1")).data();
-    auto &data2 =
-        static_cast<TableColumn<std::string> &>(*ws.getColumn("col2")).data();
-    auto &data3 =
-        static_cast<TableColumn<double> &>(*ws.getColumn("col3")).data();
+    auto &data2 = static_cast<TableColumn<std::string> &>(*ws.getColumn("col2")).data();
+    auto &data3 = static_cast<TableColumn<double> &>(*ws.getColumn("col3")).data();
     data1[0] = 3;
     data2[0] = "hello";
     data3[0] = 5.0;
@@ -697,11 +661,9 @@ public:
     // Check property can be obtained as const_sptr or sptr
     TableWorkspace_const_sptr wsConst;
     TableWorkspace_sptr wsNonConst;
-    TS_ASSERT_THROWS_NOTHING(
-        wsConst = manager.getValue<TableWorkspace_const_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsConst = manager.getValue<TableWorkspace_const_sptr>(wsName));
     TS_ASSERT(wsConst != nullptr);
-    TS_ASSERT_THROWS_NOTHING(wsNonConst =
-                                 manager.getValue<TableWorkspace_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsNonConst = manager.getValue<TableWorkspace_sptr>(wsName));
     TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
@@ -729,11 +691,9 @@ public:
     // Check property can be obtained as const_sptr or sptr
     ITableWorkspace_const_sptr wsConst;
     ITableWorkspace_sptr wsNonConst;
-    TS_ASSERT_THROWS_NOTHING(
-        wsConst = manager.getValue<ITableWorkspace_const_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsConst = manager.getValue<ITableWorkspace_const_sptr>(wsName));
     TS_ASSERT(wsConst != nullptr);
-    TS_ASSERT_THROWS_NOTHING(
-        wsNonConst = manager.getValue<ITableWorkspace_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsNonConst = manager.getValue<ITableWorkspace_sptr>(wsName));
     TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 

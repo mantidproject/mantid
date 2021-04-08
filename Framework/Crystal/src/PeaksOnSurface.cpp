@@ -40,33 +40,25 @@ const std::string PeaksOnSurface::category() const { return "Crystal\\Peaks"; }
 void PeaksOnSurface::init() {
   this->initBaseProperties();
 
-  auto manditoryExtents = std::make_shared<
-      Mantid::Kernel::MandatoryValidator<std::vector<double>>>();
+  auto manditoryExtents = std::make_shared<Mantid::Kernel::MandatoryValidator<std::vector<double>>>();
+
+  declareProperty(std::make_unique<ArrayProperty<double>>("Vertex1", std::vector<double>(), manditoryExtents->clone()),
+                  "A comma separated list of cartesian coordinates for the "
+                  "lower left vertex of the surface. Values to be specified in "
+                  "the CoordinateFrame choosen.");
+
+  declareProperty(std::make_unique<ArrayProperty<double>>("Vertex2", std::vector<double>(), manditoryExtents->clone()),
+                  "A comma separated list of cartesian coordinates for the "
+                  "upper left vertex of the surface. Values to be specified in "
+                  "the CoordinateFrame choosen.");
+
+  declareProperty(std::make_unique<ArrayProperty<double>>("Vertex3", std::vector<double>(), manditoryExtents->clone()),
+                  "A comma separated list of cartesian coordinates for the "
+                  "upper right vertex of the surface. Values to be specified "
+                  "in the CoordinateFrame choosen.");
 
   declareProperty(
-      std::make_unique<ArrayProperty<double>>("Vertex1", std::vector<double>(),
-                                              manditoryExtents->clone()),
-      "A comma separated list of cartesian coordinates for the "
-      "lower left vertex of the surface. Values to be specified in "
-      "the CoordinateFrame choosen.");
-
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("Vertex2", std::vector<double>(),
-                                              manditoryExtents->clone()),
-      "A comma separated list of cartesian coordinates for the "
-      "upper left vertex of the surface. Values to be specified in "
-      "the CoordinateFrame choosen.");
-
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("Vertex3", std::vector<double>(),
-                                              manditoryExtents->clone()),
-      "A comma separated list of cartesian coordinates for the "
-      "upper right vertex of the surface. Values to be specified "
-      "in the CoordinateFrame choosen.");
-
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("Vertex4", std::vector<double>(),
-                                              std::move(manditoryExtents)),
+      std::make_unique<ArrayProperty<double>>("Vertex4", std::vector<double>(), std::move(manditoryExtents)),
       "A comma separated list of cartesian coordinates for the "
       "lower right vertex of the surface. Values to be specified "
       "in the CoordinateFrame choosen.");
@@ -92,12 +84,9 @@ void PeaksOnSurface::validateExtentsInput() const {
   }
 }
 
-bool PeaksOnSurface::pointOutsideAnyExtents(const V3D & /*testPoint*/) const {
-  return true;
-}
+bool PeaksOnSurface::pointOutsideAnyExtents(const V3D & /*testPoint*/) const { return true; }
 
-bool lineIntersectsSphere(const V3D &line, const V3D &lineStart,
-                          const V3D &peakCenter, const double peakRadius) {
+bool lineIntersectsSphere(const V3D &line, const V3D &lineStart, const V3D &peakCenter, const double peakRadius) {
   V3D peakToStart = peakCenter - lineStart;
   const V3D unitLine = normalize(line);
   double proj = peakToStart.scalar_prod(unitLine); // All we are doing here is
@@ -110,13 +99,13 @@ bool lineIntersectsSphere(const V3D &line, const V3D &lineStart,
                  // point of the segment.
   {
     closestPointOnSegment = lineStart; // Start of line
-  } else if (proj >= line.norm()) // The projection is greater than the segment
-                                  // length. So use the end point of the
-                                  // segment.
+  } else if (proj >= line.norm())      // The projection is greater than the segment
+                                       // length. So use the end point of the
+                                       // segment.
   {
     closestPointOnSegment = lineStart + line; // End of line.
-  } else // The projection falls somewhere between the start and end of the line
-         // segment.
+  } else                                      // The projection falls somewhere between the start and end of the line
+                                              // segment.
   {
     V3D projectionVector = unitLine * proj;
     closestPointOnSegment = projectionVector + lineStart;
@@ -125,8 +114,7 @@ bool lineIntersectsSphere(const V3D &line, const V3D &lineStart,
   return (peakCenter - closestPointOnSegment).norm() <= peakRadius;
 }
 
-bool PeaksOnSurface::pointInsideAllExtents(const V3D &testPoint,
-                                           const V3D &peakCenter) const {
+bool PeaksOnSurface::pointInsideAllExtents(const V3D &testPoint, const V3D &peakCenter) const {
   const double peakRadius = getPeakRadius();
 
   /*
@@ -146,18 +134,15 @@ bool PeaksOnSurface::pointInsideAllExtents(const V3D &testPoint,
          lineIntersectsSphere(m_line2, m_vertex2, peakCenter, peakRadius) ||
          lineIntersectsSphere(m_line3, m_vertex3, peakCenter, peakRadius) ||
          lineIntersectsSphere(m_line4, m_vertex4, peakCenter, peakRadius) ||
-         (testPoint[0] >= m_extents[0] && testPoint[0] <= m_extents[1] &&
-          testPoint[1] >= m_extents[2] && testPoint[1] <= m_extents[3] &&
-          testPoint[2] >= m_extents[4] && testPoint[2] <= m_extents[5]);
+         (testPoint[0] >= m_extents[0] && testPoint[0] <= m_extents[1] && testPoint[1] >= m_extents[2] &&
+          testPoint[1] <= m_extents[3] && testPoint[2] >= m_extents[4] && testPoint[2] <= m_extents[5]);
 }
 
-void PeaksOnSurface::checkTouchPoint(const V3D &touchPoint, const V3D &normal,
-                                     const V3D &faceVertex) const {
+void PeaksOnSurface::checkTouchPoint(const V3D &touchPoint, const V3D &normal, const V3D &faceVertex) const {
   if (normal.scalar_prod(touchPoint - faceVertex) != 0) {
-    throw std::runtime_error(
-        "Debugging. Calculation is wrong. touch point should always be on the "
-        "plane!"); // Remove this line later. Check that geometry is setup
-                   // properly.
+    throw std::runtime_error("Debugging. Calculation is wrong. touch point should always be on the "
+                             "plane!"); // Remove this line later. Check that geometry is setup
+                                        // properly.
   }
 }
 
@@ -192,8 +177,7 @@ VecVecV3D PeaksOnSurface::createFaces() const {
 
 V3D makeV3DFromVector(const VecDouble &vec) {
   if (vec.size() != 3) {
-    throw std::invalid_argument(
-        "All Vertex parameter arguments must have 3 entries.");
+    throw std::invalid_argument("All Vertex parameter arguments must have 3 entries.");
   }
   return V3D(vec[0], vec[1], vec[2]);
 }
@@ -225,18 +209,12 @@ void PeaksOnSurface::exec() {
   // Determine minimum and maximum in x, y and z.
   using std::max;
   using std::min;
-  m_extents[0] =
-      min(m_vertex1.X(), min(m_vertex2.X(), min(m_vertex3.X(), m_vertex4.X())));
-  m_extents[1] =
-      max(m_vertex1.X(), max(m_vertex2.X(), max(m_vertex3.X(), m_vertex4.X())));
-  m_extents[2] =
-      min(m_vertex1.Y(), min(m_vertex2.Y(), min(m_vertex3.Y(), m_vertex4.Y())));
-  m_extents[3] =
-      max(m_vertex1.Y(), max(m_vertex2.Y(), max(m_vertex3.Y(), m_vertex4.Y())));
-  m_extents[4] =
-      min(m_vertex1.Z(), min(m_vertex2.Z(), min(m_vertex3.Z(), m_vertex4.Z())));
-  m_extents[5] =
-      max(m_vertex1.Z(), max(m_vertex2.Z(), max(m_vertex3.Z(), m_vertex4.Z())));
+  m_extents[0] = min(m_vertex1.X(), min(m_vertex2.X(), min(m_vertex3.X(), m_vertex4.X())));
+  m_extents[1] = max(m_vertex1.X(), max(m_vertex2.X(), max(m_vertex3.X(), m_vertex4.X())));
+  m_extents[2] = min(m_vertex1.Y(), min(m_vertex2.Y(), min(m_vertex3.Y(), m_vertex4.Y())));
+  m_extents[3] = max(m_vertex1.Y(), max(m_vertex2.Y(), max(m_vertex3.Y(), m_vertex4.Y())));
+  m_extents[4] = min(m_vertex1.Z(), min(m_vertex2.Z(), min(m_vertex3.Z(), m_vertex4.Z())));
+  m_extents[5] = max(m_vertex1.Z(), max(m_vertex2.Z(), max(m_vertex3.Z(), m_vertex4.Z())));
 
   executePeaksIntersection();
 }

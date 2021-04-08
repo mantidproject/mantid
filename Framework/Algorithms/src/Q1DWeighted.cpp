@@ -48,17 +48,13 @@ void Q1DWeighted::init() {
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
   wsValidator->add<InstrumentValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
                   "Input workspace containing the SANS 2D data");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Workspace that will contain the I(Q) data");
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>(
-          "OutputBinning", std::make_shared<RebinParamsValidator>()),
-      "The new bin boundaries in the form: <math>x_1,\\Delta x_1,x_2,\\Delta "
-      "x_2,\\dots,x_n</math>");
+  declareProperty(std::make_unique<ArrayProperty<double>>("OutputBinning", std::make_shared<RebinParamsValidator>()),
+                  "The new bin boundaries in the form: :math:`x_1,\\Delta x_1,x_2,\\Delta "
+                  "x_2,\\dots,x_n`");
 
   auto positiveInt = std::make_shared<BoundedValidator<int>>();
   positiveInt->setLower(0);
@@ -71,34 +67,23 @@ void Q1DWeighted::init() {
                   "NPixelDivision*NPixelDivision.");
 
   // Wedge properties
-  declareProperty("NumberOfWedges", 2, positiveInt,
-                  "Number of wedges to calculate.");
-  declareProperty("WedgeAngle", 30.0, positiveDouble,
-                  "Opening angle of the wedge, in degrees.");
-  declareProperty("WedgeOffset", 0.0, positiveDouble,
-                  "Wedge offset relative to the horizontal axis, in degrees.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-          "WedgeWorkspace", "", Direction::Output, PropertyMode::Optional),
-      "Name for the WorkspaceGroup containing the wedge I(q) distributions.");
+  declareProperty("NumberOfWedges", 2, positiveInt, "Number of wedges to calculate.");
+  declareProperty("WedgeAngle", 30.0, positiveDouble, "Opening angle of the wedge, in degrees.");
+  declareProperty("WedgeOffset", 0.0, positiveDouble, "Wedge offset relative to the horizontal axis, in degrees.");
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("WedgeWorkspace", "", Direction::Output,
+                                                                      PropertyMode::Optional),
+                  "Name for the WorkspaceGroup containing the wedge I(q) distributions.");
 
-  declareProperty("PixelSizeX", 5.15, positiveDouble,
-                  "Pixel size in the X direction (mm).");
-  declareProperty("PixelSizeY", 5.15, positiveDouble,
-                  "Pixel size in the Y direction (mm).");
-  declareProperty(
-      "ErrorWeighting", false,
-      "Choose whether each pixel contribution will be weighted by 1/error^2.");
+  declareProperty("PixelSizeX", 5.15, positiveDouble, "Pixel size in the X direction (mm).");
+  declareProperty("PixelSizeY", 5.15, positiveDouble, "Pixel size in the Y direction (mm).");
+  declareProperty("ErrorWeighting", false, "Choose whether each pixel contribution will be weighted by 1/error^2.");
 
-  declareProperty("AsymmetricWedges", false,
-                  "Choose to produce the results for asymmetric wedges.");
+  declareProperty("AsymmetricWedges", false, "Choose to produce the results for asymmetric wedges.");
 
-  declareProperty("AccountForGravity", false,
-                  "Take the nominal gravity drop into account.");
+  declareProperty("AccountForGravity", false, "Take the nominal gravity drop into account.");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-          "ShapeTable", "", Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>("ShapeTable", "", Direction::Input, PropertyMode::Optional),
       "Table workspace containing the shapes (sectors only) drawn in the "
       "instrument viewer; if specified, the wedges properties defined above "
       "are not taken into account.");
@@ -133,9 +118,7 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
   // Calculate the output binning
   const std::vector<double> binParams = getProperty("OutputBinning");
 
-  m_nQ = static_cast<size_t>(
-             VectorHelper::createAxisFromRebinParams(binParams, m_qBinEdges)) -
-         1;
+  m_nQ = static_cast<size_t>(VectorHelper::createAxisFromRebinParams(binParams, m_qBinEdges)) - 1;
 
   // number of spectra in the input
   m_nSpec = inputWS->getNumberHistograms();
@@ -165,14 +148,13 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
       double centerX = 0.;
       double centerY = 0.;
       double angleRange = wedgeAngle * deg2rad;
-      double midAngle =
-          M_PI * static_cast<double>(iw) / static_cast<double>(m_nWedges);
+      double midAngle = M_PI * static_cast<double>(iw) / static_cast<double>(m_nWedges);
       if (m_asymmWedges)
         midAngle *= 2;
       midAngle += wedgeOffset * deg2rad;
 
-      m_wedgesParameters.push_back(Q1DWeighted::wedgeParameters(
-          innerRadius, outerRadius, centerX, centerY, midAngle, angleRange));
+      m_wedgesParameters.push_back(
+          Q1DWeighted::wedgeParameters(innerRadius, outerRadius, centerX, centerY, midAngle, angleRange));
     }
   } else {
     getTableShapes();
@@ -187,8 +169,7 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
   // we want to do this, since we want to average the I(Q) in each lambda bin
   // then average all the I(Q)s together
   m_intensities = std::vector<std::vector<std::vector<double>>>(
-      m_nWedges + 1, std::vector<std::vector<double>>(
-                         m_nLambda, std::vector<double>(m_nQ, 0.0)));
+      m_nWedges + 1, std::vector<std::vector<double>>(m_nLambda, std::vector<double>(m_nQ, 0.0)));
   m_errors = m_intensities;
   m_normalisation = m_intensities;
 }
@@ -210,8 +191,7 @@ void Q1DWeighted::getTableShapes() {
   for (size_t i = 0; i < rowCount - 1; ++i) {
     std::map<std::string, std::vector<std::string>> paramMap;
     std::vector<std::string> splitParams;
-    boost::algorithm::split(splitParams, shapeWs->String(i, 1),
-                            boost::algorithm::is_any_of("\n"));
+    boost::algorithm::split(splitParams, shapeWs->String(i, 1), boost::algorithm::is_any_of("\n"));
     std::vector<std::string> params;
     for (std::string val : splitParams) {
       if (val.empty())
@@ -225,10 +205,8 @@ void Q1DWeighted::getTableShapes() {
     if (paramMap["Type"][1] == "sector")
       getSectorParams(paramMap["Parameters"], viewportParams);
     else
-      g_log.information() << "Shape " << i + 1 << " is of type "
-                          << paramMap["Type"][1]
-                          << " which is not supported. This shape is ignored."
-                          << std::endl;
+      g_log.information() << "Shape " << i + 1 << " is of type " << paramMap["Type"][1]
+                          << " which is not supported. This shape is ignored." << std::endl;
   }
 }
 
@@ -239,12 +217,10 @@ void Q1DWeighted::getTableShapes() {
  * @param viewport the parameters as they were saved in the shape table
  * @param viewportParams the map to fill
  */
-void Q1DWeighted::getViewportParams(
-    const std::string &viewport,
-    std::map<std::string, std::vector<double>> &viewportParams) {
+void Q1DWeighted::getViewportParams(const std::string &viewport,
+                                    std::map<std::string, std::vector<double>> &viewportParams) {
   std::vector<std::string> params;
-  boost::algorithm::split(params, viewport,
-                          boost::algorithm::is_any_of("\t, \n"));
+  boost::algorithm::split(params, viewport, boost::algorithm::is_any_of("\t, \n"));
 
   if (params[0] != "Translation") {
     g_log.error("No viewport found in the shape table. Please provide a table "
@@ -269,10 +245,8 @@ void Q1DWeighted::getViewportParams(
 
   double epsilon = 1e-10;
 
-  if (std::fabs(viewportParams["Rotation"][0]) > epsilon ||
-      std::fabs(viewportParams["Rotation"][1]) > epsilon ||
-      std::fabs(viewportParams["Rotation"][3]) > epsilon ||
-      std::fabs(viewportParams["Rotation"][2] - 1) > epsilon) {
+  if (std::fabs(viewportParams["Rotation"][0]) > epsilon || std::fabs(viewportParams["Rotation"][1]) > epsilon ||
+      std::fabs(viewportParams["Rotation"][3]) > epsilon || std::fabs(viewportParams["Rotation"][2] - 1) > epsilon) {
     g_log.warning("The shapes were created using a rotated viewport not using "
                   "Z- projection, which is not supported. Results are likely "
                   "to be erroneous. Consider freezing the rotation in the "
@@ -285,9 +259,8 @@ void Q1DWeighted::getViewportParams(
  * @param params the vector of strings containing the data defining the sector
  * @param viewport the previously created map of the viewport's parameters
  */
-void Q1DWeighted::getSectorParams(
-    std::vector<std::string> &params,
-    std::map<std::string, std::vector<double>> &viewport) {
+void Q1DWeighted::getSectorParams(std::vector<std::string> &params,
+                                  std::map<std::string, std::vector<double>> &viewport) {
   double zoom = viewport["Zoom"][0];
 
   double innerRadius = std::stod(params[1]) / zoom;
@@ -313,8 +286,8 @@ void Q1DWeighted::getSectorParams(
   double centerX = -(std::stod(params[5]) - xOffset) / zoom;
   double centerY = (std::stod(params[6]) - yOffset) / zoom;
 
-  Q1DWeighted::wedgeParameters wedge = Q1DWeighted::wedgeParameters(
-      innerRadius, outerRadius, centerX, centerY, centerAngle, angleRange);
+  Q1DWeighted::wedgeParameters wedge =
+      Q1DWeighted::wedgeParameters(innerRadius, outerRadius, centerX, centerY, centerAngle, angleRange);
 
   if (m_asymmWedges || !checkIfSymetricalWedge(wedge)) {
     m_wedgesParameters.push_back(wedge);
@@ -335,17 +308,13 @@ void Q1DWeighted::getSectorParams(
  */
 bool Q1DWeighted::checkIfSymetricalWedge(Q1DWeighted::wedgeParameters &wedge) {
 
-  for (size_t i = 0; i < m_wedgesParameters.size(); ++i) {
-    Q1DWeighted::wedgeParameters params = m_wedgesParameters[i];
-    double diffAngle =
-        std::fabs(std::fmod(wedge.angleMiddle - params.angleMiddle, M_PI));
+  for (Q1DWeighted::wedgeParameters params : m_wedgesParameters) {
+    double diffAngle = std::fabs(std::fmod(wedge.angleMiddle - params.angleMiddle, M_PI));
 
     double epsilon = 1e-3;
-    if (wedge.innerRadius == params.innerRadius &&
-        wedge.outerRadius == params.outerRadius &&
+    if (wedge.innerRadius == params.innerRadius && wedge.outerRadius == params.outerRadius &&
         wedge.centerX == params.centerX && wedge.centerY == params.centerY &&
-        std::fabs(wedge.angleRange - params.angleRange) < epsilon &&
-        std::fabs(diffAngle - M_PI) < epsilon) {
+        std::fabs(wedge.angleRange - params.angleRange) < epsilon && std::fabs(diffAngle - M_PI) < epsilon) {
       return true;
     }
   }
@@ -367,8 +336,7 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
   // Beam line axis, to compute scattering angle
   const V3D beamLine = samplePos - sourcePos;
 
-  const auto up =
-      inputWS->getInstrument()->getReferenceFrame()->vecPointingUp();
+  const auto up = inputWS->getInstrument()->getReferenceFrame()->vecPointingUp();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS))
   // first we loop over spectra
@@ -376,8 +344,7 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
     PARALLEL_START_INTERUPT_REGION
     const auto i = static_cast<size_t>(index);
     // skip spectra with no detectors, monitors or masked spectra
-    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) ||
-        spectrumInfo.isMasked(i)) {
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i)) {
       continue;
     }
 
@@ -420,12 +387,9 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
       for (int isub = 0; isub < m_nSubPixels * m_nSubPixels; ++isub) {
 
         // Find the position offset for this sub-pixel in real space
-        const double subY =
-            m_pixelSizeY *
-            ((isub % m_nSubPixels) - (m_nSubPixels - 1.0) / 2.0) / m_nSubPixels;
+        const double subY = m_pixelSizeY * ((isub % m_nSubPixels) - (m_nSubPixels - 1.0) / 2.0) / m_nSubPixels;
         const double subX = m_pixelSizeX *
-                            (floor(static_cast<double>(isub) / m_nSubPixels) -
-                             (m_nSubPixels - 1.0) * 0.5) /
+                            (floor(static_cast<double>(isub) / m_nSubPixels) - (m_nSubPixels - 1.0) * 0.5) /
                             m_nSubPixels;
 
         // calculate Q
@@ -470,20 +434,15 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
           double centerAngle = wedge.angleMiddle;
           const V3D subPix = V3D(position.X(), position.Y(), 0.0);
           const V3D center = V3D(wedge.centerX, wedge.centerY, 0);
-          double angle = std::fabs(
-              (subPix - center)
-                  .angle(V3D(cos(centerAngle), sin(centerAngle), 0.0)));
+          double angle = std::fabs((subPix - center).angle(V3D(cos(centerAngle), sin(centerAngle), 0.0)));
 
           // checks that the pixel is within the angular range or, if the
           // integration is symmetrical, within the angular range + PI
           bool isWithinAngularRange =
-              angle < wedge.angleRange * 0.5 ||
-              (!m_asymmWedges &&
-               std::fabs(M_PI - angle) < wedge.angleRange * 0.5);
+              angle < wedge.angleRange * 0.5 || (!m_asymmWedges && std::fabs(M_PI - angle) < wedge.angleRange * 0.5);
 
           bool isWithinRadii = subPix.distance(center) > wedge.innerRadius &&
-                               (wedge.outerRadius <= 0 ||
-                                subPix.distance(center) <= wedge.outerRadius);
+                               (wedge.outerRadius <= 0 || subPix.distance(center) <= wedge.outerRadius);
 
           if (isWithinAngularRange && isWithinRadii) {
             PARALLEL_CRITICAL(iqnorm_wedges) {
@@ -508,8 +467,7 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
  * @param inputWS : the input workspace
  */
 void Q1DWeighted::finalize(const MatrixWorkspace_const_sptr &inputWS) {
-  MatrixWorkspace_sptr outputWS =
-      createOutputWorkspace(inputWS, m_nQ, m_qBinEdges);
+  MatrixWorkspace_sptr outputWS = createOutputWorkspace(inputWS, m_nQ, m_qBinEdges);
   setProperty("OutputWorkspace", outputWS);
 
   // Create workspace group that holds output workspaces for wedges
@@ -517,11 +475,8 @@ void Q1DWeighted::finalize(const MatrixWorkspace_const_sptr &inputWS) {
   if (m_nWedges != 0) {
     // Create wedge workspaces
     for (size_t iw = 0; iw < m_nWedges; ++iw) {
-      MatrixWorkspace_sptr wedgeWs =
-          createOutputWorkspace(inputWS, m_nQ, m_qBinEdges);
-      wedgeWs->mutableRun().addProperty(
-          "wedge_angle", m_wedgesParameters[iw].angleMiddle / deg2rad,
-          "degrees", true);
+      MatrixWorkspace_sptr wedgeWs = createOutputWorkspace(inputWS, m_nQ, m_qBinEdges);
+      wedgeWs->mutableRun().addProperty("wedge_angle", m_wedgesParameters[iw].angleMiddle / deg2rad, "degrees", true);
       wsgroup->addWorkspace(wedgeWs);
     }
     // set the output property
@@ -536,9 +491,7 @@ void Q1DWeighted::finalize(const MatrixWorkspace_const_sptr &inputWS) {
 
   for (size_t iout = 0; iout < m_nWedges + 1; ++iout) {
 
-    auto ws = (iout == 0) ? outputWS
-                          : std::dynamic_pointer_cast<MatrixWorkspace>(
-                                wsgroup->getItem(iout - 1));
+    auto ws = (iout == 0) ? outputWS : std::dynamic_pointer_cast<MatrixWorkspace>(wsgroup->getItem(iout - 1));
     auto &YOut = ws->mutableY(0);
     auto &EOut = ws->mutableE(0);
 
@@ -573,15 +526,11 @@ void Q1DWeighted::finalize(const MatrixWorkspace_const_sptr &inputWS) {
  * @param binEdges : bin edges
  * @return output I(Q) workspace
  */
-MatrixWorkspace_sptr
-Q1DWeighted::createOutputWorkspace(const MatrixWorkspace_const_sptr &parent,
-                                   const size_t nBins,
-                                   const std::vector<double> &binEdges) {
+MatrixWorkspace_sptr Q1DWeighted::createOutputWorkspace(const MatrixWorkspace_const_sptr &parent, const size_t nBins,
+                                                        const std::vector<double> &binEdges) {
 
-  MatrixWorkspace_sptr outputWS =
-      WorkspaceFactory::Instance().create(parent, 1, nBins + 1, nBins);
-  outputWS->getAxis(0)->unit() =
-      UnitFactory::Instance().create("MomentumTransfer");
+  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(parent, 1, nBins + 1, nBins);
+  outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
   outputWS->setBinEdges(0, binEdges);
   outputWS->setYUnitLabel("1/cm");
   outputWS->setDistribution(true);

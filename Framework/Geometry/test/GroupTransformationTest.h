@@ -22,14 +22,10 @@ class GroupTransformationTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static GroupTransformationTest *createSuite() {
-    return new GroupTransformationTest();
-  }
+  static GroupTransformationTest *createSuite() { return new GroupTransformationTest(); }
   static void destroySuite(GroupTransformationTest *suite) { delete suite; }
 
-  void test_ConstructionSymmetryOperation() {
-    TS_ASSERT_THROWS_NOTHING(GroupTransformation("x,y,z"));
-  }
+  void test_ConstructionSymmetryOperation() { TS_ASSERT_THROWS_NOTHING(GroupTransformation("x,y,z")); }
 
   void test_ConstructionSymmetryOperationString() {
     TS_ASSERT_THROWS_NOTHING(GroupTransformation("x,y,z"));
@@ -57,33 +53,28 @@ public:
     std::unordered_set<std::string> elements;
     std::vector<SymmetryOperation> ops = transformed.getSymmetryOperations();
     for (auto &op : ops) {
-      SymmetryElement_sptr el =
-          SymmetryElementFactory::Instance().createSymElement(op);
+      SymmetryElement_sptr el = SymmetryElementFactory::Instance().createSymElement(op);
 
       // Check for identity
-      SymmetryElementIdentity_sptr identity =
-          std::dynamic_pointer_cast<SymmetryElementIdentity>(el);
+      SymmetryElementIdentity_sptr identity = std::dynamic_pointer_cast<SymmetryElementIdentity>(el);
       if (identity) {
         elements.insert(el->hmSymbol());
       }
 
       // Check for inversion
-      SymmetryElementInversion_sptr inversion =
-          std::dynamic_pointer_cast<SymmetryElementInversion>(el);
+      SymmetryElementInversion_sptr inversion = std::dynamic_pointer_cast<SymmetryElementInversion>(el);
       if (inversion) {
         elements.insert(el->hmSymbol());
       }
 
       // Check for 2 || z
-      SymmetryElementRotation_sptr rotation =
-          std::dynamic_pointer_cast<SymmetryElementRotation>(el);
+      SymmetryElementRotation_sptr rotation = std::dynamic_pointer_cast<SymmetryElementRotation>(el);
       if (rotation && rotation->getAxis() == V3R(0, 0, 1)) {
         elements.insert(el->hmSymbol());
       }
 
       // Check for m perpendicular to z
-      SymmetryElementMirror_sptr mirror =
-          std::dynamic_pointer_cast<SymmetryElementMirror>(el);
+      SymmetryElementMirror_sptr mirror = std::dynamic_pointer_cast<SymmetryElementMirror>(el);
       if (mirror && mirror->getAxis() == V3R(0, 0, 1)) {
         elements.insert(el->hmSymbol());
       }
@@ -111,15 +102,13 @@ public:
   }
 
   void test_TransformGroup_Rhombohedral() {
-    SpaceGroup_const_sptr r3cHex =
-        SpaceGroupFactory::Instance().createSpaceGroup("R -3 c");
+    SpaceGroup_const_sptr r3cHex = SpaceGroupFactory::Instance().createSpaceGroup("R -3 c");
 
     /* 2/3 -1/3 -1/3    0
      * 1/3  1/3 -2/3    0
      * 1/3  1/3  1/3    0
      */
-    GroupTransformation hexToRhom(
-        "2/3x-1/3y-1/3z, 1/3x+1/3y-2/3z, 1/3x+1/3y+1/3z");
+    GroupTransformation hexToRhom("2/3x-1/3y-1/3z, 1/3x+1/3y-2/3z, 1/3x+1/3y+1/3z");
     Group r3cRh = hexToRhom(*r3cHex);
 
     TS_ASSERT(r3cRh.isGroup());

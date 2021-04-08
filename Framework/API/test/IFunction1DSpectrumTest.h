@@ -17,14 +17,10 @@ class IFunction1DSpectrumTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static IFunction1DSpectrumTest *createSuite() {
-    return new IFunction1DSpectrumTest();
-  }
+  static IFunction1DSpectrumTest *createSuite() { return new IFunction1DSpectrumTest(); }
   static void destroySuite(IFunction1DSpectrumTest *suite) { delete suite; }
 
-  void testConstruction() {
-    TS_ASSERT_THROWS_NOTHING(ConcreteFunction1DSpectrum function1DSpectrum);
-  }
+  void testConstruction() { TS_ASSERT_THROWS_NOTHING(ConcreteFunction1DSpectrum function1DSpectrum); }
 
   void testFunctionCorrectDomain() {
     std::vector<double> xValues;
@@ -58,20 +54,17 @@ public:
 
     IFunction_sptr fun(new ConcreteFunction1DSpectrum);
 
-    TS_ASSERT_THROWS(fun->function(domain, values),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(fun->function(domain, values), const std::invalid_argument &);
   }
 
 private:
-  class ConcreteFunction1DSpectrum : public virtual ParamFunction,
-                                     public virtual IFunction1DSpectrum {
+  class ConcreteFunction1DSpectrum : public virtual ParamFunction, public virtual IFunction1DSpectrum {
     friend class IFunction1DSpectrumTest;
 
   public:
     std::string name() const override { return "ConcreteFunction1DSpectrum"; }
 
-    void function1DSpectrum(const FunctionDomain1DSpectrum &domain,
-                            FunctionValues &values) const override {
+    void function1DSpectrum(const FunctionDomain1DSpectrum &domain, FunctionValues &values) const override {
       for (size_t i = 0; i < domain.size(); ++i) {
         values.addToCalculated(i, domain[i]);
       }

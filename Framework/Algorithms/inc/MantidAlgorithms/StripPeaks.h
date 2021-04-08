@@ -48,9 +48,7 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"FindPeaks", "StripVanadiumPeaks"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"FindPeaks", "StripVanadiumPeaks"}; }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "CorrectionFunctions\\PeakCorrections;Optimization\\PeakFinding";
@@ -63,9 +61,8 @@ private:
   void exec() override;
 
   API::ITableWorkspace_sptr findPeaks(const API::MatrixWorkspace_sptr &WS);
-  API::MatrixWorkspace_sptr
-  removePeaks(const API::MatrixWorkspace_const_sptr &input,
-              const API::ITableWorkspace_sptr &peakslist);
+  API::MatrixWorkspace_sptr removePeaks(const API::MatrixWorkspace_const_sptr &input,
+                                        const API::ITableWorkspace_sptr &peakslist);
   double m_maxChiSq{0.0};
 };
 

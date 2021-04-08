@@ -29,9 +29,7 @@ class SaveGSASInstrumentFileTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SaveGSASInstrumentFileTest *createSuite() {
-    return new SaveGSASInstrumentFileTest();
-  }
+  static SaveGSASInstrumentFileTest *createSuite() { return new SaveGSASInstrumentFileTest(); }
   static void destroySuite(SaveGSASInstrumentFileTest *suite) { delete suite; }
 
   void test_SaveGSSInstrumentFile_1Bank() {
@@ -40,8 +38,7 @@ public:
     // Load a (local) table workspace
     loadProfileTable("PG3ProfileTable");
     TableWorkspace_sptr profiletablews =
-        std::dynamic_pointer_cast<TableWorkspace>(
-            AnalysisDataService::Instance().retrieve("PG3ProfileTable"));
+        std::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve("PG3ProfileTable"));
     TS_ASSERT(profiletablews);
 
     // Set up the algorithm
@@ -64,8 +61,7 @@ public:
     TS_ASSERT(saver.isExecuted());
 
     // Check the output file's existence and size
-    std::string filename =
-        saver.getProperty("OutputFilename"); // get full pathname
+    std::string filename = saver.getProperty("OutputFilename"); // get full pathname
     TS_ASSERT(Poco::File(filename).exists());
 
     vector<size_t> veclineindextoread;
@@ -117,8 +113,7 @@ public:
     TS_ASSERT(saver.isExecuted());
 
     // Check the output file's existence and size
-    std::string filename =
-        saver.getProperty("OutputFilename"); // get full pathname
+    std::string filename = saver.getProperty("OutputFilename"); // get full pathname
     TS_ASSERT(Poco::File(filename).exists());
 
     // Clean
@@ -171,12 +166,9 @@ public:
     vector<string> veclines;
     readLines(filename, veclineindextoread, veclines);
 
-    TS_ASSERT_EQUALS(veclines[0],
-                     "INS  1PAB334   0.99581  -0.99997124999.99996   0.15997");
-    TS_ASSERT_EQUALS(veclines[1],
-                     "INS  3PAB481   2.13019  -0.8982985923.49391   0.15924");
-    TS_ASSERT_EQUALS(veclines[2],
-                     "INS  4PAB589   3.91787 173.70816   0.01643   0.01323");
+    TS_ASSERT_EQUALS(veclines[0], "INS  1PAB334   0.99581  -0.99997124999.99996   0.15997");
+    TS_ASSERT_EQUALS(veclines[1], "INS  3PAB481   2.13019  -0.8982985923.49391   0.15924");
+    TS_ASSERT_EQUALS(veclines[2], "INS  4PAB589   3.91787 173.70816   0.01643   0.01323");
 
     // Clean
     Poco::File(prmfilename).remove();
@@ -403,8 +395,7 @@ public:
   //------------------------------------------------------------------------------------
   /** Read several specified lines from a file
    */
-  void readLines(const std::string &filename,
-                 const std::vector<size_t> &veclineindex,
+  void readLines(const std::string &filename, const std::vector<size_t> &veclineindex,
                  std::vector<std::string> &veclines) {
     // Validate
     if (veclineindex.empty())
@@ -457,8 +448,7 @@ public:
   }
 
   // Compare 2 files
-  bool compare2Files(const std::string &filename1,
-                     const std::string &filename2) {
+  bool compare2Files(const std::string &filename1, const std::string &filename2) {
     ifstream file1(filename1.c_str(), std::ifstream::in);
     ifstream file2(filename2.c_str(), std::ifstream::in);
 
@@ -489,8 +479,7 @@ public:
     if (c1 != c2) {
       cout << "Different number of lines in files!"
            << "\n";
-      cout << filename1 << " has " << c1 << " lines and " << filename2 << " has"
-           << c2 << " lines"
+      cout << filename1 << " has " << c1 << " lines and " << filename2 << " has" << c2 << " lines"
            << "\n";
       return false;
     }

@@ -39,8 +39,7 @@ namespace {
  * @return EventWorkspace_sptr
  */
 EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
-  FacilityHelper::ScopedFacilities loadTESTFacility(
-      "unit_testing/UnitTestFacilities.xml", "TEST");
+  FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
   int numPixels = 10000;
   int numBins = 16;
@@ -52,11 +51,9 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
   // --------- Load the instrument -----------
   LoadInstrument *loadInst = new LoadInstrument();
   loadInst->initialize();
-  loadInst->setPropertyValue("Filename",
-                             "unit_testing/MINITOPAZ_Definition.xml");
+  loadInst->setPropertyValue("Filename", "unit_testing/MINITOPAZ_Definition.xml");
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", retVal);
-  loadInst->setProperty("RewriteSpectraMap",
-                        Mantid::Kernel::OptionalBool(true));
+  loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
   loadInst->execute();
   delete loadInst;
   // Populate the instrument parameters in this workspace - this works around
@@ -79,12 +76,9 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
 
     // Peak
     int r = static_cast<int>(
-        numEvents / std::sqrt((pix / 100 - 50.5) * (pix / 100 - 50.5) +
-                              (pix % 100 - 50.5) * (pix % 100 - 50.5)));
+        numEvents / std::sqrt((pix / 100 - 50.5) * (pix / 100 - 50.5) + (pix % 100 - 50.5) * (pix % 100 - 50.5)));
     for (int i = 0; i < r; i++) {
-      el += TofEvent(0.75 + binDelta *
-                                ((flat(rng) + flat(rng) + flat(rng)) * 2. - 3.),
-                     run_start + double(i));
+      el += TofEvent(0.75 + binDelta * ((flat(rng) + flat(rng) + flat(rng)) * 2. - 3.), run_start + double(i));
     }
   }
 
@@ -136,9 +130,7 @@ public:
     TS_ASSERT(alg->isExecuted())
 
     MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "TOPAZ"));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("TOPAZ"));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -149,20 +141,14 @@ public:
 
 class NormaliseVanadiumTestPerformance : public CxxTest::TestSuite {
 public:
-  static NormaliseVanadiumTestPerformance *createSuite() {
-    return new NormaliseVanadiumTestPerformance();
-  }
-  static void destroySuite(NormaliseVanadiumTestPerformance *suite) {
-    delete suite;
-  }
+  static NormaliseVanadiumTestPerformance *createSuite() { return new NormaliseVanadiumTestPerformance(); }
+  static void destroySuite(NormaliseVanadiumTestPerformance *suite) { delete suite; }
 
   void setUp() override { normaliseVanadiumAlg = createAlgorithm(); }
 
   void tearDown() override { AnalysisDataService::Instance().remove("TOPAZ"); }
 
-  void testNormaliseVanadiumPerformance() {
-    TS_ASSERT_THROWS_NOTHING(normaliseVanadiumAlg->execute());
-  }
+  void testNormaliseVanadiumPerformance() { TS_ASSERT_THROWS_NOTHING(normaliseVanadiumAlg->execute()); }
 
 private:
   IAlgorithm_sptr normaliseVanadiumAlg;

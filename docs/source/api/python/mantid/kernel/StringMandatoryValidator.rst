@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::Kernel::MandatoryValidator.
 
 .. module:`mantid.kernel`
 
-.. autoclass:: mantid.kernel.StringMandatoryValidator 
+.. autoclass:: mantid.kernel.StringMandatoryValidator
     :members:
     :undoc-members:
     :inherited-members:

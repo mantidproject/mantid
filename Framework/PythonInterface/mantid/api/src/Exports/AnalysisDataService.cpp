@@ -49,39 +49,32 @@ AnalysisDataServiceImpl &instance() {
  * @param unrollGroups If true unroll the workspace groups
  * @return a python list of the workspaces in the ADS
  */
-list retrieveWorkspaces(AnalysisDataServiceImpl &self, const list &names,
-                        bool unrollGroups = false) {
-  return Converters::ToPyList<Workspace_sptr>()(self.retrieveWorkspaces(
-      Converters::PySequenceToVector<std::string>(names)(), unrollGroups));
+list retrieveWorkspaces(AnalysisDataServiceImpl &self, const list &names, bool unrollGroups = false) {
+  return Converters::ToPyList<Workspace_sptr>()(
+      self.retrieveWorkspaces(Converters::PySequenceToVector<std::string>(names)(), unrollGroups));
 }
 
 GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
-BOOST_PYTHON_FUNCTION_OVERLOADS(AdsRetrieveWorkspacesOverloads,
-                                retrieveWorkspaces, 2, 3)
+BOOST_PYTHON_FUNCTION_OVERLOADS(AdsRetrieveWorkspacesOverloads, retrieveWorkspaces, 2, 3)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 } // namespace
 
 void export_AnalysisDataService() {
-  using ADSExporter =
-      DataServiceExporter<AnalysisDataServiceImpl, Workspace_sptr>;
+  using ADSExporter = DataServiceExporter<AnalysisDataServiceImpl, Workspace_sptr>;
   auto pythonClass = ADSExporter::define("AnalysisDataServiceImpl");
   pythonClass
-      .def("Instance", instance,
-           return_value_policy<reference_existing_object>(),
+      .def("Instance", instance, return_value_policy<reference_existing_object>(),
            "Return a reference to the singleton instance")
       .staticmethod("Instance")
       .def("retrieveWorkspaces", retrieveWorkspaces,
-           AdsRetrieveWorkspacesOverloads(
-               "Retrieve a list of workspaces by name",
-               (arg("self"), arg("names"), arg("unrollGroups") = false)))
-      .def("addToGroup", &AnalysisDataServiceImpl::addToGroup,
-           (arg("groupName"), arg("wsName")),
+           AdsRetrieveWorkspacesOverloads("Retrieve a list of workspaces by name",
+                                          (arg("self"), arg("names"), arg("unrollGroups") = false)))
+      .def("addToGroup", &AnalysisDataServiceImpl::addToGroup, (arg("groupName"), arg("wsName")),
            "Add a workspace in the ADS to a group in the ADS")
-      .def("removeFromGroup", &AnalysisDataServiceImpl::removeFromGroup,
-           (arg("groupName"), arg("wsName")),
+      .def("removeFromGroup", &AnalysisDataServiceImpl::removeFromGroup, (arg("groupName"), arg("wsName")),
            "Remove a workspace from a group in the ADS");
 }

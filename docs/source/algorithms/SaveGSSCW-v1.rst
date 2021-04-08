@@ -15,7 +15,7 @@ Saves a constant wavelength diffraction pattern in units Degrees to
 FXYE GSAS format.
 
 From the GSAS manual a description of the format options:
-If TYPE is 'FXY' or 'FXYE' then the data records give the position, 
+If TYPE is 'FXY' or 'FXYE' then the data records give the position,
 intensity and in the case of 'FXYE' the esd in the intensity with one set per record and in free format.
 The values may also be in scientific form. The position is either in centidegrees for CW data
 or microseconds for TOF data. Each record must be padded out to 80 characters and end with CR/LF.

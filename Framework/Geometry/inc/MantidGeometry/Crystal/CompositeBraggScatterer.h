@@ -51,8 +51,7 @@ public:
   CompositeBraggScatterer();
 
   static CompositeBraggScatterer_sptr create();
-  static CompositeBraggScatterer_sptr
-  create(const std::vector<BraggScatterer_sptr> &scatterers);
+  static CompositeBraggScatterer_sptr create(const std::vector<BraggScatterer_sptr> &scatterers);
 
   std::string name() const override { return "CompositeBraggScatterer"; }
   BraggScatterer_sptr clone() const override;
@@ -64,14 +63,12 @@ public:
   void removeScatterer(size_t i);
   void removeAllScatterers();
 
-  StructureFactor
-  calculateStructureFactor(const Kernel::V3D &hkl) const override;
+  StructureFactor calculateStructureFactor(const Kernel::V3D &hkl) const override;
 
 protected:
   void afterPropertySet(const std::string &propertyName) override;
   void propagateProperty(const std::string &propertyName);
-  void propagatePropertyToScatterer(BraggScatterer_sptr &scatterer,
-                                    const std::string &propertyName,
+  void propagatePropertyToScatterer(BraggScatterer_sptr &scatterer, const std::string &propertyName,
                                     const std::string &propertyValue);
 
   void addScattererImplementation(const BraggScatterer_sptr &scatterer);

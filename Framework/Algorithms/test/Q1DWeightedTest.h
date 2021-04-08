@@ -48,26 +48,20 @@ public:
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void testExec() {
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("InputWorkspace", m_inputWS))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("InputWorkspace", m_inputWS))
     const std::string outputWS("result");
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("OutputWorkspace", outputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("OutputBinning", "0.01,0.001,0.11"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("NPixelDivision", "3"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("ErrorWeighting", "1"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputBinning", "0.01,0.001,0.11"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("NPixelDivision", "3"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("ErrorWeighting", "1"))
 
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
 
     TS_ASSERT(radial_average.isExecuted())
 
     MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(outputWS)))
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 AnalysisDataService::Instance().retrieve(outputWS)))
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1)
 
     // Timer is 3600.0 for this test data file
@@ -97,61 +91,39 @@ public:
     // We then call the algorithm twice, once with offset 0, once with offset
     // 90. With offset 90 the wedges are thus logically "swapped", so we check
     // if their values match.
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("InputWorkspace", m_inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("OutputWorkspace", outputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("OutputBinning", "0.01,0.001,0.11"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("NPixelDivision", "3"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("ErrorWeighting", "1"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("WedgeWorkspace", wedgeWS1))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("NumberOfWedges", "2"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("WedgeAngle", "30"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("WedgeOffset", "0"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("InputWorkspace", m_inputWS))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputBinning", "0.01,0.001,0.11"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("NPixelDivision", "3"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("ErrorWeighting", "1"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeWorkspace", wedgeWS1))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("NumberOfWedges", "2"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeAngle", "30"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeOffset", "0"))
 
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
     TS_ASSERT(radial_average.isExecuted())
 
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("InputWorkspace", m_inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("OutputWorkspace", outputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("OutputBinning", "0.01,0.001,0.11"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("NPixelDivision", "3"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("ErrorWeighting", "1"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("WedgeWorkspace", wedgeWS2))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("NumberOfWedges", "2"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("WedgeAngle", "30"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("WedgeOffset", "90"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("InputWorkspace", m_inputWS))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputBinning", "0.01,0.001,0.11"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("NPixelDivision", "3"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("ErrorWeighting", "1"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeWorkspace", wedgeWS2))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("NumberOfWedges", "2"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeAngle", "30"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeOffset", "90"))
 
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
     TS_ASSERT(radial_average.isExecuted())
 
     // Get wedge 0 of the result with offset 0.
-    auto result1 = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve(wedgeWS1));
-    auto wedge1 =
-        std::dynamic_pointer_cast<MatrixWorkspace>(result1->getItem(0));
+    auto result1 = std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wedgeWS1));
+    auto wedge1 = std::dynamic_pointer_cast<MatrixWorkspace>(result1->getItem(0));
 
     // Get wedge 1 of the result with offset 90.
-    auto result2 = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve(wedgeWS2));
-    auto wedge2 =
-        std::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(1));
+    auto result2 = std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wedgeWS2));
+    auto wedge2 = std::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(1));
 
     double tolerance = 1e-12;
 
@@ -169,19 +141,15 @@ public:
     // mask all the bins where the relative error is above 10%
     masker.setPropertyValue("Criterion", "e / y > 0.1");
     masker.execute();
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("InputWorkspace", "__masked"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("OutputWorkspace", "__iqmasked"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("OutputBinning", "0.001,0.001,0.08"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("InputWorkspace", "__masked"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputWorkspace", "__iqmasked"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputBinning", "0.001,0.001,0.08"))
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
     TS_ASSERT(radial_average.isExecuted())
 
     MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("__iqmasked")))
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("__iqmasked")))
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1)
     TS_ASSERT_DELTA(result->y(0)[6], 247.106, 0.001);
   }
@@ -198,77 +166,50 @@ public:
     // such that they are back-to-back in azimuthal plane. The pair-wise average
     // of asymmetric wedges should match the corresponding symmetric ones.
 
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("InputWorkspace", m_inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("OutputWorkspace", outputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("OutputBinning", "0.01,0.001,0.08"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("NPixelDivision", "3"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("ErrorWeighting", "0"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("WedgeWorkspace", wedgeWS1))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("NumberOfWedges", "2"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("WedgeAngle", "30"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("WedgeOffset", "0"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("InputWorkspace", m_inputWS))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputBinning", "0.01,0.001,0.08"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("NPixelDivision", "3"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("ErrorWeighting", "0"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeWorkspace", wedgeWS1))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("NumberOfWedges", "2"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeAngle", "30"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeOffset", "0"))
 
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
     TS_ASSERT(radial_average.isExecuted())
 
     radial_average.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("InputWorkspace", m_inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("OutputWorkspace", outputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("OutputBinning", "0.01,0.001,0.08"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("NPixelDivision", "3"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("ErrorWeighting", "0"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("WedgeWorkspace", wedgeWS2))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("NumberOfWedges", "4"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("WedgeAngle", "30"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("WedgeOffset", "0"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("AsymmetricWedges", "1"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("InputWorkspace", m_inputWS))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputBinning", "0.01,0.001,0.08"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("NPixelDivision", "3"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("ErrorWeighting", "0"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeWorkspace", wedgeWS2))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("NumberOfWedges", "4"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeAngle", "30"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeOffset", "0"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("AsymmetricWedges", "1"))
 
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
     TS_ASSERT(radial_average.isExecuted())
 
     // Get the results of symmetric wedges.
-    auto result1 = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve(wedgeWS1));
+    auto result1 = std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wedgeWS1));
     TS_ASSERT(result1)
-    auto wedge1 =
-        std::dynamic_pointer_cast<MatrixWorkspace>(result1->getItem(0));
-    auto wedge2 =
-        std::dynamic_pointer_cast<MatrixWorkspace>(result1->getItem(1));
+    auto wedge1 = std::dynamic_pointer_cast<MatrixWorkspace>(result1->getItem(0));
+    auto wedge2 = std::dynamic_pointer_cast<MatrixWorkspace>(result1->getItem(1));
 
     TS_ASSERT(wedge1)
     TS_ASSERT(wedge2)
 
     // Get the results of asymmetric wedges.
-    auto result2 = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve(wedgeWS2));
+    auto result2 = std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wedgeWS2));
     TS_ASSERT(result2)
-    auto wedgeA1 =
-        std::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(0));
-    auto wedgeA2 =
-        std::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(1));
-    auto wedgeA3 =
-        std::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(2));
-    auto wedgeA4 =
-        std::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(3));
+    auto wedgeA1 = std::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(0));
+    auto wedgeA2 = std::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(1));
+    auto wedgeA3 = std::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(2));
+    auto wedgeA4 = std::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(3));
 
     TS_ASSERT(wedgeA1)
     TS_ASSERT(wedgeA2)
@@ -279,26 +220,20 @@ public:
 
     // The average of A2 and A4 should be similar to wedge 2.
     for (size_t i = 0; i < wedge1->y(0).size(); ++i) {
-      TS_ASSERT_DELTA(wedge2->y(0)[i],
-                      (wedgeA2->y(0)[i] + wedgeA4->y(0)[i]) / 2, tolerance);
+      TS_ASSERT_DELTA(wedge2->y(0)[i], (wedgeA2->y(0)[i] + wedgeA4->y(0)[i]) / 2, tolerance);
     }
   }
 
   void testWithGravity() {
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("InputWorkspace", m_inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("OutputWorkspace", "__iqg"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setProperty("AccountForGravity", true))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("OutputBinning", "0.001,0.001,0.08"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("InputWorkspace", m_inputWS))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputWorkspace", "__iqg"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setProperty("AccountForGravity", true))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputBinning", "0.001,0.001,0.08"))
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
     TS_ASSERT(radial_average.isExecuted())
     MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("__iqg")))
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("__iqg")))
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1)
     TS_ASSERT_DELTA(result->y(0)[6], 251.052, 0.001);
   }
@@ -307,25 +242,18 @@ public:
     createShapeTable();
 
     std::string outputWS = "q1d_shapes";
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("InputWorkspace", m_inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("OutputWorkspace", outputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("OutputBinning", "0.001,0.001,0.08"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("WedgeWorkspace", outputWS + "_wedges"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("AsymmetricWedges", "1"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("ShapeTable", "MaskShapes"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("InputWorkspace", m_inputWS))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputBinning", "0.001,0.001,0.08"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeWorkspace", outputWS + "_wedges"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("AsymmetricWedges", "1"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("ShapeTable", "MaskShapes"))
 
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
 
     WorkspaceGroup_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<WorkspaceGroup>(
-            AnalysisDataService::Instance().retrieve(outputWS + "_wedges")))
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<WorkspaceGroup>(
+                                 AnalysisDataService::Instance().retrieve(outputWS + "_wedges")))
     TS_ASSERT_EQUALS(result->getNumberOfEntries(), 2)
   }
 
@@ -336,52 +264,35 @@ public:
     createShapeTable(true);
 
     std::string outputWS = "q1d_shapes";
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("InputWorkspace", m_inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("OutputWorkspace", outputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("WedgeWorkspace", outputWS + "_wedges"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("OutputBinning", "0.001,0.001,0.08"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("AsymmetricWedges", "0"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("ShapeTable", "MaskShapes"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("InputWorkspace", m_inputWS))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeWorkspace", outputWS + "_wedges"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputBinning", "0.001,0.001,0.08"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("AsymmetricWedges", "0"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("ShapeTable", "MaskShapes"))
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
 
     std::string refWS = "q1d_wedges";
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("InputWorkspace", m_inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("OutputWorkspace", refWS))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("OutputBinning", "0.001,0.001,0.08"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("NumberOfWedges", "2"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("WedgeAngle", "90"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("WedgeOffset", "0"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("AsymmetricWedges", "0"))
-    TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("WedgeWorkspace", refWS + "_wedges"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("InputWorkspace", m_inputWS))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputWorkspace", refWS))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputBinning", "0.001,0.001,0.08"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("NumberOfWedges", "2"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeAngle", "90"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeOffset", "0"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("AsymmetricWedges", "0"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeWorkspace", refWS + "_wedges"))
 
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
 
     WorkspaceGroup_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<WorkspaceGroup>(
-            AnalysisDataService::Instance().retrieve(outputWS + "_wedges")))
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<WorkspaceGroup>(
+                                 AnalysisDataService::Instance().retrieve(outputWS + "_wedges")))
 
-    WorkspaceGroup_sptr ref = std::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve(refWS + "_wedges"));
+    WorkspaceGroup_sptr ref =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(refWS + "_wedges"));
 
-    auto wedge1 =
-        std::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(0));
-    auto wedge2 =
-        std::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(1));
+    auto wedge1 = std::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(0));
+    auto wedge2 = std::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(1));
     TS_ASSERT(wedge1)
     TS_ASSERT(wedge2)
 
@@ -463,8 +374,7 @@ private:
 
       for (size_t i = 0; i < 4; ++i) {
 
-        sector = createDummySector(innerRadius * zoom, outerRadius * zoom,
-                                   startAngle, endAngle, centerXOffset * zoom,
+        sector = createDummySector(innerRadius * zoom, outerRadius * zoom, startAngle, endAngle, centerXOffset * zoom,
                                    centerYOffset * zoom);
         TableRow row = table->appendRow();
         row << std::to_string(i) << sector;
@@ -472,8 +382,7 @@ private:
         endAngle = fmod(endAngle + M_PI / 2, 2 * M_PI);
       }
 
-      viewport = createDummyViewport(centerXOffset * zoom, centerYOffset * zoom,
-                                     zoom, 0, 0, 1, 0);
+      viewport = createDummyViewport(centerXOffset * zoom, centerYOffset * zoom, zoom, 0, 0, 1, 0);
       TableRow row = table->appendRow();
       row << std::to_string(-1) << viewport;
     }
@@ -481,25 +390,22 @@ private:
     AnalysisDataService::Instance().addOrReplace("MaskShapes", table);
   }
 
-  std::string createDummySector(double innerRadius, double outerRadius,
-                                double startAngle, double endAngle,
+  std::string createDummySector(double innerRadius, double outerRadius, double startAngle, double endAngle,
                                 double centerX, double centerY) {
     std::stringstream ss;
     ss << "Type\tsector" << std::endl;
-    ss << "Parameters\t" << innerRadius << "\t" << outerRadius << "\t"
-       << startAngle << "\t" << endAngle << "\t" << centerX << "\t" << centerY;
+    ss << "Parameters\t" << innerRadius << "\t" << outerRadius << "\t" << startAngle << "\t" << endAngle << "\t"
+       << centerX << "\t" << centerY;
     // the other parameters are omitted, since they are not useful for us
     return ss.str();
   }
 
-  std::string createDummyViewport(double transX, double transY, double zoom,
-                                  double rotation0, double rotation1,
+  std::string createDummyViewport(double transX, double transY, double zoom, double rotation0, double rotation1,
                                   double rotation2, double rotation3) {
     std::stringstream ss;
     ss << "Translation\t" << transX << "\t" << transY << std::endl;
     ss << "Zoom\t" << zoom << std::endl;
-    ss << "Rotation\t" << rotation0 << "\t" << rotation1 << "\t" << rotation2
-       << "\t" << rotation3;
+    ss << "Rotation\t" << rotation0 << "\t" << rotation1 << "\t" << rotation2 << "\t" << rotation3;
     return ss.str();
   }
 
@@ -509,9 +415,7 @@ private:
 
 class Q1DWeightedTestPerformance : public CxxTest::TestSuite {
 public:
-  static Q1DWeightedTestPerformance *createSuite() {
-    return new Q1DWeightedTestPerformance();
-  }
+  static Q1DWeightedTestPerformance *createSuite() { return new Q1DWeightedTestPerformance(); }
   static void destroySuite(Q1DWeightedTestPerformance *suite) { delete suite; }
 
   Q1DWeightedTestPerformance() {}

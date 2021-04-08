@@ -20,17 +20,12 @@ using namespace ICatTestHelper;
 class CatalogDownloadDataFilesTest : public CxxTest::TestSuite {
 public:
   // This means the constructor isn't called when running other tests
-  static CatalogDownloadDataFilesTest *createSuite() {
-    return new CatalogDownloadDataFilesTest();
-  }
+  static CatalogDownloadDataFilesTest *createSuite() { return new CatalogDownloadDataFilesTest(); }
 
-  static void destroySuite(CatalogDownloadDataFilesTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(CatalogDownloadDataFilesTest *suite) { delete suite; }
 
   CatalogDownloadDataFilesTest()
-      : m_fakeLogin(std::make_unique<FakeICatLogin>()),
-        m_sessionID(m_fakeLogin->getSessionId()) {}
+      : m_fakeLogin(std::make_unique<FakeICatLogin>()), m_sessionID(m_fakeLogin->getSessionId()) {}
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 

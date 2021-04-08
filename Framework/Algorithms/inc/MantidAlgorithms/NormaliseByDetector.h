@@ -34,9 +34,7 @@ public:
 
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Normalise the input workspace by the detector efficiency.";
-  }
+  const std::string summary() const override { return "Normalise the input workspace by the detector efficiency."; }
 
   int version() const override;
   const std::vector<std::string> seeAlso() const override { return {"Divide"}; }
@@ -47,18 +45,15 @@ private:
   const bool m_parallelExecution;
   /// Try to parse a function parameter and extract the correctly typed
   /// parameter.
-  const Mantid::Geometry::FitParameter
-  tryParseFunctionParameter(const Mantid::Geometry::Parameter_sptr &parameter,
-                            const Geometry::IDetector &det);
+  const Mantid::Geometry::FitParameter tryParseFunctionParameter(const Mantid::Geometry::Parameter_sptr &parameter,
+                                                                 const Geometry::IDetector &det);
   /// Block to process histograms.
   std::shared_ptr<Mantid::API::MatrixWorkspace>
   processHistograms(const std::shared_ptr<Mantid::API::MatrixWorkspace> &inWS);
   /// Process indivdual histogram.
-  void processHistogram(
-      size_t wsIndex,
-      const std::shared_ptr<const Mantid::API::MatrixWorkspace> &inWS,
-      const std::shared_ptr<Mantid::API::MatrixWorkspace> &denominatorWS,
-      Mantid::API::Progress &prog);
+  void processHistogram(size_t wsIndex, const std::shared_ptr<const Mantid::API::MatrixWorkspace> &inWS,
+                        const std::shared_ptr<Mantid::API::MatrixWorkspace> &denominatorWS,
+                        Mantid::API::Progress &prog);
 
   void init() override;
   void exec() override;

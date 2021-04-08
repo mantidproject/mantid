@@ -14,8 +14,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-using namespace MantidQt::CustomInterfaces::ISISReflectometry::
-    ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using MantidQt::MantidWidgets::Batch::Cell;
 using MantidQt::MantidWidgets::Batch::RowLocation;
@@ -24,16 +23,11 @@ using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
 
-class RunsTablePresenterProcessingTest : public CxxTest::TestSuite,
-                                         RunsTablePresenterTest {
+class RunsTablePresenterProcessingTest : public CxxTest::TestSuite, RunsTablePresenterTest {
 public:
-  static RunsTablePresenterProcessingTest *createSuite() {
-    return new RunsTablePresenterProcessingTest();
-  }
+  static RunsTablePresenterProcessingTest *createSuite() { return new RunsTablePresenterProcessingTest(); }
 
-  static void destroySuite(RunsTablePresenterProcessingTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(RunsTablePresenterProcessingTest *suite) { delete suite; }
 
   void testResumeReductionNotifiesParent() {
     auto presenter = makePresenter(m_view, ReductionJobs());
@@ -58,9 +52,7 @@ public:
 
   void testChangingInstrumentIsDisabledWhenAnyBatchReducing() {
     auto presenter = makePresenter(m_view, ReductionJobs());
-    EXPECT_CALL(m_mainPresenter, isAnyBatchProcessing())
-        .Times(1)
-        .WillOnce(Return(true));
+    EXPECT_CALL(m_mainPresenter, isAnyBatchProcessing()).Times(1).WillOnce(Return(true));
     EXPECT_CALL(m_view, setInstrumentSelectorEnabled(false)).Times(1);
     presenter.notifyAnyBatchReductionResumed();
     verifyAndClearExpectations();
@@ -68,9 +60,7 @@ public:
 
   void testChangingInstrumentIsEnabledWhenNoBatchesReducing() {
     auto presenter = makePresenter(m_view, ReductionJobs());
-    EXPECT_CALL(m_mainPresenter, isAnyBatchProcessing())
-        .Times(1)
-        .WillOnce(Return(false));
+    EXPECT_CALL(m_mainPresenter, isAnyBatchProcessing()).Times(1).WillOnce(Return(false));
     EXPECT_CALL(m_view, setInstrumentSelectorEnabled(true)).Times(1);
     presenter.notifyAnyBatchReductionPaused();
     verifyAndClearExpectations();
@@ -92,9 +82,7 @@ public:
 
   void testChangingInstrumentIsDisabledWhenAnyBatchAutoreducing() {
     auto presenter = makePresenter(m_view, ReductionJobs());
-    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing())
-        .Times(1)
-        .WillOnce(Return(true));
+    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing()).Times(1).WillOnce(Return(true));
     EXPECT_CALL(m_view, setInstrumentSelectorEnabled(false)).Times(1);
     presenter.notifyAnyBatchAutoreductionResumed();
     verifyAndClearExpectations();
@@ -102,9 +90,7 @@ public:
 
   void testChangingInstrumentIsEnabledWhenNoBatchesAutoreducing() {
     auto presenter = makePresenter(m_view, ReductionJobs());
-    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing())
-        .Times(1)
-        .WillOnce(Return(false));
+    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing()).Times(1).WillOnce(Return(false));
     EXPECT_CALL(m_view, setInstrumentSelectorEnabled(true)).Times(1);
     presenter.notifyAnyBatchAutoreductionPaused();
     verifyAndClearExpectations();
@@ -113,11 +99,8 @@ public:
   void testNotifyChangeInstrumentRequested() {
     auto presenter = makePresenter(m_view, ReductionJobs());
     auto const instrument = std::string("test_instrument");
-    EXPECT_CALL(m_view, getInstrumentName())
-        .Times(1)
-        .WillOnce(Return(instrument));
-    EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(instrument))
-        .Times(1);
+    EXPECT_CALL(m_view, getInstrumentName()).Times(1).WillOnce(Return(instrument));
+    EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(instrument)).Times(1);
     presenter.notifyChangeInstrumentRequested();
     verifyAndClearExpectations();
   }
@@ -222,18 +205,14 @@ public:
   }
 
   void testNotifyRowOutputsChangedForInputQRange() {
-    auto presenter =
-        makePresenter(m_view, oneGroupWithARowWithInputQRangeModel());
-    EXPECT_CALL(m_jobs,
-                setCellsAt(RowLocation({0, 0}), rowCellsWithValues(DEFAULT)))
-        .Times(1);
+    auto presenter = makePresenter(m_view, oneGroupWithARowWithInputQRangeModel());
+    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), rowCellsWithValues(DEFAULT))).Times(1);
     presenter.notifyRowOutputsChanged();
     verifyAndClearExpectations();
   }
 
   void testNotifyRowOutputsChangedForOutputQRange() {
-    auto presenter =
-        makePresenter(m_view, oneGroupWithARowWithOutputQRangeModel());
+    auto presenter = makePresenter(m_view, oneGroupWithARowWithOutputQRangeModel());
     auto cells = rowCellsWithValues(DEFAULT);
     cells[4].setOutput();
     cells[5].setOutput();
@@ -267,8 +246,7 @@ private:
 
   std::vector<Cell> rowCells(const char *colour) {
     auto cells =
-        std::vector<Cell>{Cell(""), Cell(""), Cell(""), Cell(""), Cell(""),
-                          Cell(""), Cell(""), Cell(""), Cell("")};
+        std::vector<Cell>{Cell(""), Cell(""), Cell(""), Cell(""), Cell(""), Cell(""), Cell(""), Cell(""), Cell("")};
     for (auto &cell : cells)
       cell.setBackgroundColor(colour);
     return cells;
@@ -276,138 +254,88 @@ private:
 
   std::vector<Cell> rowCellsWithValues(const char *colour) {
     auto cells =
-        std::vector<Cell>{Cell("12345"),    Cell("0.500000"), Cell("Trans A"),
-                          Cell("Trans B"),  Cell("0.500000"), Cell("0.900000"),
-                          Cell("0.010000"), Cell(""),         Cell("")};
+        std::vector<Cell>{Cell("12345"),    Cell("0.500000"), Cell("Trans A"), Cell("Trans B"), Cell("0.500000"),
+                          Cell("0.900000"), Cell("0.010000"), Cell(""),        Cell("")};
     for (auto &cell : cells)
       cell.setBackgroundColor(colour);
     return cells;
   }
 
-  void expectGroupStateCleared() {
-    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0}), rowCells(DEFAULT)))
-        .Times(1);
-  }
+  void expectGroupStateCleared() { EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0}), rowCells(DEFAULT))).Times(1); }
 
-  void expectRowStateCleared() {
-    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), rowCells(DEFAULT)))
-        .Times(1);
-  }
+  void expectRowStateCleared() { EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), rowCells(DEFAULT))).Times(1); }
 
   void expectRowStateInvalid() {
     auto cells = rowCells(INVALID);
     for (auto &cell : cells)
-      cell.setToolTip(
-          "Row will not be processed: it either contains invalid cell values, "
-          "or duplicates a reduction in another row");
+      cell.setToolTip("Row will not be processed: it either contains invalid cell values, "
+                      "or duplicates a reduction in another row");
 
     EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), cells)).Times(1);
   }
 
   void expectGroupState(const char *colour) {
-    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0}), rowCells(colour)))
-        .Times(1);
+    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0}), rowCells(colour))).Times(1);
   }
 
   void expectRowState(const char *colour) {
-    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), rowCells(colour)))
-        .Times(1);
+    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), rowCells(colour))).Times(1);
   }
 
   void expectUpdateProgressBar() {
     auto progress = 33;
-    EXPECT_CALL(m_mainPresenter, percentComplete())
-        .Times(1)
-        .WillOnce(Return(progress));
+    EXPECT_CALL(m_mainPresenter, percentComplete()).Times(1).WillOnce(Return(progress));
     EXPECT_CALL(m_view, setProgress(progress)).Times(1);
   }
 
   void expectTableEditingEnabled(bool enabled) {
     EXPECT_CALL(m_view, setJobsTableEnabled(enabled)).Times(1);
-    EXPECT_CALL(m_view,
-                setActionEnabled(IRunsTableView::Action::InsertRow, enabled))
-        .Times(1);
-    EXPECT_CALL(m_view,
-                setActionEnabled(IRunsTableView::Action::InsertGroup, enabled))
-        .Times(1);
-    EXPECT_CALL(m_view,
-                setActionEnabled(IRunsTableView::Action::DeleteRow, enabled))
-        .Times(1);
-    EXPECT_CALL(m_view,
-                setActionEnabled(IRunsTableView::Action::DeleteGroup, enabled))
-        .Times(1);
-    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::Copy, enabled))
-        .Times(1);
-    EXPECT_CALL(m_view,
-                setActionEnabled(IRunsTableView::Action::Paste, enabled))
-        .Times(1);
-    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::Cut, enabled))
-        .Times(1);
+    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::InsertRow, enabled)).Times(1);
+    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::InsertGroup, enabled)).Times(1);
+    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::DeleteRow, enabled)).Times(1);
+    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::DeleteGroup, enabled)).Times(1);
+    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::Copy, enabled)).Times(1);
+    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::Paste, enabled)).Times(1);
+    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::Cut, enabled)).Times(1);
   }
 
   void expectIsProcessing() {
-    EXPECT_CALL(m_mainPresenter, isProcessing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
-    EXPECT_CALL(m_mainPresenter, isAnyBatchProcessing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_mainPresenter, isProcessing()).Times(AtLeast(1)).WillRepeatedly(Return(true));
+    EXPECT_CALL(m_mainPresenter, isAnyBatchProcessing()).Times(AtLeast(1)).WillRepeatedly(Return(true));
     EXPECT_CALL(m_view, setInstrumentSelectorEnabled(false)).Times(1);
     EXPECT_CALL(m_view, setProcessButtonEnabled(false)).Times(1);
-    EXPECT_CALL(m_view,
-                setActionEnabled(IRunsTableView::Action::Process, false))
-        .Times(1);
-    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::Pause, true))
-        .Times(1);
+    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::Process, false)).Times(1);
+    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::Pause, true)).Times(1);
     expectTableEditingEnabled(false);
   }
 
   void expectIsNotProcessing() {
-    EXPECT_CALL(m_mainPresenter, isProcessing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(false));
-    EXPECT_CALL(m_mainPresenter, isAnyBatchProcessing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(m_mainPresenter, isProcessing()).Times(AtLeast(1)).WillRepeatedly(Return(false));
+    EXPECT_CALL(m_mainPresenter, isAnyBatchProcessing()).Times(AtLeast(1)).WillRepeatedly(Return(false));
     EXPECT_CALL(m_view, setInstrumentSelectorEnabled(true)).Times(1);
     EXPECT_CALL(m_view, setProcessButtonEnabled(true)).Times(1);
-    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::Process, true))
-        .Times(1);
-    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::Pause, false))
-        .Times(1);
+    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::Process, true)).Times(1);
+    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::Pause, false)).Times(1);
     expectTableEditingEnabled(true);
   }
 
   void expectIsAutoreducing() {
-    EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
-    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing()).Times(AtLeast(1)).WillRepeatedly(Return(true));
+    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing()).Times(AtLeast(1)).WillRepeatedly(Return(true));
     EXPECT_CALL(m_view, setInstrumentSelectorEnabled(false)).Times(1);
     EXPECT_CALL(m_view, setProcessButtonEnabled(false)).Times(1);
-    EXPECT_CALL(m_view,
-                setActionEnabled(IRunsTableView::Action::Process, false))
-        .Times(1);
-    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::Pause, false))
-        .Times(1);
+    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::Process, false)).Times(1);
+    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::Pause, false)).Times(1);
     expectTableEditingEnabled(false);
   }
 
   void expectIsNotAutoreducing() {
-    EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(false));
-    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing()).Times(AtLeast(1)).WillRepeatedly(Return(false));
+    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing()).Times(AtLeast(1)).WillRepeatedly(Return(false));
     EXPECT_CALL(m_view, setInstrumentSelectorEnabled(true)).Times(1);
     EXPECT_CALL(m_view, setProcessButtonEnabled(true)).Times(1);
-    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::Process, true))
-        .Times(1);
-    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::Pause, false))
-        .Times(1);
+    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::Process, true)).Times(1);
+    EXPECT_CALL(m_view, setActionEnabled(IRunsTableView::Action::Pause, false)).Times(1);
     expectTableEditingEnabled(true);
   }
 };

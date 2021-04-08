@@ -30,9 +30,7 @@ DECLARE_ALGORITHM(JoinISISPolarizationEfficiencies)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string JoinISISPolarizationEfficiencies::name() const {
-  return "JoinISISPolarizationEfficiencies";
-}
+const std::string JoinISISPolarizationEfficiencies::name() const { return "JoinISISPolarizationEfficiencies"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int JoinISISPolarizationEfficiencies::version() const { return 1; }
@@ -44,10 +42,8 @@ const std::string JoinISISPolarizationEfficiencies::summary() const {
          "PolarizationEfficiencyCor.";
 }
 
-const std::vector<std::string>
-JoinISISPolarizationEfficiencies::seeAlso() const {
-  return {"CreatePolarizationEfficiencies", "LoadISISPolarizationEfficiencies",
-          "PolarizationEfficiencyCor"};
+const std::vector<std::string> JoinISISPolarizationEfficiencies::seeAlso() const {
+  return {"CreatePolarizationEfficiencies", "LoadISISPolarizationEfficiencies", "PolarizationEfficiencyCor"};
 }
 
 //----------------------------------------------------------------------------------------------
@@ -56,43 +52,35 @@ JoinISISPolarizationEfficiencies::seeAlso() const {
 void JoinISISPolarizationEfficiencies::init() {
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          Pp, "", Kernel::Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(Pp, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the Pp polarization efficiency.");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          Ap, "", Kernel::Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(Ap, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the Ap polarization efficiency.");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          Rho, "", Kernel::Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(Rho, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the Rho polarization efficiency.");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          Alpha, "", Kernel::Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(Alpha, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the Alpha polarization efficiency.");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          P1, "", Kernel::Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(P1, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the P1 polarization efficiency.");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          P2, "", Kernel::Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(P2, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the P2 polarization efficiency.");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          F1, "", Kernel::Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(F1, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the F1 polarization efficiency.");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          F2, "", Kernel::Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(F2, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the F2 polarization efficiency.");
 
   initOutputWorkspace();
@@ -100,15 +88,13 @@ void JoinISISPolarizationEfficiencies::init() {
 
 /// Load efficientcies from files and put them into a single workspace.
 /// @param props :: Names of properties containg names of files to load.
-MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::createEfficiencies(
-    std::vector<std::string> const &props) {
+MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::createEfficiencies(std::vector<std::string> const &props) {
   std::vector<MatrixWorkspace_sptr> workspaces;
   for (auto const &propName : props) {
     MatrixWorkspace_sptr ws = getProperty(propName);
     if (ws->getNumberHistograms() != 1) {
-      throw std::runtime_error(
-          "Loaded workspace must contain a single histogram. Found " +
-          std::to_string(ws->getNumberHistograms()));
+      throw std::runtime_error("Loaded workspace must contain a single histogram. Found " +
+                               std::to_string(ws->getNumberHistograms()));
     }
     workspaces.emplace_back(ws);
   }
@@ -120,14 +106,13 @@ MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::createEfficiencies(
 /// one.
 /// @param labels :: Axis labels for each workspace.
 /// @param workspaces :: Workspaces to put together.
-MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::createEfficiencies(
-    std::vector<std::string> const &labels,
-    std::vector<MatrixWorkspace_sptr> const &workspaces) {
+MatrixWorkspace_sptr
+JoinISISPolarizationEfficiencies::createEfficiencies(std::vector<std::string> const &labels,
+                                                     std::vector<MatrixWorkspace_sptr> const &workspaces) {
   auto interpolatedWorkspaces = interpolateWorkspaces(workspaces);
 
   auto const &inWS = interpolatedWorkspaces.front();
-  MatrixWorkspace_sptr outWS = DataObjects::create<Workspace2D>(
-      *inWS, labels.size(), inWS->histogram(0));
+  MatrixWorkspace_sptr outWS = DataObjects::create<Workspace2D>(*inWS, labels.size(), inWS->histogram(0));
   auto axis1 = std::make_unique<TextAxis>(labels.size());
   auto axis1Raw = axis1.get();
   outWS->replaceAxis(1, std::move(axis1));
@@ -146,8 +131,7 @@ MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::createEfficiencies(
 /// @param workspaces :: The workspaces to interpolate.
 /// @return A list of interpolated workspaces.
 std::vector<MatrixWorkspace_sptr>
-JoinISISPolarizationEfficiencies::interpolateWorkspaces(
-    std::vector<MatrixWorkspace_sptr> const &workspaces) {
+JoinISISPolarizationEfficiencies::interpolateWorkspaces(std::vector<MatrixWorkspace_sptr> const &workspaces) {
   size_t minSize(std::numeric_limits<size_t>::max());
   size_t maxSize(0);
   bool thereAreHistograms = false;
@@ -180,11 +164,9 @@ JoinISISPolarizationEfficiencies::interpolateWorkspaces(
   for (auto const &ws : workspaces) {
     if (ws->blocksize() < maxSize) {
       if (allAreHistograms) {
-        interpolatedWorkspaces.emplace_back(
-            interpolateHistogramWorkspace(ws, maxSize));
+        interpolatedWorkspaces.emplace_back(interpolateHistogramWorkspace(ws, maxSize));
       } else {
-        interpolatedWorkspaces.emplace_back(
-            interpolatePointDataWorkspace(ws, maxSize));
+        interpolatedWorkspaces.emplace_back(interpolatePointDataWorkspace(ws, maxSize));
       }
     } else {
       interpolatedWorkspaces.emplace_back(ws);
@@ -194,9 +176,8 @@ JoinISISPolarizationEfficiencies::interpolateWorkspaces(
   return interpolatedWorkspaces;
 }
 
-MatrixWorkspace_sptr
-JoinISISPolarizationEfficiencies::interpolatePointDataWorkspace(
-    const MatrixWorkspace_sptr &ws, size_t const maxSize) {
+MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::interpolatePointDataWorkspace(const MatrixWorkspace_sptr &ws,
+                                                                                     size_t const maxSize) {
   auto const &x = ws->x(0);
   auto const startX = x.front();
   auto const endX = x.back();
@@ -211,9 +192,8 @@ JoinISISPolarizationEfficiencies::interpolatePointDataWorkspace(
   return interpolatedWS;
 }
 
-MatrixWorkspace_sptr
-JoinISISPolarizationEfficiencies::interpolateHistogramWorkspace(
-    const MatrixWorkspace_sptr &ws, size_t const maxSize) {
+MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::interpolateHistogramWorkspace(const MatrixWorkspace_sptr &ws,
+                                                                                     size_t const maxSize) {
   ws->setDistribution(true);
   auto const &x = ws->x(0);
   auto const dX = (x.back() - x.front()) / double(maxSize);

@@ -28,18 +28,13 @@ class ConjoinWorkspacesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConjoinWorkspacesTest *createSuite() {
-    return new ConjoinWorkspacesTest();
-  }
+  static ConjoinWorkspacesTest *createSuite() { return new ConjoinWorkspacesTest(); }
   static void destroySuite(ConjoinWorkspacesTest *suite) { delete suite; }
 
-  ConjoinWorkspacesTest()
-      : ws1Name("ConjoinWorkspacesTest_grp1"),
-        ws2Name("ConjoinWorkspacesTest_grp2") {}
+  ConjoinWorkspacesTest() : ws1Name("ConjoinWorkspacesTest_grp1"), ws2Name("ConjoinWorkspacesTest_grp2") {}
 
   MatrixWorkspace_sptr getWSFromADS(const std::string &wsName) {
-    auto out = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(wsName));
+    auto out = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
     TS_ASSERT(out);
     return out;
   }
@@ -84,10 +79,10 @@ public:
       conj.initialize();
 
     // Get the two input workspaces for later
-    MatrixWorkspace_sptr in1 = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("top"));
-    MatrixWorkspace_sptr in2 = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("bottom"));
+    MatrixWorkspace_sptr in1 =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("top"));
+    MatrixWorkspace_sptr in2 =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("bottom"));
 
     // Mask a spectrum and check it is carried over
     const size_t maskTop(5), maskBottom(10);
@@ -108,8 +103,7 @@ public:
 
     // Now it should succeed
     TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("InputWorkspace1", "top"));
-    TS_ASSERT_THROWS_NOTHING(
-        conj.setPropertyValue("InputWorkspace2", "bottom"));
+    TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("InputWorkspace2", "bottom"));
     TS_ASSERT_THROWS_NOTHING(conj.execute());
     TS_ASSERT(conj.isExecuted());
 
@@ -123,10 +117,8 @@ public:
     TS_ASSERT_EQUALS(output->readE(7)[700], in1->readE(7)[700]);
     TS_ASSERT_EQUALS(output->readY(19)[55], in2->readY(9)[55]);
     TS_ASSERT_EQUALS(output->readE(10)[321], in2->readE(0)[321]);
-    TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(5),
-                     in1->getAxis(1)->spectraNo(5));
-    TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(12),
-                     in2->getAxis(1)->spectraNo(2));
+    TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(5), in1->getAxis(1)->spectraNo(5));
+    TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(12), in2->getAxis(1)->spectraNo(2));
 
     // Check masking
     const auto &spectrumInfo = output->spectrumInfo();
@@ -134,8 +126,7 @@ public:
     TS_ASSERT_EQUALS(spectrumInfo.isMasked(10 + maskBottom), true);
 
     // Check that 2nd input workspace no longer exists
-    TS_ASSERT_THROWS(AnalysisDataService::Instance().retrieve("bottom"),
-                     const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(AnalysisDataService::Instance().retrieve("bottom"), const Exception::NotFoundError &);
 
     // Check that th workspace has the correct number of history entries
     TS_ASSERT_EQUALS(output->getHistory().size(), 3);
@@ -143,8 +134,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   void testExecMismatchedWorkspaces() {
-    MatrixWorkspace_sptr ews =
-        WorkspaceCreationHelper::createEventWorkspace(10, 10);
+    MatrixWorkspace_sptr ews = WorkspaceCreationHelper::createEventWorkspace(10, 10);
 
     // Check it fails if input overlap
     ConjoinWorkspaces conj;
@@ -156,17 +146,14 @@ public:
 
     // Check it fails if mixing event workspaces and workspace 2Ds
     TS_ASSERT_THROWS_NOTHING(conj.setProperty("InputWorkspace1", ews));
-    TS_ASSERT_THROWS_NOTHING(conj.setProperty(
-        "InputWorkspace2", WorkspaceCreationHelper::create2DWorkspace(10, 10)));
+    TS_ASSERT_THROWS_NOTHING(conj.setProperty("InputWorkspace2", WorkspaceCreationHelper::create2DWorkspace(10, 10)));
     conj.execute();
     TS_ASSERT(!conj.isExecuted());
   }
 
   void testMismatchedEventWorkspace() {
-    setupMismatchedWorkspace("testMismatchedEventWorkspace1", 0, 2,
-                             "100,200,700");
-    setupMismatchedWorkspace("testMismatchedEventWorkspace2", 3, 5,
-                             "100,200,1000");
+    setupMismatchedWorkspace("testMismatchedEventWorkspace1", 0, 2, "100,200,700");
+    setupMismatchedWorkspace("testMismatchedEventWorkspace2", 3, 5, "100,200,1000");
 
     ConjoinWorkspaces conj;
     conj.initialize();
@@ -198,8 +185,7 @@ public:
     TS_ASSERT(!conj.isExecuted());
 
     // Adjust second workspace
-    Mantid::specnum_t start =
-        ws1->getSpectrum(numPixels - 1).getSpectrumNo() + 10;
+    Mantid::specnum_t start = ws1->getSpectrum(numPixels - 1).getSpectrumNo() + 10;
     for (int i = 0; i < 5; ++i) {
       auto &spec = ws2->getSpectrum(i);
       spec.setSpectrumNo(start + i);
@@ -215,8 +201,7 @@ public:
     MatrixWorkspace_sptr output = getWSFromADS(ws1Name);
     // Check the first spectrum has the correct ID
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 15);
-    TS_ASSERT_EQUALS(output->getSpectrum(0).getSpectrumNo(),
-                     ws1->getSpectrum(0).getSpectrumNo());
+    TS_ASSERT_EQUALS(output->getSpectrum(0).getSpectrumNo(), ws1->getSpectrum(0).getSpectrumNo());
     // and the joining point
     TS_ASSERT_EQUALS(output->getSpectrum(10).getSpectrumNo(), start);
     TS_ASSERT(!output->getSpectrum(11).getDetectorIDs().empty());
@@ -229,8 +214,7 @@ public:
     const int numBins = 20;
 
     if (event) {
-      ws1 = WorkspaceCreationHelper::createEventWorkspace2(
-          10, numBins); // 2 events per bin
+      ws1 = WorkspaceCreationHelper::createEventWorkspace2(10, numBins); // 2 events per bin
       ws2 = WorkspaceCreationHelper::createEventWorkspace2(5, numBins);
     } else {
       ws1 = WorkspaceCreationHelper::create2DWorkspace(10, numBins);
@@ -269,8 +253,7 @@ public:
     const int numBins = 20;
 
     if (event) {
-      ws1 = WorkspaceCreationHelper::createEventWorkspace2(
-          10, numBins); // 2 events per bin
+      ws1 = WorkspaceCreationHelper::createEventWorkspace2(10, numBins); // 2 events per bin
       ws2 = WorkspaceCreationHelper::createEventWorkspace2(5, numBins + 1);
     } else {
       ws1 = WorkspaceCreationHelper::create2DWorkspace(10, numBins);
@@ -362,8 +345,7 @@ public:
 
     auto result = getWSFromADS(ws1Name);
 
-    TSM_ASSERT_EQUALS("YUnitLabel was not reset after YUnit changed",
-                      result->YUnitLabel(), label);
+    TSM_ASSERT_EQUALS("YUnitLabel was not reset after YUnit changed", result->YUnitLabel(), label);
     TS_ASSERT_EQUALS(unit, result->YUnit());
   }
 
@@ -393,11 +375,9 @@ private:
   const std::string ws1Name{"ws1name"};
   const std::string ws2Name{"ws2name"};
 
-  void setupMismatchedWorkspace(const std::string &name, int startIndex,
-                                int endIndex,
+  void setupMismatchedWorkspace(const std::string &name, int startIndex, int endIndex,
                                 const std::string &rebinParams) const {
-    MatrixWorkspace_sptr ews =
-        WorkspaceCreationHelper::createEventWorkspace(10, 10);
+    MatrixWorkspace_sptr ews = WorkspaceCreationHelper::createEventWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace(name, ews);
 
     // Crop ews to have first 3 spectra, ews2 to have second 3

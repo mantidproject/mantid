@@ -1,13 +1,13 @@
 .. _03_fit_model_choices:
 
 =================
-Fit Model Choices 
+Fit Model Choices
 =================
 
 
 Mantid contains an increasing catalog of predefined fitting
 function, which can be used to create a model. Some are
-demonstrated here. 
+demonstrated here.
 
 In addition, it is possible to create new fitting
 functions using the User Function toolbox.
@@ -59,7 +59,7 @@ Browser or with the help of the User Function Dialog:
    :align: center
 
 Type your function in the large lower text field. Browse the built-in functions above and add (|AddButton.png|) them
-to your formula. The fitting parameters are displayed in the Parameters 
+to your formula. The fitting parameters are displayed in the Parameters
 field (read-only). If the field is empty then your formula contains errors.
 
 You can save the function you have defined, for future use. Click

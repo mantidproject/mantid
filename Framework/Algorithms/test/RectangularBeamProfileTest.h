@@ -21,9 +21,7 @@ class RectangularBeamProfileTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RectangularBeamProfileTest *createSuite() {
-    return new RectangularBeamProfileTest();
-  }
+  static RectangularBeamProfileTest *createSuite() { return new RectangularBeamProfileTest(); }
   static void destroySuite(RectangularBeamProfileTest *suite) { delete suite; }
 
   //----------------------------------------------------------------------------
@@ -40,9 +38,7 @@ public:
 
     MockRNG rng;
     const double rand(0.75);
-    EXPECT_CALL(rng, nextValue())
-        .Times(Exactly(2))
-        .WillRepeatedly(Return(rand));
+    EXPECT_CALL(rng, nextValue()).Times(Exactly(2)).WillRepeatedly(Return(rand));
     auto ray = profile.generatePoint(rng);
     TS_ASSERT_EQUALS(V3D(0.0, 0.025, 0.05), ray.startPos);
     TS_ASSERT_EQUALS(V3D(1.0, 0, 0), ray.unitDir);
@@ -59,9 +55,7 @@ public:
 
     MockRNG rng;
     const double rand(0.75);
-    EXPECT_CALL(rng, nextValue())
-        .Times(Exactly(2))
-        .WillRepeatedly(Return(rand));
+    EXPECT_CALL(rng, nextValue()).Times(Exactly(2)).WillRepeatedly(Return(rand));
     auto ray = profile.generatePoint(rng);
     TS_ASSERT_EQUALS(V3D(1.0, 2.025, -2.95), ray.startPos);
     TS_ASSERT_EQUALS(V3D(1.0, 0, 0), ray.unitDir);
@@ -78,10 +72,7 @@ public:
 
     MockRNG rng;
     const double rand1(0.75), rand2(0.25);
-    EXPECT_CALL(rng, nextValue())
-        .Times(Exactly(2))
-        .WillOnce(Return(rand1))
-        .WillRepeatedly(Return(rand2));
+    EXPECT_CALL(rng, nextValue()).Times(Exactly(2)).WillOnce(Return(rand1)).WillRepeatedly(Return(rand2));
     auto ray = profile.generatePoint(rng);
     TS_ASSERT_EQUALS(V3D(1.0, 1.975, -2.95), ray.startPos);
     TS_ASSERT_EQUALS(V3D(1.0, 0, 0), ray.unitDir);
@@ -96,8 +87,7 @@ public:
     Sample testSample;
     testSample.setShape(ComponentCreationHelper::createSphere(0.5));
 
-    auto region =
-        profile.defineActiveRegion(testSample.getShape().getBoundingBox());
+    auto region = profile.defineActiveRegion(testSample.getShape().getBoundingBox());
     TS_ASSERT(region.isNonNull());
     TS_ASSERT_EQUALS(V3D(-0.5, -0.5, -0.5), region.minPoint());
     TS_ASSERT_EQUALS(V3D(0.5, 0.5, 0.5), region.maxPoint());
@@ -112,8 +102,7 @@ public:
     Sample testSample;
     testSample.setShape(ComponentCreationHelper::createSphere(0.5));
 
-    auto region =
-        profile.defineActiveRegion(testSample.getShape().getBoundingBox());
+    auto region = profile.defineActiveRegion(testSample.getShape().getBoundingBox());
     TS_ASSERT(region.isNonNull());
     TS_ASSERT_EQUALS(V3D(-0.5, -0.05, -0.1), region.minPoint());
     TS_ASSERT_EQUALS(V3D(0.5, 0.05, 0.1), region.maxPoint());
@@ -125,7 +114,6 @@ private:
     using Mantid::Geometry::PointingAlong;
     using Mantid::Geometry::ReferenceFrame;
     // up = Z, beam = X
-    return ReferenceFrame(PointingAlong::Z, PointingAlong::X, Handedness::Right,
-                          "source");
+    return ReferenceFrame(PointingAlong::Z, PointingAlong::X, Handedness::Right, "source");
   }
 };

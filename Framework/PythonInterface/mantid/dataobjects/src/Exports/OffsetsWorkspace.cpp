@@ -17,8 +17,7 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(OffsetsWorkspace)
 
 void export_OffsetsWorkspace() {
-  class_<OffsetsWorkspace, bases<SpecialWorkspace2D>, boost::noncopyable>(
-      "OffsetsWorkspace", no_init);
+  class_<OffsetsWorkspace, bases<SpecialWorkspace2D>, boost::noncopyable>("OffsetsWorkspace", no_init);
 
   // register pointers
   RegisterWorkspacePtrToPython<OffsetsWorkspace>();

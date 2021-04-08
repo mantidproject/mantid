@@ -25,9 +25,7 @@ class DLLExport SaveRMCProfile : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveRMCProfile"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveRMCProfile"}; }
   const std::string category() const override;
   const std::string summary() const override;
   std::map<std::string, std::string> validateInputs() override;
@@ -35,10 +33,8 @@ public:
 private:
   void init() override;
   void exec() override;
-  void writeMetaData(std::ofstream &out,
-                     const API::MatrixWorkspace_const_sptr &inputWS);
-  void writeWSData(std::ofstream &out,
-                   const API::MatrixWorkspace_const_sptr &inputWS);
+  void writeMetaData(std::ofstream &out, const API::MatrixWorkspace_const_sptr &inputWS);
+  void writeWSData(std::ofstream &out, const API::MatrixWorkspace_const_sptr &inputWS);
 };
 
 } // namespace DataHandling

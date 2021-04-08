@@ -29,8 +29,7 @@ MoveInstrumentComponent::MoveInstrumentComponent() {}
 void MoveInstrumentComponent::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "Workspace", "Anonymous", Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("Workspace", "Anonymous", Direction::InOut),
                   "The name of the workspace for which the new instrument "
                   "configuration will have an effect. Any other workspaces "
                   "stored in the analysis data service will be unaffected.");
@@ -60,8 +59,7 @@ void MoveInstrumentComponent::exec() {
   // Get the input workspace
   Workspace_sptr ws = getProperty("Workspace");
   MatrixWorkspace_sptr inputW = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  DataObjects::PeaksWorkspace_sptr inputP =
-      std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
+  DataObjects::PeaksWorkspace_sptr inputP = std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
 
   // Get some stuff from the input workspace
   Instrument_const_sptr inst;
@@ -112,11 +110,9 @@ void MoveInstrumentComponent::exec() {
     throw std::invalid_argument("DetectorID or ComponentName must be given.");
   }
 
-  auto &componentInfo =
-      inputW ? inputW->mutableComponentInfo() : inputP->mutableComponentInfo();
+  auto &componentInfo = inputW ? inputW->mutableComponentInfo() : inputP->mutableComponentInfo();
   auto compIndex = componentInfo.indexOf(comp->getComponentID());
-  if (ComponentInfoBankHelpers::isDetectorFixedInBank(componentInfo,
-                                                      compIndex)) {
+  if (ComponentInfoBankHelpers::isDetectorFixedInBank(componentInfo, compIndex)) {
     // DetectorInfo makes changing positions possible but we keep the old
     // behavior of ignoring position changes for Structured banks.
     g_log.warning("Component is fixed within a structured bank, moving is not "

@@ -41,8 +41,7 @@ public:
 
     PeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = std::dynamic_pointer_cast<PeaksWorkspace>(
-            AnalysisDataService::Instance().retrieve(WSName)));
+        ws = std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(WSName)));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -77,8 +76,7 @@ public:
   }
 
   void test_fail() {
-    Mantid::Geometry::Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+    Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
     inst->setName("SillyInstrument");
     PeaksWorkspace_sptr pw(new PeaksWorkspace);
     pw->setInstrument(inst);
@@ -154,32 +152,20 @@ private:
     UB = ol.getUB();
   }
 
-  double QXUB(double H, double K, double L) {
-    return (UB * V3D(H, K, L))[0] * 2. * M_PI;
-  }
+  double QXUB(double H, double K, double L) { return (UB * V3D(H, K, L))[0] * 2. * M_PI; }
 
-  double QYUB(double H, double K, double L) {
-    return (UB * V3D(H, K, L))[1] * 2. * M_PI;
-  }
+  double QYUB(double H, double K, double L) { return (UB * V3D(H, K, L))[1] * 2. * M_PI; }
 
-  double QZUB(double H, double K, double L) {
-    return (UB * V3D(H, K, L))[2] * 2. * M_PI;
-  }
+  double QZUB(double H, double K, double L) { return (UB * V3D(H, K, L))[2] * 2. * M_PI; }
 
   double lam(double H, double K, double L) {
     return 2. * QZUB(H, K, L) /
-           (QXUB(H, K, L) * QXUB(H, K, L) + QYUB(H, K, L) * QYUB(H, K, L) +
-            QZUB(H, K, L) * QZUB(H, K, L)) *
-           2. * M_PI;
+           (QXUB(H, K, L) * QXUB(H, K, L) + QYUB(H, K, L) * QYUB(H, K, L) + QZUB(H, K, L) * QZUB(H, K, L)) * 2. * M_PI;
   }
 
-  double th(double H, double K, double L) {
-    return acos(1. - QZUB(H, K, L) * lam(H, K, L) / 2. / M_PI);
-  }
+  double th(double H, double K, double L) { return acos(1. - QZUB(H, K, L) * lam(H, K, L) / 2. / M_PI); }
 
-  double ph(double H, double K, double L) {
-    return atan2(-QYUB(H, K, L), -QXUB(H, K, L));
-  }
+  double ph(double H, double K, double L) { return atan2(-QYUB(H, K, L), -QXUB(H, K, L)); }
 
   void generatePeaks(const std::string &WSName) {
     setupUB();
@@ -195,9 +181,7 @@ private:
       phi.at(i) = ph(Hpeaks[i], Kpeaks[i], Lpeaks[i]);
     }
 
-    auto inst =
-        ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions(
-            L2, theta, phi);
+    auto inst = ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions(L2, theta, phi);
     inst->setName("SillyInstrument");
     auto pw = PeaksWorkspace_sptr(new PeaksWorkspace);
     pw->setInstrument(inst);

@@ -16,10 +16,7 @@ using namespace MantidQt::CustomInterfaces::IDA;
 
 class ConvFunctionModelTest : public CxxTest::TestSuite {
 public:
-  void setUp() override {
-    m_model =
-        std::make_unique<MantidQt::CustomInterfaces::IDA::ConvFunctionModel>();
-  }
+  void setUp() override { m_model = std::make_unique<MantidQt::CustomInterfaces::IDA::ConvFunctionModel>(); }
 
   void tearDown() override { m_model.reset(); }
 
@@ -72,8 +69,7 @@ public:
     TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(), fun->asString())
   }
 
-  void
-  test_setFunction_correctly_handles_one_lorentzian_and_one_delta_function() {
+  void test_setFunction_correctly_handles_one_lorentzian_and_one_delta_function() {
     auto fun = FunctionFactory::Instance().createInitialized(
         "composite=Convolution,FixResolution=true,NumDeriv=true;name="
         "Resolution,WorkspaceIndex=0,X=(),Y=();(name=DeltaFunction,Height=1,"
@@ -85,8 +81,7 @@ public:
     TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(), fun->asString())
   }
 
-  void
-  test_setFunction_correctly_handles_two_lorentzian_and_one_delta_function_one_background() {
+  void test_setFunction_correctly_handles_two_lorentzian_and_one_delta_function_one_background() {
     auto fun = FunctionFactory::Instance().createInitialized(
         "name=LinearBackground,A0=0,A1=0,constraints=(0<A0);(composite="
         "Convolution,FixResolution=true,NumDeriv=true;name=Resolution,"
@@ -120,15 +115,12 @@ public:
 
     m_model->setFunction(func);
 
-    TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(),
-                     func->asString())
+    TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(), func->asString())
     TS_ASSERT_EQUALS(m_model->getBackgroundType(), BackgroundType::None);
-    TS_ASSERT_EQUALS(m_model->getLorentzianType(),
-                     LorentzianType::OneLorentzian);
+    TS_ASSERT_EQUALS(m_model->getLorentzianType(), LorentzianType::OneLorentzian);
   }
 
-  void
-  test_setFunction_does_not_throw_for_valid_temperature_function_with_delta() {
+  void test_setFunction_does_not_throw_for_valid_temperature_function_with_delta() {
     m_model->setLorentzianType(LorentzianType::OneLorentzian);
     m_model->setTempCorrection(true, 100.0);
     m_model->setDeltaFunction(true);
@@ -136,30 +128,24 @@ public:
 
     m_model->setFunction(func);
 
-    TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(),
-                     func->asString())
+    TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(), func->asString())
     TS_ASSERT_EQUALS(m_model->getBackgroundType(), BackgroundType::None);
-    TS_ASSERT_EQUALS(m_model->getLorentzianType(),
-                     LorentzianType::OneLorentzian);
+    TS_ASSERT_EQUALS(m_model->getLorentzianType(), LorentzianType::OneLorentzian);
   }
 
-  void
-  test_setFunction_does_not_throw_for_valid_two_lorenztian_temperature_function() {
+  void test_setFunction_does_not_throw_for_valid_two_lorenztian_temperature_function() {
     m_model->setLorentzianType(LorentzianType::TwoLorentzians);
     m_model->setTempCorrection(true, 100.0);
     auto func = m_model->getFitFunction();
 
     m_model->setFunction(func);
 
-    TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(),
-                     func->asString())
+    TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(), func->asString())
     TS_ASSERT_EQUALS(m_model->getBackgroundType(), BackgroundType::None);
-    TS_ASSERT_EQUALS(m_model->getLorentzianType(),
-                     LorentzianType::TwoLorentzians);
+    TS_ASSERT_EQUALS(m_model->getLorentzianType(), LorentzianType::TwoLorentzians);
   }
 
-  void
-  test_setFunction_does_not_throw_for_valid_two_lorenztian_temperature_function_with_delta() {
+  void test_setFunction_does_not_throw_for_valid_two_lorenztian_temperature_function_with_delta() {
     m_model->setLorentzianType(LorentzianType::TwoLorentzians);
     m_model->setTempCorrection(true, 100.0);
     m_model->setDeltaFunction(true);
@@ -167,11 +153,9 @@ public:
 
     m_model->setFunction(func);
 
-    TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(),
-                     func->asString());
+    TS_ASSERT_EQUALS(m_model->getCurrentFunction()->asString(), func->asString());
     TS_ASSERT_EQUALS(m_model->getBackgroundType(), BackgroundType::None);
-    TS_ASSERT_EQUALS(m_model->getLorentzianType(),
-                     LorentzianType::TwoLorentzians);
+    TS_ASSERT_EQUALS(m_model->getLorentzianType(), LorentzianType::TwoLorentzians);
   }
 
 private:

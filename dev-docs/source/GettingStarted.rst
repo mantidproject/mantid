@@ -72,6 +72,9 @@ Red Hat/Cent OS/Fedora
   # Install dependencies
   yum install mantid-developer
 
+  # Install pre-commit
+  pip install pre-commit --user
+
 Ubuntu 18.04
 ~~~~~~~~~~~~
 - Setup the Kitware APT repository to get a recent version of CMake by
@@ -88,6 +91,10 @@ Ubuntu 18.04
    gdebi ~/Downloads/mantid-developer.X.Y.Z.deb
 
 where ``X.Y.Z`` should be replaced with the version that was downloaded.
+
+Install pre-commit for use in our current developer workflow
+.. code-block:: sh
+  pip install pre-commit --user
 
 if you wish to setup eclipse for use developing mantid, then instructions can be found :ref:`here <Eclipse>`.
 
@@ -155,9 +162,17 @@ Ubuntu 20.04
 
 and passing the `-DENABLE_MANTIDPLOT=OFF` option to the cmake command line or selecting this in the cmake GUI.
 
+Install pre-commit for use in our current developer workflow
+.. code-block:: sh
+  pip install pre-commit --user
+
 OSX
 ---
 The build environment on OS X is described here :ref:`BuildingOnOSX`.
+
+Install pre-commit for use in our current developer workflow
+.. code-block:: sh
+  brew install pre-commit
 
 Docker
 ------
@@ -166,7 +181,7 @@ On Docker supported systems you may use the `mantid-development
 <https://github.com/mantidproject/dockerfiles/tree/master/development>`_
 images to develop Mantid without having to configure your system as a suitable
 build environment. This will give you an out of the box working build
-environment, including ParaView/VATES, Python 3 (where available) and ccache.
+environment, Python 3 (where available) and ccache.
 
 More details and instructions can be found at the GitHub link above.
 
@@ -190,10 +205,6 @@ Please install the ZenHub Browser extension from this `page <https://www.zenhub.
 Building Mantid
 ###############
 See :ref:`BuildingWithCMake` for information about building Mantid.
-
-Building VATES
-##############
-See :ref:`BuildingVATES` for infromation about building VATES.
 
 Archive access
 ##############

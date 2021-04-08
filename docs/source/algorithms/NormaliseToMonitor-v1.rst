@@ -62,9 +62,9 @@ account the error on the monitor counts.
 Detector Scan Workspaces
 ########################
 
-Workspaces that have scanning detectors are supported by this algorithm, both for bin-by-bin mode and normlisation by integrated 
-count. The only option for specifying the monitor is by 'MonitorID', attempting to use 'MonitorSpectrum' or MonitorWorkspaceIndex' 
-will throw an error. In this case the 'NormFactorWS' output will contain a monitor spectrum for each time index. 
+Workspaces that have scanning detectors are supported by this algorithm, both for bin-by-bin mode and normlisation by integrated
+count. The only option for specifying the monitor is by 'MonitorID', attempting to use 'MonitorSpectrum' or MonitorWorkspaceIndex'
+will throw an error. In this case the 'NormFactorWS' output will contain a monitor spectrum for each time index.
 
 Child Algorithms used
 #####################
@@ -100,10 +100,10 @@ Output:
 .. testoutput:: exNormaliseToMonitorSimple
 
    Without normalisation
-   Monitor ID=1 626034.000, 626681.000 
+   Monitor ID=1 626034.000, 626681.000
    Selected data 2.000000, 1.000000
    With Normalisation
-   Monitor ID=1 464872.441, 464872.441 
+   Monitor ID=1 464872.441, 464872.441
    Selected data 1.485135, 0.741801
 
 .. categories::

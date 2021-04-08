@@ -51,13 +51,10 @@ private:
 
   bool doValidation(bool silent = false);
 
-  void addShapeSpecificSampleOptions(const Mantid::API::IAlgorithm_sptr &alg,
-                                     const QString &shape);
-  void addShapeSpecificCanOptions(const Mantid::API::IAlgorithm_sptr &alg,
-                                  const QString &shape);
+  void addShapeSpecificSampleOptions(const Mantid::API::IAlgorithm_sptr &alg, const QString &shape);
+  void addShapeSpecificCanOptions(const Mantid::API::IAlgorithm_sptr &alg, const QString &shape);
 
-  void setComboBoxOptions(QComboBox *combobox,
-                          std::vector<std::string> const &options);
+  void setComboBoxOptions(QComboBox *combobox, std::vector<std::string> const &options);
 
   std::vector<std::string> getDensityOptions(QString const &method) const;
   std::string getDensityType(std::string const &type) const;
@@ -71,9 +68,8 @@ private:
   void setButtonsEnabled(bool enabled);
   void setRunIsRunning(bool running);
 
-  boost::optional<double> getInstrumentParameter(
-      const Mantid::Geometry::Instrument_const_sptr &instrument,
-      const std::string &parameterName);
+  boost::optional<double> getInstrumentParameter(const Mantid::Geometry::Instrument_const_sptr &instrument,
+                                                 const std::string &parameterName);
 
   Ui::CalculatePaalmanPings m_uiForm;
 

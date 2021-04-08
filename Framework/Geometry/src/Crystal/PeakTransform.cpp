@@ -8,25 +8,19 @@
 
 namespace Mantid {
 namespace Geometry {
-PeakTransform::PeakTransform(const std::string &xPlotLabel,
-                             const std::string &yPlotLabel,
-                             const boost::regex &regexOne,
-                             const boost::regex &regexTwo,
-                             const boost::regex &regexThree)
-    : m_xPlotLabel(xPlotLabel), m_yPlotLabel(yPlotLabel), m_indexOfPlotX(0),
-      m_indexOfPlotY(1), m_indexOfPlotZ(2), m_indexOfPeakX(0),
-      m_indexOfPeakY(1), m_indexOfPeakZ(2), m_FirstRegex(regexOne),
-      m_SecondRegex(regexTwo), m_ThirdRegex(regexThree) {
+PeakTransform::PeakTransform(const std::string &xPlotLabel, const std::string &yPlotLabel, const boost::regex &regexOne,
+                             const boost::regex &regexTwo, const boost::regex &regexThree)
+    : m_xPlotLabel(xPlotLabel), m_yPlotLabel(yPlotLabel), m_indexOfPlotX(0), m_indexOfPlotY(1), m_indexOfPlotZ(2),
+      m_indexOfPeakX(0), m_indexOfPeakY(1), m_indexOfPeakZ(2), m_FirstRegex(regexOne), m_SecondRegex(regexTwo),
+      m_ThirdRegex(regexThree) {
   const std::string &xLabel = m_xPlotLabel;
   const std::string &yLabel = m_yPlotLabel;
 
-  const int FirstIndex =
-      0; // Maybe more appropriate to call this IndexZero etc.
+  const int FirstIndex = 0; // Maybe more appropriate to call this IndexZero etc.
   const int SecondIndex = 1;
   const int ThirdIndex = 2;
 
-  if (boost::regex_match(xLabel, m_FirstRegex) &&
-      boost::regex_match(yLabel, m_SecondRegex)) // HKL
+  if (boost::regex_match(xLabel, m_FirstRegex) && boost::regex_match(yLabel, m_SecondRegex)) // HKL
   {
     m_indexOfPlotX = FirstIndex;
     m_indexOfPlotY = SecondIndex;
@@ -35,8 +29,7 @@ PeakTransform::PeakTransform(const std::string &xPlotLabel,
     m_indexOfPeakX = FirstIndex;
     m_indexOfPeakY = SecondIndex;
     m_indexOfPeakZ = ThirdIndex;
-  } else if (boost::regex_match(xLabel, m_FirstRegex) &&
-             boost::regex_match(yLabel, m_ThirdRegex)) // HLK
+  } else if (boost::regex_match(xLabel, m_FirstRegex) && boost::regex_match(yLabel, m_ThirdRegex)) // HLK
   {
     m_indexOfPlotX = FirstIndex;
     m_indexOfPlotY = ThirdIndex;
@@ -45,8 +38,7 @@ PeakTransform::PeakTransform(const std::string &xPlotLabel,
     m_indexOfPeakX = FirstIndex;
     m_indexOfPeakY = ThirdIndex;
     m_indexOfPeakZ = SecondIndex;
-  } else if (boost::regex_match(xLabel, m_ThirdRegex) &&
-             boost::regex_match(yLabel, m_FirstRegex)) // LHK
+  } else if (boost::regex_match(xLabel, m_ThirdRegex) && boost::regex_match(yLabel, m_FirstRegex)) // LHK
   {
     m_indexOfPlotX = ThirdIndex;
     m_indexOfPlotY = FirstIndex;
@@ -55,8 +47,7 @@ PeakTransform::PeakTransform(const std::string &xPlotLabel,
     m_indexOfPeakX = SecondIndex;
     m_indexOfPeakY = ThirdIndex;
     m_indexOfPeakZ = FirstIndex;
-  } else if (boost::regex_match(xLabel, m_ThirdRegex) &&
-             boost::regex_match(yLabel, m_SecondRegex)) // LKH
+  } else if (boost::regex_match(xLabel, m_ThirdRegex) && boost::regex_match(yLabel, m_SecondRegex)) // LKH
   {
     m_indexOfPlotX = ThirdIndex;
     m_indexOfPlotY = SecondIndex;
@@ -65,8 +56,7 @@ PeakTransform::PeakTransform(const std::string &xPlotLabel,
     m_indexOfPeakX = ThirdIndex;
     m_indexOfPeakY = SecondIndex;
     m_indexOfPeakZ = FirstIndex;
-  } else if (boost::regex_match(xLabel, m_SecondRegex) &&
-             boost::regex_match(yLabel, m_ThirdRegex)) // KLH
+  } else if (boost::regex_match(xLabel, m_SecondRegex) && boost::regex_match(yLabel, m_ThirdRegex)) // KLH
   {
     m_indexOfPlotX = SecondIndex;
     m_indexOfPlotY = ThirdIndex;
@@ -75,8 +65,7 @@ PeakTransform::PeakTransform(const std::string &xPlotLabel,
     m_indexOfPeakX = ThirdIndex;
     m_indexOfPeakY = FirstIndex;
     m_indexOfPeakZ = SecondIndex;
-  } else if (boost::regex_match(xLabel, m_SecondRegex) &&
-             boost::regex_match(yLabel, m_FirstRegex)) // KHL
+  } else if (boost::regex_match(xLabel, m_SecondRegex) && boost::regex_match(yLabel, m_FirstRegex)) // KHL
   {
     m_indexOfPlotX = SecondIndex;
     m_indexOfPlotY = FirstIndex;
@@ -101,8 +90,7 @@ boost::regex PeakTransform::getFreePeakAxisRegex() const {
   }
 }
 
-Mantid::Kernel::V3D
-PeakTransform::transform(const Mantid::Kernel::V3D &original) const {
+Mantid::Kernel::V3D PeakTransform::transform(const Mantid::Kernel::V3D &original) const {
   // Will have the plots x, y, and z aligned to the correct h, k, l value.
   Mantid::Kernel::V3D transformedPeakPosition;
   transformedPeakPosition.setX(original[m_indexOfPlotX]);
@@ -111,8 +99,7 @@ PeakTransform::transform(const Mantid::Kernel::V3D &original) const {
   return transformedPeakPosition;
 }
 
-Mantid::Kernel::V3D
-PeakTransform::transformBack(const Mantid::Kernel::V3D &transformed) const {
+Mantid::Kernel::V3D PeakTransform::transformBack(const Mantid::Kernel::V3D &transformed) const {
   // Will have the plots x, y, and z aligned to the correct h, k, l value.
   Mantid::Kernel::V3D originalPeakPosition;
   originalPeakPosition.setX(transformed[m_indexOfPeakX]);

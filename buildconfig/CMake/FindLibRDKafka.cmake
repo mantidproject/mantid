@@ -113,7 +113,7 @@ endmacro(_LibRDKafka_check_version)
 find_path(LibRDKafka_ROOT_DIR
         NAMES include/librdkafka/rdkafkacpp.h
         PATHS /usr/local
-        )   
+        )
 find_path(LibRDKafka_INCLUDE_DIR
         NAMES librdkafka/rdkafkacpp.h
         HINTS ${LibRDKafka_ROOT_DIR}/include
@@ -138,7 +138,7 @@ find_library(LibRDKafka_C_DEBUG
 if (LibRDKafka_INCLUDE_DIR)
     _LibRDKafka_check_version()
 endif ()
-        
+
 if( LibRDKafka_DEBUG )
 
 set( LibRDKafka_LIBRARIES optimized ${LibRDKafka}
@@ -160,7 +160,7 @@ set( LibRDKafka_C_LIBRARIES optimized ${LibRDKafka_C}
 
 else ()
 
-set( LibRDKafka_C_LIBRARIES ${LibRDKafka_C} 
+set( LibRDKafka_C_LIBRARIES ${LibRDKafka_C}
 )
 
 endif ()

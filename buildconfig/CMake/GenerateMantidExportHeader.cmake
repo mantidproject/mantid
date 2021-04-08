@@ -2,7 +2,7 @@ include (GenerateExportHeader)
 function( GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
     string(TOUPPER "${TARGET_LIBRARY}" TARGET_NAME)
     set (CUSTOM "\n")
-    
+
     if(MSVC)
         set (CUSTOM "${CUSTOM}\n\
 #ifdef _WIN32\n\
@@ -23,7 +23,7 @@ function( GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
 #endif\n\n\
 ")
     endif(MSVC)
-    
+
     set(CUSTOM "${CUSTOM}\
 #ifndef UNUSED_ARG\n\
     #define UNUSED_ARG(x) (void) x;\n\
@@ -44,9 +44,9 @@ function( GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
 #endif /* ${TARGET_NAME}_EXPORTS*/\n\
  ")
     endif(GENERATE_EXTERN)
-    
-    generate_export_header("${TARGET_LIBRARY}" 
-       BASE_NAME "MANTID_${TARGET_NAME}" 
+
+    generate_export_header("${TARGET_LIBRARY}"
+       BASE_NAME "MANTID_${TARGET_NAME}"
        PREFIX_NAME ""
        EXPORT_FILE_NAME "Mantid${TARGET_LIBRARY}/DllConfig.h"
        EXPORT_MACRO_NAME "MANTID_${TARGET_NAME}_DLL"

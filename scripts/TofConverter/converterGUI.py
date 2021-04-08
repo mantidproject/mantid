@@ -8,7 +8,6 @@
 from qtpy.QtWidgets import QMainWindow, QMessageBox
 from qtpy.QtGui import QDoubleValidator
 from qtpy import QtCore
-import os
 from mantid.kernel import Logger
 from mantidqt.gui_helper import show_interface_help
 import math
@@ -60,8 +59,10 @@ class MainWindow(QMainWindow):
         if outOption in self.needsFlightPathOutputList:
             self.flightPathEnable(True)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, window_flags=None):
         QMainWindow.__init__(self, parent)
+        if window_flags:
+            self.setWindowFlags(window_flags)
         self.ui = load_ui(__file__, 'converter.ui', baseinstance=self)
         self.ui.InputVal.setValidator(QDoubleValidator(self.ui.InputVal))
         self.ui.totalFlightPathInput.setValidator(QDoubleValidator(self.ui.totalFlightPathInput))
@@ -80,12 +81,7 @@ class MainWindow(QMainWindow):
         #help
         self.assistant_process = QtCore.QProcess(self)
         # pylint: disable=protected-access
-        import mantid
         self.mantidplot_name = 'TOF Converter'
-        self.collection_file = os.path.join(mantid._bindir, '../docs/qthelp/MantidProject.qhc')
-        version = ".".join(mantid.__version__.split(".")[:2])
-        self.qt_url = 'qthelp://org.sphinx.mantidproject.' + version + '/doc/interfaces/TOF Converter.html'
-        self.external_url = 'http://docs.mantidproject.org/nightly/interfaces/TOF Converter.html'
 
         try:
             import mantid
@@ -96,8 +92,7 @@ class MainWindow(QMainWindow):
             pass
 
     def helpClicked(self):
-        show_interface_help(self.mantidplot_name, self.assistant_process, self.collection_file,
-                            self.qt_url, self.external_url)
+        show_interface_help(self.mantidplot_name, self.assistant_process, area='utility')
 
     def closeEvent(self, event):
         self.assistant_process.close()

@@ -14,6 +14,7 @@ try:
 except ImportError:
     pass
 import unittest
+from unittest.mock import patch
 
 # third-party library imports
 
@@ -37,6 +38,18 @@ class InProcessJupyterConsoleTest(unittest.TestCase):
     def test_construction_with_startup_code_adds_to_banner_and_executes(self):
         widget = InProcessJupyterConsole(startup_code="x = 1")
         self.assertEqual(1, widget.kernel_manager.kernel.shell.user_ns['x'])
+        self._pre_delete_console_cleanup(widget)
+        widget.kernel_manager.shutdown_kernel()
+        del widget
+
+    @patch('mantidqt.widgets.jupyterconsole.input_qinputdialog')
+    def test_construction_overrides_python_input_with_qinputdialog(self, mock_input):
+        widget = InProcessJupyterConsole()
+        kernel = widget.kernel_manager.kernel
+        kernel.raw_input("prompt")
+
+        mock_input.assert_called_with("prompt")
+
         self._pre_delete_console_cleanup(widget)
         widget.kernel_manager.shutdown_kernel()
         del widget

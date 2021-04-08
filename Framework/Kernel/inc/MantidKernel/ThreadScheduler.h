@@ -33,8 +33,7 @@ class MANTID_KERNEL_DLL ThreadScheduler {
 public:
   /** Constructor
    */
-  ThreadScheduler()
-      : m_cost(0), m_costExecuted(0), m_abortException(""), m_aborted(false) {}
+  ThreadScheduler() : m_cost(0), m_costExecuted(0), m_abortException(""), m_aborted(false) {}
 
   /// Destructor
   virtual ~ThreadScheduler() = default;

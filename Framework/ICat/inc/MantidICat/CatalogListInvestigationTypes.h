@@ -26,22 +26,14 @@ public:
   /// destructor
   ~CatalogListInvestigationTypes() override {}
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override {
-    return "CatalogListInvestigationTypes";
-  }
+  const std::string name() const override { return "CatalogListInvestigationTypes"; }
   /// Summary of algorithms purpose.
-  const std::string summary() const override {
-    return "Obtains a list of investigation types for active catalogs.";
-  }
+  const std::string summary() const override { return "Obtains a list of investigation types for active catalogs."; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"CatalogListInstruments"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CatalogListInstruments"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Catalog";
-  }
+  const std::string category() const override { return "DataHandling\\Catalog"; }
 
 private:
   /// Overwrites Algorithm init method.

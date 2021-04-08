@@ -34,59 +34,60 @@ namespace MantidWidgets {
  * This table has been manually created and derived from QTableWidget to allow
  * the table rows to be highlighted when a hover event occurs.
  */
-class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorDataTable
-    : public QTableWidget {
+class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorDataTable : public QTableWidget {
   Q_OBJECT
 
 public:
-  enum ColumnIndex {
-    WorkspaceName = 0,
-    WorkspaceIndex = 1,
-    StartX = 2,
-    EndX = 3
-  };
+  enum ColumnIndex { WorkspaceName = 0, WorkspaceIndex = 1, StartX = 2, EndX = 3 };
 
   FitScriptGeneratorDataTable(QWidget *parent = nullptr);
   ~FitScriptGeneratorDataTable() = default;
 
   [[nodiscard]] std::string workspaceName(FitDomainIndex row) const;
-  [[nodiscard]] MantidWidgets::WorkspaceIndex
-  workspaceIndex(FitDomainIndex row) const;
+  [[nodiscard]] MantidWidgets::WorkspaceIndex workspaceIndex(FitDomainIndex row) const;
   [[nodiscard]] double startX(FitDomainIndex row) const;
   [[nodiscard]] double endX(FitDomainIndex row) const;
 
+  [[nodiscard]] std::vector<FitDomainIndex> allRows() const;
   [[nodiscard]] std::vector<FitDomainIndex> selectedRows() const;
+  [[nodiscard]] FitDomainIndex currentRow() const;
 
-  void removeDomain(std::string const &workspaceName,
-                    MantidWidgets::WorkspaceIndex workspaceIndex);
-  void addDomain(QString const &workspaceName,
-                 MantidWidgets::WorkspaceIndex workspaceIndex, double startX,
+  [[nodiscard]] bool hasLoadedData() const;
+
+  [[nodiscard]] QString selectedDomainFunctionPrefix() const;
+
+  void removeDomain(std::string const &workspaceName, MantidWidgets::WorkspaceIndex workspaceIndex);
+  void addDomain(QString const &workspaceName, MantidWidgets::WorkspaceIndex workspaceIndex, double startX,
                  double endX);
 
   void formatSelection();
   void resetSelection();
+
+  void setFunctionPrefixVisible(bool visible);
 
 signals:
   void itemExited(int newRowIndex);
 
 private slots:
   void handleItemClicked(QTableWidgetItem *item);
+  void handleItemSelectionChanged();
 
 private:
   bool eventFilter(QObject *widget, QEvent *event) override;
   QPersistentModelIndex hoveredRowIndex(QEvent *event);
 
-  int indexOfDomain(std::string const &workspaceName,
-                    MantidWidgets::WorkspaceIndex workspaceIndex) const;
+  void updateVerticalHeaders();
+
+  int indexOfDomain(std::string const &workspaceName, MantidWidgets::WorkspaceIndex workspaceIndex) const;
 
   QString getText(FitDomainIndex row, int column) const;
 
   void setSelectedXValue(double xValue);
 
-  int m_selectedRow;
+  std::vector<FitDomainIndex> m_selectedRows;
   int m_selectedColumn;
   double m_selectedValue;
-  QPersistentModelIndex m_lastIndex;
+  QPersistentModelIndex m_lastHoveredIndex;
 };
 
 using ColumnIndex = FitScriptGeneratorDataTable::ColumnIndex;
@@ -100,18 +101,15 @@ class CustomItemDelegate : public QStyledItemDelegate {
   Q_OBJECT
 
 public:
-  CustomItemDelegate(FitScriptGeneratorDataTable *parent,
-                     ColumnIndex const &index);
+  CustomItemDelegate(FitScriptGeneratorDataTable *parent, ColumnIndex const &index);
 
 private slots:
   void handleItemEntered(QTableWidgetItem *item);
   void handleItemExited(int newRowIndex);
 
 private:
-  QWidget *createEditor(QWidget *parent, QStyleOptionViewItem const &option,
-                        QModelIndex const &index) const override;
-  void paint(QPainter *painter, QStyleOptionViewItem const &option,
-             QModelIndex const &index) const override;
+  QWidget *createEditor(QWidget *parent, QStyleOptionViewItem const &option, QModelIndex const &index) const override;
+  void paint(QPainter *painter, QStyleOptionViewItem const &option, QModelIndex const &index) const override;
 
   FitScriptGeneratorDataTable *m_tableWidget;
   ColumnIndex m_columnIndex;

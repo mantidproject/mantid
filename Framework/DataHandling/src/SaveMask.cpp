@@ -36,11 +36,9 @@ DECLARE_ALGORITHM(SaveMask)
 /// Define input parameters
 void SaveMask::init() {
 
-  declareProperty(std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Workspace to output masking to XML file");
-  declareProperty(std::make_unique<FileProperty>("OutputFile", "",
-                                                 FileProperty::Save, ".xml"),
+  declareProperty(std::make_unique<FileProperty>("OutputFile", "", FileProperty::Save, ".xml"),
                   "File to save the detectors mask in XML format");
 }
 
@@ -49,12 +47,10 @@ void SaveMask::exec() {
   // 1. Get input
   API::MatrixWorkspace_sptr userInputWS = this->getProperty("InputWorkspace");
 
-  DataObjects::SpecialWorkspace2D_sptr inpWS =
-      std::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(userInputWS);
+  DataObjects::SpecialWorkspace2D_sptr inpWS = std::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(userInputWS);
   if (!inpWS) {
     // extract the masking and use that
-    Algorithm_sptr emAlg =
-        this->createChildAlgorithm("ExtractMask", 0.0, 0.5, false);
+    Algorithm_sptr emAlg = this->createChildAlgorithm("ExtractMask", 0.0, 0.5, false);
     emAlg->setProperty("InputWorkspace", userInputWS);
     emAlg->setPropertyValue("OutputWorkspace", "tmp");
     emAlg->setLogging(this->isLogging());
@@ -62,8 +58,7 @@ void SaveMask::exec() {
     API::MatrixWorkspace_sptr ws = emAlg->getProperty("OutputWorkspace");
     inpWS = std::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(ws);
     if (!inpWS) {
-      throw std::runtime_error(
-          "Unable to extract masking data using ExtractMask");
+      throw std::runtime_error("Unable to extract masking data using ExtractMask");
     }
   }
 
@@ -80,8 +75,7 @@ void SaveMask::exec() {
   }
 
   // d) sort
-  g_log.debug() << "Number of detectors to be masked = " << detid0s.size()
-                << '\n';
+  g_log.debug() << "Number of detectors to be masked = " << detid0s.size() << '\n';
 
   // 3. Count workspace to count 1 and 0
   std::vector<detid_t> idx0sts; // starting point of the pair
@@ -115,8 +109,8 @@ void SaveMask::exec() {
     idx0eds.emplace_back(i0ed);
 
     for (size_t i = 0; i < idx0sts.size(); i++) {
-      g_log.information() << "Section " << i << " : " << idx0sts[i] << "  ,  "
-                          << idx0eds[i] << " to be masked and recorded.\n";
+      g_log.information() << "Section " << i << " : " << idx0sts[i] << "  ,  " << idx0eds[i]
+                          << " to be masked and recorded.\n";
     }
   } // Only work for detid > 0
 
@@ -155,9 +149,7 @@ void SaveMask::exec() {
 
   } // for
   std::string textvalue = ss.str();
-  g_log.debug() << "SaveMask main text:  available section = " << idx0sts.size()
-                << "\n"
-                << textvalue << '\n';
+  g_log.debug() << "SaveMask main text:  available section = " << idx0sts.size() << "\n" << textvalue << '\n';
 
   // c2. Create element
   AutoPtr<Element> pDetid = pDoc->createElement("detids");

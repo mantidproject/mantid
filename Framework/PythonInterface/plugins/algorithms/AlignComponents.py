@@ -214,6 +214,17 @@ class AlignComponents(PythonAlgorithm):
                       "GammaRotation", "MinGammaRotation", "MaxGammaRotation"]
         [self.setPropertyGroup(name, "Rotation") for name in properties]
 
+        #
+        # Minimization Properties
+        self.declareProperty(name='Minimizer', defaultValue='L-BFGS-B', direction=Direction.Input,
+                             validator=StringListValidator(['L-BFGS-B', 'differential_evolution']),
+                             doc='Minimizer to Use')
+        self.declareProperty(name='MaxIterations', defaultValue=100, direction=Direction.Input,
+                             doc='Maximum number of iterations for minimizer differential_evolution')
+
+        properties = ['Minimizer', 'MaxIterations']
+        [self.setPropertyGroup(name, "Minimization") for name in properties]
+
     def validateInputs(self):
         """
         Does basic validation for inputs
@@ -387,7 +398,7 @@ class AlignComponents(PythonAlgorithm):
                     instrument = api.mtd[wks_name].getInstrument()
                     name_finder = {'Source': instrument.getSource().getName(),
                                    'Sample': instrument.getSample().getName()}
-                    component_adjustments = [name_finder[component]] + xmap[:3] + [0.0] * 4 # no rotations
+                    component_adjustments = [name_finder[component]] + xmap[:3] + [0.0] * 4  # no rotations
                     adjustments_table.addRow(component_adjustments)
 
                 # Need to grab the component again, as things have changed
@@ -440,12 +451,17 @@ class AlignComponents(PythonAlgorithm):
                     boundsList.append((self._initialPos[iopt] + self.getProperty("Min"+opt).value,
                                        self._initialPos[iopt] + self.getProperty("Max"+opt).value))
 
-            # scipy.opimize.minimize with the L-BFGS-B algorithm
-            results: OptimizeResult = minimize(self._minimisation_func, x0=x0List,
-                                               method='L-BFGS-B',
-                                               args=(wks_name, component, firstIndex, lastIndex),
-                                               bounds=boundsList)
-
+            minimizer_selection = self.getProperty('Minimizer').value
+            if minimizer_selection == 'L-BFGS-B':
+                # scipy.opimize.minimize with the L-BFGS-B algorithm
+                results: OptimizeResult = minimize(self._minimisation_func, x0=x0List, method='L-BFGS-B',
+                                                   args=(wks_name, component, firstIndex, lastIndex),
+                                                   bounds=boundsList)
+            elif minimizer_selection == 'differential_evolution':
+                results: OptimizeResult = differential_evolution(self._minimisation_func,
+                                                                 bounds=boundsList,
+                                                                 args=(wks_name, component, firstIndex, lastIndex),
+                                                                 maxiter=self.getProperty('MaxIterations').value)
             # Apply the results to the output workspace
             xmap = self._mapOptions(results.x)
 
@@ -475,7 +491,7 @@ class AlignComponents(PythonAlgorithm):
             prog.report()
         api.DeleteWorkspace(wks_name)
         self.setProperty("OutputWorkspace", output_workspace)
-        logger.notice("Results applied to workspace "+wks_name)
+        logger.notice("Results applied to workspace " + wks_name)
 
     def _initialize_adjustments_table(self, table_name):
         r"""Create a table with appropriate column names for saving the adjustments to each component"""
@@ -499,7 +515,6 @@ class AlignComponents(PythonAlgorithm):
         indexes_and_titles = [(index, title) for index, title in enumerate(table_tofs.getColumnNames()) if '@' in title]
         column_indexes, titles = list(zip(*indexes_and_titles))
         peak_tofs = np.array([table_tofs.column(i) for i in column_indexes])  # shape = (peak_count, detector_count)
-        # sort by increasing peak centers (d-spacing units)
         peak_centers = np.array([float(title.replace('@', '')) for title in titles])
         permutation = np.argsort(peak_centers)  # reorder of indices guarantee increase in d-spacing
         peak_tofs = peak_tofs[permutation]  # sort by increasing d-spacing
@@ -512,22 +527,22 @@ class AlignComponents(PythonAlgorithm):
 
         .. math::
 
-            \sum_i^{N_d}\sum_j^{N_p} (1 - m_{i,j}) \frac{|d_{i,j} - d_j^*|}{d_j^*}
+            \\sum_i^{N_d}\\sum_j^{N_p} (1 - m_{i,j}) \\frac{|d_{i,j} - d_j^*|}{d_j^*}
 
         where :math:`N_d` is the number of detectors in the bank, :math:`N_p` is the number of reference peaks, and
         :math:`m_{i,j}` is the mask for peak :math:`j` and detector :math:`i`. The mask evaluates to 1 if the
         detector is defective or the peak is missing in the detector, otherwise the mask evaluates to zero.
 
-        There's an implicit one-to-correspondence between array index of `difc` and workspace index of `wks_name`,
-        that is, between row index of the input TOFS table and workspace index of `wks_name`.
+        There's an implicit one-to-correspondence between array index of ``difc`` and workspace index of ``wks_name``,
+        that is, between row index of the input TOFS table and workspace index of ``wks_name``.
 
         @param x_0 :: list of length 3 (new XYZ coordinates of the component) or length 6 (XYZ and rotation coords)
         @param wks_name :: name of a workspace with an embedded instrument. The instrument will be adjusted according to
-            the new coordinates `x_0` for instrument component `component`. It's pixel spectra will contain the new DIFC
+            the new coordinates ``x_0`` for instrument component ``component``. It's pixel spectra will contain the new DIFC
         @param component :: name of the instrument component to be optimized
-        @param firstIndex :: workspace index of first index of `difc` array to be considered when comparing old
+        @param firstIndex :: workspace index of first index of ``difc`` array to be considered when comparing old
             and new DIFC values. When fitting the source or sample, this is the first spectrum index.
-        @param lastIndex ::  workspace index of last index of `difc` array to be considered when comparing old
+        @param lastIndex ::  workspace index of last index of ``difc`` array to be considered when comparing old
             and new DIFC values. When fitting the source or sample, this is the last row number of the input
             TOFS table.
 
@@ -557,7 +572,7 @@ class AlignComponents(PythonAlgorithm):
 
         @param component :: reference to a detector component object
 
-        @returns detector ID (`int`) of the first detector in the component
+        @returns detector ID (``int``) of the first detector in the component
         """
         if component.type() == 'DetectorComponent' or component.type() == 'GridDetectorPixel':
             return component.getID()
@@ -629,7 +644,7 @@ class AlignComponents(PythonAlgorithm):
 
 
 try:
-    from scipy.optimize import minimize, OptimizeResult
+    from scipy.optimize import minimize, differential_evolution, OptimizeResult
     AlgorithmFactory.subscribe(AlignComponents)
 except ImportError:
     logger.debug('Failed to subscribe algorithm AlignComponets; cannot import minimize from scipy.optimize')

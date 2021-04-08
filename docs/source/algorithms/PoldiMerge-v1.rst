@@ -33,7 +33,7 @@ Usage
 This small usage example merges two compatible POLDI-files which have been loaded before.
 
 .. testcode:: ExMergeSilicon
-    
+
     # Load the first data file and the correct instrument
     raw_6903 = LoadSINQFile(Filename = "poldi2013n006903.hdf", Instrument = "POLDI")
     LoadInstrument(raw_6903, RewriteSpectraMap=True, InstrumentName = "POLDI")
@@ -43,18 +43,18 @@ This small usage example merges two compatible POLDI-files which have been loade
     histo_6903 = ConvertToHistogram(raw_6903)
     spectra_6903 = Integration(histo_6903)
     total_6903 = SumSpectra(spectra_6903)
-    
+
     # The result has one spectrum with one bin, which contains the total counts.
     counts_6903 = int(total_6903.dataY(0)[0])
     print("6903 contains a total of {} counts.".format(counts_6903))
-    
+
     # The same with the second data file
     raw_6904 = LoadSINQFile(Filename = "poldi2013n006904.hdf", Instrument = "POLDI")
     LoadInstrument(raw_6904, RewriteSpectraMap=True, InstrumentName = "POLDI")
     histo_6904 = ConvertToHistogram(raw_6904)
     spectra_6904 = Integration(histo_6904)
     total_6904 = SumSpectra(spectra_6904)
-    
+
     counts_6904 = int(total_6904.dataY(0)[0])
     print("6904 contains a total of {} counts.".format(counts_6904))
 

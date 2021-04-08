@@ -58,23 +58,19 @@ LeBailFunction::LeBailFunction(const std::string &peaktype) {
   IFunction_sptr ifunc = FunctionFactory::Instance().createFunction(m_peakType);
   if (!ifunc) {
     stringstream errss;
-    errss << "Input peak type " << peaktype
-          << " is not a recoganizable Mantid function.";
+    errss << "Input peak type " << peaktype << " is not a recoganizable Mantid function.";
     throw runtime_error(errss.str());
   }
-  IPowderDiffPeakFunction_sptr peakfunc =
-      std::dynamic_pointer_cast<IPowderDiffPeakFunction>(ifunc);
+  IPowderDiffPeakFunction_sptr peakfunc = std::dynamic_pointer_cast<IPowderDiffPeakFunction>(ifunc);
   if (!peakfunc) {
     stringstream errss;
-    errss << "Input peak type " << peaktype
-          << " is not a IPowderDiffPeakFunction.";
+    errss << "Input peak type " << peaktype << " is not a IPowderDiffPeakFunction.";
     throw runtime_error(errss.str());
   }
 
   m_peakParameterNameVec = peakfunc->getParameterNames();
   m_orderedProfileParameterNames = m_peakParameterNameVec;
-  sort(m_orderedProfileParameterNames.begin(),
-       m_orderedProfileParameterNames.end());
+  sort(m_orderedProfileParameterNames.begin(), m_orderedProfileParameterNames.end());
 
   // Peak parameter values
   for (auto parname : m_peakParameterNameVec) {
@@ -107,9 +103,8 @@ API::IFunction_sptr LeBailFunction::getFunction() {
  * otherwise, assume zero background
  * @return :: output vector
  */
-HistogramY
-LeBailFunction::function(const Mantid::HistogramData::HistogramX &xvalues,
-                         bool calpeaks, bool calbkgd) const {
+HistogramY LeBailFunction::function(const Mantid::HistogramData::HistogramX &xvalues, bool calpeaks,
+                                    bool calbkgd) const {
 
   // Reset output elements to zero
   std::vector<double> out(xvalues.size(), 0);
@@ -122,8 +117,7 @@ LeBailFunction::function(const Mantid::HistogramData::HistogramX &xvalues,
       vector<double> temp(xvalues.size(), 0);
       IPowderDiffPeakFunction_sptr peak = m_vecPeaks[ipk];
       peak->function(temp, xvals);
-      transform(out.begin(), out.end(), temp.begin(), out.begin(),
-                ::plus<double>());
+      transform(out.begin(), out.end(), temp.begin(), out.begin(), ::plus<double>());
     }
   }
 
@@ -135,8 +129,7 @@ LeBailFunction::function(const Mantid::HistogramData::HistogramX &xvalues,
 
     FunctionDomain1DVector domain(xvals);
     FunctionValues values(domain);
-    g_log.information() << "Background function (in LeBailFunction): "
-                        << m_background->asString() << ".\n";
+    g_log.information() << "Background function (in LeBailFunction): " << m_background->asString() << ".\n";
     m_background->function(domain, values);
     size_t numpts = out.size();
     for (size_t i = 0; i < numpts; ++i)
@@ -148,14 +141,11 @@ LeBailFunction::function(const Mantid::HistogramData::HistogramX &xvalues,
 
 /**  Calculate a single peak's value
  */
-HistogramY LeBailFunction::calPeak(size_t ipk,
-                                   const std::vector<double> &xvalues,
-                                   size_t ySize) const {
+HistogramY LeBailFunction::calPeak(size_t ipk, const std::vector<double> &xvalues, size_t ySize) const {
 
   if (ipk >= m_numPeaks) {
     stringstream errss;
-    errss << "Try to calculate peak indexed " << ipk
-          << ". But number of peaks = " << m_numPeaks;
+    errss << "Try to calculate peak indexed " << ipk << ". But number of peaks = " << m_numPeaks;
     g_log.error(errss.str());
     throw runtime_error(errss.str());
   }
@@ -171,8 +161,7 @@ HistogramY LeBailFunction::calPeak(size_t ipk,
  * @param paramname :: parameter name to check with
  */
 bool LeBailFunction::hasProfileParameter(const std::string &paramname) {
-  auto fiter = lower_bound(m_orderedProfileParameterNames.cbegin(),
-                           m_orderedProfileParameterNames.cend(), paramname);
+  auto fiter = lower_bound(m_orderedProfileParameterNames.cbegin(), m_orderedProfileParameterNames.cend(), paramname);
 
   bool found = true;
   if (fiter == m_orderedProfileParameterNames.end()) {
@@ -211,11 +200,9 @@ bool LeBailFunction::isParameterValid(double maxfwhm) const {
 
       int h, k, l;
       peak->getMillerIndex(h, k, l);
-      g_log.information()
-          << "Peak [" << h << ", " << k << ", " << l
-          << "] @ TOF = " << peak->centre()
-          << " has unphysical parameters or unreasonable large FWHM"
-          << ".\n";
+      g_log.information() << "Peak [" << h << ", " << k << ", " << l << "] @ TOF = " << peak->centre()
+                          << " has unphysical parameters or unreasonable large FWHM"
+                          << ".\n";
       break;
     }
   }
@@ -241,8 +228,7 @@ void LeBailFunction::calculatePeakParameterValues() const {
  * @param tofmin :: minimum TOF for peak position
  * @param tofmax :: maximum TOF for peak position
  */
-void LeBailFunction::setPeakCentreTolerance(double peakpostol, double tofmin,
-                                            double tofmax) {
+void LeBailFunction::setPeakCentreTolerance(double peakpostol, double tofmin, double tofmax) {
   // m_usePeakPosTol = true;
   m_minTOFPeakCentre = tofmin - peakpostol;
   m_maxTOFPeakCentre = tofmax + peakpostol;
@@ -255,9 +241,8 @@ void LeBailFunction::setPeakCentreTolerance(double peakpostol, double tofmin,
 void LeBailFunction::addPeaks(std::vector<std::vector<int>> peakhkls) {
   // Prerequisit
   if (!m_isInputValue)
-    throw runtime_error(
-        "Client must set up profile parameter vlaues by calling "
-        "setProfileParameterValues() first! ");
+    throw runtime_error("Client must set up profile parameter vlaues by calling "
+                        "setProfileParameterValues() first! ");
 
   // Add peaks
   for (size_t ipk = 0; ipk < peakhkls.size(); ++ipk) {
@@ -266,8 +251,8 @@ void LeBailFunction::addPeaks(std::vector<std::vector<int>> peakhkls) {
     // Check input Miller Index
     if (hkl.size() != 3) {
       stringstream errss;
-      errss << "Error of " << ipk << "-th input Miller Index.  It has "
-            << peakhkls[ipk].size() << " items, but not required 3 items.";
+      errss << "Error of " << ipk << "-th input Miller Index.  It has " << peakhkls[ipk].size()
+            << " items, but not required 3 items.";
       g_log.error(errss.str());
       throw runtime_error(errss.str());
     }
@@ -284,11 +269,9 @@ void LeBailFunction::addPeaks(std::vector<std::vector<int>> peakhkls) {
 
     double tofh = newpeak->centre();
     if (tofh < m_minTOFPeakCentre || tofh > m_maxTOFPeakCentre) {
-      g_log.information() << "Peak " << h << ", " << k << ", " << l
-                          << " 's centre is at TOF = " << tofh
-                          << ", which is out of user specified boundary ("
-                          << m_minTOFPeakCentre << ", " << m_maxTOFPeakCentre
-                          << "). "
+      g_log.information() << "Peak " << h << ", " << k << ", " << l << " 's centre is at TOF = " << tofh
+                          << ", which is out of user specified boundary (" << m_minTOFPeakCentre << ", "
+                          << m_maxTOFPeakCentre << "). "
                           << ".\n";
     } else {
       double dsp = newpeak->getPeakParameter("d_h");
@@ -303,8 +286,7 @@ void LeBailFunction::addPeaks(std::vector<std::vector<int>> peakhkls) {
 
   m_numPeaks = m_vecPeaks.size();
 
-  g_log.information() << "Total " << m_numPeaks << " after trying to add "
-                      << peakhkls.size() << " peaks. \n";
+  g_log.information() << "Total " << m_numPeaks << " after trying to add " << peakhkls.size() << " peaks. \n";
 } // END of addPeaks()
 
 //----------------------------------------------------------------------------------------------
@@ -315,8 +297,7 @@ void LeBailFunction::addPeaks(std::vector<std::vector<int>> peakhkls) {
  */
 IPowderDiffPeakFunction_sptr LeBailFunction::generatePeak(int h, int k, int l) {
   IFunction_sptr f = FunctionFactory::Instance().createFunction(m_peakType);
-  IPowderDiffPeakFunction_sptr peak =
-      std::dynamic_pointer_cast<IPowderDiffPeakFunction>(f);
+  IPowderDiffPeakFunction_sptr peak = std::dynamic_pointer_cast<IPowderDiffPeakFunction>(f);
 
   peak->setMillerIndex(h, k, l);
   for (const auto &parname : m_peakParameterNameVec) {
@@ -342,9 +323,8 @@ IPowderDiffPeakFunction_sptr LeBailFunction::generatePeak(int h, int k, int l) {
  *
  * Return: True if all peaks' height are physical.  False otherwise
  */
-bool LeBailFunction::calculatePeaksIntensities(
-    const vector<double> &vecX, const vector<double> &vecY,
-    vector<double> &vec_summedpeaks) {
+bool LeBailFunction::calculatePeaksIntensities(const vector<double> &vecX, const vector<double> &vecY,
+                                               vector<double> &vec_summedpeaks) {
   // Clear inputs
   std::fill(vec_summedpeaks.begin(), vec_summedpeaks.end(), 0.0);
 
@@ -361,8 +341,7 @@ bool LeBailFunction::calculatePeaksIntensities(
     g_log.debug() << "[Fx351] Calculate peaks heights for (peak) group " << ig
                   << " : number of peaks = " << peakgroupvec[ig].size() << "\n";
 
-    bool peakheightsphysical = calculateGroupPeakIntensities(
-        peakgroupvec[ig], vecX, vecY, vec_summedpeaks);
+    bool peakheightsphysical = calculateGroupPeakIntensities(peakgroupvec[ig], vecX, vecY, vec_summedpeaks);
 
     if (!peakheightsphysical)
       allpeakheightsphysical = false;
@@ -387,14 +366,12 @@ bool LeBailFunction::calculatePeaksIntensities(
  * sum_peaks
  * @return :: boolean whether the peaks' heights are physical
  */
-bool LeBailFunction::calculateGroupPeakIntensities(
-    vector<pair<double, IPowderDiffPeakFunction_sptr>> peakgroup,
-    const vector<double> &vecX, const vector<double> &vecY,
-    vector<double> &vec_summedpeaks) {
+bool LeBailFunction::calculateGroupPeakIntensities(vector<pair<double, IPowderDiffPeakFunction_sptr>> peakgroup,
+                                                   const vector<double> &vecX, const vector<double> &vecY,
+                                                   vector<double> &vec_summedpeaks) {
   // Check input peaks group and sort peak by d-spacing
   if (peakgroup.empty()) {
-    throw runtime_error(
-        "Programming error such that input peak group cannot be empty!");
+    throw runtime_error("Programming error such that input peak group cannot be empty!");
   } else {
     g_log.debug() << "[Fx155] Peaks group size = " << peakgroup.size() << "\n";
   }
@@ -404,8 +381,7 @@ bool LeBailFunction::calculateGroupPeakIntensities(
   // Check input vector validity
   if (vec_summedpeaks.size() != vecY.size()) {
     stringstream errss;
-    errss << "Input vector 'allpeaksvalues' has wrong size = "
-          << vec_summedpeaks.size()
+    errss << "Input vector 'allpeaksvalues' has wrong size = " << vec_summedpeaks.size()
           << " != data workspace Y's size = " << vecY.size();
     g_log.error(errss.str());
     throw runtime_error(errss.str());
@@ -418,22 +394,18 @@ bool LeBailFunction::calculateGroupPeakIntensities(
     stringstream msg;
     int h, k, l;
     leftpeak->getMillerIndex(h, k, l);
-    msg << "Peak group (containing " << peakgroup.size()
-        << " peaks) has its left boundary (TOF = " << leftbound
-        << ") out side of input data workspace's left boundary ("
-        << vecX.front()
+    msg << "Peak group (containing " << peakgroup.size() << " peaks) has its left boundary (TOF = " << leftbound
+        << ") out side of input data workspace's left boundary (" << vecX.front()
         << ").  Accuracy of its peak intensity might be affected. "
-        << "Group's left boundary is determined by its leftmost peak (" << h
-        << ", " << k << ", " << l << ") at TOF = " << leftpeak->centre()
-        << " with FWHM = " << leftpeak->fwhm() << ". ";
+        << "Group's left boundary is determined by its leftmost peak (" << h << ", " << k << ", " << l
+        << ") at TOF = " << leftpeak->centre() << " with FWHM = " << leftpeak->fwhm() << ". ";
 
     g_log.information(msg.str());
 
     leftbound = vecX[0] + 0.1;
   }
   IPowderDiffPeakFunction_sptr rightpeak = peakgroup.back().second;
-  double rightbound =
-      rightpeak->centre() + PEAKRANGECONSTANT * rightpeak->fwhm();
+  double rightbound = rightpeak->centre() + PEAKRANGECONSTANT * rightpeak->fwhm();
   if (rightbound > vecX.back()) {
     stringstream msg;
     msg << "Peak group's right boundary " << rightbound << " is out side of "
@@ -461,22 +433,17 @@ bool LeBailFunction::calculateGroupPeakIntensities(
   size_t ndata = iright - ileft;
   if (ileft >= iright) {
     stringstream errss;
-    errss << "[Calcualte Peak Intensity] Group range is unphysical.  iLeft = "
-          << ileft << ", iRight = " << iright
-          << "; Number of peaks = " << peakgroup.size()
-          << "; Left boundary = " << leftbound
-          << ", Right boundary = " << rightbound
-          << "; Left peak FWHM = " << leftpeak->fwhm()
+    errss << "[Calcualte Peak Intensity] Group range is unphysical.  iLeft = " << ileft << ", iRight = " << iright
+          << "; Number of peaks = " << peakgroup.size() << "; Left boundary = " << leftbound
+          << ", Right boundary = " << rightbound << "; Left peak FWHM = " << leftpeak->fwhm()
           << ", Right peak FWHM = " << rightpeak->fwhm();
     for (size_t ipk = 0; ipk < peakgroup.size(); ++ipk) {
       IPowderDiffPeakFunction_sptr thispeak = peakgroup[ipk].second;
-      errss << "Peak " << ipk << ":  d_h = " << peakgroup[ipk].first
-            << ", TOF_h = " << thispeak->centre()
+      errss << "Peak " << ipk << ":  d_h = " << peakgroup[ipk].first << ", TOF_h = " << thispeak->centre()
             << ", FWHM = " << thispeak->fwhm() << "\n";
       vector<string> peakparamnames = thispeak->getParameterNames();
       for (auto &peakparamname : peakparamnames) {
-        errss << "\t" << peakparamname << " = "
-              << thispeak->getParameter(peakparamname) << "\n";
+        errss << "\t" << peakparamname << " = " << thispeak->getParameter(peakparamname) << "\n";
       }
     }
 
@@ -489,13 +456,11 @@ bool LeBailFunction::calculateGroupPeakIntensities(
   vector<double> datay(vecY.begin() + ileft, vecY.begin() + iright);
   if (datax.size() != ndata) {
     stringstream errmsg;
-    errmsg << "Impossible: Partial peak data size = " << datax.size()
-           << " != ndata = " << ndata;
+    errmsg << "Impossible: Partial peak data size = " << datax.size() << " != ndata = " << ndata;
     g_log.error(errmsg.str());
     throw runtime_error(errmsg.str());
   }
-  g_log.debug() << "[DBx356] Number of data points = " << ndata
-                << " index from " << ileft << " to " << iright
+  g_log.debug() << "[DBx356] Number of data points = " << ndata << " index from " << ileft << " to " << iright
                 << ";  Size(datax, datay) = " << datax.size() << "\n";
 
   // Prepare to integrate dataY to calculate peak intensity
@@ -534,8 +499,7 @@ bool LeBailFunction::calculateGroupPeakIntensities(
       int h, k, l;
       peak->getMillerIndex(h, k, l);
       stringstream warnss;
-      warnss << "Peak (" << h << ", " << k << ", " << l
-             << ") @ TOF = " << peak->centre() << " has " << numbadpts
+      warnss << "Peak (" << h << ", " << k << ", " << l << ") @ TOF = " << peak->centre() << " has " << numbadpts
              << " data points, "
              << "whose values exceed limit (i.e., not physical). ";
       g_log.debug(warnss.str());
@@ -577,8 +541,7 @@ bool LeBailFunction::calculateGroupPeakIntensities(
 
         int h, k, l;
         peak->getMillerIndex(h, k, l);
-        g_log.warning() << "Peak (" << h << ", " << k << ", " << l
-                        << ") has unphysical intensity = NaN!\n";
+        g_log.warning() << "Peak (" << h << ", " << k << ", " << l << ") has unphysical intensity = NaN!\n";
 
       } else if (intensity <= -DBL_MAX || intensity >= DBL_MAX) {
         // Unphysical intensity: NaN
@@ -587,17 +550,14 @@ bool LeBailFunction::calculateGroupPeakIntensities(
 
         int h, k, l;
         peak->getMillerIndex(h, k, l);
-        g_log.warning() << "Peak (" << h << ", " << k << ", " << l
-                        << ") has unphysical intensity = Infty!\n";
+        g_log.warning() << "Peak (" << h << ", " << k << ", " << l << ") has unphysical intensity = Infty!\n";
       } else if (intensity < 0.0) {
         // No negative intensity
-        g_log.debug() << "[Fx134] Set peak @ " << peak->centre()
-                      << "'s intensity to 0.0 instead of " << intensity
+        g_log.debug() << "[Fx134] Set peak @ " << peak->centre() << "'s intensity to 0.0 instead of " << intensity
                       << ".\n";
         intensity = 0.0;
       }
-      g_log.debug() << "[Fx407] Peak @ " << peak->centre()
-                    << ": Set Intensity = " << intensity << "\n";
+      g_log.debug() << "[Fx407] Peak @ " << peak->centre() << ": Set Intensity = " << intensity << "\n";
       peak->setHeight(intensity);
 
       // Add peak's value to peaksvalues
@@ -620,8 +580,7 @@ bool LeBailFunction::calculateGroupPeakIntensities(
  * @param peakheight: height of the peak
  * @param setpeakheight:  boolean as the option to set peak height or not.
  */
-void LeBailFunction::setPeakParameters(const IPowderDiffPeakFunction_sptr &peak,
-                                       const map<string, double> &parammap,
+void LeBailFunction::setPeakParameters(const IPowderDiffPeakFunction_sptr &peak, const map<string, double> &parammap,
                                        double peakheight, bool setpeakheight) {
   UNUSED_ARG(peak);
   UNUSED_ARG(parammap);
@@ -681,8 +640,7 @@ void LeBailFunction::setPeakParameters(const IPowderDiffPeakFunction_sptr &peak,
  *
  * @param parammap: map of Parameters to set to peak
  */
-void LeBailFunction::setProfileParameterValues(
-    map<std::string, double> parammap) {
+void LeBailFunction::setProfileParameterValues(map<std::string, double> parammap) {
   const double MINDIFF = 1.0E-10;
 
   map<std::string, double>::iterator inpiter, curiter;
@@ -699,8 +657,7 @@ void LeBailFunction::setProfileParameterValues(
       curiter = m_functionParameters.find(parname);
       if (curiter == m_functionParameters.end()) {
         stringstream errmsg;
-        errmsg << "Parameter " << parname
-               << " is in parameter name list, but not in profile "
+        errmsg << "Parameter " << parname << " is in parameter name list, but not in profile "
                << "parameter map.  It violates the programming logic.";
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
@@ -727,9 +684,8 @@ void LeBailFunction::setProfileParameterValues(
       }
     } // If parameter name is a profile parameter
     else {
-      g_log.debug() << "Parameter " << parname
-                    << " is not a profile parameter. Length of string = "
-                    << parname.size() << "\n";
+      g_log.debug() << "Parameter " << parname << " is not a profile parameter. Length of string = " << parname.size()
+                    << "\n";
     }
   } // ENDFOR [All profile parameter]
 
@@ -746,10 +702,8 @@ void LeBailFunction::setProfileParameterValues(
  * @param xmax : maximum x value of the data
  * Disabled argument: MatrixWorkspace_sptr dataws, size_t workspaceindex,
  */
-void LeBailFunction::groupPeaks(
-    vector<vector<pair<double, IPowderDiffPeakFunction_sptr>>> &peakgroupvec,
-    vector<IPowderDiffPeakFunction_sptr> &outboundpeakvec, double xmin,
-    double xmax) {
+void LeBailFunction::groupPeaks(vector<vector<pair<double, IPowderDiffPeakFunction_sptr>>> &peakgroupvec,
+                                vector<IPowderDiffPeakFunction_sptr> &outboundpeakvec, double xmin, double xmax) {
   // Sort peaks
   if (m_numPeaks > 1) {
     sort(m_dspPeakVec.begin(), m_dspPeakVec.end());
@@ -763,8 +717,7 @@ void LeBailFunction::groupPeaks(
   // Set up starting value
   peakgroupvec.clear();
   outboundpeakvec.clear();
-  vector<pair<double, IPowderDiffPeakFunction_sptr>>
-      peakgroup; // one group of peaks
+  vector<pair<double, IPowderDiffPeakFunction_sptr>> peakgroup; // one group of peaks
   size_t ipk = 0;
 
   // Group peaks from low-d to high-d
@@ -799,10 +752,8 @@ void LeBailFunction::groupPeaks(
         // test whether next peak will be in a different group
         IPowderDiffPeakFunction_sptr rightpeak = m_dspPeakVec[ipk + 1].second;
 
-        double thispeak_rightbound =
-            thispeak->centre() + PEAKRANGECONSTANT * thispeak->fwhm();
-        double rightpeak_leftbound =
-            rightpeak->centre() - PEAKRANGECONSTANT * rightpeak->fwhm();
+        double thispeak_rightbound = thispeak->centre() + PEAKRANGECONSTANT * thispeak->fwhm();
+        double rightpeak_leftbound = rightpeak->centre() - PEAKRANGECONSTANT * rightpeak->fwhm();
 
         if (thispeak_rightbound < rightpeak_leftbound) {
           // this peak and its right peak are well separated.
@@ -824,8 +775,7 @@ void LeBailFunction::groupPeaks(
     else {
       // Peak is get out of boundary
       inbound = false;
-      g_log.information() << "[Fx301] Group peak: peak @ " << thispeak->centre()
-                          << " causes grouping "
+      g_log.information() << "[Fx301] Group peak: peak @ " << thispeak->centre() << " causes grouping "
                           << "peak over at maximum TOF = " << xmax << ".\n";
 
       if (!peakgroup.empty()) {
@@ -840,8 +790,7 @@ void LeBailFunction::groupPeaks(
     ipk += 1;
   }
 
-  g_log.debug() << "[Calculate Peak Intensity]:  Number of Peak Groups = "
-                << peakgroupvec.size() << "\n";
+  g_log.debug() << "[Calculate Peak Intensity]:  Number of Peak Groups = " << peakgroupvec.size() << "\n";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -855,32 +804,25 @@ void LeBailFunction::groupPeaks(
  * @param startx :: background's StartX.  Used by Chebyshev
  * @param endx :: background's EndX.  Used by Chebyshev
  */
-void LeBailFunction::addBackgroundFunction(
-    const string &backgroundtype, const unsigned int &order,
-    const std::vector<std::string> &vecparnames,
-    const std::vector<double> &vecparvalues, double startx, double endx) {
+void LeBailFunction::addBackgroundFunction(const string &backgroundtype, const unsigned int &order,
+                                           const std::vector<std::string> &vecparnames,
+                                           const std::vector<double> &vecparvalues, double startx, double endx) {
   // Check
-  if (backgroundtype != POLYNOMIAL_BACKGROUND &&
-      backgroundtype != CHEBYSHEV_BACKGROUND &&
+  if (backgroundtype != POLYNOMIAL_BACKGROUND && backgroundtype != CHEBYSHEV_BACKGROUND &&
       backgroundtype != FULLPROF_POLYNOMIAL_BACKGROUND) {
     stringstream warnss;
-    warnss << "Cliet specified background type " << backgroundtype
-           << " may not be supported properly.";
+    warnss << "Cliet specified background type " << backgroundtype << " may not be supported properly.";
     g_log.warning(warnss.str());
   }
   if (vecparnames.size() != vecparvalues.size())
-    throw runtime_error(
-        "Input parameter names and parameter values are not matched. ");
+    throw runtime_error("Input parameter names and parameter values are not matched. ");
 
-  g_log.information() << "Add background: type = " << backgroundtype
-                      << ", order = " << order
-                      << ", number of parameters/attributes = "
-                      << vecparnames.size() << "\n";
+  g_log.information() << "Add background: type = " << backgroundtype << ", order = " << order
+                      << ", number of parameters/attributes = " << vecparnames.size() << "\n";
 
   // Create background function from factory
   auto background = FunctionFactory::Instance().createFunction(backgroundtype);
-  m_background =
-      std::dynamic_pointer_cast<Functions::BackgroundFunction>(background);
+  m_background = std::dynamic_pointer_cast<Functions::BackgroundFunction>(background);
 
   // Set order and initialize
   m_background->setAttributeValue("n", static_cast<int>(order));
@@ -912,8 +854,7 @@ void LeBailFunction::addBackgroundFunction(
  * @param minvalue :: lower boundary
  * @param maxvalue :: upper boundary
  */
-void LeBailFunction::setFitProfileParameter(const string &paramname,
-                                            double minvalue, double maxvalue) {
+void LeBailFunction::setFitProfileParameter(const string &paramname, double minvalue, double maxvalue) {
   // Make ties in composition function
   for (size_t ipk = 1; ipk < m_numPeaks; ++ipk) {
     stringstream ss1, ss2;
@@ -922,16 +863,14 @@ void LeBailFunction::setFitProfileParameter(const string &paramname,
     string tiepart1 = ss1.str();
     string tiepart2 = ss2.str();
     m_compsiteFunction->tie(tiepart1, tiepart2);
-    g_log.debug() << "LeBailFunction::Fit(Tie) / " << tiepart1 << " / "
-                  << tiepart2 << " /\n";
+    g_log.debug() << "LeBailFunction::Fit(Tie) / " << tiepart1 << " / " << tiepart2 << " /\n";
   }
 
   // Set contrains of the parameter on any of the tied parameter.
   std::stringstream parss;
   parss << "f0." << paramname;
   string parnamef0 = parss.str();
-  auto bc = std::make_unique<Constraints::BoundaryConstraint>(
-      m_compsiteFunction.get(), parnamef0, minvalue, maxvalue);
+  auto bc = std::make_unique<Constraints::BoundaryConstraint>(m_compsiteFunction.get(), parnamef0, minvalue, maxvalue);
   m_compsiteFunction->addConstraint(std::move(bc));
 }
 
@@ -940,8 +879,7 @@ void LeBailFunction::setFitProfileParameter(const string &paramname,
  * @param paramname :: name of parameter
  * @param paramvalue :: value of parameter to be fixed to
  */
-void LeBailFunction::fixPeakParameter(const string &paramname,
-                                      double paramvalue) {
+void LeBailFunction::fixPeakParameter(const string &paramname, double paramvalue) {
   for (size_t ipk = 0; ipk < m_numPeaks; ++ipk) {
     stringstream ss1, ss2;
     ss1 << "f" << ipk << "." << paramname;
@@ -950,8 +888,7 @@ void LeBailFunction::fixPeakParameter(const string &paramname,
     string tievalue = ss2.str();
     m_compsiteFunction->tie(tiepart1, tievalue);
 
-    g_log.debug() << "Set up tie | " << tiepart1 << " <---> " << tievalue
-                  << " | \n";
+    g_log.debug() << "Set up tie | " << tiepart1 << " <---> " << tievalue << " | \n";
 
     // FIXME & TODO: Make a map between peak parameter name and index. And use
     // fix() to replace tie
@@ -1013,8 +950,7 @@ void LeBailFunction::setPeakHeights(const std::vector<double> &inheights) {
 IPowderDiffPeakFunction_sptr LeBailFunction::getPeak(size_t peakindex) {
   if (peakindex >= m_numPeaks) {
     stringstream errmsg;
-    errmsg << "Try to access peak " << peakindex << " out of range [0, "
-           << m_numPeaks << ").";
+    errmsg << "Try to access peak " << peakindex << " out of range [0, " << m_numPeaks << ").";
     g_log.error(errmsg.str());
     throw runtime_error(errmsg.str());
   }
@@ -1027,15 +963,14 @@ IPowderDiffPeakFunction_sptr LeBailFunction::getPeak(size_t peakindex) {
 //----------------------------------------------------------------------------------------------
 /** Get value of one specific peak's parameter
  */
-double LeBailFunction::getPeakParameter(std::vector<int> hkl,
-                                        const std::string &parname) const {
+double LeBailFunction::getPeakParameter(std::vector<int> hkl, const std::string &parname) const {
   // Search peak in map
   map<vector<int>, IPowderDiffPeakFunction_sptr>::const_iterator fiter;
   fiter = m_mapHKLPeak.find(hkl);
   if (fiter == m_mapHKLPeak.end()) {
     stringstream errss;
-    errss << "Peak with Miller index (" << hkl[0] << ", " << hkl[1] << ","
-          << hkl[2] << ") does not exist in Le Bail function.";
+    errss << "Peak with Miller index (" << hkl[0] << ", " << hkl[1] << "," << hkl[2]
+          << ") does not exist in Le Bail function.";
     g_log.error(errss.str());
     throw runtime_error(errss.str());
   }
@@ -1050,13 +985,11 @@ double LeBailFunction::getPeakParameter(std::vector<int> hkl,
 //----------------------------------------------------------------------------------------------
 /** Get value of one specific peak's parameter
  */
-double LeBailFunction::getPeakParameter(size_t index,
-                                        const std::string &parname) const {
+double LeBailFunction::getPeakParameter(size_t index, const std::string &parname) const {
   if (index >= m_numPeaks) {
     stringstream errss;
-    errss << "getPeakParameter() tries to reach a peak with index " << index
-          << ", which is out of range " << m_numPeaks << "/"
-          << m_vecPeaks.size() << ".";
+    errss << "getPeakParameter() tries to reach a peak with index " << index << ", which is out of range " << m_numPeaks
+          << "/" << m_vecPeaks.size() << ".";
     g_log.error(errss.str());
     throw std::runtime_error(errss.str());
   }
@@ -1072,12 +1005,10 @@ double LeBailFunction::getPeakParameter(size_t index,
  * @param peak :: shared pointer to peak function
  * @param parname :: name of the peak parameter
  */
-double LeBailFunction::getPeakParameterValue(
-    const API::IPowderDiffPeakFunction_sptr &peak,
-    const std::string &parname) const {
+double LeBailFunction::getPeakParameterValue(const API::IPowderDiffPeakFunction_sptr &peak,
+                                             const std::string &parname) const {
   // Locate the category of the parameter name
-  auto vsiter = lower_bound(m_orderedProfileParameterNames.cbegin(),
-                            m_orderedProfileParameterNames.cend(), parname);
+  auto vsiter = lower_bound(m_orderedProfileParameterNames.cbegin(), m_orderedProfileParameterNames.cend(), parname);
 
   bool found = true;
   if (vsiter == m_orderedProfileParameterNames.end()) {
@@ -1106,16 +1037,14 @@ double LeBailFunction::getPeakParameterValue(
 //----------------------------------------------------------------------------------------------
 /** Get the maximum value of a peak in a given set of data points
  */
-double LeBailFunction::getPeakMaximumValue(std::vector<int> hkl,
-                                           const std::vector<double> &xvalues,
-                                           size_t &ix) {
+double LeBailFunction::getPeakMaximumValue(std::vector<int> hkl, const std::vector<double> &xvalues, size_t &ix) {
   // Search peak in map
   map<vector<int>, IPowderDiffPeakFunction_sptr>::const_iterator fiter;
   fiter = m_mapHKLPeak.find(hkl);
   if (fiter == m_mapHKLPeak.end()) {
     stringstream errss;
-    errss << "Peak with Miller index (" << hkl[0] << ", " << hkl[1] << ","
-          << hkl[2] << ") does not exist in Le Bail function.";
+    errss << "Peak with Miller index (" << hkl[0] << ", " << hkl[1] << "," << hkl[2]
+          << ") does not exist in Le Bail function.";
     g_log.error(errss.str());
     throw runtime_error(errss.str());
   }

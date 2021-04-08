@@ -26,12 +26,8 @@ public:
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string category() const override { return "Reflectometry"; }
   /// Summary of algorithm's purpose
-  const std::string summary() const override {
-    return "Stitches single histogram matrix workspaces together";
-  }
-  const std::vector<std::string> seeAlso() const override {
-    return {"Rebin", "Stitch1DMany"};
-  }
+  const std::string summary() const override { return "Stitches single histogram matrix workspaces together"; }
+  const std::vector<std::string> seeAlso() const override { return {"Rebin", "Stitch1DMany"}; }
   /// Does the x-axis have non-zero errors
   bool hasNonzeroErrors(Mantid::API::MatrixWorkspace_sptr &ws);
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
@@ -46,41 +42,30 @@ private:
   /// Overwrites Algorithm method.
   void exec() override;
   /// Get the start overlap
-  double getStartOverlap(const double intesectionMin,
-                         const double intesectionMax) const;
+  double getStartOverlap(const double intesectionMin, const double intesectionMax) const;
   /// Get the end overlap
-  double getEndOverlap(const double intesectionMin,
-                       const double intesectionMax) const;
+  double getEndOverlap(const double intesectionMin, const double intesectionMax) const;
 
   /// Get the rebin parameters
-  std::vector<double>
-  getRebinParams(Mantid::API::MatrixWorkspace_const_sptr &lhsWS,
-                 Mantid::API::MatrixWorkspace_const_sptr &rhsWS,
-                 const bool scaleRHS) const;
+  std::vector<double> getRebinParams(Mantid::API::MatrixWorkspace_const_sptr &lhsWS,
+                                     Mantid::API::MatrixWorkspace_const_sptr &rhsWS, const bool scaleRHS) const;
   /// Perform rebin
-  Mantid::API::MatrixWorkspace_sptr
-  rebin(Mantid::API::MatrixWorkspace_sptr &input,
-        const std::vector<double> &params);
+  Mantid::API::MatrixWorkspace_sptr rebin(Mantid::API::MatrixWorkspace_sptr &input, const std::vector<double> &params);
   /// Perform integration
-  Mantid::API::MatrixWorkspace_sptr
-  integration(Mantid::API::MatrixWorkspace_sptr &input, const double start,
-              const double stop);
+  Mantid::API::MatrixWorkspace_sptr integration(Mantid::API::MatrixWorkspace_sptr &input, const double start,
+                                                const double stop);
   Mantid::API::MatrixWorkspace_sptr singleValueWS(const double val);
   /// Calculate the weighted mean
-  Mantid::API::MatrixWorkspace_sptr
-  weightedMean(Mantid::API::MatrixWorkspace_sptr &inOne,
-               Mantid::API::MatrixWorkspace_sptr &inTwo);
+  Mantid::API::MatrixWorkspace_sptr weightedMean(Mantid::API::MatrixWorkspace_sptr &inOne,
+                                                 Mantid::API::MatrixWorkspace_sptr &inTwo);
   /// Conjoin x axis
-  Mantid::API::MatrixWorkspace_sptr
-  conjoinXAxis(Mantid::API::MatrixWorkspace_sptr &inOne,
-               Mantid::API::MatrixWorkspace_sptr &inTwo);
+  Mantid::API::MatrixWorkspace_sptr conjoinXAxis(Mantid::API::MatrixWorkspace_sptr &inOne,
+                                                 Mantid::API::MatrixWorkspace_sptr &inTwo);
   /// Find the start and end indexes
-  boost::tuple<int, int>
-  findStartEndIndexes(double startOverlap, double endOverlap,
-                      Mantid::API::MatrixWorkspace_sptr &workspace);
+  boost::tuple<int, int> findStartEndIndexes(double startOverlap, double endOverlap,
+                                             Mantid::API::MatrixWorkspace_sptr &workspace);
   /// Mask out everything but the data in the ranges
-  Mantid::API::MatrixWorkspace_sptr
-  maskAllBut(int a1, int a2, Mantid::API::MatrixWorkspace_sptr &source);
+  Mantid::API::MatrixWorkspace_sptr maskAllBut(int a1, int a2, Mantid::API::MatrixWorkspace_sptr &source);
   /// Mask out everything but the data in the ranges, but do it inplace.
   void maskInPlace(int a1, int a2, Mantid::API::MatrixWorkspace_sptr &source);
   /// Add back in any special values
@@ -91,8 +76,7 @@ private:
   double m_scaleFactor;
   double m_errorScaleFactor;
   /// Scale workspace (left hand side or right hand side)
-  void scaleWorkspace(API::MatrixWorkspace_sptr &ws,
-                      API::MatrixWorkspace_sptr &scaleFactorWS,
+  void scaleWorkspace(API::MatrixWorkspace_sptr &ws, API::MatrixWorkspace_sptr &scaleFactorWS,
                       API::MatrixWorkspace_const_sptr &dxWS);
   /// Index per workspace spectra of Nans
   SpecialTypeIndexes m_nanEIndexes;

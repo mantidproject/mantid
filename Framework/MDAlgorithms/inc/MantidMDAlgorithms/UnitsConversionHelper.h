@@ -48,20 +48,21 @@ class DLLExport UnitsConversionHelper {
   //  these variables needed and used for conversion through TOF
   int m_Emode;
 
-  double m_L1, m_Efix, m_TwoTheta, m_L2;
+  double m_L1, m_Efix, m_TwoTheta, m_L2, m_DIFA, m_DIFC, m_TZERO;
   std::vector<double> const *m_pTwoThetas;
   std::vector<double> const *m_pL2s;
   // pointer to detector specific input energy (eFixed) defined for indirect
   // instruments;
   float *m_pEfixedArray;
+  std::vector<double> const *m_pDIFAs;
+  std::vector<double> const *m_pDIFCs;
+  std::vector<double> const *m_pTZEROs;
 
 public:
   UnitsConversionHelper();
-  void initialize(const MDWSDescription &targetWSDescr,
-                  const std::string &unitsTo, bool forceViaTOF = false);
+  void initialize(const MDWSDescription &targetWSDescr, const std::string &unitsTo, bool forceViaTOF = false);
   void initialize(const std::string &unitsFrom, const std::string &unitsTo,
-                  const DataObjects::TableWorkspace_const_sptr &DetWS,
-                  int Emode, bool forceViaTOF = false);
+                  const DataObjects::TableWorkspace_const_sptr &DetWS, int Emode, bool forceViaTOF = false);
   void updateConversion(size_t i);
   double convertUnits(double val) const;
 
@@ -73,8 +74,7 @@ public:
 protected: // for testing
   /// establish and initialize proper units conversion from input to output
   /// units;
-  CnvrtToMD::ConvertUnits analyzeUnitsConversion(const std::string &UnitsFrom,
-                                                 const std::string &UnitsTo,
+  CnvrtToMD::ConvertUnits analyzeUnitsConversion(const std::string &UnitsFrom, const std::string &UnitsTo,
                                                  bool forceViaTOF = false);
 };
 

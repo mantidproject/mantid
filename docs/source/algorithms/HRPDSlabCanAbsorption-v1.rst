@@ -49,7 +49,7 @@ Usage
 **Example:**
 
 .. testcode:: ExSimpleHRPDSlab
-    
+
     ws = CreateSampleWorkspace("Histogram",NumBanks=1,BankPixelWidth=1)
     ws = ConvertUnits(ws,"Wavelength")
     ws = Rebin(ws,Params=[1])

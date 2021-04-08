@@ -104,7 +104,7 @@ class AtomsData(collections.abc.Sequence):
         ...
 
     @overload  # noqa F811
-    def __getitem__(self, item: slice) -> List[Dict[str, Any]]:
+    def __getitem__(self, item: slice) -> List[Dict[str, Any]]: # noqa F811
         ...
 
     def __getitem__(self, item):  # noqa F811

@@ -119,11 +119,11 @@ Normalised Polygon Transformation
 
     # Should now have signed theta vs Lambda
     ConvertSpectrumAxis(InputWorkspace=I,OutputWorkspace='SignedTheta_vs_Wavelength',Target='signed_theta')
-    
+
     qxqy, vertexes_qxqy = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength', OutputDimensions='Q (lab frame)', Extents='-0.0005,0.0005,0,0.12', OutputAsMDWorkspace=False,Method='NormalisedPolygon')
-                                
+
     kikf, vertexes_kikf = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength', OutputDimensions='K (incident, final)', Extents='0,0.05,0,0.05', OutputAsMDWorkspace=False,Method='NormalisedPolygon')
-    
+
     pipf, vertexes_pipf = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength', OutputDimensions='P (lab frame)', Extents='0,0.1,-0.02,0.15', OutputAsMDWorkspace=False,Method='NormalisedPolygon')
 
     print("{} {}".format(qxqy.getDimension(0).name, qxqy.getDimension(1).name))
@@ -138,14 +138,14 @@ Output:
     Qx Qz
     Ki Kf
     Pz_i + Pz_f Pz_i - Pz_f
-    
+
 Plot of the SignedTheta vs Wavelength workspace:
 ================================================
 Before the ConvertToReflectometryQ algorithm is executed in the usage example above, the plot of the 'SignedTheta_vs_Wavelength' workspace should resemble this plot:
 
 .. figure:: /images/SignedThetaVSlam_plot.png
-   :alt: plot of Signed theta vs lambda. 
-    
+   :alt: plot of Signed theta vs lambda.
+
 Patch Plot with Dumped Vertexes
 ###############################
 
@@ -163,15 +163,15 @@ achieved by running the algorithm below.
     from matplotlib.collections import PatchCollection
     import matplotlib.pyplot as plt
     from matplotlib.colors import LogNorm
-    
+
     # full reduction on workspace
     Load(Filename='data_th_lam.nxs', OutputWorkspace='data_th_lam')
     CropWorkspace('data_th_lam', StartWorkspaceIndex=124, OutputWorkspace='data_th_lam')
     data_th_lam = Rebin('data_th_lam', [1e-2])
-    
-    out_ws, dump_vertexes = ConvertToReflectometryQ(InputWorkspace='data_th_lam',OutputWorkspace='QxQy_poly', OutputDimensions='Q (lab frame)', 
+
+    out_ws, dump_vertexes = ConvertToReflectometryQ(InputWorkspace='data_th_lam',OutputWorkspace='QxQy_poly', OutputDimensions='Q (lab frame)',
     Extents='-0.0005,0.0005,-0,0.2', OutputAsMDWorkspace=False,Method='NormalisedPolygon',  IncidentTheta=0.44, OverrideIncidentTheta=True, NumberBinsQx=100, NumberBinsQz=100,DumpVertexes=True, OutputVertexes='dump_vertexes')
-    
+
     #plot the conversion
     plotSlice(out_ws)
 
@@ -180,7 +180,7 @@ achieved by running the algorithm below.
 
         patches = list()
         colors = list()
-        polygon_vertexes = list()   
+        polygon_vertexes = list()
 
         for vertex in vertex_table:
             #Column of vertex i.e 'Qx' in this case, is dependent on the type of transform.
@@ -192,7 +192,7 @@ achieved by running the algorithm below.
                 patches.append(poly)
                 colors.append(vertex['CellSignal'])
                 polygon_vertexes = list()
-         
+
         p = PatchCollection(patches, cmap=matplotlib.cm.jet,norm=LogNorm(vmin=1e-3, vmax=1e5),linewidths=(0,))
         p.set_array(np.array(colors))
         ax.add_collection(p)
@@ -202,7 +202,7 @@ achieved by running the algorithm below.
         axes.set_ylim([0,0.2])
 
         plt.show()
-    
+
     threadsafe_call(patch_plot, dump_vertexes)
 
 **Output:**
@@ -222,7 +222,7 @@ Patch plots can also be produced using the other Transformations :math:`K_i, K_f
 
 
 .. figure:: /images/ConvertToReflectometryQ_PatchPlotK.PNG
-   :alt: patch plot of dumped vertexes using K transformation 
+   :alt: patch plot of dumped vertexes using K transformation
 
 
 **Patch plot for P Transformation:**

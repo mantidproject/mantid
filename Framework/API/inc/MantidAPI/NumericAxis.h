@@ -32,20 +32,17 @@ public:
   NumericAxis(const std::vector<double> &centres);
 
   Axis *clone(const MatrixWorkspace *const parentWorkspace) override;
-  Axis *clone(const std::size_t length,
-              const MatrixWorkspace *const parentWorkspace) override;
+  Axis *clone(const std::size_t length, const MatrixWorkspace *const parentWorkspace) override;
   /// Is the axis numeric - always true for this class
   bool isNumeric() const override { return true; }
   std::size_t length() const override { return m_values.size(); }
   /// Get a value at the specified index
-  double operator()(const std::size_t &index,
-                    const std::size_t &verticalIndex = 0) const override;
+  double operator()(const std::size_t &index, const std::size_t &verticalIndex = 0) const override;
   /// Set the value at a specific index
   void setValue(const std::size_t &index, const double &value) override;
   size_t indexOfValue(const double value) const override;
   bool operator==(const Axis &) const override;
-  virtual bool equalWithinTolerance(const Axis &axis2,
-                                    const double tolerance) const;
+  virtual bool equalWithinTolerance(const Axis &axis2, const double tolerance) const;
   std::string label(const std::size_t &index) const override;
   /// Create bin boundaries from the point values
   virtual std::vector<double> createBinBoundaries() const;

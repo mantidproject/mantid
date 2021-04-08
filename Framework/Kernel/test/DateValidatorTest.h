@@ -16,8 +16,7 @@ class DateValidatorTest : public CxxTest::TestSuite {
 public:
   void testInValidFormat() {
     DateValidator v;
-    TS_ASSERT_EQUALS(v.isValid("ddmmyyyy"),
-                     "Invalid Date:date format must be DD/MM/YYYY")
+    TS_ASSERT_EQUALS(v.isValid("ddmmyyyy"), "Invalid Date:date format must be DD/MM/YYYY")
 
     TS_ASSERT_EQUALS(v.isValid("dd/mm:yyyy"), "Invalid Date")
   }
@@ -27,9 +26,7 @@ public:
     std::getline(std::cin,s);*/
 
     DateValidator v;
-    TS_ASSERT_EQUALS(
-        v.isValid("32/10/2009"),
-        "Invalid Date:Day part of the Date parameter must be between 1 and 31")
+    TS_ASSERT_EQUALS(v.isValid("32/10/2009"), "Invalid Date:Day part of the Date parameter must be between 1 and 31")
 
     TS_ASSERT_EQUALS(v.isValid("12/101/2009"), "Invalid Date:Month part of the "
                                                "Date parameter must be between "

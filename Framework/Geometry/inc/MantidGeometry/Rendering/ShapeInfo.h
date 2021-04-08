@@ -92,8 +92,7 @@ public:
   double height() const;
   GeometryShape shape() const;
 
-  void getObjectGeometry(GeometryShape &shape, std::vector<Kernel::V3D> &points,
-                         double &innerRadius, double &radius,
+  void getObjectGeometry(GeometryShape &shape, std::vector<Kernel::V3D> &points, double &innerRadius, double &radius,
                          double &height) const;
 
   CuboidGeometry cuboidGeometry() const;
@@ -103,31 +102,23 @@ public:
   ConeGeometry coneGeometry() const;
   HollowCylinderGeometry hollowCylinderGeometry() const;
   /// sets the geometry handler for a cuboid
-  void setCuboid(const Kernel::V3D &, const Kernel::V3D &, const Kernel::V3D &,
-                 const Kernel::V3D &);
+  void setCuboid(const Kernel::V3D &, const Kernel::V3D &, const Kernel::V3D &, const Kernel::V3D &);
   /// sets the geometry handler for a hexahedron
-  void setHexahedron(const Kernel::V3D &, const Kernel::V3D &,
-                     const Kernel::V3D &, const Kernel::V3D &,
-                     const Kernel::V3D &, const Kernel::V3D &,
-                     const Kernel::V3D &, const Kernel::V3D &);
+  void setHexahedron(const Kernel::V3D &, const Kernel::V3D &, const Kernel::V3D &, const Kernel::V3D &,
+                     const Kernel::V3D &, const Kernel::V3D &, const Kernel::V3D &, const Kernel::V3D &);
   /// sets the geometry handler for a sphere
   void setSphere(const Kernel::V3D &center, double radius);
   /// sets the geometry handler for a cylinder
-  void setCylinder(const Kernel::V3D &centerBottomBase,
-                   const Kernel::V3D &symmetryAxis, double radius,
-                   double height);
+  void setCylinder(const Kernel::V3D &centerBottomBase, const Kernel::V3D &symmetryAxis, double radius, double height);
   /// sets the geometry handler for a cone
-  void setCone(const Kernel::V3D &center, const Kernel::V3D &symmetryAxis,
-               double radius, double height);
+  void setCone(const Kernel::V3D &center, const Kernel::V3D &symmetryAxis, double radius, double height);
   /// sets the geometry handler for a hollow cylinder
-  void setHollowCylinder(const Kernel::V3D &centreBottomBase,
-                         const Kernel::V3D &symmetryAxis, double innerRadius,
+  void setHollowCylinder(const Kernel::V3D &centreBottomBase, const Kernel::V3D &symmetryAxis, double innerRadius,
                          double outerRadius, double height);
   bool operator==(const ShapeInfo &other);
 };
 
-MANTID_GEOMETRY_DLL std::ostream &
-operator<<(std::ostream &os, const ShapeInfo::GeometryShape shape);
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os, const ShapeInfo::GeometryShape shape);
 
 } // namespace detail
 } // namespace Geometry

@@ -12,22 +12,16 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-SearchResult::SearchResult(const std::string &runNumber,
-                           const std::string &title)
-    : m_title(title) {
+SearchResult::SearchResult(const std::string &runNumber, const std::string &title) : m_title(title) {
   parseRun(runNumber);
   parseMetadataFromTitle();
 }
 
-SearchResult::SearchResult(const std::string &runNumber,
-                           const std::string &title,
-                           const std::string &groupName,
-                           const std::string &theta, const std::string &error,
-                           const std::string &excludeReason,
+SearchResult::SearchResult(const std::string &runNumber, const std::string &title, const std::string &groupName,
+                           const std::string &theta, const std::string &error, const std::string &excludeReason,
                            const std::string &comment)
-    : m_runNumber(runNumber), m_title(title), m_groupName(groupName),
-      m_theta(theta), m_error(error), m_excludeReason(excludeReason),
-      m_comment(comment) {}
+    : m_runNumber(runNumber), m_title(title), m_groupName(groupName), m_theta(theta), m_error(error),
+      m_excludeReason(excludeReason), m_comment(comment) {}
 
 void SearchResult::parseRun(std::string const &runNumber) {
   auto const maybeRunNumber = parseRunNumber(runNumber);
@@ -77,9 +71,7 @@ bool SearchResult::hasError() const { return !m_error.empty(); }
 
 bool SearchResult::exclude() const { return !m_excludeReason.empty(); }
 
-const std::string &SearchResult::excludeReason() const {
-  return m_excludeReason;
-}
+const std::string &SearchResult::excludeReason() const { return m_excludeReason; }
 
 bool SearchResult::hasComment() const { return !m_comment.empty(); }
 
@@ -92,13 +84,9 @@ void SearchResult::addError(std::string const &error) {
     m_error.append("\n").append(error);
 }
 
-void SearchResult::addExcludeReason(std::string const &excludeReason) {
-  m_excludeReason = excludeReason;
-}
+void SearchResult::addExcludeReason(std::string const &excludeReason) { m_excludeReason = excludeReason; }
 
-void SearchResult::addComment(std::string const &comment) {
-  m_comment = comment;
-}
+void SearchResult::addComment(std::string const &comment) { m_comment = comment; }
 
 bool operator==(SearchResult const &lhs, SearchResult const &rhs) {
   // Ignore the error field in the comparison because this represents the
@@ -106,9 +94,7 @@ bool operator==(SearchResult const &lhs, SearchResult const &rhs) {
   return lhs.runNumber() == rhs.runNumber() && lhs.title() == rhs.title();
 }
 
-bool operator!=(SearchResult const &lhs, SearchResult const &rhs) {
-  return !(lhs == rhs);
-}
+bool operator!=(SearchResult const &lhs, SearchResult const &rhs) { return !(lhs == rhs); }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -56,8 +56,7 @@ public:
     Logout2 lo;
     TS_ASSERT_THROWS_NOTHING(lo.initialize());
     // username missing
-    TS_ASSERT_THROWS(lo.setPropertyValue("ComputeResource", "anything"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(lo.setPropertyValue("ComputeResource", "anything"), const std::invalid_argument &);
 
     TS_ASSERT_THROWS(lo.execute(), const std::runtime_error &);
     TS_ASSERT(!lo.isExecuted());
@@ -66,15 +65,13 @@ public:
   void test_wrongProperty() {
     Logout2 lo;
     TS_ASSERT_THROWS_NOTHING(lo.initialize());
-    TS_ASSERT_THROWS(lo.setPropertyValue("usernam", "anything"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(lo.setPropertyValue("usernam", "anything"), const std::runtime_error &);
   }
 
   void test_runOK() {
     testFacilities.emplace_back("SNS", "Fermi");
 
-    const Mantid::Kernel::FacilityInfo &prevFac =
-        Mantid::Kernel::ConfigService::Instance().getFacility();
+    const Mantid::Kernel::FacilityInfo &prevFac = Mantid::Kernel::ConfigService::Instance().getFacility();
     // test that job managers are created correctly for different facilities
     for (auto &testFacility : testFacilities) {
       const std::string facName = testFacility.first;
@@ -83,8 +80,7 @@ public:
       Mantid::Kernel::ConfigService::Instance().setFacility(facName);
       Logout2 lo;
       TS_ASSERT_THROWS_NOTHING(lo.initialize());
-      TS_ASSERT_THROWS_NOTHING(
-          lo.setPropertyValue("ComputeResource", compName));
+      TS_ASSERT_THROWS_NOTHING(lo.setPropertyValue("ComputeResource", compName));
       // Note: this would run the algorithm and could do a remote
       // connection. uncomment only when/if we have a mock up for this
       // TS_ASSERT_THROWS(lo.execute(), std::exception);

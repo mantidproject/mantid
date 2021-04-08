@@ -197,12 +197,9 @@ class SANSILLIntegration(PythonAlgorithm):
                                 XMax=self._lambda_range[1])
             self._input_ws = cut_input_ws
             # re-calculate the Q-range after lambda cut
-            CalculateDynamicRange(Workspace=self._input_ws,
-                                  ComponentNames=['back_detector',
-                                                  'front_detector_right',
-                                                  'front_detector_left',
-                                                  'front_detector_top',
-                                                  'front_detector_bottom'])
+            # TOF is only D33 which has panels
+            panel_names = mtd[self._input_ws].getInstrument().getStringParameter('detector_panels')[0].split(',')
+            CalculateDynamicRange(Workspace=self._input_ws, ComponentNames=panel_names)
         self._integrate(self._input_ws, self._output_ws)
         self.setProperty('OutputWorkspace', self._output_ws)
         panels_out_ws = self.getPropertyValue('PanelOutputWorkspaces')

@@ -31,8 +31,7 @@ DECLARE_FUNCTION(PeakParameterFunction)
  * @param xValues :: Domain, ignored.
  * @param nData :: Domain size, must be 4.
  */
-void PeakParameterFunction::function1D(double *out, const double *xValues,
-                                       const size_t nData) const {
+void PeakParameterFunction::function1D(double *out, const double *xValues, const size_t nData) const {
   UNUSED_ARG(xValues);
   if (nData != 4) {
     throw std::invalid_argument("Can only work with domain of size 4.");
@@ -49,20 +48,16 @@ void PeakParameterFunction::function1D(double *out, const double *xValues,
 }
 
 /// Uses numerical derivatives to calculate Jacobian of the function.
-void PeakParameterFunction::functionDeriv(const FunctionDomain &domain,
-                                          Jacobian &jacobian) {
+void PeakParameterFunction::functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
 }
 
 /// Make sure the decorated function is IPeakFunction and store it.
-void PeakParameterFunction::beforeDecoratedFunctionSet(
-    const IFunction_sptr &fn) {
-  std::shared_ptr<IPeakFunction> peakFunction =
-      std::dynamic_pointer_cast<IPeakFunction>(fn);
+void PeakParameterFunction::beforeDecoratedFunctionSet(const IFunction_sptr &fn) {
+  std::shared_ptr<IPeakFunction> peakFunction = std::dynamic_pointer_cast<IPeakFunction>(fn);
 
   if (!peakFunction) {
-    throw std::invalid_argument(
-        "Decorated function needs to be an IPeakFunction.");
+    throw std::invalid_argument("Decorated function needs to be an IPeakFunction.");
   }
 
   m_peakFunction = peakFunction;
