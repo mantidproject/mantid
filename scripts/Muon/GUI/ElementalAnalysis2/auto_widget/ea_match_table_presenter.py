@@ -4,12 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from Muon.GUI.ElementalAnalysis2.auto_widget.ea_match_table_view import EAMatchTableView
 
 
 class EAMatchTablePresenter(object):
 
-    def __init__(self, view: EAMatchTableView):
+    def __init__(self, view):
         self.view = view
         self.table_entries = []
 
