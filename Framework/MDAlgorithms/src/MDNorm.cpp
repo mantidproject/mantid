@@ -165,25 +165,25 @@ void MDNorm::init() {
   // temporary workspaces
   declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("TemporaryDataWorkspace", "", Direction::Input,
                                                                          PropertyMode::Optional),
-                  "An input MDHistoWorkspace used to accumulate data from "
+                  "An (optional) input MDHistoWorkspace used to accumulate data from "
                   "multiple MDEventWorkspaces. If unspecified a blank "
                   "MDHistoWorkspace will be created.");
   declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("TemporaryNormalizationWorkspace", "",
                                                                          Direction::Input, PropertyMode::Optional),
-                  "An input MDHistoWorkspace used to accumulate normalization "
+                  "An (optional) input MDHistoWorkspace used to accumulate normalization "
                   "from multiple MDEventWorkspaces. If unspecified a blank "
                   "MDHistoWorkspace will be created.");
 
   // temporary background workspace
   declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("TemporaryBackgroundDataWorkspace", "",
                                                                          Direction::Input, PropertyMode::Optional),
-                  "An input MDHistoWorkspace used to accumulate background from "
+                  "An (optional) input MDHistoWorkspace used to accumulate background from "
                   "multiple background MDEventWorkspaces. If unspecified but "
                   "BackgroundWorkspace is specified, a blank "
                   "MDHistoWorkspace will be created.");
   declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("TemporaryBackgroundNormalizationWorkspace",
                                                                          "", Direction::Input, PropertyMode::Optional),
-                  "An input MDHistoWorkspace used to accumulate background normalization "
+                  "An (optional) input MDHistoWorkspace used to accumulate background normalization "
                   "from multiple background MDEventWorkspaces. If unspecified but "
                   "BackgroundWorkspace is specified, a blank "
                   "MDHistoWorkspace will be created.");
@@ -202,10 +202,10 @@ void MDNorm::init() {
                   "A name for the output normalization MDHistoWorkspace.");
   declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
                       "OutputBackgroundDataWorkspace", "", Kernel::Direction::Output, PropertyMode::Optional),
-                  "A name for the output data MDHistoWorkspace.");
+                  "A name for the optional output background data MDHistoWorkspace.");
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputBackgroundNormalizationWorkspace", "",
                                                                  Direction::Output, PropertyMode::Optional),
-                  "A name for the output background normalization MDHistoWorkspace.");
+                  "A name for the optional output background normalization MDHistoWorkspace.");
 }
 
 //----------------------------------------------------------------------------------------------
