@@ -270,9 +270,7 @@ void FunctionBrowser::setColumnSizes(int s0, int s1, int s2) { m_presenter->setC
  * Set the last column to stretch. This avoids a vertical scroll bar.
  * @param stretch :: A bool whether or not to stretch the last column.
  */
-void FunctionBrowser::setStretchLastColumn(bool stretch) {
-  m_presenter->setStretchLastColumn(stretch);
-}
+void FunctionBrowser::setStretchLastColumn(bool stretch) { m_presenter->setStretchLastColumn(stretch); }
 
 /**
  * Set display of parameter errors on/off
