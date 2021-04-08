@@ -12,6 +12,7 @@ from Engineering.gui.engineering_diffraction.settings.settings_helper import get
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 from mantid.api import AnalysisDataService as ADS
 from mantid.api import TextAxis
+from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams, UnitParametersMap
 from matplotlib.pyplot import subplots
 from numpy import full, nan, max, array, vstack, argsort, sqrt, sin
 from itertools import chain
@@ -332,22 +333,28 @@ class FittingDataModel(object):
         return self._loaded_workspaces[ws_name].getSampleDetails().getLogData(log_name).value
 
     def _convert_TOF_to_d(self, tof, ws_name):
-        difa, difc, tzero = self._get_diff_constants(ws_name)
-        if abs(difa) < 1E-10:
-            return (tof - tzero) / difc
-        else:
-            return (-difc + sqrt(difc ** 2 - 4 * difa * (tzero - tof))) / (2 * difa)
+        difa, difc, tzero, l1 = self._get_diff_constants(ws_name)
+        params = UnitParametersMap()
+        params[UnitParams.difc] = difc
+        params[UnitParams.difa] = difa
+        params[UnitParams.tzero] = tzero
+        dSpacing = UnitConversion.run("TOF", "dSpacing", tof, 0, DeltaEModeType.Elastic, params)  # l1 = 0 (ignored)
+        return dSpacing
 
     def _convert_TOFerror_to_derror(self, tof_error, d, ws_name):
         difa, difc, _ = self._get_diff_constants(ws_name)
         return tof_error / (2 * difa * d + difc)
 
     def _get_diff_constants(self, ws_name):
-        """Subject to change when ws will be able to carry diff constant on ws object post calibration"""
+        """
+        Subject to change when ws will be able to carry diff constant on ws object post calibration.
+        TOF = difc*d + difa*(d^2) + tzero
+        """
         ws = ADS.retrieve(ws_name)
         si = ws.spectrumInfo()
-        m_over_h = 252.816
-        difc = 2 * m_over_h * (si.l1() + si.l2(0)) * sin(si.twoTheta(0) / 2)
+        m_over_h = 252.816  # neutron mass/plank const. in friendly units
+        ltot = (si.l1() + si.l2(0))  # total flight path
+        difc = 2 * m_over_h * ltot * sin(si.twoTheta(0) / 2)
         difa = 0
         tzero = 0
         return difa, difc, tzero
