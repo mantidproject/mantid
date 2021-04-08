@@ -231,7 +231,6 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         mtd[diagnostics_workspaces].add(difc_table + '_mask')
 
         adjustments_table_name = f'{prefix_output}adjustments'
-        displacements_table_name = f'{prefix_output}displacements'
         # Adjust the position of the source along the beam (Z) axis
         # The instrument in `input_workspace` is adjusted in-place
         if self.getProperty('AdjustSource').value is True:
@@ -241,7 +240,6 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
                           PeakCentersTofTable=peak_centers_in_tof,
                           PeakPositions=self.getProperty('PeakPositions').value,
                           MaskWorkspace=f'{difc_table}_mask',
-                          AdjustmentsTable=adjustments_table_name,
                           FitSourcePosition=True,
                           FitSamplePosition=False,
                           Zposition=True, MinZPosition=-dz, MaxZPosition=dz,
@@ -269,6 +267,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
                             EulerConvention='YXZ')
 
         # Remaining options for AlignComponents
+        displacements_table_name = f'{prefix_output}displacements'
         kwargs = dict(InputWorkspace=input_workspace,
                       OutputWorkspace=input_workspace,
                       PeakCentersTofTable=peak_centers_in_tof,
