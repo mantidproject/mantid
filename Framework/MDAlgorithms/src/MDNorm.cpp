@@ -90,7 +90,7 @@ void MDNorm::init() {
 
   declareProperty(std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
                       "BackgroundWorkspace", "", Kernel::Direction::Input, PropertyMode::Optional),
-                  "An input MDEventWorkspace for background.  Must be in Q_lab frame.");
+                  "An (optional) input MDEventWorkspace for background.  Must be in Q_lab frame.");
 
   // RLU and settings
   declareProperty("RLU", true, "Use reciprocal lattice units. If false, use Q_sample");
@@ -542,31 +542,11 @@ void MDNorm::exec() {
 
   if (m_backgroundWS) {
     // Normalize binned (BinMD) sample workspace with background
-    IAlgorithm_sptr divideMD = createChildAlgorithm("DivideMD", 0.97, 0.98);
-
-    // Normalize sample
-    divideMD->setProperty("LHSWorkspace", outputDataWS);
-    divideMD->setProperty("RHSWorkspace", m_normWS);
-    divideMD->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
-    divideMD->executeAsChildAlg();
-
-    out = divideMD->getProperty("OutputWorkspace");
+    out = divideMD(outputDataWS, m_normWS, getPropertyValue("OutputWorkspace"), 0.97, 0.98);
 
     // Normalize background
-    IAlgorithm_sptr divideBkgdMD = createChildAlgorithm("DivideMD", 0.98, 0.99);
-
-    // Normalize sample
-    divideBkgdMD->setProperty("LHSWorkspace", outputBackgroundDataWS);
-    divideBkgdMD->setProperty("RHSWorkspace", m_bkgdNormWS);
-    // const std::string normedBkgdWSName(getProperty("OutputWorkspace") + "_normedBkgd");
     const std::string normedBkgdWSName("_normedBkgd");
-    const std::string extra(getPropertyValue("OutputWorkspace") + "_normBkgd");
-    divideBkgdMD->setPropertyValue("OutputWorkspace", normedBkgdWSName);
-    divideBkgdMD->executeAsChildAlg();
-
-    // Clean background from sample: outbkgd cannot be specified as 'auto'
-    // otherwise it will fail the build on minusMD->setProperty
-    API::IMDWorkspace_sptr outbkgd = divideBkgdMD->getProperty("OutputWorkspace");
+    API::IMDWorkspace_sptr outbkgd = divideMD(outputBackgroundDataWS, m_bkgdNormWS, normedBkgdWSName, 0.98, 0.99);
 
     // Clean workspace
     IAlgorithm_sptr minusMD = createChildAlgorithm("MinusMD", 0.99, 1.00);
@@ -580,18 +560,25 @@ void MDNorm::exec() {
 
   } else {
     // Normalize binned (BinMD) sample workspace without background
-    IAlgorithm_sptr divideMD = createChildAlgorithm("DivideMD", 0.97, 1.);
-    divideMD->setProperty("LHSWorkspace", outputDataWS);
-    divideMD->setProperty("RHSWorkspace", m_normWS);
-    divideMD->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
-    divideMD->executeAsChildAlg();
-    // API::IMDWorkspace_sptr
-    out = divideMD->getProperty("OutputWorkspace");
+    out = divideMD(outputDataWS, m_normWS, getPropertyValue("OutputWorkspace"), 0.97, 1.);
   }
-  //
 
   // Set output workspace
   this->setProperty("OutputWorkspace", out);
+}
+
+inline API::IMDWorkspace_sptr MDNorm::divideMD(API::IMDHistoWorkspace_sptr lhs, API::IMDHistoWorkspace_sptr rhs,
+                                               const std::string &outputwsname, const double &startProgress,
+                                               const double &endProgress) {
+  IAlgorithm_sptr divideMD = createChildAlgorithm("DivideMD", startProgress, endProgress);
+  divideMD->setProperty("LHSWorkspace", lhs);
+  divideMD->setProperty("RHSWorkspace", rhs);
+  divideMD->setPropertyValue("OutputWorkspace", outputwsname);
+  divideMD->executeAsChildAlg();
+  // API::IMDWorkspace_sptr
+  API::IMDWorkspace_sptr out = divideMD->getProperty("OutputWorkspace");
+
+  return out;
 }
 
 /**

@@ -80,6 +80,10 @@ private:
                               std::vector<coord_t> &posNew, std::vector<std::atomic<signal_t>> &signalArray,
                               const double &solidBkgd, std::vector<std::atomic<signal_t>> &bkgdSignalArray);
 
+  API::IMDWorkspace_sptr divideMD(API::IMDHistoWorkspace_sptr lhs, API::IMDHistoWorkspace_sptr rhs,
+                                  const std::string &outputwsname, const double &startProgress,
+                                  const double &endProgress);
+
   /// Normalization workspace
   DataObjects::MDHistoWorkspace_sptr m_normWS;
   DataObjects::MDHistoWorkspace_sptr m_bkgdNormWS;
