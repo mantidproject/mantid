@@ -8,6 +8,7 @@
 #include "MantidDataObjects/NoShape.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
 
 #include <boost/math/special_functions/round.hpp>
@@ -35,6 +36,11 @@ namespace MDAlgorithms {
 using namespace std;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::V3D;
+
+namespace {
+/// static logger
+Kernel::Logger g_log("CostFuncUnweightedLeastSquares");
+} // namespace
 
 IntegrateQLabEvents::IntegrateQLabEvents(const SlimEvents &peak_q_list, double radius,
                                          const bool useOnePercentBackgroundCorrection)
@@ -65,6 +71,7 @@ void IntegrateQLabEvents::addEvents(SlimEvents const &event_qs) {
     addEvent(event_q);
 }
 
+// Entry function that perform the integration
 Mantid::Geometry::PeakShape_const_sptr
 IntegrateQLabEvents::ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D const &peak_q, bool specify_size,
                                             double peak_radius, double back_inner_radius, double back_outer_radius,
@@ -102,6 +109,7 @@ IntegrateQLabEvents::ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D c
   return ellipseIntegrateEvents(std::move(E1Vec), peak_q, some_events, eigen_vectors, sigmas, specify_size, peak_radius,
                                 back_inner_radius, back_outer_radius, axes_radii, inti, sigi);
 }
+
 std::pair<double, double> IntegrateQLabEvents::numInEllipsoid(SlimEvents const &events,
                                                               std::vector<V3D> const &directions,
                                                               std::vector<double> const &sizes) {
@@ -140,9 +148,16 @@ std::pair<double, double> IntegrateQLabEvents::numInEllipsoidBkg(SlimEvents cons
       eventVec.emplace_back(event.first);
   }
 
+  // NOTE:
+  //  [for SNS only]
+  //  Some event has weight great than 1, which is corrected using the following prunning
+  //  by removing the top 1% events with higher weights.
+  //  It is worth pointing out that this pruning is (to the best) an rough estimate as it
+  //  will most likely either over-prunning (remove some events with weight of 1) or under-
+  //  pruning (did not remove all events with weights greater than 1).
   auto endIndex = eventVec.size();
   if (useOnePercentBackgroundCorrection) {
-    // Remove top 1% of background
+    // Remove top 1%
     std::sort(eventVec.begin(), eventVec.end(),
               [](const std::pair<double, double> &a, const std::pair<double, double> &b) { return a.first < b.first; });
     endIndex = static_cast<size_t>(0.99 * static_cast<double>(endIndex));
@@ -300,6 +315,27 @@ PeakShapeEllipsoid_const_sptr IntegrateQLabEvents::ellipseIntegrateEvents(
 
   inti = peak_w_back.first - ratio * backgrd.first;
   sigi = sqrt(peak_w_back.second + ratio * ratio * backgrd.second);
+
+  if (inti < 0) {
+    std::ostringstream msg;
+    msg << "Negative intensity found: " << inti << "\n"
+        << "Please use slice viewer to check the peak with negative intensity to decide:\n"
+        << "-- adjust peak and background raidus\n"
+        << "-- prune false positive indexation results\n";
+    g_log.notice() << msg.str();
+    // debug message
+    std::ostringstream debugmsg;
+    debugmsg << "peak_radius = " << peak_radius << "\n"
+             << "back_inner_radius = " << back_inner_radius << "\n"
+             << "back_outer_radius = " << back_outer_radius << "\n"
+             << "sigmas = (" << sigmas[0] << "," << sigmas[1] << "," << sigmas[2] << ")\n"
+             << "r1, r2, r3 = " << r1 << "," << r2 << "," << r3 << "\n"
+             << "peak_w_back.first = " << peak_w_back.first << "\n"
+             << "backgrd.first = " << backgrd.first << "\n"
+             << "ratio = " << ratio << "\n"
+             << "inti = peak_w_back.first - ratio * backgrd.first = " << inti << "\n";
+    g_log.debug() << debugmsg.str();
+  }
 
   // Make the shape and return it.
   return std::make_shared<const PeakShapeEllipsoid>(directions, abcRadii, abcBackgroundInnerRadii,
