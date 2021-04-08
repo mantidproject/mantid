@@ -84,7 +84,7 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
             CorelliPowderCalibrationCreate(
                 InputWorkspace='test_workspace_TOF', OutputWorkspacesPrefix='cal_',
                 TofBinning=[300, 1.0, 16666.7], PeakPositions=self.spacings_reference, FixSource=False,
-                AdjustSource=False, FixY=False, ComponentList='bank1', FixY=False, ComponentMaxTranslation=0.2,
+                AdjustSource=False, FixY=False, ComponentList='bank1', FixYaw=False, ComponentMaxTranslation=0.2,
                 FixYaw=False, ComponentMaxRotation=10)
         except RuntimeError as error:
             assert 'Some invalid Properties found' in str(error)
