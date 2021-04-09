@@ -210,10 +210,9 @@ class ComponentInfoTest(unittest.TestCase):
         self.assertEqual(index, info.root())
 
     def test_uniqueName(self):
-        ws = LoadEmptyInstrument(InstrumentName="POLARIS", StoreInADS=False)
-        info = ws.componentInfo()
-        self.assertFalse(info.uniqueName("monitor")) # duplicated for POLARIS
-        self.assertTrue(info.uniqueName("bank1"))
+        info = self._ws.componentInfo()
+        self.assertTrue(info.uniqueName(info.name(info.root())))
+        self.assertFalse(info.uniqueName("fictional-name"))
 
     def test_indexOfAny_throws(self):
         info = self._ws.componentInfo()
