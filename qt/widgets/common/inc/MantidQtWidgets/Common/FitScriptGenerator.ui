@@ -116,6 +116,9 @@
           </item>
           <item row="2" column="0" colspan="3">
            <widget class="QLabel" name="lbMessage">
+            <property name="styleSheet">
+             <string notr="true">QLabel { color: green; }</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -230,7 +233,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton">
+              <widget class="QPushButton" name="pbGenerateScriptToClipboard">
                <property name="text">
                 <string>Generate Script to Clipboard</string>
                </property>

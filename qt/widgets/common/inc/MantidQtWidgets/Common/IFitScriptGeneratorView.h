@@ -53,7 +53,8 @@ public:
     EditLocalParameterClicked,
     EditLocalParameterFinished,
     FittingModeChanged,
-    GenerateScriptToFileClicked
+    GenerateScriptToFileClicked,
+    GenerateScriptToClipboardClicked
   };
 
   IFitScriptGeneratorView(QWidget *parent = nullptr) : API::MantidWidget(parent) {}
@@ -110,7 +111,8 @@ public:
 
   virtual void displayWarning(std::string const &message) = 0;
 
-  virtual void showSuccessMessage(std::string const &filepath) = 0;
+  virtual void setSuccessText(std::string const &text) = 0;
+  virtual void saveTextToClipboard(std::string const &text) const = 0;
 
 public:
   /// Testing accessors

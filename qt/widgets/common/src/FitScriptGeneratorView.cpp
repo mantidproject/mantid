@@ -146,6 +146,7 @@ void FitScriptGeneratorView::connectUiSignals() {
           SLOT(onFittingModeChanged(FittingMode)));
 
   connect(m_ui.pbGenerateScriptToFile, SIGNAL(clicked()), this, SLOT(onGenerateScriptToFileClicked()));
+  connect(m_ui.pbGenerateScriptToClipboard, SIGNAL(clicked()), this, SLOT(onGenerateScriptToClipboardClicked()));
 
   /// Disconnected because it causes a crash when selecting a table row while
   /// editing a parameters value. This is because selecting a different row will
@@ -225,7 +226,7 @@ void FitScriptGeneratorView::onGlobalParametersChanged(QStringList const &global
 
 void FitScriptGeneratorView::onCopyFunctionToClipboard() {
   if (auto const function = m_functionTreeView->getSelectedFunction())
-    QApplication::clipboard()->setText(QString::fromStdString(function->asString()));
+    saveTextToClipboard(function->asString());
 }
 
 void FitScriptGeneratorView::onFunctionHelpRequested() {
@@ -250,6 +251,10 @@ void FitScriptGeneratorView::onEditLocalParameterFinished(int result) {
 
 void FitScriptGeneratorView::onGenerateScriptToFileClicked() {
   m_presenter->notifyPresenter(ViewEvent::GenerateScriptToFileClicked);
+}
+
+void FitScriptGeneratorView::onGenerateScriptToClipboardClicked() {
+  m_presenter->notifyPresenter(ViewEvent::GenerateScriptToClipboardClicked);
 }
 
 std::string FitScriptGeneratorView::workspaceName(FitDomainIndex index) const {
@@ -374,9 +379,13 @@ void FitScriptGeneratorView::setGlobalParameters(std::vector<GlobalParameter> co
   m_functionTreeView->setGlobalParameters(convertToQStringList(globalToQString, globalParameters));
 }
 
-void FitScriptGeneratorView::showSuccessMessage(std::string const &filepath) {
-  m_ui.lbMessage->setText("Successfully generated fit script '" + QString::fromStdString(filepath) + "'");
-  m_ui.lbMessage->setStyleSheet("QLabel { color : green; }");
+void FitScriptGeneratorView::setSuccessText(std::string const &text) {
+  m_ui.lbMessage->setText(QString::fromStdString(text));
+}
+
+void FitScriptGeneratorView::saveTextToClipboard(std::string const &text) const {
+  if (QClipboard *clipboard = QApplication::clipboard())
+    clipboard->setText(QString::fromStdString(text));
 }
 
 void FitScriptGeneratorView::displayWarning(std::string const &message) {

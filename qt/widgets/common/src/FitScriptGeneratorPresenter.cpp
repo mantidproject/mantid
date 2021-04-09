@@ -89,6 +89,9 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event, std::s
   case ViewEvent::GenerateScriptToFileClicked:
     handleGenerateScriptToFileClicked();
     return;
+  case ViewEvent::GenerateScriptToClipboardClicked:
+    handleGenerateScriptToClipboardClicked();
+    return;
   default:
     throw std::runtime_error("Failed to notify the FitScriptGeneratorPresenter.");
   }
@@ -234,18 +237,11 @@ void FitScriptGeneratorPresenter::handleFittingModeChanged(FittingMode fittingMo
 }
 
 void FitScriptGeneratorPresenter::handleGenerateScriptToFileClicked() {
-  auto const [valid, message] = m_model->isValid();
+  generateFitScript(&FitScriptGeneratorPresenter::generateScriptToFile);
+}
 
-  if (!message.empty())
-    m_view->displayWarning(message);
-
-  if (valid) {
-    auto const filepath = m_view->filename();
-    if (!filepath.empty()) {
-      m_model->generatePythonFitScript(m_view->fitOptions(), filepath);
-      m_view->showSuccessMessage(filepath);
-    }
-  }
+void FitScriptGeneratorPresenter::handleGenerateScriptToClipboardClicked() {
+  generateFitScript(&FitScriptGeneratorPresenter::generateScriptToClipboard);
 }
 
 void FitScriptGeneratorPresenter::setGlobalTies(std::vector<GlobalTie> const &globalTies) {
@@ -491,6 +487,32 @@ void FitScriptGeneratorPresenter::checkForWarningMessages() {
     std::copy(m_warnings.cbegin(), m_warnings.cend(), std::ostream_iterator<std::string>(ss, "\n"));
     m_view->displayWarning(ss.str());
     m_warnings.clear();
+  }
+}
+
+template <typename Generator> void FitScriptGeneratorPresenter::generateFitScript(Generator &&func) const {
+  auto const [valid, message] = m_model->isValid();
+
+  if (!message.empty())
+    m_view->displayWarning(message);
+
+  if (valid)
+    std::invoke(std::forward<Generator>(func), this);
+}
+
+void FitScriptGeneratorPresenter::generateScriptToFile() const {
+  auto const filepath = m_view->filename();
+  if (!filepath.empty()) {
+    m_model->generatePythonFitScript(m_view->fitOptions(), filepath);
+    m_view->setSuccessText("Successfully generated fit script to file '" + filepath + "'");
+  }
+}
+
+void FitScriptGeneratorPresenter::generateScriptToClipboard() const {
+  auto const scriptText = m_model->generatePythonFitScript(m_view->fitOptions());
+  if (!scriptText.empty()) {
+    m_view->saveTextToClipboard(scriptText);
+    m_view->setSuccessText("Successfully generated fit script to clipboard");
   }
 }
 

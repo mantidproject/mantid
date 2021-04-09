@@ -106,8 +106,10 @@ void GeneratePythonFitScript::init() {
       "The EvaluationType to be passed to the Fit algorithm in the Python script.", Kernel::Direction::Input);
 
   std::vector<std::string> extensions{".py"};
-  declareProperty(std::make_unique<FileProperty>("Filepath", "", FileProperty::Save, extensions),
+  declareProperty(std::make_unique<FileProperty>("Filepath", "", FileProperty::OptionalSave, extensions),
                   "The name of the Python fit script which will be generated and saved in the selected location.");
+
+  declareProperty("ScriptText", "", Direction::Output);
 }
 
 std::map<std::string, std::string> GeneratePythonFitScript::validateInputs() {
@@ -118,8 +120,6 @@ std::map<std::string, std::string> GeneratePythonFitScript::validateInputs() {
   auto const filepath = getPropertyValue("Filepath");
 
   std::map<std::string, std::string> errors;
-  if (filepath.empty())
-    errors["Filepath"] = "A filepath must be provided for the Python fit script to be generated.";
   if (workspaceIndices.size() != inputWorkspaces.size())
     errors["WorkspaceIndices"] = "The number of workspace indices must correspond to the number of input workspaces.";
   if (startXs.size() != inputWorkspaces.size())
@@ -137,7 +137,11 @@ void GeneratePythonFitScript::exec() {
   generatedScript += generateCodeForTidyingFitOutput();
   generatedScript += generateCodeForPlottingFitOutput();
 
-  savePythonScript(generatedScript);
+  auto const filepath = getPropertyValue("Filepath");
+  if (!filepath.empty())
+    savePythonScript(filepath, generatedScript);
+
+  setProperty("ScriptText", generatedScript);
 }
 
 std::string GeneratePythonFitScript::generateVariableSetupCode() const {
@@ -154,8 +158,8 @@ std::string GeneratePythonFitScript::generateVariableSetupCode() const {
   IFunction_const_sptr function = getProperty("Function");
 
   std::string code = "# A python script generated to perform a sequential fit\n";
-  code += "import matplotlib.pyplot as plt\n";
   code += "from mantid.simpleapi import *\n";
+  code += "import matplotlib.pyplot as plt\n";
   code += "\n";
   code += "input_workspaces = " + constructPythonStringList(inputWorkspaces) + "\n";
   code += "workspace_indices = " + constructPythonList(workspaceIndices) + "\n";
@@ -213,9 +217,7 @@ std::string GeneratePythonFitScript::generateCodeForPlottingFitOutput() const {
   return code;
 }
 
-void GeneratePythonFitScript::savePythonScript(std::string const &contents) const {
-  auto const filepath = getPropertyValue("Filepath");
-
+void GeneratePythonFitScript::savePythonScript(std::string const &filepath, std::string const &contents) const {
   std::ofstream file(filepath.c_str(), std::ofstream::trunc);
   file << contents;
   file.flush();

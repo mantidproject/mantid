@@ -37,7 +37,7 @@ private:
   std::string generateCodeForTidyingFitOutput() const;
   std::string generateCodeForPlottingFitOutput() const;
 
-  void savePythonScript(std::string const &contents) const;
+  void savePythonScript(std::string const &filepath, std::string const &contents) const;
 };
 
 } // namespace Algorithms

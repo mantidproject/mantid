@@ -94,7 +94,8 @@ public:
 
   void displayWarning(std::string const &message) override;
 
-  void showSuccessMessage(std::string const &filepath) override;
+  void setSuccessText(std::string const &text) override;
+  void saveTextToClipboard(std::string const &text) const override;
 
 public:
   /// Testing accessors
@@ -123,6 +124,7 @@ private slots:
   void onEditLocalParameterClicked(QString const &parameter);
   void onEditLocalParameterFinished(int result);
   void onGenerateScriptToFileClicked();
+  void onGenerateScriptToClipboardClicked();
 
 private:
   void connectUiSignals();

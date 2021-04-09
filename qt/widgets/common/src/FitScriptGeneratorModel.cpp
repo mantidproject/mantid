@@ -627,7 +627,7 @@ std::string FitScriptGeneratorModel::generatePermissibleWarnings() const {
   return "";
 }
 
-void FitScriptGeneratorModel::generatePythonFitScript(
+std::string FitScriptGeneratorModel::generatePythonFitScript(
     std::tuple<std::string, std::string, std::string, std::string> const &fitOptions, std::string const &filepath) {
   auto generateScript = AlgorithmManager::Instance().create("GeneratePythonFitScript");
   generateScript->initialize();
@@ -646,6 +646,8 @@ void FitScriptGeneratorModel::generatePythonFitScript(
 
   generateScript->setProperty("Filepath", filepath);
   generateScript->execute();
+
+  return generateScript->getPropertyValue("ScriptText");
 }
 
 std::vector<std::string> FitScriptGeneratorModel::getInputWorkspaces() const {
