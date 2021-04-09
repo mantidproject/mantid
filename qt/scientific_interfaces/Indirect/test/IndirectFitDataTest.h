@@ -444,7 +444,7 @@ public:
     TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
   void test_that_getQValues() {
-    auto const workspace = createWorkspaceWithInelasticInstrument(10, 10);
+    auto const workspace = createWorkspaceWithInelasticInstrument(10);
     FunctionModelSpectra const spec =
         FunctionModelSpectra(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0},
                              MantidQt::CustomInterfaces::IDA::WorkspaceIndex{workspace->getNumberHistograms() - 1});

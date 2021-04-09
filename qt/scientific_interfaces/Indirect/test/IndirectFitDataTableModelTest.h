@@ -112,7 +112,7 @@ public:
   }
 
   void test_getQValuesForData_returns_correct_value() {
-    auto dataWorkspace = Mantid::IndirectFitDataCreationHelper::createWorkspaceWithInelasticInstrument(5, 4);
+    auto dataWorkspace = Mantid::IndirectFitDataCreationHelper::createWorkspaceWithInelasticInstrument(4);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("data workspace 2", dataWorkspace);
     m_fitData->addWorkspace("data workspace 2");
     auto spectrumInfo = dataWorkspace->spectrumInfo();

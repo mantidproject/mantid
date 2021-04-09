@@ -22,6 +22,7 @@
 #include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
@@ -40,6 +41,8 @@ using ConvolutionFitSequential = Algorithms::ConvolutionFit<Algorithms::QENSFitS
 namespace {
 TableWorkspace_sptr createTableWorkspace(std::size_t const &size) { return std::make_shared<TableWorkspace>(size); }
 } // namespace
+
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockFunctionTemplateBrowser : public FunctionTemplateBrowser {
 public:
@@ -77,6 +80,8 @@ public:
   MOCK_METHOD0(createBrowser, void());
   MOCK_METHOD0(createProperties, void());
 };
+
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class IndirectFitPropertyBrowserTest : public CxxTest::TestSuite {
 public:

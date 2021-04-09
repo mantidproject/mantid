@@ -79,9 +79,9 @@ std::unique_ptr<DummyModel> createModelWithSingleInstrumentWorkspace(std::string
 }
 
 std::unique_ptr<DummyModel> createModelWithSingleInelasticInstrumentWorkspace(std::string const &workspaceName,
-                                                                              int const &xLength, int const &yLength) {
+                                                                              int const &yLength) {
   auto model = getEmptyModel();
-  SetUpADSWithWorkspace ads(workspaceName, createWorkspaceWithInelasticInstrument(xLength, yLength));
+  SetUpADSWithWorkspace ads(workspaceName, createWorkspaceWithInelasticInstrument(yLength));
   model->addWorkspace(workspaceName);
   return model;
 }
@@ -134,15 +134,6 @@ std::unique_ptr<DummyModel> getModelWithFitOutputData() {
 
   auto const alg = getExecutedFitAlgorithm(model, modelWorkspace, "__ConvFit");
   model->addOutput(alg);
-  return model;
-}
-
-std::unique_ptr<DummyModel> getModelWithSingleFitOutputData() {
-  auto model = createModelWithSingleInstrumentWorkspace("__ConvFit", 6, 5);
-  auto const modelWorkspace = model->getWorkspace(0);
-
-  auto const alg = getExecutedFitAlgorithm(model, modelWorkspace, "__ConvFit");
-  model->addSingleFitOutput(alg, TableDatasetIndex{0}, IDA::WorkspaceIndex{0});
   return model;
 }
 
@@ -532,7 +523,7 @@ public:
   }
 
   void test_that_getQValuesForData_returns_values_from_fitDataModel() {
-    auto const model = createModelWithSingleInelasticInstrumentWorkspace("WorkspaceName", 6, 5);
+    auto const model = createModelWithSingleInelasticInstrumentWorkspace("WorkspaceName", 5);
     std::vector<double> QValues{2.1986};
     TS_ASSERT_DELTA(model->getQValuesForData(), QValues, 1e-4)
   }

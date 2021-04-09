@@ -90,7 +90,7 @@ std::unordered_map<std::string, ParameterValue> IndirectFitOutputModel::getParam
   if (isSpectrumFit(index)) {
     return m_parameters.at(index.value);
   } else {
-    throw std::invalid_argument("Could not get Paramiters, not fit exists for index: " + index.value);
+    throw std::invalid_argument("Could not get Paramiters, not fit exists for index: " + std::to_string(index.value));
   }
 }
 
