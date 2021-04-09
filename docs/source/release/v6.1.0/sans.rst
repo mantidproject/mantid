@@ -23,6 +23,9 @@ Improvements
   for scaling during stitching
 - The core algorithm for ISIS SANS reductions underwent a significant rewrite to improve processing wavelength slices.
   For 15 slices the reduction time dropped by 55% compared to the previous release.
+- Workspace names for ISIS SANS reductions no longer append the wavelength to the name. The prepended
+  wavelength is still present. For example `12345_rear_1d_1.0_10.0_...p0_t4_1.0_10.0` will now be called
+  `12345_rear_1d_1.0_10.0_...p0_t4`, where `1.0_10.0` is the wavelength of that workspace.
 
 
 Algorithms and instruments
