@@ -336,7 +336,7 @@ std::tuple<std::string, std::string, std::string, std::string> FitScriptGenerato
           m_fitOptionsBrowser->getProperty("Cost Function"), m_fitOptionsBrowser->getProperty("Evaluation Type")};
 }
 
-std::string FitScriptGeneratorView::filename() const {
+std::string FitScriptGeneratorView::filepath() const {
   auto const defaultDirectory = getDefaultScriptDirectory();
   auto const filePath = QFileDialog::getSaveFileName(this->parentWidget(), tr("Save Script As "), defaultDirectory,
                                                      tr("Script files (*.py)"));

@@ -96,7 +96,7 @@ public:
                                                               std::vector<std::string>, std::vector<std::string>>());
 
   MOCK_CONST_METHOD0(fitOptions, std::tuple<std::string, std::string, std::string, std::string>());
-  MOCK_CONST_METHOD0(filename, std::string());
+  MOCK_CONST_METHOD0(filepath, std::string());
 
   MOCK_METHOD0(resetSelection, void());
 
@@ -116,6 +116,8 @@ public:
   MOCK_CONST_METHOD0(removeButton, QPushButton *());
   MOCK_CONST_METHOD0(addWorkspaceButton, QPushButton *());
   MOCK_CONST_METHOD0(addWorkspaceDialog, AddWorkspaceDialog *());
+  MOCK_CONST_METHOD0(generateScriptToFileButton, QPushButton *());
+  MOCK_CONST_METHOD0(generateScriptToClipboardButton, QPushButton *());
 
   MOCK_METHOD1(setSuccessText, void(std::string const &text));
   MOCK_CONST_METHOD1(saveTextToClipboard, void(std::string const &text));

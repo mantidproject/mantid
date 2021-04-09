@@ -604,9 +604,7 @@ bool FitScriptGeneratorModel::checkFunctionIsSameForAllDomains() const {
 
 std::tuple<bool, std::string> FitScriptGeneratorModel::isValid() const {
   std::string message;
-  if (ConfigService::Instance().getString("defaultsave.directory").empty())
-    message = "A default save directory must be set before a python script is generated.";
-  else if (numberOfDomains() == 0)
+  if (numberOfDomains() == 0)
     message = "Domain data must be loaded before generating a python script.";
   else if (!checkFunctionExistsInAllDomains())
     message = "A function must exist in ALL domains to generate a python script.";

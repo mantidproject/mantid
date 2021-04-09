@@ -95,7 +95,7 @@ public:
   getEditLocalParameterResults() const = 0;
 
   [[nodiscard]] virtual std::tuple<std::string, std::string, std::string, std::string> fitOptions() const = 0;
-  [[nodiscard]] virtual std::string filename() const = 0;
+  [[nodiscard]] virtual std::string filepath() const = 0;
 
   virtual void resetSelection() = 0;
 
@@ -120,6 +120,8 @@ public:
   virtual QPushButton *removeButton() const = 0;
   virtual QPushButton *addWorkspaceButton() const = 0;
   virtual AddWorkspaceDialog *addWorkspaceDialog() const = 0;
+  virtual QPushButton *generateScriptToFileButton() const = 0;
+  virtual QPushButton *generateScriptToClipboardButton() const = 0;
 };
 
 } // namespace MantidWidgets

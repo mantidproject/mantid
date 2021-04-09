@@ -501,7 +501,7 @@ template <typename Generator> void FitScriptGeneratorPresenter::generateFitScrip
 }
 
 void FitScriptGeneratorPresenter::generateScriptToFile() const {
-  auto const filepath = m_view->filename();
+  auto const filepath = m_view->filepath();
   if (!filepath.empty()) {
     m_model->generatePythonFitScript(m_view->fitOptions(), filepath);
     m_view->setSuccessText("Successfully generated fit script to file '" + filepath + "'");
