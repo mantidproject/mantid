@@ -33,9 +33,6 @@ private:
   void exec() override;
 
   std::string generateVariableSetupCode() const;
-  std::string generateSequentialFittingCode() const;
-  std::string generateCodeForTidyingFitOutput() const;
-  std::string generateCodeForPlottingFitOutput() const;
 
   void savePythonScript(std::string const &filepath, std::string const &contents) const;
 };

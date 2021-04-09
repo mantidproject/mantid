@@ -5,21 +5,16 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GeneratePythonFitScript.h"
+
 #include "MantidAPI/ADSValidator.h"
-#include "MantidAPI/AlgorithmHistory.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/FunctionProperty.h"
-#include "MantidAPI/ScriptBuilder.h"
-#include "MantidAPI/Workspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/StartsWithValidator.h"
-#include "MantidKernel/System.h"
 
 #include <fstream>
 
@@ -28,6 +23,49 @@ using namespace Mantid::Kernel;
 using Mantid::Types::Core::DateAndTime;
 
 namespace {
+
+std::string const SEQUENTIAL_SCRIPT =
+    "output_workspaces, parameter_tables, normalised_matrices = [], [], []\n"
+    "for input_workspace, domain_data in input_data.items():\n"
+    "    fit_output = Fit(Function=function, InputWorkspace=input_workspace, WorkspaceIndex=domain_data[0], \n"
+    "                     StartX=domain_data[1], EndX=domain_data[2], MaxIterations=max_iterations, \n"
+    "                     Minimizer=minimizer, CostFunction=cost_function, EvaluationType=evaluation_type, \n"
+    "                     CreateOutput=True)\n"
+    "\n"
+    "    output_workspaces.append(fit_output.OutputWorkspace)\n"
+    "    parameter_tables.append(fit_output.OutputParameters)\n"
+    "    normalised_matrices.append(fit_output.OutputNormalisedCovarianceMatrix)\n"
+    "\n"
+    "    #Use the parameters in the previous function as the start parameters of the next fit\n"
+    "    function = fit_output.Function\n"
+    "\n"
+    "#Group the output workspaces from the sequential fit\n"
+    "GroupWorkspaces(InputWorkspaces=output_workspaces, OutputWorkspace=\"Sequential_Fit_Workspaces\")\n"
+    "GroupWorkspaces(InputWorkspaces=parameter_tables, OutputWorkspace=\"Sequential_Fit_Parameters\")\n"
+    "GroupWorkspaces(InputWorkspaces=normalised_matrices, "
+    "OutputWorkspace=\"Sequential_Fit_NormalisedCovarianceMatrices\")\n"
+    "\n"
+    "#Plot the results of the sequential fit\n"
+    "fig, axes = plt.subplots(nrows=2, \n"
+    "                         ncols=len(output_workspaces), \n"
+    "                         sharex=True, \n"
+    "                         gridspec_kw={\"height_ratios\": [2, 1]}, \n"
+    "                         subplot_kw={\"projection\": \"mantid\"})\n"
+    "\n"
+    "for i, workspace in enumerate(output_workspaces):\n"
+    "    axes[0, i].errorbar(workspace, \"rs\", wkspIndex=0, label=\"Data\", markersize=2)\n"
+    "    axes[0, i].errorbar(workspace, \"b-\", wkspIndex=1, label=\"Fit\")\n"
+    "    axes[0, i].set_title(workspace.name())\n"
+    "    axes[0, i].set_xlabel(\"\")\n"
+    "    axes[0, i].tick_params(axis=\"both\", direction=\"in\")\n"
+    "    axes[0, i].legend()\n"
+    "\n"
+    "    axes[1, i].errorbar(workspace, \"ko\", wkspIndex=2, markersize=2)\n"
+    "    axes[1, i].set_ylabel(\"Difference\")\n"
+    "    axes[1, i].tick_params(axis=\"both\", direction=\"in\")\n"
+    "\n"
+    "fig.subplots_adjust(hspace=0)\n"
+    "fig.show()\n";
 
 template <typename T> std::string joinVector(std::vector<T> const &vec, std::string const &delimiter = ", ") {
   std::stringstream ss;
@@ -67,7 +105,7 @@ int GeneratePythonFitScript::version() const { return 1; };
 std::string const GeneratePythonFitScript::category() const { return "Utility\\Python"; }
 
 std::string const GeneratePythonFitScript::summary() const {
-  return "An Algorithm to generate a Python script file for performing a sequential or simultaneous fit.";
+  return "An algorithm to generate a Python script file for performing a sequential or simultaneous fit.";
 }
 
 std::vector<std::string> const GeneratePythonFitScript::seeAlso() const { return {"Fit", "GeneratePythonScript"}; }
@@ -144,9 +182,7 @@ std::map<std::string, std::string> GeneratePythonFitScript::validateInputs() {
 void GeneratePythonFitScript::exec() {
   std::string generatedScript;
   generatedScript += generateVariableSetupCode();
-  generatedScript += generateSequentialFittingCode();
-  generatedScript += generateCodeForTidyingFitOutput();
-  generatedScript += generateCodeForPlottingFitOutput();
+  generatedScript += SEQUENTIAL_SCRIPT;
 
   auto const filepath = getPropertyValue("Filepath");
   if (!filepath.empty())
@@ -185,59 +221,6 @@ std::string GeneratePythonFitScript::generateVariableSetupCode() const {
   code += "cost_function = \"" + costFunction + "\"\n";
   code += "evaluation_type = \"" + evaluationType + "\"\n\n";
 
-  return code;
-}
-
-std::string GeneratePythonFitScript::generateSequentialFittingCode() const {
-  std::string code = "# Perform a sequential fit\n";
-  code += "output_workspaces, parameter_tables, normalised_matrices = [], [], []\n";
-  code += "for input_workspace, domain_data in input_data.items():\n";
-  code += "    fit_output = Fit(Function=function, InputWorkspace=input_workspace, ";
-  code += "WorkspaceIndex=domain_data[0], \n                     ";
-  code += "StartX=domain_data[1], EndX=domain_data[2], ";
-  code += "MaxIterations=max_iterations, Minimizer=minimizer, \n                     ";
-  code += "CostFunction=cost_function, EvaluationType=evaluation_type, CreateOutput=True)\n";
-  code += "\n";
-  code += "    output_workspaces.append(fit_output.OutputWorkspace)\n";
-  code += "    parameter_tables.append(fit_output.OutputParameters)\n";
-  code += "    normalised_matrices.append(fit_output.OutputNormalisedCovarianceMatrix)\n";
-  code += "\n";
-  code += "    # Use the parameters in the previous function as the start parameters of the next fit\n";
-  code += "    function = fit_output.Function\n\n";
-  return code;
-}
-
-std::string GeneratePythonFitScript::generateCodeForTidyingFitOutput() const {
-  std::string code = "# Group the output workspaces from the sequential fit\n";
-  code += "GroupWorkspaces(InputWorkspaces=output_workspaces, OutputWorkspace=\"Sequential_Fit_Workspaces\")\n";
-  code += "GroupWorkspaces(InputWorkspaces=parameter_tables, OutputWorkspace=\"Sequential_Fit_Parameters\")\n";
-  code += "GroupWorkspaces(InputWorkspaces=normalised_matrices, "
-          "OutputWorkspace=\"Sequential_Fit_NormalisedCovarianceMatrices\")\n\n";
-  return code;
-}
-
-std::string GeneratePythonFitScript::generateCodeForPlottingFitOutput() const {
-  std::string code = "# Plot the results of the sequential fit\n";
-  code += "fig, axes = plt.subplots(nrows=2, \n";
-  code += "                         ncols=len(output_workspaces), \n";
-  code += "                         sharex=True, \n";
-  code += "                         gridspec_kw={\"height_ratios\": [2, 1]}, \n";
-  code += "                         subplot_kw={\"projection\": \"mantid\"})\n\n";
-
-  code += "for i, workspace in enumerate(output_workspaces):\n";
-  code += "    axes[0, i].errorbar(workspace, \"rs\", wkspIndex=0, label=\"Data\", markersize=2)\n";
-  code += "    axes[0, i].errorbar(workspace, \"b-\", wkspIndex=1, label=\"Fit\")\n";
-  code += "    axes[0, i].set_title(workspace.name())\n";
-  code += "    axes[0, i].set_xlabel(\"\")\n";
-  code += "    axes[0, i].tick_params(axis=\"both\", direction=\"in\")\n";
-  code += "    axes[0, i].legend()\n\n";
-
-  code += "    axes[1, i].errorbar(workspace, \"ko\", wkspIndex=2, markersize=2)\n";
-  code += "    axes[1, i].set_ylabel(\"Difference\")\n";
-  code += "    axes[1, i].tick_params(axis=\"both\", direction=\"in\")\n\n";
-
-  code += "fig.subplots_adjust(hspace=0)\n";
-  code += "fig.show()\n";
   return code;
 }
 
