@@ -10,9 +10,9 @@ import matplotlib.pyplot as plt
 
 from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger, IntArrayProperty
-from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, Integration, DiffractionFocussing, \
-    CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace, LoadAscii, NormaliseByCurrent, AlignDetectors, \
-    CreateGroupingWorkspace, EditInstrumentGeometry, ConvertUnits, Load, GroupDetectors, RebinToWorkspace,\
+from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, DiffractionFocussing, \
+    CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace, LoadAscii, NormaliseByCurrent, \
+    CreateGroupingWorkspace, ConvertUnits, Load, RebinToWorkspace,\
     Divide, EnggEstimateFocussedBackground, ApplyDiffCal
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file, default_ceria_expected_peaks
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
@@ -260,6 +260,11 @@ class CalibrationModel(object):
 
             tof_focused = ConvertUnits(InputWorkspace=normalised, Target='TOF')
 
+            DeleteWorkspace(focused_sample)
+            DeleteWorkspace(background_van)
+            DeleteWorkspace(bg_rebinned)
+            DeleteWorkspace(normalised)
+
             return tof_focused, focused_van
 
         # need to clone the data as PDCalibration rebins
@@ -296,6 +301,9 @@ class CalibrationModel(object):
 
         ws_d /= van_integration
 
+        DeleteWorkspace(van_integration)
+        DeleteWorkspace(sample)
+
         kwargs = {
             "PeakPositions": default_ceria_expected_peaks(final=True),
             "TofBinning": [15500, -0.0003, 52000],  # using a finer binning now have better stats
@@ -312,20 +320,24 @@ class CalibrationModel(object):
             if bank == '1' or bank is None:
                 df_kwarg = {"GroupingFileName": NORTH_BANK_CAL}
                 focused_North, curves_North = focus_and_normalise(ws_d, ws_van_d, df_kwarg)
+
                 # final calibration of focused data
                 kwargs["InputWorkspace"] = focused_North
                 kwargs["OutputCalibrationTable"] = 'engggui_calibration_bank_1'
                 kwargs["DiagnosticWorkspaces"] = 'diag_North'
 
-                debug_output_ws = run_pd_calibration(kwargs)
-                cal_north = debug_output_ws[0]
+                cal_north = run_pd_calibration(kwargs)[0]
                 cal_output.append(cal_north)
                 curves_north = CloneWorkspace(curves_North)
                 curves_output.append(curves_north)
 
+                DeleteWorkspace(curves_north)
+                DeleteWorkspace(focused_North)
+
             if bank == '2' or bank is None:
                 df_kwarg = {"GroupingFileName": SOUTH_BANK_CAL}
                 focused_South, curves_South = focus_and_normalise(ws_d, ws_van_d, df_kwarg)
+
                 # final calibration of focused data
                 kwargs["InputWorkspace"] = focused_South
                 kwargs["OutputCalibrationTable"] = 'engggui_calibration_bank_2'
@@ -335,6 +347,10 @@ class CalibrationModel(object):
                 cal_output.append(cal_north)
                 curves_south = CloneWorkspace(curves_South)
                 curves_output.append(curves_south)
+
+                DeleteWorkspace(curves_south)
+                DeleteWorkspace(focused_South)
+
         else:
             grp_ws, _, _ = CreateGroupingWorkspace(InputWorkspace=sample_raw)  # blank grouping workspace based on inst
             int_spectrum_numbers = self._create_spectrum_list_from_string(spectrum_numbers)
@@ -345,15 +361,24 @@ class CalibrationModel(object):
                 grp_ws.setValue(det_id, 1)
             df_kwarg = {"GroupingWorkspace": grp_ws}
             focused_Cropped, curves_Cropped = focus_and_normalise(ws_d, ws_van_d, df_kwarg)
+
             # final calibration of focused data
             kwargs["InputWorkspace"] = focused_Cropped
             kwargs["OutputCalibrationTable"] = 'engggui_calibration_cropped'
             kwargs["DiagnosticWorkspaces"] = 'diag_Cropped'
 
-            cal_north = run_pd_calibration(kwargs)[0]
-            cal_output.append(cal_north)
+            cal_cropped = run_pd_calibration(kwargs)[0]
+            cal_output.append(cal_cropped)
+
             curves_cropped = CloneWorkspace(curves_Cropped)
             curves_output.append(curves_cropped)
+
+            DeleteWorkspace(curves_cropped)
+            DeleteWorkspace(focused_Cropped)
+
+        DeleteWorkspace(ws_van)
+        DeleteWorkspace(ws_van_d)
+        DeleteWorkspace(ws_d)
 
         cal = list()
         for bank_cal in cal_output:
