@@ -155,7 +155,16 @@ class CalibrationModel(object):
 
     @staticmethod
     def _generate_tof_fit_workspace(difa, difc, tzero, bank):
-        bank_ws = Ads.retrieve(CalibrationModel._generate_table_workspace_name(bank))
+
+        if bank == '1':
+            diag_ws_name = 'diag_North'
+        elif bank == '2':
+            diag_ws_name = 'diag_South'
+        else:
+            diag_ws_name = 'diag_' + bank
+
+        fitparam_ws = Ads.retrieve(diag_ws_name + '_fitparam')
+        expected_dspacing_peaks = default_ceria_expected_peaks(final=True)
 
         x_val = []
         y_val = []
@@ -165,9 +174,9 @@ class CalibrationModel(object):
         difc_to_plot = difc
         tzero_to_plot = tzero
 
-        for irow in range(0, bank_ws.rowCount()):
-            x_val.append(bank_ws.cell(irow, 0))
-            y_val.append(bank_ws.cell(irow, 5))
+        for irow in range(0, fitparam_ws.rowCount()):
+            x_val.append(expected_dspacing_peaks[-(irow+1)])
+            y_val.append(fitparam_ws.cell(irow, 5))
             y2_val.append(pow(x_val[irow], 2) * difa_to_plot + x_val[irow] * difc_to_plot + tzero_to_plot)
 
         ws1 = CreateWorkspace(DataX=x_val,
