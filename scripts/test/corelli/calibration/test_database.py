@@ -20,7 +20,8 @@ import unittest
 from mantid import AnalysisDataService, config
 from mantid.api import mtd, WorkspaceGroup
 from mantid.dataobjects import MaskWorkspace, TableWorkspace
-from mantid.simpleapi import CreateEmptyTableWorkspace, CreateSampleWorkspace, DeleteWorkspaces, LoadNexusProcessed
+from mantid.simpleapi import (CreateEmptyTableWorkspace, CreateSampleWorkspace, DeleteWorkspace, DeleteWorkspaces,
+                              LoadNexusProcessed)
 
 from corelli.calibration.database import (combine_spatial_banks, combine_temporal_banks, day_stamp, filename_bank_table,
                                           has_valid_columns, init_corelli_table, load_bank_table, load_calibration_set,
@@ -53,7 +54,6 @@ class TestCorelliDatabase(unittest.TestCase):
             cls.workspaces_temporary.append(workspace)
 
     def setUp(self) -> None:
-
         # create a mock database
         # tests save_bank_table and load_bank_table, save_manifest
         self.database_path: str = TestCorelliDatabase.test_dir.name
@@ -282,7 +282,7 @@ class TestCorelliDatabase(unittest.TestCase):
                 self.assertAlmostEqual(expected_array, table_dict['Detector Y Coordinate'][i])
 
     def test_new_corelli_calibration_and_load_calibration(self):
-        r"""Creating a database is time consuming, thus we test both new_corelli_clibration and load_calibration"""
+        r"""Creating a database is time consuming, thus we test both new_corelli_calibration and load_calibration"""
         # populate a calibration database with a few cases. There should be at least one bank with two calibrations
         database = tempfile.TemporaryDirectory()
         cases = [('124016_bank10', '10'), ('124023_bank10', '10'), ('124023_banks_14_15', '14-15')]
@@ -302,7 +302,8 @@ class TestCorelliDatabase(unittest.TestCase):
         assert open(manifest_file).read() == 'bankID, timestamp\n10, 20200109\n14, 20200109\n15, 20200109\n'
 
         # load latest calibration and mask (day-stamp of '124023_bank10' is 20200109)
-        calibration, mask = load_calibration_set(self.cases['124023_bank10'], database.name)
+        calibration, mask = load_calibration_set(self.cases['124023_bank10'], database.name,
+                                                 mask_format='TableWorkspace')
         calibration_expected = LoadNexusProcessed(Filename=calibration_file)
         mask_expected = LoadNexusProcessed(Filename=mask_file)
         assert_allclose(calibration.column(1), calibration_expected.column(1), atol=1e-4)
@@ -316,7 +317,8 @@ class TestCorelliDatabase(unittest.TestCase):
         assert open(manifest_file).read() == 'bankID, timestamp\n10, 20200106\n'
 
         # load oldest calibration and mask(day-stamp of '124023_bank10' is 20200106)
-        calibration, mask = load_calibration_set(self.cases['124016_bank10'], database.name)
+        calibration, mask = load_calibration_set(self.cases['124016_bank10'], database.name,
+                                                 mask_format='TableWorkspace')
         calibration_expected = LoadNexusProcessed(Filename=calibration_file)
         mask_expected = LoadNexusProcessed(Filename=mask_file)
         assert_allclose(calibration.column(1), calibration_expected.column(1), atol=1e-4)
@@ -326,7 +328,7 @@ class TestCorelliDatabase(unittest.TestCase):
 
     def test_table_to_workspace(self) -> None:
         r"""Test the conversion of a TableWorkspace containing the masked detector ID's to a MaskWorkspace object"""
-        output_workspace = 'masked'
+        output_workspace = 'test_table_to_workspace_masked'
         # Have a fake mask table, masking bank 42
         mask_table = CreateEmptyTableWorkspace(OutputWorkspace=output_workspace)
         mask_table.addColumn(type='int', name='Detector ID')
@@ -344,6 +346,7 @@ class TestCorelliDatabase(unittest.TestCase):
         assert np.all(mask_flags[masked_workspace_indexes])  # all values are 1
         mask_flags = np.delete(mask_flags, masked_workspace_indexes)
         assert not np.any(mask_flags)  # no value is 1
+        DeleteWorkspace(output_workspace)
 
     def test_load_calibration_set(self) -> None:
         r"""

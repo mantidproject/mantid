@@ -480,7 +480,9 @@ def _table_to_workspace(input_workspace: Union[str, TableWorkspace],
 def load_calibration_set(input_workspace: Union[str, Workspace],
                          database_path: str,
                          output_calibration_name: str = 'calibration',
-                         output_mask_name: str = 'mask') -> Tuple[Optional[TableWorkspace], Optional[TableWorkspace]]:
+                         output_mask_name: str = 'mask',
+                         mask_format: str = 'MaskWorkspace') -> Tuple[Optional[TableWorkspace],
+                                                                      Optional[TableWorkspace]]:
     r"""
     Retrieve an instrument calibration and instrument mask.
 
@@ -492,10 +494,15 @@ def load_calibration_set(input_workspace: Union[str, Workspace],
     :param database_path: absolute path to the instrument calibration tables
     :param output_calibration_name: name of the TableWorkspace containing the calibrated pixel positions
     :param output_mask_name: name of the TableWorkspace containing the uncalibrated pixels to be masked
+    :param mask_format: return the mask either as a 'MaskWorkspace' or as 'TableWorkspace/
 
     :return: calibration TableWorkspdce and mask MaskWorkspace. Returns `None` for each of these if a suitable
         calibration file is not found in the database.
     """
+    valid_mask_formats = ('MaskWorkspace', 'TableWorkspace')
+    if mask_format not in valid_mask_formats:
+        raise ValueError(f'mask_format must be one of {valid_mask_formats}')
+
     workspace_names = {'calibration': output_calibration_name, 'mask': output_mask_name}
     run_start = day_stamp(input_workspace)  # day when the experiment associated to `input_workspace` was started
     instrument_tables = {'calibration': None, 'mask': None}  # store the calibration and mask instrument tables
@@ -527,7 +534,7 @@ def load_calibration_set(input_workspace: Union[str, Workspace],
             instrument_tables[table_type] = LoadNexusProcessed(Filename=filename,
                                                                OutputWorkspace=workspace_names[table_type])
             # Additional step to convert the mask TableWorkspace to a MaskWorkspace
-            if table_type == 'mask':
+            if table_type == 'mask' and mask_format=='MaskWorkspace':
                 instrument_tables[table_type] = _table_to_workspace(workspace_names[table_type])
         else:
             message = f'No {table_type} file found for {str(input_workspace)} with run start {run_start}. '
