@@ -19,6 +19,7 @@ using namespace Mantid::API;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
 using ObserverMethod = void (AnalysisDataServiceObserver::*)(bool);
+using ObserverMethodSignature = boost::mpl::vector<void, AnalysisDataServiceObserver &, bool>;
 
 namespace {
 
@@ -43,48 +44,39 @@ void export_AnalysisDataServiceObserver() {
       "AnalysisDataServiceObserver", "Observes AnalysisDataService notifications: all only")
       .def("observeAll",
            make_function(std::bind(callReleasingGIL, _1, _2, &AnalysisDataServiceObserver::observeAll),
-                         default_call_policies(), (arg("self"), arg("on")),
-                         boost::mpl::vector<void, AnalysisDataServiceObserver &, bool>()),
+                         default_call_policies(), (arg("self"), arg("on")), ObserverMethodSignature()),
            "Observe AnalysisDataService for any changes")
       .def("observeAdd",
            make_function(std::bind(callReleasingGIL, _1, _2, &AnalysisDataServiceObserver::observeAdd),
-                         default_call_policies(), (arg("self"), arg("on")),
-                         boost::mpl::vector<void, AnalysisDataServiceObserver &, bool>()),
+                         default_call_policies(), (arg("self"), arg("on")), ObserverMethodSignature()),
            "Observe AnalysisDataService for a workspace being added")
       .def("observeReplace",
            make_function(std::bind(callReleasingGIL, _1, _2, &AnalysisDataServiceObserver::observeReplace),
-                         default_call_policies(), (arg("self"), arg("on")),
-                         boost::mpl::vector<void, AnalysisDataServiceObserver &, bool>()),
+                         default_call_policies(), (arg("self"), arg("on")), ObserverMethodSignature()),
            "Observe AnalysisDataService for a workspace being replaced")
       .def("observeDelete",
            make_function(std::bind(callReleasingGIL, _1, _2, &AnalysisDataServiceObserver::observeDelete),
-                         default_call_policies(), (arg("self"), arg("on")),
-                         boost::mpl::vector<void, AnalysisDataServiceObserver &, bool>()),
+                         default_call_policies(), (arg("self"), arg("on")), ObserverMethodSignature()),
            "Observe AnalysisDataService for a workspace being deleted")
       .def("observeClear",
            make_function(std::bind(callReleasingGIL, _1, _2, &AnalysisDataServiceObserver::observeClear),
-                         default_call_policies(), (arg("self"), arg("on")),
-                         boost::mpl::vector<void, AnalysisDataServiceObserver &, bool>()),
+                         default_call_policies(), (arg("self"), arg("on")), ObserverMethodSignature()),
            "Observe AnalysisDataService for it being cleared")
       .def("observeRename",
            make_function(std::bind(callReleasingGIL, _1, _2, &AnalysisDataServiceObserver::observeRename),
-                         default_call_policies(), (arg("self"), arg("on")),
-                         boost::mpl::vector<void, AnalysisDataServiceObserver &, bool>()),
+                         default_call_policies(), (arg("self"), arg("on")), ObserverMethodSignature()),
            "Observe AnalysisDataService for a workspace being renamed")
       .def("observeGroup",
            make_function(std::bind(callReleasingGIL, _1, _2, &AnalysisDataServiceObserver::observeGroup),
-                         default_call_policies(), (arg("self"), arg("on")),
-                         boost::mpl::vector<void, AnalysisDataServiceObserver &, bool>()),
+                         default_call_policies(), (arg("self"), arg("on")), ObserverMethodSignature()),
            "Observe AnalysisDataService for a group being added/made in the ADS")
       .def("observeUnGroup",
            make_function(std::bind(callReleasingGIL, _1, _2, &AnalysisDataServiceObserver::observeUnGroup),
-                         default_call_policies(), (arg("self"), arg("on")),
-                         boost::mpl::vector<void, AnalysisDataServiceObserver &, bool>()),
+                         default_call_policies(), (arg("self"), arg("on")), ObserverMethodSignature()),
            "Observe AnalysisDataService for a group being removed from the ADS")
       .def("observeGroupUpdate",
            make_function(std::bind(callReleasingGIL, _1, _2, &AnalysisDataServiceObserver::observeGroupUpdate),
-                         default_call_policies(), (arg("self"), arg("on")),
-                         boost::mpl::vector<void, AnalysisDataServiceObserver &, bool>()),
+                         default_call_policies(), (arg("self"), arg("on")), ObserverMethodSignature()),
            "Observe AnalysisDataService for a group being updated by being "
            "added to or removed from");
 }
