@@ -132,11 +132,11 @@ std::map<std::string, std::string> GeneratePythonFitScript::validateInputs() {
 
   std::map<std::string, std::string> errors;
   if (workspaceIndices.size() != inputWorkspaces.size())
-    errors["WorkspaceIndices"] = "The number of workspace indices must correspond to the number of input workspaces.";
+    errors["WorkspaceIndices"] = "The number of workspace indices must be equal to the number of input workspaces.";
   if (startXs.size() != inputWorkspaces.size())
-    errors["StartXs"] = "The number of Start Xs must correspond to the number of input workspaces.";
+    errors["StartXs"] = "The number of Start Xs must be equal to the number of input workspaces.";
   if (endXs.size() != inputWorkspaces.size())
-    errors["EndXs"] = "The number of End Xs must correspond to the number of input workspaces.";
+    errors["EndXs"] = "The number of End Xs must be equal to the number of input workspaces.";
 
   return errors;
 }
@@ -218,15 +218,26 @@ std::string GeneratePythonFitScript::generateCodeForTidyingFitOutput() const {
 
 std::string GeneratePythonFitScript::generateCodeForPlottingFitOutput() const {
   std::string code = "# Plot the results of the sequential fit\n";
-  code += "fig, axes = plt.subplots(1, len(input_data.keys()))\n";
-  code += "for j, workspace in enumerate(output_workspaces):\n";
-  code += "    last_index = len(workspace.dataY(0))\n";
-  code += "    axes[j].set_title(workspace.name())\n";
-  code += "    axes[j].plot(workspace.dataX(0)[:last_index], workspace.dataY(0), label=\"Data\")\n";
-  code += "    axes[j].plot(workspace.dataX(1)[:last_index], workspace.dataY(1), label=\"Calc\")\n";
-  code += "    axes[j].plot(workspace.dataX(2)[:last_index], workspace.dataY(2), label=\"Diff\")\n";
-  code += "    axes[j].legend()\n\n";
-  code += "plt.show()\n";
+  code += "fig, axes = plt.subplots(nrows=2, \n";
+  code += "                         ncols=len(output_workspaces), \n";
+  code += "                         sharex=True, \n";
+  code += "                         gridspec_kw={\"height_ratios\": [2, 1]}, \n";
+  code += "                         subplot_kw={\"projection\": \"mantid\"})\n\n";
+
+  code += "for i, workspace in enumerate(output_workspaces):\n";
+  code += "    axes[0, i].errorbar(workspace, \"rs\", wkspIndex=0, label=\"Data\", markersize=2)\n";
+  code += "    axes[0, i].errorbar(workspace, \"b-\", wkspIndex=1, label=\"Fit\")\n";
+  code += "    axes[0, i].set_title(workspace.name())\n";
+  code += "    axes[0, i].set_xlabel(\"\")\n";
+  code += "    axes[0, i].tick_params(axis=\"both\", direction=\"in\")\n";
+  code += "    axes[0, i].legend()\n\n";
+
+  code += "    axes[1, i].errorbar(workspace, \"ko\", wkspIndex=2, markersize=2)\n";
+  code += "    axes[1, i].set_ylabel(\"Difference\")\n";
+  code += "    axes[1, i].tick_params(axis=\"both\", direction=\"in\")\n\n";
+
+  code += "fig.subplots_adjust(hspace=0)\n";
+  code += "fig.show()\n";
   return code;
 }
 
