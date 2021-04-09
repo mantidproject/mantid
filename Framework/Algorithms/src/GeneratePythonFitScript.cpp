@@ -36,10 +36,21 @@ template <typename T> std::string joinVector(std::vector<T> const &vec, std::str
   return str.substr(0, str.size() - delimiter.size());
 }
 
-template <typename T> std::string constructPythonList(std::vector<T> const &vec) { return "[" + joinVector(vec) + "]"; }
+std::string constructInputDictionaryEntry(std::string const &workspaceName, std::size_t const &workspaceIndex,
+                                          double const startX, double const endX) {
+  return "\"" + workspaceName + "\": (" + std::to_string(workspaceIndex) + ", " + std::to_string(startX) + ", " +
+         std::to_string(endX) + ")";
+}
 
-template <typename T> std::string constructPythonStringList(std::vector<T> const &vec) {
-  return "[\"" + joinVector(vec, "\", \"") + "\"]";
+std::string constructInputDictionary(std::vector<std::string> const &inputWorkspaces,
+                                     std::vector<std::size_t> const &workspaceIndices,
+                                     std::vector<double> const &startXs, std::vector<double> const &endXs) {
+  std::vector<std::string> entries;
+  entries.reserve(inputWorkspaces.size());
+  for (auto i = 0u; i < inputWorkspaces.size(); ++i)
+    entries.emplace_back(constructInputDictionaryEntry(inputWorkspaces[i], workspaceIndices[i], startXs[i], endXs[i]));
+
+  return "input_data = {\n    " + joinVector(entries, ",\n    ") + "\n}";
 }
 
 } // namespace
@@ -159,28 +170,31 @@ std::string GeneratePythonFitScript::generateVariableSetupCode() const {
 
   std::string code = "# A python script generated to perform a sequential fit\n";
   code += "from mantid.simpleapi import *\n";
-  code += "import matplotlib.pyplot as plt\n";
-  code += "\n";
-  code += "input_workspaces = " + constructPythonStringList(inputWorkspaces) + "\n";
-  code += "workspace_indices = " + constructPythonList(workspaceIndices) + "\n";
-  code += "start_xs = " + constructPythonList(startXs) + "\n";
-  code += "end_xs = " + constructPythonList(endXs) + "\n";
-  code += "n_workspaces = len(input_workspaces)\n\n";
+  code += "import matplotlib.pyplot as plt\n\n";
+
+  code += "# Dictionary { workspace_name: (workspace_index, start_x, end_x) }\n";
+  code += constructInputDictionary(inputWorkspaces, workspaceIndices, startXs, endXs);
+  code += "\n\n";
+
+  code += "# Fit function as a string\n";
   code += "function = \"" + function->asString() + "\"\n\n";
+
+  code += "# Fitting options\n";
   code += "max_iterations = " + std::to_string(maxIterations) + "\n";
   code += "minimizer = \"" + minimizer + "\"\n";
   code += "cost_function = \"" + costFunction + "\"\n";
   code += "evaluation_type = \"" + evaluationType + "\"\n\n";
+
   return code;
 }
 
 std::string GeneratePythonFitScript::generateSequentialFittingCode() const {
   std::string code = "# Perform a sequential fit\n";
   code += "output_workspaces, parameter_tables, normalised_matrices = [], [], []\n";
-  code += "for i in range(n_workspaces):\n";
-  code += "    fit_output = Fit(Function=function, InputWorkspace=input_workspaces[i], ";
-  code += "WorkspaceIndex=workspace_indices[i], \n                     ";
-  code += "StartX=start_xs[i], EndX=end_xs[i], ";
+  code += "for input_workspace, domain_data in input_data.items():\n";
+  code += "    fit_output = Fit(Function=function, InputWorkspace=input_workspace, ";
+  code += "WorkspaceIndex=domain_data[0], \n                     ";
+  code += "StartX=domain_data[1], EndX=domain_data[2], ";
   code += "MaxIterations=max_iterations, Minimizer=minimizer, \n                     ";
   code += "CostFunction=cost_function, EvaluationType=evaluation_type, CreateOutput=True)\n";
   code += "\n";
@@ -195,17 +209,16 @@ std::string GeneratePythonFitScript::generateSequentialFittingCode() const {
 
 std::string GeneratePythonFitScript::generateCodeForTidyingFitOutput() const {
   std::string code = "# Group the output workspaces from the sequential fit\n";
-  code += "base_name = input_workspaces[0] + \"_Sequential_\"\n";
-  code += "GroupWorkspaces(InputWorkspaces=output_workspaces, OutputWorkspace=base_name + \"Workspaces\")\n";
-  code += "GroupWorkspaces(InputWorkspaces=parameter_tables, OutputWorkspace=base_name + \"Parameters\")\n";
-  code += "GroupWorkspaces(InputWorkspaces=normalised_matrices, OutputWorkspace=base_name + "
-          "\"NormalisedCovarianceMatrices\")\n\n";
+  code += "GroupWorkspaces(InputWorkspaces=output_workspaces, OutputWorkspace=\"Sequential_Fit_Workspaces\")\n";
+  code += "GroupWorkspaces(InputWorkspaces=parameter_tables, OutputWorkspace=\"Sequential_Fit_Parameters\")\n";
+  code += "GroupWorkspaces(InputWorkspaces=normalised_matrices, "
+          "OutputWorkspace=\"Sequential_Fit_NormalisedCovarianceMatrices\")\n\n";
   return code;
 }
 
 std::string GeneratePythonFitScript::generateCodeForPlottingFitOutput() const {
   std::string code = "# Plot the results of the sequential fit\n";
-  code += "fig, axes = plt.subplots(1, n_workspaces)\n";
+  code += "fig, axes = plt.subplots(1, len(input_data.keys()))\n";
   code += "for j, workspace in enumerate(output_workspaces):\n";
   code += "    last_index = len(workspace.dataY(0))\n";
   code += "    axes[j].set_title(workspace.name())\n";
