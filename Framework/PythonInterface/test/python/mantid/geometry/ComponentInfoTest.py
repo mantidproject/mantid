@@ -211,7 +211,7 @@ class ComponentInfoTest(unittest.TestCase):
 
     def test_uniqueName(self):
         ws = LoadEmptyInstrument(InstrumentName="POLARIS", StoreInADS=False)
-        info = self.ws.componentInfo()
+        info = ws.componentInfo()
         self.assertFalse(info.uniqueName("monitor")) # duplicated for POLARIS
         self.assertTrue(info.uniqueName("bank1"))
 
