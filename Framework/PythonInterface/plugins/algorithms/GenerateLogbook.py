@@ -127,10 +127,74 @@ class GenerateLogbook(PythonAlgorithm):
             raise RuntimeError("There are no files in {} with specified numors.".format(self._data_directory))
         return file_list
 
-    def _get_default_entries(self):
+    def _get_optional_entries(self, parameters):
+        try:
+            logbook_optional_parameters = parameters.getStringParameter('logbook_optional_parameters')[0]
+        except IndexError:
+            raise RuntimeError("Optional headers are requested but are not defined for {}.".format(self._instrument))
+        else:
+            logbook_optional_parameters = logbook_optional_parameters.split(',')
+            # create tmp dictionary with headers and paths read from IPF with whitespaces removed from the header
+            optional_entries = dict()
+            for entry in logbook_optional_parameters:
+                optional_entry = entry.split(':')
+                if len(optional_entry) < 3:
+                    optional_entry.append('s')
+                optional_entries[(optional_entry[2], str(optional_entry[0]).strip())] = optional_entry[1]
+            requested_headers = self.getPropertyValue('OptionalHeaders')
+            if str(requested_headers).casefold() == 'all':
+                for type, header in optional_entries:
+                    self._metadata_headers.append((type, header))
+                    self._metadata_entries.append(optional_entries[(type, header)])
+            else:
+                for header in requested_headers.split(','):
+                    for type in ['s', 'd', 'f']:
+                        if (type, header) in optional_entries:
+                            self._metadata_headers.append((type, header))
+                            self._metadata_entries.append(optional_entries[(type, header)])
+                            break
+                    if (('s', header) not in optional_entries and ('d', header) not in optional_entries
+                            and ('f', header) not in optional_entries):
+                        raise RuntimeError("Header {} requested, but not defined for {}.".format(header, self._instrument))
+
+    def _get_custom_entries(self):
+        logbook_custom_entries = self.getPropertyValue('CustomEntries')
+        logbook_custom_entries = logbook_custom_entries.split(',')
+        for entry in logbook_custom_entries:
+            self._metadata_entries.append(entry.split(':')[0])
+        logbook_custom_headers = [""] * len(logbook_custom_entries)
+        operators = ["+", "-", "*", "//"]
+        columnType = 's'
+        if self.getProperty('CustomHeaders').isDefault:
+            # derive headers from custom entries:
+            for entry_no, entry in enumerate(logbook_custom_entries):
+                entry_content = entry.split(':')
+                if len(entry_content) > 1:
+                    columnType = entry_content[1]
+                if any(op in entry_content[0] for op in operators):
+                    list_entries, binary_operations = self._process_regex(entry_content[0])
+                    header = ""
+                    for split_entry_no, split_entry in enumerate(list_entries):
+                        # always use two strings around the final '/' for more informative header
+                        partial_header = split_entry[split_entry.rfind('/', 0,
+                                                                       split_entry.rfind('/') - 1) + 1:]
+                        header += partial_header
+                        header += binary_operations[split_entry_no] \
+                            if split_entry_no < len(binary_operations) else ""
+                    logbook_custom_headers[entry_no] = (columnType, header)
+                else:
+                    # always use two strings around the final '/' for more informative header
+                    logbook_custom_headers[entry_no] = \
+                        (columnType, (entry_content[0])[entry_content[0].rfind('/', 0, entry_content[0].rfind('/') - 1) + 1:])
+        else:
+            logbook_custom_headers = self.getPropertyValue('CustomHeaders')
+            logbook_custom_headers = [(columnType, header) for header in logbook_custom_headers.split(',')]
+        return logbook_custom_headers
+
+    def _get_entries(self):
         """Gets default and optional metadata entries using the specified instrument IPF."""
         self._metadata_entries = []
-        self._metadata_headers = ['run_number']
+        self._metadata_headers = [('d', 'run_number')]
         tmp_instr = self._instrument + '_tmp'
         # Load empty instrument to access parameters defining metadata entries to be searched
         LoadEmptyInstrument(Filename=self._instrument + "_Definition.xml", OutputWorkspace=tmp_instr)
@@ -139,69 +203,27 @@ class GenerateLogbook(PythonAlgorithm):
             logbook_default_parameters = (parameters.getStringParameter('logbook_default_parameters')[0]).split(',')
             for parameter in logbook_default_parameters:
                 parameter = parameter.split(':')
-                self._metadata_headers.append(str(parameter[0]).strip()) # removes whitespaces
+                if len(parameter) < 3:
+                    parameter.append('s')
+                # type, header, strip removes whitespaces
+                self._metadata_headers.append((parameter[2], str(parameter[0]).strip()))
                 self._metadata_entries.append(parameter[1])
         except IndexError:
             raise RuntimeError("The default logbook entries and headers are not defined for {}".format(self._instrument))
         default_entries = list(self._metadata_entries)
 
         if not self.getProperty('OptionalHeaders').isDefault:
-            try:
-                logbook_optional_parameters = parameters.getStringParameter('logbook_optional_parameters')[0]
-            except IndexError:
-                raise RuntimeError("Optional headers are requested but are not defined for {}.".format(self._instrument))
-            else:
-                logbook_optional_parameters = logbook_optional_parameters.split(',')
-                # create tmp dictionary with headers and paths read from IPF with whitespaces removed from the header
-                optional_entries = {str(entry.split(':')[0]).strip() : entry.split(':')[1]
-                                    for entry in logbook_optional_parameters}
-                requested_headers = self.getPropertyValue('OptionalHeaders')
-                if str(requested_headers).casefold() == 'all':
-                    for header in optional_entries:
-                        self._metadata_headers.append(header)
-                        self._metadata_entries.append(optional_entries[header])
-                else:
-                    for header in requested_headers.split(','):
-                        if header in optional_entries:
-                            self._metadata_headers.append(header)
-                            self._metadata_entries.append(optional_entries[header])
-                        else:
-                            raise RuntimeError("Header {} requested, but not defined for {}.".format(header,
-                                                                                                     self._instrument))
+            self._get_optional_entries(parameters)
 
         if not self.getProperty('CustomEntries').isDefault:
-            logbook_custom_entries = self.getPropertyValue('CustomEntries')
-            logbook_custom_entries = logbook_custom_entries.split(',')
-            self._metadata_entries += logbook_custom_entries
-            logbook_custom_headers = [""]*len(logbook_custom_entries)
-            operators = ["+", "-", "*", "//"]
-            if self.getProperty('CustomHeaders').isDefault:
-                # derive headers from custom entries:
-                for entry_no, entry in enumerate(logbook_custom_entries):
-                    if any(op in entry for op in operators):
-                        list_entries, binary_operations = self._process_regex(entry)
-                        header = ""
-                        for split_entry_no, split_entry in enumerate(list_entries):
-                            # always use two strings around the final '/' for more informative header
-                            partial_header = split_entry[split_entry.rfind('/', 0,
-                                                                           split_entry.rfind('/') - 1) + 1:]
-                            header += partial_header
-                            header += binary_operations[split_entry_no]\
-                                if split_entry_no < len(binary_operations) else ""
-                        logbook_custom_headers[entry_no] = header
-                    else:
-                        # always use two strings around the final '/' for more informative header
-                        logbook_custom_headers[entry_no] = entry[entry.rfind('/', 0, entry.rfind('/') - 1) + 1:]
-            else:
-                logbook_custom_headers = self.getPropertyValue('CustomHeaders')
-                logbook_custom_headers = logbook_custom_headers.split(',')
+            logbook_custom_headers = self._get_custom_entries()
             self._metadata_headers += logbook_custom_headers
         DeleteWorkspace(Workspace=tmp_instr)
         return default_entries
 
     def _verify_contains_metadata(self, data_array):
         """Verifies that the raw data indeed contains the desired meta-data to be logged."""
-        default_entries = self._get_default_entries()
+        default_entries = self._get_entries()
         data_path = os.path.join(self._data_directory, data_array[0] + '.nxs')
         # check only if default entries exist in the first file in the directory
         with h5py.File(data_path, 'r') as f:
@@ -215,8 +237,9 @@ class GenerateLogbook(PythonAlgorithm):
         """Prepares the TableWorkspace logbook for filling with entries, sets up the headers."""
         logbook_ws = self.getPropertyValue('OutputWorkspace')
         CreateEmptyTableWorkspace(OutputWorkspace=logbook_ws)
-        for headline in self._metadata_headers:
-            mtd[logbook_ws].addColumn("str", headline)
+        type_dict = {'s': 'str', 'd': 'int', 'f': 'float'}
+        for type, headline in self._metadata_headers:
+            mtd[logbook_ws].addColumn(type_dict[type], headline)
         return logbook_ws
 
     def _perform_binary_operations(self, values, binary_operations, operations):
@@ -272,6 +295,22 @@ class GenerateLogbook(PythonAlgorithm):
         list_entries.append(entry[prev_pos:])  # add the last remaining file
         return list_entries, binary_operations
 
+    @staticmethod
+    def _perform_cast(data, type):
+        if type == 'f':
+            try:
+                data = float(data)
+            except ValueError:
+                data = np.nan
+        elif type == 'd':
+            try:
+                data = int(data)
+            except ValueError:
+                data = -99999
+        elif type == 's':
+            data = str(data)
+        return data
+
     def _fill_logbook(self, logbook_ws, data_array, progress):
         """Fills out the logbook with the requested meta-data."""
         n_entries = len(self._metadata_headers)
@@ -286,7 +325,7 @@ class GenerateLogbook(PythonAlgorithm):
             file_path = os.path.join(self._data_directory, file_name + '.nxs')
             with h5py.File(file_path, 'r') as f:
                 rowData = np.empty(n_entries, dtype=object)
-                rowData[0] = str(file_name)
+                rowData[0] = int(file_name)
                 for entry_no, entry in enumerate(self._metadata_entries, 1):
                     if any(op in entry for op in operators):
                         if entry in cache_entries_ops:
@@ -327,24 +366,26 @@ class GenerateLogbook(PythonAlgorithm):
                                 tmp_data += str(value) + ','
                             rowData[entry_no] = tmp_data[:-1]
                         else:
-                            rowData[entry_no] = str(values[0]).strip()
+                            data = self._perform_cast(values[0], self._metadata_headers[entry_no][0])
+                            rowData[entry_no] = data
                     else:
                         try:
                             entry, index = self._get_index(entry)
                             data = f.get(entry)[index]
                         except TypeError:
-                            rowData[entry_no] = "Not found"
+                            data = "Not found"
                             self.log().warning(entry_not_found_msg.format(entry))
-                        else:
-                            if isinstance(data, np.ndarray):
-                                tmp_data = ""
-                                for array in data:
-                                    tmp_data += ",".join(array)
-                                data = tmp_data
-                            elif isinstance(data, np.bytes_):
-                                data = data.decode('utf-8')
-                                data = data.replace(',', ';') # needed for CSV output
-                            rowData[entry_no] = str(data).strip()
+
+                        if isinstance(data, np.ndarray):
+                            tmp_data = ""
+                            for array in data:
+                                tmp_data += ",".join(array)
+                            data = tmp_data
+                        elif isinstance(data, np.bytes_):
+                            data = data.decode('utf-8')
+                            data = str(data.replace(',', ';')).strip() # needed for CSV output
+                        data = self._perform_cast(data, self._metadata_headers[entry_no][0])
+                        rowData[entry_no] = data
                 mtd[logbook_ws].addRow(rowData)
 
     def _store_logbook_as_csv(self, logbook_ws):

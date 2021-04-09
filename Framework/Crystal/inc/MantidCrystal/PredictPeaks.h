@@ -8,8 +8,8 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DetectorSearcher.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidCrystal/DllConfig.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include "MantidGeometry/Crystal/StructureFactorCalculator.h"
@@ -62,13 +62,15 @@ private:
   void fillPossibleHKLsUsingGenerator(const Geometry::OrientedLattice &orientedLattice,
                                       std::vector<Kernel::V3D> &possibleHKLs) const;
 
-  void fillPossibleHKLsUsingPeaksWorkspace(const DataObjects::PeaksWorkspace_sptr &peaksWorkspace,
+  void fillPossibleHKLsUsingPeaksWorkspace(const API::IPeaksWorkspace_sptr &peaksWorkspace,
                                            std::vector<Kernel::V3D> &possibleHKLs) const;
 
   void setStructureFactorCalculatorFromSample(const API::Sample &sample);
 
   void calculateQAndAddToOutput(const Kernel::V3D &hkl, const Kernel::DblMatrix &orientedUB,
                                 const Kernel::DblMatrix &goniometerMatrix);
+
+  void calculateQAndAddToOutputLeanElastic(const Kernel::V3D &hkl, const Kernel::DblMatrix &UB);
 
 private:
   /// Get the predicted detector direction from Q
@@ -93,8 +95,9 @@ private:
   /// Direction of the beam for this instrument
   Kernel::V3D m_refBeamDir;
   /// Output peaks workspace
-  Mantid::DataObjects::PeaksWorkspace_sptr m_pw;
+  Mantid::API::IPeaksWorkspace_sptr m_pw;
   Geometry::StructureFactorCalculator_sptr m_sfCalculator;
+  bool m_leanElasticPeak = false;
 
   double m_qConventionFactor;
 };

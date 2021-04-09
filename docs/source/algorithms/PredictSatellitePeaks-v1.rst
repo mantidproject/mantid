@@ -21,6 +21,15 @@ The input PeaksWorkspace must contain an orientation matrix and have
 been INDEXED by THIS MATRIX when the new peaks are not created from a
 range of h ,k, and l values
 
+Convention: if includePeaksInRange = true, each new discovered peak's
+goniometer matrix will be the goniometer orientation matrix from the
+PeaksWorkspace. Each new discovered peak's run number will be the run number
+from the PeaksWorkspace.
+
+If includePeaksInRange = false, each new discovered peak's
+goniometer matrix and run number will be set to the same values as that
+of the peak it was discovered to be a satellite of.
+
 
 Usage
 -----
