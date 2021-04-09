@@ -13,6 +13,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 class FileEventDataListenerTest : public CxxTest::TestSuite {
 public:
@@ -62,6 +63,60 @@ public:
     // Check it's a different workspace to last time
     TS_ASSERT_DIFFERS(buffer.get(), buffer2.get())
     TS_ASSERT_EQUALS(buffer2->getNumberHistograms(), 77824)
+
+    TS_ASSERT_EQUALS(listener->runStatus(), ILiveListener::EndRun)
+
+    // Calling it again will throw as it's the end of the file
+    TS_ASSERT_THROWS(listener->extractData(), const std::runtime_error &)
+  }
+
+  void testFileListener() {
+    // Test that the event listener works for an event nexus file
+    // Set the properties that are required by this listener
+    const int nchunks = 4;
+    ConfigService::Instance().setString("fileeventdatalistener.filename", "EQSANS_89157.nxs.h5");
+    ConfigService::Instance().setString("fileeventdatalistener.chunks", std::to_string(nchunks));
+
+    // Create the listener. Remember: this will call connect()
+    ILiveListener_sptr listener = LiveListenerFactory::Instance().create("FileEventDataListener", true);
+
+    // Test the 'property' methods
+    TS_ASSERT(listener)
+    TS_ASSERT_EQUALS(listener->name(), "FileEventDataListener")
+    TS_ASSERT(!listener->supportsHistory())
+    TS_ASSERT(listener->buffersEvents())
+    TS_ASSERT(listener->isConnected())
+
+    TS_ASSERT_EQUALS(listener->runStatus(), ILiveListener::NoRun)
+
+    TS_ASSERT_THROWS_NOTHING(listener->start());
+
+    TS_ASSERT_EQUALS(listener->runStatus(), ILiveListener::BeginRun)
+
+    EventWorkspace_const_sptr buffer;
+    TS_ASSERT_THROWS_NOTHING(buffer = std::dynamic_pointer_cast<const EventWorkspace>(listener->extractData()))
+    TS_ASSERT(buffer)
+    // Check this is the only surviving reference to it
+    TS_ASSERT_EQUALS(buffer.use_count(), 1)
+    TS_ASSERT_EQUALS(buffer->getNumberHistograms(), 49152)
+
+    int events = buffer->getNumberEvents();
+
+    for (int i = 0; i < nchunks - 1; i++) {
+      TS_ASSERT_EQUALS(listener->runStatus(), ILiveListener::Running)
+      EventWorkspace_const_sptr buffer2;
+      // Call extractData again
+      TS_ASSERT_THROWS_NOTHING(buffer2 = std::dynamic_pointer_cast<const EventWorkspace>(listener->extractData()))
+      TS_ASSERT(buffer2)
+      // Check this is the only surviving reference to it
+      TS_ASSERT_EQUALS(buffer2.use_count(), 1)
+      // Check it's a different workspace to last time
+      TS_ASSERT_DIFFERS(buffer.get(), buffer2.get())
+      TS_ASSERT_EQUALS(buffer2->getNumberHistograms(), 49152)
+      events += buffer2->getNumberEvents();
+    }
+
+    TS_ASSERT_EQUALS(events, 14553);
 
     TS_ASSERT_EQUALS(listener->runStatus(), ILiveListener::EndRun)
 
