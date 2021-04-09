@@ -25,6 +25,9 @@ set ( TEST_PY_FILES
    elemental_analysis_2/EA_grouping_tab/elemental_analysis_grouping_tab_model_test.py
    elemental_analysis_2/EA_grouping_tab/elemental_analysis_grouping_tab_presenter_test.py
    elemental_analysis_2/EA_grouping_tab/elemental_analysis_grouping_table_presenter_test.py
+   elemental_analysis_2/EA_auto_tab/ea_auto_tab_model_test.py
+   elemental_analysis_2/EA_auto_tab/ea_auto_tab_presenter_test.py
+   elemental_analysis_2/EA_auto_tab/ea_match_table_presenter_test.py
    external_plotting_model_test.py
    fft_presenter_context_interaction_test.py
    FFTModel_test.py
