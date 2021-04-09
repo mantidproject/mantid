@@ -209,6 +209,12 @@ class ComponentInfoTest(unittest.TestCase):
         # Root index and the discovered index should be the same
         self.assertEqual(index, info.root())
 
+    def test_uniqueName(self):
+        ws = LoadEmptyInstrument(InstrumentName="POLARIS", StoreInADS=False)
+        info = self.ws.componentInfo()
+        self.assertFalse(info.uniqueName("monitor")) # duplicated for POLARIS
+        self.assertTrue(info.uniqueName("bank1"))
+
     def test_indexOfAny_throws(self):
         info = self._ws.componentInfo()
         with self.assertRaises(ValueError):
