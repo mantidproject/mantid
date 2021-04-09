@@ -364,7 +364,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
     # flake8: noqa: C901
     def PyExec(self):
-
         self.setUp()
         outputSamples = []
         outputWedges = []

@@ -83,6 +83,7 @@ Improvements
 - :ref:`FilterPeaks <algm-FilterPeaks>` now can select banks in addition to filtering by values.
 - :ref:`FindPeaksMD <algm-FindPeaksMD>` has been modified to make use of the multiple goniometers add to :ref:`Run <mantid.api.Run>` and `goniometerIndex` add to MDEvents.
 - :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>` calculates intensity for satellite peaks with fractional HKL
+- :ref:`MDNorm <algm-MDNorm>` algorithm can now efficiently process background.
 
 Bugfixes
 ########
