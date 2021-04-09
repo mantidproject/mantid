@@ -14,7 +14,7 @@ from mantid.api import AnalysisDataService as ADS
 from mantid.api import TextAxis
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams, UnitParametersMap
 from matplotlib.pyplot import subplots
-from numpy import full, nan, max, array, vstack, argsort, sqrt, sin
+from numpy import full, nan, max, array, vstack, argsort, sin
 from itertools import chain
 from collections import defaultdict
 from re import findall, sub
@@ -333,7 +333,7 @@ class FittingDataModel(object):
         return self._loaded_workspaces[ws_name].getSampleDetails().getLogData(log_name).value
 
     def _convert_TOF_to_d(self, tof, ws_name):
-        difa, difc, tzero, l1 = self._get_diff_constants(ws_name)
+        difa, difc, tzero = self._get_diff_constants(ws_name)
         params = UnitParametersMap()
         params[UnitParams.difc] = difc
         params[UnitParams.difa] = difa
