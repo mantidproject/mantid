@@ -6,7 +6,7 @@ exclude: ^$|instrument
 repos:
 
   # Run fast code improvement/checks before running PR specific helpers.
-  - repo: https://github.com/pre-commit/pre-commit-hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks.git
     rev: 2618198e9658cccb4a53f04af0f7d642109f3b54
     hooks:
       - id: trailing-whitespace
@@ -18,13 +18,13 @@ repos:
       - id: check-yaml
         args: [--allow-multiple-documents]
 
-  - repo: https://github.com/mantidproject/pre-commit-hooks
+  - repo: https://github.com/mantidproject/pre-commit-hooks.git
     rev: 05b2d4cfe17dcb36e29c249705364c19eeccced5
     hooks:
       - id: clang-format
         exclude: Testing/Tools/cxxtest|tools
 
-  - repo: https://gitlab.com/pycqa/flake8
+  - repo: https://gitlab.com/pycqa/flake8.git
     rev: 3.7.9
     hooks:
       - id: flake8
