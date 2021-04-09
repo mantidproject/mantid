@@ -201,6 +201,11 @@ void ConvertHFIRSCDtoMDE::exec() {
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
   float k = boost::math::float_constants::two_pi / static_cast<float>(wavelength);
+  // check convention to determine the sign of k
+  std::string convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  if (convention == "Crystallography") {
+    k *= -1.f;
+  }
   std::vector<Eigen::Vector3f> q_lab_pre;
   q_lab_pre.reserve(azimuthal.size());
   for (size_t m = 0; m < azimuthal.size(); ++m) {
