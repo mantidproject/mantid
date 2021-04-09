@@ -156,6 +156,12 @@ To get peaks from an existing workspace `'name_of_peaks_workspace'`
     p = pws.getPeak(12)
     pws.removePeak(34)
 
+The command :meth:`p = pws.getPeak
+<mantid.api.IPeaksWorkspace.getPeak()>` will give you a reference to
+the peak and not a copy of the peak, so any modification to `p` will
+change not just `p` but that peak in the `name_of_peaks_workspace`
+workspace.
+
 To create an empty LeanElasticPeaksWorkspace then add peaks to it:
 
 .. testsetup:: createpeaks
@@ -171,7 +177,8 @@ To create an empty LeanElasticPeaksWorkspace then add peaks to it:
    p1 = peaks.createPeakHKL([1,2,3])
    peaks.addPeak(p1)
    for n in range(2):
-       print('Peak {} hkl = {h:.0f}{k:.0f}{l:.0f} q_sample = {QSample}'.format(n, **peaks.row(n)))
+       peak = peaks.getPeak(n)
+       print('Peak {} hkl = {:.0f}{:.0f}{:.0f} q_sample = {}'.format(n, peak.getH(), peak.getK(), peak.getL(), peak.getQSampleFrame()))
 
 Output:
 
