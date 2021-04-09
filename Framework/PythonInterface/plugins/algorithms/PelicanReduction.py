@@ -885,7 +885,7 @@ class PelicanReduction(PythonAlgorithm):
                 evl.clear(False)
 
         # mask the spectra, exlicitly convert numpy.int32 to int as MaskDetectors fails
-        mask = (include is not True)
+        mask = np.invert(include)
         masked_spectra = [int(x) for x in np.arange(nhist)[mask]]
         MaskDetectors(Workspace=ws_tag, SpectraList=masked_spectra)
 
