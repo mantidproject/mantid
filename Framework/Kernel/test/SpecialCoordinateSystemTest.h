@@ -24,9 +24,7 @@ public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor (& destructor) isn't called when running other
   // tests
-  static SpecialCoordinateSystemTest *createSuite() {
-    return new SpecialCoordinateSystemTest();
-  }
+  static SpecialCoordinateSystemTest *createSuite() { return new SpecialCoordinateSystemTest(); }
   static void destroySuite(SpecialCoordinateSystemTest *suite) { delete suite; }
 
   void test_none() {

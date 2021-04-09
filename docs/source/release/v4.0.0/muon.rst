@@ -15,7 +15,7 @@ Muon Changes
 
 .. contents:: Table of Contents
    :local:
-   
+
 Interface
 ---------
 
@@ -40,7 +40,7 @@ Bugfixes
 - Results table now includes all logs that are common to all of the loaded files.
 - When turning TF Asymmetry mode off it no longer resets the global options.
 - Results table will produce correct values for co-added runs.
-- The x limits on the settings tab will now correct themselves if bad values are entered. 
+- The x limits on the settings tab will now correct themselves if bad values are entered.
 - The `load current run` button now works for CHRONUS in muon analysis.
 - ALC interface now removes all of the fitting regions for the baseline modelling when the data changes.
 - ALC interface now produces a warning if the custom grouping is not valid.

@@ -14,15 +14,12 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL OptionsDialogModel
-    : public IOptionsDialogModel {
+class MANTIDQT_ISISREFLECTOMETRY_DLL OptionsDialogModel : public IOptionsDialogModel {
 public:
   OptionsDialogModel();
   ~OptionsDialogModel() = default;
-  void applyDefaultOptions(std::map<std::string, bool> &boolOptions,
-                           std::map<std::string, int> &intOptions) override;
-  void loadSettings(std::map<std::string, bool> &boolOptions,
-                    std::map<std::string, int> &intOptions) override;
+  void applyDefaultOptions(std::map<std::string, bool> &boolOptions, std::map<std::string, int> &intOptions) override;
+  void loadSettings(std::map<std::string, bool> &boolOptions, std::map<std::string, int> &intOptions) override;
   void saveSettings(const std::map<std::string, bool> &boolOptions,
                     const std::map<std::string, int> &intOptions) override;
 

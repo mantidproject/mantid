@@ -44,9 +44,7 @@ const std::string SaveIsawQvector::name() const { return "SaveIsawQvector"; }
 int SaveIsawQvector::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SaveIsawQvector::category() const {
-  return "DataHandling\\Isaw";
-}
+const std::string SaveIsawQvector::category() const { return "DataHandling\\Isaw"; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -58,29 +56,18 @@ void SaveIsawQvector::init() {
   // the validator which checks if the workspace has axis and any units
   ws_valid->add<WorkspaceUnitValidator>("TOF");
 
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
-                      "InputWorkspace", "", Direction::Input, ws_valid),
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("InputWorkspace", "", Direction::Input, ws_valid),
                   "An input EventWorkspace with units along X-axis and defined "
                   "instrument with defined sample");
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
-                                     ".bin"),
-      "Optional path to an hkl file to save.  Vectors returned if no file "
-      "requested.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave, ".bin"),
+                  "Optional path to an hkl file to save.  Vectors returned if no file "
+                  "requested.");
   declareProperty("RightHanded", true, "Save the Q-vector as k_f - k_i");
-  declareProperty(
-      "ISAWcoords", true,
-      "Save the Q-vector with y gravitationally up and x pointing downstream");
+  declareProperty("ISAWcoords", true, "Save the Q-vector with y gravitationally up and x pointing downstream");
   std::vector<double> Qx_save, Qy_save, Qz_save;
-  declareProperty("Qx_vector", Qx_save,
-                  "The name of the vector in which to store the list of Qx",
-                  Direction::Output);
-  declareProperty("Qy_vector", Qy_save,
-                  "The name of the vector in which to store the list of Qy",
-                  Direction::Output);
-  declareProperty("Qz_vector", Qz_save,
-                  "The name of the vector in which to store the list of Qz",
-                  Direction::Output);
+  declareProperty("Qx_vector", Qx_save, "The name of the vector in which to store the list of Qx", Direction::Output);
+  declareProperty("Qy_vector", Qy_save, "The name of the vector in which to store the list of Qy", Direction::Output);
+  declareProperty("Qz_vector", Qz_save, "The name of the vector in which to store the list of Qz", Direction::Output);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -96,8 +83,7 @@ void SaveIsawQvector::exec() {
   }
   // error out if there are not events
   if (wksp->getNumberEvents() <= 0) {
-    throw std::runtime_error(
-        "SaveIsawQvector does not work for empty event lists");
+    throw std::runtime_error("SaveIsawQvector does not work for empty event lists");
   }
 
   // open the output file
@@ -133,8 +119,7 @@ void SaveIsawQvector::exec() {
   unitConv.initialize(m_targWSDescr, "Momentum");
 
   // initialize the MD coordinates conversion class
-  MDTransf_sptr q_converter =
-      MDTransfFactory::Instance().create(m_targWSDescr.AlgID);
+  MDTransf_sptr q_converter = MDTransfFactory::Instance().create(m_targWSDescr.AlgID);
   q_converter->initialize(m_targWSDescr);
 
   // set up the progress bar
@@ -167,8 +152,7 @@ void SaveIsawQvector::exec() {
       double val = unitConv.convertUnits(raw_event.tof());
       q_converter->calcMatrixCoord(val, locCoord, signal, errorSq);
       for (size_t dim = 0; dim < DIMS; ++dim) {
-        buffer[dim] =
-            static_cast<float>(coord_signs[dim] * locCoord[coord_map[dim]]);
+        buffer[dim] = static_cast<float>(coord_signs[dim] * locCoord[coord_map[dim]]);
       }
       if (filename.empty()) {
         Qx_save.emplace_back(static_cast<double>(buffer[0]));
@@ -195,22 +179,18 @@ void SaveIsawQvector::exec() {
  * @param wksp The workspace to get information from.
  */
 void SaveIsawQvector::initTargetWSDescr(const EventWorkspace_sptr &wksp) {
-  m_targWSDescr.setMinMax(std::vector<double>(3, -2000.),
-                          std::vector<double>(3, 2000.));
+  m_targWSDescr.setMinMax(std::vector<double>(3, -2000.), std::vector<double>(3, 2000.));
   m_targWSDescr.buildFromMatrixWS(wksp, Q3D, ELASTIC);
   m_targWSDescr.setLorentsCorr(false);
 
   // generate the detectors table
-  Mantid::API::Algorithm_sptr childAlg =
-      createChildAlgorithm("PreprocessDetectorsToMD", 0., .5);
+  Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm("PreprocessDetectorsToMD", 0., .5);
   childAlg->setProperty("InputWorkspace", wksp);
   childAlg->executeAsChildAlg();
 
-  DataObjects::TableWorkspace_sptr table =
-      childAlg->getProperty("OutputWorkspace");
+  DataObjects::TableWorkspace_sptr table = childAlg->getProperty("OutputWorkspace");
   if (!table)
-    throw(std::runtime_error(
-        "Can not retrieve results of \"PreprocessDetectorsToMD\""));
+    throw(std::runtime_error("Can not retrieve results of \"PreprocessDetectorsToMD\""));
   else
     m_targWSDescr.m_PreprDetTable = table;
 }

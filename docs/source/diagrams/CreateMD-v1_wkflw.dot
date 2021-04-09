@@ -35,14 +35,14 @@ digraph CreateMD {
   Gs      ->  addSampleLogGs
   EFix    ->  addSampleLogEFix
   Psi     ->  addSampleLogPsi
-  
+
   Alatt     ->    setUB
   Angdeg    ->    setUB
   u         ->    setUB
   v         ->    setUB
-  
+
   EMode ->    convertToMD
-  
+
   EMode ->    convertToMDMinMaxGlobal
 
   DataSources               ->  setUB           [label="if workspace"]

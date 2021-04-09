@@ -42,58 +42,44 @@ int PoldiFitPeaks1D::version() const { return 1; }
 const std::string PoldiFitPeaks1D::category() const { return "SINQ\\Poldi"; }
 
 void PoldiFitPeaks1D::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace2D>>("InputWorkspace", "",
-                                                       Direction::Input),
-      "An input workspace containing a POLDI auto-correlation spectrum.");
-  std::shared_ptr<BoundedValidator<double>> minFwhmPerDirection =
-      std::make_shared<BoundedValidator<double>>();
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("InputWorkspace", "", Direction::Input),
+                  "An input workspace containing a POLDI auto-correlation spectrum.");
+  std::shared_ptr<BoundedValidator<double>> minFwhmPerDirection = std::make_shared<BoundedValidator<double>>();
   minFwhmPerDirection->setLower(2.0);
-  declareProperty(
-      "FwhmMultiples", 2.0, minFwhmPerDirection,
-      "Each peak will be fitted using x times FWHM data in each direction.",
-      Direction::Input);
+  declareProperty("FwhmMultiples", 2.0, minFwhmPerDirection,
+                  "Each peak will be fitted using x times FWHM data in each direction.", Direction::Input);
 
-  std::vector<std::string> peakFunctions =
-      FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
-  auto peakFunctionNames =
-      std::make_shared<ListValidator<std::string>>(peakFunctions);
-  declareProperty("PeakFunction", "Gaussian", peakFunctionNames,
-                  "Peak function that will be fitted to all peaks.",
+  std::vector<std::string> peakFunctions = FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
+  auto peakFunctionNames = std::make_shared<ListValidator<std::string>>(peakFunctions);
+  declareProperty("PeakFunction", "Gaussian", peakFunctionNames, "Peak function that will be fitted to all peaks.",
                   Direction::Input);
 
-  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
-                      "PoldiPeakTable", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("PoldiPeakTable", "", Direction::Input),
                   "A table workspace containing POLDI peak data.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
-                      "OutputWorkspace", "RefinedPeakTable", Direction::Output),
-                  "Output workspace with refined peak data.");
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "FitPlotsWorkspace", "FitPlots", Direction::Output),
+  declareProperty(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>("OutputWorkspace", "RefinedPeakTable", Direction::Output),
+      "Output workspace with refined peak data.");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("FitPlotsWorkspace", "FitPlots", Direction::Output),
                   "Plots of all peak fits.");
 
-  m_backgroundTemplate = FunctionFactory::Instance().createInitialized(
-      "name=UserFunction, Formula=A0 + A1*(x - x0)^2");
+  m_backgroundTemplate = FunctionFactory::Instance().createInitialized("name=UserFunction, Formula=A0 + A1*(x - x0)^2");
   m_profileTies = "f1.x0 = f0.PeakCentre";
 }
 
-void PoldiFitPeaks1D::setPeakFunction(const std::string &peakFunction) {
-  m_profileTemplate = peakFunction;
-}
+void PoldiFitPeaks1D::setPeakFunction(const std::string &peakFunction) { m_profileTemplate = peakFunction; }
 
-PoldiPeakCollection_sptr PoldiFitPeaks1D::getInitializedPeakCollection(
-    const DataObjects::TableWorkspace_sptr &peakTable) const {
+PoldiPeakCollection_sptr
+PoldiFitPeaks1D::getInitializedPeakCollection(const DataObjects::TableWorkspace_sptr &peakTable) const {
   auto peakCollection = std::make_shared<PoldiPeakCollection>(peakTable);
   peakCollection->setProfileFunctionName(m_profileTemplate);
 
   return peakCollection;
 }
 
-IFunction_sptr
-PoldiFitPeaks1D::getPeakProfile(const PoldiPeak_sptr &poldiPeak) const {
-  IPeakFunction_sptr clonedProfile = std::dynamic_pointer_cast<IPeakFunction>(
-      FunctionFactory::Instance().createFunction(m_profileTemplate));
+IFunction_sptr PoldiFitPeaks1D::getPeakProfile(const PoldiPeak_sptr &poldiPeak) const {
+  IPeakFunction_sptr clonedProfile =
+      std::dynamic_pointer_cast<IPeakFunction>(FunctionFactory::Instance().createFunction(m_profileTemplate));
   clonedProfile->setCentre(poldiPeak->q());
   clonedProfile->setFwhm(poldiPeak->fwhm(PoldiPeak::AbsoluteQ));
   clonedProfile->setHeight(poldiPeak->intensity());
@@ -112,30 +98,23 @@ PoldiFitPeaks1D::getPeakProfile(const PoldiPeak_sptr &poldiPeak) const {
   return totalProfile;
 }
 
-void PoldiFitPeaks1D::setValuesFromProfileFunction(
-    const PoldiPeak_sptr &poldiPeak,
-    const IFunction_sptr &fittedFunction) const {
-  CompositeFunction_sptr totalFunction =
-      std::dynamic_pointer_cast<CompositeFunction>(fittedFunction);
+void PoldiFitPeaks1D::setValuesFromProfileFunction(const PoldiPeak_sptr &poldiPeak,
+                                                   const IFunction_sptr &fittedFunction) const {
+  CompositeFunction_sptr totalFunction = std::dynamic_pointer_cast<CompositeFunction>(fittedFunction);
 
   if (totalFunction) {
-    IPeakFunction_sptr peakFunction =
-        std::dynamic_pointer_cast<IPeakFunction>(totalFunction->getFunction(0));
+    IPeakFunction_sptr peakFunction = std::dynamic_pointer_cast<IPeakFunction>(totalFunction->getFunction(0));
 
     if (peakFunction) {
-      poldiPeak->setIntensity(
-          UncertainValue(peakFunction->height(), peakFunction->getError(0)));
-      poldiPeak->setQ(
-          UncertainValue(peakFunction->centre(), peakFunction->getError(1)));
-      poldiPeak->setFwhm(UncertainValue(peakFunction->fwhm(),
-                                        getFwhmWidthRelation(peakFunction) *
-                                            peakFunction->getError(2)));
+      poldiPeak->setIntensity(UncertainValue(peakFunction->height(), peakFunction->getError(0)));
+      poldiPeak->setQ(UncertainValue(peakFunction->centre(), peakFunction->getError(1)));
+      poldiPeak->setFwhm(
+          UncertainValue(peakFunction->fwhm(), getFwhmWidthRelation(peakFunction) * peakFunction->getError(2)));
     }
   }
 }
 
-double PoldiFitPeaks1D::getFwhmWidthRelation(
-    const IPeakFunction_sptr &peakFunction) const {
+double PoldiFitPeaks1D::getFwhmWidthRelation(const IPeakFunction_sptr &peakFunction) const {
   return peakFunction->fwhm() / peakFunction->getParameter(2);
 }
 
@@ -159,8 +138,7 @@ void PoldiFitPeaks1D::exec() {
     PoldiPeak_sptr currentPeak = m_peaks->peak(i);
     IFunction_sptr currentProfile = getPeakProfile(currentPeak);
 
-    IAlgorithm_sptr fit =
-        getFitAlgorithm(dataWorkspace, currentPeak, currentProfile);
+    IAlgorithm_sptr fit = getFitAlgorithm(dataWorkspace, currentPeak, currentProfile);
 
     bool fitSuccess = fit->execute();
 
@@ -176,10 +154,8 @@ void PoldiFitPeaks1D::exec() {
   setProperty("FitPlotsWorkspace", fitPlotGroup);
 }
 
-IAlgorithm_sptr
-PoldiFitPeaks1D::getFitAlgorithm(const Workspace2D_sptr &dataWorkspace,
-                                 const PoldiPeak_sptr &peak,
-                                 const IFunction_sptr &profile) {
+IAlgorithm_sptr PoldiFitPeaks1D::getFitAlgorithm(const Workspace2D_sptr &dataWorkspace, const PoldiPeak_sptr &peak,
+                                                 const IFunction_sptr &profile) {
   double width = peak->fwhm();
   double extent = std::min(0.05, std::max(0.002, width)) * m_fwhmMultiples;
 

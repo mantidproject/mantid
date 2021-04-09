@@ -18,13 +18,9 @@ GET_POINTER_SPECIALIZATION(ICompAssembly)
 void export_ICompAssembly() {
   register_ptr_to_python<std::shared_ptr<ICompAssembly>>();
 
-  class_<ICompAssembly, boost::python::bases<IComponent>, boost::noncopyable>(
-      "ICompAssembly", no_init)
-      .def("nelements", &ICompAssembly::nelements, arg("self"),
-           "Returns the number of elements in the assembly")
-      .def("__len__", &ICompAssembly::nelements, arg("self"),
-           "Returns the number of elements in the assembly")
-      .def("__getitem__",
-           &ICompAssembly::operator[],(arg("self"), arg("index")),
+  class_<ICompAssembly, boost::python::bases<IComponent>, boost::noncopyable>("ICompAssembly", no_init)
+      .def("nelements", &ICompAssembly::nelements, arg("self"), "Returns the number of elements in the assembly")
+      .def("__len__", &ICompAssembly::nelements, arg("self"), "Returns the number of elements in the assembly")
+      .def("__getitem__", &ICompAssembly::operator[], (arg("self"), arg("index")),
            "Return the component at the given index");
 }

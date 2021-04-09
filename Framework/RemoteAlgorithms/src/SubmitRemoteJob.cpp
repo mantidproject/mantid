@@ -38,48 +38,36 @@ void SubmitRemoteJob::init() {
   auto requireValue = std::make_shared<MandatoryValidator<std::string>>();
 
   // Compute Resources
-  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
-                                          .getFacility()
-                                          .computeResources();
-  declareProperty(
-      "ComputeResource", "", std::make_shared<StringListValidator>(computes),
-      "The name of the remote computer to submit the job to", Direction::Input);
+  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
+  declareProperty("ComputeResource", "", std::make_shared<StringListValidator>(computes),
+                  "The name of the remote computer to submit the job to", Direction::Input);
 
   // Note: these 2 properties are 'implementation specific'.  We know that Fermi
   // needs them, but we really
   // ought to query the information URL before requiring them.
-  declareProperty("NumNodes", 0, mustBePositive,
-                  "The number of compute nodes the job requires",
-                  Direction::Input);
-  declareProperty("CoresPerNode", 0, mustBePositive,
-                  "The number of processes to start on each compute node",
+  declareProperty("NumNodes", 0, mustBePositive, "The number of compute nodes the job requires", Direction::Input);
+  declareProperty("CoresPerNode", 0, mustBePositive, "The number of processes to start on each compute node",
                   Direction::Input);
   // Number of actual MPI processes will be (NumNodes * CoresPerNode)
 
   // This is just an easy way to reference remote jobs (such as when we display
   // a list of
   // all the jobs the user has submitted recently...)
-  declareProperty("TaskName", std::string(""), "A short name for the job.",
-                  Direction::Input);
+  declareProperty("TaskName", std::string(""), "A short name for the job.", Direction::Input);
 
   // The transaction ID comes from the StartRemoteTransaction algortithm
-  declareProperty("TransactionID", "", requireValue,
-                  "The transaction ID to associate with this job",
-                  Direction::Input);
+  declareProperty("TransactionID", "", requireValue, "The transaction ID to associate with this job", Direction::Input);
 
   // Name of the python script to execute
-  declareProperty("ScriptName", "", requireValue,
-                  "A name for the python script that will be executed",
+  declareProperty("ScriptName", "", requireValue, "A name for the python script that will be executed",
                   Direction::Input);
 
   // The actual python code
-  declareProperty("PythonScript", "", requireValue,
-                  "The actual python code to execute", Direction::Input);
+  declareProperty("PythonScript", "", requireValue, "The actual python code to execute", Direction::Input);
 
   // Assuming the submission succeeded, this property will be set with a value
   // we can use to track the job
-  declareProperty("JobID", std::string(""), "An ID string for this job",
-                  Direction::Output);
+  declareProperty("JobID", std::string(""), "An ID string for this job", Direction::Output);
 }
 
 void SubmitRemoteJob::exec() {
@@ -91,16 +79,14 @@ void SubmitRemoteJob::exec() {
   //   MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
 
   std::shared_ptr<RemoteJobManager> jobManager =
-      ConfigService::Instance().getFacility().getRemoteJobManager(
-          getPropertyValue("ComputeResource"));
+      ConfigService::Instance().getFacility().getRemoteJobManager(getPropertyValue("ComputeResource"));
 
   // jobManager is a std::shared_ptr...
   if (!jobManager) {
     // Requested compute resource doesn't exist
     // TODO: should we create our own exception class for this??
     throw(std::runtime_error(
-        std::string("Unable to create a compute resource named " +
-                    getPropertyValue("ComputeResource"))));
+        std::string("Unable to create a compute resource named " + getPropertyValue("ComputeResource"))));
   }
 
   RemoteJobManager::PostDataMap postData;
@@ -125,8 +111,7 @@ void SubmitRemoteJob::exec() {
     std::string jobId;
     resp["JobID"].getValue(jobId);
     setPropertyValue("JobID", jobId);
-    g_log.information() << "Job submitted.  Job ID =  "
-                        << getPropertyValue("JobID") << '\n';
+    g_log.information() << "Job submitted.  Job ID =  " << getPropertyValue("JobID") << '\n';
   } else {
     std::string errMsg;
     resp["Err_Msg"].getValue(errMsg);

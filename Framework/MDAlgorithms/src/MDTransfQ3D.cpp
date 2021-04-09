@@ -15,9 +15,8 @@ DECLARE_MD_TRANSFID(MDTransfQ3D, Q3D)
 
 /** method returns number of matrix dimensions calculated by this class
  * as function of energy analysis mode   */
-unsigned int
-MDTransfQ3D::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
-                                  API::MatrixWorkspace_const_sptr inWS) const {
+unsigned int MDTransfQ3D::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
+                                               API::MatrixWorkspace_const_sptr inWS) const {
   UNUSED_ARG(inWS);
   switch (mode) {
   case (Kernel::DeltaEMode::Direct):
@@ -27,8 +26,7 @@ MDTransfQ3D::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
   case (Kernel::DeltaEMode::Elastic):
     return 3;
   default:
-    throw(
-        std::invalid_argument("Unknow or unsupported energy conversion mode"));
+    throw(std::invalid_argument("Unknow or unsupported energy conversion mode"));
   }
 }
 
@@ -47,9 +45,7 @@ MDTransfQ3D::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
   @return s    -- Lorentz corrected signal
   @return err  -- Lorentz corrected error
 */
-bool MDTransfQ3D::calcMatrixCoord(const double &deltaEOrK0,
-                                  std::vector<coord_t> &Coord, double &s,
-                                  double &err) const {
+bool MDTransfQ3D::calcMatrixCoord(const double &deltaEOrK0, std::vector<coord_t> &Coord, double &s, double &err) const {
   if (m_Emode == Kernel::DeltaEMode::Elastic) {
     return calcMatrixCoord3DElastic(deltaEOrK0, Coord, s, err);
   } else {
@@ -71,8 +67,7 @@ the algorithm and false otherwise.
 * it also uses preprocessed detectors positions, which are calculated by
 PreprocessDetectors algorithm and set up by
 * calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i) method.    */
-bool MDTransfQ3D::calcMatrixCoord3DInelastic(
-    const double &deltaE, std::vector<coord_t> &Coord) const {
+bool MDTransfQ3D::calcMatrixCoord3DInelastic(const double &deltaE, std::vector<coord_t> &Coord) const {
   Coord[3] = static_cast<coord_t>(deltaE);
   if (Coord[3] < m_DimMin[3] || Coord[3] >= m_DimMax[3])
     return false;
@@ -80,16 +75,14 @@ bool MDTransfQ3D::calcMatrixCoord3DInelastic(
   // x,y,z refer to internal coordinate system where Z is the beam direction
   double qx{0.0}, qy{0.0}, qz{0.0};
   if (m_Emode == Kernel::DeltaEMode::Direct) {
-    const double kFinal = sqrt((m_eFixed - deltaE) /
-                               PhysicalConstants::E_mev_toNeutronWavenumberSq);
+    const double kFinal = sqrt((m_eFixed - deltaE) / PhysicalConstants::E_mev_toNeutronWavenumberSq);
     qx = -m_ex * kFinal;
     qy = -m_ey * kFinal;
     qz = m_kFixed - m_ez * kFinal;
   } else {
     qx = -m_ex * m_kFixed;
     qy = -m_ey * m_kFixed;
-    const double kInitial = sqrt(
-        (m_eFixed + deltaE) / PhysicalConstants::E_mev_toNeutronWavenumberSq);
+    const double kInitial = sqrt((m_eFixed + deltaE) / PhysicalConstants::E_mev_toNeutronWavenumberSq);
     qz = kInitial - m_ez * m_kFixed;
   }
 
@@ -99,22 +92,18 @@ bool MDTransfQ3D::calcMatrixCoord3DInelastic(
     qz = -qz;
   }
 
-  Coord[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy +
-                                  m_RotMat[2] * qz);
+  Coord[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy + m_RotMat[2] * qz);
 
   if (Coord[0] < m_DimMin[0] || Coord[0] >= m_DimMax[0])
     return false;
-  Coord[1] = static_cast<coord_t>(m_RotMat[3] * qx + m_RotMat[4] * qy +
-                                  m_RotMat[5] * qz);
+  Coord[1] = static_cast<coord_t>(m_RotMat[3] * qx + m_RotMat[4] * qy + m_RotMat[5] * qz);
   if (Coord[1] < m_DimMin[1] || Coord[1] >= m_DimMax[1])
     return false;
-  Coord[2] = static_cast<coord_t>(m_RotMat[6] * qx + m_RotMat[7] * qy +
-                                  m_RotMat[8] * qz);
+  Coord[2] = static_cast<coord_t>(m_RotMat[6] * qx + m_RotMat[7] * qy + m_RotMat[8] * qz);
   if (Coord[2] < m_DimMin[2] || Coord[2] >= m_DimMax[2])
     return false;
 
-  if (std::sqrt(Coord[0] * Coord[0] + Coord[1] * Coord[1] +
-                Coord[2] * Coord[2]) < m_AbsMin)
+  if (std::sqrt(Coord[0] * Coord[0] + Coord[1] * Coord[1] + Coord[2] * Coord[2]) < m_AbsMin)
     return false;
 
   return true;
@@ -136,9 +125,7 @@ false otherwise.
 * it uses preprocessed detectors positions, which are calculated by
 PreprocessDetectors algorithm and set up by
 * calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i) method. */
-bool MDTransfQ3D::calcMatrixCoord3DElastic(const double &k0,
-                                           std::vector<coord_t> &Coord,
-                                           double &signal,
+bool MDTransfQ3D::calcMatrixCoord3DElastic(const double &k0, std::vector<coord_t> &Coord, double &signal,
                                            double &errSq) const {
 
   double qx = -m_ex * k0;
@@ -152,26 +139,19 @@ bool MDTransfQ3D::calcMatrixCoord3DElastic(const double &k0,
 
   // Dimension limits have to be converted to coord_t, otherwise floating point
   // error will cause valid events to be discarded.
-  Coord[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy +
-                                  m_RotMat[2] * qz);
-  if (Coord[0] < static_cast<coord_t>(m_DimMin[0]) ||
-      Coord[0] >= static_cast<coord_t>(m_DimMax[0]))
+  Coord[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy + m_RotMat[2] * qz);
+  if (Coord[0] < static_cast<coord_t>(m_DimMin[0]) || Coord[0] >= static_cast<coord_t>(m_DimMax[0]))
     return false;
 
-  Coord[1] = static_cast<coord_t>(m_RotMat[3] * qx + m_RotMat[4] * qy +
-                                  m_RotMat[5] * qz);
-  if (Coord[1] < static_cast<coord_t>(m_DimMin[1]) ||
-      Coord[1] >= static_cast<coord_t>(m_DimMax[1]))
+  Coord[1] = static_cast<coord_t>(m_RotMat[3] * qx + m_RotMat[4] * qy + m_RotMat[5] * qz);
+  if (Coord[1] < static_cast<coord_t>(m_DimMin[1]) || Coord[1] >= static_cast<coord_t>(m_DimMax[1]))
     return false;
 
-  Coord[2] = static_cast<coord_t>(m_RotMat[6] * qx + m_RotMat[7] * qy +
-                                  m_RotMat[8] * qz);
-  if (Coord[2] < static_cast<coord_t>(m_DimMin[2]) ||
-      Coord[2] >= static_cast<coord_t>(m_DimMax[2]))
+  Coord[2] = static_cast<coord_t>(m_RotMat[6] * qx + m_RotMat[7] * qy + m_RotMat[8] * qz);
+  if (Coord[2] < static_cast<coord_t>(m_DimMin[2]) || Coord[2] >= static_cast<coord_t>(m_DimMax[2]))
     return false;
 
-  if (std::sqrt(Coord[0] * Coord[0] + Coord[1] * Coord[1] +
-                Coord[2] * Coord[2]) < m_AbsMin)
+  if (std::sqrt(Coord[0] * Coord[0] + Coord[1] * Coord[1] + Coord[2] * Coord[2]) < m_AbsMin)
     return false;
 
   /*Apply Lorentz corrections if necessary */
@@ -185,9 +165,7 @@ bool MDTransfQ3D::calcMatrixCoord3DElastic(const double &k0,
   return true;
 }
 
-std::vector<double> MDTransfQ3D::getExtremumPoints(const double xMin,
-                                                   const double xMax,
-                                                   size_t det_num) const {
+std::vector<double> MDTransfQ3D::getExtremumPoints(const double xMin, const double xMax, size_t det_num) const {
   UNUSED_ARG(det_num);
 
   std::vector<double> rez(2);
@@ -243,8 +221,7 @@ void MDTransfQ3D::initialize(const MDWSDescription &ConvParams) {
     throw(std::runtime_error("The detectors have not been preprocessed but "
                              "they have to before running initialize"));
   // get pointer to the positions of the preprocessed detectors
-  std::vector<Kernel::V3D> const &DetDir =
-      ConvParams.m_PreprDetTable->getColVector<Kernel::V3D>("DetDirections");
+  std::vector<Kernel::V3D> const &DetDir = ConvParams.m_PreprDetTable->getColVector<Kernel::V3D>("DetDirections");
   m_DetDirecton = &DetDir[0]; //
 
   // get min and max values defined by the algorithm.
@@ -255,19 +232,15 @@ void MDTransfQ3D::initialize(const MDWSDescription &ConvParams) {
   //************   specific part of the initialization, dependent on emode:
   m_Emode = ConvParams.getEMode();
   m_NMatrixDim = getNMatrixDimensions(m_Emode);
-  if (m_Emode == Kernel::DeltaEMode::Direct ||
-      m_Emode == Kernel::DeltaEMode::Indirect) {
+  if (m_Emode == Kernel::DeltaEMode::Direct || m_Emode == Kernel::DeltaEMode::Indirect) {
     // energy needed in inelastic case
-    m_eFixed =
-        ConvParams.m_PreprDetTable->getLogs()->getPropertyValueAsType<double>(
-            "Ei");
+    m_eFixed = ConvParams.m_PreprDetTable->getLogs()->getPropertyValueAsType<double>("Ei");
     // the wave vector of incident neutrons;
     m_kFixed = sqrt(m_eFixed / PhysicalConstants::E_mev_toNeutronWavenumberSq);
 
     m_pEfixedArray = nullptr;
     if (m_Emode == static_cast<int>(Kernel::DeltaEMode::Indirect))
-      m_pEfixedArray =
-          ConvParams.m_PreprDetTable->getColDataArray<float>("eFixed");
+      m_pEfixedArray = ConvParams.m_PreprDetTable->getColDataArray<float>("eFixed");
   } else {
     if (m_Emode != Kernel::DeltaEMode::Elastic)
       throw(std::runtime_error("MDTransfQ3D::initialize::Unknown or "
@@ -276,8 +249,7 @@ void MDTransfQ3D::initialize(const MDWSDescription &ConvParams) {
     // values for their precalculation:
     m_isLorentzCorrected = ConvParams.isLorentsCorrections();
     if (m_isLorentzCorrected) {
-      auto &TwoTheta =
-          ConvParams.m_PreprDetTable->getColVector<double>("TwoTheta");
+      auto &TwoTheta = ConvParams.m_PreprDetTable->getColVector<double>("TwoTheta");
       SinThetaSq.resize(TwoTheta.size());
       for (size_t i = 0; i < TwoTheta.size(); i++) {
         double sth = sin(0.5 * TwoTheta[i]);
@@ -304,9 +276,8 @@ conversion mode.
 The position of each dimID in the vector corresponds to the position of each MD
 coordinate in the Coord vector
 */
-std::vector<std::string>
-MDTransfQ3D::getDefaultDimID(Kernel::DeltaEMode::Type dEmode,
-                             API::MatrixWorkspace_const_sptr inWS) const {
+std::vector<std::string> MDTransfQ3D::getDefaultDimID(Kernel::DeltaEMode::Type dEmode,
+                                                      API::MatrixWorkspace_const_sptr inWS) const {
   UNUSED_ARG(inWS);
   std::vector<std::string> default_dim_ID;
   switch (dEmode) {
@@ -321,8 +292,7 @@ MDTransfQ3D::getDefaultDimID(Kernel::DeltaEMode::Type dEmode,
     break;
   }
   default:
-    throw(std::invalid_argument(
-        "MDTransfQ3D::getDefaultDimID::Unknown energy conversion mode"));
+    throw(std::invalid_argument("MDTransfQ3D::getDefaultDimID::Unknown energy conversion mode"));
   }
   default_dim_ID[0] = "Q1";
   default_dim_ID[1] = "Q2";
@@ -336,9 +306,8 @@ MDTransfQ3D::getDefaultDimID(Kernel::DeltaEMode::Type dEmode,
  * @param inWS -- input workspace
  * @return
  * It is Momentum and DelteE in inelastic modes   */
-std::vector<std::string>
-MDTransfQ3D::outputUnitID(Kernel::DeltaEMode::Type dEmode,
-                          API::MatrixWorkspace_const_sptr inWS) const {
+std::vector<std::string> MDTransfQ3D::outputUnitID(Kernel::DeltaEMode::Type dEmode,
+                                                   API::MatrixWorkspace_const_sptr inWS) const {
   UNUSED_ARG(inWS);
   std::vector<std::string> UnitID = this->getDefaultDimID(dEmode, inWS);
 
@@ -357,8 +326,7 @@ MDTransfQ3D::outputUnitID(Kernel::DeltaEMode::Type dEmode,
 
 /// constructor;
 MDTransfQ3D::MDTransfQ3D()
-    : m_isLorentzCorrected(false), m_SinThetaSqArray(nullptr), SinThetaSq(),
-      m_SinThetaSq(0.), m_AbsMin(0.) {}
+    : m_isLorentzCorrected(false), m_SinThetaSqArray(nullptr), SinThetaSq(), m_SinThetaSq(0.), m_AbsMin(0.) {}
 
 } // namespace MDAlgorithms
 } // namespace Mantid

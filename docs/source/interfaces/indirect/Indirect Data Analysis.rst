@@ -16,7 +16,7 @@ Reduction interface or using :math:`S(Q, \omega)` files (*_sqw.nxs*) and
 workspaces (*_sqw*) created using either the Indirect Data Reduction interface or
 taken from a bespoke algorithm or auto reduction.
 
-Four of the available tabs are QENS fitting interfaces and share common features and 
+Four of the available tabs are QENS fitting interfaces and share common features and
 layout. These tabs are documented in :ref:`Indirect Fitting <QENS-fitting-ref>`.
 
 The other two tabs in the interface perform transformations on data and are documented in :ref:`Elwin and I(Q,t) <Elwin-iqt-ref>`.

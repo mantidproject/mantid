@@ -108,7 +108,7 @@ Performance
 
 Improved
 ########
-- :ref:`LoadEmptyInstrument <algm-LoadEmptyInstrument>` and load algorithms that are using it. Improved performance for second and consecutive loads of instrument geometry, particularly for instruments with many detector pixels. 
+- :ref:`LoadEmptyInstrument <algm-LoadEmptyInstrument>` and load algorithms that are using it. Improved performance for second and consecutive loads of instrument geometry, particularly for instruments with many detector pixels.
 - :ref:`CropToComponent <algm-CropToComponent>`: Up to 30% performance improvement, based on ongoing work on Instrument-2.0.
 - :ref:`MaxEnt <algm-MaxEnt>`: Improved rate of convergence. The  ``ChiTarget`` property has been replaced by  ``ChiTargetOverN``.
 

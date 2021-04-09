@@ -71,8 +71,7 @@ namespace Mantid {
  * @returns A string containing the welcome message for Mantid.
  */
 std::string welcomeMessage() {
-  return "Welcome to Mantid " +
-         std::string(Mantid::Kernel::MantidVersion::version()) +
+  return "Welcome to Mantid " + std::string(Mantid::Kernel::MantidVersion::version()) +
          "\nPlease cite: " + Mantid::Kernel::MantidVersion::paperCitation() +
          " and this release: " + Mantid::Kernel::MantidVersion::doi();
 }
@@ -96,8 +95,7 @@ std::vector<std::string> splitPath(const std::string &path) {
   if (path.find(';') == std::string::npos) { // don't bother tokenizing
     splitted.emplace_back(path);
   } else {
-    int options = Mantid::Kernel::StringTokenizer::TOK_TRIM +
-                  Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY;
+    int options = Mantid::Kernel::StringTokenizer::TOK_TRIM + Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY;
     Mantid::Kernel::StringTokenizer tokenizer(path, ";,", options);
     auto iend = tokenizer.end();
     for (auto itr = tokenizer.begin(); itr != iend; ++itr) {
@@ -117,8 +115,7 @@ std::vector<std::string> splitPath(const std::string &path) {
 
 /// Private constructor for singleton class
 ConfigServiceImpl::ConfigServiceImpl()
-    : m_pConf(nullptr), m_pSysConfig(nullptr), m_changed_keys(),
-      m_strBaseDir(""), m_propertyString(""),
+    : m_pConf(nullptr), m_pSysConfig(nullptr), m_changed_keys(), m_strBaseDir(""), m_propertyString(""),
       m_properties_file_name("Mantid.properties"),
 #ifdef MPI_BUILD
       // Use a different user properties file for an mpi-enabled build to avoid
@@ -127,16 +124,14 @@ ConfigServiceImpl::ConfigServiceImpl()
 #else
       m_user_properties_file_name("Mantid.user.properties"),
 #endif
-      m_dataSearchDirs(), m_instrumentDirs(), m_proxyInfo(),
-      m_isProxySet(false) {
+      m_dataSearchDirs(), m_instrumentDirs(), m_proxyInfo(), m_isProxySet(false) {
   // getting at system details
   m_pSysConfig = new Poco::Util::SystemConfiguration();
   m_pConf = nullptr;
 
   // Register StdChannel with Poco
   Poco::LoggingFactory::defaultFactory().registerChannelClass(
-      "StdoutChannel",
-      new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);
+      "StdoutChannel", new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);
 
   setBaseDirectory();
 
@@ -184,16 +179,12 @@ ConfigServiceImpl::ConfigServiceImpl()
   }
 
   g_log.debug() << "ConfigService created.\n";
-  g_log.debug() << "Configured Mantid.properties directory of application as "
-                << getPropertiesDir() << '\n';
-  g_log.information() << "This is Mantid version " << MantidVersion::version()
-                      << " revision " << MantidVersion::revision() << '\n';
+  g_log.debug() << "Configured Mantid.properties directory of application as " << getPropertiesDir() << '\n';
+  g_log.information() << "This is Mantid version " << MantidVersion::version() << " revision "
+                      << MantidVersion::revision() << '\n';
   g_log.information() << "running on " << getComputerName() << " starting "
-                      << Types::Core::DateAndTime::getCurrentTime()
-                             .toFormattedString("%Y-%m-%dT%H:%MZ")
-                      << "\n";
-  g_log.information() << "Properties file(s) loaded: " << propertiesFilesList
-                      << '\n';
+                      << Types::Core::DateAndTime::getCurrentTime().toFormattedString("%Y-%m-%dT%H:%MZ") << "\n";
+  g_log.information() << "Properties file(s) loaded: " << propertiesFilesList << '\n';
 
   // Assert that the appdata and the instrument subdirectory exists
   std::string appDataDir = getAppDataDir();
@@ -205,21 +196,17 @@ ConfigServiceImpl::ConfigServiceImpl()
   try {
     file.createDirectories();
   } catch (Poco::FileException &fe) {
-    g_log.error()
-        << "Cannot create the local instrument cache directory ["
-        << path.toString()
-        << "]. Mantid will not be able to update instrument definitions.\n"
-        << fe.what() << '\n';
+    g_log.error() << "Cannot create the local instrument cache directory [" << path.toString()
+                  << "]. Mantid will not be able to update instrument definitions.\n"
+                  << fe.what() << '\n';
   }
   Poco::File vtpDir(getVTPFileDirectory());
   try {
     vtpDir.createDirectories();
   } catch (Poco::FileException &fe) {
-    g_log.error()
-        << "Cannot create the local instrument geometry cache directory ["
-        << path.toString()
-        << "]. Mantid will be slower at viewing complex instruments.\n"
-        << fe.what() << '\n';
+    g_log.error() << "Cannot create the local instrument geometry cache directory [" << path.toString()
+                  << "]. Mantid will be slower at viewing complex instruments.\n"
+                  << fe.what() << '\n';
   }
   // must update the cache of instrument paths
   cacheInstrumentPaths();
@@ -292,8 +279,7 @@ void ConfigServiceImpl::setBaseDirectory() {
 
 namespace {
 // look for specific keys and throw an exception if one is found
-std::string checkForBadConfigOptions(const std::string &filename,
-                                     const std::string &propertiesString) {
+std::string checkForBadConfigOptions(const std::string &filename, const std::string &propertiesString) {
   std::stringstream stream(propertiesString);
   std::stringstream resultPropertiesString;
   std::string line;
@@ -320,8 +306,7 @@ std::string checkForBadConfigOptions(const std::string &filename,
       } else {
         g_log.warning() << Kernel::Strings::strip(line);
       }
-      g_log.warning() << "\" in " << filename << " on line " << line_num
-                      << std::endl;
+      g_log.warning() << "\" in " << filename << " on line " << line_num << std::endl;
 
       // comment out the property
       resultPropertiesString << '#';
@@ -342,8 +327,7 @@ std::string checkForBadConfigOptions(const std::string &filename,
  *discarded, otherwise the new keys are added, and repeated keys will override
  *existing ones.
  */
-void ConfigServiceImpl::loadConfig(const std::string &filename,
-                                   const bool append) {
+void ConfigServiceImpl::loadConfig(const std::string &filename, const bool append) {
 
   if (!append) {
     // remove the previous property string
@@ -377,8 +361,7 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
     }
   } catch (std::exception &e) {
     // there was a problem loading the file - it probably is not there
-    g_log.error() << "Problem loading the configuration file " << filename
-                  << " " << e.what() << '\n';
+    g_log.error() << "Problem loading the configuration file " << filename << " " << e.what() << '\n';
     g_log.error() << "Mantid is unable to start.\n" << std::endl;
     throw;
   }
@@ -394,8 +377,7 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
  * @param contents :: The file contents will be placed here
  * @returns A boolean indicating whether opening the file was successful
  */
-bool ConfigServiceImpl::readFile(const std::string &filename,
-                                 std::string &contents) const {
+bool ConfigServiceImpl::readFile(const std::string &filename, std::string &contents) const {
   std::ifstream propFile(filename.c_str(), std::ios::in);
   bool good = propFile.good();
   if (!good) {
@@ -425,8 +407,7 @@ void ConfigServiceImpl::configureLogging() {
     configurator.configure(m_pConf.get());
 #endif
   } catch (std::exception &e) {
-    std::cerr << "Trouble configuring the logging framework " << e.what()
-              << '\n';
+    std::cerr << "Trouble configuring the logging framework " << e.what() << '\n';
   }
 }
 
@@ -437,8 +418,7 @@ void ConfigServiceImpl::configureLogging() {
  * @returns A string containing an absolute path by resolving the relative
  * directory with the executable directory
  */
-std::string ConfigServiceImpl::makeAbsolute(const std::string &dir,
-                                            const std::string &key) const {
+std::string ConfigServiceImpl::makeAbsolute(const std::string &dir, const std::string &key) const {
   if (dir.empty()) {
     // Don't do anything for an empty value
     return dir;
@@ -475,8 +455,7 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir,
   try {
     is_relative = Poco::Path(dir).isRelative();
   } catch (Poco::PathSyntaxException &) {
-    g_log.warning() << "Malformed path detected in the \"" << key
-                    << "\" variable, skipping \"" << dir << "\"\n";
+    g_log.warning() << "Malformed path detected in the \"" << key << "\" variable, skipping \"" << dir << "\"\n";
     return "";
   }
   if (is_relative) {
@@ -524,9 +503,8 @@ bool ConfigServiceImpl::isInDataSearchList(const std::string &path) const {
   replace(correctedPath.begin(), correctedPath.end(), '\\', '/');
 
   using std::placeholders::_1;
-  auto it =
-      std::find_if(m_dataSearchDirs.cbegin(), m_dataSearchDirs.cend(),
-                   std::bind(std::equal_to<std::string>(), _1, correctedPath));
+  auto it = std::find_if(m_dataSearchDirs.cbegin(), m_dataSearchDirs.cend(),
+                         std::bind(std::equal_to<std::string>(), _1, correctedPath));
   return (it != m_dataSearchDirs.end());
 }
 
@@ -536,9 +514,7 @@ bool ConfigServiceImpl::isInDataSearchList(const std::string &path) const {
  */
 void ConfigServiceImpl::createUserPropertiesFile() const {
   try {
-    std::fstream filestr(
-        (getUserPropertiesDir() + m_user_properties_file_name).c_str(),
-        std::fstream::out);
+    std::fstream filestr((getUserPropertiesDir() + m_user_properties_file_name).c_str(), std::fstream::out);
 
     filestr << "# This file can be used to override any properties for this "
                "installation.\n";
@@ -549,15 +525,13 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr << "# properties that suit your particular installation.\n";
     filestr << "#\n";
     filestr << "# See here for a list of possible options:\n";
-    filestr
-        << "# "
-           "http://docs.mantidproject.org/nightly/concepts/PropertiesFile.html"
-           "\n\n";
+    filestr << "# "
+               "http://docs.mantidproject.org/nightly/concepts/PropertiesFile.html"
+               "\n\n";
     filestr << "##\n";
     filestr << "## GENERAL\n";
     filestr << "##\n\n";
-    filestr
-        << "## Set the maximum number of cores used to run algorithms over\n";
+    filestr << "## Set the maximum number of cores used to run algorithms over\n";
     filestr << "#MultiThreaded.MaxCores=4\n\n";
     filestr << "##\n";
     filestr << "## FACILITY AND INSTRUMENT\n";
@@ -591,8 +565,7 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr << "##\n\n";
     filestr << "## Uncomment to change logging level\n";
     filestr << "## Default is information\n";
-    filestr
-        << "## Valid values are: error, warning, notice, information, debug\n";
+    filestr << "## Valid values are: error, warning, notice, information, debug\n";
     filestr << "#logging.loggers.root.level=information\n\n";
     filestr << "##\n";
     filestr << "## MantidPlot\n";
@@ -609,9 +582,8 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
 
     filestr.close();
   } catch (std::runtime_error &ex) {
-    g_log.warning() << "Unable to write out user.properties file to "
-                    << getUserPropertiesDir() << m_user_properties_file_name
-                    << " error: " << ex.what() << '\n';
+    g_log.warning() << "Unable to write out user.properties file to " << getUserPropertiesDir()
+                    << m_user_properties_file_name << " error: " << ex.what() << '\n';
   }
 }
 
@@ -634,8 +606,7 @@ void ConfigServiceImpl::reset() {
   // Now load the original
   const bool append = false;
   const bool updateCaches = true;
-  updateConfig(getPropertiesDir() + m_properties_file_name, append,
-               updateCaches);
+  updateConfig(getPropertiesDir() + m_properties_file_name, append, updateCaches);
 }
 
 /** Updates and existing configuration and restarts the logging
@@ -647,9 +618,7 @@ void ConfigServiceImpl::reset() {
  *  @param update_caches :: If true(default) then the various property caches
  * are updated
  */
-void ConfigServiceImpl::updateConfig(const std::string &filename,
-                                     const bool append,
-                                     const bool update_caches) {
+void ConfigServiceImpl::updateConfig(const std::string &filename, const bool append, const bool update_caches) {
   loadConfig(filename, append);
 
   // Ensure that the default save directory makes sense
@@ -791,8 +760,7 @@ void ConfigServiceImpl::saveConfig(const std::string &filename) const {
  *  @returns The string value of the property, or an empty string if the key
  *cannot be found
  */
-std::string ConfigServiceImpl::getString(const std::string &keyName,
-                                         bool pathAbsolute) const {
+std::string ConfigServiceImpl::getString(const std::string &keyName, bool pathAbsolute) const {
   if (m_pConf->hasProperty(keyName)) {
     std::string value = m_pConf->getString(keyName);
     const auto key = m_configPaths.find(keyName);
@@ -802,8 +770,7 @@ std::string ConfigServiceImpl::getString(const std::string &keyName,
     return value;
   }
 
-  g_log.debug() << "Unable to find " << keyName << " in the properties file"
-                << '\n';
+  g_log.debug() << "Unable to find " << keyName << " in the properties file" << '\n';
   return {};
 }
 
@@ -816,8 +783,7 @@ std::string ConfigServiceImpl::getString(const std::string &keyName,
  *there isn't
  *  a key or it couldn't be found.
  */
-std::vector<std::string>
-ConfigServiceImpl::getKeys(const std::string &keyName) const {
+std::vector<std::string> ConfigServiceImpl::getKeys(const std::string &keyName) const {
   std::vector<std::string> rawKeys;
   m_pConf->keys(keyName, rawKeys);
   return rawKeys;
@@ -828,8 +794,7 @@ ConfigServiceImpl::getKeys(const std::string &keyName) const {
  *
  * @return Vector containing all config options
  */
-void ConfigServiceImpl::getKeysRecursive(
-    const std::string &root, std::vector<std::string> &allKeys) const {
+void ConfigServiceImpl::getKeysRecursive(const std::string &root, std::vector<std::string> &allKeys) const {
   std::vector<std::string> rootKeys = getKeys(root);
 
   if (rootKeys.empty())
@@ -880,9 +845,7 @@ void ConfigServiceImpl::remove(const std::string &rootName) {
  *exists.
  *  @returns Boolean value denoting whether the exists or not.
  */
-bool ConfigServiceImpl::hasProperty(const std::string &rootName) const {
-  return m_pConf->hasProperty(rootName);
-}
+bool ConfigServiceImpl::hasProperty(const std::string &rootName) const { return m_pConf->hasProperty(rootName); }
 
 /** Checks to see whether the given file target is an executable one and it
  *exists.
@@ -918,9 +881,8 @@ bool ConfigServiceImpl::isExecutable(const std::string &target) const {
  *  the file to load up.
  */
 
-void ConfigServiceImpl::launchProcess(
-    const std::string &programFilePath,
-    const std::vector<std::string> &programArguments) const {
+void ConfigServiceImpl::launchProcess(const std::string &programFilePath,
+                                      const std::vector<std::string> &programArguments) const {
   try {
     std::string expTarget = Poco::Path::expand(programFilePath);
     Poco::Process::launch(expTarget, programArguments);
@@ -934,8 +896,7 @@ void ConfigServiceImpl::launchProcess(
  * @param key :: The key to refer to this property
  * @param value :: The value of the property
  */
-void ConfigServiceImpl::setString(const std::string &key,
-                                  const std::string &value) {
+void ConfigServiceImpl::setString(const std::string &key, const std::string &value) {
   // If the value is unchanged (after any path conversions), there's nothing to
   // do.
   const std::string old = getString(key);
@@ -968,8 +929,7 @@ void ConfigServiceImpl::setString(const std::string &key,
  *value of.
  *  @returns An optional container with the value if found
  */
-template <typename T>
-boost::optional<T> ConfigServiceImpl::getValue(const std::string &keyName) {
+template <typename T> boost::optional<T> ConfigServiceImpl::getValue(const std::string &keyName) {
   std::string strValue = getString(keyName);
   T output;
   int result = Mantid::Kernel::Strings::convert(strValue, output);
@@ -988,8 +948,7 @@ boost::optional<T> ConfigServiceImpl::getValue(const std::string &keyName) {
  *value of.
  *  @returns An optional container with the value if found
  */
-template <>
-boost::optional<bool> ConfigServiceImpl::getValue(const std::string &keyName) {
+template <> boost::optional<bool> ConfigServiceImpl::getValue(const std::string &keyName) {
   auto returnedValue = getValue<std::string>(keyName);
   if (!returnedValue.is_initialized()) {
     return boost::none;
@@ -997,8 +956,7 @@ boost::optional<bool> ConfigServiceImpl::getValue(const std::string &keyName) {
 
   auto &configVal = returnedValue.get();
 
-  std::transform(configVal.begin(), configVal.end(), configVal.begin(),
-                 ::tolower);
+  std::transform(configVal.begin(), configVal.end(), configVal.begin(), ::tolower);
 
   boost::trim(configVal);
 
@@ -1026,9 +984,7 @@ std::string ConfigServiceImpl::getLocalFilename() const {
  * Return the full filename of the user properties file
  * @returns A string containing the full path to the user file
  */
-std::string ConfigServiceImpl::getUserFilename() const {
-  return getUserPropertiesDir() + m_user_properties_file_name;
-}
+std::string ConfigServiceImpl::getUserFilename() const { return getUserPropertiesDir() + m_user_properties_file_name; }
 
 /** Searches for the string within the environment variables and returns the
  *  value as a string.
@@ -1045,33 +1001,25 @@ std::string ConfigServiceImpl::getEnvironment(const std::string &keyName) {
  *
  *  @returns The name pf the OS version
  */
-std::string ConfigServiceImpl::getOSName() {
-  return m_pSysConfig->getString("system.osName");
-}
+std::string ConfigServiceImpl::getOSName() { return m_pSysConfig->getString("system.osName"); }
 
 /** Gets the name of the computer running Mantid
  *
  *  @returns The  name of the computer
  */
-std::string ConfigServiceImpl::getOSArchitecture() {
-  return m_pSysConfig->getString("system.osArchitecture");
-}
+std::string ConfigServiceImpl::getOSArchitecture() { return m_pSysConfig->getString("system.osArchitecture"); }
 
 /** Gets the name of the operating system Architecture
  *
  * @returns The operating system architecture
  */
-std::string ConfigServiceImpl::getComputerName() {
-  return m_pSysConfig->getString("system.nodeName");
-}
+std::string ConfigServiceImpl::getComputerName() { return m_pSysConfig->getString("system.nodeName"); }
 
 /** Gets the name of the operating system version
  *
  * @returns The operating system version
  */
-std::string ConfigServiceImpl::getOSVersion() {
-  return m_pSysConfig->getString("system.osVersion");
-}
+std::string ConfigServiceImpl::getOSVersion() { return m_pSysConfig->getString("system.osVersion"); }
 
 /// @returns true if the file exists and can be read
 bool canRead(const std::string &filename) {
@@ -1086,8 +1034,7 @@ bool canRead(const std::string &filename) {
 }
 
 /// @returns the value associated with the key.
-std::string getValueFromStdOut(const std::string &orig,
-                               const std::string &key) {
+std::string getValueFromStdOut(const std::string &orig, const std::string &key) {
   size_t start = orig.find(key);
   if (start == std::string::npos) {
     return std::string();
@@ -1175,8 +1122,7 @@ std::string ConfigServiceImpl::getOSVersionReadable() {
 #if defined __APPLE__ || defined _WIN32
   try {
     Poco::Pipe outPipe, errorPipe;
-    Poco::ProcessHandle ph =
-        Poco::Process::launch(cmd, args, nullptr, &outPipe, &errorPipe);
+    Poco::ProcessHandle ph = Poco::Process::launch(cmd, args, nullptr, &outPipe, &errorPipe);
     const int rc = ph.wait();
     // Only if the command returned successfully.
     if (rc == 0) {
@@ -1185,10 +1131,8 @@ std::string ConfigServiceImpl::getOSVersionReadable() {
       Poco::StreamCopier::copyStream(pipeStream, stringStream);
       const std::string result = stringStream.str();
 #ifdef __APPLE__
-      const std::string product_name =
-          getValueFromStdOut(result, "ProductName:");
-      const std::string product_vers =
-          getValueFromStdOut(result, "ProductVersion:");
+      const std::string product_name = getValueFromStdOut(result, "ProductName:");
+      const std::string product_vers = getValueFromStdOut(result, "ProductVersion:");
 
       description = product_name + " " + product_vers;
 #elif _WIN32
@@ -1241,26 +1185,20 @@ std::string ConfigServiceImpl::getUsername() {
  *
  * @returns The absolute path of the current directory containing the dll
  */
-std::string ConfigServiceImpl::getCurrentDir() {
-  return m_pSysConfig->getString("system.currentDir");
-}
+std::string ConfigServiceImpl::getCurrentDir() { return m_pSysConfig->getString("system.currentDir"); }
 
 /** Gets the absolute path of the current directory containing the dll. Const
  *version.
  *
  * @returns The absolute path of the current directory containing the dll
  */
-std::string ConfigServiceImpl::getCurrentDir() const {
-  return m_pSysConfig->getString("system.currentDir");
-}
+std::string ConfigServiceImpl::getCurrentDir() const { return m_pSysConfig->getString("system.currentDir"); }
 
 /** Gets the absolute path of the temp directory
  *
  * @returns The absolute path of the temp directory
  */
-std::string ConfigServiceImpl::getTempDir() {
-  return m_pSysConfig->getString("system.tempDir");
-}
+std::string ConfigServiceImpl::getTempDir() { return m_pSysConfig->getString("system.tempDir"); }
 
 /** Gets the absolute path of the appdata directory
  *
@@ -1388,8 +1326,7 @@ bool ConfigServiceImpl::isNetworkDrive(const std::string &path) {
       strm.setf(std::ios::oct, std::ios::basefield);
       strm >> printch;
       if (printch != -1) {
-        mntpoint = mntpoint.substr(0, idx) + static_cast<char>(printch) +
-                   mntpoint.substr(idx + 4);
+        mntpoint = mntpoint.substr(0, idx) + static_cast<char>(printch) + mntpoint.substr(idx + 4);
       }
       // Search for this at the start of the path
       if (path.find(mntpoint) == 0)
@@ -1438,16 +1375,13 @@ std::string ConfigServiceImpl::getUserPropertiesDir() const {
  * Return the list of search paths
  * @returns A vector of strings containing the defined search directories
  */
-const std::vector<std::string> &ConfigServiceImpl::getDataSearchDirs() const {
-  return m_dataSearchDirs;
-}
+const std::vector<std::string> &ConfigServiceImpl::getDataSearchDirs() const { return m_dataSearchDirs; }
 
 /**
  * Set a list of search paths via a vector
  * @param searchDirs :: A list of search directories
  */
-void ConfigServiceImpl::setDataSearchDirs(
-    const std::vector<std::string> &searchDirs) {
+void ConfigServiceImpl::setDataSearchDirs(const std::vector<std::string> &searchDirs) {
   std::string searchPaths = boost::join(searchDirs, ";");
   setDataSearchDirs(searchPaths);
 }
@@ -1488,8 +1422,7 @@ void ConfigServiceImpl::appendDataSearchSubDir(const std::string &subdir) {
       newDirPath = Poco::Path(path);
       newDirPath.append(subDirPath);
       // only add new path if it isn't already there
-      if (std::find(newDataDirs.begin(), newDataDirs.end(),
-                    newDirPath.toString()) == newDataDirs.end())
+      if (std::find(newDataDirs.begin(), newDataDirs.end(), newDirPath.toString()) == newDataDirs.end())
         newDataDirs.emplace_back(newDirPath.toString());
     } catch (Poco::PathSyntaxException &) {
       continue;
@@ -1516,8 +1449,7 @@ void ConfigServiceImpl::appendDataSearchDir(const std::string &path) {
     return;
   }
   if (!isInDataSearchList(dirPath.toString())) {
-    auto newSearchString = Strings::join(std::begin(m_dataSearchDirs),
-                                         std::end(m_dataSearchDirs), ";");
+    auto newSearchString = Strings::join(std::begin(m_dataSearchDirs), std::end(m_dataSearchDirs), ";");
     newSearchString.append(";" + path);
     setString("datasearch.directories", newSearchString);
   }
@@ -1527,8 +1459,7 @@ void ConfigServiceImpl::appendDataSearchDir(const std::string &path) {
  * Sets the search directories for XML instrument definition files (IDFs)
  * @param directories An ordered list of paths for instrument searching
  */
-void ConfigServiceImpl::setInstrumentDirectories(
-    const std::vector<std::string> &directories) {
+void ConfigServiceImpl::setInstrumentDirectories(const std::vector<std::string> &directories) {
   m_instrumentDirs = directories;
 }
 
@@ -1536,18 +1467,13 @@ void ConfigServiceImpl::setInstrumentDirectories(
  * Return the search directories for XML instrument definition files (IDFs)
  * @returns An ordered list of paths for instrument searching
  */
-const std::vector<std::string> &
-ConfigServiceImpl::getInstrumentDirectories() const {
-  return m_instrumentDirs;
-}
+const std::vector<std::string> &ConfigServiceImpl::getInstrumentDirectories() const { return m_instrumentDirs; }
 
 /**
  * Return the base search directories for XML instrument definition files (IDFs)
  * @returns a last entry of getInstrumentDirectories
  */
-const std::string ConfigServiceImpl::getInstrumentDirectory() const {
-  return m_instrumentDirs.back();
-}
+const std::string ConfigServiceImpl::getInstrumentDirectory() const { return m_instrumentDirs.back(); }
 /**
  * Return the search directory for vtp files
  * @returns a path
@@ -1594,8 +1520,7 @@ void ConfigServiceImpl::cacheInstrumentPaths() {
     // This is the assumed deployment directory for IDFs, where we need to be
     // relative to the
     // directory of the executable, not the current working directory.
-    directoryName =
-        Poco::Path(getPropertiesDir()).resolve("../instrument").toString();
+    directoryName = Poco::Path(getPropertiesDir()).resolve("../instrument").toString();
   }
   addDirectoryifExists(directoryName, m_instrumentDirs);
 }
@@ -1607,8 +1532,8 @@ void ConfigServiceImpl::cacheInstrumentPaths() {
  * @param directoryList the list to add the directory to
  * @returns true if the directory was valid and added to the list
  */
-bool ConfigServiceImpl::addDirectoryifExists(
-    const std::string &directoryName, std::vector<std::string> &directoryList) {
+bool ConfigServiceImpl::addDirectoryifExists(const std::string &directoryName,
+                                             std::vector<std::string> &directoryList) {
   try {
     if (Poco::File(directoryName).isDirectory()) {
       directoryList.emplace_back(directoryName);
@@ -1626,8 +1551,7 @@ bool ConfigServiceImpl::addDirectoryifExists(
   }
 }
 
-const std::vector<std::string>
-ConfigServiceImpl::getFacilityFilenames(const std::string &fName) {
+const std::vector<std::string> ConfigServiceImpl::getFacilityFilenames(const std::string &fName) {
   std::vector<std::string> returnPaths;
 
   // first try the supplied file
@@ -1643,8 +1567,7 @@ ConfigServiceImpl::getFacilityFilenames(const std::string &fName) {
   const auto &directoryNames = getInstrumentDirectories();
 
   // only use downloaded instruments if configured to download
-  const std::string updateInstrStr =
-      this->getString("UpdateInstrumentDefinitions.OnStartup");
+  const std::string updateInstrStr = this->getString("UpdateInstrumentDefinitions.OnStartup");
 
   auto instrDir = directoryNames.begin();
 
@@ -1652,8 +1575,7 @@ ConfigServiceImpl::getFacilityFilenames(const std::string &fName) {
   // update the iterator, this means we will skip the folder in HOME and
   // look in the instrument folder in mantid install directory or mantid source
   // code directory
-  if (!(updateInstrStr == "1" || updateInstrStr == "on" ||
-        updateInstrStr == "On")) {
+  if (!(updateInstrStr == "1" || updateInstrStr == "on" || updateInstrStr == "On")) {
     instrDir++;
   }
 
@@ -1674,8 +1596,7 @@ ConfigServiceImpl::getFacilityFilenames(const std::string &fName) {
 
   // getting this far means the file was not found
   std::string directoryNamesList = boost::algorithm::join(directoryNames, ", ");
-  throw std::runtime_error("Failed to find \"Facilities.xml\". Searched in " +
-                           directoryNamesList);
+  throw std::runtime_error("Failed to find \"Facilities.xml\". Searched in " + directoryNamesList);
 }
 
 /**
@@ -1714,36 +1635,31 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
         throw std::runtime_error("No root element in Facilities.xml file");
       }
 
-      const Poco::AutoPtr<Poco::XML::NodeList> pNL_facility =
-          pRootElem->getElementsByTagName("facility");
+      const Poco::AutoPtr<Poco::XML::NodeList> pNL_facility = pRootElem->getElementsByTagName("facility");
       const size_t n = pNL_facility->length();
 
       for (unsigned long i = 0; i < n; ++i) {
-        const auto *elem =
-            dynamic_cast<Poco::XML::Element *>(pNL_facility->item(i));
+        const auto *elem = dynamic_cast<Poco::XML::Element *>(pNL_facility->item(i));
         if (elem) {
           m_facilities.emplace_back(new FacilityInfo(elem));
         }
       }
 
       if (m_facilities.empty()) {
-        throw std::runtime_error("The facility definition file " + fileName +
-                                 " defines no facilities");
+        throw std::runtime_error("The facility definition file " + fileName + " defines no facilities");
       }
 
       // if we got here we have suceeded and can exit the loop
       success = true;
     } catch (std::runtime_error &ex) {
       // log this failure to load a file
-      g_log.error() << "Failed to load the facilities.xml file at " << fileName
-                    << "\nIt might be corrupt.  " << ex.what()
-                    << "\nWill try to load another version.\n";
+      g_log.error() << "Failed to load the facilities.xml file at " << fileName << "\nIt might be corrupt.  "
+                    << ex.what() << "\nWill try to load another version.\n";
       attemptIndex++;
       // move on to the next file index if available
       if (attemptIndex == fileNames.size()) {
-        const std::string errorMessage =
-            "No more Facilities.xml files can be found, Mantid will not be "
-            "able to start, Sorry.  Try reinstalling Mantid.";
+        const std::string errorMessage = "No more Facilities.xml files can be found, Mantid will not be "
+                                         "able to start, Sorry.  Try reinstalling Mantid.";
         // This is one of the few times that both logging a messge and throwing
         // might make sense
         // as the error reporter tends to swallow the thrown message.
@@ -1770,16 +1686,14 @@ void ConfigServiceImpl::clearFacilities() {
  * @return the instrument information object
  * @throw NotFoundError if iName was not found
  */
-const InstrumentInfo &
-ConfigServiceImpl::getInstrument(const std::string &instrumentName) const {
+const InstrumentInfo &ConfigServiceImpl::getInstrument(const std::string &instrumentName) const {
 
   // Let's first search for the instrument in our default facility
   std::string defaultFacility = getFacility().name();
 
   if (!defaultFacility.empty()) {
     try {
-      g_log.debug() << "Looking for " << instrumentName << " at "
-                    << defaultFacility << ".\n";
+      g_log.debug() << "Looking for " << instrumentName << " at " << defaultFacility << ".\n";
       return getFacility(defaultFacility).instrument(instrumentName);
     } catch (Exception::NotFoundError &) {
       // Well the instName doesn't exist for this facility
@@ -1790,8 +1704,7 @@ ConfigServiceImpl::getInstrument(const std::string &instrumentName) const {
   // Now let's look through the other facilities
   for (auto facility : m_facilities) {
     try {
-      g_log.debug() << "Looking for " << instrumentName << " at "
-                    << (*facility).name() << ".\n";
+      g_log.debug() << "Looking for " << instrumentName << " at " << (*facility).name() << ".\n";
       return (*facility).instrument(instrumentName);
     } catch (Exception::NotFoundError &) {
       // Well the instName doesn't exist for this facility...
@@ -1799,9 +1712,7 @@ ConfigServiceImpl::getInstrument(const std::string &instrumentName) const {
     }
   }
 
-  const std::string errMsg =
-      "Failed to find an instrument with this name in any facility: '" +
-      instrumentName + "' -";
+  const std::string errMsg = "Failed to find an instrument with this name in any facility: '" + instrumentName + "' -";
   g_log.debug("Instrument " + instrumentName + " not found");
   throw Exception::NotFoundError(errMsg, instrumentName);
 }
@@ -1809,9 +1720,7 @@ ConfigServiceImpl::getInstrument(const std::string &instrumentName) const {
 /** Gets a vector of the facility Information objects
  * @return A vector of FacilityInfo objects
  */
-const std::vector<FacilityInfo *> ConfigServiceImpl::getFacilities() const {
-  return m_facilities;
-}
+const std::vector<FacilityInfo *> ConfigServiceImpl::getFacilities() const { return m_facilities; }
 
 /** Gets a vector of the facility names
  * @return A vector of the facility Names
@@ -1841,14 +1750,12 @@ const FacilityInfo &ConfigServiceImpl::getFacility() const {
  * @return the facility information object
  * @throw NotFoundException if the facility is not found
  */
-const FacilityInfo &
-ConfigServiceImpl::getFacility(const std::string &facilityName) const {
+const FacilityInfo &ConfigServiceImpl::getFacility(const std::string &facilityName) const {
   if (facilityName.empty())
     return this->getFacility();
 
-  auto facility = std::find_if(
-      m_facilities.cbegin(), m_facilities.cend(),
-      [&facilityName](const auto f) { return f->name() == facilityName; });
+  auto facility = std::find_if(m_facilities.cbegin(), m_facilities.cend(),
+                               [&facilityName](const auto f) { return f->name() == facilityName; });
 
   if (facility != m_facilities.cend()) {
     return **facility;
@@ -1870,8 +1777,7 @@ void ConfigServiceImpl::setFacility(const std::string &facilityName) {
     // is known
     foundFacility = &getFacility(facilityName);
   } catch (const Exception::NotFoundError &) {
-    g_log.error("Failed to set default facility to be " + facilityName +
-                ". Facility not found");
+    g_log.error("Failed to set default facility to be " + facilityName + ". Facility not found");
     throw;
   }
   assert(foundFacility);
@@ -1879,8 +1785,7 @@ void ConfigServiceImpl::setFacility(const std::string &facilityName) {
 
   const auto &associatedInsts = foundFacility->instruments();
   if (associatedInsts.empty()) {
-    throw std::invalid_argument(
-        "The selected facility has no instruments associated with it");
+    throw std::invalid_argument("The selected facility has no instruments associated with it");
   }
 
   // Update the default instrument to be one from this facility
@@ -1890,16 +1795,14 @@ void ConfigServiceImpl::setFacility(const std::string &facilityName) {
 /**  Add an observer to a notification
  @param observer :: Reference to the observer to add
  */
-void ConfigServiceImpl::addObserver(
-    const Poco::AbstractObserver &observer) const {
+void ConfigServiceImpl::addObserver(const Poco::AbstractObserver &observer) const {
   m_notificationCenter.addObserver(observer);
 }
 
 /**  Remove an observer
  @param observer :: Reference to the observer to remove
  */
-void ConfigServiceImpl::removeObserver(
-    const Poco::AbstractObserver &observer) const {
+void ConfigServiceImpl::removeObserver(const Poco::AbstractObserver &observer) const {
   m_notificationCenter.removeObserver(observer);
 }
 
@@ -1929,8 +1832,7 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
   return m_proxyInfo;
 }
 
-std::string ConfigServiceImpl::getFullPath(const std::string &filename,
-                                           const bool ignoreDirs,
+std::string ConfigServiceImpl::getFullPath(const std::string &filename, const bool ignoreDirs,
                                            const int options) const {
   std::string fName = Kernel::Strings::strip(filename);
   g_log.debug() << "getFullPath(" << fName << ")\n";
@@ -1948,8 +1850,7 @@ std::string ConfigServiceImpl::getFullPath(const std::string &filename,
 
   auto directoryNames = getDataSearchDirs();
   const auto &instrDirectories = getInstrumentDirectories();
-  directoryNames.insert(directoryNames.end(), instrDirectories.begin(),
-                        instrDirectories.end());
+  directoryNames.insert(directoryNames.end(), instrDirectories.begin(), instrDirectories.end());
   for (const auto &searchPath : directoryNames) {
     g_log.debug() << "Searching for " << fName << " in " << searchPath << "\n";
 // On windows globbing is not working properly with network drives
@@ -1996,17 +1897,12 @@ void ConfigServiceImpl::setLogLevel(int logLevel, bool quiet) {
 }
 
 /// \cond TEMPLATE
-template DLLExport boost::optional<double>
-ConfigServiceImpl::getValue(const std::string &);
-template DLLExport boost::optional<std::string>
-ConfigServiceImpl::getValue(const std::string &);
-template DLLExport boost::optional<int>
-ConfigServiceImpl::getValue(const std::string &);
-template DLLExport boost::optional<size_t>
-ConfigServiceImpl::getValue(const std::string &);
+template DLLExport boost::optional<double> ConfigServiceImpl::getValue(const std::string &);
+template DLLExport boost::optional<std::string> ConfigServiceImpl::getValue(const std::string &);
+template DLLExport boost::optional<int> ConfigServiceImpl::getValue(const std::string &);
+template DLLExport boost::optional<size_t> ConfigServiceImpl::getValue(const std::string &);
 #ifdef _MSC_VER
-template DLLExport boost::optional<bool>
-ConfigServiceImpl::getValue(const std::string &);
+template DLLExport boost::optional<bool> ConfigServiceImpl::getValue(const std::string &);
 #endif
 
 /// \endcond TEMPLATE

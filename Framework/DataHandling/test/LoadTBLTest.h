@@ -24,8 +24,7 @@ public:
   static LoadTBLTest *createSuite() { return new LoadTBLTest(); }
   static void destroySuite(LoadTBLTest *suite) { delete suite; }
 
-  LoadTBLTest()
-      : m_filename("LoadTBLTest.tbl"), m_wsName("LoadTBLTestWS"), m_abspath() {}
+  LoadTBLTest() : m_filename("LoadTBLTest.tbl"), m_wsName("LoadTBLTestWS"), m_abspath() {}
 
   ~LoadTBLTest() override {}
 
@@ -41,71 +40,52 @@ public:
     file << ",,,,,,,,,,13462,2.3,13463,0.035,0.3,0.04,2\n";
     file.close();
 
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
     m_abspath = alg->getPropertyValue("Filename"); // Get absolute path
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", m_wsName));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", m_wsName));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
 
     TS_ASSERT(alg->isExecuted());
 
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().doesExist(m_wsName), true);
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve(m_wsName));
-    TableWorkspace_sptr outputWS =
-        std::dynamic_pointer_cast<TableWorkspace>(output);
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(m_wsName));
+    TableWorkspace_sptr outputWS = std::dynamic_pointer_cast<TableWorkspace>(output);
     TS_ASSERT_EQUALS(outputWS->columnCount(), 10);
     TS_ASSERT_EQUALS(outputWS->rowCount(), 10);
 
     // test the first three rows, equivalent to the first two rows of the file.
     TableRow row = outputWS->getRow(0);
     TS_ASSERT_EQUALS(row.cell<std::string>(1), "13460");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(2)), 0.7,
-                    0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(2)), 0.7, 0.01);
     TS_ASSERT_EQUALS(row.cell<std::string>(3), "13463");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)), 0.01,
-                    0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.06,
-                    0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 0.04,
-                    0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(7)), 2,
-                    0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)), 0.01, 0.001);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.06, 0.001);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 0.04, 0.001);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(7)), 2, 0.01);
     TS_ASSERT_EQUALS(boost::lexical_cast<double>(row.cell<std::string>(0)), 1);
 
     row = outputWS->getRow(1);
     TS_ASSERT_EQUALS(row.cell<std::string>(1), "13469");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(2)), 0.7,
-                    0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(2)), 0.7, 0.01);
     TS_ASSERT_EQUALS(row.cell<std::string>(3), "13463");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)), 0.01,
-                    0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.06,
-                    0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 0.04,
-                    0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(7)), 2,
-                    0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)), 0.01, 0.001);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.06, 0.001);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 0.04, 0.001);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(7)), 2, 0.01);
     TS_ASSERT_EQUALS(boost::lexical_cast<double>(row.cell<std::string>(0)), 2);
 
     row = outputWS->getRow(2);
     TS_ASSERT_EQUALS(row.cell<std::string>(1), "13470");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(2)), 2.3,
-                    0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(2)), 2.3, 0.01);
     TS_ASSERT_EQUALS(row.cell<std::string>(3), "13463");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)),
-                    0.035, 0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.3,
-                    0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 0.04,
-                    0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(7)), 2,
-                    0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)), 0.035, 0.001);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.3, 0.001);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 0.04, 0.001);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(7)), 2, 0.01);
     TS_ASSERT_EQUALS(boost::lexical_cast<double>(row.cell<std::string>(0)), 2);
 
     TS_ASSERT(outputWS->getColumn("HiddenOptions") != nullptr);
@@ -126,71 +106,52 @@ public:
     file << ",,,,,,,,,,13462,2.3,\"13463,13464\",0.035,0.3,0.04,2\n";
     file.close();
 
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
     m_abspath = alg->getPropertyValue("Filename"); // Get absolute path
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", m_wsName));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", m_wsName));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
 
     TS_ASSERT(alg->isExecuted());
 
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().doesExist(m_wsName), true);
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve(m_wsName));
-    TableWorkspace_sptr outputWS =
-        std::dynamic_pointer_cast<TableWorkspace>(output);
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(m_wsName));
+    TableWorkspace_sptr outputWS = std::dynamic_pointer_cast<TableWorkspace>(output);
     TS_ASSERT_EQUALS(outputWS->columnCount(), 10);
     TS_ASSERT_EQUALS(outputWS->rowCount(), 10);
 
     // test the first three rows, equivalent to the first two rows of the file.
     TableRow row = outputWS->getRow(0);
     TS_ASSERT_EQUALS(row.cell<std::string>(1), "13460");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(2)), 0.7,
-                    0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(2)), 0.7, 0.01);
     TS_ASSERT_EQUALS(row.cell<std::string>(3), "13463,13464");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)), 0.01,
-                    0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.06,
-                    0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 0.04,
-                    0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(7)), 2,
-                    0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)), 0.01, 0.001);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.06, 0.001);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 0.04, 0.001);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(7)), 2, 0.01);
     TS_ASSERT_EQUALS(boost::lexical_cast<double>(row.cell<std::string>(0)), 1);
 
     row = outputWS->getRow(1);
     TS_ASSERT_EQUALS(row.cell<std::string>(1), "13469");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(2)), 0.7,
-                    0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(2)), 0.7, 0.01);
     TS_ASSERT_EQUALS(row.cell<std::string>(3), "13463,13464");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)), 0.01,
-                    0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.06,
-                    0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 0.04,
-                    0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(7)), 2,
-                    0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)), 0.01, 0.001);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.06, 0.001);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 0.04, 0.001);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(7)), 2, 0.01);
     TS_ASSERT_EQUALS(boost::lexical_cast<double>(row.cell<std::string>(0)), 2);
 
     row = outputWS->getRow(2);
     TS_ASSERT_EQUALS(row.cell<std::string>(1), "13470");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(2)), 2.3,
-                    0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(2)), 2.3, 0.01);
     TS_ASSERT_EQUALS(row.cell<std::string>(3), "13463,13464");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)),
-                    0.035, 0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.3,
-                    0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 0.04,
-                    0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(7)), 2,
-                    0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)), 0.035, 0.001);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.3, 0.001);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 0.04, 0.001);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(7)), 2, 0.01);
     TS_ASSERT_EQUALS(boost::lexical_cast<double>(row.cell<std::string>(0)), 2);
 
     cleanupafterwards();
@@ -210,14 +171,12 @@ public:
     file << ",,,,13462,2.3,\"13463,13464\",0.035,0.3,0.04,2\n";
     file.close();
 
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
     m_abspath = alg->getPropertyValue("Filename"); // Get absolute path
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", m_wsName));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", m_wsName));
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
 
     TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
@@ -237,14 +196,12 @@ public:
     file << ",,,,,,,,,13462,2.3,13463,0.035,0.3,0.04,2,,,,0.04,2\n";
     file.close();
 
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
     m_abspath = alg->getPropertyValue("Filename"); // Get absolute path
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", m_wsName));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", m_wsName));
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
 
     TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
@@ -264,14 +221,12 @@ public:
     file << ",,,,,,,,,,,,13462,2.3,\"13463,0.035\",0.3,0.04,2,,,,0.04,2\n";
     file.close();
 
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
     m_abspath = alg->getPropertyValue("Filename"); // Get absolute path
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", m_wsName));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", m_wsName));
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
 
     TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
@@ -285,23 +240,18 @@ public:
          << "14456,0.7,1.443,8.992,1,\n"
          << "18553,0.3,1.233,4.388,3,\n";
     file.close();
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
     m_abspath = alg->getPropertyValue("Filename"); // Get absolute path
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", m_wsName));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", m_wsName));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().doesExist(m_wsName), true);
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve(m_wsName));
-    TableWorkspace_sptr outputWS =
-        std::dynamic_pointer_cast<TableWorkspace>(output);
-    std::vector<std::string> cols{"Runs", "Angle", "QMin",
-                                  "QMax", "Group", "Options"};
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(m_wsName));
+    TableWorkspace_sptr outputWS = std::dynamic_pointer_cast<TableWorkspace>(output);
+    std::vector<std::string> cols{"Runs", "Angle", "QMin", "QMax", "Group", "Options"};
     TS_ASSERT_EQUALS(outputWS->getColumnNames(), cols);
     TableRow firstRow = outputWS->getRow(0);
     TS_ASSERT_EQUALS(firstRow.cell<std::string>(0), "14456");
@@ -326,23 +276,18 @@ public:
     std::ofstream file(m_filename.c_str());
     file << "Runs,Angle,Transmission,Energy,Spin,Group,Options\n";
     file.close();
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
     m_abspath = alg->getPropertyValue("Filename"); // Get absolute path
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", m_wsName));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", m_wsName));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().doesExist(m_wsName), true);
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve(m_wsName));
-    TableWorkspace_sptr outputWS =
-        std::dynamic_pointer_cast<TableWorkspace>(output);
-    std::vector<std::string> cols{"Runs", "Angle", "Transmission", "Energy",
-                                  "Spin", "Group", "Options"};
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(m_wsName));
+    TableWorkspace_sptr outputWS = std::dynamic_pointer_cast<TableWorkspace>(output);
+    std::vector<std::string> cols{"Runs", "Angle", "Transmission", "Energy", "Spin", "Group", "Options"};
     TS_ASSERT_EQUALS(outputWS->getColumnNames(), cols);
     TableRow row = outputWS->getRow(0);
     // we added no rows so we should get runtime error when we try to acheive a
@@ -354,14 +299,12 @@ public:
     std::ofstream file(m_filename.c_str());
     file.close();
 
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
     m_abspath = alg->getPropertyValue("Filename"); // Get absolute path
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", m_wsName));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", m_wsName));
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
 
     cleanupafterwards();
@@ -380,14 +323,12 @@ public:
     file << ",,,,,,,,,,,,,,,,\n";
     file.close();
 
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
     m_abspath = alg->getPropertyValue("Filename"); // Get absolute path
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", m_wsName));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", m_wsName));
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
     cleanupafterwards();
   }

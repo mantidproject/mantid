@@ -14,8 +14,7 @@ namespace Geometry {
 using namespace Kernel;
 
 /// Constructor, takes an orientation matrix and lambda min/max.
-HKLFilterWavelength::HKLFilterWavelength(const Kernel::DblMatrix &ub,
-                                         double lambdaMin, double lambdaMax)
+HKLFilterWavelength::HKLFilterWavelength(const Kernel::DblMatrix &ub, double lambdaMin, double lambdaMax)
     : m_ub(ub), m_lambdaMin(lambdaMin), m_lambdaMax(lambdaMax) {
   checkProperLambdaRangeValues();
 }

@@ -21,27 +21,22 @@ namespace MDAlgorithms {
  *
  * @date 2013-05-20
  */
-class DLLExport ConvertToDiffractionMDWorkspace3
-    : public MDAlgorithms::BaseConvertToDiffractionMDWorkspace {
+class DLLExport ConvertToDiffractionMDWorkspace3 : public MDAlgorithms::BaseConvertToDiffractionMDWorkspace {
 public:
   /// Algorithm's version for identification
   int version() const override { return 3; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"ConvertToMD", "SetSpecialCoordinates"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ConvertToMD", "SetSpecialCoordinates"}; }
 
 private:
   void init() override;
 
 private:
   // method to covnert extents to the properties of ConvertMD
-  void convertExtents(const std::vector<double> &Extents,
-                      std::vector<double> &minVal,
+  void convertExtents(const std::vector<double> &Extents, std::vector<double> &minVal,
                       std::vector<double> &maxVal) override;
 
   // method to calculate the extents of the data from the input workspace
-  void calculateExtentsFromData(std::vector<double> &minVal,
-                                std::vector<double> &maxVal);
+  void calculateExtentsFromData(std::vector<double> &minVal, std::vector<double> &maxVal);
 };
 
 } // namespace MDAlgorithms

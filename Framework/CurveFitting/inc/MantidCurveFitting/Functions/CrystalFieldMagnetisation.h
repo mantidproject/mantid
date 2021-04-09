@@ -24,32 +24,28 @@ namespace Functions {
 class CrystalFieldMagnetisationBase : public API::IFunction1D {
 public:
   CrystalFieldMagnetisationBase();
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
 
 protected:
   mutable ComplexFortranMatrix m_ham;
   mutable int m_nre;
 };
 
-class MANTID_CURVEFITTING_DLL CrystalFieldMagnetisation
-    : public CrystalFieldPeaksBase,
-      public CrystalFieldMagnetisationBase {
+class MANTID_CURVEFITTING_DLL CrystalFieldMagnetisation : public CrystalFieldPeaksBase,
+                                                          public CrystalFieldMagnetisationBase {
 public:
   CrystalFieldMagnetisation();
   std::string name() const override { return "CrystalFieldMagnetisation"; }
   const std::string category() const override { return "General"; }
   void setHamiltonian(const ComplexFortranMatrix &ham, const int nre);
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
 
 private:
   bool m_setDirect;
 };
 
-class MANTID_CURVEFITTING_DLL CrystalFieldMagnetisationCalculation
-    : public API::ParamFunction,
-      public CrystalFieldMagnetisationBase {
+class MANTID_CURVEFITTING_DLL CrystalFieldMagnetisationCalculation : public API::ParamFunction,
+                                                                     public CrystalFieldMagnetisationBase {
 public:
   CrystalFieldMagnetisationCalculation();
   std::string name() const override { return "mh"; }

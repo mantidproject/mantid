@@ -111,7 +111,7 @@ C - 2D and 3D Plot ILL Data
 
     '''2D Plotting - Colorfill and Contour'''
 
-    # Get a figure and axes for 
+    # Get a figure and axes for
     figC,axC = plt.subplots(ncols=2, subplot_kw={'projection':'mantid'}, figsize = (6,4))
 
     # Plot the data as a 2D colorfill: IMPORTANT to set origin to lower

@@ -22,23 +22,15 @@ public:
   static void showPage(QWidget *parent, const std::string &url = std::string());
   static void showPage(QWidget *parent, const QString &url);
   static void showPage(QWidget *parent, const QUrl &url);
-  static void showAlgorithm(QWidget *parent,
-                            const std::string &name = std::string(),
-                            const int version = -1);
-  static void showAlgorithm(QWidget *parent, const QString &name,
-                            const int version = -1);
-  static void showConcept(QWidget *parent,
-                          const std::string &name = std::string());
+  static void showAlgorithm(QWidget *parent, const std::string &name = std::string(), const int version = -1);
+  static void showAlgorithm(QWidget *parent, const QString &name, const int version = -1);
+  static void showConcept(QWidget *parent, const std::string &name = std::string());
   static void showConcept(QWidget *parent, const QString &name);
-  static void showFitFunction(QWidget *parent,
-                              const std::string &name = std::string());
-  static void showCustomInterface(QWidget *parent, const QString &name,
-                                  const QString &area = QString(),
+  static void showFitFunction(QWidget *parent, const std::string &name = std::string());
+  static void showCustomInterface(QWidget *parent, const QString &name, const QString &area = QString(),
                                   const QString &section = QString());
-  static void showCustomInterface(QWidget *parent,
-                                  const std::string &name = std::string(),
-                                  const std::string &area = std::string(),
-                                  const std::string &section = std::string());
+  static void showCustomInterface(QWidget *parent, const std::string &name = std::string(),
+                                  const std::string &area = std::string(), const std::string &section = std::string());
 };
 } // namespace API
 } // namespace MantidQt

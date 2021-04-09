@@ -31,8 +31,7 @@ public:
   void testExec() {
     IAlgorithm *loader = new Mantid::DataHandling::LoadNexus;
     loader->initialize();
-    loader->setPropertyValue(
-        "Filename", "HRP38692a.nxs"); // HRP382692.raw spectrum range 320-330
+    loader->setPropertyValue("Filename", "HRP38692a.nxs"); // HRP382692.raw spectrum range 320-330
 
     std::string outputSpace = "tofocus";
     loader->setPropertyValue("OutputWorkspace", outputSpace);
@@ -47,9 +46,7 @@ public:
     TS_ASSERT(focus.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "focusedWS"));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("focusedWS"));
 
     // only 1 group for this limited range of spectra
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);

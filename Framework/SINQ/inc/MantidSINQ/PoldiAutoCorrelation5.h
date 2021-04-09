@@ -45,9 +45,7 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "PoldiAutoCorrelation"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Performs correlation analysis of POLDI 2D-data.";
-  }
+  const std::string summary() const override { return "Performs correlation analysis of POLDI 2D-data."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 5; }
@@ -58,9 +56,8 @@ protected:
   /// Overwrites Algorithm method
   void exec() override;
 
-  void logConfigurationInformation(
-      const std::shared_ptr<PoldiDeadWireDecorator> &cleanDetector,
-      const PoldiAbstractChopper_sptr &chopper);
+  void logConfigurationInformation(const std::shared_ptr<PoldiDeadWireDecorator> &cleanDetector,
+                                   const PoldiAbstractChopper_sptr &chopper);
 
 private:
   /// Overwrites Algorithm method.

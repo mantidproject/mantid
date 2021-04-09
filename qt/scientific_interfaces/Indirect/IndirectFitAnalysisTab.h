@@ -35,16 +35,13 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-size_t getNumberOfSpecificFunctionContained(const std::string &functionName,
-                                            const IFunction *compositeFunction);
+size_t getNumberOfSpecificFunctionContained(const std::string &functionName, const IFunction *compositeFunction);
 
-class MANTIDQT_INDIRECT_DLL IndirectFitAnalysisTab
-    : public IndirectDataAnalysisTab {
+class MANTIDQT_INDIRECT_DLL IndirectFitAnalysisTab : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
-  IndirectFitAnalysisTab(IndirectFittingModel *model,
-                         QWidget *parent = nullptr);
+  IndirectFitAnalysisTab(IndirectFittingModel *model, QWidget *parent = nullptr);
   virtual ~IndirectFitAnalysisTab() override = default;
 
   void setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenter> presenter);
@@ -54,14 +51,12 @@ public:
   void setFitPropertyBrowser(IndirectFitPropertyBrowser *browser);
   TableDatasetIndex getSelectedDataIndex() const;
   WorkspaceIndex getSelectedSpectrum() const;
-  bool isRangeCurrentlySelected(TableDatasetIndex dataIndex,
-                                WorkspaceIndex spectrum) const;
+  bool isRangeCurrentlySelected(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const;
   size_t getNumberOfCustomFunctions(const std::string &functionName) const;
   void setConvolveMembers(bool convolveMembers);
 
-  static size_t
-  getNumberOfSpecificFunctionContained(const std::string &functionName,
-                                       const IFunction *compositeFunction);
+  static size_t getNumberOfSpecificFunctionContained(const std::string &functionName,
+                                                     const IFunction *compositeFunction);
 
   virtual std::string getTabName() const = 0;
   virtual bool hasResolution() const = 0;
@@ -77,8 +72,7 @@ protected:
   void setSampleSuffixes(std::string const &tab, bool filter);
   void setResolutionSuffixes(std::string const &tab, bool filter);
 
-  void setAlgorithmProperties(
-      const Mantid::API::IAlgorithm_sptr &fitAlgorithm) const;
+  void setAlgorithmProperties(const Mantid::API::IAlgorithm_sptr &fitAlgorithm) const;
   void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
   void runSingleFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
   virtual void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
@@ -125,13 +119,9 @@ protected slots:
   void setDataTableStartX(double startX);
   void setDataTableEndX(double endX);
   void setDataTableExclude(const std::string &exclude);
-  void tableStartXChanged(double startX, TableDatasetIndex dataIndex,
-                          WorkspaceIndex spectrum);
-  void tableEndXChanged(double endX, TableDatasetIndex dataIndex,
-                        WorkspaceIndex spectrum);
-  void tableExcludeChanged(const std::string &exclude,
-                           TableDatasetIndex dataIndex,
-                           WorkspaceIndex spectrum);
+  void tableStartXChanged(double startX, TableDatasetIndex dataIndex, WorkspaceIndex spectrum);
+  void tableEndXChanged(double endX, TableDatasetIndex dataIndex, WorkspaceIndex spectrum);
+  void tableExcludeChanged(const std::string &exclude, TableDatasetIndex dataIndex, WorkspaceIndex spectrum);
   void startXChanged(double startX);
   void endXChanged(double endX);
   void updateFitOutput(bool error);
@@ -141,11 +131,9 @@ protected slots:
   void singleFit(TableDatasetIndex dataIndex, WorkspaceIndex spectrum);
   void executeFit();
   void updateParameterValues();
-  void updateParameterValues(
-      const std::unordered_map<std::string, ParameterValue> &parameters);
+  void updateParameterValues(const std::unordered_map<std::string, ParameterValue> &parameters);
   void updateFitBrowserParameterValues(
-      std::unordered_map<std::string, ParameterValue> parameters =
-          std::unordered_map<std::string, ParameterValue>());
+      std::unordered_map<std::string, ParameterValue> parameters = std::unordered_map<std::string, ParameterValue>());
   void updateFitBrowserParameterValuesFromAlg();
   void updateFitStatus();
   void updateDataReferences();

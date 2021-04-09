@@ -32,8 +32,7 @@ Chebyshev::Chebyshev() : m_n(0), m_StartX(-1.), m_EndX(1.) {
   declareAttribute("EndX", Attribute(m_EndX));
 }
 
-void Chebyshev::function1D(double *out, const double *xValues,
-                           const size_t nData) const {
+void Chebyshev::function1D(double *out, const double *xValues, const size_t nData) const {
   if (m_StartX >= m_EndX) {
     throw std::runtime_error("Chebyshev: invalid x-range");
   }
@@ -54,8 +53,7 @@ void Chebyshev::function1D(double *out, const double *xValues,
   }
 }
 
-void Chebyshev::functionDeriv1D(Jacobian *out, const double *xValues,
-                                const size_t nData) {
+void Chebyshev::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
   if (m_n < 0) {
     return;
   }
@@ -85,8 +83,7 @@ void Chebyshev::functionDeriv1D(Jacobian *out, const double *xValues,
  * @param att :: An int attribute containing the new value. The value cannot be
  * negative.
  */
-void Chebyshev::setAttribute(const std::string &attName,
-                             const API::IFunction::Attribute &att) {
+void Chebyshev::setAttribute(const std::string &attName, const API::IFunction::Attribute &att) {
   storeAttributeValue(attName, att);
 
   if (attName == "n") {
@@ -94,8 +91,7 @@ void Chebyshev::setAttribute(const std::string &attName,
 
     auto newN = att.asInt();
     if (newN < 0) {
-      throw std::invalid_argument(
-          "Chebyshev: polynomial order cannot be negative.");
+      throw std::invalid_argument("Chebyshev: polynomial order cannot be negative.");
     }
 
     // Save old values

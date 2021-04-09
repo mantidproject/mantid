@@ -345,7 +345,7 @@ rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DENABLE_MANTIDPLOT=OFF -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} .."
+$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_PRECOMMIT=OFF -DENABLE_CPACK=ON -DENABLE_MANTIDPLOT=OFF -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} .."
 
 ###############################################################################
 # Coverity build should exit early
@@ -391,14 +391,15 @@ fi
 # Prevent race conditions when creating the user config directory
 userconfig_dir=$HOME/.mantid
 rm -fr $userconfig_dir
-# Remove GUI qsettings files
+# Remove old application saved state & crash reports on mac.
+# If we don't do this then when a previous test has crashed macOS
+# will pop up a dialog box and wait for clicking okay. We are heavy
+# handed but builders tend not to be used for anything else.
 if [[ ${ON_MACOS} == true ]] ; then
-    rm -f $HOME/Library/Preferences/com.mantid.MantidPlot.plist
-    rm -f $HOME/Library/Preferences/org.mantidproject.MantidPlot.plist
-    rm -f "$HOME/Library/Saved Application State/org.mantidproject.MantidPlot.savedState/windows.plist"
-else
-    rm -f ~/.config/Mantid/MantidPlot.conf
+    rm -fr "$HOME/Library/Saved Application State/org.python.python"
+    rm -f $HOME/Library/Application\ Support/CrashReporter/*
 fi
+# Remove GUI qsettings files
 rm -f ~/.config/mantidproject/mantidworkbench.ini
 
 mkdir -p $userconfig_dir

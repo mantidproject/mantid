@@ -120,33 +120,24 @@ public:
   void setProxy(const Kernel::ProxyInfo &proxy);
 
   // Execute call methods
-  virtual int downloadFile(const std::string &urlFile,
-                           const std::string &localFilePath = "");
+  virtual int downloadFile(const std::string &urlFile, const std::string &localFilePath = "");
   virtual int sendRequest(const std::string &url, std::ostream &responseStream);
 
 protected:
-  virtual int sendHTTPSRequest(const std::string &url,
-                               std::ostream &responseStream);
-  virtual int sendHTTPRequest(const std::string &url,
-                              std::ostream &responseStream);
+  virtual int sendHTTPSRequest(const std::string &url, std::ostream &responseStream);
+  virtual int sendHTTPRequest(const std::string &url, std::ostream &responseStream);
   virtual void processResponseHeaders(const Poco::Net::HTTPResponse &res);
-  virtual int processErrorStates(const Poco::Net::HTTPResponse &res,
-                                 std::istream &rs, const std::string &url);
-  virtual int sendRequestAndProcess(Poco::Net::HTTPClientSession &session,
-                                    Poco::URI &uri,
+  virtual int processErrorStates(const Poco::Net::HTTPResponse &res, std::istream &rs, const std::string &url);
+  virtual int sendRequestAndProcess(Poco::Net::HTTPClientSession &session, Poco::URI &uri,
                                     std::ostream &responseStream);
 
-  void setupProxyOnSession(Poco::Net::HTTPClientSession &session,
-                           const std::string &proxyUrl);
+  void setupProxyOnSession(Poco::Net::HTTPClientSession &session, const std::string &proxyUrl);
   void createRequest(Poco::URI &uri);
-  int processRelocation(const Poco::Net::HTTPResponse &response,
-                        std::ostream &responseStream);
+  int processRelocation(const Poco::Net::HTTPResponse &response, std::ostream &responseStream);
   bool isRelocated(const int response);
-  void throwNotConnected(const std::string &url,
-                         const Poco::Net::HostNotFoundException &ex);
+  void throwNotConnected(const std::string &url, const Poco::Net::HostNotFoundException &ex);
 
-  void logDebugRequestSending(const std::string &schemeName,
-                              const std::string &url) const;
+  void logDebugRequestSending(const std::string &schemeName, const std::string &url) const;
 
   Kernel::ProxyInfo m_proxyInfo;
   bool m_isProxySet;

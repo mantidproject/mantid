@@ -47,8 +47,7 @@ private:
   };
   // Holds data about sample as a whole.
   struct SampleComptonProperties {
-    SampleComptonProperties(const int nprops)
-        : atoms(nprops), density(-1.0), totalxsec(-1.0), mu(-1.0) {}
+    SampleComptonProperties(const int nprops) : atoms(nprops), density(-1.0), totalxsec(-1.0), mu(-1.0) {}
 
     std::vector<ComptonNeutronAtom> atoms;
     double density;   // g/cm^3
@@ -63,9 +62,7 @@ public:
   /// @copydoc Algorithm::version
   int version() const override { return 1; }
   /// @copydoc Algorithm::category
-  const std::string category() const override {
-    return "CorrectionFunctions\\SpecialCorrections";
-  }
+  const std::string category() const override { return "CorrectionFunctions\\SpecialCorrections"; }
   /// @copydoc Algorithm::summary
   const std::string summary() const override {
     return "Calculates the contributions of multiple scattering "
@@ -73,8 +70,7 @@ public:
   }
 
   const std::vector<std::string> seeAlso() const override {
-    return {"MayersSampleCorrection", "MonteCarloAbsorption",
-            "CarpenterSampleCorrection"};
+    return {"MayersSampleCorrection", "MonteCarloAbsorption", "CarpenterSampleCorrection"};
   }
 
 private:
@@ -82,50 +78,38 @@ private:
   void exec() override;
 
   void cacheInputs();
-  void calculateMS(const size_t wsIndex, API::ISpectrum &totalsc,
-                   API::ISpectrum &multsc) const;
-  void simulate(const DetectorParams &detpar,
-                const Functions::ResolutionParams &respar,
+  void calculateMS(const size_t wsIndex, API::ISpectrum &totalsc, API::ISpectrum &multsc) const;
+  void simulate(const DetectorParams &detpar, const Functions::ResolutionParams &respar,
                 MSVesuvioHelper::Simulation &simulCounts) const;
-  void assignToOutput(const MSVesuvioHelper::SimulationWithErrors &avgCounts,
-                      API::ISpectrum &totalsc, API::ISpectrum &multsc) const;
-  double calculateCounts(const DetectorParams &detpar,
-                         const Functions::ResolutionParams &respar,
+  void assignToOutput(const MSVesuvioHelper::SimulationWithErrors &avgCounts, API::ISpectrum &totalsc,
+                      API::ISpectrum &multsc) const;
+  double calculateCounts(const DetectorParams &detpar, const Functions::ResolutionParams &respar,
                          MSVesuvioHelper::Simulation &simulation) const;
 
   // single-event helpers
   Kernel::V3D generateSrcPos(const double l1) const;
   double generateE0(const double l1, const double t2, double &weight) const;
-  double generateTOF(const double en0, const double dtof,
-                     const double dl1) const;
-  bool generateScatter(const Kernel::V3D &startPos, const Kernel::V3D &direc,
-                       double &weight, Kernel::V3D &scatterPt) const;
-  std::pair<double, double> calculateE1Range(const double theta,
-                                             const double en0) const;
-  double partialDiffXSec(const double en0, const double en1,
-                         const double theta) const;
-  Kernel::V3D generateDetectorPos(const Kernel::V3D &nominalPos,
-                                  const double energy,
-                                  const Kernel::V3D &scatterPt,
-                                  const Kernel::V3D &direcBeforeSc,
-                                  double &scang, double &distToExit) const;
-  double generateE1(const double angle, const double e1nom,
-                    const double e1res) const;
+  double generateTOF(const double en0, const double dtof, const double dl1) const;
+  bool generateScatter(const Kernel::V3D &startPos, const Kernel::V3D &direc, double &weight,
+                       Kernel::V3D &scatterPt) const;
+  std::pair<double, double> calculateE1Range(const double theta, const double en0) const;
+  double partialDiffXSec(const double en0, const double en1, const double theta) const;
+  Kernel::V3D generateDetectorPos(const Kernel::V3D &nominalPos, const double energy, const Kernel::V3D &scatterPt,
+                                  const Kernel::V3D &direcBeforeSc, double &scang, double &distToExit) const;
+  double generateE1(const double angle, const double e1nom, const double e1res) const;
 
   // Member Variables
-  std::unique_ptr<CurveFitting::MSVesuvioHelper::RandomVariateGenerator>
-      m_randgen; // random number generator
+  std::unique_ptr<CurveFitting::MSVesuvioHelper::RandomVariateGenerator> m_randgen; // random number generator
 
-  size_t m_acrossIdx, m_upIdx, m_beamIdx; // indices of each direction
-  Kernel::V3D m_beamDir;                  // Directional vector for beam
-  double m_srcR2;                         // beam penumbra radius (m)
+  size_t m_acrossIdx, m_upIdx, m_beamIdx;                          // indices of each direction
+  Kernel::V3D m_beamDir;                                           // Directional vector for beam
+  double m_srcR2;                                                  // beam penumbra radius (m)
   double m_halfSampleHeight, m_halfSampleWidth, m_halfSampleThick; // (m)
-  Geometry::IObject const *m_sampleShape; // sample shape
-  std::unique_ptr<SampleComptonProperties>
-      m_sampleProps; // description of sample properties
-  double m_detHeight, m_detWidth, m_detThick; // (m)
-  double m_tmin, m_tmax, m_delt;              // min, max & dt TOF value
-  double m_foilRes;                           // resolution in energy of foil
+  Geometry::IObject const *m_sampleShape;                          // sample shape
+  std::unique_ptr<SampleComptonProperties> m_sampleProps;          // description of sample properties
+  double m_detHeight, m_detWidth, m_detThick;                      // (m)
+  double m_tmin, m_tmax, m_delt;                                   // min, max & dt TOF value
+  double m_foilRes;                                                // resolution in energy of foil
 
   size_t m_nscatters; // highest order of scattering to generate
   size_t m_nruns;     // number of runs per spectrum

@@ -49,8 +49,7 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return {"OneMinusExponentialCor", "MagFormFactorCorrection",
-            "ExponentialCorrection", "PowerLawCorrection"};
+    return {"OneMinusExponentialCor", "MagFormFactorCorrection", "ExponentialCorrection", "PowerLawCorrection"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "CorrectionFunctions"; }
@@ -59,14 +58,12 @@ private:
   // Overridden UnaryOperation methods
   void defineProperties() override;
   void retrieveProperties() override;
-  void performUnaryOperation(const double XIn, const double YIn,
-                             const double EIn, double &YOut,
-                             double &EOut) override;
+  void performUnaryOperation(const double XIn, const double YIn, const double EIn, double &YOut, double &EOut) override;
 
   std::vector<double> m_coeffs; ///< Holds the coefficients for the polynomial
   /// correction function
   std::vector<double>::size_type m_polySize; ///< The order of the polynomial
-  bool m_isOperationMultiply; ///< True is the operation is multiply, false
+  bool m_isOperationMultiply;                ///< True is the operation is multiply, false
   /// means divide
 };
 

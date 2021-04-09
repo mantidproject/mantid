@@ -29,8 +29,7 @@ using namespace Mantid::MDAlgorithms;
 
 namespace {
 Mantid::API::MatrixWorkspace_sptr createTestWorkspaces() {
-  auto sim_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-      "CreateSimulationWorkspace");
+  auto sim_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CreateSimulationWorkspace");
   sim_alg->initialize();
   sim_alg->setChild(true);
   sim_alg->setPropertyValue("Instrument", "MAR");
@@ -39,11 +38,9 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspaces() {
   sim_alg->setPropertyValue("OutputWorkspace", "data_source_1");
   sim_alg->execute();
 
-  Mantid::API::MatrixWorkspace_sptr ws =
-      sim_alg->getProperty("OutputWorkspace");
+  Mantid::API::MatrixWorkspace_sptr ws = sim_alg->getProperty("OutputWorkspace");
 
-  auto log_alg =
-      Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
+  auto log_alg = Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
   log_alg->initialize();
   log_alg->setChild(true);
   log_alg->setProperty("Workspace", ws);
@@ -59,21 +56,16 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspaces() {
 class Convert2AnyTestHelper : public ConvertToMD {
 public:
   Convert2AnyTestHelper(){};
-  TableWorkspace_const_sptr preprocessDetectorsPositions(
-      const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,
-      const std::string &dEModeRequested = "Direct", bool updateMasks = false) {
-    return ConvertToMD::preprocessDetectorsPositions(
-        InWS2D, dEModeRequested, updateMasks,
-        std::string(this->getProperty("PreprocDetectorsWS")));
+  TableWorkspace_const_sptr preprocessDetectorsPositions(const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,
+                                                         const std::string &dEModeRequested = "Direct",
+                                                         bool updateMasks = false) {
+    return ConvertToMD::preprocessDetectorsPositions(InWS2D, dEModeRequested, updateMasks,
+                                                     std::string(this->getProperty("PreprocDetectorsWS")));
   }
-  void setSourceWS(Mantid::API::MatrixWorkspace_sptr InWS2D) {
-    m_InWS2D = std::move(InWS2D);
-  }
+  void setSourceWS(Mantid::API::MatrixWorkspace_sptr InWS2D) { m_InWS2D = std::move(InWS2D); }
 };
 // helper function to provide list of names to test:
-std::vector<std::string> dim_availible() {
-  return {"DeltaE", "T", "alpha", "beta", "gamma"};
-}
+std::vector<std::string> dim_availible() { return {"DeltaE", "T", "alpha", "beta", "gamma"}; }
 //
 class ConvertToMDTest : public CxxTest::TestSuite {
   std::unique_ptr<Convert2AnyTestHelper> pAlg;
@@ -89,8 +81,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(pAlg->initialize())
     TS_ASSERT(pAlg->isInitialized())
 
-    TSM_ASSERT_EQUALS("algorithm should have 26 properties", 26,
-                      (size_t)(pAlg->getProperties().size()));
+    TSM_ASSERT_EQUALS("algorithm should have 26 properties", 26, (size_t)(pAlg->getProperties().size()));
   }
 
   void testSetUpThrow() {
@@ -98,30 +89,24 @@ public:
 
     // get ws from the DS
     Mantid::API::MatrixWorkspace_sptr ws2D =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "testWSProcessed");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
     // give it to algorithm
-    TSM_ASSERT_THROWS_NOTHING(
-        "the initial ws is not in the units of energy transfer",
-        pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
+    TSM_ASSERT_THROWS_NOTHING("the initial ws is not in the units of energy transfer",
+                              pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
     // target ws fine
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("OutputWorkspace", "EnergyTransferND"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransferND"));
     // unknown Q-dimension trows
-    TS_ASSERT_THROWS(pAlg->setPropertyValue("QDimensions", "unknownQ"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(pAlg->setPropertyValue("QDimensions", "unknownQ"), const std::invalid_argument &);
     // correct Q-dimension fine
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "|Q|"));
     // additional dimensions requested -- fine
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("OtherDimensions", "DeltaE,omega"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OtherDimensions", "DeltaE,omega"));
   }
 
   void testExecNoQ() {
 
     Mantid::API::MatrixWorkspace_sptr ws2D =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "testWSProcessed");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
     auto pAxis = std::make_unique<API::NumericAxis>(3);
     pAxis->setUnit("dSpacing");
 
@@ -141,8 +126,7 @@ public:
     pAlg->setPropertyValue("OtherDimensions", "phi,chi");
     //    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode",
     //    "NoDE"));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue(
-        "dEAnalysisMode", "Elastic")); // dE mode will be ignored
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Elastic")); // dE mode will be ignored
     //
     pAlg->setPropertyValue("MinValues", "-10,0,-10");
     pAlg->setPropertyValue("MaxValues", " 10,20,40");
@@ -150,16 +134,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(pAlg->execute());
     checkHistogramsHaveBeenStored("WS3DNoQ");
 
-    auto outWS =
-        AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS3DNoQ");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS3DNoQ");
     TS_ASSERT_EQUALS(Mantid::Kernel::None, outWS->getSpecialCoordinateSystem());
 
     // Check that the display normalization is set correctly -- NoQ
-    TSM_ASSERT_EQUALS("Should be set to volume normalization",
-                      outWS->displayNormalization(),
+    TSM_ASSERT_EQUALS("Should be set to volume normalization", outWS->displayNormalization(),
                       Mantid::API::VolumeNormalization);
-    TSM_ASSERT_EQUALS("Should be set to volume normalization",
-                      outWS->displayNormalizationHisto(),
+    TSM_ASSERT_EQUALS("Should be set to volume normalization", outWS->displayNormalizationHisto(),
                       Mantid::API::VolumeNormalization);
 
     AnalysisDataService::Instance().remove("WS3DNoQ");
@@ -168,8 +149,7 @@ public:
   void testExecModQ() {
 
     Mantid::API::MatrixWorkspace_sptr ws2D =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "testWSProcessed");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
     auto pAxis = std::make_unique<API::NumericAxis>(3);
     pAxis->setUnit("dSpacing");
 
@@ -180,27 +160,22 @@ public:
     pAlg->setPropertyValue("QDimensions", "|Q|");
     pAlg->setPropertyValue("PreprocDetectorsWS", "");
     pAlg->setPropertyValue("OtherDimensions", "phi,chi");
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("dEAnalysisMode", "Elastic"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Elastic"));
     //
     pAlg->setPropertyValue("MinValues", "-10,0,-10");
     pAlg->setPropertyValue("MaxValues", " 10,20,40");
     pAlg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(pAlg->execute());
-    checkHistogramsHaveBeenStored("WS3DmodQ", 7000, 6489.5591101441796,
-                                  7300.7539989122024);
+    checkHistogramsHaveBeenStored("WS3DmodQ", 7000, 6489.5591101441796, 7300.7539989122024);
 
-    auto outWS =
-        AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS3DmodQ");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS3DmodQ");
     TS_ASSERT_EQUALS(Mantid::Kernel::None, outWS->getSpecialCoordinateSystem());
 
     // Check that the display normalization is set correctly -- Q with
     // Elasticevent
-    TSM_ASSERT_EQUALS("Should be set to volume normalization",
-                      outWS->displayNormalization(),
+    TSM_ASSERT_EQUALS("Should be set to volume normalization", outWS->displayNormalization(),
                       Mantid::API::VolumeNormalization);
-    TSM_ASSERT_EQUALS("Should be set to volume normalization",
-                      outWS->displayNormalizationHisto(),
+    TSM_ASSERT_EQUALS("Should be set to volume normalization", outWS->displayNormalizationHisto(),
                       Mantid::API::VolumeNormalization);
 
     AnalysisDataService::Instance().remove("WS3DmodQ");
@@ -208,8 +183,7 @@ public:
 
   void testExecQ3D() {
     Mantid::API::MatrixWorkspace_sptr ws2D =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "testWSProcessed");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
     auto pAxis = std::make_unique<API::NumericAxis>(3);
     pAxis->setUnit("DeltaE");
 
@@ -221,8 +195,7 @@ public:
     pAlg->setPropertyValue("PreprocDetectorsWS", "");
 
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "Q3D"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
     pAlg->setPropertyValue("MinValues", "-10,-10,-10,  0,-10,-10");
     pAlg->setPropertyValue("MaxValues", " 10, 10, 10, 20, 40, 20");
     pAlg->setRethrows(false);
@@ -230,8 +203,7 @@ public:
     TSM_ASSERT("Should finish successfully", pAlg->isExecuted());
     checkHistogramsHaveBeenStored("WS5DQ3D");
 
-    auto outWS =
-        AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS5DQ3D");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS5DQ3D");
     TS_ASSERT_EQUALS(Mantid::Kernel::HKL, outWS->getSpecialCoordinateSystem());
 
     // Check that we are getting good frame information back for each dimension.
@@ -245,19 +217,16 @@ public:
 
     // Check that the display normalization is set correctly -- WS2D with
     // inelastic and Q
-    TSM_ASSERT_EQUALS("Should be set to num events normalization",
-                      outWS->displayNormalization(),
+    TSM_ASSERT_EQUALS("Should be set to num events normalization", outWS->displayNormalization(),
                       Mantid::API::VolumeNormalization);
-    TSM_ASSERT_EQUALS("Should be set to num events normalization",
-                      outWS->displayNormalizationHisto(),
+    TSM_ASSERT_EQUALS("Should be set to num events normalization", outWS->displayNormalizationHisto(),
                       Mantid::API::NumEventsNormalization);
     AnalysisDataService::Instance().remove("WS5DQ3D");
   }
 
   void testInitialSplittingEnabled() {
     // Create workspace
-    auto alg = Mantid::API::AlgorithmManager::Instance().create(
-        "CreateSampleWorkspace");
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("CreateSampleWorkspace");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("WorkspaceType", "Event");
@@ -282,11 +251,9 @@ public:
     convertAlg.setPropertyValue("TopLevelSplitting", "1");
     convertAlg.execute();
 
-    IMDEventWorkspace_sptr outEventWS =
-        convertAlg.getProperty("OutputWorkspace");
+    IMDEventWorkspace_sptr outEventWS = convertAlg.getProperty("OutputWorkspace");
 
-    Mantid::API::BoxController_sptr boxController =
-        outEventWS->getBoxController();
+    Mantid::API::BoxController_sptr boxController = outEventWS->getBoxController();
     std::vector<size_t> numMDBoxes = boxController->getNumMDBoxes();
     std::vector<size_t> numMDGridBoxes = boxController->getNumMDGridBoxes();
     // Check depth 0
@@ -296,8 +263,7 @@ public:
     // We need to ensure that the number of Boxes plus the number of Gridboxes
     // is 50^4
     size_t level1 = numMDBoxes[1] + numMDGridBoxes[1];
-    TSM_ASSERT_EQUALS("Should have 6250000 MDBoxes at level 1", 6250000,
-                      level1);
+    TSM_ASSERT_EQUALS("Should have 6250000 MDBoxes at level 1", 6250000, level1);
 
     // Confirm that the boxcontroller is set to the original settings
     TSM_ASSERT_EQUALS("Should be set to 5", 5, boxController->getSplitInto(0));
@@ -307,18 +273,15 @@ public:
 
     // Check that the display normalization is set correctly -- EventWS with
     // inelastic and Q
-    TSM_ASSERT_EQUALS("Should be set to num events normalization",
-                      outEventWS->displayNormalization(),
+    TSM_ASSERT_EQUALS("Should be set to num events normalization", outEventWS->displayNormalization(),
                       Mantid::API::VolumeNormalization);
-    TSM_ASSERT_EQUALS("Should be set to num events normalization",
-                      outEventWS->displayNormalizationHisto(),
+    TSM_ASSERT_EQUALS("Should be set to num events normalization", outEventWS->displayNormalizationHisto(),
                       Mantid::API::NoNormalization);
   }
 
   void testInitialSplittingDisabled() {
     Mantid::API::MatrixWorkspace_sptr ws2D =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "testWSProcessed");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
     auto pAxis = std::make_unique<API::NumericAxis>(3);
     pAxis->setUnit("DeltaE");
 
@@ -330,8 +293,7 @@ public:
     pAlg->setPropertyValue("PreprocDetectorsWS", "");
 
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "Q3D"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
     pAlg->setPropertyValue("MinValues", "-10,-10,-10,  0,-10,-10");
     pAlg->setPropertyValue("MaxValues", " 10, 10, 10, 20, 40, 20");
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("TopLevelSplitting", "0"));
@@ -339,27 +301,22 @@ public:
     pAlg->execute();
     TSM_ASSERT("Should finish successfully", pAlg->isExecuted());
 
-    IMDEventWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            "WS5DQ3D");
-    Mantid::API::BoxController_sptr boxController =
-        outputWS->getBoxController();
+    IMDEventWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("WS5DQ3D");
+    Mantid::API::BoxController_sptr boxController = outputWS->getBoxController();
 
     std::vector<size_t> numMDBoxes = boxController->getNumMDBoxes();
 
     // Check depth 0
     TSM_ASSERT_EQUALS("Should have no MDBoxes at level 0", 0, numMDBoxes[0]);
     // Check depth 1. The boxController is set to split with 5, 5, 5, 5, 5, 5
-    TSM_ASSERT_EQUALS("Should have 15625 MDBoxes at level 1", 15625,
-                      numMDBoxes[1]);
+    TSM_ASSERT_EQUALS("Should have 15625 MDBoxes at level 1", 15625, numMDBoxes[1]);
 
     // Confirm that the boxcontroller is set to the original settings
     TSM_ASSERT_EQUALS("Should be set to 5", 5, boxController->getSplitInto(0));
     TSM_ASSERT_EQUALS("Should be set to 5", 5, boxController->getSplitInto(1));
     TSM_ASSERT_EQUALS("Should be set to 5", 5, boxController->getSplitInto(2));
 
-    auto outWS =
-        AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS5DQ3D");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS5DQ3D");
     TS_ASSERT_EQUALS(Mantid::Kernel::HKL, outWS->getSpecialCoordinateSystem());
 
     AnalysisDataService::Instance().remove("WS5DQ3D");
@@ -392,10 +349,9 @@ public:
                               "Create MD Workspace GUI. Fix "
                               "CreateMDWorkspaceGUI!",
                               QDimProperty = alg.getProperty("dEAnalysisMode"));
-    TSM_ASSERT_THROWS_NOTHING(
-        "Property name has changed. This has broken Create MD Workspace GUI. "
-        "Fix CreateMDWorkspaceGUI!",
-        QDimProperty = alg.getProperty("OtherDimensions"));
+    TSM_ASSERT_THROWS_NOTHING("Property name has changed. This has broken Create MD Workspace GUI. "
+                              "Fix CreateMDWorkspaceGUI!",
+                              QDimProperty = alg.getProperty("OtherDimensions"));
     TSM_ASSERT_THROWS_NOTHING("Property name has changed. This has broken "
                               "Create MD Workspace GUI. Fix "
                               "CreateMDWorkspaceGUI!",
@@ -421,10 +377,8 @@ public:
                "Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!",
                findValue(QDimValues, "Q3D"));
 
-    Mantid::Kernel::Property *dEAnalysisMode =
-        alg.getProperty("dEAnalysisMode");
-    PropertyAllowedValues dEAnalysisModeValues =
-        dEAnalysisMode->allowedValues();
+    Mantid::Kernel::Property *dEAnalysisMode = alg.getProperty("dEAnalysisMode");
+    PropertyAllowedValues dEAnalysisModeValues = dEAnalysisMode->allowedValues();
     TSM_ASSERT_EQUALS("QDimensions property values have changed. This has "
                       "broken Create MD Workspace GUI. Fix "
                       "CreateMDWorkspaceGUI!",
@@ -445,8 +399,8 @@ public:
 
   ConvertToMDTest() {
     pAlg = std::make_unique<Convert2AnyTestHelper>();
-    Mantid::API::MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::
-        createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);
+    Mantid::API::MatrixWorkspace_sptr ws2D =
+        WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);
     // rotate the crystal by twenty degrees back;
     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0, 20);
     // add workspace energy
@@ -454,9 +408,7 @@ public:
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
   }
-  ~ConvertToMDTest() override {
-    AnalysisDataService::Instance().remove("testWSProcessed");
-  }
+  ~ConvertToMDTest() override { AnalysisDataService::Instance().remove("testWSProcessed"); }
 
   void test_execute_filebackend() {
     // Arrange
@@ -465,8 +417,7 @@ public:
       Poco::File(file_name).remove();
     {
       auto test_workspace = createTestWorkspaces();
-      Algorithm_sptr min_max_alg = AlgorithmManager::Instance().createUnmanaged(
-          "ConvertToMDMinMaxGlobal");
+      Algorithm_sptr min_max_alg = AlgorithmManager::Instance().createUnmanaged("ConvertToMDMinMaxGlobal");
       min_max_alg->initialize();
       min_max_alg->setChild(true);
       min_max_alg->setProperty("InputWorkspace", test_workspace);
@@ -476,8 +427,7 @@ public:
       std::string min_values = min_max_alg->getPropertyValue("MinValues");
       std::string max_values = min_max_alg->getPropertyValue("MaxValues");
 
-      Algorithm_sptr convert_alg =
-          AlgorithmManager::Instance().createUnmanaged("ConvertToMD");
+      Algorithm_sptr convert_alg = AlgorithmManager::Instance().createUnmanaged("ConvertToMD");
       convert_alg->initialize();
       convert_alg->setChild(true);
       convert_alg->setProperty("InputWorkspace", test_workspace);
@@ -492,8 +442,7 @@ public:
       convert_alg->setProperty("FileBackEnd", true);
       convert_alg->setProperty("OutputWorkspace", "blank");
       TS_ASSERT_THROWS_NOTHING(convert_alg->execute());
-      Mantid::API::IMDEventWorkspace_sptr out_ws =
-          convert_alg->getProperty("OutputWorkspace");
+      Mantid::API::IMDEventWorkspace_sptr out_ws = convert_alg->getProperty("OutputWorkspace");
 
       // Asssert
       file_name = out_ws->getBoxController()->getFilename();
@@ -505,19 +454,14 @@ public:
       load_alg->setProperty("FileBackEnd", true);
       load_alg->setProperty("OutputWorkspace", "blank");
       TS_ASSERT_THROWS_NOTHING(load_alg->execute());
-      Mantid::API::IMDWorkspace_sptr reference_out_ws =
-          load_alg->getProperty("OutputWorkspace");
+      Mantid::API::IMDWorkspace_sptr reference_out_ws = load_alg->getProperty("OutputWorkspace");
       // Make sure that the output workspaces exist
       TS_ASSERT(out_ws);
       TS_ASSERT(reference_out_ws);
-      auto ws_cast =
-          std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace_sptr>(
-              reference_out_ws);
+      auto ws_cast = std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace_sptr>(reference_out_ws);
 
       // Compare the loaded and original workspace
-      auto compare_alg =
-          Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-              "CompareMDWorkspaces");
+      auto compare_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CompareMDWorkspaces");
       compare_alg->setChild(true);
       compare_alg->initialize();
       compare_alg->setProperty("Workspace1", out_ws);
@@ -537,11 +481,9 @@ public:
   }
 
 private:
-  void checkHistogramsHaveBeenStored(const std::string &wsName,
-                                     double val = 0.34, double bin_min = 0.3,
+  void checkHistogramsHaveBeenStored(const std::string &wsName, double val = 0.34, double bin_min = 0.3,
                                      double bin_max = 0.4) {
-    IMDEventWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(wsName);
+    IMDEventWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(wsName);
     uint16_t nexpts = outputWS->getNumExperimentInfo();
     for (uint16_t i = 0; i < nexpts; ++i) {
       ExperimentInfo_const_sptr expt = outputWS->getExperimentInfo(i);
@@ -551,10 +493,8 @@ private:
     }
   }
 
-  bool findValue(const PropertyAllowedValues &container,
-                 const std::string &value) {
-    return std::find(container.begin(), container.end(), value) !=
-           container.end();
+  bool findValue(const PropertyAllowedValues &container, const std::string &value) {
+    return std::find(container.begin(), container.end(), value) != container.end();
   }
 };
 
@@ -586,9 +526,7 @@ class ConvertToMDTestPerformance : public CxxTest::TestSuite {
   std::shared_ptr<MDEventWSWrapper> pTargWS;
 
 public:
-  static ConvertToMDTestPerformance *createSuite() {
-    return new ConvertToMDTestPerformance();
-  }
+  static ConvertToMDTestPerformance *createSuite() { return new ConvertToMDTestPerformance(); }
   static void destroySuite(ConvertToMDTestPerformance *suite) { delete suite; }
 
   void test_EventNoUnitsConv() {
@@ -619,12 +557,11 @@ public:
     pMockAlgorithm->resetProgress(numHist);
     // Clock.elapsedCPU();
     std::time(&start);
-    TS_ASSERT_THROWS_NOTHING(
-        pConvMethods->runConversion(pMockAlgorithm->getProgress()));
+    TS_ASSERT_THROWS_NOTHING(pConvMethods->runConversion(pMockAlgorithm->getProgress()));
     std::time(&end);
     double sec = std::difftime(end, start);
-    TS_WARN("Time to complete: <EventWSType,Q3D,Indir,ConvertNo,CrystType>: " +
-            boost::lexical_cast<std::string>(sec) + " sec");
+    TS_WARN("Time to complete: <EventWSType,Q3D,Indir,ConvertNo,CrystType>: " + boost::lexical_cast<std::string>(sec) +
+            " sec");
   }
 
   void test_EventFromTOFConv() {
@@ -654,14 +591,12 @@ public:
     pMockAlgorithm->resetProgress(numHist);
     // Clock.elapsedCPU();
     std::time(&start);
-    TS_ASSERT_THROWS_NOTHING(
-        pConvMethods->runConversion(pMockAlgorithm->getProgress()));
+    TS_ASSERT_THROWS_NOTHING(pConvMethods->runConversion(pMockAlgorithm->getProgress()));
     std::time(&end);
     double sec = std::difftime(end, start);
     // float sec = Clock.elapsedCPU();
-    TS_WARN(
-        "Time to complete: <EventWSType,Q3D,Indir,ConvFromTOF,CrystType>: " +
-        boost::lexical_cast<std::string>(sec) + " sec");
+    TS_WARN("Time to complete: <EventWSType,Q3D,Indir,ConvFromTOF,CrystType>: " +
+            boost::lexical_cast<std::string>(sec) + " sec");
   }
 
   void test_HistoFromTOFConv() {
@@ -694,14 +629,12 @@ public:
     pMockAlgorithm->resetProgress(numHist);
     // Clock.elapsedCPU();
     std::time(&start);
-    TS_ASSERT_THROWS_NOTHING(
-        pConvMethods->runConversion(pMockAlgorithm->getProgress()));
+    TS_ASSERT_THROWS_NOTHING(pConvMethods->runConversion(pMockAlgorithm->getProgress()));
     std::time(&end);
     double sec = std::difftime(end, start);
 
-    TS_WARN(
-        "Time to complete: <Ws2DHistoType,Q3D,Indir,ConvFromTOF,CrystType>: " +
-        boost::lexical_cast<std::string>(sec) + " sec");
+    TS_WARN("Time to complete: <Ws2DHistoType,Q3D,Indir,ConvFromTOF,CrystType>: " +
+            boost::lexical_cast<std::string>(sec) + " sec");
   }
 
   void test_HistoNoUnitsConv() {
@@ -734,22 +667,20 @@ public:
     pMockAlgorithm->resetProgress(numHist);
     // Clock.elapsedCPU();
     std::time(&start);
-    TS_ASSERT_THROWS_NOTHING(
-        pConvMethods->runConversion(pMockAlgorithm->getProgress()));
+    TS_ASSERT_THROWS_NOTHING(pConvMethods->runConversion(pMockAlgorithm->getProgress()));
     std::time(&end);
     double sec = std::difftime(end, start);
 
-    TS_WARN(
-        "Time to complete: <Ws2DHistoType,Q3D,Indir,ConvertNo,CrystType>: " +
-        boost::lexical_cast<std::string>(sec) + " sec");
+    TS_WARN("Time to complete: <Ws2DHistoType,Q3D,Indir,ConvertNo,CrystType>: " +
+            boost::lexical_cast<std::string>(sec) + " sec");
   }
 
   void test_EventFromTOFConvBuildTreeDefault() { convertAlgDefault.execute(); }
 
   void test_EventFromTOFConvBuildTreeIndexed() { convertAlgIndexed.execute(); }
 
-  static void setUpConvAlg(Mantid::MDAlgorithms::ConvertToMD &convAlg,
-                           const std::string &type, const std::string &inName) {
+  static void setUpConvAlg(Mantid::MDAlgorithms::ConvertToMD &convAlg, const std::string &type,
+                           const std::string &inName) {
     static uint32_t cnt = 0;
     std::vector<int> splits(3, 2);
     convAlg.initialize();
@@ -768,16 +699,13 @@ public:
     numHist = 100 * 100;
     size_t nEvents = 1000;
     inWsEv = std::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceCreationHelper::createRandomEventWorkspace(nEvents, numHist,
-                                                            0.1));
-    inWsEv->setInstrument(
-        ComponentCreationHelper::createTestInstrumentCylindrical(int(numHist)));
+        WorkspaceCreationHelper::createRandomEventWorkspace(nEvents, numHist, 0.1));
+    inWsEv->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(int(numHist)));
     inWsEv->mutableRun().addProperty("Ei", 12., "meV", true);
     API::AnalysisDataService::Instance().addOrReplace("TestEventWS", inWsEv);
 
     inWs2D = std::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            int(numHist), int(nEvents)));
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(int(numHist), int(nEvents)));
     // add workspace energy
     inWs2D->mutableRun().addProperty("Ei", 12., "meV", true);
     API::AnalysisDataService::Instance().addOrReplace("TestMatrixWS", inWs2D);
@@ -792,25 +720,20 @@ public:
     if (!pAlg->isExecuted())
       throw(std::runtime_error("Can not preprocess histogram detectors to MD"));
 
-    API::Workspace_sptr tWs = API::AnalysisDataService::Instance().retrieve(
-        "PreprocessedDetectorsTable");
+    API::Workspace_sptr tWs = API::AnalysisDataService::Instance().retrieve("PreprocessedDetectorsTable");
     pDetLoc_histo = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(tWs);
     if (!pDetLoc_histo)
-      throw(std::runtime_error(
-          "Can not obtain preprocessed histogram detectors "));
+      throw(std::runtime_error("Can not obtain preprocessed histogram detectors "));
 
     pAlg->setPropertyValue("InputWorkspace", "TestEventWS");
     pAlg->execute();
     if (!pAlg->isExecuted())
       throw(std::runtime_error("Can not preprocess events detectors to MD"));
 
-    tWs = API::AnalysisDataService::Instance().retrieve(
-        "PreprocessedDetectorsTable");
-    pDetLoc_events =
-        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(tWs);
+    tWs = API::AnalysisDataService::Instance().retrieve("PreprocessedDetectorsTable");
+    pDetLoc_events = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(tWs);
     if (!pDetLoc_events)
-      throw(
-          std::runtime_error("Can not obtain preprocessed events detectors "));
+      throw(std::runtime_error("Can not obtain preprocessed events detectors "));
 
     pTargWS = std::make_shared<MDEventWSWrapper>();
 
@@ -820,8 +743,7 @@ public:
     // this will be used to display progress
     pMockAlgorithm = std::make_unique<WorkspaceCreationHelper::MockAlgorithm>();
 
-    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-        "CreateSampleWorkspace");
+    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
     alg->initialize();
     alg->setProperty("WorkspaceType", "Event");
     alg->setProperty("Function", "Flat background");

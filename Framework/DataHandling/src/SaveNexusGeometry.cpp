@@ -36,9 +36,7 @@ DECLARE_ALGORITHM(SaveNexusGeometry)
 
 /// Algorithms name for identification. @see Algorithm::name
 
-const std::string SaveNexusGeometry::name() const {
-  return "SaveNexusGeometry";
-}
+const std::string SaveNexusGeometry::name() const { return "SaveNexusGeometry"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 
@@ -46,9 +44,7 @@ int SaveNexusGeometry::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 
-const std::string SaveNexusGeometry::category() const {
-  return "DataHandling\\Instrument";
-}
+const std::string SaveNexusGeometry::category() const { return "DataHandling\\Instrument"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 
@@ -66,12 +62,10 @@ void SaveNexusGeometry::init() {
 
   // TODO resolve linkererror for experimentinfo, replace MatrixWorkspace with
   // base class ExperimentInfo.
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Workspace containing the Instrument.");
 
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::OptionalSave),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::OptionalSave),
                   "Full path to save destination file");
 
   declareProperty("EntryName", "entry" /*default*/,
@@ -92,8 +86,7 @@ void SaveNexusGeometry::exec() {
   const auto &detInfo = ws->detectorInfo();
 
   NexusGeometry::LogAdapter<Kernel::Logger> adapter(&g_log);
-  Mantid::NexusGeometry::NexusGeometrySave::saveInstrument(
-      compInfo, detInfo, destinationFile, rootFileName, adapter);
+  Mantid::NexusGeometry::NexusGeometrySave::saveInstrument(compInfo, detInfo, destinationFile, rootFileName, adapter);
 }
 
 } // namespace DataHandling

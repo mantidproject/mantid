@@ -44,8 +44,7 @@ public:
   QString getMinValue() const;
   QString getMaxValue() const;
   QString getNthPower() const;
-  void
-  setMinPositiveValue(double /*unused*/) { /*Unused in this implementation*/
+  void setMinPositiveValue(double /*unused*/) { /*Unused in this implementation*/
   }
   int getScaleType() const;
   void setScaleType(int /*index*/);
@@ -73,9 +72,8 @@ private slots:
 
 private:
   void initLayout();
-  void createColorbar(
-      const Common::Python::Object &ticks = Common::Python::Object(),
-      const Common::Python::Object &format = Common::Python::Object());
+  void createColorbar(const Common::Python::Object &ticks = Common::Python::Object(),
+                      const Common::Python::Object &format = Common::Python::Object());
   void connectSignals();
 
 private: // data

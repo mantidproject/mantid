@@ -46,16 +46,14 @@ private:
     lAlg->setPropertyValue("OutputWorkspace", "demo_ws");
     lAlg->execute();
     Workspace_sptr temp = lAlg->getProperty("OutputWorkspace");
-    MatrixWorkspace_sptr matrixWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(temp);
+    MatrixWorkspace_sptr matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(temp);
     if (matrixWS)
       return matrixWS;
 
     WorkspaceGroup_sptr group = std::dynamic_pointer_cast<WorkspaceGroup>(temp);
     if (group) {
       Workspace_sptr temp = group->getItem(0);
-      MatrixWorkspace_sptr matrixWS =
-          std::dynamic_pointer_cast<MatrixWorkspace>(temp);
+      MatrixWorkspace_sptr matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(temp);
       if (matrixWS)
         return matrixWS;
     }
@@ -63,9 +61,7 @@ private:
     return MatrixWorkspace_sptr();
   };
 
-  void momentumTransferHelper(ReflectometryReductionOneAuto2 &alg,
-                              MatrixWorkspace_sptr &inter,
-                              const double &theta) {
+  void momentumTransferHelper(ReflectometryReductionOneAuto2 &alg, MatrixWorkspace_sptr &inter, const double &theta) {
     alg.setChild(true);
     alg.setProperty("InputWorkspace", inter);
     alg.setProperty("ThetaIn", theta);
@@ -75,33 +71,20 @@ private:
   }
 
 public:
-  void setUp() override {
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility",
-                                                        "ISIS");
-  }
+  void setUp() override { Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS"); }
 
-  void tearDown() override {
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility",
-                                                        " ");
-  }
+  void tearDown() override { Mantid::Kernel::ConfigService::Instance().setString("default.facility", " "); }
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ReflectometryReductionOneAuto2Test *createSuite() {
-    return new ReflectometryReductionOneAuto2Test();
-  }
-  static void destroySuite(ReflectometryReductionOneAuto2Test *suite) {
-    delete suite;
-  }
+  static ReflectometryReductionOneAuto2Test *createSuite() { return new ReflectometryReductionOneAuto2Test(); }
+  static void destroySuite(ReflectometryReductionOneAuto2Test *suite) { delete suite; }
 
   ReflectometryReductionOneAuto2Test() {
     FrameworkManager::Instance();
 
-    m_notTOF =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            1, 10, 10);
-    m_TOF = WorkspaceCreationHelper::
-        create2DWorkspaceWithReflectometryInstrumentMultiDetector();
+    m_notTOF = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(1, 10, 10);
+    m_TOF = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrumentMultiDetector();
   }
 
   ~ReflectometryReductionOneAuto2Test() override {}
@@ -195,8 +178,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", m_TOF);
     alg.setProperty("FirstTransmissionRun", m_TOF);
-    TS_ASSERT_THROWS_ANYTHING(
-        alg.setProperty("SecondTransmissionRun", m_notTOF));
+    TS_ASSERT_THROWS_ANYTHING(alg.setProperty("SecondTransmissionRun", m_notTOF));
   }
 
   void test_bad_first_transmission_group_size() {
@@ -316,8 +298,7 @@ public:
     TS_ASSERT_EQUALS(point1In.X(), point1Out.X());
     TS_ASSERT_EQUALS(point1In.Z(), point1Out.Z());
     TS_ASSERT_DIFFERS(point1In.Y(), point1Out.Y());
-    TS_ASSERT_DELTA(point1Out.Y() /
-                        (point1Out.Z() - instOut->getSample()->getPos().Z()),
+    TS_ASSERT_DELTA(point1Out.Y() / (point1Out.Z() - instOut->getSample()->getPos().Z()),
                     std::tan(theta * 2 * M_PI / 180), 1e-4);
   }
 
@@ -408,8 +389,7 @@ public:
 
     TS_ASSERT_EQUALS(detectorIn.X(), detectorOut.X());
     TS_ASSERT_EQUALS(detectorIn.Z(), detectorOut.Z());
-    TS_ASSERT_DELTA(detectorOut.Y() /
-                        (detectorOut.Z() - instOut->getSample()->getPos().Z()),
+    TS_ASSERT_DELTA(detectorOut.Y() / (detectorOut.Z() - instOut->getSample()->getPos().Z()),
                     std::tan(0.25 * 2 * M_PI / 180), 1e-4);
   }
 
@@ -455,8 +435,7 @@ public:
     TS_ASSERT_EQUALS(point1In.X(), point1Out.X());
     TS_ASSERT_EQUALS(point1In.Z(), point1Out.Z());
     TS_ASSERT_DIFFERS(point1In.Y(), point1Out.Y());
-    TS_ASSERT_DELTA(point1Out.Y() /
-                        (point1Out.Z() - instOut->getSample()->getPos().Z()),
+    TS_ASSERT_DELTA(point1Out.Y() / (point1Out.Z() - instOut->getSample()->getPos().Z()),
                     std::tan(theta * 2 * M_PI / 180), 1e-4);
   }
 
@@ -853,9 +832,8 @@ public:
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    TS_ASSERT_THROWS_EQUALS(
-        alg.execute(), std::invalid_argument & e, std::string(e.what()),
-        "For PNR analysis, input group must have 2 periods.");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::invalid_argument & e, std::string(e.what()),
+                            "For PNR analysis, input group must have 2 periods.");
   }
 
   void test_polarization_correction_PNR() {
@@ -964,8 +942,7 @@ public:
     ADS.clear();
   }
 
-  void
-  test_input_workspace_group_with_default_output_workspaces_and_debug_on() {
+  void test_input_workspace_group_with_default_output_workspaces_and_debug_on() {
     ReflectometryReductionOneAuto2 alg;
     setup_alg_on_input_workspace_group_with_run_number(alg);
     alg.setProperty("Debug", true);
@@ -1030,15 +1007,12 @@ public:
     const double deltaX = 1000;
     const std::vector<double> yValues1 = {1, 2, 3};
     const std::vector<double> yValues2 = {4, 5, 6};
-    MatrixWorkspace_sptr input =
-        createWorkspaceSingle(startX, nBins, deltaX, yValues1);
+    MatrixWorkspace_sptr input = createWorkspaceSingle(startX, nBins, deltaX, yValues1);
     ADS.addOrReplace("input", input);
 
-    MatrixWorkspace_sptr first =
-        createWorkspaceSingle(startX, nBins, deltaX, yValues1);
+    MatrixWorkspace_sptr first = createWorkspaceSingle(startX, nBins, deltaX, yValues1);
     ADS.addOrReplace("first", first);
-    MatrixWorkspace_sptr second =
-        createWorkspaceSingle(startX, nBins, deltaX, yValues2);
+    MatrixWorkspace_sptr second = createWorkspaceSingle(startX, nBins, deltaX, yValues2);
     ADS.addOrReplace("second", second);
 
     GroupWorkspaces mkGroup;
@@ -1091,19 +1065,15 @@ public:
     const double deltaX = 1000;
     const std::vector<double> yValues1 = {1, 2, 3};
     const std::vector<double> yValues2 = {4, 5, 6};
-    MatrixWorkspace_sptr input =
-        createWorkspaceSingle(startX, nBins, deltaX, yValues1);
+    MatrixWorkspace_sptr input = createWorkspaceSingle(startX, nBins, deltaX, yValues1);
     ADS.addOrReplace("input", input);
 
-    MatrixWorkspace_sptr input2 =
-        createWorkspaceSingle(startX, nBins, deltaX, yValues1);
+    MatrixWorkspace_sptr input2 = createWorkspaceSingle(startX, nBins, deltaX, yValues1);
     ADS.addOrReplace("input2", input2);
 
-    MatrixWorkspace_sptr first =
-        createWorkspaceSingle(startX, nBins, deltaX, yValues1);
+    MatrixWorkspace_sptr first = createWorkspaceSingle(startX, nBins, deltaX, yValues1);
     ADS.addOrReplace("first", first);
-    MatrixWorkspace_sptr second =
-        createWorkspaceSingle(startX, nBins, deltaX, yValues2);
+    MatrixWorkspace_sptr second = createWorkspaceSingle(startX, nBins, deltaX, yValues2);
     ADS.addOrReplace("second", second);
 
     GroupWorkspaces mkGroup;
@@ -1158,22 +1128,17 @@ public:
     const double deltaX = 1000;
     const std::vector<double> yValues1 = {1, 2, 3};
     const std::vector<double> yValues2 = {4, 5, 6};
-    MatrixWorkspace_sptr input =
-        createWorkspaceSingle(startX, nBins, deltaX, yValues1);
+    MatrixWorkspace_sptr input = createWorkspaceSingle(startX, nBins, deltaX, yValues1);
     ADS.addOrReplace("input", input);
 
-    MatrixWorkspace_sptr first =
-        createWorkspaceSingle(startX, nBins, deltaX, yValues1);
+    MatrixWorkspace_sptr first = createWorkspaceSingle(startX, nBins, deltaX, yValues1);
     ADS.addOrReplace("first", first);
-    MatrixWorkspace_sptr second =
-        createWorkspaceSingle(startX, nBins, deltaX, yValues2);
+    MatrixWorkspace_sptr second = createWorkspaceSingle(startX, nBins, deltaX, yValues2);
     ADS.addOrReplace("second", second);
 
-    MatrixWorkspace_sptr first2 =
-        createWorkspaceSingle(startX, nBins, deltaX, yValues1);
+    MatrixWorkspace_sptr first2 = createWorkspaceSingle(startX, nBins, deltaX, yValues1);
     ADS.addOrReplace("first2", first2);
-    MatrixWorkspace_sptr second2 =
-        createWorkspaceSingle(startX, nBins, deltaX, yValues2);
+    MatrixWorkspace_sptr second2 = createWorkspaceSingle(startX, nBins, deltaX, yValues2);
     ADS.addOrReplace("second2", second2);
 
     GroupWorkspaces mkGroup;
@@ -1287,8 +1252,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::invalid_argument & e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::invalid_argument & e, std::string(e.what()),
                             "A detector is expected at workspace index 0 (Was "
                             "converted from specnum), found a monitor");
   }
@@ -1311,8 +1275,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::invalid_argument & e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::invalid_argument & e, std::string(e.what()),
                             "A monitor is expected at spectrum index 1");
   }
 
@@ -1495,8 +1458,7 @@ public:
   }
 
   void test_flood_correction() {
-    auto inputWS =
-        create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
+    auto inputWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
     auto flood = createFloodWorkspace(inputWS->getInstrument());
 
     // Correct by rotating detectors around the sample
@@ -1520,10 +1482,8 @@ public:
   }
 
   void test_flood_correction_transmission() {
-    auto inputWS =
-        create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
-    auto transWS =
-        create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
+    auto inputWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
+    auto transWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
     for (size_t i = 0; i < transWS->getNumberHistograms(); ++i) {
       auto &y = transWS->mutableY(i);
       y.assign(y.size(), 10.0 * double(i + 1));
@@ -1551,10 +1511,8 @@ public:
   }
 
   void test_flood_correction_group() {
-    auto inputWS1 =
-        create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
-    auto inputWS2 =
-        create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
+    auto inputWS1 = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
+    auto inputWS2 = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
     inputWS2 *= 2.0;
     auto group = std::make_shared<WorkspaceGroup>();
     group->addWorkspace(inputWS1);
@@ -1579,8 +1537,7 @@ public:
     alg.setProperty("OutputWorkspace", "IvsQ");
     alg.setProperty("OutputWorkspaceBinned", "IvsQb");
     alg.execute();
-    WorkspaceGroup_sptr out =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsQ");
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsQ");
     auto out1 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0));
     TS_ASSERT_DELTA(out1->y(0)[0], 4.5, 0.000001);
     auto out2 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1));
@@ -1592,9 +1549,7 @@ public:
     std::string const name = "input";
     prepareInputGroup(name, "Fredrikze");
     applyPolarizationEfficiencies(name);
-    auto const inputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name +
-                                                                    "_1");
+    auto const inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name + "_1");
     auto flood = createFloodWorkspace(inputWS->getInstrument(), 257);
 
     ReflectometryReductionOneAuto2 alg;
@@ -1612,8 +1567,7 @@ public:
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
-    WorkspaceGroup_sptr out =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsQ");
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsQ");
     TS_ASSERT(out);
     auto out1 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0));
     TS_ASSERT_DELTA(out1->y(0)[0], 90.0, 0.001);
@@ -1631,9 +1585,7 @@ public:
 
     std::string const name = "input";
     prepareInputGroup(name, "Flood");
-    auto const inputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name +
-                                                                    "_1");
+    auto const inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name + "_1");
     auto flood = createFloodWorkspace(inputWS->getInstrument(), 257);
 
     ReflectometryReductionOneAuto2 alg;
@@ -1650,8 +1602,7 @@ public:
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
-    WorkspaceGroup_sptr out =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsQ");
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsQ");
     TS_ASSERT(out);
     auto out1 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0));
     TS_ASSERT_DELTA(out1->y(0)[0], 90.0, 1e-15);
@@ -1682,16 +1633,13 @@ public:
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    TS_ASSERT_THROWS_EQUALS(
-        alg.execute(), std::invalid_argument & e, e.what(),
-        std::string(
-            "Instrument parameter file doesn't have the Flood_Run parameter."));
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::invalid_argument & e, e.what(),
+                            std::string("Instrument parameter file doesn't have the Flood_Run parameter."));
     AnalysisDataService::Instance().clear();
   }
 
 private:
-  MatrixWorkspace_sptr createFloodWorkspace(
-      const Mantid::Geometry::Instrument_const_sptr &instrument, size_t n = 4) {
+  MatrixWorkspace_sptr createFloodWorkspace(const Mantid::Geometry::Instrument_const_sptr &instrument, size_t n = 4) {
     size_t detid = 1;
     auto flood = create2DWorkspace(int(n), 1);
     if (n == 4) {
@@ -1713,13 +1661,11 @@ private:
     return flood;
   }
 
-  void setup_alg_on_input_workspace_group_with_run_number(
-      ReflectometryReductionOneAuto2 &alg) {
+  void setup_alg_on_input_workspace_group_with_run_number(ReflectometryReductionOneAuto2 &alg) {
     std::string const name = "input";
     prepareInputGroup(name);
     WorkspaceGroup_sptr group = ADS.retrieveWS<WorkspaceGroup>("input");
-    MatrixWorkspace_sptr ws =
-        ADS.retrieveWS<MatrixWorkspace>(group->getNames()[0]);
+    MatrixWorkspace_sptr ws = ADS.retrieveWS<MatrixWorkspace>(group->getNames()[0]);
     ws->mutableRun().addProperty<std::string>("run_number", "1234");
 
     alg.initialize();

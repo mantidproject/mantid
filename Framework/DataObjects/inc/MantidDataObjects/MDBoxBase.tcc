@@ -18,12 +18,9 @@ namespace DataObjects {
 //-----------------------------------------------------------------------------------------------
 /** Default constructor.
  */
-TMDE(MDBoxBase)::MDBoxBase(Mantid::API::BoxController *const boxController,
-                           const uint32_t depth, const size_t boxID)
-    : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
-      m_BoxController(boxController),
-      m_inverseVolume(std::numeric_limits<coord_t>::quiet_NaN()),
-      m_depth(depth), m_parent(nullptr), m_fileID(boxID) {
+TMDE(MDBoxBase)::MDBoxBase(Mantid::API::BoxController *const boxController, const uint32_t depth, const size_t boxID)
+    : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0), m_BoxController(boxController),
+      m_inverseVolume(std::numeric_limits<coord_t>::quiet_NaN()), m_depth(depth), m_parent(nullptr), m_fileID(boxID) {
   if (boxController) {
     // Give it a fresh ID from the controller.
     if (boxID == std::numeric_limits<size_t>::max()) // Give it a fresh ID from
@@ -34,14 +31,10 @@ TMDE(MDBoxBase)::MDBoxBase(Mantid::API::BoxController *const boxController,
 //-----------------------------------------------------------------------------------------------
 /** Constructor with extents
  */
-TMDE(MDBoxBase)::MDBoxBase(
-    Mantid::API::BoxController *const boxController, const uint32_t depth,
-    const size_t boxID,
-    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-        &extentsVector)
-    : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
-      m_BoxController(boxController), m_inverseVolume(UNDEF_COORDT),
-      m_depth(depth), m_parent(nullptr), m_fileID(boxID) {
+TMDE(MDBoxBase)::MDBoxBase(Mantid::API::BoxController *const boxController, const uint32_t depth, const size_t boxID,
+                           const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &extentsVector)
+    : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0), m_BoxController(boxController),
+      m_inverseVolume(UNDEF_COORDT), m_depth(depth), m_parent(nullptr), m_fileID(boxID) {
   if (boxController) {
     // Give it a fresh ID from the controller.
     if (boxID == UNDEF_SIZET) // Give it a fresh ID from the controller.
@@ -50,8 +43,7 @@ TMDE(MDBoxBase)::MDBoxBase(
 
   // Set the extents
   if (extentsVector.size() != nd)
-    throw std::invalid_argument(
-        "MDBoxBase::ctor(): extentsVector.size() must be == nd.");
+    throw std::invalid_argument("MDBoxBase::ctor(): extentsVector.size() must be == nd.");
   for (size_t d = 0; d < nd; d++)
     this->extents[d] = extentsVector[d];
 
@@ -64,12 +56,10 @@ TMDE(MDBoxBase)::MDBoxBase(
  * @param otherBC :: if present, other (different from the current one) box
  * controller pointer
  */
-TMDE(MDBoxBase)::MDBoxBase(const MDBoxBase<MDE, nd> &box,
-                           Mantid::API::BoxController *const otherBC)
-    : m_signal(box.m_signal), m_errorSquared(box.m_errorSquared),
-      m_totalWeight(box.m_totalWeight), m_BoxController(otherBC),
-      m_inverseVolume(box.m_inverseVolume), m_depth(box.m_depth),
-      m_parent(box.m_parent), m_fileID(box.m_fileID), m_dataMutex() {
+TMDE(MDBoxBase)::MDBoxBase(const MDBoxBase<MDE, nd> &box, Mantid::API::BoxController *const otherBC)
+    : m_signal(box.m_signal), m_errorSquared(box.m_errorSquared), m_totalWeight(box.m_totalWeight),
+      m_BoxController(otherBC), m_inverseVolume(box.m_inverseVolume), m_depth(box.m_depth), m_parent(box.m_parent),
+      m_fileID(box.m_fileID), m_dataMutex() {
 
   // Copy the extents
   for (size_t d = 0; d < nd; d++)
@@ -85,8 +75,7 @@ TMDE(MDBoxBase)::MDBoxBase(const MDBoxBase<MDE, nd> &box,
  * @param scaling :: multiply each coordinate by this value.
  * @param offset :: after multiplying, add this offset.
  */
-TMDE(void MDBoxBase)::transformDimensions(std::vector<double> &scaling,
-                                          std::vector<double> &offset) {
+TMDE(void MDBoxBase)::transformDimensions(std::vector<double> &scaling, std::vector<double> &offset) {
   for (size_t d = 0; d < nd; d++) {
     extents[d].scaleExtents(scaling[d], offset[d]);
   }
@@ -140,8 +129,7 @@ TMDE(std::vector<Mantid::Kernel::VMD> MDBoxBase)::getVertexes() const {
  * @param[out] numVertices :: returns the number of vertices in the array.
  * @return the bare array. This should be deleted by the caller!
  * */
-TMDE(std::unique_ptr<coord_t[]> MDBoxBase)::getVertexesArray(
-    size_t &numVertices) const {
+TMDE(std::unique_ptr<coord_t[]> MDBoxBase)::getVertexesArray(size_t &numVertices) const {
   // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd
   // bits
   numVertices = 1 << nd;
@@ -190,12 +178,10 @@ TMDE(std::unique_ptr<coord_t[]> MDBoxBase)::getVertexesArray(
  *caller!
  * @throw if outDimensions == 0
  * */
-TMDE(std::unique_ptr<coord_t[]> MDBoxBase)::getVertexesArray(
-    size_t &numVertices, const size_t outDimensions,
-    const bool *maskDim) const {
+TMDE(std::unique_ptr<coord_t[]> MDBoxBase)::getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                                                             const bool *maskDim) const {
   if (outDimensions == 0)
-    throw std::invalid_argument(
-        "MDBoxBase::getVertexesArray(): Must have > 0 output dimensions.");
+    throw std::invalid_argument("MDBoxBase::getVertexesArray(): Must have > 0 output dimensions.");
 
   // How many vertices does one box have? 2^numOutputDimensions
   numVertices = (size_t)1 << outDimensions;

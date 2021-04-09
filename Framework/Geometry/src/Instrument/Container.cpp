@@ -35,8 +35,7 @@ constexpr const char *VAL_ATT = "val";
  * to be updated
  * @param args A hash of tag names to values
  */
-void updateTreeValues(Poco::XML::Element *root,
-                      const Container::ShapeArgs &args) {
+void updateTreeValues(Poco::XML::Element *root, const Container::ShapeArgs &args) {
   using namespace Poco::XML;
   NodeIterator nodeIter(root, NodeFilter::SHOW_ELEMENT);
   Node *node = nodeIter.nextNode();
@@ -59,24 +58,20 @@ Container::Container() : m_shape(std::make_shared<CSGObject>()) {}
 Container::Container(IObject_sptr shape) : m_shape(std::move(shape)) {}
 
 Container::Container(const Container &container)
-    : m_shape(IObject_sptr(container.m_shape->clone())),
-      m_sampleShapeXML(container.m_sampleShapeXML),
+    : m_shape(IObject_sptr(container.m_shape->clone())), m_sampleShapeXML(container.m_sampleShapeXML),
       m_sampleShape(container.m_sampleShape) {}
 
 /**
  * Construct a container providing an XML definition shape
  * @param xml Definition of the shape in xml
  */
-Container::Container(std::string xml)
-    : m_shape(std::make_shared<CSGObject>(xml)) {}
+Container::Container(std::string xml) : m_shape(std::make_shared<CSGObject>(xml)) {}
 
 /**
  * @return True if the can contains a definition of the sample shape
  * with dimensions that can be overridden
  */
-bool Container::hasCustomizableSampleShape() const {
-  return !m_sampleShapeXML.empty();
-}
+bool Container::hasCustomizableSampleShape() const { return !m_sampleShapeXML.empty(); }
 
 /**
  * @return True if the can contains a definition of the sample shape
@@ -91,8 +86,7 @@ bool Container::hasFixedSampleShape() const { return m_sampleShape != nullptr; }
  * @param args A hash of tag values to use in place of the default
  * @return A pointer to a object modeling the sample shape
  */
-IObject_sptr
-Container::createSampleShape(const Container::ShapeArgs &args) const {
+IObject_sptr Container::createSampleShape(const Container::ShapeArgs &args) const {
   using namespace Poco::XML;
   if (!hasCustomizableSampleShape()) {
     throw std::runtime_error("Can::createSampleShape() - No definition found "
@@ -134,8 +128,7 @@ void Container::setSampleShape(const std::string &sampleShapeXML) {
     std::ostringstream msg;
     msg << "Can::setSampleShape() - XML definition "
            "expected to be contained within a <"
-        << SAMPLEGEOMETRY_TAG << "> tag. Found "
-        << doc->documentElement()->nodeName() << "instead.";
+        << SAMPLEGEOMETRY_TAG << "> tag. Found " << doc->documentElement()->nodeName() << "instead.";
     throw std::invalid_argument(msg.str());
   }
   m_sampleShapeXML = sampleShapeXML;

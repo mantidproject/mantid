@@ -28,13 +28,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveFocusedXYE"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveFocusedXYE"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Diffraction\\DataHandling;DataHandling\\Text";
-  }
+  const std::string category() const override { return "Diffraction\\DataHandling;DataHandling\\Text"; }
 
 private:
   /// Initialisation code

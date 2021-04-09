@@ -78,6 +78,35 @@
 		<parameter name="temperature_sample_log" type="string">
 			<value val="sample.temperature" />
 		</parameter>
+
+
+		<!-- These parameters are used to define headers and entries for GenerateLogbook algorithm -->
+		<parameter name="logbook_default_parameters" type="string">
+		  <value val="acq_mode:/entry0/acquisition_mode:s,
+			      start_time:/entry0/start_time:s,
+			      end_time:/entry0/end_time:s,
+			      SRot:/entry0/instrument/SRot/value:f,
+			      CO:/entry0/instrument/CO/rotation_speed:f,
+			      PhC:/entry0/instrument/CO/setpoint_phase:f,
+			      FO:/entry0/instrument/FO/rotation_speed:f,
+			      PhF:/entry0/instrument/FO/setpoint_phase:f,
+			      Monrate:/entry0/monitor/monrate:f,
+			      cps:/entry0/instrument/Detector/detrate:f,
+			      Treg:/entry0/sample/regulation_temperature:f,
+			      Tsamp:/entry0/sample/temperature:f,
+			      subtitle:/entry0/experiment_identifier:s" />
+		</parameter>
+		<parameter name="logbook_optional_parameters" type="string">
+		  <value val="lambda:/entry0/wavelength:f,
+			      NCH:/entry0/monitor/time_of_flight/1:f,
+			      CHW:/entry0/monitor/time_of_flight/0:f,
+			      delay:/entry0/monitor/time_of_flight/2:f,
+			      duration:/entry0/duration:d,
+			      Tset:/entry0/sample/setpoint_temperature:f,
+			      Monsum:/entry0/monitor/monsum:d,
+			      ReactorPower:/entry0/reactor_power:f,
+			      ScannedVariables:/entry0/data_scan/scanned_variables/variables_names/name:s" />
+		</parameter>
 	</component-link>
 
 </parameter-file>

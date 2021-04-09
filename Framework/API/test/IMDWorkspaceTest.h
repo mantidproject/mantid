@@ -52,68 +52,55 @@ public:
   void testGetXDimension() {
     WorkspaceTester matrixWS;
     matrixWS.initialize(1, 1, 1);
-    std::shared_ptr<const Mantid::Geometry::IMDDimension> dimension =
-        matrixWS.getXDimension();
+    std::shared_ptr<const Mantid::Geometry::IMDDimension> dimension = matrixWS.getXDimension();
     std::string id = dimension->getDimensionId();
-    TSM_ASSERT_EQUALS("Dimension-X does not have the expected dimension id.",
-                      "xDimension", id);
+    TSM_ASSERT_EQUALS("Dimension-X does not have the expected dimension id.", "xDimension", id);
   }
 
   void testGetYDimension() {
     WorkspaceTester matrixWS;
     matrixWS.initialize(1, 1, 1);
-    std::shared_ptr<const Mantid::Geometry::IMDDimension> dimension =
-        matrixWS.getYDimension();
+    std::shared_ptr<const Mantid::Geometry::IMDDimension> dimension = matrixWS.getYDimension();
     std::string id = dimension->getDimensionId();
-    TSM_ASSERT_EQUALS("Dimension-Y does not have the expected dimension id.",
-                      "yDimension", id);
+    TSM_ASSERT_EQUALS("Dimension-Y does not have the expected dimension id.", "yDimension", id);
   }
 
   void testGetZDimension() {
     WorkspaceTester matrixWS;
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Current implementation should throw runtime error.",
-        matrixWS.getZDimension());
+    TSM_ASSERT_THROWS_ANYTHING("Current implementation should throw runtime error.", matrixWS.getZDimension());
   }
 
   void testGettDimension() {
     WorkspaceTester matrixWS;
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Current implementation should throw runtime error.",
-        matrixWS.getTDimension());
+    TSM_ASSERT_THROWS_ANYTHING("Current implementation should throw runtime error.", matrixWS.getTDimension());
   }
 
   void testGetDimensionThrows() {
     WorkspaceTester matrixWS;
     matrixWS.initialize(1, 1, 1);
-    TSM_ASSERT_THROWS("Id doesn't exist. Should throw during find routine.",
-                      matrixWS.getDimensionWithId("3"),
+    TSM_ASSERT_THROWS("Id doesn't exist. Should throw during find routine.", matrixWS.getDimensionWithId("3"),
                       const std::overflow_error &);
   }
 
   void testGetDimension() {
     WorkspaceTester matrixWS;
     matrixWS.initialize(1, 1, 1);
-    std::shared_ptr<const Mantid::Geometry::IMDDimension> dim =
-        matrixWS.getDimensionWithId("yDimension");
-    TSM_ASSERT_EQUALS(
-        "The dimension id found is not the same as that searched for.",
-        "yDimension", dim->getDimensionId());
+    std::shared_ptr<const Mantid::Geometry::IMDDimension> dim = matrixWS.getDimensionWithId("yDimension");
+    TSM_ASSERT_EQUALS("The dimension id found is not the same as that searched for.", "yDimension",
+                      dim->getDimensionId());
   }
 
   void testGetDimensionOverflow() {
     WorkspaceTester matrixWS;
     matrixWS.initialize(1, 1, 1);
-    TSM_ASSERT_THROWS(
-        "The dimension does not exist. Attempting to get it should throw",
-        matrixWS.getDimensionWithId("1"), const std::overflow_error &);
+    TSM_ASSERT_THROWS("The dimension does not exist. Attempting to get it should throw",
+                      matrixWS.getDimensionWithId("1"), const std::overflow_error &);
   }
 
   void testGetNPoints() {
     WorkspaceTester matrixWS;
     matrixWS.initialize(5, 5, 5);
-    TSM_ASSERT_EQUALS("The expected number of points have not been returned.",
-                      25, matrixWS.getNPoints());
+    TSM_ASSERT_EQUALS("The expected number of points have not been returned.", 25, matrixWS.getNPoints());
   }
 
   /**
@@ -128,11 +115,9 @@ public:
     // Check property can be obtained as const_sptr or sptr
     IMDWorkspace_const_sptr wsConst;
     IMDWorkspace_sptr wsNonConst;
-    TS_ASSERT_THROWS_NOTHING(
-        wsConst = manager.getValue<IMDWorkspace_const_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsConst = manager.getValue<IMDWorkspace_const_sptr>(wsName));
     TS_ASSERT(wsConst != nullptr);
-    TS_ASSERT_THROWS_NOTHING(wsNonConst =
-                                 manager.getValue<IMDWorkspace_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsNonConst = manager.getValue<IMDWorkspace_sptr>(wsName));
     TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 

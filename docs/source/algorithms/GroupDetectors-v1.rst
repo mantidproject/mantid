@@ -79,12 +79,12 @@ In addition the following XML grouping format is also supported
 .. code-block:: xml
 
     <?xml version="1.0" encoding="UTF-8" ?>
-    <detector-grouping> 
-      <group name="fwd1"> <ids val="1-32"/> </group> 
-      <group name="bwd1"> <ids val="33,36,38,60-64"/> </group>   
+    <detector-grouping>
+      <group name="fwd1"> <ids val="1-32"/> </group>
+      <group name="bwd1"> <ids val="33,36,38,60-64"/> </group>
 
-      <group name="fwd2"><detids val="1,2,17,32"/></group> 
-      <group name="bwd2"><detids val="33,36,38,60,64"/> </group> 
+      <group name="fwd2"><detids val="1,2,17,32"/></group>
+      <group name="bwd2"><detids val="33,36,38,60,64"/> </group>
     </detector-grouping>
 
 where is used to specify spectra IDs and detector IDs.

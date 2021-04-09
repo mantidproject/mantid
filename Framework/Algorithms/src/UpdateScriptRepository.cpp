@@ -16,17 +16,13 @@ DECLARE_ALGORITHM(UpdateScriptRepository)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string UpdateScriptRepository::name() const {
-  return "UpdateScriptRepository";
-}
+const std::string UpdateScriptRepository::name() const { return "UpdateScriptRepository"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int UpdateScriptRepository::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string UpdateScriptRepository::category() const {
-  return "Utility\\Python";
-}
+const std::string UpdateScriptRepository::category() const { return "Utility\\Python"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -43,8 +39,7 @@ void UpdateScriptRepository::exec() {
   using Mantid::API::ScriptRepository;
   using Mantid::API::ScriptRepository_sptr;
   using Mantid::API::ScriptRepositoryFactory;
-  auto repo_ptr =
-      ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
+  auto repo_ptr = ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
 
   if (!repo_ptr->isValid())
     return; // it means that the ScriptRepository was not installed.

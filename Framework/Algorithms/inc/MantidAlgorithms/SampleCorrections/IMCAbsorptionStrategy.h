@@ -35,12 +35,9 @@ class MonteCarloAbsorption;
 class MANTID_ALGORITHMS_DLL IMCAbsorptionStrategy {
 public:
   virtual ~IMCAbsorptionStrategy() = default;
-  virtual void calculate(Kernel::PseudoRandomNumberGenerator &rng,
-                         const Kernel::V3D &finalPos,
-                         const std::vector<double> &lambdas,
-                         const double lambdaFixed,
-                         std::vector<double> &attenuationFactors,
-                         std::vector<double> &attFactorErrors,
+  virtual void calculate(Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &finalPos,
+                         const std::vector<double> &lambdas, const double lambdaFixed,
+                         std::vector<double> &attenuationFactors, std::vector<double> &attFactorErrors,
                          MCInteractionStatistics &stats) = 0;
 };
 

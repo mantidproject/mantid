@@ -1,7 +1,7 @@
 digraph OSIRISDiffractionReduction {
   label="OSIRISDiffractionReduction Flowchart"
   $global_style
-  
+
   subgraph params {
     $param_style
     CalibrationFile
@@ -41,7 +41,7 @@ digraph OSIRISDiffractionReduction {
     MergeRuns
     RenameWorkspace
   }
-  
+
   subgraph decisions {
     $decision_style
     useContainer        [label="Container file"]
@@ -49,7 +49,7 @@ digraph OSIRISDiffractionReduction {
     processedWks        [label="Processed all workspaces in maps"]
     runNumbers          [label="Number of runs"]
   }
-  
+
   subgraph process {
     $process_style
     averageWorkspaces   [label="Average together any workspaces that have the same DRange"]
@@ -57,7 +57,7 @@ digraph OSIRISDiffractionReduction {
     appendResults       [label="Add the scalar data to the result workspace."]
 
   }
-  
+
   SampleRuns            -> Load
   VanadiumRuns          -> Load
   SpecMin               -> Load
@@ -81,7 +81,7 @@ digraph OSIRISDiffractionReduction {
   VanadiumWorkspaces    -> VanadiumWorkspaceMap
   VanadiumWorkspaceMap  -> averageWorkspaces
   SampleWorkspaceMap    -> averageWorkspaces
-  averageWorkspaces     -> CurrentWorkspace                 [label="Extract next workspace from either the vanadium or sample map"] 
+  averageWorkspaces     -> CurrentWorkspace                 [label="Extract next workspace from either the vanadium or sample map"]
   CurrentWorkspace      -> NormaliseByCurrent
   NormaliseByCurrent    -> AlignDetectors
   CalibrationFile       -> AlignDetectors

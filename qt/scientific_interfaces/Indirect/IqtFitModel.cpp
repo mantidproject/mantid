@@ -17,11 +17,9 @@
 using namespace Mantid::API;
 
 namespace {
-IFunction_sptr getFirstInCategory(IFunction_sptr function,
-                                  const std::string &category);
+IFunction_sptr getFirstInCategory(IFunction_sptr function, const std::string &category);
 
-IFunction_sptr getFirstInCategory(const CompositeFunction_sptr &composite,
-                                  const std::string &category) {
+IFunction_sptr getFirstInCategory(const CompositeFunction_sptr &composite, const std::string &category) {
   for (auto i = 0u; i < composite->nFunctions(); ++i) {
     auto function = getFirstInCategory(composite->getFunction(i), category);
     if (function)
@@ -30,8 +28,7 @@ IFunction_sptr getFirstInCategory(const CompositeFunction_sptr &composite,
   return nullptr;
 }
 
-IFunction_sptr getFirstInCategory(IFunction_sptr function,
-                                  const std::string &category) {
+IFunction_sptr getFirstInCategory(IFunction_sptr function, const std::string &category) {
   if (!function)
     return nullptr;
   if (function->category() == category)
@@ -42,8 +39,7 @@ IFunction_sptr getFirstInCategory(IFunction_sptr function,
   return nullptr;
 }
 
-std::vector<std::string> getParameters(const IFunction_sptr &function,
-                                       const std::string &shortParameterName) {
+std::vector<std::string> getParameters(const IFunction_sptr &function, const std::string &shortParameterName) {
   std::vector<std::string> parameters;
 
   for (const auto &longName : function->getParameterNames()) {
@@ -57,15 +53,12 @@ bool constrainIntensities(const IFunction_sptr &function) {
   const auto intensityParameters = getParameters(function, "Height");
   const auto backgroundParameters = getParameters(function, "A0");
 
-  if (intensityParameters.size() + backgroundParameters.size() < 2 ||
-      intensityParameters.empty())
+  if (intensityParameters.size() + backgroundParameters.size() < 2 || intensityParameters.empty())
     return false;
 
-  std::string tieString = std::accumulate(
-      backgroundParameters.cbegin(), backgroundParameters.cend(),
-      std::string("1"), [](const auto &head, const auto &parameter) {
-        return head + "-" + parameter;
-      });
+  std::string tieString =
+      std::accumulate(backgroundParameters.cbegin(), backgroundParameters.cend(), std::string("1"),
+                      [](const auto &head, const auto &parameter) { return head + "-" + parameter; });
 
   for (auto i = 1u; i < intensityParameters.size(); ++i)
     tieString += "-" + intensityParameters[i];
@@ -96,10 +89,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IqtFitModel::IqtFitModel()
-    : IndirectFittingModel(), m_constrainIntensities(false) {
-  m_fitType = IQTFIT_STRING;
-}
+IqtFitModel::IqtFitModel() : IndirectFittingModel(), m_constrainIntensities(false) { m_fitType = IQTFIT_STRING; }
 
 IAlgorithm_sptr IqtFitModel::sequentialFitAlgorithm() const {
   auto algorithm = AlgorithmManager::Instance().create("IqtFitSequential");
@@ -113,18 +103,15 @@ IAlgorithm_sptr IqtFitModel::simultaneousFitAlgorithm() const {
   return algorithm;
 }
 
-void IqtFitModel::setFitFunction(
-    Mantid::API::MultiDomainFunction_sptr function) {
+void IqtFitModel::setFitFunction(Mantid::API::MultiDomainFunction_sptr function) {
   IndirectFittingModel::setFitFunction(function);
   if (m_constrainIntensities)
     constrainIntensities(function);
 }
 
-std::unordered_map<std::string, ParameterValue>
-IqtFitModel::createDefaultParameters(TableDatasetIndex index) const {
+std::unordered_map<std::string, ParameterValue> IqtFitModel::createDefaultParameters(TableDatasetIndex index) const {
   std::unordered_map<std::string, ParameterValue> parameters;
-  parameters["Height"] =
-      ParameterValue(computeHeightApproximation(getFittingFunction()));
+  parameters["Height"] = ParameterValue(computeHeightApproximation(getFittingFunction()));
 
   const auto inputWs = getWorkspace(index);
   const auto tau = inputWs ? computeTauApproximation(inputWs) : 0.0;

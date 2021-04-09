@@ -94,7 +94,7 @@ The dialog box will close having sent no information. Mantid will either continu
 **Share non-identifiable information**
 
 An error report will be sent to errorreports.mantidproject.org. It will contain the following information:
- 
+
 - Operating System including version.
 - Mantid version including git Sha1.
 - System architecture.

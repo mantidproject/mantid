@@ -63,12 +63,10 @@ public:
   enum class YMode { Uninitialized, Counts, Frequencies };
   /// Construct with given storage mode for X data (BinEdges or Points) and Y
   /// data (Counts or Frequencies).
-  explicit Histogram(XMode xmode, YMode ymode)
-      : m_x(Kernel::make_cow<HistogramX>(0)), m_xMode(xmode), m_yMode(ymode) {}
+  explicit Histogram(XMode xmode, YMode ymode) : m_x(Kernel::make_cow<HistogramX>(0)), m_xMode(xmode), m_yMode(ymode) {}
 
   template <class TX, class TY = Counts, class TE = CountVariances>
-  explicit Histogram(const TX &x, const TY &y = Counts(),
-                     const TE &e = CountVariances());
+  explicit Histogram(const TX &x, const TY &y = Counts(), const TE &e = CountVariances());
 
   // Copy and move need to be declared and defaulted, since we need to have the
   // lvalue reference qualifier on the assignment operators.
@@ -87,10 +85,10 @@ public:
   Points points() const;
   PointVariances pointVariances() const;
   PointStandardDeviations pointStandardDeviations() const;
-  template <typename... T> void setBinEdges(T &&... data) &;
-  template <typename... T> void setPoints(T &&... data) &;
-  template <typename... T> void setPointVariances(T &&... data) &;
-  template <typename... T> void setPointStandardDeviations(T &&... data) &;
+  template <typename... T> void setBinEdges(T &&...data) &;
+  template <typename... T> void setPoints(T &&...data) &;
+  template <typename... T> void setPointVariances(T &&...data) &;
+  template <typename... T> void setPointStandardDeviations(T &&...data) &;
 
   Counts counts() const;
   CountVariances countVariances() const;
@@ -98,12 +96,12 @@ public:
   Frequencies frequencies() const;
   FrequencyVariances frequencyVariances() const;
   FrequencyStandardDeviations frequencyStandardDeviations() const;
-  template <typename... T> void setCounts(T &&... data) &;
-  template <typename... T> void setCountVariances(T &&... data) &;
-  template <typename... T> void setCountStandardDeviations(T &&... data) &;
-  template <typename... T> void setFrequencies(T &&... data) &;
-  template <typename... T> void setFrequencyVariances(T &&... data) &;
-  template <typename... T> void setFrequencyStandardDeviations(T &&... data) &;
+  template <typename... T> void setCounts(T &&...data) &;
+  template <typename... T> void setCountVariances(T &&...data) &;
+  template <typename... T> void setCountStandardDeviations(T &&...data) &;
+  template <typename... T> void setFrequencies(T &&...data) &;
+  template <typename... T> void setFrequencyVariances(T &&...data) &;
+  template <typename... T> void setFrequencyStandardDeviations(T &&...data) &;
 
   const HistogramX &x() const { return *m_x; }
   const HistogramY &y() const { return *m_y; }
@@ -204,20 +202,11 @@ private:
 template <> MANTID_HISTOGRAMDATA_DLL void Histogram::initX(const Points &x);
 template <> MANTID_HISTOGRAMDATA_DLL void Histogram::initX(const BinEdges &x);
 template <> MANTID_HISTOGRAMDATA_DLL void Histogram::setValues(const Counts &y);
-template <>
-MANTID_HISTOGRAMDATA_DLL void Histogram::setValues(const Frequencies &y);
-template <>
-MANTID_HISTOGRAMDATA_DLL void
-Histogram::setUncertainties(const CountVariances &e);
-template <>
-MANTID_HISTOGRAMDATA_DLL void
-Histogram::setUncertainties(const CountStandardDeviations &e);
-template <>
-MANTID_HISTOGRAMDATA_DLL void
-Histogram::setUncertainties(const FrequencyVariances &e);
-template <>
-void MANTID_HISTOGRAMDATA_DLL
-Histogram::setUncertainties(const FrequencyStandardDeviations &e);
+template <> MANTID_HISTOGRAMDATA_DLL void Histogram::setValues(const Frequencies &y);
+template <> MANTID_HISTOGRAMDATA_DLL void Histogram::setUncertainties(const CountVariances &e);
+template <> MANTID_HISTOGRAMDATA_DLL void Histogram::setUncertainties(const CountStandardDeviations &e);
+template <> MANTID_HISTOGRAMDATA_DLL void Histogram::setUncertainties(const FrequencyVariances &e);
+template <> void MANTID_HISTOGRAMDATA_DLL Histogram::setUncertainties(const FrequencyStandardDeviations &e);
 
 /** Construct from X data, (optionally) Y data, and (optionally) E data.
 
@@ -227,8 +216,7 @@ Histogram::setUncertainties(const FrequencyStandardDeviations &e);
   StandardDeviations for Counts or Frequencies. If not specified or null, the
   standard deviations will be set as the square root of the Y data.
   */
-template <class TX, class TY, class TE>
-Histogram::Histogram(const TX &x, const TY &y, const TE &e) {
+template <class TX, class TY, class TE> Histogram::Histogram(const TX &x, const TY &y, const TE &e) {
   initX(x);
   initY(y);
   initE(e);
@@ -258,7 +246,7 @@ template <class TE> void Histogram::initE(const TE &e) {
  Any arguments that can be used for constructing a BinEdges object are allowed,
  however, a size check ensures that the Histogram stays valid, i.e., that x and
  y lengths are consistent. */
-template <typename... T> void Histogram::setBinEdges(T &&... data) & {
+template <typename... T> void Histogram::setBinEdges(T &&...data) & {
   BinEdges edges(std::forward<T>(data)...);
   checkSize(edges);
   if (selfAssignmentX(data...))
@@ -272,7 +260,7 @@ template <typename... T> void Histogram::setBinEdges(T &&... data) & {
  Any arguments that can be used for constructing a Points object are allowed,
  however, a size check ensures that the Histogram stays valid, i.e., that x and
  y lengths are consistent. */
-template <typename... T> void Histogram::setPoints(T &&... data) & {
+template <typename... T> void Histogram::setPoints(T &&...data) & {
   Points points(std::forward<T>(data)...);
   checkSize(points);
   if (selfAssignmentX(data...))
@@ -282,7 +270,7 @@ template <typename... T> void Histogram::setPoints(T &&... data) & {
 }
 
 /// Sets the Histogram's point variances.
-template <typename... T> void Histogram::setPointVariances(T &&... data) & {
+template <typename... T> void Histogram::setPointVariances(T &&...data) & {
   PointVariances points(std::forward<T>(data)...);
   if (points)
     checkSize(points);
@@ -296,8 +284,7 @@ template <typename... T> void Histogram::setPointVariances(T &&... data) & {
 }
 
 /// Sets the Histogram's point standard deviations.
-template <typename... T>
-void Histogram::setPointStandardDeviations(T &&... data) & {
+template <typename... T> void Histogram::setPointStandardDeviations(T &&...data) & {
   PointStandardDeviations points(std::forward<T>(data)...);
   if (points)
     checkSize(points);
@@ -311,7 +298,7 @@ void Histogram::setPointStandardDeviations(T &&... data) & {
  Any arguments that can be used for constructing a Counts object are allowed,
  however, a size check ensures that the Histogram stays valid, i.e., that x and
  y lengths are consistent. */
-template <typename... T> void Histogram::setCounts(T &&... data) & {
+template <typename... T> void Histogram::setCounts(T &&...data) & {
   checkAndSetYModeCounts();
   Counts counts(std::forward<T>(data)...);
   checkSize(counts);
@@ -321,7 +308,7 @@ template <typename... T> void Histogram::setCounts(T &&... data) & {
 }
 
 /// Sets the Histogram's count variances.
-template <typename... T> void Histogram::setCountVariances(T &&... data) & {
+template <typename... T> void Histogram::setCountVariances(T &&...data) & {
   checkAndSetYModeCounts();
   CountVariances counts(std::forward<T>(data)...);
   checkSize(counts);
@@ -335,8 +322,7 @@ template <typename... T> void Histogram::setCountVariances(T &&... data) & {
 }
 
 /// Sets the Histogram's count standard deviations.
-template <typename... T>
-void Histogram::setCountStandardDeviations(T &&... data) & {
+template <typename... T> void Histogram::setCountStandardDeviations(T &&...data) & {
   checkAndSetYModeCounts();
   CountStandardDeviations counts(std::forward<T>(data)...);
   checkSize(counts);
@@ -350,7 +336,7 @@ void Histogram::setCountStandardDeviations(T &&... data) & {
  Any arguments that can be used for constructing a Frequencies object are
  allowed, however, a size check ensures that the Histogram stays valid, i.e.,
  that x and y lengths are consistent. */
-template <typename... T> void Histogram::setFrequencies(T &&... data) & {
+template <typename... T> void Histogram::setFrequencies(T &&...data) & {
   checkAndSetYModeFrequencies();
   Frequencies frequencies(std::forward<T>(data)...);
   checkSize(frequencies);
@@ -360,7 +346,7 @@ template <typename... T> void Histogram::setFrequencies(T &&... data) & {
 }
 
 /// Sets the Histogram's frequency variances.
-template <typename... T> void Histogram::setFrequencyVariances(T &&... data) & {
+template <typename... T> void Histogram::setFrequencyVariances(T &&...data) & {
   checkAndSetYModeFrequencies();
   FrequencyVariances frequencies(std::forward<T>(data)...);
   checkSize(frequencies);
@@ -370,8 +356,7 @@ template <typename... T> void Histogram::setFrequencyVariances(T &&... data) & {
 }
 
 /// Sets the Histogram's frequency standard deviations.
-template <typename... T>
-void Histogram::setFrequencyStandardDeviations(T &&... data) & {
+template <typename... T> void Histogram::setFrequencyStandardDeviations(T &&...data) & {
   checkAndSetYModeFrequencies();
   FrequencyStandardDeviations frequencies(std::forward<T>(data)...);
   checkSize(frequencies);
@@ -380,8 +365,7 @@ void Histogram::setFrequencyStandardDeviations(T &&... data) & {
   m_e = frequencies.cowData();
 }
 
-template <>
-MANTID_HISTOGRAMDATA_DLL void Histogram::checkSize(const BinEdges &data) const;
+template <> MANTID_HISTOGRAMDATA_DLL void Histogram::checkSize(const BinEdges &data) const;
 
 template <class T> void Histogram::checkSize(const T &data) const {
   size_t target = m_x->size();
@@ -392,44 +376,31 @@ template <class T> void Histogram::checkSize(const T &data) const {
     throw std::logic_error("Histogram: size mismatch of data.\n");
 }
 
-template <> inline bool Histogram::selfAssignmentX(const HistogramX &data) {
-  return &data == m_x.get();
-}
+template <> inline bool Histogram::selfAssignmentX(const HistogramX &data) { return &data == m_x.get(); }
 
-template <>
-inline bool Histogram::selfAssignmentX(const std::vector<double> &data) {
+template <> inline bool Histogram::selfAssignmentX(const std::vector<double> &data) {
   return static_cast<bool>(m_x) && &data == &(m_x->rawData());
 }
 
-template <> inline bool Histogram::selfAssignmentDx(const HistogramDx &data) {
-  return &data == m_dx.get();
-}
+template <> inline bool Histogram::selfAssignmentDx(const HistogramDx &data) { return &data == m_dx.get(); }
 
-template <>
-inline bool Histogram::selfAssignmentDx(const std::vector<double> &data) {
+template <> inline bool Histogram::selfAssignmentDx(const std::vector<double> &data) {
   return static_cast<bool>(m_dx) && &data == &(m_dx->rawData());
 }
 
-template <> inline bool Histogram::selfAssignmentY(const HistogramY &data) {
-  return &data == m_y.get();
-}
+template <> inline bool Histogram::selfAssignmentY(const HistogramY &data) { return &data == m_y.get(); }
 
-template <>
-inline bool Histogram::selfAssignmentY(const std::vector<double> &data) {
+template <> inline bool Histogram::selfAssignmentY(const std::vector<double> &data) {
   return static_cast<bool>(m_y) && &data == &(m_y->rawData());
 }
 
-template <> inline bool Histogram::selfAssignmentE(const HistogramE &data) {
-  return &data == m_e.get();
-}
+template <> inline bool Histogram::selfAssignmentE(const HistogramE &data) { return &data == m_e.get(); }
 
-template <>
-inline bool Histogram::selfAssignmentE(const std::vector<double> &data) {
+template <> inline bool Histogram::selfAssignmentE(const std::vector<double> &data) {
   return static_cast<bool>(m_e) && &data == &(m_e->rawData());
 }
 
-MANTID_HISTOGRAMDATA_DLL Histogram::XMode getHistogramXMode(size_t xLength,
-                                                            size_t yLength);
+MANTID_HISTOGRAMDATA_DLL Histogram::XMode getHistogramXMode(size_t xLength, size_t yLength);
 
 } // namespace HistogramData
 } // namespace Mantid

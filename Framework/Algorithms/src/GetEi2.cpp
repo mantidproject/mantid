@@ -40,9 +40,8 @@ DECLARE_ALGORITHM(GetEi2)
  * Default contructor
  */
 GetEi2::GetEi2()
-    : Algorithm(), m_input_ws(), m_peak1_pos(0, 0.0), m_fixedei(false),
-      m_tof_window(0.1), m_peak_signif(2.0), m_peak_deriv(1.0),
-      m_binwidth_frac(1.0 / 12.0), m_bkgd_frac(0.5) {
+    : Algorithm(), m_input_ws(), m_peak1_pos(0, 0.0), m_fixedei(false), m_tof_window(0.1), m_peak_signif(2.0),
+      m_peak_deriv(1.0), m_binwidth_frac(1.0 / 12.0), m_bkgd_frac(0.5) {
   // Conversion factor common for converting between micro seconds and energy in
   // meV
   m_t_to_mev = 5e11 * PhysicalConstants::NeutronMass / PhysicalConstants::meV;
@@ -56,11 +55,9 @@ void GetEi2::init()
   validator->add<HistogramValidator>();
   validator->add<InstrumentValidator>();
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                            Direction::InOut, validator),
-      "The X units of this workspace must be time of flight with times in\n"
-      "microseconds");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::InOut, validator),
+                  "The X units of this workspace must be time of flight with times in\n"
+                  "microseconds");
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("Monitor1Spec", EMPTY_INT(), mustBePositive,
@@ -73,20 +70,16 @@ void GetEi2::init()
                   "be read from the instrument file.\n");
   auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0.0);
-  declareProperty(
-      "EnergyEstimate", EMPTY_DBL(), positiveDouble,
-      "An approximate value for the typical incident energy, energy of\n"
-      "neutrons leaving the source (meV)\n Can be empty if there is a Sample "
-      "Log called EnergyRequest. Otherwise it is mandatory.");
-  declareProperty(
-      "FixEi", false,
-      "If true, the incident energy will be set to the value of the \n"
-      "EnergyEstimate property.");
+  declareProperty("EnergyEstimate", EMPTY_DBL(), positiveDouble,
+                  "An approximate value for the typical incident energy, energy of\n"
+                  "neutrons leaving the source (meV)\n Can be empty if there is a Sample "
+                  "Log called EnergyRequest. Otherwise it is mandatory.");
+  declareProperty("FixEi", false,
+                  "If true, the incident energy will be set to the value of the \n"
+                  "EnergyEstimate property.");
 
-  declareProperty(
-      "IncidentEnergy", -1.0,
-      "The energy of neutron in meV, it is also printed to the Mantid's log",
-      Direction::Output);
+  declareProperty("IncidentEnergy", -1.0, "The energy of neutron in meV, it is also printed to the Mantid's log",
+                  Direction::Output);
 
   declareProperty("FirstMonitorPeak", -1.0,
                   "The time in :math:`\\rm{\\mu s}` when the count rate of the "
@@ -96,10 +89,8 @@ void GetEi2::init()
                   "and is also writen to Mantid's log.",
                   Direction::Output);
 
-  declareProperty(
-      "FirstMonitorIndex", 0,
-      "The workspace index of the first monitor in the input workspace.",
-      Direction::Output);
+  declareProperty("FirstMonitorIndex", 0, "The workspace index of the first monitor in the input workspace.",
+                  Direction::Output);
 
   declareProperty("Tzero", 0.0, "", Direction::Output);
 
@@ -164,8 +155,7 @@ double GetEi2::calculateEi(const double initial_guess) {
   Instrument_const_sptr instrument = m_input_ws->getInstrument();
 
   // If we have a t0 formula, calculate t0 and return the initial guess
-  Parameter_sptr par =
-      pmap.getRecursive(instrument->getChild(0).get(), "t0_formula");
+  Parameter_sptr par = pmap.getRecursive(instrument->getChild(0).get(), "t0_formula");
   if (par) {
     std::string formula = par->asString();
     std::stringstream guess;
@@ -187,8 +177,7 @@ double GetEi2::calculateEi(const double initial_guess) {
       return initial_guess;
     } catch (mu::Parser::exception_type &e) {
       throw Kernel::Exception::InstrumentDefinitionError(
-          "Equation attribute for t0 formula. Muparser error message is: " +
-          e.GetMsg());
+          "Equation attribute for t0 formula. Muparser error message is: " + e.GetMsg());
     }
   }
 
@@ -205,8 +194,7 @@ double GetEi2::calculateEi(const double initial_guess) {
     }
   }
   if ((mon1 == EMPTY_INT()) || (mon2 == EMPTY_INT())) {
-    throw std::invalid_argument(
-        "Could not determine spectrum number to use. Try to set it explicitly");
+    throw std::invalid_argument("Could not determine spectrum number to use. Try to set it explicitly");
   }
   // Covert spectrum numbers to workspace indices
   std::vector<specnum_t> spec_nums(2, mon1);
@@ -217,8 +205,7 @@ double GetEi2::calculateEi(const double initial_guess) {
   if (mon_indices.size() != 2) {
     g_log.error() << "Error retrieving monitor spectra from input workspace. "
                      "Check input properties.\n";
-    throw std::runtime_error(
-        "Error retrieving monitor spectra spectra from input workspace.");
+    throw std::runtime_error("Error retrieving monitor spectra spectra from input workspace.");
   }
 
   // Calculate actual peak postion for each monitor peak
@@ -228,35 +215,27 @@ double GetEi2::calculateEi(const double initial_guess) {
   for (unsigned int i = 0; i < 2; ++i) {
     size_t ws_index = mon_indices[i];
     det_distances[i] = getDistanceFromSource(ws_index, spectrumInfo);
-    const double peak_guess =
-        det_distances[i] * std::sqrt(m_t_to_mev / initial_guess);
+    const double peak_guess = det_distances[i] * std::sqrt(m_t_to_mev / initial_guess);
     const double t_min = (1.0 - m_tof_window) * peak_guess;
     const double t_max = (1.0 + m_tof_window) * peak_guess;
-    g_log.information() << "Time-of-flight window for peak " << (i + 1)
-                        << ": tmin = " << t_min
-                        << " microseconds, tmax = " << t_max
-                        << " microseconds\n";
+    g_log.information() << "Time-of-flight window for peak " << (i + 1) << ": tmin = " << t_min
+                        << " microseconds, tmax = " << t_max << " microseconds\n";
     try {
       peak_times[i] = calculatePeakPosition(ws_index, t_min, t_max);
-      g_log.information() << "Peak for monitor " << (i + 1) << " (at "
-                          << det_distances[i] << " metres) = " << peak_times[i]
-                          << " microseconds\n";
+      g_log.information() << "Peak for monitor " << (i + 1) << " (at " << det_distances[i]
+                          << " metres) = " << peak_times[i] << " microseconds\n";
     } catch (std::invalid_argument &) {
 
       if (!m_fixedei) {
-        throw std::invalid_argument(
-            "No peak found for the monitor with spectra num: " +
-            std::to_string(spec_nums[i]) + " (at " +
-            boost::lexical_cast<std::string>(det_distances[i]) +
-            "  metres from source).\n");
+        throw std::invalid_argument("No peak found for the monitor with spectra num: " + std::to_string(spec_nums[i]) +
+                                    " (at " + boost::lexical_cast<std::string>(det_distances[i]) +
+                                    "  metres from source).\n");
       } else {
         peak_times[i] = peak_guess;
-        g_log.warning() << "No peak found for monitor with spectra num "
-                        << spec_nums[i] << " (at " << det_distances[i]
+        g_log.warning() << "No peak found for monitor with spectra num " << spec_nums[i] << " (at " << det_distances[i]
                         << " metres).\n";
-        g_log.warning()
-            << "Using guess time found from energy estimate of Peak = "
-            << peak_times[i] << " microseconds\n";
+        g_log.warning() << "Using guess time found from energy estimate of Peak = " << peak_times[i]
+                        << " microseconds\n";
       }
     }
     if (i == 0) {
@@ -267,20 +246,18 @@ double GetEi2::calculateEi(const double initial_guess) {
   }
 
   if (m_fixedei) {
-    g_log.notice() << "Incident energy fixed at Ei=" << initial_guess
-                   << " meV\n";
+    g_log.notice() << "Incident energy fixed at Ei=" << initial_guess << " meV\n";
     return initial_guess;
   } else {
-    double mean_speed =
-        (det_distances[1] - det_distances[0]) / (peak_times[1] - peak_times[0]);
+    double mean_speed = (det_distances[1] - det_distances[0]) / (peak_times[1] - peak_times[0]);
     double tzero = peak_times[1] - ((1.0 / mean_speed) * det_distances[1]);
     g_log.debug() << "T0 = " << tzero << '\n';
     g_log.debug() << "Mean Speed = " << mean_speed << '\n';
     setProperty("Tzero", tzero);
 
     const double energy = mean_speed * mean_speed * m_t_to_mev;
-    g_log.notice() << "Incident energy calculated at Ei= " << energy
-                   << " meV from initial guess = " << initial_guess << " meV\n";
+    g_log.notice() << "Incident energy calculated at Ei= " << energy << " meV from initial guess = " << initial_guess
+                   << " meV\n";
     return energy;
   }
 }
@@ -294,17 +271,14 @@ double GetEi2::calculateEi(const double initial_guess) {
  * DetectorGroup)
  *  @throw runtime_error if there is a problem
  */
-double GetEi2::getDistanceFromSource(size_t ws_index,
-                                     const SpectrumInfo &spectrumInfo) const {
-  g_log.debug() << "Computing distance between spectrum at index '" << ws_index
-                << "' and the source\n";
+double GetEi2::getDistanceFromSource(size_t ws_index, const SpectrumInfo &spectrumInfo) const {
+  g_log.debug() << "Computing distance between spectrum at index '" << ws_index << "' and the source\n";
 
   const auto &detector = spectrumInfo.detector(ws_index);
   const IComponent_const_sptr source = m_input_ws->getInstrument()->getSource();
   if (!spectrumInfo.hasDetectors(ws_index)) {
     std::ostringstream msg;
-    msg << "A detector for monitor at workspace index " << ws_index
-        << " cannot be found. ";
+    msg << "A detector for monitor at workspace index " << ws_index << " cannot be found. ";
     throw std::runtime_error(msg.str());
   }
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
@@ -323,8 +297,7 @@ double GetEi2::getDistanceFromSource(size_t ws_index,
  * @param t_max :: the max time to consider
  * @return the peak position
  */
-double GetEi2::calculatePeakPosition(size_t ws_index, double t_min,
-                                     double t_max) {
+double GetEi2::calculatePeakPosition(size_t ws_index, double t_min, double t_max) {
   // Crop out the current monitor workspace to the min/max times defined
   MatrixWorkspace_sptr monitor_ws = extractSpectrum(ws_index, t_min, t_max);
   // Workspace needs to be a count rate for the fitting algorithm
@@ -332,8 +305,7 @@ double GetEi2::calculatePeakPosition(size_t ws_index, double t_min,
 
   const double prominence(4.0);
   std::vector<double> dummyX, dummyY, dummyE;
-  double peak_width = calculatePeakWidthAtHalfHeight(monitor_ws, prominence,
-                                                     dummyX, dummyY, dummyE);
+  double peak_width = calculatePeakWidthAtHalfHeight(monitor_ws, prominence, dummyX, dummyY, dummyE);
   monitor_ws = rebin(monitor_ws, t_min, peak_width * m_binwidth_frac, t_max);
 
   double t_mean(0.0);
@@ -360,8 +332,7 @@ double GetEi2::calculatePeakPosition(size_t ws_index, double t_min,
  *  @throw runtime_error if the algorithm just falls over
  *  @throw invalid_argument if the input workspace does not have common binning
  */
-MatrixWorkspace_sptr
-GetEi2::extractSpectrum(size_t ws_index, const double start, const double end) {
+MatrixWorkspace_sptr GetEi2::extractSpectrum(size_t ws_index, const double start, const double end) {
   IAlgorithm_sptr childAlg = createChildAlgorithm("CropWorkspace");
   childAlg->setProperty("InputWorkspace", m_input_ws);
   childAlg->setProperty<int>("StartWorkspaceIndex", static_cast<int>(ws_index));
@@ -395,10 +366,9 @@ GetEi2::extractSpectrum(size_t ws_index, const double start, const double end) {
  * data
  * @returns The width of the peak at half height
  */
-double GetEi2::calculatePeakWidthAtHalfHeight(
-    const API::MatrixWorkspace_sptr &data_ws, const double prominence,
-    std::vector<double> &peak_x, std::vector<double> &peak_y,
-    std::vector<double> &peak_e) const {
+double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &data_ws, const double prominence,
+                                              std::vector<double> &peak_x, std::vector<double> &peak_y,
+                                              std::vector<double> &peak_e) const {
   // Use WS->points() to create a temporary vector of bin_centre values to work
   // with
   auto Xs = data_ws->points(0);
@@ -422,8 +392,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
   auto im = static_cast<int64_t>(iPeak - 1);
   for (; im >= 0; --im) {
     const double ratio = (Ys[im] - bkg_val) / peakY;
-    const double ratio_err =
-        std::sqrt(std::pow(Es[im], 2) + std::pow(ratio * peakE, 2)) / peakY;
+    const double ratio_err = std::sqrt(std::pow(Es[im], 2) + std::pow(ratio * peakE, 2)) / peakY;
     if (ratio < (1.0 / prominence - m_peak_signif * ratio_err)) {
       break;
     }
@@ -432,16 +401,14 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
   std::vector<double>::size_type ip = iPeak + 1;
   for (; ip < nxvals; ip++) {
     const double ratio = (Ys[ip] - bkg_val) / peakY;
-    const double ratio_err =
-        std::sqrt(std::pow(Es[ip], 2) + std::pow(ratio * peakE, 2)) / peakY;
+    const double ratio_err = std::sqrt(std::pow(Es[ip], 2) + std::pow(ratio * peakE, 2)) / peakY;
     if (ratio < (1.0 / prominence - m_peak_signif * ratio_err)) {
       break;
     }
   }
 
   if (ip == nxvals || im < 0) {
-    throw std::invalid_argument(
-        "No peak found in data that satisfies prominence criterion");
+    throw std::invalid_argument("No peak found in data that satisfies prominence criterion");
   }
 
   // We now have a peak, so can start filling output arguments
@@ -462,12 +429,9 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
     while ((ip < nxvals - 1) && (deriv < -m_peak_deriv * error)) {
       double dtp = Xs[ip + 1] - Xs[ip];
       double dtm = Xs[ip] - Xs[ip - 1];
-      deriv =
-          0.5 * (((Ys[ip + 1] - Ys[ip]) / dtp) + ((Ys[ip] - Ys[ip - 1]) / dtm));
-      error = 0.5 * std::sqrt(((std::pow(Es[ip + 1], 2) + std::pow(Es[ip], 2)) /
-                               std::pow(dtp, 2)) +
-                              ((std::pow(Es[ip], 2) + std::pow(Es[ip - 1], 2)) /
-                               std::pow(dtm, 2)) -
+      deriv = 0.5 * (((Ys[ip + 1] - Ys[ip]) / dtp) + ((Ys[ip] - Ys[ip - 1]) / dtm));
+      error = 0.5 * std::sqrt(((std::pow(Es[ip + 1], 2) + std::pow(Es[ip], 2)) / std::pow(dtp, 2)) +
+                              ((std::pow(Es[ip], 2) + std::pow(Es[ip - 1], 2)) / std::pow(dtm, 2)) -
                               2.0 * (std::pow(Es[ip], 2) / (dtp * dtm)));
       ip++;
     }
@@ -484,12 +448,9 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
     while ((im > 0) && (deriv > m_peak_deriv * error)) {
       double dtp = Xs[im + 1] - Xs[im];
       double dtm = Xs[im] - Xs[im - 1];
-      deriv =
-          0.5 * (((Ys[im + 1] - Ys[im]) / dtp) + ((Ys[im] - Ys[im - 1]) / dtm));
-      error = 0.5 * std::sqrt(((std::pow(Es[im + 1], 2) + std::pow(Es[im], 2)) /
-                               std::pow(dtp, 2)) +
-                              ((std::pow(Es[im], 2) + std::pow(Es[im - 1], 2)) /
-                               std::pow(dtm, 2)) -
+      deriv = 0.5 * (((Ys[im + 1] - Ys[im]) / dtp) + ((Ys[im] - Ys[im - 1]) / dtm));
+      error = 0.5 * std::sqrt(((std::pow(Es[im + 1], 2) + std::pow(Es[im], 2)) / std::pow(dtp, 2)) +
+                              ((std::pow(Es[im], 2) + std::pow(Es[im - 1], 2)) / std::pow(dtm, 2)) -
                               2.0 * std::pow(Es[im], 2) / (dtp * dtm));
       im--;
     }
@@ -534,14 +495,12 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
   std::copy(Xs.begin() + im, Xs.begin() + ip + 1, peak_x.begin());
   peak_y.resize(nvalues);
   using std::placeholders::_1;
-  std::transform(Ys.begin() + im, Ys.begin() + ip + 1, peak_y.begin(),
-                 std::bind(std::minus<double>(), _1, bkgd));
+  std::transform(Ys.begin() + im, Ys.begin() + ip + 1, peak_y.begin(), std::bind(std::minus<double>(), _1, bkgd));
   peak_e.resize(nvalues);
   std::copy(Es.begin() + im, Es.begin() + ip + 1, peak_e.begin());
 
   // FWHH:
-  int64_t ipk_int = static_cast<int64_t>(iPeak) -
-                    im; //       ! peak position in internal array
+  int64_t ipk_int = static_cast<int64_t>(iPeak) - im; //       ! peak position in internal array
   double hby2 = 0.5 * peak_y[ipk_int];
   double xp_hh(0);
 
@@ -573,9 +532,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
                       << "half-height point will not be as accurate.\n";
       ip1--;
     }
-    xp_hh =
-        peak_x[ip2] + (peak_x[ip1] - peak_x[ip2]) *
-                          ((hby2 - peak_y[ip2]) / (peak_y[ip1] - peak_y[ip2]));
+    xp_hh = peak_x[ip2] + (peak_x[ip1] - peak_x[ip2]) * ((hby2 - peak_y[ip2]) / (peak_y[ip1] - peak_y[ip2]));
   } else {
     xp_hh = peak_x[nyvals - 1];
   }
@@ -608,9 +565,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
                       << "half-height point will not be as accurate.\n";
       im1++;
     }
-    xm_hh =
-        peak_x[im2] + (peak_x[im1] - peak_x[im2]) *
-                          ((hby2 - peak_y[im2]) / (peak_y[im1] - peak_y[im2]));
+    xm_hh = peak_x[im2] + (peak_x[im1] - peak_x[im2]) * ((hby2 - peak_y[im2]) / (peak_y[im1] - peak_y[im2]));
   } else {
     xm_hh = peak_x.front();
   }
@@ -623,11 +578,9 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
  * considered a "real" peak
  *  @return The calculated first moment
  */
-double GetEi2::calculateFirstMoment(const API::MatrixWorkspace_sptr &monitor_ws,
-                                    const double prominence) {
+double GetEi2::calculateFirstMoment(const API::MatrixWorkspace_sptr &monitor_ws, const double prominence) {
   std::vector<double> peak_x, peak_y, peak_e;
-  calculatePeakWidthAtHalfHeight(std::move(monitor_ws), prominence, peak_x,
-                                 peak_y, peak_e);
+  calculatePeakWidthAtHalfHeight(std::move(monitor_ws), prominence, peak_x, peak_y, peak_e);
 
   // Area
   double area(0.0), dummy(0.0);
@@ -635,8 +588,7 @@ double GetEi2::calculateFirstMoment(const API::MatrixWorkspace_sptr &monitor_ws,
   double pk_xmax = peak_x.back();
   integrate(area, dummy, peak_x, peak_y, peak_e, pk_xmin, pk_xmax);
   // First moment
-  std::transform(peak_y.begin(), peak_y.end(), peak_x.begin(), peak_y.begin(),
-                 std::multiplies<double>());
+  std::transform(peak_y.begin(), peak_y.end(), peak_x.begin(), peak_y.begin(), std::multiplies<double>());
   double xbar(0.0);
   integrate(xbar, dummy, peak_x, peak_y, peak_e, pk_xmin, pk_xmax);
   return xbar / area;
@@ -650,9 +602,8 @@ double GetEi2::calculateFirstMoment(const API::MatrixWorkspace_sptr &monitor_ws,
  * @param end :: The maximum value for the new bin range
  * @returns The rebinned workspace
 */
-API::MatrixWorkspace_sptr
-GetEi2::rebin(const API::MatrixWorkspace_sptr &monitor_ws, const double first,
-              const double width, const double end) {
+API::MatrixWorkspace_sptr GetEi2::rebin(const API::MatrixWorkspace_sptr &monitor_ws, const double first,
+                                        const double width, const double end) {
   IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin");
   childAlg->setProperty("InputWorkspace", monitor_ws);
   std::ostringstream binParams;
@@ -673,10 +624,8 @@ GetEi2::rebin(const API::MatrixWorkspace_sptr &monitor_ws, const double first,
  * @param xmin :: The minimum value for the integration
  * @param xmax :: The maximum value for the integration
  */
-void GetEi2::integrate(double &integral_val, double &integral_err,
-                       const HistogramData::HistogramX &x,
-                       const HistogramData::HistogramY &s,
-                       const HistogramData::HistogramE &e, const double xmin,
+void GetEi2::integrate(double &integral_val, double &integral_err, const HistogramData::HistogramX &x,
+                       const HistogramData::HistogramY &s, const HistogramData::HistogramE &e, const double xmin,
                        const double xmax) const {
   // MG: Note that this is integration of a point data set from libisis
   // @todo: Move to Kernel::VectorHelper and improve performance
@@ -691,27 +640,21 @@ void GetEi2::integrate(double &integral_val, double &integral_err,
   auto nx(x.size());
   if (mu < ml) {
     // special case of no data points in the integration range
-    unsigned int ilo =
-        std::max<unsigned int>(static_cast<unsigned int>(ml) - 1, 0);
-    unsigned int ihi = std::min<unsigned int>(static_cast<unsigned int>(mu) + 1,
-                                              static_cast<unsigned int>(nx));
+    unsigned int ilo = std::max<unsigned int>(static_cast<unsigned int>(ml) - 1, 0);
+    unsigned int ihi = std::min<unsigned int>(static_cast<unsigned int>(mu) + 1, static_cast<unsigned int>(nx));
     double fraction = (xmax - xmin) / (x[ihi] - x[ilo]);
-    integral_val = 0.5 * fraction *
-                   (s[ihi] * ((xmax - x[ilo]) + (xmin - x[ilo])) +
-                    s[ilo] * ((x[ihi] - xmax) + (x[ihi] - xmin)));
+    integral_val =
+        0.5 * fraction * (s[ihi] * ((xmax - x[ilo]) + (xmin - x[ilo])) + s[ilo] * ((x[ihi] - xmax) + (x[ihi] - xmin)));
     double err_hi = e[ihi] * ((xmax - x[ilo]) + (xmin - x[ilo]));
     double err_lo = e[ilo] * ((x[ihi] - xmax) + (x[ihi] - xmin));
-    integral_err =
-        0.5 * fraction * std::sqrt(err_hi * err_hi + err_lo * err_lo);
+    integral_err = 0.5 * fraction * std::sqrt(err_hi * err_hi + err_lo * err_lo);
     return;
   }
 
   double x1eff(0.0), s1eff(0.0), e1eff(0.0);
   if (ml > 0) {
-    x1eff = (xmin * (xmin - x[ml - 1]) + x[ml - 1] * (x[ml] - xmin)) /
-            (x[ml] - x[ml - 1]);
-    double fraction =
-        (x[ml] - xmin) / ((x[ml] - x[ml - 1]) + (xmin - x[ml - 1]));
+    x1eff = (xmin * (xmin - x[ml - 1]) + x[ml - 1] * (x[ml] - xmin)) / (x[ml] - x[ml - 1]);
+    double fraction = (x[ml] - xmin) / ((x[ml] - x[ml - 1]) + (xmin - x[ml - 1]));
     s1eff = s[ml - 1] * fraction;
     e1eff = e[ml - 1] * fraction;
   } else {
@@ -721,10 +664,8 @@ void GetEi2::integrate(double &integral_val, double &integral_err,
 
   double xneff(0.0), sneff(0.0), eneff;
   if (mu < static_cast<int>(nx - 1)) {
-    xneff = (xmax * (x[mu + 1] - xmax) + x[mu + 1] * (xmax - x[mu])) /
-            (x[mu + 1] - x[mu]);
-    const double fraction =
-        (xmax - x[mu]) / ((x[mu + 1] - x[mu]) + (x[mu + 1] - xmax));
+    xneff = (xmax * (x[mu + 1] - xmax) + x[mu + 1] * (xmax - x[mu])) / (x[mu + 1] - x[mu]);
+    const double fraction = (xmax - x[mu]) / ((x[mu + 1] - x[mu]) + (x[mu + 1] - xmax));
     sneff = s[mu + 1] * fraction;
     eneff = e[mu + 1] * fraction;
   } else {
@@ -770,8 +711,7 @@ void GetEi2::integrate(double &integral_val, double &integral_err,
  * @param ei :: The value of the incident energy of the neutron
  */
 void GetEi2::storeEi(const double ei) const {
-  Property *incident_energy =
-      new PropertyWithValue<double>("Ei", ei, Direction::Input);
+  Property *incident_energy = new PropertyWithValue<double>("Ei", ei, Direction::Input);
   m_input_ws->mutableRun().addProperty(incident_energy, true);
 }
 } // namespace Algorithms

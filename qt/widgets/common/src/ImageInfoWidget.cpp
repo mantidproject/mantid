@@ -20,8 +20,7 @@ namespace MantidWidgets {
  * @param parent A QWidget to act as the parent widget
  */
 ImageInfoWidget::ImageInfoWidget(QWidget *parent)
-    : IImageInfoWidget(parent),
-      m_presenter(std::make_unique<ImageInfoPresenter>(this)) {
+    : IImageInfoWidget(parent), m_presenter(std::make_unique<ImageInfoPresenter>(this)) {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
   setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 #endif
@@ -35,8 +34,7 @@ ImageInfoWidget::ImageInfoWidget(QWidget *parent)
  * @param y Y position if the cursor
  * @param signal Signal value at cursor position
  */
-void ImageInfoWidget::cursorAt(const double x, const double y,
-                               const double signal) {
+void ImageInfoWidget::cursorAt(const double x, const double y, const double signal) {
   m_presenter->cursorAt(x, y, signal);
 }
 
@@ -66,8 +64,6 @@ void ImageInfoWidget::showInfo(const ImageInfoModel::ImageInfo &info) {
  * Set the workspace to probe for information
  * @param ws A pointer to a Workspace object
  */
-void ImageInfoWidget::setWorkspace(const Mantid::API::Workspace_sptr &ws) {
-  m_presenter->setWorkspace(ws);
-}
+void ImageInfoWidget::setWorkspace(const Mantid::API::Workspace_sptr &ws) { m_presenter->setWorkspace(ws); }
 } // namespace MantidWidgets
 } // namespace MantidQt

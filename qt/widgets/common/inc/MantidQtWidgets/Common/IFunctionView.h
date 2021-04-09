@@ -39,15 +39,12 @@ public:
   virtual void setErrorsEnabled(bool enabled) = 0;
   virtual void clearErrors() = 0;
   virtual boost::optional<QString> currentFunctionIndex() const = 0;
-  virtual void setParameterTie(const QString &paramName,
-                               const QString &tie) = 0;
-  virtual void setParameterConstraint(const QString &paramName,
-                                      const QString &constraint) = 0;
+  virtual void setParameterTie(const QString &paramName, const QString &tie) = 0;
+  virtual void setParameterConstraint(const QString &paramName, const QString &constraint) = 0;
   virtual void setGlobalParameters(const QStringList &) = 0;
   virtual void showFunctionHelp(const QString &) const = 0;
   // Set the value of an attribute based on the template type
-  template <typename T>
-  void setAttributeValue(const QString &attributeName, T &value) {
+  template <typename T> void setAttributeValue(const QString &attributeName, T &value) {
     if constexpr (std::is_same_v<T, double>) {
       setDoubleAttribute(attributeName, value);
     } else if constexpr (std::is_same_v<T, int>) {
@@ -64,11 +61,9 @@ public:
 protected:
   virtual void setDoubleAttribute(const QString &paramName, double value) = 0;
   virtual void setIntAttribute(const QString &paramName, int value) = 0;
-  virtual void setStringAttribute(const QString &paramName,
-                                  std::string &value) = 0;
+  virtual void setStringAttribute(const QString &paramName, std::string &value) = 0;
   virtual void setBooleanAttribute(const QString &paramName, bool value) = 0;
-  virtual void setVectorAttribute(const QString &paramName,
-                                  std::vector<double> &val) = 0;
+  virtual void setVectorAttribute(const QString &paramName, std::vector<double> &val) = 0;
 
 signals:
   /// User replaces the whole function (eg, by pasting it from clipboard)
@@ -90,8 +85,7 @@ signals:
   /// User sets a tie
   void parameterTieChanged(const QString &parName, const QString &tie);
   /// User sets a constraint
-  void parameterConstraintAdded(const QString &functionIndex,
-                                const QString &constraint);
+  void parameterConstraintAdded(const QString &functionIndex, const QString &constraint);
   /// User removes a constraint
   void parameterConstraintRemoved(const QString &paramName);
   /// User requested copy function to clipboard

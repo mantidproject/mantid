@@ -31,21 +31,18 @@ DECLARE_ALGORITHM(MaskBinsFromTable)
 /** Constructor
  */
 MaskBinsFromTable::MaskBinsFromTable()
-    : API::Algorithm(), id_xmin(-1), id_xmax(-1), id_spec(-1), id_dets(-1),
-      m_useDetectorID(false), m_useSpectrumID(false) {}
+    : API::Algorithm(), id_xmin(-1), id_xmax(-1), id_spec(-1), id_dets(-1), m_useDetectorID(false),
+      m_useSpectrumID(false) {}
 
 //----------------------------------------------------------------------------------------------
 void MaskBinsFromTable::init() {
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
-                            "InputWorkspace", "", Direction::Input,
-                            std::make_shared<HistogramValidator>()),
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                                              std::make_shared<HistogramValidator>()),
                         "Input Workspace to mask bins. ");
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
-                            "OutputWorkspace", "", Direction::Output),
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                         "Output Workspace with bins masked.");
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<DataObjects::TableWorkspace>>(
-          "MaskingInformation", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<DataObjects::TableWorkspace>>("MaskingInformation", "", Direction::Input),
       "Input TableWorkspace containing parameters, XMin and "
       "XMax and either SpectraList or DetectorIDsList");
 }
@@ -78,13 +75,11 @@ void MaskBinsFromTable::maskBins(const API::MatrixWorkspace_sptr &dataws) {
                 << "\n";
   for (size_t ib = 0; ib < numcalls; ++ib) {
     // Construct algorithm
-    IAlgorithm_sptr maskbins =
-        this->createChildAlgorithm("MaskBins", 0, 0.3, true);
+    IAlgorithm_sptr maskbins = this->createChildAlgorithm("MaskBins", 0, 0.3, true);
     maskbins->initialize();
 
     // Set properties
-    g_log.debug() << "Input to MaskBins: SpetraList = '" << m_spectraVec[ib]
-                  << "'; Xmin = " << m_xminVec[ib]
+    g_log.debug() << "Input to MaskBins: SpetraList = '" << m_spectraVec[ib] << "'; Xmin = " << m_xminVec[ib]
                   << ", Xmax = " << m_xmaxVec[ib] << ".\n";
 
     if (firstloop) {
@@ -95,8 +90,7 @@ void MaskBinsFromTable::maskBins(const API::MatrixWorkspace_sptr &dataws) {
         throw runtime_error("Programming logic error.");
       maskbins->setProperty("InputWorkspace", outputws);
     }
-    maskbins->setProperty("OutputWorkspace",
-                          this->getPropertyValue("OutputWorkspace"));
+    maskbins->setProperty("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
     maskbins->setPropertyValue("SpectraList", m_spectraVec[ib]);
     maskbins->setProperty("XMin", m_xminVec[ib]);
     maskbins->setProperty("XMax", m_xmaxVec[ib]);
@@ -114,8 +108,7 @@ void MaskBinsFromTable::maskBins(const API::MatrixWorkspace_sptr &dataws) {
     outputws = maskbins->getProperty("OutputWorkspace");
     if (!outputws) {
       stringstream errmsg;
-      errmsg << "OutputWorkspace cannot be obtained from algorithm row " << ib
-             << ". ";
+      errmsg << "OutputWorkspace cannot be obtained from algorithm row " << ib << ". ";
       g_log.error(errmsg.str());
       throw std::runtime_error(errmsg.str());
     }
@@ -133,14 +126,12 @@ void MaskBinsFromTable::maskBins(const API::MatrixWorkspace_sptr &dataws) {
  * @param masktblws :: TableWorkspace for mask bins
  * @param dataws :: MatrixWorkspace to mask
  */
-void MaskBinsFromTable::processMaskBinWorkspace(
-    const TableWorkspace_sptr &masktblws,
-    const API::MatrixWorkspace_sptr &dataws) {
+void MaskBinsFromTable::processMaskBinWorkspace(const TableWorkspace_sptr &masktblws,
+                                                const API::MatrixWorkspace_sptr &dataws) {
   // Check input
   if (!masktblws)
     throw std::invalid_argument("Input workspace is not a table workspace.");
-  g_log.debug() << "Lines of parameters workspace = " << masktblws->rowCount()
-                << '\n';
+  g_log.debug() << "Lines of parameters workspace = " << masktblws->rowCount() << '\n';
 
   // Check column names type and sequence
   vector<std::string> colnames = masktblws->getColumnNames();
@@ -165,8 +156,7 @@ void MaskBinsFromTable::processMaskBinWorkspace(
     } else if (boost::algorithm::starts_with(colname, "detectorid")) {
       id_dets = i;
     } else {
-      g_log.warning() << "In TableWorkspace " << masktblws->getName()
-                      << ", column " << i << " with name " << colname
+      g_log.warning() << "In TableWorkspace " << masktblws->getName() << ", column " << i << " with name " << colname
                       << " is not used by MaskBinsFromTable.";
     }
   }
@@ -191,13 +181,12 @@ void MaskBinsFromTable::processMaskBinWorkspace(
       spectralist = masktblws->cell<string>(i, static_cast<size_t>(id_spec));
     } else {
       // Convert detectors list to spectra list
-      string detidslist =
-          masktblws->cell<string>(i, static_cast<size_t>(id_dets));
+      string detidslist = masktblws->cell<string>(i, static_cast<size_t>(id_dets));
       spectralist = convertToSpectraList(dataws, detidslist);
     }
 
-    g_log.debug() << "Row " << i << " XMin = " << xmin << "  XMax = " << xmax
-                  << " SpectraList = " << spectralist << ".\n";
+    g_log.debug() << "Row " << i << " XMin = " << xmin << "  XMax = " << xmax << " SpectraList = " << spectralist
+                  << ".\n";
 
     // Store to class variables
     m_xminVec.emplace_back(xmin);
@@ -213,9 +202,8 @@ void MaskBinsFromTable::processMaskBinWorkspace(
  * @param detidliststr :: list of detector IDs in string format
  * @return :: list of spectra/workspace index IDs in string format
  */
-std::string
-MaskBinsFromTable::convertToSpectraList(const API::MatrixWorkspace_sptr &dataws,
-                                        const std::string &detidliststr) {
+std::string MaskBinsFromTable::convertToSpectraList(const API::MatrixWorkspace_sptr &dataws,
+                                                    const std::string &detidliststr) {
   // Use array property to get a list of detectors
   vector<int> detidvec;
   ArrayProperty<int> parser("detids", detidliststr);
@@ -237,8 +225,7 @@ MaskBinsFromTable::convertToSpectraList(const API::MatrixWorkspace_sptr &dataws,
       size_t wsindex = fiter->second;
       wsindexvec.emplace_back(wsindex);
     } else {
-      g_log.warning() << "Detector ID " << detid
-                      << " cannot be mapped to any workspace index/spectrum."
+      g_log.warning() << "Detector ID " << detid << " cannot be mapped to any workspace index/spectrum."
                       << ".\n";
     }
   }

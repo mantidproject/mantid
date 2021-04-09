@@ -19,12 +19,8 @@ class OrientedLatticeValidatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static OrientedLatticeValidatorTest *createSuite() {
-    return new OrientedLatticeValidatorTest();
-  }
-  static void destroySuite(OrientedLatticeValidatorTest *suite) {
-    delete suite;
-  }
+  static OrientedLatticeValidatorTest *createSuite() { return new OrientedLatticeValidatorTest(); }
+  static void destroySuite(OrientedLatticeValidatorTest *suite) { delete suite; }
 
   void test_getType() {
     OrientedLatticeValidator validator;
@@ -33,8 +29,7 @@ public:
 
   void test_isValid_is_valid_when_latticeDefined() {
     auto info = std::make_shared<ExperimentInfo>();
-    info->mutableSample().setOrientedLattice(
-        std::make_unique<OrientedLattice>());
+    info->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>());
 
     OrientedLatticeValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(info), "");
@@ -43,8 +38,6 @@ public:
   void test_isValid_is_invalid_when_latticeUndefined() {
     auto info = std::make_shared<ExperimentInfo>();
     OrientedLatticeValidator validator;
-    TS_ASSERT_EQUALS(
-        validator.isValid(info),
-        "Workspace must have a sample with an orientation matrix defined.");
+    TS_ASSERT_EQUALS(validator.isValid(info), "Workspace must have a sample with an orientation matrix defined.");
   };
 };

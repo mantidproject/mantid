@@ -34,8 +34,7 @@ DECLARE_ALGORITHM(ConvertToConstantL2)
 
 // Constructor
 ConvertToConstantL2::ConvertToConstantL2()
-    : API::Algorithm(), m_inputWS(), m_outputWS(), m_instrument(), m_l2(0.),
-      m_wavelength(0.) {}
+    : API::Algorithm(), m_inputWS(), m_outputWS(), m_instrument(), m_l2(0.), m_wavelength(0.) {}
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
@@ -44,11 +43,10 @@ void ConvertToConstantL2::init() {
   auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<HistogramValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
-                  "Name of the input workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input, wsValidator),
+      "Name of the input workspace");
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace, can be the same as the input");
 }
 
@@ -85,8 +83,7 @@ void ConvertToConstantL2::exec() {
   const size_t numberOfSpectra = m_inputWS->getNumberHistograms();
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
 
-  auto numberOfSpectra_i =
-      static_cast<int64_t>(numberOfSpectra); // cast to make openmp happy
+  auto numberOfSpectra_i = static_cast<int64_t>(numberOfSpectra); // cast to make openmp happy
 
   const auto &inputSpecInfo = m_inputWS->spectrumInfo();
   auto &outputDetInfo = m_outputWS->mutableDetectorInfo();
@@ -103,10 +100,9 @@ void ConvertToConstantL2::exec() {
 
     // Throw if detector doesn't exist or is a group
     if (!inputSpecInfo.hasUniqueDetector(i)) {
-      const auto errorMsg =
-          boost::format("The detector for spectrum number %d was either not "
-                        "found, or is a group.") %
-          i;
+      const auto errorMsg = boost::format("The detector for spectrum number %d was either not "
+                                          "found, or is a group.") %
+                            i;
       throw std::runtime_error(errorMsg.str());
     }
 
@@ -149,8 +145,7 @@ double ConvertToConstantL2::getRunProperty(const std::string &s) {
   Mantid::Kernel::Property *prop = run.getProperty(s);
   double val;
   if (!Strings::convert(prop->value(), val)) {
-    const std::string mesg =
-        "Cannot convert sample log '" + s + "' to a number.";
+    const std::string mesg = "Cannot convert sample log '" + s + "' to a number.";
     throw std::runtime_error(mesg);
   }
   return val;
@@ -175,8 +170,7 @@ double ConvertToConstantL2::getInstrumentProperty(const std::string &s) {
  * @distance - Distance in meters
  */
 double ConvertToConstantL2::calculateTOF(double distance) {
-  double velocity = PhysicalConstants::h / (PhysicalConstants::NeutronMass *
-                                            m_wavelength * 1e-10); // m/s
+  double velocity = PhysicalConstants::h / (PhysicalConstants::NeutronMass * m_wavelength * 1e-10); // m/s
 
   return distance / velocity;
 }

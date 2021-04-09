@@ -51,8 +51,10 @@ class QECoverageGUI(QtWidgets.QWidget):
     # Initial Mantid Algorithm by Helen Walker (2015)
     # Rewritten as a Mantid interface by Duc Le (2016)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, window_flags=None):
         QtWidgets.QWidget.__init__(self, parent)
+        if window_flags:
+            self.setWindowFlags(window_flags)
         self.setWindowTitle("QECoverage")
         self.grid = QtWidgets.QVBoxLayout()
         self.setLayout(self.grid)

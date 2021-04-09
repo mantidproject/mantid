@@ -35,8 +35,7 @@ Function parameters:
 @author Anders Markvardsen, ISIS, RAL
 @date 9/11/2009
 */
-class MANTID_CURVEFITTING_DLL BackToBackExponential
-    : public API::IPeakFunction {
+class MANTID_CURVEFITTING_DLL BackToBackExponential : public API::IPeakFunction {
 public:
   /// Default constructor.
   BackToBackExponential() : API::IPeakFunction() {}
@@ -49,18 +48,14 @@ public:
   double fwhm() const override;
   void setFwhm(const double w) override;
   double intensity() const override { return getParameter("I"); }
-  void setIntensity(const double newIntensity) override {
-    setParameter("I", newIntensity);
-  }
+  void setIntensity(const double newIntensity) override { setParameter("I", newIntensity); }
   std::string getWidthParameterName() const override { return "S"; }
 
   /// overwrite IFunction base class methods
   std::string name() const override { return "BackToBackExponential"; }
   const std::string category() const override { return "Peak"; }
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
-  void functionDeriv1D(API::Jacobian *jacobian, const double *xValues,
-                       const size_t nData) override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
+  void functionDeriv1D(API::Jacobian *jacobian, const double *xValues, const size_t nData) override;
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters
@@ -68,8 +63,7 @@ protected:
   /// Function evaluation method to be implemented in the inherited classes
   void functionLocal(double *, const double *, const size_t) const override {}
   /// Derivative evaluation method to be implemented in the inherited classes
-  void functionDerivLocal(API::Jacobian *, const double *,
-                          const size_t) override {}
+  void functionDerivLocal(API::Jacobian *, const double *, const size_t) override {}
   double expWidth() const;
 };
 

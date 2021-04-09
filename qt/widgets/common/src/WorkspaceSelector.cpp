@@ -33,19 +33,16 @@ using namespace MantidQt::MantidWidgets;
  * (default = true)
  */
 WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init)
-    : QComboBox(parent),
-      m_addObserver(*this, &WorkspaceSelector::handleAddEvent),
+    : QComboBox(parent), m_addObserver(*this, &WorkspaceSelector::handleAddEvent),
       m_remObserver(*this, &WorkspaceSelector::handleRemEvent),
       m_clearObserver(*this, &WorkspaceSelector::handleClearEvent),
       m_renameObserver(*this, &WorkspaceSelector::handleRenameEvent),
-      m_replaceObserver(*this, &WorkspaceSelector::handleReplaceEvent),
-      m_init(init), m_workspaceTypes(), m_showHidden(false), m_showGroups(true),
-      m_optional(false), m_binLimits(std::make_pair(0, -1)), m_suffix(),
+      m_replaceObserver(*this, &WorkspaceSelector::handleReplaceEvent), m_init(init), m_workspaceTypes(),
+      m_showHidden(false), m_showGroups(true), m_optional(false), m_binLimits(std::make_pair(0, -1)), m_suffix(),
       m_algName(), m_algPropName(), m_algorithm() {
   setEditable(true);
   if (init) {
-    Mantid::API::AnalysisDataServiceImpl &ads =
-        Mantid::API::AnalysisDataService::Instance();
+    Mantid::API::AnalysisDataServiceImpl &ads = Mantid::API::AnalysisDataService::Instance();
     ads.notificationCenter.addObserver(m_addObserver);
     ads.notificationCenter.addObserver(m_remObserver);
     ads.notificationCenter.addObserver(m_renameObserver);
@@ -65,22 +62,15 @@ WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init)
  */
 WorkspaceSelector::~WorkspaceSelector() {
   if (m_init) {
-    Mantid::API::AnalysisDataService::Instance()
-        .notificationCenter.removeObserver(m_addObserver);
-    Mantid::API::AnalysisDataService::Instance()
-        .notificationCenter.removeObserver(m_remObserver);
-    Mantid::API::AnalysisDataService::Instance()
-        .notificationCenter.removeObserver(m_clearObserver);
-    Mantid::API::AnalysisDataService::Instance()
-        .notificationCenter.removeObserver(m_renameObserver);
-    Mantid::API::AnalysisDataService::Instance()
-        .notificationCenter.removeObserver(m_replaceObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_addObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_remObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clearObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_renameObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
   }
 }
 
-QStringList WorkspaceSelector::getWorkspaceTypes() const {
-  return m_workspaceTypes;
-}
+QStringList WorkspaceSelector::getWorkspaceTypes() const { return m_workspaceTypes; }
 
 void WorkspaceSelector::setWorkspaceTypes(const QStringList &types) {
   if (types != m_workspaceTypes) {
@@ -136,13 +126,9 @@ void WorkspaceSelector::setSuffixes(const QStringList &suffix) {
   }
 }
 
-void WorkspaceSelector::setLowerBinLimit(int numberOfBins) {
-  m_binLimits.first = numberOfBins;
-}
+void WorkspaceSelector::setLowerBinLimit(int numberOfBins) { m_binLimits.first = numberOfBins; }
 
-void WorkspaceSelector::setUpperBinLimit(int numberOfBins) {
-  m_binLimits.second = numberOfBins;
-}
+void WorkspaceSelector::setUpperBinLimit(int numberOfBins) { m_binLimits.second = numberOfBins; }
 
 QString WorkspaceSelector::getValidatingAlgorithm() const { return m_algName; }
 
@@ -152,16 +138,13 @@ void WorkspaceSelector::setValidatingAlgorithm(const QString &algName) {
   }
   m_algName = algName;
   if (m_init) {
-    m_algorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-        algName.toStdString());
+    m_algorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged(algName.toStdString());
     m_algorithm->initialize();
-    std::vector<Mantid::Kernel::Property *> props =
-        m_algorithm->getProperties();
+    std::vector<Mantid::Kernel::Property *> props = m_algorithm->getProperties();
     for (auto &prop : props) {
       if (prop->direction() == Mantid::Kernel::Direction::Input) {
         // try to cast property to WorkspaceProperty
-        Mantid::API::WorkspaceProperty<> *wsProp =
-            dynamic_cast<Mantid::API::WorkspaceProperty<> *>(prop);
+        Mantid::API::WorkspaceProperty<> *wsProp = dynamic_cast<Mantid::API::WorkspaceProperty<> *>(prop);
         if (wsProp != nullptr) {
           m_algPropName = QString::fromStdString(prop->name());
           break;
@@ -172,11 +155,9 @@ void WorkspaceSelector::setValidatingAlgorithm(const QString &algName) {
   }
 }
 
-void WorkspaceSelector::handleAddEvent(
-    Mantid::API::WorkspaceAddNotification_ptr pNf) {
+void WorkspaceSelector::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf) {
   if (!showHiddenWorkspaces() &&
-      Mantid::API::AnalysisDataService::Instance().isHiddenDataServiceObject(
-          pNf->objectName())) {
+      Mantid::API::AnalysisDataService::Instance().isHiddenDataServiceObject(pNf->objectName())) {
     return;
   }
 
@@ -186,8 +167,7 @@ void WorkspaceSelector::handleAddEvent(
   }
 }
 
-void WorkspaceSelector::handleRemEvent(
-    Mantid::API::WorkspacePostDeleteNotification_ptr pNf) {
+void WorkspaceSelector::handleRemEvent(Mantid::API::WorkspacePostDeleteNotification_ptr pNf) {
   QString name = QString::fromStdString(pNf->objectName());
   int index = findText(name);
   if (index != -1) {
@@ -198,16 +178,14 @@ void WorkspaceSelector::handleRemEvent(
   }
 }
 
-void WorkspaceSelector::handleClearEvent(
-    Mantid::API::ClearADSNotification_ptr /*unused*/) {
+void WorkspaceSelector::handleClearEvent(Mantid::API::ClearADSNotification_ptr /*unused*/) {
   this->clear();
   if (m_optional)
     addItem("");
   emit emptied();
 }
 
-void WorkspaceSelector::handleRenameEvent(
-    Mantid::API::WorkspaceRenameNotification_ptr pNf) {
+void WorkspaceSelector::handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf) {
   QString name = QString::fromStdString(pNf->objectName());
   QString newName = QString::fromStdString(pNf->newObjectName());
   auto &ads = Mantid::API::AnalysisDataService::Instance();
@@ -229,8 +207,7 @@ void WorkspaceSelector::handleRenameEvent(
   }
 }
 
-void WorkspaceSelector::handleReplaceEvent(
-    Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf) {
+void WorkspaceSelector::handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf) {
 
   QString name = QString::fromStdString(pNf->objectName());
   auto &ads = Mantid::API::AnalysisDataService::Instance();
@@ -251,18 +228,14 @@ void WorkspaceSelector::handleReplaceEvent(
     removeItem(index);
 }
 
-bool WorkspaceSelector::checkEligibility(
-    const QString &name, const Mantid::API::Workspace_sptr &object) const {
+bool WorkspaceSelector::checkEligibility(const QString &name, const Mantid::API::Workspace_sptr &object) const {
   if (m_algorithm && !m_algPropName.isEmpty()) {
     try {
-      m_algorithm->setPropertyValue(m_algPropName.toStdString(),
-                                    name.toStdString());
+      m_algorithm->setPropertyValue(m_algPropName.toStdString(), name.toStdString());
     } catch (std::invalid_argument &) {
       return false;
     }
-  } else if ((!m_workspaceTypes.empty()) &&
-             m_workspaceTypes.indexOf(QString::fromStdString(object->id())) ==
-                 -1) {
+  } else if ((!m_workspaceTypes.empty()) && m_workspaceTypes.indexOf(QString::fromStdString(object->id())) == -1) {
     return false;
   } else if (!hasValidSuffix(name)) {
     return false;
@@ -291,15 +264,12 @@ bool WorkspaceSelector::hasValidSuffix(const QString &name) const {
   return false;
 }
 
-bool WorkspaceSelector::hasValidNumberOfBins(
-    const Mantid::API::Workspace_sptr &object) const {
+bool WorkspaceSelector::hasValidNumberOfBins(const Mantid::API::Workspace_sptr &object) const {
   if (m_binLimits.first != 0 || m_binLimits.second != -1) {
-    if (auto const workspace =
-            std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(object)) {
+    if (auto const workspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(object)) {
       auto const numberOfBins = static_cast<int>(workspace->y(0).size());
       if (m_binLimits.second != -1)
-        return numberOfBins >= m_binLimits.first &&
-               numberOfBins <= m_binLimits.second;
+        return numberOfBins >= m_binLimits.first && numberOfBins <= m_binLimits.second;
       return numberOfBins >= m_binLimits.first;
     }
   }
@@ -313,8 +283,7 @@ void WorkspaceSelector::refresh() {
   auto &ads = Mantid::API::AnalysisDataService::Instance();
   std::vector<std::string> items;
   if (showHiddenWorkspaces()) {
-    items = ads.getObjectNames(Mantid::Kernel::DataServiceSort::Sorted,
-                               Mantid::Kernel::DataServiceHidden::Include);
+    items = ads.getObjectNames(Mantid::Kernel::DataServiceSort::Sorted, Mantid::Kernel::DataServiceHidden::Include);
   } else {
     items = ads.getObjectNames();
   }

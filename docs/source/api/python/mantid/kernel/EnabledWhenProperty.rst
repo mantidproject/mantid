@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::Kernel::EnabledWhenProperty.
 
 .. module:`mantid.kernel`
 
-.. autoclass:: mantid.kernel.EnabledWhenProperty 
+.. autoclass:: mantid.kernel.EnabledWhenProperty
     :members:
     :undoc-members:
     :inherited-members:

@@ -20,7 +20,7 @@ Usage
 **Example: A simple spherical sample**
 
 .. testcode:: ExSphericalAbsorption
-          
+
     ws = CreateSampleWorkspace("Histogram",NumBanks=1,BankPixelWidth=1)
     ws = ConvertUnits(ws,"Wavelength")
     ws = Rebin(ws,Params=[1])
@@ -28,7 +28,7 @@ Usage
 
     #restrict the number of wavelength points to speed up the example
     wsOut = SphericalAbsorption(ws,SphericalSampleRadius=0.2)
-    
+
     print("The created workspace has spectra: {}".format(wsOut.readY(0)))
 
 Output:

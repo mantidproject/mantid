@@ -63,8 +63,7 @@ private:
   /// Called upon a close event.
   void closeEvent(QCloseEvent * /*unused*/) override;
   /// handle POCO event
-  void
-  handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
+  void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
 private slots:
   /// Sets the active workspace in the selected tab
@@ -87,9 +86,7 @@ private:
   QDoubleValidator *m_valDbl;
 
   /// Change Observer for ConfigService (monitors user directories)
-  Poco::NObserver<IndirectDataAnalysis,
-                  Mantid::Kernel::ConfigValChangeNotification>
-      m_changeObserver;
+  Poco::NObserver<IndirectDataAnalysis, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
 
   /// Map of unsigned int (TabChoice enum values) to tabs.
   std::map<unsigned int, IndirectDataAnalysisTab *> m_tabs;

@@ -38,10 +38,7 @@ namespace {
 /// static logger object
 Kernel::Logger g_log("WorkspaceHistory");
 struct AlgorithmHistorySearch {
-  bool operator()(const AlgorithmHistory_sptr &lhs,
-                  const AlgorithmHistory_sptr &rhs) {
-    return (*lhs) < (*rhs);
-  }
+  bool operator()(const AlgorithmHistory_sptr &lhs, const AlgorithmHistory_sptr &rhs) { return (*lhs) < (*rhs); }
 };
 struct AlgorithmHistoryHasher {
   size_t operator()(const AlgorithmHistory_sptr &x) const {
@@ -51,8 +48,7 @@ struct AlgorithmHistoryHasher {
   }
 };
 struct AlgorithmHistoryComparator {
-  bool operator()(const AlgorithmHistory_sptr &a,
-                  const AlgorithmHistory_sptr &b) const {
+  bool operator()(const AlgorithmHistory_sptr &a, const AlgorithmHistory_sptr &b) const {
     return a->uuid() == b->uuid();
   }
 };
@@ -62,15 +58,9 @@ struct AlgorithmHistoryComparator {
 WorkspaceHistory::WorkspaceHistory() : m_environment() {}
 
 /// Returns a const reference to the algorithmHistory
-const Mantid::API::AlgorithmHistories &
-WorkspaceHistory::getAlgorithmHistories() const {
-  return m_algorithms;
-}
+const Mantid::API::AlgorithmHistories &WorkspaceHistory::getAlgorithmHistories() const { return m_algorithms; }
 /// Returns a const reference to the EnvironmentHistory
-const Kernel::EnvironmentHistory &
-WorkspaceHistory::getEnvironmentHistory() const {
-  return m_environment;
-}
+const Kernel::EnvironmentHistory &WorkspaceHistory::getEnvironmentHistory() const { return m_environment; }
 
 /// Append the algorithm history from another WorkspaceHistory into this one
 void WorkspaceHistory::addHistory(const WorkspaceHistory &otherHistory) {
@@ -80,16 +70,14 @@ void WorkspaceHistory::addHistory(const WorkspaceHistory &otherHistory) {
   }
 
   // Merge the histories
-  const AlgorithmHistories &otherAlgorithms =
-      otherHistory.getAlgorithmHistories();
+  const AlgorithmHistories &otherAlgorithms = otherHistory.getAlgorithmHistories();
 
   for (const auto &algHistory : otherAlgorithms) {
     this->addHistory(algHistory);
   }
 
   using UniqueAlgorithmHistories =
-      std::unordered_set<AlgorithmHistory_sptr, AlgorithmHistoryHasher,
-                         AlgorithmHistoryComparator>;
+      std::unordered_set<AlgorithmHistory_sptr, AlgorithmHistoryHasher, AlgorithmHistoryComparator>;
   // It is faster to default construct a set/unordered_set and insert the
   // elements than use the range-based constructor directly.
   // See https://stackoverflow.com/a/24477023:
@@ -100,8 +88,7 @@ void WorkspaceHistory::addHistory(const WorkspaceHistory &otherHistory) {
     uniqueHistories.insert(algorithmHistory);
   }
   m_algorithms.assign(std::begin(uniqueHistories), std::end(uniqueHistories));
-  std::sort(std::begin(m_algorithms), std::end(m_algorithms),
-            AlgorithmHistorySearch());
+  std::sort(std::begin(m_algorithms), std::end(m_algorithms), AlgorithmHistorySearch());
 }
 
 /// Append an AlgorithmHistory to this WorkspaceHistory
@@ -133,11 +120,9 @@ void WorkspaceHistory::clearHistory() { m_algorithms.clear(); }
  * @returns A pointer to an AlgorithmHistory object
  * @throws std::out_of_range error if the index is invalid
  */
-AlgorithmHistory_const_sptr
-WorkspaceHistory::getAlgorithmHistory(const size_t index) const {
+AlgorithmHistory_const_sptr WorkspaceHistory::getAlgorithmHistory(const size_t index) const {
   if (index >= this->size()) {
-    throw std::out_of_range(
-        "WorkspaceHistory::getAlgorithmHistory() - Index out of range");
+    throw std::out_of_range("WorkspaceHistory::getAlgorithmHistory() - Index out of range");
   }
   return *std::next(m_algorithms.cbegin(), index);
 }
@@ -148,8 +133,7 @@ WorkspaceHistory::getAlgorithmHistory(const size_t index) const {
  * @returns A pointer to an AlgorithmHistory object
  * @throws std::out_of_range error if the index is invalid
  */
-AlgorithmHistory_const_sptr WorkspaceHistory::
-operator[](const size_t index) const {
+AlgorithmHistory_const_sptr WorkspaceHistory::operator[](const size_t index) const {
   return getAlgorithmHistory(index);
 }
 
@@ -158,8 +142,7 @@ operator[](const size_t index) const {
  * @param index ::  An index within the workspace history
  * @returns A shared pointer to an algorithm object
  */
-std::shared_ptr<IAlgorithm>
-WorkspaceHistory::getAlgorithm(const size_t index) const {
+std::shared_ptr<IAlgorithm> WorkspaceHistory::getAlgorithm(const size_t index) const {
   return Algorithm::fromHistory(*(this->getAlgorithmHistory(index)));
 }
 
@@ -169,8 +152,7 @@ WorkspaceHistory::getAlgorithm(const size_t index) const {
  */
 std::shared_ptr<IAlgorithm> WorkspaceHistory::lastAlgorithm() const {
   if (m_algorithms.empty()) {
-    throw std::out_of_range(
-        "WorkspaceHistory::lastAlgorithm() - History contains no algorithms.");
+    throw std::out_of_range("WorkspaceHistory::lastAlgorithm() - History contains no algorithms.");
   }
   return this->getAlgorithm(this->size() - 1);
 }
@@ -236,13 +218,10 @@ void WorkspaceHistory::saveNexus(::NeXus::File *file) const {
  *  @param[out] w3 the third word in the input string
  *  @throw out_of_range if there aren't exaltly three strings in the word
  */
-void getWordsInString(const std::string &words3, std::string &w1,
-                      std::string &w2, std::string &w3) {
-  Mantid::Kernel::StringTokenizer data(
-      words3, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+void getWordsInString(const std::string &words3, std::string &w1, std::string &w2, std::string &w3) {
+  Mantid::Kernel::StringTokenizer data(words3, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   if (data.count() != 3)
-    throw std::out_of_range("Algorithm list line " + words3 +
-                            " is not of the correct format\n");
+    throw std::out_of_range("Algorithm list line " + words3 + " is not of the correct format\n");
 
   w1 = data[0];
   w2 = data[1];
@@ -260,13 +239,10 @@ void getWordsInString(const std::string &words3, std::string &w1,
  *  @param[out] w4 the fourth word in the input string
  *  @throw out_of_range if there aren't exaltly four strings in the word
  */
-void getWordsInString(const std::string &words4, std::string &w1,
-                      std::string &w2, std::string &w3, std::string &w4) {
-  Mantid::Kernel::StringTokenizer data(
-      words4, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+void getWordsInString(const std::string &words4, std::string &w1, std::string &w2, std::string &w3, std::string &w4) {
+  Mantid::Kernel::StringTokenizer data(words4, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   if (data.count() != 4)
-    throw std::out_of_range("Algorithm list line " + words4 +
-                            " is not of the correct format\n");
+    throw std::out_of_range("Algorithm list line " + words4 + " is not of the correct format\n");
 
   w1 = data[0];
   w2 = data[1];
@@ -304,13 +280,11 @@ void WorkspaceHistory::loadNexus(::NeXus::File *file) {
  *loaded histories are added to
  * the workspace history.
  */
-void WorkspaceHistory::loadNestedHistory(::NeXus::File *file,
-                                         AlgorithmHistory_sptr parent) {
+void WorkspaceHistory::loadNestedHistory(::NeXus::File *file, AlgorithmHistory_sptr parent) {
   // historyNumbers should be sorted by number
   std::set<int> historyNumbers = findHistoryEntries(file);
   for (auto historyNumber : historyNumbers) {
-    std::string entryName =
-        "MantidAlgorithm_" + Kernel::Strings::toString(historyNumber);
+    std::string entryName = "MantidAlgorithm_" + Kernel::Strings::toString(historyNumber);
     std::string rawData;
     file->openGroup(entryName, "NXnote");
     file->readData("data", rawData);
@@ -364,8 +338,7 @@ std::set<int> WorkspaceHistory::findHistoryEntries(::NeXus::File *file) {
  * @returns a pointer to the loaded algorithm history object
  * @throws std::runtime_error if the loaded data could not be parsed
  */
-AlgorithmHistory_sptr
-WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
+AlgorithmHistory_sptr WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
   /// specifies the order that algorithm data is listed in workspaces' histories
   enum AlgorithmHist {
     NAME = 0,      //< algorithms name
@@ -381,8 +354,7 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
   const size_t nlines = info.size();
   if (nlines < 4) { // ignore badly formed history entries still at 4 so that
                     // legacy files can be loaded, 5 is ideal for newer files
-    throw std::runtime_error(
-        "Malformed history record: Incorrect record size.");
+    throw std::runtime_error("Malformed history record: Incorrect record size.");
   }
 
   std::string algName, dummy, temp;
@@ -408,8 +380,7 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
     Poco::DateTime start_timedate;
     // This is needed by the Poco parsing function
     int tzdiff(-1);
-    if (!Poco::DateTimeParser::tryParse("%Y-%b-%d %H:%M:%S", date + " " + time,
-                                        start_timedate, tzdiff)) {
+    if (!Poco::DateTimeParser::tryParse("%Y-%b-%d %H:%M:%S", date + " " + time, start_timedate, tzdiff)) {
       g_log.warning() << "Error parsing start time in algorithm history entry."
                       << "\n";
       utc_start = Types::Core::DateAndTime::defaultTime();
@@ -440,14 +411,12 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
   }
 
   // Create the algorithm history
-  API::AlgorithmHistory alg_hist(algName, version, uuid, utc_start, dur,
-                                 Algorithm::g_execCount);
+  API::AlgorithmHistory alg_hist(algName, version, uuid, utc_start, dur, Algorithm::g_execCount);
   // Simulate running an algorithm
   ++Algorithm::g_execCount;
 
   // Add property information
-  for (size_t index = static_cast<size_t>(paramNum) + 1; index < nlines;
-       ++index) {
+  for (size_t index = static_cast<size_t>(paramNum) + 1; index < nlines; ++index) {
     const std::string line = info[index];
     std::string::size_type colon = line.find(':');
     std::string::size_type comma = line.find(',');
@@ -473,9 +442,7 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
 //-------------------------------------------------------------------------------------------------
 /** Create a flat view of the workspaces algorithm history
  */
-std::shared_ptr<HistoryView> WorkspaceHistory::createView() const {
-  return std::make_shared<HistoryView>(*this);
-}
+std::shared_ptr<HistoryView> WorkspaceHistory::createView() const { return std::make_shared<HistoryView>(*this); }
 
 //------------------------------------------------------------------------------------------------
 /** Prints a text representation

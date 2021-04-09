@@ -111,6 +111,8 @@ if(ENABLE_WORKBENCH)
         mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogview.py
         mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
         mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
+        mantidqt/widgets/memorywidget/test/test_memoryinfo.py
+        mantidqt/widgets/memorywidget/test/test_memorypresenter.py
         mantidqt/widgets/plotconfigdialog/axestabwidget/test/test_axestabwidgetpresenter.py
         mantidqt/widgets/plotconfigdialog/curvestabwidget/test/test_curveproperties.py
         mantidqt/widgets/plotconfigdialog/curvestabwidget/test/test_curvestabwidgetpresenter.py

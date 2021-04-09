@@ -24,16 +24,14 @@
 namespace Mantid {
 namespace API {
 
-FunctionFactoryImpl::FunctionFactoryImpl()
-    : Kernel::DynamicFactory<IFunction>() {
+FunctionFactoryImpl::FunctionFactoryImpl() : Kernel::DynamicFactory<IFunction>() {
   // we need to make sure the library manager has been loaded before we
   // are constructed so that it is destroyed after us and thus does
   // not close any loaded DLLs with loaded algorithms in them
   Mantid::Kernel::LibraryManager::Instance();
 }
 
-IFunction_sptr
-FunctionFactoryImpl::createFunction(const std::string &type) const {
+IFunction_sptr FunctionFactoryImpl::createFunction(const std::string &type) const {
   IFunction_sptr fun = create(type);
   fun->initialize();
   return fun;
@@ -51,8 +49,7 @@ FunctionFactoryImpl::createFunction(const std::string &type) const {
  * PeakCentre=10.,Sigma=1"
  * @return A pointer to the created function
  */
-IFunction_sptr
-FunctionFactoryImpl::createInitialized(const std::string &input) const {
+IFunction_sptr FunctionFactoryImpl::createInitialized(const std::string &input) const {
   Expression expr;
   try {
     expr.parse(input);
@@ -88,8 +85,7 @@ FunctionFactoryImpl::createInitialized(const std::string &input) const {
  * @return A pointer to the created function.
  */
 std::shared_ptr<MultiDomainFunction>
-FunctionFactoryImpl::createInitializedMultiDomainFunction(
-    const std::string &input, size_t domainNumber) const {
+FunctionFactoryImpl::createInitializedMultiDomainFunction(const std::string &input, size_t domainNumber) const {
   auto singleFunction = createInitialized(input);
   auto multiDomainFunction = std::make_shared<MultiDomainFunction>();
 
@@ -112,9 +108,8 @@ FunctionFactoryImpl::createInitializedMultiDomainFunction(
  * values of the parent function
  * @return A pointer to the created function
  */
-IFunction_sptr FunctionFactoryImpl::createSimple(
-    const Expression &expr,
-    std::map<std::string, std::string> &parentAttributes) const {
+IFunction_sptr FunctionFactoryImpl::createSimple(const Expression &expr,
+                                                 std::map<std::string, std::string> &parentAttributes) const {
   if (expr.name() == "=" && expr.size() > 1) {
     return createFunction(expr.terms()[1].name());
   }
@@ -128,16 +123,13 @@ IFunction_sptr FunctionFactoryImpl::createSimple(
 
   if (term->name() != "=")
     inputError(expr.str());
-  if (term->terms()[0].name() != "name" &&
-      term->terms()[0].name() != "composite") {
-    throw std::invalid_argument(
-        "Function name must be defined before its parameters");
+  if (term->terms()[0].name() != "name" && term->terms()[0].name() != "composite") {
+    throw std::invalid_argument("Function name must be defined before its parameters");
   }
   std::string fnName = term->terms()[1].name();
 
   IFunction_sptr fun = createFunction(fnName);
-  for (++term; term != terms.end();
-       ++term) { // loop over function's parameters/attributes
+  for (++term; term != terms.end(); ++term) { // loop over function's parameters/attributes
     if (term->name() != "=")
       inputError(expr.str());
     std::string parName = term->terms()[0].name();
@@ -164,12 +156,11 @@ IFunction_sptr FunctionFactoryImpl::createSimple(
       try {
         fun->setParameter(parName, boost::lexical_cast<double>(parValue));
       } catch (boost::bad_lexical_cast &) {
-        throw std::runtime_error(
-            std::string("Error in value of parameter ")
-                .append(parName)
-                .append(".\n")
-                .append(parValue)
-                .append(" cannot be interpreted as a floating point value."));
+        throw std::runtime_error(std::string("Error in value of parameter ")
+                                     .append(parName)
+                                     .append(".\n")
+                                     .append(parValue)
+                                     .append(" cannot be interpreted as a floating point value."));
       }
     }
   } // for term
@@ -185,9 +176,9 @@ IFunction_sptr FunctionFactoryImpl::createSimple(
  * values of the parent function
  * @return A pointer to the created function
  */
-CompositeFunction_sptr FunctionFactoryImpl::createComposite(
-    const Expression &expr,
-    std::map<std::string, std::string> &parentAttributes) const {
+CompositeFunction_sptr
+FunctionFactoryImpl::createComposite(const Expression &expr,
+                                     std::map<std::string, std::string> &parentAttributes) const {
   if (expr.name() != ";")
     inputError(expr.str());
 
@@ -202,14 +193,12 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
   CompositeFunction_sptr cfun;
   if (term.name() == "=") {
     if (term.terms()[0].name() == "composite") {
-      cfun = std::dynamic_pointer_cast<CompositeFunction>(
-          createFunction(term.terms()[1].name()));
+      cfun = std::dynamic_pointer_cast<CompositeFunction>(createFunction(term.terms()[1].name()));
       if (!cfun)
         inputError(expr.str());
       ++it;
     } else if (term.terms()[0].name() == "name") {
-      cfun = std::dynamic_pointer_cast<CompositeFunction>(
-          createFunction("CompositeFunction"));
+      cfun = std::dynamic_pointer_cast<CompositeFunction>(createFunction("CompositeFunction"));
       if (!cfun)
         inputError(expr.str());
     } else {
@@ -219,14 +208,12 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
     auto firstTerm = term.terms().cbegin();
     if (firstTerm->name() == "=") {
       if (firstTerm->terms()[0].name() == "composite") {
-        cfun = std::dynamic_pointer_cast<CompositeFunction>(
-            createSimple(term, parentAttributes));
+        cfun = std::dynamic_pointer_cast<CompositeFunction>(createSimple(term, parentAttributes));
         if (!cfun)
           inputError(expr.str());
         ++it;
       } else if (firstTerm->terms()[0].name() == "name") {
-        cfun = std::dynamic_pointer_cast<CompositeFunction>(
-            createFunction("CompositeFunction"));
+        cfun = std::dynamic_pointer_cast<CompositeFunction>(createFunction("CompositeFunction"));
         if (!cfun)
           inputError(expr.str());
       } else {
@@ -234,8 +221,7 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
       }
     }
   } else if (term.name() == ";") {
-    cfun = std::dynamic_pointer_cast<CompositeFunction>(
-        createFunction("CompositeFunction"));
+    cfun = std::dynamic_pointer_cast<CompositeFunction>(createFunction("CompositeFunction"));
     if (!cfun)
       inputError(expr.str());
   } else {
@@ -303,8 +289,7 @@ void FunctionFactoryImpl::inputError(const std::string &str) const {
  * separated by commas ','
  *    and enclosed in brackets "(...)" .
  */
-void FunctionFactoryImpl::addConstraints(const IFunction_sptr &fun,
-                                         const Expression &expr) const {
+void FunctionFactoryImpl::addConstraints(const IFunction_sptr &fun, const Expression &expr) const {
   if (expr.name() == ",") {
     for (auto it = expr.begin(); it != expr.end(); ++it) {
       // If this is a penalty term, we used it on the previous iteration
@@ -337,10 +322,8 @@ void FunctionFactoryImpl::addConstraints(const IFunction_sptr &fun,
  * @param fun :: The function
  * @param expr :: The constraint expression.
  */
-void FunctionFactoryImpl::addConstraint(const std::shared_ptr<IFunction> &fun,
-                                        const Expression &expr) const {
-  auto c = std::unique_ptr<IConstraint>(
-      ConstraintFactory::Instance().createInitialized(fun.get(), expr));
+void FunctionFactoryImpl::addConstraint(const std::shared_ptr<IFunction> &fun, const Expression &expr) const {
+  auto c = std::unique_ptr<IConstraint>(ConstraintFactory::Instance().createInitialized(fun.get(), expr));
   c->setPenaltyFactor(c->getDefaultPenaltyFactor());
   fun->addConstraint(std::move(c));
 }
@@ -351,12 +334,9 @@ void FunctionFactoryImpl::addConstraint(const std::shared_ptr<IFunction> &fun,
  * @param constraint_expr :: The constraint expression.
  * @param penalty_expr :: The penalty expression.
  */
-void FunctionFactoryImpl::addConstraint(const std::shared_ptr<IFunction> &fun,
-                                        const Expression &constraint_expr,
+void FunctionFactoryImpl::addConstraint(const std::shared_ptr<IFunction> &fun, const Expression &constraint_expr,
                                         const Expression &penalty_expr) const {
-  auto c = std::unique_ptr<IConstraint>(
-      ConstraintFactory::Instance().createInitialized(fun.get(),
-                                                      constraint_expr));
+  auto c = std::unique_ptr<IConstraint>(ConstraintFactory::Instance().createInitialized(fun.get(), constraint_expr));
   double penalty_factor = std::stof(penalty_expr.terms()[1].str(), NULL);
   c->setPenaltyFactor(penalty_factor);
   fun->addConstraint(std::move(c));
@@ -367,8 +347,7 @@ void FunctionFactoryImpl::addConstraint(const std::shared_ptr<IFunction> &fun,
  * @param expr :: The tie expression: either parName = TieString or a list
  *   of name = string pairs
  */
-void FunctionFactoryImpl::addTies(const IFunction_sptr &fun,
-                                  const Expression &expr) const {
+void FunctionFactoryImpl::addTies(const IFunction_sptr &fun, const Expression &expr) const {
   if (expr.name() == "=") {
     addTie(fun, expr);
   } else if (expr.name() == ",") {
@@ -382,8 +361,7 @@ void FunctionFactoryImpl::addTies(const IFunction_sptr &fun,
  * @param fun :: The function
  * @param expr :: The tie expression: parName = TieString
  */
-void FunctionFactoryImpl::addTie(const IFunction_sptr &fun,
-                                 const Expression &expr) const {
+void FunctionFactoryImpl::addTie(const IFunction_sptr &fun, const Expression &expr) const {
   if (expr.size() > 1) { // if size > 2 it is interpreted as setting a tie (last
     // expr.term) to multiple parameters, e.g
     // f1.alpha = f2.alpha = f3.alpha = f0.beta^2/2
@@ -397,36 +375,27 @@ void FunctionFactoryImpl::addTie(const IFunction_sptr &fun,
 
 std::vector<std::string> FunctionFactoryImpl::getFunctionNamesGUI() const {
   auto allNames = getFunctionNames<IFunction1D>();
-  auto ImmutableCompositeFunctions =
-      getFunctionNames<ImmutableCompositeFunction>();
-  allNames.insert(allNames.end(), ImmutableCompositeFunctions.begin(),
-                  ImmutableCompositeFunctions.end());
+  auto ImmutableCompositeFunctions = getFunctionNames<ImmutableCompositeFunction>();
+  allNames.insert(allNames.end(), ImmutableCompositeFunctions.begin(), ImmutableCompositeFunctions.end());
   allNames.emplace_back("ProductFunction");
   allNames.emplace_back("CompositeFunction");
   allNames.emplace_back("Convolution");
   std::sort(allNames.begin(), allNames.end());
   std::vector<std::string> names;
   names.reserve(allNames.size());
-  auto excludes =
-      Kernel::ConfigService::Instance().getString("curvefitting.guiExclude");
-  Kernel::StringTokenizer tokenizer(excludes, ";",
-                                    Kernel::StringTokenizer::TOK_TRIM);
+  auto excludes = Kernel::ConfigService::Instance().getString("curvefitting.guiExclude");
+  Kernel::StringTokenizer tokenizer(excludes, ";", Kernel::StringTokenizer::TOK_TRIM);
   std::set<std::string> excludeList(tokenizer.begin(), tokenizer.end());
   std::copy_if(allNames.cbegin(), allNames.cend(), std::back_inserter(names),
-               [&excludeList](const auto &name) {
-                 return excludeList.count(name) == 0;
-               });
+               [&excludeList](const auto &name) { return excludeList.count(name) == 0; });
   return names;
 }
 
-void FunctionFactoryImpl::subscribe(
-    const std::string &className,
-    std::unique_ptr<AbstractFactory> pAbstractFactory,
-    Kernel::DynamicFactory<IFunction>::SubscribeAction replace) {
+void FunctionFactoryImpl::subscribe(const std::string &className, std::unique_ptr<AbstractFactory> pAbstractFactory,
+                                    Kernel::DynamicFactory<IFunction>::SubscribeAction replace) {
   // Clear the cache, then do all the work in the base class method
   m_cachedFunctionNames.clear();
-  Kernel::DynamicFactory<IFunction>::subscribe(
-      className, std::move(pAbstractFactory), replace);
+  Kernel::DynamicFactory<IFunction>::subscribe(className, std::move(pAbstractFactory), replace);
 }
 
 void FunctionFactoryImpl::unsubscribe(const std::string &className) {

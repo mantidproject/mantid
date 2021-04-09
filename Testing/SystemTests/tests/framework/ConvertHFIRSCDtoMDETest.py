@@ -45,6 +45,24 @@ class ConvertHFIRSCDtoMDETest(systemtesting.MantidSystemTest):
                                        atol=0.005,
                                        err_msg=f"mismatch for peak {p}")
 
+        # now try using LeanElasticPeak
+        ConvertHFIRSCDtoMDETest_peaks3 = FindPeaksMD(InputWorkspace=ConvertHFIRSCDtoMDETest_Q, PeakDistanceThreshold=2.2,
+                                                     OutputType='LeanElasticPeak')
+
+        self.assertEqual(ConvertHFIRSCDtoMDETest_peaks3.getNumberPeaks(), 14)
+
+        for p in range(14):
+            np.testing.assert_allclose(ConvertHFIRSCDtoMDETest_peaks3.getPeak(p).getQSampleFrame(),
+                                       ConvertHFIRSCDtoMDETest_peaks.getPeak(p).getQSampleFrame(),
+                                       atol=0.005,
+                                       err_msg=f"mismatch for peak {p}")
+
+        HFIRCalculateGoniometer(ConvertHFIRSCDtoMDETest_peaks3)
+        peak0 = ConvertHFIRSCDtoMDETest_peaks3.getPeak(0)
+        self.assertDelta(peak0.getWavelength(), 1.488, 1e-8)
+        g=peak0.getGoniometerMatrix()
+        self.assertDelta(np.rad2deg(np.arccos(g[0][0])), 77.5, 1e-2)
+
 
 class ConvertHFIRSCDtoMDE_HB3A_Test(systemtesting.MantidSystemTest):
     def requiredMemoryMB(self):

@@ -33,9 +33,7 @@ public:
 
   int version() const override { return 1; }
 
-  const std::vector<std::string> seeAlso() const override {
-    return {"IntegrateEllipsoidsTwoStep"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"IntegrateEllipsoidsTwoStep"}; }
   const std::string category() const override { return "Crystal\\Integration"; }
 
 private:
@@ -50,8 +48,7 @@ private:
    * @param prog : progress object
    * @param wksp : input EventWorkspace
    */
-  void qListFromEventWS(IntegrateQLabEvents &integrator, API::Progress &prog,
-                        DataObjects::EventWorkspace_sptr &wksp);
+  void qListFromEventWS(IntegrateQLabEvents &integrator, API::Progress &prog, DataObjects::EventWorkspace_sptr &wksp);
 
   /**
    * @brief create a list of SlimEvent objects from a histogram workspace
@@ -59,14 +56,13 @@ private:
    * @param prog : progress object
    * @param wksp : input Workspace2D
    */
-  void qListFromHistoWS(IntegrateQLabEvents &integrator, API::Progress &prog,
-                        DataObjects::Workspace2D_sptr &wksp);
+  void qListFromHistoWS(IntegrateQLabEvents &integrator, API::Progress &prog, DataObjects::Workspace2D_sptr &wksp);
 
   /// Calculate if this Q is on a detector
   void calculateE1(const Geometry::DetectorInfo &detectorInfo);
 
-  void runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
-                        const std::string &property, const std::string &values);
+  void runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS, const std::string &property,
+                        const std::string &values);
 
   /// save for all detector pixels
   std::vector<Kernel::V3D> E1Vec;

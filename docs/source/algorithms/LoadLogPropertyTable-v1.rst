@@ -39,7 +39,7 @@ Usage
 **Example:**
 
 .. testcode:: Exlogtable
-    
+
         def print_table_workspace(wsOut):
 	    print(" ".join(wsOut.getColumnNames()[i]
 	          for i in range(wsOut.columnCount())))
@@ -48,12 +48,12 @@ Usage
   	        print(" ".join(str(wsOut.column(i)[rowIndex])
 	              for i in range(wsOut.columnCount())))
 
-        wsComment = LoadLogPropertyTable(FirstFile = "MUSR00015189.nxs", 
+        wsComment = LoadLogPropertyTable(FirstFile = "MUSR00015189.nxs",
                     LastFile = "MUSR00015193.nxs", LogNames="comment")
         print("The comments of all the files")
         print_table_workspace(wsComment)
 
-        wsMultiple = LoadLogPropertyTable(FirstFile = "MUSR00015189.nxs", 
+        wsMultiple = LoadLogPropertyTable(FirstFile = "MUSR00015189.nxs",
                     LastFile = "MUSR00015193.nxs", LogNames="Temp_Sample,dur")
         print("\nThe Temp_Sample and dur logs")
         print_table_workspace(wsMultiple)

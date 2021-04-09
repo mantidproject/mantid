@@ -26,7 +26,7 @@ where,
 and :math:`\Delta` is the precession frequency.
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np
