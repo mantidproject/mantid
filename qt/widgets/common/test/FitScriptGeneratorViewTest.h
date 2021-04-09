@@ -94,7 +94,7 @@ public:
   void test_that_clicking_the_remove_button_will_notify_the_presenter() {
     openFitScriptGeneratorWidget();
 
-    EXPECT_CALL(*m_presenter, notifyPresenterImpl(ViewEvent::RemoveClicked, "", "")).Times(1);
+    EXPECT_CALL(*m_presenter, notifyPresenterImpl(ViewEvent::RemoveDomainClicked, "", "")).Times(1);
 
     QTest::mouseClick(m_view->removeButton(), Qt::LeftButton);
     QApplication::sendPostedEvents();
@@ -103,7 +103,7 @@ public:
   void test_that_clicking_the_add_workspace_button_will_notify_the_presenter() {
     openFitScriptGeneratorWidget();
 
-    EXPECT_CALL(*m_presenter, notifyPresenterImpl(ViewEvent::AddClicked, "", "")).Times(1);
+    EXPECT_CALL(*m_presenter, notifyPresenterImpl(ViewEvent::AddDomainClicked, "", "")).Times(1);
 
     QTest::mouseClick(m_view->addWorkspaceButton(), Qt::LeftButton);
     QApplication::sendPostedEvents();

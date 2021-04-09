@@ -14,6 +14,7 @@
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/ConfigService.h"
 
 #include <algorithm>
 #include <iterator>

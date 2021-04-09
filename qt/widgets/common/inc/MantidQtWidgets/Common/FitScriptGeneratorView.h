@@ -11,7 +11,6 @@
 
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/BasicFitOptionsBrowser.h"
 #include "MantidQtWidgets/Common/FittingMode.h"

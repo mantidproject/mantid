@@ -117,7 +117,7 @@ public:
     EXPECT_CALL(*m_model, getGlobalParameters()).Times(1);
     EXPECT_CALL(*m_view, setGlobalParameters(VectorSize(0u))).Times(1);
 
-    m_presenter->notifyPresenter(ViewEvent::RemoveClicked);
+    m_presenter->notifyPresenter(ViewEvent::RemoveDomainClicked);
   }
 
   void test_that_a_add_domain_event_will_attempt_to_add_a_domain_in_the_view_and_model() {
@@ -135,7 +135,7 @@ public:
     EXPECT_CALL(*m_view, addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX)).Times(1);
     EXPECT_CALL(*m_model, addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX)).Times(1);
 
-    m_presenter->notifyPresenter(ViewEvent::AddClicked);
+    m_presenter->notifyPresenter(ViewEvent::AddDomainClicked);
   }
 
   void test_that_changing_a_start_x_will_update_its_value_in_the_model_when_the_x_value_is_valid() {

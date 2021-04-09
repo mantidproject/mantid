@@ -173,7 +173,6 @@ private:
   template <typename T, typename Function> std::vector<T> transformDomains(Function const &func) const;
 
   [[nodiscard]] Mantid::API::IFunction_sptr getFunction() const;
-  [[nodiscard]] std::string constructFilepath(std::string const &filename) const;
 
   IFitScriptGeneratorPresenter *m_presenter;
   std::vector<std::unique_ptr<FitDomain>> m_fitDomains;
