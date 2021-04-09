@@ -251,7 +251,6 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
         r_out = CompareMDWorkspaces(Workspace1=benchmark.cleaned, Workspace2='clean_data', Tolerance=1E-16)
         if not r_out.Equals:
             raise ValueError(f'Sample output data does not match: {r_out.Result}')
-        print(f'[STATUS REPORT] Task #88 and #89 non-accumulation mode is done... ...')
 
         # Round 2: Test accumulation mode
         dgs_red_group_name1 = self.prepare_md(input_ws_name='sum', merged_md_name='merged2', min_log_value=13,
@@ -289,60 +288,23 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
 
         # Compare gold (old solution) and new: passed test in #88
         r = CompareMDWorkspaces(Workspace1=benchmark2.bkgd_data, Workspace2='background_dataMD2')
-        if r.Equals:
-            print(f'Accumulation mode: Background binned data MD: {r.Result}')
-        else:
+        if not r.Equals:
             raise ValueError(f'Accumulation mode: Background binned data MD: {r.Result}')
 
         # Compare gold (old solution) and new: passed test in #88
         r_bn = CompareMDWorkspaces(Workspace1=benchmark2.bkgd_norm, Workspace2='background_normMD2', Tolerance=1E-9)
-        if r_bn.Equals:
-            print(f'Accumulation mode: Background normlaization MD: {r_bn.Result}')
-        else:
+        if not r_bn.Equals:
             raise ValueError(f'Accumulation mode: Background normalization MD: {r_bn.Result}')
 
-        # Test: This can mess some experimental data set up for verifying
-        # whether the reduction is correct.
+        # Test MDNorm's checking on inputs
+        # Note that this test must be put after all the tests because
+        # it will modify some workspaces and thus mess some experimental data set up to verify
         self.test_property_setup('merged1', f'{dgs_red_group_name1}_1')
-
-        # clean_data = r.OutputWorkspace
-        # print(f'[VZ DEBUG] clean data: s1 = 10 .. 12: Number of Experiment Info = {clean_data.getNumExperimentInfo()}')
-
-        # SaveMD(InputWorkspace=clean_data, Filename='/tmp/clean.nxs')
-
-        # # MinusMD(LHSWorkspace='reducedMD',
-        # #         RHSWorkspace='backgroundMDH',
-        # #         OutputWorkspace='result')
-        # # SaveMD(InputWorkspace='result', Filename='/tmp/clean.nxs')
-        # SaveMD(InputWorkspace='normMD', Filename='/tmp/sample_norm_round1.nxs')
-        # SaveMD(InputWorkspace='dataMD', Filename='/tmp/sample_data_round1.nxs')
-        # SaveMD(InputWorkspace='background_normMD', Filename='/tmp/normed_background_round1.nxs')
-        # # SaveMD(InputWorkspace='background_dataMD', Filename='/tmp/background_data_round1.nxs')
-
-        # # 2nd round
-        # clean_data = self.normalize_with_background('sum', 'clean2', (12., 15.),
-        #                                             sample_temp_ws_names=('dataMD', 'normMD'),
-        #                                             background_temp_ws_names=('background_dataMD', 'background_normMD'))
-
-        # # @JESSE: Here is the difference
-        # # save MD for 2nd round
-        # # save
-        # SaveMD(InputWorkspace=clean_data, Filename='/tmp/clean_round2.nxs')
-        # # SaveMD(InputWorkspace='normMD', Filename='/tmp/sample_norm_round1.nxs')
-        # # SaveMD(InputWorkspace='dataMD', Filename='/tmp/sample_data_round1.nxs')
-        # # SaveMD(InputWorkspace='background_normMD', Filename='/tmp/normed_background_round1.nxs')
-        # # SaveMD(InputWorkspace='background_dataMD', Filename='/tmp/background_data_round1.nxs')
-
-        # # @JESSE: If LATER you set log value range from (10, 12) to (10, 15) on line 115,
-        # # Then clean_data (on line 152) shall be same as clean_data on line 160 calculated in the current test setup
-
-        # assert mtd.doesExist('clean_data')
 
     def validate(self):
         self.tolerance = 1e-8
-        # FIXME - this is cheating to make #85 and #88 work!
         test_ws_name = 'clean_data'
-        return test_ws_name, 'MDNormBackgroundHYSPEC.nxs'   # FIXME , 'clean2', 'MDNormBackgroundHYSPEC_10_15.nxs'
+        return test_ws_name, 'MDNormBackgroundHYSPEC.nxs'
 
     @staticmethod
     def prepare_single_exp_info_background(input_md_name, output_md_name, target_qframe='Q_lab'):
@@ -384,12 +346,8 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
         # prepare sample MD
         self.prepare_md(input_ws_name=event_ws_name, merged_md_name='merged',
                         min_log_value=log_value_range[0], max_log_value=log_value_range[1])
-        mde = mtd['merged']
-        print(f'[VZ DEBUG] s1 = 12 .. 15: Number of Experiment Info = {mde.getNumExperimentInfo()}')
         # Prepare background workspace
-        # # old way - use reduced_1 as the background
-        # self.prepare_background(input_md='reduced_1', reference_sample_mde='merged',
-        #                         background_md='background_MDE')
+        # old way - use reduced_1 as the background
         self.prepare_single_exp_info_background(input_md_name='reduced_1',
                                                 output_md_name='background_MDE',
                                                 target_qframe='Q_lab')
@@ -406,10 +364,10 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
                Dimension3Name='QDimension0',
                Dimension3Binning='-0.5,0.5',
                SymmetryOperations='x,y,z;x,-y,z;x,y,-z;x,-y,-z',
-               TemporaryDataWorkspace=sample_temp_ws_names[0],  # 'dataMD',
-               TemporaryNormalizationWorkspace=sample_temp_ws_names[1],  # 'normMD',
-               TemporaryBackgroundDataWorkspace=background_temp_ws_names[0],  # FIXME this is temp solution use S for B
-               TemporaryBackgroundNormalizationWorkspace=background_temp_ws_names[1],  # 'normMD',
+               TemporaryDataWorkspace=sample_temp_ws_names[0],
+               TemporaryNormalizationWorkspace=sample_temp_ws_names[1],
+               TemporaryBackgroundDataWorkspace=background_temp_ws_names[0],
+               TemporaryBackgroundNormalizationWorkspace=background_temp_ws_names[1],
                OutputWorkspace='result',
                OutputDataWorkspace=sample_temp_ws_names[0],
                OutputNormalizationWorkspace=sample_temp_ws_names[1],
@@ -417,33 +375,6 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
                OutputBackgroundNormalizationWorkspace=background_temp_ws_names[1])
 
         clean_md = mtd['result']
-        print(f'[VZ DEBUG] clean_data s1 = 12 .. 15: Number of Experiment Info = {clean_md.getNumExperimentInfo()}')
-        #        OutputWorkspace='reducedMD',
-        #        OutputDataWorkspace='dataMD',
-        #        OutputNormalizationWorkspace='normMD')
-
-        # # do MDNorm to background
-        # MDNorm(InputWorkspace='background_MDE',
-        #        Dimension0Name='QDimension1',
-        #        Dimension0Binning='-5,0.05,5',
-        #        Dimension1Name='QDimension2',
-        #        Dimension1Binning='-5,0.05,5',
-        #        Dimension2Name='DeltaE',
-        #        Dimension2Binning='-2,2',
-        #        Dimension3Name='QDimension0',
-        #        Dimension3Binning='-0.5,0.5',
-        #        SymmetryOperations='x,y,z;x,-y,z;x,y,-z;x,-y,-z',
-        #        TemporaryDataWorkspace=background_temp_ws_names[0],
-        #        TemporaryNormalizationWorkspace=background_temp_ws_names[0],  # 'background_dataMD',
-        #        OutputWorkspace='backgroundMDH',
-        #        OutputDataWorkspace='background_dataMD',
-        #        OutputNormalizationWorkspace='background_normMD')
-
-        # # clean
-        # clean_md = MinusMD(LHSWorkspace='reducedMD',
-        #                    RHSWorkspace='backgroundMDH',
-        #                    OutputWorkspace=output_ws_name)
-        # origin/SPEC59_MDNormBkgd_feature
 
         return clean_md
 
