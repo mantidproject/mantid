@@ -100,7 +100,7 @@ public:
     TS_ASSERT_EQUALS(buffer.use_count(), 1)
     TS_ASSERT_EQUALS(buffer->getNumberHistograms(), 49152)
 
-    int events = buffer->getNumberEvents();
+    size_t events = buffer->getNumberEvents();
 
     for (int i = 0; i < nchunks - 1; i++) {
       TS_ASSERT_EQUALS(listener->runStatus(), ILiveListener::Running)
