@@ -18,14 +18,14 @@ Usage
 .. testcode:: PelicanReductionExample
 
     test = PelicanReduction('44464', EnergyTransfer='-2,0.05,2', MomentumTransfer='0,0.05,2', ConfigurationFile='pelican_doctest.ini')
-	print('Workspaces in group = {}'.format(test.getNumberOfEntries()))
-	gp = test.getNames()
-	print('First workspace: {}'.format(gp[0]))
+    print('Workspaces in group = {}'.format(test.getNumberOfEntries()))
+    gp = test.getNames()
+    print('First workspace: {}'.format(gp[0]))
 
 .. testoutput::  PelicanReductionExample
 
-	Workspaces in group = 3
-	First workspace: test_qw1_1D_dE
+    Workspaces in group = 3
+    First workspace: test_qw1_1D_dE
 
 References
 ----------
