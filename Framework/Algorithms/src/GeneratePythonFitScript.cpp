@@ -20,11 +20,11 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using Mantid::Types::Core::DateAndTime;
 
 namespace {
 
 std::string const SEQUENTIAL_SCRIPT =
+    "# Perform a sequential fit\n"
     "output_workspaces, parameter_tables, normalised_matrices = [], [], []\n"
     "for input_workspace, domain_data in input_data.items():\n"
     "    fit_output = Fit(Function=function, InputWorkspace=input_workspace, WorkspaceIndex=domain_data[0], \n"
@@ -36,16 +36,16 @@ std::string const SEQUENTIAL_SCRIPT =
     "    parameter_tables.append(fit_output.OutputParameters)\n"
     "    normalised_matrices.append(fit_output.OutputNormalisedCovarianceMatrix)\n"
     "\n"
-    "    #Use the parameters in the previous function as the start parameters of the next fit\n"
+    "    # Use the parameters in the previous function as the start parameters of the next fit\n"
     "    function = fit_output.Function\n"
     "\n"
-    "#Group the output workspaces from the sequential fit\n"
+    "# Group the output workspaces from the sequential fit\n"
     "GroupWorkspaces(InputWorkspaces=output_workspaces, OutputWorkspace=\"Sequential_Fit_Workspaces\")\n"
     "GroupWorkspaces(InputWorkspaces=parameter_tables, OutputWorkspace=\"Sequential_Fit_Parameters\")\n"
     "GroupWorkspaces(InputWorkspaces=normalised_matrices, "
     "OutputWorkspace=\"Sequential_Fit_NormalisedCovarianceMatrices\")\n"
     "\n"
-    "#Plot the results of the sequential fit\n"
+    "# Plot the results of the sequential fit\n"
     "fig, axes = plt.subplots(nrows=2, \n"
     "                         ncols=len(output_workspaces), \n"
     "                         sharex=True, \n"

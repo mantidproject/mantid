@@ -835,6 +835,7 @@ set(TEST_FILES
     GenerateEventsFilterTest.h
     GenerateIPythonNotebookTest.h
     GeneratePeaksTest.h
+    GeneratePythonFitScriptTest.h
     GeneratePythonScriptTest.h
     GetAllEiTest.h
     GetDetOffsetsMultiPeaksTest.h
