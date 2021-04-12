@@ -21,6 +21,7 @@ New
 Improvements
 ############
 * :ref:`MDNorm <algm-MDNorm>` algorithm can now efficiently process background.
+* Added SNS instruments to :ref:`PyChop <PyChop>`
 
 MSlice
 ------
