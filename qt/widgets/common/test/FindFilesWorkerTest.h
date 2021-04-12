@@ -1,4 +1,4 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
+﻿// Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
@@ -122,6 +122,20 @@ public:
     executeWorker(worker);
 
     const auto results = widget->getResults();
+    TS_ASSERT(widget->isFinishedSignalRecieved())
+    TS_ASSERT_DIFFERS(results.error, "")
+    TS_ASSERT_EQUALS(results.filenames.size(), 0)
+  }
+
+  void test_that_a_non_ascii_symbol_does_not_cause_a_crash_when_file_searching() {
+    const auto searchText = QString("£");
+    const auto parameters = createFileSearch(searchText.toStdString());
+    const auto worker = new FindFilesWorker(parameters);
+    const auto widget = createWidget(worker);
+
+    executeWorker(worker);
+
+    auto results = widget->getResults();
     TS_ASSERT(widget->isFinishedSignalRecieved())
     TS_ASSERT_DIFFERS(results.error, "")
     TS_ASSERT_EQUALS(results.filenames.size(), 0)
