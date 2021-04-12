@@ -60,6 +60,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "ConvertHFIRSCDtoMDETest_data"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Wavelength", "1.008"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ObliquityParallaxCoefficient", 1.5));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
@@ -89,7 +90,9 @@ public:
     // check other things
     TS_ASSERT_EQUALS(1, outWS->getNumExperimentInfo());
     TS_ASSERT_EQUALS(9038, outWS->getNEvents());
-    const Mantid::coord_t coords[3] = {-0.42f, 1.71f, 2.3f}; // roughly the location of maximum instenity
+    Mantid::coord_t coords[3] = {-0.42f, 1.71f, 2.3f}; // roughly the location of maximum instenity
+    float coeff = std::stof(alg.getPropertyValue("ObliquityParallaxCoefficient"));
+    coords[1] = coeff*coords[1];
     TS_ASSERT_DELTA(outWS->getSignalAtCoord(coords, Mantid::API::NoNormalization), 568, 1e-5);
   }
 };
