@@ -1128,13 +1128,12 @@ def save_to_file(reduction_packages, save_can, additional_run_numbers, event_sli
     state = reduction_packages[0].state
     save_info = state.save
     file_formats = save_info.file_format
-    for i, to_save in enumerate(workspaces_names_to_save):
+    for to_save in workspaces_names_to_save:
         if isinstance(to_save, tuple):
-            transmission = to_save[1][i] if to_save[1] else ''
-            transmission_can = to_save[2][i] if to_save[2] else ''
-            names_to_save = to_save[0]
-            for name_to_save in names_to_save:
-                save_workspace_to_file(name_to_save, file_formats, name_to_save, additional_run_numbers,
+            for i, ws_name_to_save in enumerate(to_save[0]):
+                transmission = to_save[1][i] if to_save[1] else ''
+                transmission_can = to_save[2][i] if to_save[2] else ''
+                save_workspace_to_file(ws_name_to_save, file_formats, ws_name_to_save, additional_run_numbers,
                                        transmission, transmission_can)
         else:
             save_workspace_to_file(to_save, file_formats, to_save, additional_run_numbers)
