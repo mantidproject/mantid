@@ -16,7 +16,10 @@ from typing import List, Optional, Tuple, Union
 from mantid.dataobjects import EventWorkspace, TableWorkspace,  Workspace2D
 from mantid.api import mtd, Workspace, WorkspaceGroup, AnalysisDataService
 from mantid.kernel import logger
-from mantid.simpleapi import CreateEmptyTableWorkspace, SaveNexusProcessed, LoadNexusProcessed, CloneWorkspace, ClearMaskFlag, MaskDetectors, ExtractMask
+from mantid.simpleapi import (
+    CreateEmptyTableWorkspace, SaveNexusProcessed, LoadNexusProcessed,
+    CloneWorkspace, ClearMaskFlag, MaskDetectors, ExtractMask
+)
 
 # Functions exposed to the general user (public) API
 __all__ = ['day_stamp', 'load_calibration_set', 'new_corelli_calibration', 'save_calibration_set']
