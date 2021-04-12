@@ -219,8 +219,9 @@ public:
 
   MOCK_CONST_METHOD0(isValid, std::tuple<bool, std::string>());
 
-  std::string generatePythonFitScript(std::tuple<std::string, std::string, std::string, std::string> const &fitOptions,
-                                      std::string const &filepath = "") override {
+  std::string generatePythonFitScript(
+      [[maybe_unused]] std::tuple<std::string, std::string, std::string, std::string> const &fitOptions,
+      [[maybe_unused]] std::string const &filepath = "") override {
     return "# mock python script";
   }
 };

@@ -98,9 +98,9 @@ namespace Algorithms {
 
 DECLARE_ALGORITHM(GeneratePythonFitScript)
 
-std::string const GeneratePythonFitScript::name() const { return "GeneratePythonFitScript"; };
+std::string const GeneratePythonFitScript::name() const { return "GeneratePythonFitScript"; }
 
-int GeneratePythonFitScript::version() const { return 1; };
+int GeneratePythonFitScript::version() const { return 1; }
 
 std::string const GeneratePythonFitScript::category() const { return "Utility\\Python"; }
 
