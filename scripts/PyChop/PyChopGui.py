@@ -21,7 +21,7 @@ import os
 import warnings
 import copy
 from .Instruments import Instrument
-from qtpy.QtCore import (QEventLoop, Qt)  # noqa
+from qtpy.QtCore import (QEventLoop, Qt, QProcess)  # noqa
 from qtpy.QtWidgets import (QAction, QCheckBox, QComboBox, QDialog, QFileDialog, QGridLayout, QHBoxLayout, QMenu, QLabel,
                             QLineEdit, QMainWindow, QMessageBox, QPushButton, QSizePolicy, QSpacerItem, QTabWidget,
                             QTextEdit, QVBoxLayout, QWidget)  # noqa
@@ -34,12 +34,12 @@ try:
     from mantidqt.MPLwidgets import NavigationToolbar2QT as NavigationToolbar
 except ImportError:
     from qtpy import PYQT4, PYQT5, PYSIDE, PYSIDE2  # noqa
-    if PYQT4 or PYSIDE:
-        from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-        from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
-    elif PYQT5 or PYSIDE2:
+    if PYQT5 or PYSIDE2:
         from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
         from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+    elif PYQT4 or PYSIDE:
+        from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+        from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
     else:
         raise RuntimeError('Do not know which matplotlib backend to set')
     from matplotlib.legend import Legend
@@ -81,6 +81,15 @@ class PyChopGui(QMainWindow):
         self.resaxes_xlim = 0
         self.qeaxes_xlim = 0
         self.isFramePlotted = 0
+        # help
+        self.assistant_process = QProcess(self)
+        # pylint: disable=protected-access
+        self.mantidplot_name = 'PyChop'
+
+    def closeEvent(self, event):
+        self.assistant_process.close()
+        self.assistant_process.waitForFinished()
+        event.accept()
 
     def setInstrument(self, instname):
         """
@@ -730,8 +739,8 @@ class PyChopGui(QMainWindow):
         Shows the help page
         """
         try:
-            import mantidqt
-            mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp("PyChop", 'direct')
+            from mantidqt.gui_helper import show_interface_help
+            show_interface_help(self.mantidplot_name, self.assistant_process, area='direct')
         except ImportError:
             helpTxt = "PyChop is a tool to allow direct inelastic neutron\nscattering users to estimate the inelastic resolution\n"
             helpTxt += "and incident flux for a given spectrometer setting.\n\nFirst select the instrument, chopper settings and\n"
