@@ -93,6 +93,7 @@ class MockedModule(mock.MagicMock):
     def __init__(self, *args, mock_class=mock.MagicMock, **kwargs):
         super().__init__(*args, **kwargs)
         self.mock_class = mock_class
+
     def __call__(self, *args, **kwargs):
         return self.mock_class(*args, **kwargs)
 
@@ -192,51 +193,51 @@ class PyChopGuiTests(unittest.TestCase):
                 self.menuBar = mock.MagicMock()
                 self.setCentralWidget = mock.MagicMock()
                 self.setWindowTitle = mock.MagicMock()
-            def setWindowFlags(self, *args, **kwargs):
+            def setWindowFlags(self, *args, **kwargs):            # noqa: E306
                 pass
-            def show(self):
+            def show(self):                                       # noqa: E306
                 pass
-        class fake_QCombo(mock.MagicMock):
+        class fake_QCombo(mock.MagicMock):                        # noqa: E306
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 self.clear()
-            def clear(self):
+            def clear(self):                                      # noqa: E306
                 self.items = []
                 self.currentIndex = 0
-            def addItem(self, item):
+            def addItem(self, item):                              # noqa: E306
                 self.items.append(item)
-            def currentText(self):
+            def currentText(self):                                # noqa: E306
                 return self.items[self.currentIndex]
-            def count(self):
+            def count(self):                                      # noqa: E306
                 return len(self.items)
-            def itemText(self, idx):
+            def itemText(self, idx):                              # noqa: E306
                 return self.items[idx]
-            def setCurrentIndex(self, idx):
+            def setCurrentIndex(self, idx):                       # noqa: E306
                 self.currentIndex = idx
-            def __getattr__(self, attribute):
+            def __getattr__(self, attribute):                     # noqa: E306
                 if attribute not in self.__dict__:
                     self.__dict__[attribute] = mock.MagicMock()
                 return self.__dict__[attribute]
-        class fake_Line(mock.MagicMock):
+        class fake_Line(mock.MagicMock):                          # noqa: E306
             def __init__(self, parent, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 self.parent = parent
-            def set_label(self, label):
+            def set_label(self, label):                           # noqa: E306
                 parent.legends[self] = label
-        class fake_Axes(mock.MagicMock):
+        class fake_Axes(mock.MagicMock):                          # noqa: E306
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 self.legends = {}
-            def plot(self, *args, **kwargs):
+            def plot(self, *args, **kwargs):                      # noqa: E306
                 self.lines.append(fake_Line(self))
                 return self.lines[-1],
-            def get_legend_handles_labels(self):
+            def get_legend_handles_labels(self):                  # noqa: E306
                 labels = [self.legends[line] for line in self.lines]
                 return self.lines, labels
-        class fake_Figure(mock.MagicMock):
+        class fake_Figure(mock.MagicMock):                        # noqa: E306
             def add_subplot(self, *args, **kwargs):
                 return fake_Axes()
-        class fake_Slider(mock.MagicMock):
+        class fake_Slider(mock.MagicMock):                        # noqa: E306
             def __init__(self, parent, label, valmin, valmax, **kwargs):
                 super().__init__(parent, label, valmin, valmax, **kwargs)
                 self.parent, self.label, self.valmin, self.valmax = parent, label, valmin, valmax

@@ -27,7 +27,7 @@ else:
         parent, flags = get_window_config()
     else:
         parent, flags = None, None
- 
+
 window = PyChopGui.PyChopGui(parent, flags)
 window.show()
 if not within_mantid:

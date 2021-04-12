@@ -47,6 +47,7 @@ except ImportError:
         SET_DRAGGABLE_METHOD = "set_draggable"
     else:
         SET_DRAGGABLE_METHOD = "draggable"
+
     def legend_set_draggable(legend, state, use_blit=False, update='loc'):
         getattr(legend, SET_DRAGGABLE_METHOD)(state, use_blit, update)
 
@@ -337,7 +338,7 @@ class PyChopGui(QMainWindow):
             if abs(self.hyspecS2) <= 30:
                 self.engine.detector.tthlims = [0, abs(self.hyspecS2) + 30]
             else:
-                self.engine.detector.tthlims = [abs(self.hyspecS2) - 30, abs(self.hyspecS2) + 30] 
+                self.engine.detector.tthlims = [abs(self.hyspecS2) - 30, abs(self.hyspecS2) + 30]
             label_text += '_S2={}'.format(self.hyspecS2)
         for tth in self.engine.detector.tthlims:
             q = np.sqrt(E2q * (2 * Ei - en - 2 * np.sqrt(Ei * (Ei - en)) * np.cos(np.deg2rad(tth))) * meV2J) / 1e10

@@ -29,7 +29,7 @@ chopper_system:
       isDouble: False           # Is this a double disk system?
       isPhaseIndependent: False # Is this disk to be phased independently?
     -
-      name: HYSPEC Fermi Chopper 
+      name: HYSPEC Fermi Chopper
       distance: 37.17           # Distance from moderator to this chopper in metres
       aperture_distance: 37.0   # Distance from aperture (moderator face) to this chopper (only for Fermi)
       packages:                 # A hash of chopper packages
@@ -42,7 +42,7 @@ chopper_system:
           tjit: 0.0             # Jitter time (us)
           fluxcorr: 1.0         # (Empirical/Fudge) factor to scale calculated flux by
           isPi: True            # Should the PI pulse (at 180 deg rotation) be transmitted by this package?
-#      slot_width: 110           # Slot width in mm.  angle/360.*2*pi*R. angle=9.0 deg. 
+#      slot_width: 110           # Slot width in mm.  angle/360.*2*pi*R. angle=9.0 deg.
 #      guide_width: 40           # Width of guide after chopper in mm
 #      nslot: 2                  # Number of slots. (Assume all slots equally spaced)
 #      radius: 282.5             # Disk radius
@@ -52,7 +52,7 @@ chopper_system:
   # This is an NxM matrix A where N is the number of choppers and M is the number of indepdent frequencies
   # Such that A.F will give the N required frequencies for each chopper from the M input frequencies
   frequency_matrix:             # HYSPEC is run with one main frequency:
-    [[0],                    
+    [[0],
      [0],
      [1]]                       #   f1: The frequency of the resolution chopper (Chopper 4)
   constant_frequencies:         # This specifies if a chopper should be run at a fixed constant frequency
@@ -82,7 +82,7 @@ moderator:
   name: TS2 Hydrogen            # A==water, AP==poisoned water, CH4==methane, H2==hydrogen. This is only used for analytical calculations
                                 # of the flux distribution for ISIS TS1 moderators. If measured_flux is defined below, name can be anything
   imod: 3                       # Moderator time profile type: 0==chi^2, 1==Ikeda-Carpenter, 2==modified chi^2
-  mod_pars: [0.0] 
+  mod_pars: [0.0]
                                 # imod==3 is polynomial. Pars are coeff from highest order to lowest
   theta: 32.0                   # Angle beamline makes with moderator face (degrees)
   source_rep: 60                # Frequency of source (Hz)
@@ -111,10 +111,10 @@ moderator:
     scale_factor: 1.0    # A factor to scale the flux values below by
     wavelength: [1.28,1.53,1.74,2.02,2.34,3.3,3.69,4.04,4.64]
     flux: [4.23,8.42,12.52,21.27,30.67,24.92,18.72,12.33,11.60] #from V_fits2, sheet PGApr2014, yellow
-sample: 
+sample:
   name: Sample Can
   isam: 2                       # Sample type: 0==flat plate, 1==ellipse, 2==annulus, 3==sphere, 4==solid cylinder
-  sx: 10.0                      # Thickness (mm) 
+  sx: 10.0                      # Thickness (mm)
   sy: 10.0                      # Width (mm)
   sz: 30.0                      # Height (mm)
   gamma: 0.                     # Angle of x-axis to ki (degrees)
