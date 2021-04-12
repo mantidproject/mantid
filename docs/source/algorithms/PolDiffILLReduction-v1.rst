@@ -80,6 +80,9 @@ Sample-only keys:
 - *SampleDensity*
 - *Height*
 
+The SampleMass needs to be defined, as well as FormulaUnitMass and FormulaUnits, even when the self-attenuation is not taken into account. The other
+parameters are required when the self-attenuation is calculated.
+
 Container-only keys:
 
 - *ContainerChemicalFormula*
@@ -89,6 +92,8 @@ Beam-only keys:
 
 - *BeamHeight*
 - *BeamWidth*
+
+These do not have to be defined, and by default will be set to be larger than the sample size.
 
 Then, depending on the chosen sample geometry, additional parameters need to be defined:
 
