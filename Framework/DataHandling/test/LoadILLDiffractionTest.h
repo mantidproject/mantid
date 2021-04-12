@@ -37,6 +37,7 @@ public:
     ConfigService::Instance().appendDataSearchSubDir("ILL/D2B/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D1B/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/IN5/");
+    ConfigService::Instance().appendDataSearchSubDir("ILL/PANTHER/");
   }
 
   void setUp() override {
@@ -549,6 +550,65 @@ public:
     TS_ASSERT_EQUALS(sample->size(), 17)
 
     TS_ASSERT_DELTA(ei, 4.80, 0.01)
+    TS_ASSERT_EQUALS(outputWS->run().getProperty("Detector.calibration_file")->value(), "none")
+    checkTimeFormat(outputWS);
+  }
+
+  void test_PANTHER_omega_scan() {
+    // Tests the omega-scan case for PANTHER
+
+    LoadILLDiffraction alg;
+    // Don't put output in ADS by default
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "010578.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DataType", "Raw"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 73729)
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 16)
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(73728))
+    TS_ASSERT(!outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->isDistribution())
+
+    TS_ASSERT_DELTA(outputWS->x(0)[0], 0.00, 0.01)
+    TS_ASSERT_DELTA(outputWS->y(0)[0], 0.00, 0.01)
+    TS_ASSERT_DELTA(outputWS->e(0)[0], 0.00, 0.01)
+
+    TS_ASSERT_DELTA(outputWS->x(65)[15], 30.00, 0.01)
+    TS_ASSERT_DELTA(outputWS->y(65)[15], 3.00, 0.01)
+    TS_ASSERT_DELTA(outputWS->e(65)[15], 1.73, 0.01)
+
+    TS_ASSERT_DELTA(outputWS->x(73728)[0], 0.00, 0.01)
+    TS_ASSERT_DELTA(outputWS->y(73728)[0], 497.00, 0.01)
+    TS_ASSERT_DELTA(outputWS->e(73728)[0], 22.29, 0.01)
+
+    TS_ASSERT_DELTA(outputWS->x(73728)[15], 30.00, 0.01)
+    TS_ASSERT_DELTA(outputWS->y(73728)[15], 504.00, 0.01)
+    TS_ASSERT_DELTA(outputWS->e(73728)[15], 22.45, 0.01)
+
+    const auto &run = outputWS->run();
+    TS_ASSERT(run.hasProperty("AcquisitionSpy.Time"))
+    TS_ASSERT(run.hasProperty("SampleSettings.SampleTemp"))
+    TS_ASSERT(run.hasProperty("ScanType"))
+    TS_ASSERT(run.hasProperty("ResolutionMode"))
+    TS_ASSERT(run.hasProperty("Ei"))
+
+    const auto spy = run.getLogData("AcquisitionSpy.Time");
+    const auto sample = run.getLogData("SampleSettings.SampleTemp");
+    const auto scanType = run.getLogData("ScanType");
+    const auto ei = run.getLogAsSingleValue("wavelength");
+
+    TS_ASSERT_EQUALS(scanType->value(), "OtherScan")
+    TS_ASSERT_EQUALS(spy->size(), 16)
+    TS_ASSERT_EQUALS(sample->size(), 16)
+
+    TS_ASSERT_DELTA(ei, 1.5288, 0.0001)
     TS_ASSERT_EQUALS(outputWS->run().getProperty("Detector.calibration_file")->value(), "none")
     checkTimeFormat(outputWS);
   }
