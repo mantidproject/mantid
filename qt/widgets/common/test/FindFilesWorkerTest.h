@@ -146,6 +146,7 @@ public:
     auto parameters = createFileSearch(searchText.toStdString());
     parameters.algorithmName = "";
     parameters.algorithmProperty = "";
+    parameters.isForRunFiles = true;
     const auto worker = new FindFilesWorker(parameters);
     const auto widget = createWidget(worker);
 
