@@ -17,7 +17,7 @@ To date this algorithm only supports: IN4, IN5, IN6, PANTHER, and SHARP.
 By default, this algorithm loads the data indexed by channels. To convert to time-of-flight, use the ConvertToTOF option.
 
 This algorithm also supports diffraction mode. In this case, the unit of the output workspace will be wavelength instead of time-of-flight or channel.
-The support for the omega scan measurement mode for IN5 and PANTHER is **not** handled by this loader, but instead the data
+The support for the omega scan measurement mode for IN5, PANTHER, and SHARP is **not** handled by this loader, but instead the data
 is loaded with :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>`.
 
 .. note::
