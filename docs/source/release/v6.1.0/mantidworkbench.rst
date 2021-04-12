@@ -39,6 +39,7 @@ Bugfixes
 - First time dialog box will not appear recurrently, if user selected their choice of facility
   and instrument at least once and checked "Do not show again until next version".
 - Fixed a bug that would cause a crash if the user right clicked on the plot in the instrument view pick tab after the stored curves were cleared.
+- Fixed a scenario where workbench could hang if the user closed a plot while live data was being read.
 - Fixed a crash that happens when multiple plot windows are open, and the users closes one of them.
 - The y-axis in the instrument view's pick tab will now rescale if the range changes.
 
