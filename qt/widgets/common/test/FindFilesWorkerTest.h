@@ -127,9 +127,25 @@ public:
     TS_ASSERT_EQUALS(results.filenames.size(), 0)
   }
 
-  void test_that_a_non_ascii_symbol_does_not_cause_a_crash_when_file_searching() {
+  void test_that_a_non_ascii_symbol_does_not_cause_a_crash_when_file_searching_using_a_filename() {
     const auto searchText = QString("£");
-    const auto parameters = createFileSearch(searchText.toStdString());
+    auto parameters = createFileSearch(searchText.toStdString());
+    const auto worker = new FindFilesWorker(parameters);
+    const auto widget = createWidget(worker);
+
+    executeWorker(worker);
+
+    auto results = widget->getResults();
+    TS_ASSERT(widget->isFinishedSignalRecieved())
+    TS_ASSERT_DIFFERS(results.error, "")
+    TS_ASSERT_EQUALS(results.filenames.size(), 0)
+  }
+
+  void test_that_a_non_ascii_symbol_does_not_cause_a_crash_when_file_searching_using_runs() {
+    const auto searchText = QString("£");
+    auto parameters = createFileSearch(searchText.toStdString());
+    parameters.algorithmName = "";
+    parameters.algorithmProperty = "";
     const auto worker = new FindFilesWorker(parameters);
     const auto widget = createWidget(worker);
 
