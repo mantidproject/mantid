@@ -416,7 +416,6 @@ if (ENABLE_PRECOMMIT)
     HINTS
     ~/.local/bin/
     "${MSVC_PYTHON_EXECUTABLE_DIR}/Scripts/")
-  message(WARNING ${PRE_COMMIT_EXE})
   if (NOT PRE_COMMIT_EXE)
     message ( FATAL_ERROR "Failed to find pre-commit see https://developer.mantidproject.org/GettingStarted.html" )
   endif ()
