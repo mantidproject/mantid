@@ -413,16 +413,16 @@ if (ENABLE_PRECOMMIT)
   find_program(PRE_COMMIT_EXE
     NAMES
     pre-commit
-    pre-commit.cmd
     HINTS
     ~/.local/bin/
     "${MSVC_PYTHON_EXECUTABLE_DIR}/Scripts/")
+  message(WARNING ${PRE_COMMIT_EXE})
   if (NOT PRE_COMMIT_EXE)
     message ( FATAL_ERROR "Failed to find pre-commit see https://developer.mantidproject.org/GettingStarted.html" )
   endif ()
 
   if (MSVC)
-    execute_process(COMMAND "${PRE_COMMIT_EXE} install --overwrite" WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE PRE_COMMIT_RESULT)
+    execute_process(COMMAND "${PRE_COMMIT_EXE}.cmd" install --overwrite WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE PRE_COMMIT_RESULT)
     if(NOT PRE_COMMIT_RESULT EQUAL "0")
         message(FATAL_ERROR "Pre-commit install failed with ${PRE_COMMIT_RESULT}")
     endif()
