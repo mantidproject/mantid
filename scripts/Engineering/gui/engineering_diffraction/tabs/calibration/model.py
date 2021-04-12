@@ -11,13 +11,12 @@ import matplotlib.pyplot as plt
 from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger, IntArrayProperty
 from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, DiffractionFocussing, \
-    CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace, LoadAscii, NormaliseByCurrent, \
+    CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace, NormaliseByCurrent, \
     CreateGroupingWorkspace, ConvertUnits, Load, RebinToWorkspace,\
     Divide, EnggEstimateFocussedBackground, ApplyDiffCal
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file, default_ceria_expected_peaks
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
-from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 
 VANADIUM_INPUT_WORKSPACE_NAME = "engggui_vanadium_ws"
 CURVES_WORKSPACE_NAME = "engggui_vanadium_curves"
@@ -52,22 +51,11 @@ class CalibrationModel(object):
         van_integration, van_curves = vanadium_corrections.fetch_correction_workspaces(
             vanadium_path, instrument, rb_num=rb_num)  # van_curves = None at this point
         sample_workspace = path_handling.load_workspace(sample_path)
-        full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
-                                      path_handling.ENGINEERING_PREFIX, "full_calibration")
-        if full_calib_path is not None and path.exists(full_calib_path):
-            full_calib = LoadAscii(full_calib_path, OutputWorkspace="det_pos", Separator="Tab")
-            output, van_curves, sample_raw = self.run_calibration(sample_workspace,
-                                                                  vanadium_path,
-                                                                  van_integration,
-                                                                  bank,
-                                                                  spectrum_numbers,
-                                                                  full_calib_ws=full_calib)
-        else:
-            output, van_curves, sample_raw = self.run_calibration(sample_workspace,
-                                                                  vanadium_path,
-                                                                  van_integration,
-                                                                  bank,
-                                                                  spectrum_numbers)
+        output, van_curves, sample_raw = self.run_calibration(sample_workspace,
+                                                              vanadium_path,
+                                                              van_integration,
+                                                              bank,
+                                                              spectrum_numbers)
         vanadium_corrections.handle_van_curves(van_curves, vanadium_path, instrument, rb_num)
         if plot_output:
             for i in range(len(output)):
@@ -228,14 +216,12 @@ class CalibrationModel(object):
                         vanadium_workspace,
                         van_integration,
                         bank,
-                        spectrum_numbers,
-                        full_calib_ws=None):
+                        spectrum_numbers):
         """
         Runs the main Engineering calibration algorithm.
         :param sample_ws: The workspace with the sample data.
         :param vanadium_workspace: The workspace with the vanadium data
         :param van_integration: The integration values from the vanadium corrections
-        :param full_calib_ws: Full pixel calibration of the detector (optional)
         :param bank: The bank to crop to, both if none.
         :param spectrum_numbers: The spectrum numbers to crop to, no crop if none.
         :return: The output of the algorithm.
@@ -278,8 +264,8 @@ class CalibrationModel(object):
             "MinimumPeakHeight": 0.5,
             "PeakFunction": 'BackToBackExponential',
             "CalibrationParameters": 'DIFC+TZERO',
-            "OutputCalibrationTable": 'cal_B2B_DIFC_TZERO_chisq',
-            "DiagnosticWorkspaces": 'diag_B2B_DIFC_TZERO_chisq',
+            "OutputCalibrationTable": 'cal_inst',
+            "DiagnosticWorkspaces": 'diag_inst',
             "UseChiSq": True
         }
 
