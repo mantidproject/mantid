@@ -71,7 +71,7 @@ std::map<ParamID, QString> g_paramName{
     {ParamID::SE_CENTRE, "Centre"},
     {ParamID::IRD_HEIGHT, "Height"},
     {ParamID::IRD_RADIUS, "Radius"},
-    {ParamID::IRD_TOU, "Tau"},
+    {ParamID::IRD_TAU, "Tau"},
     {ParamID::IRD_CENTRE, "Centre"},
     {ParamID::DP_INTENSITY, "Intensity"},
     {ParamID::DP_RADIUS, "Radius"},

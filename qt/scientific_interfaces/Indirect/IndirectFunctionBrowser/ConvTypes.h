@@ -77,7 +77,7 @@ enum class ParamID {
   SE_CENTRE,
   IRD_HEIGHT,
   IRD_RADIUS,
-  IRD_TOU,
+  IRD_TAU,
   IRD_CENTRE,
   EDP_HEIGHT,
   EDP_CENTRE,
