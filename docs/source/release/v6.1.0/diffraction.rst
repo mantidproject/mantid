@@ -100,6 +100,7 @@ Known Defects
 
 Bugfixes
 ########
+- :ref:`PredictPeaks <algm-PredictPeaks>` no longer segfaults when the instrument of the input workspace doesn't have the sample position set
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` no longer returns null calibration outputs.
 - Fix failure in :ref:`HB3AFindPeaks <algm-HB3AFindPeaks>` when switching to crystallographic convention.
 - Make :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ>` awear of k convention.
