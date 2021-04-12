@@ -159,6 +159,9 @@ void LoadILLDiffraction::loadDataScan() {
   NXRoot dataRoot(m_filename);
   NXEntry firstEntry = dataRoot.openFirstEntry();
   m_instName = firstEntry.getString("instrument/name");
+  if (m_instName == "IN5" || m_instName == "PANTHER" || m_instName == "SHARP") {
+    m_isSpectrometer = true;
+  }
   m_startTime = DateAndTime(m_loadHelper.dateTimeInIsoFormat(firstEntry.getString("start_time")));
   const std::string dataType = getPropertyValue("DataType");
   const bool hasCalibratedData = containsCalibratedData(m_filename);
@@ -197,7 +200,7 @@ void LoadILLDiffraction::loadDataScan() {
     } else {
       twoThetaValue = getProperty("TwoThetaOffset");
     }
-  } else if (m_instName != "IN5" && m_instName != "PANTHER" && m_instName != "SHARP") {
+  } else if (!m_isSpectrometer) {
     std::string twoThetaPath = "instrument/2theta/value";
     NXFloat twoTheta0 = firstEntry.openNXFloat(twoThetaPath);
     twoTheta0.load();
@@ -501,7 +504,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data, const NXDo
 
   size_t monitorIndex = 0;
   size_t startIndex = NUMBER_MONITORS;
-  if (m_instName == "IN5" || m_instName == "PANTHER" || m_instName == "SHARP") {
+  if (m_isSpectrometer) {
     startIndex = 0;
     monitorIndex = m_numberDetectorsActual;
   }
@@ -532,7 +535,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data, const NXDo
 
   // Link the instrument
   loadStaticInstrument();
-  if (m_instName != "IN5" && m_instName != "PANTHER" && m_instName != "SHARP") {
+  if (!m_isSpectrometer) {
     // Move to the starting 2theta
     moveTwoThetaZero(twoTheta0);
   }
