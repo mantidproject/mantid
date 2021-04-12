@@ -94,6 +94,8 @@ class GeneralSettingsTest(unittest.TestCase):
 
         self.assert_connected_once(presenter.view.main_font,
                                    presenter.view.main_font.clicked)
+        self.assert_connected_once(presenter.view.window_behaviour,
+                                   presenter.view.window_behaviour.currentTextChanged)
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_facility_changed(self, mock_ConfigService):
@@ -129,6 +131,19 @@ class GeneralSettingsTest(unittest.TestCase):
         presenter.action_prompt_save_on_close(False)
 
         mock_conf.set.assert_called_once_with(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value, False)
+
+    @patch(WORKBENCH_CONF_CLASSPATH)
+    def test_action_window_behaviour_changed(self, mock_conf):
+        presenter = GeneralSettings(None)
+        values = presenter.WINDOW_BEHAVIOUR
+        presenter.action_window_behaviour_changed(values[0])
+
+        mock_conf.set.assert_called_once_with(GeneralProperties.WINDOW_BEHAVIOUR.value, values[0])
+        mock_conf.set.reset_mock()
+
+        presenter.action_window_behaviour_changed(values[1])
+
+        mock_conf.set.assert_called_once_with(GeneralProperties.WINDOW_BEHAVIOUR.value, values[1])
 
     @patch(WORKBENCH_CONF_CLASSPATH)
     def test_action_prompt_save_editor_modified(self, mock_CONF):

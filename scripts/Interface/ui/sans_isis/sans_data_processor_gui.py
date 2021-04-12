@@ -154,12 +154,13 @@ class SANSDataProcessorGui(QMainWindow,
             """
             pass
 
-    def __init__(self):
+    def __init__(self, parent=None, window_flags=None):
         """
         Initialise the interface
         """
-        super(QMainWindow, self).__init__()
-
+        super(QMainWindow, self).__init__(parent)
+        if window_flags:
+            self.setWindowFlags(window_flags)
         self.setupUi(self)
 
         # Listeners allow us to to notify all presenters
