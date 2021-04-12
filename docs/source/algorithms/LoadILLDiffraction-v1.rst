@@ -44,7 +44,7 @@ The loader is able to load the following scan configurations:
 Logs
 ####
 
-The loader creates time series logs for each of the scanned variable in the `.nxs` file.
+The loader creates time series logs for each of the scanned variable in the `.nxs` file. The scanned variable name is added under `ScanVar` log.
 
 D2B alignment
 -------------

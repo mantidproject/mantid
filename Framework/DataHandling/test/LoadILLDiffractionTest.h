@@ -222,11 +222,15 @@ public:
     }
 
     const auto &run = outputWS->run();
+    TS_ASSERT(run.hasProperty("ScanType"))
+    TS_ASSERT(run.hasProperty("ScanVar"))
     TS_ASSERT(outputWS->run().hasProperty("omega.position"))
     TS_ASSERT(outputWS->run().hasProperty("detector.totalcount"))
     TS_ASSERT(outputWS->run().hasProperty("acquisitionspy.time"))
     TS_ASSERT(outputWS->run().hasProperty("samplesettings.sampletemp"))
     TS_ASSERT(outputWS->run().hasProperty("magneticfield.field"))
+    const auto scanVar = run.getLogData("ScanVar");
+    TS_ASSERT_EQUALS(scanVar->value(), "omega.position")
     const auto omega = run.getLogData("omega.position");
     TS_ASSERT_EQUALS(omega->size(), 21)
     const double steps = run.getLogAsSingleValue("ScanSteps");
@@ -460,6 +464,9 @@ public:
     TS_ASSERT(run.hasProperty("ScanType"));
     const auto type = run.getLogData("ScanType");
     TS_ASSERT_EQUALS(type->value(), "DetectorScan");
+    TS_ASSERT(run.hasProperty("ScanVar"));
+    const auto scanVar = run.getLogData("ScanVar");
+    TS_ASSERT_EQUALS(scanVar->value(), "2theta.position");
     checkTimeFormat(outputWS);
   }
 
@@ -538,15 +545,18 @@ public:
     TS_ASSERT(run.hasProperty("AcquisitionSpy.Time"))
     TS_ASSERT(run.hasProperty("SampleSettings.SampleTemp"))
     TS_ASSERT(run.hasProperty("ScanType"))
+    TS_ASSERT(run.hasProperty("ScanVar"))
     TS_ASSERT(run.hasProperty("ResolutionMode"))
     TS_ASSERT(run.hasProperty("Ei"))
 
     const auto spy = run.getLogData("AcquisitionSpy.Time");
     const auto sample = run.getLogData("SampleSettings.SampleTemp");
     const auto scanType = run.getLogData("ScanType");
+    const auto scanVar = run.getLogData("ScanVar");
     const auto ei = run.getLogAsSingleValue("wavelength");
 
     TS_ASSERT_EQUALS(scanType->value(), "OtherScan")
+    TS_ASSERT_EQUALS(scanVar->value(), "samplerotation.position")
     TS_ASSERT_EQUALS(spy->size(), 17)
     TS_ASSERT_EQUALS(sample->size(), 17)
 
@@ -597,15 +607,18 @@ public:
     TS_ASSERT(run.hasProperty("AcquisitionSpy.Time"))
     TS_ASSERT(run.hasProperty("SampleSettings.SampleTemp"))
     TS_ASSERT(run.hasProperty("ScanType"))
+    TS_ASSERT(run.hasProperty("ScanVar"))
     TS_ASSERT(run.hasProperty("ResolutionMode"))
     TS_ASSERT(run.hasProperty("Ei"))
 
     const auto spy = run.getLogData("AcquisitionSpy.Time");
     const auto sample = run.getLogData("SampleSettings.SampleTemp");
     const auto scanType = run.getLogData("ScanType");
+    const auto scanVar = run.getLogData("ScanVar");
     const auto ei = run.getLogAsSingleValue("wavelength");
 
     TS_ASSERT_EQUALS(scanType->value(), "OtherScan")
+    TS_ASSERT_EQUALS(scanVar->value(), "d1t.position")
     TS_ASSERT_EQUALS(spy->size(), 16)
     TS_ASSERT_EQUALS(sample->size(), 16)
 
@@ -656,15 +669,18 @@ public:
     TS_ASSERT(run.hasProperty("AcquisitionSpy.Time"))
     TS_ASSERT(run.hasProperty("SampleSettings.SampleTemp"))
     TS_ASSERT(run.hasProperty("ScanType"))
+    TS_ASSERT(run.hasProperty("ScanVar"))
     TS_ASSERT(run.hasProperty("ResolutionMode"))
     TS_ASSERT(run.hasProperty("Ei"))
 
     const auto spy = run.getLogData("AcquisitionSpy.Time");
     const auto sample = run.getLogData("SampleSettings.SampleTemp");
     const auto scanType = run.getLogData("ScanType");
+    const auto scanVar = run.getLogData("ScanVar");
     const auto ei = run.getLogAsSingleValue("wavelength");
 
     TS_ASSERT_EQUALS(scanType->value(), "OtherScan")
+    TS_ASSERT_EQUALS(scanVar->value(), "updown.position")
     TS_ASSERT_EQUALS(spy->size(), 8)
     TS_ASSERT_EQUALS(sample->size(), 8)
 

@@ -580,6 +580,9 @@ void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
       const std::string scanVarName = boost::algorithm::to_lower_copy(m_scanVar[i].name);
       const std::string scanVarProp = boost::algorithm::to_lower_copy(m_scanVar[i].property);
       const std::string propName = scanVarName + "." + scanVarProp;
+      if (m_scanVar[i].scanned == 1) {
+        mutableRun.addProperty("ScanVar", propName, true);
+      }
       auto property = std::make_unique<TimeSeriesProperty<double>>(propName);
       for (size_t j = 0; j < m_numberScanPoints; ++j) {
         property->addValue(absoluteTimes[j], scan(static_cast<int>(i), static_cast<int>(j)));
