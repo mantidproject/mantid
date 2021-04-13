@@ -21,7 +21,7 @@ from sans.user_file.parser_helpers.wavelength_parser import parse_range_waveleng
 
 class StateGuiModel(ModelCommon):
     def __init__(self, all_states: AllStates):
-        assert(isinstance(all_states, AllStates)), \
+        assert (isinstance(all_states, AllStates)), \
             "Expected AllStates, got %r, could be a legacy API caller" % repr(all_states)
         super(StateGuiModel, self).__init__(all_states)
 
@@ -361,6 +361,9 @@ class StateGuiModel(ModelCommon):
     @wavelength_step_type.setter
     def wavelength_step_type(self, value):
         self._set_on_all_wavelength("wavelength_step_type", value)
+        if value is not RangeStepType.RANGE_LIN and value is not RangeStepType.RANGE_LOG:
+            # Convert range input to the min/max of full range
+            self.wavelength_range = f"{self.wavelength_min}, {self.wavelength_max}"
 
     @property
     def wavelength_min(self):
@@ -404,7 +407,7 @@ class StateGuiModel(ModelCommon):
     @wavelength_range.setter
     def wavelength_range(self, value):
         full_range, pairs = parse_range_wavelength(value)
-        self.wavelength_full_range = full_range
+        self._set_on_all_wavelength("wavelength_full_range", full_range)
         self._set_on_all_wavelength('selected_ranges', pairs)
         # Ensure the GUI remembers the original user string
         self._wavelength_range = value

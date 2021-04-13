@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import itertools
 import unittest
 
 from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStepType, SampleShape, SaveType,
@@ -259,6 +260,50 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model = StateGuiModel(AllStates())
         state_gui_model.wavelength_step_type = RangeStepType.NOT_SET
         self.assertEqual(state_gui_model.wavelength_step_type, RangeStepType.LIN)
+
+    def test_wavelength_step_type_resets_range_for_non_range(self):
+        state_gui_model = StateGuiModel(AllStates())
+
+        sample_wav_range = "1, 2, 2, 3"
+        sample_full_range = (1, 3)
+        user_facing_full_range = "1.0, 3.0"  # This is what is expected on reset
+
+        range_types = [RangeStepType.RANGE_LIN, RangeStepType.RANGE_LOG]
+        non_range_types = [RangeStepType.LIN, RangeStepType.LOG]
+        for range_enum, non_range in itertools.product(range_types, non_range_types):
+            state_gui_model.wavelength_step_type = range_enum
+            state_gui_model.wavelength_range = sample_wav_range
+            state_gui_model.wavelength_min = sample_full_range[0]
+            state_gui_model.wavelength_max = sample_full_range[1]
+            self.assertNotEqual(user_facing_full_range, state_gui_model.wavelength_range,
+                                "State GUI model not preserving user range input. Aborting test")
+
+            state_gui_model.wavelength_step_type = non_range
+            # This should now reset our sample range back to only the full range
+            self.assertEqual(user_facing_full_range, state_gui_model.wavelength_range)
+
+    def test_wavelength_step_same_type_preserves_input(self):
+        state_gui_model = StateGuiModel(AllStates())
+
+        range_wav_range = "2, 4, 6, 8"
+        user_facing_full_range = "2.0, 8.0"
+
+        range_types = [RangeStepType.RANGE_LIN, RangeStepType.RANGE_LOG]
+        non_range_types = [RangeStepType.LIN, RangeStepType.LOG]
+
+        def run_test(enum_type, user_input):
+            for original_val, new_val in itertools.permutations(enum_type):
+                state_gui_model.wavelength_step_type = original_val
+                state_gui_model.wavelength_range = user_input
+                state_gui_model.wavelength_step_type = new_val
+                self.assertEqual(user_input, state_gui_model.wavelength_range,
+                                 f"Setting enum from {original_val} to {new_val}"
+                                 " did not preserve the users selected range")
+                self.assertEqual(2., state_gui_model.wavelength_min)
+                self.assertEqual(8., state_gui_model.wavelength_max)
+
+        run_test(range_types, range_wav_range)
+        run_test(non_range_types, user_facing_full_range)
 
     def test_that_can_set_wavelength(self):
         state_gui_model = StateGuiModel(AllStates())
