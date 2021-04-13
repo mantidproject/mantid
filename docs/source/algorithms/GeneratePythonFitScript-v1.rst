@@ -34,7 +34,7 @@ Usage
 
 Output:
 
-.. testoutput:: ExGeneratePythonScriptSimple
+.. testoutput:: ExGeneratePythonSequentialFitScript
    :options: +ELLIPSIS
 
    # A python script generated to perform a sequential fit
