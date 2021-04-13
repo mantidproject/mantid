@@ -9,7 +9,6 @@ from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
 import functools
-from scipy.signal import find_peaks, peak_widths
 import numpy as np
 from typing import List, Tuple
 import datetime
@@ -391,51 +390,6 @@ class LRDirectBeamSort(PythonAlgorithm):
         # Delete workspaces
         for ws_name in [peak_ws_name, model_ws_name, param_ws_name]:
             DeleteWorkspace(ws_name)
-
-        return peak, [0, 255]
-
-    def _find_peak_x(self, ws):
-        """
-            Find the peak in y
-            TODO: find peak in x
-        """
-        SaveNexusProcessed(InputWorkspace=ws, Filename=f'/tmp/{ws}.nxs')
-        y = ws.extractY()
-        # x=ws.extractX()
-        y = np.reshape(y, (256, 304, y.shape[1]))
-
-        p_vs_t = np.sum(y, axis=0)
-        counts = np.sum(p_vs_t, axis=1)
-
-        avg = np.average(counts)
-
-        # Crop pixels on each side where background can create a peak
-        # call scipy.signal.find_peaks and scipy.signal.peak_width to
-        # find peaks and properties
-        _crop = 25
-        peaks, props = find_peaks(counts[_crop:-_crop],
-                                  threshold=None,
-                                  width=3,
-                                  prominence=0.5*avg)
-        width = peak_widths(counts[_crop:-_crop], peaks, rel_height=0.05)
-
-        _peak_index = 0
-        _peak_max = 0
-        if len(peaks)>0:
-            for i in range(len(peaks)):
-                if counts[peaks[i]+_crop] > _peak_max:
-                    _peak_index = i
-                    _peak_max = counts[peaks[i]+_crop]
-
-        try:
-            peak = [np.int(np.floor(peaks[_peak_index]+_crop-2.0*width[0][_peak_index])),
-                    np.int(np.floor(peaks[_peak_index]+_crop+2.0*width[0][_peak_index]))]
-        except:
-            print(counts)
-            print(avg)
-            print(peaks)
-            print(props)
-            raise
 
         return peak, [0, 255]
 
