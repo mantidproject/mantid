@@ -159,7 +159,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
         outputWorkspaces.append(refinedPeaks)
         outputWorkspaces.append(fitPlots)
 
-        indexedPeaks, unindexedPeaks = self.runIndex(refinedPeaks)
+        indexedPeaks, unindexedPeaks = self.expInfoIndex(refinedPeaks)
         outputWorkspaces.append(indexedPeaks)
 
         pawleyFit = self.getProperty('PawleyFit').value
@@ -214,7 +214,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
 
         return AnalysisDataService.retrieve(refinedPeaksName), AnalysisDataService.retrieve(plotNames)
 
-    def runIndex(self, peaks):
+    def expInfoIndex(self, peaks):
         indexedPeaksName = self.baseName + "_indexed"
 
         PoldiIndexKnownCompounds(InputWorkspace=peaks,

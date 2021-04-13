@@ -244,23 +244,23 @@ public:
   void test_create_MDEvent3() {
     float signal(1.5);
     float error(2.5);
-    uint16_t runIndex = 123;
+    uint16_t expInfoIndex = 123;
     uint16_t goniometerIndex(42);
     uint16_t detectorId = 45678;
     Mantid::coord_t center[3] = {1.25, 2.5, 3.5};
     for (size_t i = 0; i < num; i++)
-      events3.emplace_back(MDEvent<3>(signal, error, runIndex, goniometerIndex, detectorId, center));
+      events3.emplace_back(MDEvent<3>(signal, error, expInfoIndex, goniometerIndex, detectorId, center));
   }
 
   void test_create_MDEvent4() {
     float signal(1.5);
     float error(2.5);
-    uint16_t runIndex = 123;
+    uint16_t expInfoIndex = 123;
     uint16_t goniometerIndex(42);
     uint16_t detectorId = 45678;
     Mantid::coord_t center[4] = {1.25, 2.5, 3.5, 4.75};
     for (size_t i = 0; i < num; i++)
-      events4.emplace_back(MDEvent<4>(signal, error, runIndex, goniometerIndex, detectorId, center));
+      events4.emplace_back(MDEvent<4>(signal, error, expInfoIndex, goniometerIndex, detectorId, center));
   }
 
   void test_create_MDLeanEvent3() {

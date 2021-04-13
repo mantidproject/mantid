@@ -23,7 +23,7 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
   UnitsConversionHelper localUnitConv(m_UnitConversion);
 
   uint32_t detID = m_detID[workspaceIndex];
-  uint16_t runIndexLoc = m_RunIndex;
+  uint16_t expInfoIndexLoc = m_RunIndex;
 
   std::vector<coord_t> locCoord(m_Coord);
   // set up unit conversion and calculate up all coordinates, which depend on
@@ -62,7 +62,7 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
 
     sig_err.emplace_back(static_cast<float>(signal));
     sig_err.emplace_back(static_cast<float>(errorSq));
-    run_index.emplace_back(runIndexLoc);
+    run_index.emplace_back(expInfoIndexLoc);
     goniometer_index.emplace_back(0); // default value
     det_ids.emplace_back(detID);
     allCoord.insert(allCoord.end(), locCoord.begin(), locCoord.end());

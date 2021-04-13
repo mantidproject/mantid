@@ -106,7 +106,7 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
     // create local QConverter
     MDTransf_sptr localQConverter = qConverters[PARALLEL_THREAD_NUMBER];
     int32_t detID = m_detID[workspaceIndex];
-    uint16_t runIndexLoc = m_RunIndex;
+    uint16_t expInfoIndexLoc = m_RunIndex;
     uint16_t goniometerIndex(0); // default value
 
     std::vector<coord_t> locCoord(ND);
@@ -131,7 +131,7 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
         continue; // skip ND outside the range
 
       mdEventsForSpectrum.emplace_back(MDEventMaker<ND, MDEventType>::makeMDEvent(
-          signal, errorSq, runIndexLoc, goniometerIndex, detID, &locCoord[0]));
+          signal, errorSq, expInfoIndexLoc, goniometerIndex, detID, &locCoord[0]));
 
       // Filter events before adding to the ndEvents vector to add in workspace
       // The bounds of the resulting WS have to be already defined

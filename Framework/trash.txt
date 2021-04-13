@@ -1,0 +1,151 @@
+MDAlgorithms/test/ConvertToMDComponentsTest.h:250:    TS_ASSERT_THROWS_NOTHING(expInfoIndex = targWSDescr.getPropertyValueAsType<uint16_t>("RUN_INDEX"));
+MDAlgorithms/test/ConvertToMDTest.h:547:    WSD.addProperty("RUN_INDEX", static_cast<uint16_t>(10), true);
+MDAlgorithms/test/ConvertToMDTest.h:581:    WSD.addProperty("RUN_INDEX", static_cast<uint16_t>(10), true);
+MDAlgorithms/test/ConvertToMDTest.h:617:    WSD.addProperty("RUN_INDEX", static_cast<uint16_t>(10), true);
+MDAlgorithms/test/ConvertToMDTest.h:655:    WSD.addProperty("RUN_INDEX", static_cast<uint16_t>(10), true);
+Binary file MDAlgorithms/test/.ConvertToMDComponentsTest.h.swp matches
+MDAlgorithms/src/ConvToMDBase.cpp:52:  m_RunIndex = WSD.getPropertyValueAsType<uint16_t>("RUN_INDEX");
+MDAlgorithms/src/ConvertToMD.cpp:326:  targWSDescr.addProperty("RUN_INDEX", expInfoIndex, true);
+MDAlgorithms/src/ConvertToMDMinMaxLocal.cpp:86:  targWSDescr.addProperty("RUN_INDEX", uint16_t(0), true);
+grep: input file ‘trash.txt’ is also the output
+MDAlgorithms/test/MergeMDTest.h:141:  void test_expInfoIndex() {
+MDAlgorithms/test/ConvertToMDComponentsTest.h:249:    uint16_t expInfoIndex(1000);
+MDAlgorithms/test/ConvertToMDComponentsTest.h:250:    TS_ASSERT_THROWS_NOTHING(expInfoIndex = targWSDescr.getPropertyValueAsType<uint16_t>("RUN_INDEX"));
+MDAlgorithms/test/ConvertToMDComponentsTest.h:251:    TS_ASSERT_EQUALS(0, expInfoIndex);
+Binary file MDAlgorithms/test/.ConvertToMDComponentsTest.h.swp matches
+MDAlgorithms/src/ConvertToDiffractionMDWorkspace.cpp:448:  uint16_t expInfoIndex = ws->addExperimentInfo(ei);
+MDAlgorithms/src/ConvertToDiffractionMDWorkspace.cpp:449:  UNUSED_ARG(expInfoIndex);
+MDAlgorithms/src/ConvertToDetectorFaceMD.cpp:71: * @param expInfoIndex : index of the run, starting at 0
+MDAlgorithms/src/ConvertToDetectorFaceMD.cpp:79:                                               uint16_t expInfoIndex, uint16_t goniometerIndex, int32_t detectorID) {
+MDAlgorithms/src/ConvertToDetectorFaceMD.cpp:101:      out_events.emplace_back(float(it->weight()), float(it->errorSquared()), expInfoIndex, goniometerIndex, detectorID,
+MDAlgorithms/src/ConvertToDetectorFaceMD.cpp:105:      out_events.emplace_back(static_cast<float>(it->weight()), static_cast<float>(it->errorSquared()), expInfoIndex,
+MDAlgorithms/src/ConvertToDetectorFaceMD.cpp:241:  uint16_t expInfoIndex = outWS->addExperimentInfo(ei);
+MDAlgorithms/src/ConvertToDetectorFaceMD.cpp:267:            this->convertEventList<TofEvent, MDEvent<3>, 3>(outWS3, wi, xPos, yPos, bankPos, expInfoIndex, goniometerIndex,
+MDAlgorithms/src/ConvertToDetectorFaceMD.cpp:270:            this->convertEventList<TofEvent, MDEvent<4>, 4>(outWS4, wi, xPos, yPos, bankPos, expInfoIndex, goniometerIndex,
+MDAlgorithms/src/ConvertToDetectorFaceMD.cpp:275:            this->convertEventList<WeightedEvent, MDEvent<3>, 3>(outWS3, wi, xPos, yPos, bankPos, expInfoIndex,
+MDAlgorithms/src/ConvertToDetectorFaceMD.cpp:278:            this->convertEventList<WeightedEvent, MDEvent<4>, 4>(outWS4, wi, xPos, yPos, bankPos, expInfoIndex,
+MDAlgorithms/src/ConvertToDetectorFaceMD.cpp:283:            this->convertEventList<WeightedEventNoTime, MDEvent<3>, 3>(outWS3, wi, xPos, yPos, bankPos, expInfoIndex,
+MDAlgorithms/src/ConvertToDetectorFaceMD.cpp:286:            this->convertEventList<WeightedEventNoTime, MDEvent<4>, 4>(outWS4, wi, xPos, yPos, bankPos, expInfoIndex,
+MDAlgorithms/src/ConvToMDEventsWS.cpp:26:  uint16_t expInfoIndexLoc = m_RunIndex;
+MDAlgorithms/src/ConvToMDEventsWS.cpp:65:    run_index.emplace_back(expInfoIndexLoc);
+MDAlgorithms/src/MDEventWSWrapper.cpp:75:*@param expInfoIndex -- pointer to the beginning of data_size  containing run index
+MDAlgorithms/src/MDEventWSWrapper.cpp:86:void MDEventWSWrapper::addMDDataND(float *sigErr, uint16_t *expInfoIndex, uint16_t *goniometerIndex, uint32_t *detId,
+MDAlgorithms/src/MDEventWSWrapper.cpp:92:      pWs->addEvent(DataObjects::MDEvent<nd>(*(sigErr + 2 * i), *(sigErr + 2 * i + 1), *(expInfoIndex + i),
+MDAlgorithms/src/MDEventWSWrapper.cpp:195: *@param expInfoIndex : pointer to the beginnign of data_size  containing run index
+MDAlgorithms/src/MDEventWSWrapper.cpp:204:void MDEventWSWrapper::addMDData(std::vector<float> &sigErr, std::vector<uint16_t> &expInfoIndex,
+MDAlgorithms/src/MDEventWSWrapper.cpp:211:  (this->*(mdEvAddAndForget[m_NDimensions]))(&sigErr[0], &expInfoIndex[0], &goniometerIndex[0], &detId[0], &Coord[0],
+MDAlgorithms/src/ConvertToMD.cpp:322:  uint16_t expInfoIndex = mdEventWS->addExperimentInfo(ei);
+MDAlgorithms/src/ConvertToMD.cpp:326:  targWSDescr.addProperty("RUN_INDEX", expInfoIndex, true);
+MDAlgorithms/src/FindPeaksMD.cpp:556:        // events in the box, that matches this expInfoIndex, this assumes
+MDAlgorithms/src/MergeMD.cpp:159: * @param expInfoIndexOffset :: offset to be added to the expInfoIndex
+MDAlgorithms/src/MergeMD.cpp:162:inline void copyEvent(const MDLeanEvent<nd> &srcEvent, MDLeanEvent<ond> &newEvent, const uint16_t expInfoIndexOffset) {
+MDAlgorithms/src/MergeMD.cpp:166:  UNUSED_ARG(expInfoIndexOffset);
+MDAlgorithms/src/MergeMD.cpp:175: * @param expInfoIndexOffset :: offset to be added to the expInfoIndex
+MDAlgorithms/src/MergeMD.cpp:178:inline void copyEvent(const MDEvent<nd> &srcEvent, MDEvent<ond> &newEvent, const uint16_t expInfoIndexOffset) {
+MDAlgorithms/src/MergeMD.cpp:180:  newEvent.setRunIndex(static_cast<uint16_t>(srcEvent.getRunIndex() + expInfoIndexOffset));
+MDAlgorithms/src/MergeMD.cpp:198:  uint16_t expInfoIndexOffset = experimentInfoNo.back();
+MDAlgorithms/src/MergeMD.cpp:230:          copyEvent(*it, newEvent, expInfoIndexOffset);
+MDAlgorithms/inc/MantidMDAlgorithms/ConvToMDEventsWSIndexing.h:109:    uint16_t expInfoIndexLoc = m_RunIndex;
+MDAlgorithms/inc/MantidMDAlgorithms/ConvToMDEventsWSIndexing.h:134:          signal, errorSq, expInfoIndexLoc, goniometerIndex, detID, &locCoord[0]));
+MDAlgorithms/inc/MantidMDAlgorithms/MDEventWSWrapper.h:57:  void addMDData(std::vector<float> &sigErr, std::vector<uint16_t> &expInfoIndex, std::vector<uint16_t> &goniometerIndex,
+MDAlgorithms/inc/MantidMDAlgorithms/MDEventWSWrapper.h:104:  void addMDDataND(float *sigErr, uint16_t *expInfoIndex, uint16_t *goniometerIndex, uint32_t *detId, coord_t *Coord,
+MDAlgorithms/inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h:45:                        coord_t x, coord_t y, coord_t bankNum, uint16_t expInfoIndex, uint16_t goniometerIndex,
+API/src/MultipleExperimentInfos.cpp:33: * @param expInfoIndex :: 0-based index of the run to get.
+API/src/MultipleExperimentInfos.cpp:36:ExperimentInfo_sptr MultipleExperimentInfos::getExperimentInfo(const uint16_t expInfoIndex) {
+API/src/MultipleExperimentInfos.cpp:37:  if (size_t(expInfoIndex) >= m_expInfos.size())
+API/src/MultipleExperimentInfos.cpp:38:    throw std::invalid_argument("MDWorkspace::getExperimentInfo(): expInfoIndex is out of range.");
+API/src/MultipleExperimentInfos.cpp:39:  return m_expInfos[expInfoIndex];
+API/src/MultipleExperimentInfos.cpp:45: * @param expInfoIndex :: 0-based index of the run to get.
+API/src/MultipleExperimentInfos.cpp:48:ExperimentInfo_const_sptr MultipleExperimentInfos::getExperimentInfo(const uint16_t expInfoIndex) const {
+API/src/MultipleExperimentInfos.cpp:49:  if (size_t(expInfoIndex) >= m_expInfos.size())
+API/src/MultipleExperimentInfos.cpp:50:    throw std::invalid_argument("MDWorkspace::getExperimentInfo() const: expInfoIndex is out of range.");
+API/src/MultipleExperimentInfos.cpp:51:  return m_expInfos[expInfoIndex];
+API/src/MultipleExperimentInfos.cpp:58: * @return the expInfoIndex at which it was added
+API/src/MultipleExperimentInfos.cpp:72: * @param expInfoIndex :: 0-based index of the run to replace
+API/src/MultipleExperimentInfos.cpp:75:void MultipleExperimentInfos::setExperimentInfo(const uint16_t expInfoIndex, ExperimentInfo_sptr ei) {
+API/src/MultipleExperimentInfos.cpp:76:  if (size_t(expInfoIndex) >= m_expInfos.size())
+API/src/MultipleExperimentInfos.cpp:77:    throw std::invalid_argument("MDEventWorkspace::setExperimentInfo(): expInfoIndex is out of range.");
+API/src/MultipleExperimentInfos.cpp:78:  m_expInfos[expInfoIndex] = std::move(ei);
+API/inc/MantidAPI/IMDNode.h:161:                                uint16_t expInfoIndex, uint16_t goniometerIndex, uint32_t detectorId) = 0;
+API/inc/MantidAPI/IMDNode.h:164:                                      uint16_t expInfoIndex, uint16_t goniometerIndex, uint32_t detectorId) = 0;
+API/inc/MantidAPI/IMDNode.h:167:                                   const std::vector<uint16_t> &expInfoIndex, const std::vector<uint16_t> &goniometerIndex,
+API/inc/MantidAPI/MultipleExperimentInfos.h:26:  ExperimentInfo_sptr getExperimentInfo(const uint16_t expInfoIndex);
+API/inc/MantidAPI/MultipleExperimentInfos.h:28:  ExperimentInfo_const_sptr getExperimentInfo(const uint16_t expInfoIndex) const;
+API/inc/MantidAPI/MultipleExperimentInfos.h:32:  void setExperimentInfo(const uint16_t expInfoIndex, ExperimentInfo_sptr ei);
+grep: input file ‘trash.txt’ is also the output
+PythonInterface/plugins/algorithms/WorkflowAlgorithms/PoldiDataAnalysis.py:162:        indexedPeaks, unindexedPeaks = self.expInfoIndex(refinedPeaks)
+PythonInterface/plugins/algorithms/WorkflowAlgorithms/PoldiDataAnalysis.py:217:    def expInfoIndex(self, peaks):
+DataObjects/test/MDGridBoxTest.h:196:    std::vector<uint16_t> expInfoIndex;
+DataObjects/test/MDGridBoxTest.h:206:    g->buildAndAddEvents(sigErr, coord, expInfoIndex, goniometerIndex, detID);
+DataObjects/test/MDBoxBaseTest.h:90:                           const std::vector<uint16_t> & /*expInfoIndex*/,
+DataObjects/test/MDEventTest.h:247:    uint16_t expInfoIndex = 123;
+DataObjects/test/MDEventTest.h:252:      events3.emplace_back(MDEvent<3>(signal, error, expInfoIndex, goniometerIndex, detectorId, center));
+DataObjects/test/MDEventTest.h:258:    uint16_t expInfoIndex = 123;
+DataObjects/test/MDEventTest.h:263:      events4.emplace_back(MDEvent<4>(signal, error, expInfoIndex, goniometerIndex, detectorId, center));
+DataObjects/src/BoxControllerNeXusIO.cpp:25:                              "signal, errorSquared, expInfoIndex, goniometerIndex, detectorId, center (each "
+DataObjects/src/BoxControllerNeXusIO.cpp:420:        // signal, error, and expInfoIndex occupy the first three data items
+DataObjects/src/BoxControllerNeXusIO.cpp:448:        // signal, error, and expInfoIndex occupy the first three data items
+DataObjects/inc/MantidDataObjects/MDBox.h:146:                        uint16_t expInfoIndex, uint16_t goniometerIndex, uint32_t detectorId) override;
+DataObjects/inc/MantidDataObjects/MDBox.h:148:                              uint16_t expInfoIndex, uint16_t goniometernIndex, uint32_t detectorId) override;
+DataObjects/inc/MantidDataObjects/MDBox.h:150:                           const std::vector<uint16_t> &expInfoIndex, const std::vector<uint16_t> &goniometernIndex,
+DataObjects/inc/MantidDataObjects/MDBox.h:234:                          const std::vector<coord_t> &Coord, const std::vector<uint16_t> &expInfoIndex,
+DataObjects/inc/MantidDataObjects/MDBox.h:238:      data.emplace_back(sigErrSq[2 * i], sigErrSq[2 * i + 1], expInfoIndex[i], goniometerIndex[i], detectorId[i],
+DataObjects/inc/MantidDataObjects/MDBox.h:244:                                const uint16_t expInfoIndex, const uint16_t goniometerIndex, const uint32_t detectorId) {
+DataObjects/inc/MantidDataObjects/MDBox.h:245:    return MDE(Signal, Error, expInfoIndex, goniometerIndex, detectorId, Coord);
+DataObjects/inc/MantidDataObjects/MDBox.h:253:                          const std::vector<coord_t> &Coord, const std::vector<uint16_t> & /*expInfoIndex*/,
+DataObjects/inc/MantidDataObjects/MDBox.h:262:                                            const uint16_t /*expInfoIndex*/, const uint16_t /*goniometerIndex*/,
+DataObjects/inc/MantidDataObjects/MDGridBox.h:134:                        uint16_t expInfoIndex, uint16_t goniometerIndex, uint32_t detectorId) override;
+DataObjects/inc/MantidDataObjects/MDGridBox.h:136:                              uint16_t expInfoIndex, uint16_t goniometerIndex, uint32_t detectorId) override;
+DataObjects/inc/MantidDataObjects/MDGridBox.h:138:                           const std::vector<uint16_t> &expInfoIndex, const std::vector<uint16_t> &goniometerIndex,
+DataObjects/inc/MantidDataObjects/MDGridBox.tcc:1543:                          const std::vector<coord_t> &Coord, const std::vector<uint16_t> &expInfoIndex,
+DataObjects/inc/MantidDataObjects/MDGridBox.tcc:1547:      pBox->addEvent(MDEvent<nd>(sigErrSq[2 * i], sigErrSq[2 * i + 1], expInfoIndex[i], goniometerIndex[i], detectorId[i],
+DataObjects/inc/MantidDataObjects/MDGridBox.tcc:1556:                          const std::vector<coord_t> &Coord, const std::vector<uint16_t> & /*expInfoIndex*/,
+DataObjects/inc/MantidDataObjects/MDGridBox.tcc:1571: * @param expInfoIndex   :: vector of run  indexes for N events.
+DataObjects/inc/MantidDataObjects/MDGridBox.tcc:1577:                                          const std::vector<uint16_t> &expInfoIndex,
+DataObjects/inc/MantidDataObjects/MDGridBox.tcc:1582:  IF_EVENT<MDE, nd>::EXEC(this, sigErrSq, Coord, expInfoIndex, goniometerIndex, detectorId, nEvents);
+DataObjects/inc/MantidDataObjects/MDGridBox.tcc:1591: * @param expInfoIndex ::    run  index
+DataObjects/inc/MantidDataObjects/MDGridBox.tcc:1595:                                       uint16_t expInfoIndex, uint16_t goniometerIndex, uint32_t detectorId) {
+DataObjects/inc/MantidDataObjects/MDGridBox.tcc:1596:  this->addEvent(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0], expInfoIndex, goniometerIndex, detectorId));
+DataObjects/inc/MantidDataObjects/MDGridBox.tcc:1608: * @param expInfoIndex ::    run  index
+DataObjects/inc/MantidDataObjects/MDGridBox.tcc:1613:                                             const std::vector<coord_t> &point, uint16_t expInfoIndex,
+DataObjects/inc/MantidDataObjects/MDGridBox.tcc:1615:  this->addEventUnsafe(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0], expInfoIndex, goniometerIndex, detectorId));
+DataObjects/inc/MantidDataObjects/MDEvent.h:43:  uint16_t expInfoIndex;
+DataObjects/inc/MantidDataObjects/MDEvent.h:57:  MDEvent() : MDLeanEvent<nd>(), expInfoIndex(0), goniometerIndex(0), detectorId(0) {}
+DataObjects/inc/MantidDataObjects/MDEvent.h:66:      : MDLeanEvent<nd>(signal, errorSquared), expInfoIndex(0), goniometerIndex(0), detectorId(0) {}
+DataObjects/inc/MantidDataObjects/MDEvent.h:75:      : MDLeanEvent<nd>(signal, errorSquared), expInfoIndex(0), goniometerIndex(0), detectorId(0) {}
+DataObjects/inc/MantidDataObjects/MDEvent.h:78:  /** Constructor with signal, error, expInfoIndex and detectorId
+DataObjects/inc/MantidDataObjects/MDEvent.h:82:   * @param expInfoIndex :: 0-based index of which run in the containing
+DataObjects/inc/MantidDataObjects/MDEvent.h:88:  MDEvent(const double signal, const double errorSquared, const uint16_t expInfoIndex, const uint16_t goniometerIndex,
+DataObjects/inc/MantidDataObjects/MDEvent.h:90:      : MDLeanEvent<nd>(signal, errorSquared), expInfoIndex(expInfoIndex), goniometerIndex(goniometerIndex),
+DataObjects/inc/MantidDataObjects/MDEvent.h:94:  /** Constructor with signal, error, expInfoIndex and detectorId
+DataObjects/inc/MantidDataObjects/MDEvent.h:98:   * @param expInfoIndex :: 0-based index of which run in the containing
+DataObjects/inc/MantidDataObjects/MDEvent.h:104:  MDEvent(const float signal, const float errorSquared, const uint16_t expInfoIndex, const uint16_t goniometerIndex,
+DataObjects/inc/MantidDataObjects/MDEvent.h:106:      : MDLeanEvent<nd>(signal, errorSquared), expInfoIndex(expInfoIndex), goniometerIndex(goniometerIndex),
+DataObjects/inc/MantidDataObjects/MDEvent.h:118:      : MDLeanEvent<nd>(signal, errorSquared, centers), expInfoIndex(0), goniometerIndex(0), detectorId(0) {}
+DataObjects/inc/MantidDataObjects/MDEvent.h:128:      : MDLeanEvent<nd>(signal, errorSquared, centers), expInfoIndex(0), goniometerIndex(0), detectorId(0) {}
+DataObjects/inc/MantidDataObjects/MDEvent.h:131:   *expInfoIndex and detectorID
+DataObjects/inc/MantidDataObjects/MDEvent.h:135:   * @param expInfoIndex :: 0-based index of which run in the containing
+DataObjects/inc/MantidDataObjects/MDEvent.h:143:  MDEvent(const float signal, const float errorSquared, const uint16_t expInfoIndex, const uint16_t goniometerIndex,
+DataObjects/inc/MantidDataObjects/MDEvent.h:145:      : MDLeanEvent<nd>(signal, errorSquared, centers), expInfoIndex(expInfoIndex), goniometerIndex(goniometerIndex),
+DataObjects/inc/MantidDataObjects/MDEvent.h:148:  MDEvent(const double signal, const double errorSquared, const uint16_t expInfoIndex, const uint16_t goniometerIndex,
+DataObjects/inc/MantidDataObjects/MDEvent.h:150:      : MDLeanEvent<nd>(signal, errorSquared, centers), expInfoIndex(expInfoIndex), goniometerIndex(goniometerIndex),
+DataObjects/inc/MantidDataObjects/MDEvent.h:156:   *expInfoIndex and detectorID
+DataObjects/inc/MantidDataObjects/MDEvent.h:160:   * @param expInfoIndex :: 0-based index of which run in the containing
+DataObjects/inc/MantidDataObjects/MDEvent.h:168:  MDEvent(const float signal, const float errorSquared, const uint16_t expInfoIndex, const uint16_t goniometerIndex,
+DataObjects/inc/MantidDataObjects/MDEvent.h:170:      : MDLeanEvent<nd>(signal, errorSquared, centers), expInfoIndex(expInfoIndex), goniometerIndex(goniometerIndex),
+DataObjects/inc/MantidDataObjects/MDEvent.h:176:  uint16_t getRunIndex() const { return expInfoIndex; }
+DataObjects/inc/MantidDataObjects/MDEvent.h:178:  /** Sets the expInfoIndex of this event
+DataObjects/inc/MantidDataObjects/MDEvent.h:179:   * @param index :: new expInfoIndex value. */
+DataObjects/inc/MantidDataObjects/MDEvent.h:180:  void setRunIndex(uint16_t index) { expInfoIndex = index; }
+DataObjects/inc/MantidDataObjects/MDEvent.h:186:  /** Sets the expInfoIndex of this event
+DataObjects/inc/MantidDataObjects/MDEvent.h:195:   * @param id :: new expInfoIndex value. */
+DataObjects/inc/MantidDataObjects/MDEvent.h:228:      data[index++] = static_cast<coord_t>(event.expInfoIndex);
+DataObjects/inc/MantidDataObjects/MDEvent.h:269:      // Create the event with signal, errorSquared, expInfoIndex,
+DataObjects/inc/MantidDataObjects/MDBox.tcc:731:                                      const std::vector<uint16_t> &expInfoIndex,
+DataObjects/inc/MantidDataObjects/MDBox.tcc:739:  IF<MDE, nd>::EXEC(this->data, sigErrSq, Coord, expInfoIndex, goniometerIndex, detectorId, nEvents);
+DataObjects/inc/MantidDataObjects/MDBox.tcc:748: * @param expInfoIndex  ::  run  index of the experiment the event come from
+DataObjects/inc/MantidDataObjects/MDBox.tcc:754:                                   uint16_t expInfoIndex, uint16_t goniometerIndex, uint32_t detectorId) {
+DataObjects/inc/MantidDataObjects/MDBox.tcc:756:  this->data.emplace_back(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0], expInfoIndex, goniometerIndex, detectorId));
+DataObjects/inc/MantidDataObjects/MDBox.tcc:767: * @param expInfoIndex  ::  run  index of the experiment the event come from
+DataObjects/inc/MantidDataObjects/MDBox.tcc:773:                                         const std::vector<coord_t> &point, uint16_t expInfoIndex, uint16_t goniometerIndex,
+DataObjects/inc/MantidDataObjects/MDBox.tcc:775:  this->data.emplace_back(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0], expInfoIndex, goniometerIndex, detectorId));

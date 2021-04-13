@@ -87,7 +87,7 @@ public:
   /// Add a single event
   size_t addEventUnsafe(const MDE & /*point*/) override { return 0; }
   size_t buildAndAddEvents(const std::vector<signal_t> & /*sigErrSq*/, const std::vector<coord_t> & /*Coord*/,
-                           const std::vector<uint16_t> & /*runIndex*/,
+                           const std::vector<uint16_t> & /*expInfoIndex*/,
                            const std::vector<uint16_t> & /*goniometerIndex*/,
                            const std::vector<uint32_t> & /*detectorId*/) override {
     return 0;

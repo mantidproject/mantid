@@ -553,7 +553,7 @@ template <typename MDE, size_t nd> void FindPeaksMD::findPeaks(typename MDEventW
         }
 
         // If multiple goniometers than use the average one from the
-        // events in the box, that matches this runIndex, this assumes
+        // events in the box, that matches this expInfoIndex, this assumes
         // the events are added in same order as the goniometers
         if (ei->run().getNumGoniometers() > 1) {
           const std::vector<MDE> &events = dynamic_cast<MDBox<MDE, nd> *>(box)->getEvents();
