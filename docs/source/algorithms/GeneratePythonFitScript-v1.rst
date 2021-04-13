@@ -26,7 +26,7 @@ Usage
    function = "name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0"
 
    # If you want to save the python script to a file then specify the Filepath property
-   script_text = GeneratePythonFitScript(InputWorkspaces=["ws1", "ws2", "ws1", "ws2"], WorkspaceIndices=[0, 1, 0, 1],
+   script_text = GeneratePythonFitScript(InputWorkspaces=["ws1", "ws1", "ws2", "ws2"], WorkspaceIndices=[0, 1, 0, 1],
                                          StartXs=[0.0, 0.0, 0.0, 0.0], EndXs=[20000.0, 20000.0, 20000.0, 20000.0],
                                          Function=function, MaxIterations=500, Minimizer="Levenberg-Marquardt")
 
@@ -44,8 +44,8 @@ Output:
    # Dictionary { workspace_name: (workspace_index, start_x, end_x) }
    input_data = {
        "ws1": (0, 0.000000, 20000.000000),
-       "ws2": (1, 0.000000, 20000.000000),
-       "ws1": (0, 0.000000, 20000.000000),
+       "ws1": (1, 0.000000, 20000.000000),
+       "ws2": (0, 0.000000, 20000.000000),
        "ws2": (1, 0.000000, 20000.000000)
    }
 
