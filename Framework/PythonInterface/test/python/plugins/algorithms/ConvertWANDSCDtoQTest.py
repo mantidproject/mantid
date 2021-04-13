@@ -122,12 +122,12 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
 
         self.assertTrue(ConvertWANDSCDtoQTest_out)
         self.assertTrue(ConvertWANDSCDtoQTest_cop)
-        
+
         Test_out = ConvertWANDSCDtoQTest_out.getSignalArray().copy()
         Test_cop = ConvertWANDSCDtoQTest_cop.getSignalArray().copy()
 
-        x, y, z = np.meshgrid(np.linspace(-8,8,101), 
-                              np.linspace(-1.6,1.6,21), 
+        x, y, z = np.meshgrid(np.linspace(-8,8,101),
+                              np.linspace(-1.6,1.6,21),
                               np.linspace(-8,8,101), indexing='ij')
 
         Test_out_max_Qy = y[~np.isnan(Test_out)].max()
