@@ -224,7 +224,7 @@ public:
   /** Calculate the centroid of this box and all sub-boxes. */
   virtual void calculateCentroid(coord_t * /*centroid*/) const = 0;
   /** Calculate the centroid of this box and all sub-boxes. */
-  virtual void calculateCentroid(coord_t * /*centroid*/, const int /*runindex*/) const = 0;
+  virtual void calculateCentroid(coord_t * /*centroid*/, const int /*expInfoIndex*/) const = 0;
   /** Get the centroid of this box and all sub-boxes. */
   virtual coord_t *getCentroid() const = 0;
   //----------------------------------------------------------------------------------------------------------------------------------

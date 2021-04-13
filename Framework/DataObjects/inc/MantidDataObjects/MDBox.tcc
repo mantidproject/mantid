@@ -428,9 +428,9 @@ TMDE(void MDBox)::calculateCentroid(coord_t *centroid) const {
 //-----------------------------------------------------------------------------------------------
 /** Calculate the centroid of this box.
  * @param centroid [out] :: nd-sized array that will be set to the centroid.
- * @param runindex [in] :: run index used to filter the events.
+ * @param expInfoIndex [in] :: run index used to filter the events.
  */
-TMDE(void MDBox)::calculateCentroid(coord_t *centroid, const int runindex) const {
+TMDE(void MDBox)::calculateCentroid(coord_t *centroid, const int expInfoIndex) const {
 
   std::fill_n(centroid, nd, 0.0f);
 
@@ -441,7 +441,7 @@ TMDE(void MDBox)::calculateCentroid(coord_t *centroid, const int runindex) const
 
   for (const MDE &Evnt : data) {
     coord_t signal = Evnt.getSignal();
-    if (Evnt.getExpInfoIndex() == runindex) {
+    if (Evnt.getExpInfoIndex() == expInfoIndex) {
       for (size_t d = 0; d < nd; d++) {
         // Total up the coordinate weighted by the signal.
         centroid[d] += Evnt.getCenter(d) * signal;

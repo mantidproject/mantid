@@ -180,7 +180,7 @@ public:
   //-------------------------------------------------------------------------
   /** The function used to satisfy IMDNode interface but the physical meaning is
    * unclear */
-  void calculateCentroid(coord_t * /*centroid*/, const int /*runindex*/) const override {
+  void calculateCentroid(coord_t * /*centroid*/, const int /*expInfoIndex*/) const override {
     throw(std::runtime_error("This function should not be called on MDGridBox "
                              "(as its meaning for MDbox is dubious too)"));
   }

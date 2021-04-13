@@ -162,7 +162,7 @@ public:
    * coordinates */
   void refreshCache(Kernel::ThreadScheduler * /*ts*/ = nullptr) override;
   void calculateCentroid(coord_t *centroid) const override;
-  void calculateCentroid(coord_t *centroid, const int runindex) const override;
+  void calculateCentroid(coord_t *centroid, const int expInfoIndex) const override;
   coord_t *getCentroid() const override;
   void calculateDimensionStats(MDDimensionStats *stats) const;
   void integrateSphere(Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared, signal_t &signal,
