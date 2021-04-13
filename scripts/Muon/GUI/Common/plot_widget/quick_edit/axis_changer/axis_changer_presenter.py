@@ -6,11 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.plot_widget.quick_edit.axis_changer.axis_changer_view import AxisChangerView
 
+
 class AxisChangerPresenter(object):
-    def __init__(self,view):
+
+    def __init__(self, view):
         self._view = view
 
+
 class AxisChangerWidget(object):
+
     def __init__(self, label, parent=None):
         self._view = AxisChangerView(label, parent)
         self._presenter = AxisChangerPresenter(self._view)

@@ -6,13 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from unittest import mock
+#from unittest import mock
 from Muon.GUI.Common.contexts.plotting_context import PlottingContext
 
 
 class MuonPlottingContextTest(unittest.TestCase):
-    def setUp(self):
 
+    def setUp(self):
         self.context = PlottingContext()
 
     def tearDown(self):
@@ -49,18 +49,18 @@ class MuonPlottingContextTest(unittest.TestCase):
 
     """ tests for the all methods """
     def test_get_xlim_all(self):
-        self.assertEqual([-0.1,0.1], self.context.get_xlim_all)
+        self.assertEqual([-0.1, 0.1], self.context.get_xlim_all)
 
     def test_update_xlim_all(self):
-        self.context.update_xlim_all([1.,10.])
-        self.assertEqual([1.0,10.], self.context.get_xlim_all)
+        self.context.update_xlim_all([1., 10.])
+        self.assertEqual([1.0, 10.], self.context.get_xlim_all)
 
     def test_get_ylim_all(self):
-        self.assertEqual([-10.,10.], self.context.get_ylim_all)
+        self.assertEqual([-10., 10.], self.context.get_ylim_all)
 
     def test_update_ylim_all(self):
-        self.context.update_ylim_all([1.,10.])
-        self.assertEqual([1.0,10.], self.context.get_ylim_all)
+        self.context.update_ylim_all([1., 10.])
+        self.assertEqual([1.0, 10.], self.context.get_ylim_all)
 
     def test_get_autoscale_all(self):
         self.assertEqual(False, self.context.get_autoscale_all)
@@ -87,7 +87,7 @@ class MuonPlottingContextTest(unittest.TestCase):
         values = {"a": [1.,10.], "b":[2.,11.], "c":[3.,12.]}
         for name in values.keys():
             self.context.update_xlim(name, values[name])
-        
+
         for name in values.keys():
             self.assertEqual(values[name], self.context.get_xlim(name))
 
@@ -96,11 +96,11 @@ class MuonPlottingContextTest(unittest.TestCase):
         values = {"a": [1.,10.], "b":[2.,11.], "c":[3.,12.]}
         for name in values.keys():
             self.context.update_ylim(name, values[name])
-        
+
         for name in values.keys():
             self.assertEqual(values[name], self.context.get_ylim(name))
 
-    def test_update_xlim_all(self):
+    def test_update_xlim_all_with_sub_plot(self):
         self.add_subplot()
         values = {"a": [1.,10.], "b":[2.,11.], "c":[3.,12.]}
         for name in values.keys():
@@ -111,7 +111,7 @@ class MuonPlottingContextTest(unittest.TestCase):
         for name in values.keys():
             self.assertEqual([5., 50.], self.context.get_xlim(name))
 
-    def test_update_ylim_all(self):
+    def test_update_ylim_all_with_sub_plot(self):
         self.add_subplot()
         values = {"a": [1.,10.], "b":[2.,11.], "c":[3.,12.]}
         for name in values.keys():
@@ -184,6 +184,7 @@ class MuonPlottingContextTest(unittest.TestCase):
         self.context.update_axis("new", 6)
         self.assertEqual(["a","b","c", "new"], list(self.context._subplots.keys()))
         self.assertEqual(6, self.context.get_axis("new"))
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

@@ -44,8 +44,7 @@ class MuonContext(object):
         self.base_directory = base_directory
         self.workspace_suffix = workspace_suffix
         self._plotting_context= plotting_context
-        self._plotting_context.set_defaults(
-            MUON_ANALYSIS_DEFAULT_X_RANGE, MUON_ANALYSIS_DEFAULT_Y_RANGE)
+        self._plotting_context.set_defaults(MUON_ANALYSIS_DEFAULT_X_RANGE, MUON_ANALYSIS_DEFAULT_Y_RANGE)
         self.ads_observer = MuonContextADSObserver(
             self.remove_workspace,
             self.clear_context,
@@ -64,7 +63,7 @@ class MuonContext(object):
     @property
     def plotting_context(self):
         return self._plotting_context
-  
+
     @property
     def data_context(self):
         return self._data_context

@@ -14,7 +14,6 @@ class QuickEditPresenter(object):
         self.set_plot_x_range(self._context.default_xlims)
         self.set_plot_y_range(self._context.default_ylims)
 
-
     @property
     def widget(self):
         return self._view
@@ -105,7 +104,7 @@ class QuickEditPresenter(object):
     def get_selection_index(self)->int:
         return self._view.get_selection_index()
 
-    def set_selection_by_index(self, index:int = 0):
+    def set_selection_by_index(self, index: int = 0):
         self._view.set_selection(index)
 
     def rm_subplot(self, name):

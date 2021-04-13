@@ -6,13 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from unittest import mock
+#from unittest import mock
 from Muon.GUI.Common.contexts.plot_edit_context import PlotEditContext
 
 
-class MuonPlotEidtContextTest(unittest.TestCase):
-    def setUp(self):
+class MuonPlotEditContextTest(unittest.TestCase):
 
+    def setUp(self):
         self.context = PlotEditContext()
 
     def tearDown(self):

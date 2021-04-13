@@ -92,8 +92,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.context = FrequencyDomainAnalysisContext(
             muon_data_context=self.data_context, muon_gui_context=self.gui_context,
             muon_group_context=self.group_pair_context, muon_phase_context=self.phase_context,
-            plotting_context=self.plotting_context,
-            freq_plotting_context=self.freq_plotting_context,
+            plotting_context=self.plotting_context, freq_plotting_context=self.freq_plotting_context,
             fitting_context=self.fitting_context, frequency_context=self.frequency_context)
 
         # create the dockable widget

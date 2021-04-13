@@ -67,15 +67,15 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.toolBar)
         layout.addWidget(self.fig.canvas)
-        self._quick_eidt = quick_edit
-        layout.addWidget(self._quick_eidt)
+        self._quick_edit = quick_edit
+        layout.addWidget(self._quick_edit)
         self.setLayout(layout)
 
         self._plot_information_list = []  # type : List[PlotInformation}
 
     @property
     def autoscale_state(self):
-        return self._quick_eidt.autoscale_state
+        return self._quick_edit.autoscale_state
 
     @property
     def plotted_workspace_information(self):
@@ -183,7 +183,6 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                 else:
                     color = artist.get_color()
                 self._color_queue[axis_number] += color
-                self._color_queue[axis_number] += color
 
     # Ads observer functions
     def replace_specified_workspace_in_plot(self, workspace):
@@ -233,7 +232,6 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                 ymin = ymin_i
             if ymax_i > ymax:
                 ymax = ymax_i
-        print("moo", ymax, ymin)
         plt.setp(self.fig.axes, ylim=[ymin, ymax])
 
     @property
@@ -323,4 +321,3 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
     def add_range_changed_subscriber(self, observer):
         self.toolBar.range_changed_notifier.add_subscriber(observer)
-

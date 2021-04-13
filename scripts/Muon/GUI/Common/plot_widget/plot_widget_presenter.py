@@ -145,10 +145,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         elif plot_mode == PlotMode.Fitting:
             self._view.disable_plot_type_combo()
             self._view.show_plot_diff()
-            #self._view.disable_tile_plotting_options()
-            #self._view.disable_plot_raw_option()
             self.data_plot_tiled_state = self._view.is_tiled_plot()
-            #self._view.set_is_tiled_plot(False)
             self.update_plot()
             self.data_plot_range = self._figure_presenter.get_plot_x_range()
             self._figure_presenter.set_plot_range(self.fitting_plot_range)
@@ -334,7 +331,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             if plot_raw and not fit_raw_data:
                 ws_list.append(remove_rebin_from_name(workspace_name))
             # raw data but want binned plot
-            elif not plot_raw and  fit_raw_data:
+            elif not plot_raw and fit_raw_data:
                 ws_list.append(add_rebin_to_name(workspace_name))
             else:
                 ws_list.append(workspace_name)

@@ -69,7 +69,6 @@ class PlottingContext(object):
             del self._subplots[name]
 
     """ methods for the All option """
-
     def update_xlim_all(self, values:List[float]):
         self._xlim_all = values
 
@@ -86,20 +85,19 @@ class PlottingContext(object):
 
     def set_autoscale_all(self, state:bool):
         self._autoscale_all = state
-    
+
     @property
     def get_autoscale_all(self)->bool:
         return self._autoscale_all
 
     def set_error_all(self, state:bool):
-        print("error",state)
         self._errors_all = state
 
     @property
     def get_error_all(self)->bool:
         return self._errors_all
 
-    """ get/eidt values for a specific subplot"""
+    """ get/edit values for a specific subplot"""
     def update_xlim(self, name:str, values:List[float]):
         if name == "All":
             for subplot in list(self._subplots.keys()):

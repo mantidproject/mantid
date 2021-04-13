@@ -8,6 +8,7 @@ from typing import List
 
 
 class PlotEditContext(object):
+
     def __init__(self):
         self._xlim = [0.0, 15.]
         self._ylim = [-0.3, 0.3]
@@ -49,5 +50,3 @@ class PlotEditContext(object):
     @property
     def get_autoscale_state(self) -> bool:
         return self._auto
-
-

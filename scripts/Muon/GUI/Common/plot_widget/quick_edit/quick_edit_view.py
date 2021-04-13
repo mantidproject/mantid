@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets, QtCore
-import qtpy
 from Muon.GUI.Common.plot_widget.quick_edit.axis_changer.axis_changer_presenter import AxisChangerWidget
 
 
@@ -14,10 +13,12 @@ class QuickEditView(QtWidgets.QWidget):
 
     def __init__(self, subcontext, parent=None):
         super(QuickEditView, self).__init__(parent)
-       
+
         button_layout = QtWidgets.QHBoxLayout()
         self.plot_selector = QtWidgets.QComboBox()
-        self.plot_selector.setMinimumContentsLength(30)
+        self.plot_selector.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.plot_selector.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToContents)
+        self.plot_selector.setMinimumContentsLength(12)
         self.plot_selector.setEditable(True)
         self.plot_selector.completer().setCompletionMode(
             QtWidgets.QCompleter.PopupCompletion)
@@ -40,22 +41,23 @@ class QuickEditView(QtWidgets.QWidget):
         self.errors.stateChanged.connect(self._emit_errors)
 
         button_layout.addWidget(self.plot_selector)
-        button_layout.addStretch()
+        # button_layout.addStretch()
         button_layout.addWidget(self.x_axis_changer.view)
-        button_layout.addStretch()
+        #button_layout.addStretch()
         button_layout.addWidget(self.autoscale)
         button_layout.addWidget(self.y_axis_changer.view)
-        button_layout.addStretch()
+        #button_layout.addStretch()
         button_layout.addWidget(self.errors)
         self.setLayout(button_layout)
-        self.setFixedHeight(50)
+        self.setFixedHeight(55)
 
     """ plot selection """
     def add_subplot(self, name):
         self.plot_selector.blockSignals(True)
         self.plot_selector.addItem(name)
+        self.plot_selector.adjustSize()
         self.plot_selector.blockSignals(False)
-        width = self.plot_selector.minimumSizeHint().width()
+        #width = self.plot_selector.minimumSizeHint().width()
 
     def rm_subplot(self, index):
         self.plot_selector.removeItem(index)
@@ -152,5 +154,3 @@ class QuickEditView(QtWidgets.QWidget):
 
     def get_errors(self):
         return self.errors.isChecked()
-
-
