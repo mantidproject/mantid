@@ -454,6 +454,7 @@ FitScriptGeneratorPresenter::getDomainsWithLocalParameter(std::string const &par
   auto domainIndices = m_view->allRows();
   domainIndices.erase(std::remove_if(domainIndices.begin(), domainIndices.end(), doesNotHaveParameter),
                       domainIndices.end());
+  std::reverse(domainIndices.begin(), domainIndices.end());
   return domainIndices;
 }
 
