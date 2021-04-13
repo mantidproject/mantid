@@ -784,7 +784,7 @@ Sample normalisation
         CrossSectionSeparationMethod='None',
         NormalisationMethod='Vanadium',
         VanadiumInputWorkspace='vanadium_ws',
-        OutputTreatment='Sum',
+        OutputTreatment='Merge',
         OutputUnits='TwoTheta',
         ScatteringAngleBinSize=1.0, # degrees
         SampleAndEnvironmentProperties=sample_dictionary,

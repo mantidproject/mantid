@@ -177,7 +177,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
         D7AbsoluteCrossSections(InputWorkspace='sample_individual', OutputWorkspace='sample_individual_not_normalised',
                                 CrossSectionSeparationMethod='XYZ',
                                 NormalisationMethod='None',
-                                OutputTreatment='Sum',
+                                OutputTreatment='Merge',
                                 OutputUnits='Q',
                                 SampleAndEnvironmentProperties=self._sampleProperties)
         self._check_output(mtd['sample_individual_not_normalised'], 263, 1, 6, 'q', 'MomentumTransfer', 'Height',
@@ -192,7 +192,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
         D7AbsoluteCrossSections(InputWorkspace='sample_individual', OutputWorkspace='sample_individual_incoherent',
                                 CrossSectionSeparationMethod='XYZ',
                                 NormalisationMethod='Incoherent',
-                                OutputTreatment='Sum',
+                                OutputTreatment='Merge',
                                 OutputUnits='TwoTheta',
                                 SampleAndEnvironmentProperties=self._sampleProperties)
         self._check_output(mtd['sample_individual_incoherent'], 263, 1, 6, 'Scattering Angle', 'Label', 'Height',
@@ -258,7 +258,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
                                 CrossSectionSeparationMethod='XYZ',
                                 VanadiumInputWorkspace='vanadium_full',
                                 NormalisationMethod='Vanadium',
-                                OutputTreatment='Sum',
+                                OutputTreatment='Merge',
                                 OutputUnits='Q',
                                 SampleAndEnvironmentProperties=self._sampleProperties,
                                 AbsoluteUnitsNormalisation=True)

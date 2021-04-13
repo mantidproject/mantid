@@ -146,7 +146,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         self.declareProperty(name="OutputTreatment",
                              defaultValue="Individual",
-                             validator=StringListValidator(["Individual", "Sum"]),
+                             validator=StringListValidator(["Individual", "Merge"]),
                              direction=Direction.Input,
                              doc="Which treatment of the provided scan should be used to create output.")
 
@@ -159,7 +159,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                              direction=Direction.Input,
                              doc="Scattering angle bin size in degrees used for expressing scan data on a single TwoTheta axis.")
 
-        self.setPropertySettings("ScatteringAngleBinSize", EnabledWhenProperty('OutputTreatment', PropertyCriterion.IsEqualTo, 'Sum'))
+        self.setPropertySettings("ScatteringAngleBinSize", EnabledWhenProperty('OutputTreatment', PropertyCriterion.IsEqualTo, 'Merge'))
 
         self.declareProperty(WorkspaceGroupProperty('VanadiumInputWorkspace', '',
                                                     direction=Direction.Input,
@@ -521,7 +521,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         unit = r'd$\sigma$/d$\Omega$'
         self._set_as_distribution(ws)
         if output_unit == 'TwoTheta':
-            if mtd[ws].getNumberOfEntries()/nMeasurements > 1 and self.getPropertyValue('OutputTreatment') == 'Sum':
+            if mtd[ws].getNumberOfEntries()/nMeasurements > 1 and self.getPropertyValue('OutputTreatment') == 'Merge':
                 self._merge_polarisations(ws)
                 ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula='-x')
             else:
@@ -529,7 +529,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='Y', Formula='-y')
                 Transpose(InputWorkspace=ws, OutputWorkspace=ws)
         elif output_unit == 'Q':
-            if mtd[ws].getNumberOfEntries()/nMeasurements > 1 and self.getPropertyValue('OutputTreatment') == 'Sum':
+            if mtd[ws].getNumberOfEntries()/nMeasurements > 1 and self.getPropertyValue('OutputTreatment') == 'Merge':
                 self._merge_polarisations(ws)
                 wavelength = mtd[ws][0].getRun().getLogData('monochromator.wavelength').value # in Angstrom
                 # flips axis sign and converts detector 2theta to momentum exchange
