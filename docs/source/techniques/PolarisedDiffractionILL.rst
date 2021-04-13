@@ -185,23 +185,23 @@ Transmission
     # Beam with cadmium absorber, used for transmission
     PolDiffILLReduction(
         Run='396991',
-        OutputWorkspace='cadmium_ws',
-        ProcessAs='BeamWithAbsorber'
+        OutputWorkspace='cadmium_transmission_ws',
+        ProcessAs='BeamWithCadmium'
     )
     # Beam measurement for transmisison
     PolDiffILLReduction(
         Run='396983',
         OutputWorkspace='beam_ws',
-        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
         ProcessAs='EmptyBeam'
     )
-    print('Cadmium absorber transmission is {0:.3f}'.format(mtd['cadmium_ws_1'].readY(0)[0] / mtd['beam_ws_1'].readY(0)[0]))
+    print('Cadmium absorber transmission is {0:.3f}'.format(mtd['cadmium_transmission_ws_1'].readY(0)[0] / mtd['beam_ws_1'].readY(0)[0]))
 
     # Quartz transmission
     PolDiffILLReduction(
         Run='396985',
         OutputWorkspace='quartz_transmission',
-        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
         BeamInputWorkspace='beam_ws_1',
         ProcessAs='Transmission'
     )
@@ -229,7 +229,7 @@ differences in the polarizing efficiency and choosing the quartz to have the sam
 is not a problem, as the correction is given by a ratio and there is no spin-flip scattering to depolarize the beam. The polarization efficiencies
 are calculated from ratios of non-spin-flip to spin-flip scattering, hence absolute numbers are not necessary.
 
-First, the data is normalised to monitor 1 (M1). Then, if the necessary inputs of container and absorber (please note this is a different measurement
+First, the data is normalised to monitor 1 (M1). Then, if the necessary inputs of empty container and absorber (please note this is a different measurement
 than mentioned in the `Transmission` section) measurements are provided, the background can be subtracted from the data: 
 
 .. math:: \dot{I_{B}} = \dot{I} - T\dot{E} - (1-T) \dot{C},
@@ -271,15 +271,15 @@ Below is the relevant workflow diagram describing reduction steps of the quartz 
     # Beam with cadmium absorber, used for transmission
     PolDiffILLReduction(
         Run='396991',
-        OutputWorkspace='cadmium_ws',
-        ProcessAs='BeamWithAbsorber'
+        OutputWorkspace='cadmium_transmission_ws',
+        ProcessAs='BeamWithCadmium'
     )
 
     # Beam measurement for transmisison
     PolDiffILLReduction(
         Run='396983',
         OutputWorkspace='beam_ws',
-        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
         ProcessAs='EmptyBeam'
     )
 
@@ -287,31 +287,31 @@ Below is the relevant workflow diagram describing reduction steps of the quartz 
     PolDiffILLReduction(
         Run='396985',
         OutputWorkspace='quartz_transmission',
-        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
         BeamInputWorkspace='beam_ws_1',
-       ProcessAs='Transmission'
+        ProcessAs='Transmission'
     )
 
     # Empty container
     PolDiffILLReduction(
         Run='396917',
-        OutputWorkspace='container_ws',
-        ProcessAs='Container'
+        OutputWorkspace='empty_ws',
+        ProcessAs='Empty'
     )
 
     # Absorber
     PolDiffILLReduction(
         Run='396928',
-        OutputWorkspace='absorber_ws',
-        ProcessAs='Absorber'
+        OutputWorkspace='cadmium_ws',
+        ProcessAs='Cadmium'
     )
 
     # Polarisation correction
     PolDiffILLReduction(
         Run='396939',
         OutputWorkspace='pol_corrections',
-        AbsorberInputWorkspace='absorber_ws',
-        ContainerInputWorkspace='container_ws',
+        CadmiumInputWorkspace='cadmium_ws',
+        EmptyInputWorkspace='empty_ws',
         TransmissionInputWorkspace='quartz_transmission_1',
         OutputTreatment='Average',
         ProcessAs='Quartz'
@@ -494,14 +494,14 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
     # Beam with cadmium absorber, used for transmission
     PolDiffILLReduction(
         Run='396991',
-        OutputWorkspace='cadmium_ws',
-        ProcessAs='BeamWithAbsorber'
+        OutputWorkspace='cadmium_transmission_ws',
+        ProcessAs='BeamWithCadmium'
     )
     # Beam measurement for transmisison
     PolDiffILLReduction(
         Run='396983',
         OutputWorkspace='beam_ws',
-        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
         ProcessAs='EmptyBeam'
     )
 
@@ -509,7 +509,7 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
     PolDiffILLReduction(
         Run='396985',
         OutputWorkspace='quartz_transmission',
-        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
         BeamInputWorkspace='beam_ws_1',
         ProcessAs='Transmission'
     )
@@ -517,23 +517,23 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
     # Empty container
     PolDiffILLReduction(
         Run='396917',
-        OutputWorkspace='container_ws',
-        ProcessAs='Container'
+        OutputWorkspace='empty_ws',
+        ProcessAs='Empty'
     )
 
     # Absorber
     PolDiffILLReduction(
         Run='396928',
-        OutputWorkspace='absorber_ws',
-        ProcessAs='Absorber'
+        OutputWorkspace='cadmium_ws',
+        ProcessAs='Cadmium'
     )
 
     # Polarisation correction
     PolDiffILLReduction(
         Run='396939',
         OutputWorkspace='pol_corrections',
-        AbsorberInputWorkspace='absorber_ws',
-        ContainerInputWorkspace='container_ws',
+        CadmiumInputWorkspace='cadmium_ws',
+        EmptyInputWorkspace='empty_ws',
         TransmissionInputWorkspace='quartz_transmission_1',
         OutputTreatment='Average',
         ProcessAs='Quartz'
@@ -543,7 +543,7 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
     PolDiffILLReduction(
         Run='396990',
         OutputWorkspace='vanadium_transmission',
-        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
         BeamInputWorkspace='beam_ws_1',
         ProcessAs='Transmission'
     )
@@ -553,8 +553,8 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
     PolDiffILLReduction(
         Run='396993',
         OutputWorkspace='vanadium_ws',
-        AbsorberInputWorkspace='absorber_ws',
-        ContainerInputWorkspace='container_ws',
+        CadmiumInputWorkspace='cadmium_ws',
+        EmptyInputWorkspace='empty_ws',
         TransmissionInputWorkspace='vanadium_transmission_1',
         QuartzInputWorkspace='pol_corrections',
         OutputTreatment='Sum',
@@ -680,14 +680,14 @@ Sample normalisation
     # Beam with cadmium absorber, used for transmission
     PolDiffILLReduction(
         Run='396991',
-        OutputWorkspace='cadmium_ws',
-        ProcessAs='BeamWithAbsorber'
+        OutputWorkspace='cadmium_transmission_ws',
+        ProcessAs='BeamWithCadmium'
     )
     # Beam measurement for transmisison
     PolDiffILLReduction(
         Run='396983',
         OutputWorkspace='beam_ws',
-        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
         ProcessAs='EmptyBeam'
     )
 
@@ -695,31 +695,31 @@ Sample normalisation
     PolDiffILLReduction(
         Run='396985, 396986',
         OutputWorkspace='quartz_transmission',
-        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
         BeamInputWorkspace='beam_ws_1',
-       ProcessAs='Transmission'
+        ProcessAs='Transmission'
     )
 
     # Empty container
     PolDiffILLReduction(
         Run='396917, 396918',
-        OutputWorkspace='container_ws',
-        ProcessAs='Container'
+        OutputWorkspace='empty_ws',
+        ProcessAs='Empty'
     )
 
-    # Absorber
+    # Cadmium absorber
     PolDiffILLReduction(
         Run='396928, 396929',
-        OutputWorkspace='absorber_ws',
-        ProcessAs='Absorber'
+        OutputWorkspace='cadmium_ws',
+        ProcessAs='Cadmium'
     )
 
     # Polarisation correction
     PolDiffILLReduction(
         Run='396939, 396940',
         OutputWorkspace='pol_corrections',
-        AbsorberInputWorkspace='absorber_ws',
-        ContainerInputWorkspace='container_ws',
+        CadmiumInputWorkspace='cadmium_ws',
+        EmptyInputWorkspace='empty_ws',
         TransmissionInputWorkspace='quartz_transmission_1',
         OutputTreatment='Average',
         ProcessAs='Quartz'
@@ -729,7 +729,7 @@ Sample normalisation
     PolDiffILLReduction(
         Run='396990',
         OutputWorkspace='vanadium_transmission',
-        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
         BeamInputWorkspace='beam_ws_1',
         ProcessAs='Transmission'
     )
@@ -738,8 +738,8 @@ Sample normalisation
     PolDiffILLReduction(
         Run='396993, 396994',
         OutputWorkspace='vanadium_ws',
-        AbsorberInputWorkspace='absorber_ws',
-        ContainerInputWorkspace='container_ws',
+        CadmiumInputWorkspace='cadmium_ws',
+        EmptyInputWorkspace='empty_ws',
         TransmissionInputWorkspace='vanadium_transmission_1',
         QuartzInputWorkspace='pol_corrections',
         OutputTreatment='Sum',
@@ -753,7 +753,7 @@ Sample normalisation
     PolDiffILLReduction(
        Run='396986, 396987',
        OutputWorkspace='sample_transmission',
-       AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+       CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
        BeamInputWorkspace='beam_ws_1',
        ProcessAs='Transmission'
     )
@@ -763,8 +763,8 @@ Sample normalisation
     PolDiffILLReduction(
         Run='397004, 397005',
         OutputWorkspace='sample_ws',
-        AbsorberInputWorkspace='absorber_ws',
-        ContainerInputWorkspace='container_ws',
+        CadmiumInputWorkspace='cadmium_ws',
+        EmptyInputWorkspace='empty_ws',
         TransmissionInputWorkspace='sample_transmission_1',
         QuartzInputWorkspace='pol_corrections',
         OutputTreatment='Individual',

@@ -12,7 +12,7 @@ Description
 This algorithm performs polarised diffraction reduction for the D7 instrument at the ILL.
 With each call, this algorithm processes one type of data which is a part of the whole experiment.
 The logic is resolved by the property **ProcessAs**, which governs the reduction steps based on the requested type.
-It can be one of the 8: absorber, empty beam, beam-with-absorber, transmission, container, quartz, vanadium, and sample.
+It can be one of the 8: cadmium, empty beam, beam-with-cadmium, transmission, empty, quartz, vanadium, and sample.
 The full data treatment of the complete experiment should be build up as a chain with multiple calls of this algorithm over various types of acquisitions.
 The sequence should be logical, typically as enumerated above, since the later processes need the outputs of earlier processes as input.
 The common mandatory input is a run file (numor), or a list of them. In case a list is provided, coming for example from a scan over twoTheta angle,
@@ -31,35 +31,35 @@ Different input properties can be specified depending on the value of **ProcessA
 +------------------+--------------------------------------+--------------------------------------------+
 | ProcessAs        | Input Workspace Properties           | Other Input Properties                     |
 +==================+======================================+============================================+
-| BeamWithAbsorber |                                      |                                            |
+| BeamWithCadmium  |                                      |                                            |
 +------------------+--------------------------------------+--------------------------------------------+
-| EmptyBeam        | * AbsorberTransmissionInputWorkspace |                                            |
+| EmptyBeam        | * CadmiumTransmissionInputWorkspace  |                                            |
 |                  |                                      |                                            |
 +------------------+--------------------------------------+--------------------------------------------+
-| Transmission     | * AbsorberTransmissionInputWorkspace |                                            |
+| Transmission     | * CadmiumTransmissionInputWorkspace  |                                            |
 |                  | * **BeamInputWorkspace**             |                                            |
 +------------------+--------------------------------------+--------------------------------------------+
-| Absorber         |                                      |                                            |
+| Cadmium          |                                      |                                            |
 +------------------+--------------------------------------+--------------------------------------------+
-| Container        |                                      |                                            |
+| Empty            |                                      |                                            |
 +------------------+--------------------------------------+--------------------------------------------+
-| Quartz           | * AbsorberInputWorkspace             | * OutputTreatment                          |
-|                  | * ContainerInputWorkspace            |                                            |
+| Quartz           | * CadmiumInputWorkspace              | * OutputTreatment                          |
+|                  | * EmptyInputWorkspace                |                                            |
 |                  | * **TransmissionInputWorkspace**     |                                            |
 +------------------+--------------------------------------+--------------------------------------------+
-| Vanadium         | * AbsorberInputWorkspace             | * SampleGeometry                           |
-|                  | * ContainerInputWorkspace            | * **SampleAndEnvironmentProperties**       |
+| Vanadium         | * CadmiumInputWorkspace              | * SampleGeometry                           |
+|                  | * EmptyInputWorkspace                | * **SampleAndEnvironmentProperties**       |
 |                  | * TransmissionInputWorkspace         | * OutputTreatment                          |
 |                  | * QuartzInputWorkspace               |                                            |
 +------------------+--------------------------------------+--------------------------------------------+
-| Sample           | * AbsorberInputWorkspace             | * SampleGeometry                           |
-|                  | * ContainerInputWorkspace            | * **SampleAndEnvironmentProperties**       |
+| Sample           | * CadmiumInputWorkspace              | * SampleGeometry                           |
+|                  | * EmptyInputWorkspace                | * **SampleAndEnvironmentProperties**       |
 |                  | * TransmissionInputWorkspace         | * OutputTreatment                          |
 |                  | * QuartzInputWorkspace               |                                            |
 +------------------+--------------------------------------+--------------------------------------------+
 
 All the input workspace properties above are optional, unless bolded.
-For example, if processing as sample, if a container and absorber inputs are specified, subtraction will be performed, if not, the step will be skipped.
+For example, if processing as sample, if a empty container and cadmium absorber inputs are specified, subtraction will be performed, if not, the step will be skipped.
 The rare exceptions are when processing as transmission, when beam input workspace is mandatory, and to calculate polarising efficiencies,
 where input from transmission is indispensable.
 
@@ -169,7 +169,7 @@ Full Treatment
 ##############
 
 Full treatment is built by stacking up unary reductions with corresponding **ProcessAs**. The diagram below illustrates the flow of processing.
-Letters denote beam with absorber (AT), beam (B), transmission (T), absorber (A), container (C), quartz (Q), vanadium (V), sample (S).
+Letters denote beam with absorber (AT), beam (B), transmission (T), cadmium (A), empty (C), quartz (Q), vanadium (V), sample (S).
 AT is processed first, and passed to all the other processes.
 B takes only AT as optional input, and the output of B is needed by all transmisison calculations.
 T takes AT and B as inputs, and the calculated transmission is used by Q, V, and S respectively.
@@ -206,48 +206,48 @@ This example below performs a complete reduction for D7 data.
     # Beam with cadmium absorber, used for transmission
     PolDiffILLReduction(
         Run='396991',
-        OutputWorkspace='cadmium_ws',
-        ProcessAs='BeamWithAbsorber'
+        OutputWorkspace='cadmium_transmission_ws',
+        ProcessAs='BeamWithCadmium'
     )
     # Beam measurement for transmisison
     PolDiffILLReduction(
         Run='396983',
         OutputWorkspace='beam_ws',
-        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
         ProcessAs='EmptyBeam'
     )
-    print('Cadmium absorber transmission is {0:.3f}'.format(mtd['cadmium_ws_1'].readY(0)[0] / mtd['beam_ws_1'].readY(0)[0]))
+    print('Cadmium absorber transmission is {0:.3f}'.format(mtd['cadmium_transmission_ws_1'].readY(0)[0] / mtd['beam_ws_1'].readY(0)[0]))
 
     # Quartz transmission
     PolDiffILLReduction(
         Run='396985',
         OutputWorkspace='quartz_transmission',
-        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
         BeamInputWorkspace='beam_ws_1',
-       ProcessAs='Transmission'
+        ProcessAs='Transmission'
     )
     print('Quartz transmission is {0:.3f}'.format(mtd['quartz_transmission_1'].readY(0)[0]))
 
     # Empty container
     PolDiffILLReduction(
         Run='396917',
-        OutputWorkspace='container_ws',
-        ProcessAs='Container'
+        OutputWorkspace='empty_ws',
+        ProcessAs='Empty'
     )
 
-    # Absorber
+    # Cadmium absorber
     PolDiffILLReduction(
         Run='396928',
-        OutputWorkspace='absorber_ws',
-        ProcessAs='Absorber'
+        OutputWorkspace='cadmium_ws',
+        ProcessAs='Cadmium'
     )
     
     # Polarisation correction
     PolDiffILLReduction(
         Run='396939',
         OutputWorkspace='pol_corrections',
-        AbsorberInputWorkspace='absorber_ws',
-        ContainerInputWorkspace='container_ws',
+        CadmiumInputWorkspace='cadmium_ws',
+        EmptyInputWorkspace='empty_ws',
         TransmissionInputWorkspace='quartz_transmission_1',
         OutputTreatment='Average',
         ProcessAs='Quartz'
@@ -257,7 +257,7 @@ This example below performs a complete reduction for D7 data.
     PolDiffILLReduction(
         Run='396990',
         OutputWorkspace='vanadium_transmission',
-        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
         BeamInputWorkspace='beam_ws_1',
         ProcessAs='Transmission'
     )
@@ -267,8 +267,8 @@ This example below performs a complete reduction for D7 data.
     PolDiffILLReduction(
         Run='396993',
         OutputWorkspace='vanadium_ws',
-        AbsorberInputWorkspace='absorber_ws',
-        ContainerInputWorkspace='container_ws',
+        CadmiumInputWorkspace='cadmium_ws',
+        EmptyInputWorkspace='empty_ws',
         TransmissionInputWorkspace='vanadium_transmission_1',
         QuartzInputWorkspace='pol_corrections',
         OutputTreatment='Sum',
@@ -281,7 +281,7 @@ This example below performs a complete reduction for D7 data.
     PolDiffILLReduction(
        Run='396986',
        OutputWorkspace='sample_transmission',
-       AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+       CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
        BeamInputWorkspace='beam_ws_1',
        ProcessAs='Transmission'
     )
@@ -291,8 +291,8 @@ This example below performs a complete reduction for D7 data.
     PolDiffILLReduction(
         Run='397004',
         OutputWorkspace='sample_ws',
-        AbsorberInputWorkspace='absorber_ws',
-        ContainerInputWorkspace='container_ws',
+        CadmiumInputWorkspace='cadmium_ws',
+        EmptyInputWorkspace='empty_ws',
         TransmissionInputWorkspace='sample_transmission_1',
         QuartzInputWorkspace='pol_corrections',
         OutputTreatment='Individual',
