@@ -70,9 +70,9 @@ private:
   std::vector<MDEventType<ND>> convertEvents();
 
   template <size_t ND, template <size_t> class MDEventType> struct MDEventMaker {
-    static MDEventType<ND> makeMDEvent(const double &sig, const double &err, const uint16_t &run_index,
+    static MDEventType<ND> makeMDEvent(const double &sig, const double &err, const uint16_t &expInfoIndex,
                                        const uint16_t &goniometer_index, const uint32_t &det_id, coord_t *coord) {
-      return MDEventType<ND>(sig, err, run_index, goniometer_index, det_id, coord);
+      return MDEventType<ND>(sig, err, expInfoIndex, goniometer_index, det_id, coord);
     }
   };
 };

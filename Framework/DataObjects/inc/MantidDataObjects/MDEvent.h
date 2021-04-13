@@ -21,7 +21,7 @@ namespace DataObjects {
  * in N-dimensions (for example, Qx, Qy, Qz, E).
  *
  * This is an extension to MDLeanEvent which adds:
- *   - 16-bit int for the run_index (index into the vector of ExperimentInfo of
+ *   - 16-bit int for the expInfoIndex (index into the vector of ExperimentInfo of
  *the workspace)
  *   - 16-bit int for the goniometer index (0-based index determines the
  *     goniometer settings when the event occurred)
@@ -172,7 +172,7 @@ public:
 #endif
 
   //---------------------------------------------------------------------------------------------
-  /** @return the run index of this event in the containing MDEventWorkspace */
+  /** @return the associated experiment-info index of this event in the containing MDEventWorkspace */
   uint16_t getExpInfoIndex() const { return expInfoIndex; }
 
   /** Sets the expInfoIndex of this event

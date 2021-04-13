@@ -1383,7 +1383,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         Guarantees: have vanadium run reduced.
         :param van_run_number_list: list of vanadium run
         :param timeFilterWall: time filter wall
-        :param samExpInfoIndex: sample run index
+        :param samExpInfoIndex: sample associated experiment-info index
         :param focuspos:
         :return:
         """

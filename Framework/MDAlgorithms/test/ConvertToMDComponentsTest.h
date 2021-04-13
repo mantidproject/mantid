@@ -247,7 +247,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(subAlgo.addExperimentInfo(spws, targWSDescr));
 
     uint16_t expInfoIndex(1000);
-    TS_ASSERT_THROWS_NOTHING(expInfoIndex = targWSDescr.getPropertyValueAsType<uint16_t>("RUN_INDEX"));
+    TS_ASSERT_THROWS_NOTHING(expInfoIndex = targWSDescr.getPropertyValueAsType<uint16_t>("EXP_INFO_INDEX"));
     TS_ASSERT_EQUALS(0, expInfoIndex);
 
     // target workspace has W-matrix, which should be unit matrix

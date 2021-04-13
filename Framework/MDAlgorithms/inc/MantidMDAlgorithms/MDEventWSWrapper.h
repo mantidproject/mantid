@@ -104,7 +104,7 @@ private:
   void addMDDataND(float *sigErr, uint16_t *expInfoIndex, uint16_t *goniometerIndex, uint32_t *detId, coord_t *Coord,
                    size_t dataSize) const;
   template <size_t nd>
-  void addAndTraceMDDataND(float *sig_err, uint16_t *run_index, uint16_t *goniometerIndex, uint32_t *det_id,
+  void addAndTraceMDDataND(float *sig_err, uint16_t *expInfoIndex, uint16_t *goniometerIndex, uint32_t *det_id,
                            coord_t *Coord, size_t data_size) const;
 
   template <size_t nd> void calcCentroidND();

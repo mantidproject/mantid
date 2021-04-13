@@ -261,7 +261,7 @@ private:
     } else {
       expectedG = {1.0, 0.000304617, 0.0, -0.000304617, 1.0, -0.0, -0.0, 0.0, 1.0};
     }
-    TSM_ASSERT_DELTA("Goniometer for run index " + std::to_string(index) + " is incorrect", expectedG, gR.getVector(),
+    TSM_ASSERT_DELTA("Goniometer for associated experiment-info index " + std::to_string(index) + " is incorrect", expectedG, gR.getVector(),
                      1e-04);
   }
 
@@ -298,7 +298,7 @@ private:
         auto nevents = iter->getNumEvents();
         for (size_t i = 0; i < nevents; ++i) {
           auto irun = iter->getInnerExpInfoIndex(i);
-          TSM_ASSERT("Expected run index 0 or 1. Found " + std::to_string(irun), irun == 0 || irun == 1);
+          TSM_ASSERT("Expected associated experiment-info index 0 or 1. Found " + std::to_string(irun), irun == 0 || irun == 1);
           if (irun == 0)
             nexpt1++;
           else

@@ -92,7 +92,7 @@ void run_create_partitioned_with_instrument(const Parallel::Communicator &comm,
   TS_ASSERT_EQUALS(i.size(), expectedSize);
 }
 
-void run_indexInfo_legacy_compatibility_partitioned_workspace_failure(const Parallel::Communicator &comm) {
+void expInfoIndexInfo_legacy_compatibility_partitioned_workspace_failure(const Parallel::Communicator &comm) {
   IndexInfo indices(3, Parallel::StorageMode::Distributed, comm);
   indices.setSpectrumDefinitions(std::vector<SpectrumDefinition>(indices.size()));
   const auto ws = create<Workspace2D>(indices, Histogram(BinEdges{1, 2}));
@@ -485,12 +485,12 @@ public:
     // Sibling of MatrixWorkspace::test_indexInfo_legacy_compatibility().
     // Setting spectrum numbers via legacy interface should fail for partitioned
     // workspace.
-    run_indexInfo_legacy_compatibility_partitioned_workspace_failure(Parallel::Communicator{});
+    expInfoIndexInfo_legacy_compatibility_partitioned_workspace_failure(Parallel::Communicator{});
     // Currently having 0 spectra on a rank is not supported by MatrixWorkspace
     // so we must make sure to use fewer threads than detectors here:
     int n_thread = 3;
     ParallelRunner runner(n_thread);
-    runner.run(run_indexInfo_legacy_compatibility_partitioned_workspace_failure);
+    runner.run(expInfoIndexInfo_legacy_compatibility_partitioned_workspace_failure);
   }
 
 private:

@@ -64,7 +64,7 @@ class VesuvioTOFFitTest(unittest.TestCase):
         self.assertTrue(self._equal_within_tolerance(expected_bin_index_spec2, bin_index_spec2))
 
 
-    def test_single_run_index0_kfixed_no_background_with_ties(self):
+    def test_single_expInfoIndex0_kfixed_no_background_with_ties(self):
         profiles = "function=GramCharlier,width=[2, 5, 7],hermite_coeffs=[1, 0, 0],k_free=0,sears_flag=1;"\
                    "function=Gaussian,width=10;function=Gaussian,width=13;function=Gaussian,width=30;"
         ties = "f2.Intensity=f3.Intensity"

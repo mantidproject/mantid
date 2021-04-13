@@ -155,7 +155,7 @@ public:
     Mantid::detid_t detid61 = mditer->getInnerDetectorID(61);
     TS_ASSERT_EQUALS(detid61, 18);
 
-    // Run index
+    // experiment info index
     uint16_t run0 = mditer->getInnerExpInfoIndex(0);
     TS_ASSERT_EQUALS(run0, 1);
     uint16_t run1 = mditer->getInnerExpInfoIndex(44);
@@ -337,7 +337,7 @@ public:
     Mantid::detid_t detid61 = mditer->getInnerDetectorID(61);
     TS_ASSERT_EQUALS(detid61, 18);
 
-    // Run index
+    // experiment info index
     uint16_t run0 = mditer->getInnerExpInfoIndex(0);
     TS_ASSERT_EQUALS(run0, 1);
     uint16_t run1 = mditer->getInnerExpInfoIndex(44);

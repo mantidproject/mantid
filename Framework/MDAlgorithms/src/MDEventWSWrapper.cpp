@@ -72,7 +72,7 @@ workspace, so no checks are performed
 
 *@param sigErr   -- pointer to the beginning of 2*data_size array containing
 signal and squared error
-*@param expInfoIndex -- pointer to the beginning of data_size  containing run index
+*@param expInfoIndex -- pointer to the beginning of data_size  containing associated experiment-info index
 *@param goniometerIndex -- 0-based index determines the goniometer
 settings when this event occurred
 *@param detId    -- pointer to the beginning of dataSize array containing
@@ -192,7 +192,7 @@ void MDEventWSWrapper::setMDWS(API::IMDEventWorkspace_sptr spWS) {
 /** method adds the data to the workspace which was initiated before;
  *@param sigErr : pointer to the beginning of 2*data_size array containing
  *signal and squared error
- *@param expInfoIndex : pointer to the beginnign of data_size  containing run index
+ *@param expInfoIndex : pointer to the beginnign of data_size  containing associated experiment-info index
  *@param goniometerIndex : 0-based index determines the goniometer
  * settings when this event occurred
  *@param detId : pointer to the beginning of dataSize array containing

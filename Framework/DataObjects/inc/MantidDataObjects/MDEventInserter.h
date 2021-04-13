@@ -47,7 +47,7 @@ public:
   determined internally using type information on the MDEventType.
   @param signal : intensity
   @param errorSQ : squared value of the error
-  @param expInfoIndex : run index (index into the vector of ExperimentInfo)
+  @param expInfoIndex : associated experiment-info index (index into the vector of ExperimentInfo)
   @param goniometerIndex: 0-based index determines the goniometer settings when
   this event occurred
   @param detectno : detector number
@@ -80,7 +80,7 @@ private:
   Creates a FULL MDEvent and adds it to the MDEW.
   @param signal : intensity
   @param errorSQ : squared value of the error
-  @param expInfoIndex : run index
+  @param expInfoIndex : associated experiment-info index
   @param goniometerIndex: 0-based index determines the goniometer settings when
   this event occurred
   @param detectno : detector number

@@ -28,7 +28,7 @@ MultipleExperimentInfos::MultipleExperimentInfos(const MultipleExperimentInfos &
 }
 
 //-----------------------------------------------------------------------------------------------
-/** Get the ExperimentInfo for the given run Index
+/** Get the ExperimentInfo for the given Experiment-Info Index
  *
  * @param expInfoIndex :: 0-based index of the run to get.
  * @return shared ptr to the ExperimentInfo class
@@ -40,7 +40,7 @@ ExperimentInfo_sptr MultipleExperimentInfos::getExperimentInfo(const uint16_t ex
 }
 
 //-----------------------------------------------------------------------------------------------
-/** Get the ExperimentInfo for the given run Index
+/** Get the ExperimentInfo for the given Experiment-Info Index
  *
  * @param expInfoIndex :: 0-based index of the run to get.
  * @return shared ptr to the ExperimentInfo class

@@ -307,7 +307,7 @@ public:
   static std::string getTypeName() { return "MDLeanEvent"; }
 
   //---------------------------------------------------------------------------------------------
-  /** @return the run index of this event in the containing MDEventWorkspace.
+  /** @return the associated experiment-info index of this event in the containing MDEventWorkspace.
    *          Always 0: this information is not present in a MDLeanEvent. */
   uint16_t getExpInfoIndex() const { return 0; }
 
