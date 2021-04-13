@@ -203,6 +203,7 @@ void ConvertHFIRSCDtoMDE::exec() {
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
   double cop = this->getProperty("ObliquityParallaxCoefficient");
+  float coeff = static_cast<float>(cop);
 
   float k = boost::math::float_constants::two_pi / static_cast<float>(wavelength);
   // check convention to determine the sign of k
@@ -215,8 +216,7 @@ void ConvertHFIRSCDtoMDE::exec() {
   for (size_t m = 0; m < azimuthal.size(); ++m) {
     auto twotheta_f = static_cast<float>(twotheta[m]);
     auto azimuthal_f = static_cast<float>(azimuthal[m]);
-    q_lab_pre.push_back({-sin(twotheta_f) * cos(azimuthal_f) * k, 
-                         -sin(twotheta_f) * sin(azimuthal_f) * k * cop,
+    q_lab_pre.push_back({-sin(twotheta_f) * cos(azimuthal_f) * k, -sin(twotheta_f) * sin(azimuthal_f) * k * coeff,
                          (1.f - cos(twotheta_f)) * k});
   }
   const auto run = inputWS->getExperimentInfo(0)->run();

@@ -258,7 +258,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         # check convention to determine the sign
         if config['Q.convention'] == 'Crystallography':
             k *= -1.0
-            
+
         cop = self.getProperty('ObliquityParallaxCoefficient').value
 
         qlab = np.vstack((np.sin(polar)*np.cos(azim),
