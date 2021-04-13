@@ -164,7 +164,8 @@ public:
                                       uint16_t expInfoIndex, uint16_t goniometerIndex, uint32_t detectorId) = 0;
   /// Add several events from the vector of event parameters
   virtual size_t buildAndAddEvents(const std::vector<signal_t> &sigErrSq, const std::vector<coord_t> &Coord,
-                                   const std::vector<uint16_t> &expInfoIndex, const std::vector<uint16_t> &goniometerIndex,
+                                   const std::vector<uint16_t> &expInfoIndex,
+                                   const std::vector<uint16_t> &goniometerIndex,
                                    const std::vector<uint32_t> &detectorId) = 0;
 
   // -------------------------------------------------------------------------------------------

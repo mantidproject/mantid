@@ -64,7 +64,7 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra) {
 
   // allocate temporary buffer for MD Events data
   std::vector<float> sig_err(2 * m_bufferSize);         // array for signal and error.
-  std::vector<uint16_t> expInfoIndex(m_bufferSize);        // Buffer associated experiment-info index for each event
+  std::vector<uint16_t> expInfoIndex(m_bufferSize);     // Buffer associated experiment-info index for each event
   std::vector<uint16_t> goniometer_index(m_bufferSize); // Buffer goniometer index for each event
   std::vector<uint32_t> det_ids(m_bufferSize);          // Buffer of det Id-s for each event
 

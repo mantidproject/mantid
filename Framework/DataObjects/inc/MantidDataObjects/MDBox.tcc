@@ -753,7 +753,8 @@ TMDE(size_t MDBox)::buildAndAddEvents(const std::vector<signal_t> &sigErrSq, con
 TMDE(void MDBox)::buildAndAddEvent(const signal_t Signal, const signal_t errorSq, const std::vector<coord_t> &point,
                                    uint16_t expInfoIndex, uint16_t goniometerIndex, uint32_t detectorId) {
   std::lock_guard<std::mutex> _lock(this->m_dataMutex);
-  this->data.emplace_back(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0], expInfoIndex, goniometerIndex, detectorId));
+  this->data.emplace_back(
+      IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0], expInfoIndex, goniometerIndex, detectorId));
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -770,9 +771,10 @@ TMDE(void MDBox)::buildAndAddEvent(const signal_t Signal, const signal_t errorSq
  * @param detectorId :: the ID of the  detector recoded the event
  * */
 TMDE(void MDBox)::buildAndAddEventUnsafe(const signal_t Signal, const signal_t errorSq,
-                                         const std::vector<coord_t> &point, uint16_t expInfoIndex, uint16_t goniometerIndex,
-                                         uint32_t detectorId) {
-  this->data.emplace_back(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0], expInfoIndex, goniometerIndex, detectorId));
+                                         const std::vector<coord_t> &point, uint16_t expInfoIndex,
+                                         uint16_t goniometerIndex, uint32_t detectorId) {
+  this->data.emplace_back(
+      IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0], expInfoIndex, goniometerIndex, detectorId));
 }
 
 //-----------------------------------------------------------------------------------------------

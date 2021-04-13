@@ -36,7 +36,7 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
   // MD events coordinates buffer
   std::vector<coord_t> allCoord;
   std::vector<float> sig_err;             // array for signal and error.
-  std::vector<uint16_t> expInfoIndex;        // Buffer for associated experiment-info index for each event
+  std::vector<uint16_t> expInfoIndex;     // Buffer for associated experiment-info index for each event
   std::vector<uint16_t> goniometer_index; // Buffer for goniometer index for each event
   std::vector<uint32_t> det_ids;          // Buffer of det Id-s for each event
 

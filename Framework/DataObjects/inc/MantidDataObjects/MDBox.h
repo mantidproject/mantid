@@ -241,7 +241,8 @@ public:
   }
   // create single generic event from event's data
   static inline MDE BUILD_EVENT(const signal_t Signal, const signal_t Error, const coord_t *Coord,
-                                const uint16_t expInfoIndex, const uint16_t goniometerIndex, const uint32_t detectorId) {
+                                const uint16_t expInfoIndex, const uint16_t goniometerIndex,
+                                const uint32_t detectorId) {
     return MDE(Signal, Error, expInfoIndex, goniometerIndex, detectorId, Coord);
   }
 };

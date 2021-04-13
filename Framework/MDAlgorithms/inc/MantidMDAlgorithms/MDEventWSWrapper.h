@@ -54,8 +54,9 @@ public:
   API::IMDEventWorkspace_sptr createEmptyMDWS(const MDWSDescription &WSD);
   /// add the data to the internal workspace. The workspace has to exist and be
   /// initiated
-  void addMDData(std::vector<float> &sigErr, std::vector<uint16_t> &expInfoIndex, std::vector<uint16_t> &goniometerIndex,
-                 std::vector<uint32_t> &detId, std::vector<coord_t> &Coord, size_t dataSize) const;
+  void addMDData(std::vector<float> &sigErr, std::vector<uint16_t> &expInfoIndex,
+                 std::vector<uint16_t> &goniometerIndex, std::vector<uint32_t> &detId, std::vector<coord_t> &Coord,
+                 size_t dataSize) const;
   /// releases the shared pointer to the MD workspace, stored by the class and
   /// makes the class instance undefined;
   void releaseWorkspace();

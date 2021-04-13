@@ -264,11 +264,11 @@ void ConvertToDetectorFaceMD::exec() {
         switch (el.getEventType()) {
         case TOF:
           if (nd == 3)
-            this->convertEventList<TofEvent, MDEvent<3>, 3>(outWS3, wi, xPos, yPos, bankPos, expInfoIndex, goniometerIndex,
-                                                            detID);
+            this->convertEventList<TofEvent, MDEvent<3>, 3>(outWS3, wi, xPos, yPos, bankPos, expInfoIndex,
+                                                            goniometerIndex, detID);
           else if (nd == 4)
-            this->convertEventList<TofEvent, MDEvent<4>, 4>(outWS4, wi, xPos, yPos, bankPos, expInfoIndex, goniometerIndex,
-                                                            detID);
+            this->convertEventList<TofEvent, MDEvent<4>, 4>(outWS4, wi, xPos, yPos, bankPos, expInfoIndex,
+                                                            goniometerIndex, detID);
           break;
         case WEIGHTED:
           if (nd == 3)

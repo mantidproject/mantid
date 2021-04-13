@@ -102,7 +102,7 @@ size_t ConvToMDBase::initialize(const MDAlgorithms::MDWSDescription &WSD,
 /** empty default constructor */
 ConvToMDBase::ConvToMDBase()
     : m_NDims(0),           // wrong non-initialized
-      m_ExpInfoIndex(0),        // defauld associated experiment-info index is 0
+      m_ExpInfoIndex(0),    // defauld associated experiment-info index is 0
       m_NSpectra(0),        // no valid spectra by default.
       m_NumThreads(-1),     // run with all cores availible
       m_ignoreZeros(false), // 0-s added to workspace

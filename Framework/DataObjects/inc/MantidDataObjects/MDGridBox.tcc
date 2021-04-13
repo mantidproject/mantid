@@ -1544,8 +1544,8 @@ public:
                           const std::vector<uint16_t> &goniometerIndex, const std::vector<uint32_t> &detectorId,
                           size_t nEvents) {
     for (size_t i = 0; i < nEvents; i++)
-      pBox->addEvent(MDEvent<nd>(sigErrSq[2 * i], sigErrSq[2 * i + 1], expInfoIndex[i], goniometerIndex[i], detectorId[i],
-                                 &Coord[i * nd]));
+      pBox->addEvent(MDEvent<nd>(sigErrSq[2 * i], sigErrSq[2 * i + 1], expInfoIndex[i], goniometerIndex[i],
+                                 detectorId[i], &Coord[i * nd]));
   }
 };
 /* Specialize for the case of LeanEvent */
