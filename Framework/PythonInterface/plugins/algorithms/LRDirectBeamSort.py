@@ -208,47 +208,8 @@ class LRDirectBeamSort(PythonAlgorithm):
             bck_ranges = []
 
             for run in g:
-                SaveNexusProcessed(InputWorkspace=run, Filename=f'/tmp/LRD{run}.nxs')
-                # # Create peak workspace
-                # number_of_pixels_x = int(run.getInstrument().getNumberParameter("number-of-x-pixels")[0])
-                # number_of_pixels_y = int(run.getInstrument().getNumberParameter("number-of-y-pixels")[0])
 
-                # # Direct beam signal
-                # workspace = RefRoi(InputWorkspace=run, ConvertToQ=False,
-                #                    NXPixel=number_of_pixels_x,
-                #                    NYPixel=number_of_pixels_y,
-                #                    IntegrateY=False,
-                #                    OutputWorkspace="__ref_peak")
-                # workspace = Transpose(InputWorkspace=workspace)
-                # peak, _, _ = LRPeakSelection(InputWorkspace=workspace)
-
-                # # Low resolution cut
-                # if use_low_res_cut:
-                #     workspace = RefRoi(InputWorkspace=run, ConvertToQ=False,
-                #                        NXPixel=number_of_pixels_x,
-                #                        NYPixel=number_of_pixels_y,
-                #                        IntegrateY=True,
-                #                        OutputWorkspace="__ref_peak")
-                #     workspace = Transpose(InputWorkspace=workspace)
-                #     _, low_res, _ = LRPeakSelection(InputWorkspace=workspace)
-                # else:
-                #     low_res = [0, number_of_pixels_x]
-
-                # #  att = run.getRun().getProperty('vAtt').value[0]-1
-                # #  wl = run.getRun().getProperty('LambdaRequest').value[0]
-                # #  thi = run.getRun().getProperty('thi').value[0]
-                # #  direct_beam_runs.append(run.getRunNumber())
-                # #  peak_ranges.append(int(peak[0]))
-                # #  peak_ranges.append(int(peak[1]))
-                # #  x_ranges.append(int(low_res[0]))
-                # #  x_ranges.append(int(low_res[1]))
-                # # bck_ranges.append(int(peak[0])-3)
-                # # bck_ranges.append(int(peak[1])+3)
-
-                if False:
-                    peak, low_res = self._find_peak_old(run, use_low_res_cut)
-                else:
-                    peak, low_res = self._find_peak(run)
+                peak, low_res = self._find_peak(run, use_low_res_cut)
 
                 att = run.getRun().getProperty('vAtt').value[0]-1
                 wl = run.getRun().getProperty('LambdaRequest').value[0]
@@ -295,7 +256,7 @@ class LRDirectBeamSort(PythonAlgorithm):
                              ScalingFactorFile=scaling_file)
         logger.notice(summary)
 
-    def _find_peak_old(self, run, use_low_res_cut):
+    def _find_peak(self, run, use_low_res_cut):
 
         # Create peak workspace
         number_of_pixels_x = int(run.getInstrument().getNumberParameter("number-of-x-pixels")[0])
@@ -325,13 +286,13 @@ class LRDirectBeamSort(PythonAlgorithm):
         return peak, low_res
 
     @staticmethod
-    def _find_peak(ws, crop=25, factor=1.) -> Tuple[List[int], List[int]]:
+    def _find_peak_new(ws, crop=25, factor=1.) -> Tuple[List[int], List[int]]:
         """Find peak by Mantid FindPeaks with Gaussian peak in the counts
         summed from detector pixels on the same row.
 
         Assumption
         1. The maximum count is belonged to the real peak
-\
+
         Parameters
         ----------
         ws: MatrixWorkspace
@@ -381,7 +342,8 @@ class LRDirectBeamSort(PythonAlgorithm):
         peak_width = mtd[param_ws_name].cell(0, 3)
         peak_center = mtd[param_ws_name].cell(0, 2)
 
-        print(f'[INFO FIT]{ws}: Max = {max_index}, Peak center = {peak_center}, Width = {peak_width}')
+        info_str = f'{ws}: Max = {max_index}, Peak center = {peak_center}, Width = {peak_width}'
+        logger.notice(info_str)
 
         # Form output
         peak = [int(peak_center - factor * peak_width),
