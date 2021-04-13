@@ -25,6 +25,10 @@ Algorithms
 - :ref:`LoadLog <algm-LoadLog>` will now detect old unsupported log files and set an appropriate explanatory string in the exception.
 - :ref:`Stitch1DMany <algm-Stitch1DMany>` has additional property `IndexOfReference` to allow user to decide which of the provided workspaces should give reference for scaling
 
+Improvements
+------------
+- Loading a CORELLI tube calibration returns a ``MaskWorkspace``.
+
 Data Objects
 ------------
 
