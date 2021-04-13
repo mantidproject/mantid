@@ -255,13 +255,10 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             if inWS.getExperimentInfo(0).getInstrument().getName() == 'HB3A':
                 azim = azim.reshape(512*3, 512).T.flatten()
 
-<<<<<<< HEAD
         # check convention to determine the sign
         if config['Q.convention'] == 'Crystallography':
             k *= -1.0
         
-=======
->>>>>>> 7768178299dc7c1b6808dc7eb94cf94e79bc7ce3
         cop = self.getProperty('ObliquityParallaxCoefficient').value
 
         qlab = np.vstack((np.sin(polar)*np.cos(azim),
