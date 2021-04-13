@@ -297,7 +297,7 @@ private:
       do {
         auto nevents = iter->getNumEvents();
         for (size_t i = 0; i < nevents; ++i) {
-          auto irun = iter->getInnerRunIndex(i);
+          auto irun = iter->getInnerExpInfoIndex(i);
           TSM_ASSERT("Expected run index 0 or 1. Found " + std::to_string(irun), irun == 0 || irun == 1);
           if (irun == 0)
             nexpt1++;

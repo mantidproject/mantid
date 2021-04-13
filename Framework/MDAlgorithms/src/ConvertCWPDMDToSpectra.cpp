@@ -412,7 +412,7 @@ void ConvertCWPDMDToSpectra::binMD(const API::IMDEventWorkspace_const_sptr &mdws
   auto mditer = mdws->createIterator();
   bool scancell = true;
   size_t nextindex = 1;
-  int currRunIndex = -1;
+  int currExpInfoIndex = -1;
   double currWavelength = -1;
   while (scancell) {
     // get the number of events of this cell
@@ -438,12 +438,12 @@ void ConvertCWPDMDToSpectra::binMD(const API::IMDEventWorkspace_const_sptr &mdws
       double twotheta = calculate2Theta(v_det_sample, v_sample_src) / M_PI * 180.;
 
       // convert unit optionally
-      auto temprun = static_cast<int>(mditer->getInnerRunIndex(iev));
+      auto temprun = static_cast<int>(mditer->getInnerExpInfoIndex(iev));
       double outx;
       if (unitbit == 't')
         outx = twotheta;
       else {
-        if (temprun != currRunIndex) {
+        if (temprun != currExpInfoIndex) {
           // use map to find a new wavelength
           auto miter = map_runlambda.find(temprun);
           if (miter == map_runlambda.end()) {
@@ -495,7 +495,7 @@ void ConvertCWPDMDToSpectra::binMD(const API::IMDEventWorkspace_const_sptr &mdws
       if (xindex < 0) {
         // Out of left boundary
         int32_t innerDetid = mditer->getInnerDetectorID(iev);
-        uint16_t runid = mditer->getInnerRunIndex(iev);
+        uint16_t runid = mditer->getInnerExpInfoIndex(iev);
         g_log.debug() << "Event is out of user-specified range by " << (outx - vecx.front()) << ", xindex = " << xindex
                       << ", " << unitbit << " = " << outx << " out of left boundeary [" << vecx.front() << ", "
                       << vecx.back() << "]. dep pos = " << detpos.X() << ", " << detpos.Y() << ", " << detpos.Z()
@@ -504,7 +504,7 @@ void ConvertCWPDMDToSpectra::binMD(const API::IMDEventWorkspace_const_sptr &mdws
       } else if (xindex >= static_cast<int>(vecy.size())) {
         // Out of right boundary
         int32_t innerDetid = mditer->getInnerDetectorID(iev);
-        uint16_t runid = mditer->getInnerRunIndex(iev);
+        uint16_t runid = mditer->getInnerExpInfoIndex(iev);
         g_log.debug() << "Event is out of user-specified range "
                       << "xindex = " << xindex << ", " << unitbit << " = " << outx << " out of [" << vecx.front()
                       << ", " << vecx.back() << "]. dep pos = " << detpos.X() << ", " << detpos.Y() << ", "

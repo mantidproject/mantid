@@ -88,7 +88,7 @@ public:
   virtual size_t getNumEvents() const = 0;
 
   /// For a given event/point in this box, return the run index
-  virtual uint16_t getInnerRunIndex(size_t index) const = 0;
+  virtual uint16_t getInnerExpInfoIndex(size_t index) const = 0;
 
   /// For a given event/point in this box, return the goniometer index
   virtual uint16_t getInnerGoniometerIndex(size_t index) const = 0;

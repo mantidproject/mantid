@@ -177,7 +177,7 @@ inline void copyEvent(const MDLeanEvent<nd> &srcEvent, MDLeanEvent<ond> &newEven
 template <size_t nd, size_t ond>
 inline void copyEvent(const MDEvent<nd> &srcEvent, MDEvent<ond> &newEvent, const uint16_t expInfoIndexOffset) {
   newEvent.setDetectorId(srcEvent.getDetectorID());
-  newEvent.setRunIndex(static_cast<uint16_t>(srcEvent.getRunIndex() + expInfoIndexOffset));
+  newEvent.setExpInfoIndex(static_cast<uint16_t>(srcEvent.getExpInfoIndex() + expInfoIndexOffset));
 }
 
 //----------------------------------------------------------------------------------------------

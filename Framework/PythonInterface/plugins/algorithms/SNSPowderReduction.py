@@ -485,7 +485,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             # END-FOR
         # ENDIF (Sum data or not)
 
-        for (samRunIndex, sam_ws_name) in enumerate(samwksplist):
+        for (samExpInfoIndex, sam_ws_name) in enumerate(samwksplist):
             assert isinstance(sam_ws_name, str), 'Assuming that samRun is a string. But it is %s' % str(type(sam_ws_name))
             if is_event_workspace(sam_ws_name):
                 self.log().information('Sample Run %s:  starting number of events = %d.' % (
@@ -505,7 +505,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             #       -> delete the current one, then carry on
             #  - no history (processing list of runs)
             #    -> carry on as a single call wiht list of runs ensures that same method is used.
-            can_run_ws_name, _ = self._generate_container_run_name(can_run_numbers, samRunIndex)
+            can_run_ws_name, _ = self._generate_container_run_name(can_run_numbers, samExpInfoIndex)
             if can_run_ws_name in mtd:
                 hstry = mtd[can_run_ws_name].getHistory()
                 if not hstry.empty():
@@ -518,7 +518,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                             mtd.remove(can_run_ws_name)
 
             can_run_ws_name = self._process_container_runs(can_run_numbers,
-                                                           samRunIndex,
+                                                           samExpInfoIndex,
                                                            preserveEvents,
                                                            absorptionWksp=a_container)
             if can_run_ws_name is not None:
@@ -529,7 +529,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             van_run_number_list = ['%s_%d' % (self._instrument, value) for value in van_run_number_list]
             van_specified = not noRunSpecified(van_run_number_list)
             if van_specified:
-                van_run_ws_name = self._process_vanadium_runs(van_run_number_list, samRunIndex)
+                van_run_ws_name = self._process_vanadium_runs(van_run_number_list, samExpInfoIndex)
                 workspacelist.append(van_run_ws_name)
             else:
                 van_run_ws_name = None
@@ -1306,16 +1306,16 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
         return do_split_raw_wksp, num_out_wksp
 
-    def _generate_container_run_name(self, can_run_numbers, samRunIndex):
+    def _generate_container_run_name(self, can_run_numbers, samExpInfoIndex):
         """generate container workspace name based on given info
 
         :param can_run_numbers:
-        :param samRunIndex:
+        :param samExpInfoIndex:
 
         :return can_run_ws_name:
         :return can_run_number:
         """
-        assert isinstance(samRunIndex, int)
+        assert isinstance(samExpInfoIndex, int)
 
         if noRunSpecified(can_run_numbers):
             # no container run is specified
@@ -1328,7 +1328,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                 can_run_number = can_run_numbers[0]
             else:
                 # in case of multiple container run, use the corresponding one to sample
-                can_run_number = can_run_numbers[samRunIndex]
+                can_run_number = can_run_numbers[samExpInfoIndex]
 
             # get reference to container run
             can_run_ws_name = getBasename(can_run_number)
@@ -1336,7 +1336,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
     def _process_container_runs(self,
                                 can_run_numbers,
-                                samRunIndex,
+                                samExpInfoIndex,
                                 preserveEvents,
                                 absorptionWksp=None):
         """ Process container runs
@@ -1344,7 +1344,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         :return:
         """
         can_run_ws_name, can_run_number = self._generate_container_run_name(
-            can_run_numbers, samRunIndex)
+            can_run_numbers, samExpInfoIndex)
 
         if can_run_ws_name is not None:
             if self.does_workspace_exist(can_run_ws_name):
@@ -1376,14 +1376,14 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
         return can_run_ws_name
 
-    def _process_vanadium_runs(self, van_run_number_list, samRunIndex, **dummy_focuspos):
+    def _process_vanadium_runs(self, van_run_number_list, samExpInfoIndex, **dummy_focuspos):
         """
         Purpose: process vanadium runs
-        Requirements: if more than 1 run in given run number list, then samRunIndex must be given.
+        Requirements: if more than 1 run in given run number list, then samExpInfoIndex must be given.
         Guarantees: have vanadium run reduced.
         :param van_run_number_list: list of vanadium run
         :param timeFilterWall: time filter wall
-        :param samRunIndex: sample run index
+        :param samExpInfoIndex: sample run index
         :param focuspos:
         :return:
         """
@@ -1391,8 +1391,8 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         if len(van_run_number_list) == 1:
             van_run_number = van_run_number_list[0]
         else:
-            assert isinstance(samRunIndex, int)
-            van_run_number = van_run_number_list[samRunIndex]
+            assert isinstance(samExpInfoIndex, int)
+            van_run_number = van_run_number_list[samExpInfoIndex]
 
         # get handle on workspace of this van run and make sure its unit is T.O.F
         if van_run_number in mtd:
@@ -1470,7 +1470,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                 if len(van_bkgd_run_number_list) == 1:
                     van_bkgd_run_number = van_bkgd_run_number_list[0]
                 else:
-                    van_bkgd_run_number = van_bkgd_run_number_list[samRunIndex]
+                    van_bkgd_run_number = van_bkgd_run_number_list[samExpInfoIndex]
                 van_bkgd_ws_name = getBasename(van_bkgd_run_number) + "_vanbg"
                 try:
                     self.log().notice('Processing vanadium background {}'.format(van_bkgd_ws_name))

@@ -441,7 +441,7 @@ TMDE(void MDBox)::calculateCentroid(coord_t *centroid, const int runindex) const
 
   for (const MDE &Evnt : data) {
     coord_t signal = Evnt.getSignal();
-    if (Evnt.getRunIndex() == runindex) {
+    if (Evnt.getExpInfoIndex() == runindex) {
       for (size_t d = 0; d < nd; d++) {
         // Total up the coordinate weighted by the signal.
         centroid[d] += Evnt.getCenter(d) * signal;

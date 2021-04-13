@@ -173,11 +173,11 @@ public:
 
   //---------------------------------------------------------------------------------------------
   /** @return the run index of this event in the containing MDEventWorkspace */
-  uint16_t getRunIndex() const { return expInfoIndex; }
+  uint16_t getExpInfoIndex() const { return expInfoIndex; }
 
   /** Sets the expInfoIndex of this event
    * @param index :: new expInfoIndex value. */
-  void setRunIndex(uint16_t index) { expInfoIndex = index; }
+  void setExpInfoIndex(uint16_t index) { expInfoIndex = index; }
 
   //---------------------------------------------------------------------------------------------
   /** @return the goniometer index of this event*/

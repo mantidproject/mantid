@@ -309,7 +309,7 @@ public:
   //---------------------------------------------------------------------------------------------
   /** @return the run index of this event in the containing MDEventWorkspace.
    *          Always 0: this information is not present in a MDLeanEvent. */
-  uint16_t getRunIndex() const { return 0; }
+  uint16_t getExpInfoIndex() const { return 0; }
 
   //---------------------------------------------------------------------------------------------
   /** @return the goniometer index of this event in the containing

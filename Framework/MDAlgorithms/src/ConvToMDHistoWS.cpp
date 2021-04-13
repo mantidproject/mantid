@@ -126,7 +126,7 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra) {
       // coppy all data into data buffer for future transformation into events;
       sig_err[2 * nBufEvents + 0] = float(signal);
       sig_err[2 * nBufEvents + 1] = float(errorSq);
-      run_index[nBufEvents] = m_RunIndex;
+      run_index[nBufEvents] = m_ExpInfoIndex;
       goniometer_index[nBufEvents] = 0; // default value
       det_ids[nBufEvents] = det_id;
 

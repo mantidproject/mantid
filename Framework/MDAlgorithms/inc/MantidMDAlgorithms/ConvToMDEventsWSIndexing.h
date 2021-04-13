@@ -106,7 +106,7 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
     // create local QConverter
     MDTransf_sptr localQConverter = qConverters[PARALLEL_THREAD_NUMBER];
     int32_t detID = m_detID[workspaceIndex];
-    uint16_t expInfoIndexLoc = m_RunIndex;
+    uint16_t expInfoIndexLoc = m_ExpInfoIndex;
     uint16_t goniometerIndex(0); // default value
 
     std::vector<coord_t> locCoord(ND);

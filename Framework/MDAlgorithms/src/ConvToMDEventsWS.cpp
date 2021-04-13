@@ -23,7 +23,7 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
   UnitsConversionHelper localUnitConv(m_UnitConversion);
 
   uint32_t detID = m_detID[workspaceIndex];
-  uint16_t expInfoIndexLoc = m_RunIndex;
+  uint16_t expInfoIndexLoc = m_ExpInfoIndex;
 
   std::vector<coord_t> locCoord(m_Coord);
   // set up unit conversion and calculate up all coordinates, which depend on
