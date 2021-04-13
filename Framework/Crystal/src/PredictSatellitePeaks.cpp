@@ -81,7 +81,7 @@ void PredictSatellitePeaks::init() {
                   "Maximum wavelength limit at which to start looking for "
                   "single-crystal peaks.");
   declareProperty(std::make_unique<PropertyWithValue<double>>("MinDSpacing", 0.1, Direction::Input),
-                  "Minimum d-spacing of peaks to consider. Default = 1.0");
+                  "Minimum d-spacing of peaks to consider. Default = 0.1");
   declareProperty(std::make_unique<PropertyWithValue<double>>("MaxDSpacing", 100.0, Direction::Input),
                   "Maximum d-spacing of peaks to consider");
 
@@ -140,7 +140,7 @@ void PredictSatellitePeaks::exec() {
   const auto instrument = Peaks->getInstrument();
 
   outPeaks = std::dynamic_pointer_cast<IPeaksWorkspace>(WorkspaceFactory::Instance().createPeaks(Peaks->id()));
-  outPeaks->setInstrument(instrument);
+  outPeaks->copyExperimentInfoFrom(Peaks.get());
   outPeaks->mutableSample().setOrientedLattice(std::move(lattice));
 
   Kernel::Matrix<double> goniometer;
@@ -251,7 +251,7 @@ void PredictSatellitePeaks::exec_peaks() {
   const auto instrument = Peaks->getInstrument();
 
   outPeaks = std::dynamic_pointer_cast<IPeaksWorkspace>(WorkspaceFactory::Instance().createPeaks(Peaks->id()));
-  outPeaks->setInstrument(instrument);
+  outPeaks->copyExperimentInfoFrom(Peaks.get());
   outPeaks->mutableSample().setOrientedLattice(std::move(lattice));
 
   vector<vector<int>> AlreadyDonePeaks;

@@ -6,14 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import (AlgorithmFactory, FileAction, FileProperty,
                         PythonAlgorithm, PropertyMode, ADSValidator,
-                        WorkspaceGroup, WorkspaceProperty, MultipleExperimentInfos)
+                        WorkspaceGroup, WorkspaceProperty, MultipleExperimentInfos,
+                        IPeaksWorkspace)
 from mantid.kernel import Direction, FloatBoundedValidator, StringListValidator, StringArrayProperty
 from mantid.simpleapi import (DeleteWorkspace, IntegratePeaksMD,
                               SaveHKL, SaveReflections,
                               CreatePeaksWorkspace, CopySample,
                               AnalysisDataService,
-                              CombinePeaksWorkspaces)
-from mantid.dataobjects import PeaksWorkspace
+                              CombinePeaksWorkspaces, mtd)
 import numpy as np
 
 
@@ -92,8 +92,8 @@ class HB3AIntegratePeaks(PythonAlgorithm):
                 issues["InputWorkspace"] = "Workspace has the wrong number of dimensions"
 
         for peak_ws in peak_workspaces:
-            if not isinstance(AnalysisDataService[peak_ws], PeaksWorkspace):
-                issues["PeaksWorkspace"] = "Workspace need to be a PeaksWorkspace"
+            if not isinstance(AnalysisDataService[peak_ws], IPeaksWorkspace):
+                issues["PeaksWorkspace"] = "Workspace need to be a PeaksWorkspace or LeanElasticPeaksWorkspace"
 
         return issues
 
@@ -129,7 +129,8 @@ class HB3AIntegratePeaks(PythonAlgorithm):
             peaks_ws_name = output_workspace_name
             CreatePeaksWorkspace(InstrumentWorkspace=input_workspaces[0],
                                  NumberOfPeaks=0,
-                                 OutputWorkspace=peaks_ws_name)
+                                 OutputWorkspace=peaks_ws_name,
+                                 OutputType=mtd[peak_workspaces[0]].id().replace('sWorkspace',''))
             CopySample(InputWorkspace=output_workspaces[0],
                        OutputWorkspace=peaks_ws_name,
                        CopyName=False,
