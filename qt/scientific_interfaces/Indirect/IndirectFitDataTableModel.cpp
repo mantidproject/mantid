@@ -46,8 +46,8 @@ IndirectFitDataTableModel::IndirectFitDataTableModel()
 
 bool IndirectFitDataTableModel::hasWorkspace(std::string const &workspaceName) const {
   auto const names = getWorkspaceNames();
-  auto const iter = std::find(names.begin(), names.end(), workspaceName);
-  return iter != names.end();
+  auto const iter = std::find(names.cbegin(), names.cend(), workspaceName);
+  return iter != names.cend();
 }
 
 Mantid::API::MatrixWorkspace_sptr IndirectFitDataTableModel::getWorkspace(TableDatasetIndex index) const {
@@ -74,15 +74,14 @@ size_t IndirectFitDataTableModel::getNumberOfSpectra(TableDatasetIndex index) co
   else
     throw std::runtime_error("Cannot find the number of spectra for a workspace: the workspace "
                              "index provided is too large.");
-  return 1;
 }
 
 size_t IndirectFitDataTableModel::getNumberOfDomains() const {
-  size_t sum{0};
-  for (auto fittingData : *m_fittingData) {
-    sum += fittingData.numberOfSpectra().value;
-  }
-  return sum;
+  size_t init(0);
+  auto const getNumberOfSpectra = [](size_t sum, auto const &fittingData) {
+    return sum + fittingData.numberOfSpectra().value;
+  };
+  return std::accumulate(m_fittingData->cbegin(), m_fittingData->cend(), init, getNumberOfSpectra);
 }
 
 std::vector<double> IndirectFitDataTableModel::getQValuesForData() const {
@@ -97,8 +96,8 @@ std::vector<double> IndirectFitDataTableModel::getQValuesForData() const {
 std::vector<std::pair<std::string, size_t>> IndirectFitDataTableModel::getResolutionsForFit() const {
   std::vector<std::pair<std::string, size_t>> resolutionVector;
   for (size_t index = 0; index < m_resolutions->size(); ++index) {
-    auto resolutionWorkspace = m_resolutions->at(index).lock();
-    auto spectra = getSpectra(TableDatasetIndex{index});
+    const auto resolutionWorkspace = m_resolutions->at(index).lock();
+    const auto spectra = getSpectra(TableDatasetIndex{index});
     if (!resolutionWorkspace) {
       for (auto &spectraIndex : spectra) {
         resolutionVector.emplace_back("", spectraIndex.value);
@@ -106,9 +105,9 @@ std::vector<std::pair<std::string, size_t>> IndirectFitDataTableModel::getResolu
       continue;
     }
 
-    auto singleSpectraResolution = m_resolutions->at(index).lock()->getNumberHistograms() == 1;
+    const auto singleSpectraResolution = m_resolutions->at(index).lock()->getNumberHistograms() == 1;
     for (auto &spectraIndex : spectra) {
-      auto resolutionIndex = singleSpectraResolution ? 0 : spectraIndex.value;
+      const auto resolutionIndex = singleSpectraResolution ? 0 : spectraIndex.value;
       resolutionVector.emplace_back(m_resolutions->at(index).lock()->getName(), resolutionIndex);
     }
   }
@@ -117,7 +116,7 @@ std::vector<std::pair<std::string, size_t>> IndirectFitDataTableModel::getResolu
 
 void IndirectFitDataTableModel::setResolution(const std::string &name, TableDatasetIndex index) {
   if (!name.empty() && doesExistInADS(name)) {
-    auto resolution = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(name);
+    const auto resolution = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(name);
     if (m_resolutions->size() > index.value) {
       m_resolutions->at(index.value) = resolution;
     } else if (m_resolutions->size() == index.value) {
@@ -180,9 +179,9 @@ void IndirectFitDataTableModel::addWorkspace(const std::string &workspaceName, c
 void IndirectFitDataTableModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                                              const FunctionModelSpectra &spectra) {
   if (!m_fittingData->empty()) {
-    for (auto i : *m_fittingData) {
-      if (equivalentWorkspaces(workspace, i.workspace())) {
-        i.combine(IndirectFitData(workspace, spectra));
+    for (auto fitData : *m_fittingData) {
+      if (equivalentWorkspaces(workspace, fitData.workspace())) {
+        fitData.combine(IndirectFitData(workspace, spectra));
         return;
       }
     }
@@ -325,7 +324,7 @@ std::string IndirectFitDataTableModel::getExcludeRegion(FitDomainIndex index) co
 void IndirectFitDataTableModel::setExcludeRegion(const std::string &exclude, FitDomainIndex index) {
   if (m_fittingData->empty())
     return;
-  auto subIndices = getSubIndices(index);
+  const auto subIndices = getSubIndices(index);
   m_fittingData->at(subIndices.first.value).setExcludeRegionString(exclude, subIndices.second);
 }
 
