@@ -41,13 +41,17 @@ DECLARE_ALGORITHM(ConvertHFIRSCDtoMDE)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string ConvertHFIRSCDtoMDE::name() const { return "ConvertHFIRSCDtoMDE"; }
+const std::string ConvertHFIRSCDtoMDE::name() const {
+  return "ConvertHFIRSCDtoMDE";
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
 int ConvertHFIRSCDtoMDE::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ConvertHFIRSCDtoMDE::category() const { return "MDAlgorithms\\Creation"; }
+const std::string ConvertHFIRSCDtoMDE::category() const {
+  return "MDAlgorithms\\Creation";
+}
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ConvertHFIRSCDtoMDE::summary() const {
@@ -62,26 +66,31 @@ std::map<std::string, std::string> ConvertHFIRSCDtoMDE::validateInputs() {
   std::stringstream inputWSmsg;
   if (inputWS->getNumDims() != 3) {
     inputWSmsg << "Incorrect number of dimensions";
-  } else if (inputWS->getDimension(0)->getName() != "y" || inputWS->getDimension(1)->getName() != "x" ||
+  } else if (inputWS->getDimension(0)->getName() != "y" ||
+             inputWS->getDimension(1)->getName() != "x" ||
              inputWS->getDimension(2)->getName() != "scanIndex") {
     inputWSmsg << "Wrong dimensions";
   } else if (inputWS->getNumExperimentInfo() == 0) {
     inputWSmsg << "Missing experiment info";
-  } else if (inputWS->getExperimentInfo(0)->getInstrument()->getName() != "HB3A" &&
-             inputWS->getExperimentInfo(0)->getInstrument()->getName() != "WAND") {
+  } else if (inputWS->getExperimentInfo(0)->getInstrument()->getName() !=
+                 "HB3A" &&
+             inputWS->getExperimentInfo(0)->getInstrument()->getName() !=
+                 "WAND") {
     inputWSmsg << "This only works for DEMAND (HB3A) or WAND (HB2C)";
-  } else if (inputWS->getDimension(2)->getNBins() != inputWS->getExperimentInfo(0)->run().getNumGoniometers()) {
+  } else if (inputWS->getDimension(2)->getNBins() !=
+             inputWS->getExperimentInfo(0)->run().getNumGoniometers()) {
     inputWSmsg << "goniometers not set correctly, did you run SetGoniometer "
                   "with Average=False";
   } else {
-    std::string instrument = inputWS->getExperimentInfo(0)->getInstrument()->getName();
+    std::string instrument =
+        inputWS->getExperimentInfo(0)->getInstrument()->getName();
     const auto run = inputWS->getExperimentInfo(0)->run();
     size_t number_of_runs = inputWS->getDimension(2)->getNBins();
     std::vector<std::string> logs;
     if (instrument == "HB3A")
-      logs = {"monitor", "time"};
+      logs = { "monitor", "time" };
     else
-      logs = {"duration", "monitor_count"};
+      logs = { "duration", "monitor_count" };
     for (auto log : logs) {
       if (run.hasProperty(log)) {
         if (static_cast<size_t>(run.getLogData(log)->size()) != number_of_runs)
@@ -112,7 +121,8 @@ std::map<std::string, std::string> ConvertHFIRSCDtoMDE::validateInputs() {
           msg << "max not bigger than min ";
         else
           msg << ", ";
-        msg << "at index=" << (i + 1) << " (" << minVals[i] << ">=" << maxVals[i] << ")";
+        msg << "at index=" << (i + 1) << " (" << minVals[i]
+            << ">=" << maxVals[i] << ")";
       }
     }
 
@@ -130,26 +140,35 @@ std::map<std::string, std::string> ConvertHFIRSCDtoMDE::validateInputs() {
  */
 void ConvertHFIRSCDtoMDE::init() {
 
-  declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>("InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace> >(
+                      "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "Wavelength", DBL_MAX, std::make_shared<BoundedValidator<double>>(0.0, 100.0, true), Direction::Input),
+      std::make_unique<PropertyWithValue<double> >(
+          "Wavelength", DBL_MAX,
+          std::make_shared<BoundedValidator<double> >(0.0, 100.0, true),
+          Direction::Input),
       "Wavelength");
-  declareProperty(std::make_unique<ArrayProperty<double>>("MinValues", "-10,-10,-10"),
-                  "It has to be 3 comma separated values, one for each dimension in "
-                  "q_sample."
-                  "Values smaller then specified here will not be added to "
-                  "workspace.");
-  declareProperty(std::make_unique<ArrayProperty<double>>("MaxValues", "10,10,10"),
-                  "A list of the same size and the same units as MinValues "
-                  "list. Values higher or equal to the specified by "
-                  "this list will be ignored");
+  declareProperty(
+      std::make_unique<ArrayProperty<double> >("MinValues", "-10,-10,-10"),
+      "It has to be 3 comma separated values, one for each dimension in "
+      "q_sample."
+      "Values smaller then specified here will not be added to "
+      "workspace.");
+  declareProperty(
+      std::make_unique<ArrayProperty<double> >("MaxValues", "10,10,10"),
+      "A list of the same size and the same units as MinValues "
+      "list. Values higher or equal to the specified by "
+      "this list will be ignored");
   // Box controller properties. These are the defaults
-  this->initBoxControllerProps("5" /*SplitInto*/, 1000 /*SplitThreshold*/, 20 /*MaxRecursionDepth*/);
-  declareProperty(std::make_unique<PropertyWithValue<double>>("ObliquityParallaxCoefficient", 1.0, Direction::Input),
-                  "Geometrical correction for shift in vertical beam position due to wide beam.");
-  declareProperty(std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>("OutputWorkspace", "", Direction::Output),
+  this->initBoxControllerProps("5" /*SplitInto*/, 1000 /*SplitThreshold*/,
+                               20 /*MaxRecursionDepth*/);
+  declareProperty(std::make_unique<PropertyWithValue<double> >(
+                      "ObliquityParallaxCoefficient", 1.0, Direction::Input),
+                  "Geometrical correction for shift in vertical beam position "
+                  "due to wide beam.");
+  declareProperty(std::make_unique<WorkspaceProperty<API::IMDEventWorkspace> >(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -176,8 +195,12 @@ void ConvertHFIRSCDtoMDE::exec() {
       }
     }
   } else { // HB2C
-    azimuthal = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(expInfo.getLog("azimuthal"))))();
-    twotheta = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(expInfo.getLog("twotheta"))))();
+    azimuthal =
+        (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double> > *>(
+              expInfo.getLog("azimuthal"))))();
+    twotheta =
+        (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double> > *>(
+              expInfo.getLog("twotheta"))))();
   }
 
   auto outputWS = DataObjects::MDEventFactory::CreateMDWorkspace(3, "MDEvent");
@@ -185,13 +208,16 @@ void ConvertHFIRSCDtoMDE::exec() {
   std::vector<double> minVals = this->getProperty("MinValues");
   std::vector<double> maxVals = this->getProperty("MaxValues");
   outputWS->addDimension(std::make_shared<Geometry::MDHistoDimension>(
-      "Q_sample_x", "Q_sample_x", frame, static_cast<coord_t>(minVals[0]), static_cast<coord_t>(maxVals[0]), 1));
+      "Q_sample_x", "Q_sample_x", frame, static_cast<coord_t>(minVals[0]),
+      static_cast<coord_t>(maxVals[0]), 1));
 
   outputWS->addDimension(std::make_shared<Geometry::MDHistoDimension>(
-      "Q_sample_y", "Q_sample_y", frame, static_cast<coord_t>(minVals[1]), static_cast<coord_t>(maxVals[1]), 1));
+      "Q_sample_y", "Q_sample_y", frame, static_cast<coord_t>(minVals[1]),
+      static_cast<coord_t>(maxVals[1]), 1));
 
   outputWS->addDimension(std::make_shared<Geometry::MDHistoDimension>(
-      "Q_sample_z", "Q_sample_z", frame, static_cast<coord_t>(minVals[2]), static_cast<coord_t>(maxVals[2]), 1));
+      "Q_sample_z", "Q_sample_z", frame, static_cast<coord_t>(minVals[2]),
+      static_cast<coord_t>(maxVals[2]), 1));
   outputWS->setCoordinateSystem(Mantid::Kernel::QSample);
   outputWS->initialize();
 
@@ -199,16 +225,19 @@ void ConvertHFIRSCDtoMDE::exec() {
   this->setBoxController(bc);
   outputWS->splitBox();
 
-  auto mdws_mdevt_3 = std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(outputWS);
+  auto mdws_mdevt_3 =
+      std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3> >(outputWS);
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
   double cop = this->getProperty("ObliquityParallaxCoefficient");
 
   float coeff = static_cast<float>(cop);
 
-  float k = boost::math::float_constants::two_pi / static_cast<float>(wavelength);
+  float k =
+      boost::math::float_constants::two_pi / static_cast<float>(wavelength);
   // check convention to determine the sign of k
-  std::string convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  std::string convention =
+      Kernel::ConfigService::Instance().getString("Q.convention");
   if (convention == "Crystallography") {
     k *= -1.f;
   }
@@ -217,9 +246,9 @@ void ConvertHFIRSCDtoMDE::exec() {
   for (size_t m = 0; m < azimuthal.size(); ++m) {
     auto twotheta_f = static_cast<float>(twotheta[m]);
     auto azimuthal_f = static_cast<float>(azimuthal[m]);
-    q_lab_pre.push_back({-sin(twotheta_f) * cos(azimuthal_f) * k, 
-                         -sin(twotheta_f) * sin(azimuthal_f) * k * coeff,
-                         (1.f - cos(twotheta_f)) * k});
+    q_lab_pre.push_back({ -sin(twotheta_f) * cos(azimuthal_f) * k,
+                          -sin(twotheta_f) * sin(azimuthal_f) * k * coeff,
+                          (1.f - cos(twotheta_f)) * k });
   }
   const auto run = inputWS->getExperimentInfo(0)->run();
   for (size_t n = 0; n < inputWS->getDimension(2)->getNBins(); n++) {
@@ -235,7 +264,8 @@ void ConvertHFIRSCDtoMDE::exec() {
       coord_t signal = static_cast<coord_t>(inputWS->getSignalAt(idx));
       if (signal > 0.f && std::isfinite(signal)) {
         Eigen::Vector3f q_sample = goniometer * q_lab_pre[m];
-        inserter.insertMDEvent(signal, signal, 0, goniometerIndex, 0, q_sample.data());
+        inserter.insertMDEvent(signal, signal, 0, goniometerIndex, 0,
+                               q_sample.data());
       }
     }
   }
@@ -254,7 +284,8 @@ void ConvertHFIRSCDtoMDE::exec() {
   outRun.addLogData(new PropertyWithValue<double>("wavelength", wavelength));
   outRun.getProperty("wavelength")->setUnits("Angstrom");
 
-  auto user_convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  auto user_convention =
+      Kernel::ConfigService::Instance().getString("Q.convention");
   auto ws_convention = outputWS->getConvention();
   if (user_convention != ws_convention) {
     auto convention_alg = createChildAlgorithm("ChangeQConvention");
