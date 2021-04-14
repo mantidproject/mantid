@@ -10,6 +10,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAlgorithms/MaskBinsIf.h"
 #include "MantidAlgorithms/Q1DWeighted.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
@@ -21,6 +22,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using Mantid::Algorithms::CompareWorkspaces;
 using Mantid::Algorithms::MaskBinsIf;
 using Mantid::Algorithms::Q1DWeighted;
 using Mantid::DataHandling::LoadNexusProcessed;
@@ -242,12 +244,8 @@ public:
     createShapeTable();
 
     std::string outputWS = "q1d_shapes";
-    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("InputWorkspace", m_inputWS))
-    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputWorkspace", outputWS))
-    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputBinning", "0.001,0.001,0.08"))
-    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeWorkspace", outputWS + "_wedges"))
-    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("AsymmetricWedges", "1"))
-    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("ShapeTable", "MaskShapes"))
+
+    populateAlgorithm(outputWS, outputWS + "_wedges", true, true);
 
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
 
@@ -264,49 +262,38 @@ public:
     createShapeTable(true);
 
     std::string outputWS = "q1d_shapes";
-    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("InputWorkspace", m_inputWS))
-    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputWorkspace", outputWS))
-    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeWorkspace", outputWS + "_wedges"))
-    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputBinning", "0.001,0.001,0.08"))
-    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("AsymmetricWedges", "0"))
-    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("ShapeTable", "MaskShapes"))
+    std::string outputWedges = outputWS + "_wedges";
+
+    populateAlgorithm(outputWS, outputWedges, true, false);
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
 
     std::string refWS = "q1d_wedges";
-    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("InputWorkspace", m_inputWS))
-    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputWorkspace", refWS))
-    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputBinning", "0.001,0.001,0.08"))
-    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("NumberOfWedges", "2"))
-    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeAngle", "90"))
-    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeOffset", "0"))
-    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("AsymmetricWedges", "0"))
-    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeWorkspace", refWS + "_wedges"))
+    std::string refWedges = refWS + "_wedges";
 
+    populateAlgorithm(refWS, refWedges, false, false);
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
 
-    WorkspaceGroup_sptr result;
-    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<WorkspaceGroup>(
-                                 AnalysisDataService::Instance().retrieve(outputWS + "_wedges")))
+    compareWorkspaces(refWedges, outputWedges);
+  }
 
-    WorkspaceGroup_sptr ref =
-        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(refWS + "_wedges"));
+  void testShapeCorrectOrder() {
+    // exactly the same test as testShapeTableResults, except the shapes are
+    // created in a different order. The result should still be 1-to-1 identical
+    // with the wedges results
+    createShapeTable(true, true);
+    std::string outputWS = "q1d_shapes";
+    std::string outputWedges = outputWS + "_wedges";
 
-    auto wedge1 = std::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(0));
-    auto wedge2 = std::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(1));
-    TS_ASSERT(wedge1)
-    TS_ASSERT(wedge2)
+    populateAlgorithm(outputWS, outputWedges, true, false);
+    TS_ASSERT_THROWS_NOTHING(radial_average.execute())
 
-    auto ref1 = std::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(0));
-    auto ref2 = std::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(1));
+    std::string refWS = "q1d_wedges";
+    std::string refWedges = refWS + "_wedges";
 
-    double tolerance = 1e-12;
+    populateAlgorithm(refWS, refWedges, false, false);
+    TS_ASSERT_THROWS_NOTHING(radial_average.execute())
 
-    for (size_t i = 0; i < wedge1->y(0).size(); ++i) {
-      TS_ASSERT_DELTA(ref1->y(0)[i], wedge1->y(0)[i], tolerance);
-    }
-    for (size_t i = 0; i < wedge2->y(0).size(); ++i) {
-      TS_ASSERT_DELTA(ref2->y(0)[i], wedge2->y(0)[i], tolerance);
-    }
+    compareWorkspaces(refWedges, outputWedges);
   }
 
 private:
@@ -339,7 +326,16 @@ private:
     mover.execute();
   }
 
-  void createShapeTable(bool alignWithWedges = false) {
+  /**
+   * Create a table containing the description of sectors
+   *
+   * @param alignWithWedges if true, the sectors correspond to wedges as defined
+   * by Q1DWeighted. Else they are arbitrary defined
+   * @param reverseOrder if true, the sectors are defined in the reverse order
+   * from the way they are defined by Q1DWeighted. Else, standard way.
+   */
+
+  void createShapeTable(bool alignWithWedges = false, bool reverseOrder = false) {
     // since the instrument viewer mostly lacks an API, we create a dummy
     // MaskShapes table
 
@@ -378,8 +374,13 @@ private:
                                    centerYOffset * zoom);
         TableRow row = table->appendRow();
         row << std::to_string(i) << sector;
-        startAngle = fmod(startAngle + M_PI / 2, 2 * M_PI);
-        endAngle = fmod(endAngle + M_PI / 2, 2 * M_PI);
+        if (!reverseOrder) {
+          startAngle = fmod(startAngle + M_PI / 2, 2 * M_PI);
+          endAngle = fmod(endAngle + M_PI / 2, 2 * M_PI);
+        } else {
+          startAngle = fmod(startAngle - M_PI / 2, 2 * M_PI);
+          endAngle = fmod(endAngle - M_PI / 2, 2 * M_PI);
+        }
       }
 
       viewport = createDummyViewport(centerXOffset * zoom, centerYOffset * zoom, zoom, 0, 0, 1, 0);
@@ -407,6 +408,53 @@ private:
     ss << "Zoom\t" << zoom << std::endl;
     ss << "Rotation\t" << rotation0 << "\t" << rotation1 << "\t" << rotation2 << "\t" << rotation3;
     return ss.str();
+  }
+
+  void populateAlgorithm(std::string outputWS, std::string wedgesWS, bool useTable, bool asymmetric = false,
+                         std::string binning = "0.001,0.001,0.08") {
+    std::string asymm_flag = asymmetric ? "1" : "0";
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("InputWorkspace", m_inputWS))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputBinning", binning))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeWorkspace", wedgesWS))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("AsymmetricWedges", asymm_flag))
+
+    if (useTable) {
+      TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("ShapeTable", "MaskShapes"))
+    } else {
+      TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("NumberOfWedges", "2"))
+      TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeAngle", "90"))
+      TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeOffset", "0"))
+    }
+  }
+
+  void compareWorkspaces(std::string refWS, std::string toCompare) {
+    WorkspaceGroup_sptr result;
+    TS_ASSERT_THROWS_NOTHING(
+        result = std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(toCompare)))
+
+    WorkspaceGroup_sptr ref =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(refWS));
+
+    TS_ASSERT_EQUALS(result->getNumberOfEntries(), ref->getNumberOfEntries())
+    std::string tolerance = "1e-12";
+
+    CompareWorkspaces comparison;
+    comparison.initialize();
+
+    for (int i = 0; i < result->getNumberOfEntries(); i++) {
+      auto resultWS = std::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(i));
+      TS_ASSERT(resultWS)
+      auto refWS = std::dynamic_pointer_cast<MatrixWorkspace>(ref->getItem(i));
+
+      comparison.setProperty("Workspace1", refWS);
+      comparison.setProperty("Workspace2", resultWS);
+      comparison.setPropertyValue("Tolerance", tolerance);
+      comparison.setPropertyValue("CheckAllData", "1");
+      comparison.setPropertyValue("CheckType", "1");
+      comparison.setPropertyValue("ToleranceRelErr", "1");
+      comparison.execute();
+    }
   }
 
   Q1DWeighted radial_average;
