@@ -25,8 +25,7 @@ class DLLExport EQSANSLoad : public API::Algorithm {
 public:
   /// Constructor
   EQSANSLoad()
-      : API::Algorithm(), m_low_TOF_cut(0), m_high_TOF_cut(0), m_center_x(0),
-        m_center_y(0), m_moderator_position(0) {
+      : API::Algorithm(), m_low_TOF_cut(0), m_high_TOF_cut(0), m_center_x(0), m_center_y(0), m_moderator_position(0) {
     m_mask_as_string = "";
     m_output_message = "";
     for (int i = 0; i < 3; i++)

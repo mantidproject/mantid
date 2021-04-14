@@ -6,22 +6,27 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from os import path, remove
-import unittest
-from numpy.testing import assert_allclose
-import pathlib
+from contextlib import contextmanager
 from datetime import datetime
+import numpy as np
+from numpy.testing import assert_allclose
+from os import path, remove
+import pathlib
+import shutil
 import tempfile
+from typing import List
+import unittest
 
 from mantid import AnalysisDataService, config
 from mantid.api import mtd, WorkspaceGroup
-from mantid.dataobjects import TableWorkspace
-from mantid.simpleapi import CreateEmptyTableWorkspace, DeleteWorkspaces, LoadNexusProcessed
+from mantid.dataobjects import MaskWorkspace, TableWorkspace
+from mantid.simpleapi import (CreateEmptyTableWorkspace, CreateSampleWorkspace, DeleteWorkspace, DeleteWorkspaces,
+                              LoadNexusProcessed)
 
 from corelli.calibration.database import (combine_spatial_banks, combine_temporal_banks, day_stamp, filename_bank_table,
                                           has_valid_columns, init_corelli_table, load_bank_table, load_calibration_set,
                                           new_corelli_calibration, save_bank_table, save_calibration_set,
-                                          save_manifest_file, verify_date_format)
+                                          save_manifest_file, _table_to_workspace, verify_date_format)
 from corelli.calibration.bank import calibrate_banks
 
 
@@ -49,7 +54,6 @@ class TestCorelliDatabase(unittest.TestCase):
             cls.workspaces_temporary.append(workspace)
 
     def setUp(self) -> None:
-
         # create a mock database
         # tests save_bank_table and load_bank_table, save_manifest
         self.database_path: str = TestCorelliDatabase.test_dir.name
@@ -99,7 +103,6 @@ class TestCorelliDatabase(unittest.TestCase):
         self.ws_group.addWorkspace(load_bank_table(40, self.database_path, '20200601'))
 
     def test_init_corelli_table(self):
-
         corelli_table = init_corelli_table()
         assert isinstance(corelli_table, TableWorkspace)
 
@@ -279,7 +282,7 @@ class TestCorelliDatabase(unittest.TestCase):
                 self.assertAlmostEqual(expected_array, table_dict['Detector Y Coordinate'][i])
 
     def test_new_corelli_calibration_and_load_calibration(self):
-        r"""Creating a database is time consuming, thus we test both new_corelli_clibration and load_calibration"""
+        r"""Creating a database is time consuming, thus we test both new_corelli_calibration and load_calibration"""
         # populate a calibration database with a few cases. There should be at least one bank with two calibrations
         database = tempfile.TemporaryDirectory()
         cases = [('124016_bank10', '10'), ('124023_bank10', '10'), ('124023_banks_14_15', '14-15')]
@@ -299,7 +302,8 @@ class TestCorelliDatabase(unittest.TestCase):
         assert open(manifest_file).read() == 'bankID, timestamp\n10, 20200109\n14, 20200109\n15, 20200109\n'
 
         # load latest calibration and mask (day-stamp of '124023_bank10' is 20200109)
-        calibration, mask = load_calibration_set(self.cases['124023_bank10'], database.name)
+        calibration, mask = load_calibration_set(self.cases['124023_bank10'], database.name,
+                                                 mask_format='TableWorkspace')
         calibration_expected = LoadNexusProcessed(Filename=calibration_file)
         mask_expected = LoadNexusProcessed(Filename=mask_file)
         assert_allclose(calibration.column(1), calibration_expected.column(1), atol=1e-4)
@@ -313,7 +317,8 @@ class TestCorelliDatabase(unittest.TestCase):
         assert open(manifest_file).read() == 'bankID, timestamp\n10, 20200106\n'
 
         # load oldest calibration and mask(day-stamp of '124023_bank10' is 20200106)
-        calibration, mask = load_calibration_set(self.cases['124016_bank10'], database.name)
+        calibration, mask = load_calibration_set(self.cases['124016_bank10'], database.name,
+                                                 mask_format='TableWorkspace')
         calibration_expected = LoadNexusProcessed(Filename=calibration_file)
         mask_expected = LoadNexusProcessed(Filename=mask_file)
         assert_allclose(calibration.column(1), calibration_expected.column(1), atol=1e-4)
@@ -321,8 +326,115 @@ class TestCorelliDatabase(unittest.TestCase):
 
         database.cleanup()
 
-    def tearDown(self) -> None:
+    def test_table_to_workspace(self) -> None:
+        r"""Test the conversion of a TableWorkspace containing the masked detector ID's to a MaskWorkspace object"""
+        output_workspace = 'test_table_to_workspace_masked'
+        # Have a fake mask table, masking bank 42
+        mask_table = CreateEmptyTableWorkspace(OutputWorkspace=output_workspace)
+        mask_table.addColumn(type='int', name='Detector ID')
+        begin, end = 167936, 172030  # # Bank 42 has detector ID's from 167936 to 172030
+        for detector_id in range(begin, 1 + end):
+            mask_table.addRow([detector_id])
+        # Convert to MaskWorkspace
+        mask_table = _table_to_workspace(mask_table)
+        # Check the output workspace is of type MaskWorkspace
+        assert isinstance(mask_table, MaskWorkspace)
+        # Check the output workspace has 1 on workspace indexes for bank 42, and 0 elsewhere
+        mask_flags = mask_table.extractY().flatten()
+        offset = 3  # due to the detector monitors, workspace_index = detector_id + offset
+        masked_workspace_indexes = slice(begin + offset, 1 + end + offset)
+        assert np.all(mask_flags[masked_workspace_indexes])  # all values are 1
+        mask_flags = np.delete(mask_flags, masked_workspace_indexes)
+        assert not np.any(mask_flags)  # no value is 1
+        DeleteWorkspace(output_workspace)
 
+    def test_load_calibration_set(self) -> None:
+        r"""
+        1. create an empty "database"
+          1.1. create a workspace with a particular daystamp
+          1.2. try to find a file in the database
+        2. create a database with only one calibration file with daystamp 20200601
+          1.1 create a workspace with the following daystamps and see in which cases the calibration file is loaded
+              20200101, 20200601, 20201201
+        3. create a database with two calibration files with day-stamsp 20200401 and 20200801
+          3.1 create a workspace with the following day-stamps and see which (in any) calibration is selected
+             20200101, 20200401, 20200601, 20200801, 20201201
+        """
+
+        @contextmanager
+        def mock_database(day_stamps: List[int]):
+            r"""create a database with mock calibration files"""
+            dir_path = tempfile.mkdtemp()
+            path = pathlib.Path(dir_path)
+            for daystamp in day_stamps:
+                file_path = path / f'calibration_corelli_{daystamp}.nxs.h5'
+                with open(str(file_path), 'w') as fp:
+                    fp.write('mock')
+            try:
+                yield dir_path
+            finally:
+                shutil.rmtree(dir_path)
+
+        def set_daystamp(input_workspace: str, daystamp: int):
+            r"""Update the run_start log entry of a workspace
+            :param input_workspace: handle to a workspace (not its name!)
+            :param daystamp: 8-digit integer
+            """
+            x = str(daystamp)
+            run_start = f'{x[0:4]}-{x[4:6]}-{x[6:]}T20:54:07.265105667'
+            run = input_workspace.getRun()
+            run.addProperty(name='run_start', value=run_start, replace=True)
+
+        workspace = CreateSampleWorkspace(OutputWorkspace='test_load_calibration_set')
+        set_daystamp(workspace, 20200101)
+
+        # empty calibration database (corner case)
+        with mock_database([]) as database_path:
+            instrument_tables = load_calibration_set(workspace, database_path)
+            assert list(instrument_tables) == [None, None]
+
+        # database with only one calibration file (corner case)
+        with mock_database([20200601]) as database_path:
+            set_daystamp(workspace, 20200101)  # no calibration found
+            assert list(load_calibration_set(workspace, database_path)) == [None, None]
+
+            set_daystamp(workspace, 20200601)
+            with self.assertRaises(RuntimeError) as ar:
+                load_calibration_set(workspace, database_path)  # should pick calibration 20200601
+            self.assertEqual('20200601' in str(ar.exception), True)
+
+            set_daystamp(workspace, 20201201)
+            with self.assertRaises(RuntimeError) as ar:
+                load_calibration_set(workspace, database_path)
+            self.assertEqual('calibration_corelli_20200601.nxs.h5' in str(ar.exception), True)
+
+        # database with two calibration files (general case)
+        with mock_database([20200401, 20200801]) as database_path:
+            set_daystamp(workspace, '20200101')
+            assert list(load_calibration_set(workspace, database_path)) == [None, None]
+
+            set_daystamp(workspace, '20200401')
+            with self.assertRaises(RuntimeError) as ar:
+                load_calibration_set(workspace, database_path)
+            self.assertEqual('calibration_corelli_20200401.nxs.h5' in str(ar.exception), True)
+
+            set_daystamp(workspace, '20200601')
+            with self.assertRaises(RuntimeError) as ar:
+                load_calibration_set(workspace, database_path)
+            self.assertEqual('calibration_corelli_20200401.nxs.h5' in str(ar.exception), True)
+
+            set_daystamp(workspace, '20200801')
+            with self.assertRaises(RuntimeError) as ar:
+                load_calibration_set(workspace, database_path)
+            self.assertEqual('calibration_corelli_20200801.nxs.h5' in str(ar.exception), True)
+
+            set_daystamp(workspace, '20201201')
+            with self.assertRaises(RuntimeError) as ar:
+                load_calibration_set(workspace, database_path)
+            self.assertEqual('calibration_corelli_20200801.nxs.h5' in str(ar.exception), True)
+        workspace.delete()
+
+    def tearDown(self) -> None:
         date: str = datetime.now().strftime('%Y%m%d')  # format YYYYMMDD
         remove(filename_bank_table(10, self.database_path, date))
         remove(filename_bank_table(20, self.database_path, date))

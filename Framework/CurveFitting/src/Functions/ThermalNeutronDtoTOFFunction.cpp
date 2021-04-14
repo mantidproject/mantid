@@ -43,9 +43,7 @@ void ThermalNeutronDtoTOFFunction::init() {
 /** Main function
  * xValues containing the d-space value of peaks centres
  */
-void ThermalNeutronDtoTOFFunction::function1D(double *out,
-                                              const double *xValues,
-                                              const size_t nData) const {
+void ThermalNeutronDtoTOFFunction::function1D(double *out, const double *xValues, const size_t nData) const {
   double dtt1 = getParameter("Dtt1");
   double dtt1t = getParameter("Dtt1t");
   double dtt2t = getParameter("Dtt2t");
@@ -57,8 +55,7 @@ void ThermalNeutronDtoTOFFunction::function1D(double *out,
   for (size_t i = 0; i < nData; ++i) {
     // out[i] = corefunction(xValues[i], dtt1, dtt1t, dtt2t, zero, zerot, width,
     // tcross);
-    out[i] = calThermalNeutronTOF(xValues[i], dtt1, dtt1t, dtt2t, zero, zerot,
-                                  width, tcross);
+    out[i] = calThermalNeutronTOF(xValues[i], dtt1, dtt1t, dtt2t, zero, zerot, width, tcross);
   }
 }
 
@@ -66,8 +63,7 @@ void ThermalNeutronDtoTOFFunction::function1D(double *out,
 /** Main function
  * xValues containing the d-space value of peaks centres
  */
-void ThermalNeutronDtoTOFFunction::function1D(
-    vector<double> &out, const vector<double> &xValues) const {
+void ThermalNeutronDtoTOFFunction::function1D(vector<double> &out, const vector<double> &xValues) const {
   double dtt1 = getParameter(0);
   double dtt1t = getParameter(1);
   double dtt2t = getParameter(2);
@@ -79,14 +75,11 @@ void ThermalNeutronDtoTOFFunction::function1D(
   size_t nData = out.size();
 
   for (size_t i = 0; i < nData; ++i) {
-    out[i] = calThermalNeutronTOF(xValues[i], dtt1, dtt1t, dtt2t, zero, zerot,
-                                  width, tcross);
+    out[i] = calThermalNeutronTOF(xValues[i], dtt1, dtt1t, dtt2t, zero, zerot, width, tcross);
   }
 }
 
-void ThermalNeutronDtoTOFFunction::functionDeriv1D(Jacobian *out,
-                                                   const double *xValues,
-                                                   const size_t nData) {
+void ThermalNeutronDtoTOFFunction::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
   // 1. Get hold all parameters
   const double dtt1 = getParameter("Dtt1");
   const double dtt1t = getParameter("Dtt1t");
@@ -108,10 +101,9 @@ void ThermalNeutronDtoTOFFunction::functionDeriv1D(Jacobian *out,
     double deriv_dtt2t = (n - 1) / x;
     double deriv_zero = n;
     double deriv_zerot = (1 - n);
-    double deriv_width = -(zero + dtt1 * x - zerot - dtt1t * x + dtt2t / x) *
-                         exp(-u * u) / sqrt(M_PI) * (tcross - 1 / x);
-    double deriv_tcross = -(zero + dtt1 * x - zerot - dtt1t * x + dtt2t / x) *
-                          exp(-u * u) / sqrt(M_PI) * width;
+    double deriv_width =
+        -(zero + dtt1 * x - zerot - dtt1t * x + dtt2t / x) * exp(-u * u) / sqrt(M_PI) * (tcross - 1 / x);
+    double deriv_tcross = -(zero + dtt1 * x - zerot - dtt1t * x + dtt2t / x) * exp(-u * u) / sqrt(M_PI) * width;
 
     // b) Set
     out->set(i, 0, deriv_dtt1);
@@ -126,12 +118,10 @@ void ThermalNeutronDtoTOFFunction::functionDeriv1D(Jacobian *out,
 
 /** Some forbidden function
  */
-void ThermalNeutronDtoTOFFunction::functionDerivLocal(
-    API::Jacobian * /*unused*/, const double * /*unused*/,
-    const size_t /*unused*/) {
-  throw Mantid::Kernel::Exception::NotImplementedError(
-      "functionDerivLocal is not implemented for "
-      "ThermalNeutronDtoTOFFunction.");
+void ThermalNeutronDtoTOFFunction::functionDerivLocal(API::Jacobian * /*unused*/, const double * /*unused*/,
+                                                      const size_t /*unused*/) {
+  throw Mantid::Kernel::Exception::NotImplementedError("functionDerivLocal is not implemented for "
+                                                       "ThermalNeutronDtoTOFFunction.");
 }
 
 } // namespace Functions

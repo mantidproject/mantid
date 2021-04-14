@@ -163,11 +163,11 @@ Data analysis I(Q, T)
 #. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
 #. Go to the ``I(Q, T)`` tab
 #. Load the ``irs26176_graphite002_red.nxs`` file from the sample data
-#. Load the resolution file ``irs26173_graphite002_res.nxs`` from the sample data 
+#. Load the resolution file ``irs26173_graphite002_res.nxs`` from the sample data
 #. Click ``Run``
 #. A new workspace with the suffix ``_iqt`` should appear in the main GUI, it should be a 87 x 6 table. **NB** keep this workspace for the next test
 #. Click ``Plot Current View`` this should plot the same data as the preview window
-#. Choose some workspace indices (e.g. 0-2) in the ``Output`` section and click ``Plot Spectra`` this should give a plot with the title *irs26176_graphite002_iqt*   
+#. Choose some workspace indices (e.g. 0-2) in the ``Output`` section and click ``Plot Spectra`` this should give a plot with the title *irs26176_graphite002_iqt*
 #. Click the down arrow on the ``Plot Spectra`` button and then select ``Plot Tiled``. This should give a tiled plot of the selected workspace indices.
 
 Data analysis I(Q, T) Fit
@@ -193,4 +193,4 @@ Data analysis I(Q, T) Fit
 #. Click ``Run``
 #. Select Lifetime from the ``Output`` drop-down
 #. Click ``Plot`` this should open a new plot with the lifetimes plotted
-  
+

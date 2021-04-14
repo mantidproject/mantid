@@ -25,20 +25,14 @@ public:
   const std::string name() const override { return "SaveOpenGenieAscii"; }
 
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Saves a focused data set into an OpenGenie ASCII file ";
-  }
+  const std::string summary() const override { return "Saves a focused data set into an OpenGenie ASCII file "; }
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveAscii"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveAscii"}; }
 
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Diffraction\\DataHandling;DataHandling\\Text";
-  }
+  const std::string category() const override { return "Diffraction\\DataHandling;DataHandling\\Text"; }
 
 private:
   /// Typedef of a tuple containing the name, type and value as strings
@@ -50,9 +44,7 @@ private:
   /// Execution code
   void exec() override;
 
-  inline void addToOutputBuffer(const std::string &outName,
-                                const std::string &outType,
-                                const std::string &outVal) {
+  inline void addToOutputBuffer(const std::string &outName, const std::string &outType, const std::string &outVal) {
     m_outputVector.emplace_back(OutputBufferEntry(outName, outType, outVal));
   }
 
@@ -60,13 +52,11 @@ private:
   void applyEnginxFormat();
 
   /// Calculate delta x/y/z from the log files for ENGINX
-  void calculateXYZDelta(const std::string &unit,
-                         const Kernel::Property *values);
+  void calculateXYZDelta(const std::string &unit, const Kernel::Property *values);
 
   /// Converts XYE data to a tuple containing the OPENGENIE string and store
   /// it into the output buffer
-  template <typename T>
-  void convertWorkspaceData(const T &histoData, const char &axis);
+  template <typename T> void convertWorkspaceData(const T &histoData, const char &axis);
 
   /// Determines the ENGIN-X bank from the detectors IDs present
   void determineEnginXBankId();

@@ -52,22 +52,18 @@ public:
 
   /// Read parameter correction file, return applicabel parameter file and
   /// whether to append
-  void readParameterCorrectionFile(const std::string &correction_file,
-                                   const std::string &date,
+  void readParameterCorrectionFile(const std::string &correction_file, const std::string &date,
                                    std::string &parameter_file, bool &append);
 
   /// Load the parameters from Nexus file if possible, else from parameter file,
   /// into workspace
-  void LoadParameters(::NeXus::File *nxfile,
-                      const API::MatrixWorkspace_sptr &localWorkspace);
+  void LoadParameters(::NeXus::File *nxfile, const API::MatrixWorkspace_sptr &localWorkspace);
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
 
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Instrument";
-  }
+  const std::string category() const override { return "DataHandling\\Instrument"; }
 
 private:
   /// Overwrites Algorithm method. Does nothing at present
@@ -76,8 +72,7 @@ private:
   void exec() override;
   /// Load Parameter File specified by full pathname into given workspace,
   /// return success
-  bool loadParameterFile(const std::string &fullPathName,
-                         const API::MatrixWorkspace_sptr &localWorkspace);
+  bool loadParameterFile(const std::string &fullPathName, const API::MatrixWorkspace_sptr &localWorkspace);
 };
 
 } // namespace DataHandling

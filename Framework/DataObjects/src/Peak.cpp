@@ -30,8 +30,7 @@ namespace DataObjects {
 
 //----------------------------------------------------------------------------------------------
 /** Default constructor */
-Peak::Peak()
-    : BasePeak(), m_detectorID(-1), m_initialEnergy(0.), m_finalEnergy(0.) {}
+Peak::Peak() : BasePeak(), m_row(-1), m_col(-1), m_detectorID(-1), m_initialEnergy(0.), m_finalEnergy(0.) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor that uses the Q position of the peak (in the lab frame).
@@ -43,12 +42,13 @@ Peak::Peak()
  *detector. Calculated if not explicitly provided.
  *        Used to give a valid TOF. Default 1.0 meters.
  */
-Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
-           const Mantid::Kernel::V3D &QLabFrame,
+Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, const Mantid::Kernel::V3D &QLabFrame,
            boost::optional<double> detectorDistance)
     : BasePeak() {
-  this->setInstrument(m_inst);
-  this->setQLabFrame(QLabFrame, std::move(detectorDistance));
+  // Initialization of m_inst, sourcePos, m_samplePos
+  setInstrument(m_inst);
+  // Initialization of m_detectorID, detPos, m_det, m_row, m_col, m_bankName, m_initialEnergy, m_finalEnergy
+  setQLabFrame(QLabFrame, std::move(detectorDistance));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -64,12 +64,12 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
  *detector. Calculated if not explicitly provided.
  *        Used to give a valid TOF. Default 1.0 meters.
  */
-Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
-           const Mantid::Kernel::V3D &QSampleFrame,
-           const Mantid::Kernel::Matrix<double> &goniometer,
-           boost::optional<double> detectorDistance)
+Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, const Mantid::Kernel::V3D &QSampleFrame,
+           const Mantid::Kernel::Matrix<double> &goniometer, boost::optional<double> detectorDistance)
     : BasePeak(goniometer) {
+  // Initialization of m_inst, sourcePos, m_samplePos
   this->setInstrument(m_inst);
+  // Initialization of m_detectorID, detPos, m_det, m_row, m_col, m_bankName, m_initialEnergy, m_finalEnergy
   this->setQSampleFrame(QSampleFrame, std::move(detectorDistance));
 }
 
@@ -81,11 +81,12 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
  * @param m_Wavelength :: incident neutron wavelength, in Angstroms
  * @return
  */
-Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
-           double m_Wavelength)
-    : BasePeak() {
+Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID, double m_Wavelength) : BasePeak() {
+  // Initialization of m_inst, sourcePos, m_samplePos
   this->setInstrument(m_inst);
+  // Initialization of m_detectorID, detPos, m_det, m_row, m_col, m_bankName
   this->setDetectorID(m_detectorID);
+  // Initialization of m_initialEnergy, m_finalEnergy
   this->setWavelength(m_Wavelength);
 }
 
@@ -98,11 +99,14 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
  * @param HKL :: vector with H,K,L position of the peak
  * @return
  */
-Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
-           double m_Wavelength, const Mantid::Kernel::V3D &HKL)
+Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID, double m_Wavelength,
+           const Mantid::Kernel::V3D &HKL)
     : BasePeak() {
+  // Initialization of m_inst, sourcePos, m_samplePos
   this->setInstrument(m_inst);
+  // Initialization of m_detectorID, detPos, m_det, m_row, m_col, m_bankName
   this->setDetectorID(m_detectorID);
+  // Initialization of m_initialEnergy, m_finalEnergy
   this->setWavelength(m_Wavelength);
   this->setHKL(HKL);
 }
@@ -117,15 +121,18 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
  * @param goniometer :: a 3x3 rotation matrix
  * @return
  */
-Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
-           double m_Wavelength, const Mantid::Kernel::V3D &HKL,
-           const Mantid::Kernel::Matrix<double> &goniometer)
+Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID, double m_Wavelength,
+           const Mantid::Kernel::V3D &HKL, const Mantid::Kernel::Matrix<double> &goniometer)
     : BasePeak(goniometer) {
+  // Initialization of m_inst, sourcePos, m_samplePos
   this->setInstrument(m_inst);
+  // Initialization of m_detectorID, detPos, m_det, m_row, m_col, m_bankName
   this->setDetectorID(m_detectorID);
+  // Initialization of m_initialEnergy, m_finalEnergy
   this->setWavelength(m_Wavelength);
   this->setHKL(HKL);
 }
+
 //----------------------------------------------------------------------------------------------
 /** Constructor
  *
@@ -134,10 +141,11 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
  * @param m_Wavelength :: incident neutron wavelength, in Angstroms
  * @return
  */
-Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering,
-           double m_Wavelength)
-    : BasePeak() {
+Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering, double m_Wavelength)
+    : BasePeak(), m_row(-1), m_col(-1) {
+  // Initialization of m_inst, sourcePos, m_samplePos
   this->setInstrument(m_inst);
+  // Initialization of m_initialEnergy, m_finalEnergy
   this->setWavelength(m_Wavelength);
   m_detectorID = -1;
   // get the approximate location of the detector
@@ -151,30 +159,35 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering,
  * @return
  */
 Peak::Peak(const Peak &other)
-    : BasePeak(other), m_inst(other.m_inst), m_det(other.m_det),
-      m_detectorID(other.m_detectorID), m_initialEnergy(other.m_initialEnergy),
-      m_finalEnergy(other.m_finalEnergy), sourcePos(other.sourcePos),
-      samplePos(other.samplePos), detPos(other.detPos),
-      m_detIDs(other.m_detIDs) {}
+    : BasePeak(other), m_inst(other.m_inst), m_det(other.m_det), m_bankName(other.m_bankName), m_row(other.m_row),
+      m_col(other.m_col), m_detectorID(other.m_detectorID), m_initialEnergy(other.m_initialEnergy),
+      m_finalEnergy(other.m_finalEnergy), sourcePos(other.sourcePos), detPos(other.detPos), m_detIDs(other.m_detIDs) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor making a Peak from IPeak interface
  *
- * @param ipeak :: const reference to an IPeak object
+ * @param ipeak :: const reference to an IPeak object though actually
+ * referencing a Peak object.
  * @return
  */
 Peak::Peak(const Geometry::IPeak &ipeak)
-    : BasePeak(ipeak), m_detectorID(ipeak.getDetectorID()),
-      m_initialEnergy(ipeak.getInitialEnergy()),
-      m_finalEnergy(ipeak.getFinalEnergy()) {
-  setInstrument(ipeak.getInstrument());
-  detid_t id = ipeak.getDetectorID();
-  if (id >= 0) {
+    : BasePeak(ipeak), m_initialEnergy(ipeak.getInitialEnergy()), m_finalEnergy(ipeak.getFinalEnergy()) {
+  const auto *peak = dynamic_cast<const Peak *>(&ipeak);
+  if (!peak)
+    throw std::invalid_argument("Cannot construct a Peak from this non-Peak object");
+  setInstrument(peak->getInstrument());
+  detid_t id = peak->getDetectorID();
+  if (id >= 0)
     setDetectorID(id);
-  }
-  if (const auto *peak = dynamic_cast<const Peak *>(&ipeak)) {
-    this->m_detIDs = peak->m_detIDs;
-  }
+  this->m_detIDs = peak->m_detIDs;
+}
+
+//----------------------------------------------------------------------------------------------
+Peak::Peak(const Mantid::DataObjects::LeanElasticPeak &lpeak, const Geometry::Instrument_const_sptr &inst,
+           boost::optional<double> detectorDistance)
+    : BasePeak(lpeak) {
+  this->setInstrument(inst);
+  this->setQLabFrame(lpeak.getQLabFrame(), std::move(detectorDistance));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -185,8 +198,7 @@ Peak::Peak(const Geometry::IPeak &ipeak)
  */
 void Peak::setWavelength(double wavelength) {
   // Velocity of the neutron (non-relativistic)
-  double velocity = PhysicalConstants::h /
-                    (wavelength * 1e-10 * PhysicalConstants::NeutronMass);
+  double velocity = PhysicalConstants::h / (wavelength * 1e-10 * PhysicalConstants::NeutronMass);
   // Energy in J of the neutron
   double energy = PhysicalConstants::NeutronMass * velocity * velocity / 2.0;
   // Convert to meV
@@ -239,8 +251,7 @@ void Peak::setDetectorID(int id) {
     return;
 
   // Use the parent if the grandparent is the instrument
-  Instrument_const_sptr instrument =
-      std::dynamic_pointer_cast<const Instrument>(parent);
+  Instrument_const_sptr instrument = std::dynamic_pointer_cast<const Instrument>(parent);
   if (instrument)
     return;
   // Use the grand-parent whenever possible
@@ -252,8 +263,7 @@ void Peak::setDetectorID(int id) {
   }
 
   // Special for rectangular detectors: find the row and column.
-  RectangularDetector_const_sptr retDet =
-      std::dynamic_pointer_cast<const RectangularDetector>(parent);
+  RectangularDetector_const_sptr retDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
   if (!retDet)
     return;
   std::pair<int, int> xy = retDet->getXYForDetectorID(m_detectorID);
@@ -310,7 +320,7 @@ void Peak::setInstrument(const Geometry::Instrument_const_sptr &inst) {
                                                "instrument");
 
   sourcePos = sourceObj->getPos();
-  samplePos = sampleObj->getPos();
+  m_samplePos = sampleObj->getPos();
 }
 
 //----------------------------------------------------------------------------------------------
@@ -320,12 +330,37 @@ Geometry::IDetector_const_sptr Peak::getDetector() const { return m_det; }
 /** Return a shared ptr to the instrument for this peak. */
 Geometry::Instrument_const_sptr Peak::getInstrument() const { return m_inst; }
 
-/** Return a shared ptr to the reference frame from the instrument for this
- * peak. */
-std::shared_ptr<const Geometry::ReferenceFrame>
-Peak::getReferenceFrame() const {
-  return m_inst->getReferenceFrame();
-}
+/** Return a shared ptr to the reference frame from the instrument for this peak. */
+std::shared_ptr<const Geometry::ReferenceFrame> Peak::getReferenceFrame() const { return m_inst->getReferenceFrame(); }
+
+/// For RectangularDetectors only, returns the row (y) of the pixel of the detector or -1 if not found
+int Peak::getRow() const { return m_row; }
+
+/**
+ * @brief For RectangularDetectors only, sets the row (y) of the pixel of the detector
+ * @param row :: row value
+ */
+void Peak::setRow(int row) { m_row = row; }
+
+/// For RectangularDetectors only, returns the column (x) of the pixel of the detector or -1 if not found
+int Peak::getCol() const { return m_col; }
+
+/**
+ * @brief For RectangularDetectors only, sets the column (x) of the pixel of the detector
+ * @param col :: col value
+ */
+void Peak::setCol(int col) { m_col = col; }
+
+/** Find the name of the bank that is the parent of the detector. This works
+ * best for RectangularDetector instruments (goes up two levels)
+ * @return name of the bank.
+ */
+std::string Peak::getBankName() const { return m_bankName; }
+
+/** Set the BankName of this peak
+ * @param bankName :: index to set
+ */
+void Peak::setBankName(std::string bankName) { this->m_bankName = std::move(bankName); }
 
 // -------------------------------------------------------------------------------------
 /** Calculate the neutron wavelength (in angstroms) at the peak
@@ -337,8 +372,7 @@ double Peak::getWavelength() const {
   // v = sqrt(2.0 * E / m)
   double velocity = sqrt(2.0 * energy / PhysicalConstants::NeutronMass);
   // wavelength = h / mv
-  double wavelength =
-      PhysicalConstants::h / (PhysicalConstants::NeutronMass * velocity);
+  double wavelength = PhysicalConstants::h / (PhysicalConstants::NeutronMass * velocity);
   // Return it in angstroms
   return wavelength * 1e10;
 }
@@ -367,8 +401,8 @@ double Peak::getTOF() const {
 /** Calculate the scattering angle of the peak  */
 double Peak::getScattering() const {
   // The detector is at 2 theta scattering angle
-  V3D beamDir = samplePos - sourcePos;
-  V3D detDir = detPos - samplePos;
+  V3D beamDir = m_samplePos - sourcePos;
+  V3D detDir = detPos - m_samplePos;
 
   return detDir.angle(beamDir);
 }
@@ -377,7 +411,7 @@ double Peak::getScattering() const {
 /** Calculate the azimuthal angle of the peak  */
 double Peak::getAzimuthal() const {
   // The detector is at 2 theta scattering angle
-  V3D detDir = detPos - samplePos;
+  V3D detDir = detPos - m_samplePos;
 
   return atan2(detDir.Y(), detDir.X());
 }
@@ -386,8 +420,8 @@ double Peak::getAzimuthal() const {
 /** Calculate the d-spacing of the peak, in 1/Angstroms  */
 double Peak::getDSpacing() const {
   // The detector is at 2 theta scattering angle
-  V3D beamDir = samplePos - sourcePos;
-  V3D detDir = detPos - samplePos;
+  V3D beamDir = m_samplePos - sourcePos;
+  V3D detDir = detPos - m_samplePos;
 
   double two_theta;
   try {
@@ -398,11 +432,9 @@ double Peak::getDSpacing() const {
 
   // In general case (2*pi/d)^2=k_i^2+k_f^2-2*k_i*k_f*cos(two_theta)
   // E_i,f=k_i,f^2*hbar^2/(2 m)
-  return 1e10 * PhysicalConstants::h /
-         sqrt(2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV) /
+  return 1e10 * PhysicalConstants::h / sqrt(2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV) /
          sqrt(getInitialEnergy() + getFinalEnergy() -
-              2.0 * sqrt(getInitialEnergy() * getFinalEnergy()) *
-                  cos(two_theta));
+              2.0 * sqrt(getInitialEnergy() * getFinalEnergy()) * cos(two_theta));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -413,10 +445,10 @@ double Peak::getDSpacing() const {
  * */
 Mantid::Kernel::V3D Peak::getQLabFrame() const {
   // Normalized beam direction
-  V3D beamDir = samplePos - sourcePos;
+  V3D beamDir = m_samplePos - sourcePos;
   beamDir /= beamDir.norm();
   // Normalized detector direction
-  V3D detDir = (detPos - samplePos);
+  V3D detDir = (detPos - m_samplePos);
   detDir /= detDir.norm();
 
   // Energy in J of the neutron
@@ -462,8 +494,7 @@ Mantid::Kernel::V3D Peak::getQSampleFrame() const {
  * @param detectorDistance :: distance between the sample and the detector.
  *        Used to give a valid TOF. You do NOT need to explicitly set this.
  */
-void Peak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
-                           boost::optional<double> detectorDistance) {
+void Peak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame, boost::optional<double> detectorDistance) {
   V3D Qlab = getGoniometerMatrix() * QSampleFrame;
   this->setQLabFrame(Qlab, detectorDistance);
 }
@@ -484,8 +515,7 @@ void Peak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
  *this is provided. Then we do not
  * ray trace to find the intersecing detector.
  */
-void Peak::setQLabFrame(const Mantid::Kernel::V3D &qLab,
-                        boost::optional<double> detectorDistance) {
+void Peak::setQLabFrame(const Mantid::Kernel::V3D &qLab, boost::optional<double> detectorDistance) {
   if (!this->m_inst) {
     throw std::invalid_argument("Setting QLab without an instrument would lead "
                                 "to an inconsistent state for the Peak");
@@ -494,8 +524,8 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &qLab,
   m_detectorID = -1;
   detPos = V3D();
   m_det = IDetector_sptr();
-  setRow(-1);
-  setCol(-1);
+  m_row = -1;
+  m_col = -1;
   setBankName("None");
 
   /* The q-vector direction of the peak is = goniometer * ub * hkl_vector
@@ -511,23 +541,20 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &qLab,
   if (norm_q == 0.0)
     throw std::invalid_argument("Peak::setQLabFrame(): Q cannot be 0,0,0.");
 
-  std::shared_ptr<const ReferenceFrame> refFrame =
-      this->m_inst->getReferenceFrame();
+  std::shared_ptr<const ReferenceFrame> refFrame = this->m_inst->getReferenceFrame();
   const V3D refBeamDir = refFrame->vecPointingAlongBeam();
   // Default for ki-kf has -q
   const double qSign = (convention != "Crystallography") ? 1.0 : -1.0;
   const double qBeam = qLab.scalar_prod(refBeamDir) * qSign;
 
   if (qBeam == 0.0)
-    throw std::invalid_argument(
-        "Peak::setQLabFrame(): Q cannot be 0 in the beam direction.");
+    throw std::invalid_argument("Peak::setQLabFrame(): Q cannot be 0 in the beam direction.");
 
   const double one_over_wl = (norm_q * norm_q) / (2.0 * qBeam);
   const double wl = (2.0 * M_PI) / one_over_wl;
   if (wl < 0.0) {
     std::ostringstream mess;
-    mess << "Peak::setQLabFrame(): Wavelength found was negative (" << wl
-         << " Ang)! This Q is not physical.";
+    mess << "Peak::setQLabFrame(): Wavelength found was negative (" << wl << " Ang)! This Q is not physical.";
     throw std::invalid_argument(mess.str());
   }
 
@@ -540,7 +567,7 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &qLab,
 
   // Use the given detector distance to find the detector position.
   if (detectorDistance.is_initialized()) {
-    detPos = samplePos + detectorDir * detectorDistance.get();
+    detPos = m_samplePos + detectorDir * detectorDistance.get();
     // We do not-update the detector as by manually setting the distance the
     // client seems to know better.
   } else {
@@ -559,15 +586,24 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &qLab,
 }
 
 V3D Peak::getVirtualDetectorPosition(const V3D &detectorDir) const {
-  const auto component =
-      getInstrument()->getComponentByName("extended-detector-space");
+  const auto component = getInstrument()->getComponentByName("extended-detector-space");
   if (!component) {
     return detectorDir; // the best idea we have is just the direction
   }
   const auto object = std::dynamic_pointer_cast<const ObjComponent>(component);
-  const auto distance =
-      object->shape()->distance(Geometry::Track(samplePos, detectorDir));
+  const auto distance = object->shape()->distance(Geometry::Track(m_samplePos, detectorDir));
   return detectorDir * distance;
+}
+
+double Peak::getValueByColName(std::string name) const {
+  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+  std::map<std::string, double> colVals = {
+      {"detid", double(m_detectorID)}, {"row", double(m_row)}, {"col", double(m_col)}};
+  auto it = colVals.find(name);
+  if (it != colVals.end())
+    return it->second;
+  else
+    return BasePeak::getValueByColName(name);
 }
 
 /** After creating a peak using the Q in the lab frame,
@@ -594,7 +630,7 @@ bool Peak::findDetector() {
  */
 bool Peak::findDetector(const InstrumentRayTracer &tracer) {
   // Scattered beam direction
-  const V3D beam = normalize(detPos - samplePos);
+  const V3D beam = normalize(detPos - m_samplePos);
 
   return findDetector(beam, tracer);
 }
@@ -606,8 +642,7 @@ bool Peak::findDetector(const InstrumentRayTracer &tracer) {
  * @param tracer : Ray tracer to use for detector finding
  * @return True if a detector has been found
  */
-bool Peak::findDetector(const Mantid::Kernel::V3D &beam,
-                        const InstrumentRayTracer &tracer) {
+bool Peak::findDetector(const Mantid::Kernel::V3D &beam, const InstrumentRayTracer &tracer) {
   bool found = false;
   // Create a ray tracer
   tracer.traceFromSample(beam);
@@ -658,59 +693,27 @@ double Peak::getFinalEnergy() const { return m_finalEnergy; }
 double Peak::getInitialEnergy() const { return m_initialEnergy; }
 
 /** Get the difference between the initial and final neutron energy in meV */
-double Peak::getEnergyTransfer() const {
-  return getInitialEnergy() - getFinalEnergy();
-}
-
-/** Set sample position
- *
- * @ doubles x,y,z-> samplePos(x), samplePos(y), samplePos(z)
- */
-void Peak::setSamplePos(double samX, double samY, double samZ) {
-
-  this->samplePos[0] = samX;
-  this->samplePos[1] = samY;
-  this->samplePos[2] = samZ;
-}
-
-/** Set sample position
- *
- * @param XYZ :: vector x,y,z-> samplePos(x), samplePos(y), samplePos(z)
- */
-void Peak::setSamplePos(const Mantid::Kernel::V3D &XYZ) {
-
-  this->samplePos[0] = XYZ[0];
-  this->samplePos[1] = XYZ[1];
-  this->samplePos[2] = XYZ[2];
-}
+double Peak::getEnergyTransfer() const { return getInitialEnergy() - getFinalEnergy(); }
 
 /** Set the final energy
  * @param m_finalEnergy :: final energy in meV   */
-void Peak::setFinalEnergy(double m_finalEnergy) {
-  this->m_finalEnergy = m_finalEnergy;
-}
+void Peak::setFinalEnergy(double m_finalEnergy) { this->m_finalEnergy = m_finalEnergy; }
 
 /** Set the initial energy
  * @param m_initialEnergy :: initial energy in meV   */
-void Peak::setInitialEnergy(double m_initialEnergy) {
-  this->m_initialEnergy = m_initialEnergy;
-}
+void Peak::setInitialEnergy(double m_initialEnergy) { this->m_initialEnergy = m_initialEnergy; }
 
 // -------------------------------------------------------------------------------------
 /** Return the detector position vector */
 Mantid::Kernel::V3D Peak::getDetPos() const { return detPos; }
 
 // -------------------------------------------------------------------------------------
-/** Return the sample position vector */
-Mantid::Kernel::V3D Peak::getSamplePos() const { return samplePos; }
-
-// -------------------------------------------------------------------------------------
 /** Return the L1 flight path length (source to sample), in meters. */
-double Peak::getL1() const { return (samplePos - sourcePos).norm(); }
+double Peak::getL1() const { return (m_samplePos - sourcePos).norm(); }
 
 // -------------------------------------------------------------------------------------
 /** Return the L2 flight path length (sample to detector), in meters. */
-double Peak::getL2() const { return (detPos - samplePos).norm(); }
+double Peak::getL2() const { return (detPos - m_samplePos).norm(); }
 
 /**
  * @brief Assignement operator overload
@@ -722,11 +725,14 @@ Peak &Peak::operator=(const Peak &other) {
     BasePeak::operator=(other);
     m_inst = other.m_inst;
     m_det = other.m_det;
+    m_bankName = other.m_bankName;
+    m_row = other.m_row;
+    m_col = other.m_col;
     m_detectorID = other.m_detectorID;
     m_initialEnergy = other.m_initialEnergy;
     m_finalEnergy = other.m_finalEnergy;
     sourcePos = other.sourcePos;
-    samplePos = other.samplePos;
+    m_samplePos = other.m_samplePos;
     detPos = other.detPos;
     m_detIDs = other.m_detIDs;
   }
@@ -736,9 +742,7 @@ Peak &Peak::operator=(const Peak &other) {
 /**
  Forwarding function. Exposes the detector position directly.
  */
-Mantid::Kernel::V3D Peak::getDetectorPositionNoCheck() const {
-  return getDetector()->getPos();
-}
+Mantid::Kernel::V3D Peak::getDetectorPositionNoCheck() const { return getDetector()->getPos(); }
 
 /**
  Forwarding function. Exposes the detector position directly, but checks that

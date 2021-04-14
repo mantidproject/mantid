@@ -18,9 +18,7 @@ class GroupWorkspacesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static GroupWorkspacesTest *createSuite() {
-    return new GroupWorkspacesTest();
-  }
+  static GroupWorkspacesTest *createSuite() { return new GroupWorkspacesTest(); }
 
   static void destroySuite(GroupWorkspacesTest *suite) { delete suite; }
 
@@ -60,8 +58,7 @@ public:
   }
 
   void test_Exec_With_Single_Workspace_Succeeds() {
-    std::vector<std::string> inputs(
-        1, "test_Exec_With_Two_Workspaces_Of_Same_Type_Succeeds");
+    std::vector<std::string> inputs(1, "test_Exec_With_Two_Workspaces_Of_Same_Type_Succeeds");
     addTestMatrixWorkspacesToADS(inputs);
 
     const std::string groupName = inputs[0] + "_grouped";
@@ -72,13 +69,11 @@ public:
   }
 
   void test_Exec_With_Two_Workspaces_Of_Same_Type_Succeeds() {
-    std::vector<std::string> inputs(
-        2, "test_Exec_With_Two_Workspaces_Of_Same_Type_Succeeds_1");
+    std::vector<std::string> inputs(2, "test_Exec_With_Two_Workspaces_Of_Same_Type_Succeeds_1");
     inputs[1] = "test_Exec_With_Two_Workspaces_Of_Same_Type_Succeeds_2";
     addTestMatrixWorkspacesToADS(inputs);
 
-    const std::string groupName =
-        "test_Exec_With_Two_Workspaces_Of_Same_Type_Succeeds_grouped";
+    const std::string groupName = "test_Exec_With_Two_Workspaces_Of_Same_Type_Succeeds_grouped";
     TS_ASSERT_THROWS_NOTHING(runAlgorithm(inputs, groupName));
 
     checkGroupExistsWithMembers(groupName, inputs);
@@ -86,22 +81,19 @@ public:
   }
 
   void test_Exec_With_Three_Workspaces_Of_Same_Type_Succeeds() {
-    std::vector<std::string> inputs(
-        3, "test_Exec_With_Two_Workspaces_Of_Same_Type_Succeeds_1");
+    std::vector<std::string> inputs(3, "test_Exec_With_Two_Workspaces_Of_Same_Type_Succeeds_1");
     inputs[1] = "test_Exec_With_Two_Workspaces_Of_Same_Type_Succeeds_2";
     inputs[2] = "test_Exec_With_Two_Workspaces_Of_Same_Type_Succeeds_3";
     addTestMatrixWorkspacesToADS(inputs);
 
-    const std::string groupName =
-        "test_Exec_With_Three_Workspaces_Of_Same_Type_Succeeds_grouped";
+    const std::string groupName = "test_Exec_With_Three_Workspaces_Of_Same_Type_Succeeds_grouped";
     TS_ASSERT_THROWS_NOTHING(runAlgorithm(inputs, groupName));
 
     checkGroupExistsWithMembers(groupName, inputs);
     removeFromADS(groupName, inputs);
   }
 
-  void
-  test_Exec_With_Single_Workspace_And_WorkspaceGroup_Unrolls_Group_And_Adds_Both_Together() {
+  void test_Exec_With_Single_Workspace_And_WorkspaceGroup_Unrolls_Group_And_Adds_Both_Together() {
     // Create Group
     std::vector<std::string> groupNames(3, "test_Exec_With_Single_Workspace_"
                                            "And_WorkspaceGroup_Unrolls_Group_"
@@ -115,9 +107,7 @@ public:
                                        "WorkspaceGroup_Unrolls_Group_And_Adds_"
                                        "Both_Together";
     runAlgorithm(groupNames, inputGroupName);
-    TS_ASSERT_EQUALS(
-        true,
-        Mantid::API::AnalysisDataService::Instance().doesExist(inputGroupName));
+    TS_ASSERT_EQUALS(true, Mantid::API::AnalysisDataService::Instance().doesExist(inputGroupName));
 
     // Single workspace
     std::string singleWS = "test_Exec_With_Single_Workspace_And_WorkspaceGroup_"
@@ -136,14 +126,11 @@ public:
     groupNames.reserve(4);
     groupNames.emplace_back(singleWS);
     checkGroupExistsWithMembers(finalGroupName, groupNames);
-    TS_ASSERT_EQUALS(
-        false,
-        Mantid::API::AnalysisDataService::Instance().doesExist(inputGroupName));
+    TS_ASSERT_EQUALS(false, Mantid::API::AnalysisDataService::Instance().doesExist(inputGroupName));
     removeFromADS(finalGroupName, groupNames);
   }
 
-  void
-  test_Exec_With_Mixture_Of_TableWorkspace_And_Other_Workspace_Type_Succeeds() {
+  void test_Exec_With_Mixture_Of_TableWorkspace_And_Other_Workspace_Type_Succeeds() {
     std::string matrixWS = "test_Exec_With_Mixture_Of_WorkspaceTypes_Not_"
                            "Including_TableWorkspace_Throws_Error_Matrix";
     addTestMatrixWorkspaceToADS(matrixWS);
@@ -161,8 +148,7 @@ public:
     removeFromADS(groupName, inputs);
   }
 
-  void
-  test_Exec_With_Mixture_Of_WorkspaceTypes_Not_Including_TableWorkspace_Succeeds() {
+  void test_Exec_With_Mixture_Of_WorkspaceTypes_Not_Including_TableWorkspace_Succeeds() {
     std::string matrixWS = "test_Exec_With_Mixture_Of_WorkspaceTypes_Not_"
                            "Including_TableWorkspace_Succeeds_Matrix";
     addTestMatrixWorkspaceToADS(matrixWS);
@@ -182,8 +168,7 @@ public:
   }
 
   void test_GlobExpression_Star_Succeeds() {
-    std::vector<std::string> inputs{"test_name_1", "test_name_2",
-                                    "test_name_20"};
+    std::vector<std::string> inputs{"test_name_1", "test_name_2", "test_name_20"};
     addTestMatrixWorkspacesToADS(inputs);
     std::string glob{"test_name_*"};
     std::string groupName{"test_name_output"};
@@ -196,8 +181,7 @@ public:
   }
 
   void test_GlobExpression_Question_Succeeds() {
-    std::vector<std::string> inputs{"test_name_1", "test_name_2",
-                                    "test_name_20"};
+    std::vector<std::string> inputs{"test_name_1", "test_name_2", "test_name_20"};
     addTestMatrixWorkspacesToADS(inputs);
     std::string glob{"test_name_?"};
     std::string groupName{"test_name_output"};
@@ -213,8 +197,7 @@ public:
 
   void test_GlobExpression_Brackets_Succeeds() {
 
-    std::vector<std::string> inputs{"test_name_1", "test_name_2",
-                                    "test_name_3"};
+    std::vector<std::string> inputs{"test_name_1", "test_name_2", "test_name_3"};
     addTestMatrixWorkspacesToADS(inputs);
     std::string glob{"test_name_[0-2]"};
     std::string groupName{"test_name_output"};
@@ -228,8 +211,7 @@ public:
 
   void test_GlobExpression_Brackets_Succeeds_2() {
 
-    std::vector<std::string> inputs{"test_name_1", "test_name_2",
-                                    "test_name_3"};
+    std::vector<std::string> inputs{"test_name_1", "test_name_2", "test_name_3"};
     addTestMatrixWorkspacesToADS(inputs);
     std::string glob{"test_name_[0-3]"};
     std::string groupName{"test_name_output"};
@@ -243,8 +225,7 @@ public:
 
   void test_GlobExpression_List_And_Glob_Succeeds() {
 
-    std::vector<std::string> inputs{"test_name_1", "test_name_2",
-                                    "test_name_3"};
+    std::vector<std::string> inputs{"test_name_1", "test_name_2", "test_name_3"};
     addTestMatrixWorkspacesToADS(inputs);
     std::string glob{"test_name_[0-2]"};
     std::string groupName{"test_name_output"};
@@ -258,8 +239,7 @@ public:
 
   void test_GlobExpression_List_And_Glob_Succeeds_2() {
 
-    std::vector<std::string> inputs{"test_name_1", "test_name_2",
-                                    "test_name_3"};
+    std::vector<std::string> inputs{"test_name_1", "test_name_2", "test_name_3"};
     addTestMatrixWorkspacesToADS(inputs);
     std::string glob{"test_name_[0-3]"};
     std::string groupName{"test_name_output"};
@@ -285,8 +265,7 @@ public:
   }
 
   void test_GlobExpression_EscapedCharacter_Succeeds_2() {
-    std::vector<std::string> inputs{"test_name_1", "test_name_2",
-                                    "test_name_3"};
+    std::vector<std::string> inputs{"test_name_1", "test_name_2", "test_name_3"};
     addTestMatrixWorkspacesToADS(inputs);
     std::string glob{"test_name_[2-3]"};
     std::string groupName{"test_name_output"};
@@ -302,73 +281,59 @@ public:
   //===========================================
 
   void test_Exec_With_Input_That_Is_Not_In_ADS_Fails() {
-    std::vector<std::string> inputs(
-        2, "test_Exec_With_Input_That_Is_Not_In_ADS_Fails_1");
+    std::vector<std::string> inputs(2, "test_Exec_With_Input_That_Is_Not_In_ADS_Fails_1");
     inputs[1] = "test_Exec_With_Two_Workspaces_Of_Same_Type_Succeeds_2";
     addTestMatrixWorkspacesToADS(inputs);
 
     // Add another to the input list
     inputs.reserve(3);
-    inputs.emplace_back(
-        "test_Exec_With_Two_Workspaces_Of_Same_Type_Succeeds_3");
+    inputs.emplace_back("test_Exec_With_Two_Workspaces_Of_Same_Type_Succeeds_3");
 
-    const std::string groupName =
-        "test_Exec_With_Input_That_Is_Not_In_ADS_Fails";
+    const std::string groupName = "test_Exec_With_Input_That_Is_Not_In_ADS_Fails";
     runAlgorithm(inputs, groupName, true);
 
-    TS_ASSERT_EQUALS(
-        false,
-        Mantid::API::AnalysisDataService::Instance().doesExist(groupName));
+    TS_ASSERT_EQUALS(false, Mantid::API::AnalysisDataService::Instance().doesExist(groupName));
     removeFromADS("", inputs);
   }
 
   void test_GlobExpression_Mismatched_Brackets_Fails() {
 
-    std::vector<std::string> inputs{"test_name_1", "test_name_2",
-                                    "test_name_3"};
+    std::vector<std::string> inputs{"test_name_1", "test_name_2", "test_name_3"};
     addTestMatrixWorkspacesToADS(inputs);
     std::string glob{"test_name_[1-3]]"};
     std::string groupName{"test_name_output"};
 
     runAlgorithm(glob, groupName, true);
 
-    TS_ASSERT_EQUALS(
-        false,
-        Mantid::API::AnalysisDataService::Instance().doesExist(groupName));
+    TS_ASSERT_EQUALS(false, Mantid::API::AnalysisDataService::Instance().doesExist(groupName));
 
     removeFromADS("", inputs);
   }
 
   void test_GlobExpression_Fails() {
 
-    std::vector<std::string> inputs{"test_name_1", "test_name_2",
-                                    "test_name_3"};
+    std::vector<std::string> inputs{"test_name_1", "test_name_2", "test_name_3"};
     addTestMatrixWorkspacesToADS(inputs);
     std::string glob{"test_name_1"};
     std::string groupName{"test_name_output"};
 
     runAlgorithm(glob, groupName, true);
 
-    TS_ASSERT_EQUALS(
-        false,
-        Mantid::API::AnalysisDataService::Instance().doesExist(groupName));
+    TS_ASSERT_EQUALS(false, Mantid::API::AnalysisDataService::Instance().doesExist(groupName));
 
     removeFromADS("", inputs);
   }
 
   void test_GlobExpression_Empty_Output_Fails() {
 
-    std::vector<std::string> inputs{"test_name_1", "test_name_2",
-                                    "test_name_3"};
+    std::vector<std::string> inputs{"test_name_1", "test_name_2", "test_name_3"};
     addTestMatrixWorkspacesToADS(inputs);
     std::string glob{"test_name_[!1-3]"};
     std::string groupName{"test_name_output"};
 
     runAlgorithm(glob, groupName, true);
 
-    TS_ASSERT_EQUALS(
-        false,
-        Mantid::API::AnalysisDataService::Instance().doesExist(groupName));
+    TS_ASSERT_EQUALS(false, Mantid::API::AnalysisDataService::Instance().doesExist(groupName));
 
     removeFromADS("", inputs);
   }
@@ -382,9 +347,7 @@ public:
 
     runAlgorithm(glob, groupName, true);
 
-    TS_ASSERT_EQUALS(
-        false,
-        Mantid::API::AnalysisDataService::Instance().doesExist(groupName));
+    TS_ASSERT_EQUALS(false, Mantid::API::AnalysisDataService::Instance().doesExist(groupName));
 
     removeFromADS("", inputs);
   }
@@ -438,8 +401,7 @@ private:
     ads.add(name, ws);
   }
 
-  void runAlgorithm(const std::vector<std::string> &inputs,
-                    const std::string &outputWorkspace,
+  void runAlgorithm(const std::vector<std::string> &inputs, const std::string &outputWorkspace,
                     bool errorExpected = false) {
     Mantid::Algorithms::GroupWorkspaces alg;
     alg.initialize();
@@ -449,16 +411,13 @@ private:
       TS_ASSERT_THROWS_ANYTHING(alg.setProperty("InputWorkspaces", inputs));
     } else {
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", inputs));
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setProperty("OutputWorkspace", outputWorkspace));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", outputWorkspace));
       alg.execute();
       TS_ASSERT(alg.isExecuted());
     }
   }
 
-  void runAlgorithm(const std::string &globExpression,
-                    const std::string &outputWorkspace,
-                    bool errorExpected = false) {
+  void runAlgorithm(const std::string &globExpression, const std::string &outputWorkspace, bool errorExpected = false) {
     Mantid::Algorithms::GroupWorkspaces alg;
     alg.initialize();
     alg.setRethrows(true);
@@ -468,17 +427,14 @@ private:
       alg.setProperty("OutputWorkspace", outputWorkspace);
       TS_ASSERT_THROWS_ANYTHING(alg.execute());
     } else {
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setProperty("GlobExpression", globExpression));
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setProperty("OutputWorkspace", outputWorkspace));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("GlobExpression", globExpression));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", outputWorkspace));
       alg.execute();
       TS_ASSERT(alg.isExecuted());
     }
   }
 
-  void runAlgorithm(const std::vector<std::string> &inputs,
-                    const std::string &globExpression,
+  void runAlgorithm(const std::vector<std::string> &inputs, const std::string &globExpression,
                     const std::string &outputWorkspace) {
     Mantid::Algorithms::GroupWorkspaces alg;
     alg.initialize();
@@ -486,19 +442,16 @@ private:
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", inputs));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GlobExpression", globExpression));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("OutputWorkspace", outputWorkspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", outputWorkspace));
     alg.execute();
     TS_ASSERT(alg.isExecuted());
   }
-  void checkGroupExistsWithMembers(const std::string &groupName,
-                                   std::vector<std::string> expectedMembers) {
+  void checkGroupExistsWithMembers(const std::string &groupName, std::vector<std::string> expectedMembers) {
     using namespace Mantid::API;
 
     auto &ads = AnalysisDataService::Instance();
     WorkspaceGroup_sptr result;
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 ads.retrieveWS<WorkspaceGroup>(groupName));
+    TS_ASSERT_THROWS_NOTHING(result = ads.retrieveWS<WorkspaceGroup>(groupName));
     std::vector<std::string> grpVec = result->getNames();
     TS_ASSERT_EQUALS(expectedMembers.size(), grpVec.size());
 
@@ -512,8 +465,7 @@ private:
     }
   }
 
-  void removeFromADS(const std::string &groupName,
-                     const std::vector<std::string> &members) {
+  void removeFromADS(const std::string &groupName, const std::vector<std::string> &members) {
     auto &ads = Mantid::API::AnalysisDataService::Instance();
 
     for (const auto &member : members) {

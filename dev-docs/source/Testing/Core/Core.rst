@@ -3,9 +3,9 @@
 .. raw:: html
 
     <style> .r {color:#FF0000; font-weight:bold} </style>
-    <style> .g {color:#008000; font-weight:bold} </style>    
-    <style> .b {color:#0000FF; font-weight:bold} </style> 
-    <style> .o {color:#FF8C00; font-weight:bold} </style> 
+    <style> .g {color:#008000; font-weight:bold} </style>
+    <style> .b {color:#0000FF; font-weight:bold} </style>
+    <style> .o {color:#FF8C00; font-weight:bold} </style>
 
 
 .. role:: r

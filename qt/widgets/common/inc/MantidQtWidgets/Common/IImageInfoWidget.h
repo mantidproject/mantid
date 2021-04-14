@@ -19,8 +19,7 @@ class EXPORT_OPT_MANTIDQT_COMMON IImageInfoWidget : public QTableWidget {
 public:
   IImageInfoWidget(QWidget *parent = nullptr) : QTableWidget(0, 0, parent) {}
 
-  virtual void cursorAt(const double x, const double y,
-                        const double signal) = 0;
+  virtual void cursorAt(const double x, const double y, const double signal) = 0;
   virtual void showInfo(const ImageInfoModel::ImageInfo &info) = 0;
   virtual void setWorkspace(const Mantid::API::Workspace_sptr &ws) = 0;
 };

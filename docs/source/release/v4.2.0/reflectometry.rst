@@ -4,7 +4,7 @@ Reflectometry Changes
 
 .. contents:: Table of Contents
    :local:
-   
+
 
 ISIS Reflectometry Interface
 ----------------------------
@@ -14,7 +14,7 @@ ISIS Reflectometry Interface
    :width: 500px
    :align: right
    :alt: New features on the ISIS Reflectometry interface
-        
+
    *New features on the ISIS Reflectometry interface*
 
 New

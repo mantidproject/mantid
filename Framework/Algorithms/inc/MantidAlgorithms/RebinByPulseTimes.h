@@ -28,16 +28,12 @@ public:
 
   const std::string category() const override;
   /// Algorithm's seeAlso
-  const std::vector<std::string> seeAlso() const override {
-    return {"Rebin", "RebinByTimeAtSample"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"Rebin", "RebinByTimeAtSample"}; }
 
 private:
   /// Do the algorithm specific histogramming.
-  void doHistogramming(Mantid::API::IEventWorkspace_sptr inWS,
-                       Mantid::API::MatrixWorkspace_sptr outputWS,
-                       Mantid::MantidVecPtr &XValues_new,
-                       Mantid::MantidVec &OutXValues_scaled,
+  void doHistogramming(Mantid::API::IEventWorkspace_sptr inWS, Mantid::API::MatrixWorkspace_sptr outputWS,
+                       Mantid::MantidVecPtr &XValues_new, Mantid::MantidVec &OutXValues_scaled,
                        Mantid::API::Progress &prog) override;
 
   /// Get the minimum x across all spectra in workspace

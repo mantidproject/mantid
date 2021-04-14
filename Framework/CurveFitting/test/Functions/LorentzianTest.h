@@ -131,12 +131,10 @@ public:
 private:
   class TestableLorentzian : public Lorentzian {
   public:
-    void functionLocal(double *out, const double *xValues,
-                       const size_t nData) const override {
+    void functionLocal(double *out, const double *xValues, const size_t nData) const override {
       Lorentzian::functionLocal(out, xValues, nData);
     }
-    void functionDerivLocal(Mantid::API::Jacobian *out, const double *xValues,
-                            const size_t nData) override {
+    void functionDerivLocal(Mantid::API::Jacobian *out, const double *xValues, const size_t nData) override {
       Lorentzian::functionDerivLocal(out, xValues, nData);
     }
   };

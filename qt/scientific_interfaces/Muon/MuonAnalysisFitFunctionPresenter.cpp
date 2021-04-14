@@ -19,9 +19,8 @@ namespace CustomInterfaces {
  * @param fitBrowser :: [input] Non-owning pointer to muon fit property browser
  * @param funcBrowser :: [input] Non-owning pointer to function browser
  */
-MuonAnalysisFitFunctionPresenter::MuonAnalysisFitFunctionPresenter(
-    QObject *parent, IMuonFitFunctionModel *fitBrowser,
-    IFunctionBrowser *funcBrowser)
+MuonAnalysisFitFunctionPresenter::MuonAnalysisFitFunctionPresenter(QObject *parent, IMuonFitFunctionModel *fitBrowser,
+                                                                   IFunctionBrowser *funcBrowser)
     : QObject(parent), m_fitBrowser(fitBrowser), m_funcBrowser(funcBrowser),
       m_multiFitState(Muon::MultiFitState::Disabled) {
   doConnect();
@@ -34,21 +33,14 @@ MuonAnalysisFitFunctionPresenter::MuonAnalysisFitFunctionPresenter(
  */
 void MuonAnalysisFitFunctionPresenter::doConnect() {
   if (const QObject *fitBrowser = dynamic_cast<QObject *>(m_fitBrowser)) {
-    connect(fitBrowser, SIGNAL(functionUpdateRequested()), this,
-            SLOT(updateFunction()));
-    connect(fitBrowser, SIGNAL(functionUpdateAndFitRequested(bool)), this,
-            SLOT(updateFunctionAndFit(bool)));
-    connect(fitBrowser, SIGNAL(fittingDone(const QString &)), this,
-            SLOT(handleFitFinished(const QString &)));
-    connect(fitBrowser, SIGNAL(functionCleared()), this,
-            SLOT(handleModelCleared()));
-    connect(fitBrowser, SIGNAL(errorsEnabled(bool)), this,
-            SLOT(handleErrorsEnabled(bool)));
+    connect(fitBrowser, SIGNAL(functionUpdateRequested()), this, SLOT(updateFunction()));
+    connect(fitBrowser, SIGNAL(functionUpdateAndFitRequested(bool)), this, SLOT(updateFunctionAndFit(bool)));
+    connect(fitBrowser, SIGNAL(fittingDone(const QString &)), this, SLOT(handleFitFinished(const QString &)));
+    connect(fitBrowser, SIGNAL(functionCleared()), this, SLOT(handleModelCleared()));
+    connect(fitBrowser, SIGNAL(errorsEnabled(bool)), this, SLOT(handleErrorsEnabled(bool)));
     connect(fitBrowser, SIGNAL(fitUndone()), this, SLOT(handleFitFinished()));
-    connect(fitBrowser, SIGNAL(workspacesToFitChanged(int)), this,
-            SLOT(updateNumberOfDatasets(int)));
-    connect(fitBrowser, SIGNAL(userChangedDatasetIndex(int)), this,
-            SLOT(handleDatasetIndexChanged(int)));
+    connect(fitBrowser, SIGNAL(workspacesToFitChanged(int)), this, SLOT(updateNumberOfDatasets(int)));
+    connect(fitBrowser, SIGNAL(userChangedDatasetIndex(int)), this, SLOT(handleDatasetIndexChanged(int)));
   }
   setParameterUpdates(true);
 }
@@ -60,17 +52,12 @@ void MuonAnalysisFitFunctionPresenter::doConnect() {
 void MuonAnalysisFitFunctionPresenter::setParameterUpdates(bool on) {
   if (const QObject *funcBrowser = dynamic_cast<QObject *>(m_funcBrowser)) {
     if (on) {
-      connect(funcBrowser, SIGNAL(functionStructureChanged()), this,
-              SLOT(updateFunction()));
-      connect(funcBrowser,
-              SIGNAL(parameterChanged(const QString &, const QString &)), this,
+      connect(funcBrowser, SIGNAL(functionStructureChanged()), this, SLOT(updateFunction()));
+      connect(funcBrowser, SIGNAL(parameterChanged(const QString &, const QString &)), this,
               SLOT(handleParameterEdited(const QString &, const QString &)));
     } else {
-      disconnect(funcBrowser, SIGNAL(functionStructureChanged()), this,
-                 SLOT(updateFunction()));
-      disconnect(funcBrowser,
-                 SIGNAL(parameterChanged(const QString &, const QString &)),
-                 this,
+      disconnect(funcBrowser, SIGNAL(functionStructureChanged()), this, SLOT(updateFunction()));
+      disconnect(funcBrowser, SIGNAL(parameterChanged(const QString &, const QString &)), this,
                  SLOT(handleParameterEdited(const QString &, const QString &)));
     }
   }
@@ -82,9 +69,8 @@ void MuonAnalysisFitFunctionPresenter::setParameterUpdates(bool on) {
 void MuonAnalysisFitFunctionPresenter::updateFunction() {
   // Check there is still a function to update
   const auto funcString = m_funcBrowser->getFunctionString();
-  const Mantid::API::IFunction_sptr function =
-      funcString.isEmpty() ? nullptr // last function has been removed
-                           : m_funcBrowser->getGlobalFunction();
+  const Mantid::API::IFunction_sptr function = funcString.isEmpty() ? nullptr // last function has been removed
+                                                                    : m_funcBrowser->getGlobalFunction();
   setFunctionInModel(function);
 }
 
@@ -118,8 +104,7 @@ void MuonAnalysisFitFunctionPresenter::updateFunctionAndFit(bool sequential) {
  * browser is hidden).
  * @param wsName :: [input] workspace name - empty if fit undone
  */
-void MuonAnalysisFitFunctionPresenter::handleFitFinished(
-    const QString &wsName) {
+void MuonAnalysisFitFunctionPresenter::handleFitFinished(const QString &wsName) {
   // Don't update if the function browser is hidden
   if (m_multiFitState == Muon::MultiFitState::Enabled) {
     const auto function = m_fitBrowser->getFunction();
@@ -145,8 +130,7 @@ void MuonAnalysisFitFunctionPresenter::handleFitFinished(
  * @param funcIndex :: [input] index of the function (unused)
  * @param paramName :: [input] parameter name (unused)
  */
-void MuonAnalysisFitFunctionPresenter::handleParameterEdited(
-    const QString &funcIndex, const QString &paramName) {
+void MuonAnalysisFitFunctionPresenter::handleParameterEdited(const QString &funcIndex, const QString &paramName) {
   Q_UNUSED(funcIndex);
   Q_UNUSED(paramName);
   updateFunction();
@@ -156,18 +140,14 @@ void MuonAnalysisFitFunctionPresenter::handleParameterEdited(
  * Called when "Clear model" selected on the fit property browser.
  * Clears the function set in the function browser.
  */
-void MuonAnalysisFitFunctionPresenter::handleModelCleared() {
-  m_funcBrowser->clear();
-}
+void MuonAnalysisFitFunctionPresenter::handleModelCleared() { m_funcBrowser->clear(); }
 
 /**
  * Called when user shows/hides parameter errors.
  * Pass this change on to the function browser.
  * @param enabled :: [input] enabled/disabled state of param errors
  */
-void MuonAnalysisFitFunctionPresenter::handleErrorsEnabled(bool enabled) {
-  m_funcBrowser->setErrorsEnabled(enabled);
-}
+void MuonAnalysisFitFunctionPresenter::handleErrorsEnabled(bool enabled) { m_funcBrowser->setErrorsEnabled(enabled); }
 
 /**
  * Called when the number of datasets to fit is changed in the model.
@@ -207,8 +187,7 @@ void MuonAnalysisFitFunctionPresenter::handleDatasetIndexChanged(int index) {
  * the fitting works as it used to pre-Mantid 3.8.
  * @param state :: [input] On/off for multiple fitting mode.
  */
-void MuonAnalysisFitFunctionPresenter::setMultiFitState(
-    Muon::MultiFitState state) {
+void MuonAnalysisFitFunctionPresenter::setMultiFitState(Muon::MultiFitState state) {
   m_fitBrowser->setMultiFittingMode(state == Muon::MultiFitState::Enabled);
   m_multiFitState = state;
 }
@@ -226,10 +205,8 @@ void MuonAnalysisFitFunctionPresenter::setMultiFitState(
  *
  * @param function :: [input] Function to set in the model
  */
-void MuonAnalysisFitFunctionPresenter::setFunctionInModel(
-    const Mantid::API::IFunction_sptr &function) {
-  const bool updateGuess = m_multiFitState == Muon::MultiFitState::Enabled &&
-                           m_fitBrowser->hasGuess();
+void MuonAnalysisFitFunctionPresenter::setFunctionInModel(const Mantid::API::IFunction_sptr &function) {
+  const bool updateGuess = m_multiFitState == Muon::MultiFitState::Enabled && m_fitBrowser->hasGuess();
   if (updateGuess) {
     m_fitBrowser->doRemoveGuess();
   }

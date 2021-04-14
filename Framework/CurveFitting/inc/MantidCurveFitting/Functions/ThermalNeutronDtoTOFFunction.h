@@ -24,13 +24,11 @@ namespace Functions {
 
 /** ThermalNeutronDtoTOFFunction : TODO: DESCRIPTION
  */
-class MANTID_CURVEFITTING_DLL ThermalNeutronDtoTOFFunction
-    : virtual public API::IFunction1D,
-      public API::ParamFunction {
+class MANTID_CURVEFITTING_DLL ThermalNeutronDtoTOFFunction : virtual public API::IFunction1D,
+                                                             public API::ParamFunction {
 public:
   /// Override
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
 
   /// overwrite IFunction base class methods
   std::string name() const override { return "ThermalNeutronDtoTOFFunction"; }
@@ -39,8 +37,7 @@ public:
   const std::string category() const override { return "General"; }
 
   /// Calculate function values
-  void function1D(std::vector<double> &out,
-                  const std::vector<double> &xValues) const;
+  void function1D(std::vector<double> &out, const std::vector<double> &xValues) const;
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters
@@ -48,9 +45,8 @@ protected:
 
 private:
   /// Core function (inline) to calcualte TOF_h from d-spacing
-  inline double corefunction(double dh, double dtt1, double dtt1t, double dtt2t,
-                             double zero, double zerot, double width,
-                             double tcross) const;
+  inline double corefunction(double dh, double dtt1, double dtt1t, double dtt2t, double zero, double zerot,
+                             double width, double tcross) const;
 
   /// Derivative
   void functionDerivLocal(API::Jacobian *, const double *, const size_t);
@@ -60,19 +56,16 @@ private:
   // jacobian);
 
   /// Derviate to overwritten
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData) override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override;
 
   // void functionDeriv(const API::FunctionDomain& domain, API::Jacobian&
   // jacobian);
 };
 
-using ThermalNeutronDtoTOFFunction_sptr =
-    std::shared_ptr<ThermalNeutronDtoTOFFunction>;
+using ThermalNeutronDtoTOFFunction_sptr = std::shared_ptr<ThermalNeutronDtoTOFFunction>;
 
 /// Calcualte TOF from d-spacing value for thermal neutron
-inline double calThermalNeutronTOF(double dh, double dtt1, double dtt1t,
-                                   double dtt2t, double zero, double zerot,
+inline double calThermalNeutronTOF(double dh, double dtt1, double dtt1t, double dtt2t, double zero, double zerot,
                                    double width, double tcross) {
   double n = 0.5 * gsl_sf_erfc(width * (tcross - 1 / dh));
   double Th_e = zero + dtt1 * dh;

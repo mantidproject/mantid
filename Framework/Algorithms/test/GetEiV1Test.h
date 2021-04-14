@@ -46,8 +46,7 @@ public:
     AnalysisDataService::Instance().add(outputName, testWS);
 
     IAlgorithm_sptr alg;
-    TS_ASSERT_THROWS_NOTHING(
-        alg = runGetEiUsingTestMonitors(outputName, input_ei));
+    TS_ASSERT_THROWS_NOTHING(alg = runGetEiUsingTestMonitors(outputName, input_ei));
 
     // Test output answers
     // The monitor peak should always be calculated from the data
@@ -61,8 +60,7 @@ public:
 
     // and verify it has been store on the run object
     Property *ei_runprop = testWS->run().getProperty("Ei");
-    PropertyWithValue<double> *ei_propvalue =
-        dynamic_cast<PropertyWithValue<double> *>(ei_runprop);
+    PropertyWithValue<double> *ei_propvalue = dynamic_cast<PropertyWithValue<double> *>(ei_runprop);
     TS_ASSERT_DELTA((*ei_propvalue)(), expected_ei, 1e-08);
 
     AnalysisDataService::Instance().remove(outputName);
@@ -71,12 +69,9 @@ public:
   void testParametersOnWorkspace() {
     MatrixWorkspace_sptr testWS = createTestWorkspaceWithMonitors();
 
-    testWS->instrumentParameters().addString(
-        testWS->getInstrument()->getChild(0).get(), "ei-mon1-spec", "1");
-    testWS->instrumentParameters().addString(
-        testWS->getInstrument()->getChild(0).get(), "ei-mon2-spec", "2");
-    Property *incident_energy_guess =
-        new PropertyWithValue<double>("EnergyRequest", 15.0, Direction::Input);
+    testWS->instrumentParameters().addString(testWS->getInstrument()->getChild(0).get(), "ei-mon1-spec", "1");
+    testWS->instrumentParameters().addString(testWS->getInstrument()->getChild(0).get(), "ei-mon2-spec", "2");
+    Property *incident_energy_guess = new PropertyWithValue<double>("EnergyRequest", 15.0, Direction::Input);
     testWS->mutableRun().addProperty(incident_energy_guess, true);
     // This algorithm needs a name attached to the workspace
     const std::string outputName("eiNoParTest");
@@ -92,8 +87,7 @@ public:
     TS_ASSERT_DELTA(ei, expected_ei, 1e-08);
     // and verify it has been store on the run object
     Property *ei_runprop = testWS->run().getProperty("Ei");
-    PropertyWithValue<double> *ei_propvalue =
-        dynamic_cast<PropertyWithValue<double> *>(ei_runprop);
+    PropertyWithValue<double> *ei_propvalue = dynamic_cast<PropertyWithValue<double> *>(ei_runprop);
     TS_ASSERT_DELTA((*ei_propvalue)(), expected_ei, 1e-08);
 
     AnalysisDataService::Instance().remove(outputName);
@@ -105,15 +99,13 @@ public:
     const std::string outputName("eitest1");
     AnalysisDataService::Instance().add(outputName, testWS);
 
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().createUnmanaged("GetEi", 1);
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 1);
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", outputName);
     alg->setProperty("Monitor2Spec", 2);
     alg->setProperty("EnergyEstimate", 15.0);
     alg->setRethrows(true);
-    TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::runtime_error &e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::runtime_error &e, std::string(e.what()),
                             "Some invalid Properties found");
     AnalysisDataService::Instance().remove(outputName);
   }
@@ -123,15 +115,13 @@ public:
     const std::string outputName("eitest2");
     AnalysisDataService::Instance().add(outputName, testWS);
 
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().createUnmanaged("GetEi", 1);
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 1);
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", outputName);
     alg->setProperty("Monitor1Spec", 1);
     alg->setProperty("Monitor2Spec", 2);
     alg->setRethrows(true);
-    TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::runtime_error &e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::runtime_error &e, std::string(e.what()),
                             "Some invalid Properties found");
     AnalysisDataService::Instance().remove(outputName);
   }
@@ -143,8 +133,7 @@ public:
     const std::string outputName("eitest2");
     AnalysisDataService::Instance().add(outputName, testWS);
 
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().createUnmanaged("GetEi", 1);
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 1);
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", outputName);
     alg->setProperty("Monitor1Spec", 1);
@@ -157,15 +146,11 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr
-  createTestWorkspaceWithMonitors(const bool includePeaks = true) {
+  MatrixWorkspace_sptr createTestWorkspaceWithMonitors(const bool includePeaks = true) {
     const int numHists(2);
     const int numBins(2000);
-    MatrixWorkspace_sptr testWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            numHists, numBins, true);
-    testWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    MatrixWorkspace_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(numHists, numBins, true);
+    testWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
     BinEdges xdata(numBins + 1, LinearGenerator(5.0, 5.5));
     // Update X data  to a sensible values. Looks roughly like the MARI binning
     // Update the Y values. We don't care about errors here
@@ -174,17 +159,12 @@ private:
     // these neceesary peak values.
     // We'll simply use a gaussian as a test
 
-    const double peakOneCentre(6493.0), sigmaSqOne(150. * 150.),
-        peakTwoCentre(10625.), sigmaSqTwo(25. * 25.);
+    const double peakOneCentre(6493.0), sigmaSqOne(150. * 150.), peakTwoCentre(10625.), sigmaSqTwo(25. * 25.);
     const double peakOneHeight(3000.), peakTwoHeight(1000.);
     for (int i = 0; i < numBins; ++i) {
       if (includePeaks) {
-        testWS->dataY(0)[i] =
-            peakOneHeight *
-            exp(-0.5 * pow(xdata[i] - peakOneCentre, 2.) / sigmaSqOne);
-        testWS->dataY(1)[i] =
-            peakTwoHeight *
-            exp(-0.5 * pow(xdata[i] - peakTwoCentre, 2.) / sigmaSqTwo);
+        testWS->dataY(0)[i] = peakOneHeight * exp(-0.5 * pow(xdata[i] - peakOneCentre, 2.) / sigmaSqOne);
+        testWS->dataY(1)[i] = peakTwoHeight * exp(-0.5 * pow(xdata[i] - peakTwoCentre, 2.) / sigmaSqTwo);
       }
     }
     testWS->setBinEdges(0, xdata);
@@ -192,10 +172,8 @@ private:
     return testWS;
   }
 
-  IAlgorithm_sptr runGetEiUsingTestMonitors(const std::string &inputWS,
-                                            const double energyGuess) {
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().createUnmanaged("GetEi", 1);
+  IAlgorithm_sptr runGetEiUsingTestMonitors(const std::string &inputWS, const double energyGuess) {
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("GetEi", 1);
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", inputWS);
     alg->setProperty("Monitor1Spec", 1);

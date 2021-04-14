@@ -40,8 +40,7 @@ public:
   /** In this test, only a very simple event workspace is used
    */
   void NtestTooManyParams() {
-    EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::createEventWorkspace(1, 1);
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::createEventWorkspace(1, 1);
     AnalysisDataService::Instance().addOrReplace("eventWS", ws);
 
     FilterByTime2 algStopTime;
@@ -89,11 +88,9 @@ public:
     // Do the filtering now.
     FilterByTime2 algRelative;
     algRelative.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        algRelative.setPropertyValue("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(algRelative.setPropertyValue("InputWorkspace", inputWS));
     outputWS = "eventWS_relative";
-    TS_ASSERT_THROWS_NOTHING(
-        algRelative.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(algRelative.setPropertyValue("OutputWorkspace", outputWS));
     // Get 1 minute worth
     TS_ASSERT_THROWS_NOTHING(algRelative.setPropertyValue("StartTime", "60"));
     TS_ASSERT_THROWS_NOTHING(algRelative.setPropertyValue("StopTime", "120"));
@@ -103,8 +100,7 @@ public:
 
     // Retrieve Workspace changed
     EventWorkspace_sptr outWS;
-    outWS =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputWS);
+    outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputWS);
     TS_ASSERT(outWS); // workspace is loaded
 
     // Things that haven't changed
@@ -113,28 +109,22 @@ public:
     // Things that changed
     TS_ASSERT_LESS_THAN(outWS->getNumberEvents(), WS->getNumberEvents());
     // Proton charge is lower
-    TS_ASSERT_LESS_THAN(outWS->run().getProtonCharge(),
-                        WS->run().getProtonCharge());
+    TS_ASSERT_LESS_THAN(outWS->run().getProtonCharge(), WS->run().getProtonCharge());
 
     //-------------- Absolute time filtering --------------------
     FilterByTime2 algAbs;
     algAbs.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        algAbs.setPropertyValue("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(algAbs.setPropertyValue("InputWorkspace", inputWS));
     outputWS = "eventWS_absolute";
-    TS_ASSERT_THROWS_NOTHING(
-        algAbs.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(algAbs.setPropertyValue("OutputWorkspace", outputWS));
     // Get 1 minutes worth, starting at minute 1
-    TS_ASSERT_THROWS_NOTHING(
-        algAbs.setPropertyValue("AbsoluteStartTime", "2010-03-25T16:09:37.46"));
-    TS_ASSERT_THROWS_NOTHING(
-        algAbs.setPropertyValue("AbsoluteStopTime", "2010-03-25T16:10:37.46"));
+    TS_ASSERT_THROWS_NOTHING(algAbs.setPropertyValue("AbsoluteStartTime", "2010-03-25T16:09:37.46"));
+    TS_ASSERT_THROWS_NOTHING(algAbs.setPropertyValue("AbsoluteStopTime", "2010-03-25T16:10:37.46"));
     algAbs.execute();
     TS_ASSERT(algAbs.isExecuted());
 
     EventWorkspace_sptr outWS2;
-    outWS2 =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputWS);
+    outWS2 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputWS);
     TS_ASSERT(outWS2); // workspace is loaded
 
     // Things that haven't changed
@@ -153,8 +143,7 @@ public:
 
     int count = 0;
     for (size_t i = 0; i < outWS->getNumberHistograms(); i++) {
-      double diff = fabs(double(outWS->getSpectrum(i).getNumberEvents() -
-                                outWS2->getSpectrum(i).getNumberEvents()));
+      double diff = fabs(double(outWS->getSpectrum(i).getNumberEvents() - outWS2->getSpectrum(i).getNumberEvents()));
       // No more than 2 events difference because of rounding to 0.01 second
       TS_ASSERT_LESS_THAN(diff, 3);
       if (diff > 3)
@@ -164,8 +153,7 @@ public:
     }
 
     // Almost same proton charge
-    TS_ASSERT_DELTA(outWS->run().getProtonCharge(),
-                    outWS2->run().getProtonCharge(), 0.01);
+    TS_ASSERT_DELTA(outWS->run().getProtonCharge(), outWS2->run().getProtonCharge(), 0.01);
   }
 
 private:

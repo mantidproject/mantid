@@ -538,12 +538,12 @@ class SliceViewerView(QWidget, ObservingView):
     close_signal = Signal()
     rename_signal = Signal(str)
 
-    def __init__(self, presenter, dims_info, can_normalise, parent=None, conf=None):
+    def __init__(self, presenter, dims_info, can_normalise, parent=None, window_flags=Qt.Window, conf=None):
         super().__init__(parent)
 
         self.presenter = presenter
 
-        self.setWindowFlags(Qt.Window)
+        self.setWindowFlags(window_flags)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         self._splitter = QSplitter(self)

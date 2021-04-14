@@ -24,13 +24,10 @@ class ComponentInfoIteratorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ComponentInfoIteratorTest *createSuite() {
-    return new ComponentInfoIteratorTest();
-  }
+  static ComponentInfoIteratorTest *createSuite() { return new ComponentInfoIteratorTest(); }
   static void destroySuite(ComponentInfoIteratorTest *suite) { delete suite; }
 
-  std::unique_ptr<Mantid::Geometry::ComponentInfo>
-  create_component_info_object() {
+  std::unique_ptr<Mantid::Geometry::ComponentInfo> create_component_info_object() {
 
     // Create a very basic instrument to visit
     auto visitee = createMinimalInstrument(V3D(0, 0, 0),   // Source position

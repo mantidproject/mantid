@@ -35,10 +35,13 @@ The steps for a new piece of work can be summarised as follows:
 
 1. Push up or `create <https://guides.github.com/features/issues>`_ an
    issue `here <https://github.com/mantidproject/mantid/issues>`__
-2. Create a branch from master, using the naming convention described
-   at :ref:`GitWorkflowPublicPrivateBranches`
-3. Do the work and commit changes to the branch. Push the branch
-   regularly to GitHub to make sure no work is accidentally lost
+2. Create a branch from master using the naming convention described
+   at :ref:`GitWorkflowNamingBranches`
+3. Do the work and commit changes to the branch. On commit, the
+   `pre-commit <https://pre-commit.com/>`_ framework will run, it will
+   check all your changes for formatting, linting, and perform static
+   analysis. Push the branch regularly to GitHub to make sure no work
+   is accidentally lost.
 4. When you are finished with the work, ensure that all of the unit
    tests, documentation tests and system tests if necessary pass on
    your own machine
@@ -51,27 +54,17 @@ The steps for a new piece of work can be summarised as follows:
    - If any issues come up, continue working on your branch and push
      to GitHub - the pull request will update automatically
 
-.. _GitWorkflowPublicPrivateBranches:
+.. _GitWorkflowNamingBranches:
 
-Public and Private Branches
----------------------------
+Naming Branches
+---------------
 
 When naming `public branches
 <http://github.com/mantidproject/mantid/branches>`_ that will be
 pushed to GitHub, please follow the convention of
 ``issuenumber_short_description``. This will allow others to discover
 what the branch is for (issue number) and quickly know what is being
-done there (short description). Please remember that public branches
-should not be rebased.
-
-For private branches please follow the convention
-``yourname/issuenumber_short_description``.  You can sync these with
-GitHub (for backup reasons) and rebase. Since the branch name is
-prefixed with your name people will know, by convention, that it is a
-private branch and can be rebased, deleted, etc at the owner's
-whim. Changing a private branch is done by simply renaming the branch
-to drop the prefix.
-
+done there (short description).
 
 .. _GitWorkflowPullRequests:
 

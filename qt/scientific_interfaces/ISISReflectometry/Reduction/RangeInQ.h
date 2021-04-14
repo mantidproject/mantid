@@ -14,8 +14,7 @@ namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL RangeInQ {
 public:
-  RangeInQ(boost::optional<double> min = boost::none,
-           boost::optional<double> step = boost::none,
+  RangeInQ(boost::optional<double> min = boost::none, boost::optional<double> step = boost::none,
            boost::optional<double> max = boost::none);
 
   boost::optional<double> min() const;
@@ -28,10 +27,8 @@ private:
   boost::optional<double> m_max;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(RangeInQ const &lhs,
-                                               RangeInQ const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(RangeInQ const &lhs,
-                                               RangeInQ const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(RangeInQ const &lhs, RangeInQ const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(RangeInQ const &lhs, RangeInQ const &rhs);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

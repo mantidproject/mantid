@@ -28,15 +28,11 @@ constexpr double FIT_TOLERANCE = 10;
 const std::string FIRST_GOOD = "First good spectra ";
 const std::string LAST_GOOD = "Last good spectra ";
 
-std::pair<double, double> getRange(const MatrixWorkspace_sptr &inputWorkspace,
-                                   const size_t &index) {
-  auto firstGoodIndex = std::stoi(
-      inputWorkspace->getLog(FIRST_GOOD + std::to_string(index))->value());
-  auto lastGoodIndex = std::stoi(
-      inputWorkspace->getLog(LAST_GOOD + std::to_string(index))->value());
+std::pair<double, double> getRange(const MatrixWorkspace_sptr &inputWorkspace, const size_t &index) {
+  auto firstGoodIndex = std::stoi(inputWorkspace->getLog(FIRST_GOOD + std::to_string(index))->value());
+  auto lastGoodIndex = std::stoi(inputWorkspace->getLog(LAST_GOOD + std::to_string(index))->value());
 
-  auto midGoodIndex =
-      int(floor(((double(lastGoodIndex) - double(firstGoodIndex)) / 2.)));
+  auto midGoodIndex = int(floor(((double(lastGoodIndex) - double(firstGoodIndex)) / 2.)));
 
   double midGood = inputWorkspace->readX(index)[midGoodIndex];
 
@@ -53,21 +49,18 @@ DECLARE_ALGORITHM(PSIBackgroundSubtraction)
 void PSIBackgroundSubtraction::init() {
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "InputWorkspace", "", Direction::InOut, PropertyMode::Mandatory),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::InOut, PropertyMode::Mandatory),
       "Input workspace containing the PSI bin data "
       "which the background correction will be applied to.");
 
   auto mustBePositive = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty(
-      "MaxIterations", 500, mustBePositive,
-      "Stop after this number of iterations if a good fit is not found");
+  declareProperty("MaxIterations", 500, mustBePositive,
+                  "Stop after this number of iterations if a good fit is not found");
 
   auto mustBeGreater0 = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBeGreater0->setLower(1);
-  declareProperty("Binning", 1, mustBeGreater0,
-                  "Constant sized rebinning of the data");
+  declareProperty("Binning", 1, mustBeGreater0, "Constant sized rebinning of the data");
 }
 
 std::map<std::string, std::string> PSIBackgroundSubtraction::validateInputs() {
@@ -87,30 +80,23 @@ std::map<std::string, std::string> PSIBackgroundSubtraction::validateInputs() {
     int firstGood = 0;
     int lastGood = 0;
     try {
-      firstGood = std::stoi(
-          run.getProperty(FIRST_GOOD + std::to_string(index))->value());
+      firstGood = std::stoi(run.getProperty(FIRST_GOOD + std::to_string(index))->value());
     } catch (Kernel::Exception::NotFoundError) {
-      errors["InputWorkspace"] =
-          "Input Workspace should should contain first food data. ";
+      errors["InputWorkspace"] = "Input Workspace should should contain first food data. ";
     }
     try {
-      lastGood = std::stoi(
-          run.getProperty(LAST_GOOD + std::to_string(index))->value());
+      lastGood = std::stoi(run.getProperty(LAST_GOOD + std::to_string(index))->value());
     } catch (Kernel::Exception::NotFoundError) {
-      errors["InputWorkspace"] +=
-          "\n Input Workspace should should contain last food data. ";
+      errors["InputWorkspace"] += "\n Input Workspace should should contain last food data. ";
     }
     if (lastGood <= firstGood) {
-      errors["InputWorkspace"] +=
-          "\n Input Workspace should have last good data > first good data. ";
+      errors["InputWorkspace"] += "\n Input Workspace should have last good data > first good data. ";
     }
     if (firstGood < 0) {
-      errors["InputWorkspace"] +=
-          "\n Input Workspace should have first good data > 0. ";
+      errors["InputWorkspace"] += "\n Input Workspace should have first good data > 0. ";
     }
     if (lastGood >= int(inputWS->readX(index).size())) {
-      errors["InputWorkspace"] +=
-          "\n Input Workspace should have last good data < number of bins. ";
+      errors["InputWorkspace"] += "\n Input Workspace should have last good data < number of bins. ";
     }
   }
   return errors;
@@ -126,22 +112,18 @@ void PSIBackgroundSubtraction::exec() {
  of a FlatBackground and ExpDecayMuon, on the second half of the PSI data.
  * @param inputWorkspace ::  Input PSI workspace which is modified inplace
  */
-void PSIBackgroundSubtraction::calculateBackgroundUsingFit(
-    MatrixWorkspace_sptr &inputWorkspace) {
+void PSIBackgroundSubtraction::calculateBackgroundUsingFit(MatrixWorkspace_sptr &inputWorkspace) {
   IAlgorithm_sptr fit = setupFitAlgorithm(inputWorkspace->getName());
   auto numberOfHistograms = inputWorkspace->getNumberHistograms();
   std::vector<double> backgroundValues(numberOfHistograms);
   for (size_t index = 0; index < numberOfHistograms; ++index) {
     std::pair<double, double> range = getRange(inputWorkspace, index);
-    auto [background, fitQuality] =
-        calculateBackgroundFromFit(fit, range, static_cast<int>(index));
+    auto [background, fitQuality] = calculateBackgroundFromFit(fit, range, static_cast<int>(index));
     // If fit quality is poor, do not subtract the background and instead log
     // a warning
     if (fitQuality > FIT_TOLERANCE) {
-      g_log.warning()
-          << "Fit quality obtained in PSIBackgroundSubtraction is poor. "
-          << "Skipping background calculation for WorkspaceIndex: "
-          << static_cast<int>(index) << "\n";
+      g_log.warning() << "Fit quality obtained in PSIBackgroundSubtraction is poor. "
+                      << "Skipping background calculation for WorkspaceIndex: " << static_cast<int>(index) << "\n";
     } else {
       backgroundValues[index] = background;
     }
@@ -168,11 +150,9 @@ void PSIBackgroundSubtraction::calculateBackgroundUsingFit(
  * @param wsName ::  Input workspace name
  * @return Initalised fitting algorithm
  */
-IAlgorithm_sptr
-PSIBackgroundSubtraction::setupFitAlgorithm(const std::string &wsName) {
+IAlgorithm_sptr PSIBackgroundSubtraction::setupFitAlgorithm(const std::string &wsName) {
   std::string functionstring = "name=FlatBackground,A0=0;name=ExpDecayMuon";
-  IFunction_sptr func =
-      FunctionFactory::Instance().createInitialized(functionstring);
+  IFunction_sptr func = FunctionFactory::Instance().createInitialized(functionstring);
 
   IAlgorithm_sptr fit = createChildAlgorithm("Fit");
   int maxIterations = getProperty("MaxIterations");
@@ -192,9 +172,9 @@ PSIBackgroundSubtraction::setupFitAlgorithm(const std::string &wsName) {
  * @param workspaceIndex :: Index which the fit will be performed on
  * @return A tuple of background and fit quality
  */
-std::tuple<double, double> PSIBackgroundSubtraction::calculateBackgroundFromFit(
-    IAlgorithm_sptr &fit, const std::pair<double, double> &range,
-    const int &workspaceIndex) {
+std::tuple<double, double> PSIBackgroundSubtraction::calculateBackgroundFromFit(IAlgorithm_sptr &fit,
+                                                                                const std::pair<double, double> &range,
+                                                                                const int &workspaceIndex) {
   fit->setProperty("StartX", range.first);
   fit->setProperty("EndX", range.second);
   fit->setProperty("WorkspaceIndex", workspaceIndex);

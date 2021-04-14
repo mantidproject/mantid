@@ -49,8 +49,8 @@ The format must be (Table Workspace):
 
 The following is an example valid file of two columns::
 
-	# Instrument Name , Run Number 
-	# str , int 
+	# Instrument Name , Run Number
+	# str , int
 	MUSR,10245
 	IRIS,8465
 	SANS2D,20462

@@ -33,11 +33,9 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Types::Core;
 
 namespace {
-MatrixWorkspace_sptr createTestScanningWS(size_t nTubes, size_t nPixelsPerTube,
-                                          const std::vector<double> &rotations,
+MatrixWorkspace_sptr createTestScanningWS(size_t nTubes, size_t nPixelsPerTube, const std::vector<double> &rotations,
                                           const std::string &name = "testWS") {
-  const auto instrument = ComponentCreationHelper::createInstrumentWithPSDTubes(
-      nTubes, nPixelsPerTube, true);
+  const auto instrument = ComponentCreationHelper::createInstrumentWithPSDTubes(nTubes, nPixelsPerTube, true);
   size_t nTimeIndexes = rotations.size();
   size_t nBins = 1;
 
@@ -60,8 +58,7 @@ MatrixWorkspace_sptr createTestScanningWS(size_t nTubes, size_t nPixelsPerTube,
   AnalysisDataService::Instance().add(name, testWS);
 
   auto parameterMap = testWS->getInstrument()->getParameterMap();
-  parameterMap->addString(testWS->getInstrument()->getBaseComponent(),
-                          "detector_for_height_axis", "tube-1");
+  parameterMap->addString(testWS->getInstrument()->getBaseComponent(), "detector_for_height_axis", "tube-1");
 
   return testWS;
 }
@@ -71,52 +68,41 @@ class SumOverlappingTubesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SumOverlappingTubesTest *createSuite() {
-    return new SumOverlappingTubesTest();
-  }
+  static SumOverlappingTubesTest *createSuite() { return new SumOverlappingTubesTest(); }
   static void destroySuite(SumOverlappingTubesTest *suite) { delete suite; }
 
   const size_t N_TUBES = 5;
   const size_t N_PIXELS_PER_TUBE = 10;
 
-  MatrixWorkspace_sptr createTestWS(size_t nTubes, size_t nPixelsPerTube,
-                                    bool mirror = true,
+  MatrixWorkspace_sptr createTestWS(size_t nTubes, size_t nPixelsPerTube, bool mirror = true,
                                     bool mirrorOutput = false) {
     const size_t nSpectra = nTubes * nPixelsPerTube;
     const size_t nBins = 1;
 
     MatrixWorkspace_sptr testWS = create<Workspace2D>(
-        ComponentCreationHelper::createInstrumentWithPSDTubes(
-            nTubes, nPixelsPerTube, mirror),
-        IndexInfo(nSpectra),
-        Histogram(BinEdges(nBins + 1, LinearGenerator(0.0, 1.0)),
-                  Counts(nBins, 2.0)));
+        ComponentCreationHelper::createInstrumentWithPSDTubes(nTubes, nPixelsPerTube, mirror), IndexInfo(nSpectra),
+        Histogram(BinEdges(nBins + 1, LinearGenerator(0.0, 1.0)), Counts(nBins, 2.0)));
 
     // This has to be added to the ADS so that it can be used with the string
     // validator used in the algorithm.
     AnalysisDataService::Instance().add("testWS", testWS);
 
     auto parameterMap = testWS->getInstrument()->getParameterMap();
-    parameterMap->addBool(testWS->getInstrument()->getBaseComponent(),
-                          "mirror_detector_angles", mirrorOutput);
-    parameterMap->addString(testWS->getInstrument()->getBaseComponent(),
-                            "detector_for_height_axis", "tube-1");
+    parameterMap->addBool(testWS->getInstrument()->getBaseComponent(), "mirror_detector_angles", mirrorOutput);
+    parameterMap->addString(testWS->getInstrument()->getBaseComponent(), "detector_for_height_axis", "tube-1");
     return testWS;
   }
 
-  void verifySuccessCase(double expectedCounts = 2.0,
-                         double expectedErrors = sqrt(2.0)) {
+  void verifySuccessCase(double expectedCounts = 2.0, double expectedErrors = sqrt(2.0)) {
     MatrixWorkspace_sptr outWS =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("outWS"));
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
 
     verifyScatteringAngleAxis(outWS, N_TUBES);
     verifyHeightAxis(outWS);
     verifySpectraHaveSameCounts(outWS, expectedCounts, expectedErrors);
   }
 
-  void verifyScatteringAngleAxis(const MatrixWorkspace_sptr &outWS,
-                                 const size_t nEntries) {
+  void verifyScatteringAngleAxis(const MatrixWorkspace_sptr &outWS, const size_t nEntries) {
     const auto &xAxis = outWS->getAxis(0);
     TS_ASSERT_EQUALS(xAxis->length(), nEntries + 1)
     for (size_t i = 0; i < N_TUBES; ++i)
@@ -131,10 +117,8 @@ public:
       TS_ASSERT_DELTA(yAxis->getValue(i), 0.003 * double(i), 1e-6)
   }
 
-  void verifySpectraHaveSameCounts(const MatrixWorkspace_sptr &outWS,
-                                   double expectedCounts = 2.0,
-                                   double expectedErrors = sqrt(2.0),
-                                   bool checkErrors = true) {
+  void verifySpectraHaveSameCounts(const MatrixWorkspace_sptr &outWS, double expectedCounts = 2.0,
+                                   double expectedErrors = sqrt(2.0), bool checkErrors = true) {
     for (size_t i = 0; i < N_TUBES; ++i)
       for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
         TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[i], expectedCounts, 1e-6)
@@ -175,8 +159,7 @@ public:
     }
   }
 
-  void
-  test_normal_operation_with_component_specified_in_instrument_parameters() {
+  void test_normal_operation_with_component_specified_in_instrument_parameters() {
     auto testWS = createTestWS(N_TUBES, N_PIXELS_PER_TUBE);
 
     SumOverlappingTubes alg;
@@ -206,8 +189,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("outWS"));
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
     const auto &xAxis = outWS->getAxis(0);
     TS_ASSERT_EQUALS(xAxis->length(), 6)
     for (size_t i = 0; i < N_TUBES; ++i)
@@ -259,8 +241,7 @@ public:
     auto testWS = createTestWS(N_TUBES, N_PIXELS_PER_TUBE);
 
     auto parameterMap = testWS->getInstrument()->getParameterMap();
-    parameterMap->addString(testWS->getInstrument()->getBaseComponent(),
-                            "detector_for_height_axis", "not_a_component");
+    parameterMap->addString(testWS->getInstrument()->getBaseComponent(), "detector_for_height_axis", "not_a_component");
 
     SumOverlappingTubes alg;
     alg.initialize();
@@ -269,8 +250,7 @@ public:
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::invalid_argument & e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::invalid_argument & e, std::string(e.what()),
                             "not_a_component does not exist");
     AnalysisDataService::Instance().remove("testWS");
   }
@@ -286,8 +266,7 @@ public:
     alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "22.5");
     alg.setProperty("HeightAxis", "0.003");
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e, std::string(e.what()),
                             "Height binning must have start, step and end "
                             "values (except for 1D option).");
     AnalysisDataService::Instance().remove("testWS");
@@ -304,8 +283,7 @@ public:
     alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "22.5");
     alg.setProperty("HeightAxis", "0.003");
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e, std::string(e.what()),
                             "Height binning must have start, step and end "
                             "values (except for 1D option).");
     AnalysisDataService::Instance().remove("testWS");
@@ -343,8 +321,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("outWS"));
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
 
     verifyScatteringAngleAxis(outWS, N_TUBES + 2);
     verifyHeightAxis(outWS);
@@ -354,8 +331,7 @@ public:
     AnalysisDataService::Instance().remove("outWS");
   }
 
-  void
-  test_with_scanning_workspaces_detectors_rotated_in_overlapping_scan_crop_negative() {
+  void test_with_scanning_workspaces_detectors_rotated_in_overlapping_scan_crop_negative() {
     std::vector<double> rotations = {0, 22.5, 45};
     auto testWS = createTestScanningWS(N_TUBES, N_PIXELS_PER_TUBE, rotations);
 
@@ -370,8 +346,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("outWS"));
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
 
     const auto &xAxis = outWS->getAxis(0);
     TS_ASSERT_EQUALS(xAxis->length(), 4)
@@ -402,8 +377,7 @@ public:
     AnalysisDataService::Instance().remove("outWS");
   }
 
-  void
-  test_with_scanning_workspaces_detectors_rotated_in_non_overlapping_scan() {
+  void test_with_scanning_workspaces_detectors_rotated_in_non_overlapping_scan() {
     std::vector<double> rotations = {0, 28.125, 45};
     auto testWS = createTestScanningWS(N_TUBES, N_PIXELS_PER_TUBE, rotations);
 
@@ -418,8 +392,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("outWS"));
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
 
     verifyScatteringAngleAxis(outWS, N_TUBES + 2);
     verifyHeightAxis(outWS);
@@ -448,8 +421,7 @@ public:
     AnalysisDataService::Instance().remove("outWS");
   }
 
-  void
-  test_with_scanning_workspaces_detectors_rotated_in_non_overlapping_scan_with_large_tolerance() {
+  void test_with_scanning_workspaces_detectors_rotated_in_non_overlapping_scan_with_large_tolerance() {
     std::vector<double> rotations = {0, 22.5, 45};
     auto testWS = createTestScanningWS(N_TUBES, N_PIXELS_PER_TUBE, rotations);
 
@@ -465,8 +437,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("outWS"));
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
 
     verifyScatteringAngleAxis(outWS, N_TUBES + 2);
     verifyHeightAxis(outWS);
@@ -476,8 +447,7 @@ public:
     AnalysisDataService::Instance().remove("outWS");
   }
 
-  void
-  test_with_scanning_workspaces_detectors_rotated_in_non_overlapping_scan_with_normalisation() {
+  void test_with_scanning_workspaces_detectors_rotated_in_non_overlapping_scan_with_normalisation() {
     std::vector<double> rotations = {0, 28.125, 45};
     auto testWS = createTestScanningWS(N_TUBES, N_PIXELS_PER_TUBE, rotations);
 
@@ -490,8 +460,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("outWS"));
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
 
     verifyScatteringAngleAxis(outWS, N_TUBES + 2);
     verifyHeightAxis(outWS);
@@ -502,8 +471,7 @@ public:
     AnalysisDataService::Instance().remove("outWS");
   }
 
-  void
-  test_with_scanning_workspaces_detectors_rotated_in_overlapping_scan_with_normalisation() {
+  void test_with_scanning_workspaces_detectors_rotated_in_overlapping_scan_with_normalisation() {
     std::vector<double> rotations = {0, 22.5, 45};
     auto testWS = createTestScanningWS(N_TUBES, N_PIXELS_PER_TUBE, rotations);
 
@@ -516,8 +484,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("outWS"));
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
 
     verifyScatteringAngleAxis(outWS, N_TUBES + 2);
     verifyHeightAxis(outWS);
@@ -557,8 +524,7 @@ public:
     AnalysisDataService::Instance().remove("outWS");
   }
 
-  MatrixWorkspace_sptr do_standard_option(bool oneDimensional = false,
-                                          bool explicitHeightAxis = false) {
+  MatrixWorkspace_sptr do_standard_option(bool oneDimensional = false, bool explicitHeightAxis = false) {
     auto testWS = createTestWS(N_TUBES, N_PIXELS_PER_TUBE);
 
     SumOverlappingTubes alg;
@@ -574,8 +540,8 @@ public:
     alg.setProperty("MirrorScatteringAngles", false);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    auto outWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("outWS"));
+    auto outWS =
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
 
     const auto &xAxis = outWS->getAxis(0);
     TS_ASSERT_EQUALS(xAxis->length(), N_TUBES + 1)
@@ -598,8 +564,7 @@ public:
         totalCounts += counts;
       }
 
-    TS_ASSERT_DELTA(totalCounts,
-                    double(N_TUBES) * double(N_PIXELS_PER_TUBE) * 2.0, 1e-6)
+    TS_ASSERT_DELTA(totalCounts, double(N_TUBES) * double(N_PIXELS_PER_TUBE) * 2.0, 1e-6)
     TS_ASSERT_DELTA(outWS->getSpectrum(8).y()[2], 2., 1e-6)
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
@@ -619,8 +584,7 @@ public:
       TS_ASSERT_DELTA(outWS->getSpectrum(0).e()[i], sqrt(counts), 0.001)
       totalCounts += counts;
     }
-    TS_ASSERT_DELTA(totalCounts,
-                    double(N_TUBES) * double(N_PIXELS_PER_TUBE) * 2.0, 1e-6)
+    TS_ASSERT_DELTA(totalCounts, double(N_TUBES) * double(N_PIXELS_PER_TUBE) * 2.0, 1e-6)
     TS_ASSERT_DELTA(outWS->getSpectrum(0).y()[2], 20., 1e-6)
 
     AnalysisDataService::Instance().remove("testWS");
@@ -641,8 +605,7 @@ public:
       totalCounts += counts;
     }
 
-    TS_ASSERT_DELTA(totalCounts, double(N_TUBES) * double(N_PIXELS_PER_TUBE),
-                    1e-6)
+    TS_ASSERT_DELTA(totalCounts, double(N_TUBES) * double(N_PIXELS_PER_TUBE), 1e-6)
 
     // An analytic comparison is a little harder for this case, do a quick check
     // of an arbitary value
@@ -694,16 +657,15 @@ public:
     alg.setProperty("MirrorScatteringAngles", false);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    auto outWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("outWS"));
+    auto outWS =
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
 
     auto yAxis = outWS->getAxis(1);
     TS_ASSERT_EQUALS(outWS->getAxis(0)->length(), 296)
     TS_ASSERT_EQUALS(yAxis->length(), 256)
 
     for (size_t i = 0; i < 256; i++) {
-      TS_ASSERT_DELTA(yAxis->getValue(i), -0.5925 + 1.92 * double(i) / 256,
-                      1e-6)
+      TS_ASSERT_DELTA(yAxis->getValue(i), -0.5925 + 1.92 * double(i) / 256, 1e-6)
     }
 
     TS_ASSERT_EQUALS(outWS->getSpectrum(14).y()[0], 17)
@@ -732,16 +694,15 @@ public:
     alg.setProperty("MirrorScatteringAngles", false);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    auto outWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("outWS"));
+    auto outWS =
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
 
     auto yAxis = outWS->getAxis(1);
     TS_ASSERT_EQUALS(outWS->getAxis(0)->length(), 296)
     TS_ASSERT_EQUALS(yAxis->length(), 256)
 
     for (size_t i = 0; i < 256; i++) {
-      TS_ASSERT_DELTA(yAxis->getValue(i), -0.5925 + 1.92 * double(i) / 256,
-                      1e-6)
+      TS_ASSERT_DELTA(yAxis->getValue(i), -0.5925 + 1.92 * double(i) / 256, 1e-6)
     }
 
     TS_ASSERT_EQUALS(outWS->getSpectrum(14).y()[0], 40)
@@ -753,12 +714,8 @@ public:
 
 class SumOverlappingTubesTestPerformance : public CxxTest::TestSuite {
 public:
-  static SumOverlappingTubesTestPerformance *createSuite() {
-    return new SumOverlappingTubesTestPerformance();
-  }
-  static void destroySuite(SumOverlappingTubesTestPerformance *suite) {
-    delete suite;
-  }
+  static SumOverlappingTubesTestPerformance *createSuite() { return new SumOverlappingTubesTestPerformance(); }
+  static void destroySuite(SumOverlappingTubesTestPerformance *suite) { delete suite; }
 
   SumOverlappingTubesTestPerformance() {}
 
@@ -771,8 +728,7 @@ public:
       for (size_t j = 0; j < 25; ++j)
         rotations.emplace_back(double(j * m_numberOfWorkspaces + i) * 0.1);
 
-      auto testWS =
-          createTestScanningWS(100, 128, rotations, "a" + std::to_string(i));
+      auto testWS = createTestScanningWS(100, 128, rotations, "a" + std::to_string(i));
       group->addWorkspace(testWS);
     }
 
@@ -785,9 +741,7 @@ public:
     m_alg.setProperty("ScatteringAngleBinning", "1.0");
   }
 
-  void test_merge_d2b_like_detector_scan_workspaces() {
-    TS_ASSERT_THROWS_NOTHING(m_alg.execute());
-  }
+  void test_merge_d2b_like_detector_scan_workspaces() { TS_ASSERT_THROWS_NOTHING(m_alg.execute()); }
 
   void tearDown() override {
     AnalysisDataService::Instance().remove("group");

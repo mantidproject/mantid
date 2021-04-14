@@ -28,9 +28,7 @@ public:
            "from peaks in the input PeaksWorkspace";
   }
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"PredictPeaks"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"PredictPeaks"}; }
   const std::string category() const override { return "Crystal\\Peaks"; }
   std::map<std::string, std::string> validateInputs() override;
 

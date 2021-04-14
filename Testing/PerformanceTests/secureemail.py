@@ -15,7 +15,7 @@ class SendEmailSecure:
         self.recipient = recipient
         self.regLinks = regLinks
         self.speedLinks = speedLinks
-    
+
     def send(self):
         msg = MIMEText("The following tests may have performance regressions:\n"+"\n\n - ".join(self.regLinks)+"\n This following tests may have spedup:\n"+"\n\n - ".join(self.speedLinks))
 
@@ -46,5 +46,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     email = SendEmailSecure(args.sender, args.pwd, args.recipient, args.regLinks.split(";"), args.speedLinks.split(";"))
     email.send()
-    
-    
+

@@ -39,8 +39,7 @@ namespace FileDialogHandler {
     Contains modifications to Qt functions where problems have been found
     on certain operating systems
 */
-QString getSaveFileName(QWidget *parent,
-                        const Mantid::Kernel::Property *baseProp,
+QString getSaveFileName(QWidget *parent, const Mantid::Kernel::Property *baseProp,
                         const QFileDialog::Options &options) {
   // set up filters and dialog title
   const auto filter = getFilter(baseProp);
@@ -50,8 +49,7 @@ QString getSaveFileName(QWidget *parent,
 
   // create the file browser
   const QString filename = QFileDialog::getSaveFileName(
-      parent, caption, AlgorithmInputHistory::Instance().getPreviousDirectory(),
-      filter, &selectedFilter, options);
+      parent, caption, AlgorithmInputHistory::Instance().getPreviousDirectory(), filter, &selectedFilter, options);
   return addExtension(filename, selectedFilter);
 }
 
@@ -77,14 +75,12 @@ QString getFilter(const Mantid::Kernel::Property *baseProp) {
     return ALL_FILES;
 
   // multiple file version
-  const auto *multiProp =
-      dynamic_cast<const Mantid::API::MultipleFileProperty *>(baseProp);
+  const auto *multiProp = dynamic_cast<const Mantid::API::MultipleFileProperty *>(baseProp);
   if (multiProp)
     return getFilter(multiProp->getExts());
 
   // regular file version
-  const auto *singleProp =
-      dynamic_cast<const Mantid::API::FileProperty *>(baseProp);
+  const auto *singleProp = dynamic_cast<const Mantid::API::FileProperty *>(baseProp);
   // The allowed values in this context are file extensions
   if (singleProp)
     return getFilter(singleProp->allowedValues());
@@ -117,8 +113,7 @@ QString getFilter(const std::vector<std::string> &exts) {
 
     // Append individual file filters
     for (auto &itr : exts) {
-      filter.append(QString::fromStdString(itr) + " (*" +
-                    QString::fromStdString(itr) + ");;");
+      filter.append(QString::fromStdString(itr) + " (*" + QString::fromStdString(itr) + ");;");
     }
     filter = filter.trimmed();
   }
@@ -150,14 +145,12 @@ QString formatExtension(const std::string &extension) {
   return formattedExtension;
 }
 
-QString getCaption(const std::string &dialogName,
-                   const Mantid::Kernel::Property *prop) {
+QString getCaption(const std::string &dialogName, const Mantid::Kernel::Property *prop) {
   // generate the dialog title
   auto dialogTitle = QString::fromStdString(dialogName);
   if (bool(prop)) {
     const auto &name = prop->name();
-    if (name != "Filename" && prop->name() != "Directory" &&
-        prop->name() != "Dir") {
+    if (name != "Filename" && prop->name() != "Directory" && prop->name() != "Dir") {
       dialogTitle.append(" - ");
       dialogTitle.append(QString::fromStdString(name));
     }

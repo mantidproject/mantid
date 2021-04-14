@@ -39,8 +39,7 @@ public:
       orthogonalWorkspaceFailed = true;
     }
     // Assert
-    TSM_ASSERT("Orthogonal workspaces should not be given a skew matrix",
-               orthogonalWorkspaceFailed);
+    TSM_ASSERT("Orthogonal workspaces should not be given a skew matrix", orthogonalWorkspaceFailed);
   }
 
   void test_provideSkewMatrixWithOrthogonalAndHKL() {
@@ -56,8 +55,7 @@ public:
       orthogonalWorkspaceFailed = true;
     }
     // Assert
-    TSM_ASSERT("Orthogonal HKL workspaces should not be given a skew matrix",
-               orthogonalWorkspaceFailed);
+    TSM_ASSERT("Orthogonal HKL workspaces should not be given a skew matrix", orthogonalWorkspaceFailed);
   }
 
   void test_provideSkewMatrixWithNonOrthogonal() {
@@ -71,15 +69,13 @@ public:
     const auto numberOfRows = skewMatrix.numRows();
     for (size_t column = 0; column < numberOfColumns; ++column) {
       for (size_t row = 0; row < numberOfRows; ++row) {
-        if (!skewWithinTolerance(skewMatrix[row][column],
-                                 exampleSkewMatrix[row][column])) {
+        if (!skewWithinTolerance(skewMatrix[row][column], exampleSkewMatrix[row][column])) {
           nonOrthogonalWorkspaceFailed = false;
         }
       }
     }
 
-    TSM_ASSERT("Skew matrix for nonOrthogonal workspace incorrect",
-               nonOrthogonalWorkspaceFailed);
+    TSM_ASSERT("Skew matrix for nonOrthogonal workspace incorrect", nonOrthogonalWorkspaceFailed);
   }
 
   void test_requiresSkewMatrixWithOrthogonal() {
@@ -102,26 +98,22 @@ public:
 
   void test_isHKLDimensionsWithOrthogonal() {
     auto eventWorkspace = getOrthogonalEventWorkspace();
-    TSM_ASSERT("Should not have HKL dimensions",
-               !MantidQt::API::isHKLDimensions(*eventWorkspace, DimX, DimY));
+    TSM_ASSERT("Should not have HKL dimensions", !MantidQt::API::isHKLDimensions(*eventWorkspace, DimX, DimY));
   }
 
   void test_isHKLDimensionsWithOrthogonalandHKL() {
     auto eventWorkspace = getOrthogonalHKLEventWorkspace();
-    TSM_ASSERT("Should have HKL dimensions",
-               MantidQt::API::isHKLDimensions(*eventWorkspace, DimX, DimY));
+    TSM_ASSERT("Should have HKL dimensions", MantidQt::API::isHKLDimensions(*eventWorkspace, DimX, DimY));
   }
 
   void test_isHKLDimensionsWithNonOrthogonal() {
     auto eventWorkspace = getNonOrthogonalEventWorkspace();
-    TSM_ASSERT("Should have HKL dimensions",
-               MantidQt::API::isHKLDimensions(*eventWorkspace, DimX, DimY));
+    TSM_ASSERT("Should have HKL dimensions", MantidQt::API::isHKLDimensions(*eventWorkspace, DimX, DimY));
   }
 
   void test_getGridLineAnglesInRadianWithZeroArray() {
     std::array<Mantid::coord_t, 9> skewMatrixCoord = {{}};
-    auto radianAngles =
-        MantidQt::API::getGridLineAnglesInRadian(skewMatrixCoord, DimX, DimY);
+    auto radianAngles = MantidQt::API::getGridLineAnglesInRadian(skewMatrixCoord, DimX, DimY);
     TSM_ASSERT("When given Zero array, getGridLinesInRadian should return "
                "0 for result.first",
                radianAngles.first == 0);
@@ -132,8 +124,7 @@ public:
 
   void test_getGridLineAnglesInRadianWithDefaultTestArray() {
     auto skewMatrixCoord = getExampleCoordTArray(true);
-    auto radianAngles =
-        MantidQt::API::getGridLineAnglesInRadian(skewMatrixCoord, DimX, DimY);
+    auto radianAngles = MantidQt::API::getGridLineAnglesInRadian(skewMatrixCoord, DimX, DimY);
     TSM_ASSERT("When given default array, getGridLinesInRadian should return 0 "
                "for result.first",
                radianAngles.first == 0);
@@ -149,8 +140,7 @@ public:
     for (size_t d = 0; d < eventWorkspace->getNumDims(); d++) {
       coords[d] = Mantid::Kernel::VMD_t(0.0);
     }
-    MantidQt::API::transformLookpointToWorkspaceCoord(coords, skewMatrixCoord,
-                                                      DimX, DimY, SliceDim);
+    MantidQt::API::transformLookpointToWorkspaceCoord(coords, skewMatrixCoord, DimX, DimY, SliceDim);
     TSM_ASSERT("coords[0]=0 should not be affected by skewMatrix "
                "translation",
                (coords[0] == 0));
@@ -166,12 +156,10 @@ public:
     for (size_t d = 0; d < eventWorkspace->getNumDims(); d++) {
       coords[d] = Mantid::Kernel::VMD_t(1.5);
     }
-    MantidQt::API::transformLookpointToWorkspaceCoord(coords, skewMatrixCoord,
-                                                      DimX, DimY, SliceDim);
+    MantidQt::API::transformLookpointToWorkspaceCoord(coords, skewMatrixCoord, DimX, DimY, SliceDim);
     bool coordsAccurate(false);
-    if ((skewWithinTolerance(coords[0],
-                             static_cast<Mantid::Kernel::VMD_t>(0.75))) &&
-        (coords[1] == 1.5) && (coords[2] == 1.5) && (coords[3] == 1.5)) {
+    if ((skewWithinTolerance(coords[0], static_cast<Mantid::Kernel::VMD_t>(0.75))) && (coords[1] == 1.5) &&
+        (coords[2] == 1.5) && (coords[3] == 1.5)) {
       coordsAccurate = true;
     }
     TSM_ASSERT("Example coordinates skewed result incorrect", coordsAccurate);
@@ -182,38 +170,34 @@ private:
     Mantid::Kernel::ReciprocalLatticeUnitFactory factory;
     auto product = factory.create(Mantid::Kernel::Units::Symbol::RLU);
     Mantid::Geometry::HKL frame(product);
-    auto workspace =
-        Mantid::DataObjects::MDEventsTestHelper::makeMDEWWithFrames<3>(
-            5, -10, 10, frame);
+    auto workspace = Mantid::DataObjects::MDEventsTestHelper::makeMDEWWithFrames<3>(5, -10, 10, frame);
     return workspace;
   }
 
   Mantid::DataObjects::EventWorkspace_sptr getOrthogonalEventWorkspace() {
-    Mantid::DataObjects::EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::createEventWorkspace();
+    Mantid::DataObjects::EventWorkspace_sptr ws = WorkspaceCreationHelper::createEventWorkspace();
     return ws;
   }
 
-  Mantid::API::IMDEventWorkspace_sptr getNonOrthogonalEventWorkspace(
-      bool wrongCoords = false, bool forgetUB = false, bool forgetWmat = false,
-      bool forgetAffmat = false, double scale = 1.0) {
+  Mantid::API::IMDEventWorkspace_sptr getNonOrthogonalEventWorkspace(bool wrongCoords = false, bool forgetUB = false,
+                                                                     bool forgetWmat = false, bool forgetAffmat = false,
+                                                                     double scale = 1.0) {
     Mantid::API::IMDEventWorkspace_sptr ws;
     std::string wsName = "simpleWS";
     if (wrongCoords) {
       Mantid::Geometry::QSample frame;
-      ws = Mantid::DataObjects::MDEventsTestHelper::makeAnyMDEWWithFrames<
-          Mantid::DataObjects::MDEvent<4>, 4>(1, 0.0, 1.0, frame, 1, wsName);
+      ws = Mantid::DataObjects::MDEventsTestHelper::makeAnyMDEWWithFrames<Mantid::DataObjects::MDEvent<4>, 4>(
+          1, 0.0, 1.0, frame, 1, wsName);
     } else {
       Mantid::Kernel::ReciprocalLatticeUnitFactory factory;
       auto product = factory.create(Mantid::Kernel::Units::Symbol::RLU);
       Mantid::Geometry::HKL frame(product);
-      ws = Mantid::DataObjects::MDEventsTestHelper::makeAnyMDEWWithFrames<
-          Mantid::DataObjects::MDEvent<4>, 4>(1, 0.0, 1.0, frame, 1, wsName);
+      ws = Mantid::DataObjects::MDEventsTestHelper::makeAnyMDEWWithFrames<Mantid::DataObjects::MDEvent<4>, 4>(
+          1, 0.0, 1.0, frame, 1, wsName);
     }
     if (!forgetUB) {
       // add UB Matrix
-      Mantid::API::IAlgorithm_sptr alg =
-          Mantid::API::AlgorithmManager::Instance().create("SetUB");
+      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SetUB");
       alg->initialize();
       alg->setRethrows(true);
       alg->setProperty("Workspace", wsName);
@@ -237,9 +221,7 @@ private:
     }
 
     // Create the coordinate transformation information
-    std::vector<Mantid::coord_t> affMatVals{1, 0, 0, 0, 0, 0, 0, 1, 0,
-                                            0, 0, 0, 0, 1, 0, 0, 1, 0,
-                                            0, 0, 0, 0, 0, 0, 1};
+    std::vector<Mantid::coord_t> affMatVals{1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1};
 
     Mantid::DataObjects::CoordTransformAffine affMat(4, 4);
     affMat.setMatrix(Mantid::Kernel::Matrix<Mantid::coord_t>(affMatVals));
@@ -252,8 +234,7 @@ private:
     Mantid::Kernel::DblMatrix temp(3, 3, true);
     wMat = temp.getVector();
     if (!forgetWmat) {
-      auto p = new Mantid::Kernel::PropertyWithValue<std::vector<double>>(
-          "W_MATRIX", wMat);
+      auto p = new Mantid::Kernel::PropertyWithValue<std::vector<double>>("W_MATRIX", wMat);
       ws->getExperimentInfo(0)->mutableRun().addProperty(p, true);
     }
     return ws;
@@ -282,8 +263,7 @@ private:
     if (nonSkewed) {
       coordinates = {{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}};
     } else {
-      coordinates = {{1.0, 0.0, static_cast<Mantid::coord_t>(-0.57735), 0.0,
-                      1.0, 0.0, 0.0, 0.0,
+      coordinates = {{1.0, 0.0, static_cast<Mantid::coord_t>(-0.57735), 0.0, 1.0, 0.0, 0.0, 0.0,
                       static_cast<Mantid::coord_t>(1.1547)}};
     }
     return coordinates;

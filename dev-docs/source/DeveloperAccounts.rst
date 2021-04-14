@@ -15,7 +15,6 @@ Simple, easy to recognise user names are preferred. For example "Nick Draper", o
 Account Creation
 ----------------
 
-- Create a **Mantid Wiki** account; follow `this link <https://www.mantidproject.org/Special:RequestAccount>`__.
 - Sign up for the **Mantid Slack** channel; follow `this link <https://mantid.slack.com/>`__.
 - If you don't already have one, sign up for a **Github** account; follow `this link <https://github.com/>`__.
 	+ Remember that your username should be easily identifiable.
@@ -47,13 +46,6 @@ Admin Notes
 -----------
 
 These are notes for account admins on how to add new users.
-
-- **Wiki**
-    + Go to the `special pages index <https://www.mantidproject.org/Special:SpecialPages>`_.
-    + Select Login/Create Account.
-    + Select the Create Account link at the top of the box.
-    + Username should be first name (space) surname.
-    + User will be sent an email to verify.
 
 - **Github**
 	- Add the username provided to the mantid-developers team at `https://github.com/organizations/mantidproject/teams <https://github.com/organizations/mantidproject/teams>`_.

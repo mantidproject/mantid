@@ -20,7 +20,7 @@ The nexus file must have a ``raw_data_1`` top-level entry to be loaded.
 
 The workspace data is loaded from ``raw_data_1/Detector_1``.
 
-Instrument information is loaded from ``raw_data_1/Instrument`` if available in file, 
+Instrument information is loaded from ``raw_data_1/Instrument`` if available in file,
 otherwise :ref:`instrument information <InstrumentDefinitionFile>` is read from a MantidInstall instrument directory.
 
 If the main entry contains a ``/isis_vms_compat`` the following entries will be read by the Algorithm:
@@ -46,7 +46,7 @@ the main entry, i.e ``/group`` is equivalent to ``raw_data_1/group``.
 | Description of Data          | Found in Nexus file                       | Placed in Workspace (Workspace2D)   |
 |                              | (within 'raw_data_1')                     |                                     |
 +==============================+===========================================+=====================================+
-| Monitor Data                 | within groups of Class NXMonitor          | Monitor histogram data (loaded      | 
+| Monitor Data                 | within groups of Class NXMonitor          | Monitor histogram data (loaded      |
 |                              | (one monitor per group)                   | depending on prop. LoadMonitors)    |
 +------------------------------+-------------------------------------------+-------------------------------------+
 | Detector Data                | group ``Detector_1``                      | Histogram Data                      |
@@ -59,8 +59,8 @@ the main entry, i.e ``/group`` is equivalent to ``raw_data_1/group``.
 
 Run Object
 ''''''''''
-LoadISISNexus executes :ref:`algm-LoadNexusLogs` to load run logs from the Nexus ``runlog`` or some other appropriate group. 
-It also loads the Nexus ``raw_data_1/periods/proton_charge`` group 
+LoadISISNexus executes :ref:`algm-LoadNexusLogs` to load run logs from the Nexus ``runlog`` or some other appropriate group.
+It also loads the Nexus ``raw_data_1/periods/proton_charge`` group
 into the ``proton_charge_by_period`` property of the workspace run object.
 
 Properties of the workspace :ref:`Run <Run>` object are loaded as follows:
@@ -93,7 +93,7 @@ Properties of the workspace :ref:`Run <Run>` object are loaded as follows:
 
 The group (data) indicates that the number is obtained from the histogram data in an appropriate manner.
 
-``IRPB`` and ``RRPB`` point to the same data. In ``IRPB``, the data is seen as 32-bit integer 
+``IRPB`` and ``RRPB`` point to the same data. In ``IRPB``, the data is seen as 32-bit integer
 and in RRPB it is seen as 32-bit floating point (same 32 bits).
 In all cases, integers are passed. The 32-bit floating point numbers are used only to store larger integers.
 

@@ -47,8 +47,7 @@ static const std::string RAWFILE = "MAR11001.raw";
 static const double TIMEOFF = 3.9;
 static const int MONITOR = 2;
 static const int NUMRANDOM = 7;
-static const int DETECTS[NUMRANDOM] = {4101, 4804, 1323, 1101,
-                                       3805, 1323, 3832};
+static const int DETECTS[NUMRANDOM] = {4101, 4804, 1323, 1101, 3805, 1323, 3832};
 
 namespace SmallTestDatFile {
 const int NDETECTS = 6;
@@ -56,10 +55,8 @@ const int NDETECTS = 6;
 
 namespace {
 std::string delta[] = {"4", "4.500", "4.500", "4.500", "-6.00", "0.000"};
-std::string pressure[] = {"10.0000", "10.0000", "10.0000",
-                          "10.0001", "10.000",  "10.0001"};
-std::string wallThick[] = {"0.00080",  "0.00080", "0.00080",
-                           "-0.00080", "0.00080", "9.500"};
+std::string pressure[] = {"10.0000", "10.0000", "10.0000", "10.0001", "10.000", "10.0001"};
+std::string wallThick[] = {"0.00080", "0.00080", "0.00080", "-0.00080", "0.00080", "9.500"};
 std::string code[] = {"3", "1", "3", "3", "3", "3"};
 std::string det_l2[] = {"1.5", "1.5", "1.5", "1.5", "1.5", "1.5"};
 std::string det_theta[] = {"30", "35", "40", "45", "50", "55"};
@@ -75,13 +72,11 @@ void writeSmallDatFile(const std::string &filename) {
           "        a_y         a_z        det_1       det_2       det_3       "
           "det4\n";
   for (int detector = 0; detector < SmallTestDatFile::NDETECTS; ++detector) {
-    file << detector << "\t" << delta[detector] << "\t" << det_l2[detector]
-         << "\t" << code[detector] << "\t" << det_theta[detector] << "\t"
-         << det_phi[detector] << "\t" << NOTUSED << "\t" << NOTUSED << "\t"
-         << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED
-         << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t"
-         << NOTUSED << "\t" << pressure[detector] << "\t" << wallThick[detector]
-         << "\t" << NOTUSED << '\n';
+    file << detector << "\t" << delta[detector] << "\t" << det_l2[detector] << "\t" << code[detector] << "\t"
+         << det_theta[detector] << "\t" << det_phi[detector] << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED
+         << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t"
+         << NOTUSED << "\t" << NOTUSED << "\t" << pressure[detector] << "\t" << wallThick[detector] << "\t" << NOTUSED
+         << '\n';
   }
   file.close();
 }
@@ -195,19 +190,16 @@ void writeLargeTestDatFile(const std::string &filename, const int ndets) {
           "        a_y         a_z        det_1       det_2       det_3       "
           "det4\n";
   for (int i = 0; i < ndets; ++i) {
-    file << i << "\t" << delta[0] << "\t" << det_l2[0] << "\t" << code[0]
-         << "\t" << det_theta[0] << "\t" << det_phi[0] << "\t" << NOTUSED
-         << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t"
-         << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED
-         << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << pressure[0] << "\t"
-         << wallThick[0] << "\t" << NOTUSED << '\n';
+    file << i << "\t" << delta[0] << "\t" << det_l2[0] << "\t" << code[0] << "\t" << det_theta[0] << "\t" << det_phi[0]
+         << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t"
+         << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << pressure[0]
+         << "\t" << wallThick[0] << "\t" << NOTUSED << '\n';
   }
   file.close();
 }
 
 // Set up a small workspace for testing
-void makeTestWorkspace(const int ndets, const int nbins,
-                       const std::string &ads_name) {
+void makeTestWorkspace(const int ndets, const int nbins, const std::string &ads_name) {
   auto space2D = createWorkspace<Workspace2D>(ndets, nbins + 1, nbins);
   space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   BinEdges xs(nbins + 1, LinearGenerator(0.0, 1.0));
@@ -243,14 +235,11 @@ void makeTestWorkspace(const int ndets, const int nbins,
 
 class LoadDetectorInfoTest : public CxxTest::TestSuite {
 public:
-  static LoadDetectorInfoTest *createSuite() {
-    return new LoadDetectorInfoTest();
-  }
+  static LoadDetectorInfoTest *createSuite() { return new LoadDetectorInfoTest(); }
   static void destroySuite(LoadDetectorInfoTest *suite) { delete suite; }
 
   LoadDetectorInfoTest()
-      : m_InoutWS("loaddetectorinfotest_input_workspace"),
-        m_DatFile("loaddetectorinfotest_filename.dat"),
+      : m_InoutWS("loaddetectorinfotest_input_workspace"), m_DatFile("loaddetectorinfotest_filename.dat"),
         m_NXSFile("loaddetectorinfotest_filename.nxs"), m_MariWS("MARfromRaw") {
     // create a .dat file in the current directory that we'll load later
     writeSmallDatFile(m_DatFile);
@@ -290,8 +279,8 @@ public:
     TS_ASSERT(grouper.isInitialized());
 
     loadRawFile();
-    MatrixWorkspace_sptr WS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(m_MariWS));
+    MatrixWorkspace_sptr WS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(m_MariWS));
 
     // check the X-values for a sample of spectra avoiding the monitors
     grouper.setPropertyValue("Workspace", m_MariWS);
@@ -337,8 +326,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
   }
 
-  void loadDatFileTestHelper(const std::string &fileName,
-                             bool singleWallPressure = false) {
+  void loadDatFileTestHelper(const std::string &fileName, bool singleWallPressure = false) {
     LoadDetectorInfo grouper;
 
     TS_ASSERT_EQUALS(grouper.name(), "LoadDetectorInfo");
@@ -357,8 +345,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(grouper.execute());
     TS_ASSERT(grouper.isExecuted());
 
-    MatrixWorkspace_const_sptr WS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(m_InoutWS));
+    MatrixWorkspace_const_sptr WS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(m_InoutWS));
 
     const auto &pmap = WS->constInstrumentParameters();
     const auto &detInfo = WS->detectorInfo();
@@ -374,24 +362,21 @@ public:
         TS_ASSERT(par);
         if (!par)
           return;
-        TS_ASSERT_DELTA(par->value<double>(),
-                        boost::lexical_cast<double>(pressure[j]), 1.e-3);
+        TS_ASSERT_DELTA(par->value<double>(), boost::lexical_cast<double>(pressure[j]), 1.e-3);
 
         par = pmap.get(baseComp, "TubeThickness");
         TS_ASSERT(par);
         if (!par)
           return;
         if (!singleWallPressure || j < 3)
-          TS_ASSERT_DELTA(par->value<double>(),
-                          boost::lexical_cast<double>(wallThick[j]), 1.e-3);
+          TS_ASSERT_DELTA(par->value<double>(), boost::lexical_cast<double>(wallThick[j]), 1.e-3);
         const V3D pos = detInfo.position(detIndex);
         V3D expected;
         if (j == 1) // Monitors are fixed and unaffected
         {
           expected = V3D(0, 0, 0);
         } else {
-          expected.spherical(boost::lexical_cast<double>(det_l2[j]),
-                             boost::lexical_cast<double>(det_theta[j]),
+          expected.spherical(boost::lexical_cast<double>(det_l2[j]), boost::lexical_cast<double>(det_theta[j]),
                              boost::lexical_cast<double>(det_phi[j]));
         }
         TS_ASSERT_EQUALS(expected.X(), pos.X());
@@ -418,16 +403,11 @@ private:
 
 class LoadDetectorInfoTestPerformance : public CxxTest::TestSuite {
 public:
-  static LoadDetectorInfoTestPerformance *createSuite() {
-    return new LoadDetectorInfoTestPerformance();
-  }
-  static void destroySuite(LoadDetectorInfoTestPerformance *suite) {
-    delete suite;
-  }
+  static LoadDetectorInfoTestPerformance *createSuite() { return new LoadDetectorInfoTestPerformance(); }
+  static void destroySuite(LoadDetectorInfoTestPerformance *suite) { delete suite; }
 
   LoadDetectorInfoTestPerformance()
-      : m_testfile("LoadDetectorInfoTestPerformance_largefile.dat"),
-        m_wsName("LoadDetectorInfoTestPerformance") {}
+      : m_testfile("LoadDetectorInfoTestPerformance_largefile.dat"), m_wsName("LoadDetectorInfoTestPerformance") {}
 
   void setUp() override {
     // 100,000 histograms

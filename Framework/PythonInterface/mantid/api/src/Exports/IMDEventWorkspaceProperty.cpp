@@ -15,6 +15,5 @@ GET_POINTER_SPECIALIZATION(WorkspaceProperty<IMDEventWorkspace>)
 
 void export_IMDEventWorkspaceProperty() {
   using Mantid::PythonInterface::WorkspacePropertyExporter;
-  WorkspacePropertyExporter<IMDEventWorkspace>::define(
-      "IMDEventWorkspaceProperty");
+  WorkspacePropertyExporter<IMDEventWorkspace>::define("IMDEventWorkspaceProperty");
 }

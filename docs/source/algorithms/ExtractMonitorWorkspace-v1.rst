@@ -19,12 +19,12 @@ This does not extract monitor data that is stored with the detector data in the 
 Usage
 -----
 
-**Example: Extracting an internally stored monitor workspace**  
+**Example: Extracting an internally stored monitor workspace**
 
 .. This is encoded as a non tested block as it is currently not possible to create a workspace with an internal monitor workspace in python.
 
 .. code-block:: python
-   
+
    #If no monitor workspace is present the algorithm will fail.
    wsMonitor = ExtractMonitorWorkspace(ws)
 

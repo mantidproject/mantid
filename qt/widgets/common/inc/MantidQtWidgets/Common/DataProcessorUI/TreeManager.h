@@ -62,8 +62,7 @@ public:
   /// Blank table
   virtual void newTable(const WhiteList &whitelist) = 0;
   /// Blank table
-  virtual void newTable(Mantid::API::ITableWorkspace_sptr table,
-                        const WhiteList &whitelist) = 0;
+  virtual void newTable(Mantid::API::ITableWorkspace_sptr table, const WhiteList &whitelist) = 0;
 
   /// Read/write data
 
@@ -72,8 +71,7 @@ public:
   /// Return all data
   virtual TreeData allData(bool prompt = false) = 0;
   /// Transfer new data to model
-  virtual void
-  transfer(const std::vector<std::map<QString, QString>> &runs) = 0;
+  virtual void transfer(const std::vector<std::map<QString, QString>> &runs) = 0;
   /// Update row with new data
   virtual void update(int parent, int child, const QStringList &data) = 0;
   /// Get the number of rows of a given parent
@@ -94,14 +92,11 @@ public:
   /// Reset the processed/error state of all items
   virtual void invalidateAllProcessed() = 0;
   /// Access cells
-  virtual void setCell(int row, int column, int parentRow, int parentColumn,
-                       const std::string &value) = 0;
-  virtual std::string getCell(int row, int column, int parentRow,
-                              int parentColumn) const = 0;
+  virtual void setCell(int row, int column, int parentRow, int parentColumn, const std::string &value) = 0;
+  virtual std::string getCell(int row, int column, int parentRow, int parentColumn) const = 0;
   virtual int getNumberOfRows() = 0;
   /// Validate a table workspace
-  virtual bool isValidModel(Mantid::API::Workspace_sptr ws,
-                            size_t whitelistColumns) const = 0;
+  virtual bool isValidModel(Mantid::API::Workspace_sptr ws, size_t whitelistColumns) const = 0;
 
   /// Return member variables
 
@@ -112,8 +107,7 @@ public:
 
 protected:
   /// Add a command to the list of available commands
-  void addCommand(std::vector<std::unique_ptr<Command>> &commands,
-                  std::unique_ptr<Command> command) {
+  void addCommand(std::vector<std::unique_ptr<Command>> &commands, std::unique_ptr<Command> command) {
     commands.emplace_back(std::move(command));
   }
 };

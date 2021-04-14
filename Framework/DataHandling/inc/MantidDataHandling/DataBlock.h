@@ -27,8 +27,7 @@ class DLLExport DataBlock {
 public:
   DataBlock();
   DataBlock(const Mantid::NeXus::NXInt &data);
-  DataBlock(int numberOfperiods, size_t numberOfSpectra,
-            size_t numberOfChannels);
+  DataBlock(int numberOfperiods, size_t numberOfSpectra, size_t numberOfChannels);
 
   virtual ~DataBlock() = default;
 

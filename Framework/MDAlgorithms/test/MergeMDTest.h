@@ -58,8 +58,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaces", inputs));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "failed_output"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "failed_output"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(!alg.isExecuted());
   }
@@ -68,17 +67,14 @@ public:
     MergeMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspaces", "ws0,ws1,ws2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaces", "ws0,ws1,ws2"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", wsName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     IMDEventWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            wsName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(wsName));
     TS_ASSERT(ws);
     return ws;
   }
@@ -108,8 +104,7 @@ public:
     std::string outWSName("MergeMDTest_OutputWS");
 
     // Mask half of ws2
-    FrameworkManager::Instance().exec("MaskMD", 6, "Workspace", "ws2",
-                                      "Dimensions", "Axis0,Axis1", "Extents",
+    FrameworkManager::Instance().exec("MaskMD", 6, "Workspace", "ws2", "Dimensions", "Axis0,Axis1", "Extents",
                                       "0,10,0,20");
 
     auto ws = execute_merge(outWSName); // cannot be nullptr
@@ -131,17 +126,13 @@ public:
   void test_displayNormalization() {
     // Name of the output workspace.
     std::string outWSName("MergeMDTest_OutputWS");
-    auto ws0 =
-        AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("ws0");
+    auto ws0 = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("ws0");
     ws0->setDisplayNormalization(API::MDNormalization::NoNormalization);
-    ws0->setDisplayNormalizationHisto(
-        API::MDNormalization::NumEventsNormalization);
+    ws0->setDisplayNormalizationHisto(API::MDNormalization::NumEventsNormalization);
     auto ws = execute_merge(outWSName); // cannot be nullptr
 
-    TS_ASSERT_EQUALS(API::MDNormalization::NoNormalization,
-                     ws->displayNormalization());
-    TS_ASSERT_EQUALS(API::MDNormalization::NumEventsNormalization,
-                     ws->displayNormalizationHisto());
+    TS_ASSERT_EQUALS(API::MDNormalization::NoNormalization, ws->displayNormalization());
+    TS_ASSERT_EQUALS(API::MDNormalization::NumEventsNormalization, ws->displayNormalizationHisto());
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -154,18 +145,14 @@ public:
     MergeMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspaces", "mde3,mde3,mde3"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaces", "mde3,mde3,mde3"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     MDEventWorkspace3::sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3>(
-            outWSName);)
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3>(outWSName);)
     TS_ASSERT(ws);
 
     typename std::vector<API::IMDNode *> boxes;
@@ -182,9 +169,8 @@ public:
     TS_ASSERT_EQUALS(events.size(), 24);
 
     // reference vector, 3 identical events except for incremented run numbers
-    const std::vector<coord_t> ref = {1, 1, 0, 0, 0, 6.25, 6.25, 6.25,
-                                      1, 1, 1, 0, 0, 6.25, 6.25, 6.25,
-                                      1, 1, 2, 0, 0, 6.25, 6.25, 6.25};
+    const std::vector<coord_t> ref = {1, 1,    0,    0,    0, 6.25, 6.25, 6.25, 1, 1,    1,    0,
+                                      0, 6.25, 6.25, 6.25, 1, 1,    2,    0,    0, 6.25, 6.25, 6.25};
 
     for (auto i = 0; i < 24; i++) {
       TS_ASSERT_EQUALS(events[i], ref[i]);
@@ -194,17 +180,13 @@ public:
     MergeMD alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize())
     TS_ASSERT(alg2.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue(
-        "InputWorkspaces", "MergeMDTest_OutputWS,MergeMDTest_OutputWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg2.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("InputWorkspaces", "MergeMDTest_OutputWS,MergeMDTest_OutputWS"));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg2.execute(););
     TS_ASSERT(alg2.isExecuted());
 
     // Retrieve the workspace from data service.
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3>(
-            outWSName);)
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3>(outWSName);)
     TS_ASSERT(ws);
 
     typename std::vector<API::IMDNode *> boxes2;
@@ -219,10 +201,9 @@ public:
     TS_ASSERT_EQUALS(events.size(), 48);
 
     // reference vector, 6 identical events except for incremented run numbers
-    const std::vector<coord_t> ref2 = {
-        1, 1, 0, 0, 0, 6.25, 6.25, 6.25, 1, 1, 1, 0, 0, 6.25, 6.25, 6.25,
-        1, 1, 2, 0, 0, 6.25, 6.25, 6.25, 1, 1, 3, 0, 0, 6.25, 6.25, 6.25,
-        1, 1, 4, 0, 0, 6.25, 6.25, 6.25, 1, 1, 5, 0, 0, 6.25, 6.25, 6.25};
+    const std::vector<coord_t> ref2 = {1, 1, 0, 0, 0, 6.25, 6.25, 6.25, 1, 1, 1, 0, 0, 6.25, 6.25, 6.25,
+                                       1, 1, 2, 0, 0, 6.25, 6.25, 6.25, 1, 1, 3, 0, 0, 6.25, 6.25, 6.25,
+                                       1, 1, 4, 0, 0, 6.25, 6.25, 6.25, 1, 1, 5, 0, 0, 6.25, 6.25, 6.25};
 
     for (auto i = 0; i < 48; i++) {
       TS_ASSERT_EQUALS(events[i], ref2[i]);

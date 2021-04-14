@@ -55,13 +55,12 @@ int ANNkdFRPtsInRange;    // number of points in the range
 //	annkFRSearch - fixed radius search for k nearest neighbors
 //----------------------------------------------------------------------
 
-int ANNkd_tree::annkFRSearch(
-    ANNpoint q,         // the query point
-    ANNdist sqRad,      // squared radius search bound
-    int k,              // number of near neighbors to return
-    ANNidxArray nn_idx, // nearest neighbor indices (returned)
-    ANNdistArray dd,    // the approximate nearest neighbor
-    double eps)         // the error bound
+int ANNkd_tree::annkFRSearch(ANNpoint q,         // the query point
+                             ANNdist sqRad,      // squared radius search bound
+                             int k,              // number of near neighbors to return
+                             ANNidxArray nn_idx, // nearest neighbor indices (returned)
+                             ANNdistArray dd,    // the approximate nearest neighbor
+                             double eps)         // the error bound
 {
   ANNkdFRDim = dim; // copy arguments to static equivs
   ANNkdFRQ = q;
@@ -112,8 +111,7 @@ void ANNkd_split::ann_FR_search(ANNdist box_dist) {
     if (box_diff < 0) // within bounds - ignore
       box_diff = 0;
     // distance to further box
-    box_dist = (ANNdist)ANN_SUM(box_dist,
-                                ANN_DIFF(ANN_POW(box_diff), ANN_POW(cut_diff)));
+    box_dist = (ANNdist)ANN_SUM(box_dist, ANN_DIFF(ANN_POW(box_diff), ANN_POW(cut_diff)));
 
     // visit further child if in range
     if (box_dist * ANNkdFRMaxErr <= ANNkdFRSqRad)
@@ -126,8 +124,7 @@ void ANNkd_split::ann_FR_search(ANNdist box_dist) {
     if (box_diff < 0) // within bounds - ignore
       box_diff = 0;
     // distance to further box
-    box_dist = (ANNdist)ANN_SUM(box_dist,
-                                ANN_DIFF(ANN_POW(box_diff), ANN_POW(cut_diff)));
+    box_dist = (ANNdist)ANN_SUM(box_dist, ANN_DIFF(ANN_POW(box_diff), ANN_POW(cut_diff)));
 
     // visit further child if close enough
     if (box_dist * ANNkdFRMaxErr <= ANNkdFRSqRad)

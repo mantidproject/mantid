@@ -29,14 +29,11 @@ DECLARE_ALGORITHM(BroadcastWorkspace)
 void BroadcastWorkspace::init() {
   // Input is optional - only the 'BroadcasterRank' process should provide an
   // input workspace
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-      "InputWorkspace", "", Direction::Input, PropertyMode::Optional));
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output));
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, PropertyMode::Optional));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output));
 
-  declareProperty("BroadcasterRank", 0,
-                  std::make_shared<BoundedValidator<int>>(
-                      0, mpi::communicator().size() - 1));
+  declareProperty("BroadcasterRank", 0, std::make_shared<BoundedValidator<int>>(0, mpi::communicator().size() - 1));
 }
 
 void BroadcastWorkspace::exec() {
@@ -55,8 +52,7 @@ void BroadcastWorkspace::exec() {
   if (world.rank() == root) {
     inputWorkspace = getProperty("InputWorkspace");
     if (!inputWorkspace) {
-      g_log.fatal("InputWorkspace '" + getPropertyValue("InputWorkspace") +
-                  "' not found in root process");
+      g_log.fatal("InputWorkspace '" + getPropertyValue("InputWorkspace") + "' not found in root process");
       // We need to stop all the other processes. Not very graceful, but there's
       // not much point in trying to be cleverer
       mpi::environment::abort(-1);
@@ -77,8 +73,8 @@ void BroadcastWorkspace::exec() {
   broadcast(world, hist, root);
 
   // Create an output workspace in each process. Assume Workspace2D for now
-  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", numSpec, numBins + hist, numBins);
+  MatrixWorkspace_sptr outputWorkspace =
+      WorkspaceFactory::Instance().create("Workspace2D", numSpec, numBins + hist, numBins);
   setProperty("OutputWorkspace", outputWorkspace);
 
   // Broadcast the units

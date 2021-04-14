@@ -38,6 +38,7 @@ set(SRC_FILES
     src/PeakShapeSpherical.cpp
     src/PeakShapeSphericalFactory.cpp
     src/PeaksWorkspace.cpp
+    src/LeanElasticPeaksWorkspace.cpp
     src/PropertyWithValue.cpp
     src/RebinnedOutput.cpp
     src/ReflectometryTransform.cpp
@@ -121,6 +122,7 @@ set(INC_FILES
     inc/MantidDataObjects/PeakShapeSpherical.h
     inc/MantidDataObjects/PeakShapeSphericalFactory.h
     inc/MantidDataObjects/PeaksWorkspace.h
+    inc/MantidDataObjects/LeanElasticPeaksWorkspace.h
     inc/MantidDataObjects/RebinnedOutput.h
     inc/MantidDataObjects/ReflectometryTransform.h
     inc/MantidDataObjects/ScanningWorkspaceBuilder.h
@@ -181,6 +183,7 @@ set(TEST_FILES
     PeakTest.h
     LeanElasticPeakTest.h
     PeaksWorkspaceTest.h
+    LeanElasticPeaksWorkspaceTest.h
     RebinnedOutputTest.h
     RefAxisTest.h
     ReflectometryTransformTest.h

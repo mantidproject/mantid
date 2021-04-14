@@ -38,9 +38,9 @@ Improvements
 
 - The *Fit Single Spectrum* buttons on MSDFit, I(Q,t)Fit, ConvFit and F(Q)Fit are now disabled
   during fitting.
-- When the :ref:`InelasticDiffSphere <func-InelasticDiffSphere>`, 
+- When the :ref:`InelasticDiffSphere <func-InelasticDiffSphere>`,
   :ref:`InelasticDiffRotDiscreteCircle <func-InelasticDiffRotDiscreteCircle>`,
-  :ref:`ElasticDiffSphere <func-ElasticDiffSphere>` or 
+  :ref:`ElasticDiffSphere <func-ElasticDiffSphere>` or
   :ref:`ElasticDiffRotDiscreteCircle <func-ElasticDiffRotDiscreteCircle>` functions are selected in
   the ConvFit tab, the Q values are retrieved from the workspaces, preventing a crash when plotting
   a guess.
@@ -158,7 +158,7 @@ Improvements
 Bugfixes
 ########
 
-- Symmetrise tab has changed so you can no longer click the run button before preview, and 
+- Symmetrise tab has changed so you can no longer click the run button before preview, and
   preview will not run even if clicked unless the max or min bars on the top graph have changed
   from their default.
 - A bug where the output reduced files had large file sizes depending on the size of the batch
@@ -170,7 +170,7 @@ Bugfixes
   interface would cause an error has been fixed.
 - A bug where specifying a custom detector grouping for OSIRIS was not working has been fixed.
 - A crash caused by data being loaded multiple times on the transmission tab has been fixed, as
-  part of this fix the preview now shows a preview of the plot on run being clicked and not 
+  part of this fix the preview now shows a preview of the plot on run being clicked and not
   before as this was the cause of the issue.
 - A bug caused by incorrect masked detectors during a reduction of an individual runs has been
   fixed. This could sometimes cause unexpected peaks in the output plots.
@@ -222,14 +222,14 @@ Diffraction Interface
 Improvements
 ############
 
-- Any zeros within the vanadium file are replaced with a substitute value of 10% the minimum 
-  y value found within that file. This prevents infinity values being produced when dividing the 
+- Any zeros within the vanadium file are replaced with a substitute value of 10% the minimum
+  y value found within that file. This prevents infinity values being produced when dividing the
   input file by the vanadium file.
 
 Bugfixes
 ########
 - An unexpected error when using manual grouping has been fixed.
-  
+
 Algorithms
 ----------
 

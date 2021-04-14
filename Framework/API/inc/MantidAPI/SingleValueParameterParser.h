@@ -38,17 +38,13 @@ namespace API {
  */
 
 template <class SingleValueParameterType>
-class DLLExport SingleValueParameterParser
-    : public Mantid::API::ImplicitFunctionParameterParser {
+class DLLExport SingleValueParameterParser : public Mantid::API::ImplicitFunctionParameterParser {
 public:
-  Mantid::API::ImplicitFunctionParameter *
-  createParameter(Poco::XML::Element *parameterElement) override;
+  Mantid::API::ImplicitFunctionParameter *createParameter(Poco::XML::Element *parameterElement) override;
 
-  SingleValueParameterType *
-  createWithoutDelegation(Poco::XML::Element *parameterElement);
+  SingleValueParameterType *createWithoutDelegation(Poco::XML::Element *parameterElement);
 
-  void setSuccessorParser(
-      Mantid::API::ImplicitFunctionParameterParser *paramParser) override;
+  void setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser *paramParser) override;
 };
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -61,15 +57,13 @@ parser.
 */
 template <class SingleValueParameterType>
 Mantid::API::ImplicitFunctionParameter *
-SingleValueParameterParser<SingleValueParameterType>::createParameter(
-    Poco::XML::Element *parameterElement) {
+SingleValueParameterParser<SingleValueParameterType>::createParameter(Poco::XML::Element *parameterElement) {
   using ValType = typename SingleValueParameterType::ValueType;
   std::string typeName = parameterElement->getChildElement("Type")->innerText();
   if (SingleValueParameterType::parameterName() != typeName) {
     return m_successor->createParameter(parameterElement);
   } else {
-    std::string sParameterValue =
-        parameterElement->getChildElement("Value")->innerText();
+    std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
     ValType value = boost::lexical_cast<ValType>(sParameterValue);
     return new SingleValueParameterType(value);
   }
@@ -83,16 +77,14 @@ to successor if it fails!.
 */
 template <class SingleValueParameterType>
 SingleValueParameterType *
-SingleValueParameterParser<SingleValueParameterType>::createWithoutDelegation(
-    Poco::XML::Element *parameterElement) {
+SingleValueParameterParser<SingleValueParameterType>::createWithoutDelegation(Poco::XML::Element *parameterElement) {
   using ValType = typename SingleValueParameterType::ValueType;
   std::string typeName = parameterElement->getChildElement("Type")->innerText();
   if (SingleValueParameterType::parameterName() != typeName) {
     throw std::runtime_error("The attempted ::createWithoutDelegation failed. "
                              "The type provided does not match this parser.");
   } else {
-    std::string sParameterValue =
-        parameterElement->getChildElement("Value")->innerText();
+    std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
     ValType value = boost::lexical_cast<ValType>(sParameterValue);
     return new SingleValueParameterType(value);
   }

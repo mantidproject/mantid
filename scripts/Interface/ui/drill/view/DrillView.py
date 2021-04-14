@@ -141,9 +141,14 @@ class DrillView(QMainWindow):
     ERROR_COLOR = "#3fff0000"
     PROCESSING_COLOR = "#3fffff00"
 
-    def __init__(self):
-        super(DrillView, self).__init__(None, Qt.Window)
+    def __init__(self, parent=None, window_flags=None):
+        super(DrillView, self).__init__(parent)
+        if window_flags:
+            self.setWindowFlags(window_flags)
         self.here = os.path.dirname(os.path.realpath(__file__))
+
+        # help
+        self.assistant_process = QProcess(self)
 
         # setup ui
         uic.loadUi(os.path.join(self.here, 'ui/main.ui'), self)
@@ -259,6 +264,8 @@ class DrillView(QMainWindow):
         Args:
             event (QCloseEvent): the close event
         """
+        self.assistant_process.close()
+        self.assistant_process.waitForFinished()
         children = self.findChildren(QDialog)
         for child in children:
             child.close()
@@ -358,16 +365,20 @@ class DrillView(QMainWindow):
         for (r, c) in indexes:
             self.table.eraseCell(r, c)
 
-    def add_row_after(self):
+    def add_row_after(self, n=0):
         """
         Add row(s) after the selected ones. If no row selected, the row(s)
         is(are) added at the end of the table. The number of row to add is
         taken from the ui spinbox.
+
+        Args:
+            n(int): number of rows. If 0, it will be taken from the spinbox
         """
         position = self.table.getLastSelectedRow()
         if position == -1:
             position = self.table.getLastRow()
-        n = self.nrows.value()
+        if not n:
+            n = self.nrows.value()
         for i in range(n):
             self.table.addRow(position + 1)
             self.rowAdded.emit(position + 1)
@@ -426,8 +437,8 @@ class DrillView(QMainWindow):
         """
         Popup the help window.
         """
-        InterfaceManager().showHelpPage(
-                "qthelp://org.mantidproject/doc/interfaces/DrILL.html")
+        from mantidqt.gui_helper import show_interface_help
+        show_interface_help("DrILL",self.assistant_process,area="ILL")
 
     def keyPressEvent(self, event):
         """

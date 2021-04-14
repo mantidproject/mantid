@@ -31,23 +31,19 @@ using namespace API;
 
 /// Constructor
 LoadRawBin0::LoadRawBin0()
-    : isisRaw(), m_filename(), m_numberOfSpectra(0), m_noTimeRegimes(0),
-      m_cache_options(), m_specTimeRegimes(), m_prog(0.0), m_lengthIn(0),
-      m_perioids(), m_total_specs(0), m_timeChannelsVec() {}
+    : isisRaw(), m_filename(), m_numberOfSpectra(0), m_noTimeRegimes(0), m_cache_options(), m_specTimeRegimes(),
+      m_prog(0.0), m_lengthIn(0), m_perioids(), m_total_specs(0), m_timeChannelsVec() {}
 
 /// Initialisation method.
 void LoadRawBin0::init() {
   LoadRawHelper::init();
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
-  declareProperty("SpectrumMin", 1, mustBePositive,
-                  "The number of the first spectrum to read.");
-  declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive,
-                  "The number of the last spectrum to read.");
-  declareProperty(
-      std::make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
-      "A comma-separated list of individual spectra to read.  Only used if "
-      "explicitly set.");
+  declareProperty("SpectrumMin", 1, mustBePositive, "The number of the first spectrum to read.");
+  declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive, "The number of the last spectrum to read.");
+  declareProperty(std::make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
+                  "A comma-separated list of individual spectra to read.  Only used if "
+                  "explicitly set.");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -76,8 +72,7 @@ void LoadRawBin0::exec() {
   std::string title;
   readTitle(file, title);
 
-  readworkspaceParameters(m_numberOfSpectra, m_numberOfPeriods, m_lengthIn,
-                          m_noTimeRegimes);
+  readworkspaceParameters(m_numberOfSpectra, m_numberOfPeriods, m_lengthIn, m_noTimeRegimes);
 
   ///
   setOptionalProperties();
@@ -97,8 +92,7 @@ void LoadRawBin0::exec() {
   int64_t histCurrent = -1;
 
   // Create the 2D workspace for the output xlength and ylength is one
-  DataObjects::Workspace2D_sptr localWorkspace =
-      createWorkspace(m_total_specs, 1, 1, title);
+  DataObjects::Workspace2D_sptr localWorkspace = createWorkspace(m_total_specs, 1, 1, title);
   Run &run = localWorkspace->mutableRun();
   if (bLoadlogFiles) {
     runLoadLog(m_filename, localWorkspace, 0.0, 0.0);
@@ -109,8 +103,7 @@ void LoadRawBin0::exec() {
   setProtonCharge(run);
 
   WorkspaceGroup_sptr ws_grp = createGroupWorkspace();
-  setWorkspaceProperty("OutputWorkspace", title, ws_grp, localWorkspace,
-                       m_numberOfPeriods, false, this);
+  setWorkspaceProperty("OutputWorkspace", title, ws_grp, localWorkspace, m_numberOfPeriods, false, this);
 
   // Loop over the number of periods in the raw file, putting each period in a
   // separate workspace
@@ -131,15 +124,13 @@ void LoadRawBin0::exec() {
       }
     }
 
-    const int64_t periodTimesNSpectraP1 =
-        period * (static_cast<int64_t>(m_numberOfSpectra) + 1);
+    const int64_t periodTimesNSpectraP1 = period * (static_cast<int64_t>(m_numberOfSpectra) + 1);
     skipData(file, periodTimesNSpectraP1);
     int64_t wsIndex = 0;
     for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
       int64_t histToRead = i + periodTimesNSpectraP1;
       if ((i >= m_spec_min && i < m_spec_max) ||
-          (m_list && find(m_spec_list.begin(), m_spec_list.end(), i) !=
-                         m_spec_list.end())) {
+          (m_list && find(m_spec_list.begin(), m_spec_list.end(), i) != m_spec_list.end())) {
         progress(m_prog, "Reading raw file data...");
         // readData(file, histToRead);
         // read spectrum
@@ -147,8 +138,7 @@ void LoadRawBin0::exec() {
           throw std::runtime_error("Error reading raw file");
         }
         int64_t binStart = 0;
-        setWorkspaceData(localWorkspace, m_timeChannelsVec, wsIndex, i,
-                         m_noTimeRegimes, 1, binStart);
+        setWorkspaceData(localWorkspace, m_timeChannelsVec, wsIndex, i, m_noTimeRegimes, 1, binStart);
         ++wsIndex;
 
         if (m_numberOfPeriods == 1) {
@@ -166,8 +156,7 @@ void LoadRawBin0::exec() {
     if (m_numberOfPeriods > 1) {
       setWorkspaceProperty(localWorkspace, ws_grp, period, false, this);
       // progress for workspace groups
-      m_prog = static_cast<double>(period) /
-               static_cast<double>(m_numberOfPeriods - 1);
+      m_prog = static_cast<double>(period) / static_cast<double>(m_numberOfPeriods - 1);
     }
 
   } // loop over periods

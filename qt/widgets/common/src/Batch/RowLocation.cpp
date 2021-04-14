@@ -30,8 +30,7 @@ bool RowLocation::isChildOf(RowLocation const &other) const {
     } else {
       auto const &otherPath = other.path();
       if (depth() - other.depth() == 1)
-        return boost::algorithm::equal(m_path.cbegin(), m_path.cend() - 1,
-                                       otherPath.cbegin(), otherPath.cend());
+        return boost::algorithm::equal(m_path.cbegin(), m_path.cend() - 1, otherPath.cbegin(), otherPath.cend());
       else
         return false;
     }
@@ -41,9 +40,7 @@ bool RowLocation::isChildOf(RowLocation const &other) const {
 }
 
 RowLocation RowLocation::parent() const {
-  assertOrThrow(
-      !isRoot(),
-      "RowLocation::parent: cannot get parent of root node location.");
+  assertOrThrow(!isRoot(), "RowLocation::parent: cannot get parent of root node location.");
   return RowLocation(RowPath(m_path.begin(), m_path.cend() - 1));
 }
 
@@ -68,13 +65,9 @@ std::ostream &operator<<(std::ostream &os, RowLocation const &location) {
   return os;
 }
 
-bool RowLocation::operator==(RowLocation const &other) const {
-  return this->path() == other.path();
-}
+bool RowLocation::operator==(RowLocation const &other) const { return this->path() == other.path(); }
 
-bool RowLocation::operator!=(RowLocation const &other) const {
-  return !((*this) == other);
-}
+bool RowLocation::operator!=(RowLocation const &other) const { return !((*this) == other); }
 
 bool RowLocation::operator<(RowLocation const &other) const {
   auto &lhsPath = this->path();
@@ -82,39 +75,29 @@ bool RowLocation::operator<(RowLocation const &other) const {
   return boost::algorithm::lexicographical_compare(lhsPath, rhsPath);
 }
 
-bool RowLocation::operator<=(RowLocation const &other) const {
-  return (*this) < other || (*this) == other;
-}
+bool RowLocation::operator<=(RowLocation const &other) const { return (*this) < other || (*this) == other; }
 
-bool RowLocation::operator>=(RowLocation const &other) const {
-  return !((*this) < other);
-}
+bool RowLocation::operator>=(RowLocation const &other) const { return !((*this) < other); }
 
-bool RowLocation::operator>(RowLocation const &other) const {
-  return !((*this) <= other);
-}
+bool RowLocation::operator>(RowLocation const &other) const { return !((*this) <= other); }
 
 RowLocation RowLocation::relativeTo(RowLocation const &ancestor) const {
   assertOrThrow((*this) == ancestor || (*this).isDescendantOf(ancestor),
                 "RowLocation::relativeTo: Tried to get position relative to "
                 "node which was not an ancestor");
-  return RowLocation(
-      RowPath(m_path.cbegin() + ancestor.depth(), m_path.cend()));
+  return RowLocation(RowPath(m_path.cbegin() + ancestor.depth(), m_path.cend()));
 }
 
 bool RowLocation::isSiblingOf(RowLocation const &other) const {
   if (!(isRoot() || other.isRoot())) {
     auto const &otherPath = other.path();
     if (depth() == other.depth())
-      return boost::algorithm::equal(m_path.cbegin(), m_path.cend() - 1,
-                                     otherPath.cbegin(), otherPath.cend() - 1);
+      return boost::algorithm::equal(m_path.cbegin(), m_path.cend() - 1, otherPath.cbegin(), otherPath.cend() - 1);
   }
   return false;
 }
 
-bool RowLocation::isChildOrSiblingOf(RowLocation const &other) const {
-  return isChildOf(other) || isSiblingOf(other);
-}
+bool RowLocation::isChildOrSiblingOf(RowLocation const &other) const { return isChildOf(other) || isSiblingOf(other); }
 
 bool RowLocation::isDescendantOf(RowLocation const &ancestor) const {
   if (!isRoot()) {
@@ -123,23 +106,20 @@ bool RowLocation::isDescendantOf(RowLocation const &ancestor) const {
     } else {
       auto const &ancestorPath = ancestor.path();
       if (depth() > ancestor.depth())
-        return boost::algorithm::equal(
-            m_path.cbegin(), m_path.cbegin() + ancestor.depth(),
-            ancestorPath.cbegin(), ancestorPath.cend());
+        return boost::algorithm::equal(m_path.cbegin(), m_path.cbegin() + ancestor.depth(), ancestorPath.cbegin(),
+                                       ancestorPath.cend());
     }
   }
   return false;
 }
 
-bool pathsSameUntilDepth(int depth, RowLocation const &locationA,
-                         RowLocation const &locationB) {
+bool pathsSameUntilDepth(int depth, RowLocation const &locationA, RowLocation const &locationB) {
   auto &pathA = locationA.path();
   auto &pathB = locationB.path();
   assertOrThrow(depth <= std::min(locationA.depth(), locationB.depth()),
                 "pathsSameUntilDepth: Comparison depth must be less than or "
                 "equal to the depth of both locations");
-  return boost::algorithm::equal(pathA.cbegin(), pathA.cbegin() + depth,
-                                 pathB.cbegin(), pathB.cbegin() + depth);
+  return boost::algorithm::equal(pathA.cbegin(), pathA.cbegin() + depth, pathB.cbegin(), pathB.cbegin() + depth);
 }
 } // namespace Batch
 } // namespace MantidWidgets

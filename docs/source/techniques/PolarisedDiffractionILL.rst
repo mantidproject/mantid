@@ -10,7 +10,7 @@ Data reduction for D7 instrument at the ILL
 There are three workflow algorithms supporting data reduction at ILL's D7 polarised diffraction and spectroscopy instrument. These algorithms are:
 
 :ref:`algm-D7YIGPOsitionCalibration`
-    Performs wavelength and position calibraiton for D7 instrument banks and individual detectors in banks. 
+    Performs wavelength and position calibraiton for D7 instrument banks and individual detectors in banks.
 
 :ref:`algm-PolDiffILLReduction`
     Performs data reduction and produces the unnormalised sample cross-sections in one of the available units.
@@ -51,7 +51,7 @@ A very basic reduction would include a vanadium reference and a sample, without 
 
     # Define vanadium properties:
     vanadiumProperties = {'FormulaUnits': 1, 'SampleMass': 8.54, 'FormulaUnitMass': 50.94}
-    
+
     # Vanadium reduction
     PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputTreatment='Sum',
 	                OutputWorkspace='reduced_vanadium',
@@ -78,7 +78,7 @@ Output:
 
     dS/dOmega (TwoTheta) detector position range: 13.14...144.06 (degrees)
 
-   
+
 
 Wavelength and position calibration
 ===================================
@@ -133,7 +133,7 @@ It is strongly advised to first run the :ref:`D7YIGPositionCalibration <algm-D7Y
    print('The bank4 gradient is: {0:.3f}'.format(1.0 / mtd['shortWavelength'].column(1)[352]))
 
 
-	     
+
 Transmission calculation
 ========================
 

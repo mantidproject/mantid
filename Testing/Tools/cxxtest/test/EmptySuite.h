@@ -15,7 +15,7 @@ public:
     void setUp() {}
     void tearDown() {}
 
-    void thisSuiteHasNoTests() 
+    void thisSuiteHasNoTests()
     {
         TS_FAIL( "This suite has no tests" );
     }

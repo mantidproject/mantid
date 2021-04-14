@@ -48,21 +48,16 @@ public:
   /// Effective typeid
   std::string className() const override { return "Quadratic"; }
 
-  const std::vector<double> &copyBaseEqn() const {
-    return BaseEqn;
-  } ///< access BaseEquation vector
+  const std::vector<double> &copyBaseEqn() const { return BaseEqn; } ///< access BaseEquation vector
 
   int side(const Kernel::V3D &) const override;
 
   virtual void setBaseEqn() = 0; ///< Abstract set baseEqn
   double eqnValue(const Kernel::V3D &) const;
 
-  int onSurface(
-      const Kernel::V3D &) const override; ///< is point valid on surface
-  double distance(const Kernel::V3D &)
-      const override; ///< distance between point and surface (approx)
-  Kernel::V3D
-  surfaceNormal(const Kernel::V3D &) const override; ///< Normal at surface
+  int onSurface(const Kernel::V3D &) const override;             ///< is point valid on surface
+  double distance(const Kernel::V3D &) const override;           ///< distance between point and surface (approx)
+  Kernel::V3D surfaceNormal(const Kernel::V3D &) const override; ///< Normal at surface
 
   void displace(const Kernel::V3D &) override;
   void rotate(const Kernel::Matrix<double> &) override;

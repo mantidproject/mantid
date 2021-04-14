@@ -71,7 +71,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             OutputTreatment='Average', OutputWorkspace='quartz')
         self._check_output(mtd['quartz'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['quartz'], 'Quartz')
-    
+
     def test_vanadium(self):
         sampleProperties = {'FormulaUnits': 1, 'SampleMass': 8.54, 'FormulaUnitMass': 50.94}
         PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium',
@@ -103,7 +103,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             OutputTreatment='Individual')
         self._check_output(mtd['sample'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['sample'], 'Sample')
-    
+
     def _check_process_flag(self, ws, value):
         self.assertTrue(ws[0].getRun().getLogData('ProcessedAs').value, value)
 

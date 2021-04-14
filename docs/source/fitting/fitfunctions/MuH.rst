@@ -24,7 +24,7 @@ Fitting function for use by Muon scientists defined by:
 and :math:`\phi` (rad) is the phase at time :math:`t=0`.
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np

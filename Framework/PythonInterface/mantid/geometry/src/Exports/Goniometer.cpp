@@ -27,31 +27,34 @@ GNU_DIAG_OFF("unused-local-typedef")
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
 // define overloaded functions
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getEulerAngles_overloads,
-                                       Goniometer::getEulerAngles, 0, 1)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getEulerAngles_overloads, Goniometer::getEulerAngles, 0, 1)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
 
 /// Set the U vector via a numpy array
-void setR(Goniometer &self, const object &data) {
-  self.setR(Converters::PyObjectToMatrix(data)());
+void setR(Goniometer &self, const object &data) { self.setR(Converters::PyObjectToMatrix(data)()); }
+
+/// calc goniometer with V3D sample position input
+void calcFromQSampleAndWavelength(Goniometer &self, const object &position, double wavelength, bool flip_x,
+                                  bool inner) {
+  self.calcFromQSampleAndWavelength(Converters::PyObjectToV3D(position)(), wavelength, flip_x, inner);
 }
 } // namespace
 
 void export_Goniometer() {
 
   // return_value_policy for read-only numpy array
-  using return_readonly_numpy =
-      return_value_policy<Policies::MatrixRefToNumpy<Converters::WrapReadOnly>>;
+  using return_readonly_numpy = return_value_policy<Policies::MatrixRefToNumpy<Converters::WrapReadOnly>>;
 
   class_<Goniometer>("Goniometer", init<>(arg("self")))
       .def(init<Goniometer const &>((arg("self"), arg("other"))))
       .def(init<DblMatrix>((arg("self"), arg("rot"))))
       .def("getEulerAngles", (&Goniometer::getEulerAngles),
-           getEulerAngles_overloads(args("self", "convention"),
-                                    "Default convention is \'YZX\'. Universal "
-                                    "goniometer is \'YZY\'"))
+           getEulerAngles_overloads(args("self", "convention"), "Default convention is \'YZX\'. Universal "
+                                                                "goniometer is \'YZY\'"))
       .def("getR", &Goniometer::getR, arg("self"), return_readonly_numpy())
-      .def("setR", &setR, (arg("self"), arg("rot")));
+      .def("setR", &setR, (arg("self"), arg("rot")))
+      .def("calcFromQSampleAndWavelength", &calcFromQSampleAndWavelength,
+           (arg("self"), arg("positions"), arg("wavelength"), arg("flip_x") = false, arg("inner") = false));
 }

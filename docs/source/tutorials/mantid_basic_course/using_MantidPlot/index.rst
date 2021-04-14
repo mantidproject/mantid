@@ -18,7 +18,7 @@ If Workbench is the Olympian Greek Gods, then Plot is the Titans before them.
    03_differences
    04_Exercises_Plot
 
-**Sections** 
+**Sections**
 
 * :ref:`01_opening_mantid_plot`
 * :ref:`02_lost_the_plot`

@@ -27,29 +27,21 @@ DECLARE_ALGORITHM(AlphaCalc)
  */
 void AlphaCalc::init() {
 
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
 
   std::vector<int> forwardDefault{1};
-  declareProperty(std::make_unique<ArrayProperty<int>>(
-                      "ForwardSpectra", std::move(forwardDefault)),
+  declareProperty(std::make_unique<ArrayProperty<int>>("ForwardSpectra", std::move(forwardDefault)),
                   "The spectra numbers of the forward group (default to 1)");
 
   std::vector<int> backwardDefault{2};
-  declareProperty(std::make_unique<ArrayProperty<int>>(
-                      "BackwardSpectra", std::move(backwardDefault)),
+  declareProperty(std::make_unique<ArrayProperty<int>>("BackwardSpectra", std::move(backwardDefault)),
                   "The spectra numbers of the backward group (default to 2)");
 
-  declareProperty("FirstGoodValue", EMPTY_DBL(),
-                  "First good value (default lowest value of x)",
-                  Direction::Input);
-  declareProperty("LastGoodValue", EMPTY_DBL(),
-                  "Last good value (default highest value of x)",
-                  Direction::Input);
+  declareProperty("FirstGoodValue", EMPTY_DBL(), "First good value (default lowest value of x)", Direction::Input);
+  declareProperty("LastGoodValue", EMPTY_DBL(), "Last good value (default highest value of x)", Direction::Input);
 
-  declareProperty("Alpha", 1.0, "The alpha efficiency (default to 1.0)",
-                  Direction::Output);
+  declareProperty("Alpha", 1.0, "The alpha efficiency (default to 1.0)", Direction::Output);
 }
 
 /** Executes the algorithm
@@ -65,9 +57,8 @@ void AlphaCalc::exec() {
   // one spectra
   API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   if (inputWS->getNumberHistograms() < 2) {
-    g_log.error()
-        << "Can't calculate alpha value for workspace which"
-        << " contains one spectrum. A default value of alpha = 1.0 is returned";
+    g_log.error() << "Can't calculate alpha value for workspace which"
+                  << " contains one spectrum. A default value of alpha = 1.0 is returned";
     setProperty("Alpha", alpha);
     return;
   }
@@ -88,8 +79,7 @@ void AlphaCalc::exec() {
   groupForward->setProperty("SpectraList", forwardSpectraList);
   groupForward->setProperty("KeepUngroupedSpectra", false);
   groupForward->execute();
-  API::MatrixWorkspace_sptr forwardWS =
-      groupForward->getProperty("OutputWorkspace");
+  API::MatrixWorkspace_sptr forwardWS = groupForward->getProperty("OutputWorkspace");
 
   API::IAlgorithm_sptr groupBackward = createChildAlgorithm("GroupDetectors");
   groupBackward->setProperty("InputWorkspace", inputWS);
@@ -97,8 +87,7 @@ void AlphaCalc::exec() {
   groupBackward->setProperty("SpectraList", backwardSpectraList);
   groupBackward->setProperty("KeepUngroupedSpectra", false);
   groupBackward->execute();
-  API::MatrixWorkspace_sptr backwardWS =
-      groupBackward->getProperty("OutputWorkspace");
+  API::MatrixWorkspace_sptr backwardWS = groupBackward->getProperty("OutputWorkspace");
 
   // calculate sum of forward counts
 

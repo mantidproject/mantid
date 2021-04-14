@@ -33,65 +33,48 @@ void QueryRemoteJob::init() {
   auto nullValidator = std::make_shared<NullValidator>();
 
   // Compute Resources
-  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
-                                          .getFacility()
-                                          .computeResources();
-  declareProperty("ComputeResource", "",
-                  std::make_shared<StringListValidator>(computes),
+  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
+  declareProperty("ComputeResource", "", std::make_shared<StringListValidator>(computes),
                   "The name of the remote computer to query", Direction::Input);
 
   // The ID of the job we want to query
-  declareProperty("JobID", "", requireValue, "The ID of the job to query",
-                  Direction::Input);
+  declareProperty("JobID", "", requireValue, "The ID of the job to query", Direction::Input);
 
   // Name given to the job
-  declareProperty("JobName", "", nullValidator, "The name of the job",
-                  Direction::Output);
+  declareProperty("JobName", "", nullValidator, "The name of the job", Direction::Output);
 
   // Name of the python script that was (or will be) run
-  declareProperty("ScriptName", "", nullValidator,
-                  "The name of the script that was (or will be) executed",
+  declareProperty("ScriptName", "", nullValidator, "The name of the script that was (or will be) executed",
                   Direction::Output);
 
   // A human readable description of the job's status
-  declareProperty(
-      "JobStatusString", "", nullValidator,
-      "The current status of the job (Queued, Running, Complete, etc..)",
-      Direction::Output);
+  declareProperty("JobStatusString", "", nullValidator,
+                  "The current status of the job (Queued, Running, Complete, etc..)", Direction::Output);
 
   // Transaction ID this job is associated with
-  declareProperty("TransID", "", nullValidator,
-                  "The transaction ID this job was submitted under",
-                  Direction::Output);
+  declareProperty("TransID", "", nullValidator, "The transaction ID this job was submitted under", Direction::Output);
 
   // Dates and times for job submit, job start and job complete (may be empty
   // depending on the server-side implementation)
-  declareProperty("SubmitDate", "", nullValidator,
-                  "The date & time the job was submitted", Direction::Output);
-  declareProperty("StartDate", "", nullValidator,
-                  "The date & time the job actually started executing",
+  declareProperty("SubmitDate", "", nullValidator, "The date & time the job was submitted", Direction::Output);
+  declareProperty("StartDate", "", nullValidator, "The date & time the job actually started executing",
                   Direction::Output);
-  declareProperty("CompletionDate", "", nullValidator,
-                  "The date & time the job finished", Direction::Output);
+  declareProperty("CompletionDate", "", nullValidator, "The date & time the job finished", Direction::Output);
 }
 
 void QueryRemoteJob::exec() {
   std::shared_ptr<RemoteJobManager> jobManager =
-      Mantid::Kernel::ConfigService::Instance()
-          .getFacility()
-          .getRemoteJobManager(getPropertyValue("ComputeResource"));
+      Mantid::Kernel::ConfigService::Instance().getFacility().getRemoteJobManager(getPropertyValue("ComputeResource"));
 
   // jobManager is a std::shared_ptr...
   if (!jobManager) {
     // Requested compute resource doesn't exist
     // TODO: should we create our own exception class for this??
     throw(std::runtime_error(
-        std::string("Unable to create a compute resource named " +
-                    getPropertyValue("ComputeResource"))));
+        std::string("Unable to create a compute resource named " + getPropertyValue("ComputeResource"))));
   }
 
-  std::istream &respStream = jobManager->httpGet(
-      "/query", std::string("JobID=") + getPropertyValue("JobID"));
+  std::istream &respStream = jobManager->httpGet("/query", std::string("JobID=") + getPropertyValue("JobID"));
   JSONObject resp;
   initFromStream(resp, respStream);
   if (jobManager->lastStatus() == Poco::Net::HTTPResponse::HTTP_OK) {

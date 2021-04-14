@@ -39,30 +39,25 @@ using namespace MantidQt::CustomInterfaces;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-const std::string EnggDiffFittingViewQtWidget::g_settingsGroup =
-    "CustomInterfaces/EnggDiffraction/FittingView";
+const std::string EnggDiffFittingViewQtWidget::g_settingsGroup = "CustomInterfaces/EnggDiffraction/FittingView";
 
-const std::string EnggDiffFittingViewQtWidget::g_peaksListExt =
-    "Peaks list File: CSV "
-    "(*.csv *.txt);;"
-    "Other extensions/all files (*)";
+const std::string EnggDiffFittingViewQtWidget::g_peaksListExt = "Peaks list File: CSV "
+                                                                "(*.csv *.txt);;"
+                                                                "Other extensions/all files (*)";
 
 std::vector<std::string> EnggDiffFittingViewQtWidget::m_fitting_runno_dir_vec;
 
-EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
-    QWidget * /*parent*/, std::shared_ptr<IEnggDiffractionUserMsg> mainMsg,
-    std::shared_ptr<IEnggDiffractionSettings> mainSettings,
-    std::shared_ptr<IEnggDiffractionCalibration> mainCalib,
-    std::shared_ptr<IEnggDiffractionParam> mainParam,
-    std::shared_ptr<IEnggDiffractionPythonRunner> mainPythonRunner,
-    std::shared_ptr<IEnggDiffractionParam> fileSettings)
-    : IEnggDiffFittingView(), m_fittedDataVector(),
-      m_fileSettings(std::move(fileSettings)),
-      m_mainMsgProvider(std::move(mainMsg)),
-      m_mainPythonRunner(std::move(mainPythonRunner)),
-      m_presenter(std::make_shared<EnggDiffFittingPresenter>(
-          this, std::make_unique<EnggDiffFittingModel>(), mainCalib,
-          mainParam)) {
+EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(QWidget * /*parent*/,
+                                                         std::shared_ptr<IEnggDiffractionUserMsg> mainMsg,
+                                                         std::shared_ptr<IEnggDiffractionSettings> mainSettings,
+                                                         std::shared_ptr<IEnggDiffractionCalibration> mainCalib,
+                                                         std::shared_ptr<IEnggDiffractionParam> mainParam,
+                                                         std::shared_ptr<IEnggDiffractionPythonRunner> mainPythonRunner,
+                                                         std::shared_ptr<IEnggDiffractionParam> fileSettings)
+    : IEnggDiffFittingView(), m_fittedDataVector(), m_fileSettings(std::move(fileSettings)),
+      m_mainMsgProvider(std::move(mainMsg)), m_mainPythonRunner(std::move(mainPythonRunner)),
+      m_presenter(std::make_shared<EnggDiffFittingPresenter>(this, std::make_unique<EnggDiffFittingModel>(), mainCalib,
+                                                             mainParam)) {
 
   initLayout();
   m_presenter->notify(IEnggDiffFittingPresenter::Start);
@@ -90,49 +85,39 @@ void EnggDiffFittingViewQtWidget::initLayout() {
 }
 
 void EnggDiffFittingViewQtWidget::doSetup() {
-  connect(m_ui.pushButton_fitting_browse_run_num, SIGNAL(released()), this,
-          SLOT(browseFitFocusedRun()));
+  connect(m_ui.pushButton_fitting_browse_run_num, SIGNAL(released()), this, SLOT(browseFitFocusedRun()));
 
-  connect(m_ui.lineEdit_pushButton_run_num, SIGNAL(returnPressed()), this,
-          SLOT(loadClicked()));
+  connect(m_ui.lineEdit_pushButton_run_num, SIGNAL(returnPressed()), this, SLOT(loadClicked()));
 
-  connect(m_ui.pushButton_fitting_browse_peaks, SIGNAL(released()), this,
-          SLOT(browseClicked()));
+  connect(m_ui.pushButton_fitting_browse_peaks, SIGNAL(released()), this, SLOT(browseClicked()));
 
   connect(m_ui.pushButton_load, SIGNAL(released()), this, SLOT(loadClicked()));
 
   connect(m_ui.pushButton_fit, SIGNAL(released()), this, SLOT(fitClicked()));
 
-  connect(m_ui.pushButton_fit_all, SIGNAL(released()), this,
-          SLOT(fitAllClicked()));
+  connect(m_ui.pushButton_fit_all, SIGNAL(released()), this, SLOT(fitAllClicked()));
 
   // add peak by clicking the button
   connect(m_ui.pushButton_select_peak, SIGNAL(released()), SLOT(setPeakPick()));
 
   connect(m_ui.pushButton_add_peak, SIGNAL(released()), SLOT(addClicked()));
 
-  connect(m_ui.pushButton_save_peak_list, SIGNAL(released()),
-          SLOT(saveClicked()));
+  connect(m_ui.pushButton_save_peak_list, SIGNAL(released()), SLOT(saveClicked()));
 
-  connect(m_ui.pushButton_clear_peak_list, SIGNAL(released()),
-          SLOT(clearPeakList()));
+  connect(m_ui.pushButton_clear_peak_list, SIGNAL(released()), SLOT(clearPeakList()));
 
-  connect(m_ui.pushButton_plot_separate_window, SIGNAL(released()),
-          SLOT(plotSeparateWindow()));
+  connect(m_ui.pushButton_plot_separate_window, SIGNAL(released()), SLOT(plotSeparateWindow()));
 
-  connect(m_ui.listWidget_fitting_run_num,
-          SIGNAL(itemClicked(QListWidgetItem *)), this,
+  connect(m_ui.listWidget_fitting_run_num, SIGNAL(itemClicked(QListWidgetItem *)), this,
           SLOT(listWidget_fitting_run_num_clicked(QListWidgetItem *)));
 
-  connect(m_ui.checkBox_plotFittedPeaks, SIGNAL(stateChanged(int)), this,
-          SLOT(plotFittedPeaksStateChanged()));
+  connect(m_ui.checkBox_plotFittedPeaks, SIGNAL(stateChanged(int)), this, SLOT(plotFittedPeaksStateChanged()));
 
   // Tool-tip button
   connect(m_ui.pushButton_tooltip, SIGNAL(released()), SLOT(showToolTipHelp()));
 
   // Remove run button
-  connect(m_ui.pushButton_remove_run, SIGNAL(released()), this,
-          SLOT(removeRunClicked()));
+  connect(m_ui.pushButton_remove_run, SIGNAL(released()), this, SLOT(removeRunClicked()));
 
   m_ui.dataPlot->setCanvasBackground(Qt::white);
   m_ui.dataPlot->setAxisTitle(QwtPlot::xBottom, "d-Spacing (A)");
@@ -147,10 +132,8 @@ void EnggDiffFittingViewQtWidget::doSetup() {
   m_peakPicker = new MantidWidgets::PeakPicker(m_ui.dataPlot, Qt::red);
   setPeakPickerEnabled(false);
 
-  m_zoomTool =
-      new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft,
-                        QwtPicker::DragSelection | QwtPicker::CornerToCorner,
-                        QwtPicker::AlwaysOff, m_ui.dataPlot->canvas());
+  m_zoomTool = new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft, QwtPicker::DragSelection | QwtPicker::CornerToCorner,
+                                 QwtPicker::AlwaysOff, m_ui.dataPlot->canvas());
   m_zoomTool->setRubberBandPen(QPen(Qt::black));
   setZoomTool(false);
 }
@@ -160,10 +143,8 @@ void EnggDiffFittingViewQtWidget::readSettings() {
   qs.beginGroup(QString::fromStdString(g_settingsGroup));
 
   // user params
-  m_ui.lineEdit_pushButton_run_num->setText(
-      qs.value("user-params-fitting-focused-file", "").toString());
-  m_ui.lineEdit_fitting_peaks->setText(
-      qs.value("user-params-fitting-peaks-to-fit", "").toString());
+  m_ui.lineEdit_pushButton_run_num->setText(qs.value("user-params-fitting-focused-file", "").toString());
+  m_ui.lineEdit_fitting_peaks->setText(qs.value("user-params-fitting-peaks-to-fit", "").toString());
 
   qs.endGroup();
 }
@@ -172,10 +153,8 @@ void EnggDiffFittingViewQtWidget::saveSettings() const {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(g_settingsGroup));
 
-  qs.setValue("user-params-fitting-focused-file",
-              m_ui.lineEdit_pushButton_run_num->text());
-  qs.setValue("user-params-fitting-peaks-to-fit",
-              m_ui.lineEdit_fitting_peaks->text());
+  qs.setValue("user-params-fitting-focused-file", m_ui.lineEdit_pushButton_run_num->text());
+  qs.setValue("user-params-fitting-peaks-to-fit", m_ui.lineEdit_fitting_peaks->text());
 
   qs.endGroup();
 }
@@ -192,71 +171,49 @@ void EnggDiffFittingViewQtWidget::enable(bool enable) {
   m_ui.groupBox_fititng_preview->setEnabled(enable);
 }
 
-void EnggDiffFittingViewQtWidget::showStatus(const std::string &sts) {
-  m_mainMsgProvider->showStatus(sts);
-}
+void EnggDiffFittingViewQtWidget::showStatus(const std::string &sts) { m_mainMsgProvider->showStatus(sts); }
 
-void EnggDiffFittingViewQtWidget::userWarning(const std::string &err,
-                                              const std::string &description) {
+void EnggDiffFittingViewQtWidget::userWarning(const std::string &err, const std::string &description) {
   m_mainMsgProvider->userWarning(err, description);
 }
 
-void EnggDiffFittingViewQtWidget::userError(const std::string &err,
-                                            const std::string &description) {
+void EnggDiffFittingViewQtWidget::userError(const std::string &err, const std::string &description) {
   m_mainMsgProvider->userError(err, description);
 }
 
-void EnggDiffFittingViewQtWidget::enableCalibrateFocusFitUserActions(
-    bool enable) {
+void EnggDiffFittingViewQtWidget::enableCalibrateFocusFitUserActions(bool enable) {
   m_mainMsgProvider->enableCalibrateFocusFitUserActions(enable);
 }
 
-EnggDiffCalibSettings
-EnggDiffFittingViewQtWidget::currentCalibSettings() const {
+EnggDiffCalibSettings EnggDiffFittingViewQtWidget::currentCalibSettings() const {
   return m_mainSettings->currentCalibSettings();
 }
 
-std::string
-EnggDiffFittingViewQtWidget::enggRunPythonCode(const std::string &pyCode) {
+std::string EnggDiffFittingViewQtWidget::enggRunPythonCode(const std::string &pyCode) {
   return m_mainPythonRunner->enggRunPythonCode(pyCode);
 }
 
-void EnggDiffFittingViewQtWidget::loadClicked() {
-  m_presenter->notify(IEnggDiffFittingPresenter::Load);
-}
+void EnggDiffFittingViewQtWidget::loadClicked() { m_presenter->notify(IEnggDiffFittingPresenter::Load); }
 
-void EnggDiffFittingViewQtWidget::fitClicked() {
-  m_presenter->notify(IEnggDiffFittingPresenter::FitPeaks);
-}
+void EnggDiffFittingViewQtWidget::fitClicked() { m_presenter->notify(IEnggDiffFittingPresenter::FitPeaks); }
 
-void EnggDiffFittingViewQtWidget::fitAllClicked() {
-  m_presenter->notify(IEnggDiffFittingPresenter::FitAllPeaks);
-}
+void EnggDiffFittingViewQtWidget::fitAllClicked() { m_presenter->notify(IEnggDiffFittingPresenter::FitAllPeaks); }
 
-void EnggDiffFittingViewQtWidget::addClicked() {
-  m_presenter->notify(IEnggDiffFittingPresenter::addPeaks);
-}
+void EnggDiffFittingViewQtWidget::addClicked() { m_presenter->notify(IEnggDiffFittingPresenter::addPeaks); }
 
-void EnggDiffFittingViewQtWidget::browseClicked() {
-  m_presenter->notify(IEnggDiffFittingPresenter::browsePeaks);
-}
+void EnggDiffFittingViewQtWidget::browseClicked() { m_presenter->notify(IEnggDiffFittingPresenter::browsePeaks); }
 
-void EnggDiffFittingViewQtWidget::saveClicked() {
-  m_presenter->notify(IEnggDiffFittingPresenter::savePeaks);
-}
+void EnggDiffFittingViewQtWidget::saveClicked() { m_presenter->notify(IEnggDiffFittingPresenter::savePeaks); }
 
 void EnggDiffFittingViewQtWidget::plotFittedPeaksStateChanged() {
   m_presenter->notify(IEnggDiffFittingPresenter::updatePlotFittedPeaks);
 }
 
-void EnggDiffFittingViewQtWidget::listWidget_fitting_run_num_clicked(
-    QListWidgetItem *) {
+void EnggDiffFittingViewQtWidget::listWidget_fitting_run_num_clicked(QListWidgetItem *) {
   m_presenter->notify(IEnggDiffFittingPresenter::selectRun);
 }
 
-void EnggDiffFittingViewQtWidget::removeRunClicked() {
-  m_presenter->notify(IEnggDiffFittingPresenter::removeRun);
-}
+void EnggDiffFittingViewQtWidget::removeRunClicked() { m_presenter->notify(IEnggDiffFittingPresenter::removeRun); }
 
 void EnggDiffFittingViewQtWidget::resetCanvas() {
   // clear vector and detach curves to avoid plot crash
@@ -275,9 +232,8 @@ void EnggDiffFittingViewQtWidget::resetCanvas() {
   m_ui.pushButton_plot_separate_window->setEnabled(false);
 }
 
-void EnggDiffFittingViewQtWidget::setDataVector(
-    std::vector<std::shared_ptr<QwtData>> &data, bool focused,
-    bool plotSinglePeaks, const std::string &xAxisLabel) {
+void EnggDiffFittingViewQtWidget::setDataVector(std::vector<std::shared_ptr<QwtData>> &data, bool focused,
+                                                bool plotSinglePeaks, const std::string &xAxisLabel) {
 
   if (!plotSinglePeaks) {
     // clear vector and detach curves to avoid plot crash
@@ -293,9 +249,8 @@ void EnggDiffFittingViewQtWidget::setDataVector(
   }
 }
 
-void EnggDiffFittingViewQtWidget::dataCurvesFactory(
-    std::vector<std::shared_ptr<QwtData>> &data,
-    std::vector<QwtPlotCurve *> &dataVector, bool focused) {
+void EnggDiffFittingViewQtWidget::dataCurvesFactory(std::vector<std::shared_ptr<QwtData>> &data,
+                                                    std::vector<QwtPlotCurve *> &dataVector, bool focused) {
 
   // clear vector
   for (auto curves : dataVector) {
@@ -310,10 +265,9 @@ void EnggDiffFittingViewQtWidget::dataCurvesFactory(
   resetView();
 
   // dark colours could be removed so that the coloured peaks stand out more
-  const std::array<QColor, 16> QPenList{
-      {Qt::white, Qt::red, Qt::darkRed, Qt::green, Qt::darkGreen, Qt::blue,
-       Qt::darkBlue, Qt::cyan, Qt::darkCyan, Qt::magenta, Qt::darkMagenta,
-       Qt::yellow, Qt::darkYellow, Qt::gray, Qt::lightGray, Qt::black}};
+  const std::array<QColor, 16> QPenList{{Qt::white, Qt::red, Qt::darkRed, Qt::green, Qt::darkGreen, Qt::blue,
+                                         Qt::darkBlue, Qt::cyan, Qt::darkCyan, Qt::magenta, Qt::darkMagenta, Qt::yellow,
+                                         Qt::darkYellow, Qt::gray, Qt::lightGray, Qt::black}};
 
   std::mt19937 gen;
   std::uniform_int_distribution<std::size_t> dis(0, QPenList.size() - 1);
@@ -332,8 +286,7 @@ void EnggDiffFittingViewQtWidget::dataCurvesFactory(
     } else {
       dataCurve->setStyle(QwtPlotCurve::NoCurve);
       // focused workspace in bg set as darkGrey crosses insted of line
-      dataCurve->setSymbol(QwtSymbol(QwtSymbol::XCross, QBrush(),
-                                     QPen(Qt::darkGray, 1), QSize(3, 3)));
+      dataCurve->setSymbol(QwtSymbol(QwtSymbol::XCross, QBrush(), QPen(Qt::darkGray, 1), QSize(3, 3)));
     }
     dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
 
@@ -362,8 +315,7 @@ void EnggDiffFittingViewQtWidget::setPeakPickerEnabled(bool enabled) {
   }
 }
 
-void EnggDiffFittingViewQtWidget::setPeakPicker(
-    const IPeakFunction_const_sptr &peak) {
+void EnggDiffFittingViewQtWidget::setPeakPicker(const IPeakFunction_const_sptr &peak) {
   m_peakPicker->setPeak(peak);
   m_ui.dataPlot->replot();
 }
@@ -374,13 +326,9 @@ double EnggDiffFittingViewQtWidget::getPeakCentre() const {
   return centre;
 }
 
-bool EnggDiffFittingViewQtWidget::peakPickerEnabled() const {
-  return m_peakPicker->isEnabled();
-}
+bool EnggDiffFittingViewQtWidget::peakPickerEnabled() const { return m_peakPicker->isEnabled(); }
 
-void EnggDiffFittingViewQtWidget::setZoomTool(bool enabled) {
-  m_zoomTool->setEnabled(enabled);
-}
+void EnggDiffFittingViewQtWidget::setZoomTool(bool enabled) { m_zoomTool->setEnabled(enabled); }
 
 void EnggDiffFittingViewQtWidget::resetView() {
   // Resets the view to a sensible default
@@ -394,8 +342,7 @@ void EnggDiffFittingViewQtWidget::resetView() {
 
 std::string EnggDiffFittingViewQtWidget::getPreviousDir() const {
 
-  QString prevPath =
-      MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  QString prevPath = MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
 
   return prevPath.toStdString();
 }
@@ -405,22 +352,18 @@ void EnggDiffFittingViewQtWidget::setPreviousDir(const std::string &path) {
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(qPath);
 }
 
-std::string
-EnggDiffFittingViewQtWidget::getOpenFile(const std::string &prevPath) {
+std::string EnggDiffFittingViewQtWidget::getOpenFile(const std::string &prevPath) {
 
-  QString path(QFileDialog::getOpenFileName(
-      this, tr("Open Peaks To Fit"), QString::fromStdString(prevPath),
-      QString::fromStdString(g_peaksListExt)));
+  QString path(QFileDialog::getOpenFileName(this, tr("Open Peaks To Fit"), QString::fromStdString(prevPath),
+                                            QString::fromStdString(g_peaksListExt)));
 
   return path.toStdString();
 }
 
-std::string
-EnggDiffFittingViewQtWidget::getSaveFile(const std::string &prevPath) {
+std::string EnggDiffFittingViewQtWidget::getSaveFile(const std::string &prevPath) {
 
-  QString path(QFileDialog::getSaveFileName(
-      this, tr("Save Expected Peaks List"), QString::fromStdString(prevPath),
-      QString::fromStdString(g_peaksListExt)));
+  QString path(QFileDialog::getSaveFileName(this, tr("Save Expected Peaks List"), QString::fromStdString(prevPath),
+                                            QString::fromStdString(g_peaksListExt)));
 
   return path.toStdString();
 }
@@ -430,9 +373,8 @@ void EnggDiffFittingViewQtWidget::browseFitFocusedRun() {
   std::string nexusFormat = "Nexus file with calibration table: NXS, NEXUS"
                             "(*.nxs *.nexus);;";
 
-  QStringList paths(QFileDialog::getOpenFileNames(
-      this, tr("Open Focused File "), QString::fromStdString(focusDir),
-      QString::fromStdString(nexusFormat)));
+  QStringList paths(QFileDialog::getOpenFileNames(this, tr("Open Focused File "), QString::fromStdString(focusDir),
+                                                  QString::fromStdString(nexusFormat)));
 
   if (paths.isEmpty()) {
     return;
@@ -441,8 +383,7 @@ void EnggDiffFittingViewQtWidget::browseFitFocusedRun() {
   setFocusedFileNames(paths.join(",").toStdString());
 }
 
-void EnggDiffFittingViewQtWidget::setFocusedFileNames(
-    const std::string &paths) {
+void EnggDiffFittingViewQtWidget::setFocusedFileNames(const std::string &paths) {
   m_ui.lineEdit_pushButton_run_num->setText(QString::fromStdString(paths));
 }
 
@@ -450,13 +391,9 @@ std::string EnggDiffFittingViewQtWidget::getFocusedFileNames() const {
   return m_ui.lineEdit_pushButton_run_num->text().toStdString();
 }
 
-void EnggDiffFittingViewQtWidget::enableFitAllButton(bool enable) const {
-  m_ui.pushButton_fit_all->setEnabled(enable);
-}
+void EnggDiffFittingViewQtWidget::enableFitAllButton(bool enable) const { m_ui.pushButton_fit_all->setEnabled(enable); }
 
-void EnggDiffFittingViewQtWidget::clearFittingListWidget() const {
-  m_ui.listWidget_fitting_run_num->clear();
-}
+void EnggDiffFittingViewQtWidget::clearFittingListWidget() const { m_ui.listWidget_fitting_run_num->clear(); }
 
 void EnggDiffFittingViewQtWidget::enableFittingListWidget(bool enable) const {
   m_ui.listWidget_fitting_run_num->setEnabled(enable);
@@ -466,8 +403,7 @@ int EnggDiffFittingViewQtWidget::getFittingListWidgetCurrentRow() const {
   return m_ui.listWidget_fitting_run_num->currentRow();
 }
 
-boost::optional<std::string>
-EnggDiffFittingViewQtWidget::getFittingListWidgetCurrentValue() const {
+boost::optional<std::string> EnggDiffFittingViewQtWidget::getFittingListWidgetCurrentValue() const {
   if (listWidgetHasSelectedRow()) {
     return m_ui.listWidget_fitting_run_num->currentItem()->text().toStdString();
   }
@@ -478,8 +414,7 @@ bool EnggDiffFittingViewQtWidget::listWidgetHasSelectedRow() const {
   return m_ui.listWidget_fitting_run_num->selectedItems().size() != 0;
 }
 
-void EnggDiffFittingViewQtWidget::updateFittingListWidget(
-    const std::vector<std::string> &rows) {
+void EnggDiffFittingViewQtWidget::updateFittingListWidget(const std::vector<std::string> &rows) {
   clearFittingListWidget();
 
   for (const auto &rowLabel : rows) {
@@ -487,14 +422,11 @@ void EnggDiffFittingViewQtWidget::updateFittingListWidget(
   }
 }
 
-void EnggDiffFittingViewQtWidget::setFittingListWidgetCurrentRow(
-    int idx) const {
+void EnggDiffFittingViewQtWidget::setFittingListWidgetCurrentRow(int idx) const {
   m_ui.listWidget_fitting_run_num->setCurrentRow(idx);
 }
 
-bool EnggDiffFittingViewQtWidget::plotFittedPeaksEnabled() const {
-  return m_ui.checkBox_plotFittedPeaks->isChecked();
-}
+bool EnggDiffFittingViewQtWidget::plotFittedPeaksEnabled() const { return m_ui.checkBox_plotFittedPeaks->isChecked(); }
 
 void EnggDiffFittingViewQtWidget::plotSeparateWindow() {
   std::string pyCode =
@@ -516,8 +448,7 @@ void EnggDiffFittingViewQtWidget::plotSeparateWindow() {
       "fitting_plot.setTitle(\"Engg GUI Single Peaks Fitting Workspace\")\n";
 
   std::string status = m_mainPythonRunner->enggRunPythonCode(pyCode);
-  m_logMsgs.emplace_back("Plotted output focused data, with status string " +
-                         status);
+  m_logMsgs.emplace_back("Plotted output focused data, with status string " + status);
   m_presenter->notify(IEnggDiffFittingPresenter::LogMsg);
 }
 
@@ -529,8 +460,7 @@ void EnggDiffFittingViewQtWidget::showToolTipHelp() {
   const QPoint relWidgetPosition(0, 0);
   const QPoint mousePos = QCursor::pos();
   // Now fire the generated event to show a tool tip at the cursor
-  QEvent *toolTipEvent =
-      new QHelpEvent(QEvent::ToolTip, relWidgetPosition, mousePos);
+  QEvent *toolTipEvent = new QHelpEvent(QEvent::ToolTip, relWidgetPosition, mousePos);
   QCoreApplication::sendEvent(m_ui.pushButton_tooltip, toolTipEvent);
 }
 
@@ -539,8 +469,7 @@ std::string EnggDiffFittingViewQtWidget::getExpectedPeaksInput() const {
   return m_ui.lineEdit_fitting_peaks->text().toStdString();
 }
 
-void EnggDiffFittingViewQtWidget::setPeakList(
-    const std::string &peakList) const {
+void EnggDiffFittingViewQtWidget::setPeakList(const std::string &peakList) const {
   m_ui.lineEdit_fitting_peaks->setText(QString::fromStdString(peakList));
 }
 
@@ -548,29 +477,23 @@ void EnggDiffFittingViewQtWidget::addRunNoItem(std::string runNo) {
   m_ui.listWidget_fitting_run_num->addItem(QString::fromStdString(runNo));
 }
 
-std::vector<std::string> EnggDiffFittingViewQtWidget::getFittingRunNumVec() {
-  return m_fitting_runno_dir_vec;
-}
+std::vector<std::string> EnggDiffFittingViewQtWidget::getFittingRunNumVec() { return m_fitting_runno_dir_vec; }
 
-void EnggDiffFittingViewQtWidget::setFittingRunNumVec(
-    std::vector<std::string> assignVec) {
+void EnggDiffFittingViewQtWidget::setFittingRunNumVec(std::vector<std::string> assignVec) {
   // holds all the directories required
   m_fitting_runno_dir_vec.clear();
   m_fitting_runno_dir_vec = assignVec;
 }
 
 void EnggDiffFittingViewQtWidget::setPeakPick() {
-  auto bk2bk =
-      FunctionFactory::Instance().createFunction("BackToBackExponential");
+  auto bk2bk = FunctionFactory::Instance().createFunction("BackToBackExponential");
   auto bk2bkFunc = std::dynamic_pointer_cast<IPeakFunction>(bk2bk);
   // set the peak to BackToBackExponential function
   setPeakPicker(bk2bkFunc);
   setPeakPickerEnabled(true);
 }
 
-void EnggDiffFittingViewQtWidget::clearPeakList() {
-  m_ui.lineEdit_fitting_peaks->clear();
-}
+void EnggDiffFittingViewQtWidget::clearPeakList() { m_ui.lineEdit_fitting_peaks->clear(); }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

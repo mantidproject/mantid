@@ -16,7 +16,7 @@ import BivariateGaussian as BivariateGaussian
 plt.ion()
 
 
-def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150, fracBoxToHistogram=1.0,
+def get3DPeak(peak, peakNumber, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150, fracBoxToHistogram=1.0,
               plotResults=False, zBG=1.96, bgPolyOrder=1, fICCParams=None, oldICCFit=None,
               strongPeakParams=None, forceCutoff=250, edgeCutoff=15,
               neigh_length_m=3, q_frame='sample', dtSpread=0.03, pplmin_frac=0.8, pplmax_frac=1.5, mindtBinWidth=1,
@@ -89,10 +89,12 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
         nPixels = [numDetRows, numDetCols]
     except:
         UserWarning('Detector size not found in instrument parameters file. Assuming a 255*255 detector!')
-        nPixels = [255,255]
+        nPixels = [255, 255]
 
-    useForceParams = peak.getIntensity() < forceCutoff or peak.getRow() <= dEdge or peak.getRow(
-    ) >= nPixels[0] - dEdge or peak.getCol() <= dEdge or peak.getCol() >= nPixels[1] - dEdge
+    row, col = peaks_ws.column('Row')[peakNumber], peaks_ws.column('Col')[peakNumber]
+    rowIsOutsideLimits = row <= dEdge or row >= nPixels[0] - dEdge
+    colIsOutsideLimits = col <= dEdge or col >= nPixels[1] - dEdge
+    useForceParams = peak.getIntensity() < forceCutoff or rowIsOutsideLimits or colIsOutsideLimits
 
     sigX0Params, sigY0, sigP0Params, doPeakConvolution = getBVGGuesses(peaks_ws, sigX0Params, sigY0, sigP0Params)
     if strongPeakParams is not None and useForceParams:  # We will force parameters on this fit

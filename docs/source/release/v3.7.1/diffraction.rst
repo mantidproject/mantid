@@ -7,8 +7,8 @@ Diffraction Changes
 
 Documentation
 -------------
- 
-- The documentation for all calibration approaches, including Powder diffraction, single crystal and engineering calibrations has been pulled together, and expanded :ref:`here <Calibration Intro>`. 
+
+- The documentation for all calibration approaches, including Powder diffraction, single crystal and engineering calibrations has been pulled together, and expanded :ref:`here <Calibration Intro>`.
 
 Powder Diffraction
 ------------------
@@ -29,7 +29,7 @@ Powder Diffraction Scripts
 - PowderISIS script has been renamed to CryPowderISIS and can be found within
   the following folder `scripts/CryPowderISIS`
 
-- `Pearl Powder Diffraction Script <http://docs.mantidproject.org/v3.7.1/api/python/techniques/PearlPowderDiffractionISIS-v1.html>`_ 
+- `Pearl Powder Diffraction Script <http://docs.mantidproject.org/v3.7.1/api/python/techniques/PearlPowderDiffractionISIS-v1.html>`_
   documentation has been implemented and
   PowderISIS script documentation has been renamed to
   `Crystallography Powder Diffraction Script <http://docs.mantidproject.org/v3.7.1/api/python/techniques/CryPowderDiffractionISIS-v1.html>`_
@@ -38,8 +38,8 @@ Single Crystal Improvements
 ---------------------------
 
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` has parameter errors reduced,
-  an option for simplex minimization, and 3 new workspaces which can plot calculated 
-  vs theoretical columns, rows, and TOF for each bank. Calibration is now as good 
+  an option for simplex minimization, and 3 new workspaces which can plot calculated
+  vs theoretical columns, rows, and TOF for each bank. Calibration is now as good
   as ISAW's for Mandi data.
 - 5 detectors added to the MANDI instrument geometry
 - :ref:`LoadCIF <algm-LoadCIF>` can now also load structures where only anisotropic displacement parameters are given,
@@ -123,12 +123,12 @@ Graphical user interface
 Imaging
 -------
 
-- The new algorithm `ImggAggregateWavelengths 
+- The new algorithm `ImggAggregateWavelengths
   <http://docs.mantidproject.org/v3.7.1/algorithms/ImggAggregateWavelengths-v1.html>`_
   aggregates stacks of images from wavelength dependent data.
 
-- The algorithm `ImggTomographicReconstruction 
-  <http://docs.mantidproject.org/v3.7.1/algorithms/ImggTomographicReconstruction-v1.html>`_ 
+- The algorithm `ImggTomographicReconstruction
+  <http://docs.mantidproject.org/v3.7.1/algorithms/ImggTomographicReconstruction-v1.html>`_
   has been introduced. This is a
   first experimental version that implements the Filtered
   Back-Projection (FBP) reconstruction method using the FBP
@@ -159,7 +159,7 @@ Improvements in the tomographic reconstruction graphical user interface
 
 - The energy bands tab can now produce multiple output bands in one
   pass, and supports different aggregation methods via the new
-  algorithm `ImggAggregateWavelengths 
+  algorithm `ImggAggregateWavelengths
   <http://docs.mantidproject.org/v3.7.1/algorithms/ImggAggregateWavelengths-v1.html>`_.
 
 

@@ -23,6 +23,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -235,17 +236,17 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_edit->setIcon(QIcon(":/PickTools/selection-edit.png"));
   m_edit->setToolTip("Edit a shape");
 
-  m_peak = new QPushButton();
-  m_peak->setCheckable(true);
-  m_peak->setAutoExclusive(true);
-  m_peak->setIcon(QIcon(":/PickTools/selection-peak.png"));
-  m_peak->setToolTip("Add single crystal peak");
+  m_peakAdd = new QPushButton();
+  m_peakAdd->setCheckable(true);
+  m_peakAdd->setAutoExclusive(true);
+  m_peakAdd->setIcon(QIcon(":/PickTools/selection-peak.png"));
+  m_peakAdd->setToolTip("Add single crystal peak");
 
-  m_peakSelect = new QPushButton();
-  m_peakSelect->setCheckable(true);
-  m_peakSelect->setAutoExclusive(true);
-  m_peakSelect->setIcon(QIcon(":/PickTools/eraser.png"));
-  m_peakSelect->setToolTip("Erase single crystal peak(s)");
+  m_peakErase = new QPushButton();
+  m_peakErase->setCheckable(true);
+  m_peakErase->setAutoExclusive(true);
+  m_peakErase->setIcon(QIcon(":/PickTools/eraser.png"));
+  m_peakErase->setToolTip("Erase single crystal peak(s)");
 
   m_peakCompare = new QPushButton();
   m_peakCompare->setCheckable(true);
@@ -270,8 +271,8 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   toolBox->addWidget(m_free_draw, 0, 7);
   toolBox->addWidget(m_one, 1, 0);
   toolBox->addWidget(m_tube, 1, 1);
-  toolBox->addWidget(m_peak, 1, 2);
-  toolBox->addWidget(m_peakSelect, 1, 3);
+  toolBox->addWidget(m_peakAdd, 1, 2);
+  toolBox->addWidget(m_peakErase, 1, 3);
   toolBox->addWidget(m_peakCompare, 1, 4);
   toolBox->addWidget(m_peakAlign, 1, 5);
   toolBox->setColumnStretch(8, 1);
@@ -279,8 +280,8 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   connect(m_zoom, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_one, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_tube, SIGNAL(clicked()), this, SLOT(setSelectionType()));
-  connect(m_peak, SIGNAL(clicked()), this, SLOT(setSelectionType()));
-  connect(m_peakSelect, SIGNAL(clicked()), this, SLOT(setSelectionType()));
+  connect(m_peakAdd, SIGNAL(clicked()), this, SLOT(setSelectionType()));
+  connect(m_peakErase, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_peakCompare, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_peakAlign, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_rectangle, SIGNAL(clicked()), this, SLOT(setSelectionType()));
@@ -312,7 +313,7 @@ void InstrumentWidgetPickTab::collapsePlotPanel() {
  * Returns true if the plot can be updated when the mouse moves over detectors
  */
 bool InstrumentWidgetPickTab::canUpdateTouchedDetector() const {
-  return !m_peak->isChecked();
+  return !m_peakAdd->isChecked();
 }
 
 /**
@@ -443,12 +444,12 @@ void InstrumentWidgetPickTab::setSelectionType() {
     if (plotType < DetectorPlotController::TubeSum) {
       plotType = DetectorPlotController::TubeSum;
     }
-  } else if (m_peak->isChecked()) {
+  } else if (m_peakAdd->isChecked()) {
     m_selectionType = AddPeak;
     m_activeTool->setText("Tool: Add a single crystal peak");
     surfaceMode = ProjectionSurface::AddPeakMode;
     plotType = DetectorPlotController::Single;
-  } else if (m_peakSelect->isChecked()) {
+  } else if (m_peakErase->isChecked()) {
     m_selectionType = ErasePeak;
     m_activeTool->setText("Tool: Erase crystal peak(s)");
     surfaceMode = ProjectionSurface::ErasePeakMode;
@@ -716,12 +717,13 @@ void InstrumentWidgetPickTab::selectTool(const ToolType tool) {
     m_tube->setChecked(true);
     break;
   case PeakSelect:
-    m_peak->setChecked(true);
+    m_peakAdd->setChecked(true);
     break;
   case PeakCompare:
     m_peakCompare->setChecked(true);
+    break;
   case PeakErase:
-    m_peakSelect->setChecked(true);
+    m_peakErase->setChecked(true);
     break;
   case DrawRectangle:
     m_rectangle->setChecked(true);
@@ -840,7 +842,7 @@ void InstrumentWidgetPickTab::loadFromProject(const std::string &lines) {
   std::vector<QPushButton *> buttons{
       m_zoom,         m_edit,           m_ellipse,   m_rectangle,
       m_ring_ellipse, m_ring_rectangle, m_free_draw, m_one,
-      m_tube,         m_peak,           m_peakSelect};
+      m_tube,         m_peakAdd,        m_peakErase};
 
   tab.selectLine("ActiveTools");
   for (auto button : buttons) {
@@ -866,7 +868,7 @@ std::string InstrumentWidgetPickTab::saveToProject() const {
   std::vector<QPushButton *> buttons{
       m_zoom,         m_edit,           m_ellipse,   m_rectangle,
       m_ring_ellipse, m_ring_rectangle, m_free_draw, m_one,
-      m_tube,         m_peak,           m_peakSelect};
+      m_tube,         m_peakAdd,        m_peakErase};
 
   tab.writeLine("ActiveTools");
   for (auto button : buttons) {
@@ -973,7 +975,26 @@ QString ComponentInfoController::displayDetectorInfo(size_t index) {
     const QString counts = integrated == InstrumentActor::INVALID_VALUE
                                ? "N/A"
                                : QString::number(integrated);
-    text += "Counts: " + counts + '\n';
+    text += "Pixel counts: " + counts + '\n';
+
+    // Display tube counts if the tube selection tool is active.
+    if (m_tab->getSelectionType() == InstrumentWidgetPickTab::Tube) {
+      int64_t tubeCounts = 0;
+
+      auto tube = componentInfo.parent(index);
+      auto tubeDetectors = componentInfo.detectorsInSubtree(tube);
+
+      for (auto detector : tubeDetectors) {
+        if (componentInfo.isDetector(detector)) {
+          const double pixelCounts = actor.getIntegratedCounts(detector);
+          if (pixelCounts != InstrumentActor::INVALID_VALUE) {
+            tubeCounts += static_cast<int64_t>(pixelCounts);
+          }
+        }
+      }
+      text += "Tube counts: " + QString::number(tubeCounts) + '\n';
+    }
+
     // display info about peak overlays
     text += actor.getParameterInfo(index);
   }
@@ -1004,8 +1025,9 @@ QString ComponentInfoController::displayNonDetectorInfo(
 }
 
 QString
-ComponentInfoController::displayPeakInfo(Mantid::Geometry::IPeak *peak) {
+ComponentInfoController::displayPeakInfo(Mantid::Geometry::IPeak *ipeak) {
   std::stringstream text;
+  auto peak = dynamic_cast<Mantid::DataObjects::Peak *>(ipeak);
   auto instrument = peak->getInstrument();
   auto sample = instrument->getSample()->getPos();
   auto source = instrument->getSource()->getPos();
@@ -1067,7 +1089,7 @@ void ComponentInfoController::displayComparePeaksInfo(
 
 void ComponentInfoController::displayAlignPeaksInfo(
     const std::vector<Mantid::Kernel::V3D> &planePeaks,
-    const Mantid::Geometry::IPeak *peak) {
+    const Mantid::Geometry::IPeak *ipeak) {
 
   using Mantid::Kernel::V3D;
 
@@ -1079,6 +1101,7 @@ void ComponentInfoController::displayAlignPeaksInfo(
 
   // find projection of beam direction onto plane
   // this is so we always orientate to a common reference direction
+  auto peak = dynamic_cast<const Mantid::DataObjects::Peak *>(ipeak);
   const auto instrument = peak->getInstrument();
   const auto samplePos = instrument->getSample()->getPos();
   const auto sourcePos = instrument->getSource()->getPos();

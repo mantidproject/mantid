@@ -40,8 +40,7 @@ namespace MantidWidgets {
  * a message is a framework Poco message or a simple string.
  * It can connect to the Mantid logging framework if required
  */
-class EXPORT_OPT_MANTIDQT_COMMON MessageDisplay : public QWidget,
-                                                  public Configurable {
+class EXPORT_OPT_MANTIDQT_COMMON MessageDisplay : public QWidget, public Configurable {
   Q_OBJECT
   Q_PROPERTY(QString source READ source WRITE setSource)
 
@@ -81,29 +80,19 @@ public:
   /// Get whether framework output is being displayed
   inline bool showFrameworkOutput() const { return m_showFrameworkOutput; }
   /// Set whether framework output should be displayed
-  void setShowFrameworkOutput(const bool &show) {
-    m_showFrameworkOutput = show;
-  }
+  void setShowFrameworkOutput(const bool &show) { m_showFrameworkOutput = show; }
   /// Get whether all script output is being displayed
   inline bool showAllScriptOutput() const { return m_showAllScriptOutput; }
   /// Set whether all script output should be displayed
-  void setShowAllScriptOutput(const bool &show) {
-    m_showAllScriptOutput = show;
-  }
+  void setShowAllScriptOutput(const bool &show) { m_showAllScriptOutput = show; }
   /// Get whether only active script output is being displayed
-  inline bool showActiveScriptOutput() const {
-    return m_showActiveScriptOutput;
-  }
+  inline bool showActiveScriptOutput() const { return m_showActiveScriptOutput; }
   /// Get whether only active script output should be displayed
-  void setShowActiveScriptOutput(const bool &show) {
-    m_showActiveScriptOutput = show;
-  }
+  void setShowActiveScriptOutput(const bool &show) { m_showActiveScriptOutput = show; }
   /// Get the path of the currently active script
   inline QString activeScript() const { return m_activeScript; }
   /// Set the path of the currently active script
-  void setActiveScript(const QString &scriptPath) {
-    m_activeScript = scriptPath;
-  }
+  void setActiveScript(const QString &scriptPath) { m_activeScript = scriptPath; }
 
 signals:
   /// Indicate that a message of error or higher has been received.
@@ -127,8 +116,7 @@ public slots:
   /// Write a message after the current contents
   void append(const Message &msg);
   /// Write a Python script message, intended for use with Python API
-  void appendPython(const QString &text, const int &priority,
-                    const QString &fileName);
+  void appendPython(const QString &text, const int &priority, const QString &fileName);
   /// Replace the display text with the given contents
   void replace(const Message &msg);
   /// Clear all of the text
@@ -181,8 +169,7 @@ private:
   /// Keep track of the message history
   QList<Message> m_messageHistory;
   /// Bools to dictate whether to print certain types of messages
-  bool m_showFrameworkOutput{true}, m_showAllScriptOutput{true},
-      m_showActiveScriptOutput{false};
+  bool m_showFrameworkOutput{true}, m_showAllScriptOutput{true}, m_showActiveScriptOutput{false};
   QString m_activeScript;
 };
 } // namespace MantidWidgets

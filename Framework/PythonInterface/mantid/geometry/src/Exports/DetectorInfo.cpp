@@ -37,33 +37,26 @@ DetectorInfoPythonIterator make_pyiterator(DetectorInfo &detectorInfo) {
   return DetectorInfoPythonIterator(detectorInfo);
 }
 /// return_value_policy for read-only numpy array
-using return_readonly_numpy =
-    return_value_policy<Policies::VectorRefToNumpy<Converters::WrapReadOnly>>;
+using return_readonly_numpy = return_value_policy<Policies::VectorRefToNumpy<Converters::WrapReadOnly>>;
 } // namespace
 
 // Export DetectorInfo
 void export_DetectorInfo() {
 
   // Function pointers to distinguish between overloaded versions
-  bool (DetectorInfo::*isMonitor)(const size_t) const =
-      &DetectorInfo::isMonitor;
+  bool (DetectorInfo::*isMonitor)(const size_t) const = &DetectorInfo::isMonitor;
 
   bool (DetectorInfo::*isMasked)(const size_t) const = &DetectorInfo::isMasked;
 
-  double (DetectorInfo::*twoTheta)(const size_t) const =
-      &DetectorInfo::twoTheta;
+  double (DetectorInfo::*twoTheta)(const size_t) const = &DetectorInfo::twoTheta;
 
-  double (DetectorInfo::*azimuthal)(const size_t) const =
-      &DetectorInfo::azimuthal;
+  double (DetectorInfo::*azimuthal)(const size_t) const = &DetectorInfo::azimuthal;
 
-  Mantid::Kernel::V3D (DetectorInfo::*position)(const size_t) const =
-      &DetectorInfo::position;
+  Mantid::Kernel::V3D (DetectorInfo::*position)(const size_t) const = &DetectorInfo::position;
 
-  Mantid::Kernel::Quat (DetectorInfo::*rotation)(const size_t) const =
-      &DetectorInfo::rotation;
+  Mantid::Kernel::Quat (DetectorInfo::*rotation)(const size_t) const = &DetectorInfo::rotation;
 
-  void (DetectorInfo::*setMasked)(const size_t, bool) =
-      &DetectorInfo::setMasked;
+  void (DetectorInfo::*setMasked)(const size_t, bool) = &DetectorInfo::setMasked;
 
   double (DetectorInfo::*l2)(const size_t) const = &DetectorInfo::l2;
 
@@ -83,21 +76,17 @@ void export_DetectorInfo() {
       .def("indexOf", &DetectorInfo::indexOf, (arg("self"), arg("detId")),
            "Returns the index of the detector with the given id.")
 
-      .def("isMonitor", isMonitor, (arg("self"), arg("index")),
-           "Returns True if the detector is a monitor.")
+      .def("isMonitor", isMonitor, (arg("self"), arg("index")), "Returns True if the detector is a monitor.")
 
-      .def("isMasked", isMasked, (arg("self"), arg("index")),
-           "Returns True if the detector is masked.")
+      .def("isMasked", isMasked, (arg("self"), arg("index")), "Returns True if the detector is masked.")
 
       .def("setMasked", setMasked, (arg("self"), arg("index"), arg("masked")),
            "Set the mask flag of the detector where the detector is identified "
            "by 'index'.")
 
-      .def("clearMaskFlags", &DetectorInfo::clearMaskFlags, (arg("self")),
-           "Sets all mask flags to false (unmasked).")
+      .def("clearMaskFlags", &DetectorInfo::clearMaskFlags, (arg("self")), "Sets all mask flags to false (unmasked).")
 
-      .def("isEquivalent", &DetectorInfo::isEquivalent,
-           (arg("self"), arg("other")),
+      .def("isEquivalent", &DetectorInfo::isEquivalent, (arg("self"), arg("other")),
            "Returns True if the content of this "
            "detector is equivalent to the content "
            "of the other detector.")
@@ -116,10 +105,8 @@ void export_DetectorInfo() {
            "is identified by 'index'.")
       .def("detectorIDs", &DetectorInfo::detectorIDs, return_readonly_numpy(),
            "Returns all detector ids sorted by detector index")
-      .def("l2", l2, (arg("self"), arg("index")),
-           "Returns the l2 scattering distance")
-      .def("l1", &DetectorInfo::l1, arg("self"),
-           "Returns the l1 scattering distance")
+      .def("l2", l2, (arg("self"), arg("index")), "Returns the l2 scattering distance")
+      .def("l1", &DetectorInfo::l1, arg("self"), "Returns the l1 scattering distance")
       .def("hasMaskedDetectors", &DetectorInfo::hasMaskedDetectors, arg("self"),
            "Returns if there are masked detectors");
 }

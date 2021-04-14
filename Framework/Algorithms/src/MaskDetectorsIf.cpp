@@ -45,32 +45,23 @@ template <class T> struct not_finite {
  */
 void MaskDetectorsIf::init() {
   using namespace Mantid::Kernel;
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "A 1D Workspace that contains values to select against");
   const std::vector<std::string> select_mode{"SelectIf", "DeselectIf"};
-  declareProperty(
-      "Mode", "SelectIf", std::make_shared<StringListValidator>(select_mode),
-      "Mode to select or deselect detectors based on comparison with values.");
-  const std::vector<std::string> select_operator{
-      "Equal", "NotEqual",  "Greater",  "GreaterEqual",
-      "Less",  "LessEqual", "NotFinite"};
-  declareProperty("Operator", "Equal",
-                  std::make_shared<StringListValidator>(select_operator),
+  declareProperty("Mode", "SelectIf", std::make_shared<StringListValidator>(select_mode),
+                  "Mode to select or deselect detectors based on comparison with values.");
+  const std::vector<std::string> select_operator{"Equal", "NotEqual",  "Greater",  "GreaterEqual",
+                                                 "Less",  "LessEqual", "NotFinite"};
+  declareProperty("Operator", "Equal", std::make_shared<StringListValidator>(select_operator),
                   "Operator to compare to given values.");
   declareProperty("Value", 0.0);
+  declareProperty(std::make_unique<API::FileProperty>("InputCalFile", "", API::FileProperty::OptionalLoad, ".cal"),
+                  "The name of the CalFile with grouping data.");
+  declareProperty(std::make_unique<API::FileProperty>("OutputCalFile", "", API::FileProperty::OptionalSave, ".cal"),
+                  "The name of the CalFile with grouping data.");
   declareProperty(
-      std::make_unique<API::FileProperty>(
-          "InputCalFile", "", API::FileProperty::OptionalLoad, ".cal"),
-      "The name of the CalFile with grouping data.");
-  declareProperty(
-      std::make_unique<API::FileProperty>(
-          "OutputCalFile", "", API::FileProperty::OptionalSave, ".cal"),
-      "The name of the CalFile with grouping data.");
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "OutputWorkspace", "", Direction::Output,
-                      API::PropertyMode::Optional),
-                  "The masked workspace.");
+      std::make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output, API::PropertyMode::Optional),
+      "The masked workspace.");
 }
 
 /**
@@ -95,8 +86,7 @@ void MaskDetectorsIf::exec() {
   retrieveProperties();
 
   if (isDefault("InputCalFile") && isDefault("OutputWorkspace")) {
-    g_log.error() << "No InputCalFle or OutputWorkspace specified; "
-                  << this->name() << " will do nothing.\n";
+    g_log.error() << "No InputCalFle or OutputWorkspace specified; " << this->name() << " will do nothing.\n";
     return;
   }
   const size_t nspec = m_inputW->getNumberHistograms();
@@ -140,8 +130,7 @@ void MaskDetectorsIf::outputToWorkspace() {
     outputW = m_inputW->clone();
   auto &detectorInfo = outputW->mutableDetectorInfo();
   for (const auto &selection : m_umap) {
-    detectorInfo.setMasked(detectorInfo.indexOf(selection.first),
-                           selection.second);
+    detectorInfo.setMasked(detectorInfo.indexOf(selection.first), selection.second);
   }
 
   const auto &spectrumInfo = outputW->spectrumInfo();
@@ -226,10 +215,9 @@ void MaskDetectorsIf::createNewCalFile() {
     else
       selection = (*it).second;
 
-    newf << std::fixed << std::setw(9) << n << std::fixed << std::setw(15)
-         << udet << std::fixed << std::setprecision(7) << std::setw(15)
-         << offset << std::fixed << std::setw(8) << selection << std::fixed
-         << std::setw(8) << group << '\n';
+    newf << std::fixed << std::setw(9) << n << std::fixed << std::setw(15) << udet << std::fixed << std::setprecision(7)
+         << std::setw(15) << offset << std::fixed << std::setw(8) << selection << std::fixed << std::setw(8) << group
+         << '\n';
   }
   oldf.close();
   newf.close();

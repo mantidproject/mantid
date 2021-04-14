@@ -31,15 +31,12 @@ public:
     CalculateCountRate::setSourceWSandXRanges(InputWorkspace);
   }
   std::tuple<double, double, bool> getXRanges() const {
-    return std::tuple<double, double, bool>(m_XRangeMin, m_XRangeMax,
-                                            m_rangeExplicit);
+    return std::tuple<double, double, bool>(m_XRangeMin, m_XRangeMax, m_rangeExplicit);
   }
-  void
-  setOutLogParameters(const DataObjects::EventWorkspace_sptr &InputWorkspace) {
+  void setOutLogParameters(const DataObjects::EventWorkspace_sptr &InputWorkspace) {
     CalculateCountRate::setOutLogParameters(InputWorkspace);
   }
-  void getAlgLogSettings(size_t &numLogSteps,
-                         Kernel::TimeSeriesProperty<double> const *&pNormLog) {
+  void getAlgLogSettings(size_t &numLogSteps, Kernel::TimeSeriesProperty<double> const *&pNormLog) {
     pNormLog = m_pNormalizationLog;
     numLogSteps = m_numLogSteps;
   }
@@ -56,9 +53,7 @@ class CalculateCountRateTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CalculateCountRateTest *createSuite() {
-    return new CalculateCountRateTest();
-  }
+  static CalculateCountRateTest *createSuite() { return new CalculateCountRateTest(); }
   static void destroySuite(CalculateCountRateTest *suite) { delete suite; }
 
   void test_Init() {
@@ -116,8 +111,7 @@ public:
     // both crop ranges are specified. Result lies within the crop
     // ranges in energy units.
 
-    sws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
-        2, 10, false);
+    sws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 10, false);
 
     alg.setProperty("XMin", 1.);
     alg.setProperty("XMax", 30.);
@@ -245,8 +239,7 @@ public:
 
     TS_ASSERT(sws->run().hasProperty("block_count_rate"));
 
-    auto newLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-        sws->run().getLogData("block_count_rate"));
+    auto newLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(sws->run().getLogData("block_count_rate"));
 
     TS_ASSERT(newLog);
     if (!newLog)
@@ -293,8 +286,7 @@ public:
   void test_visWS_noNormalization() {
 
     DataObjects::EventWorkspace_sptr sws =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 10,
-                                                                        false);
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 10, false);
 
     CalculateCountRateTester alg;
     alg.initialize();
@@ -326,8 +318,7 @@ public:
     if (!Yax)
       return;
 
-    auto newLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-        sws->run().getLogData("block_count_rate"));
+    auto newLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(sws->run().getLogData("block_count_rate"));
     TS_ASSERT(newLog);
     if (!newLog)
       return;
@@ -340,9 +331,7 @@ public:
     for (size_t i = 0; i < testVisWS->getNumberHistograms(); ++i) {
       const MantidVec &Y = testVisWS->readY(i);
       double sum = std::accumulate(Y.begin(), Y.end(), 0.);
-      TSM_ASSERT_DELTA("Incorrect counts at index: " +
-                           boost::lexical_cast<std::string>(i),
-                       counts[i], sum, 1.e-6);
+      TSM_ASSERT_DELTA("Incorrect counts at index: " + boost::lexical_cast<std::string>(i), counts[i], sum, 1.e-6);
     }
   }
 
@@ -442,8 +431,7 @@ public:
     if (!Yax)
       return;
 
-    auto newLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-        sws->run().getLogData("block_count_rate"));
+    auto newLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(sws->run().getLogData("block_count_rate"));
     TS_ASSERT(newLog);
     if (!newLog)
       return;
@@ -457,16 +445,14 @@ public:
       // const MantidVec &Y = testVisWS->readY(i); // -- better for debugging as
       // one can see what is inside
       double sum = std::accumulate(Y.begin(), Y.end(), 0.);
-      TSM_ASSERT_DELTA("Incorrect counts at index: " + std::to_string(i),
-                       counts[i], sum, 1.e-6);
+      TSM_ASSERT_DELTA("Incorrect counts at index: " + std::to_string(i), counts[i], sum, 1.e-6);
     }
   }
   //----------------------------------------------------------------------
   DataObjects::EventWorkspace_sptr build_test_ws(bool addLog = false) {
 
     DataObjects::EventWorkspace_sptr sws =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 10,
-                                                                        false);
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 10, false);
 
     if (!addLog) {
       return sws;

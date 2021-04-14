@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from Muon.GUI.Common.muon_group import MuonDiff
+from Muon.GUI.Common.muon_diff import MuonDiff
 
 
 class MuonDifferenceTest(unittest.TestCase):
@@ -26,8 +26,8 @@ class MuonDifferenceTest(unittest.TestCase):
     def test_that_can_get_positive_and_negative(self):
         diff = MuonDiff("diff1", "positive", "negative")
 
-        self.assertEqual("positive", diff.forward_group)
-        self.assertEqual("negative", diff.backward_group)
+        self.assertEqual("positive", diff.positive)
+        self.assertEqual("negative", diff.negative)
 
     def test_is_group_diff_by_default(self):
         diff = MuonDiff("diff1", "positive", "negative")

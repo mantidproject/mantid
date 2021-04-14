@@ -19,36 +19,27 @@ public:
   FakeCatalog();
   ~FakeCatalog() override;
 
-  API::CatalogSession_sptr login(std::string const &username,
-                                 std::string const &password,
-                                 std::string const &endPoint,
+  API::CatalogSession_sptr login(std::string const &username, std::string const &password, std::string const &endPoint,
                                  std::string const &facility) override;
   void logout() override;
 
-  void search(ICat::CatalogSearchParam const &inputs,
-              API::ITableWorkspace_sptr &outputWorkspace, int const &offset,
+  void search(ICat::CatalogSearchParam const &inputs, API::ITableWorkspace_sptr &outputWorkspace, int const &offset,
               int const &limit) override;
-  int64_t
-  getNumberOfSearchResults(ICat::CatalogSearchParam const &inputs) override;
+  int64_t getNumberOfSearchResults(ICat::CatalogSearchParam const &inputs) override;
 
   void myData(API::ITableWorkspace_sptr &outputWorkspace) override;
-  void getDataSets(std::string const &investigationID,
-                   API::ITableWorkspace_sptr &outputWorkspace) override;
-  void getDataFiles(std::string const &investigationID,
-                    API::ITableWorkspace_sptr &outputWorkspace) override;
+  void getDataSets(std::string const &investigationID, API::ITableWorkspace_sptr &outputWorkspace) override;
+  void getDataFiles(std::string const &investigationID, API::ITableWorkspace_sptr &outputWorkspace) override;
 
   void listInstruments(std::vector<std::string> &instruments) override;
-  void
-  listInvestigationTypes(std::vector<std::string> &investigationTypes) override;
+  void listInvestigationTypes(std::vector<std::string> &investigationTypes) override;
 
   void keepAlive() override;
 
   std::string const getFileLocation(long long const &fileID) override;
   std::string const getDownloadURL(long long const &fileID) override;
-  std::string const
-  getUploadURL(std::string const &investigationID,
-               std::string const &createFileName,
-               std::string const &dataFileDescription) override;
+  std::string const getUploadURL(std::string const &investigationID, std::string const &createFileName,
+                                 std::string const &dataFileDescription) override;
   API::ITableWorkspace_sptr getPublishInvestigations() override;
 
   static void setCount(std::size_t const &count);

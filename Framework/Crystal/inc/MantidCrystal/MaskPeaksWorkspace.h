@@ -30,16 +30,12 @@ public:
   const std::string name() const override { return "MaskPeaksWorkspace"; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"CreatePeaksWorkspace"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CreatePeaksWorkspace"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Crystal\\Peaks"; }
 
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Masks a peaks workspace.";
-  }
+  const std::string summary() const override { return "Masks a peaks workspace."; }
 
 private:
   API::MatrixWorkspace_sptr m_inputW; ///< A pointer to the input workspace
@@ -47,11 +43,9 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  std::size_t getWkspIndex(const detid2index_map &pixel_to_wi,
-                           const Geometry::IComponent_const_sptr &comp,
-                           const int x, const int y);
-  void getTofRange(double &tofMin, double &tofMax, const double tofPeak,
-                   const HistogramData::HistogramX &tof);
+  std::size_t getWkspIndex(const detid2index_map &pixel_to_wi, const Geometry::IComponent_const_sptr &comp, const int x,
+                           const int y);
+  void getTofRange(double &tofMin, double &tofMax, const double tofPeak, const HistogramData::HistogramX &tof);
   int findPixelID(const std::string &bankName, int col, int row);
 
   /// Read in all the input parameters
