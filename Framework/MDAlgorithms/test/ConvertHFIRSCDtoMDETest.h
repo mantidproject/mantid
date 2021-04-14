@@ -60,7 +60,6 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "ConvertHFIRSCDtoMDETest_data"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Wavelength", "1.008"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ObliquityParallaxCoefficient", 1.5));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
