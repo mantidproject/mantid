@@ -79,6 +79,7 @@ class SuperplotPresenter:
         Triggered when the add button is pressed. This function adds the
         workspace to the selection list.
         """
+        selection = self._view.getSelectedWorkspacesFromList()
         addedWorkspace = self._view.getSelectedWorkspace()
         self._model.addWorkspace(addedWorkspace)
         names = self._model.getWorkspaces()
@@ -90,7 +91,7 @@ class SuperplotPresenter:
                 if data[0] == name:
                     spectra.append(data[1])
             self._view.setSpectraList(name, spectra)
-        self._view.setSelectedWorkspacesInList([addedWorkspace])
+        self._view.setSelectedWorkspacesInList(selection)
         self._updatePlot()
 
     def onDelButtonClicked(self, wsName=None):
