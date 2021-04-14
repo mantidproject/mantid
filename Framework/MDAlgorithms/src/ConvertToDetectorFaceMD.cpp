@@ -32,17 +32,13 @@ DECLARE_ALGORITHM(ConvertToDetectorFaceMD)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string ConvertToDetectorFaceMD::name() const {
-  return "ConvertToDetectorFaceMD";
-}
+const std::string ConvertToDetectorFaceMD::name() const { return "ConvertToDetectorFaceMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int ConvertToDetectorFaceMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ConvertToDetectorFaceMD::category() const {
-  return "MDAlgorithms\\Creation";
-}
+const std::string ConvertToDetectorFaceMD::category() const { return "MDAlgorithms\\Creation"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -50,19 +46,16 @@ const std::string ConvertToDetectorFaceMD::category() const {
 /** Initialize the algorithm's properties.
  */
 void ConvertToDetectorFaceMD::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input MatrixWorkspace.");
-  declareProperty(
-      std::make_unique<ArrayProperty<int>>("BankNumbers", Direction::Input),
-      "A list of the bank numbers to convert. If empty, will use "
-      "all banksMust have at least one entry.");
+  declareProperty(std::make_unique<ArrayProperty<int>>("BankNumbers", Direction::Input),
+                  "A list of the bank numbers to convert. If empty, will use "
+                  "all banksMust have at least one entry.");
 
   // Now the box controller settings
   this->initBoxControllerProps("2", 200, 20);
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace.");
 }
 
@@ -81,10 +74,9 @@ void ConvertToDetectorFaceMD::init() {
  * @param detectorID : detectorID for this event list
  */
 template <class T, class MDE, size_t nd>
-void ConvertToDetectorFaceMD::convertEventList(
-    std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> outWS,
-    size_t workspaceIndex, coord_t x, coord_t y, coord_t bankNum,
-    uint16_t runIndex, uint16_t goniometerIndex, int32_t detectorID) {
+void ConvertToDetectorFaceMD::convertEventList(std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> outWS,
+                                               size_t workspaceIndex, coord_t x, coord_t y, coord_t bankNum,
+                                               uint16_t runIndex, uint16_t goniometerIndex, int32_t detectorID) {
 
   EventList &el = in_ws->getSpectrum(workspaceIndex);
 
@@ -106,12 +98,11 @@ void ConvertToDetectorFaceMD::convertEventList(
     auto tof = static_cast<coord_t>(it->tof());
     if (nd == 3) {
       coord_t center[3] = {x, y, tof};
-      out_events.emplace_back(float(it->weight()), float(it->errorSquared()),
-                              runIndex, goniometerIndex, detectorID, center);
+      out_events.emplace_back(float(it->weight()), float(it->errorSquared()), runIndex, goniometerIndex, detectorID,
+                              center);
     } else if (nd == 4) {
       coord_t center[4] = {x, y, tof, bankNum};
-      out_events.emplace_back(static_cast<float>(it->weight()),
-                              static_cast<float>(it->errorSquared()), runIndex,
+      out_events.emplace_back(static_cast<float>(it->weight()), static_cast<float>(it->errorSquared()), runIndex,
                               detectorID, goniometerIndex, center);
     }
   }
@@ -126,8 +117,7 @@ void ConvertToDetectorFaceMD::convertEventList(
  * @return map with key = bank number; value = pointer to the rectangular
  *detector
  */
-std::map<int, RectangularDetector_const_sptr>
-ConvertToDetectorFaceMD::getBanks() {
+std::map<int, RectangularDetector_const_sptr> ConvertToDetectorFaceMD::getBanks() {
   Instrument_const_sptr inst = in_ws->getInstrument();
 
   std::vector<int> bankNums = this->getProperty("BankNumbers");
@@ -143,8 +133,7 @@ ConvertToDetectorFaceMD::getBanks() {
 
     for (auto &comp : comps) {
       // Retrieve it
-      RectangularDetector_const_sptr det =
-          std::dynamic_pointer_cast<const RectangularDetector>(comp);
+      RectangularDetector_const_sptr det = std::dynamic_pointer_cast<const RectangularDetector>(comp);
       if (det) {
         std::string name = det->getName();
         if (name.size() < 5)
@@ -159,11 +148,9 @@ ConvertToDetectorFaceMD::getBanks() {
   } else {
     // -- Find detectors using the numbers given ---
     for (auto &bankNum : bankNums) {
-      std::string bankName =
-          "bank" + Mantid::Kernel::Strings::toString(bankNum);
+      std::string bankName = "bank" + Mantid::Kernel::Strings::toString(bankNum);
       IComponent_const_sptr comp = inst->getComponentByName(bankName);
-      RectangularDetector_const_sptr det =
-          std::dynamic_pointer_cast<const RectangularDetector>(comp);
+      RectangularDetector_const_sptr det = std::dynamic_pointer_cast<const RectangularDetector>(comp);
       if (det)
         banks[bankNum] = det;
     }
@@ -197,8 +184,7 @@ void ConvertToDetectorFaceMD::exec() {
     throw std::runtime_error("InputWorkspace is not an EventWorkspace");
 
   // Fill the map, throw if there are grouped pixels.
-  m_detID_to_WI =
-      in_ws->getDetectorIDToWorkspaceIndexVector(m_detID_to_WI_offset, true);
+  m_detID_to_WI = in_ws->getDetectorIDToWorkspaceIndexVector(m_detID_to_WI_offset, true);
 
   // Get the map of the banks we'll display
   std::map<int, RectangularDetector_const_sptr> banks = this->getBanks();
@@ -213,52 +199,42 @@ void ConvertToDetectorFaceMD::exec() {
     tof_max = ax0->getValue(ax0->length() - 1);
 
   // Get MDFrame of General Frame type
-  Mantid::Geometry::GeneralFrame framePixel(
-      Mantid::Geometry::GeneralFrame::GeneralFrameName, "pixel");
-  Mantid::Geometry::GeneralFrame frameTOF(
-      Mantid::Geometry::GeneralFrame::GeneralFrameName, ax0->unit()->label());
+  Mantid::Geometry::GeneralFrame framePixel(Mantid::Geometry::GeneralFrame::GeneralFrameName, "pixel");
+  Mantid::Geometry::GeneralFrame frameTOF(Mantid::Geometry::GeneralFrame::GeneralFrameName, ax0->unit()->label());
 
   // ------------------ Build all the dimensions ----------------------------
-  MDHistoDimension_sptr dimX(
-      new MDHistoDimension("x", "x", framePixel, static_cast<coord_t>(0),
-                           static_cast<coord_t>(m_numXPixels), m_numXPixels));
-  MDHistoDimension_sptr dimY(
-      new MDHistoDimension("y", "y", framePixel, static_cast<coord_t>(0),
-                           static_cast<coord_t>(m_numYPixels), m_numYPixels));
+  MDHistoDimension_sptr dimX(new MDHistoDimension("x", "x", framePixel, static_cast<coord_t>(0),
+                                                  static_cast<coord_t>(m_numXPixels), m_numXPixels));
+  MDHistoDimension_sptr dimY(new MDHistoDimension("y", "y", framePixel, static_cast<coord_t>(0),
+                                                  static_cast<coord_t>(m_numYPixels), m_numYPixels));
   std::string TOFname = ax0->title();
   if (TOFname.empty())
     TOFname = ax0->unit()->unitID();
-  MDHistoDimension_sptr dimTOF(new MDHistoDimension(
-      TOFname, TOFname, frameTOF, static_cast<coord_t>(tof_min),
-      static_cast<coord_t>(tof_max), ax0->length()));
+  MDHistoDimension_sptr dimTOF(new MDHistoDimension(TOFname, TOFname, frameTOF, static_cast<coord_t>(tof_min),
+                                                    static_cast<coord_t>(tof_max), ax0->length()));
 
   std::vector<IMDDimension_sptr> dims{dimX, dimY, dimTOF};
 
   if (banks.size() > 1) {
-    Mantid::Geometry::GeneralFrame frameNumber(
-        Mantid::Geometry::GeneralFrame::GeneralFrameName, "number");
+    Mantid::Geometry::GeneralFrame frameNumber(Mantid::Geometry::GeneralFrame::GeneralFrameName, "number");
     int min = banks.begin()->first;
     int max = banks.rbegin()->first + 1;
-    MDHistoDimension_sptr dimBanks(new MDHistoDimension(
-        "bank", "bank", frameNumber, static_cast<coord_t>(min),
-        static_cast<coord_t>(max), max - min));
+    MDHistoDimension_sptr dimBanks(new MDHistoDimension("bank", "bank", frameNumber, static_cast<coord_t>(min),
+                                                        static_cast<coord_t>(max), max - min));
     dims.emplace_back(dimBanks);
   }
 
   // --------- Create the workspace with the right number of dimensions
   // ----------
   size_t nd = dims.size();
-  IMDEventWorkspace_sptr outWS =
-      MDEventFactory::CreateMDWorkspace(nd, "MDEvent");
+  IMDEventWorkspace_sptr outWS = MDEventFactory::CreateMDWorkspace(nd, "MDEvent");
   outWS->initGeometry(dims);
   outWS->initialize();
   this->setBoxController(outWS->getBoxController(), mws->getInstrument());
   outWS->splitBox();
 
-  MDEventWorkspace3::sptr outWS3 =
-      std::dynamic_pointer_cast<MDEventWorkspace3>(outWS);
-  MDEventWorkspace4::sptr outWS4 =
-      std::dynamic_pointer_cast<MDEventWorkspace4>(outWS);
+  MDEventWorkspace3::sptr outWS3 = std::dynamic_pointer_cast<MDEventWorkspace3>(outWS);
+  MDEventWorkspace4::sptr outWS4 = std::dynamic_pointer_cast<MDEventWorkspace4>(outWS);
 
   // Copy ExperimentInfo (instrument, run, sample) to the output WS
   ExperimentInfo_sptr ei(in_ws->cloneExperimentInfo());
@@ -274,8 +250,7 @@ void ConvertToDetectorFaceMD::exec() {
         detid_t detID = det->getDetectorIDAtXY(x, y);
         size_t wi = m_detID_to_WI[detID + m_detID_to_WI_offset];
         if (wi >= in_ws->getNumberHistograms())
-          throw std::runtime_error("Invalid workspace index found in bank " +
-                                   det->getName() + "!");
+          throw std::runtime_error("Invalid workspace index found in bank " + det->getName() + "!");
 
         auto xPos = static_cast<coord_t>(x);
         auto yPos = static_cast<coord_t>(y);
@@ -289,33 +264,27 @@ void ConvertToDetectorFaceMD::exec() {
         switch (el.getEventType()) {
         case TOF:
           if (nd == 3)
-            this->convertEventList<TofEvent, MDEvent<3>, 3>(
-                outWS3, wi, xPos, yPos, bankPos, runIndex, goniometerIndex,
-                detID);
+            this->convertEventList<TofEvent, MDEvent<3>, 3>(outWS3, wi, xPos, yPos, bankPos, runIndex, goniometerIndex,
+                                                            detID);
           else if (nd == 4)
-            this->convertEventList<TofEvent, MDEvent<4>, 4>(
-                outWS4, wi, xPos, yPos, bankPos, runIndex, goniometerIndex,
-                detID);
+            this->convertEventList<TofEvent, MDEvent<4>, 4>(outWS4, wi, xPos, yPos, bankPos, runIndex, goniometerIndex,
+                                                            detID);
           break;
         case WEIGHTED:
           if (nd == 3)
-            this->convertEventList<WeightedEvent, MDEvent<3>, 3>(
-                outWS3, wi, xPos, yPos, bankPos, runIndex, goniometerIndex,
-                detID);
+            this->convertEventList<WeightedEvent, MDEvent<3>, 3>(outWS3, wi, xPos, yPos, bankPos, runIndex,
+                                                                 goniometerIndex, detID);
           else if (nd == 4)
-            this->convertEventList<WeightedEvent, MDEvent<4>, 4>(
-                outWS4, wi, xPos, yPos, bankPos, runIndex, goniometerIndex,
-                detID);
+            this->convertEventList<WeightedEvent, MDEvent<4>, 4>(outWS4, wi, xPos, yPos, bankPos, runIndex,
+                                                                 goniometerIndex, detID);
           break;
         case WEIGHTED_NOTIME:
           if (nd == 3)
-            this->convertEventList<WeightedEventNoTime, MDEvent<3>, 3>(
-                outWS3, wi, xPos, yPos, bankPos, runIndex, goniometerIndex,
-                detID);
+            this->convertEventList<WeightedEventNoTime, MDEvent<3>, 3>(outWS3, wi, xPos, yPos, bankPos, runIndex,
+                                                                       goniometerIndex, detID);
           else if (nd == 4)
-            this->convertEventList<WeightedEventNoTime, MDEvent<4>, 4>(
-                outWS4, wi, xPos, yPos, bankPos, runIndex, goniometerIndex,
-                detID);
+            this->convertEventList<WeightedEventNoTime, MDEvent<4>, 4>(outWS4, wi, xPos, yPos, bankPos, runIndex,
+                                                                       goniometerIndex, detID);
           break;
         default:
           throw std::runtime_error("EventList had an unexpected data type!");

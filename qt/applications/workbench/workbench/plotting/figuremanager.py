@@ -14,6 +14,7 @@ import io
 import sys
 import re
 from functools import wraps
+
 import matplotlib
 from matplotlib._pylab_helpers import Gcf
 from matplotlib.axes import Axes
@@ -316,8 +317,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         if self.toolbar:
             self.toolbar.destroy()
+
         self._ads_observer.observeAll(False)
-        del self._ads_observer
+        self._ads_observer = None
         # disconnect window events before calling Gcf.destroy. window.close is not guaranteed to
         # delete the object and do this for us. On macOS it was observed that closing the figure window
         # would produce an extraneous activated event that would add a new figure to the plots list
@@ -510,7 +512,7 @@ def new_figure_manager(num, *args, **kwargs):
 def new_figure_manager_given_figure(num, figure):
     """Create a new manager from a num & figure """
 
-    def _new_figure_manager_given_figure_impl(num, figure):
+    def _new_figure_manager_given_figure_impl(num: int, figure):
         """Create a new figure manager instance for the given figure.
         Forces all public and non-dunder method calls onto the QApplication thread.
         """
@@ -518,4 +520,4 @@ def new_figure_manager_given_figure(num, figure):
         return force_method_calls_to_qapp_thread(FigureManagerWorkbench(canvas, num))
 
     # figure manager & canvas must be created on the QApplication thread
-    return QAppThreadCall(_new_figure_manager_given_figure_impl)(num, figure)
+    return QAppThreadCall(_new_figure_manager_given_figure_impl)(int(num), figure)

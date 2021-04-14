@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, Progress, \
     WorkspaceGroupProperty, FileAction
-from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty
+from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty, IntBoundedValidator
 from mantid.simpleapi import *
 import numpy as np
 from os import path
@@ -218,6 +218,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.maxqxy = self.getPropertyValue('MaxQxy').split(',')
         self.deltaq = self.getPropertyValue('DeltaQ').split(',')
         self.output_type = self.getPropertyValue('OutputType')
+        self.stitch_reference_index = self.getProperty('StitchReferenceIndex').value
 
     def PyInit(self):
 
@@ -357,10 +358,15 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty('SensitivityWithOffsets', False,
                              'Whether the sensitivity data has been measured with different horizontal offsets.')
 
-    def PyExec(self):
+        self.declareProperty('StitchReferenceIndex', defaultValue=1,
+                             validator=IntBoundedValidator(lower=0),
+                             doc='Index of reference workspace during stitching.')
 
+    # flake8: noqa: C901
+    def PyExec(self):
         self.setUp()
-        outputs = []
+        outputSamples = []
+        outputWedges = []
         panel_output_groups = []
         sensitivity_outputs = []
 
@@ -377,10 +383,12 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                     beam, flux = self.processBeam(d, absorber)
                 container = self.processContainer(d, beam, absorber,
                                                   container_transmission)
-                sample, panels, sensitivity = self.processSample(d, flux,
-                                                                 sample_transmission, beam,
-                                                                 absorber, container)
-                outputs.append(sample)
+                sample, wedges, panels, sensitivity = \
+                    self.processSample(d, flux, sample_transmission, beam,
+                                       absorber, container)
+                outputSamples.append(sample)
+                outputWedges.append(wedges)
+
                 if sensitivity:
                     sensitivity_outputs.append(sensitivity)
                 if panels:
@@ -388,72 +396,100 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             else:
                 self.log().information('Skipping empty token run.')
 
-        for output in outputs:
-            ConvertToPointData(InputWorkspace=output,
-                               OutputWorkspace=output)
-        if len(outputs) > 1 and self.getPropertyValue('OutputType') == 'I(Q)':
+        # rename to a user friendly naming scheme
+        for i in range(len(outputSamples)):
+            suffix = self.createCustomSuffix(outputSamples[i])
+            RenameWorkspace(InputWorkspace=outputSamples[i],
+                            OutputWorkspace=outputSamples[i] + suffix)
+            outputSamples[i] += suffix
+
+        # try to stitch automatically
+        if (len(outputSamples) > 1
+           and self.getPropertyValue('OutputType') == 'I(Q)'):
             try:
                 stitched = self.output + "_stitched"
-                Stitch1DMany(InputWorkspaces=outputs,
-                             OutputWorkspace=stitched)
-                outputs.append(stitched)
+                Stitch1DMany(InputWorkspaces=outputSamples,
+                             OutputWorkspace=stitched,
+                             ScaleRHSWorkspace=True,
+                             IndexOfReference=self.stitch_reference_index)
+                outputSamples.append(stitched)
             except RuntimeError as re:
                 self.log().warning("Unable to stitch automatically, consider "
                                    "stitching manually: " + str(re))
 
-        GroupWorkspaces(InputWorkspaces=outputs, OutputWorkspace=self.output)
-
-        # group wedge workspaces
-        if self.output_type == "I(Q)":
-            for w in range(self.n_wedges):
-                wedge_ws = [self.output + "_wedge_" + str(w + 1) + "_" + str(d + 1)
-                            for d in range(self.dimensionality)]
-                # convert to point data and remove nan and 0 from edges
-                for ws in wedge_ws:
-                    ConvertToPointData(InputWorkspace=ws,
-                                       OutputWorkspace=ws)
-                    ReplaceSpecialValues(InputWorkspace=ws,
-                                         OutputWorkspace=ws,
-                                         NaNValue=0)
-                    y = mtd[ws].readY(0)
-                    x = mtd[ws].readX(0)
-                    nonzero = np.nonzero(y)
-
-                    CropWorkspace(InputWorkspace=ws,
-                                  XMin=x[nonzero][0] - 1,
-                                  XMax=x[nonzero][-1],
-                                  OutputWorkspace=ws)
-
-                # and stitch if possible
-                if len(wedge_ws) > 1:
-                    try:
-                        stitched = self.output + "_wedge_" + str(w + 1) \
-                                   + "_stitched"
-                        Stitch1DMany(InputWorkspaces=wedge_ws,
-                                     OutputWorkspace=stitched)
-                        wedge_ws.append(stitched)
-                    except RuntimeError as re:
-                        self.log().warning("Unable to stitch automatically, "
-                                           "consider stitching manually: "
-                                           + str(re))
-                GroupWorkspaces(InputWorkspaces=wedge_ws,
-                                OutputWorkspace=self.output + "_wedge_" + str(w + 1))
-
+        GroupWorkspaces(InputWorkspaces=outputSamples,
+                        OutputWorkspace=self.output)
         self.setProperty('OutputWorkspace', mtd[self.output])
-        if self.output_sens:
-            if len(sensitivity_outputs) > 1:
-                GroupWorkspaces(InputWorkspaces=sensitivity_outputs, OutputWorkspace=self.output_sens)
-            if self.getProperty('SensitivityWithOffsets').value:
-                tmp_group_name = self.output_sens + '_group'
-                RenameWorkspace(InputWorkspace=self.output_sens, OutputWorkspace=tmp_group_name)
-                CalculateEfficiency(InputWorkspace=tmp_group_name, MergeGroup=True, OutputWorkspace=self.output_sens)
-                DeleteWorkspace(Workspace=tmp_group_name)
-            self.setProperty('SensitivityOutputWorkspace', mtd[self.output_sens])
 
-        # group panels
+        if outputWedges:
+            self.outputWedges(outputWedges)
+
+        if self.output_sens:
+            self.outputSensitivity(sensitivity_outputs)
+
         if panel_output_groups:
-            GroupWorkspaces(InputWorkspaces=panel_output_groups,
-                            OutputWorkspace=self.output_panels)
+            self.outputPanels(panel_output_groups)
+
+    def outputWedges(self, outputWedges):
+        # convert to point data and remove nan and 0 from wedges
+        for i in range(self.dimensionality):
+            for j in range(len(outputWedges[i])):
+                ws = outputWedges[i][j]
+                ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
+                ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
+                                     NaNValue=0)
+                y = mtd[ws].readY(0)
+                x = mtd[ws].readX(0)
+                nonzero = np.nonzero(y)
+
+                CropWorkspace(InputWorkspace=ws, XMin=x[nonzero][0] - 1,
+                              XMax=x[nonzero][-1], OutputWorkspace=ws)
+
+                # add the suffix
+                suffix = self.createCustomSuffix(outputWedges[i][j])
+                RenameWorkspace(InputWorkspace=outputWedges[i][j],
+                                OutputWorkspace=outputWedges[i][j] + suffix)
+                outputWedges[i][j] += suffix
+
+        # stitch if possible and group
+        for i in range(len(outputWedges[0])):
+            inWs = [outputWedges[d][i] for d in range(self.dimensionality)]
+            if len(inWs) > 1:
+                try:
+                    stitched = self.output + "_wedge_" + str(i + 1) + "_stitched"
+                    Stitch1DMany(InputWorkspaces=inWs,
+                                 OutputWorkspace=stitched,
+                                 ScaleRHSWorkspace=True,
+                                 IndexOfReference=self.stitch_reference_index)
+                    inWs.append(stitched)
+                except RuntimeError as re:
+                    self.log().warning("Unable to stitch automatically, consider "
+                                       "stitching manually: " + str(re))
+            GroupWorkspaces(InputWorkspaces=inWs,
+                            OutputWorkspace=self.output + "_wedge_" + str(i + 1))
+
+    def outputSensitivity(self, sensitivity_outputs):
+        if len(sensitivity_outputs) > 1:
+            GroupWorkspaces(InputWorkspaces=sensitivity_outputs, OutputWorkspace=self.output_sens)
+        if self.getProperty('SensitivityWithOffsets').value:
+            tmp_group_name = self.output_sens + '_group'
+            RenameWorkspace(InputWorkspace=self.output_sens, OutputWorkspace=tmp_group_name)
+            CalculateEfficiency(InputWorkspace=tmp_group_name, MergeGroup=True, OutputWorkspace=self.output_sens)
+            DeleteWorkspace(Workspace=tmp_group_name)
+        self.setProperty('SensitivityOutputWorkspace', mtd[self.output_sens])
+
+    def outputPanels(self, panel_output_groups):
+        panelWs = []
+        for groupName in panel_output_groups:
+            wsNames = mtd[groupName].getNames()
+            UnGroupWorkspace(InputWorkspace=groupName)
+            for ws in wsNames:
+                suffix = self.createCustomSuffix(ws)
+                RenameWorkspace(InputWorkspace=ws,
+                                OutputWorkspace=ws + suffix)
+                panelWs.append(ws + suffix)
+        GroupWorkspaces(InputWorkspaces=panelWs,
+                        OutputWorkspace=self.output_panels)
 
     def processTransmissions(self):
         absorber_transmission_names = []
@@ -569,7 +605,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              FluxOutputWorkspace=flux_name)
         return beam_name, flux_name
 
-    def processFlux(self, i, aborber_name):
+    def processFlux(self, i, absorber_name):
         if self.flux[0]:
             flux = (self.flux[i]
                     if len(self.flux) == self.dimensionality
@@ -616,6 +652,67 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              ThetaDependent=self.theta_dependent,
                              NormaliseBy=self.normalise)
         return container_name
+
+    def createCustomSuffix(self, ws):
+        DISTANCE_LOG = "L2"
+        COLLIMATION_LOG = "collimation.actual_position"
+        WAVELENGTH_LOG1 = "wavelength"
+        WAVELENGTH_LOG2 = "selector.wavelength"
+
+        logs = mtd[ws].run().getProperties()
+        logs = {log.name:log.value for log in logs}
+
+        distance = None
+        try:
+            instrument = mtd[ws].getInstrument()
+            components = instrument.getStringParameter('detector_panels')
+            if components:
+                components = components[0].split(',')
+                for c in components:
+                    if c in ws:
+                        distance = instrument.getComponentByName(c).getPos()[2]
+                        break
+            if not distance:
+                distance = float(logs[DISTANCE_LOG])
+            if distance < 0.0:
+                distance = None
+                raise ValueError
+        except:
+            logger.notice("Unable to get a valid detector distance value from "
+                          "the sample logs.")
+        collimation = None
+        try:
+            collimation = float(logs[COLLIMATION_LOG])
+            if collimation < 0.0:
+                collimation = None
+                raise ValueError
+        except:
+            logger.notice("Unable to get a valid collimation distance from "
+                          "the sample logs.")
+        wavelength = None
+        try:
+            wavelength = float(logs[WAVELENGTH_LOG1])
+            if wavelength < 0.0:
+                wavelength = None
+                raise ValueError
+        except:
+            try:
+                wavelength = float(logs[WAVELENGTH_LOG2])
+                if wavelength < 0.0:
+                    wavelength = None
+                    raise ValueError
+            except:
+                logger.notice("Unable to get a valid wavelength from the "
+                              "sample logs.")
+        suffix = ""
+        if distance:
+            suffix += "_d{:.1f}m".format(distance)
+        if collimation:
+            suffix += "_c{:.1f}m".format(collimation)
+        if wavelength:
+            suffix += "_w{:.1f}A".format(wavelength)
+
+        return suffix
 
     def processSample(self, i, flux_name, sample_transmission_names, beam_name,
                       absorber_name, container_name):
@@ -671,7 +768,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         # sample
         [_, sample_name] = needs_processing(self.sample[i], 'Sample')
-        output = self.output + '_' + str(i + 1)
         self.progress.report('Processing sample at detector configuration '
                              + str(i + 1))
 
@@ -703,6 +799,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 self.getProperty('WaterCrossSection').value,
                 )
 
+        output_sample = self.output + '_' + str(i + 1)
+
         if self.getProperty('OutputPanels').value:
             panel_ws_group = self.output_panels + '_' + str(i + 1)
         else:
@@ -718,7 +816,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         SANSILLIntegration(
                 InputWorkspace=sample_name,
-                OutputWorkspace=output,
+                OutputWorkspace=output_sample,
                 OutputType=self.output_type,
                 CalculateResolution=
                 self.getPropertyValue('CalculateResolution'),
@@ -742,8 +840,10 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 WavelengthRange=self.getProperty('WavelengthRange').value
                 )
 
+        ConvertToPointData(InputWorkspace=output_sample, OutputWorkspace=output_sample)
+
         # wedges ungrouping and renaming
-        if self.n_wedges and self.output_type == "I(Q)":
+        if output_wedges:
             wedges_old_names = [output_wedges + "_" + str(w + 1)
                                 for w in range(self.n_wedges)]
             wedges_new_names = [self.output + "_wedge_" + str(w + 1)
@@ -752,6 +852,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             UnGroupWorkspace(InputWorkspace=output_wedges)
             RenameWorkspaces(InputWorkspaces=wedges_old_names,
                              WorkspaceNames=wedges_new_names)
+            output_wedges = wedges_new_names
+        else:
+            output_wedges = []
 
         if self.cleanup:
             DeleteWorkspace(sample_name)
@@ -759,7 +862,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         if not mtd.doesExist(panel_ws_group):
             panel_ws_group = ""
 
-        return output, panel_ws_group, output_sens
+        return output_sample, output_wedges, panel_ws_group, output_sens
 
 
 AlgorithmFactory.subscribe(SANSILLAutoProcess)

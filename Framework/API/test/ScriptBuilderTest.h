@@ -18,8 +18,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 namespace {
-std::string getAlgTimestamp(Mantid::API::HistoryView &historyView,
-                            size_t index) {
+std::string getAlgTimestamp(Mantid::API::HistoryView &historyView, size_t index) {
   auto algList = historyView.getAlgorithmsList();
   TS_ASSERT(algList.size() >= index + 1);
   auto executionTime = algList[index].getAlgorithmHistory()->executionDate();
@@ -42,15 +41,9 @@ public:
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
     const std::string summary() const override { return "SubAlgorithm"; }
-    const std::string workspaceMethodName() const override {
-      return "methodname";
-    }
-    const std::string workspaceMethodOnTypes() const override {
-      return "MatrixWorkspace;ITableWorkspace";
-    }
-    const std::string workspaceMethodInputProperty() const override {
-      return "InputWorkspace";
-    }
+    const std::string workspaceMethodName() const override { return "methodname"; }
+    const std::string workspaceMethodOnTypes() const override { return "MatrixWorkspace;ITableWorkspace"; }
+    const std::string workspaceMethodInputProperty() const override { return "InputWorkspace"; }
 
     void init() override {
       declareProperty("PropertyA", "Hello");
@@ -69,15 +62,9 @@ public:
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
     const std::string summary() const override { return "BasicAlgorithm"; }
-    const std::string workspaceMethodName() const override {
-      return "methodname";
-    }
-    const std::string workspaceMethodOnTypes() const override {
-      return "MatrixWorkspace;ITableWorkspace";
-    }
-    const std::string workspaceMethodInputProperty() const override {
-      return "InputWorkspace";
-    }
+    const std::string workspaceMethodName() const override { return "methodname"; }
+    const std::string workspaceMethodOnTypes() const override { return "MatrixWorkspace;ITableWorkspace"; }
+    const std::string workspaceMethodInputProperty() const override { return "InputWorkspace"; }
 
     void init() override {
       declareProperty("PropertyA", "Hello");
@@ -97,25 +84,16 @@ public:
   // Algorithm has an input in the form of a PropertyManager
   class PropertyManagerInputAlgorithm : public Algorithm {
   public:
-    const std::string name() const override {
-      return "PropertyManagerInputAlgorithm";
-    }
+    const std::string name() const override { return "PropertyManagerInputAlgorithm"; }
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
-    const std::string summary() const override {
-      return "PropertyManagerInputAlgorithm";
-    }
+    const std::string summary() const override { return "PropertyManagerInputAlgorithm"; }
     void init() override {
-      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input));
-      declareProperty(
-          std::make_unique<PropertyManagerProperty>("Dict", Direction::Input));
-      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output));
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input));
+      declareProperty(std::make_unique<PropertyManagerProperty>("Dict", Direction::Input));
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output));
     }
-    void exec() override {
-      setProperty("OutputWorkspace", std::make_shared<WorkspaceTester>());
-    }
+    void exec() override { setProperty("OutputWorkspace", std::make_shared<WorkspaceTester>()); }
   };
 
   class NewlineAlgorithm : public Algorithm {
@@ -133,10 +111,8 @@ public:
     }
 
     void init() override {
-      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input));
-      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output));
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input));
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output));
       declareProperty("PropertyA", "Hello");
       declareProperty("PropertyB", "World");
     }
@@ -144,8 +120,7 @@ public:
       declareProperty("DynamicProperty1", "value", Direction::Output);
       setPropertyValue("DynamicProperty1", "outputValue");
 
-      std::shared_ptr<MatrixWorkspace> output =
-          std::make_shared<WorkspaceTester>();
+      std::shared_ptr<MatrixWorkspace> output = std::make_shared<WorkspaceTester>();
       setProperty("OutputWorkspace", output);
     }
   };
@@ -159,15 +134,9 @@ public:
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
     const std::string summary() const override { return "NestedAlgorithm"; }
-    const std::string workspaceMethodName() const override {
-      return "methodname";
-    }
-    const std::string workspaceMethodOnTypes() const override {
-      return "MatrixWorkspace;ITableWorkspace";
-    }
-    const std::string workspaceMethodInputProperty() const override {
-      return "InputWorkspace";
-    }
+    const std::string workspaceMethodName() const override { return "methodname"; }
+    const std::string workspaceMethodOnTypes() const override { return "MatrixWorkspace;ITableWorkspace"; }
+    const std::string workspaceMethodInputProperty() const override { return "InputWorkspace"; }
 
     void init() override {
       declareProperty("PropertyA", 13);
@@ -197,21 +166,13 @@ public:
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
     const std::string summary() const override { return "TopLevelAlgorithm"; }
-    const std::string workspaceMethodName() const override {
-      return "methodname";
-    }
-    const std::string workspaceMethodOnTypes() const override {
-      return "Workspace;MatrixWorkspace;ITableWorkspace";
-    }
-    const std::string workspaceMethodInputProperty() const override {
-      return "InputWorkspace";
-    }
+    const std::string workspaceMethodName() const override { return "methodname"; }
+    const std::string workspaceMethodOnTypes() const override { return "Workspace;MatrixWorkspace;ITableWorkspace"; }
+    const std::string workspaceMethodInputProperty() const override { return "InputWorkspace"; }
 
     void init() override {
-      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input));
-      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output));
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input));
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output));
     }
     void exec() override {
       auto alg = createChildAlgorithm("NestedAlgorithm");
@@ -222,8 +183,7 @@ public:
       alg->initialize();
       alg->execute();
 
-      std::shared_ptr<MatrixWorkspace> output =
-          std::make_shared<WorkspaceTester>();
+      std::shared_ptr<MatrixWorkspace> output = std::make_shared<WorkspaceTester>();
       setProperty("OutputWorkspace", output);
     }
   };
@@ -232,24 +192,18 @@ public:
   public:
     AlgorithmWithDynamicProperty() : Algorithm() {}
     ~AlgorithmWithDynamicProperty() override {}
-    const std::string name() const override {
-      return "AlgorithmWithDynamicProperty";
-    }
+    const std::string name() const override { return "AlgorithmWithDynamicProperty"; }
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
-    const std::string summary() const override {
-      return "AlgorithmWithDynamicProperty";
-    }
+    const std::string summary() const override { return "AlgorithmWithDynamicProperty"; }
     void afterPropertySet(const std::string &name) override {
       if (name == "InputWorkspace")
         declareProperty("DynamicInputProperty", "");
     }
 
     void init() override {
-      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input));
-      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output));
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input));
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output));
       declareProperty("PropertyA", "Hello");
       declareProperty("PropertyB", "World");
     }
@@ -257,15 +211,13 @@ public:
       declareProperty("DynamicProperty1", "value", Direction::Output);
       setPropertyValue("DynamicProperty1", "outputValue");
 
-      std::shared_ptr<MatrixWorkspace> output =
-          std::make_shared<WorkspaceTester>();
+      std::shared_ptr<MatrixWorkspace> output = std::make_shared<WorkspaceTester>();
       setProperty("OutputWorkspace", output);
     }
   };
 
   ScriptBuilderTest()
-      : m_algFactory(AlgorithmFactory::Instance()),
-        m_ads(AnalysisDataService::Instance()),
+      : m_algFactory(AlgorithmFactory::Instance()), m_ads(AnalysisDataService::Instance()),
         m_testWS(std::make_shared<WorkspaceTester>()) {
     m_algFactory.subscribe<TopLevelAlgorithm>();
     m_algFactory.subscribe<NestedAlgorithm>();
@@ -332,10 +284,9 @@ public:
     const auto &wsHist = outputWS->history();
     ScriptBuilder builder(wsHist.createView());
     const auto generatedText = builder.build();
-    const auto expectedText =
-        "PropertyManagerInputAlgorithm(InputWorkspace='test_input_workspace', "
-        "Dict='{\"Int\":1,\"String\":\"option\"}', "
-        "OutputWorkspace='test_Build_With_PropertyManagerProperty_Out')\n";
+    const auto expectedText = "PropertyManagerInputAlgorithm(InputWorkspace='test_input_workspace', "
+                              "Dict='{\"Int\":1,\"String\":\"option\"}', "
+                              "OutputWorkspace='test_Build_With_PropertyManagerProperty_Out')\n";
 
     TS_ASSERT_EQUALS(expectedText, generatedText)
 
@@ -515,8 +466,7 @@ public:
                             "workspace', "
                             "OutputWorkspace='test_output_workspace')",
                             ""};
-    std::shared_ptr<WorkspaceTester> backSlashName =
-        std::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> backSlashName = std::make_shared<WorkspaceTester>();
     m_ads.addOrReplace("test_inp\\ut_workspace", backSlashName);
 
     auto alg = m_algFactory.create("TopLevelAlgorithm", 1);
@@ -546,10 +496,9 @@ public:
 
   void test_Build_Dynamic_Property() {
     // importantly the Dynamic Property should not be written into the script
-    std::string result =
-        "AlgorithmWithDynamicProperty(InputWorkspace='test_input_workspace', "
-        "OutputWorkspace='test_output_workspace', PropertyA='A', "
-        "PropertyB='B', DynamicInputProperty='C')\n";
+    std::string result = "AlgorithmWithDynamicProperty(InputWorkspace='test_input_workspace', "
+                         "OutputWorkspace='test_output_workspace', PropertyA='A', "
+                         "PropertyB='B', DynamicInputProperty='C')\n";
 
     auto alg = m_algFactory.create("AlgorithmWithDynamicProperty", 1);
     alg->initialize();
@@ -572,8 +521,7 @@ public:
         foundDynamicProperty = true;
       }
     }
-    TSM_ASSERT("Could not find the dynamic property in the algorithm history.",
-               foundDynamicProperty);
+    TSM_ASSERT("Could not find the dynamic property in the algorithm history.", foundDynamicProperty);
 
     ScriptBuilder builder(wsHist.createView());
     std::string scriptText = builder.build();

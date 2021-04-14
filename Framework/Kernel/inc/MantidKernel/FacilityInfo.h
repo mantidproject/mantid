@@ -55,13 +55,9 @@ public:
   const std::string &timezone() const { return m_timezone; }
 
   /// Return the archive search interface names
-  const std::vector<std::string> &archiveSearch() const {
-    return m_archiveSearch;
-  }
+  const std::vector<std::string> &archiveSearch() const { return m_archiveSearch; }
   /// Returns a list of instruments of this facility
-  const std::vector<InstrumentInfo> &instruments() const {
-    return m_instruments;
-  }
+  const std::vector<InstrumentInfo> &instruments() const { return m_instruments; }
   /// Returns a list of instruments of given technique
   std::vector<InstrumentInfo> instruments(const std::string &tech) const;
   /// Returns instruments with given name
@@ -75,8 +71,7 @@ public:
   /// Returns a vector of the names of the available compute resources
   std::vector<std::string> computeResources() const;
   /// Returns the RemoteJobManager for the named compute resource
-  std::shared_ptr<RemoteJobManager>
-  getRemoteJobManager(const std::string &name) const;
+  std::shared_ptr<RemoteJobManager> getRemoteJobManager(const std::string &name) const;
   /// Returns the catalogInfo class.
   const CatalogInfo &catalogInfo() const { return m_catalogs; }
 
@@ -101,27 +96,22 @@ private:
   /// Add new extension
   void addExtension(const std::string &ext);
 
-  CatalogInfo m_catalogs;   ///< Gain access to the catalogInfo class.
-  const std::string m_name; ///< facility name
-  std::string m_timezone;   ///< Timezone designation in pytz
-  int m_zeroPadding;        ///< default zero padding for this facility
-  std::string
-      m_delimiter; ///< default delimiter between instrument name and run number
-  std::vector<std::string>
-      m_extensions; ///< file extensions in order of preference
-  std::vector<std::string>
-      m_archiveSearch; ///< names of the archive search interface
-  std::vector<InstrumentInfo>
-      m_instruments;   ///< list of instruments of this facility
-  bool m_noFilePrefix; ///< flag indicating if prefix is required in file names
-  size_t m_multiFileLimit; ///< the multiple file limit
+  CatalogInfo m_catalogs;                             ///< Gain access to the catalogInfo class.
+  const std::string m_name;                           ///< facility name
+  std::string m_timezone;                             ///< Timezone designation in pytz
+  int m_zeroPadding;                                  ///< default zero padding for this facility
+  std::string m_delimiter;                            ///< default delimiter between instrument name and run number
+  std::vector<std::string> m_extensions;              ///< file extensions in order of preference
+  std::vector<std::string> m_archiveSearch;           ///< names of the archive search interface
+  std::vector<InstrumentInfo> m_instruments;          ///< list of instruments of this facility
+  bool m_noFilePrefix;                                ///< flag indicating if prefix is required in file names
+  size_t m_multiFileLimit;                            ///< the multiple file limit
   std::vector<ComputeResourceInfo> m_computeResInfos; ///< (remote) compute
   /// resources available in
   /// this facility
 
   // TODO: remove RemoteJobManager form here (trac ticket #11373)
-  using ComputeResourcesMap =
-      std::map<std::string, std::shared_ptr<RemoteJobManager>>;
+  using ComputeResourcesMap = std::map<std::string, std::shared_ptr<RemoteJobManager>>;
   ComputeResourcesMap m_computeResources; ///< list of compute resources
                                           ///(clusters, etc...) available at
                                           /// this facility

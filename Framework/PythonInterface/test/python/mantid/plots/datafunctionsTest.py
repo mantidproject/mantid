@@ -17,7 +17,7 @@ import numpy as np
 import mantid.api
 import mantid.plots.datafunctions as funcs
 from unittest.mock import Mock
-from mantid.kernel import config
+from mantid.kernel import config, ConfigService
 from mantid.plots.utility import MantidAxType
 from mantid.simpleapi import (AddSampleLog, AddTimeSeriesLog, ConjoinWorkspaces,
                               CreateMDHistoWorkspace, CreateSampleWorkspace,
@@ -192,7 +192,7 @@ class DataFunctionsTest(unittest.TestCase):
         index, dist, kwargs = funcs.get_wksp_index_dist_and_label(self.ws2d_histo, specNum=2)
         self.assertEqual(index, 1)
         self.assertTrue(dist)
-        self.assertEqual(kwargs['label'], 'ws2d_histo: 6')
+        self.assertEqual(kwargs['label'], 'ws2d_histo: 7')
         # get info from default spectrum in the 1d case
         index, dist, kwargs = funcs.get_wksp_index_dist_and_label(self.ws1d_point, wkspIndex=0)
         self.assertEqual(index, 0)
@@ -877,9 +877,11 @@ class DataFunctionsTest(unittest.TestCase):
         self.assertTrue(isinstance(bin_indices, range))
 
     def test_get_bin_indices_returns_a_numpy_ndarray_with_monitors(self):
+        ConfigService.Instance().setString("default.facility", "ISIS")
         ws = LoadRaw("GEM40979", SpectrumMin=1, SpectrumMax=102)
         bin_indices = funcs.get_bin_indices(ws)
         self.assertTrue(isinstance(bin_indices, np.ndarray))
+        ConfigService.Instance().setString("default.facility", " ")
 
 
 if __name__ == '__main__':

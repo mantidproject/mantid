@@ -50,14 +50,14 @@ A peak will not be used if
 -  its :math:`\chi^2` of peak fitting is larger than pre-defined maximum
    value;
 -  its height is lower than pre-defined lowest peak height;
--  its observed maximum value corrected by background is smaller than user specified value; 
+-  its observed maximum value corrected by background is smaller than user specified value;
 -  its signal/noise ratio is less than 5
    :math:`H\cdot FWHM\_To\_SIGMA/width < 5`;
 -  its height is not outside of error bars of background
    :math:`H < \sqrt{H + B}/2`;
 -  its z-value on :math:`\frac{\delta d}{d}` is larger than 2.0;
--  its offset from theoretical position exceeds the limitation specified by user; 
--  its resolution (:math:`\Delta(d)/d`) is out of user-specified range. 
+-  its offset from theoretical position exceeds the limitation specified by user;
+-  its resolution (:math:`\Delta(d)/d`) is out of user-specified range.
 
 Generate fit window
 ###################
@@ -198,9 +198,9 @@ Spectra to be masked
 --------------------
 
 A MaskWorskpace is output from the algorithm.  Along with it, a TableWorkspace is output
-to describe the status of offset calculation. 
+to describe the status of offset calculation.
 
-Here are the cases that a spectra (i.e., a detector) will be masked in the output MaskWorkspace. 
+Here are the cases that a spectra (i.e., a detector) will be masked in the output MaskWorkspace.
 
 -  An empty spectrum (i.e., the corresponding EventList is empty).  It is noted as "empty det";
 

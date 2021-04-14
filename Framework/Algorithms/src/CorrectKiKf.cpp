@@ -34,17 +34,14 @@ void CorrectKiKf::init() {
   auto wsValidator = std::make_shared<WorkspaceUnitValidator>("DeltaE");
 
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input, wsValidator),
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input, wsValidator),
       "Name of the input workspace");
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
       "Name of the output workspace, can be the same as the input");
 
   std::vector<std::string> propOptions{"Direct", "Indirect"};
-  this->declareProperty("EMode", "Direct",
-                        std::make_shared<StringListValidator>(propOptions),
+  this->declareProperty("EMode", "Direct", std::make_shared<StringListValidator>(propOptions),
                         "The energy mode (default: Direct)");
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
@@ -59,8 +56,7 @@ void CorrectKiKf::exec() {
   MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
 
   // Check if it is an event workspace
-  EventWorkspace_const_sptr eventW =
-      std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+  EventWorkspace_const_sptr eventW = std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (eventW != nullptr) {
     this->execEvent();
     return;
@@ -88,8 +84,7 @@ void CorrectKiKf::exec() {
         efixedProp = inputWS->run().getPropertyValueAsType<double>("Ei");
         g_log.debug() << "Using stored Ei value " << efixedProp << "\n";
       } else {
-        throw std::invalid_argument(
-            "No Ei value has been set or stored within the run information.");
+        throw std::invalid_argument("No Ei value has been set or stored within the run information.");
       }
     } else {
       // If not specified, will try to get Ef from the parameter file for
@@ -117,9 +112,8 @@ void CorrectKiKf::exec() {
       else if (spectrumInfo.hasUniqueDetector(i)) {
         getEfixedFromParameterMap(Efi, i, spectrumInfo, pmap);
       } else {
-        g_log.information()
-            << "Workspace Index " << i << ": cannot find detector"
-            << "\n";
+        g_log.information() << "Workspace Index " << i << ": cannot find detector"
+                            << "\n";
       }
     }
 
@@ -177,8 +171,7 @@ void CorrectKiKf::exec() {
 void CorrectKiKf::execEvent() {
   g_log.information("Processing event workspace");
 
-  const MatrixWorkspace_const_sptr matrixInputWS =
-      getProperty("InputWorkspace");
+  const MatrixWorkspace_const_sptr matrixInputWS = getProperty("InputWorkspace");
   auto inputWS = std::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
 
   // generate the output workspace pointer
@@ -199,8 +192,7 @@ void CorrectKiKf::execEvent() {
         efixedProp = inputWS->run().getPropertyValueAsType<double>("Ei");
         g_log.debug() << "Using stored Ei value " << efixedProp << "\n";
       } else {
-        throw std::invalid_argument(
-            "No Ei value has been set or stored within the run information.");
+        throw std::invalid_argument("No Ei value has been set or stored within the run information.");
       }
     } else {
       // If not specified, will try to get Ef from the parameter file for
@@ -230,9 +222,8 @@ void CorrectKiKf::execEvent() {
       } else if (spectrumInfo.hasUniqueDetector(i)) {
         getEfixedFromParameterMap(Efi, i, spectrumInfo, pmap);
       } else {
-        g_log.information()
-            << "Workspace Index " << i << ": cannot find detector"
-            << "\n";
+        g_log.information() << "Workspace Index " << i << ": cannot find detector"
+                            << "\n";
       }
       efixed = Efi;
     } else
@@ -252,8 +243,7 @@ void CorrectKiKf::execEvent() {
       break;
 
     case WEIGHTED_NOTIME:
-      correctKiKfEventHelper(evlist.getWeightedEventsNoTime(), efixed,
-                             emodeStr);
+      correctKiKfEventHelper(evlist.getWeightedEventsNoTime(), efixed, emodeStr);
       break;
     }
 
@@ -264,20 +254,15 @@ void CorrectKiKf::execEvent() {
 
   outputWS->clearMRU();
   if (inputWS->getNumberEvents() != outputWS->getNumberEvents()) {
-    g_log.information() << "Ef <= 0 or Ei <= 0 for "
-                        << inputWS->getNumberEvents() -
-                               outputWS->getNumberEvents()
-                        << " events, out of " << inputWS->getNumberEvents()
-                        << '\n';
+    g_log.information() << "Ef <= 0 or Ei <= 0 for " << inputWS->getNumberEvents() - outputWS->getNumberEvents()
+                        << " events, out of " << inputWS->getNumberEvents() << '\n';
     if (efixedProp == EMPTY_DBL())
       g_log.information() << "Try to set fixed energy\n";
   }
 }
 
 template <class T>
-void CorrectKiKf::correctKiKfEventHelper(std::vector<T> &wevector,
-                                         double efixed,
-                                         const std::string &emodeStr) {
+void CorrectKiKf::correctKiKfEventHelper(std::vector<T> &wevector, double efixed, const std::string &emodeStr) {
   double Ei, Ef;
   float kioverkf;
   typename std::vector<T>::iterator it;
@@ -303,8 +288,7 @@ void CorrectKiKf::correctKiKfEventHelper(std::vector<T> &wevector,
   }
 }
 
-void CorrectKiKf::getEfixedFromParameterMap(double &Efi, int64_t i,
-                                            const SpectrumInfo &spectrumInfo,
+void CorrectKiKf::getEfixedFromParameterMap(double &Efi, int64_t i, const SpectrumInfo &spectrumInfo,
                                             const ParameterMap &pmap) {
   Efi = 0;
 

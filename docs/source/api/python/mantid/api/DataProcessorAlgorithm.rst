@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::API::DataProcessorAlgorithm.
 
 .. module:`mantid.api`
 
-.. autoclass:: mantid.api.DataProcessorAlgorithm 
+.. autoclass:: mantid.api.DataProcessorAlgorithm
     :members:
     :undoc-members:
     :inherited-members:

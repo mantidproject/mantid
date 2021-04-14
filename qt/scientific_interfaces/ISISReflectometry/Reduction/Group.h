@@ -49,18 +49,15 @@ public:
 
   void resetState(bool resetChildren = true) override;
   void resetSkipped();
-  void renameOutputWorkspace(std::string const &oldName,
-                             std::string const &newName) override;
+  void renameOutputWorkspace(std::string const &oldName, std::string const &newName) override;
 
-  boost::optional<int> indexOfRowWithTheta(double angle,
-                                           double tolerance) const;
+  boost::optional<int> indexOfRowWithTheta(double angle, double tolerance) const;
 
   boost::optional<Row> const &operator[](int rowIndex) const;
   std::vector<boost::optional<Row>> const &rows() const;
   std::vector<boost::optional<Row>> &mutableRows();
 
-  boost::optional<Item &>
-  getItemWithOutputWorkspaceOrNone(std::string const &wsName);
+  boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 
 private:
   std::string m_name;
@@ -73,13 +70,12 @@ private:
 };
 
 template <typename ModificationListener>
-void mergeRowsInto(Group &intoHere, Group const &fromHere, int groupIndex,
-                   double thetaTolerance, ModificationListener &listener) {
+void mergeRowsInto(Group &intoHere, Group const &fromHere, int groupIndex, double thetaTolerance,
+                   ModificationListener &listener) {
   for (auto const &maybeRow : fromHere.rows()) {
     if (maybeRow.is_initialized()) {
       auto const &fromRow = maybeRow.get();
-      auto index =
-          intoHere.indexOfRowWithTheta(fromRow.theta(), thetaTolerance);
+      auto index = intoHere.indexOfRowWithTheta(fromRow.theta(), thetaTolerance);
       if (index.is_initialized()) {
         auto const updateAtIndex = index.get();
         auto const &intoRow = intoHere[updateAtIndex].get();
@@ -94,10 +90,8 @@ void mergeRowsInto(Group &intoHere, Group const &fromHere, int groupIndex,
   }
 }
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Group const &lhs,
-                                               Group const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Group const &lhs,
-                                               Group const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Group const &lhs, Group const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Group const &lhs, Group const &rhs);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

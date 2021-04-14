@@ -12,7 +12,7 @@ Description
 This function calculates energies and intensities of transitions between states of a crystal electric field acting upon a rare earth ion. It is a part of crystal field computation
 in Mantid and under active development. More documentation will follow as the development progresses.
 
-Here is an example of how the function can be evaluated from python. The output is a `TableWorkspace` with two columns: the first column with the energies (in meV) and the second one with the intensities (in milibarn per steradian). 
+Here is an example of how the function can be evaluated from python. The output is a `TableWorkspace` with two columns: the first column with the energies (in meV) and the second one with the intensities (in milibarn per steradian).
 The function doesn't require an input workspace so `None` is passed for `InputWorkspace` property of `EvaluateFunction`.
 
 .. code::

@@ -26,8 +26,7 @@ public:
     IndexInfo source({1, 2, 3});
     std::vector<std::vector<size_t>> grouping{{0}, {1}, {2}};
     std::vector<SpectrumNumber> specNums{4, 5};
-    TS_ASSERT_THROWS(group(source, std::move(specNums), grouping),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(group(source, std::move(specNums), grouping), const std::runtime_error &);
     TS_ASSERT_EQUALS(specNums.size(), 2);
   }
 

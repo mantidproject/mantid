@@ -17,12 +17,12 @@ where,
 
 :math:`\lambda` (MHz) is the relaxation rate,
 
-:math:`A_0` is the amplitude, 
+:math:`A_0` is the amplitude,
 
 and :math:`B_\text{D}` (G) is the dipolar field.
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np

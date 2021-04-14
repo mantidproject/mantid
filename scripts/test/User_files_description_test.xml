@@ -1,22 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<!--The file describes list of files to copy to a user's RB folder from Mantid users script repository 
+<!--The file describes list of files to copy to a user's RB folder from Mantid users script repository
     and operations to perform with these files during copying.
-    
+
     At the moment, supported operations are:
     Copy file(s) with specified name into RB folder with name which may depend on cycle ID, instrument or other variables below.
     On request, replace any instances of variable specified by its value.
 -->
 <user_files_description>
-  <!-- the file descriptions support the following variables defined and parsed by 
+  <!-- the file descriptions support the following variables defined and parsed by
     ISISDirectInelasticConfig.py module. $instrument$, $cycleID$ $start_date$, $rb_folder$
-    $rb_folder$ value is short rb folder path (e.g. RB1501020)  
-    not full rb folder path (/home/wkc26243/RB1501020), 
+    $rb_folder$ value is short rb folder path (e.g. RB1501020)
+    not full rb folder path (/home/wkc26243/RB1501020),
     The values of these variables are taken from archive for current cycle and user
   -->
- <!--Simple file copying -->  
+ <!--Simple file copying -->
   <file_to_copy file_name="Test_reduction_file1.py" copy_as="Test_reduction_file2.py"/>
 
- <!--Advanced file copying 
+ <!--Advanced file copying
     Variables have to be either strings or strings with variables, described above
   -->
   <file_to_copy file_name="Test_reduction_file.py" copy_as="Test_reduction_file_$cycleID$.py">

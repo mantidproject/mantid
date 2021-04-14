@@ -23,26 +23,20 @@ void export_PropertyHistory() {
 
   class_<PropertyHistory>(
       "PropertyHistory",
-      init<const std::string &, const std::string &, const std::string &,
-           const bool, const unsigned int>())
+      init<const std::string &, const std::string &, const std::string &, const bool, const unsigned int>())
 
-      .def("name", &PropertyHistory::name, arg("self"),
-           return_value_policy<copy_const_reference>(),
+      .def("name", &PropertyHistory::name, arg("self"), return_value_policy<copy_const_reference>(),
            "Returns the name of the property.")
 
-      .def("value", &PropertyHistory::value, arg("self"),
-           return_value_policy<copy_const_reference>(),
+      .def("value", &PropertyHistory::value, arg("self"), return_value_policy<copy_const_reference>(),
            "Returns the value of the property.")
 
-      .def("type", &PropertyHistory::type, arg("self"),
-           return_value_policy<copy_const_reference>(),
+      .def("type", &PropertyHistory::type, arg("self"), return_value_policy<copy_const_reference>(),
            "Returns the type of the property.")
 
-      .def("isDefault", &PropertyHistory::isDefault, arg("self"),
-           "Returns if the property value is the default value.")
+      .def("isDefault", &PropertyHistory::isDefault, arg("self"), "Returns if the property value is the default value.")
 
-      .def("direction", &PropertyHistory::direction, arg("self"),
-           "Returns the direction of the property.")
+      .def("direction", &PropertyHistory::direction, arg("self"), "Returns the direction of the property.")
       // ----------------- Operators --------------------------------------
       .def(self_ns::str(self));
 }

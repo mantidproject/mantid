@@ -10,7 +10,7 @@ Event Workspace
 What is it for?
 ______________________
 
-Event Workspaces are specialised for time-of-flight neutron scattering. Event Workspaces are designed for sparse data storage of neutron events. Individual detector observations, including information about when that observation was made are stored as discrete items inside the workspace. The ability to keep more detailed information gives a number of advantages over converting directly to a compressed form, such as allowing  more powerful filtering operations to be used.  
+Event Workspaces are specialised for time-of-flight neutron scattering. Event Workspaces are designed for sparse data storage of neutron events. Individual detector observations, including information about when that observation was made are stored as discrete items inside the workspace. The ability to keep more detailed information gives a number of advantages over converting directly to a compressed form, such as allowing  more powerful filtering operations to be used.
 
 Summary for Users
 -----------------------

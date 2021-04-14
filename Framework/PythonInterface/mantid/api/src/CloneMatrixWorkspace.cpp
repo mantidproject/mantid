@@ -38,14 +38,12 @@ enum DataField { XValues = 0, YValues = 1, EValues = 2, DxValues = 3 };
  *reading the data (similar to .end() for STL)
  *
  */
-PyArrayObject *cloneArray(MatrixWorkspace &workspace, DataField field,
-                          const size_t start, const size_t endp1) {
+PyArrayObject *cloneArray(MatrixWorkspace &workspace, DataField field, const size_t start, const size_t endp1) {
   const npy_intp numHist(endp1 - start);
   npy_intp stride{0};
 
   // Find out which function we need to call to access the data
-  using ArrayAccessFn =
-      const MantidVec &(MatrixWorkspace::*)(const size_t) const;
+  using ArrayAccessFn = const MantidVec &(MatrixWorkspace::*)(const size_t) const;
   ArrayAccessFn dataAccesor;
   /**
    * Can do better than this with a templated object that knows how to access
@@ -65,13 +63,12 @@ PyArrayObject *cloneArray(MatrixWorkspace &workspace, DataField field,
       dataAccesor = &MatrixWorkspace::readE;
   }
   npy_intp arrayDims[2] = {numHist, stride};
-  auto *nparray = reinterpret_cast<PyArrayObject *>(
-      PyArray_NewFromDescr(&PyArray_Type, PyArray_DescrFromType(NPY_DOUBLE),
-                           2,         // rank 2
-                           arrayDims, // Length in each dimension
-                           nullptr, nullptr, 0, nullptr));
-  auto *dest = reinterpret_cast<double *>(
-      PyArray_DATA(nparray)); // HEAD of the contiguous numpy data array
+  auto *nparray =
+      reinterpret_cast<PyArrayObject *>(PyArray_NewFromDescr(&PyArray_Type, PyArray_DescrFromType(NPY_DOUBLE),
+                                                             2,         // rank 2
+                                                             arrayDims, // Length in each dimension
+                                                             nullptr, nullptr, 0, nullptr));
+  auto *dest = reinterpret_cast<double *>(PyArray_DATA(nparray)); // HEAD of the contiguous numpy data array
 
   PARALLEL_FOR_IF(threadSafe(workspace))
   for (npy_intp i = 0; i < numHist; ++i) {
@@ -90,8 +87,7 @@ PyArrayObject *cloneArray(MatrixWorkspace &workspace, DataField field,
  * @return A 2D numpy array created from the X values
  */
 PyObject *cloneX(MatrixWorkspace &self) {
-  return reinterpret_cast<PyObject *>(
-      cloneArray(self, XValues, 0, self.getNumberHistograms()));
+  return reinterpret_cast<PyObject *>(cloneArray(self, XValues, 0, self.getNumberHistograms()));
 }
 /* Create a numpy array from the Y values of the given workspace reference
  * This acts like a python method on a Matrixworkspace object
@@ -99,8 +95,7 @@ PyObject *cloneX(MatrixWorkspace &self) {
  * @return A 2D numpy array created from the Y values
  */
 PyObject *cloneY(MatrixWorkspace &self) {
-  return reinterpret_cast<PyObject *>(
-      cloneArray(self, YValues, 0, self.getNumberHistograms()));
+  return reinterpret_cast<PyObject *>(cloneArray(self, YValues, 0, self.getNumberHistograms()));
 }
 
 /* Create a numpy array from the E values of the given workspace reference
@@ -109,8 +104,7 @@ PyObject *cloneY(MatrixWorkspace &self) {
  * @return A 2D numpy array created from the E values
  */
 PyObject *cloneE(MatrixWorkspace &self) {
-  return reinterpret_cast<PyObject *>(
-      cloneArray(self, EValues, 0, self.getNumberHistograms()));
+  return reinterpret_cast<PyObject *>(cloneArray(self, EValues, 0, self.getNumberHistograms()));
 }
 
 /* Create a numpy array from the E values of the given workspace reference
@@ -119,8 +113,7 @@ PyObject *cloneE(MatrixWorkspace &self) {
  * @return A 2D numpy array created from the E values
  */
 PyObject *cloneDx(MatrixWorkspace &self) {
-  return reinterpret_cast<PyObject *>(
-      cloneArray(self, DxValues, 0, self.getNumberHistograms()));
+  return reinterpret_cast<PyObject *>(cloneArray(self, DxValues, 0, self.getNumberHistograms()));
 }
 } // namespace PythonInterface
 } // namespace Mantid

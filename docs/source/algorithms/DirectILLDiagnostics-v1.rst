@@ -120,7 +120,7 @@ For usage of this algorithm as part of the direct geometry data reduction, check
         OutputRawWorkspace='raw',  # Needed for the diagnostics
         OutputEPPWorkspace='epps'  # Needed for the diagnostics
     )
-    
+
     diagnostics = DirectILLDiagnostics(
         InputWorkspace='raw',  # Use 'raw' rather than 'preprocessed' for background diagnostics
         OutputWorkspace='mask',  # A special MaskWorkspace
@@ -178,7 +178,7 @@ Output:
 The figure below shows the mask produced by the IN5 example script above. The green pixels show the default hard mask and the beam stop.
 
 .. figure:: ../images/DiagnosticsMaskIN5.png
-    :alt: Default and beam stop masks of IN5 spectrometer. 
+    :alt: Default and beam stop masks of IN5 spectrometer.
 
 
 .. categories::

@@ -28,10 +28,7 @@ using Kernel::V3D;
 
 /** Empty constructor
  */
-StructuredDetector::StructuredDetector()
-    : CompAssembly(), IObjComponent(nullptr), m_base(nullptr) {
-  init();
-}
+StructuredDetector::StructuredDetector() : CompAssembly(), IObjComponent(nullptr), m_base(nullptr) { init(); }
 
 /** Valued constructor
  *  @param name :: name of the assembly
@@ -42,8 +39,7 @@ StructuredDetector::StructuredDetector()
  *  an assembly itself, then in addition to parenting
  *  this is registered as a children of reference.
  */
-StructuredDetector::StructuredDetector(const std::string &name,
-                                       IComponent *reference)
+StructuredDetector::StructuredDetector(const std::string &name, IComponent *reference)
     : CompAssembly(name, reference), IObjComponent(nullptr), m_base(nullptr) {
   init();
   this->setName(name);
@@ -53,8 +49,7 @@ StructuredDetector::StructuredDetector(const std::string &name,
  * @param base: the base (un-parametrized) StructuredDetector
  * @param map: pointer to the ParameterMap
  * */
-StructuredDetector::StructuredDetector(const StructuredDetector *base,
-                                       const ParameterMap *map)
+StructuredDetector::StructuredDetector(const StructuredDetector *base, const ParameterMap *map)
     : CompAssembly(base, map), IObjComponent(nullptr), m_base(base) {
   init();
 }
@@ -83,9 +78,7 @@ void StructuredDetector::init() {
  *  Make a copy of the component assembly
  *  @return new(*this)
  */
-IComponent *StructuredDetector::clone() const {
-  return new StructuredDetector(*this);
-}
+IComponent *StructuredDetector::clone() const { return new StructuredDetector(*this); }
 
 //-------------------------------------------------------------------------------------------------
 /** Return a pointer to the component in the assembly at the
@@ -98,23 +91,17 @@ IComponent *StructuredDetector::clone() const {
  * @throw runtime_error if the x/y pixel width is not set, or X/Y are out of
  *range
  */
-std::shared_ptr<Detector> StructuredDetector::getAtXY(const size_t x,
-                                                      const size_t y) const {
+std::shared_ptr<Detector> StructuredDetector::getAtXY(const size_t x, const size_t y) const {
   if (x >= xPixels())
-    throw std::runtime_error(
-        "StructuredDetector::getAtXY: X specified is out of range.");
+    throw std::runtime_error("StructuredDetector::getAtXY: X specified is out of range.");
   if (y >= yPixels())
-    throw std::runtime_error(
-        "StructuredDetector::getAtXY: Y specified is out of range.");
+    throw std::runtime_error("StructuredDetector::getAtXY: Y specified is out of range.");
 
   // Get to column
-  ICompAssembly_sptr xCol = std::dynamic_pointer_cast<ICompAssembly>(
-      this->getChild(static_cast<int>(x)));
+  ICompAssembly_sptr xCol = std::dynamic_pointer_cast<ICompAssembly>(this->getChild(static_cast<int>(x)));
   if (!xCol)
-    throw std::runtime_error(
-        "StructuredDetector::getAtXY: X specified is out of range.");
-  return std::dynamic_pointer_cast<Detector>(
-      xCol->getChild(static_cast<int>(y)));
+    throw std::runtime_error("StructuredDetector::getAtXY: X specified is out of range.");
+  return std::dynamic_pointer_cast<Detector>(xCol->getChild(static_cast<int>(y)));
 }
 
 /** Return the detector ID corresponding to the component in the assembly at the
@@ -126,16 +113,13 @@ std::shared_ptr<Detector> StructuredDetector::getAtXY(const size_t x,
  * @throw runtime_error if the x/y pixel width is not set, or X/Y are out of
  *range
  */
-detid_t StructuredDetector::getDetectorIDAtXY(const size_t x,
-                                              const size_t y) const {
+detid_t StructuredDetector::getDetectorIDAtXY(const size_t x, const size_t y) const {
   const StructuredDetector *me = m_map == nullptr ? this : this->m_base;
 
   if (me->m_idFillByFirstY)
-    return static_cast<detid_t>(me->m_idStart + x * me->m_idStepByRow +
-                                y * me->m_idStep);
+    return static_cast<detid_t>(me->m_idStart + x * me->m_idStepByRow + y * me->m_idStep);
   else
-    return static_cast<detid_t>(me->m_idStart + y * me->m_idStepByRow +
-                                x * me->m_idStep);
+    return static_cast<detid_t>(me->m_idStart + y * me->m_idStepByRow + x * me->m_idStep);
 }
 
 /** Given a detector ID, return the X,Y coords into the structured detector
@@ -143,8 +127,7 @@ detid_t StructuredDetector::getDetectorIDAtXY(const size_t x,
  * @param detectorID :: detectorID
  * @return pair of (x,y)
  */
-std::pair<size_t, size_t>
-StructuredDetector::getXYForDetectorID(const detid_t detectorID) const {
+std::pair<size_t, size_t> StructuredDetector::getXYForDetectorID(const detid_t detectorID) const {
   const StructuredDetector *me = this;
   if (m_map)
     me = this->m_base;
@@ -178,8 +161,7 @@ actor
 * @param g green color channel
 * @param b blue color channel
 */
-void StructuredDetector::setColors(const std::vector<int> &r,
-                                   const std::vector<int> &g,
+void StructuredDetector::setColors(const std::vector<int> &r, const std::vector<int> &g,
                                    const std::vector<int> &b) const {
   if (m_map)
     m_base->setColors(r, g, b);
@@ -294,11 +276,8 @@ std::vector<double> const &StructuredDetector::getYValues() const {
  *            and idStep=100 and idStart=1 then (0,0)=1; (0,1)=101; and so on
  *
  */
-void StructuredDetector::initialize(size_t xPixels, size_t yPixels,
-                                    std::vector<double> &&x,
-                                    std::vector<double> &&y, bool isZBeam,
-                                    detid_t idStart, bool idFillByFirstY,
-                                    int idStepByRow, int idStep) {
+void StructuredDetector::initialize(size_t xPixels, size_t yPixels, std::vector<double> &&x, std::vector<double> &&y,
+                                    bool isZBeam, detid_t idStart, bool idFillByFirstY, int idStepByRow, int idStep) {
   if (m_map)
     throw std::runtime_error("StructuredDetector::initialize() called for a "
                              "parametrized StructuredDetector");
@@ -317,14 +296,11 @@ void StructuredDetector::initialize(size_t xPixels, size_t yPixels,
 
   // Some safety checks
   if (m_xPixels <= 0)
-    throw std::invalid_argument(
-        "StructuredDetector::initialize(): xPixels should be > 0");
+    throw std::invalid_argument("StructuredDetector::initialize(): xPixels should be > 0");
   if (m_yPixels <= 0)
-    throw std::invalid_argument(
-        "StructuredDetector::initialize(): yPixels should be > 0");
+    throw std::invalid_argument("StructuredDetector::initialize(): yPixels should be > 0");
   if (x.size() != y.size())
-    throw std::invalid_argument(
-        "StructuredDetector::initialize(): x.size() should be = y.size()");
+    throw std::invalid_argument("StructuredDetector::initialize(): x.size() should be = y.size()");
   if (x.size() != (size_t)((m_xPixels + 1) * (m_yPixels + 1)))
     throw std::invalid_argument("StructuredDetector::initialize(): x.size() "
                                 "should be = (xPixels+1)*(yPixels+1)");
@@ -388,9 +364,8 @@ void StructuredDetector::createDetectors() {
  * @param id :: The pixel ID
  * @return newly created detector.
  */
-Detector *StructuredDetector::addDetector(CompAssembly *parent,
-                                          const std::string &name, size_t x,
-                                          size_t y, detid_t id) {
+Detector *StructuredDetector::addDetector(CompAssembly *parent, const std::string &name, size_t x, size_t y,
+                                          detid_t id) {
   auto w = m_xPixels + 1;
 
   // Store hexahedral vertices for detector shape
@@ -418,8 +393,7 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent,
   ylb -= ypos;
 
   std::shared_ptr<Mantid::Geometry::IObject> shape =
-      ShapeFactory{}.createHexahedralShape(xlb, xlf, xrf, xrb, ylb, ylf, yrf,
-                                           yrb);
+      ShapeFactory{}.createHexahedralShape(xlb, xlf, xrf, xrb, ylb, ylf, yrf, yrb);
 
   // Create detector
   auto detector = new Detector(name, id, shape, parent);
@@ -451,9 +425,7 @@ int StructuredDetector::maxDetectorID() {
   return m_maxDetId;
 }
 
-std::shared_ptr<const IComponent>
-StructuredDetector::getComponentByName(const std::string &cname,
-                                       int nlevels) const {
+std::shared_ptr<const IComponent> StructuredDetector::getComponentByName(const std::string &cname, int nlevels) const {
   // exact matches
   if (cname == this->getName())
     return std::shared_ptr<const IComponent>(this);
@@ -481,33 +453,28 @@ StructuredDetector::getComponentByName(const std::string &cname,
 //-------------------------------------------------------------------------------------------------
 /// Does the point given lie within this object component?
 bool StructuredDetector::isValid(const V3D & /*point*/) const {
-  throw Kernel::Exception::NotImplementedError(
-      "StructuredDetector::isValid() is not implemented.");
+  throw Kernel::Exception::NotImplementedError("StructuredDetector::isValid() is not implemented.");
 }
 
 /// Does the point given lie on the surface of this object component?
 bool StructuredDetector::isOnSide(const V3D & /*point*/) const {
-  throw Kernel::Exception::NotImplementedError(
-      "StructuredDetector::isOnSide() is not implemented.");
+  throw Kernel::Exception::NotImplementedError("StructuredDetector::isOnSide() is not implemented.");
 }
 
 /// Checks whether the track given will pass through this Component.
 int StructuredDetector::interceptSurface(Track & /*track*/) const {
-  throw Kernel::Exception::NotImplementedError(
-      "StructuredDetector::interceptSurface() is not implemented.");
+  throw Kernel::Exception::NotImplementedError("StructuredDetector::interceptSurface() is not implemented.");
 }
 
 /// Finds the approximate solid angle covered by the component when viewed from
 /// the point given
 double StructuredDetector::solidAngle(const V3D & /*observer*/) const {
-  throw Kernel::Exception::NotImplementedError(
-      "StructuredDetector::solidAngle() is not implemented.");
+  throw Kernel::Exception::NotImplementedError("StructuredDetector::solidAngle() is not implemented.");
 }
 
 /// Try to find a point that lies within (or on) the object
 int StructuredDetector::getPointInObject(V3D & /*point*/) const {
-  throw Kernel::Exception::NotImplementedError(
-      "StructuredDetector::getPointInObject() is not implemented.");
+  throw Kernel::Exception::NotImplementedError("StructuredDetector::getPointInObject() is not implemented.");
 }
 
 /**
@@ -617,9 +584,7 @@ const std::shared_ptr<const IObject> StructuredDetector::shape() const {
   return shapeCreator.createShape(xmlHexahedralShape);
 }
 
-const Kernel::Material StructuredDetector::material() const {
-  return Kernel::Material();
-}
+const Kernel::Material StructuredDetector::material() const { return Kernel::Material(); }
 
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
@@ -645,8 +610,7 @@ std::ostream &operator<<(std::ostream &os, const StructuredDetector &ass) {
   return os;
 }
 
-size_t StructuredDetector::registerContents(
-    class ComponentVisitor &componentVisitor) const {
+size_t StructuredDetector::registerContents(class ComponentVisitor &componentVisitor) const {
   return componentVisitor.registerStructuredBank(*this);
 }
 

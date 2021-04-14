@@ -32,9 +32,7 @@ const std::string RebinnedOutput::id() const { return "RebinnedOutput"; }
  * @param YLength :: The number of data/error points in each vector (must all be
  * the same)
  */
-void RebinnedOutput::init(const std::size_t &NVectors,
-                          const std::size_t &XLength,
-                          const std::size_t &YLength) {
+void RebinnedOutput::init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength) {
   Workspace2D::init(NVectors, XLength, YLength);
   std::size_t nHist = this->getNumberHistograms();
   this->fracArea.resize(nHist);
@@ -57,9 +55,7 @@ void RebinnedOutput::init(const HistogramData::Histogram &histogram) {
  * @param index :: the array to fetch
  * @return the requested fractional area array
  */
-MantidVec &RebinnedOutput::dataF(const std::size_t index) {
-  return this->fracArea[index];
-}
+MantidVec &RebinnedOutput::dataF(const std::size_t index) { return this->fracArea[index]; }
 
 /**
  * Function that returns a fractional area array for a given index. This
@@ -67,9 +63,7 @@ MantidVec &RebinnedOutput::dataF(const std::size_t index) {
  * @param index :: the array to fetch
  * @return the requested fractional area array
  */
-const MantidVec &RebinnedOutput::dataF(const std::size_t index) const {
-  return this->fracArea[index];
-}
+const MantidVec &RebinnedOutput::dataF(const std::size_t index) const { return this->fracArea[index]; }
 
 /**
  * Function that returns a fractional area array for a given index. This
@@ -77,18 +71,14 @@ const MantidVec &RebinnedOutput::dataF(const std::size_t index) const {
  * @param index :: the array to fetch
  * @return the requested fractional area array
  */
-const MantidVec &RebinnedOutput::readF(const std::size_t index) const {
-  return this->fracArea[index];
-}
+const MantidVec &RebinnedOutput::readF(const std::size_t index) const { return this->fracArea[index]; }
 
 /**
  * Function that sets the fractional area array for a given index.
  * @param index :: the particular array to set
  * @param F :: the array contained the information
  */
-void RebinnedOutput::setF(const std::size_t index, const MantidVecPtr &F) {
-  this->fracArea[index] = *F;
-}
+void RebinnedOutput::setF(const std::size_t index, const MantidVecPtr &F) { this->fracArea[index] = *F; }
 
 /**
  * Function that scales the fractional area arrays.
@@ -98,8 +88,7 @@ void RebinnedOutput::scaleF(const double scale) {
   std::size_t nHist = this->getNumberHistograms();
   for (std::size_t i = 0; i < nHist; ++i) {
     MantidVec &frac = this->dataF(i);
-    std::transform(frac.begin(), frac.end(), frac.begin(),
-                   [scale](double x) { return scale * x; });
+    std::transform(frac.begin(), frac.end(), frac.begin(), [scale](double x) { return scale * x; });
   }
 }
 
@@ -145,11 +134,9 @@ void RebinnedOutput::finalize(bool hasSqrdErrs) {
       MantidVec &err = this->dataE(i);
       MantidVec &frac = this->dataF(i);
       if (hasSqrdErrs) {
-        std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
-                       std::divides<double>());
+        std::transform(err.begin(), err.end(), frac.begin(), err.begin(), std::divides<double>());
       } else {
-        std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
-                       std::multiplies<double>());
+        std::transform(err.begin(), err.end(), frac.begin(), err.begin(), std::multiplies<double>());
       }
     }
 
@@ -163,13 +150,10 @@ void RebinnedOutput::finalize(bool hasSqrdErrs) {
     MantidVec &data = this->dataY(i);
     MantidVec &err = this->dataE(i);
     MantidVec &frac = this->dataF(i);
-    std::transform(data.begin(), data.end(), frac.begin(), data.begin(),
-                   std::divides<double>());
-    std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
-                   std::divides<double>());
+    std::transform(data.begin(), data.end(), frac.begin(), data.begin(), std::divides<double>());
+    std::transform(err.begin(), err.end(), frac.begin(), err.begin(), std::divides<double>());
     if (hasSqrdErrs) {
-      std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
-                     std::divides<double>());
+      std::transform(err.begin(), err.end(), frac.begin(), err.begin(), std::divides<double>());
     }
   }
   // Sets flags so subsequent algorithms know to correctly treat data
@@ -193,13 +177,10 @@ void RebinnedOutput::unfinalize() {
     MantidVec &data = this->dataY(i);
     MantidVec &err = this->dataE(i);
     MantidVec &frac = this->dataF(i);
-    std::transform(data.begin(), data.end(), frac.begin(), data.begin(),
-                   std::multiplies<double>());
-    std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
-                   std::multiplies<double>());
+    std::transform(data.begin(), data.end(), frac.begin(), data.begin(), std::multiplies<double>());
+    std::transform(err.begin(), err.end(), frac.begin(), err.begin(), std::multiplies<double>());
     if (this->m_hasSqrdErrs) {
-      std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
-                     std::multiplies<double>());
+      std::transform(err.begin(), err.end(), frac.begin(), err.begin(), std::multiplies<double>());
     }
   }
   // Sets flag so subsequent algorithms know to correctly treat data

@@ -26,8 +26,7 @@
 using Mantid::CurveFitting::Algorithms::VesuvioCalculateMS;
 
 namespace {
-Mantid::API::IAlgorithm_sptr
-createTestAlgorithm(const Mantid::API::MatrixWorkspace_sptr &inputWS) {
+Mantid::API::IAlgorithm_sptr createTestAlgorithm(const Mantid::API::MatrixWorkspace_sptr &inputWS) {
   Mantid::API::IAlgorithm_sptr alg = std::make_shared<VesuvioCalculateMS>();
   alg->initialize();
   alg->setRethrows(true);
@@ -36,11 +35,9 @@ createTestAlgorithm(const Mantid::API::MatrixWorkspace_sptr &inputWS) {
   alg->setProperty("InputWorkspace", inputWS);
   alg->setProperty("NoOfMasses", 3);
   alg->setProperty("SampleDensity", 241.0);
-  const double sampleProps[9] = {1.007900, 0.9272392,     5.003738,
-                                 16.00000, 3.2587662E-02, 13.92299,
-                                 27.50000, 4.0172841E-02, 15.07701};
-  alg->setProperty("AtomicProperties",
-                   std::vector<double>(sampleProps, sampleProps + 9));
+  const double sampleProps[9] = {1.007900, 0.9272392, 5.003738,      16.00000, 3.2587662E-02,
+                                 13.92299, 27.50000,  4.0172841E-02, 15.07701};
+  alg->setProperty("AtomicProperties", std::vector<double>(sampleProps, sampleProps + 9));
   alg->setProperty("BeamRadius", 2.5);
   // reduce number of events for test purposes
   alg->setProperty("NumEventsPerRun", 10000);
@@ -52,9 +49,7 @@ createTestAlgorithm(const Mantid::API::MatrixWorkspace_sptr &inputWS) {
   return alg;
 }
 
-Mantid::API::MatrixWorkspace_sptr
-createTestWorkspace(const bool detShape = true,
-                    const bool groupedDets = false) {
+Mantid::API::MatrixWorkspace_sptr createTestWorkspace(const bool detShape = true, const bool groupedDets = false) {
   using namespace Mantid::Geometry;
   using namespace Mantid::Kernel;
 
@@ -62,30 +57,25 @@ createTestWorkspace(const bool detShape = true,
   const double x0(50.0), x1(562.0), dx(1.0);
   const bool singleMassSpec(false), foilChanger(true);
   auto ws2d = ComptonProfileTestHelpers::createTestWorkspace(
-      nhist, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None,
-      singleMassSpec, foilChanger);
+      nhist, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None, singleMassSpec, foilChanger);
 
   if (detShape) {
     // replace instrument with one that has a detector with a shape
-    const std::string shapeXML =
-        "<cuboid id=\"shape\">"
-        "<left-front-bottom-point x=\"0.0125\" y=\"-0.0395\" z= \"0.0045\" />"
-        "<left-front-top-point x=\"0.0125\" y=\"0.0395\" z= \"0.0045\" />"
-        "<left-back-bottom-point x=\"0.0125\" y=\"-0.0395\" z= \"-0.0045\" />"
-        "<right-front-bottom-point x=\"-0.0125\" y=\"-0.0395\" z= \"0.0045\" "
-        "/>"
-        "</cuboid>"
-        "<algebra val=\"shape\" />";
+    const std::string shapeXML = "<cuboid id=\"shape\">"
+                                 "<left-front-bottom-point x=\"0.0125\" y=\"-0.0395\" z= \"0.0045\" />"
+                                 "<left-front-top-point x=\"0.0125\" y=\"0.0395\" z= \"0.0045\" />"
+                                 "<left-back-bottom-point x=\"0.0125\" y=\"-0.0395\" z= \"-0.0045\" />"
+                                 "<right-front-bottom-point x=\"-0.0125\" y=\"-0.0395\" z= \"0.0045\" "
+                                 "/>"
+                                 "</cuboid>"
+                                 "<algebra val=\"shape\" />";
     const auto pos = ws2d->spectrumInfo().position(0);
-    auto instrument =
-        ComptonProfileTestHelpers::createTestInstrumentWithFoilChanger(
-            1, pos, shapeXML);
+    auto instrument = ComptonProfileTestHelpers::createTestInstrumentWithFoilChanger(1, pos, shapeXML);
 
     if (groupedDets) {
       // Add another detector in the same position as the first
       auto shape = ShapeFactory().createShape(shapeXML);
-      Mantid::Geometry::Detector *det2 =
-          new Detector("det1", 2, shape, nullptr);
+      Mantid::Geometry::Detector *det2 = new Detector("det1", 2, shape, nullptr);
       // Setting detectors should normally go via DetectorInfo, but here we need
       // to set a position as we are adding a new detector. In general getPos
       // should not be called as this tries to set the position of the base
@@ -111,32 +101,28 @@ createTestWorkspace(const bool detShape = true,
   return ws2d;
 }
 
-Mantid::API::MatrixWorkspace_sptr
-createFlatPlateSampleWS(const bool detShape = true,
-                        const bool groupedDets = false) {
+Mantid::API::MatrixWorkspace_sptr createFlatPlateSampleWS(const bool detShape = true, const bool groupedDets = false) {
   auto testWS = createTestWorkspace(detShape, groupedDets);
   // Sample shape
   const double halfHeight(0.05), halfWidth(0.05), halfThick(0.0025);
   std::ostringstream sampleShapeXML;
   sampleShapeXML << " <cuboid id=\"detector-shape\"> "
-                 << "<left-front-bottom-point x=\"" << halfWidth << "\" y=\""
-                 << -halfHeight << "\" z=\"" << -halfThick << "\"  /> "
-                 << "<left-front-top-point  x=\"" << halfWidth << "\" y=\""
-                 << halfHeight << "\" z=\"" << -halfThick << "\"  /> "
-                 << "<left-back-bottom-point  x=\"" << halfWidth << "\" y=\""
-                 << -halfHeight << "\" z=\"" << halfThick << "\"  /> "
-                 << "<right-front-bottom-point  x=\"" << -halfWidth << "\" y=\""
-                 << -halfHeight << "\" z=\"" << -halfThick << "\"  /> "
+                 << "<left-front-bottom-point x=\"" << halfWidth << "\" y=\"" << -halfHeight << "\" z=\"" << -halfThick
+                 << "\"  /> "
+                 << "<left-front-top-point  x=\"" << halfWidth << "\" y=\"" << halfHeight << "\" z=\"" << -halfThick
+                 << "\"  /> "
+                 << "<left-back-bottom-point  x=\"" << halfWidth << "\" y=\"" << -halfHeight << "\" z=\"" << halfThick
+                 << "\"  /> "
+                 << "<right-front-bottom-point  x=\"" << -halfWidth << "\" y=\"" << -halfHeight << "\" z=\""
+                 << -halfThick << "\"  /> "
                  << "</cuboid>";
-  auto sampleShape =
-      Mantid::Geometry::ShapeFactory().createShape(sampleShapeXML.str());
+  auto sampleShape = Mantid::Geometry::ShapeFactory().createShape(sampleShapeXML.str());
   testWS->mutableSample().setShape(sampleShape);
 
   return testWS;
 }
 
-void checkOutputValuesAsExpected(const Mantid::API::IAlgorithm_sptr &alg,
-                                 const double expectedTotal,
+void checkOutputValuesAsExpected(const Mantid::API::IAlgorithm_sptr &alg, const double expectedTotal,
                                  const double expectedMS) {
   using Mantid::API::MatrixWorkspace_sptr;
   const size_t checkIdx = 100;
@@ -163,9 +149,7 @@ class VesuvioCalculateMSTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static VesuvioCalculateMSTest *createSuite() {
-    return new VesuvioCalculateMSTest();
-  }
+  static VesuvioCalculateMSTest *createSuite() { return new VesuvioCalculateMSTest(); }
   static void destroySuite(VesuvioCalculateMSTest *suite) { delete suite; }
 
   // ------------------------ Success Cases
@@ -198,8 +182,7 @@ public:
     alg.initialize();
 
     auto testWS = WorkspaceCreationHelper::create2DWorkspace(1, 1);
-    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", testWS),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", testWS), const std::invalid_argument &);
   }
 
   void test_setting_workspace_with_no_sample_shape_throws_invalid_argument() {
@@ -208,52 +191,41 @@ public:
 
     auto testWS = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     testWS->getAxis(0)->setUnit("TOF");
-    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", testWS),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", testWS), const std::invalid_argument &);
   }
 
   void test_setting_nmasses_zero_or_negative_throws_invalid_argument() {
     VesuvioCalculateMS alg;
     alg.initialize();
 
-    TS_ASSERT_THROWS(alg.setProperty("NoOfMasses", -1),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(alg.setProperty("NoOfMasses", 0),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("NoOfMasses", -1), const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("NoOfMasses", 0), const std::invalid_argument &);
   }
 
   void test_setting_sampledensity_zero_or_negative_throws_invalid_argument() {
     VesuvioCalculateMS alg;
     alg.initialize();
 
-    TS_ASSERT_THROWS(alg.setProperty("SampleDensity", -1),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(alg.setProperty("SampleDensity", 0),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("SampleDensity", -1), const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("SampleDensity", 0), const std::invalid_argument &);
   }
 
-  void
-  test_setting_atomic_properties_not_length_three_times_nmasses_throws_invalid_argument_on_execute() {
+  void test_setting_atomic_properties_not_length_three_times_nmasses_throws_invalid_argument_on_execute() {
     auto alg = createTestAlgorithm(createFlatPlateSampleWS());
 
     alg->setProperty("NoOfMasses", 2);
-    const double sampleProps[5] = {1.007900, 0.9272392, 5.003738, 16.00000,
-                                   3.2587662E-02};
-    alg->setProperty("AtomicProperties",
-                     std::vector<double>(sampleProps, sampleProps + 5));
+    const double sampleProps[5] = {1.007900, 0.9272392, 5.003738, 16.00000, 3.2587662E-02};
+    alg->setProperty("AtomicProperties", std::vector<double>(sampleProps, sampleProps + 5));
 
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
 
-  void
-  test_setting_zero_or_negative_beam_radius_values_throws_invalid_argument() {
+  void test_setting_zero_or_negative_beam_radius_values_throws_invalid_argument() {
     VesuvioCalculateMS alg;
     alg.initialize();
 
-    TS_ASSERT_THROWS(alg.setProperty("BeamRadius", -1.5),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(alg.setProperty("BeamRadius", 0.0),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("BeamRadius", -1.5), const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("BeamRadius", 0.0), const std::invalid_argument &);
   }
 
   void test_input_workspace_with_detector_that_has_no_shape_throws_exception() {
@@ -266,16 +238,10 @@ class VesuvioCalculateMSTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static VesuvioCalculateMSTestPerformance *createSuite() {
-    return new VesuvioCalculateMSTestPerformance();
-  }
-  static void destroySuite(VesuvioCalculateMSTestPerformance *suite) {
-    delete suite;
-  }
+  static VesuvioCalculateMSTestPerformance *createSuite() { return new VesuvioCalculateMSTestPerformance(); }
+  static void destroySuite(VesuvioCalculateMSTestPerformance *suite) { delete suite; }
 
-  void setUp() override {
-    alg = createTestAlgorithm(createFlatPlateSampleWS());
-  }
+  void setUp() override { alg = createTestAlgorithm(createFlatPlateSampleWS()); }
 
   void test_exec_with_flat_plate_sample() { alg->execute(); }
 

@@ -41,11 +41,9 @@ using namespace API;
 using Types::Core::DateAndTime;
 
 void AddSampleLog::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "Workspace", "", Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("Workspace", "", Direction::InOut),
                   "Workspace to add the log entry to");
-  declareProperty("LogName", "",
-                  std::make_shared<MandatoryValidator<std::string>>(),
+  declareProperty("LogName", "", std::make_shared<MandatoryValidator<std::string>>(),
                   "The name that will identify the log entry");
 
   declareProperty("LogText", "", "The content of the log");
@@ -54,8 +52,7 @@ void AddSampleLog::init() {
   propOptions.emplace_back(stringLogOption);
   propOptions.emplace_back(numberLogOption);
   propOptions.emplace_back(numberSeriesLogOption);
-  declareProperty("LogType", stringLogOption,
-                  std::make_shared<StringListValidator>(propOptions),
+  declareProperty("LogType", stringLogOption, std::make_shared<StringListValidator>(propOptions),
                   "The type that the log data will be.");
   declareProperty("LogUnit", "", "The units of the log");
 
@@ -63,27 +60,22 @@ void AddSampleLog::init() {
   typeOptions.emplace_back(intTypeOption);
   typeOptions.emplace_back(doubleTypeOption);
   typeOptions.emplace_back(autoTypeOption);
-  declareProperty("NumberType", autoTypeOption,
-                  std::make_shared<StringListValidator>(typeOptions),
+  declareProperty("NumberType", autoTypeOption, std::make_shared<StringListValidator>(typeOptions),
                   "Force LogText to be interpreted as a number of type 'int' "
                   "or 'double'.");
 
   // add optional workspace which contains the data of the TimeSeriesProperty
-  declareProperty(
-      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-          "TimeSeriesWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Optional workspace contain the data");
-  declareProperty(
-      "WorkspaceIndex", 0,
-      "The workspace index of the TimeSeriesWorkspace to be imported.");
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("TimeSeriesWorkspace", "", Direction::Input,
+                                                                            PropertyMode::Optional),
+                  "Optional workspace contain the data");
+  declareProperty("WorkspaceIndex", 0, "The workspace index of the TimeSeriesWorkspace to be imported.");
   declareProperty("AutoMetaData", false,
                   "If it is specified as true, then all the meta data "
                   "information will be retrieved from the input workspace. It "
                   "will be used with algorithm ExportTimeSeriesProperty.");
 
   std::vector<std::string> time_units{"Second", "Nanosecond"};
-  declareProperty("TimeUnit", "Second",
-                  std::make_shared<Kernel::StringListValidator>(time_units),
+  declareProperty("TimeUnit", "Second", std::make_shared<Kernel::StringListValidator>(time_units),
                   "The unit of the time of the input workspace");
   declareProperty("RelativeTime", true,
                   "If specified as True, then then the "
@@ -100,11 +92,9 @@ void AddSampleLog::exec() {
   auto expinfo_ws = std::dynamic_pointer_cast<ExperimentInfo>(target_workspace);
   if (!expinfo_ws) {
     // We're dealing with an MD workspace which has multiple experiment infos
-    auto infos =
-        std::dynamic_pointer_cast<MultipleExperimentInfos>(target_workspace);
+    auto infos = std::dynamic_pointer_cast<MultipleExperimentInfos>(target_workspace);
     if (!infos) {
-      throw std::invalid_argument(
-          "Input workspace does not support sample logs");
+      throw std::invalid_argument("Input workspace does not support sample logs");
     }
     if (infos->getNumExperimentInfo() < 1) {
       ExperimentInfo_sptr info(new ExperimentInfo());
@@ -123,11 +113,9 @@ void AddSampleLog::exec() {
   std::string propNumberType = getPropertyValue("NumberType");
 
   // check inputs
-  if ((propNumberType != autoTypeOption) &&
-      ((propType != numberLogOption) && (propType != numberSeriesLogOption))) {
-    throw std::invalid_argument(
-        "You may only use NumberType 'Int' or 'Double' options if "
-        "LogType is 'Number' or 'Number Series'");
+  if ((propNumberType != autoTypeOption) && ((propType != numberLogOption) && (propType != numberSeriesLogOption))) {
+    throw std::invalid_argument("You may only use NumberType 'Int' or 'Double' options if "
+                                "LogType is 'Number' or 'Number Series'");
   }
 
   // Remove any existing log
@@ -146,12 +134,10 @@ void AddSampleLog::exec() {
     //       If propValue is given, then use this value to determine whether the
     //       type is
     //       integer or double; Otherwise, the series should be double
-    addTimeSeriesProperty(theRun, propName, propValue, propUnit,
-                          propNumberType);
+    addTimeSeriesProperty(theRun, propName, propValue, propUnit, propNumberType);
   } else {
     // add a single value property
-    addSingleValueProperty(theRun, propName, propValue, propUnit,
-                           propNumberType);
+    addSingleValueProperty(theRun, propName, propValue, propUnit, propNumberType);
   }
 
   return;
@@ -165,11 +151,8 @@ void AddSampleLog::exec() {
  * @param propUnit
  * @param propNumberType
  */
-void AddSampleLog::addSingleValueProperty(Run &theRun,
-                                          const std::string &propName,
-                                          const std::string &propValue,
-                                          const std::string &propUnit,
-                                          const std::string &propNumberType) {
+void AddSampleLog::addSingleValueProperty(Run &theRun, const std::string &propName, const std::string &propValue,
+                                          const std::string &propUnit, const std::string &propNumberType) {
   // add a single value property, integer or double
   bool value_is_int(false);
   if (propNumberType != autoTypeOption) {
@@ -188,8 +171,7 @@ void AddSampleLog::addSingleValueProperty(Run &theRun,
     int convert_to_int = Strings::convert(propValue, intVal);
     if (convert_to_int == 0) {
       // spit out error message and set to default value
-      g_log.error() << "Error interpreting string '" << propValue
-                    << "' as NumberType Int.";
+      g_log.error() << "Error interpreting string '" << propValue << "' as NumberType Int.";
       throw std::runtime_error("Invalie integer input");
     }
     theRun.addLogData(new PropertyWithValue<int>(propName, intVal));
@@ -198,13 +180,11 @@ void AddSampleLog::addSingleValueProperty(Run &theRun,
     double dblVal;
     int convert_to_dbl = Strings::convert(propValue, dblVal);
     if (convert_to_dbl == 0) {
-      g_log.error() << "Error interpreting string '" << propValue
-                    << "' as NumberType Double.";
+      g_log.error() << "Error interpreting string '" << propValue << "' as NumberType Double.";
       throw std::runtime_error("Invalid double input.");
     }
     theRun.addLogData(new PropertyWithValue<double>(propName, dblVal));
-    g_log.information() << "added property " << propName << " with value "
-                        << dblVal << "\n";
+    g_log.information() << "added property " << propName << " with value " << dblVal << "\n";
   }
 
   // add unit
@@ -220,8 +200,7 @@ void AddSampleLog::addSingleValueProperty(Run &theRun,
  * @param propValue
  * @param propUnit
  */
-void AddSampleLog::addStringLog(Run &theRun, const std::string &propName,
-                                const std::string &propValue,
+void AddSampleLog::addStringLog(Run &theRun, const std::string &propName, const std::string &propValue,
                                 const std::string &propUnit) {
   theRun.addLogData(new PropertyWithValue<std::string>(propName, propValue));
   theRun.getProperty(propName)->setUnits(propUnit);
@@ -236,11 +215,8 @@ void AddSampleLog::addStringLog(Run &theRun, const std::string &propName,
  * @param prop_unit
  * @param prop_number_type
  */
-void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
-                                         const std::string &prop_name,
-                                         const std::string &prop_value,
-                                         const std::string &prop_unit,
-                                         const std::string &prop_number_type) {
+void AddSampleLog::addTimeSeriesProperty(Run &run_obj, const std::string &prop_name, const std::string &prop_value,
+                                         const std::string &prop_unit, const std::string &prop_number_type) {
   // set up the number type right
   bool is_int_series(false);
   if (prop_number_type == intTypeOption) {
@@ -261,8 +237,7 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
     }
   } else if (prop_number_type != doubleTypeOption) {
     // unsupported type: anything but double, integer or auto
-    g_log.error() << "TimeSeriesProperty with data type " << prop_number_type
-                  << " is not supported.\n";
+    g_log.error() << "TimeSeriesProperty with data type " << prop_number_type << " is not supported.\n";
     throw std::runtime_error("Unsupported TimeSeriesProperty type.");
   }
 
@@ -290,8 +265,7 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
       if (Strings::convert(prop_value, intVal)) {
         tsp->addValue(startTime, intVal);
       } else {
-        throw std::invalid_argument(
-            "Input value cannot be converted to an integer value.");
+        throw std::invalid_argument("Input value cannot be converted to an integer value.");
       }
     }
     run_obj.addLogData(std::move(tsp));
@@ -302,8 +276,7 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
       if (Strings::convert(prop_value, dblVal)) {
         tsp->addValue(startTime, dblVal);
       } else {
-        throw std::invalid_argument(
-            "Input value cannot be converted to a double number.");
+        throw std::invalid_argument("Input value cannot be converted to a double number.");
       }
     }
     run_obj.addLogData(std::move(tsp));
@@ -321,14 +294,11 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
  * @param property_name
  * @param value_is_int
  */
-void AddSampleLog::setTimeSeriesData(Run &run_obj,
-                                     const std::string &property_name,
-                                     bool value_is_int) {
+void AddSampleLog::setTimeSeriesData(Run &run_obj, const std::string &property_name, bool value_is_int) {
   // get input and
   MatrixWorkspace_sptr data_ws = getProperty("TimeSeriesWorkspace");
   int ws_index = getProperty("WorkspaceIndex");
-  if (ws_index < 0 ||
-      ws_index > static_cast<int>(data_ws->getNumberHistograms()))
+  if (ws_index < 0 || ws_index > static_cast<int>(data_ws->getNumberHistograms()))
     throw std::runtime_error("Input workspace index is out of range");
 
   // get meta data
@@ -338,18 +308,15 @@ void AddSampleLog::setTimeSeriesData(Run &run_obj,
   bool is_second = timeunit == "Second";
 
   // convert the data in workspace to time series property value
-  std::vector<DateAndTime> time_vec =
-      getTimes(data_ws, ws_index, epochtime, is_second, run_obj);
+  std::vector<DateAndTime> time_vec = getTimes(data_ws, ws_index, epochtime, is_second, run_obj);
   if (value_is_int) {
     // integer property
-    auto *int_prop = dynamic_cast<TimeSeriesProperty<int> *>(
-        run_obj.getProperty(property_name));
+    auto *int_prop = dynamic_cast<TimeSeriesProperty<int> *>(run_obj.getProperty(property_name));
     std::vector<int> value_vec = getIntValues(data_ws, ws_index);
     int_prop->addValues(time_vec, value_vec);
   } else {
     // double property
-    auto *int_prop = dynamic_cast<TimeSeriesProperty<double> *>(
-        run_obj.getProperty(property_name));
+    auto *int_prop = dynamic_cast<TimeSeriesProperty<double> *>(run_obj.getProperty(property_name));
     std::vector<double> value_vec = getDblValues(data_ws, ws_index);
     int_prop->addValues(time_vec, value_vec);
   }
@@ -367,10 +334,9 @@ void AddSampleLog::setTimeSeriesData(Run &run_obj,
  * @param run_obj
  * @return
  */
-std::vector<Types::Core::DateAndTime>
-AddSampleLog::getTimes(const API::MatrixWorkspace_const_sptr &dataws,
-                       int workspace_index, bool is_epoch, bool is_second,
-                       API::Run &run_obj) {
+std::vector<Types::Core::DateAndTime> AddSampleLog::getTimes(const API::MatrixWorkspace_const_sptr &dataws,
+                                                             int workspace_index, bool is_epoch, bool is_second,
+                                                             API::Run &run_obj) {
   // get run start time
   int64_t timeshift(0);
   if (!is_epoch) {
@@ -419,9 +385,7 @@ Types::Core::DateAndTime AddSampleLog::getRunStart(API::Run &run_obj) {
  * @param workspace_index
  * @return
  */
-std::vector<double>
-AddSampleLog::getDblValues(const API::MatrixWorkspace_const_sptr &dataws,
-                           int workspace_index) {
+std::vector<double> AddSampleLog::getDblValues(const API::MatrixWorkspace_const_sptr &dataws, int workspace_index) {
   std::vector<double> valuevec;
   size_t vecsize = dataws->readY(workspace_index).size();
   for (size_t i = 0; i < vecsize; ++i)
@@ -437,9 +401,7 @@ AddSampleLog::getDblValues(const API::MatrixWorkspace_const_sptr &dataws,
  * @param workspace_index
  * @return
  */
-std::vector<int>
-AddSampleLog::getIntValues(const API::MatrixWorkspace_const_sptr &dataws,
-                           int workspace_index) {
+std::vector<int> AddSampleLog::getIntValues(const API::MatrixWorkspace_const_sptr &dataws, int workspace_index) {
   std::vector<int> valuevec;
   size_t vecsize = dataws->readY(workspace_index).size();
   for (size_t i = 0; i < vecsize; ++i)
@@ -454,13 +416,11 @@ AddSampleLog::getIntValues(const API::MatrixWorkspace_const_sptr &dataws,
  * @param epochtime
  * @param timeunit
  */
-void AddSampleLog::getMetaData(const API::MatrixWorkspace_const_sptr &dataws,
-                               bool &epochtime, std::string &timeunit) {
+void AddSampleLog::getMetaData(const API::MatrixWorkspace_const_sptr &dataws, bool &epochtime, std::string &timeunit) {
   bool auto_meta = getProperty("AutoMetaData");
   if (auto_meta) {
     // get the meta data from the input workspace
-    std::string epochtimestr =
-        dataws->run().getProperty("IsEpochTime")->value();
+    std::string epochtimestr = dataws->run().getProperty("IsEpochTime")->value();
     epochtime = epochtimestr == "true";
     timeunit = dataws->run().getProperty("TimeUnit")->value();
   } else {

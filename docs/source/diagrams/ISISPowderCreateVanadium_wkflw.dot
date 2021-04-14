@@ -107,7 +107,7 @@ digraph isisPowderCreateVanadium{
         param_vanadiumTOFCropValues     ->      alg_CropVanTOF
         alg_ExtractWsSpectra            ->      alg_CropVanTOF
         alg_CropVanTOF                  ->      proc_InstMaskPeaks
-        
+
         // Spline the vanadium
         param_vanadiumSplineCoefficient ->      alg_SplineVanadium
         proc_InstMaskPeaks              ->      alg_SplineVanadium

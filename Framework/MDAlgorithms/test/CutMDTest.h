@@ -33,10 +33,8 @@ using namespace Mantid::Kernel;
 
 namespace {
 const std::string sharedWSName = "__CutMDTest_dataWS";
-const Mantid::API::MDNormalization eventNorm =
-    Mantid::API::MDNormalization::VolumeNormalization;
-const Mantid::API::MDNormalization histoNorm =
-    Mantid::API::MDNormalization::NumEventsNormalization;
+const Mantid::API::MDNormalization eventNorm = Mantid::API::MDNormalization::VolumeNormalization;
+const Mantid::API::MDNormalization histoNorm = Mantid::API::MDNormalization::NumEventsNormalization;
 } // namespace
 
 class CutMDTest : public CxxTest::TestSuite {
@@ -55,44 +53,34 @@ private:
     }
   }
 
-  IMDWorkspace_const_sptr
-  makeWorkspaceWithSpecifiedUnits(const std::string &units,
-                                  const std::string &wsName) {
+  IMDWorkspace_const_sptr makeWorkspaceWithSpecifiedUnits(const std::string &units, const std::string &wsName) {
     const std::string units_string = units + "," + units + "," + units + ",V";
 
-    FrameworkManager::Instance().exec(
-        "CreateMDWorkspace", 10, "OutputWorkspace", wsName.c_str(),
-        "Dimensions", "4", "Extents", "-1,1,-1,1,-1,1,-10,10", "Names",
-        "H,K,L,E", "Units", units_string.c_str());
+    FrameworkManager::Instance().exec("CreateMDWorkspace", 10, "OutputWorkspace", wsName.c_str(), "Dimensions", "4",
+                                      "Extents", "-1,1,-1,1,-1,1,-10,10", "Names", "H,K,L,E", "Units",
+                                      units_string.c_str());
 
-    FrameworkManager::Instance().exec("SetUB", 14, "Workspace", wsName.c_str(),
-                                      "a", "1", "b", "1", "c", "1", "alpha",
+    FrameworkManager::Instance().exec("SetUB", 14, "Workspace", wsName.c_str(), "a", "1", "b", "1", "c", "1", "alpha",
                                       "90", "beta", "90", "gamma", "90");
 
-    FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace",
-                                      wsName.c_str(), "PeakParams",
+    FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace", wsName.c_str(), "PeakParams",
                                       "1000,0,0,0,0,1");
 
-    IMDWorkspace_sptr cutMDtestws =
-        AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(wsName);
+    IMDWorkspace_sptr cutMDtestws = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(wsName);
 
     auto eventWS = std::dynamic_pointer_cast<IMDEventWorkspace>(cutMDtestws);
 
-    Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
-        Mantid::Kernel::QSample;
+    Mantid::Kernel::SpecialCoordinateSystem appliedCoord = Mantid::Kernel::QSample;
     eventWS->setCoordinateSystem(appliedCoord);
 
-    FrameworkManager::Instance().exec(
-        "CreateSampleWorkspace", 4, "OutputWorkspace", "__CutMDTest_tempMatWS",
-        "WorkspaceType", "Event");
+    FrameworkManager::Instance().exec("CreateSampleWorkspace", 4, "OutputWorkspace", "__CutMDTest_tempMatWS",
+                                      "WorkspaceType", "Event");
 
     MatrixWorkspace_sptr tempMatWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "__CutMDTest_tempMatWS");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__CutMDTest_tempMatWS");
 
     tempMatWS->mutableSample().setOrientedLattice(
-        std::make_unique<Mantid::Geometry::OrientedLattice>(2, 3, 4, 90, 90,
-                                                            90));
+        std::make_unique<Mantid::Geometry::OrientedLattice>(2, 3, 4, 90, 90, 90));
 
     ExperimentInfo_sptr ei(tempMatWS->cloneExperimentInfo());
     eventWS->addExperimentInfo(ei);
@@ -123,29 +111,22 @@ private:
 
 public:
   CutMDTest() : m_log("CutMDTest") {
-    FrameworkManager::Instance().exec(
-        "CreateMDWorkspace", 10, "OutputWorkspace", sharedWSName.c_str(),
-        "Dimensions", "3", "Extents", "-10,10,-10,10,-10,10", "Names", "A,B,C",
-        "Units", "U,U,U");
+    FrameworkManager::Instance().exec("CreateMDWorkspace", 10, "OutputWorkspace", sharedWSName.c_str(), "Dimensions",
+                                      "3", "Extents", "-10,10,-10,10,-10,10", "Names", "A,B,C", "Units", "U,U,U");
 
-    FrameworkManager::Instance().exec(
-        "SetUB", 14, "Workspace", sharedWSName.c_str(), "a", "1", "b", "1", "c",
-        "1", "alpha", "90", "beta", "90", "gamma", "90");
+    FrameworkManager::Instance().exec("SetUB", 14, "Workspace", sharedWSName.c_str(), "a", "1", "b", "1", "c", "1",
+                                      "alpha", "90", "beta", "90", "gamma", "90");
 
-    FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace",
-                                      sharedWSName.c_str(), "PeakParams",
+    FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace", sharedWSName.c_str(), "PeakParams",
                                       "10000,0,0,0,1");
 
-    m_inWS =
-        AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(sharedWSName);
+    m_inWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(sharedWSName);
     auto eventWS = std::dynamic_pointer_cast<IMDEventWorkspace>(m_inWS);
     eventWS->setDisplayNormalization(eventNorm);
     eventWS->setDisplayNormalizationHisto(histoNorm);
   }
 
-  ~CutMDTest() override {
-    AnalysisDataService::Instance().remove(sharedWSName);
-  }
+  ~CutMDTest() override { AnalysisDataService::Instance().remove(sharedWSName); }
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -161,10 +142,8 @@ public:
   void test_exec_throws_if_giving_4th_binning_param_when_workspace_is_3d() {
     const std::string wsName = "__CutMDTest_4thbinon3dthrows";
 
-    FrameworkManager::Instance().exec(
-        "CreateMDWorkspace", 10, "OutputWorkspace", wsName.c_str(),
-        "Dimensions", "3", "Extents", "-10,10,-10,10,-10,10", "Names", "H,K,L",
-        "Units", "U,U,U");
+    FrameworkManager::Instance().exec("CreateMDWorkspace", 10, "OutputWorkspace", wsName.c_str(), "Dimensions", "3",
+                                      "Extents", "-10,10,-10,10,-10,10", "Names", "H,K,L", "Units", "U,U,U");
 
     auto algCutMD = AlgorithmManager::Instance().create("CutMD");
     algCutMD->initialize();
@@ -194,29 +173,21 @@ public:
     algCutMD->execute();
     TS_ASSERT(algCutMD->isExecuted());
 
-    IMDEventWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(wsName);
+    IMDEventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(wsName);
     TS_ASSERT(outWS.get());
 
-    TS_ASSERT_EQUALS(outWS->getDimension(0)->getMinimum(),
-                     m_inWS->getDimension(0)->getMinimum());
-    TS_ASSERT_EQUALS(outWS->getDimension(0)->getMaximum(),
-                     m_inWS->getDimension(0)->getMaximum());
-    TS_ASSERT_EQUALS(outWS->getDimension(1)->getMinimum(),
-                     m_inWS->getDimension(1)->getMinimum());
-    TS_ASSERT_EQUALS(outWS->getDimension(1)->getMaximum(),
-                     m_inWS->getDimension(1)->getMaximum());
-    TS_ASSERT_EQUALS(outWS->getDimension(2)->getMinimum(),
-                     m_inWS->getDimension(2)->getMinimum());
-    TS_ASSERT_EQUALS(outWS->getDimension(2)->getMaximum(),
-                     m_inWS->getDimension(2)->getMaximum());
+    TS_ASSERT_EQUALS(outWS->getDimension(0)->getMinimum(), m_inWS->getDimension(0)->getMinimum());
+    TS_ASSERT_EQUALS(outWS->getDimension(0)->getMaximum(), m_inWS->getDimension(0)->getMaximum());
+    TS_ASSERT_EQUALS(outWS->getDimension(1)->getMinimum(), m_inWS->getDimension(1)->getMinimum());
+    TS_ASSERT_EQUALS(outWS->getDimension(1)->getMaximum(), m_inWS->getDimension(1)->getMaximum());
+    TS_ASSERT_EQUALS(outWS->getDimension(2)->getMinimum(), m_inWS->getDimension(2)->getMinimum());
+    TS_ASSERT_EQUALS(outWS->getDimension(2)->getMaximum(), m_inWS->getDimension(2)->getMaximum());
 
     TS_ASSERT_EQUALS("['zeta', 0, 0]", outWS->getDimension(0)->getName());
     TS_ASSERT_EQUALS("[0, 'eta', 0]", outWS->getDimension(1)->getName());
     TS_ASSERT_EQUALS("[0, 0, 'xi']", outWS->getDimension(2)->getName());
 
-    TSM_ASSERT_EQUALS("Should have num events normalization",
-                      outWS->displayNormalizationHisto(), histoNorm);
+    TSM_ASSERT_EQUALS("Should have num events normalization", outWS->displayNormalizationHisto(), histoNorm);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -236,16 +207,14 @@ public:
     algCutMD->execute();
     TS_ASSERT(algCutMD->isExecuted());
 
-    IMDWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(wsName);
+    IMDWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(wsName);
     TS_ASSERT(outWS.get());
 
     TS_ASSERT_DELTA(outWS->getDimension(0)->getMinimum(), 0.0, 1E-6);
     TS_ASSERT_DELTA(outWS->getDimension(0)->getMaximum(), 0.6, 1E-6);
     TS_ASSERT_EQUALS(outWS->getDimension(0)->getNBins(), 2);
 
-    TSM_ASSERT_EQUALS("Should have num events normalization",
-                      outWS->displayNormalizationHisto(), histoNorm);
+    TSM_ASSERT_EQUALS("Should have num events normalization", outWS->displayNormalizationHisto(), histoNorm);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -265,15 +234,13 @@ public:
     algCutMD->execute();
     TS_ASSERT(algCutMD->isExecuted());
 
-    IMDWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(wsName);
+    IMDWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(wsName);
     TS_ASSERT(outWS.get());
 
     TS_ASSERT_EQUALS(outWS->getDimension(0)->getNBins(), 1);
     TS_ASSERT_EQUALS(outWS->getDimension(1)->getNBins(), 1);
 
-    TSM_ASSERT_EQUALS("Should have num events normalization",
-                      outWS->displayNormalizationHisto(), histoNorm);
+    TSM_ASSERT_EQUALS("Should have num events normalization", outWS->displayNormalizationHisto(), histoNorm);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -281,13 +248,10 @@ public:
   void test_orthogonal_slice_with_scaling() {
     const std::string wsName = "__CutMDTest_orthog_slice_with_scaling";
 
-    FrameworkManager::Instance().exec(
-        "CreateMDWorkspace", 10, "OutputWorkspace", wsName.c_str(),
-        "Dimensions", "3", "Extents", "-1,1,-1,1,-1,1", "Names", "H,K,L",
-        "Units", "U,U,U");
+    FrameworkManager::Instance().exec("CreateMDWorkspace", 10, "OutputWorkspace", wsName.c_str(), "Dimensions", "3",
+                                      "Extents", "-1,1,-1,1,-1,1", "Names", "H,K,L", "Units", "U,U,U");
 
-    FrameworkManager::Instance().exec("SetUB", 14, "Workspace", wsName.c_str(),
-                                      "a", "1", "b", "1", "c", "1", "alpha",
+    FrameworkManager::Instance().exec("SetUB", 14, "Workspace", wsName.c_str(), "a", "1", "b", "1", "c", "1", "alpha",
                                       "90", "beta", "90", "gamma", "90");
 
     ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
@@ -318,8 +282,7 @@ public:
     algCutMD->execute();
     TS_ASSERT(algCutMD->isExecuted());
 
-    IMDHistoWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(wsName);
+    IMDHistoWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(wsName);
     TS_ASSERT(outWS.get());
 
     TS_ASSERT_DELTA(outWS->getDimension(0)->getMinimum(), -0.5, 1E-6);
@@ -332,8 +295,7 @@ public:
     TS_ASSERT_EQUALS("[0, 'eta', 0]", outWS->getDimension(1)->getName());
     TS_ASSERT_EQUALS("[0, 0, 'xi']", outWS->getDimension(2)->getName());
 
-    TSM_ASSERT_EQUALS("Should have num events normalization",
-                      outWS->displayNormalizationHisto(), histoNorm);
+    TSM_ASSERT_EQUALS("Should have num events normalization", outWS->displayNormalizationHisto(), histoNorm);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -341,13 +303,10 @@ public:
   void test_non_orthogonal_slice() {
     const std::string wsName = "__CutMDTest_non_orthog_slice";
 
-    FrameworkManager::Instance().exec(
-        "CreateMDWorkspace", 10, "OutputWorkspace", wsName.c_str(),
-        "Dimensions", "3", "Extents", "-1,1,-1,1,-1,1", "Names", "H,K,L",
-        "Units", "U,U,U");
+    FrameworkManager::Instance().exec("CreateMDWorkspace", 10, "OutputWorkspace", wsName.c_str(), "Dimensions", "3",
+                                      "Extents", "-1,1,-1,1,-1,1", "Names", "H,K,L", "Units", "U,U,U");
 
-    FrameworkManager::Instance().exec("SetUB", 14, "Workspace", wsName.c_str(),
-                                      "a", "1", "b", "1", "c", "1", "alpha",
+    FrameworkManager::Instance().exec("SetUB", 14, "Workspace", wsName.c_str(), "a", "1", "b", "1", "c", "1", "alpha",
                                       "90", "beta", "90", "gamma", "90");
 
     ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
@@ -378,8 +337,7 @@ public:
     algCutMD->execute();
     TS_ASSERT(algCutMD->isExecuted());
 
-    IMDHistoWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(wsName);
+    IMDHistoWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(wsName);
     TS_ASSERT(outWS.get());
 
     TS_ASSERT_EQUALS(outWS->getDimension(0)->getMinimum(), -1);
@@ -392,8 +350,7 @@ public:
     TS_ASSERT_EQUALS("['-eta', 'eta', 0]", outWS->getDimension(1)->getName());
     TS_ASSERT_EQUALS("[0, 0, 'xi']", outWS->getDimension(2)->getName());
 
-    TSM_ASSERT_EQUALS("Should have num events normalization",
-                      outWS->displayNormalizationHisto(), histoNorm);
+    TSM_ASSERT_EQUALS("Should have num events normalization", outWS->displayNormalizationHisto(), histoNorm);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -401,13 +358,10 @@ public:
   void test_orthogonal_slice_with_cropping() {
     const std::string wsName = "__CutMDTest_orthog_slice_crop";
 
-    FrameworkManager::Instance().exec(
-        "CreateMDWorkspace", 10, "OutputWorkspace", wsName.c_str(),
-        "Dimensions", "3", "Extents", "-1,1,-1,1,-1,1", "Names", "H,K,L",
-        "Units", "U,U,U");
+    FrameworkManager::Instance().exec("CreateMDWorkspace", 10, "OutputWorkspace", wsName.c_str(), "Dimensions", "3",
+                                      "Extents", "-1,1,-1,1,-1,1", "Names", "H,K,L", "Units", "U,U,U");
 
-    FrameworkManager::Instance().exec("SetUB", 14, "Workspace", wsName.c_str(),
-                                      "a", "1", "b", "1", "c", "1", "alpha",
+    FrameworkManager::Instance().exec("SetUB", 14, "Workspace", wsName.c_str(), "a", "1", "b", "1", "c", "1", "alpha",
                                       "90", "beta", "90", "gamma", "90");
 
     auto proj = createProjection("r");
@@ -427,8 +381,7 @@ public:
     algCutMD->execute();
     TS_ASSERT(algCutMD->isExecuted());
 
-    IMDHistoWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(wsName);
+    IMDHistoWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(wsName);
     TS_ASSERT(outWS.get());
 
     TS_ASSERT_DELTA(outWS->getDimension(0)->getMinimum(), -0.5, 1E-6);
@@ -441,8 +394,7 @@ public:
     TS_ASSERT_EQUALS("[0, 'eta', 0]", outWS->getDimension(1)->getName());
     TS_ASSERT_EQUALS("[0, 0, 'xi']", outWS->getDimension(2)->getName());
 
-    TSM_ASSERT_EQUALS("Should have num events normalization",
-                      outWS->displayNormalizationHisto(), histoNorm);
+    TSM_ASSERT_EQUALS("Should have num events normalization", outWS->displayNormalizationHisto(), histoNorm);
     AnalysisDataService::Instance().remove(wsName);
   }
 
@@ -450,13 +402,10 @@ public:
     const std::string wsName = "__CutMDTest_orthog_slice_4d";
     const std::string wsOutName = "__CutMDTest_orthog_slice_4d_out";
 
-    FrameworkManager::Instance().exec(
-        "CreateMDWorkspace", 10, "OutputWorkspace", wsName.c_str(),
-        "Dimensions", "4", "Extents", "-1,1,-1,1,-1,1,-10,10", "Names",
-        "H,K,L,E", "Units", "U,U,U,V");
+    FrameworkManager::Instance().exec("CreateMDWorkspace", 10, "OutputWorkspace", wsName.c_str(), "Dimensions", "4",
+                                      "Extents", "-1,1,-1,1,-1,1,-10,10", "Names", "H,K,L,E", "Units", "U,U,U,V");
 
-    FrameworkManager::Instance().exec("SetUB", 14, "Workspace", wsName.c_str(),
-                                      "a", "1", "b", "1", "c", "1", "alpha",
+    FrameworkManager::Instance().exec("SetUB", 14, "Workspace", wsName.c_str(), "a", "1", "b", "1", "c", "1", "alpha",
                                       "90", "beta", "90", "gamma", "90");
 
     addNormalization(wsName);
@@ -474,9 +423,7 @@ public:
     algCutMD->execute();
     TS_ASSERT(algCutMD->isExecuted());
 
-    IMDHistoWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
-            wsOutName);
+    IMDHistoWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(wsOutName);
     TS_ASSERT(outWS.get());
 
     TS_ASSERT_DELTA(outWS->getDimension(0)->getMinimum(), -0.5, 1E-6);
@@ -499,12 +446,10 @@ public:
     algCutMD->setProperty("OutputWorkspace", wsOutName);
     algCutMD->execute();
     TS_ASSERT(algCutMD->isExecuted());
-    outWS = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
-        wsOutName);
+    outWS = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(wsOutName);
     TS_ASSERT_EQUALS(16, outWS->getDimension(3)->getNBins());
 
-    TSM_ASSERT_EQUALS("Should have num events normalization",
-                      outWS->displayNormalizationHisto(), histoNorm);
+    TSM_ASSERT_EQUALS("Should have num events normalization", outWS->displayNormalizationHisto(), histoNorm);
     AnalysisDataService::Instance().remove(wsName);
     AnalysisDataService::Instance().remove(wsOutName);
   }
@@ -514,20 +459,15 @@ public:
     // many events
     const std::string wsName = "__CutMDTest_MaxRecursionDepth_one";
 
-    FrameworkManager::Instance().exec(
-        "CreateMDWorkspace", 10, "OutputWorkspace", wsName.c_str(),
-        "Dimensions", "3", "Extents", "-1,1,-1,1,-1,1", "Names", "H,K,L",
-        "Units", "U,U,U");
-    FrameworkManager::Instance().exec(
-        "FakeMDEventData", 6, "InputWorkspace", wsName.c_str(), "PeakParams",
-        "2000,-0.5,-0.5,-0.5,0.1", "RandomizeSignal", "0");
+    FrameworkManager::Instance().exec("CreateMDWorkspace", 10, "OutputWorkspace", wsName.c_str(), "Dimensions", "3",
+                                      "Extents", "-1,1,-1,1,-1,1", "Names", "H,K,L", "Units", "U,U,U");
+    FrameworkManager::Instance().exec("FakeMDEventData", 6, "InputWorkspace", wsName.c_str(), "PeakParams",
+                                      "2000,-0.5,-0.5,-0.5,0.1", "RandomizeSignal", "0");
 
-    FrameworkManager::Instance().exec("SetUB", 14, "Workspace", wsName.c_str(),
-                                      "a", "1", "b", "1", "c", "1", "alpha",
+    FrameworkManager::Instance().exec("SetUB", 14, "Workspace", wsName.c_str(), "a", "1", "b", "1", "c", "1", "alpha",
                                       "90", "beta", "90", "gamma", "90");
 
-    FrameworkManager::Instance().exec("SetSpecialCoordinates", 4,
-                                      "InputWorkspace", wsName.c_str(),
+    FrameworkManager::Instance().exec("SetSpecialCoordinates", 4, "InputWorkspace", wsName.c_str(),
                                       "SpecialCoordinates", "HKL");
 
     ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
@@ -558,8 +498,7 @@ public:
     algCutMD->execute();
     TS_ASSERT(algCutMD->isExecuted());
 
-    IMDEventWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(wsName);
+    IMDEventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(wsName);
     TS_ASSERT(outWS.get());
 
     auto bc = outWS->getBoxController();
@@ -611,8 +550,8 @@ public:
   */
 
     using namespace Mantid::DataObjects;
-    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        1.0 /*signal*/, 2 /*nd*/, 10 /*nbins*/, 10 /*max*/, 1.0 /*error sq*/);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0 /*signal*/, 2 /*nd*/, 10 /*nbins*/,
+                                                                            10 /*max*/, 1.0 /*error sq*/);
 
     CutMD alg; // This should be a pass-through to IntegrateMDHistoWorkspace
     alg.setChild(true);
@@ -623,39 +562,30 @@ public:
     const double max = 7.1; // 7.1 - 1.1 = 6
     const std::vector<double> minMaxVec = {min, max};
 
-    alg.setProperty("P1Bin", std::vector<double>(
-                                 0)); // Pass through. Do not change binning.
+    alg.setProperty("P1Bin", std::vector<double>(0)); // Pass through. Do not change binning.
     alg.setProperty("P2Bin", minMaxVec);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     IMDWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
 
     // Quick check that output seems to have the right shape.
-    TSM_ASSERT_EQUALS(
-        "All integrated", 10,
-        outWS->getNPoints()); // one dimension unchanged the other integrated
+    TSM_ASSERT_EQUALS("All integrated", 10,
+                      outWS->getNPoints()); // one dimension unchanged the other integrated
     auto intdim = outWS->getDimension(1);
     TS_ASSERT_DELTA(min, intdim->getMinimum(), 1e-4);
     TS_ASSERT_DELTA(max, intdim->getMaximum(), 1e-4);
     TS_ASSERT_EQUALS(1, intdim->getNBins());
     auto dim = outWS->getDimension(0);
-    TSM_ASSERT_DELTA(
-        "Not integrated binning should be the same as the original dimension",
-        0, dim->getMinimum(), 1e-4);
-    TSM_ASSERT_DELTA(
-        "Not integrated binning should be the same as the original dimension",
-        10, dim->getMaximum(), 1e-4);
-    TSM_ASSERT_EQUALS(
-        "Not integrated binning should be the same as the original dimension",
-        10, dim->getNBins());
+    TSM_ASSERT_DELTA("Not integrated binning should be the same as the original dimension", 0, dim->getMinimum(), 1e-4);
+    TSM_ASSERT_DELTA("Not integrated binning should be the same as the original dimension", 10, dim->getMaximum(),
+                     1e-4);
+    TSM_ASSERT_EQUALS("Not integrated binning should be the same as the original dimension", 10, dim->getNBins());
 
     // Check the data.
     auto histoOutWS = std::dynamic_pointer_cast<IMDHistoWorkspace>(outWS);
     TS_ASSERT(histoOutWS);
-    TSM_ASSERT_DELTA("Wrong integrated value", 6.0, histoOutWS->getSignalAt(0),
-                     1e-4);
-    TSM_ASSERT_DELTA("Wrong error value",
-                     std::sqrt(6.0 * (ws->getErrorAt(0) * ws->getErrorAt(0))),
+    TSM_ASSERT_DELTA("Wrong integrated value", 6.0, histoOutWS->getSignalAt(0), 1e-4);
+    TSM_ASSERT_DELTA("Wrong error value", std::sqrt(6.0 * (ws->getErrorAt(0) * ws->getErrorAt(0))),
                      histoOutWS->getErrorAt(0), 1e-4);
   }
 
@@ -664,8 +594,7 @@ public:
     auto cutMDtestws = makeWorkspaceWithSpecifiedUnits("A^-1", ws_name);
 
     auto foundUnits = findOriginalQUnits(cutMDtestws, m_log);
-    TSM_ASSERT_EQUALS("Units should be found to be inverse angstroms",
-                      foundUnits[0], "a");
+    TSM_ASSERT_EQUALS("Units should be found to be inverse angstroms", foundUnits[0], "a");
     // Clean up
     AnalysisDataService::Instance().remove(ws_name);
   }
@@ -675,8 +604,7 @@ public:
     auto cutMDtestws = makeWorkspaceWithSpecifiedUnits("Angstrom^-1", ws_name);
 
     auto foundUnits = findOriginalQUnits(cutMDtestws, m_log);
-    TSM_ASSERT_EQUALS("Units should be found to be inverse angstroms",
-                      foundUnits[0], "a");
+    TSM_ASSERT_EQUALS("Units should be found to be inverse angstroms", foundUnits[0], "a");
     // Clean up
     AnalysisDataService::Instance().remove(ws_name);
   }
@@ -695,9 +623,8 @@ public:
   void test_CutMD_dimension_labels_A_to_A() {
     const std::string ws_name = "__CutMDTest_unitstest";
     auto ws_temp = makeWorkspaceWithSpecifiedUnits("Angstrom^-1", ws_name);
-    TSM_ASSERT_EQUALS(
-        "Input workspace dimensions have units of inverse angstroms",
-        ws_temp->getDimension(0)->getUnits().ascii(), "Angstrom^-1");
+    TSM_ASSERT_EQUALS("Input workspace dimensions have units of inverse angstroms",
+                      ws_temp->getDimension(0)->getUnits().ascii(), "Angstrom^-1");
 
     auto proj = createProjection("a");
 
@@ -729,9 +656,8 @@ public:
   void test_CutMD_dimension_labels_A_to_RLU() {
     const std::string ws_name = "__CutMDTest_unitstest";
     auto ws_temp = makeWorkspaceWithSpecifiedUnits("Angstrom^-1", ws_name);
-    TSM_ASSERT_EQUALS(
-        "Input workspace dimensions have units of inverse angstroms",
-        ws_temp->getDimension(0)->getUnits().ascii(), "Angstrom^-1");
+    TSM_ASSERT_EQUALS("Input workspace dimensions have units of inverse angstroms",
+                      ws_temp->getDimension(0)->getUnits().ascii(), "Angstrom^-1");
 
     auto proj = createProjection("r");
 
@@ -755,8 +681,7 @@ public:
     TS_ASSERT_EQUALS(outWS->getDimension(2)->getName(), "[0, 0, 'xi']")
     TSM_ASSERT_EQUALS("Output workspace unit label should show scaling from "
                       "conversion to RLU",
-                      outWS->getDimension(0)->getUnits().ascii(),
-                      "in 3.14 A^-1")
+                      outWS->getDimension(0)->getUnits().ascii(), "in 3.14 A^-1")
 
     // Clean up
     AnalysisDataService::Instance().remove(ws_name);

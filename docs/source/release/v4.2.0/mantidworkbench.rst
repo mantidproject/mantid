@@ -54,7 +54,7 @@ Scripting
    :class: screenshot
    :width: 900px
    :align: center
-        
+
    *Tiled Plots in Workbench!!!*
 
 |
@@ -118,15 +118,15 @@ Bugfixes
 - Workspaces contained within groups are no longer duplicated when saving a project.
 - The button to "Remove" a curve in Figure Options is now the same size as the drop-down list of curves.
 - "MantidPlot" in window titles have been removed.
-- If multiple plots of the same workspace are open, the fit property browser will change the default output name so any output workspaces are not overridden. 
+- If multiple plots of the same workspace are open, the fit property browser will change the default output name so any output workspaces are not overridden.
 - When showing the data table for a sqw workspace the vertical header now shows the bin center value and unit.
 - Fixes an issue where opening any help menu after previously opening the help menu in the Manage User Directories window would crash Workbench.
 
 Known Issues
 #############
 
-- Changing the scale of a Colorbar to Logarithmic may result in no tick labels being added. This is an issue with how matplotlib tries to deal with a Min Colorbar value of 0. Hopefully we will find a way around this for a future release. 
-  For now, in Figure Options (Gear Icon on a Colorfill plot), under the Images Tab, change the Min value to 1 or a small positive value. The logarithmic tick marks should now appear and the Min and Max values can be altered appropriately to produce the best plot for the data. See the Images below for an example of before and after this change: 
+- Changing the scale of a Colorbar to Logarithmic may result in no tick labels being added. This is an issue with how matplotlib tries to deal with a Min Colorbar value of 0. Hopefully we will find a way around this for a future release.
+  For now, in Figure Options (Gear Icon on a Colorfill plot), under the Images Tab, change the Min value to 1 or a small positive value. The logarithmic tick marks should now appear and the Min and Max values can be altered appropriately to produce the best plot for the data. See the Images below for an example of before and after this change:
 
 |
 
@@ -134,7 +134,7 @@ Known Issues
    :class: screenshot
    :width: 900px
    :align: center
-        
+
    *Before: Min is 0 and no Colorbar Tick Marks; After: Min is changed to 1 snf Colorbar Tick Marks Appear!!!*
 
 |

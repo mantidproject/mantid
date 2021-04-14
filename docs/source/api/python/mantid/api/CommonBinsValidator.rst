@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::API::CommonBinsValidator.
 
 .. module:`mantid.api`
 
-.. autoclass:: mantid.api.CommonBinsValidator 
+.. autoclass:: mantid.api.CommonBinsValidator
     :members:
     :undoc-members:
     :inherited-members:

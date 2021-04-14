@@ -26,15 +26,11 @@ public:
   /// Algorithm's name for identification
   const std::string name() const override { return "Rebin2D"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Rebins both axes of a 2D workspace using the given parameters";
-  }
+  const std::string summary() const override { return "Rebins both axes of a 2D workspace using the given parameters"; }
 
   /// Algorithm's version for identification
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"Rebin", "SofQW"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"Rebin", "SofQW"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "Transforms\\Rebin"; }
 
@@ -48,11 +44,9 @@ private:
   /// Run the algorithm
   void exec() override;
   /// Setup the output workspace
-  API::MatrixWorkspace_sptr
-  createOutputWorkspace(const API::MatrixWorkspace_const_sptr &parent,
-                        HistogramData::BinEdges &newXBins,
-                        HistogramData::BinEdges &newYBins,
-                        const bool useFractionalArea) const;
+  API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace_const_sptr &parent,
+                                                  HistogramData::BinEdges &newXBins, HistogramData::BinEdges &newYBins,
+                                                  const bool useFractionalArea) const;
 };
 
 } // namespace Algorithms

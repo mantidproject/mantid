@@ -25,21 +25,14 @@ finding the range
 @author
 @date 03/03/2017
 */
-HistogramData::Histogram
-normaliseCounts(const HistogramData::Histogram &histogram,
-                const double numGoodFrames);
+HistogramData::Histogram normaliseCounts(const HistogramData::Histogram &histogram, const double numGoodFrames);
 // calculate Muon normalisation constant
-double estimateNormalisationConst(const HistogramData::Histogram &histogram,
-                                  const double numGoodFrames,
+double estimateNormalisationConst(const HistogramData::Histogram &histogram, const double numGoodFrames,
                                   const double startX, const double endX);
-size_t startIndexFromTime(const HistogramData::BinEdges &xData,
-                          const double startX);
-size_t endIndexFromTime(const HistogramData::BinEdges &xData,
-                        const double endX);
+size_t startIndexFromTime(const HistogramData::BinEdges &xData, const double startX);
+size_t endIndexFromTime(const HistogramData::BinEdges &xData, const double endX);
 
-void updateNormalizationTable(Mantid::API::ITableWorkspace_sptr &table,
-                              const std::vector<std::string> &wsNamse,
-                              const std::vector<double> &norms,
-                              const std::vector<std::string> &methods);
+void updateNormalizationTable(Mantid::API::ITableWorkspace_sptr &table, const std::vector<std::string> &wsNamse,
+                              const std::vector<double> &norms, const std::vector<std::string> &methods);
 
 } // namespace Mantid

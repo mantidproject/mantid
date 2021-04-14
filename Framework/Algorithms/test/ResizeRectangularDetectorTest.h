@@ -50,8 +50,7 @@ public:
 
     Instrument_const_sptr inst = ws->getInstrument();
     std::shared_ptr<const RectangularDetector> det =
-        std::dynamic_pointer_cast<const RectangularDetector>(
-            inst->getComponentByName("bank1"));
+        std::dynamic_pointer_cast<const RectangularDetector>(inst->getComponentByName("bank1"));
 
     // Bank 1 got scaled
     V3D pos;
@@ -65,15 +64,13 @@ public:
     const GridDetectorPixel *recDetPix;
     const auto &spectrumInfo = ws->spectrumInfo();
     const auto &pixel = spectrumInfo.detector(11);
-    recDetPix =
-        dynamic_cast<const GridDetectorPixel *>(det->getAtXY(1, 1).get());
+    recDetPix = dynamic_cast<const GridDetectorPixel *>(det->getAtXY(1, 1).get());
     TSM_ASSERT("getDetector() returns a GridDetectorPixel", recDetPix);
     pos = pixel.getPos();
     TS_ASSERT_EQUALS(pos, V3D(0.008 * 2, 0.008 * 0.5, 5.0));
 
     // Bank 2 did not get scaled
-    det = std::dynamic_pointer_cast<const RectangularDetector>(
-        inst->getComponentByName("bank2"));
+    det = std::dynamic_pointer_cast<const RectangularDetector>(inst->getComponentByName("bank2"));
     pos = det->getAtXY(1, 1)->getPos();
     TS_ASSERT_EQUALS(pos, V3D(0.008 * 1.0, 0.008 * 1.0, 10.0));
     TS_ASSERT_DELTA(det->xstep(), 0.008 * 1, 1e-6);

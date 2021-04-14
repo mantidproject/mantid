@@ -38,14 +38,11 @@ const std::string MergeMD::category() const { return "MDAlgorithms\\Creation"; }
 void MergeMD::init() {
   // declare arbitrary number of input m_workspaces as a list of strings at the
   // moment
-  declareProperty(
-      std::make_unique<ArrayProperty<std::string>>(
-          "InputWorkspaces",
-          std::make_shared<MandatoryValidator<std::vector<std::string>>>()),
-      "The names of the input MDWorkspaces as a comma-separated list");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
+                      "InputWorkspaces", std::make_shared<MandatoryValidator<std::vector<std::string>>>()),
+                  "The names of the input MDWorkspaces as a comma-separated list");
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output MDWorkspace.");
 
   // Set the box controller properties
@@ -59,12 +56,10 @@ void MergeMD::init() {
 void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
   auto it = inputs.begin();
   for (; it != inputs.end(); it++) {
-    IMDEventWorkspace_sptr ws = std::dynamic_pointer_cast<IMDEventWorkspace>(
-        AnalysisDataService::Instance().retrieve(*it));
+    IMDEventWorkspace_sptr ws =
+        std::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(*it));
     if (!ws)
-      throw std::invalid_argument(
-          "Workspace " + *it +
-          " is not a MDEventWorkspace. Cannot merge this workspace.");
+      throw std::invalid_argument("Workspace " + *it + " is not a MDEventWorkspace. Cannot merge this workspace.");
     else
       m_workspaces.emplace_back(ws);
   }
@@ -86,26 +81,19 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
   for (auto &ws : m_workspaces) {
     if (ws->getNumDims() != numDims)
       throw std::invalid_argument(
-          "Workspace " + ws->getName() +
-          " does not match the number of dimensions of the others (" +
-          Strings::toString(ws->getNumDims()) + ", expected " +
-          Strings::toString(numDims) + ")");
+          "Workspace " + ws->getName() + " does not match the number of dimensions of the others (" +
+          Strings::toString(ws->getNumDims()) + ", expected " + Strings::toString(numDims) + ")");
 
     if (ws->getEventTypeName() != ws0->getEventTypeName())
-      throw std::invalid_argument(
-          "Workspace " + ws->getName() +
-          " does not match the MDEvent type of the others (" +
-          ws->getEventTypeName() + ", expected " + ws0->getEventTypeName() +
-          ")");
+      throw std::invalid_argument("Workspace " + ws->getName() + " does not match the MDEvent type of the others (" +
+                                  ws->getEventTypeName() + ", expected " + ws0->getEventTypeName() + ")");
 
     for (size_t d = 0; d < numDims; d++) {
       IMDDimension_const_sptr dim = ws->getDimension(d);
       IMDDimension_const_sptr dim0 = ws0->getDimension(d);
       if (dim->getName() != dim0->getName())
-        throw std::invalid_argument("Workspace " + ws->getName() +
-                                    " does not have the same dimension " +
-                                    Strings::toString(d) + " as the others (" +
-                                    dim->getName() + ", expected " +
+        throw std::invalid_argument("Workspace " + ws->getName() + " does not have the same dimension " +
+                                    Strings::toString(d) + " as the others (" + dim->getName() + ", expected " +
                                     dim0->getName() + ")");
 
       // Find the extents
@@ -126,9 +114,8 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
   // Give all the dimensions
   for (size_t d = 0; d < numDims; d++) {
     IMDDimension_const_sptr dim0 = ws0->getDimension(d);
-    MDHistoDimension *dim = new MDHistoDimension(
-        dim0->getName(), dim0->getDimensionId(), dim0->getMDFrame(), dimMin[d],
-        dimMax[d], dim0->getNBins());
+    MDHistoDimension *dim = new MDHistoDimension(dim0->getName(), dim0->getDimensionId(), dim0->getMDFrame(), dimMin[d],
+                                                 dimMax[d], dim0->getNBins());
     out->addDimension(MDHistoDimension_sptr(dim));
   }
 
@@ -144,8 +131,7 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
   // copy experiment infos
   uint16_t nExperiments(0);
   if (m_workspaces.size() > std::numeric_limits<uint16_t>::max())
-    throw std::invalid_argument(
-        "currently we can not combine more then 65535 experiments");
+    throw std::invalid_argument("currently we can not combine more then 65535 experiments");
   else
     nExperiments = static_cast<uint16_t>(m_workspaces.size());
 
@@ -153,15 +139,14 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
     uint16_t nWSexperiments = m_workspaces[i]->getNumExperimentInfo();
     experimentInfoNo.emplace_back(nWSexperiments);
     for (uint16_t j = 0; j < nWSexperiments; j++) {
-      API::ExperimentInfo_sptr ei = API::ExperimentInfo_sptr(
-          m_workspaces[i]->getExperimentInfo(j)->cloneExperimentInfo());
+      API::ExperimentInfo_sptr ei =
+          API::ExperimentInfo_sptr(m_workspaces[i]->getExperimentInfo(j)->cloneExperimentInfo());
       out->addExperimentInfo(ei);
     }
   }
 
   // Cumulative sum of number of experimentInfo and reverse order
-  std::partial_sum(experimentInfoNo.begin(), experimentInfoNo.end(),
-                   experimentInfoNo.begin());
+  std::partial_sum(experimentInfoNo.begin(), experimentInfoNo.end(), experimentInfoNo.begin());
   std::reverse(std::begin(experimentInfoNo), std::end(experimentInfoNo));
 }
 
@@ -174,9 +159,7 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
  * @param runIndexOffset :: offset to be added to the runIndex
  */
 template <size_t nd, size_t ond>
-inline void copyEvent(const MDLeanEvent<nd> &srcEvent,
-                      MDLeanEvent<ond> &newEvent,
-                      const uint16_t runIndexOffset) {
+inline void copyEvent(const MDLeanEvent<nd> &srcEvent, MDLeanEvent<ond> &newEvent, const uint16_t runIndexOffset) {
   // Nothing extra copy - this is no-op
   UNUSED_ARG(srcEvent);
   UNUSED_ARG(newEvent);
@@ -192,11 +175,9 @@ inline void copyEvent(const MDLeanEvent<nd> &srcEvent,
  * @param runIndexOffset :: offset to be added to the runIndex
  */
 template <size_t nd, size_t ond>
-inline void copyEvent(const MDEvent<nd> &srcEvent, MDEvent<ond> &newEvent,
-                      const uint16_t runIndexOffset) {
+inline void copyEvent(const MDEvent<nd> &srcEvent, MDEvent<ond> &newEvent, const uint16_t runIndexOffset) {
   newEvent.setDetectorId(srcEvent.getDetectorID());
-  newEvent.setRunIndex(
-      static_cast<uint16_t>(srcEvent.getRunIndex() + runIndexOffset));
+  newEvent.setRunIndex(static_cast<uint16_t>(srcEvent.getRunIndex() + runIndexOffset));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -205,11 +186,9 @@ inline void copyEvent(const MDEvent<nd> &srcEvent, MDEvent<ond> &newEvent,
  *
  * @param ws ::  MDEventWorkspace to clone
  */
-template <typename MDE, size_t nd>
-void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws2) {
+template <typename MDE, size_t nd> void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws2) {
   // CPUTimer tim;
-  typename MDEventWorkspace<MDE, nd>::sptr ws1 =
-      std::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(out);
+  typename MDEventWorkspace<MDE, nd>::sptr ws1 = std::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(out);
   if (!ws1 || !ws2)
     throw std::runtime_error("Incompatible workspace types passed to MergeMD.");
 
@@ -288,8 +267,7 @@ void MergeMD::exec() {
   // This will hold the inputs, with the groups separated off
   std::vector<std::string> inputs;
   for (const auto &input : inputs_orig) {
-    WorkspaceGroup_sptr wsgroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(input);
+    WorkspaceGroup_sptr wsgroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(input);
     if (wsgroup) { // Workspace group
       std::vector<std::string> group = wsgroup->getNames();
       inputs.insert(inputs.end(), group.begin(), group.end());
@@ -310,8 +288,7 @@ void MergeMD::exec() {
   // Run PlusMD on each of the input workspaces, in order.
   double progStep = 1.0 / double(m_workspaces.size());
   for (size_t i = 0; i < m_workspaces.size(); i++) {
-    g_log.information() << "Adding workspace " << m_workspaces[i]->getName()
-                        << '\n';
+    g_log.information() << "Adding workspace " << m_workspaces[i]->getName() << '\n';
     progress(double(i) * progStep, m_workspaces[i]->getName());
     CALL_MDEVENT_FUNCTION(doPlus, m_workspaces[i]);
   }

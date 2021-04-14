@@ -36,7 +36,7 @@ Usage
 
    print("Input workspace has {} points.".format(ws.getNPoints()))
    print("Output workspace has {} points.".format(OutputWorkspace.getNPoints()))
-   
+
 Output:
 
 .. testoutput:: ExSumRowColumnSimple

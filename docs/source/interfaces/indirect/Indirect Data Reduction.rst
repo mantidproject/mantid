@@ -57,14 +57,14 @@ Manage Directories
 ISIS/ILL Energy Transfer
 ------------------------
 
-If the default facility has been set to ISIS, then the ISIS Energy Transfer tab will be available. However, this tab will 
-be replaced by the ILL Energy Transfer tab if the default facility has been set to ILL. A further explanation of each tab 
+If the default facility has been set to ISIS, then the ISIS Energy Transfer tab will be available. However, this tab will
+be replaced by the ILL Energy Transfer tab if the default facility has been set to ILL. A further explanation of each tab
 can be found below.
 
 ISIS Energy Transfer
 ~~~~~~~~~~~~~~~~~~~~
 
-This tab provides you with the functionality to convert the raw data from the experiment run into 
+This tab provides you with the functionality to convert the raw data from the experiment run into
 units of :math:`\Delta E`. See the algorithm :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>`.
 
 .. interface:: Data Reduction
@@ -98,8 +98,8 @@ Spectra Min/Spectra Max
   Used to specify a range of spectra.
 
 Detector Grouping
-  Used to specify a method for grouping spectra. Possible grouping options include Individual, All, 
-  File, Groups and Custom. The TOSCA instrument also has the Default grouping option which will use the grouping 
+  Used to specify a method for grouping spectra. Possible grouping options include Individual, All,
+  File, Groups and Custom. The TOSCA instrument also has the Default grouping option which will use the grouping
   specified in the IPF.
 
 Background Removal
@@ -107,7 +107,7 @@ Background Removal
 
 Detailed Balance
   Gives the option to perform an exponential correction on the data once it has
-  been converted to Energy based on the temperature. This is automatically loaded 
+  been converted to Energy based on the temperature. This is automatically loaded
   from the sample logs of the input file if available.
 
 Scale by Factor
@@ -170,7 +170,7 @@ The ISIS Energy Transfer tab operates on raw TOF data files. Before starting thi
 3. Change the **Spectra Min** and **Spectra Max** if you want to avoid some of the detectors. For
    the purposes of this demonstration, keep them at their default values.
 
-4. The **Detector Grouping** option allows you to specify how you want to group your detectors. The 
+4. The **Detector Grouping** option allows you to specify how you want to group your detectors. The
    different option available are explained in the :ref:`detector-grouping` section. For this
    demonstration, choose **Individual**.
 
@@ -210,7 +210,7 @@ File
   Gives the option of supplying a grouping file to be used with the
   :ref:`GroupDetectors <algm-GroupDetectors>` algorithm.
 
-Default 
+Default
   This grouping option is only available for TOSCA. It uses the spectra grouping specified in the IPF.
 
 Rebinning
@@ -267,7 +267,7 @@ would therefore be 13, 53, 54, 55 and 56.
 ILL Energy Transfer
 ~~~~~~~~~~~~~~~~~~~
 
-This tab handles the reduction of data from the IN16B instrument and will appear when the default facility is set to be 
+This tab handles the reduction of data from the IN16B instrument and will appear when the default facility is set to be
 the ILL. See the algorithm :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>`.
 
 .. interface:: Data Reduction
@@ -458,7 +458,7 @@ The ISIS Calibration tab operates on raw TOF data files. Before starting this wo
    workspaces ending in _red, _res and _calib. The calibration workspace can be used in the ISIS
    Energy Transfer tab by ticking **Use Calib File**.
 
-5. Select the workspace ending in _calib in the output options. Enter index 0 in the neighbouring box, 
+5. Select the workspace ending in _calib in the output options. Enter index 0 in the neighbouring box,
    and then click the down arrow on the **Plot Spectra** button, and select **Plot Bins**. This will
    plot the bin at index 0.
 
@@ -466,7 +466,7 @@ The ISIS Calibration tab operates on raw TOF data files. Before starting this wo
    and then click the **Plot Spectra** button. This will plot the spectrum at workspace index 0.
 
 7. Choose a default save directory and then click **Save Result** to save the workspaces ending
-   in _res and _calib. The _res file is used in the :ref:`iqt-example-workflow` and 
+   in _res and _calib. The _res file is used in the :ref:`iqt-example-workflow` and
    :ref:`convfit-example-workflow`. The _calib file is used in the
    :ref:`isis-diagnostics-example-workflow`.
 
@@ -710,11 +710,11 @@ S(Q, w) Options
 
 Input
   Allows you to select a reduced NeXus file (*_red.nxs*) or workspace (*_red*) as the
-  input to the algorithm. An automatic contour plot of *_rqw* will be plotted in the preview 
+  input to the algorithm. An automatic contour plot of *_rqw* will be plotted in the preview
   plot once a file has finished loading.
 
 Q Low, Q Width & Q High
-  Q binning parameters that are passed to the :ref:`SofQW <algm-SofQW>` algorithm. The low and high 
+  Q binning parameters that are passed to the :ref:`SofQW <algm-SofQW>` algorithm. The low and high
   values can be determined using the neighbouring contour plot.
 
 Rebin in Energy

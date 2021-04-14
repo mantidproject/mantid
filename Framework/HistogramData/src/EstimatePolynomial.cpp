@@ -18,16 +18,14 @@ namespace {                    // anonymous
 const double BAD_CHISQ(1.e10); // big invalid value
 const double INVALID_CHISQ(std::numeric_limits<double>::quiet_NaN());
 
-inline void calcFlatParameters(const double sum, const double sumY,
-                               double &bg0) {
+inline void calcFlatParameters(const double sum, const double sumY, double &bg0) {
   if (sum != 0.)
     bg0 = sumY / sum;
   // otherwise outputs are already 0.
 }
 
 // use Cramer's rule for 2 x 2 matrix
-inline void calcLinearParameters(const double sum, const double sumX,
-                                 const double sumY, const double sumXY,
+inline void calcLinearParameters(const double sum, const double sumX, const double sumY, const double sumXY,
                                  const double sumX2, double &bg0, double &bg1) {
   const double determinant = sum * sumX2 - sumX * sumX;
   if (determinant != 0) {
@@ -41,24 +39,20 @@ inline void calcLinearParameters(const double sum, const double sumX,
 // | d e f |
 // | g h i |
 // 3 x 3 determinate:  aei+bfg+cdh-ceg-bdi-afh
-inline void calcQuadraticParameters(const double sum, const double sumX,
-                                    const double sumY, const double sumXY,
-                                    const double sumX2, const double sumX2Y,
-                                    const double sumX3, const double sumX4,
+inline void calcQuadraticParameters(const double sum, const double sumX, const double sumY, const double sumXY,
+                                    const double sumX2, const double sumX2Y, const double sumX3, const double sumX4,
                                     double &bg0, double &bg1, double &bg2) {
-  double determinant = sum * sumX2 * sumX4 + sumX * sumX3 * sumX2 +
-                       sumX2 * sumX * sumX3 - sumX2 * sumX2 * sumX2 -
+  double determinant = sum * sumX2 * sumX4 + sumX * sumX3 * sumX2 + sumX2 * sumX * sumX3 - sumX2 * sumX2 * sumX2 -
                        sumX * sumX * sumX4 - sum * sumX3 * sumX3;
   if (determinant != 0) {
-    bg0 =
-        (sumY * sumX2 * sumX4 + sumX * sumX3 * sumX2Y + sumX2 * sumXY * sumX3 -
-         sumX2 * sumX2 * sumX2Y - sumX * sumXY * sumX4 - sumY * sumX3 * sumX3) /
-        determinant;
-    bg1 = (sum * sumXY * sumX4 + sumY * sumX3 * sumX2 + sumX2 * sumX * sumX2Y -
-           sumX2 * sumXY * sumX2 - sumY * sumX * sumX4 - sum * sumX3 * sumX2Y) /
+    bg0 = (sumY * sumX2 * sumX4 + sumX * sumX3 * sumX2Y + sumX2 * sumXY * sumX3 - sumX2 * sumX2 * sumX2Y -
+           sumX * sumXY * sumX4 - sumY * sumX3 * sumX3) /
           determinant;
-    bg2 = (sum * sumX2 * sumX2Y + sumX * sumXY * sumX2 + sumY * sumX * sumX3 -
-           sumY * sumX2 * sumX2 - sumX * sumX * sumX2Y - sum * sumXY * sumX3) /
+    bg1 = (sum * sumXY * sumX4 + sumY * sumX3 * sumX2 + sumX2 * sumX * sumX2Y - sumX2 * sumXY * sumX2 -
+           sumY * sumX * sumX4 - sum * sumX3 * sumX2Y) /
+          determinant;
+    bg2 = (sum * sumX2 * sumX2Y + sumX * sumXY * sumX2 + sumY * sumX * sumX3 - sumY * sumX2 * sumX2 -
+           sumX * sumX * sumX2Y - sum * sumXY * sumX3) /
           determinant;
   } // otherwise outputs are already 0.
 }
@@ -91,8 +85,7 @@ struct linear {
 
 // y = bg0 + bg1*x + bg2*x**2
 struct quadratic {
-  explicit quadratic(const double bg0, const double bg1, const double bg2)
-      : bg0(bg0), bg1(bg1), bg2(bg2) {}
+  explicit quadratic(const double bg0, const double bg1, const double bg2) : bg0(bg0), bg1(bg1), bg2(bg2) {}
 
   double operator()(const double x, const double y) const {
     const double temp = bg0 + bg1 * x + bg2 * x * x - y;
@@ -108,23 +101,20 @@ struct quadratic {
 namespace Mantid {
 namespace HistogramData {
 
-void estimate(const size_t order, const Points &X, const HistogramY &Y,
-              const size_t i_min, const size_t i_max, const size_t p_min,
-              const size_t p_max, bool haveGap, double &out_bg0,
-              double &out_bg1, double &out_bg2, double &out_chisq_red) {
+void estimate(const size_t order, const Points &X, const HistogramY &Y, const size_t i_min, const size_t i_max,
+              const size_t p_min, const size_t p_max, bool haveGap, double &out_bg0, double &out_bg1, double &out_bg2,
+              double &out_chisq_red) {
   // Validate input
   if (order > 2)
     throw std::runtime_error("can only estimate up to order=2");
   if (i_min >= i_max) {
     std::stringstream err;
-    err << "i_min (" << i_min << ")cannot be larger or equal to i_max ("
-        << i_max << ")";
+    err << "i_min (" << i_min << ")cannot be larger or equal to i_max (" << i_max << ")";
     throw std::runtime_error(err.str());
   }
   if (i_max > X.size()) {
     std::stringstream err;
-    err << "i_max  (" << i_max << ") cannot be larger or equal to size of X "
-        << X.size() << ")";
+    err << "i_max  (" << i_max << ") cannot be larger or equal to size of X " << X.size() << ")";
     throw std::runtime_error(err.str());
   }
   if (haveGap && p_min >= p_max)
@@ -176,8 +166,8 @@ void estimate(const size_t order, const Points &X, const HistogramY &Y,
   double bg0_quadratic = 0.;
   double bg1_quadratic = 0.;
   double bg2_quadratic = 0.;
-  calcQuadraticParameters(sum, sumX, sumY, sumXY, sumX2, sumX2Y, sumX3, sumX4,
-                          bg0_quadratic, bg1_quadratic, bg2_quadratic);
+  calcQuadraticParameters(sum, sumX, sumY, sumXY, sumX2, sumX2Y, sumX3, sumX4, bg0_quadratic, bg1_quadratic,
+                          bg2_quadratic);
 
   // Setup to calculate the residuals
   double chisq_flat = 0.;
@@ -185,8 +175,7 @@ void estimate(const size_t order, const Points &X, const HistogramY &Y,
   double chisq_quadratic = 0.;
   auto residual_flat = constant(bg0_flat);
   auto residual_linear = linear(bg0_linear, bg1_linear);
-  auto residual_quadratic =
-      quadratic(bg0_quadratic, bg1_quadratic, bg2_quadratic);
+  auto residual_quadratic = quadratic(bg0_quadratic, bg1_quadratic, bg2_quadratic);
   double num_points = 0.;
 
   // calculate the chisq - not normalized by the number of points
@@ -218,8 +207,7 @@ void estimate(const size_t order, const Points &X, const HistogramY &Y,
   if ((chisq_flat <= chisq_linear) && (chisq_flat <= chisq_quadratic)) {
     out_bg0 = bg0_flat;
     out_chisq_red = chisq_flat;
-  } else if ((chisq_linear <= chisq_flat) &&
-             (chisq_linear <= chisq_quadratic)) {
+  } else if ((chisq_linear <= chisq_flat) && (chisq_linear <= chisq_quadratic)) {
     out_bg0 = bg0_linear;
     out_bg1 = bg1_linear;
     out_chisq_red = chisq_linear;
@@ -231,27 +219,21 @@ void estimate(const size_t order, const Points &X, const HistogramY &Y,
   }
 }
 
-void estimateBackground(const size_t order, const Histogram &histo,
-                        const size_t i_min, const size_t i_max,
-                        const size_t p_min, const size_t p_max, double &out_bg0,
-                        double &out_bg1, double &out_bg2,
+void estimateBackground(const size_t order, const Histogram &histo, const size_t i_min, const size_t i_max,
+                        const size_t p_min, const size_t p_max, double &out_bg0, double &out_bg1, double &out_bg2,
                         double &out_chisq_red) {
   const auto &X = histo.points();
   const auto &Y = histo.y();
 
   // fit with a hole in the middle
-  estimate(order, X, Y, i_min, i_max, p_min, p_max, true, out_bg0, out_bg1,
-           out_bg2, out_chisq_red);
+  estimate(order, X, Y, i_min, i_max, p_min, p_max, true, out_bg0, out_bg1, out_bg2, out_chisq_red);
 }
 
-void estimatePolynomial(const size_t order, const Histogram &histo,
-                        const size_t i_min, const size_t i_max, double &out_bg0,
-                        double &out_bg1, double &out_bg2,
-                        double &out_chisq_red) {
+void estimatePolynomial(const size_t order, const Histogram &histo, const size_t i_min, const size_t i_max,
+                        double &out_bg0, double &out_bg1, double &out_bg2, double &out_chisq_red) {
   const auto &X = histo.points();
   const auto &Y = histo.y();
-  estimate(order, X, Y, i_min, i_max, 0, 0, false, out_bg0, out_bg1, out_bg2,
-           out_chisq_red);
+  estimate(order, X, Y, i_min, i_max, 0, 0, false, out_bg0, out_bg1, out_bg2, out_chisq_red);
 }
 
 } // namespace HistogramData

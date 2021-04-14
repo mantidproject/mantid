@@ -56,42 +56,38 @@ private:
       // first algorithm
       testfile.file->makeGroup("MantidAlgorithm_0", "NXnote", true);
       testfile.file->writeData("author", std::string("mantid"));
-      testfile.file->writeData("description",
-                               std::string("Mantid Algorithm data"));
-      testfile.file->writeData(
-          "data", "Algorithm: LoadRaw v1\nExecution Date: 2009-Oct-09 "
-                  "16:56:54\nExecution Duration: 2.3 seconds\nParameters:\n  "
-                  "Name: Filename, Value: "
-                  "/home/dmn58364/Mantid/trunk/Test/Data/GEM38370.raw, "
-                  "Default?: No, Direction: Input\n  Name: OutputWorkspace, "
-                  "Value: GEM38370, Default?: No, Direction: Output\n  Name: "
-                  "SpectrumMin, Value: 1, Default?: Yes, Direction: Input\n  "
-                  "Name: SpectrumMax, Value: 2147483632, Default?: Yes, "
-                  "Direction: Input\n  Name: SpectrumList, Value: , Default?: "
-                  "Yes, Direction: Input\n  Name: Cache, Value: If Slow, "
-                  "Default?: Yes, Direction: Input\n  Name: LoadLogFiles, "
-                  "Value: 1, Default?: Yes, Direction: Input");
+      testfile.file->writeData("description", std::string("Mantid Algorithm data"));
+      testfile.file->writeData("data", "Algorithm: LoadRaw v1\nExecution Date: 2009-Oct-09 "
+                                       "16:56:54\nExecution Duration: 2.3 seconds\nParameters:\n  "
+                                       "Name: Filename, Value: "
+                                       "/home/dmn58364/Mantid/trunk/Test/Data/GEM38370.raw, "
+                                       "Default?: No, Direction: Input\n  Name: OutputWorkspace, "
+                                       "Value: GEM38370, Default?: No, Direction: Output\n  Name: "
+                                       "SpectrumMin, Value: 1, Default?: Yes, Direction: Input\n  "
+                                       "Name: SpectrumMax, Value: 2147483632, Default?: Yes, "
+                                       "Direction: Input\n  Name: SpectrumList, Value: , Default?: "
+                                       "Yes, Direction: Input\n  Name: Cache, Value: If Slow, "
+                                       "Default?: Yes, Direction: Input\n  Name: LoadLogFiles, "
+                                       "Value: 1, Default?: Yes, Direction: Input");
       testfile.file->closeGroup();
       // second algorithm is different each test
       switch (testno) {
       case 2: {
         testfile.file->makeGroup("MantidAlgorithm_1", "NXnote", true);
         // missing author
-        testfile.file->writeData("description",
-                                 std::string("Mantid Algorithm data"));
-        testfile.file->writeData(
-            "data", "Algorithm: LoadRaw v2\nExecution Date: 2009-Oct-09 "
-                    "16:56:54\nExecution Duration: 2.3 seconds\nParameters:\n  "
-                    "Name: Filename, Value: "
-                    "/home/dmn58364/Mantid/trunk/Test/Data/GEM38370.raw, "
-                    "Default?: No, Direction: Input\n  Name: OutputWorkspace, "
-                    "Value: GEM38370, Default?: No, Direction: Output\n  Name: "
-                    "SpectrumMin, Value: 1, Default?: Yes, Direction: Input\n  "
-                    "Name: SpectrumMax, Value: 2147483632, Default?: Yes, "
-                    "Direction: Input\n  Name: SpectrumList, Value: , "
-                    "Default?: Yes, Direction: Input\n  Name: Cache, Value: If "
-                    "Slow, Default?: Yes, Direction: Input\n  Name: "
-                    "LoadLogFiles, Value: 1, Default?: Yes, Direction: Input");
+        testfile.file->writeData("description", std::string("Mantid Algorithm data"));
+        testfile.file->writeData("data", "Algorithm: LoadRaw v2\nExecution Date: 2009-Oct-09 "
+                                         "16:56:54\nExecution Duration: 2.3 seconds\nParameters:\n  "
+                                         "Name: Filename, Value: "
+                                         "/home/dmn58364/Mantid/trunk/Test/Data/GEM38370.raw, "
+                                         "Default?: No, Direction: Input\n  Name: OutputWorkspace, "
+                                         "Value: GEM38370, Default?: No, Direction: Output\n  Name: "
+                                         "SpectrumMin, Value: 1, Default?: Yes, Direction: Input\n  "
+                                         "Name: SpectrumMax, Value: 2147483632, Default?: Yes, "
+                                         "Direction: Input\n  Name: SpectrumList, Value: , "
+                                         "Default?: Yes, Direction: Input\n  Name: Cache, Value: If "
+                                         "Slow, Default?: Yes, Direction: Input\n  Name: "
+                                         "LoadLogFiles, Value: 1, Default?: Yes, Direction: Input");
         testfile.file->closeGroup();
         break;
       }
@@ -99,27 +95,25 @@ private:
         testfile.file->makeGroup("MantidAlgorithm_1", "NXnote", true);
         testfile.file->writeData("author", std::string("mantid"));
         // missing description
-        testfile.file->writeData(
-            "data", "Algorithm: LoadRaw v2\nExecution Date: 2009-Oct-09 "
-                    "16:56:54\nExecution Duration: 2.3 seconds\nParameters:\n  "
-                    "Name: Filename, Value: "
-                    "/home/dmn58364/Mantid/trunk/Test/Data/GEM38370.raw, "
-                    "Default?: No, Direction: Input\n  Name: OutputWorkspace, "
-                    "Value: GEM38370, Default?: No, Direction: Output\n  Name: "
-                    "SpectrumMin, Value: 1, Default?: Yes, Direction: Input\n  "
-                    "Name: SpectrumMax, Value: 2147483632, Default?: Yes, "
-                    "Direction: Input\n  Name: SpectrumList, Value: , "
-                    "Default?: Yes, Direction: Input\n  Name: Cache, Value: If "
-                    "Slow, Default?: Yes, Direction: Input\n  Name: "
-                    "LoadLogFiles, Value: 1, Default?: Yes, Direction: Input");
+        testfile.file->writeData("data", "Algorithm: LoadRaw v2\nExecution Date: 2009-Oct-09 "
+                                         "16:56:54\nExecution Duration: 2.3 seconds\nParameters:\n  "
+                                         "Name: Filename, Value: "
+                                         "/home/dmn58364/Mantid/trunk/Test/Data/GEM38370.raw, "
+                                         "Default?: No, Direction: Input\n  Name: OutputWorkspace, "
+                                         "Value: GEM38370, Default?: No, Direction: Output\n  Name: "
+                                         "SpectrumMin, Value: 1, Default?: Yes, Direction: Input\n  "
+                                         "Name: SpectrumMax, Value: 2147483632, Default?: Yes, "
+                                         "Direction: Input\n  Name: SpectrumList, Value: , "
+                                         "Default?: Yes, Direction: Input\n  Name: Cache, Value: If "
+                                         "Slow, Default?: Yes, Direction: Input\n  Name: "
+                                         "LoadLogFiles, Value: 1, Default?: Yes, Direction: Input");
         testfile.file->closeGroup();
         break;
       }
       case 4: {
         testfile.file->makeGroup("MantidAlgorithm_1", "NXnote", true);
         testfile.file->writeData("author", std::string("mantid"));
-        testfile.file->writeData("description",
-                                 std::string("Mantid Algorithm data"));
+        testfile.file->writeData("description", std::string("Mantid Algorithm data"));
         // missing data
         testfile.file->closeGroup();
         break;
@@ -127,8 +121,7 @@ private:
       case 5: {
         testfile.file->makeGroup("MantidAlgorithm_1", "NXnote", true);
         testfile.file->writeData("author", std::string("mantid"));
-        testfile.file->writeData("description",
-                                 std::string("Mantid Algorithm data"));
+        testfile.file->writeData("description", std::string("Mantid Algorithm data"));
         testfile.file->writeData("data", "some data");
         testfile.file->closeGroup();
         break;
@@ -136,72 +129,63 @@ private:
       case 7: {
         testfile.file->makeGroup("MantidAlgorithm_1", "NXnote", true);
         testfile.file->writeData("author", std::string("mantid"));
-        testfile.file->writeData("description",
-                                 std::string("Mantid Algorithm data"));
-        testfile.file->writeData(
-            "data", "some data\nsome data\nsome data\nsome data\nsome data");
+        testfile.file->writeData("description", std::string("Mantid Algorithm data"));
+        testfile.file->writeData("data", "some data\nsome data\nsome data\nsome data\nsome data");
         testfile.file->closeGroup();
         break;
       }
       default: {
         testfile.file->makeGroup("MantidAlgorithm_1", "NXnote", true);
         testfile.file->writeData("author", std::string("mantid"));
-        testfile.file->writeData("description",
-                                 std::string("Mantid Algorithm data"));
-        testfile.file->writeData(
-            "data", "Algorithm: LoadRaw v2\nExecution Date: 2009-Oct-09 "
-                    "16:56:54\nExecution Duration: 2.3 seconds\nParameters:\n  "
-                    "Name: Filename, Value: "
-                    "/home/dmn58364/Mantid/trunk/Test/Data/GEM38370.raw, "
-                    "Default?: No, Direction: Input\n  Name: OutputWorkspace, "
-                    "Value: GEM38370, Default?: No, Direction: Output\n  Name: "
-                    "SpectrumMin, Value: 1, Default?: Yes, Direction: Input\n  "
-                    "Name: SpectrumMax, Value: 2147483632, Default?: Yes, "
-                    "Direction: Input\n  Name: SpectrumList, Value: , "
-                    "Default?: Yes, Direction: Input\n  Name: Cache, Value: If "
-                    "Slow, Default?: Yes, Direction: Input\n  Name: "
-                    "LoadLogFiles, Value: 1, Default?: Yes, Direction: Input");
+        testfile.file->writeData("description", std::string("Mantid Algorithm data"));
+        testfile.file->writeData("data", "Algorithm: LoadRaw v2\nExecution Date: 2009-Oct-09 "
+                                         "16:56:54\nExecution Duration: 2.3 seconds\nParameters:\n  "
+                                         "Name: Filename, Value: "
+                                         "/home/dmn58364/Mantid/trunk/Test/Data/GEM38370.raw, "
+                                         "Default?: No, Direction: Input\n  Name: OutputWorkspace, "
+                                         "Value: GEM38370, Default?: No, Direction: Output\n  Name: "
+                                         "SpectrumMin, Value: 1, Default?: Yes, Direction: Input\n  "
+                                         "Name: SpectrumMax, Value: 2147483632, Default?: Yes, "
+                                         "Direction: Input\n  Name: SpectrumList, Value: , "
+                                         "Default?: Yes, Direction: Input\n  Name: Cache, Value: If "
+                                         "Slow, Default?: Yes, Direction: Input\n  Name: "
+                                         "LoadLogFiles, Value: 1, Default?: Yes, Direction: Input");
         testfile.file->closeGroup();
         break;
       }
       }
       testfile.file->makeGroup("MantidAlgorithm_2", "NXnote", true);
       testfile.file->writeData("author", std::string("mantid"));
-      testfile.file->writeData("description",
-                               std::string("Mantid Algorithm data"));
-      testfile.file->writeData(
-          "data", "Algorithm: LoadRaw v3\nExecution Date: 2009-Oct-09 "
-                  "16:56:54\nExecution Duration: 2.3 seconds\nParameters:\n  "
-                  "Name: Filename, Value: "
-                  "/home/dmn58364/Mantid/trunk/Test/Data/GEM38370.raw, "
-                  "Default?: No, Direction: Input\n  Name: OutputWorkspace, "
-                  "Value: GEM38370, Default?: No, Direction: Output\n  Name: "
-                  "SpectrumMin, Value: 1, Default?: Yes, Direction: Input\n  "
-                  "Name: SpectrumMax, Value: 2147483632, Default?: Yes, "
-                  "Direction: Input\n  Name: SpectrumList, Value: , Default?: "
-                  "Yes, Direction: Input\n  Name: Cache, Value: If Slow, "
-                  "Default?: Yes, Direction: Input\n  Name: LoadLogFiles, "
-                  "Value: 1, Default?: Yes, Direction: Input");
+      testfile.file->writeData("description", std::string("Mantid Algorithm data"));
+      testfile.file->writeData("data", "Algorithm: LoadRaw v3\nExecution Date: 2009-Oct-09 "
+                                       "16:56:54\nExecution Duration: 2.3 seconds\nParameters:\n  "
+                                       "Name: Filename, Value: "
+                                       "/home/dmn58364/Mantid/trunk/Test/Data/GEM38370.raw, "
+                                       "Default?: No, Direction: Input\n  Name: OutputWorkspace, "
+                                       "Value: GEM38370, Default?: No, Direction: Output\n  Name: "
+                                       "SpectrumMin, Value: 1, Default?: Yes, Direction: Input\n  "
+                                       "Name: SpectrumMax, Value: 2147483632, Default?: Yes, "
+                                       "Direction: Input\n  Name: SpectrumList, Value: , Default?: "
+                                       "Yes, Direction: Input\n  Name: Cache, Value: If Slow, "
+                                       "Default?: Yes, Direction: Input\n  Name: LoadLogFiles, "
+                                       "Value: 1, Default?: Yes, Direction: Input");
       testfile.file->closeGroup();
     } else {
       testfile.file->makeGroup("MantidAlgorithm_0", "NXnote", true);
       testfile.file->writeData("author", std::string("mantid"));
-      testfile.file->writeData("description",
-                               std::string("Mantid Algorithm data"));
+      testfile.file->writeData("description", std::string("Mantid Algorithm data"));
       testfile.file->writeData("data", "some data");
       testfile.file->closeGroup();
 
       testfile.file->makeGroup("MantidAlgorithm_1", "NXnote", true);
       testfile.file->writeData("author", std::string("mantid"));
-      testfile.file->writeData("description",
-                               std::string("Mantid Algorithm data"));
+      testfile.file->writeData("description", std::string("Mantid Algorithm data"));
       testfile.file->writeData("data", "some data");
       testfile.file->closeGroup();
 
       testfile.file->makeGroup("MantidAlgorithm_2", "NXnote", true);
       testfile.file->writeData("author", std::string("mantid"));
-      testfile.file->writeData("description",
-                               std::string("Mantid Algorithm data"));
+      testfile.file->writeData("description", std::string("Mantid Algorithm data"));
       testfile.file->writeData("data", "some data");
       testfile.file->closeGroup();
     }
@@ -213,10 +197,9 @@ public:
   void test_SaveNexus() {
     WorkspaceHistory testHistory;
     for (int i = 1; i < 5; i++) {
-      AlgorithmHistory algHist(
-          "History" + boost::lexical_cast<std::string>(i), 1,
-          boost::uuids::to_string(boost::uuids::random_generator()()),
-          DateAndTime::defaultTime(), -1.0, i);
+      AlgorithmHistory algHist("History" + boost::lexical_cast<std::string>(i), 1,
+                               boost::uuids::to_string(boost::uuids::random_generator()()), DateAndTime::defaultTime(),
+                               -1.0, i);
       testHistory.addHistory(std::make_shared<AlgorithmHistory>(algHist));
     }
 
@@ -232,19 +215,13 @@ public:
     std::string rootstring = "/process/";
     for (int i = 1; i < 5; i++) {
       TS_ASSERT_THROWS_NOTHING(
-          loadhandle->openPath(rootstring + "MantidAlgorithm_" +
-                               boost::lexical_cast<std::string>(i)));
+          loadhandle->openPath(rootstring + "MantidAlgorithm_" + boost::lexical_cast<std::string>(i)));
     }
-    TS_ASSERT_THROWS_NOTHING(
-        loadhandle->openPath(rootstring + "MantidEnvironment"));
-    TS_ASSERT_THROWS_NOTHING(
-        loadhandle->openPath(rootstring + "MantidAlgorithm_4/author"));
-    TS_ASSERT_THROWS_NOTHING(
-        loadhandle->openPath(rootstring + "MantidAlgorithm_4/data"));
-    TS_ASSERT_THROWS_NOTHING(
-        loadhandle->openPath(rootstring + "MantidAlgorithm_4/description"));
-    TS_ASSERT_THROWS_ANYTHING(
-        loadhandle->openPath(rootstring + "MantidAlgorithm_5"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidEnvironment"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_4/author"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_4/data"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_4/description"));
+    TS_ASSERT_THROWS_ANYTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_5"));
 
     loadhandle->close();
     Poco::File("WorkspaceHistoryTest_test_SaveNexus.nxs").remove();
@@ -252,14 +229,10 @@ public:
 
   void test_SaveNexus_NestedHistory() {
     WorkspaceHistory testHistory;
-    AlgorithmHistory algHist(
-        "ParentHistory", 1,
-        boost::uuids::to_string(boost::uuids::random_generator()()),
-        DateAndTime::defaultTime(), -1.0, 0);
-    AlgorithmHistory childHist(
-        "ChildHistory", 1,
-        boost::uuids::to_string(boost::uuids::random_generator()()),
-        DateAndTime::defaultTime(), -1.0, 1);
+    AlgorithmHistory algHist("ParentHistory", 1, boost::uuids::to_string(boost::uuids::random_generator()()),
+                             DateAndTime::defaultTime(), -1.0, 0);
+    AlgorithmHistory childHist("ChildHistory", 1, boost::uuids::to_string(boost::uuids::random_generator()()),
+                               DateAndTime::defaultTime(), -1.0, 1);
 
     algHist.addChildHistory(std::make_shared<AlgorithmHistory>(childHist));
     testHistory.addHistory(std::make_shared<AlgorithmHistory>(algHist));
@@ -274,23 +247,15 @@ public:
     auto loadhandle = std::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs");
     // clang-format on
     std::string rootstring = "/process/";
-    TS_ASSERT_THROWS_NOTHING(
-        loadhandle->openPath(rootstring + "MantidAlgorithm_1/"));
-    TS_ASSERT_THROWS_NOTHING(
-        loadhandle->openPath(rootstring + "MantidAlgorithm_1/author"));
-    TS_ASSERT_THROWS_NOTHING(
-        loadhandle->openPath(rootstring + "MantidAlgorithm_1/data"));
-    TS_ASSERT_THROWS_NOTHING(
-        loadhandle->openPath(rootstring + "MantidAlgorithm_1/description"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/author"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/data"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/description"));
 
-    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(
-        rootstring + "MantidAlgorithm_1/MantidAlgorithm_2"));
-    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(
-        rootstring + "MantidAlgorithm_1/MantidAlgorithm_2/author"));
-    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(
-        rootstring + "MantidAlgorithm_1/MantidAlgorithm_2/data"));
-    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(
-        rootstring + "MantidAlgorithm_1/MantidAlgorithm_2/description"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/MantidAlgorithm_2"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/MantidAlgorithm_2/author"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/MantidAlgorithm_2/data"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/MantidAlgorithm_2/description"));
 
     loadhandle->close();
     Poco::File("WorkspaceHistoryTest_test_SaveNexus.nxs").remove();
@@ -310,18 +275,15 @@ public:
     // clang-format on
     std::string rootstring = "/process/";
     TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring));
-    TS_ASSERT_THROWS_NOTHING(
-        loadhandle->openPath(rootstring + "MantidEnvironment"));
-    TS_ASSERT_THROWS_ANYTHING(
-        loadhandle->openPath(rootstring + "MantidAlgorithm_1"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidEnvironment"));
+    TS_ASSERT_THROWS_ANYTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1"));
 
     loadhandle->close();
     Poco::File("WorkspaceHistoryTest_test_SaveNexus.nxs").remove();
   }
 
   void test_LoadNexus() {
-    std::string filename =
-        FileFinder::Instance().getFullPath("GEM38370_Focussed_Legacy.nxs");
+    std::string filename = FileFinder::Instance().getFullPath("GEM38370_Focussed_Legacy.nxs");
     // clang-format off
     auto loadhandle = std::make_shared< ::NeXus::File >(filename);
     // clang-format on
@@ -337,15 +299,13 @@ public:
 
     TS_ASSERT_EQUALS("LoadRaw", history->name());
     TS_ASSERT_EQUALS(3, history->version());
-    TS_ASSERT_EQUALS(DateAndTime("2009-10-09T16:56:54"),
-                     history->executionDate());
+    TS_ASSERT_EQUALS(DateAndTime("2009-10-09T16:56:54"), history->executionDate());
     TS_ASSERT_EQUALS(2.3, history->executionDuration());
     loadhandle->close();
   }
 
   void test_LoadNexus_NestedHistory() {
-    std::string filename = FileFinder::Instance().getFullPath(
-        "HistoryTest_CreateTransmissionAuto.nxs");
+    std::string filename = FileFinder::Instance().getFullPath("HistoryTest_CreateTransmissionAuto.nxs");
     // clang-format off
     auto loadhandle = std::make_shared< ::NeXus::File >(filename);
     // clang-format on
@@ -388,10 +348,8 @@ public:
 
     TS_ASSERT_EQUALS(0, histories.size());
     TS_ASSERT_THROWS_ANYTHING(testfile.file->openPath(rootstring));
-    TS_ASSERT_THROWS_ANYTHING(
-        testfile.file->openPath(rootstring + "MantidEnvironment"));
-    TS_ASSERT_THROWS_ANYTHING(
-        testfile.file->openPath(rootstring + "MantidAlgorithm_1"));
+    TS_ASSERT_THROWS_ANYTHING(testfile.file->openPath(rootstring + "MantidEnvironment"));
+    TS_ASSERT_THROWS_ANYTHING(testfile.file->openPath(rootstring + "MantidAlgorithm_1"));
   }
 
   void test_LoadNexus_Missing_Author() {

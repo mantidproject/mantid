@@ -37,8 +37,7 @@ namespace MDAlgorithms {
 
 class ConvToMDEventsWS : public ConvToMDBase {
 public:
-  size_t initialize(const MDWSDescription &WSD,
-                    std::shared_ptr<MDEventWSWrapper> inWSWrapper,
+  size_t initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper,
                     bool ignoreZeros) override;
   void runConversion(API::Progress *pProgress) override;
 
@@ -54,8 +53,7 @@ private:
    * events to the workspace itself    */
   template <class T> size_t convertEventList(size_t workspaceIndex);
 
-  virtual void appendEventsFromInputWS(API::Progress *pProgress,
-                                       const API::BoxController_sptr &bc);
+  virtual void appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc);
 };
 
 } // namespace MDAlgorithms

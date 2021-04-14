@@ -19,8 +19,7 @@ namespace ISISReflectometry {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL MonitorCorrections {
 public:
-  MonitorCorrections(size_t monitorIndex, bool integrate,
-                     boost::optional<RangeInLambda> backgroundRange,
+  MonitorCorrections(size_t monitorIndex, bool integrate, boost::optional<RangeInLambda> backgroundRange,
                      boost::optional<RangeInLambda> integralRange);
 
   size_t monitorIndex() const;
@@ -35,10 +34,8 @@ private:
   boost::optional<RangeInLambda> m_integralRange;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(MonitorCorrections const &lhs,
-                                               MonitorCorrections const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(MonitorCorrections const &lhs,
-                                               MonitorCorrections const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(MonitorCorrections const &lhs, MonitorCorrections const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(MonitorCorrections const &lhs, MonitorCorrections const &rhs);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -97,12 +97,10 @@
 QT_BEGIN_NAMESPACE
 #endif
 
-QToolButton *
-QtButtonPropertyBrowserPrivate::createButton(QWidget *parent) const {
+QToolButton *QtButtonPropertyBrowserPrivate::createButton(QWidget *parent) const {
   auto *button = new QToolButton(parent);
   button->setCheckable(true);
-  button->setSizePolicy(
-      QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed));
+  button->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed));
   button->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
   button->setArrowType(Qt::DownArrow);
   button->setIconSize(QSize(3, 16));
@@ -144,8 +142,7 @@ int QtButtonPropertyBrowserPrivate::gridSpan(WidgetItem *item) const {
 void QtButtonPropertyBrowserPrivate::init(QWidget *parent) {
   m_mainLayout = new QGridLayout();
   parent->setLayout(m_mainLayout);
-  QLayoutItem *item =
-      new QSpacerItem(0, 0, QSizePolicy::Fixed, QSizePolicy::Expanding);
+  QLayoutItem *item = new QSpacerItem(0, 0, QSizePolicy::Fixed, QSizePolicy::Expanding);
   m_mainLayout->addItem(item, 0, 0);
 }
 
@@ -180,8 +177,7 @@ void QtButtonPropertyBrowserPrivate::slotUpdate() {
     if (!item->widget && !item->widgetLabel)
       span = 2;
     item->label = new QLabel(w);
-    item->label->setSizePolicy(
-        QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+    item->label->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
     l->addWidget(item->label, oldRow, 0, 1, span);
 
     updateItem(item);
@@ -189,8 +185,7 @@ void QtButtonPropertyBrowserPrivate::slotUpdate() {
   m_recreateQueue.clear();
 }
 
-void QtButtonPropertyBrowserPrivate::setExpanded(WidgetItem *item,
-                                                 bool expanded) {
+void QtButtonPropertyBrowserPrivate::setExpanded(WidgetItem *item, bool expanded) {
   if (item->expanded == expanded)
     return;
 
@@ -233,12 +228,9 @@ void QtButtonPropertyBrowserPrivate::slotToggled(bool checked) {
     emit q_ptr->collapsed(m_itemToIndex.value(item));
 }
 
-void QtButtonPropertyBrowserPrivate::updateLater() {
-  QTimer::singleShot(0, q_ptr, SLOT(slotUpdate()));
-}
+void QtButtonPropertyBrowserPrivate::updateLater() { QTimer::singleShot(0, q_ptr, SLOT(slotUpdate())); }
 
-void QtButtonPropertyBrowserPrivate::propertyInserted(
-    QtBrowserItem *index, QtBrowserItem *afterIndex) {
+void QtButtonPropertyBrowserPrivate::propertyInserted(QtBrowserItem *index, QtBrowserItem *afterIndex) {
   WidgetItem *afterItem = m_indexToItem.value(afterIndex);
   WidgetItem *parentItem = m_indexToItem.value(index->parent());
 
@@ -257,8 +249,7 @@ void QtButtonPropertyBrowserPrivate::propertyInserted(
   } else {
     row = gridRow(afterItem) + gridSpan(afterItem);
     if (parentItem)
-      parentItem->children.insert(parentItem->children.indexOf(afterItem) + 1,
-                                  newItem);
+      parentItem->children.insert(parentItem->children.indexOf(afterItem) + 1, newItem);
     else
       m_children.insert(m_children.indexOf(afterItem) + 1, newItem);
   }
@@ -283,8 +274,7 @@ void QtButtonPropertyBrowserPrivate::propertyInserted(
       parentItem->container = container;
       parentItem->button = createButton();
       m_buttonToItem[parentItem->button] = parentItem;
-      q_ptr->connect(parentItem->button, SIGNAL(toggled(bool)), q_ptr,
-                     SLOT(slotToggled(bool)));
+      q_ptr->connect(parentItem->button, SIGNAL(toggled(bool)), q_ptr, SLOT(slotToggled(bool)));
       parentItem->layout = new QGridLayout();
       container->setLayout(parentItem->layout);
       if (parentItem->label) {
@@ -303,17 +293,14 @@ void QtButtonPropertyBrowserPrivate::propertyInserted(
   }
 
   newItem->label = new QLabel(parentWidget);
-  newItem->label->setSizePolicy(
-      QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+  newItem->label->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
   newItem->widget = createEditor(index->property(), parentWidget);
   if (newItem->widget) {
-    QObject::connect(newItem->widget, SIGNAL(destroyed()), q_ptr,
-                     SLOT(slotEditorDestroyed()));
+    QObject::connect(newItem->widget, SIGNAL(destroyed()), q_ptr, SLOT(slotEditorDestroyed()));
     m_widgetToItem[newItem->widget] = newItem;
   } else if (index->property()->hasValue()) {
     newItem->widgetLabel = new QLabel(parentWidget);
-    newItem->widgetLabel->setSizePolicy(
-        QSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed));
+    newItem->widgetLabel->setSizePolicy(QSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed));
   }
 
   insertRow(layout, row);
@@ -401,8 +388,7 @@ void QtButtonPropertyBrowserPrivate::propertyRemoved(QtBrowserItem *index) {
   delete item;
 }
 
-void QtButtonPropertyBrowserPrivate::insertRow(QGridLayout *layout,
-                                               int row) const {
+void QtButtonPropertyBrowserPrivate::insertRow(QGridLayout *layout, int row) const {
   QMap<QLayoutItem *, QRect> itemToPos;
   int idx = 0;
   while (idx < layout->count()) {
@@ -416,15 +402,13 @@ void QtButtonPropertyBrowserPrivate::insertRow(QGridLayout *layout,
   }
 
   const QMap<QLayoutItem *, QRect>::ConstIterator icend = itemToPos.constEnd();
-  for (QMap<QLayoutItem *, QRect>::ConstIterator it = itemToPos.constBegin();
-       it != icend; ++it) {
+  for (QMap<QLayoutItem *, QRect>::ConstIterator it = itemToPos.constBegin(); it != icend; ++it) {
     const QRect r = it.value();
     layout->addItem(it.key(), r.x(), r.y(), r.width(), r.height());
   }
 }
 
-void QtButtonPropertyBrowserPrivate::removeRow(QGridLayout *layout,
-                                               int row) const {
+void QtButtonPropertyBrowserPrivate::removeRow(QGridLayout *layout, int row) const {
   QMap<QLayoutItem *, QRect> itemToPos;
   int idx = 0;
   while (idx < layout->count()) {
@@ -438,8 +422,7 @@ void QtButtonPropertyBrowserPrivate::removeRow(QGridLayout *layout,
   }
 
   const QMap<QLayoutItem *, QRect>::ConstIterator icend = itemToPos.constEnd();
-  for (QMap<QLayoutItem *, QRect>::ConstIterator it = itemToPos.constBegin();
-       it != icend; ++it) {
+  for (QMap<QLayoutItem *, QRect>::ConstIterator it = itemToPos.constBegin(); it != icend; ++it) {
     const QRect r = it.value();
     layout->addItem(it.key(), r.x(), r.y(), r.width(), r.height());
   }
@@ -536,8 +519,7 @@ void QtButtonPropertyBrowserPrivate::updateItem(WidgetItem *item) {
 /**
     Creates a property browser with the given \a parent.
 */
-QtButtonPropertyBrowser::QtButtonPropertyBrowser(QWidget *parent)
-    : QtAbstractPropertyBrowser(parent) {
+QtButtonPropertyBrowser::QtButtonPropertyBrowser(QWidget *parent) : QtAbstractPropertyBrowser(parent) {
   d_ptr = new QtButtonPropertyBrowserPrivate;
   d_ptr->q_ptr = this;
 
@@ -555,11 +537,9 @@ QtButtonPropertyBrowser::QtButtonPropertyBrowser(QWidget *parent)
     \sa QtProperty, QtAbstractPropertyManager
 */
 QtButtonPropertyBrowser::~QtButtonPropertyBrowser() {
-  const QMap<QtButtonPropertyBrowserPrivate::WidgetItem *,
-             QtBrowserItem *>::ConstIterator icend =
+  const QMap<QtButtonPropertyBrowserPrivate::WidgetItem *, QtBrowserItem *>::ConstIterator icend =
       d_ptr->m_itemToIndex.constEnd();
-  for (QMap<QtButtonPropertyBrowserPrivate::WidgetItem *,
-            QtBrowserItem *>::ConstIterator it =
+  for (QMap<QtButtonPropertyBrowserPrivate::WidgetItem *, QtBrowserItem *>::ConstIterator it =
            d_ptr->m_itemToIndex.constBegin();
        it != icend; ++it)
     delete it.key();
@@ -569,24 +549,19 @@ QtButtonPropertyBrowser::~QtButtonPropertyBrowser() {
 /**
     \reimp
 */
-void QtButtonPropertyBrowser::itemInserted(QtBrowserItem *item,
-                                           QtBrowserItem *afterItem) {
+void QtButtonPropertyBrowser::itemInserted(QtBrowserItem *item, QtBrowserItem *afterItem) {
   d_ptr->propertyInserted(item, afterItem);
 }
 
 /**
     \reimp
 */
-void QtButtonPropertyBrowser::itemRemoved(QtBrowserItem *item) {
-  d_ptr->propertyRemoved(item);
-}
+void QtButtonPropertyBrowser::itemRemoved(QtBrowserItem *item) { d_ptr->propertyRemoved(item); }
 
 /**
     \reimp
 */
-void QtButtonPropertyBrowser::itemChanged(QtBrowserItem *item) {
-  d_ptr->propertyChanged(item);
-}
+void QtButtonPropertyBrowser::itemChanged(QtBrowserItem *item) { d_ptr->propertyChanged(item); }
 
 /**
     Sets the \a item to either collapse or expanded, depending on the value of
@@ -596,8 +571,7 @@ void QtButtonPropertyBrowser::itemChanged(QtBrowserItem *item) {
 */
 
 void QtButtonPropertyBrowser::setExpanded(QtBrowserItem *item, bool expanded) {
-  QtButtonPropertyBrowserPrivate::WidgetItem *itm =
-      d_ptr->m_indexToItem.value(item);
+  QtButtonPropertyBrowserPrivate::WidgetItem *itm = d_ptr->m_indexToItem.value(item);
   if (itm)
     d_ptr->setExpanded(itm, expanded);
 }
@@ -609,8 +583,7 @@ void QtButtonPropertyBrowser::setExpanded(QtBrowserItem *item, bool expanded) {
 */
 
 bool QtButtonPropertyBrowser::isExpanded(QtBrowserItem *item) const {
-  QtButtonPropertyBrowserPrivate::WidgetItem *itm =
-      d_ptr->m_indexToItem.value(item);
+  QtButtonPropertyBrowserPrivate::WidgetItem *itm = d_ptr->m_indexToItem.value(item);
   if (itm)
     return itm->expanded;
   return false;

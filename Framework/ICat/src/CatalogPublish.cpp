@@ -35,26 +35,18 @@ DECLARE_ALGORITHM(CatalogPublish)
 
 /// Init method to declare algorithm properties
 void CatalogPublish::init() {
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "FileName", "", API::FileProperty::OptionalLoad),
+  declareProperty(std::make_unique<API::FileProperty>("FileName", "", API::FileProperty::OptionalLoad),
                   "The file to publish.");
   declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
-                      "InputWorkspace", "", Kernel::Direction::Input,
-                      API::PropertyMode::Optional),
+                      "InputWorkspace", "", Kernel::Direction::Input, API::PropertyMode::Optional),
                   "The workspace to publish.");
-  declareProperty(
-      "NameInCatalog", "",
-      "The name to give to the file being saved. The file name or workspace "
-      "name is used by default. "
-      "This can only contain alphanumerics, underscores or periods.");
-  declareProperty(
-      "InvestigationNumber", "",
-      "The investigation number where the published file will be saved to.");
-  declareProperty(
-      "DataFileDescription", "",
-      "A short description of the datafile you are publishing to the catalog.");
-  declareProperty("Session", "",
-                  "The session information of the catalog to use.");
+  declareProperty("NameInCatalog", "",
+                  "The name to give to the file being saved. The file name or workspace "
+                  "name is used by default. "
+                  "This can only contain alphanumerics, underscores or periods.");
+  declareProperty("InvestigationNumber", "", "The investigation number where the published file will be saved to.");
+  declareProperty("DataFileDescription", "", "A short description of the datafile you are publishing to the catalog.");
+  declareProperty("Session", "", "The session information of the catalog to use.");
 }
 
 /// Execute the algorithm
@@ -74,8 +66,7 @@ void CatalogPublish::exec() {
 
   // Error checking to ensure a workspace OR a file is selected. Never both.
   if ((ws.empty() && filePath.empty()) || (!ws.empty() && !filePath.empty())) {
-    throw std::runtime_error(
-        "Please select a workspace or a file to publish. Not both.");
+    throw std::runtime_error("Please select a workspace or a file to publish. Not both.");
   }
 
   // Cast a catalog to a catalogInfoService to access publishing functionality.
@@ -94,42 +85,35 @@ void CatalogPublish::exec() {
     // filename of the file being uploaded.
     if (nameInCatalog.empty()) {
       setProperty("NameInCatalog", fileName);
-      g_log.notice("NameInCatalog has not been set. Using filename instead: " +
-                   fileName + ".");
+      g_log.notice("NameInCatalog has not been set. Using filename instead: " + fileName + ".");
     }
   } else // The user wants to upload a workspace.
   {
     if (nameInCatalog.empty()) {
       setProperty("NameInCatalog", workspace->getName());
-      g_log.notice(
-          "NameInCatalog has not been set. Using workspace name instead: " +
-          workspace->getName() + ".");
+      g_log.notice("NameInCatalog has not been set. Using workspace name instead: " + workspace->getName() + ".");
     }
 
     // Save workspace to a .nxs file in the user's default directory.
     saveWorkspaceToNexus(workspace);
     // Overwrite the filePath string to the location of the file (from which the
     // workspace was saved to).
-    filePath = Mantid::Kernel::ConfigService::Instance().getString(
-                   "defaultsave.directory") +
-               workspace->getName() + ".nxs";
+    filePath =
+        Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory") + workspace->getName() + ".nxs";
   }
 
   // Obtain the mode to used base on file extension.
-  std::ios_base::openmode mode =
-      isDataFile(filePath) ? std::ios_base::binary : std::ios_base::in;
+  std::ios_base::openmode mode = isDataFile(filePath) ? std::ios_base::binary : std::ios_base::in;
   // Stream the contents of the file the user wants to publish & store it in
   // file.
   std::ifstream fileStream(filePath.c_str(), mode);
   // Verify that the file can be opened correctly.
   if (fileStream.rdstate() & std::ios::failbit)
-    throw Mantid::Kernel::Exception::FileError("Error on opening file at: ",
-                                               filePath);
+    throw Mantid::Kernel::Exception::FileError("Error on opening file at: ", filePath);
   // Publish the contents of the file to the server.
-  publish(fileStream, catalogInfoService->getUploadURL(
-                          getPropertyValue("InvestigationNumber"),
-                          getPropertyValue("NameInCatalog"),
-                          getPropertyValue("DataFileDescription")));
+  publish(fileStream,
+          catalogInfoService->getUploadURL(getPropertyValue("InvestigationNumber"), getPropertyValue("NameInCatalog"),
+                                           getPropertyValue("DataFileDescription")));
   // If a workspace was published, then we want to also publish the history of a
   // workspace.
   if (!ws.empty())
@@ -141,8 +125,7 @@ void CatalogPublish::exec() {
  * @param fileContents :: The contents of the file to publish.
  * @param uploadURL    :: The REST URL to stream the data from the file to.
  */
-void CatalogPublish::publish(std::istream &fileContents,
-                             const std::string &uploadURL) {
+void CatalogPublish::publish(std::istream &fileContents, const std::string &uploadURL) {
   try {
     Poco::URI uri(uploadURL);
     std::string path(uri.getPathAndQuery());
@@ -152,19 +135,15 @@ void CatalogPublish::publish(std::istream &fileContents,
     // Currently do not use any means of authentication. This should be updated
     // IDS has signed certificate.
     const Poco::Net::Context::Ptr context =
-        new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "",
-                               Poco::Net::Context::VERIFY_NONE);
+        new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE);
     // Create a singleton for holding the default context. E.g. any future
     // requests to publish are made to this certificate and context.
-    Poco::Net::SSLManager::instance().initializeClient(
-        nullptr, certificateHandler, context);
-    Poco::Net::HTTPSClientSession session(uri.getHost(), uri.getPort(),
-                                          context);
+    Poco::Net::SSLManager::instance().initializeClient(nullptr, certificateHandler, context);
+    Poco::Net::HTTPSClientSession session(uri.getHost(), uri.getPort(), context);
 
     // Send the HTTP request, and obtain the output stream to write to. E.g. the
     // data to publish to the server.
-    Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_PUT, path,
-                                   Poco::Net::HTTPMessage::HTTP_1_1);
+    Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_PUT, path, Poco::Net::HTTPMessage::HTTP_1_1);
     // Sets the encoding type of the request. This enables us to stream data to
     // the server.
     request.setChunkedTransferEncoding(true);
@@ -180,8 +159,7 @@ void CatalogPublish::publish(std::istream &fileContents,
     // Obtain the status returned by the server to verify if it was a success.
     Poco::Net::HTTPResponse::HTTPStatus HTTPStatus = response.getStatus();
     // The error message returned by the IDS (if one exists).
-    std::string IDSError =
-        CatalogAlgorithmHelper().getIDSError(HTTPStatus, responseStream);
+    std::string IDSError = CatalogAlgorithmHelper().getIDSError(HTTPStatus, responseStream);
     // Cancel the algorithm and display the message if it exists.
     if (!IDSError.empty()) {
       // As an error occurred we must cancel the algorithm.
@@ -209,8 +187,7 @@ void CatalogPublish::publish(std::istream &fileContents,
  */
 bool CatalogPublish::isDataFile(const std::string &filePath) {
   std::string extension = Poco::Path(filePath).getExtension();
-  std::transform(extension.begin(), extension.end(), extension.begin(),
-                 tolower);
+  std::transform(extension.begin(), extension.end(), extension.begin(), tolower);
   return extension == "raw" || extension == "nxs";
 }
 
@@ -220,18 +197,14 @@ bool CatalogPublish::isDataFile(const std::string &filePath) {
  * This is then used to publish the workspace (as a file) for ease of use later.
  * @param workspace :: The workspace to save to a file.
  */
-void CatalogPublish::saveWorkspaceToNexus(
-    Mantid::API::Workspace_sptr &workspace) {
+void CatalogPublish::saveWorkspaceToNexus(Mantid::API::Workspace_sptr &workspace) {
   // Create the save nexus algorithm to use.
-  auto saveNexus =
-      Mantid::API::AlgorithmManager::Instance().create("SaveNexus");
+  auto saveNexus = Mantid::API::AlgorithmManager::Instance().create("SaveNexus");
   saveNexus->initialize();
   // Set the required properties & execute.
   saveNexus->setProperty("InputWorkspace", workspace->getName());
-  saveNexus->setProperty("FileName",
-                         Mantid::Kernel::ConfigService::Instance().getString(
-                             "defaultsave.directory") +
-                             workspace->getName() + ".nxs");
+  saveNexus->setProperty("FileName", Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory") +
+                                         workspace->getName() + ".nxs");
   saveNexus->execute();
 }
 
@@ -240,21 +213,16 @@ void CatalogPublish::saveWorkspaceToNexus(
  * @param catalogInfoService :: The catalog to use to publish the file.
  * @param workspace :: The workspace to obtain the history from.
  */
-void CatalogPublish::publishWorkspaceHistory(
-    Mantid::API::ICatalogInfoService_sptr &catalogInfoService,
-    Mantid::API::Workspace_sptr &workspace) {
+void CatalogPublish::publishWorkspaceHistory(Mantid::API::ICatalogInfoService_sptr &catalogInfoService,
+                                             Mantid::API::Workspace_sptr &workspace) {
   std::stringstream ss;
   // Obtain the workspace history as a string.
   ss << generateWorkspaceHistory(workspace);
   // Use the name the use wants to save the file to the server as and append .py
-  std::string fileName =
-      Poco::Path(Poco::Path(getPropertyValue("NameInCatalog")).getFileName())
-          .getBaseName() +
-      ".py";
+  std::string fileName = Poco::Path(Poco::Path(getPropertyValue("NameInCatalog")).getFileName()).getBaseName() + ".py";
   // Publish the workspace history to the server.
-  publish(ss, catalogInfoService->getUploadURL(
-                  getPropertyValue("InvestigationNumber"), fileName,
-                  getPropertyValue("DataFileDescription")));
+  publish(ss, catalogInfoService->getUploadURL(getPropertyValue("InvestigationNumber"), fileName,
+                                               getPropertyValue("DataFileDescription")));
 }
 
 /**
@@ -262,10 +230,8 @@ void CatalogPublish::publishWorkspaceHistory(
  * @param workspace :: The workspace to obtain the history from.
  * @return The history of a given workspace.
  */
-const std::string CatalogPublish::generateWorkspaceHistory(
-    Mantid::API::Workspace_sptr &workspace) {
-  auto wsHistory = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-      "GeneratePythonScript");
+const std::string CatalogPublish::generateWorkspaceHistory(Mantid::API::Workspace_sptr &workspace) {
+  auto wsHistory = Mantid::API::AlgorithmManager::Instance().createUnmanaged("GeneratePythonScript");
   wsHistory->initialize();
   wsHistory->setProperty("InputWorkspace", workspace->getName());
   wsHistory->execute();

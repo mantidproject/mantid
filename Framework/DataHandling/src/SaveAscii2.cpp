@@ -35,37 +35,30 @@ using namespace API;
 
 /// Empty constructor
 SaveAscii2::SaveAscii2()
-    : m_separatorIndex(), m_nBins(0), m_sep(), m_writeDX(false),
-      m_writeID(false), m_isCommonBins(false), m_writeSpectrumAxisValue(false),
-      m_ws() {}
+    : m_separatorIndex(), m_nBins(0), m_sep(), m_writeDX(false), m_writeID(false), m_isCommonBins(false),
+      m_writeSpectrumAxisValue(false), m_ws() {}
 
 /// Initialisation method.
 void SaveAscii2::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "",
-                                                     Direction::Input),
-      "The name of the workspace containing the data you want to save to a "
-      "Ascii file.");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
+                  "The name of the workspace containing the data you want to save to a "
+                  "Ascii file.");
 
   const std::vector<std::string> asciiExts{".dat", ".txt", ".csv"};
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                 FileProperty::Save, asciiExts),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save, asciiExts),
                   "The filename of the output Ascii file.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   auto mustBeZeroGreater = std::make_shared<BoundedValidator<int>>();
   mustBeZeroGreater->setLower(0);
-  declareProperty(
-      "WorkspaceIndexMin", EMPTY_INT(), mustBeZeroGreater,
-      "The starting workspace index. Ignored for Table Workspaces.");
+  declareProperty("WorkspaceIndexMin", EMPTY_INT(), mustBeZeroGreater,
+                  "The starting workspace index. Ignored for Table Workspaces.");
   declareProperty("WorkspaceIndexMax", EMPTY_INT(), mustBeZeroGreater,
                   "The ending workspace index. Ignored for Table Workspaces.");
-  declareProperty(
-      std::make_unique<ArrayProperty<int>>("SpectrumList"),
-      "List of workspace indices to save. Ignored for Table Workspaces.");
-  declareProperty("Precision", EMPTY_INT(), mustBePositive,
-                  "Precision of output double values.");
+  declareProperty(std::make_unique<ArrayProperty<int>>("SpectrumList"),
+                  "List of workspace indices to save. Ignored for Table Workspaces.");
+  declareProperty("Precision", EMPTY_INT(), mustBePositive, "Precision of output double values.");
   declareProperty("ScientificFormat", false,
                   "If true, the values will be "
                   "written to the file in "
@@ -73,54 +66,43 @@ void SaveAscii2::init() {
   declareProperty("WriteXError", false,
                   "If true, the error on X will be written as the fourth "
                   "column. Ignored for Table Workspaces.");
-  declareProperty(
-      "WriteSpectrumID", true,
-      "If false, the spectrum No will not be written for "
-      "single-spectrum workspaces. "
-      "It is always written for workspaces with multiple spectra, "
-      "unless spectrum axis value is written. Ignored for Table Workspaces.");
+  declareProperty("WriteSpectrumID", true,
+                  "If false, the spectrum No will not be written for "
+                  "single-spectrum workspaces. "
+                  "It is always written for workspaces with multiple spectra, "
+                  "unless spectrum axis value is written. Ignored for Table Workspaces.");
 
-  declareProperty("CommentIndicator", "#",
-                  "Character(s) to put in front of comment lines.");
+  declareProperty("CommentIndicator", "#", "Character(s) to put in front of comment lines.");
 
   // For the ListValidator
-  std::string spacers[6][2] = {
-      {"CSV", ","},   {"Tab", "\t"},      {"Space", " "},
-      {"Colon", ":"}, {"SemiColon", ";"}, {"UserDefined", "UserDefined"}};
+  std::string spacers[6][2] = {{"CSV", ","},   {"Tab", "\t"},      {"Space", " "},
+                               {"Colon", ":"}, {"SemiColon", ";"}, {"UserDefined", "UserDefined"}};
   std::vector<std::string> sepOptions;
   for (auto &spacer : spacers) {
     std::string option = spacer[0];
-    m_separatorIndex.insert(
-        std::pair<std::string, std::string>(option, spacer[1]));
+    m_separatorIndex.insert(std::pair<std::string, std::string>(option, spacer[1]));
     sepOptions.emplace_back(option);
   }
 
-  declareProperty("Separator", "CSV",
-                  std::make_shared<StringListValidator>(sepOptions),
+  declareProperty("Separator", "CSV", std::make_shared<StringListValidator>(sepOptions),
                   "The separator between data columns in the data file. The "
                   "possible values are \"CSV\", \"Tab\", "
                   "\"Space\", \"SemiColon\", \"Colon\" or \"UserDefined\".");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>("CustomSeparator", "",
-                                                       Direction::Input),
-      "If present, will override any specified choice given to Separator.");
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("CustomSeparator", "", Direction::Input),
+                  "If present, will override any specified choice given to Separator.");
 
   setPropertySettings("CustomSeparator",
-                      std::make_unique<VisibleWhenProperty>(
-                          "Separator", IS_EQUAL_TO, "UserDefined"));
+                      std::make_unique<VisibleWhenProperty>("Separator", IS_EQUAL_TO, "UserDefined"));
   getPointerToProperty("CustomSeparator")->setAutoTrim(false);
-  declareProperty("ColumnHeader", true,
-                  "If true, put column headers into file. ");
+  declareProperty("ColumnHeader", true, "If true, put column headers into file. ");
 
   declareProperty("SpectrumMetaData", "",
                   "A comma separated list that defines data that describes "
                   "each spectrum in a workspace. The valid options for this "
                   "are: SpectrumNumber,Q,Angle. Ignored for Table Workspaces.");
 
-  declareProperty(
-      "AppendToFile", false,
-      "If true, don't overwrite the file. Append to the end of it. ");
+  declareProperty("AppendToFile", false, "If true, don't overwrite the file. Append to the end of it. ");
 
   declareProperty("RaggedWorkspace", true,
                   "If true, ensure that more than one xspectra is used. "
@@ -138,8 +120,7 @@ void SaveAscii2::exec() {
   // Get the workspace
   Workspace_const_sptr ws = getProperty("InputWorkspace");
   m_ws = std::dynamic_pointer_cast<const MatrixWorkspace>(ws);
-  ITableWorkspace_const_sptr tws =
-      std::dynamic_pointer_cast<const ITableWorkspace>(ws);
+  ITableWorkspace_const_sptr tws = std::dynamic_pointer_cast<const ITableWorkspace>(ws);
 
   // Get the properties valid for all workspaces
   const bool writeHeader = getProperty("ColumnHeader");
@@ -171,16 +152,13 @@ void SaveAscii2::exec() {
   }
 
   if (tws) {
-    writeTableWorkspace(tws, filename, appendToFile, writeHeader, prec,
-                        scientific, comment);
+    writeTableWorkspace(tws, filename, appendToFile, writeHeader, prec, scientific, comment);
     // return here as the rest of the class is all about matrix workspace saving
     return;
   }
 
   if (!m_ws) {
-    throw std::runtime_error(
-        "SaveAscii does not now how to save this workspace type, " +
-        ws->getName());
+    throw std::runtime_error("SaveAscii does not now how to save this workspace type, " + ws->getName());
   }
 
   // Get the properties valid for matrix workspaces
@@ -194,8 +172,7 @@ void SaveAscii2::exec() {
   std::string metaDataString = getPropertyValue("SpectrumMetaData");
   if (!metaDataString.empty()) {
     m_metaData = stringListToVector(metaDataString);
-    auto containsSpectrumNumber =
-        findElementInUnorderedStringVector(m_metaData, "spectrumnumber");
+    auto containsSpectrumNumber = findElementInUnorderedStringVector(m_metaData, "spectrumnumber");
     if (containsSpectrumNumber) {
       try {
         m_ws->getSpectrumToWorkspaceIndexMap();
@@ -207,8 +184,7 @@ void SaveAscii2::exec() {
     }
   }
   if (m_writeID) {
-    auto containsSpectrumNumber =
-        findElementInUnorderedStringVector(m_metaData, "spectrumnumber");
+    auto containsSpectrumNumber = findElementInUnorderedStringVector(m_metaData, "spectrumnumber");
     if (!containsSpectrumNumber) {
       auto firstIter = m_metaData.begin();
       m_metaData.insert(firstIter, "spectrumnumber");
@@ -218,8 +194,7 @@ void SaveAscii2::exec() {
   if (m_writeSpectrumAxisValue) {
     auto spectrumAxis = m_ws->getAxis(1);
     if (dynamic_cast<BinEdgeAxis *>(spectrumAxis)) {
-      m_axisProxy =
-          std::make_unique<AxisHelper::BinEdgeAxisProxy>(spectrumAxis);
+      m_axisProxy = std::make_unique<AxisHelper::BinEdgeAxisProxy>(spectrumAxis);
     } else {
       m_axisProxy = std::make_unique<AxisHelper::AxisProxy>(spectrumAxis);
     }
@@ -227,21 +202,18 @@ void SaveAscii2::exec() {
 
   // Check whether we need to write the fourth column
   if (!m_ws->hasDx(0) && m_writeDX) {
-    throw std::runtime_error(
-        "x data errors have been requested but do not exist.");
+    throw std::runtime_error("x data errors have been requested but do not exist.");
   }
 
   // e + and - are included as they're part of the scientific notation
-  if (!boost::regex_match(m_sep.begin(), m_sep.end(),
-                          boost::regex("[^0-9e+-]+", boost::regex::perl))) {
+  if (!boost::regex_match(m_sep.begin(), m_sep.end(), boost::regex("[^0-9e+-]+", boost::regex::perl))) {
     throw std::invalid_argument("Separators cannot contain numeric characters, "
                                 "plus signs, hyphens or 'e'");
   }
 
   if (comment.at(0) == m_sep.at(0) ||
-      !boost::regex_match(
-          comment.begin(), comment.end(),
-          boost::regex("[^0-9e" + m_sep + "+-]+", boost::regex::perl))) {
+      !boost::regex_match(comment.begin(), comment.end(),
+                          boost::regex("[^0-9e" + m_sep + "+-]+", boost::regex::perl))) {
     throw std::invalid_argument("Comment markers cannot contain numeric "
                                 "characters, plus signs, hyphens,"
                                 " 'e' or the selected separator character");
@@ -256,8 +228,7 @@ void SaveAscii2::exec() {
 
   // Add spectra interval into the index list
   if (spec_max != EMPTY_INT() && spec_min != EMPTY_INT()) {
-    if (spec_min >= nSpectra || spec_max >= nSpectra || spec_min < 0 ||
-        spec_max < 0 || spec_min > spec_max) {
+    if (spec_min >= nSpectra || spec_max >= nSpectra || spec_min < 0 || spec_max < 0 || spec_min > spec_max) {
       throw std::invalid_argument("Inconsistent spectra interval");
     }
     for (int i = spec_min; i <= spec_max; i++) {
@@ -283,8 +254,7 @@ void SaveAscii2::exec() {
   if (m_nBins == 0 || nSpectra == 0) {
     throw std::runtime_error("Trying to save an empty workspace");
   }
-  std::ofstream file(filename.c_str(),
-                     (appendToFile ? std::ios::app : std::ios::out));
+  std::ofstream file(filename.c_str(), (appendToFile ? std::ios::app : std::ios::out));
 
   if (!file) {
     g_log.error("Unable to create file: " + filename);
@@ -374,15 +344,12 @@ void SaveAscii2::writeSpectrum(const int &wsIndex, std::ofstream &file) {
  * @param inputString	:: The user input comma separated string list
  * @return A vector of valid meta data strings
  */
-std::vector<std::string>
-SaveAscii2::stringListToVector(std::string &inputString) {
+std::vector<std::string> SaveAscii2::stringListToVector(std::string &inputString) {
   const std::vector<std::string> validMetaData{"spectrumnumber", "q", "angle"};
   boost::to_lower(inputString);
-  auto stringVector =
-      Kernel::VectorHelper::splitStringIntoVector<std::string>(inputString);
+  auto stringVector = Kernel::VectorHelper::splitStringIntoVector<std::string>(inputString);
   for (const auto &input : stringVector) {
-    if (std::find(validMetaData.begin(), validMetaData.end(), input) ==
-        validMetaData.end()) {
+    if (std::find(validMetaData.begin(), validMetaData.end(), input) == validMetaData.end()) {
       throw std::runtime_error(input + " is not recognised as a possible input "
                                        "for SpectrumMetaData.\n Valid inputs "
                                        "are: SpectrumNumber, Q, Angle.");
@@ -405,8 +372,7 @@ void SaveAscii2::populateQMetaData() {
     if (!spectrumInfo.isMonitor(i)) {
       theta = 0.5 * spectrumInfo.twoTheta(i);
       try {
-        std::shared_ptr<const Geometry::IDetector> detector(
-            &spectrumInfo.detector(i), NoDeleting());
+        std::shared_ptr<const Geometry::IDetector> detector(&spectrumInfo.detector(i), NoDeleting());
         efixed = m_ws->getEFixed(detector);
       } catch (std::runtime_error &) {
         throw;
@@ -468,19 +434,15 @@ void SaveAscii2::populateAllMetaData() {
   }
 }
 
-bool SaveAscii2::findElementInUnorderedStringVector(
-    const std::vector<std::string> &vector, const std::string &toFind) {
+bool SaveAscii2::findElementInUnorderedStringVector(const std::vector<std::string> &vector, const std::string &toFind) {
   return std::find(vector.cbegin(), vector.cend(), toFind) != vector.cend();
 }
 
-void SaveAscii2::writeTableWorkspace(const ITableWorkspace_const_sptr &tws,
-                                     const std::string &filename,
-                                     bool appendToFile, bool writeHeader,
-                                     int prec, bool scientific,
+void SaveAscii2::writeTableWorkspace(const ITableWorkspace_const_sptr &tws, const std::string &filename,
+                                     bool appendToFile, bool writeHeader, int prec, bool scientific,
                                      const std::string &comment) {
 
-  std::ofstream file(filename.c_str(),
-                     (appendToFile ? std::ios::app : std::ios::out));
+  std::ofstream file(filename.c_str(), (appendToFile ? std::ios::app : std::ios::out));
 
   if (!file) {
     g_log.error("Unable to create file: " + filename);

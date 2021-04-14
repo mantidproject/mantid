@@ -19,13 +19,11 @@ namespace DataObjects {
 class DLLExport PeakShapeEllipsoid : public PeakShapeBase {
 public:
   /// Constructor
-  PeakShapeEllipsoid(const std::vector<Mantid::Kernel::V3D> &directions,
-                     const std::vector<double> &abcRadii,
+  PeakShapeEllipsoid(const std::vector<Mantid::Kernel::V3D> &directions, const std::vector<double> &abcRadii,
                      const std::vector<double> &abcRadiiBackgroundInner,
-                     const std::vector<double> &abcRadiiBackgroundOuter,
-                     Kernel::SpecialCoordinateSystem frame,
-                     std::string algorithmName = std::string(),
-                     int algorithmVersion = -1);
+                     const std::vector<double> &abcRadiiBackgroundOuter, Kernel::SpecialCoordinateSystem frame,
+                     std::string algorithmName = std::string(), int algorithmVersion = -1,
+                     const Mantid::Kernel::V3D &translation = {0.0, 0.0, 0.0});
   /// Equals operator
   bool operator==(const PeakShapeEllipsoid &other) const;
   /// Get radii
@@ -36,9 +34,10 @@ public:
   const std::vector<double> &abcRadiiBackgroundOuter() const;
   /// Get ellipsoid directions
   const std::vector<Mantid::Kernel::V3D> &directions() const;
+  /// Get translation of center
+  const Kernel::V3D &translation() const;
   /// Get ellipsoid directions in a specified frame
-  std::vector<Kernel::V3D> getDirectionInSpecificFrame(
-      Kernel::Matrix<double> &invertedGoniometerMatrix) const;
+  std::vector<Kernel::V3D> getDirectionInSpecificFrame(Kernel::Matrix<double> &invertedGoniometerMatrix) const;
 
   /// PeakShape interface
   std::string toJSON() const override;
@@ -48,8 +47,7 @@ public:
   std::string shapeName() const override;
 
   /// PeakBase interface
-  boost::optional<double>
-  radius(RadiusType type = RadiusType::Radius) const override;
+  boost::optional<double> radius(RadiusType type = RadiusType::Radius) const override;
   static const std::string ellipsoidShapeName();
 
 private:
@@ -61,6 +59,8 @@ private:
   std::vector<double> m_abc_radiiBackgroundInner;
   /// outer radii
   std::vector<double> m_abc_radiiBackgroundOuter;
+  /// translation of center
+  Mantid::Kernel::V3D m_translation;
 };
 
 using PeakShapeEllipsoid_sptr = std::shared_ptr<PeakShapeEllipsoid>;

@@ -12,9 +12,8 @@ namespace Algorithms {
 // Algorithm must be declared
 DECLARE_ALGORITHM(WeightedMean)
 
-bool WeightedMean::checkCompatibility(
-    const API::MatrixWorkspace_const_sptr lhs,
-    const API::MatrixWorkspace_const_sptr rhs) const {
+bool WeightedMean::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                                      const API::MatrixWorkspace_const_sptr rhs) const {
   if (lhs->YUnit() != rhs->YUnit()) {
     g_log.error("The two workspaces are not compatible because they have "
                 "different units for the data (Y).");
@@ -37,9 +36,8 @@ bool WeightedMean::checkCompatibility(
  *  @retval "<reason why not compatible>" The two workspaces are NOT size
  * compatible
  */
-std::string WeightedMean::checkSizeCompatibility(
-    const API::MatrixWorkspace_const_sptr lhs,
-    const API::MatrixWorkspace_const_sptr rhs) const {
+std::string WeightedMean::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                                                 const API::MatrixWorkspace_const_sptr rhs) const {
   // in order to be size compatible then the workspaces must be identically
   // sized
   if (lhs->size() == rhs->size()) {
@@ -49,10 +47,8 @@ std::string WeightedMean::checkSizeCompatibility(
   }
 }
 
-void WeightedMean::performBinaryOperation(const HistogramData::Histogram &lhs,
-                                          const HistogramData::Histogram &rhs,
-                                          HistogramData::HistogramY &YOut,
-                                          HistogramData::HistogramE &EOut) {
+void WeightedMean::performBinaryOperation(const HistogramData::Histogram &lhs, const HistogramData::Histogram &rhs,
+                                          HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) {
   const size_t bins = lhs.size();
   for (size_t j = 0; j < bins; ++j) {
     if (lhs.e()[j] > 0.0 && rhs.e()[j] > 0.0) {
@@ -75,10 +71,8 @@ void WeightedMean::performBinaryOperation(const HistogramData::Histogram &lhs,
   }
 }
 
-void WeightedMean::performBinaryOperation(const HistogramData::Histogram &lhs,
-                                          const double rhsY, const double rhsE,
-                                          HistogramData::HistogramY &YOut,
-                                          HistogramData::HistogramE &EOut) {
+void WeightedMean::performBinaryOperation(const HistogramData::Histogram &lhs, const double rhsY, const double rhsE,
+                                          HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) {
   assert(lhs.size() == 1);
   // If we get here we've got two single column workspaces so it's easy.
   if (lhs.e()[0] > 0.0 && rhsE > 0.0) {

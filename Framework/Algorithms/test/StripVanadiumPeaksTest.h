@@ -55,8 +55,7 @@ public:
     TS_ASSERT(strip.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        outputWSName);
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWSName);
 
     // Get a spectrum
     const auto &X = output->x(2);

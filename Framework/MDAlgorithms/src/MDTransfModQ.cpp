@@ -21,9 +21,8 @@ the WS data will be converted into the requested units on the fly.
 transformation
 @param inWS   -- input matrix workspace, the subject of transformation.
 */
-const std::string
-MDTransfModQ::inputUnitID(Kernel::DeltaEMode::Type dEmode,
-                          API::MatrixWorkspace_const_sptr inWS) const {
+const std::string MDTransfModQ::inputUnitID(Kernel::DeltaEMode::Type dEmode,
+                                            API::MatrixWorkspace_const_sptr inWS) const {
   UNUSED_ARG(inWS);
   switch (dEmode) {
   case (Kernel::DeltaEMode::Elastic):
@@ -45,9 +44,8 @@ MDTransfModQ::inputUnitID(Kernel::DeltaEMode::Type dEmode,
 transformation
 @param inWS   -- input matrix workspace, the subject of transformation.
 */
-unsigned int
-MDTransfModQ::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
-                                   API::MatrixWorkspace_const_sptr inWS) const {
+unsigned int MDTransfModQ::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
+                                                API::MatrixWorkspace_const_sptr inWS) const {
   UNUSED_ARG(inWS);
   switch (mode) {
   case (Kernel::DeltaEMode::Direct):
@@ -57,8 +55,7 @@ MDTransfModQ::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
   case (Kernel::DeltaEMode::Elastic):
     return 1;
   default:
-    throw(
-        std::invalid_argument("Unknown or unsupported energy conversion mode"));
+    throw(std::invalid_argument("Unknown or unsupported energy conversion mode"));
   }
 }
 
@@ -77,8 +74,7 @@ No signal or error transformation is performed by this particular method.
 @return Coord -- the calculated coordinate of the point in the reciprocal space.
 
 */
-bool MDTransfModQ::calcMatrixCoord(const double &deltaEOrK0,
-                                   std::vector<coord_t> &Coord, double &signal,
+bool MDTransfModQ::calcMatrixCoord(const double &deltaEOrK0, std::vector<coord_t> &Coord, double &signal,
                                    double &ErrSq) const {
   UNUSED_ARG(signal);
   UNUSED_ARG(ErrSq);
@@ -99,15 +95,12 @@ bool MDTransfModQ::calcMatrixCoord(const double &deltaEOrK0,
  *@returns     -- Coord vector with nd-(1 or 2, depending on emode) values of MD
  *coordinates
  */
-bool MDTransfModQ::calcGenericVariables(std::vector<coord_t> &Coord,
-                                        size_t nd) {
+bool MDTransfModQ::calcGenericVariables(std::vector<coord_t> &Coord, size_t nd) {
   // sanity check. If fails, something went fundamentally wrong
   if (m_NMatrixDim + m_AddDimCoordinates.size() != nd) {
-    std::string ERR =
-        "Number of matrix dimensions: " + std::to_string(m_NMatrixDim) +
-        " plus number of additional dimensions: " +
-        std::to_string(m_AddDimCoordinates.size()) +
-        " not equal to number of workspace dimensions: " + std::to_string(nd);
+    std::string ERR = "Number of matrix dimensions: " + std::to_string(m_NMatrixDim) +
+                      " plus number of additional dimensions: " + std::to_string(m_AddDimCoordinates.size()) +
+                      " not equal to number of workspace dimensions: " + std::to_string(nd);
     throw(std::invalid_argument(ERR));
   }
 
@@ -117,8 +110,7 @@ bool MDTransfModQ::calcGenericVariables(std::vector<coord_t> &Coord,
   // m_NMatrixDim is either 1 in elastic case or 2 in inelastic
   size_t ic(0);
   for (size_t i = m_NMatrixDim; i < nd; i++) {
-    if (m_AddDimCoordinates[ic] < m_DimMin[i] ||
-        m_AddDimCoordinates[ic] >= m_DimMax[i])
+    if (m_AddDimCoordinates[ic] < m_DimMin[i] || m_AddDimCoordinates[ic] >= m_DimMax[i])
       return false;
     Coord[i] = m_AddDimCoordinates[ic];
     ic++;
@@ -167,8 +159,7 @@ the algorithm and false otherwise.
 * it also uses preprocessed detectors positions, which are calculated by
 PreprocessDetectors algorithm and set up by
 * calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i) method.    */
-bool MDTransfModQ::calcMatrixCoordInelastic(const double &deltaE,
-                                            std::vector<coord_t> &Coord) const {
+bool MDTransfModQ::calcMatrixCoordInelastic(const double &deltaE, std::vector<coord_t> &Coord) const {
   if (deltaE < m_DimMin[1] || deltaE >= m_DimMax[1])
     return false;
   Coord[1] = static_cast<coord_t>(deltaE);
@@ -176,14 +167,12 @@ bool MDTransfModQ::calcMatrixCoordInelastic(const double &deltaE,
   // x,y,z refer to internal coordinate system where Z is the beam direction
   double qx{0.0}, qy{0.0}, qz{0.0};
   if (this->m_Emode == Kernel::DeltaEMode::Direct) {
-    const double kFinal = sqrt((m_eFixed - deltaE) /
-                               PhysicalConstants::E_mev_toNeutronWavenumberSq);
+    const double kFinal = sqrt((m_eFixed - deltaE) / PhysicalConstants::E_mev_toNeutronWavenumberSq);
     qx = -m_ex * kFinal;
     qy = -m_ey * kFinal;
     qz = m_kFixed - m_ez * kFinal;
   } else {
-    const double kInitial = sqrt(
-        (m_eFixed + deltaE) / PhysicalConstants::E_mev_toNeutronWavenumberSq);
+    const double kInitial = sqrt((m_eFixed + deltaE) / PhysicalConstants::E_mev_toNeutronWavenumberSq);
     qx = -m_ex * m_kFixed;
     qy = -m_ey * m_kFixed;
     qz = kInitial - m_ez * m_kFixed;
@@ -216,8 +205,7 @@ false otherwise.
 * it uses preprocessed detectors positions, which are calculated by
 PreprocessDetectors algorithm and set up by
 * calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i) method. */
-bool MDTransfModQ::calcMatrixCoordElastic(const double &k0,
-                                          std::vector<coord_t> &Coord) const {
+bool MDTransfModQ::calcMatrixCoordElastic(const double &k0, std::vector<coord_t> &Coord) const {
 
   double qx = -m_ex * k0;
   double qy = -m_ey * k0;
@@ -244,9 +232,7 @@ bool MDTransfModQ::calcMatrixCoordElastic(const double &k0,
  *inelastic) for the transformation
  * @param det_num -- number of the instrument detector for the transformation
  */
-std::vector<double> MDTransfModQ::getExtremumPoints(const double eMin,
-                                                    const double eMax,
-                                                    size_t det_num) const {
+std::vector<double> MDTransfModQ::getExtremumPoints(const double eMin, const double eMax, size_t det_num) const {
   std::vector<double> rez(2);
   switch (m_Emode) {
   case (Kernel::DeltaEMode::Elastic): {
@@ -274,8 +260,7 @@ std::vector<double> MDTransfModQ::getExtremumPoints(const double eMin,
     return rez;
   }
   default: {
-    throw std::invalid_argument(
-        "Undefined or unsupported energy conversion mode ");
+    throw std::invalid_argument("Undefined or unsupported energy conversion mode ");
   }
   }
   return rez;
@@ -294,8 +279,7 @@ void MDTransfModQ::initialize(const MDWSDescription &ConvParams) {
                              "they have to before running initialize"));
 
   // get pointer to the positions of the detectors
-  std::vector<Kernel::V3D> const &DetDir =
-      ConvParams.m_PreprDetTable->getColVector<Kernel::V3D>("DetDirections");
+  std::vector<Kernel::V3D> const &DetDir = ConvParams.m_PreprDetTable->getColVector<Kernel::V3D>("DetDirections");
   m_DetDirecton = &DetDir[0]; //
 
   // get min and max values defined by the algorithm.
@@ -310,12 +294,10 @@ void MDTransfModQ::initialize(const MDWSDescription &ConvParams) {
   // m_DimMin here is a momentum and it is verified on momentum squared base
   m_DimMin[0] *= m_DimMin[0];
   m_DimMax[0] *= m_DimMax[0];
-  if (std::fabs(m_DimMin[0] - m_DimMax[0]) < FLT_EPSILON ||
-      m_DimMax[0] < m_DimMin[0]) {
-    std::string ERR = "ModQ coordinate transformation: Min Q^2 value: " +
-                      boost::lexical_cast<std::string>(m_DimMin[0]) +
-                      " is more or equal then Max Q^2 value: " +
-                      boost::lexical_cast<std::string>(m_DimMax[0]);
+  if (std::fabs(m_DimMin[0] - m_DimMax[0]) < FLT_EPSILON || m_DimMax[0] < m_DimMin[0]) {
+    std::string ERR =
+        "ModQ coordinate transformation: Min Q^2 value: " + boost::lexical_cast<std::string>(m_DimMin[0]) +
+        " is more or equal then Max Q^2 value: " + boost::lexical_cast<std::string>(m_DimMax[0]);
     throw(std::invalid_argument(ERR));
   }
   m_AddDimCoordinates = ConvParams.getAddCoord();
@@ -323,19 +305,15 @@ void MDTransfModQ::initialize(const MDWSDescription &ConvParams) {
   //************   specific part of the initialization, dependent on emode:
   m_Emode = ConvParams.getEMode();
   m_NMatrixDim = getNMatrixDimensions(m_Emode);
-  if (m_Emode == Kernel::DeltaEMode::Direct ||
-      m_Emode == Kernel::DeltaEMode::Indirect) {
+  if (m_Emode == Kernel::DeltaEMode::Direct || m_Emode == Kernel::DeltaEMode::Indirect) {
     // energy needed in inelastic case
-    volatile auto Ei =
-        ConvParams.m_PreprDetTable->getLogs()->getPropertyValueAsType<double>(
-            "Ei");
+    volatile auto Ei = ConvParams.m_PreprDetTable->getLogs()->getPropertyValueAsType<double>("Ei");
     m_eFixed = Ei;
     if (Ei != m_eFixed) // Ei is NaN, try Efixed, but the value should be
                         // overridden later
     {
       try {
-        m_eFixed = ConvParams.m_PreprDetTable->getLogs()
-                       ->getPropertyValueAsType<double>("eFixed");
+        m_eFixed = ConvParams.m_PreprDetTable->getLogs()->getPropertyValueAsType<double>("eFixed");
       } catch (...) {
       }
     }
@@ -344,11 +322,9 @@ void MDTransfModQ::initialize(const MDWSDescription &ConvParams) {
     m_kFixed = sqrt(m_eFixed / PhysicalConstants::E_mev_toNeutronWavenumberSq);
     m_pEfixedArray = nullptr;
     if (m_Emode == static_cast<int>(Kernel::DeltaEMode::Indirect))
-      m_pEfixedArray =
-          ConvParams.m_PreprDetTable->getColDataArray<float>("eFixed");
+      m_pEfixedArray = ConvParams.m_PreprDetTable->getColDataArray<float>("eFixed");
   } else if (m_Emode != Kernel::DeltaEMode::Elastic)
-    throw(std::invalid_argument(
-        "MDTransfModQ::initialize::Unknown energy conversion mode"));
+    throw(std::invalid_argument("MDTransfModQ::initialize::Unknown energy conversion mode"));
 
   m_pDetMasks = ConvParams.m_PreprDetTable->getColDataArray<int>("detMask");
 }
@@ -363,9 +339,8 @@ conversion mode.
 The position of each dimID in the vector corresponds to the position of each MD
 coordinate in the Coord vector
 */
-std::vector<std::string>
-MDTransfModQ::getDefaultDimID(Kernel::DeltaEMode::Type dEmode,
-                              API::MatrixWorkspace_const_sptr inWS) const {
+std::vector<std::string> MDTransfModQ::getDefaultDimID(Kernel::DeltaEMode::Type dEmode,
+                                                       API::MatrixWorkspace_const_sptr inWS) const {
   UNUSED_ARG(inWS);
   std::vector<std::string> default_dim_ID;
   switch (dEmode) {
@@ -380,8 +355,7 @@ MDTransfModQ::getDefaultDimID(Kernel::DeltaEMode::Type dEmode,
     break;
   }
   default:
-    throw(std::invalid_argument(
-        "MDTransfModQ::getDefaultDimID::Unknown energy conversion mode"));
+    throw(std::invalid_argument("MDTransfModQ::getDefaultDimID::Unknown energy conversion mode"));
   }
   default_dim_ID[0] = "|Q|";
 
@@ -393,9 +367,8 @@ MDTransfModQ::getDefaultDimID(Kernel::DeltaEMode::Type dEmode,
  * @param inWS -- Input Matrix workspace
  *
  * It is Momentum and DelteE in inelastic modes   */
-std::vector<std::string>
-MDTransfModQ::outputUnitID(Kernel::DeltaEMode::Type dEmode,
-                           API::MatrixWorkspace_const_sptr inWS) const {
+std::vector<std::string> MDTransfModQ::outputUnitID(Kernel::DeltaEMode::Type dEmode,
+                                                    API::MatrixWorkspace_const_sptr inWS) const {
   UNUSED_ARG(inWS);
   std::vector<std::string> UnitID = this->getDefaultDimID(dEmode, inWS);
   // TODO: is it really momentum transfer, as MomentumTransfer units are seems
@@ -414,21 +387,17 @@ MDTransfModQ::MDTransfModQ()
     : m_ex(0), m_ey(0), m_ez(1), m_DetDirecton(nullptr), //,m_NMatrixDim(-1)
       m_NMatrixDim(0),                                   // uninitialized
       m_Emode(Kernel::DeltaEMode::Undefined),            // uninitialized
-      m_kFixed(1.), m_eFixed(1.), m_pEfixedArray(nullptr),
-      m_pDetMasks(nullptr) {}
+      m_kFixed(1.), m_eFixed(1.), m_pEfixedArray(nullptr), m_pDetMasks(nullptr) {}
 
-std::vector<std::string> MDTransfModQ::getEmodes() const {
-  return Kernel::DeltaEMode::availableTypes();
-}
+std::vector<std::string> MDTransfModQ::getEmodes() const { return Kernel::DeltaEMode::availableTypes(); }
 
 /**
  * Set the display normalization for Q
  * @param mdWorkspace: the md workspace
  * @param underlyingWorkspace: the underlying workspace
  */
-void MDTransfModQ::setDisplayNormalization(
-    Mantid::API::IMDWorkspace_sptr mdWorkspace,
-    Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const {
+void MDTransfModQ::setDisplayNormalization(Mantid::API::IMDWorkspace_sptr mdWorkspace,
+                                           Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const {
   DisplayNormalizationSetter setter;
   auto isQ = true;
   setter(mdWorkspace, underlyingWorkspace, isQ, m_Emode);

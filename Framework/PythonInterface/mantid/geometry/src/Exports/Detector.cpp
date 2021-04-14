@@ -23,9 +23,8 @@ bool isMaskedDeprecated(const Detector &self) {
 }
 
 bool isMonitorDeprecated(const Detector &self) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "'Detector::isMonitor' is deprecated, "
-             "use 'DetectorInfo::isMonitor' instead.");
+  PyErr_Warn(PyExc_DeprecationWarning, "'Detector::isMonitor' is deprecated, "
+                                       "use 'DetectorInfo::isMonitor' instead.");
   const auto &detInfo = self.parameterMap().detectorInfo();
   return detInfo.isMonitor(self.index());
 }
@@ -36,8 +35,7 @@ bool isMonitorDeprecated(const Detector &self) {
  * appropriate Detector leaf type
  */
 void export_Detector() {
-  class_<Detector, bases<IDetector, ObjComponent>, boost::noncopyable>(
-      "Detector", no_init)
+  class_<Detector, bases<IDetector, ObjComponent>, boost::noncopyable>("Detector", no_init)
       .def("isMasked", &isMaskedDeprecated, arg("self"),
            "Returns the value of the masked flag. True means ignore this "
            "detector")

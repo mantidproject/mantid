@@ -152,7 +152,7 @@ Instruments, or any component within them (bank, detector, chopper, slit etc) ca
     print("  The type of NumberParam in bank 1: " + bank1.getParameterType("NumberParam"))
     print("  The type of NumberParam in bank 2: " + bank2.getParameterType("NumberParam"))
 
-Output: 
+Output:
 
 .. testoutput:: InstrumentParameters
 

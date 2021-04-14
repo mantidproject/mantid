@@ -28,7 +28,7 @@ and :math:`a` is the half-width half maximum of the local field Lorentzian Distr
 Note that :math:`0<q<1` and :math:`\gamma>0`
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np

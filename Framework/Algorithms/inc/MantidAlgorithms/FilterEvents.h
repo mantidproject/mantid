@@ -28,13 +28,7 @@ class TimeAtSampleStrategy;
 */
 class MANTID_ALGORITHMS_DLL FilterEvents : public API::Algorithm {
 
-  enum TOFCorrectionType {
-    NoneCorrect,
-    CustomizedCorrect,
-    DirectCorrect,
-    ElasticCorrect,
-    IndirectCorrect
-  };
+  enum TOFCorrectionType { NoneCorrect, CustomizedCorrect, DirectCorrect, ElasticCorrect, IndirectCorrect };
   enum TOFCorrectionOp { MultiplyOp, ShiftOp };
   enum EVENTFILTERSKIP { EventFilterSkipNoDet, EventFilterSkipNoDetTOFCorr };
 
@@ -56,9 +50,7 @@ public:
   }
 
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Events\\EventFiltering";
-  }
+  const std::string category() const override { return "Events\\EventFiltering"; }
   std::map<std::string, std::string> validateInputs() override;
 
 private:
@@ -118,49 +110,36 @@ private:
   /// (itarget)
   void convertSplittersWorkspaceToVectors();
 
-  void splitTimeSeriesLogs(
-      const std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_vector,
-      const std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_vector,
-      const std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_vector,
-      const std::vector<Kernel::TimeSeriesProperty<std::string> *>
-          &string_tsp_vector);
+  void splitTimeSeriesLogs(const std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_vector,
+                           const std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_vector,
+                           const std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_vector,
+                           const std::vector<Kernel::TimeSeriesProperty<std::string> *> &string_tsp_vector);
 
   /// get the names of all the time series properties in the input workspace's
   /// Run object
   std::vector<std::string> getTimeSeriesLogNames();
 
-  void generateSplitterTSP(
-      std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>>
-          &split_tsp_vec);
+  void generateSplitterTSP(std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>> &split_tsp_vec);
 
-  void generateSplitterTSPalpha(
-      std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>>
-          &split_tsp_vec);
+  void generateSplitterTSPalpha(std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>> &split_tsp_vec);
 
   /// Add time series property 'Splitter' to each child workspace
-  void mapSplitterTSPtoWorkspaces(
-      std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>>
-          &split_tsp_vec);
+  void mapSplitterTSPtoWorkspaces(std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>> &split_tsp_vec);
 
-  void copyNoneSplitLogs(
-      std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_name_vector,
-      std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_name_vector,
-      std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_name_vector,
-      std::vector<Kernel::TimeSeriesProperty<std::string> *>
-          &string_tsp_vector);
+  void copyNoneSplitLogs(std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_name_vector,
+                         std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_name_vector,
+                         std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_name_vector,
+                         std::vector<Kernel::TimeSeriesProperty<std::string> *> &string_tsp_vector);
 
   template <typename TYPE>
-  void splitTimeSeriesProperty(
-      Kernel::TimeSeriesProperty<TYPE> *tsp,
-      std::vector<Types::Core::DateAndTime> &split_datetime_vec,
-      const int max_target_index);
+  void splitTimeSeriesProperty(Kernel::TimeSeriesProperty<TYPE> *tsp,
+                               std::vector<Types::Core::DateAndTime> &split_datetime_vec, const int max_target_index);
 
   void groupOutputWorkspace();
 
   /// calculate split-workspace's duration according to splitter time series
   /// property
-  double calculate_duration(
-      std::unique_ptr<Kernel::TimeSeriesProperty<int>> &splitter_tsp);
+  double calculate_duration(std::unique_ptr<Kernel::TimeSeriesProperty<int>> &splitter_tsp);
 
   DataObjects::EventWorkspace_sptr m_eventWS;
   DataObjects::SplittersWorkspace_sptr m_splittersWorkspace;

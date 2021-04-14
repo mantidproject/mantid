@@ -74,15 +74,12 @@ struct InY {
 } // namespace
 
 GramCharlierComptonProfile::GramCharlierComptonProfile()
-    : ComptonProfile(), m_hermite(), m_yfine(), m_qfine(), m_voigt(),
-      m_voigtProfile(), m_userFixedFSE(false) {}
+    : ComptonProfile(), m_hermite(), m_yfine(), m_qfine(), m_voigt(), m_voigtProfile(), m_userFixedFSE(false) {}
 
 /**
  * @returns A string containing the name of the function
  */
-std::string GramCharlierComptonProfile::name() const {
-  return "GramCharlierComptonProfile";
-}
+std::string GramCharlierComptonProfile::name() const { return "GramCharlierComptonProfile"; }
 
 void GramCharlierComptonProfile::declareParameters() {
   // Base class ones
@@ -105,8 +102,7 @@ void GramCharlierComptonProfile::declareAttributes() {
  * @param name The name of the attribute
  * @param value The attribute's value
  */
-void GramCharlierComptonProfile::setAttribute(const std::string &name,
-                                              const Attribute &value) {
+void GramCharlierComptonProfile::setAttribute(const std::string &name, const Attribute &value) {
   if (name == HERMITE_C_NAME)
     setHermiteCoefficients(value.asString());
   ComptonProfile::setAttribute(name, value);
@@ -117,11 +113,9 @@ void GramCharlierComptonProfile::setAttribute(const std::string &name,
  * @param coeffs A string of space separated 1/0 values indicating which
  * polynomial coefficients to include in the fitting
  */
-void GramCharlierComptonProfile::setHermiteCoefficients(
-    const std::string &coeffs) {
+void GramCharlierComptonProfile::setHermiteCoefficients(const std::string &coeffs) {
   if (coeffs.empty()) {
-    throw std::invalid_argument(
-        "GramCharlierComptonProfile - Hermite polynomial string is empty!");
+    throw std::invalid_argument("GramCharlierComptonProfile - Hermite polynomial string is empty!");
   }
   m_hermite.clear();
   m_hermite.reserve(3); // Maximum guess
@@ -130,9 +124,7 @@ void GramCharlierComptonProfile::setHermiteCoefficients(
     short value;
     is >> value;
     if (!is) {
-      throw std::invalid_argument(
-          "NCSCountRate - Error reading int from hermite coefficient string: " +
-          coeffs);
+      throw std::invalid_argument("NCSCountRate - Error reading int from hermite coefficient string: " + coeffs);
     }
     m_hermite.emplace_back(value);
   }
@@ -158,8 +150,7 @@ void GramCharlierComptonProfile::declareGramCharlierParameters() {
   }
 }
 
-std::vector<size_t>
-GramCharlierComptonProfile::intensityParameterIndices() const {
+std::vector<size_t> GramCharlierComptonProfile::intensityParameterIndices() const {
   assert(!m_hermite.empty());
 
   std::vector<size_t> indices;
@@ -167,8 +158,7 @@ GramCharlierComptonProfile::intensityParameterIndices() const {
   for (size_t i = 0; i < m_hermite.size(); ++i) {
     if (m_hermite[i] > 0) {
       std::ostringstream os;
-      os << HERMITE_PREFIX
-         << 2 * i; // refactor to have method that produces the name
+      os << HERMITE_PREFIX << 2 * i; // refactor to have method that produces the name
       indices.emplace_back(this->parameterIndex(os.str()));
     }
   }
@@ -190,9 +180,8 @@ GramCharlierComptonProfile::intensityParameterIndices() const {
  * @param errors Data errors array
  * @returns The number of columns filled
  */
-size_t GramCharlierComptonProfile::fillConstraintMatrix(
-    Kernel::DblMatrix &cmatrix, const size_t start,
-    const HistogramData::HistogramE &errors) const {
+size_t GramCharlierComptonProfile::fillConstraintMatrix(Kernel::DblMatrix &cmatrix, const size_t start,
+                                                        const HistogramData::HistogramE &errors) const {
   std::vector<double> profile(NFINE_Y, 0.0);
   const size_t nData(ySpace().size());
   std::vector<double> result(nData, 0.0);
@@ -216,11 +205,9 @@ size_t GramCharlierComptonProfile::fillConstraintMatrix(
     addMassProfile(profile.data(), npoly);
     convoluteVoigt(result.data(), nData, profile);
     if (i == 0 && m_userFixedFSE) {
-      std::transform(result.begin(), result.end(), convolvedFSE.begin(),
-                     result.begin(), std::plus<double>());
+      std::transform(result.begin(), result.end(), convolvedFSE.begin(), result.begin(), std::plus<double>());
     }
-    std::transform(result.begin(), result.end(), errors.begin(), result.begin(),
-                   std::divides<double>());
+    std::transform(result.begin(), result.end(), errors.begin(), result.begin(), std::divides<double>());
     cmatrix.setColumn(start + col, result);
 
     std::fill_n(profile.begin(), NFINE_Y, 0.0);
@@ -230,8 +217,8 @@ size_t GramCharlierComptonProfile::fillConstraintMatrix(
 
   if (!m_userFixedFSE) // Extra column for He3
   {
-    std::transform(convolvedFSE.begin(), convolvedFSE.end(), errors.begin(),
-                   convolvedFSE.begin(), std::divides<double>());
+    std::transform(convolvedFSE.begin(), convolvedFSE.end(), errors.begin(), convolvedFSE.begin(),
+                   std::divides<double>());
     cmatrix.setColumn(start + col, convolvedFSE);
     ++col;
   }
@@ -246,8 +233,7 @@ size_t GramCharlierComptonProfile::fillConstraintMatrix(
  * results
  * @param nData The length of the array
  */
-void GramCharlierComptonProfile::massProfile(double *result,
-                                             const size_t nData) const {
+void GramCharlierComptonProfile::massProfile(double *result, const size_t nData) const {
   UNUSED_ARG(nData);
 
   using namespace Mantid::Kernel;
@@ -276,8 +262,7 @@ void GramCharlierComptonProfile::massProfile(double *result,
  * results. Size is fixed at NFINE_Y
  * @param npoly An integer denoting the polynomial to calculate
  */
-void GramCharlierComptonProfile::addMassProfile(
-    double *result, const unsigned int npoly) const {
+void GramCharlierComptonProfile::addMassProfile(double *result, const unsigned int npoly) const {
 
   using namespace Mantid::Kernel;
 
@@ -331,9 +316,8 @@ void GramCharlierComptonProfile::addFSETerm(std::vector<double> &lhs) const {
  * @param nData The length of the array
  * @param profile The input mass profile
  */
-void GramCharlierComptonProfile::convoluteVoigt(
-    double *result, const size_t nData,
-    const std::vector<double> &profile) const {
+void GramCharlierComptonProfile::convoluteVoigt(double *result, const size_t nData,
+                                                const std::vector<double> &profile) const {
   const auto &modq = modQ();
   const auto &ei = e0();
 
@@ -343,8 +327,7 @@ void GramCharlierComptonProfile::convoluteVoigt(
     const std::vector<double> &voigt = m_voigt[i];
     // Multiply voigt with polynomial sum and put result in voigt to save using
     // another vector
-    std::transform(voigt.begin(), voigt.end(), profile.begin(),
-                   m_voigtProfile.begin(), std::multiplies<double>());
+    std::transform(voigt.begin(), voigt.end(), profile.begin(), m_voigtProfile.begin(), std::multiplies<double>());
     const double prefactor = std::pow(ei[i], 0.1) * mass() / modq[i];
     result[i] = prefactor * trapzf(m_yfine, m_voigtProfile);
   }
@@ -357,9 +340,8 @@ void GramCharlierComptonProfile::convoluteVoigt(
  * @param startX Starting x-vaue (unused).
  * @param endX Ending x-vaue (unused).
  */
-void GramCharlierComptonProfile::setMatrixWorkspace(
-    std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
-    double startX, double endX) {
+void GramCharlierComptonProfile::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
+                                                    double startX, double endX) {
   ComptonProfile::setMatrixWorkspace(workspace, wi, startX,
                                      endX); // Do base-class calculation first
 }
@@ -368,9 +350,8 @@ void GramCharlierComptonProfile::setMatrixWorkspace(
  * @param tseconds A vector containing the time-of-flight values in seconds
  * @param detpar Structure containing detector parameters
  */
-void GramCharlierComptonProfile::cacheYSpaceValues(
-    const HistogramData::Points &tseconds,
-    const Algorithms::DetectorParams &detpar) {
+void GramCharlierComptonProfile::cacheYSpaceValues(const HistogramData::Points &tseconds,
+                                                   const Algorithms::DetectorParams &detpar) {
   ComptonProfile::cacheYSpaceValues(tseconds,
                                     detpar); // base-class calculations
 
@@ -408,8 +389,7 @@ void GramCharlierComptonProfile::cacheYSpaceValues(
 
   // Set up GSL interpolater
   gsl_interp_accel *acc = gsl_interp_accel_alloc();
-  gsl_spline *spline = gsl_spline_alloc(
-      gsl_interp_linear, ncoarseY); // Actually a linear interpolater
+  gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, ncoarseY); // Actually a linear interpolater
   gsl_spline_init(spline, sortedy.data(), sortedq.data(), ncoarseY);
   for (int i = 0; i < NFINE_Y - 1; ++i) {
     const double xi = miny + step * i;
@@ -425,10 +405,8 @@ void GramCharlierComptonProfile::cacheYSpaceValues(
   // Cache voigt function over yfine
   std::vector<double> minusYFine(NFINE_Y);
   using std::placeholders::_1;
-  std::transform(m_yfine.begin(), m_yfine.end(), minusYFine.begin(),
-                 std::bind(std::multiplies<double>(), _1, -1.0));
-  std::vector<double> ym(
-      NFINE_Y); // Holds result of (y[i] - yfine) for each original y
+  std::transform(m_yfine.begin(), m_yfine.end(), minusYFine.begin(), std::bind(std::multiplies<double>(), _1, -1.0));
+  std::vector<double> ym(NFINE_Y); // Holds result of (y[i] - yfine) for each original y
   m_voigt.resize(ncoarseY);
 
   for (size_t i = 0; i < ncoarseY; ++i) {
@@ -436,9 +414,8 @@ void GramCharlierComptonProfile::cacheYSpaceValues(
     voigt.resize(NFINE_Y);
 
     const double yi = yspace[i];
-    std::transform(
-        minusYFine.begin(), minusYFine.end(), ym.begin(),
-        std::bind(std::plus<double>(), _1, yi)); // yfine is actually -yfine
+    std::transform(minusYFine.begin(), minusYFine.end(), ym.begin(),
+                   std::bind(std::plus<double>(), _1, yi)); // yfine is actually -yfine
     m_resolutionFunction->voigtApprox(voigt, ym, 0, 1.0);
   }
 

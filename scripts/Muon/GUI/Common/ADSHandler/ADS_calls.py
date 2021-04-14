@@ -11,5 +11,10 @@ def remove_ws(name):
     AnalysisDataService.remove(name)
 
 
+def remove_ws_if_present(name):
+    if AnalysisDataService.doesExist(name):
+        AnalysisDataService.remove(name)
+
+
 def retrieve_ws(name):
     return  AnalysisDataService.retrieve(name)

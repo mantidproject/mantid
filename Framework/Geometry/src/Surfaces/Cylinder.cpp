@@ -83,8 +83,8 @@ int Cylinder::setSurface(const std::string &Pstr)
 
   std::string Line = Pstr;
   std::string item;
-  if (!Mantid::Kernel::Strings::section(Line, item) ||
-      tolower(item[0]) != 'c' || item.length() < 2 || item.length() > 3)
+  if (!Mantid::Kernel::Strings::section(Line, item) || tolower(item[0]) != 'c' || item.length() < 2 ||
+      item.length() > 3)
     return errDesc;
 
   // Cylinders on X/Y/Z axis
@@ -241,17 +241,16 @@ void Cylinder::setBaseEqn()
  */
 {
   const double CdotN(m_centre.scalar_prod(m_normal));
-  BaseEqn[0] = 1.0 - m_normal[0] * m_normal[0];           // A x^2
-  BaseEqn[1] = 1.0 - m_normal[1] * m_normal[1];           // B y^2
-  BaseEqn[2] = 1.0 - m_normal[2] * m_normal[2];           // C z^2
-  BaseEqn[3] = -2 * m_normal[0] * m_normal[1];            // D xy
-  BaseEqn[4] = -2 * m_normal[0] * m_normal[2];            // E xz
-  BaseEqn[5] = -2 * m_normal[1] * m_normal[2];            // F yz
-  BaseEqn[6] = 2.0 * (m_normal[0] * CdotN - m_centre[0]); // G x
-  BaseEqn[7] = 2.0 * (m_normal[1] * CdotN - m_centre[1]); // H y
-  BaseEqn[8] = 2.0 * (m_normal[2] * CdotN - m_centre[2]); // J z
-  BaseEqn[9] = m_centre.scalar_prod(m_centre) - CdotN * CdotN -
-               m_radius * m_radius; // K const
+  BaseEqn[0] = 1.0 - m_normal[0] * m_normal[0];                                      // A x^2
+  BaseEqn[1] = 1.0 - m_normal[1] * m_normal[1];                                      // B y^2
+  BaseEqn[2] = 1.0 - m_normal[2] * m_normal[2];                                      // C z^2
+  BaseEqn[3] = -2 * m_normal[0] * m_normal[1];                                       // D xy
+  BaseEqn[4] = -2 * m_normal[0] * m_normal[2];                                       // E xz
+  BaseEqn[5] = -2 * m_normal[1] * m_normal[2];                                       // F yz
+  BaseEqn[6] = 2.0 * (m_normal[0] * CdotN - m_centre[0]);                            // G x
+  BaseEqn[7] = 2.0 * (m_normal[1] * CdotN - m_centre[1]);                            // H y
+  BaseEqn[8] = 2.0 * (m_normal[2] * CdotN - m_centre[2]);                            // J z
+  BaseEqn[9] = m_centre.scalar_prod(m_centre) - CdotN * CdotN - m_radius * m_radius; // K const
 }
 
 double Cylinder::distance(const Kernel::V3D &A) const
@@ -316,8 +315,7 @@ void Cylinder::write(std::ostream &OX) const
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
 }
 
-double Cylinder::lineIntersect(const Kernel::V3D &Pt,
-                               const Kernel::V3D &uVec) const
+double Cylinder::lineIntersect(const Kernel::V3D &Pt, const Kernel::V3D &uVec) const
 /**
  Given a track starting from Pt and traveling along
  uVec determine the intersection point (distance)
@@ -343,8 +341,7 @@ void Cylinder::print() const
   logger.debug() << "Radius == " << m_radius << '\n';
 }
 
-void Cylinder::getBoundingBox(double &xmax, double &ymax, double &zmax,
-                              double &xmin, double &ymin, double &zmin) {
+void Cylinder::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) {
   /**
    Cylinder bounding box
    find the intersection points of the axis of cylinder with the input bounding
@@ -396,8 +393,7 @@ void Cylinder::getBoundingBox(double &xmax, double &ymax, double &zmax,
   if (!listOfPoints.empty()) {
     xmin = ymin = zmin = std::numeric_limits<double>::max();
     xmax = ymax = zmax = std::numeric_limits<double>::lowest();
-    for (std::vector<V3D>::const_iterator it = listOfPoints.begin();
-         it != listOfPoints.end(); ++it) {
+    for (std::vector<V3D>::const_iterator it = listOfPoints.begin(); it != listOfPoints.end(); ++it) {
       //			std::cout<<(*it)<<'\n';
       if ((*it)[0] < xmin)
         xmin = (*it)[0];

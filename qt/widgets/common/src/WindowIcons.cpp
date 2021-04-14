@@ -63,8 +63,7 @@ void WindowIcons::initInternalLookup() {
   m_idToPixmapName["Graph3D"] = "trajectory_xpm";
   m_idToPixmapName["Graph"] = "graph_xpm";
   m_idToPixmapName["Workspace"] = "mantid_matrix_xpm";
-  m_idToPixmapName["SliceViewer"] =
-      ":/SliceViewer/icons/SliceViewerWindow_icon.png";
+  m_idToPixmapName["SliceViewer"] = ":/SliceViewer/icons/SliceViewerWindow_icon.png";
 }
 
 /**
@@ -78,8 +77,7 @@ void WindowIcons::initInternalLookup() {
  */
 QIcon WindowIcons::makeIconFromFile(const std::string &path) const {
   QIcon icon;
-  icon.addFile(QString::fromStdString(path), QSize(), QIcon::Normal,
-               QIcon::Off);
+  icon.addFile(QString::fromStdString(path), QSize(), QIcon::Normal, QIcon::Off);
   return icon;
 }
 } // namespace API

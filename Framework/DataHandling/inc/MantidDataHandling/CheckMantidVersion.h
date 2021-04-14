@@ -32,8 +32,7 @@ private:
 
   std::string cleanVersionTag(const std::string &versionTag) const;
   std::vector<int> splitVersionString(const std::string &versionString) const;
-  bool isVersionMoreRecent(const std::string &localVersion,
-                           const std::string &gitHubVersion) const;
+  bool isVersionMoreRecent(const std::string &localVersion, const std::string &gitHubVersion) const;
 };
 
 } // namespace DataHandling

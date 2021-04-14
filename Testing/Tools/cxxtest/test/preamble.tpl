@@ -19,7 +19,7 @@ int main()
     TS_FAIL( "This will not be displayed" );
     int result = runner.run() + runner.run();
     TS_FAIL( "This will not be displayed" );
-    
+
     return result;
 }
 

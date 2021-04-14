@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
+#include "MantidDataObjects/Peak.h"
 #include "MantidQtWidgets/InstrumentView/PeakOverlay.h"
 
 #include <QFontMetrics>
@@ -20,6 +21,8 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
+using Mantid::DataObjects::Peak;
+using Mantid::Geometry::IPeak;
 /// Default size in screen pixels of the marker's symbol
 const int PeakMarker2D::g_defaultMarkerSize = 5;
 
@@ -122,14 +125,16 @@ void PeakMarker2D::drawSquare(QPainter &painter) const {
 /**
  * Save some peak information.
  */
-void PeakMarker2D::setPeak(const Mantid::Geometry::IPeak &peak, int row) {
-  m_h = peak.getH();
-  m_k = peak.getK();
-  m_l = peak.getL();
+void PeakMarker2D::setPeak(const IPeak &ipeak, int row) {
+  m_h = ipeak.getH();
+  m_k = ipeak.getK();
+  m_l = ipeak.getL();
   m_label = QString("%1 %2 %3")
                 .arg(QString::number(m_h, 'g', 2), QString::number(m_k, 'g', 2),
                      QString::number(m_l, 'g', 2));
-  m_detID = peak.getDetectorID();
+  auto peak = dynamic_cast<const Peak *>(&ipeak);
+  if (peak)
+    m_detID = peak->getDetectorID();
   m_row = row;
 }
 

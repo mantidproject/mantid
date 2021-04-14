@@ -38,8 +38,7 @@ public:
   /// Return current value of the cost function
   double costFunctionVal() override;
   /// Initialize minimizer, i.e. pass a function to minimize.
-  void initialize(API::ICostFunction_sptr function,
-                  size_t maxIterations = 0) override;
+  void initialize(API::ICostFunction_sptr function, size_t maxIterations = 0) override;
 
 protected:
   void resetSize(const double &size);

@@ -1,0 +1,120 @@
+name: HYSPEC
+# Input file for PyChop for the HYSPEC spectrometer at SNS.
+# At a minium, the "chopper_system" and "moderator" entries must be present
+
+# This file uses pulse widths data computed from the SNS_IRP2_TD_BL5_30o70p_fit_fit.dat file
+# See https://jupyter.sns.gov/user/lj7/notebooks/dv/sns-chops/resolution/HYSPEC/moderator%20fitfit.ipynb#
+
+chopper_system:
+  name: HYSPEC chopper system
+  chop_sam: 3.61                # Distance (x1) from final chopper to sample (m)
+  sam_det: 4.5                  # Distance (x2) from sample to detector (m)
+  choppers:
+    -
+      name: HYSPEC T1A Chopper
+      distance: 9.400           # Distance from moderator to this chopper in metres
+      slot_width: 94.7          # Slot width in mm.  angle/360.*2*pi*R. angle=21.7 deg.(from SING14B-20-EQ0007-R00 p 17)
+      guide_width: 40           # Width of guide after chopper in mm (from SING14B-20-EQ0005-R00 p 15)
+      nslot: 1                  # Number of slots. (Assume all slots equally spaced)
+      radius: 250               # Disk radius (assume middle of beam...) (from SING14B-20-EQ0007-R00 p 17)
+      isDouble: False           # Is this a double disk system?
+      isPhaseIndependent: False # Is this disk to be phased independently?
+    -
+      name: HYSPEC T1B Chopper
+      distance: 36.46           # Distance from moderator to this chopper in metres
+      slot_width: 94.7          # Slot width in mm.  angle/360.*2*pi*R. angle=21.7 deg.(from SING14B-20-EQ0007-R00 p 17)
+      guide_width: 40           # Width of guide after chopper in mm (from SING14B-20-EQ0005-R00 p 15)
+      nslot: 1                  # Number of slots. (Assume all slots equally spaced)
+      radius: 250               # Disk radius (from SING14B-20-EQ0007-R00 p 17)
+      isDouble: False           # Is this a double disk system?
+      isPhaseIndependent: False # Is this disk to be phased independently?
+    -
+      name: HYSPEC Fermi Chopper
+      distance: 37.17           # Distance from moderator to this chopper in metres
+      aperture_distance: 37.0   # Distance from aperture (moderator face) to this chopper (only for Fermi)
+      packages:                 # A hash of chopper packages
+        OnlyOne:
+          name: HYSPEC Only Chopper
+          pslit: 0.6            # Neutron transparent slit width (mm) SING14B-20-EQ0006-R00 p 12
+          pslat: 0.06           # Neutron absorbing slat width (mm) SING14B-20-EQ0006-R00 p 12
+          radius: 5.0          # Chopper package radius (mm) 10 mm long, SING14B-20-EQ0006-R00 p 12
+          rho: 1000000.0        # Chopper package curvature (mm) (it is flat, so approx with large number)
+          tjit: 0.0             # Jitter time (us)
+          fluxcorr: 1.0         # (Empirical/Fudge) factor to scale calculated flux by
+          isPi: True            # Should the PI pulse (at 180 deg rotation) be transmitted by this package?
+#      slot_width: 110           # Slot width in mm.  angle/360.*2*pi*R. angle=9.0 deg.
+#      guide_width: 40           # Width of guide after chopper in mm
+#      nslot: 2                  # Number of slots. (Assume all slots equally spaced)
+#      radius: 282.5             # Disk radius
+#      isDouble: False           # Is this a double disk system?
+#      isPhaseIndependent: False # Is this disk to be phased independently?
+  # Now define how the frequencies of the choppers should be related
+  # This is an NxM matrix A where N is the number of choppers and M is the number of indepdent frequencies
+  # Such that A.F will give the N required frequencies for each chopper from the M input frequencies
+  frequency_matrix:             # HYSPEC is run with one main frequency:
+    [[0],
+     [0],
+     [1]]                       #   f1: The frequency of the resolution chopper (Chopper 4)
+  constant_frequencies:         # This specifies if a chopper should be run at a fixed constant frequency
+    [60., 60., 0.]              # On HYSPEC, the rep/frame-overlap choppers should always run at 60 Hz
+  frequency_names:
+    - 'Fermi frequency'
+  max_frequencies:
+    [420]                  # Maximum frequencies (Hz)
+  default_frequencies:
+    [180]
+  overlap_ei_frac: 0.9          # Fraction of energy loss Ei to plot ToF lines in time-distance plots
+  ei_limits: [3.6, 61.0]            # Limits on ei for multirep calculations (reps outside range ignored)
+  flux_ref_slot: 40             # Reference slot width (mm) for flux transmission calculation (disk choppers only)
+  flux_ref_freq: 180            # Reference final chopper freq (Hz) for flux transmission calc (disk choppers only)
+  # Can define variants which overide one of the above parameters
+
+detector:
+  name: He3 PSD tubes
+  idet: 2                       # Detector type: 1==He tube binned together, 2==He tube
+  dd: 0.025                     # Detector depth (diameter for tube) in metres
+  tbin: 0.0                     # Detector time bins (microseconds)
+  phi: 60.0                     # Detector scattering angle (degrees)
+  tthlims: [5.0, 65.0]          # Min and max 2-theta angles of detectors (for Q-E plot)
+# for HYSPEC we will need
+
+moderator:
+  name: TS2 Hydrogen            # A==water, AP==poisoned water, CH4==methane, H2==hydrogen. This is only used for analytical calculations
+                                # of the flux distribution for ISIS TS1 moderators. If measured_flux is defined below, name can be anything
+  imod: 3                       # Moderator time profile type: 0==chi^2, 1==Ikeda-Carpenter, 2==modified chi^2
+  mod_pars: [0.0]
+                                # imod==3 is polynomial. Pars are coeff from highest order to lowest
+  theta: 32.0                   # Angle beamline makes with moderator face (degrees)
+  source_rep: 60                # Frequency of source (Hz)
+  n_frame: 6                    # Number of frames to calculate time-distance diagram for
+  emission_time: 3500           # Time width of source pulse in microseconds (only used to determine spurious reps in multi-rep mode)
+  measured_width:
+    wavelength: [28.60141458, 26.65479018, 24.84065387, 23.14998844, 21.57439041,
+               20.10602826, 18.73760346, 17.46231422, 16.27382172, 15.16621852,
+               14.13399926, 13.17203328, 12.27553911, 11.44006072, 10.66144534,
+                9.93582285,  9.25958654,  8.62937515,  8.04205622,  7.49471047,
+                6.9846173 ,  6.50924128,  6.06621956,  5.65335009,  5.26858069,
+                4.90999885,  4.57582225,  4.26438985,  3.97415367,  3.70367109,
+                3.45159766,  3.21668046,  2.99775183,  2.79372357,  2.60358156,
+                2.42638069,  2.2612402 ,  2.10733923,  1.96391283,  1.83024809,
+                1.70568063,  1.58959128,  1.48140303,  1.38057811,  1.28661538,
+                1.19904779,  1.11744009,  1.04138664,  0.97050943,  0.90445614]
+    width:       [349.37, 354.02, 358.23, 361.74, 364.36, 365.84, 366.  , 364.71,
+       361.86, 357.47, 351.6 , 344.4 , 336.06, 326.81, 316.87, 306.49,
+       295.86, 285.14, 274.45, 263.89, 253.48, 243.24, 233.12, 223.05,
+       212.97, 202.77, 192.43, 181.89, 171.24, 160.57, 150.08, 139.97,
+       130.4 , 121.38, 112.68, 103.81,  94.24,  83.71,  72.47,  61.31,
+        51.03,  42.13,  34.74,  28.75,  23.98,  20.19,  17.17,  14.77,
+        12.85,  11.29 ]
+    isSigma: false
+  measured_flux:                # Table of measured flux vs wavelength. Wavelength in Angstrom. Flux in n/cm^2/s/uA/Angstrom
+    scale_factor: 1.0    # A factor to scale the flux values below by
+    wavelength: [1.28,1.53,1.74,2.02,2.34,3.3,3.69,4.04,4.64]
+    flux: [4.23,8.42,12.52,21.27,30.67,24.92,18.72,12.33,11.60] #from V_fits2, sheet PGApr2014, yellow
+sample:
+  name: Sample Can
+  isam: 2                       # Sample type: 0==flat plate, 1==ellipse, 2==annulus, 3==sphere, 4==solid cylinder
+  sx: 10.0                      # Thickness (mm)
+  sy: 10.0                      # Width (mm)
+  sz: 30.0                      # Height (mm)
+  gamma: 0.                     # Angle of x-axis to ki (degrees)

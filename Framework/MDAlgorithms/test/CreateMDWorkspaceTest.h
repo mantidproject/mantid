@@ -31,68 +31,56 @@ public:
 
   void test_default_properties() {
     TS_ASSERT(FrameworkManager::Instance()
-                  .exec("CreateMDWorkspace", 10, "OutputWorkspace", "simple_md",
-                        "Dimensions", "3", "Extents", "-1,1,-2,2,3,3", "Names",
-                        "One,Two,Three", "Units", "One,Two,Three")
+                  .exec("CreateMDWorkspace", 10, "OutputWorkspace", "simple_md", "Dimensions", "3", "Extents",
+                        "-1,1,-2,2,3,3", "Names", "One,Two,Three", "Units", "One,Two,Three")
                   ->isExecuted());
   }
 
   /** Validate bad inputs. */
   void test_validation() {
     TS_ASSERT(!FrameworkManager::Instance()
-                   .exec("CreateMDWorkspace", 4, "OutputWorkspace",
-                         "failed_output", "Dimensions", "0")
+                   .exec("CreateMDWorkspace", 4, "OutputWorkspace", "failed_output", "Dimensions", "0")
                    ->isExecuted());
     TS_ASSERT(!FrameworkManager::Instance()
-                   .exec("CreateMDWorkspace", 6, "OutputWorkspace",
-                         "failed_output", "Dimensions", "3", "Extents",
+                   .exec("CreateMDWorkspace", 6, "OutputWorkspace", "failed_output", "Dimensions", "3", "Extents",
                          "-1,1,-2,2")
                    ->isExecuted());
     TS_ASSERT(!FrameworkManager::Instance()
-                   .exec("CreateMDWorkspace", 6, "OutputWorkspace",
-                         "failed_output", "Dimensions", "3", "Extents",
+                   .exec("CreateMDWorkspace", 6, "OutputWorkspace", "failed_output", "Dimensions", "3", "Extents",
                          "-1,1,-2,2,3,3,4,4")
                    ->isExecuted());
     TS_ASSERT(!FrameworkManager::Instance()
-                   .exec("CreateMDWorkspace", 8, "OutputWorkspace",
-                         "failed_output", "Dimensions", "3", "Extents",
+                   .exec("CreateMDWorkspace", 8, "OutputWorkspace", "failed_output", "Dimensions", "3", "Extents",
                          "-1,1,-2,2,3,3", "Names", "One,Two")
                    ->isExecuted());
     TS_ASSERT(!FrameworkManager::Instance()
-                   .exec("CreateMDWorkspace", 12, "OutputWorkspace",
-                         "failed_output", "Dimensions", "3", "Extents",
-                         "-1,1,-2,2,3,3", "Names", "One,Two,Three",
-                         "MinRecursionDepth", "5", "MaxRecursionDepth", "4")
+                   .exec("CreateMDWorkspace", 12, "OutputWorkspace", "failed_output", "Dimensions", "3", "Extents",
+                         "-1,1,-2,2,3,3", "Names", "One,Two,Three", "MinRecursionDepth", "5", "MaxRecursionDepth", "4")
                    ->isExecuted());
 
     // Wrong Frame-type input
-    TS_ASSERT_THROWS(FrameworkManager::Instance().exec(
-                         "CreateMDWorkspace", 12, "OutputWorkspace",
-                         "simple_md", "Dimensions", "3", "Extents",
-                         "-1,1,-2,2,3,3", "Names", "One,Two,Three", "Units",
-                         "One,Two,Three", "Frames", "QSample, QTest, QSample"),
+    TS_ASSERT_THROWS(FrameworkManager::Instance().exec("CreateMDWorkspace", 12, "OutputWorkspace", "simple_md",
+                                                       "Dimensions", "3", "Extents", "-1,1,-2,2,3,3", "Names",
+                                                       "One,Two,Three", "Units", "One,Two,Three", "Frames",
+                                                       "QSample, QTest, QSample"),
                      const std::runtime_error &);
 
     // Wrong number of frames
-    TS_ASSERT_THROWS(FrameworkManager::Instance().exec(
-                         "CreateMDWorkspace", 12, "OutputWorkspace",
-                         "simple_md", "Dimensions", "3", "Extents",
-                         "-1,1,-2,2,3,3", "Names", "One,Two,Three", "Units",
-                         "One,Two,Three", "Frames", "QSample, QSample"),
+    TS_ASSERT_THROWS(FrameworkManager::Instance().exec("CreateMDWorkspace", 12, "OutputWorkspace", "simple_md",
+                                                       "Dimensions", "3", "Extents", "-1,1,-2,2,3,3", "Names",
+                                                       "One,Two,Three", "Units", "One,Two,Three", "Frames",
+                                                       "QSample, QSample"),
                      const std::runtime_error &);
 
     // Uses too much memory
     TS_ASSERT(!FrameworkManager::Instance()
-                   .exec("CreateMDWorkspace", 14, "OutputWorkspace",
-                         "failed_output", "Dimensions", "3", "Extents",
-                         "-1,1,-2,2,3,3", "Names", "One,Two,Three", "Units",
-                         "One,Two,Three", "SplitInto", "10",
+                   .exec("CreateMDWorkspace", 14, "OutputWorkspace", "failed_output", "Dimensions", "3", "Extents",
+                         "-1,1,-2,2,3,3", "Names", "One,Two,Three", "Units", "One,Two,Three", "SplitInto", "10",
                          "MinRecursionDepth", "5", "MaxRecursionDepth", "5")
                    ->isExecuted());
   }
 
-  void do_test_exec(const std::string &Filename, bool lean,
-                    int MinRecursionDepth = 0, int expectedNumMDBoxes = 216,
+  void do_test_exec(const std::string &Filename, bool lean, int MinRecursionDepth = 0, int expectedNumMDBoxes = 216,
                     bool withFrames = false) {
 
     std::string wsName = "CreateMDWorkspaceTest_out";
@@ -126,8 +114,7 @@ public:
     // Get it from data service
     IMDEventWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = std::dynamic_pointer_cast<IMDEventWorkspace>(
-            AnalysisDataService::Instance().retrieve(wsName)));
+        ws = std::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
     TS_ASSERT(ws);
 
     // Correct info?
@@ -152,15 +139,13 @@ public:
     BoxController_sptr bc;
 
     if (lean) {
-      MDEventWorkspace3Lean::sptr ews =
-          std::dynamic_pointer_cast<MDEventWorkspace3Lean>(ws);
+      MDEventWorkspace3Lean::sptr ews = std::dynamic_pointer_cast<MDEventWorkspace3Lean>(ws);
       TS_ASSERT(ews);
       if (!ews)
         return;
       bc = ews->getBoxController();
     } else {
-      MDEventWorkspace3::sptr ews =
-          std::dynamic_pointer_cast<MDEventWorkspace3>(ws);
+      MDEventWorkspace3::sptr ews = std::dynamic_pointer_cast<MDEventWorkspace3>(ws);
       TS_ASSERT(ews);
       if (!ews)
         return;
@@ -190,14 +175,13 @@ public:
     if (withFrames) {
       for (size_t dim = 0; dim < ws->getNumDims(); ++dim) {
         const auto &frame = ws->getDimension(dim)->getMDFrame();
-        TSM_ASSERT_EQUALS("Should be convertible to a QSample frame",
-                          Mantid::Geometry::QSample::QSampleName, frame.name());
+        TSM_ASSERT_EQUALS("Should be convertible to a QSample frame", Mantid::Geometry::QSample::QSampleName,
+                          frame.name());
       }
     } else {
       for (size_t dim = 0; dim < ws->getNumDims(); ++dim) {
         const auto &frame = ws->getDimension(dim)->getMDFrame();
-        TSM_ASSERT_EQUALS("Should be convertible to a General frame",
-                          Mantid::Geometry::GeneralFrame::GeneralFrameName,
+        TSM_ASSERT_EQUALS("Should be convertible to a General frame", Mantid::Geometry::GeneralFrame::GeneralFrameName,
                           frame.name());
       }
     }
@@ -205,15 +189,11 @@ public:
 
   void test_exec_MDEvent() { do_test_exec("", false); }
 
-  void test_exec_MDEvent_fileBacked() {
-    do_test_exec("CreateMDWorkspaceTest.nxs", false);
-  }
+  void test_exec_MDEvent_fileBacked() { do_test_exec("CreateMDWorkspaceTest.nxs", false); }
 
   void test_exec_MDLeanEvent() { do_test_exec("", true); }
 
-  void test_exec_MDLeanEvent_fileBacked() {
-    do_test_exec("CreateMDWorkspaceTest.nxs", true);
-  }
+  void test_exec_MDLeanEvent_fileBacked() { do_test_exec("CreateMDWorkspaceTest.nxs", true); }
 
   void test_exec_MinRecursionDepth() { do_test_exec("", true, 2, 216 * 216); }
 };

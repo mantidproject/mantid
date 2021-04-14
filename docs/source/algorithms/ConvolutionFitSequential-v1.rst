@@ -55,28 +55,28 @@ Usage
                                              ConvolveMembers=convolve,
                                              Minimizer=minimizer, MaxIterations=maxIt)
   result_ws = result_ws[0]
-  
+
   print("Result has %i Spectra" %result_ws.getNumberHistograms())
-  
+
   print("Amplitude 0: %.3f" %(result_ws.readY(0)[0]))
   print("Amplitude 1: %.3f" %(result_ws.readY(0)[1]))
   print("Amplitude 2: %.3f" %(result_ws.readY(0)[2]))
-  
+
   print("X axis at 0: %.5f" %(result_ws.readX(0)[0]))
   print("X axis at 1: %.5f" %(result_ws.readX(0)[1]))
   print("X axis at 2: %.5f" %(result_ws.readX(0)[2]))
-  
+
   print("Amplitude Err 0: %.5f" %(result_ws.readE(0)[0]))
   print("Amplitude Err 1: %.5f" %(result_ws.readE(0)[1]))
   print("Amplitude Err 2: %.5f" %(result_ws.readE(0)[2]))
 
-Output:  
-  
+Output:
+
 .. testoutput:: ConvolutionFitSequentialExample
   :options: +NORMALIZE_WHITESPACE
 
   Result has 3 Spectra
-  
+
   Amplitude 0: 4.314
   Amplitude 1: 4.213
   Amplitude 2: 4.555
@@ -84,7 +84,7 @@ Output:
   X axis at 0: 0.52531
   X axis at 1: 0.72917
   X axis at 2: 0.92340
-  
+
   Amplitude Err 0: 0.00460
   Amplitude Err 1: 0.00468
   Amplitude Err 2: 0.00577

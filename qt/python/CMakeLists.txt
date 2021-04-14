@@ -111,6 +111,8 @@ if(ENABLE_WORKBENCH)
         mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogview.py
         mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
         mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
+        mantidqt/widgets/memorywidget/test/test_memoryinfo.py
+        mantidqt/widgets/memorywidget/test/test_memorypresenter.py
         mantidqt/widgets/plotconfigdialog/axestabwidget/test/test_axestabwidgetpresenter.py
         mantidqt/widgets/plotconfigdialog/curvestabwidget/test/test_curveproperties.py
         mantidqt/widgets/plotconfigdialog/curvestabwidget/test/test_curvestabwidgetpresenter.py
@@ -119,6 +121,7 @@ if(ENABLE_WORKBENCH)
         mantidqt/widgets/plotconfigdialog/imagestabwidget/test/test_imagestabwidgetpresenter.py
         mantidqt/widgets/plotconfigdialog/test/test_plotconfigdialogpresenter.py
         mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
+        mantidqt/widgets/samplematerialdialog/test/test_samplematerial_presenter.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_cursortracker.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_model.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_movemousecursor.py

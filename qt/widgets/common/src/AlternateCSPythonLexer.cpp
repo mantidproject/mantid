@@ -10,8 +10,7 @@
  * Construct a lexer with a font to be used for all text styles
  * @param font A font to used for the text
  */
-AlternateCSPythonLexer::AlternateCSPythonLexer(const QFont &font)
-    : QsciLexerPython(), m_font(font) {}
+AlternateCSPythonLexer::AlternateCSPythonLexer(const QFont &font) : QsciLexerPython(), m_font(font) {}
 
 /**
  * Returns the foreground colour of the text for a style.

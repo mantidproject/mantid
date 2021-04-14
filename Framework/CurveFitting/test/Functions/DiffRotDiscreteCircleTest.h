@@ -30,9 +30,7 @@ class DiffRotDiscreteCircleTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DiffRotDiscreteCircleTest *createSuite() {
-    return new DiffRotDiscreteCircleTest();
-  }
+  static DiffRotDiscreteCircleTest *createSuite() { return new DiffRotDiscreteCircleTest(); }
   static void destroySuite(DiffRotDiscreteCircleTest *suite) { delete suite; }
 
   // convolve the elastic part with a resolution function, here a Gaussian
@@ -53,8 +51,7 @@ public:
     const double r = random_value(0.3, 9.8);
     const double Q = 0.9;
     const int N = 6;
-    std::shared_ptr<ElasticDiffRotDiscreteCircle> structure_factor(
-        new ElasticDiffRotDiscreteCircle());
+    std::shared_ptr<ElasticDiffRotDiscreteCircle> structure_factor(new ElasticDiffRotDiscreteCircle());
     structure_factor->setParameter("Height", I);
     structure_factor->setParameter("Radius", r);
     structure_factor->setAttributeValue("Q", Q);
@@ -83,26 +80,17 @@ public:
     Mantid::API::FunctionValues out_resolution(xView);
     resolution->function(xView, out_resolution);
     for (size_t i = 0; i < M; i++)
-      TS_ASSERT_DELTA(out.getCalculated(i),
-                      scaling * out_resolution.getCalculated(i), 1e-3);
+      TS_ASSERT_DELTA(out.getCalculated(i), scaling * out_resolution.getCalculated(i), 1e-3);
 
   } // testDiffRotDiscreteCircleElastic
 
-  void testDiffRotDiscreteCircleInelasticWithQParam() {
-    runDiffRotDiscreteCircleInelasticTest(0.0, 0.20092);
-  }
+  void testDiffRotDiscreteCircleInelasticWithQParam() { runDiffRotDiscreteCircleInelasticTest(0.0, 0.20092); }
 
-  void testDiffRotDiscreteCircleInelasticWithWSIndex() {
-    runDiffRotDiscreteCircleInelasticTest(0.0);
-  }
+  void testDiffRotDiscreteCircleInelasticWithWSIndex() { runDiffRotDiscreteCircleInelasticTest(0.0); }
 
-  void testDiffRotDiscreteCircleInelasticWithShiftWithQParam() {
-    runDiffRotDiscreteCircleInelasticTest(0.5, 0.20092);
-  }
+  void testDiffRotDiscreteCircleInelasticWithShiftWithQParam() { runDiffRotDiscreteCircleInelasticTest(0.5, 0.20092); }
 
-  void testDiffRotDiscreteCircleInelasticWithShiftWithWSIndex() {
-    runDiffRotDiscreteCircleInelasticTest(0.5);
-  }
+  void testDiffRotDiscreteCircleInelasticWithShiftWithWSIndex() { runDiffRotDiscreteCircleInelasticTest(0.5); }
 
   /* Check the particular case for N = 3
    * In this case, the inelastic part should reduce to a single Lorentzian in
@@ -147,8 +135,7 @@ public:
     // // for debugging purposes only
 
     // check the parameters of the InelasticDiffRotDiscreteCircle did not change
-    Mantid::API::IFunction_sptr fitalg_structure_factor =
-        fitalg.getProperty("Function");
+    Mantid::API::IFunction_sptr fitalg_structure_factor = fitalg.getProperty("Function");
     TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("Intensity"), I,
                     I * 0.01); // allow for a small percent variation
     TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("Radius"), R,
@@ -186,8 +173,7 @@ public:
     func.setAttributeValue("N", N);
 
     // check values where correctly initialized
-    auto ids = std::dynamic_pointer_cast<InelasticDiffRotDiscreteCircle>(
-        func.getFunction(1));
+    auto ids = std::dynamic_pointer_cast<InelasticDiffRotDiscreteCircle>(func.getFunction(1));
     TS_ASSERT_EQUALS(ids->getParameter("Intensity"), I);
     TS_ASSERT_EQUALS(ids->getParameter("Radius"), R);
     TS_ASSERT_EQUALS(ids->getParameter("Decay"), tao);
@@ -196,8 +182,7 @@ public:
 
     // check the ties were applied correctly
     func.applyTies(); // elastic parameters are tied to inelastic parameters
-    auto eds = std::dynamic_pointer_cast<ElasticDiffRotDiscreteCircle>(
-        func.getFunction(0));
+    auto eds = std::dynamic_pointer_cast<ElasticDiffRotDiscreteCircle>(func.getFunction(0));
     TS_ASSERT_EQUALS(eds->getParameter("Height"), I);
     TS_ASSERT_EQUALS(eds->getParameter("Radius"), R);
     TS_ASSERT_EQUALS(eds->getAttribute("Q").asDouble(), Q);
@@ -217,16 +202,14 @@ public:
     func.setParameter("Decay", tao);
 
     // check the parameter of the inelastic part
-    auto ifunc = std::dynamic_pointer_cast<InelasticDiffRotDiscreteCircle>(
-        func.getFunction(1));
+    auto ifunc = std::dynamic_pointer_cast<InelasticDiffRotDiscreteCircle>(func.getFunction(1));
     TS_ASSERT_EQUALS(ifunc->getParameter("Intensity"), I);
     TS_ASSERT_EQUALS(ifunc->getParameter("Radius"), R);
     TS_ASSERT_EQUALS(ifunc->getParameter("Decay"), tao);
 
     // check the parameters of the elastic part
     func.applyTies(); // elastic parameters are tied to inelastic parameters
-    auto efunc = std::dynamic_pointer_cast<ElasticDiffRotDiscreteCircle>(
-        func.getFunction(0));
+    auto efunc = std::dynamic_pointer_cast<ElasticDiffRotDiscreteCircle>(func.getFunction(0));
     TS_ASSERT_EQUALS(efunc->getParameter("Height"), I);
     TS_ASSERT_EQUALS(efunc->getParameter("Radius"), R);
 
@@ -238,12 +221,11 @@ public:
     // initialize the fitting function in a Fit algorithm
     // Parameter units are assumed in micro-eV, Angstroms, Angstroms**(-1), and
     // nano-seconds. Intensities have arbitrary units
-    std::string funtion_string =
-        "(composite=Convolution,FixResolution=true,NumDeriv=true;name=Gaussian,"
-        "Height=1,PeakCentre=0,Sigma=20,ties=(Height=1,PeakCentre=0,Sigma=20);("
-        "name=DiffRotDiscreteCircle,N=3,NumDeriv=true,Q=0.20092,Intensity=47."
-        "014,"
-        "Radius=1.567,Decay=0.07567))";
+    std::string funtion_string = "(composite=Convolution,FixResolution=true,NumDeriv=true;name=Gaussian,"
+                                 "Height=1,PeakCentre=0,Sigma=20,ties=(Height=1,PeakCentre=0,Sigma=20);("
+                                 "name=DiffRotDiscreteCircle,N=3,NumDeriv=true,Q=0.20092,Intensity=47."
+                                 "014,"
+                                 "Radius=1.567,Decay=0.07567))";
 
     // Initialize the fit function in the Fit algorithm
     Algorithms::Fit fitalg;
@@ -258,12 +240,11 @@ public:
     // purposes only
 
     // override the function with new parameters, then do the Fit
-    funtion_string =
-        "(composite=Convolution,FixResolution=true,NumDeriv=true;"
-        "name=Gaussian,Height=1,PeakCentre=0,Sigma=20,ties=("
-        "Height=1,PeakCentre=0,Sigma=20);(name="
-        "DiffRotDiscreteCircle,N=3,NumDeriv=true,Q=0.20092,Intensity="
-        "20.0,Radius=1.567,Decay=0.1))";
+    funtion_string = "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+                     "name=Gaussian,Height=1,PeakCentre=0,Sigma=20,ties=("
+                     "Height=1,PeakCentre=0,Sigma=20);(name="
+                     "DiffRotDiscreteCircle,N=3,NumDeriv=true,Q=0.20092,Intensity="
+                     "20.0,Radius=1.567,Decay=0.1))";
     fitalg.setProperty("Function", funtion_string);
     fitalg.setProperty("InputWorkspace", data_workspace);
     fitalg.setPropertyValue("WorkspaceIndex", "0");
@@ -277,8 +258,7 @@ public:
     // debugging purposes
 
     // check the parameters of the resolution did not change
-    Mantid::API::IFunction_sptr fitalg_function =
-        fitalg.getProperty("Function");
+    Mantid::API::IFunction_sptr fitalg_function = fitalg.getProperty("Function");
     auto fitalg_conv = std::dynamic_pointer_cast<Convolution>(fitalg_function);
     Mantid::API::IFunction_sptr fitalg_resolution = fitalg_conv->getFunction(0);
     TS_ASSERT_DELTA(fitalg_resolution->getParameter("PeakCentre"), 0.0,
@@ -294,8 +274,7 @@ public:
     // purposes
 
     // check the parameters of the DiffRotDiscreteCircle
-    Mantid::API::IFunction_sptr fitalg_structure_factor =
-        fitalg_conv->getFunction(1);
+    Mantid::API::IFunction_sptr fitalg_structure_factor = fitalg_conv->getFunction(1);
     TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("Intensity"), 47.014,
                     47.014 * 0.05); // allow for a small percent variation
     TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("Radius"), 1.567,
@@ -314,9 +293,7 @@ public:
 private:
   /// Fit the convolution of the inelastic part with a Gaussian resolution
   /// function
-  void
-  runDiffRotDiscreteCircleInelasticTest(const double S,
-                                        const double Q = Mantid::EMPTY_DBL()) {
+  void runDiffRotDiscreteCircleInelasticTest(const double S, const double Q = Mantid::EMPTY_DBL()) {
     /* Note: it turns out that parameters Intensity and Radius are highly
      * covariant, so that more than one minimum exists.
      * Thus, I tied parameter Radius. This is OK since one usually knows the
@@ -334,13 +311,11 @@ private:
     // Parameter units are assumed in micro-eV, Angstroms, Angstroms**(-1), and
     // nano-seconds. Intensities have arbitrary units
     std::ostringstream function_stream;
-    function_stream
-        << "(composite=Convolution,FixResolution=true,NumDeriv=true;"
-        << "name=Gaussian,Height=1.0,PeakCentre=0.0,Sigma=20.0,"
-        << "ties=(Height=1.0,PeakCentre=0.0,Sigma=20.0);"
-        << "name=InelasticDiffRotDiscreteCircle,N=3,Q=" << simQ
-        << ",Intensity=" << I << ",Radius=" << R << ",Decay=" << tao
-        << ",Shift=" << S << ")";
+    function_stream << "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+                    << "name=Gaussian,Height=1.0,PeakCentre=0.0,Sigma=20.0,"
+                    << "ties=(Height=1.0,PeakCentre=0.0,Sigma=20.0);"
+                    << "name=InelasticDiffRotDiscreteCircle,N=3,Q=" << simQ << ",Intensity=" << I << ",Radius=" << R
+                    << ",Decay=" << tao << ",Shift=" << S << ")";
 
     // Initialize the fit function in the Fit algorithm
     Algorithms::Fit fitalg;
@@ -358,11 +333,10 @@ private:
     // purposes only
 
     // override the function with new parameters, then do the Fit
-    function_stream
-        << "(composite=Convolution,FixResolution=true,NumDeriv=true;"
-        << "name=Gaussian,Height=1.0,PeakCentre=0.0,Sigma=20.0,"
-        << "ties=(Height=1.0,PeakCentre=0.0,Sigma=20.0);"
-        << "name=InelasticDiffRotDiscreteCircle,N=3";
+    function_stream << "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+                    << "name=Gaussian,Height=1.0,PeakCentre=0.0,Sigma=20.0,"
+                    << "ties=(Height=1.0,PeakCentre=0.0,Sigma=20.0);"
+                    << "name=InelasticDiffRotDiscreteCircle,N=3";
 
     if (Q != Mantid::EMPTY_DBL())
       function_stream << ",Q=" << Q;
@@ -382,8 +356,7 @@ private:
     // debugging purposes
 
     // check the parameters of the resolution did not change
-    Mantid::API::IFunction_sptr fitalg_function =
-        fitalg.getProperty("Function");
+    Mantid::API::IFunction_sptr fitalg_function = fitalg.getProperty("Function");
     auto fitalg_conv = std::dynamic_pointer_cast<Convolution>(fitalg_function);
     Mantid::API::IFunction_sptr fitalg_resolution = fitalg_conv->getFunction(0);
     TS_ASSERT_DELTA(fitalg_resolution->getParameter("PeakCentre"), 0.0,
@@ -399,8 +372,7 @@ private:
     // purposes
 
     // check the parameters of the inelastic part
-    Mantid::API::IFunction_sptr fitalg_structure_factor =
-        fitalg_conv->getFunction(1);
+    Mantid::API::IFunction_sptr fitalg_structure_factor = fitalg_conv->getFunction(1);
     TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("Intensity"), I,
                     I * 0.05); // allow for a small percent variation
     TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("Radius"), R,
@@ -425,27 +397,22 @@ private:
   }
 
   /// save the domain and the values of a function to a nexus file
-  void saveValues(Mantid::API::IFunction_sptr &function_pointer,
-                  Mantid::API::FunctionDomain1DView &xView,
+  void saveValues(Mantid::API::IFunction_sptr &function_pointer, Mantid::API::FunctionDomain1DView &xView,
                   const std::string &filename) {
     Mantid::API::FunctionValues dataYvalues(xView);
     function_pointer->function(xView, dataYvalues); // evaluate the function
     const size_t M = xView.size();
     // create temporaray workspace.
-    auto temp_ws =
-        WorkspaceCreationHelper::create2DWorkspace(1, static_cast<int>(M));
+    auto temp_ws = WorkspaceCreationHelper::create2DWorkspace(1, static_cast<int>(M));
     for (size_t i = 0; i < M; i++) {
       temp_ws->dataX(0)[i] = xView[i];
       temp_ws->dataY(0)[i] = dataYvalues.getCalculated(i);
-      temp_ws->dataE(0)[i] =
-          0.1 * dataYvalues.getCalculated(
-                    i); // assume the error is 10% of the actual value
+      temp_ws->dataE(0)[i] = 0.1 * dataYvalues.getCalculated(i); // assume the error is 10% of the actual value
     }
     const double dw = xView[1] - xView[0]; // bin width
     temp_ws->dataX(0)[M] = temp_ws->dataX(0)[M - 1] + dw;
     //  save workspace to file.
-    auto save =
-        Mantid::API::AlgorithmFactory::Instance().create("SaveNexus", 1);
+    auto save = Mantid::API::AlgorithmFactory::Instance().create("SaveNexus", 1);
     if (!save)
       throw std::runtime_error("Algorithm not created");
     save->initialize();
@@ -462,14 +429,10 @@ private:
    *   A1( Q ) = ( 1 / 3 ) * ( 1 - j0( Q * R * sqrt( 3 ) ) )
    *   j0( x ) = sin( x ) / x
    */
-  Mantid::DataObjects::Workspace2D_sptr generateN3Workspace(const double &I,
-                                                            const double &R,
-                                                            const double &tao,
+  Mantid::DataObjects::Workspace2D_sptr generateN3Workspace(const double &I, const double &R, const double &tao,
                                                             const double &Q) {
     const double hbar = 0.658211626; // plank constant in meV*THz (or ueV*PHz)
-    const double rate =
-        hbar /
-        tao; // conversion from picosec to mili-eV, or from nanosec to micro-eV
+    const double rate = hbar / tao;  // conversion from picosec to mili-eV, or from nanosec to micro-eV
 
     // calculate prefix A1. Better be verbose for clarity
     const double x = Q * R * sqrt(3.0);
@@ -479,8 +442,7 @@ private:
     // initialize some frequency values centered around zero. Will work as dataX
     const size_t M = 1001;
     double dataX[M];
-    const double dw =
-        0.4; // typical bin width for BASIS@ORNL beamline, in micro-seconds
+    const double dw = 0.4; // typical bin width for BASIS@ORNL beamline, in micro-seconds
     for (size_t i = 0; i < M; i++)
       dataX[i] = (static_cast<double>(i) - M / 2) * dw;
 
@@ -488,31 +450,22 @@ private:
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, M);
     double fractional_error = 0.01; // error taken as a percent of the signal
     for (size_t i = 0; i < M; i++) {
-      double bin_boundary =
-          dataX[i] -
-          dw / 2.0; // bin boundaries are shifted by half the bind width
+      double bin_boundary = dataX[i] - dw / 2.0; // bin boundaries are shifted by half the bind width
       double y =
-          I * (2.0 / M_PI) * A1 *
-          (3.0 * rate /
-           (9.0 * rate * rate + dataX[i] * dataX[i])); // verbose for clarity
+          I * (2.0 / M_PI) * A1 * (3.0 * rate / (9.0 * rate * rate + dataX[i] * dataX[i])); // verbose for clarity
       ws->dataX(0)[i] = bin_boundary;
       ws->dataY(0)[i] = y;
-      ws->dataE(0)[i] =
-          fractional_error *
-          y; // assume the error is a small percent of the actual value
+      ws->dataE(0)[i] = fractional_error * y; // assume the error is a small percent of the actual value
     }
-    ws->dataX(0)[M] =
-        dataX[M - 1] + dw / 2; // recall number of bin boundaries is 1 + #bins
+    ws->dataX(0)[M] = dataX[M - 1] + dw / 2; // recall number of bin boundaries is 1 + #bins
 
     // return now the workspace
     return ws;
   }
 
   /// save a worskapece to a nexus file
-  void saveWorkspace(Mantid::DataObjects::Workspace2D_sptr &ws,
-                     const std::string &filename) {
-    auto save =
-        Mantid::API::AlgorithmFactory::Instance().create("SaveNexus", 1);
+  void saveWorkspace(Mantid::DataObjects::Workspace2D_sptr &ws, const std::string &filename) {
+    auto save = Mantid::API::AlgorithmFactory::Instance().create("SaveNexus", 1);
     if (!save)
       throw std::runtime_error("Algorithm not created");
     save->initialize();
@@ -522,24 +475,21 @@ private:
   }
 
   // create a data workspace using a Fit algorithm
-  Mantid::DataObjects::Workspace2D_sptr
-  generateWorkspaceFromFitAlgorithm(Algorithms::Fit &fitalg) {
+  Mantid::DataObjects::Workspace2D_sptr generateWorkspaceFromFitAlgorithm(Algorithms::Fit &fitalg) {
     using namespace Mantid::Kernel;
     using namespace Mantid::Geometry;
 
     // initialize some frequency values centered around zero. Will work as dataX
     const size_t M = 1001;
     double dataX[M];
-    const double dw =
-        0.4; // typical bin width for BASIS@ORNL beamline, in micro-seconds
+    const double dw = 0.4; // typical bin width for BASIS@ORNL beamline, in micro-seconds
     for (size_t i = 0; i < M; i++)
       dataX[i] = (static_cast<double>(i) - M / 2) * dw;
 
     // Evaluate the fitting function. Will work as dataY
     Mantid::API::FunctionDomain1DView dataXview(&dataX[0], M);
     Mantid::API::FunctionValues dataYvalues(dataXview);
-    Mantid::API::IFunction_sptr fitalg_function =
-        fitalg.getProperty("Function");
+    Mantid::API::IFunction_sptr fitalg_function = fitalg.getProperty("Function");
     fitalg_function->function(dataXview, dataYvalues);
 
     // Create the workspace
@@ -550,10 +500,8 @@ private:
     inst->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Left, ""));
 
     // Add the source position
-    ObjComponent *source = new ObjComponent(
-        "moderator",
-        ComponentCreationHelper::createSphere(0.1, V3D(0, 0, 0), "1"),
-        inst.get());
+    ObjComponent *source =
+        new ObjComponent("moderator", ComponentCreationHelper::createSphere(0.1, V3D(0, 0, 0), "1"), inst.get());
     source->setPos(V3D(0.0, 0.0, -84.0));
     inst->add(source);
     inst->markAsSource(source);
@@ -565,11 +513,10 @@ private:
     inst->markAsSamplePos(sample);
 
     // Add a detector
-    auto pixelShape = ComponentCreationHelper::createCappedCylinder(
-        0.05, 0.02, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
-    Detector *det =
-        new Detector("pixel-1", 1, pixelShape,
-                     inst.get()); // ID 5 is a valid detector for BASIS
+    auto pixelShape =
+        ComponentCreationHelper::createCappedCylinder(0.05, 0.02, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
+    Detector *det = new Detector("pixel-1", 1, pixelShape,
+                                 inst.get()); // ID 5 is a valid detector for BASIS
     det->setPos(0.942677, 0.0171308,
                 4.63343); // Position of first detector on BASIS
     inst->add(det);
@@ -580,24 +527,17 @@ private:
     ws->getSpectrum(0).addDetectorID(det->getID());
 
     // Set emergy mode and fixed energy
-    ws->mutableRun().addLogData(
-        new Mantid::Kernel::PropertyWithValue<std::string>("deltaE-mode",
-                                                           "Indirect"));
+    ws->mutableRun().addLogData(new Mantid::Kernel::PropertyWithValue<std::string>("deltaE-mode", "Indirect"));
     ws->setEFixed(det->getID(), 2.08275); // EFixed of first detector on BASIS
 
     double fractional_error = 0.01; // error taken as a percent of the signal
     for (size_t i = 0; i < M; i++) {
-      ws->dataX(0)[i] =
-          dataX[i] -
-          dw / 2; // bin boundaries are shifted by half the bind width
+      ws->dataX(0)[i] = dataX[i] - dw / 2; // bin boundaries are shifted by half the bind width
       ws->dataY(0)[i] = dataYvalues.getCalculated(i);
       ws->dataE(0)[i] =
-          fractional_error *
-          dataYvalues.getCalculated(
-              i); // assume the error is a small percent of the actual value
+          fractional_error * dataYvalues.getCalculated(i); // assume the error is a small percent of the actual value
     }
-    ws->dataX(0)[M] =
-        dataX[M - 1] + dw / 2; // recall number of bin boundaries is 1 + #bins
+    ws->dataX(0)[M] = dataX[M - 1] + dw / 2; // recall number of bin boundaries is 1 + #bins
 
     // return now the workspace
     return ws;

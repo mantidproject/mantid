@@ -53,10 +53,8 @@ DECLARE_FILELOADER_ALGORITHM(LoadSQW)
 
 /// Constructor
 LoadSQW::LoadSQW()
-    : m_fileName(""), m_fileStream(),
-      m_prog(new Mantid::API::Progress(this, 0.05, 0.95, 100)),
-      m_outputFile(""), m_dataPositions(), m_boxSizes(), m_nDataPoints(0),
-      m_mdImageSize(0), m_nDims(0), m_nBins() {}
+    : m_fileName(""), m_fileStream(), m_prog(new Mantid::API::Progress(this, 0.05, 0.95, 100)), m_outputFile(""),
+      m_dataPositions(), m_boxSizes(), m_nDataPoints(0), m_mdImageSize(0), m_nDims(0), m_nBins() {}
 
 /**
  * Return the confidence with this algorithm can load the file
@@ -85,21 +83,16 @@ LoadSQW::~LoadSQW() { delete m_prog; }
 /// Initialize the algorithm
 void LoadSQW::init() {
   std::vector<std::string> fileExtensions{".sqw"};
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Load, fileExtensions),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load, fileExtensions),
                   "File of type SQW format");
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::IMDEventWorkspace>>(
-          "OutputWorkspace", "", Kernel::Direction::Output),
-      "Output IMDEventWorkspace reflecting SQW data read-in.");
-  declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<bool>>("MetadataOnly", false),
-      "Load Metadata without events.");
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::IMDEventWorkspace>>("OutputWorkspace", "",
+                                                                                   Kernel::Direction::Output),
+                  "Output IMDEventWorkspace reflecting SQW data read-in.");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("MetadataOnly", false),
+                  "Load Metadata without events.");
   std::vector<std::string> fileExtensions2{".nxs"};
   declareProperty(
-      std::make_unique<API::FileProperty>("OutputFilename", "",
-                                          API::FileProperty::OptionalSave,
-                                          fileExtensions2),
+      std::make_unique<API::FileProperty>("OutputFilename", "", API::FileProperty::OptionalSave, fileExtensions2),
       "If the input SQW file is too large to fit in memory, specify an output "
       "NXS file.\n"
       "The MDEventWorkspace will be create with this file as its back-end.");
@@ -147,13 +140,11 @@ void LoadSQW::exec() {
     // set file backed;
     MemoryStats stat;
     if ((m_nDataPoints * sizeof(MDEvent<4>) * 2 / 1024) < stat.availMem())
-      g_log.notice() << "You have enough memory available to load the "
-                     << m_nDataPoints
+      g_log.notice() << "You have enough memory available to load the " << m_nDataPoints
                      << " points into memory; this would be "
                         "faster than using a file back-end.\n";
 
-    IAlgorithm_sptr saver =
-        this->createChildAlgorithm("SaveMD", 0.01, 0.05, true);
+    IAlgorithm_sptr saver = this->createChildAlgorithm("SaveMD", 0.01, 0.05, true);
     saver->setProperty("InputWorkspace", ws);
     saver->setPropertyValue("Filename", m_outputFile);
     // should think about it.
@@ -163,26 +154,21 @@ void LoadSQW::exec() {
     m_prog->resetNumSteps(100, 0.05, 0.75);
 
     // set file backed boxes
-    auto Saver = std::shared_ptr<API::IBoxControllerIO>(
-        new DataObjects::BoxControllerNeXusIO(bc.get()));
+    auto Saver = std::shared_ptr<API::IBoxControllerIO>(new DataObjects::BoxControllerNeXusIO(bc.get()));
     bc->setFileBacked(Saver, m_outputFile);
     pWs->getBox()->setFileBacked();
     bc->getFileIO()->setWriteBufferSize(1000000);
 
   } else {
     MemoryStats stat;
-    if ((size_t(double(m_nDataPoints) * 1.5) * sizeof(MDEvent<4>) / 1024) >
-        stat.availMem())
-      g_log.warning()
-          << "You may not have enough physical memory available to load the "
-          << m_nDataPoints
-          << " points into memory. You can cancel and specify "
-             "OutputFilename to load to a file back-end.\n";
+    if ((size_t(double(m_nDataPoints) * 1.5) * sizeof(MDEvent<4>) / 1024) > stat.availMem())
+      g_log.warning() << "You may not have enough physical memory available to load the " << m_nDataPoints
+                      << " points into memory. You can cancel and specify "
+                         "OutputFilename to load to a file back-end.\n";
   }
 
   if (bc->isFileBacked()) {
-    std::cout << "File backed? " << bc->isFileBacked() << ". Cache "
-              << bc->getFileIO()->getMemoryStr() << '\n';
+    std::cout << "File backed? " << bc->isFileBacked() << ". Cache " << bc->getFileIO()->getMemoryStr() << '\n';
   } else {
     bool ff(false);
     std::cout << "File backed? " << ff << ". Cache  0\n";
@@ -191,8 +177,7 @@ void LoadSQW::exec() {
   // Persist the workspace.
   API::IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");
   if (i_out)
-    throw std::runtime_error(
-        "Cannot currently handle overwriting of an existing workspace.");
+    throw std::runtime_error("Cannot currently handle overwriting of an existing workspace.");
   setProperty("OutputWorkspace", ws);
 
   // Read events into the workspace.
@@ -213,8 +198,7 @@ void LoadSQW::exec() {
 }
 
 /// Add events after reading pixels/datapoints from file.
-void LoadSQW::readEvents(
-    Mantid::DataObjects::MDEventWorkspace<MDEvent<4>, 4> *ws) {
+void LoadSQW::readEvents(Mantid::DataObjects::MDEventWorkspace<MDEvent<4>, 4> *ws) {
   CPUTimer tim;
 
   size_t maxNPix = ~size_t(0);
@@ -223,9 +207,8 @@ void LoadSQW::readEvents(
                              "memory using this architecture ");
   }
 
-  const size_t ncolumns = 9; // qx, qy, qz, en, s, err, irunid, idetid, ien
-  const size_t column_size =
-      4; // types stored as either float32 or unsigned integer (both 4byte).
+  const size_t ncolumns = 9;                    // qx, qy, qz, en, s, err, irunid, idetid, ien
+  const size_t column_size = 4;                 // types stored as either float32 or unsigned integer (both 4byte).
   const size_t column_size_2 = column_size * 2; // offset, gives qz
   const size_t column_size_3 = column_size * 3; // offset, gives en
   const size_t column_size_4 = column_size * 4; // offset, gives idet
@@ -266,8 +249,7 @@ void LoadSQW::readEvents(
 
     // Load the block from the file
     std::vector<char> Buffer = std::vector<char>(currentBlockSize);
-    this->m_fileStream.seekg(this->m_dataPositions.pix_start + inputFileOffset,
-                             std::ios::beg);
+    this->m_fileStream.seekg(this->m_dataPositions.pix_start + inputFileOffset, std::ios::beg);
     this->m_fileStream.read(&Buffer[0], currentBlockSize);
 
     // Go through each pixel in the input
@@ -278,21 +260,16 @@ void LoadSQW::readEvents(
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < currentNumPixels; i++) {
       auto current_pix = size_t(i * pixel_width);
-      coord_t centers[4] = {
-          interpretAs<float>(Buffer, current_pix),
-          interpretAs<float>(Buffer, current_pix + column_size),
-          interpretAs<float>(Buffer, current_pix + column_size_2),
-          interpretAs<float>(Buffer, current_pix + column_size_3)};
-      const auto errorSQ =
-          interpretAs<float>(Buffer, current_pix + column_size_8);
+      coord_t centers[4] = {interpretAs<float>(Buffer, current_pix),
+                            interpretAs<float>(Buffer, current_pix + column_size),
+                            interpretAs<float>(Buffer, current_pix + column_size_2),
+                            interpretAs<float>(Buffer, current_pix + column_size_3)};
+      const auto errorSQ = interpretAs<float>(Buffer, current_pix + column_size_8);
       ws->addEvent(MDEvent<4>(
-          interpretAs<float>(Buffer, current_pix + column_size_7), // Signal
-          errorSQ,                                                 // Error sq
-          static_cast<uint16_t>(interpretAs<float>(
-              Buffer, current_pix + column_size_6)), // run Index
-          goniometerIndex,
-          static_cast<int32_t>(interpretAs<float>(
-              Buffer, current_pix + column_size_4)), // Detector Id
+          interpretAs<float>(Buffer, current_pix + column_size_7),                                        // Signal
+          errorSQ,                                                                                        // Error sq
+          static_cast<uint16_t>(interpretAs<float>(Buffer, current_pix + column_size_6)),                 // run Index
+          goniometerIndex, static_cast<int32_t>(interpretAs<float>(Buffer, current_pix + column_size_4)), // Detector Id
           centers));
     }
 
@@ -314,8 +291,7 @@ void LoadSQW::readEvents(
     //            == numBlocks-1) )
 
     if (eventsAdded > 19000000) {
-      g_log.information() << "Splitting boxes after " << eventsAdded
-                          << " events added.\n";
+      g_log.information() << "Splitting boxes after " << eventsAdded << " events added.\n";
 
       // This splits up all the boxes according to split thresholds and sizes.
       Kernel::ThreadScheduler *ts = new ThreadSchedulerFIFO();
@@ -383,10 +359,8 @@ Extract the b-matrix from a SQW file. Create experiment info with oriented
 lattice and add to workspace.
 @param ws : Workspace to modify.
 */
-void LoadSQW::addLattice(
-    Mantid::DataObjects::MDEventWorkspace<MDEvent<4>, 4> *ws) {
-  std::vector<char> buf(
-      4 * (3 + 3)); // Where 4 = size_of(float) and 3 * 3 is size of b-matrix.
+void LoadSQW::addLattice(Mantid::DataObjects::MDEventWorkspace<MDEvent<4>, 4> *ws) {
+  std::vector<char> buf(4 * (3 + 3)); // Where 4 = size_of(float) and 3 * 3 is size of b-matrix.
   this->m_fileStream.seekg(this->m_dataPositions.geom_start, std::ios::beg);
   this->m_fileStream.read(&buf[0], buf.size());
 
@@ -402,13 +376,11 @@ void LoadSQW::addLattice(
   // frame,
   // Q units so general goniometer should provide unit rotation matrix
   info->mutableRun().mutableGoniometer().makeUniversalGoniometer();
-  info->mutableSample().setOrientedLattice(
-      std::make_unique<OrientedLattice>(a, b, c, aa, bb, cc));
+  info->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>(a, b, c, aa, bb, cc));
   ws->addExperimentInfo(info);
 }
 
-void LoadSQW::buildMDDimsBase(
-    std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVector) {
+void LoadSQW::buildMDDimsBase(std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVector) {
   std::vector<std::string> dimID(4, "qx");
   std::vector<std::string> dimUnit(4, "A^-1");
   std::vector<std::string> dimFrameName(4, "HKL");
@@ -427,9 +399,8 @@ void LoadSQW::buildMDDimsBase(
 }
 
 /// Add a dimension after reading info from file.
-void LoadSQW::readDNDDimensions(
-    std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVectorOut,
-    bool arrangeByMDImage) {
+void LoadSQW::readDNDDimensions(std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVectorOut,
+                                bool arrangeByMDImage) {
   // using Mantid::Geometry::MDHistoDimensionBuilder;
   std::vector<Mantid::Geometry::MDHistoDimensionBuilder> DimVectorIn;
   this->buildMDDimsBase(DimVectorIn);
@@ -448,16 +419,14 @@ void LoadSQW::readDNDDimensions(
 
   // TODO: how to use it in our framework? -> it is B^-1 matrix possibly
   // re-scaled
-  std::vector<double> u_to_Rlu(
-      4 * 4); // the matrix transforming from lab to crystal frame with scaling
+  std::vector<double> u_to_Rlu(4 * 4); // the matrix transforming from lab to crystal frame with scaling
   i0 += 4 * 4;
   // [data.u_to_rlu, count, ok, mess] = fread_catch(fid,[4,4],'float32'); if
   // ~all(ok); return; end;
   size_t ic = 0;
   for (size_t i = 0; i < 4; i++) {
     for (size_t j = 0; j < 4; j++) {
-      u_to_Rlu[ic] =
-          static_cast<double>(interpretAs<float>(buf, i0 + 4 * (i * 4 + j)));
+      u_to_Rlu[ic] = static_cast<double>(interpretAs<float>(buf, i0 + 4 * (i * 4 + j)));
       ic++;
     }
   }
@@ -532,8 +501,7 @@ void LoadSQW::readDNDDimensions(
     for (unsigned int i = 0; i < niax; i++) {
       iax[i] = interpretAs<uint32_t>(buf, i * 4) - 1;
       auto min = interpretAs<float>(buf, 4 * (niax + i * 2));
-      float max =
-          interpretAs<float>(buf, 4 * (niax + i * 2 + 1)) * (1 + FLT_EPSILON);
+      float max = interpretAs<float>(buf, 4 * (niax + i * 2 + 1)) * (1 + FLT_EPSILON);
 
       DimVectorIn[ic].setNumBins(1);
       DimVectorIn[ic].setMax(max);
@@ -588,8 +556,7 @@ void LoadSQW::readDNDDimensions(
       this->m_fileStream.read(&axis_buffer[0], 4 * nAxisPoints);
 
       auto min = interpretAs<float>(axis_buffer, 0);
-      float max = interpretAs<float>(axis_buffer, 4 * (nAxisPoints - 1)) *
-                  (1 + FLT_EPSILON);
+      float max = interpretAs<float>(axis_buffer, 4 * (nAxisPoints - 1)) * (1 + FLT_EPSILON);
 
       DimVectorIn[ic].setNumBins(nAxisPoints - 1);
       DimVectorIn[ic].setMax(max);
@@ -630,9 +597,8 @@ void LoadSQW::readDNDDimensions(
   }
 }
 /// add range of dimensions to the workspace;
-void LoadSQW::addDimsToWs(
-    Mantid::DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4> *ws,
-    std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVector) {
+void LoadSQW::addDimsToWs(Mantid::DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4> *ws,
+                          std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVector) {
   // Add dimensions to the workspace by invoking the dimension builders.
   for (size_t i = 0; i < 4; i++) {
     ws->addDimension(DimVector[i].create());
@@ -640,8 +606,7 @@ void LoadSQW::addDimsToWs(
 }
 
 /// Add a dimension after reading info from file.
-void LoadSQW::readSQWDimensions(
-    std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVectorOut) {
+void LoadSQW::readSQWDimensions(std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVectorOut) {
   using Mantid::Geometry::MDHistoDimensionBuilder;
 
   this->buildMDDimsBase(DimVectorOut);
@@ -675,8 +640,7 @@ void LoadSQW::parseMetadata(const std::string &fileName) {
   m_fileStream.open(fileName.c_str(), std::ios::binary);
 
   if (!m_fileStream.is_open())
-    throw(
-        Kernel::Exception::FileError("Can not open input sqw file", fileName));
+    throw(Kernel::Exception::FileError("Can not open input sqw file", fileName));
 
   std::vector<char> data_buffer;
   m_fileStream.seekg(m_dataPositions.if_sqw_start);
@@ -692,24 +656,20 @@ void LoadSQW::parseMetadata(const std::string &fileName) {
   size_t nFiles = m_dataPositions.component_headers_starts.size();
   for (size_t i = 0; i < nFiles; i++) {
     m_dataPositions.component_headers_starts[i] = next_position;
-    next_position =
-        m_dataPositions.parse_component_header(m_fileStream, next_position);
+    next_position = m_dataPositions.parse_component_header(m_fileStream, next_position);
   }
   m_dataPositions.detectors_start = next_position;
   // get detectors
-  m_dataPositions.data_start = m_dataPositions.parse_sqw_detpar(
-      m_fileStream, m_dataPositions.detectors_start);
+  m_dataPositions.data_start = m_dataPositions.parse_sqw_detpar(m_fileStream, m_dataPositions.detectors_start);
   // calculate all other data fields locations;
-  m_dataPositions.parse_data_locations(m_fileStream, m_dataPositions.data_start,
-                                       m_nBins, m_nDataPoints);
+  m_dataPositions.parse_data_locations(m_fileStream, m_dataPositions.data_start, m_nBins, m_nDataPoints);
 }
 
 void LoadSQW::readBoxSizes() {
 
   m_boxSizes.resize(m_dataPositions.mdImageSize);
   m_fileStream.seekg(m_dataPositions.n_cell_pix_start, std::ios::beg);
-  m_fileStream.read(reinterpret_cast<char *>(&m_boxSizes[0]),
-                    m_dataPositions.mdImageSize * sizeof(uint64_t));
+  m_fileStream.read(reinterpret_cast<char *>(&m_boxSizes[0]), m_dataPositions.mdImageSize * sizeof(uint64_t));
 }
 
 namespace LoadSQWHelper {
@@ -718,21 +678,18 @@ namespace LoadSQWHelper {
 /**Block 1:  Main_header: Parse SQW main data header
  *@param dataStream -- the open file handler responsible for IO operations
  **/
-void dataPositions::parse_sqw_main_header(
-    std::ifstream &dataStream) { // we do not need this header  at the moment ->
-                                 // just need to calculated its length;
+void dataPositions::parse_sqw_main_header(std::ifstream &dataStream) { // we do not need this header  at the moment ->
+                                                                       // just need to calculated its length;
 
   std::vector<char> data_buffer(4 * 3);
   dataStream.read(&data_buffer[0], 4);
 
-  unsigned int file_name_length =
-      *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
+  unsigned int file_name_length = *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
   // skip main header file name
   dataStream.seekg(file_name_length, std::ios_base::cur);
 
   dataStream.read(&data_buffer[0], 4);
-  unsigned int file_path_length =
-      *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
+  unsigned int file_path_length = *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
 
   // skip main header file path
   dataStream.seekg(file_path_length, std::ios_base::cur);
@@ -765,11 +722,11 @@ void dataPositions::parse_sqw_main_header(
  *
  *@returns: the file location of the first byte behind this header
  */
-std::streamoff dataPositions::parse_component_header(
-    std::ifstream &dataStream,
-    std::streamoff start_location) { // we do not need this header  at the
-                                     // moment -> just calculating its length;
-                                     // or may be we do soon?
+std::streamoff
+dataPositions::parse_component_header(std::ifstream &dataStream,
+                                      std::streamoff start_location) { // we do not need this header  at the
+                                                                       // moment -> just calculating its length;
+                                                                       // or may be we do soon?
   std::vector<char> data_buffer(8);
 
   std::streamoff shift = start_location - dataStream.tellg();
@@ -778,14 +735,12 @@ std::streamoff dataPositions::parse_component_header(
 
   dataStream.read(&data_buffer[0], 4);
 
-  unsigned int file_name_length =
-      *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
+  unsigned int file_name_length = *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
   // skip component header file name
   dataStream.seekg(file_name_length, std::ios_base::cur);
 
   dataStream.read(&data_buffer[0], 4);
-  unsigned int file_path_length =
-      *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
+  unsigned int file_path_length = *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
 
   // skip component header file path
   dataStream.seekg(file_path_length, std::ios_base::cur);
@@ -821,9 +776,8 @@ std::streamoff dataPositions::parse_component_header(
  *the binary file
  *
  *@returns: the file location of the first byte behind this header   */
-std::streamoff
-dataPositions::parse_sqw_detpar(std::ifstream &dataStream,
-                                std::streamoff start_location) { //
+std::streamoff dataPositions::parse_sqw_detpar(std::ifstream &dataStream,
+                                               std::streamoff start_location) { //
   std::vector<char> data_buffer(8);
 
   std::streamoff shift = start_location - dataStream.tellg();
@@ -831,14 +785,12 @@ dataPositions::parse_sqw_detpar(std::ifstream &dataStream,
   dataStream.seekg(shift, std::ios_base::cur);
 
   dataStream.read(&data_buffer[0], 4);
-  unsigned int file_name_length =
-      *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
+  unsigned int file_name_length = *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
   // skip component header file name
   dataStream.seekg(file_name_length, std::ios_base::cur);
 
   dataStream.read(&data_buffer[0], 4);
-  unsigned int file_path_length =
-      *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
+  unsigned int file_path_length = *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
   // skip component header file path
   dataStream.seekg(file_path_length, std::ios_base::cur);
 
@@ -856,10 +808,8 @@ dataPositions::parse_sqw_detpar(std::ifstream &dataStream,
 @param nBins -- the vector of bin sizes for MD image
 @param nDataPoints -- number of pixels (MD events) contributing to the image
 */
-void dataPositions::parse_data_locations(std::ifstream &dataStream,
-                                         std::streamoff data_start,
-                                         std::vector<size_t> &nBins,
-                                         uint64_t &nDataPoints) {
+void dataPositions::parse_data_locations(std::ifstream &dataStream, std::streamoff data_start,
+                                         std::vector<size_t> &nBins, uint64_t &nDataPoints) {
   std::vector<char> data_buffer(12);
 
   std::streamoff shift = data_start - dataStream.tellg();
@@ -868,21 +818,18 @@ void dataPositions::parse_data_locations(std::ifstream &dataStream,
 
   dataStream.read(&data_buffer[0], 4);
 
-  unsigned int file_name_length =
-      *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
+  unsigned int file_name_length = *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
   // skip dummy file name
   dataStream.seekg(file_name_length, std::ios_base::cur);
 
   dataStream.read(&data_buffer[0], 4);
-  unsigned int file_path_length =
-      *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
+  unsigned int file_path_length = *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
 
   // skip dummy file path
   dataStream.seekg(file_path_length, std::ios_base::cur);
 
   dataStream.read(&data_buffer[0], 4);
-  unsigned int data_title_length =
-      *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
+  unsigned int data_title_length = *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
 
   // skip data title
   dataStream.seekg(data_title_length, std::ios_base::cur);
@@ -917,8 +864,7 @@ void dataPositions::parse_data_locations(std::ifstream &dataStream,
     for (unsigned int i = 0; i < npax; i++) {
       dataStream.read(&data_buffer[0], 4);
 
-      unsigned int nAxisPoints =
-          *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
+      unsigned int nAxisPoints = *(reinterpret_cast<uint32_t *>(&data_buffer[0]));
       nBins[i] = nAxisPoints - 1;
       mdImageSize *= nBins[i];
       dataStream.seekg(nAxisPoints * 4, std::ios_base::cur);
@@ -968,8 +914,7 @@ void dataPositions::parse_data_locations(std::ifstream &dataStream,
   // skip redundant field and read nPix (number of data points)
   dataStream.read(&data_buffer[0], 12);
 
-  nDataPoints =
-      static_cast<size_t>(*(reinterpret_cast<uint64_t *>(&data_buffer[4])));
+  nDataPoints = static_cast<size_t>(*(reinterpret_cast<uint64_t *>(&data_buffer[4])));
   this->pix_start = dataStream.tellg();
 }
 

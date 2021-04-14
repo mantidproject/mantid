@@ -44,9 +44,7 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CreateMDHistoWorkspaceTest *createSuite() {
-    return new CreateMDHistoWorkspaceTest();
-  }
+  static CreateMDHistoWorkspaceTest *createSuite() { return new CreateMDHistoWorkspaceTest(); }
   static void destroySuite(CreateMDHistoWorkspaceTest *suite) { delete suite; }
 
   void test_name() {
@@ -63,9 +61,8 @@ public:
   void test_throws_if_wrong_number_of_signal_values() {
     std::string outWSName = "test_ws";
     IAlgorithm_sptr alg = make_standard_algorithm(outWSName);
-    alg->setProperty(
-        "SignalInput",
-        "1"); // Only one signal value provided, but NumberOfBins set to 5!
+    alg->setProperty("SignalInput",
+                     "1"); // Only one signal value provided, but NumberOfBins set to 5!
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
     AnalysisDataService::Instance().remove(outWSName);
   }
@@ -73,9 +70,8 @@ public:
   void test_throws_if_wrong_number_of_error_values() {
     std::string outWSName = "test_ws";
     IAlgorithm_sptr alg = make_standard_algorithm(outWSName);
-    alg->setProperty(
-        "ErrorInput",
-        "1"); // Only one error value provided, but NumberOfBins set to 5!
+    alg->setProperty("ErrorInput",
+                     "1"); // Only one error value provided, but NumberOfBins set to 5!
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
     AnalysisDataService::Instance().remove(outWSName);
   }
@@ -98,23 +94,19 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("SignalInput", "1,2,3,4,5"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ErrorInput", "0,0.1,0.2,0.3,0.4"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ErrorInput", "0,0.1,0.2,0.3,0.4"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Dimensionality", 1));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NumberOfBins", "5"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Extents", "-1,1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Names", "A"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Units", "U"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Frames", "QSample"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     MDHistoWorkspace_sptr outWs;
-    TS_ASSERT_THROWS_NOTHING(
-        outWs = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(outWs = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(outWSName));
     TS_ASSERT(outWs);
     if (!outWs)
       return;
@@ -125,11 +117,8 @@ public:
 
     TS_ASSERT_EQUALS("A", dim1->getName());
     TS_ASSERT_EQUALS("A", dim1->getDimensionId());
-    TSM_ASSERT("Should not be set to U any longer",
-               "U" != dim1->getUnits().ascii());
-    TSM_ASSERT_EQUALS("Should be a QSample frame",
-                      Mantid::Geometry::QSample::QSampleName,
-                      dim1->getMDFrame().name());
+    TSM_ASSERT("Should not be set to U any longer", "U" != dim1->getUnits().ascii());
+    TSM_ASSERT_EQUALS("Should be a QSample frame", Mantid::Geometry::QSample::QSampleName, dim1->getMDFrame().name());
 
     TS_ASSERT_EQUALS(1, dim1->getMaximum());
     TS_ASSERT_EQUALS(-1, dim1->getMinimum());
@@ -155,24 +144,19 @@ public:
     CreateMDHistoWorkspace alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("SignalInput", "1,2,3,4,5,6"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ErrorInput", "0,0.1,0.2,0.3,0.4,0.5"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("SignalInput", "1,2,3,4,5,6"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ErrorInput", "0,0.1,0.2,0.3,0.4,0.5"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Dimensionality", 2));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NumberOfBins", "2,3"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Extents", "-1,1,-1,1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Names", "A,B"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Units", "U,U"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     MDHistoWorkspace_sptr outWs;
-    TS_ASSERT_THROWS_NOTHING(
-        outWs = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(outWs = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(outWSName));
     TS_ASSERT(outWs);
     if (!outWs)
       return;
@@ -187,11 +171,9 @@ public:
 
     // Check frame and label
     TSM_ASSERT("Should be set to U", "U" == dim1->getUnits().ascii());
-    TSM_ASSERT_EQUALS("Should be convertible to a General Frame",
-                      Mantid::Geometry::GeneralFrame::GeneralFrameName,
+    TSM_ASSERT_EQUALS("Should be convertible to a General Frame", Mantid::Geometry::GeneralFrame::GeneralFrameName,
                       dim1->getMDFrame().name());
-    TSM_ASSERT_EQUALS("Should be convertible to a General Frame",
-                      Mantid::Geometry::GeneralFrame::GeneralFrameName,
+    TSM_ASSERT_EQUALS("Should be convertible to a General Frame", Mantid::Geometry::GeneralFrame::GeneralFrameName,
                       dim2->getMDFrame().name());
 
     // Check the data

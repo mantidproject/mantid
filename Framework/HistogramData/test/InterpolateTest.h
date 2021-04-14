@@ -76,8 +76,7 @@ public:
     auto output = interpolateLinear(input, 3);
 
     checkSizesUnchanged(input, output);
-    std::vector<double> expectedY = {-2., -2 + (2.5 / 1.5) * 0.5, -1. / 3., 0.5,
-                                     2.};
+    std::vector<double> expectedY = {-2., -2 + (2.5 / 1.5) * 0.5, -1. / 3., 0.5, 2.};
     checkData(input, output, expectedY, {});
 
     // Inplace
@@ -89,8 +88,7 @@ public:
   }
 
   void test_interpolateLinearPointDataSet_Errors_No_Interpolation_Error() {
-    Histogram input(Points(5, LinearGenerator(0, 0.5)), {-2, 0, 0., 0, 2},
-                    CountStandardDeviations{2., 0., 1., 0., 1.});
+    Histogram input(Points(5, LinearGenerator(0, 0.5)), {-2, 0, 0., 0, 2}, CountStandardDeviations{2., 0., 1., 0., 1.});
     auto output = interpolateLinear(input, 2, true);
     checkSizesUnchanged(input, output);
 
@@ -98,10 +96,8 @@ public:
     checkData(input, output, {}, expectedE);
   }
 
-  void
-  test_interpolateLinearPointDataSet_CorrelatedErrors_No_Interpolation_Error() {
-    Histogram input(Points(5, LinearGenerator(0, 0.5)), {-2, 0, 0., 0, 2},
-                    CountStandardDeviations{2., 0., 1., 0., 1.});
+  void test_interpolateLinearPointDataSet_CorrelatedErrors_No_Interpolation_Error() {
+    Histogram input(Points(5, LinearGenerator(0, 0.5)), {-2, 0, 0., 0, 2}, CountStandardDeviations{2., 0., 1., 0., 1.});
     auto output = interpolateLinear(input, 2, true, false);
     checkSizesUnchanged(input, output);
 
@@ -115,13 +111,11 @@ public:
     auto output = interpolateLinear(input, 2, true);
     checkSizesUnchanged(input, output);
 
-    std::vector<double> expectedE_source = {2., sqrt(5) / 2, 1., sqrt(2) / 2,
-                                            1.};
+    std::vector<double> expectedE_source = {2., sqrt(5) / 2, 1., sqrt(2) / 2, 1.};
     std::vector<double> expectedE_interp = {0., 0.125, 0., 0.125, 0.};
     std::vector<double> expectedE(expectedE_source.size());
     for (size_t i = 0; i < expectedE_source.size(); i++) {
-      expectedE[i] =
-          sqrt(pow(expectedE_source[i], 2) + pow(expectedE_interp[i], 2));
+      expectedE[i] = sqrt(pow(expectedE_source[i], 2) + pow(expectedE_interp[i], 2));
     }
     checkData(input, output, {}, expectedE);
   }
@@ -137,8 +131,7 @@ public:
   // Success cases - cspline in-place no copy
   // ---------------------------------------------------------------------------
   void test_interpolateCSplineInPlaceDoes_Not_Copy() {
-    Histogram input(Points(7, LinearGenerator(0, 0.5)),
-                    {-3, 0, -1, 0, 1, 0, 3});
+    Histogram input(Points(7, LinearGenerator(0, 0.5)), {-3, 0, -1, 0, 1, 0, 3});
     auto xAddrBefore = &input.x();
     auto yAddrBefore = &input.y();
     TS_ASSERT_THROWS_NOTHING(interpolateCSplineInplace(input, 2));
@@ -151,8 +144,7 @@ public:
   // Success cases - cspline, point X data
   // ---------------------------------------------------------------------------
   void test_interpolateCSplinePointDataSet_Minimum_Calculated_Points() {
-    Histogram input(Points(7, LinearGenerator(0, 0.5)),
-                    Counts({-3, 0, -4, 0, 4, 0, 3}),
+    Histogram input(Points(7, LinearGenerator(0, 0.5)), Counts({-3, 0, -4, 0, 4, 0, 3}),
                     CountStandardDeviations({1., 0., 1., 0., 1., 0., 1.}));
     auto output = interpolateCSpline(input, 2);
 
@@ -169,8 +161,7 @@ public:
   }
 
   void test_interpolateCSplinePointDataSet_Errors() {
-    Histogram input(Points(7, LinearGenerator(0, 0.5)),
-                    Counts({-3, 0, -4, 0, 4, 0, 3}),
+    Histogram input(Points(7, LinearGenerator(0, 0.5)), Counts({-3, 0, -4, 0, 4, 0, 3}),
                     CountStandardDeviations{2., 0., 1., 0., 1., 0., 2.});
     auto output = interpolateCSpline(input, 2, true);
     checkSizesUnchanged(input, output);
@@ -185,20 +176,16 @@ public:
     double C = -0.0625;
     double D = -0.0625;
     expectedE[1] =
-        sqrt(A * A * pow(2., 2) + B * B * pow(1., 2) + 2 * A * C * 0 +
-             2 * B * D * 2.8 + C * C * 0 + D * D * 19.36);
-    expectedE[3] =
-        sqrt(A * A * pow(1., 2) + B * B * pow(1., 2) + 2 * A * C * 2.8 +
-             2 * B * D * 2.8 + C * C * 19.36 + D * D * 19.36);
+        sqrt(A * A * pow(2., 2) + B * B * pow(1., 2) + 2 * A * C * 0 + 2 * B * D * 2.8 + C * C * 0 + D * D * 19.36);
+    expectedE[3] = sqrt(A * A * pow(1., 2) + B * B * pow(1., 2) + 2 * A * C * 2.8 + 2 * B * D * 2.8 + C * C * 19.36 +
+                        D * D * 19.36);
     expectedE[5] =
-        sqrt(A * A * pow(1., 2) + B * B * pow(2., 2) + 2 * A * C * 2.8 +
-             2 * B * D * 0 + C * C * 19.36 + D * D * 0);
+        sqrt(A * A * pow(1., 2) + B * B * pow(2., 2) + 2 * A * C * 2.8 + 2 * B * D * 0 + C * C * 19.36 + D * D * 0);
     checkData(input, output, {}, expectedE);
   }
 
   void test_interpolateCSplinePointDataSet_CorrelatedErrors() {
-    Histogram input(Points(7, LinearGenerator(0, 0.5)),
-                    Counts({-3, 0, -4, 0, 4, 0, 3}),
+    Histogram input(Points(7, LinearGenerator(0, 0.5)), Counts({-3, 0, -4, 0, 4, 0, 3}),
                     CountStandardDeviations{2., 0., 1., 0., 1., 0., 2.});
     auto output = interpolateCSpline(input, 2, true, false);
     checkSizesUnchanged(input, output);
@@ -218,8 +205,7 @@ public:
   // Success cases - linear edge X data
   // ---------------------------------------------------------------------------
   void test_interpolateLinearEdgeDataSet_Stepsize_One_Less_Point_Size() {
-    Histogram input(BinEdges(6, LinearGenerator(-0.25, 0.5)),
-                    Counts({-2, 0, 0, 0, 2}));
+    Histogram input(BinEdges(6, LinearGenerator(-0.25, 0.5)), Counts({-2, 0, 0, 0, 2}));
     auto output = interpolateLinear(input, 4);
 
     checkSizesUnchanged(input, output);
@@ -235,8 +221,7 @@ public:
   }
 
   void test_interpolateLinearEdgeDataSet_Even_StepSize() {
-    Histogram input(BinEdges(6, LinearGenerator(-0.25, 0.5)),
-                    {-2, 0, 0.5, 0, 2});
+    Histogram input(BinEdges(6, LinearGenerator(-0.25, 0.5)), {-2, 0, 0.5, 0, 2});
     auto output = interpolateLinear(input, 2);
 
     checkSizesUnchanged(input, output);
@@ -252,13 +237,11 @@ public:
   }
 
   void test_interpolateLinearEdgeDataSet_Odd_StepSize() {
-    Histogram input(BinEdges(6, LinearGenerator(-0.25, 0.5)),
-                    {-2, 0, 0.0, 0.5, 2});
+    Histogram input(BinEdges(6, LinearGenerator(-0.25, 0.5)), {-2, 0, 0.0, 0.5, 2});
     Histogram output = interpolateLinear(input, 3);
 
     checkSizesUnchanged(input, output);
-    std::vector<double> expectedY = {-2., -2 + (2.5 / 1.5) * 0.5, -1. / 3., 0.5,
-                                     2.};
+    std::vector<double> expectedY = {-2., -2 + (2.5 / 1.5) * 0.5, -1. / 3., 0.5, 2.};
     checkData(input, output, expectedY, {});
 
     // Inplace
@@ -273,8 +256,7 @@ public:
   // Success cases - cspline edge X data
   // ---------------------------------------------------------------------------
   void test_interpolateCSplineEdgeDataSet_Minimum_Calculated_Points() {
-    Histogram input(BinEdges(8, LinearGenerator(-0.25, 0.5)),
-                    Counts({-3, 0, -1, 0, 1, 0, 3}));
+    Histogram input(BinEdges(8, LinearGenerator(-0.25, 0.5)), Counts({-3, 0, -1, 0, 1, 0, 3}));
     auto output = interpolateCSpline(input, 2);
 
     checkSizesUnchanged(input, output);
@@ -296,8 +278,7 @@ public:
   // ---------------------------------------------------------------------------
 
   void test_interpolateLinearPointFrequencyData_Stepsize_One_Less_Point_Size() {
-    Histogram input(Points(5, LinearGenerator(0., 0.5)),
-                    Frequencies({-2, 0, 0, 0, 2}));
+    Histogram input(Points(5, LinearGenerator(0., 0.5)), Frequencies({-2, 0, 0, 0, 2}));
     auto output = interpolateLinear(input, 4);
 
     checkSizesUnchanged(input, output);
@@ -320,8 +301,7 @@ public:
     TS_ASSERT_EQUALS(input.x().size(), output.x().size());
   }
 
-  void checkData(const Histogram &input, const Histogram &output,
-                 const std::vector<double> &expectedY,
+  void checkData(const Histogram &input, const Histogram &output, const std::vector<double> &expectedY,
                  const std::vector<double> &expectedE) {
     TS_ASSERT_EQUALS(input.x(), output.x());
     TS_ASSERT_EQUALS(input.xMode(), output.xMode());
@@ -346,78 +326,53 @@ public:
   // Failure cases - linear
   // ---------------------------------------------------------------------------
   void test_interpolatelinear_throws_for_undefined_ymode_type() {
-    TS_ASSERT_THROWS(
-        interpolateLinear(Histogram(Points(10, LinearGenerator(0, 0.5))), 10),
-        const std::runtime_error &);
+    TS_ASSERT_THROWS(interpolateLinear(Histogram(Points(10, LinearGenerator(0, 0.5))), 10), const std::runtime_error &);
   }
 
   void test_interpolatelinear_throws_if_number_points_less_than_3() {
-    TS_ASSERT_THROWS(
-        interpolateLinear(
-            Histogram(Points(2, LinearGenerator(0, 0.5)), {-2, 2}), 1),
-        const std::runtime_error &);
-    TS_ASSERT_THROWS(
-        interpolateLinear(Histogram(Points(2, LinearGenerator(0, 0.5))), 1),
-        const std::runtime_error &);
+    TS_ASSERT_THROWS(interpolateLinear(Histogram(Points(2, LinearGenerator(0, 0.5)), {-2, 2}), 1),
+                     const std::runtime_error &);
+    TS_ASSERT_THROWS(interpolateLinear(Histogram(Points(2, LinearGenerator(0, 0.5))), 1), const std::runtime_error &);
   }
 
   void test_interpolatelinearinplace_throws_if_input_has_less_than_2_points() {
     Histogram input(Points(1, LinearGenerator(0.1, 0.1)), {-2});
     Histogram output(Points(1, LinearGenerator(0.1, 0.1)));
-    TS_ASSERT_THROWS(interpolateLinearInplace(input, output),
-                     const std::runtime_error &)
+    TS_ASSERT_THROWS(interpolateLinearInplace(input, output), const std::runtime_error &)
   }
 
-  void
-  test_interpolatelinear_throws_if_stepsize_greater_or_equal_number_points() {
-    TS_ASSERT_THROWS(
-        interpolateLinear(Histogram(Points(6, LinearGenerator(0, 0.5))), 6),
-        const std::runtime_error &);
-    TS_ASSERT_THROWS(
-        interpolateLinear(Histogram(Points(6, LinearGenerator(0, 0.5))), 7),
-        const std::runtime_error &);
+  void test_interpolatelinear_throws_if_stepsize_greater_or_equal_number_points() {
+    TS_ASSERT_THROWS(interpolateLinear(Histogram(Points(6, LinearGenerator(0, 0.5))), 6), const std::runtime_error &);
+    TS_ASSERT_THROWS(interpolateLinear(Histogram(Points(6, LinearGenerator(0, 0.5))), 7), const std::runtime_error &);
   }
 
   void test_interpolateLinearPointDataSet_Errors_Too_Few_Points() {
-    Histogram input(Points(5, LinearGenerator(0, 0.5)), {-2, 0, 0, 0, 2},
-                    CountStandardDeviations{1., 0., 0., 0., 1.});
-    TS_ASSERT_THROWS(interpolateLinear(input, 4, true),
-                     const std::runtime_error &);
+    Histogram input(Points(5, LinearGenerator(0, 0.5)), {-2, 0, 0, 0, 2}, CountStandardDeviations{1., 0., 0., 0., 1.});
+    TS_ASSERT_THROWS(interpolateLinear(input, 4, true), const std::runtime_error &);
   }
 
   // ---------------------------------------------------------------------------
   // Failure cases - cspline
   // ---------------------------------------------------------------------------
   void test_interpolatecspline_throws_for_undefined_ymode_type() {
-    TS_ASSERT_THROWS(
-        interpolateCSpline(Histogram(Points(10, LinearGenerator(0, 0.5))), 10),
-        const std::runtime_error &);
+    TS_ASSERT_THROWS(interpolateCSpline(Histogram(Points(10, LinearGenerator(0, 0.5))), 10),
+                     const std::runtime_error &);
   }
 
   void test_interpolatecspline_throws_if_less_than_4_calculated_points() {
-    TS_ASSERT_THROWS(
-        interpolateCSpline(Histogram(Points(2, LinearGenerator(0, 0.5))), 1),
-        const std::runtime_error &);
-    TS_ASSERT_THROWS(
-        interpolateCSpline(Histogram(Points(3, LinearGenerator(0, 0.5))), 1),
-        const std::runtime_error &);
+    TS_ASSERT_THROWS(interpolateCSpline(Histogram(Points(2, LinearGenerator(0, 0.5))), 1), const std::runtime_error &);
+    TS_ASSERT_THROWS(interpolateCSpline(Histogram(Points(3, LinearGenerator(0, 0.5))), 1), const std::runtime_error &);
   }
 
   void test_interpolatecsplineinplace_throws_if_input_has_less_than_3_points() {
     Histogram input(Points(2, LinearGenerator(0, 1.0)));
     Histogram output(Points(5, LinearGenerator(0.1, 0.1)));
-    TS_ASSERT_THROWS(interpolateCSplineInplace(input, output),
-                     const std::runtime_error &)
+    TS_ASSERT_THROWS(interpolateCSplineInplace(input, output), const std::runtime_error &)
   }
 
-  void
-  test_interpolatecspline_throws_if_stepsize_greater_or_equal_number_points() {
-    TS_ASSERT_THROWS(
-        interpolateCSpline(Histogram(Points(6, LinearGenerator(0, 0.5))), 6),
-        const std::runtime_error &);
-    TS_ASSERT_THROWS(
-        interpolateCSpline(Histogram(Points(6, LinearGenerator(0, 0.5))), 7),
-        const std::runtime_error &);
+  void test_interpolatecspline_throws_if_stepsize_greater_or_equal_number_points() {
+    TS_ASSERT_THROWS(interpolateCSpline(Histogram(Points(6, LinearGenerator(0, 0.5))), 6), const std::runtime_error &);
+    TS_ASSERT_THROWS(interpolateCSpline(Histogram(Points(6, LinearGenerator(0, 0.5))), 7), const std::runtime_error &);
   }
 };
 
@@ -428,13 +383,10 @@ class InterpolateTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static InterpolateTestPerformance *createSuite() {
-    return new InterpolateTestPerformance();
-  }
+  static InterpolateTestPerformance *createSuite() { return new InterpolateTestPerformance(); }
   static void destroySuite(InterpolateTestPerformance *suite) { delete suite; }
 
-  InterpolateTestPerformance()
-      : hist(BinEdges(binSize, LinearGenerator(0, 1))) {
+  InterpolateTestPerformance() : hist(BinEdges(binSize, LinearGenerator(0, 1))) {
     Counts counts(binSize - 1, LinearGenerator(10, 0.1));
     hist.setCounts(counts);
 

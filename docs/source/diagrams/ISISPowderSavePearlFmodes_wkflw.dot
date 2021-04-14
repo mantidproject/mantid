@@ -5,7 +5,7 @@ digraph isisPowderCreateVanadium{
     // **Labels
     // PEARL Focus modes - this helps keeps the graph tidy
     label_focusModeAllPearl                     [label="Focus mode: All"]
-    label_focusModeGroupsPearl                  [label="Focus mode: Groups"]    
+    label_focusModeGroupsPearl                  [label="Focus mode: Groups"]
     label_focusModeModsPearl                    [label="Focus mode: Mods"]
     label_focusModeTransPearl                   [label="Focus mode: Trans"]
 
@@ -33,10 +33,10 @@ digraph isisPowderCreateVanadium{
     subgraph algorithms{
         $algorithm_style
 
-        // Focus mode: All 
+        // Focus mode: All
         alg_MergeRuns_all                       [label="Merge Runs: Banks 1-9 (inc.)"]
         alg_Scale_all                           [label="Scale: 0.11111111 (1/9)"]
-        
+
         alg_SaveGss_all                         [label="Save GSS: TOF\n Appending banks 10-12 (inc.) to merged runs"]
         alg_SaveGssSummed_all                   [label="Save GSS: TOF"]
 
@@ -62,7 +62,7 @@ digraph isisPowderCreateVanadium{
         // Focus mode : TRANS
         alg_MergeRuns_trans                     [label="Merge Runs: Banks 1-9 (inc.)"]
         alg_Scale_trans                         [label="Scale: 0.11111111 (1/9)"]
-        
+
         alg_SaveGssSummed_trans                 [label="Save GSS: TOF"]
 
         alg_SaveFocusedXyeDSummed_trans         [label="Save Focused XYE: dSpacing"]
@@ -94,7 +94,7 @@ digraph isisPowderCreateVanadium{
         // Merge + Scale
         label_focusModeAllPearl         -> alg_MergeRuns_all
         alg_MergeRuns_all               -> alg_Scale_all
-        
+
         // All - Attenuate
         alg_Scale_all                   -> if_attenuatePearl_all
         param_attenuatePearl_all        -> if_attenuatePearl_all

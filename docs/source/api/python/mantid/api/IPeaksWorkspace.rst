@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::API::IPeaksWorkspace.
 
 .. module:`mantid.api`
 
-.. autoclass:: mantid.api.IPeaksWorkspace 
+.. autoclass:: mantid.api.IPeaksWorkspace
     :members:
     :undoc-members:
     :inherited-members:

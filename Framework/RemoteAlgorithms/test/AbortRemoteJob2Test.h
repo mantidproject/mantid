@@ -19,9 +19,7 @@ class AbortRemoteJob2Test : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static AbortRemoteJob2Test *createSuite() {
-    return new AbortRemoteJob2Test();
-  }
+  static AbortRemoteJob2Test *createSuite() { return new AbortRemoteJob2Test(); }
   static void destroySuite(AbortRemoteJob2Test *suite) { delete suite; }
 
   void test_algorithm() {
@@ -38,8 +36,7 @@ public:
     TS_ASSERT(a = std::make_shared<AbortRemoteJob2>());
     // can cast to inherited interfaces and base classes
 
-    TS_ASSERT(
-        dynamic_cast<Mantid::RemoteAlgorithms::AbortRemoteJob2 *>(a.get()));
+    TS_ASSERT(dynamic_cast<Mantid::RemoteAlgorithms::AbortRemoteJob2 *>(a.get()));
     TS_ASSERT(dynamic_cast<Mantid::API::Algorithm *>(a.get()));
     TS_ASSERT(dynamic_cast<Mantid::Kernel::PropertyManagerOwner *>(a.get()));
     TS_ASSERT(dynamic_cast<Mantid::API::IAlgorithm *>(a.get()));
@@ -63,8 +60,7 @@ public:
     AbortRemoteJob2 alg1;
     TS_ASSERT_THROWS_NOTHING(alg1.initialize());
     // id missing
-    TS_ASSERT_THROWS(alg1.setPropertyValue("ComputeResource", "missing!"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg1.setPropertyValue("ComputeResource", "missing!"), const std::invalid_argument &);
 
     TS_ASSERT_THROWS(alg1.execute(), const std::runtime_error &);
     TS_ASSERT(!alg1.isExecuted());
@@ -81,27 +77,22 @@ public:
   void test_wrongProperty() {
     AbortRemoteJob2 ab;
     TS_ASSERT_THROWS_NOTHING(ab.initialize();)
-    TS_ASSERT_THROWS(ab.setPropertyValue("ComputeRes", "anything"),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(ab.setPropertyValue("username", "anything"),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(ab.setPropertyValue("sername", "anything"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(ab.setPropertyValue("ComputeRes", "anything"), const std::runtime_error &);
+    TS_ASSERT_THROWS(ab.setPropertyValue("username", "anything"), const std::runtime_error &);
+    TS_ASSERT_THROWS(ab.setPropertyValue("sername", "anything"), const std::runtime_error &);
   }
 
   void test_wrongResource() {
     AbortRemoteJob2 ab;
     TS_ASSERT_THROWS_NOTHING(ab.initialize());
     // the compute resource given  does not exist:
-    TS_ASSERT_THROWS(ab.setPropertyValue("ComputeResource", "missing c r!"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(ab.setPropertyValue("ComputeResource", "missing c r!"), const std::invalid_argument &);
   }
 
   void test_propertiesOK() {
     testFacilities.emplace_back("SNS", "Fermi");
 
-    const Mantid::Kernel::FacilityInfo &prevFac =
-        Mantid::Kernel::ConfigService::Instance().getFacility();
+    const Mantid::Kernel::FacilityInfo &prevFac = Mantid::Kernel::ConfigService::Instance().getFacility();
     for (auto &testFacility : testFacilities) {
       const std::string facName = testFacility.first;
       const std::string compName = testFacility.second;
@@ -109,8 +100,7 @@ public:
       Mantid::Kernel::ConfigService::Instance().setFacility(facName);
       AbortRemoteJob2 ab;
       TS_ASSERT_THROWS_NOTHING(ab.initialize());
-      TS_ASSERT_THROWS_NOTHING(
-          ab.setPropertyValue("ComputeResource", compName));
+      TS_ASSERT_THROWS_NOTHING(ab.setPropertyValue("ComputeResource", compName));
       TS_ASSERT_THROWS_NOTHING(ab.setPropertyValue("JobID", "000001"));
       // TODO: this will run the algorithm and do a remote
       // connection. uncomment only when/if we have a mock up for this

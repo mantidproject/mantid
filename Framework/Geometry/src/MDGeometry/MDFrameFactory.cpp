@@ -14,8 +14,7 @@
 namespace Mantid {
 namespace Geometry {
 
-GeneralFrame *
-GeneralFrameFactory::createRaw(const MDFrameArgument &argument) const {
+GeneralFrame *GeneralFrameFactory::createRaw(const MDFrameArgument &argument) const {
   using namespace Mantid::Kernel;
 
   // Try to generate a proper md unit, don't just assume a label unit.
@@ -34,19 +33,14 @@ bool GeneralFrameFactory::canInterpret(const MDFrameArgument &argument) const {
   return canInterpret;
 }
 
-QLab *QLabFrameFactory::createRaw(const MDFrameArgument & /*argument*/) const {
-  return new QLab;
-}
+QLab *QLabFrameFactory::createRaw(const MDFrameArgument & /*argument*/) const { return new QLab; }
 
 bool QLabFrameFactory::canInterpret(const MDFrameArgument &argument) const {
   // We only need to check the frame QLab only makes sense in inverse Angstroms
   return argument.frameString == QLab::QLabName;
 }
 
-QSample *
-QSampleFrameFactory::createRaw(const MDFrameArgument & /*argument*/) const {
-  return new QSample;
-}
+QSample *QSampleFrameFactory::createRaw(const MDFrameArgument & /*argument*/) const { return new QSample; }
 
 bool QSampleFrameFactory::canInterpret(const MDFrameArgument &argument) const {
   // We only need to check the frame QSample only makes sense in inverse
@@ -66,19 +60,16 @@ bool HKLFrameFactory::canInterpret(const MDFrameArgument &argument) const {
   auto unitFactoryChain = Kernel::makeMDUnitFactoryChain();
   auto mdUnit = unitFactoryChain->create(argument.unitString);
   // We expect units to be RLU or A^-1
-  auto isInverseAngstrom =
-      mdUnit->getUnitLabel() == Units::Symbol::InverseAngstrom;
+  auto isInverseAngstrom = mdUnit->getUnitLabel() == Units::Symbol::InverseAngstrom;
   auto isRLU = mdUnit->getUnitLabel() == Units::Symbol::RLU;
   boost::regex pattern("in.*A.*\\^-1");
-  auto isHoraceStyle =
-      boost::regex_match(mdUnit->getUnitLabel().ascii(), pattern);
+  auto isHoraceStyle = boost::regex_match(mdUnit->getUnitLabel().ascii(), pattern);
   const bool compatibleUnit = isInverseAngstrom || isRLU || isHoraceStyle;
   // Check both the frame name and the unit name
   return argument.frameString == HKL::HKLName && compatibleUnit;
 }
 
-UnknownFrame *
-UnknownFrameFactory::createRaw(const MDFrameArgument &argument) const {
+UnknownFrame *UnknownFrameFactory::createRaw(const MDFrameArgument &argument) const {
   using namespace Mantid::Kernel;
 
   // Try to generate a proper md unit, don't just assume a label unit.
@@ -89,8 +80,7 @@ UnknownFrameFactory::createRaw(const MDFrameArgument &argument) const {
 }
 
 /// Indicate an ability to intepret the string
-bool UnknownFrameFactory::canInterpret(
-    const MDFrameArgument & /*unitString*/) const {
+bool UnknownFrameFactory::canInterpret(const MDFrameArgument & /*unitString*/) const {
   return true; // This can interpret everything
 }
 

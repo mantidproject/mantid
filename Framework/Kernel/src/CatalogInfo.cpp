@@ -33,10 +33,8 @@ CatalogInfo::CatalogInfo(const Poco::XML::Element *element) {
 
 CatalogInfo::CatalogInfo(const CatalogInfo &other)
     : m_catalogName(other.m_catalogName), m_soapEndPoint(other.m_soapEndPoint),
-      m_externalDownloadURL(other.m_externalDownloadURL),
-      m_catalogPrefix(other.m_catalogPrefix),
-      m_windowsPrefix(other.m_windowsPrefix), m_macPrefix(other.m_macPrefix),
-      m_linuxPrefix(other.m_linuxPrefix) {}
+      m_externalDownloadURL(other.m_externalDownloadURL), m_catalogPrefix(other.m_catalogPrefix),
+      m_windowsPrefix(other.m_windowsPrefix), m_macPrefix(other.m_macPrefix), m_linuxPrefix(other.m_linuxPrefix) {}
 
 /**
  * Obtain catalog name from the facility file.
@@ -51,23 +49,17 @@ const std::string CatalogInfo::soapEndPoint() const { return (m_soapEndPoint); }
 /**
  * Obtain catalog name from the facility file.
  */
-const std::string CatalogInfo::externalDownloadURL() const {
-  return (m_externalDownloadURL);
-}
+const std::string CatalogInfo::externalDownloadURL() const { return (m_externalDownloadURL); }
 
 /**
  * Obtain the regex prefix for default archive path.
  */
-const std::string CatalogInfo::catalogPrefix() const {
-  return (m_catalogPrefix);
-}
+const std::string CatalogInfo::catalogPrefix() const { return (m_catalogPrefix); }
 
 /**
  * Obtain Windows prefix from the facility file.
  */
-const std::string CatalogInfo::windowsPrefix() const {
-  return (m_windowsPrefix);
-}
+const std::string CatalogInfo::windowsPrefix() const { return (m_windowsPrefix); }
 
 /**
  * Obtain Macintosh prefix from facility file.
@@ -92,11 +84,9 @@ CatalogInfo *CatalogInfo::clone() const { return new CatalogInfo(*this); }
  * @param attributeName :: The name of the attribute for the given tag.
  * @return The contents of the attribute from an XML element.
  */
-std::string CatalogInfo::getAttribute(const Poco::XML::Element *element,
-                                      const std::string &tagName,
+std::string CatalogInfo::getAttribute(const Poco::XML::Element *element, const std::string &tagName,
                                       const std::string &attributeName) {
-  Poco::AutoPtr<Poco::XML::NodeList> elementTag =
-      element->getElementsByTagName(tagName);
+  Poco::AutoPtr<Poco::XML::NodeList> elementTag = element->getElementsByTagName(tagName);
 
   // If the tag exists in the XML file.
   if (elementTag->length() == 1) {

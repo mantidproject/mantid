@@ -49,17 +49,14 @@ DECLARE_ALGORITHM(ConvertToMD)
 
 void ConvertToMD::init() {
   ConvertToMDParent::init();
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output *MDEventWorkspace*.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("OverwriteExisting", true,
-                                                Direction::Input),
-      "By default  (\"1\"), existing Output Workspace will be replaced. Select "
-      "false (\"0\") if you want to add new events to the workspace, which "
-      "already exist. "
-      "\nChoosing \"0\" can be very inefficient for file-based workspaces");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("OverwriteExisting", true, Direction::Input),
+                  "By default  (\"1\"), existing Output Workspace will be replaced. Select "
+                  "false (\"0\") if you want to add new events to the workspace, which "
+                  "already exist. "
+                  "\nChoosing \"0\" can be very inefficient for file-based workspaces");
 
   declareProperty(std::make_unique<ArrayProperty<double>>("MinValues"),
                   "It has to be N comma separated values, where N is the "
@@ -81,38 +78,30 @@ void ConvertToMD::init() {
   // specified here, the target workspace range will be used instead" );
 
   // Box controller properties. These are the defaults
-  this->initBoxControllerProps("5" /*SplitInto*/, 1000 /*SplitThreshold*/,
-                               20 /*MaxRecursionDepth*/);
+  this->initBoxControllerProps("5" /*SplitInto*/, 1000 /*SplitThreshold*/, 20 /*MaxRecursionDepth*/);
   // additional box controller settings property.
   auto mustBeMoreThan1 = std::make_shared<BoundedValidator<int>>();
   mustBeMoreThan1->setLower(1);
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<int>>("MinRecursionDepth", 1,
-                                               mustBeMoreThan1),
-      "Optional. If specified, then all the boxes will be split to this "
-      "minimum recursion depth. 0 = no splitting, "
-      "1 = one level of splitting, etc. \n Be careful using this since it can "
-      "quickly create a huge number of :math:`boxes = "
-      "SplitInto^{MinRercursionDepth \\times NumDimensions}`. \n But setting "
-      "this property equal to MaxRecursionDepth "
-      "is necessary if one wants to generate multiple file based "
-      "workspaces in order to merge them later.");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("MinRecursionDepth", 1, mustBeMoreThan1),
+                  "Optional. If specified, then all the boxes will be split to this "
+                  "minimum recursion depth. 0 = no splitting, "
+                  "1 = one level of splitting, etc. \n Be careful using this since it can "
+                  "quickly create a huge number of :math:`boxes = "
+                  "SplitInto^{MinRercursionDepth \\times NumDimensions}`. \n But setting "
+                  "this property equal to MaxRecursionDepth "
+                  "is necessary if one wants to generate multiple file based "
+                  "workspaces in order to merge them later.");
   setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("TopLevelSplitting", false,
-                                                Direction::Input),
-      "This option causes a split of the top level, i.e. level0, of 50 for the "
-      "first four dimensions.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("TopLevelSplitting", false, Direction::Input),
+                  "This option causes a split of the top level, i.e. level0, of 50 for the "
+                  "first four dimensions.");
 
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
-                                     ".nxs"),
-      "The name of the Nexus file to write, as a full or relative path.\n"
-      "Only used if FileBackEnd is true.");
-  setPropertySettings("Filename", std::make_unique<EnabledWhenProperty>(
-                                      "FileBackEnd", IS_EQUAL_TO, "1"));
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave, ".nxs"),
+                  "The name of the Nexus file to write, as a full or relative path.\n"
+                  "Only used if FileBackEnd is true.");
+  setPropertySettings("Filename", std::make_unique<EnabledWhenProperty>("FileBackEnd", IS_EQUAL_TO, "1"));
 
   declareProperty("FileBackEnd", false,
                   "If true, Filename must also be specified. The algorithm "
@@ -153,16 +142,14 @@ std::map<std::string, std::string> ConvertToMD::validateInputs() {
                                  "for indexed version of algorithm. ";
 
     if (topLevelSplittingChecked)
-      result["ConverterType"] +=
-          "The usage of top level splitting is "
-          "not possible for indexed version of algorithm. ";
+      result["ConverterType"] += "The usage of top level splitting is "
+                                 "not possible for indexed version of algorithm. ";
 
     bool validSplitInfo = ConvToMDEventsWSIndexing::isSplitValid(split_into);
     if (!validSplitInfo)
-      result["ConverterType"] +=
-          "The split parameter should be the same for"
-          " all dimensions and be equal the power of 2"
-          " (2 ,4, 8, 16,..) for indexed version of algorithm. ";
+      result["ConverterType"] += "The split parameter should be the same for"
+                                 " all dimensions and be equal the power of 2"
+                                 " (2 ,4, 8, 16,..) for indexed version of algorithm. ";
   }
 
   std::vector<double> minVals = this->getProperty("MinValues");
@@ -170,8 +157,7 @@ std::map<std::string, std::string> ConvertToMD::validateInputs() {
 
   if (minVals.size() != maxVals.size()) {
     std::stringstream msg;
-    msg << "Rank of MinValues != MaxValues (" << minVals.size()
-        << "!=" << maxVals.size() << ")";
+    msg << "Rank of MinValues != MaxValues (" << minVals.size() << "!=" << maxVals.size() << ")";
     result["MinValues"] = msg.str();
     result["MaxValues"] = msg.str();
   } else {
@@ -184,8 +170,7 @@ std::map<std::string, std::string> ConvertToMD::validateInputs() {
           msg << "max not bigger than min ";
         else
           msg << ", ";
-        msg << "at index=" << (i + 1) << " (" << minVals[i]
-            << ">=" << maxVals[i] << ")";
+        msg << "at index=" << (i + 1) << " (" << minVals[i] << ">=" << maxVals[i] << ")";
       }
     }
 
@@ -237,18 +222,14 @@ void ConvertToMD::exec() {
   // Sanity check some options
   if (QModReq != MDTransfQ3D().transfID()) {
     MDWSTransform transform;
-    const std::string autoSelect =
-        transform.getTargetFrames()[CnvrtToMD::AutoSelect];
+    const std::string autoSelect = transform.getTargetFrames()[CnvrtToMD::AutoSelect];
     if (QFrame != autoSelect) {
-      g_log.warning("Q3DFrames value ignored with QDimensions != " +
-                    MDTransfQ3D().transfID());
+      g_log.warning("Q3DFrames value ignored with QDimensions != " + MDTransfQ3D().transfID());
       QFrame = autoSelect;
     }
-    const std::string noScaling =
-        transform.getQScalings()[CnvrtToMD::NoScaling];
+    const std::string noScaling = transform.getQScalings()[CnvrtToMD::NoScaling];
     if (convertTo_ != noScaling) {
-      g_log.warning("QConversionScales value ignored with QDimensions != " +
-                    MDTransfQ3D().transfID());
+      g_log.warning("QConversionScales value ignored with QDimensions != " + MDTransfQ3D().transfID());
       convertTo_ = noScaling;
     }
   }
@@ -259,8 +240,7 @@ void ConvertToMD::exec() {
   // get workspace parameters and build target workspace description, report if
   // there is need to build new target MD workspace
   bool createNewTargetWs =
-      buildTargetWSDescription(spws, QModReq, dEModReq, otherDimNames, dimMin,
-                               dimMax, QFrame, convertTo_, targWSDescr);
+      buildTargetWSDescription(spws, QModReq, dEModReq, otherDimNames, dimMin, dimMax, QFrame, convertTo_, targWSDescr);
 
   // create and initiate new workspace or set up existing workspace as a target.
   if (createNewTargetWs) // create new
@@ -269,9 +249,8 @@ void ConvertToMD::exec() {
     m_OutWSWrapper->setMDWS(spws);
 
   // pre-process detectors;
-  targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(
-      m_InWS2D, dEModReq, getProperty("UpdateMasks"),
-      std::string(getProperty("PreprocDetectorsWS")));
+  targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(m_InWS2D, dEModReq, getProperty("UpdateMasks"),
+                                                                   std::string(getProperty("PreprocDetectorsWS")));
 
   /// copy & retrieve metadata, necessary to initialize convertToMD Plugin,
   /// including getting the unique number, that identifies the run, the source
@@ -281,16 +260,13 @@ void ConvertToMD::exec() {
   // factory, (will throw if logic is wrong and ChildAlgorithm is not found
   // among existing)
   ConvToMDSelector::ConverterType convType =
-      getPropertyValue("ConverterType") == "Indexed"
-          ? ConvToMDSelector::INDEXED
-          : ConvToMDSelector::DEFAULT;
+      getPropertyValue("ConverterType") == "Indexed" ? ConvToMDSelector::INDEXED : ConvToMDSelector::DEFAULT;
   ConvToMDSelector AlgoSelector(convType);
   this->m_Convertor = AlgoSelector.convSelector(m_InWS2D, this->m_Convertor);
 
   bool ignoreZeros = getProperty("IgnoreZeroSignals");
   // initiate conversion and estimate amount of job to do
-  size_t n_steps =
-      this->m_Convertor->initialize(targWSDescr, m_OutWSWrapper, ignoreZeros);
+  size_t n_steps = this->m_Convertor->initialize(targWSDescr, m_OutWSWrapper, ignoreZeros);
 
   // copy the metadata, necessary for resolution corrections
   copyMetaData(spws);
@@ -315,8 +291,7 @@ void ConvertToMD::exec() {
   }
 
   // JOB COMPLETED:
-  setProperty("OutputWorkspace",
-              std::dynamic_pointer_cast<IMDEventWorkspace>(spws));
+  setProperty("OutputWorkspace", std::dynamic_pointer_cast<IMDEventWorkspace>(spws));
   // free the algorithm from the responsibility for the target workspace to
   // allow it to be deleted if necessary
   m_OutWSWrapper->releaseWorkspace();
@@ -334,17 +309,12 @@ void ConvertToMD::exec() {
  * @return  :: modified targWSDescription containing the number of experiment
  *info added from the current MD workspace
  */
-void ConvertToMD::addExperimentInfo(API::IMDEventWorkspace_sptr &mdEventWS,
-                                    MDWSDescription &targWSDescr) const {
+void ConvertToMD::addExperimentInfo(API::IMDEventWorkspace_sptr &mdEventWS, MDWSDescription &targWSDescr) const {
   // Copy ExperimentInfo (instrument, run, sample) to the output WS
   API::ExperimentInfo_sptr ei(m_InWS2D->cloneExperimentInfo());
 
-  ei->mutableRun().addProperty("RUBW_MATRIX", targWSDescr.m_Wtransf.getVector(),
-                               true);
-  ei->mutableRun().addProperty(
-      "W_MATRIX",
-      targWSDescr.getPropertyValueAsType<std::vector<double>>("W_MATRIX"),
-      true);
+  ei->mutableRun().addProperty("RUBW_MATRIX", targWSDescr.m_Wtransf.getVector(), true);
+  ei->mutableRun().addProperty("W_MATRIX", targWSDescr.getPropertyValueAsType<std::vector<double>>("W_MATRIX"), true);
 
   // run index as the number of experiment into merged within this run. It is
   // possible to interpret it differently
@@ -380,10 +350,9 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
     }
   }
   if (!detector_found) {
-    g_log.information()
-        << "No spectra in the workspace have detectors associated "
-           "with them. Storing bin boundaries from first spectrum for"
-           "resolution calculation\n";
+    g_log.information() << "No spectra in the workspace have detectors associated "
+                           "with them. Storing bin boundaries from first spectrum for"
+                           "resolution calculation\n";
   }
 
   // retrieve representative bin boundaries
@@ -418,8 +387,7 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
   // information set already
   uint16_t nexpts = mdEventWS->getNumExperimentInfo();
   if (nexpts > 0) {
-    ExperimentInfo_sptr expt =
-        mdEventWS->getExperimentInfo(static_cast<uint16_t>(nexpts - 1));
+    ExperimentInfo_sptr expt = mdEventWS->getExperimentInfo(static_cast<uint16_t>(nexpts - 1));
     expt->mutableRun().storeHistogramBinBoundaries(binBoundaries.rawData());
   }
 }
@@ -443,12 +411,11 @@ is ignored in any other case
 * @param targWSDescr -- the resulting class used to interpret all parameters
 together and used to describe selected transformation.
 */
-bool ConvertToMD::buildTargetWSDescription(
-    const API::IMDEventWorkspace_sptr &spws, const std::string &QModReq,
-    const std::string &dEModReq, const std::vector<std::string> &otherDimNames,
-    std::vector<double> &dimMin, std::vector<double> &dimMax,
-    const std::string &QFrame, const std::string &convertTo_,
-    MDAlgorithms::MDWSDescription &targWSDescr) {
+bool ConvertToMD::buildTargetWSDescription(const API::IMDEventWorkspace_sptr &spws, const std::string &QModReq,
+                                           const std::string &dEModReq, const std::vector<std::string> &otherDimNames,
+                                           std::vector<double> &dimMin, std::vector<double> &dimMax,
+                                           const std::string &QFrame, const std::string &convertTo_,
+                                           MDAlgorithms::MDWSDescription &targWSDescr) {
   // ------- Is there need to create new output workspace?
   bool createNewTargetWs = doWeNeedNewTargetWorkspace(spws);
   std::vector<int> split_into;
@@ -457,8 +424,7 @@ bool ConvertToMD::buildTargetWSDescription(
     targWSDescr.m_buildingNewWorkspace = true;
     // find min-max dimensions values -- either take them from input parameters
     // or identify the defaults if input parameters are not defined
-    this->findMinMax(m_InWS2D, QModReq, dEModReq, QFrame, convertTo_,
-                     otherDimNames, dimMin, dimMax);
+    this->findMinMax(m_InWS2D, QModReq, dEModReq, QFrame, convertTo_, otherDimNames, dimMin, dimMax);
     // set number of bins each dimension split into.
     split_into = this->getProperty("SplitInto");
   } else // get min/max from existing MD workspace ignoring input min/max values
@@ -495,8 +461,7 @@ bool ConvertToMD::buildTargetWSDescription(
     try {
       // otherwise input uv are ignored -> later it can be modified to set ub
       // matrix if no given, but this may over-complicate things.
-      MsliceProj.setUVvectors(getProperty("UProj"), getProperty("VProj"),
-                              getProperty("WProj"));
+      MsliceProj.setUVvectors(getProperty("UProj"), getProperty("VProj"), getProperty("WProj"));
     } catch (std::invalid_argument &) {
       g_log.warning() << "The projections are coplanar. Will use defaults "
                          "[1,0,0],[0,1,0] and [0,0,1]\n";
@@ -505,8 +470,7 @@ bool ConvertToMD::buildTargetWSDescription(
     auto warnIfSet = [this](const std::string &propName) {
       Property *prop = this->getProperty(propName);
       if (!prop->isDefault()) {
-        g_log.warning(propName + " value ignored with QDimensions != " +
-                      MDTransfQ3D().transfID());
+        g_log.warning(propName + " value ignored with QDimensions != " + MDTransfQ3D().transfID());
       }
     };
     for (const auto &name : {"UProj", "VProj", "WProj"}) {
@@ -519,8 +483,7 @@ bool ConvertToMD::buildTargetWSDescription(
     // check if we are working in powder mode
     // set up target coordinate system and identify/set the (multi) dimension's
     // names to use
-    targWSDescr.m_RotMatrix =
-        MsliceProj.getTransfMatrix(targWSDescr, QFrame, convertTo_);
+    targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr, QFrame, convertTo_);
   } else // user input is mainly ignored and everything is in old MD workspace
   {
     // dimensions are already build, so build MDWS description from existing
@@ -533,8 +496,7 @@ bool ConvertToMD::buildTargetWSDescription(
     // and derived from input parameters.
     oldWSDescr.setUpMissingParameters(targWSDescr);
     // set up target coordinate system and the dimension names/units
-    oldWSDescr.m_RotMatrix =
-        MsliceProj.getTransfMatrix(oldWSDescr, QFrame, convertTo_);
+    oldWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(oldWSDescr, QFrame, convertTo_);
 
     // check inconsistencies, if the existing workspace can be used as target
     // workspace.
@@ -553,22 +515,17 @@ bool ConvertToMD::buildTargetWSDescription(
  * @param filename :: file to use for file back end of workspace
  * @return :: Shared pointer for the created workspace
  */
-API::IMDEventWorkspace_sptr
-ConvertToMD::createNewMDWorkspace(const MDWSDescription &targWSDescr,
-                                  const bool filebackend,
-                                  const std::string &filename) {
+API::IMDEventWorkspace_sptr ConvertToMD::createNewMDWorkspace(const MDWSDescription &targWSDescr,
+                                                              const bool filebackend, const std::string &filename) {
   // create new md workspace and set internal shared pointer of m_OutWSWrapper
   // to this workspace
-  API::IMDEventWorkspace_sptr spws =
-      m_OutWSWrapper->createEmptyMDWS(targWSDescr);
+  API::IMDEventWorkspace_sptr spws = m_OutWSWrapper->createEmptyMDWS(targWSDescr);
   if (!spws) {
-    g_log.error() << "can not create target event workspace with :"
-                  << targWSDescr.nDimensions() << " dimensions\n";
+    g_log.error() << "can not create target event workspace with :" << targWSDescr.nDimensions() << " dimensions\n";
     throw(std::invalid_argument("can not create target workspace"));
   }
   // Build up the box controller
-  Mantid::API::BoxController_sptr bc =
-      m_OutWSWrapper->pWorkspace()->getBoxController();
+  Mantid::API::BoxController_sptr bc = m_OutWSWrapper->pWorkspace()->getBoxController();
   // Build up the box controller, using the properties in
   // BoxControllerSettingsAlgorithm
   this->setBoxController(bc, m_InWS2D->getInstrument());
@@ -591,8 +548,7 @@ ConvertToMD::createNewMDWorkspace(const MDWSDescription &targWSDescr,
   int minDepth = this->getProperty("MinRecursionDepth");
   int maxDepth = this->getProperty("MaxRecursionDepth");
   if (minDepth > maxDepth)
-    throw std::invalid_argument(
-        "MinRecursionDepth must be >= MaxRecursionDepth ");
+    throw std::invalid_argument("MinRecursionDepth must be >= MaxRecursionDepth ");
   spws->setMinRecursionDepth(size_t(minDepth));
 
   return spws;
@@ -603,8 +559,7 @@ ConvertToMD::createNewMDWorkspace(const MDWSDescription &targWSDescr,
  * the first level.
  * @param bc A pointer to the box controller.
  */
-void ConvertToMD::setupTopLevelSplitting(
-    const Mantid::API::BoxController_sptr &bc) {
+void ConvertToMD::setupTopLevelSplitting(const Mantid::API::BoxController_sptr &bc) {
   const size_t topLevelSplitSetting = 50;
   const size_t dimCutoff = 4;
 
@@ -625,8 +580,7 @@ void ConvertToMD::setupTopLevelSplitting(
  *
  *@returns true if one needs to create new workspace and false otherwise
  */
-bool ConvertToMD::doWeNeedNewTargetWorkspace(
-    const API::IMDEventWorkspace_sptr &spws) {
+bool ConvertToMD::doWeNeedNewTargetWorkspace(const API::IMDEventWorkspace_sptr &spws) {
 
   bool createNewWs(false);
   if (!spws) {
@@ -655,11 +609,10 @@ bool ConvertToMD::doWeNeedNewTargetWorkspace(
  *
  *
  */
-void ConvertToMD::findMinMax(
-    const Mantid::API::MatrixWorkspace_sptr &inWS, const std::string &QMode,
-    const std::string &dEMode, const std::string &QFrame,
-    const std::string &ConvertTo, const std::vector<std::string> &otherDim,
-    std::vector<double> &minVal, std::vector<double> &maxVal) {
+void ConvertToMD::findMinMax(const Mantid::API::MatrixWorkspace_sptr &inWS, const std::string &QMode,
+                             const std::string &dEMode, const std::string &QFrame, const std::string &ConvertTo,
+                             const std::vector<std::string> &otherDim, std::vector<double> &minVal,
+                             std::vector<double> &maxVal) {
 
   // get raw pointer to Q-transformation (do not delete this pointer, it hold by
   // MDTransfFatctory!)
@@ -680,9 +633,8 @@ void ConvertToMD::findMinMax(
     for (size_t i = 0; i < minVal.size(); i++) {
       if (minVal[i] >= maxVal[i]) // no it is ill defined
       {
-        g_log.information()
-            << " Min Value: " << minVal[i] << " for dimension N: " << i
-            << " equal or exceeds max value:" << maxVal[i] << '\n';
+        g_log.information() << " Min Value: " << minVal[i] << " for dimension N: " << i
+                            << " equal or exceeds max value:" << maxVal[i] << '\n';
         wellDefined = false;
         break;
       }
@@ -693,11 +645,9 @@ void ConvertToMD::findMinMax(
 
   // we need to identify min-max values by themselves
 
-  Mantid::API::Algorithm_sptr childAlg =
-      createChildAlgorithm("ConvertToMDMinMaxLocal");
+  Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm("ConvertToMDMinMaxLocal");
   if (!childAlg)
-    throw(std::runtime_error(
-        "Can not create child ChildAlgorithm to found min/max values"));
+    throw(std::runtime_error("Can not create child ChildAlgorithm to found min/max values"));
 
   childAlg->setProperty("InputWorkspace", inWS);
   childAlg->setProperty("QDimensions", QMode);
@@ -705,8 +655,7 @@ void ConvertToMD::findMinMax(
   childAlg->setProperty("Q3DFrames", QFrame);
   childAlg->setProperty("OtherDimensions", otherDim);
   childAlg->setProperty("QConversionScales", ConvertTo);
-  childAlg->setProperty("PreprocDetectorsWS",
-                        std::string(getProperty("PreprocDetectorsWS")));
+  childAlg->setProperty("PreprocDetectorsWS", std::string(getProperty("PreprocDetectorsWS")));
   childAlg->execute();
   if (!childAlg->isExecuted())
     throw(std::runtime_error("Can not properly execute child algorithm to find "
@@ -762,9 +711,8 @@ void ConvertToMD::findMinMax(
  * @param filebackPath :: Path to the file used for backend storage
  * @param outputWS :: Workspace on which to set the file back end
  */
-void ConvertToMD::setupFileBackend(
-    const std::string &filebackPath,
-    const Mantid::API::IMDEventWorkspace_sptr &outputWS) {
+void ConvertToMD::setupFileBackend(const std::string &filebackPath,
+                                   const Mantid::API::IMDEventWorkspace_sptr &outputWS) {
   using DataObjects::BoxControllerNeXusIO;
   auto savemd = this->createChildAlgorithm("SaveMD", 0.01, 0.05, true);
   savemd->setProperty("InputWorkspace", outputWS);
@@ -775,8 +723,7 @@ void ConvertToMD::setupFileBackend(
 
   // create file-backed box controller
   auto boxControllerMem = outputWS->getBoxController();
-  auto boxControllerIO =
-      std::make_shared<BoxControllerNeXusIO>(boxControllerMem.get());
+  auto boxControllerIO = std::make_shared<BoxControllerNeXusIO>(boxControllerMem.get());
   boxControllerMem->setFileBacked(boxControllerIO, filebackPath);
   outputWS->setFileBacked();
   boxControllerMem->getFileIO()->setWriteBufferSize(1000000);

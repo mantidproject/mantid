@@ -32,9 +32,7 @@ public:
 
 private:
   FakeWorkspaceA *doClone() const override { return new FakeWorkspaceA(*this); }
-  FakeWorkspaceA *doCloneEmpty() const override {
-    return new FakeWorkspaceA(storageMode());
-  }
+  FakeWorkspaceA *doCloneEmpty() const override { return new FakeWorkspaceA(storageMode()); }
 };
 
 class FakeWorkspaceB : public WorkspaceTester {
@@ -44,9 +42,7 @@ public:
 
 private:
   FakeWorkspaceB *doClone() const override { return new FakeWorkspaceB(*this); }
-  FakeWorkspaceB *doCloneEmpty() const override {
-    return new FakeWorkspaceB(storageMode());
-  }
+  FakeWorkspaceB *doCloneEmpty() const override { return new FakeWorkspaceB(storageMode()); }
 };
 
 class FakeAlgNoParallelism : public Algorithm {
@@ -57,8 +53,7 @@ public:
   const std::string summary() const override { return ""; }
 
   void init() override {
-    declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                          Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input));
   }
 
   void exec() override {}
@@ -66,32 +61,27 @@ public:
 
 class FakeAlgTestGetInputWorkspaceStorageModes : public Algorithm {
 public:
-  const std::string name() const override {
-    return "FakeAlgTestGetInputWorkspaceStorageModes";
-  }
+  const std::string name() const override { return "FakeAlgTestGetInputWorkspaceStorageModes"; }
   int version() const override { return 1; }
   const std::string category() const override { return ""; }
   const std::string summary() const override { return ""; }
   void init() override {
-    declareProperty(std::make_unique<WorkspaceProperty<>>(
-        "Input1", "", Kernel::Direction::Input));
-    declareProperty(std::make_unique<WorkspaceProperty<>>(
-        "Input2", "", Kernel::Direction::Input, PropertyMode::Optional));
-    declareProperty(std::make_unique<WorkspaceProperty<>>(
-        "Input3", "", Kernel::Direction::Input, PropertyMode::Optional));
-    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-        "InOut1", "", Direction::InOut));
-    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-        "InOut2", "", Direction::InOut, PropertyMode::Optional));
-    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-        "InOut3", "", Direction::InOut, PropertyMode::Optional));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("Input1", "", Kernel::Direction::Input));
+    declareProperty(
+        std::make_unique<WorkspaceProperty<>>("Input2", "", Kernel::Direction::Input, PropertyMode::Optional));
+    declareProperty(
+        std::make_unique<WorkspaceProperty<>>("Input3", "", Kernel::Direction::Input, PropertyMode::Optional));
+    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InOut1", "", Direction::InOut));
+    declareProperty(
+        std::make_unique<WorkspaceProperty<Workspace>>("InOut2", "", Direction::InOut, PropertyMode::Optional));
+    declareProperty(
+        std::make_unique<WorkspaceProperty<Workspace>>("InOut3", "", Direction::InOut, PropertyMode::Optional));
   }
   void exec() override {}
 
 protected:
-  Parallel::ExecutionMode getParallelExecutionMode(
-      const std::map<std::string, Parallel::StorageMode> &storageModes)
-      const override {
+  Parallel::ExecutionMode
+  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override {
     // The result of getInputWorkspaceStorageModes is passed to this virtual
     // method, so we can test it here. Only initialized workspaces are part of
     // the map.
@@ -106,9 +96,7 @@ protected:
 
 class FakeAlgBadGetParallelExecutionMode : public Algorithm {
 public:
-  const std::string name() const override {
-    return "FakeAlgBadGetParallelExecutionMode ";
-  }
+  const std::string name() const override { return "FakeAlgBadGetParallelExecutionMode "; }
   int version() const override { return 1; }
   const std::string category() const override { return ""; }
   const std::string summary() const override { return ""; }
@@ -116,9 +104,8 @@ public:
   void exec() override {}
 
 protected:
-  Parallel::ExecutionMode getParallelExecutionMode(
-      const std::map<std::string, Parallel::StorageMode> &storageModes)
-      const override {
+  Parallel::ExecutionMode
+  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override {
     static_cast<void>(storageModes);
     return Parallel::ExecutionMode::Serial;
   }
@@ -131,11 +118,9 @@ public:
   const std::string category() const override { return ""; }
   const std::string summary() const override { return ""; }
   void init() override {
-    declareProperty(std::make_unique<WorkspaceProperty<>>(
-        "InputWorkspace", "", Kernel::Direction::Input,
-        std::make_unique<HistogramValidator>()));
-    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-        "OutputWorkspace", "", Direction::Output));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Kernel::Direction::Input,
+                                                          std::make_unique<HistogramValidator>()));
+    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output));
   }
   void exec() override {
     std::shared_ptr<MatrixWorkspace> ws = getProperty("InputWorkspace");
@@ -143,9 +128,8 @@ public:
   }
 
 protected:
-  Parallel::ExecutionMode getParallelExecutionMode(
-      const std::map<std::string, Parallel::StorageMode> &storageModes)
-      const override {
+  Parallel::ExecutionMode
+  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override {
     return getCorrespondingExecutionMode(storageModes.at("InputWorkspace"));
   }
 };
@@ -157,12 +141,10 @@ public:
   const std::string category() const override { return ""; }
   const std::string summary() const override { return ""; }
   void init() override {
-    declareProperty(std::make_unique<WorkspaceProperty<>>(
-        "InputWorkspace1", "", Kernel::Direction::Input,
-        std::make_unique<HistogramValidator>()));
-    declareProperty(std::make_unique<WorkspaceProperty<>>(
-        "InputWorkspace2", "", Kernel::Direction::Input,
-        std::make_unique<HistogramValidator>()));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace1", "", Kernel::Direction::Input,
+                                                          std::make_unique<HistogramValidator>()));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace2", "", Kernel::Direction::Input,
+                                                          std::make_unique<HistogramValidator>()));
   }
   void exec() override {
     std::shared_ptr<MatrixWorkspace> ws1 = getProperty("InputWorkspace1");
@@ -170,9 +152,8 @@ public:
   }
 
 protected:
-  Parallel::ExecutionMode getParallelExecutionMode(
-      const std::map<std::string, Parallel::StorageMode> &storageModes)
-      const override {
+  Parallel::ExecutionMode
+  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override {
     return getCorrespondingExecutionMode(storageModes.at("InputWorkspace1"));
   }
 };
@@ -184,14 +165,11 @@ public:
   const std::string category() const override { return ""; }
   const std::string summary() const override { return ""; }
   void init() override {
-    declareProperty(std::make_unique<WorkspaceProperty<>>(
-        "InputWorkspace1", "", Kernel::Direction::Input,
-        std::make_unique<HistogramValidator>()));
-    declareProperty(std::make_unique<WorkspaceProperty<>>(
-        "InputWorkspace2", "", Kernel::Direction::Input,
-        std::make_unique<HistogramValidator>()));
-    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-        "OutputWorkspace", "", Direction::Output));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace1", "", Kernel::Direction::Input,
+                                                          std::make_unique<HistogramValidator>()));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace2", "", Kernel::Direction::Input,
+                                                          std::make_unique<HistogramValidator>()));
+    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output));
   }
   void exec() override {
     std::shared_ptr<MatrixWorkspace> ws1 = getProperty("InputWorkspace1");
@@ -200,25 +178,20 @@ public:
   }
 
 protected:
-  Parallel::ExecutionMode getParallelExecutionMode(
-      const std::map<std::string, Parallel::StorageMode> &storageModes)
-      const override {
+  Parallel::ExecutionMode
+  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override {
     return getCorrespondingExecutionMode(storageModes.at("InputWorkspace1"));
   }
 };
 
-template <Parallel::StorageMode storageMode>
-class FakeAlg0To1 : public Algorithm {
+template <Parallel::StorageMode storageMode> class FakeAlg0To1 : public Algorithm {
 public:
-  const std::string name() const override {
-    return "FakeAlg0To1" + Parallel::toString(storageMode);
-  }
+  const std::string name() const override { return "FakeAlg0To1" + Parallel::toString(storageMode); }
   int version() const override { return 1; }
   const std::string category() const override { return ""; }
   const std::string summary() const override { return ""; }
   void init() override {
-    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-        "OutputWorkspace", "", Direction::Output));
+    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output));
   }
   void exec() override {
     auto ws = std::make_unique<FakeWorkspaceA>(storageMode);
@@ -227,40 +200,32 @@ public:
   }
 
 protected:
-  Parallel::ExecutionMode getParallelExecutionMode(
-      const std::map<std::string, Parallel::StorageMode> &storageModes)
-      const override {
+  Parallel::ExecutionMode
+  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override {
     static_cast<void>(storageModes);
     return getCorrespondingExecutionMode(storageMode);
   }
 };
 
-template <Parallel::StorageMode storageModeOut>
-class FakeAlg1To1StorageModeTransition : public Algorithm {
+template <Parallel::StorageMode storageModeOut> class FakeAlg1To1StorageModeTransition : public Algorithm {
 public:
-  const std::string name() const override {
-    return "FakeAlgAnyModeTo" + Parallel::toString(storageModeOut);
-  }
+  const std::string name() const override { return "FakeAlgAnyModeTo" + Parallel::toString(storageModeOut); }
   int version() const override { return 1; }
   const std::string category() const override { return ""; }
   const std::string summary() const override { return ""; }
   void init() override {
-    declareProperty(std::make_unique<WorkspaceProperty<>>(
-        "InputWorkspace", "", Kernel::Direction::Input,
-        std::make_unique<HistogramValidator>()));
-    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-        "OutputWorkspace", "", Direction::Output));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Kernel::Direction::Input,
+                                                          std::make_unique<HistogramValidator>()));
+    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output));
   }
   void exec() override {
     std::shared_ptr<MatrixWorkspace> ws = getProperty("InputWorkspace");
-    setProperty("OutputWorkspace",
-                std::make_unique<FakeWorkspaceA>(storageModeOut));
+    setProperty("OutputWorkspace", std::make_unique<FakeWorkspaceA>(storageModeOut));
   }
 
 protected:
-  Parallel::ExecutionMode getParallelExecutionMode(
-      const std::map<std::string, Parallel::StorageMode> &storageModes)
-      const override {
+  Parallel::ExecutionMode
+  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override {
     static_cast<void>(storageModes);
     // ExecutionMode depends on *output* StorageMode.
     return getCorrespondingExecutionMode(storageModeOut);
@@ -269,8 +234,7 @@ protected:
 
 void runNoParallelism(const Parallel::Communicator &comm) {
   for (auto storageMode :
-       {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed,
-        Parallel::StorageMode::MasterOnly}) {
+       {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed, Parallel::StorageMode::MasterOnly}) {
     auto in = std::make_shared<WorkspaceTester>(storageMode);
     auto alg = create<FakeAlgNoParallelism>(comm);
     alg->setProperty("InputWorkspace", in);
@@ -278,11 +242,10 @@ void runNoParallelism(const Parallel::Communicator &comm) {
       TS_ASSERT_THROWS_NOTHING(alg->execute());
       TS_ASSERT(alg->isExecuted());
     } else {
-      TS_ASSERT_THROWS_EQUALS(
-          alg->execute(), const std::runtime_error &e, std::string(e.what()),
-          "Algorithm does not support execution with input workspaces of the "
-          "following storage types: \nInputWorkspace " +
-              Parallel::toString(storageMode) + "\n.");
+      TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::runtime_error &e, std::string(e.what()),
+                              "Algorithm does not support execution with input workspaces of the "
+                              "following storage types: \nInputWorkspace " +
+                                  Parallel::toString(storageMode) + "\n.");
     }
   }
 }
@@ -302,8 +265,7 @@ void runBadGetParallelExecutionMode(const Parallel::Communicator &comm) {
   if (comm.size() == 1) {
     TS_ASSERT_THROWS_NOTHING(alg->execute());
   } else {
-    TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::runtime_error &e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::runtime_error &e, std::string(e.what()),
                             "Parallel::ExecutionMode::Serial is not a valid "
                             "*parallel* execution mode.");
   }
@@ -311,8 +273,7 @@ void runBadGetParallelExecutionMode(const Parallel::Communicator &comm) {
 
 void run1To1(const Parallel::Communicator &comm) {
   for (auto storageMode :
-       {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed,
-        Parallel::StorageMode::MasterOnly}) {
+       {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed, Parallel::StorageMode::MasterOnly}) {
     auto in = std::make_shared<FakeWorkspaceA>(storageMode);
     in->initialize(1, 2, 1);
     auto alg = create<FakeAlg1To1>(comm);
@@ -332,8 +293,7 @@ void run1To1(const Parallel::Communicator &comm) {
 
 void runNTo0(const Parallel::Communicator &comm) {
   for (auto storageMode :
-       {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed,
-        Parallel::StorageMode::MasterOnly}) {
+       {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed, Parallel::StorageMode::MasterOnly}) {
     auto in1 = std::make_shared<FakeWorkspaceA>(storageMode);
     auto in2 = std::make_shared<FakeWorkspaceB>(storageMode);
     in1->initialize(1, 2, 1);
@@ -349,8 +309,7 @@ void runNTo0(const Parallel::Communicator &comm) {
 
 void runNTo1(const Parallel::Communicator &comm) {
   for (auto storageMode :
-       {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed,
-        Parallel::StorageMode::MasterOnly}) {
+       {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed, Parallel::StorageMode::MasterOnly}) {
     auto in1 = std::make_shared<FakeWorkspaceA>(storageMode);
     auto in2 = std::make_shared<FakeWorkspaceB>(storageMode);
     in1->initialize(1, 2, 1);
@@ -374,8 +333,7 @@ void runNTo1(const Parallel::Communicator &comm) {
   }
 }
 
-template <Parallel::StorageMode storageMode>
-void run0To1(const Parallel::Communicator &comm) {
+template <Parallel::StorageMode storageMode> void run0To1(const Parallel::Communicator &comm) {
   auto alg = create<FakeAlg0To1<storageMode>>(comm);
   TS_ASSERT_THROWS_NOTHING(alg->execute());
   TS_ASSERT(alg->isExecuted());
@@ -419,8 +377,7 @@ void runChained(const Parallel::Communicator &comm) {
     TS_ASSERT_EQUALS(ws1, nullptr);
   }
 
-  auto alg2 =
-      create<FakeAlg1To1StorageModeTransition<StorageMode::Distributed>>(comm);
+  auto alg2 = create<FakeAlg1To1StorageModeTransition<StorageMode::Distributed>>(comm);
   alg2->setProperty("InputWorkspace", ws1);
   TS_ASSERT_THROWS_NOTHING(alg2->execute());
   TS_ASSERT(alg2->isExecuted());
@@ -438,13 +395,9 @@ public:
 
   void testNoParallelism() { runParallel(runNoParallelism); }
 
-  void testGetInputWorkspaceStorageModes() {
-    runParallel(runTestGetInputWorkspaceStorageModes);
-  }
+  void testGetInputWorkspaceStorageModes() { runParallel(runTestGetInputWorkspaceStorageModes); }
 
-  void testBadGetParallelExecutionMode() {
-    runParallel(runBadGetParallelExecutionMode);
-  }
+  void testBadGetParallelExecutionMode() { runParallel(runBadGetParallelExecutionMode); }
 
   void test1To1() { runParallel(run1To1); }
 
@@ -460,24 +413,15 @@ public:
 
   void test1To1StorageModeTransition() {
     using Parallel::StorageMode;
-    runParallel(
-        run1To1StorageModeTransition<StorageMode::Cloned, StorageMode::Cloned>);
-    runParallel(run1To1StorageModeTransition<StorageMode::Cloned,
-                                             StorageMode::Distributed>);
-    runParallel(run1To1StorageModeTransition<StorageMode::Cloned,
-                                             StorageMode::MasterOnly>);
-    runParallel(run1To1StorageModeTransition<StorageMode::Distributed,
-                                             StorageMode::Cloned>);
-    runParallel(run1To1StorageModeTransition<StorageMode::Distributed,
-                                             StorageMode::Distributed>);
-    runParallel(run1To1StorageModeTransition<StorageMode::Distributed,
-                                             StorageMode::MasterOnly>);
-    runParallel(run1To1StorageModeTransition<StorageMode::MasterOnly,
-                                             StorageMode::Cloned>);
-    runParallel(run1To1StorageModeTransition<StorageMode::MasterOnly,
-                                             StorageMode::Distributed>);
-    runParallel(run1To1StorageModeTransition<StorageMode::MasterOnly,
-                                             StorageMode::MasterOnly>);
+    runParallel(run1To1StorageModeTransition<StorageMode::Cloned, StorageMode::Cloned>);
+    runParallel(run1To1StorageModeTransition<StorageMode::Cloned, StorageMode::Distributed>);
+    runParallel(run1To1StorageModeTransition<StorageMode::Cloned, StorageMode::MasterOnly>);
+    runParallel(run1To1StorageModeTransition<StorageMode::Distributed, StorageMode::Cloned>);
+    runParallel(run1To1StorageModeTransition<StorageMode::Distributed, StorageMode::Distributed>);
+    runParallel(run1To1StorageModeTransition<StorageMode::Distributed, StorageMode::MasterOnly>);
+    runParallel(run1To1StorageModeTransition<StorageMode::MasterOnly, StorageMode::Cloned>);
+    runParallel(run1To1StorageModeTransition<StorageMode::MasterOnly, StorageMode::Distributed>);
+    runParallel(run1To1StorageModeTransition<StorageMode::MasterOnly, StorageMode::MasterOnly>);
   }
 
   void testChained() {

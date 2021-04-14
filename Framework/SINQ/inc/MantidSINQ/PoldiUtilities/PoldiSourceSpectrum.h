@@ -32,20 +32,16 @@ public:
   double intensity(double wavelength) const;
 
 protected:
-  void setSpectrumFromInstrument(
-      const Geometry::Instrument_const_sptr &poldiInstrument);
-  Geometry::IComponent_const_sptr
-  getSourceComponent(const Geometry::Instrument_const_sptr &poldiInstrument);
-  Geometry::Parameter_sptr getSpectrumParameter(
-      const Geometry::IComponent_const_sptr &source,
-      const Geometry::ParameterMap_sptr &instrumentParameterMap);
+  void setSpectrumFromInstrument(const Geometry::Instrument_const_sptr &poldiInstrument);
+  Geometry::IComponent_const_sptr getSourceComponent(const Geometry::Instrument_const_sptr &poldiInstrument);
+  Geometry::Parameter_sptr getSpectrumParameter(const Geometry::IComponent_const_sptr &source,
+                                                const Geometry::ParameterMap_sptr &instrumentParameterMap);
   void setSpectrum(const Geometry::Parameter_sptr &spectrumParameter);
 
   Kernel::Interpolation m_spectrum;
 };
 
 using PoldiSourceSpectrum_sptr = std::shared_ptr<PoldiSourceSpectrum>;
-using PoldiSourceSpectrum_const_sptr =
-    std::shared_ptr<const PoldiSourceSpectrum>;
+using PoldiSourceSpectrum_const_sptr = std::shared_ptr<const PoldiSourceSpectrum>;
 } // namespace Poldi
 } // namespace Mantid

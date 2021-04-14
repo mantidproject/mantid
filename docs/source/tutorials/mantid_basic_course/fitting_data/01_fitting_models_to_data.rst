@@ -1,15 +1,15 @@
 ﻿.. _01_fitting_models_to_data:
 
 ======================
-Fitting Models To Data 
+Fitting Models To Data
 ======================
 
 .. raw:: html
 
     <style> .red {color:#FF0000; font-weight:bold} </style>
-    <style> .green {color:#008000; font-weight:bold} </style>    
-    <style> .blue {color:#0000FF; font-weight:bold} </style> 
-    <style> .orange {color:#FF8C00; font-weight:bold} </style> 
+    <style> .green {color:#008000; font-weight:bold} </style>
+    <style> .blue {color:#0000FF; font-weight:bold} </style>
+    <style> .orange {color:#FF8C00; font-weight:bold} </style>
 
 .. role:: red
 .. role:: blue
@@ -55,15 +55,15 @@ For now, just click on the drop-down menu "Fit" and run a normal Fit.
    :alt: RunFitOption
    :align: center
 
-6. Examine the results... 
+6. Examine the results...
 
 Fit results
 ===========
 
 After a successful fit the results can be examined in three ways.
 
-A. A **plot of the fitted model** will be added to the graph which now 
-   shows the :blue:`Original data`, the :orange:`Calculated fit` and the :green:`Difference between them`. 
+A. A **plot of the fitted model** will be added to the graph which now
+   shows the :blue:`Original data`, the :orange:`Calculated fit` and the :green:`Difference between them`.
 
 B. The Fit Function property browser will show the **fitted parameters**
    instead of their initial values. If you click on the :red:`triangle` beside `fo-ExpDecay` in the Functions list, it will reveal the Output fit parameters (Height and Lifetime values). Also the :red:`Chi-Squared value` is displayed at the top of the Fitting tab.

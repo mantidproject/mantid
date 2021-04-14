@@ -40,10 +40,8 @@ public:
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
-  void readSpectraToDetectorMapping(Mantid::NeXus::NXEntry &mtd_entry,
-                                    Mantid::API::MatrixWorkspace &ws) override;
-  bool loadNexusGeometry(Mantid::API::Workspace &ws,
-                         const int nWorkspaceEntries, Kernel::Logger &logger,
+  void readSpectraToDetectorMapping(Mantid::NeXus::NXEntry &mtd_entry, Mantid::API::MatrixWorkspace &ws) override;
+  bool loadNexusGeometry(Mantid::API::Workspace &ws, const int nWorkspaceEntries, Kernel::Logger &logger,
                          const std::string &filename) override;
   /// Extract mapping information where it is build across NXDetectors
   void extractMappingInfoNew(Mantid::NeXus::NXEntry &mtd_entry);

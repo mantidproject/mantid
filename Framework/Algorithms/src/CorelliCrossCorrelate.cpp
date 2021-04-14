@@ -40,15 +40,13 @@ void CorelliCrossCorrelate::init() {
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<InstrumentValidator>();
 
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
-                  "An input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(
+      std::make_unique<WorkspaceProperty<EventWorkspace>>("InputWorkspace", "", Direction::Input, wsValidator),
+      "An input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
-  declareProperty("TimingOffset", EMPTY_INT(),
-                  std::make_shared<MandatoryValidator<int>>(),
+  declareProperty("TimingOffset", EMPTY_INT(), std::make_shared<MandatoryValidator<int>>(),
                   "Correlation chopper TDC timing offset in nanoseconds.");
 }
 
@@ -72,16 +70,11 @@ std::map<std::string, std::string> CorelliCrossCorrelate::validateInputs() {
     errors["InputWorkspace"] = "Correlation chopper not found.";
 
   // The chopper must have a sequence parameter
-  else if (inputWS->getInstrument()
-               ->getComponentByName("correlation-chopper")
-               ->getStringParameter("sequence")
-               .empty())
-    errors["InputWorkspace"] =
-        "Found the correlation chopper but no chopper sequence?";
+  else if (inputWS->getInstrument()->getComponentByName("correlation-chopper")->getStringParameter("sequence").empty())
+    errors["InputWorkspace"] = "Found the correlation chopper but no chopper sequence?";
 
   // Check for the sample and source.
-  else if (!inputWS->getInstrument()->getSource() ||
-           !inputWS->getInstrument()->getSample())
+  else if (!inputWS->getInstrument()->getSource() || !inputWS->getInstrument()->getSample())
     errors["InputWorkspace"] = "Instrument not sufficiently defined: failed to "
                                "get source and/or sample";
 
@@ -117,10 +110,8 @@ void CorelliCrossCorrelate::exec() {
   // Read in chopper sequence from IDF.
   // Chopper sequence, alternating between open and closed. If index%2==0 than
   // absorbing else transparent.
-  IComponent_const_sptr chopper =
-      inputWS->getInstrument()->getComponentByName("correlation-chopper");
-  std::vector<std::string> chopperSequence =
-      chopper->getStringParameter("sequence");
+  IComponent_const_sptr chopper = inputWS->getInstrument()->getComponentByName("correlation-chopper");
+  std::vector<std::string> chopperSequence = chopper->getStringParameter("sequence");
   g_log.information("Found chopper sequence: " + chopperSequence[0]);
 
   std::vector<std::string> chopperSequenceSplit;
@@ -142,14 +133,12 @@ void CorelliCrossCorrelate::exec() {
   // Calculate the duty cycle and the event weights from the duty cycle.
   double dutyCycle = totalOpen / sequence.back();
   auto weightAbsorbing = static_cast<float>(-dutyCycle / (1.0 - dutyCycle));
-  g_log.information() << "dutyCycle = " << dutyCycle
-                      << " weightTransparent = 1.0"
+  g_log.information() << "dutyCycle = " << dutyCycle << " weightTransparent = 1.0"
                       << " weightAbsorbing = " << weightAbsorbing << "\n";
 
   // Read in the TDC timings for the correlation chopper and apply the timing
   // offset.
-  auto chopperTdc = dynamic_cast<ITimeSeriesProperty *>(
-      inputWS->run().getLogData("chopper4_TDC"));
+  auto chopperTdc = dynamic_cast<ITimeSeriesProperty *>(inputWS->run().getLogData("chopper4_TDC"));
   if (!chopperTdc) {
     throw std::runtime_error("chopper4_TDC not found");
   }
@@ -158,39 +147,29 @@ void CorelliCrossCorrelate::exec() {
   int offset_int = getProperty("TimingOffset");
   const auto offset = static_cast<int64_t>(offset_int);
 
-  std::transform(tdc.begin(), tdc.end(), tdc.begin(),
-                 [offset](auto timing) { return timing + offset; });
+  std::transform(tdc.begin(), tdc.end(), tdc.begin(), [offset](auto timing) { return timing + offset; });
 
   // Determine period from chopper frequency.
-  auto motorSpeed = dynamic_cast<TimeSeriesProperty<double> *>(
-      inputWS->run().getProperty("BL9:Chop:Skf4:MotorSpeed"));
+  auto motorSpeed = dynamic_cast<TimeSeriesProperty<double> *>(inputWS->run().getProperty("BL9:Chop:Skf4:MotorSpeed"));
   if (!motorSpeed) {
-    throw Exception::NotFoundError(
-        "Could not find a log value for the motor speed",
-        "BL9:Chop:Skf4:MotorSpeed");
+    throw Exception::NotFoundError("Could not find a log value for the motor speed", "BL9:Chop:Skf4:MotorSpeed");
   }
   double period = 1e9 / static_cast<double>(motorSpeed->timeAverageValue());
-  g_log.information() << "Frequency = " << 1e9 / period
-                      << "Hz Period = " << period << "ns\n";
+  g_log.information() << "Frequency = " << 1e9 / period << "Hz Period = " << period << "ns\n";
 
   // Get the sample and source, calculate distances.
   IComponent_const_sptr sample = inputWS->getInstrument()->getSample();
-  const double distanceChopperToSource =
-      inputWS->getInstrument()->getSource()->getDistance(*chopper);
-  const double distanceSourceToSample =
-      inputWS->getInstrument()->getSource()->getDistance(*sample);
+  const double distanceChopperToSource = inputWS->getInstrument()->getSource()->getDistance(*chopper);
+  const double distanceSourceToSample = inputWS->getInstrument()->getSource()->getDistance(*sample);
 
   // extract formula from instrument parameters
-  std::vector<std::string> t0_formula =
-      inputWS->getInstrument()->getStringParameter("t0_formula");
+  std::vector<std::string> t0_formula = inputWS->getInstrument()->getStringParameter("t0_formula");
   if (t0_formula.empty())
-    throw Exception::InstrumentDefinitionError(
-        "Unable to retrieve t0_formula among instrument parameters");
+    throw Exception::InstrumentDefinitionError("Unable to retrieve t0_formula among instrument parameters");
   std::string formula = t0_formula[0];
   g_log.debug() << formula << "\n";
 
-  const double m_convfactor = 0.5e+12 * Mantid::PhysicalConstants::NeutronMass /
-                              Mantid::PhysicalConstants::meV;
+  const double m_convfactor = 0.5e+12 * Mantid::PhysicalConstants::NeutronMass / Mantid::PhysicalConstants::meV;
 
   // Do the cross correlation.
   auto numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
@@ -215,12 +194,10 @@ void CorelliCrossCorrelate::exec() {
     // Check for duplicate pulse problem in Corelli.
     DateAndTime emptyTime;
     if (events.back().pulseTime() == emptyTime)
-      throw std::runtime_error(
-          "Missing pulse times on events. This will not work.");
+      throw std::runtime_error("Missing pulse times on events. This will not work.");
 
     // Scale for elastic scattering.
-    double distanceSourceToDetector =
-        distanceSourceToSample + spectrumInfo.l2(i);
+    double distanceSourceToDetector = distanceSourceToSample + spectrumInfo.l2(i);
     double tofScale = distanceChopperToSource / distanceSourceToDetector;
 
     double E1;
@@ -233,20 +210,15 @@ void CorelliCrossCorrelate::exec() {
     std::vector<WeightedEvent>::iterator it;
     for (it = events.begin(); it != events.end(); ++it) {
       double tof = it->tof();
-      E1 = m_convfactor * (distanceSourceToDetector / tof) *
-           (distanceSourceToDetector / tof);
+      E1 = m_convfactor * (distanceSourceToDetector / tof) * (distanceSourceToDetector / tof);
       double t0 = parser.Eval();
 
-      DateAndTime tofTime =
-          it->pulseTime() +
-          static_cast<int64_t>(((tof - t0) * tofScale + t0) * 1000.);
+      DateAndTime tofTime = it->pulseTime() + static_cast<int64_t>(((tof - t0) * tofScale + t0) * 1000.);
       while (tdc_i != tdc.size() && tofTime > tdc[tdc_i])
         tdc_i += 1;
 
-      double angle = 360. *
-                     static_cast<double>(tofTime.totalNanoseconds() -
-                                         tdc[tdc_i - 1].totalNanoseconds()) /
-                     period;
+      double angle =
+          360. * static_cast<double>(tofTime.totalNanoseconds() - tdc[tdc_i - 1].totalNanoseconds()) / period;
 
       std::vector<double>::iterator location;
       location = std::lower_bound(sequence.begin(), sequence.end(), angle);
@@ -258,8 +230,7 @@ void CorelliCrossCorrelate::exec() {
     }
 
     // Warn if the tdc signal has stopped during the run
-    if ((events.back().pulseTime() +
-         static_cast<int64_t>(events.back().tof() * 1000.)) >
+    if ((events.back().pulseTime() + static_cast<int64_t>(events.back().tof() * 1000.)) >
         (tdc.back() + static_cast<int64_t>(period * 2)))
       g_log.warning("Events occurred long after last TDC.");
 

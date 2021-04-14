@@ -18,8 +18,7 @@ public:
   static void destroySuite(IconTest *suite) { delete suite; }
 
   void testGetIconShort() {
-    auto icon =
-        MantidQt::Icons::getIcon(QString("mdi.run-fast"), QString("red"), 1.5);
+    auto icon = MantidQt::Icons::getIcon(QString("mdi.run-fast"), QString("red"), 1.5);
     auto isNull = icon.isNull();
     TS_ASSERT(!isNull);
   }
@@ -41,10 +40,8 @@ public:
     option1.insert(QString("color"), QVariant(QString("red")));
     option1.insert(QString("scaleFactor"), QVariant(1.5));
     options.append(option1);
-    TS_ASSERT_THROWS(
-        MantidQt::Icons::getIcon(
-            {QString("mdi.run-fast"), QString("mdi.run-fast")}, options),
-        const std::invalid_argument &)
+    TS_ASSERT_THROWS(MantidQt::Icons::getIcon({QString("mdi.run-fast"), QString("mdi.run-fast")}, options),
+                     const std::invalid_argument &)
   }
 
   void testGetFont() {
@@ -55,7 +52,6 @@ public:
   }
 
   void testGetIconThrowsIfIconLibraryIsNotPresent() {
-    TS_ASSERT_THROWS(MantidQt::Icons::getIcon(QString("fda.run-fast")),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(MantidQt::Icons::getIcon(QString("fda.run-fast")), const std::invalid_argument &);
   }
 };

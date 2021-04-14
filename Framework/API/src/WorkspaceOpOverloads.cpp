@@ -34,12 +34,9 @@ namespace OperatorOverloads {
  *  @return The result in a workspace shared pointer
  */
 template <typename LHSType, typename RHSType, typename ResultType>
-ResultType executeBinaryOperation(const std::string &algorithmName,
-                                  const LHSType lhs, const RHSType rhs,
-                                  bool lhsAsOutput, bool child,
-                                  const std::string &name, bool rethrow) {
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().createUnmanaged(algorithmName);
+ResultType executeBinaryOperation(const std::string &algorithmName, const LHSType lhs, const RHSType rhs,
+                                  bool lhsAsOutput, bool child, const std::string &name, bool rethrow) {
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(algorithmName);
   alg->setChild(child);
   alg->setRethrows(rethrow);
   alg->initialize();
@@ -83,51 +80,51 @@ ResultType executeBinaryOperation(const std::string &algorithmName,
     API::MatrixWorkspace_sptr result = alg->getProperty("OutputWorkspace");
     return std::dynamic_pointer_cast<typename ResultType::element_type>(result);
   } else {
-    API::Workspace_sptr result = API::AnalysisDataService::Instance().retrieve(
-        alg->getPropertyValue("OutputWorkspace"));
+    API::Workspace_sptr result =
+        API::AnalysisDataService::Instance().retrieve(alg->getPropertyValue("OutputWorkspace"));
     return std::dynamic_pointer_cast<typename ResultType::element_type>(result);
   }
 }
 
-template MANTID_API_DLL MatrixWorkspace_sptr executeBinaryOperation(
-    const std::string &, const MatrixWorkspace_sptr, const MatrixWorkspace_sptr,
-    bool, bool, const std::string &, bool);
-template MANTID_API_DLL WorkspaceGroup_sptr executeBinaryOperation(
-    const std::string &, const WorkspaceGroup_sptr, const WorkspaceGroup_sptr,
-    bool, bool, const std::string &, bool);
-template MANTID_API_DLL WorkspaceGroup_sptr executeBinaryOperation(
-    const std::string &, const WorkspaceGroup_sptr, const MatrixWorkspace_sptr,
-    bool, bool, const std::string &, bool);
-template MANTID_API_DLL WorkspaceGroup_sptr executeBinaryOperation(
-    const std::string &, const MatrixWorkspace_sptr, const WorkspaceGroup_sptr,
-    bool, bool, const std::string &, bool);
+template MANTID_API_DLL MatrixWorkspace_sptr executeBinaryOperation(const std::string &, const MatrixWorkspace_sptr,
+                                                                    const MatrixWorkspace_sptr, bool, bool,
+                                                                    const std::string &, bool);
+template MANTID_API_DLL WorkspaceGroup_sptr executeBinaryOperation(const std::string &, const WorkspaceGroup_sptr,
+                                                                   const WorkspaceGroup_sptr, bool, bool,
+                                                                   const std::string &, bool);
+template MANTID_API_DLL WorkspaceGroup_sptr executeBinaryOperation(const std::string &, const WorkspaceGroup_sptr,
+                                                                   const MatrixWorkspace_sptr, bool, bool,
+                                                                   const std::string &, bool);
+template MANTID_API_DLL WorkspaceGroup_sptr executeBinaryOperation(const std::string &, const MatrixWorkspace_sptr,
+                                                                   const WorkspaceGroup_sptr, bool, bool,
+                                                                   const std::string &, bool);
 
-template MANTID_API_DLL IMDWorkspace_sptr executeBinaryOperation(
-    const std::string &, const IMDWorkspace_sptr, const IMDWorkspace_sptr, bool,
-    bool, const std::string &, bool);
-template MANTID_API_DLL WorkspaceGroup_sptr executeBinaryOperation(
-    const std::string &, const WorkspaceGroup_sptr, const IMDWorkspace_sptr,
-    bool, bool, const std::string &, bool);
-template MANTID_API_DLL WorkspaceGroup_sptr executeBinaryOperation(
-    const std::string &, const IMDWorkspace_sptr, const WorkspaceGroup_sptr,
-    bool, bool, const std::string &, bool);
+template MANTID_API_DLL IMDWorkspace_sptr executeBinaryOperation(const std::string &, const IMDWorkspace_sptr,
+                                                                 const IMDWorkspace_sptr, bool, bool,
+                                                                 const std::string &, bool);
+template MANTID_API_DLL WorkspaceGroup_sptr executeBinaryOperation(const std::string &, const WorkspaceGroup_sptr,
+                                                                   const IMDWorkspace_sptr, bool, bool,
+                                                                   const std::string &, bool);
+template MANTID_API_DLL WorkspaceGroup_sptr executeBinaryOperation(const std::string &, const IMDWorkspace_sptr,
+                                                                   const WorkspaceGroup_sptr, bool, bool,
+                                                                   const std::string &, bool);
 
-template MANTID_API_DLL IMDWorkspace_sptr executeBinaryOperation(
-    const std::string &, const IMDWorkspace_sptr, const MatrixWorkspace_sptr,
-    bool, bool, const std::string &, bool);
-template MANTID_API_DLL IMDWorkspace_sptr executeBinaryOperation(
-    const std::string &, const MatrixWorkspace_sptr, const IMDWorkspace_sptr,
-    bool, bool, const std::string &, bool);
+template MANTID_API_DLL IMDWorkspace_sptr executeBinaryOperation(const std::string &, const IMDWorkspace_sptr,
+                                                                 const MatrixWorkspace_sptr, bool, bool,
+                                                                 const std::string &, bool);
+template MANTID_API_DLL IMDWorkspace_sptr executeBinaryOperation(const std::string &, const MatrixWorkspace_sptr,
+                                                                 const IMDWorkspace_sptr, bool, bool,
+                                                                 const std::string &, bool);
 
-template MANTID_API_DLL IMDHistoWorkspace_sptr executeBinaryOperation(
-    const std::string &, const IMDHistoWorkspace_sptr,
-    const IMDHistoWorkspace_sptr, bool, bool, const std::string &, bool);
-template MANTID_API_DLL IMDHistoWorkspace_sptr executeBinaryOperation(
-    const std::string &, const IMDHistoWorkspace_sptr,
-    const MatrixWorkspace_sptr, bool, bool, const std::string &, bool);
-template MANTID_API_DLL IMDHistoWorkspace_sptr executeBinaryOperation(
-    const std::string &, const MatrixWorkspace_sptr,
-    const IMDHistoWorkspace_sptr, bool, bool, const std::string &, bool);
+template MANTID_API_DLL IMDHistoWorkspace_sptr executeBinaryOperation(const std::string &, const IMDHistoWorkspace_sptr,
+                                                                      const IMDHistoWorkspace_sptr, bool, bool,
+                                                                      const std::string &, bool);
+template MANTID_API_DLL IMDHistoWorkspace_sptr executeBinaryOperation(const std::string &, const IMDHistoWorkspace_sptr,
+                                                                      const MatrixWorkspace_sptr, bool, bool,
+                                                                      const std::string &, bool);
+template MANTID_API_DLL IMDHistoWorkspace_sptr executeBinaryOperation(const std::string &, const MatrixWorkspace_sptr,
+                                                                      const IMDHistoWorkspace_sptr, bool, bool,
+                                                                      const std::string &, bool);
 
 } // namespace OperatorOverloads
 
@@ -139,10 +136,8 @@ template MANTID_API_DLL IMDHistoWorkspace_sptr executeBinaryOperation(
  *  @param tolerance :: acceptable difference for floating point numbers
  *  @return bool, true if workspaces match
  */
-bool equals(const MatrixWorkspace_sptr &lhs, const MatrixWorkspace_sptr &rhs,
-            double tolerance) {
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
+bool equals(const MatrixWorkspace_sptr &lhs, const MatrixWorkspace_sptr &rhs, double tolerance) {
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
   alg->setChild(true);
   alg->setRethrows(false);
   alg->initialize();
@@ -164,8 +159,7 @@ bool equals(const MatrixWorkspace_sptr &lhs, const MatrixWorkspace_sptr &rhs,
  *  @return The value in a workspace shared pointer
  */
 static MatrixWorkspace_sptr createWorkspaceSingleValue(const double &rhsValue) {
-  MatrixWorkspace_sptr retVal =
-      WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
+  MatrixWorkspace_sptr retVal = WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
   retVal->dataY(0)[0] = rhsValue;
 
   return retVal;
@@ -178,10 +172,8 @@ using OperatorOverloads::executeBinaryOperation;
  *  @param rhs :: right hand side workspace shared pointer
  *  @return The result in a workspace shared pointer
  */
-MatrixWorkspace_sptr operator+(const MatrixWorkspace_sptr &lhs,
-                               const MatrixWorkspace_sptr &rhs) {
-  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr,
-                                MatrixWorkspace_sptr>("Plus", lhs, rhs);
+MatrixWorkspace_sptr operator+(const MatrixWorkspace_sptr &lhs, const MatrixWorkspace_sptr &rhs) {
+  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>("Plus", lhs, rhs);
 }
 
 /** Adds a workspace to a single value
@@ -189,10 +181,8 @@ MatrixWorkspace_sptr operator+(const MatrixWorkspace_sptr &lhs,
  *  @param rhsValue :: the single value
  *  @return The result in a workspace shared pointer
  */
-MatrixWorkspace_sptr operator+(const MatrixWorkspace_sptr &lhs,
-                               const double &rhsValue) {
-  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr,
-                                MatrixWorkspace_sptr>(
+MatrixWorkspace_sptr operator+(const MatrixWorkspace_sptr &lhs, const double &rhsValue) {
+  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Plus", lhs, createWorkspaceSingleValue(rhsValue));
 }
 
@@ -201,10 +191,8 @@ MatrixWorkspace_sptr operator+(const MatrixWorkspace_sptr &lhs,
  *  @param rhs :: right hand side workspace shared pointer
  *  @return The result in a workspace shared pointer
  */
-MatrixWorkspace_sptr operator-(const MatrixWorkspace_sptr &lhs,
-                               const MatrixWorkspace_sptr &rhs) {
-  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr,
-                                MatrixWorkspace_sptr>("Minus", lhs, rhs);
+MatrixWorkspace_sptr operator-(const MatrixWorkspace_sptr &lhs, const MatrixWorkspace_sptr &rhs) {
+  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>("Minus", lhs, rhs);
 }
 
 /** Subtracts  a single value from a workspace
@@ -212,10 +200,8 @@ MatrixWorkspace_sptr operator-(const MatrixWorkspace_sptr &lhs,
  *  @param rhsValue :: the single value
  *  @return The result in a workspace shared pointer
  */
-MatrixWorkspace_sptr operator-(const MatrixWorkspace_sptr &lhs,
-                               const double &rhsValue) {
-  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr,
-                                MatrixWorkspace_sptr>(
+MatrixWorkspace_sptr operator-(const MatrixWorkspace_sptr &lhs, const double &rhsValue) {
+  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Minus", lhs, createWorkspaceSingleValue(rhsValue));
 }
 
@@ -224,10 +210,8 @@ MatrixWorkspace_sptr operator-(const MatrixWorkspace_sptr &lhs,
  *  @param rhs :: right-hand side workspace shared pointer
  *  @return The result in a workspace shared pointer
  */
-MatrixWorkspace_sptr operator-(const double &lhsValue,
-                               const MatrixWorkspace_sptr &rhs) {
-  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr,
-                                MatrixWorkspace_sptr>(
+MatrixWorkspace_sptr operator-(const double &lhsValue, const MatrixWorkspace_sptr &rhs) {
+  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Minus", createWorkspaceSingleValue(lhsValue), rhs);
 }
 /** Multiply two workspaces
@@ -235,10 +219,8 @@ MatrixWorkspace_sptr operator-(const double &lhsValue,
  *  @param rhs :: right hand side workspace shared pointer
  *  @return The result in a workspace shared pointer
  */
-MatrixWorkspace_sptr operator*(const MatrixWorkspace_sptr &lhs,
-                               const MatrixWorkspace_sptr &rhs) {
-  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr,
-                                MatrixWorkspace_sptr>("Multiply", lhs, rhs);
+MatrixWorkspace_sptr operator*(const MatrixWorkspace_sptr &lhs, const MatrixWorkspace_sptr &rhs) {
+  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>("Multiply", lhs, rhs);
 }
 
 /** Multiply a workspace and a single value
@@ -246,10 +228,8 @@ MatrixWorkspace_sptr operator*(const MatrixWorkspace_sptr &lhs,
  *  @param rhsValue :: the single value
  *  @return The result in a workspace shared pointer
  */
-MatrixWorkspace_sptr operator*(const MatrixWorkspace_sptr &lhs,
-                               const double &rhsValue) {
-  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr,
-                                MatrixWorkspace_sptr>(
+MatrixWorkspace_sptr operator*(const MatrixWorkspace_sptr &lhs, const double &rhsValue) {
+  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Multiply", lhs, createWorkspaceSingleValue(rhsValue));
 }
 
@@ -259,10 +239,8 @@ MatrixWorkspace_sptr operator*(const MatrixWorkspace_sptr &lhs,
  *  @param rhs ::      workspace shared pointer
  *  @return The result in a workspace shared pointer
  */
-MatrixWorkspace_sptr operator*(const double &lhsValue,
-                               const MatrixWorkspace_sptr &rhs) {
-  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr,
-                                MatrixWorkspace_sptr>(
+MatrixWorkspace_sptr operator*(const double &lhsValue, const MatrixWorkspace_sptr &rhs) {
+  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Multiply", createWorkspaceSingleValue(lhsValue), rhs);
 }
 
@@ -271,10 +249,8 @@ MatrixWorkspace_sptr operator*(const double &lhsValue,
  *  @param rhs :: right hand side workspace shared pointer
  *  @return The result in a workspace shared pointer
  */
-MatrixWorkspace_sptr operator/(const MatrixWorkspace_sptr &lhs,
-                               const MatrixWorkspace_sptr &rhs) {
-  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr,
-                                MatrixWorkspace_sptr>("Divide", lhs, rhs);
+MatrixWorkspace_sptr operator/(const MatrixWorkspace_sptr &lhs, const MatrixWorkspace_sptr &rhs) {
+  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>("Divide", lhs, rhs);
 }
 
 /** Divide a workspace by a single value
@@ -282,10 +258,8 @@ MatrixWorkspace_sptr operator/(const MatrixWorkspace_sptr &lhs,
  *  @param rhsValue :: the single value
  *  @return The result in a workspace shared pointer
  */
-MatrixWorkspace_sptr operator/(const MatrixWorkspace_sptr &lhs,
-                               const double &rhsValue) {
-  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr,
-                                MatrixWorkspace_sptr>(
+MatrixWorkspace_sptr operator/(const MatrixWorkspace_sptr &lhs, const double &rhsValue) {
+  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Divide", lhs, createWorkspaceSingleValue(rhsValue));
 }
 
@@ -295,10 +269,8 @@ MatrixWorkspace_sptr operator/(const MatrixWorkspace_sptr &lhs,
  *  @param rhs ::      workspace shared pointer
  *  @return The result in a workspace shared pointer
  */
-MatrixWorkspace_sptr operator/(const double &lhsValue,
-                               const MatrixWorkspace_sptr &rhs) {
-  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr,
-                                MatrixWorkspace_sptr>(
+MatrixWorkspace_sptr operator/(const double &lhsValue, const MatrixWorkspace_sptr &rhs) {
+  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Divide", createWorkspaceSingleValue(lhsValue), rhs);
 }
 
@@ -307,10 +279,9 @@ MatrixWorkspace_sptr operator/(const double &lhsValue,
  *  @param rhs :: right hand side workspace shared pointer
  *  @return The result in a workspace shared pointer
  */
-MatrixWorkspace_sptr operator+=(const MatrixWorkspace_sptr &lhs,
-                                const MatrixWorkspace_sptr &rhs) {
-  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr,
-                                MatrixWorkspace_sptr>("Plus", lhs, rhs, true);
+MatrixWorkspace_sptr operator+=(const MatrixWorkspace_sptr &lhs, const MatrixWorkspace_sptr &rhs) {
+  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>("Plus", lhs, rhs,
+                                                                                                  true);
 }
 
 /** Adds a single value to a workspace
@@ -318,10 +289,8 @@ MatrixWorkspace_sptr operator+=(const MatrixWorkspace_sptr &lhs,
  *  @param rhsValue :: the single value
  *  @return The result in a workspace shared pointer
  */
-MatrixWorkspace_sptr operator+=(const MatrixWorkspace_sptr &lhs,
-                                const double &rhsValue) {
-  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr,
-                                MatrixWorkspace_sptr>(
+MatrixWorkspace_sptr operator+=(const MatrixWorkspace_sptr &lhs, const double &rhsValue) {
+  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Plus", lhs, createWorkspaceSingleValue(rhsValue), true);
 }
 
@@ -330,10 +299,9 @@ MatrixWorkspace_sptr operator+=(const MatrixWorkspace_sptr &lhs,
  *  @param rhs :: right hand side workspace shared pointer
  *  @return The result in a workspace shared pointer
  */
-MatrixWorkspace_sptr operator-=(const MatrixWorkspace_sptr &lhs,
-                                const MatrixWorkspace_sptr &rhs) {
-  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr,
-                                MatrixWorkspace_sptr>("Minus", lhs, rhs, true);
+MatrixWorkspace_sptr operator-=(const MatrixWorkspace_sptr &lhs, const MatrixWorkspace_sptr &rhs) {
+  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>("Minus", lhs, rhs,
+                                                                                                  true);
 }
 
 /** Subtracts a single value from a workspace
@@ -341,10 +309,8 @@ MatrixWorkspace_sptr operator-=(const MatrixWorkspace_sptr &lhs,
  *  @param rhsValue :: the single value
  *  @return The result in a workspace shared pointer
  */
-MatrixWorkspace_sptr operator-=(const MatrixWorkspace_sptr &lhs,
-                                const double &rhsValue) {
-  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr,
-                                MatrixWorkspace_sptr>(
+MatrixWorkspace_sptr operator-=(const MatrixWorkspace_sptr &lhs, const double &rhsValue) {
+  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Minus", lhs, createWorkspaceSingleValue(rhsValue), true);
 }
 
@@ -353,11 +319,9 @@ MatrixWorkspace_sptr operator-=(const MatrixWorkspace_sptr &lhs,
  *  @param rhs :: right hand side workspace shared pointer
  *  @return The result in a workspace shared pointer
  */
-MatrixWorkspace_sptr operator*=(const MatrixWorkspace_sptr &lhs,
-                                const MatrixWorkspace_sptr &rhs) {
-  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr,
-                                MatrixWorkspace_sptr>("Multiply", lhs, rhs,
-                                                      true);
+MatrixWorkspace_sptr operator*=(const MatrixWorkspace_sptr &lhs, const MatrixWorkspace_sptr &rhs) {
+  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>("Multiply", lhs, rhs,
+                                                                                                  true);
 }
 
 /** Multiplies a workspace by a single value
@@ -365,10 +329,8 @@ MatrixWorkspace_sptr operator*=(const MatrixWorkspace_sptr &lhs,
  *  @param rhsValue :: the single value
  *  @return The result in a workspace shared pointer
  */
-MatrixWorkspace_sptr operator*=(const MatrixWorkspace_sptr &lhs,
-                                const double &rhsValue) {
-  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr,
-                                MatrixWorkspace_sptr>(
+MatrixWorkspace_sptr operator*=(const MatrixWorkspace_sptr &lhs, const double &rhsValue) {
+  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Multiply", lhs, createWorkspaceSingleValue(rhsValue), true);
 }
 
@@ -377,10 +339,9 @@ MatrixWorkspace_sptr operator*=(const MatrixWorkspace_sptr &lhs,
  *  @param rhs :: right hand side workspace shared pointer
  *  @return The result in a workspace shared pointer
  */
-MatrixWorkspace_sptr operator/=(const MatrixWorkspace_sptr &lhs,
-                                const MatrixWorkspace_sptr &rhs) {
-  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr,
-                                MatrixWorkspace_sptr>("Divide", lhs, rhs, true);
+MatrixWorkspace_sptr operator/=(const MatrixWorkspace_sptr &lhs, const MatrixWorkspace_sptr &rhs) {
+  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>("Divide", lhs, rhs,
+                                                                                                  true);
 }
 
 /** Divides a workspace by a single value
@@ -388,10 +349,8 @@ MatrixWorkspace_sptr operator/=(const MatrixWorkspace_sptr &lhs,
  *  @param rhsValue :: the single value
  *  @return The result in a workspace shared pointer
  */
-MatrixWorkspace_sptr operator/=(const MatrixWorkspace_sptr &lhs,
-                                const double &rhsValue) {
-  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr,
-                                MatrixWorkspace_sptr>(
+MatrixWorkspace_sptr operator/=(const MatrixWorkspace_sptr &lhs, const double &rhsValue) {
+  return executeBinaryOperation<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Divide", lhs, createWorkspaceSingleValue(rhsValue), true);
 }
 
@@ -408,9 +367,7 @@ MatrixWorkspace_sptr operator/=(const MatrixWorkspace_sptr &lhs,
  * number of spectra
  *  @return True if the test passes
  */
-bool WorkspaceHelpers::matchingBins(const MatrixWorkspace &ws1,
-                                    const MatrixWorkspace &ws2,
-                                    const bool firstOnly) {
+bool WorkspaceHelpers::matchingBins(const MatrixWorkspace &ws1, const MatrixWorkspace &ws2, const bool firstOnly) {
   // First of all, the first vector must be the same size
   if (ws1.x(0).size() != ws2.x(0).size())
     return false;
@@ -423,9 +380,7 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace &ws1,
       if (std::abs(ws1.x(0)[i] - ws2.x(0)[i]) > 1.0E-7)
         return false;
     }
-  } else if (std::abs(firstWS - secondWS) /
-                 std::max<double>(std::abs(firstWS), std::abs(secondWS)) >
-             1.0E-7)
+  } else if (std::abs(firstWS - secondWS) / std::max<double>(std::abs(firstWS), std::abs(secondWS)) > 1.0E-7)
     return false;
 
   // If we were only asked to check the first spectrum, return now
@@ -451,18 +406,14 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace &ws1,
   if (!step)
     step = 1;
   for (size_t i = step; i < numHist; i += step) {
-    const double firstWSLoop =
-        std::accumulate(ws1.x(i).begin(), ws1.x(i).end(), 0.);
-    const double secondWSLoop =
-        std::accumulate(ws2.x(i).begin(), ws2.x(i).end(), 0.);
+    const double firstWSLoop = std::accumulate(ws1.x(i).begin(), ws1.x(i).end(), 0.);
+    const double secondWSLoop = std::accumulate(ws2.x(i).begin(), ws2.x(i).end(), 0.);
     if (std::abs(firstWSLoop) < 1.0E-7 && std::abs(secondWSLoop) < 1.0E-7) {
       for (size_t j = 0; j < ws1.x(i).size(); j++) {
         if (std::abs(ws1.x(i)[j] - ws2.x(i)[j]) > 1.0E-7)
           return false;
       }
-    } else if (std::abs(firstWSLoop - secondWSLoop) /
-                   std::max<double>(std::abs(firstWSLoop),
-                                    std::abs(secondWSLoop)) >
+    } else if (std::abs(firstWSLoop - secondWSLoop) / std::max<double>(std::abs(firstWSLoop), std::abs(secondWSLoop)) >
                1.0E-7)
       return false;
   }
@@ -488,8 +439,7 @@ bool WorkspaceHelpers::sharedXData(const MatrixWorkspace &WS) {
  *  @param forwards :: If true (the default) divides by bin width, if false
  * multiplies
  */
-void WorkspaceHelpers::makeDistribution(const MatrixWorkspace_sptr &workspace,
-                                        const bool forwards) {
+void WorkspaceHelpers::makeDistribution(const MatrixWorkspace_sptr &workspace, const bool forwards) {
   // If we're not able to get a writable reference to Y, then this is an event
   // workspace, which we can't operate on.
   if (workspace->id() == "EventWorkspace")
@@ -497,10 +447,8 @@ void WorkspaceHelpers::makeDistribution(const MatrixWorkspace_sptr &workspace,
                              "into distributions.");
 
   const size_t numberOfSpectra = workspace->getNumberHistograms();
-  if (workspace->histogram(0).xMode() ==
-      HistogramData::Histogram::XMode::Points) {
-    throw std::runtime_error(
-        "Workspace is using point data for x (should be bin edges).");
+  if (workspace->histogram(0).xMode() == HistogramData::Histogram::XMode::Points) {
+    throw std::runtime_error("Workspace is using point data for x (should be bin edges).");
   }
   for (size_t i = 0; i < numberOfSpectra; ++i) {
     if (forwards) {

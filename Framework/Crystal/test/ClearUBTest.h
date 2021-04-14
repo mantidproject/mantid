@@ -39,8 +39,7 @@ private:
   std::string createMatrixWorkspace(const bool withOrientedLattice = true) {
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 2);
     if (withOrientedLattice) {
-      ws->mutableSample().setOrientedLattice(
-          std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));
+      ws->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));
     }
     const std::string wsName = "TestWorkspace";
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
@@ -51,8 +50,7 @@ private:
   // Helper method to create a MDHW
   std::string createMDHistoWorkspace(const uint16_t nExperimentInfosToAdd = 2) {
     const std::string wsName = "TestWorkspace";
-    auto ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 10, 10, 1, wsName);
+    auto ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 10, 10, 1, wsName);
     ws->getExperimentInfo(0)->mutableSample().setOrientedLattice(
         std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));
 
@@ -79,8 +77,7 @@ private:
     TS_ASSERT(alg.isExecuted());
 
     // Check results
-    auto expInfo =
-        AnalysisDataService::Instance().retrieveWS<ExperimentInfo>(wsName);
+    auto expInfo = AnalysisDataService::Instance().retrieveWS<ExperimentInfo>(wsName);
     SingleReturnType output;
     output.ExperimentInfo = expInfo;
     output.DidClear = alg.getProperty("DoesClear");
@@ -99,9 +96,7 @@ private:
     TS_ASSERT(alg.isExecuted());
 
     // Check results
-    auto expInfos =
-        AnalysisDataService::Instance().retrieveWS<MultipleExperimentInfos>(
-            wsName);
+    auto expInfos = AnalysisDataService::Instance().retrieveWS<MultipleExperimentInfos>(wsName);
     MultipleReturnType output;
     output.ExperimentInfos = expInfos;
     output.DidClear = alg.getProperty("DoesClear");
@@ -123,17 +118,14 @@ public:
   void test_removeOrientedLattice() {
     // Name of the output workspace.
     const std::string wsName = createMatrixWorkspace();
-    auto ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
-    TSM_ASSERT("OrientedLattice should be present!",
-               ws->sample().hasOrientedLattice());
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+    TSM_ASSERT("OrientedLattice should be present!", ws->sample().hasOrientedLattice());
 
     auto output = doExecute(wsName);
     auto expInfo = output.ExperimentInfo;
 
     TS_ASSERT(expInfo)
-    TSM_ASSERT("OrientedLattice should be gone!",
-               !expInfo->sample().hasOrientedLattice());
+    TSM_ASSERT("OrientedLattice should be gone!", !expInfo->sample().hasOrientedLattice());
     TSM_ASSERT("OutputFlag should indicate removal", output.DidClear);
 
     // Clean up.
@@ -152,8 +144,7 @@ public:
     // Check that every experiment info has been cleared.
     const uint16_t nInfos = expInfo->getNumExperimentInfo();
     for (uint16_t i = 0; i < nInfos; ++i) {
-      TSM_ASSERT("OrientedLattice should be gone!",
-                 !expInfo->getExperimentInfo(i)->sample().hasOrientedLattice());
+      TSM_ASSERT("OrientedLattice should be gone!", !expInfo->getExperimentInfo(i)->sample().hasOrientedLattice());
     }
     TSM_ASSERT("OutputFlag should indicate removal", output.DidClear);
     // Clean up.
@@ -164,17 +155,14 @@ public:
     // Name of the output workspace.
     const bool createOrientedLattice = false;
     const std::string wsName = createMatrixWorkspace(createOrientedLattice);
-    auto ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
-    TSM_ASSERT("No oriented lattice to begin with",
-               !ws->sample().hasOrientedLattice());
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+    TSM_ASSERT("No oriented lattice to begin with", !ws->sample().hasOrientedLattice());
 
     auto output = doExecute(wsName);
     auto expInfo = output.ExperimentInfo;
 
     TS_ASSERT(expInfo)
-    TSM_ASSERT("OrientedLattice should be gone!",
-               !expInfo->sample().hasOrientedLattice());
+    TSM_ASSERT("OrientedLattice should be gone!", !expInfo->sample().hasOrientedLattice());
 
     // Clean up.
     AnalysisDataService::Instance().remove(wsName);

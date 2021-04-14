@@ -50,8 +50,7 @@ dict getRegisteredAlgorithms(AlgorithmFactoryImpl &self, bool includeHidden) {
   dict inventory;
   for (size_t i = 0; i < nkeys; ++i) {
     auto algInfo = self.decodeName(keys[i]);
-    object name(
-        handle<>(to_python_value<const std::string &>()(algInfo.first)));
+    object name(handle<>(to_python_value<const std::string &>()(algInfo.first)));
     object ver(handle<>(to_python_value<const int &>()(algInfo.second)));
     // There seems to be no way to "promote" the return of .get to a list
     // without copying it
@@ -72,8 +71,7 @@ dict getRegisteredAlgorithms(AlgorithmFactoryImpl &self, bool includeHidden) {
  * @param self :: An instance of AlgorithmFactory.
  * @param includeHidden :: If true hidden algorithms are included.
  */
-list getDescriptors(AlgorithmFactoryImpl &self, bool includeHidden = false,
-                    bool includeAlias = false) {
+list getDescriptors(AlgorithmFactoryImpl &self, bool includeHidden = false, bool includeAlias = false) {
   auto descriptors = self.getDescriptors(includeHidden, includeAlias);
   list pyDescriptors;
   for (auto &descr : descriptors) {
@@ -96,8 +94,7 @@ dict getCategoriesandState(AlgorithmFactoryImpl &self) {
   std::map<std::string, bool> categories = self.getCategoriesWithState();
   dict pythonCategories;
   for (auto &it : categories) {
-    object categoryName(
-        handle<>(to_python_value<const std::string &>()(it.first)));
+    object categoryName(handle<>(to_python_value<const std::string &>()(it.first)));
     pythonCategories[categoryName] = it.second;
   }
 
@@ -123,9 +120,7 @@ void subscribe(AlgorithmFactoryImpl &self, const boost::python::object &obj) {
   UninstallTrace uninstallTrace;
   std::lock_guard<std::recursive_mutex> lock(PYALG_REGISTER_MUTEX);
 
-  static auto *const pyAlgClass =
-      (PyObject *)
-          converter::registered<Algorithm>::converters.to_python_target_type();
+  static auto *const pyAlgClass = (PyObject *)converter::registered<Algorithm>::converters.to_python_target_type();
   // obj could be or instance/class, check instance first
   PyObject *classObject(nullptr);
   if (PyObject_IsInstance(obj.ptr(), pyAlgClass)) {
@@ -134,15 +129,13 @@ void subscribe(AlgorithmFactoryImpl &self, const boost::python::object &obj) {
     classObject = obj.ptr(); // We need to ensure the type of lifetime
                              // management so grab the raw pointer
   } else {
-    throw std::invalid_argument(
-        "Cannot register an algorithm that does not derive from Algorithm.");
+    throw std::invalid_argument("Cannot register an algorithm that does not derive from Algorithm.");
   }
   boost::python::object classType(handle<>(borrowed(classObject)));
   // Takes ownership of instantiator and replaces any existing algorithm
   std::unique_ptr<Mantid::Kernel::AbstractInstantiator<Algorithm>> temp =
       std::make_unique<PythonObjectInstantiator<Algorithm>>(classType);
-  auto descr =
-      self.subscribe(std::move(temp), AlgorithmFactoryImpl::OverwriteCurrent);
+  auto descr = self.subscribe(std::move(temp), AlgorithmFactoryImpl::OverwriteCurrent);
 
   // Python algorithms cannot yet act as loaders so remove any registered ones
   // from the FileLoaderRegistry
@@ -172,43 +165,34 @@ void export_AlgorithmFactory() {
       .def_readonly("category", &AlgorithmDescriptor::category)
       .def_readonly("version", &AlgorithmDescriptor::version);
 
-  class_<AlgorithmFactoryImpl, boost::noncopyable>("AlgorithmFactoryImpl",
-                                                   no_init)
+  class_<AlgorithmFactoryImpl, boost::noncopyable>("AlgorithmFactoryImpl", no_init)
       .def("exists", &AlgorithmFactoryImpl::exists,
-           existsOverloader((arg("name"), arg("version") = -1),
-                            "Returns true if the given algorithm exists with "
-                            "an option to specify the version"))
+           existsOverloader((arg("name"), arg("version") = -1), "Returns true if the given algorithm exists with "
+                                                                "an option to specify the version"))
 
-      .def("getRegisteredAlgorithms", &getRegisteredAlgorithms,
-           (arg("self"), arg("include_hidden")),
+      .def("getRegisteredAlgorithms", &getRegisteredAlgorithms, (arg("self"), arg("include_hidden")),
            "Returns a Python dictionary of currently registered algorithms")
-      .def("highestVersion", &AlgorithmFactoryImpl::highestVersion,
-           (arg("self"), arg("algorithm_name")),
+      .def("highestVersion", &AlgorithmFactoryImpl::highestVersion, (arg("self"), arg("algorithm_name")),
            "Returns the highest version of the named algorithm. Throws "
            "ValueError if no algorithm can be found")
       .def("subscribe", &subscribe, (arg("self"), arg("object")),
            "Register a Python class derived from "
            "PythonAlgorithm into the factory")
       .def("getDescriptors", &getDescriptors,
-           getDescriptors_overloads(
-               (arg("self"), arg("include_hidden") = false,
-                arg("include_alias") = false),
-               "Return a list of descriptors of registered algorithms. Each "
-               "descriptor is a list: [name, version, category, alias]."))
-      .def(
-          "getCategoriesandState", &getCategoriesandState,
-          "Return the categories of the algorithms. This includes those within "
-          "the Factory itself and any cleanly constructed algorithms stored "
-          "here")
-      .def("unsubscribe", &AlgorithmFactoryImpl::unsubscribe,
-           (arg("self"), arg("name"), arg("version")),
+           getDescriptors_overloads((arg("self"), arg("include_hidden") = false, arg("include_alias") = false),
+                                    "Return a list of descriptors of registered algorithms. Each "
+                                    "descriptor is a list: [name, version, category, alias]."))
+      .def("getCategoriesandState", &getCategoriesandState,
+           "Return the categories of the algorithms. This includes those within "
+           "the Factory itself and any cleanly constructed algorithms stored "
+           "here")
+      .def("unsubscribe", &AlgorithmFactoryImpl::unsubscribe, (arg("self"), arg("name"), arg("version")),
            "Returns the highest version of the named algorithm. Throws "
            "ValueError if no algorithm can be found")
       .def("enableNotifications", &AlgorithmFactoryImpl::enableNotifications)
       .def("disableNotifications", &AlgorithmFactoryImpl::disableNotifications)
 
-      .def("Instance", &AlgorithmFactory::Instance,
-           return_value_policy<reference_existing_object>(),
+      .def("Instance", &AlgorithmFactory::Instance, return_value_policy<reference_existing_object>(),
            "Returns a reference to the AlgorithmFactory singleton")
       .staticmethod("Instance");
 }
