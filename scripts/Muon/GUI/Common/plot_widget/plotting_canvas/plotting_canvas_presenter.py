@@ -5,10 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import List
-from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import PlottingCanvasModel
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import \
     PlottingCanvasPresenterInterface
+from Muon.GUI.Common.plot_widget.quick_edit.quick_edit_widget import QuickEditWidget
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view_interface import PlottingCanvasViewInterface
 from mantid import AnalysisDataService
 from mantidqt.utils.observer_pattern import GenericObserver
@@ -165,7 +165,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._view.add_range_changed_subscriber(self.range_changed_observer)
 
     def _handle_subplot_changed_in_quick_edit_widget(self):
-        selected_subplots, indicies = self._get_selected_subplots_from_quick_edit_widget()
+        selected_subplots, indices = self._get_selected_subplots_from_quick_edit_widget()
 
         if not selected_subplots:
             return
@@ -186,7 +186,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self.set_autoscale(autoscale)
         self.set_errors(error)
         # update the plots and contexts
-        for subplot, index in zip(selected_subplots, indicies):
+        for subplot, index in zip(selected_subplots, indices):
             self._view.set_axis_xlimits(index, xlim)
             self._view.set_axis_ylimits(index, ylim)
             self._context.update_xlim(subplot, xlim)
@@ -199,8 +199,8 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
     def _get_selected_subplots_from_quick_edit_widget(self):
         subplots = self._options_presenter.get_selection()
         if len(subplots) > 0:
-            indicies = [self._context.get_axis(name) for name in subplots]
-            return subplots, indicies
+            indices = [self._context.get_axis(name) for name in subplots]
+            return subplots, indices
         else:
             return [], [] # no subplots are available
 
@@ -214,10 +214,10 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
     """x or y range changed"""
     def _handle_xlim_changed_in_quick_edit_options(self, xlims):
-        selected_subplots, indicies = self._get_selected_subplots_from_quick_edit_widget()
+        selected_subplots, indices = self._get_selected_subplots_from_quick_edit_widget()
         if len(selected_subplots) > 1:
             self._context.update_xlim_all(xlims)
-        for subplot, index in zip(selected_subplots, indicies):
+        for subplot, index in zip(selected_subplots, indices):
             self._view.set_axis_xlimits(index, xlims)
             self._context.update_xlim(subplot, xlims)
         if self._view.autoscale_state:
@@ -225,10 +225,10 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._view.redraw_figure()
 
     def _handle_ylim_changed_in_quick_edit_options(self, ylims):
-        selected_subplots, indicies = self._get_selected_subplots_from_quick_edit_widget()
+        selected_subplots, indices = self._get_selected_subplots_from_quick_edit_widget()
         if len(selected_subplots) > 1:
             self._context.update_ylim_all(ylims)
-        for subplot, index in zip(selected_subplots, indicies):
+        for subplot, index in zip(selected_subplots, indices):
             self._view.set_axis_ylimits(index, ylims)
             self._context.update_ylim(subplot, ylims)
 
@@ -266,7 +266,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
         # force all to be not selected
         selection_index = self._options_presenter.get_selection_index()
-        if selection_index==0:
+        if selection_index == 0:
             self._options_presenter.set_selection_by_index(1)
 
         # Logic to only update the quick edit once
@@ -310,7 +310,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         state = self._options_presenter.autoscale
         for plot in selected_subplots:
             self._context.update_autoscale_state(plot, state)
-        if len(selected_subplots)>1:
+        if len(selected_subplots) > 1:
             self._context.set_autoscale_all = state
         if not state:
             self._options_presenter.enable_yaxis_changer()
@@ -321,17 +321,17 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         for axis_num, plot in zip(axes, selected_subplots):
             self._view.autoscale_selected_y_axis(axis_num)
             _, _, y_min, y_max = self._view.get_axis_limits(axis_num)
-            if ymin > y_min:
+            if y_min > ymin:
                 ymin = y_min
-            if y_max > ymax:
+            if y_max < ymax:
                 ymax = y_max
         # update y vales
         for plot in selected_subplots:
-            self._context.update_ylim(plot, [ymin,ymax])
-        if len(selected_subplots)>1:
-            self._context.update_ylim_all([ymin,ymax])
+            self._context.update_ylim(plot, [ymin, ymax])
+        if len(selected_subplots) > 1:
+            self._context.update_ylim_all([ymin, ymax])
 
-        self._options_presenter.set_plot_y_range([ymin,ymax])
+        self._options_presenter.set_plot_y_range([ymin, ymax])
         self._options_presenter.disable_yaxis_changer()
         self._view.redraw_figure()
 
@@ -341,17 +341,16 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._view.redraw_figure()
 
     """ error checkbox"""
-    def set_errors(self, state:bool):
-        self._options_presenter.set_errors(state)
+    def set_errors(self, state: bool):
         self._options_presenter.set_errors(state)
 
     def handle_error_selection_changed(self):
-        # update the state of autoscale
+        # update the state of errors
         selected_subplots, _ = self._get_selected_subplots_from_quick_edit_widget()
         state = self._options_presenter.get_errors()
-        plotted_workspaces, plot_indicies = self._view.plotted_workspaces_and_indices
+        plotted_workspaces, plot_indices = self._view.plotted_workspaces_and_indices
 
-        if len(selected_subplots)>1:
+        if len(selected_subplots) > 1:
             self._context.set_error_all(state)
 
         for plot in selected_subplots:

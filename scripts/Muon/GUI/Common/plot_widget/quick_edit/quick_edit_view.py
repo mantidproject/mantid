@@ -41,12 +41,9 @@ class QuickEditView(QtWidgets.QWidget):
         self.errors.stateChanged.connect(self._emit_errors)
 
         button_layout.addWidget(self.plot_selector)
-        # button_layout.addStretch()
         button_layout.addWidget(self.x_axis_changer.view)
-        #button_layout.addStretch()
         button_layout.addWidget(self.autoscale)
         button_layout.addWidget(self.y_axis_changer.view)
-        #button_layout.addStretch()
         button_layout.addWidget(self.errors)
         self.setLayout(button_layout)
         self.setFixedHeight(55)
@@ -57,7 +54,6 @@ class QuickEditView(QtWidgets.QWidget):
         self.plot_selector.addItem(name)
         self.plot_selector.adjustSize()
         self.plot_selector.blockSignals(False)
-        #width = self.plot_selector.minimumSizeHint().width()
 
     def rm_subplot(self, index):
         self.plot_selector.removeItem(index)
@@ -69,10 +65,10 @@ class QuickEditView(QtWidgets.QWidget):
     def find_subplot(self, name):
         return self.plot_selector.findText(name)
 
-    def set_selection(self, index:int):
+    def set_selection(self, index: int):
         self.plot_selector.setCurrentIndex(index)
 
-    def get_selection_index(self)->int:
+    def get_selection_index(self) -> int:
         return self.plot_selector.currentIndex()
 
     def plot_at_index(self, index):

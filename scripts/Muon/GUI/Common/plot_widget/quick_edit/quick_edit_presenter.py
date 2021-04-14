@@ -101,7 +101,7 @@ class QuickEditPresenter(object):
             return self.all()
         return [name]
 
-    def get_selection_index(self)->int:
+    def get_selection_index(self) -> int:
         return self._view.get_selection_index()
 
     def set_selection_by_index(self, index: int = 0):

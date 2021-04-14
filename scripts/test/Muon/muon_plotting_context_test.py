@@ -84,7 +84,7 @@ class MuonPlottingContextTest(unittest.TestCase):
 
     def test_update_xlim(self):
         self.add_subplot()
-        values = {"a": [1.,10.], "b":[2.,11.], "c":[3.,12.]}
+        values = {"a": [1., 10.], "b": [2., 11.], "c": [3., 12.]}
         for name in values.keys():
             self.context.update_xlim(name, values[name])
 
@@ -93,7 +93,7 @@ class MuonPlottingContextTest(unittest.TestCase):
 
     def test_update_ylim(self):
         self.add_subplot()
-        values = {"a": [1.,10.], "b":[2.,11.], "c":[3.,12.]}
+        values = {"a": [1., 10.], "b": [2., 11.], "c": [3., 12.]}
         for name in values.keys():
             self.context.update_ylim(name, values[name])
 
@@ -102,7 +102,7 @@ class MuonPlottingContextTest(unittest.TestCase):
 
     def test_update_xlim_all_with_sub_plot(self):
         self.add_subplot()
-        values = {"a": [1.,10.], "b":[2.,11.], "c":[3.,12.]}
+        values = {"a": [1., 10.], "b": [2., 11.], "c": [3., 12.]}
         for name in values.keys():
             self.context.update_xlim(name, values[name])
         self.context.update_xlim("All", [5.,50.])
@@ -113,7 +113,7 @@ class MuonPlottingContextTest(unittest.TestCase):
 
     def test_update_ylim_all_with_sub_plot(self):
         self.add_subplot()
-        values = {"a": [1.,10.], "b":[2.,11.], "c":[3.,12.]}
+        values = {"a": [1., 10.], "b": [2., 11.], "c" : [3., 12.]}
         for name in values.keys():
             self.context.update_ylim(name, values[name])
         self.context.update_ylim("All", [5., 50.])
@@ -164,13 +164,13 @@ class MuonPlottingContextTest(unittest.TestCase):
 
     def test_get_axis(self):
         self.add_subplot()
-        values = {"a":1, "b":2, "c":3}
+        values = {"a": 1, "b": 2, "c": 3}
         for name in values.keys():
             self.assertEqual(values[name], self.context.get_axis(name))
 
     def test_update_axis(self):
         self.add_subplot()
-        values = {"a":5, "b":6, "c":8}
+        values = {"a": 5, "b": 6, "c": 8}
         for name in values.keys():
             self.context.update_axis(name, values[name])
 
@@ -179,10 +179,10 @@ class MuonPlottingContextTest(unittest.TestCase):
 
     def test_add_axis(self):
         self.add_subplot()
-        self.assertEqual(["a","b","c"], list(self.context._subplots.keys()))
+        self.assertEqual(["a", "b", "c"], list(self.context._subplots.keys()))
 
         self.context.update_axis("new", 6)
-        self.assertEqual(["a","b","c", "new"], list(self.context._subplots.keys()))
+        self.assertEqual(["a", "b", "c", "new"], list(self.context._subplots.keys()))
         self.assertEqual(6, self.context.get_axis("new"))
 
 

@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-
-#from unittest import mock
 from Muon.GUI.Common.contexts.plot_edit_context import PlotEditContext
 
 
