@@ -67,7 +67,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         self.declareProperty('KeepTemporaryWorkspaces', False,
                              "If True the normalization and data workspaces in addition to the normalized data will be outputted")
         self.declareProperty("ObliquityParallaxCoefficient", 1.0, validator=FloatBoundedValidator(0.0),
-                             "Geometrical correction for shift in vertical beam position due to wide beam'.")
+                             doc="Geometrical correction for shift in vertical beam position due to wide beam.")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "",
                                                optional=PropertyMode.Mandatory,
                                                direction=Direction.Output),
