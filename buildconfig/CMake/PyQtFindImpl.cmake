@@ -55,6 +55,23 @@ function (find_pyqt major_version)
     endif()
   else ()
     message (FATAL_ERROR "Error encountered while determining PyQt confguration:\n${_pyqt_config_err}")
+  # Set the sip ABI used for compiling PyQt. Required for the new sip-build
+  # system
+  if(major_version EQUAL 5)
+    set(PYQT5_SIP_ABI_VERSION
+        12
+        CACHE STRING "The sip ABI used to compile PyQt5" FORCE
+    )
+  elseif(major_version EQUAL 6)
+    set(PYQT6_SIP_ABI_VERSION
+        13
+        CACHE STRING "The sip ABI used to compile PyQt6" FORCE
+    )
+  else()
+    message(
+      FATAL_ERROR "Unknown PyQt major version specified: ${major_version}. \
+        This buildsystem only understands building against PyQt 5/6"
+    )
   endif()
 
   find_package_handle_standard_args( PyQt${major_version}
