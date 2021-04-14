@@ -447,7 +447,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                         if isinstance(normalisationFactors, float):
                             CreateSingleValuedWorkspace(DataValue=normalisationFactors,
                                                         ErrorValue=dataE,
-                                                        OutputWorkspace='normalisation_ws')
+                                                        OutputWorkspace=norm_ws)
                         else:
                             CreateWorkspace(dataX=mtd[cross_section_ws][1].readX(0), dataY=normalisationFactors,
                                             dataE=dataE,
@@ -462,7 +462,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
             GroupWorkspaces(InputWorkspaces=tmp_names, OutputWorkspace=det_efficiency_ws)
 
-        if len(to_clean) != 0:
+        if self.getProperty('ClearCache').value and len(to_clean) != 0:
             DeleteWorkspaces(to_clean)
         return det_efficiency_ws, relative_norm_ws
 
