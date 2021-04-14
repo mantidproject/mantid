@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include <cxxtest/TestSuite.h>
@@ -122,5 +123,59 @@ public:
 
     // Calling it again will throw as it's the end of the file
     TS_ASSERT_THROWS(listener->extractData(), const std::runtime_error &)
+  }
+
+  void testChunkingProtonCharge() {
+    ConfigService::Instance().setString("fileeventdatalistener.filename", "EQSANS_89157.nxs.h5");
+    ConfigService::Instance().setString("fileeventdatalistener.chunks", "1");
+
+    ILiveListener_sptr listener = LiveListenerFactory::Instance().create("FileEventDataListener", true);
+    TS_ASSERT(listener)
+    TS_ASSERT_EQUALS(listener->name(), "FileEventDataListener")
+    TS_ASSERT(!listener->supportsHistory())
+    TS_ASSERT(listener->buffersEvents())
+    TS_ASSERT(listener->isConnected())
+    TS_ASSERT_EQUALS(listener->runStatus(), ILiveListener::NoRun)
+
+    TS_ASSERT_THROWS_NOTHING(listener->start());
+
+    TS_ASSERT_EQUALS(listener->runStatus(), ILiveListener::BeginRun)
+
+    EventWorkspace_const_sptr buffer;
+    TS_ASSERT_THROWS_NOTHING(buffer = std::dynamic_pointer_cast<const EventWorkspace>(listener->extractData()))
+    TS_ASSERT(buffer)
+    TS_ASSERT_EQUALS(buffer.use_count(), 1)
+    TS_ASSERT_EQUALS(buffer->getNumberHistograms(), 49152)
+    TS_ASSERT_EQUALS(buffer->getNumberEvents(), 14553);
+    TS_ASSERT_THROWS(listener->extractData(), const std::runtime_error &)
+
+    // Get the proton charge from the single chunk
+    const double pcharge_onechunk = buffer->run().getProtonCharge();
+
+    // Start the data listener again but load two chunks this time
+    ConfigService::Instance().setString("fileeventdatalistener.chunks", "2");
+
+    listener = LiveListenerFactory::Instance().create("FileEventDataListener", true);
+    TS_ASSERT(listener)
+    TS_ASSERT_EQUALS(listener->name(), "FileEventDataListener")
+    TS_ASSERT(!listener->supportsHistory())
+    TS_ASSERT(listener->buffersEvents())
+    TS_ASSERT(listener->isConnected())
+    TS_ASSERT_THROWS_NOTHING(listener->start(0));
+    TS_ASSERT_EQUALS(listener->runStatus(), ILiveListener::BeginRun)
+
+    EventWorkspace_const_sptr buffer2;
+    TS_ASSERT_THROWS_NOTHING(buffer2 = std::dynamic_pointer_cast<const EventWorkspace>(listener->extractData()))
+    TS_ASSERT(buffer2)
+    TS_ASSERT_EQUALS(buffer2.use_count(), 1)
+    // Load the second chunk from the file
+    TS_ASSERT_THROWS_NOTHING(buffer2 = std::dynamic_pointer_cast<const EventWorkspace>(listener->extractData()))
+    TS_ASSERT(buffer2)
+    TS_ASSERT_EQUALS(buffer2.use_count(), 1)
+    TS_ASSERT_EQUALS(buffer2->getNumberHistograms(), 49152)
+
+    // Get the proton charge from this chunk - it should be half of the charge from one chunk
+    const double pcharge_twochunk = buffer2->run().getProtonCharge();
+    TS_ASSERT_EQUALS(pcharge_onechunk * 0.5, pcharge_twochunk);
   }
 };
