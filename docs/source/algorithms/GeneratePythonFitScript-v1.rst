@@ -20,17 +20,18 @@ Usage
 
 .. testcode:: ExGeneratePythonSequentialFitScript
 
-   ws1 = CreateSampleWorkspace()
-   ws2 = CreateSampleWorkspace()
+    ws1 = CreateSampleWorkspace()
+    ws2 = CreateSampleWorkspace()
 
-   function = "name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0"
+    function = "name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0"
 
-   # If you want to save the python script to a file then specify the Filepath property
-   script_text = GeneratePythonFitScript(InputWorkspaces=["ws1", "ws1", "ws2", "ws2"], WorkspaceIndices=[0, 1, 0, 1],
+    # If you want to save the python script to a file then specify the Filepath property
+    script_text = GeneratePythonFitScript(InputWorkspaces=["ws1", "ws1", "ws2", "ws2"], WorkspaceIndices=[0, 1, 0, 1],
                                           StartXs=[0.0, 0.0, 0.0, 0.0], EndXs=[20000.0, 20000.0, 20000.0, 20000.0],
                                           Function=function, MaxIterations=500, Minimizer="Levenberg-Marquardt")
 
-   print(script_text[:-2])
+    for line in script_text.strip().split("\n"):
+        print(line)
 
 Output:
 
