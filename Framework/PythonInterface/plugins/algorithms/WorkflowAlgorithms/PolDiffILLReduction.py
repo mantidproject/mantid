@@ -674,6 +674,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                                     OutputWorkspace=norm_name)
         to_remove = [norm_name]
         if self.getPropertyValue('OutputTreatment') == 'Sum':
+            self._merge_polarisations(ws, average_detectors=True)
             tmp_name = '{}_1'.format(self.getPropertyValue('OutputWorkspace'))
             RenameWorkspace(InputWorkspace=mtd[ws][0].name(), OutputWorkspace=tmp_name)
             for entry_no in range(1, mtd[ws].getNumberOfEntries()):

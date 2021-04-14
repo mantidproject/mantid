@@ -601,7 +601,11 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             component_ws = self._cross_section_separation(input_ws, nMeasurements, nComponents)
             self._set_as_distribution(component_ws)
             if normalisation_method != 'None':
-                det_efficiency_ws, relative_norm_ws = self._detector_efficiency_correction(component_ws)
+                if normalisation_method == 'Vanadium':
+                    det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
+                else:
+                    det_efficiency_input = component_ws
+                det_efficiency_ws, relative_norm_ws = self._detector_efficiency_correction(det_efficiency_input)
                 output_ws = self._normalise_sample_data(component_ws, det_efficiency_ws, relative_norm_ws)
                 if self.getProperty('ClearCache').value:
                     DeleteWorkspaces(WorkspaceList=[component_ws, det_efficiency_ws])
