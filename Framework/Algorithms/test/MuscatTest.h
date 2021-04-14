@@ -24,6 +24,13 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
+class MuscatHelper : public Mantid::Algorithms::Muscat {
+public:
+  double interpolateLogQuadratic(const Mantid::API::MatrixWorkspace_sptr &workspaceToInterpolate, double x) {
+    return Muscat::interpolateLogQuadratic(workspaceToInterpolate, x);
+  }
+};
+
 class MuscatTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -94,5 +101,16 @@ public:
     double analyticResult = (1 - alpha) * (exp(-tau * secangle) - exp(-tau)) / (4 * M_PI * (1 - secangle));
     const double delta(1e-05);
     TS_ASSERT_DELTA(singleScatterResult->y(SPECTRUMINDEXTOTEST)[0], analyticResult, delta);
+  }
+
+  void test_interpolateLogQuadratic() {
+    MuscatHelper alg;
+    const int NBINS = 10;
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, NBINS);
+    for (auto i = 0; i < NBINS; i++) {
+      ws->mutableY(0)[i] = pow(2 * i, 2);
+    }
+    auto interpY = alg.interpolateLogQuadratic(ws, 2.0);
+    TS_ASSERT_EQUALS(interpY, exp(9.0));
   }
 };

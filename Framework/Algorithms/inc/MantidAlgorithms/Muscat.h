@@ -54,6 +54,7 @@ protected:
                                                                  const size_t wavelengthPoints, const size_t rows,
                                                                  const size_t columns);
   virtual std::unique_ptr<InterpolationOption> createInterpolateOption();
+  double interpolateLogQuadratic(const API::MatrixWorkspace_sptr &workspaceToInterpolate, double x);
 
 private:
   void init() override;
@@ -62,7 +63,6 @@ private:
   API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
   double new_vector(const API::MatrixWorkspace_sptr sigmaSSWS, const Kernel::Material &material, double kinc,
                     bool specialSingleScatterCalc);
-  double interpolateLogQuadratic(const API::MatrixWorkspace_sptr &workspaceToInterpolate, double x);
   double simulatePaths(const int nEvents, const size_t nScatters, const API::Sample &sample,
                        const Geometry::Instrument &instrument, Kernel::PseudoRandomNumberGenerator &rng,
                        const API::MatrixWorkspace_sptr sigmaSSWS, const API::MatrixWorkspace_sptr SOfQ,

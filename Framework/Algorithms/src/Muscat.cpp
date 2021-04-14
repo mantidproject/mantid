@@ -365,12 +365,11 @@ double Muscat::new_vector(const MatrixWorkspace_sptr sigmaSSWS, const Material &
 }
 
 /**
- * Interpolate a value from a spectrum where the y value is quadratic and e^y
- * represents some physical quantity
+ * Interpolate a value from a spectrum where the y value is quadratic and return e^y
  * @param workspaceToInterpolate The workspace containing the data to
  * interpolate (pass whole workspace to get access to yIndexOfX method)
  * @param x The x value to interpolate at
- * @return The interpolated value
+ * @return The exponential of the interpolated value
  */
 double Muscat::interpolateLogQuadratic(const MatrixWorkspace_sptr &workspaceToInterpolate, double x) {
   if (x > workspaceToInterpolate->points(0).back()) {
