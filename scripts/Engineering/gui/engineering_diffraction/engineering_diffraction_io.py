@@ -74,7 +74,7 @@ class EngineeringDiffractionDecoder(EngineeringDiffractionUIAttributes):
 
         if obj_dic["fit_properties"]:
             fit_browser = presenter.fitting_presenter.plot_widget.view.fit_browser
-            presenter.fitting_presenter.plot_widget.view.fit_toggle()  # show the fit browser, default is off
+            fit_browser.show()  # show the fit browser, default is off
             fit_props = obj_dic["fit_properties"]["properties"]
             fit_function = fit_props["Function"]
             output_name = fit_props["Output"]
