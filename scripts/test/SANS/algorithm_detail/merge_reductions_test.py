@@ -5,8 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from unittest import mock
 
-from sans.algorithm_detail.bundles import OutputPartsBundle
+from sans.algorithm_detail.bundles import OutputPartsBundle, ReducedSlice
 from sans.algorithm_detail.merge_reductions import (MergeFactory, ISIS1DMerger)
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DataType, ReductionMode)
@@ -52,11 +53,18 @@ class MergeReductionsTest(unittest.TestCase):
         lab_bundle = OutputPartsBundle(state=state, data_type=data_type, reduction_mode=ReductionMode.LAB,
                                        output_workspace_count=lab_count, output_workspace_norm=lab_norm)
 
+        mock_out_bundle = mock.Mock()
+        mock_out_bundle.state = state
+        lab_slice = ReducedSlice(parts_bundle=lab_bundle, wav_range=None, transmission_bundle=None,
+                                 output_bundle=mock_out_bundle)
+
         hab_count = MergeReductionsTest.create_1D_workspace(data_x_hab, data_y_hab_count)
         hab_norm = MergeReductionsTest.create_1D_workspace(data_x_hab, data_y_hab_norm)
         hab_bundle = OutputPartsBundle(state=state, data_type=data_type, reduction_mode=ReductionMode.HAB,
                                        output_workspace_count=hab_count, output_workspace_norm=hab_norm)
-        return lab_bundle, hab_bundle
+        hab_slice = ReducedSlice(parts_bundle=hab_bundle, wav_range=None, transmission_bundle=None,
+                                 output_bundle=mock_out_bundle)
+        return lab_slice, hab_slice
 
     @staticmethod
     def _provide_data(state):
@@ -83,6 +91,14 @@ class MergeReductionsTest(unittest.TestCase):
         can_lab, can_hab = MergeReductionsTest._create_workspaces(state, DataType.CAN, data_x_lab,
                                                                   data_y_lab_count, data_y_lab_norm,
                                                                   data_x_hab, data_y_hab_count, data_y_hab_norm)
+
+        def _set_sample(mock_bundle, data_type: DataType):
+            mock_bundle.output_bundle.data_type = data_type
+
+        _set_sample(sample_lab, DataType.SAMPLE)
+        _set_sample(sample_hab, DataType.SAMPLE)
+        _set_sample(can_lab, DataType.CAN)
+        _set_sample(can_hab, DataType.CAN)
         return sample_lab, sample_hab, can_lab, can_hab
 
     def test_that_correct_merger_is_generated(self):
@@ -132,6 +148,7 @@ class MergeReductionsTest(unittest.TestCase):
         merger = merge_factory.create_merger(state)
 
         sample_lab, sample_hab, can_lab, can_hab = self._provide_data(state)
+
         bundles = {ReductionMode.LAB: [sample_lab, can_lab],
                    ReductionMode.HAB: [sample_hab, can_hab]}
 

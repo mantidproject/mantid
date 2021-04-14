@@ -1137,11 +1137,11 @@ class RunTabPresenter(PresenterCommon):
             self._set_on_custom_model("event_slices", state_model)
             self._set_on_custom_model("event_binning", state_model)
 
-            self._set_on_custom_model("wavelength_step_type", state_model)
             self._set_on_custom_model("wavelength_min", state_model)
             self._set_on_custom_model("wavelength_max", state_model)
-            self._set_on_custom_model("wavelength_step", state_model)
             self._set_on_custom_model("wavelength_range", state_model)
+            self._set_on_custom_model("wavelength_step", state_model)
+            self._set_on_custom_model("wavelength_step_type", state_model)
 
             self._set_on_custom_model("absolute_scale", state_model)
             self._set_on_custom_model("z_offset", state_model)

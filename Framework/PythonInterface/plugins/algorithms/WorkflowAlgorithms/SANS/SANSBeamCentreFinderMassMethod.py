@@ -234,9 +234,9 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         wavelength_name = "SANSConvertToWavelengthAndRebin"
         wavelength_options = {"InputWorkspace": workspace,
                               "OutputWorkspace": EMPTY_NAME,
-                              "WavelengthLow": wavelength_state.wavelength_low[0],
-                              "WavelengthHigh": wavelength_state.wavelength_high[0],
-                              "WavelengthStep": wavelength_state.wavelength_step,
+                              "WavelengthLow": wavelength_state.wavelength_interval.wavelength_min,
+                              "WavelengthHigh": wavelength_state.wavelength_interval.wavelength_max,
+                              "WavelengthStep": wavelength_state.wavelength_interval.wavelength_step,
                               "WavelengthStepType": wavelength_state.wavelength_step_type_lin_log.value,
                               "RebinMode": wavelength_state.rebin_type.value}
 

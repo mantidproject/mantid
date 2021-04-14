@@ -16,11 +16,17 @@ Bugfixes
 - On D16 using :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, now use the correct monitor for normalization, fix a bug where processing transmission would yield undefined values at 90 degrees when using ThetaDependent correction, and improve the q binning used.
 
 Improvements
-------------
+############
 
 - With SANSILLAutoProcess, the detector distance, the collimation position and the wavelength are appended to the names of the output workspaces (values are taken from the sample logs).
 - :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>` has new property: `StitchReferenceIndex` to denote the index of ws that should be a reference
   for scaling during stitching
+- The core algorithm for ISIS SANS reductions underwent a significant rewrite to improve processing wavelength slices.
+  For 15 slices the reduction time dropped by 55% compared to the previous release.
+- Workspace names for ISIS SANS reductions no longer append the wavelength to the name. The prepended
+  wavelength is still present. For example `12345_rear_1d_1.0_10.0_...p0_t4_1.0_10.0` will now be called
+  `12345_rear_1d_1.0_10.0_...p0_t4`, where `1.0_10.0` is the wavelength of that workspace.
+
 
 Algorithms and instruments
 --------------------------
