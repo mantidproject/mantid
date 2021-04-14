@@ -76,8 +76,8 @@ private:
   void calculate(const API::MatrixWorkspace_const_sptr &);
   void finalize(const API::MatrixWorkspace_const_sptr &);
 
-  struct wedge {
-    wedge(double innerRadius, double outerRadius, double centerX, double centerY, double angleMiddle, double angleRange)
+  struct Wedge {
+    Wedge(double innerRadius, double outerRadius, double centerX, double centerY, double angleMiddle, double angleRange)
         : innerRadius(innerRadius), outerRadius(outerRadius), centerX(centerX), centerY(centerY),
           angleMiddle(angleMiddle), angleRange(angleRange) {}
     double innerRadius;
@@ -87,19 +87,27 @@ private:
     double angleMiddle;
     double angleRange;
 
-    bool operator<(wedge &other) {
-      if (this->angleMiddle != other.angleMiddle)
-        return this->angleMiddle < other.angleMiddle;
-      if (this->angleRange != other.angleRange)
-        return (this->angleRange < other.angleRange);
-      if (this->centerX != other.centerX)
-        return (this->centerX < other.centerX);
-      if (this->centerY != other.centerY)
-        return (this->centerY < other.centerY);
-      if (this->innerRadius != other.innerRadius)
-        return (this->innerRadius != other.innerRadius);
-      if (this->outerRadius != other.outerRadius)
-        return (this->outerRadius != other.outerRadius);
+    /**
+     * @brief isSymmetric determines if the two wedges have a center symmetry
+     * with one another.
+     * @param other the wedge to compare to
+     * @return
+     */
+    bool isSymmetric(Wedge &other) {
+      double diffAngle = std::fabs(std::fmod(this->angleMiddle - other.angleMiddle, M_PI));
+
+      double epsilon = 1e-3;
+      bool hasSameRadii = this->innerRadius == other.innerRadius && this->outerRadius == other.outerRadius;
+
+      bool hasSameCenter = this->centerX == other.centerX && this->centerY == other.centerY;
+
+      bool hasSameAngleRange = std::fabs(this->angleRange - other.angleRange) < epsilon;
+
+      bool hasSymmetricalAngle = std::fabs(diffAngle - M_PI) < epsilon || diffAngle < epsilon;
+
+      if (hasSameRadii && hasSameCenter && hasSameAngleRange && hasSymmetricalAngle) {
+        return true;
+      }
       return false;
     }
   };
@@ -107,7 +115,7 @@ private:
   void getTableShapes();
   void getViewportParams(const std::string &, std::map<std::string, std::vector<double>> &);
   void getWedgeParams(std::vector<std::string> &, std::map<std::string, std::vector<double>> &);
-  bool checkIfSymetricalWedge(wedge &wedge);
+  bool checkIfSymetricalWedge(Wedge &Wedge);
   std::vector<std::vector<std::vector<double>>> m_intensities;
   std::vector<std::vector<std::vector<double>>> m_errors;
   std::vector<std::vector<std::vector<double>>> m_normalisation;
@@ -116,7 +124,7 @@ private:
   size_t m_nLambda;
   size_t m_nWedges;
 
-  std::vector<wedge> m_wedgesParameters;
+  std::vector<Wedge> m_wedgesParameters;
 
   size_t m_nSpec;
   int m_nSubPixels;

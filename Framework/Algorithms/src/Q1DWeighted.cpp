@@ -127,7 +127,7 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
   // histogram
   m_nLambda = inputWS->readY(0).size();
 
-  m_wedgesParameters = std::vector<Q1DWeighted::wedge>();
+  m_wedgesParameters = std::vector<Q1DWeighted::Wedge>();
 
   m_asymmWedges = getProperty("AsymmetricWedges");
 
@@ -154,7 +154,7 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
       midAngle += wedgeOffset * deg2rad;
 
       m_wedgesParameters.push_back(
-          Q1DWeighted::wedge(innerRadius, outerRadius, centerX, centerY, midAngle, angleRange));
+          Q1DWeighted::Wedge(innerRadius, outerRadius, centerX, centerY, midAngle, angleRange));
     }
   } else {
     getTableShapes();
@@ -209,7 +209,10 @@ void Q1DWeighted::getTableShapes() {
                           << " which is not supported. This shape is ignored." << std::endl;
   }
 
-  std::sort(m_wedgesParameters.begin(), m_wedgesParameters.end());
+  std::sort(m_wedgesParameters.begin(), m_wedgesParameters.end(),
+            [](const Q1DWeighted::Wedge &wedgeA, const Q1DWeighted::Wedge &wedgeB) {
+              return wedgeA.angleMiddle < wedgeB.angleMiddle;
+            });
 }
 
 /**
@@ -289,7 +292,7 @@ void Q1DWeighted::getWedgeParams(std::vector<std::string> &params,
   double centerX = -(std::stod(params[5]) - xOffset) / zoom;
   double centerY = (std::stod(params[6]) - yOffset) / zoom;
 
-  Q1DWeighted::wedge wedge = Q1DWeighted::wedge(innerRadius, outerRadius, centerX, centerY, centerAngle, angleRange);
+  Q1DWeighted::Wedge wedge = Q1DWeighted::Wedge(innerRadius, outerRadius, centerX, centerY, centerAngle, angleRange);
 
   if (m_asymmWedges || !checkIfSymetricalWedge(wedge)) {
     m_wedgesParameters.push_back(wedge);
@@ -303,23 +306,11 @@ void Q1DWeighted::getWedgeParams(std::vector<std::string> &params,
  * @param wedge the wedge whose symmetrical we are looking for
  * @return true if a symetrical wedge already exists
  */
-bool Q1DWeighted::checkIfSymetricalWedge(Q1DWeighted::wedge &wedge) {
+bool Q1DWeighted::checkIfSymetricalWedge(Q1DWeighted::Wedge &wedge) {
 
-  for (Q1DWeighted::wedge params : m_wedgesParameters) {
-    double diffAngle = std::fabs(std::fmod(wedge.angleMiddle - params.angleMiddle, M_PI));
-
-    double epsilon = 1e-3;
-    bool hasSameRadii = wedge.innerRadius == params.innerRadius && wedge.outerRadius == params.outerRadius;
-
-    bool hasSameCenter = wedge.centerX == params.centerX && wedge.centerY == params.centerY;
-
-    bool hasSameAngleRange = std::fabs(wedge.angleRange - params.angleRange) < epsilon;
-
-    bool hasSymmetricalAngle = std::fabs(diffAngle - M_PI) < epsilon || diffAngle < epsilon;
-
-    if (hasSameRadii && hasSameCenter && hasSameAngleRange && hasSymmetricalAngle) {
+  for (Q1DWeighted::Wedge params : m_wedgesParameters) {
+    if (wedge.isSymmetric(params))
       return true;
-    }
   }
   return false;
 }
@@ -433,7 +424,7 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
 
         for (size_t iw = 0; iw < m_nWedges; ++iw) {
 
-          Q1DWeighted::wedge wedge = m_wedgesParameters[iw];
+          Q1DWeighted::Wedge wedge = m_wedgesParameters[iw];
           double centerAngle = wedge.angleMiddle;
           const V3D subPix = V3D(position.X(), position.Y(), 0.0);
           const V3D center = V3D(wedge.centerX, wedge.centerY, 0);

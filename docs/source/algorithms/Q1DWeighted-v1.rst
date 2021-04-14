@@ -73,7 +73,7 @@ Drawing sectors
 It is also possible to use the instrument viewer to draw the shape of the angular sector. Only sector shapes are currently supported,
 and they must be drawn in the Full 3D, Z- projection, without any rotation (translation and zoom are supported). Please
 note that in this projection, the X-axis points to the left. So when doing the wedges without the table (see above), they are ordered
-clockwise, starting on the left.
+clockwise, opening from the positive ray of the X-axis.
 If running Q1DWeighted with drawn sectors as input, the output will be ordered similarly, regardless of the order in which they were drawn.
 Once the shapes are drawn, they must be saved using the ``Save shapes to table`` button.
 
@@ -89,6 +89,9 @@ as an argument to the ``ShapeTable`` field. The algorithm will then use the draw
 
 Symmetric
 ~~~~~~~~~
+
+Symmetric or asymmetric integration is determined by the `AsymmetricWedges` flag.
+
 
 The figure below illustrates an example for symmetric wedges. Each wedge in this case represents two back-to-back sectors.
 The wedges output group will have two workspaces: one for the red region, one for the blue region.

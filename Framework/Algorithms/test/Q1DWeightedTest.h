@@ -252,19 +252,19 @@ public:
     WorkspaceGroup_sptr result;
     TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<WorkspaceGroup>(
                                  AnalysisDataService::Instance().retrieve(outputWS + "_wedges")))
-    TS_ASSERT_EQUALS(result->getNumberOfEntries(), 2)
+    TS_ASSERT_EQUALS(result->getNumberOfEntries(), 4)
   }
 
   void testShapeTableResults() {
     // test the results computed by the table shape method against those from
     // the usual method
 
-    createShapeTable(true);
+    std::shared_ptr<ITableWorkspace> table = createShapeTable(true);
 
     std::string outputWS = "q1d_shapes";
     std::string outputWedges = outputWS + "_wedges";
 
-    populateAlgorithm(outputWS, outputWedges, true, false);
+    populateAlgorithm(outputWS, outputWedges, true, false, table);
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
 
     std::string refWS = "q1d_wedges";
@@ -280,11 +280,12 @@ public:
     // exactly the same test as testShapeTableResults, except the shapes are
     // created in a different order. The result should still be 1-to-1 identical
     // with the wedges results
-    createShapeTable(true, true);
+    std::shared_ptr<ITableWorkspace> table = createShapeTable(true, true);
     std::string outputWS = "q1d_shapes";
     std::string outputWedges = outputWS + "_wedges";
 
-    populateAlgorithm(outputWS, outputWedges, true, false);
+    populateAlgorithm(outputWS, outputWedges, true, false, table);
+
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
 
     std::string refWS = "q1d_wedges";
@@ -335,12 +336,12 @@ private:
    * from the way they are defined by Q1DWeighted. Else, standard way.
    */
 
-  void createShapeTable(bool alignWithWedges = false, bool reverseOrder = false) {
+  std::shared_ptr<ITableWorkspace> createShapeTable(bool alignWithWedges = false, bool reverseOrder = false) {
     // since the instrument viewer mostly lacks an API, we create a dummy
     // MaskShapes table
 
     using namespace Mantid::API;
-    auto table = WorkspaceFactory::Instance().createTable();
+    std::shared_ptr<ITableWorkspace> table = WorkspaceFactory::Instance().createTable();
     table->addColumn("str", "Index");
     table->addColumn("str", "Parameters");
 
@@ -365,8 +366,8 @@ private:
       double zoom = 1.2;
       double innerRadius = 0;
       double outerRadius = 100;
-      double startAngle = 7 * M_PI / 4;
-      double endAngle = M_PI / 4;
+      double startAngle = 3 * M_PI / 4;
+      double endAngle = 5 * M_PI / 4;
 
       for (size_t i = 0; i < 4; ++i) {
 
@@ -388,7 +389,7 @@ private:
       row << std::to_string(-1) << viewport;
     }
 
-    AnalysisDataService::Instance().addOrReplace("MaskShapes", table);
+    return table;
   }
 
   std::string createDummySector(double innerRadius, double outerRadius, double startAngle, double endAngle,
@@ -411,6 +412,7 @@ private:
   }
 
   void populateAlgorithm(std::string outputWS, std::string wedgesWS, bool useTable, bool asymmetric = false,
+                         std::shared_ptr<ITableWorkspace> shapeWS = std::shared_ptr<ITableWorkspace>(),
                          std::string binning = "0.001,0.001,0.08") {
     std::string asymm_flag = asymmetric ? "1" : "0";
     TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("InputWorkspace", m_inputWS))
@@ -420,7 +422,7 @@ private:
     TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("AsymmetricWedges", asymm_flag))
 
     if (useTable) {
-      TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("ShapeTable", "MaskShapes"))
+      TS_ASSERT_THROWS_NOTHING(radial_average.setProperty("ShapeTable", shapeWS))
     } else {
       TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("NumberOfWedges", "2"))
       TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeAngle", "90"))
@@ -453,7 +455,9 @@ private:
       comparison.setPropertyValue("CheckAllData", "1");
       comparison.setPropertyValue("CheckType", "1");
       comparison.setPropertyValue("ToleranceRelErr", "1");
-      comparison.execute();
+      TS_ASSERT(comparison.execute())
+      TS_ASSERT(comparison.isExecuted())
+      TS_ASSERT_EQUALS(comparison.getPropertyValue("Result"), "1");
     }
   }
 
