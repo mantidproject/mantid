@@ -58,14 +58,6 @@ MANTID_TO_MPL = {
     'column_spacing': 'columnspacing'
 }
 
-NOT_MPL = [
-    'visible',
-    'entries_font',
-    'entries_color',
-    'title_font',
-    'title_color'
-]
-
 
 def generate_legend_commands(legend):
     kwargs = get_legend_command_kwargs(legend)
