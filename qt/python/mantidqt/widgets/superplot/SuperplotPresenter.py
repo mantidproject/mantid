@@ -181,9 +181,10 @@ class SuperplotPresenter:
                                                    line.get_label(),
                                                    line.get_color())
 
-        figure.tight_layout()
-        axes.relim()
-        axes.legend()
+        if selection or plottedData:
+            figure.tight_layout()
+            axes.relim()
+            axes.legend()
         self._canvas.draw_idle()
 
     def onWorkspaceSelectionChanged(self):
