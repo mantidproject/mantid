@@ -30,9 +30,7 @@ Usage
                                           StartXs=[0.0, 0.0, 0.0, 0.0], EndXs=[20000.0, 20000.0, 20000.0, 20000.0],
                                           Function=function, MaxIterations=500, Minimizer="Levenberg-Marquardt")
 
-    script_lines = script_text.strip().split("\n")
-    for line in script_lines:
-        print(line)
+    print(script_text)
 
 Output:
 
