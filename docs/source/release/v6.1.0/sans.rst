@@ -14,10 +14,11 @@ New
 
 - Sectors drawn in the instrument viewer can now be used to define wedges in :ref:`Q1DWeighted <algm-Q1DWeighted>`.
 
-Bugs fixes
-----------
+Bugfixes
+--------
 
 - Fix a bug that made it impossible to process flux in SANSILLAutoprocess.
+- On D16 using :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, now use the correct monitor for normalization, fix a bug where processing transmission would yield undefined values at 90 degrees when using ThetaDependent correction, and improve the q binning used.
 
 Improvements
 ------------

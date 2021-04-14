@@ -25,10 +25,15 @@ Algorithms
 - :ref:`LoadLog <algm-LoadLog>` will now detect old unsupported log files and set an appropriate explanatory string in the exception.
 - :ref:`Stitch1DMany <algm-Stitch1DMany>` has additional property `IndexOfReference` to allow user to decide which of the provided workspaces should give reference for scaling
 
+Improvements
+------------
+- Loading a CORELLI tube calibration returns a ``MaskWorkspace``.
+
 Data Objects
 ------------
 
 - exposed ``geographicalAngles`` method on :py:obj:`mantid.api.SpectrumInfo`
+- ``BinEdgeAxis`` now overrides the label in order to return the bin center and not the edge
 - :ref:`Run <mantid.api.Run>` has been modified to allow multiple goniometers to be stored.
 - :ref:`FileFinder <mantid.api.FileFinderImpl>` has been modified to improve search times when loading multiple runs on the same instrument.
 
