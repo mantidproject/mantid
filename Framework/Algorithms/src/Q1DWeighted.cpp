@@ -127,7 +127,7 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
   // histogram
   m_nLambda = inputWS->readY(0).size();
 
-  m_wedgesParameters = std::vector<Q1DWeighted::wedgeParameters>();
+  m_wedgesParameters = std::vector<Q1DWeighted::wedge>();
 
   m_asymmWedges = getProperty("AsymmetricWedges");
 
@@ -154,7 +154,7 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
       midAngle += wedgeOffset * deg2rad;
 
       m_wedgesParameters.push_back(
-          Q1DWeighted::wedgeParameters(innerRadius, outerRadius, centerX, centerY, midAngle, angleRange));
+          Q1DWeighted::wedge(innerRadius, outerRadius, centerX, centerY, midAngle, angleRange));
     }
   } else {
     getTableShapes();
@@ -177,7 +177,7 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
 /**
  * @brief Q1DWeighted::getTableShapes
  * if the user provided a shape table, parse the stored values and get the
- * viewport and the sector shapes
+ * viewport and the sector shapes defining wedges
  */
 void Q1DWeighted::getTableShapes() {
   ITableWorkspace_sptr shapeWs = getProperty("ShapeTable");
@@ -203,11 +203,13 @@ void Q1DWeighted::getTableShapes() {
       paramMap[params[0]] = params;
     }
     if (paramMap["Type"][1] == "sector")
-      getSectorParams(paramMap["Parameters"], viewportParams);
+      getWedgeParams(paramMap["Parameters"], viewportParams);
     else
       g_log.information() << "Shape " << i + 1 << " is of type " << paramMap["Type"][1]
                           << " which is not supported. This shape is ignored." << std::endl;
   }
+
+  std::sort(m_wedgesParameters.begin(), m_wedgesParameters.end());
 }
 
 /**
@@ -256,12 +258,12 @@ void Q1DWeighted::getViewportParams(const std::string &viewport,
 }
 
 /**
- * @brief Q1DWeighted::getSectorParams
+ * @brief Q1DWeighted::getWedgeParams
  * @param params the vector of strings containing the data defining the sector
  * @param viewport the previously created map of the viewport's parameters
  */
-void Q1DWeighted::getSectorParams(std::vector<std::string> &params,
-                                  std::map<std::string, std::vector<double>> &viewport) {
+void Q1DWeighted::getWedgeParams(std::vector<std::string> &params,
+                                 std::map<std::string, std::vector<double>> &viewport) {
   double zoom = viewport["Zoom"][0];
 
   double innerRadius = std::stod(params[1]) / zoom;
@@ -287,8 +289,7 @@ void Q1DWeighted::getSectorParams(std::vector<std::string> &params,
   double centerX = -(std::stod(params[5]) - xOffset) / zoom;
   double centerY = (std::stod(params[6]) - yOffset) / zoom;
 
-  Q1DWeighted::wedgeParameters wedge =
-      Q1DWeighted::wedgeParameters(innerRadius, outerRadius, centerX, centerY, centerAngle, angleRange);
+  Q1DWeighted::wedge wedge = Q1DWeighted::wedge(innerRadius, outerRadius, centerX, centerY, centerAngle, angleRange);
 
   if (m_asymmWedges || !checkIfSymetricalWedge(wedge)) {
     m_wedgesParameters.push_back(wedge);
@@ -302,9 +303,9 @@ void Q1DWeighted::getSectorParams(std::vector<std::string> &params,
  * @param wedge the wedge whose symmetrical we are looking for
  * @return true if a symetrical wedge already exists
  */
-bool Q1DWeighted::checkIfSymetricalWedge(Q1DWeighted::wedgeParameters &wedge) {
+bool Q1DWeighted::checkIfSymetricalWedge(Q1DWeighted::wedge &wedge) {
 
-  for (Q1DWeighted::wedgeParameters params : m_wedgesParameters) {
+  for (Q1DWeighted::wedge params : m_wedgesParameters) {
     double diffAngle = std::fabs(std::fmod(wedge.angleMiddle - params.angleMiddle, M_PI));
 
     double epsilon = 1e-3;
@@ -432,7 +433,7 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
 
         for (size_t iw = 0; iw < m_nWedges; ++iw) {
 
-          Q1DWeighted::wedgeParameters wedge = m_wedgesParameters[iw];
+          Q1DWeighted::wedge wedge = m_wedgesParameters[iw];
           double centerAngle = wedge.angleMiddle;
           const V3D subPix = V3D(position.X(), position.Y(), 0.0);
           const V3D center = V3D(wedge.centerX, wedge.centerY, 0);

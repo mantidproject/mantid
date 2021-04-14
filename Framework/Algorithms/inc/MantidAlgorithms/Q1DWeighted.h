@@ -76,9 +76,8 @@ private:
   void calculate(const API::MatrixWorkspace_const_sptr &);
   void finalize(const API::MatrixWorkspace_const_sptr &);
 
-  struct wedgeParameters {
-    wedgeParameters(double innerRadius, double outerRadius, double centerX, double centerY, double angleMiddle,
-                    double angleRange)
+  struct wedge {
+    wedge(double innerRadius, double outerRadius, double centerX, double centerY, double angleMiddle, double angleRange)
         : innerRadius(innerRadius), outerRadius(outerRadius), centerX(centerX), centerY(centerY),
           angleMiddle(angleMiddle), angleRange(angleRange) {}
     double innerRadius;
@@ -87,12 +86,28 @@ private:
     double centerY;
     double angleMiddle;
     double angleRange;
+
+    bool operator<(wedge &other) {
+      if (this->angleMiddle != other.angleMiddle)
+        return this->angleMiddle < other.angleMiddle;
+      if (this->angleRange != other.angleRange)
+        return (this->angleRange < other.angleRange);
+      if (this->centerX != other.centerX)
+        return (this->centerX < other.centerX);
+      if (this->centerY != other.centerY)
+        return (this->centerY < other.centerY);
+      if (this->innerRadius != other.innerRadius)
+        return (this->innerRadius != other.innerRadius);
+      if (this->outerRadius != other.outerRadius)
+        return (this->outerRadius != other.outerRadius);
+      return false;
+    }
   };
 
   void getTableShapes();
   void getViewportParams(const std::string &, std::map<std::string, std::vector<double>> &);
-  void getSectorParams(std::vector<std::string> &, std::map<std::string, std::vector<double>> &);
-  bool checkIfSymetricalWedge(wedgeParameters &wedge);
+  void getWedgeParams(std::vector<std::string> &, std::map<std::string, std::vector<double>> &);
+  bool checkIfSymetricalWedge(wedge &wedge);
   std::vector<std::vector<std::vector<double>>> m_intensities;
   std::vector<std::vector<std::vector<double>>> m_errors;
   std::vector<std::vector<std::vector<double>>> m_normalisation;
@@ -101,7 +116,7 @@ private:
   size_t m_nLambda;
   size_t m_nWedges;
 
-  std::vector<wedgeParameters> m_wedgesParameters;
+  std::vector<wedge> m_wedgesParameters;
 
   size_t m_nSpec;
   int m_nSubPixels;
