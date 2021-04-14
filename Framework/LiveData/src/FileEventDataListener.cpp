@@ -10,6 +10,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/ConfigService.h"
 
 using namespace Mantid::Kernel;
@@ -148,6 +149,12 @@ std::shared_ptr<Workspace> FileEventDataListener::extractData() {
   }
 
   m_runNumber = chunk->getRunNumber();
+
+  if (!m_loaderName.compare("LoadEventNexus")) {
+    // Scale the proton charge by the number of chunks
+    double charge = chunk->run().getProtonCharge();
+    chunk->mutableRun().setProtonCharge(charge / m_numChunks);
+  }
 
   return chunk;
 }
