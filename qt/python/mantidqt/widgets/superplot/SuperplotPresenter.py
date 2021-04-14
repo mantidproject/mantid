@@ -98,7 +98,8 @@ class SuperplotPresenter:
             self._model.delWorkspace(selectedWorkspace)
             self._view.removeWorkspace(selectedWorkspace)
         names = self._model.getWorkspaces()
-        self._view.setSelectedWorkspacesInList([names[-1]])
+        if names:
+            self._view.setSelectedWorkspacesInList([names[-1]])
         self._updatePlot()
 
     def _updateSpectrumSlider(self, wsNames, position):
