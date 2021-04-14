@@ -135,6 +135,21 @@ class PlotScriptGeneratorLegendTest(unittest.TestCase):
         self.assertEqual(0, len(label_font_commands))
         self.assertEqual(0, len(title_font_commands))
 
+    def test_set_legend_hidden(self):
+        """
+        Check that the visible flag functions correctly. If it's set different to default, then a command should be
+        generated.
+        """
+        legend = self.ax.legend()
+        empty_visible_command = generate_visible_command(legend, "legend")
+        # Should be empty because we haven't changed it from the default value.
+        self.assertEqual(0, len(empty_visible_command))
+
+        legend.set_visible(not legend.get_visible())
+        visible_command = generate_visible_command(legend, "legend")
+        # Should now contain a single entry.
+        self.assertEqual(1, len(visible_command))
+
 
 if __name__ == '__main__':
     unittest.main()

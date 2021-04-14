@@ -60,6 +60,9 @@ MANTID_TO_MPL = {
 
 
 def generate_legend_commands(legend):
+    """
+    Generates a string containing a comma separated list of kwargs to set legend properties.
+    """
     kwargs = get_legend_command_kwargs(legend)
     return convert_args_to_string([], kwargs)
 
@@ -95,7 +98,23 @@ def generate_label_font_commands(legend, legend_object_var):
     return label_commands
 
 
+def generate_visible_command(legend, legend_object_var):
+    """
+    Returns a command to set the visibility of the legend if it's different to the default value.
+    It's returned as a list for convenience, so it can be added to the end of a list without checking if it's empty.
+    """
+    visible_command = []
+    kwargs = LegendProperties.from_legend(legend)
+    _remove_kwargs_if_default(kwargs)
+    if 'visible' in kwargs:
+        visible_command.append(legend_object_var + ".set_visible(" + str(kwargs['visible']) + ")")
+    return visible_command
+
+
 def get_legend_command_kwargs(legend):
+    """
+    Returns a list of matplotlib legend kwargs, removing any that are default values.
+    """
     kwargs = LegendProperties.from_legend(legend)
     _remove_kwargs_if_default(kwargs)
     # Convert the kwargs to the matplotlib ones.
@@ -119,7 +138,9 @@ def get_mpl_kwargs(kwargs):
 
 
 def _remove_kwargs_if_default(kwargs):
-    """Remove kwargs from the given dict if they're the default values"""
+    """
+    Remove kwargs from the given dict if they're the default values
+    """
     for kwarg, default_value in mpl_default_kwargs.items():
         if kwargs[kwarg] == default_value:
             kwargs.pop(kwarg)

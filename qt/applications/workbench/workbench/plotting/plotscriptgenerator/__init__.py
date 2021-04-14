@@ -20,7 +20,8 @@ from workbench.plotting.plotscriptgenerator.figure import generate_subplots_comm
 from workbench.plotting.plotscriptgenerator.lines import generate_plot_command
 from workbench.plotting.plotscriptgenerator.legend import (generate_legend_commands,
                                                            generate_title_font_commands,
-                                                           generate_label_font_commands)
+                                                           generate_label_font_commands,
+                                                           generate_visible_command)
 from workbench.plotting.plotscriptgenerator.colorfills import generate_plot_2d_command
 from workbench.plotting.plotscriptgenerator.utils import generate_workspace_retrieval_commands, sorted_lines_in
 from workbench.plotting.plotscriptgenerator.fitting import get_fit_cmds
@@ -159,11 +160,12 @@ def get_legend_cmds(ax, ax_object_var):
             draggable_method=SET_DRAGGABLE_METHOD))
         cmds.extend(generate_title_font_commands(ax.legend_, LEGEND_VARIABLE))
         cmds.extend(generate_label_font_commands(ax.legend_, LEGEND_VARIABLE))
+        cmds.extend(generate_visible_command(ax.legend_, LEGEND_VARIABLE))
     return cmds
 
 
 def get_axes_object_variable(ax):
-    """Get a string that will return the axeses object in the script"""
+    """Get a string that will return the axes object in the script"""
     # plt.subplots returns an Axes object if there's only one axes being
     # plotted otherwise it returns a list
     ax_object_var = AXES_VARIABLE
