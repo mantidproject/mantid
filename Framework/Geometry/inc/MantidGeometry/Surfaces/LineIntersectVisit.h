@@ -38,13 +38,12 @@ Creates interaction with a line
 */
 class MANTID_GEOMETRY_DLL LineIntersectVisit : public BaseVisit {
 public:
-  using PType = boost::container::small_vector<Kernel::V3D, 5>;
   using DType = boost::container::small_vector<double, 5>;
 
 private:
-  Line ATrack; ///< The line
-  PType PtOut; ///< The intersection point
-  DType DOut;  ///< The distance
+  Line ATrack;       ///< The line
+  Line::PType PtOut; ///< The intersection point
+  DType DOut;        ///< The distance
 
   void procTrack();
 
@@ -62,7 +61,7 @@ public:
   /// Get the distance
   const DType &getDistance() const { return DOut; }
   /// Get the intersection points
-  const PType &getPoints() const { return PtOut; }
+  const Line::PType &getPoints() const { return PtOut; }
   /// Get the number of intersection points
   unsigned long getNPoints() const { return (unsigned long)PtOut.size(); }
 

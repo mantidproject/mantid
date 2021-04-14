@@ -41,15 +41,9 @@ ChangeLog:
 changed to normal destructor
 */
 class MANTID_GEOMETRY_DLL Line {
-
-private:
-  Kernel::V3D m_origin;    ///< Orign point (on plane)
-  Kernel::V3D m_direction; ///< Direction of outer surface (Unit Vector)
-
-  int lambdaPair(const int ix, const std::pair<std::complex<double>, std::complex<double>> &SQ,
-                 boost::container::small_vector<Kernel::V3D, 5> &PntOut) const;
-
 public:
+  using PType = boost::container::small_vector<Kernel::V3D, 5>;
+
   Line();
   Line(const Kernel::V3D &, const Kernel::V3D &);
   Line *clone() const;
@@ -67,10 +61,16 @@ public:
   int setLine(const Kernel::V3D &,
               const Kernel::V3D &); ///< input Origin + direction
 
-  int intersect(boost::container::small_vector<Kernel::V3D, 5> &, const Quadratic &) const;
-  int intersect(boost::container::small_vector<Kernel::V3D, 5> &, const Cylinder &) const;
-  int intersect(boost::container::small_vector<Kernel::V3D, 5> &, const Plane &) const;
-  int intersect(boost::container::small_vector<Kernel::V3D, 5> &, const Sphere &) const;
+  int intersect(PType &, const Quadratic &) const;
+  int intersect(PType &, const Cylinder &) const;
+  int intersect(PType &, const Plane &) const;
+  int intersect(PType &, const Sphere &) const;
+
+private:
+  Kernel::V3D m_origin;    ///< Orign point (on plane)
+  Kernel::V3D m_direction; ///< Direction of outer surface (Unit Vector)
+
+  int lambdaPair(const int ix, const std::pair<std::complex<double>, std::complex<double>> &SQ, PType &PntOut) const;
 };
 
 } // namespace Geometry

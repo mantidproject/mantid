@@ -340,7 +340,7 @@ void Muscat::exec() {
  * function of k
  * @param material The sample material
  * @param kinc The incident wavenumber
- * @oaram specialSingleScatterCalc Boolean indicating whether special single
+ * @param specialSingleScatterCalc Boolean indicating whether special single
  * scatter calculation should be performed
  * @return A tuple containing the mean free path (metres), the total cross
  * section (barns)
@@ -416,8 +416,10 @@ double Muscat::interpolateLogQuadratic(const MatrixWorkspace_sptr &workspaceToIn
  * @param rng Random number generator
  * @param sigmaSSWS
  * @param SOfQ
+ * @param kinc
  * @param detPos
- * @param specialSingleScatterCalc
+ * @param specialSingleScatterCalc Boolean indicating whether special single
+ * scatter calculation should be performed
  * @return An average weight across all of the paths
  */
 double Muscat::simulatePaths(const int nPaths, const size_t nScatters, const Sample &sample,
@@ -465,7 +467,8 @@ double Muscat::simulatePaths(const int nPaths, const size_t nScatters, const Sam
  * @param SOfQ Pointer to workspace containing log(S(Q))
  * @param kinc The incident wavevector
  * @param detPos The detector position xyz coordinates
- * @param specialSingleScatterCalc
+ * @param specialSingleScatterCalc Boolean indicating whether special single
+ * scatter calculation should be performed
  * @return A tuple containing a success\fail boolean, the calculated weight and
  * a sum of the QSS values across the n-1 multiple scatters
  */
@@ -605,7 +608,7 @@ void Muscat::updateWeightAndPosition(Geometry::Track &track, double &weight, con
 /**
  * Generate an initial track starting at the source and entering
  * the sample at a random point on its front surface
- * @param sample The sample
+ * @param shape The sample shape
  * @param frame The instrument's reference frame
  * @param sourcePos The source position
  * @param rng Random number generator
