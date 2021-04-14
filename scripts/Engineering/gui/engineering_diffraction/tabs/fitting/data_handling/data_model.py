@@ -296,6 +296,9 @@ class FittingDataModel(object):
     def get_bg_params(self):
         return self._bg_params
 
+    def get_fit_results(self):
+        return self._fit_results
+
     def create_or_update_bgsub_ws(self, ws_name, bg_params):
         ws = self._loaded_workspaces[ws_name]
         ws_bg = self._bg_sub_workspaces[ws_name]
