@@ -12,6 +12,7 @@
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -42,10 +43,10 @@ FileEventDataListener::FileEventDataListener()
     } else {
       auto loader = FileLoaderRegistry::Instance().chooseLoader(m_filename);
       m_loaderName = loader->name();
-      if (m_loaderName.compare("LoadEventPreNexus") == 0) {
+      if (m_loaderName == "LoadEventPreNexus") {
         m_filePropName = "EventFilename";
         m_canLoadMonitors = false;
-      } else if (m_loaderName.compare("LoadEventNexus") == 0) {
+      } else if (m_loaderName == "LoadEventNexus") {
         m_filePropName = "Filename";
         m_canLoadMonitors = true;
       } else {
@@ -150,10 +151,15 @@ std::shared_ptr<Workspace> FileEventDataListener::extractData() {
 
   m_runNumber = chunk->getRunNumber();
 
-  if (!m_loaderName.compare("LoadEventNexus")) {
+  if (m_loaderName == "LoadEventNexus") {
     // Scale the proton charge by the number of chunks
-    double charge = chunk->run().getProtonCharge();
-    chunk->mutableRun().setProtonCharge(charge / m_numChunks);
+    TimeSeriesProperty<double> *pcharge = chunk->mutableRun().getTimeSeriesProperty<double>("proton_charge");
+    auto values = pcharge->valuesAsVector();
+    for (auto &value : values) {
+      value /= m_numChunks;
+    }
+    pcharge->replaceValues(pcharge->timesAsVector(), values);
+    chunk->mutableRun().integrateProtonCharge();
   }
 
   return chunk;
