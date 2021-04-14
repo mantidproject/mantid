@@ -72,8 +72,9 @@ Drawing sectors
 
 It is also possible to use the instrument viewer to draw the shape of the angular sector. Only sector shapes are currently supported,
 and they must be drawn in the Full 3D, Z- projection, without any rotation (translation and zoom are supported). Please
-note that in this projection, the X-axis points to the left. When doing the wedges without the table, trigonometric azimuthal
-angle opens at positive ray of the x-axis.
+note that in this projection, the X-axis points to the left. So when doing the wedges without the table (see above), they are ordered
+clockwise, starting on the left.
+If running Q1DWeighted with drawn sectors as input, the output will be ordered similarly, regardless of the order in which they were drawn.
 Once the shapes are drawn, they must be saved using the ``Save shapes to table`` button.
 
 .. figure:: /images/Q1DWeightedShapeIntegration.png
@@ -96,10 +97,13 @@ The wedges output group will have two workspaces: one for the red region, one fo
   :align: center
   :width: 600
 
-In the case of drawn sectors, the symmetric computation will happen only if the pair of sectors has been provided,
-and if they are perfectly symmetrical around their centers. Copy pasting the sectors using Ctrl+C - Ctrl+V or editing
-the values directly in the instrument viewer is thus recommended to ensure perfect alignment.
-A sector without its symmetrical counterpart will be integrated asymmetrically.
+In the case of drawn sectors, when doing symmetric integration, symmetric shapes will be grouped together.
+Taking the above example, the shape table will have 4 shapes in it, but the output will only have 2 workspaces, because the
+red shapes and the blue shapes will be grouped.
+If no corresponding symmetric is found for a shape, the algorithm will nonetheless integrate on the projected symmetric too,
+so the result will be identical (though for clarity it is not advised to provide only one of the shapes).
+Again, in the above example, the result will be identical whether only one or both of the red and blue shapes are provided,
+because the algorithm will find the missing symmetric if needed.
 
 Asymmetric
 ~~~~~~~~~~
