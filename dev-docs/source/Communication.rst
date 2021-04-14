@@ -1,9 +1,6 @@
 .. _Communication:
 
 .. toctree::
-   :hidden:
-
-   DevelopmentTeam
 
 Communication
 ==============
@@ -39,4 +36,3 @@ Face to Face
 ^^^^^^^^^^^^
 
 * Annual Developer Workshop
-
