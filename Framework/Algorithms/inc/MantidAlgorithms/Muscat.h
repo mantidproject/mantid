@@ -55,6 +55,7 @@ protected:
                                                                  const size_t columns);
   virtual std::unique_ptr<InterpolationOption> createInterpolateOption();
   double interpolateLogQuadratic(const API::MatrixWorkspace_sptr &workspaceToInterpolate, double x);
+  void updateTrackDirection(Geometry::Track &track, const double cosT, const double phi);
 
 private:
   void init() override;

@@ -152,6 +152,18 @@ std::map<std::string, std::string> Muscat::validateInputs() {
   if (emode != Kernel::DeltaEMode::Elastic) {
     issues["EMode"] = "Only elastic mode is supported at the moment";
   }
+
+  const int nlambda = getProperty("NumberOfWavelengthPoints");
+  if (!isEmpty(nlambda)) {
+    InterpolationOption interpOpt;
+    const std::string interpValue = getPropertyValue("Interpolation");
+    interpOpt.set(interpValue, false, false);
+    const auto nlambdaIssue = interpOpt.validateInputSize(nlambda);
+    if (!nlambdaIssue.empty()) {
+      issues["NumberOfWavelengthPoints"] = nlambdaIssue;
+    }
+  }
+
   return issues;
 }
 
@@ -217,8 +229,7 @@ void Muscat::exec() {
   const int seed = getProperty("SeedValue");
 
   InterpolationOption interpolateOpt;
-  interpolateOpt.set(getPropertyValue("Interpolation"));
-  interpolateOpt.setIndependentErrors(true);
+  interpolateOpt.set(getPropertyValue("Interpolation"), false, true);
 
   Progress prog(this, 0.0, 1.0, nhists * nlambda);
   prog.setNotifyStep(0.01);
@@ -240,7 +251,9 @@ void Muscat::exec() {
       const auto lambdas = instrumentWS.points(i).rawData();
 
       const auto nbins = lambdas.size();
-      const size_t lambdaStepSize = nbins / nlambda;
+      // step size = index range / number of steps requested
+      const size_t nsteps = std::max(1, nlambda - 1);
+      const size_t lambdaStepSize = nbins == 1 ? 1 : (nbins - 1) / nsteps;
 
       for (size_t bin = 0; bin < nbins; bin += lambdaStepSize) {
 
@@ -541,39 +554,63 @@ void Muscat::q_dir(Geometry::Track &track, const MatrixWorkspace_sptr SOfQ, cons
     double SQ = interpolateLogQuadratic(SOfQ, QQ);
     QSS += QQ * SQ;
     weight = weight * scatteringXSection * SQ * QQ;
-    auto phi = rng.nextValue() * 2 * M_PI;
-    auto B3 = sqrt(1 - cosT * cosT);
-    auto B2 = cosT;
-    // possible to do this using the Quat class instead??
-    // Quat(const double _deg, const V3D &_axis);
-    // Quat(acos(cosT)*180/M_PI,
-    // Kernel::V3D(track.direction()[],track.direction()[],0))
-
-    // Rodrigues formula with final term equal to zero
-    // v_rot = cosT * v + sinT(k x v)
-    // with rotation axis k orthogonal to v and defined as:
-    // sin(phi) * (vy, -vx, 0) + cos(phi) * (-vx * vz, -vy * vz, 1 - vz * vz)
-    auto horiz = track.direction()[0];
-    auto up = track.direction()[1];
-    auto beam = track.direction()[2];
-    double UKX, UKY, UKZ;
-    if (up < 1) {
-      auto A2 = sqrt(1 - up * up);
-      auto UQTZ = cos(phi) * A2;
-      auto UQTX = -cos(phi) * up * beam / A2 + sin(phi) * horiz / A2;
-      auto UQTY = -cos(phi) * up * horiz / A2 - sin(phi) * beam / A2;
-      UKX = B2 * beam + B3 * UQTX;
-      UKY = B2 * horiz + B3 * UQTY;
-      UKZ = B2 * up + B3 * UQTZ;
-    } else {
-      UKX = B2 * cos(phi);
-      UKY = B3 * sin(phi);
-      UKZ = B2;
-    }
-    track.reset(track.startPoint(), Kernel::V3D(UKX, UKY, UKZ));
+    updateTrackDirection(track, cosT, rng.nextValue() * 2 * M_PI);
   }
 }
 
+/**
+ * Update the track's direction following a scatter event given theta and phi angles
+ * @param track The track whose direction will be updated
+ * @param cosT Cos two theta. two theta is scattering angle
+ * @param phi Phi (radians) of after track. Measured in plane perpendicular to initial trajectory
+ */
+void Muscat::updateTrackDirection(Geometry::Track &track, const double cosT, const double phi) {
+  auto B3 = sqrt(1 - cosT * cosT);
+  auto B2 = cosT;
+  // possible to do this using the Quat class instead??
+  // Quat(const double _deg, const V3D &_axis);
+  // Quat(acos(cosT)*180/M_PI,
+  // Kernel::V3D(track.direction()[],track.direction()[],0))
+
+  // Rodrigues formula with final term equal to zero
+  // v_rot = cosT * v + sinT(k x v)
+  // with rotation axis k orthogonal to v
+  // Define k by first creating two vectors orthogonal to v:
+  // (-vy, vx, 0) by inspection
+  // and then (-vz * vx, -vy * vz, vx * vx + vy * vy) as cross product
+  // Then define k as combination of these:
+  // sin(phi) * (vy, -vx, 0) + cos(phi) * (-vx * vz, -vy * vz, 1 - vz * vz)
+  // Note: xyz convention here isn't the standard Mantid one. x=beam, z=up
+  auto vy = track.direction()[0];
+  auto vz = track.direction()[1];
+  auto vx = track.direction()[2];
+  double UKX, UKY, UKZ;
+  if (vz < 1) {
+    auto A2 = sqrt(1 - vz * vz);
+    auto UQTZ = cos(phi) * A2;
+    auto UQTX = -cos(phi) * vz * vx / A2 + sin(phi) * vy / A2;
+    auto UQTY = -cos(phi) * vz * vy / A2 - sin(phi) * vx / A2;
+    UKX = B2 * vx + B3 * UQTX;
+    UKY = B2 * vy + B3 * UQTY;
+    UKZ = B2 * vz + B3 * UQTZ;
+  } else {
+    UKX = B3 * cos(phi);
+    UKY = B3 * sin(phi);
+    UKZ = B2;
+  }
+  track.reset(track.startPoint(), Kernel::V3D(UKY, UKZ, UKX));
+}
+
+/**
+ * Repeatedly attempt to generate an initial track starting at the source and entering the sample at a random point on
+ * its front surface. After each attempt check the track has at least one intercept with sample shape (sometimes for
+ * tracks very close to the surface this can sometimes be zero due to numerical precision)
+ * @param shape The sample shape
+ * @param frame The instrument's reference frame
+ * @param sourcePos The source position
+ * @param rng Random number generator
+ * @return a track intercepting the sample
+ */
 Geometry::Track Muscat::start_point(const Geometry::IObject &shape,
                                     std::shared_ptr<const Geometry::ReferenceFrame> frame, const V3D sourcePos,
                                     Kernel::PseudoRandomNumberGenerator &rng) {
