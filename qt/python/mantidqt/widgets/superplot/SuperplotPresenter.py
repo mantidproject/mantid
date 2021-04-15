@@ -65,6 +65,13 @@ class SuperplotPresenter:
         self._view.close()
         del self._model
 
+    def onResize(self):
+        """
+        Triggered when one of the dockwidgets is resized.
+        """
+        self._canvas.figure.tight_layout()
+        self._canvas.draw_idle()
+
     def onVisibilityChanged(self, state):
         """
         Triggered when the visibility of the superplot widget changed. This
