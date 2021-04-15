@@ -209,7 +209,7 @@ void Muscat::exec() {
 
   auto noAbsOutputWS = createOutputWorkspace(*inputWS);
   auto noAbsSimulationWS = useSparseInstrument ? sparseWS->clone() : noAbsOutputWS;
-  for (auto i = 0; i < nScatters; i++) {
+  for (size_t i = 0; i < nScatters; i++) {
     auto outputWS = createOutputWorkspace(*inputWS);
     MatrixWorkspace_sptr simulationWS = useSparseInstrument ? sparseWS->clone() : outputWS;
     simulationWSs.push_back(simulationWS);
@@ -325,14 +325,14 @@ void Muscat::exec() {
   std::string wsname = wsNamePrefix + "1_NoAbs";
   API::AnalysisDataService::Instance().addOrReplace(wsname, noAbsOutputWS);
   wsgroup->addWorkspace(noAbsOutputWS);
-  for (auto i = 0; i < outputWSs.size(); i++) {
+  for (size_t i = 0; i < outputWSs.size(); i++) {
     std::string wsname = wsNamePrefix + std::to_string(i + 1);
     API::AnalysisDataService::Instance().addOrReplace(wsname, outputWSs[i]);
     wsgroup->addWorkspace(outputWSs[i]);
   }
 
   auto summedOutput = createOutputWorkspace(*inputWS);
-  for (auto i = 0; i < outputWSs.size(); i++) {
+  for (size_t i = 0; i < outputWSs.size(); i++) {
     summedOutput = summedOutput + outputWSs[i];
   }
   API::AnalysisDataService::Instance().addOrReplace("Scatter_1_" + std::to_string(outputWSs.size()) + "_Summed",
@@ -457,7 +457,7 @@ double Muscat::simulatePaths(const int nPaths, const size_t nScatters, const Sam
 
   // divide by the mean of Q*S(Q) for each of the n-1 terms representing a
   // multiple scatter
-  sumOfWeights = sumOfWeights / pow(sumOfQSS / (nPaths * (nScatters - 1)), nScatters - 1);
+  sumOfWeights = sumOfWeights / pow(sumOfQSS / static_cast<double>(nPaths * (nScatters - 1)), nScatters - 1);
 
   return sumOfWeights / nPaths;
 }
