@@ -41,7 +41,7 @@ public:
   static MuscatTest *createSuite() { return new MuscatTest(); }
   static void destroySuite(MuscatTest *suite) { delete suite; }
 
-  MuscatTest::MuscatTest() {
+  MuscatTest() {
     SofQWorkspace = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     SofQWorkspace->mutableY(0)[0] = 1.;
     SofQWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");

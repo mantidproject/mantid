@@ -481,7 +481,7 @@ double Muscat::simulatePaths(const int nPaths, const size_t nScatters, const Sam
  * @param detPos The detector position xyz coordinates
  * @param specialSingleScatterCalc Boolean indicating whether special single
  * scatter calculation should be performed
- * @return A tuple containing a success\fail boolean, the calculated weight and
+ * @return A tuple containing a success/fail boolean, the calculated weight and
  * a sum of the QSS values across the n-1 multiple scatters
  */
 std::tuple<bool, double, double> Muscat::scatter(const size_t nScatters, const Sample &sample,
