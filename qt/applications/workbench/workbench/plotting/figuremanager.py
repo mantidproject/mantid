@@ -332,6 +332,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.window.disconnect()
         self._fig_interaction.disconnect()
         self.window.close()
+        if self.superplot:
+            self.superplot.close()
 
         try:
             Gcf.destroy(self.num)
