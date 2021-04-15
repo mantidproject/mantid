@@ -96,7 +96,8 @@ class CalibrationModel(object):
             self.create_output_files(user_calib_dir, difa, difc, tzero, bk2bk_params, sample_path, vanadium_path,
                                      instrument, bank, spectrum_numbers)
 
-    def extract_b2b_params(self, workspace):
+    @staticmethod
+    def extract_b2b_params(workspace):
 
         ws_inst = workspace.getInstrument()
         NorthBank = ws_inst.getComponentByName("NorthBank")
@@ -211,8 +212,8 @@ class CalibrationModel(object):
         ax.set_xlabel("Expected Peaks Centre(dSpacing, A)")
         ax.set_ylabel("Fitted Peaks Centre(TOF, us)")
 
-    def run_calibration(self,
-                        sample_ws,
+    @staticmethod
+    def run_calibration(sample_ws,
                         vanadium_workspace,
                         van_integration,
                         bank,
@@ -339,7 +340,7 @@ class CalibrationModel(object):
 
         else:
             grp_ws, _, _ = CreateGroupingWorkspace(InputWorkspace=sample_raw)  # blank grouping workspace based on inst
-            int_spectrum_numbers = self._create_spectrum_list_from_string(spectrum_numbers)
+            int_spectrum_numbers = _create_spectrum_list_from_string(spectrum_numbers)
             for spec in int_spectrum_numbers:
                 ws_ind = int(spec - 1)
                 det_ids = grp_ws.getDetectorIDs(ws_ind)
@@ -372,11 +373,6 @@ class CalibrationModel(object):
             current_fit_params = {'difc': row['difc'], 'difa': row['difa'], 'tzero': row['tzero']}
             cal.append(current_fit_params)
         return cal, curves_output, sample_raw
-
-    def _create_spectrum_list_from_string(self, str_list):
-        array = IntArrayProperty('var', str_list).value
-        int_list = list(array)
-        return int_list
 
     def create_output_files(self, calibration_dir, difa, difc, tzero, bk2bk_params, sample_path, vanadium_path,
                             instrument, bank, spectrum_numbers):
@@ -486,3 +482,9 @@ class CalibrationModel(object):
         else:
             raise ValueError("Invalid bank name entered")
         return filename
+
+
+def _create_spectrum_list_from_string(str_list):
+    array = IntArrayProperty('var', str_list).value
+    int_list = list(array)
+    return int_list
