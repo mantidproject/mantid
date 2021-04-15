@@ -1,5 +1,3 @@
-from __future__ import (absolute_import, division, print_function)
-
 import os
 import re
 import math
@@ -36,17 +34,17 @@ def seq_to_list(iseqn):
     seqn = iseqn.replace(' ', '')
     nlist = []
     sqlist = seqn.split(',')
-    for rg in sqlist:
-        if rg == '':
+    for run in sqlist:
+        if run == '':
             continue
-        ss = rg.split('-')
+        ss = run.split('-')
         try:
-            lo = int(ss[0])
-            hi = int(ss[-1])
+            run_start = int(ss[0])
+            run_end = int(ss[-1])
             if len(ss) == 1:
-                nlist.append(lo)
+                nlist.append(run_start)
             else:
-                for i in range(lo, hi+1):
+                for i in range(run_start, run_end+1):
                     nlist.append(i)
         except ValueError:
             raise RuntimeError('Unexpected run sequence: {}'.format(seqn))
@@ -58,42 +56,45 @@ def dataset_seq_to_list(iseqn):
     # uses a ';' as a separator and expects
     # 'run_seqn:data_sets;...'
     # returns a list [path:dset,...]
-    run_numbers = []
-    datasets = []
+    run_list = []
+    dataset_list = []
     for seq in iseqn.split(';'):
         # check for data set spec else use dataset 0
         ss = seq.split(':')
         runs = ss[0]
-        dlist = seq_to_list(ss[1]) if len(ss) > 1 else [0]
+        datasets = seq_to_list(ss[1]) if len(ss) > 1 else [0]
         for run in seq_to_list(runs):
-            for dset in dlist:
-                run_numbers.append(run)
-                datasets.append(dset)
+            for dataset in datasets:
+                run_list.append(run)
+                dataset_list.append(dataset)
 
-    return run_numbers, datasets
+    return run_list, dataset_list
 
 
 def list_to_seq(nlist):
 
-    sseq = []
+    # converts a list of numbers into an ordered string sequence,
+    # for example [1,2,3,10,7,6,8] -> '1-3,6-8,10'
+
+    sequence = []
     # rewrite using range notation to a simple sequence
-    nseq = sorted(nlist)
-    p_, lo = nseq[0], nseq[0]
-    for hi in nseq[1:]:
-        if hi == p_ + 1:
-            p_ = hi
+    sorted_runs = sorted(nlist)
+    run_end, run_start = sorted_runs[0], sorted_runs[0]
+    for next_run in sorted_runs[1:]:
+        if next_run == run_end + 1:
+            run_end = next_run
         else:
             # add the range
-            if lo != p_:
-                sseq.append(str(lo) + '-' + str(p_))
+            if run_start != run_end:
+                sequence.append(str(run_start) + '-' + str(run_end))
             else:
-                sseq.append(str(lo))
-            lo, p_ = hi, hi
-    if lo != hi:
-        sseq.append(str(lo) + '-' + str(hi))
+                sequence.append(str(run_start))
+            run_start, run_end = next_run, next_run
+    if run_start != next_run:
+        sequence.append(str(run_start) + '-' + str(next_run))
     else:
-        sseq.append(str(hi))
-    return sseq
+        sequence.append(str(next_run))
+    return sequence
 
 
 def extract_runs(file_list, collapse=False):
@@ -118,8 +119,7 @@ def build_file_list(file_prefix, file_extn, runs):
     data_runs, run_index = dataset_seq_to_list(runs)
     data_files = []
     for run, index in zip(data_runs, run_index):
-        data_files.append('{}{:07d}{}:{}'.format(
-            file_prefix, run, file_extn, index))
+        data_files.append(f"{file_prefix}{run:07d}{file_extn}:{index}")
 
     # remove any repeated files and sort
     data_files = sorted(list(set(data_files)))
@@ -203,6 +203,29 @@ def find_event_path(spath, evpath):
     return './'
 
 
+def beam_monitor_counts(src):
+    run = mtd[src].getRun()
+    return np.sum(run.getProperty('MonitorCounts').value)
+
+
+def scale_and_remove_background(source_ws, source_scale, empty_ws, empty_scale,
+                                out_ws, floor_negatives):
+    # Common reduction processing step in the algorithm,
+    #   source_scale.source_ws - empty_scale.empty_ws -> out_ws
+    alpha_scale = source_scale * 1.0e6 / beam_monitor_counts(source_ws)
+    Scale(InputWorkspace=source_ws,
+            Factor=alpha_scale, OutputWorkspace=out_ws)
+    if empty_ws is not None:
+        factor = empty_scale * 1.0e6 / beam_monitor_counts(empty_ws)
+        Scale(InputWorkspace=empty_ws, Factor=factor,
+                OutputWorkspace=empty_ws)
+        Minus(LHSWorkspace=out_ws, RHSWorkspace=empty_ws,
+                OutputWorkspace=out_ws)
+        if floor_negatives:
+            ResetNegatives(InputWorkspace=out_ws,
+                            OutputWorkspace=out_ws, AddMinimum=False)
+
+
 class PelicanReduction(PythonAlgorithm):
 
     def category(self):
@@ -224,14 +247,15 @@ class PelicanReduction(PythonAlgorithm):
         self.declareProperty(StringArrayProperty('SampleRuns',
                                                  values=[],
                                                  validator=mandatoryInputRuns),
-                             doc='Comma separated range of sample runs,\n'
-                                 ' eg [cycle::] 7333-7341,7345')
+                             doc='Optional cycle number followed by comma separated range of\n'
+                                 'sample runs as [cycle::] n1,n2,..\n'
+                                 ' eg 123::7333-7341,7345')
 
         self.declareProperty(name='EmptyRuns',
                              defaultValue='',
-                             doc='Optional path followed by comma separated range of runs,\n'
-                                 'looking for runs in the sample folder if path not included,\n'
-                                 '  eg [cycle::] 6300-6308')
+                             doc='Optional cycle number followed by comma separated range of\n'
+                                 'runs as [cycle::] n1,n2,..\n'
+                                 '  eg 123::6300-6308')
 
         self.declareProperty(name='ScaleEmptyRuns',
                              defaultValue=1.0,
@@ -239,15 +263,15 @@ class PelicanReduction(PythonAlgorithm):
 
         self.declareProperty(name='CalibrationRuns',
                              defaultValue='',
-                             doc='Optional path followed by comma separated range of runs,\n'
-                                 'looking for runs in the sample folder if path not included,\n'
-                                 '  eg [cycle::] 6350-6365')
+                             doc='Optional cycle number followed by comma separated range of\n'
+                                 'runs as [cycle::] n1,n2,..\n'
+                                 '  eg 123::6350-6365')
 
         self.declareProperty(name='EmptyCalibrationRuns',
                              defaultValue='',
-                             doc='Optional path followed by comma separated range of runs,\n'
-                                 'looking for runs in the sample folder if path not included,\n'
-                                 '  eg [cycle::] 6370-6375')
+                             doc='Optional cycle number followed by comma separated range of\n'
+                                 'runs as [cycle::] n1,n2,..\n'
+                                 '  eg 123::6370-6375')
 
         self.declareProperty(name='EnergyTransfer',
                              defaultValue='0.0, 0.02, 3.0',
@@ -303,6 +327,8 @@ class PelicanReduction(PythonAlgorithm):
         sample_file = re.sub(r':[0-9]+$', '', sample_runs[0])
         self.set_efixed(sample_file)
 
+        # The progress includes 4 additional status reports on top of incrementing
+        # the progress on each loaded file
         self._progress = Progress(
             self, start=0.0, end=1.0, nreports=total_runs + 4)
         self._progress.report('File selection complete, loading initial file')
@@ -327,60 +353,17 @@ class PelicanReduction(PythonAlgorithm):
         # append the selected processing option to the output ws name
         output_ws += self._process_suffix[self._processing]
 
-        # perform the time normalization by beam monitor counts and background removal
-        # all data is normalized to the beam monitor counts and scaled by 1e6
-        # red_2D = (alpha.sample - empty) / (beta.cal - empty_cal)
-        def total_time(src):
-            run = mtd[src].getRun()
-            return run.getProperty('dur').value
-
-        def beam_monitor_counts(src):
-            run = mtd[src].getRun()
-            return np.sum(run.getProperty('MonitorCounts').value)
-
+        # Perform background removal and normalization against the integrated calibration data as
+        #   red_2D = (alpha.sample_ws - empty_ws) / integrated (beta.calibration_ws - empty_cal_ws)
         red_2D = output_ws+'_2D'
-        alpha_scale = self._sample_scale * \
-            1.0e6 / beam_monitor_counts(_sample_ws)
-        Scale(InputWorkspace=_sample_ws,
-              Factor=alpha_scale, OutputWorkspace=red_2D)
-        if _empty_ws is not None:
-            factor = self._scale_empty * 1.0e6 / beam_monitor_counts(_empty_ws)
-            Scale(InputWorkspace=_empty_ws, Factor=factor,
-                  OutputWorkspace=_empty_ws)
-            Minus(LHSWorkspace=red_2D, RHSWorkspace=_empty_ws,
-                  OutputWorkspace=red_2D)
-            if self._reset_negatives:
-                ResetNegatives(InputWorkspace=red_2D,
-                               OutputWorkspace=red_2D, AddMinimum=False)
-
-        # normalize to vanadium
+        scale_and_remove_background(_sample_ws, self._sample_scale,
+                                    _empty_ws, self._scale_empty, red_2D, self._reset_negatives)
         if _calibration_ws is not None:
             denom_ws = '_integ_cal'
-            beta_scale = self._calibration_scale * 1.0e6 / \
-                beam_monitor_counts(_calibration_ws)
-            Scale(InputWorkspace=_calibration_ws,
-                  Factor=beta_scale, OutputWorkspace=denom_ws)
-            if _empty_calib_ws is not None:
-                factor = self._cal_background_scale * 1.0e6 / \
-                    beam_monitor_counts(_empty_calib_ws)
-                Scale(InputWorkspace=_empty_calib_ws, Factor=factor,
-                      OutputWorkspace=_empty_calib_ws)
-                Minus(LHSWorkspace=denom_ws, RHSWorkspace=_empty_calib_ws,
-                      OutputWorkspace=denom_ws)
-                if self._reset_negatives:
-                    ResetNegatives(InputWorkspace=denom_ws,
-                                   OutputWorkspace=denom_ws, AddMinimum=False)
+            self._integrated_calibration(
+                _calibration_ws, _empty_calib_ws, denom_ws)
 
-            # Scale the data by the calibration after it has been integrated
-            if self._cal_peak_intensity:
-                self._integrate_over_peak(denom_ws, denom_ws)
-            else:
-                Integration(InputWorkspace=denom_ws, OutputWorkspace=denom_ws,
-                            RangeLower=self._lo_integ_range, RangeUpper=self._hi_integ_range)
-
-            # average the normalization over the tube
-            self._average_over_tube(denom_ws, denom_ws)
-
+            # perform normalization step and add the denom_ws to be cleaned up later
             Divide(LHSWorkspace=red_2D, RHSWorkspace=denom_ws,
                    OutputWorkspace=red_2D)
             ReplaceSpecialValues(InputWorkspace=red_2D, OutputWorkspace=red_2D,
@@ -388,51 +371,11 @@ class PelicanReduction(PythonAlgorithm):
             self._intermediate_ws.append(denom_ws)
 
         if self._processing == 'NXSPE':
-            if self._temp_folder is None:
-                nxspe_file = red_2D + '.nxspe'
-            else:
-                nxspe_file = os.path.join(self._temp_folder, red_2D + '.nxspe')
-
-            # SaveNXSPE works with the detectors only
-            red_det = red_2D + 'det'
-            ExtractMonitors(InputWorkspace=red_2D, DetectorWorkspace=red_det)
-            SaveNXSPE(InputWorkspace=red_det, Filename=nxspe_file,
-                      EFixed=self._efixed, Psi=self._mscor)
-            self.setProperty('OutputWorkspace', red_2D)
-            DeleteWorkspace(Workspace=red_det)
+            self._nxspe_processing(red_2D)
         else:
             self._progress.report(
                 'SOFQW-{} processing'.format(self._sofqw_mode))
-
-            # convert to SofQW and KIKf correction and transpose axis
-            SofQW(InputWorkspace=red_2D, OutputWorkspace=red_2D,
-                  QAxisBinning=self._q_range, EMode='Direct', EFixed=self._efixed,
-                  Method=self._sofqw_mode, ReplaceNANs=True)
-            CorrectKiKf(InputWorkspace=red_2D, OutputWorkspace=red_2D,
-                        EMode='Direct', EFixed=self._efixed)
-
-            red_1D = output_ws + '_1D_dE'
-            SumSpectra(InputWorkspace=red_2D, OutputWorkspace=red_1D,
-                       RemoveSpecialValues=True)
-            Transpose(InputWorkspace=red_2D, OutputWorkspace=red_2D)
-
-            # generate the 1D results and group with the 2D data and update the axis for the 2D data
-            # which was created when the detector grouping was created and add the ini params
-            # for completeness
-            red_1DQ = output_ws + '_1D_Q'
-            # drop exception handling when updated formal Mantid build includes SumSpectra change
-            try:
-                SumSpectra(InputWorkspace=red_2D, OutputWorkspace=red_1DQ,
-                           UseFractionalArea=False, RemoveSpecialValues=True)
-            except:
-                SumSpectra(InputWorkspace=red_2D,
-                           OutputWorkspace=red_1DQ, RemoveSpecialValues=True)
-            self._append_ini_params(red_1D)
-            self._append_ini_params(red_1DQ)
-            self._append_ini_params(red_2D)
-            grouped = [red_1D, red_1DQ, red_2D]
-            GroupWorkspaces(InputWorkspaces=grouped, OutputWorkspace=output_ws)
-            self.setProperty('OutputWorkspace', output_ws)
+            self._sofqw_processing(red_2D, output_ws)
 
         # clean up the intermediate workspaces else group them to keep display clean
         if not self._keep_intermediate:
@@ -447,6 +390,74 @@ class PelicanReduction(PythonAlgorithm):
                             OutputWorkspace='intermediate')
 
         self._progress.report('Clean up complete')
+
+    def _nxspe_processing(self, reduced_2D):
+        if self._temp_folder is None:
+            nxspe_file = reduced_2D + '.nxspe'
+        else:
+            nxspe_file = os.path.join(self._temp_folder, reduced_2D + '.nxspe')
+
+        # SaveNXSPE works with the detectors only
+        red_det = reduced_2D + 'det'
+        ExtractMonitors(InputWorkspace=reduced_2D, DetectorWorkspace=red_det)
+        SaveNXSPE(InputWorkspace=red_det, Filename=nxspe_file,
+                  EFixed=self._efixed, Psi=self._mscor)
+        self.setProperty('OutputWorkspace', reduced_2D)
+        DeleteWorkspace(Workspace=red_det)
+
+    def _sofqw_processing(self, reduced_2D, output_ws):
+        # convert to SofQW and KIKf correction and transpose axis
+        SofQW(InputWorkspace=reduced_2D, OutputWorkspace=reduced_2D,
+              QAxisBinning=self._q_range, EMode='Direct', EFixed=self._efixed,
+              Method=self._sofqw_mode, ReplaceNANs=True)
+        CorrectKiKf(InputWorkspace=reduced_2D, OutputWorkspace=reduced_2D,
+                    EMode='Direct', EFixed=self._efixed)
+
+        red_1D = output_ws + '_1D_dE'
+        SumSpectra(InputWorkspace=reduced_2D, OutputWorkspace=red_1D,
+                   RemoveSpecialValues=True)
+        Transpose(InputWorkspace=reduced_2D, OutputWorkspace=reduced_2D)
+
+        # generate the 1D results and group with the 2D data and update the axis for the 2D data
+        # which was created when the detector grouping was created and add the ini params
+        # for completeness
+        red_1DQ = output_ws + '_1D_Q'
+        # drop exception handling when updated formal Mantid build includes SumSpectra change
+        try:
+            SumSpectra(InputWorkspace=reduced_2D, OutputWorkspace=red_1DQ,
+                       UseFractionalArea=False, RemoveSpecialValues=True)
+        except:
+            SumSpectra(InputWorkspace=reduced_2D,
+                       OutputWorkspace=red_1DQ, RemoveSpecialValues=True)
+        self._append_ini_params(red_1D)
+        self._append_ini_params(red_1DQ)
+        self._append_ini_params(reduced_2D)
+        grouped = [red_1D, red_1DQ, reduced_2D]
+        GroupWorkspaces(InputWorkspaces=grouped, OutputWorkspace=output_ws)
+        self.setProperty('OutputWorkspace', output_ws)
+
+    def _integrated_calibration(self, calibration_ws, empty_calib_ws, output_ws):
+
+        scale_and_remove_background(calibration_ws, self._calibration_scale,
+                                    empty_calib_ws, self._cal_background_scale, output_ws,
+                                    self._reset_negatives)
+
+        # Scale the data by the calibration after it has been integrated
+        if self._cal_peak_intensity:
+            self._integrate_over_peak(output_ws, output_ws)
+        else:
+            Integration(InputWorkspace=output_ws, OutputWorkspace=output_ws,
+                        RangeLower=self._lo_integ_range, RangeUpper=self._hi_integ_range)
+
+        # average the normalization over the tube
+        self._average_over_tube(output_ws, output_ws)
+
+        # the normalization step and add the output_ws to be cleaned up later
+        Divide(LHSWorkspace=red_2D, RHSWorkspace=output_ws,
+               OutputWorkspace=red_2D)
+        ReplaceSpecialValues(InputWorkspace=red_2D, OutputWorkspace=red_2D,
+                             NaNValue=0.0, InfinityValue=0.0)
+        self._intermediate_ws.append(output_ws)
 
     def _append_ini_params(self, output_ws):
 
@@ -472,16 +483,20 @@ class PelicanReduction(PythonAlgorithm):
         return value
 
     def set_efixed(self, sample_path):
-        # the
+        # the instrument offers a lambda on two mode which effectively
+        # halves the neutron wavelength, the captured raw data stores the
+        # nominal wavelength so it needs to be divided by 2
         tags = [('wavelength', '/entry1/instrument/crystal/wavelength', None),
                 ('mscor', '/entry1/sample/mscor', 0.0)]
         values = extract_hdf_params(sample_path, tags)
-        # convert wavelength to energy (approx)
         if self._lambda_on_two:
             wavelength = 0.5 * values['wavelength'][0]
         else:
             wavelength = values['wavelength'][0]
-        self._efixed = float(81.804 / wavelength**2)
+        # standard conversion factor from wavelength (A) to meV using
+        # planck's constant and neutron mass
+        ANGSTROMS_TO_MEV = 81.804
+        self._efixed = float(ANGSTROMS_TO_MEV / wavelength**2)
         self._mscor = float(values['mscor'][0])
 
     def setUp(self):

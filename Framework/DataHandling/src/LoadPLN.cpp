@@ -874,19 +874,21 @@ void LoadPLN::exec() {
     // build the path to the event file using the standard storage convention at ansto:
     //   'relpath/[daq_dirname]/DATASET_[n]/EOS.bin'
     // but if the file is missing, try relpath/{source}.bin
-    char buffer[255] = {};
-    snprintf(buffer, sizeof(buffer), "%s/DATASET_%d/EOS.bin", eventDir.c_str(), dataset);
+    std::stringstream buffer;
+    buffer << eventDir.c_str() << "/DATASET_" << dataset << "/EOS.bin";
     fs::path path = evtPath;
-    path /= buffer;
+    path /= buffer.str();
     path = fs::absolute(path);
     std::string nomPath = path.generic_string();
     if (fs::is_regular_file(nomPath)) {
       evtPath = nomPath;
     } else {
       fs::path hp = hdfFile;
-      snprintf(buffer, sizeof(buffer), "%s.bin", hp.stem().generic_string().c_str());
+      buffer.str("");
+      buffer.clear();
+      buffer << hp.stem().generic_string().c_str() << ".bin";
       fs::path path = evtPath;
-      path /= buffer;
+      path /= buffer.str();
       path = fs::absolute(path);
       evtPath = path.generic_string();
     }
