@@ -389,6 +389,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
     def superplot_toggle(self):
         """Toggle superplot dockwidgets on/off"""
         if self.superplot:
+            self.window.removeDockWidget(self.superplot.getSideView())
+            self.window.removeDockWidget(self.superplot.getBottomView())
             self.superplot.close()
             self.superplot = None
         else:
