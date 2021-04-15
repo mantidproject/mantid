@@ -5,12 +5,19 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import *
+from mantid.kernel import IntArrayProperty
 import mantid.simpleapi as mantid
 
 ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']
 
 ENGINX_MASK_BIN_MINS = [0, 19930, 39960, 59850, 79930]
 ENGINX_MASK_BIN_MAXS = [5300, 20400, 40450, 62000, 82670]
+
+
+def create_spectrum_list_from_string(str_list):
+    array = IntArrayProperty('var', str_list).value
+    int_list = list(array)
+    return int_list
 
 
 def default_ceria_expected_peaks(final=False):

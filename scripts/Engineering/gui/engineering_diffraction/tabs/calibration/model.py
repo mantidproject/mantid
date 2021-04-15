@@ -9,7 +9,7 @@ from matplotlib import gridspec
 import matplotlib.pyplot as plt
 
 from mantid.api import AnalysisDataService as Ads
-from mantid.kernel import logger, IntArrayProperty
+from mantid.kernel import logger
 from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, DiffractionFocussing, \
     CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace, NormaliseByCurrent, \
     CreateGroupingWorkspace, ConvertUnits, Load, RebinToWorkspace,\
@@ -219,13 +219,13 @@ class CalibrationModel(object):
                         bank,
                         spectrum_numbers):
         """
-        Runs the main Engineering calibration algorithm.
+        Creates Engineering calibration files with PDCalibration
         :param sample_ws: The workspace with the sample data.
         :param vanadium_workspace: The workspace with the vanadium data
         :param van_integration: The integration values from the vanadium corrections
         :param bank: The bank to crop to, both if none.
         :param spectrum_numbers: The spectrum numbers to crop to, no crop if none.
-        :return: The output of the algorithm.
+        :return: The calibration output files, the vanadium curves workspace(s), and a clone of the sample file
         """
 
         def run_pd_calibration(kwargs_to_pass):
@@ -482,9 +482,3 @@ class CalibrationModel(object):
         else:
             raise ValueError("Invalid bank name entered")
         return filename
-
-
-def _create_spectrum_list_from_string(str_list):
-    array = IntArrayProperty('var', str_list).value
-    int_list = list(array)
-    return int_list

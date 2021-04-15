@@ -74,7 +74,7 @@ class CreateCalibrationCroppedTest(systemtesting.MantidSystemTest):
              crop_type="spectra", crop_on="1-20")
 
     def validateSingleColumn(self, col1, col2, tolerance):
-        assert len(col1)==len(col2)
+        assert len(col1) == len(col2)
         for a, b in zip(col1, col2):
             den = 0.5 * (abs(a) + abs(b))
             assert (abs(a - b) / den) < tolerance
