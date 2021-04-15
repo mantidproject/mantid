@@ -5,12 +5,21 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from qtpy.QtCore import QObject, Signal
+
 from mantid.api import mtd, WorkspaceGroup
 
 from .SuperplotAdsObserver import SuperplotAdsObserver
 
 
-class SuperplotModel:
+class SuperplotModel(QObject):
+
+    """
+    Emitted when a workspace is deleted (ADS observation).
+    Args:
+        str: name of the workspace
+    """
+    workspaceDeleted = Signal(str)
 
     """
     List of managed workspace names.
@@ -33,11 +42,13 @@ class SuperplotModel:
     _plotMode = None
 
     def __init__(self):
+        super().__init__()
         self._workspaces = list()
         self._spectra = dict()
         self._plottedData = list()
         self._plotMode = None
         self._adsObserver = SuperplotAdsObserver()
+        self._adsObserver.signals.wsDeleted.connect(self.onWorkspaceDeleted)
 
     def __del__(self):
         del self._adsObserver
@@ -165,3 +176,20 @@ class SuperplotModel:
             list(tuple(str, int)): list of workspace, spectrum index pairs
         """
         return [data for data in self._plottedData]
+
+    def onWorkspaceDeleted(self, wsName):
+        """
+        Triggered when the ADS reports a workspace deletion. This method deletes
+        any reference to the corresponding workspace.
+
+        Args:
+            wsName (str): name of the deleted workspace
+        """
+        if wsName not in self._workspaces:
+            return
+        self._workspaces.remove(wsName)
+        self._plottedData = [(ws, sp) for (ws, sp) in self._plottedData
+                             if ws != wsName]
+        self._spectra = {ws: sp for ws, sp in self._spectra.items()
+                         if ws != wsName}
+        self.workspaceDeleted.emit(wsName)
