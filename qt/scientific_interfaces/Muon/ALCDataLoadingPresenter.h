@@ -93,7 +93,7 @@ private:
   std::string isCustomGroupingValid(const std::string &group, bool &isValid);
 
   /// Get path from files
-  std::string getPathFromFiles();
+  std::string getPathFromFiles() const;
 
   /// View which the object works with
   IALCDataLoadingView *const m_view;
