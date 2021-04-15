@@ -241,18 +241,19 @@ public:
   }
 
   void testShapeTable() {
-    createShapeTable();
+    // test if the shape table returns the correct number of wedges
+    std::shared_ptr<ITableWorkspace> table = createShapeTable();
 
     std::string outputWS = "q1d_shapes";
 
-    populateAlgorithm(outputWS, outputWS + "_wedges", true, true);
+    populateAlgorithm(outputWS, outputWS + "_wedges", true, true, -1, table);
 
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
 
     WorkspaceGroup_sptr result;
     TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<WorkspaceGroup>(
                                  AnalysisDataService::Instance().retrieve(outputWS + "_wedges")))
-    TS_ASSERT_EQUALS(result->getNumberOfEntries(), 4)
+    TS_ASSERT_EQUALS(result->getNumberOfEntries(), 2)
   }
 
   void testShapeTableResults() {
@@ -264,13 +265,34 @@ public:
     std::string outputWS = "q1d_shapes";
     std::string outputWedges = outputWS + "_wedges";
 
-    populateAlgorithm(outputWS, outputWedges, true, false, table);
+    populateAlgorithm(outputWS, outputWedges, true, false, -1, table);
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
 
     std::string refWS = "q1d_wedges";
     std::string refWedges = refWS + "_wedges";
 
-    populateAlgorithm(refWS, refWedges, false, false);
+    populateAlgorithm(refWS, refWedges, false, false, 2);
+    TS_ASSERT_THROWS_NOTHING(radial_average.execute())
+
+    compareWorkspaces(refWedges, outputWedges);
+  }
+
+  void testShapeTableResultsAsymm() {
+    // test the results computed by the table shape method against those from
+    // the usual method when asymmetricWedges is set to true
+
+    std::shared_ptr<ITableWorkspace> table = createShapeTable(true);
+
+    std::string outputWS = "q1d_shapes";
+    std::string outputWedges = outputWS + "_wedges";
+
+    populateAlgorithm(outputWS, outputWedges, true, true, -1, table);
+    TS_ASSERT_THROWS_NOTHING(radial_average.execute())
+
+    std::string refWS = "q1d_wedges";
+    std::string refWedges = refWS + "_wedges";
+
+    populateAlgorithm(refWS, refWedges, false, true, 4);
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
 
     compareWorkspaces(refWedges, outputWedges);
@@ -284,14 +306,14 @@ public:
     std::string outputWS = "q1d_shapes";
     std::string outputWedges = outputWS + "_wedges";
 
-    populateAlgorithm(outputWS, outputWedges, true, false, table);
+    populateAlgorithm(outputWS, outputWedges, true, false, -1, table);
 
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
 
     std::string refWS = "q1d_wedges";
     std::string refWedges = refWS + "_wedges";
 
-    populateAlgorithm(refWS, refWedges, false, false);
+    populateAlgorithm(refWS, refWedges, false, false, 2);
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
 
     compareWorkspaces(refWedges, outputWedges);
@@ -412,8 +434,9 @@ private:
   }
 
   void populateAlgorithm(std::string outputWS, std::string wedgesWS, bool useTable, bool asymmetric = false,
+                         const int wedgesTotal = 4,
                          std::shared_ptr<ITableWorkspace> shapeWS = std::shared_ptr<ITableWorkspace>(),
-                         std::string binning = "0.001,0.001,0.08") {
+                         const std::string binning = "0.001,0.001,0.08") {
     std::string asymm_flag = asymmetric ? "1" : "0";
     TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("InputWorkspace", m_inputWS))
     TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputWorkspace", outputWS))
@@ -424,7 +447,7 @@ private:
     if (useTable) {
       TS_ASSERT_THROWS_NOTHING(radial_average.setProperty("ShapeTable", shapeWS))
     } else {
-      TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("NumberOfWedges", "2"))
+      TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("NumberOfWedges", std::to_string(wedgesTotal)))
       TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeAngle", "90"))
       TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeOffset", "0"))
     }
