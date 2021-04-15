@@ -29,7 +29,14 @@ class MuonPeriodInfoWidgetTest(unittest.TestCase):
         self.assertEqual(True, self.widget.is_empty())
 
     def test_clear(self):
+        self.widget._table.insertRow(0)
+        self.widget._table.insertRow(1)
+        self.widget._table.insertRow(2)
+        self.assertEqual(False, self.widget.is_empty())
+        self.widget.clear()
         self.assertEqual(True, self.widget.is_empty())
+        self.assertEqual(0, self.widget.daq_count)
+        self.assertEqual(CYCLES_NOT_FOUND, self.widget._label.text())
 
     def test_add_entry(self):
         self.widget.add_period_to_table("state 1 dwell", DWELL, "50", "1000", "25", "1")
