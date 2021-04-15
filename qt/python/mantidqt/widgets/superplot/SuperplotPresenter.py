@@ -60,6 +60,7 @@ class SuperplotPresenter:
 
     def close(self):
         self._view.close()
+        del self._model
 
     def onVisibilityChanged(self, state):
         """

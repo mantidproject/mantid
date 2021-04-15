@@ -7,6 +7,8 @@
 
 from mantid.api import mtd, WorkspaceGroup
 
+from .SuperplotAdsObserver import SuperplotAdsObserver
+
 
 class SuperplotModel:
 
@@ -35,6 +37,10 @@ class SuperplotModel:
         self._spectra = dict()
         self._plottedData = list()
         self._plotMode = None
+        self._adsObserver = SuperplotAdsObserver()
+
+    def __del__(self):
+        del self._adsObserver
 
     def addWorkspace(self, name):
         """
