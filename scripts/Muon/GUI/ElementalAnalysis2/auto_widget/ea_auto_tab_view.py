@@ -9,6 +9,15 @@ from mantidqt.utils.observer_pattern import GenericObservable
 from Muon.GUI.Common import message_box
 
 
+MIN_ENERGY = "50"
+MAX_ENERGY = "1000"
+ACCEPTANCE_THRESHOLD = "0.01"
+MIN_WIDTH = "0.5"
+MAX_WIDTH = "30"
+ESTIMATE_WIDTH = "3"
+USE_DEFAULT_PEAK_WIDTH = True
+
+
 class EAAutoTabView(QtWidgets.QWidget):
 
     def __init__(self, match_table, parent=None):
@@ -106,7 +115,6 @@ class EAAutoTabView(QtWidgets.QWidget):
         size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
-        # size_policy.setHeightForWidth(self.default_peak_checkbox.sizePolicy().hasHeightForWidth())
         self.default_peak_label.setSizePolicy(size_policy)
         self.default_peak_checkbox.setSizePolicy(size_policy)
 
@@ -154,24 +162,25 @@ class EAAutoTabView(QtWidgets.QWidget):
             parameters["min_energy"] = float(self.min_energy_line_edit.text())
             parameters["max_energy"] = float(self.max_energy_line_edit.text())
             parameters["threshold"] = float(self.threshold_line_edit.text())
-            parameters["default_width"] = True
-            if not self.default_peak_checkbox.isChecked():
-                parameters["default_width"] = False
+            parameters["default_width"] = self.default_peak_checkbox.isChecked()
+            if not parameters["default_width"]:
                 parameters["min_width"] = float(self.min_width_line_edit.text())
                 parameters["max_width"] = float(self.max_width_line_edit.text())
                 parameters["estimate_width"] = float(self.estimate_width_line_edit.text())
-                if parameters["min_width"] > parameters["max_width"] and \
-                   parameters["min_width"] > parameters["estimate_width"] > parameters["max_width"]:
-                    raise ValueError()
+                if parameters["min_width"] > parameters["max_width"]:
+                    raise ValueError("Minimum peak width is greater than maximum peak width")
+                if parameters["min_width"] > parameters["estimate_width"] or \
+                        parameters["estimate_width"] > parameters["max_width"]:
+                    raise ValueError("Estimated peak width must be between minimum and maximum peak width")
             if parameters["min_energy"] > parameters["max_energy"]:
-                raise ValueError()
+                raise ValueError("Minimum energy is greater than maximum energy")
 
-        except ValueError:
-            message_box.warning("ERROR: Invalid arguments for peak finding", self)
+        except ValueError as error:
+            message_box.warning(f"Invalid arguments for peak finding: {error}")
             return None
         workspace_name = self.find_peaks_combobox.currentText()
         if workspace_name == "":
-            message_box.warning("ERROR: No workspace selected")
+            message_box.warning("No workspace selected")
             return None
         parameters["workspace"] = workspace_name
         parameters["plot_peaks"] = self.plot_peaks_checkbox.isChecked()
@@ -191,13 +200,13 @@ class EAAutoTabView(QtWidgets.QWidget):
         self.show_match_table_combobox.addItems(options)
 
     def setup_intial_parameters(self):
-        self.min_energy_line_edit.setText("50")
-        self.max_energy_line_edit.setText("1000")
-        self.threshold_line_edit.setText("0.01")
-        self.min_width_line_edit.setText("0.5")
-        self.max_width_line_edit.setText("30")
-        self.estimate_width_line_edit.setText("3")
-        self.default_peak_checkbox.setChecked(True)
+        self.min_energy_line_edit.setText(MIN_ENERGY)
+        self.max_energy_line_edit.setText(MAX_ENERGY)
+        self.threshold_line_edit.setText(ACCEPTANCE_THRESHOLD)
+        self.min_width_line_edit.setText(MIN_WIDTH)
+        self.max_width_line_edit.setText(MAX_WIDTH)
+        self.estimate_width_line_edit.setText(ESTIMATE_WIDTH)
+        self.default_peak_checkbox.setChecked(USE_DEFAULT_PEAK_WIDTH)
         self.set_peak_width_visible(False)
 
     def set_peak_width_visible(self, arg):
@@ -215,10 +224,7 @@ class EAAutoTabView(QtWidgets.QWidget):
         self.setEnabled(False)
 
     def set_peak_info(self, workspace, number_of_peaks):
-        if number_of_peaks == 1:
-            label_text = f"{number_of_peaks} peak found in {workspace}"
-        else:
-            label_text = f"{number_of_peaks} peaks found in {workspace}"
+        label_text = f"{number_of_peaks} peak(s) found in {workspace}"
         self.peak_info_label.setText(label_text)
         self.peak_info_label.setVisible(True)
 

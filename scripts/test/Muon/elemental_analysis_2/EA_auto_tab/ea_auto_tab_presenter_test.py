@@ -26,9 +26,8 @@ class EAAutoTabPresenterTest(unittest.TestCase):
     @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_presenter.check_if_workspace_exist")
     @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_presenter.retrieve_ws")
     @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_presenter.EAAutoTabPresenter.extract_rows")
-    def test_show_match_table(self, mock_extract_row, mock_retrieve_ws, mock_check_workspace, mock_ea_auto_popup_table):
+    def test_show_table(self, mock_extract_row, mock_retrieve_ws, mock_check_workspace, mock_ea_auto_popup_table):
         # setup
-        self.presenter.view.show_peaks_table_combobox.currentText.return_value = "mock_table"
         mock_extract_row.return_value = ["row1", "row2"]
         mock_popup = mock.Mock()
         mock_ea_auto_popup_table.return_value = mock_popup
@@ -37,7 +36,7 @@ class EAAutoTabPresenterTest(unittest.TestCase):
         mock_retrieve_ws.return_value = mock_table
         mock_check_workspace.return_value = True
 
-        self.presenter.show_peaks_table()
+        self.presenter.show_table("mock_table")
 
         # Assert statement
         mock_extract_row.assert_called_once_with("mock_table")
@@ -46,68 +45,20 @@ class EAAutoTabPresenterTest(unittest.TestCase):
         mock_popup.show.assert_called_once()
 
     @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_presenter.message_box.warning")
-    def test_show_match_table_with_invalid_string(self, mock_warning):
-        # setup
-        self.presenter.view.show_peaks_table_combobox.currentText.return_value = "mock_table"
+    def test_show_table_with_invalid_string(self, mock_warning):
 
-        self.presenter.show_peaks_table()
+        self.presenter.show_table("mock_table")
 
         # Assert statement
         mock_warning.assert_called_once_with("ERROR : mock_table Table does not exist", None)
 
     @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_presenter.check_if_workspace_exist")
     @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_presenter.message_box.warning")
-    def test_show_match_table_with_empty_table(self, mock_warning, mock_check_workspace):
+    def test_show_table_with_empty_table(self, mock_warning, mock_check_workspace):
         # setup
-        self.presenter.view.show_peaks_table_combobox.currentText.return_value = ""
         mock_check_workspace.return_value = False
 
-        self.presenter.show_peaks_table()
-
-        # Assert statement
-        mock_warning.assert_called_once_with("ERROR : No selected table", None)
-
-    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_presenter.EAAutoPopupTable")
-    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_presenter.check_if_workspace_exist")
-    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_presenter.retrieve_ws")
-    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_presenter.EAAutoTabPresenter.extract_rows")
-    def test_show_peaks_table(self, mock_extract_row, mock_retrieve_ws, mock_check_workspace, mock_ea_auto_popup_table):
-        # setup
-        self.presenter.view.show_peaks_table_combobox.currentText.return_value = "mock_table"
-        mock_extract_row.return_value = ["row1", "row2"]
-        mock_popup = mock.Mock()
-        mock_ea_auto_popup_table.return_value = mock_popup
-        mock_table = mock.Mock()
-        mock_table.getColumnNames.return_value = ["column1", "column2"]
-        mock_retrieve_ws.return_value = mock_table
-        mock_check_workspace.return_value = True
-
-        self.presenter.show_peaks_table()
-
-        # Assert statement
-        mock_extract_row.assert_called_once_with("mock_table")
-        mock_popup.create_table.assert_called_once_with(["column1", "column2"])
-        mock_popup.add_entry_to_table.assert_has_calls([mock.call("row1"), mock.call("row2")])
-        mock_popup.show.assert_called_once()
-
-    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_presenter.message_box.warning")
-    def test_show_peaks_table_with_invalid_string(self, mock_warning):
-        # setup
-        self.presenter.view.show_peaks_table_combobox.currentText.return_value = "mock_table"
-
-        self.presenter.show_peaks_table()
-
-        # Assert statement
-        mock_warning.assert_called_once_with("ERROR : mock_table Table does not exist", None)
-
-    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_presenter.check_if_workspace_exist")
-    @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_presenter.message_box.warning")
-    def test_show_peaks_table_with_empty_table(self, mock_warning, mock_check_workspace):
-        # setup
-        self.presenter.view.show_peaks_table_combobox.currentText.return_value = ""
-        mock_check_workspace.return_value = False
-
-        self.presenter.show_peaks_table()
+        self.presenter.show_table("")
 
         # Assert statement
         mock_warning.assert_called_once_with("ERROR : No selected table", None)

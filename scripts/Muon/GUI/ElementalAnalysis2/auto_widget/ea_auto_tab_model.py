@@ -13,23 +13,37 @@ from queue import Queue
 from Muon.GUI.ElementalAnalysis2.context.ea_group_context import check_if_group_is_valid
 import copy
 
-# Peak width for detectors are defined below for each detector data was extracted from run 2749
+"""
+Peak width for detectors are constant between runs are defined below for each detector,
+data was extracted from run 2749
+"""
 PEAK_WIDTH = {"Detector 1": [0.5, 1, 2.5],
               "Detector 2": [0.5, 1, 3],
               "Detector 3": [0.1, 0.5, 1.5],
               "Detector 4": [0.1, 0.7, 1.5]}
 
+NUMBER_OF_ELEMENTS_DISPLAYED = 3
 
-def find_peak_algorithm(workspace, spectrum_number, min_energy, max_energy, threshold, min_width, estimate_width, max_width):
+# Workspace suffixes
+REFITTED_PEAKS_WS_SUFFIX = "_refitted_peaks"
+PEAKS_WS_SUFFIX = "_peaks"
+ERRORS_WS_SUFFIX = "_with_errors"
+MATCH_TABLE_WS_SUFFIXES = ["_all_matches", "_primary_matches", "_secondary_matches", "_all_matches_sorted_by_energy",
+                           "_likelihood"]
+MATCH_GROUP_WS_SUFFIX = "_matches"
+
+
+def find_peak_algorithm(workspace, spectrum_number, min_energy, max_energy, threshold, min_width,
+                        estimate_width, max_width):
     FindPeaksAutomatic(InputWorkspace=retrieve_ws(workspace), SpectrumNumber=spectrum_number, StartXValue=min_energy,
                        EndXValue=max_energy, AcceptanceThreshold=threshold,
-                       PeakPropertiesTableName=workspace + "_peaks",
-                       RefitPeakPropertiesTableName=workspace + "_refitted_peaks", MinPeakSigma=min_width,
+                       PeakPropertiesTableName=workspace + PEAKS_WS_SUFFIX,
+                       RefitPeakPropertiesTableName=workspace + REFITTED_PEAKS_WS_SUFFIX, MinPeakSigma=min_width,
                        EstimatePeakSigma=estimate_width, MaxPeakSigma=max_width)
 
 
 def peak_matching_algorithm(workspace, match_table_names):
-    PeakMatching(PeakTable=workspace + "_peaks", AllPeaks=match_table_names[0],
+    PeakMatching(PeakTable=workspace + PEAKS_WS_SUFFIX, AllPeaks=match_table_names[0],
                  PrimaryPeaks=match_table_names[1], SecondaryPeaks=match_table_names[2],
                  SortedByEnergy=match_table_names[3], ElementLikelihood=match_table_names[4])
 
@@ -54,7 +68,7 @@ class EAAutoTabModel(object):
     def split_run_and_detector(self, workspace_name):
         run_and_detector = workspace_name.split(";")
         if len(run_and_detector) == 1:
-            return None
+            return None, None
         run, detector = run_and_detector
         return run.strip(), detector.strip()
 
@@ -84,10 +98,9 @@ class EAAutoTabModel(object):
 
     def _run_peak_algorithms(self, parameters):
         workspace = parameters["workspace"]
-        run_and_detector = self.split_run_and_detector(workspace)
-        if run_and_detector is None:
-            run = workspace
-            group = retrieve_ws(run)
+        run, detector = self.split_run_and_detector(workspace)
+        if run is None or detector is None:
+            group = retrieve_ws(workspace)
             for workspace_name in group.getNames():
                 if check_if_group_is_valid(workspace_name):
                     tmp_parameters = copy.deepcopy(parameters)
@@ -95,14 +108,16 @@ class EAAutoTabModel(object):
                     if not self._run_find_peak_algorithm(tmp_parameters, group, True):
                         self._run_peak_matchiing_algorithm(workspace_name, group)
         else:
-            run, detector = run_and_detector
             group = retrieve_ws(run)
             self._run_find_peak_algorithm(parameters, group)
             self._run_peak_matchiing_algorithm(workspace, group)
 
     def _run_find_peak_algorithm(self, parameters, group, delay_errors=False):
-        # Run FindPeaksAutomatic algorithm
-        ignore_peak_matching = False
+        """
+        Run FindPeaksAutomatic algorithm and then adds output workspace to run group workspace, it also adds tables to
+        run group workspace if they are not empty or it is deleted.
+        """
+
         workspace = parameters["workspace"]
         min_energy = parameters["min_energy"]
         max_energy = parameters["max_energy"]
@@ -119,20 +134,51 @@ class EAAutoTabModel(object):
 
         find_peak_algorithm(workspace, 3, min_energy, max_energy, threshold, min_width, estimate_width, max_width)
 
-        group.add(workspace + "_with_errors")
+        return self._handle_find_peak_algorithm_outputs(group, workspace, delay_errors)
 
-        refit_peak_table = retrieve_ws(workspace + "_refitted_peaks")
+    def _run_peak_matchiing_algorithm(self, workspace, group):
+        """
+        Run PeakMatching algorithm and adds resulting table workspaces into a matches group workspace, matches group
+        workspace is then added is then added to run group workspace.
+        """
+        match_table_names = [workspace + suffix for suffix in MATCH_TABLE_WS_SUFFIXES]
+
+        peak_matching_algorithm(workspace, match_table_names)
+
+        GroupWorkspaces(InputWorkspaces=match_table_names, OutputWorkspace=workspace + MATCH_GROUP_WS_SUFFIX)
+
+        group.add(workspace + "_matches")
+        self.update_match_table(workspace + MATCH_TABLE_WS_SUFFIXES[-1], workspace)
+
+    def update_match_table(self, likelihood_table_name, workspace_name):
+        likelihood_table = retrieve_ws(likelihood_table_name)
+        entry = list(self.split_run_and_detector(workspace_name))
+
+        likelihood_data = likelihood_table.toDict()
+        if likelihood_table.rowCount() > NUMBER_OF_ELEMENTS_DISPLAYED:
+            elements_list = likelihood_data["Element"][:NUMBER_OF_ELEMENTS_DISPLAYED]
+        else:
+            elements_list = likelihood_data["Element"]
+        elements = " , ".join(elements_list)
+        entry.append(elements)
+        self.table_entries.put(entry)
+
+    def _handle_find_peak_algorithm_outputs(self, group, workspace, delay_errors):
+        ignore_peak_matching = False
+        group.add(workspace + ERRORS_WS_SUFFIX)
+
+        refit_peak_table = retrieve_ws(workspace + REFITTED_PEAKS_WS_SUFFIX)
         if refit_peak_table.rowCount() != 0:
-            group.add(workspace + "_refitted_peaks")
+            group.add(workspace + REFITTED_PEAKS_WS_SUFFIX)
         else:
             refit_peak_table.delete()
 
-        peak_table = retrieve_ws(workspace + "_peaks")
+        peak_table = retrieve_ws(workspace + PEAKS_WS_SUFFIX)
         number_of_peaks = peak_table.rowCount()
         self.current_peak_table_info["workspace"] = workspace
         self.current_peak_table_info["number_of_peaks"] = number_of_peaks
         if number_of_peaks != 0:
-            group.add(workspace + "_peaks")
+            group.add(workspace + PEAKS_WS_SUFFIX)
         else:
             peak_table.delete()
             if delay_errors:
@@ -141,29 +187,3 @@ class EAAutoTabModel(object):
             else:
                 raise RuntimeError(f"No peaks found in {workspace} try reducing acceptance threshold")
         return ignore_peak_matching
-
-    def _run_peak_matchiing_algorithm(self, workspace, group):
-        # Run PeakMatching algorithm
-        match_table_names = [workspace + "_all_matches", workspace + "_primary_matches",
-                             workspace + "_secondary_matches",
-                             workspace + "_all_matches_sorted_by_energy", workspace + "_likelihood"]
-
-        peak_matching_algorithm(workspace, match_table_names)
-
-        GroupWorkspaces(InputWorkspaces=match_table_names, OutputWorkspace=workspace + "_matches")
-
-        group.add(workspace + "_matches")
-        self.update_match_table(workspace + "_likelihood", workspace)
-
-    def update_match_table(self, likelihood_table_name, workspace_name):
-        likelihood_table = retrieve_ws(likelihood_table_name)
-        entry = list(self.split_run_and_detector(workspace_name))
-
-        likelihood_data = likelihood_table.toDict()
-        if likelihood_table.rowCount() > 3:
-            elements_list = likelihood_data["Element"][:3]
-        else:
-            elements_list = likelihood_data["Element"]
-        elements = " , ".join(elements_list)
-        entry.append(elements)
-        self.table_entries.put(entry)
