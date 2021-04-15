@@ -467,21 +467,15 @@ private:
     CompareWorkspaces comparison;
     comparison.initialize();
 
-    for (int i = 0; i < result->getNumberOfEntries(); i++) {
-      auto resultWS = std::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(i));
-      TS_ASSERT(resultWS)
-      auto refWS = std::dynamic_pointer_cast<MatrixWorkspace>(ref->getItem(i));
-
-      comparison.setProperty("Workspace1", refWS);
-      comparison.setProperty("Workspace2", resultWS);
-      comparison.setPropertyValue("Tolerance", tolerance);
-      comparison.setPropertyValue("CheckAllData", "1");
-      comparison.setPropertyValue("CheckType", "1");
-      comparison.setPropertyValue("ToleranceRelErr", "1");
-      TS_ASSERT(comparison.execute())
-      TS_ASSERT(comparison.isExecuted())
-      TS_ASSERT_EQUALS(comparison.getPropertyValue("Result"), "1");
-    }
+    comparison.setProperty("Workspace1", ref);
+    comparison.setProperty("Workspace2", result);
+    comparison.setPropertyValue("Tolerance", tolerance);
+    comparison.setPropertyValue("CheckAllData", "1");
+    comparison.setPropertyValue("CheckType", "1");
+    comparison.setPropertyValue("ToleranceRelErr", "1");
+    TS_ASSERT(comparison.execute())
+    TS_ASSERT(comparison.isExecuted())
+    TS_ASSERT_EQUALS(comparison.getPropertyValue("Result"), "1");
   }
 
   Q1DWeighted radial_average;

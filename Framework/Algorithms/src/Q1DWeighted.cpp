@@ -213,6 +213,8 @@ void Q1DWeighted::getTableShapes() {
             [](const Q1DWeighted::Wedge &wedgeA, const Q1DWeighted::Wedge &wedgeB) {
               return wedgeA.angleMiddle < wedgeB.angleMiddle;
             });
+
+  checkIfSuperposedWedges();
 }
 
 /**
@@ -313,6 +315,22 @@ bool Q1DWeighted::checkIfSymetricalWedge(Q1DWeighted::Wedge &wedge) {
       return true;
   }
   return false;
+}
+
+/**
+ * @brief Q1DWeighted::checkIfSuperposedWedges
+ * Check if some wedges ahev the same angleMiddle, which is not something the
+ * user should be wanting.
+ * Assume the wedges vector has already been sorted.
+ */
+void Q1DWeighted::checkIfSuperposedWedges() {
+  for (size_t i = 0; i < m_wedgesParameters.size() - 1; ++i) {
+    if (m_wedgesParameters[i].angleMiddle == m_wedgesParameters[i + 1].angleMiddle) {
+      g_log.warning() << "Two of the given wedges are superposed, at " << m_wedgesParameters[i].angleMiddle / deg2rad
+                      << " degrees." << std::endl;
+      ;
+    }
+  }
 }
 
 /**

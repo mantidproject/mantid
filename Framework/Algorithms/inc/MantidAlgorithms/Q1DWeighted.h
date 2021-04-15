@@ -116,6 +116,8 @@ private:
   void getViewportParams(const std::string &, std::map<std::string, std::vector<double>> &);
   void getWedgeParams(std::vector<std::string> &, std::map<std::string, std::vector<double>> &);
   bool checkIfSymetricalWedge(Wedge &Wedge);
+  void checkIfSuperposedWedges();
+
   std::vector<std::vector<std::vector<double>>> m_intensities;
   std::vector<std::vector<std::vector<double>>> m_errors;
   std::vector<std::vector<std::vector<double>>> m_normalisation;
