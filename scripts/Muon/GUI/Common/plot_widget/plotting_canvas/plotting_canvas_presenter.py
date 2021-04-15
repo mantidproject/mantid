@@ -151,7 +151,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         titles = self._model.create_axes_titles()
         for axis_number, title in enumerate(titles):
             self._view.set_title(axis_number, title)
-        self._update_quickedit_widget()
+        self._update_quick_edit_widget()
         self._view.redraw_figure()
 
     """ Quick edit"""
@@ -244,7 +244,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._options_presenter.set_plot_x_range(range)
         self._handle_xlim_changed_in_quick_edit_options(range)
 
-    def _update_quickedit_widget(self):
+    def _update_quick_edit_widget(self):
         self._update_quick_widget_subplots_menu()
         self._handle_subplot_changed_in_quick_edit_widget()
 

@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-#from unittest import mock
 from Muon.GUI.Common.contexts.plotting_context import PlottingContext
 
 

@@ -96,7 +96,7 @@ class QuickEditPresenter(object):
         return self._view.get_errors()
 
     def get_selection(self):
-        name = self.widget.current_selection()
+        name = self._view.current_selection()
         if name == "All":
             return self.all()
         return [name]
@@ -111,7 +111,7 @@ class QuickEditPresenter(object):
         current = self._view.current_selection()
         if current == name:
             current = "All"
-        to_remove = self._view.find_index(name)
+        to_remove = self._view.find_subplot(name)
         self._view.rm_subplot(to_remove)
-        index = self._view.find_index(current)
-        self._view.set_index(index)
+        index = self._view.find_subplot(current)
+        self._view.set_selection(index)
