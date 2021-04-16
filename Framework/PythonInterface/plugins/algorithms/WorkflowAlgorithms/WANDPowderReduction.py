@@ -117,7 +117,19 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             doc="The mask from this workspace will be applied before reduction",
         )
 
-        self.copyProperties("ConvertSpectrumAxis", ["Target", "EFixed"])
+        self.declareProperty(
+            "EFixed",
+            37.02,
+            FloatBoundedValidator(lower=0.0),  # must be positive
+            "Value of fixed energy in meV : EI (EMode=Direct) or EF (EMode=Indirect))",
+        )
+
+        self.declareProperty(
+            "Target",
+            "",
+            StringListValidator(["Theta", "ElasticQ", "ElasticDSpacing"]),
+            "The unit to which spectrum axis is converted to",
+        )
 
         self.copyProperties("ResampleX", ["XMin", "XMax", "NumberBins", "LogBinning"])
 
