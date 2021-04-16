@@ -30,6 +30,13 @@ class SuperplotModel(QObject):
     workspaceRenamed = Signal(str, str)
 
     """
+    Emitted when a workspace is replaced (ADS observation).
+    Args:
+        str: name of the workspace
+    """
+    workspaceReplaced = Signal(str)
+
+    """
     List of managed workspace names.
     """
     _workspaces = None
@@ -58,6 +65,7 @@ class SuperplotModel(QObject):
         self._adsObserver = SuperplotAdsObserver()
         self._adsObserver.signals.wsDeleted.connect(self.onWorkspaceDeleted)
         self._adsObserver.signals.wsRenamed.connect(self.onWorkspaceRenamed)
+        self._adsObserver.signals.wsReplaced.connect(self.onWorkspaceReplaced)
 
     def __del__(self):
         del self._adsObserver
@@ -223,3 +231,12 @@ class SuperplotModel(QObject):
             self._spectra[newName] = self._spectra[oldName]
             del self._spectra[oldName]
         self.workspaceRenamed.emit(oldName, newName)
+
+    def onWorkspaceReplaced(self, wsName, ws):
+        """
+        Triggered when the ADS reports a workspace replacement.
+
+        Args:
+            wsName (str): name of the workspace
+        """
+        self.workspaceReplaced.emit(wsName)

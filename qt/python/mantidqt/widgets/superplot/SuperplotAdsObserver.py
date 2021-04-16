@@ -28,6 +28,13 @@ class SuperplotAdsObserverSignals(QObject):
     """
     wsRenamed = Signal(str, str)
 
+    """
+    Emitted when a workspace is replaced.
+    Args:
+        str: name of the workspace
+    """
+    wsReplaced = Signal(str)
+
     def __init__(self):
         super().__init__()
 
@@ -39,6 +46,7 @@ class SuperplotAdsObserver(AnalysisDataServiceObserver):
         self.signals = SuperplotAdsObserverSignals()
         self.observeDelete(True)
         self.observeRename(True)
+        self.observeReplace(True)
 
     def __del__(self):
         self.observeAll(False)
@@ -62,3 +70,13 @@ class SuperplotAdsObserver(AnalysisDataServiceObserver):
             newName (str): new name of the workspace
         """
         self.signals.wsRenamed.emit(oldName, newName)
+
+    def replacedHandle(self, wsName, ws):
+        """
+        Triggered when a workspace is replaces.
+
+        Args:
+            wsName (str): name of the workspace
+            ws (workspace): reference to the workspace
+        """
+        self.signals.wsReplaced.emit(wsName)

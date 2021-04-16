@@ -28,6 +28,7 @@ class SuperplotPresenter:
 
         self._model.workspaceDeleted.connect(self.onWorkspaceDeleted)
         self._model.workspaceRenamed.connect(self.onWorkspaceRenamed)
+        self._model.workspaceReplaced.connect(self.onWorkspaceReplaced)
 
         #initial state
         figure = self._canvas.figure
@@ -385,4 +386,13 @@ class SuperplotPresenter:
                     spectra.append(data[1])
             self._view.setSpectraList(name, spectra)
         self._view.setSelectedWorkspacesInList(selection)
+        self._updatePlot()
+
+    def onWorkspaceReplaced(self, wsName):
+        """
+        Triggered when the model reports a workapce replacement.
+
+        Args:
+            wsName (str): name of the workspace
+        """
         self._updatePlot()
