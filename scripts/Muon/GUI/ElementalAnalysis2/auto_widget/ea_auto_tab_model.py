@@ -106,11 +106,11 @@ class EAAutoTabModel(object):
                     tmp_parameters = copy.deepcopy(parameters)
                     tmp_parameters["workspace"] = workspace_name
                     if not self._run_find_peak_algorithm(tmp_parameters, group, True):
-                        self._run_peak_matchiing_algorithm(workspace_name, group)
+                        self._run_peak_matching_algorithm(workspace_name, group)
         else:
             group = retrieve_ws(run)
             self._run_find_peak_algorithm(parameters, group)
-            self._run_peak_matchiing_algorithm(workspace, group)
+            self._run_peak_matching_algorithm(workspace, group)
 
     def _run_find_peak_algorithm(self, parameters, group, delay_errors=False):
         """
@@ -136,7 +136,7 @@ class EAAutoTabModel(object):
 
         return self._handle_find_peak_algorithm_outputs(group, workspace, delay_errors)
 
-    def _run_peak_matchiing_algorithm(self, workspace, group):
+    def _run_peak_matching_algorithm(self, workspace, group):
         """
         Run PeakMatching algorithm and adds resulting table workspaces into a matches group workspace, matches group
         workspace is then added is then added to run group workspace.

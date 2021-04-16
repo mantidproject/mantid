@@ -60,7 +60,7 @@ class EAAutoTabModelTest(unittest.TestCase):
     @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.retrieve_ws")
     @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.EAAutoTabModel._run_find_peak_algorithm")
     @mock.patch(
-        "Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.EAAutoTabModel._run_peak_matchiing_algorithm")
+        "Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.EAAutoTabModel._run_peak_matching_algorithm")
     def test_run_peak_algorithms_with_workspace(self, mock_peak_matching, mock_run_find_peak, mock_retrieve_ws):
         # setup
         parameters = {"workspace": "9999; Detector 1"}
@@ -77,7 +77,7 @@ class EAAutoTabModelTest(unittest.TestCase):
     @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.retrieve_ws")
     @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.EAAutoTabModel._run_find_peak_algorithm")
     @mock.patch(
-        "Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.EAAutoTabModel._run_peak_matchiing_algorithm")
+        "Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.EAAutoTabModel._run_peak_matching_algorithm")
     def test_run_peak_algorithms_with_group(self, mock_peak_matching, mock_run_find_peak, mock_retrieve_ws):
         # setup
         mock_group = mock.Mock()
@@ -99,7 +99,7 @@ class EAAutoTabModelTest(unittest.TestCase):
     @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.retrieve_ws")
     @mock.patch("Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.EAAutoTabModel._run_find_peak_algorithm")
     @mock.patch(
-        "Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.EAAutoTabModel._run_peak_matchiing_algorithm")
+        "Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model.EAAutoTabModel._run_peak_matching_algorithm")
     def test_run_peak_algorithms_with_group_and_peak_matching_not_run(self, mock_peak_matching, mock_run_find_peak,
                                                                       mock_retrieve_ws):
         # setup
@@ -229,7 +229,7 @@ class EAAutoTabModelTest(unittest.TestCase):
                              workspace + "_secondary_matches",
                              workspace + "_all_matches_sorted_by_energy", workspace + "_likelihood"]
 
-        self.model._run_peak_matchiing_algorithm(workspace, mock_group)
+        self.model._run_peak_matching_algorithm(workspace, mock_group)
 
         mock_peak_matching.assert_called_once_with(workspace, match_table_names)
         mock_group_workspaces.assert_called_once_with(InputWorkspaces=match_table_names,
