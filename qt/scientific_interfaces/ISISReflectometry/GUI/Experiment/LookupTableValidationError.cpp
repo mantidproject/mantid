@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "PerThetaDefaultsTableValidationError.h"
+#include "LookupTableValidationError.h"
 
 #include <utility>
 
@@ -13,16 +13,14 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-PerThetaDefaultsTableValidationError::PerThetaDefaultsTableValidationError(
+LookupTableValidationError::LookupTableValidationError(
     // cppcheck-suppress passedByValue
     std::vector<InvalidDefaultsError> validationErrors, boost::optional<ThetaValuesValidationError> fullTableError)
     : m_validationErrors(std::move(validationErrors)), m_fullTableError(std::move(fullTableError)) {}
 
-std::vector<InvalidDefaultsError> const &PerThetaDefaultsTableValidationError::errors() const {
-  return m_validationErrors;
-}
+std::vector<InvalidDefaultsError> const &LookupTableValidationError::errors() const { return m_validationErrors; }
 
-boost::optional<ThetaValuesValidationError> PerThetaDefaultsTableValidationError::fullTableError() const {
+boost::optional<ThetaValuesValidationError> LookupTableValidationError::fullTableError() const {
   return m_fullTableError;
 }
 } // namespace ISISReflectometry

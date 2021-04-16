@@ -16,14 +16,14 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-/** @class PerThetaDefaults
+/** @class LookupRow
 
-    The PerThetaDefaults model holds information about default experiment
+    The LookupRow model holds information about default experiment
    settings that should be applied during reduction for runs with a specific
    angle, theta. If theta is not set, then the settings will be applied to all
-   runs that do not have PerThetaDefaults with a matching theta.
+   runs that do not have LookupRow with a matching theta.
  */
-class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaults {
+class MANTIDQT_ISISREFLECTOMETRY_DLL LookupRow {
 public:
   static auto constexpr OPTIONS_TABLE_COLUMN_COUNT = 10;
   using ValueArray = std::array<std::string, OPTIONS_TABLE_COLUMN_COUNT>;
@@ -55,10 +55,10 @@ public:
                                                            "ProcessingInstructions",
                                                            "BackgroundProcessingInstructions"};
 
-  PerThetaDefaults(boost::optional<double> theta, TransmissionRunPair tranmissionRuns,
-                   boost::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
-                   boost::optional<double> scaleFactor, boost::optional<ProcessingInstructions> processingInstructions,
-                   boost::optional<ProcessingInstructions> backgroundProcessingInstructions);
+  LookupRow(boost::optional<double> theta, TransmissionRunPair tranmissionRuns,
+            boost::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
+            boost::optional<double> scaleFactor, boost::optional<ProcessingInstructions> processingInstructions,
+            boost::optional<ProcessingInstructions> backgroundProcessingInstructions);
 
   TransmissionRunPair const &transmissionWorkspaceNames() const;
   bool isWildcard() const;
@@ -79,9 +79,11 @@ private:
   boost::optional<ProcessingInstructions> m_backgroundProcessingInstructions;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(PerThetaDefaults const &lhs, PerThetaDefaults const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(PerThetaDefaults const &lhs, PerThetaDefaults const &rhs);
-PerThetaDefaults::ValueArray perThetaDefaultsToArray(PerThetaDefaults const &perThetaDefaults);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(LookupRow const &lhs, LookupRow const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(LookupRow const &lhs, LookupRow const &rhs);
+LookupRow::ValueArray lookupRowToArray(LookupRow const &lookupRow);
+
+using LookupTable = std::vector<LookupRow>;
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

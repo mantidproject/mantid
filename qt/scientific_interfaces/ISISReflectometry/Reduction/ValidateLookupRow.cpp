@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "ValidatePerThetaDefaults.h"
+#include "ValidateLookupRow.h"
 #include "AllInitialized.h"
 #include "Common/Parse.h"
 #include <boost/algorithm/string/trim.hpp>
@@ -38,9 +38,9 @@ private:
   int m_baseColumn;
 };
 
-using CellText = PerThetaDefaults::ValueArray;
+using CellText = LookupRow::ValueArray;
 
-boost::optional<boost::optional<double>> PerThetaDefaultsValidator::parseThetaOrWhitespace(CellText const &cellText) {
+boost::optional<boost::optional<double>> LookupRowValidator::parseThetaOrWhitespace(CellText const &cellText) {
   if (isEntirelyWhitespace(cellText[0])) {
     return boost::optional<double>();
   } else {
@@ -53,14 +53,14 @@ boost::optional<boost::optional<double>> PerThetaDefaultsValidator::parseThetaOr
   return boost::none;
 }
 
-boost::optional<TransmissionRunPair> PerThetaDefaultsValidator::parseTransmissionRuns(CellText const &cellText) {
+boost::optional<TransmissionRunPair> LookupRowValidator::parseTransmissionRuns(CellText const &cellText) {
   auto transmissionRunsOrError =
       ::MantidQt::CustomInterfaces::ISISReflectometry::parseTransmissionRuns(cellText[1], cellText[2]);
   return boost::apply_visitor(AppendErrorIfNotType<TransmissionRunPair>(m_invalidColumns, 1), transmissionRunsOrError);
 }
 
 boost::optional<boost::optional<std::string>>
-PerThetaDefaultsValidator::parseTransmissionProcessingInstructions(CellText const &cellText) {
+LookupRowValidator::parseTransmissionProcessingInstructions(CellText const &cellText) {
   auto optionalInstructionsOrNoneIfError =
       ::MantidQt::CustomInterfaces::ISISReflectometry::parseProcessingInstructions(cellText[3]);
   if (!optionalInstructionsOrNoneIfError.is_initialized())
@@ -68,13 +68,13 @@ PerThetaDefaultsValidator::parseTransmissionProcessingInstructions(CellText cons
   return optionalInstructionsOrNoneIfError;
 }
 
-boost::optional<RangeInQ> PerThetaDefaultsValidator::parseQRange(CellText const &cellText) {
+boost::optional<RangeInQ> LookupRowValidator::parseQRange(CellText const &cellText) {
   auto qRangeOrError =
       ::MantidQt::CustomInterfaces::ISISReflectometry::parseQRange(cellText[4], cellText[5], cellText[6]);
   return boost::apply_visitor(AppendErrorIfNotType<RangeInQ>(m_invalidColumns, 4), qRangeOrError);
 }
 
-boost::optional<boost::optional<double>> PerThetaDefaultsValidator::parseScaleFactor(CellText const &cellText) {
+boost::optional<boost::optional<double>> LookupRowValidator::parseScaleFactor(CellText const &cellText) {
   auto optionalScaleFactorOrNoneIfError =
       ::MantidQt::CustomInterfaces::ISISReflectometry::parseScaleFactor(cellText[7]);
   if (!optionalScaleFactorOrNoneIfError.is_initialized())
@@ -83,7 +83,7 @@ boost::optional<boost::optional<double>> PerThetaDefaultsValidator::parseScaleFa
 }
 
 boost::optional<boost::optional<std::string>>
-PerThetaDefaultsValidator::parseProcessingInstructions(CellText const &cellText) {
+LookupRowValidator::parseProcessingInstructions(CellText const &cellText) {
   auto optionalInstructionsOrNoneIfError =
       ::MantidQt::CustomInterfaces::ISISReflectometry::parseProcessingInstructions(cellText[8]);
   if (!optionalInstructionsOrNoneIfError.is_initialized())
@@ -92,7 +92,7 @@ PerThetaDefaultsValidator::parseProcessingInstructions(CellText const &cellText)
 }
 
 boost::optional<boost::optional<std::string>>
-PerThetaDefaultsValidator::parseBackgroundProcessingInstructions(CellText const &cellText) {
+LookupRowValidator::parseBackgroundProcessingInstructions(CellText const &cellText) {
   auto optionalInstructionsOrNoneIfError =
       ::MantidQt::CustomInterfaces::ISISReflectometry::parseProcessingInstructions(cellText[9]);
   if (!optionalInstructionsOrNoneIfError.is_initialized())
@@ -100,7 +100,7 @@ PerThetaDefaultsValidator::parseBackgroundProcessingInstructions(CellText const 
   return optionalInstructionsOrNoneIfError;
 }
 
-ValidationResult<PerThetaDefaults, std::vector<int>> PerThetaDefaultsValidator::operator()(CellText const &cellText) {
+ValidationResult<LookupRow, std::vector<int>> LookupRowValidator::operator()(CellText const &cellText) {
   auto maybeTheta = parseThetaOrWhitespace(cellText);
   auto maybeTransmissionRuns = parseTransmissionRuns(cellText);
   auto maybeTransmissionProcessingInstructions = parseTransmissionProcessingInstructions(cellText);
@@ -108,18 +108,18 @@ ValidationResult<PerThetaDefaults, std::vector<int>> PerThetaDefaultsValidator::
   auto maybeScaleFactor = parseScaleFactor(cellText);
   auto maybeProcessingInstructions = parseProcessingInstructions(cellText);
   auto maybeBackgroundProcessingInstructions = parseBackgroundProcessingInstructions(cellText);
-  auto maybeDefaults = makeIfAllInitialized<PerThetaDefaults>(
+  auto maybeDefaults = makeIfAllInitialized<LookupRow>(
       maybeTheta, maybeTransmissionRuns, maybeTransmissionProcessingInstructions, maybeQRange, maybeScaleFactor,
       maybeProcessingInstructions, maybeBackgroundProcessingInstructions);
 
   if (maybeDefaults.is_initialized())
-    return ValidationResult<PerThetaDefaults, std::vector<int>>(maybeDefaults.get());
+    return ValidationResult<LookupRow, std::vector<int>>(maybeDefaults.get());
   else
-    return ValidationResult<PerThetaDefaults, std::vector<int>>(m_invalidColumns);
+    return ValidationResult<LookupRow, std::vector<int>>(m_invalidColumns);
 }
 
-ValidationResult<PerThetaDefaults, std::vector<int>> validatePerThetaDefaults(CellText const &cells) {
-  auto validate = PerThetaDefaultsValidator();
+ValidationResult<LookupRow, std::vector<int>> validateLookupRow(CellText const &cells) {
+  auto validate = LookupRowValidator();
   return validate(cells);
 }
 } // namespace ISISReflectometry

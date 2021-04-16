@@ -5,8 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-
-#include "../../../ISISReflectometry/GUI/Experiment/PerThetaDefaultsTableValidator.h"
+#include "../../../ISISReflectometry/GUI/Experiment/LookupTableValidator.h"
 #include "../../../ISISReflectometry/Reduction/TransmissionRunPair.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include <cxxtest/TestSuite.h>
@@ -17,14 +16,14 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 // https://llvm.org/bugs/show_bug.cgi?id=21629
 GNU_DIAG_OFF("missing-braces")
 
-class PerThetaDefaultsTableValidatorTest : public CxxTest::TestSuite {
+class LookupTableValidatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PerThetaDefaultsTableValidatorTest *createSuite() { return new PerThetaDefaultsTableValidatorTest(); }
-  static void destroySuite(PerThetaDefaultsTableValidatorTest *suite) { delete suite; }
+  static LookupTableValidatorTest *createSuite() { return new LookupTableValidatorTest(); }
+  static void destroySuite(LookupTableValidatorTest *suite) { delete suite; }
   static auto constexpr TOLERANCE = 0.001;
-  using Cells = PerThetaDefaults::ValueArray;
+  using Cells = LookupRow::ValueArray;
   using Table = std::vector<Cells>;
 
   void testEmptyTable() {
@@ -184,8 +183,8 @@ private:
     return errors;
   }
 
-  std::vector<PerThetaDefaults> runTestValid(const Table &table) {
-    PerThetaDefaultsTableValidator validator;
+  LookupTable runTestValid(const Table &table) {
+    LookupTableValidator validator;
     auto result = validator(table, TOLERANCE);
     TS_ASSERT(result.isValid());
     return result.assertValid();
@@ -193,7 +192,7 @@ private:
 
   void runTestInvalidThetas(const Table &table, ThetaValuesValidationError thetaValuesError,
                             std::vector<InvalidDefaultsError> expectedErrors) {
-    PerThetaDefaultsTableValidator validator;
+    LookupTableValidator validator;
     auto result = validator(table, TOLERANCE);
     TS_ASSERT(result.isError());
     auto validationError = result.assertError();
@@ -203,7 +202,7 @@ private:
   }
 
   void runTestInvalidCells(const Table &table, std::vector<InvalidDefaultsError> expectedErrors) {
-    PerThetaDefaultsTableValidator validator;
+    LookupTableValidator validator;
     auto result = validator(table, TOLERANCE);
     TS_ASSERT(result.isError());
     auto validationError = result.assertError();
