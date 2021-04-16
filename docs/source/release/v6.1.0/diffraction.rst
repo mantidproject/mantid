@@ -36,6 +36,7 @@ Improvements
 Bugfixes
 ########
 
+- Fix the issue in saving reduced data as GSAS format using :ref:`HB2AReduce <algm-HB2AReduce>`.
 - Fix the format inconsistency (with data saved from autoreduction workflow) issue for saving GSAS data using :ref:`HB2AReduce <algm-HB2AReduce>` - both are now using :ref:`SaveGSSCW <algm-SaveGSSCW>` for saving GSAS data.
 - Fix out-of-range bug in :ref:`FitPeaks <algm-FitPeaks>` for histogram data.
 - Fix bug in :ref:`FitPeaks <algm-FitPeaks>` not correctly checking right window for an individual peak
