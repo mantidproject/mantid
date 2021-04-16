@@ -139,6 +139,8 @@ public:
   void scale(const double scaleFactor);
   void updateGeometryHandler();
 
+  std::vector<std::vector<std::vector<double>>> getMeshVectors() const;
+
 private:
   void initialize();
   /// Get intersections
