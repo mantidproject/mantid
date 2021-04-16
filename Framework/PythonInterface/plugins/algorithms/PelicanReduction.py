@@ -452,13 +452,6 @@ class PelicanReduction(PythonAlgorithm):
         # average the normalization over the tube
         self._average_over_tube(output_ws, output_ws)
 
-        # the normalization step and add the output_ws to be cleaned up later
-        Divide(LHSWorkspace=red_2D, RHSWorkspace=output_ws,
-               OutputWorkspace=red_2D)
-        ReplaceSpecialValues(InputWorkspace=red_2D, OutputWorkspace=red_2D,
-                             NaNValue=0.0, InfinityValue=0.0)
-        self._intermediate_ws.append(output_ws)
-
     def _append_ini_params(self, output_ws):
 
         # all the options are under a 'processing' section
