@@ -76,7 +76,6 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 "InputWorkspace",
                 "",
                 direction=Direction.Input,
-                # validator=ADSValidator(),
             ),
             doc="The main input workspace[s].",
         )
@@ -155,7 +154,8 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         )
 
         self.declareProperty(
-            WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
+            "OutputWS",
+            "outws",
             doc="Output Workspace",
         )
 
@@ -166,6 +166,19 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         )
 
     def PyExec(self):
+        # DEV_NOTE:
+        #    This is a GUI hack to get rid of the confusing copy input workspace name
+        #    button next to the OutputWorkspace.
+        #    Users are complaining accidentally clicking on this button that results in
+        #    overwriting data in memory.
+        #    This hack here hide the actual OutputWorkspace property from the GUI initializer,
+        #    tricking it to creat a string value one without the extra button.
+        outWS = self.getPropertyValue("OutputWS")
+        self.declareProperty(
+            WorkspaceProperty("OutputWorkspace", outWS, direction=Direction.Output),
+            doc="Output Workspace",
+        )
+
         data = self._expand_groups()
         bkg = self.getProperty("BackgroundWorkspace").valueAsStr  # same background for all
         cal = self.getProperty("CalibrationWorkspace").value  # same calibration for all
@@ -212,9 +225,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
             # background
             if bkg:
-                _ws_bkg_resampled = self._resample_background(
-                    bkg, _wsn, _mskn, xMin, xMax, _ws_cal_resampled
-                )
+                _ws_bkg_resampled = self._resample_background(bkg, _wsn, _mskn, xMin, xMax, _ws_cal_resampled)
 
                 Minus(
                     LHSWorkspace=_wsn,
@@ -269,11 +280,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         self.setProperty("OutputWorkspace", outWS)
 
         # Step_4: remove temp workspaces
-        [
-            DeleteWorkspace(ws, EnableLogging=False)
-            for ws in self.temp_workspace_list
-            if mtd.doesExist(ws)
-        ]
+        [DeleteWorkspace(ws, EnableLogging=False) for ws in self.temp_workspace_list if mtd.doesExist(ws)]
 
     def _expand_groups(self):
         """expand workspace groups"""
@@ -304,9 +311,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             else:
                 raise ValueError(f"Unknown normalize type: {normaliseBy}")
 
-    def _to_spectrum_axis(
-        self, workspace_in, workspace_out, mask, instrument_donor=None
-    ):
+    def _to_spectrum_axis(self, workspace_in, workspace_out, mask, instrument_donor=None):
         target = self.getProperty("Target").value
         e_fixed = self.getProperty("EFixed").value
 
@@ -347,9 +352,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
         return workspace_out
 
-    def _to_spectrum_axis_resample(
-        self, workspace_in, workspace_out, mask, instrument_donor, x_min, x_max
-    ):
+    def _to_spectrum_axis_resample(self, workspace_in, workspace_out, mask, instrument_donor, x_min, x_max):
         # common part of converting axis
         self._to_spectrum_axis(workspace_in, workspace_out, mask, instrument_donor)
 
@@ -376,16 +379,12 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         # BEGIN_FOR: located_global_xMin&xMax
         output_workspaces = [f"{outname}{n+1}" for n in range(len(input_workspaces))]
         mask_workspaces = []
-        for n, (_wksp_in, _wksp_out) in enumerate(
-            zip(input_workspaces, output_workspaces)
-        ):
+        for n, (_wksp_in, _wksp_out) in enumerate(zip(input_workspaces, output_workspaces)):
             _wksp_in = str(_wksp_in)
             _mask_n = f"__mask_{n}"  # mask for n-th
             self.temp_workspace_list.append(_mask_n)  # cleanup later
 
-            ExtractMask(
-                InputWorkspace=_wksp_in, OutputWorkspace=_mask_n, EnableLogging=False
-            )
+            ExtractMask(InputWorkspace=_wksp_in, OutputWorkspace=_mask_n, EnableLogging=False)
             if mask_angle != Property.EMPTY_DBL:
                 MaskAngle(
                     Workspace=_mask_n,
@@ -446,9 +445,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         """Perform resample on calibration"""
         cal = self.getProperty("CalibrationWorkspace").valueAsStr
 
-        return self._to_spectrum_axis_resample(
-            cal, "_ws_cal", mask_name, current_workspace, x_min, x_max
-        )
+        return self._to_spectrum_axis_resample(cal, "_ws_cal", mask_name, current_workspace, x_min, x_max)
 
     def _resample_background(
         self,
@@ -465,9 +462,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         outname = str(current_background) + str(current_workspace)
         self.temp_workspace_list.append(outname)
 
-        self._to_spectrum_axis_resample(
-            current_background, outname, make_name, current_workspace, x_min, x_max
-        )
+        self._to_spectrum_axis_resample(current_background, outname, make_name, current_workspace, x_min, x_max)
 
         if resampled_calibration:
             Divide(
