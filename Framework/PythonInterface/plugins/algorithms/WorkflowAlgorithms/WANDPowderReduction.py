@@ -40,6 +40,7 @@ from mantid.kernel import (
     Direction,
     Property,
     FloatBoundedValidator,
+    IntBoundedValidator,
     StringArrayProperty,
 )
 
@@ -131,7 +132,14 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             "The unit to which spectrum axis is converted to",
         )
 
-        self.copyProperties("ResampleX", ["XMin", "XMax", "NumberBins", "LogBinning"])
+        self.copyProperties("ResampleX", ["XMin", "XMax", "LogBinning"])
+
+        self.declareProperty(
+            "NumberBins",
+            1000,
+            IntBoundedValidator(lower=1),  # need at least one bin
+            "Number of bins to split up each spectrum into.",
+        )
 
         self.declareProperty(
             "NormaliseBy",
