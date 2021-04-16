@@ -635,9 +635,9 @@ void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo, MuonN
   auto timeChannels = new float[lengthIn + 1]();
   nxload.getTimeChannels(timeChannels, static_cast<int>(lengthIn + 1));
   // Put the read in array into a vector (inside a shared pointer)
-
-  localWorkspace->setHistogram(hist, BinEdges(timeChannels, timeChannels + lengthIn + 1),
-                               Counts(nxload.counts + i * lengthIn, nxload.counts + i * lengthIn + lengthIn));
+  localWorkspace->setHistogram(
+      hist, BinEdges(timeChannels, timeChannels + lengthIn + 1),
+      Counts(nxload.m_counts.begin() + i * lengthIn, nxload.m_counts.begin() + i * lengthIn + lengthIn));
 
   localWorkspace->getSpectrum(hist).setSpectrumNo(specNo);
   // Muon v1 files: always a one-to-one mapping between spectra and detectors

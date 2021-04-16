@@ -14,12 +14,12 @@ from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
 from Muon.GUI.Common.muon_period_info_widget import MuonPeriodInfoWidget, PERIOD_INFO_NOT_FOUND, INFO_DELIM
 
-CONTEXT_MAP = {"Name": 1,
-               "Type": 2,
-               "Frames": 3,
-               "Total Good Frames": 4,
+CONTEXT_MAP = {"Name": 6,
+               "Type": 1,
+               "Frames": 2,
+               "Total Good Frames": 3,
                "Counts": 5,
-               "Tag": 6}
+               "Tag": 4}
 
 
 class GroupingTabPresenter(object):

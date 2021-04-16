@@ -31,20 +31,20 @@ class DLLExport MuonNexusReader {
   @date 14/08/2008
   */
 private:
-  std::string nexus_instrument_name;            ///< name read from nexus file
-  std::string nexus_samplename;                 ///< sample name read from Nexus
-  int nexusLogCount;                            ///< number of NXlog sections read from file
-  std::vector<bool> logType;                    ///< true if i'th log is numeric
-  std::vector<std::string> logNames;            ///< stores name read from file
-  std::vector<std::string> m_periodInformation; /// stores the information of the periods
+  std::string m_nexusInstrumentName;            ///< name read from nexus file
+  std::string m_nexusSampleName;                ///< sample name read from Nexus
+  int m_nexusLogCount;                          ///< number of NXlog sections read from file
+  std::vector<bool> m_logType;                  ///< true if i'th log is numeric
+  std::vector<std::string> m_logNames;          ///< stores name read from file
+  std::vector<std::string> m_periodInformation; ///< stores the information of the periods
   void openFirstNXentry(NeXus::File &handle);
-  bool readMuonLogData(NeXus::File &handle);             ///< method to read the fields of open NXlog section
-  std::vector<std::vector<float>> logValues,             ///< array of values for i'th NXlog section
-      logTimes;                                          ///< arrys of times for i'th NXlog section
-  std::vector<std::vector<std::string>> logStringValues; ///< array of string values for i'th NXlog section
-  std::string startTime;                                 ///< string startTime which must be read from Nexus
+  bool readMuonLogData(NeXus::File &handle);               ///< method to read the fields of open NXlog section
+  std::vector<std::vector<float>> m_logValues,             ///< array of values for i'th NXlog section
+      m_logTimes;                                          ///< arrys of times for i'th NXlog section
+  std::vector<std::vector<std::string>> m_logStringValues; ///< array of string values for i'th NXlog section
+  std::string m_startTime;                                 ///< string startTime which must be read from Nexus
   /// file to base all NXlog times on
-  std::time_t startTime_time_t;                            ///< startTime in time_t format
+  std::time_t m_startTime_time_t;                          ///< startTime in time_t format
   std::time_t to_time_t(const boost::posix_time::ptime &t) ///< convert posix time to time_t
   {
     /**
@@ -60,6 +60,10 @@ private:
     boost::posix_time::ptime start(boost::gregorian::date(1970, 1, 1));
     return (t - start).total_seconds();
   }
+  void readIntPeriodInfo(NeXus::File &handle);
+  void readIntArrayPeriodInfo(NeXus::File &handle);
+  void readFloatArrayPeriodInfo(NeXus::File &handle);
+  void readStringPeriodInfo(NeXus::File &handle);
 
 public:
   /// Default constructor
@@ -72,7 +76,7 @@ public:
   void getTimeChannels(float *timebnds,
                        const int &nbnds) const; ///< get time bin boundaries
                                                 /// return sample name
-  std::string getSampleName() const { return nexus_samplename; };
+  std::string getSampleName() const { return m_nexusSampleName; };
   int numberOfLogs() const;                  ///< Number of NXlog sections read from file
   int getLogLength(const int i) const;       ///< Lenght of i'th log
   std::string getLogName(const int i) const; ///< Name of i'th log
@@ -86,10 +90,10 @@ public:
   int t_ntc1; ///< number of time channels in time regime 1
   int t_nper; ///< number of periods in file (=1 at present)
   // for nexus histogram data
-  float *corrected_times;                         ///< temp store for corrected times
-  int *counts;                                    ///< temp store of histogram data
-  int *detectorGroupings;                         ///< detector grouping info
-  int numDetectors;                               ///< detector count
+  std::vector<float> m_correctedTimes;            ///< temp store for corrected times
+  std::vector<int> m_counts;                      ///< temp store of histogram data
+  std::vector<int> m_detectorGroupings;           ///< detector grouping info
+  int m_numDetectors;                             ///< detector count
   std::string getInstrumentName() const;          ///< return instrument name
   std::vector<std::string> getPeriodInfo() const; /// Return period information
 };

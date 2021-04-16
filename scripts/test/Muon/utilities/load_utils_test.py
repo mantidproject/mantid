@@ -78,11 +78,11 @@ class MuonFileUtilsTest(unittest.TestCase):
         self.assertEqual(load_result['MainFieldDirection'], 'Transverse')
         self.assertAlmostEqual(load_result['TimeZero'], 0.55000, 5)
         self.assertEqual(run, 22725)
-        self.assertEqual(period_info, ["0", "Period 1", "1", "500", "88558", "20.076818", "0"])
+        self.assertEqual(period_info, ["0", "1", "500", "88558", "0", "20.076818", "Period 1"])
         ConfigService.Instance().setString("default.facility", " ")
 
     def test_load_workspace_from_filename_for_file_path(self):
-        filename = 'PSI'+ os.sep + 'run_1529_templs0.mon'
+        filename = 'PSI' + os.sep + 'run_1529_templs0.mon'
         inputs = {
               "DeadTimeTable": "__notUsed",
               "DetectorGroupingTable": "__notUsed"}
