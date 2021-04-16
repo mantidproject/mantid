@@ -280,17 +280,6 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &firstRunNumber, size_t &la
   // If file names empty, first and last provided so need to populate vector
   if (m_fileNames.empty()) {
     populateFileNamesFromFirstLast(getProperty("FirstRun"), getProperty("LastRun"));
-  } else {
-    // Get directory of first file
-    const auto firstDir = getDirectoryFromFileName(m_fileNames[0]);
-
-    // Check all directories match
-    for (const auto &file : m_fileNames) {
-      if (firstDir != getDirectoryFromFileName(file)) {
-        // Error
-        throw std::runtime_error("All Files are not in the same directory (" + firstDir + ").");
-      }
-    }
   }
 
   // Extract run numbers for all runs and map to filenames
