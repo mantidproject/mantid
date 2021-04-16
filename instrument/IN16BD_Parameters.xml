@@ -9,11 +9,11 @@
 </parameter>
 
 <parameter name="sample_logs_fail" type="string">
-    <value val="Doppler.mirror_sense, acquisition_mode, Doppler.maximum_delta_energy, wavelength" />
+    <value val="wavelength" />
 </parameter>
 
 <parameter name="conjoin_sample_logs_fail" type="string">
-    <value val="acquisition_mode, wavelength" />
+    <value val="wavelength" />
 </parameter>
 
 </component-link>

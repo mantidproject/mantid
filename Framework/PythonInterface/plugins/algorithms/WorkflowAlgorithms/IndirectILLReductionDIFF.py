@@ -58,15 +58,18 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
 
         self.declareProperty("Transpose", True, doc="Transpose the result.")
 
+        self.declareProperty("Sum", False, doc="Sum along the scan")
+
+        self.declareProperty(name='ComponentsToMask', defaultValue='',
+                             doc='Comma separated list of component names to mask, for instance: tube_1, tube_2')
+
     def _normalize_by_monitor(self):
         """
             Normalizes the workspace by monitor value (ID is 0 for IN16B)
         """
         monitor_ws = self.output + '_mon'
         ExtractMonitors(InputWorkspace=self.output, DetectorWorkspace=self.output, MonitorWorkspace=monitor_ws)
-
         Divide(LHSWorkspace=self.output, RHSWorkspace=monitor_ws, OutputWorkspace=self.output, WarnOnZeroDivide=True)
-
         DeleteWorkspace(monitor_ws)
 
     def _mask_tube_ends(self):
@@ -88,33 +91,44 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
             run = mtd[ws][0].getRun()
         else:
             run = mtd[ws].getRun()
-
         if run.hasProperty('Doppler.incident_energy'):
             energy = run.getLogData('Doppler.incident_energy').value / 1000
         else:
             raise RuntimeError("Unable to find incident energy for Doppler mode")
 
         Integration(InputWorkspace=ws, OutputWorkspace=self.output)
-
         ConvertToPointData(InputWorkspace=self.output, OutputWorkspace=self.output)
+
+        tmp_name = self.output + '_joined'
         ConjoinXRuns(InputWorkspaces=self.output,
                      SampleLogAsXAxis=self.scan_parameter,
                      FailBehaviour="Skip File",
-                     OutputWorkspace=self.output)
+                     OutputWorkspace=tmp_name)
+        DeleteWorkspaces(self.output)
+        RenameWorkspace(InputWorkspace=tmp_name, OutputWorkspace=self.output)
 
         self._normalize_by_monitor()
         self._mask_tube_ends()
 
-        ExtractUnmaskedSpectra(InputWorkspace=self.output, OutputWorkspace=self.output)
+        components_to_mask = self.getPropertyValue('ComponentsToMask')
+        if components_to_mask:
+            MaskDetectors(Workspace=self.output, ComponentList=components_to_mask)
 
+        ExtractUnmaskedSpectra(InputWorkspace=self.output, OutputWorkspace=self.output)
         ConvertSpectrumAxis(InputWorkspace=self.output,
                             OutputWorkspace=self.output,
                             Target='ElasticQ',
                             EMode="Direct",
                             EFixed=energy)
 
+        if self.getProperty("Sum").value:
+            blocksize = mtd[self.output].blocksize()
+            Integration(InputWorkspace=self.output, OutputWorkspace=self.output)
+            Scale(InputWorkspace=self.output, OutputWorkspace=self.output, Factor=1./blocksize)
+
         if self.transpose:
             Transpose(InputWorkspace=self.output, OutputWorkspace=self.output)
+            mtd[self.output].setDistribution(True)
 
     def _treat_BATS(self, ws):
         self.log().warning("BATS treatment not implemented yet.")
