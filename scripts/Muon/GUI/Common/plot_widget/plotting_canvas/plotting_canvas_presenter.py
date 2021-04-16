@@ -175,7 +175,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         autoscale = self._context.get_autoscale_state(selected_subplots[0])
         error = self._context.get_error_state(selected_subplots[0])
         # if all
-        if len(selected_subplots)>1:
+        if len(selected_subplots) > 1:
             xlim = self._context.get_xlim_all
             ylim = self._context.get_ylim_all
             autoscale = self._context.get_autoscale_all

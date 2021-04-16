@@ -389,25 +389,25 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         self.options.get_plot_x_range.return_value = [0, 0]
         self.options.get_plot_y_range.return_value = [0, 0]
         self.model.create_axes_titles.return_value = ["fwd"]
-        self.presenter._update_quickedit_widget = mock.Mock()
+        self.presenter._update_quick_edit_widget = mock.Mock()
         self.presenter._get_selected_subplots_from_quick_edit_widget = mock.Mock(return_value=(ws_names, ws_indices))
 
         self.presenter._set_axes_limits_and_titles(False)
 
         self.view.set_axes_limits.assert_called_once_with(DEFAULT_X_LIMITS, DEFAULT_Y_LIMITS)
 
-    def test_set_axes_limits_updates_quickedit_widget(self):
+    def test_set_axes_limits_updates_quick_edit_widget(self):
         ws_names = ["MUSR62260; Group; fwd", "MUSR62260; Group; bwd"]
         ws_indices = [0, 1]
         self.options.get_plot_x_range.return_value = [0, 0]
         self.options.get_plot_y_range.return_value = [0, 0]
         self.model.create_axes_titles.return_value = ["fwd"]
-        self.presenter._update_quickedit_widget = mock.Mock()
+        self.presenter._update_quick_edit_widget = mock.Mock()
         self.presenter._get_selected_subplots_from_quick_edit_widget = mock.Mock(return_value=(ws_names, ws_indices))
 
         self.presenter._set_axes_limits_and_titles(False)
 
-        self.presenter._update_quickedit_widget.assert_called_once()
+        self.presenter._update_quick_edit_widget.assert_called_once()
 
     def test_update_quick_edit_widget_subplots_correctly_updates_from_view(self):
         number_of_axes = 2
