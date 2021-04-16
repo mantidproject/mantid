@@ -118,7 +118,6 @@ class SPowderSemiEmpiricalCalculator:
                                         step=(bin_width / fine_bin_factor),
                                         dtype=FLOAT_TYPE)
             self._fine_bin_centres = self._fine_bins[:-1] + (bin_width / fine_bin_factor / 2)
-            print(np.max(self._bins), np.max(self._bin_centres), np.max(self._fine_bins), np.max(self._fine_bin_centres))
 
         else:
             self._fine_bins = None
@@ -162,14 +161,31 @@ class SPowderSemiEmpiricalCalculator:
         s_data = self._calculate_s_powder_over_k().sum_over_angles(average=True)
 
         if self._autoconvolution:
+            # a_tensors = powder_data.get_a_tensors()[k_point]
+            # b_tensors = powder_data.get_b_tensors()[k_point]
+            # a_traces = np.trace(a=a_tensors, axis1=1, axis2=2)
+            # b_traces = np.trace(a=b_tensors, axis1=2, axis2=3)
+
+            # dw = _isotropic_dw(atom=atom, a_traces=self._a_traces)
+
             s_data.add_autoconvolution_spectra(
                 max_order=abins.parameters.autoconvolution['max_order'])
 
         broadening_scheme = abins.parameters.sampling['broadening_scheme']
         s_data = self._broaden_sdata(s_data,
                                      broadening_scheme=broadening_scheme)
-
         return s_data
+
+    @staticmethod
+    def _isotropic_dw(*, frequencies, q2, a_trace, temperature):
+        """Compute Debye-Waller factor in isotropic approximation
+
+        This is used for second-order and above.
+
+        If using autoconvolution, the fundamental spectrum will be _divided_ by this factor"""
+
+        coth = 1.0 / np.tanh(frequencies * CM1_2_HARTREE / (2.0 * temperature * K_2_HARTREE))
+        return np.exp(-q2 * a_trace / 3.0 * coth * coth)
 
     def _broaden_sdata(self, sdata: SData,
                        broadening_scheme: str = 'auto') -> SData:
@@ -578,9 +594,11 @@ class SPowderSemiEmpiricalCalculator:
         :param b_trace: frequency dependent MSD trace for the given atom
         :returns: s for the second quantum order event for the given atom
         """
-        coth = 1.0 / np.tanh(frequencies * CM1_2_HARTREE / (2.0 * self._temperature * K_2_HARTREE))
+        # coth = 1.0 / np.tanh(frequencies * CM1_2_HARTREE / (2.0 * self._temperature * K_2_HARTREE))
 
-        dw = np.exp(-q2 * a_trace / 3.0 * coth * coth)
+        # dw = np.exp(-q2 * a_trace / 3.0 * coth * coth)
+
+        dw = self._isotropic_dw(frequencies=frequencies, q2=q2, a_trace=a_trace, temperature=self._temperature)
         q4 = q2 ** 2
 
         # in case indices are the same factor is 2 otherwise it is 1
