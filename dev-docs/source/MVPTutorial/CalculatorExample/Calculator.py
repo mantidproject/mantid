@@ -8,17 +8,17 @@ from Presenter import Presenter
 from Model import Model
 from View import View
 
-import PyQt4.QtGui as QtGui
+import PyQt5.QtWidgets as QtWidgets
 
 import sys
 
 
-class Demo(QtGui.QMainWindow):
+class Demo(QtWidgets.QMainWindow):
     """ Wrapper class for setting the main window"""
     def __init__(self, parent=None):
         super(Demo, self).__init__(parent)
 
-        self.window = QtGui.QMainWindow()
+        self.window = QtWidgets.QMainWindow()
         demo_view = View()
         demo_model = Model()
         # create presenter
@@ -29,10 +29,10 @@ class Demo(QtGui.QMainWindow):
 
 
 def qapp():
-    if QtGui.QApplication.instance():
-        _app = QtGui.QApplication.instance()
+    if QtWidgets.QApplication.instance():
+        _app = QtWidgets.QApplication.instance()
     else:
-        _app = QtGui.QApplication(sys.argv)
+        _app = QtWidgets.QApplication(sys.argv)
     return _app
 
 
