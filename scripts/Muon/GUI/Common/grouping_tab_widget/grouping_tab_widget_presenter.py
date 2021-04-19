@@ -12,7 +12,7 @@ from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.run_selection_dialog import RunSelectionDialog
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
-from Muon.GUI.Common.muon_period_info_widget import MuonPeriodInfoWidget, PERIOD_INFO_NOT_FOUND, INFO_DELIM
+from Muon.GUI.Common.muon_period_info_widget import MuonPeriodInfoWidget, PERIOD_INFO_NOT_FOUND
 
 CONTEXT_MAP = {"Name": 6,
                "Type": 1,
@@ -267,6 +267,8 @@ class GroupingTabPresenter(object):
             self.update_description_text()
             self.handle_update_all_clicked()
             self.plot_default_groups_or_pairs()
+            if self.period_info_widget.isVisible():
+                self._add_period_info_to_widget()
         else:
             self.on_clear_requested()
 
@@ -294,13 +296,36 @@ class GroupingTabPresenter(object):
         self.period_info_widget.show()
 
     def _add_period_info_to_widget(self):
-        self.period_info_widget.number_of_sequences = self._model._data.periods_info[0]
-        names = self._model._data.periods_info[CONTEXT_MAP["Name"]].split(INFO_DELIM)
-        types = self._model._data.periods_info[CONTEXT_MAP["Type"]].split(INFO_DELIM)
-        frames = self._model._data.periods_info[CONTEXT_MAP["Frames"]].split(INFO_DELIM)
-        total_frames = self._model._data.periods_info[CONTEXT_MAP["Total Good Frames"]].split(INFO_DELIM)
-        counts = self._model._data.periods_info[CONTEXT_MAP["Counts"]].split(INFO_DELIM)
-        tags = self._model._data.periods_info[CONTEXT_MAP["Tag"]].split(INFO_DELIM)
+        period_sequences_log = self._model._data.get_sample_log("period_sequences")
+        self.period_info_widget.number_of_sequences = str(period_sequences_log.value) if period_sequences_log else None
+        names_log = self._model._data.get_sample_log("period_labels")
+        names = names_log.value.split(";") if names_log else []
+        types_log = self._model._data.get_sample_log("period_type")
+        types = types_log.value.split(";") if types_log else []
+        frames_log = self._model._data.get_sample_log("frames_period_requested")
+        frames = frames_log.value.split(";") if frames_log else []
+        total_frames_log = self._model._data.get_sample_log("frames_period_raw")
+        total_frames = total_frames_log.value.split(";") if total_frames_log else []
+        counts_log = self._model._data.get_sample_log("total_counts_period")
+        counts = counts_log.value.split(";") if counts_log else []
+        tags_log = self._model._data.get_sample_log("period_output")
+        tags = tags_log.value.split(";") if tags_log else []
+
+        #
+        # self.period_info_widget.number_of_sequences = self._model._data.periods_info[0] if \
+        #     self._model._data.periods_info[0] != [''] else None
+        # names = self._model._data.periods_info[CONTEXT_MAP["Name"]].split(INFO_DELIM) if \
+        #     self._model._data.periods_info[CONTEXT_MAP["Name"]] != [''] else []
+        # types = self._model._data.periods_info[CONTEXT_MAP["Type"]].split(INFO_DELIM) if \
+        #     self._model._data.periods_info[CONTEXT_MAP["Type"]] != [''] else []
+        # frames = self._model._data.periods_info[CONTEXT_MAP["Frames"]].split(INFO_DELIM) if \
+        #     self._model._data.periods_info[CONTEXT_MAP["Frames"]] != [''] else []
+        # total_frames = self._model._data.periods_info[CONTEXT_MAP["Total Good Frames"]].split(INFO_DELIM) if \
+        #     self._model._data.periods_info[CONTEXT_MAP["Total Good Frames"]] != [''] else []
+        # counts = self._model._data.periods_info[CONTEXT_MAP["Counts"]].split(INFO_DELIM) if \
+        #     self._model._data.periods_info[CONTEXT_MAP["Counts"]] != [''] else []
+        # tags = self._model._data.periods_info[CONTEXT_MAP["Tag"]].split(INFO_DELIM) if \
+        #     self._model._data.periods_info[CONTEXT_MAP["Tag"]] != [''] else []
         names, types, frames, total_frames, counts, tags, count = self._fix_up_period_info_lists([names, types, frames,
                                                                                                   total_frames, counts,
                                                                                                   tags])
@@ -314,11 +339,10 @@ class GroupingTabPresenter(object):
         count = max(lengths_list)
         # Then make sure lists are correct size
         for i, info in enumerate(info_list):
-            if len(info) != count:
-                if info[0] == "":
-                    info_list[i] = [PERIOD_INFO_NOT_FOUND] * count
-                else:
-                    info_list[i] += [PERIOD_INFO_NOT_FOUND] * (count-len(info))
+            if info:
+                info_list[i] += [PERIOD_INFO_NOT_FOUND] * (count - len(info))
+            else:
+                info_list[i] = [PERIOD_INFO_NOT_FOUND] * count
         return (*info_list, count)
 
     # ------------------------------------------------------------------------------------------------------------------

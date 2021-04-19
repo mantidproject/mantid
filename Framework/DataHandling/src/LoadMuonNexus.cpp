@@ -101,12 +101,6 @@ void LoadMuonNexus::init() {
                                                                  PropertyMode::Optional),
                   "Table or a group of tables with information about the "
                   "detector grouping stored in the file (if any). Version 1 only.");
-
-  declareProperty(std::make_unique<ArrayProperty<std::string>>("PeriodsInformation", Direction::Output),
-                  "An array of strings which hold period information. This array is in the "
-                  "format ['NumberOfSequences', 'Type', 'Frames', "
-                  "'TotalFrames', 'Tag', 'Counts', 'Labels']. Strings are separated by ';' and empty "
-                  "strings show no value could be read from file.");
 }
 
 /// Validates the optional 'spectra to read' properties, if they have been set
@@ -178,5 +172,33 @@ int LoadMuonNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
   return 0; // Not to be used but LoadMuonNexus2, which inherits from this will
 }
 
+/**
+ *
+ */
+Mantid::API::Algorithm_sptr LoadMuonNexus::createSampleLogAlgorithm(DataObjects::Workspace2D_sptr &ws) {
+  Mantid::API::Algorithm_sptr logAlg = createChildAlgorithm("AddSampleLog");
+  logAlg->setProperty("Workspace", ws);
+  return logAlg;
+}
+
+/**
+ */
+void LoadMuonNexus::addToSampleLog(const std::string &logName, const int logNumber, DataObjects::Workspace2D_sptr &ws) {
+  auto alg = createSampleLogAlgorithm(ws);
+  alg->setProperty("LogType", "Number");
+  alg->setProperty("NumberType", "Int");
+  alg->setProperty("LogName", logName);
+  alg->setProperty("LogText", std::to_string(logNumber));
+  alg->executeAsChildAlg();
+}
+
+void LoadMuonNexus::addToSampleLog(const std::string &logName, const std::string logString,
+                                   DataObjects::Workspace2D_sptr &ws) {
+  auto alg = createSampleLogAlgorithm(ws);
+  alg->setProperty("LogType", "String");
+  alg->setProperty("LogName", logName);
+  alg->setProperty("LogText", logString);
+  alg->executeAsChildAlg();
+}
 } // namespace DataHandling
 } // namespace Mantid

@@ -7,6 +7,8 @@
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidKernel/System.h"
 #include <array>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/scoped_array.hpp>
 #include <nexus/NeXusException.hpp>
 #include <sstream>
@@ -33,6 +35,14 @@ const std::array<std::string, 4> PERIOD_INFO_INT_ARRAY{"period_type", "frames_pe
                                                        "period_output"};
 const std::array<std::string, 1> PERIOD_INFO_FLOAT_ARRAY{"total_counts_period"};
 const std::array<std::string, 1> PERIOD_INFO_STRING{"period_labels"};
+
+const std::string PERIOD_SEQUENCES("period_sequences");
+const std::string PERIOD_TYPE("period_type");
+const std::string FRAMES_PERIOD_REQUESTED("frames_period_requested");
+const std::string FRAMES_PERIOD_RAW("frames_period_raw");
+const std::string PERIOD_OUTPUT("period_output");
+const std::string TOTAL_COUNTS_PERIOD("total_counts_period");
+const std::string PERIOD_LABELS("period_labels");
 } // namespace
 
 using namespace Mantid;
@@ -40,7 +50,7 @@ using namespace Mantid;
 /// Default constructor
 MuonNexusReader::MuonNexusReader()
     : m_nexusInstrumentName(), m_nexusSampleName(), m_nexusLogCount(0), m_startTime_time_t(), t_nsp1(0), t_ntc1(0),
-      t_nper(0), m_numDetectors(0) {}
+      t_nper(0), m_numDetectors(0), m_numPeriodSequences(0) {}
 
 /// Destructor deletes temp storage
 MuonNexusReader::~MuonNexusReader() {}
@@ -127,11 +137,7 @@ void MuonNexusReader::readFromFile(const string &filename) {
   // Try to read in period information
   try {
     handle.openGroup("beam", "NXbeam");
-    // Loop each data type and add to info
-    readIntPeriodInfo(handle);
-    readIntArrayPeriodInfo(handle);
-    readFloatArrayPeriodInfo(handle);
-    readStringPeriodInfo(handle);
+    readPeriodInfo(handle);
     handle.closeGroup();
   } catch (...) {
     g_log.debug("Muon nexus file does not contain beam info");
@@ -155,70 +161,70 @@ void MuonNexusReader::readFromFile(const string &filename) {
   // file will close on leaving the function
 }
 
-// Functions to read different types of period information from Nexus File handle
-void MuonNexusReader::readIntPeriodInfo(NeXus::File &handle) {
-  for (const auto &intInfo : PERIOD_INFO_INT) {
-    try {
-      int temp = 0;
-      handle.readData(intInfo, temp);
-      m_periodInformation.emplace_back(std::string{std::to_string(temp)});
-    } catch (...) {
-      g_log.debug("Muon nexus file does not contain " + intInfo);
-      m_periodInformation.emplace_back(std::string{""});
-    }
+/**
+ * Try to read in vairous peices of period information.
+ * Period info includes:
+ * - Period sequences
+ * - Period Names
+ * - Period type
+ * - Frames periods requested
+ * - Raw frames
+ * - Tag
+ * - Total counts per period
+ * const std::array<std::string, 1> PERIOD_INFO_INT{"period_sequences"};
+const std::array<std::string, 4> PERIOD_INFO_INT_ARRAY{"period_type", "frames_period_requested", "frames_period_raw",
+                                                       "period_output"};
+const std::array<std::string, 1> PERIOD_INFO_FLOAT_ARRAY{"total_counts_period"};
+const std::array<std::string, 1> PERIOD_INFO_STRING{"period_labels"};
+ */
+void MuonNexusReader::readPeriodInfo(NeXus::File &handle) {
+  int tempInt;
+  std::string tempString;
+  std::vector<int> tempIntVector;
+  std::vector<float> tempFloatVector;
+  try {
+    handle.readData(PERIOD_SEQUENCES, tempInt);
+    m_numPeriodSequences = tempInt;
+  } catch (...) {
+    g_log.debug("Muon nexus file does not contain " + PERIOD_SEQUENCES);
   }
-};
-
-void MuonNexusReader::readIntArrayPeriodInfo(NeXus::File &handle) {
-  for (const auto &intArrayInfo : PERIOD_INFO_INT_ARRAY) {
-    try {
-      std::vector<int> temp;
-      std::string tempString = "";
-      handle.readData(intArrayInfo, temp);
-      if (!temp.empty()) {
-        for (const auto &value : temp)
-          tempString += std::to_string(value) + ";";
-        tempString.erase(tempString.length() - 1); // Remove final ;
-      }
-      m_periodInformation.emplace_back(tempString);
-    } catch (...) {
-      g_log.debug("Muon nexus file does not contain " + intArrayInfo);
-      m_periodInformation.emplace_back(std::string{""});
-    }
+  try {
+    handle.readData(PERIOD_LABELS, tempString);
+    m_periodNames = tempString;
+  } catch (...) {
+    g_log.debug("Muon nexus file does not contain " + PERIOD_LABELS);
   }
-};
-
-void MuonNexusReader::readFloatArrayPeriodInfo(NeXus::File &handle) {
-  for (const auto &floatArrayInfo : PERIOD_INFO_FLOAT_ARRAY) {
-    try {
-      std::vector<float> temp;
-      std::string tempString = "";
-      handle.readData(floatArrayInfo, temp);
-      if (!temp.empty()) {
-        for (const auto &value : temp)
-          tempString += std::to_string(value) + ";";
-        tempString.erase(tempString.length() - 1); // Remove final ;
-      }
-      m_periodInformation.emplace_back(tempString);
-    } catch (...) {
-      g_log.debug("Muon nexus file does not contain " + floatArrayInfo);
-      m_periodInformation.emplace_back(std::string{""});
-    }
+  try {
+    handle.readData(PERIOD_TYPE, tempIntVector);
+    m_periodTypes = convertVectorToString(tempIntVector, ";");
+  } catch (...) {
+    g_log.debug("Muon nexus file does not contain " + PERIOD_TYPE);
   }
-};
-
-void MuonNexusReader::readStringPeriodInfo(NeXus::File &handle) {
-  for (const auto &stringArrayInfo : PERIOD_INFO_STRING) {
-    try {
-      std::string tempString = "";
-      handle.readData(stringArrayInfo, tempString);
-      m_periodInformation.emplace_back(tempString);
-    } catch (...) {
-      g_log.debug("Muon nexus file does not contain " + stringArrayInfo);
-      m_periodInformation.emplace_back(std::string{""});
-    }
+  try {
+    handle.readData(FRAMES_PERIOD_REQUESTED, tempIntVector);
+    m_framesPeriodsRequested = convertVectorToString(tempIntVector, ";");
+  } catch (...) {
+    g_log.debug("Muon nexus file does not contain " + FRAMES_PERIOD_REQUESTED);
   }
-};
+  try {
+    handle.readData(FRAMES_PERIOD_RAW, tempIntVector);
+    m_framesPeriodsRaw = convertVectorToString(tempIntVector, ";");
+  } catch (...) {
+    g_log.debug("Muon nexus file does not contain " + FRAMES_PERIOD_RAW);
+  }
+  try {
+    handle.readData(PERIOD_OUTPUT, tempIntVector);
+    m_periodsOutput = convertVectorToString(tempIntVector, ";");
+  } catch (...) {
+    g_log.debug("Muon nexus file does not contain " + PERIOD_OUTPUT);
+  }
+  try {
+    handle.readData(TOTAL_COUNTS_PERIOD, tempFloatVector);
+    m_periodsCounts = convertVectorToString(tempFloatVector, ";");
+  } catch (...) {
+    g_log.debug("Muon nexus file does not contain " + TOTAL_COUNTS_PERIOD);
+  }
+}
 
 // Get time boundary data as in ISISRAW. Simpler here as NeXus stores real times
 // Not clear if corrected_time is what is wanted. Assume that values are bin

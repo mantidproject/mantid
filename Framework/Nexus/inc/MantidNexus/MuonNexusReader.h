@@ -60,10 +60,16 @@ private:
     boost::posix_time::ptime start(boost::gregorian::date(1970, 1, 1));
     return (t - start).total_seconds();
   }
-  void readIntPeriodInfo(NeXus::File &handle);
-  void readIntArrayPeriodInfo(NeXus::File &handle);
-  void readFloatArrayPeriodInfo(NeXus::File &handle);
-  void readStringPeriodInfo(NeXus::File &handle);
+  void readPeriodInfo(NeXus::File &handle);
+  template <class T> std::string convertVectorToString(T values, std::string delim) {
+    std::string result("");
+    if (!values.empty()) {
+      for (const auto &value : values)
+        result += std::to_string(value) + delim;
+      result.erase(result.length() - 1); // Remove final delim
+    }
+    return result;
+  }
 
 public:
   /// Default constructor
@@ -96,4 +102,11 @@ public:
   int m_numDetectors;                             ///< detector count
   std::string getInstrumentName() const;          ///< return instrument name
   std::vector<std::string> getPeriodInfo() const; /// Return period information
+  int m_numPeriodSequences;
+  std::string m_periodNames;
+  std::string m_periodTypes;
+  std::string m_framesPeriodsRequested;
+  std::string m_framesPeriodsRaw;
+  std::string m_periodsOutput;
+  std::string m_periodsCounts;
 };

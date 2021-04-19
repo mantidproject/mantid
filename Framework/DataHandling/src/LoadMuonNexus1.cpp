@@ -141,10 +141,6 @@ void LoadMuonNexus1::exec() {
     m_numberOfPeriods = nxload.t_nper;
   }
 
-  // Read in period information
-  m_periodInformation = nxload.getPeriodInfo();
-  setProperty("PeriodsInformation", m_periodInformation);
-
   bool autoGroup = getProperty("AutoGroup");
 
   // Grouping info should be returned if user has set the property
@@ -235,6 +231,12 @@ void LoadMuonNexus1::exec() {
     }
     addPeriodLog(localWorkspace, period);
     addGoodFrames(localWorkspace, period, nxload.t_nper);
+    addToSampleLog("period_sequences", nxload.m_numPeriodSequences, localWorkspace);
+    addToSampleLog("period_labels", nxload.m_periodNames, localWorkspace);
+    addToSampleLog("period_type", nxload.m_periodTypes, localWorkspace);
+    addToSampleLog("frames_period_requested", nxload.m_framesPeriodsRequested, localWorkspace);
+    addToSampleLog("frames_period_raw", nxload.m_framesPeriodsRaw, localWorkspace);
+    addToSampleLog("period_output", nxload.m_periodsOutput, localWorkspace);
 
     size_t counter = 0;
     for (auto i = m_spec_min; i < m_spec_max; ++i) {
