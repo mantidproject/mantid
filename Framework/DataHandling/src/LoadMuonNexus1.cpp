@@ -632,18 +632,16 @@ void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo, MuonN
   // For Nexus, not sure if above is the case, hence give all data for now
 
   // Create and fill another vector for the X axis
-  auto timeChannels = new float[lengthIn + 1]();
-  nxload.getTimeChannels(timeChannels, static_cast<int>(lengthIn + 1));
+  std::vector<float> timeChannels(lengthIn + 1);
+  nxload.getTimeChannels(timeChannels.data(), static_cast<int>(lengthIn + 1));
   // Put the read in array into a vector (inside a shared pointer)
   localWorkspace->setHistogram(
-      hist, BinEdges(timeChannels, timeChannels + lengthIn + 1),
+      hist, BinEdges(timeChannels.data(), timeChannels.data() + lengthIn + 1),
       Counts(nxload.m_counts.begin() + i * lengthIn, nxload.m_counts.begin() + i * lengthIn + lengthIn));
 
   localWorkspace->getSpectrum(hist).setSpectrumNo(specNo);
   // Muon v1 files: always a one-to-one mapping between spectra and detectors
   localWorkspace->getSpectrum(hist).setDetectorID(static_cast<detid_t>(specNo));
-  // Clean up
-  delete[] timeChannels;
 }
 
 /**  Log the run details from the file
