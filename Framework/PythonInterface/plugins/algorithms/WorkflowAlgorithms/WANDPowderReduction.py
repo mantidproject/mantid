@@ -38,10 +38,12 @@ from mantid.simpleapi import (
 from mantid.kernel import (
     StringListValidator,
     Direction,
+    Elastic,
     Property,
     FloatBoundedValidator,
     IntBoundedValidator,
     StringArrayProperty,
+    UnitConversion,
 )
 
 
@@ -117,11 +119,18 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             doc="The mask from this workspace will be applied before reduction",
         )
 
+        # self.declareProperty(
+        #     "EFixed",
+        #     37.02,
+        #     FloatBoundedValidator(lower=0.0),  # must be positive
+        #     "Value of fixed energy in meV : EI (EMode=Direct) or EF (EMode=Indirect))",
+        # )
+
         self.declareProperty(
-            "EFixed",
-            37.02,
+            "Wavelength",
+            1.4865,  # A
             FloatBoundedValidator(lower=0.0),  # must be positive
-            "Value of fixed energy in meV : EI (EMode=Direct) or EF (EMode=Indirect))",
+            "Wavelength to set the workspace (A)",
         )
 
         self.declareProperty(
@@ -313,7 +322,9 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
     def _to_spectrum_axis(self, workspace_in, workspace_out, mask, instrument_donor=None):
         target = self.getProperty("Target").value
-        e_fixed = self.getProperty("EFixed").value
+        wavelength = self.getProperty("Wavelength").value
+        e_fixed = UnitConversion.run('Wavelength', 'Energy', wavelength, 0, 0, 0, Elastic, 0)
+        # e_fixed = self.getProperty("EFixed").value
 
         ExtractUnmaskedSpectra(
             InputWorkspace=workspace_in,
