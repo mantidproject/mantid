@@ -19,7 +19,7 @@
 
 namespace {
 /// An array containing the supported instrument names
-const std::array<std::string, 4> SUPPORTED_INSTRUMENTS = {{"IN4", "IN5", "IN6", "PANTHER"}};
+const std::array<std::string, 5> SUPPORTED_INSTRUMENTS = {{"IN4", "IN5", "IN6", "PANTHER", "SHARP"}};
 } // namespace
 
 namespace Mantid {
@@ -48,6 +48,7 @@ int LoadILLTOF2::confidence(Kernel::NexusDescriptor &descriptor) const {
                                                                                         // LoadILLIndirect
       && !descriptor.pathExists("/entry0/instrument/VirtualChopper")                    // This one is for
                                                                                         // LoadILLReflectometry
+      && !descriptor.pathExists("/entry0/data_scan") // This one is handled by LoadILLDiffraction
   ) {
     return 80;
   } else {

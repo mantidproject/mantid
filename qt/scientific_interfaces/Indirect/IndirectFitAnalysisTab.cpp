@@ -11,6 +11,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
+#include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/PropertyHandler.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
@@ -197,12 +198,6 @@ bool IndirectFitAnalysisTab::isRangeCurrentlySelected(TableDatasetIndex dataInde
 }
 
 IndirectFittingModel *IndirectFitAnalysisTab::getFittingModel() const { return m_fittingModel.get(); }
-
-/**
- * @return  The fit type selected in the custom functions combo box, in the fit
- *          property browser.
- */
-QString IndirectFitAnalysisTab::getSelectedFitType() const { return m_fitPropertyBrowser->selectedFitType(); }
 
 /**
  * @param functionName  The name of the function.
@@ -515,12 +510,7 @@ void IndirectFitAnalysisTab::run() {
   setRunIsRunning(true);
   enableFitButtons(false);
   enableOutputOptions(false);
-  auto const fitType = m_fitPropertyBrowser->selectedFitType();
-  if (fitType == "Simultaneous") {
-    m_fittingModel->setFittingMode(FittingMode::SIMULTANEOUS);
-  } else {
-    m_fittingModel->setFittingMode(FittingMode::SEQUENTIAL);
-  }
+  m_fittingModel->setFittingMode(m_fitPropertyBrowser->getFittingMode());
   runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
 }
 

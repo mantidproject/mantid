@@ -569,6 +569,10 @@ std::string ConvFunctionModel::buildStretchExpFTFunctionString() const {
          "constraints=(Height>0, Tau>0)";
 }
 
+std::string ConvFunctionModel::buildIsoRotDiffFunctionString() const {
+  return "name=IsoRotDiff, Height=0.1, Radius=2, Tau=100, Centre=0";
+}
+
 std::string ConvFunctionModel::buildElasticDiffSphereFunctionString() const {
   return "name=ElasticDiffSphere, Height=1, Centre=0, Radius=2, "
          "constraints=(Height>0, Radius>0)";
@@ -579,6 +583,13 @@ std::string ConvFunctionModel::buildInelasticDiffSphereFunctionString() const {
          "Shift=0, constraints=(Intensity>0, Radius>0, Diffusion>0)";
 }
 
+std::string ConvFunctionModel::buildDiffSphereFunctionString() const {
+  return "name=DiffSphere, Q=1, f0.Q=1, "
+         "f0.WorkspaceIndex=2147483647, f1.Q = 1, f1.WorkspaceIndex = "
+         "2147483647, f0.Height = 1, f0.Centre = 0, f0.Radius = 2, "
+         "f1.Intensity = 1, f1.Radius = 2, f1.Diffusion = 0.05, f1.Shift = 0";
+}
+
 std::string ConvFunctionModel::buildInelasticDiffRotDiscreteCircleFunctionString() const {
   return "name=InelasticDiffRotDiscreteCircle, Intensity=1, Radius=1, Decay=1, "
          "Shift=0, constraints=(Intensity>0, Radius>0)";
@@ -587,6 +598,11 @@ std::string ConvFunctionModel::buildInelasticDiffRotDiscreteCircleFunctionString
 std::string ConvFunctionModel::buildElasticDiffRotDiscreteCircleFunctionString() const {
   return "name=ElasticDiffRotDiscreteCircle, Height=1, Centre=0, Radius=1, "
          "constraints=(Height>0, Radius>0)";
+}
+
+std::string ConvFunctionModel::buildDiffRotDiscreteCircleFunctionString() const {
+  return "name=DiffRotDiscreteCircle, Intensity=1, Radius=1, Decay=1, "
+         "Shift=0, constraints=(Intensity>0, Radius>0)";
 }
 
 std::string ConvFunctionModel::buildPeaksFunctionString() const {
@@ -603,10 +619,16 @@ std::string ConvFunctionModel::buildPeaksFunctionString() const {
     functions.append(buildTeixeiraFunctionString());
   } else if (m_fitType == FitType::StretchedExpFT) {
     functions.append(buildStretchExpFTFunctionString());
+  } else if (m_fitType == FitType::IsoRotDiff) {
+    functions.append(buildIsoRotDiffFunctionString());
+  } else if (m_fitType == FitType::DiffSphere) {
+    functions.append(buildDiffSphereFunctionString());
   } else if (m_fitType == FitType::ElasticDiffSphere) {
     functions.append(buildElasticDiffSphereFunctionString());
   } else if (m_fitType == FitType::InelasticDiffSphere) {
     functions.append(buildInelasticDiffSphereFunctionString());
+  } else if (m_fitType == FitType::DiffRotDiscreteCircle) {
+    functions.append(buildDiffRotDiscreteCircleFunctionString());
   } else if (m_fitType == FitType::InelasticDiffRotDiscreteCircle) {
     functions.append(buildInelasticDiffRotDiscreteCircleFunctionString());
   } else if (m_fitType == FitType::ElasticDiffRotDiscreteCircle) {
@@ -634,10 +656,16 @@ std::string ConvFunctionModel::buildFitTypeString() const {
     functions.append(buildTeixeiraFunctionString());
   } else if (m_fitType == FitType::StretchedExpFT) {
     functions.append(buildStretchExpFTFunctionString());
+  } else if (m_fitType == FitType::IsoRotDiff) {
+    functions.append(buildIsoRotDiffFunctionString());
+  } else if (m_fitType == FitType::DiffSphere) {
+    functions.append(buildDiffSphereFunctionString());
   } else if (m_fitType == FitType::ElasticDiffSphere) {
     functions.append(buildElasticDiffSphereFunctionString());
   } else if (m_fitType == FitType::InelasticDiffSphere) {
     functions.append(buildInelasticDiffSphereFunctionString());
+  } else if (m_fitType == FitType::DiffRotDiscreteCircle) {
+    functions.append(buildDiffRotDiscreteCircleFunctionString());
   } else if (m_fitType == FitType::InelasticDiffRotDiscreteCircle) {
     functions.append(buildInelasticDiffRotDiscreteCircleFunctionString());
   } else if (m_fitType == FitType::ElasticDiffRotDiscreteCircle) {

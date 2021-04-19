@@ -89,11 +89,13 @@ std::string PropertyManagerProperty::setValue(const std::string &strValue) {
     value = std::make_shared<PropertyManager>();
     (*this) = value;
   }
+  std::string strValueToSet = strValue.empty() ? "{}" : strValue;
   std::ostringstream msg;
   try {
     const std::unordered_set<std::string> ignored;
     bool createMissing{true};
-    value->setProperties(strValue, ignored, createMissing);
+    value->resetProperties();
+    value->setProperties(strValueToSet, ignored, createMissing);
     m_dataServiceKey.clear();
   } catch (std::invalid_argument &exc) {
     msg << "Error setting value from string.\n"

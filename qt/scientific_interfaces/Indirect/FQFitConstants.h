@@ -28,14 +28,16 @@ static const std::map<std::string, std::string> widthFits{
      {std::string("TeixeiraWater"), std::string("name=TeixeiraWater, Tau=1, L=1.5, constraints=(Tau>0, L>0)")}}};
 
 static const std::map<std::string, std::string> EISFFits{
-    {{std::string("EISFDiffCylinder"),
+    {{"None", ""},
+     {std::string("EISFDiffCylinder"),
       std::string("name=EISFDiffCylinder, A=1, R=1, L=2, constraints=(A>0, R>0, L>0)")},
      {std::string("EISFDiffSphere"), std::string("name=EISFDiffSphere, A=1, R=1, constraints=(A>0, R>0)")},
      {std::string("EISFDiffSphereAlkyl"), std::string("name=EISFDiffSphereAlkyl, A=1, Rmin=1, Rmax=2, "
                                                       "constraints=(A>0, Rmin>0, Rmax>0)")}}};
 
 static const std::map<std::string, std::string> AllFits{
-    {{std::string("ChudleyElliot"), std::string("name=ChudleyElliot, Tau=1, L=1.5, constraints=(Tau>0, L>0)")},
+    {{"None", ""},
+     {std::string("ChudleyElliot"), std::string("name=ChudleyElliot, Tau=1, L=1.5, constraints=(Tau>0, L>0)")},
      {std::string("HallRoss"), std::string("name=Hallross, Tau=1, L=0.2, constraints=(Tau>0, L>0)")},
      {std::string("FickDiffusion"), std::string("name=FickDiffusion, D=1, constraints=(D>0)")},
      {std::string("TeixeiraWater"), std::string("name=TeixeiraWater, Tau=1, L=1.5, constraints=(Tau>0, L>0)")},

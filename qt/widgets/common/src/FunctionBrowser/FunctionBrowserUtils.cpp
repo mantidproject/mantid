@@ -7,6 +7,8 @@
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/Expression.h"
+
+#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
 namespace MantidQt {
@@ -46,6 +48,10 @@ IFunction_sptr getFunctionWithPrefix(const QString &prefix, const IFunction_sptr
   return getFunctionWithPrefix(prefix.mid(j + 1), compFun->getFunction(funIndex));
 }
 
+std::pair<QString, int> splitFunctionPrefix(const std::string &prefix) {
+  return splitFunctionPrefix(QString::fromStdString(prefix));
+}
+
 std::pair<QString, int> splitFunctionPrefix(const QString &prefix) {
   if (prefix.isEmpty())
     return std::make_pair("", -1);
@@ -53,6 +59,10 @@ std::pair<QString, int> splitFunctionPrefix(const QString &prefix) {
   auto parentPrefix = prefix.left(j > 0 ? j + 1 : 0);
   auto funIndex = prefix.mid(j + 2, prefix.size() - j - 3).toInt();
   return std::make_pair(parentPrefix, funIndex);
+}
+
+std::pair<QString, std::pair<QString, QString>> splitConstraintString(const std::string &constraint) {
+  return splitConstraintString(QString::fromStdString(constraint));
 }
 
 std::pair<QString, std::pair<QString, QString>> splitConstraintString(const QString &constraint) {
@@ -115,6 +125,30 @@ std::pair<QString, std::pair<QString, QString>> splitConstraintString(const QStr
     }
   }
   return std::make_pair(paramName, std::make_pair(lowerBoundStr, upperBoundStr));
+}
+
+bool isNumber(std::string const &str) {
+  return !str.empty() && str.find_first_not_of("0123456789.-") == std::string::npos;
+}
+
+std::vector<std::string> splitStringBy(std::string const &str, std::string const &delimiter) {
+  std::vector<std::string> subStrings;
+  boost::split(subStrings, str, boost::is_any_of(delimiter));
+  subStrings.erase(std::remove_if(subStrings.begin(), subStrings.end(),
+                                  [](std::string const &subString) { return subString.empty(); }),
+                   subStrings.cend());
+  return subStrings;
+}
+
+std::size_t getFunctionIndexAt(std::string const &parameter, std::size_t const &index) {
+  auto const subStrings = splitStringBy(parameter, ".");
+  if (index < subStrings.size()) {
+    auto const functionIndex = splitStringBy(subStrings[index], "f");
+    if (functionIndex.size() == 1 && isNumber(functionIndex[0]))
+      return std::stoull(functionIndex[0]);
+  }
+
+  throw std::invalid_argument("No function index was found.");
 }
 
 } // namespace MantidWidgets

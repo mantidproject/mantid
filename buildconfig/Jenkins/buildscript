@@ -177,8 +177,6 @@ fi
 #                            the links helps keep it fresh
 #   - build/Testing/**: old ctest xml files will change over time and removing
 #                       the links helps keep it fresh
-#   - build/qt/**/ui_*.h: Header files produced from .ui files can remain stale
-#                         if a .ui file is removed from a CMakeLists.txt file
 ###############################################################################
 if [ -z "$BUILD_DIR" ]; then
     echo "Build directory not set. Cannot continue"
@@ -193,7 +191,7 @@ mkdir -p $BUILD_DIR
 
 # Tidy build dir
 rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData ${BUILD_DIR:?}/Testing
-find ${BUILD_DIR:?} \( -name 'ui_*.h' -o -name 'TEST-*.xml' -o -name 'Test.xml' \) -delete
+find ${BUILD_DIR:?} \( -name 'TEST-*.xml' -o -name 'Test.xml' \) -delete
 
 if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
     rm -rf $BUILD_DIR/eigen-*
@@ -393,14 +391,15 @@ fi
 # Prevent race conditions when creating the user config directory
 userconfig_dir=$HOME/.mantid
 rm -fr $userconfig_dir
-# Remove GUI qsettings files
+# Remove old application saved state & crash reports on mac.
+# If we don't do this then when a previous test has crashed macOS
+# will pop up a dialog box and wait for clicking okay. We are heavy
+# handed but builders tend not to be used for anything else.
 if [[ ${ON_MACOS} == true ]] ; then
-    rm -f $HOME/Library/Preferences/com.mantid.MantidPlot.plist
-    rm -f $HOME/Library/Preferences/org.mantidproject.MantidPlot.plist
-    rm -f "$HOME/Library/Saved Application State/org.mantidproject.MantidPlot.savedState/windows.plist"
-else
-    rm -f ~/.config/Mantid/MantidPlot.conf
+    rm -fr "$HOME/Library/Saved Application State/org.python.python"
+    rm -f $HOME/Library/Application\ Support/CrashReporter/*
 fi
+# Remove GUI qsettings files
 rm -f ~/.config/mantidproject/mantidworkbench.ini
 
 mkdir -p $userconfig_dir

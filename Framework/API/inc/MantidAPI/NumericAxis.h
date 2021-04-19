@@ -59,6 +59,9 @@ protected:
 
   /// A vector holding the centre values.
   std::vector<double> m_values;
+
+  /// Get number label
+  std::string formatLabel(const double value) const;
 };
 
 } // namespace API

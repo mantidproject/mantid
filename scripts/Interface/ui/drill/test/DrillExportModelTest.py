@@ -154,9 +154,11 @@ class DrillExportModelTest(unittest.TestCase):
         self.mConfig.getString.return_value = "/default/save/directory/"
         mSample = mock.Mock()
         mSample.getOutputName.return_value = "workspace"
+        mGroup = mock.Mock()
+        mGroup.getNames.return_value = ["workspace"]
+        self.mMtd.__getitem__.return_value = mGroup
         self.mMtd.getObjectNames.return_value = ["workspace_1",
-                                                 "workspace_2",
-                                                 "test_1"]
+                                                 "workspace_2"]
         self.exportModel._validCriteria = mock.Mock()
         self.exportModel._validCriteria.return_value = True
         self.exportModel.run(mSample)

@@ -7,7 +7,8 @@
 import os
 from math import floor
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
-from Muon.GUI.Common.muon_group import MuonGroup, MuonDiff
+from Muon.GUI.Common.muon_diff import MuonDiff
+from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_phasequad import MuonPhasequad
 from Muon.GUI.Common.muon_base_pair import MuonBasePair

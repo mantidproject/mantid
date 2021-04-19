@@ -28,6 +28,15 @@ void checkScanInterval(const std::pair<int64_t, int64_t> &interval) {
   if (interval.first >= interval.second)
     throw std::runtime_error("ComponentInfo: cannot set scan interval with start >= end");
 }
+template <class T> bool unique_if_exists(const T &inputs, const typename T::value_type &arg) {
+  auto unique = false;
+  auto it = std::find(inputs.begin(), inputs.end(), arg);
+  if (it != inputs.end()) {
+    it = std::find(++it, inputs.end(), arg);
+    unique = (it == inputs.end());
+  }
+  return unique;
+}
 } // namespace
 } // namespace
 
@@ -524,6 +533,8 @@ Eigen::Vector3d ComponentInfo::scaleFactor(const size_t componentIndex) const {
 }
 
 const std::string &ComponentInfo::name(const size_t componentIndex) const { return (*m_names)[componentIndex]; }
+
+bool ComponentInfo::uniqueName(const std::string &name) const { return unique_if_exists((*m_names), name); }
 
 size_t ComponentInfo::indexOfAny(const std::string &name) const {
   // Reverse iterate to hit top level components sooner

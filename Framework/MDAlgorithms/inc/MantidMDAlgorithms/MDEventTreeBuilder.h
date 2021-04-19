@@ -8,7 +8,7 @@
 
 #include <queue>
 #include <tbb/parallel_sort.h>
-#include <tbb/task_scheduler_init.h>
+#include <tbb/task_arena.h>
 #include <thread>
 
 namespace Mantid {
@@ -166,9 +166,12 @@ MDEventTreeBuilder<ND, MDEventType, EventIterator>::convertToIndex(std::vector<M
 
 template <size_t ND, template <size_t> class MDEventType, typename EventIterator>
 void MDEventTreeBuilder<ND, MDEventType, EventIterator>::sortEvents(std::vector<MDEventType<ND>> &mdEvents) {
-  tbb::task_scheduler_init init{m_numWorkers};
-  tbb::parallel_sort(mdEvents.begin(), mdEvents.end(), [](const MDEventType<ND> &a, const MDEventType<ND> &b) {
-    return IndexCoordinateSwitcher::getIndex(a) < IndexCoordinateSwitcher::getIndex(b);
+
+  tbb::task_arena limited_arena(m_numWorkers);
+  limited_arena.execute([&]() {
+    tbb::parallel_sort(mdEvents.begin(), mdEvents.end(), [](const MDEventType<ND> &a, const MDEventType<ND> &b) {
+      return IndexCoordinateSwitcher::getIndex(a) < IndexCoordinateSwitcher::getIndex(b);
+    });
   });
 }
 

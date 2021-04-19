@@ -328,9 +328,9 @@ void SaveGSS::generateBankHeader(std::stringstream &out, const API::SpectrumInfo
     const auto l1 = spectrumInfo.l1();
     const auto l2 = spectrumInfo.l2(specIndex);
     const auto twoTheta = spectrumInfo.twoTheta(specIndex);
-    const auto difc =
-        (2.0 * PhysicalConstants::NeutronMass * sin(twoTheta * 0.5) * (l1 + l2)) / (PhysicalConstants::h * 1.e4);
-    out << "# Total flight path " << (l1 + l2) << "m, tth " << (twoTheta * 180. / M_PI) << "deg, DIFC " << difc << "\n";
+    auto diffConstants = spectrumInfo.diffractometerConstants(specIndex);
+    out << "# Total flight path " << (l1 + l2) << "m, tth " << (twoTheta * 180. / M_PI) << "deg, DIFC "
+        << diffConstants[Kernel::UnitParams::difc] << "\n";
   }
   out << "# Data for spectrum :" << specIndex << "\n";
 }

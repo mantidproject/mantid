@@ -9,7 +9,7 @@
 Description
 -----------
 
-This calibration algorithm is develped for CORELLI type instrument (pack of tubes).
+This calibration algorithm is developed for CORELLI type instrument (pack of tubes).
 The calibration targets includes `L_1` (source to sample distance in meters), panel
 position (in meters) and orientation (as angle-axis pairs, in degrees), as well as
 initial TOF offset (not fully implemented yet).

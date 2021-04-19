@@ -5,13 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import Abins, DeleteWorkspace, mtd
+import numpy as np
+from mantid.simpleapi import Abins, mtd
 
 from abins import test_helpers
 import abins.parameters
 
 try:
-    from pathos.multiprocessing import ProcessingPool
+    from pathos.multiprocessing import ProcessingPool  # noqa 401
     PATHOS_FOUND = True
 except ImportError:
     PATHOS_FOUND = False
@@ -20,7 +21,6 @@ except ImportError:
 class AbinsAdvancedParametersTest(unittest.TestCase):
 
     def setUp(self):
-
         # set up input for Abins
         self._Si2 = "Si2-sc_AbinsAdvancedParameters"
         self._wrk_name = self._Si2 + "_ref"
@@ -28,10 +28,12 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         # before each test set abins.parameters to default values
         abins.parameters.instruments = {
             "fwhm": 3.0,
-            "TwoDMap": {"delta_width": 0.0005},
             "TOSCA": {
                 "final_neutron_energy": 32.0,
                 "cos_scattering_angle": -0.7069,
+                "angles": [135.],
+                'settings': {'forward': {'angles': [135.]}},
+                'settings_default': 'forward',
                 "a": 1e-7,
                 "b": 5e-3,
                 "c": 2.5}}
@@ -69,28 +71,6 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
 
         # fwhm should be smaller than 10
         abins.parameters.instruments["fwhm"] = 10.0
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
-                          OutputWorkspace=self._wrk_name)
-
-    def test_wrong_delta_width(self):
-
-        # delta_width should be a number
-        abins.parameters.instruments["TwoDMap"]["delta_width"] = "fd"
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
-                          OutputWorkspace=self._wrk_name)
-
-        # delta_with is positive so it cannot be negative
-        abins.parameters.instruments["TwoDMap"]["delta_width"] = -0.01
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
-                          OutputWorkspace=self._wrk_name)
-
-        # delta_width should have non-zero value
-        abins.parameters.instruments["TwoDMap"]["delta_width"] = 0.
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
-                          OutputWorkspace=self._wrk_name)
-
-        # delta_width should be smaller than one
-        abins.parameters.instruments["TwoDMap"]["delta_width"] = 1.0
         self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
@@ -193,7 +173,6 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
                           OutputWorkspace=self._wrk_name)
 
     def test_wrong_min_wavenumber(self):
-
         # minimum wavenumber cannot be negative
         abins.parameters.sampling["min_wavenumber"] = -0.001
         self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
@@ -205,7 +184,6 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
                           OutputWorkspace=self._wrk_name)
 
     def test_wrong_max_wavenumber(self):
-
         # maximum wavenumber cannot be negative
         abins.parameters.sampling["max_wavenumber"] = -0.01
         self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
@@ -217,7 +195,6 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
                           OutputWorkspace=self._wrk_name)
 
     def test_wrong_energy_window(self):
-
         # min_wavenumber must be smaller than max_wavenumber
         abins.parameters.sampling["min_wavenumber"] = 1000.0
         abins.parameters.sampling["max_wavenumber"] = 10.0
@@ -225,7 +202,6 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
                           OutputWorkspace=self._wrk_name)
 
     def test_wrong_s_absolute_threshold(self):
-
         abins.parameters.sampling["s_absolute_threshold"] = 1
         self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
@@ -239,7 +215,6 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
                           OutputWorkspace=self._wrk_name)
 
     def test_wrong_s_relative_threshold(self):
-
         abins.parameters.sampling["s_relative_threshold"] = 1
         self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
@@ -253,7 +228,6 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
                           OutputWorkspace=self._wrk_name)
 
     def test_wrong_optimal_size(self):
-
         # optimal size cannot be negative
         abins.parameters.performance["optimal_size"] = -10000
         self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
@@ -271,7 +245,6 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
                               OutputWorkspace=self._wrk_name)
 
     def test_good_case(self):
-
         good_names = [self._wrk_name, self._wrk_name + "_Si", self._wrk_name + "_Si_total"]
         Abins(VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
         names = mtd.getObjectNames()

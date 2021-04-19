@@ -102,3 +102,7 @@ References
           `doi: 10.1107/S0365110X57002212 <http://dx.doi.org/10.1107/S0365110X57002212>`_
 .. [#SAB] Sabine, T. M., *International Tables for Crystallography*, Vol. C, Page 609, Ed. Wilson, A. J. C and Prince, E. Kluwer Publishers (2004)
           `doi: 10.1107/97809553602060000103 <http://dx.doi.org/10.1107/97809553602060000103>`_
+
+.. categories::
+
+.. sourcelink::

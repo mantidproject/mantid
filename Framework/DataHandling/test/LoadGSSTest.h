@@ -96,6 +96,8 @@ public:
     TS_ASSERT_DELTA(spectrumInfo.twoTheta(0) * 180. / M_PI, 58.308, 1e-4);
     TS_ASSERT_DELTA(spectrumInfo.l2(1), 2.060, 1e-4);
     TS_ASSERT_DELTA(spectrumInfo.twoTheta(1) * 180. / M_PI, 154.257, 1e-4);
+    auto diffConsts = spectrumInfo.diffractometerConstants(1);
+    TS_ASSERT_DELTA(diffConsts[Kernel::UnitParams::difc], 10398.8, 1e-4);
   }
 
   void test_load_gss_ExtendedHeader_gsa() {

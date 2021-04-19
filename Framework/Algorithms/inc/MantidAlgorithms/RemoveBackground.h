@@ -9,6 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
@@ -45,8 +46,9 @@ public:
   BackgroundHelper &operator=(const BackgroundHelper &) = delete;
   BackgroundHelper(const BackgroundHelper &) = delete;
 
-  void initialize(const API::MatrixWorkspace_const_sptr &bkgWS, const API::MatrixWorkspace_sptr &sourceWS, int emode,
-                  Kernel::Logger *pLog = nullptr, int nThreads = 1, bool inPlace = true, bool nullifyNegative = false);
+  void initialize(const API::MatrixWorkspace_const_sptr &bkgWS, const API::MatrixWorkspace_sptr &sourceWS,
+                  Kernel::DeltaEMode::Type emode, Kernel::Logger *pLog = nullptr, int nThreads = 1, bool inPlace = true,
+                  bool nullifyNegative = false);
   void removeBackground(int nHist, HistogramData::HistogramX &x_data, HistogramData::HistogramY &y_data,
                         HistogramData::HistogramE &e_data, int threadNum = 0) const;
 
@@ -77,16 +79,11 @@ private:
   // workspace
   double m_ErrSq;
   // energy conversion mode
-  int m_Emode;
-  // incident for direct or analysis for indirect energy for units conversion
-  double m_Efix;
+  Kernel::DeltaEMode::Type m_Emode;
   // if true, negative signals are nullified
   bool m_nullifyNegative;
   // removing negative values from ws with background removed previously.
   bool m_previouslyRemovedBkgMode;
-
-  // get Ei attached to direct or indirect instrument workspace
-  double getEi(const API::MatrixWorkspace_const_sptr &inputWS) const;
 };
 
 class MANTID_ALGORITHMS_DLL RemoveBackground : public API::Algorithm {

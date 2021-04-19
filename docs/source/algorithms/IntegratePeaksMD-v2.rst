@@ -117,15 +117,15 @@ For every point on the edge, the trajectory in reciprocal space is a straight li
 Calculate a point at a fixed momentum, say k=1.
 Q in the lab frame:
 
-:math:`\vec{E}=(-k*sin(\theta)*cos(\phi),-k*sin(\theta)*sin(\phi),k-k*cos(\phi))`
+:math:`\vec{E}=(-k \cdot \sin(\theta) \cdot \cos(\phi),-k \cdot \sin(\theta) \cdot \sin(\phi),k-k \cdot \cos(\phi))`
 
 Normalize E to 1:
 
-:math:`\vec{E}=\vec{E}*(1./\left|\vec{E}\right|)`
+:math:`\vec{E}=\vec{E} \cdot (1./\left|\vec{E}\right|)`
 
 The distance from C to OE is given by:
 
-:math:`dv=\vec{C}-\vec{E}*(\vec{C} \cdot \vec{E})`
+:math:`dv=\vec{C}-\vec{E} \cdot (\vec{C} \cdot \vec{E})`
 
 If:
 
@@ -143,13 +143,13 @@ is true and the minimum dv is less than PeakRadius or BackgroundOuterRadius.
 
 For the background if
 
-:math:`\left|dv\right|_{min}<BackgroundOuterRadius`
+:math:`\left|dv\right|_{\text{min}}<BackgroundOuterRadius`
 
-:math:`h = BackgroundOuterRadius - \left|dv\right|_{min}`
+:math:`h = BackgroundOuterRadius - \left|dv\right|_{\text{min}}`
 
 From the minimum of dv the volume of the cap of the sphere is found:
 
-:math:`V_{cap} = \pi h^2 / 3 (3 * BackgroundOuterRadius - h)`
+:math:`V_{cap} = \pi h^2 / 3 (3 \cdot BackgroundOuterRadius - h)`
 
 The volume of the total sphere is calculated and for the background the volume of the inner radius must be subtracted:
 
@@ -162,15 +162,15 @@ The integrated intensity is multiplied by the ratio of the volume of the sphere 
 
 For the peak assume that the shape is Gaussian.  If
 
-:math:`\left|dv\right|_{min}<PeakRadius`
+:math:`\left|dv\right|_{\text{min}}<PeakRadius`
 
 :math:`\sigma = PeakRadius / 3`
 
-:math:`h = PeakRadius * exp(-\left|dv\right|_{min}^2 / (2 \sigma^2)`
+:math:`h = PeakRadius \cdot \exp(-\left|dv\right|_{min}^2 / (2 \sigma^2)`
 
 From the minimum of dv the volume of the cap of the sphere is found:
 
-:math:`V_{cap} = \pi h^2 / 3 (3 * PeakRadius - h)`
+:math:`V_{cap} = \pi h^2 / 3 (3 \cdot PeakRadius - h)`
 
 and the volume of the sphere is calculated
 
