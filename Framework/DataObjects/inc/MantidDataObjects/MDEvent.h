@@ -192,7 +192,7 @@ public:
   int32_t getDetectorID() const { return detectorId; }
 
   /** Sets the detectorId of this event
-   * @param id :: new expInfoIndex value. */
+   * @param id :: new detector ID value. */
   void setDetectorId(int32_t id) { detectorId = id; }
 
   //---------------------------------------------------------------------------------------------

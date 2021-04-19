@@ -1568,7 +1568,7 @@ public:
  signal
  * @param Coord      :: vector of MD event coordinates, nd(number of dimensions)
  coordinates for each event
- * @param expInfoIndex   :: vector of run  indexes for N events.
+ * @param expInfoIndex   :: vector of experiment info indexes for N events.
  * @param detectorId :: vector of detector's ID for N events.
 
  *@return number of events rejected (0 as nothing is rejected here)

@@ -119,22 +119,22 @@ void FindUBUsingIndexedPeaks::exec() {
         std::vector<V3D> run_fhkl_vectors;
         std::vector<V3D> run_hkl_vectors;
         std::vector<V3D> run_mnp_vectors;
-        size_t expInfoIndexed = 0;
+        size_t run_indexed = 0;
 
         for (int i = 0; i < n_peaks; i++) {
           const IPeak &peak = ws->getPeak(i);
           if (peak.getRunNumber() == run) {
             if (isPeakIndexed(peak))
-              expInfoIndexed++;
+              run_indexed++;
           }
         }
 
-        g_log.notice() << "Number of Indexed Peaks in Run " << run << " is " << expInfoIndexed << "\n";
+        g_log.notice() << "Number of Indexed Peaks in Run " << run << " is " << run_indexed << "\n";
 
-        run_q_vectors.reserve(expInfoIndexed);
-        run_hkl_vectors.reserve(expInfoIndexed);
-        run_mnp_vectors.reserve(expInfoIndexed);
-        run_fhkl_vectors.reserve(expInfoIndexed);
+        run_q_vectors.reserve(run_indexed);
+        run_hkl_vectors.reserve(run_indexed);
+        run_mnp_vectors.reserve(run_indexed);
+        run_fhkl_vectors.reserve(run_indexed);
 
         for (int i = 0; i < n_peaks; i++) {
           const IPeak &peak = ws->getPeak(i);
@@ -149,7 +149,7 @@ void FindUBUsingIndexedPeaks::exec() {
           }
         }
 
-        if (expInfoIndexed < 3)
+        if (run_indexed < 3)
           continue;
 
         std::vector<double> rsigabc(7);
@@ -162,7 +162,7 @@ void FindUBUsingIndexedPeaks::exec() {
 
         double average_error = 0.;
         IndexingUtils::CalculateMillerIndices(UB, run_q_vectors, 1.0, run_fhkl_vectors, average_error);
-        for (size_t i = 0; i < expInfoIndexed; i++) {
+        for (size_t i = 0; i < run_indexed; i++) {
           if (IndexingUtils::ValidIndex(run_fhkl_vectors[i], tolerance))
             continue;
 
