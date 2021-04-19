@@ -19,7 +19,7 @@ import os
 
 class SuperplotViewSide(QDockWidget):
 
-    UI = "ui/superplotSide.ui"
+    UI = "superplotSide.ui"
 
     """
     Emitted when the widget is resized.
@@ -41,7 +41,7 @@ class SuperplotViewSide(QDockWidget):
 
 class SuperplotViewBottom(QDockWidget):
 
-    UI = "ui/superplotBottom.ui"
+    UI = "superplotBottom.ui"
 
     """
     Emitted when the widget is resized.
