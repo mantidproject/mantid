@@ -16,6 +16,7 @@ namespace API {
  *  Sets the property names but initialises the function pointer to null.
  *  @param name :: The name to assign to the property
  *  @param direction :: The direction of the function (i.e. input or output)
+ *  @param optional :: A flag indicating whether the property is optional or mandatory.
  */
 FunctionProperty::FunctionProperty(const std::string &name, const unsigned int direction,
                                    const PropertyMode::Type optional)
