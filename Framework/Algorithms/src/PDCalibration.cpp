@@ -934,9 +934,9 @@ void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d, const std:
     }
   }
 
+  difc = best_difc;
   // check that something actually fit and set to the best result
   if (best_difc > 0. && best_errsum < std::numeric_limits<double>::max()) {
-    difc = best_difc;
     t0 = best_t0;
     difa = best_difa;
   }
