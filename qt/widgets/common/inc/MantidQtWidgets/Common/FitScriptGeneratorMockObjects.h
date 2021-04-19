@@ -87,6 +87,14 @@ public:
   MOCK_METHOD0(getDialogWorkspaces, std::vector<Mantid::API::MatrixWorkspace_const_sptr>());
   MOCK_CONST_METHOD0(getDialogWorkspaceIndices, std::vector<MantidQt::MantidWidgets::WorkspaceIndex>());
 
+  MOCK_METHOD7(openEditLocalParameterDialog,
+               void(std::string const &parameter, std::vector<std::string> const &workspaceNames,
+                    std::vector<std::string> const &domainNames, std::vector<double> const &values,
+                    std::vector<bool> const &fixes, std::vector<std::string> const &ties,
+                    std::vector<std::string> const &constraints));
+  MOCK_CONST_METHOD0(getEditLocalParameterResults, std::tuple<std::string, std::vector<double>, std::vector<bool>,
+                                                              std::vector<std::string>, std::vector<std::string>>());
+
   MOCK_METHOD0(resetSelection, void());
 
   MOCK_CONST_METHOD0(applyFunctionChangesToAll, bool());
@@ -139,10 +147,16 @@ public:
                      std::string(std::string const &workspaceName,
                                  MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex,
                                  std::string const &functionIndex));
+  MOCK_CONST_METHOD2(getEquivalentFunctionIndexForDomain,
+                     std::string(MantidQt::MantidWidgets::FitDomainIndex, std::string const &functionIndex));
   MOCK_CONST_METHOD4(getEquivalentParameterTieForDomain,
                      std::string(std::string const &workspaceName,
                                  MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex,
                                  std::string const &fullParameter, std::string const &fullTie));
+  MOCK_CONST_METHOD1(getAdjustedFunctionIndex, std::string(std::string const &parameter));
+  MOCK_CONST_METHOD2(getFullParameter,
+                     std::string(MantidQt::MantidWidgets::FitDomainIndex, std::string const &parameter));
+  MOCK_CONST_METHOD2(getFullTie, std::string(MantidQt::MantidWidgets::FitDomainIndex, std::string const &tie));
 
   MOCK_METHOD4(updateParameterValue,
                void(std::string const &workspaceName, MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex,
@@ -167,6 +181,30 @@ public:
   MOCK_METHOD1(setFittingMode, void(FittingMode fittingMode));
   MOCK_CONST_METHOD0(getFittingMode, FittingMode());
   MOCK_CONST_METHOD0(isSimultaneousMode, bool());
+
+  MOCK_CONST_METHOD2(hasParameter,
+                     bool(MantidQt::MantidWidgets::FitDomainIndex domainIndex, std::string const &parameter));
+
+  MOCK_METHOD3(setParameterValue, void(MantidQt::MantidWidgets::FitDomainIndex domainIndex,
+                                       std::string const &fullParameter, double value));
+  MOCK_METHOD3(setParameterFixed,
+               void(MantidQt::MantidWidgets::FitDomainIndex domainIndex, std::string const &fullParameter, bool fix));
+  MOCK_METHOD3(setParameterTie, void(MantidQt::MantidWidgets::FitDomainIndex domainIndex,
+                                     std::string const &fullParameter, std::string const &tie));
+  MOCK_METHOD3(setParameterConstraint, void(MantidQt::MantidWidgets::FitDomainIndex domainIndex,
+                                            std::string const &fullParameter, std::string const &constraint));
+
+  MOCK_CONST_METHOD1(getDomainName, std::string(MantidQt::MantidWidgets::FitDomainIndex domainIndex));
+  MOCK_CONST_METHOD2(getParameterValue,
+                     double(MantidQt::MantidWidgets::FitDomainIndex domainIndex, std::string const &fullParameter));
+  MOCK_CONST_METHOD2(isParameterFixed,
+                     bool(MantidQt::MantidWidgets::FitDomainIndex domainIndex, std::string const &fullParameter));
+  MOCK_CONST_METHOD2(getParameterTie, std::string(MantidQt::MantidWidgets::FitDomainIndex domainIndex,
+                                                  std::string const &fullParameter));
+  MOCK_CONST_METHOD2(getParameterConstraint, std::string(MantidQt::MantidWidgets::FitDomainIndex domainIndex,
+                                                         std::string const &fullParameter));
+
+  MOCK_CONST_METHOD0(numberOfDomains, std::size_t());
 
   MOCK_CONST_METHOD0(getGlobalTies, std::vector<GlobalTie>());
   MOCK_CONST_METHOD0(getGlobalParameters, std::vector<GlobalParameter>());

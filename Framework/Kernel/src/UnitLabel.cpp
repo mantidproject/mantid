@@ -5,7 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/UnitLabel.h"
+#include <codecvt>
 #include <cstring>
+#include <locale>
 
 namespace Mantid {
 namespace Kernel {
@@ -22,15 +24,16 @@ UnitLabel::UnitLabel(const AsciiString &ascii, const Utf8String &unicode, const 
  * Use an ASCII string for the unicode variant too
  * @param ascii A plain-text label containing only ascii characters
  */
-UnitLabel::UnitLabel(const UnitLabel::AsciiString &ascii)
-    : m_ascii(ascii), m_utf8(ascii.begin(), ascii.end()), m_latex(ascii) {}
-
+UnitLabel::UnitLabel(const AsciiString &ascii) : m_ascii(ascii), m_latex(ascii) {
+  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+  m_utf8 = converter.from_bytes(m_ascii);
+}
 /**
  * Use an ASCII string for the unicode variant too, given
  * as a C-style string
  * @param ascii A plain-text label
  */
-UnitLabel::UnitLabel(const char *ascii) : m_ascii(ascii), m_utf8(m_ascii.begin(), m_ascii.end()), m_latex(ascii) {}
+UnitLabel::UnitLabel(const char *ascii) : UnitLabel(AsciiString(ascii)) {}
 
 /**
  * Test if two objects are considered equal

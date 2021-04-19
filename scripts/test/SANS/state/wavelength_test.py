@@ -21,31 +21,6 @@ class StateWavelengthTest(unittest.TestCase):
         state = StateWavelength()
         self.assertTrue(isinstance(state, StateWavelength))
 
-    def test_that_raises_when_wavelength_entry_is_missing(self):
-        # Arrange
-        state = StateWavelength()
-        with self.assertRaises(ValueError):
-            state.validate()
-
-        state.wavelength_low = [1.]
-        with self.assertRaises(ValueError):
-            state.validate()
-
-        state.wavelength_high = [2.]
-        with self.assertRaises(ValueError):
-            state.validate()
-
-        state.wavelength_step = 2.
-        self.assertIsNone(state.validate())
-
-    def test_that_raises_when_lower_wavelength_is_smaller_than_high_wavelength(self):
-        state = StateWavelength()
-        state.wavelength_low = [2.]
-        state.wavelength_high = [1.]
-        state.wavelength_step = 2.
-        with self.assertRaises(ValueError):
-            state.validate()
-
     def test_convert_step_type_from_RANGE_LIN_to_LIN(self):
         state = StateWavelength()
         state.wavelength_step_type = RangeStepType.RANGE_LIN
@@ -89,17 +64,15 @@ class StateSliceEventBuilderTest(unittest.TestCase):
         builder = get_wavelength_builder(data_info)
         self.assertTrue(builder)
 
-        builder.set_wavelength_low([10.0])
-        builder.set_wavelength_high([20.0])
-        builder.set_wavelength_step(3.0)
+        builder.state.wavelength_interval.wavelength_full_range = (10.0, 20.0)
+        builder.state.wavelength_interval.wavelength_step = 3.0
         builder.set_wavelength_step_type(RangeStepType.LIN)
         builder.set_rebin_type(RebinType.REBIN)
 
         # Assert
         state = builder.build()
 
-        self.assertEqual(state.wavelength_low,  [10.0])
-        self.assertEqual(state.wavelength_high,  [20.0])
+        self.assertEqual(state.wavelength_interval.wavelength_full_range,  (10.0, 20.0))
         self.assertEqual(state.wavelength_step_type, RangeStepType.LIN)
         self.assertEqual(state.rebin_type, RebinType.REBIN)
 

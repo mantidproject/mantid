@@ -7,9 +7,13 @@
 # pylint: disable=invalid-name
 
 """A base class to share functionality between SANSReductionCore algorithms."""
+import os
+from typing import Tuple, Dict
 
-from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, IEventWorkspace)
+from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspace, MatrixWorkspaceProperty,
+                        PropertyMode, IEventWorkspace, WorkspaceGroup, WorkspaceGroupProperty)
 from mantid.kernel import (Direction, StringListValidator)
+from mantid.py36compat import dataclass
 from sans.algorithm_detail.CreateSANSAdjustmentWorkspaces import CreateSANSAdjustmentWorkspaces
 from sans.algorithm_detail.convert_to_q import convert_workspace
 from sans.algorithm_detail.crop_helper import get_component_name
@@ -21,6 +25,24 @@ from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DetectorType, DataType)
 from sans.common.general_functions import (create_child_algorithm, append_to_sans_file_tag)
 from sans.state.Serializer import Serializer
+from sans.state.StateObjects.wavelength_interval import WavRange
+
+WsList = Dict[Tuple[float, float], MatrixWorkspace]
+
+
+@dataclass
+class AdjustmentStruct:
+    wavelength_adjustment: MatrixWorkspace
+    pixel_adjustment: MatrixWorkspace
+    wavelength_and_pixel_adjustment: MatrixWorkspace
+    calculated_transmission_workspace: MatrixWorkspace
+    unfitted_transmission_workspace: MatrixWorkspace
+
+
+@dataclass
+class SumsStruct:
+    counts : int
+    norm: int
 
 
 class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
@@ -73,25 +95,25 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         # ----------
         # OUTPUT
         # ----------
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", '', direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty("OutputWorkspaces", '', direction=Direction.Output),
                              doc='The output workspace.')
 
-        self.declareProperty(MatrixWorkspaceProperty('SumOfCounts', '', optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('SumOfCounts', '', optional=PropertyMode.Optional,
+                                                    direction=Direction.Output),
                              doc='The sum of the counts of the output workspace.')
 
-        self.declareProperty(MatrixWorkspaceProperty('SumOfNormFactors', '', optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('SumOfNormFactors', '', optional=PropertyMode.Optional,
+                                                    direction=Direction.Output),
                              doc='The sum of the counts of the output workspace.')
 
         self.declareProperty(
-            MatrixWorkspaceProperty('CalculatedTransmissionWorkspace', '', optional=PropertyMode.Optional,
-                                    direction=Direction.Output),
+            WorkspaceGroupProperty('CalculatedTransmissionWorkspaces', '', optional=PropertyMode.Optional,
+                                   direction=Direction.Output),
             doc='The calculated transmission workspace')
 
         self.declareProperty(
-            MatrixWorkspaceProperty('UnfittedTransmissionWorkspace', '', optional=PropertyMode.Optional,
-                                    direction=Direction.Output),
+            WorkspaceGroupProperty('UnfittedTransmissionWorkspaces', '', optional=PropertyMode.Optional,
+                                   direction=Direction.Output),
             doc='The unfitted transmission workspace')
 
     def _get_cropped_workspace(self, component):
@@ -136,28 +158,35 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         output_ws = mask_workspace(component_as_string=component, workspace=workspace, state=state)
         return output_ws
 
-    def _convert_to_wavelength(self, state, workspace):
-        wavelength_state = state.wavelength
+    def _convert_to_wavelength(self, workspace, wavelength_state) -> WsList:
         wavelength_name = "SANSConvertToWavelengthAndRebin"
-        wavelength_options = {"InputWorkspace": workspace,
-                              "OutputWorkspace": EMPTY_NAME,
-                              "WavelengthLow": wavelength_state.wavelength_low[0],
-                              "WavelengthHigh": wavelength_state.wavelength_high[0],
-                              "WavelengthStep": wavelength_state.wavelength_step,
-                              "WavelengthStepType": wavelength_state.wavelength_step_type_lin_log.value,
-                              "RebinMode": wavelength_state.rebin_type.value}
 
-        wavelength_alg = create_child_algorithm(self, wavelength_name, **wavelength_options)
-        wavelength_alg.execute()
-        return wavelength_alg.getProperty("OutputWorkspace").value
+        processed = {}
+        assert(len(wavelength_state.wavelength_interval.selected_ranges) > 0)
+        for wav_range in wavelength_state.wavelength_interval.selected_ranges:
+            wavelength_options = {"InputWorkspace": workspace,
+                                  "OutputWorkspace": EMPTY_NAME,
+                                  "WavelengthLow": wav_range[0],
+                                  "WavelengthHigh": wav_range[1],
+                                  "WavelengthStep": wavelength_state.wavelength_interval.wavelength_step,
+                                  "WavelengthStepType": wavelength_state.wavelength_step_type_lin_log.value,
+                                  "RebinMode": wavelength_state.rebin_type.value}
 
-    def _scale(self, state, workspace):
+            wavelength_alg = create_child_algorithm(self, wavelength_name, **wavelength_options)
+            wavelength_alg.execute()
+            # The JSON serialiser will convert tuples->lists which are unhashable, so cast back
+            processed[tuple(wav_range)] = wavelength_alg.getProperty("OutputWorkspace").value
+        return processed
+
+    def _scale(self, state, ws_list: WsList):
         instrument = state.data.instrument
-        output_ws = scale_workspace(instrument=instrument, state_scale=state.scale, workspace=workspace)
+        for key, ws in ws_list.items():
+            output_ws = scale_workspace(instrument=instrument, state_scale=state.scale, workspace=ws)
+            ws_list[key] = output_ws
+        return ws_list
 
-        return output_ws
-
-    def _adjustment(self, state, workspace, monitor_workspace, component_as_string, data_type):
+    def _adjustment(self, state, workspaces: WsList, monitor_workspace, component_as_string,
+                    data_type) -> Dict[WavRange, AdjustmentStruct]:
         transmission_workspace = self._get_transmission_workspace()
         direct_workspace = self._get_direct_workspace()
 
@@ -171,43 +200,72 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
 
         alg = CreateSANSAdjustmentWorkspaces(state_adjustment=state.adjustment,
                                              component=component_as_string, data_type=data_type)
-        returned_dict = alg.create_sans_adjustment_workspaces(direct_ws=direct_workspace, monitor_ws=monitor_workspace,
-                                                              sample_data=workspace,
-                                                              transmission_ws=transmission_workspace)
 
-        wavelength_adjustment = returned_dict["wavelength_adj"]
-        pixel_adjustment = returned_dict["pixel_adj"]
-        wavelength_and_pixel_adjustment = returned_dict["wavelength_pixel_adj"]
-        calculated_transmission_workspace = returned_dict["calculated_trans_ws"]
-        unfitted_transmission_workspace = returned_dict["unfitted_trans_ws"]
+        adjustments = {}
+        for wav_range, ws in workspaces.items():
+            returned_dict = alg.create_sans_adjustment_workspaces(direct_ws=direct_workspace,
+                                                                  monitor_ws=monitor_workspace, sample_data=ws,
+                                                                  transmission_ws=transmission_workspace,
+                                                                  wav_range=wav_range)
+            adjustments[wav_range] = AdjustmentStruct(
+                wavelength_adjustment=returned_dict["wavelength_adj"], pixel_adjustment=returned_dict["pixel_adj"],
+                wavelength_and_pixel_adjustment=returned_dict["wavelength_pixel_adj"],
+                calculated_transmission_workspace=returned_dict["calculated_trans_ws"],
+                unfitted_transmission_workspace=returned_dict["unfitted_trans_ws"])
 
-        return wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment, \
-            calculated_transmission_workspace, unfitted_transmission_workspace
+        return adjustments
 
-    def _copy_bin_masks(self, workspace, dummy_workspace):
-        mask_options = {"InputWorkspace": workspace,
-                        "MaskedWorkspace": dummy_workspace,
-                        "OutputWorkspace": EMPTY_NAME}
-        mask_alg = create_child_algorithm(self, "MaskBinsFromWorkspace", **mask_options)
-        mask_alg.execute()
-        return mask_alg.getProperty("OutputWorkspace").value
+    def _group_workspaces(self, workspaces):
+        group = WorkspaceGroup()
+        for ws in workspaces.values():
+            if ws:
+                group.addWorkspace(ws)
+        return group
 
-    def _convert_to_histogram(self, workspace):
-        if isinstance(workspace, IEventWorkspace):
-            convert_name = "RebinToWorkspace"
-            convert_options = {"WorkspaceToRebin": workspace,
-                               "WorkspaceToMatch": workspace,
-                               "OutputWorkspace": "OutputWorkspace",
-                               "PreserveEvents": False}
-            convert_alg = create_child_algorithm(self, convert_name, **convert_options)
-            convert_alg.execute()
-            workspace = convert_alg.getProperty("OutputWorkspace").value
-            append_to_sans_file_tag(workspace, "_histogram")
+    def _add_metadata(self, state, workspaces):
+        for wav_range, ws in workspaces.items():
+            if not ws:
+                continue  # If we have something disabled but meta-data is still produced
 
-        return workspace
+            replace_prop = True
+            run = ws.getRun()
+            # The wavelength range allows the calling algorithms to get this back out, without
+            # having to much around with trying to pass dicts through Properties (which would be
+            # easy if the property manager accepted Workspaces2D values...)
+            run.addProperty("Wavelength Range", f"{wav_range[0]}-{wav_range[1]}", replace_prop)
+            if state.save.user_file:
+                run.addProperty("UserFile", os.path.basename(state.save.user_file), replace_prop)
+            if state.save.batch_file:
+                run.addProperty("BatchFile", os.path.basename(state.save.batch_file), replace_prop)
+        return workspaces  # Allow us to chain up these commands
 
-    def _convert_to_q(self, state, workspace, wavelength_adjustment_workspace, pixel_adjustment_workspace,
-                      wavelength_and_pixel_adjustment_workspace):
+    def _copy_bin_masks(self, workspaces, dummy_workspaces):
+        for wav_range in workspaces.keys():
+            mask_options = {"InputWorkspace": workspaces[wav_range],
+                            "MaskedWorkspace": dummy_workspaces[wav_range],
+                            "OutputWorkspace": EMPTY_NAME}
+            mask_alg = create_child_algorithm(self, "MaskBinsFromWorkspace", **mask_options)
+            mask_alg.execute()
+            workspaces[wav_range] = mask_alg.getProperty("OutputWorkspace").value
+
+    def _convert_to_histogram(self, workspaces):
+        for wav_range, workspace in workspaces.items():
+            if isinstance(workspace, IEventWorkspace):
+                convert_name = "RebinToWorkspace"
+                convert_options = {"WorkspaceToRebin": workspace,
+                                   "WorkspaceToMatch": workspace,
+                                   "OutputWorkspace": "OutputWorkspace",
+                                   "PreserveEvents": False}
+                convert_alg = create_child_algorithm(self, convert_name, **convert_options)
+                convert_alg.execute()
+                workspace = convert_alg.getProperty("OutputWorkspace").value
+                append_to_sans_file_tag(workspace, "_histogram")
+                workspaces[wav_range] = workspace
+
+        return workspaces
+
+    def _convert_to_q(self, state, workspaces: WsList,
+                      adjustment_dict: Dict[WavRange, AdjustmentStruct]) -> Dict[WavRange, SumsStruct]:
         """
         A conversion to momentum transfer is performed in this step.
 
@@ -220,17 +278,19 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         @param wavelength_and_pixel_adjustment_workspace: the wavelength and pixel adjustment workspace.
         @return: a reduced workspace
         """
-        output_dict = convert_workspace(workspace=workspace, state_convert_to_q=state.convert_to_q,
-                                        wavelength_adj_workspace=wavelength_adjustment_workspace,
-                                        pixel_adj_workspace=pixel_adjustment_workspace,
-                                        wavelength_and_pixel_adj_workspace=wavelength_and_pixel_adjustment_workspace,
-                                        output_summed_parts=True)
+        sums = {}
+        for wav_range in workspaces.keys():
+            adjustment = adjustment_dict[wav_range]
 
-        output_workspace = output_dict["output"]
-        sum_of_counts = output_dict["counts_summed"]
-        sum_of_norms = output_dict["norm_summed"]
+            output_dict = \
+                convert_workspace(workspace=workspaces[wav_range], state_convert_to_q=state.convert_to_q,
+                                  wavelength_adj_workspace=adjustment.wavelength_adjustment,
+                                  wavelength_and_pixel_adj_workspace=adjustment.wavelength_and_pixel_adjustment,
+                                  pixel_adj_workspace=adjustment.pixel_adjustment, output_summed_parts=True)
 
-        return output_workspace, sum_of_counts, sum_of_norms
+            sums[wav_range] = SumsStruct(counts=output_dict["counts_summed"], norm=output_dict["norm_summed"])
+            workspaces[wav_range] = output_dict["output"]
+        return sums
 
     def _get_state(self):
         json_state = self.getProperty("SANSState").value

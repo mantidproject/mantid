@@ -67,6 +67,20 @@ FitDomainIndex getDomainIndexOf(std::string const &fullParameter) {
   return FitDomainIndex(getFunctionIndexAt(fullParameter, 0));
 }
 
+std::string getParameterName(std::string const &constraint) {
+  return splitParameterName(splitConstraintString(constraint).first).second.toStdString();
+}
+
+std::string getFunctionIndex(std::string const &parameter) {
+  return splitFunctionPrefix(parameter).first.toStdString();
+}
+
+std::string getAdjustedConstraint(std::string const &constraint) {
+  auto const parameterName = getParameterName(constraint);
+  auto const limits = splitConstraintString(constraint).second;
+  return limits.first.toStdString() + "<" + parameterName + "<" + limits.second.toStdString();
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -165,10 +179,17 @@ IFunction_sptr FitScriptGeneratorModel::getFunction(std::string const &workspace
 std::string FitScriptGeneratorModel::getEquivalentFunctionIndexForDomain(std::string const &workspaceName,
                                                                          WorkspaceIndex workspaceIndex,
                                                                          std::string const &functionIndex) const {
-  if (!functionIndex.empty() && m_fittingMode == FittingMode::SIMULTANEOUS) {
-    auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
+  auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
+  return getEquivalentFunctionIndexForDomain(domainIndex, functionIndex);
+}
+
+std::string FitScriptGeneratorModel::getEquivalentFunctionIndexForDomain(FitDomainIndex domainIndex,
+                                                                         std::string const &functionIndex) const {
+  if (domainIndex.value >= numberOfDomains())
+    throw std::invalid_argument("The domain index provided does not exist.");
+
+  if (!functionIndex.empty() && m_fittingMode == FittingMode::SIMULTANEOUS)
     return replaceTopFunctionIndexWith(functionIndex, domainIndex.value);
-  }
   return functionIndex;
 }
 
@@ -203,6 +224,18 @@ std::string FitScriptGeneratorModel::getAdjustedFunctionIndex(std::string const 
   if (m_fittingMode == FittingMode::SEQUENTIAL)
     return parameter;
   return removeTopFunctionIndex(parameter);
+}
+
+std::string FitScriptGeneratorModel::getFullParameter(FitDomainIndex domainIndex, std::string const &parameter) const {
+  if (m_fittingMode == FittingMode::SEQUENTIAL)
+    return parameter;
+  return "f" + std::to_string(domainIndex.value) + "." + parameter;
+}
+
+std::string FitScriptGeneratorModel::getFullTie(FitDomainIndex domainIndex, std::string const &tie) const {
+  if (tie.empty() || isNumber(tie))
+    return tie;
+  return getFullParameter(domainIndex, tie);
 }
 
 void FitScriptGeneratorModel::updateParameterValue(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
@@ -312,17 +345,8 @@ void FitScriptGeneratorModel::updateParameterConstraint(std::string const &works
                                                         std::string const &constraint) {
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
 
-  auto const parameterName = splitConstraintString(constraint).first.toStdString();
-  m_fitDomains[domainIndex.value]->updateParameterConstraint(getAdjustedFunctionIndex(functionIndex), parameterName,
-                                                             constraint);
-}
-
-double FitScriptGeneratorModel::getParameterValue(FitDomainIndex domainIndex, std::string const &fullParameter) const {
-  auto const parameter = getAdjustedFunctionIndex(fullParameter);
-  if (domainIndex.value < numberOfDomains())
-    return m_fitDomains[domainIndex.value]->getParameterValue(parameter);
-
-  throw std::runtime_error("The domain index provided does not exist.");
+  m_fitDomains[domainIndex.value]->updateParameterConstraint(getAdjustedFunctionIndex(functionIndex),
+                                                             getParameterName(constraint), constraint);
 }
 
 bool FitScriptGeneratorModel::validParameter(std::string const &fullParameter) const {
@@ -452,6 +476,77 @@ void FitScriptGeneratorModel::setFittingMode(FittingMode fittingMode) {
 }
 
 bool FitScriptGeneratorModel::isSimultaneousMode() const { return m_fittingMode == FittingMode::SIMULTANEOUS; }
+
+std::string FitScriptGeneratorModel::getDomainName(FitDomainIndex domainIndex) const {
+  if (domainIndex.value < numberOfDomains())
+    return m_fitDomains[domainIndex.value]->domainName();
+
+  throw std::runtime_error("The domain index provided does not exist.");
+}
+
+bool FitScriptGeneratorModel::hasParameter(FitDomainIndex domainIndex, std::string const &fullParameter) const {
+  return getParameterProperty(&FitDomain::hasParameter, domainIndex, fullParameter);
+}
+
+void FitScriptGeneratorModel::setParameterValue(FitDomainIndex domainIndex, std::string const &fullParameter,
+                                                double value) {
+  auto const parameter = getAdjustedFunctionIndex(fullParameter);
+  if (domainIndex.value >= numberOfDomains())
+    throw std::runtime_error("The domain index provided does not exist.");
+
+  m_fitDomains[domainIndex.value]->setParameterValue(parameter, value);
+}
+
+void FitScriptGeneratorModel::setParameterFixed(FitDomainIndex domainIndex, std::string const &fullParameter,
+                                                bool fix) {
+  auto const parameter = getAdjustedFunctionIndex(fullParameter);
+  if (domainIndex.value >= numberOfDomains())
+    throw std::runtime_error("The domain index provided does not exist.");
+
+  m_fitDomains[domainIndex.value]->setParameterFixed(parameter, fix);
+}
+
+void FitScriptGeneratorModel::setParameterTie(FitDomainIndex domainIndex, std::string const &fullParameter,
+                                              std::string const &tie) {
+  if (domainIndex.value >= numberOfDomains())
+    throw std::runtime_error("The domain index provided does not exist.");
+
+  auto const fullTie = getFullTie(domainIndex, tie);
+  if (validTie(fullTie))
+    updateParameterTie(domainIndex, fullParameter, fullTie);
+}
+
+void FitScriptGeneratorModel::setParameterConstraint(FitDomainIndex domainIndex, std::string const &fullParameter,
+                                                     std::string const &constraint) {
+  auto const parameter = getAdjustedFunctionIndex(fullParameter);
+  if (domainIndex.value >= numberOfDomains())
+    throw std::runtime_error("The domain index provided does not exist.");
+
+  if (!constraint.empty()) {
+    m_fitDomains[domainIndex.value]->updateParameterConstraint(
+        getFunctionIndex(parameter), getParameterName(constraint), getAdjustedConstraint(constraint));
+  } else {
+    m_fitDomains[domainIndex.value]->removeParameterConstraint(parameter);
+  }
+}
+
+double FitScriptGeneratorModel::getParameterValue(FitDomainIndex domainIndex, std::string const &fullParameter) const {
+  return getParameterProperty(&FitDomain::getParameterValue, domainIndex, fullParameter);
+}
+
+bool FitScriptGeneratorModel::isParameterFixed(FitDomainIndex domainIndex, std::string const &fullParameter) const {
+  return getParameterProperty(&FitDomain::isParameterFixed, domainIndex, fullParameter);
+}
+
+std::string FitScriptGeneratorModel::getParameterTie(FitDomainIndex domainIndex,
+                                                     std::string const &fullParameter) const {
+  return getParameterProperty(&FitDomain::getParameterTie, domainIndex, fullParameter);
+}
+
+std::string FitScriptGeneratorModel::getParameterConstraint(FitDomainIndex domainIndex,
+                                                            std::string const &fullParameter) const {
+  return getParameterProperty(&FitDomain::getParameterConstraint, domainIndex, fullParameter);
+}
 
 void FitScriptGeneratorModel::checkParameterIsInAllDomains(std::string const &globalParameter) const {
   auto const hasParameter = [&globalParameter](auto const &fitDomain) {
