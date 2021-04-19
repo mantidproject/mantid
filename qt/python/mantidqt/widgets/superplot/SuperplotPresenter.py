@@ -233,8 +233,7 @@ class SuperplotPresenter:
             spectrumIndex = 0
         else:
             self._view.checkHoldButton(True)
-        self._view.setSpectrumSliderPosition(spectrumIndex)
-        self._view.setSpectrumSpinBoxValue(spectrumIndex)
+        self._updateSpectrumSlider(selection.keys(), spectrumIndex)
         self._updatePlot()
 
     def onSpectrumSliderMoved(self, position):
