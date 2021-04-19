@@ -119,13 +119,6 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             doc="The mask from this workspace will be applied before reduction",
         )
 
-        # self.declareProperty(
-        #     "EFixed",
-        #     37.02,
-        #     FloatBoundedValidator(lower=0.0),  # must be positive
-        #     "Value of fixed energy in meV : EI (EMode=Direct) or EF (EMode=Indirect))",
-        # )
-
         self.declareProperty(
             "Wavelength",
             1.4865,  # A
@@ -324,7 +317,6 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         target = self.getProperty("Target").value
         wavelength = self.getProperty("Wavelength").value
         e_fixed = UnitConversion.run('Wavelength', 'Energy', wavelength, 0, 0, 0, Elastic, 0)
-        # e_fixed = self.getProperty("EFixed").value
 
         ExtractUnmaskedSpectra(
             InputWorkspace=workspace_in,

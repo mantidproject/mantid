@@ -204,7 +204,6 @@ class WANDPowderReductionTest(unittest.TestCase):
             BackgroundWorkspace=bkg,
             Target="ElasticDSpacing",
             Wavelength=1.6513045600369298,
-            # EFixed=30,
             NumberBins=1000,
         )
 
@@ -217,15 +216,13 @@ class WANDPowderReductionTest(unittest.TestCase):
         self.assertAlmostEqual(y.max(), 19.03642005)
         self.assertAlmostEqual(x[0, y.argmax()], 2.1543333)
 
-        pd_out4_multi = WANDPowderReduction(
-            InputWorkspace=[data, data],
-            CalibrationWorkspace=cal,
-            BackgroundWorkspace=bkg,
-            Target="ElasticDSpacing",
-            Wavelength=1.6513045600369298,
-            # EFixed=30,
-            NumberBins=1000,
-            Sum=True)
+        pd_out4_multi = WANDPowderReduction(InputWorkspace=[data, data],
+                                            CalibrationWorkspace=cal,
+                                            BackgroundWorkspace=bkg,
+                                            Target="ElasticDSpacing",
+                                            Wavelength=1.6513045600369298,
+                                            NumberBins=1000,
+                                            Sum=True)
 
         x = pd_out4_multi.extractX()
         y = pd_out4_multi.extractY()
@@ -243,7 +240,6 @@ class WANDPowderReductionTest(unittest.TestCase):
             BackgroundWorkspace=bkg,
             Target="ElasticQ",
             Wavelength=1.6513045600369298,
-            # EFixed=30,
             NumberBins=2000,
             MaskAngle=60,
         )
@@ -259,16 +255,14 @@ class WANDPowderReductionTest(unittest.TestCase):
 
         # NOTE:
         # Need to check the physics
-        pd_out4_multi = WANDPowderReduction(
-            InputWorkspace=[data, data],
-            CalibrationWorkspace=cal,
-            BackgroundWorkspace=bkg,
-            Target="ElasticQ",
-            Wavelength=1.6513045600369298,
-            # EFixed=30,
-            NumberBins=2000,
-            MaskAngle=60,
-            Sum=True)
+        pd_out4_multi = WANDPowderReduction(InputWorkspace=[data, data],
+                                            CalibrationWorkspace=cal,
+                                            BackgroundWorkspace=bkg,
+                                            Target="ElasticQ",
+                                            Wavelength=1.6513045600369298,
+                                            NumberBins=2000,
+                                            MaskAngle=60,
+                                            Sum=True)
 
         x = pd_out4_multi.extractX()
         y = pd_out4_multi.extractY()
