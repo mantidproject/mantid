@@ -163,10 +163,8 @@ def create_vanadium_integration(van_run, calibration_directory):
 def handle_van_curves(van_curves, van_path):
     if len(van_curves) == 2:
         curves_ws = simple.AppendSpectra(InputWorkspace1=van_curves[0], InputWorkspace2=van_curves[1])
-        simple.DeleteWorkspace(van_curves[1])
     else:
         curves_ws = van_curves[0]
-    simple.DeleteWorkspace(van_curves[0])
     simple.SaveNexus(curves_ws, van_path)
 
 
@@ -243,9 +241,9 @@ def create_calibration_files(ceria_run, van_run, int_van, van_curves_file, calib
     handle_van_curves(curves, van_curves_file)
     if len(output) == 1:
         # get the values needed for saving out the .prm files
-        difa = output[0]['difa']
-        difc = output[0]['difc']
-        tzero = output[0]['tzero']
+        difa = [output[0]['difa']]
+        difc = [output[0]['difc']]
+        tzero = [output[0]['tzero']]
         save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", [crop_name],
                          tzero, difc, difa)
         if spectrum_numbers is not None:
@@ -333,7 +331,7 @@ def run_calibration(sample_ws,
     # initial calibration of instrument
     cal_initial = run_pd_calibration(kwargs)[0]
 
-    ws_van = simple.Load(vanadium_workspace)
+    ws_van = simple.CloneWorkspace(vanadium_workspace)
     simple.NormaliseByCurrent(InputWorkspace=ws_van, OutputWorkspace=ws_van)
     simple.ApplyDiffCal(InstrumentWorkspace=ws_van, CalibrationWorkspace=cal_initial)
     ws_van_d = simple.ConvertUnits(InputWorkspace=ws_van, Target='dSpacing')
@@ -370,7 +368,7 @@ def run_calibration(sample_ws,
 
             # final calibration of focused data
             kwargs["InputWorkspace"] = focused_North
-            kwargs["OutputCalibrationTable"] = 'engggui_calibration_bank_1'
+            kwargs["OutputCalibrationTable"] = 'engg_calibration_bank_1'
             kwargs["DiagnosticWorkspaces"] = 'diag_North'
 
             cal_north = run_pd_calibration(kwargs)[0]
@@ -378,25 +376,19 @@ def run_calibration(sample_ws,
             curves_north = simple.CloneWorkspace(curves_North)
             curves_output.append(curves_north)
 
-            simple.DeleteWorkspace(curves_north)
-            simple.DeleteWorkspace(focused_North)
-
         if bank == '2' or bank is None:
             df_kwarg = {"GroupingFileName": SOUTH_BANK_CAL}
             focused_South, curves_South = focus_and_normalise(ws_d, ws_van_d, df_kwarg)
 
             # final calibration of focused data
             kwargs["InputWorkspace"] = focused_South
-            kwargs["OutputCalibrationTable"] = 'engggui_calibration_bank_2'
+            kwargs["OutputCalibrationTable"] = 'engg_calibration_bank_2'
             kwargs["DiagnosticWorkspaces"] = 'diag_South'
 
             cal_north = run_pd_calibration(kwargs)[0]
             cal_output.append(cal_north)
             curves_south = simple.CloneWorkspace(curves_South)
             curves_output.append(curves_south)
-
-            simple.DeleteWorkspace(curves_south)
-            simple. DeleteWorkspace(focused_South)
 
     else:
         grp_ws, _, _ = simple.CreateGroupingWorkspace(InputWorkspace=sample_raw)  # blank grp workspace from inst
@@ -419,9 +411,6 @@ def run_calibration(sample_ws,
 
         curves_cropped = simple.CloneWorkspace(curves_Cropped)
         curves_output.append(curves_cropped)
-
-        simple.DeleteWorkspace(curves_cropped)
-        simple.DeleteWorkspace(focused_Cropped)
 
     simple.DeleteWorkspace(ws_van)
     simple.DeleteWorkspace(ws_van_d)
@@ -453,7 +442,7 @@ def load_van_curves_file(curves_van):
         @param curves_van:: the path to the integrated vanadium file
 
         """
-    van_curves_ws = simple.Load(curves, OutputWorkspace="curves_van")
+    van_curves_ws = simple.Load(curves_van, OutputWorkspace="curves_van")
     return van_curves_ws
 
 
@@ -542,17 +531,22 @@ def create_difc_zero_workspace(difc, tzero, crop_on, name):
         actual_i = correction + i
         # retrieve required workspace
         if not plot_spec_num:
-            bank_ws = simple.AnalysisDataService.retrieve("engg_calibration_bank_{}".format(actual_i))
+            if actual_i == 1:
+                fitparam_ws = simple.AnalysisDataService.retrieve("diag_North_fitparam")
+            elif actual_i == 2:
+                fitparam_ws = simple.AnalysisDataService.retrieve("diag_South_fitparam")
         else:
-            bank_ws = simple.AnalysisDataService.retrieve(name)
+            fitparam_ws = simple.AnalysisDataService.retrieve("diag_Cropped_fitparam")
+
+        expected_dspacing_peaks = Utils.default_ceria_expected_peaks(final=True)
 
         # get the data to be used
         x_val = []
         y_val = []
         y2_val = []
-        for irow in range(0, bank_ws.rowCount()):
-            x_val.append(bank_ws.cell(irow, 0))
-            y_val.append(bank_ws.cell(irow, 5))
+        for irow in range(0, fitparam_ws.rowCount()):
+            x_val.append(expected_dspacing_peaks[-(irow+1)])
+            y_val.append(fitparam_ws.cell(irow, 5))
             y2_val.append(x_val[irow] * difc[i - 1] + tzero[i - 1])
 
         # create workspaces to temporary hold the data
