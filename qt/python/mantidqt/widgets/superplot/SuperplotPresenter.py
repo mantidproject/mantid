@@ -151,7 +151,7 @@ class SuperplotPresenter:
                 maximum = nbHist
         self._view.setSpectrumDisabled(False)
         self._view.setSpectrumSliderPosition(position)
-        self._view.setSpectrumSliderMax(nbHist  - 1)
+        self._view.setSpectrumSliderMax(maximum - 1)
         self._view.setSpectrumSpinBoxValue(position)
         self._view.setSpectrumSpinBoxMax(maximum - 1)
 
