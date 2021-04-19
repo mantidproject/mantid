@@ -139,6 +139,7 @@ class SuperplotView(QWidget):
             if item:
                 self._sideView.workspacesList.setCurrentItem(
                         item[0], 0, QItemSelectionModel.Select)
+        self._sideView.workspacesList.expandAll()
         self._sideView.workspacesList.blockSignals(False)
 
     def getSelectedWorkspacesFromList(self):
