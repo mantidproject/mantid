@@ -41,12 +41,13 @@ digraph PelicanReduction {
   subgraph cluster {
 
       label="LoadMergeTransfer"
-
+      color="orange"
       LoadPLN -> MergeRuns
       MergeRuns -> ConvertUnits
   }
 
   subgraph mydefs {
+      node[fillcolor="orange", style = filled]
       LoadMergeTransfer
       LoadMergeTransferA [label="LoadMergeTransfer"]
       LoadMergeTransferB [label="LoadMergeTransfer"]
