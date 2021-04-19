@@ -70,7 +70,7 @@ class DataContext(object):
 
     def clear(self):
         self._loaded_data.clear()
-        self._current_runs = []
+        self.current_runs = []
 
     def remove_workspace_by_name(self, workspace_name):
         runs_removed = self._loaded_data.remove_workspace_by_name(workspace_name, self.instrument)

@@ -12,8 +12,10 @@ from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QWidget, QTableWidgetItem
 
 from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model import EAGroupingTabModel
-from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_presenter import EAGroupingTablePresenter
-from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view import EAGroupingTableView
+from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_presenter import EAGroupingTablePresenter, \
+    REBIN_FIXED_OPTION, REBIN_VARIABLE_OPTION
+from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view import EAGroupingTableView, \
+    INVERSE_GROUP_TABLE_COLUMNS
 from mantidqt.utils.observer_pattern import Observer
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_ea_tests
 
@@ -265,6 +267,182 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(mock_remove_selected_groups.call_count, 1)
         self.assertEqual(mock_notify_data_changed.call_count, 1)
         mock_remove_group_from_analysis.assert_has_calls([mock.call("mock_name")])
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_presenter."
+                "EAGroupingTablePresenter.handle_to_analyse_column_changed")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_presenter."
+                "EAGroupingTablePresenter.handle_rebin_column_changed")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_presenter."
+                "EAGroupingTablePresenter.handle_rebin_option_column_changed")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_presenter."
+                "EAGroupingTablePresenter.handle_update")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view.EAGroupingTableView."
+                "get_table_item")
+    def test_handle_data_changed(self, mock_get_table_item, mock_handle_update, mock_handle_rebin_option,
+                                 mock_handle_rebin_column, mock_handle_to_analyse):
+        # setup
+        row = 3
+        column = 4
+        mock_table_item = mock.Mock()
+        mock_table_item.text.return_value = "mock_workspace_name"
+        mock_get_table_item.return_value = mock_table_item
+        mock_handle_to_analyse.return_value = "mock_value"
+
+        self.presenter.handle_data_change(row, column)
+
+        # Assert statements
+        mock_handle_to_analyse.assert_called_once_with(column, mock_table_item, "mock_workspace_name")
+        mock_handle_rebin_column.assert_called_once_with(column, row, mock_table_item)
+        mock_handle_rebin_option.assert_called_once_with(column, mock_table_item, "mock_workspace_name")
+        mock_handle_update.assert_called_once_with("mock_value")
+        mock_get_table_item.assert_has_calls([mock.call(row, column),
+                                              mock.call(row, INVERSE_GROUP_TABLE_COLUMNS['workspace_name'])])
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_presenter."
+                "EAGroupingTablePresenter.to_analyse_data_checkbox_changed")
+    def test_handle_to_analyse_column_changed_if_column_is_to_analyse(self, mock_to_analyse):
+        # setup
+        ws_name = "mock_workspace"
+        mock_changed_item = mock.Mock()
+        mock_changed_item.checkState.return_value = "mock_state"
+
+        update_model = self.presenter.handle_to_analyse_column_changed(INVERSE_GROUP_TABLE_COLUMNS['to_analyse'],
+                                                                       mock_changed_item, ws_name)
+        # Assert statements
+        # method should return False
+        self.assertEqual(update_model, False)
+        mock_to_analyse.assert_called_once_with("mock_state", ws_name)
+        mock_changed_item.checkState.assert_called_once()
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_presenter."
+                "EAGroupingTablePresenter.to_analyse_data_checkbox_changed")
+    def test_handle_to_analyse_column_changed_if_column_is_not_to_analyse(self, mock_to_analyse):
+        # setup
+        ws_name = "mock_workspace"
+        mock_changed_item = mock.Mock()
+        mock_changed_item.checkState.return_value = "mock_state"
+
+        update_model = self.presenter.handle_to_analyse_column_changed(INVERSE_GROUP_TABLE_COLUMNS['workspace_name'],
+                                                                       mock_changed_item, ws_name)
+        # Assert statements
+        # method should return True
+        self.assertEqual(update_model, True)
+        mock_to_analyse.assert_not_called()
+        mock_changed_item.checkState.assert_not_called()
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view.EAGroupingTableView."
+                "rebin_fixed_chosen")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view.EAGroupingTableView."
+                "rebin_variable_chosen")
+    def test_handle_rebin_column_changed_when_rebin_column_is_not_changed(self, mock_rebin_variable, mock_rebin_fixed):
+        mock_changed_item = "mock_item"
+
+        self.presenter.handle_rebin_column_changed(INVERSE_GROUP_TABLE_COLUMNS['to_analyse'], 1, mock_changed_item)
+
+        # Assert statements
+        mock_rebin_fixed.assert_not_called()
+        mock_rebin_variable.assert_not_called()
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view.EAGroupingTableView."
+                "rebin_fixed_chosen")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view.EAGroupingTableView."
+                "rebin_variable_chosen")
+    def test_handle_rebin_column_changed_when_rebin_fixed_is_chosen(self, mock_rebin_variable, mock_rebin_fixed):
+        mock_changed_item = mock.Mock()
+        mock_changed_item.text.return_value = REBIN_FIXED_OPTION
+        row = 1
+
+        self.presenter.handle_rebin_column_changed(INVERSE_GROUP_TABLE_COLUMNS['rebin'], row, mock_changed_item)
+
+        # Assert statements
+        mock_rebin_fixed.assert_called_once_with(row)
+        mock_rebin_variable.assert_not_called()
+        mock_changed_item.text.assert_called_once()
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view.EAGroupingTableView."
+                "rebin_fixed_chosen")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view.EAGroupingTableView."
+                "rebin_variable_chosen")
+    def test_handle_rebin_column_changed_when_rebin_variable_is_chosen(self, mock_rebin_variable, mock_rebin_fixed):
+        mock_changed_item = mock.Mock()
+        mock_changed_item.text.return_value = REBIN_VARIABLE_OPTION
+        row = 4
+
+        self.presenter.handle_rebin_column_changed(INVERSE_GROUP_TABLE_COLUMNS['rebin'], row, mock_changed_item)
+
+        # Assert statements
+        mock_rebin_variable.assert_called_once_with(row)
+        mock_rebin_fixed.assert_not_called()
+        mock_changed_item.text.assert_has_calls([mock.call(), mock.call()])
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model.EAGroupingTabModel.handle_rebin")
+    def test_handle_rebin_option_column_changed_with_wrong_column(self, mock_handle_rebin):
+        mock_changed_item = mock.Mock()
+        ws_name = "mock_name"
+
+        self.presenter.handle_rebin_option_column_changed(INVERSE_GROUP_TABLE_COLUMNS['to_analyse'], mock_changed_item,
+                                                          ws_name)
+
+        # Assert statements
+        mock_changed_item.text.assert_not_called()
+        self.presenter._view.warning_popup.assert_not_called()
+        mock_handle_rebin.assert_not_called()
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model.EAGroupingTabModel.handle_rebin")
+    def test_handle_rebin_option_column_changed_with_no_given_parameters(self, mock_handle_rebin):
+        mock_changed_item = mock.Mock()
+        mock_changed_item.text.return_value = "Steps: "
+        ws_name = "mock_name"
+
+        self.presenter.handle_rebin_option_column_changed(INVERSE_GROUP_TABLE_COLUMNS['rebin_options'],
+                                                          mock_changed_item, ws_name)
+
+        # Assert statements
+        mock_changed_item.text.assert_called_once()
+        self.presenter._view.warning_popup.assert_called_once_with("Rebin parameters not given")
+        mock_handle_rebin.assert_not_called()
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model.EAGroupingTabModel.handle_rebin")
+    def test_handle_rebin_option_column_with_a_fixed_step(self, mock_handle_rebin):
+        mock_changed_item = mock.Mock()
+        mock_changed_item.text.return_value = "Steps: 3 "
+        ws_name = "mock_name"
+
+        self.presenter.handle_rebin_option_column_changed(INVERSE_GROUP_TABLE_COLUMNS['rebin_options'],
+                                                          mock_changed_item, ws_name)
+
+        # Assert statements
+        mock_changed_item.text.assert_called_once()
+        self.presenter._view.warning_popup.assert_not_called()
+        mock_handle_rebin.assert_called_once_with(name=ws_name, rebin_type="Fixed", rebin_param=3.0)
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model.EAGroupingTabModel.handle_rebin")
+    def test_handle_rebin_option_column_with_an_invalid_fixed_step(self, mock_handle_rebin):
+        mock_changed_item = mock.Mock()
+        mock_changed_item.text.return_value = "Steps: a "
+        ws_name = "mock_name"
+
+        self.presenter.handle_rebin_option_column_changed(INVERSE_GROUP_TABLE_COLUMNS['rebin_options'],
+                                                          mock_changed_item, ws_name)
+
+        # Assert statements
+        mock_changed_item.text.assert_called_once()
+        self.presenter._view.warning_popup.assert_called_once_with("Given rebin step is invalid")
+        mock_handle_rebin.assert_not_called()
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model.EAGroupingTabModel.handle_rebin")
+    def test_handle_rebin_option_column_with_a_variable_step(self, mock_handle_rebin):
+        mock_changed_item = mock.Mock()
+        mock_changed_item.text.return_value = "Bin Boundaries: 3,10,8"
+        ws_name = "mock_name"
+
+        self.presenter.handle_rebin_option_column_changed(INVERSE_GROUP_TABLE_COLUMNS['rebin_options'],
+                                                          mock_changed_item, ws_name)
+
+        # Assert statements
+        mock_changed_item.text.assert_called_once()
+        self.presenter._view.warning_popup.assert_not_called()
+        mock_handle_rebin.assert_called_once_with(name=ws_name, rebin_type="Variable", rebin_param=" 3,10,8")
 
 
 if __name__ == '__main__':

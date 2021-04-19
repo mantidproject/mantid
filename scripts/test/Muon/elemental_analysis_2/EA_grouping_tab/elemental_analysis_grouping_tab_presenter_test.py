@@ -52,8 +52,8 @@ class EAGroupingTabPresenterTest(unittest.TestCase):
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector2))
         run = 9999
         self.context.data_context._loaded_data.add_data(run=[run], workspace=grpws)
-        loadedData = self.context.data_context._loaded_data
-        self.context.group_context.reset_group_to_default(loadedData)
+        loaded_data = self.context.data_context._loaded_data
+        self.context.group_context.reset_group_to_default(loaded_data)
 
     def tearDown(self):
         self.obj = None
@@ -82,6 +82,35 @@ class EAGroupingTabPresenterTest(unittest.TestCase):
         self.presenter.on_clear_requested()
 
         self.assertEqual(self.grouping_table_view.num_rows(), 0)
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model.EAGroupingTabModel.is_data_loaded")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_widget_presenter.EAGroupingTabPresenter."
+                "update_view_from_model")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_widget_presenter.EAGroupingTabPresenter."
+                "update_description_text")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_widget_presenter.EAGroupingTabPresenter."
+                "plot_default_groups")
+    def test_handle_data_loaded_when_data_loaded(self, mock_plot_default_groups, mock_update_text, mock_update_view,
+                                                 mock_is_data_loaded):
+        mock_is_data_loaded.return_value = True
+
+        self.presenter.handle_new_data_loaded()
+
+        # Assert statements
+        mock_update_text.assert_called_once()
+        mock_update_view.assert_called_once()
+        mock_plot_default_groups.assert_called_once()
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model.EAGroupingTabModel.is_data_loaded")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_widget_presenter.EAGroupingTabPresenter."
+                "on_clear_requested")
+    def test_handle_data_loaded_when_data_not_loaded(self, mock_on_clear_requested, mock_is_data_loaded):
+        mock_is_data_loaded.return_value = False
+
+        self.presenter.handle_new_data_loaded()
+
+        # Assert statements
+        mock_on_clear_requested.assert_called_once()
 
 
 if __name__ == '__main__':
