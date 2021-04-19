@@ -1338,8 +1338,7 @@ void InstrumentWidgetMaskTab::storeMask() {
 
 void InstrumentWidgetMaskTab::changedIntegrationRange(double /*unused*/,
                                                       double /*unused*/) {
-  InstrumentWidgetTab* baseTab = this;
-  if (m_instrWidget->isCurrentTab(baseTab)) {
+  if (m_instrWidget->isCurrentTab(this)) {
     enableApplyButtons();
   }
 }
