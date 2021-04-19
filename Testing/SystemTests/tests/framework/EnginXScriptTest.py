@@ -10,7 +10,7 @@ import systemtesting
 
 import mantid.simpleapi as simple
 
-from mantid import config, mtd
+from mantid import config
 from Engineering.EnginX import main
 
 DIRS = config['datasearch.directories'].split(';')
@@ -19,114 +19,6 @@ ref_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(DIRS[0]))
 root_directory = os.path.join(DIRS[0], "ENGINX")
 cal_directory = os.path.join(root_directory, "cal")
 focus_directory = os.path.join(root_directory, "focus")
-
-
-class CreateVanadiumTest(systemtesting.MantidSystemTest):
-
-    def runTest(self):
-        _make_test_directories()
-        main(vanadium_run="236516", user="test", focus_run=None, force_vanadium=True, directory=cal_directory)
-
-    def validate(self):
-        return "eng_vanadium_integration", "engggui_vanadium_integration.nxs"
-
-    def cleanup(self):
-        simple.mtd.clear()
-        _try_delete(cal_directory)
-
-
-class CreateCalibrationWholeTest(systemtesting.MantidSystemTest):
-
-    def runTest(self):
-        _make_test_directories()
-        main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, force_cal=True, directory=cal_directory)
-
-    def validate(self):
-        self.tolerance_is_rel_err = True
-        self.tolerance = 5e-2
-
-        # this is neccesary due to appendspectra creating spectrum numbers of 0
-        self.disableChecking.append('SpectraMap')
-        if systemtesting.using_gsl_v1():
-            return ("engg_calibration_bank_1", "engggui_calibration_bank_1_gsl1.nxs",
-                    "engg_calibration_bank_2", "engggui_calibration_bank_2_gsl1.nxs",
-                    "engg_calibration_banks_parameters", "engggui_calibration_banks_parameters_gsl1.nxs",
-                    "Engg difc Zero Peaks Bank 1", "engggui_difc_zero_peaks_bank_1.nxs",
-                    "Engg difc Zero Peaks Bank 2", "engggui_difc_zero_peaks_bank_2.nxs")
-        else:
-            return ("engg_calibration_bank_1", "engggui_calibration_bank_1.nxs",
-                    "engg_calibration_bank_2", "engggui_calibration_bank_2.nxs",
-                    "engg_calibration_banks_parameters", "engggui_calibration_banks_parameters.nxs",
-                    "Engg difc Zero Peaks Bank 1", "engggui_difc_zero_peaks_bank_1.nxs",
-                    "Engg difc Zero Peaks Bank 2", "engggui_difc_zero_peaks_bank_2.nxs"
-                    )
-
-    def cleanup(self):
-        simple.mtd.clear()
-        _try_delete(cal_directory)
-
-
-class CreateCalibrationCroppedTest(systemtesting.MantidSystemTest):
-
-    def runTest(self):
-        _make_test_directories()
-        main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, force_cal=True, directory=cal_directory,
-             crop_type="spectra", crop_on="1-20")
-
-    def validateSingleColumn(self, col1, col2, tolerance):
-        assert len(col1) == len(col2)
-        for a, b in zip(col1, col2):
-            den = 0.5 * (abs(a) + abs(b))
-            assert (abs(a - b) / den) < tolerance
-
-    def validate(self):
-        self.tolerance_is_rel_err = True
-        self.tolerance = 1e-2
-
-        # this is neccesary due to appendspectra creating spectrum numbers of 0
-        self.disableChecking.append('SpectraMap')
-        # fitted peaks table workspace is v sensitive to changes in input data so just validate X0 col
-        if systemtesting.using_gsl_v1():
-            reffile = simple.LoadNexus(Filename="engggui_calibration_bank_cropped_gsl1.nxs")
-            self.validateSingleColumn(mtd["cropped"].column("X0"),reffile.column("X0"),self.tolerance)
-            return ("engg_calibration_banks_parameters", "engggui_calibration_cropped_parameters_gsl1.nxs",
-                    "Engg difc Zero Peaks Bank cropped", "engggui_difc_zero_peaks_bank_cropped_gsl1.nxs")
-        else:
-            reffile = simple.LoadNexus(Filename="engggui_calibration_bank_cropped.nxs")
-            self.validateSingleColumn(mtd["cropped"].column("X0"),reffile.column("X0"),self.tolerance)
-            return ("engg_calibration_banks_parameters", "engggui_calibration_bank_cropped_parameters.nxs",
-                    "Engg difc Zero Peaks Bank cropped", "engggui_difc_zero_peaks_bank_cropped.nxs")
-
-    def cleanup(self):
-        simple.mtd.clear()
-        _try_delete(cal_directory)
-
-
-class CreateCalibrationBankTest(systemtesting.MantidSystemTest):
-
-    def runTest(self):
-        _make_test_directories()
-        main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, force_cal=True, directory=cal_directory,
-             crop_type="banks", crop_on="South")
-
-    def validate(self):
-        self.tolerance_is_rel_err = True
-        self.tolerance = 1e-2
-
-        # this is neccesary due to appendspectra creating spectrum numbers of 0
-        self.disableChecking.append('SpectraMap')
-        if systemtesting.using_gsl_v1():
-            return ("engg_calibration_bank_2", "engggui_calibration_bank_2_gsl1.nxs",
-                    "engg_calibration_banks_parameters", "engggui_calibration_bank_south_parameters_gsl1.nxs",
-                    "Engg difc Zero Peaks Bank 2", "engggui_difc_zero_peaks_bank_2.nxs")
-        else:
-            return ("engg_calibration_bank_2", "engggui_calibration_bank_2.nxs",
-                    "engg_calibration_banks_parameters", "engggui_calibration_bank_south_parameters.nxs",
-                    "Engg difc Zero Peaks Bank 2", "engggui_difc_zero_peaks_bank_2.nxs")
-
-    def cleanup(self):
-        simple.mtd.clear()
-        _try_delete(cal_directory)
 
 
 class FocusBothBanks(systemtesting.MantidSystemTest):
