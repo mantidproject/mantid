@@ -17,19 +17,22 @@ namespace API {
  *  @param name :: The name to assign to the property
  *  @param direction :: The direction of the function (i.e. input or output)
  */
-FunctionProperty::FunctionProperty(const std::string &name, const unsigned int direction)
+FunctionProperty::FunctionProperty(const std::string &name, const unsigned int direction,
+                                   const PropertyMode::Type optional)
     : Kernel::PropertyWithValue<std::shared_ptr<IFunction>>(
-          name, std::shared_ptr<IFunction>(), Kernel::IValidator_sptr(new Kernel::NullValidator()), direction) {}
+          name, std::shared_ptr<IFunction>(), Kernel::IValidator_sptr(new Kernel::NullValidator()), direction),
+      m_optional(optional) {}
 
 /// Copy constructor
 FunctionProperty::FunctionProperty(const FunctionProperty &right)
-    : Kernel::PropertyWithValue<std::shared_ptr<IFunction>>(right) {}
+    : Kernel::PropertyWithValue<std::shared_ptr<IFunction>>(right), m_optional(right.m_optional) {}
 
 /// Copy assignment operator. Copies the pointer to the function.
 FunctionProperty &FunctionProperty::operator=(const FunctionProperty &right) {
-  if (&right == this)
+  if (&right == this && right.m_optional == m_optional)
     return *this;
   Kernel::PropertyWithValue<std::shared_ptr<IFunction>>::operator=(right);
+  m_optional = right.m_optional;
   return *this;
 }
 
@@ -71,6 +74,11 @@ Json::Value FunctionProperty::valueAsJson() const { return Json::Value(value());
  */
 std::string FunctionProperty::getDefault() const { return ""; }
 
+/** Returns true if this property is optional.
+ *  @return true if this property is optional.
+ */
+bool FunctionProperty::isOptional() const { return (m_optional == PropertyMode::Optional); }
+
 /** Set the function definition.
  *  Also tries to create the function with FunctionFactory.
  *  @param value :: The function definition string.
@@ -78,6 +86,13 @@ std::string FunctionProperty::getDefault() const { return ""; }
  */
 std::string FunctionProperty::setValue(const std::string &value) {
   std::string error;
+
+  if (isOptional() && value.empty()) {
+    m_value = std::shared_ptr<IFunction>();
+    m_definition = value;
+    return error;
+  }
+
   try {
     m_value = std::shared_ptr<IFunction>(FunctionFactory::Instance().createInitialized(value));
     m_definition = value;
@@ -106,7 +121,7 @@ std::string FunctionProperty::setValueFromJson(const Json::Value &value) {
  *  @returns A user level description of the problem or "" if it is valid.
  */
 std::string FunctionProperty::isValid() const {
-  if (direction() == Kernel::Direction::Output) {
+  if (isOptional() || direction() == Kernel::Direction::Output) {
     return "";
   } else {
     return isDefault() ? "Function is empty." : "";
