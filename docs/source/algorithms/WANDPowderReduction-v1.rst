@@ -50,7 +50,7 @@ Usage
                        CalibrationWorkspace=vanadium,
                        Target='Theta',
                        NumberBins=1000,
-                       OutputWorkspace='silicon_powder',
+                       OutputWS='silicon_powder',
                        Sum=False)
 
 .. figure:: /images/WANDPowderReduction_silicon_powder.png
@@ -68,7 +68,7 @@ Usage
                        XMin=4.5,
                        Xmax=6.25,
                        NumberBins=500,
-                       OutputWorkspace='silicon_powder_q',
+                       OutputWS='silicon_powder_q',
                        Sum=False)
 
 .. figure:: /images/WANDPowderReduction_silicon_powder_q.png
@@ -84,7 +84,7 @@ Usage
                        CalibrationWorkspace=vanadium,
                        Target='ElasticDSpacing',
                        NumberBins=1000,
-                       OutputWorkspace='silicon_powder_d_spacing',
+                       OutputWS='silicon_powder_d_spacing',
                        Sum=False)
 
 .. figure:: /images/WANDPowderReduction_silicon_powder_d.png
@@ -107,7 +107,7 @@ Usage
                        BackgroundWorkspace=bkg,
                        Target='Theta',
                        NumberBins=1000,
-                       OutputWorkspace='silicon_powder_background',
+                       OutputWS='silicon_powder_background',
                        Sum=False)
 
    # Scale background by 50%
@@ -117,7 +117,7 @@ Usage
                        BackgroundScale=0.5,
                        Target='Theta',
                        NumberBins=1000,
-                       OutputWorkspace='silicon_powder_background_0.5',
+                       OutputWS='silicon_powder_background_0.5',
                        Sum=False)
 
 .. figure:: /images/WANDPowderReduction_silicon_powder_bkg.png
@@ -137,7 +137,7 @@ Usage
          Target='Theta',
          NumberBins=1000,
          NormaliseBy='Time',
-         OutputWorkspace=f'si1_reduced',
+         OutputWS=f'si1_reduced',
          Sum=False,
          )
 
@@ -148,7 +148,7 @@ Usage
          Target='Theta',
          NumberBins=1000,
          NormaliseBy='Time',
-         OutputWorkspace=f'si2_reduced',
+         OutputWS=f'si2_reduced',
          Sum=False,
          )
 
@@ -159,7 +159,7 @@ Usage
          Target='Theta',
          NumberBins=1000,
          NormaliseBy='Time',
-         OutputWorkspace=f'si_reduced',
+         OutputWS=f'si_reduced',
          Sum=True,
          )
 
@@ -170,7 +170,7 @@ Usage
          Target='Theta',
          NumberBins=1000,
          NormaliseBy='Time',
-         OutputWorkspace=f'si_reduced',
+         OutputWS=f'si_reduced',
          Sum=False,
          )
 
