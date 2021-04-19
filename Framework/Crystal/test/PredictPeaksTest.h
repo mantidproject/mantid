@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/PredictPeaks.h"
 #include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
@@ -348,6 +349,26 @@ public:
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
+  }
+
+  void test_missing_instrument_sample_pos() {
+    // PredictPeaks was segfaulting when the instrument in the
+    // InputWorkspace didn't have the sample position set, this checks
+    // that it no longer segfaults
+    FrameworkManager::Instance().exec("CreatePeaksWorkspace", 2, "OutputWorkspace", "peaks_ws");
+    FrameworkManager::Instance().exec("SetUB", 2, "Workspace", "peaks_ws");
+
+    PredictPeaks alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "peaks_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "PredictPeaksTest_OutputWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+
+    // check that the algorithm didn't run
+    TS_ASSERT(!alg.isExecuted());
+
+    AnalysisDataService::Instance().remove("peaks_ws");
   }
 };
 
