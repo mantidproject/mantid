@@ -127,8 +127,8 @@ class SuperplotPresenter:
                 if data[0] == name:
                     spectra.append(data[1])
             self._view.setSpectraList(name, spectra)
-        if names:
-            self._view.setSelectedWorkspacesInList([names[-1]])
+        self._view.setSelectedWorkspacesInList([])
+        self._updateSpectrumSlider([], 0)
         self._updatePlot()
 
     def _updateSpectrumSlider(self, wsNames, position):
@@ -140,6 +140,11 @@ class SuperplotPresenter:
             position (int): position that the slider should take
         """
         if not wsNames:
+            self._view.setSpectrumSliderPosition(position)
+            self._view.setSpectrumSliderMax(position)
+            self._view.setSpectrumSpinBoxValue(position)
+            self._view.setSpectrumSpinBoxMax(position)
+            self._view.setSpectrumDisabled(True)
             return
         maximum = None
         for wsName in wsNames:
@@ -280,7 +285,7 @@ class SuperplotPresenter:
             self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
                                           self.BIN_MODE_TEXT])
             self._view.setMode(mode)
-        self._view.setSelectedWorkspacesInList([wsName])
+        self._updateSpectrumSlider([], 0)
         self._updatePlot()
 
     def onHoldButtonToggled(self, state):

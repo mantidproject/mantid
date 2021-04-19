@@ -200,11 +200,13 @@ class SuperplotView(QWidget):
         Args:
             name (str): name of the workspace
         """
+        self._sideView.workspacesList.blockSignals(True)
         wsItem = self._sideView.workspacesList.findItems(name,
                                                          Qt.MatchExactly, 0)
         for item in wsItem:
             index = self._sideView.workspacesList.indexOfTopLevelItem(item)
             self._sideView.workspacesList.takeTopLevelItem(index)
+        self._sideView.workspacesList.blockSignals(False)
 
     def modifySpectrumLabel(self, wsName, spectrumIndex, label, color):
         """
