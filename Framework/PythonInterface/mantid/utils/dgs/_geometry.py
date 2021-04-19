@@ -13,7 +13,7 @@ from mantid.geometry import OrientedLattice
 import mantid.kernel as mk
 from enum import Enum
 import warnings
-warnings.filterwarnings("ignore", category=RuntimeWarning) 
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 
 __all__ = ['qangle', 'ErrorCodes']
@@ -97,7 +97,7 @@ def qangle(*,  # force keyword arguments
     """
     The function calculates the momentum transfer in the lab frame,
     scattered momentum, and vertical goniometer angle,
-    based on HKL, DeltaE and Ei. 
+    based on HKL, DeltaE and Ei.
     Detailed documentation at https://code.ornl.gov/spectroscopy/dgs/status/-/issues/31
 
     Parameters:
@@ -244,12 +244,12 @@ def qangle(*,  # force keyword arguments
     chi = np.degrees(chi)
     delta = np.degrees(delta)
     omega = np.degrees(omega)
-    in_plane_Q_angle = np.degrees(in_plane_Q_angle) 
-    out_plane_Q_angle = np.degrees(out_plane_Q_angle) 
+    in_plane_Q_angle = np.degrees(in_plane_Q_angle)
+    out_plane_Q_angle = np.degrees(out_plane_Q_angle)
 
     if detector_constraints:
         error_code[((chi<horizontal_extent[0]) | (chi>horizontal_extent[1]) |
-                   (delta<vertical_extent[0]) | (delta>vertical_extent[1])) 
+                   (delta<vertical_extent[0]) | (delta>vertical_extent[1]))
                    & (error_code==ErrorCodes.CORRECT)
                     ] =  ErrorCodes.OUTSIDE_DETECTOR
         error_code[(chi>horizontal_extent_low[0]) & (chi<horizontal_extent_low[1]) &

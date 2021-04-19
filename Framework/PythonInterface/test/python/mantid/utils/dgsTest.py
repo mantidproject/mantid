@@ -80,7 +80,7 @@ class DgsUtilsTest(unittest.TestCase):
         self.run_test(ol, expected_Qx, expected_Qy, expected_Qz, expected_in_plane_Q_angle, expected_out_plane_Q_angle,
                  expected_in_plane_kf_angle, expected_out_plane_kf_angle, expected_omega, expected_error_code, **pars)
 
-        
+
     def test_qangle_NoGC_NoOC_Ei10(self):
         # No geometry constraints, no omega constraints, all parameters are arrays,
         # except for Ei=10
