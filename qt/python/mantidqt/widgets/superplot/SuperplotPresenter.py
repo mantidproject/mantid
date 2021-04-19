@@ -319,6 +319,7 @@ class SuperplotPresenter:
                                               self.BIN_MODE_TEXT])
                 self._view.setMode(mode)
         self._view.setSelectedWorkspacesInList(selection.keys())
+        self._view.checkHoldButton(False)
         self._updatePlot()
 
     def onModeChanged(self, mode):
