@@ -307,6 +307,7 @@ class SuperplotPresenter:
             else:
                 self._model.setBinMode()
                 self._view.setAvailableModes([self.BIN_MODE_TEXT])
+            self._view.setSelectedWorkspacesInList(selection.keys())
         else:
             for wsName in selection:
                 spectraList = self._view.getSpectraList(wsName)
@@ -318,7 +319,7 @@ class SuperplotPresenter:
                 self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
                                               self.BIN_MODE_TEXT])
                 self._view.setMode(mode)
-        self._view.setSelectedWorkspacesInList(selection.keys())
+            self._view.setSelectedWorkspacesInList([])
         self._view.checkHoldButton(False)
         self._updatePlot()
 
