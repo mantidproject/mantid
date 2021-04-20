@@ -104,6 +104,7 @@ Instrument Updates
 ##################
 
 - Added new detector to MANDI instrument geomety with updated calibration. Valid-to dates changed in previous files ``MANDI_Definition_2020_04_01.xml`` and ``MANDI_Parameters_2020_04_01.xml``. Valid-from dates changed in newly added files ``MANDI_Definition_2021_02_01.xml`` and ``MANDI_Parameters_2021_02_01.xml``.
+- New IDF for D19 instrument at the ILL.
 
 Known Defects
 #############
