@@ -156,8 +156,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         )
 
         self.declareProperty(
-            "OutputWS",
-            "outws",
+            WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
             doc="Output Workspace",
         )
 
@@ -168,19 +167,6 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         )
 
     def PyExec(self):
-        # DEV_NOTE:
-        #    This is a GUI hack to get rid of the confusing copy input workspace name
-        #    button next to the OutputWorkspace.
-        #    Users are complaining accidentally clicking on this button that results in
-        #    overwriting data in memory.
-        #    This hack here hide the actual OutputWorkspace property from the GUI initializer,
-        #    tricking it to creat a string value one without the extra button.
-        outWS = self.getPropertyValue("OutputWS")
-        self.declareProperty(
-            WorkspaceProperty("OutputWorkspace", outWS, direction=Direction.Output),
-            doc="Output Workspace",
-        )
-
         data = self._expand_groups()
         bkg = self.getProperty("BackgroundWorkspace").valueAsStr  # same background for all
         cal = self.getProperty("CalibrationWorkspace").value  # same calibration for all
