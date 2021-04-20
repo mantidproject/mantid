@@ -7,7 +7,7 @@
 from qtpy import QtWidgets, QtCore
 from Muon.GUI.Common.utilities import table_utils
 
-HEADERS = ["Period Number", "Name", "Type", "DAQ Number", "Frames", "Total Good Frames", "Counts", "Tag"]
+HEADERS = ["Period Number", "Name", "Type", "DAQ Number", "Frames", "Total Data Frames", "Counts", "Tag"]
 HEADER_STYLE = "QHeaderView { font-weight: bold; }"
 COLUMN_COUNT = 8
 HEADER_COLUMN_MAP = {"Period Number": 0,
@@ -15,7 +15,7 @@ HEADER_COLUMN_MAP = {"Period Number": 0,
                      "Type": 2,
                      "DAQ Number": 3,
                      "Frames": 4,
-                     "Total Good Frames": 5,
+                     "Total Data Frames": 5,
                      "Counts": 6,
                      "Tag": 7}
 PERIOD_INFO_NOT_FOUND = "Not found"
@@ -77,7 +77,7 @@ class MuonPeriodInfoWidget(QtWidgets.QWidget):
             self._table.setItem(row_num, HEADER_COLUMN_MAP["DAQ Number"], self._new_text_widget(NOT_DAQ_STRING))
             self._table.setItem(row_num, HEADER_COLUMN_MAP["Counts"], self._new_text_widget(NOT_DAQ_STRING))
         self._table.setItem(row_num, HEADER_COLUMN_MAP["Frames"], self._new_text_widget(frames))
-        self._table.setItem(row_num, HEADER_COLUMN_MAP["Total Good Frames"], self._new_text_widget(total_frames))
+        self._table.setItem(row_num, HEADER_COLUMN_MAP["Total Data Frames"], self._new_text_widget(total_frames))
         try:
             tag = "{:04b}".format(int(tag))
         except ValueError:
