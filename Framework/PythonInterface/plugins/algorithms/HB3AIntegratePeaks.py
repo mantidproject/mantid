@@ -12,7 +12,7 @@ from mantid.kernel import Direction, FloatBoundedValidator, StringListValidator,
 from mantid.simpleapi import (DeleteWorkspace, IntegratePeaksMD,
                               SaveHKL, SaveReflections,
                               CreatePeaksWorkspace, CopySample,
-                              AnalysisDataService,
+                              AnalysisDataService, FilterPeaks,
                               CombinePeaksWorkspaces, mtd)
 import numpy as np
 
@@ -51,6 +51,9 @@ class HB3AIntegratePeaks(PythonAlgorithm):
 
         self.declareProperty("ApplyLorentz", defaultValue=True,
                              doc="Whether the Lorentz correction should be applied to the integrated peaks")
+
+        self.declareProperty("RemoveZeroIntensity", defaultValue=True,
+                             doc="If to remove peaks with 0 or less intensity from the output")
 
         formats = StringListValidator()
         formats.addAllowedValue("SHELX")
@@ -105,6 +108,7 @@ class HB3AIntegratePeaks(PythonAlgorithm):
         inner_radius = self.getProperty("BackgroundInnerRadius").value
         outer_radius = self.getProperty("BackgroundOuterRadius").value
 
+        remove_0_intensity = self.getProperty("RemoveZeroIntensity").value
         use_lorentz = self.getProperty("ApplyLorentz").value
 
         multi_ws = len(input_workspaces) > 1
@@ -149,6 +153,10 @@ class HB3AIntegratePeaks(PythonAlgorithm):
                 peak = peaks.getPeak(p)
                 lorentz = abs(np.sin(peak.getScattering() * np.cos(peak.getAzimuthal())))
                 peak.setIntensity(peak.getIntensity() * lorentz)
+
+        if remove_0_intensity:
+            FilterPeaks(InputWorkspace=peaks_ws_name, OutputWorkspace=peaks_ws_name,
+                        FilterVariable='Intensity', FilterValue=0, Operator='>')
 
         # Write output only if a file path was provided
         if not self.getProperty("OutputFile").isDefault:

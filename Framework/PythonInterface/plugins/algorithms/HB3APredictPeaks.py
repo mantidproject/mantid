@@ -182,8 +182,6 @@ class HB3APredictPeaks(PythonAlgorithm):
                                           MaxDSpacing=self.getProperty("MaxDSpacing").value,
                                           SatellitePeaks=output_ws)
             HFIRCalculateGoniometer(peaks, Wavelength=wavelength)
-
-            # TODO Filter peaks if goniometer is valid
         else:
             peaks = PredictPeaks(InputWorkspace=input_ws,
                                  ReflectionCondition=reflection_condition,
