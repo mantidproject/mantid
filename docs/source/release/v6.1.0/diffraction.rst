@@ -34,6 +34,8 @@ Improvements
 - :ref:`AlignComponents <algm-AlignComponents>` has option to output a table listing the changes in position and orientation for each component
 - :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>` now outputs a table listing the changes in position and orientation for each bank
 
+- :ref:`WANDPowderReduction <algm-WANDPowderReduction>` GUI now only shows relevant items in drop down menu and no longer has a confusing copy input workspace name button.
+
 Bugfixes
 ########
 
