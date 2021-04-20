@@ -518,9 +518,15 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         pol_directions = set()
         numors = set()
         for name in mtd[ws].getNames():
-            first_underscore = name.find("_")
-            numors.add(name[:first_underscore])
-            pol_directions.add(name[first_underscore+1:])
+            last_underscore = name.rfind("_")
+            if name[last_underscore+1:] == 'normalised':
+                short_name = name[:last_underscore]
+                second_last = short_name.rfind("_")
+                numors.add(short_name[:second_last])
+                pol_directions.add(short_name[second_last + 1:]+name[last_underscore:])
+            else:
+                numors.add(name[:last_underscore])
+                pol_directions.add(name[last_underscore + 1:])
         if len(numors) > 1:
             names_list = []
             for direction in sorted(list(pol_directions)):
