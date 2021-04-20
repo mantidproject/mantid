@@ -11,6 +11,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/FunctionProperty.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -130,29 +131,33 @@ void GeneratePythonFitScript::init() {
                   "A list of end X's to be used for the fitting. The End X at index i will correspond to the input "
                   "workspace at index i.");
 
+  auto const fittingTypes = std::vector<std::string>{"Sequential", "Simultaneous"};
+  auto const fittingTypesValidator = std::make_shared<ListValidator<std::string>>(fittingTypes);
+  declareProperty("FittingType", "Sequential", fittingTypesValidator,
+                  "The type of fitting to generate a python script for (Sequential or Simultaneous).",
+                  Direction::Input);
+
   declareProperty(
       std::make_unique<FunctionProperty>("Function", Direction::Input),
       "The function to use for the fitting. This should be a single domain function if the Python script will be for "
       "sequential fitting, or a MultiDomainFunction if the Python script is for simultaneous fitting.");
 
   declareProperty("MaxIterations", 500, mustBePositive->clone(),
-                  "The MaxIterations to be passed to the Fit algorithm in the Python script.",
-                  Kernel::Direction::Input);
+                  "The MaxIterations to be passed to the Fit algorithm in the Python script.", Direction::Input);
 
   auto const minimizerOptions = FuncMinimizerFactory::Instance().getKeys();
-  auto const minimizerValidator = std::make_shared<StartsWithValidator>(minimizerOptions);
+  auto const minimizerValidator = std::make_shared<ListValidator<std::string>>(minimizerOptions);
   declareProperty("Minimizer", "Levenberg-Marquardt", minimizerValidator,
-                  "The Minimizer to be passed to the Fit algorithm in the Python script.");
+                  "The Minimizer to be passed to the Fit algorithm in the Python script.", Direction::Input);
 
   auto const costFunctionOptions = CostFunctionFactory::Instance().getKeys();
-  auto const costFunctionValidator = std::make_shared<Kernel::ListValidator<std::string>>(costFunctionOptions);
+  auto const costFunctionValidator = std::make_shared<ListValidator<std::string>>(costFunctionOptions);
   declareProperty("CostFunction", "Least squares", costFunctionValidator,
-                  "The CostFunction to be passed to the Fit algorithm in the Python script.", Kernel::Direction::Input);
+                  "The CostFunction to be passed to the Fit algorithm in the Python script.", Direction::Input);
 
   std::array<std::string, 2> evaluationTypes = {{"CentrePoint", "Histogram"}};
-  declareProperty(
-      "EvaluationType", "CentrePoint", Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(evaluationTypes)),
-      "The EvaluationType to be passed to the Fit algorithm in the Python script.", Kernel::Direction::Input);
+  declareProperty("EvaluationType", "CentrePoint", IValidator_sptr(new ListValidator<std::string>(evaluationTypes)),
+                  "The EvaluationType to be passed to the Fit algorithm in the Python script.", Direction::Input);
 
   std::vector<std::string> extensions{".py"};
   declareProperty(std::make_unique<FileProperty>("Filepath", "", FileProperty::OptionalSave, extensions),
@@ -166,7 +171,9 @@ std::map<std::string, std::string> GeneratePythonFitScript::validateInputs() {
   std::vector<std::size_t> const workspaceIndices = getProperty("WorkspaceIndices");
   std::vector<double> const startXs = getProperty("StartXs");
   std::vector<double> const endXs = getProperty("EndXs");
+  auto const fittingType = getPropertyValue("FittingType");
   auto const filepath = getPropertyValue("Filepath");
+  IFunction_sptr function = getProperty("Function");
 
   std::map<std::string, std::string> errors;
   if (workspaceIndices.size() != inputWorkspaces.size())
@@ -175,6 +182,15 @@ std::map<std::string, std::string> GeneratePythonFitScript::validateInputs() {
     errors["StartXs"] = "The number of Start Xs must be equal to the number of input workspaces.";
   if (endXs.size() != inputWorkspaces.size())
     errors["EndXs"] = "The number of End Xs must be equal to the number of input workspaces.";
+  if (fittingType == "Sequential") {
+    if (auto const multiDomainFunction = std::dynamic_pointer_cast<MultiDomainFunction>(function))
+      errors["Function"] = "The Function cannot be a MultiDomainFunction when in Sequential fit mode.";
+  }
+  if (fittingType == "Simultaneous") {
+    if (getNumberOfDomainsInFunction(function) != inputWorkspaces.size())
+      errors["Function"] = "The Function provided does not have the same number of domains as there is input "
+                           "workspaces. This is a requirement for Simultaneous fitting.";
+  }
 
   return errors;
 }
@@ -189,6 +205,14 @@ void GeneratePythonFitScript::exec() {
     savePythonScript(filepath, generatedScript);
 
   setProperty("ScriptText", generatedScript);
+}
+
+std::size_t GeneratePythonFitScript::getNumberOfDomainsInFunction(IFunction_sptr const &function) const {
+  if (!function)
+    return 0u;
+  if (auto const multiDomainFunction = std::dynamic_pointer_cast<MultiDomainFunction>(function))
+    return multiDomainFunction->nFunctions();
+  return 1u;
 }
 
 std::string GeneratePythonFitScript::generateVariableSetupCode() const {

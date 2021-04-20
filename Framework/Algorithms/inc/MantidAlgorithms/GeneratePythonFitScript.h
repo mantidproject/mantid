@@ -32,6 +32,8 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
+  std::size_t getNumberOfDomainsInFunction(Mantid::API::IFunction_sptr const &function) const;
+
   std::string generateVariableSetupCode() const;
 
   void savePythonScript(std::string const &filepath, std::string const &contents) const;
