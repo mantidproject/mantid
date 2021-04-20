@@ -70,9 +70,9 @@ private:
   std::vector<MDEventType<ND>> convertEvents();
 
   template <size_t ND, template <size_t> class MDEventType> struct MDEventMaker {
-    static MDEventType<ND> makeMDEvent(const double &sig, const double &err, const uint16_t &run_index,
+    static MDEventType<ND> makeMDEvent(const double &sig, const double &err, const uint16_t &expInfoIndex,
                                        const uint16_t &goniometer_index, const uint32_t &det_id, coord_t *coord) {
-      return MDEventType<ND>(sig, err, run_index, goniometer_index, det_id, coord);
+      return MDEventType<ND>(sig, err, expInfoIndex, goniometer_index, det_id, coord);
     }
   };
 };
@@ -106,7 +106,7 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
     // create local QConverter
     MDTransf_sptr localQConverter = qConverters[PARALLEL_THREAD_NUMBER];
     int32_t detID = m_detID[workspaceIndex];
-    uint16_t runIndexLoc = m_RunIndex;
+    uint16_t expInfoIndexLoc = m_ExpInfoIndex;
     uint16_t goniometerIndex(0); // default value
 
     std::vector<coord_t> locCoord(ND);
@@ -131,7 +131,7 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
         continue; // skip ND outside the range
 
       mdEventsForSpectrum.emplace_back(MDEventMaker<ND, MDEventType>::makeMDEvent(
-          signal, errorSq, runIndexLoc, goniometerIndex, detID, &locCoord[0]));
+          signal, errorSq, expInfoIndexLoc, goniometerIndex, detID, &locCoord[0]));
 
       // Filter events before adding to the ndEvents vector to add in workspace
       // The bounds of the resulting WS have to be already defined

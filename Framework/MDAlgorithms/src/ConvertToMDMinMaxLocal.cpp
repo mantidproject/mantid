@@ -81,9 +81,9 @@ void ConvertToMDMinMaxLocal::exec() {
   // dimensions defined by properties and min is less max
   targWSDescr.setMinMax(MinValues, MaxValues);
   targWSDescr.buildFromMatrixWS(InWS2D, QModReq, dEModReq, otherDimNames);
-  // add runindex to the target workspace description for further usage as the
+  // add expInfoIndex to the target workspace description for further usage as the
   // identifier for the events, which come from this run.
-  targWSDescr.addProperty("RUN_INDEX", uint16_t(0), true);
+  targWSDescr.addProperty("EXP_INFO_INDEX", uint16_t(0), true);
 
   // instantiate class, responsible for defining Mslice-type projection
   MDAlgorithms::MDWSTransform MsliceProj;

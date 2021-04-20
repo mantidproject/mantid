@@ -283,7 +283,7 @@ public:
     for (size_t i = 0; i < 10; i++) {
       TS_ASSERT_DELTA(it->getInnerSignal(i), 1.0, 1e-6);
       TS_ASSERT_DELTA(it->getInnerError(i), 1.0, 1e-6);
-      TS_ASSERT_DELTA(it->getInnerRunIndex(i), 0, 0);
+      TS_ASSERT_DELTA(it->getInnerExpInfoIndex(i), 0, 0);
       TS_ASSERT_DELTA(it->getInnerGoniometerIndex(i), 0, 0);
       TS_ASSERT_DELTA(it->getInnerDetectorID(i), 0, 0);
       TS_ASSERT_DELTA(it->getInnerPosition(i, 0), 0.5 + double(i), 1e-6);
