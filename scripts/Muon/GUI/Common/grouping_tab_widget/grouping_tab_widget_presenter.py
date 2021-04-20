@@ -35,7 +35,7 @@ class GroupingTabPresenter(object):
     def __init__(self, view, model,
                  grouping_table_widget=None,
                  pairing_table_widget=None,
-                 diff_table = None):
+                 diff_table=None):
         self._view = view
         self._model = model
 
@@ -296,6 +296,14 @@ class GroupingTabPresenter(object):
         self.period_info_widget.show()
 
     def _add_period_info_to_widget(self):
+        runs = self._model._data.current_runs
+        runs_string = ""
+        for run_list in runs:
+            for run in run_list:
+                if runs_string:
+                    runs_string += ", "
+                runs_string += str(run)
+        self.period_info_widget.set_title_runs(self._model.instrument + runs_string)
         period_sequences_log = self._model._data.get_sample_log("period_sequences")
         self.period_info_widget.number_of_sequences = str(period_sequences_log.value) if period_sequences_log else None
         names_log = self._model._data.get_sample_log("period_labels")

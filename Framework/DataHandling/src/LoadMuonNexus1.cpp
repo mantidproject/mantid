@@ -237,6 +237,7 @@ void LoadMuonNexus1::exec() {
     addToSampleLog("frames_period_requested", nxload.m_framesPeriodsRequested, localWorkspace);
     addToSampleLog("frames_period_raw", nxload.m_framesPeriodsRaw, localWorkspace);
     addToSampleLog("period_output", nxload.m_periodsOutput, localWorkspace);
+    addToSampleLog("total_counts_period", nxload.m_periodsCounts, localWorkspace);
 
     size_t counter = 0;
     for (auto i = m_spec_min; i < m_spec_max; ++i) {

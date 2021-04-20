@@ -164,17 +164,16 @@ void MuonNexusReader::readFromFile(const string &filename) {
  * - Total counts per period
  */
 void MuonNexusReader::readPeriodInfo(NeXus::File &handle) {
-  int tempInt;
-  std::string tempString;
   std::vector<int> tempIntVector;
-  std::vector<float> tempFloatVector;
   try {
+    int tempInt;
     handle.readData(PERIOD_SEQUENCES, tempInt);
     m_numPeriodSequences = tempInt;
   } catch (...) {
     g_log.debug("Muon nexus file does not contain " + PERIOD_SEQUENCES);
   }
   try {
+    std::string tempString;
     handle.readData(PERIOD_LABELS, tempString);
     m_periodNames = tempString;
   } catch (...) {
@@ -205,6 +204,7 @@ void MuonNexusReader::readPeriodInfo(NeXus::File &handle) {
     g_log.debug("Muon nexus file does not contain " + PERIOD_OUTPUT);
   }
   try {
+    std::vector<float> tempFloatVector;
     handle.readData(TOTAL_COUNTS_PERIOD, tempFloatVector);
     m_periodsCounts = convertVectorToString(tempFloatVector, ";");
   } catch (...) {

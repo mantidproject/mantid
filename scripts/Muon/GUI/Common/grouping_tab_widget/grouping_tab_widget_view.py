@@ -32,6 +32,7 @@ class GroupingTabView(QtWidgets.QWidget):
         self.period_label = None
         self.subtracted_period_edit = None
         self.minus_label = None
+        self._parent = parent
 
         self._grouping_table = grouping_table
         self._pairing_table = pairing_table

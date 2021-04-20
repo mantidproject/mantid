@@ -95,6 +95,9 @@ class MuonPeriodInfoWidget(QtWidgets.QWidget):
         for row in reversed(range(self._num_rows())):
             self._table.removeRow(row)
 
+    def set_title_runs(self, text):
+        self.setWindowTitle("Period Information for Run(s) " + text)
+
     def _new_text_widget(self, text):
         new_widget = table_utils.ValidatedTableItem(lambda text: True)
         new_widget.setText(text)

@@ -63,6 +63,10 @@ class MuonPeriodInfoWidgetTest(unittest.TestCase):
         self.widget.number_of_sequences = "100"
         self.assertEqual("Run contains 100 cycles of periods", str(self.widget._label.text()))
 
+    def test_set_title(self):
+        self.widget.set_title_runs("HIFI110542")
+        self.assertEqual("Period Information for Run(s) HIFI110542", self.widget.windowTitle())
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
