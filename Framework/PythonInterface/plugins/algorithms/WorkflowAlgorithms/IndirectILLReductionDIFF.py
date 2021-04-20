@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
 from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, Progress
 from mantid.kernel import Direction, IntBoundedValidator
 from mantid.simpleapi import *
@@ -14,7 +13,6 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
     """
     Performs reduction on IN16B's diffraction data. It can be on mode Doppler or BATS.
     """
-
     runs = None
     mode = None
     scan_parameter = None
@@ -44,22 +42,16 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(MultipleFileProperty('SampleRuns', extensions=['nxs']), doc="File path for run(s).")
-
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The output workspace group containing reduced data.')
-
         self.declareProperty("MaskPixelsFromStart", 10, validator=IntBoundedValidator(lower=0),
                              doc="Number of pixels to mask at the start of each tube")
         self.declareProperty("MaskPixelsFromEnd", 10, validator=IntBoundedValidator(lower=0),
                              doc="Number of pixels to mask at the end of each tube")
-
         self.declareProperty("Observable", "sample.temperature",
                              doc="If multiple files, the parameter from SampleLog to use as an index when conjoined.")
-
         self.declareProperty("Transpose", True, doc="Transpose the result.")
-
         self.declareProperty("Sum", False, doc="Sum along the scan")
-
         self.declareProperty(name='ComponentsToMask', defaultValue='',
                              doc='Comma separated list of component names to mask, for instance: tube_1, tube_2')
 
