@@ -670,9 +670,14 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         vanadium_expected_cross_section = 0.404 # barns
         norm_name = ws + "_norm"
-        CreateSingleValuedWorkspace(DataValue=3.0 * vanadium_expected_cross_section
-                                    * self._sampleAndEnvironmentProperties['NMoles'].value,
-                                    OutputWorkspace=norm_name)
+        if self.getProperty('AbsoluteNormalisation').value:
+            # expected total cross-section of unpolarised neutrons in V is 1/3 * sum of all measured c-s,
+            # and normalised to 0.404 barns times the number of moles of V:
+            CreateSingleValuedWorkspace(DataValue=3.0 * vanadium_expected_cross_section
+                                        * self._sampleAndEnvironmentProperties['NMoles'].value,
+                                        OutputWorkspace=norm_name)
+        else:
+            CreateSingleValuedWorkspace(DataValue=3.0, OutputWorkspace=norm_name)
         to_remove = [norm_name]
         if self.getPropertyValue('OutputTreatment') == 'Sum':
             self._merge_polarisations(ws, average_detectors=True)
@@ -682,10 +687,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                 ws_name = mtd[ws][entry_no].name()
                 Plus(LHSWorkspace=tmp_name, RHSWorkspace=ws_name, OutputWorkspace=tmp_name)
                 to_remove.append(ws_name)
-            # expected total cross-section of unpolarised neutrons in V is 1/3 * sum of all measured c-s,
-            # and normalised to 0.404 barns times the number of moles of V:
-            if self.getProperty('AbsoluteNormalisation').value:
-                Divide(LHSWorkspace=tmp_name, RHSWorkspace=norm_name, OutputWorkspace=tmp_name)
+            Divide(LHSWorkspace=tmp_name, RHSWorkspace=norm_name, OutputWorkspace=tmp_name)
             GroupWorkspaces(InputWorkspaces=tmp_name, OutputWorkspace=ws)
         else:
             if self.getPropertyValue('OutputTreatment') == 'Average':
