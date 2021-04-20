@@ -124,7 +124,7 @@ class LRDirectBeamSort(PythonAlgorithm):
         self.declareProperty("IncidentMedium", "Air", doc="Name of the incident medium")
         self.declareProperty("OrderDirectBeamsByRunNumber", False,
                              "Force the sequence of direct beam files to be ordered by run number")
-        self.declareProperty(FileProperty("ScalingFactorFile","",
+        self.declareProperty(FileProperty("ScalingFactorFile", "",
                                           action=FileAction.OptionalSave,
                                           extensions=['cfg']),
                              "Scaling factor file to be created")
@@ -140,7 +140,9 @@ class LRDirectBeamSort(PythonAlgorithm):
         run_list = self.getProperty("RunList").value
         if len(run_list) > 0:
             for run in run_list:
-                workspace = LoadEventNexus(Filename="REF_L_%s" % run, OutputWorkspace="__data_file_%s" % run, MetaDataOnly=not compute)
+                workspace = LoadEventNexus(Filename="REF_L_%s" % run,
+                                           OutputWorkspace="__data_file_%s" % run,
+                                           MetaDataOnly=not compute)
                 lr_data.append(workspace)
         else:
             ws_list = self.getProperty("WorkspaceList").value
@@ -162,7 +164,8 @@ class LRDirectBeamSort(PythonAlgorithm):
         # Compute the scaling factors if requested
         if compute:
             sf_file = self.getProperty("ScalingFactorFile").value
-            if len(sf_file)==0:
+            print(f'....... DEBUG ...... scaling factor file: {sf_file}')
+            if len(sf_file) == 0:
                 logger.error("Scaling factors were requested but no output file was set")
             else:
                 self._compute_scaling_factors(lr_data_sorted)
@@ -246,8 +249,10 @@ class LRDirectBeamSort(PythonAlgorithm):
             # Compute the scaling factors
             logger.notice("Computing scaling factors for %s" % str(direct_beam_runs))
             slit_tolerance = self.getProperty("SlitTolerance").value
+            print(f'......  ....... [DEBUG] direct beam runs: {direct_beam_runs}, Output to : {scaling_file}')
             LRScalingFactors(DirectBeamRuns=direct_beam_runs,
-                             TOFRange=tof_range, TOFSteps=tof_steps,
+                             TOFRange=tof_range,
+                             TOFSteps=tof_steps,
                              SignalPeakPixelRange=peak_ranges,
                              SignalBackgroundPixelRange=bck_ranges,
                              LowResolutionPixelRange=x_ranges,
