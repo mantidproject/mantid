@@ -44,8 +44,8 @@ public:
   void setGlobalParameters(std::vector<GlobalParameter> const &globalParameters) override;
 
 private:
-  void handleRemoveClicked();
-  void handleAddWorkspaceClicked();
+  void handleRemoveDomainClicked();
+  void handleAddDomainClicked();
   void handleSelectionChanged();
   void handleStartXChanged();
   void handleEndXChanged();
@@ -61,6 +61,8 @@ private:
   void handleEditLocalParameterClicked(std::string const &parameter);
   void handleEditLocalParameterFinished();
   void handleFittingModeChanged(FittingMode fittingMode);
+  void handleGenerateScriptToFileClicked();
+  void handleGenerateScriptToClipboardClicked();
 
   void setWorkspaces(QStringList const &workspaceNames, double startX, double endX);
   void addWorkspaces(std::vector<Mantid::API::MatrixWorkspace_const_sptr> const &workspaces,
@@ -127,6 +129,10 @@ private:
                                                                           std::string const &tie) const;
 
   void checkForWarningMessages();
+
+  template <typename Generator> void generateFitScript(Generator &&func) const;
+  void generateScriptToFile() const;
+  void generateScriptToClipboard() const;
 
   std::vector<std::string> m_warnings;
 

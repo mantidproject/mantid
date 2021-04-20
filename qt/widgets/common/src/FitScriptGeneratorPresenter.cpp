@@ -41,11 +41,11 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event, std::s
     UNUSED_ARG(arg2);
 
   switch (event) {
-  case ViewEvent::RemoveClicked:
-    handleRemoveClicked();
+  case ViewEvent::RemoveDomainClicked:
+    handleRemoveDomainClicked();
     return;
-  case ViewEvent::AddClicked:
-    handleAddWorkspaceClicked();
+  case ViewEvent::AddDomainClicked:
+    handleAddDomainClicked();
     return;
   case ViewEvent::StartXChanged:
     handleStartXChanged();
@@ -86,6 +86,12 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event, std::s
   case ViewEvent::EditLocalParameterFinished:
     handleEditLocalParameterFinished();
     return;
+  case ViewEvent::GenerateScriptToFileClicked:
+    handleGenerateScriptToFileClicked();
+    return;
+  case ViewEvent::GenerateScriptToClipboardClicked:
+    handleGenerateScriptToClipboardClicked();
+    return;
   default:
     throw std::runtime_error("Failed to notify the FitScriptGeneratorPresenter.");
   }
@@ -113,7 +119,7 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event, Fittin
 
 void FitScriptGeneratorPresenter::openFitScriptGenerator() { m_view->show(); }
 
-void FitScriptGeneratorPresenter::handleRemoveClicked() {
+void FitScriptGeneratorPresenter::handleRemoveDomainClicked() {
   for (auto const &index : m_view->selectedRows()) {
     auto const workspaceName = m_view->workspaceName(index);
     auto const workspaceIndex = m_view->workspaceIndex(index);
@@ -125,7 +131,7 @@ void FitScriptGeneratorPresenter::handleRemoveClicked() {
   handleSelectionChanged();
 }
 
-void FitScriptGeneratorPresenter::handleAddWorkspaceClicked() {
+void FitScriptGeneratorPresenter::handleAddDomainClicked() {
   if (m_view->openAddWorkspaceDialog()) {
     auto const workspaces = m_view->getDialogWorkspaces();
     auto const workspaceIndices = m_view->getDialogWorkspaceIndices();
@@ -228,6 +234,14 @@ void FitScriptGeneratorPresenter::handleEditLocalParameterFinished() {
 void FitScriptGeneratorPresenter::handleFittingModeChanged(FittingMode fittingMode) {
   m_model->setFittingMode(fittingMode);
   handleSelectionChanged();
+}
+
+void FitScriptGeneratorPresenter::handleGenerateScriptToFileClicked() {
+  generateFitScript(&FitScriptGeneratorPresenter::generateScriptToFile);
+}
+
+void FitScriptGeneratorPresenter::handleGenerateScriptToClipboardClicked() {
+  generateFitScript(&FitScriptGeneratorPresenter::generateScriptToClipboard);
 }
 
 void FitScriptGeneratorPresenter::setGlobalTies(std::vector<GlobalTie> const &globalTies) {
@@ -473,6 +487,32 @@ void FitScriptGeneratorPresenter::checkForWarningMessages() {
     std::copy(m_warnings.cbegin(), m_warnings.cend(), std::ostream_iterator<std::string>(ss, "\n"));
     m_view->displayWarning(ss.str());
     m_warnings.clear();
+  }
+}
+
+template <typename Generator> void FitScriptGeneratorPresenter::generateFitScript(Generator &&func) const {
+  auto const [valid, message] = m_model->isValid();
+
+  if (!message.empty())
+    m_view->displayWarning(message);
+
+  if (valid)
+    std::invoke(std::forward<Generator>(func), this);
+}
+
+void FitScriptGeneratorPresenter::generateScriptToFile() const {
+  auto const filepath = m_view->filepath();
+  if (!filepath.empty()) {
+    m_model->generatePythonFitScript(m_view->fitOptions(), filepath);
+    m_view->setSuccessText("Successfully generated fit script to file '" + filepath + "'");
+  }
+}
+
+void FitScriptGeneratorPresenter::generateScriptToClipboard() const {
+  auto const scriptText = m_model->generatePythonFitScript(m_view->fitOptions());
+  if (!scriptText.empty()) {
+    m_view->saveTextToClipboard(scriptText);
+    m_view->setSuccessText("Successfully generated fit script to clipboard");
   }
 }
 

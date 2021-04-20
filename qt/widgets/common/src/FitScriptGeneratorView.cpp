@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitScriptGeneratorView.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorDataTable.h"
 #include "MantidQtWidgets/Common/FittingGlobals.h"
@@ -13,13 +14,18 @@
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/ConfigService.h"
 
 #include <algorithm>
 #include <iterator>
 
 #include <QApplication>
 #include <QClipboard>
+#include <QFileDialog>
 #include <QMessageBox>
+
+using namespace Mantid::Kernel;
+using namespace MantidQt::API;
 
 namespace {
 using MantidQt::MantidWidgets::WorkspaceIndex;
@@ -68,6 +74,13 @@ template <typename T> QList<T> convertToQList(std::vector<T> const &vec) {
   return qList;
 }
 
+QString getDefaultScriptDirectory() {
+  auto const previousDirectory = AlgorithmInputHistory::Instance().getPreviousDirectory();
+  if (previousDirectory.isEmpty())
+    return QString::fromStdString(ConfigService::Instance().getString("pythonscripts.directory"));
+  return previousDirectory;
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -102,8 +115,8 @@ FitScriptGeneratorView::~FitScriptGeneratorView() {
 }
 
 void FitScriptGeneratorView::connectUiSignals() {
-  connect(m_ui.pbRemove, SIGNAL(clicked()), this, SLOT(onRemoveClicked()));
-  connect(m_ui.pbAddWorkspace, SIGNAL(clicked()), this, SLOT(onAddWorkspaceClicked()));
+  connect(m_ui.pbRemoveDomain, SIGNAL(clicked()), this, SLOT(onRemoveDomainClicked()));
+  connect(m_ui.pbAddDomain, SIGNAL(clicked()), this, SLOT(onAddDomainClicked()));
   connect(m_dataTable.get(), SIGNAL(cellChanged(int, int)), this, SLOT(onCellChanged(int, int)));
   connect(m_dataTable.get(), SIGNAL(itemSelectionChanged()), this, SLOT(onItemSelected()));
 
@@ -133,6 +146,9 @@ void FitScriptGeneratorView::connectUiSignals() {
   connect(m_fitOptionsBrowser.get(), SIGNAL(fittingModeChanged(FittingMode)), this,
           SLOT(onFittingModeChanged(FittingMode)));
 
+  connect(m_ui.pbGenerateScriptToFile, SIGNAL(clicked()), this, SLOT(onGenerateScriptToFileClicked()));
+  connect(m_ui.pbGenerateScriptToClipboard, SIGNAL(clicked()), this, SLOT(onGenerateScriptToClipboardClicked()));
+
   /// Disconnected because it causes a crash when selecting a table row while
   /// editing a parameters value. This is because selecting a different row will
   /// change the current function in the FunctionTreeView. The closeEditor slot
@@ -156,9 +172,9 @@ void FitScriptGeneratorView::subscribePresenter(IFitScriptGeneratorPresenter *pr
   m_presenter->notifyPresenter(ViewEvent::FittingModeChanged, m_fitOptionsBrowser->getFittingMode());
 }
 
-void FitScriptGeneratorView::onRemoveClicked() { m_presenter->notifyPresenter(ViewEvent::RemoveClicked); }
+void FitScriptGeneratorView::onRemoveDomainClicked() { m_presenter->notifyPresenter(ViewEvent::RemoveDomainClicked); }
 
-void FitScriptGeneratorView::onAddWorkspaceClicked() { m_presenter->notifyPresenter(ViewEvent::AddClicked); }
+void FitScriptGeneratorView::onAddDomainClicked() { m_presenter->notifyPresenter(ViewEvent::AddDomainClicked); }
 
 void FitScriptGeneratorView::onCellChanged(int row, int column) {
   UNUSED_ARG(row);
@@ -211,7 +227,7 @@ void FitScriptGeneratorView::onGlobalParametersChanged(QStringList const &global
 
 void FitScriptGeneratorView::onCopyFunctionToClipboard() {
   if (auto const function = m_functionTreeView->getSelectedFunction())
-    QApplication::clipboard()->setText(QString::fromStdString(function->asString()));
+    saveTextToClipboard(function->asString());
 }
 
 void FitScriptGeneratorView::onFunctionHelpRequested() {
@@ -232,6 +248,14 @@ void FitScriptGeneratorView::onEditLocalParameterFinished(int result) {
     m_presenter->notifyPresenter(ViewEvent::EditLocalParameterFinished);
 
   m_editLocalParameterDialog = nullptr;
+}
+
+void FitScriptGeneratorView::onGenerateScriptToFileClicked() {
+  m_presenter->notifyPresenter(ViewEvent::GenerateScriptToFileClicked);
+}
+
+void FitScriptGeneratorView::onGenerateScriptToClipboardClicked() {
+  m_presenter->notifyPresenter(ViewEvent::GenerateScriptToClipboardClicked);
 }
 
 std::string FitScriptGeneratorView::workspaceName(FitDomainIndex index) const {
@@ -307,6 +331,22 @@ FitScriptGeneratorView::getEditLocalParameterResults() const {
           convertToStdVector(m_editLocalParameterDialog->getConstraints())};
 }
 
+std::tuple<std::string, std::string, std::string, std::string> FitScriptGeneratorView::fitOptions() const {
+  return {m_fitOptionsBrowser->getProperty("Max Iterations"), m_fitOptionsBrowser->getProperty("Minimizer"),
+          m_fitOptionsBrowser->getProperty("Cost Function"), m_fitOptionsBrowser->getProperty("Evaluation Type")};
+}
+
+std::string FitScriptGeneratorView::filepath() const {
+  auto const defaultDirectory = getDefaultScriptDirectory();
+  auto const filePath = QFileDialog::getSaveFileName(this->parentWidget(), tr("Save Script As "), defaultDirectory,
+                                                     tr("Script files (*.py)"));
+
+  if (!filePath.isEmpty())
+    API::AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(filePath).absoluteDir().path());
+
+  return filePath.toStdString();
+}
+
 void FitScriptGeneratorView::resetSelection() { m_dataTable->resetSelection(); }
 
 bool FitScriptGeneratorView::applyFunctionChangesToAll() const {
@@ -338,6 +378,15 @@ void FitScriptGeneratorView::setGlobalTies(std::vector<GlobalTie> const &globalT
 
 void FitScriptGeneratorView::setGlobalParameters(std::vector<GlobalParameter> const &globalParameters) {
   m_functionTreeView->setGlobalParameters(convertToQStringList(globalToQString, globalParameters));
+}
+
+void FitScriptGeneratorView::setSuccessText(std::string const &text) {
+  m_ui.lbMessage->setText(QString::fromStdString(text));
+}
+
+void FitScriptGeneratorView::saveTextToClipboard(std::string const &text) const {
+  if (QClipboard *clipboard = QApplication::clipboard())
+    clipboard->setText(QString::fromStdString(text));
 }
 
 void FitScriptGeneratorView::displayWarning(std::string const &message) {

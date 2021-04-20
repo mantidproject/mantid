@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -113,6 +114,11 @@ public:
 
   [[nodiscard]] inline std::size_t numberOfDomains() const noexcept override { return m_fitDomains.size(); }
 
+  std::tuple<bool, std::string> isValid() const override;
+
+  std::string generatePythonFitScript(std::tuple<std::string, std::string, std::string, std::string> const &fitOptions,
+                                      std::string const &filepath = "") override;
+
 private:
   [[nodiscard]] FitDomainIndex findDomainIndex(std::string const &workspaceName, WorkspaceIndex workspaceIndex) const;
   [[nodiscard]] std::vector<std::unique_ptr<FitDomain>>::const_iterator
@@ -154,6 +160,19 @@ private:
 
   template <typename Getter>
   auto getParameterProperty(Getter &&func, FitDomainIndex domainIndex, std::string const &fullParameter) const;
+
+  [[nodiscard]] bool checkFunctionExistsInAllDomains() const;
+  [[nodiscard]] bool checkFunctionIsSameForAllDomains() const;
+  [[nodiscard]] std::string generatePermissibleWarnings() const;
+
+  [[nodiscard]] std::vector<std::string> getInputWorkspaces() const;
+  [[nodiscard]] std::vector<std::size_t> getWorkspaceIndices() const;
+  [[nodiscard]] std::vector<double> getStartXs() const;
+  [[nodiscard]] std::vector<double> getEndXs() const;
+
+  template <typename T, typename Function> std::vector<T> transformDomains(Function const &func) const;
+
+  [[nodiscard]] Mantid::API::IFunction_sptr getFunction() const;
 
   IFitScriptGeneratorPresenter *m_presenter;
   std::vector<std::unique_ptr<FitDomain>> m_fitDomains;
