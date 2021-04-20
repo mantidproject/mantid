@@ -576,7 +576,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
     def _convert_parameter_to_tf_asymmetry_mode(parameter: str) -> str:
         """Converts a normal parameter to the equivalent parameter in the TF Asymmetry function."""
         split_parameter = parameter.split(".")
-        return split_parameter[0] + f".{TF_ASYMMETRY_PREFIX_FUNCTION_INDEX}" + split_parameter[1]
+        return split_parameter[0] + f".{TF_ASYMMETRY_PREFIX_FUNCTION_INDEX}" + ".".join(split_parameter[1:])
 
     def _get_global_parameters_for_tf_asymmetry_fit(self) -> list:
         """Returns a list of global parameters in TF Asymmetry format."""
