@@ -370,7 +370,7 @@ void GetSpiceDataRawCountsFromMD::getDetCounts(const API::IMDEventWorkspace_cons
       // filter out the events with uninterrested run numbers and detid
       // runnumber/detid < 0 indicates that all run number or all detectors will
       // be taken
-      int thisrunnumber = mditer->getInnerRunIndex(iev);
+      int thisrunnumber = mditer->getInnerExpInfoIndex(iev);
       if (runnumber >= 0 && thisrunnumber != runnumber)
         continue;
 

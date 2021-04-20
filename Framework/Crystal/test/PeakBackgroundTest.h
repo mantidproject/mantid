@@ -57,7 +57,7 @@ public:
                      std::unique_ptr<coord_t[]>(size_t &numVertices, const size_t outDimensions, const bool *maskDim));
   MOCK_CONST_METHOD0(getCenter, Mantid::Kernel::VMD());
   MOCK_CONST_METHOD0(getNumEvents, size_t());
-  MOCK_CONST_METHOD1(getInnerRunIndex, uint16_t(size_t index));
+  MOCK_CONST_METHOD1(getInnerExpInfoIndex, uint16_t(size_t index));
   MOCK_CONST_METHOD1(getInnerGoniometerIndex, uint16_t(size_t index));
   MOCK_CONST_METHOD1(getInnerDetectorID, int32_t(size_t index));
   MOCK_CONST_METHOD2(getInnerPosition, coord_t(size_t index, size_t dimension));
