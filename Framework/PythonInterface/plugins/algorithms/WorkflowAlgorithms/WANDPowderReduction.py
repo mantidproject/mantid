@@ -13,6 +13,7 @@ from mantid.api import (
     IEventWorkspace,
     WorkspaceProperty,
     WorkspaceGroup,
+    ADSValidator,
 )
 from mantid.dataobjects import MaskWorkspaceProperty
 from mantid.simpleapi import (
@@ -78,6 +79,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 "InputWorkspace",
                 "",
                 direction=Direction.Input,
+                validator=ADSValidator(),
             ),
             doc="The main input workspace[s].",
         )
