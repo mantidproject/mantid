@@ -68,6 +68,8 @@ std::string const SEQUENTIAL_SCRIPT =
     "fig.subplots_adjust(hspace=0)\n"
     "fig.show()\n";
 
+std::string const SIMULTANEOUS_SCRIPT = "";
+
 template <typename T> std::string joinVector(std::vector<T> const &vec, std::string const &delimiter = ", ") {
   std::stringstream ss;
   std::copy(vec.cbegin(), vec.cend(), std::ostream_iterator<T>(ss, delimiter.c_str()));
@@ -196,9 +198,8 @@ std::map<std::string, std::string> GeneratePythonFitScript::validateInputs() {
 }
 
 void GeneratePythonFitScript::exec() {
-  std::string generatedScript;
-  generatedScript += generateVariableSetupCode();
-  generatedScript += SEQUENTIAL_SCRIPT;
+  auto const fittingType = getPropertyValue("FittingType");
+  auto const generatedScript = generateFitScript(fittingType);
 
   auto const filepath = getPropertyValue("Filepath");
   if (!filepath.empty())
@@ -213,6 +214,16 @@ std::size_t GeneratePythonFitScript::getNumberOfDomainsInFunction(IFunction_sptr
   if (auto const multiDomainFunction = std::dynamic_pointer_cast<MultiDomainFunction>(function))
     return multiDomainFunction->nFunctions();
   return 1u;
+}
+
+std::string GeneratePythonFitScript::generateFitScript(std::string const &fittingType) const {
+  std::string generatedScript;
+  generatedScript += generateVariableSetupCode();
+  if (fittingType == "Sequential")
+    generatedScript += SEQUENTIAL_SCRIPT;
+  else if (fittingType == "Simultaneous")
+    generatedScript += SIMULTANEOUS_SCRIPT;
+  return generatedScript;
 }
 
 std::string GeneratePythonFitScript::generateVariableSetupCode() const {
