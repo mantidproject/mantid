@@ -37,6 +37,7 @@ class EngineeringDiffractionEncoder(EngineeringDiffractionUIAttributes):
             obj_dic["settings_dict"] = presenter.settings_presenter.model.get_settings_dict(SETTINGS_KEYS_TYPES)
         if data_widget.presenter.get_loaded_workspaces():
             obj_dic["data_loaded_workspaces"] = [*data_widget.presenter.get_loaded_workspaces().keys()]
+            obj_dic["fit_results"] = data_widget.model.get_fit_results()
             obj_dic["plotted_workspaces"] = [*data_widget.presenter.plotted]
             obj_dic["background_params"] = data_widget.model.get_bg_params()
             if plot_widget.view.fit_browser.read_current_fitprop():
@@ -72,9 +73,13 @@ class EngineeringDiffractionDecoder(EngineeringDiffractionUIAttributes):
         fit_data_widget.presenter.plotted = set(obj_dic["plotted_workspaces"])
         fit_data_widget.presenter.restore_table()
 
+        if obj_dic["fit_results"]:
+            fit_data_widget.model._fit_results = obj_dic["fit_results"]
+            fit_data_widget.model.create_fit_tables()
+
         if obj_dic["fit_properties"]:
             fit_browser = presenter.fitting_presenter.plot_widget.view.fit_browser
-            presenter.fitting_presenter.plot_widget.view.fit_toggle()  # show the fit browser, default is off
+            fit_browser.show()  # show the fit browser, default is off
             fit_props = obj_dic["fit_properties"]["properties"]
             fit_function = fit_props["Function"]
             output_name = fit_props["Output"]

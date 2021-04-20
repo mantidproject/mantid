@@ -11,7 +11,7 @@ from qtpy.QtCore import QTimer
 
 from ..memorywidget.memoryinfo import get_memory_info
 
-TIME_INTERVAL_MEMORY_USAGE_UPDATE = 10  # in ms
+TIME_INTERVAL_MEMORY_USAGE_UPDATE = 2000  # in ms
 
 
 class MemoryPresenter(object):
