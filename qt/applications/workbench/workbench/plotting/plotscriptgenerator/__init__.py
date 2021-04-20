@@ -150,7 +150,7 @@ def get_title_cmds(ax, ax_object_var):
 
 
 def get_legend_cmds(ax, ax_object_var):
-    """Get command axes.set_legend"""
+    """Get commands for setting legend properties"""
     cmds = []
     if ax.legend_:
         cmds.append("{legend_object} = {ax_obj}.legend({legend_commands}).{draggable_method}.legend".format(

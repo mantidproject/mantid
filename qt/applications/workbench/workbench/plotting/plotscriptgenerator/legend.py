@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 
 from matplotlib import rcParams
-
+from matplotlib.font_manager import FontProperties
 from mantid.plots.legend import LegendProperties, convert_color_to_hex
 from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string
 
@@ -19,10 +19,10 @@ mpl_default_kwargs = {
     'edge_color': convert_color_to_hex(rcParams['legend.edgecolor']),
     'transparency': rcParams['legend.framealpha'],
     'entries_font': 'DejaVu Sans',
-    'entries_size': 10,
+    'entries_size': rcParams['legend.fontsize'],
     'entries_color': '#000000',
     'title_font': 'DejaVu Sans',
-    'title_size': 10,
+    'title_size': rcParams['axes.labelsize'],  # Uses axes size by default
     'title_color': '#000000',
     'marker_size': rcParams['legend.handlelength'],
     'box_visible': rcParams['legend.frameon'],
@@ -37,7 +37,7 @@ mpl_default_kwargs = {
     'marker_label_padding': rcParams['legend.handletextpad']
 }
 
-# Arguments for the legend
+# Dictionary to convert from the mantid legend interface to matplotlib legend argument names.
 MANTID_TO_MPL = {
     'background_color': 'facecolor',
     'edge_color': 'edgecolor',
@@ -123,7 +123,7 @@ def get_legend_command_kwargs(legend):
 
 def get_mpl_kwargs(kwargs):
     """
-    Keep only matplotlib kwargs, and convert the keys to matplotlib compatible ones.
+    Keep only matplotlib legend kwargs, and convert the keys to matplotlib compatible ones.
     """
     mpl_kwargs = {}
     for key, value in kwargs.items():
@@ -145,7 +145,23 @@ def _remove_kwargs_if_default(kwargs):
         if kwargs[kwarg] == default_value:
             kwargs.pop(kwarg)
 
-    # Hex values of colours may not be the same case.
+    # Font size defaults are string values (e.g. 'medium', 'large', 'x-large'), so we need to convert the defaults to
+    # point sizes before comparing.
+    if 'title_size' in kwargs:
+        font = FontProperties()
+        font.set_size(mpl_default_kwargs['title_size'])
+        point_size = font.get_size_in_points()
+        if kwargs['title_size'] == point_size:
+            kwargs.pop('title_size')
+
+    if 'entries_size' in kwargs:
+        font = FontProperties()
+        font.set_size(mpl_default_kwargs['entries_size'])
+        point_size = font.get_size_in_points()
+        if kwargs['entries_size'] == point_size:
+            kwargs.pop('entries_size')
+
+    # Hex values of colours may not be the same case, so convert to lower before comparing.
     if 'background_color' in kwargs:
         if kwargs['background_color'].lower() == mpl_default_kwargs['background_color'].lower():
             kwargs.pop('background_color')
