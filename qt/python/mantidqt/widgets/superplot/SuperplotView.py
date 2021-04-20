@@ -9,7 +9,7 @@
 from .WorkspaceItem import WorkspaceItem
 from .SpectrumItem import SpectrumItem
 
-from qtpy.QtWidgets import QDockWidget, QWidget
+from qtpy.QtWidgets import QDockWidget, QWidget, QHeaderView
 from qtpy.QtGui import QColor
 from qtpy.QtCore import *
 from qtpy import uic
@@ -30,6 +30,8 @@ class SuperplotViewSide(QDockWidget):
         super().__init__(parent)
         self.here = os.path.dirname(os.path.realpath(__file__))
         uic.loadUi(os.path.join(self.here, SuperplotViewSide.UI), self)
+        wsList = self.workspacesList
+        wsList.header().setSectionResizeMode(QHeaderView.ResizeToContents)
 
     def resizeEvent(self, event):
         """
