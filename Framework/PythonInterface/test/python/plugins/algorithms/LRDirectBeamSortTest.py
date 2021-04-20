@@ -18,9 +18,8 @@ class LRDirectBeamSortTest(unittest.TestCase):
         unittest.TestCase.__init__(self, *args)
 
     def test_RunsSuccessfully(self):
-        # FIXME - scale factor file is not set and thus the most important part is not tested
-        # LRDirectBeamSort(WorkspaceList=['REF_L_179926', 'REF_L_179927'],
-        LRDirectBeamSort(RunList='179926, 179927',
+        # LRDirectBeamSort(RunList='179926, 179927',
+        LRDirectBeamSort(WorkspaceList=['REF_L_179926', 'REF_L_179927'],
                          ComputeScalingFactors=True,
                          OrderDirectBeamsByRunNumber=False,
                          SlitTolerance=0.06,
@@ -28,6 +27,7 @@ class LRDirectBeamSortTest(unittest.TestCase):
                          UseLowResCut=False,
                          ScalingFactorFile='/tmp/scalefactor.txt',
                          TOFSteps=200)
+        # assert 1 == 3
 
     def __del__(self):
         DeleteWorkspace('REF_L_179926')
