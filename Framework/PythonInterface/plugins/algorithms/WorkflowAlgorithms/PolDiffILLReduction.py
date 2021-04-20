@@ -222,14 +222,15 @@ class PolDiffILLReduction(PythonAlgorithm):
     @staticmethod
     def _normalise(ws):
         """Normalises the provided WorkspaceGroup to the monitor 1."""
-        for entry_no, entry in enumerate(mtd[ws]):
+        for entry in mtd[ws]:
             mon = ws + '_mon'
             ExtractMonitors(InputWorkspace=entry, DetectorWorkspace=entry,
                             MonitorWorkspace=mon)
             if 0 in mtd[mon].readY(0):
                 raise RuntimeError('Cannot normalise to monitor; monitor has 0 counts.')
             else:
-                CreateSingleValuedWorkspace(DataValue=mtd[mon].readY(0)[0], ErrorValue=mtd[mon].readE(0)[0],
+                CreateSingleValuedWorkspace(DataValue=mtd[mon].readY(0)[0]/1000.0,
+                                            ErrorValue=np.sqrt(mtd[mon].readY(0)[0]/1000.0),
                                             OutputWorkspace=mon)
                 Divide(LHSWorkspace=entry, RHSWorkspace=mon, OutputWorkspace=entry)
                 DeleteWorkspace(Workspace=mon)
