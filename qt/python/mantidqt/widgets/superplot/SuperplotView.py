@@ -279,6 +279,7 @@ class SuperplotView(QWidget):
             name (str): name of the workspace
             nums (list(int)): list of the spectrum indexes
         """
+        self._sideView.workspacesList.blockSignals(True)
         wsItem = self._sideView.workspacesList.findItems(name,
                                                          Qt.MatchExactly, 0)[0]
         wsItem.takeChildren()
@@ -287,6 +288,7 @@ class SuperplotView(QWidget):
             item.signals.delClicked.connect(
                     self._presenter.onDelSpectrumButtonClicked)
             item.setText(0, str(num))
+        self._sideView.workspacesList.blockSignals(False)
 
     def getSpectraList(self, name):
         """
