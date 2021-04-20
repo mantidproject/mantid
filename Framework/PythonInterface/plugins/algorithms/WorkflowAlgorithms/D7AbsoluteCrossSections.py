@@ -372,29 +372,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         GroupWorkspaces(InputWorkspaces=separated_cs, OutputWorkspace=output_name)
         return output_name
 
-    def _relative_normalisation_factors(self, vanadium_ws):
-        """Performs relative normalisation assuming the detector with the highest number of counts is 100% efficient.
-        This relative normalisation is always performed on counts using vanadium measurement."""
-        relative_norm_ws = 'relative_norm_ws'
-        relative_norm_tmp_names = []
-        if isinstance(mtd[vanadium_ws], WorkspaceGroup) and mtd[vanadium_ws].getNumberOfEntries() > 1:
-            for entry_no, entry in enumerate(mtd[vanadium_ws]):
-                relative_norm_factor, dataE = self._max_value_per_detector(entry.name(),
-                                                                           one_per_detector=False)
-                relative_norm_tmp_name = '{}_{}'.format(relative_norm_ws, entry_no)
-                relative_norm_tmp_names.append(relative_norm_tmp_name)
-                CreateSingleValuedWorkspace(DataValue=relative_norm_factor, ErrorValue=dataE,
-                                            OutputWorkspace=relative_norm_tmp_name)
-        else:
-            relative_norm_factor, dataE = self._max_value_per_detector(vanadium_ws,
-                                                                       one_per_detector=False)
-            relative_norm_tmp_name = '{}_{}'.format(relative_norm_ws, 0)
-            CreateSingleValuedWorkspace(DataValue=relative_norm_factor, ErrorValue=dataE,
-                                        OutputWorkspace=relative_norm_tmp_name)
-            relative_norm_tmp_names.append(relative_norm_tmp_name)
-        GroupWorkspaces(InputWorkspaces=relative_norm_tmp_names, OutputWorkspace=relative_norm_ws)
-        return relative_norm_ws
-
     def _detector_efficiency_correction(self, cross_section_ws):
         """Calculates detector efficiency using either vanadium data, incoherent,
         or paramagnetic scattering cross-sections."""
@@ -403,10 +380,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         normaliseToAbsoluteUnits = self.getProperty('AbsoluteUnitsNormalisation').value
         det_efficiency_ws = cross_section_ws + '_det_efficiency'
         norm_ws = 'normalisation_ws'
-        relative_norm_ws = ''
-        if not self.getProperty('VanadiumInputWorkspace').isDefault:
-            vanadium_ws = self.getPropertyValue('VanadiumInputWorkspace')
-            relative_norm_ws = self._relative_normalisation_factors(vanadium_ws)
         tmp_name = 'det_eff'
         tmp_names = []
         to_clean = []
@@ -415,12 +388,21 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 normFactor = self._sampleAndEnvironmentProperties['NMoles'].value
                 CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace=norm_ws)
             else:
+                normalisationFactors, dataE = self._max_value_per_detector(mtd[cross_section_ws].name(),
+                                                                           one_per_detector=False)
+                unit_ws = 'unit'
                 CreateSingleValuedWorkspace(DataValue=1.0, ErrorValue=0.0,
-                                            OutputWorkspace=norm_ws)
+                                            OutputWorkspace=unit_ws)
+                maximumFactors_ws = "maximum_vanadium_ws"
+                CreateSingleValuedWorkspace(DataValue=normalisationFactors, ErrorValue=dataE,
+                                            OutputWorkspace=maximumFactors_ws)
+                Divide(LHSWorkspace=unit_ws, RHSWorkspace=maximumFactors_ws, OutputWorkspace=norm_ws)
+                to_clean += [unit_ws, maximumFactors_ws]
+
             to_clean.append(norm_ws)
-            Divide(LHSWorkspace=norm_ws,
-                   RHSWorkspace=cross_section_ws,
-                   OutputWorkspace=det_efficiency_ws)
+            Multiply(LHSWorkspace=cross_section_ws,
+                     RHSWorkspace=norm_ws,
+                     OutputWorkspace=det_efficiency_ws)
         elif calibrationType in  ['Paramagnetic', 'Incoherent']:
             if calibrationType == 'Paramagnetic':
                 spin = self._sampleAndEnvironmentProperties['SampleSpin'].value
@@ -464,20 +446,12 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         if self.getProperty('ClearCache').value and len(to_clean) != 0:
             DeleteWorkspaces(to_clean)
-        return det_efficiency_ws, relative_norm_ws
+        return det_efficiency_ws
 
-    def _normalise_sample_data(self, sample_ws, det_efficiency_ws, relative_norm_ws):
-        """Normalises the sample data using the detector efficiency calibration workspace and relative_norm_ws,
-        if available."""
+    def _normalise_sample_data(self, sample_ws, det_efficiency_ws):
+        """Normalises the sample data using the detector efficiency calibration workspace."""
 
         normalisation_method = self.getPropertyValue('NormalisationMethod')
-        norm_ws = 'norm_ws'
-
-        single_rel_norm_entry = True
-        if relative_norm_ws != str():
-            nEntries = mtd[relative_norm_ws].getNumberOfEntries()
-            if nEntries == mtd[sample_ws].getNumberOfEntries():
-                single_rel_norm_entry = False
 
         single_efficiency_per_POL = False
         if mtd[sample_ws].getNumberOfEntries() != mtd[det_efficiency_ws].getNumberOfEntries():
@@ -491,28 +465,14 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 det_eff_entry_no = int(entry_no / 2)
                 if entry_no % 2 != 0:
                     det_eff_entry_no -= 1
-            if single_rel_norm_entry:
-                rel_norm_entry = 0
-            else:
-                rel_norm_entry = entry_no
 
             ws_name = entry.name() + '_normalised'
             tmp_names.append(ws_name)
-            if relative_norm_ws != str():
-                Multiply(LHSWorkspace=mtd[det_efficiency_ws][det_eff_entry_no],
-                         RHSWorkspace=mtd[relative_norm_ws][rel_norm_entry],
-                         OutputWorkspace=norm_ws)
-            else:
-                norm_ws = mtd[det_efficiency_ws][det_eff_entry_no]
             Divide(LHSWorkspace=entry,
-                   RHSWorkspace=norm_ws,
+                   RHSWorkspace=mtd[det_efficiency_ws][det_eff_entry_no],
                    OutputWorkspace=ws_name)
         output_ws = self.getPropertyValue('OutputWorkspace')
         GroupWorkspaces(InputWorkspaces=tmp_names, Outputworkspace=output_ws)
-        if self.getProperty('ClearCache').value:
-            DeleteWorkspace(Workspace=norm_ws)
-            if relative_norm_ws != str():
-                DeleteWorkspace(Workspace=relative_norm_ws)
         return output_ws
 
     def _set_units(self, ws, nMeasurements):
@@ -591,8 +551,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         if self.getPropertyValue('CrossSectionSeparationMethod') == 'None':
             if normalisation_method =='Vanadium':
                 det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
-                det_efficiency_ws, relative_norm_ws = self._detector_efficiency_correction(det_efficiency_input)
-                output_ws = self._normalise_sample_data(input_ws, det_efficiency_ws, relative_norm_ws)
+                det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
+                output_ws = self._normalise_sample_data(input_ws, det_efficiency_ws)
                 if self.getProperty('ClearCache').value:
                     DeleteWorkspace(det_efficiency_ws)
             else:
@@ -605,8 +565,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                     det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
                 else:
                     det_efficiency_input = component_ws
-                det_efficiency_ws, relative_norm_ws = self._detector_efficiency_correction(det_efficiency_input)
-                output_ws = self._normalise_sample_data(component_ws, det_efficiency_ws, relative_norm_ws)
+                det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
+                output_ws = self._normalise_sample_data(component_ws, det_efficiency_ws)
                 if self.getProperty('ClearCache').value:
                     DeleteWorkspaces(WorkspaceList=[component_ws, det_efficiency_ws])
             else:
