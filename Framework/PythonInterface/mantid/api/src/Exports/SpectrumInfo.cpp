@@ -81,11 +81,9 @@ void export_SpectrumInfo() {
            "index.")
       .def("detectorCount", &SpectrumInfo::detectorCount, arg("self"),
            "Returns the total number of detectors used across spectrum info.")
-      .def("difcUncalibrated", &SpectrumInfo::difcUncalibrated,
-           (arg("self"), arg("index")),
+      .def("difcUncalibrated", &SpectrumInfo::difcUncalibrated, (arg("self"), arg("index")),
            "Return the uncalibrated difc diffractometer constant")
       .def("diffractometerConstants",
-           (UnitParametersMap(SpectrumInfo::*)(const size_t) const) &
-               SpectrumInfo::diffractometerConstants,
+           (UnitParametersMap(SpectrumInfo::*)(const size_t) const) & SpectrumInfo::diffractometerConstants,
            (arg("self"), arg("index")), "Return the diffractometer constants");
 }
