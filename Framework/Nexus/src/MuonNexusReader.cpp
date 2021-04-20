@@ -6,9 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidKernel/System.h"
-#include <array>
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/split.hpp>
 #include <boost/scoped_array.hpp>
 #include <nexus/NeXusException.hpp>
 #include <sstream>
@@ -29,13 +26,7 @@ const string START_TIME("start_time");
 /// logger
 Mantid::Kernel::Logger g_log("MuonNexusReader");
 
-///< Types for period information
-const std::array<std::string, 1> PERIOD_INFO_INT{"period_sequences"};
-const std::array<std::string, 4> PERIOD_INFO_INT_ARRAY{"period_type", "frames_period_requested", "frames_period_raw",
-                                                       "period_output"};
-const std::array<std::string, 1> PERIOD_INFO_FLOAT_ARRAY{"total_counts_period"};
-const std::array<std::string, 1> PERIOD_INFO_STRING{"period_labels"};
-
+///< Strings for period information
 const std::string PERIOD_SEQUENCES("period_sequences");
 const std::string PERIOD_TYPE("period_type");
 const std::string FRAMES_PERIOD_REQUESTED("frames_period_requested");
@@ -171,11 +162,6 @@ void MuonNexusReader::readFromFile(const string &filename) {
  * - Raw frames
  * - Tag
  * - Total counts per period
- * const std::array<std::string, 1> PERIOD_INFO_INT{"period_sequences"};
-const std::array<std::string, 4> PERIOD_INFO_INT_ARRAY{"period_type", "frames_period_requested", "frames_period_raw",
-                                                       "period_output"};
-const std::array<std::string, 1> PERIOD_INFO_FLOAT_ARRAY{"total_counts_period"};
-const std::array<std::string, 1> PERIOD_INFO_STRING{"period_labels"};
  */
 void MuonNexusReader::readPeriodInfo(NeXus::File &handle) {
   int tempInt;
@@ -405,5 +391,3 @@ bool MuonNexusReader::logTypeNumeric(const int i) const { return (m_logType[i]);
  * @return the log name at the given index
  */
 string MuonNexusReader::getLogName(const int i) const { return (m_logNames[i]); }
-
-std::vector<std::string> MuonNexusReader::getPeriodInfo() const { return m_periodInformation; }

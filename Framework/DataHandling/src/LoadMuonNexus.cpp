@@ -173,7 +173,7 @@ int LoadMuonNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
 }
 
 /**
- *
+ * Create Algorithm to add a sample log to a workspace
  */
 Mantid::API::Algorithm_sptr LoadMuonNexus::createSampleLogAlgorithm(DataObjects::Workspace2D_sptr &ws) {
   Mantid::API::Algorithm_sptr logAlg = createChildAlgorithm("AddSampleLog");
@@ -182,6 +182,7 @@ Mantid::API::Algorithm_sptr LoadMuonNexus::createSampleLogAlgorithm(DataObjects:
 }
 
 /**
+ * Function to add a single int as a sample log to a workspace
  */
 void LoadMuonNexus::addToSampleLog(const std::string &logName, const int logNumber, DataObjects::Workspace2D_sptr &ws) {
   auto alg = createSampleLogAlgorithm(ws);
@@ -192,6 +193,9 @@ void LoadMuonNexus::addToSampleLog(const std::string &logName, const int logNumb
   alg->executeAsChildAlg();
 }
 
+/**
+ * Fucntion to add a single string as a sample log to a workspace
+ */
 void LoadMuonNexus::addToSampleLog(const std::string &logName, const std::string logString,
                                    DataObjects::Workspace2D_sptr &ws) {
   auto alg = createSampleLogAlgorithm(ws);

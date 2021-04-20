@@ -23,7 +23,6 @@ NOT_DAQ_STRING = "-"
 DAQ = "1"
 DWELL = "2"
 CYCLES_NOT_FOUND = "Number of period cycles not found"
-INFO_DELIM = ';'
 
 
 class MuonPeriodInfoWidget(QtWidgets.QWidget):

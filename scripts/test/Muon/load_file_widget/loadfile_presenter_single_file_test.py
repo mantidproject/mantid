@@ -14,7 +14,6 @@ from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
 from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
 from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
-from Muon.GUI.Common.test_helpers.general_test_helpers import EMPTY_PERIOD_INFO_LIST
 
 
 @start_qapplication
@@ -68,7 +67,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
 
     def mock_model_to_load_workspaces(self, workspaces, runs, filenames):
         psi_data = [False] * len(filenames)
-        self.load_utils_patcher.side_effect = zip(workspaces, runs, filenames, psi_data, EMPTY_PERIOD_INFO_LIST)
+        self.load_utils_patcher.side_effect = zip(workspaces, runs, filenames, psi_data)
 
     def load_workspaces_into_model_and_view_from_browse(self, workspaces, runs, files):
         self.mock_model_to_load_workspaces(workspaces, runs, files)

@@ -76,7 +76,6 @@ protected:
   Mantid::API::Algorithm_sptr createSampleLogAlgorithm(DataObjects::Workspace2D_sptr &ws);
   void addToSampleLog(const std::string &logName, const int logNumber, DataObjects::Workspace2D_sptr &ws);
   void addToSampleLog(const std::string &logName, const std::string log, DataObjects::Workspace2D_sptr &ws);
-  void addToSampleLog(const std::string &logName, const std::vector<int> logs, DataObjects::Workspace2D_sptr &ws);
 
   /// The name and path of the input file
   std::string m_filename;
@@ -92,8 +91,6 @@ protected:
   specnum_t m_numberOfSpectra;
   /// The number of periods in the raw file
   int64_t m_numberOfPeriods;
-  /// The different pieces of information about periods
-  std::vector<std::string> m_periodInformation;
   /// Has the spectrum_list property been set?
   bool m_list;
   /// Have the spectrum_min/max properties been set?

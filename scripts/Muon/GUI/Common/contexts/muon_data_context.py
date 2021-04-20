@@ -79,7 +79,6 @@ class MuonDataContext(object):
         self.instrumentNotifier = MuonDataContext.InstrumentNotifier(self)
         self.message_notifier = MuonDataContext.MessageNotifier(self)
         self.base_directory = base_directory
-        self.periods_info = []
 
     def is_data_loaded(self):
         return self._loaded_data.num_items() > 0
@@ -231,7 +230,6 @@ class MuonDataContext(object):
         self._loaded_data.clear()
         self._current_runs = []
         self._main_field_direction = ''
-        self.periods_info = []
 
     def _base_run_name(self, run=None):
         """ e.g. EMU0001234 """

@@ -14,7 +14,6 @@ from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
-from Muon.GUI.Common.test_helpers.general_test_helpers import EMPTY_PERIOD_INFO_LIST
 
 
 @start_qapplication
@@ -55,7 +54,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
 
     def mock_loading_via_user_input_run(self, workspace, filename, run):
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(
-            return_value=(workspace, run, filename, False, EMPTY_PERIOD_INFO_LIST))
+            return_value=(workspace, run, filename, False))
         self.view.set_run_edit_text("1234")
 
     # ------------------------------------------------------------------------------------------------------------------

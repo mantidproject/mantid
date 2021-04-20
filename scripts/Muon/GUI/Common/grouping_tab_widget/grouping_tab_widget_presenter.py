@@ -311,21 +311,6 @@ class GroupingTabPresenter(object):
         tags_log = self._model._data.get_sample_log("period_output")
         tags = tags_log.value.split(";") if tags_log else []
 
-        #
-        # self.period_info_widget.number_of_sequences = self._model._data.periods_info[0] if \
-        #     self._model._data.periods_info[0] != [''] else None
-        # names = self._model._data.periods_info[CONTEXT_MAP["Name"]].split(INFO_DELIM) if \
-        #     self._model._data.periods_info[CONTEXT_MAP["Name"]] != [''] else []
-        # types = self._model._data.periods_info[CONTEXT_MAP["Type"]].split(INFO_DELIM) if \
-        #     self._model._data.periods_info[CONTEXT_MAP["Type"]] != [''] else []
-        # frames = self._model._data.periods_info[CONTEXT_MAP["Frames"]].split(INFO_DELIM) if \
-        #     self._model._data.periods_info[CONTEXT_MAP["Frames"]] != [''] else []
-        # total_frames = self._model._data.periods_info[CONTEXT_MAP["Total Good Frames"]].split(INFO_DELIM) if \
-        #     self._model._data.periods_info[CONTEXT_MAP["Total Good Frames"]] != [''] else []
-        # counts = self._model._data.periods_info[CONTEXT_MAP["Counts"]].split(INFO_DELIM) if \
-        #     self._model._data.periods_info[CONTEXT_MAP["Counts"]] != [''] else []
-        # tags = self._model._data.periods_info[CONTEXT_MAP["Tag"]].split(INFO_DELIM) if \
-        #     self._model._data.periods_info[CONTEXT_MAP["Tag"]] != [''] else []
         names, types, frames, total_frames, counts, tags, count = self._fix_up_period_info_lists([names, types, frames,
                                                                                                   total_frames, counts,
                                                                                                   tags])
