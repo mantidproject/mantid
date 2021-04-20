@@ -60,14 +60,14 @@ class PlotScriptGeneratorLegendTest(unittest.TestCase):
         title.set_color(TEST_FONT_KWARGS['color'])
         title_font_commands = generate_title_font_commands(legend, "legend")
 
-        # There should be two lines of commands, one to set the font name, and the other to set the colour.
-        self.assertEqual(2, len(title_font_commands))
         # Default arguments should not appear in the list of commands.
         for value in DEFAULT_TITLE_FONT_KWARGS.values():
             self.assertFalse(any(str(value) in command for command in title_font_commands))
         # The new values should all appear in the list of commands.
         for value in TEST_FONT_KWARGS.values():
             self.assertTrue(any(str(value) in command for command in title_font_commands))
+        # There should be two lines of commands, one to set the font name, and the other to set the colour.
+        self.assertEqual(2, len(title_font_commands))
 
     def test_label_font_commands(self):
         """
@@ -78,14 +78,14 @@ class PlotScriptGeneratorLegendTest(unittest.TestCase):
             label.set_fontname(TEST_FONT_KWARGS['font'])
             label.set_color(TEST_FONT_KWARGS['color'])
         label_font_commands = generate_label_font_commands(legend, "legend")
-        # There should be two lines of commands, one to set the font name, and the other to set the colour.
-        self.assertEqual(2, len(label_font_commands))
         # Default arguments should not appear in the list of commands.
         for value in DEFAULT_TITLE_FONT_KWARGS.values():
             self.assertFalse(any(str(value) in command for command in label_font_commands))
         # The new values should all appear in the list of commands.
         for value in TEST_FONT_KWARGS.values():
             self.assertTrue(any(str(value) in command for command in label_font_commands))
+        # There should be two lines of commands, one to set the font name, and the other to set the colour.
+        self.assertEqual(2, len(label_font_commands))
 
     def test_legend_kwargs(self):
         """
