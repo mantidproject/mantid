@@ -159,6 +159,29 @@ class SuperplotView(QWidget):
                 selection.append(wsName)
         return selection
 
+    def setSelection(self, selection):
+        """
+        Set the selected workspaces and spectra in list.
+
+        Args:
+            selection (dict(str: list(int))): workspace names and list of
+                                              spectrum numbers
+        """
+        self._sideView.workspacesList.blockSignals(True)
+        self._sideView.workspacesList.clearSelection()
+        for i in range(self._sideView.workspacesList.topLevelItemCount()):
+            wsItem = self._sideView.workspacesList.topLevelItem(i)
+            wsName = wsItem.getWorkspaceName()
+            if wsName in selection:
+                if not selection[wsName]:
+                    wsItem.setSelected(True)
+                    continue
+                for j in range(wsItem.childCount()):
+                    spItem = wsItem.child(j)
+                    if spItem.getSpectrumIndex() in selection[wsName]:
+                        spItem.setSelected(True)
+        self._sideView.workspacesList.blockSignals(False)
+
     def getSelection(self):
         """
         Get the current selection.
