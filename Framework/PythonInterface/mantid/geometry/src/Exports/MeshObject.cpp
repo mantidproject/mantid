@@ -32,7 +32,7 @@ boost::python::object wrapMeshWithNDArray(MeshObject &self) {
   auto vertices = self.getV3Ds();
   auto triangles = self.getTriangles();
   size_t numberTriangles = triangles.size() / 3;
-  npy_intp dims[3] = {numberTriangles, 3, 3};
+  npy_intp dims[3] = {static_cast<int>(numberTriangles), 3, 3};
   for (size_t iTriangle = 0; iTriangle < numberTriangles; ++iTriangle) {
     for (int corner = 0; corner < 3; corner++) {
       auto coords = std::vector<double>(vertices[triangles[(3 * iTriangle) + corner]]);
