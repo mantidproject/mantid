@@ -24,29 +24,8 @@ using namespace Mantid::Kernel;
 
 namespace {
 
-std::string const SEQUENTIAL_SCRIPT =
-    "# Perform a sequential fit\n"
-    "output_workspaces, parameter_tables, normalised_matrices = [], [], []\n"
-    "for input_workspace, domain_data in input_data.items():\n"
-    "    fit_output = Fit(Function=function, InputWorkspace=input_workspace, WorkspaceIndex=domain_data[0],\n"
-    "                     StartX=domain_data[1], EndX=domain_data[2], MaxIterations=max_iterations,\n"
-    "                     Minimizer=minimizer, CostFunction=cost_function, EvaluationType=evaluation_type,\n"
-    "                     CreateOutput=True)\n"
-    "\n"
-    "    output_workspaces.append(fit_output.OutputWorkspace)\n"
-    "    parameter_tables.append(fit_output.OutputParameters)\n"
-    "    normalised_matrices.append(fit_output.OutputNormalisedCovarianceMatrix)\n"
-    "\n"
-    "    # Use the parameters in the previous function as the start parameters of the next fit\n"
-    "    function = fit_output.Function\n"
-    "\n"
-    "# Group the output workspaces from the sequential fit\n"
-    "GroupWorkspaces(InputWorkspaces=output_workspaces, OutputWorkspace=\"Sequential_Fit_Workspaces\")\n"
-    "GroupWorkspaces(InputWorkspaces=parameter_tables, OutputWorkspace=\"Sequential_Fit_Parameters\")\n"
-    "GroupWorkspaces(InputWorkspaces=normalised_matrices, "
-    "OutputWorkspace=\"Sequential_Fit_NormalisedCovarianceMatrices\")\n"
-    "\n"
-    "# Plot the results of the sequential fit\n"
+std::string const PLOTTING_CODE =
+    "# Plot the results of the fit\n"
     "fig, axes = plt.subplots(nrows=2,\n"
     "                         ncols=len(output_workspaces),\n"
     "                         sharex=True,\n"
@@ -68,7 +47,28 @@ std::string const SEQUENTIAL_SCRIPT =
     "fig.subplots_adjust(hspace=0)\n"
     "fig.show()\n";
 
-std::string const SIMULTANEOUS_SCRIPT = "";
+std::string const SEQUENTIAL_FIT_CODE =
+    "# Perform a sequential fit\n"
+    "output_workspaces, parameter_tables, normalised_matrices = [], [], []\n"
+    "for input_workspace, domain_data in input_data.items():\n"
+    "    fit_output = Fit(Function=function, InputWorkspace=input_workspace, WorkspaceIndex=domain_data[0],\n"
+    "                     StartX=domain_data[1], EndX=domain_data[2], MaxIterations=max_iterations,\n"
+    "                     Minimizer=minimizer, CostFunction=cost_function, EvaluationType=evaluation_type,\n"
+    "                     CreateOutput=True)\n"
+    "\n"
+    "    output_workspaces.append(fit_output.OutputWorkspace)\n"
+    "    parameter_tables.append(fit_output.OutputParameters)\n"
+    "    normalised_matrices.append(fit_output.OutputNormalisedCovarianceMatrix)\n"
+    "\n"
+    "    # Use the parameters in the previous function as the start parameters of the next fit\n"
+    "    function = fit_output.Function\n"
+    "\n"
+    "# Group the output workspaces from the sequential fit\n"
+    "GroupWorkspaces(InputWorkspaces=output_workspaces, OutputWorkspace=\"Sequential_Fit_Workspaces\")\n"
+    "GroupWorkspaces(InputWorkspaces=parameter_tables, OutputWorkspace=\"Sequential_Fit_Parameters\")\n"
+    "GroupWorkspaces(InputWorkspaces=normalised_matrices, "
+    "OutputWorkspace=\"Sequential_Fit_NormalisedCovarianceMatrices\")\n"
+    "\n";
 
 template <typename T> std::string joinVector(std::vector<T> const &vec, std::string const &delimiter = ", ") {
   std::stringstream ss;
@@ -220,9 +220,10 @@ std::string GeneratePythonFitScript::generateFitScript(std::string const &fittin
   std::string generatedScript;
   generatedScript += generateVariableSetupCode();
   if (fittingType == "Sequential")
-    generatedScript += SEQUENTIAL_SCRIPT;
+    generatedScript += SEQUENTIAL_FIT_CODE;
   else if (fittingType == "Simultaneous")
-    generatedScript += SIMULTANEOUS_SCRIPT;
+    generatedScript += generateSimultaneousFitCode();
+  generatedScript += PLOTTING_CODE;
   return generatedScript;
 }
 
@@ -239,7 +240,7 @@ std::string GeneratePythonFitScript::generateVariableSetupCode() const {
 
   IFunction_const_sptr function = getProperty("Function");
 
-  std::string code = "# A python script generated to perform a sequential fit\n";
+  std::string code = "# A python script generated to perform a sequential or simultaneous fit\n";
   code += "from mantid.simpleapi import *\n";
   code += "import matplotlib.pyplot as plt\n\n";
 
@@ -256,6 +257,30 @@ std::string GeneratePythonFitScript::generateVariableSetupCode() const {
   code += "cost_function = \"" + costFunction + "\"\n";
   code += "evaluation_type = \"" + evaluationType + "\"\n\n";
 
+  return code;
+}
+
+std::string GeneratePythonFitScript::generateSimultaneousFitCode() const {
+  std::string code = "# Perform a simultaneous fit\n";
+  code += "input_workspaces = list(input_data.keys())\n";
+  code += "domain_data = list(input_data.values())\n\n";
+  code += "fit_output = Fit(Function=function,\n";
+
+  code += "                 InputWorkspace=input_workspaces[0], WorkspaceIndex=domain_data[0][0], "
+          "StartX=domain_data[0][1], EndX=domain_data[0][2],\n";
+
+  std::vector<std::string> const inputWorkspaces = getProperty("InputWorkspaces");
+  for (auto i = 1u; i < inputWorkspaces.size(); ++i) {
+    code += "                 InputWorkspace_" + std::to_string(i) + "=input_workspaces[" + std::to_string(i) + "], ";
+    code += "WorkspaceIndex_" + std::to_string(i) + "=domain_data[" + std::to_string(i) + "][0], ";
+    code += "StartX_" + std::to_string(i) + "=domain_data[" + std::to_string(i) + "][1], ";
+    code += "EndX_" + std::to_string(i) + "=domain_data[" + std::to_string(i) + "][2],\n";
+  }
+
+  code += "                 MaxIterations=max_iterations, Minimizer=minimizer, CostFunction=cost_function,\n";
+  code += "                 EvaluationType=evaluation_type, CreateOutput=True)\n\n";
+
+  code += "output_workspaces = fit_output.OutputWorkspace\n\n";
   return code;
 }
 

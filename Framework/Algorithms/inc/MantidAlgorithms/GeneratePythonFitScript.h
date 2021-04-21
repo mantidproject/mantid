@@ -36,6 +36,7 @@ private:
 
   std::string generateFitScript(std::string const &fittingType) const;
   std::string generateVariableSetupCode() const;
+  std::string generateSimultaneousFitCode() const;
 
   void savePythonScript(std::string const &filepath, std::string const &contents) const;
 };
