@@ -9,7 +9,7 @@
 import unittest
 
 # 3rd party
-from mantid.api import SpecialCoordinateSystem
+from mantid.kernel import SpecialCoordinateSystem
 
 # local imports
 from mantidqt.widgets.sliceviewer.sliceinfo import SliceInfo
