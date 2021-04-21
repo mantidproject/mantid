@@ -346,16 +346,8 @@ class SuperplotPresenter:
         Args:
             mode (str): new mode
         """
-        currentWsName = self._view.getSelectedWorkspaceFromList()
-        currentWs = mtd[currentWsName]
-        if mode == self.SPECTRUM_MODE_TEXT:
-            maximum = currentWs.getNumberHistograms()
-        else:
-            maximum = currentWs.blocksize()
-        self._view.setSpectrumSliderMax(maximum - 1)
-        self._view.setSpectrumSliderPosition(0)
-        self._view.setSpectrumSpinBoxMax(maximum - 1)
-        self._view.setSpectrumSpinBoxValue(0)
+        wsNames = self._view.getSelectedWorkspacesFromList()
+        self._updateSpectrumSlider(wsNames, 0)
         self._updatePlot()
 
     def onWorkspaceDeleted(self, wsName):
