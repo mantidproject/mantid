@@ -198,7 +198,11 @@ class SuperplotPresenter:
         figure = self._canvas.figure
         axes = figure.get_axes()
         axes = axes[0]
+        xscale = axes.get_xscale()
+        yscale = axes.get_yscale()
         axes.clear()
+        axes.set_xscale(xscale)
+        axes.set_yscale(yscale)
         for wsName, sp in plottedData:
             if self._model.isSpectrumMode():
                 axisType = MantidAxType.SPECTRUM
