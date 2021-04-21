@@ -8,6 +8,7 @@ from mantid.api import (PythonAlgorithm, AlgorithmFactory,
                         PropertyMode, WorkspaceProperty, Progress,
                         IMDHistoWorkspaceProperty, mtd)
 from mantid.kernel import Direction, FloatArrayProperty, FloatArrayLengthValidator, StringListValidator, FloatBoundedValidator
+from mantid import config
 from mantid import logger
 import numpy as np
 
@@ -65,6 +66,8 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                              "format: 'minimum,maximum,number_of_bins'.")
         self.declareProperty('KeepTemporaryWorkspaces', False,
                              "If True the normalization and data workspaces in addition to the normalized data will be outputted")
+        self.declareProperty("ObliquityParallaxCoefficient", 1.0, validator=FloatBoundedValidator(0.0),
+                             doc="Geometrical correction for shift in vertical beam position due to wide beam.")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "",
                                                optional=PropertyMode.Mandatory,
                                                direction=Direction.Output),
@@ -252,8 +255,14 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             if inWS.getExperimentInfo(0).getInstrument().getName() == 'HB3A':
                 azim = azim.reshape(512*3, 512).T.flatten()
 
+        # check convention to determine the sign
+        if config['Q.convention'] == 'Crystallography':
+            k *= -1.0
+
+        cop = self.getProperty('ObliquityParallaxCoefficient').value
+
         qlab = np.vstack((np.sin(polar)*np.cos(azim),
-                          np.sin(polar)*np.sin(azim),
+                          np.sin(polar)*np.sin(azim)*cop,
                           np.cos(polar) - 1)).T * -k # Kf - Ki(0,0,1)
 
         progress.report('Calculating Q volume')
@@ -355,6 +364,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
 
         outWS.getExperimentInfo(0).run().addProperty('RUBW_MATRIX', list(UBW.flatten()), True)
         outWS.getExperimentInfo(0).run().addProperty('W_MATRIX', list(W.flatten()), True)
+        outWS.getExperimentInfo(0).run().addProperty('wavelength', self.getProperty("Wavelength").value, True)
         try:
             if outWS.getExperimentInfo(0).sample().hasOrientedLattice():
                 outWS.getExperimentInfo(0).sample().getOrientedLattice().setUB(UB)

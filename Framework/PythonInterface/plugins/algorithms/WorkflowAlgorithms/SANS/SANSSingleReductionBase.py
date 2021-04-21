@@ -13,7 +13,7 @@ from collections import defaultdict
 from mantid.api import (DistributedDataProcessorAlgorithm,
                         MatrixWorkspaceProperty, Progress, PropertyMode)
 from mantid.kernel import Direction
-from sans.algorithm_detail.bundles import ReductionSettingBundle
+from sans.algorithm_detail.bundles import ReductionSettingBundle, CompletedSlices
 from sans.algorithm_detail.single_execution import (get_final_output_workspaces,
                                                     get_merge_bundle_for_merge_request)
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
@@ -119,11 +119,14 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
         # --------------------------------------------------------------------------------------------------------------
         # Reduction - here we slice the workspaces and perform the steps which must be carried out after slicing
         # --------------------------------------------------------------------------------------------------------------
-        output_bundles, output_parts_bundles, \
-            output_transmission_bundles = self.do_reduction(reduction_alg, reduction_setting_bundles, use_optimizations,
-                                                            progress)
+        completed_event_slices: CompletedSlices = []
+        for event_slice in reduction_setting_bundles:
+            # The single reductions represent CAN / sample reductions
+            for bundle in event_slice:
+                reduced_slices = self.do_reduction(reduction_alg, bundle, use_optimizations, progress)
+                # Merge the list of lists into a single flat list to keep our lives easier
+                completed_event_slices.extend(reduced_slices)
 
-        reduction_mode_vs_output_workspaces = defaultdict(list)
         reduction_mode_vs_workspace_names = defaultdict(list)
 
         # --------------------------------------------------------------------------------------------------------------
@@ -131,13 +134,10 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
         # Note that we have non-merged workspaces even in the case of a merged reduction, ie LAB and HAB results
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Final clean up...")
-        for event_slice_bundle in output_bundles:
-            output_workspaces_non_merged = get_final_output_workspaces(event_slice_bundle, self)
-            for reduction_mode, workspace in output_workspaces_non_merged.items():
-                reduction_mode_vs_output_workspaces[reduction_mode].append(workspace)
 
-            reduction_mode_vs_workspace_names = self._get_workspace_names(reduction_mode_vs_workspace_names,
-                                                                          event_slice_bundle)
+        reduction_mode_vs_output_workspaces = get_final_output_workspaces(completed_event_slices, self)
+        reduction_mode_vs_workspace_names = self._get_workspace_names(reduction_mode_vs_workspace_names,
+                                                                      completed_event_slices)
 
         # --------------------------------------------------------------------------------------------------------------
         # Deal with merging
@@ -145,20 +145,22 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
         # Merge if required with stitching etc.
         scale_factors = []
         shift_factors = []
+
         if overall_reduction_mode is ReductionMode.MERGED:
             progress.report("Merging reductions ...")
-            for i, event_slice_part_bundle in enumerate(output_parts_bundles):
-                merge_bundle = get_merge_bundle_for_merge_request(event_slice_part_bundle, self)
-                scale_factors.append(merge_bundle.scale)
-                shift_factors.append(merge_bundle.shift)
-                reduction_mode_vs_output_workspaces[ReductionMode.MERGED].append(merge_bundle.merged_workspace)
-                merged_name = self._get_merged_workspace_name(event_slice_part_bundle)
+            merge_bundle = get_merge_bundle_for_merge_request(completed_event_slices, self)
+            reduction_mode_vs_output_workspaces[ReductionMode.MERGED] = []
+            for merged in merge_bundle:
+                scale_factors.append(merged.scale)
+                shift_factors.append(merged.shift)
+                reduction_mode_vs_output_workspaces[ReductionMode.MERGED].append(merged.merged_workspace)
+                merged_name = self._get_merged_workspace_name(completed_event_slices)
                 reduction_mode_vs_workspace_names[ReductionMode.MERGED].append(merged_name)
 
-                scaled_HAB = strip_end_nans(merge_bundle.scaled_hab_workspace, self)
+                scaled_HAB = strip_end_nans(merged.scaled_hab_workspace, self)
                 reduction_mode_vs_output_workspaces[ReductionMode.HAB].append(scaled_HAB)
                 # Get HAB workspace name
-                state = event_slice_part_bundle[0].state
+                state = completed_event_slices[0].output_bundle.state
                 hab_name = self._get_output_workspace_name(state, reduction_mode=ReductionMode.HAB)
                 reduction_mode_vs_workspace_names[ReductionMode.HAB].append(hab_name)
 
@@ -175,13 +177,13 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
         # --------------------------------------------------------------------------------------------------------------
         if use_optimizations:
             if not save_can:
-                self.set_reduced_can_workspace_on_output(output_bundles)
-            self.set_reduced_can_count_and_norm_on_output(output_parts_bundles)
+                self.set_reduced_can_workspace_on_output(completed_event_slices)
+            self.set_reduced_can_count_and_norm_on_output(completed_event_slices)
 
         if save_can:
-            self.set_can_and_sam_on_output(output_bundles)
+            self.set_can_and_sam_on_output(completed_event_slices)
 
-        self.set_transmission_workspaces_on_output(output_transmission_bundles,
+        self.set_transmission_workspaces_on_output(completed_event_slices,
                                                    state.adjustment.calculate_transmission.fit)
 
     def do_initial_reduction(self, state, overall_reduction_mode):

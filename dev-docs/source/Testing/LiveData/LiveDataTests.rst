@@ -60,19 +60,27 @@ ISIS Histogram
 ADARA Fake Event
 ################
 
-This approach reads from an SNS pre-nexus file to recreate realistic event data, however It is a little more fiddly to setup.
+This approach reads from an SNS pre-nexus file or an event-nexus file to recreate realistic event data, however It is a little more fiddly to setup.
 
 #. Find the file ``Mantid.user.properties``. Its location will be:
 
    - Windows: ``C:\MantidInstall\bin``
    - Mac or linux: ``~/.mantid`` (i.e. in a ``.mantid`` directory under your home directory)
 
-#. To use the ``REF_L_32035_neutron_event.dat`` file (located in the ``TrainingCourseData`` folder), open ``Mantid.user.properties`` in your favorite text editor and add the following lines:
+#. To use a pre-nexus file, use the ``REF_L_32035_neutron_event.dat`` file (located in the ``TrainingCourseData`` folder), open ``Mantid.user.properties`` in your favorite text editor and add the following lines:
 
    ::
 
     fileeventdatalistener.filename=REF_L_32035_neutron_event.dat
     fileeventdatalistener.chunks=300
+
+   A event nexus file can also be used instead, for example:
+
+   ::
+
+    fileeventdatalistener.filename=EQSANS_6071_event.nxs
+
+   Chunking for files can be determined by using the :ref:`DetermineChunking <algm-DetermineChunking>` algorithm.
 
 #. Start MantidPlot
 #. Use the instrument ``ADARA_FileReader`` in the ``TEST_LIVE`` facility in the First Time Setup dialog (MantidPlot) or Settings dialog (MantidWorkbench).  There is no need to stop this fake instrument.

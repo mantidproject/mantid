@@ -445,8 +445,8 @@ void ConvertToDiffractionMDWorkspace::exec() {
 
   // Copy ExperimentInfo (instrument, run, sample) to the output WS
   ExperimentInfo_sptr ei(m_inWS->cloneExperimentInfo());
-  uint16_t runIndex = ws->addExperimentInfo(ei);
-  UNUSED_ARG(runIndex);
+  uint16_t expInfoIndex = ws->addExperimentInfo(ei);
+  UNUSED_ARG(expInfoIndex);
 
   // ------------------- Cache values that are common for all
   // ---------------------------

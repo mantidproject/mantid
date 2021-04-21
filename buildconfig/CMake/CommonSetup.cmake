@@ -408,19 +408,28 @@ endif()
 # ##############################################################################
 option(ENABLE_PRECOMMIT "Enable pre-commit framework" ON)
 if (ENABLE_PRECOMMIT)
+  # Windows should use downloaded ThirdParty version of pre-commit.cmd
+  # Everybody else should find one in their PATH
+  find_program(PRE_COMMIT_EXE
+    NAMES
+    pre-commit
+    HINTS
+    ~/.local/bin/
+    "${MSVC_PYTHON_EXECUTABLE_DIR}/Scripts/")
+  if (NOT PRE_COMMIT_EXE)
+    message ( FATAL_ERROR "Failed to find pre-commit see https://developer.mantidproject.org/GettingStarted.html" )
+  endif ()
+
   if (MSVC)
-    # Use downloaded ThirdParty version of pre-commit
-    execute_process(COMMAND "${MSVC_PYTHON_EXECUTABLE_DIR}/Scripts/pre-commit.cmd" install --overwrite WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE PRE_COMMIT_RESULT)
+    execute_process(COMMAND "${PRE_COMMIT_EXE}.cmd" install --overwrite WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE PRE_COMMIT_RESULT)
     if(NOT PRE_COMMIT_RESULT EQUAL "0")
         message(FATAL_ERROR "Pre-commit install failed with ${PRE_COMMIT_RESULT}")
     endif()
     # Create pre-commit script wrapper to use mantid third party python for pre-commit
     file(RENAME "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit" "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py")
     file(WRITE "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit" "#!/usr/bin/env sh\n${MSVC_PYTHON_EXECUTABLE_DIR}/python.exe ${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py")
-  else()
-    # Use system installed pre-commit if not present it should just fail but
-    # continue anyway.
-    execute_process(COMMAND bash -c "pre-commit install" WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE STATUS)
+  else()  # linux as osx
+    execute_process(COMMAND bash -c "${PRE_COMMIT_EXE} install" WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE STATUS)
     if (STATUS AND NOT STATUS EQUAL 0)
       message(FATAL_ERROR "Pre-commit tried to install itself into your repository, but failed to do so. Is it installed on your system?")
     endif()

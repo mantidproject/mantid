@@ -172,7 +172,8 @@ public:
     TS_ASSERT_DELTA(plp.getFinalEnergy(), peak.getFinalEnergy(), tolerance);
     //
     TS_ASSERT_EQUALS(plp.getAzimuthal(), peak.getAzimuthal());
-    TS_ASSERT_THROWS_NOTHING(plp.getDetectorID());
+    // Actually check that we found the same detector ID
+    TS_ASSERT_EQUALS(plp.getDetectorID(), 19999);
 
     std::ostringstream msg;
     msg.precision(16);

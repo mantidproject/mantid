@@ -447,7 +447,7 @@ void LoadPLN::init() {
   declareProperty(std::make_unique<API::FileProperty>(FilenameStr, "", API::FileProperty::Load, exts),
                   "The input filename of the stored data");
 
-  declareProperty(PathToBinaryStr, "", std::make_shared<Kernel::MandatoryValidator<std::string>>(),
+  declareProperty(PathToBinaryStr, "./", std::make_shared<Kernel::MandatoryValidator<std::string>>(),
                   "Relative or absolute path to the compressed binary\n"
                   "event file linked to the HDF file, eg /storage/data/");
 
@@ -857,7 +857,9 @@ void LoadPLN::exec() {
   // dataset index to be loaded
   m_datasetIndex = getProperty(SelectDatasetStr);
 
-  // if path provided build the file path
+  // if path provided build the file path from the directory name and dataset
+  // number from the hdf file, however if this is not a valid path then try
+  // the basename with a '.bin' extension
   if (fs::is_directory(evtPath)) {
     NeXus::NXRoot root(hdfFile);
     NeXus::NXEntry entry = root.openFirstEntry();
@@ -869,15 +871,27 @@ void LoadPLN::exec() {
       dataset = 0;
     }
 
-    // build the path to the event file as if a relative or absolute
-    // path is passed:
-    //   'relpath/[daq_dirname]/DATASET_[n]/EOS.bin' or the
-    char buffer[255] = {};
-    snprintf(buffer, sizeof(buffer), "%s/DATASET_%d/EOS.bin", eventDir.c_str(), dataset);
+    // build the path to the event file using the standard storage convention at ansto:
+    //   'relpath/[daq_dirname]/DATASET_[n]/EOS.bin'
+    // but if the file is missing, try relpath/{source}.bin
+    std::stringstream buffer;
+    buffer << eventDir.c_str() << "/DATASET_" << dataset << "/EOS.bin";
     fs::path path = evtPath;
-    path /= buffer;
+    path /= buffer.str();
     path = fs::absolute(path);
-    evtPath = path.generic_string();
+    std::string nomPath = path.generic_string();
+    if (fs::is_regular_file(nomPath)) {
+      evtPath = nomPath;
+    } else {
+      fs::path hp = hdfFile;
+      buffer.str("");
+      buffer.clear();
+      buffer << hp.stem().generic_string().c_str() << ".bin";
+      fs::path path = evtPath;
+      path /= buffer.str();
+      path = fs::absolute(path);
+      evtPath = path.generic_string();
+    }
   }
 
   // finally check that the event file exists

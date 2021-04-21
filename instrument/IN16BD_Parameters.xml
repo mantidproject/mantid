@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "IN16BD" valid-from = "2014-03-11T00:00:00">
+
+<component-link name = "IN16BD">
+
+<!-- Sample log merging behaviour -->
+<parameter name="sample_logs_sum" type="string">
+  <value val="time, duration" />
+</parameter>
+
+<parameter name="sample_logs_fail" type="string">
+    <value val="Doppler.mirror_sense, acquisition_mode, Doppler.maximum_delta_energy, wavelength" />
+</parameter>
+
+<parameter name="conjoin_sample_logs_fail" type="string">
+    <value val="acquisition_mode, wavelength" />
+</parameter>
+
+</component-link>
+
+</parameter-file>

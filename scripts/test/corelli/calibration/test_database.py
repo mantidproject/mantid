@@ -8,6 +8,7 @@
 
 from contextlib import contextmanager
 from datetime import datetime
+import numpy as np
 from numpy.testing import assert_allclose
 from os import path, remove
 import pathlib
@@ -18,13 +19,14 @@ import unittest
 
 from mantid import AnalysisDataService, config
 from mantid.api import mtd, WorkspaceGroup
-from mantid.dataobjects import TableWorkspace
-from mantid.simpleapi import CreateEmptyTableWorkspace, CreateSampleWorkspace, DeleteWorkspaces, LoadNexusProcessed
+from mantid.dataobjects import MaskWorkspace, TableWorkspace
+from mantid.simpleapi import (CreateEmptyTableWorkspace, CreateSampleWorkspace, DeleteWorkspace, DeleteWorkspaces,
+                              LoadNexusProcessed)
 
 from corelli.calibration.database import (combine_spatial_banks, combine_temporal_banks, day_stamp, filename_bank_table,
                                           has_valid_columns, init_corelli_table, load_bank_table, load_calibration_set,
                                           new_corelli_calibration, save_bank_table, save_calibration_set,
-                                          save_manifest_file, verify_date_format)
+                                          save_manifest_file, _table_to_workspace, verify_date_format)
 from corelli.calibration.bank import calibrate_banks
 
 
@@ -52,7 +54,6 @@ class TestCorelliDatabase(unittest.TestCase):
             cls.workspaces_temporary.append(workspace)
 
     def setUp(self) -> None:
-
         # create a mock database
         # tests save_bank_table and load_bank_table, save_manifest
         self.database_path: str = TestCorelliDatabase.test_dir.name
@@ -102,7 +103,6 @@ class TestCorelliDatabase(unittest.TestCase):
         self.ws_group.addWorkspace(load_bank_table(40, self.database_path, '20200601'))
 
     def test_init_corelli_table(self):
-
         corelli_table = init_corelli_table()
         assert isinstance(corelli_table, TableWorkspace)
 
@@ -282,7 +282,7 @@ class TestCorelliDatabase(unittest.TestCase):
                 self.assertAlmostEqual(expected_array, table_dict['Detector Y Coordinate'][i])
 
     def test_new_corelli_calibration_and_load_calibration(self):
-        r"""Creating a database is time consuming, thus we test both new_corelli_clibration and load_calibration"""
+        r"""Creating a database is time consuming, thus we test both new_corelli_calibration and load_calibration"""
         # populate a calibration database with a few cases. There should be at least one bank with two calibrations
         database = tempfile.TemporaryDirectory()
         cases = [('124016_bank10', '10'), ('124023_bank10', '10'), ('124023_banks_14_15', '14-15')]
@@ -302,7 +302,8 @@ class TestCorelliDatabase(unittest.TestCase):
         assert open(manifest_file).read() == 'bankID, timestamp\n10, 20200109\n14, 20200109\n15, 20200109\n'
 
         # load latest calibration and mask (day-stamp of '124023_bank10' is 20200109)
-        calibration, mask = load_calibration_set(self.cases['124023_bank10'], database.name)
+        calibration, mask = load_calibration_set(self.cases['124023_bank10'], database.name,
+                                                 mask_format='TableWorkspace')
         calibration_expected = LoadNexusProcessed(Filename=calibration_file)
         mask_expected = LoadNexusProcessed(Filename=mask_file)
         assert_allclose(calibration.column(1), calibration_expected.column(1), atol=1e-4)
@@ -316,13 +317,36 @@ class TestCorelliDatabase(unittest.TestCase):
         assert open(manifest_file).read() == 'bankID, timestamp\n10, 20200106\n'
 
         # load oldest calibration and mask(day-stamp of '124023_bank10' is 20200106)
-        calibration, mask = load_calibration_set(self.cases['124016_bank10'], database.name)
+        calibration, mask = load_calibration_set(self.cases['124016_bank10'], database.name,
+                                                 mask_format='TableWorkspace')
         calibration_expected = LoadNexusProcessed(Filename=calibration_file)
         mask_expected = LoadNexusProcessed(Filename=mask_file)
         assert_allclose(calibration.column(1), calibration_expected.column(1), atol=1e-4)
         assert mask.column(0) == mask_expected.column(0)
 
         database.cleanup()
+
+    def test_table_to_workspace(self) -> None:
+        r"""Test the conversion of a TableWorkspace containing the masked detector ID's to a MaskWorkspace object"""
+        output_workspace = 'test_table_to_workspace_masked'
+        # Have a fake mask table, masking bank 42
+        mask_table = CreateEmptyTableWorkspace(OutputWorkspace=output_workspace)
+        mask_table.addColumn(type='int', name='Detector ID')
+        begin, end = 167936, 172030  # # Bank 42 has detector ID's from 167936 to 172030
+        for detector_id in range(begin, 1 + end):
+            mask_table.addRow([detector_id])
+        # Convert to MaskWorkspace
+        mask_table = _table_to_workspace(mask_table)
+        # Check the output workspace is of type MaskWorkspace
+        assert isinstance(mask_table, MaskWorkspace)
+        # Check the output workspace has 1 on workspace indexes for bank 42, and 0 elsewhere
+        mask_flags = mask_table.extractY().flatten()
+        offset = 3  # due to the detector monitors, workspace_index = detector_id + offset
+        masked_workspace_indexes = slice(begin + offset, 1 + end + offset)
+        assert np.all(mask_flags[masked_workspace_indexes])  # all values are 1
+        mask_flags = np.delete(mask_flags, masked_workspace_indexes)
+        assert not np.any(mask_flags)  # no value is 1
+        DeleteWorkspace(output_workspace)
 
     def test_load_calibration_set(self) -> None:
         r"""

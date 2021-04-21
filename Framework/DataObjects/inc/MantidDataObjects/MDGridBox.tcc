@@ -1540,12 +1540,12 @@ public:
   // create generic events from array of events data and add them to the grid
   // box
   static inline void EXEC(MDGridBox<MDE, nd> *pBox, const std::vector<signal_t> &sigErrSq,
-                          const std::vector<coord_t> &Coord, const std::vector<uint16_t> &runIndex,
+                          const std::vector<coord_t> &Coord, const std::vector<uint16_t> &expInfoIndex,
                           const std::vector<uint16_t> &goniometerIndex, const std::vector<uint32_t> &detectorId,
                           size_t nEvents) {
     for (size_t i = 0; i < nEvents; i++)
-      pBox->addEvent(MDEvent<nd>(sigErrSq[2 * i], sigErrSq[2 * i + 1], runIndex[i], goniometerIndex[i], detectorId[i],
-                                 &Coord[i * nd]));
+      pBox->addEvent(MDEvent<nd>(sigErrSq[2 * i], sigErrSq[2 * i + 1], expInfoIndex[i], goniometerIndex[i],
+                                 detectorId[i], &Coord[i * nd]));
   }
 };
 /* Specialize for the case of LeanEvent */
@@ -1553,7 +1553,7 @@ template <size_t nd> struct IF_EVENT<MDLeanEvent<nd>, nd> {
 public:
   // create lean events from array of events data and add them to the grid box
   static inline void EXEC(MDGridBox<MDLeanEvent<nd>, nd> *pBox, const std::vector<signal_t> &sigErrSq,
-                          const std::vector<coord_t> &Coord, const std::vector<uint16_t> & /*runIndex*/,
+                          const std::vector<coord_t> &Coord, const std::vector<uint16_t> & /*expInfoIndex*/,
                           const std::vector<uint16_t> & /*goniometerIndex*/,
                           const std::vector<uint32_t> & /*detectorId*/, size_t nEvents) {
     for (size_t i = 0; i < nEvents; i++)
@@ -1568,18 +1568,18 @@ public:
  signal
  * @param Coord      :: vector of MD event coordinates, nd(number of dimensions)
  coordinates for each event
- * @param runIndex   :: vector of run  indexes for N events.
+ * @param expInfoIndex   :: vector of experiment info indexes for N events.
  * @param detectorId :: vector of detector's ID for N events.
 
  *@return number of events rejected (0 as nothing is rejected here)
  */
 TMDE(size_t MDGridBox)::buildAndAddEvents(const std::vector<signal_t> &sigErrSq, const std::vector<coord_t> &Coord,
-                                          const std::vector<uint16_t> &runIndex,
+                                          const std::vector<uint16_t> &expInfoIndex,
                                           const std::vector<uint16_t> &goniometerIndex,
                                           const std::vector<uint32_t> &detectorId) {
 
   size_t nEvents = sigErrSq.size() / 2;
-  IF_EVENT<MDE, nd>::EXEC(this, sigErrSq, Coord, runIndex, goniometerIndex, detectorId, nEvents);
+  IF_EVENT<MDE, nd>::EXEC(this, sigErrSq, Coord, expInfoIndex, goniometerIndex, detectorId, nEvents);
 
   return 0;
 }
@@ -1588,12 +1588,12 @@ TMDE(size_t MDGridBox)::buildAndAddEvents(const std::vector<signal_t> &sigErrSq,
  * @param Signal  :: events signal
  * @param errorSq :: events Error squared
  * @param point   :: reference to the vector of  MDEvent coordinates
- * @param runIndex ::    run  index
+ * @param expInfoIndex ::    run  index
  * @param detectorId ::  detector's ID
  * */
 TMDE(void MDGridBox)::buildAndAddEvent(const signal_t Signal, const signal_t errorSq, const std::vector<coord_t> &point,
-                                       uint16_t runIndex, uint16_t goniometerIndex, uint32_t detectorId) {
-  this->addEvent(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0], runIndex, goniometerIndex, detectorId));
+                                       uint16_t expInfoIndex, uint16_t goniometerIndex, uint32_t detectorId) {
+  this->addEvent(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0], expInfoIndex, goniometerIndex, detectorId));
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -1605,14 +1605,14 @@ TMDE(void MDGridBox)::buildAndAddEvent(const signal_t Signal, const signal_t err
  * @param errorSq :: events Error squared
  * @param point :: reference to the  MDEvent coordinates
  * @param point   :: reference to the vector of  MDEvent coordinates
- * @param runIndex ::    run  index
+ * @param expInfoIndex ::    run  index
  * @param detectorId ::  detector's ID
 
  * */
 TMDE(void MDGridBox)::buildAndAddEventUnsafe(const signal_t Signal, const signal_t errorSq,
-                                             const std::vector<coord_t> &point, uint16_t runIndex,
+                                             const std::vector<coord_t> &point, uint16_t expInfoIndex,
                                              uint16_t goniometerIndex, uint32_t detectorId) {
-  this->addEventUnsafe(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0], runIndex, goniometerIndex, detectorId));
+  this->addEventUnsafe(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0], expInfoIndex, goniometerIndex, detectorId));
 }
 
 //-----------------------------------------------------------------------------------------------

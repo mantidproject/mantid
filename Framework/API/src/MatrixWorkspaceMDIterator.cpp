@@ -229,10 +229,10 @@ Mantid::Kernel::VMD MatrixWorkspaceMDIterator::getCenter() const {
 size_t MatrixWorkspaceMDIterator::getNumEvents() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
-/// For a given event/point in this box, return the run index
-uint16_t MatrixWorkspaceMDIterator::getInnerRunIndex(size_t /*index*/) const { return 0; }
+/// For a given event/point in this box, return the associated experiment-info index
+uint16_t MatrixWorkspaceMDIterator::getInnerExpInfoIndex(size_t /*index*/) const { return 0; }
 
-/// For a given event/point in this box, return the run index
+/// For a given event/point in this box, return the associated experiment-info index
 uint16_t MatrixWorkspaceMDIterator::getInnerGoniometerIndex(size_t /*index*/) const { return 0; }
 
 /// For a given event/point in this box, return the detector ID

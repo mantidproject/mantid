@@ -92,10 +92,6 @@ public:
   Mantid::Kernel::Matrix<double> getInverseGoniometerMatrix() const;
   void setGoniometerMatrix(const Mantid::Kernel::Matrix<double> &goniometerMatrix) override;
 
-  int getRow() const override;
-  int getCol() const override;
-  void setRow(int m_row);
-  void setCol(int m_col);
   void setPeakNumber(int m_peakNumber) override;
   int getPeakNumber() const override;
 
@@ -159,12 +155,6 @@ private:
 
   /// Integrated monitor count over TOF range for this run
   double m_monitorCount;
-
-  /// Cached row in the detector
-  int m_row;
-
-  /// Cached column in the detector
-  int m_col;
 
   int m_peakNumber;
   Mantid::Kernel::V3D m_intHKL;
