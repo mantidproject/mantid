@@ -80,9 +80,9 @@ public:
         dspacing_max(10.0),                      //
         wavelength_min(0.1), wavelength_max(10), //
         omega_step(6.0),                         //
-        TOLERANCE_L(1e-6),                       // this calibration has intrinsic accuracy limit of
+        TOLERANCE_L(1e-12),                      // this calibration has intrinsic accuracy limit of
                                                  // 5mm for translation
-        TOLERANCE_R(1e-5),                       // this calibration has intrinsic accuracy limit of
+        TOLERANCE_R(1e-12),                      // this calibration has intrinsic accuracy limit of
                                                  // 0.1 deg for rotation
         LOGCHILDALG(false) {
     // NOTE:
@@ -128,7 +128,7 @@ public:
    *        Therefore the calibration results should be close to a zero
    *        vector.
    */
-  void run_Null_Case() {
+  void test_Null_Case() {
     g_log.notice() << "test: !Null case!\n";
     // Generate unique temp files
     auto filenamebase = boost::filesystem::temp_directory_path();
@@ -145,15 +145,11 @@ public:
 
     // Check if the calibration results
     // -- get a blank workspace for loading cali results
-    // MatrixWorkspace_sptr ws_raw = m_ws->clone();
+    MatrixWorkspace_sptr ws_raw = m_ws->clone();
     // -- check
-    // bool sameInstrument =
-    // validateCalibrationResults(m_pws, ws_raw, filenamebase.string());
+    bool sameInstrument = validateCalibrationResults(m_pws, ws_raw, filenamebase.string());
     // -- assert
-    // NOTE:
-    //    Due to built-in q vector centering, the asseration will always fail.
-    //    We are commenting it out for now.
-    // TS_ASSERT(sameInstrument);
+    TS_ASSERT(sameInstrument);
   }
 
   void run_L1() {
