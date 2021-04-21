@@ -23,6 +23,7 @@ New and Improved
   to find better estimates of parameter errors.
 - Instrument view: when in tube selection mode, the sum of pixel counts is now output to the selection pane.
 - Added memory widget to display total memory usage.
+- Added legend property commands to the plot script generator.
 
 
 Bugfixes
