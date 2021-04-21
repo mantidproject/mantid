@@ -17,6 +17,7 @@ from workbench.plotting.plotscriptgenerator.legend import *
 
 DEFAULT_TITLE_FONT_KWARGS = {
     'font': mpl_default_kwargs['title_font'],
+    'size': mpl_default_kwargs['title_size'],
     'color': mpl_default_kwargs['title_color']
 }
 
@@ -26,6 +27,7 @@ DEFAULT_LABEL_FONT_KWARGS = {
 }
 
 TEST_FONT_COLOUR = '#ff0000'  # red
+TEST_FONT_SIZE = 'x-large'
 
 
 class PlotScriptGeneratorLegendTest(unittest.TestCase):
@@ -57,6 +59,8 @@ class PlotScriptGeneratorLegendTest(unittest.TestCase):
         title = legend.get_title()
         title.set_fontname(self.test_font)
         title.set_color(TEST_FONT_COLOUR)
+        test_font_size = TEST_FONT_SIZE
+        title.set_fontsize(test_font_size)
         title_font_commands = generate_title_font_commands(legend, "legend")
 
         # Default arguments should not appear in the list of commands.
@@ -66,8 +70,10 @@ class PlotScriptGeneratorLegendTest(unittest.TestCase):
         self.assertTrue(self.test_font in command for command in title_font_commands)
         # The new colour should appear in the list of commands.
         self.assertTrue(TEST_FONT_COLOUR in command for command in title_font_commands)
-        # There should be two lines of commands, one to set the font name, and the other to set the colour.
-        self.assertEqual(2, len(title_font_commands))
+        # The new font size should appear in the list of commands.
+        self.assertTrue(test_font_size in command for command in title_font_commands)
+        # There should be three lines of commands (font name, size, and colour).
+        self.assertEqual(3, len(title_font_commands))
 
     def test_label_font_commands(self):
         """
@@ -97,7 +103,6 @@ class PlotScriptGeneratorLegendTest(unittest.TestCase):
             'edge_color': '#ff0000',
             'transparency': mpl_default_kwargs['transparency'] * 0.5,
             'entries_size': 20,
-            'title_size': 20,
             'columns': mpl_default_kwargs['columns'] + 1,
             'markers': mpl_default_kwargs['markers'] + 1,
             'marker_position': "Right of Entries",

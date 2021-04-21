@@ -43,7 +43,6 @@ MANTID_TO_MPL = {
     'edge_color': 'edgecolor',
     'transparency': 'framealpha',
     'entries_size': 'fontsize',
-    'title_size': 'title_fontsize',
     'columns': 'ncol',
     'markers': 'numpoints',
     'marker_position': 'markerfirst',
@@ -69,21 +68,26 @@ def generate_legend_commands(legend):
 
 def generate_title_font_commands(legend, legend_object_var):
     """
-    Generate commands for setting properties for the legend title font. The size is not present here because it is
-    already included in the list of legend properties.
+    Generate commands for setting properties for the legend title font.
     """
     title_commands = []
-    title = legend.get_title()
-    if title.get_fontname() != mpl_default_kwargs['title_font']:
-        title_commands.append(legend_object_var + ".get_title().set_fontname('" + title.get_fontname() + "')")
-    if convert_color_to_hex(title.get_color()) != mpl_default_kwargs['title_color']:
-        title_commands.append(legend_object_var + ".get_title().set_color('" + title.get_color() + "')")
+    kwargs = LegendProperties.from_legend(legend)
+    _remove_kwargs_if_default(kwargs)
+
+    if 'title_font' in kwargs:
+        title_commands.append(legend_object_var + ".get_title().set_fontname('" + kwargs['title_font'] + "')")
+    if 'title_color' in kwargs:
+        title_commands.append(legend_object_var + ".get_title().set_color('" + kwargs['title_color'] + "')")
+    if 'title_size' in kwargs:
+        title_commands.append(legend_object_var + ".get_title().set_fontsize('" + str(kwargs['title_size']) + "')")
+
     return title_commands
 
 
 def generate_label_font_commands(legend, legend_object_var):
     """
-    Generate python commands for setting the legend text label properties.
+    Generate python commands for setting the legend text label properties. The size is not present here because it is
+    already included in the list of legend properties.
     """
     label_commands = []
     kwargs = LegendProperties.from_legend(legend)
@@ -148,17 +152,11 @@ def _remove_kwargs_if_default(kwargs):
     # Font size defaults are string values (e.g. 'medium', 'large', 'x-large'), so we need to convert the defaults to
     # point sizes before comparing.
     if 'title_size' in kwargs:
-        font = FontProperties()
-        font.set_size(mpl_default_kwargs['title_size'])
-        point_size = font.get_size_in_points()
-        if kwargs['title_size'] == point_size:
+        if _convert_to_point_size(kwargs['title_size']) == _convert_to_point_size(mpl_default_kwargs['title_size']):
             kwargs.pop('title_size')
 
     if 'entries_size' in kwargs:
-        font = FontProperties()
-        font.set_size(mpl_default_kwargs['entries_size'])
-        point_size = font.get_size_in_points()
-        if kwargs['entries_size'] == point_size:
+        if _convert_to_point_size(kwargs['entries_size']) == _convert_to_point_size(mpl_default_kwargs['entries_size']):
             kwargs.pop('entries_size')
 
     # Hex values of colours may not be the same case, so convert to lower before comparing.
@@ -169,3 +167,12 @@ def _remove_kwargs_if_default(kwargs):
     if 'edge_color' in kwargs:
         if kwargs['edge_color'].lower() == mpl_default_kwargs['edge_color'].lower():
             kwargs.pop('edge_color')
+
+
+def _convert_to_point_size(font_size):
+    """
+    Convert font size (may be int or string, e.g. 'medium', 'large', ...) to point size.
+    """
+    font = FontProperties()
+    font.set_size(font_size)
+    return font.get_size_in_points()
