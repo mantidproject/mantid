@@ -261,6 +261,13 @@ class SANSILLReduction(PythonAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='Input workspace containing already loaded raw data, used for parameter scans.')
 
+        self.declareProperty(MatrixWorkspaceProperty('SolventInputWorkspace', '',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='The name of the solvent workspace.')
+
+        self.setPropertySettings('SolventInputWorkspace', sample)
+
     def _normalise(self, ws):
         """
             Normalizes the workspace by time (SampleLog Timer) or Monitor (ID=100000)
@@ -409,6 +416,9 @@ class SANSILLReduction(PythonAlgorithm):
             Scale(InputWorkspace=ws, Factor=self.getProperty('WaterCrossSection').value, OutputWorkspace=ws)
             self._mask(ws, reference_ws)
             self._rescale_flux(ws, reference_ws)
+        solvent_ws = self.getProperty('SolventInputWorkspace').value
+        if solvent_ws:
+            self._apply_solvent(ws, solvent_ws)
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
                              NaNValue=0., NaNError=0., InfinityValue=0., InfinityError=0.)
 
@@ -565,6 +575,24 @@ class SANSILLReduction(PythonAlgorithm):
                 DeadTimeCorrection(InputWorkspace=ws, Tau=tau, OutputWorkspace=ws)
         else:
             self.log().information('No tau available in IPF, skipping dead time correction.')
+
+    def _apply_solvent(self, ws, solvent_ws):
+        """
+            Applies solvent subtraction
+            @param ws: input workspace
+            @param solvent_ws: empty container workspace
+        """
+        solvent_ws.setDistribution(False)
+        if not self._check_processed_flag(solvent_ws, 'Sample'):
+            self.log().warning('Solvent input workspace is not processed as sample.')
+        self._check_distances_match(mtd[ws], solvent_ws)
+        solvent_ws_name = solvent_ws.getName()
+        if self._mode != 'TOF':
+            self._check_wavelengths_match(mtd[ws], solvent_ws)
+        else:
+            solvent_ws_name += '_tmp'
+            RebinToWorkspace(WorkspaceToRebin=solvent_ws, WorkspaceToMatch=ws, OutputWorkspace=solvent_ws_name)
+        Minus(LHSWorkspace=ws, RHSWorkspace=solvent_ws_name, OutputWorkspace=ws)
 
     def _finalize(self, ws, process):
         if process != 'Transmission':
