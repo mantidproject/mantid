@@ -272,13 +272,15 @@ class EAGroupingTableView(QtWidgets.QWidget):
 
     def rebin_fixed_chosen(self, row):
         steps, ok = QtWidgets.QInputDialog.getText(self, 'Steps',
-                                                   'Enter the new bin width:')
+                                                   'Rebinnng creates a new workspace.\n'
+                                                   'Enter the new bin width for a new workspace:')
 
         steps_text = "Steps: " + str(steps)
         self.grouping_table.setItem(row, 5, QTableWidgetItem(steps_text))
 
     def rebin_variable_chosen(self, row):
         steps, ok = QtWidgets.QInputDialog.getText(self, 'Bin Boundaries',
+                                                   'Rebinning creates a new workspace.\n'
                                                    'A comma separated list of first bin boundary, width, last bin '
                                                    'boundary.\n'
                                                    'Optionally this can be followed by a comma and more widths and last'
