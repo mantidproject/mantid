@@ -22,7 +22,7 @@ The master testing guide is located at :ref:`Muon_Analysis_TestGuide-ref`.
 
 -----------
 
-.. _test_1:
+.. _test_1_muon_fit:
 
 Test 1: Individual Fit
 ----------------------
@@ -54,7 +54,7 @@ Test 1: Individual Fit
 
 -----------
 
-.. _test_2:
+.. _test_2_muon_fit:
 
 Test 2: Sequential Fit
 ----------------------
@@ -79,14 +79,14 @@ Test 2: Sequential Fit
 
 -----------
 
-.. _test_3:
+.. _test_3_muon_fit:
 
 Test 3: Co-added Fit
 --------------------
 
 **Time required 5 minutes**
 
-- Following :ref:`test_2`, in the *Loading* section, check **Co-Add** to load
+- Following :ref:`test_2_muon_fit`, in the *Loading* section, check **Co-Add** to load
   ``20918-20`` as one run
 - Go to **Fitting** tab
 	- In the **Select Workspace** drop-down, there should only be one workspace
@@ -106,7 +106,7 @@ Test 4: Simultaneous Fit Across Runs
 
 **Time required 5 minutes**
 
-- Following :ref:`test_3`, uncheck **Co-Add**
+- Following :ref:`test_3_muon_fit`, uncheck **Co-Add**
 - Go to the **Fitting** tab
 	- Check the **Simultaneous fit over** checkbox, and change from **Run**
 	  to **Group/Pair**
@@ -154,8 +154,7 @@ Test 6: Sequential Fit of Simultaneous Fits
 - Load runs ``20918-20`` again
 - Keep the same set up as :ref:`test_5` in the **Grouping** and **Fitting**
   tab
-- With **Simultaneous fit over** still checked, go to the
-  **Sequential Fitting** tab
+- With **Simultaneous fit over** still checked, go to the **Sequential Fitting** tab
 	- Click **Sequentially fit all**
 	- This should fit the **fwd** and **bwd** groups simultaneously for each
 	  run in sequence; ``20918``, ``20919``, ``20920``
@@ -220,7 +219,7 @@ Test 8: TF Asymmetry Fit
 
 ------------
 
-.. _test_9::
+.. _test_9:
 
 Test 9: Simultaneous TF Asymmetry Fits
 --------------------------------------
