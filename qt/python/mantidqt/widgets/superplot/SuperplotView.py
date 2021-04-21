@@ -31,7 +31,7 @@ class SuperplotViewSide(QDockWidget):
         self.here = os.path.dirname(os.path.realpath(__file__))
         uic.loadUi(os.path.join(self.here, SuperplotViewSide.UI), self)
         wsList = self.workspacesList
-        wsList.header().setSectionResizeMode(QHeaderView.ResizeToContents)
+        wsList.header().resizeSection(0, 120)
 
     def resizeEvent(self, event):
         """
