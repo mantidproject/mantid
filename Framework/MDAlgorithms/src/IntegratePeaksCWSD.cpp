@@ -224,7 +224,7 @@ void IntegratePeaksCWSD::simplePeakIntegration(const std::vector<detid_t> &vecMa
       if (signal <= THRESHOLD_SIGNAL)
         continue;
 
-      uint16_t run_number = mditer->getInnerRunIndex(iev);
+      uint16_t run_number = mditer->getInnerExpInfoIndex(iev);
       auto run_number_i = static_cast<int>(run_number);
 
       /* debug: record raw signals

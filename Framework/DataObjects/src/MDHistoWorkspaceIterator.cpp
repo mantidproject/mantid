@@ -421,11 +421,11 @@ size_t MDHistoWorkspaceIterator::getNumEvents() const { return static_cast<size_
 signal_t MDHistoWorkspaceIterator::getNumEventsFraction() const { return m_ws->getNumEventsAt(m_pos); }
 
 //----------------------------------------------------------------------------------------------
-/// For a given event/point in this box, return the run index
-uint16_t MDHistoWorkspaceIterator::getInnerRunIndex(size_t /*index*/) const {
+/// For a given event/point in this box, return the associated experiment-info index
+uint16_t MDHistoWorkspaceIterator::getInnerExpInfoIndex(size_t /*index*/) const {
   return 0;
   // throw std::runtime_error("MDHistoWorkspaceIterator: No events are
-  // contained, so it is not possible to return inner run index.");
+  // contained, so it is not possible to return inner associated experiment-info index.");
 }
 
 /// For a given event/point in this box, return the goniometer index

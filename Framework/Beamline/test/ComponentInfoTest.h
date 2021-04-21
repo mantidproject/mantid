@@ -733,6 +733,14 @@ public:
     TS_ASSERT_EQUALS(compInfo.indexOfAny("root"), compInfo.root());
   }
 
+  void test_uniqueName() {
+    auto infos = makeFlatTree(PosVec(1), RotVec(1));
+    ComponentInfo &compInfo = *std::get<0>(infos);
+    TS_ASSERT(compInfo.uniqueName("det0"));
+    TS_ASSERT(compInfo.uniqueName("root"));
+    TS_ASSERT(!compInfo.uniqueName("phantom"));
+  }
+
   void test_scan_count_no_scanning() {
     ComponentInfo info;
     TS_ASSERT_EQUALS(info.scanCount(), 1);
