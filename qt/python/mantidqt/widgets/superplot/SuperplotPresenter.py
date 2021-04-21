@@ -237,7 +237,9 @@ class SuperplotPresenter:
                 if spectrumIndex is None:
                     spectrumIndex = sp
                 if sp != spectrumIndex:
-                    spectrumIndex = 0
+                    self._updateSpectrumSlider([], 0)
+                    self._updatePlot()
+                    return
 
         if spectrumIndex is None:
             self._view.checkHoldButton(False)
