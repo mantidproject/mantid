@@ -9,7 +9,8 @@
 from enum import Enum
 from typing import Dict, List, Sequence, Tuple, Optional
 
-from mantid.api import MatrixWorkspace, MultipleExperimentInfos, SpecialCoordinateSystem
+from mantid.api import MatrixWorkspace, MultipleExperimentInfos
+from mantid.kernel import SpecialCoordinateSystem
 from mantid.plots.datafunctions import get_indices
 from mantid.simpleapi import BinMD, IntegrateMDHistoWorkspace, TransposeMD
 import numpy as np
