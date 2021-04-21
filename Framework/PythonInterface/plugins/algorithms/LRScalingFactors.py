@@ -122,6 +122,7 @@ class LRScalingFactors(PythonAlgorithm):
         for i in range(len(data_runs)):
             run = data_runs[i]
             workspace_name = "REF_L_%s" % int(run)
+            print(f'.... DEBUG ... Load REF_L_{run}')
             workspace = LoadEventNexus("REF_L_%s" % run,
                                        OutputWorkspace = workspace_name)
 
