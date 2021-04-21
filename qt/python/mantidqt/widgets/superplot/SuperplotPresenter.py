@@ -153,13 +153,17 @@ class SuperplotPresenter:
             self._view.setSpectrumDisabled(True)
             return
         maximum = None
+        mode = self._view.getMode()
         for wsName in wsNames:
             ws = mtd[wsName]
-            nbHist = ws.getNumberHistograms()
+            if mode == self.SPECTRUM_MODE_TEXT:
+                value = ws.getNumberHistograms()
+            else:
+                value = ws.blocksize()
             if maximum is None:
-                maximum = nbHist
-            elif nbHist < maximum:
-                maximum = nbHist
+                maximum = value
+            elif value < maximum:
+                maximum = value
         self._view.setSpectrumDisabled(False)
         self._view.setSpectrumSliderMax(maximum - 1)
         self._view.setSpectrumSliderPosition(position)
