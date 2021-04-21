@@ -63,6 +63,7 @@ This was last updated for Release 5.1. Check if the organiser has considered if 
     Settings (Preferences on Mac),:r:`Y`,,:g:`Y`,,"Check all options work. Some may need restart."
     Script Editor / Interpreter,:r:`Y`,,,:o:`Y`,"Check basic functionality, such as checking the buttons/options at the top of SE, running algorithms, accessing workspace properties in both environments. Does autocompletion work for mantid algorithms/numpy/matplotlib? :ref:`02_scripts`"
     MantidPython and Jupyter Notebook,:r:`Y`,:b:`Y`,:g:`Y`,,"Open MantidPython and a Jupyter Notebook. Check you can import mantid.simpleapi and run a script/notebook. :ref:`Click here <JupyterNotebook>` for Further Instructions and an example Notebook (You may need to rename without spaces)"
+    Memory Widget,:r:`Y`,:b:`Y`,:g:`Y`,:o:`Y`,"Check that the System Memory Usage widget updates at a frequency of no more than once every two seconds, ideally on a system with limited resourses. Check that the default position of the widget is in the top right, in the same column as the Messages widget."
 
 .. csv-table:: Larger tasks
     :widths: 10 20 5 5 5 5 50
