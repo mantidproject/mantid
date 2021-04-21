@@ -234,33 +234,35 @@ void SCDCalibratePanels2::exec() {
   // STEP_0: sort the peaks
   std::vector<std::pair<std::string, bool>> criteria{{"BankName", true}};
   m_pws->sort(criteria);
+  // need to keep a copy of the peak workspace at its input state
+  IPeaksWorkspace_sptr pws_original = m_pws->clone();
 
-  // STEP_1: preparation
+  // STEP_2: preparation
   // get names of banks that can be calibrated
   getBankNames(m_pws);
 
-  // STEP_2: optimize T0,L1,L2,etc.
+  // STEP_3: optimize T0,L1,L2,etc.
   if (calibrateT0) {
     g_log.notice() << "** Calibrating T0 as requested\n";
-    optimizeT0(m_pws);
+    optimizeT0(m_pws, pws_original);
   }
 
   if (calibrateL1) {
     g_log.notice() << "** Calibrating L1 (moderator) as requested\n";
-    optimizeL1(m_pws);
+    optimizeL1(m_pws, pws_original);
   }
 
   if (calibrateBanks) {
     g_log.notice() << "** Calibrating L2 and orientation (bank) as requested\n";
-    optimizeBanks(m_pws);
+    optimizeBanks(m_pws, pws_original);
   }
 
-  // STEP_3: generate a table workspace to save the calibration results
+  // STEP_4: generate a table workspace to save the calibration results
   g_log.notice() << "-- Generate calibration table\n";
   Instrument_sptr instCalibrated = std::const_pointer_cast<Geometry::Instrument>(m_pws->getInstrument());
   ITableWorkspace_sptr tablews = generateCalibrationTable(instCalibrated);
 
-  // STEP_4: Write to disk if required
+  // STEP_5: Write to disk if required
   if (!XmlFilename.empty())
     saveXmlFile(XmlFilename, m_BankNames, instCalibrated);
 
@@ -286,7 +288,7 @@ void SCDCalibratePanels2::exec() {
  *
  * @param pws
  */
-void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws) {
+void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_sptr pws_original) {
   // create child Fit alg to optimize T0
   IAlgorithm_sptr fitT0_alg = createChildAlgorithm("Fit", -1, -1, false);
   //-- obj func def
@@ -303,7 +305,9 @@ void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws) {
   MatrixWorkspace_sptr t0ws = getIdealQSampleAsHistogram1D(pws);
 
   auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
-  objf->setPeakWorkspace(pws, "none");
+  // NOTE: always use the original pws to get the tofs
+  std::vector<double> tofs = captureTOF(pws_original);
+  objf->setPeakWorkspace(pws, "none", tofs);
   fitT0_alg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(objf));
 
   //-- bounds&constraints def
@@ -337,7 +341,7 @@ void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws) {
  *
  * @param pws
  */
-void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws) {
+void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_sptr pws_original) {
   // cache starting L1 position
   double original_L1 = std::abs(pws->getInstrument()->getSource()->getPos().Z());
 
@@ -346,7 +350,9 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws) {
   // fit algorithm for the optimization of L1
   IAlgorithm_sptr fitL1_alg = createChildAlgorithm("Fit", -1, -1, false);
   auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
-  objf->setPeakWorkspace(pws, "moderator");
+  // NOTE: always use the original pws to get the tofs
+  std::vector<double> tofs = captureTOF(pws_original);
+  objf->setPeakWorkspace(pws, "moderator", tofs);
   fitL1_alg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(objf));
 
   //-- bounds&constraints def
@@ -380,7 +386,7 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws) {
  *
  * @param pws
  */
-void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws) {
+void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspace_sptr pws_original) {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*pws))
   for (int i = 0; i < static_cast<int>(m_BankNames.size()); ++i) {
@@ -391,6 +397,9 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws) {
 
     //-- step 0: extract peaks that lies on the current bank
     IPeaksWorkspace_sptr pwsBanki = selectPeaksByBankName(pws, bankname, pwsBankiName);
+    //   get tofs from the original subset of pws
+    IPeaksWorkspace_sptr pwsBanki_original = selectPeaksByBankName(pws_original, bankname, pwsBankiName);
+    std::vector<double> tofs = captureTOF(pwsBanki_original);
 
     // Do not attempt correct panels with less than 6 peaks as the system will
     // be under-determined
@@ -411,7 +420,7 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws) {
     IAlgorithm_sptr fitBank_alg = createChildAlgorithm("Fit", -1, -1, false);
     //---- setup obj fun def
     auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
-    objf->setPeakWorkspace(pwsBanki, bankname);
+    objf->setPeakWorkspace(pwsBanki, bankname, tofs);
     fitBank_alg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(objf));
 
     //---- bounds&constraints def
@@ -546,6 +555,22 @@ IPeaksWorkspace_sptr SCDCalibratePanels2::removeUnindexedPeaks(Mantid::API::IPea
   IPeaksWorkspace_sptr outWS = fltpk_alg->getProperty("OutputWorkspace");
   IPeaksWorkspace_sptr ows = std::dynamic_pointer_cast<IPeaksWorkspace>(outWS);
   return outWS;
+}
+
+/**
+ * @brief Capture TOFs that are equivalent to thoes measured from experiment.
+ *        This step should be carried out after the indexation (if required)
+ *
+ * @param pws
+ */
+std::vector<double> SCDCalibratePanels2::captureTOF(Mantid::API::IPeaksWorkspace_sptr pws) {
+  std::vector<double> tofs;
+
+  for (int i = 0; i < pws->getNumberPeaks(); ++i) {
+    tofs.emplace_back(pws->getPeak(i).getTOF());
+  }
+
+  return tofs;
 }
 
 /**

@@ -63,6 +63,9 @@ private:
   /// Private validator for inputs
   std::map<std::string, std::string> validateInputs() override;
 
+  /// Cache TOF equivalent to those measured from experiment
+  std::vector<double> captureTOF(Mantid::API::IPeaksWorkspace_sptr pws);
+
   /// Private function dedicated for parsing lattice constant
   void parseLatticeConstant(Mantid::API::IPeaksWorkspace_sptr pws);
 
@@ -76,13 +79,13 @@ private:
   void getBankNames(Mantid::API::IPeaksWorkspace_sptr pws);
 
   /// Private function for calibrating T0
-  void optimizeT0(Mantid::API::IPeaksWorkspace_sptr pws);
+  void optimizeT0(Mantid::API::IPeaksWorkspace_sptr pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
 
   /// Private function for calibrating L1
-  void optimizeL1(Mantid::API::IPeaksWorkspace_sptr pws);
+  void optimizeL1(Mantid::API::IPeaksWorkspace_sptr pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
 
   /// Private function for calibrating banks
-  void optimizeBanks(Mantid::API::IPeaksWorkspace_sptr pws);
+  void optimizeBanks(Mantid::API::IPeaksWorkspace_sptr pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
 
   /// Helper function for selecting peaks based on given bank name
   Mantid::API::IPeaksWorkspace_sptr selectPeaksByBankName(Mantid::API::IPeaksWorkspace_sptr pws,

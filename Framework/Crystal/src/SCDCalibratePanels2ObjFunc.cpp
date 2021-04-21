@@ -52,7 +52,8 @@ SCDCalibratePanels2ObjFunc::SCDCalibratePanels2ObjFunc() {
   declareParameter("DeltaT0", 0.0, "delta of TOF");
 }
 
-void SCDCalibratePanels2ObjFunc::setPeakWorkspace(IPeaksWorkspace_sptr &pws, const std::string componentName) {
+void SCDCalibratePanels2ObjFunc::setPeakWorkspace(IPeaksWorkspace_sptr &pws, const std::string componentName,
+                                                  const std::vector<double> tofs) {
   m_pws = pws->clone();
   m_cmpt = componentName;
 
@@ -63,6 +64,9 @@ void SCDCalibratePanels2ObjFunc::setPeakWorkspace(IPeaksWorkspace_sptr &pws, con
     // a bank name with sixteenpack already appended
     if (!boost::algorithm::ends_with(m_cmpt, "/sixteenpack"))
       m_cmpt.append("/sixteenpack");
+
+  // Get the experimentally measured TOFs
+  m_tofs = tofs;
 
   // Set the iteration count
   n_iter = 0;
@@ -123,8 +127,8 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
   // calculate residual
   // double residual = 0.0;
   for (int i = 0; i < pws->getNumberPeaks(); ++i) {
-    // cache TOF
-    const double tof = pws->getPeak(i).getTOF();
+    // use the provided cached tofs
+    const double tof = m_tofs[i];
 
     Peak pk = Peak(pws->getPeak(i));
     // update instrument
