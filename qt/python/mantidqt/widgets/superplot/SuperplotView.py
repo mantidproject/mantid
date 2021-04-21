@@ -290,6 +290,7 @@ class SuperplotView(QWidget):
             item.signals.delClicked.connect(
                     self._presenter.onDelSpectrumButtonClicked)
             item.setText(0, str(num))
+        self._sideView.workspacesList.expandAll()
         self._sideView.workspacesList.blockSignals(False)
 
     def getSpectraList(self, name):
