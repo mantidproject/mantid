@@ -198,7 +198,7 @@ class LRDirectBeamSort(PythonAlgorithm):
 
         tof_steps = self.getProperty("TOFSteps").value
         scaling_file = self.getProperty("ScalingFactorFile").value
-        use_low_res_cut = self.getProperty("UseLowResCut").value
+        # use_low_res_cut = self.getProperty("UseLowResCut").value
         incident_medium = self.getProperty("IncidentMedium").value
         summary = ""
         for g in group_list:
@@ -212,7 +212,7 @@ class LRDirectBeamSort(PythonAlgorithm):
 
             for run in g:
 
-                peak, low_res = self._find_peak(run, use_low_res_cut)
+                peak, low_res = self._find_peak(run)  #, use_low_res_cut)
 
                 att = run.getRun().getProperty('vAtt').value[0]-1
                 wl = run.getRun().getProperty('LambdaRequest').value[0]
@@ -261,37 +261,8 @@ class LRDirectBeamSort(PythonAlgorithm):
                              ScalingFactorFile=scaling_file)
         logger.notice(summary)
 
-    def _find_peak(self, run, use_low_res_cut):
-
-        # Create peak workspace
-        number_of_pixels_x = int(run.getInstrument().getNumberParameter("number-of-x-pixels")[0])
-        number_of_pixels_y = int(run.getInstrument().getNumberParameter("number-of-y-pixels")[0])
-
-        # Direct beam signal
-        workspace = RefRoi(InputWorkspace=run, ConvertToQ=False,
-                           NXPixel=number_of_pixels_x,
-                           NYPixel=number_of_pixels_y,
-                           IntegrateY=False,
-                           OutputWorkspace="__ref_peak")
-        workspace = Transpose(InputWorkspace=workspace)
-        peak, _, _ = LRPeakSelection(InputWorkspace=workspace)
-
-        # Low resolution cut
-        if use_low_res_cut:
-            workspace = RefRoi(InputWorkspace=run, ConvertToQ=False,
-                               NXPixel=number_of_pixels_x,
-                               NYPixel=number_of_pixels_y,
-                               IntegrateY=True,
-                               OutputWorkspace="__ref_peak")
-            workspace = Transpose(InputWorkspace=workspace)
-            _, low_res, _ = LRPeakSelection(InputWorkspace=workspace)
-        else:
-            low_res = [0, number_of_pixels_x]
-
-        return peak, low_res
-
     @staticmethod
-    def _find_peak_new(ws, crop=25, factor=1.) -> Tuple[List[int], List[int]]:
+    def _find_peak(ws, crop=25, factor=1.) -> Tuple[List[int], List[int]]:
         """Find peak by Mantid FindPeaks with Gaussian peak in the counts
         summed from detector pixels on the same row.
 
