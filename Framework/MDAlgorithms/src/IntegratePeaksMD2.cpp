@@ -245,8 +245,6 @@ void IntegratePeaksMD2::init() {
   setPropertySettings("MaxIterations", std::make_unique<VisibleWhenProperty>("Ellipsoid", IS_EQUAL_TO, "1"));
 
   // Disable / greyed out these Properties based on the value of another
-  setPropertySettings("AdaptiveQMultiplier",
-                      std::make_unique<Kernel::EnabledWhenProperty>("AdaptiveQBackground", IS_EQUAL_TO, "1"));
   setPropertySettings("CorrectIfOnEdge",
                       std::make_unique<Kernel::EnabledWhenProperty>("IntegrateIfOnEdge", IS_EQUAL_TO, "1"));
 }
@@ -258,6 +256,7 @@ std::map<std::string, std::string> IntegratePeaksMD2::validateInputs() {
   std::vector<double> BackgroundInnerRadius = getProperty("BackgroundInnerRadius");
   std::vector<double> BackgroundOuterRadius = getProperty("BackgroundOuterRadius");
   bool ellipsoid = getProperty("Ellipsoid");
+  bool cylinder = getProperty("Cylinder");
 
   if (PeakRadius.size() != 1 && PeakRadius.size() != 3) {
     std::stringstream errmsg;
@@ -293,6 +292,13 @@ std::map<std::string, std::string> IntegratePeaksMD2::validateInputs() {
     std::stringstream errmsg;
     errmsg << "One value must be specified when Ellipsoid is false";
     result["BackgroundOuterRadius"] = errmsg.str();
+  }
+
+  if (ellipsoid && cylinder) {
+    std::stringstream errmsg;
+    errmsg << "Ellipsoid and Cylinder cannot both be true";
+    result["Ellipsoid"] = errmsg.str();
+    result["Cylinder"] = errmsg.str();
   }
 
   return result;
