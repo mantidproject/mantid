@@ -314,7 +314,8 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self._set_beam(input_wave_ws)
 
         self._sample_shape = input_wave_ws.sample().getShape()
-        self._sample_env = input_wave_ws.sample().getEnvironment()
+        if input_wave_ws.sample().hasEnvironment():
+            self._sample_env = input_wave_ws.sample().getEnvironment()
         # make sure there is no container defined at this point
         self._set_sample(input_wave_ws, ['Sample'])
         monte_carlo_alg = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
