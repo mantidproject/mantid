@@ -34,27 +34,33 @@ class SuperplotPresenter:
         figure = self._canvas.figure
         axes = figure.gca()
         artists = axes.get_tracked_artists()
-        for artist in artists[:-1]:
-            ws, specIndex = \
-                    axes.get_artists_workspace_and_workspace_index(artist)
-            self._model.addWorkspace(ws.name())
-            self._model.setSpectrum(ws.name(), specIndex)
-            self._model.addData(ws.name(), specIndex)
-        ws, specIndex = \
-                axes.get_artists_workspace_and_workspace_index(artists[-1])
-        self._model.addWorkspace(ws.name())
-        self._model.setSpectrum(ws.name(), specIndex)
-        names = self._model.getWorkspaces()
-        self._view.setWorkspacesList(names)
-        self._view.setSelectedWorkspacesInList([names[-1]])
+        alreadyPlotted = dict()
         self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
                                       self.BIN_MODE_TEXT])
+        for artist in artists:
+            ws, specIndex = \
+                    axes.get_artists_workspace_and_workspace_index(artist)
+            if ws.blocksize() > 1:
+                self._model.setSpectrumMode()
+                self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT])
+            else:
+                self._model.setBinMode()
+                self._view.setAvailableModes([self.BIN_MODE_TEXT])
+            wsName = ws.name()
+            if wsName in alreadyPlotted:
+                alreadyPlotted[wsName].append(specIndex)
+            else:
+                alreadyPlotted[wsName] = [specIndex]
+            self._model.addWorkspace(wsName)
+            self._model.setSpectrum(wsName, specIndex)
+            self._model.addData(wsName, specIndex)
 
-        if ws.blocksize() > 1:
-            self._view.setMode(self.SPECTRUM_MODE_TEXT)
-        else:
-            self._view.setMode(self.BIN_MODE_TEXT)
-        self._updateSpectrumSlider([ws.name()], 0)
+        for ws, sp in alreadyPlotted.items():
+            self._view.appendWorkspace(ws)
+            self._view.setSpectraList(ws, sp)
+
+        self._updateSpectrumSlider([], 0)
+        self._updatePlot()
 
     def getSideView(self):
         return self._view.getSideWidget()
