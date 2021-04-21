@@ -25,6 +25,69 @@ qRegisterMetaType<Message>("Message");
 // Classes
 // ----------------------------------------------------------------------------
 
+class IGUILauncher {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/IGUILauncher.h"
+#include <QString>
+%End
+public:
+  virtual QString name() const = 0;
+  virtual QString category() const = 0;
+  virtual void show() const = 0;
+};
+
+class GUIRegistryImpl {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/GUIRegistry.h"
+#include "MantidQtWidgets/Common/Python/Sip.h"
+#include <QMenu>
+using MantidQt::Widgets::Common::Python::extract;
+using MantidQt::Widgets::Common::Python::BorrowedRef;
+%End
+public:
+void populateMenu(QMenu&) const;
+static SIP_PYOBJECT Instance() const;
+%MethodCode
+  auto &cppInstance = MantidQt::API::GUIRegistry::Instance();
+  return sipConvertFromType(&cppInstance, sipType_GUIRegistryImpl, nullptr);
+%End
+void subscribe(SIP_PYOBJECT);
+%MethodCode
+try {
+   MantidQt::API::IGUILauncher* cppGuiLauncher = nullptr;
+   // a0 can be either a python instance or a class name, try class first
+   try {
+        auto pyGuiLauncher = BorrowedRef(PyObject_CallObject(a0, nullptr));
+        cppGuiLauncher = extract<MantidQt::API::IGUILauncher>(pyGuiLauncher);
+   } catch(...) {
+        cppGuiLauncher = extract<MantidQt::API::IGUILauncher>(a0);
+   }
+   if (cppGuiLauncher) {
+        sipCpp->subscribe(cppGuiLauncher);
+   } else {
+       throw std::runtime_error("Unable to register a launcher neither via class nor via instance.");
+   }
+} catch (std::runtime_error &sipExceptionRef)
+{
+   const char *detail = sipExceptionRef.what();
+   SIP_BLOCK_THREADS
+   PyErr_SetString(PyExc_ValueError, detail);
+   SIP_UNBLOCK_THREADS
+   return NULL;
+}
+catch (...)
+{
+   sipRaiseUnknownException();
+   return NULL;
+}
+%End
+private:
+  // lifetime management is with C++ so don't generate any of that in Python
+  GUIRegistryImpl();
+  ~GUIRegistryImpl();
+  GUIRegistryImpl(const GUIRegistryImpl &);
+};
+
 class Configurable {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/Configurable.h"
