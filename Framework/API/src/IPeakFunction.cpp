@@ -184,6 +184,11 @@ double IPeakFunction::intensity() const {
   return result.result;
 }
 
+/// Returns the uncertainty associated to the integral intensity of the peak function
+double IPeakFunction::intensityError() const {
+  return NAN;
+}
+
 /// Sets the integral intensity of the peak by adjusting the height.
 void IPeakFunction::setIntensity(const double newIntensity) {
   double currentHeight = height();
