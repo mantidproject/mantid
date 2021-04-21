@@ -212,7 +212,7 @@ std::size_t GeneratePythonFitScript::getNumberOfDomainsInFunction(IFunction_sptr
   if (!function)
     return 0u;
   if (auto const multiDomainFunction = std::dynamic_pointer_cast<MultiDomainFunction>(function))
-    return multiDomainFunction->nFunctions();
+    return multiDomainFunction->getNumberDomains();
   return 1u;
 }
 
