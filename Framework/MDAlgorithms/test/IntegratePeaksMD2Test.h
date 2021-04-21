@@ -12,6 +12,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/NoShape.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
@@ -57,7 +58,8 @@ public:
                     std::string OutputWorkspace = "IntegratePeaksMD2Test_peaks",
                     std::vector<double> BackgroundStartRadius = {}, bool edge = true, bool cyl = false,
                     std::string fnct = "NoFit", double adaptive = 0.0, bool ellip = false, bool fixQAxis = false,
-                    bool useCentroid = false, bool fixMajorAxisLength = true, int maxIterations = 1) {
+                    bool useCentroid = false, bool fixMajorAxisLength = true, int maxIterations = 1,
+                    bool maskEdgeTubes = true) {
     IntegratePeaksMD2 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -86,6 +88,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AdaptiveQMultiplier", adaptive));
     if (adaptive > 0.0)
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("AdaptiveQBackground", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaskEdgeTubes", maskEdgeTubes));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
   }
