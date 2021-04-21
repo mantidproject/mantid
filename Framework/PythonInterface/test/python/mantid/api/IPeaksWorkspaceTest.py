@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from testhelpers import WorkspaceCreationHelper
-from mantid.kernel import V3D
+from mantid.kernel import SpecialCoordinateSystem, V3D
 from mantid.api import IPeaksWorkspace, IPeak
 
 import math
@@ -27,7 +27,7 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         # Try a few IPeak get/setters. Not everything.
         p.setH(234)
         self.assertEqual(p.getH(), 234)
-        p.setHKL(5,6,7)
+        p.setHKL(5, 6, 7)
         self.assertEqual(p.getH(), 5)
         self.assertEqual(p.getK(), 6)
         self.assertEqual(p.getL(), 7)
@@ -61,6 +61,13 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         # Peaks workspace will not be integrated by default.
         self.assertTrue(not pws.hasIntegratedPeaks())
 
+    def test_addPeak_SpecialCoordinateSystem(self):
+        r"""Verify we can add peaks in different coordinate systems"""
+        pws = WorkspaceCreationHelper.createPeaksWorkspace(numPeaks=0, createOrientedLattice=True)
+        pws.addPeak([1, 2, 3], SpecialCoordinateSystem.QLab)
+        pws.addPeak([1, 2, 3], SpecialCoordinateSystem.QSample)
+        pws.addPeak([1, 2, 3], SpecialCoordinateSystem.HKL)
+
     def test_createPeakHKL(self):
         r"""Simple test that the creational method is exposed"""
         pws = WorkspaceCreationHelper.createPeaksWorkspace(0, True)
@@ -92,7 +99,7 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         p = pws.getPeak(0)
 
         try:
-            p.setQSampleFrame(V3D(1,1,1))
+            p.setQSampleFrame(V3D(1, 1, 1))
         except Exception:
             self.fail("Tried setQSampleFrame with one V3D argument")
 
