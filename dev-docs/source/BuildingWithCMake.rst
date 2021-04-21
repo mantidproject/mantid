@@ -7,7 +7,7 @@ Building with CMake
 .. contents::
   :local:
 
-CMake is the build system for the entirety of Mantid (Framework, MantidQt & MantidPlot). It is used to generate native build files for your platform, which can be Makefiles (for use with make, nmake or jom) for command line builds or project/solution files for an IDE (e.g. Visual Studio, Eclipse, Qt Creator, XCode).
+CMake is the build system for the entirety of Mantid (Framework, MantidQt and MantidWorkbench). It is used to generate native build files for your platform, which can be Makefiles (for use with make, nmake or jom) for command line builds or project/solution files for an IDE (e.g. Visual Studio, Eclipse, Qt Creator, XCode).
 For a "how is it used version" of this guide, look at the scripts used on the builservers for `windows <https://github.com/mantidproject/mantid/blob/master/buildconfig/Jenkins/buildscript.bat>`_ or `linux/osx <https://github.com/mantidproject/mantid/blob/master/buildconfig/Jenkins/buildscript>`_.
 
 Environment
@@ -73,7 +73,7 @@ From the command line
 * On Windows, you may need to be in a Visual Studio Command Prompt.
 * Run ``cmake /path/to/Mantid``, or to ``/path/to/Mantid/Framework`` if you only want a build of the Framework (typically not recommended, but possible nonetheless). This will generate build files using the default generator for your platform (e.g. Unix Makefiles on Linux).
 * If you want to use a specific generator (run ``cmake --help`` for a list of available generators for your platform), use the ``-G`` option, e.g. ``cmake -G"NMake Makefiles" /path/to/Mantid``.
-* If you want to set the build type (e.g. Release, Debug) you can run cmake with the ``-i`` option or by passing the argument ``-DCMAKE_BUILD_TYPE=Debug`` to cmake. The default is Release.
+* If you want to set the build type (e.g. Release, Debug) you can run cmake with the ``-i`` option or by passing the argument ``-DCMAKE_BUILD_TYPE=RelWithDebIfo`` to cmake. The default is Release.
 * Please note that the executable is called ``cmake3`` on Red Hat 7 / CentOS7.
 * On Red Hat 7 / CentOS7 mantid uses `devtoolset-7 <https://www.softwarecollections.org/en/scls/rhscl/devtoolset-7/>`_. This means that you need to wrap your initial ``cmake`` command as ``scl enable devtoolset-7 "cmake3 /path/to/source"``. Following build commands do not need this.
 

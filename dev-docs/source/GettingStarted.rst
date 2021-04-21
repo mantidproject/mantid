@@ -180,7 +180,6 @@ Ubuntu 20.04
      python3-toml \
      python3-yaml
 
-and passing the `-DENABLE_MANTIDPLOT=OFF` option to the cmake command line or selecting this in the cmake GUI.
 
 Install pre-commit for use in our current developer workflow
 
