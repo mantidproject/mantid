@@ -27,6 +27,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
+#include <boost/filesystem.hpp>
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
 #include <fstream>
@@ -240,6 +241,8 @@ void SCDCalibratePanels2::exec() {
   // STEP_2: preparation
   // get names of banks that can be calibrated
   getBankNames(m_pws);
+
+  profileL1(m_pws, pws_original);
 
   // STEP_3: optimize T0,L1,L2,etc.
   if (calibrateT0) {
@@ -956,6 +959,77 @@ void SCDCalibratePanels2::saveCalibrationTable(const std::string &FileName, ITab
   alg->setProperty("ColumnHeader", true);
   alg->setProperty("AppendToFile", false);
   alg->executeAsChildAlg();
+}
+
+/**
+ * @brief Profile obj func along L1 axis
+ *
+ * @param pws
+ * @param pws_original
+ */
+void SCDCalibratePanels2::profileL1(Mantid::API::IPeaksWorkspace_sptr &pws,
+                                    Mantid::API::IPeaksWorkspace_sptr pws_original) {
+  g_log.notice() << "START of profiling objective func along L1\n";
+  // prepare container for profile information
+  std::ostringstream msgrst;
+  msgrst.precision(12);
+  msgrst << "dL1\tresidual\n";
+
+  // setting up as if we are doing optimization
+  auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
+  // NOTE: always use the original pws to get the tofs
+  std::vector<double> tofs = captureTOF(pws_original);
+  objf->setPeakWorkspace(pws, "moderator", tofs);
+
+  // call the obj to perform evaluation
+  const int n_peaks = pws->getNumberPeaks();
+  std::unique_ptr<double[]> target(new double[n_peaks * 3]);
+
+  // generate the target
+  auto ubmatrix = pws->sample().getOrientedLattice().getUB();
+  for (int i = 0; i < n_peaks; ++i) {
+    V3D qv = ubmatrix * pws->getPeak(i).getIntHKL();
+    qv *= 2 * PI;
+    for (int j = 0; j < 3; ++j) {
+      target[i * 3 + j] = qv[j];
+    }
+  }
+
+  double xValues[7] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // xValues is not used
+
+  // scan from -4cm to 4cm along dL1 where the minimum is supposed to be at 0 for null
+  // case with instrument at the engineering position
+  double deltaL1 = -4e-2;
+  while (deltaL1 < 4e-2) {
+    std::unique_ptr<double[]> out(new double[n_peaks * 3]);
+    objf->setParameter("DeltaZ", deltaL1);
+    objf->function1D(out.get(), xValues, 1);
+
+    // calc residual
+    double residual = 0.0;
+    for (int i = 0; i < n_peaks * 3; ++i) {
+      residual += (out[i] - target[i]) * (out[i] - target[i]);
+    }
+    residual = std::sqrt(residual) / (n_peaks - 1); // only 1 deg of freedom here
+    // log rst
+    msgrst << deltaL1 << "\t" << residual << "\n";
+
+    //
+    g_log.notice() << "deltaL1 = " << deltaL1 << ", residual = " << residual << "\n"
+                   << "-- out[1-3] = " << out[0] << "," << out[1] << "," << out[2] << "\n";
+
+    // increment
+    deltaL1 += 1e-4; // 0.1mm step size
+  }
+
+  // output to file
+  auto filenamebase = boost::filesystem::temp_directory_path();
+  filenamebase /= boost::filesystem::unique_path("profileSCDCalibratePanels2_L1_%%%%%%%%.csv");
+  std::ofstream profL1File;
+  profL1File.open(filenamebase.string());
+  profL1File << msgrst.str();
+  profL1File.close();
+  g_log.notice() << "END of profiling objective func along L1\n";
 }
 
 } // namespace Crystal

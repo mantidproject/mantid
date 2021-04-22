@@ -116,6 +116,9 @@ private:
   /// Save the calibration table to a CSV file
   void saveCalibrationTable(const std::string &FileName, Mantid::API::ITableWorkspace_sptr &tws);
 
+  /// Profile related functions
+  void profileL1(Mantid::API::IPeaksWorkspace_sptr &pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
+
   /// unique vars for a given instance of calibration
   double m_a, m_b, m_c, m_alpha, m_beta, m_gamma;
   double m_T0 = 0.0;

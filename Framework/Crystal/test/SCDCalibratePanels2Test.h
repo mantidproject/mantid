@@ -224,7 +224,7 @@ public:
     // TS_ASSERT(sameInstrument);
   }
 
-  void test_Exec() {
+  void run_Exec() {
     g_log.notice() << "test_Exec() starts.\n";
     // Generate unique temp files
     auto filenamebase = boost::filesystem::temp_directory_path();
