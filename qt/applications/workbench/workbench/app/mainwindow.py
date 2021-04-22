@@ -72,6 +72,10 @@ SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft
 # The event loop has not started - force event processing
 QApplication.processEvents(QEventLoop.AllEvents)
 
+# MainWindow state encodes widget layout (among other things).
+# Increment this when the state of the next version is incompatible with the previous.
+SAVE_STATE_VERSION = 1
+
 # -----------------------------------------------------------------------------
 # MainWindow
 # -----------------------------------------------------------------------------
@@ -740,7 +744,7 @@ class MainWindow(QMainWindow):
 
         # restore window state
         if settings.has('MainWindow/state'):
-            self.restoreState(settings.get('MainWindow/state'))
+            self.restoreState(settings.get('MainWindow/state'), SAVE_STATE_VERSION)
         else:
             self.setWindowState(Qt.WindowMaximized)
 
@@ -753,7 +757,7 @@ class MainWindow(QMainWindow):
     def writeSettings(self, settings):
         settings.set('MainWindow/size', self.size())  # QSize
         settings.set('MainWindow/position', self.pos())  # QPoint
-        settings.set('MainWindow/state', self.saveState())  # QByteArray
+        settings.set('MainWindow/state', self.saveState(SAVE_STATE_VERSION))  # QByteArray
 
         # write out settings for children
         AlgorithmInputHistory().writeSettings(settings)
