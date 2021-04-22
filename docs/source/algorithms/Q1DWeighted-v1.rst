@@ -70,6 +70,7 @@ The trigonometrical circle is split in ``NumberOfWedges`` sectors, equally space
 Drawing sectors
 ~~~~~~~~~~~~~~~
 
+This option is still in active development, and might be subject to changes in later versions.
 It is also possible to use the instrument viewer to draw the shape of the angular sector. Only sector shapes are currently supported,
 and they must be drawn in the Full 3D, Z- projection, without any rotation (translation and zoom are supported). Please
 note that in this projection, the X-axis points to the left. So when doing the wedges without the table (see above), they are ordered

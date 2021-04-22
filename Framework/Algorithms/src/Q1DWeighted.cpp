@@ -157,6 +157,8 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
           Q1DWeighted::Wedge(innerRadius, outerRadius, centerX, centerY, midAngle, angleRange));
     }
   } else {
+    g_log.warning("This option is still in active development and might be "
+                  "subject to changes in the next version.");
     getTableShapes();
     m_nWedges = m_wedgesParameters.size();
   }
