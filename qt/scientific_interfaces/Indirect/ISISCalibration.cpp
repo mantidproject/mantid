@@ -173,10 +173,10 @@ ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
           SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ISISCalibration::~ISISCalibration() {}
+ISISCalibration::~ISISCalibration() {
+  m_propTrees["CalPropTree"]->unsetFactoryForManager(m_dblManager);
+  m_propTrees["ResPropTree"]->unsetFactoryForManager(m_dblManager);
+}
 
 std::pair<double, double> ISISCalibration::peakRange() const {
   return std::make_pair(m_dblManager->value(m_properties["CalPeakMin"]),

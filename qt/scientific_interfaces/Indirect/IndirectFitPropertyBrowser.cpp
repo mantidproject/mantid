@@ -16,6 +16,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
+#include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
@@ -71,9 +72,9 @@ void IndirectFitPropertyBrowser::initFitOptionsBrowser() {
   // this object is added as a child to the stacked widget m_templateBrowser
   // which is a child of this class so the lifetime of this pointer is handled
   // by Qt
-  m_fitOptionsBrowser = new FitOptionsBrowser(nullptr, FitOptionsBrowser::SimultaneousAndSequential);
+  m_fitOptionsBrowser = new FitOptionsBrowser(nullptr, FittingMode::SEQUENTIAL_AND_SIMULTANEOUS);
   m_fitOptionsBrowser->setObjectName("fitOptionsBrowser");
-  m_fitOptionsBrowser->setCurrentFittingType(FitOptionsBrowser::Sequential);
+  m_fitOptionsBrowser->setCurrentFittingType(FittingMode::SEQUENTIAL);
 }
 
 void IndirectFitPropertyBrowser::setHiddenProperties(std::vector<std::string> hiddenProperties) {
@@ -276,12 +277,9 @@ void IndirectFitPropertyBrowser::updateFitStatus(const FitDomainIndex index) {
 }
 
 /**
- * @return  The selected fit type in the fit type combo box.
+ * @return  The currently active fitting mode (Sequential or Simultaneous).
  */
-QString IndirectFitPropertyBrowser::selectedFitType() const {
-  return m_fitOptionsBrowser->getCurrentFittingType() == FitOptionsBrowser::Simultaneous ? "Simultaneous"
-                                                                                         : "Sequential";
-}
+FittingMode IndirectFitPropertyBrowser::getFittingMode() const { return m_fitOptionsBrowser->getCurrentFittingType(); }
 
 /**
  * Sets whether fit members should be convolved with the resolution after a fit.
@@ -399,9 +397,9 @@ void IndirectFitPropertyBrowser::browserVisibilityChanged(bool isVisible) {
 void IndirectFitPropertyBrowser::updateFitType() {
   auto const nGlobals = m_functionBrowser->getGlobalParameters().size();
   if (nGlobals == 0) {
-    m_fitOptionsBrowser->setCurrentFittingType(FitOptionsBrowser::Sequential);
+    m_fitOptionsBrowser->setCurrentFittingType(FittingMode::SEQUENTIAL);
   } else {
-    m_fitOptionsBrowser->setCurrentFittingType(FitOptionsBrowser::Simultaneous);
+    m_fitOptionsBrowser->setCurrentFittingType(FittingMode::SIMULTANEOUS);
   }
 }
 

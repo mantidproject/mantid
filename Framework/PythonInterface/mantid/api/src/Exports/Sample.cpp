@@ -63,6 +63,8 @@ void export_Sample() {
       .def("setWidth", &Sample::setWidth, (arg("self"), arg("width")), "Set the width in mm.")
       .def("getShape", &Sample::getShape, arg("self"), "Returns a shape of a Sample object.",
            return_value_policy<reference_existing_object>())
+      .def("hasEnvironment", &Sample::hasEnvironment, arg("self"),
+           "Returns True if the sample has an environment defined")
       // -------------------------Operators
       // -------------------------------------
       .def("__len__", &Sample::size, arg("self"), "Gets the number of samples in this collection")

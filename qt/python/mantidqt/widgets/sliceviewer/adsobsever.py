@@ -43,9 +43,6 @@ class SliceViewerADSObserver(AnalysisDataServiceObserver):
         self.observeReplace(True)
         self.observeRename(True)
 
-    def __del__(self):
-        self.observeAll(False)
-
     @_catch_exceptions
     def clearHandle(self):
         """Called when the ADS is deleted all of its workspaces"""

@@ -226,8 +226,7 @@ class SANSILLIntegration(PythonAlgorithm):
                 if wavelength != 0:
                     run = mtd[self._input_ws].getRun()
                     instrument = mtd[self._input_ws].getInstrument()
-                    if instrument.getName() == "D16" and run.hasProperty("Gamma.value") \
-                            and run.getLogData("Gamma.value") != 0:
+                    if instrument.getName() == "D16" and run.hasProperty("Gamma.value"):
                         if instrument.hasParameter('detector-width'):
                             pixel_nb = instrument.getNumberParameter('detector-width')[0]
                         else:
@@ -263,7 +262,7 @@ class SANSILLIntegration(PythonAlgorithm):
         Returns q binning based on q_min, q_max. Used when the detector is not aligned with axis Z.
         """
         step = (q_max - q_min) * binning_factor / pixel_nb
-        return [q_min, step, q_max]
+        return [q_min-step/2, step, q_max+step/2]
 
     def _pixel_q_binning(self, q_min, q_max, pixel_size, wavelength, l2, offset):
         """

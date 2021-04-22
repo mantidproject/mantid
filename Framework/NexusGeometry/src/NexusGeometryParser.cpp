@@ -7,11 +7,9 @@
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/CSGObject.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/ChecksumHelper.h"
-#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidNexusGeometry/AbstractLogger.h"
 #include "MantidNexusGeometry/H5ForwardCompatibility.h"
 #include "MantidNexusGeometry/Hdf5Version.h"
@@ -23,8 +21,6 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <H5Cpp.h>
-#include <boost/algorithm/string.hpp>
-#include <boost/optional.hpp>
 #include <boost/regex.hpp>
 #include <numeric>
 #include <sstream>
@@ -37,14 +33,6 @@ using namespace H5;
 
 // Anonymous namespace
 namespace {
-using FaceV = std::vector<Eigen::Vector3d>;
-
-struct Face {
-  Eigen::Vector3d v1;
-  Eigen::Vector3d v2;
-  Eigen::Vector3d v3;
-  Eigen::Vector3d v4;
-};
 
 bool isDegrees(const H5std_string &units) {
   using boost::regex;
@@ -228,10 +216,10 @@ private:
   }
 
   // Provided to support invalid or null-termination character strings
-  std::string readOrSubsitute(const std::string &dataset, const Group &group, std::string &substitue) {
+  std::string readOrSubstitute(const std::string &dataset, const Group &group, const std::string &substitute) {
     auto read = get1DStringDataset(dataset, group);
     if (read.empty())
-      read = substitue;
+      read = substitute;
     return read;
   }
 
@@ -492,9 +480,9 @@ private:
       throw std::runtime_error("numbers of detector with shape cylinder does "
                                "not match number of detectors");
     if (cPoints.size() % 3 != 0)
-      throw std::runtime_error("cylinders not divisble by 3. Bad input.");
+      throw std::runtime_error("cylinders not divisible by 3. Bad input.");
     if (vPoints.size() % 3 != 0)
-      throw std::runtime_error("vertices not divisble by 3. Bad input.");
+      throw std::runtime_error("vertices not divisible by 3. Bad input.");
 
     for (size_t i = 0; i < cylinderIndexToDetId.size(); i += 2) {
       auto cylinderIndex = cylinderIndexToDetId[i];
@@ -575,7 +563,8 @@ private:
   void extractNexusMeshAndAddDetectors(const std::vector<uint32_t> &detFaces, const std::vector<uint32_t> &faceIndices,
                                        const std::vector<uint32_t> &windingOrder, const std::vector<double> &vertices,
                                        const size_t numDets, const std::unordered_map<int, uint32_t> &detIdToIndex,
-                                       const std::string &name, InstrumentBuilder &builder) {
+                                       const std::string &name, InstrumentBuilder &builder,
+                                       const Group &detectorGroup) {
     std::vector<std::vector<Eigen::Vector3d>> detFaceVerts(numDets);
     std::vector<std::vector<uint32_t>> detFaceIndices(numDets);
     std::vector<std::vector<uint32_t>> detWindingOrder(numDets);
@@ -584,35 +573,57 @@ private:
     extractFacesAndIDs(detFaces, windingOrder, vertices, detIdToIndex, faceIndices, detFaceVerts, detFaceIndices,
                        detWindingOrder, detIds);
 
+    Pixels detectorPixels;
+    bool calculatePixelCentre = true;
+    if (detFaces.size() != 2 * numDets) {
+      // At least one pixel is 3D (comprises multiple faces)
+      // We need pixel offsets from the NXdetector in this case, as
+      // calculating centre of mass for a general polyhedron is fairly
+      // complex and computationally expensive
+      Pixels pixelOffsets = getPixelOffsets(detectorGroup);
+      // Calculate pixel relative positions
+      detectorPixels = Eigen::Affine3d::Identity() * pixelOffsets;
+      calculatePixelCentre = false;
+    }
+
     for (size_t i = 0; i < numDets; ++i) {
       auto &detVerts = detFaceVerts[i];
-      const auto &faceIndices = detFaceIndices[i];
+      const auto &singleDetIndices = detFaceIndices[i];
       const auto &detWinding = detWindingOrder[i];
-      // Calculate polygon centre
-      Eigen::Vector3d centre =
-          std::accumulate(detVerts.begin() + 1, detVerts.end(), detVerts.front()) / detVerts.size();
 
-      // translate shape to origin for shape coordinates.
+      Eigen::Vector3d centre;
+      if (calculatePixelCentre) {
+        // Our detector is 2D (described by a single face in the mesh)
+        // Calculate polygon centre
+        centre = std::accumulate(detVerts.begin() + 1, detVerts.end(), detVerts.front()) / detVerts.size();
+      } else {
+        // Our detector is 3D (described by multiple faces in the mesh)
+        // Use pixel offset which was recorded in the NXdetector
+        centre = detectorPixels.col(i);
+      }
+
+      // translate shape to origin for shape coordinates
       std::for_each(detVerts.begin(), detVerts.end(), [&centre](Eigen::Vector3d &val) { val -= centre; });
 
-      auto shape = NexusShapeFactory::createFromOFFMesh(faceIndices, detWinding, detVerts);
+      auto shape = NexusShapeFactory::createFromOFFMesh(singleDetIndices, detWinding, detVerts);
       builder.addDetectorToLastBank(name + "_" + std::to_string(i), detIds[i], centre, std::move(shape));
     }
   }
 
   void parseMeshAndAddDetectors(InstrumentBuilder &builder, const Group &shapeGroup,
-                                const std::vector<Mantid::detid_t> &detectorIds, const std::string &bankName) {
+                                const std::vector<Mantid::detid_t> &detectorIds, const std::string &bankName,
+                                const Group &detectorGroup) {
     // Load mapping between detector IDs and faces, winding order of vertices
-    // for faces, and face corner vertices.
+    // for faces, and face corner vertices
     const auto detFaces = readNXUInts32(shapeGroup, "detector_faces");
     const auto faceIndices = readNXUInts32(shapeGroup, "faces");
     const auto windingOrder = readNXUInts32(shapeGroup, "winding_order");
     const auto vertices = readNXFloats(shapeGroup, "vertices");
 
     // Sanity check entries
-    if (detFaces.size() != 2 * detectorIds.size())
-      throw std::runtime_error("Expect to have as many detector_face entries "
-                               "as detector_number entries");
+    if (detFaces.size() < 2 * detectorIds.size())
+      throw std::runtime_error("Expect to have at least as many detector_face "
+                               "entries as detector_number entries");
     if (detFaces.size() % 2 != 0)
       throw std::runtime_error("Unequal pairs of face indices to detector "
                                "indices in detector_faces");
@@ -629,13 +640,14 @@ private:
     }
 
     extractNexusMeshAndAddDetectors(detFaces, faceIndices, windingOrder, vertices, detectorIds.size(), detIdToIndex,
-                                    bankName, builder);
+                                    bankName, builder, detectorGroup);
   }
 
   void parseAndAddBank(const Group &shapeGroup, InstrumentBuilder &builder,
-                       const std::vector<Mantid::detid_t> &detectorIds, const std::string &bankName) {
+                       const std::vector<Mantid::detid_t> &detectorIds, const std::string &bankName,
+                       const Group &detectorGroup) {
     if (utilities::hasNXAttribute(shapeGroup, NX_OFF)) {
-      parseMeshAndAddDetectors(builder, shapeGroup, detectorIds, bankName);
+      parseMeshAndAddDetectors(builder, shapeGroup, detectorIds, bankName, detectorGroup);
     } else if (utilities::hasNXAttribute(shapeGroup, NX_CYLINDER)) {
       parseNexusCylinderDetector(shapeGroup, bankName, builder, detectorIds);
     } else {
@@ -650,7 +662,7 @@ private:
    * IObject.
    *
    * Null object return if no shape can be found.
-   * @param detectorGroup : parent group possibily containing sub-group relating
+   * @param detectorGroup : parent group possibly containing sub-group relating
    * to shape
    * @param searchTubes : out parameter, true if tubes can be searched
    * @return shared pointer holding IObject subtype or null shared pointer
@@ -660,16 +672,16 @@ private:
     // that have NX_class attributes of either NX_CYLINDER or NX_OFF. That way
     // we handle groups called any of the allowed - shape, pixel_shape,
     // detector_shape
-    auto cylinderical = utilities::findGroup(detectorGroup, NX_CYLINDER);
+    auto cylindrical = utilities::findGroup(detectorGroup, NX_CYLINDER);
     auto off = utilities::findGroup(detectorGroup, NX_OFF);
     searchTubes = false;
-    if (off && cylinderical) {
+    if (off && cylindrical) {
       throw std::runtime_error("Can either provide cylindrical OR OFF "
                                "geometries as subgroups, not both");
     }
-    if (cylinderical) {
+    if (cylindrical) {
       searchTubes = true;
-      return parseNexusCylinder(*cylinderical);
+      return parseNexusCylinder(*cylindrical);
     } else if (off)
       return parseNexusMesh(*off);
     else {
@@ -682,9 +694,9 @@ private:
     Group entryGroup = utilities::findGroupOrThrow(root, NX_ENTRY);
     Group instrumentGroup = utilities::findGroupOrThrow(entryGroup, NX_INSTRUMENT);
     Group sourceGroup = utilities::findGroupOrThrow(instrumentGroup, NX_SOURCE);
-    std::string sourceName = "Unspecfied";
+    std::string sourceName = "Unspecified";
     if (utilities::findDataset(sourceGroup, "name"))
-      sourceName = readOrSubsitute("name", sourceGroup, sourceName);
+      sourceName = readOrSubstitute("name", sourceGroup, sourceName);
     auto sourceTransformations = getTransformations(file, sourceGroup);
     auto defaultPos = Eigen::Vector3d(0.0, 0.0, 0.0);
     builder.addSource(sourceName, sourceTransformations * defaultPos);
@@ -698,7 +710,7 @@ private:
     Eigen::Vector3d samplePos = sampleTransforms * Eigen::Vector3d(0.0, 0.0, 0.0);
     std::string sampleName = "Unspecified";
     if (utilities::findDataset(sampleGroup, "name"))
-      sampleName = readOrSubsitute("name", sampleGroup, sampleName);
+      sampleName = readOrSubstitute("name", sampleGroup, sampleName);
     builder.addSample(sampleName, samplePos);
   }
 
@@ -749,10 +761,10 @@ public:
       auto detectorIds = getDetectorIds(detectorGroup);
 
       // We preferentially deal with DETECTOR_SHAPE type shapes. Pixel offsets
-      // not needed for this processing
+      // only needed if pixels are 3D for this processing
       auto detector_shape = utilities::findGroupByName(detectorGroup, DETECTOR_SHAPE);
       if (detector_shape) {
-        parseAndAddBank(*detector_shape, builder, detectorIds, bankName);
+        parseAndAddBank(*detector_shape, builder, detectorIds, bankName, detectorGroup);
         continue;
       }
 
@@ -776,7 +788,7 @@ public:
         auto index = static_cast<int>(i);
         std::string name = bankName + "_" + std::to_string(index);
 
-        Eigen::Vector3d relativePos = detectorPixels.col(index);
+        const Eigen::Vector3d &relativePos = detectorPixels.col(index);
         builder.addDetectorToLastBank(name, detectorIds[index], relativePos, detShape);
       }
     }

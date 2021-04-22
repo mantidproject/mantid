@@ -18,6 +18,13 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using Mantid::Kernel::DeltaEMode;
 
+/**
+ * Determines whether an input has a value of zero
+ * @param Input value
+ * @return True if zero, False if not
+ */
+static bool isValueZero(double value) { return value == 0; }
+
 namespace {
 Mantid::Kernel::Logger g_log("AbsorptionCorrections");
 
@@ -124,6 +131,7 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   // Change of input
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(getParameterDefaults(const QString &)));
+  connect(m_uiForm.cbShape, SIGNAL(currentIndexChanged(int)), this, SLOT(handlePresetShapeChanges(int)));
   // Handle algorithm completion
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   // Handle running, plotting and saving
@@ -147,11 +155,10 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
 
   connect(m_uiForm.leSampleChemicalFormula, SIGNAL(editingFinished()), this, SLOT(doValidation()));
   connect(m_uiForm.leCanChemicalFormula, SIGNAL(editingFinished()), this, SLOT(doValidation()));
-  connect(m_uiForm.ckUseCan, SIGNAL(stateChanged(int)), this, SLOT(doValidation()));
+  connect(m_uiForm.cbUseCan, SIGNAL(stateChanged(int)), this, SLOT(doValidation()));
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsSampleInput->isOptional(true);
-  m_uiForm.dsCanInput->isOptional(true);
 }
 
 AbsorptionCorrections::~AbsorptionCorrections() {}
@@ -166,19 +173,28 @@ void AbsorptionCorrections::setup() { doValidation(); }
 void AbsorptionCorrections::run() {
   setRunIsRunning(true);
 
-  // Get correct corrections algorithm
-  QString const sampleShape = m_uiForm.cbShape->currentText().replace(" ", "");
+  bool const isUseCan = m_uiForm.cbUseCan->isChecked();
 
   IAlgorithm_sptr monteCarloAbsCor = AlgorithmManager::Instance().create("PaalmanPingsMonteCarloAbsorption");
   monteCarloAbsCor->initialize();
 
-  monteCarloAbsCor->setProperty("Shape", sampleShape.toStdString());
-
-  addShapeSpecificSampleOptions(monteCarloAbsCor, sampleShape);
-
   // Sample details
   QString const sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
-  monteCarloAbsCor->setProperty("SampleWorkspace", sampleWsName.toStdString());
+  monteCarloAbsCor->setProperty("InputWorkspace", sampleWsName.toStdString());
+
+  // General details
+  monteCarloAbsCor->setProperty("BeamHeight", m_uiForm.spBeamHeight->value());
+  monteCarloAbsCor->setProperty("BeamWidth", m_uiForm.spBeamWidth->value());
+  long const events = static_cast<long>(m_uiForm.spNumberEvents->value());
+  monteCarloAbsCor->setProperty("EventsPerPoint", events);
+  auto const interpolation = m_uiForm.cbInterpolation->currentText().toStdString();
+  monteCarloAbsCor->setProperty("Interpolation", interpolation);
+  long const maxAttempts = static_cast<long>(m_uiForm.spMaxScatterPtAttempts->value());
+  monteCarloAbsCor->setProperty("MaxScatterPtAttempts", maxAttempts);
+
+  QString const sampleShape = m_uiForm.cbShape->currentText().replace(" ", "");
+  const bool isPreset = sampleShape == "Preset";
+  monteCarloAbsCor->setProperty("Shape", sampleShape.toStdString());
 
   auto const sampleDensityType = m_uiForm.cbSampleDensity->currentText().toStdString();
   monteCarloAbsCor->setProperty("SampleDensityType", getDensityType(sampleDensityType));
@@ -196,39 +212,31 @@ void AbsorptionCorrections::run() {
     monteCarloAbsCor->setProperty("SampleAttenuationXSection", m_uiForm.spSampleAttenuationXSection->value());
   }
 
-  // General details
-  monteCarloAbsCor->setProperty("BeamHeight", m_uiForm.spBeamHeight->value());
-  monteCarloAbsCor->setProperty("BeamWidth", m_uiForm.spBeamWidth->value());
-  long const events = static_cast<long>(m_uiForm.spNumberEvents->value());
-  monteCarloAbsCor->setProperty("EventsPerPoint", events);
-  auto const interpolation = m_uiForm.cbInterpolation->currentText().toStdString();
-  monteCarloAbsCor->setProperty("Interpolation", interpolation);
-  long const maxAttempts = static_cast<long>(m_uiForm.spMaxScatterPtAttempts->value());
-  monteCarloAbsCor->setProperty("MaxScatterPtAttempts", maxAttempts);
+  if (!isPreset) {
 
-  // Can details
-  bool const useCan = m_uiForm.ckUseCan->isChecked();
-  if (useCan) {
-    std::string const canWsName = m_uiForm.dsCanInput->getCurrentDataName().toStdString();
-    monteCarloAbsCor->setProperty("ContainerWorkspace", canWsName);
+    addShapeSpecificSampleOptions(monteCarloAbsCor, sampleShape);
 
-    auto const containerDensityType = m_uiForm.cbCanDensity->currentText().toStdString();
-    monteCarloAbsCor->setProperty("ContainerDensityType", getDensityType(containerDensityType));
-    if (containerDensityType != "Mass Density")
-      monteCarloAbsCor->setProperty("ContainerNumberDensityUnit", getNumberDensityUnit(containerDensityType));
+    if (isUseCan) {
 
-    monteCarloAbsCor->setProperty("ContainerDensity", m_uiForm.spCanDensity->value());
+      // Can details
+      auto const containerDensityType = m_uiForm.cbCanDensity->currentText().toStdString();
+      monteCarloAbsCor->setProperty("ContainerDensityType", getDensityType(containerDensityType));
+      if (containerDensityType != "Mass Density")
+        monteCarloAbsCor->setProperty("ContainerNumberDensityUnit", getNumberDensityUnit(containerDensityType));
 
-    if (m_uiForm.cbCanMaterialMethod->currentText() == "Chemical Formula") {
-      auto const canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
-      monteCarloAbsCor->setProperty("ContainerChemicalFormula", canChemicalFormula.toStdString());
-    } else {
-      monteCarloAbsCor->setProperty("ContainerCoherentXSection", m_uiForm.spCanCoherentXSection->value());
-      monteCarloAbsCor->setProperty("ContainerIncoherentXSection", m_uiForm.spCanIncoherentXSection->value());
-      monteCarloAbsCor->setProperty("ContainerAttenuationXSection", m_uiForm.spCanAttenuationXSection->value());
+      monteCarloAbsCor->setProperty("ContainerDensity", m_uiForm.spCanDensity->value());
+
+      if (m_uiForm.cbCanMaterialMethod->currentText() == "Chemical Formula") {
+        auto const canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
+        monteCarloAbsCor->setProperty("ContainerChemicalFormula", canChemicalFormula.toStdString());
+      } else {
+        monteCarloAbsCor->setProperty("ContainerCoherentXSection", m_uiForm.spCanCoherentXSection->value());
+        monteCarloAbsCor->setProperty("ContainerIncoherentXSection", m_uiForm.spCanIncoherentXSection->value());
+        monteCarloAbsCor->setProperty("ContainerAttenuationXSection", m_uiForm.spCanAttenuationXSection->value());
+      }
+
+      addShapeSpecificCanOptions(monteCarloAbsCor, sampleShape);
     }
-
-    addShapeSpecificCanOptions(monteCarloAbsCor, sampleShape);
   }
 
   // Generate workspace names
@@ -236,7 +244,7 @@ void AbsorptionCorrections::run() {
   if (nameCutIndex == -1)
     nameCutIndex = sampleWsName.length();
 
-  auto const outputWsName = sampleWsName.left(nameCutIndex) + "_" + sampleShape + "_MC_Corrections";
+  auto const outputWsName = sampleWsName.left(nameCutIndex) + "_MC_Corrections";
 
   monteCarloAbsCor->setProperty("CorrectionsWorkspace", outputWsName.toStdString());
 
@@ -331,6 +339,96 @@ bool AbsorptionCorrections::validate() {
   return uiv.isAllInputValid();
 }
 
+/**
+ * Validates algorithm properties specific to the sample for a given shape.
+ *
+ * @param uiv Address of user input validator to set error messages omn
+ * @param shape Sample shape
+ */
+void AbsorptionCorrections::validateSampleGeometryInputs(UserInputValidator &uiv, const QString &shape) {
+  bool hasZero = false;
+  if (shape == "FlatPlate") {
+    double const sampleHeight = m_uiForm.spFlatSampleHeight->value();
+    hasZero = hasZero || isValueZero(sampleHeight);
+
+    double const sampleWidth = m_uiForm.spFlatSampleWidth->value();
+    hasZero = hasZero || isValueZero(sampleWidth);
+
+    double const sampleThickness = m_uiForm.spFlatSampleThickness->value();
+    hasZero = hasZero || isValueZero(sampleThickness);
+
+  } else if (shape == "Annulus") {
+
+    double const sampleHeight = m_uiForm.spAnnSampleHeight->value();
+    hasZero = hasZero || isValueZero(sampleHeight);
+
+    double const sampleInnerRadius = m_uiForm.spAnnSampleInnerRadius->value();
+    hasZero = hasZero || isValueZero(sampleInnerRadius);
+
+    double const sampleOuterRadius = m_uiForm.spAnnSampleOuterRadius->value();
+    hasZero = hasZero || isValueZero(sampleOuterRadius);
+
+    if (sampleInnerRadius >= sampleOuterRadius) {
+      uiv.addErrorMessage("SampleOuterRadius must be greater than SampleInnerRadius.");
+    }
+
+  } else if (shape == "Cylinder") {
+    double const sampleRadius = m_uiForm.spCylSampleRadius->value();
+    hasZero = hasZero || isValueZero(sampleRadius);
+
+    double const sampleHeight = m_uiForm.spCylSampleHeight->value();
+    hasZero = hasZero || isValueZero(sampleHeight);
+  }
+  if (hasZero) {
+    uiv.addErrorMessage("Sample Geometry inputs cannot be zero-valued.");
+  }
+}
+
+/**
+ * Validates algorithm properties specific to the container for a given shape.
+ *
+ * @param uiv Address of user input validator to set error messages omn
+ * @param shape Container shape
+ */
+void AbsorptionCorrections::validateContainerGeometryInputs(UserInputValidator &uiv, const QString &shape) {
+  bool hasZero = false;
+
+  if (shape == "FlatPlate") {
+    double const canFrontThickness = m_uiForm.spFlatCanFrontThickness->value();
+    hasZero = hasZero || isValueZero(canFrontThickness);
+
+    double const canBackThickness = m_uiForm.spFlatCanBackThickness->value();
+    hasZero = hasZero || isValueZero(canBackThickness);
+  } else if (shape == "Cylinder") {
+    double const canOuterRadius = m_uiForm.spCylCanOuterRadius->value();
+    hasZero = hasZero || isValueZero(canOuterRadius);
+
+    double const sampleRadius = m_uiForm.spAnnSampleOuterRadius->value();
+    if (canOuterRadius <= sampleRadius) {
+      uiv.addErrorMessage("CanOuterRadius must be greater than SampleRadius.");
+    }
+
+  } else if (shape == "Annulus") {
+    double const canInnerRadius = m_uiForm.spAnnCanInnerRadius->value();
+    hasZero = hasZero || isValueZero(canInnerRadius);
+
+    double const canOuterRadius = m_uiForm.spAnnCanOuterRadius->value();
+    hasZero = hasZero || isValueZero(canOuterRadius);
+
+    double const sampleInnerRadius = m_uiForm.spAnnSampleInnerRadius->value();
+    double const sampleOuterRadius = m_uiForm.spAnnSampleOuterRadius->value();
+    if (canInnerRadius >= sampleInnerRadius) {
+      uiv.addErrorMessage("SampleInnerRadius must be greater than ContainerInnerRadius.");
+    }
+    if (canOuterRadius <= sampleOuterRadius) {
+      uiv.addErrorMessage("ContainerOuterRadius must be greater than SampleOuterRadius.");
+    }
+  }
+  if (hasZero) {
+    uiv.addErrorMessage("Container Geometry inputs cannot be zero-valued.");
+  }
+}
+
 UserInputValidator AbsorptionCorrections::doValidation() {
   UserInputValidator uiv;
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
@@ -338,55 +436,54 @@ UserInputValidator AbsorptionCorrections::doValidation() {
   if (!sampleWorkspace())
     uiv.addErrorMessage("Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
 
+  QString const sampleShape = m_uiForm.cbShape->currentText().replace(" ", "");
+  const bool isPreset = sampleShape == "Preset";
+  const bool isUseCan = m_uiForm.cbUseCan->isChecked();
+
   if (m_uiForm.cbSampleMaterialMethod->currentText() == "Chemical Formula") {
-    if (uiv.checkFieldIsNotEmpty("Sample Chemical Formula", m_uiForm.leSampleChemicalFormula,
-                                 m_uiForm.valSampleChemicalFormula))
+    if (!(m_uiForm.leSampleChemicalFormula->text().isEmpty() && isPreset)) {
       uiv.checkFieldIsValid("Sample Chemical Formula", m_uiForm.leSampleChemicalFormula,
                             m_uiForm.valSampleChemicalFormula);
-    auto const sampleChem = m_uiForm.leSampleChemicalFormula->text().toStdString();
-    try {
-      Mantid::Kernel::Material::parseChemicalFormula(sampleChem);
-    } catch (std::runtime_error &ex) {
-      UNUSED_ARG(ex);
-      uiv.addErrorMessage("Chemical Formula for Sample was not recognised.");
-      uiv.setErrorLabel(m_uiForm.valSampleChemicalFormula, false);
+      auto const sampleChem = m_uiForm.leSampleChemicalFormula->text().toStdString();
+      try {
+        Mantid::Kernel::Material::parseChemicalFormula(sampleChem);
+      } catch (std::runtime_error &ex) {
+        UNUSED_ARG(ex);
+        uiv.addErrorMessage("Chemical Formula for Sample was not recognised.");
+        uiv.setErrorLabel(m_uiForm.valSampleChemicalFormula, false);
+      }
     }
   }
 
-  bool useCan = m_uiForm.ckUseCan->isChecked();
-  if (useCan) {
+  if (!isPreset) {
+    validateSampleGeometryInputs(uiv, sampleShape);
 
-    uiv.checkDataSelectorIsValid("Container", m_uiForm.dsCanInput);
+    if (isUseCan) {
+      if (m_uiForm.cbCanMaterialMethod->currentText() == "Chemical Formula") {
+        auto const containerChem = m_uiForm.leCanChemicalFormula->text().toStdString();
+        if (uiv.checkFieldIsNotEmpty("Container Chemical Formula", m_uiForm.leCanChemicalFormula,
+                                     m_uiForm.valCanChemicalFormula)) {
+          uiv.checkFieldIsValid("Container Chemical Formula", m_uiForm.leCanChemicalFormula,
+                                m_uiForm.valCanChemicalFormula);
+        }
 
-    auto const containerWsName = m_uiForm.dsCanInput->getCurrentDataName().toStdString();
-    if (doesExistInADS(containerWsName) && !getADSMatrixWorkspace(containerWsName))
-      uiv.addErrorMessage("Invalid container workspace. Ensure a MatrixWorkspace is provided.");
-
-    if (m_uiForm.cbCanMaterialMethod->currentText() == "Chemical Formula") {
-      auto const containerChem = m_uiForm.leCanChemicalFormula->text().toStdString();
-      if (uiv.checkFieldIsNotEmpty("Container Chemical Formula", m_uiForm.leCanChemicalFormula,
-                                   m_uiForm.valCanChemicalFormula)) {
-        uiv.checkFieldIsValid("Container Chemical Formula", m_uiForm.leCanChemicalFormula,
-                              m_uiForm.valCanChemicalFormula);
+        try {
+          Mantid::Kernel::Material::parseChemicalFormula(containerChem);
+        } catch (std::runtime_error &ex) {
+          UNUSED_ARG(ex);
+          uiv.addErrorMessage("Chemical Formula for Container was not recognised.");
+          uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, false);
+        }
       }
-
-      try {
-        Mantid::Kernel::Material::parseChemicalFormula(containerChem);
-      } catch (std::runtime_error &ex) {
-        UNUSED_ARG(ex);
-        uiv.addErrorMessage("Chemical Formula for Container was not recognised.");
-        uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, false);
-      }
+      validateContainerGeometryInputs(uiv, sampleShape);
     }
-  } else
-    uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, true);
+  }
 
   return uiv;
 }
 
 void AbsorptionCorrections::loadSettings(const QSettings &settings) {
   m_uiForm.dsSampleInput->readSettings(settings.group());
-  m_uiForm.dsCanInput->readSettings(settings.group());
 }
 
 void AbsorptionCorrections::setFileExtensionsByName(bool filter) {
@@ -394,8 +491,6 @@ void AbsorptionCorrections::setFileExtensionsByName(bool filter) {
   auto const tabName("CalculateMonteCarlo");
   m_uiForm.dsSampleInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
   m_uiForm.dsSampleInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
-  m_uiForm.dsCanInput->setFBSuffixes(filter ? getContainerFBSuffixes(tabName) : getExtensions(tabName));
-  m_uiForm.dsCanInput->setWSSuffixes(filter ? getContainerWSSuffixes(tabName) : noSuffixes);
 }
 
 void AbsorptionCorrections::processWavelengthWorkspace() {
@@ -588,6 +683,17 @@ void AbsorptionCorrections::setCanDensity(double value) {
     m_canDensities->setMassDensity(value);
   else
     m_canDensities->setNumberDensity(value);
+}
+
+void AbsorptionCorrections::handlePresetShapeChanges(int index) {
+  if (index == 0) {
+    m_uiForm.cbUseCan->setChecked(true);
+    m_uiForm.cbUseCan->setEnabled(false);
+    m_uiForm.gbContainerDetails->setEnabled(false);
+  } else {
+    m_uiForm.cbUseCan->setEnabled(true);
+    m_uiForm.gbContainerDetails->setEnabled(m_uiForm.cbUseCan->isChecked());
+  }
 }
 
 std::vector<std::string> AbsorptionCorrections::getDensityOptions(QString const &method) const {

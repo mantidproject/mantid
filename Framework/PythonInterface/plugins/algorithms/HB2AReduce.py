@@ -9,7 +9,7 @@ from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, Workspa
 from mantid.kernel import (Direction, IntArrayProperty, FloatTimeSeriesProperty,
                            StringListValidator, FloatBoundedValidator, EnabledWhenProperty,
                            PropertyCriterion, Property)
-from mantid.simpleapi import (SaveGSSCW, SaveFocusedXYE)
+from mantid.simpleapi import (SaveGSSCW, SaveFocusedXYE, AnalysisDataService)
 from mantid import logger
 import numpy as np
 import datetime
@@ -271,7 +271,7 @@ class HB2AReduce(PythonAlgorithm):
         createWS_alg.setProperty("WorkspaceTitle", str(metadata['scan_title']))
         createWS_alg.execute()
         outWS = createWS_alg.getProperty("OutputWorkspace").value
-
+        AnalysisDataService.addOrReplace(outputfn, outWS)
         self.setProperty("OutputWorkspace", outWS)
         self.add_metadata(outWS, metadata, data)
 

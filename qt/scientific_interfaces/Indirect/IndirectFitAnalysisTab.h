@@ -52,7 +52,6 @@ public:
   TableDatasetIndex getSelectedDataIndex() const;
   WorkspaceIndex getSelectedSpectrum() const;
   bool isRangeCurrentlySelected(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const;
-  QString getSelectedFitType() const;
   size_t getNumberOfCustomFunctions(const std::string &functionName) const;
   void setConvolveMembers(bool convolveMembers);
 

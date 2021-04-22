@@ -28,8 +28,9 @@ compile_commands.json
 *.la
 *.a
 
-# Compiled python files
-*.py[co]
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
 
 # Eclipse-generated files
 *.pydevproject

@@ -413,11 +413,11 @@ void LoadNexusLogs::init() {
   declareProperty(std::make_unique<PropertyWithValue<std::vector<std::string>>>("AllowList", std::vector<std::string>(),
                                                                                 Direction::Input),
                   "If specified, only these logs will be loaded from the file (each "
-                  "separated by a space).");
+                  "separated by a comma).");
   declareProperty(std::make_unique<PropertyWithValue<std::vector<std::string>>>("BlockList", std::vector<std::string>(),
                                                                                 Direction::Input),
                   "If specified, these logs will NOT be loaded from the file (each "
-                  "separated by a space).");
+                  "separated by a comma).");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating

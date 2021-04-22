@@ -16,8 +16,6 @@ This algorithms is to convert an experiment done on reactor-based four-circle in
 In this algorithm's name, ConvertCWSDToMomentum, *CW* stands for constant wave
 (reactor-source instrument); *SD* stands for single crystal diffraction.
 
-This algorithm takes ??? as inputs.
-
 Furthermore, the unit of the output matrix workspace can be converted to
 momentum transfer (Q).
 

@@ -403,10 +403,10 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
     return nullptr;
   }
 
-  auto h = std::make_unique<PropertyHandler>(f, m_cf, m_browser);
+  f->setHandler(std::make_unique<PropertyHandler>(f, m_cf, m_browser));
+  auto h = static_cast<PropertyHandler *>(f->getHandler());
   h->setAttribute("StartX", m_browser->startX());
   h->setAttribute("EndX", m_browser->endX());
-  f->setHandler(std::move(h));
 
   // enable the change slots
   m_browser->m_changeSlotsEnabled = true;

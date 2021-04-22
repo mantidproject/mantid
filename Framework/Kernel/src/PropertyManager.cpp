@@ -275,6 +275,15 @@ void PropertyManager::declareOrReplaceProperty(std::unique_ptr<Property> p, cons
   m_properties[key] = std::move(p);
 }
 
+/** Reset property values back to initial values (blank or default values)
+ */
+void PropertyManager::resetProperties() {
+  for (auto &prop : getProperties()) {
+    if (!prop->isDefault())
+      prop->setValue(prop->getDefault());
+  }
+}
+
 //-----------------------------------------------------------------------------------------------
 /** Set the ordered list of properties by one string of values, separated by
  *semicolons.

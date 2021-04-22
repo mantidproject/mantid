@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/DataService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidPythonInterface/core/WeakPtr.h"
 
@@ -64,7 +65,7 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
             .def("remove", &SvcType::remove, (arg("self"), arg("name")), "Remove a named object")
             .def("clear", &SvcType::clear, arg("self"), "Removes all objects managed by the service.")
             .def("size", &SvcType::size, arg("self"), "Returns the number of objects within the service")
-            .def("getObjectNames", &DataServiceExporter::getObjectNamesAsList, arg("self"),
+            .def("getObjectNames", &DataServiceExporter::getObjectNamesAsList, (arg("self"), arg("contain") = ""),
                  "Return the list of names currently known to the ADS")
 
             // Make it act like a dictionary
@@ -146,11 +147,14 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * Return a Python list of object names from the ADS as this is
    * far easier to work with than a set
    * @param self :: A reference to the ADS object that called this method
+   * @param contain :: If provided, the function will return only names that
+   * contain this string
    * @returns A python list created from the set of strings
    */
-  static boost::python::list getObjectNamesAsList(SvcType &self) {
+  static boost::python::list getObjectNamesAsList(SvcType &self, const std::string &contain) {
     boost::python::list names;
-    const auto keys = self.getObjectNames();
+    const auto keys = self.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
+                                          Mantid::Kernel::DataServiceHidden::Auto, contain);
     for (auto itr = keys.begin(); itr != keys.end(); ++itr) {
       names.append(*itr);
     }
