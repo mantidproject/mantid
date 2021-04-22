@@ -9,7 +9,7 @@
 from typing import Any, Tuple, Sequence, Optional
 
 # 3rd party
-from mantid.api import SpecialCoordinateSystem
+from mantid.kernel import SpecialCoordinateSystem
 import numpy as np
 
 # Types
