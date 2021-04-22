@@ -42,10 +42,8 @@ public:
 
   SaveCSVTest() {
     // create dummy 2D-workspace with one pixel
-    Workspace_sptr localWorkspace =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
-    Workspace2D_sptr localWorkspace2D_onePixel =
-        std::dynamic_pointer_cast<Workspace2D>(localWorkspace);
+    Workspace_sptr localWorkspace = WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
+    Workspace2D_sptr localWorkspace2D_onePixel = std::dynamic_pointer_cast<Workspace2D>(localWorkspace);
 
     double d = 0.0;
     for (int i = 0; i < 10; ++i, d += 0.1) {
@@ -54,8 +52,7 @@ public:
       localWorkspace2D_onePixel->mutableE(0)[i] = d + 2.0;
     }
 
-    AnalysisDataService::Instance().add("SAVECSVTEST-testSpace",
-                                        localWorkspace);
+    AnalysisDataService::Instance().add("SAVECSVTEST-testSpace", localWorkspace);
   }
 
   void testInit() {
@@ -80,8 +77,7 @@ public:
     outputFile = algToBeTested.getPropertyValue("Filename");
 
     std::string result;
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 algToBeTested.getPropertyValue("Filename"))
+    TS_ASSERT_THROWS_NOTHING(result = algToBeTested.getPropertyValue("Filename"))
     TS_ASSERT(!result.compare(outputFile));
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
@@ -101,8 +97,7 @@ public:
     std::string separator;
     std::string number_plus_comma;
 
-    in >> Amarker >> d1 >> separator >> d2 >> separator >> d3 >> separator >>
-        number_plus_comma;
+    in >> Amarker >> d1 >> separator >> d2 >> separator >> d3 >> separator >> number_plus_comma;
 
     in.close();
 
@@ -135,8 +130,7 @@ private:
   std::string outputFile;
 
   MatrixWorkspace_sptr createWorkspaceWithDxValues(const size_t nSpec) const {
-    auto ws = WorkspaceFactory::Instance().create("Workspace2D", nSpec,
-                                                  nBins + 1, nBins);
+    auto ws = WorkspaceFactory::Instance().create("Workspace2D", nSpec, nBins + 1, nBins);
     BinEdges edges(nBins + 1, LinearGenerator(0, 1));
     for (size_t j = 0; j < nSpec; ++j) {
       ws->setHistogram(j, edges, Counts(nBins, double(j)));
@@ -169,8 +163,7 @@ private:
     Poco::File(fileName).remove();
   }
 
-  void evaluateFileWithDX(const std::string &fileName,
-                          const size_t nSpec) const {
+  void evaluateFileWithDX(const std::string &fileName, const size_t nSpec) const {
     std::ifstream stream(fileName.c_str());
     std::istringstream dataStream;
     std::string line;
@@ -186,8 +179,7 @@ private:
     dataStream.str(std::string());
     dataStream.clear();
     dataStream.str(line);
-    dataStream >> stringMarker >> d1 >> separator >> d2 >> separator >> d3 >>
-        separator >> dEnd >> separator;
+    dataStream >> stringMarker >> d1 >> separator >> d2 >> separator >> d3 >> separator >> dEnd >> separator;
 
     TS_ASSERT_EQUALS(stringMarker, "A");
     TS_ASSERT_EQUALS(separator, ",");
@@ -202,8 +194,7 @@ private:
       dataStream.str(std::string());
       dataStream.clear();
       dataStream.str(line);
-      dataStream >> indexMarker >> d1 >> separator >> d2 >> separator >> d3 >>
-          separator;
+      dataStream >> indexMarker >> d1 >> separator >> d2 >> separator >> d3 >> separator;
       TS_ASSERT_EQUALS(indexMarker, double(spec));
       TS_ASSERT_EQUALS(separator, ",");
       TS_ASSERT_DELTA(d1, double(spec), 1e-5);
@@ -228,8 +219,7 @@ private:
       dataStream.str(std::string());
       dataStream.clear();
       dataStream.str(line);
-      dataStream >> indexMarker >> d1 >> separator >> d2 >> separator >> d3 >>
-          separator;
+      dataStream >> indexMarker >> d1 >> separator >> d2 >> separator >> d3 >> separator;
       TS_ASSERT_EQUALS(indexMarker, spec);
       TS_ASSERT_EQUALS(separator, ",");
       TS_ASSERT_DELTA(d1, sqrt(double(spec)), 1e-5);
@@ -254,8 +244,7 @@ private:
       dataStream.str(std::string());
       dataStream.clear();
       dataStream.str(line);
-      dataStream >> indexMarker >> d1 >> separator >> d2 >> separator >> d3 >>
-          separator;
+      dataStream >> indexMarker >> d1 >> separator >> d2 >> separator >> d3 >> separator;
       TS_ASSERT_EQUALS(indexMarker, spec);
       TS_ASSERT_EQUALS(separator, ",");
       TS_ASSERT_DELTA(d1, sqrt(double(spec)), 1e-5);

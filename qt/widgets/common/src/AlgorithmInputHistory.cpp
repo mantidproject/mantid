@@ -23,10 +23,8 @@ using namespace MantidQt::API;
 /**
  * Constructor
  */
-AbstractAlgorithmInputHistory::AbstractAlgorithmInputHistory(
-    const QString &settingsGroup)
-    : m_lastInput(), m_previousDirectory(""),
-      m_algorithmsGroup(std::move(settingsGroup)), m_dirKey("LastDirectory") {
+AbstractAlgorithmInputHistory::AbstractAlgorithmInputHistory(const QString &settingsGroup)
+    : m_lastInput(), m_previousDirectory(""), m_algorithmsGroup(std::move(settingsGroup)), m_dirKey("LastDirectory") {
   // Fill the stored map from the QSettings information
   load();
 }
@@ -47,16 +45,14 @@ AbstractAlgorithmInputHistory::~AbstractAlgorithmInputHistory() {
  * @param algName :: The name of the algorithm
  * @param property :: A pair containing <name,value> of a property
  */
-void AbstractAlgorithmInputHistory::storeNewValue(
-    const QString &algName, const QPair<QString, QString> &property) {
+void AbstractAlgorithmInputHistory::storeNewValue(const QString &algName, const QPair<QString, QString> &property) {
   m_lastInput[algName][property.first] = property.second;
 }
 
 /**
  * Clear all stored values associated with a particular algorithm
  */
-void AbstractAlgorithmInputHistory::clearAlgorithmInput(
-    const QString &algName) {
+void AbstractAlgorithmInputHistory::clearAlgorithmInput(const QString &algName) {
   if (m_lastInput.contains(algName))
     m_lastInput[algName].clear();
 }
@@ -66,9 +62,7 @@ void AbstractAlgorithmInputHistory::clearAlgorithmInput(
  * @param algName :: The name of the algorithm
  * @param propName :: The name of the property
  */
-QString
-AbstractAlgorithmInputHistory::previousInput(const QString &algName,
-                                             const QString &propName) const {
+QString AbstractAlgorithmInputHistory::previousInput(const QString &algName, const QString &propName) const {
   if (!m_lastInput.contains(algName))
     return "";
 
@@ -84,16 +78,11 @@ AbstractAlgorithmInputHistory::previousInput(const QString &algName,
  * @param lastdir :: A QString giving the path of the directory that was last
  * accessed with a file dialog
  */
-void AbstractAlgorithmInputHistory::setPreviousDirectory(
-    const QString &lastdir) {
-  m_previousDirectory = lastdir;
-}
+void AbstractAlgorithmInputHistory::setPreviousDirectory(const QString &lastdir) { m_previousDirectory = lastdir; }
 
 /// Get the directory that was accessed when the previous open file dialog was
 /// used
-const QString &AbstractAlgorithmInputHistory::getPreviousDirectory() const {
-  return m_previousDirectory;
-}
+const QString &AbstractAlgorithmInputHistory::getPreviousDirectory() const { return m_previousDirectory; }
 
 /**
  * Save the stored information to persistent storage
@@ -142,9 +131,7 @@ void AbstractAlgorithmInputHistory::writeSettings(QSettings &storage) const {
     // Remove all keys for this group that exist at the moment
     storage.remove("");
     QHash<QString, QString>::const_iterator iend = inputHistory.value().end();
-    for (QHash<QString, QString>::const_iterator itr =
-             inputHistory.value().begin();
-         itr != iend; ++itr) {
+    for (QHash<QString, QString>::const_iterator itr = inputHistory.value().begin(); itr != iend; ++itr) {
       storage.setValue(itr.key(), itr.value());
     }
     storage.endGroup();

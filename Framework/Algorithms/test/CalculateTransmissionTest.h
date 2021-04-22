@@ -25,9 +25,7 @@ class CalculateTransmissionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CalculateTransmissionTest *createSuite() {
-    return new CalculateTransmissionTest();
-  }
+  static CalculateTransmissionTest *createSuite() { return new CalculateTransmissionTest(); }
   static void destroySuite(CalculateTransmissionTest *suite) { delete suite; }
 
   void testBasics() {
@@ -40,10 +38,8 @@ public:
   void testDefiningBothTransmissionMonitorAndRegionOfInterestThrows() {
     Mantid::Algorithms::CalculateTransmission trans;
 
-    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        4, 50, true);
-    inputWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(4, 50, true);
+    inputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 
     const std::string outputWsName("CalculateTransmissionTest_outputWS");
 
@@ -54,8 +50,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(trans.setProperty("IncidentBeamMonitor", 1));
     TS_ASSERT_THROWS_NOTHING(trans.setProperty("TransmissionMonitor", 2));
     TS_ASSERT_THROWS_NOTHING(trans.setProperty("TransmissionROI", "2,3"));
-    TS_ASSERT_THROWS_NOTHING(
-        trans.setPropertyValue("OutputWorkspace", outputWsName));
+    TS_ASSERT_THROWS_NOTHING(trans.setPropertyValue("OutputWorkspace", outputWsName));
     TS_ASSERT_THROWS_NOTHING(trans.setProperty("OutputUnfittedData", true));
 
     trans.execute();
@@ -66,10 +61,8 @@ public:
   void testRegionOfInterest() {
     Mantid::Algorithms::CalculateTransmission trans;
 
-    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        4, 50, true);
-    inputWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(4, 50, true);
+    inputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 
     const std::string outputWsName("CalculateTransmissionTest_outputWS");
 
@@ -79,22 +72,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(trans.setProperty("DirectRunWorkspace", inputWS));
     TS_ASSERT_THROWS_NOTHING(trans.setProperty("IncidentBeamMonitor", 1));
     TS_ASSERT_THROWS_NOTHING(trans.setProperty("TransmissionROI", "2,3"));
-    TS_ASSERT_THROWS_NOTHING(
-        trans.setPropertyValue("OutputWorkspace", outputWsName));
+    TS_ASSERT_THROWS_NOTHING(trans.setPropertyValue("OutputWorkspace", outputWsName));
     TS_ASSERT_THROWS_NOTHING(trans.setProperty("OutputUnfittedData", true));
 
     TS_ASSERT_THROWS_NOTHING(trans.execute());
     TS_ASSERT(trans.isExecuted());
 
     Mantid::API::MatrixWorkspace_const_sptr fitted, unfitted;
-    TS_ASSERT_THROWS_NOTHING(
-        fitted = std::dynamic_pointer_cast<MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                outputWsName)));
-    TS_ASSERT_THROWS_NOTHING(
-        unfitted = std::dynamic_pointer_cast<MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                outputWsName + "_unfitted")));
+    TS_ASSERT_THROWS_NOTHING(fitted = std::dynamic_pointer_cast<MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWsName)));
+    TS_ASSERT_THROWS_NOTHING(unfitted = std::dynamic_pointer_cast<MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWsName + "_unfitted")));
 
     auto &fit = fitted->y(0);
     auto &unfit = unfitted->y(0);
@@ -107,17 +95,14 @@ public:
     }
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWsName);
-    Mantid::API::AnalysisDataService::Instance().remove(outputWsName +
-                                                        "_unfitted");
+    Mantid::API::AnalysisDataService::Instance().remove(outputWsName + "_unfitted");
   }
 
   void testFittedUnfitted() {
 
     Mantid::API::MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            4, 50, true); // Make sure this has a spectrum 3
-    inputWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(4, 50, true); // Make sure this has a spectrum 3
+    inputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 
     Mantid::Algorithms::CalculateTransmission trans;
 
@@ -128,21 +113,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(trans.setProperty("DirectRunWorkspace", inputWS))
     TS_ASSERT_THROWS_NOTHING(trans.setProperty("IncidentBeamMonitor", 2))
     std::string outputWS("CalculateTransmissionTest_outputWS");
-    TS_ASSERT_THROWS_NOTHING(
-        trans.setPropertyValue("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(trans.setPropertyValue("OutputWorkspace", outputWS))
     TS_ASSERT_THROWS_NOTHING(trans.setProperty("OutputUnfittedData", true))
 
     TS_ASSERT_THROWS_NOTHING(trans.execute());
     TS_ASSERT(trans.isExecuted());
 
     Mantid::API::MatrixWorkspace_const_sptr fitted, unfitted;
-    TS_ASSERT_THROWS_NOTHING(
-        fitted = std::dynamic_pointer_cast<MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
-    TS_ASSERT_THROWS_NOTHING(
-        unfitted = std::dynamic_pointer_cast<MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                outputWS + "_unfitted")));
+    TS_ASSERT_THROWS_NOTHING(fitted = std::dynamic_pointer_cast<MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
+    TS_ASSERT_THROWS_NOTHING(unfitted = std::dynamic_pointer_cast<MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS + "_unfitted")));
 
     auto &fit = fitted->y(0);
     auto &unfit = unfitted->y(0);
@@ -161,10 +142,8 @@ public:
   void testFittedNoBeamMonitor() {
 
     Mantid::API::MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            4, 50, true); // Make sure this has a spectrum 3
-    inputWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(4, 50, true); // Make sure this has a spectrum 3
+    inputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 
     Mantid::Algorithms::CalculateTransmission trans;
 
@@ -174,17 +153,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(trans.setProperty("SampleRunWorkspace", inputWS))
     TS_ASSERT_THROWS_NOTHING(trans.setProperty("DirectRunWorkspace", inputWS))
     std::string outputWS("CalculateTransmissionTest_outputWS");
-    TS_ASSERT_THROWS_NOTHING(
-        trans.setPropertyValue("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(trans.setPropertyValue("OutputWorkspace", outputWS))
     TS_ASSERT_THROWS_NOTHING(trans.setProperty("OutputUnfittedData", false))
 
     TS_ASSERT_THROWS_NOTHING(trans.execute());
     TS_ASSERT(trans.isExecuted());
 
     Mantid::API::MatrixWorkspace_const_sptr fitted, unfitted;
-    TS_ASSERT_THROWS_NOTHING(
-        fitted = std::dynamic_pointer_cast<MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
+    TS_ASSERT_THROWS_NOTHING(fitted = std::dynamic_pointer_cast<MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
 
     auto &fit = fitted->y(0);
     for (unsigned int i = 0; i < fit.size(); ++i) {
@@ -201,8 +178,7 @@ public:
 
     const std::string inputWS = "sampletransdata";
 
-    Mantid::DataObjects::Workspace2D_sptr ws =
-        SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(inputWS);
+    Mantid::DataObjects::Workspace2D_sptr ws = SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(inputWS);
     Mantid::API::AnalysisDataService::Instance().addOrReplace(inputWS, ws);
 
     const std::string emptyWS("directbeam_ws");
@@ -212,40 +188,34 @@ public:
     // According to this detector geometry, Monitor #1 is spectrum 0, and
     // Monitor #2 is spectrum 1.
     empty_ws->mutableY(0)[0] = 10.0;
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(emptyWS,
-                                                              empty_ws);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(emptyWS, empty_ws);
 
     TS_ASSERT_EQUALS(ws->y(0).size(), 1)
 
     Mantid::Algorithms::CalculateTransmission trans;
     TS_ASSERT_THROWS_NOTHING(trans.initialize());
 
-    TS_ASSERT_THROWS_NOTHING(
-        trans.setPropertyValue("SampleRunWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        trans.setPropertyValue("DirectRunWorkspace", emptyWS))
+    TS_ASSERT_THROWS_NOTHING(trans.setPropertyValue("SampleRunWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(trans.setPropertyValue("DirectRunWorkspace", emptyWS))
     TS_ASSERT_THROWS_NOTHING(trans.setProperty("IncidentBeamMonitor", 1))
     TS_ASSERT_THROWS_NOTHING(trans.setProperty("TransmissionMonitor", 2))
     std::string outputWS("CalculateTransmissionTest_outputWS2");
-    TS_ASSERT_THROWS_NOTHING(
-        trans.setPropertyValue("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(trans.setPropertyValue("OutputWorkspace", outputWS))
 
     trans.execute();
     TS_ASSERT(trans.isExecuted())
 
     Mantid::API::MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = std::dynamic_pointer_cast<MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
+    TS_ASSERT_THROWS_NOTHING(output = std::dynamic_pointer_cast<MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
     TS_ASSERT_DELTA(output->y(0)[0], 5.0, 0.005)
 
     // If we reverse the monitors, we should invert the output
     TS_ASSERT_THROWS_NOTHING(trans.setProperty("IncidentBeamMonitor", 2))
     TS_ASSERT_THROWS_NOTHING(trans.setProperty("TransmissionMonitor", 1))
     trans.execute();
-    TS_ASSERT_THROWS_NOTHING(
-        output = std::dynamic_pointer_cast<MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
+    TS_ASSERT_THROWS_NOTHING(output = std::dynamic_pointer_cast<MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
     TS_ASSERT_DELTA(output->y(0)[0], 0.2, 0.005)
 
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
@@ -258,8 +228,7 @@ public:
     trans.initialize();
     trans.setPropertyValue("SampleRunWorkspace", m_transWS);
     trans.setPropertyValue("DirectRunWorkspace", m_dirWS);
-    trans.setPropertyValue("OutputWorkspace",
-                           "CalculateTransmissionTest_extra");
+    trans.setPropertyValue("OutputWorkspace", "CalculateTransmissionTest_extra");
     trans.setProperty("IncidentBeamMonitor", 1);
     trans.setProperty("TransmissionMonitor", 2);
     trans.setProperty("RebinParams", "0.5, 0.1, 14");
@@ -267,10 +236,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(trans.execute());
     TS_ASSERT(trans.isExecuted());
 
-    Mantid::API::MatrixWorkspace_const_sptr extra =
-        std::dynamic_pointer_cast<MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                "CalculateTransmissionTest_extra"));
+    Mantid::API::MatrixWorkspace_const_sptr extra = std::dynamic_pointer_cast<MatrixWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve("CalculateTransmissionTest_extra"));
 
     // these values were dervived from the debugger when exprolation was first
     // added and are believed to be correct on that basis
@@ -281,8 +248,7 @@ public:
     TS_ASSERT_DELTA(extra->y(0)[54], 0.2, 0.8059)
     TS_ASSERT_DELTA(extra->y(0).back(), 0.2, 0.6914)
 
-    Mantid::API::AnalysisDataService::Instance().remove(
-        "CalculateTransmissionTest_extra");
+    Mantid::API::AnalysisDataService::Instance().remove("CalculateTransmissionTest_extra");
   }
 
   /// fitting with log or linear should give similar results
@@ -301,19 +267,16 @@ public:
     trans.setPropertyValue("SampleRunWorkspace", m_transWS);
     trans.setPropertyValue("DirectRunWorkspace", m_dirWS);
     trans.setProperty("FitMethod", "Linear");
-    trans.setPropertyValue("OutputWorkspace",
-                           "CalculateTransmissionTest_linear");
+    trans.setPropertyValue("OutputWorkspace", "CalculateTransmissionTest_linear");
     TS_ASSERT_THROWS_NOTHING(trans.execute());
     TS_ASSERT(trans.isExecuted());
     Mantid::API::MatrixWorkspace_const_sptr logged, lineared;
     TS_ASSERT_THROWS_NOTHING(
         logged = std::dynamic_pointer_cast<MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                "CalculateTransmissionTest_log")));
+            Mantid::API::AnalysisDataService::Instance().retrieve("CalculateTransmissionTest_log")));
     TS_ASSERT_THROWS_NOTHING(
         lineared = std::dynamic_pointer_cast<MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                "CalculateTransmissionTest_linear")));
+            Mantid::API::AnalysisDataService::Instance().retrieve("CalculateTransmissionTest_linear")));
 
     auto &log = logged->y(0);
     auto &linear = lineared->y(0);
@@ -325,10 +288,8 @@ public:
       TS_ASSERT_DELTA(log[i] / linear[i], 1.0, 0.02)
     }
 
-    Mantid::API::AnalysisDataService::Instance().remove(
-        "CalculateTransmissionTest_log");
-    Mantid::API::AnalysisDataService::Instance().remove(
-        "CalculateTransmissionTest_linear");
+    Mantid::API::AnalysisDataService::Instance().remove("CalculateTransmissionTest_log");
+    Mantid::API::AnalysisDataService::Instance().remove("CalculateTransmissionTest_linear");
   }
 
   void testPolyFit() {
@@ -348,13 +309,10 @@ public:
 
     Mantid::API::MatrixWorkspace_const_sptr fitted, unfitted;
 
-    TS_ASSERT_THROWS_NOTHING(
-        fitted = std::dynamic_pointer_cast<MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
-    TS_ASSERT_THROWS_NOTHING(
-        unfitted = std::dynamic_pointer_cast<MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                outputWS + "_unfitted")));
+    TS_ASSERT_THROWS_NOTHING(fitted = std::dynamic_pointer_cast<MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
+    TS_ASSERT_THROWS_NOTHING(unfitted = std::dynamic_pointer_cast<MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS + "_unfitted")));
 
     {
       auto &fitted_y = fitted->y(0);
@@ -364,10 +322,7 @@ public:
 
       for (unsigned int i = 0; i < fitted_y.size(); ++i) {
         double x = fitted_x[i]; //(fitted_x[i] + fitted_x[i+1])* 0.5;
-        TS_ASSERT_DELTA(fitted_y[i],
-                        26.6936 - 9.31494 * x + 1.11532 * x * x -
-                            0.044502 * x * x * x,
-                        0.01);
+        TS_ASSERT_DELTA(fitted_y[i], 26.6936 - 9.31494 * x + 1.11532 * x * x - 0.044502 * x * x * x, 0.01);
       }
     }
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
@@ -391,13 +346,10 @@ public:
 
     Mantid::API::MatrixWorkspace_const_sptr fitted, unfitted;
 
-    TS_ASSERT_THROWS_NOTHING(
-        fitted = std::dynamic_pointer_cast<MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
-    TS_ASSERT_THROWS_NOTHING(
-        unfitted = std::dynamic_pointer_cast<MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                outputWS + "_unfitted")));
+    TS_ASSERT_THROWS_NOTHING(fitted = std::dynamic_pointer_cast<MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
+    TS_ASSERT_THROWS_NOTHING(unfitted = std::dynamic_pointer_cast<MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS + "_unfitted")));
 
     {
       auto &fitted_y = fitted->y(0);
@@ -407,10 +359,7 @@ public:
 
       for (unsigned int i = 0; i < fitted_y.size(); ++i) {
         double x = (fitted_x[i] + fitted_x[i + 1]) * 0.5;
-        TS_ASSERT_DELTA(fitted_y[i],
-                        26.6936 - 9.31494 * x + 1.11532 * x * x -
-                            0.044502 * x * x * x,
-                        0.01);
+        TS_ASSERT_DELTA(fitted_y[i], 26.6936 - 9.31494 * x + 1.11532 * x * x - 0.044502 * x * x * x, 0.01);
       }
     }
 
@@ -419,8 +368,7 @@ public:
   }
 
   CalculateTransmissionTest()
-      : m_dirWS("CalculateTransmissionTest_direct"),
-        m_transWS("CalculateTransmissionTest_trans") {
+      : m_dirWS("CalculateTransmissionTest_direct"), m_transWS("CalculateTransmissionTest_trans") {
     loadSampleLOQMonitors();
   }
 
@@ -461,11 +409,10 @@ public:
 
     Mantid::API::AnalysisDataService::Instance().remove(wkspName);
 
-    Mantid::API::MatrixWorkspace_sptr
-        dir = std::dynamic_pointer_cast<MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(m_dirWS)),
-        source = std::dynamic_pointer_cast<MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(m_transWS));
+    Mantid::API::MatrixWorkspace_sptr dir = std::dynamic_pointer_cast<MatrixWorkspace>(
+                                          Mantid::API::AnalysisDataService::Instance().retrieve(m_dirWS)),
+                                      source = std::dynamic_pointer_cast<MatrixWorkspace>(
+                                          Mantid::API::AnalysisDataService::Instance().retrieve(m_transWS));
 
     dir->setSharedX(0, source->sharedX(0));
     dir->setSharedX(1, source->sharedX(0));

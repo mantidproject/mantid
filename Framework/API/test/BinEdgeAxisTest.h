@@ -9,6 +9,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/VectorHelper.h"
 
 using Mantid::API::BinEdgeAxis;
 
@@ -29,8 +31,7 @@ public:
     delete copy;
   }
 
-  void
-  test_Clone_With_Only_Length_And_Workspace_Returns_BinEdgeAxis_With_New_Length() {
+  void test_Clone_With_Only_Length_And_Workspace_Returns_BinEdgeAxis_With_New_Length() {
     BinEdgeAxis ax1(10);
     Mantid::API::Axis *copy = ax1.clone(20, nullptr);
     auto *typedCopy = dynamic_cast<BinEdgeAxis *>(copy);
@@ -67,7 +68,36 @@ public:
     }
   }
 
+  void test_label() {
+    const size_t length(10); // 9 bin centres
+    BinEdgeAxis ax1(length);
+    for (size_t i = 0; i < length; ++i) {
+      ax1.setValue(i, static_cast<double>(i + 1));
+    }
+    auto edges = ax1.createBinBoundaries();
+    std::vector<double> centers;
+    centers.reserve(9);
+    Mantid::Kernel::VectorHelper::convertToBinCentre(edges, centers);
+    TS_ASSERT_EQUALS(length, edges.size());
+    for (size_t i = 0; i < length - 1; ++i) {
+      TS_ASSERT_EQUALS(ax1.label(i), std::to_string(centers[i]).substr(0, 3));
+    }
+  }
+
   // ------------------------- Failure cases -----------------------------------
+
+  void test_fail_label_out_of_range() {
+    const size_t length(10); // 9 bin centres
+    BinEdgeAxis ax1(length);
+    for (size_t i = 0; i < length; ++i) {
+      ax1.setValue(i, static_cast<double>(i + 1));
+    }
+    auto edges = ax1.createBinBoundaries();
+    TS_ASSERT_EQUALS(length, edges.size());
+    // label index can be [0,8]
+    TS_ASSERT_THROWS_EQUALS(ax1.label(9), const Mantid::Kernel::Exception::IndexError &re, std::string(re.what()),
+                            "IndexError: BinEdgeAxis: Bin index out of range. 9 :: 0 <==> 8");
+  }
 
   void test_indexOfValue_Throws_OutOfRange_For_Invalid_Value() {
     const size_t length(10); // 9 bin centres
@@ -76,7 +106,9 @@ public:
       ax1.setValue(i, static_cast<double>(i + 1));
     }
 
-    TS_ASSERT_THROWS(ax1.indexOfValue(0.9), const std::out_of_range &); // start
-    TS_ASSERT_THROWS(ax1.indexOfValue(10.1), const std::out_of_range &); // end
+    TS_ASSERT_THROWS(ax1.indexOfValue(0.9),
+                     const std::out_of_range &); // start
+    TS_ASSERT_THROWS(ax1.indexOfValue(10.1),
+                     const std::out_of_range &); // end
   }
 };

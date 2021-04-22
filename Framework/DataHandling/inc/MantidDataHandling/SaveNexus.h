@@ -65,8 +65,7 @@ private:
   /// Method to execute SNP Child Algorithm
   void runSaveNexusProcessed();
   /// sets non workspace properties for the algorithm
-  void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
-                          const std::string &propertyValue,
+  void setOtherProperties(IAlgorithm *alg, const std::string &propertyName, const std::string &propertyValue,
                           int perioidNum) override;
 
 protected:

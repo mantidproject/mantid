@@ -22,33 +22,27 @@ using namespace Mantid::API;
 
 namespace {
 MatrixWorkspace_sptr getMatrixWorkspace(const QString &name) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      name.toStdString());
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name.toStdString());
 }
 WorkspaceGroup_sptr getWorkspaceGroup(const QString &name) {
-  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-      name.toStdString());
+  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name.toStdString());
 }
 } // namespace
 
 /// Constructor.
 /// @param parent :: A parent widget.
-AddWorkspaceDialog::AddWorkspaceDialog(QWidget *parent)
-    : QDialog(parent), m_maxIndex(0) {
+AddWorkspaceDialog::AddWorkspaceDialog(QWidget *parent) : QDialog(parent), m_maxIndex(0) {
   m_uiForm.setupUi(this);
   // populate the combo box with names of eligible workspaces
   QStringList workspaceNames = availableWorkspaces();
-  connect(m_uiForm.cbWorkspaceName,
-          SIGNAL(currentIndexChanged(const QString &)), this,
+  connect(m_uiForm.cbWorkspaceName, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(workspaceNameChanged(const QString &)));
   m_uiForm.cbWorkspaceName->addItems(workspaceNames);
 
-  connect(m_uiForm.cbAllSpectra, SIGNAL(stateChanged(int)), this,
-          SLOT(selectAllSpectra(int)));
+  connect(m_uiForm.cbAllSpectra, SIGNAL(stateChanged(int)), this, SLOT(selectAllSpectra(int)));
 }
 
-std::vector<MatrixWorkspace_const_sptr>
-AddWorkspaceDialog::getWorkspaces() const {
+std::vector<MatrixWorkspace_const_sptr> AddWorkspaceDialog::getWorkspaces() const {
   auto const workspaceName = this->workspaceName().trimmed().toStdString();
   std::vector<MatrixWorkspace_const_sptr> workspaces;
 
@@ -62,13 +56,11 @@ AddWorkspaceDialog::getWorkspaces() const {
   return workspaces;
 }
 
-void AddWorkspaceDialog::addWorkspacesFromGroup(
-    std::vector<MatrixWorkspace_const_sptr> &workspaces,
-    WorkspaceGroup_const_sptr const &group) const {
+void AddWorkspaceDialog::addWorkspacesFromGroup(std::vector<MatrixWorkspace_const_sptr> &workspaces,
+                                                WorkspaceGroup_const_sptr const &group) const {
   auto const groupSize = static_cast<std::size_t>(group->getNumberOfEntries());
   for (auto i = 0u; i < groupSize; ++i) {
-    if (auto const workspace =
-            std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i))) {
+    if (auto const workspace = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i))) {
       workspaces.emplace_back(workspace);
     }
   }
@@ -136,8 +128,7 @@ void AddWorkspaceDialog::findCommonMaxIndex(const QString &wsName) {
       for (auto ws : grp->getAllItems()) {
         mws = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
         if (mws) {
-          maxIndex = std::min(maxIndex,
-                              static_cast<int>(mws->getNumberHistograms()) - 1);
+          maxIndex = std::min(maxIndex, static_cast<int>(mws->getNumberHistograms()) - 1);
         }
       }
       m_maxIndex = maxIndex < std::numeric_limits<int>::max() ? maxIndex : 0;
@@ -154,23 +145,18 @@ void AddWorkspaceDialog::accept() {
   m_wsIndices.clear();
   QString indexInput = m_uiForm.leWSIndices->text();
   if (!m_workspaceName.isEmpty() && !indexInput.isEmpty()) {
-    auto validator =
-        std::make_shared<Mantid::Kernel::ArrayBoundedValidator<int>>(
-            0, m_maxIndex);
+    auto validator = std::make_shared<Mantid::Kernel::ArrayBoundedValidator<int>>(0, m_maxIndex);
     Mantid::Kernel::ArrayProperty<int> prop("Indices", validator);
     std::string err = prop.setValue(indexInput.toStdString());
     if (err.empty()) {
       m_wsIndices = prop;
     } else {
-      QMessageBox::warning(
-          this, "Mantid - Error",
-          QString("Some of the indices are outside the allowed range [0,%1]")
-              .arg(m_maxIndex));
+      QMessageBox::warning(this, "Mantid - Error",
+                           QString("Some of the indices are outside the allowed range [0,%1]").arg(m_maxIndex));
     }
   }
   if (m_wsIndices.empty()) {
-    QMessageBox::warning(this, "Mantid - Warning",
-                         QString("No indices have been selected."));
+    QMessageBox::warning(this, "Mantid - Warning", QString("No indices have been selected."));
     return;
   }
   QDialog::accept();

@@ -26,9 +26,7 @@ class IntegrateByComponentTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static IntegrateByComponentTest *createSuite() {
-    return new IntegrateByComponentTest();
-  }
+  static IntegrateByComponentTest *createSuite() { return new IntegrateByComponentTest(); }
   static void destroySuite(IntegrateByComponentTest *suite) { delete suite; }
 
   void test_Init() {
@@ -45,18 +43,14 @@ public:
     IntegrateByComponent alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", inputWSname));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outputWSname));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LevelsUp", 0));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     Workspace2D_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = AnalysisDataService::Instance().retrieveWS<Workspace2D>(
-            outputWSname));
+    TS_ASSERT_THROWS_NOTHING(result = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname));
     TS_ASSERT(result);
     if (!result)
       return;
@@ -77,25 +71,20 @@ public:
     IntegrateByComponent alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", inputWSname));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outputWSname));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LevelsUp", 1));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     Workspace2D_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = AnalysisDataService::Instance().retrieveWS<Workspace2D>(
-            outputWSname));
+    TS_ASSERT_THROWS_NOTHING(result = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname));
     TS_ASSERT(result);
     if (!result)
       return;
     for (size_t i = 0; i < result->getNumberHistograms() / 2; i++) {
       TS_ASSERT_DELTA(result->y(i * 2)[0], result->y(i * 2 + 1)[0], 1e-10);
-      TS_ASSERT_DELTA(static_cast<double>(i) * 4 + 1, result->y(i * 2 + 1)[0],
-                      1e-10);
+      TS_ASSERT_DELTA(static_cast<double>(i) * 4 + 1, result->y(i * 2 + 1)[0], 1e-10);
     }
 
     // Remove workspace from the data service.
@@ -111,18 +100,14 @@ public:
     IntegrateByComponent alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", inputWSname));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outputWSname));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LevelsUp", 2));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     Workspace2D_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = AnalysisDataService::Instance().retrieveWS<Workspace2D>(
-            outputWSname));
+    TS_ASSERT_THROWS_NOTHING(result = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname));
     TS_ASSERT(result);
     if (!result)
       return;
@@ -130,8 +115,7 @@ public:
       TS_ASSERT_DELTA(result->y(i * 4)[0], result->y(i * 4 + 1)[0], 1e-10);
       TS_ASSERT_DELTA(result->y(i * 4)[0], result->y(i * 4 + 2)[0], 1e-10);
       TS_ASSERT_DELTA(result->y(i * 4)[0], result->y(i * 4 + 3)[0], 1e-10);
-      TS_ASSERT_DELTA(static_cast<double>(i) * 8 + 3, result->y(i * 4)[0],
-                      1e-10);
+      TS_ASSERT_DELTA(static_cast<double>(i) * 8 + 3, result->y(i * 4)[0], 1e-10);
     }
 
     // Remove workspace from the data service.
@@ -147,18 +131,14 @@ public:
     IntegrateByComponent alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", inputWSname));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outputWSname));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LevelsUp", 3));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     Workspace2D_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = AnalysisDataService::Instance().retrieveWS<Workspace2D>(
-            outputWSname));
+    TS_ASSERT_THROWS_NOTHING(result = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname));
     TS_ASSERT(result);
     if (!result)
       return;
@@ -179,18 +159,14 @@ public:
     IntegrateByComponent alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", inputWSname));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outputWSname));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LevelsUp", 15));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     Workspace2D_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = AnalysisDataService::Instance().retrieveWS<Workspace2D>(
-            outputWSname));
+    TS_ASSERT_THROWS_NOTHING(result = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname));
     TS_ASSERT(result);
     if (!result)
       return;
@@ -211,18 +187,14 @@ public:
     IntegrateByComponent alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", inputWSname));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outputWSname));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LevelsUp", 2));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     Workspace2D_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = AnalysisDataService::Instance().retrieveWS<Workspace2D>(
-            outputWSname));
+    TS_ASSERT_THROWS_NOTHING(result = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname));
     TS_ASSERT(result);
     if (!result)
       return;
@@ -242,11 +214,8 @@ public:
 private:
   void ABCtestWorkspace(const std::string &inputWSname, bool mask) {
     int nSpectra(12);
-    Workspace2D_sptr ws2D =
-        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(
-            nSpectra, 2);
-    ws2D->setInstrument(
-        ComponentCreationHelper::createTestInstrumentRectangular(3, 2, 0));
+    Workspace2D_sptr ws2D = WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(nSpectra, 2);
+    ws2D->setInstrument(ComponentCreationHelper::createTestInstrumentRectangular(3, 2, 0));
 
     auto &detectorInfo = ws2D->mutableDetectorInfo();
     for (int i = 0; i < nSpectra; i++) {

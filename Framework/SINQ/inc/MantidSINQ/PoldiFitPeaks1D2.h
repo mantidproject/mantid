@@ -23,8 +23,7 @@ namespace Poldi {
 class MANTID_SINQ_DLL RefinedRange {
 public:
   RefinedRange(const PoldiPeak_sptr &peak, double fwhmMultiples);
-  RefinedRange(double xStart, double xEnd,
-               const std::vector<PoldiPeak_sptr> &peaks);
+  RefinedRange(double xStart, double xEnd, const std::vector<PoldiPeak_sptr> &peaks);
   double getWidth() const;
 
   bool operator<(const RefinedRange &other) const;
@@ -53,8 +52,7 @@ private:
 
 using RefinedRange_sptr = std::shared_ptr<RefinedRange>;
 
-bool MANTID_SINQ_DLL operator<(const RefinedRange_sptr &lhs,
-                               const RefinedRange_sptr &rhs);
+bool MANTID_SINQ_DLL operator<(const RefinedRange_sptr &lhs, const RefinedRange_sptr &rhs);
 
 /** PoldiFitPeaks1D2 :
 
@@ -73,48 +71,36 @@ public:
   }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"PoldiFitPeaks2D"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"PoldiFitPeaks2D"}; }
   const std::string category() const override;
 
 protected:
   PoldiPeakCollection_sptr fitPeaks(const PoldiPeakCollection_sptr &peaks);
 
-  int getBestChebyshevPolynomialDegree(
-      const DataObjects::Workspace2D_sptr &dataWorkspace,
-      const RefinedRange_sptr &range);
+  int getBestChebyshevPolynomialDegree(const DataObjects::Workspace2D_sptr &dataWorkspace,
+                                       const RefinedRange_sptr &range);
 
-  PoldiPeakCollection_sptr
-  getReducedPeakCollection(const PoldiPeakCollection_sptr &peaks) const;
+  PoldiPeakCollection_sptr getReducedPeakCollection(const PoldiPeakCollection_sptr &peaks) const;
 
   bool peakIsAcceptable(const PoldiPeak_sptr &peak) const;
   void setPeakFunction(const std::string &peakFunction);
 
-  PoldiPeakCollection_sptr getInitializedPeakCollection(
-      const DataObjects::TableWorkspace_sptr &peakTable) const;
+  PoldiPeakCollection_sptr getInitializedPeakCollection(const DataObjects::TableWorkspace_sptr &peakTable) const;
 
-  std::vector<RefinedRange_sptr>
-  getRefinedRanges(const PoldiPeakCollection_sptr &peaks) const;
+  std::vector<RefinedRange_sptr> getRefinedRanges(const PoldiPeakCollection_sptr &peaks) const;
 
-  std::vector<RefinedRange_sptr>
-  getReducedRanges(const std::vector<RefinedRange_sptr> &ranges) const;
+  std::vector<RefinedRange_sptr> getReducedRanges(const std::vector<RefinedRange_sptr> &ranges) const;
 
-  API::IFunction_sptr getRangeProfile(const RefinedRange_sptr &range,
-                                      int n) const;
+  API::IFunction_sptr getRangeProfile(const RefinedRange_sptr &range, int n) const;
 
   API::IFunction_sptr getPeakProfile(const PoldiPeak_sptr &poldiPeak) const;
 
-  void
-  setValuesFromProfileFunction(const PoldiPeak_sptr &poldiPeak,
-                               const API::IFunction_sptr &fittedFunction) const;
+  void setValuesFromProfileFunction(const PoldiPeak_sptr &poldiPeak, const API::IFunction_sptr &fittedFunction) const;
 
-  double
-  getFwhmWidthRelation(const API::IPeakFunction_sptr &peakFunction) const;
+  double getFwhmWidthRelation(const API::IPeakFunction_sptr &peakFunction) const;
 
-  API::IAlgorithm_sptr
-  getFitAlgorithm(const DataObjects::Workspace2D_sptr &dataWorkspace,
-                  const RefinedRange_sptr &range, int n);
+  API::IAlgorithm_sptr getFitAlgorithm(const DataObjects::Workspace2D_sptr &dataWorkspace,
+                                       const RefinedRange_sptr &range, int n);
 
   PoldiPeakCollection_sptr m_peaks;
   std::string m_profileTemplate;

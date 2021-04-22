@@ -22,20 +22,11 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL ChopData : public API::Algorithm {
 public:
-  const std::string name() const override {
-    return "ChopData";
-  } ///< @return the algorithms name
-  const std::string category() const override {
-    return "Transforms\\Splitting";
-  } ///< @return the algorithms category
-  int version() const override {
+  const std::string name() const override { return "ChopData"; }                  ///< @return the algorithms name
+  const std::string category() const override { return "Transforms\\Splitting"; } ///< @return the algorithms category
+  int version() const override { return (1); } ///< @return version number of algorithm
 
-    return (1);
-  } ///< @return version number of algorithm
-
-  const std::vector<std::string> seeAlso() const override {
-    return {"ExtractSpectra"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ExtractSpectra"}; }
   /// Algorithm's summary
   const std::string summary() const override {
     return "Splits an input workspace into a grouped workspace, where each "

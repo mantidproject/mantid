@@ -42,20 +42,15 @@ public:
     Mantid::Geometry::Instrument_sptr inst = createInstrument();
 
     std::string testWorkspaceName = "TestApplyDiffCalWorkspace";
-    AnalysisDataService::Instance().add(testWorkspaceName,
-                                        std::make_shared<Workspace2D>());
-    auto instrumentWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            testWorkspaceName);
+    AnalysisDataService::Instance().add(testWorkspaceName, std::make_shared<Workspace2D>());
+    auto instrumentWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(testWorkspaceName);
     instrumentWS->setInstrument(inst);
 
     ApplyDiffCal appDiffCal;
     TS_ASSERT_THROWS_NOTHING(appDiffCal.initialize());
     TS_ASSERT(appDiffCal.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(
-        appDiffCal.setProperty("InstrumentWorkspace", testWorkspaceName));
-    TS_ASSERT_THROWS_NOTHING(
-        appDiffCal.setProperty("CalibrationWorkspace", calWSIn));
+    TS_ASSERT_THROWS_NOTHING(appDiffCal.setProperty("InstrumentWorkspace", testWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(appDiffCal.setProperty("CalibrationWorkspace", calWSIn));
     TS_ASSERT_THROWS_NOTHING(appDiffCal.execute(););
     TS_ASSERT(appDiffCal.isExecuted());
 
@@ -82,10 +77,8 @@ public:
     pmap->addDouble(det->getComponentID(), "extraparam", 1.23);
     TS_ASSERT_THROWS_NOTHING(appDiffCalClear.initialize());
     TS_ASSERT(appDiffCalClear.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(
-        appDiffCalClear.setProperty("InstrumentWorkspace", testWorkspaceName));
-    TS_ASSERT_THROWS_NOTHING(
-        appDiffCalClear.setProperty("ClearCalibration", true));
+    TS_ASSERT_THROWS_NOTHING(appDiffCalClear.setProperty("InstrumentWorkspace", testWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(appDiffCalClear.setProperty("ClearCalibration", true));
     TS_ASSERT_THROWS_NOTHING(appDiffCalClear.execute(););
     TS_ASSERT(appDiffCalClear.isExecuted());
 
@@ -102,8 +95,7 @@ public:
 
 private:
   Mantid::Geometry::Instrument_sptr createInstrument() {
-    auto instr =
-        ComponentCreationHelper::createTestInstrumentCylindrical(NUM_BANK);
+    auto instr = ComponentCreationHelper::createTestInstrumentCylindrical(NUM_BANK);
     auto pmap = std::make_shared<Mantid::Geometry::ParameterMap>();
     instr = std::make_shared<Mantid::Geometry::Instrument>(instr, pmap);
     return instr;

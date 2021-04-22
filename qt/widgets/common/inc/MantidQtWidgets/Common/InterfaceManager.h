@@ -56,27 +56,22 @@ class EXPORT_OPT_MANTIDQT_COMMON InterfaceManager {
 
 public:
   /// Create a new instance of the correct type of AlgorithmDialog
-  AlgorithmDialog *createDialog(
-      const std::shared_ptr<Mantid::API::IAlgorithm> &alg,
-      QWidget *parent = nullptr, bool forScript = false,
-      const QHash<QString, QString> &presetValues = (QHash<QString, QString>()),
-      const QString &optional_msg = QString(),
-      const QStringList &enabled = QStringList(),
-      const QStringList &disabled = QStringList());
+  AlgorithmDialog *createDialog(const std::shared_ptr<Mantid::API::IAlgorithm> &alg, QWidget *parent = nullptr,
+                                bool forScript = false,
+                                const QHash<QString, QString> &presetValues = (QHash<QString, QString>()),
+                                const QString &optional_msg = QString(), const QStringList &enabled = QStringList(),
+                                const QStringList &disabled = QStringList());
 
   /// Create an algorithm dialog for a given name and version
-  AlgorithmDialog *createDialogFromName(
-      const QString &algorithmName, const int version = -1,
-      QWidget *parent = nullptr, bool forScript = false,
-      const QHash<QString, QString> &presetValues = (QHash<QString, QString>()),
-      const QString &optionalMsg = QString(),
-      const QStringList &enabled = QStringList(),
-      const QStringList &disabled = QStringList());
+  AlgorithmDialog *createDialogFromName(const QString &algorithmName, const int version = -1, QWidget *parent = nullptr,
+                                        bool forScript = false,
+                                        const QHash<QString, QString> &presetValues = (QHash<QString, QString>()),
+                                        const QString &optionalMsg = QString(),
+                                        const QStringList &enabled = QStringList(),
+                                        const QStringList &disabled = QStringList());
 
   /// Create a new instance of the correct type of UserSubWindow
-  UserSubWindow *createSubWindow(const QString &interface_name,
-                                 QWidget *parent = nullptr,
-                                 bool isWindow = true);
+  UserSubWindow *createSubWindow(const QString &interface_name, QWidget *parent = nullptr, bool isWindow = true);
 
   /**
    * Function that instantiates the help window.
@@ -105,8 +100,7 @@ public:
    * @param area - folder for documentation in the interfaces directory
    * @param section - section in the html document
    **/
-  void showCustomInterfaceHelp(const QString &name,
-                               const QString &area = QString(),
+  void showCustomInterfaceHelp(const QString &name, const QString &area = QString(),
                                const QString &section = QString());
 
   /// @param url of web page to open in browser
@@ -118,8 +112,7 @@ public:
    * Registration function for the help window factory.
    * @param factory the factory instance
    */
-  static void registerHelpWindowFactory(
-      Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *factory);
+  static void registerHelpWindowFactory(Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *factory);
 
   /// The keys associated with UserSubWindow classes
   QStringList getUserSubWindowKeys() const;
@@ -133,17 +126,16 @@ private:
   void notifyExistingInterfaces(UserSubWindow *newWindow);
 
   /// Handle to the help window factory
-  static Mantid::Kernel::AbstractInstantiator<MantidHelpInterface>
-      *m_helpViewer;
+  static Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *m_helpViewer;
 };
 } // namespace API
 } // namespace MantidQt
 
 /// Used to register help window
-#define REGISTER_HELPWINDOW(TYPE)                                              \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_helpviewer(                      \
-      ((MantidQt::API::InterfaceManager::registerHelpWindowFactory(            \
-           new Mantid::Kernel::Instantiator<TYPE, MantidHelpInterface>())),    \
-       0));                                                                    \
+#define REGISTER_HELPWINDOW(TYPE)                                                                                      \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper                                                                                   \
+      register_helpviewer(((MantidQt::API::InterfaceManager::registerHelpWindowFactory(                                \
+                               new Mantid::Kernel::Instantiator<TYPE, MantidHelpInterface>())),                        \
+                           0));                                                                                        \
   }

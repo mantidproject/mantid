@@ -39,14 +39,12 @@ public:
     LoadSNSNexus ld;
     std::string outws_name = "nickr0x0r";
     ld.initialize();
-    ld.setPropertyValue("Filename",
-                        "../../../../Test/Nexus/SNS/REF_L_16055.nxs");
+    ld.setPropertyValue("Filename", "../../../../Test/Nexus/SNS/REF_L_16055.nxs");
     ld.setPropertyValue("OutputWorkspace", outws_name);
     TS_ASSERT_THROWS_NOTHING(ld.execute());
     TS_ASSERT(ld.isExecuted());
 
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outws_name);
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outws_name);
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->blocksize(), 501);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 77824);

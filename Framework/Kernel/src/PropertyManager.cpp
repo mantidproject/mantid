@@ -40,24 +40,20 @@ const std::string createKey(const std::string &name) {
 const std::string PropertyManager::INVALID_VALUES_SUFFIX = "_invalid_values";
 /// Gets the correct log name for the matching invalid values log for a given
 /// log name
-std::string
-PropertyManager::getInvalidValuesFilterLogName(const std::string &logName) {
+std::string PropertyManager::getInvalidValuesFilterLogName(const std::string &logName) {
   return logName + PropertyManager::INVALID_VALUES_SUFFIX;
 }
-std::string
-PropertyManager::getLogNameFromInvalidValuesFilter(const std::string &logName) {
+std::string PropertyManager::getLogNameFromInvalidValuesFilter(const std::string &logName) {
   std::string retVal = "";
   if (PropertyManager::isAnInvalidValuesFilterLog(logName)) {
-    retVal = logName.substr(
-        0, logName.size() - PropertyManager::INVALID_VALUES_SUFFIX.size());
+    retVal = logName.substr(0, logName.size() - PropertyManager::INVALID_VALUES_SUFFIX.size());
   }
   return retVal;
 }
 bool PropertyManager::isAnInvalidValuesFilterLog(const std::string &logName) {
   const auto ending = PropertyManager::INVALID_VALUES_SUFFIX;
   if (logName.length() >= ending.length()) {
-    return (0 == logName.compare(logName.length() - ending.length(),
-                                 ending.length(), ending));
+    return (0 == logName.compare(logName.length() - ending.length(), ending.length(), ending));
   } else {
     return false;
   }
@@ -140,8 +136,7 @@ PropertyManager &PropertyManager::operator+=(const PropertyManager &rhs) {
  * @param stop :: Absolute stop time. Any log entries at times < than this time
  *are kept.
  */
-void PropertyManager::filterByTime(const Types::Core::DateAndTime &start,
-                                   const Types::Core::DateAndTime &stop) {
+void PropertyManager::filterByTime(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop) {
   // Iterate through all properties
   PropertyMap::const_iterator it;
   for (it = this->m_properties.begin(); it != this->m_properties.end(); ++it) {
@@ -160,9 +155,8 @@ void PropertyManager::filterByTime(const Types::Core::DateAndTime &start,
  * @param splitter :: TimeSplitterType with the intervals and destinations.
  * @param outputs :: Vector of output runs.
  */
-void PropertyManager::splitByTime(
-    std::vector<SplittingInterval> &splitter,
-    std::vector<PropertyManager *> outputs) const {
+void PropertyManager::splitByTime(std::vector<SplittingInterval> &splitter,
+                                  std::vector<PropertyManager *> outputs) const {
   size_t n = outputs.size();
 
   // Iterate through all properties
@@ -177,8 +171,7 @@ void PropertyManager::splitByTime(
     std::vector<Property *> output_properties;
     for (size_t i = 0; i < n; i++) {
       if (outputs[i])
-        output_properties.emplace_back(
-            outputs[i]->getPointerToPropertyOrNull(prop->name()));
+        output_properties.emplace_back(outputs[i]->getPointerToPropertyOrNull(prop->name()));
       else
         output_properties.emplace_back(nullptr);
     }
@@ -199,41 +192,33 @@ void PropertyManager::splitByTime(
  * @param excludedFromFiltering :: A string list of properties that
  * will be excluded from filtering
  */
-void PropertyManager::filterByProperty(
-    const Kernel::TimeSeriesProperty<bool> &filter,
-    const std::vector<std::string> &excludedFromFiltering) {
+void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &filter,
+                                       const std::vector<std::string> &excludedFromFiltering) {
   for (auto &orderedProperty : m_orderedProperties) {
-    if (std::find(excludedFromFiltering.cbegin(), excludedFromFiltering.cend(),
-                  orderedProperty->name()) != excludedFromFiltering.cend()) {
+    if (std::find(excludedFromFiltering.cbegin(), excludedFromFiltering.cend(), orderedProperty->name()) !=
+        excludedFromFiltering.cend()) {
       // this log should be excluded from filtering
       continue;
     }
 
     Property *currentProp = orderedProperty;
-    if (auto doubleSeries =
-            dynamic_cast<TimeSeriesProperty<double> *>(currentProp)) {
+    if (auto doubleSeries = dynamic_cast<TimeSeriesProperty<double> *>(currentProp)) {
       // don't filter the invalid values filters
       if (PropertyManager::isAnInvalidValuesFilterLog(currentProp->name()))
         break;
       std::unique_ptr<Property> filtered(nullptr);
-      if (this->existsProperty(PropertyManager::getInvalidValuesFilterLogName(
-              currentProp->name()))) {
+      if (this->existsProperty(PropertyManager::getInvalidValuesFilterLogName(currentProp->name()))) {
         // add the filter to the passed in filters
         auto logFilter = std::make_unique<LogFilter>(filter);
-        auto filterProp =
-            getPointerToProperty(PropertyManager::getInvalidValuesFilterLogName(
-                currentProp->name()));
-        auto tspFilterProp =
-            dynamic_cast<TimeSeriesProperty<bool> *>(filterProp);
+        auto filterProp = getPointerToProperty(PropertyManager::getInvalidValuesFilterLogName(currentProp->name()));
+        auto tspFilterProp = dynamic_cast<TimeSeriesProperty<bool> *>(filterProp);
         if (!tspFilterProp)
           break;
         logFilter->addFilter(*tspFilterProp);
 
-        filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(
-            doubleSeries, *logFilter->filter());
+        filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries, *logFilter->filter());
       } else {
-        filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(
-            doubleSeries, filter);
+        filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries, filter);
       }
       orderedProperty = filtered.get();
       // Now replace in the map
@@ -250,8 +235,7 @@ void PropertyManager::filterByProperty(
  * exists
  *  @throw std::invalid_argument  if the property declared has an empty name.
  */
-void PropertyManager::declareProperty(std::unique_ptr<Property> p,
-                                      const std::string &doc) {
+void PropertyManager::declareProperty(std::unique_ptr<Property> p, const std::string &doc) {
   p->setDocumentation(doc);
 
   const std::string key = createKey(p->name());
@@ -262,8 +246,7 @@ void PropertyManager::declareProperty(std::unique_ptr<Property> p,
   } else {
     // Don't error if this is actually the same property object!
     if (existing->second != p) {
-      throw Exception::ExistsError("Property with given name already exists",
-                                   key);
+      throw Exception::ExistsError("Property with given name already exists", key);
     }
   }
 }
@@ -273,8 +256,7 @@ void PropertyManager::declareProperty(std::unique_ptr<Property> p,
  *  @param doc :: A description of the property that may be displayed to users
  *  @throw std::invalid_argument  if the property declared has an empty name.
  */
-void PropertyManager::declareOrReplaceProperty(std::unique_ptr<Property> p,
-                                               const std::string &doc) {
+void PropertyManager::declareOrReplaceProperty(std::unique_ptr<Property> p, const std::string &doc) {
   p->setDocumentation(doc);
 
   const std::string key = createKey(p->name());
@@ -282,9 +264,7 @@ void PropertyManager::declareOrReplaceProperty(std::unique_ptr<Property> p,
   if (existing != std::end(m_properties)) {
     // replace it in the same position
     auto oldPropPtr = existing->second.get();
-    auto ordereredPropPos =
-        std::find(std::begin(m_orderedProperties),
-                  std::end(m_orderedProperties), oldPropPtr);
+    auto ordereredPropPos = std::find(std::begin(m_orderedProperties), std::end(m_orderedProperties), oldPropPtr);
     // if the property exists it should be guaranteed to be in the ordered list
     // by declareProperty
     assert(ordereredPropPos != std::end(m_orderedProperties));
@@ -316,10 +296,8 @@ void PropertyManager::resetProperties() {
  *  @param createMissing :: If the property does not exist then create it
  *  @throw invalid_argument if error in parameters
  */
-void PropertyManager::setProperties(
-    const std::string &propertiesJson,
-    const std::unordered_set<std::string> &ignoreProperties,
-    bool createMissing) {
+void PropertyManager::setProperties(const std::string &propertiesJson,
+                                    const std::unordered_set<std::string> &ignoreProperties, bool createMissing) {
   setProperties(propertiesJson, this, ignoreProperties, createMissing);
 }
 //-----------------------------------------------------------------------------------------------
@@ -336,16 +314,13 @@ void PropertyManager::setProperties(
  *  @param createMissing :: If the property does not exist then create it
  *  @throw invalid_argument if error in parameters
  */
-void PropertyManager::setProperties(
-    const std::string &propertiesJson, IPropertyManager *targetPropertyManager,
-    const std::unordered_set<std::string> &ignoreProperties,
-    bool createMissing) {
+void PropertyManager::setProperties(const std::string &propertiesJson, IPropertyManager *targetPropertyManager,
+                                    const std::unordered_set<std::string> &ignoreProperties, bool createMissing) {
   ::Json::Reader reader;
   ::Json::Value jsonValue;
 
   if (reader.parse(propertiesJson, jsonValue)) {
-    setProperties(jsonValue, targetPropertyManager, ignoreProperties,
-                  createMissing);
+    setProperties(jsonValue, targetPropertyManager, ignoreProperties, createMissing);
   } else {
     throw std::invalid_argument("propertiesArray was not valid json");
   }
@@ -358,10 +333,8 @@ void PropertyManager::setProperties(
  *      from the propertiesArray
  *  @param createMissing :: If the property does not exist then create it
  */
-void PropertyManager::setProperties(
-    const ::Json::Value &jsonValue,
-    const std::unordered_set<std::string> &ignoreProperties,
-    bool createMissing) {
+void PropertyManager::setProperties(const ::Json::Value &jsonValue,
+                                    const std::unordered_set<std::string> &ignoreProperties, bool createMissing) {
   setProperties(jsonValue, this, ignoreProperties, createMissing);
 }
 
@@ -375,10 +348,8 @@ void PropertyManager::setProperties(
  *      most of the time this will be *this
  *  @param createMissing :: If the property does not exist then create it
  */
-void PropertyManager::setProperties(
-    const ::Json::Value &jsonValue, IPropertyManager *targetPropertyManager,
-    const std::unordered_set<std::string> &ignoreProperties,
-    bool createMissing) {
+void PropertyManager::setProperties(const ::Json::Value &jsonValue, IPropertyManager *targetPropertyManager,
+                                    const std::unordered_set<std::string> &ignoreProperties, bool createMissing) {
   if (jsonValue.type() != ::Json::ValueType::objectValue)
     return;
 
@@ -393,14 +364,12 @@ void PropertyManager::setProperties(
   const auto memberNames = jsonValue.getMemberNames();
   for (::Json::ArrayIndex i = 0; i < jsonValue.size(); i++) {
     const auto &propName = memberNames[i];
-    if ((propFilename == propName) ||
-        (ignoreProperties.find(propName) != ignoreProperties.end())) {
+    if ((propFilename == propName) || (ignoreProperties.find(propName) != ignoreProperties.end())) {
       continue;
     }
     const ::Json::Value &propValue = jsonValue[propName];
     if (createMissing) {
-      targetPropertyManager->declareOrReplaceProperty(
-          decodeAsProperty(propName, propValue));
+      targetPropertyManager->declareOrReplaceProperty(decodeAsProperty(propName, propValue));
     } else {
       targetPropertyManager->setPropertyValueFromJson(propName, propValue);
     }
@@ -413,9 +382,8 @@ void PropertyManager::setProperties(
   @param ignoreProperties :: A set of names of any properties NOT to set
   from the propertiesArray
 */
-void PropertyManager::setPropertiesWithString(
-    const std::string &propertiesString,
-    const std::unordered_set<std::string> &ignoreProperties) {
+void PropertyManager::setPropertiesWithString(const std::string &propertiesString,
+                                              const std::unordered_set<std::string> &ignoreProperties) {
   if (propertiesString.empty()) {
     return;
   }
@@ -435,18 +403,15 @@ void PropertyManager::setPropertiesWithString(
   @param ignoreProperties :: A set of names of any properties NOT to set
   from the propertiesArray
 */
-void PropertyManager::setPropertiesWithJSONString(
-    const std::string &propertiesString,
-    const std::unordered_set<std::string> &ignoreProperties) {
+void PropertyManager::setPropertiesWithJSONString(const std::string &propertiesString,
+                                                  const std::unordered_set<std::string> &ignoreProperties) {
   ::Json::Reader reader;
   ::Json::Value propertyJson;
 
   if (reader.parse(propertiesString, propertyJson)) {
     setProperties(propertyJson, ignoreProperties);
   } else {
-    throw std::invalid_argument(
-        "Could not parse JSON string when trying to set a property from: " +
-        propertiesString);
+    throw std::invalid_argument("Could not parse JSON string when trying to set a property from: " + propertiesString);
   }
 }
 
@@ -456,16 +421,14 @@ void PropertyManager::setPropertiesWithJSONString(
   @param ignoreProperties :: A set of names of any properties NOT to set
   from the propertiesArray
 */
-void PropertyManager::setPropertiesWithSimpleString(
-    const std::string &propertiesString,
-    const std::unordered_set<std::string> &ignoreProperties) {
+void PropertyManager::setPropertiesWithSimpleString(const std::string &propertiesString,
+                                                    const std::unordered_set<std::string> &ignoreProperties) {
   ::Json::Value propertyJson;
   // Split up comma-separated properties
   using tokenizer = Mantid::Kernel::StringTokenizer;
 
   boost::char_separator<char> sep(";");
-  tokenizer propPairs(propertiesString, ";",
-                      Mantid::Kernel::StringTokenizer::TOK_TRIM);
+  tokenizer propPairs(propertiesString, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   // Iterate over the properties
   for (const auto &pair : propPairs) {
     size_t n = pair.find('=');
@@ -499,14 +462,13 @@ void PropertyManager::setPropertiesWithSimpleString(
  *  @throw std::invalid_argument If the value is not valid for the property
  * given
  */
-void PropertyManager::setPropertyValue(const std::string &name,
-                                       const std::string &value) {
+void PropertyManager::setPropertyValue(const std::string &name, const std::string &value) {
   auto *prop = getPointerToProperty(name);
   auto helpMsg = prop->setValue(value);
   afterPropertySet(name);
   if (!helpMsg.empty()) {
-    helpMsg = "Invalid value for property " + prop->name() + " (" +
-              prop->type() + ") from string \"" + value + "\": " + helpMsg;
+    helpMsg = "Invalid value for property " + prop->name() + " (" + prop->type() + ") from string \"" + value +
+              "\": " + helpMsg;
     throw std::invalid_argument(helpMsg);
   }
 }
@@ -518,15 +480,13 @@ void PropertyManager::setPropertyValue(const std::string &name,
  *  @throw std::invalid_argument If the value is not valid for the property
  * given
  */
-void PropertyManager::setPropertyValueFromJson(const std::string &name,
-                                               const Json::Value &value) {
+void PropertyManager::setPropertyValueFromJson(const std::string &name, const Json::Value &value) {
   auto *prop = getPointerToProperty(name);
   auto helpMsg = prop->setValueFromJson(value);
   afterPropertySet(name);
   if (!helpMsg.empty()) {
-    helpMsg = "Invalid value for property " + prop->name() + " (" +
-              prop->type() + ") from Json \"" + value.toStyledString() +
-              "\": " + helpMsg;
+    helpMsg = "Invalid value for property " + prop->name() + " (" + prop->type() + ") from Json \"" +
+              value.toStyledString() + "\": " + helpMsg;
     throw std::invalid_argument(helpMsg);
   }
 }
@@ -540,15 +500,12 @@ void PropertyManager::setPropertyValueFromJson(const std::string &name,
  *  @throw std::invalid_argument If the value is not valid for the property
  * given
  */
-void PropertyManager::setPropertyOrdinal(const int &index,
-                                         const std::string &value) {
-  Property *p = getPointerToPropertyOrdinal(
-      index); // throws runtime_error if property not in vector
+void PropertyManager::setPropertyOrdinal(const int &index, const std::string &value) {
+  Property *p = getPointerToPropertyOrdinal(index); // throws runtime_error if property not in vector
   std::string errorMsg = p->setValue(value);
   this->afterPropertySet(p->name());
   if (!errorMsg.empty()) {
-    errorMsg = "Invalid value for property " + p->name() + " (" + p->type() +
-               ") \"" + value + "\" : " + errorMsg;
+    errorMsg = "Invalid value for property " + p->name() + " (" + p->type() + ") \"" + value + "\" : " + errorMsg;
     throw std::invalid_argument(errorMsg);
   }
 }
@@ -576,8 +533,7 @@ bool PropertyManager::validateProperties() const {
     std::string error = property.second->isValid();
     //"" means no error
     if (!error.empty()) {
-      g_log.error() << "Property \"" << property.first
-                    << "\" is not set to a valid value: \"" << error << "\".\n";
+      g_log.error() << "Property \"" << property.first << "\" is not set to a valid value: \"" << error << "\".\n";
       allValid = false;
     }
   }
@@ -589,9 +545,7 @@ bool PropertyManager::validateProperties() const {
  * Count the number of properties under management
  * @returns The number of properties being managed
  */
-size_t PropertyManager::propertyCount() const {
-  return m_orderedProperties.size();
-}
+size_t PropertyManager::propertyCount() const { return m_orderedProperties.size(); }
 
 //-----------------------------------------------------------------------------------------------
 /** Get the value of a property as a string
@@ -600,8 +554,7 @@ size_t PropertyManager::propertyCount() const {
  *  @throw Exception::NotFoundError if the named property is unknown
  */
 std::string PropertyManager::getPropertyValue(const std::string &name) const {
-  Property *p = getPointerToProperty(
-      name); // throws NotFoundError if property not in vector
+  Property *p = getPointerToProperty(name); // throws NotFoundError if property not in vector
   return p->value();
 }
 
@@ -638,8 +591,7 @@ std::string PropertyManager::asString(bool withDefaultValues) const {
     if (p->getSettings()) {
       is_enabled = p->getSettings()->isEnabled(this);
     }
-    if (p->isValueSerializable() && (withDefaultValues || !p->isDefault()) &&
-        is_enabled) {
+    if (p->isValueSerializable() && (withDefaultValues || !p->isDefault()) && is_enabled) {
       jsonMap[p->name()] = p->valueAsJson();
     }
   }
@@ -659,9 +611,7 @@ bool PropertyManager::operator==(const PropertyManager &other) const {
   return true;
 }
 
-bool PropertyManager::operator!=(const PropertyManager &other) const {
-  return !this->operator==(other);
-}
+bool PropertyManager::operator!=(const PropertyManager &other) const { return !this->operator==(other); }
 
 //-----------------------------------------------------------------------------------------------
 /** Get a property by name
@@ -683,8 +633,7 @@ Property *PropertyManager::getPointerToProperty(const std::string &name) const {
  *  @param name :: The name of the property (case insensitive)
  *  @return A pointer to the named property; NULL if not found
  */
-Property *
-PropertyManager::getPointerToPropertyOrNull(const std::string &name) const {
+Property *PropertyManager::getPointerToPropertyOrNull(const std::string &name) const {
   const std::string key = createKey(name);
   auto it = m_properties.find(key);
   if (it != m_properties.end()) {
@@ -712,9 +661,7 @@ Property *PropertyManager::getPointerToPropertyOrdinal(const int &index) const {
  *  The properties will be stored in the order that they were declared.
  *  @return A vector holding pointers to the list of properties
  */
-const std::vector<Property *> &PropertyManager::getProperties() const {
-  return m_orderedProperties;
-}
+const std::vector<Property *> &PropertyManager::getProperties() const { return m_orderedProperties; }
 
 //-----------------------------------------------------------------------------------------------
 /** Get the value of a property. Allows you to assign directly to a variable of
@@ -733,8 +680,7 @@ const std::vector<Property *> &PropertyManager::getProperties() const {
  *different type
  *  @throw Exception::NotFoundError If the property requested does not exist
  */
-PropertyManager::TypedValue
-PropertyManager::getProperty(const std::string &name) const {
+PropertyManager::TypedValue PropertyManager::getProperty(const std::string &name) const {
   return TypedValue(*this, name);
 }
 
@@ -743,8 +689,7 @@ PropertyManager::getProperty(const std::string &name) const {
  *  @param name ::  name of the property to be removed.
  *  @param delproperty :: if true, delete the named property
  */
-void PropertyManager::removeProperty(const std::string &name,
-                                     const bool delproperty) {
+void PropertyManager::removeProperty(const std::string &name, const bool delproperty) {
   if (existsProperty(name)) {
     // remove it
     Property *prop = getPointerToProperty(name);
@@ -772,9 +717,7 @@ void PropertyManager::clear() {
  * @param propMgr A reference to a
  * @return A new Json::Value of type objectValue
  */
-Json::Value encodeAsJson(const PropertyManager &propMgr) {
-  return propMgr.asJson(true);
-}
+Json::Value encodeAsJson(const PropertyManager &propMgr) { return propMgr.asJson(true); }
 
 } // namespace Kernel
 } // namespace Mantid

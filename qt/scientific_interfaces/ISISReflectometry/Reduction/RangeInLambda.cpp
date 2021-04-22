@@ -37,9 +37,7 @@ bool operator==(RangeInLambda const &lhs, RangeInLambda const &rhs) {
   return lhs.min() == rhs.min() && lhs.max() == rhs.max();
 }
 
-bool operator!=(RangeInLambda const &lhs, RangeInLambda const &rhs) {
-  return !(lhs == rhs);
-}
+bool operator!=(RangeInLambda const &lhs, RangeInLambda const &rhs) { return !(lhs == rhs); }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

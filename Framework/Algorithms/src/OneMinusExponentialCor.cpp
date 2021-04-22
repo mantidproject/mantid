@@ -19,8 +19,7 @@ namespace Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(OneMinusExponentialCor)
 
-OneMinusExponentialCor::OneMinusExponentialCor()
-    : UnaryOperation(), m_c(0.), m_c1(0.), m_divide(false) {}
+OneMinusExponentialCor::OneMinusExponentialCor() : UnaryOperation(), m_c(0.), m_c1(0.), m_divide(false) {}
 
 void OneMinusExponentialCor::defineProperties() {
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
@@ -37,8 +36,7 @@ void OneMinusExponentialCor::defineProperties() {
   std::vector<std::string> operations(2);
   operations[0] = "Multiply";
   operations[1] = "Divide";
-  declareProperty("Operation", "Divide",
-                  std::make_shared<Kernel::StringListValidator>(operations),
+  declareProperty("Operation", "Divide", std::make_shared<Kernel::StringListValidator>(operations),
                   "Whether to divide (the default) or multiply the data by the "
                   "correction function.");
 }
@@ -50,10 +48,8 @@ void OneMinusExponentialCor::retrieveProperties() {
   m_divide = op == "Divide";
 }
 
-void OneMinusExponentialCor::performUnaryOperation(const double XIn,
-                                                   const double YIn,
-                                                   const double EIn,
-                                                   double &YOut, double &EOut) {
+void OneMinusExponentialCor::performUnaryOperation(const double XIn, const double YIn, const double EIn, double &YOut,
+                                                   double &EOut) {
   double factor = m_c1 * (1.0 - exp(-1.0 * m_c * XIn));
   if (m_divide)
     factor = 1.0 / factor;

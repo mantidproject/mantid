@@ -26,21 +26,14 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void do_test(const std::string &InputWorkspace,
-               const std::string &MaskWorkspace,
-               const std::string &ValueWorkspace, const std::string &Value,
-               const std::string &OutputWorkspace, double expectedSignal,
+  void do_test(const std::string &InputWorkspace, const std::string &MaskWorkspace, const std::string &ValueWorkspace,
+               const std::string &Value, const std::string &OutputWorkspace, double expectedSignal,
                double expectedError, bool succeeds = true) {
-    MDHistoWorkspace_sptr histo_A =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0);
-    MDHistoWorkspace_sptr histo_B =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 3.0);
-    MDHistoWorkspace_sptr histo_diff =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 4, 10.0, 2.0);
-    MDHistoWorkspace_sptr mask_0 =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(0.0, 2, 5, 10.0, 0.0);
-    MDHistoWorkspace_sptr mask_1 =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 5, 10.0, 0.0);
+    MDHistoWorkspace_sptr histo_A = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0);
+    MDHistoWorkspace_sptr histo_B = MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 3.0);
+    MDHistoWorkspace_sptr histo_diff = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 4, 10.0, 2.0);
+    MDHistoWorkspace_sptr mask_0 = MDEventsTestHelper::makeFakeMDHistoWorkspace(0.0, 2, 5, 10.0, 0.0);
+    MDHistoWorkspace_sptr mask_1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 5, 10.0, 0.0);
     AnalysisDataService::Instance().addOrReplace("histo_A", histo_A);
     AnalysisDataService::Instance().addOrReplace("histo_B", histo_B);
     AnalysisDataService::Instance().addOrReplace("histo_diff", histo_diff);
@@ -50,25 +43,19 @@ public:
     SetMDUsingMask alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", InputWorkspace));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("MaskWorkspace", MaskWorkspace));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ValueWorkspace", ValueWorkspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", InputWorkspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MaskWorkspace", MaskWorkspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ValueWorkspace", ValueWorkspace));
     if (!Value.empty())
       TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Value", Value));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", OutputWorkspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", OutputWorkspace));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
 
     if (succeeds) {
       TS_ASSERT(alg.isExecuted());
       // Retrieve the workspace from data service.
       IMDHistoWorkspace_sptr ws;
-      TS_ASSERT_THROWS_NOTHING(
-          ws = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
-              OutputWorkspace));
+      TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(OutputWorkspace));
       TS_ASSERT(ws);
       if (!ws)
         return;

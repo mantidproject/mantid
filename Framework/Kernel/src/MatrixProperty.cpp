@@ -21,8 +21,7 @@ namespace Kernel {
  * @param direction :: The direction
  */
 template <typename TYPE>
-MatrixProperty<TYPE>::MatrixProperty(const std::string &propName,
-                                     const IValidator_sptr &validator,
+MatrixProperty<TYPE>::MatrixProperty(const std::string &propName, const IValidator_sptr &validator,
                                      unsigned int direction)
     : PropertyWithValue<HeldType>(propName, HeldType(), validator, direction) {}
 
@@ -31,8 +30,7 @@ MatrixProperty<TYPE>::MatrixProperty(const std::string &propName,
  * @param rhs :: Contruct this object from rhs
  */
 template <typename TYPE>
-MatrixProperty<TYPE>::MatrixProperty(const MatrixProperty &rhs)
-    : PropertyWithValue<HeldType>(rhs) {}
+MatrixProperty<TYPE>::MatrixProperty(const MatrixProperty &rhs) : PropertyWithValue<HeldType>(rhs) {}
 
 /// Destructor
 template <typename TYPE> MatrixProperty<TYPE>::~MatrixProperty() {}

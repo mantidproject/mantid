@@ -11,8 +11,7 @@ namespace Mantid {
 namespace NexusGeometry {
 
 // Utility for checking hdf5 library version
-uint32_t Hdf5Version::makeHdf5VersionNumber(uint32_t maj, uint32_t min,
-                                            uint32_t relnum) {
+uint32_t Hdf5Version::makeHdf5VersionNumber(uint32_t maj, uint32_t min, uint32_t relnum) {
   return 100000 * maj + 1000 * min + relnum;
 }
 

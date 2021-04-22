@@ -13,13 +13,9 @@ namespace DataHandling {
 // -------------------------------------------------------------
 // DataBlock Generator
 // -------------------------------------------------------------
-DataBlockGenerator::DataBlockGenerator(
-    const std::vector<SpectrumPair> &intervals)
-    : m_intervals(intervals) {
+DataBlockGenerator::DataBlockGenerator(const std::vector<SpectrumPair> &intervals) : m_intervals(intervals) {
   // We need to sort the data items.
-  auto comparison = [](const SpectrumPair &el1, const SpectrumPair &el2) {
-    return el1.first < el2.first;
-  };
+  auto comparison = [](const SpectrumPair &el1, const SpectrumPair &el2) { return el1.first < el2.first; };
   std::sort(m_intervals.begin(), m_intervals.end(), comparison);
 
   // If there is an interval then set the current index to the first interval in
@@ -47,9 +43,8 @@ DataBlockGenerator &DataBlockGenerator::operator++() {
     // We need to check if this index is still in the current interval
     // If not we need to increment the interval or set the interval index
     // to a final state
-    auto isinCurrentInterval =
-        m_intervals[m_currentIntervalIndex.get()].first <= m_currentSpectrum &&
-        m_currentSpectrum <= m_intervals[m_currentIntervalIndex.get()].second;
+    auto isinCurrentInterval = m_intervals[m_currentIntervalIndex.get()].first <= m_currentSpectrum &&
+                               m_currentSpectrum <= m_intervals[m_currentIntervalIndex.get()].second;
 
     if (!isinCurrentInterval) {
       ++(*m_currentIntervalIndex);

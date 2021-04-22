@@ -39,16 +39,13 @@ class ImageInfoPresenterTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ImageInfoPresenterTest *createSuite() {
-    return new ImageInfoPresenterTest();
-  }
+  static ImageInfoPresenterTest *createSuite() { return new ImageInfoPresenterTest(); }
   static void destroySuite(ImageInfoPresenterTest *suite) { delete suite; }
 
   void test_cursorAt_calls_view_showInfo() {
     auto mockView = std::make_unique<StrictMock<MockImageInfoView>>();
     ImageInfoPresenter presenter(mockView.get());
-    presenter.setWorkspace(
-        WorkspaceCreationHelper::create2DWorkspace123(10, 10));
+    presenter.setWorkspace(WorkspaceCreationHelper::create2DWorkspace123(10, 10));
 
     EXPECT_CALL(*mockView, showInfo(_)).Times(1);
     presenter.cursorAt(1, 2, 1);

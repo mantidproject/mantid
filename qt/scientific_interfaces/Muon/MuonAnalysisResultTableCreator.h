@@ -23,75 +23,56 @@ using LogValuesMap = QMap<QString, QMap<QString, QVariant>>;
 class MANTIDQT_MUONINTERFACE_DLL MuonAnalysisResultTableCreator {
 public:
   /// Constructor
-  MuonAnalysisResultTableCreator(const QStringList &itemsSelected,
-                                 const QStringList &logsSelected,
-                                 const LogValuesMap *logValues,
-                                 bool multipleLabels = false);
+  MuonAnalysisResultTableCreator(const QStringList &itemsSelected, const QStringList &logsSelected,
+                                 const LogValuesMap *logValues, bool multipleLabels = false);
 
   /// Create results table
   Mantid::API::ITableWorkspace_sptr createTable() const;
 
 protected:
   /// Check if fit tables have same parameters
-  bool haveSameParameters(
-      const std::vector<Mantid::API::ITableWorkspace_sptr> &tables) const;
+  bool haveSameParameters(const std::vector<Mantid::API::ITableWorkspace_sptr> &tables) const;
   /// Remove error columns for fixed parameters from a results table
-  void removeFixedParameterErrors(
-      const Mantid::API::ITableWorkspace_sptr &table) const;
+  void removeFixedParameterErrors(const Mantid::API::ITableWorkspace_sptr &table) const;
 
 private:
   /// Get map of label to workspaces
   std::map<QString, std::vector<std::string>> getWorkspacesByLabel() const;
   /// Get parameter table from workspace/label name
-  Mantid::API::ITableWorkspace_sptr
-  getFitParametersTable(const QString &name) const;
+  Mantid::API::ITableWorkspace_sptr getFitParametersTable(const QString &name) const;
   /// Get parameter table from workspace name
-  Mantid::API::ITableWorkspace_sptr
-  tableFromWorkspace(const std::string &wsName) const;
+  Mantid::API::ITableWorkspace_sptr tableFromWorkspace(const std::string &wsName) const;
   /// Get parameter table from label name
-  Mantid::API::ITableWorkspace_sptr
-  tableFromLabel(const std::string &labelName) const;
+  Mantid::API::ITableWorkspace_sptr tableFromLabel(const std::string &labelName) const;
   /// Check workspaces have same parameters
   void checkSameFitModel() const;
   /// Check labels have same number of runs
-  void checkSameNumberOfDatasets(
-      const std::map<QString, std::vector<std::string>> &workspacesByLabel)
-      const;
+  void checkSameNumberOfDatasets(const std::map<QString, std::vector<std::string>> &workspacesByLabel) const;
   /// Get start time of first run
-  int64_t getFirstStartTimeNanosec(
-      const std::map<QString, std::vector<std::string>> &workspacesByLabel)
-      const;
+  int64_t getFirstStartTimeNanosec(const std::map<QString, std::vector<std::string>> &workspacesByLabel) const;
   /// Get parameters by label
-  QMap<QString, WSParameterList> getParametersByLabel(
-      const std::map<QString, std::vector<std::string>> &workspacesByLabel)
-      const;
+  QMap<QString, WSParameterList>
+  getParametersByLabel(const std::map<QString, std::vector<std::string>> &workspacesByLabel) const;
   /// Add parameter and error columns to table
-  QStringList addParameterColumns(
-      Mantid::API::ITableWorkspace_sptr &table,
-      const QMap<QString, WSParameterList> &paramsByLabel) const;
+  QStringList addParameterColumns(Mantid::API::ITableWorkspace_sptr &table,
+                                  const QMap<QString, WSParameterList> &paramsByLabel) const;
   /// Finds if a parameter in a fit was global
-  bool isGlobal(const QString &param,
-                const QMap<QString, WSParameterList> &paramList) const;
+  bool isGlobal(const QString &param, const QMap<QString, WSParameterList> &paramList) const;
   bool isGlobal(const QString &param, const WSParameterList &paramList) const;
   /// Write data to table
-  void writeData(Mantid::API::ITableWorkspace_sptr &table,
-                 const QMap<QString, WSParameterList> &paramsByLabel,
+  void writeData(Mantid::API::ITableWorkspace_sptr &table, const QMap<QString, WSParameterList> &paramsByLabel,
                  const QStringList &paramsToDisplay) const;
   /// Write data to table for single fit
-  void
-  writeDataForSingleFit(Mantid::API::ITableWorkspace_sptr &table,
-                        const QMap<QString, WSParameterList> &paramsByLabel,
-                        const QStringList &paramsToDisplay) const;
+  void writeDataForSingleFit(Mantid::API::ITableWorkspace_sptr &table,
+                             const QMap<QString, WSParameterList> &paramsByLabel,
+                             const QStringList &paramsToDisplay) const;
   /// Write data to table for multiple fits
-  void
-  writeDataForMultipleFits(Mantid::API::ITableWorkspace_sptr &table,
-                           const QMap<QString, WSParameterList> &paramsByLabel,
-                           const QStringList &paramsToDisplay) const;
+  void writeDataForMultipleFits(Mantid::API::ITableWorkspace_sptr &table,
+                                const QMap<QString, WSParameterList> &paramsByLabel,
+                                const QStringList &paramsToDisplay) const;
 
-  void
-  addColumnToResultsTable(Mantid::API::ITableWorkspace_sptr &table,
-                          const QMap<QString, WSParameterList> &paramsByLabel,
-                          const QString &log) const;
+  void addColumnToResultsTable(Mantid::API::ITableWorkspace_sptr &table,
+                               const QMap<QString, WSParameterList> &paramsByLabel, const QString &log) const;
 
   /// Items selected by user (fitted workspaces or fit labels)
   const QStringList m_items;

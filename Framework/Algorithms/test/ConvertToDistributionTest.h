@@ -18,16 +18,12 @@ using Mantid::Algorithms::ConvertToDistribution;
 
 class TestConvertToDistribution : public ConvertToDistribution {
 public:
-  std::map<std::string, std::string> wrapValidateInputs() {
-    return this->validateInputs();
-  }
+  std::map<std::string, std::string> wrapValidateInputs() { return this->validateInputs(); }
 };
 
 class ConvertToDistributionTest : public CxxTest::TestSuite {
 public:
-  static ConvertToDistributionTest *createSuite() {
-    return new ConvertToDistributionTest();
-  }
+  static ConvertToDistributionTest *createSuite() { return new ConvertToDistributionTest(); }
   static void destroySuite(ConvertToDistributionTest *suite) { delete suite; }
 
   void testName() {
@@ -89,7 +85,5 @@ public:
   }
 
 private:
-  Workspace_sptr createTestWorkspace() {
-    return WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 0, 0.5);
-  }
+  Workspace_sptr createTestWorkspace() { return WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 0, 0.5); }
 };

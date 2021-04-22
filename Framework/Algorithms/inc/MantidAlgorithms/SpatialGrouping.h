@@ -46,9 +46,7 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"GroupDetectors"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"GroupDetectors"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "Transforms\\Grouping"; }
 
@@ -59,15 +57,12 @@ private:
   void exec() override;
 
   /// expand our search out to the next neighbours along
-  bool expandNet(std::map<specnum_t, Mantid::Kernel::V3D> &nearest,
-                 specnum_t spec, const size_t noNeighbours,
+  bool expandNet(std::map<specnum_t, Mantid::Kernel::V3D> &nearest, specnum_t spec, const size_t noNeighbours,
                  const Mantid::Geometry::BoundingBox &bbox);
   /// sort by distance
-  void sortByDistance(std::map<specnum_t, Mantid::Kernel::V3D> &nearest,
-                      const size_t noNeighbours);
+  void sortByDistance(std::map<specnum_t, Mantid::Kernel::V3D> &nearest, const size_t noNeighbours);
   /// create expanded bounding box for our purposes
-  void createBox(const Geometry::IDetector &det, Geometry::BoundingBox &bndbox,
-                 double searchDist);
+  void createBox(const Geometry::IDetector &det, Geometry::BoundingBox &bndbox, double searchDist);
   /// grow dimensions of our bounding box to the factor
   void growBox(double &min, double &max, const double factor);
 

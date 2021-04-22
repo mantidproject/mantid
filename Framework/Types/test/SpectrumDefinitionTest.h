@@ -16,9 +16,7 @@ class SpectrumDefinitionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SpectrumDefinitionTest *createSuite() {
-    return new SpectrumDefinitionTest();
-  }
+  static SpectrumDefinitionTest *createSuite() { return new SpectrumDefinitionTest(); }
   static void destroySuite(SpectrumDefinitionTest *suite) { delete suite; }
 
   void test_default_construct() {

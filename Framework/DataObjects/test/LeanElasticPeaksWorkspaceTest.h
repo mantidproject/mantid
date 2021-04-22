@@ -28,19 +28,14 @@ class LeanElasticPeaksWorkspaceTest : public CxxTest::TestSuite {
 private:
   class TestableLeanElasticPeaksWorkspace : public LeanElasticPeaksWorkspace {
   public:
-    TestableLeanElasticPeaksWorkspace(const LeanElasticPeaksWorkspace &other)
-        : LeanElasticPeaksWorkspace(other) {}
+    TestableLeanElasticPeaksWorkspace(const LeanElasticPeaksWorkspace &other) : LeanElasticPeaksWorkspace(other) {}
   };
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LeanElasticPeaksWorkspaceTest *createSuite() {
-    return new LeanElasticPeaksWorkspaceTest();
-  }
-  static void destroySuite(LeanElasticPeaksWorkspaceTest *suite) {
-    delete suite;
-  }
+  static LeanElasticPeaksWorkspaceTest *createSuite() { return new LeanElasticPeaksWorkspaceTest(); }
+  static void destroySuite(LeanElasticPeaksWorkspaceTest *suite) { delete suite; }
 
   void test_defaultConstructor() {
     auto pw = std::make_shared<LeanElasticPeaksWorkspace>();
@@ -51,6 +46,23 @@ public:
     TS_ASSERT_EQUALS(pw->rowCount(), 1);
     TS_ASSERT_EQUALS(pw->getNumberPeaks(), 1);
     TS_ASSERT_DELTA(pw->getPeak(0).getWavelength(), 3.0, 1e-9);
+
+    // check column printing
+    std::ostringstream s;
+    for (int n = 0; n < 14; n++) {
+      pw->getColumn(n)->print(0, s);
+      s << " ";
+    }
+    TS_ASSERT_EQUALS(s.str(), "0 0.00 0.00 0.00 3 9.1 6.3 0 0 0 0 [1,0,0] [1,0,0] 0 ");
+
+    // check some cell values
+    TS_ASSERT_EQUALS(pw->cell<int>(0, 0), 0);
+    TS_ASSERT_EQUALS(pw->cell<double>(0, 1), 0);
+    TS_ASSERT_EQUALS(pw->cell<double>(0, 2), 0);
+    TS_ASSERT_EQUALS(pw->cell<double>(0, 3), 0);
+    TS_ASSERT_EQUALS(pw->cell<double>(0, 4), 3);
+    TS_ASSERT_DELTA(pw->cell<double>(0, 5), 9.0893558317, 1e-7);
+    TS_ASSERT_DELTA(pw->cell<double>(0, 6), 6.2831853017, 1e-7);
   }
 
   void test_copyConstructor() {
@@ -84,8 +96,7 @@ public:
     pw->mutableRun().setGoniometer(goniometer, false);
 
     // cannot create peak using q-lab
-    TS_ASSERT_THROWS(pw->createPeak(V3D(1, 1, 0)),
-                     const Exception::NotImplementedError &)
+    TS_ASSERT_THROWS(pw->createPeak(V3D(1, 1, 0)), const Exception::NotImplementedError &)
 
     auto peak = pw->createPeakQSample(V3D(1, 1, 0));
 
@@ -105,8 +116,7 @@ public:
     goniometer.pushAxis("axis1", 0, 1, 0);
     goniometer.setRotationAngle(0, 90);
 
-    pw->mutableSample().setOrientedLattice(
-        std::make_unique<OrientedLattice>(5, 5, 5, 90, 90, 90));
+    pw->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>(5, 5, 5, 90, 90, 90));
     pw->mutableRun().setGoniometer(goniometer, false);
     auto peak = pw->createPeakHKL(V3D(1, 0, 0));
 
@@ -129,12 +139,10 @@ public:
     goniometer.pushAxis("axis1", 0, 1, 0);
     goniometer.setRotationAngle(0, 90);
 
-    pw->mutableSample().setOrientedLattice(
-        std::make_unique<OrientedLattice>(5, 5, 5, 90, 90, 90));
+    pw->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>(5, 5, 5, 90, 90, 90));
     pw->mutableRun().setGoniometer(goniometer, false);
 
-    TS_ASSERT_THROWS(pw->addPeak(V3D(1, 0, 0), Mantid::Kernel::QLab),
-                     const Exception::NotImplementedError &)
+    TS_ASSERT_THROWS(pw->addPeak(V3D(1, 0, 0), Mantid::Kernel::QLab), const Exception::NotImplementedError &)
 
     pw->addPeak(V3D(1, 1, 0), Mantid::Kernel::QSample);
     pw->addPeak(V3D(1, 0, 0), Mantid::Kernel::HKL);
@@ -251,8 +259,7 @@ public:
     nexusHelper.reopenFile();
 
     // Verify that this test_entry has a peaks_workspace entry
-    TS_ASSERT_THROWS_NOTHING(
-        nexusHelper.file->openGroup("peaks_workspace", "NXentry"));
+    TS_ASSERT_THROWS_NOTHING(nexusHelper.file->openGroup("peaks_workspace", "NXentry"));
 
     // Check wavelengths
     TS_ASSERT_THROWS_NOTHING(nexusHelper.file->openData("column_7"));

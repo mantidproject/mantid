@@ -23,9 +23,7 @@ class LeanElasticPeakTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LeanElasticPeakTest *createSuite() {
-    return new LeanElasticPeakTest();
-  }
+  static LeanElasticPeakTest *createSuite() { return new LeanElasticPeakTest(); }
   static void destroySuite(LeanElasticPeakTest *suite) { delete suite; }
 
   void test_default_constructor() {
@@ -84,8 +82,7 @@ public:
 
     // calculate Q_lab from scattering and azimuthal to check values
     const auto k = 2 * M_PI / p.getWavelength();
-    V3D qLab(-sin(p.getScattering()) * cos(p.getAzimuthal()),
-             -sin(p.getScattering()) * sin(p.getAzimuthal()),
+    V3D qLab(-sin(p.getScattering()) * cos(p.getAzimuthal()), -sin(p.getScattering()) * sin(p.getAzimuthal()),
              1 - cos(p.getScattering()));
     qLab *= k;
     TS_ASSERT_DELTA(qLab.X(), 2, 1e-9)
@@ -103,17 +100,15 @@ public:
 
     // different reference frame should cause different wavelength to be
     // calculated
-    auto refFrame = std::make_shared<ReferenceFrame>(
-        Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/, Left,
-        "0,0,0");
+    auto refFrame = std::make_shared<const ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/,
+                                                           Left, "0,0,0");
 
     LeanElasticPeak p(V3D(1, 2, 3), gon, refFrame);
 
     TS_ASSERT_EQUALS(p.getQSampleFrame(), V3D(1, 2, 3))
     TS_ASSERT_EQUALS(p.getQLabFrame(), V3D(2, 1, 3))
 
-    TS_ASSERT_EQUALS(p.getReferenceFrame()->vecPointingAlongBeam(),
-                     V3D(1, 0, 0))
+    TS_ASSERT_EQUALS(p.getReferenceFrame()->vecPointingAlongBeam(), V3D(1, 0, 0))
     TS_ASSERT_EQUALS(p.getReferenceFrame()->pointingAlongBeam(), 0)
     TS_ASSERT_DELTA(p.getWavelength(), M_PI * 4 / 7, 1e-9)
     TS_ASSERT_DELTA(p.getDSpacing(), 1.679251908362714, 1e-9)
@@ -121,8 +116,7 @@ public:
 
     // calculate Q_lab from scattering and azimuthal to check values
     const auto k = 2 * M_PI / p.getWavelength();
-    V3D qLab(1 - cos(p.getScattering()),
-             -sin(p.getScattering()) * sin(p.getAzimuthal()),
+    V3D qLab(1 - cos(p.getScattering()), -sin(p.getScattering()) * sin(p.getAzimuthal()),
              -sin(p.getScattering()) * cos(p.getAzimuthal()));
     qLab *= k;
     TS_ASSERT_DELTA(qLab.X(), 2, 1e-9)
@@ -249,8 +243,7 @@ public:
   }
 
   void test_Peak_to_LeanElasticPeak_through_IPeak() {
-    Instrument_sptr inst(
-        ComponentCreationHelper::createTestInstrumentRectangular(5, 100));
+    Instrument_sptr inst(ComponentCreationHelper::createTestInstrumentRectangular(5, 100));
 
     // Peak 3 is phi,chi,omega of 90,0,0; giving this matrix:
     Matrix<double> r(3, 3, false);
@@ -286,8 +279,7 @@ public:
     TS_ASSERT_EQUALS(leanpeak.getK(), 2);
     TS_ASSERT_EQUALS(leanpeak.getL(), 3);
 
-    TS_ASSERT_EQUALS(leanpeak.getGoniometerMatrix(),
-                     peak.getGoniometerMatrix());
+    TS_ASSERT_EQUALS(leanpeak.getGoniometerMatrix(), peak.getGoniometerMatrix());
     TS_ASSERT_EQUALS(leanpeak.getGoniometerMatrix(), r);
 
     TS_ASSERT_DELTA(leanpeak.getInitialEnergy(), peak.getInitialEnergy(), 1e-7);

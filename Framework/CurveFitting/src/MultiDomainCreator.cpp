@@ -34,18 +34,14 @@ void MultiDomainCreator::setCreator(size_t i, IDomainCreator *creator) {
  * Check if i-th creator has been set with setCreator
  * @param i :: Index of a creator, 0 < i < getNCreators()
  */
-bool MultiDomainCreator::hasCreator(size_t i) const {
-  return static_cast<bool>(m_creators[i]);
-}
+bool MultiDomainCreator::hasCreator(size_t i) const { return static_cast<bool>(m_creators[i]); }
 
 /// Create a domain from the input workspace
-void MultiDomainCreator::createDomain(
-    std::shared_ptr<API::FunctionDomain> &domain,
-    std::shared_ptr<API::FunctionValues> &ivalues, size_t i0) {
+void MultiDomainCreator::createDomain(std::shared_ptr<API::FunctionDomain> &domain,
+                                      std::shared_ptr<API::FunctionValues> &ivalues, size_t i0) {
   if (m_workspacePropertyNames.size() != m_creators.size()) {
-    throw std::runtime_error(
-        "Cannot create JointDomain: number of workspaces does not match "
-        "the number of creators");
+    throw std::runtime_error("Cannot create JointDomain: number of workspaces does not match "
+                             "the number of creators");
   }
   auto jointDomain = std::make_unique<API::JointDomain>();
   API::FunctionValues_sptr values;
@@ -69,8 +65,7 @@ void MultiDomainCreator::createDomain(
  * @param function :: A function to initialize.
  */
 void MultiDomainCreator::initFunction(API::IFunction_sptr function) {
-  auto mdFunction =
-      std::dynamic_pointer_cast<API::MultiDomainFunction>(function);
+  auto mdFunction = std::dynamic_pointer_cast<API::MultiDomainFunction>(function);
   if (mdFunction) {
     // loop over member functions and init them
     for (size_t iFun = 0; iFun < mdFunction->nFunctions(); ++iFun) {
@@ -95,8 +90,7 @@ void MultiDomainCreator::initFunction(API::IFunction_sptr function) {
         }
         m_creators[index]->initFunction(mdFunction->getFunction(iFun));
       } else {
-        g_log.warning() << "Function #" << iFun
-                        << " doesn't apply to any domain\n";
+        g_log.warning() << "Function #" << iFun << " doesn't apply to any domain\n";
       }
     }
   } else {
@@ -118,23 +112,19 @@ void MultiDomainCreator::initFunction(API::IFunction_sptr function) {
  * @return A shared pointer to the created workspace.
  */
 std::shared_ptr<API::Workspace> MultiDomainCreator::createOutputWorkspace(
-    const std::string &baseName, API::IFunction_sptr function,
-    std::shared_ptr<API::FunctionDomain> domain,
-    std::shared_ptr<API::FunctionValues> values,
-    const std::string &outputWorkspacePropertyName) {
+    const std::string &baseName, API::IFunction_sptr function, std::shared_ptr<API::FunctionDomain> domain,
+    std::shared_ptr<API::FunctionValues> values, const std::string &outputWorkspacePropertyName) {
   UNUSED_ARG(domain);
   UNUSED_ARG(values);
 
   // split the function into independent parts
-  std::vector<API::IFunction_sptr> functions =
-      function->createEquivalentFunctions();
+  std::vector<API::IFunction_sptr> functions = function->createEquivalentFunctions();
   // there must be as many parts as there are domains
   if (functions.size() != m_creators.size()) {
     throw std::runtime_error("Number of functions and domains don't match");
   }
 
-  API::WorkspaceGroup_sptr outWS =
-      API::WorkspaceGroup_sptr(new API::WorkspaceGroup());
+  API::WorkspaceGroup_sptr outWS = API::WorkspaceGroup_sptr(new API::WorkspaceGroup());
 
   for (size_t i = 0; i < functions.size(); ++i) {
     std::string localName = baseName + "Workspace_" + std::to_string(i);
@@ -145,19 +135,16 @@ std::shared_ptr<API::Workspace> MultiDomainCreator::createOutputWorkspace(
     fun->setUpForFit();
     creator->createDomain(localDomain, localValues);
     creator->initFunction(fun);
-    auto ws = creator->createOutputWorkspace(localName, fun, localDomain,
-                                             localValues, "");
+    auto ws = creator->createOutputWorkspace(localName, fun, localDomain, localValues, "");
     API::AnalysisDataService::Instance().addOrReplace(localName, ws);
     outWS->addWorkspace(ws);
   }
 
   if (!outputWorkspacePropertyName.empty()) {
     declareProperty(
-        new API::WorkspaceProperty<API::WorkspaceGroup>(
-            outputWorkspacePropertyName, "", Kernel::Direction::Output),
+        new API::WorkspaceProperty<API::WorkspaceGroup>(outputWorkspacePropertyName, "", Kernel::Direction::Output),
         "Name of the output Workspace holding resulting simulated spectrum");
-    m_manager->setPropertyValue(outputWorkspacePropertyName,
-                                baseName + "Workspaces");
+    m_manager->setPropertyValue(outputWorkspacePropertyName, baseName + "Workspaces");
     m_manager->setProperty(outputWorkspacePropertyName, outWS);
   }
 

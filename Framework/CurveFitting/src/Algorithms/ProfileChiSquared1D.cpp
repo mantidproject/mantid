@@ -27,14 +27,13 @@ constexpr double MAXCHISQUAREDIFFERENCE = 10.8276;
 /// @param nParams :: Number of free fitting parameters.
 /// @param values :: Functin's values.
 /// @param chi0 :: Chi squared at the minimum.
-double getDiff(const Mantid::API::IFunction &fun, size_t nParams,
-               const Mantid::API::FunctionDomain &domain,
+double getDiff(const Mantid::API::IFunction &fun, size_t nParams, const Mantid::API::FunctionDomain &domain,
                Mantid::API::FunctionValues &values, double chi0) {
   double chiSquared = 0.0;
   double chiSquaredWeighted = 0.0;
   double dof = 0;
-  Mantid::CurveFitting::Algorithms::CalculateChiSquared::calcChiSquared(
-      fun, nParams, domain, values, chiSquared, chiSquaredWeighted, dof);
+  Mantid::CurveFitting::Algorithms::CalculateChiSquared::calcChiSquared(fun, nParams, domain, values, chiSquared,
+                                                                        chiSquaredWeighted, dof);
   return chiSquaredWeighted - chi0;
 }
 
@@ -60,14 +59,11 @@ public:
   /// @param values :: Functin's values.
   /// @param chi0 :: Chi squared at the minimum.
   /// @param freeParameters :: Parameters which are free in the function.
-  ChiSlice(IFunction_sptr inputFunction, int fixedParameterIndex,
-           API::MatrixWorkspace_sptr inputWS, int workspaceIndex,
-           const API::FunctionDomain &domain, API::FunctionValues &values,
-           double chi0, std::vector<int> &freeParameters)
-      : m_fixedParameterIndex(fixedParameterIndex), m_domain(domain),
-        m_values(values), m_chi0(chi0), m_function(inputFunction),
-        m_ws(inputWS), m_workspaceIndex(workspaceIndex),
-        m_freeParameters(freeParameters) {
+  ChiSlice(IFunction_sptr inputFunction, int fixedParameterIndex, API::MatrixWorkspace_sptr inputWS, int workspaceIndex,
+           const API::FunctionDomain &domain, API::FunctionValues &values, double chi0,
+           std::vector<int> &freeParameters)
+      : m_fixedParameterIndex(fixedParameterIndex), m_domain(domain), m_values(values), m_chi0(chi0),
+        m_function(inputFunction), m_ws(inputWS), m_workspaceIndex(workspaceIndex), m_freeParameters(freeParameters) {
     // create a fitting algorithm based on least squares (which is the default)
     m_fitalg = AlgorithmFactory::Instance().create("Fit", -1);
     m_fitalg->setChild(true);
@@ -86,8 +82,7 @@ public:
     for (auto ip = 0u; ip < function->nParams(); ++ip) {
       originalParamValues[ip] = function->getParameter(ip);
     }
-    function->setParameter(m_fixedParameterIndex,
-                           originalParamValues[m_fixedParameterIndex] + p);
+    function->setParameter(m_fixedParameterIndex, originalParamValues[m_fixedParameterIndex] + p);
     function->fix(m_fixedParameterIndex);
 
     // re run the fit to minimze the unfixed parameters
@@ -96,8 +91,7 @@ public:
     // num free parameters is the number of global free parameters - the 1 we've
     // just fixed
     int numFreeParameters = static_cast<int>(m_freeParameters.size() - 1);
-    double res =
-        getDiff(*function, numFreeParameters, m_domain, m_values, m_chi0);
+    double res = getDiff(*function, numFreeParameters, m_domain, m_values, m_chi0);
     // reset fit to original values
     for (auto ip = 0u; ip < function->nParams(); ++ip) {
       function->setParameter(ip, originalParamValues[ip]);
@@ -111,12 +105,9 @@ public:
   /// @param rBound :: The right bound of the approximation interval.
   /// @param P :: Output vector with approximation parameters.
   /// @param A :: Output vector with approximation parameters.
-  Functions::ChebfunBase_sptr makeApprox(double lBound, double rBound,
-                                         std::vector<double> &P,
-                                         std::vector<double> &A) {
+  Functions::ChebfunBase_sptr makeApprox(double lBound, double rBound, std::vector<double> &P, std::vector<double> &A) {
 
-    auto base = Functions::ChebfunBase::bestFitAnyTolerance(
-        lBound, rBound, *this, P, A, 1.0, 1e-4, 129);
+    auto base = Functions::ChebfunBase::bestFitAnyTolerance(lBound, rBound, *this, P, A, 1.0, 1e-4, 129);
     if (!base) {
       base = std::make_shared<Functions::ChebfunBase>(10, lBound, rBound, 1e-4);
       P = base->fit(*this);
@@ -186,9 +177,7 @@ private:
 /// Default constructor
 ProfileChiSquared1D::ProfileChiSquared1D() : IFittingAlgorithm() {}
 
-const std::string ProfileChiSquared1D::name() const {
-  return "ProfileChiSquared1D";
-}
+const std::string ProfileChiSquared1D::name() const { return "ProfileChiSquared1D"; }
 
 int ProfileChiSquared1D::version() const { return 1; }
 
@@ -197,9 +186,7 @@ const std::string ProfileChiSquared1D::summary() const {
          "for the input function.";
 }
 
-void ProfileChiSquared1D::initConcrete() {
-  declareProperty("Output", "", "A base name for output workspaces.");
-}
+void ProfileChiSquared1D::initConcrete() { declareProperty("Output", "", "A base name for output workspaces."); }
 
 void ProfileChiSquared1D::execConcrete() {
   // Number of fiting parameters
@@ -239,11 +226,9 @@ void ProfileChiSquared1D::execConcrete() {
   if (baseName.empty()) {
     baseName = "ProfileChiSquared1D";
   }
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "PDFs", "", Kernel::Direction::Output),
-      "The name of the TableWorkspace in which to store the "
-      "pdfs of fit parameters");
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("PDFs", "", Kernel::Direction::Output),
+                  "The name of the TableWorkspace in which to store the "
+                  "pdfs of fit parameters");
   setPropertyValue("PDFs", baseName + "_pdf");
   setProperty("PDFs", pdfTable);
 
@@ -253,22 +238,15 @@ void ProfileChiSquared1D::execConcrete() {
   auto valueColumn = errorsTable->addColumn("double", "Value");
   auto minValueColumn = errorsTable->addColumn("double", "Value at Min");
   auto leftErrColumn = errorsTable->addColumn("double", "Left Error (1-sigma)");
-  auto rightErrColumn =
-      errorsTable->addColumn("double", "Right Error (1-sigma)");
-  auto leftErrColumn_2 =
-      errorsTable->addColumn("double", "Left Error (2-sigma)");
-  auto rightErrColumn_2 =
-      errorsTable->addColumn("double", "Right Error (2-sigma )");
-  auto leftErrColumn_3 =
-      errorsTable->addColumn("double", "Left Error (3-sigma)");
-  auto rightErrColumn_3 =
-      errorsTable->addColumn("double", "Right Error (3-sigma )");
-  auto quadraticErrColumn =
-      errorsTable->addColumn("double", "Quadratic Error (1-sigma)");
+  auto rightErrColumn = errorsTable->addColumn("double", "Right Error (1-sigma)");
+  auto leftErrColumn_2 = errorsTable->addColumn("double", "Left Error (2-sigma)");
+  auto rightErrColumn_2 = errorsTable->addColumn("double", "Right Error (2-sigma )");
+  auto leftErrColumn_3 = errorsTable->addColumn("double", "Left Error (3-sigma)");
+  auto rightErrColumn_3 = errorsTable->addColumn("double", "Right Error (3-sigma )");
+  auto quadraticErrColumn = errorsTable->addColumn("double", "Quadratic Error (1-sigma)");
   errorsTable->setRowCount(freeParameters.size());
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "Errors", "", Kernel::Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("Errors", "", Kernel::Direction::Output),
       "The name of the TableWorkspace in which to store the "
       "values and errors of fit parameters");
   setPropertyValue("Errors", baseName + "_errors");
@@ -281,8 +259,7 @@ void ProfileChiSquared1D::execConcrete() {
   API::FunctionDomain_sptr domain;
   API::FunctionValues_sptr values;
   m_domainCreator->createDomain(domain, values);
-  CalculateChiSquared::calcChiSquared(*m_function, nParams, *domain, *values,
-                                      chiSquared, chiSquaredWeighted, dof);
+  CalculateChiSquared::calcChiSquared(*m_function, nParams, *domain, *values, chiSquared, chiSquaredWeighted, dof);
   // Value of chi squared for current parameters in m_function
   double chi0 = chiSquaredWeighted;
 
@@ -319,8 +296,7 @@ void ProfileChiSquared1D::execConcrete() {
     }
 
     // Make a slice along this parameter
-    ChiSlice slice(m_function, ip, inputws, workspaceIndex, *domain, *values,
-                   chi0, freeParameters);
+    ChiSlice slice(m_function, ip, inputws, workspaceIndex, *domain, *values, chi0, freeParameters);
 
     // Find the bounds withn which the PDF is significantly above zero.
     // The bounds are defined relative to par0:
@@ -376,8 +352,7 @@ void ProfileChiSquared1D::execConcrete() {
     valueColumn->fromDouble(row, par0);
     minValueColumn->fromDouble(row, par0 + parMin);
     for (size_t i = 0; i < qvalues.size(); i++) {
-      auto [rootsMin, rootsMax] =
-          getChiSquaredRoots(base, A, qvalues[i], rBound, lBound);
+      auto [rootsMin, rootsMax] = getChiSquaredRoots(base, A, qvalues[i], rBound, lBound);
       errorsTable->getColumn(3 + 2 * i)->fromDouble(row, rootsMin - parMin);
       errorsTable->getColumn(4 + 2 * i)->fromDouble(row, rootsMax - parMin);
     }
@@ -449,10 +424,9 @@ void ProfileChiSquared1D::refixParameters() {
   m_fixedParameters.clear();
 }
 
-std::tuple<double, double> ProfileChiSquared1D::getChiSquaredRoots(
-    const Functions::ChebfunBase_sptr &approximation,
-    std::vector<double> &coeffs, double qvalue, double rBound,
-    double lBound) const {
+std::tuple<double, double> ProfileChiSquared1D::getChiSquaredRoots(const Functions::ChebfunBase_sptr &approximation,
+                                                                   std::vector<double> &coeffs, double qvalue,
+                                                                   double rBound, double lBound) const {
   // Points of intersections with line chi^2 = 1  give an estimate of
   // the standard deviation of this parameter if it's uncorrelated with the
   // others.

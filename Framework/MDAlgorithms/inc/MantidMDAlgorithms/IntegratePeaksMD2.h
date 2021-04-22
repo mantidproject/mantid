@@ -39,13 +39,11 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 2; };
   const std::vector<std::string> seeAlso() const override {
-    return {"CentroidPeaksMD", "IntegratePeaksHybrid", "IntegratePeaksMDHKL",
-            "IntegratePeaksUsingClusters", "IntegratePeaksCWSD"};
+    return {"CentroidPeaksMD", "IntegratePeaksHybrid", "IntegratePeaksMDHKL", "IntegratePeaksUsingClusters",
+            "IntegratePeaksCWSD"};
   }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "MDAlgorithms\\Peaks;Crystal\\Integration";
-  }
+  const std::string category() const override { return "MDAlgorithms\\Peaks;Crystal\\Integration"; }
 
 private:
   /// Initialise the properties
@@ -55,8 +53,7 @@ private:
 
   std::map<std::string, std::string> validateInputs() override;
 
-  template <typename MDE, size_t nd>
-  void integrate(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  template <typename MDE, size_t nd> void integrate(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Input MDEventWorkspace
   Mantid::API::IMDEventWorkspace_sptr inWS;
@@ -64,41 +61,32 @@ private:
   // find the eigenvectors and eigenvalues that diagonalise the covariance
   // matrix that defines an ellipsoid.
   template <typename MDE, size_t nd>
-  void
-  findEllipsoid(const typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws,
-                const Mantid::API::CoordTransform &getRadiusSq,
-                const Mantid::Kernel::V3D &pos, const coord_t &radiusSquared,
-                const bool &qAxisBool, const bool &useCentroid,
-                const double &bgDensity,
-                std::vector<Mantid::Kernel::V3D> &eigenvects,
-                std::vector<double> &eigenvals, Mantid::Kernel::V3D &mean,
-                const int maxIter = 1);
+  void findEllipsoid(const typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws,
+                     const Mantid::API::CoordTransform &getRadiusSq, const Mantid::Kernel::V3D &pos,
+                     const coord_t &radiusSquared, const bool &qAxisBool, const bool &useCentroid,
+                     const double &bgDensity, std::vector<Mantid::Kernel::V3D> &eigenvects,
+                     std::vector<double> &eigenvals, Mantid::Kernel::V3D &mean, const int maxIter = 1);
 
-  void calcCovar(
-      const std::vector<std::pair<Mantid::Kernel::V3D, double>> &peak_events,
-      const Mantid::Kernel::V3D &pos, const coord_t &radiusSquared,
-      const bool &qAxisIsFixed, const bool &useCentroid,
-      std::vector<Mantid::Kernel::V3D> &eigenvects,
-      std::vector<double> &eigenvals, Mantid::Kernel::V3D &mean,
-      const int maxIter);
+  void calcCovar(const std::vector<std::pair<Mantid::Kernel::V3D, double>> &peak_events, const Mantid::Kernel::V3D &pos,
+                 const coord_t &radiusSquared, const bool &qAxisIsFixed, const bool &useCentroid,
+                 std::vector<Mantid::Kernel::V3D> &eigenvects, std::vector<double> &eigenvals,
+                 Mantid::Kernel::V3D &mean, const int maxIter);
 
   // get matrix to transform from Qlab to plane perp to Q
-  void getPinv(const Mantid::Kernel::V3D &q,
-               Mantid::Kernel::Matrix<double> &Pinv);
+  void getPinv(const Mantid::Kernel::V3D &q, Mantid::Kernel::Matrix<double> &Pinv);
 
   /// Calculate if this Q is on a detector
   void calculateE1(const Geometry::DetectorInfo &detectorInfo);
   double detectorQ(Mantid::Kernel::V3D QLabFrame, double r);
-  void runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
-                        const std::string &property, const std::string &values);
+  void runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS, const std::string &property,
+                        const std::string &values);
 
   /// save for all detector pixels
   std::vector<Kernel::V3D> E1Vec;
 
   /// Check if peaks overlap
   void checkOverlap(int i, const Mantid::API::IPeaksWorkspace_sptr &peakWS,
-                    Mantid::Kernel::SpecialCoordinateSystem CoordinatesToUse,
-                    double radius);
+                    Mantid::Kernel::SpecialCoordinateSystem CoordinatesToUse, double radius);
 };
 
 } // namespace MDAlgorithms

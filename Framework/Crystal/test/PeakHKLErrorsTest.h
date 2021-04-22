@@ -32,9 +32,7 @@ private:
   Kernel::Matrix<double> M;
 
 public:
-  Jacob(int nparams, int npoints) {
-    M = Kernel::Matrix<double>(nparams, npoints);
-  }
+  Jacob(int nparams, int npoints) { M = Kernel::Matrix<double>(nparams, npoints); }
 
   ~Jacob() override {}
   void set(size_t iY, size_t iP, double value) override { M[iP][iY] = value; }
@@ -55,20 +53,17 @@ public:
     alg.execute();
     alg.setProperty("OutputWorkspace", "abcd");
     API::Workspace_sptr ows = alg.getProperty("OutputWorkspace");
-    DataObjects::PeaksWorkspace_sptr peaks =
-        std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ows);
+    DataObjects::PeaksWorkspace_sptr peaks = std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ows);
     // std::cout<<"Peaks number="<<peaks->getNumberPeaks()<<'\n';
 
     LoadIsawUB loadUB;
     loadUB.initialize();
-    loadUB.setProperty("InputWorkspace",
-                       alg.getPropertyValue("OutputWorkspace"));
+    loadUB.setProperty("InputWorkspace", alg.getPropertyValue("OutputWorkspace"));
     loadUB.setProperty("Filename", "ls5637.mat");
     loadUB.execute();
 
     PeakHKLErrors peakErrs;
-    peakErrs.setAttribute(std::string("PeakWorkspaceName"),
-                          IFunction::Attribute("abcd"));
+    peakErrs.setAttribute(std::string("PeakWorkspaceName"), IFunction::Attribute("abcd"));
     peakErrs.setAttribute("OptRuns", IFunction::Attribute("/5638/"));
     peakErrs.initialize();
     std::string OptRuns[] = {"5638"};
@@ -109,8 +104,7 @@ public:
     TS_ASSERT_DELTA(-0.0060874, out[12], .01);
     TS_ASSERT_DELTA(-0.0103673, out[16], .01);
 
-    std::shared_ptr<Jacob> Jac(
-        new Jacob((int)peakErrs.nParams(), (int)(3 * NPeaks)));
+    std::shared_ptr<Jacob> Jac(new Jacob((int)peakErrs.nParams(), (int)(3 * NPeaks)));
     peakErrs.functionDeriv1D(Jac.get(), xValues.data(), (size_t)(3 * NPeaks));
 
     TS_ASSERT_DELTA(Jac->get(1, 0), -1.39557, .4);

@@ -24,8 +24,7 @@ class MANTIDQT_INDIRECT_DLL IndirectFitOutputOptionsPresenter : public QObject {
   Q_OBJECT
 public:
   IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsView *view);
-  IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsModel *model,
-                                    IIndirectFitOutputOptionsView *view);
+  IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsModel *model, IIndirectFitOutputOptionsView *view);
   ~IndirectFitOutputOptionsPresenter() override;
 
   void setMultiWorkspaceOptionsVisible(bool visible);
@@ -66,12 +65,10 @@ private:
   void plotResult(std::string const &selectedGroup);
   void setSaving(bool saving);
 
-  std::unique_ptr<IndirectEditResultsDialog>
-  getEditResultsDialog(QWidget *parent) const;
+  std::unique_ptr<IndirectEditResultsDialog> getEditResultsDialog(QWidget *parent) const;
   void setEditingResult(bool editing);
 
-  void replaceSingleFitResult(std::string const &inputName,
-                              std::string const &singleBinName,
+  void replaceSingleFitResult(std::string const &inputName, std::string const &singleBinName,
                               std::string const &outputName);
 
   void displayWarning(std::string const &message);

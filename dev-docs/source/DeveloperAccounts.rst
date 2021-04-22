@@ -15,7 +15,6 @@ Simple, easy to recognise user names are preferred. For example "Nick Draper", o
 Account Creation
 ----------------
 
-- Create a **Mantid Wiki** account; follow `this link <https://www.mantidproject.org/Special:RequestAccount>`__.
 - Sign up for the **Mantid Slack** channel; follow `this link <https://mantid.slack.com/>`__.
 - If you don't already have one, sign up for a **Github** account; follow `this link <https://github.com/>`__.
 	+ Remember that your username should be easily identifiable.
@@ -23,20 +22,6 @@ Account Creation
 	+ Set up Git on your workstation; see `this guide <https://help.github.com/articles/set-up-git/>`__.
 	+ The Git workflow is described on the :ref:`GitWorkflow` page.
 - If based at ISIS, please sign up for a `User Facilities account <https://users.facilities.rl.ac.uk/>`__ that among other things, grants access to IDAaaS.
-
-SNS Git
--------
-
-If you are based at SNS, in order to be able to ssh out of the lab, you need to do the following:
-
-- Install "Corkscrew" using your package manager.
-- Add the following lines to ~/.ssh/config:
-
-
-.. code:: bash
-
-    ProxyCommand corkscrew snowman.ornl.gov 3128 %h %p
-    Host github.com
 
 Introducing Yourself
 --------------------
@@ -47,13 +32,6 @@ Admin Notes
 -----------
 
 These are notes for account admins on how to add new users.
-
-- **Wiki**
-    + Go to the `special pages index <https://www.mantidproject.org/Special:SpecialPages>`_.
-    + Select Login/Create Account.
-    + Select the Create Account link at the top of the box.
-    + Username should be first name (space) surname.
-    + User will be sent an email to verify.
 
 - **Github**
 	- Add the username provided to the mantid-developers team at `https://github.com/organizations/mantidproject/teams <https://github.com/organizations/mantidproject/teams>`_.

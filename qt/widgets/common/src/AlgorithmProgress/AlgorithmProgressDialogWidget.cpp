@@ -18,11 +18,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-AlgorithmProgressDialogWidget::AlgorithmProgressDialogWidget(
-    QWidget *parent, AlgorithmProgressModel &model)
-    : QDialog(parent), m_tree{new QTreeWidget(this)},
-      m_presenter{std::make_unique<AlgorithmProgressDialogPresenter>(
-          parent, this, model)} {
+AlgorithmProgressDialogWidget::AlgorithmProgressDialogWidget(QWidget *parent, AlgorithmProgressModel &model)
+    : QDialog(parent), m_tree{new QTreeWidget(this)}, m_presenter{std::make_unique<AlgorithmProgressDialogPresenter>(
+                                                          parent, this, model)} {
 
   m_tree->setColumnCount(3);
   m_tree->setSelectionMode(QTreeWidget::NoSelection);
@@ -35,8 +33,7 @@ AlgorithmProgressDialogWidget::AlgorithmProgressDialogWidget(
   auto buttonLayout = new QHBoxLayout();
   const auto button = new QPushButton("Close", this);
 
-  connect(button, &QPushButton::clicked, this,
-          &AlgorithmProgressDialogWidget::close);
+  connect(button, &QPushButton::clicked, this, &AlgorithmProgressDialogWidget::close);
 
   buttonLayout->addStretch();
   buttonLayout->addWidget(button);
@@ -59,15 +56,13 @@ std::pair<QTreeWidgetItem *, QProgressBar *>
 AlgorithmProgressDialogWidget::addAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
   const auto name = alg->name();
   const auto &properties = alg->getProperties();
-  const auto item =
-      new QTreeWidgetItem(m_tree, QStringList{QString::fromStdString(name)});
+  const auto item = new QTreeWidgetItem(m_tree, QStringList{QString::fromStdString(name)});
 
   m_tree->addTopLevelItem(item);
   auto progressBar = new QProgressBar(m_tree);
   progressBar->setAlignment(Qt::AlignHCenter);
 
-  const auto cancelButton =
-      new AlgorithmProgressDialogWidgetCancelButton(alg, m_tree);
+  const auto cancelButton = new AlgorithmProgressDialogWidgetCancelButton(alg, m_tree);
 
   m_tree->setItemWidget(item, 1, progressBar);
   m_tree->setItemWidget(item, 2, cancelButton);
@@ -75,8 +70,7 @@ AlgorithmProgressDialogWidget::addAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
   for (const auto &prop : properties) {
     const auto &propAsString = prop->value();
     if (!propAsString.empty()) {
-      item->addChild(new QTreeWidgetItem(
-          item, QStringList{QString::fromStdString(propAsString)}));
+      item->addChild(new QTreeWidgetItem(item, QStringList{QString::fromStdString(propAsString)}));
     }
   }
 

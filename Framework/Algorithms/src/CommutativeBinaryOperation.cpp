@@ -18,9 +18,8 @@ namespace Algorithms {
  * @retval "<reason why not compatible>" The two workspaces are NOT size
  * compatible
  */
-std::string CommutativeBinaryOperation::checkSizeCompatibility(
-    const API::MatrixWorkspace_const_sptr lhs,
-    const API::MatrixWorkspace_const_sptr rhs) const {
+std::string CommutativeBinaryOperation::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                                                               const API::MatrixWorkspace_const_sptr rhs) const {
   // Don't allow this for EventWorkspaces. See for instance
   // Multiply::checkSizeCompatability
   if (std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(lhs) ||

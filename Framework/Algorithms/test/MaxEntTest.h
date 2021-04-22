@@ -28,9 +28,7 @@ using Mantid::HistogramData::Points;
  */
 class TestMaxEnt : public Mantid::Algorithms::MaxEnt {
 public:
-  std::map<std::string, std::string> wrapValidateInputs() {
-    return this->validateInputs();
-  }
+  std::map<std::string, std::string> wrapValidateInputs() { return this->validateInputs(); }
 };
 
 class MaxEntTest : public CxxTest::TestSuite {
@@ -985,10 +983,8 @@ public:
    * We have to use the ADS to test WorkspaceGroups
    */
   void testValidateInputsWithWSGroup() {
-    auto ws1 = std::static_pointer_cast<Workspace>(
-        WorkspaceCreationHelper::create2DWorkspace(5, 10));
-    auto ws2 = std::static_pointer_cast<Workspace>(
-        WorkspaceCreationHelper::create2DWorkspace(5, 10));
+    auto ws1 = std::static_pointer_cast<Workspace>(WorkspaceCreationHelper::create2DWorkspace(5, 10));
+    auto ws2 = std::static_pointer_cast<Workspace>(WorkspaceCreationHelper::create2DWorkspace(5, 10));
     AnalysisDataService::Instance().add("workspace1", ws1);
     AnalysisDataService::Instance().add("workspace2", ws2);
     auto group = std::make_shared<WorkspaceGroup>();
@@ -1041,8 +1037,7 @@ public:
     // Run MaxEnt on the offsetted ws
     alg->setProperty("InputWorkspace", offsetted);
     alg->execute();
-    MatrixWorkspace_sptr outWSOffsetted =
-        alg->getProperty("ReconstructedImage");
+    MatrixWorkspace_sptr outWSOffsetted = alg->getProperty("ReconstructedImage");
 
     // outWS and outWSOffsetted are shifted by ~pi -> there should be a factor
     // ~(-1) between them
@@ -1056,8 +1051,7 @@ public:
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);
-    TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", ws),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", ws), const std::invalid_argument &);
   }
 
   void test_histogram_workspace() {
@@ -1101,8 +1095,8 @@ public:
 
   void test_pointdata_workspace() {
     const size_t size = 10;
-    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
+    MatrixWorkspace_sptr ws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
     // We don't care about values, except to check they are transferred
     // to data after one iteration.
     // Otherwise, we just want to test the number of
@@ -1137,9 +1131,7 @@ public:
     TS_ASSERT_EQUALS(data->readX(0), ws->readX(0));
   }
 
-  MatrixWorkspace_sptr
-  createWorkspaceWithYValues(size_t nHist, size_t length,
-                             std::vector<double> const &YVal) {
+  MatrixWorkspace_sptr createWorkspaceWithYValues(size_t nHist, size_t length, std::vector<double> const &YVal) {
 
     size_t nPts = length * nHist;
     TS_ASSERT_EQUALS(nPts, YVal.size());
@@ -1168,8 +1160,7 @@ public:
     return ws;
   }
 
-  MatrixWorkspace_sptr createWorkspaceReal(size_t maxt, double phase,
-                                           size_t nSpec) {
+  MatrixWorkspace_sptr createWorkspaceReal(size_t maxt, double phase, size_t nSpec) {
 
     // Create cosine with phase 'phase'
 
@@ -1204,8 +1195,7 @@ public:
     return ws;
   }
 
-  MatrixWorkspace_sptr createWorkspaceComplex(size_t maxt, double phase,
-                                              size_t nSpec, double shift) {
+  MatrixWorkspace_sptr createWorkspaceComplex(size_t maxt, double phase, size_t nSpec, double shift) {
 
     // Create cosine with phase 'phase'
 
@@ -1223,8 +1213,7 @@ public:
         Y[t + s * maxt] = cos(w * x + phase + static_cast<double>(s) * shift);
         E[t + s * maxt] = 0.2;
         X[t + s * maxt + nPts] = x;
-        Y[t + s * maxt + nPts] =
-            sin(w * x + phase + static_cast<double>(s) * shift);
+        Y[t + s * maxt + nPts] = sin(w * x + phase + static_cast<double>(s) * shift);
         E[t + s * maxt + nPts] = 0.2;
       }
     }
@@ -1246,49 +1235,38 @@ public:
 
     const size_t size = 51;
 
-    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceFactory::Instance().create("Workspace2D", 2, size, size));
+    MatrixWorkspace_sptr ws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D", 2, size, size));
 
     // x = 2 * pi * i / N
     // Real
     ws->setHistogram(
         0,
-        Points{0.0000, 0.1232, 0.2464, 0.3696, 0.4928, 0.6160, 0.7392, 0.8624,
-               0.9856, 1.1088, 1.2320, 1.3552, 1.4784, 1.6016, 1.7248, 1.8480,
-               1.9712, 2.0944, 2.2176, 2.3408, 2.4640, 2.5872, 2.7104, 2.8336,
-               2.9568, 3.0800, 3.2032, 3.3264, 3.4496, 3.5728, 3.6960, 3.8192,
-               3.9424, 4.0656, 4.1888, 4.3120, 4.4352, 4.5584, 4.6816, 4.8048,
-               4.9280, 5.0512, 5.1744, 5.2976, 5.4208, 5.5440, 5.6672, 5.7904,
-               5.9136, 6.0368, 6.1600},
-        Counts{1.07,  0.95,  0.84,  0.51,  -0.04, -0.42, -0.47, -0.98, -0.96,
-               -1.03, -0.71, -0.70, -0.13, -0.04, 0.59,  0.84,  0.91,  0.93,
-               1.03,  0.75,  0.40,  0.18,  -0.24, -0.48, -0.78, -0.95, -0.94,
-               -0.87, -0.46, -0.19, 0.13,  0.35,  0.88,  1.01,  0.92,  0.79,
-               0.80,  0.44,  0.15,  -0.26, -0.49, -0.79, -0.84, -1.04, -0.80,
-               -0.73, -0.26, 0.09,  0.45,  0.67,  0.92},
-        CountStandardDeviations{
-            0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
-            0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
-            0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
-            0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1});
+        Points{0.0000, 0.1232, 0.2464, 0.3696, 0.4928, 0.6160, 0.7392, 0.8624, 0.9856, 1.1088, 1.2320, 1.3552, 1.4784,
+               1.6016, 1.7248, 1.8480, 1.9712, 2.0944, 2.2176, 2.3408, 2.4640, 2.5872, 2.7104, 2.8336, 2.9568, 3.0800,
+               3.2032, 3.3264, 3.4496, 3.5728, 3.6960, 3.8192, 3.9424, 4.0656, 4.1888, 4.3120, 4.4352, 4.5584, 4.6816,
+               4.8048, 4.9280, 5.0512, 5.1744, 5.2976, 5.4208, 5.5440, 5.6672, 5.7904, 5.9136, 6.0368, 6.1600},
+        Counts{1.07,  0.95,  0.84,  0.51,  -0.04, -0.42, -0.47, -0.98, -0.96, -1.03, -0.71, -0.70, -0.13,
+               -0.04, 0.59,  0.84,  0.91,  0.93,  1.03,  0.75,  0.40,  0.18,  -0.24, -0.48, -0.78, -0.95,
+               -0.94, -0.87, -0.46, -0.19, 0.13,  0.35,  0.88,  1.01,  0.92,  0.79,  0.80,  0.44,  0.15,
+               -0.26, -0.49, -0.79, -0.84, -1.04, -0.80, -0.73, -0.26, 0.09,  0.45,  0.67,  0.92},
+        CountStandardDeviations{0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+                                0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+                                0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1});
 
     // Imaginary
-    ws->setHistogram(
-        1, ws->points(0),
-        Counts{0.07,  0.25,  0.82,  0.75,  1.08,  0.84,  0.82,  0.62,  0.33,
-               -0.20, -0.58, -0.88, -0.85, -1.10, -0.77, -0.59, -0.36, 0.13,
-               0.39,  0.62,  0.87,  1.03,  0.82,  0.94,  0.47,  0.30,  -0.22,
-               -0.39, -0.86, -0.91, -0.88, -0.84, -0.59, -0.27, 0.14,  0.36,
-               0.69,  0.98,  0.98,  0.95,  0.71,  0.41,  0.32,  -0.13, -0.53,
-               -0.74, -0.82, -0.91, -0.82, -0.60, -0.32},
-        ws->countStandardDeviations(0));
+    ws->setHistogram(1, ws->points(0),
+                     Counts{0.07,  0.25,  0.82,  0.75,  1.08,  0.84,  0.82,  0.62,  0.33,  -0.20, -0.58, -0.88, -0.85,
+                            -1.10, -0.77, -0.59, -0.36, 0.13,  0.39,  0.62,  0.87,  1.03,  0.82,  0.94,  0.47,  0.30,
+                            -0.22, -0.39, -0.86, -0.91, -0.88, -0.84, -0.59, -0.27, 0.14,  0.36,  0.69,  0.98,  0.98,
+                            0.95,  0.71,  0.41,  0.32,  -0.13, -0.53, -0.74, -0.82, -0.91, -0.82, -0.60, -0.32},
+                     ws->countStandardDeviations(0));
 
     return ws;
   }
 
-  MatrixWorkspace_sptr createWorkspaceAdjustments(size_t maxt, double base,
-                                                  double magnitude,
-                                                  double phase, size_t nSpec) {
+  MatrixWorkspace_sptr createWorkspaceAdjustments(size_t maxt, double base, double magnitude, double phase,
+                                                  size_t nSpec) {
 
     // Frequency of the oscillations
     double w = 2.4;
@@ -1304,14 +1282,11 @@ public:
       for (size_t s = 0; s < nSpec; s++) {
         // Real
         X[t + s * maxt] = 0.0;
-        Y[t + s * maxt] =
-            base +
-            magnitude * cos(w * x + phase + static_cast<double>(s) * shift);
+        Y[t + s * maxt] = base + magnitude * cos(w * x + phase + static_cast<double>(s) * shift);
         E[t + s * maxt] = 0.0;
         // Imaginary
         X[t + s * maxt + nPts] = 0.0;
-        Y[t + s * maxt + nPts] =
-            magnitude * sin(w * x + phase + static_cast<double>(s) * shift);
+        Y[t + s * maxt + nPts] = magnitude * sin(w * x + phase + static_cast<double>(s) * shift);
         E[t + s * maxt + nPts] = 0.0;
       }
     }
@@ -1334,9 +1309,7 @@ class MaxEntTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MaxEntTestPerformance *createSuite() {
-    return new MaxEntTestPerformance();
-  }
+  static MaxEntTestPerformance *createSuite() { return new MaxEntTestPerformance(); }
   static void destroySuite(MaxEntTestPerformance *suite) { delete suite; }
 
   MaxEntTestPerformance() {

@@ -21,10 +21,8 @@ namespace DataHandling {
 namespace ANSTO {
 
 // ProgressTracker
-ProgressTracker::ProgressTracker(API::Progress &progBar, const char *msg,
-                                 int64_t target, size_t count)
-    : m_msg(msg), m_count(count), m_step(target / count), m_next(m_step),
-      m_progBar(progBar) {
+ProgressTracker::ProgressTracker(API::Progress &progBar, const char *msg, int64_t target, size_t count)
+    : m_msg(msg), m_count(count), m_step(target / count), m_next(m_step), m_progBar(progBar) {
 
   m_progBar.doReport(m_msg);
 }
@@ -56,21 +54,15 @@ void ProgressTracker::complete() {
 }
 
 // EventProcessor
-EventProcessor::EventProcessor(const std::vector<bool> &roi,
-                               const size_t stride, const double period,
-                               const double phase, const int64_t startTime,
-                               const double tofMinBoundary,
-                               const double tofMaxBoundary,
-                               const double timeMinBoundary,
-                               const double timeMaxBoundary)
-    : m_roi(roi), m_stride(stride), m_frames(0), m_framesValid(0),
-      m_startTime(startTime), m_period(period), m_phase(phase),
-      m_tofMinBoundary(tofMinBoundary), m_tofMaxBoundary(tofMaxBoundary),
+EventProcessor::EventProcessor(const std::vector<bool> &roi, const size_t stride, const double period,
+                               const double phase, const int64_t startTime, const double tofMinBoundary,
+                               const double tofMaxBoundary, const double timeMinBoundary, const double timeMaxBoundary)
+    : m_roi(roi), m_stride(stride), m_frames(0), m_framesValid(0), m_startTime(startTime), m_period(period),
+      m_phase(phase), m_tofMinBoundary(tofMinBoundary), m_tofMaxBoundary(tofMaxBoundary),
       m_timeMinBoundary(timeMinBoundary), m_timeMaxBoundary(timeMaxBoundary) {}
 bool EventProcessor::validFrame() const {
   // frame boundary
-  double frameTime =
-      (static_cast<double>(m_frames) * m_period) * 1e-6; // in seconds
+  double frameTime = (static_cast<double>(m_frames) * m_period) * 1e-6; // in seconds
 
   return (frameTime >= m_timeMinBoundary) && (frameTime <= m_timeMaxBoundary);
 }
@@ -116,24 +108,16 @@ void EventProcessor::addEvent(size_t x, size_t y, double tof) {
 }
 
 // EventCounter
-EventCounter::EventCounter(const std::vector<bool> &roi, const size_t stride,
-                           const double period, const double phase,
-                           const int64_t startTime, const double tofMinBoundary,
-                           const double tofMaxBoundary,
-                           const double timeMinBoundary,
-                           const double timeMaxBoundary,
-                           std::vector<size_t> &eventCounts)
-    : EventProcessor(roi, stride, period, phase, startTime, tofMinBoundary,
-                     tofMaxBoundary, timeMinBoundary, timeMaxBoundary),
+EventCounter::EventCounter(const std::vector<bool> &roi, const size_t stride, const double period, const double phase,
+                           const int64_t startTime, const double tofMinBoundary, const double tofMaxBoundary,
+                           const double timeMinBoundary, const double timeMaxBoundary, std::vector<size_t> &eventCounts)
+    : EventProcessor(roi, stride, period, phase, startTime, tofMinBoundary, tofMaxBoundary, timeMinBoundary,
+                     timeMaxBoundary),
       m_eventCounts(eventCounts), m_tofMin(std::numeric_limits<double>::max()),
       m_tofMax(std::numeric_limits<double>::min()) {}
 size_t EventCounter::numFrames() const { return m_framesValid; }
-double EventCounter::tofMin() const {
-  return m_tofMin <= m_tofMax ? m_tofMin : 0.0;
-}
-double EventCounter::tofMax() const {
-  return m_tofMin <= m_tofMax ? m_tofMax : 0.0;
-}
+double EventCounter::tofMin() const { return m_tofMin <= m_tofMax ? m_tofMin : 0.0; }
+double EventCounter::tofMax() const { return m_tofMin <= m_tofMax ? m_tofMax : 0.0; }
 void EventCounter::addEventImpl(size_t id, int64_t pulse, double tof) {
   UNUSED_ARG(pulse);
   if (m_tofMin > tof)
@@ -145,31 +129,28 @@ void EventCounter::addEventImpl(size_t id, int64_t pulse, double tof) {
 }
 
 // EventAssigner
-EventAssigner::EventAssigner(
-    const std::vector<bool> &roi, const size_t stride, const double period,
-    const double phase, const int64_t startTime, const double tofMinBoundary,
-    const double tofMaxBoundary, const double timeMinBoundary,
-    const double timeMaxBoundary, std::vector<EventVector_pt> &eventVectors)
-    : EventProcessor(roi, stride, period, phase, startTime, tofMinBoundary,
-                     tofMaxBoundary, timeMinBoundary, timeMaxBoundary),
+EventAssigner::EventAssigner(const std::vector<bool> &roi, const size_t stride, const double period, const double phase,
+                             const int64_t startTime, const double tofMinBoundary, const double tofMaxBoundary,
+                             const double timeMinBoundary, const double timeMaxBoundary,
+                             std::vector<EventVector_pt> &eventVectors)
+    : EventProcessor(roi, stride, period, phase, startTime, tofMinBoundary, tofMaxBoundary, timeMinBoundary,
+                     timeMaxBoundary),
       m_eventVectors(eventVectors) {}
 void EventAssigner::addEventImpl(size_t id, int64_t pulse, double tof) {
   m_eventVectors[id]->emplace_back(tof, Types::Core::DateAndTime(pulse));
 }
 
 // EventAssignerFixedWavelength
-EventAssignerFixedWavelength::EventAssignerFixedWavelength(
-    const std::vector<bool> &roi, const size_t stride, const double wavelength,
-    const double period, const double phase, const int64_t startTime,
-    const double tofMinBoundary, const double tofMaxBoundary,
-    const double timeMinBoundary, const double timeMaxBoundary,
-    std::vector<EventVector_pt> &eventVectors)
-    : EventAssigner(roi, stride, period, phase, startTime, tofMinBoundary,
-                    tofMaxBoundary, timeMinBoundary, timeMaxBoundary,
-                    eventVectors),
+EventAssignerFixedWavelength::EventAssignerFixedWavelength(const std::vector<bool> &roi, const size_t stride,
+                                                           const double wavelength, const double period,
+                                                           const double phase, const int64_t startTime,
+                                                           const double tofMinBoundary, const double tofMaxBoundary,
+                                                           const double timeMinBoundary, const double timeMaxBoundary,
+                                                           std::vector<EventVector_pt> &eventVectors)
+    : EventAssigner(roi, stride, period, phase, startTime, tofMinBoundary, tofMaxBoundary, timeMinBoundary,
+                    timeMaxBoundary, eventVectors),
       m_wavelength(wavelength) {}
-void EventAssignerFixedWavelength::addEventImpl(size_t id, int64_t pulse,
-                                                double tof) {
+void EventAssignerFixedWavelength::addEventImpl(size_t id, int64_t pulse, double tof) {
   UNUSED_ARG(pulse);
   UNUSED_ARG(tof);
   m_eventVectors[id]->emplace_back(m_wavelength);
@@ -178,8 +159,7 @@ void EventAssignerFixedWavelength::addEventImpl(size_t id, int64_t pulse,
 // FastReadOnlyFile
 #ifdef _WIN32
 FastReadOnlyFile::FastReadOnlyFile(const char *filename) {
-  m_handle = CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ, NULL,
-                         OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  m_handle = CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 }
 FastReadOnlyFile::~FastReadOnlyFile() { close(); }
 void *FastReadOnlyFile::handle() const { return m_handle; }
@@ -189,17 +169,13 @@ void FastReadOnlyFile::close() {
 }
 bool FastReadOnlyFile::read(void *buffer, uint32_t size) {
   DWORD bytesRead;
-  return (FALSE != ReadFile(m_handle, buffer, size, &bytesRead, NULL)) &&
-         (bytesRead == size);
+  return (FALSE != ReadFile(m_handle, buffer, size, &bytesRead, NULL)) && (bytesRead == size);
 }
 bool FastReadOnlyFile::seek(int64_t offset, int whence, int64_t *newPosition) {
-  return FALSE != SetFilePointerEx(m_handle, *(LARGE_INTEGER *)&offset,
-                                   (LARGE_INTEGER *)newPosition, whence);
+  return FALSE != SetFilePointerEx(m_handle, *(LARGE_INTEGER *)&offset, (LARGE_INTEGER *)newPosition, whence);
 }
 #else
-FastReadOnlyFile::FastReadOnlyFile(const char *filename) {
-  m_handle = fopen(filename, "rb");
-}
+FastReadOnlyFile::FastReadOnlyFile(const char *filename) { m_handle = fopen(filename, "rb"); }
 FastReadOnlyFile::~FastReadOnlyFile() { close(); }
 void *FastReadOnlyFile::handle() const { return m_handle; }
 void FastReadOnlyFile::close() {
@@ -211,8 +187,7 @@ bool FastReadOnlyFile::read(void *buffer, uint32_t size) {
 }
 bool FastReadOnlyFile::seek(int64_t offset, int whence, int64_t *newPosition) {
   return (0 == fseek(m_handle, offset, whence)) &&
-         ((newPosition == nullptr) ||
-          (0 <= (*newPosition = static_cast<int64_t>(ftell(m_handle)))));
+         ((newPosition == nullptr) || (0 <= (*newPosition = static_cast<int64_t>(ftell(m_handle)))));
 }
 #endif
 
@@ -220,13 +195,11 @@ namespace Tar {
 
 void EntryHeader::writeChecksum() {
   memset(Checksum, ' ', sizeof(Checksum));
-  size_t value = std::accumulate(
-      (const char *)this, (const char *)this + sizeof(EntryHeader), (size_t)0);
+  size_t value = std::accumulate((const char *)this, (const char *)this + sizeof(EntryHeader), (size_t)0);
 
   std::ostringstream buffer;
 
-  buffer << std::oct << std::setfill('0')
-         << std::setw(static_cast<int>(sizeof(Checksum)) - 1) << value;
+  buffer << std::oct << std::setfill('0') << std::setw(static_cast<int>(sizeof(Checksum)) - 1) << value;
   std::string string = buffer.str();
 
   std::copy(string.cbegin(), string.cend(), Checksum);
@@ -235,8 +208,7 @@ void EntryHeader::writeChecksum() {
 void EntryHeader::writeFileSize(int64_t value) {
   std::ostringstream buffer;
 
-  buffer << std::oct << std::setfill('0')
-         << std::setw(static_cast<int>(sizeof(FileSize)) - 1) << value;
+  buffer << std::oct << std::setfill('0') << std::setw(static_cast<int>(sizeof(FileSize)) - 1) << value;
   std::string string = buffer.str();
 
   std::copy(string.cbegin(), string.cend(), FileSize);
@@ -255,8 +227,8 @@ int64_t EntryHeader::readFileSize() {
 
 // construction
 File::File(const std::string &path)
-    : m_good(true), m_file(path.c_str()), m_selected(static_cast<size_t>(-1)),
-      m_position(0), m_size(0), m_bufferPosition(0), m_bufferAvailable(0) {
+    : m_good(true), m_file(path.c_str()), m_selected(static_cast<size_t>(-1)), m_position(0), m_size(0),
+      m_bufferPosition(0), m_bufferAvailable(0) {
 
   m_good = m_file.handle() != nullptr;
   while (m_good) {
@@ -303,9 +275,7 @@ void File::close() {
 // properties
 bool File::good() const { return m_good; }
 const std::vector<std::string> &File::files() const { return m_fileNames; }
-const std::string &File::selected_name() const {
-  return m_fileNames[m_selected];
-}
+const std::string &File::selected_name() const { return m_fileNames[m_selected]; }
 int64_t File::selected_position() const { return m_position; }
 int64_t File::selected_size() const { return m_size; }
 
@@ -380,8 +350,7 @@ size_t File::read(void *dst, size_t size) {
   }
 
   while (size != 0) {
-    auto bytesToRead = static_cast<uint32_t>(
-        std::min<size_t>(size, std::numeric_limits<uint32_t>::max()));
+    auto bytesToRead = static_cast<uint32_t>(std::min<size_t>(size, std::numeric_limits<uint32_t>::max()));
 
     m_good &= m_file.read(ptr, bytesToRead);
     if (!m_good)
@@ -407,8 +376,7 @@ int File::read_byte() {
     m_bufferPosition = 0;
     m_bufferAvailable = 0;
 
-    uint32_t size = static_cast<uint32_t>(
-        std::min<int64_t>(sizeof(m_buffer), m_size - m_position));
+    uint32_t size = static_cast<uint32_t>(std::min<int64_t>(sizeof(m_buffer), m_size - m_position));
     m_good &= m_file.read(m_buffer, size);
 
     if (m_good)
@@ -420,10 +388,8 @@ int File::read_byte() {
   m_position++;
   return m_buffer[m_bufferPosition++];
 }
-bool File::append(const std::string &path, const std::string &name,
-                  const void *buffer, size_t size) {
-  std::unique_ptr<FILE, decltype(&fclose)> handle(fopen(path.c_str(), "rb+"),
-                                                  fclose);
+bool File::append(const std::string &path, const std::string &name, const void *buffer, size_t size) {
+  std::unique_ptr<FILE, decltype(&fclose)> handle(fopen(path.c_str(), "rb+"), fclose);
 
   bool good = handle != nullptr;
   int64_t lastHeaderPosition = 0;
@@ -449,8 +415,7 @@ bool File::append(const std::string &path, const std::string &name,
     if (fileName == name)
       targetPosition = lastHeaderPosition;
     else if (targetPosition != -1)
-      throw std::runtime_error(
-          "format exception"); // it has to be the last file in the archive
+      throw std::runtime_error("format exception"); // it has to be the last file in the archive
 
     FileInfo fileInfo;
     fileInfo.Offset = position;
@@ -460,8 +425,7 @@ bool File::append(const std::string &path, const std::string &name,
     if (offset != 0)
       offset = 512 - offset;
 
-    good &= 0 == fseek(handle.get(), static_cast<long>(fileInfo.Size + offset),
-                       SEEK_CUR);
+    good &= 0 == fseek(handle.get(), static_cast<long>(fileInfo.Size + offset), SEEK_CUR);
   }
 
   if (!good)

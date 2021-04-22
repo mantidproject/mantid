@@ -94,8 +94,7 @@ int Plane::setSurface(const std::string &Pstr)
   if (item.size() == 1) // PROCESS BASIC PLANE:
   {
     int cnt;
-    for (cnt = 0; cnt < 9 && Mantid::Kernel::Strings::section(Line, surf[cnt]);
-         cnt++)
+    for (cnt = 0; cnt < 9 && Mantid::Kernel::Strings::section(Line, surf[cnt]); cnt++)
       ;
 
     if (cnt != 4 && cnt != 9)
@@ -284,8 +283,7 @@ void Plane::write(std::ostream &OX) const {
   cx.precision(Surface::Nprecision);
   const std::size_t ptype = planeType();
   if (!ptype)
-    cx << "p " << m_normVec[0] << " " << m_normVec[1] << " " << m_normVec[2]
-       << " " << m_distance;
+    cx << "p " << m_normVec[0] << " " << m_normVec[1] << " " << m_normVec[2] << " " << m_distance;
   else if (m_normVec[ptype - 1] < 0)
     cx << "p"
        << "xyz"[ptype - 1] << " " << -m_distance;
@@ -307,21 +305,16 @@ int Plane::LineIntersectionWithPlane(V3D startpt, V3D endpt, V3D &output) {
   double const sprod = this->getNormal().scalar_prod(startpt - endpt);
   if (sprod == 0)
     return 0;
-  double const projection = m_normVec[0] * startpt[0] +
-                            m_normVec[1] * startpt[1] +
-                            m_normVec[2] * startpt[2];
+  double const projection = m_normVec[0] * startpt[0] + m_normVec[1] * startpt[1] + m_normVec[2] * startpt[2];
   double s1 = (projection - m_distance) / sprod;
   if (s1 < 0 || s1 > 1)
     return 0;
   // The expressions below for resolving the point of intersection are
   // resilient to the corner m_distance << sprod.
   double const ratio = projection / sprod;
-  output[0] = ratio * endpt[0] + (1 - ratio) * startpt[0] -
-              ((endpt[0] - startpt[0]) / sprod) * m_distance;
-  output[1] = ratio * endpt[1] + (1 - ratio) * startpt[1] -
-              ((endpt[1] - startpt[1]) / sprod) * m_distance;
-  output[2] = ratio * endpt[2] + (1 - ratio) * startpt[2] -
-              ((endpt[2] - startpt[2]) / sprod) * m_distance;
+  output[0] = ratio * endpt[0] + (1 - ratio) * startpt[0] - ((endpt[0] - startpt[0]) / sprod) * m_distance;
+  output[1] = ratio * endpt[1] + (1 - ratio) * startpt[1] - ((endpt[1] - startpt[1]) / sprod) * m_distance;
+  output[2] = ratio * endpt[2] + (1 - ratio) * startpt[2] - ((endpt[2] - startpt[2]) / sprod) * m_distance;
   return 1;
 }
 
@@ -336,8 +329,7 @@ int Plane::LineIntersectionWithPlane(V3D startpt, V3D endpt, V3D &output) {
  * @param ymin :: input & output minimum value in y direction
  * @param zmin :: input & output minimum value in z direction
  */
-void Plane::getBoundingBox(double &xmax, double &ymax, double &zmax,
-                           double &xmin, double &ymin, double &zmin) {
+void Plane::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) {
   // to get the bounding box calculate the normal and the starting point
   V3D vertex1(xmin, ymin, zmin);
   V3D vertex2(xmax, ymin, zmin);
@@ -378,8 +370,7 @@ void Plane::getBoundingBox(double &xmax, double &ymax, double &zmax,
     listOfPoints.emplace_back(vertex7);
   if (this->side(vertex8) <= 0)
     listOfPoints.emplace_back(vertex8);
-  V3D edge1, edge2, edge3, edge4, edge5, edge6, edge7, edge8, edge9, edge10,
-      edge11, edge12;
+  V3D edge1, edge2, edge3, edge4, edge5, edge6, edge7, edge8, edge9, edge10, edge11, edge12;
   if (LineIntersectionWithPlane(vertex1, vertex2, edge1) == 1)
     listOfPoints.emplace_back(edge1);
   if (LineIntersectionWithPlane(vertex2, vertex3, edge2) == 1)
@@ -409,8 +400,7 @@ void Plane::getBoundingBox(double &xmax, double &ymax, double &zmax,
   if (!listOfPoints.empty()) {
     xmin = ymin = zmin = std::numeric_limits<double>::max();
     xmax = ymax = zmax = std::numeric_limits<double>::lowest();
-    for (std::vector<V3D>::const_iterator it = listOfPoints.begin();
-         it != listOfPoints.end(); ++it) {
+    for (std::vector<V3D>::const_iterator it = listOfPoints.begin(); it != listOfPoints.end(); ++it) {
       //			std::cout<<(*it)<<'\n';
       if ((*it)[0] < xmin)
         xmin = (*it)[0];
@@ -440,14 +430,10 @@ TopoDS_Shape Plane::createShape() {
   // Find point closest to origin
   double t = distance / norm2;
   // Create Half Space
-  TopoDS_Face P = BRepBuilderAPI_MakeFace(
-                      gp_Pln(normal[0], normal[1], normal[2], -distance))
-                      .Face();
+  TopoDS_Face P = BRepBuilderAPI_MakeFace(gp_Pln(normal[0], normal[1], normal[2], -distance)).Face();
 
-  TopoDS_Shape Result = BRepPrimAPI_MakeHalfSpace(
-                            P, gp_Pnt(normal[0] * (1 + t), normal[1] * (1 + t),
-                                      normal[2] * (1 + t)))
-                            .Solid();
+  TopoDS_Shape Result =
+      BRepPrimAPI_MakeHalfSpace(P, gp_Pnt(normal[0] * (1 + t), normal[1] * (1 + t), normal[2] * (1 + t))).Solid();
   return Result.Complemented();
 }
 #endif

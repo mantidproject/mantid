@@ -28,8 +28,7 @@ struct MinAndMaxTof {
 };
 
 struct MinAndMaxIndex {
-  MinAndMaxIndex(int minIndex, int maxIndex)
-      : minIndex(minIndex), maxIndex(maxIndex) {}
+  MinAndMaxIndex(int minIndex, int maxIndex) : minIndex(minIndex), maxIndex(maxIndex) {}
   int minIndex;
   int maxIndex;
 };
@@ -48,40 +47,31 @@ struct MinAndMaxIndex {
  * @param upperWavelengthLimit the upper bound of the wavelength in Angstrom
  * @return  the upper and lower bound of the TOF in microseconds
  */
-MinAndMaxTof getMinAndMaxTofForDistanceFromSoure(double distanceFromSource,
-                                                 double lowerWavelengthLimit,
+MinAndMaxTof getMinAndMaxTofForDistanceFromSoure(double distanceFromSource, double lowerWavelengthLimit,
                                                  double upperWavelengthLimit) {
   // Calculate and set the constant factor for the conversion to wavelength
   const double angstromConversion = 1e10;
   const double microsecondConversion = 1e6;
   const double conversionConstant =
-      (distanceFromSource * Mantid::PhysicalConstants::NeutronMass *
-       microsecondConversion) /
+      (distanceFromSource * Mantid::PhysicalConstants::NeutronMass * microsecondConversion) /
       (Mantid::PhysicalConstants::h * angstromConversion);
-  const double minTof = lowerWavelengthLimit == specialWavelengthCutoff
-                            ? specialTimeOfFlightCutoff
-                            : conversionConstant * lowerWavelengthLimit;
-  const double maxTof = upperWavelengthLimit == specialWavelengthCutoff
-                            ? specialTimeOfFlightCutoff
-                            : conversionConstant * upperWavelengthLimit;
+  const double minTof = lowerWavelengthLimit == specialWavelengthCutoff ? specialTimeOfFlightCutoff
+                                                                        : conversionConstant * lowerWavelengthLimit;
+  const double maxTof = upperWavelengthLimit == specialWavelengthCutoff ? specialTimeOfFlightCutoff
+                                                                        : conversionConstant * upperWavelengthLimit;
   return MinAndMaxTof(minTof, maxTof);
 }
 
-double getDistanceFromSourceForWorkspaceIndex(
-    Mantid::API::MatrixWorkspace *workspace,
-    const Mantid::API::SpectrumInfo &spectrumInfo, size_t workspaceIndex) {
+double getDistanceFromSourceForWorkspaceIndex(Mantid::API::MatrixWorkspace *workspace,
+                                              const Mantid::API::SpectrumInfo &spectrumInfo, size_t workspaceIndex) {
   const auto &detector = spectrumInfo.detector(workspaceIndex);
   return detector.getDistance(*(workspace->getInstrument()->getSource()));
 }
 
-MinAndMaxTof getMinAndMaxTof(Mantid::API::MatrixWorkspace *workspace,
-                             const Mantid::API::SpectrumInfo &spectrumInfo,
-                             size_t workspaceIndex, double lowerWavelengthLimit,
-                             double upperWavelengthLimit) {
-  const auto distanceFromSource = getDistanceFromSourceForWorkspaceIndex(
-      workspace, spectrumInfo, workspaceIndex);
-  return getMinAndMaxTofForDistanceFromSoure(
-      distanceFromSource, lowerWavelengthLimit, upperWavelengthLimit);
+MinAndMaxTof getMinAndMaxTof(Mantid::API::MatrixWorkspace *workspace, const Mantid::API::SpectrumInfo &spectrumInfo,
+                             size_t workspaceIndex, double lowerWavelengthLimit, double upperWavelengthLimit) {
+  const auto distanceFromSource = getDistanceFromSourceForWorkspaceIndex(workspace, spectrumInfo, workspaceIndex);
+  return getMinAndMaxTofForDistanceFromSoure(distanceFromSource, lowerWavelengthLimit, upperWavelengthLimit);
 }
 
 /**
@@ -92,8 +82,7 @@ MinAndMaxTof getMinAndMaxTof(Mantid::API::MatrixWorkspace *workspace,
  * @param workspaceIndex the particular histogram index
  * @return a BinEdges object
  */
-Mantid::HistogramData::Points getPoints(Mantid::API::MatrixWorkspace *workspace,
-                                        size_t workspaceIndex) {
+Mantid::HistogramData::Points getPoints(Mantid::API::MatrixWorkspace *workspace, size_t workspaceIndex) {
   auto points = workspace->points(workspaceIndex);
   std::vector<double> doubledData(2 * points.size(), 0);
   std::copy(std::begin(points), std::end(points), std::begin(doubledData));
@@ -116,19 +105,16 @@ Mantid::HistogramData::Points getPoints(Mantid::API::MatrixWorkspace *workspace,
     lastElementToNewElementSpacing = doubledData[1] - doubledData[0];
   }
 
-  for (auto pointsIterator = points.begin();
-       doubledDataIterator != doubledData.end();
+  for (auto pointsIterator = points.begin(); doubledDataIterator != doubledData.end();
        ++doubledDataIterator, ++pointsIterator) {
-    auto newValue =
-        lastTof + lastElementToNewElementSpacing + (*pointsIterator - firstTof);
+    auto newValue = lastTof + lastElementToNewElementSpacing + (*pointsIterator - firstTof);
     *doubledDataIterator = newValue;
   }
 
   return Mantid::HistogramData::Points{doubledData};
 }
 
-MinAndMaxIndex getMinAndMaxIndex(const MinAndMaxTof &minMaxTof,
-                                 const Mantid::HistogramData::Points &points) {
+MinAndMaxIndex getMinAndMaxIndex(const MinAndMaxTof &minMaxTof, const Mantid::HistogramData::Points &points) {
   int minIndex = specialIndex;
   int maxIndex = specialIndex;
   const auto minCutOff = minMaxTof.minTof;
@@ -167,8 +153,7 @@ MinAndMaxIndex getMinAndMaxIndex(const MinAndMaxTof &minMaxTof,
   return MinAndMaxIndex(minIndex, maxIndex);
 }
 
-void setTofBelowLowerBoundToZero(std::vector<double> &doubledData,
-                                 int minIndex) {
+void setTofBelowLowerBoundToZero(std::vector<double> &doubledData, int minIndex) {
   if (minIndex == specialIndex) {
     return;
   }
@@ -178,8 +163,7 @@ void setTofBelowLowerBoundToZero(std::vector<double> &doubledData,
   std::fill(begin, end, 0.0);
 }
 
-void setTofAboveUpperBoundToZero(std::vector<double> &doubledData,
-                                 int maxIndex) {
+void setTofAboveUpperBoundToZero(std::vector<double> &doubledData, int maxIndex) {
   if (maxIndex >= static_cast<int>(doubledData.size()) - 1) {
     return;
   }
@@ -199,10 +183,8 @@ void setTofAboveUpperBoundToZero(std::vector<double> &doubledData,
  * @param binEdges the TOF BinEdges object
  * @return a Counts object
  */
-Mantid::HistogramData::Counts
-getCounts(Mantid::API::MatrixWorkspace *workspace, size_t workspaceIndex,
-          const MinAndMaxTof &minMaxTof,
-          const Mantid::HistogramData::Points &points) {
+Mantid::HistogramData::Counts getCounts(Mantid::API::MatrixWorkspace *workspace, size_t workspaceIndex,
+                                        const MinAndMaxTof &minMaxTof, const Mantid::HistogramData::Points &points) {
   // Create the data twice
   auto counts = workspace->counts(workspaceIndex);
   std::vector<double> doubledData(2 * counts.size(), 0);
@@ -233,8 +215,7 @@ getCounts(Mantid::API::MatrixWorkspace *workspace, size_t workspaceIndex,
  * @param workspace
  * @return
  */
-std::vector<size_t>
-getWorkspaceIndicesForMonitors(Mantid::API::MatrixWorkspace *workspace) {
+std::vector<size_t> getWorkspaceIndicesForMonitors(Mantid::API::MatrixWorkspace *workspace) {
   std::vector<size_t> workspaceIndices;
   auto monitorWorkspace = workspace->monitorWorkspace();
   if (monitorWorkspace) {
@@ -242,15 +223,13 @@ getWorkspaceIndicesForMonitors(Mantid::API::MatrixWorkspace *workspace) {
     for (size_t index = 0; index < numberOfHistograms; ++index) {
       const auto &spectrum = workspace->getSpectrum(index);
       auto spectrumNumber = spectrum.getSpectrumNo();
-      auto workspaceIndex =
-          workspace->getIndexFromSpectrumNumber(spectrumNumber);
+      auto workspaceIndex = workspace->getIndexFromSpectrumNumber(spectrumNumber);
       workspaceIndices.emplace_back(workspaceIndex);
     }
   } else {
     auto numberOfHistograms = workspace->getNumberHistograms();
     const auto &spectrumInfo = workspace->spectrumInfo();
-    for (size_t workspaceIndex = 0; workspaceIndex < numberOfHistograms;
-         ++workspaceIndex) {
+    for (size_t workspaceIndex = 0; workspaceIndex < numberOfHistograms; ++workspaceIndex) {
       if (spectrumInfo.isMonitor(workspaceIndex)) {
         workspaceIndices.emplace_back(workspaceIndex);
       }
@@ -272,17 +251,13 @@ DECLARE_ALGORITHM(UnwrapMonitorsInTOF)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string UnwrapMonitorsInTOF::name() const {
-  return "UnwrapMonitorsInTOF";
-}
+const std::string UnwrapMonitorsInTOF::name() const { return "UnwrapMonitorsInTOF"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int UnwrapMonitorsInTOF::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string UnwrapMonitorsInTOF::category() const {
-  return "CorrectionFunctions\\InstrumentCorrections";
-}
+const std::string UnwrapMonitorsInTOF::category() const { return "CorrectionFunctions\\InstrumentCorrections"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string UnwrapMonitorsInTOF::summary() const {
@@ -304,17 +279,13 @@ const std::string UnwrapMonitorsInTOF::summary() const {
  */
 void UnwrapMonitorsInTOF::init() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
   declareProperty(
-      std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
+      std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
       "An output workspace.");
-  declareProperty<double>("WavelengthMin", specialWavelengthCutoff,
-                          "A lower bound of the wavelength range.");
-  declareProperty<double>("WavelengthMax", specialWavelengthCutoff,
-                          "An upper bound of the wavelength range.");
+  declareProperty<double>("WavelengthMin", specialWavelengthCutoff, "A lower bound of the wavelength range.");
+  declareProperty<double>("WavelengthMax", specialWavelengthCutoff, "An upper bound of the wavelength range.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -327,30 +298,23 @@ void UnwrapMonitorsInTOF::exec() {
   //    that at there is an interval in which the data is correct
   // 2. Data which is outside of a certain equivalent wavelength range will be
   // set to 0
-  Mantid::API::MatrixWorkspace_sptr inputWorkspace =
-      getProperty("InputWorkspace");
+  Mantid::API::MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
   const double lowerWavelengthLimit = getProperty("WavelengthMin");
   const double upperWavelengthLimit = getProperty("WavelengthMax");
 
-  auto outputWorkspace =
-      Mantid::API::MatrixWorkspace_sptr(inputWorkspace->clone());
-  const auto workspaceIndices =
-      getWorkspaceIndicesForMonitors(outputWorkspace.get());
+  auto outputWorkspace = Mantid::API::MatrixWorkspace_sptr(inputWorkspace->clone());
+  const auto workspaceIndices = getWorkspaceIndicesForMonitors(outputWorkspace.get());
 
   const auto &spectrumInfo = outputWorkspace->spectrumInfo();
 
   for (const auto &workspaceIndex : workspaceIndices) {
-    const auto minMaxTof =
-        getMinAndMaxTof(outputWorkspace.get(), spectrumInfo, workspaceIndex,
-                        lowerWavelengthLimit, upperWavelengthLimit);
+    const auto minMaxTof = getMinAndMaxTof(outputWorkspace.get(), spectrumInfo, workspaceIndex, lowerWavelengthLimit,
+                                           upperWavelengthLimit);
     auto points = getPoints(outputWorkspace.get(), workspaceIndex);
-    auto counts =
-        getCounts(outputWorkspace.get(), workspaceIndex, minMaxTof, points);
+    auto counts = getCounts(outputWorkspace.get(), workspaceIndex, minMaxTof, points);
     // Get the input histogram
     auto inputHistogram = inputWorkspace->histogram(workspaceIndex);
-    auto spectrumIsHistogramData =
-        inputHistogram.xMode() ==
-        Mantid::HistogramData::Histogram::XMode::BinEdges;
+    auto spectrumIsHistogramData = inputHistogram.xMode() == Mantid::HistogramData::Histogram::XMode::BinEdges;
     if (spectrumIsHistogramData) {
       Mantid::HistogramData::BinEdges binEdges(points);
       Mantid::HistogramData::Histogram histogram(binEdges, counts);
@@ -373,20 +337,15 @@ std::map<std::string, std::string> UnwrapMonitorsInTOF::validateInputs() {
   // boundary
   const double lowerWavelengthLimit = getProperty("WavelengthMin");
   const double upperWavelengthLimit = getProperty("WavelengthMax");
-  if (lowerWavelengthLimit != specialWavelengthCutoff &&
-      lowerWavelengthLimit < 0.0) {
-    invalidProperties["WavelengthMin"] =
-        "The lower wavelength limit must be set to a positive value.";
+  if (lowerWavelengthLimit != specialWavelengthCutoff && lowerWavelengthLimit < 0.0) {
+    invalidProperties["WavelengthMin"] = "The lower wavelength limit must be set to a positive value.";
   }
 
-  if (upperWavelengthLimit != specialWavelengthCutoff &&
-      upperWavelengthLimit < 0.0) {
-    invalidProperties["WavelengthMax"] =
-        "The upper wavelength limit must be set to a positive value.";
+  if (upperWavelengthLimit != specialWavelengthCutoff && upperWavelengthLimit < 0.0) {
+    invalidProperties["WavelengthMax"] = "The upper wavelength limit must be set to a positive value.";
   }
 
-  if (lowerWavelengthLimit != specialWavelengthCutoff &&
-      upperWavelengthLimit != specialWavelengthCutoff &&
+  if (lowerWavelengthLimit != specialWavelengthCutoff && upperWavelengthLimit != specialWavelengthCutoff &&
       lowerWavelengthLimit >= upperWavelengthLimit) {
     invalidProperties["WavelengthMin"] = "The lower wavelength limit must be "
                                          "smaller than the upper wavelnegth "

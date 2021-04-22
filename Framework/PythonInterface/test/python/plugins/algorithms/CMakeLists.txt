@@ -53,6 +53,7 @@ set(TEST_PY_FILES
     HB3AFindPeaksTest.py
     HB3AIntegratePeaksTest.py
     HB3APredictPeaksTest.py
+    HFIRCalculateGoniometerTest.py
     HFIRSANS2WavelengthTest.py
     IndirectTransmissionTest.py
     IndexSatellitePeaksTest.py
@@ -88,6 +89,7 @@ set(TEST_PY_FILES
     OptimizeCrystalPlacementByRunTest.py
     PDConvertRealSpaceTest.py
     PDConvertReciprocalSpaceTest.py
+    PeakMatchingTest.py
     RebinRaggedTest.py
     ReflectometryReductionOneLiveDataTest.py
     ReflectometrySliceEventWorkspaceTest.py

@@ -48,8 +48,7 @@ dict neutron(Atom &self) {
  * @param z_number :: Atomic number of element (number of protons)
  * @return a dict of the neutron cross-sections
  */
-static std::shared_ptr<Atom> setAtom(const std::string &symbol,
-                                     const uint16_t a_number = 0,
+static std::shared_ptr<Atom> setAtom(const std::string &symbol, const uint16_t a_number = 0,
                                      const uint16_t z_number = 0) {
   if (z_number > 0) {
     Atom atom = getAtom(z_number, a_number);
@@ -72,22 +71,15 @@ void export_Atom() {
 
   class_<Atom, boost::noncopyable>("Atom", no_init) // No default constructor
       .def("__init__",
-           make_constructor(
-               &setAtom, default_call_policies(),
-               (arg("symbol") = "", arg("a_number") = 0, arg("z_number") = 0)),
+           make_constructor(&setAtom, default_call_policies(),
+                            (arg("symbol") = "", arg("a_number") = 0, arg("z_number") = 0)),
            "Constructor for Atom class")
       .def_readonly("symbol", &Atom::symbol, "The element symbol of this atom")
-      .def_readonly("z_number", &Atom::z_number,
-                    "The atomic number (number of protons) of this atom")
-      .def_readonly("a_number", &Atom::a_number,
-                    "The mass number (number of nucleons) of this atom")
+      .def_readonly("z_number", &Atom::z_number, "The atomic number (number of protons) of this atom")
+      .def_readonly("a_number", &Atom::a_number, "The mass number (number of nucleons) of this atom")
       .def_readonly("abundance", &Atom::abundance, "The abundance of this atom")
-      .def_readonly("mass", &Atom::mass,
-                    "The relative atomic mass of this atom")
-      .def_readonly("mass_density", &Atom::mass_density,
-                    "The mass density of this atom in g/cm^3")
-      .def_readonly("number_density", &Atom::number_density,
-                    "The number density of this atom in cm^-3")
-      .def("neutron", &neutron, arg("self"),
-           "Neutron cross-section information for this atom");
+      .def_readonly("mass", &Atom::mass, "The relative atomic mass of this atom")
+      .def_readonly("mass_density", &Atom::mass_density, "The mass density of this atom in g/cm^3")
+      .def_readonly("number_density", &Atom::number_density, "The number density of this atom in cm^-3")
+      .def("neutron", &neutron, arg("self"), "Neutron cross-section information for this atom");
 }

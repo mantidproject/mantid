@@ -27,11 +27,9 @@ namespace Geometry {
     in a hierarchical structure in the form of a tree.
     ObjCompAssembly inherits from component.
 */
-class MANTID_GEOMETRY_DLL ObjCompAssembly : public virtual ICompAssembly,
-                                            public virtual ObjComponent {
-  using comp_it = std::vector<ObjComponent *>::iterator; ///< Iterator type
-  using const_comp_it =
-      std::vector<ObjComponent *>::const_iterator; ///< Const iterator type
+class MANTID_GEOMETRY_DLL ObjCompAssembly : public virtual ICompAssembly, public virtual ObjComponent {
+  using comp_it = std::vector<ObjComponent *>::iterator;             ///< Iterator type
+  using const_comp_it = std::vector<ObjComponent *>::const_iterator; ///< Const iterator type
 public:
   /// String description of the type of component
   std::string type() const override { return "ObjCompAssembly"; }
@@ -57,16 +55,12 @@ public:
   int addCopy(IComponent *, const std::string &) override;
   //! Get a pointer to the ith component within the assembly. Easier to use than
   //[] when you have a pointer
-  std::shared_ptr<IComponent> getChild(const int i) const override {
-    return (*this)[i];
-  }
+  std::shared_ptr<IComponent> getChild(const int i) const override { return (*this)[i]; }
   //! Get all children
-  void getChildren(std::vector<IComponent_const_sptr> &outVector,
-                   bool recursive) const override;
+  void getChildren(std::vector<IComponent_const_sptr> &outVector, bool recursive) const override;
   //! Returns a pointer to the first component of assembly encountered with the
   // given name
-  std::shared_ptr<const IComponent>
-  getComponentByName(const std::string &cname, int nlevels = 0) const override;
+  std::shared_ptr<const IComponent> getComponentByName(const std::string &cname, int nlevels = 0) const override;
   //! Get a pointer to the ith component in the assembly
   std::shared_ptr<IComponent> operator[](int i) const override;
   //! Print information about all children
@@ -82,12 +76,10 @@ public:
 
   /** Test the intersection of the ray with the children of the component
    * assembly  */
-  void testIntersectionWithChildren(
-      Track & /*testRay*/,
-      std::deque<IComponent_const_sptr> & /*searchQueue*/) const override;
+  void testIntersectionWithChildren(Track & /*testRay*/,
+                                    std::deque<IComponent_const_sptr> & /*searchQueue*/) const override;
 
-  size_t registerContents(
-      class Mantid::Geometry::ComponentVisitor &visitor) const override;
+  size_t registerContents(class Mantid::Geometry::ComponentVisitor &visitor) const override;
 
 private:
   /// Private copy assignment operator
@@ -102,8 +94,7 @@ using ObjCompAssembly_sptr = std::shared_ptr<ObjCompAssembly>;
 /// Shared pointer to ObjCompAssembly (const version)
 using ObjCompAssembly_const_sptr = std::shared_ptr<const ObjCompAssembly>;
 
-MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
-                                             const ObjCompAssembly &);
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &, const ObjCompAssembly &);
 
 } // Namespace Geometry
 } // Namespace Mantid

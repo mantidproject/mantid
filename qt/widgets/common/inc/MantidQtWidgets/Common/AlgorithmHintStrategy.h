@@ -18,19 +18,15 @@ namespace MantidWidgets {
  */
 class AlgorithmHintStrategy : public HintStrategy {
 public:
-  AlgorithmHintStrategy(Mantid::API::IAlgorithm_sptr algorithm,
-                        std::vector<std::string> blacklist)
+  AlgorithmHintStrategy(Mantid::API::IAlgorithm_sptr algorithm, std::vector<std::string> blacklist)
       : m_algorithm(std::move(algorithm)), m_blacklist(std::move(blacklist)) {}
 
-  AlgorithmHintStrategy(std::string const &algorithmName,
-                        std::vector<std::string> blacklist)
-      : m_algorithm(
-            Mantid::API::AlgorithmManager::Instance().create(algorithmName)),
+  AlgorithmHintStrategy(std::string const &algorithmName, std::vector<std::string> blacklist)
+      : m_algorithm(Mantid::API::AlgorithmManager::Instance().create(algorithmName)),
         m_blacklist(std::move(blacklist)) {}
 
   bool isBlacklisted(std::string const &propertyName) {
-    return std::find(m_blacklist.cbegin(), m_blacklist.cend(), propertyName) !=
-           m_blacklist.cend();
+    return std::find(m_blacklist.cbegin(), m_blacklist.cend(), propertyName) != m_blacklist.cend();
   }
 
   std::vector<Hint> createHints() override {
@@ -38,16 +34,12 @@ public:
     auto properties = m_algorithm->getProperties();
     properties.erase(
         std::remove_if(properties.begin(), properties.end(),
-                       [this](Mantid::Kernel::Property *property) -> bool {
-                         return isBlacklisted(property->name());
-                       }),
+                       [this](Mantid::Kernel::Property *property) -> bool { return isBlacklisted(property->name()); }),
         properties.end());
     hints.reserve(properties.size());
-    std::transform(properties.cbegin(), properties.cend(),
-                   std::back_inserter(hints),
-                   [](Mantid::Kernel::Property *property) -> Hint {
-                     return Hint(property->name(), property->documentation());
-                   });
+    std::transform(
+        properties.cbegin(), properties.cend(), std::back_inserter(hints),
+        [](Mantid::Kernel::Property *property) -> Hint { return Hint(property->name(), property->documentation()); });
 
     return hints;
   }

@@ -26,12 +26,8 @@ class GetSpiceDataRawCountsFromMDTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static GetSpiceDataRawCountsFromMDTest *createSuite() {
-    return new GetSpiceDataRawCountsFromMDTest();
-  }
-  static void destroySuite(GetSpiceDataRawCountsFromMDTest *suite) {
-    delete suite;
-  }
+  static GetSpiceDataRawCountsFromMDTest *createSuite() { return new GetSpiceDataRawCountsFromMDTest(); }
+  static void destroySuite(GetSpiceDataRawCountsFromMDTest *suite) { delete suite; }
 
   //----------------------------------------------------------------------------------------------
   /** Test for initialization
@@ -51,20 +47,17 @@ public:
     testalg.initialize();
 
     TS_ASSERT_THROWS_NOTHING(testalg.setProperty("InputWorkspace", m_dataMD));
-    TS_ASSERT_THROWS_NOTHING(
-        testalg.setProperty("MonitorWorkspace", m_monitorMD));
+    TS_ASSERT_THROWS_NOTHING(testalg.setProperty("MonitorWorkspace", m_monitorMD));
     TS_ASSERT_THROWS_NOTHING(testalg.setProperty("Mode", "Pt."));
     TS_ASSERT_THROWS_NOTHING(testalg.setProperty("Pt", 30));
-    TS_ASSERT_THROWS_NOTHING(
-        testalg.setPropertyValue("OutputWorkspace", "Run1CountsMatrixWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        testalg.setProperty("NormalizeByMonitorCounts", true));
+    TS_ASSERT_THROWS_NOTHING(testalg.setPropertyValue("OutputWorkspace", "Run1CountsMatrixWS"));
+    TS_ASSERT_THROWS_NOTHING(testalg.setProperty("NormalizeByMonitorCounts", true));
 
     testalg.execute();
     TS_ASSERT(testalg.isExecuted());
 
-    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("Run1CountsMatrixWS"));
+    MatrixWorkspace_sptr outws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Run1CountsMatrixWS"));
     TS_ASSERT(outws);
 
     const auto &vecX = outws->x(0);
@@ -89,20 +82,17 @@ public:
     testalg.initialize();
 
     TS_ASSERT_THROWS_NOTHING(testalg.setProperty("InputWorkspace", m_dataMD));
-    TS_ASSERT_THROWS_NOTHING(
-        testalg.setProperty("MonitorWorkspace", m_monitorMD));
+    TS_ASSERT_THROWS_NOTHING(testalg.setProperty("MonitorWorkspace", m_monitorMD));
     TS_ASSERT_THROWS_NOTHING(testalg.setProperty("Mode", "Detector"));
     TS_ASSERT_THROWS_NOTHING(testalg.setProperty("DetectorID", 1));
-    TS_ASSERT_THROWS_NOTHING(
-        testalg.setPropertyValue("OutputWorkspace", "Run1CountsMatrixWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        testalg.setProperty("NormalizeByMonitorCounts", false));
+    TS_ASSERT_THROWS_NOTHING(testalg.setPropertyValue("OutputWorkspace", "Run1CountsMatrixWS"));
+    TS_ASSERT_THROWS_NOTHING(testalg.setProperty("NormalizeByMonitorCounts", false));
 
     testalg.execute();
     TS_ASSERT(testalg.isExecuted());
 
-    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("Run1CountsMatrixWS"));
+    MatrixWorkspace_sptr outws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Run1CountsMatrixWS"));
     TS_ASSERT(outws);
 
     const auto &vecX = outws->x(0);
@@ -127,21 +117,18 @@ public:
     testalg.initialize();
 
     TS_ASSERT_THROWS_NOTHING(testalg.setProperty("InputWorkspace", m_dataMD));
-    TS_ASSERT_THROWS_NOTHING(
-        testalg.setProperty("MonitorWorkspace", m_monitorMD));
+    TS_ASSERT_THROWS_NOTHING(testalg.setProperty("MonitorWorkspace", m_monitorMD));
     TS_ASSERT_THROWS_NOTHING(testalg.setProperty("Mode", "Detector"));
     TS_ASSERT_THROWS_NOTHING(testalg.setProperty("DetectorID", 1));
     TS_ASSERT_THROWS_NOTHING(testalg.setProperty("XLabel", "Pt."))
-    TS_ASSERT_THROWS_NOTHING(
-        testalg.setPropertyValue("OutputWorkspace", "Run1CountsMatrixWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        testalg.setProperty("NormalizeByMonitorCounts", true));
+    TS_ASSERT_THROWS_NOTHING(testalg.setPropertyValue("OutputWorkspace", "Run1CountsMatrixWS"));
+    TS_ASSERT_THROWS_NOTHING(testalg.setProperty("NormalizeByMonitorCounts", true));
 
     testalg.execute();
     TS_ASSERT(testalg.isExecuted());
 
-    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("Run1CountsMatrixWS"));
+    MatrixWorkspace_sptr outws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Run1CountsMatrixWS"));
     TS_ASSERT(outws);
 
     const auto &vecX = outws->x(0);
@@ -167,20 +154,17 @@ public:
     testalg.initialize();
 
     TS_ASSERT_THROWS_NOTHING(testalg.setProperty("InputWorkspace", m_dataMD));
-    TS_ASSERT_THROWS_NOTHING(
-        testalg.setProperty("MonitorWorkspace", m_monitorMD));
+    TS_ASSERT_THROWS_NOTHING(testalg.setProperty("MonitorWorkspace", m_monitorMD));
     TS_ASSERT_THROWS_NOTHING(testalg.setProperty("Mode", "Sample Log"));
     TS_ASSERT_THROWS_NOTHING(testalg.setProperty("SampleLogName", "2theta"));
-    TS_ASSERT_THROWS_NOTHING(
-        testalg.setPropertyValue("OutputWorkspace", "Run1CountsMatrixWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        testalg.setProperty("NormalizeByMonitorCounts", false));
+    TS_ASSERT_THROWS_NOTHING(testalg.setPropertyValue("OutputWorkspace", "Run1CountsMatrixWS"));
+    TS_ASSERT_THROWS_NOTHING(testalg.setProperty("NormalizeByMonitorCounts", false));
 
     testalg.execute();
     TS_ASSERT(testalg.isExecuted());
 
-    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("Run1CountsMatrixWS"));
+    MatrixWorkspace_sptr outws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Run1CountsMatrixWS"));
     TS_ASSERT(outws);
 
     const auto &vecX = outws->x(0);
@@ -219,27 +203,20 @@ private:
     spcloader.initialize();
 
     // Load HB2A spice file
-    TS_ASSERT_THROWS_NOTHING(
-        spcloader.setProperty("Filename", "HB2A_exp0231_scan0001.dat"));
-    TS_ASSERT_THROWS_NOTHING(
-        spcloader.setProperty("OutputWorkspace", "DataTable"));
-    TS_ASSERT_THROWS_NOTHING(
-        spcloader.setProperty("RunInfoWorkspace", "LogParentWS"));
-    TS_ASSERT_THROWS_NOTHING(spcloader.setPropertyValue(
-        "DateAndTimeLog", "date,MM/DD/YYYY,time,HH:MM:SS AM"));
-    TS_ASSERT_THROWS_NOTHING(
-        spcloader.setProperty("IgnoreUnlistedLogs", false));
+    TS_ASSERT_THROWS_NOTHING(spcloader.setProperty("Filename", "HB2A_exp0231_scan0001.dat"));
+    TS_ASSERT_THROWS_NOTHING(spcloader.setProperty("OutputWorkspace", "DataTable"));
+    TS_ASSERT_THROWS_NOTHING(spcloader.setProperty("RunInfoWorkspace", "LogParentWS"));
+    TS_ASSERT_THROWS_NOTHING(spcloader.setPropertyValue("DateAndTimeLog", "date,MM/DD/YYYY,time,HH:MM:SS AM"));
+    TS_ASSERT_THROWS_NOTHING(spcloader.setProperty("IgnoreUnlistedLogs", false));
     spcloader.execute();
 
     // Retrieve the workspaces as the inputs of ConvertSpiceDataToRealSpace
     ITableWorkspace_sptr datatablews =
-        std::dynamic_pointer_cast<ITableWorkspace>(
-            AnalysisDataService::Instance().retrieve("DataTable"));
+        std::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve("DataTable"));
     TS_ASSERT(datatablews);
 
     MatrixWorkspace_sptr parentlogws =
-        std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("LogParentWS"));
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LogParentWS"));
     TS_ASSERT(parentlogws);
 
     // Set up ConvertSpiceDataToRealSpace
@@ -256,10 +233,8 @@ private:
     TS_ASSERT(loader.isExecuted());
 
     // Get on hold of MDWorkspaces for test
-    m_dataMD = std::dynamic_pointer_cast<IMDEventWorkspace>(
-        AnalysisDataService::Instance().retrieve("HB2A_MD"));
-    m_monitorMD = std::dynamic_pointer_cast<IMDEventWorkspace>(
-        AnalysisDataService::Instance().retrieve("MonitorMDW"));
+    m_dataMD = std::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve("HB2A_MD"));
+    m_monitorMD = std::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve("MonitorMDW"));
     TS_ASSERT(m_dataMD);
     TS_ASSERT(m_monitorMD);
 

@@ -51,8 +51,7 @@ void copyInstrument(const API::Workspace *source, API::Workspace *target) {
     auto *targetGroup = dynamic_cast<API::WorkspaceGroup *>(target);
     auto minSize = std::min(sourceGroup->size(), targetGroup->size());
     for (size_t index = 0; index < minSize; ++index) {
-      copyInstrument(sourceGroup->getItem(index).get(),
-                     targetGroup->getItem(index).get());
+      copyInstrument(sourceGroup->getItem(index).get(), targetGroup->getItem(index).get());
     }
   } else if (source->isGroup()) {
     auto *sourceGroup = dynamic_cast<const API::WorkspaceGroup *>(source);
@@ -61,10 +60,8 @@ void copyInstrument(const API::Workspace *source, API::Workspace *target) {
     auto *targetGroup = dynamic_cast<API::WorkspaceGroup *>(target);
     copyInstrument(source, targetGroup->getItem(0).get());
   } else {
-    if (auto *sourceExpInfo =
-            dynamic_cast<const API::ExperimentInfo *>(source)) {
-      dynamic_cast<API::ExperimentInfo &>(*target).setInstrument(
-          sourceExpInfo->getInstrument());
+    if (auto *sourceExpInfo = dynamic_cast<const API::ExperimentInfo *>(source)) {
+      dynamic_cast<API::ExperimentInfo &>(*target).setInstrument(sourceExpInfo->getInstrument());
     }
   }
 }
@@ -78,9 +75,7 @@ DECLARE_ALGORITHM(LoadLiveData)
 const std::string LoadLiveData::name() const { return "LoadLiveData"; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadLiveData::category() const {
-  return "DataHandling\\LiveData\\Support";
-}
+const std::string LoadLiveData::category() const { return "DataHandling\\LiveData\\Support"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int LoadLiveData::version() const { return 1; }
@@ -98,12 +93,9 @@ void LoadLiveData::init() { this->initProps(); }
  * @return the processed workspace. Will point to inputWS if no processing is to
  *do
  */
-Mantid::API::Workspace_sptr
-LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
-                            bool PostProcess) {
+Mantid::API::Workspace_sptr LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS, bool PostProcess) {
   if (!inputWS)
-    throw std::runtime_error(
-        "LoadLiveData::runProcessing() called for an empty input workspace.");
+    throw std::runtime_error("LoadLiveData::runProcessing() called for an empty input workspace.");
   // Prevent others writing to the workspace while we run.
   ReadLock _lock(*inputWS);
 
@@ -119,8 +111,7 @@ LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
     // Run the processing algorithm
 
     // Make a unique anonymous names for the workspace, to put in ADS
-    std::string inputName = "__anonymous_livedata_input_" +
-                            this->getPropertyValue("OutputWorkspace");
+    std::string inputName = "__anonymous_livedata_input_" + this->getPropertyValue("OutputWorkspace");
     // Transform the chunk in-place
     std::string outputName = inputName;
 
@@ -133,26 +124,22 @@ LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
     // For python scripts to work we need to go through the ADS
     AnalysisDataService::Instance().addOrReplace(inputName, inputWS);
     if (!AnalysisDataService::Instance().doesExist(inputName))
-      g_log.error() << "Something really wrong happened when adding "
-                    << inputName << " to ADS. "
+      g_log.error() << "Something really wrong happened when adding " << inputName << " to ADS. "
                     << this->getPropertyValue("OutputWorkspace") << '\n';
 
     // What is the name of the input workspace property
     if (alg->existsProperty("InputWorkspace")) {
-      g_log.debug()
-          << "Using InputWorkspace as the input workspace property name.\n";
+      g_log.debug() << "Using InputWorkspace as the input workspace property name.\n";
       alg->setPropertyValue("InputWorkspace", inputName);
     } else {
       // Look for the first Workspace property that is marked INPUT.
       std::vector<Property *> proplist = alg->getProperties();
-      g_log.debug() << "Processing algorithm (" << alg->name() << ") has "
-                    << proplist.size() << " properties.\n";
+      g_log.debug() << "Processing algorithm (" << alg->name() << ") has " << proplist.size() << " properties.\n";
       bool inputPropertyWorkspaceFound = false;
       for (auto prop : proplist) {
         if ((prop->direction() == 0) && (!inputPropertyWorkspaceFound)) {
           if (boost::ends_with(prop->type(), "Workspace")) {
-            g_log.information()
-                << "Using " << prop->name() << " as the input property.\n";
+            g_log.information() << "Using " << prop->name() << " as the input property.\n";
             alg->setPropertyValue(prop->name(), inputName);
             inputPropertyWorkspaceFound = true;
           }
@@ -164,16 +151,14 @@ LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
     alg->setChild(true);
     alg->execute();
     if (!alg->isExecuted())
-      throw std::runtime_error("Error processing the workspace using " +
-                               alg->name() + ". See log for details.");
+      throw std::runtime_error("Error processing the workspace using " + alg->name() + ". See log for details.");
 
     // Retrieve the output.
     Property *prop = alg->getProperty("OutputWorkspace");
     auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
     if (!wsProp)
-      throw std::runtime_error(
-          "The " + alg->name() +
-          " Algorithm's OutputWorkspace property is not a WorkspaceProperty!");
+      throw std::runtime_error("The " + alg->name() +
+                               " Algorithm's OutputWorkspace property is not a WorkspaceProperty!");
     Workspace_sptr temp = wsProp->getWorkspace();
 
     if (!PostProcess) {
@@ -185,8 +170,7 @@ LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
       AnalysisDataService::Instance().remove(inputName);
     } else if (!temp) {
       // a group workspace cannot be returned by wsProp
-      temp = AnalysisDataService::Instance().retrieve(
-          getPropertyValue("OutputWorkspace"));
+      temp = AnalysisDataService::Instance().retrieve(getPropertyValue("OutputWorkspace"));
     }
     return temp;
   } else {
@@ -202,8 +186,7 @@ LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
  * @param chunkWS :: chunk workspace to process
  * @return the processed workspace sptr
  */
-Mantid::API::Workspace_sptr
-LoadLiveData::processChunk(Mantid::API::Workspace_sptr chunkWS) {
+Mantid::API::Workspace_sptr LoadLiveData::processChunk(Mantid::API::Workspace_sptr chunkWS) {
   try {
     return runProcessing(std::move(chunkWS), false);
   } catch (...) {
@@ -239,10 +222,8 @@ void LoadLiveData::addChunk(const Mantid::API::Workspace_sptr &chunkWS) {
   ReadLock _lock2(*chunkWS);
 
   // ISIS multi-period data come in workspace groups
-  if (WorkspaceGroup_sptr gws =
-          std::dynamic_pointer_cast<WorkspaceGroup>(chunkWS)) {
-    WorkspaceGroup_sptr accum_gws =
-        std::dynamic_pointer_cast<WorkspaceGroup>(m_accumWS);
+  if (WorkspaceGroup_sptr gws = std::dynamic_pointer_cast<WorkspaceGroup>(chunkWS)) {
+    WorkspaceGroup_sptr accum_gws = std::dynamic_pointer_cast<WorkspaceGroup>(m_accumWS);
     if (!accum_gws) {
       throw std::runtime_error("Two workspace groups are expected.");
     }
@@ -252,12 +233,10 @@ void LoadLiveData::addChunk(const Mantid::API::Workspace_sptr &chunkWS) {
     }
     // binary operations cannot handle groups passed by pointers, so add members
     // one by one
-    for (size_t i = 0; i < static_cast<size_t>(gws->getNumberOfEntries());
-         ++i) {
+    for (size_t i = 0; i < static_cast<size_t>(gws->getNumberOfEntries()); ++i) {
       addMatrixWSChunk(accum_gws->getItem(i), gws->getItem(i));
     }
-  } else if (MatrixWorkspace_sptr mws =
-                 std::dynamic_pointer_cast<MatrixWorkspace>(chunkWS)) {
+  } else if (MatrixWorkspace_sptr mws = std::dynamic_pointer_cast<MatrixWorkspace>(chunkWS)) {
     // If workspace is a Matrix workspace just add the chunk
     addMatrixWSChunk(m_accumWS, chunkWS);
   } else {
@@ -274,8 +253,7 @@ void LoadLiveData::addChunk(const Mantid::API::Workspace_sptr &chunkWS) {
  * @param accumWS :: accumulation matrix workspace
  * @param chunkWS :: processed live data chunk matrix workspace
  */
-void LoadLiveData::addMatrixWSChunk(const Workspace_sptr &accumWS,
-                                    const Workspace_sptr &chunkWS) {
+void LoadLiveData::addMatrixWSChunk(const Workspace_sptr &accumWS, const Workspace_sptr &chunkWS) {
   // Handle the addition of the internal monitor workspace, if present
   auto accumMW = std::dynamic_pointer_cast<MatrixWorkspace>(accumWS);
   auto chunkMW = std::dynamic_pointer_cast<MatrixWorkspace>(chunkWS);
@@ -302,11 +280,9 @@ void LoadLiveData::addMatrixWSChunk(const Workspace_sptr &accumWS,
  * @param accumWS :: accumulation MD workspace
  * @param chunkWS :: processed live data chunk MD workspace
  */
-void LoadLiveData::addMDWSChunk(Workspace_sptr &accumWS,
-                                const Workspace_sptr &chunkWS) {
+void LoadLiveData::addMDWSChunk(Workspace_sptr &accumWS, const Workspace_sptr &chunkWS) {
   // Need to add chunk to ADS for MergeMD
-  std::string chunkName = "__anonymous_livedata_addmdws_" +
-                          this->getPropertyValue("OutputWorkspace");
+  std::string chunkName = "__anonymous_livedata_addmdws_" + this->getPropertyValue("OutputWorkspace");
   AnalysisDataService::Instance().addOrReplace(chunkName, chunkWS);
 
   std::string ws_names_to_merge = accumWS->getName();
@@ -325,9 +301,8 @@ void LoadLiveData::addMDWSChunk(Workspace_sptr &accumWS,
   Property *prop = alg->getProperty("OutputWorkspace");
   auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
   if (!wsProp)
-    throw std::runtime_error(
-        "The " + alg->name() +
-        " Algorithm's OutputWorkspace property is not a WorkspaceProperty!");
+    throw std::runtime_error("The " + alg->name() +
+                             " Algorithm's OutputWorkspace property is not a WorkspaceProperty!");
   Workspace_sptr temp = wsProp->getWorkspace();
   accumWS = temp;
 }
@@ -361,12 +336,10 @@ void LoadLiveData::replaceChunk(Mantid::API::Workspace_sptr chunkWS) {
  */
 void LoadLiveData::appendChunk(const Mantid::API::Workspace_sptr &chunkWS) {
   // ISIS multi-period data come in workspace groups
-  WorkspaceGroup_sptr chunk_gws =
-      std::dynamic_pointer_cast<WorkspaceGroup>(chunkWS);
+  WorkspaceGroup_sptr chunk_gws = std::dynamic_pointer_cast<WorkspaceGroup>(chunkWS);
 
   if (chunk_gws) {
-    WorkspaceGroup_sptr accum_gws =
-        std::dynamic_pointer_cast<WorkspaceGroup>(m_accumWS);
+    WorkspaceGroup_sptr accum_gws = std::dynamic_pointer_cast<WorkspaceGroup>(m_accumWS);
     if (!accum_gws) {
       throw std::runtime_error("Two workspace groups are expected.");
     }
@@ -384,8 +357,7 @@ void LoadLiveData::appendChunk(const Mantid::API::Workspace_sptr &chunkWS) {
     accum_gws->removeAll();
     // append members one by one
     for (size_t i = 0; i < nItems; ++i) {
-      accum_gws->addWorkspace(
-          appendMatrixWSChunk(items[i], chunk_gws->getItem(i)));
+      accum_gws->addWorkspace(appendMatrixWSChunk(items[i], chunk_gws->getItem(i)));
     }
   } else {
     // just append the chunk
@@ -401,9 +373,7 @@ void LoadLiveData::appendChunk(const Mantid::API::Workspace_sptr &chunkWS) {
  * @param accumWS :: accumulation matrix workspace
  * @param chunkWS :: processed live data chunk matrix workspace
  */
-Workspace_sptr
-LoadLiveData::appendMatrixWSChunk(Workspace_sptr accumWS,
-                                  const Workspace_sptr &chunkWS) {
+Workspace_sptr LoadLiveData::appendMatrixWSChunk(Workspace_sptr accumWS, const Workspace_sptr &chunkWS) {
   IAlgorithm_sptr alg;
   ReadLock _lock1(*accumWS);
   ReadLock _lock2(*chunkWS);
@@ -502,10 +472,8 @@ void LoadLiveData::exec() {
       chunkWS = listener->extractData();
       dataNotYetGiven = false;
     } catch (Exception::NotYet &ex) {
-      g_log.warning() << "The " << listener->name()
-                      << " is not ready to return data: " << ex.what() << "\n";
-      g_log.warning()
-          << "Trying again in 10 seconds - cancel the algorithm to stop.\n";
+      g_log.warning() << "The " << listener->name() << " is not ready to return data: " << ex.what() << "\n";
+      g_log.warning() << "Trying again in 10 seconds - cancel the algorithm to stop.\n";
       const int tenSeconds = 40;
       for (int i = 0; i < tenSeconds; ++i) {
         Poco::Thread::sleep(10000 / tenSeconds); // 250 ms
@@ -527,8 +495,7 @@ void LoadLiveData::exec() {
   // Now we process the chunk
   Workspace_sptr processed = this->processChunk(chunkWS);
 
-  EventWorkspace_sptr processedEvent =
-      std::dynamic_pointer_cast<EventWorkspace>(processed);
+  EventWorkspace_sptr processedEvent = std::dynamic_pointer_cast<EventWorkspace>(processed);
   if (!preserveEvents && processedEvent) {
     // Convert the monitor workspace, if there is one and it's necessary
     MatrixWorkspace_sptr monitorWS = processedEvent->monitorWorkspace();
@@ -538,16 +505,14 @@ void LoadLiveData::exec() {
       monAlg->setProperty("InputWorkspace", monitorEventWS);
       monAlg->executeAsChildAlg();
       if (!monAlg->isExecuted())
-        g_log.error(
-            "Failed to convert monitors from events to histogram form.");
+        g_log.error("Failed to convert monitors from events to histogram form.");
       monitorWS = monAlg->getProperty("OutputWorkspace");
     }
 
     // Now do the main workspace
     Algorithm_sptr alg = this->createChildAlgorithm("ConvertToMatrixWorkspace");
     alg->setProperty("InputWorkspace", processedEvent);
-    std::string outputName = "__anonymous_livedata_convert_" +
-                             this->getPropertyValue("OutputWorkspace");
+    std::string outputName = "__anonymous_livedata_convert_" + this->getPropertyValue("OutputWorkspace");
     alg->setPropertyValue("OutputWorkspace", outputName);
     alg->execute();
     if (!alg->isExecuted())
@@ -604,15 +569,13 @@ void LoadLiveData::exec() {
   }
 
   // Output group requires some additional handling
-  WorkspaceGroup_sptr out_gws =
-      std::dynamic_pointer_cast<WorkspaceGroup>(m_outputWS);
+  WorkspaceGroup_sptr out_gws = std::dynamic_pointer_cast<WorkspaceGroup>(m_outputWS);
   if (out_gws) {
     auto n = static_cast<size_t>(out_gws->getNumberOfEntries());
     for (size_t i = 0; i < n; ++i) {
       auto ws = out_gws->getItem(i);
       const std::string &itemName = ws->getName();
-      std::string wsName =
-          getPropertyValue("OutputWorkspace") + "_" + std::to_string(i + 1);
+      std::string wsName = getPropertyValue("OutputWorkspace") + "_" + std::to_string(i + 1);
       if (wsName != itemName) {
         if (AnalysisDataService::Instance().doesExist(itemName)) {
           // replace the temporary name with the proper one

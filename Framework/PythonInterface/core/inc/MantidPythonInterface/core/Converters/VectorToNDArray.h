@@ -23,8 +23,7 @@ namespace Converters {
  * The type of conversion is specified by another struct/class that
  * contains a static member create1D.
  */
-template <typename ElementType, typename ConversionPolicy>
-struct VectorToNDArray {
+template <typename ElementType, typename ConversionPolicy> struct VectorToNDArray {
   /**
    * Converts a cvector to a numpy array
    * @param cdata :: A const reference to a vector

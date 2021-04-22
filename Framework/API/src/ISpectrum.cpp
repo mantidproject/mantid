@@ -107,15 +107,11 @@ void ISpectrum::setDetectorIDs(std::set<detid_t> &&detIDs) {
 }
 
 /** Return true if the given detector ID is in the list for this ISpectrum */
-bool ISpectrum::hasDetectorID(const detid_t detID) const {
-  return (detectorIDs.find(detID) != detectorIDs.end());
-}
+bool ISpectrum::hasDetectorID(const detid_t detID) const { return (detectorIDs.find(detID) != detectorIDs.end()); }
 
 /** Get a const reference to the detector IDs set.
  */
-const std::set<detid_t> &ISpectrum::getDetectorIDs() const {
-  return this->detectorIDs;
-}
+const std::set<detid_t> &ISpectrum::getDetectorIDs() const { return this->detectorIDs; }
 
 /** Clear the detector IDs set.
  */
@@ -146,15 +142,13 @@ bool ISpectrum::hasDx() const { return bool(histogramRef().sharedDx()); }
 void ISpectrum::resetHasDx() { mutableHistogramRef().setSharedDx(nullptr); }
 
 /// Copy constructor.
-ISpectrum::ISpectrum(const ISpectrum &other)
-    : m_specNo(other.m_specNo), detectorIDs(other.detectorIDs) {
+ISpectrum::ISpectrum(const ISpectrum &other) : m_specNo(other.m_specNo), detectorIDs(other.detectorIDs) {
   // m_matrixWorkspace and m_index are not copied: A copy should not refer to
   // the parent of the source. m_experimentInfo will be nullptr.
 }
 
 /// Move constructor.
-ISpectrum::ISpectrum(ISpectrum &&other)
-    : m_specNo(other.m_specNo), detectorIDs(std::move(other.detectorIDs)) {
+ISpectrum::ISpectrum(ISpectrum &&other) : m_specNo(other.m_specNo), detectorIDs(std::move(other.detectorIDs)) {
   // m_matrixWorkspace and m_index are not copied: A copy should not refer to
   // the parent of the source. m_experimentInfo will be nullptr.
 }
@@ -187,8 +181,7 @@ ISpectrum &ISpectrum::operator=(ISpectrum &&other) {
  * getting a mutable reference to an ISpectrum stored in a MatrixWorkspace. The
  * pointer set by this method is used to push updates of the detector IDs into
  * the Beamline::SpectrumInfo that is stored in the ExperimentInfo. */
-void ISpectrum::setMatrixWorkspace(MatrixWorkspace *matrixWorkspace,
-                                   const size_t index) {
+void ISpectrum::setMatrixWorkspace(MatrixWorkspace *matrixWorkspace, const size_t index) {
   m_matrixWorkspace = matrixWorkspace;
   m_index = index;
 }

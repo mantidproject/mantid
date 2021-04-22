@@ -29,25 +29,18 @@ public:
   const std::string category() const override;
 
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Join two workspaces together by appending their spectra.";
-  }
+  const std::string summary() const override { return "Join two workspaces together by appending their spectra."; }
 
 protected:
-  API::MatrixWorkspace_sptr execWS2D(const API::MatrixWorkspace &ws1,
-                                     const API::MatrixWorkspace &ws2);
-  DataObjects::EventWorkspace_sptr
-  execEvent(const DataObjects::EventWorkspace &eventWs1,
-            const DataObjects::EventWorkspace &eventWs2);
+  API::MatrixWorkspace_sptr execWS2D(const API::MatrixWorkspace &ws1, const API::MatrixWorkspace &ws2);
+  DataObjects::EventWorkspace_sptr execEvent(const DataObjects::EventWorkspace &eventWs1,
+                                             const DataObjects::EventWorkspace &eventWs2);
   using Mantid::API::Algorithm::validateInputs;
-  void checkCompatibility(const API::MatrixWorkspace &ws1,
-                          const API::MatrixWorkspace &ws2);
-  void getMinMax(const API::MatrixWorkspace &ws, specnum_t &min,
-                 specnum_t &max);
+  void checkCompatibility(const API::MatrixWorkspace &ws1, const API::MatrixWorkspace &ws2);
+  void getMinMax(const API::MatrixWorkspace &ws, specnum_t &min, specnum_t &max);
 
   /// Abstract method to be implemented in concrete algorithm classes
-  virtual void fixSpectrumNumbers(const API::MatrixWorkspace &ws1,
-                                  const API::MatrixWorkspace &ws2,
+  virtual void fixSpectrumNumbers(const API::MatrixWorkspace &ws1, const API::MatrixWorkspace &ws2,
                                   API::MatrixWorkspace &output) = 0;
 
   std::unique_ptr<API::Progress> m_progress; ///< Progress reporting object

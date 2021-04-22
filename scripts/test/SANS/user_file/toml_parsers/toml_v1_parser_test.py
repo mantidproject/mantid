@@ -113,7 +113,7 @@ class TomlV1ParserTest(unittest.TestCase):
             wavelength = self._setup_parser(wavelength_dict).get_state_wavelength()
             self.assertEqual([1.1], wavelength.wavelength_low)
             self.assertEqual([2.2], wavelength.wavelength_high)
-            self.assertEqual(0.1, wavelength.wavelength_step)
+            self.assertEqual(0.1, wavelength.wavelength_interval.wavelength_step)
             self.assertEqual(RangeStepType(bin_type), wavelength.wavelength_step_type)
 
         one_d_reduction_q_dict = {"binning": {"1d_reduction": {"binning": "1.0, 0.1, 2.0, -0.2, 3.0",

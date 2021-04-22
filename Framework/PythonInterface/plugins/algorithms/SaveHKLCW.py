@@ -70,13 +70,8 @@ class SaveHKLCW(PythonAlgorithm):
 
             if directionCosines:
                 U = peak_ws.sample().getOrientedLattice().getU()
-                sample_pos = peak_ws.getInstrument().getSample().getPos()
-                source_pos = peak_ws.getInstrument().getSource().getPos()
-                ki_n = sample_pos - source_pos  # direction of incident wavevector
-                ki_n = ki_n * (1. / ki_n.norm())
-
-            for p in peak_ws:
-                if directionCosines:
+                for p in peak_ws:
+                    ki_n = p.getReferenceFrame().vecPointingAlongBeam()
                     R = p.getGoniometerMatrix()
                     RU = np.dot(R, U)
                     ki = ki_n * (2 * np.pi / p.getWavelength())
@@ -89,7 +84,8 @@ class SaveHKLCW(PythonAlgorithm):
                         .format(p.getH(), p.getK(), p.getL(), p.getIntensity(),
                                 p.getSigmaIntensity(), 1, dir_cos_1[0], dir_cos_2[0], dir_cos_1[1],
                                 dir_cos_2[1], dir_cos_1[2], dir_cos_2[2]))
-                else:
+            else:
+                for p in peak_ws:
                     f.write("{:4.0f}{:4.0f}{:4.0f}{:8.2f}{:8.2f}{:4d}\n".format(
                         p.getH(), p.getK(), p.getL(), p.getIntensity(), p.getSigmaIntensity(), 1))
 

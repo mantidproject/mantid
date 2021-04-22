@@ -58,8 +58,7 @@ public slots:
    * @param workspace :: The workspace containing the data to plot
    * @param workspaceIndex :: The index of the data to plot
    */
-  virtual void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace,
-                            std::size_t const &workspaceIndex = 0) = 0;
+  virtual void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex = 0) = 0;
 
   /**
    * Update displayed corrected data curve
@@ -74,8 +73,7 @@ public slots:
    * @param workspace :: The workspace containing the data to plot
    * @param workspaceIndex :: The index of the data to plot
    */
-  virtual void setBaselineCurve(Mantid::API::MatrixWorkspace_sptr workspace,
-                                std::size_t const &workspaceIndex = 0) = 0;
+  virtual void setBaselineCurve(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex = 0) = 0;
 
   /**
    * Update displayed function

@@ -19,8 +19,7 @@ the SANSBackgroundCorrectionWidget
 */
 class MANTIDQT_ISISSANS_DLL SANSBackgroundCorrectionSettings {
 public:
-  SANSBackgroundCorrectionSettings(const QString &runNumber, bool useMean,
-                                   bool useMon, const QString &monNumber);
+  SANSBackgroundCorrectionSettings(const QString &runNumber, bool useMean, bool useMon, const QString &monNumber);
 
   bool hasValidSettings();
 

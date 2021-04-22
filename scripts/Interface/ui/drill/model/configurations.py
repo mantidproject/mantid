@@ -78,6 +78,7 @@ class RundexSettings(object):
                 "TransmissionBeamRuns",
                 "MaskFiles",
                 "ReferenceFiles",
+                "SolventFiles",
                 "OutputWorkspace",
                 "SampleThickness",
                 "CustomOptions"
@@ -221,7 +222,9 @@ class RundexSettings(object):
                 "DeltaQ",
                 "IQxQyLogBinning",
                 "OutputPanels",
-                "WavelengthRange"
+                "WavelengthRange",
+                "StitchReferenceIndex",
+                "ClearCorrected2DWorkspace"
                 ],
             SANS_PSCAN : [
                 "SensitivityMap",

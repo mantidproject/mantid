@@ -43,48 +43,38 @@ private slots:
   void includeExtraGroupingOption(bool includeOption, QString const &option);
   void handleSaveCustomGroupingClicked();
 
-  void
-  setInstrumentDefault(); ///< Sets default parameters for current instrument
-  void mappingOptionSelected(
-      const QString &groupType); ///< change ui to display appropriate options
-  void plotRaw();                ///< plot raw data from instrument
-  void
-  pbRunEditing(); //< Called when a user starts to type / edit the runs to load.
-  void pbRunFinding();  //< Called when the FileFinder starts finding the files.
-  void pbRunFinished(); //< Called when the FileFinder has finished finding the
+  void setInstrumentDefault();                          ///< Sets default parameters for current instrument
+  void mappingOptionSelected(const QString &groupType); ///< change ui to display appropriate options
+  void plotRaw();                                       ///< plot raw data from instrument
+  void pbRunEditing();                                  //< Called when a user starts to type / edit the runs to load.
+  void pbRunFinding();                                  //< Called when the FileFinder starts finding the files.
+  void pbRunFinished();                                 //< Called when the FileFinder has finished finding the
   // files.
-  void plotRawComplete(
-      bool error); //< Called when the Plot Raw algorithmm chain completes
+  void plotRawComplete(bool error); //< Called when the Plot Raw algorithmm chain completes
   /// Handles running, plotting and saving
   void runClicked();
   void saveClicked();
 
-  void updateRunButton(bool enabled = true,
-                       std::string const &enableOutputButtons = "unchanged",
-                       QString const &message = "Run",
-                       QString const &tooltip = "");
+  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
+                       QString const &message = "Run", QString const &tooltip = "");
 
 private:
   void setInstrumentDefault(QMap<QString, QString> const &instDetails);
-  void setInstrumentCheckBoxProperty(QCheckBox *checkbox,
-                                     QMap<QString, QString> const &instDetails,
+  void setInstrumentCheckBoxProperty(QCheckBox *checkbox, QMap<QString, QString> const &instDetails,
                                      QString const &instrumentProperty);
 
   void setFileExtensionsByName(bool filter) override;
 
   void createCustomGroupingWorkspace();
 
-  std::pair<std::string, std::string> createMapFile(
-      const std::string
-          &groupType); ///< create the mapping file with which to group results
+  std::pair<std::string, std::string>
+  createMapFile(const std::string &groupType); ///< create the mapping file with which to group results
 
-  void plotWorkspace(std::string const &workspaceName,
-                     std::string const &plotType);
+  void plotWorkspace(std::string const &workspaceName, std::string const &plotType);
   void saveWorkspace(std::string const &workspaceName);
 
   bool numberInCorrectRange(std::size_t const &spectraNumber) const;
-  QString checkCustomGroupingNumbersInRange(
-      std::vector<std::size_t> const &customGroupingNumbers) const;
+  QString checkCustomGroupingNumbersInRange(std::vector<std::size_t> const &customGroupingNumbers) const;
   QString validateDetectorGrouping() const;
   std::string getDetectorGroupingString() const;
 

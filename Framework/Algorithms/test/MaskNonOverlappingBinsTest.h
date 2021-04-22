@@ -23,9 +23,7 @@ class MaskNonOverlappingBinsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MaskNonOverlappingBinsTest *createSuite() {
-    return new MaskNonOverlappingBinsTest();
-  }
+  static MaskNonOverlappingBinsTest *createSuite() { return new MaskNonOverlappingBinsTest(); }
   static void destroySuite(MaskNonOverlappingBinsTest *suite) { delete suite; }
 
   void test_init() {
@@ -54,8 +52,7 @@ public:
 
   void test_maskAll() {
     HistogramData::BinEdges comparison{-13., -1.1};
-    auto const expected =
-        API::MatrixWorkspace::MaskList{{0, 1.}, {1, 1.}, {2, 1.}};
+    auto const expected = API::MatrixWorkspace::MaskList{{0, 1.}, {1, 1.}, {2, 1.}};
     runTestWithAlwaysSameExpectedOutcome(std::move(comparison), expected);
     comparison = {1.8, 13.};
     runTestWithAlwaysSameExpectedOutcome(std::move(comparison), expected);
@@ -76,54 +73,41 @@ public:
   }
 
   void test_unsortedXThrows() {
-    API::MatrixWorkspace_sptr inputWS =
-        makeWorkspace(HistogramData::BinEdges{-1.1, -0.1, 0.2, 1.8});
+    API::MatrixWorkspace_sptr inputWS = makeWorkspace(HistogramData::BinEdges{-1.1, -0.1, 0.2, 1.8});
     inputWS->mutableX(0)[2] = -0.9;
-    API::MatrixWorkspace_sptr comparisonWS =
-        makeWorkspace(HistogramData::BinEdges{-1.1, 1.8});
+    API::MatrixWorkspace_sptr comparisonWS = makeWorkspace(HistogramData::BinEdges{-1.1, 1.8});
     Algorithms::MaskNonOverlappingBins alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("ComparisonWorkspace", comparisonWS))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::invalid_argument const &e,
-                            e.what(),
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ComparisonWorkspace", comparisonWS))
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::invalid_argument const &e, e.what(),
                             std::string("InputWorkspace has unsorted X."))
     TS_ASSERT(!alg.isExecuted())
   }
 
 private:
-  template <typename BinEdges>
-  static API::MatrixWorkspace_sptr makeWorkspace(BinEdges &&binEdges) {
+  template <typename BinEdges> static API::MatrixWorkspace_sptr makeWorkspace(BinEdges &&binEdges) {
     HistogramData::BinEdges edges(std::forward<BinEdges>(binEdges));
     HistogramData::Counts counts(edges.size() - 1, 2);
-    return DataObjects::create<DataObjects::Workspace2D>(
-        1, HistogramData::Histogram(edges, counts));
+    return DataObjects::create<DataObjects::Workspace2D>(1, HistogramData::Histogram(edges, counts));
   }
 
-  static void runTestWithAlwaysSameExpectedOutcome(
-      HistogramData::BinEdges comparisonBinEdges,
-      API::MatrixWorkspace::MaskList const &expected) {
+  static void runTestWithAlwaysSameExpectedOutcome(HistogramData::BinEdges comparisonBinEdges,
+                                                   API::MatrixWorkspace::MaskList const &expected) {
     runTestWithMatchingBins(comparisonBinEdges, expected, true);
     runTestWithMatchingBins(std::move(comparisonBinEdges), expected, false);
   }
 
   template <typename BinEdges>
-  static void
-  runTestWithMatchingBins(BinEdges &&comparisonBinEdges,
-                          API::MatrixWorkspace::MaskList const &expected,
-                          bool const maskPartial) {
-    API::MatrixWorkspace_sptr inputWS =
-        makeWorkspace(HistogramData::BinEdges{-1.1, -0.1, 0.9, 1.8});
-    API::MatrixWorkspace_sptr comparisonWS =
-        makeWorkspace(std::forward<BinEdges>(comparisonBinEdges));
-    std::array<std::string, 3> raggedOptions{
-        {"Check", "Ragged", "Common Bins"}};
+  static void runTestWithMatchingBins(BinEdges &&comparisonBinEdges, API::MatrixWorkspace::MaskList const &expected,
+                                      bool const maskPartial) {
+    API::MatrixWorkspace_sptr inputWS = makeWorkspace(HistogramData::BinEdges{-1.1, -0.1, 0.9, 1.8});
+    API::MatrixWorkspace_sptr comparisonWS = makeWorkspace(std::forward<BinEdges>(comparisonBinEdges));
+    std::array<std::string, 3> raggedOptions{{"Check", "Ragged", "Common Bins"}};
     for (auto const &raggedness : raggedOptions) {
       Algorithms::MaskNonOverlappingBins alg;
       alg.setChild(true);
@@ -131,12 +115,9 @@ private:
       TS_ASSERT_THROWS_NOTHING(alg.initialize())
       TS_ASSERT(alg.isInitialized())
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setProperty("ComparisonWorkspace", comparisonWS))
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setProperty("MaskPartiallyOverlapping", maskPartial))
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("ComparisonWorkspace", comparisonWS))
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaskPartiallyOverlapping", maskPartial))
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("RaggedInputs", raggedness))
       TS_ASSERT_THROWS_NOTHING(alg.execute())
       TS_ASSERT(alg.isExecuted())
@@ -157,24 +138,16 @@ class MaskNonOverlappingBinsTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MaskNonOverlappingBinsTestPerformance *createSuite() {
-    return new MaskNonOverlappingBinsTestPerformance();
-  }
-  static void destroySuite(MaskNonOverlappingBinsTestPerformance *suite) {
-    delete suite;
-  }
+  static MaskNonOverlappingBinsTestPerformance *createSuite() { return new MaskNonOverlappingBinsTestPerformance(); }
+  static void destroySuite(MaskNonOverlappingBinsTestPerformance *suite) { delete suite; }
 
   void setUp() override {
-    HistogramData::BinEdges edges(1000,
-                                  HistogramData::LinearGenerator(-100., 23.));
+    HistogramData::BinEdges edges(1000, HistogramData::LinearGenerator(-100., 23.));
     HistogramData::Counts counts(edges.size() - 1, 2);
-    m_ws = DataObjects::create<DataObjects::Workspace2D>(
-        10000, HistogramData::Histogram(edges, counts));
-    edges =
-        HistogramData::BinEdges(200, HistogramData::LinearGenerator(-10., 2.3));
+    m_ws = DataObjects::create<DataObjects::Workspace2D>(10000, HistogramData::Histogram(edges, counts));
+    edges = HistogramData::BinEdges(200, HistogramData::LinearGenerator(-10., 2.3));
     counts = HistogramData::Counts(edges.size() - 1, 2);
-    m_compWS = DataObjects::create<DataObjects::Workspace2D>(
-        10000, HistogramData::Histogram(edges, counts));
+    m_compWS = DataObjects::create<DataObjects::Workspace2D>(10000, HistogramData::Histogram(edges, counts));
     m_alg.initialize();
     m_alg.setChild(true);
     m_alg.setRethrows(true);

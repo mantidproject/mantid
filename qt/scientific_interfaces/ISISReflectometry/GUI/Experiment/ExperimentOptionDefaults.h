@@ -16,8 +16,7 @@ namespace ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL IExperimentOptionDefaults {
 public:
   virtual ~IExperimentOptionDefaults() = default;
-  virtual Experiment
-  get(Mantid::Geometry::Instrument_const_sptr instrument) = 0;
+  virtual Experiment get(Mantid::Geometry::Instrument_const_sptr instrument) = 0;
 };
 
 /** @class ExperimentOptionDefaults
@@ -25,8 +24,7 @@ public:
     This class gets the defaults for the "Experiment" settings tab in the
     reflectometry GUI
  */
-class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentOptionDefaults
-    : public IExperimentOptionDefaults {
+class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentOptionDefaults : public IExperimentOptionDefaults {
 public:
   Experiment get(Mantid::Geometry::Instrument_const_sptr instrument) override;
 };

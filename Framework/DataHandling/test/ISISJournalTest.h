@@ -70,8 +70,7 @@ static constexpr const char *journalFile = "\
 class MockInternetHelper : public InternetHelper {
 public:
   // The constructor specifies the string that we want sendRequest to return
-  MockInternetHelper(std::string const &returnString)
-      : m_returnString(returnString){};
+  MockInternetHelper(std::string const &returnString) : m_returnString(returnString){};
 
   MOCK_METHOD2(sendRequestProxy, int(std::string const &, std::ostream &));
 
@@ -88,8 +87,7 @@ class ISISJournalTest : public CxxTest::TestSuite {
 public:
   void test_getRuns_requests_correct_url() {
     auto journal = makeJournal();
-    auto url = std::string(
-        "http://data.isis.rl.ac.uk/journals/ndxinter/journal_19_4.xml");
+    auto url = std::string("http://data.isis.rl.ac.uk/journals/ndxinter/journal_19_4.xml");
     EXPECT_CALL(*m_internetHelper, sendRequestProxy(url, _)).Times(1);
     journal.getRuns();
     verifyAndClear();
@@ -97,8 +95,7 @@ public:
 
   void test_getCycleNames_requests_correct_url() {
     auto journal = makeJournal(indexFile);
-    auto url = std::string(
-        "http://data.isis.rl.ac.uk/journals/ndxinter/journal_main.xml");
+    auto url = std::string("http://data.isis.rl.ac.uk/journals/ndxinter/journal_main.xml");
     EXPECT_CALL(*m_internetHelper, sendRequestProxy(url, _)).Times(1);
     journal.getCycleNames();
     verifyAndClear();
@@ -108,9 +105,7 @@ public:
     auto journal = makeJournal(journalFile);
     auto results = journal.getRuns();
     auto const expected =
-        std::vector<ISISJournal::RunData>{{{"name", "INTER22345"}},
-                                          {{"name", "INTER12345"}},
-                                          {{"name", "INTER12346"}}};
+        std::vector<ISISJournal::RunData>{{{"name", "INTER22345"}}, {{"name", "INTER12345"}}, {{"name", "INTER12346"}}};
     TS_ASSERT_EQUALS(results, expected);
     verifyAndClear();
   }
@@ -118,8 +113,7 @@ public:
   void test_getCycleNames_when_server_returns_indexFile() {
     auto journal = makeJournal(indexFile);
     auto results = journal.getCycleNames();
-    auto const expected =
-        std::vector<std::string>{"17_1", "18_1", "19_1", "19_2"};
+    auto const expected = std::vector<std::string>{"17_1", "18_1", "19_1", "19_2"};
     TS_ASSERT_EQUALS(results, expected);
     verifyAndClear();
   }
@@ -157,35 +151,26 @@ public:
     verifyAndClear();
   }
 
-  void
-  test_getRuns_still_returns_run_names_when_requested_values_list_is_empty() {
+  void test_getRuns_still_returns_run_names_when_requested_values_list_is_empty() {
     auto journal = makeJournal();
     auto results = journal.getRuns(emptyValueNames(), filters());
-    auto const expected = std::vector<ISISJournal::RunData>{
-        {{"name", "INTER12345"}}, {{"name", "INTER12346"}}};
+    auto const expected = std::vector<ISISJournal::RunData>{{{"name", "INTER12345"}}, {{"name", "INTER12346"}}};
   }
 
-  void
-  test_getRuns_returns_all_run_names_when_values_list_and_filters_are_empty() {
+  void test_getRuns_returns_all_run_names_when_values_list_and_filters_are_empty() {
     auto journal = makeJournal();
     auto results = journal.getRuns();
     auto const expected =
-        std::vector<ISISJournal::RunData>{{{"name", "INTER22345"}},
-                                          {{"name", "INTER12345"}},
-                                          {{"name", "INTER12346"}}};
+        std::vector<ISISJournal::RunData>{{{"name", "INTER22345"}}, {{"name", "INTER12345"}}, {{"name", "INTER12346"}}};
     verifyAndClear();
   }
 
   void test_getRuns_returns_requested_values_filtered_by_one_filter() {
     auto journal = makeJournal();
     auto results = journal.getRuns(valuesToLookup(), filters());
-    auto const expected =
-        std::vector<ISISJournal::RunData>{{{"name", "INTER12345"},
-                                           {"run_number", "12345"},
-                                           {"title", "Experiment 1 run 1"}},
-                                          {{"name", "INTER12346"},
-                                           {"run_number", "12346"},
-                                           {"title", "Experiment 1 run 2"}}};
+    auto const expected = std::vector<ISISJournal::RunData>{
+        {{"name", "INTER12345"}, {"run_number", "12345"}, {"title", "Experiment 1 run 1"}},
+        {{"name", "INTER12346"}, {"run_number", "12346"}, {"title", "Experiment 1 run 2"}}};
     TS_ASSERT_EQUALS(results, expected);
     verifyAndClear();
   }
@@ -193,28 +178,19 @@ public:
   void test_getRuns_returns_requested_values_filtered_by_multiple_filters() {
     auto journal = makeJournal();
     auto results = journal.getRuns(valuesToLookup(), multipleFilters());
-    auto const expected =
-        std::vector<ISISJournal::RunData>{{{"name", "INTER12346"},
-                                           {"run_number", "12346"},
-                                           {"title", "Experiment 1 run 2"}}};
+    auto const expected = std::vector<ISISJournal::RunData>{
+        {{"name", "INTER12346"}, {"run_number", "12346"}, {"title", "Experiment 1 run 2"}}};
     TS_ASSERT_EQUALS(results, expected);
     verifyAndClear();
   }
 
-  void
-  test_getRuns_returns_requested_values_for_all_entries_when_no_filter_is_set() {
+  void test_getRuns_returns_requested_values_for_all_entries_when_no_filter_is_set() {
     auto journal = makeJournal();
     auto results = journal.getRuns(valuesToLookup(), emptyFilters());
-    auto const expected =
-        std::vector<ISISJournal::RunData>{{{"name", "INTER22345"},
-                                           {"run_number", "22345"},
-                                           {"title", "Experiment 2 run 1"}},
-                                          {{"name", "INTER12345"},
-                                           {"run_number", "12345"},
-                                           {"title", "Experiment 1 run 1"}},
-                                          {{"name", "INTER12346"},
-                                           {"run_number", "12346"},
-                                           {"title", "Experiment 1 run 2"}}};
+    auto const expected = std::vector<ISISJournal::RunData>{
+        {{"name", "INTER22345"}, {"run_number", "22345"}, {"title", "Experiment 2 run 1"}},
+        {{"name", "INTER12345"}, {"run_number", "12345"}, {"title", "Experiment 1 run 1"}},
+        {{"name", "INTER12346"}, {"run_number", "12346"}, {"title", "Experiment 1 run 2"}}};
     TS_ASSERT_EQUALS(results, expected);
     verifyAndClear();
   }
@@ -247,8 +223,7 @@ public:
   void test_getCycleList_returns_all_valid_cycles() {
     auto journal = makeJournal(indexFile);
     auto results = journal.getCycleNames();
-    auto const expected =
-        std::vector<std::string>{"17_1", "18_1", "19_1", "19_2"};
+    auto const expected = std::vector<std::string>{"17_1", "18_1", "19_1", "19_2"};
     TS_ASSERT_EQUALS(results, expected);
     verifyAndClear();
   }
@@ -256,47 +231,32 @@ public:
 private:
   NiceMock<MockInternetHelper> *m_internetHelper;
 
-  ISISJournal
-  makeJournal(std::string const &xmlContents = std::string(journalFile)) {
+  ISISJournal makeJournal(std::string const &xmlContents = std::string(journalFile)) {
     // Inject a mock internet helper. The journal takes ownership of the
     // unique_ptr but we store a raw pointer to use in our test.
-    auto internetHelper =
-        std::make_unique<NiceMock<MockInternetHelper>>(xmlContents);
+    auto internetHelper = std::make_unique<NiceMock<MockInternetHelper>>(xmlContents);
     m_internetHelper = internetHelper.get();
     auto journal = ISISJournal("INTER", "19_4", std::move(internetHelper));
     // Ensure the internet helper returns an ok status by default.
     auto status = Poco::Net::HTTPResponse::HTTP_OK;
-    ON_CALL(*m_internetHelper, sendRequestProxy(_, _))
-        .WillByDefault(Return(status));
+    ON_CALL(*m_internetHelper, sendRequestProxy(_, _)).WillByDefault(Return(status));
     return journal;
   }
 
-  std::vector<std::string> valuesToLookup() {
-    return std::vector<std::string>{"run_number", "title"};
-  }
+  std::vector<std::string> valuesToLookup() { return std::vector<std::string>{"run_number", "title"}; }
 
-  std::vector<std::string> emptyValueNames() {
-    return std::vector<std::string>{};
-  }
+  std::vector<std::string> emptyValueNames() { return std::vector<std::string>{}; }
 
-  ISISJournal::RunData filters() {
-    return ISISJournal::RunData{{"experiment_id", "100001"}};
-  }
+  ISISJournal::RunData filters() { return ISISJournal::RunData{{"experiment_id", "100001"}}; }
 
-  ISISJournal::RunData multipleFilters() {
-    return ISISJournal::RunData{{"experiment_id", "100001"}, {"count", "5"}};
-  }
+  ISISJournal::RunData multipleFilters() { return ISISJournal::RunData{{"experiment_id", "100001"}, {"count", "5"}}; }
 
   ISISJournal::RunData emptyFilters() { return ISISJournal::RunData{}; }
 
   void expectURLNotFound() {
     auto status = Poco::Net::HTTPResponse::HTTP_NOT_FOUND;
-    EXPECT_CALL(*m_internetHelper, sendRequestProxy(_, _))
-        .Times(1)
-        .WillOnce(Return(status));
+    EXPECT_CALL(*m_internetHelper, sendRequestProxy(_, _)).Times(1).WillOnce(Return(status));
   }
 
-  void verifyAndClear() {
-    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(m_internetHelper));
-  }
+  void verifyAndClear() { TS_ASSERT(testing::Mock::VerifyAndClearExpectations(m_internetHelper)); }
 };

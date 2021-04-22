@@ -54,8 +54,7 @@ public:
     TS_ASSERT_EQUALS(proxy->existsProperty("Filename"), true);
     TS_ASSERT_EQUALS(proxy->existsProperty("OutputWorkspace"), true);
 
-    TS_ASSERT_THROWS_NOTHING(
-        proxy->setPropertyValue("Filename", "IRS38633.raw"));
+    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("Filename", "IRS38633.raw"));
     TS_ASSERT_EQUALS(proxy->existsProperty("Cache"), true);
     TS_ASSERT_EQUALS(proxy->existsProperty("LoadLogFiles"), true);
 
@@ -63,8 +62,7 @@ public:
     TS_ASSERT_EQUALS(proxy->existsProperty("Cache"), true);
     TS_ASSERT_EQUALS(proxy->existsProperty("LoadLogFiles"), true);
 
-    TS_ASSERT_THROWS_NOTHING(
-        proxy->setPropertyValue("Filename", "LOQ49886.nxs"));
+    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("Filename", "LOQ49886.nxs"));
     TS_ASSERT_EQUALS(proxy->existsProperty("Cache"), false);
     TS_ASSERT_EQUALS(proxy->existsProperty("LoadLogFiles"), false);
   }
@@ -74,8 +72,7 @@ public:
     TS_ASSERT_EQUALS(proxy->existsProperty("Filename"), true);
     TS_ASSERT_EQUALS(proxy->existsProperty("OutputWorkspace"), true);
 
-    TS_ASSERT_THROWS_NOTHING(
-        proxy->setPropertyValue("Filename", "IRS38633.raw"));
+    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("Filename", "IRS38633.raw"));
     TS_ASSERT_EQUALS(proxy->existsProperty("Cache"), true);
     TS_ASSERT_EQUALS(proxy->existsProperty("LoadLogFiles"), true);
     TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("SpectrumMin", "10"));
@@ -90,8 +87,7 @@ public:
     IAlgorithm_sptr proxy = AlgorithmManager::Instance().create("Load");
     TS_ASSERT_EQUALS(proxy->existsProperty("Filename"), true);
     TS_ASSERT_EQUALS(proxy->existsProperty("OutputWorkspace"), true);
-    TS_ASSERT_THROWS_NOTHING(
-        proxy->setPropertyValue("Filename", "IRS38633.raw"));
+    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("Filename", "IRS38633.raw"));
     TS_ASSERT_EQUALS(proxy->existsProperty("Cache"), true);
     TS_ASSERT_EQUALS(proxy->existsProperty("LoadLogFiles"), true);
 
@@ -118,16 +114,14 @@ public:
     Load loader;
     loader.initialize();
     static const size_t NUMPROPS = 5;
-    const char *loadraw_props[NUMPROPS] = {
-        "SpectrumMin", "SpectrumMax", "SpectrumList", "Cache", "LoadLogFiles"};
+    const char *loadraw_props[NUMPROPS] = {"SpectrumMin", "SpectrumMax", "SpectrumList", "Cache", "LoadLogFiles"};
     // Basic load has no additional loader properties
     for (auto &loadraw_prop : loadraw_props) {
       TS_ASSERT_EQUALS(loader.existsProperty(loadraw_prop), false);
     }
     // After setting the file property, the algorithm should have aquired the
     // appropriate properties
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", "IRS38633.raw"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "IRS38633.raw"));
     // Now
     for (auto &loadraw_prop : loadraw_props) {
       TS_ASSERT_EQUALS(loader.existsProperty(loadraw_prop), true);
@@ -142,8 +136,7 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename", "MUSR15189,15190,15191.nxs");
 
-    std::vector<std::vector<std::string>> foundFiles =
-        loader.getProperty("Filename");
+    std::vector<std::vector<std::string>> foundFiles = loader.getProperty("Filename");
 
     // Outer vector holds separate lists of files to be summed together
     // In this case no summing required
@@ -159,8 +152,7 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename", "IRS38633+38633.nxs");
 
-    std::vector<std::vector<std::string>> foundFiles =
-        loader.getProperty("Filename");
+    std::vector<std::vector<std::string>> foundFiles = loader.getProperty("Filename");
 
     // Outer vector holds separate lists of files to be summed together
     TS_ASSERT_EQUALS(1, foundFiles.size());
@@ -173,8 +165,7 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename", "MUSR15189:15192.nxs");
 
-    std::vector<std::vector<std::string>> foundFiles =
-        loader.getProperty("Filename");
+    std::vector<std::vector<std::string>> foundFiles = loader.getProperty("Filename");
 
     // Outer vector holds separate lists of files to be summed together
     // In this case no summing required
@@ -191,8 +182,7 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename", "MUSR15189:15192:2.nxs");
 
-    std::vector<std::vector<std::string>> foundFiles =
-        loader.getProperty("Filename");
+    std::vector<std::vector<std::string>> foundFiles = loader.getProperty("Filename");
 
     // Outer vector holds separate lists of files to be summed together
     // In this case no summing required
@@ -218,8 +208,7 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename", "MUSR15189-15192.nxs");
 
-    std::vector<std::vector<std::string>> foundFiles =
-        loader.getProperty("Filename");
+    std::vector<std::vector<std::string>> foundFiles = loader.getProperty("Filename");
 
     // Outer vector holds separate lists of files to be summed together
     // In this case no summing required
@@ -244,8 +233,7 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename", "LOQ48127.raw, CSP79590.raw");
 
-    std::vector<std::vector<std::string>> foundFiles =
-        loader.getProperty("Filename");
+    std::vector<std::vector<std::string>> foundFiles = loader.getProperty("Filename");
 
     // Outer vector holds separate lists of files to be summed together
     // In this case no summing required
@@ -280,10 +268,8 @@ public:
     loader.setPropertyValue("OutputWorkspace", outputWS);
     TS_ASSERT_THROWS_NOTHING(loader.execute());
 
-    MatrixWorkspace_sptr output =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS);
-    MatrixWorkspace_sptr output2D =
-        std::dynamic_pointer_cast<MatrixWorkspace>(output);
+    MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS);
+    MatrixWorkspace_sptr output2D = std::dynamic_pointer_cast<MatrixWorkspace>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 397);
   }
@@ -305,10 +291,8 @@ public:
     loader.setPropertyValue("OutputWorkspace", outputWS);
     TS_ASSERT_THROWS_NOTHING(loader.execute());
 
-    MatrixWorkspace_sptr output =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS);
-    MatrixWorkspace_sptr output2D =
-        std::dynamic_pointer_cast<MatrixWorkspace>(output);
+    MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS);
+    MatrixWorkspace_sptr output2D = std::dynamic_pointer_cast<MatrixWorkspace>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 397);
   }
@@ -316,18 +300,15 @@ public:
   void test_EventPreNeXus_WithNoExecute() {
     Load loader;
     loader.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", "CNCS_7860_neutron_event.dat"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "CNCS_7860_neutron_event.dat"));
     TS_ASSERT_EQUALS(loader.existsProperty("EventFilename"), false);
-    TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"),
-                     "LoadEventPreNexus");
+    TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadEventPreNexus");
   }
 
   void test_SNSEventNeXus_WithNoExecute() {
     Load loader;
     loader.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", "CNCS_7860_event.nxs"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "CNCS_7860_event.nxs"));
     TS_ASSERT_EQUALS(loader.existsProperty("EventFilename"), false);
     TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadEventNexus");
   }
@@ -352,9 +333,7 @@ class LoadTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadTestPerformance *createSuite() {
-    return new LoadTestPerformance();
-  }
+  static LoadTestPerformance *createSuite() { return new LoadTestPerformance(); }
   static void destroySuite(LoadTestPerformance *suite) { delete suite; }
 
   void test_find_loader_performance() {

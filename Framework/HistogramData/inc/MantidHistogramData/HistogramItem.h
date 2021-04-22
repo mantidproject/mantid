@@ -130,16 +130,11 @@ private:
   friend class HistogramIterator;
 
   /// Private constructor, can only be created by HistogramIterator
-  HistogramItem(const Histogram &histogram, const size_t index)
-      : m_histogram(histogram), m_index(index) {}
+  HistogramItem(const Histogram &histogram, const size_t index) : m_histogram(histogram), m_index(index) {}
 
-  bool xModeIsPoints() const {
-    return Histogram::XMode::Points == m_histogram.xMode();
-  }
+  bool xModeIsPoints() const { return Histogram::XMode::Points == m_histogram.xMode(); }
 
-  bool yModeIsCounts() const {
-    return Histogram::YMode::Counts == m_histogram.yMode();
-  }
+  bool yModeIsCounts() const { return Histogram::YMode::Counts == m_histogram.yMode(); }
   // Deleted assignment operator as a HistogramItem is not copyable
   HistogramItem operator=(const HistogramItem &) = delete;
 
