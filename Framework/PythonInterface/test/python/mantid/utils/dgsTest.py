@@ -11,6 +11,9 @@ from mantid.utils.dgs import qangle, ErrorCodes
 from mantid.geometry import OrientedLattice
 
 class DgsUtilsTest(unittest.TestCase):
+    # The original tests 1-9 were taken from known good values which were hand calculated in Excel by Barry Winn
+    # ConvertToMD can also be used to generate similar data in Mantid. Take a run at a given angle, find the peak
+    # Use the H, K, L values as input to check if the angles are the same as you see with instrument viewer
 
     def run_test(self, ol, expected_Qx, expected_Qy, expected_Qz, expected_in_plane_Q_angle, expected_out_plane_Q_angle,
                  expected_in_plane_kf_angle, expected_out_plane_kf_angle, expected_omega, expected_error_code, **pars):
