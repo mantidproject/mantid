@@ -14,8 +14,8 @@ New
 
 * Updated instrument geometry for CHESS
 * Loading of SHARP TOF and single-channel data has been added to :ref:`LoadILLTOF <algm-LoadILLTOF-v2>`
+* New function to calculate angles for final momentum and for momentum transfer, in the `mantid.utils.dgs` library
 * Loading of the omega-scan mode is supported for ILL instruments IN5, PANTHER, and SHARP via :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` loader
-
 
 
 Improvements
