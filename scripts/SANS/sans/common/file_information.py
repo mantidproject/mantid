@@ -434,8 +434,8 @@ def check_nexus_information(file_name):
     :param file_name: the full file path.
     :return: if the file was a Nexus file and the number of periods.
     """
-    ADDED_SUFFIX = "-add_added_event_data"
-    ADDED_MONITOR_SUFFIX = "-add_monitors_added_event_data"
+    ADDED_SUFFIX = "_added_event_data"
+    ADDED_MONITOR_SUFFIX = "_monitors_added_event_data"
 
     def get_all_keys_for_top_level(key_collection):
         top_level_key_collection = []
@@ -532,7 +532,7 @@ def check_nexus_information(file_name):
             is_event = False
             number_of_periods = number_of_periods_histogram
         else:
-            raise RuntimeError("Ended up in added branch with an unrecognised add file?")
+            raise RuntimeError("Ended up in added branch where it's neither processed or raw?")
 
     return nexus_added_tag_present, number_of_periods, is_event
 
