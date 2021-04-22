@@ -69,14 +69,11 @@ class LRDirectBeamSortTest(unittest.TestCase):
             s2w = float(dataline.split('S2iW=')[1].split()[0])
             self.assertAlmostEqual(s2w, 8.804976096)
             a = float(dataline.split('a=')[1].split()[0])
-            self.assertAlmostEqual(a  , 6.431245846)
-
+            self.assertAlmostEqual(a, 6.431245846)
 
     def __del__(self):
-        print(f'Workspaces: {mtd.getObjectNames()}')
         if len(mtd.getObjectNames()) > 0:
             raise RuntimeError('Workspaces are not cleaned')
-
 
 
 if __name__ == '__main__':

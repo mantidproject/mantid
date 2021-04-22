@@ -164,7 +164,6 @@ class LRDirectBeamSort(PythonAlgorithm):
         # Compute the scaling factors if requested
         if compute:
             sf_file = self.getProperty("ScalingFactorFile").value
-            print(f'....... DEBUG ...... scaling factor file: {sf_file}')
             if len(sf_file) == 0:
                 logger.error("Scaling factors were requested but no output file was set")
             else:
@@ -225,7 +224,7 @@ class LRDirectBeamSort(PythonAlgorithm):
                 bck_ranges.append(int(peak[0])-3)
                 bck_ranges.append(int(peak[1])+3)
 
-                summary += "Find Peak: %10s wl=%5s thi=%5s att=%s %5s,%5s %5s,%5s\n" % \
+                summary += "%10s wl=%5s thi=%5s att=%s %5s,%5s %5s,%5s\n" % \
                     (run.getRunNumber(), wl, thi, att, peak[0], peak[1], low_res[0], low_res[1])
 
             # Determine TOF range from first file
@@ -249,7 +248,6 @@ class LRDirectBeamSort(PythonAlgorithm):
             # Compute the scaling factors
             logger.notice("Computing scaling factors for %s" % str(direct_beam_runs))
             slit_tolerance = self.getProperty("SlitTolerance").value
-            print(f'......  ....... [DEBUG] direct beam runs: {direct_beam_runs}, Output to : {scaling_file}')
             LRScalingFactors(DirectBeamRuns=direct_beam_runs,
                              TOFRange=tof_range,
                              TOFSteps=tof_steps,
@@ -259,6 +257,8 @@ class LRDirectBeamSort(PythonAlgorithm):
                              IncidentMedium=incident_medium,
                              SlitTolerance=slit_tolerance,
                              ScalingFactorFile=scaling_file)
+
+        # log output summary
         logger.notice(summary)
 
     @staticmethod
