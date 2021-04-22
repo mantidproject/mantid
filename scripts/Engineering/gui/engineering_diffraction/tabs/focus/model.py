@@ -11,11 +11,16 @@ import matplotlib.pyplot as plt
 
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections, path_handling
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
-from mantid.simpleapi import EnggFocus, logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE, \
-    LoadAscii
+from Engineering.EnggUtils import create_custom_grouping_workspace
+from mantid.simpleapi import logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE, \
+    LoadAscii, NormaliseByCurrent, Divide, DiffractionFocussing, RebinToWorkspace, \
+    ConvertUnits, CloneWorkspace
 
 SAMPLE_RUN_WORKSPACE_NAME = "engggui_focusing_input_ws"
 FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_bank_"
+
+NORTH_BANK_CAL = "EnginX_NorthBank.cal"
+SOUTH_BANK_CAL = "EnginX_SouthBank.cal"
 
 
 class FocusModel(object):
@@ -27,7 +32,7 @@ class FocusModel(object):
     def get_last_path(self):
         return self._last_path
 
-    def focus_run(self, sample_paths, banks, plot_output, instrument, rb_num, spectrum_numbers):
+    def focus_run(self, sample_paths, banks, plot_output, instrument, rb_num, spectrum_numbers, custom_cal):
         """
         Focus some data using the current calibration.
         :param sample_paths: The paths to the data to be focused.
@@ -36,7 +41,9 @@ class FocusModel(object):
         :param instrument: The instrument that the data came from.
         :param rb_num: The experiment number, used to create directories. Can be None
         :param spectrum_numbers: The specific spectra that should be focused. Used instead of banks.
+        :param custom_cal: User defined calibration file to crop the focus to
         """
+
         if not Ads.doesExist(vanadium_corrections.INTEGRATED_WORKSPACE_NAME) and not Ads.doesExist(
                 vanadium_corrections.CURVES_WORKSPACE_NAME):
             return
@@ -49,30 +56,43 @@ class FocusModel(object):
             full_calib_workspace = LoadAscii(full_calib_path, OutputWorkspace="det_pos", Separator="Tab")
         else:
             full_calib_workspace = None
-        if spectrum_numbers is None:
+        df_kwarg, name = None, None
+        if spectrum_numbers:
+            grp_ws = create_custom_grouping_workspace(spectrum_numbers, sample_paths[0])
+            df_kwarg = {"GroupingWorkspace": grp_ws}
+            name = 'cropped'
+        elif custom_cal:
+            df_kwarg = {"GroupingFileName": custom_cal}
+            name = 'customcal'
+        if df_kwarg:
+            for sample_path in sample_paths:
+                sample_workspace = path_handling.load_workspace(sample_path)
+                run_no = path_handling.get_run_number_from_path(sample_path, instrument)
+                output_workspace_name = str(run_no) + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + name
+                self._run_focus(sample_workspace, output_workspace_name, integration_workspace,
+                                curves_workspace, df_kwarg, full_calib_workspace)
+                output_workspaces.append([output_workspace_name])
+                self._save_output(instrument, sample_path, "cropped", output_workspace_name, rb_num)
+                self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
+        else:
             for sample_path in sample_paths:
                 sample_workspace = path_handling.load_workspace(sample_path)
                 run_no = path_handling.get_run_number_from_path(sample_path, instrument)
                 workspaces_for_run = []
                 for name in banks:
                     output_workspace_name = str(run_no) + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + str(name)
+                    if name == '1':
+                        df_kwarg = {"GroupingFileName": NORTH_BANK_CAL}
+                    else:
+                        df_kwarg = {"GroupingFileName": SOUTH_BANK_CAL}
                     self._run_focus(sample_workspace, output_workspace_name, integration_workspace,
-                                    curves_workspace, name, full_calib_workspace)
+                                    curves_workspace, df_kwarg, full_calib_workspace)
                     workspaces_for_run.append(output_workspace_name)
                     # Save the output to the file system.
                     self._save_output(instrument, sample_path, name, output_workspace_name, rb_num)
                 output_workspaces.append(workspaces_for_run)
                 self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
-        else:
-            for sample_path in sample_paths:
-                sample_workspace = path_handling.load_workspace(sample_path)
-                run_no = path_handling.get_run_number_from_path(sample_path, instrument)
-                output_workspace_name = str(run_no) + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + "cropped"
-                self._run_focus(sample_workspace, output_workspace_name, integration_workspace,
-                                curves_workspace, None, full_calib_workspace, spectrum_numbers)
-                output_workspaces.append([output_workspace_name])
-                self._save_output(instrument, sample_path, "cropped", output_workspace_name, rb_num)
-                self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
+
         # Plot the output
         if plot_output:
             for ws_names in output_workspaces:
@@ -83,30 +103,21 @@ class FocusModel(object):
                    output_workspace,
                    vanadium_integration_ws,
                    vanadium_curves_ws,
-                   bank,
-                   full_calib_ws=None,
-                   spectrum_numbers=None):
-        kwargs = {
-            "InputWorkspace": input_workspace,
-            "OutputWorkspace": output_workspace,
-            "VanIntegrationWorkspace": vanadium_integration_ws,
-            "VanCurvesWorkspace": vanadium_curves_ws
-        }
-        if full_calib_ws is not None:
-            kwargs["DetectorPositions"] = full_calib_ws
-
-        if bank is None:
-            kwargs["SpectrumNumbers"] = spectrum_numbers
-        else:
-            kwargs["Bank"] = bank
-
-        try:
-            return EnggFocus(**kwargs)
-        except RuntimeError as e:
-            logger.error(
-                "Error in focusing, Could not run the EnggFocus algorithm successfully for bank "
-                + str(bank) + ". Error Description: " + str(e))
-            raise RuntimeError()
+                   df_kwarg,
+                   full_calib_ws=None):
+        import pydevd_pycharm
+        pydevd_pycharm.settrace('localhost', port=8080, stdoutToServer=True, stderrToServer=True)
+        ws = CloneWorkspace(input_workspace)
+        ws = NormaliseByCurrent(ws)
+        ws_d = ConvertUnits(ws, Target='dSpacing')
+        ws_d /= vanadium_integration_ws
+        focused_sample = DiffractionFocussing(InputWorkspace=ws_d, **df_kwarg)
+        curves_rebinned = RebinToWorkspace(WorkspaceToRebin=vanadium_curves_ws, WorkspaceToMatch=focused_sample)
+        normalised = Divide(LHSWorkspace=focused_sample, RHSWorkspace=curves_rebinned,
+                            AllowDifferentNumberSpectra=True)
+        output_workspace = ConvertUnits(InputWorkspace=normalised, OutputWorkspace=output_workspace, Target='TOF')
+        return output_workspace
+    # TODO this is ((done)) - now test
 
     @staticmethod
     def _plot_focused_workspaces(focused_workspaces):

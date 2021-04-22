@@ -20,6 +20,17 @@ def create_spectrum_list_from_string(str_list):
     return int_list
 
 
+def create_custom_grouping_workspace(str_list, sample_raw):
+    grp_ws, _, _ = mantid.CreateGroupingWorkspace(InputWorkspace=sample_raw)  # blank grouping workspace based on inst
+    int_spectrum_numbers = create_spectrum_list_from_string(str_list)
+    for spec in int_spectrum_numbers:
+        ws_ind = int(spec - 1)
+        det_ids = grp_ws.getDetectorIDs(ws_ind)
+        det_id = det_ids[0]
+        grp_ws.setValue(det_id, 1)
+    return grp_ws
+
+
 def default_ceria_expected_peaks(final=False):
     """
     Get the list of expected Ceria peaks, which can be a good default for the expected peaks

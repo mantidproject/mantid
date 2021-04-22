@@ -12,9 +12,10 @@ from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger
 from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, DiffractionFocussing, \
     CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace, NormaliseByCurrent, \
-    CreateGroupingWorkspace, ConvertUnits, Load, RebinToWorkspace,\
+    ConvertUnits, Load, RebinToWorkspace,\
     Divide, EnggEstimateFocussedBackground, ApplyDiffCal
-from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file, default_ceria_expected_peaks
+from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file, default_ceria_expected_peaks, \
+    create_custom_grouping_workspace
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 
@@ -26,7 +27,7 @@ CALIB_PARAMS_WORKSPACE_NAME = "engggui_calibration_banks_parameters"
 NORTH_BANK_TEMPLATE_FILE = "template_ENGINX_241391_236516_North_bank.prm"
 SOUTH_BANK_TEMPLATE_FILE = "template_ENGINX_241391_236516_South_bank.prm"
 NORTH_BANK_CAL = "EnginX_NorthBank.cal"
-SOUTH_BANK_CAL = "EnginX_NorthBank.cal"
+SOUTH_BANK_CAL = "EnginX_SouthBank.cal"
 
 
 class CalibrationModel(object):
@@ -288,7 +289,6 @@ class CalibrationModel(object):
 
         ws_d /= van_integration
 
-        DeleteWorkspace(van_integration)
         DeleteWorkspace(sample)
 
         kwargs = {
@@ -339,13 +339,7 @@ class CalibrationModel(object):
                 DeleteWorkspace(focused_South)
 
         else:
-            grp_ws, _, _ = CreateGroupingWorkspace(InputWorkspace=sample_raw)  # blank grouping workspace based on inst
-            int_spectrum_numbers = _create_spectrum_list_from_string(spectrum_numbers)
-            for spec in int_spectrum_numbers:
-                ws_ind = int(spec - 1)
-                det_ids = grp_ws.getDetectorIDs(ws_ind)
-                det_id = det_ids[0]
-                grp_ws.setValue(det_id, 1)
+            grp_ws = create_custom_grouping_workspace(spectrum_numbers, sample_raw)
             df_kwarg = {"GroupingWorkspace": grp_ws}
             focused_Cropped, curves_Cropped = focus_and_normalise(ws_d, ws_van_d, df_kwarg)
 
