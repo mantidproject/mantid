@@ -117,7 +117,6 @@ class FocusModel(object):
                             AllowDifferentNumberSpectra=True)
         output_workspace = ConvertUnits(InputWorkspace=normalised, OutputWorkspace=output_workspace, Target='TOF')
         return output_workspace
-    # TODO this is ((done)) - now test
 
     @staticmethod
     def _plot_focused_workspaces(focused_workspaces):

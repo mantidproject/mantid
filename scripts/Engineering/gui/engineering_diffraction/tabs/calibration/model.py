@@ -12,10 +12,11 @@ from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger
 from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, DiffractionFocussing, \
     CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace, NormaliseByCurrent, \
-    ConvertUnits, Load, RebinToWorkspace,\
-    Divide, EnggEstimateFocussedBackground, ApplyDiffCal
+    ConvertUnits, Load, ReplaceSpecialValues, \
+    EnggEstimateFocussedBackground, ApplyDiffCal
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file, default_ceria_expected_peaks, \
     create_custom_grouping_workspace
+from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 
@@ -33,16 +34,16 @@ SOUTH_BANK_CAL = "EnginX_SouthBank.cal"
 class CalibrationModel(object):
     def create_new_calibration(self,
                                vanadium_path,
-                               sample_path,
+                               ceria_path,
                                plot_output,
                                instrument,
                                rb_num=None,
                                bank=None,
                                spectrum_numbers=None):
         """
-        Create a new calibration from a vanadium run and sample run
+        Create a new calibration from a vanadium run and ceria run
         :param vanadium_path: Path to vanadium data file.
-        :param sample_path: Path to sample (CeO2) data file
+        :param ceria_path: Path to ceria (CeO2) data file
         :param plot_output: Whether the output should be plotted.
         :param instrument: The instrument the data relates to.
         :param rb_num: The RB number for file creation.
@@ -51,12 +52,20 @@ class CalibrationModel(object):
         """
         van_integration, van_curves = vanadium_corrections.fetch_correction_workspaces(
             vanadium_path, instrument, rb_num=rb_num)  # van_curves = None at this point
-        sample_workspace = path_handling.load_workspace(sample_path)
-        output, van_curves, sample_raw = self.run_calibration(sample_workspace,
+        ceria_workspace = path_handling.load_workspace(ceria_path)
+        full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
+                                      path_handling.ENGINEERING_PREFIX, "full_calibration")
+        if full_calib_path is not None and path.exists(full_calib_path):
+            full_calib = Load(full_calib_path, OutputWorkspace="full_inst_calib", Separator="Tab")
+        else:
+            raise RuntimeError("Full instrument calibration has not been supplied - this is set in the interface"
+                               " settings.")
+        output, van_curves, ceria_raw = self.run_calibration(ceria_workspace,
                                                               vanadium_path,
                                                               van_integration,
                                                               bank,
-                                                              spectrum_numbers)
+                                                              spectrum_numbers,
+                                                              full_calib)
         vanadium_corrections.handle_van_curves(van_curves, vanadium_path, instrument, rb_num)
         if plot_output:
             for i in range(len(output)):
@@ -80,7 +89,7 @@ class CalibrationModel(object):
         difc = [row['difc'] for row in output]
         tzero = [row['tzero'] for row in output]
 
-        bk2bk_params = self.extract_b2b_params(sample_raw)
+        bk2bk_params = self.extract_b2b_params(ceria_raw)
 
         params_table = []
 
@@ -89,12 +98,12 @@ class CalibrationModel(object):
         self.update_calibration_params_table(params_table)
 
         calib_dir = path.join(path_handling.get_output_path(), "Calibration", "")
-        self.create_output_files(calib_dir, difa, difc, tzero, bk2bk_params, sample_path, vanadium_path, instrument,
+        self.create_output_files(calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path, instrument,
                                  bank, spectrum_numbers)
         if rb_num:
             user_calib_dir = path.join(path_handling.get_output_path(), "User", rb_num,
                                        "Calibration", "")
-            self.create_output_files(user_calib_dir, difa, difc, tzero, bk2bk_params, sample_path, vanadium_path,
+            self.create_output_files(user_calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path,
                                      instrument, bank, spectrum_numbers)
 
     @staticmethod
@@ -116,13 +125,13 @@ class CalibrationModel(object):
             logger.warning("Could not open GSAS calibration file: ", file_path)
             return
         try:
-            instrument, van_no, sample_no, params_table = self.get_info_from_file(file_path)
+            instrument, van_no, ceria_no, params_table = self.get_info_from_file(file_path)
             self.update_calibration_params_table(params_table)
         except RuntimeError:
             logger.error("Invalid file selected: ", file_path)
             return
         vanadium_corrections.fetch_correction_workspaces(instrument+van_no, instrument)
-        return instrument, van_no, sample_no
+        return instrument, van_no, ceria_no
 
     @staticmethod
     def update_calibration_params_table(params_table):
@@ -214,82 +223,57 @@ class CalibrationModel(object):
         ax.set_ylabel("Fitted Peaks Centre(TOF, us)")
 
     @staticmethod
-    def run_calibration(sample_ws,
+    def run_calibration(ceria_ws,
                         vanadium_workspace,
                         van_integration,
                         bank,
-                        spectrum_numbers):
+                        spectrum_numbers,
+                        full_calib):
         """
         Creates Engineering calibration files with PDCalibration
-        :param sample_ws: The workspace with the sample data.
+        :param ceria_ws: The workspace with the ceria data.
         :param vanadium_workspace: The workspace with the vanadium data
         :param van_integration: The integration values from the vanadium corrections
         :param bank: The bank to crop to, both if none.
         :param spectrum_numbers: The spectrum numbers to crop to, no crop if none.
-        :return: The calibration output files, the vanadium curves workspace(s), and a clone of the sample file
+        :return: The calibration output files, the vanadium curves workspace(s), and a clone of the ceria file
         """
 
         def run_pd_calibration(kwargs_to_pass):
             return PDCalibration(**kwargs_to_pass)
 
-        def focus_and_normalise(ws_d, ws_van_d, grouping_kwarg):
-            # focus sample
-            focused_sample = DiffractionFocussing(InputWorkspace=ws_d, **grouping_kwarg)
-            ApplyDiffCal(InstrumentWorkspace=focused_sample, ClearCalibration=True)
+        def focus_and_make_van_curves(ceria_d, vanadium_d, grouping_kwarg):
+            # focus ceria
+            focused_ceria = DiffractionFocussing(InputWorkspace=ceria_d, **grouping_kwarg)
+            ApplyDiffCal(InstrumentWorkspace=focused_ceria, ClearCalibration=True)
+            tof_focused = ConvertUnits(InputWorkspace=focused_ceria, Target='TOF')
 
             # focus van data
-            focused_van = DiffractionFocussing(InputWorkspace=ws_van_d, **grouping_kwarg)
-            ApplyDiffCal(InstrumentWorkspace=focused_van, ClearCalibration=True)
+            focused_van = DiffractionFocussing(InputWorkspace=vanadium_d, **grouping_kwarg)
+
             background_van = EnggEstimateFocussedBackground(InputWorkspace=focused_van, NIterations='15', XWindow=0.03)
 
-            # normalise by focused vanadium
-            bg_rebinned = RebinToWorkspace(WorkspaceToRebin=background_van, WorkspaceToMatch=focused_sample)
-            normalised = Divide(LHSWorkspace=focused_sample, RHSWorkspace=bg_rebinned)
+            DeleteWorkspace(focused_ceria)
+            DeleteWorkspace(focused_van)
 
-            tof_focused = ConvertUnits(InputWorkspace=normalised, Target='TOF')
-
-            DeleteWorkspace(focused_sample)
-            DeleteWorkspace(background_van)
-            DeleteWorkspace(bg_rebinned)
-            DeleteWorkspace(normalised)
-
-            return tof_focused, focused_van
+            return tof_focused, background_van
 
         # need to clone the data as PDCalibration rebins
-        sample_raw = CloneWorkspace(InputWorkspace=sample_ws)
-
-        kwargs = {
-            "InputWorkspace": sample_ws,
-            "PeakPositions": default_ceria_expected_peaks(final=False),
-            "TofBinning": [10000, -0.0005, 46000],
-            "PeakWindow": 0.03,
-            "MinimumPeakHeight": 0.5,
-            "PeakFunction": 'BackToBackExponential',
-            "CalibrationParameters": 'DIFC+TZERO',
-            "OutputCalibrationTable": 'cal_inst',
-            "DiagnosticWorkspaces": 'diag_inst',
-            "UseChiSq": True
-        }
-
-        # initial calibration of instrument
-        cal_initial = run_pd_calibration(kwargs)[0]
+        ceria_raw = CloneWorkspace(InputWorkspace=ceria_ws)
 
         ws_van = Load(vanadium_workspace)
         NormaliseByCurrent(InputWorkspace=ws_van, OutputWorkspace=ws_van)
-        ApplyDiffCal(InstrumentWorkspace=ws_van, CalibrationWorkspace=cal_initial)
+        ApplyDiffCal(InstrumentWorkspace=ws_van, CalibrationWorkspace=full_calib)
         ws_van_d = ConvertUnits(InputWorkspace=ws_van, Target='dSpacing')
 
+        # van sensitivity correction
         ws_van_d /= van_integration
+        ReplaceSpecialValues(InputWorkspace=ws_van_d, OutputWorkspace=ws_van_d, NaNValue=0, InfinityValue=0)
 
-        # sensitivity correction for sample
-        sample = CloneWorkspace(sample_raw)
-        NormaliseByCurrent(InputWorkspace=sample, OutputWorkspace=sample)
-        ApplyDiffCal(InstrumentWorkspace=sample, CalibrationWorkspace=cal_initial)
-        ws_d = ConvertUnits(InputWorkspace=sample, Target='dSpacing')
+        ApplyDiffCal(InstrumentWorkspace=ceria_ws, CalibrationWorkspace=full_calib)
+        ws_d = ConvertUnits(InputWorkspace=ceria_ws, Target='dSpacing')
 
-        ws_d /= van_integration
-
-        DeleteWorkspace(sample)
+        DeleteWorkspace(ceria_ws)
 
         kwargs = {
             "PeakPositions": default_ceria_expected_peaks(final=True),
@@ -306,7 +290,9 @@ class CalibrationModel(object):
         if spectrum_numbers is None:
             if bank == '1' or bank is None:
                 df_kwarg = {"GroupingFileName": NORTH_BANK_CAL}
-                focused_North, curves_North = focus_and_normalise(ws_d, ws_van_d, df_kwarg)
+                ws_d_clone = CloneWorkspace(ws_d)
+                ws_van_d_clone = CloneWorkspace(ws_van_d)
+                focused_North, curves_North = focus_and_make_van_curves(ws_d_clone, ws_van_d_clone, df_kwarg)
 
                 # final calibration of focused data
                 kwargs["InputWorkspace"] = focused_North
@@ -318,30 +304,30 @@ class CalibrationModel(object):
                 curves_north = CloneWorkspace(curves_North)
                 curves_output.append(curves_north)
 
-                DeleteWorkspace(curves_north)
                 DeleteWorkspace(focused_North)
 
             if bank == '2' or bank is None:
                 df_kwarg = {"GroupingFileName": SOUTH_BANK_CAL}
-                focused_South, curves_South = focus_and_normalise(ws_d, ws_van_d, df_kwarg)
+                ws_d_clone = CloneWorkspace(ws_d)
+                ws_van_d_clone = CloneWorkspace(ws_van_d)
+                focused_South, curves_South = focus_and_make_van_curves(ws_d_clone, ws_van_d_clone, df_kwarg)
 
                 # final calibration of focused data
                 kwargs["InputWorkspace"] = focused_South
                 kwargs["OutputCalibrationTable"] = 'engggui_calibration_bank_2'
                 kwargs["DiagnosticWorkspaces"] = 'diag_South'
 
-                cal_north = run_pd_calibration(kwargs)[0]
-                cal_output.append(cal_north)
+                cal_south = run_pd_calibration(kwargs)[0]
+                cal_output.append(cal_south)
                 curves_south = CloneWorkspace(curves_South)
                 curves_output.append(curves_south)
 
-                DeleteWorkspace(curves_south)
                 DeleteWorkspace(focused_South)
 
         else:
-            grp_ws = create_custom_grouping_workspace(spectrum_numbers, sample_raw)
+            grp_ws = create_custom_grouping_workspace(spectrum_numbers, ceria_raw)
             df_kwarg = {"GroupingWorkspace": grp_ws}
-            focused_Cropped, curves_Cropped = focus_and_normalise(ws_d, ws_van_d, df_kwarg)
+            focused_Cropped, curves_Cropped = focus_and_make_van_curves(ws_d, ws_van_d, df_kwarg)
 
             # final calibration of focused data
             kwargs["InputWorkspace"] = focused_Cropped
@@ -366,9 +352,9 @@ class CalibrationModel(object):
             row = bank_cal.row(0)
             current_fit_params = {'difc': row['difc'], 'difa': row['difa'], 'tzero': row['tzero']}
             cal.append(current_fit_params)
-        return cal, curves_output, sample_raw
+        return cal, curves_output, ceria_raw
 
-    def create_output_files(self, calibration_dir, difa, difc, tzero, bk2bk_params, sample_path, vanadium_path,
+    def create_output_files(self, calibration_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path,
                             instrument, bank, spectrum_numbers):
         """
         Create output files from the algorithms in the specified directory
@@ -377,13 +363,13 @@ class CalibrationModel(object):
         :param difc: DIFC values from the calibration algorithm.
         :param tzero: TZERO values from the calibration algorithm.
         :param bk2bk_params: BackToBackExponential parameters from Parameters.xml file.
-        :param sample_path: The path to the sample data file.
+        :param ceria_path: The path to the ceria data file.
         :param vanadium_path: The path to the vanadium data file.
         :param instrument: The instrument (ENGINX or IMAT).
         :param bank: Optional parameter to crop by bank.
         :param spectrum_numbers: Optional parameter to crop using spectrum numbers.
         """
-        kwargs = {"ceria_run": path_handling.get_run_number_from_path(sample_path, instrument),
+        kwargs = {"ceria_run": path_handling.get_run_number_from_path(ceria_path, instrument),
                   "vanadium_run": path_handling.get_run_number_from_path(vanadium_path, instrument)}
 
         def south_kwargs():
@@ -395,7 +381,7 @@ class CalibrationModel(object):
             kwargs["bank_names"] = ["North"]
 
         def generate_output_file(difa_list, difc_list, tzero_list, bank_name, kwargs_to_pass):
-            file_path = calibration_dir + self._generate_output_file_name(vanadium_path, sample_path, instrument,
+            file_path = calibration_dir + self._generate_output_file_name(vanadium_path, ceria_path, instrument,
                                                                           bank=bank_name)
             write_ENGINX_GSAS_iparam_file(file_path, difa_list, difc_list, tzero_list, bk2bk_params, **kwargs_to_pass)
 
@@ -444,27 +430,27 @@ class CalibrationModel(object):
             raise RuntimeError("Invalid file format.")
 
         words = run_numbers.split()
-        sample_no = words[2]  # Run numbers are stored as the 3rd and 4th word in this line.
+        ceria_no = words[2]  # Run numbers are stored as the 3rd and 4th word in this line.
         van_no = words[3]
-        return instrument, van_no, sample_no, params_table
+        return instrument, van_no, ceria_no, params_table
 
     @staticmethod
     def _generate_table_workspace_name(bank_num):
         return "engggui_calibration_bank_" + str(bank_num)
 
     @staticmethod
-    def _generate_output_file_name(vanadium_path, sample_path, instrument, bank):
+    def _generate_output_file_name(vanadium_path, ceria_path, instrument, bank):
         """
-        Generate an output filename in the form INSTRUMENT_VanadiumRunNo_SampleRunNo_BANKS
+        Generate an output filename in the form INSTRUMENT_VanadiumRunNo_ceriaRunNo_BANKS
         :param vanadium_path: Path to vanadium data file
-        :param sample_path: Path to sample data file
+        :param ceria_path: Path to ceria data file
         :param instrument: The instrument in use.
         :param bank: The bank being saved.
-        :return: The filename, the vanadium run number, and sample run number.
+        :return: The filename, the vanadium run number, and ceria run number.
         """
         vanadium_no = path_handling.get_run_number_from_path(vanadium_path, instrument)
-        sample_no = path_handling.get_run_number_from_path(sample_path, instrument)
-        filename = instrument + "_" + vanadium_no + "_" + sample_no + "_"
+        ceria_no = path_handling.get_run_number_from_path(ceria_path, instrument)
+        filename = instrument + "_" + vanadium_no + "_" + ceria_no + "_"
         if bank == "all":
             filename = filename + "all_banks.prm"
         elif bank == "north":

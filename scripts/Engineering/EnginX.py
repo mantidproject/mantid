@@ -391,13 +391,7 @@ def run_calibration(sample_ws,
             curves_output.append(curves_south)
 
     else:
-        grp_ws, _, _ = simple.CreateGroupingWorkspace(InputWorkspace=sample_raw)  # blank grp workspace from inst
-        int_spectrum_numbers = Utils.create_spectrum_list_from_string(spectrum_numbers)
-        for spec in int_spectrum_numbers:
-            ws_ind = int(spec - 1)
-            det_ids = grp_ws.getDetectorIDs(ws_ind)
-            det_id = det_ids[0]
-            grp_ws.setValue(det_id, 1)
+        grp_ws = Utils.create_custom_grouping_workspace(spectrum_numbers, sample_raw)
         df_kwarg = {"GroupingWorkspace": grp_ws}
         focused_Cropped, curves_Cropped = focus_and_normalise(ws_d, ws_van_d, df_kwarg)
 
@@ -640,6 +634,24 @@ def focus(run_no, van_run, calibration_directory, focus_directory, focus_general
                     time_period)
 
 
+def _run_focus(input_workspace,
+               output_workspace,
+               vanadium_integration_ws,
+               vanadium_curves_ws,
+               df_kwarg,
+               full_calib_ws=None):
+    ws = simple.CloneWorkspace(input_workspace)
+    ws = simple.NormaliseByCurrent(ws)
+    ws_d = simple.ConvertUnits(ws, Target='dSpacing')
+    ws_d /= vanadium_integration_ws
+    focused_sample = simple.DiffractionFocussing(InputWorkspace=ws_d, **df_kwarg)
+    curves_rebinned = simple.RebinToWorkspace(WorkspaceToRebin=vanadium_curves_ws, WorkspaceToMatch=focused_sample)
+    normalised = simple.Divide(LHSWorkspace=focused_sample, RHSWorkspace=curves_rebinned,
+                               AllowDifferentNumberSpectra=True)
+    output_workspace = simple.ConvertUnits(InputWorkspace=normalised, OutputWorkspace=output_workspace, Target='TOF')
+    return output_workspace
+
+
 def focus_whole(run_number, van_curves, van_int, focus_directory, focus_general, do_pre_process, params, time_period):
     """
     focus a whole run with no cropping
@@ -659,9 +671,10 @@ def focus_whole(run_number, van_curves, van_int, focus_directory, focus_general,
     # loop through both banks, focus and save them
     for i in range(1, 3):
         output_ws = "engg_focus_output_bank_{}".format(i)
-        simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
-                         VanIntegrationWorkspace=van_integrated_ws, VanCurvesWorkspace=van_curves_ws,
-                         Bank=str(i))
+        cal_file = NORTH_BANK_CAL if i == 1 else SOUTH_BANK_CAL
+        df_kwarg = {"GroupingFileName": cal_file}
+        _run_focus(input_workspace=ws_to_focus, output_workspace=output_ws, vanadium_integration_ws=van_integrated_ws,
+                   vanadium_curves_ws=van_curves_ws, df_kwarg=df_kwarg)
         _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_{}{{}}", str(i))
 
 
