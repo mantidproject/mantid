@@ -110,6 +110,13 @@ void SCDCalibratePanels2::init() {
   setPropertyGroup("CalibrateL1", PARAMETERS);
   setPropertyGroup("CalibrateBanks", PARAMETERS);
 
+  // Profiling option
+  declareProperty("ProfileL1", true, "Perform profiling of objective function with given input for L1");
+  declareProperty("ProfileBanks", true, "Perform profiling of objective function with given input for Banks");
+  const std::string PROFILING("Profiling objective function");
+  setPropertyGroup("ProfileL1", PROFILING);
+  setPropertyGroup("ProfileBanks", PROFILING);
+
   // Output options group
   declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The workspace containing the calibration table.");
@@ -220,6 +227,9 @@ void SCDCalibratePanels2::exec() {
   bool calibrateL1 = getProperty("CalibrateL1");
   bool calibrateBanks = getProperty("CalibrateBanks");
 
+  bool profL1 = getProperty("ProfileL1");
+  bool profBanks = getProperty("ProfileBanks");
+
   const std::string DetCalFilename = getProperty("DetCalFilename");
   const std::string XmlFilename = getProperty("XmlFilename");
   const std::string CSVFilename = getProperty("CSVFilename");
@@ -242,7 +252,13 @@ void SCDCalibratePanels2::exec() {
   // get names of banks that can be calibrated
   getBankNames(m_pws);
 
-  profileL1(m_pws, pws_original);
+  // DEV ONLY
+  if (profL1) {
+    profileL1(m_pws, pws_original);
+  }
+  if (profBanks) {
+    profileBanks(m_pws, pws_original);
+  }
 
   // STEP_3: optimize T0,L1,L2,etc.
   if (calibrateT0) {
@@ -1014,22 +1030,138 @@ void SCDCalibratePanels2::profileL1(Mantid::API::IPeaksWorkspace_sptr &pws,
     // log rst
     msgrst << deltaL1 << "\t" << residual << "\n";
 
-    //
-    g_log.notice() << "deltaL1 = " << deltaL1 << ", residual = " << residual << "\n"
-                   << "-- out[1-3] = " << out[0] << "," << out[1] << "," << out[2] << "\n";
-
     // increment
     deltaL1 += 1e-4; // 0.1mm step size
   }
 
   // output to file
   auto filenamebase = boost::filesystem::temp_directory_path();
-  filenamebase /= boost::filesystem::unique_path("profileSCDCalibratePanels2_L1_%%%%%%%%.csv");
+  filenamebase /= boost::filesystem::unique_path("profileSCDCalibratePanels2_L1.csv");
   std::ofstream profL1File;
   profL1File.open(filenamebase.string());
   profL1File << msgrst.str();
   profL1File.close();
-  g_log.notice() << "END of profiling objective func along L1\n";
+  g_log.notice() << "Profile data is saved at:\n"
+                 << filenamebase << "\n"
+                 << "END of profiling objective func along L1\n";
+}
+
+/**
+ * @brief Profiling obj func along six degree of freedom, which can very slow.
+ *
+ * @param pws
+ * @param pws_original
+ */
+void SCDCalibratePanels2::profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws,
+                                       Mantid::API::IPeaksWorkspace_sptr pws_original) {
+  g_log.notice() << "START of profiling all banks along six degree of freedom\n";
+
+  // Use OPENMP to speed up the profiling
+  PARALLEL_FOR_IF(Kernel::threadSafe(*pws))
+  for (int i = 0; i < static_cast<int>(m_BankNames.size()); ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    // prepare local copies to work with
+    const std::string bankname = *std::next(m_BankNames.begin(), i);
+    const std::string pwsBankiName = "_pws_" + bankname;
+
+    //-- step 0: extract peaks that lies on the current bank
+    IPeaksWorkspace_sptr pwsBanki = selectPeaksByBankName(pws, bankname, pwsBankiName);
+    //   get tofs from the original subset of pws
+    IPeaksWorkspace_sptr pwsBanki_original = selectPeaksByBankName(pws_original, bankname, pwsBankiName);
+    std::vector<double> tofs = captureTOF(pwsBanki_original);
+
+    // Do not attempt correct panels with less than 6 peaks as the system will
+    // be under-determined
+    int nBankPeaks = pwsBanki->getNumberPeaks();
+    if (nBankPeaks < MINIMUM_PEAKS_PER_BANK) {
+      // use ostringstream to prevent OPENMP breaks log info
+      std::ostringstream msg_npeakCheckFail;
+      msg_npeakCheckFail << "-- Cannot profile Bank " << bankname << " have only " << nBankPeaks << " (<"
+                         << MINIMUM_PEAKS_PER_BANK << ") Peaks, skipping\n";
+      g_log.notice() << msg_npeakCheckFail.str();
+      continue;
+    }
+
+    //
+    MatrixWorkspace_sptr wsBankCali = getIdealQSampleAsHistogram1D(pwsBanki);
+    std::ostringstream msgrst;
+    msgrst.precision(12);
+    msgrst << "dx\tdy\tdz\ttheta\tphi\trogang\tresidual\n";
+    //
+    auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
+    objf->setPeakWorkspace(pwsBanki, bankname, tofs);
+    //
+    const int n_peaks = pwsBanki->getNumberPeaks();
+    std::unique_ptr<double[]> target(new double[n_peaks * 3]);
+    // generate the target
+    auto ubmatrix = pwsBanki->sample().getOrientedLattice().getUB();
+    for (int i = 0; i < n_peaks; ++i) {
+      V3D qv = ubmatrix * pwsBanki->getPeak(i).getIntHKL();
+      qv *= 2 * PI;
+      for (int j = 0; j < 3; ++j) {
+        target[i * 3 + j] = qv[j];
+      }
+    }
+    //
+    double xValues[7] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // xValues is not used
+
+    // NOTE: very expensive scan of the parameter space, proceed with caution
+    //       100^6 -> 10^8 entries
+    for (double dx = -1e-2; dx < 1e-2; dx += 1e-4) {
+      // deltaX: meter
+      for (double dy = -1e-2; dy < 1e-2; dy += 1e-4) {
+        // deltaY: meter
+        for (double dz = -1e-2; dz < 1e-2; dz += 1e-4) {
+          // deltaZ: meter
+          for (double theta = 0.0; theta < PI; theta += PI / 100) {
+            // theta: rad
+            for (double phi = 0.0; phi < 2 * PI; phi += 2 * PI / 100) {
+              // phi: rad
+              for (double ang = -5.0; ang < 5.0; ang += 5 / 100) {
+                // ang: degrees
+                // configure the objfunc
+                std::unique_ptr<double[]> out(new double[n_peaks * 3]);
+                objf->setParameter("DeltaX", dx);
+                objf->setParameter("DeltaY", dy);
+                objf->setParameter("DeltaZ", dz);
+                objf->setParameter("Theta", theta);
+                objf->setParameter("Phi", phi);
+                objf->setParameter("DeltaRotationAngle", ang);
+                objf->function1D(out.get(), xValues, 1);
+                // calc residual
+                double residual = 0.0;
+                for (int i = 0; i < n_peaks * 3; ++i) {
+                  residual += (out[i] - target[i]) * (out[i] - target[i]);
+                }
+                residual = std::sqrt(residual) / (n_peaks - 6);
+                // record
+                msgrst << dx << "\t" << dy << "\t" << dz << "\t" << theta << "\t" << phi << "\t" << ang << "\t"
+                       << residual << "\n";
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // output to file
+    auto filenamebase = boost::filesystem::temp_directory_path();
+    std::string fnbase = "profileSCDCalibratePanels2_" + bankname + ".csv";
+    filenamebase /= boost::filesystem::unique_path(fnbase);
+    std::ofstream profBankFile;
+    profBankFile.open(filenamebase.string());
+    profBankFile << msgrst.str();
+    profBankFile.close();
+
+    // notify at the terminal
+    std::ostringstream msg;
+    msg << "Profile of " << bankname << " is saved at:\n"
+        << filenamebase << "\n"
+        << "END of profiling objective func for " << bankname << "\n";
+    g_log.notice() << msg.str();
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
 }
 
 } // namespace Crystal
