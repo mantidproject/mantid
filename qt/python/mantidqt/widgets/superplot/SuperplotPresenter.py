@@ -76,8 +76,11 @@ class SuperplotPresenter:
         """
         Triggered when one of the dockwidgets is resized.
         """
-        self._canvas.figure.tight_layout()
-        self._canvas.draw_idle()
+        try:
+            self._canvas.figure.tight_layout()
+            self._canvas.draw_idle()
+        except:
+            pass
 
     def onVisibilityChanged(self, state):
         """
