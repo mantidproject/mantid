@@ -25,7 +25,7 @@ Including this at the start of your view script will import a class
 
 .. code-block:: python
 
-    from mantid.utils.qt import load_ui
+    from mantidqt.utils.qt import load_ui
 
     Ui_MyWidget, _ = load_ui(__file__, "my_widget.ui")
 

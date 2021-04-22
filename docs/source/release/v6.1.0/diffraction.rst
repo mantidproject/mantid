@@ -34,9 +34,12 @@ Improvements
 - :ref:`AlignComponents <algm-AlignComponents>` has option to output a table listing the changes in position and orientation for each component
 - :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>` now outputs a table listing the changes in position and orientation for each bank
 
+- :ref:`WANDPowderReduction <algm-WANDPowderReduction>` GUI now only shows relevant items in drop down menu and no longer has a confusing copy input workspace name button.
+
 Bugfixes
 ########
 
+- Fix the issue in saving reduced data as GSAS format using :ref:`HB2AReduce <algm-HB2AReduce>`.
 - Fix the format inconsistency (with data saved from autoreduction workflow) issue for saving GSAS data using :ref:`HB2AReduce <algm-HB2AReduce>` - both are now using :ref:`SaveGSSCW <algm-SaveGSSCW>` for saving GSAS data.
 - Fix out-of-range bug in :ref:`FitPeaks <algm-FitPeaks>` for histogram data.
 - Fix bug in :ref:`FitPeaks <algm-FitPeaks>` not correctly checking right window for an individual peak
@@ -69,12 +72,21 @@ Improvements
 - BackToBackExponential fitting parameters read from .xml file and output to .prm file for GSAS-II.
 - The Engineering Diffraction interface can now be saved as part of a project file, and can save/restore in the event of a crash as part of the general project save system.
 
+Bugfixes
+########
+- Engineering diffraction interface now converts fitted TOF centre to d-spacing using diffractometer constants post sequential fit (in a matrix workspace).
+- Error on the fitted peak centre converted from TOF to d-spacing will now be correct for non-zero difa (in preparation for supporting this in the interface).
+- Added checks on existance of non-zero proton charge before attempting to average log values weighted by proton charge in the fitting tab of the engineering difraction interface.
+
+
 Single Crystal Diffraction
 --------------------------
 - New version of algorithm :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` provides more accurate calibration results for CORELLI instrument.
 - Modified some logs in output workspace from :ref:`LoadWANDSCD <algm-LoadWANDSCD>` to be TimeSeriesProperty so they work with :ref:`SetGoniometer <algm-SetGoniometer>`.
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` has option to integrate ellipsoids around estimated centroid instead of nominal position.
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` has option to determine ellipsoid covariance iteratively and to use the estimated standard deviation rather than scale the major axis of the ellipsoid to the spherical radius.
+- :ref:`ConvertHFIRSCDtoMDE <algm-ConvertHFIRSCDtoMDE>` has new geometrical correction factor `ObliquityParallaxCoefficient` for shift in vertical beam position due to wide beam.
+- :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ>` has new geometrical correction factor `ObliquityParallaxCoefficient` for shift in vertical beam position due to wide beam.
 
 Improvements
 ############

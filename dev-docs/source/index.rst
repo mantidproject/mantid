@@ -51,6 +51,7 @@ Development Process
    Communication
    IssueTracking
    UserSupport
+   GitConfig
    GitWorkflow
    AutomatedBuildProcess
    JenkinsConfiguration
@@ -101,6 +102,7 @@ Tools
 
    ToolsOverview
    ProfilingOverview
+   ProfilingWithValgrind
    FlowchartCreation
    VisualStudioBuildImpact
    PyCharm
@@ -228,6 +230,7 @@ Component Overviews
    EventWorkspaceDev
    HandlingXML
    IndexProperty
+   IndirectDataAnalysisFileStructure
    InstrumentViewer
    ISISReflectometryInterface
    ISISSANSReductionBackend

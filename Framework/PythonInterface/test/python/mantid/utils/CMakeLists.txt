@@ -1,7 +1,8 @@
 # mantid.utils tests
 
 set(TEST_PY_FILES
-    absorptioncorrutilsTest.py)
+    absorptioncorrutilsTest.py
+    dgsTest.py)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 

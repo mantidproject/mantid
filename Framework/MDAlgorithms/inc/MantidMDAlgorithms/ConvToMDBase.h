@@ -64,7 +64,7 @@ protected:
   /// number of target ws dimensions
   size_t m_NDims;
   // index of current run(workspace). Used for MD WS combining
-  uint16_t m_RunIndex;
+  uint16_t m_ExpInfoIndex;
   //---> preprocessed detectors information
   // number of valid spectra
   uint32_t m_NSpectra;

@@ -42,5 +42,7 @@ Bugfixes
 - Fixed a scenario where workbench could hang if the user closed a plot while live data was being read.
 - Fixed a crash that happens when multiple plot windows are open, and the users closes one of them.
 - The y-axis in the instrument view's pick tab will now rescale if the range changes.
+- On the instrument widget pick tab, when the integration range is changed the current tool will stay selected.
+- Fixed a bug where Workbench would hang on startup when running on Big Sur.
 
 :ref:`Release 6.1.0 <v6.1.0>`

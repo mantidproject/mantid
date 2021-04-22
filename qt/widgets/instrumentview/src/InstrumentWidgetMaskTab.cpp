@@ -1337,7 +1337,9 @@ void InstrumentWidgetMaskTab::storeMask() {
 
 void InstrumentWidgetMaskTab::changedIntegrationRange(double /*unused*/,
                                                       double /*unused*/) {
-  enableApplyButtons();
+  if (m_instrWidget->isCurrentTab(this)) {
+    enableApplyButtons();
+  }
 }
 
 /** Load mask tab state from a Mantid project file
