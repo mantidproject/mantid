@@ -13,7 +13,7 @@ FREQUENCY_DOMAIN_ANALYSIS_DEFAULT_Y_RANGE = [0.0, 1000.0]
 
 class FrequencyDomainAnalysisContext(MuonContext):
     def __init__(self, muon_data_context=None, muon_gui_context=None,
-                 muon_group_context=None, fitting_context=None, muon_phase_context=None,plotting_context=None,
+                 muon_group_context=None, fitting_context=None, muon_phase_context=None, plotting_context=None,
                  frequency_context=None, freq_plotting_context=None):
         super().__init__(muon_data_context=muon_data_context, muon_gui_context=muon_gui_context,
                          muon_group_context=muon_group_context, plotting_context=plotting_context,

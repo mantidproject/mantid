@@ -316,8 +316,45 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         self.options.set_plot_y_range.assert_not_called()
         self.view.redraw_figure.assert_not_called()
 
-    def test_handle_error_selection_changed(self):
-        pass
+    def test_handle_error_selection_changed_all(self):
+        ws_names = ["MUSR62260; Group; fwd", "MUSR62260; Group; bwd"]
+        ws_indices = [0, 1]
+        self.view.plotted_workspaces_and_indices = [ws_names, ws_indices]
+        self.presenter._get_selected_subplots_from_quick_edit_widget = mock.Mock(return_value=(ws_names, ws_indices))
+        self.options.get_errors = mock.Mock(return_value=True)
+        self.context.set_error_all = mock.Mock()
+        self.context.update_error_state = mock.Mock()
+        self.presenter.replot_workspace_with_error_state = mock.Mock()
+        replot_workspace_with_error_state_calls = [mock.call(ws_names[0], True), mock.call(ws_names[1], True)]
+        update_error_state_calls = [mock.call(ws_names[0], True), mock.call(ws_names[1], True)]
+        self.context.get_axis = mock.Mock()
+        self.context.get_axis.side_effect = [0, 1]
+        self.model._get_workspace_plot_axis = mock.Mock()
+        self.model._get_workspace_plot_axis.side_effect = [0, 1, 0, 1]
+        self.presenter.handle_error_selection_changed()
+        self.context.set_error_all.assert_called_once_with(True)
+        self.context.update_error_state.assert_has_calls(update_error_state_calls)
+        self.presenter.replot_workspace_with_error_state.assert_has_calls(replot_workspace_with_error_state_calls)
+
+    def test_handle_error_selection_changed_specific_subplot(self):
+        ws_names = ["MUSR62260; Group; fwd", "MUSR62260; Group; bwd"]
+        ws_indices = [0, 1]
+        self.view.plotted_workspaces_and_indices = [ws_names, ws_indices]
+        self.presenter._get_selected_subplots_from_quick_edit_widget = mock.Mock(return_value=([ws_names[1]], [ws_indices[1]]))
+        self.options.get_errors = mock.Mock(return_value=False)
+        self.context.set_error_all = mock.Mock()
+        self.context.update_error_state = mock.Mock()
+        self.presenter.replot_workspace_with_error_state = mock.Mock()
+        replot_workspace_with_error_state_calls = [mock.call(ws_names[1], False)]
+        update_error_state_calls = [mock.call(ws_names[1], False)]
+        self.context.get_axis = mock.Mock()
+        self.context.get_axis.side_effect = [1]
+        self.model._get_workspace_plot_axis = mock.Mock()
+        self.model._get_workspace_plot_axis.side_effect = [0, 1]
+        self.presenter.handle_error_selection_changed()
+        self.context.set_error_all.assert_not_called()
+        self.context.update_error_state.assert_has_calls(update_error_state_calls)
+        self.presenter.replot_workspace_with_error_state.assert_has_calls(replot_workspace_with_error_state_calls)
 
     def test_handle_subplot_changed_all(self):
         ws_names = ["MUSR62260; Group; fwd", "MUSR62260; Group; bwd"]
