@@ -23,20 +23,6 @@ Account Creation
 	+ The Git workflow is described on the :ref:`GitWorkflow` page.
 - If based at ISIS, please sign up for a `User Facilities account <https://users.facilities.rl.ac.uk/>`__ that among other things, grants access to IDAaaS.
 
-SNS Git
--------
-
-If you are based at SNS, in order to be able to ssh out of the lab, you need to do the following:
-
-- Install "Corkscrew" using your package manager.
-- Add the following lines to ~/.ssh/config:
-
-
-.. code:: bash
-
-    ProxyCommand corkscrew snowman.ornl.gov 3128 %h %p
-    Host github.com
-
 Introducing Yourself
 --------------------
 

@@ -51,7 +51,12 @@ public:
 
   void test_LoadSANS_D22() { checkLoader("ILL/D22/192068", "LoadILLSANS"); }
 
-  void test_LoadSANS_D16() { checkLoader("ILL/D16/218356", "LoadILLSANS"); }
+  void test_LoadSANS_D16() {
+    checkLoader("ILL/D16/023583", "LoadILLSANS");
+    checkLoader("ILL/D16/218356", "LoadILLSANS");
+  }
+
+  void test_LoadDiffraction_D1B() { checkLoader("ILL/D1B/473432", "LoadILLDiffraction"); }
 
   void test_LoadDiffraction_D2B() { checkLoader("ILL/D2B/535401", "LoadILLDiffraction"); }
 
@@ -59,6 +64,14 @@ public:
     checkLoader("ILL/D20/967076", "LoadILLDiffraction");
     checkLoader("ILL/D20/967087", "LoadILLDiffraction");
   }
+
+  void test_loadDiffraction_IN5() { checkLoader("ILL/IN5/199857", "LoadILLDiffraction"); }
+
+  void test_loadDiffraction_PANTHER() { checkLoader("ILL/PANTHER/010578", "LoadILLDiffraction"); }
+
+  void test_loadDiffraction_SHARP() { checkLoader("ILL/SHARP/000104.nxs", "LoadILLDiffraction"); }
+
+  void test_LoadPolarizedDiffraction_D7() { checkLoader("ILL/D7/394458", "LoadILLPolarizedDiffraction"); }
 
   void test_loadIndirect_IN16B() {
     checkLoader("ILL/IN16B/090661", "LoadILLIndirect"); // one wing qens

@@ -1611,6 +1611,10 @@ int InstrumentWidget::getCurrentTab() const {
   return mControlsTab->currentIndex();
 }
 
+bool InstrumentWidget::isCurrentTab(InstrumentWidgetTab* tab) const {
+  return this->getCurrentTab() == mControlsTab->indexOf(tab);
+}
+
 /**
  * Save the state of the instrument widget to a project file.
  * @return string representing the current state of the instrumet widget.

@@ -55,6 +55,10 @@ const std::string ALPHA_PLUS_ALPHA(R"((?<=\D)\s*\+\s*(?=\D))");
 const std::string PLUS_OPERATORS = NUM_PLUS_ALPHA + "|" + ALPHA_PLUS_ALPHA;
 static const boost::regex REGEX_PLUS_OPERATORS(PLUS_OPERATORS, boost::regex_constants::perl);
 
+bool isASCII(const std::string &str) {
+  return !std::any_of(str.cbegin(), str.cend(), [](char c) { return static_cast<unsigned char>(c) > 127; });
+}
+
 } // anonymous namespace
 
 namespace Mantid {
@@ -242,6 +246,8 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
   boost::smatch invalid_substring;
   if (!m_allowEmptyTokens && boost::regex_search(propValue.begin(), propValue.end(), invalid_substring, REGEX_INVALID))
     return "Unable to parse filename due to an empty token.";
+  if (!isASCII(propValue))
+    return "Unable to parse filename due to an unsupported non-ASCII character being found.";
 
   std::vector<std::vector<std::string>> fileNames;
 

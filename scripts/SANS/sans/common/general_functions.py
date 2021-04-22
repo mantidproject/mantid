@@ -12,6 +12,8 @@ from math import (acos, sqrt, degrees)
 import re
 from copy import deepcopy
 import json
+from typing import Tuple
+
 import numpy as np
 from mantid.api import (AlgorithmManager, AnalysisDataService, isSameWorkspaceObject)
 from sans.common.constant_containers import (SANSInstrument_enum_list, SANSInstrument_string_list,
@@ -517,7 +519,7 @@ class EventSliceParser(object):
         if start > stop:
             raise ValueError("Parsing event slices. It appears that the start value {0} is larger than the stop "
                              "value {1}. Make sure that this is not the case.")
-        return [start, stop]
+        return start, stop
 
     @staticmethod
     def _extract_slice_range(line):
@@ -535,7 +537,7 @@ class EventSliceParser(object):
 
         # We generate ranges with [[element[0], element[1]], [element[1], element[2]], ...]
         ranges = list(zip(elements[:-1], elements[1:]))
-        return [[e1, e2] for e1, e2 in ranges]
+        return [(e1, e2) for e1, e2 in ranges]
 
     @staticmethod
     def _extract_full_range(line, range_marker_pattern):
@@ -543,15 +545,15 @@ class EventSliceParser(object):
         line = re.sub(range_marker_pattern, "", line)
         value = float(line)
         if is_lower_bound:
-            return [value, -1.]
+            return value, -1.
         else:
-            return [-1., value]
+            return -1., value
 
     def _parse_comma_separated_range(self):
         assert (isinstance(self.user_input, list))
         output_list = []
         for i, j in zip(self.user_input, self.user_input[1:]):
-            output_list.append([float(i), float(j)])
+            output_list.append((float(i), float(j)))
 
         return output_list
 
@@ -565,12 +567,7 @@ def parse_event_slice_setting(string_to_parse):
 
 def get_ranges_from_event_slice_setting(string_to_parse):
     parsed_elements = parse_event_slice_setting(string_to_parse)
-    if not parsed_elements:
-        return
-    # We have the elements in the form [[a, b], [c, d], ...] but want [a, c, ...] and [b, d, ...]
-    lower = [element[0] for element in parsed_elements]
-    upper = [element[1] for element in parsed_elements]
-    return lower, upper
+    return parsed_elements
 
 
 def get_bins_for_rebin_setting(min_value, max_value, step_value, step_type):
@@ -641,7 +638,12 @@ def get_ranges_for_rebin_array(rebin_array):
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions related to workspace names
 # ----------------------------------------------------------------------------------------------------------------------
-def get_standard_output_workspace_name(state, reduction_data_type,
+def get_wav_range_from_ws(workspace) -> Tuple[float, float]:
+    range_str = workspace.getRun().getProperty("Wavelength Range").valueAsStr
+    return range_str.split('-')
+
+
+def get_standard_output_workspace_name(state, reduction_data_type, wav_range,
                                        include_slice_limits=True, custom_run_name=None):
     """
     Creates the name of the output workspace from a state object.
@@ -699,8 +701,7 @@ def get_standard_output_workspace_name(state, reduction_data_type,
         dimensionality_as_string = "_2D"
 
     # 5. Wavelength range
-    wavelength = state.wavelength
-    wavelength_range_string = "_" + str(wavelength.wavelength_low[0]) + "_" + str(wavelength.wavelength_high[0])
+    wavelength_range_string = f"_{wav_range[0]}_{wav_range[1]}"
 
     # 6. Phi Limits
     mask = state.mask
@@ -734,7 +735,8 @@ def get_standard_output_workspace_name(state, reduction_data_type,
     return output_workspace_name, output_workspace_base_name
 
 
-def get_transmission_output_name(state, data_type=DataType.SAMPLE, multi_reduction_type=None, fitted=True):
+def get_transmission_output_name(state, wav_range, data_type=DataType.SAMPLE,
+                                 multi_reduction_type=None, fitted=True,):
     user_specified_output_name = state.save.user_specified_output_name
 
     data = state.data
@@ -743,7 +745,7 @@ def get_transmission_output_name(state, data_type=DataType.SAMPLE, multi_reducti
 
     calculated_transmission_state = state.adjustment.calculate_transmission
     fit = calculated_transmission_state.fit[DataType.SAMPLE.value]
-    wavelength_range_string = "_" + str(fit.wavelength_low) + "_" + str(fit.wavelength_high)
+    fit_wav_range_string = "_" + str(fit.wavelength_low) + "_" + str(fit.wavelength_high)
 
     trans_suffix = "_trans_Sample" if data_type == DataType.SAMPLE else "_trans_Can"
     trans_suffix = trans_suffix + '_unfitted' if not fitted else trans_suffix
@@ -752,31 +754,29 @@ def get_transmission_output_name(state, data_type=DataType.SAMPLE, multi_reducti
         output_name = user_specified_output_name + trans_suffix
         output_base_name = user_specified_output_name + '_trans'
     else:
-        output_name = short_run_number_as_string + trans_suffix + wavelength_range_string
-        output_base_name = short_run_number_as_string + '_trans' + wavelength_range_string
+        output_name = short_run_number_as_string + trans_suffix + fit_wav_range_string
+        output_base_name = short_run_number_as_string + '_trans' + fit_wav_range_string
 
     if multi_reduction_type and fitted:
         if multi_reduction_type["wavelength_range"]:
-            wavelength = state.wavelength
-            wavelength_range_string = "_" + str(wavelength.wavelength_low[0]) + "_" + str(
-                wavelength.wavelength_high[0])
+            wavelength_range_string = f"_{wav_range[0]}_{wav_range[1]}"
             output_name += wavelength_range_string
 
     return output_name, output_base_name
 
 
-def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_type=None,
-                    event_slice_optimisation=False):
+def get_output_name(state, reduction_mode, is_group, wav_range, suffix="",
+                    multi_reduction_type=None, event_slice_optimisation=False):
     # Get the external settings from the save state
     save_info = state.save
     user_specified_output_name = save_info.user_specified_output_name
     user_specified_output_name_suffix = save_info.user_specified_output_name_suffix
 
     # Get the standard workspace name
-    workspace_name, \
-        workspace_base_name = get_standard_output_workspace_name(state, reduction_mode,
-                                                                 include_slice_limits=(not event_slice_optimisation),
-                                                                 custom_run_name=user_specified_output_name)
+    workspace_name, workspace_base_name = \
+        get_standard_output_workspace_name(state, reduction_mode, wav_range=wav_range,
+                                           include_slice_limits=(not event_slice_optimisation),
+                                           custom_run_name=user_specified_output_name)
 
     # If user specified output name is not none then we use it for the base name
     output_name = workspace_name
@@ -799,12 +799,6 @@ def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_
                 start_time_as_string = ""
                 end_time_as_string = ""
             output_name += start_time_as_string + end_time_as_string
-
-        if multi_reduction_type["wavelength_range"]:
-            wavelength = state.wavelength
-            wavelength_range_string = "_" + str(wavelength.wavelength_low[0]) + "_" + str(
-                wavelength.wavelength_high[0])
-            output_name += wavelength_range_string
 
     # Add a suffix if the user has specified one
     if user_specified_output_name_suffix:

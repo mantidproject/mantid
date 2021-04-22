@@ -25,11 +25,17 @@ Algorithms
 - :ref:`LoadLog <algm-LoadLog>` will now detect old unsupported log files and set an appropriate explanatory string in the exception.
 - :ref:`Stitch1DMany <algm-Stitch1DMany>` has additional property `IndexOfReference` to allow user to decide which of the provided workspaces should give reference for scaling
 - New algorithm :ref:`Muscat <algm-Muscat>` to calculate multiple scattering corrections using a Monte Carlo integration approach that doesn't rely on an isotropic scattering assumption. The implementation is based on Fortran code developed by Mike Johnson and Spencer Howells. The algorithm only supports elastic instruments so far but support for inelastic instruments will be added at a later date.
+- New algorithm :ref:`GeneratePythonFitScript <algm-GeneratePythonFitScript>` allows the creation of a python script for sequential fitting.
+
+Improvements
+------------
+- Loading a CORELLI tube calibration returns a ``MaskWorkspace``.
 
 Data Objects
 ------------
 
 - exposed ``geographicalAngles`` method on :py:obj:`mantid.api.SpectrumInfo`
+- ``BinEdgeAxis`` now overrides the label in order to return the bin center and not the edge
 - :ref:`Run <mantid.api.Run>` has been modified to allow multiple goniometers to be stored.
 - :ref:`FileFinder <mantid.api.FileFinderImpl>` has been modified to improve search times when loading multiple runs on the same instrument.
 
@@ -65,5 +71,6 @@ Bugfixes
 - Fix problem with dictionary parameters on :ref:`SetSample <algm-SetSample>` algorithm when running from the algorithm dialog
 - Fix segmentation fault when running :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` algorithm on Ubuntu without a material defined on one of the sample\environment shapes
 - Fix calculation of region where scattering points are sampled in :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` when a shape is defined for the environment but not the sample
+- Fix crash on macOS when creating a UnitLabel with non-ascii characters using the single argument constructor
 
 :ref:`Release 6.1.0 <v6.1.0>`

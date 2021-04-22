@@ -569,6 +569,10 @@ std::string ConvFunctionModel::buildStretchExpFTFunctionString() const {
          "constraints=(Height>0, Tau>0)";
 }
 
+std::string ConvFunctionModel::buildIsoRotDiffFunctionString() const {
+  return "name=IsoRotDiff, Height=0.1, Radius=2, Tau=100, Centre=0";
+}
+
 std::string ConvFunctionModel::buildElasticDiffSphereFunctionString() const {
   return "name=ElasticDiffSphere, Height=1, Centre=0, Radius=2, "
          "constraints=(Height>0, Radius>0)";
@@ -615,6 +619,8 @@ std::string ConvFunctionModel::buildPeaksFunctionString() const {
     functions.append(buildTeixeiraFunctionString());
   } else if (m_fitType == FitType::StretchedExpFT) {
     functions.append(buildStretchExpFTFunctionString());
+  } else if (m_fitType == FitType::IsoRotDiff) {
+    functions.append(buildIsoRotDiffFunctionString());
   } else if (m_fitType == FitType::DiffSphere) {
     functions.append(buildDiffSphereFunctionString());
   } else if (m_fitType == FitType::ElasticDiffSphere) {
@@ -650,6 +656,8 @@ std::string ConvFunctionModel::buildFitTypeString() const {
     functions.append(buildTeixeiraFunctionString());
   } else if (m_fitType == FitType::StretchedExpFT) {
     functions.append(buildStretchExpFTFunctionString());
+  } else if (m_fitType == FitType::IsoRotDiff) {
+    functions.append(buildIsoRotDiffFunctionString());
   } else if (m_fitType == FitType::DiffSphere) {
     functions.append(buildDiffSphereFunctionString());
   } else if (m_fitType == FitType::ElasticDiffSphere) {

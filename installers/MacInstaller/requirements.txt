@@ -10,7 +10,7 @@ mock==4.0.2
 notebook==6.1.5
 numpy==1.18.4
 requests==2.23.0
-scipy==1.4.1
+scipy==1.6.2
 six==1.14.0
 sphinx==1.6.7
 sphinx_bootstrap_theme==0.7.1
