@@ -79,6 +79,90 @@ class ErrorCodes(Enum):
     INSIDE_BEAMSTOP = 5
     GONIOMETR = 6
 
+
+def _qangle_validate_inputs(hkl: np.array,
+                            Ei: float or np.array,
+                            DeltaE: float or np.array,
+                            sign: float or np.array,
+                            lattice: OrientedLattice,
+                            detector_constraints: bool,
+                            horizontal_extent: np.array,
+                            vertical_extent: np.array,
+                            horizontal_extent_low: np.array,
+                            vertical_extent_low: np.array,
+                            goniometer_constraints: bool,
+                            goniometer_range):
+    """
+    Validate inputs for qangle function, according to the rules for
+    that function
+    """
+    try:
+        len_hkl = len(hkl)
+        if len(hkl[0]) != 3:
+            raise ValueError()
+    except (TypeError, ValueError):
+        raise ValueError('hkl is not an array of triplets')
+
+    try:
+        # check if float
+        Ei = float(Ei)
+        Ei = np.full(len_hkl, Ei)
+    except ValueError:
+        raise ValueError('Ei is not a float or numpy array')
+    except TypeError:
+        if len(Ei) != len_hkl:
+            raise ValueError('Ei has different length than hkl')
+    try:
+        # check if float
+        DeltaE = float(DeltaE)
+        DeltaE = np.full(len_hkl, DeltaE)
+    except ValueError:
+        raise ValueError('DeltaE is not a float or numpy array')
+    except TypeError:
+        if len(DeltaE) != len_hkl:
+            raise ValueError('DeltaE has different length than hkl')
+
+    try:
+        # check if int
+        sign = int(sign)
+        sign = np.full(len_hkl,sign)
+    except ValueError:
+        raise ValueError('sign is not an int or numpy array')
+    except TypeError:
+        if len(sign) != len_hkl:
+            raise ValueError('sign has different length than hkl')
+
+    try:
+        UB = lattice.getUB() * 2. * np.pi
+    except:
+        raise ValueError("Can't get the UB matrix from the lattice object")
+
+    # inputs for geometry and goniometer constraints
+    if detector_constraints:
+        if horizontal_extent[0]<-180 or horizontal_extent[1]<horizontal_extent[0] or horizontal_extent[1]>180:
+            raise ValueError("Horizontal constraints must obey -180 <= horizontal_extent[0] <= "
+                             "horizontal_extent[1] <=180")
+        if vertical_extent[0]<-180 or vertical_extent[1]<vertical_extent[0] or vertical_extent[1]>180:
+            raise ValueError("Vertical constraints must obey -180 <= vertical_extent[0] <= "
+                             "vertical_extent[1] <=180")
+        if horizontal_extent_low[0]<-180 or horizontal_extent_low[1]<horizontal_extent_low[0] or horizontal_extent_low[1]>180:
+            raise ValueError("Horizontal constraints must obey -180 <= horizontal_extent_low[0] <= "
+                             "horizontal_extent_low[1] <=180")
+        if vertical_extent_low[0]<-180 or vertical_extent_low[1]<vertical_extent_low[0] or vertical_extent_low[1]>180:
+            raise ValueError("Vertical constraints must obey -180 <= vertical_extent_low[0] <= "
+                             "vertical_extent_low[1] <=180")
+
+    if goniometer_constraints:
+        if goniometer_range[1]<goniometer_range[0] or \
+           goniometer_range[0]<-180. or goniometer_range[1]>180.:
+            raise ValueError("goniometer_range must be an increasing array, "
+                             "with both limits between -180 and 180 degrees")
+
+
+    return (Ei, DeltaE, sign, UB)
+
+
+
 @namedtuplefy
 def qangle(*,  # force keyword arguments
            Ei: float or np.array,
@@ -135,73 +219,20 @@ def qangle(*,  # force keyword arguments
     horizontal_extent_low, vertical_extent_low are ignored
     3. If goniometer_constraints is False, goniometer_range is ignored
     """
+    # Note for developers: formulas from
+    # https://github.com/mantidproject/documents/blob/master/Design/UBMatriximplementationnotes.pdf
+
     # check input parameters
-    try:
-        len_hkl = len(hkl)
-        if len(hkl[0]) != 3:
-            raise ValueError()
-    except (TypeError, ValueError):
-        raise ValueError('hkl is not an array of triplets')
+    Ei, DeltaE, sign, UB = _qangle_validate_inputs(hkl, Ei, DeltaE, sign, lattice, detector_constraints,
+                                                   horizontal_extent, vertical_extent, horizontal_extent_low,
+                                                   vertical_extent_low, goniometer_constraints, goniometer_range)
 
-    try:
-        # check if float
-        Ei = float(Ei)
-        Ei = np.full(len_hkl, Ei)
-    except ValueError:
-        raise ValueError('Ei is not a float or numpy array')
-    except TypeError:
-        if len(Ei) != len_hkl:
-            raise ValueError('Ei has different length than hkl')
-    try:
-        # check if float
-        DeltaE = float(DeltaE)
-        DeltaE = np.full(len_hkl, DeltaE)
-    except ValueError:
-        raise ValueError('DeltaE is not a float or numpy array')
-    except TypeError:
-        if len(DeltaE) != len_hkl:
-            raise ValueError('DeltaE has different length than hkl')
+    error_code = np.full((len(hkl)), ErrorCodes.CORRECT)
 
-    try:
-        # check if int
-        sign = int(sign)
-        sign = np.full(len_hkl,sign)
-    except ValueError:
-        raise ValueError('sign is not an int or numpy array')
-    except TypeError:
-        if len(sign) != len_hkl:
-            raise ValueError('sign has different length than hkl')
-
-    error_code = np.full((len_hkl), ErrorCodes.CORRECT)
-
-    try:
-        UB = lattice.getUB() * 2. * np.pi
-    except:
-        raise ValueError("Can't get the UB matrix from the lattice object")
-
-    # inputs for geometry and goniometer constraints
-    if detector_constraints:
-        if horizontal_extent[0]<-180 or horizontal_extent[1]<horizontal_extent[0] or horizontal_extent[1]>180:
-            raise ValueError("Horizontal constraints must obey -180 <= horizontal_extent[0] <= "
-                             "horizontal_extent[1] <=180")
-        if vertical_extent[0]<-180 or vertical_extent[1]<vertical_extent[0] or vertical_extent[1]>180:
-            raise ValueError("Vertical constraints must obey -180 <= vertical_extent[0] <= "
-                             "vertical_extent[1] <=180")
-        if horizontal_extent_low[0]<-180 or horizontal_extent_low[1]<horizontal_extent_low[0] or horizontal_extent_low[1]>180:
-            raise ValueError("Horizontal constraints must obey -180 <= horizontal_extent_low[0] <= "
-                             "horizontal_extent_low[1] <=180")
-        if vertical_extent_low[0]<-180 or vertical_extent_low[1]<vertical_extent_low[0] or vertical_extent_low[1]>180:
-            raise ValueError("Vertical constraints must obey -180 <= vertical_extent_low[0] <= "
-                             "vertical_extent_low[1] <=180")
-
-    if goniometer_constraints:
-        if goniometer_range[1]<goniometer_range[0] or \
-           goniometer_range[0]<-180. or goniometer_range[1]>180.:
-            raise ValueError("goniometer_range must be an increasing array, "
-                             "with both limits between -180 and 180 degrees")
-
+    # conversion factor from momentum (inverse Angstroms) to energy (meV) - E = E2k * k**2
     E2k = mk.PhysicalConstants.E_mev_toNeutronWavenumberSq
 
+    # Q_sample =2Pi(hkl) (the multiplication with 2pi was done in validation) (eq 5-7)
     Q_sample_x, Q_sample_y, Q_sample_z = np.matmul(UB, hkl.T)
     k_i = np.sqrt(Ei/E2k)
     k_f = np.sqrt((Ei-DeltaE)/E2k)
@@ -210,11 +241,11 @@ def qangle(*,  # force keyword arguments
     error_code[np.logical_not(np.isfinite(k_f))] = ErrorCodes.QE_CONSERVATION
     error_code[np.logical_not(np.isfinite(Q_sample_x + Q_sample_y + Q_sample_z + k_i))] = ErrorCodes.WRONG_INPUT
 
-    # calculate delta
+    # calculate delta (eq 121)
     error_code[np.abs(Q_sample_y) > 0.9998 * k_f] = ErrorCodes.OUT_OF_PLANE
     delta = -np.arcsin(Q_sample_y / k_f)
 
-    # calculate chi
+    # calculate chi (eq 125)
     chi = np.arccos((k_i**2 + k_f**2 - Q_sample_x**2 - Q_sample_y**2 - Q_sample_z**2)/(2 * k_i * k_f *np.cos(delta)))
     bad_chi = np.logical_not(np.isfinite(chi))
     error_code[np.logical_and(bad_chi, error_code == ErrorCodes.CORRECT)] = ErrorCodes.QE_CONSERVATION
@@ -226,7 +257,7 @@ def qangle(*,  # force keyword arguments
     delta[bad_sign] = np.nan
     error_code[bad_sign] = ErrorCodes.WRONG_INPUT
 
-    # calculate Q_lab
+    # calculate Q_lab (eq 118)
     Q_lab_x = -k_f * np.cos(delta) * np.sin(chi)
     Q_lab_y = Q_sample_y
     Q_lab_z = k_i - k_f * np.cos(delta) * np.cos(chi)
@@ -235,7 +266,7 @@ def qangle(*,  # force keyword arguments
     in_plane_Q_angle = np.arctan2(Q_lab_x, Q_lab_z)
     out_plane_Q_angle = np.arcsin(Q_lab_y/np.sqrt(Q_lab_x**2 + Q_lab_y**2 + Q_lab_z**2))
 
-    # calculate omega
+    # calculate omega (eq 126)
     omega = np.arctan2(Q_lab_x, Q_lab_z) - np.arctan2(Q_sample_x, Q_sample_z)
     omega[omega>np.pi] -= 2*np.pi
     omega[omega<-np.pi] += 2*np.pi
