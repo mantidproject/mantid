@@ -221,7 +221,7 @@ void Muscat::exec() {
   const auto nhists = useSparseInstrument ? static_cast<int64_t>(sparseWS->getNumberHistograms())
                                           : static_cast<int64_t>(inputWS->getNumberHistograms());
 
-  auto &sample = inputWS->sample();
+  const auto &sample = inputWS->sample();
 
   const int nSingleScatterEvents = getProperty("NeutronPathsSingle");
   const int nMultiScatterEvents = getProperty("NeutronPathsMultiple");
@@ -257,12 +257,12 @@ void Muscat::exec() {
 
       for (size_t bin = 0; bin < nbins; bin += lambdaStepSize) {
 
-        double kinc = 2 * M_PI / instrumentWS.histogram(i).points()[bin];
+        const double kinc = 2 * M_PI / instrumentWS.histogram(i).points()[bin];
 
-        auto detPos = instrumentWS.detectorInfo().position(i);
+        const auto detPos = instrumentWS.detectorInfo().position(i);
 
-        double total(0);
-        total = simulatePaths(nSingleScatterEvents, 1, sample, *instrument, rng, sigmaSSWS, SQWS, kinc, detPos, true);
+        double total =
+            simulatePaths(nSingleScatterEvents, 1, sample, *instrument, rng, sigmaSSWS, SQWS, kinc, detPos, true);
         noAbsSimulationWS->getSpectrum(i).dataY()[bin] = total;
 
         for (size_t ne = 0; ne < nScatters; ne++) {
@@ -321,12 +321,12 @@ void Muscat::exec() {
   // Create workspace group that holds output workspaces
   auto wsgroup = std::make_shared<WorkspaceGroup>();
 
-  std::string wsNamePrefix = "Scatter_";
+  const std::string wsNamePrefix = "Scatter_";
   std::string wsname = wsNamePrefix + "1_NoAbs";
   API::AnalysisDataService::Instance().addOrReplace(wsname, noAbsOutputWS);
   wsgroup->addWorkspace(noAbsOutputWS);
   for (size_t i = 0; i < outputWSs.size(); i++) {
-    std::string wsname = wsNamePrefix + std::to_string(i + 1);
+    wsname = wsNamePrefix + std::to_string(i + 1);
     API::AnalysisDataService::Instance().addOrReplace(wsname, outputWSs[i]);
     wsgroup->addWorkspace(outputWSs[i]);
   }
@@ -364,7 +364,7 @@ double Muscat::new_vector(const MatrixWorkspace_sptr sigmaSSWS, const Material &
   if (specialSingleScatterCalc) {
     absorbXsection = 0;
   } else {
-    double wavelength = 2 * M_PI / kinc;
+    const double wavelength = 2 * M_PI / kinc;
     absorbXsection = material.absorbXSection(wavelength);
   }
   if (sigmaSSWS) {
@@ -373,7 +373,7 @@ double Muscat::new_vector(const MatrixWorkspace_sptr sigmaSSWS, const Material &
     scatteringXSection = material.totalScatterXSection();
   }
 
-  auto sig_total = scatteringXSection + absorbXsection;
+  const auto sig_total = scatteringXSection + absorbXsection;
   return sig_total;
 }
 
@@ -406,11 +406,11 @@ double Muscat::interpolateLogQuadratic(const MatrixWorkspace_sptr &workspaceToIn
   }
   // this interpolation assumes the set of 3 bins\point have the same width
   // U=0 on point or bin edge to the left of where x lies
-  auto U = (x - workspaceToInterpolate->points(0)[idx]) / binWidth;
-  auto &y = workspaceToInterpolate->y(0);
-  auto A = (y[idx] - 2 * y[idx + 1] + y[idx + 2]) / 2;
-  auto B = (-3 * y[idx] + 4 * y[idx + 1] - y[idx + 2]) / 2;
-  auto C = y[idx];
+  const auto U = (x - workspaceToInterpolate->points(0)[idx]) / binWidth;
+  const auto &y = workspaceToInterpolate->y(0);
+  const auto A = (y[idx] - 2 * y[idx + 1] + y[idx + 2]) / 2;
+  const auto B = (-3 * y[idx] + 4 * y[idx + 1] - y[idx + 2]) / 2;
+  const auto C = y[idx];
   return exp(A * U * U + B * U + C);
 }
 
@@ -500,7 +500,7 @@ std::tuple<bool, double, double> Muscat::scatter(const size_t nScatters, const S
   double QSS = 0;
   for (size_t is = 0; is < nScatters - 1; is++) {
     q_dir(track, SOfQ, kinc, scatteringXSection, rng, QSS, weight);
-    int nlinks = sample.getShape().interceptSurface(track);
+    const int nlinks = sample.getShape().interceptSurface(track);
     m_callsToInterceptSurface++;
     if (nlinks == 0) {
       return {false, 0, 0};
@@ -512,7 +512,7 @@ std::tuple<bool, double, double> Muscat::scatter(const size_t nScatters, const S
   Kernel::V3D prevDirection = track.direction();
   directionToDetector.normalize();
   track.reset(track.startPoint(), directionToDetector);
-  int nlinks = sample.getShape().interceptSurface(track);
+  const int nlinks = sample.getShape().interceptSurface(track);
   m_callsToInterceptSurface++;
   // due to VALID_INTERCEPT_POINT_SHIFT some tracks that skim the surface
   // of a CSGObject sample may not generate valid tracks. Start over again
@@ -520,12 +520,12 @@ std::tuple<bool, double, double> Muscat::scatter(const size_t nScatters, const S
   if (nlinks == 0) {
     return {false, 0, 0};
   }
-  double dl = track.front().distInsideObject;
-  auto q = (directionToDetector - prevDirection) * kinc;
-  auto SQ = interpolateLogQuadratic(SOfQ, q.norm());
+  const double dl = track.front().distInsideObject;
+  const auto q = (directionToDetector - prevDirection) * kinc;
+  const auto SQ = interpolateLogQuadratic(SOfQ, q.norm());
   if (specialSingleScatterCalc)
     vmu = 0;
-  auto AT2 = exp(-dl * vmu);
+  const auto AT2 = exp(-dl * vmu);
   weight = weight * AT2 * SQ * scatteringXSection / (4 * M_PI);
   return {true, weight, QSS};
 }
@@ -565,8 +565,8 @@ void Muscat::q_dir(Geometry::Track &track, const MatrixWorkspace_sptr SOfQ, cons
  * @param phi Phi (radians) of after track. Measured in plane perpendicular to initial trajectory
  */
 void Muscat::updateTrackDirection(Geometry::Track &track, const double cosT, const double phi) {
-  auto B3 = sqrt(1 - cosT * cosT);
-  auto B2 = cosT;
+  const auto B3 = sqrt(1 - cosT * cosT);
+  const auto B2 = cosT;
   // possible to do this using the Quat class instead??
   // Quat(const double _deg, const V3D &_axis);
   // Quat(acos(cosT)*180/M_PI,
@@ -581,9 +581,9 @@ void Muscat::updateTrackDirection(Geometry::Track &track, const double cosT, con
   // Then define k as combination of these:
   // sin(phi) * (vy, -vx, 0) + cos(phi) * (-vx * vz, -vy * vz, 1 - vz * vz)
   // Note: xyz convention here isn't the standard Mantid one. x=beam, z=up
-  auto vy = track.direction()[0];
-  auto vz = track.direction()[1];
-  auto vx = track.direction()[2];
+  const auto vy = track.direction()[0];
+  const auto vz = track.direction()[1];
+  const auto vx = track.direction()[2];
   double UKX, UKY, UKZ;
   if (vz < 1) {
     auto A2 = sqrt(1 - vz * vz);
@@ -614,10 +614,10 @@ void Muscat::updateTrackDirection(Geometry::Track &track, const double cosT, con
 Geometry::Track Muscat::start_point(const Geometry::IObject &shape,
                                     std::shared_ptr<const Geometry::ReferenceFrame> frame, const V3D sourcePos,
                                     Kernel::PseudoRandomNumberGenerator &rng) {
-  int MAX_ATTEMPTS = 100;
+  const int MAX_ATTEMPTS = 100;
   for (int i = 0; i < MAX_ATTEMPTS; i++) {
     auto t = generateInitialTrack(shape, frame, sourcePos, rng);
-    int nlinks = shape.interceptSurface(t);
+    const int nlinks = shape.interceptSurface(t);
     m_callsToInterceptSurface++;
     if (nlinks > 0) {
       if (i > 0) {
@@ -633,10 +633,10 @@ Geometry::Track Muscat::start_point(const Geometry::IObject &shape,
 // update track start point and weight
 void Muscat::updateWeightAndPosition(Geometry::Track &track, double &weight, const double vmu, const double sigma_total,
                                      Kernel::PseudoRandomNumberGenerator &rng) {
-  double dl = track.front().distInsideObject;
-  double b4 = (1.0 - exp(-dl * vmu));
-  double vmfp = 1.0 / vmu;
-  double vl = -(vmfp * log(1 - rng.nextValue() * b4));
+  const double dl = track.front().distInsideObject;
+  const double b4 = (1.0 - exp(-dl * vmu));
+  const double vmfp = 1.0 / vmu;
+  const double vl = -(vmfp * log(1 - rng.nextValue() * b4));
   weight = weight * b4 / sigma_total;
   inc_xyz(track, vl);
 }

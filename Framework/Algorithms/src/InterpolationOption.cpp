@@ -35,7 +35,7 @@ namespace Algorithms {
  * @param independentErrors Sets whether the errors in the spectra should be considered to be independent
  * or not when interpolating between them
  */
-void InterpolationOption::set(InterpolationOption::Value kind, const bool calculateErrors,
+void InterpolationOption::set(const InterpolationOption::Value &kind, const bool calculateErrors,
                               const bool independentErrors) {
   m_value = kind;
   m_calculateErrors = calculateErrors;
