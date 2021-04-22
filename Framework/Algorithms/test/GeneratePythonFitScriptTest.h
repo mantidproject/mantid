@@ -115,7 +115,7 @@ private:
   std::string createExpectedSequentialScriptText() const {
     std::string expectedScript;
 
-    expectedScript += "# A python script generated to perform a sequential fit\n";
+    expectedScript += "# A python script generated to perform a sequential or simultaneous fit\n";
     expectedScript += "from mantid.simpleapi import *\n";
     expectedScript += "import matplotlib.pyplot as plt\n";
     expectedScript += "\n";
@@ -128,8 +128,9 @@ private:
     expectedScript += "}\n";
     expectedScript += "\n";
     expectedScript += "# Fit function as a string\n";
-    expectedScript += "function = \"" + m_function + "\"\n";
-    expectedScript += "\n";
+    expectedScript += "function = \\\n";
+    expectedScript += "\"" + m_function + "\"";
+    expectedScript += "\n\n";
     expectedScript += "# Fitting options\n";
     expectedScript += "max_iterations = " + std::to_string(m_maxIterations) + "\n";
     expectedScript += "minimizer = \"" + m_minimizer + "\"\n";
@@ -159,7 +160,7 @@ private:
         "GroupWorkspaces(InputWorkspaces=normalised_matrices, "
         "OutputWorkspace=\"Sequential_Fit_NormalisedCovarianceMatrices\")\n"
         "\n"
-        "# Plot the results of the sequential fit\n"
+        "# Plot the results of the fit\n"
         "fig, axes = plt.subplots(nrows=2,\n"
         "                         ncols=len(output_workspaces),\n"
         "                         sharex=True,\n"
