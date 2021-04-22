@@ -44,5 +44,6 @@ Bugfixes
 - The y-axis in the instrument view's pick tab will now rescale if the range changes.
 - On the instrument widget pick tab, when the integration range is changed the current tool will stay selected.
 - Fixed a bug where Workbench would hang on startup when running on Big Sur.
+- Fixed a bug applying constraints with the conjugate gradient minimizer.
 
 :ref:`Release 6.1.0 <v6.1.0>`
