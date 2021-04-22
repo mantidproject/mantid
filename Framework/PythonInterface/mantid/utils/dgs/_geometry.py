@@ -47,19 +47,6 @@ def namedtuplefy(func):
     return wrapper
 
 
-def _get_angle_from_vectors(x: np.array,
-                            y: np.array,
-                            z: np.array) -> Tuple[np.array, np.array]:
-    """
-    Get the in-plane and out of plane angle from x, y, z vectors
-    Parameters:
-    -----------
-      x, y, z (numpy arrays): x, y, z coordinates of a vector
-    Returns
-    """
-    pass
-
-
 class ErrorCodes(Enum):
     """
     Error codes for qangle
@@ -140,17 +127,17 @@ def _qangle_validate_inputs(hkl: np.array,
     # inputs for geometry and goniometer constraints
     if detector_constraints:
         if horizontal_extent[0]<-180 or horizontal_extent[1]<horizontal_extent[0] or horizontal_extent[1]>180:
-            raise ValueError("Horizontal constraints must obey -180 <= horizontal_extent[0] <= "
-                             "horizontal_extent[1] <=180")
+            raise ValueError(f"Horizontal constraints must obey -180 <= horizontal_extent[0]"
+                             f" ({horizontal_extent[0]}) <= horizontal_extent[1] ({horizontal_extent[1]})<=180")
         if vertical_extent[0]<-180 or vertical_extent[1]<vertical_extent[0] or vertical_extent[1]>180:
-            raise ValueError("Vertical constraints must obey -180 <= vertical_extent[0] <= "
-                             "vertical_extent[1] <=180")
+            raise ValueError(f"Vertical constraints must obey -180 <= vertical_extent[0] ({vertical_extent[0]}) "
+                             f"<= vertical_extent[1] ({vertical_extent[1]}) <=180")
         if horizontal_extent_low[0]<-180 or horizontal_extent_low[1]<horizontal_extent_low[0] or horizontal_extent_low[1]>180:
-            raise ValueError("Horizontal constraints must obey -180 <= horizontal_extent_low[0] <= "
-                             "horizontal_extent_low[1] <=180")
+            raise ValueError(f"Horizontal constraints must obey -180 <= horizontal_extent_low[0]"
+                             f" ({horizontal_extent_low[0]}) <= horizontal_extent_low[1] ({horizontal_extent_low[1]}) <=180")
         if vertical_extent_low[0]<-180 or vertical_extent_low[1]<vertical_extent_low[0] or vertical_extent_low[1]>180:
-            raise ValueError("Vertical constraints must obey -180 <= vertical_extent_low[0] <= "
-                             "vertical_extent_low[1] <=180")
+            raise ValueError(f"Vertical constraints must obey -180 <= vertical_extent_low[0] ({vertical_extent_low[0]}) "
+                             f"<= vertical_extent_low[1] ({vertical_extent_low[1]}) <=180")
 
     if goniometer_constraints:
         if goniometer_range[1]<goniometer_range[0] or \
