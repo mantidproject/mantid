@@ -47,29 +47,6 @@ std::string const PLOTTING_CODE =
     "fig.subplots_adjust(hspace=0)\n"
     "fig.show()\n";
 
-std::string const SEQUENTIAL_FIT_CODE =
-    "# Perform a sequential fit\n"
-    "output_workspaces, parameter_tables, normalised_matrices = [], [], []\n"
-    "for input_workspace, domain_data in input_data.items():\n"
-    "    fit_output = Fit(Function=function, InputWorkspace=input_workspace, WorkspaceIndex=domain_data[0],\n"
-    "                     StartX=domain_data[1], EndX=domain_data[2], MaxIterations=max_iterations,\n"
-    "                     Minimizer=minimizer, CostFunction=cost_function, EvaluationType=evaluation_type,\n"
-    "                     CreateOutput=True)\n"
-    "\n"
-    "    output_workspaces.append(fit_output.OutputWorkspace)\n"
-    "    parameter_tables.append(fit_output.OutputParameters)\n"
-    "    normalised_matrices.append(fit_output.OutputNormalisedCovarianceMatrix)\n"
-    "\n"
-    "    # Use the parameters in the previous function as the start parameters of the next fit\n"
-    "    function = fit_output.Function\n"
-    "\n"
-    "# Group the output workspaces from the sequential fit\n"
-    "GroupWorkspaces(InputWorkspaces=output_workspaces, OutputWorkspace=\"Sequential_Fit_Workspaces\")\n"
-    "GroupWorkspaces(InputWorkspaces=parameter_tables, OutputWorkspace=\"Sequential_Fit_Parameters\")\n"
-    "GroupWorkspaces(InputWorkspaces=normalised_matrices, "
-    "OutputWorkspace=\"Sequential_Fit_NormalisedCovarianceMatrices\")\n"
-    "\n";
-
 template <typename T> std::string joinVector(std::vector<T> const &vec, std::string const &delimiter = ", ") {
   std::stringstream ss;
   std::copy(vec.cbegin(), vec.cend(), std::ostream_iterator<T>(ss, delimiter.c_str()));
@@ -220,7 +197,7 @@ std::string GeneratePythonFitScript::generateFitScript(std::string const &fittin
   std::string generatedScript;
   generatedScript += generateVariableSetupCode();
   if (fittingType == "Sequential")
-    generatedScript += SEQUENTIAL_FIT_CODE;
+    generatedScript += generateSequentialFitCode();
   else if (fittingType == "Simultaneous")
     generatedScript += generateSimultaneousFitCode();
   generatedScript += PLOTTING_CODE;
@@ -257,6 +234,30 @@ std::string GeneratePythonFitScript::generateVariableSetupCode() const {
   code += "cost_function = \"" + costFunction + "\"\n";
   code += "evaluation_type = \"" + evaluationType + "\"\n\n";
 
+  return code;
+}
+
+std::string GeneratePythonFitScript::generateSequentialFitCode() const {
+  std::string code = "# Perform a sequential fit\n";
+  code += "output_workspaces, parameter_tables, normalised_matrices = [], [], []\n";
+  code += "for input_workspace, domain_data in input_data.items():\n";
+  code += "    fit_output = Fit(Function=function, InputWorkspace=input_workspace, WorkspaceIndex=domain_data[0],\n";
+  code += "                     StartX=domain_data[1], EndX=domain_data[2], MaxIterations=max_iterations,\n";
+  code += "                     Minimizer=minimizer, CostFunction=cost_function, EvaluationType=evaluation_type,\n";
+  code += "                     CreateOutput=True)\n";
+  code += "\n";
+  code += "    output_workspaces.append(fit_output.OutputWorkspace)\n";
+  code += "    parameter_tables.append(fit_output.OutputParameters)\n";
+  code += "    normalised_matrices.append(fit_output.OutputNormalisedCovarianceMatrix)\n";
+  code += "\n";
+  code += "    # Use the parameters in the previous function as the start parameters of the next fit\n";
+  code += "    function = fit_output.Function\n";
+  code += "\n";
+  code += "# Group the output workspaces from the sequential fit\n";
+  code += "GroupWorkspaces(InputWorkspaces=output_workspaces, OutputWorkspace=\"Sequential_Fit_Workspaces\")\n";
+  code += "GroupWorkspaces(InputWorkspaces=parameter_tables, OutputWorkspace=\"Sequential_Fit_Parameters\")\n";
+  code += "GroupWorkspaces(InputWorkspaces=normalised_matrices, ";
+  code += "OutputWorkspace=\"Sequential_Fit_NormalisedCovarianceMatrices\")\n\n";
   return code;
 }
 
