@@ -101,6 +101,8 @@ class SuperplotModel(QObject):
             del self._spectra[name]
             self._plottedData = [(n, i) for (n, i) in self._plottedData
                                  if n != name]
+        if not self._plottedData:
+            self._plotMode = None
 
     def setSpectrum(self, name, num):
         """

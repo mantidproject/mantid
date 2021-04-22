@@ -133,6 +133,11 @@ class SuperplotPresenter:
                 if data[0] == name:
                     spectra.append(data[1])
             self._view.setSpectraList(name, spectra)
+        if not self._model.isBinMode() and not self._model.isSpectrumMode():
+            mode = self._view.getMode()
+            self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
+                                          self.BIN_MODE_TEXT])
+            self._view.setMode(mode)
         self._view.setSelectedWorkspacesInList([])
         self._updateSpectrumSlider([], 0)
         self._updatePlot()
