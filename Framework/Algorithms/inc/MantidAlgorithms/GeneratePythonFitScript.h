@@ -38,6 +38,7 @@ private:
   std::string generateVariableSetupCode() const;
   std::string generateSequentialFitCode() const;
   std::string generateSimultaneousFitCode() const;
+  std::string generateFunctionString() const;
 
   void savePythonScript(std::string const &filepath, std::string const &contents) const;
 };

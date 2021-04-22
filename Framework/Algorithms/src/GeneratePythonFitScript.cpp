@@ -71,6 +71,15 @@ std::string constructInputDictionary(std::vector<std::string> const &inputWorksp
   return "input_data = {\n    " + joinVector(entries, ",\n    ") + "\n}";
 }
 
+std::vector<std::string> splitStringBy(std::string const &str, std::string const &delimiter) {
+  std::vector<std::string> subStrings;
+  boost::split(subStrings, str, boost::is_any_of(delimiter));
+  subStrings.erase(std::remove_if(subStrings.begin(), subStrings.end(),
+                                  [](std::string const &subString) { return subString.empty(); }),
+                   subStrings.end());
+  return subStrings;
+}
+
 } // namespace
 
 namespace Mantid {
@@ -215,8 +224,6 @@ std::string GeneratePythonFitScript::generateVariableSetupCode() const {
   std::string const costFunction = getProperty("CostFunction");
   std::string const evaluationType = getProperty("EvaluationType");
 
-  IFunction_const_sptr function = getProperty("Function");
-
   std::string code = "# A python script generated to perform a sequential or simultaneous fit\n";
   code += "from mantid.simpleapi import *\n";
   code += "import matplotlib.pyplot as plt\n\n";
@@ -226,7 +233,7 @@ std::string GeneratePythonFitScript::generateVariableSetupCode() const {
   code += "\n\n";
 
   code += "# Fit function as a string\n";
-  code += "function = \"" + function->asString() + "\"\n\n";
+  code += generateFunctionString();
 
   code += "# Fitting options\n";
   code += "max_iterations = " + std::to_string(maxIterations) + "\n";
@@ -282,6 +289,16 @@ std::string GeneratePythonFitScript::generateSimultaneousFitCode() const {
   code += "                 EvaluationType=evaluation_type, CreateOutput=True)\n\n";
 
   code += "output_workspaces = fit_output.OutputWorkspace\n\n";
+  return code;
+}
+
+std::string GeneratePythonFitScript::generateFunctionString() const {
+  IFunction_const_sptr function = getProperty("Function");
+  auto const functionSplit = splitStringBy(function->asString(), ";");
+
+  std::string code = "function = \\\n\"";
+  code += joinVector(functionSplit, ";\" \\\n\"");
+  code += "\"\n\n";
   return code;
 }
 
