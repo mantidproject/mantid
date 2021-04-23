@@ -9,7 +9,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAlgorithms/Muscat.h"
+#include "MantidAlgorithms/CalculateMultipleScattering.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -24,24 +24,24 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-class MuscatHelper : public Mantid::Algorithms::Muscat {
+class CalculateMultipleScatteringHelper : public Mantid::Algorithms::CalculateMultipleScattering {
 public:
   double interpolateLogQuadratic(const Mantid::API::MatrixWorkspace_sptr &workspaceToInterpolate, double x) {
-    return Muscat::interpolateLogQuadratic(workspaceToInterpolate, x);
+    return CalculateMultipleScattering::interpolateLogQuadratic(workspaceToInterpolate, x);
   }
   void updateTrackDirection(Mantid::Geometry::Track &track, const double cosT, const double phi) {
-    Muscat::updateTrackDirection(track, cosT, phi);
+    CalculateMultipleScattering::updateTrackDirection(track, cosT, phi);
   }
 };
 
-class MuscatTest : public CxxTest::TestSuite {
+class CalculateMultipleScatteringTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MuscatTest *createSuite() { return new MuscatTest(); }
-  static void destroySuite(MuscatTest *suite) { delete suite; }
+  static CalculateMultipleScatteringTest *createSuite() { return new CalculateMultipleScatteringTest(); }
+  static void destroySuite(CalculateMultipleScatteringTest *suite) { delete suite; }
 
-  MuscatTest() {
+  CalculateMultipleScatteringTest() {
     SofQWorkspace = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     SofQWorkspace->mutableY(0)[0] = 1.;
     SofQWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
@@ -207,7 +207,7 @@ public:
   }
 
   void test_interpolateLogQuadratic() {
-    MuscatHelper alg;
+    CalculateMultipleScatteringHelper alg;
     const int NBINS = 10;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, NBINS);
     for (auto i = 0; i < NBINS; i++) {
@@ -218,7 +218,7 @@ public:
   }
 
   void test_updateTrackDirection() {
-    MuscatHelper alg;
+    CalculateMultipleScatteringHelper alg;
     const double twoTheta = M_PI * 60. / 180.;
     const double cosTwoTheta = cos(twoTheta);
     const double sinTwoTheta = sin(twoTheta);
@@ -236,7 +236,7 @@ public:
   //---------------------------------------------------------------------------
 
   void test_invalidSOfQ() {
-    MuscatHelper alg;
+    CalculateMultipleScatteringHelper alg;
     const double THICKNESS = 0.001; // metres
     auto inputWorkspace = SetupFlatPlateWorkspace(5, 2, 1, THICKNESS);
     auto SofQWorkspaceTwoSp = WorkspaceCreationHelper::create2DWorkspace(2, 1);
@@ -269,9 +269,9 @@ public:
 
 private:
   Mantid::API::IAlgorithm_sptr createAlgorithm() {
-    using Mantid::Algorithms::Muscat;
+    using Mantid::Algorithms::CalculateMultipleScattering;
     using Mantid::API::IAlgorithm;
-    auto alg = std::make_shared<Muscat>();
+    auto alg = std::make_shared<CalculateMultipleScattering>();
     alg->setAlwaysStoreInADS(false);
     alg->initialize();
     TS_ASSERT(alg->isInitialized());

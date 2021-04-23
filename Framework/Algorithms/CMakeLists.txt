@@ -28,6 +28,7 @@ set(SRC_FILES
     src/CalculateEfficiency2.cpp
     src/CalculateFlatBackground.cpp
     src/CalculateIqt.cpp
+    src/CalculateMultipleScattering.cpp
     src/CalculatePlaczekSelfScattering.cpp
     src/CalculatePolynomialBackground.cpp
     src/CalculateTransmission.cpp
@@ -212,7 +213,6 @@ set(SRC_FILES
     src/MostLikelyMean.cpp
     src/Multiply.cpp
     src/MultiplyRange.cpp
-    src/Muscat.cpp
     src/NormaliseByCurrent.cpp
     src/NormaliseByDetector.cpp
     src/NormaliseToMonitor.cpp
@@ -362,6 +362,7 @@ set(INC_FILES
     inc/MantidAlgorithms/CalculateEfficiency2.h
     inc/MantidAlgorithms/CalculateFlatBackground.h
     inc/MantidAlgorithms/CalculateIqt.h
+    inc/MantidAlgorithms/CalculateMultipleScattering.h
     inc/MantidAlgorithms/CalculatePlaczekSelfScattering.h
     inc/MantidAlgorithms/CalculatePolynomialBackground.h
     inc/MantidAlgorithms/CalculateTransmission.h
@@ -550,7 +551,6 @@ set(INC_FILES
     inc/MantidAlgorithms/MostLikelyMean.h
     inc/MantidAlgorithms/Multiply.h
     inc/MantidAlgorithms/MultiplyRange.h
-    inc/MantidAlgorithms/Muscat.h
     inc/MantidAlgorithms/NormaliseByCurrent.h
     inc/MantidAlgorithms/NormaliseByDetector.h
     inc/MantidAlgorithms/NormaliseToMonitor.h
@@ -714,6 +714,7 @@ set(TEST_FILES
     CalculateEfficiencyTest.h
     CalculateFlatBackgroundTest.h
     CalculateIqtTest.h
+    CalculateMultipleScatteringTest.h
     CalculatePlaczekSelfScatteringTest.h
     CalculatePolynomialBackgroundTest.h
     CalculateTransmissionBeamSpreaderTest.h
@@ -896,7 +897,6 @@ set(TEST_FILES
     MostLikelyMeanTest.h
     MultiplyRangeTest.h
     MultiplyTest.h
-    MuscatTest.h
     MuonWorkspaceCreationHelperTest.h
     NormaliseByCurrentTest.h
     NormaliseByDetectorTest.h

@@ -27,15 +27,15 @@ class Instrument;
 namespace Algorithms {
 
 /** Calculates a multiple scattering correction
-* Based on Fortran code provided by Spencer Howells
+* Based on Muscat Fortran code provided by Spencer Howells
 
   @author Danny Hindson
   @date 2020-11-10
 */
-class MANTID_ALGORITHMS_DLL Muscat : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculateMultipleScattering : public API::Algorithm {
 public:
   /// Algorithm's name
-  const std::string name() const override { return "Muscat"; }
+  const std::string name() const override { return "CalculateMultipleScattering"; }
   /// Algorithm's version
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
@@ -45,9 +45,9 @@ public:
   const std::string category() const override { return "CorrectionFunctions\\AbsorptionCorrections"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Calculates a multiple scattering correction using a Monte Carlo "
-           "method";
+    return "Calculates a multiple scattering correction using a Monte Carlo method";
   }
+  const std::string alias() const override { return "Muscat"; }
 
 protected:
   virtual std::shared_ptr<SparseWorkspace> createSparseWorkspace(const API::MatrixWorkspace &modelWS,

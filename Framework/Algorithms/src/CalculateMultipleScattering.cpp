@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAlgorithms/Muscat.h"
+#include "MantidAlgorithms/CalculateMultipleScattering.h"
 #include "MantidAPI/EqualBinSizesValidator.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -40,12 +40,12 @@ namespace Mantid {
 namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(Muscat)
+DECLARE_ALGORITHM(CalculateMultipleScattering)
 
 /**
  * Initialize the algorithm
  */
-void Muscat::init() {
+void CalculateMultipleScattering::init() {
   // The input workspace must have an instrument and units of wavelength
   auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
@@ -123,7 +123,7 @@ void Muscat::init() {
  * Validate the input properties.
  * @return a map where keys are property names and values the found issues
  */
-std::map<std::string, std::string> Muscat::validateInputs() {
+std::map<std::string, std::string> CalculateMultipleScattering::validateInputs() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   std::map<std::string, std::string> issues;
   Geometry::IComponent_const_sptr sample = inputWS->getInstrument()->getSample();
@@ -170,7 +170,9 @@ std::map<std::string, std::string> Muscat::validateInputs() {
 /**
  * Execution code
  */
-void Muscat::exec() {
+void CalculateMultipleScattering::exec() {
+  g_log.warning("CalculateMultipleScattering is in the beta stage of development. Its name, properties and behaviour "
+                "may change without warning.");
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr SQWS = getProperty("SofqWorkspace");
   // take log of S(Q) and store it this way
@@ -358,8 +360,8 @@ void Muscat::exec() {
  * @return A tuple containing the mean free path (metres), the total cross
  * section (barns)
  */
-double Muscat::new_vector(const MatrixWorkspace_sptr sigmaSSWS, const Material &material, double kinc,
-                          bool specialSingleScatterCalc) {
+double CalculateMultipleScattering::new_vector(const MatrixWorkspace_sptr sigmaSSWS, const Material &material,
+                                               double kinc, bool specialSingleScatterCalc) {
   double scatteringXSection, absorbXsection;
   if (specialSingleScatterCalc) {
     absorbXsection = 0;
@@ -384,7 +386,8 @@ double Muscat::new_vector(const MatrixWorkspace_sptr sigmaSSWS, const Material &
  * @param x The x value to interpolate at
  * @return The exponential of the interpolated value
  */
-double Muscat::interpolateLogQuadratic(const MatrixWorkspace_sptr &workspaceToInterpolate, double x) {
+double CalculateMultipleScattering::interpolateLogQuadratic(const MatrixWorkspace_sptr &workspaceToInterpolate,
+                                                            double x) {
   if (x > workspaceToInterpolate->points(0).back()) {
     return exp(workspaceToInterpolate->y(0).back());
   }
@@ -434,10 +437,12 @@ double Muscat::interpolateLogQuadratic(const MatrixWorkspace_sptr &workspaceToIn
  * scatter calculation should be performed
  * @return An average weight across all of the paths
  */
-double Muscat::simulatePaths(const int nPaths, const size_t nScatters, const Sample &sample,
-                             const Geometry::Instrument &instrument, Kernel::PseudoRandomNumberGenerator &rng,
-                             const MatrixWorkspace_sptr sigmaSSWS, const MatrixWorkspace_sptr SOfQ, const double kinc,
-                             Kernel::V3D detPos, bool specialSingleScatterCalc) {
+double CalculateMultipleScattering::simulatePaths(const int nPaths, const size_t nScatters, const Sample &sample,
+                                                  const Geometry::Instrument &instrument,
+                                                  Kernel::PseudoRandomNumberGenerator &rng,
+                                                  const MatrixWorkspace_sptr sigmaSSWS, const MatrixWorkspace_sptr SOfQ,
+                                                  const double kinc, Kernel::V3D detPos,
+                                                  bool specialSingleScatterCalc) {
   double sumOfWeights = 0, sumOfQSS = 0.;
   auto sourcePos = instrument.getSource()->getPos();
 
@@ -484,11 +489,10 @@ double Muscat::simulatePaths(const int nPaths, const size_t nScatters, const Sam
  * @return A tuple containing a success/fail boolean, the calculated weight and
  * a sum of the QSS values across the n-1 multiple scatters
  */
-std::tuple<bool, double, double> Muscat::scatter(const size_t nScatters, const Sample &sample,
-                                                 const Geometry::Instrument &instrument, const V3D sourcePos,
-                                                 Kernel::PseudoRandomNumberGenerator &rng, const double sigma_total,
-                                                 double scatteringXSection, const MatrixWorkspace_sptr SOfQ,
-                                                 const double kinc, Kernel::V3D detPos, bool specialSingleScatterCalc) {
+std::tuple<bool, double, double> CalculateMultipleScattering::scatter(
+    const size_t nScatters, const Sample &sample, const Geometry::Instrument &instrument, const V3D sourcePos,
+    Kernel::PseudoRandomNumberGenerator &rng, const double sigma_total, double scatteringXSection,
+    const MatrixWorkspace_sptr SOfQ, const double kinc, Kernel::V3D detPos, bool specialSingleScatterCalc) {
   double weight = 1;
   double numberDensity = sample.getMaterial().numberDensityEffective();
   // if scale up scatteringXSection by 100*numberDensity then may not need
@@ -531,9 +535,9 @@ std::tuple<bool, double, double> Muscat::scatter(const size_t nScatters, const S
 }
 
 // update track direction, QSS and weight
-void Muscat::q_dir(Geometry::Track &track, const MatrixWorkspace_sptr SOfQ, const double kinc,
-                   const double scatteringXSection, Kernel::PseudoRandomNumberGenerator &rng, double &QSS,
-                   double &weight) {
+void CalculateMultipleScattering::q_dir(Geometry::Track &track, const MatrixWorkspace_sptr SOfQ, const double kinc,
+                                        const double scatteringXSection, Kernel::PseudoRandomNumberGenerator &rng,
+                                        double &QSS, double &weight) {
   auto qvalues = SOfQ->histogram(0).x().rawData();
   // For elastic just select a q value in range 0 to 2k
   // The following will eventually be used for inelastic where it's less trivial
@@ -564,7 +568,7 @@ void Muscat::q_dir(Geometry::Track &track, const MatrixWorkspace_sptr SOfQ, cons
  * @param cosT Cos two theta. two theta is scattering angle
  * @param phi Phi (radians) of after track. Measured in plane perpendicular to initial trajectory
  */
-void Muscat::updateTrackDirection(Geometry::Track &track, const double cosT, const double phi) {
+void CalculateMultipleScattering::updateTrackDirection(Geometry::Track &track, const double cosT, const double phi) {
   const auto B3 = sqrt(1 - cosT * cosT);
   const auto B2 = cosT;
   // possible to do this using the Quat class instead??
@@ -611,9 +615,10 @@ void Muscat::updateTrackDirection(Geometry::Track &track, const double cosT, con
  * @param rng Random number generator
  * @return a track intercepting the sample
  */
-Geometry::Track Muscat::start_point(const Geometry::IObject &shape,
-                                    std::shared_ptr<const Geometry::ReferenceFrame> frame, const V3D sourcePos,
-                                    Kernel::PseudoRandomNumberGenerator &rng) {
+Geometry::Track CalculateMultipleScattering::start_point(const Geometry::IObject &shape,
+                                                         std::shared_ptr<const Geometry::ReferenceFrame> frame,
+                                                         const V3D sourcePos,
+                                                         Kernel::PseudoRandomNumberGenerator &rng) {
   const int MAX_ATTEMPTS = 100;
   for (int i = 0; i < MAX_ATTEMPTS; i++) {
     auto t = generateInitialTrack(shape, frame, sourcePos, rng);
@@ -626,13 +631,14 @@ Geometry::Track Muscat::start_point(const Geometry::IObject &shape,
       return t;
     }
   }
-  throw std::runtime_error("Muscat::start_point() - Unable to "
+  throw std::runtime_error("CalculateMultipleScattering::start_point() - Unable to "
                            "generate entry point into sample");
 }
 
 // update track start point and weight
-void Muscat::updateWeightAndPosition(Geometry::Track &track, double &weight, const double vmu, const double sigma_total,
-                                     Kernel::PseudoRandomNumberGenerator &rng) {
+void CalculateMultipleScattering::updateWeightAndPosition(Geometry::Track &track, double &weight, const double vmu,
+                                                          const double sigma_total,
+                                                          Kernel::PseudoRandomNumberGenerator &rng) {
   const double dl = track.front().distInsideObject;
   const double b4 = (1.0 - exp(-dl * vmu));
   const double vmfp = 1.0 / vmu;
@@ -650,9 +656,10 @@ void Muscat::updateWeightAndPosition(Geometry::Track &track, double &weight, con
  * @param rng Random number generator
  * @return a track
  */
-Geometry::Track Muscat::generateInitialTrack(const Geometry::IObject &shape,
-                                             std::shared_ptr<const Geometry::ReferenceFrame> frame, const V3D sourcePos,
-                                             Kernel::PseudoRandomNumberGenerator &rng) {
+Geometry::Track CalculateMultipleScattering::generateInitialTrack(const Geometry::IObject &shape,
+                                                                  std::shared_ptr<const Geometry::ReferenceFrame> frame,
+                                                                  const V3D sourcePos,
+                                                                  Kernel::PseudoRandomNumberGenerator &rng) {
   auto sampleBox = shape.getBoundingBox();
   // generate random point on front surface of sample bounding box
   // I'm not 100% sure this sampling is correct because for a sample with
@@ -679,7 +686,7 @@ Geometry::Track Muscat::generateInitialTrack(const Geometry::IObject &shape,
  * @param track A track defining the current trajectory
  * @param vl A distance to move along the current trajectory
  */
-void Muscat::inc_xyz(Geometry::Track &track, double vl) {
+void CalculateMultipleScattering::inc_xyz(Geometry::Track &track, double vl) {
   Kernel::V3D position = track.front().entryPoint;
   Kernel::V3D direction = track.direction();
   auto x = position[0] + vl * direction[0];
@@ -700,14 +707,15 @@ void Muscat::inc_xyz(Geometry::Track &track, double vl) {
  * @param columns The number of columns of detectors to create
  * @return a pointer to an SparseInstrument object
  */
-std::shared_ptr<SparseWorkspace> Muscat::createSparseWorkspace(const API::MatrixWorkspace &modelWS,
-                                                               const size_t wavelengthPoints, const size_t rows,
-                                                               const size_t columns) {
+std::shared_ptr<SparseWorkspace> CalculateMultipleScattering::createSparseWorkspace(const API::MatrixWorkspace &modelWS,
+                                                                                    const size_t wavelengthPoints,
+                                                                                    const size_t rows,
+                                                                                    const size_t columns) {
   auto sparseWS = std::make_shared<SparseWorkspace>(modelWS, wavelengthPoints, rows, columns);
   return sparseWS;
 }
 
-MatrixWorkspace_sptr Muscat::createOutputWorkspace(const MatrixWorkspace &inputWS) const {
+MatrixWorkspace_sptr CalculateMultipleScattering::createOutputWorkspace(const MatrixWorkspace &inputWS) const {
   MatrixWorkspace_uptr outputWS = DataObjects::create<Workspace2D>(inputWS);
   // The algorithm computes the signal values at bin centres so they should
   // be treated as a distribution
@@ -722,13 +730,13 @@ MatrixWorkspace_sptr Muscat::createOutputWorkspace(const MatrixWorkspace &inputW
  * class
  * @return a pointer to an InterpolationOption object
  */
-std::unique_ptr<InterpolationOption> Muscat::createInterpolateOption() {
+std::unique_ptr<InterpolationOption> CalculateMultipleScattering::createInterpolateOption() {
   auto interpolationOpt = std::make_unique<InterpolationOption>();
   return interpolationOpt;
 }
 
-void Muscat::interpolateFromSparse(MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
-                                   const Mantid::Algorithms::InterpolationOption &interpOpt) {
+void CalculateMultipleScattering::interpolateFromSparse(MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
+                                                        const Mantid::Algorithms::InterpolationOption &interpOpt) {
   const auto &spectrumInfo = targetWS.spectrumInfo();
   const auto refFrame = targetWS.getInstrument()->getReferenceFrame();
   PARALLEL_FOR_IF(Kernel::threadSafe(targetWS, sparseWS))
