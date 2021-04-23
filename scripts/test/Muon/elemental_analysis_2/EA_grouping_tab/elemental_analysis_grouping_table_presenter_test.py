@@ -351,7 +351,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
     def test_handle_rebin_option_column_changed_with_no_given_parameters(self):
         self.presenter._model.handle_rebin = mock.Mock()
         mock_changed_item = mock.Mock()
-        mock_changed_item.text.return_value = "Steps: "
+        mock_changed_item.text.return_value = "Steps: None"
         ws_name = "mock_name"
 
         self.presenter.handle_rebin_option_column_changed(INVERSE_GROUP_TABLE_COLUMNS['rebin_options'],
