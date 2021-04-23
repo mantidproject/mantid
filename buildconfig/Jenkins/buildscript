@@ -30,7 +30,7 @@ function run_with_xvfb {
     if [ $(command -v xvfb-run) ]; then
         # -e=--error-file. A bug in Xvfb on RHEL7 means --error-file
         # produces an error: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=337703;msg=2
-        xvfb-run --server-args="-screen 0 640x480x24" \
+        xvfb-run -e /dev/stderr --server-args="-screen 0 640x480x24" \
         --server-num=${XVFB_SERVER_NUM} $@
     else
         eval $@
