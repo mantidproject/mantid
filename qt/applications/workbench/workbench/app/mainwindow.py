@@ -779,7 +779,7 @@ class MainWindow(QMainWindow):
         reply = QMessageBox.question(
             self,
             "Layout Restoration",
-            "The selected layout is incompatible with this version of Workbench. Workbench will attempt to restore \\"
+            "The selected layout is incompatible with this version of Workbench. Workbench will attempt to restore "
             "the layout, but it may appear differently from before.\nDo you wish to continue?",
             QMessageBox.Yes | QMessageBox.No)
         if not reply == QMessageBox.Yes:
@@ -790,7 +790,7 @@ class MainWindow(QMainWindow):
                 QMessageBox.information(
                     self,
                     "Success",
-                    "The layout was successfully restored.\nTo hide this warning in the future, delete the old \\"
+                    "The layout was successfully restored.\nTo hide this warning in the future, delete the old "
                     "layout in File > Settings, and save this as a new layout."
                 )
                 return
