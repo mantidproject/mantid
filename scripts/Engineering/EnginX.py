@@ -704,20 +704,24 @@ def focus_cropped(run_number, van_curves, van_int, focus_directory, focus_genera
         # get the bank to crop on, focus and save it out
         bank = {"North": "1",
                 "South": "2"}
-        output_ws = output_ws.format("_bank_", bank.get(crop_on))
-        simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
-                         VanIntegrationWorkspace=van_integrated_ws, VanCurvesWorkspace=van_curves_ws,
-                         Bank=bank.get(crop_on))
+        bank_no = bank.get(crop_on)
+        cal_file = NORTH_BANK_CAL if bank_no == 1 else SOUTH_BANK_CAL
+        df_kwarg = {"GroupingFileName": cal_file}
+        output_ws = output_ws.format("_bank_", bank_no)
+        _run_focus(input_workspace=ws_to_focus, output_workspace=output_ws, vanadium_integration_ws=van_integrated_ws,
+                   vanadium_curves_ws=van_curves_ws, df_kwarg=df_kwarg)
         _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_{}{{}}", crop_on)
     else:
         # crop on the spectra passed in, focus and save it out
-        output_ws = output_ws.format("", "")
-        simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
-                         VanIntegrationWorkspace=van_integrated_ws,
-                         VanCurvesWorkspace=van_curves_ws, SpectrumNumbers=crop_on)
+        output_ws = output_ws.format("_", "cropped")
+        grp_ws = Utils.create_custom_grouping_workspace(crop_on, ws_to_focus)
+        df_kwarg = {"GroupingWorkspace": grp_ws}
+        _run_focus(input_workspace=ws_to_focus, output_workspace=output_ws, vanadium_integration_ws=van_integrated_ws,
+                   vanadium_curves_ws=van_curves_ws, df_kwarg=df_kwarg)
         _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_bank_{}{{}}", "cropped")
 
 
+# TODO update texture mode
 def focus_texture_mode(run_number, van_curves, van_int, focus_directory, focus_general, do_pre_process, params,
                        time_period,
                        dg_file):
