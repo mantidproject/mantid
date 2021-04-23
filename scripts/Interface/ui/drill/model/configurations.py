@@ -78,6 +78,7 @@ class RundexSettings(object):
                 "TransmissionBeamRuns",
                 "MaskFiles",
                 "ReferenceFiles",
+                "SolventFiles",
                 "OutputWorkspace",
                 "SampleThickness",
                 "CustomOptions"
@@ -197,6 +198,16 @@ class RundexSettings(object):
             }
 
     # settings for each acquisition mode
+
+    # optionnal flags
+    FLAGS = {
+            REFL_POL : {
+                "PolarizationOption": "Polarized"
+                },
+            REFL_NPOL : {
+                "PolarizationOption": "NonPolarized"
+                }
+            }
     SETTINGS = {
             SANS_ACQ : [
                 "ThetaDependent",
@@ -221,7 +232,10 @@ class RundexSettings(object):
                 "DeltaQ",
                 "IQxQyLogBinning",
                 "OutputPanels",
-                "WavelengthRange"
+                "WavelengthRange",
+                "StitchReferenceIndex",
+                "ClearCorrected2DWorkspace",
+                "ShapeTable"
                 ],
             SANS_PSCAN : [
                 "SensitivityMap",
@@ -326,16 +340,6 @@ class RundexSettings(object):
                 "ZeroCountingCells",
                 "Unit"
                 ]
-            }
-
-    # optionnal flags
-    FLAGS = {
-            REFL_POL : {
-                "PolarizationOption": "Polarized"
-                },
-            REFL_NPOL : {
-                "PolarizationOption": "NonPolarized"
-                }
             }
 
     # Json keys

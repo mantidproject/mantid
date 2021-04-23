@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from Muon.GUI.Common.ADSHandler.workspace_naming import TF_ASYMMETRY_PREFIX
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 COUNTS_PLOT_TYPE = 'Counts'
@@ -154,7 +153,7 @@ class PlotWidgetModel(object):
         indices = []
         for workspace_name in fit.output_workspace_names:
             first_fit_index = 1  # calc
-            if TF_ASYMMETRY_PREFIX in workspace_name:
+            if fit.tf_asymmetry_fit:
                 first_fit_index = 3
             second_fit_index = 2  # Diff
             workspaces.append(workspace_name)

@@ -111,6 +111,36 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
 
         ConvertWANDSCDtoQTest_out.delete()
 
+    def test_COP(self):
+        ConvertWANDSCDtoQTest_out = ConvertWANDSCDtoQ('ConvertWANDSCDtoQTest_data', BinningDim0='-8.08,8.08,101',
+                                                      BinningDim1='-1.68,1.68,21', BinningDim2='-8.08,8.08,101',
+                                                      NormaliseBy='None')
+
+        ConvertWANDSCDtoQTest_cop = ConvertWANDSCDtoQ('ConvertWANDSCDtoQTest_data', BinningDim0='-8.08,8.08,101',
+                                                      BinningDim1='-1.68,1.68,21', BinningDim2='-8.08,8.08,101',
+                                                      NormaliseBy='None', ObliquityParallaxCoefficient=1.5)
+
+        self.assertTrue(ConvertWANDSCDtoQTest_out)
+        self.assertTrue(ConvertWANDSCDtoQTest_cop)
+
+        Test_out = ConvertWANDSCDtoQTest_out.getSignalArray().copy()
+        Test_cop = ConvertWANDSCDtoQTest_cop.getSignalArray().copy()
+
+        x, y, z = np.meshgrid(np.linspace(-8,8,101),
+                              np.linspace(-1.6,1.6,21),
+                              np.linspace(-8,8,101), indexing='ij')
+
+        Test_out_max_Qy = y[~np.isnan(Test_out)].max()
+        Test_cop_max_Qy = y[~np.isnan(Test_cop)].max()
+
+        # Test whether Qy is scaled by ObliquityParallaxCoefficient correctly
+        proportion = Test_cop_max_Qy/Test_out_max_Qy
+
+        self.assertAlmostEquals(proportion, 1.5, 5)
+
+        ConvertWANDSCDtoQTest_out.delete()
+        ConvertWANDSCDtoQTest_cop.delete()
+
     def test_HKL_norm_and_KeepTemporary(self):
         ConvertWANDSCDtoQTest_out = ConvertWANDSCDtoQ('ConvertWANDSCDtoQTest_data',
                                                       NormalisationWorkspace='ConvertWANDSCDtoQTest_norm',

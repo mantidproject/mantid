@@ -36,6 +36,8 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
         # State
         self.declareProperty('SANSState', '',
                              doc='A JSON string which fulfills the SANSState contract.')
+        self.declareProperty('WavelengthMin', '', doc='Minimum Wavelength of associated workspace')
+        self.declareProperty('WavelengthMax', '', doc='Maximum Wavelength of associated workspace')
 
         # Input workspaces
         self.declareProperty(MatrixWorkspaceProperty('TransmissionWorkspace', '',
@@ -161,7 +163,7 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
         pixel_out = wave_pixel_adjustment_alg.getProperty("OutputWorkspacePixelAdjustment").value
         return wavelength_out, pixel_out
 
-    def _get_monitor_normalization_workspace(self, state):
+    def _get_monitor_normalization_workspace(self, state, wav_range):
         """
         Gets the monitor normalization workspace via the NormalizeToSansMonitor algorithm
 
@@ -172,11 +174,12 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
         scale_factor = self.getProperty("SliceEventFactor").value
 
         ws = normalize_to_monitor(workspace=monitor_workspace, scale_factor=scale_factor,
-                                  state_adjustment_normalize_to_monitor=state.adjustment.normalize_to_monitor)
+                                  state_adjustment_normalize_to_monitor=state.adjustment.normalize_to_monitor,
+                                  wav_range=wav_range)
 
         return ws
 
-    def _get_calculated_transmission_workspace(self, state):
+    def _get_calculated_transmission_workspace(self, state, wav_range):
         """
         Creates the fitted transmission workspace.
 
@@ -193,7 +196,8 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
             fitted_data, unfitted_data = \
                 calculate_transmission(direct_ws=direct_workspace, data_type_str=data_type,
                                        transmission_ws=transmission_workspace,
-                                       state_adjustment_calculate_transmission=state.adjustment.calculate_transmission)
+                                       state_adjustment_calculate_transmission=state.adjustment.calculate_transmission,
+                                       wav_range=wav_range)
 
         else:
             fitted_data = None

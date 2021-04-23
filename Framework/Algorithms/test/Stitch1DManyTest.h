@@ -568,6 +568,58 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_three_workspaces_scale_to_second() {
+    // Three matrix workspaces with two spectra each,
+    // scale the stiched output to the second workspace.
+
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws2");
+    createUniformWorkspace(1.6, 0.1, 1.5, 2.5, "ws3");
+
+    Stitch1DMany alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "ws1, ws2, ws3");
+    alg.setProperty("Params", "0.1, 0.1, 2.6");
+    alg.setProperty("StartOverlaps", "0.8, 1.6");
+    alg.setProperty("EndOverlaps", "1.1, 1.8");
+    alg.setProperty("OutputWorkspace", "outws");
+    alg.setProperty("IndexOfReference", "1");
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    // Test output ws
+    Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outws);
+    const auto stitched = std::dynamic_pointer_cast<MatrixWorkspace>(outws);
+
+    TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(stitched->blocksize(), 25);
+    // First spectrum, Y values
+    TS_ASSERT_DELTA(stitched->y(0)[0], 1.10, 0.01);
+    TS_ASSERT_DELTA(stitched->y(0)[10], 1.10, 0.01);
+    TS_ASSERT_DELTA(stitched->y(0)[18], 1.10, 0.01);
+    // Second spectrum, Y values
+    TS_ASSERT_DELTA(stitched->y(1)[0], 2.10, 0.01);
+    TS_ASSERT_DELTA(stitched->y(1)[10], 2.10, 0.01);
+    TS_ASSERT_DELTA(stitched->y(1)[18], 2.10, 0.01);
+    // First spectrum, E values
+    TS_ASSERT_DELTA(stitched->e(0)[0], 1.41, 0.01);
+    TS_ASSERT_DELTA(stitched->e(0)[10], 1.05, 0.01);
+    TS_ASSERT_DELTA(stitched->e(0)[18], 1.33, 0.01);
+    // Second spectrum, E values
+    TS_ASSERT_DELTA(stitched->e(1)[0], 1.91, 0.01);
+    TS_ASSERT_DELTA(stitched->e(1)[10], 1.45, 0.01);
+    TS_ASSERT_DELTA(stitched->e(1)[18], 1.92, 0.01);
+
+    // Check workspaces in ADS
+    auto wsInADS = AnalysisDataService::Instance().getObjectNames();
+    // In ADS: ws1, ws2, ws3
+    TS_ASSERT_EQUALS(wsInADS.size(), 3)
+    // Remove workspaces from ADS
+    AnalysisDataService::Instance().clear();
+  }
+
   void test_one_group_two_workspaces() {
     // One group with two workspaces
     // Wrong: this algorithm can't stitch workspaces within a group
@@ -1310,6 +1362,110 @@ public:
     TS_ASSERT_EQUALS(wsInADS[4], "outws_ws1_ws3_ws5")
     TS_ASSERT_EQUALS(wsInADS[5], "outws_ws2_ws4_ws6")
     TS_ASSERT_EQUALS(wsInADS.size(), 12)
+    // Clear the ADS
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_two_groups_scale_to_second_entry() {
+    // This test is functionally similar to
+    // test_three_workspaces_scale_to_second,
+    // but applies the logic to groups.
+
+    // Three groups with two matrix workspaces each.
+    // Each matrix workspace has two spectra.
+
+    // First group
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.1, 0.1, 1.5, 2.5, "ws2");
+    doGroupWorkspaces("ws1, ws2", "group1");
+    // Second group
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws3");
+    createUniformWorkspace(0.8, 0.1, 1.6, 2.6, "ws4");
+    doGroupWorkspaces("ws3, ws4", "group2");
+    // Third group
+    createUniformWorkspace(1.6, 0.1, 1.5, 2.5, "ws5");
+    createUniformWorkspace(1.6, 0.1, 1.6, 3.0, "ws6");
+    doGroupWorkspaces("ws5, ws6", "group3");
+
+    // Will produce a group outws containing outws_ws1_ws3_ws5 and
+    // outws_ws2_ws4_ws6
+    Stitch1DMany alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", "group1, group2, group3"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Params", "0.1, 0.1, 2.6"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartOverlaps", "0.8, 1.6"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndOverlaps", "1.1, 1.9"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IndexOfReference", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outws"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Test output ws
+    Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outws);
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(outws);
+    TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
+
+    // First item in the output group
+    auto stitched = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(stitched->blocksize(), 25);
+    // First spectrum, Y values
+    TS_ASSERT_DELTA(stitched->y(0)[0], 1.099, 0.001);
+    TS_ASSERT_DELTA(stitched->y(0)[9], 1.099, 0.001);
+    TS_ASSERT_DELTA(stitched->y(0)[16], 0.878, 0.001);
+    TS_ASSERT_DELTA(stitched->y(0)[24], 0.733, 0.001);
+    // Second spectrum, Y values
+    TS_ASSERT_DELTA(stitched->y(1)[0], 2.099, 0.001);
+    TS_ASSERT_DELTA(stitched->y(1)[9], 2.099, 0.001);
+    TS_ASSERT_DELTA(stitched->y(1)[16], 1.693, 0.001);
+    TS_ASSERT_DELTA(stitched->y(1)[24], 1.399, 0.001);
+    // First spectrum, E values
+    TS_ASSERT_DELTA(stitched->e(0)[0], 1.407, 0.001);
+    TS_ASSERT_DELTA(stitched->e(0)[9], 0.841, 0.001);
+    TS_ASSERT_DELTA(stitched->e(0)[16], 0.660, 0.001);
+    TS_ASSERT_DELTA(stitched->e(0)[24], 0.850, 0.001);
+    // Second spectrum, E values
+    TS_ASSERT_DELTA(stitched->e(1)[0], 1.908, 0.001);
+    TS_ASSERT_DELTA(stitched->e(1)[9], 1.154, 0.001);
+    TS_ASSERT_DELTA(stitched->e(1)[16], 0.938, 0.001);
+    TS_ASSERT_DELTA(stitched->e(1)[24], 1.230, 0.001);
+
+    // Second item in the output group
+    stitched = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
+
+    TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(stitched->blocksize(), 25);
+    // First spectrum, Y values
+    TS_ASSERT_DELTA(stitched->y(0)[0], 1.600, 0.001);
+    TS_ASSERT_DELTA(stitched->y(0)[9], 1.600, 0.001);
+    TS_ASSERT_DELTA(stitched->y(0)[16], 1.306, 0.001);
+    TS_ASSERT_DELTA(stitched->y(0)[24], 1.067, 0.001);
+    // Second spectrum, Y values
+    TS_ASSERT_DELTA(stitched->y(1)[0], 2.600, 0.001);
+    TS_ASSERT_DELTA(stitched->y(1)[9], 2.600, 0.001);
+    TS_ASSERT_DELTA(stitched->y(1)[16], 2.100, 0.001);
+    TS_ASSERT_DELTA(stitched->y(1)[24], 1.733, 0.001);
+    // First spectrum, E values
+    TS_ASSERT_DELTA(stitched->e(0)[0], 1.676, 0.001);
+    TS_ASSERT_DELTA(stitched->e(0)[9], 1.010, 0.001);
+    TS_ASSERT_DELTA(stitched->e(0)[16], 0.848, 0.001);
+    TS_ASSERT_DELTA(stitched->e(0)[24], 1.142, 0.001);
+    // Second spectrum, E values
+    TS_ASSERT_DELTA(stitched->e(1)[0], 2.115, 0.001);
+    TS_ASSERT_DELTA(stitched->e(1)[9], 1.282, 0.001);
+    TS_ASSERT_DELTA(stitched->e(1)[16], 1.050, 0.001);
+    TS_ASSERT_DELTA(stitched->e(1)[24], 1.383, 0.001);
+
+    // Check workspaces in ADS
+    auto wsInADS = AnalysisDataService::Instance().getObjectNames();
+    // In ADS: group1, group2, grou3, ws1, ws2, ws3, ws4, ws5, ws6 and
+    TS_ASSERT_EQUALS(wsInADS.size(), 12)
+    TS_ASSERT_EQUALS(wsInADS[3], "outws")
+    TS_ASSERT_EQUALS(wsInADS[4], "outws_ws1_ws3_ws5")
+    TS_ASSERT_EQUALS(wsInADS[5], "outws_ws2_ws4_ws6")
     // Clear the ADS
     AnalysisDataService::Instance().clear();
   }

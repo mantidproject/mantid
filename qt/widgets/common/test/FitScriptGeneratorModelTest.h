@@ -288,25 +288,30 @@ public:
     setup_simultaneous_fit_with_global_tie();
     TS_ASSERT_THROWS(m_model->getEquivalentFunctionIndexForDomain("BadName", m_wsIndex, "f0.f0."),
                      std::invalid_argument const &);
+
+    TS_ASSERT_THROWS(m_model->getEquivalentFunctionIndexForDomain(FitDomainIndex(4), "f0.f0."),
+                     std::invalid_argument const &);
   }
 
   void test_that_getEquivalentFunctionIndexForDomain_will_return_the_correct_function_index_for_simultaneous_mode() {
     setup_simultaneous_fit_with_global_tie();
 
-    auto const equivalentIndex = m_model->getEquivalentFunctionIndexForDomain("Name2", m_wsIndex, "f0.f0.");
-    TS_ASSERT_EQUALS(equivalentIndex, "f1.f0.");
+    TS_ASSERT_EQUALS(m_model->getEquivalentFunctionIndexForDomain("Name2", m_wsIndex, "f0.f0."), "f1.f0.");
+    TS_ASSERT_EQUALS(m_model->getEquivalentFunctionIndexForDomain(FitDomainIndex(1), "f0.f0."), "f1.f0.");
   }
 
   void test_that_getEquivalentFunctionIndexForDomain_just_returns_the_index_if_it_is_an_empty_string() {
     setup_simultaneous_fit_with_global_tie();
 
-    auto const equivalentIndex = m_model->getEquivalentFunctionIndexForDomain("Name2", m_wsIndex, "");
-    TS_ASSERT_EQUALS(equivalentIndex, "");
+    TS_ASSERT_EQUALS(m_model->getEquivalentFunctionIndexForDomain("Name2", m_wsIndex, ""), "");
+    TS_ASSERT_EQUALS(m_model->getEquivalentFunctionIndexForDomain(FitDomainIndex(1), ""), "");
   }
 
   void test_that_getEquivalentFunctionIndexForDomain_just_returns_the_index_if_it_is_in_sequential_mode() {
-    auto const equivalentIndex = m_model->getEquivalentFunctionIndexForDomain(m_wsName, m_wsIndex, "f0.");
-    TS_ASSERT_EQUALS(equivalentIndex, "f0.");
+    setup_sequential_fit_with_no_ties();
+
+    TS_ASSERT_EQUALS(m_model->getEquivalentFunctionIndexForDomain(m_wsName, m_wsIndex, "f0."), "f0.");
+    TS_ASSERT_EQUALS(m_model->getEquivalentFunctionIndexForDomain(FitDomainIndex(0), "f0."), "f0.");
   }
 
   void test_that_getEquivalentParameterTieForDomain_will_throw_if_the_domain_specified_does_not_exist() {
@@ -343,6 +348,48 @@ public:
     setup_simultaneous_fit_with_no_ties();
     TS_ASSERT_EQUALS(m_model->getEquivalentParameterTieForDomain(m_wsName, m_wsIndex, "f1.f0.A0", "f0.f1.Height"),
                      "f0.f1.Height");
+  }
+
+  void test_that_getAdjustedFunctionIndex_will_return_the_same_parameter_for_sequential_mode() {
+    setup_sequential_fit_with_no_ties();
+    TS_ASSERT_EQUALS(m_model->getAdjustedFunctionIndex("f0.A0"), "f0.A0");
+  }
+
+  void test_that_getAdjustedFunctionIndex_will_return_the_same_string_for_an_empty_string_or_number() {
+    setup_sequential_fit_with_no_ties();
+    TS_ASSERT_EQUALS(m_model->getAdjustedFunctionIndex(""), "");
+    TS_ASSERT_EQUALS(m_model->getAdjustedFunctionIndex("4.0"), "4.0");
+  }
+
+  void test_that_getAdjustedFunctionIndex_will_remove_the_top_function_index_for_simultaneous_mode() {
+    setup_simultaneous_fit_with_no_ties();
+    TS_ASSERT_EQUALS(m_model->getAdjustedFunctionIndex("f1.f0.A0"), "f0.A0");
+  }
+
+  void test_that_getFullParameter_will_return_the_same_parameter_if_in_sequential_mode() {
+    setup_sequential_fit_with_no_ties();
+    TS_ASSERT_EQUALS(m_model->getFullParameter(FitDomainIndex(1), "f0.A0"), "f0.A0");
+  }
+
+  void test_that_getFullParameter_will_return_the_full_parameter_if_in_simultaneous_mode() {
+    setup_simultaneous_fit_with_no_ties();
+    TS_ASSERT_EQUALS(m_model->getFullParameter(FitDomainIndex(1), "f0.A0"), "f1.f0.A0");
+  }
+
+  void test_that_getFullTie_will_return_the_same_tie_if_in_sequential_mode() {
+    setup_sequential_fit_with_no_ties();
+    TS_ASSERT_EQUALS(m_model->getFullTie(FitDomainIndex(1), "f0.A0"), "f0.A0");
+  }
+
+  void test_that_getFullTie_will_return_the_same_tie_if_it_is_empty_or_a_number() {
+    setup_simultaneous_fit_with_no_ties();
+    TS_ASSERT_EQUALS(m_model->getFullTie(FitDomainIndex(1), ""), "");
+    TS_ASSERT_EQUALS(m_model->getFullTie(FitDomainIndex(1), "4.0"), "4.0");
+  }
+
+  void test_that_getFullTie_will_return_the_full_tie_if_in_simultaneous_mode() {
+    setup_simultaneous_fit_with_no_ties();
+    TS_ASSERT_EQUALS(m_model->getFullTie(FitDomainIndex(1), "f0.A0"), "f1.f0.A0");
   }
 
   void test_that_updateParameterValue_will_not_update_a_parameter_value_if_it_has_a_global_tie() {
@@ -568,6 +615,200 @@ public:
     m_model->setFittingMode(FittingMode::SIMULTANEOUS);
   }
 
+  void test_that_hasParameter_returns_true_if_the_parameter_exists_when_in_sequential_mode() {
+    setup_sequential_fit_with_no_ties();
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+
+    TS_ASSERT(m_model->hasParameter(FitDomainIndex(0), "f0.A0"));
+  }
+
+  void test_that_hasParameter_returns_false_if_the_parameter_does_not_exist_when_in_sequential_mode() {
+    setup_sequential_fit_with_no_ties();
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+
+    TS_ASSERT(!m_model->hasParameter(FitDomainIndex(0), "f0.BadParam"));
+  }
+
+  void test_that_hasParameter_returns_true_if_the_parameter_exists_when_in_simultaneous_mode() {
+    setup_simultaneous_fit_with_no_ties();
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+
+    TS_ASSERT(m_model->hasParameter(FitDomainIndex(0), "f0.f0.A0"));
+  }
+
+  void test_that_hasParameter_returns_false_if_the_parameter_does_not_exist_when_in_simultaneous_mode() {
+    setup_simultaneous_fit_with_no_ties();
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+
+    TS_ASSERT(!m_model->hasParameter(FitDomainIndex(0), "f0.f0.BadParam"));
+  }
+
+  void test_that_setParameterValue_sets_the_parameter_if_the_parameter_exists_when_in_sequential_mode() {
+    double newValue = 5.0;
+    setup_sequential_fit_with_no_ties();
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+
+    m_model->setParameterValue(FitDomainIndex(0), "f0.A0", newValue);
+
+    TS_ASSERT_EQUALS(m_model->getParameterValue(FitDomainIndex(0), "f0.A0"), newValue);
+  }
+
+  void
+  test_that_setParameterValue_will_not_throw_if_the_parameter_if_the_parameter_does_not_exist_when_in_sequential_mode() {
+    double newValue = 5.0;
+    setup_sequential_fit_with_no_ties();
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+
+    TS_ASSERT_THROWS_NOTHING(m_model->setParameterValue(FitDomainIndex(0), "f0.BadParam", newValue));
+  }
+
+  void test_that_setParameterValue_sets_the_parameter_if_the_parameter_exists_when_in_simultaneous_mode() {
+    double newValue = 5.0;
+    setup_simultaneous_fit_with_no_ties();
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+
+    m_model->setParameterValue(FitDomainIndex(0), "f0.f0.A0", newValue);
+
+    TS_ASSERT_EQUALS(m_model->getParameterValue(FitDomainIndex(0), "f0.f0.A0"), newValue);
+  }
+
+  void test_that_setParameterValue_will_not_throw_if_the_parameter_does_not_exist_when_in_simultaneous_mode() {
+    double newValue = 5.0;
+    setup_simultaneous_fit_with_no_ties();
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+
+    m_model->setParameterValue(FitDomainIndex(0), "f0.f0.BadParam", newValue);
+
+    TS_ASSERT_THROWS_NOTHING(m_model->setParameterValue(FitDomainIndex(0), "f0.f0.BadParam", newValue));
+  }
+
+  void test_that_setParameterFixed_sets_the_parameter_as_fixed_if_the_parameter_exists_when_in_sequential_mode() {
+    std::string const parameter("f0.A0");
+    setup_sequential_fit_with_no_ties();
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+
+    m_model->setParameterFixed(FitDomainIndex(0), parameter, true);
+    TS_ASSERT(m_model->isParameterFixed(FitDomainIndex(0), parameter));
+
+    m_model->setParameterFixed(FitDomainIndex(0), parameter, false);
+    TS_ASSERT(!m_model->isParameterFixed(FitDomainIndex(0), parameter));
+  }
+
+  void
+  test_that_setParameterFixed_will_throw_if_the_parameter_if_the_parameter_does_not_exist_when_in_sequential_mode() {
+    setup_sequential_fit_with_no_ties();
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+
+    TS_ASSERT_THROWS(m_model->setParameterFixed(FitDomainIndex(0), "f0.BadParam", true), std::runtime_error const &);
+  }
+
+  void test_that_setParameterFixed_sets_the_parameter_if_the_parameter_exists_when_in_simultaneous_mode() {
+    std::string const parameter("f0.f0.A0");
+    setup_simultaneous_fit_with_no_ties();
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+
+    m_model->setParameterFixed(FitDomainIndex(0), parameter, true);
+    TS_ASSERT(m_model->isParameterFixed(FitDomainIndex(0), parameter));
+
+    m_model->setParameterFixed(FitDomainIndex(0), parameter, false);
+    TS_ASSERT(!m_model->isParameterFixed(FitDomainIndex(0), parameter));
+  }
+
+  void test_that_setParameterFixed_will_throw_if_the_parameter_does_not_exist_when_in_simultaneous_mode() {
+    setup_simultaneous_fit_with_no_ties();
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+
+    TS_ASSERT_THROWS(m_model->setParameterFixed(FitDomainIndex(0), "f0.f0.BadParam", true), std::runtime_error const &);
+  }
+
+  void test_that_setParameterTie_sets_the_parameter_tie_if_the_parameter_exists_when_in_sequential_mode() {
+    std::string const parameter("f0.A0");
+    std::string const tie("f1.Height");
+    setup_sequential_fit_with_no_ties();
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+
+    m_model->setParameterTie(FitDomainIndex(0), parameter, tie);
+    TS_ASSERT_EQUALS(m_model->getParameterTie(FitDomainIndex(0), parameter), tie);
+
+    m_model->setParameterTie(FitDomainIndex(0), parameter, "");
+    TS_ASSERT_EQUALS(m_model->getParameterTie(FitDomainIndex(0), parameter), "");
+  }
+
+  void test_that_setParameterTie_will_not_throw_if_the_parameter_does_not_exist_when_in_sequential_mode() {
+    setup_sequential_fit_with_no_ties();
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+
+    TS_ASSERT_THROWS_NOTHING(m_model->setParameterTie(FitDomainIndex(0), "f0.BadParam", "f1.Height"));
+  }
+
+  void test_that_setParameterTie_sets_the_parameter_tie_if_the_parameter_exists_when_in_simultaneous_mode() {
+    std::string const parameter("f0.f0.A0");
+    std::string const tie("f1.Height");
+    setup_simultaneous_fit_with_no_ties();
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+
+    m_model->setParameterTie(FitDomainIndex(0), parameter, tie);
+    TS_ASSERT_EQUALS(m_model->getParameterTie(FitDomainIndex(0), parameter), tie);
+
+    m_model->setParameterTie(FitDomainIndex(0), parameter, "");
+    TS_ASSERT_EQUALS(m_model->getParameterTie(FitDomainIndex(0), parameter), "");
+  }
+
+  void test_that_setParameterTie_will_throw_if_the_parameter_does_not_exist_when_in_simultaneous_mode() {
+    setup_simultaneous_fit_with_no_ties();
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+
+    TS_ASSERT_THROWS_NOTHING(m_model->setParameterTie(FitDomainIndex(0), "f0.f0.BadParam", "f0.f1.Height"));
+  }
+
+  void
+  test_that_setParameterConstraint_sets_the_parameter_constraint_if_the_parameter_exists_when_in_sequential_mode() {
+    std::string const parameter("f0.A0");
+    std::string const constraint("0<f0.A0<1");
+    setup_sequential_fit_with_no_ties();
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+
+    m_model->setParameterConstraint(FitDomainIndex(0), parameter, constraint);
+    TS_ASSERT_EQUALS(m_model->getParameterConstraint(FitDomainIndex(0), parameter), "0<A0<1");
+
+    m_model->setParameterConstraint(FitDomainIndex(0), parameter, "");
+    TS_ASSERT_EQUALS(m_model->getParameterConstraint(FitDomainIndex(0), parameter), "");
+  }
+
+  void test_that_setParameterConstraint_will_not_throw_if_the_parameter_does_not_exist_when_in_sequential_mode() {
+    std::string const constraint("0<f0.BadParam<1");
+    setup_sequential_fit_with_no_ties();
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+
+    TS_ASSERT_THROWS_NOTHING(m_model->setParameterConstraint(FitDomainIndex(0), "f0.BadParam", constraint));
+  }
+
+  void
+  test_that_setParameterConstraint_sets_the_parameter_constraint_if_the_parameter_exists_when_in_simultaneous_mode() {
+    std::string const parameter("f0.f0.A0");
+    std::string const constraint("0<f0.A0<1");
+    setup_simultaneous_fit_with_no_ties();
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+
+    m_model->setParameterConstraint(FitDomainIndex(0), parameter, constraint);
+    TS_ASSERT_EQUALS(m_model->getParameterConstraint(FitDomainIndex(0), parameter), "0<A0<1");
+
+    m_model->setParameterConstraint(FitDomainIndex(0), parameter, "");
+    TS_ASSERT_EQUALS(m_model->getParameterConstraint(FitDomainIndex(0), parameter), "");
+  }
+
+  void test_that_setParameterConstraint_will_throw_if_the_parameter_does_not_exist_when_in_simultaneous_mode() {
+    setup_simultaneous_fit_with_no_ties();
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+
+    TS_ASSERT_THROWS_NOTHING(m_model->setParameterConstraint(FitDomainIndex(0), "f0.f0.BadParam", "0<f0.BadParam<1"));
+  }
+
+  void test_that_numberOfDomains_returns_the_expected_number_of_domains() {
+    setup_simultaneous_fit_with_no_ties();
+    TS_ASSERT_EQUALS(m_model->numberOfDomains(), 2);
+  }
+
   void
   test_that_setting_the_value_of_a_parameter_to_a_value_outside_of_the_constraints_of_another_parameter_globally_tied_to_it_will_remove_the_tie() {
     setup_simultaneous_fit_with_no_ties();
@@ -616,6 +857,51 @@ public:
 
     TS_ASSERT_EQUALS(m_model->getFunction(m_wsName, m_wsIndex)->getParameter("Height"), 2.0);
     TS_ASSERT_EQUALS(m_model->getFunction("Name2", m_wsIndex)->getParameter("Height"), 2.0);
+  }
+
+  void test_that_isValid_returns_true_if_the_data_stored_in_the_model_is_sufficient_for_generating_a_file() {
+    setup_sequential_fit_with_no_ties();
+
+    auto const [valid, message] = m_model->isValid();
+
+    TS_ASSERT(valid);
+    TS_ASSERT_EQUALS(message, "");
+  }
+
+  void test_that_isValid_returns_false_if_there_is_not_data_loaded() {
+    auto const [valid, message] = m_model->isValid();
+
+    TS_ASSERT(!valid);
+    TS_ASSERT_EQUALS(message, "Domain data must be loaded before generating a python script.");
+  }
+
+  void test_that_isValid_returns_false_if_there_is_a_function_missing_in_one_of_the_domains() {
+    m_model->addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX);
+    m_model->addWorkspaceDomain("Name2", m_wsIndex, m_startX, m_endX);
+
+    m_model->setFunction(m_wsName, m_wsIndex, m_flatBackground->asString());
+
+    auto const [valid, message] = m_model->isValid();
+
+    TS_ASSERT(!valid);
+    TS_ASSERT_EQUALS(message, "A function must exist in ALL domains to generate a python script.");
+  }
+
+  void
+  test_that_isValid_returns_true_and_a_warning_message_if_there_are_different_functions_in_different_domains_when_in_sequential_mode() {
+    m_model->addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX);
+    m_model->addWorkspaceDomain("Name2", m_wsIndex, m_startX, m_endX);
+
+    m_model->setFunction(m_wsName, m_wsIndex, m_flatBackground->asString());
+    m_model->setFunction("Name2", m_wsIndex, m_expDecay->asString());
+
+    auto const [valid, message] = m_model->isValid();
+
+    TS_ASSERT(valid);
+    TS_ASSERT_EQUALS(message,
+                     "Note that each domain should have the same fit function, including ties and constraints, for a "
+                     "sequential fit. This is not the case for the fit functions you have provided. \n\nThe sequential "
+                     "fit script will be generated using the fit function in the first domain.");
   }
 
 private:

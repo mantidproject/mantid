@@ -19,8 +19,8 @@ import sys
 __requires_compat = False if sys.version_info[0:2] > (3, 6) else True
 
 if __requires_compat:
-    from ._dataclasses.dataclasses import dataclass
+    from ._dataclasses.dataclasses import dataclass, field
 else:
-    from dataclasses import dataclass
+    from dataclasses import dataclass, field
 
-__all__ = "dataclass"
+__all__ = "dataclass, field"

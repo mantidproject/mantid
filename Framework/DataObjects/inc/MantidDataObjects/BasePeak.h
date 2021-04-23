@@ -69,7 +69,6 @@ public:
   void setH(double m_H) override;
   void setK(double m_K) override;
   void setL(double m_L) override;
-  void setBankName(std::string m_bankName);
   void setHKL(double H, double K, double L) override;
   void setHKL(const Mantid::Kernel::V3D &HKL) override;
   void setIntHKL(const Kernel::V3D &HKL) override;
@@ -93,11 +92,6 @@ public:
   Mantid::Kernel::Matrix<double> getInverseGoniometerMatrix() const;
   void setGoniometerMatrix(const Mantid::Kernel::Matrix<double> &goniometerMatrix) override;
 
-  std::string getBankName() const override;
-  int getRow() const override;
-  int getCol() const override;
-  void setRow(int m_row);
-  void setCol(int m_col);
   void setPeakNumber(int m_peakNumber) override;
   int getPeakNumber() const override;
 
@@ -128,9 +122,6 @@ protected:
   Mantid::Kernel::V3D m_samplePos;
 
 private:
-  /// Name of the parent bank
-  std::string m_bankName;
-
   /// H of the peak
   double m_H;
 
@@ -164,12 +155,6 @@ private:
 
   /// Integrated monitor count over TOF range for this run
   double m_monitorCount;
-
-  /// Cached row in the detector
-  int m_row;
-
-  /// Cached column in the detector
-  int m_col;
 
   int m_peakNumber;
   Mantid::Kernel::V3D m_intHKL;

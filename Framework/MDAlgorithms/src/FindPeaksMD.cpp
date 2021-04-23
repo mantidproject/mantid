@@ -547,20 +547,20 @@ template <typename MDE, size_t nd> void FindPeaksMD::findPeaks(typename MDEventW
           auto *mdbox = dynamic_cast<MDBox<MDE, nd> *>(box);
           const std::vector<MDE> &events = mdbox->getEvents();
           if (std::none_of(events.cbegin(), events.cend(), [&iexp, &numExperimentInfo](MDE event) {
-                return event.getRunIndex() == iexp || event.getRunIndex() >= numExperimentInfo;
+                return event.getExpInfoIndex() == iexp || event.getExpInfoIndex() >= numExperimentInfo;
               }))
             continue;
         }
 
         // If multiple goniometers than use the average one from the
-        // events in the box, that matches this runIndex, this assumes
+        // events in the box, that matches this expInfoIndex, this assumes
         // the events are added in same order as the goniometers
         if (ei->run().getNumGoniometers() > 1) {
           const std::vector<MDE> &events = dynamic_cast<MDBox<MDE, nd> *>(box)->getEvents();
           double sum = 0;
           double count = 0;
           for (const auto &event : events) {
-            if (event.getRunIndex() == iexp) {
+            if (event.getExpInfoIndex() == iexp) {
               sum += event.getGoniometerIndex();
               count++;
             }
@@ -830,10 +830,12 @@ void FindPeaksMD::exec() {
                              "not work on a regular MatrixWorkspace.");
   }
 
-  // Do a sort by bank name and then descending bin count (intensity)
+  // Do a sort by bank name (if peaks of class "Peak") and then descending bin count (intensity)
   std::vector<std::pair<std::string, bool>> criteria;
   criteria.emplace_back("RunNumber", true);
-  criteria.emplace_back("BankName", true);
+  auto isPeaksWorkspace = std::dynamic_pointer_cast<PeaksWorkspace>(peakWS);
+  if (isPeaksWorkspace)
+    criteria.emplace_back("BankName", true);
   criteria.emplace_back("bincount", false);
   peakWS->sort(criteria);
 

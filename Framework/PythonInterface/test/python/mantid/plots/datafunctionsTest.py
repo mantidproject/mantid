@@ -192,7 +192,7 @@ class DataFunctionsTest(unittest.TestCase):
         index, dist, kwargs = funcs.get_wksp_index_dist_and_label(self.ws2d_histo, specNum=2)
         self.assertEqual(index, 1)
         self.assertTrue(dist)
-        self.assertEqual(kwargs['label'], 'ws2d_histo: 6')
+        self.assertEqual(kwargs['label'], 'ws2d_histo: 7')
         # get info from default spectrum in the 1d case
         index, dist, kwargs = funcs.get_wksp_index_dist_and_label(self.ws1d_point, wkspIndex=0)
         self.assertEqual(index, 0)

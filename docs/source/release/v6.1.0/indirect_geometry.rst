@@ -11,8 +11,9 @@ Indirect Geometry Changes
 
 New Features
 ############
+- A new algorithm :ref:`IndirectILLReductionDIFF <algm-IndirectILLReductionDIFF>` added for treatment of diffraction detector data from the indirect geometry beamline IN16B at the ILL.
 - Three fitting functions `IsoRotDiff`, `DiffSphere` and `DiffRotDiscreteCircle` have been made available in the fitting browser
-- `DiffSphere` and `DiffRotDiscreteCircle` have been added to the function options in Indirect Data Analysis ConvFit.
+- `IsoRotDiff`, `DiffSphere` and `DiffRotDiscreteCircle` have been added to the function options in Indirect Data Analysis ConvFit.
 - The Abins Algorithm has an additional "setting" option which may be
   used to select between configurations of a given instrument. (For
   TOSCA this is a choice of forward/back detector banks, for Lagrange

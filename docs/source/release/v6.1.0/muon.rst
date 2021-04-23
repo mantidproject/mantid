@@ -38,6 +38,7 @@ Improvements
 ############
 - Exported workspaces now have history.
 - The interface saves previous settings if possible instead of resetting.
+- The interface can now load runs from different directories/cycles
 
 Bug fixes
 ##########
@@ -56,6 +57,7 @@ Algorithms
 ----------
 - Added the ability to specify the spectrum number in :ref:`FindPeaksAutomatic <algm-FindPeaksAutomatic>`.
 - Added :ref:`PeakMatching <algm-PeakMatching>` algorithm.
+- Added the ability to specify a Start and End X in :ref:`PSIBackgroundSubtraction <algm-PSIBackgroundSubtraction>`.
 
 Fit Functions
 -------------

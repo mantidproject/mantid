@@ -100,8 +100,8 @@ public:
 
     // different reference frame should cause different wavelength to be
     // calculated
-    auto refFrame =
-        std::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/, Left, "0,0,0");
+    auto refFrame = std::make_shared<const ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/,
+                                                           Left, "0,0,0");
 
     LeanElasticPeak p(V3D(1, 2, 3), gon, refFrame);
 
