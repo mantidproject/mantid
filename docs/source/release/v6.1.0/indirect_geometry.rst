@@ -11,6 +11,7 @@ Indirect Geometry Changes
 
 New Features
 ############
+- A new algorithm :ref:`IndirectILLReductionDIFF <algm-IndirectILLReductionDIFF>` added for treatment of diffraction detector data from the indirect geometry beamline IN16B at the ILL.
 - Three fitting functions `IsoRotDiff`, `DiffSphere` and `DiffRotDiscreteCircle` have been made available in the fitting browser
 - `IsoRotDiff`, `DiffSphere` and `DiffRotDiscreteCircle` have been added to the function options in Indirect Data Analysis ConvFit.
 - The Abins Algorithm has an additional "setting" option which may be

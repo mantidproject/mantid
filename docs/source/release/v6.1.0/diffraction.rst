@@ -91,12 +91,14 @@ Single Crystal Diffraction
 Improvements
 ############
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` now allows ellipsoidal shapes to be manually defined for the PeakRadius and Background radii options.
+- The :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` input dialog has been reorganised to present the many input properties in a more user-friendly manner.
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now check if previous container is created using the same method before reusing it.
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` now update attached UB matrix with given lattice constants (optional).
 - :ref:`FilterPeaks <algm-FilterPeaks>` now can select banks in addition to filtering by values.
 - :ref:`FindPeaksMD <algm-FindPeaksMD>` has been modified to make use of the multiple goniometers add to :ref:`Run <mantid.api.Run>` and `goniometerIndex` add to MDEvents.
 - :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>` calculates intensity for satellite peaks with fractional HKL
 - :ref:`MDNorm <algm-MDNorm>` algorithm can now efficiently process background.
+- method ``IPeaksWorkspaceaddPeak(V3D, SpecialCoordinateSystem)`` exposed to the python interface.
 
 Bugfixes
 ########

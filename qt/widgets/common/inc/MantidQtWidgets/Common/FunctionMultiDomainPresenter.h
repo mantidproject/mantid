@@ -73,6 +73,7 @@ public:
   void setBackgroundA0(double value);
 
   void setColumnSizes(int s0, int s1, int s2);
+  void setStretchLastColumn(bool stretch);
   void setErrorsEnabled(bool enabled);
   void hideGlobals();
   void showGlobals();

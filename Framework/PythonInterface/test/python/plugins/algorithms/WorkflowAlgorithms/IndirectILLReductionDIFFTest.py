@@ -13,44 +13,64 @@ from mantid.api import MatrixWorkspace
 
 
 class IndirectILLReductionDIFF(unittest.TestCase):
-    # cache the def instrument and data search dirs
-    facility = config['default.facility']
-    instrument = config['default.instrument']
-    data_dir = config['datasearch.directories']
-
-    # Doppler
+    # Doppler run
     doppler_run = '276047'
+    # Doppler, with alternating velocity profile and mirror sense
+    doppler_alternating_runs = ['313719', '313720']
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
+        # cache the def instrument and data search dirs
+        cls.facility = config['default.facility']
+        cls.instrument = config['default.instrument']
+        cls.data_dir = config['datasearch.directories']
+
         # set instrument and append datasearch directory
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'IN16B'
         config.appendDataSearchSubDir('ILL/IN16B/')
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         # set cached facility and datasearch directory
-        config['default.facility'] = self.facility
-        config['default.instrument'] = self.instrument
-        config['datasearch.directories'] = self.data_dir
+        config['default.facility'] = cls.facility
+        config['default.instrument'] = cls.instrument
+        config['datasearch.directories'] = cls.data_dir
 
     def test_doppler(self):
         args = {'SampleRuns': self.doppler_run,
-                'OutputWorkspace': 'out'}
+                'OutputWorkspace': 'out1'}
         alg_test = run_algorithm("IndirectILLReductionDIFF", **args)
-
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionDIFF not executed")
+        self.check_workspace_dims(mtd['out1'], 1896, 1)
 
-        ws = mtd["out"]
+    def test_doppler_alternating(self):
+        args = {'SampleRuns': ','.join(self.doppler_alternating_runs),
+                'OutputWorkspace': 'out2'}
+        alg_test = run_algorithm("IndirectILLReductionDIFF", **args)
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionDIFF not executed")
+        self.check_workspace_dims(mtd['out2'], 1896, 2)
+
+    def test_doppler_alternating_sum(self):
+        # same as above, but with summing option, also masks a tube
+        # note, this is not summing at raw level (due to different dimensions), but after reduction
+        # hence input is still with a ,
+        args = {'SampleRuns': ','.join(self.doppler_alternating_runs),
+                'Sum': True,
+                'ComponentsToMask': 'tube_8',
+                'OutputWorkspace': 'out3'}
+        alg_test = run_algorithm("IndirectILLReductionDIFF", **args)
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionDIFF not executed")
+        self.check_workspace_dims(mtd['out3'], 1659, 1)
+
+    def check_workspace_dims(self, ws, bsize, nhist):
         name = ws.name()
-
         self.assertTrue(isinstance(ws, MatrixWorkspace), "{0} should be a matrix workspace".format(name))
-        self.assertEqual(ws.getNumberHistograms(), 1, "{0} should contain {1} spectra".format(name, 1))
-
-        self.assertEqual(ws.blocksize(), 1896, "{0} should contain {1} bins".format(name, 1896))
-
+        self.assertEqual(ws.getNumberHistograms(), nhist, "{0} should contain {1} spectra".format(name, nhist))
+        self.assertEqual(ws.blocksize(), bsize, "{0} should contain {1} bins".format(name, bsize))
         self.assertTrue(ws.getSampleDetails(), "{0} should have sample logs".format(name))
-
         self.assertTrue(ws.getHistory().lastAlgorithm(), "{0} should have history".format(name))
+        self.assertEquals(ws.getAxis(0).getUnit().unitID(), "MomentumTransfer")
 
 
 if __name__ == '__main__':

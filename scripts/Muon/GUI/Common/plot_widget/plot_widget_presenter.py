@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import Dict, List
 from Muon.GUI.Common.ADSHandler.workspace_naming import remove_rebin_from_name, add_rebin_to_name
-from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FitPlotInformation
+from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import FitPlotInformation
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
 from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_model import ExternalPlottingModel
 from Muon.GUI.Common.plot_widget.external_plotting.external_plotting_view import ExternalPlottingView
@@ -39,7 +39,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         self._view = view
         self._model = model
         self.context = context
-        self._get_selected_fit_workspaces = get_selected_fit_workspaces
+        self._get_selected_fit_workspaces  = get_selected_fit_workspaces
         # figure presenter - the common presenter talks to this through an interface
         self._figure_presenter = figure_presenter
         self._external_plotting_view = external_plotting_view if external_plotting_view else ExternalPlottingView()
