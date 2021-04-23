@@ -28,7 +28,7 @@
       </parameter>
 
       <!-- These parameters are used to define headers and entries for GenerateLogbook algorithm -->
-      <parameter name="logbook_default_parameters" type="string">
+      <parameter name="logbook_default_parameters" type="string" visible="false">
 	<value val="SampleDescription:/entry0/experiment_identifier:s,
 		    TotalTime:/entry0/duration:f,
 		    RateMonitor1:/entry0/monitor1/monrate:f,
@@ -39,7 +39,7 @@
 		    Attenuator:/entry0/instrument/attenuator/attenuation_value:f,
 		    Det:/entry0/instrument/Det/value:f" />
       </parameter>
-      <parameter name="logbook_optional_parameters" type="string">
+      <parameter name="logbook_optional_parameters" type="string" visible="false">
 	<value val="AcquisitionMode:/entry0/acquisition_mode:d,
 		    Mode:/entry0/mode:d,
 		    BeamStopYOffset:/entry0/instrument/BStopY/offset_value:f,

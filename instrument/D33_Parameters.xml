@@ -3,7 +3,7 @@
 
   <component-link name="D33">
     <!-- The name of the panels for separate I(Q) calculations, the names are from the IDF -->
-    <parameter name="detector_panels" type="string">
+    <parameter name="detector_panels" type="string" visible="false">
       <value val="back_detector,front_detector_top,front_detector_bottom,front_detector_left,front_detector_right"/>
     </parameter>
     <!-- Attenuation coefficients for 3 attenuators -->
@@ -38,7 +38,7 @@
     </parameter>
 
     <!-- These parameters are used to define headers and entries for GenerateLogbook algorithm -->
-    <parameter name="logbook_default_parameters" type="string">
+    <parameter name="logbook_default_parameters" type="string" visible="false">
       <value val="SampleDescription:/entry0/sample_description:s,
 		  TotalTime:/entry0/duration:f,
 		  RateMonitor1:/entry0/monitor1/monrate:f,
@@ -52,7 +52,7 @@
 		  SD2:/entry0/D33/detector/det2_actual:f,
 		  BeamStopY:/entry0/D33/beamstop/by_actual:f" />
     </parameter>
-    <parameter name="logbook_optional_parameters" type="string">
+    <parameter name="logbook_optional_parameters" type="string" visible="false">
       <value val="AcquisitionMode:/entry0/mode:d,
 		  VelocitySelectorSpeed:/entry0/D33/selector/rotation_speed:f,
 		  VelocitySelectorTilt:/entry0/D33/selector/selrot_actual:f,
