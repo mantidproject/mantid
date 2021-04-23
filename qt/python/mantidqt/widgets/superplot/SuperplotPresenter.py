@@ -34,7 +34,6 @@ class SuperplotPresenter:
         figure = self._canvas.figure
         axes = figure.gca()
         artists = axes.get_tracked_artists()
-        alreadyPlotted = dict()
         self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
                                       self.BIN_MODE_TEXT])
         for artist in artists:
@@ -47,17 +46,10 @@ class SuperplotPresenter:
                 self._model.setBinMode()
                 self._view.setAvailableModes([self.BIN_MODE_TEXT])
             wsName = ws.name()
-            if wsName in alreadyPlotted:
-                alreadyPlotted[wsName].append(specIndex)
-            else:
-                alreadyPlotted[wsName] = [specIndex]
             self._model.addWorkspace(wsName)
             self._model.addData(wsName, specIndex)
 
-        for ws, sp in alreadyPlotted.items():
-            self._view.appendWorkspace(ws)
-            self._view.setSpectraList(ws, sp)
-
+        self._updateList()
         self._updateSpectrumSlider([], 0)
         self._updatePlot()
 
