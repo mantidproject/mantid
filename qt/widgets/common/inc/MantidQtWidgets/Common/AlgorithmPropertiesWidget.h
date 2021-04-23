@@ -52,7 +52,7 @@ public:
 
   void addEnabledAndDisableLists(const QStringList &enabled, const QStringList &disabled);
 
-  void hideOrDisableProperties();
+  void hideOrDisableProperties(const QString &changedPropName = "");
 
   void saveInput();
 
@@ -70,7 +70,7 @@ public:
 
 public slots:
   /// Any property changed
-  void propertyChanged(const QString &pName);
+  void propertyChanged(const QString &changedPropName);
 
   /// Replace WS button was clicked
   void replaceWSClicked(const QString &propName);

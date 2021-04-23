@@ -420,7 +420,7 @@ double CostFuncFitting::valDerivHessian(bool evalDeriv, bool evalHessian) const 
         if (!m_function->isActive(ip))
           continue;
         API::IConstraint *c = m_function->getConstraint(ip);
-        if (c) {
+        if (c && !m_hessian.isEmpty()) {
           double d = m_hessian.get(i, i) + c->checkDeriv2();
           m_hessian.set(i, i, d);
         }

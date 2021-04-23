@@ -8,6 +8,7 @@
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -18,6 +19,7 @@
 #include <stdexcept>
 
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
 
 namespace {
@@ -580,6 +582,106 @@ void FitScriptGeneratorModel::checkParameterIsNotGlobal(std::string const &fullP
 
   if (std::any_of(m_globalParameters.cbegin(), m_globalParameters.cend(), isGlobal)) {
     throw std::invalid_argument(fullParameter + " cannot be tied because it is a global parameter.");
+  }
+}
+
+bool FitScriptGeneratorModel::checkFunctionExistsInAllDomains() const {
+  auto const hasFunction = [](auto const &fitDomain) { return fitDomain->getFunctionCopy() != nullptr; };
+  return std::all_of(m_fitDomains.cbegin(), m_fitDomains.cend(), hasFunction);
+}
+
+bool FitScriptGeneratorModel::checkFunctionIsSameForAllDomains() const {
+  if (numberOfDomains() <= 0u || m_fitDomains[0u]->getFunctionCopy() == nullptr) {
+    return false;
+  }
+
+  auto const functionString = m_fitDomains[0u]->getFunctionCopy()->asString();
+  auto const hasSameFunction = [&functionString](auto const &fitDomain) {
+    return fitDomain->getFunctionCopy()->asString() == functionString;
+  };
+  return std::all_of(m_fitDomains.cbegin(), m_fitDomains.cend(), hasSameFunction);
+}
+
+std::tuple<bool, std::string> FitScriptGeneratorModel::isValid() const {
+  std::string message;
+  if (numberOfDomains() == 0)
+    message = "Domain data must be loaded before generating a python script.";
+  else if (!checkFunctionExistsInAllDomains())
+    message = "A function must exist in ALL domains to generate a python script.";
+
+  bool valid(message.empty());
+  if (valid)
+    message = generatePermissibleWarnings();
+
+  return {valid, message};
+}
+
+std::string FitScriptGeneratorModel::generatePermissibleWarnings() const {
+  if (m_fittingMode == FittingMode::SEQUENTIAL && !checkFunctionIsSameForAllDomains()) {
+    return "Note that each domain should have the same fit function, including ties and constraints, for a sequential "
+           "fit. This is not the case for the fit functions you have provided. \n\nThe sequential fit script will be "
+           "generated using the fit function in the first domain.";
+  }
+  return "";
+}
+
+std::string FitScriptGeneratorModel::generatePythonFitScript(
+    std::tuple<std::string, std::string, std::string, std::string> const &fitOptions, std::string const &filepath) {
+  auto generateScript = AlgorithmManager::Instance().create("GeneratePythonFitScript");
+  generateScript->initialize();
+  generateScript->setProperty("InputWorkspaces", getInputWorkspaces());
+  generateScript->setProperty("WorkspaceIndices", getWorkspaceIndices());
+  generateScript->setProperty("StartXs", getStartXs());
+  generateScript->setProperty("EndXs", getEndXs());
+
+  generateScript->setProperty("Function", getFunction());
+
+  auto const [maxIterations, minimizer, costFunction, evaluationType] = fitOptions;
+  generateScript->setProperty("MaxIterations", maxIterations);
+  generateScript->setProperty("Minimizer", minimizer);
+  generateScript->setProperty("CostFunction", costFunction);
+  generateScript->setProperty("EvaluationType", evaluationType);
+
+  generateScript->setProperty("Filepath", filepath);
+  generateScript->execute();
+
+  return generateScript->getPropertyValue("ScriptText");
+}
+
+std::vector<std::string> FitScriptGeneratorModel::getInputWorkspaces() const {
+  auto const getWSName = [](std::unique_ptr<FitDomain> const &domain) { return domain->workspaceName(); };
+  return transformDomains<std::string>(getWSName);
+}
+
+std::vector<std::size_t> FitScriptGeneratorModel::getWorkspaceIndices() const {
+  auto const getWSIndex = [](std::unique_ptr<FitDomain> const &domain) { return domain->workspaceIndex().value; };
+  return transformDomains<std::size_t>(getWSIndex);
+}
+
+std::vector<double> FitScriptGeneratorModel::getStartXs() const {
+  auto const getStartX = [](std::unique_ptr<FitDomain> const &domain) { return domain->startX(); };
+  return transformDomains<double>(getStartX);
+}
+
+std::vector<double> FitScriptGeneratorModel::getEndXs() const {
+  auto const getEndX = [](std::unique_ptr<FitDomain> const &domain) { return domain->endX(); };
+  return transformDomains<double>(getEndX);
+}
+
+template <typename T, typename Function>
+std::vector<T> FitScriptGeneratorModel::transformDomains(Function const &func) const {
+  std::vector<T> domainData;
+  domainData.reserve(numberOfDomains());
+  std::transform(m_fitDomains.cbegin(), m_fitDomains.cend(), std::back_inserter(domainData), func);
+  return domainData;
+}
+
+IFunction_sptr FitScriptGeneratorModel::getFunction() const {
+  switch (m_fittingMode) {
+  case FittingMode::SEQUENTIAL:
+    return m_fitDomains[0u]->getFunctionCopy();
+  default:
+    throw std::runtime_error("getFunction is not implemented for the simultaneous FittingMode.");
   }
 }
 

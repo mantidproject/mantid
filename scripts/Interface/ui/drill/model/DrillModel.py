@@ -410,8 +410,10 @@ class DrillModel(QObject):
         for s in self.settings:
             p = alg.getProperty(s)
             v = p.value
-            if (isinstance(v, numpy.ndarray)):
+            if isinstance(v, numpy.ndarray):
                 self.settings[s] = v.tolist()
+            elif v is None:
+                self.settings[s] = ""
             else:
                 self.settings[s] = v
 

@@ -217,7 +217,7 @@ public:
     TS_ASSERT_DELTA(b.getSignal(), 1.2 * 3, 1e-5);
     TS_ASSERT_DELTA(b.getErrorSquared(), 3.4 * 3, 1e-5);
 
-    TS_ASSERT_EQUALS(b.getEvents()[2].getRunIndex(), 10);
+    TS_ASSERT_EQUALS(b.getEvents()[2].getExpInfoIndex(), 10);
     TS_ASSERT_EQUALS(b.getEvents()[2].getGoniometerIndex(), 42);
     TS_ASSERT_EQUALS(b.getEvents()[2].getDetectorID(), 20);
   }

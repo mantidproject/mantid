@@ -154,6 +154,7 @@ set(SRC_FILES
     src/GenerateEventsFilter.cpp
     src/GenerateIPythonNotebook.cpp
     src/GeneratePeaks.cpp
+    src/GeneratePythonFitScript.cpp
     src/GeneratePythonScript.cpp
     src/GetAllEi.cpp
     src/GetDetOffsetsMultiPeaks.cpp
@@ -487,6 +488,7 @@ set(INC_FILES
     inc/MantidAlgorithms/GenerateEventsFilter.h
     inc/MantidAlgorithms/GenerateIPythonNotebook.h
     inc/MantidAlgorithms/GeneratePeaks.h
+    inc/MantidAlgorithms/GeneratePythonFitScript.h
     inc/MantidAlgorithms/GeneratePythonScript.h
     inc/MantidAlgorithms/GetAllEi.h
     inc/MantidAlgorithms/GetDetOffsetsMultiPeaks.h
@@ -833,6 +835,7 @@ set(TEST_FILES
     GenerateEventsFilterTest.h
     GenerateIPythonNotebookTest.h
     GeneratePeaksTest.h
+    GeneratePythonFitScriptTest.h
     GeneratePythonScriptTest.h
     GetAllEiTest.h
     GetDetOffsetsMultiPeaksTest.h

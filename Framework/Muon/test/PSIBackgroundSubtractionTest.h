@@ -172,4 +172,26 @@ public:
     }
     clearADS();
   }
+
+  void test_background_correctly_removed_from_input_workspace_when_startX_and_endX_are_set() {
+    MockPSIBackgroundSubtraction alg;
+    double background = 20;
+    double fitQuality = 1.00;
+    auto ws = createCountsTestWorkspace(4, 100);
+    auto wsClone = ws->clone();
+    alg.setReturnBackground(background);
+    alg.setReturnFitQuality(fitQuality);
+
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+    alg.setProperty("StartX", 25.0);
+    alg.setProperty("EndX", 75.0);
+    alg.execute();
+
+    for (auto wsIndex = 0u; wsIndex < ws->getNumberHistograms(); ++wsIndex) {
+      for (auto i = 0u; i < ws->y(wsIndex).size(); ++i)
+        TS_ASSERT_EQUALS(ws->y(wsIndex)[i], wsClone->y(wsIndex)[i] - background)
+    }
+    clearADS();
+  }
 };

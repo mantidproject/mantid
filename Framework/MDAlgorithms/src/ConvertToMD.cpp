@@ -316,14 +316,14 @@ void ConvertToMD::addExperimentInfo(API::IMDEventWorkspace_sptr &mdEventWS, MDWS
   ei->mutableRun().addProperty("RUBW_MATRIX", targWSDescr.m_Wtransf.getVector(), true);
   ei->mutableRun().addProperty("W_MATRIX", targWSDescr.getPropertyValueAsType<std::vector<double>>("W_MATRIX"), true);
 
-  // run index as the number of experiment into merged within this run. It is
+  // associated experiment-info index as the number of experiment into merged within this run. It is
   // possible to interpret it differently
   // and should never expect it to start with 0 (for first experiment info)
-  uint16_t runIndex = mdEventWS->addExperimentInfo(ei);
+  uint16_t expInfoIndex = mdEventWS->addExperimentInfo(ei);
 
   // add run-index to the target workspace description for further usage as the
   // identifier for the events, which come from this run.
-  targWSDescr.addProperty("RUN_INDEX", runIndex, true);
+  targWSDescr.addProperty("EXP_INFO_INDEX", expInfoIndex, true);
 }
 
 /**

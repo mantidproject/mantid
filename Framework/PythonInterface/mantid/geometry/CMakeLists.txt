@@ -43,6 +43,7 @@ set(EXPORT_FILES
     src/Exports/ComponentInfo.cpp
     src/Exports/ComponentInfoItem.cpp
     src/Exports/ComponentInfoPythonIterator.cpp
+    src/Exports/MeshObject.cpp
     src/Exports/SampleEnvironment.cpp
 )
 
