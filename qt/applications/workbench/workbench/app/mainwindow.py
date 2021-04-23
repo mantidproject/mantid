@@ -130,6 +130,8 @@ class MainWindow(QMainWindow):
         self.interface_executor = None
         self.interface_list = None
 
+        self.could_restore_state = False
+
     def setup(self):
         # menus must be done first so they can be filled by the
         # plugins in register_plugin
@@ -741,7 +743,10 @@ class MainWindow(QMainWindow):
 
         # restore window state
         if settings.has('MainWindow/state'):
-            self.restoreState(settings.get('MainWindow/state'), SAVE_STATE_VERSION)
+            if not self.restoreState(settings.get('MainWindow/state'), SAVE_STATE_VERSION):
+                logger.warning(
+                    "The previous layout of workbench is not compatible with this version, reverting to default layout."
+                )
         else:
             self.setWindowState(Qt.WindowMaximized)
 
