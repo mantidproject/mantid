@@ -103,12 +103,16 @@ Output:
     diffs = np.round(workspace_diff.readY(0), 4)
     # The counts in workspace diff should be a flat line corresponding to the background
     print("Difference in first count is: {}".format(diffs[0]))
+    print("Difference in middle count is: {}".format(diffs[int(len(diffs)/2)]))
+    print("Difference in last count is: {}".format(diffs[-1]))
 
 Output:
 
 .. testoutput:: CalculateBackgroundWithAdditionalFunction
 
     Difference in first count is: 19.5723
+    Difference in middle count is: 19.5723
+    Difference in last count is: 19.5723
 
 .. categories::
 
