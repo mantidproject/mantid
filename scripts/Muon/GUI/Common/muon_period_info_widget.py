@@ -121,3 +121,4 @@ class MuonPeriodInfoWidget(QtWidgets.QWidget):
         self.layout.addWidget(self._table)
         self.setLayout(self.layout)
         self.setWindowTitle("Period Information")
+        self.setWindowFlags(QtCore.Qt.Dialog)
