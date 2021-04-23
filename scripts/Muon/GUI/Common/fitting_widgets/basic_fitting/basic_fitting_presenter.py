@@ -9,7 +9,7 @@ from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, Gener
 from mantidqt.widgets.fitscriptgenerator import (FittingMode, FitScriptGeneratorModel, FitScriptGeneratorPresenter,
                                                  FitScriptGeneratorView)
 
-from Muon.GUI.Common.contexts.muon_gui_context import PlotMode
+from Muon.GUI.Common.contexts.plotting_context import PlotMode
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_view import BasicFittingView
 from Muon.GUI.Common.thread_model import ThreadModel
