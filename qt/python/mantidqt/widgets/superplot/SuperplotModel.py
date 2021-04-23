@@ -209,7 +209,7 @@ class SuperplotModel(QObject):
                 self._plottedData[i] = (newName, self._plottedData[i][1])
         self.workspaceRenamed.emit(oldName, newName)
 
-    def onWorkspaceReplaced(self, wsName, ws):
+    def onWorkspaceReplaced(self, wsName):
         """
         Triggered when the ADS reports a workspace replacement.
 
