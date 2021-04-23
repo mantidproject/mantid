@@ -15,6 +15,7 @@ import os
 
 from mantid.api import FrameworkManager
 from mantid.kernel import ConfigService, logger
+from workbench.config import SAVE_STATE_VERSION
 from workbench.app import MAIN_WINDOW_OBJECT_NAME, MAIN_WINDOW_TITLE
 from workbench.utils.windowfinder import find_window
 from workbench.widgets.about.presenter import AboutPresenter
@@ -71,10 +72,6 @@ SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft
                    | Qt.AlignAbsolute, QColor(Qt.black))
 # The event loop has not started - force event processing
 QApplication.processEvents(QEventLoop.AllEvents)
-
-# MainWindow state encodes widget layout (among other things).
-# Increment this when the state of the next version is incompatible with the previous.
-SAVE_STATE_VERSION = 1
 
 # -----------------------------------------------------------------------------
 # MainWindow
@@ -480,7 +477,7 @@ class MainWindow(QMainWindow):
     def create_load_layout_action(self, layout_name, layout):
         action_load_layout = create_action(self,
                                            layout_name,
-                                           on_triggered=lambda: self.restoreState(layout))
+                                           on_triggered=lambda: self.attempt_to_restore_state(layout))
         return action_load_layout
 
     def prep_window_for_reset(self):
@@ -768,3 +765,30 @@ class MainWindow(QMainWindow):
     def override_python_input(self):
         """Replace python input with a call to a qinputdialog"""
         builtins.input = QAppThreadCall(input_qinputdialog)
+
+    def attempt_to_restore_state(self, state):
+        success = self.restoreState(state, SAVE_STATE_VERSION)
+        if success:
+            return
+
+        # The version number of the supplied state is older than the current version
+        reply = QMessageBox.question(
+            self,
+            "Layout Restoration",
+            "The selected layout is incompatible with this version of Workbench. Workbench will attempt to restore \\"
+            "the layout, but it may appear differently from before.\nDo you wish to continue?",
+            QMessageBox.Yes | QMessageBox.No)
+        if not reply == QMessageBox.Yes:
+            return
+
+        for version in range(0, SAVE_STATE_VERSION):
+            success = self.restoreState(state, version)
+            if success:
+                QMessageBox.information(
+                    self,
+                    "Success",
+                    "The layout was successfully restored.\nTo hide this warning in the future, delete the old \\"
+                    "layout in File > Settings, and save this as a new layout."
+                )
+                return
+        QMessageBox.warning(self, "Failure", "The layout was unable to be restored.", QMessageBox.Ok)
