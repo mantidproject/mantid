@@ -52,7 +52,6 @@ class SuperplotPresenter:
             else:
                 alreadyPlotted[wsName] = [specIndex]
             self._model.addWorkspace(wsName)
-            self._model.setSpectrum(wsName, specIndex)
             self._model.addData(wsName, specIndex)
 
         for ws, sp in alreadyPlotted.items():
@@ -274,7 +273,6 @@ class SuperplotPresenter:
         """
         self._view.setSpectrumSpinBoxValue(position)
         currentWsName = self._view.getSelectedWorkspaceFromList()
-        self._model.setSpectrum(currentWsName, position)
         self._updateHoldButton(currentWsName, position)
         self._updatePlot()
 
@@ -287,7 +285,6 @@ class SuperplotPresenter:
         """
         self._view.setSpectrumSliderPosition(value)
         currentWsName = self._view.getSelectedWorkspaceFromList()
-        self._model.setSpectrum(currentWsName, value)
         self._updateHoldButton(currentWsName, value)
         self._updatePlot()
 

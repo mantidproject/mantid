@@ -42,11 +42,6 @@ class SuperplotModel(QObject):
     _workspaces = None
 
     """
-    Correspondance between workspace and current spectra.
-    """
-    _spectra = None
-
-    """
     List of plotted workspace, spectrum index pairs.
     """
     _plottedData = None
@@ -59,7 +54,6 @@ class SuperplotModel(QObject):
     def __init__(self):
         super().__init__()
         self._workspaces = list()
-        self._spectra = dict()
         self._plottedData = list()
         self._plotMode = None
         self._adsObserver = SuperplotAdsObserver()
@@ -85,7 +79,6 @@ class SuperplotModel(QObject):
         for name in names:
             if name not in self._workspaces:
                 self._workspaces.append(name)
-                self._spectra[name] = 0
 
     def delWorkspace(self, name):
         """
@@ -96,33 +89,10 @@ class SuperplotModel(QObject):
         """
         if name in self._workspaces:
             self._workspaces.remove(name)
-            del self._spectra[name]
             self._plottedData = [(n, i) for (n, i) in self._plottedData
                                  if n != name]
         if not self._plottedData:
             self._plotMode = None
-
-    def setSpectrum(self, name, num):
-        """
-        Set the current spectrum of a managed workspace.
-
-        Args:
-            name (str): name of the workspace
-            num (int): index of the spectrum
-        """
-        self._spectra[name] = num
-
-    def getSpectrum(self, name):
-        """
-        Get the current spectrum of a managed workspace.
-
-        Args:
-            name (str): name of the workspace
-
-        Returns:
-            int: index of the spectrum
-        """
-        return self._spectra[name]
 
     def getWorkspaces(self):
         """
@@ -207,8 +177,6 @@ class SuperplotModel(QObject):
         self._workspaces.remove(wsName)
         self._plottedData = [(ws, sp) for (ws, sp) in self._plottedData
                              if ws != wsName]
-        self._spectra = {ws: sp for ws, sp in self._spectra.items()
-                         if ws != wsName}
         self.workspaceDeleted.emit(wsName)
 
     def onWorkspaceRenamed(self, oldName, newName):
@@ -227,9 +195,6 @@ class SuperplotModel(QObject):
         for i in range(len(self._plottedData)):
             if self._plottedData[i][0] == oldName:
                 self._plottedData[i] = (newName, self._plottedData[i][1])
-        if oldName in self._spectra:
-            self._spectra[newName] = self._spectra[oldName]
-            del self._spectra[oldName]
         self.workspaceRenamed.emit(oldName, newName)
 
     def onWorkspaceReplaced(self, wsName, ws):
