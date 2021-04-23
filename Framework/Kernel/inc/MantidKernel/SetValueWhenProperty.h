@@ -6,11 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/IPropertySettings.h"
-#include "MantidKernel/System.h"
 #include <functional>
-#include <iostream>
-#include <memory>
 #include <string>
 
 namespace Mantid {
@@ -20,7 +18,7 @@ namespace Kernel {
 class IPropertyManager;
 class Property;
 
-class DLLExport SetValueWhenProperty : public IPropertySettings {
+class MANTID_KERNEL_DLL SetValueWhenProperty : public IPropertySettings {
 public:
   /// Constructs an SetValueWhenProperty object which checks the
   /// watched property with name given and uses the given

@@ -14,8 +14,6 @@
 #include <boost/lexical_cast.hpp>
 #include <cassert>
 #include <exception>
-#include <iostream>
-#include <memory>
 #include <stdexcept>
 
 using namespace Mantid::Kernel;
