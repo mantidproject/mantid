@@ -15,6 +15,16 @@ from .SuperplotAdsObserver import SuperplotAdsObserver
 class SuperplotModel(QObject):
 
     """
+    Constant for bin mode.
+    """
+    BIN_MODE = "bin"
+
+    """
+    Constant for spectrum mode.
+    """
+    SPECTRUM_MODE = "spectrum"
+
+    """
     Emitted when a workspace is deleted (ADS observation).
     Args:
         str: name of the workspace
@@ -107,13 +117,13 @@ class SuperplotModel(QObject):
         """
         Set the plot mode to 'bins'.
         """
-        self._plotMode = "bin"
+        self._plotMode = self.BIN_MODE
 
     def setSpectrumMode(self):
         """
         Set the plot mode to 'spectra'.
         """
-        self._plotMode = "spectrum"
+        self._plotMode = self.SPECTRUM_MODE
 
     def isBinMode(self):
         """
@@ -122,7 +132,7 @@ class SuperplotModel(QObject):
         Returns:
             bool: True if 'bins' mode
         """
-        return self._plotMode == "bin"
+        return self._plotMode == self.BIN_MODE
 
     def isSpectrumMode(self):
         """
@@ -131,7 +141,7 @@ class SuperplotModel(QObject):
         Returns:
             bool: True if 'spectra' mode
         """
-        return self._plotMode == "spectrum"
+        return self._plotMode == self.SPECTRUM_MODE
 
     def addData(self, workspace, spectrum):
         """
