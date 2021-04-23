@@ -18,7 +18,7 @@ TABLE_COLUMN_FLAGS = {'workspace_name': QtCore.Qt.ItemIsSelectable | QtCore.Qt.I
                       'detector': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
                       'to_analyse': QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled,
                       'rebin': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
-                      'rebin_options': QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable}
+                      'rebin_options': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled}
 
 
 class EAGroupingTableView(QtWidgets.QWidget):
@@ -272,11 +272,16 @@ class EAGroupingTableView(QtWidgets.QWidget):
 
     def rebin_fixed_chosen(self, row):
         steps, ok = QtWidgets.QInputDialog.getText(self, 'Steps',
-                                                   'Rebinnng creates a new workspace.\n'
+                                                   'Rebinning creates a new workspace.\n'
                                                    'Enter the new bin width for a new workspace:')
-
+        if not ok:
+            return
+        if not steps.strip():
+            steps = None
         steps_text = "Steps: " + str(steps)
-        self.grouping_table.setItem(row, 5, QTableWidgetItem(steps_text))
+        table_item = QTableWidgetItem(steps_text)
+        table_item.setFlags(TABLE_COLUMN_FLAGS['rebin_options'])
+        self.grouping_table.setItem(row, 5, table_item)
 
     def rebin_variable_chosen(self, row):
         steps, ok = QtWidgets.QInputDialog.getText(self, 'Bin Boundaries',
@@ -292,8 +297,14 @@ class EAGroupingTableView(QtWidgets.QWidget):
                                                    '2,-0.035,10: from 2 rebin in Logarithmic bins of 0.035 up to 10;\n'
                                                    '0,100,10000,200,20000: from 0 rebin in steps of 100 to 10,000 then '
                                                    'steps of 200 to 20,000')
+        if not ok:
+            return
+        if not steps.strip():
+            steps = None
         bin_text = "Bin Boundaries: " + str(steps)
-        self.grouping_table.setItem(row, 5, QTableWidgetItem(bin_text))
+        table_item = QTableWidgetItem(bin_text)
+        table_item.setFlags(TABLE_COLUMN_FLAGS['rebin_options'])
+        self.grouping_table.setItem(row, 5, table_item)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Enabling and disabling editing and updating of the widget

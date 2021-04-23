@@ -90,28 +90,26 @@ class ElementalAnalysisContextTest(unittest.TestCase):
         # check context is empty
         self.assert_context_empty()
 
-    @mock.patch("Muon.GUI.ElementalAnalysis2.context.data_context.DataContext.remove_workspace_by_name")
-    @mock.patch("Muon.GUI.ElementalAnalysis2.context.ea_group_context.EAGroupContext.remove_group")
-    @mock.patch("Muon.GUI.Common.contexts.muon_gui_context.MuonGuiContext.remove_workspace_by_name")
     @mock.patch("mantidqt.utils.observer_pattern.GenericObservable.notify_subscribers")
-    def test_remove_workspace_with_a_string(self, mock_notify_subscirbers, mock_gui_context, mock_group_context,
-                                            mock_data_context):
+    def test_remove_workspace_with_a_string(self, mock_notify_subscirbers):
+        self.context.data_context.remove_workspace_by_name = mock.Mock()
+        self.context.group_context.remove_group = mock.Mock()
+        self.context.gui_context.remove_workspace_by_name = mock.Mock()
         # call remove_workspace function
         self.context.remove_workspace("mock_workspace")
 
         # assert statement
         mock_notify_subscirbers.assert_called_once_with("mock_workspace")
-        mock_gui_context.assert_called_once_with("mock_workspace")
-        mock_data_context.assert_called_once_with("mock_workspace")
-        mock_group_context.assert_called_once_with("mock_workspace")
+        self.context.gui_context.remove_workspace_by_name.assert_called_once_with("mock_workspace")
+        self.context.data_context.remove_workspace_by_name.assert_called_once_with("mock_workspace")
+        self.context.group_context.remove_group.assert_called_once_with("mock_workspace")
 
-    @mock.patch("Muon.GUI.ElementalAnalysis2.context.data_context.DataContext.remove_workspace_by_name")
-    @mock.patch("Muon.GUI.ElementalAnalysis2.context.ea_group_context.EAGroupContext.remove_group")
-    @mock.patch("Muon.GUI.Common.contexts.muon_gui_context.MuonGuiContext.remove_workspace_by_name")
     @mock.patch("mantidqt.utils.observer_pattern.GenericObservable.notify_subscribers")
-    def test_remove_workspace_with_a_workspace(self, mock_notify_subscirbers, mock_gui_context, mock_group_context,
-                                               mock_data_context):
+    def test_remove_workspace_with_a_workspace(self, mock_notify_subscirbers):
         # setup
+        self.context.data_context.remove_workspace_by_name = mock.Mock()
+        self.context.group_context.remove_group = mock.Mock()
+        self.context.gui_context.remove_workspace_by_name = mock.Mock()
         mock_ws = CreateWorkspace(OutputWorkspace="mock_workspace", DataX=[0, 2, 4, 6, 8, 9], DataY=[2, 2, 2, 2, 1])
 
         # call remove_workspace function
@@ -119,24 +117,24 @@ class ElementalAnalysisContextTest(unittest.TestCase):
 
         # assert statement
         mock_notify_subscirbers.assert_called_once_with("mock_workspace")
-        mock_gui_context.assert_called_once_with("mock_workspace")
-        mock_data_context.assert_called_once_with("mock_workspace")
-        mock_group_context.assert_called_once_with("mock_workspace")
+        self.context.gui_context.remove_workspace_by_name.assert_called_once_with("mock_workspace")
+        self.context.data_context.remove_workspace_by_name.assert_called_once_with("mock_workspace")
+        self.context.group_context.remove_group.assert_called_once_with("mock_workspace")
 
-    @mock.patch("Muon.GUI.ElementalAnalysis2.context.data_context.DataContext.clear")
-    def test_update_current_data_with_empty_data_context(self, mock_clear):
+    def test_update_current_data_with_empty_data_context(self):
         # check if data context is empty
         self.assertEqual(len(self.context.data_context.current_runs), 0)
+        self.context.data_context.clear = mock.Mock()
 
         # call update_current_data
         self.context.update_current_data()
 
-        mock_clear.assert_called_once()
+        self.context.data_context.clear.assert_called_once()
 
-    @mock.patch("Muon.GUI.ElementalAnalysis2.context.ea_group_context.EAGroupContext.reset_group_to_default")
-    def test_update_current_data_with_empty_group_context(self, mock_reset_group):
+    def test_update_current_data_with_empty_group_context(self):
         # check if group context is empty
         self.assertEqual(len(self.context.group_context.groups), 0)
+        self.context.group_context.reset_group_to_default = mock.Mock()
 
         # add run to data context
         self.context.data_context.current_runs.append("mock_run_1")
@@ -145,10 +143,11 @@ class ElementalAnalysisContextTest(unittest.TestCase):
         self.context.update_current_data()
 
         # assert statement
-        mock_reset_group.assert_called_once_with(self.context.data_context._loaded_data)
+        self.context.group_context.reset_group_to_default.assert_called_once_with(
+            self.context.data_context._loaded_data)
 
-    @mock.patch("Muon.GUI.ElementalAnalysis2.context.ea_group_context.EAGroupContext.add_new_group")
-    def test_update_current_data_with_populated_group_context(self, mock_add_new_group):
+    def test_update_current_data_with_populated_group_context(self):
+        self.context.group_context.add_new_group = mock.Mock()
         # add run to data context and group to group context
         self.context.data_context.current_runs.append("mock_run_1")
         self.context.group_context.groups.append("mock_group")
@@ -157,8 +156,8 @@ class ElementalAnalysisContextTest(unittest.TestCase):
         self.context.update_current_data()
 
         # assert statement
-        mock_add_new_group.assert_called_once_with(self.context.group_context.groups,
-                                                   self.context.data_context._loaded_data)
+        self.context.group_context.add_new_group.assert_called_once_with(self.context.group_context.groups,
+                                                                         self.context.data_context._loaded_data)
 
 
 class DataContextTest(unittest.TestCase):

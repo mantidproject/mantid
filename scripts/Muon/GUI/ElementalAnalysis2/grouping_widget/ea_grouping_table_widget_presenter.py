@@ -114,7 +114,7 @@ class EAGroupingTablePresenter(object):
         if col == INVERSE_GROUP_TABLE_COLUMNS['rebin_options']:
             params = changed_item.text().split(":")
             if len(params) == 2:
-                if params[1].strip() == "":
+                if params[1].strip() == "None":
                     self._view.warning_popup("Rebin parameters not given")
                     return
                 if params[0] == "Steps":

@@ -83,34 +83,29 @@ class EAGroupingTabPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.grouping_table_view.num_rows(), 0)
 
-    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model.EAGroupingTabModel.is_data_loaded")
-    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_widget_presenter.EAGroupingTabPresenter."
-                "update_view_from_model")
-    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_widget_presenter.EAGroupingTabPresenter."
-                "update_description_text")
-    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_widget_presenter.EAGroupingTabPresenter."
-                "plot_default_groups")
-    def test_handle_data_loaded_when_data_loaded(self, mock_plot_default_groups, mock_update_text, mock_update_view,
-                                                 mock_is_data_loaded):
-        mock_is_data_loaded.return_value = True
+    def test_handle_data_loaded_when_data_loaded(self):
+        self.presenter._model.is_data_loaded = mock.Mock()
+        self.presenter._model.is_data_loaded.return_value = True
+        self.presenter.update_view_from_model = mock.Mock()
+        self.presenter.update_description_text = mock.Mock()
+        self.presenter.plot_default_groups = mock.Mock()
 
         self.presenter.handle_new_data_loaded()
 
         # Assert statements
-        mock_update_text.assert_called_once()
-        mock_update_view.assert_called_once()
-        mock_plot_default_groups.assert_called_once()
+        self.presenter.update_view_from_model.assert_called_once()
+        self.presenter.update_description_text.assert_called_once()
+        self.presenter.plot_default_groups.assert_called_once()
 
-    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model.EAGroupingTabModel.is_data_loaded")
-    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_widget_presenter.EAGroupingTabPresenter."
-                "on_clear_requested")
-    def test_handle_data_loaded_when_data_not_loaded(self, mock_on_clear_requested, mock_is_data_loaded):
-        mock_is_data_loaded.return_value = False
+    def test_handle_data_loaded_when_data_not_loaded(self):
+        self.presenter._model.is_data_loaded = mock.Mock()
+        self.presenter._model.is_data_loaded.return_value = False
+        self.presenter.on_clear_requested = mock.Mock()
 
         self.presenter.handle_new_data_loaded()
 
         # Assert statements
-        mock_on_clear_requested.assert_called_once()
+        self.presenter.on_clear_requested.assert_called_once()
 
 
 if __name__ == '__main__':
