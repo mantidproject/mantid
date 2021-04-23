@@ -1237,6 +1237,9 @@ void ExperimentInfo::populateWithParameter(Geometry::ParameterMap &paramMap,
   const std::string *pDescription = nullptr;
   if (!paramInfo.m_description.empty())
     pDescription = &paramInfo.m_description;
+  std::string pVisible = "true";
+  if (!paramInfo.m_visible.empty())
+    pVisible = paramInfo.m_visible;
 
   // Some names are special. Values should be convertible to double
   if (name == "masked") {
@@ -1263,15 +1266,15 @@ void ExperimentInfo::populateWithParameter(Geometry::ParameterMap &paramMap,
         << paramInfo.m_constraint[0] << " , " << paramInfo.m_constraint[1] << " , " << paramInfo.m_penaltyFactor
         << " , " << paramInfo.m_tie << " , " << paramInfo.m_formula << " , " << paramInfo.m_formulaUnit << " , "
         << paramInfo.m_resultUnit << " , " << (*(paramInfo.m_interpolation));
-    paramMap.add("fitting", paramInfo.m_component, name, str.str(), pDescription);
+    paramMap.add("fitting", paramInfo.m_component, name, str.str(), pDescription, pVisible);
   } else if (category == "string") {
-    paramMap.addString(paramInfo.m_component, name, paramInfo.m_value, pDescription);
+    paramMap.addString(paramInfo.m_component, name, paramInfo.m_value, pDescription, pVisible);
   } else if (category == "bool") {
-    paramMap.addBool(paramInfo.m_component, name, paramValue, pDescription);
+    paramMap.addBool(paramInfo.m_component, name, paramValue, pDescription, pVisible);
   } else if (category == "int") {
-    paramMap.addInt(paramInfo.m_component, name, paramValue, pDescription);
+    paramMap.addInt(paramInfo.m_component, name, paramValue, pDescription, pVisible);
   } else { // assume double
-    paramMap.addDouble(paramInfo.m_component, name, paramValue, pDescription);
+    paramMap.addDouble(paramInfo.m_component, name, paramValue, pDescription, pVisible);
   }
 }
 
