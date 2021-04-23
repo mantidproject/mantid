@@ -119,6 +119,7 @@ private:
   std::string buildFitTypeString() const;
   std::string buildBackgroundFunctionString() const;
   std::string buildStretchExpFTFunctionString() const;
+  std::string buildIsoRotDiffFunctionString() const;
   std::string buildDiffSphereFunctionString() const;
   std::string buildElasticDiffSphereFunctionString() const;
   std::string buildInelasticDiffSphereFunctionString() const;

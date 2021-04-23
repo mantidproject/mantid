@@ -54,7 +54,9 @@ class ISIS1DMerger(Merger):
         """
         Merges two partial reductions to obtain a merged reduction.
 
-        :param reduction_mode_vs_output_bundles: a ReductionMode vs OutputBundle map
+        :param all_outputs: all ReductionMode vs OutputBundle maps
+        :param can_outputs: a ReductionMode vs OutputBundle map for the can workspaces
+        :param sample_outputs: a ReductionMode vs OutputBundle map for the sample workspaces
         :param parent_alg: a handle to the parent algorithm.
         :return: a MergeBundle with the merged which contains the merged workspace.
         """
@@ -158,17 +160,17 @@ class MergeFactory(object):
         return merger
 
 
-def get_detectors_for_merge(output_bundles):
+def get_detectors_for_merge(output_tuples):
     """
     Extracts the merge strategy from the output bundles. This is the name of the primary and the secondary detector.
 
     The merge strategy will let us know which two detectors are to be merged. This abstraction might be useful in the
     future if we are dealing with more than two detector banks.
-    :param output_bundles: a ReductionMap vs OutputBundle map
+    :param output_tuples: paired up reductions
     :return: the primary detector and the secondary detector.
     """
-    reduction_settings_collection = next(iter(list(output_bundles.values())))
-    state = reduction_settings_collection[0].state
+    # Get first element of first list as we don't care about its wav range or if it's a can/sample
+    state = next(iter(output_tuples.values()))[0].output_bundle.state
     reduction_info = state.reduction
     return reduction_info.get_merge_strategy()
 
@@ -187,14 +189,14 @@ def get_partial_workspaces(primary_detector, secondary_detector, reduction_mode_
     # Get primary reduction information for specified data type, i.e. sample or can
     primary = reduction_mode_vs_output_bundles[primary_detector]
     primary_for_data_type = next((setting for setting in primary if is_data_type(setting)), None)
-    primary_count = None if primary_for_data_type is None else primary_for_data_type.output_workspace_count
-    primary_norm = None if primary_for_data_type is None else primary_for_data_type.output_workspace_norm
+    primary_count = primary_for_data_type.parts_bundle.output_workspace_count if primary_for_data_type else None
+    primary_norm = primary_for_data_type.parts_bundle.output_workspace_norm if primary_for_data_type else None
 
     # Get secondary reduction information for specified data type, i.e. sample or can
     secondary = reduction_mode_vs_output_bundles[secondary_detector]
     secondary_for_data_type = next((setting for setting in secondary if is_data_type(setting)), None)
-    secondary_count = None if secondary_for_data_type is None else secondary_for_data_type.output_workspace_count
-    secondary_norm = None if secondary_for_data_type is None else secondary_for_data_type.output_workspace_norm
+    secondary_count = secondary_for_data_type.parts_bundle.output_workspace_count if secondary_for_data_type else None
+    secondary_norm = secondary_for_data_type.parts_bundle.output_workspace_norm if secondary_for_data_type else None
     return primary_count, primary_norm, secondary_count, secondary_norm
 
 
@@ -206,7 +208,7 @@ def get_shift_and_scale_parameter(reduction_mode_vs_output_bundles):
     :return: the shift, scale and fit mode.
     """
     reduction_settings_collection = next(iter(list(reduction_mode_vs_output_bundles.values())))
-    state = reduction_settings_collection[0].state
+    state = reduction_settings_collection[0].output_bundle.state
     reduction_info = state.reduction
 
     if reduction_info.merge_range_min:
@@ -223,8 +225,8 @@ def get_shift_and_scale_parameter(reduction_mode_vs_output_bundles):
 
 
 def is_sample(x):
-    return x.data_type is DataType.SAMPLE
+    return x.output_bundle.data_type is DataType.SAMPLE
 
 
 def is_can(x):
-    return x.data_type is DataType.CAN
+    return x.output_bundle.data_type is DataType.CAN

@@ -109,6 +109,8 @@ public:
   int getCurrentDataset() const override;
   /// Resize the browser's columns
   void setColumnSizes(int s0, int s1, int s2 = -1);
+  /// Set the last column to stretch.
+  void setStretchLastColumn(bool stretch);
   /// Set error display on/off
   void setErrorsEnabled(bool enabled) override;
   /// Clear all errors

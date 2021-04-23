@@ -31,9 +31,12 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/SetValueWhenProperty.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidMDAlgorithms/GSLFunctions.h"
 #include "MantidMDAlgorithms/MDBoxMaskFunction.h"
 
@@ -109,11 +112,9 @@ void IntegratePeaksMD2::init() {
                   "BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|** and "
                   "BackgroundInnerRadius + AdaptiveQMultiplier * **|Q|**");
 
-  std::string ellip_grp = "Ellipsoid Integration";
   declareProperty("Ellipsoid", false, "Default is sphere.");
-  setPropertyGroup("Ellipsoid", ellip_grp);
+
   declareProperty("FixQAxis", false, "Fix one axis of ellipsoid to be along direction of Q.");
-  setPropertyGroup("FixQAxis", ellip_grp);
 
   declareProperty("Cylinder", false, "Default is sphere.  Use next five parameters for cylinder.");
 
@@ -167,23 +168,93 @@ void IntegratePeaksMD2::init() {
                   "PeakRadius. If False then the ellipsoid radii are set to "
                   "3 times the sqrt of the eigenvalues of the covariance "
                   "matrix");
-  setPropertyGroup("FixMajorAxisLength", ellip_grp);
+
   declareProperty("UseCentroid", false,
                   "Perform integration on estimated centroid not peak position "
                   "(ignored if all three peak radii are specified).");
-  setPropertyGroup("UseCentroid", ellip_grp);
+
   auto maxIterValidator = std::make_shared<BoundedValidator<int>>();
   maxIterValidator->setLower(1);
   declareProperty("MaxIterations", 1, maxIterValidator,
                   "Number of iterations in covariance estimation (ignored if all "
                   "peak radii are specified). 2-3 should be sufficient.");
-  setPropertyGroup("MaxIterations", ellip_grp);
+
   declareProperty(
       "MaskEdgeTubes", true,
       "Mask tubes on the edge of all banks in the PeaksWorkspace instrument (note the edge pixels at top/bottom of all "
       "tubes will always be masked even if this property is False). Note the algorithm will treat "
       "any masked pixels as edges (including pixles already masked prior to the execution of this algorithm) - this "
       "means a custom mask can be applied to the PeaksWorkspace before integration.");
+
+  // Group Properties
+  std::string general_grp = "General Inputs";
+  std::string cylin_grp = "Cylindrical Integration";
+  std::string ellip_grp = "Ellipsoid Integration";
+
+  setPropertyGroup("InputWorkspace", general_grp);
+  setPropertyGroup("PeakRadius", general_grp);
+  setPropertyGroup("BackgroundInnerRadius", general_grp);
+  setPropertyGroup("BackgroundOuterRadius", general_grp);
+  setPropertyGroup("PeaksWorkspace", general_grp);
+  setPropertyGroup("OutputWorkspace", general_grp);
+  setPropertyGroup("ReplaceIntensity", general_grp);
+  setPropertyGroup("IntegrateIfOnEdge", general_grp);
+  setPropertyGroup("AdaptiveQBackground", general_grp);
+
+  setPropertyGroup("Ellipsoid", ellip_grp);
+  setPropertyGroup("FixQAxis", ellip_grp);
+
+  setPropertyGroup("Cylinder", cylin_grp);
+  setPropertyGroup("CylinderLength", cylin_grp);
+  setPropertyGroup("PercentBackground", cylin_grp);
+  setPropertyGroup("ProfileFunction", cylin_grp);
+  setPropertyGroup("IntegrationOption", cylin_grp);
+  setPropertyGroup("ProfilesFile", cylin_grp);
+
+  setPropertyGroup("AdaptiveQMultiplier", general_grp);
+  setPropertyGroup("CorrectIfOnEdge", general_grp);
+  setPropertyGroup("UseOnePercentBackgroundCorrection", general_grp);
+
+  setPropertyGroup("FixMajorAxisLength", ellip_grp);
+  setPropertyGroup("UseCentroid", ellip_grp);
+  setPropertyGroup("MaxIterations", ellip_grp);
+
+  // SetValue when another property value changes
+  setPropertySettings(
+      "Ellipsoid", std::make_unique<SetValueWhenProperty>("Cylinder", [](std::string ellipsoid, std::string cylinder) {
+        // Set Ellipsoid to 0, if user has set Cylinder to 1
+        if (ellipsoid == "1" && cylinder == "1") {
+          return std::string{"0"};
+        } else {
+          return ellipsoid;
+        };
+      }));
+  setPropertySettings(
+      "Cylinder", std::make_unique<SetValueWhenProperty>("Ellipsoid", [](std::string cylinder, std::string ellipsoid) {
+        // Set Cylinder to 0, if user has set Ellipsoid to 1
+        if (cylinder == "1" && ellipsoid == "1") {
+          return std::string{"0"};
+        } else {
+          return cylinder;
+        };
+      }));
+
+  // Set these Properties as visible only when Cylinder = 1
+  setPropertySettings("CylinderLength", std::make_unique<VisibleWhenProperty>("Cylinder", IS_EQUAL_TO, "1"));
+  setPropertySettings("PercentBackground", std::make_unique<VisibleWhenProperty>("Cylinder", IS_EQUAL_TO, "1"));
+  setPropertySettings("ProfileFunction", std::make_unique<VisibleWhenProperty>("Cylinder", IS_EQUAL_TO, "1"));
+  setPropertySettings("IntegrationOption", std::make_unique<VisibleWhenProperty>("Cylinder", IS_EQUAL_TO, "1"));
+  setPropertySettings("ProfilesFile", std::make_unique<VisibleWhenProperty>("Cylinder", IS_EQUAL_TO, "1"));
+
+  // Set these Properties as visible only when Ellipsoid = 1
+  setPropertySettings("FixQAxis", std::make_unique<VisibleWhenProperty>("Ellipsoid", IS_EQUAL_TO, "1"));
+  setPropertySettings("FixMajorAxisLength", std::make_unique<VisibleWhenProperty>("Ellipsoid", IS_EQUAL_TO, "1"));
+  setPropertySettings("UseCentroid", std::make_unique<VisibleWhenProperty>("Ellipsoid", IS_EQUAL_TO, "1"));
+  setPropertySettings("MaxIterations", std::make_unique<VisibleWhenProperty>("Ellipsoid", IS_EQUAL_TO, "1"));
+
+  // Disable / greyed out these Properties based on the value of another
+  setPropertySettings("CorrectIfOnEdge",
+                      std::make_unique<Kernel::EnabledWhenProperty>("IntegrateIfOnEdge", IS_EQUAL_TO, "1"));
 }
 
 std::map<std::string, std::string> IntegratePeaksMD2::validateInputs() {
@@ -193,6 +264,7 @@ std::map<std::string, std::string> IntegratePeaksMD2::validateInputs() {
   std::vector<double> BackgroundInnerRadius = getProperty("BackgroundInnerRadius");
   std::vector<double> BackgroundOuterRadius = getProperty("BackgroundOuterRadius");
   bool ellipsoid = getProperty("Ellipsoid");
+  bool cylinder = getProperty("Cylinder");
 
   if (PeakRadius.size() != 1 && PeakRadius.size() != 3) {
     std::stringstream errmsg;
@@ -228,6 +300,13 @@ std::map<std::string, std::string> IntegratePeaksMD2::validateInputs() {
     std::stringstream errmsg;
     errmsg << "One value must be specified when Ellipsoid is false";
     result["BackgroundOuterRadius"] = errmsg.str();
+  }
+
+  if (ellipsoid && cylinder) {
+    std::stringstream errmsg;
+    errmsg << "Ellipsoid and Cylinder cannot both be true";
+    result["Ellipsoid"] = errmsg.str();
+    result["Cylinder"] = errmsg.str();
   }
 
   return result;

@@ -67,6 +67,8 @@ Linux
 -  Keeps track of allocs/deallocs and reports anything missing at exit.
 -  Slow but thorough
 -  Useful options to run with
+-  See :doc:`valgrind <ProfilingWithValgrind>` for details on how to install
+
 
 ``valgrind --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --track-origins=yes --freelist-vol=500000000 ``\ \ `` [args...]``
 
@@ -284,4 +286,3 @@ To format on all the CMakeLists run the following from within the mantid source 
 				cmakefile = os.path.join(path, file)
 				print("Formatting " + cmakefile)
 				os.system('python -m cmake_format -c ' + os.path.join(dir, '.cmake-format.json') +' -i ' + cmakefile)
-

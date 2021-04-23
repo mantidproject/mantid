@@ -23,13 +23,13 @@ public:
   MultipleExperimentInfos(const MultipleExperimentInfos &other);
   virtual ~MultipleExperimentInfos() = default;
 
-  ExperimentInfo_sptr getExperimentInfo(const uint16_t runIndex);
+  ExperimentInfo_sptr getExperimentInfo(const uint16_t expInfoIndex);
 
-  ExperimentInfo_const_sptr getExperimentInfo(const uint16_t runIndex) const;
+  ExperimentInfo_const_sptr getExperimentInfo(const uint16_t expInfoIndex) const;
 
   uint16_t addExperimentInfo(const ExperimentInfo_sptr &ei);
 
-  void setExperimentInfo(const uint16_t runIndex, ExperimentInfo_sptr ei);
+  void setExperimentInfo(const uint16_t expInfoIndex, ExperimentInfo_sptr ei);
 
   uint16_t getNumExperimentInfo() const;
 

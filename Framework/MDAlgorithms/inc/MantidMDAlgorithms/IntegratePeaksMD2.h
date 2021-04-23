@@ -33,7 +33,9 @@ public:
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Integrate single-crystal peaks in reciprocal space, for "
-           "MDEventWorkspaces.";
+           "MDEventWorkspaces. \n\n"
+           "Sphere is the default shape: tick Ellipsoid or Cylinder "
+           "to change shape.";
   }
 
   /// Algorithm's version for identification

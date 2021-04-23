@@ -137,7 +137,7 @@ template <typename MDE, size_t nd> void FakeMD::addFakePeak(typename MDEventWork
 
     // Create and add the event.
     eventHelper.insertMDEvent(signal, errorSquared, 0, 0, pickDetectorID(),
-                              centers); // 0 = run index
+                              centers); // 0 = associated experiment-info index
   }
 
   ws->splitBox();
@@ -246,7 +246,7 @@ template <typename MDE, size_t nd> void FakeMD::addFakeEllipsoid(typename MDEven
 
     // add event (need to convert pos to coord_t)
     eventHelper.insertMDEvent(signal, errorSquared, 0, 0, pickDetectorID(),
-                              eventCenter); // 0 = run index
+                              eventCenter); // 0 = associated experiment-info index
   }
 
   ws->splitBox();
@@ -360,7 +360,7 @@ void FakeMD::addFakeRandomData(const std::vector<double> &params, typename MDEve
 
     // Create and add the event.
     eventHelper.insertMDEvent(signal, errorSquared, 0, 0, pickDetectorID(),
-                              centers); // 0 = run index
+                              centers); // 0 = associated experiment-info index
   }
 }
 
@@ -428,7 +428,7 @@ void FakeMD::addFakeRegularData(const std::vector<double> &params, typename MDEv
 
     // Create and add the event.
     eventHelper.insertMDEvent(signal, errorSquared, 0, 0, pickDetectorID(),
-                              centers); // 0 = run index
+                              centers); // 0 = associated experiment-info index
   }
 }
 
