@@ -1144,8 +1144,11 @@ QString InstrumentActor::getParameterInfo(size_t index) const {
       for (auto paramName : compParamNames) {
         // no need to search recursively as we are asking from the matching
         // component
-        std::string paramValue =
-            paramComp->getParameterAsString(paramName, false);
+        std::string paramValue = "";
+        if (paramComp->getParameterVisible(paramName)) {
+            paramValue =
+                paramComp->getParameterAsString(paramName, false);
+        }
         if (paramValue != "") {
           text += QString::fromStdString(paramName + ": " + paramValue + "\n");
         }
