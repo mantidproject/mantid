@@ -198,6 +198,16 @@ class RundexSettings(object):
             }
 
     # settings for each acquisition mode
+
+    # optionnal flags
+    FLAGS = {
+            REFL_POL : {
+                "PolarizationOption": "Polarized"
+                },
+            REFL_NPOL : {
+                "PolarizationOption": "NonPolarized"
+                }
+            }
     SETTINGS = {
             SANS_ACQ : [
                 "ThetaDependent",
@@ -224,7 +234,8 @@ class RundexSettings(object):
                 "OutputPanels",
                 "WavelengthRange",
                 "StitchReferenceIndex",
-                "ClearCorrected2DWorkspace"
+                "ClearCorrected2DWorkspace",
+                "ShapeTable"
                 ],
             SANS_PSCAN : [
                 "SensitivityMap",
@@ -329,16 +340,6 @@ class RundexSettings(object):
                 "ZeroCountingCells",
                 "Unit"
                 ]
-            }
-
-    # optionnal flags
-    FLAGS = {
-            REFL_POL : {
-                "PolarizationOption": "Polarized"
-                },
-            REFL_NPOL : {
-                "PolarizationOption": "NonPolarized"
-                }
             }
 
     # Json keys
