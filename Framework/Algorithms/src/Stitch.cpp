@@ -13,6 +13,9 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
+
 namespace {
 static const std::string INPUT_WORKSPACE_PROPERTY = "InputWorkspaces";
 static const std::string REFERENCE_WORKSPACE_NAME = "ReferenceWorkspace";
@@ -20,13 +23,51 @@ static const std::string COMBINATION_BEHAVIOUR = "CombinationBehaviour";
 static const std::string SCALE_FACTOR_CALCULATION = "ScaleFactorCalculation";
 static const std::string SCALE_FACTOR_BEHAVIOUR = "ScaleFactorBehaviour";
 static const std::string OUTPUT_WORKSPACE_PROPERTY = "OutputWorkspace";
+
+/**
+ * @brief getMinMaxX Calculates the x-axis extent of a [ragged] workspace
+ * Assumes that the histogram bin edges are in ascending order
+ * @param ws : the input workspace
+ * @return a pair of min-x and max-x
+ */
+std::pair<double, double> getMinMaxX(const MatrixWorkspace &ws) {
+  double xmin = ws.readX(0).front();
+  double xmax = ws.readX(0).back();
+  for (size_t i = 1; i < ws.getNumberHistograms(); ++i) {
+    const double startx = ws.readX(i).front();
+    if (startx < xmin) {
+      xmin = startx;
+    }
+    const double endx = ws.readX(i).back();
+    if (endx > xmax) {
+      xmax = endx;
+    }
+  }
+  return std::make_pair(xmin, xmax);
+}
+
+/**
+ * @brief compareInterval Compares two workspaces in terms of their x-coverage
+ * @param ws1 : input workspace 1
+ * @param ws2 : input workspace 2
+ * @return true if ws1 is less than ws2 in terms of its x-interval
+ */
+bool compareInterval(const MatrixWorkspace_sptr ws1, const MatrixWorkspace_sptr ws2) {
+  const auto minmax1 = getMinMaxX(*ws1);
+  const auto minmax2 = getMinMaxX(*ws2);
+  if (minmax1.first < minmax2.first) {
+    return true;
+  } else if (minmax1.first > minmax2.first) {
+    return false;
+  } else {
+    return minmax1.second < minmax2.second;
+  }
+}
+
 } // namespace
 
 namespace Mantid {
 namespace Algorithms {
-
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Stitch)
@@ -65,7 +106,7 @@ std::map<std::string, std::string> Stitch::validateInputs() {
     combHelper.setReferenceProperties(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaces.front()));
   } catch (const std::exception &e) {
     issues[INPUT_WORKSPACE_PROPERTY] =
-        std::string("Please provide MatrixWorkspaces or groups of those as input: ") + e.what();
+        std::string("Please provide MatrixWorkspaces as or groups of those as input: ") + e.what();
     return issues;
   }
   if (!isDefault(REFERENCE_WORKSPACE_NAME)) {
@@ -92,10 +133,8 @@ std::map<std::string, std::string> Stitch::validateInputs() {
 void Stitch::init() {
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>(INPUT_WORKSPACE_PROPERTY, std::make_unique<ADSValidator>()),
-      "The names of the input workspaces or workspace groups as a list. At "
-      "least two MatrixWorkspaces are "
-      "required, having the same instrument, same number of spectra and "
-      "units.");
+      "The names of the input workspaces or groups of those as a list. "
+      "At least two MatrixWorkspaces are required, having the same instrument, same number of spectra and units.");
   declareProperty(REFERENCE_WORKSPACE_NAME, "",
                   "The name of the workspace that will serve as the reference; "
                   "that is, the one that will not be scaled. If left blank, "
@@ -122,8 +161,7 @@ void Stitch::exec() {
   const auto inputs = RunCombinationHelper::unWrapGroups(getProperty(INPUT_WORKSPACE_PROPERTY));
   std::transform(inputs.cbegin(), inputs.cend(), std::back_inserter(workspaces),
                  [](const auto ws) { return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(ws); });
-  const auto reference = std::find(workspaces.cbegin(), workspaces.cend(),
-                                   [&referenceName](const auto ws) { return ws->getName() == referenceName; });
+  std::sort(workspaces.begin(), workspaces.end(), compareInterval);
 }
 
 } // namespace Algorithms
