@@ -293,7 +293,7 @@ std::string DetectorGroup::getParameterAsString(const std::string &pname, bool r
 
 /**
  *  Get a visibility attribute of a parameter
- * @param p_name :: The name of the parameter
+ * @param pname :: The name of the parameter
  * @param recursive :: If true the search will walk up through the parent
  * components
  * @return A boolean containing the visibility attribute of the parameter, false if does not exist
