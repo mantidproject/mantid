@@ -90,9 +90,10 @@ private:
   mutable int m_peakRadius;
   /// The default level for searching a domain interval (getDomainInterval())
   static constexpr double DEFAULT_SEARCH_LEVEL = 1e-5;
+  // helper function for intensity() and intensityError()
+  IntegrationResult integrate() const;
   // cache the result of a PeakFunctionIntegrator call
-  boost::optional<double> intensityResult = boost::none;
-  boost::optional<double> intensityError = boost::none;
+  boost::optional<IntegrationResult> integrationResult = boost::none;
 };
 
 using IPeakFunction_sptr = std::shared_ptr<IPeakFunction>;
