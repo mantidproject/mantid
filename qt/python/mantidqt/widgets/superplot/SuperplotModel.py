@@ -78,16 +78,14 @@ class SuperplotModel(QObject):
         Args:
             name (str): name of the workspace
         """
-        if name in self._workspaces:
-            return
         if isinstance(mtd[name], WorkspaceGroup):
             names = mtd[name].getNames()
-            for name in names:
+        else:
+            names = [name]
+        for name in names:
+            if name not in self._workspaces:
                 self._workspaces.append(name)
                 self._spectra[name] = 0
-        else:
-            self._workspaces.append(name)
-            self._spectra[name] = 0
 
     def delWorkspace(self, name):
         """
