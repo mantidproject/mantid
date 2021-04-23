@@ -196,11 +196,33 @@ void Voigt::setFwhm(const double value) {
 /**
  * Returns the integral intensity of the peak
  */
-double Voigt::intensity() const {
+API::IntegrationResult Voigt::intensity() const {
+
+  API::IntegrationResult evaluated_integral;
+
   if (getParameter(GAUSSIAN_FWHM) == 0.0) {
-    return 0.0;
+
+    evaluated_integral.result = 0.0;
+    evaluated_integral.error = 0.0;
   }
-  return M_PI * getParameter(LORENTZ_AMP) * getParameter(LORENTZ_FWHM) / 2.0;
+
+  else
+  {
+    double lorentz_amp = getParameter( LORENTZ_AMP );
+    double lorentz_amp_error = getError( LORENTZ_AMP );
+    double lorentz_fwhm = getParameter(LORENTZ_FWHM);
+    double lorentz_fwhm_error = getError(LORENTZ_FWHM);
+
+    evaluated_integral.result =
+    M_PI * lorentz_amp * lorentz_fwhm / 2.0;
+
+    evaluated_integral.error = 
+    evaluated_integral.result *
+    std::sqrt( lorentz_amp_error * lorentz_amp_error / lorentz_amp / lorentz_amp 
+               + lorentz_fwhm_error * lorentz_fwhm_error / lorentz_fwhm / lorentz_fwhm );
+  }
+
+  return evaluated_integral;
 }
 
 /**

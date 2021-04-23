@@ -220,7 +220,7 @@ public:
 
       IPeakFunction_sptr wrappedFunction = poldiFunction->getProfileFunction();
 
-      TS_ASSERT_DELTA(wrappedFunction->intensity(), static_cast<double>(peaks->peak(i)->intensity()), 1e-10);
+      TS_ASSERT_DELTA(wrappedFunction->intensity().result, static_cast<double>(peaks->peak(i)->intensity()), 1e-10);
     }
   }
 

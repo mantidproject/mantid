@@ -2209,7 +2209,7 @@ void FitPeaks::writeFitResult(size_t wi, const std::vector<double> &expected_pos
       m_fittedParamTable->cell<double>(row_index, 2) = peak_function->centre();
       m_fittedParamTable->cell<double>(row_index, 3) = peak_function->fwhm();
       m_fittedParamTable->cell<double>(row_index, 4) = peak_function->height();
-      m_fittedParamTable->cell<double>(row_index, 5) = peak_function->intensity();
+      m_fittedParamTable->cell<double>(row_index, 5) = peak_function->intensity().result;
 
       // background
       for (size_t iparam = 0; iparam < num_bkgd_params; ++iparam)

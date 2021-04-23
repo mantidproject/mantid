@@ -94,6 +94,16 @@ void PseudoVoigt::init() {
   // 0: mixing, 1: intensity, 2: fwhm, 3: height
 }
 
+API::IntegrationResult PseudoVoigt::intensity() const
+{ 
+  API::IntegrationResult evaluated_integral;
+
+  evaluated_integral.result = getParameter("Intensity");
+  evaluated_integral.error = getError("Intensity");
+
+  return evaluated_integral;
+}
+
 /** calculate pseudo voigt
  * @param out :: array with calculated value
  * @param xValues :: array with input X values

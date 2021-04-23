@@ -36,7 +36,7 @@ namespace Functions {
 class MANTID_CURVEFITTING_DLL PseudoVoigt : public API::IPeakFunction {
 public:
   double centre() const override { return getParameter("PeakCentre"); }
-  double intensity() const override { return getParameter("Intensity"); }
+  API::IntegrationResult intensity() const override;
   double height() const override;
   double fwhm() const override { return getParameter("FWHM"); }
 

@@ -39,7 +39,7 @@ public:
   const std::string category() const override { return "Peak"; }
 
   /// Returns the integral intensity of the peak
-  double intensity() const override;
+  API::IntegrationResult intensity() const override;
 
   void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX,
                           double endX) override;

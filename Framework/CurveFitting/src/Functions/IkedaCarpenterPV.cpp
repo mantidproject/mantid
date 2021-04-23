@@ -373,13 +373,13 @@ void IkedaCarpenterPV::functionDeriv(const API::FunctionDomain &domain, API::Jac
 }
 
 /// Returns the integral intensity of the peak
-double IkedaCarpenterPV::intensity() const {
+API::IntegrationResult IkedaCarpenterPV::intensity() const {
   auto interval = getDomainInterval(1e-2);
 
   API::PeakFunctionIntegrator integrator;
   API::IntegrationResult result = integrator.integrate(*this, interval.first, interval.second);
 
-  return result.result;
+  return result;
 }
 
 void IkedaCarpenterPV::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,

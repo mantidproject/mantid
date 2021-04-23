@@ -229,7 +229,7 @@ PoldiFitPeaks2D::getIntegratedPeakCollection(const PoldiPeakCollection_sptr &raw
     profileFunction->setFwhm(peak->fwhm(PoldiPeak::AbsoluteD));
 
     PoldiPeak_sptr integratedPeak = peak->clone();
-    integratedPeak->setIntensity(UncertainValue(profileFunction->intensity()));
+    integratedPeak->setIntensity(UncertainValue(profileFunction->intensity().result));
     integratedPeakCollection->addPeak(integratedPeak);
   }
 
@@ -371,7 +371,7 @@ PoldiPeak_sptr PoldiFitPeaks2D::getPeakFromPeakFunction(const IPeakFunction_sptr
 
   bool useIntegratedIntensities = getProperty("OutputIntegratedIntensities");
   if (useIntegratedIntensities) {
-    double integratedIntensity = profileFunction->intensity();
+    double integratedIntensity = profileFunction->intensity().result;
     double integratedIntensityError = errorTable->cell<double>(3, 2);
     intensity = UncertainValue(integratedIntensity, integratedIntensityError);
   } else {

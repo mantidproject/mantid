@@ -40,7 +40,7 @@ public:
   double centre() const override;
   double height() const override;
   double fwhm() const override;
-  double intensity() const override;
+  API::IntegrationResult intensity() const override;
   void setCentre(const double c) override;
   void setHeight(const double h) override;
   void setFwhm(const double w) override;

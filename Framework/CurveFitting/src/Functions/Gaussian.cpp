@@ -80,18 +80,50 @@ double Gaussian::activeParameter(size_t i) const {
 double Gaussian::centre() const { return getParameter("PeakCentre"); }
 double Gaussian::height() const { return getParameter("Height"); }
 double Gaussian::fwhm() const { return 2.0 * sqrt(2.0 * M_LN2) * getParameter("Sigma"); }
-double Gaussian::intensity() const {
-  auto sigma = getParameter("Sigma");
+API::IntegrationResult Gaussian::intensity() const {
+
+  API::IntegrationResult evaluated_integral;
+
+  double sigma = getParameter("Sigma");
+
+  double sigma_error = getError( "Sigma" );
+
+  double height = getParameter("Height");
+
+  double height_error = getError( "Height" );
+
   if (sigma == 0.0) {
-    auto height = getParameter("Height");
+
     if (std::isfinite(height)) {
-      m_intensityCache = height;
+
+      evaluated_integral.result = height;
+      evaluated_integral.error = height_error;
+      evaluated_integral.success = true;
     }
+
+    else
+    {
+      evaluated_integral.result = NAN;
+      evaluated_integral.error = NAN;
+      evaluated_integral.success = false;
+    }
+
   } else {
-    m_intensityCache = getParameter("Height") * getParameter("Sigma") * sqrt(2.0 * M_PI);
+
+    evaluated_integral.result = 
+    height * sigma * sqrt( 2.0 * M_PI );
+
+    evaluated_integral.error =
+    evaluated_integral.result * 
+    sqrt( height_error * height_error / height / height 
+          + sigma_error * sigma_error / sigma / sigma );
+
+    evaluated_integral.success = true;
   }
-  return m_intensityCache;
+
+  return evaluated_integral;
 }
+/* end replace old code */
 
 void Gaussian::setCentre(const double c) { setParameter("PeakCentre", c); }
 void Gaussian::setHeight(const double h) { setParameter("Height", h); }
@@ -111,7 +143,7 @@ void Gaussian::fixCentre(bool isDefault) { fixParameter("PeakCentre", isDefault)
 void Gaussian::unfixCentre() { unfixParameter("PeakCentre"); }
 
 void Gaussian::fixIntensity(bool isDefault) {
-  std::string formula = std::to_string(intensity() / sqrt(2.0 * M_PI)) + "/Sigma";
+  std::string formula = std::to_string(intensity().result / sqrt(2.0 * M_PI)) + "/Sigma";
   tie("Height", formula, isDefault);
 }
 
@@ -126,7 +158,7 @@ void Gaussian::unfixIntensity() { removeTie("Height"); }
 /// @param nBins :: Number of bins.
 void Gaussian::histogram1D(double *out, double left, const double *right, const size_t nBins) const {
 
-  double amplitude = intensity();
+  double amplitude = intensity().result;
   const double peakCentre = getParameter("PeakCentre");
   const double sigma2 = getParameter("Sigma") * sqrt(2.0);
 

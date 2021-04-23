@@ -105,6 +105,17 @@ void BackToBackExponential::setFwhm(const double w) {
   setHeight(h0);
 }
 
+API::IntegrationResult BackToBackExponential::intensity() const
+{ 
+  API::IntegrationResult evaluated_integral;
+
+  evaluated_integral.result = getParameter( "I" );
+
+  evaluated_integral.error = getError( "I" );
+
+  return evaluated_integral;
+}
+
 void BackToBackExponential::function1D(double *out, const double *xValues, const size_t nData) const {
   /*
     const double& I = getParameter("I");

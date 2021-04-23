@@ -63,7 +63,7 @@ GSLMatrix makeJacobian(IPeakFunction &peak, double &centre, double &height, doub
   centre = peak.centre();
   height = peak.height();
   fwhm = peak.fwhm();
-  intensity = peak.intensity();
+  intensity = peak.intensity().result;
   for (size_t ip = 0; ip < peak.nParams(); ++ip) {
     double p = peak.getParameter(ip);
     double dp = 1e-9;
@@ -74,7 +74,7 @@ GSLMatrix makeJacobian(IPeakFunction &peak, double &centre, double &height, doub
     jacobian.set(0, ip, (peak.centre() - centre) / dp);
     jacobian.set(1, ip, (peak.height() - height) / dp);
     jacobian.set(2, ip, (peak.fwhm() - fwhm) / dp);
-    jacobian.set(3, ip, (peak.intensity() - intensity) / dp);
+    jacobian.set(3, ip, (peak.intensity().result - intensity) / dp);
     peak.setParameter(ip, p);
   }
   return jacobian;

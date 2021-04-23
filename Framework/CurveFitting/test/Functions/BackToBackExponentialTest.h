@@ -183,10 +183,10 @@ public:
     b2bExp.setParameter("X0", 0.0);
     b2bExp.setParameter("S", s);
 
-    TS_ASSERT_EQUALS(b2bExp.intensity(), 2.1);
+    TS_ASSERT_EQUALS(b2bExp.intensity().result, 2.1);
     TS_ASSERT_THROWS_NOTHING(b2bExp.setIntensity(3.0));
 
-    TS_ASSERT_EQUALS(b2bExp.intensity(), 3.0);
+    TS_ASSERT_EQUALS(b2bExp.intensity().result, 3.0);
     TS_ASSERT_EQUALS(b2bExp.getParameter("I"), 3.0);
   }
 };

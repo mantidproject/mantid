@@ -71,6 +71,6 @@ public:
     fn.setParameter("SigmaSquared", 0.00281776);
     fn.setParameter("Gamma", 0.125);
     fn.setParameter("X0", 0);
-    TS_ASSERT_DELTA(fn.intensity(), 810.7256, 1e-4);
+    TS_ASSERT_DELTA(fn.intensity().result, 810.7256, 1e-4);
   }
 };

@@ -171,30 +171,30 @@ void IPeakFunction::setPeakRadius(int r) const {
 
 /// Returns the integral intensity of the peak function, using the peak radius
 /// to determine integration borders.
-double IPeakFunction::intensity() const {
+IntegrationResult IPeakFunction::intensity() const {
   auto interval = getDomainInterval();
 
   PeakFunctionIntegrator integrator;
   IntegrationResult result = integrator.integrate(*this, interval.first, interval.second);
 
   if (!result.success) {
-    return 0.0;
+    result.result = NAN;
   }
 
-  return result.result;
+  return result;
 }
 
 /// Sets the integral intensity of the peak by adjusting the height.
 void IPeakFunction::setIntensity(const double newIntensity) {
   double currentHeight = height();
-  double currentIntensity = intensity();
+  double currentIntensity = intensity().result;
 
   if (currentIntensity == 0.0) {
     // Try to set a different height first.
     setHeight(2.0);
 
     currentHeight = height();
-    currentIntensity = intensity();
+    currentIntensity = intensity().result;
 
     // If the current intensity is still 0, there's nothing left to do.
     if (currentIntensity == 0.0) {

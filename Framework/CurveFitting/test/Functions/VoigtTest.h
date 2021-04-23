@@ -135,7 +135,7 @@ public:
       voigt->setHeight(3.0);
       TS_ASSERT_DELTA(voigt->height(), 3.0, 1e-10);
       TS_ASSERT_DELTA(voigt->fwhm(), 0, 1e-10);
-      TS_ASSERT_DELTA(voigt->intensity(), 0, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity().result, 0, 1e-10);
     }
     {
       auto voigt = createFunction(1, 0, 0, 0);
@@ -143,7 +143,7 @@ public:
       voigt->setHeight(3.0);
       TS_ASSERT_DELTA(voigt->height(), 3.0, 1e-10);
       TS_ASSERT_DELTA(voigt->fwhm(), 0, 1e-10);
-      TS_ASSERT_DELTA(voigt->intensity(), 0, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity().result, 0, 1e-10);
     }
     {
       auto voigt = createFunction(1, 0, 1, 0);
@@ -151,7 +151,7 @@ public:
       voigt->setHeight(3.0);
       TS_ASSERT_DELTA(voigt->height(), 3.0, 1e-10);
       TS_ASSERT_DELTA(voigt->fwhm(), 1, 1e-10);
-      TS_ASSERT_DELTA(voigt->intensity(), 4.7123, 1e-4);
+      TS_ASSERT_DELTA(voigt->intensity().result, 4.7123, 1e-4);
     }
     {
       auto voigt = createFunction(1, 0, 0, 1);
@@ -159,7 +159,7 @@ public:
       voigt->setHeight(3.0);
       TS_ASSERT_DELTA(voigt->height(), 3.0, 1e-10);
       TS_ASSERT_DELTA(voigt->fwhm(), 1, 1e-10);
-      TS_ASSERT_DELTA(voigt->intensity(), 3.1933, 1e-4);
+      TS_ASSERT_DELTA(voigt->intensity().result, 3.1933, 1e-4);
     }
     {
       auto voigt = createFunction(0, 0, 1, 1);
@@ -167,7 +167,7 @@ public:
       voigt->setHeight(3.0);
       TS_ASSERT_DELTA(voigt->height(), 3.0, 1e-10);
       TS_ASSERT_DELTA(voigt->fwhm(), 2, 1e-10);
-      TS_ASSERT_DELTA(voigt->intensity(), 6.6795, 1e-4);
+      TS_ASSERT_DELTA(voigt->intensity().result, 6.6795, 1e-4);
     }
     {
       auto voigt = createFunction(4, 0, 2, 3);
@@ -175,51 +175,51 @@ public:
       voigt->setHeight(3.0);
       TS_ASSERT_DELTA(voigt->height(), 3.0, 1e-10);
       TS_ASSERT_DELTA(voigt->fwhm(), 5, 1e-10);
-      TS_ASSERT_DELTA(voigt->intensity(), 16.2778, 1e-4);
+      TS_ASSERT_DELTA(voigt->intensity().result, 16.2778, 1e-4);
     }
   }
 
   void test_intensity() {
     {
       auto voigt = createFunction(0, 0, 0, 0);
-      TS_ASSERT_EQUALS(voigt->intensity(), 0.0);
+      TS_ASSERT_EQUALS(voigt->intensity().result, 0.0);
       voigt->setIntensity(3.0);
       TS_ASSERT_DELTA(voigt->height(), 6068115080134125.22, 1e10);
       TS_ASSERT_DELTA(voigt->fwhm(), 0, 1e-10);
-      TS_ASSERT_DELTA(voigt->intensity(), 3.0, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity().result, 3.0, 1e-10);
     }
     {
       auto voigt = createFunction(1, 0, 0, 0);
-      TS_ASSERT_EQUALS(voigt->intensity(), 0.0);
+      TS_ASSERT_EQUALS(voigt->intensity().result, 0.0);
       voigt->setIntensity(3.0);
       TS_ASSERT_DELTA(voigt->height(), 6068115080134125.22, 1e10);
       TS_ASSERT_DELTA(voigt->fwhm(), 0, 1e-10);
-      TS_ASSERT_DELTA(voigt->intensity(), 3.0, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity().result, 3.0, 1e-10);
     }
     {
       auto voigt = createFunction(1, 0, 0, 1);
-      TS_ASSERT_EQUALS(voigt->intensity(), 0.0);
+      TS_ASSERT_EQUALS(voigt->intensity().result, 0.0);
       voigt->setIntensity(3.0);
       TS_ASSERT_DELTA(voigt->height(), 2.8183, 1e-4);
       TS_ASSERT_DELTA(voigt->fwhm(), 1, 1e-10);
-      TS_ASSERT_DELTA(voigt->intensity(), 3.0, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity().result, 3.0, 1e-10);
     }
     {
       auto voigt = createFunction(1, 0, 1, 0);
-      TS_ASSERT_EQUALS(voigt->intensity(), 0.0);
+      TS_ASSERT_EQUALS(voigt->intensity().result, 0.0);
       voigt->setIntensity(3.0);
       TS_ASSERT_DELTA(voigt->height(), 1.9098, 1e-4);
       TS_ASSERT_DELTA(voigt->fwhm(), 1, 1e-10);
-      TS_ASSERT_DELTA(voigt->intensity(), 3.0, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity().result, 3.0, 1e-10);
     }
     {
       auto voigt = createFunction(4, 0, 2, 3);
-      TS_ASSERT_DELTA(voigt->intensity(), 12.5663, 1e-4);
+      TS_ASSERT_DELTA(voigt->intensity().result, 12.5663, 1e-4);
       voigt->setIntensity(3.0);
       TS_ASSERT_DELTA(voigt->height(), 0.5528, 1e-4);
       TS_ASSERT_DELTA(voigt->fwhm(), 5, 1e-10);
-      TS_ASSERT_DELTA(voigt->intensity(), 3.0, 1e-10);
-      TS_ASSERT_DELTA(voigt->IPeakFunction::intensity(), 3.0, 1e-2);
+      TS_ASSERT_DELTA(voigt->intensity().result, 3.0, 1e-10);
+      TS_ASSERT_DELTA(voigt->IPeakFunction::intensity().result, 3.0, 1e-2);
     }
   }
 
@@ -230,7 +230,7 @@ public:
       voigt->setFwhm(3.0);
       TS_ASSERT_DELTA(voigt->height(), 0, 1e-10);
       TS_ASSERT_DELTA(voigt->fwhm(), 3, 1e-10);
-      TS_ASSERT_DELTA(voigt->intensity(), 0.0, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity().result, 0.0, 1e-10);
       TS_ASSERT_DELTA(voigt->getParameter("LorentzFWHM"), 1.5, 1e-10);
       TS_ASSERT_DELTA(voigt->getParameter("GaussianFWHM"), 1.5, 1e-10);
     }
@@ -240,7 +240,7 @@ public:
       voigt->setFwhm(3.0);
       TS_ASSERT_DELTA(voigt->height(), 0, 1e-10);
       TS_ASSERT_DELTA(voigt->fwhm(), 3, 1e-10);
-      TS_ASSERT_DELTA(voigt->intensity(), 0.0, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity().result, 0.0, 1e-10);
       TS_ASSERT_DELTA(voigt->getParameter("LorentzFWHM"), 3.0, 1e-10);
       TS_ASSERT_DELTA(voigt->getParameter("GaussianFWHM"), 0.0, 1e-10);
     }
@@ -250,7 +250,7 @@ public:
       voigt->setFwhm(3.0);
       TS_ASSERT_DELTA(voigt->height(), 0, 1e-10);
       TS_ASSERT_DELTA(voigt->fwhm(), 3, 1e-10);
-      TS_ASSERT_DELTA(voigt->intensity(), 0.0, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity().result, 0.0, 1e-10);
       TS_ASSERT_DELTA(voigt->getParameter("LorentzFWHM"), 0.0, 1e-10);
       TS_ASSERT_DELTA(voigt->getParameter("GaussianFWHM"), 3.0, 1e-10);
     }
@@ -259,7 +259,7 @@ public:
       TS_ASSERT_EQUALS(voigt->fwhm(), 3.0);
       voigt->setFwhm(5.5);
       TS_ASSERT_DELTA(voigt->fwhm(), 5.5, 1e-10);
-      TS_ASSERT_DELTA(voigt->intensity(), 11.5191, 1e-4);
+      TS_ASSERT_DELTA(voigt->intensity().result, 11.5191, 1e-4);
       TS_ASSERT_DELTA(voigt->getParameter("LorentzFWHM"), 3.6666, 1e-4);
       TS_ASSERT_DELTA(voigt->getParameter("GaussianFWHM"), 1.8333, 1e-4);
     }

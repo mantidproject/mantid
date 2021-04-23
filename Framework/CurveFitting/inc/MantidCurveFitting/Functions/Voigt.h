@@ -47,7 +47,7 @@ private:
   /// Set the FWHM of the peak
   void setFwhm(const double value) override;
   /// Returns the integral intensity of the peak
-  double intensity() const override;
+  API::IntegrationResult intensity() const override;
   /// Sets the integral intensity of the peak
   void setIntensity(const double value) override;
 };

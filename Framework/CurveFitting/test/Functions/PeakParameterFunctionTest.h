@@ -46,7 +46,7 @@ public:
     TS_ASSERT_EQUALS(values[0], peakFunction->centre());
     TS_ASSERT_EQUALS(values[1], peakFunction->height());
     TS_ASSERT_EQUALS(values[2], peakFunction->fwhm());
-    TS_ASSERT_EQUALS(values[3], peakFunction->intensity());
+    TS_ASSERT_EQUALS(values[3], peakFunction->intensity().result);
   }
 
   void testFunctionDeriv() {

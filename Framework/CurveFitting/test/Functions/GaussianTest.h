@@ -90,7 +90,7 @@ public:
     fn->setCentre(-200.0);
 
     // Area under a gaussian is height * sigma * sqrt(2 * pi)
-    TS_ASSERT_DELTA(fn->intensity(), 0.26611675485780654483, 1e-10);
+    TS_ASSERT_DELTA(fn->intensity().result, 0.26611675485780654483, 1e-10);
   }
 
   void testSetIntensity() {
@@ -102,7 +102,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(fn->setIntensity(0.5));
 
-    TS_ASSERT_DELTA(fn->intensity(), 0.5, 1e-10);
+    TS_ASSERT_DELTA(fn->intensity().result, 0.5, 1e-10);
 
     // FWHM does not change
     TS_ASSERT_EQUALS(fn->fwhm(), 0.125);
@@ -115,16 +115,16 @@ public:
     std::shared_ptr<Gaussian> fn = std::make_shared<Gaussian>();
     fn->initialize();
 
-    TS_ASSERT_EQUALS(fn->intensity(), 0.0);
+    TS_ASSERT_EQUALS(fn->intensity().result, 0.0);
 
     TS_ASSERT_THROWS_NOTHING(fn->setIntensity(20.0));
-    TS_ASSERT_EQUALS(fn->intensity(), 20.0);
+    TS_ASSERT_EQUALS(fn->intensity().result, 20.0);
 
     // Now, fwhm is not zero
     fn->setFwhm(0.02);
 
     TS_ASSERT_THROWS_NOTHING(fn->setIntensity(20.0));
-    TS_ASSERT_DELTA(fn->intensity(), 20.0, 1e-10);
+    TS_ASSERT_DELTA(fn->intensity().result, 20.0, 1e-10);
   }
 
   void testGetCentreParameterName() {
@@ -146,25 +146,25 @@ public:
     TS_ASSERT(!fn.isFixed(i));
 
     fn.setParameter("Height", 1.0);
-    auto intensity = fn.intensity();
+    auto intensity = fn.intensity().result;
     fn.fixIntensity();
     fn.setParameter("Sigma", 2.0);
     fn.applyTies();
-    TS_ASSERT_DELTA(fn.intensity(), intensity, 1e-6);
+    TS_ASSERT_DELTA(fn.intensity().result, intensity, 1e-6);
     TS_ASSERT_DELTA(fn.getParameter("Height"), 0.199471, 1e-6);
 
     fn.setParameter("Sigma", 3.0);
     fn.applyTies();
-    TS_ASSERT_DELTA(fn.intensity(), intensity, 1e-6);
+    TS_ASSERT_DELTA(fn.intensity().result, intensity, 1e-6);
     TS_ASSERT_DELTA(fn.getParameter("Height"), 0.132981, 1e-6);
 
     fn.setParameter("Sigma", 0.01);
     fn.applyTies();
-    TS_ASSERT_DELTA(fn.intensity(), intensity, 1e-6);
+    TS_ASSERT_DELTA(fn.intensity().result, intensity, 1e-6);
 
     fn.setParameter("Sigma", 1.0);
     fn.applyTies();
-    TS_ASSERT_DELTA(fn.intensity(), intensity, 1e-6);
+    TS_ASSERT_DELTA(fn.intensity().result, intensity, 1e-6);
     TS_ASSERT_DELTA(fn.getParameter("Height"), 0.398942, 1e-6);
   }
 };

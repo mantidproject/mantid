@@ -110,7 +110,7 @@ public:
     lor.setHeight(2.0);
     lor.setCentre(3.0);
 
-    TS_ASSERT_DELTA(lor.intensity(), M_PI, 1e-10);
+    TS_ASSERT_DELTA(lor.intensity().result, M_PI, 1e-10);
   }
 
   void testIntensity_special_case() {
@@ -121,10 +121,10 @@ public:
     lor.setCentre(3.0);
     lor.setFwhm(1.0);
 
-    TS_ASSERT_DELTA(lor.intensity(), M_PI, 1e-10);
+    TS_ASSERT_DELTA(lor.intensity().result, M_PI, 1e-10);
     TS_ASSERT_THROWS_NOTHING(lor.setIntensity(2.0));
 
-    TS_ASSERT_DELTA(lor.intensity(), 2.0, 1e-10);
+    TS_ASSERT_DELTA(lor.intensity().result, 2.0, 1e-10);
     TS_ASSERT_EQUALS(lor.fwhm(), 1.0);
   }
 

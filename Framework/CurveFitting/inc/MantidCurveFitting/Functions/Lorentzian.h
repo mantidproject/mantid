@@ -36,7 +36,7 @@ public:
   double centre() const override { return getParameter("PeakCentre"); }
   double height() const override;
   double fwhm() const override { return getParameter("FWHM"); }
-  double intensity() const override { return getParameter("Amplitude"); }
+  API::IntegrationResult intensity() const override;
   void setCentre(const double c) override { setParameter("PeakCentre", c); }
   void setHeight(const double h) override;
   void setFwhm(const double w) override;

@@ -44,7 +44,7 @@ void PeakParameterFunction::function1D(double *out, const double *xValues, const
   out[0] = m_peakFunction->centre();
   out[1] = m_peakFunction->height();
   out[2] = m_peakFunction->fwhm();
-  out[3] = m_peakFunction->intensity();
+  out[3] = m_peakFunction->intensity().result;
 }
 
 /// Uses numerical derivatives to calculate Jacobian of the function.

@@ -47,7 +47,7 @@ public:
   void setHeight(const double h) override;
   double fwhm() const override;
   void setFwhm(const double w) override;
-  double intensity() const override { return getParameter("I"); }
+  API::IntegrationResult intensity() const override;
   void setIntensity(const double newIntensity) override { setParameter("I", newIntensity); }
   std::string getWidthParameterName() const override { return "S"; }
 

@@ -49,7 +49,7 @@ public:
     gaussian.initialize();
     gaussian.setFwhm(0.5);
     gaussian.setHeight(2.0);
-    double intensity = gaussian.intensity();
+    double intensity = gaussian.intensity().result;
 
     PseudoVoigt pv;
     pv.initialize();
@@ -58,7 +58,7 @@ public:
     pv.setParameter("Mixing", 1.);
     pv.setFwhm(0.5);
     pv.setHeight(2.0);
-    double pv_intensity = pv.intensity();
+    double pv_intensity = pv.intensity().result;
     TS_ASSERT_DELTA(intensity, pv_intensity, 1.E-4);
 
     // change mixing to Lorentzian
@@ -69,7 +69,7 @@ public:
     double lr_height = lr.height();
 
     pv.setHeight(lr_height);
-    pv.setIntensity(lr.intensity());
+    pv.setIntensity(lr.intensity().result);
     double lr_mixing = pv.getParameter("Mixing");
     TS_ASSERT_DELTA(lr_mixing, 0., 1E-5);
 
@@ -159,7 +159,7 @@ public:
 
     TS_ASSERT_DELTA(pv->centre(), center, 1.E-10);
     TS_ASSERT_DELTA(pv->fwhm(), fwhm, 1.E-10);
-    TS_ASSERT_DELTA(pv->intensity(), intensity, 1.E-10);
+    TS_ASSERT_DELTA(pv->intensity().result, intensity, 1.E-10);
     TS_ASSERT_DELTA(pv->getParameter("Mixing"), mixing, 1.E-10);
 
     // check each data point

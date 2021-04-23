@@ -142,7 +142,7 @@ private:
     std::vector<double> intensities;
 
     for (const auto &peak : peaks) {
-      intensities.emplace_back(peak->intensity());
+      intensities.emplace_back(peak->intensity().result);
     }
 
     return intensities;

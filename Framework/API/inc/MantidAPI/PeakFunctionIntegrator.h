@@ -24,7 +24,7 @@ namespace API {
     @author Michael Wedel, Paul Scherrer Institut - SINQ
     @date 24/04/2014
 */
-
+/*
 struct MANTID_API_DLL IntegrationResult {
   double result;
   double error;
@@ -33,6 +33,7 @@ struct MANTID_API_DLL IntegrationResult {
   int errorCode;
   bool success;
 };
+*/
 
 class MANTID_API_DLL PeakFunctionIntegrator {
 public:

@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionWithLocation.h"
+#include "MantidAPI/IntegrationResult.h"
 
 namespace Mantid {
 namespace API {
@@ -33,7 +34,7 @@ public:
   virtual void setFwhm(const double w) = 0;
 
   /// Returns the integral intensity of the peak
-  virtual double intensity() const;
+  virtual IntegrationResult intensity() const;
 
   /// Sets the integral intensity of the peak
   virtual void setIntensity(const double newIntensity);
