@@ -218,4 +218,6 @@ class SuperplotModel(QObject):
         Args:
             wsName (str): name of the workspace
         """
+        if wsName not in self._workspaces:
+            return
         self.workspaceReplaced.emit(wsName)
