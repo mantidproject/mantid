@@ -219,6 +219,8 @@ void IntegratePeaksMD2::init() {
   setPropertyGroup("UseCentroid", ellip_grp);
   setPropertyGroup("MaxIterations", ellip_grp);
 
+  setPropertyGroup("MaskEdgeTubes", general_grp);
+
   // SetValue when another property value changes
   setPropertySettings(
       "Ellipsoid", std::make_unique<SetValueWhenProperty>("Cylinder", [](std::string ellipsoid, std::string cylinder) {
