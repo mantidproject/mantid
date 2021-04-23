@@ -28,21 +28,20 @@ GET_POINTER_SPECIALIZATION(MeshObject)
 
 boost::python::object wrapMeshWithNDArray(MeshObject &self) {
   // PyArray_SimpleNewFromData doesn't interact well with smart pointers so use raw pointer
-  auto *meshCoords = new std::vector<double>;
   auto vertices = self.getV3Ds();
   auto triangles = self.getTriangles();
   size_t numberTriangles = triangles.size() / 3;
   npy_intp dims[3] = {static_cast<int>(numberTriangles), 3, 3};
+  auto *meshCoords = new double[dims[0] * dims[1] * dims[2]];
   for (size_t iTriangle = 0; iTriangle < numberTriangles; ++iTriangle) {
-    for (int corner = 0; corner < 3; corner++) {
+    for (size_t corner = 0; corner < 3; corner++) {
       auto coords = std::vector<double>(vertices[triangles[(3 * iTriangle) + corner]]);
-      for (double coord : coords) {
-        meshCoords->push_back(coord);
+      for (size_t xyz = 0; xyz < 3; xyz++) {
+        meshCoords[iTriangle * 3 * 3 + corner * 3 + xyz] = coords[xyz];
       } // for each coordinate of that corner
     }   // for each corner of the triangle
   }     // for each triangle
-  PyObject *ndarray =
-      Impl::wrapWithNDArray(meshCoords->data(), 3, dims, NumpyWrapMode::ReadOnly, OwnershipMode::Python);
+  PyObject *ndarray = Impl::wrapWithNDArray(meshCoords, 3, dims, NumpyWrapMode::ReadOnly, OwnershipMode::Python);
 
   return boost::python::object(handle<>(ndarray));
 }

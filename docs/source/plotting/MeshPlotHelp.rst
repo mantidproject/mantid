@@ -68,13 +68,13 @@ Basic example of plotting a general Poly3DCollection `Polygon <https://matplotli
     axes.add_collection3d(mesh_polygon)
 
     # Auto scale to the mesh size
-    axes_lims = mesh.flatten()[0:9]
+    axes_lims = mesh.flatten()
     axes.auto_scale_xyz(axes_lims, axes_lims, axes_lims)
 
     axes.set_title('Sample Shape: Tube')
-    axes.set_xlabel('X')
-    axes.set_ylabel('Y')
-    axes.set_zlabel('Z')
+    axes.set_xlabel('X / m')
+    axes.set_ylabel('Y / m')
+    axes.set_zlabel('Z / m')
 
     plt.show()
 
