@@ -10,5 +10,5 @@ struct MANTID_API_DLL IntegrationResult {
   bool success;
 };
 
-}
-}
+} // namespace API
+} // namespace Mantid

@@ -40,12 +40,11 @@ double Lorentzian::height() const {
   }
 }
 
-API::IntegrationResult Lorentzian::intensity() const
-{ 
+API::IntegrationResult Lorentzian::intensity() const {
   API::IntegrationResult evaluated_integral;
 
   evaluated_integral.result = getParameter("Amplitude");
-  evaluated_integral.error = getError( "Amplitude" );
+  evaluated_integral.error = getError("Amplitude");
 
   return evaluated_integral;
 }

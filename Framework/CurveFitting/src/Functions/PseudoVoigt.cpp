@@ -94,8 +94,7 @@ void PseudoVoigt::init() {
   // 0: mixing, 1: intensity, 2: fwhm, 3: height
 }
 
-API::IntegrationResult PseudoVoigt::intensity() const
-{ 
+API::IntegrationResult PseudoVoigt::intensity() const {
   API::IntegrationResult evaluated_integral;
 
   evaluated_integral.result = getParameter("Intensity");

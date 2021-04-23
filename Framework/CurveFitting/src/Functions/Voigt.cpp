@@ -206,20 +206,17 @@ API::IntegrationResult Voigt::intensity() const {
     evaluated_integral.error = 0.0;
   }
 
-  else
-  {
-    double lorentz_amp = getParameter( LORENTZ_AMP );
-    double lorentz_amp_error = getError( LORENTZ_AMP );
+  else {
+    double lorentz_amp = getParameter(LORENTZ_AMP);
+    double lorentz_amp_error = getError(LORENTZ_AMP);
     double lorentz_fwhm = getParameter(LORENTZ_FWHM);
     double lorentz_fwhm_error = getError(LORENTZ_FWHM);
 
-    evaluated_integral.result =
-    M_PI * lorentz_amp * lorentz_fwhm / 2.0;
+    evaluated_integral.result = M_PI * lorentz_amp * lorentz_fwhm / 2.0;
 
-    evaluated_integral.error = 
-    evaluated_integral.result *
-    std::sqrt( lorentz_amp_error * lorentz_amp_error / lorentz_amp / lorentz_amp 
-               + lorentz_fwhm_error * lorentz_fwhm_error / lorentz_fwhm / lorentz_fwhm );
+    evaluated_integral.error =
+        evaluated_integral.result * std::sqrt(lorentz_amp_error * lorentz_amp_error / lorentz_amp / lorentz_amp +
+                                              lorentz_fwhm_error * lorentz_fwhm_error / lorentz_fwhm / lorentz_fwhm);
   }
 
   return evaluated_integral;

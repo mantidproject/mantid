@@ -86,11 +86,11 @@ API::IntegrationResult Gaussian::intensity() const {
 
   double sigma = getParameter("Sigma");
 
-  double sigma_error = getError( "Sigma" );
+  double sigma_error = getError("Sigma");
 
   double height = getParameter("Height");
 
-  double height_error = getError( "Height" );
+  double height_error = getError("Height");
 
   if (sigma == 0.0) {
 
@@ -101,8 +101,7 @@ API::IntegrationResult Gaussian::intensity() const {
       evaluated_integral.success = true;
     }
 
-    else
-    {
+    else {
       evaluated_integral.result = NAN;
       evaluated_integral.error = NAN;
       evaluated_integral.success = false;
@@ -110,13 +109,10 @@ API::IntegrationResult Gaussian::intensity() const {
 
   } else {
 
-    evaluated_integral.result = 
-    height * sigma * sqrt( 2.0 * M_PI );
+    evaluated_integral.result = height * sigma * sqrt(2.0 * M_PI);
 
-    evaluated_integral.error =
-    evaluated_integral.result * 
-    sqrt( height_error * height_error / height / height 
-          + sigma_error * sigma_error / sigma / sigma );
+    evaluated_integral.error = evaluated_integral.result * sqrt(height_error * height_error / height / height +
+                                                                sigma_error * sigma_error / sigma / sigma);
 
     evaluated_integral.success = true;
   }
