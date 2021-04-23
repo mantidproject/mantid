@@ -169,13 +169,25 @@ void IPeakFunction::setPeakRadius(int r) const {
   }
 }
 
+IntegrationResult IPeakFunction::integrate() const {
+  IntegrationResult result = NULL;
+
+  if (integrationResult) {
+    result = *integrationResult;
+  } else {
+    auto interval = getDomainInterval();
+
+    PeakFunctionIntegrator integrator;
+    result = integrator.integrate(*this, interval.first, interval.second);
+    integrationResult = result;
+  }
+  return result;
+}
+
 /// Returns the integral intensity of the peak function, using the peak radius
 /// to determine integration borders.
 double IPeakFunction::intensity() const {
-  auto interval = getDomainInterval();
-
-  PeakFunctionIntegrator integrator;
-  IntegrationResult result = integrator.integrate(*this, interval.first, interval.second);
+  IntegrationResult result = integrate();
 
   if (!result.success) {
     return 0.0;
@@ -185,7 +197,15 @@ double IPeakFunction::intensity() const {
 }
 
 /// Returns the uncertainty associated to the integral intensity of the peak function
-double IPeakFunction::intensityError() const { return NAN; }
+double IPeakFunction::intensityError() const {
+  IntegrationResult result = integrate();
+  // TODO: dont forget to remove this from the cache in the setParameter function
+  if (!result.success) {
+    return 0.0;
+  }
+
+  return result.error;
+}
 
 /// Sets the integral intensity of the peak by adjusting the height.
 void IPeakFunction::setIntensity(const double newIntensity) {
