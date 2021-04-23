@@ -294,6 +294,7 @@ class GroupingTabPresenter(object):
         if self._model.is_data_loaded() and self.period_info_widget.is_empty():
             self._add_period_info_to_widget()
         self.period_info_widget.show()
+        self.period_info_widget.raise_()
 
     def _add_period_info_to_widget(self):
         runs = self._model._data.current_runs
@@ -325,6 +326,9 @@ class GroupingTabPresenter(object):
         for i in range(count):
             self.period_info_widget.add_period_to_table(names[i], types[i], frames[i], total_frames[i],
                                                         counts[self.period_info_widget.daq_count], tags[i])
+
+    def closePeriodInfoWidget(self):
+        self.period_info_widget.close()
 
     def _fix_up_period_info_lists(self, info_list):
         # First find number of periods
