@@ -45,6 +45,8 @@ public:
   const std::string &name() const { return m_name; }
   /// Parameter name
   const char *nameAsCString() const { return m_name.c_str(); }
+  /// Parameter visibility in InstrumentViewer
+  const bool &visible() const { return m_visible; }
 
   /// type-independent clone method;
   virtual Parameter *clone() const = 0;
@@ -64,6 +66,8 @@ public:
   virtual const std::string &getDescription() const { return m_description; }
   /// get short description
   virtual std::string getShortDescription() const;
+  /// set visibility:
+  virtual void setVisible(const bool &visible) { m_visible = visible; }
   /// Equality operator
   bool operator==(const Parameter &rhs) const {
     if (this->name() == rhs.name() && this->type() == rhs.type() && this->asString() == rhs.asString())
@@ -83,7 +87,7 @@ protected:
 
   friend class ParameterFactory;
   /// Constructor
-  Parameter() : m_type(""), m_name(""), m_str_value(""), m_description("") {}
+  Parameter() : m_type(""), m_name(""), m_str_value(""), m_visible(true), m_description("") {}
 
 private:
   /// The type of the property
@@ -91,6 +95,7 @@ private:
   /// The name of the property
   std::string m_name;
   std::string m_str_value; ///< Parameter value as a string
+  bool m_visible;          /// whether the parameter should be visible in InstrumentViewer
   /// parameter's description -- string containing the description
   /// of this parameter
   std::string m_description;
@@ -119,7 +124,6 @@ private:
   friend class Parameter;
   /// Set the value of the parameter
   void setValue(const Type &value);
-  /// Set the value of the parameter
   ParameterType &operator=(const Type &value);
 
 private:
@@ -174,7 +178,7 @@ template <> inline void ParameterType<std::string>::fromString(const std::string
 
 /** Set the value of the parameter via the assignment operator
  * @tparam The parameter type
- * @param value :: The vlue of the parameter
+ * @param value :: The value of the parameter
  */
 template <class Type> void ParameterType<Type>::setValue(const Type &value) { m_value = value; }
 
