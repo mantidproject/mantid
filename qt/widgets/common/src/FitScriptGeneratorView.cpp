@@ -5,6 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitScriptGeneratorView.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorDataTable.h"
 #include "MantidQtWidgets/Common/FittingGlobals.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h"
@@ -12,16 +14,22 @@
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/ConfigService.h"
 
 #include <algorithm>
 #include <iterator>
 
 #include <QApplication>
 #include <QClipboard>
+#include <QFileDialog>
 #include <QMessageBox>
+
+using namespace Mantid::Kernel;
+using namespace MantidQt::API;
 
 namespace {
 using MantidQt::MantidWidgets::WorkspaceIndex;
+
 std::vector<WorkspaceIndex> convertToWorkspaceIndex(std::vector<int> const &indices) {
   std::vector<WorkspaceIndex> workspaceIndices;
   workspaceIndices.reserve(indices.size());
@@ -32,20 +40,45 @@ std::vector<WorkspaceIndex> convertToWorkspaceIndex(std::vector<int> const &indi
 
 std::vector<std::string> convertToStdVector(QStringList const &qList) {
   std::vector<std::string> vec;
-  vec.reserve(qList.size());
+  vec.reserve(static_cast<std::size_t>(qList.size()));
   std::transform(qList.cbegin(), qList.cend(), std::back_inserter(vec),
                  [](QString const &element) { return element.toStdString(); });
   return vec;
 }
 
-QStringList convertToQStringList(std::vector<MantidQt::MantidWidgets::GlobalParameter> const &vec) {
+template <typename T> std::vector<T> convertQListToStdVector(QList<T> const &qList) {
+  std::vector<T> vec;
+  vec.reserve(static_cast<std::size_t>(qList.size()));
+  std::transform(qList.cbegin(), qList.cend(), std::back_inserter(vec), [](T const &element) { return element; });
+  return vec;
+}
+
+QString toQString(std::string const &str) { return QString::fromStdString(str); }
+
+QString globalToQString(MantidQt::MantidWidgets::GlobalParameter const &global) {
+  return toQString(global.m_parameter);
+}
+
+template <typename Function, typename T>
+QStringList convertToQStringList(Function const &func, std::vector<T> const &vec) {
   QStringList qList;
   qList.reserve(static_cast<int>(vec.size()));
-  std::transform(vec.cbegin(), vec.cend(), std::back_inserter(qList),
-                 [](MantidQt::MantidWidgets::GlobalParameter const &element) {
-                   return QString::fromStdString(element.m_parameter);
-                 });
+  std::transform(vec.cbegin(), vec.cend(), std::back_inserter(qList), func);
   return qList;
+}
+
+template <typename T> QList<T> convertToQList(std::vector<T> const &vec) {
+  QList<T> qList;
+  qList.reserve(static_cast<int>(vec.size()));
+  std::transform(vec.cbegin(), vec.cend(), std::back_inserter(qList), [](T const &element) { return element; });
+  return qList;
+}
+
+QString getDefaultScriptDirectory() {
+  auto const previousDirectory = AlgorithmInputHistory::Instance().getPreviousDirectory();
+  if (previousDirectory.isEmpty())
+    return QString::fromStdString(ConfigService::Instance().getString("pythonscripts.directory"));
+  return previousDirectory;
 }
 
 } // namespace
@@ -61,7 +94,7 @@ FitScriptGeneratorView::FitScriptGeneratorView(QWidget *parent, FittingMode fitt
     : IFitScriptGeneratorView(parent), m_presenter(), m_dialog(std::make_unique<AddWorkspaceDialog>(this)),
       m_dataTable(std::make_unique<FitScriptGeneratorDataTable>()),
       m_functionTreeView(std::make_unique<FunctionTreeView>(nullptr, true)),
-      m_fitOptionsBrowser(std::make_unique<BasicFitOptionsBrowser>(nullptr)) {
+      m_fitOptionsBrowser(std::make_unique<BasicFitOptionsBrowser>(nullptr)), m_editLocalParameterDialog(nullptr) {
   m_ui.setupUi(this);
 
   m_ui.fDataTable->layout()->addWidget(m_dataTable.get());
@@ -82,8 +115,8 @@ FitScriptGeneratorView::~FitScriptGeneratorView() {
 }
 
 void FitScriptGeneratorView::connectUiSignals() {
-  connect(m_ui.pbRemove, SIGNAL(clicked()), this, SLOT(onRemoveClicked()));
-  connect(m_ui.pbAddWorkspace, SIGNAL(clicked()), this, SLOT(onAddWorkspaceClicked()));
+  connect(m_ui.pbRemoveDomain, SIGNAL(clicked()), this, SLOT(onRemoveDomainClicked()));
+  connect(m_ui.pbAddDomain, SIGNAL(clicked()), this, SLOT(onAddDomainClicked()));
   connect(m_dataTable.get(), SIGNAL(cellChanged(int, int)), this, SLOT(onCellChanged(int, int)));
   connect(m_dataTable.get(), SIGNAL(itemSelectionChanged()), this, SLOT(onItemSelected()));
 
@@ -107,9 +140,14 @@ void FitScriptGeneratorView::connectUiSignals() {
           SLOT(onGlobalParametersChanged(QStringList const &)));
   connect(m_functionTreeView.get(), SIGNAL(copyToClipboardRequest()), this, SLOT(onCopyFunctionToClipboard()));
   connect(m_functionTreeView.get(), SIGNAL(functionHelpRequest()), this, SLOT(onFunctionHelpRequested()));
+  connect(m_functionTreeView.get(), SIGNAL(localParameterButtonClicked(QString const &)), this,
+          SLOT(onEditLocalParameterClicked(QString const &)));
 
   connect(m_fitOptionsBrowser.get(), SIGNAL(fittingModeChanged(FittingMode)), this,
           SLOT(onFittingModeChanged(FittingMode)));
+
+  connect(m_ui.pbGenerateScriptToFile, SIGNAL(clicked()), this, SLOT(onGenerateScriptToFileClicked()));
+  connect(m_ui.pbGenerateScriptToClipboard, SIGNAL(clicked()), this, SLOT(onGenerateScriptToClipboardClicked()));
 
   /// Disconnected because it causes a crash when selecting a table row while
   /// editing a parameters value. This is because selecting a different row will
@@ -134,9 +172,9 @@ void FitScriptGeneratorView::subscribePresenter(IFitScriptGeneratorPresenter *pr
   m_presenter->notifyPresenter(ViewEvent::FittingModeChanged, m_fitOptionsBrowser->getFittingMode());
 }
 
-void FitScriptGeneratorView::onRemoveClicked() { m_presenter->notifyPresenter(ViewEvent::RemoveClicked); }
+void FitScriptGeneratorView::onRemoveDomainClicked() { m_presenter->notifyPresenter(ViewEvent::RemoveDomainClicked); }
 
-void FitScriptGeneratorView::onAddWorkspaceClicked() { m_presenter->notifyPresenter(ViewEvent::AddClicked); }
+void FitScriptGeneratorView::onAddDomainClicked() { m_presenter->notifyPresenter(ViewEvent::AddDomainClicked); }
 
 void FitScriptGeneratorView::onCellChanged(int row, int column) {
   UNUSED_ARG(row);
@@ -189,7 +227,7 @@ void FitScriptGeneratorView::onGlobalParametersChanged(QStringList const &global
 
 void FitScriptGeneratorView::onCopyFunctionToClipboard() {
   if (auto const function = m_functionTreeView->getSelectedFunction())
-    QApplication::clipboard()->setText(QString::fromStdString(function->asString()));
+    saveTextToClipboard(function->asString());
 }
 
 void FitScriptGeneratorView::onFunctionHelpRequested() {
@@ -199,6 +237,25 @@ void FitScriptGeneratorView::onFunctionHelpRequested() {
 
 void FitScriptGeneratorView::onFittingModeChanged(FittingMode fittingMode) {
   m_presenter->notifyPresenter(ViewEvent::FittingModeChanged, fittingMode);
+}
+
+void FitScriptGeneratorView::onEditLocalParameterClicked(QString const &parameter) {
+  m_presenter->notifyPresenter(ViewEvent::EditLocalParameterClicked, parameter.toStdString());
+}
+
+void FitScriptGeneratorView::onEditLocalParameterFinished(int result) {
+  if (result == QDialog::Accepted)
+    m_presenter->notifyPresenter(ViewEvent::EditLocalParameterFinished);
+
+  m_editLocalParameterDialog = nullptr;
+}
+
+void FitScriptGeneratorView::onGenerateScriptToFileClicked() {
+  m_presenter->notifyPresenter(ViewEvent::GenerateScriptToFileClicked);
+}
+
+void FitScriptGeneratorView::onGenerateScriptToClipboardClicked() {
+  m_presenter->notifyPresenter(ViewEvent::GenerateScriptToClipboardClicked);
 }
 
 std::string FitScriptGeneratorView::workspaceName(FitDomainIndex index) const {
@@ -251,6 +308,45 @@ std::vector<WorkspaceIndex> FitScriptGeneratorView::getDialogWorkspaceIndices() 
   return convertToWorkspaceIndex(m_dialog->workspaceIndices());
 }
 
+void FitScriptGeneratorView::openEditLocalParameterDialog(
+    std::string const &parameter, std::vector<std::string> const &workspaceNames,
+    std::vector<std::string> const &domainNames, std::vector<double> const &values, std::vector<bool> const &fixes,
+    std::vector<std::string> const &ties, std::vector<std::string> const &constraints) {
+  m_editLocalParameterDialog = new EditLocalParameterDialog(
+      this, QString::fromStdString(parameter), convertToQStringList(toQString, workspaceNames),
+      convertToQStringList(toQString, domainNames), convertToQList(values), convertToQList(fixes),
+      convertToQStringList(toQString, ties), convertToQStringList(toQString, constraints));
+
+  connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this, SLOT(onEditLocalParameterFinished(int)));
+
+  m_editLocalParameterDialog->open();
+}
+
+std::tuple<std::string, std::vector<double>, std::vector<bool>, std::vector<std::string>, std::vector<std::string>>
+FitScriptGeneratorView::getEditLocalParameterResults() const {
+  return {m_editLocalParameterDialog->getParameterName().toStdString(),
+          convertQListToStdVector(m_editLocalParameterDialog->getValues()),
+          convertQListToStdVector(m_editLocalParameterDialog->getFixes()),
+          convertToStdVector(m_editLocalParameterDialog->getTies()),
+          convertToStdVector(m_editLocalParameterDialog->getConstraints())};
+}
+
+std::tuple<std::string, std::string, std::string, std::string> FitScriptGeneratorView::fitOptions() const {
+  return {m_fitOptionsBrowser->getProperty("Max Iterations"), m_fitOptionsBrowser->getProperty("Minimizer"),
+          m_fitOptionsBrowser->getProperty("Cost Function"), m_fitOptionsBrowser->getProperty("Evaluation Type")};
+}
+
+std::string FitScriptGeneratorView::filepath() const {
+  auto const defaultDirectory = getDefaultScriptDirectory();
+  auto const filePath = QFileDialog::getSaveFileName(this->parentWidget(), tr("Save Script As "), defaultDirectory,
+                                                     tr("Script files (*.py)"));
+
+  if (!filePath.isEmpty())
+    API::AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(filePath).absoluteDir().path());
+
+  return filePath.toStdString();
+}
+
 void FitScriptGeneratorView::resetSelection() { m_dataTable->resetSelection(); }
 
 bool FitScriptGeneratorView::applyFunctionChangesToAll() const {
@@ -281,7 +377,16 @@ void FitScriptGeneratorView::setGlobalTies(std::vector<GlobalTie> const &globalT
 }
 
 void FitScriptGeneratorView::setGlobalParameters(std::vector<GlobalParameter> const &globalParameters) {
-  m_functionTreeView->setGlobalParameters(convertToQStringList(globalParameters));
+  m_functionTreeView->setGlobalParameters(convertToQStringList(globalToQString, globalParameters));
+}
+
+void FitScriptGeneratorView::setSuccessText(std::string const &text) {
+  m_ui.lbMessage->setText(QString::fromStdString(text));
+}
+
+void FitScriptGeneratorView::saveTextToClipboard(std::string const &text) const {
+  if (QClipboard *clipboard = QApplication::clipboard())
+    clipboard->setText(QString::fromStdString(text));
 }
 
 void FitScriptGeneratorView::displayWarning(std::string const &message) {

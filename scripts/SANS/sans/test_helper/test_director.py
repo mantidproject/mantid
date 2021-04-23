@@ -108,9 +108,9 @@ class TestDirector(object):
         # Build the SANSStateWavelength
         if self.wavelength_state is None:
             wavelength_builder = get_wavelength_builder(self.data_state)
-            wavelength_builder.set_wavelength_low([1.0])
-            wavelength_builder.set_wavelength_high([10.0])
-            wavelength_builder.set_wavelength_step(2.0)
+            wavelength_range = (1.0, 10.0)
+            wavelength_builder.state.wavelength_interval.wavelength_full_range = wavelength_range
+            wavelength_builder.state.wavelength_interval.selected_ranges = [wavelength_range]
             wavelength_builder.set_wavelength_step_type(RangeStepType.LIN)
             wavelength_builder.set_rebin_type(RebinType.REBIN)
             self.wavelength_state = wavelength_builder.build()
@@ -138,9 +138,10 @@ class TestDirector(object):
         if self.adjustment_state is None:
             # NormalizeToMonitor
             normalize_to_monitor_builder = get_normalize_to_monitor_builder(self.data_state)
-            normalize_to_monitor_builder.set_wavelength_low([1.0])
-            normalize_to_monitor_builder.set_wavelength_high([10.0])
-            normalize_to_monitor_builder.set_wavelength_step(2.0)
+            wavelength_range = (1.0, 10.0)
+            normalize_to_monitor_builder.state.wavelength_interval.wavelength_full_range = wavelength_range
+            normalize_to_monitor_builder.state.wavelength_interval.selected_ranges = [wavelength_range]
+            normalize_to_monitor_builder.state.wavelength_interval.wavelength_step = 2.0
             normalize_to_monitor_builder.set_wavelength_step_type(RangeStepType.LIN)
             normalize_to_monitor_builder.set_rebin_type(RebinType.REBIN)
             normalize_to_monitor_builder.set_background_TOF_general_start(1000.)
@@ -152,9 +153,10 @@ class TestDirector(object):
             calculate_transmission_obj = get_calculate_transmission(instrument=instrument)
             calculate_transmission_obj.transmission_monitor = 3
             calculate_transmission_obj.incident_monitor = 2
-            calculate_transmission_obj.wavelength_low = [1.0]
-            calculate_transmission_obj.wavelength_high = [10.0]
-            calculate_transmission_obj.wavelength_step = 2.0
+            wavelength_range = (1.0, 10.0)
+            calculate_transmission_obj.wavelength_interval.wavelength_full_range = wavelength_range
+            calculate_transmission_obj.wavelength_interval.selected_ranges = [wavelength_range]
+            calculate_transmission_obj.wavelength_interval.wavelength_step = 2.0
             calculate_transmission_obj.wavelength_step_type = RangeStepType.LIN
             calculate_transmission_obj.rebin_type = RebinType.REBIN
             calculate_transmission_obj.background_TOF_general_start = 1000.
@@ -171,9 +173,10 @@ class TestDirector(object):
 
             # Wavelength and pixel adjustment
             wavelength_and_pixel_builder = get_wavelength_and_pixel_adjustment_builder(self.data_state)
-            wavelength_and_pixel_builder.set_wavelength_low([1.0])
-            wavelength_and_pixel_builder.set_wavelength_high([10.0])
-            wavelength_and_pixel_builder.set_wavelength_step(2.0)
+            wavelength_range = (1.0, 10.0)
+            wavelength_and_pixel_builder.state.wavelength_interval.wavelength_full_range = wavelength_range
+            wavelength_and_pixel_builder.state.wavelength_interval.selected_ranges = [wavelength_range]
+            wavelength_and_pixel_builder.state.wavelength_interval.wavelength_step = 2.0
             wavelength_and_pixel_builder.set_wavelength_step_type(RangeStepType.LIN)
             wavelength_and_pixel = wavelength_and_pixel_builder.build()
 

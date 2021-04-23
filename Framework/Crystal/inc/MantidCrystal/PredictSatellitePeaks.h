@@ -6,9 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "IPeak.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidCrystal/DllConfig.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/HKLFilterWavelength.h"
 #include "MantidKernel/System.h"
@@ -41,10 +43,23 @@ public:
   /// Algorithm's category for identification
   const std::string category() const override { return "Crystal\\Peaks"; }
 
+  /* Determine which type of workspace we're dealing with */
+  enum class workspace_type_enum { regular_peaks, lean_elastic_peaks, invalid };
+
 private:
+  workspace_type_enum determine_workspace_type(API::IPeaksWorkspace_sptr const &iPeaksWorkspace) const;
+
+  std::shared_ptr<Geometry::IPeak> createPeakForOutputWorkspace(Kernel::Matrix<double> const &goniometer,
+                                                                Kernel::V3D const &satellite_hkl);
+
+  void addPeakToOutputWorkspace(std::shared_ptr<Geometry::IPeak> iPeak,
+                                Kernel::Matrix<double> const &peak_goniometer_matrix, Kernel::V3D const &hkl,
+                                Kernel::V3D const &satelliteHKL, int const RunNumber,
+                                std::vector<std::vector<int>> &AlreadyDonePeaks, Kernel::V3D const &mnp);
+
   const size_t MAX_NUMBER_HKLS = 10000000000;
   double m_qConventionFactor;
-  DataObjects::PeaksWorkspace_sptr Peaks;
+  API::IPeaksWorkspace_sptr Peaks;
   API::IPeaksWorkspace_sptr outPeaks;
   /// Initialise the properties
   void init() override;

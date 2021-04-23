@@ -12,9 +12,11 @@ from sans.algorithm_detail.calculate_transmission_helper import (get_detector_id
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (RangeStepType, FitType, DataType)
 from sans.common.general_functions import create_unmanaged_algorithm
+from sans.state.StateObjects.wavelength_interval import WavRange
 
 
-def calculate_transmission(transmission_ws, direct_ws, state_adjustment_calculate_transmission, data_type_str):
+def calculate_transmission(transmission_ws, direct_ws, state_adjustment_calculate_transmission, data_type_str,
+                           wav_range):
     """
     Calculates the transmission for a SANS reduction.
     :param transmission_ws: The transmission workspace in time-of-light units.
@@ -54,16 +56,16 @@ def calculate_transmission(transmission_ws, direct_ws, state_adjustment_calculat
     # 2. Clean transmission data
 
     data_type = DataType(data_type_str)
-    transmission_ws = _get_corrected_wavelength_workspace(transmission_ws, all_detector_ids,
+    transmission_ws = _get_corrected_wavelength_workspace(transmission_ws, wav_range, all_detector_ids,
                                                           calculate_transmission_state, data_type=data_type)
-    direct_ws = _get_corrected_wavelength_workspace(direct_ws, all_detector_ids,
+    direct_ws = _get_corrected_wavelength_workspace(direct_ws, wav_range, all_detector_ids,
                                                     calculate_transmission_state, data_type=data_type)
 
     # 3. Fit
     output_workspace, unfitted_transmission_workspace = \
         _perform_fit(transmission_ws, direct_ws, detector_ids_roi,
                      detector_id_transmission_monitor,
-                     detector_id_incident_monitor, calculate_transmission_state, data_type)
+                     detector_id_incident_monitor, calculate_transmission_state, data_type, wav_range)
 
     return output_workspace, unfitted_transmission_workspace
 
@@ -71,7 +73,7 @@ def calculate_transmission(transmission_ws, direct_ws, state_adjustment_calculat
 def _perform_fit(transmission_workspace, direct_workspace,
                  transmission_roi_detector_ids, transmission_monitor_detector_id,
                  incident_monitor_detector_id,
-                 calculate_transmission_state, data_type):
+                 calculate_transmission_state, data_type, wav_range: WavRange):
     """
     This performs the actual transmission calculation.
 
@@ -84,13 +86,11 @@ def _perform_fit(transmission_workspace, direct_workspace,
     :param data_type: the data type which is currently being investigated, ie if it is a sample or a can run.
     :return: a fitted workspace and an unfitted workspace
     """
-    wavelength_low = calculate_transmission_state.wavelength_low[0]
-    wavelength_high = calculate_transmission_state.wavelength_high[0]
-    wavelength_step = calculate_transmission_state.wavelength_step
+    wavelength_step = calculate_transmission_state.wavelength_interval.wavelength_step
     wavelength_step_type = calculate_transmission_state.wavelength_step_type_lin_log
     prefix = 1.0 if wavelength_step_type is RangeStepType.LIN else -1.0
     wavelength_step *= prefix
-    rebin_params = str(wavelength_low) + "," + str(wavelength_step) + "," + str(wavelength_high)
+    rebin_params = f"{wav_range[0]}, {wavelength_step}, {wav_range[1]}"
 
     trans_name = "CalculateTransmission"
     trans_options = {"SampleRunWorkspace": transmission_workspace,
@@ -174,11 +174,12 @@ def _get_detector_ids_for_transmission_calculation(transmission_workspace, calcu
     return detector_ids_roi, detector_id_transmission_monitor
 
 
-def _get_corrected_wavelength_workspace(workspace, detector_ids, calculate_transmission_state, data_type):
+def _get_corrected_wavelength_workspace(workspace, wav_range, detector_ids, calculate_transmission_state, data_type):
     """
     Performs a prompt peak correction, a background correction, converts to wavelength and rebins.
 
     :param workspace: the workspace which is being corrected.
+    :param wav_range: the wavelength corresponding to this run
     :param detector_ids: a list of relevant detector ids
     :param calculate_transmission_state: a SANSStateCalculateTransmission state
     :param data_type The component of the instrument which is to be reduced
@@ -249,12 +250,10 @@ def _get_corrected_wavelength_workspace(workspace, detector_ids, calculate_trans
         wavelength_high = calculate_transmission_state.wavelength_full_range_high
     else:
         fit_state = calculate_transmission_state.fit[data_type.value]
-        wavelength_low = fit_state.wavelength_low if fit_state.wavelength_low \
-            else calculate_transmission_state.wavelength_low[0]
-        wavelength_high = fit_state.wavelength_high if fit_state.wavelength_high \
-            else calculate_transmission_state.wavelength_high[0]
+        wavelength_low = fit_state.wavelength_low if fit_state.wavelength_low else wav_range[0]
+        wavelength_high = fit_state.wavelength_high if fit_state.wavelength_high else wav_range[1]
 
-    wavelength_step = calculate_transmission_state.wavelength_step
+    wavelength_step = calculate_transmission_state.wavelength_interval.wavelength_step
     rebin_type = calculate_transmission_state.rebin_type
     wavelength_step_type = calculate_transmission_state.wavelength_step_type_lin_log
 

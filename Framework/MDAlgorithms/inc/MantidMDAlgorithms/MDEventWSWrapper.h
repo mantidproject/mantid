@@ -54,8 +54,9 @@ public:
   API::IMDEventWorkspace_sptr createEmptyMDWS(const MDWSDescription &WSD);
   /// add the data to the internal workspace. The workspace has to exist and be
   /// initiated
-  void addMDData(std::vector<float> &sigErr, std::vector<uint16_t> &runIndex, std::vector<uint16_t> &goniometerIndex,
-                 std::vector<uint32_t> &detId, std::vector<coord_t> &Coord, size_t dataSize) const;
+  void addMDData(std::vector<float> &sigErr, std::vector<uint16_t> &expInfoIndex,
+                 std::vector<uint16_t> &goniometerIndex, std::vector<uint32_t> &detId, std::vector<coord_t> &Coord,
+                 size_t dataSize) const;
   /// releases the shared pointer to the MD workspace, stored by the class and
   /// makes the class instance undefined;
   void releaseWorkspace();
@@ -101,10 +102,10 @@ private:
   // internal function tempates to generate as function of dimensions and
   // assign to function pointers
   template <size_t nd>
-  void addMDDataND(float *sigErr, uint16_t *runIndex, uint16_t *goniometerIndex, uint32_t *detId, coord_t *Coord,
+  void addMDDataND(float *sigErr, uint16_t *expInfoIndex, uint16_t *goniometerIndex, uint32_t *detId, coord_t *Coord,
                    size_t dataSize) const;
   template <size_t nd>
-  void addAndTraceMDDataND(float *sig_err, uint16_t *run_index, uint16_t *goniometerIndex, uint32_t *det_id,
+  void addAndTraceMDDataND(float *sig_err, uint16_t *expInfoIndex, uint16_t *goniometerIndex, uint32_t *det_id,
                            coord_t *Coord, size_t data_size) const;
 
   template <size_t nd> void calcCentroidND();

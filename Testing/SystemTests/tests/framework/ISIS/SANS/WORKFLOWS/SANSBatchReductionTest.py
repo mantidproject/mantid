@@ -227,19 +227,11 @@ class SANSBatchReductionTest(unittest.TestCase):
         state.compatibility.use_compatibility_mode = True  # COMPATIBILITY BEGIN -- Remove when appropriate
         state.data = data_info
 
-        start = [1.0,2.0]
-        end = [2.0,3.0]
-        state.wavelength.wavelength_low = start
-        state.wavelength.wavelength_high = end
-
-        state.adjustment.normalize_to_monitor.wavelength_low = start
-        state.adjustment.normalize_to_monitor.wavelength_high = end
-
-        state.adjustment.calculate_transmission.wavelength_low = start
-        state.adjustment.calculate_transmission.wavelength_high = end
-
-        state.adjustment.wavelength_and_pixel_adjustment.wavelength_low = start
-        state.adjustment.wavelength_and_pixel_adjustment.wavelength_high = end
+        selected_range = [(1.0,2.0), (2.0, 3.0)]
+        state.wavelength.wavelength_interval.selected_ranges = selected_range
+        state.adjustment.normalize_to_monitor.wavelength_interval.selected_ranges = selected_range
+        state.adjustment.calculate_transmission.wavelength_interval.selected_ranges = selected_range
+        state.adjustment.wavelength_and_pixel_adjustment.wavelength_interval.selected_ranges = selected_range
 
         # Act
         states = [state]
@@ -282,19 +274,11 @@ class SANSBatchReductionTest(unittest.TestCase):
         state.slice.start_time = [1.0, 3.0]
         state.slice.end_time = [3.0, 5.0]
 
-        start = [1.0, 1.0]
-        end = [3.0, 2.0]
-        state.wavelength.wavelength_low = start
-        state.wavelength.wavelength_high = end
-
-        state.adjustment.normalize_to_monitor.wavelength_low = start
-        state.adjustment.normalize_to_monitor.wavelength_high = end
-
-        state.adjustment.calculate_transmission.wavelength_low = start
-        state.adjustment.calculate_transmission.wavelength_high = end
-
-        state.adjustment.wavelength_and_pixel_adjustment.wavelength_low = start
-        state.adjustment.wavelength_and_pixel_adjustment.wavelength_high = end
+        selected_range = [(1.0, 2.0), (1.0, 3.0)]
+        state.wavelength.wavelength_interval.selected_ranges = selected_range
+        state.adjustment.normalize_to_monitor.wavelength_interval.selected_ranges = selected_range
+        state.adjustment.calculate_transmission.wavelength_interval.selected_ranges = selected_range
+        state.adjustment.wavelength_and_pixel_adjustment.wavelength_interval.selected_ranges = selected_range
 
         # Act
         states = [state]

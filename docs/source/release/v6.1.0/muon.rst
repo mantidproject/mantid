@@ -37,6 +37,7 @@ Improvements
 ############
 - Exported workspaces now have history.
 - The interface saves previous settings if possible instead of resetting.
+- The interface can now load runs from different directories/cycles
 
 Bug fixes
 ##########

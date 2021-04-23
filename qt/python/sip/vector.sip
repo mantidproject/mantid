@@ -17,7 +17,7 @@
 %Include string.sip
 
 %ModuleCode
-#include "SIPVector.h"
+#include "vector.sip.h"
 %End
 
 template<TYPE>
@@ -30,7 +30,7 @@ template<TYPE>
 %ConvertFromTypeCode
   return vectorToPythonList(*sipCpp, [&](TYPE item) -> PyObject* {
     auto *heapCopy = new TYPE(item);
-    return sipConvertFromInstance(heapCopy, sipClass_TYPE, sipTransferObj);
+    return sipConvertFromType(heapCopy, sipType_TYPE, sipTransferObj);
   });
 %End
 
@@ -40,15 +40,15 @@ template<TYPE>
     return isIterable(sipPy);
   } else {
     auto cppValue = pythonListToVector<TYPE>(sipPy, [&](PyObject* pyItem) -> boost::optional<TYPE> {
-      if (!sipCanConvertToInstance(pyItem, sipClass_TYPE, SIP_NOT_NONE)) {
+      if (!sipCanConvertToType(pyItem, sipType_TYPE, SIP_NOT_NONE)) {
         PyErr_Format(PyExc_TypeError, "object in iterable cannot be converted to TYPE");
         return boost::none;
       } else {
         int state;
         auto* cppItemPtr = reinterpret_cast<TYPE*>(
-           sipConvertToInstance(pyItem, sipClass_TYPE, 0, SIP_NOT_NONE, &state, sipIsErr));
+           sipConvertToType(pyItem, sipType_TYPE, 0, SIP_NOT_NONE, &state, sipIsErr));
 
-        sipReleaseInstance(cppItemPtr, sipClass_TYPE, state);
+        sipReleaseType(cppItemPtr, sipType_TYPE, state);
         return asOptional(sipIsErr, cppItemPtr);
       }
     });
@@ -69,7 +69,7 @@ template<TYPE>
   return optionalToPyObject(*sipCpp, [&](std::vector<TYPE> const& vector) -> PyObject* {
     return vectorToPythonList(vector, [&](TYPE const& item) -> PyObject* {
       auto *heapCopy = new TYPE(item);
-      return sipConvertFromInstance(heapCopy, sipClass_TYPE, sipTransferObj);
+      return sipConvertFromType(heapCopy, sipType_TYPE, sipTransferObj);
     });
   });
 %End
@@ -81,15 +81,15 @@ template<TYPE>
     } else {
       auto cppValue = pythonObjectToOptional<std::vector<TYPE>>(sipPy, [&](PyObject* pythonList) -> boost::optional<std::vector<TYPE>> {
         return pythonListToVector<TYPE>(pythonList, [&](PyObject* pyItem) -> boost::optional<TYPE> {
-          if (!sipCanConvertToInstance(pyItem, sipClass_TYPE, SIP_NOT_NONE)) {
+          if (!sipCanConvertToType(pyItem, sipType_TYPE, SIP_NOT_NONE)) {
             PyErr_Format(PyExc_TypeError, "object in iterable cannot be converted to TYPE");
             return boost::none;
           } else {
             int state;
             auto* cppItemPtr = reinterpret_cast<TYPE*>(
-               sipConvertToInstance(pyItem, sipClass_TYPE, 0, SIP_NOT_NONE, &state, sipIsErr));
+               sipConvertToType(pyItem, sipType_TYPE, 0, SIP_NOT_NONE, &state, sipIsErr));
 
-            sipReleaseInstance(cppItemPtr, sipClass_TYPE, state);
+            sipReleaseType(cppItemPtr, sipType_TYPE, state);
             return asOptional(sipIsErr, cppItemPtr);
           }
         });
@@ -246,7 +246,7 @@ template<TYPE>
   return vectorToPythonList(*sipCpp, [&](std::vector<TYPE> const& item) -> PyObject* {
     return vectorToPythonList(item, [&](TYPE const& item) -> PyObject* {
       auto *heapCopy = new TYPE(item);
-      return sipConvertFromInstance(heapCopy, sipClass_TYPE, sipTransferObj);
+      return sipConvertFromType(heapCopy, sipType_TYPE, sipTransferObj);
     });
   });
 %End
@@ -258,14 +258,14 @@ template<TYPE>
   } else {
     auto cppValue = pythonListToVector<std::vector<TYPE>>(sipPy, [&](PyObject* pyItem) -> boost::optional<std::vector<TYPE>> {
       return pythonListToVector<TYPE>(pyItem, [&](PyObject* pyInnerItem) -> boost::optional<TYPE> {
-        if (!sipCanConvertToInstance(pyInnerItem, sipClass_TYPE, SIP_NOT_NONE)) {
+        if (!sipCanConvertToType(pyInnerItem, sipType_TYPE, SIP_NOT_NONE)) {
           PyErr_Format(PyExc_TypeError, "object in iterable cannot be converted to the damn TYPE");
           return boost::none;
         } else {
           int state;
           auto* cppItemPtr = reinterpret_cast<TYPE*>(
-             sipConvertToInstance(pyInnerItem, sipClass_TYPE, 0, SIP_NOT_NONE, &state, sipIsErr));
-          sipReleaseInstance(cppItemPtr, sipClass_TYPE, state);
+             sipConvertToType(pyInnerItem, sipType_TYPE, 0, SIP_NOT_NONE, &state, sipIsErr));
+          sipReleaseType(cppItemPtr, sipType_TYPE, state);
           return asOptional(sipIsErr, cppItemPtr);
         }
       });
@@ -293,7 +293,7 @@ template<TYPE>
     return vectorToPythonList(vector, [&](std::vector<TYPE> const& item) -> PyObject* {
       return vectorToPythonList(item, [&](TYPE const& item) -> PyObject* {
         auto *heapCopy = new TYPE(item);
-        return sipConvertFromInstance(heapCopy, sipClass_TYPE, sipTransferObj);
+        return sipConvertFromType(heapCopy, sipType_TYPE, sipTransferObj);
       });
     });
   });
@@ -309,15 +309,15 @@ template<TYPE>
         [&](PyObject* pythonList) -> boost::optional<std::vector<std::vector<TYPE>>> {
           return pythonListToVector<std::vector<TYPE>>(pythonList, [&](PyObject* pythonInnerList) -> boost::optional<std::vector<TYPE>> {
             return pythonListToVector<TYPE>(pythonInnerList, [&](PyObject* pyItem) -> boost::optional<TYPE> {
-              if (!sipCanConvertToInstance(pyItem, sipClass_TYPE, SIP_NOT_NONE)) {
+              if (!sipCanConvertToType(pyItem, sipType_TYPE, SIP_NOT_NONE)) {
                 PyErr_Format(PyExc_TypeError, "object in iterable cannot be converted to TYPE");
                 return boost::none;
               } else {
                 int state;
                 auto* cppItemPtr = reinterpret_cast<TYPE*>(
-                   sipConvertToInstance(pyItem, sipClass_TYPE, 0, SIP_NOT_NONE, &state, sipIsErr));
+                   sipConvertToType(pyItem, sipType_TYPE, 0, SIP_NOT_NONE, &state, sipIsErr));
 
-                sipReleaseInstance(cppItemPtr, sipClass_TYPE, state);
+                sipReleaseType(cppItemPtr, sipType_TYPE, state);
                 return asOptional(sipIsErr, cppItemPtr);
               }
             });

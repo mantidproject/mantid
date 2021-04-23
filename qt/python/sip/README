@@ -1,0 +1,2 @@
+This directory contains a set of sip definitions for things such as converters
+for common types that might be reused across multiple modules.
