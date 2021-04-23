@@ -82,7 +82,7 @@ class WISHSingleCrystalPeakPredictionTest(MantidSystemTest):
         return self._peaks.name(), "WISHPredictedSingleCrystalPeaks.nxs"
 
 
-class WISHPeakIntegrationRespectsMasking(MantidSystemTest):
+class WISHPeakIntegrationRespectsMaskingTest(MantidSystemTest):
     """
     This tests that IntegratePeaksMD correctly ignores peaks at tube ends and that a custom masking for tubes
     adjacent to the near beam in and out is respected by IntegratePeaksMD
@@ -113,24 +113,27 @@ class WISHPeakIntegrationRespectsMasking(MantidSystemTest):
                                SplitInto='2', SplitThreshold='50')
         # Integrate peaks masking all pixels at tube end (built into IntegratePeaksMD)
         self._peaks_pixels = IntegratePeaksMD(InputWorkspace=MD, PeakRadius='0.02', PeaksWorkspace=peaks,
-                                              IntegrateIfOnEdge=False,
+                                              IntegrateIfOnEdge=False, OutputWorkspace='peaks_pixels',
                                               MaskEdgeTubes=False)
         # Apply masking to specific tubes next to beam in/out (subset of all edge tubes) and integrate again
         MaskBTP(Workspace='peaks', Bank='5-6', Tube='152')
         MaskBTP(Workspace='peaks', Bank='1,10', Tube='1')
         self._peaks_pixels_beamTubes = IntegratePeaksMD(InputWorkspace='MD', PeakRadius='0.02', PeaksWorkspace=peaks,
                                                         IntegrateIfOnEdge=False,
+                                                        OutputWorkspace='peaks_pixels_beamTubes',
                                                         MaskEdgeTubes=False)
         # Integrate masking all edge tubes
         self._peaks_pixels_edgeTubes = IntegratePeaksMD(InputWorkspace='MD', PeakRadius='0.02', PeaksWorkspace='peaks',
                                                         IntegrateIfOnEdge=False,
+                                                        OutputWorkspace='peaks_pixels_edgeTubes',
                                                         MaskEdgeTubes=True)
 
     def validate(self):
         # test which peaks were not integrated due to being on edge (i.e. shape = 'none')
-        self.assertListEquals([pk.getPeakShape().shapeName() for pk in self._peaks_pixels],
+
+        self.assertListEqual([pk.getPeakShape().shapeName() for pk in self._peaks_pixels],
                               ['spherical', 'none', 'spherical', 'spherical'])
-        self.assertListEquals([pk.getPeakShape().shapeName() for pk in self._peaks_pixels_beamTubes],
+        self.assertListEqual([pk.getPeakShape().shapeName() for pk in self._peaks_pixels_beamTubes],
                               ['none', 'none', 'spherical', 'spherical'])
-        self.assertListEquals([pk.getPeakShape().shapeName() for pk in self._peaks_pixels_edgeTubes],
+        self.assertListEqual([pk.getPeakShape().shapeName() for pk in self._peaks_pixels_edgeTubes],
                               ['none', 'none', 'spherical', 'none'])
