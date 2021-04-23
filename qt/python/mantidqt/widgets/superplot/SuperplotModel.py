@@ -162,7 +162,8 @@ class SuperplotModel(QObject):
             workspaces (str): name of the workspace
             spectrum (int): index of the spectrum
         """
-        self._plottedData.remove((workspace, spectrum))
+        if (workspace, spectrum) in self._plottedData:
+            self._plottedData.remove((workspace, spectrum))
         if not self._plottedData:
             self._plotMode = None
 
