@@ -151,7 +151,8 @@ class SuperplotModel(QObject):
             workspaces (str): name of the workspace
             spectrum (int): index of the spectrum
         """
-        self._plottedData.append((workspace, spectrum))
+        if (workspace, spectrum) not in self._plottedData:
+            self._plottedData.append((workspace, spectrum))
 
     def removeData(self, workspace, spectrum):
         """
