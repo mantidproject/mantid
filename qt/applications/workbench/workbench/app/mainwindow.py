@@ -772,8 +772,7 @@ class MainWindow(QMainWindow):
         builtins.input = QAppThreadCall(input_qinputdialog)
 
     def attempt_to_restore_state(self, state):
-        success = self.restoreState(state, SAVE_STATE_VERSION)
-        if success:
+        if self.restoreState(state, SAVE_STATE_VERSION):
             return
 
         # The version number of the supplied state is older than the current version
@@ -787,8 +786,7 @@ class MainWindow(QMainWindow):
             return
 
         for version in range(0, SAVE_STATE_VERSION):
-            success = self.restoreState(state, version)
-            if success:
+            if self.restoreState(state, version):
                 QMessageBox.information(
                     self,
                     "Success",
