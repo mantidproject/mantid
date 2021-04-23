@@ -189,6 +189,8 @@ class SuperplotModel(QObject):
         self._workspaces.remove(wsName)
         self._plottedData = [(ws, sp) for (ws, sp) in self._plottedData
                              if ws != wsName]
+        if not self._plottedData:
+            self._plotMode = None
         self.workspaceDeleted.emit(wsName)
 
     def onWorkspaceRenamed(self, oldName, newName):
