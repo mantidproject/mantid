@@ -102,15 +102,7 @@ class SuperplotPresenter:
         selection = self._view.getSelectedWorkspacesFromList()
         addedWorkspace = self._view.getSelectedWorkspace()
         self._model.addWorkspace(addedWorkspace)
-        names = self._model.getWorkspaces()
-        plottedData = self._model.getPlottedData()
-        self._view.setWorkspacesList(names)
-        for name in names:
-            spectra = list()
-            for data in plottedData:
-                if data[0] == name:
-                    spectra.append(data[1])
-            self._view.setSpectraList(name, spectra)
+        self._updateList()
         self._view.setSelectedWorkspacesInList(selection)
         self._updatePlot()
 
@@ -126,15 +118,7 @@ class SuperplotPresenter:
         for selectedWorkspace in selectedWorkspaces:
             self._model.delWorkspace(selectedWorkspace)
             self._view.removeWorkspace(selectedWorkspace)
-        names = self._model.getWorkspaces()
-        plottedData = self._model.getPlottedData()
-        self._view.setWorkspacesList(names)
-        for name in names:
-            spectra = list()
-            for data in plottedData:
-                if data[0] == name:
-                    spectra.append(data[1])
-            self._view.setSpectraList(name, spectra)
+        self._updateList()
         if not self._model.isBinMode() and not self._model.isSpectrumMode():
             mode = self._view.getMode()
             self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
@@ -190,6 +174,20 @@ class SuperplotPresenter:
             self._view.checkHoldButton(True)
         else:
             self._view.checkHoldButton(False)
+
+    def _updateList(self):
+        """
+        Update the workspaces/spectra list.
+        """
+        names = self._model.getWorkspaces()
+        plottedData = self._model.getPlottedData()
+        self._view.setWorkspacesList(names)
+        for name in names:
+            spectra = list()
+            for data in plottedData:
+                if data[0] == name:
+                    spectra.append(data[1])
+            self._view.setSpectraList(name, spectra)
 
     def _updatePlot(self):
         """
