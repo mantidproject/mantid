@@ -16,7 +16,8 @@ from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.contexts.fitting_context import FittingContext
-from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext, PlotMode
+from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
+from Muon.GUI.Common.contexts.plotting_context import PlottingContext, PlotMode
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget import GroupingTabWidget
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
@@ -80,12 +81,13 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.data_context.check_group_contains_valid_detectors)
         self.phase_context = PhaseTableContext()
         self.fitting_context = FittingContext()
-
+        self.plotting_context = PlottingContext()
         self.context = DataAnalysisContext(muon_data_context=self.data_context,
                                            muon_gui_context=self.gui_context,
                                            muon_group_context=self.group_pair_context,
                                            fitting_context=self.fitting_context,
-                                           muon_phase_context=self.phase_context)
+                                           muon_phase_context=self.phase_context,
+                                           plotting_context=self.plotting_context)
 
         # create the Dockable plot widget
         self.fitting_tab = FittingTabWidget(self.context, self)
@@ -93,7 +95,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
                                       parent=self)
         self.dockable_plot_widget_window = PlottingDockWidget(parent=self,
                                                               plotting_widget=self.plot_widget.view)
-        self.dockable_plot_widget_window.setMinimumWidth(575)
+        self.dockable_plot_widget_window.setMinimumWidth(800)
 
         # Add dock widget to main Muon analysis window
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockable_plot_widget_window)
