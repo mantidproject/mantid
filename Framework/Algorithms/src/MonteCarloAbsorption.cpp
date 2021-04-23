@@ -157,8 +157,7 @@ void MonteCarloAbsorption::exec() {
   const bool resimulateTracks = getProperty("ResimulateTracksForDifferentWavelengths");
   const int seed = getProperty("SeedValue");
   InterpolationOption interpolateOpt;
-  interpolateOpt.set(getPropertyValue("Interpolation"));
-  interpolateOpt.setIndependentErrors(resimulateTracks);
+  interpolateOpt.set(getPropertyValue("Interpolation"), true, resimulateTracks);
   const bool useSparseInstrument = getProperty("SparseInstrument");
   const int maxScatterPtAttempts = getProperty("MaxScatterPtAttempts");
   auto simulatePointsIn = MCInteractionVolume::ScatteringPointVicinity::SAMPLEANDENVIRONMENT;
@@ -185,7 +184,7 @@ std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
     const int nlambda = getProperty("NumberOfWavelengthPoints");
     InterpolationOption interpOpt;
     const std::string interpValue = getPropertyValue("Interpolation");
-    interpOpt.set(interpValue);
+    interpOpt.set(interpValue, true, resimulateTracksForDiffWavelengths);
     const auto nlambdaIssue = interpOpt.validateInputSize(nlambda);
     if (!nlambdaIssue.empty()) {
       issues["NumberOfWavelengthPoints"] = nlambdaIssue;

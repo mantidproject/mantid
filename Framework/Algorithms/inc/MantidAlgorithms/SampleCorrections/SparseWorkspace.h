@@ -41,6 +41,7 @@ public:
   virtual HistogramData::Histogram bilinearInterpolateFromDetectorGrid(const double lat, const double lon) const;
 
 protected:
+  SparseWorkspace(const SparseWorkspace &other);
   std::unique_ptr<Algorithms::DetectorGridDefinition> m_gridDef;
   static std::array<double, 4> inverseDistanceWeights(const std::array<double, 4> &distances);
   static double greatCircleDistance(const double lat1, const double long1, const double lat2, const double long2);
@@ -51,6 +52,9 @@ protected:
   HistogramData::HistogramY secondDerivative(const std::array<size_t, 3> indices, const double distanceStep) const;
   HistogramData::HistogramE esq(HistogramData::HistogramE e) const;
   HistogramData::HistogramE esqrt(HistogramData::HistogramE e) const;
+
+private:
+  SparseWorkspace *doClone() const override;
 };
 
 /// unique pointer to Mantid::API::SparseWorkspace

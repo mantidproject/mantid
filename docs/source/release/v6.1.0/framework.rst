@@ -24,6 +24,7 @@ Algorithms
 - Added the ability to specify the spectrum number in :ref:`FindPeaksAutomatic <algm-FindPeaksAutomatic>`.
 - :ref:`LoadLog <algm-LoadLog>` will now detect old unsupported log files and set an appropriate explanatory string in the exception.
 - :ref:`Stitch1DMany <algm-Stitch1DMany>` has additional property `IndexOfReference` to allow user to decide which of the provided workspaces should give reference for scaling
+- New algorithm :ref:`CalculateMultipleScattering <algm-CalculateMultipleScattering>` to calculate multiple scattering corrections using a Monte Carlo integration approach that doesn't rely on an isotropic scattering assumption. The implementation is based on Fortran code developed by Mike Johnson and Spencer Howells under the names Muscat, MODES and DISCUS. The algorithm only supports elastic instruments so far but support for inelastic instruments will be added at a later date.
 - New algorithm :ref:`GeneratePythonFitScript <algm-GeneratePythonFitScript>` allows the creation of a python script for sequential fitting.
 
 Improvements
