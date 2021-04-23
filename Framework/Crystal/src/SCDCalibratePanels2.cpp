@@ -1105,19 +1105,18 @@ void SCDCalibratePanels2::profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws,
     //
     double xValues[7] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // xValues is not used
 
-    // NOTE: very expensive scan of the parameter space, proceed with caution
-    //       100^6 -> 10^8 entries
-    for (double dx = -1e-2; dx < 1e-2; dx += 1e-4) {
+    // NOTE: very expensive scan of the parameter space
+    for (double dx = -1e-2; dx < 1e-2; dx += 2e-2 / 20) {
       // deltaX: meter
-      for (double dy = -1e-2; dy < 1e-2; dy += 1e-4) {
+      for (double dy = -1e-2; dy < 1e-2; dy += 2e-2 / 20) {
         // deltaY: meter
-        for (double dz = -1e-2; dz < 1e-2; dz += 1e-4) {
+        for (double dz = -1e-2; dz < 1e-2; dz += 2e-2 / 20) {
           // deltaZ: meter
-          for (double theta = 0.0; theta < PI; theta += PI / 100) {
+          for (double theta = 0.0; theta < PI; theta += PI / 20) {
             // theta: rad
-            for (double phi = 0.0; phi < 2 * PI; phi += 2 * PI / 100) {
+            for (double phi = 0.0; phi < 2 * PI; phi += 2 * PI / 20) {
               // phi: rad
-              for (double ang = -5.0; ang < 5.0; ang += 5 / 100) {
+              for (double ang = -5.0; ang < 5.0; ang += 5 / 20) {
                 // ang: degrees
                 // configure the objfunc
                 std::unique_ptr<double[]> out(new double[n_peaks * 3]);
@@ -1137,6 +1136,8 @@ void SCDCalibratePanels2::profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws,
                 // record
                 msgrst << dx << "\t" << dy << "\t" << dz << "\t" << theta << "\t" << phi << "\t" << ang << "\t"
                        << residual << "\n";
+
+                g_log.notice() << "--" << bankname << ": " << residual << "\n";
               }
             }
           }
