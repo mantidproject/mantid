@@ -116,10 +116,6 @@ class SANSDataProcessorGui(QMainWindow,
             pass
 
         @abstractmethod
-        def on_row_inserted(self):
-            pass
-
-        @abstractmethod
         def on_rows_removed(self):
             pass
 
