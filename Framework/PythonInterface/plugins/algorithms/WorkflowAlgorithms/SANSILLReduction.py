@@ -109,7 +109,7 @@ class SANSILLReduction(PythonAlgorithm):
             prev_pos = obj.span()[1]
             binary_op.append(obj.group())
         list_entries.append(paths[prev_pos:])  # add the last remaining file
-        list_entries = [entry[entry.rfind('/')+1:] for entry in list_entries]
+        list_entries = [os.path.split(entry)[1] for entry in list_entries]
         binary_op.append('') # there is one fewer binary operator than there are numors
         list_entries = [entry + operation for entry, operation in zip(list_entries, binary_op)]
         return ''.join(list_entries)
