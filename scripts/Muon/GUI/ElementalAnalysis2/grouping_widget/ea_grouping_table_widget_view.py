@@ -318,6 +318,11 @@ class EAGroupingTableView(QtWidgets.QWidget):
         table_item.setFlags(TABLE_COLUMN_FLAGS['rebin_options'])
         self.grouping_table.setItem(row, 5, table_item)
 
+    def rebin_none_chosen(self, row):
+        table_item = QTableWidgetItem("")
+        table_item.setFlags(TABLE_COLUMN_FLAGS['rebin_options'])
+        self.grouping_table.setItem(row, 5, table_item)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Enabling and disabling editing and updating of the widget
     # ------------------------------------------------------------------------------------------------------------------

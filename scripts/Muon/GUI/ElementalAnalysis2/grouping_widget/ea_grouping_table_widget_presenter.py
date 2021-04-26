@@ -11,6 +11,7 @@ from mantidqt.utils.observer_pattern import GenericObservable
 from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view import INVERSE_GROUP_TABLE_COLUMNS
 
 MAXIMUM_NUMBER_OF_GROUPS = 20
+REBIN_NONE_OPTION = "0"
 REBIN_FIXED_OPTION = "1"
 REBIN_VARIABLE_OPTION = "2"
 
@@ -112,6 +113,8 @@ class EAGroupingTablePresenter(object):
                 self._view.rebin_fixed_chosen(row)
             elif changed_item.text() == REBIN_VARIABLE_OPTION:
                 self._view.rebin_variable_chosen(row)
+            elif changed_item.text() == REBIN_NONE_OPTION:
+                self._view.rebin_none_chosen(row)
 
     def handle_rebin_option_column_changed(self, col, changed_item, workspace_name):
         if col == INVERSE_GROUP_TABLE_COLUMNS['rebin_options']:
