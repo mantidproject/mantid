@@ -212,18 +212,13 @@ class EnggFocus(PythonAlgorithm):
 
         @param wks :: workspace (in/out, modified in place)
         """
-        p_charge = wks.getRun().getProtonCharge()
-        if p_charge <= 0:
-            self.log().warning("Cannot normalize by current because the proton charge log value "
-                               "is not positive!")
-
-        self.log().notice("Normalizing by current with proton charge: {0} uamp".
-                          format(p_charge))
-
-        alg = self.createChildAlgorithm('NormaliseByCurrent')
-        alg.setProperty('InputWorkspace', wks)
-        alg.setProperty('OutputWorkspace', wks)
-        alg.execute()
+        if wks.getRun().getProtonCharge() > 0:
+            alg = self.createChildAlgorithm('NormaliseByCurrent')
+            alg.setProperty('InputWorkspace', wks)
+            alg.setProperty('OutputWorkspace', wks)
+            alg.execute()
+        else:
+            self.log().warning(f"Cannot normalize by current because workspace {wks.name()} has invalid proton charge")
 
     def _apply_calibration(self, wks, detector_positions):
         """
