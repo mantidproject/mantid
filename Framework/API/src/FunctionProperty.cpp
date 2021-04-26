@@ -24,19 +24,6 @@ FunctionProperty::FunctionProperty(const std::string &name, const unsigned int d
                                                             std::make_shared<Kernel::NullValidator>(), direction),
       m_optional(optional) {}
 
-/// Copy constructor
-FunctionProperty::FunctionProperty(const FunctionProperty &right)
-    : Kernel::PropertyWithValue<std::shared_ptr<IFunction>>(right), m_optional(right.m_optional) {}
-
-/// Copy assignment operator. Copies the pointer to the function.
-FunctionProperty &FunctionProperty::operator=(const FunctionProperty &right) {
-  if (&right == this && right.m_optional == m_optional)
-    return *this;
-  Kernel::PropertyWithValue<std::shared_ptr<IFunction>>::operator=(right);
-  m_optional = right.m_optional;
-  return *this;
-}
-
 /** Bring in the PropertyWithValue assignment operator explicitly (avoids VSC++
  * warning)
  * @param value :: The value to set to

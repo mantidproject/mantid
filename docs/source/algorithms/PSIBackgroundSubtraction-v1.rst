@@ -110,9 +110,9 @@ Output:
 
 .. testoutput:: CalculateBackgroundWithAdditionalFunction
 
-    Difference in first count is: 19.5723
-    Difference in middle count is: 19.5723
-    Difference in last count is: 19.5723
+    Difference in first count is: 20.0
+    Difference in middle count is: 20.0
+    Difference in last count is: 20.0
 
 .. categories::
 
