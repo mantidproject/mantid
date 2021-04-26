@@ -348,20 +348,6 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.presenter._view.warning_popup.assert_not_called()
         self.presenter._model.handle_rebin.assert_not_called()
 
-    def test_handle_rebin_option_column_changed_with_no_given_parameters(self):
-        self.presenter._model.handle_rebin = mock.Mock()
-        mock_changed_item = mock.Mock()
-        mock_changed_item.text.return_value = "Steps: None"
-        ws_name = "mock_name"
-
-        self.presenter.handle_rebin_option_column_changed(INVERSE_GROUP_TABLE_COLUMNS['rebin_options'],
-                                                          mock_changed_item, ws_name)
-
-        # Assert statements
-        mock_changed_item.text.assert_called_once()
-        self.presenter._view.warning_popup.assert_called_once_with("Rebin parameters not given")
-        self.presenter._model.handle_rebin.assert_not_called()
-
     def test_handle_rebin_option_column_with_a_fixed_step(self):
         self.presenter._model.handle_rebin = mock.Mock()
         mock_changed_item = mock.Mock()
@@ -375,20 +361,6 @@ class GroupingTablePresenterTest(unittest.TestCase):
         mock_changed_item.text.assert_called_once()
         self.presenter._view.warning_popup.assert_not_called()
         self.presenter._model.handle_rebin.assert_called_once_with(name=ws_name, rebin_type="Fixed", rebin_param=3.0)
-
-    def test_handle_rebin_option_column_with_an_invalid_fixed_step(self):
-        self.presenter._model.handle_rebin = mock.Mock()
-        mock_changed_item = mock.Mock()
-        mock_changed_item.text.return_value = "Steps: a "
-        ws_name = "mock_name"
-
-        self.presenter.handle_rebin_option_column_changed(INVERSE_GROUP_TABLE_COLUMNS['rebin_options'],
-                                                          mock_changed_item, ws_name)
-
-        # Assert statements
-        mock_changed_item.text.assert_called_once()
-        self.presenter._view.warning_popup.assert_called_once_with("Given rebin step is invalid")
-        self.presenter._model.handle_rebin.assert_not_called()
 
     def test_handle_rebin_option_column_with_a_variable_step(self):
         self.presenter._model.handle_rebin = mock.Mock()

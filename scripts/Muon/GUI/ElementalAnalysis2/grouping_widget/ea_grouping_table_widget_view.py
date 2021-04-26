@@ -277,7 +277,13 @@ class EAGroupingTableView(QtWidgets.QWidget):
         if not ok:
             return
         if not steps.strip():
-            steps = None
+            self.warning_popup("Rebin parameters not given")
+            return
+        try:
+            steps = float(steps)
+        except ValueError:
+            self.warning_popup("Given rebin step is invalid")
+            return
         steps_text = "Steps: " + str(steps)
         table_item = QTableWidgetItem(steps_text)
         table_item.setFlags(TABLE_COLUMN_FLAGS['rebin_options'])
@@ -300,7 +306,8 @@ class EAGroupingTableView(QtWidgets.QWidget):
         if not ok:
             return
         if not steps.strip():
-            steps = None
+            self.warning_popup("Rebin parameters not given")
+            return
         bin_text = "Bin Boundaries: " + str(steps)
         table_item = QTableWidgetItem(bin_text)
         table_item.setFlags(TABLE_COLUMN_FLAGS['rebin_options'])

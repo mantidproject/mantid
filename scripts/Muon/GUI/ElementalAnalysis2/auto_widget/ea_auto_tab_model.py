@@ -10,7 +10,7 @@ from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 from Muon.GUI.Common import thread_model, message_box
 from mantidqt.utils.observer_pattern import GenericObservable
 from queue import Queue
-from Muon.GUI.ElementalAnalysis2.context.ea_group_context import check_if_group_is_valid
+from Muon.GUI.ElementalAnalysis2.context.ea_group_context import is_group_valid
 import copy
 
 """
@@ -102,7 +102,7 @@ class EAAutoTabModel(object):
         if run is None or detector is None:
             group = retrieve_ws(workspace)
             for workspace_name in group.getNames():
-                if check_if_group_is_valid(workspace_name):
+                if is_group_valid(workspace_name):
                     tmp_parameters = copy.deepcopy(parameters)
                     tmp_parameters["workspace"] = workspace_name
                     if not self._run_find_peak_algorithm(tmp_parameters, group, True):

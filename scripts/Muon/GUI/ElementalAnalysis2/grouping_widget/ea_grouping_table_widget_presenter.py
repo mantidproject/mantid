@@ -117,14 +117,8 @@ class EAGroupingTablePresenter(object):
         if col == INVERSE_GROUP_TABLE_COLUMNS['rebin_options']:
             params = changed_item.text().split(":")
             if len(params) == 2:
-                if params[1].strip() == "None":
-                    self._view.warning_popup("Rebin parameters not given")
-                    return
                 if params[0] == "Steps":
-                    try:
-                        self._model.handle_rebin(name=workspace_name, rebin_type="Fixed", rebin_param=float(params[1]))
-                    except ValueError:
-                        self._view.warning_popup("Given rebin step is invalid")
+                    self._model.handle_rebin(name=workspace_name, rebin_type="Fixed", rebin_param=float(params[1]))
                 if params[0] == "Bin Boundaries":
                     if len(params[1]) >= 1:
                         self._model.handle_rebin(name=workspace_name, rebin_type="Variable", rebin_param=params[1])
