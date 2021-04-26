@@ -123,6 +123,7 @@ class DrillTest(unittest.TestCase):
                 self.selectRow(n-1, Qt.NoModifier)
                 self.view.add_row_after()
             for c in range(self.view.table.columnCount()):
+                self.view.table.setColumnHidden(c, False)
                 self.setCellContents(n, c, text + str(n) + str(c))
             data.append(dict())
             data[-1].update(self.model.samples[n].getParameters())
@@ -288,14 +289,16 @@ class DrillTest(unittest.TestCase):
         self.model.setInstrument("D11")
         mFileDialog.getSaveFileName.return_value = ["test", "test"]
         QTest.mouseClick(self.view.save, Qt.LeftButton)
+        visualSettings = {
+                'FoldedColumns': [],
+                'HiddenColumns': [],
+                'ColumnsOrder': RundexSettings.COLUMNS['SANS']
+                }
+        visualSettings.update(RundexSettings.VISUAL_SETTINGS["SANS"])
         json = {
                 'Instrument': 'D11',
                 'AcquisitionMode': 'SANS',
-                'VisualSettings': {
-                    'FoldedColumns': [],
-                    'HiddenColumns': [],
-                    'ColumnsOrder': RundexSettings.COLUMNS['SANS']
-                    },
+                'VisualSettings': visualSettings,
                 'GlobalSettings': self.model.settings,
                 'ExportAlgorithms' : [
                     algo
