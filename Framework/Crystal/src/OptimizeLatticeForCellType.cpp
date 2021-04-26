@@ -10,7 +10,10 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCrystal/GSLFunctions.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/EdgePixel.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -37,7 +40,7 @@ using namespace DataObjects;
  */
 void OptimizeLatticeForCellType::init() {
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "", Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("PeaksWorkspace", "", Direction::InOut),
                   "An input PeaksWorkspace with an instrument.");
   std::vector<std::string> cellTypes;
   cellTypes.emplace_back(ReducedCell::CUBIC());
@@ -73,20 +76,21 @@ void OptimizeLatticeForCellType::exec() {
   double tolerance = this->getProperty("Tolerance");
   int edge = this->getProperty("EdgePixels");
   std::string cell_type = getProperty("CellType");
-  DataObjects::PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
-  Geometry::Instrument_const_sptr inst = ws->getInstrument();
+  IPeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
 
   std::vector<int> badPeaks;
-  std::vector<DataObjects::PeaksWorkspace_sptr> runWS;
-  if (edge > 0) {
-    for (int i = int(ws->getNumberPeaks()) - 1; i >= 0; --i) {
-      const std::vector<Peak> &peaks = ws->getPeaks();
-      if (edgePixel(inst, peaks[i].getBankName(), peaks[i].getCol(), peaks[i].getRow(), edge)) {
-        badPeaks.emplace_back(i);
+  std::vector<IPeaksWorkspace_sptr> runWS;
+  if (edge > 0)
+    if (auto pw = std::dynamic_pointer_cast<PeaksWorkspace>(ws)) {
+      Geometry::Instrument_const_sptr inst = ws->getInstrument();
+      for (int i = int(pw->getNumberPeaks()) - 1; i >= 0; --i) {
+        const std::vector<Peak> &peaks = pw->getPeaks();
+        if (edgePixel(inst, peaks[i].getBankName(), peaks[i].getCol(), peaks[i].getRow(), edge)) {
+          badPeaks.emplace_back(i);
+        }
       }
+      pw->removePeaks(std::move(badPeaks));
     }
-    ws->removePeaks(std::move(badPeaks));
-  }
   runWS.emplace_back(ws);
 
   if (perRun) {
@@ -94,14 +98,13 @@ void OptimizeLatticeForCellType::exec() {
     // Sort by run number
     criteria.emplace_back("runnumber", true);
     ws->sort(criteria);
-    const std::vector<Peak> &peaks_all = ws->getPeaks();
     int run = 0;
     int count = 0;
-    for (const auto &peak : peaks_all) {
+    for (int i = 0; i < ws->getNumberPeaks(); i++) {
+      IPeak &peak = ws->getPeak(i);
       if (peak.getRunNumber() != run) {
         count++; // first entry in runWS is input workspace
-        auto cloneWS = std::make_shared<PeaksWorkspace>();
-        cloneWS->setInstrument(inst);
+        auto cloneWS = std::dynamic_pointer_cast<IPeaksWorkspace>(WorkspaceFactory::Instance().createPeaks(ws->id()));
         cloneWS->copyExperimentInfoFrom(ws.get());
         runWS.emplace_back(cloneWS);
         runWS[count]->addPeak(peak);
@@ -114,7 +117,7 @@ void OptimizeLatticeForCellType::exec() {
   }
   // finally do the optimization
   for (auto &i_run : runWS) {
-    DataObjects::PeaksWorkspace_sptr peakWS(i_run->clone());
+    IPeaksWorkspace_sptr peakWS(i_run->clone());
     AnalysisDataService::Instance().addOrReplace("_peaks", peakWS);
     const DblMatrix UB = peakWS->sample().getOrientedLattice().getUB();
     auto ol = peakWS->sample().getOrientedLattice();
