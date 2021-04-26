@@ -18,6 +18,10 @@ from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_com
                                                          generate_tick_commands)
 from workbench.plotting.plotscriptgenerator.figure import generate_subplots_command
 from workbench.plotting.plotscriptgenerator.lines import generate_plot_command
+from workbench.plotting.plotscriptgenerator.legend import (generate_legend_commands,
+                                                           generate_title_font_commands,
+                                                           generate_label_font_commands,
+                                                           generate_visible_command)
 from workbench.plotting.plotscriptgenerator.colorfills import generate_plot_2d_command
 from workbench.plotting.plotscriptgenerator.utils import generate_workspace_retrieval_commands, sorted_lines_in
 from workbench.plotting.plotscriptgenerator.fitting import get_fit_cmds
@@ -25,6 +29,7 @@ from mantidqt.plotting.figuretype import FigureType, axes_type
 
 FIG_VARIABLE = "fig"
 AXES_VARIABLE = "axes"
+LEGEND_VARIABLE = "legend"
 if hasattr(Legend, "set_draggable"):
     SET_DRAGGABLE_METHOD = "set_draggable(True)"
 else:
@@ -115,7 +120,7 @@ def get_plot_2d_cmd(ax, ax_object_var):
     """Get commands such as imshow or pcolormesh"""
     cmds = []
     for artist in ax.get_tracked_artists():
-        cmds.extend(generate_plot_2d_command(artist,ax_object_var))
+        cmds.extend(generate_plot_2d_command(artist, ax_object_var))
     return cmds
 
 
@@ -145,15 +150,22 @@ def get_title_cmds(ax, ax_object_var):
 
 
 def get_legend_cmds(ax, ax_object_var):
-    """Get command axes.set_legend"""
+    """Get commands for setting legend properties"""
+    cmds = []
     if ax.legend_:
-        return ["{ax_obj}.legend().{draggable_method}".format(ax_obj=ax_object_var,
-                                                              draggable_method=SET_DRAGGABLE_METHOD)]
-    return []
+        cmds.append("{legend_object} = {ax_obj}.legend({legend_commands}).{draggable_method}.legend".format(
+            legend_object=LEGEND_VARIABLE,
+            ax_obj=ax_object_var,
+            legend_commands=generate_legend_commands(ax.legend_),
+            draggable_method=SET_DRAGGABLE_METHOD))
+        cmds.extend(generate_title_font_commands(ax.legend_, LEGEND_VARIABLE))
+        cmds.extend(generate_label_font_commands(ax.legend_, LEGEND_VARIABLE))
+        cmds.extend(generate_visible_command(ax.legend_, LEGEND_VARIABLE))
+    return cmds
 
 
 def get_axes_object_variable(ax):
-    """Get a string that will return the axeses object in the script"""
+    """Get a string that will return the axes object in the script"""
     # plt.subplots returns an Axes object if there's only one axes being
     # plotted otherwise it returns a list
     ax_object_var = AXES_VARIABLE

@@ -22,6 +22,7 @@ New and Improved
 - Added an algorithm ProfileChiSquared1D to profile chi squared after a fit. This can be used
   to find better estimates of parameter errors.
 - Instrument view: when in tube selection mode, the sum of pixel counts is now output to the selection pane.
+- Added legend property commands to the plot script generator.
 - Added memory widget to display total memory usage. This means that your widget layout will be reset when starting workbench v6.1.0 for the first time. Previously saved layouts accessible from ``View > User Layouts`` may need to be saved again to include the memory bar widget.
 
 
