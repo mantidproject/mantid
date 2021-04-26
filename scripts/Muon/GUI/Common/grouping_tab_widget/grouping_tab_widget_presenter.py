@@ -297,6 +297,11 @@ class GroupingTabPresenter(object):
         self.period_info_widget.raise_()
 
     def _add_period_info_to_widget(self):
+
+        def _parse_logs(log_name):
+            sample_log = self._model._data.get_sample_log(log_name)
+            return sample_log.value.split(";") if sample_log else []
+
         runs = self._model._data.current_runs
         runs_string = ""
         for run_list in runs:
@@ -305,20 +310,15 @@ class GroupingTabPresenter(object):
                     runs_string += ", "
                 runs_string += str(run)
         self.period_info_widget.set_title_runs(self._model.instrument + runs_string)
+
         period_sequences_log = self._model._data.get_sample_log("period_sequences")
         self.period_info_widget.number_of_sequences = str(period_sequences_log.value) if period_sequences_log else None
-        names_log = self._model._data.get_sample_log("period_labels")
-        names = names_log.value.split(";") if names_log else []
-        types_log = self._model._data.get_sample_log("period_type")
-        types = types_log.value.split(";") if types_log else []
-        frames_log = self._model._data.get_sample_log("frames_period_requested")
-        frames = frames_log.value.split(";") if frames_log else []
-        total_frames_log = self._model._data.get_sample_log("frames_period_raw")
-        total_frames = total_frames_log.value.split(";") if total_frames_log else []
-        counts_log = self._model._data.get_sample_log("total_counts_period")
-        counts = counts_log.value.split(";") if counts_log else []
-        tags_log = self._model._data.get_sample_log("period_output")
-        tags = tags_log.value.split(";") if tags_log else []
+        names = _parse_logs("period_labels")
+        types = _parse_logs("period_type")
+        frames = _parse_logs("frames_period_requested")
+        total_frames = _parse_logs("frames_period_Raw")
+        counts = _parse_logs("total_counts_period")
+        tags = _parse_logs("period_output")
 
         names, types, frames, total_frames, counts, tags, count = self._fix_up_period_info_lists([names, types, frames,
                                                                                                   total_frames, counts,

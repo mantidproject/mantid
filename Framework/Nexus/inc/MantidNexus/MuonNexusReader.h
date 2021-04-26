@@ -33,7 +33,7 @@ class DLLExport MuonNexusReader {
 private:
   std::string m_nexusInstrumentName;   ///< name read from nexus file
   std::string m_nexusSampleName;       ///< sample name read from Nexus
-  int m_nexusLogCount;                 ///< number of NXlog sections read from file
+  int m_nexusLogCount = 0;             ///< number of NXlog sections read from file
   std::vector<bool> m_logType;         ///< true if i'th log is numeric
   std::vector<std::string> m_logNames; ///< stores name read from file
   void openFirstNXentry(NeXus::File &handle);
@@ -43,7 +43,7 @@ private:
   std::vector<std::vector<std::string>> m_logStringValues; ///< array of string values for i'th NXlog section
   std::string m_startTime;                                 ///< string startTime which must be read from Nexus
   /// file to base all NXlog times on
-  std::time_t m_startTime_time_t;                          ///< startTime in time_t format
+  std::time_t m_startTime_time_t = 0;                      ///< startTime in time_t format
   std::time_t to_time_t(const boost::posix_time::ptime &t) ///< convert posix time to time_t
   {
     /**
@@ -60,21 +60,12 @@ private:
     return (t - start).total_seconds();
   }
   void readPeriodInfo(NeXus::File &handle);
-  template <class T> std::string convertVectorToString(T values, std::string delim) {
-    std::string result("");
-    if (!values.empty()) {
-      for (const auto &value : values)
-        result += std::to_string(value) + delim;
-      result.erase(result.length() - 1); // Remove final delim
-    }
-    return result;
-  }
 
 public:
   /// Default constructor
-  MuonNexusReader();
-  /// Destructor
-  ~MuonNexusReader();
+  MuonNexusReader() = default;
+  /// Default Destructor
+  ~MuonNexusReader() = default;
 
   void readFromFile(const std::string &filename); ///< read histogram data
   void readLogData(const std::string &filename);  ///< read log data
@@ -91,16 +82,16 @@ public:
                           std::string &value); ///< get logSequence pair of logNumber string log
   bool logTypeNumeric(const int i) const;      ///< true if i'th log is of numeric type
   // following ISISRAW.h
-  int t_nsp1; ///< number of spectra in time regime 1
-  int t_ntc1; ///< number of time channels in time regime 1
-  int t_nper; ///< number of periods in file (=1 at present)
+  int t_nsp1 = 0; ///< number of spectra in time regime 1
+  int t_ntc1 = 0; ///< number of time channels in time regime 1
+  int t_nper = 0; ///< number of periods in file (=1 at present)
   // for nexus histogram data
   std::vector<float> m_correctedTimes;   ///< temp store for corrected times
   std::vector<int> m_counts;             ///< temp store of histogram data
   std::vector<int> m_detectorGroupings;  ///< detector grouping info
-  int m_numDetectors;                    ///< detector count
+  int m_numDetectors = 0;                ///< detector count
   std::string getInstrumentName() const; ///< return instrument name
-  int m_numPeriodSequences;
+  int m_numPeriodSequences = 0;
   std::string m_periodNames;
   std::string m_periodTypes;
   std::string m_framesPeriodsRequested;
