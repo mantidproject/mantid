@@ -99,7 +99,7 @@ class SANSILLReduction(PythonAlgorithm):
 
     @staticmethod
     def _return_numors(paths):
-        regex_all = r'(\*)|(//)|(\+)|(\-)'
+        regex_all = r'(\+)'
         p = re.compile(regex_all)
         list_entries = []
         binary_op = []
@@ -110,7 +110,7 @@ class SANSILLReduction(PythonAlgorithm):
             binary_op.append(obj.group())
         list_entries.append(paths[prev_pos:])  # add the last remaining file
         list_entries = [entry[entry.rfind('/')+1:] for entry in list_entries]
-        binary_op.append('') # there are one fewer binary operators that numors
+        binary_op.append('') # there is one fewer binary operator than there are numors
         list_entries = [entry + operation for entry, operation in zip(list_entries, binary_op)]
         return ''.join(list_entries)
 
