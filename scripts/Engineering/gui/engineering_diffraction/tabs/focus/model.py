@@ -13,11 +13,12 @@ from Engineering.gui.engineering_diffraction.tabs.common import vanadium_correct
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from Engineering.EnggUtils import create_custom_grouping_workspace
 from mantid.simpleapi import logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE, \
-    LoadAscii, NormaliseByCurrent, Divide, DiffractionFocussing, RebinToWorkspace, \
-    ConvertUnits, CloneWorkspace
+    Load, NormaliseByCurrent, Divide, DiffractionFocussing, RebinToWorkspace, \
+    ConvertUnits, ReplaceSpecialValues, ApplyDiffCal
 
 SAMPLE_RUN_WORKSPACE_NAME = "engggui_focusing_input_ws"
 FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_bank_"
+CALIB_PARAMS_WORKSPACE_NAME = "engggui_calibration_banks_parameters"
 
 NORTH_BANK_CAL = "EnginX_NorthBank.cal"
 SOUTH_BANK_CAL = "EnginX_SouthBank.cal"
@@ -53,7 +54,7 @@ class FocusModel(object):
         full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
                                       path_handling.ENGINEERING_PREFIX, "full_calibration")
         if full_calib_path is not None and path.exists(full_calib_path):
-            full_calib_workspace = LoadAscii(full_calib_path, OutputWorkspace="det_pos", Separator="Tab")
+            full_calib_workspace = Load(full_calib_path, OutputWorkspace="full_inst_calib")
         else:
             full_calib_workspace = None
         df_kwarg, name = None, None
@@ -70,7 +71,7 @@ class FocusModel(object):
                 run_no = path_handling.get_run_number_from_path(sample_path, instrument)
                 output_workspace_name = str(run_no) + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + name
                 self._run_focus(sample_workspace, output_workspace_name, integration_workspace,
-                                curves_workspace, df_kwarg, full_calib_workspace)
+                                curves_workspace, df_kwarg, full_calib_workspace, full_calib_workspace)
                 output_workspaces.append([output_workspace_name])
                 self._save_output(instrument, sample_path, "cropped", output_workspace_name, rb_num)
                 self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
@@ -104,18 +105,21 @@ class FocusModel(object):
                    vanadium_integration_ws,
                    vanadium_curves_ws,
                    df_kwarg,
-                   full_calib_ws=None):
+                   full_calib):
         import pydevd_pycharm
         pydevd_pycharm.settrace('localhost', port=8080, stdoutToServer=True, stderrToServer=True)
-        ws = CloneWorkspace(input_workspace)
-        ws = NormaliseByCurrent(ws)
-        ws_d = ConvertUnits(ws, Target='dSpacing')
-        ws_d /= vanadium_integration_ws
+        NormaliseByCurrent(InputWorkspace=input_workspace, OutputWorkspace=input_workspace)
+        input_workspace /= vanadium_integration_ws
+        ReplaceSpecialValues(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, NaNValue=0,
+                             InfinityValue=0)
+        ApplyDiffCal(InstrumentWorkspace=input_workspace, CalibrationWorkspace=full_calib)
+        ws_d = ConvertUnits(InputWorkspace=input_workspace, Target='dSpacing')
         focused_sample = DiffractionFocussing(InputWorkspace=ws_d, **df_kwarg)
         curves_rebinned = RebinToWorkspace(WorkspaceToRebin=vanadium_curves_ws, WorkspaceToMatch=focused_sample)
         normalised = Divide(LHSWorkspace=focused_sample, RHSWorkspace=curves_rebinned,
                             AllowDifferentNumberSpectra=True)
-        output_workspace = ConvertUnits(InputWorkspace=normalised, OutputWorkspace=output_workspace, Target='TOF')
+        ws_d = ConvertUnits(InputWorkspace=normalised, OutputWorkspace=output_workspace, Target='TOF')
+        output_workspace = ApplyDiffCal(InstrumentWorkspace=ws_d, CalibrationWorkspace=CALIB_PARAMS_WORKSPACE_NAME)
         return output_workspace
 
     @staticmethod

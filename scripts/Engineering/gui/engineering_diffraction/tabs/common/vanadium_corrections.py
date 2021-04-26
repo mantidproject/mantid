@@ -83,6 +83,7 @@ def _calculate_vanadium_correction(vanadium_path):
     nbins = van_ws.blocksize()
     ws_van_int = Integration(InputWorkspace=van_ws)
     ws_van_int /= nbins
+    RenameWorkspace(InputWorkspace=ws_van_int, OutputWorkspace=INTEGRATED_WORKSPACE_NAME)
     return ws_van_int
 
 
@@ -138,6 +139,6 @@ def handle_van_curves(van_curves, van_path, instrument, rb_num):
         DeleteWorkspace(van_curves[1])
     else:
         curves_ws = van_curves[0]
-    DeleteWorkspace(van_curves[0])
+    #DeleteWorkspace(van_curves[0])
     save_van_workspace(curves_ws, curves_path)
     RenameWorkspace(InputWorkspace=curves_ws, OutputWorkspace=CURVES_WORKSPACE_NAME)

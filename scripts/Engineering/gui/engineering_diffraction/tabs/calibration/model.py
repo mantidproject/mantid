@@ -15,7 +15,7 @@ from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, Dif
     ConvertUnits, Load, ReplaceSpecialValues, \
     EnggEstimateFocussedBackground, ApplyDiffCal
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file, default_ceria_expected_peaks, \
-    create_custom_grouping_workspace
+    create_custom_grouping_workspace, create_spectrum_list_from_string
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
@@ -56,28 +56,28 @@ class CalibrationModel(object):
         full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
                                       path_handling.ENGINEERING_PREFIX, "full_calibration")
         if full_calib_path is not None and path.exists(full_calib_path):
-            full_calib = Load(full_calib_path, OutputWorkspace="full_inst_calib", Separator="Tab")
+            full_calib = Load(full_calib_path, OutputWorkspace="full_inst_calib")
         else:
             raise RuntimeError("Full instrument calibration has not been supplied - this is set in the interface"
                                " settings.")
-        output, van_curves, ceria_raw = self.run_calibration(ceria_workspace,
-                                                              vanadium_path,
-                                                              van_integration,
-                                                              bank,
-                                                              spectrum_numbers,
-                                                              full_calib)
+        cal_params, cal_grp, van_curves, ceria_raw = self.run_calibration(ceria_workspace,
+                                                                          vanadium_path,
+                                                                          van_integration,
+                                                                          bank,
+                                                                          spectrum_numbers,
+                                                                          full_calib)
         vanadium_corrections.handle_van_curves(van_curves, vanadium_path, instrument, rb_num)
         if plot_output:
-            for i in range(len(output)):
+            for i in range(len(cal_params)):
                 if spectrum_numbers:
                     bank_name = "cropped"
                 elif bank is None:
                     bank_name = str(i + 1)
                 else:
                     bank_name = bank
-                difa = output[i]['difa']
-                difc = output[i]['difc']
-                tzero = output[i]['tzero']
+                difa = cal_params[i]['difa']
+                difc = cal_params[i]['difc']
+                tzero = cal_params[i]['tzero']
                 self._generate_tof_fit_workspace(difa, difc, tzero, bank_name)
             if bank is None and spectrum_numbers is None:
                 self._plot_tof_fit()
@@ -85,9 +85,9 @@ class CalibrationModel(object):
                 self._plot_tof_fit_single_bank_or_custom(bank)
             else:
                 self._plot_tof_fit_single_bank_or_custom("cropped")
-        difa = [row['difa'] for row in output]
-        difc = [row['difc'] for row in output]
-        tzero = [row['tzero'] for row in output]
+        difa = [row['difa'] for row in cal_params]
+        difc = [row['difc'] for row in cal_params]
+        tzero = [row['tzero'] for row in cal_params]
 
         bk2bk_params = self.extract_b2b_params(ceria_raw)
 
@@ -284,7 +284,7 @@ class CalibrationModel(object):
             "CalibrationParameters": 'DIFC+TZERO+DIFA',
             "UseChiSq": True
         }
-        cal_output = list()
+        cal_output = dict()
         curves_output = list()
 
         if spectrum_numbers is None:
@@ -300,11 +300,11 @@ class CalibrationModel(object):
                 kwargs["DiagnosticWorkspaces"] = 'diag_North'
 
                 cal_north = run_pd_calibration(kwargs)[0]
-                cal_output.append(cal_north)
+                cal_output['north'] = cal_north
                 curves_north = CloneWorkspace(curves_North)
                 curves_output.append(curves_north)
 
-                DeleteWorkspace(focused_North)
+                #DeleteWorkspace(focused_North)
 
             if bank == '2' or bank is None:
                 df_kwarg = {"GroupingFileName": SOUTH_BANK_CAL}
@@ -318,11 +318,11 @@ class CalibrationModel(object):
                 kwargs["DiagnosticWorkspaces"] = 'diag_South'
 
                 cal_south = run_pd_calibration(kwargs)[0]
-                cal_output.append(cal_south)
+                cal_output['south'] = cal_south
                 curves_south = CloneWorkspace(curves_South)
                 curves_output.append(curves_south)
 
-                DeleteWorkspace(focused_South)
+                #DeleteWorkspace(focused_South)
 
         else:
             grp_ws = create_custom_grouping_workspace(spectrum_numbers, ceria_raw)
@@ -335,8 +335,7 @@ class CalibrationModel(object):
             kwargs["DiagnosticWorkspaces"] = 'diag_Cropped'
 
             cal_cropped = run_pd_calibration(kwargs)[0]
-            cal_output.append(cal_cropped)
-
+            cal_output['cropped'] = cal_cropped
             curves_cropped = CloneWorkspace(curves_Cropped)
             curves_output.append(curves_cropped)
 
@@ -347,12 +346,22 @@ class CalibrationModel(object):
         DeleteWorkspace(ws_van_d)
         DeleteWorkspace(ws_d)
 
-        cal = list()
+        # TODO save the PDcal outputs as well
+        cal_params = list()
+        # in the output calfile, rows are present for all detids, only read one from the region of interest
+        north_read_row = 0
+        south_read_row = 1200
         for bank_cal in cal_output:
-            row = bank_cal.row(0)
+            if bank_cal == 'north':
+                read = north_read_row
+            elif bank_cal == 'south':
+                read = south_read_row
+            else:
+                read = create_spectrum_list_from_string(spectrum_numbers)[0]
+            row = cal_output[bank_cal].row(read)
             current_fit_params = {'difc': row['difc'], 'difa': row['difa'], 'tzero': row['tzero']}
-            cal.append(current_fit_params)
-        return cal, curves_output, ceria_raw
+            cal_params.append(current_fit_params)
+        return cal_params, cal_output, curves_output, ceria_raw
 
     def create_output_files(self, calibration_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path,
                             instrument, bank, spectrum_numbers):
