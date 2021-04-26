@@ -20,22 +20,9 @@ namespace API {
  */
 FunctionProperty::FunctionProperty(const std::string &name, const unsigned int direction,
                                    const PropertyMode::Type optional)
-    : Kernel::PropertyWithValue<std::shared_ptr<IFunction>>(
-          name, std::shared_ptr<IFunction>(), Kernel::IValidator_sptr(new Kernel::NullValidator()), direction),
+    : Kernel::PropertyWithValue<std::shared_ptr<IFunction>>(name, std::shared_ptr<IFunction>(),
+                                                            std::make_shared<Kernel::NullValidator>(), direction),
       m_optional(optional) {}
-
-/// Copy constructor
-FunctionProperty::FunctionProperty(const FunctionProperty &right)
-    : Kernel::PropertyWithValue<std::shared_ptr<IFunction>>(right), m_optional(right.m_optional) {}
-
-/// Copy assignment operator. Copies the pointer to the function.
-FunctionProperty &FunctionProperty::operator=(const FunctionProperty &right) {
-  if (&right == this && right.m_optional == m_optional)
-    return *this;
-  Kernel::PropertyWithValue<std::shared_ptr<IFunction>>::operator=(right);
-  m_optional = right.m_optional;
-  return *this;
-}
 
 /** Bring in the PropertyWithValue assignment operator explicitly (avoids VSC++
  * warning)
@@ -89,6 +76,7 @@ std::string FunctionProperty::setValue(const std::string &value) {
   std::string error;
 
   if (isOptional() && value.empty()) {
+    // No error message when the function string is empty and the function is optional
     m_value = std::shared_ptr<IFunction>();
     m_definition = value;
     return error;
