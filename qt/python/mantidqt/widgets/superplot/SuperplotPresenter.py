@@ -193,8 +193,7 @@ class SuperplotPresenter:
         mode = self._view.getMode()
 
         figure = self._canvas.figure
-        axes = figure.get_axes()
-        axes = axes[0]
+        axes = figure.gca()
         xscale = axes.get_xscale()
         yscale = axes.get_yscale()
         axes.clear()
