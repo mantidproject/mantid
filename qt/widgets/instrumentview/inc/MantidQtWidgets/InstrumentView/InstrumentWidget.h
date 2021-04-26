@@ -160,6 +160,8 @@ public:
 
   /// Get the currently selected tab index
   int getCurrentTab() const;
+  /// Decides whether the given tab is the tab currently open
+  bool isCurrentTab(InstrumentWidgetTab* tab) const;
   /// Load the widget from a Mantid project file.
   void loadFromProject(const std::string &lines);
   /// Save the widget to a Mantid projecy file.

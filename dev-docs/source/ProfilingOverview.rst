@@ -5,7 +5,7 @@ Profiling Overview
 ==================
 
 .. contents::
-  :local:
+   :local:
 
 Profiling can mean a few different things, so here are the current ways!
 

@@ -19,7 +19,6 @@
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-// #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
@@ -1338,7 +1337,9 @@ void InstrumentWidgetMaskTab::storeMask() {
 
 void InstrumentWidgetMaskTab::changedIntegrationRange(double /*unused*/,
                                                       double /*unused*/) {
-  enableApplyButtons();
+  if (m_instrWidget->isCurrentTab(this)) {
+    enableApplyButtons();
+  }
 }
 
 /** Load mask tab state from a Mantid project file

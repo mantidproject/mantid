@@ -49,7 +49,7 @@ size_t ConvToMDBase::initialize(const MDAlgorithms::MDWSDescription &WSD,
   // get the index which identify the run the source workspace came from.
   // This index will mark the workspace' events for diffetent worksapces to
   // combine
-  m_RunIndex = WSD.getPropertyValueAsType<uint16_t>("RUN_INDEX");
+  m_ExpInfoIndex = WSD.getPropertyValueAsType<uint16_t>("EXP_INFO_INDEX");
 
   m_NDims = m_OutWSWrapper->nDimensions();
   // allocate space for single MDEvent coordinates
@@ -102,7 +102,7 @@ size_t ConvToMDBase::initialize(const MDAlgorithms::MDWSDescription &WSD,
 /** empty default constructor */
 ConvToMDBase::ConvToMDBase()
     : m_NDims(0),           // wrong non-initialized
-      m_RunIndex(0),        // defauld run index is 0
+      m_ExpInfoIndex(0),    // defauld associated experiment-info index is 0
       m_NSpectra(0),        // no valid spectra by default.
       m_NumThreads(-1),     // run with all cores availible
       m_ignoreZeros(false), // 0-s added to workspace

@@ -44,7 +44,7 @@ public:
   std::unique_ptr<coord_t[]> getVertexesArray(size_t &, const size_t, const bool *) const override { return nullptr; }
   Mantid::Kernel::VMD getCenter() const override;
   size_t getNumEvents() const override { return 0; }
-  uint16_t getInnerRunIndex(size_t) const override { return 0; }
+  uint16_t getInnerExpInfoIndex(size_t) const override { return 0; }
   uint16_t getInnerGoniometerIndex(size_t) const override { return 0; }
   int32_t getInnerDetectorID(size_t) const override { return 0; }
   coord_t getInnerPosition(size_t, size_t) const override { return 0; }

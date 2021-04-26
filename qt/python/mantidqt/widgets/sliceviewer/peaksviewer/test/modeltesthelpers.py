@@ -10,7 +10,7 @@
 from unittest.mock import MagicMock, create_autospec
 
 # 3rd party imports
-from mantid.api import SpecialCoordinateSystem
+from mantid.kernel import SpecialCoordinateSystem
 from mantid.dataobjects import PeaksWorkspace
 
 # local imports
