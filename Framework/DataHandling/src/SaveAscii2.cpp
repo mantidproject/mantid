@@ -543,7 +543,8 @@ std::pair<std::string, std::string> SaveAscii2::sampleLogValueUnit(const std::st
 void SaveAscii2::writeFileHeader(const std::vector<std::string> &logList, std::ofstream &outputFile) {
   for (const auto &logName : logList) {
     const std::pair<std::string, std::string> readLog = sampleLogValueUnit(logName);
-    outputFile << logName << m_sep << readLog.first << m_sep << readLog.second << '\n';
+    auto logValue = boost::replace_all_copy(readLog.second, ",", ";");
+    outputFile << logName << m_sep << readLog.first << m_sep << logValue << '\n';
   }
   outputFile << '\n';
 }
