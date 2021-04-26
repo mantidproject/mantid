@@ -56,4 +56,6 @@ class PresenterCommon(metaclass=ABCMeta):
             return
         if decimal_places:
             attribute = round(attribute,decimal_places)
-        setattr(view, attribute_name, attribute)
+        old_attribute = getattr(view, attribute_name)
+        if attribute != old_attribute:
+            setattr(view, attribute_name, attribute)
