@@ -335,8 +335,9 @@ class SliceViewerDataView(QWidget):
 
     def draw_plot(self):
         self.ax.set_title('')
-        self.colorbar.set_mappable(self.image)
-        self.colorbar.update_clim()
+        if self.image:
+            self.colorbar.set_mappable(self.image)
+            self.colorbar.update_clim()
         self.mpl_toolbar.update()  # clear nav stack
         if self.line_plots_active:
             self._line_plots.plotter.delete_line_plot_lines()

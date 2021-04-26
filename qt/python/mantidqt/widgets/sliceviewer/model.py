@@ -255,11 +255,11 @@ class SliceViewerModel:
         expt_info = self._get_ws().getExperimentInfo(0)
         lattice = expt_info.sample().getOrientedLattice()
         try:
-            proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value)
+            proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value, dtype=float)
             proj_matrix = proj_matrix.reshape(3, 3)
         except (AttributeError, KeyError):  # run can be None so no .get()
             # assume orthogonal projection
-            proj_matrix = np.diag([1., 1., 1.])
+            proj_matrix = np.eye(3)
         display_indices = list(range(0, proj_matrix.shape[0]))
         display_indices.pop(slice_info.z_index)
         return NonOrthogonalTransform.from_lattice(lattice,

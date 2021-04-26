@@ -21,8 +21,6 @@
 #include "MantidGeometry/Crystal/HKLGenerator.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include <boost/math/special_functions/round.hpp>
 
@@ -53,19 +51,10 @@ void PredictSatellitePeaks::init() {
 
   declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("SatellitePeaks", "", Direction::Output),
                   "Workspace of Peaks with peaks with fractional h,k, and/or l values");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(string("ModVector1"), "0.0,0.0,0.0"),
-                  "Offsets for h, k, l directions ");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(string("ModVector2"), "0.0,0.0,0.0"),
-                  "Offsets for h, k, l directions ");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(string("ModVector3"), "0.0,0.0,0.0"),
-                  "Offsets for h, k, l directions ");
-  declareProperty(std::make_unique<PropertyWithValue<int>>("MaxOrder", 0, Direction::Input),
-                  "Maximum order to apply ModVectors. Default = 0");
+
+  ModulationProperties::appendTo(this);
 
   declareProperty("GetModVectorsFromUB", false, "If false Modulation Vectors will be read from input");
-
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("CrossTerms", false, Direction::Input),
-                  "Include cross terms (false)");
 
   declareProperty("IncludeIntegerHKL", true, "If false order 0 peaks are not included in workspace (integer HKL)");
 
@@ -81,7 +70,7 @@ void PredictSatellitePeaks::init() {
                   "Maximum wavelength limit at which to start looking for "
                   "single-crystal peaks.");
   declareProperty(std::make_unique<PropertyWithValue<double>>("MinDSpacing", 0.1, Direction::Input),
-                  "Minimum d-spacing of peaks to consider. Default = 1.0");
+                  "Minimum d-spacing of peaks to consider. Default = 0.1");
   declareProperty(std::make_unique<PropertyWithValue<double>>("MaxDSpacing", 100.0, Direction::Input),
                   "Maximum d-spacing of peaks to consider");
 
@@ -109,11 +98,11 @@ void PredictSatellitePeaks::exec() {
     return;
   }
 
-  V3D offsets1 = getOffsetVector("ModVector1");
-  V3D offsets2 = getOffsetVector("ModVector2");
-  V3D offsets3 = getOffsetVector("ModVector3");
-  int maxOrder = getProperty("MaxOrder");
-  bool crossTerms = getProperty("CrossTerms");
+  V3D offsets1 = getOffsetVector(ModulationProperties::ModVector1);
+  V3D offsets2 = getOffsetVector(ModulationProperties::ModVector2);
+  V3D offsets3 = getOffsetVector(ModulationProperties::ModVector3);
+  int maxOrder = getProperty(ModulationProperties::MaxOrder);
+  bool crossTerms = getProperty(ModulationProperties::CrossTerms);
   bool includeOrderZero = getProperty("IncludeIntegerHKL");
   // boolean for only including order zero once
   bool notOrderZero = false;
@@ -140,7 +129,7 @@ void PredictSatellitePeaks::exec() {
   const auto instrument = Peaks->getInstrument();
 
   outPeaks = std::dynamic_pointer_cast<IPeaksWorkspace>(WorkspaceFactory::Instance().createPeaks(Peaks->id()));
-  outPeaks->setInstrument(instrument);
+  outPeaks->copyExperimentInfoFrom(Peaks.get());
   outPeaks->mutableSample().setOrientedLattice(std::move(lattice));
 
   Kernel::Matrix<double> goniometer;
@@ -212,11 +201,11 @@ void PredictSatellitePeaks::exec() {
 
 void PredictSatellitePeaks::exec_peaks() {
 
-  V3D offsets1 = getOffsetVector("ModVector1");
-  V3D offsets2 = getOffsetVector("ModVector2");
-  V3D offsets3 = getOffsetVector("ModVector3");
-  int maxOrder = getProperty("MaxOrder");
-  bool crossTerms = getProperty("CrossTerms");
+  V3D offsets1 = getOffsetVector(ModulationProperties::ModVector1);
+  V3D offsets2 = getOffsetVector(ModulationProperties::ModVector2);
+  V3D offsets3 = getOffsetVector(ModulationProperties::ModVector3);
+  int maxOrder = getProperty(ModulationProperties::MaxOrder);
+  bool crossTerms = getProperty(ModulationProperties::CrossTerms);
 
   API::Sample sample = Peaks->mutableSample();
 
@@ -251,7 +240,7 @@ void PredictSatellitePeaks::exec_peaks() {
   const auto instrument = Peaks->getInstrument();
 
   outPeaks = std::dynamic_pointer_cast<IPeaksWorkspace>(WorkspaceFactory::Instance().createPeaks(Peaks->id()));
-  outPeaks->setInstrument(instrument);
+  outPeaks->copyExperimentInfoFrom(Peaks.get());
   outPeaks->mutableSample().setOrientedLattice(std::move(lattice));
 
   vector<vector<int>> AlreadyDonePeaks;
