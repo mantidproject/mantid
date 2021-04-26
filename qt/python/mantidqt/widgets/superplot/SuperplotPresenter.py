@@ -210,7 +210,8 @@ class SuperplotPresenter:
                                            line.get_color())
 
         for wsName, spectra in selection.items():
-            spectra.append(currentSpectrumIndex)
+            if currentSpectrumIndex not in spectra:
+                spectra.append(currentSpectrumIndex)
             for spectrum in spectra:
                 if (wsName, spectrum) not in plottedData:
                     if mode == self.SPECTRUM_MODE_TEXT:
