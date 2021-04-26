@@ -226,6 +226,18 @@ class EnggFocusTest(unittest.TestCase):
         self._check_output_ok(wks=out_bank_south, ws_name=out_name, y_dim_max=1201,
                               yvalues=self._expected_yvals_bank2)
 
+    def test_no_error_when_zero_proton_charge(self):
+        """
+        Run focusing on one bank but on a ws with no proton charge
+        """
+        # remove proton charge log (getProtonCharge will then return 0)
+        ws = CloneWorkspace(self.__class__._data_ws)  # so don't interfere with other tests
+        DeleteLog(Workspace=ws, Name='gd_prtn_chrg')
+        out_bank_south = EnggFocus(InputWorkspace=ws,
+                                   VanIntegrationWorkspace=self.__class__._van_integ_tbl,
+                                   VanCurvesWorkspace=self.__class__._van_curves_ws,
+                                   Bank='South', OutputWorkspace='out_bank_south')  # test passes if no RuntimeError
+
 
 if __name__ == '__main__':
     unittest.main()
