@@ -275,13 +275,16 @@ class EAGroupingTableView(QtWidgets.QWidget):
                                                    'Rebinning creates a new workspace.\n'
                                                    'Enter the new bin width for a new workspace:')
         if not ok:
+            self.grouping_table.cellWidget(row, 4).setCurrentIndex(0)
             return
         if not steps.strip():
             self.warning_popup("Rebin parameters not given")
+            self.grouping_table.cellWidget(row, 4).setCurrentIndex(0)
             return
         try:
             steps = float(steps)
         except ValueError:
+            self.grouping_table.cellWidget(row, 4).setCurrentIndex(0)
             self.warning_popup("Given rebin step is invalid")
             return
         steps_text = "Steps: " + str(steps)
@@ -304,8 +307,10 @@ class EAGroupingTableView(QtWidgets.QWidget):
                                                    '0,100,10000,200,20000: from 0 rebin in steps of 100 to 10,000 then '
                                                    'steps of 200 to 20,000')
         if not ok:
+            self.grouping_table.cellWidget(row, 4).setCurrentIndex(0)
             return
         if not steps.strip():
+            self.grouping_table.cellWidget(row, 4).setCurrentIndex(0)
             self.warning_popup("Rebin parameters not given")
             return
         bin_text = "Bin Boundaries: " + str(steps)
