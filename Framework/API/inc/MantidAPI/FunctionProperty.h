@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.h"
 
@@ -28,14 +29,15 @@ is the creation string accepted by the FunctionFactory.
 class MANTID_API_DLL FunctionProperty : public Kernel::PropertyWithValue<std::shared_ptr<IFunction>> {
 public:
   /// Constructor.
-  FunctionProperty(const std::string &name, const unsigned int direction = Kernel::Direction::Input);
+  FunctionProperty(const std::string &name, const unsigned int direction = Kernel::Direction::Input,
+                   const PropertyMode::Type optional = PropertyMode::Type::Mandatory);
 
   /// Copy constructor
-  FunctionProperty(const FunctionProperty &right);
+  FunctionProperty(const FunctionProperty &right) = default;
 
   /// Copy assignment operator. Only copies the value (i.e. the pointer to the
   /// function)
-  FunctionProperty &operator=(const FunctionProperty &right);
+  FunctionProperty &operator=(const FunctionProperty &right) = default;
 
   /// Bring in the PropertyWithValue assignment operator explicitly (avoids
   /// VSC++ warning)
@@ -72,6 +74,11 @@ public:
   const Kernel::PropertyHistory createHistory() const override;
 
 private:
+  /// Return true if the property is optional.
+  bool isOptional() const;
+
+  /// A flag indicating whether the property should be considered optional.
+  PropertyMode::Type m_optional;
   /// The function definition string (as used by the FunctionFactory)
   std::string m_definition;
 };
