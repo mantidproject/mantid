@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import re
+import os
 
 from qtpy.QtWidgets import QFileDialog, QMessageBox
 
@@ -429,7 +430,7 @@ class DrillPresenter:
             return
         self.view.blockSignals(True)
         self.model.setIOFile(filename[0])
-        self.view.setWindowTitle(filename[0] + " [*]")
+        self.view.setWindowTitle(os.path.split(filename[0])[1] + " [*]")
         self.model.importRundexData()
         self._syncViewHeader()
         self._syncViewTable()
@@ -459,7 +460,7 @@ class DrillPresenter:
         if not filename[0]:
             return
         self.model.setIOFile(filename[0])
-        self.view.setWindowTitle(filename[0] + " [*]")
+        self.view.setWindowTitle(os.path.split(filename[0])[1] + " [*]")
         self.model.setVisualSettings(self.view.getVisualSettings())
         self.model.exportRundexData()
         self.view.setWindowModified(False)
