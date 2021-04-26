@@ -22,7 +22,7 @@ New and Improved
 - Added an algorithm ProfileChiSquared1D to profile chi squared after a fit. This can be used
   to find better estimates of parameter errors.
 - Instrument view: when in tube selection mode, the sum of pixel counts is now output to the selection pane.
-- Added memory widget to display total memory usage.
+- Added memory widget to display total memory usage. This means that your widget layout will be reset when starting workbench v6.1.0 for the first time. Previously saved layouts accessible from ``View > User Layouts`` may need to be saved again to include the memory bar widget.
 
 
 Bugfixes
@@ -43,5 +43,7 @@ Bugfixes
 - Fixed a crash that happens when multiple plot windows are open, and the users closes one of them.
 - The y-axis in the instrument view's pick tab will now rescale if the range changes.
 - On the instrument widget pick tab, when the integration range is changed the current tool will stay selected.
+- Fixed a bug where Workbench would hang on startup when running on Big Sur.
+- Fixed a bug applying constraints with the conjugate gradient minimizer.
 
 :ref:`Release 6.1.0 <v6.1.0>`

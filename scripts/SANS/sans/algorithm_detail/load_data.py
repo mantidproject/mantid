@@ -439,7 +439,6 @@ def loader_for_added_isis_nexus(file_information, is_transmission, period, paren
     :param parent_alg: a handle to the parent algorithm
     :return: the name of the load algorithm and the selected load options
     """
-    _ = is_transmission  # noqa
     loader_name = "LoadNexusProcessed"
     loader_options = {"Filename": file_information.get_file_name(),
                       "OutputWorkspace": EMPTY_NAME,

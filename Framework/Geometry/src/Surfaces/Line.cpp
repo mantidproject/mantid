@@ -103,8 +103,7 @@ Apply a displacement Pt
   m_origin += Pt;
 }
 
-int Line::lambdaPair(const int ix, const std::pair<std::complex<double>, std::complex<double>> &SQ,
-                     std::vector<Kernel::V3D> &PntOut) const
+int Line::lambdaPair(const int ix, const std::pair<std::complex<double>, std::complex<double>> &SQ, PType &PntOut) const
 /**
 Helper function to decide which roots to take.
 The assumption is that lambda has been solved by quadratic
@@ -151,7 +150,7 @@ cases exist.
   return 0; // both points imaginary
 }
 
-int Line::intersect(std::vector<Kernel::V3D> &VecOut, const Quadratic &Sur) const
+int Line::intersect(PType &VecOut, const Quadratic &Sur) const
 /**
 For the line that intersects the surfaces
 add the point(s) to the VecOut, return number of points
@@ -176,7 +175,7 @@ added. It does not check the points for validity.
   return lambdaPair(ix, SQ, VecOut);
 }
 
-int Line::intersect(std::vector<Kernel::V3D> &PntOut, const Plane &Pln) const
+int Line::intersect(PType &PntOut, const Plane &Pln) const
 /**
 For the line that intersects the cylinder generate
 add the point to the VecOut, return number of points
@@ -199,7 +198,7 @@ added. It does not check the points for validity.
   return 1;
 }
 
-int Line::intersect(std::vector<Kernel::V3D> &PntOut, const Cylinder &Cyl) const
+int Line::intersect(PType &PntOut, const Cylinder &Cyl) const
 /**
 For the line that intersects the cylinder generate
 add the point to the VecOut, return number of points
@@ -227,7 +226,7 @@ added. It does not check the points for validity.
   return lambdaPair(ix, SQ, PntOut);
 }
 
-int Line::intersect(std::vector<Kernel::V3D> &PntOut, const Sphere &Sph) const
+int Line::intersect(PType &PntOut, const Sphere &Sph) const
 /**
 For the line that intersects the cylinder generate
 add the point to the VecOut, return number of points

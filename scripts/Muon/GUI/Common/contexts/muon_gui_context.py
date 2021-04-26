@@ -6,18 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt.utils.observer_pattern import Observable
 
-from enum import Enum
-
-PlotModeStrings = ['Plot Data', 'Plot Fits']
-
-
-class PlotMode(Enum):
-    Data = 0
-    Fitting = 1
-
-    def __str__(self):
-        return PlotModeStrings[self.value]
-
 
 class GuiVariablesNotifier(Observable):
     def __init__(self, outer):

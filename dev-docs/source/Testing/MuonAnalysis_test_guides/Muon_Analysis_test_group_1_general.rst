@@ -26,7 +26,7 @@ Test 1: Load Current Run
 .. note:: This test will only work if you are using Windows and are connected
 		to the ISIS network. You should also enable search of the archive in your
 		:ref:`manage user directories <ManageUserDirectories>`. If this is not the
-		case, go to :ref:`test_2`.
+		case, go to :ref:`test_2_muon_gen`.
 
 - Open **Muon Analysis** (*Interfaces* > *Muon* > *Muon Analysis*)
 - On the **Home** tab, in the *Instrument* section, select each ISIS muon
@@ -42,7 +42,7 @@ Test 1: Load Current Run
 
 -----------
 
-.. _test_2:
+.. _test_2_muon_gen:
 
 Test 2: Data Loading and Rebinning
 ----------------------------------
@@ -56,16 +56,16 @@ Test 2: Data Loading and Rebinning
 - The data should look like this:
 
 .. image:: /images/MuonAnalysisTests/emu20918.png
-  :align: center
-  :alt: emu20918.png
+   :align: center
+   :alt: emu20918.png
 
 - On the **Home** tab, under the *Rebin* section, change **Rebin** to
   **Fixed** with steps of ``5``. Then on the Plotting Window make sure
   **Plot Raw** is unchecked. The data should now look like this:
 
 .. image:: /images/MuonAnalysisTests/emu20918_rebin.png
-  :align: center
-  :alt: emu20918_rebin.png
+   :align: center
+   :alt: emu20918_rebin.png
 
 --------------------------------
 
@@ -74,7 +74,7 @@ Test 3: Basic Fitting In The GUI
 
 **Time required 5-10 minutes**
 
-- Start with the same data loaded and rebin settings from :ref:`test_2`
+- Start with the same data loaded and rebin settings from :ref:`test_2_muon_gen`
 - Go to the **Fitting** tab
 	- Right click the empty table area; Select **Add Function**
 	- Add **Abragam** (*Muon* > *MuonSpecific* > *Abragam*)
@@ -84,12 +84,11 @@ Test 3: Basic Fitting In The GUI
 - The fit should be applied to the rebinned data
 
 .. image:: /images/MuonAnalysisTests/emu20918_rebin_fitted.png
-	:align: center
-	:alt: emu20918_rebin_fitted.png
+   :align: center
+   :alt: emu20918_rebin_fitted.png
 
 - Now set **Fit To Raw Data** to be ``true`` and click **Fit** again. This time
   it will fit to the raw data, but the rebinned data will still be shown in the
   plot
 - There should now be two new workspaces in the workspace toolbox; One for
   fitted raw data and one for fitted rebinned data
-

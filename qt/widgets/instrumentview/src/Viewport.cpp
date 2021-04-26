@@ -8,10 +8,8 @@
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidKernel/V3D.h"
 
-#include <QtGlobal>
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
-#endif
+#include <QtGlobal>
 
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 #include <cmath>
@@ -503,7 +501,9 @@ void Viewport::loadFromProject(const std::string &lines) {
 }
 
 std::string Viewport::saveToProject() const {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  // WARNING: Q1DWeighted heavily depends on the format of this function's
+  // output (via "Save Shapes to table" in the instrument viewer draw tab).
+  // Modify with great caution.
   API::TSVSerialiser tsv;
   tsv.writeLine("Translation") << m_xTrans << m_yTrans;
   tsv.writeLine("Zoom") << m_zoomFactor;
@@ -514,10 +514,6 @@ std::string Viewport::saveToProject() const {
   }
 
   return tsv.outputLines();
-#else
-  throw std::runtime_error(
-      "Viewport::saveToProject() not implemented for Qt >= 5");
-#endif
 }
 } // namespace MantidWidgets
 } // namespace MantidQt
