@@ -1149,7 +1149,7 @@ def delete_reduced_workspaces(reduction_packages, include_non_transmission=True)
     def _delete_workspaces(_delete_alg, _workspaces):
         for _workspace in _workspaces:
             if _workspace is not None:
-                _delete_alg.setProperty("Workspace", _workspace.name())
+                _delete_alg.setProperty("Workspace", _workspace)
                 _delete_alg.execute()
     # Get all names which were saved out to workspaces
     # Delete each workspace
