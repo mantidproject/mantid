@@ -84,7 +84,7 @@
       <parameter name="log_list_to_save" type="string">
       <value val="facility,instrument_name,experiment_identifier,
 		  experiment_title,start_time,end_time,numor_list,
-		  processedAs,wavelength,sample_transmission,
+		  processedAs,wavelength,sample_transmission_numors,
                   collimation.actual_position,L2"/>
       </parameter>
     </component-link>

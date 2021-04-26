@@ -6,7 +6,7 @@
     <parameter name="log_list_to_save" type="string">
       <value val="facility,instrument.name,experiment_identifier,
 		  title,start_time,end_time,numor_list,
-		  processedAs,wavelength,sample_transmission"/>
+		  processedAs,wavelength,sample_transmission_numors"/>
     </parameter>
 
   </component-link>

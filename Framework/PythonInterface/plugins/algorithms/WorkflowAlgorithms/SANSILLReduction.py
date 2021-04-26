@@ -608,7 +608,7 @@ class SANSILLReduction(PythonAlgorithm):
                              NaNError=0, InfinityValue=0, InfinityError=0)
         mtd[ws].getRun().addProperty('ProcessedAs', process, True)
         mtd[ws].getRun().addProperty('numor_list', self._return_numors(self.getPropertyValue('Run')), True)
-        mtd[ws].getRun().addProperty('sample_transmission',
+        mtd[ws].getRun().addProperty('sample_transmission_numors',
                                      self._return_numors(self.getPropertyValue('TransmissionInputWorkspace')), True)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
         self.setProperty('OutputWorkspace', mtd[ws[2:]])
