@@ -390,7 +390,7 @@ void SequentialFitDialog::getFitResults() {
   Mantid::API::TableRow row = ws->getRow(rowNo);
   // results parameter table contains parameter value followed by its error so
   // increment by 2 for each value. Ignore first and last column in row as they
-  // contain name and chi-squared
+  // contain name and chi-squared. Also ignore columns that aren't fitting parameters.
   for (size_t col = 1; col < columnNames.size() - 1; col += 2) {
     auto value = row.Double(col);
     auto error = row.Double(col + 1);
@@ -399,10 +399,12 @@ void SequentialFitDialog::getFitResults() {
     if (m_fitBrowser->count() == 1) {
       name.insert(0, "f0.");
     }
-    size_t paramIndex = m_fitBrowser->compositeFunction()->parameterIndex(name);
+    if (m_fitBrowser->compositeFunction()->hasParameter(name)) {
+      size_t paramIndex = m_fitBrowser->compositeFunction()->parameterIndex(name);
 
-    m_fitBrowser->compositeFunction()->setParameter(paramIndex, value);
-    m_fitBrowser->compositeFunction()->setError(paramIndex, error);
+      m_fitBrowser->compositeFunction()->setParameter(paramIndex, value);
+      m_fitBrowser->compositeFunction()->setError(paramIndex, error);
+    }
   }
   m_fitBrowser->updateParameters();
   m_fitBrowser->getHandler()->updateErrors();

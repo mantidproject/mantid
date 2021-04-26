@@ -7,8 +7,8 @@
 #  This file is part of the mantid workbench.
 
 # 3rd party imports
-from mantid.api import AnalysisDataService, SpecialCoordinateSystem
-from mantid.kernel import logger
+from mantid.api import AnalysisDataService
+from mantid.kernel import logger, SpecialCoordinateSystem
 
 # local imports
 from mantidqt.widgets.workspacedisplay.table.model \

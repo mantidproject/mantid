@@ -8,7 +8,8 @@ import unittest
 
 from unittest import mock
 from unittest.mock import patch
-from numpy import isnan, nan, pi
+from numpy import isnan, nan
+from mantid.kernel import UnitParams, UnitParametersMap
 from Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_model import FittingDataModel
 
 data_model_path = "Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_model"
@@ -29,17 +30,12 @@ class TestFittingDataModel(unittest.TestCase):
         self.mock_run.getProtonCharge.return_value = 1.0
         self.mock_run.getProperty.return_value = mock_prop
         self.mock_run.getLogData.return_value = mock_log_data
-        mock_spec_info = mock.MagicMock()
-        mock_spec_info.l1.return_value = 50
-        mock_spec_info.l2.return_value = 1.5
-        mock_spec_info.twoTheta.return_value = pi / 2
         self.mock_ws = mock.MagicMock()
         self.mock_ws.getNumberHistograms.return_value = 1
         self.mock_ws.getRun.return_value = self.mock_run
         self.mock_ws.getInstrument.return_value = self.mock_inst
         self.mock_ws.getRunNumber.return_value = 1
         self.mock_ws.getTitle.return_value = 'title'
-        self.mock_ws.spectrumInfo.return_value = mock_spec_info
         mock_axis = mock.MagicMock()
         mock_unit = mock.MagicMock()
         self.mock_ws.getAxis.return_value = mock_axis
@@ -377,7 +373,9 @@ class TestFittingDataModel(unittest.TestCase):
             'Error': [1.0, 10.0, 2.0, 1.0, 10.0, 2.0, 0.0]}
         mock_ads.retrieve.return_value = mock_table
         difc = 10000
-        mock_get_diffs.return_value = [0, difc, 0]
+        params = UnitParametersMap()
+        params[UnitParams.difc] = difc
+        mock_get_diffs.return_value = params
         func_str = 'name=Gaussian,Height=11,PeakCentre=40000,Sigma=54;name=Gaussian,Height=10,PeakCentre=30000,Sigma=51'
         fitprop = {'name': 'Fit', 'properties': {'ConvolveMembers': True, 'EndX': 52000,
                                                  'Function': func_str,
@@ -492,7 +490,9 @@ class TestFittingDataModel(unittest.TestCase):
 
     @patch(data_model_path + '.FittingDataModel._get_diff_constants')
     def test_convert_centres_and_error_from_TOF_to_d(self, mock_get_diffs):
-        mock_get_diffs.return_value = [0, 18000, 0]
+        params = UnitParametersMap()
+        params[UnitParams.difc] = 18000
+        mock_get_diffs.return_value = params
         tof = 40000
         tof_error = 5
         d = self.model._convert_TOF_to_d(tof, 'ws_name')
@@ -500,16 +500,6 @@ class TestFittingDataModel(unittest.TestCase):
 
         self.assertAlmostEqual(tof / d, 18000, delta=1E-10)
         self.assertAlmostEqual(d_error / d, tof_error / tof, delta=1E-10)
-
-    @patch(data_model_path + '.ADS')
-    def test_get_diff_constants(self, mock_ads):
-        mock_ads.retrieve.return_value = self.mock_ws
-        difa, difc, tzero = self.model._get_diff_constants("name1")
-
-        # presently only difc can be determined from the workspace
-        self.assertAlmostEqual(difa, 0.0, delta=1E-10)
-        self.assertAlmostEqual(tzero, 0.0, delta=1E-10)
-        self.assertAlmostEqual(difc, 18413.0945, delta=1E-4)
 
     @patch(data_model_path + '.get_setting')
     @patch(data_model_path + '.ADS')

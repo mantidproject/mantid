@@ -9,6 +9,11 @@ SANS Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+New
+---
+
+- Sectors drawn in the instrument viewer can now be used to define wedges in :ref:`Q1DWeighted <algm-Q1DWeighted>`.
+
 Bugfixes
 --------
 
@@ -28,6 +33,7 @@ Improvements
   `12345_rear_1d_1.0_10.0_...p0_t4`, where `1.0_10.0` is the wavelength of that workspace.
 - :ref:`SANSILLReduction <algm-SANSILLReduction>` has a new property `SolventInputWorkspace`, to provide reduced solvent data to be subtracted from the sample data.
 - :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>` has a new property `SolventFiles`, to communicate with :ref:`SANSILLReduction <algm-SANSILLReduction>` the file names of the reduced solvent data.
+- ISIS SANS can load summed nexus files without requiring "-add" in the name.
 - :ref:`SANSILLReduction <algm-SANSILLReduction>` adds sample log information to reduced data about facility,
   sample transmission numor, and all SampleRuns numors, with relevant algebra.
 
