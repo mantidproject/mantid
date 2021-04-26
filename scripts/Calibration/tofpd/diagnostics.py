@@ -170,7 +170,7 @@ def plot2d(workspace, tolerance: float=0.001, peakpositions: np.ndarray=DIAMOND,
 
     # annotate expected peak positions and tolerances
     for peak in peakpositions:
-        if peak > 0.4 and peak < 1.5:
+        if peak > xmin and peak < xmax:
             shade = ((1-tolerance) * peak, (1+tolerance) * peak)
             ax.axvspan(shade[0], shade[1], color=TOLERANCE_COLOR, alpha=.2)
             ax.axvline(x=peak, color=MARKER_COLOR, alpha=0.4)
