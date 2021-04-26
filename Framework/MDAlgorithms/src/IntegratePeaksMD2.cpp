@@ -183,7 +183,7 @@ void IntegratePeaksMD2::init() {
       "MaskEdgeTubes", true,
       "Mask tubes on the edge of all banks in the PeaksWorkspace instrument (note the edge pixels at top/bottom of all "
       "tubes will always be masked even if this property is False). Note the algorithm will treat "
-      "any masked pixels as edges (including pixles already masked prior to the execution of this algorithm) - this "
+      "any masked pixels as edges (including pixels already masked prior to the execution of this algorithm) - this "
       "means a custom mask can be applied to the PeaksWorkspace before integration.");
 
   // Group Properties
@@ -490,7 +490,7 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
 
     // Do not integrate if sphere is off edge of detector
 
-    double edgeDist = calculateDistanceToEdge(p.getQLabFrame(), std::max(BackgroundOuterRadius[0], PeakRadius[0]));
+    const double edgeDist = calculateDistanceToEdge(p.getQLabFrame());
     if (edgeDist < std::max(BackgroundOuterRadius[0], PeakRadius[0])) {
       g_log.warning() << "Warning: sphere/cylinder for integration is off edge "
                          "of detector for peak "
@@ -1224,15 +1224,14 @@ void IntegratePeaksMD2::calculateE1(const Geometry::DetectorInfo &detectorInfo) 
  *volume, the peak must be rejected.
  *
  * @param QLabFrame: The Peak center.
- * @param r: Peak radius.
  */
-double IntegratePeaksMD2::calculateDistanceToEdge(Mantid::Kernel::V3D QLabFrame, double r) {
-  double edgeDist = r;
+double IntegratePeaksMD2::calculateDistanceToEdge(const Mantid::Kernel::V3D &QLabFrame) {
+  double edgeDist = DBL_MAX;
   for (auto &E1 : E1Vec) {
     V3D distv = QLabFrame - E1 * (QLabFrame.scalar_prod(E1)); // distance to the
                                                               // trajectory as a
                                                               // vector
-    edgeDist = std::min(edgeDist, distv.norm());              // want smallest dist to
+    edgeDist = std::min(edgeDist, distv.norm());              // want smallest dist to peak
   }
   return edgeDist;
 }

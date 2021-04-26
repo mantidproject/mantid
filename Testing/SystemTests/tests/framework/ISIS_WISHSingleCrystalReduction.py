@@ -85,7 +85,7 @@ class WISHSingleCrystalPeakPredictionTest(MantidSystemTest):
 class WISHPeakIntegrationRespectsMaskingTest(MantidSystemTest):
     """
     This tests that IntegratePeaksMD correctly ignores peaks at tube ends and that a custom masking for tubes
-    adjacent to the near beam in and out is respected by IntegratePeaksMD
+    adjacent to the beam in and out is respected by IntegratePeaksMD
     """
 
     def cleanup(self):
