@@ -8,7 +8,7 @@
 #include <string>
 
 #include "DllConfig.h"
-#include "IIndirectFitDataModel.h"
+#include "IIndirectFitDataTableModel.h"
 #include "IndirectFitData.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
@@ -20,18 +20,18 @@ namespace IDA {
 using namespace MantidWidgets;
 
 /*
-   IndirectFitDataModel - Specifies an interface for updating, querying and
+   IndirectFitDataTableModel - Specifies an interface for updating, querying and
    accessing the raw data in IndirectFitAnalysisTabs
 */
-class MANTIDQT_INDIRECT_DLL IndirectFitDataModel : public IIndirectFitDataModel {
+class MANTIDQT_INDIRECT_DLL IndirectFitDataTableModel : public IIndirectFitDataTableModel {
 public:
-  IndirectFitDataModel();
-  virtual ~IndirectFitDataModel() = default;
+  IndirectFitDataTableModel();
+  virtual ~IndirectFitDataTableModel() = default;
   bool hasWorkspace(std::string const &workspaceName) const override;
   Mantid::API::MatrixWorkspace_sptr getWorkspace(TableDatasetIndex index) const override;
   FunctionModelSpectra getSpectra(TableDatasetIndex index) const override;
   bool isMultiFit() const override;
-  TableDatasetIndex numberOfWorkspaces() const override;
+  TableDatasetIndex getNumberOfWorkspaces() const override;
   size_t getNumberOfSpectra(TableDatasetIndex index) const override;
   size_t getNumberOfDomains() const override;
   FitDomainIndex getDomainIndex(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const override;

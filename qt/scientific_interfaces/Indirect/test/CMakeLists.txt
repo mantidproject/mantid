@@ -12,11 +12,13 @@ set(
   IndirectFitAnalysisTabTest.h
   IndirectFitDataPresenterTest.h
   IndirectFitDataTest.h
-  IndirectFitDataModelTest.h
+  IndirectFitDataTableModelTest.h
+  IndirectFitOutputModelTest.h
   IndirectFitOutputOptionsModelTest.h
   IndirectFitOutputOptionsPresenterTest.h
   IndirectFitPlotModelTest.h
   IndirectFitPlotPresenterTest.h
+  IndirectFitPropertyBrowserTest.h
   IndirectFittingModelTest.h
   IndirectPlotOptionsModelTest.h
   IndirectPlotOptionsPresenterTest.h

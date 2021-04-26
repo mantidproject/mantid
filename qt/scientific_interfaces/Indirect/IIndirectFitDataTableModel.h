@@ -22,17 +22,17 @@ using namespace MantidWidgets;
 using IndirectFitDataCollectionType = IndexCollectionType<TableDatasetIndex, std::unique_ptr<IndirectFitData>>;
 
 /*
-   IIndirectFitDataModel - Specifies an interface for updating, querying and
+   IIndirectFitDataTableModel - Specifies an interface for updating, querying and
    accessing the raw data in IndirectFitAnalysisTabs
 */
-class MANTIDQT_INDIRECT_DLL IIndirectFitDataModel {
+class MANTIDQT_INDIRECT_DLL IIndirectFitDataTableModel {
 public:
-  virtual ~IIndirectFitDataModel() = default;
+  virtual ~IIndirectFitDataTableModel() = default;
   virtual bool hasWorkspace(std::string const &workspaceName) const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getWorkspace(TableDatasetIndex index) const = 0;
   virtual FunctionModelSpectra getSpectra(TableDatasetIndex index) const = 0;
   virtual bool isMultiFit() const = 0;
-  virtual TableDatasetIndex numberOfWorkspaces() const = 0;
+  virtual TableDatasetIndex getNumberOfWorkspaces() const = 0;
   virtual size_t getNumberOfSpectra(TableDatasetIndex index) const = 0;
   virtual size_t getNumberOfDomains() const = 0;
   virtual FitDomainIndex getDomainIndex(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const = 0;
