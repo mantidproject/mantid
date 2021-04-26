@@ -101,6 +101,7 @@ Improvements
 - :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>` calculates intensity for satellite peaks with fractional HKL
 - :ref:`MDNorm <algm-MDNorm>` algorithm can now efficiently process background.
 - method ``IPeaksWorkspaceaddPeak(V3D, SpecialCoordinateSystem)`` exposed to the python interface.
+- Added option to :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` to stop masking the first and last tubes of each bank (masked pixels are used to determine whether the integration region of a peak is near the edge of the detector). Previously adjacent tubes on adjacent banks were masked which are not always to be considered edges (e.g. on WISH). A custom masking can be applied to the peak workspace (e.g. using :ref:`MaskBTP <algm-MaskBTP>`) prior to integration to denote detector edges.
 
 Bugfixes
 ########
