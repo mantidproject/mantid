@@ -484,6 +484,7 @@ class SANSDataProcessorGui(QMainWindow,
     def _row_inserted(self, row_location):
         if row_location.depth() > 1:
             self.data_processor_table.removeRowAt(row_location)
+        self._call_settings_listeners(lambda listener: listener.on_insert_row())
 
     def _append_and_edit_at_child_row_requested(self):
         self.data_processor_table.appendAndEditAtChildRow()
