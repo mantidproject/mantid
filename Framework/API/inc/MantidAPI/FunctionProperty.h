@@ -33,11 +33,11 @@ public:
                    const PropertyMode::Type optional = PropertyMode::Type::Mandatory);
 
   /// Copy constructor
-  FunctionProperty(const FunctionProperty &right) = default;
+  FunctionProperty(const FunctionProperty &right);
 
   /// Copy assignment operator. Only copies the value (i.e. the pointer to the
   /// function)
-  FunctionProperty &operator=(const FunctionProperty &right) = default;
+  FunctionProperty &operator=(const FunctionProperty &right);
 
   /// Bring in the PropertyWithValue assignment operator explicitly (avoids
   /// VSC++ warning)
