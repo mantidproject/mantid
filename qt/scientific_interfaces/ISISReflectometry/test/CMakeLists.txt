@@ -1,0 +1,73 @@
+# Testing
+set(TEST_FILES
+  Instrument/InstrumentOptionDefaultsTest.h
+  Instrument/InstrumentPresenterTest.h
+  Batch/BatchPresenterTest.h
+  Batch/BatchJobRunnerProgressBarTest.h
+  Batch/BatchJobRunnerWorkspacesTest.h
+  Batch/GroupProcessingAlgorithmTest.h
+  Batch/BatchJobRunnerProcessingTest.h
+  Batch/RowProcessingAlgorithmTest.h
+  Event/EventPresenterTest.h
+  MainWindow/MainWindowPresenterTest.h
+  RunsTable/RunsTablePresenterRowDeletionTest.h
+  RunsTable/RunsTablePresenterGroupInsertionTest.h
+  RunsTable/RunsTablePresenterRowInsertionTest.h
+  RunsTable/RunsTablePresenterProcessingTest.h
+  RunsTable/RunsTablePresenterDisplayTest.h
+  RunsTable/RunsTablePresenterGroupDeletionTest.h
+  RunsTable/RunsTablePresenterMergeJobsTest.h
+  Save/SavePresenterTest.h
+  Runs/RunsPresenterTest.h
+  Runs/CatalogRunNotifierTest.h
+  Runs/QtCatalogSearcherTest.h
+  Runs/SearchResultTest.h
+  Options/OptionsDialogPresenterTest.h
+  Common/ClipboardTest.h
+  Common/DecoderTest.h
+  Common/EncoderTest.h
+  Common/PlotterTestQt5.h
+  Experiment/ExperimentPresenterTest.h
+  Experiment/PerThetaDefaultsTableValidatorTest.h
+  Experiment/ExperimentOptionDefaultsTest.h
+  Reduction/ReductionJobsMergeTest.h
+  Reduction/ParseReflectometryStringsTest.h
+  Reduction/ValidatePerThetaDefaultsTest.h
+  Reduction/GroupTest.h
+  Reduction/ValidateRowTest.h
+)
+
+set(CXXTEST_EXTRA_HEADER_INCLUDE
+    ${CMAKE_CURRENT_LIST_DIR}/InterfacesReflectometryTestInitialization.h)
+
+mtd_add_qt_tests(
+  TARGET_NAME MantidQtInterfacesISISReflectometryTest
+  QT_VERSION 5
+  SRC ${TEST_FILES}
+  INCLUDE_DIRS
+    ../../../../Framework/CurveFitting/inc
+    ../../../../Framework/DataObjects/inc
+    ../../../../Framework/TestHelpers/inc
+  TEST_HELPER_SRCS
+    ../../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+    ../../../../Framework/TestHelpers/src/IndirectFitDataCreationHelper.cpp
+    ../../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+    ../../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+    ../../../../Framework/TestHelpers/src/ReflectometryHelper.cpp
+    ../../../../Framework/TestHelpers/src/TearDownWorld.cpp
+  LINK_LIBS
+    ${CORE_MANTIDLIBS}
+    CurveFitting
+    DataObjects
+    gmock
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
+    PythonInterfaceCore
+    ${PYTHON_LIBRARIES}
+  MTD_QT_LINK_LIBS
+    MantidScientificInterfacesISISReflectometry
+    MantidQtWidgetsCommon
+    MantidQtWidgetsPlotting
+    MantidQtWidgetsMplCpp
+  PARENT_DEPENDENCIES
+    GUITests)

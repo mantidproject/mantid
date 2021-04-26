@@ -36,7 +36,7 @@ Improvements
 - ISIS SANS can load summed nexus files without requiring "-add" in the name.
 - :ref:`SANSILLReduction <algm-SANSILLReduction>` adds sample log information to reduced data about facility,
   sample transmission numor, and all SampleRuns numors, with relevant algebra.
-
+- ISIS SANS can now load summed event transmission data
 
 Algorithms and instruments
 --------------------------

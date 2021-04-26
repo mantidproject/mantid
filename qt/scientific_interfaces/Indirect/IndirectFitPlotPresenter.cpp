@@ -113,7 +113,6 @@ void IndirectFitPlotPresenter::setStartX(double startX) { m_view->setFitRangeMin
 void IndirectFitPlotPresenter::setEndX(double endX) { m_view->setFitRangeMaximum(endX); }
 
 void IndirectFitPlotPresenter::updatePlotSpectrum(WorkspaceIndex spectrum) {
-  m_view->setPlotSpectrum(spectrum);
   setActiveSpectrum(spectrum);
   updatePlots();
 }

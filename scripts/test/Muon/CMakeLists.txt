@@ -25,6 +25,9 @@ set ( TEST_PY_FILES
    elemental_analysis_2/EA_grouping_tab/elemental_analysis_grouping_tab_model_test.py
    elemental_analysis_2/EA_grouping_tab/elemental_analysis_grouping_tab_presenter_test.py
    elemental_analysis_2/EA_grouping_tab/elemental_analysis_grouping_table_presenter_test.py
+   elemental_analysis_2/EA_auto_tab/ea_auto_tab_model_test.py
+   elemental_analysis_2/EA_auto_tab/ea_auto_tab_presenter_test.py
+   elemental_analysis_2/EA_auto_tab/ea_match_table_presenter_test.py
    external_plotting_model_test.py
    FFTModel_test.py
    FFTPresenter_test.py
@@ -84,6 +87,7 @@ set ( TEST_PY_FILES
    muon_data_context_test.py
    muon_group_pair_context_test.py
    muon_gui_context_test.py
+   muon_period_info_widget_test.py
    phase_table_widget/phase_table_context_test.py
    phase_table_widget/phase_table_presenter_test.py
    plot_widget/plot_widget_model_test.py

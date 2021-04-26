@@ -73,5 +73,6 @@ Bugfixes
 - Fix segmentation fault when running :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` algorithm on Ubuntu without a material defined on one of the sample\environment shapes
 - Fix calculation of region where scattering points are sampled in :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` when a shape is defined for the environment but not the sample
 - Fix crash on macOS when creating a UnitLabel with non-ascii characters using the single argument constructor
+- Fix bug in the ass calculation in :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>` when run on shapes already present on input workspace
 
 :ref:`Release 6.1.0 <v6.1.0>`

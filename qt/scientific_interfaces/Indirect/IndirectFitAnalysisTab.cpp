@@ -205,7 +205,7 @@ IndirectFittingModel *IndirectFitAnalysisTab::getFittingModel() const { return m
  *                      included in the selected model.
  */
 size_t IndirectFitAnalysisTab::getNumberOfCustomFunctions(const std::string &functionName) const {
-  auto fittingFunction = m_fittingModel->getFittingFunction();
+  auto fittingFunction = m_fittingModel->getFitFunction();
   if (fittingFunction && fittingFunction->nFunctions() > 0)
     return getNumberOfSpecificFunctionContained(functionName, fittingFunction->getFunction(0).get());
   else
@@ -213,20 +213,20 @@ size_t IndirectFitAnalysisTab::getNumberOfCustomFunctions(const std::string &fun
 }
 
 void IndirectFitAnalysisTab::setModelFitFunction() {
-  auto func = m_fitPropertyBrowser->getFittingFunction();
+  auto func = m_fitPropertyBrowser->getFitFunction();
   m_fittingModel->setFitFunction(func);
 }
 
 void IndirectFitAnalysisTab::setModelStartX(double startX) {
   const auto dataIndex = getSelectedDataIndex();
-  if (m_fittingModel->numberOfWorkspaces() > dataIndex) {
+  if (m_fittingModel->getNumberOfWorkspaces() > dataIndex) {
     m_fittingModel->setStartX(startX, dataIndex, getSelectedSpectrum());
   }
 }
 
 void IndirectFitAnalysisTab::setModelEndX(double endX) {
   const auto dataIndex = getSelectedDataIndex();
-  if (m_fittingModel->numberOfWorkspaces() > dataIndex) {
+  if (m_fittingModel->getNumberOfWorkspaces() > dataIndex) {
     m_fittingModel->setEndX(endX, dataIndex, getSelectedSpectrum());
   }
 }
@@ -355,7 +355,7 @@ void IndirectFitAnalysisTab::updateParameterValues(const std::unordered_map<std:
 }
 
 void IndirectFitAnalysisTab::updateFitBrowserParameterValues(std::unordered_map<std::string, ParameterValue> params) {
-  IFunction_sptr fun = m_fittingModel->getFittingFunction();
+  IFunction_sptr fun = m_fittingModel->getFitFunction();
   if (fun) {
     for (auto pair : params) {
       fun->setParameter(pair.first, pair.second.value);
@@ -495,7 +495,7 @@ bool IndirectFitAnalysisTab::validate() {
   const auto invalidFunction = m_fittingModel->isInvalidFunction();
   if (invalidFunction)
     validator.addErrorMessage(QString::fromStdString(*invalidFunction));
-  if (m_fittingModel->numberOfWorkspaces() == TableDatasetIndex{0})
+  if (m_fittingModel->getNumberOfWorkspaces() == TableDatasetIndex{0})
     validator.addErrorMessage(QString::fromStdString("No data has been selected for a fit."));
 
   const auto error = validator.generateErrorMessage();
@@ -628,7 +628,7 @@ void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
 QList<FunctionModelDataset> IndirectFitAnalysisTab::getDatasets() const {
   QList<FunctionModelDataset> datasets;
 
-  for (auto i = 0u; i < m_fittingModel->numberOfWorkspaces().value; ++i) {
+  for (auto i = 0u; i < m_fittingModel->getNumberOfWorkspaces().value; ++i) {
     TableDatasetIndex index{i};
 
     auto const name = m_fittingModel->getWorkspace(index)->getName();
@@ -641,7 +641,7 @@ void IndirectFitAnalysisTab::updateDataReferences() {
   m_fitPropertyBrowser->updateFunctionBrowserData(static_cast<int>(m_fittingModel->getNumberOfDomains()), getDatasets(),
                                                   m_fittingModel->getQValuesForData(),
                                                   m_fittingModel->getResolutionsForFit());
-  m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFittingFunction());
+  m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFitFunction());
 }
 
 /**

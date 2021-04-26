@@ -79,7 +79,7 @@ private:
 
   /// Calculate if this Q is on a detector
   void calculateE1(const Geometry::DetectorInfo &detectorInfo);
-  double detectorQ(Mantid::Kernel::V3D QLabFrame, double r);
+  double calculateDistanceToEdge(const Mantid::Kernel::V3D &QLabFrame);
   void runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS, const std::string &property,
                         const std::string &values);
 

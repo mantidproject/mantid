@@ -210,7 +210,6 @@ void FqFitModel::addWorkspace(const std::string &workspaceName) {
   auto workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
   const auto name = getHWHMName(workspace->getName());
   const auto parameters = addFqFitParameters(workspace.get(), name);
-
   const auto spectrum = getSpectrum(parameters);
   if (!spectrum)
     throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
@@ -235,7 +234,10 @@ FqFitParameters &FqFitModel::addFqFitParameters(MatrixWorkspace *workspace, cons
   const auto parameters = createFqFitParameters(workspace);
   if (parameters.widths.empty() && parameters.eisf.empty())
     throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
-  return m_fqFitParameters[hwhmName] = std::move(parameters);
+  if (parameters.eisf.empty())
+    return m_fqFitParameters[workspace->getName()] = std::move(parameters);
+  else
+    return m_fqFitParameters[hwhmName] = std::move(parameters);
 }
 
 std::unordered_map<std::string, FqFitParameters>::const_iterator
@@ -290,8 +292,6 @@ void FqFitModel::setActiveEISF(std::size_t eisfIndex, TableDatasetIndex dataInde
     logger.warning("Invalid EISF index specified.");
 }
 
-void FqFitModel::setFitType(const std::string &fitType) { m_fitString = fitType; }
-
 bool FqFitModel::zeroWidths(TableDatasetIndex dataIndex) const {
   const auto parameters = findFqFitParameters(dataIndex);
   if (parameters != m_fqFitParameters.end())
@@ -307,7 +307,7 @@ bool FqFitModel::zeroEISF(TableDatasetIndex dataIndex) const {
 }
 
 bool FqFitModel::isMultiFit() const {
-  if (numberOfWorkspaces() == TableDatasetIndex{0})
+  if (getNumberOfWorkspaces() == TableDatasetIndex{0})
     return false;
   return !allWorkspacesEqual(getWorkspace(TableDatasetIndex{0}));
 }
@@ -345,7 +345,7 @@ std::string FqFitModel::getResultXAxisUnit() const { return ""; }
 std::string FqFitModel::getResultLogName() const { return "SourceName"; }
 
 bool FqFitModel::allWorkspacesEqual(const Mantid::API::MatrixWorkspace_sptr &workspace) const {
-  for (auto i = TableDatasetIndex{1}; i < numberOfWorkspaces(); ++i) {
+  for (auto i = TableDatasetIndex{1}; i < getNumberOfWorkspaces(); ++i) {
     if (getWorkspace(i) != workspace)
       return false;
   }

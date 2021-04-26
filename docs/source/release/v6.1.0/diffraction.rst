@@ -98,9 +98,11 @@ Improvements
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` now update attached UB matrix with given lattice constants (optional).
 - :ref:`FilterPeaks <algm-FilterPeaks>` now can select banks in addition to filtering by values.
 - :ref:`FindPeaksMD <algm-FindPeaksMD>` has been modified to make use of the multiple goniometers add to :ref:`Run <mantid.api.Run>` and `goniometerIndex` add to MDEvents.
+- :ref:`HB3APredictPeaks <algm-HB3APredictPeaks>` can now predict satellite peaks for DEMAND data
 - :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>` calculates intensity for satellite peaks with fractional HKL
 - :ref:`MDNorm <algm-MDNorm>` algorithm can now efficiently process background.
 - method ``IPeaksWorkspaceaddPeak(V3D, SpecialCoordinateSystem)`` exposed to the python interface.
+- Added option to :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` to stop masking the first and last tubes of each bank (masked pixels are used to determine whether the integration region of a peak is near the edge of the detector). Previously adjacent tubes on adjacent banks were masked which are not always to be considered edges (e.g. on WISH). A custom masking can be applied to the peak workspace (e.g. using :ref:`MaskBTP <algm-MaskBTP>`) prior to integration to denote detector edges.
 
 Bugfixes
 ########
@@ -141,6 +143,7 @@ LeanElasticPeakWorkspace concept is show in detail at
 
    - :ref:`algm-AddPeakHKL`
    - :ref:`algm-CalculatePeaksHKL`
+   - :ref:`algm-CalculateUMatrix`
    - :ref:`algm-CentroidPeaksMD`
    - :ref:`algm-CompareWorkspaces`
    - :ref:`algm-CombinePeaksWorkspaces`
@@ -152,6 +155,7 @@ LeanElasticPeakWorkspace concept is show in detail at
    - :ref:`algm-IndexPeaks`
    - :ref:`algm-IntegratePeaksMD`
    - :ref:`algm-LoadNexusProcessed`
+   - :ref:`algm-OptimizeLatticeForCellType`
    - :ref:`algm-SaveNexusProcessed`
    - :ref:`algm-SaveHKLCW`
    - :ref:`algm-SelectCellOfType`
