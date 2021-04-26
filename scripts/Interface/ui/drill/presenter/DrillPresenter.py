@@ -427,12 +427,14 @@ class DrillPresenter:
                                                "Rundex (*.mrd);;All (*)")
         if not filename[0]:
             return
+        self.view.blockSignals(True)
         self.model.setIOFile(filename[0])
         self.view.setWindowTitle(filename[0] + " [*]")
         self.model.importRundexData()
         self._syncViewHeader()
         self._syncViewTable()
         self.view.setWindowModified(False)
+        self.view.blockSignals(False)
 
     def onSave(self):
         """
