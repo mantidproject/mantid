@@ -398,6 +398,7 @@ class DrillPresenter:
 
         self.model.setInstrument(instrument)
         self.model.resetIOFile()
+        self.view.setWindowTitle("Untitled [*]")
         self._syncViewHeader()
         self._syncViewTable()
 
@@ -413,6 +414,7 @@ class DrillPresenter:
 
         self.model.setAcquisitionMode(mode)
         self.model.resetIOFile()
+        self.view.setWindowTitle("Untitled [*]")
         self._syncViewHeader()
         self._syncViewTable()
 
