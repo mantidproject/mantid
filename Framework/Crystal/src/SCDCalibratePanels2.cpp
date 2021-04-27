@@ -111,8 +111,8 @@ void SCDCalibratePanels2::init() {
   setPropertyGroup("CalibrateBanks", PARAMETERS);
 
   // Profiling option
-  declareProperty("ProfileL1", true, "Perform profiling of objective function with given input for L1");
-  declareProperty("ProfileBanks", true, "Perform profiling of objective function with given input for Banks");
+  declareProperty("ProfileL1", false, "Perform profiling of objective function with given input for L1");
+  declareProperty("ProfileBanks", false, "Perform profiling of objective function with given input for Banks");
   const std::string PROFILING("Profiling objective function");
   setPropertyGroup("ProfileL1", PROFILING);
   setPropertyGroup("ProfileBanks", PROFILING);
