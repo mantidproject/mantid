@@ -32,9 +32,6 @@ Mesh Plots
 
 **Mesh Plots can only be accessed with a script, not through the Workbench interface**
 
-|
-|
-
 Scripting
 ---------
 
