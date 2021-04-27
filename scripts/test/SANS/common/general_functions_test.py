@@ -25,13 +25,13 @@ from sans.test_helper.test_director import TestDirector
 
 
 class SANSFunctionsTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         FrameworkManager.Instance()
 
     @staticmethod
-    def _prepare_workspaces(number_of_workspaces, tagged_workspace_names=None, state=None, reduction_mode=None):
+    def _prepare_workspaces(number_of_workspaces, tagged_workspace_names=None, state=None, reduction_mode=None,
+                            wav_range=None):
         create_name = "CreateSampleWorkspace"
         create_options = {"OutputWorkspace": "test",
                           "NumBanks": 1,
@@ -52,7 +52,7 @@ class SANSFunctionsTest(unittest.TestCase):
                 create_alg.execute()
                 workspace = create_alg.getProperty("OutputWorkspace").value
                 AnalysisDataService.addOrReplace(value, workspace)
-                write_hash_into_reduced_can_workspace(state, workspace, reduction_mode, key)
+                write_hash_into_reduced_can_workspace(state, workspace, reduction_mode, wav_range, key)
 
     @staticmethod
     def _create_sample_workspace():
@@ -275,7 +275,7 @@ class SANSFunctionsTest(unittest.TestCase):
                                               reduction_mode=ReductionMode.LAB)
         # Act
         workspace, workspace_count, workspace_norm = get_reduced_can_workspace_from_ads(
-            state, output_parts=True, reduction_mode=ReductionMode.LAB)
+            state, output_parts=True, wav_range=None, reduction_mode=ReductionMode.LAB)
 
         # Assert
         self.assertNotEqual(workspace, None)
@@ -293,6 +293,38 @@ class SANSFunctionsTest(unittest.TestCase):
         for element in AnalysisDataService.getObjectNames():
             AnalysisDataService.remove(element)
 
+    def test_that_can_find_can_reduction_with_wav_range(self):
+        test_director = TestDirector()
+        state = test_director.construct()
+        tagged_workspace_names = {None: "test_ws",
+                                  OutputParts.COUNT: "test_ws_count",
+                                  OutputParts.NORM: "test_ws_norm"}
+        SANSFunctionsTest._prepare_workspaces(number_of_workspaces=4,
+                                              tagged_workspace_names=tagged_workspace_names,
+                                              state=state,
+                                              reduction_mode=ReductionMode.LAB, wav_range="1-2")
+
+        workspace, workspace_count, workspace_norm = get_reduced_can_workspace_from_ads(
+            state, output_parts=True, wav_range="1-2", reduction_mode=ReductionMode.LAB)
+
+        self.assertIsNotNone(workspace)
+        self.assertIsNotNone(workspace_count)
+        self.assertIsNotNone(workspace_norm)
+        self.assertEqual(workspace.name(), AnalysisDataService.retrieve("test_ws").name())
+        self.assertEqual(workspace_count.name(), AnalysisDataService.retrieve("test_ws_count").name())
+        self.assertEqual(workspace_norm.name(), AnalysisDataService.retrieve("test_ws_norm").name())
+
+        # Both should not find anything
+        workspace, workspace_count, workspace_norm = get_reduced_can_workspace_from_ads(
+            state, output_parts=True, wav_range=None, reduction_mode=ReductionMode.LAB)
+        self.assertIsNone(workspace)
+        workspace, workspace_count, workspace_norm = get_reduced_can_workspace_from_ads(
+            state, output_parts=True, wav_range="2-3", reduction_mode=ReductionMode.LAB)
+        self.assertIsNone(workspace)
+
+        # Clean up
+        SANSFunctionsTest._remove_workspaces()
+
     def test_that_returns_none_if_it_does_not_exist(self):
         # Arrange
         test_director = TestDirector()
@@ -302,7 +334,8 @@ class SANSFunctionsTest(unittest.TestCase):
 
         # Act
         workspace, workspace_count, workspace_norm = \
-            get_reduced_can_workspace_from_ads(state, output_parts=False, reduction_mode=ReductionMode.LAB)
+            get_reduced_can_workspace_from_ads(state, output_parts=False, wav_range=None,
+                                               reduction_mode=ReductionMode.LAB)
 
         # Assert
         self.assertEqual(workspace, None)
