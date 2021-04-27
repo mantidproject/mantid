@@ -404,6 +404,7 @@ void ParameterMap::add(const IComponent *comp, const std::shared_ptr<Parameter> 
  * @param value :: value
  * @param pDescription :: a pointer (may be NULL) to a string, containing parameter's description. If provided, the
  * contents of the string is copied to the parameters memory
+ * @param pVisible :: Whether the parameter should be visible in InstrumentViewer
  */
 void ParameterMap::addPositionCoordinate(const IComponent *comp, const std::string &name, const double value,
                                          const std::string *const pDescription) {
