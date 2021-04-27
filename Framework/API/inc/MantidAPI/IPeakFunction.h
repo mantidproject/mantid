@@ -10,10 +10,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionWithLocation.h"
+#include "MantidAPI/PeakFunctionIntegrator.h"
 #include "boost/optional.hpp"
+#include "boost/shared_ptr.hpp"
 
 namespace Mantid {
 namespace API {
+
+struct IntegrationResult;
 /** An interface to a peak function, which extend the interface of
     IFunctionWithLocation by adding methods to set and get peak width.
 
