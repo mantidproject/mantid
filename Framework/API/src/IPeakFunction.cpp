@@ -101,6 +101,21 @@ void IPeakFunction::function(const FunctionDomain &domain, FunctionValues &value
 }
 
 /**
+ * Check if function has a parameter that goes by any of the given names.
+ * @param names :: Vector of std::string names/aliases that all refer to the same parameter.
+ * @return True if the parameter exists.
+ */
+bool IPeakFunction::hasParameterWithNames(std::vector<std::string> const &names) const {
+  for (std::string const &name : names) {
+    if (this->hasParameter(name)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
  * General implementation of the method for all peaks. Limits the peak
  * evaluation to
  * a certain number of FWHMs around the peak centre. The outside points are set
