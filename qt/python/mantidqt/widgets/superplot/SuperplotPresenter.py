@@ -290,14 +290,23 @@ class SuperplotPresenter:
             wsName (str): name of the corresponding workspace
             index (int): index of the corresponding spectrum
         """
+        selection = self._view.getSelection()
+        currentIndex = self._view.getSpectrumSliderPosition()
         mode = self._view.getMode()
         self._model.removeData(wsName, index)
         if not self._model.isBinMode() and not self._model.isSpectrumMode():
             self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
                                           self.BIN_MODE_TEXT])
             self._view.setMode(mode)
+        if wsName in selection:
+            if index in selection[wsName]:
+                selection[wsName].remove(index)
+                currentIndex = 0
+                if not selection[wsName]:
+                    del selection[wsName]
         self._updateList()
-        self._updateSpectrumSlider()
+        self._view.setSelection(selection)
+        self._updateSpectrumSlider(currentIndex)
         self._updatePlot()
 
     def onHoldButtonToggled(self, state):
