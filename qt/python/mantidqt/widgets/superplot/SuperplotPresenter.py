@@ -380,12 +380,12 @@ class SuperplotPresenter:
             oldName (str): old name of the workspace
             newName (str): new name of the workspace
         """
-        selection = self._view.getSelectedWorkspacesFromList()
+        selection = self._view.getSelection()
         if oldName in selection:
-            i = selection.index(oldName)
-            selection[i] = newName
+            selection[newName] = selection[oldName]
+            del selection[oldName]
         self._updateList()
-        self._view.setSelectedWorkspacesInList(selection)
+        self._view.setSelection(selection)
         self._updatePlot()
 
     def onWorkspaceReplaced(self, wsName):
