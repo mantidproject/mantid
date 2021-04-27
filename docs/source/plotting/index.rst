@@ -13,6 +13,7 @@ Matplotlib in Mantid
    WaterfallPlotsHelp
    ColorfillPlotsHelp
    3DPlotsHelp
+   MeshPlotHelp
 
 **Other Plotting Documentation**
 
@@ -26,6 +27,7 @@ Matplotlib in Mantid
 * :ref:`Waterfall_Plots`
 * :ref:`Colorfill_Plots`
 * :ref:`3D_Plots`
+* :ref:`Mesh_Plots`
 
 .. contents:: Table of contents
     :local:
