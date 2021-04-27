@@ -8,6 +8,8 @@ Mantid Workbench Changes
 New and Improved
 ----------------
 
+- The visibility of a component parameter in the Pick tab of the InstrumentViewer is now steered by the 'visible' atrribute of a parameter in IPF
+
 Bugfixes
 --------
 
