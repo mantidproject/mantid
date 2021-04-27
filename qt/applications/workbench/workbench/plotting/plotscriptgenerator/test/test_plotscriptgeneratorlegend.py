@@ -59,7 +59,7 @@ class PlotScriptGeneratorLegendTest(unittest.TestCase):
         title = legend.get_title()
         title.set_fontname(self.test_font)
         title.set_color(TEST_FONT_COLOUR)
-        test_font_size = TEST_FONT_SIZE
+        test_font_size = convert_to_point_size(TEST_FONT_SIZE)
         title.set_fontsize(test_font_size)
         title_font_commands = generate_title_font_commands(legend, "legend")
 
@@ -67,11 +67,11 @@ class PlotScriptGeneratorLegendTest(unittest.TestCase):
         for value in DEFAULT_TITLE_FONT_KWARGS.values():
             self.assertFalse(any(str(value) in command for command in title_font_commands))
         # The new font name should appear in the list of commands.
-        self.assertTrue(self.test_font in command for command in title_font_commands)
+        self.assertTrue(any(self.test_font in command for command in title_font_commands))
         # The new colour should appear in the list of commands.
-        self.assertTrue(TEST_FONT_COLOUR in command for command in title_font_commands)
+        self.assertTrue(any(TEST_FONT_COLOUR in command for command in title_font_commands))
         # The new font size should appear in the list of commands.
-        self.assertTrue(test_font_size in command for command in title_font_commands)
+        self.assertTrue(any(str(test_font_size) in command for command in title_font_commands))
         # There should be three lines of commands (font name, size, and colour).
         self.assertEqual(3, len(title_font_commands))
 
@@ -88,9 +88,9 @@ class PlotScriptGeneratorLegendTest(unittest.TestCase):
         for value in DEFAULT_LABEL_FONT_KWARGS.values():
             self.assertFalse(any(str(value) in command for command in label_font_commands))
         # The new font name should appear in the list of commands.
-        self.assertTrue(self.test_font in command for command in label_font_commands)
+        self.assertTrue(any(self.test_font in command for command in label_font_commands))
         # The new colour should appear in the list of commands.
-        self.assertTrue(TEST_FONT_COLOUR in command for command in label_font_commands)
+        self.assertTrue(any(TEST_FONT_COLOUR in command for command in label_font_commands))
         # There should be two lines of commands, one to set the font name, and the other to set the colour.
         self.assertEqual(2, len(label_font_commands))
 

@@ -152,11 +152,11 @@ def _remove_kwargs_if_default(kwargs):
     # Font size defaults are string values (e.g. 'medium', 'large', 'x-large'), so we need to convert the defaults to
     # point sizes before comparing.
     if 'title_size' in kwargs:
-        if _convert_to_point_size(kwargs['title_size']) == _convert_to_point_size(mpl_default_kwargs['title_size']):
+        if convert_to_point_size(kwargs['title_size']) == convert_to_point_size(mpl_default_kwargs['title_size']):
             kwargs.pop('title_size')
 
     if 'entries_size' in kwargs:
-        if _convert_to_point_size(kwargs['entries_size']) == _convert_to_point_size(mpl_default_kwargs['entries_size']):
+        if convert_to_point_size(kwargs['entries_size']) == convert_to_point_size(mpl_default_kwargs['entries_size']):
             kwargs.pop('entries_size')
 
     # Hex values of colours may not be the same case, so convert to lower before comparing.
@@ -169,7 +169,7 @@ def _remove_kwargs_if_default(kwargs):
             kwargs.pop('edge_color')
 
 
-def _convert_to_point_size(font_size):
+def convert_to_point_size(font_size):
     """
     Convert font size (may be int or string, e.g. 'medium', 'large', ...) to point size.
     """
