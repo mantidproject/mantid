@@ -378,9 +378,9 @@ void PlotPeakByLogValue::appendTableRow(
         row << p->getParameter(i, j) << p->getError(i, j);
       }
 
-      if (f->hasParameter("Intensity") == false && f->hasParameter("I") == false) {
-        auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(f);
-        if (intensity_handle) {
+      auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(f);
+      if (intensity_handle) {
+        if (intensity_handle->hasParameterWithNames(intensity_parameter_keys) == false) {
           row << intensity_handle->intensity() << intensity_handle->intensityError();
         }
       }
@@ -392,9 +392,9 @@ void PlotPeakByLogValue::appendTableRow(
       row << ifun->getParameter(iPar) << ifun->getError(iPar);
     }
 
-    if (ifun->hasParameter("Intensity") == false && ifun->hasParameter("I") == false) {
-      auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(ifun);
-      if (intensity_handle) {
+    auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(ifun);
+    if (intensity_handle) {
+      if (intensity_handle->hasParameterWithNames(intensity_parameter_keys) == false) {
         row << intensity_handle->intensity() << intensity_handle->intensityError();
       }
     }
@@ -426,9 +426,9 @@ ITableWorkspace_sptr PlotPeakByLogValue::createResultsTable(const std::string &l
         result->addColumn("double", p->parameterName(i, j) + "_Err");
       }
 
-      if (f->hasParameter("Intensity") == false && f->hasParameter("I") == false) {
-        auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(f);
-        if (intensity_handle) {
+      auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(f);
+      if (intensity_handle) {
+        if (intensity_handle->hasParameterWithNames(intensity_parameter_keys) == false) {
           result->addColumn("double", "f" + std::to_string(i) + ".Intensity");
           result->addColumn("double", "f" + std::to_string(i) + ".Intensity_Err");
         }
@@ -442,9 +442,9 @@ ITableWorkspace_sptr PlotPeakByLogValue::createResultsTable(const std::string &l
       result->addColumn("double", ifunSingle->parameterName(iPar) + "_Err");
     }
 
-    if (ifunSingle->hasParameter("Intensity") == false && ifunSingle->hasParameter("I") == false) {
-      auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(ifunSingle);
-      if (intensity_handle) {
+    auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(ifunSingle);
+    if (intensity_handle) {
+      if (intensity_handle->hasParameterWithNames(intensity_parameter_keys) == false) {
         result->addColumn("double", "Intensity");
         result->addColumn("double", "Intensity_Err");
       }

@@ -41,6 +41,9 @@ public:
   /// Returns the uncertainty associated to the integral intensity of the peak
   virtual double intensityError() const;
 
+  /// Check if funcion has a parameter with any of the given names
+  bool hasParameterWithNames(std::vector<std::string> const &names) const;
+
   /// Sets the integral intensity of the peak
   virtual void setIntensity(const double newIntensity);
 
