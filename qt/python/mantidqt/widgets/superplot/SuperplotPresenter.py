@@ -345,8 +345,8 @@ class SuperplotPresenter:
         Args:
             mode (str): new mode
         """
-        wsNames = self._view.getSelectedWorkspacesFromList()
-        self._updateSpectrumSlider(wsNames, 0)
+        selection = self._view.getSelection()
+        self._updateSpectrumSlider([ws for ws in selection], 0)
         self._updatePlot()
 
     def onWorkspaceDeleted(self, wsName):
