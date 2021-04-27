@@ -265,7 +265,7 @@ Monday, 3 weeks
 .. code-block:: bash
 
     python update-pr-base-branch.py [milestone] [newbase] --token [generated_token]
-    python update-pr-base-branch.py "Release 6.1" "release-next" --token [generated_token]
+    python update-pr-base-branch.py "Release 6.1" "release-next" --token fake123gener8ed456token
 
 *  Inform other developers that release-next has been created by posting to the
    *\#announcements* slack channel. You can use an adapted version of the
@@ -285,8 +285,8 @@ Monday, 3 weeks
 
 .. code-block:: bash
 
-python release.py --release [X.Y.Z] --milestone [milestone]
-python release.py --release 6.1.0 --milestone "Release 6.1"
+    python release.py --release [X.Y.Z] --milestone [milestone]
+    python release.py --release 6.1.0 --milestone "Release 6.1"
 
 Monday, Release Day
 -------------------
