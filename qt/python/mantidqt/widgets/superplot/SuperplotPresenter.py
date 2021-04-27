@@ -357,17 +357,9 @@ class SuperplotPresenter:
             name (str): name of the workspace
         """
         selection = self._view.getSelection()
-        names = self._model.getWorkspaces()
         if wsName in selection:
             del selection[wsName]
-        plottedData = self._model.getPlottedData()
-        self._view.setWorkspacesList(names)
-        for name in names:
-            spectra = list()
-            for data in plottedData:
-                if data[0] == name:
-                    spectra.append(data[1])
-            self._view.setSpectraList(name, spectra)
+        self._updateList()
         self._view.setSelection(selection)
         self._updatePlot()
 
