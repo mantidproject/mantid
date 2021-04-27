@@ -66,8 +66,7 @@ Mantid comes with a number of color map files and these can be loaded by selecti
 
 Pick Tab
 --------
-Pick Tab is for displaying information about detectors of an instruments and data collected by them.
-You can also manipulate the peak markers in this tab.
+Pick Tab is for displaying information about detectors of an instruments and data collected by them. The parameters defined for each component may be hidden if the attribute 'visible' is specified as false. You can also manipulate the peak markers in this tab.
 At the top of the tab there is a tool bar for switching between different interactive tools.
 The text box below the tool bar show textual information about selected detector: its name, ID, index in the workspace, cartesian coordinates of the detector (xyz) in metres, spherical coordinates of the detector (rtp, which stands for r, \theta, and \phi) where the distance is in metres and the angles are in degrees, the full path of the detector in the instrument tree, integrated counts, and the units of the X vector in the underlying workspace.
 
