@@ -19,7 +19,8 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
                   ('two_wing_QENS', '136558-136559'),
                   ('two_wing_EFWS', '143720'),
                   ('two_wing_IFWS', '170300'),
-                  ('bats', '215962')])
+                  ('bats', '215962'),
+                  ('3_single_dets', '318724')])
 
     # cache the def instrument and data search dirs
     _def_fac = config['default.facility']
@@ -116,6 +117,13 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 16, 1024)
 
+    def test_3_sd(self):
+        args = {'Run': self._runs['3_single_dets'],
+                'DiscardSingleDetectors': False,
+                "GroupDetectors": False}
+        res = IndirectILLEnergyTransfer(**args)
+        self._check_workspace_group(res, 1, 2051, 984)
+
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
 
         self.assertTrue(isinstance(wsgroup, WorkspaceGroup))
@@ -135,6 +143,7 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         self.assertTrue(item.getSampleDetails())
 
         self.assertTrue(item.getHistory().lastAlgorithm())
+
 
 if __name__ == '__main__':
     unittest.main()
