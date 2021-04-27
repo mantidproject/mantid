@@ -292,13 +292,11 @@ class SuperplotPresenter:
         """
         mode = self._view.getMode()
         self._model.removeData(wsName, index)
-        spectraList = self._view.getSpectraList(wsName)
-        spectraList.remove(index)
-        self._view.setSpectraList(wsName, spectraList)
         if not self._model.isBinMode() and not self._model.isSpectrumMode():
             self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
                                           self.BIN_MODE_TEXT])
             self._view.setMode(mode)
+        self._updateList()
         self._updateSpectrumSlider()
         self._updatePlot()
 
