@@ -68,8 +68,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                              direction=Direction.Input,
                              doc="Whether to use ConvertHFIRSCDtoQ for an MDEvent, or ConvertWANDSCDtoQ for an MDHisto")
 
-        # TODO implement this
-        self.declareProperty("ScaleMotorStep", False,
+        self.declareProperty("ScaleByMotorStep", False,
                              "If True then the intensity of the output in Q space will be scaled by the motor step size. "
                              "This will allow directly comparing the intensity of data measure with diffrent motor step sizes.")
 
@@ -105,6 +104,8 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         self.setPropertySettings("VanadiumFile", EnabledWhenProperty('VanadiumWorkspace', PropertyCriterion.IsDefault))
         self.setPropertySettings("InputWorkspaces", EnabledWhenProperty('Filename', PropertyCriterion.IsDefault))
         self.setPropertySettings("VanadiumWorkspace", EnabledWhenProperty('VanadiumFile', PropertyCriterion.IsDefault))
+
+        self.setPropertySettings("ScaleByMotorStep", EnabledWhenProperty('OutputType', PropertyCriterion.IsNotEqualTo, "Detector"))
 
         event_settings = EnabledWhenProperty('OutputType', PropertyCriterion.IsEqualTo, 'Q-sample events')
         self.setPropertyGroup("MinValues", "MDEvent Settings")
@@ -274,6 +275,13 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             norm_data = DivideMD(LHSWorkspace=data, RHSWorkspace=norm_data)
         else:
             norm_data = CloneMDWorkspace(data)
+
+        if self.getProperty("ScaleByMotorStep").value:
+            run = data.getExperimentInfo(0).run()
+            scan_log = 'omega' if np.isclose(run.getTimeAveragedStd('phi'), 0.0) else 'phi'
+            scan_axis = run[scan_log].value
+            scan_step = (scan_axis[-1]-scan_axis[0])/(scan_axis.size-1)
+            norm_data *= scan_step
 
         normaliseBy = self.getProperty("NormaliseBy").value
         if normaliseBy == "Monitor":
