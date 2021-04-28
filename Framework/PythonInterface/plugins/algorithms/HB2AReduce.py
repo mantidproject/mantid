@@ -343,11 +343,11 @@ class HB2AReduce(PythonAlgorithm):
             # m1 = 0 -> Ge 115, 1.54 A
             # m1 = 9.45 -> Ge 113, 2.41 A
             # colltrans is the collimator position, whether in or out of the beam
-            new_convention = np.datetime64(datetime.datetime(2021, 2, 23))
-            new_new_convention = np.datetime64(datetime.datetime(2021, 4, 25))
+            CONVENTION_2021_02 = np.datetime64(datetime.datetime(2021, 2, 23))
+            CONVENTION_2021_04 = np.datetime64(datetime.datetime(2021, 4, 25))
             date_created = self.get_date(metadata)
-            if date_created >= new_convention:
-                if date_created < new_new_convention:
+            if date_created >= CONVENTION_2021_02:
+                if date_created < CONVENTION_2021_04:
                     # colltrans = 0 -> OUT
                     # colltrans = +/-80 -> IN
                     vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(
@@ -363,7 +363,7 @@ class HB2AReduce(PythonAlgorithm):
                     vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(
                         exp, ge_peak,
                         "OUT" if np.isclose(colltrans, 0, atol=0.1) else "IN")
-            elif date_created < new_convention:
+            elif date_created < CONVENTION_2021_02:
                 # colltrans = +/-80 -> OUT
                 # colltrans = 0 -> IN
                 vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(
