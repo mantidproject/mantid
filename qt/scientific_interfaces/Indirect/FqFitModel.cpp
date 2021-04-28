@@ -235,7 +235,7 @@ FqFitParameters &FqFitModel::addFqFitParameters(MatrixWorkspace *workspace, cons
   if (parameters.widths.empty() && parameters.eisf.empty())
     throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
   if (parameters.widths.empty())
-    throw std::invalid_argument("Workspace contains no Width spectra, only EISF spectra.");
+    throw std::invalid_argument("Workspace contains EISF spectra, but no Width spectra.");
   return m_fqFitParameters[hwhmName] = std::move(parameters);
 }
 
