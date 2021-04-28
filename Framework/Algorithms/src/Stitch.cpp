@@ -21,46 +21,62 @@ static const std::string INPUT_WORKSPACE_PROPERTY = "InputWorkspaces";
 static const std::string REFERENCE_WORKSPACE_NAME = "ReferenceWorkspace";
 static const std::string COMBINATION_BEHAVIOUR = "CombinationBehaviour";
 static const std::string SCALE_FACTOR_CALCULATION = "ScaleFactorCalculation";
-static const std::string SCALE_FACTOR_BEHAVIOUR = "ScaleFactorBehaviour";
 static const std::string OUTPUT_WORKSPACE_PROPERTY = "OutputWorkspace";
 
 /**
- * @brief getMinMaxX Calculates the x-axis extent of a [ragged] workspace
+ * @brief Calculates the x-axis extent of a single spectrum workspace
  * Assumes that the histogram bin edges are in ascending order
  * @param ws : the input workspace
  * @return a pair of min-x and max-x
  */
-std::pair<double, double> getMinMaxX(const MatrixWorkspace &ws) {
-  double xmin = ws.readX(0).front();
-  double xmax = ws.readX(0).back();
-  for (size_t i = 1; i < ws.getNumberHistograms(); ++i) {
-    const double startx = ws.readX(i).front();
-    if (startx < xmin) {
-      xmin = startx;
-    }
-    const double endx = ws.readX(i).back();
-    if (endx > xmax) {
-      xmax = endx;
-    }
-  }
-  return std::make_pair(xmin, xmax);
+std::pair<double, double> getInterval(const MatrixWorkspace &ws) {
+  return std::make_pair(ws.readX(0).front(), ws.readX(0).back());
 }
 
 /**
- * @brief compareInterval Compares two workspaces in terms of their x-coverage
+ * @brief Compares two workspaces in terms of their x-coverage
  * @param ws1 : input workspace 1
  * @param ws2 : input workspace 2
  * @return true if ws1 is less than ws2 in terms of its x-interval
  */
 bool compareInterval(const MatrixWorkspace_sptr ws1, const MatrixWorkspace_sptr ws2) {
-  const auto minmax1 = getMinMaxX(*ws1);
-  const auto minmax2 = getMinMaxX(*ws2);
+  const auto minmax1 = getInterval(*ws1);
+  const auto minmax2 = getInterval(*ws2);
   if (minmax1.first < minmax2.first) {
     return true;
   } else if (minmax1.first > minmax2.first) {
     return false;
   } else {
     return minmax1.second < minmax2.second;
+  }
+}
+
+/**
+ * @brief Returns the overlap of two workspaces in x-axis
+ * @param ws1 : input workspace 1
+ * @param ws2 : input workspace 2
+ * @return the x-axis covered by both
+ */
+std::pair<double, double> getOverlap(const MatrixWorkspace_sptr ws1, const MatrixWorkspace_sptr ws2) {
+  const auto minmax1 = getInterval(*ws1);
+  const auto minmax2 = getInterval(*ws2);
+  return std::make_pair(std::max(minmax1.first, minmax2.first), std::min(minmax1.second, minmax2.second));
+}
+
+/**
+ * @brief Calculates the median of a vector
+ * @param vec : input vector
+ * @return the median
+ */
+double median(std::vector<double> &vec) {
+  if (vec.empty())
+    return 0;
+  std::sort(vec.begin(), vec.end());
+  const size_t s = vec.size();
+  if (s % 2 == 0) {
+    return 0.5 * (vec[s / 2] + vec[s / 2 - 1]);
+  } else {
+    return vec[s / 2];
   }
 }
 
@@ -103,15 +119,22 @@ std::map<std::string, std::string> Stitch::validateInputs() {
     return issues;
   }
   try {
-    combHelper.setReferenceProperties(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaces.front()));
+    const auto first = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaces.front());
+    combHelper.setReferenceProperties(first);
+    if (first->getNumberHistograms() > 1) {
+      issues[INPUT_WORKSPACE_PROPERTY] = "Input workspaces must have one spectrum each";
+      return issues;
+    }
+
   } catch (const std::exception &e) {
     issues[INPUT_WORKSPACE_PROPERTY] =
         std::string("Please provide MatrixWorkspaces as or groups of those as input: ") + e.what();
     return issues;
   }
   if (!isDefault(REFERENCE_WORKSPACE_NAME)) {
-    const auto referenceName = getProperty(REFERENCE_WORKSPACE_NAME);
-    if (std::find(workspaces.cbegin(), workspaces.cend(), referenceName) == workspaces.cend()) {
+    const auto referenceName = getPropertyValue(REFERENCE_WORKSPACE_NAME);
+    if (std::find_if(workspaces.cbegin(), workspaces.cend(),
+                     [&referenceName](const auto wsName) { return wsName == referenceName; }) == workspaces.cend()) {
       issues[REFERENCE_WORKSPACE_NAME] = "Reference workspace must be one of the input workspaces";
       return issues;
     }
@@ -134,17 +157,15 @@ void Stitch::init() {
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>(INPUT_WORKSPACE_PROPERTY, std::make_unique<ADSValidator>()),
       "The names of the input workspaces or groups of those as a list. "
-      "At least two MatrixWorkspaces are required, having the same instrument, same number of spectra and units.");
+      "At least two compatible MatrixWorkspaces are required, having one spectrum each. ");
   declareProperty(REFERENCE_WORKSPACE_NAME, "",
                   "The name of the workspace that will serve as the reference; "
                   "that is, the one that will not be scaled. If left blank, "
                   "stitching will be performed left to right.");
   declareProperty(COMBINATION_BEHAVIOUR, "Interleave",
-                  std::make_unique<ListValidator<std::string>>("Interleave", "Merge"));
-  declareProperty(SCALE_FACTOR_BEHAVIOUR, "PerSpectrum",
-                  std::make_unique<ListValidator<std::string>>("PerSpectrum", "PerWorkspace"));
+                  std::make_unique<ListValidator<std::string>>(std::array<std::string, 1>{"Interleave"}));
   declareProperty(SCALE_FACTOR_CALCULATION, "MedianOfRatios",
-                  std::make_unique<ListValidator<std::string>>("MedianOfRatios", "MeanOfRatios", "RatioOfIntegrals"));
+                  std::make_unique<ListValidator<std::string>>(std::array<std::string, 1>{"MedianOfRatios"}));
   declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(OUTPUT_WORKSPACE_PROPERTY, "", Direction::Output),
                   "The output workspace.");
 }
@@ -156,12 +177,90 @@ void Stitch::exec() {
   std::vector<MatrixWorkspace_sptr> workspaces;
   const auto referenceName = getPropertyValue(REFERENCE_WORKSPACE_NAME);
   const auto combinationBehaviour = getPropertyValue(COMBINATION_BEHAVIOUR);
-  const auto scaleFactorBehaviour = getPropertyValue(SCALE_FACTOR_BEHAVIOUR);
   const auto scaleFactorCalculation = getPropertyValue(SCALE_FACTOR_CALCULATION);
   const auto inputs = RunCombinationHelper::unWrapGroups(getProperty(INPUT_WORKSPACE_PROPERTY));
   std::transform(inputs.cbegin(), inputs.cend(), std::back_inserter(workspaces),
                  [](const auto ws) { return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(ws); });
   std::sort(workspaces.begin(), workspaces.end(), compareInterval);
+  size_t referenceIndex = 0;
+  if (!isDefault(REFERENCE_WORKSPACE_NAME)) {
+    const auto ref = std::find_if(workspaces.cbegin(), workspaces.cend(),
+                                  [&referenceName](const auto ws) { return ws->getName() == referenceName; });
+    referenceIndex = std::distance(workspaces.cbegin(), ref);
+  }
+  size_t leftIterator = referenceIndex, rightIterator = referenceIndex;
+  while (leftIterator > 0) {
+    scale(workspaces[leftIterator]->clone(), workspaces[leftIterator - 1]->clone());
+    --leftIterator;
+  }
+  while (rightIterator < workspaces.size() - 1) {
+    scale(workspaces[rightIterator]->clone(), workspaces[rightIterator + 1]->clone());
+    ++rightIterator;
+  }
+  MatrixWorkspace_sptr merged = merge(inputs);
+  setProperty(OUTPUT_WORKSPACE_PROPERTY, merged);
+}
+
+MatrixWorkspace_sptr Stitch::merge(const std::vector<std::string> &inputs) {
+  // interleave option is equivalent to concatenation followed by sort X axis
+  auto joiner = createChildAlgorithm("ConjoinXRuns");
+  joiner->setProperty("InputWorkspaces", inputs);
+  joiner->setProperty("OutputWorkspace", "__joined");
+  joiner->execute();
+  MatrixWorkspace_sptr joined = joiner->getProperty("OutputWorkspace");
+
+  auto sorter = createChildAlgorithm("SortXAxis");
+  sorter->setProperty("InputWorkspace", joined);
+  sorter->setProperty("OutputWorkspace", "__sorted");
+  sorter->execute();
+  return sorter->getProperty("OutputWorkspace");
+}
+
+void Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr wsToScale) {
+  const auto overlap = getOverlap(wsToMatch, wsToScale);
+  auto cropper = createChildAlgorithm("CropWorkspaceRagged");
+  cropper->setProperty("XMin", std::vector<double>({overlap.first}));
+  cropper->setProperty("XMax", std::vector<double>({overlap.second}));
+
+  cropper->setProperty("InputWorkspace", wsToMatch);
+  cropper->setProperty("OutputWorkspace", "__to_match");
+  cropper->execute();
+  MatrixWorkspace_sptr croppedToMatch = cropper->getProperty("OutputWorkspace");
+  cropper->setProperty("InputWorkspace", wsToScale);
+  cropper->setProperty("OutputWorkspace", "__to_scale");
+  cropper->execute();
+  MatrixWorkspace_sptr croppedToScale = cropper->getProperty("OutputWorkspace");
+
+  MatrixWorkspace_sptr rebinnedToScale;
+  if (wsToMatch->isHistogramData()) {
+    auto rebinner = createChildAlgorithm("RebinToWorkspace");
+    rebinner->setProperty("WorkspaceToMatch", croppedToMatch);
+    rebinner->setProperty("WorkspaceToRebin", croppedToScale);
+    rebinner->setProperty("OutputWorkspace", "__rebinned");
+    rebinner->execute();
+    rebinnedToScale = rebinner->getProperty("OutputWorkspace");
+  } else {
+    auto interpolator = createChildAlgorithm("SplineInterpolation");
+    interpolator->setProperty("WorkspaceToMatch", croppedToMatch);
+    interpolator->setProperty("WorkspaceToInterpolate", croppedToScale);
+    interpolator->setProperty("OutputWorkspace", "__interpolated");
+    interpolator->execute();
+    rebinnedToScale = interpolator->getProperty("OutputWorkspace");
+  }
+
+  auto divider = createChildAlgorithm("Divide");
+  divider->setProperty("LHSWorkspace", rebinnedToScale);
+  divider->setProperty("RHSWorkspace", croppedToMatch);
+  divider->setProperty("OutputWorkspace", "__ratio");
+  divider->execute();
+  MatrixWorkspace_sptr ratio = divider->getProperty("OutputWorkspace");
+
+  auto scaler = createChildAlgorithm("Scale");
+  scaler->setProperty("InputWorkspace", wsToScale);
+  scaler->setProperty("OutputWorkspace", "__scaled");
+  scaler->setProperty("Factor", 1 / median(ratio->dataY(0)));
+  scaler->execute();
+  wsToScale = scaler->getProperty("OutputWorkspace");
 }
 
 } // namespace Algorithms

@@ -25,6 +25,8 @@ public:
 private:
   void init() override;
   void exec() override;
+  void scale(Mantid::API::MatrixWorkspace_sptr wsToMatch, Mantid::API::MatrixWorkspace_sptr wsToScale);
+  Mantid::API::MatrixWorkspace_sptr merge(const std::vector<std::string> &workspaces);
 };
 
 } // namespace Algorithms
