@@ -205,6 +205,9 @@ class SuperplotPresenter:
         axes = figure.gca()
         for line in axes.get_lines():
             line.remove()
+        legend = axes.get_legend()
+        if legend:
+            legend.remove()
         axes.set_prop_cycle(None)
         for wsName, sp in plottedData:
             if self._model.isSpectrumMode():
