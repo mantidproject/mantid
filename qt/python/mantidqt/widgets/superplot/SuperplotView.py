@@ -110,21 +110,6 @@ class SuperplotView(QWidget):
         """
         return self._sideView.workspaceSelector.currentText()
 
-    def getSelectedWorkspaceFromList(self):
-        """
-        Get the selected workspace from the selection list.
-
-        Returns:
-            str: name of the selected workspace, None if nothing is selected
-        """
-        item = self._sideView.workspacesList.currentItem()
-        if item:
-            if item.parent() is not None:
-                item = item.parent()
-            return item.getWorkspaceName()
-        else:
-            return None
-
     def setSelectedWorkspacesInList(self, names):
         """
         Select the corresponding worspaces from the list. This function does not
