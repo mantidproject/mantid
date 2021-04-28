@@ -182,6 +182,7 @@ void Stitch::exec() {
   std::transform(inputs.cbegin(), inputs.cend(), std::back_inserter(workspaces),
                  [](const auto ws) { return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(ws); });
   std::sort(workspaces.begin(), workspaces.end(), compareInterval);
+  auto progress = std::make_unique<Progress>(this, 0.0, 1.0, workspaces.size());
   size_t referenceIndex = 0;
   if (!isDefault(REFERENCE_WORKSPACE_NAME)) {
     const auto ref = std::find_if(workspaces.cbegin(), workspaces.cend(),
@@ -189,45 +190,57 @@ void Stitch::exec() {
     referenceIndex = std::distance(workspaces.cbegin(), ref);
   }
   size_t leftIterator = referenceIndex, rightIterator = referenceIndex;
+  std::vector<std::string> toStitch(workspaces.size(), "");
+  toStitch[referenceIndex] = workspaces[referenceIndex]->getName();
   while (leftIterator > 0) {
-    scale(workspaces[leftIterator]->clone(), workspaces[leftIterator - 1]->clone());
+    toStitch[leftIterator - 1] = scale(workspaces[leftIterator], workspaces[leftIterator - 1]);
+    progress->report();
     --leftIterator;
   }
   while (rightIterator < workspaces.size() - 1) {
-    scale(workspaces[rightIterator]->clone(), workspaces[rightIterator + 1]->clone());
+    toStitch[rightIterator + 1] = scale(workspaces[rightIterator], workspaces[rightIterator + 1]);
+    progress->report();
     ++rightIterator;
   }
-  MatrixWorkspace_sptr merged = merge(inputs);
-  setProperty(OUTPUT_WORKSPACE_PROPERTY, merged);
+  setProperty(OUTPUT_WORKSPACE_PROPERTY, merge(toStitch, toStitch[referenceIndex]));
+  progress->report();
 }
 
-MatrixWorkspace_sptr Stitch::merge(const std::vector<std::string> &inputs) {
+MatrixWorkspace_sptr Stitch::merge(const std::vector<std::string> &inputs, const std::string &refName) {
   // interleave option is equivalent to concatenation followed by sort X axis
   auto joiner = createChildAlgorithm("ConjoinXRuns");
   joiner->setProperty("InputWorkspaces", inputs);
-  joiner->setProperty("OutputWorkspace", "__joined");
+  joiner->setPropertyValue("OutputWorkspace", "__joined");
   joiner->execute();
-  MatrixWorkspace_sptr joined = joiner->getProperty("OutputWorkspace");
+  Workspace_sptr output = joiner->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr joined = std::dynamic_pointer_cast<MatrixWorkspace>(output);
+
+  // once joined, clear all the scaled workspaces, except the reference as it is not clonned
+  for (const auto &wsName : inputs) {
+    if (wsName != refName)
+      AnalysisDataService::Instance().remove(wsName);
+  }
 
   auto sorter = createChildAlgorithm("SortXAxis");
   sorter->setProperty("InputWorkspace", joined);
-  sorter->setProperty("OutputWorkspace", "__sorted");
+  sorter->setPropertyValue("OutputWorkspace", "__sorted");
   sorter->execute();
-  return sorter->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr sorted = sorter->getProperty("OutputWorkspace");
+  return sorted;
 }
 
-void Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr wsToScale) {
+std::string Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr wsToScale) {
   const auto overlap = getOverlap(wsToMatch, wsToScale);
   auto cropper = createChildAlgorithm("CropWorkspaceRagged");
   cropper->setProperty("XMin", std::vector<double>({overlap.first}));
   cropper->setProperty("XMax", std::vector<double>({overlap.second}));
 
   cropper->setProperty("InputWorkspace", wsToMatch);
-  cropper->setProperty("OutputWorkspace", "__to_match");
+  cropper->setPropertyValue("OutputWorkspace", "__to_match");
   cropper->execute();
   MatrixWorkspace_sptr croppedToMatch = cropper->getProperty("OutputWorkspace");
   cropper->setProperty("InputWorkspace", wsToScale);
-  cropper->setProperty("OutputWorkspace", "__to_scale");
+  cropper->setPropertyValue("OutputWorkspace", "__to_scale");
   cropper->execute();
   MatrixWorkspace_sptr croppedToScale = cropper->getProperty("OutputWorkspace");
 
@@ -236,14 +249,14 @@ void Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr wsToScal
     auto rebinner = createChildAlgorithm("RebinToWorkspace");
     rebinner->setProperty("WorkspaceToMatch", croppedToMatch);
     rebinner->setProperty("WorkspaceToRebin", croppedToScale);
-    rebinner->setProperty("OutputWorkspace", "__rebinned");
+    rebinner->setPropertyValue("OutputWorkspace", "__rebinned");
     rebinner->execute();
     rebinnedToScale = rebinner->getProperty("OutputWorkspace");
   } else {
     auto interpolator = createChildAlgorithm("SplineInterpolation");
     interpolator->setProperty("WorkspaceToMatch", croppedToMatch);
     interpolator->setProperty("WorkspaceToInterpolate", croppedToScale);
-    interpolator->setProperty("OutputWorkspace", "__interpolated");
+    interpolator->setPropertyValue("OutputWorkspace", "__interpolated");
     interpolator->execute();
     rebinnedToScale = interpolator->getProperty("OutputWorkspace");
   }
@@ -251,16 +264,18 @@ void Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr wsToScal
   auto divider = createChildAlgorithm("Divide");
   divider->setProperty("LHSWorkspace", rebinnedToScale);
   divider->setProperty("RHSWorkspace", croppedToMatch);
-  divider->setProperty("OutputWorkspace", "__ratio");
+  divider->setPropertyValue("OutputWorkspace", "__ratio");
   divider->execute();
   MatrixWorkspace_sptr ratio = divider->getProperty("OutputWorkspace");
 
   auto scaler = createChildAlgorithm("Scale");
+  scaler->setAlwaysStoreInADS(true);
   scaler->setProperty("InputWorkspace", wsToScale);
-  scaler->setProperty("OutputWorkspace", "__scaled");
+  const std::string scaled = "__scaled_" + wsToScale->getName();
+  scaler->setPropertyValue("OutputWorkspace", scaled);
   scaler->setProperty("Factor", 1 / median(ratio->dataY(0)));
   scaler->execute();
-  wsToScale = scaler->getProperty("OutputWorkspace");
+  return scaled;
 }
 
 } // namespace Algorithms
