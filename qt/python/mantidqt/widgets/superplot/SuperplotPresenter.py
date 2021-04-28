@@ -168,6 +168,9 @@ class SuperplotPresenter:
         Update the hold button state based on the selection.
         """
         selection = self._view.getSelection()
+        if not selection:
+            self._view.checkHoldButton(False)
+            return
         index = self._view.getSpectrumSliderPosition()
         plottedData = self._model.getPlottedData()
         for ws in selection:
