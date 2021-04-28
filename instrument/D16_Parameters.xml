@@ -69,7 +69,11 @@
 		    Bath2Temperature:/entry0/sample/bath2_regulation_temperature:f,
 		    SampleChangerPos:/entry0/instrument/VirtualSampleChanger/sample_changer_slot_value:f" />
       </parameter>
-
+      <parameter name="log_list_to_save" type="string">
+	<value val="facility,instrument.name,experiment_identifier,
+		    start_time,end_time,numor_list,processedAs,
+		    wavelength,sample_transmission_numors,L2"/>
+      </parameter>
     </component-link>
 
 </parameter-file>

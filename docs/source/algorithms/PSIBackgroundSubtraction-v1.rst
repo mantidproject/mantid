@@ -83,7 +83,7 @@ Output:
     Background = 20
     Lambda = 0.5
     time = np.linspace(0, 10, 500)
-    func = lambda t: A*np.exp(-Lambda*t) + Background + 0.5*A*np.sin(43.2*t)
+    func = lambda t: A*np.exp(-Lambda*t) + Background + 0.5*A*np.sin(50.0*t)
     counts = np.array([func(ti) for ti in time])
 
     # Create workspaces

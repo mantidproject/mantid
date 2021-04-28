@@ -34,6 +34,8 @@ Improvements
 - :ref:`SANSILLReduction <algm-SANSILLReduction>` has a new property `SolventInputWorkspace`, to provide reduced solvent data to be subtracted from the sample data.
 - :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>` has a new property `SolventFiles`, to communicate with :ref:`SANSILLReduction <algm-SANSILLReduction>` the file names of the reduced solvent data.
 - ISIS SANS can load summed nexus files without requiring "-add" in the name.
+- :ref:`SANSILLReduction <algm-SANSILLReduction>` adds sample log information to reduced data about facility,
+  sample transmission numor, and all SampleRuns numors, with relevant algebra.
 - ISIS SANS can now load summed event transmission data
 
 Algorithms and instruments

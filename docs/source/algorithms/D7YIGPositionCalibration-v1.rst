@@ -19,6 +19,8 @@ Currently the algorithm is focused on the D7 instrument that has three detector 
 
 The property `MaskedBinsRange` allows to mask multiple :math:`2\theta` ranges of the :math:`2\theta` scan. If the number of provided arguments is even, arguments will be paired and the angular range between the first and the second element of the pair will be masked, and for all pairs. In the case where the number of arguments is odd, the first argument is assumed to be a lower cut-off, and all :math:`2\theta` detector positions below that value will be masked.
 
+The values of the fitted wavelength, three bank gradients, and the :math:`chi^{2}` value are logged on the notice level.
+
 Calibration method
 ##################
 
