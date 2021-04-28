@@ -91,13 +91,13 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         self.declareProperty(FileProperty('MapFile', '',
                                           action=FileAction.OptionalLoad,
-                                          extensions=['map','xml']),
+                                          extensions=['map', 'xml']),
                              doc='Filename of the detector grouping map file to use. \n'
                                  'By default all the pixels will be summed per each tube. \n'
                                  'Use .map or .xml file (see GroupDetectors documentation) '
                                  'only if different range is needed for each tube.')
 
-        self.declareProperty(name='ManualPSDIntegrationRange',defaultValue=[1,128],
+        self.declareProperty(name='ManualPSDIntegrationRange',defaultValue=[1, 128],
                              doc='Integration range of vertical pixels in each PSD tube. \n'
                                  'By default all the pixels will be summed per each tube. \n'
                                  'Use this option if the same range (other than default) '
@@ -189,7 +189,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 issues['ManualPSDIntegrationRange'] = 'Start or end pixel number out is of range [1-128], or has wrong order'
 
         group_by = self.getProperty('GroupPixelsBy').value
-        if group_by % 2 != 0:
+        if group_by <= 0 or (group_by & (group_by - 1)) != 0:  # quick check if the number is a power of 2
             issues['GroupPixelsBy'] = 'Group by must be a power of 2, e.g. 2, 4, 8, 16 ... 128'
 
         epp_ws = self.getProperty('InputElasticChannelWorkspace').value
@@ -202,7 +202,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         """
         Sets up the input properties to configure the reduction flow
         """
-        self._run_file = self.getPropertyValue('Run').replace(',','+') # automatic summing
+        self._run_file = self.getPropertyValue('Run').replace(',', '+')  # automatic summing
         self._analyser = self.getPropertyValue('Analyser')
         self._map_file = self.getPropertyValue('MapFile')
         self._reflection = self.getPropertyValue('Reflection')
@@ -222,9 +222,10 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         else:
             self._use_map_file = False
 
-    def _load_map_file(self):
+    def _load_map_file(self, ws):
         """
         Loads the detector grouping map file
+        @param ws :: the workspace
         @throws RuntimeError :: if neither the user defined nor the default file is found
         """
 
@@ -242,7 +243,10 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 if self.getProperty('DiscardSingleDetectors').value:
                     grouping_filename = self._instrument.getStringParameter('Workflow.GroupingFile.PSDOnly')[0]
                 else:
-                    grouping_filename = self._instrument.getStringParameter('Workflow.GroupingFile')[0]
+                    sd_count = self._get_single_detectors_number(ws)
+                    grouping_file = 'Workflow.GroupingFile' if sd_count else 'Workflow.GroupingFile.3SD'
+                    grouping_filename = self._instrument.getStringParameter(grouping_file)[0]
+
                 self._map_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
 
             self.log().information('Set detector map file : {0}'.format(self._map_file))
@@ -372,7 +376,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         self._instrument = mtd[self._red_ws].getInstrument()
 
-        self._load_map_file()
+        self._load_map_file(self._red_ws)
 
         run = str(mtd[self._red_ws].getRun().getLogData('run_number').value)[:6]
 
@@ -414,12 +418,12 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 AddSampleLog(Workspace=ws, LogName="NormalisedTo", LogType="String",
                              LogText="Monitor", EnableLogging=False)
 
-        self.setProperty('OutputWorkspace',self._red_ws)
+        self.setProperty('OutputWorkspace', self._red_ws)
 
     def _create_elastic_channel_ws(self, epp_ws, run, epp_equator_ws=None, single_detectors=0):
         """
         Creates the elastic channel table workspace.
-        @param epp_ws: EPP workspace
+        @param epp_ws: the workspace containing the EPP
         @param run: run object
         @param epp_equator_ws: EPP workspace of the equatorial line
         @param single_detectors: the number of single detectors
@@ -441,15 +445,15 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             epp_ws.addRow(equator_row)
         epp_ws.addColumn('double', 'ChopperSpeed')
         epp_ws.addColumn('double', 'ChopperPhase')
-        epp_ws.addColumn('double', 'PSD_TOF_Delay')
+        epp_ws.addColumn('double', 'TOF_Delay')
         equator_epp = 1 if epp_equator_ws else 0
         for row in range(epp_ws.rowCount()):
             epp_ws.setCell('ChopperSpeed', row, speed)
             epp_ws.setCell('ChopperPhase', row, phase)
             if epp_ws.rowCount() - single_detectors - equator_epp <= row < epp_ws.rowCount() - equator_epp:
-                epp_ws.setCell('PSD_TOF_Delay', row, delay_sd)
+                epp_ws.setCell('TOF_Delay', row, delay_sd)
             else:
-                epp_ws.setCell('PSD_TOF_Delay', row, delay)
+                epp_ws.setCell('TOF_Delay', row, delay)
 
     @staticmethod
     def _t0_offset(center_chopper_speed, center_chopper_phase, shifted_chopper_phase, center_psd_delay, shifted_psd_delay):
@@ -597,7 +601,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         Reduces inverted TOF mode (BATS)
         @param ws :: input workspace name
         """
-        x,y,z = self._sample_coords
+        x, y, z = self._sample_coords
         if x**2+y**2+z**2 != 0.:
             MoveInstrumentComponent(Workspace=ws, ComponentName='sample-position', X=x, Y=y, Z=z, RelativePosition=False)
         distance = self._get_pulse_chopper_info(mtd[ws].getRun(), self._pulse_chopper)[2]
@@ -606,7 +610,9 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         input_epp = self.getProperty('InputElasticChannelWorkspace').value
 
-        single_detectors = mtd[self._ws].getNumberHistograms() - N_TUBES * N_PIXELS_PER_TUBE - N_MONITOR
+        single_detectors = self._get_single_detectors_number(ws)
+        offset = N_MONITOR if mtd[ws].detectorInfo().isMonitor(0) else 0
+
         if not input_epp:
             equator_epp_ws = _make_name(ws, 'eq_epp')
             equator_ws = _make_name(ws, 'eq')
@@ -623,7 +629,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             if self._fit_option == 'FitAllPixelGroups':
                 GroupDetectors(InputWorkspace=ws,
                                OutputWorkspace=grouped_ws,
-                               GroupingPattern=self._group_pixels(self._group_by, single_detectors))
+                               GroupingPattern=self._group_pixels(self._group_by, single_detectors, offset))
                 CropWorkspace(InputWorkspace=grouped_ws, OutputWorkspace=grouped_ws, XMin=to_crop, XMax=3 * to_crop)
                 FindEPP(InputWorkspace=grouped_ws, OutputWorkspace=epp_ws)
                 self._create_elastic_channel_ws(mtd[epp_ws], mtd[ws].getRun(), mtd[equator_epp_ws],
@@ -633,8 +639,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 single_det_ws = _make_name(ws, "sds")
                 ExtractSpectra(InputWorkspace=ws,
                                OutputWorkspace=single_det_ws,
-                               StartWorkspaceIndex=N_TUBES*N_PIXELS_PER_TUBE + 1,
-                               EndWorkspaceIndex=N_TUBES*N_PIXELS_PER_TUBE + single_detectors)
+                               StartWorkspaceIndex=N_TUBES*N_PIXELS_PER_TUBE + offset,
+                               EndWorkspaceIndex=N_TUBES*N_PIXELS_PER_TUBE + single_detectors + offset)
                 FindEPP(InputWorkspace=single_det_ws, OutputWorkspace=epp_ws)
                 self._create_elastic_channel_ws(mtd[epp_ws], mtd[ws].getRun(), mtd[equator_epp_ws],
                                                 single_detectors=single_detectors)
@@ -645,7 +651,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
             center_chopper_speed = input_epp.cell('ChopperSpeed', 0)
             center_chopper_phase = input_epp.cell('ChopperPhase', 0)
-            center_psd_delay = input_epp.cell('PSD_TOF_Delay', 0)
+            center_psd_delay = input_epp.cell('TOF_Delay', 0)
 
             shifted_chopper_phase = self._get_pulse_chopper_info(run, self._pulse_chopper)[1]
             shifted_psd_delay = run.getLogData('PSD.time_of_flight_2').value
@@ -655,12 +661,12 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             sd_t0_offset = 0
             if single_detectors:
                 shifted_sd_delay = run.getLogData('SingleD.time_of_flight_2').value
-                center_sd_delay = input_epp.cell('PSD_TOF_Delay', input_epp.rowCount() - 2)
+                center_sd_delay = input_epp.cell('TOF_Delay', input_epp.rowCount() - 2)
                 sd_t0_offset = self._t0_offset(center_chopper_speed, center_chopper_phase, shifted_chopper_phase,
                                                center_sd_delay, shifted_sd_delay)
+                self.log().information('SD T0 Offset is {0} [sec]'.format(sd_t0_offset))
 
-            self.log().information('T0 Offset is {0} [sec]'.format(psd_t0_offset))
-            self.log().information('SD T0 Offset is {0} [sec]'.format(sd_t0_offset))
+            self.log().information('PSD T0 Offset is {0} [sec]'.format(psd_t0_offset))
 
             self._convert_to_energy_bats(mtd[ws], input_epp, psd_t0_offset, sd_t0_offset)
 
@@ -676,7 +682,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         DeleteWorkspaces([rebin_ws])
 
     @staticmethod
-    def _group_pixels(by=4, single_detectors=0):
+    def _group_pixels(by=4, single_detectors=0, offset=1):
         """
         Groups pixels in the tubes by the factor, which should be a power of 2.
         @param by : the group pixels by
@@ -684,12 +690,12 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         pattern = ''
         for i in range(N_TUBES):
             for j in range(N_PIXELS_PER_TUBE // by):
-                start = i * N_PIXELS_PER_TUBE + j * by + 1
+                start = i * N_PIXELS_PER_TUBE + j * by + offset
                 end = start + by - 1
                 pattern += str(start)+'-'+str(end)+','
 
         for single_det in range(single_detectors):
-            sd_index = N_TUBES * N_PIXELS_PER_TUBE + single_det + 1
+            sd_index = N_TUBES * N_PIXELS_PER_TUBE + single_det + offset
             pattern += str(sd_index)
             pattern += ','
 
@@ -753,25 +759,38 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         """
         pattern = ''
 
-        for tube in range(1, N_TUBES+1):
-            pattern += str((tube - 1) * N_PIXELS_PER_TUBE + self._psd_int_range[0])
+        # if the first spectrum does not correspond to a monitor, start from there
+        offset = 0 if mtd[ws].getDetector(0).isMonitor() else -1
+
+        for tube in range(1, N_TUBES + 1):
+            pattern += str((tube - 1) * N_PIXELS_PER_TUBE + self._psd_int_range[0] + offset)
             pattern += '-'
-            pattern += str((tube - 1) * N_PIXELS_PER_TUBE + self._psd_int_range[1])
+            pattern += str((tube - 1) * N_PIXELS_PER_TUBE + self._psd_int_range[1] + offset)
             pattern += ','
 
-        num_single_det = mtd[ws].getNumberHistograms()- N_TUBES * N_PIXELS_PER_TUBE - 1
-
-        for single_det in range(num_single_det):
-            sd_index = N_TUBES * N_PIXELS_PER_TUBE + single_det + 1
-            pattern += str(sd_index)
-            pattern += ','
+        if not self.getProperty('DiscardSingleDetectors').value:
+            num_single_det = self._get_single_detectors_number(ws)
+            for single_det in range(num_single_det):
+                sd_index = N_TUBES * N_PIXELS_PER_TUBE + single_det + offset + 1
+                pattern += str(sd_index)
+                pattern += ','
 
         pattern = pattern.rstrip(',')
 
         self.log().information("Grouping the detectors with pattern:\n {0}"
                                .format(pattern))
 
-        GroupDetectors(InputWorkspace=ws,OutputWorkspace=ws,GroupingPattern=pattern)
+        GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws, GroupingPattern=pattern)
+
+    @staticmethod
+    def _get_single_detectors_number(ws):
+        """
+        Get the total number of single detectors in the workspace.
+        @param ws :: the workspace name, a string
+        @return the total number of single detectors
+        """
+        monitor_count = N_MONITOR if mtd[ws].getDetector(0).isMonitor() else 0
+        return mtd[ws].getNumberHistograms() - N_TUBES * N_PIXELS_PER_TUBE - monitor_count
 
     def _normalise_to_monitor(self, ws, mon):
         """
