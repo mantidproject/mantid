@@ -346,24 +346,25 @@ class HB2AReduce(PythonAlgorithm):
             CONVENTION_2021_02 = np.datetime64(datetime.datetime(2021, 2, 23))
             CONVENTION_2021_04 = np.datetime64(datetime.datetime(2021, 4, 25))
             date_created = self.get_date(metadata)
-            if date_created >= CONVENTION_2021_02:
-                if date_created < CONVENTION_2021_04:
-                    # colltrans = 0 -> OUT
-                    # colltrans = +/-80 -> IN
-                    vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(
-                        exp, 115 if np.isclose(m1, 0, atol=0.1) else 113,
-                        "OUT" if np.isclose(colltrans, 0, atol=0.1) else "IN")
+            if date_created >= CONVENTION_2021_04:
+                if np.isclose(m1, -4.375, atol=0.1):
+                    ge_peak = 117
+                elif np.isclose(m1, 0, atol=0.1):
+                    ge_peak = 115
                 else:
-                    if np.isclose(m1, -4.375, atol=0.1):
-                        ge_peak = 117
-                    elif np.isclose(m1, 0, atol=0.1):
-                        ge_peak = 115
-                    else:
-                        ge_peak = 113
-                    vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(
-                        exp, ge_peak,
-                        "OUT" if np.isclose(colltrans, 0, atol=0.1) else "IN")
-            elif date_created < CONVENTION_2021_02:
+                    ge_peak = 113
+                vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(
+                    exp, ge_peak,
+                    "OUT" if np.isclose(colltrans, 0, atol=0.1) else "IN")
+            elif date_created >= CONVENTION_2021_02:
+                # Convention after `CONVENTION_2021_02`.
+                # colltrans = 0 -> OUT
+                # colltrans = +/-80 -> IN
+                vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(
+                    exp, 115 if np.isclose(m1, 0, atol=0.1) else 113,
+                    "OUT" if np.isclose(colltrans, 0, atol=0.1) else "IN")
+            else:
+                # Legacy convention.
                 # colltrans = +/-80 -> OUT
                 # colltrans = 0 -> IN
                 vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(
