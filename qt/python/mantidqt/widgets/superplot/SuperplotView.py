@@ -335,7 +335,6 @@ class SuperplotView(QWidget):
         """
         self._bottomView.spectrumSlider.setDisabled(state)
         self._bottomView.spectrumSpinBox.setDisabled(state)
-        self._bottomView.holdButton.setDisabled(state)
 
     def getSpectrumDisabled(self):
         """
