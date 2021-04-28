@@ -46,7 +46,7 @@ void DiffractionFocussing2::init() {
   auto wsValidator = std::make_shared<API::RawCountValidator>();
   declareProperty(
       std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input, wsValidator),
-      "A 2D workspace with X values of d-spacing/Q-spacing");
+      "A 2D workspace with X values of d-spacing, Q or TOF");
   declareProperty(std::make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The result of diffraction focussing of InputWorkspace");
 
