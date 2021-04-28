@@ -110,42 +110,6 @@ class SuperplotView(QWidget):
         """
         return self._sideView.workspaceSelector.currentText()
 
-    def setSelectedWorkspacesInList(self, names):
-        """
-        Select the corresponding worspaces from the list. This function does not
-        raise any QTreeWidget signals.
-
-        Args:
-            names (list(str)): list of workspace names
-        """
-        self._sideView.workspacesList.blockSignals(True)
-        self._sideView.workspacesList.clearSelection()
-        for name in names:
-            item = self._sideView.workspacesList.findItems(name,
-                                                           Qt.MatchExactly, 0)
-            if item:
-                self._sideView.workspacesList.setCurrentItem(
-                        item[0], 0, QItemSelectionModel.Select)
-        self._sideView.workspacesList.expandAll()
-        self._sideView.workspacesList.blockSignals(False)
-
-    def getSelectedWorkspacesFromList(self):
-        """
-        Get the selected workspaces from the selection tree.
-
-        Returns:
-            list(str): list of selected workspace names
-        """
-        items = self._sideView.workspacesList.selectedItems()
-        selection = list()
-        for item in items:
-            if item.parent() is not None:
-                item = item.parent()
-            wsName = item.getWorkspaceName()
-            if wsName not in selection:
-                selection.append(wsName)
-        return selection
-
     def setSelection(self, selection):
         """
         Set the selected workspaces and spectra in list.

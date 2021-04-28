@@ -91,11 +91,11 @@ class SuperplotPresenter:
         Triggered when the add button is pressed. This function adds the
         workspace to the selection list.
         """
-        selection = self._view.getSelectedWorkspacesFromList()
+        selection = self._view.getSelection()
         addedWorkspace = self._view.getSelectedWorkspace()
         self._model.addWorkspace(addedWorkspace)
         self._updateList()
-        self._view.setSelectedWorkspacesInList(selection)
+        self._view.setSelection(selection)
         self._updatePlot()
 
     def onDelButtonClicked(self, wsName=None):
@@ -103,8 +103,9 @@ class SuperplotPresenter:
         Triggered when the del button is pressed. This function removes the
         selected workspace from the selection list.
         """
+        selection = self._view.getSelection()
         if wsName is None:
-            selectedWorkspaces = self._view.getSelectedWorkspacesFromList()
+            selectedWorkspaces = [ws for ws in selection]
         else:
             selectedWorkspaces = [wsName]
         for selectedWorkspace in selectedWorkspaces:
@@ -116,7 +117,7 @@ class SuperplotPresenter:
             self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
                                           self.BIN_MODE_TEXT])
             self._view.setMode(mode)
-        self._view.setSelectedWorkspacesInList([])
+        self._view.setSelection(selection)
         self._updateSpectrumSlider()
         self._updatePlot()
 
