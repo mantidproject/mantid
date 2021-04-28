@@ -220,7 +220,8 @@ class SuperplotPresenter:
                                            line.get_color())
 
         for wsName, spectra in selection.items():
-            if currentSpectrumIndex not in spectra:
+            if (currentSpectrumIndex not in spectra
+                and not self._view.getSpectrumDisabled()):
                 spectra.append(currentSpectrumIndex)
             for spectrum in spectra:
                 if (wsName, spectrum) not in plottedData:
@@ -323,6 +324,7 @@ class SuperplotPresenter:
                 for spectrum in selection[wsName]:
                     self._model.removeData(wsName, spectrum)
                 selection[wsName] = []
+            selection = {e for e in selection if selection[e]}
             if not self._model.isBinMode() and not self._model.isSpectrumMode():
                 self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
                                               self.BIN_MODE_TEXT])
