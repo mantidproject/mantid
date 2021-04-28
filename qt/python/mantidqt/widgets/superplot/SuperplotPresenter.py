@@ -197,11 +197,9 @@ class SuperplotPresenter:
 
         figure = self._canvas.figure
         axes = figure.gca()
-        xscale = axes.get_xscale()
-        yscale = axes.get_yscale()
-        axes.clear()
-        axes.set_xscale(xscale)
-        axes.set_yscale(yscale)
+        for line in axes.get_lines():
+            line.remove()
+        axes.set_prop_cycle(None)
         for wsName, sp in plottedData:
             if self._model.isSpectrumMode():
                 axisType = MantidAxType.SPECTRUM
@@ -230,7 +228,6 @@ class SuperplotPresenter:
 
         if selection or plottedData:
             figure.tight_layout()
-            axes.relim()
             axes.legend()
         self._canvas.draw_idle()
 
