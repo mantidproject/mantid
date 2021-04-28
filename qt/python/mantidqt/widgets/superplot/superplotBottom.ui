@@ -27,6 +27,9 @@
     <property name="topMargin">
      <number>0</number>
     </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
     <item row="1" column="6">
      <widget class="QPushButton" name="holdButton">
       <property name="text">
