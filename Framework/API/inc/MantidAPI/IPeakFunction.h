@@ -10,13 +10,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionWithLocation.h"
-#include "boost/make_shared.hpp"
 #include "boost/shared_ptr.hpp"
+#include "boost/tuple/tuple.hpp"
 
 namespace Mantid {
 namespace API {
 
-struct IntegrationResult;
+using IntegrationResultCache = boost::tuple<double, double, bool>;
 /** An interface to a peak function, which extend the interface of
     IFunctionWithLocation by adding methods to set and get peak width.
 
@@ -85,6 +85,10 @@ public:
     throw std::runtime_error("Generic intensity fixing isn't implemented for this function.");
   }
 
+protected:
+  // helper function for intensity() and intensityError()
+  virtual IntegrationResultCache integrate() const;
+
 private:
   /// Set new peak radius
   void setPeakRadius(int r) const;
@@ -93,10 +97,8 @@ private:
   mutable int m_peakRadius;
   /// The default level for searching a domain interval (getDomainInterval())
   static constexpr double DEFAULT_SEARCH_LEVEL = 1e-5;
-  // helper function for intensity() and intensityError()
-  virtual IntegrationResult integrate() const;
   // cache the result of a PeakFunctionIntegrator call
-  mutable boost::shared_ptr<IntegrationResult> integrationResult = nullptr;
+  mutable boost::shared_ptr<IntegrationResultCache> integrationResult = nullptr;
 };
 
 using IPeakFunction_sptr = std::shared_ptr<IPeakFunction>;
