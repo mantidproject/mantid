@@ -9,6 +9,7 @@
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -111,6 +112,10 @@ void SaveAscii2::init() {
   declareProperty("WriteSpectrumAxisValue", false,
                   "Write the spectrum axis value if requested. Ignored for "
                   "Table Workspaces.");
+
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("LogList"),
+                  "List of logs to write to the file header. Ignored for Table "
+                  "Workspaces.");
 }
 
 /**
@@ -266,6 +271,10 @@ void SaveAscii2::exec() {
   }
   if (scientific) {
     file << std::scientific;
+  }
+  const std::vector<std::string> logList = getProperty("LogList");
+  if (!logList.empty()) {
+    writeFileHeader(logList, file);
   }
   if (writeHeader) {
     file << comment << " X " << m_sep << " Y " << m_sep << " E";
@@ -497,6 +506,47 @@ void SaveAscii2::writeTableWorkspace(const ITableWorkspace_const_sptr &tws, cons
 
   file.unsetf(std::ios_base::floatfield);
   file.close();
+}
+
+/**
+ * Retrieves sample log value and its unit. In case they are not defined they
+ * are replaced with 'not defined' meassage and empty string, respectively.
+ * @param logName :: The user-defined identifier for sample log
+ * @return A pair of strings containing sample log value and its unit
+ */
+std::pair<std::string, std::string> SaveAscii2::sampleLogValueUnit(const std::string &logName) {
+  auto run = m_ws->run();
+  // Gets the sample log value
+  std::string sampleLogValue = "";
+  try {
+    sampleLogValue = boost::lexical_cast<std::string>(run.getLogData(logName)->value());
+  } catch (Exception::NotFoundError &) {
+    g_log.warning("Log " + logName + " not found.");
+    sampleLogValue = "Not defined";
+  }
+  // Gets the sample log unit
+  std::string sampleLogUnit = "";
+  try {
+    sampleLogUnit = boost::lexical_cast<std::string>(run.getLogData(logName)->units());
+  } catch (Exception::NotFoundError &) {
+    sampleLogUnit = "";
+  }
+  return std::pair(sampleLogValue, sampleLogUnit);
+}
+
+/**
+ * Writes the file header containing the user-defined sample logs.
+ * @param logList :: A vector of strings containing user-defined identifiers for
+ * sample logs
+ * @param outputFile :: A reference to the output stream
+ */
+void SaveAscii2::writeFileHeader(const std::vector<std::string> &logList, std::ofstream &outputFile) {
+  for (const auto &logName : logList) {
+    const std::pair<std::string, std::string> readLog = sampleLogValueUnit(logName);
+    auto logValue = boost::replace_all_copy(readLog.second, ",", ";");
+    outputFile << logName << m_sep << readLog.first << m_sep << logValue << '\n';
+  }
+  outputFile << '\n';
 }
 
 } // namespace DataHandling

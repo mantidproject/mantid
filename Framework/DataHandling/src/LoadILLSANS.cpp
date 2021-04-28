@@ -756,6 +756,8 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry, const std::string &i
   // the start time is needed in the workspace when loading the parameter file
   std::string startDate = entry.getString("start_time");
   runDetails.addProperty<std::string>("start_time", m_loadHelper.dateTimeInIsoFormat(startDate));
+  // set the facility
+  runDetails.addProperty<std::string>("Facility", std::string("ILL"));
 }
 
 /**

@@ -47,4 +47,10 @@ Bugfixes
 - Fixed a bug where Workbench would hang on startup when running on Big Sur.
 - Fixed a bug applying constraints with the conjugate gradient minimizer.
 
+Interfaces
+----------
+
+- Automatic data export in DrILL now creates a header for ASCII files, through the new property in :ref:`SaveAscii <algm-SaveAscii>`.
+  See the :ref:`SaveAscii <algm-SaveAscii>` for more information.
+
 :ref:`Release 6.1.0 <v6.1.0>`
