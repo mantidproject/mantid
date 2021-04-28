@@ -16,7 +16,7 @@ from mantid.simpleapi import (mtd, IntegrateMDHistoWorkspace,
                               ConvertToPointData, Fit,
                               CombinePeaksWorkspaces,
                               HB3AAdjustSampleNorm,
-                              CentroidPeaksMD)
+                              CentroidPeaksMD, RenameWorkspace)
 import numpy as np
 
 
@@ -47,7 +47,6 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
         self.declareProperty("ChiSqMax", 10.0, doc="Fitting resulting in chisq higher than this won't be added to the output")
         self.declareProperty("ApplyLorentz", True, doc="If to apply Lorentz Correction to intensity")
 
-        # TODO implement this, also include a ROI workspace plot
         self.declareProperty("OutputFitResults", False, doc="This will include the fitting result workspace")
 
         self.declareProperty("OptimizeQVector", True,
@@ -70,6 +69,11 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
         ur = self.getProperty("UpperRight").value
         use_lorentz = self.getProperty("ApplyLorentz").value
         optmize_q = self.getProperty("OptimizeQVector").value
+        output_fit = self.getProperty("OutputFitResults").value
+
+        if output_fit:
+            fit_results = WorkspaceGroup()
+            AnalysisDataService.addOrReplace(outWS+"_fit_results", fit_results)
 
         for inWS in input_workspaces:
             tmp_inWS = '__tmp_' + inWS
@@ -85,7 +89,7 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
             scan_axis = run[scan_log].value
             data.setX(0, scan_axis)
 
-            fit_result = fit_gaussian(data)
+            fit_result = fit_gaussian(data, output_fit)
             if fit_result.OutputStatus == 'success' and fit_result.OutputChi2overDoF < chisqmax:
                 __tmp_pw = CreatePeaksWorkspace(OutputType='LeanElasticPeak',
                                                 InstrumentWorkspace=inWS,
@@ -94,7 +98,6 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                 _, A, x, s, _ = fit_result.OutputParameters.toDict()['Value']
                 _, errA, _, errs, _ = fit_result.OutputParameters.toDict()['Error']
 
-                # TODO change peak to get Q from pixel info
                 if scan_log == 'omega':
                     SetGoniometer(Workspace=__tmp_pw, Axis0=f'{x},0,1,0,-1', Axis1='chi,0,0,1,-1', Axis2='phi,0,1,0,-1')
                 else:
@@ -126,9 +129,19 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                 CombinePeaksWorkspaces(outWS, __tmp_pw, OutputWorkspace=outWS)
                 DeleteWorkspace(__tmp_pw)
 
+                if output_fit:
+                    fit_results.addWorkspace(RenameWorkspace(tmp_inWS+'_Workspace', inWS+'_Workspace'))
+                    fit_results.addWorkspace(RenameWorkspace(tmp_inWS+'_Parameters', inWS+'_Parameters'))
+                    fit_results.addWorkspace(RenameWorkspace(tmp_inWS+'_NormalisedCovarianceMatrix', inWS+'_NormalisedCovarianceMatrix'))
+                    fit_results.addWorkspace(IntegrateMDHistoWorkspace(InputWorkspace=inWS,
+                                                                       P1Bin=f'{ll[1]},0,{ur[1]}',
+                                                                       P2Bin=f'{ll[0]},0,{ur[0]}',
+                                                                       P3Bin='0,{}'.format(mtd[inWS].getDimension(2).getNBins()),
+                                                                       OutputWorkspace=inWS+"_ROI"))
+                else:
+                    DeleteWorkspace(tmp_inWS+'_Parameters')
+                    DeleteWorkspace(tmp_inWS+'_NormalisedCovarianceMatrix')
             DeleteWorkspace(tmp_inWS)
-            DeleteWorkspace(tmp_inWS+'_Parameters')
-            DeleteWorkspace(tmp_inWS+'_NormalisedCovarianceMatrix')
 
         self.setProperty("OutputWorkspace", mtd[outWS])
 
@@ -145,11 +158,11 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
         return input_workspaces
 
 
-def fit_gaussian(ws):
+def fit_gaussian(ws, output_fit):
     y = ws.extractY()
     x = ws.extractX()
     function = f"name=FlatBackground, A0={y.min()}; name=Gaussian, PeakCentre={x[0, y.argmax()]}, Height={y.max()-y.min()}, Sigma=0.25"
-    fit_result = Fit(function, ws, Output=str(ws), OutputParametersOnly=True)
+    fit_result = Fit(function, ws, Output=str(ws), OutputParametersOnly=not output_fit)
     return fit_result
 
 
