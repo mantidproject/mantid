@@ -10,8 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionWithLocation.h"
-#include "MantidAPI/PeakFunctionIntegrator.h"
-#include "boost/optional.hpp"
+#include "boost/make_shared.hpp"
 #include "boost/shared_ptr.hpp"
 
 namespace Mantid {
@@ -95,9 +94,9 @@ private:
   /// The default level for searching a domain interval (getDomainInterval())
   static constexpr double DEFAULT_SEARCH_LEVEL = 1e-5;
   // helper function for intensity() and intensityError()
-  IntegrationResult integrate() const;
+  virtual IntegrationResult integrate() const;
   // cache the result of a PeakFunctionIntegrator call
-  boost::optional<IntegrationResult> integrationResult = boost::none;
+  mutable boost::shared_ptr<IntegrationResult> integrationResult = nullptr;
 };
 
 using IPeakFunction_sptr = std::shared_ptr<IPeakFunction>;
