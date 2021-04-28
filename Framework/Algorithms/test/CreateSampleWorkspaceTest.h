@@ -77,6 +77,10 @@ public:
     if (numScanPoints != 1)
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumScanPoints", numScanPoints))
 
+    /* Check the property groups */
+    std::vector<Property *> instrument_properties = alg.getPropertiesInGroup("Instrument");
+    TS_ASSERT_EQUALS(instrument_properties.size(), 7);
+
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
