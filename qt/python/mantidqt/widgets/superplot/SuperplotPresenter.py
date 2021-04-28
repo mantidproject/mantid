@@ -302,43 +302,57 @@ class SuperplotPresenter:
         self._updateSpectrumSlider()
         self._updatePlot()
 
-    def onHoldButtonToggled(self, state):
+    def _onHold(self):
         """
-        Add or delete the currently selected workspace, spectrum pairs from the
-        plotted data.
+        Add the selected ws, sp pair to the plot.
+        """
+        if self._view.getSpectrumDisabled():
+            return
+        selection = self._view.getSelection()
+        spectrumIndex = self._view.getSpectrumSliderPosition()
+        mode = self._view.getMode()
+        for wsName in selection:
+            self._model.addData(wsName, spectrumIndex)
+        if mode == self.SPECTRUM_MODE_TEXT:
+            self._model.setSpectrumMode()
+            self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT])
+        self._view.checkHoldButton(False)
+        self._updateList()
+        self._view.setSelection(selection)
+        self._updatePlot()
 
-        Args:
-            state (bool): status of the two state button
+    def _onUnHold(self):
+        """
+        Remove the selected ws, sp pair from the plot.
         """
         selection = self._view.getSelection()
         spectrumIndex = self._view.getSpectrumSliderPosition()
         mode = self._view.getMode()
-        if state:
-            for wsName in selection:
-                self._model.addData(wsName, spectrumIndex)
-            if mode == self.SPECTRUM_MODE_TEXT:
-                self._model.setSpectrumMode()
-                self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT])
+        for wsName in selection:
+            if not self._view.getSpectrumDisabled():
+                self._model.removeData(wsName, spectrumIndex)
             else:
-                self._model.setBinMode()
-                self._view.setAvailableModes([self.BIN_MODE_TEXT])
-        else:
-            for wsName in selection:
                 for spectrum in selection[wsName]:
                     self._model.removeData(wsName, spectrum)
-                selection[wsName] = []
-            selection = {e for e in selection if selection[e]}
-            if not self._model.isBinMode() and not self._model.isSpectrumMode():
-                self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
-                                              self.BIN_MODE_TEXT])
-                self._view.setMode(mode)
+        if not self._model.isBinMode() and not self._model.isSpectrumMode():
+            self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
+                self.BIN_MODE_TEXT])
+            self._view.setMode(mode)
         self._updateList()
-        self._view.setSelection(selection)
         self._updateSpectrumSlider()
-        self._view.setSpectrumSliderPosition(spectrumIndex)
-        self._view.setSpectrumSpinBoxValue(spectrumIndex)
-        self._view.checkHoldButton(False)
         self._updatePlot()
+
+    def onHoldButtonToggled(self, state):
+        """
+        Triggered when the hold button state changed.
+
+        Args:
+            state (bool): status of the two state button
+        """
+        if state:
+            self._onHold()
+        else:
+            self._onUnHold()
 
     def onModeChanged(self, mode):
         """
