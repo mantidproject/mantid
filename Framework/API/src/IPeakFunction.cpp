@@ -14,6 +14,7 @@
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/PeakFunctionIntegrator.h"
 #include "MantidKernel/Exception.h"
+#include "boost/make_shared.hpp"
 
 #include <cmath>
 #include <limits>
@@ -169,43 +170,37 @@ void IPeakFunction::setPeakRadius(int r) const {
   }
 }
 
-IntegrationResult IPeakFunction::integrate() const {
-  IntegrationResult result;
-
-  if (integrationResult) {
-    result = *integrationResult;
-  } else {
-    std::pair<double, double> interval = getDomainInterval();
+IntegrationResultCache IPeakFunction::integrate() const {
+  if (!integrationResult) {
+    auto const interval = getDomainInterval();
 
     PeakFunctionIntegrator integrator;
 
-    result = integrator.integrate(*this, interval.first, interval.second);
-    integrationResult = boost::make_shared<IntegrationResult>(result);
+    auto const result = integrator.integrate(*this, interval.first, interval.second);
+    integrationResult = boost::make_shared<boost::tuple<double, double, bool>>(
+        boost::make_tuple(result.result, result.error, result.success));
   }
-  return result;
+  return *integrationResult;
 }
 
 /// Returns the integral intensity of the peak function, using the peak radius
 /// to determine integration borders.
 double IPeakFunction::intensity() const {
-  IntegrationResult result = integrate();
-
-  if (!result.success) {
-    return 0.0;
-  }
-
-  return result.result;
+  const auto result = integrate();
+  if (!boost::get<2>(result)) // success?
+    return NAN;
+  else
+    return boost::get<0>(result); // result
 }
 
 /// Returns the uncertainty associated to the integral intensity of the peak function
 double IPeakFunction::intensityError() const {
-  IntegrationResult result = integrate();
+  const auto result = integrate();
   // TODO: dont forget to remove this from the cache in the setParameter function
-  if (!result.success) {
-    return 0.0;
-  }
-
-  return result.error;
+  if (!boost::get<2>(result)) // success?
+    return NAN;
+  else
+    return boost::get<1>(result); // error
 }
 
 /// Sets the integral intensity of the peak by adjusting the height.
