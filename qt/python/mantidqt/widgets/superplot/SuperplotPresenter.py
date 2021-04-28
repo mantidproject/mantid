@@ -120,13 +120,9 @@ class SuperplotPresenter:
         self._updateSpectrumSlider()
         self._updatePlot()
 
-    def _updateSpectrumSlider(self, position=0):
+    def _updateSpectrumSlider(self):
         """
         Update the spectrum slider and spinbox to match the selected workspaces.
-
-        Args:
-            position (int): position that the slider should take (if possible).
-                            default is 0
         """
         selection = self._view.getSelection()
         if not selection:
@@ -137,9 +133,20 @@ class SuperplotPresenter:
             self._view.setSpectrumDisabled(True)
             return
         maximum = None
+        position = None
         mode = self._view.getMode()
         for wsName in selection:
             ws = mtd[wsName]
+            for sp in selection[wsName]:
+                if position is None:
+                    position = sp
+                elif position != sp:
+                    self._view.setSpectrumSliderPosition(0)
+                    self._view.setSpectrumSliderMax(0)
+                    self._view.setSpectrumSpinBoxValue(0)
+                    self._view.setSpectrumSpinBoxMax(0)
+                    self._view.setSpectrumDisabled(True)
+                    return
             if mode == self.SPECTRUM_MODE_TEXT:
                 value = ws.getNumberHistograms()
             else:
@@ -148,7 +155,7 @@ class SuperplotPresenter:
                 maximum = value
             elif value < maximum:
                 maximum = value
-        if position >= maximum:
+        if position is None or position >= maximum:
             position = 0
         self._view.setSpectrumDisabled(False)
         self._view.setSpectrumSliderMax(maximum - 1)
@@ -234,23 +241,8 @@ class SuperplotPresenter:
         """
         Triggered when the selected workspace (in the workspace tree) changed.
         """
-        selection = self._view.getSelection()
-        spectrumIndex = None
-        for ws in selection:
-            for sp in selection[ws]:
-                if spectrumIndex is None:
-                    spectrumIndex = sp
-                if sp != spectrumIndex:
-                    self._updateSpectrumSlider()
-                    self._updatePlot()
-                    return
-
-        if spectrumIndex is None:
-            self._view.checkHoldButton(False)
-            spectrumIndex = 0
-        else:
-            self._view.checkHoldButton(True)
-        self._updateSpectrumSlider(spectrumIndex)
+        self._updateSpectrumSlider()
+        self._updateHoldButton()
         self._updatePlot()
 
     def onSpectrumSliderMoved(self, position):
@@ -300,7 +292,7 @@ class SuperplotPresenter:
                     del selection[wsName]
         self._updateList()
         self._view.setSelection(selection)
-        self._updateSpectrumSlider(currentIndex)
+        self._updateSpectrumSlider()
         self._updatePlot()
 
     def onHoldButtonToggled(self, state):
@@ -334,7 +326,9 @@ class SuperplotPresenter:
                 self._view.setMode(mode)
         self._updateList()
         self._view.setSelection(selection)
-        self._updateSpectrumSlider(spectrumIndex)
+        self._updateSpectrumSlider()
+        self._view.setSpectrumSliderPosition(spectrumIndex)
+        self._view.setSpectrumSpinBoxValue(spectrumIndex)
         self._view.checkHoldButton(False)
         self._updatePlot()
 
