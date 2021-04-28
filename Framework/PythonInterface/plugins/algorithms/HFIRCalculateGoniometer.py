@@ -53,7 +53,7 @@ class HFIRCalculateGoniometer(PythonAlgorithm):
 
         wavelength = self.getProperty("Wavelength").value
         if wavelength == Property.EMPTY_DBL:
-            wavelength = peaks.run()['wavelength'].value
+            wavelength = float(peaks.run()['wavelength'].value)
 
         if self.getProperty("OverrideProperty").value:
             flip_x = self.getProperty("FlipX").value
