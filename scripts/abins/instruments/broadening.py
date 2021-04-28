@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 from scipy.special import erf
-from scipy.signal import convolve
+
+import abins.parameters
 
 prebin_required_schemes = ['interpolate', 'interpolate_coarse']
 
@@ -521,6 +522,12 @@ def interpolated_broadening(sigma=None, points=None, bins=None,
     :returntype: (1D array, 1D array)
 
     """
+    use_oaconvolve = abins.parameters.performance.get('use_oaconvolve')
+
+    if use_oaconvolve:
+        from scipy.signal import oaconvolve
+    else:
+        from scipy.signal import convolve
 
     mix_functions = {'gaussian': {'2': {'lower': [-0.1873, 1.464, -4.079, 3.803],
                                         'upper': [0.2638, -1.968, 5.057, -3.353]},
@@ -554,7 +561,11 @@ def interpolated_broadening(sigma=None, points=None, bins=None,
     else:
         raise ValueError('"{}" kernel not supported for "interpolate" broadening method.'.format(function))
 
-    spectra = np.array([convolve(hist, kernel, mode='same') for kernel in kernels])
+    if use_oaconvolve:
+        spectra = np.array([oaconvolve(kernel, hist)[kernel.size // 2:hist.size + kernel.size // 2]
+                            for kernel in kernels])
+    else:
+        spectra = np.array([convolve(hist, kernel, mode='same') for kernel in kernels])
 
     # Interpolate with parametrised relationship
     sigma_locations = np.searchsorted(sigma_samples, sigma) # locations in sampled values of points from sigma

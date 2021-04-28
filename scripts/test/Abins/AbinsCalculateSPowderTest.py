@@ -140,7 +140,14 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
             good_temp = good_data["atom_%s" % el]["s"]["order_%s" % FUNDAMENTALS]
             data_temp = data["atom_%s" % el]["s"]["order_%s" % FUNDAMENTALS]
 
-            assert_almost_equal(good_temp, data_temp)
+            try:
+                assert_almost_equal(good_temp, data_temp)
+            except AssertionError:
+                import matplotlib.pyplot as plt
+                plt.plot(good_temp)
+                plt.plot(data_temp)
+                plt.show()
+                raise
 
 
 if __name__ == '__main__':

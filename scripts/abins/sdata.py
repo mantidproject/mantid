@@ -8,14 +8,17 @@ import collections.abc
 from typing import Dict, List, Optional, overload, Sequence, TypeVar, Union
 import numpy as np
 from numbers import Real
-from scipy.signal import oaconvolve
 
 from mantid.kernel import logger as mantid_logger
 import abins
 from abins.constants import ALL_KEYWORDS_ATOMS_S_DATA, ALL_SAMPLE_FORMS, ATOM_LABEL, FLOAT_TYPE, S_LABEL
+import abins.parameters
 
 # Type annotation for atom items e.g. data['atom_1']
 OneAtomSData = Dict[str, np.ndarray]
+
+SD = TypeVar('SD', bound='SData')
+SDBA = TypeVar('SDBA', bound='SDataByAngle')
 
 
 class SData(collections.abc.Sequence):
@@ -52,6 +55,99 @@ class SData(collections.abc.Sequence):
         self._data = data
         self._check_data()
 
+    def update(self, sdata: 'SData') -> None:
+        """Update the data by atom and order
+
+        This can be used to change values or to append additional atoms/quantum orders
+
+        Args:
+            sdata: another SData instance with the same frequency series.
+                Spectra will be updated by atom and by quantum order; i.e.
+                - elements in both old and new sdata will be replaced with new value
+                - elements that only exist in the old data will be untouched
+                - elements that only exist in the new data will be appended as
+                  new entries to the old data
+        """
+
+        if not np.allclose(self._frequencies, sdata.get_frequencies()):
+            raise ValueError('Cannot update SData with inconsistent frequencies')
+
+        for atom_key, atom_data in sdata._data.items():
+            if atom_key in self._data:
+                for order, order_data in sdata._data[atom_key]['s'].items():
+                    self._data[atom_key]['s'][order] = order_data
+            else:
+                self._data[atom_key] = atom_data
+
+    def add_dict(self, data: dict) -> None:
+        """Add data in dict form to existing values.
+
+        These atoms/orders must already be present; use self.update() to add new data.
+        """
+
+        for atom_key, atom_data in data.items():
+            for order, order_data in atom_data['s'].items():
+                self._data[atom_key]['s'][order] += order_data
+
+    def apply_dw(self, dw: np.array, min_order=1, max_order=2) -> None:
+        """Multiply S by frequency-dependent scale factor for all atoms
+
+        Args:
+            dw: Numpy array with dimensions (N_atoms, N_frequencies)
+            min_order: Lowest quantum order of data to process
+            max_order: Highest quantum order of data to process
+        """
+        for atom_index, dw_row in enumerate(dw):
+            atom_key = f'atom_{atom_index}'
+            atom_data = self._data.get(atom_key)
+            if atom_data is None:
+                raise IndexError("Atoms in SData do not match dimensions of Debye-Waller data")
+
+            for order in range(min_order, max_order + 1):
+                order_key = f'order_{order}'
+                if int(order) >= min_order and ((max_order is None) or int(order) <= max_order):
+                    self._data[atom_key]['s'][order_key] *= dw_row
+
+    @classmethod
+    def get_empty(cls: SD, *,
+                  frequencies: np.ndarray,
+                  atom_keys: Sequence[str],
+                  order_keys: Sequence[str],
+                  **kwargs) -> SD:
+        """Construct data container with zeroed arrays of appropriate dimensions
+
+        This is useful as a starting point for accumulating data in a loop.
+
+        Args:
+
+            angles: inelastic scattering angles
+
+            frequencies: inelastic scattering energies
+
+            atom_keys:
+                keys for atom data sets, corresponding to keys of ``data=``
+                init argument of SData() of SDataByAngle(). Usually this is
+                ['atom_0', 'atom_1', ...]
+
+            order_keys:
+                keys for quantum order
+
+            **kwargs:
+                remaining keyword arguments will be passed to class constructor
+                (Usually these would be ``temperature=`` and ``sample_form=``.)
+
+        Returns:
+            Empty data collection with appropriate dimensions and metadata
+        """
+
+        n_frequencies = len(frequencies)
+
+        data = {atom_key: {'s': {order_key: np.zeros(n_frequencies)
+                                 for order_key in order_keys}}
+                for atom_key in atom_keys}
+
+        return cls(data=data, frequencies=frequencies, **kwargs)
+
     def get_frequencies(self) -> np.ndarray:
         return self._frequencies.copy()
 
@@ -66,7 +162,6 @@ class SData(collections.abc.Sequence):
 
         If the frequency series does not have a consistent step size, return None
         """
-
         self._check_frequencies()
         step_size = (self._frequencies[-1] - self._frequencies[0]) / (self._frequencies.size - 1)
 
@@ -136,7 +231,33 @@ class SData(collections.abc.Sequence):
         full_data.update({'frequencies': self._frequencies})
         return full_data
 
-    def add_autoconvolution_spectra(self, max_order: int = 10) -> None:
+    def rebin(self, bins: np.array) -> 'SData':
+        """Re-bin the data to a new set of frequency bins
+
+        Data is resampled using np.histogram; no smoothing/interpolation takes
+        place, this is generally intended for moving to a coarser grid.
+
+        Args: New sampling bin edges.
+
+        Returns:
+            A new SData object with resampled data.
+        """
+        old_frequencies = self.get_frequencies()
+        new_frequencies = (bins[:-1] + bins[1:]) / 2
+
+        new_data = {atom_key: {'s':
+                               {order_key: np.histogram(old_frequencies,
+                                                        bins=bins,
+                                                        weights=order_data,
+                                                        density=0)[0]
+                                for order_key, order_data in atom_data['s'].items()}}
+                    for atom_key, atom_data in self._data.items()}
+
+        return self.__class__(data=new_data, frequencies=new_frequencies,
+                              temperature=self.get_temperature(),
+                              sample_form=self.get_sample_form())
+
+    def add_autoconvolution_spectra(self, max_order: Optional[int] = None) -> None:
         """
         Atom-by-atom, add higher order spectra by convolution with fundamentals
 
@@ -149,6 +270,14 @@ class SData(collections.abc.Sequence):
         The process will begin with the highest existing order, and repeat until
         a spectrum of MAX_ORDER is obtained.
         """
+        use_oaconvolve = abins.parameters.performance.get('use_oaconvolve')
+        if max_order is None:
+            max_order = abins.parameters.autoconvolution['max_order']
+
+        if use_oaconvolve:
+            from scipy.signal import oaconvolve
+        else:
+            from scipy.signal import convolve
 
         for atom_key, atom_data in self._data.items():
             for order_index in range(1, max_order + 1):
@@ -165,7 +294,11 @@ class SData(collections.abc.Sequence):
 
             for order_index in range(highest_existing_order, max_order):
                 # Overlap-addition convolution: fast implementation of direct convolution
-                spectrum = oaconvolve(kernel, atom_data['s'][f'order_{order_index}'])[:fundamental_spectrum.size]
+                if use_oaconvolve:
+                    spectrum = oaconvolve(kernel, atom_data['s'][f'order_{order_index}'])[:fundamental_spectrum.size]
+                else:
+                    spectrum = convolve(atom_data['s'][f'order_{order_index}'], kernel, mode='same')
+
                 self._data[atom_key]['s'][f'order_{order_index + 1}'] = spectrum
 
     def check_thresholds(self, return_cases=False, logger=None):
@@ -241,9 +374,6 @@ class SData(collections.abc.Sequence):
         else:
             raise TypeError(
                 "Indices must be integers or slices, not {}.".format(type(item)))
-
-
-SDBA = TypeVar('SDBA', bound='SDataByAngle')
 
 
 class SDataByAngle(collections.abc.Sequence):

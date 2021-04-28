@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import numpy as np
+from numpy.testing import assert_almost_equal
 import logging
 import abins
 from abins import SData
@@ -53,6 +54,70 @@ class AbinsSDataTest(unittest.TestCase):
         abins.parameters.sampling['s_absolute_threshold'] = 0.5
         with self.assertLogs(logger=self.logger, level='WARNING'):
             s_data.check_thresholds(logger=self.logger)
+
+    def test_s_data_get_empty(self):
+        from itertools import product
+
+        sdata = SData.get_empty(frequencies=np.linspace(1., 5., 10),
+                                atom_keys=['atom_2', 'atom_3'],
+                                order_keys=['order_2', 'order_3'],
+                                temperature=101.,
+                                sample_form='etherial')
+        with self.assertRaises(IndexError):
+            sdata[1]
+        with self.assertRaises(KeyError):
+            sdata[2]['order_1']
+
+        for atom, order in product([2, 3], ['order_2', 'order_3']):
+            assert_almost_equal(sdata[atom][order], np.zeros(10))
+
+        assert_almost_equal(sdata.get_temperature(), 101.)
+        self.assertEqual(sdata.get_sample_form(), 'etherial')
+
+    def test_s_data_update(self):
+        # Case 1: add new atom
+        sdata = SData(data=self.sample_data, frequencies=self.frequencies)
+        sdata_new = SData(data={'atom_2':
+                                {'s': {'order_1': np.linspace(0, 2, 5)}}},
+                          frequencies=self.frequencies)
+        sdata.update(sdata_new)
+        assert_almost_equal(sdata[0]['order_1'], self.sample_data['atom_0']['s']['order_1'])
+        assert_almost_equal(sdata[2]['order_1'], np.linspace(0, 2, 5))
+
+        # Case 2: add new order
+        sdata = SData(data=self.sample_data, frequencies=self.frequencies)
+        sdata_new = SData(data={'atom_1':
+                                {'s': {'order_2': np.linspace(0, 2, 5)}}},
+                          frequencies=self.frequencies)
+        sdata.update(sdata_new)
+        assert_almost_equal(sdata[1]['order_1'], self.sample_data['atom_1']['s']['order_1'])
+        assert_almost_equal(sdata[1]['order_2'], np.linspace(0, 2, 5))
+
+        # Case 3: update in-place
+        sdata = SData(data=self.sample_data, frequencies=self.frequencies)
+        sdata_new = SData(data={'atom_1':
+                                {'s': {'order_1': np.linspace(0, 2, 5),
+                                       'order_2': np.linspace(2, 4, 5)}}},
+                          frequencies=self.frequencies)
+        sdata.update(sdata_new)
+        assert_almost_equal(sdata[1]['order_1'], np.linspace(0, 2, 5))
+        assert_almost_equal(sdata[1]['order_2'], np.linspace(2, 4, 5))
+
+        # Case 4: incompatible frequencies
+        sdata = SData(data=self.sample_data, frequencies=self.frequencies)
+        sdata_new = SData(data={'atom_2':
+                                {'s': {'order_1': np.linspace(0, 2, 4)}}},
+                          frequencies=self.frequencies[:-1])
+        with self.assertRaises(ValueError):
+            sdata.update(sdata_new)
+
+    def test_s_data_add_dict(self):
+        from copy import deepcopy
+        s_data = SData(data=deepcopy(self.sample_data), frequencies=self.frequencies)
+        s_data.add_dict({'atom_1': {'s': {'order_1': np.ones(5)}}})
+
+        assert_almost_equal(s_data[1]['order_1'],
+                            self.sample_data['atom_1']['s']['order_1'] + 1)
 
     def test_s_data_indexing(self):
         s_data = SData(data=self.sample_data, frequencies=self.frequencies)

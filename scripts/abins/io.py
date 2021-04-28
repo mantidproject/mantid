@@ -22,9 +22,10 @@ class IO(object):
     """
     Class for Abins I/O HDF file operations.
     """
-    def __init__(self, input_filename=None, group_name=None, setting=''):
+    def __init__(self, input_filename=None, group_name=None, setting='', autoconvolution=False):
 
         self._setting = setting
+        self._autoconvolution = autoconvolution
 
         if isinstance(input_filename, str):
 
@@ -82,6 +83,14 @@ class IO(object):
         """
         saved_setting = self.load(list_of_attributes=["setting"])
         return self._setting == saved_setting["attributes"]["setting"]
+
+    def _valid_autoconvolution(self):
+        """
+        Check if autoconvolution setting matches content of HDF file
+        :returns: True if consistent, otherwise False
+        """
+        saved_autoconvolution = self.load(list_of_attributes=["autoconvolution"])
+        return self._autoconvolution == saved_autoconvolution["attributes"]["autoconvolution"]
 
     def _valid_advanced_parameters(self):
         """
@@ -145,6 +154,9 @@ class IO(object):
         if not self._valid_setting():
             raise ValueError("Different instrument setting was used in the previous calculations")
 
+        if not self._valid_autoconvolution():
+            raise ValueError("Autoconvolution setting is not consistent with the previous calculations")
+
     def erase_hdf_file(self):
         """
         Erases content of hdf file.
@@ -167,6 +179,7 @@ class IO(object):
         """
         self.add_attribute("hash", self._hash_input_filename)
         self.add_attribute("setting", self._setting)
+        self.add_attribute("autoconvolution", self._autoconvolution)
         self.add_attribute("filename", self._input_filename)
         self.add_attribute("advanced_parameters",
                            json.dumps(abins.parameters.non_performance_parameters))
@@ -187,11 +200,11 @@ class IO(object):
         :param group: group to which attributes should be saved.
         """
         for name in self._attributes:
-            if isinstance(self._attributes[name], (np.int64, int, np.float64, float, str, bytes)):
+            if isinstance(self._attributes[name], (np.int64, int, np.float64, float, str, bytes, bool)):
                 group.attrs[name] = self._attributes[name]
             else:
                 raise ValueError("Invalid value of attribute. String, "
-                                 "int or bytes was expected! "
+                                 "int, bool or bytes was expected! "
                                  + name
                                  + "= (invalid type : %s) " % type(self._attributes[name]))
 
