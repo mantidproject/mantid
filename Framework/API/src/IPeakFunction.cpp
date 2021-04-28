@@ -170,16 +170,17 @@ void IPeakFunction::setPeakRadius(int r) const {
 }
 
 IntegrationResult IPeakFunction::integrate() const {
-  IntegrationResult result = NULL;
+  IntegrationResult result;
 
   if (integrationResult) {
     result = *integrationResult;
   } else {
-    auto interval = getDomainInterval();
+    std::pair<double, double> interval = getDomainInterval();
 
     PeakFunctionIntegrator integrator;
+
     result = integrator.integrate(*this, interval.first, interval.second);
-    integrationResult = result;
+    integrationResult = boost::make_shared<IntegrationResult>(result);
   }
   return result;
 }
