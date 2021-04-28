@@ -156,19 +156,18 @@ class SuperplotPresenter:
         self._view.setSpectrumSpinBoxMax(maximum - 1)
         self._view.setSpectrumSpinBoxValue(position)
 
-    def _updateHoldButton(self, wsName, spIndex):
+    def _updateHoldButton(self):
         """
-        Update the hold button state.
-
-        Args:
-            wsIndex (int): current workspace index
-            spindex (int): current spectrum index
+        Update the hold button state based on the selection.
         """
+        selection = self._view.getSelection()
+        index = self._view.getSpectrumSliderPosition()
         plottedData = self._model.getPlottedData()
-        if (wsName, spIndex) in plottedData:
-            self._view.checkHoldButton(True)
-        else:
-            self._view.checkHoldButton(False)
+        for ws in selection:
+            if (ws, index) not in plottedData:
+                self._view.checkHoldButton(False)
+                return
+        self._view.checkHoldButton(True)
 
     def _updateList(self):
         """
@@ -262,8 +261,7 @@ class SuperplotPresenter:
             position (int): slider position
         """
         self._view.setSpectrumSpinBoxValue(position)
-        currentWsName = self._view.getSelectedWorkspaceFromList()
-        self._updateHoldButton(currentWsName, position)
+        self._updateHoldButton()
         self._updatePlot()
 
     def onSpectrumSpinBoxChanged(self, value):
@@ -274,8 +272,7 @@ class SuperplotPresenter:
             value (int): spinbox value
         """
         self._view.setSpectrumSliderPosition(value)
-        currentWsName = self._view.getSelectedWorkspaceFromList()
-        self._updateHoldButton(currentWsName, value)
+        self._updateHoldButton()
         self._updatePlot()
 
     def onDelSpectrumButtonClicked(self, wsName, index):
