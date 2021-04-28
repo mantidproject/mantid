@@ -64,8 +64,8 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
                              doc='The name of the workspace containing the entire YIG scan.')
-
-        self.declareProperty(FileProperty('YIGPeaksFile', 'D7_YIG_peaks.xml',
+        default_d7_yig_file = os.path.join(config.getInstrumentDirectory(), 'D7_YIG_peaks.xml')
+        self.declareProperty(FileProperty('YIGPeaksFile', default_d7_yig_file,
                                           action=FileAction.Load,
                                           extensions=['.xml']),
                              doc='The file name with all YIG peaks in d-spacing.')
@@ -260,9 +260,9 @@ class D7YIGPositionCalibration(PythonAlgorithm):
 
     def _load_yig_peaks(self, ws):
         """Loads YIG peaks provided as an XML Instrument Parameter File"""
-        parameterFilename = self.getPropertyValue('YIGPeaksFile')
         ClearInstrumentParameters(Workspace=ws) #in case other IPF was loaded there before
-        LoadParameterFile(Workspace=ws, Filename=parameterFilename)
+        parameterFilename = self.getProperty('YIGPeaksFile')
+        LoadParameterFile(Workspace=ws, Filename=parameterFilename.value)
         yig_d_set = set()
         instrument = mtd[ws].getInstrument().getComponentByName('detector')
         for param_name in instrument.getParameterNames(True):
