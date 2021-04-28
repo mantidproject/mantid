@@ -12,8 +12,11 @@ from mantid.kernel import (Direction, IntArrayProperty,
 from mantid.simpleapi import (mtd, IntegrateMDHistoWorkspace,
                               CreatePeaksWorkspace, DeleteWorkspace,
                               AnalysisDataService, SetGoniometer,
-                              ConvertMDHistoToMatrixWorkspace, HFIRCalculateGoniometer,
-                              ConvertToPointData, Fit, CombinePeaksWorkspaces)
+                              ConvertMDHistoToMatrixWorkspace,
+                              ConvertToPointData, Fit,
+                              CombinePeaksWorkspaces,
+                              HB3AAdjustSampleNorm,
+                              CentroidPeaksMD)
 import numpy as np
 
 
@@ -34,9 +37,6 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(StringArrayProperty("InputWorkspace", direction=Direction.Input, validator=ADSValidator()),
                              doc="Workspace or comma-separated workspace list containing input MDHisto scan data.")
-        #self.declareProperty(IMDHistoWorkspaceProperty("InputWorkspace", defaultValue="", direction=Direction.Input,
-        #                                               optional=PropertyMode.Optional),
-        #                     doc="Workspace or comma-separated workspace list containing input MDHisto scan data.")
 
         self.declareProperty(IntArrayProperty("LowerLeft", [128, 128], IntArrayLengthValidator(2),
                                               direction=Direction.Input), doc="ROI lower-left")
@@ -45,6 +45,13 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
 
         self.declareProperty("ScaleFactor", 1.0, doc="scale the integrated intensity by this value")
         self.declareProperty("ChiSqMax", 10.0, doc="Fitting resulting in chisq higher than this won't be added to the output")
+        self.declareProperty("ApplyLorentz", True, doc="If to apply Lorentz Correction to intensity")
+
+        # TODO implement this, also include a ROI workspace plot
+        self.declareProperty("OutputFitResults", False, doc="This will include the fitting result workspace")
+
+        self.declareProperty("OptimizeQVector", True,
+                             doc="This will convert the data to q and optimize the peak location using CentroidPeaksdMD")
 
         self.declareProperty(IPeaksWorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output),
                              doc="Output MDWorkspace in Q-space, name is prefix if multiple input files were provided.")
@@ -61,6 +68,8 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
         chisqmax = self.getProperty("ChiSqMax").value
         ll = self.getProperty("LowerLeft").value
         ur = self.getProperty("UpperRight").value
+        use_lorentz = self.getProperty("ApplyLorentz").value
+        optmize_q = self.getProperty("OptimizeQVector").value
 
         for inWS in input_workspaces:
             tmp_inWS = '__tmp_' + inWS
@@ -83,8 +92,9 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                                                 NumberOfPeaks=0)
 
                 _, A, x, s, _ = fit_result.OutputParameters.toDict()['Value']
-                _, eA, _, es, _ = fit_result.OutputParameters.toDict()['Error']
+                _, errA, _, errs, _ = fit_result.OutputParameters.toDict()['Error']
 
+                # TODO change peak to get Q from pixel info
                 if scan_log == 'omega':
                     SetGoniometer(Workspace=__tmp_pw, Axis0=f'{x},0,1,0,-1', Axis1='chi,0,0,1,-1', Axis2='phi,0,1,0,-1')
                 else:
@@ -93,14 +103,26 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                 peak = __tmp_pw.createPeakHKL([run['h'].getStatistics().median,
                                                run['k'].getStatistics().median,
                                                run['l'].getStatistics().median])
+                peak.setWavelength(float(run['wavelength'].value))
 
                 integrated_intensity = A * s * np.sqrt(2*np.pi) * scale
                 peak.setIntensity(integrated_intensity)
                 # σ^2 = 2π (A^2 σ_s^2 + σ_A^2 s^2 + 2 A s σ_As)
-                integrated_intensity_error = np.sqrt(2*np.pi * (A**2 * es**2 +  s**2 * eA**2)) * scale  # FIX THIS
+                integrated_intensity_error = np.sqrt(2*np.pi * (A**2 * errs**2 +  s**2 * errA**2)) * scale  # FIXME
                 peak.setSigmaIntensity(integrated_intensity_error)
                 __tmp_pw.addPeak(peak)
-                HFIRCalculateGoniometer(__tmp_pw)
+                if use_lorentz:
+                    peak = __tmp_pw.getPeak(0)
+                    lorentz = abs(np.sin(peak.getScattering() * np.cos(peak.getAzimuthal())))
+                    peak.setIntensity(peak.getIntensity() * lorentz)
+                    # peak.setSigmaIntensity  # FIXME
+
+                # correct q-vector using CentroidPeaksdMD
+                if optmize_q:
+                    __tmp_q_ws = HB3AAdjustSampleNorm(InputWorkspaces=inWS, NormaliseBy='None')
+                    __tmp_pw = CentroidPeaksMD(__tmp_q_ws, __tmp_pw)
+                    DeleteWorkspace(__tmp_q_ws)
+
                 CombinePeaksWorkspaces(outWS, __tmp_pw, OutputWorkspace=outWS)
                 DeleteWorkspace(__tmp_pw)
 
@@ -128,7 +150,6 @@ def fit_gaussian(ws):
     x = ws.extractX()
     function = f"name=FlatBackground, A0={y.min()}; name=Gaussian, PeakCentre={x[0, y.argmax()]}, Height={y.max()-y.min()}, Sigma=0.25"
     fit_result = Fit(function, ws, Output=str(ws), OutputParametersOnly=True)
-    print(fit_result)
     return fit_result
 
 

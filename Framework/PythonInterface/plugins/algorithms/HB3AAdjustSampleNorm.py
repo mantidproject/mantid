@@ -68,6 +68,11 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                              direction=Direction.Input,
                              doc="Whether to use ConvertHFIRSCDtoQ for an MDEvent, or ConvertWANDSCDtoQ for an MDHisto")
 
+        # TODO implement this
+        self.declareProperty("ScaleMotorStep", False,
+                             "If True then the intensity of the output in Q space will be scaled by the motor step size. "
+                             "This will allow directly comparing the intensity of data measure with diffrent motor step sizes.")
+
         # MDEvent WS Specific options for ConvertHFIRSCDtoQ
         self.declareProperty(FloatArrayProperty("MinValues", [-10, -10, -10], FloatArrayLengthValidator(3),
                                                 direction=Direction.Input),
