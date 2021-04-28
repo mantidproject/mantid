@@ -43,6 +43,9 @@ Bugfixes
 - Fix calculation of region where scattering points are sampled in :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` when a shape is defined for the environment but not the sample
 - Fix bug in the a\ :sub:`ss` calculation in :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>` when run on shapes already present on input workspace
 
+Instrument Definition Files
+---------------------------
+- The ARGUS IDF has been updated
 
 Data Objects
 ------------
