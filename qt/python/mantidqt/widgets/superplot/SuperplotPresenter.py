@@ -316,6 +316,9 @@ class SuperplotPresenter:
         if mode == self.SPECTRUM_MODE_TEXT:
             self._model.setSpectrumMode()
             self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT])
+        else:
+            self._model.setBinMode()
+            self._view.setAvailableModes([self.BIN_MODE_TEXT])
         self._view.checkHoldButton(False)
         self._updateList()
         self._view.setSelection(selection)
