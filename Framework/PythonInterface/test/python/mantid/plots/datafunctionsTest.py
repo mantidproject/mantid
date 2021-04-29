@@ -468,6 +468,15 @@ class DataFunctionsTest(unittest.TestCase):
         np.testing.assert_allclose(x, np.array([2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6]))
         np.testing.assert_allclose(y, np.array([5, 6, 7, 8, 9]))
 
+        x, y, z = funcs.get_matrix_2d_ragged(self.ws2d_histo_rag, False, histogram2D=True,
+                                             extent=[2, 6, -5, 9], xbins=8, ybins=5)
+        np.testing.assert_allclose(x, np.array([2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6]))
+        np.testing.assert_allclose(y, np.array([-5, -1.5, 2, 5.5, 9]))
+        allmasked = np.ma.array(np.full((8),np.inf), mask=[1]*8)
+        # first z array is off the spectrum axis scale so should be masked
+        np.testing.assert_array_equal(z[0], allmasked)
+        np.testing.assert_array_equal(z[4], [2.0]*8)
+
     def test_get_matrix_2d_ragged_when_transpose_is_true(self):
         x, y, z_transposed = funcs.get_matrix_2d_ragged(self.ws2d_histo_rag, False, histogram2D=True,
                                                         extent=[5, 9, 2, 6], xbins=8, ybins=5, transpose=True)
