@@ -170,6 +170,7 @@ void IPeakFunction::setPeakRadius(int r) const {
   }
 }
 
+// TODO: dont forget to remove this from the cache in the setParameter function
 IntegrationResultCache IPeakFunction::integrate() const {
   if (!integrationResult) {
     auto const interval = getDomainInterval();
@@ -177,31 +178,20 @@ IntegrationResultCache IPeakFunction::integrate() const {
     PeakFunctionIntegrator integrator;
 
     auto const result = integrator.integrate(*this, interval.first, interval.second);
-    integrationResult = boost::make_shared<boost::tuple<double, double, bool>>(
-        boost::make_tuple(result.result, result.error, result.success));
+    if (result.success)
+      integrationResult = boost::make_shared<IntegrationResultCache>(result.result, result.error);
+    else
+      integrationResult = boost::make_shared<IntegrationResultCache>(std::nan(""), std::nan(""));
   }
   return *integrationResult;
 }
 
 /// Returns the integral intensity of the peak function, using the peak radius
 /// to determine integration borders.
-double IPeakFunction::intensity() const {
-  const auto result = integrate();
-  if (!boost::get<2>(result)) // success?
-    return NAN;
-  else
-    return boost::get<0>(result); // result
-}
+double IPeakFunction::intensity() const { return integrate().first; }
 
 /// Returns the uncertainty associated to the integral intensity of the peak function
-double IPeakFunction::intensityError() const {
-  const auto result = integrate();
-  // TODO: dont forget to remove this from the cache in the setParameter function
-  if (!boost::get<2>(result)) // success?
-    return NAN;
-  else
-    return boost::get<1>(result); // error
-}
+double IPeakFunction::intensityError() const { return integrate().second; }
 
 /// Sets the integral intensity of the peak by adjusting the height.
 void IPeakFunction::setIntensity(const double newIntensity) {

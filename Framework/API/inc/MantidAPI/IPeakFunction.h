@@ -11,12 +11,11 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionWithLocation.h"
 #include "boost/shared_ptr.hpp"
-#include "boost/tuple/tuple.hpp"
 
 namespace Mantid {
 namespace API {
 
-using IntegrationResultCache = boost::tuple<double, double, bool>;
+using IntegrationResultCache = std::pair<double, double>;
 /** An interface to a peak function, which extend the interface of
     IFunctionWithLocation by adding methods to set and get peak width.
 
