@@ -7,7 +7,6 @@
 
 # local imports
 from .noshape import NonIntegratedPeakRepresentation
-from .spherical import SphericallyIntergratedPeakRepresentation
 from .ellipsoid import EllipsoidalIntergratedPeakRepresentation
 
 # map shape names to representation classes
