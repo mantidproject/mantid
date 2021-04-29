@@ -6,6 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
+# local
+from mantidqt.widgets.sliceviewer.view import SliceViewerDataView
+
 # 3rdparty imports
 from matplotlib.path import Path
 from matplotlib.patches import Circle, Ellipse, Patch, PathPatch, Wedge
@@ -82,12 +85,12 @@ class EllipticalShell(Patch):
         return self._path
 
 
-class MplPainter():
+class MplPainter:
     """
     Implementation of a PeakPainter that uses matplotlib to draw
     """
 
-    def __init__(self, view):
+    def __init__(self, view: SliceViewerDataView):
         """
         :param view: An object defining an axes property.
         """
@@ -180,10 +183,13 @@ class MplPainter():
             to_data_coords.transform(artist_bbox.max)
 
 
-class Painted():
+class Painted:
     """Combine a collection of artists with the painter that created them"""
 
-    def __init__(self, painter, artists, effective_bbox=None):
+    def __init__(self,
+                 painter: MplPainter,
+                 artists,
+                 effective_bbox=None):
         """
         :param painter: A reference to the painter responsible for
                         drawing the artists.

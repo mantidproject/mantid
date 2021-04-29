@@ -12,6 +12,8 @@ from typing import Any, Tuple, Sequence, Optional
 from mantid.kernel import SpecialCoordinateSystem
 import numpy as np
 
+from mantidqt.widgets.sliceviewer.transform import NonOrthogonalTransform
+
 # Types
 SlicePointType = Optional[float]
 DimensionRange = Tuple[float, float]
@@ -43,7 +45,7 @@ class SliceInfo:
                  transpose: bool,
                  range: DimensionRangeCollection,
                  qflags: Sequence[bool],
-                 nonortho_transform: Optional[Any] = None):
+                 nonortho_transform: Optional[NonOrthogonalTransform] = None):
         assert len(point) == len(qflags)
         assert 3 >= sum(1 for i in filter(
             lambda x: x is True, qflags)), "A maximum of 3 spatial dimensions can be specified"

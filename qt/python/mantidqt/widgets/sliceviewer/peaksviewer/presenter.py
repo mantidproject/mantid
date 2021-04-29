@@ -12,8 +12,12 @@ from enum import Enum
 # local imports
 from mantidqt.widgets.workspacedisplay.table.presenter_standard \
     import TableWorkspaceDataPresenterStandard, create_table_item
-from .model import create_peaksviewermodel
+from .model import create_peaksviewermodel, PeaksViewerModel
+from .view import PeaksViewerView, PeaksViewerCollectionView
 from ..adsobsever import SliceViewerADSObserver
+
+# standard
+from typing import List, Union
 
 
 class PeaksWorkspaceDataPresenter(TableWorkspaceDataPresenterStandard):
@@ -51,7 +55,9 @@ class PeaksViewerPresenter:
         ClearPeaks = 4
         PeakSelected = 5
 
-    def __init__(self, model, view):
+    def __init__(self,
+                 model: PeaksViewerModel,
+                 view: PeaksViewerView):
         """
         Constructs the view for the given PeaksWorkspace
         :param model: A handle to the view-model wrapper for PeaksWorkspace to be displayed
@@ -61,8 +67,7 @@ class PeaksViewerPresenter:
         super().__init__()
         self._model = model
         self._raise_error_if_workspace_incompatible(model.peaks_workspace)
-        self._peaks_table_presenter = \
-            PeaksWorkspaceDataPresenter(model, view.table_view)
+        self._peaks_table_presenter = PeaksWorkspaceDataPresenter(model, view.table_view)
 
         self._view = view
         view.subscribe(self)
@@ -78,7 +83,7 @@ class PeaksViewerPresenter:
     def view(self):
         return self._view
 
-    def notify(self, event):
+    def notify(self, event: Event):
         """
         Notification of an event that the presenter should react to
         :param event:
@@ -157,12 +162,12 @@ class PeaksViewerCollectionPresenter:
     ]
     DEFAULT_BG_COLOR = '0.75'
 
-    def __init__(self, view):
+    def __init__(self, view: PeaksViewerCollectionView):
         """
         :param view: View displaying the model information
         """
         self._view = view
-        self._child_presenters = []
+        self._child_presenters: List[PeaksViewerPresenter] = []
         self._ads_observer = None
         self.setup_ads_observer()
 
@@ -178,7 +183,7 @@ class PeaksViewerCollectionPresenter:
     def view(self):
         return self._view
 
-    def append_peaksworkspace(self, name):
+    def append_peaksworkspace(self, name: str) -> PeaksViewerPresenter:
         """
         Create and append a view for the given named workspace
         :param name: The name of a PeaksWorkspace.
@@ -243,6 +248,18 @@ class PeaksViewerCollectionPresenter:
 
         return names
 
+    def child_presenter(self, identifier: Union[int, str]) -> PeaksViewerPresenter:
+        r"""
+        @brief Get one of the presenters corresponding to one workspace
+        :param identifier: name of the peaks workspace, or index in the list of peaks workspaces
+        """
+        if isinstance(identifier, int):
+            return self._child_presenters[identifier]
+        elif isinstance(identifier, str):
+            for index, name in enumerate(self.workspace_names()):
+                if identifier == name:
+                    return self._child_presenters[index]
+
     def notify(self, event):
         """Dispatch notification to all subpresenters"""
         self.setup_ads_observer()
@@ -250,7 +267,7 @@ class PeaksViewerCollectionPresenter:
             presenter.notify(event)
 
     # private api
-    def _create_peaksviewer_model(self, name):
+    def _create_peaksviewer_model(self, name: str) -> PeaksViewerModel:
         """
         Create a model for the given PeaksWorkspace with an appropriate color
         :param name: The name of a PeaksWorkspace.

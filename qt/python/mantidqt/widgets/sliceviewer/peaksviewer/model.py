@@ -7,13 +7,14 @@
 #  This file is part of the mantid workbench.
 
 # 3rd party imports
-from mantid.api import AnalysisDataService
+from mantid.api import AnalysisDataService, IPeaksWorkspace
 from mantid.kernel import logger, SpecialCoordinateSystem
-
 # local imports
-from mantidqt.widgets.workspacedisplay.table.model \
-    import TableWorkspaceDisplayModel
+from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayModel
 from .representation.draw import draw_peak_representation
+from .representation.painter import Painted
+# standard library
+from typing import List
 
 # map coordinate system to correct Peak getter
 FRAME_TO_PEAK_CENTER_ATTR = {
@@ -28,7 +29,10 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
     Extends PeaksWorkspace functionality to include color selection
     """
 
-    def __init__(self, peaks_ws, fg_color, bg_color):
+    def __init__(self,
+                 peaks_ws: IPeaksWorkspace,
+                 fg_color: str,
+                 bg_color: str):
         """
         :param peaks_ws: A pointer to the PeaksWorkspace
         :param fg_color: Color of the glyphs marking the signal region
@@ -40,7 +44,7 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         super().__init__(peaks_ws)
         self._fg_color = fg_color
         self._bg_color = bg_color
-        self._representations = []
+        self._representations: List[Painted] = []
 
     @property
     def bg_color(self):
@@ -122,7 +126,8 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
 
 def create_peaksviewermodel(peaks_ws_name: str, fg_color: str, bg_color: str):
     """
-    A factory function to create a PeaksViewerModel from the given workspace name
+    A factory function to create a PeaksViewerModel from the given workspace name. Used by
+    the PeaksViewerColletionPresenter when appending a new PeaksWorkspace.
     :param peaks_ws_name: A str giving a workspace name that is expected to be a PeaksWorkspace
     :param fg_color: Color of the glyphs marking the signal region
     :param bg_color: Color of the glyphs marking the background region

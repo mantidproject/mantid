@@ -11,7 +11,13 @@ from qtpy.QtCore import QSortFilterProxyModel
 from qtpy.QtWidgets import QGroupBox, QVBoxLayout, QWidget
 
 # local imports
+from .presenter import PeaksViewerPresenter
+from .representation.painter import MplPainter
 from mantidqt.widgets.workspacedisplay.table.view import QTableView, TableWorkspaceDisplayView
+from mantidqt.widgets.sliceviewer.presenter import SliceViewer
+
+# standard
+from typing import Optional
 
 
 class _LessThanOperatorSortFilterModel(QSortFilterProxyModel):
@@ -70,18 +76,21 @@ class PeaksViewerView(QWidget):
     """
     TITLE_PREFIX = "Workspace: "
 
-    def __init__(self, painter, sliceinfo_provider, parent=None):
+    def __init__(self,
+                 painter: MplPainter,
+                 sliceinfo_provider: SliceViewer,
+                 parent=None):
         """
         :param painter: An object responsible for draw the peaks representations
         :param sliceinfo_provider: An object responsible for providing access to current slice information
         :param parent: An optional parent widget
         """
         super().__init__(parent)
-        self._painter = painter
-        self._sliceinfo_provider = sliceinfo_provider
-        self._group_box = None
-        self._presenter = None
-        self._table_view = None
+        self._painter: MplPainter = painter
+        self._sliceinfo_provider: SliceViewer = sliceinfo_provider
+        self._group_box: Optional[QGroupBox] = None
+        self._presenter: Optional[PeaksViewerPresenter] = None  # handle to its presenter
+        self._table_view: Optional[_PeaksWorkspaceTableView] = None
         self._setup_ui()
 
     @property
@@ -191,8 +200,10 @@ class PeaksViewerView(QWidget):
 class PeaksViewerCollectionView(QWidget):
     """Display a collection of PeaksViewerView objects in a scrolling view.
     """
-
-    def __init__(self, painter, sliceinfo_provider, parent=None):
+    def __init__(self,
+                 painter: MplPainter,
+                 sliceinfo_provider: SliceViewer,
+                 parent=None):
         """
         :param painter: An object responsible for draw the peaks representations
         :param sliceinfo_provider: An object responsible for providing access to current slice information
@@ -203,7 +214,7 @@ class PeaksViewerCollectionView(QWidget):
         self._sliceinfo_provider = sliceinfo_provider
         self._setup_ui()
 
-    def append_peaksviewer(self):
+    def append_peaksviewer(self) -> PeaksViewerView:
         """
         Append a view widget to end of the current list of views
         :param peaks_view: A reference to a single view widget for a PeaksWorkspace
@@ -229,4 +240,4 @@ class PeaksViewerCollectionView(QWidget):
         # create vertical layouts for outer widget
         outer_layout = QVBoxLayout()
         self.setLayout(outer_layout)
-        self._peaks_layout = outer_layout
+        self._peaks_layout: QVBoxLayout = outer_layout
