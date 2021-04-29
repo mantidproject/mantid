@@ -110,7 +110,6 @@ class SuperplotPresenter:
             selectedWorkspaces = [wsName]
         for selectedWorkspace in selectedWorkspaces:
             self._model.delWorkspace(selectedWorkspace)
-            self._view.removeWorkspace(selectedWorkspace)
         self._updateList()
         if not self._model.isBinMode() and not self._model.isSpectrumMode():
             mode = self._view.getMode()
