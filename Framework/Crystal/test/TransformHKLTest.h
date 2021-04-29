@@ -169,11 +169,13 @@ public:
     TS_ASSERT_EQUALS(ws->getPeak(1).getHKL(), V3D(2, 0, 0))
     TS_ASSERT_EQUALS(ws->getPeak(2).getHKL(), V3D(0, 0, -3))
 
-    TS_ASSERT_EQUALS(lattice.errora(), 0.0)
-    TS_ASSERT_EQUALS(lattice.errorb(), 0.0)
-    TS_ASSERT_EQUALS(lattice.errorc(), 0.0)
-    TS_ASSERT_EQUALS(lattice.erroralpha(), 0.0)
-    TS_ASSERT_EQUALS(lattice.errorbeta(), 0.0)
-    TS_ASSERT_EQUALS(lattice.errorgamma(), 0.0)
+    auto lat = ws->sample().getOrientedLattice();
+
+    TS_ASSERT_DELTA(lat.errora(), 0.0, 1e-6)
+    TS_ASSERT_DELTA(lat.errorb(), 0.0, 1e-6)
+    TS_ASSERT_DELTA(lat.errorc(), 0.0, 1e-6)
+    TS_ASSERT_DELTA(lat.erroralpha(), 0.0, 1e-6)
+    TS_ASSERT_DELTA(lat.errorbeta(), 0.0, 1e-6)
+    TS_ASSERT_DELTA(lat.errorgamma(), 0.0, 1e-6)
   }
 };
