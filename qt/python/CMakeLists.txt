@@ -143,6 +143,7 @@ if(ENABLE_WORKBENCH)
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_ellipsoid.py
         mantidqt/widgets/superplot/test/SuperplotModelTest.py
         mantidqt/widgets/superplot/test/SuperplotPresenterTest.py
+        mantidqt/widgets/superplot/test/SuperplotViewTest.py
         mantidqt/widgets/test/test_jupyterconsole.py
         mantidqt/widgets/workspacedisplay/test/test_data_copier.py
         mantidqt/widgets/workspacedisplay/test/test_workspacedisplay_view.py
