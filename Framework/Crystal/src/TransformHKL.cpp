@@ -66,7 +66,6 @@ void TransformHKL::init() {
 
   this->declareProperty(std::make_unique<PropertyWithValue<double>>("AverageError", 0.0, Direction::Output),
                         "Gets set with the average HKL indexing error.");
-
 }
 
 /** Execute the algorithm.
@@ -121,8 +120,7 @@ void TransformHKL::exec() {
   if (redetermine_error) {
     SelectCellWithForm::DetermineErrors(sigabc, UB, ws, tolerance);
     o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4], sigabc[5]);
-  }
-  else {
+  } else {
     o_lattice.setError(0, 0, 0, 0, 0, 0);
   }
 
