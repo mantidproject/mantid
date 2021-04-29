@@ -21,7 +21,8 @@ def draw_representation(cls,
                         painter,
                         fg_color,
                         bg_color,
-                        slice_transform=None):
+                        slice_transform=None,
+                        shape_name = "ellipsoid"):
     """
     Calls draw on a given representation type
     :param cls: The representation type expected to have a classmethod called draw
@@ -37,6 +38,7 @@ def draw_representation(cls,
         return x
 
     peak_shape = MagicMock()
+    peak_shape.shapeName.return_value = shape_name
     peak_shape.toJSON.return_value = json.dumps(shape_info)
     if slice_transform is None:
         slice_transform = identity
