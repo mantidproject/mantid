@@ -158,7 +158,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.1"));
 
     // skip error calculation for lattice parameters
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FindError", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FindError", false));
 
     // specify a matrix that will swap H and K and negate L
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("HKLTransform", "0,1,0,1,0,0,0,0,-1"));
