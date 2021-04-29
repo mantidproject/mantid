@@ -172,7 +172,7 @@ void IPeakFunction::setPeakRadius(int r) const {
 
 // TODO: dont forget to remove this from the cache in the setParameter function
 IntegrationResultCache IPeakFunction::integrate() const {
-  if (!integrationResult) {
+  if (!integrationResult || m_parameterContextDirty) {
     auto const interval = getDomainInterval();
 
     PeakFunctionIntegrator integrator;
@@ -182,6 +182,7 @@ IntegrationResultCache IPeakFunction::integrate() const {
       integrationResult = boost::make_shared<IntegrationResultCache>(result.result, result.error);
     else
       integrationResult = boost::make_shared<IntegrationResultCache>(std::nan(""), std::nan(""));
+    m_parameterContextDirty = false;
   }
   return *integrationResult;
 }
