@@ -97,7 +97,14 @@ public:
     darkmagic->executeAsChildAlg();
 
     m_ws = generateSimulatedWorkspace();
-    m_pws = generateSimulatedPeaksWorkspace(m_ws);
+    // Predict peaks takes way too long, use the pre-generated one
+    // m_pws = generateSimulatedPeaksWorkspace(m_ws);
+    std::shared_ptr<Algorithm> loadalg = AlgorithmFactory::Instance().create("Load", 1);
+    loadalg->initialize();
+    loadalg->setProperty("Filename", "CorelliIdealPWS.nxs");
+    loadalg->setProperty("OutputWorkspace", "mpws");
+    loadalg->execute();
+    m_pws = loadalg->getProperty("OutputWorkspace");
   }
 
   // ---------------------- //
