@@ -46,6 +46,7 @@ Bugfixes
 - On the instrument widget pick tab, when the integration range is changed the current tool will stay selected.
 - Fixed a bug where Workbench would hang on startup when running on Big Sur.
 - Fixed a bug applying constraints with the conjugate gradient minimizer.
+- Fixed a bug where panning on a colour fill plot stretches dataset along spectrum axis instead of panning
 
 Interfaces
 ----------
