@@ -231,7 +231,7 @@ class SuperplotPresenterTest(unittest.TestCase):
     def test_onHold(self):
         self.presenter._updateList = mock.Mock()
         self.presenter._updatePlot = mock.Mock()
-        self.mView.getSpectrumDisabled.return_value = False
+        self.mView.isSpectrumDisabled.return_value = False
         self.mView.getSelection.return_value = {"ws1": [1], "ws2": [2]}
         self.mView.getSpectrumSliderPosition.return_value = 10
         self.mView.getMode.return_value = self.presenter.SPECTRUM_MODE_TEXT
@@ -251,7 +251,7 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.presenter._updateList = mock.Mock()
         self.presenter._updatePlot = mock.Mock()
         self.presenter._updateSpectrumSlider = mock.Mock()
-        self.mView.getSpectrumDisabled.return_value = False
+        self.mView.isSpectrumDisabled.return_value = False
         self.mView.getSelection.return_value = {"ws1": [], "ws2": []}
         self.mView.getSpectrumSliderPosition.return_value = 10
         self.presenter._onUnHold()

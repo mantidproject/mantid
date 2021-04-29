@@ -224,7 +224,7 @@ class SuperplotPresenter:
 
         for wsName, spectra in selection.items():
             if (currentSpectrumIndex not in spectra
-                and not self._view.getSpectrumDisabled()):
+                and not self._view.isSpectrumDisabled()):
                 spectra.append(currentSpectrumIndex)
             for spectrum in spectra:
                 if spectrum == -1:
@@ -308,7 +308,7 @@ class SuperplotPresenter:
         """
         Add the selected ws, sp pair to the plot.
         """
-        if self._view.getSpectrumDisabled():
+        if self._view.isSpectrumDisabled():
             return
         selection = self._view.getSelection()
         spectrumIndex = self._view.getSpectrumSliderPosition()
@@ -334,7 +334,7 @@ class SuperplotPresenter:
         spectrumIndex = self._view.getSpectrumSliderPosition()
         mode = self._view.getMode()
         for wsName in selection:
-            if not self._view.getSpectrumDisabled():
+            if not self._view.isSpectrumDisabled():
                 self._model.removeData(wsName, spectrumIndex)
             else:
                 for spectrum in selection[wsName]:
