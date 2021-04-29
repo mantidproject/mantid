@@ -147,8 +147,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("ws", ws);
     auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>(5, 6, 7, 90, 90, 120);
     ws->mutableSample().setOrientedLattice(std::move(lattice));
-    ws->addPeak(V3D(1, 0, 0), SpecialCoordinateSystem::HKL);
-    ws->addPeak(V3D(0, 2, 0), SpecialCoordinateSystem::HKL);
+    ws->addPeak(V3D(1, 2, 0), SpecialCoordinateSystem::HKL);
     ws->addPeak(V3D(0, 0, 3), SpecialCoordinateSystem::HKL);
 
     TransformHKL alg;
@@ -165,9 +164,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), V3D(0, 1, 0))
-    TS_ASSERT_EQUALS(ws->getPeak(1).getHKL(), V3D(2, 0, 0))
-    TS_ASSERT_EQUALS(ws->getPeak(2).getHKL(), V3D(0, 0, -3))
+    TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), V3D(2, 1, 0))
+    TS_ASSERT_EQUALS(ws->getPeak(1).getHKL(), V3D(0, 0, -3))
 
     auto lat = ws->sample().getOrientedLattice();
 
