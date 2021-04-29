@@ -124,9 +124,8 @@ class SuperplotView(QWidget):
             wsItem = self._sideView.workspacesList.topLevelItem(i)
             wsName = wsItem.getWorkspaceName()
             if wsName in selection:
-                if not selection[wsName]:
+                if -1 in selection[wsName]:
                     wsItem.setSelected(True)
-                    continue
                 for j in range(wsItem.childCount()):
                     spItem = wsItem.child(j)
                     if spItem.getSpectrumIndex() in selection[wsName]:
@@ -146,7 +145,7 @@ class SuperplotView(QWidget):
             if item.parent() is None:
                 wsName = item.getWorkspaceName()
                 if wsName not in selection:
-                    selection[wsName] = list()
+                    selection[wsName] = [-1]
             else:
                 spectrum = item.getSpectrumIndex()
                 wsName = item.parent().getWorkspaceName()

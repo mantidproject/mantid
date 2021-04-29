@@ -228,6 +228,8 @@ class SuperplotPresenter:
                 and not self._view.getSpectrumDisabled()):
                 spectra.append(currentSpectrumIndex)
             for spectrum in spectra:
+                if spectrum == -1:
+                    continue
                 if (wsName, spectrum) not in plottedData:
                     if mode == self.SPECTRUM_MODE_TEXT:
                         axisType = MantidAxType.SPECTRUM
