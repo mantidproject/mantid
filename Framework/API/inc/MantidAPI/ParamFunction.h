@@ -87,6 +87,7 @@ protected:
   void setParameterStatus(size_t i, ParameterStatus status) override;
   /// Get status of parameter
   ParameterStatus getParameterStatus(size_t i) const override;
+  mutable bool m_parameterContextDirty = false;
 
 private:
   /// Check that a parameter index is in a valid range.
