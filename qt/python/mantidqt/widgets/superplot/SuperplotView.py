@@ -155,32 +155,6 @@ class SuperplotView(QWidget):
                     selection[wsName] = [spectrum]
         return selection
 
-    def appendWorkspace(self, name):
-        """
-        Add a workspace at the end of the list.
-
-        Args:
-            name (str): name of the workspace
-        """
-        item = WorkspaceItem(self._sideView.workspacesList, name)
-        item.signals.delClicked.connect(self._presenter.onDelButtonClicked)
-        item.setText(0, name)
-
-    def removeWorkspace(self, name):
-        """
-        Remove a workspace from the list.
-
-        Args:
-            name (str): name of the workspace
-        """
-        self._sideView.workspacesList.blockSignals(True)
-        wsItem = self._sideView.workspacesList.findItems(name,
-                                                         Qt.MatchExactly, 0)
-        for item in wsItem:
-            index = self._sideView.workspacesList.indexOfTopLevelItem(item)
-            self._sideView.workspacesList.takeTopLevelItem(index)
-        self._sideView.workspacesList.blockSignals(False)
-
     def modifySpectrumLabel(self, wsName, spectrumIndex, label, color):
         """
         Modify spectrum label text and color.
