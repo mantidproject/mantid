@@ -47,6 +47,12 @@ public:
   /// Sets the integral intensity of the peak
   virtual void setIntensity(const double newIntensity);
 
+  /// Override parent so that we may bust the cache when a parameter is set
+  void setParameter(const std::string &name, const double &value, bool explicitlySet = true) override;
+
+  /// Override parent so that we may bust the cache when a parameter is set
+  void setParameter(size_t, const double &value, bool explicitlySet = true) override;
+
   /// General implementation of the method for all peaks.
   void function1D(double *out, const double *xValues, const size_t nData) const override;
   /// General implementation of the method for all peaks.
@@ -99,8 +105,10 @@ private:
   mutable int m_peakRadius;
   /// The default level for searching a domain interval (getDomainInterval())
   static constexpr double DEFAULT_SEARCH_LEVEL = 1e-5;
-  // cache the result of a PeakFunctionIntegrator call
+  // Cache the result of a PeakFunctionIntegrator call
   mutable boost::shared_ptr<IntegrationResultCache> integrationResult = nullptr;
+  // Flag to dirty the cache when a param has been set
+  mutable bool m_parameterContextDirty = false;
 };
 
 using IPeakFunction_sptr = std::shared_ptr<IPeakFunction>;
