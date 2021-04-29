@@ -185,6 +185,16 @@ void IPeakFunction::setPeakRadius(int r) const {
   }
 }
 
+void IPeakFunction::setParameter(size_t i, const double &value, bool explicitlySet) {
+  m_parameterContextDirty = true;
+  ParamFunction::setParameter(i, value, explicitlySet);
+}
+
+void IPeakFunction::setParameter(const std::string &name, const double &value, bool explicitlySet) {
+  m_parameterContextDirty = true;
+  ParamFunction::setParameter(name, value, explicitlySet);
+}
+
 // integrate based on dirty parameters then cache the result
 IntegrationResultCache IPeakFunction::integrate() const {
   if (!integrationResult || m_parameterContextDirty) {
