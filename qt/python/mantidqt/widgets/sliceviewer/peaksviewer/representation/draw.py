@@ -14,7 +14,7 @@ from .ellipsoid import EllipsoidalIntergratedPeakRepresentation
 # the strings need to match whatever Peak.getPeakShape.shapeName returns
 _PEAK_REPRESENTATION_FACTORY = {
     "none": NonIntegratedPeakRepresentation,
-    "spherical": SphericallyIntergratedPeakRepresentation,
+    "spherical": EllipsoidalIntergratedPeakRepresentation,
     "ellipsoid": EllipsoidalIntergratedPeakRepresentation
 }
 
