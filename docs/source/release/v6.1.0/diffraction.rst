@@ -26,6 +26,7 @@ New features
 Improvements
 ############
 
+- New motor convention for HB2A implemented in :ref:`HB2AReduce <algm-HB2AReduce>`.
 - :ref:`PDCalibration <algm-PDCalibration>` now intitialises A,B and S of BackToBackExponential if correpsonding coeficients are in the instrument parameter.xml file.
 - Support fitting diffractometer constants with chi-squared cost function in <algm-PDCalibration>.
 - Differential evolution minimizer added to :ref:`AlignComponents <algm-AlignComponents>`.
