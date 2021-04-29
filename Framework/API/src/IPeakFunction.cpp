@@ -170,7 +170,7 @@ void IPeakFunction::setPeakRadius(int r) const {
   }
 }
 
-// TODO: dont forget to remove this from the cache in the setParameter function
+// integrate based on dirty parameters then cache the result
 IntegrationResultCache IPeakFunction::integrate() const {
   if (!integrationResult || m_parameterContextDirty) {
     auto const interval = getDomainInterval();
