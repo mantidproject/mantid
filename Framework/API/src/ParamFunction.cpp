@@ -45,6 +45,7 @@ void ParamFunction::setParameter(size_t i, const double &value, bool explicitlyS
     m_explicitlySet[i] = true;
   }
   m_parameters[i] = value;
+  m_parameterContextDirty = true;
 }
 
 /** Sets a new parameter description to the i-th parameter.
