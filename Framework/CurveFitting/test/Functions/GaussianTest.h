@@ -127,7 +127,20 @@ public:
     TS_ASSERT_DELTA(fn->intensity(), 20.0, 1e-10);
   }
 
-  void testIntensityCache() {}
+  void testIntensityCache() {
+    std::shared_ptr<Gaussian> fn = std::make_shared<Gaussian>();
+    fn->initialize();
+    fn->setHeight(2.0);
+    fn->setFwhm(0.125);
+    fn->setCentre(-200.0);
+
+    const auto result1 = fn->intensity();
+
+    fn->setHeight(3.0);
+
+    const auto result2 = fn->intensity();
+    TS_ASSERT(result1 != result2);
+  }
 
   void testIntensityError() {
     std::shared_ptr<Gaussian> fn = std::make_shared<Gaussian>();
