@@ -199,9 +199,9 @@ This example below performs a complete reduction for D7 data.
 
 .. testcode:: ExPolDiffILLReduction
 
-    vanadium_dictionary = {'SampleMass':8.54,'SampleDensity':6.0,'FormulaUnits':1,'FormulaUnitMass':50.94}
+    vanadium_dictionary = {'SampleMass':8.54,'SampleDensity':0.2,'FormulaUnits':1,'FormulaUnitMass':50.94}
 
-    sample_dictionary = {'SampleMass':2.932,'SampleDensity':2.0,'FormulaUnits':1, 'FormulaUnitMass':182.56}
+    sample_dictionary = {'SampleMass':2.932,'SampleDensity':0.1,'FormulaUnits':1, 'FormulaUnitMass':182.56}
 
     # Beam with cadmium absorber, used for transmission
     PolDiffILLReduction(

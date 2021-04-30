@@ -484,9 +484,9 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
 .. testcode:: ExPolarisedDifffractionVanadium
 
     vanadium_dictionary = {'SampleMass':8.54,'FormulaUnits':1,'FormulaUnitMass':50.94,'SampleChemicalFormula':'V',
-                           'Height':2.0,'SampleDensity':1.18,'SampleInnerRadius':2.0, 'SampleOuterRadius':2.49,
+                           'Height':2.0,'SampleDensity':0.118,'SampleInnerRadius':2.0, 'SampleOuterRadius':2.49,
                            'BeamWidth':2.5,'BeamHeight':2.5,
-                           'ContainerChemicalFormula':'Al','ContainerDensity':2.7,'ContainerOuterRadius':2.52,
+                           'ContainerChemicalFormula':'Al','ContainerDensity':0.0027,'ContainerOuterRadius':2.52,
                            'ContainerInnerRadius':1.99, 'EventsPerPoint':1000}
 
     calibration_file='D7_YIG_calibration.xml' # example calibration file
@@ -670,9 +670,9 @@ Sample normalisation
     vanadium_dictionary = {'SampleMass':8.54,'FormulaUnits':1,'FormulaUnitMass':50.94}
 
     sample_dictionary = {'SampleMass':2.932,'SampleDensity':2.0,'FormulaUnits':1,'FormulaUnitMass':182.56,
-                         'SampleChemicalFormula':'Mn0.5-Fe0.5-P-S3','Height':2.0,'SampleDensity':1.18,
+                         'SampleChemicalFormula':'Mn0.5-Fe0.5-P-S3','Height':2.0,'SampleDensity':0.118,
                          'SampleInnerRadius':2.0, 'SampleOuterRadius':2.49,'BeamWidth':2.5,'BeamHeight':2.5,
-                         'ContainerChemicalFormula':'Al','ContainerDensity':2.7,'ContainerOuterRadius':2.52,
+                         'ContainerChemicalFormula':'Al','ContainerDensity':0.027,'ContainerOuterRadius':2.52,
                          'ContainerInnerRadius':1.99, 'ElementSize':0.5}
 
     calibration_file = 'D7_YIG_calibration.xml'
