@@ -181,7 +181,7 @@ scientists are working on the following targets:
 
 2) The current data structure (detector representation) is not suitable for calibrating
    instrument with tube-type detectors (such as CORELLI).
-   Additional work on an imporved internal detector and scattering vector representation
+   Additional work on an improved internal detector and scattering vector representation
    are needed in order to make this toolkit useful for CORELLI like instrument.
 
 3) In the current implementation, the calibration results are recorded as the absolute
