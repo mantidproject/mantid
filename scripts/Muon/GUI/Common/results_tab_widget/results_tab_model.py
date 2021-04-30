@@ -146,6 +146,11 @@ class ResultsTabModel(object):
             results_table.addRow(
                 self._add_parameters_to_table(row_dict, fit_parameters))
 
+        # There is a problem here where if the user has a results table open of the same name,
+        # column names are not updated. Forcefully remove the existing results table before
+        # replacing with the new one if the name is the same
+        if ads.Instance().doesExist(self.results_table_name()):
+            ads.Instance().remove(self.results_table_name())
         ads.Instance().addOrReplace(self.results_table_name(), results_table)
         return results_table
 
