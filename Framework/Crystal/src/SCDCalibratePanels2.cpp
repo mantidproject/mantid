@@ -100,7 +100,6 @@ void SCDCalibratePanels2::init() {
   declareProperty("CalibrateBanks", true, "Calibrate position and orientation of each bank.");
   // TODO:
   //  - add support to ignore edge pixels (EdgePixels)
-  //  - add support for composite panels like SNAP (CalibrateSNAPPanels)
   //  - add support for calibration panels with non-standard size
   //  (ChangePanelSize)
   //     Once the core functionality of calibration is done, we can consider
@@ -280,8 +279,8 @@ void SCDCalibratePanels2::exec() {
     g_log.notice() << "** Calibrating L1 (moderator) after bank adjusted\n";
     optimizeL1(m_pws, pws_original);
     // NOTE:
-    //    Turns out 1 pass is sufficient (tested with the following)
-    //    block enabled.
+    //    Turns out 1 pass is sufficient (tested with the following block)
+    //
     // double delta = 1;
     // int cnt = 0;
     // while (delta > 0.01) {
