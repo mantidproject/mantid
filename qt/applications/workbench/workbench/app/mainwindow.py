@@ -353,10 +353,7 @@ class MainWindow(QMainWindow):
             interface.setObjectName(object_name)
             interface.setAttribute(Qt.WA_DeleteOnClose, True)
             parent, flags = get_window_config()
-            if submenu == "Indirect":
-                # always make indirect interfaces children of workbench
-                interface.setParent(self, interface.windowFlags())
-            else:
+            if parent:
                 interface.setParent(parent, flags)
             interface.show()
         else:
