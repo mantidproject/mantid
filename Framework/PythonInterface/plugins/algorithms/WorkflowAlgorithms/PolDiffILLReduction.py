@@ -636,7 +636,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         """Applies the self-attenuation correction based on the Palmaan-Pings Monte-Carlo calculation, taking into account
         the sample's material, shape, and dimensions."""
 
-        if self.getPropertyValue('SelfAttenuationMethod') in ['MonteCarlo', 'Numerical']:
+        if (self.getPropertyValue('SelfAttenuationMethod') in ['MonteCarlo', 'Numerical']
+                and self.getPropertyValue('SampleGeometry') != 'None'):
             attenuation_ws = self._calculate_attenuation_factors(sample_ws)
         elif self.getPropertyValue('SelfAttenuationMethod') == 'User':
             attenuation_ws = self.getPropertyValue('SampleSelfAttenuationFactors')
