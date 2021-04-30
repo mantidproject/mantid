@@ -247,13 +247,6 @@ class PolDiffILLReduction(PythonAlgorithm):
         Divide(LHSWorkspace=ws, RHSWorkspace=beam_ws, OutputWorkspace=ws)
         return ws
 
-    @staticmethod
-    def _enforce_uniform_units(origin_ws, target_ws):
-        for entry_tuple in zip(mtd[origin_ws], mtd[target_ws]):
-            entry_origin, entry_target = entry_tuple
-            if entry_origin.YUnit() != entry_target.YUnit():
-                entry_target.setYUnit(entry_origin.YUnit())
-
     def _figure_out_measurement_method(self, ws):
         """Figures out the measurement method based on the structure of the input files."""
         entries_per_numor = mtd[ws].getNumberOfEntries() / len(self.getPropertyValue('Run').split(','))
@@ -647,7 +640,6 @@ class PolDiffILLReduction(PythonAlgorithm):
             attenuation_ws = self._calculate_attenuation_factors(sample_ws)
         elif self.getPropertyValue('SelfAttenuationMethod') == 'User':
             attenuation_ws = self.getPropertyValue('SampleSelfAttenuationFactors')
-        self._enforce_uniform_units(sample_ws, empty_ws)
         for entry_no, entry in enumerate(mtd[sample_ws]):
             if ( (self._method_data_structure == 'Uniaxial' and entry_no % 2 == 0)
                  or (self._method_data_structure == 'XYZ' and entry_no % 6 == 0)
