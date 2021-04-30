@@ -276,6 +276,25 @@ void SCDCalibratePanels2::exec() {
     optimizeBanks(m_pws, pws_original);
   }
 
+  if (calibrateL1 && calibrateBanks) {
+    g_log.notice() << "** Calibrating L1 (moderator) after bank adjusted\n";
+    optimizeL1(m_pws, pws_original);
+    // NOTE:
+    //    Turns out 1 pass is sufficient (tested with the following)
+    //    block enabled.
+    // double delta = 1;
+    // int cnt = 0;
+    // while (delta > 0.01) {
+    //   double L1_pre = m_pws->getInstrument()->getSource()->getPos().Z();
+    //   optimizeBanks(m_pws, pws_original);
+    //   optimizeL1(m_pws, pws_original);
+    //   double L1_post = m_pws->getInstrument()->getSource()->getPos().Z();
+    //   delta = std::abs((L1_pre - L1_post) / L1_pre);
+    //   cnt += 1;
+    //   g_log.notice() << "@pass_" << cnt << "\n" << L1_pre << "-->" << L1_post << "\n";
+    // }
+  }
+
   // STEP_4: generate a table workspace to save the calibration results
   g_log.notice() << "-- Generate calibration table\n";
   Instrument_sptr instCalibrated = std::const_pointer_cast<Geometry::Instrument>(m_pws->getInstrument());
