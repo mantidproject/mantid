@@ -225,7 +225,7 @@ void CreateSampleWorkspace::exec() {
   Progress progress(this, 0.0, 1.0, numBanks);
 
   // Create an instrument with one or more rectangular banks.
-  Instrument_sptr inst = createTestInstrumentRectangular(progress, numBanks, numMonitors, bankPixelWidth, pixelSpacing,
+  Instrument_sptr inst = createTestInstrumentRectangular(progress, numBanks, numMonitors, bankPixelWidth, pixelWidth, pixelSpacing,
                                                          bankDistanceFromSample, sourceSampleDistance);
 
   auto numBins = static_cast<int>((xMax - xMin) / binWidth);
@@ -475,7 +475,7 @@ void CreateSampleWorkspace::replaceAll(std::string &str, const std::string &from
  * @returns A shared pointer to the generated instrument
  */
 Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(API::Progress &progress, int numBanks,
-                                                                       int numMonitors, int pixels, double pixelSpacing,
+                                                                       int numMonitors, int pixels, double pixelWidth, double pixelSpacing,
                                                                        const double bankDistanceFromSample,
                                                                        const double sourceSampleDistance) {
   auto testInst = std::make_shared<Instrument>("basic_rect");
@@ -483,8 +483,9 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(API::Prog
   // vertical axis.
   testInst->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Left, ""));
 
-  const double cylRadius(pixelSpacing / 2);
-  const double cylHeight(0.0002);
+  /* Captain! This is wrong */
+  const double cylRadius(pixelWidth / 2);
+  const double cylHeight(pixelWidth);
   // One object
   auto pixelShape =
       createCappedCylinder(cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.), "pixel-shape");

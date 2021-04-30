@@ -49,7 +49,7 @@ private:
                                                     const std::string &functionString, bool isRandom,
                                                     int numScanPoints);
   Geometry::Instrument_sptr createTestInstrumentRectangular(API::Progress &progress, int numBanks, int numMonitors,
-                                                            int pixels, double pixelSpacing,
+                                                            int pixels, double pixelWidth, double pixelSpacing,
                                                             const double bankDistanceFromSample,
                                                             const double sourceSampleDistance);
   Geometry::IObject_sptr createCappedCylinder(double radius, double height, const Kernel::V3D &baseCentre,
