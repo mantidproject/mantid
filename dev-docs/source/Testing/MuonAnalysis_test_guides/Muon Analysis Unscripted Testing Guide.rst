@@ -9,9 +9,8 @@ Muon Interfaces Unscripted Testing
 Preamble
 ^^^^^^^^^
 This document is intended for developers to use for unscripted testing of `Muon Analysis` and
-`Frequency Domain Analysis` GUI.
+`Frequency Domain Analysis` GUI's.
 
-Testing here mostly focuses on the changes for Mantid 3.11, but includes other functionality as well.
 The tests follow real use cases provided by scientists and are intended to exercise all the interface's functionality.
 As changes are made to the interface and features added, anything for which it is not possible to write an automated
 test should have a manual test added to this list.

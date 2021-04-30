@@ -49,7 +49,7 @@ Test 1: Individual And Co-Added Fits
   table
 - The table should have four rows, one for each individual fit
 - **sample_temp** should be correctly expresses as an average for the co-added
-  runs, in this case the average is ``190`` (``180+190+200/3``)
+  runs, in this case the average is ``190`` (``(180+190+200)/3``)
 - There should be several pairs of columns, one for each parameter and one for
   the error of the parameter, plus a final column called
   **Cost function value**
