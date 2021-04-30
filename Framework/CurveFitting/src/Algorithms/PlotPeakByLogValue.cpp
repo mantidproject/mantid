@@ -378,11 +378,10 @@ void PlotPeakByLogValue::appendTableRow(
         row << p->getParameter(i, j) << p->getError(i, j);
       }
 
+      /* Output integrated intensity */
       auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(f);
       if (intensity_handle) {
-        if (intensity_handle->hasParameterWithNames(intensity_parameter_keys) == false) {
-          row << intensity_handle->intensity() << intensity_handle->intensityError();
-        }
+        row << intensity_handle->intensity() << intensity_handle->intensityError();
       }
     }
   }
@@ -392,11 +391,10 @@ void PlotPeakByLogValue::appendTableRow(
       row << ifun->getParameter(iPar) << ifun->getError(iPar);
     }
 
+    /* Output integrated intensity */
     auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(ifun);
     if (intensity_handle) {
-      if (intensity_handle->hasParameterWithNames(intensity_parameter_keys) == false) {
-        row << intensity_handle->intensity() << intensity_handle->intensityError();
-      }
+      row << intensity_handle->intensity() << intensity_handle->intensityError();
     }
   }
 
@@ -428,10 +426,8 @@ ITableWorkspace_sptr PlotPeakByLogValue::createResultsTable(const std::string &l
 
       auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(f);
       if (intensity_handle) {
-        if (intensity_handle->hasParameterWithNames(intensity_parameter_keys) == false) {
-          result->addColumn("double", "f" + std::to_string(i) + ".Intensity");
-          result->addColumn("double", "f" + std::to_string(i) + ".Intensity_Err");
-        }
+        result->addColumn("double", "f" + std::to_string(i) + ".Intensity");
+        result->addColumn("double", "f" + std::to_string(i) + ".Intensity_Err");
       }
     }
   }
@@ -444,10 +440,8 @@ ITableWorkspace_sptr PlotPeakByLogValue::createResultsTable(const std::string &l
 
     auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(ifunSingle);
     if (intensity_handle) {
-      if (intensity_handle->hasParameterWithNames(intensity_parameter_keys) == false) {
-        result->addColumn("double", "Intensity");
-        result->addColumn("double", "Intensity_Err");
-      }
+      result->addColumn("double", "Intensity");
+      result->addColumn("double", "Intensity_Err");
     }
   }
 
