@@ -324,6 +324,7 @@ void SCDCalibratePanels2::exec() {
  *       is still unkown.
  *
  * @param pws
+ * @param pws_original
  */
 void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_sptr pws_original) {
   // create child Fit alg to optimize T0
@@ -377,6 +378,7 @@ void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
  * @brief
  *
  * @param pws
+ * @param pws_original
  */
 void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_sptr pws_original) {
   // cache starting L1 position
@@ -422,6 +424,7 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
  * @brief Calibrate the position and rotation of each Bank, one at a time
  *
  * @param pws
+ * @param pws_original
  */
 void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspace_sptr pws_original) {
 
