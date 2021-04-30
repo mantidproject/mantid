@@ -224,6 +224,8 @@ void IndirectFitDataPresenter::updateRanges() {
   }
 }
 
+std::pair<double, double> IndirectFitDataPresenter::getXRange() const { return m_view->getXRange(); }
+
 void IndirectFitDataPresenter::addModelData(const std::string &name) {
   try {
     m_model->addWorkspace(name);
