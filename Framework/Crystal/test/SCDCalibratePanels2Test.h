@@ -67,22 +67,15 @@ public:
   SCDCalibratePanels2Test()
       : wsname("wsSCDCalibratePanels2Test"), pwsname("pwsSCDCalibratePanels2Test"),
         tmppwsname("tmppwsSCDCalibratePanels2Test"),            // fixed workspace name
-        bank_xtop("bank73/sixteenpack"),                        //
-        bank_xcenter("bank12/sixteenpack"),                     //
-        bank_xbottom("bank11/sixteenpack"),                     //
-        bank_yright("bank59/sixteenpack"),                      //
-        bank_yleft("bank58/sixteenpack"),                       //
-        bank_ytop("bank88/sixteenpack"),                        //
-        bank_ybottom("bank26/sixteenpack"),                     //
         silicon_a(5.431), silicon_b(5.431), silicon_c(5.431),   // angstrom
         silicon_alpha(90), silicon_beta(90), silicon_gamma(90), // degree
         silicon_cs(CrystalStructure("5.431 5.431 5.431", "F d -3 m", "Si 0 0 0 1.0 0.02")), dspacing_min(1.0),
         dspacing_max(10.0),                      //
         wavelength_min(0.1), wavelength_max(10), //
         omega_step(6.0),                         //
-        TOLERANCE_L(1e-12),                      // this calibration has intrinsic accuracy limit of
-                                                 // 5mm for translation
-        TOLERANCE_R(1e-12),                      // this calibration has intrinsic accuracy limit of
+        TOLERANCE_L(2e-3),                       // this calibration has intrinsic accuracy limit of
+                                                 // 2mm for translation for CORELLI
+        TOLERANCE_R(1e-3),                       // this calibration has intrinsic accuracy limit of
                                                  // 0.1 deg for rotation
         LOGCHILDALG(false) {
     // NOTE:
@@ -97,14 +90,20 @@ public:
     darkmagic->executeAsChildAlg();
 
     m_ws = generateSimulatedWorkspace();
-    // Predict peaks takes way too long, use the pre-generated one
-    // m_pws = generateSimulatedPeaksWorkspace(m_ws);
+    // NOTE:
+    // PredictPeaks
+    //     m_pws = generateSimulatedPeaksWorkspace(m_ws);
+    // takes way too long, use the pre-generated one
     std::shared_ptr<Algorithm> loadalg = AlgorithmFactory::Instance().create("Load", 1);
     loadalg->initialize();
-    loadalg->setProperty("Filename", "CorelliIdealPWS.nxs");
+    loadalg->setProperty("Filename", "PwsTOPAZIDeal.nxs");
     loadalg->setProperty("OutputWorkspace", "mpws");
     loadalg->execute();
-    m_pws = loadalg->getProperty("OutputWorkspace");
+    // NOTE:
+    // somehow
+    //    loadalg->getProperty("OutputWorkspace")
+    // will return a nullptr here, so we need to rely on ADS to retrieve the actual pws.
+    m_pws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("mpws");
   }
 
   // ---------------------- //
@@ -159,7 +158,7 @@ public:
     TS_ASSERT(sameInstrument);
   }
 
-  void run_L1() {
+  void test_L1() {
     g_log.notice() << "test_L1() starts.\n";
     // Generate unique temp files
     auto filenamebase = boost::filesystem::temp_directory_path();
@@ -178,18 +177,14 @@ public:
 
     // Check if the calibration results
     // -- get a blank workspace for loading cali results
-    // MatrixWorkspace_sptr ws_raw = m_ws->clone();
+    MatrixWorkspace_sptr ws_raw = m_ws->clone();
     // -- check
-    // bool sameInstrument =
-    // validateCalibrationResults(m_pws, ws_raw, filenamebase.string());
+    bool sameInstrument = validateCalibrationResults(m_pws, ws_raw, filenamebase.string());
     // -- assert
-    // NOTE:
-    //    Due to built-in q vector centering, the asseration will always fail.
-    //    We are commenting it out for now.
-    // TS_ASSERT(sameInstrument);
+    TS_ASSERT(sameInstrument);
   }
 
-  void run_Bank() {
+  void test_Bank() {
     g_log.notice() << "test_Bank() starts.\n";
     // Generate unique temp files
     auto filenamebase = boost::filesystem::temp_directory_path();
@@ -209,9 +204,9 @@ public:
     double rvx = sin(theta) * cos(phi);
     double rvy = sin(theta) * sin(phi);
     double rvz = cos(theta);
-    double ang = 1.414; // degrees
+    double ang = 0.0; // degrees
     //
-    adjustComponent(dx, dy, dz, rvx, rvy, rvz, ang, bank_xtop, pws);
+    adjustComponent(dx, dy, dz, rvx, rvy, rvz, ang, "bank27", pws);
 
     // Run the calibration
     // NOTE: this should bring the instrument back to engineering position,
@@ -220,15 +215,11 @@ public:
 
     // Check if the calibration results
     // -- get a blank workspace for loading cali results
-    // MatrixWorkspace_sptr ws_raw = m_ws->clone();
+    MatrixWorkspace_sptr ws_raw = m_ws->clone();
     // -- check
-    // bool sameInstrument =
-    // validateCalibrationResults(m_pws, ws_raw, filenamebase.string());
+    bool sameInstrument = validateCalibrationResults(m_pws, ws_raw, filenamebase.string());
     // -- assert
-    // NOTE:
-    //    Due to built-in q vector centering, the asseration will always fail.
-    //    We are commenting it out for now.
-    // TS_ASSERT(sameInstrument);
+    TS_ASSERT(sameInstrument);
   }
 
   void run_Exec() {
@@ -265,9 +256,9 @@ public:
     // source
     adjustComponent(0.0, 0.0, dL1, 1.0, 0.0, 0.0, 0.0, pws->getInstrument()->getSource()->getName(), pws);
     // Bank73
-    adjustComponent(dx1, dy1, dz1, rvx1, rvy1, rvz1, ang1, bank_xtop, pws);
+    adjustComponent(dx1, dy1, dz1, rvx1, rvy1, rvz1, ang1, "bank27", pws);
     // Bank11
-    adjustComponent(dx2, dy2, dz2, rvx2, rvy2, rvz2, ang2, bank_xbottom, pws);
+    adjustComponent(dx2, dy2, dz2, rvx2, rvy2, rvz2, ang2, "bank28", pws);
 
     // Run the calibration
     // NOTE: this should bring the instrument back to engineering position,
@@ -303,7 +294,7 @@ private:
     IAlgorithm_sptr csws_alg = AlgorithmFactory::Instance().create("CreateSimulationWorkspace", 1);
     csws_alg->initialize();
     csws_alg->setLogging(LOGCHILDALG);
-    csws_alg->setProperty("Instrument", "CORELLI");
+    csws_alg->setProperty("Instrument", "TOPAZ");
     csws_alg->setProperty("BinParams", "1,100,10000");
     csws_alg->setProperty("UnitX", "TOF");
     csws_alg->setProperty("OutputWorkspace", wsname);
@@ -476,6 +467,7 @@ private:
     alg.setProperty("CalibrateT0", calibrateT0);
     alg.setProperty("CalibrateL1", calibrateL1);
     alg.setProperty("CalibrateBanks", calibrateBanks);
+    alg.setProperty("RotationSearchRadius", 1e-6);
     alg.setProperty("OutputWorkspace", "caliTableTest");
     alg.setProperty("DetCalFilename", isawFilename);
     alg.setProperty("XmlFilename", xmlFilename);
@@ -623,20 +615,6 @@ private:
 
   MatrixWorkspace_sptr m_ws;
   PeaksWorkspace_sptr m_pws;
-
-  // bank&panel names selected for testing
-  // batch_1: high order zone selection
-  const std::string bank_xtop;
-  const std::string bank_xcenter;
-  const std::string bank_xbottom;
-
-  // batch_2: low order zone selection
-  // NOTE: limited reflections from experiment, often
-  //       considered as a chanllegening case
-  const std::string bank_yright;
-  const std::string bank_yleft;
-  const std::string bank_ytop;
-  const std::string bank_ybottom;
 
   // lattice constants of silicon
   const double silicon_a;
