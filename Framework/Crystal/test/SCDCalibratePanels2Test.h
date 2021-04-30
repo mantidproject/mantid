@@ -5,18 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-// NOTE: Generating a synthetic peakworkspace for testing is very time
-//       consuming, therefore only one wholesome unittest with calibration
-//       is enabled for regression test.
-//       To test other testing targets, change the lead word from
-//                 run_ to test_
-//       to run them within the ctest framework.
-//       You might need to do one at a time to avoid ctest timeout error
-//       locally.
-
 // DEVNOTE:
 //  - cos, sin func uses radians
 //  - Quat class uses degrees
+//  - The overall strategy here is that the correct answer is always the engineering position,
+//    and we are moving the insturment to the wrong location (i.e. needs calibration) so that
+//    the calibration can move it back to the correct position
 
 #pragma once
 
@@ -73,9 +67,9 @@ public:
         dspacing_max(10.0),                      //
         wavelength_min(0.1), wavelength_max(10), //
         omega_step(6.0),                         //
-        TOLERANCE_L(2e-3),                       // this calibration has intrinsic accuracy limit of
-                                                 // 2mm for translation for CORELLI
-        TOLERANCE_R(1e-3),                       // this calibration has intrinsic accuracy limit of
+        TOLERANCE_L(1e-4),                       // this calibration has intrinsic accuracy limit of
+                                                 // 0.1 mm for translation on a panel detector
+        TOLERANCE_R(1e-1),                       // this calibration has intrinsic accuracy limit of
                                                  // 0.1 deg for rotation
         LOGCHILDALG(false) {
     // NOTE:
@@ -89,7 +83,6 @@ public:
     darkmagic->setPropertyValue("OutputWorkspace", "TOPAZ_5637");
     darkmagic->executeAsChildAlg();
 
-    m_ws = generateSimulatedWorkspace();
     // NOTE:
     // PredictPeaks
     //     m_pws = generateSimulatedPeaksWorkspace(m_ws);
@@ -144,18 +137,25 @@ public:
 
     // No need to change anything
 
-    // Pretend we forget the answer
-    pws->setInstrument(m_pws->getInstrument());
     // Run the calibration
     runCalibration(filenamebase.string(), pws, false, true, false);
 
-    // Check if the calibration results
-    // -- get a blank workspace for loading cali results
-    MatrixWorkspace_sptr ws_raw = m_ws->clone();
-    // -- check
-    bool sameInstrument = validateCalibrationResults(m_pws, ws_raw, filenamebase.string());
-    // -- assert
-    TS_ASSERT(sameInstrument);
+    // Apply the calibration results
+    MatrixWorkspace_sptr ws = generateSimulatedWorkspace();
+    const std::string xmlFileName = filenamebase.string() + ".xml";
+    IAlgorithm_sptr lpf_alg = AlgorithmFactory::Instance().create("LoadParameterFile", 1);
+    lpf_alg->initialize();
+    lpf_alg->setLogging(LOGCHILDALG);
+    lpf_alg->setProperty("Workspace", ws);
+    lpf_alg->setProperty("Filename", xmlFileName);
+    lpf_alg->execute();
+
+    // Checking L1 since it is the only thing we calibrated
+    double L1_ref = m_pws->getInstrument()->getSource()->getPos().Z();
+    double L1_cali = ws->getInstrument()->getSource()->getPos().Z();
+    TS_ASSERT_DELTA(L1_cali, L1_ref, TOLERANCE_L);
+    g_log.notice() << "L1_ref = " << L1_ref << "\n"
+                   << "L1_cali = " << L1_cali << "\n";
   }
 
   void test_L1() {
@@ -175,13 +175,25 @@ public:
     //       which is the solution
     runCalibration(filenamebase.string(), pws, false, true, false);
 
-    // Check if the calibration results
-    // -- get a blank workspace for loading cali results
-    MatrixWorkspace_sptr ws_raw = m_ws->clone();
-    // -- check
-    bool sameInstrument = validateCalibrationResults(m_pws, ws_raw, filenamebase.string());
-    // -- assert
-    TS_ASSERT(sameInstrument);
+    // Apply the calibration results
+    MatrixWorkspace_sptr ws = generateSimulatedWorkspace();
+    const std::string xmlFileName = filenamebase.string() + ".xml";
+    IAlgorithm_sptr lpf_alg = AlgorithmFactory::Instance().create("LoadParameterFile", 1);
+    lpf_alg->initialize();
+    lpf_alg->setLogging(LOGCHILDALG);
+    lpf_alg->setProperty("Workspace", ws);
+    lpf_alg->setProperty("Filename", xmlFileName);
+    lpf_alg->execute();
+
+    // Checking L1 since it is the only thing we calibrated
+    double L1_wrng = pws->getInstrument()->getSource()->getPos().Z();
+    double L1_ref = m_pws->getInstrument()->getSource()->getPos().Z();
+    double L1_cali = ws->getInstrument()->getSource()->getPos().Z();
+    TS_ASSERT_DELTA(L1_cali, L1_ref, TOLERANCE_L);
+    g_log.notice() << "@calibration:\n"
+                   << L1_wrng << " --> " << L1_cali << "\n"
+                   << "@solution:\n"
+                   << "L1_ref = " << L1_ref << "\n";
   }
 
   void test_Bank() {
@@ -192,9 +204,9 @@ public:
     // Make a clone of the standard peak workspace
     PeaksWorkspace_sptr pws = m_pws->clone();
 
-    // Adjust bank
-    //
+    // Move one bank to the wrong location
     // NOTE: the common range for dx, dy ,dz is +-5cm
+    const std::string bankname = "bank27";
     double dx = 1.1e-2;
     double dy = -0.9e-2;
     double dz = 1.5e-2;
@@ -204,22 +216,57 @@ public:
     double rvx = sin(theta) * cos(phi);
     double rvy = sin(theta) * sin(phi);
     double rvz = cos(theta);
-    double ang = 0.0; // degrees
+    double ang = 0.02; // degrees
     //
-    adjustComponent(dx, dy, dz, rvx, rvy, rvz, ang, "bank27", pws);
+    adjustComponent(dx, dy, dz, rvx, rvy, rvz, ang, bankname, pws);
 
     // Run the calibration
     // NOTE: this should bring the instrument back to engineering position,
     //       which is the solution
     runCalibration(filenamebase.string(), pws, false, false, true);
 
-    // Check if the calibration results
-    // -- get a blank workspace for loading cali results
-    MatrixWorkspace_sptr ws_raw = m_ws->clone();
-    // -- check
-    bool sameInstrument = validateCalibrationResults(m_pws, ws_raw, filenamebase.string());
-    // -- assert
-    TS_ASSERT(sameInstrument);
+    // Apply the calibration results
+    MatrixWorkspace_sptr ws = generateSimulatedWorkspace();
+    const std::string xmlFileName = filenamebase.string() + ".xml";
+    IAlgorithm_sptr lpf_alg = AlgorithmFactory::Instance().create("LoadParameterFile", 1);
+    lpf_alg->initialize();
+    lpf_alg->setLogging(LOGCHILDALG);
+    lpf_alg->setProperty("Workspace", ws);
+    lpf_alg->setProperty("Filename", xmlFileName);
+    lpf_alg->execute();
+
+    // check translation
+    V3D pos_wrng = pws->getInstrument()->getComponentByName(bankname)->getRelativePos();
+    V3D pos_ref = m_pws->getInstrument()->getComponentByName(bankname)->getRelativePos();
+    V3D pos_cali = ws->getInstrument()->getComponentByName(bankname)->getRelativePos();
+    g_log.notice() << "@calibration:\n"
+                   << pos_wrng << "\n"
+                   << "\t--calibrated to-->\n"
+                   << pos_cali << "\n"
+                   << "@solution:\n"
+                   << "pos_ref = " << pos_ref << "\n";
+    TS_ASSERT_DELTA(pos_cali.X(), pos_ref.X(), TOLERANCE_L);
+    TS_ASSERT_DELTA(pos_cali.Y(), pos_ref.Y(), TOLERANCE_L);
+    TS_ASSERT_DELTA(pos_cali.Z(), pos_ref.Z(), TOLERANCE_L);
+
+    // check bank orientation
+    Quat q_wrng = pws->getInstrument()->getComponentByName(bankname)->getRelativeRot();
+    Quat q_ref = m_pws->getInstrument()->getComponentByName(bankname)->getRelativeRot();
+    Quat q_cali = ws->getInstrument()->getComponentByName(bankname)->getRelativeRot();
+    g_log.notice() << "@calibration:\n"
+                   << q_wrng << "\n"
+                   << "--calibrated to-->\n"
+                   << q_cali << "\n"
+                   << "@solution:\n"
+                   << q_ref << "\n";
+    // calculate misorientation
+    q_cali.inverse();
+    Quat dq = q_ref * q_cali;
+    double dang = (2 * acos(dq.real()) / PI * 180);
+    dang = dang > 180 ? 360 - dang : dang;
+    g_log.notice() << "with\n"
+                   << "ang(q_ref, q_cali) = " << dang << " (deg) \n";
+    TS_ASSERT_LESS_THAN(dang, TOLERANCE_R);
   }
 
   void run_Exec() {
@@ -407,7 +454,7 @@ private:
     rot_alg->setProperty("Z", rvz);
     rot_alg->setProperty("Angle", drotang);
     rot_alg->setProperty("RelativeRotation", true);
-    rot_alg->executeAsChildAlg();
+    rot_alg->execute();
 
     // translation
     IAlgorithm_sptr mv_alg = Mantid::API::AlgorithmFactory::Instance().create("MoveInstrumentComponent", -1);
@@ -419,22 +466,20 @@ private:
     mv_alg->setProperty("Y", dy);
     mv_alg->setProperty("Z", dz);
     mv_alg->setProperty("RelativePosition", true);
-    mv_alg->executeAsChildAlg();
+    mv_alg->execute();
 
     // since moving instrument does not trigger the update the embedded peaks,
     // we need to do this manually
-    double tof;
-    Units::Wavelength wl;
-    for (int i = 0; i < pws->getNumberPeaks(); ++i) {
-      tof = pws->getPeak(i).getTOF();
-      pws->getPeak(i).setInstrument(pws->getInstrument());
-      wl.initialize(pws->getPeak(i).getL1(), 0,
-                    {{UnitParams::l2, pws->getPeak(i).getL2()},
-                     {UnitParams::twoTheta, pws->getPeak(i).getScattering()},
-                     {UnitParams::efixed, pws->getPeak(i).getInitialEnergy()}});
-      pws->getPeak(i).setDetectorID(pws->getPeak(i).getDetectorID());
-      pws->getPeak(i).setWavelength(wl.singleFromTOF(tof));
-    }
+    // double tof;
+    // Units::Wavelength wl;
+    // for (int i = 0; i < pws->getNumberPeaks(); ++i) {
+    //   tof = pws->getPeak(i).getTOF();
+    //   pws->getPeak(i).setInstrument(pws->getInstrument());
+    //   wl.initialize(pws->getPeak(i).getL1(), pws->getPeak(i).getL2(), pws->getPeak(i).getScattering(), 0,
+    //                 pws->getPeak(i).getInitialEnergy(), 0.0);
+    //   pws->getPeak(i).setDetectorID(pws->getPeak(i).getDetectorID());
+    //   pws->getPeak(i).setWavelength(wl.singleFromTOF(tof));
+    // }
   }
 
   /**
@@ -467,7 +512,6 @@ private:
     alg.setProperty("CalibrateT0", calibrateT0);
     alg.setProperty("CalibrateL1", calibrateL1);
     alg.setProperty("CalibrateBanks", calibrateBanks);
-    alg.setProperty("RotationSearchRadius", 1e-6);
     alg.setProperty("OutputWorkspace", "caliTableTest");
     alg.setProperty("DetCalFilename", isawFilename);
     alg.setProperty("XmlFilename", xmlFilename);
@@ -481,22 +525,23 @@ private:
    *        positions from reference Peakworkspace and workspace adjusted
    *        using calibration output (xml)
    *
-   * @param refpws
-   * @param refws
+   * @param pws
    * @param xmlFileName
    * @return true
    * @return false
    */
-  bool validateCalibrationResults(PeaksWorkspace_sptr refpws, MatrixWorkspace_sptr refws, const std::string &fileName) {
+  bool validateCalibrationResults(PeaksWorkspace_sptr pws, const std::string &fileName) {
     // Test using xml parameter file (default)
     const std::string xmlFileName = fileName + ".xml";
+    auto refpws = pws->clone();
 
     g_log.notice() << "Using Paramter file: " << xmlFileName << "\n";
     // Adjust components in reference workspace using calibration results
+
     IAlgorithm_sptr lpf_alg = AlgorithmFactory::Instance().create("LoadParameterFile", 1);
     lpf_alg->initialize();
     lpf_alg->setLogging(LOGCHILDALG);
-    lpf_alg->setProperty("Workspace", refws);
+    lpf_alg->setProperty("Workspace", pws);
     lpf_alg->setProperty("Filename", xmlFileName);
     lpf_alg->execute();
 
@@ -520,7 +565,7 @@ private:
       }
     }
     // -- perform per bank comparison
-    Instrument_sptr inst1 = std::const_pointer_cast<Instrument>(refws->getInstrument());  // based on calibration
+    Instrument_sptr inst1 = std::const_pointer_cast<Instrument>(pws->getInstrument());    // based on calibration
     Instrument_sptr inst2 = std::const_pointer_cast<Instrument>(refpws->getInstrument()); // reference one
 
     bool sameInstrument = true;
