@@ -9,7 +9,7 @@
 Description
 -----------
 
-This calibration algorithm is developed for CORELLI type instrument (pack of tubes).
+This calibration algorithm is developed for TOPAZ type instrument (flat panels).
 The calibration targets includes `L_1` (source to sample distance in meters), panel
 position (in meters) and orientation (as angle-axis pairs, in degrees), as well as
 initial TOF offset (not fully implemented yet).
@@ -29,12 +29,19 @@ i.e.
 
 where NINT is the nearest integer function.
 To improve the speed of calibration of the whole instrument, openMP was used for calibration
-of banks (panels), which can unfortunately leads to out-of-order console logs.
+of banks (panels).
+Users are recommended to use the mantid.usersettings to restrict number of threads if the
+calibration is run on a system with limited computing resources.
 By default, the initial TOF (time of flight) is optimized if the corresponding option
 is set to true, followed by the calibration of `L1` as well as all Panels if requested.
 If the users are not familiar with the instrument, the options in the advanced control
 group should be left untouched as tweaking these paramters can drastically affect the
 constrained optimization used under-the-hood.
+
+The Profile section is solely developed for developers and beamline scientist during initial
+calibration of new instrument.
+Users should make sure they are unchecked (default value) so that computing resources are not
+wasted on unnecessary calculation.
 
 Usage
 -----
@@ -68,9 +75,9 @@ Usage
         "Si 0 0 0 1.0 0.05",
     )
 
-    # Generate simulated workspace for CORELLI
+    # Generate simulated workspace for TOPAZ
     CreateSimulationWorkspace(
-        Instrument='CORELLI',
+        Instrument='TOPAZ',
         BinParams='1,100,10000',
         UnitX='TOF',
         OutputWorkspace='cws',
@@ -172,9 +179,10 @@ scientists are working on the following targets:
 1) Fix the current T0 (initial TOF offset) calibration issue for synthetic data where a
    constant zero offset was found regardless of the actual prescirbed T0.
 
-2) The original (version 1) SCDCalibratePanels can also support TOPAZ, which consists of
-   multi-panels banks.
-   It is imporant for the new version of SCDCalibratePanels to provide similar support.
+2) The current data structure (detector representation) is not suitable for calibrating
+   instrument with tube-type detectors (such as CORELLI).
+   Additional work on an imporved internal detector and scattering vector representation
+   are needed in order to make this toolkit useful for CORELLI like instrument.
 
 3) In the current implementation, the calibration results are recorded as the absolute
    position and orientation of each component, which does not provide an intuitive
