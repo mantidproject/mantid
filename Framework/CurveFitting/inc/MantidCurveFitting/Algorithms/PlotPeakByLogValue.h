@@ -58,8 +58,6 @@ public:
   const std::string category() const override { return "Optimization"; }
 
 private:
-  // Strings that identify the integrated intensity fitting parameter
-  std::vector<std::string> const intensity_parameter_keys = {"Intensity", "I"};
   // Overridden Algorithm methods
   void init() override;
   std::map<std::string, std::string> validateInputs() override;
