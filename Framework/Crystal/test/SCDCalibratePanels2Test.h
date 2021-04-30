@@ -67,10 +67,10 @@ public:
         dspacing_max(10.0),                      //
         wavelength_min(0.1), wavelength_max(10), //
         omega_step(6.0),                         //
-        TOLERANCE_L(1e-4),                       // this calibration has intrinsic accuracy limit of
-                                                 // 0.1 mm for translation on a panel detector
+        TOLERANCE_L(1e-3),                       // this calibration has intrinsic accuracy limit of
+                                                 // 1 mm for translation on a panel detector
         TOLERANCE_R(1e-1),                       // this calibration has intrinsic accuracy limit of
-                                                 // 0.1 deg for rotation
+                                                 // 0.1 deg for rotation on a panel detector
         LOGCHILDALG(false) {
     // NOTE:
     //  The MAGIC PIECE, basically we need to let AlgorithmFactory
@@ -167,7 +167,7 @@ public:
     PeaksWorkspace_sptr pws = m_pws->clone();
 
     // Shift L1 to a "wrong" state
-    double dL1 = 0.01;
+    double dL1 = 0.001;
     adjustComponent(0.0, 0.0, dL1, 1.0, 0.0, 0.0, 0.0, pws->getInstrument()->getSource()->getName(), pws);
 
     // Run the calibration
@@ -207,9 +207,9 @@ public:
     // Move one bank to the wrong location
     // NOTE: the common range for dx, dy ,dz is +-5cm
     const std::string bankname = "bank27";
-    double dx = 1.1e-2;
-    double dy = -0.9e-2;
-    double dz = 1.5e-2;
+    double dx = 1.1e-3;
+    double dy = -0.9e-3;
+    double dz = 1.5e-3;
     // prescribed rotation
     double theta = PI / 3;
     double phi = PI / 8;
@@ -269,7 +269,7 @@ public:
     TS_ASSERT_LESS_THAN(dang, TOLERANCE_R);
   }
 
-  void run_Exec() {
+  void test_Exec() {
     g_log.notice() << "test_Exec() starts.\n";
     // Generate unique temp files
     auto filenamebase = boost::filesystem::temp_directory_path();
@@ -280,49 +280,124 @@ public:
     // Adjust L1 and banks
     //-- source
     const double dL1 = boost::math::constants::e<double>() / 100;
-    //-- xtop
-    double dx1 = 1.1e-2;
-    double dy1 = -0.9e-2;
-    double dz1 = 1.5e-2;
+    //-- bank27
+    const std::string bank27 = "bank27";
+    double dx1 = 1.1e-3;
+    double dy1 = -0.9e-3;
+    double dz1 = 1.5e-3;
     double theta1 = PI / 3;
     double phi1 = PI / 8;
     double rvx1 = sin(theta1) * cos(phi1);
     double rvy1 = sin(theta1) * sin(phi1);
     double rvz1 = cos(theta1);
-    double ang1 = 1.414; // degrees
-    //-- xbottom
-    double dx2 = 0.5e-2;
-    double dy2 = 1.3e-2;
-    double dz2 = -1.9e-2;
+    double ang1 = 0.01; // degrees
+    //-- bank16
+    const std::string bank16 = "bank16";
+    double dx2 = 0.5e-3;
+    double dy2 = 1.3e-3;
+    double dz2 = -1.9e-3;
     double theta2 = PI / 4;
     double phi2 = PI / 3;
     double rvx2 = sin(theta2) * cos(phi2);
     double rvy2 = sin(theta2) * sin(phi2);
     double rvz2 = cos(theta2);
-    double ang2 = 2.13; // degrees
+    double ang2 = 0.01; // degrees
+
     // source
     adjustComponent(0.0, 0.0, dL1, 1.0, 0.0, 0.0, 0.0, pws->getInstrument()->getSource()->getName(), pws);
-    // Bank73
-    adjustComponent(dx1, dy1, dz1, rvx1, rvy1, rvz1, ang1, "bank27", pws);
-    // Bank11
-    adjustComponent(dx2, dy2, dz2, rvx2, rvy2, rvz2, ang2, "bank28", pws);
+    // bank27
+    adjustComponent(dx1, dy1, dz1, rvx1, rvy1, rvz1, ang1, bank27, pws);
+    // bank16
+    adjustComponent(dx2, dy2, dz2, rvx2, rvy2, rvz2, ang2, bank16, pws);
 
     // Run the calibration
     // NOTE: this should bring the instrument back to engineering position,
     //       which is the solution
-    runCalibration(filenamebase.string(), pws, false, false, true);
+    runCalibration(filenamebase.string(), pws, false, true, true);
 
-    // Check if the calibration results
-    // -- get a blank workspace for loading cali results
-    // MatrixWorkspace_sptr ws_raw = m_ws->clone();
-    // -- check
-    // bool sameInstrument =
-    // validateCalibrationResults(m_pws, ws_raw, filenamebase.string());
-    // -- assert
-    // NOTE:
-    //    Due to built-in q vector centering, the asseration will always
-    //    fail. We are commenting it out for now.
-    // TS_ASSERT(sameInstrument);
+    // Apply the calibration results
+    MatrixWorkspace_sptr ws = generateSimulatedWorkspace();
+    const std::string xmlFileName = filenamebase.string() + ".xml";
+    IAlgorithm_sptr lpf_alg = AlgorithmFactory::Instance().create("LoadParameterFile", 1);
+    lpf_alg->initialize();
+    lpf_alg->setLogging(LOGCHILDALG);
+    lpf_alg->setProperty("Workspace", ws);
+    lpf_alg->setProperty("Filename", xmlFileName);
+    lpf_alg->execute();
+
+    // Check
+    // -- L1
+    double L1_wrng = pws->getInstrument()->getSource()->getPos().Z();
+    double L1_ref = m_pws->getInstrument()->getSource()->getPos().Z();
+    double L1_cali = ws->getInstrument()->getSource()->getPos().Z();
+    TS_ASSERT_DELTA(L1_cali, L1_ref, TOLERANCE_L);
+    g_log.notice() << "<<Source>>\n"
+                   << "@calibration:\n"
+                   << L1_wrng << " --> " << L1_cali << "\n"
+                   << "@solution:\n"
+                   << "L1_ref = " << L1_ref << "\n";
+    // -- bank27
+    g_log.notice() << "<<bank27>>\n";
+    V3D pos_wrng = pws->getInstrument()->getComponentByName(bank27)->getRelativePos();
+    V3D pos_ref = m_pws->getInstrument()->getComponentByName(bank27)->getRelativePos();
+    V3D pos_cali = ws->getInstrument()->getComponentByName(bank27)->getRelativePos();
+    g_log.notice() << "@calibration:\n"
+                   << pos_wrng << "\n"
+                   << "\t--calibrated to-->\n"
+                   << pos_cali << "\n"
+                   << "@solution:\n"
+                   << "pos_ref = " << pos_ref << "\n";
+    TS_ASSERT_DELTA(pos_cali.X(), pos_ref.X(), TOLERANCE_L);
+    TS_ASSERT_DELTA(pos_cali.Y(), pos_ref.Y(), TOLERANCE_L);
+    TS_ASSERT_DELTA(pos_cali.Z(), pos_ref.Z(), TOLERANCE_L);
+    Quat q_wrng = pws->getInstrument()->getComponentByName(bank27)->getRelativeRot();
+    Quat q_ref = m_pws->getInstrument()->getComponentByName(bank27)->getRelativeRot();
+    Quat q_cali = ws->getInstrument()->getComponentByName(bank27)->getRelativeRot();
+    g_log.notice() << "@calibration:\n"
+                   << q_wrng << "\n"
+                   << "--calibrated to-->\n"
+                   << q_cali << "\n"
+                   << "@solution:\n"
+                   << q_ref << "\n";
+    // calculate misorientation
+    q_cali.inverse();
+    Quat dq = q_ref * q_cali;
+    double dang = (2 * acos(dq.real()) / PI * 180);
+    dang = dang > 180 ? 360 - dang : dang;
+    g_log.notice() << "with\n"
+                   << "ang(q_ref, q_cali) = " << dang << " (deg) \n";
+    TS_ASSERT_LESS_THAN(dang, TOLERANCE_R);
+    // -- bank16
+    g_log.notice() << "<<bank16>>\n";
+    pos_wrng = pws->getInstrument()->getComponentByName(bank16)->getRelativePos();
+    pos_ref = m_pws->getInstrument()->getComponentByName(bank16)->getRelativePos();
+    pos_cali = ws->getInstrument()->getComponentByName(bank16)->getRelativePos();
+    g_log.notice() << "@calibration:\n"
+                   << pos_wrng << "\n"
+                   << "\t--calibrated to-->\n"
+                   << pos_cali << "\n"
+                   << "@solution:\n"
+                   << "pos_ref = " << pos_ref << "\n";
+    TS_ASSERT_DELTA(pos_cali.X(), pos_ref.X(), TOLERANCE_L);
+    TS_ASSERT_DELTA(pos_cali.Y(), pos_ref.Y(), TOLERANCE_L);
+    TS_ASSERT_DELTA(pos_cali.Z(), pos_ref.Z(), TOLERANCE_L);
+    q_wrng = pws->getInstrument()->getComponentByName(bank16)->getRelativeRot();
+    q_ref = m_pws->getInstrument()->getComponentByName(bank16)->getRelativeRot();
+    q_cali = ws->getInstrument()->getComponentByName(bank16)->getRelativeRot();
+    g_log.notice() << "@calibration:\n"
+                   << q_wrng << "\n"
+                   << "--calibrated to-->\n"
+                   << q_cali << "\n"
+                   << "@solution:\n"
+                   << q_ref << "\n";
+    // calculate misorientation
+    q_cali.inverse();
+    dq = q_ref * q_cali;
+    dang = (2 * acos(dq.real()) / PI * 180);
+    dang = dang > 180 ? 360 - dang : dang;
+    g_log.notice() << "with\n"
+                   << "ang(q_ref, q_cali) = " << dang << " (deg) \n";
+    TS_ASSERT_LESS_THAN(dang, TOLERANCE_R);
   }
 
 private:
