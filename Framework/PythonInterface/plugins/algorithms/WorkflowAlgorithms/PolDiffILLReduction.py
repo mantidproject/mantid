@@ -622,14 +622,21 @@ class PolDiffILLReduction(PythonAlgorithm):
     def _match_attenuation_workspace(self, sample_entry, attenuation_ws):
         correction_ws = attenuation_ws + '_matched_corr'
         CloneWorkspace(InputWorkspace=attenuation_ws, OutputWorkspace=correction_ws)
-        spectrum_axis = mtd[sample_entry].getAxis(1)
+        converted_entry = sample_entry + '_converted'
+        CloneWorkspace(InputWorkspace=sample_entry, OutputWorkspace=converted_entry)
+        ConvertSpectrumAxis(InputWorkspace=converted_entry, Target='SignedTheta', OutputWorkspace=converted_entry)
+        Transpose(InputWorkspace=converted_entry, OutputWorkspace=converted_entry)
+        ConvertAxisByFormula(InputWorkspace=converted_entry, Axis='X', Formula='-x', OutputWorkspace=converted_entry)
         for entry_no, entry in enumerate(mtd[correction_ws]):
             origin_ws_name = mtd[attenuation_ws][entry_no].name()
             factor_name = origin_ws_name[origin_ws_name.rfind("_"):]
-            RenameWorkspace(InputWorkspace=entry, OutputWorkspace=entry.name()[:-1] + factor_name)
-            RebinToWorkspace(WorkspaceToRebin=entry, WorkspaceToMatch=sample_entry, OutputWorkspace=entry)
-            Transpose(InputWorkspace=entry, OutputWorkspace=entry)
-            entry.replaceAxis(1, spectrum_axis)
+            matched_ws = entry.name()[:-1] + factor_name
+            RenameWorkspace(InputWorkspace=entry, OutputWorkspace=matched_ws)
+            ConvertToPointData(InputWorkspace=matched_ws, OutputWorkspace=matched_ws)
+            SplineInterpolation(WorkspaceToMatch=converted_entry, WorkspaceToInterpolate=matched_ws,
+                                OutputWorkspace=matched_ws, OutputWorkspaceDeriv='')
+            Transpose(InputWorkspace=matched_ws, OutputWorkspace=matched_ws)
+        DeleteWorkspace(Workspace=converted_entry)
         return correction_ws
 
     def _apply_self_attenuation_correction(self, sample_ws, empty_ws):
