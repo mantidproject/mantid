@@ -611,7 +611,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                                              Shape=sample_geometry_type,
                                              CorrectionsWorkspace=attenuation_ws,
                                              **kwargs)
-        if self.getPropertyValue('ClearCache'):
+        if self.getProperty('ClearCache').value:
             DeleteWorkspace(Workspace=mock_geometry_ws)
         ConvertSpectrumAxis(InputWorkspace=attenuation_ws, Target="SignedTheta", OutputWorkspace=attenuation_ws)
         Transpose(InputWorkspace=attenuation_ws, OutputWorkspace=attenuation_ws)
@@ -648,10 +648,12 @@ class PolDiffILLReduction(PythonAlgorithm):
                 correction_ws = self._match_attenuation_workspace(entry.name(), attenuation_ws)
             ApplyPaalmanPingsCorrection(SampleWorkspace=entry,
                                         CorrectionsWorkspace=correction_ws,
-                                        CanWorkspace=mtd[empty_ws][entry_no],
                                         OutputWorkspace=entry)
-        if self.getPropertyValue('ClearCache'):
-            DeleteWorkspaces(WorkspaceList=[correction_ws, attenuation_ws])
+        if self.getProperty('ClearCache').value:
+            ws_to_delete = [correction_ws, attenuation_ws]
+            if 'corrected' in mtd: # coming from ApplyPaalmanPingsCorrection
+                ws_to_delete.append('corrected')
+            DeleteWorkspaces(WorkspaceList=ws_to_delete)
         return sample_ws
 
     def _data_structure_helper(self):
