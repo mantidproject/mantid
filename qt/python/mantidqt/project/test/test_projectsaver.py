@@ -246,6 +246,22 @@ class ProjectWriterTest(unittest.TestCase):
         self.assertTrue(plots_string in file_string)
         self.assertTrue(interface_string in file_string)
 
+    @mock.patch('mantidqt.project.projectsaver.logger')
+    def test_exception_in_open_logs_error(self, mock_logger):
+        workspace_list = []
+        plots_to_save = []
+        interfaces_to_save = []
+        project_writer = projectsaver.ProjectWriter(save_location=working_project_file, workspace_names=workspace_list,
+                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save,
+                                                    interfaces_to_save=interfaces_to_save)
+        mock_open = mock.mock_open()
+        with mock.patch('mantidqt.project.projectsaver.open', mock_open):
+            mock_open.side_effect = OSError
+            project_writer.write_out()
+
+        mock_logger.warning.assert_called_once()
+        mock_logger.debug.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()
