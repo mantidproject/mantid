@@ -426,8 +426,8 @@ ITableWorkspace_sptr PlotPeakByLogValue::createResultsTable(const std::string &l
 
       auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(f);
       if (intensity_handle) {
-        result->addColumn("double", "f" + std::to_string(i) + ".Intensity");
-        result->addColumn("double", "f" + std::to_string(i) + ".Intensity_Err");
+        result->addColumn("double", "f" + std::to_string(i) + ".Integrated Intensity");
+        result->addColumn("double", "f" + std::to_string(i) + ".Integrated Intensity_Err");
       }
     }
   }
@@ -440,8 +440,8 @@ ITableWorkspace_sptr PlotPeakByLogValue::createResultsTable(const std::string &l
 
     auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(ifunSingle);
     if (intensity_handle) {
-      result->addColumn("double", "Intensity");
-      result->addColumn("double", "Intensity_Err");
+      result->addColumn("double", "Integrated Intensity");
+      result->addColumn("double", "Integrated Intensity_Err");
     }
   }
 
