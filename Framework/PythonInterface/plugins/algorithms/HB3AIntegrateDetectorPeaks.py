@@ -110,15 +110,21 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
 
                 integrated_intensity = A * s * np.sqrt(2*np.pi) * scale
                 peak.setIntensity(integrated_intensity)
+
+                # Convert correlation back into covariance
+                cor_As = (fit_result.OutputNormalisedCovarianceMatrix.cell(1,4)/100
+                          * fit_result.OutputParameters.cell(1,2) * fit_result.OutputParameters.cell(3,2))
                 # σ^2 = 2π (A^2 σ_s^2 + σ_A^2 s^2 + 2 A s σ_As)
-                integrated_intensity_error = np.sqrt(2*np.pi * (A**2 * errs**2 +  s**2 * errA**2)) * scale  # FIXME
+                integrated_intensity_error = np.sqrt(2*np.pi * (A**2 * errs**2 +  s**2 * errA**2 + 2*A*s*cor_As)) * scale
                 peak.setSigmaIntensity(integrated_intensity_error)
+
                 __tmp_pw.addPeak(peak)
+
                 if use_lorentz:
                     peak = __tmp_pw.getPeak(0)
                     lorentz = abs(np.sin(peak.getScattering() * np.cos(peak.getAzimuthal())))
                     peak.setIntensity(peak.getIntensity() * lorentz)
-                    # peak.setSigmaIntensity  # FIXME
+                    peak.setSigmaIntensity(peak.getSigmaIntensity() * lorentz)
 
                 # correct q-vector using CentroidPeaksdMD
                 if optmize_q:
@@ -162,7 +168,7 @@ def fit_gaussian(ws, output_fit):
     y = ws.extractY()
     x = ws.extractX()
     function = f"name=FlatBackground, A0={y.min()}; name=Gaussian, PeakCentre={x[0, y.argmax()]}, Height={y.max()-y.min()}, Sigma=0.25"
-    fit_result = Fit(function, ws, Output=str(ws), OutputParametersOnly=not output_fit)
+    fit_result = Fit(function, ws, Output=str(ws), OutputParametersOnly=not output_fit, OutputCompositeMembers=True)
     return fit_result
 
 
