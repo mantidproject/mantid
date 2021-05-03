@@ -70,7 +70,7 @@ class ResetNegatives2DTest(unittest.TestCase):
         ResetNegatives2D(self._workspace1)
         SaveP2D(Workspace=self._workspace1,
                 OutputFile=os.path.join(self._test_dir,
-                                        "test_ResetNegatives2D_addMinimum"),
+                                        "test_ResetNegatives2D_addMinimum.p2d"),
                 RemoveNaN=False,
                 RemoveNegatives=False,
                 CutData=False)
