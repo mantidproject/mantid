@@ -34,7 +34,7 @@ class ConvertQtoHKLMDHistoTest(unittest.TestCase):
         hkl = ConvertQtoHKLMDHisto(InputWorkspace=mtd["mde_ws"],
                                    PeaksWorkspace=mtd["peaks"])
         self.assertEqual(hkl.getSpecialCoordinateSystem().name, "HKL")
-
+        self.assertFalse(hkl.hasOriginalWorkspace(0))
         self.assertEqual(mtd["peaks"].getNumberPeaks(), 10)
         peak = mtd["peaks"].getPeak(0)
         self.assertEqual(peak.getH(), 0.0)

@@ -155,10 +155,6 @@ class SliceViewerModel:
                        not provided the full extent of each dimension is used
         """
         workspace = self._get_ws()
-        ws_type = self.get_ws_type()
-
-        if ws_type == WS_TYPE.MDH and self.can_support_dynamic_rebinning():
-            workspace = workspace.getOriginalWorkspace(0)
 
         params, _, __ = _roi_binmd_parameters(workspace, slicepoint, bin_params, limits)
         params['EnableLogging'] = LOG_GET_WS_MDE_ALGORITHM_CALLS

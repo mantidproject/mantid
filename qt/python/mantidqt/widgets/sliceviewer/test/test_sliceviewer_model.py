@@ -363,45 +363,6 @@ class SliceViewerModelTest(unittest.TestCase):
         mock_binmd.assert_called_once_with(**call_params)
         mock_binmd.reset_mock()
 
-    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
-    def test_get_ws_mde_get_originalws_if_cannot_rebin_currentws(self, mock_binmd):
-        ws = _create_mock_workspace(IMDHistoWorkspace,
-                                    SpecialCoordinateSystem.NONE,
-                                    has_oriented_lattice=False,
-                                    ndims=3)
-        ws.hasOriginalWorkspace.side_effect = lambda index: True
-        ws.name.return_value = 'ws_MD_3D'
-
-        original_ws_ndims = 3
-        orig_ws = _create_mock_workspace(IMDHistoWorkspace,
-                                        coords=SpecialCoordinateSystem.QLab,
-                                        has_oriented_lattice=False,
-                                        ndims=original_ws_ndims)
-        ws.getOriginalWorkspace.side_effect = lambda index: orig_ws
-        _add_dimensions(orig_ws,
-                        ('h', 'k', 'l'),
-                        (False, False, False),
-                        (-3, 3, -4, 4, -5, 5),
-                        nbins=(1,) * 3,
-                        units=('rlu', 'rlu', 'rlu'))
-
-        model = SliceViewerModel(ws)
-
-        self.assertEqual(model.get_ws_type(), WS_TYPE.MDH)
-
-        model.get_ws_MDE((None, None, 0), (1, 2, 4), ((-2, 2), (-1, 1)))
-        call_params = dict(AxisAligned=False,
-                           BasisVector0='h,rlu,1.0,0.0,0.0',
-                           BasisVector1='k,rlu,0.0,1.0,0.0',
-                           BasisVector2='l,rlu,0.0,0.0,1.0',
-                           EnableLogging=False,
-                           InputWorkspace=model._get_ws().getOriginalWorkspace(0),
-                           OutputBins=[1, 2, 1],
-                           OutputExtents=[-2, 2, -1, 1, -2.0, 2.0],
-                           OutputWorkspace='ws_MD_3D_svrebinned')
-        mock_binmd.assert_called_once_with(**call_params)
-        mock_binmd.reset_mock()
-
     def test_model_matrix(self):
         model = SliceViewerModel(self.ws2d_histo)
 
