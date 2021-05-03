@@ -89,7 +89,14 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
             scan_axis = run[scan_log].value
             data.setX(0, scan_axis)
 
-            fit_result = fit_gaussian(data, output_fit)
+            y = data.extractY().flatten()
+            x = data.extractX().flatten()
+            function = f"name=FlatBackground, A0={y.min()}; name=Gaussian, PeakCentre={x[y.argmax()]}, Height={y.max()-y.min()}, Sigma=0.25"
+            try:
+                fit_result = Fit(function, data, Output=str(data), OutputParametersOnly=not output_fit, OutputCompositeMembers=True)
+            except RuntimeError as e:
+                self.log().warning("Failed to fit workspace {}: {}".format(inWS, e))
+                continue
             if fit_result.OutputStatus == 'success' and fit_result.OutputChi2overDoF < chisqmax:
                 __tmp_pw = CreatePeaksWorkspace(OutputType='LeanElasticPeak',
                                                 InstrumentWorkspace=inWS,
@@ -162,14 +169,6 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
             else:
                 input_workspaces.append(wsname)
         return input_workspaces
-
-
-def fit_gaussian(ws, output_fit):
-    y = ws.extractY()
-    x = ws.extractX()
-    function = f"name=FlatBackground, A0={y.min()}; name=Gaussian, PeakCentre={x[0, y.argmax()]}, Height={y.max()-y.min()}, Sigma=0.25"
-    fit_result = Fit(function, ws, Output=str(ws), OutputParametersOnly=not output_fit, OutputCompositeMembers=True)
-    return fit_result
 
 
 AlgorithmFactory.subscribe(HB3AIntegrateDetectorPeaks)
