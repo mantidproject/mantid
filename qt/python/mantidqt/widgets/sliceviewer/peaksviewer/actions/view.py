@@ -23,8 +23,8 @@ class PeakActionsView:
         self.add_btn.setStyleSheet("background-color:lightgrey")
         self.rm_btn.setStyleSheet("background-color:lightgrey")
 
-        self.add_btn.clicked.connect(self.add_peak_click)
-        self.rm_btn.clicked.connect(self.rm_peak_click)
+        self.add_btn.clicked.connect(self.add_btn_click)
+        self.rm_btn.clicked.connect(self.rm_btn_click)
 
         peak_grid.addWidget(self.add_btn)
         peak_grid.addWidget(self.rm_btn)
