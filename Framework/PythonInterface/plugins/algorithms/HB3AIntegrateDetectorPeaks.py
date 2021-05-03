@@ -92,8 +92,11 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
             y = data.extractY().flatten()
             x = data.extractX().flatten()
             function = f"name=FlatBackground, A0={y.min()}; name=Gaussian, PeakCentre={x[y.argmax()]}, Height={y.max()-y.min()}, Sigma=0.25"
+            constraints = f"f0.A0 > 0, f1.Height > 0, {x.min()} < f1.PeakCentre < {x.max()}"
             try:
-                fit_result = Fit(function, data, Output=str(data), OutputParametersOnly=not output_fit, OutputCompositeMembers=True)
+                fit_result = Fit(function, data, Output=str(data),
+                                 OutputParametersOnly=not output_fit,
+                                 Constraints=constraints)
             except RuntimeError as e:
                 self.log().warning("Failed to fit workspace {}: {}".format(inWS, e))
                 continue
