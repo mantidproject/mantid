@@ -267,6 +267,12 @@ int FunctionBrowser::getCurrentDataset() const { return m_presenter->getCurrentD
 void FunctionBrowser::setColumnSizes(int s0, int s1, int s2) { m_presenter->setColumnSizes(s0, s1, s2); }
 
 /**
+ * Set the last column to stretch. This avoids a vertical scroll bar.
+ * @param stretch :: A bool whether or not to stretch the last column.
+ */
+void FunctionBrowser::setStretchLastColumn(bool stretch) { m_presenter->setStretchLastColumn(stretch); }
+
+/**
  * Set display of parameter errors on/off
  * @param enabled :: [input] On/off display of errors
  */

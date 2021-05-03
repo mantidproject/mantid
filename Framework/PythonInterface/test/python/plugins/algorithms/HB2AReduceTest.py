@@ -114,11 +114,21 @@ class HB2AReduceTest(unittest.TestCase):
         HB2AReduce_ws.delete()
 
     def test_new_convention(self):
-        HB2AReduce_ws = HB2AReduce('HB2A_exp0666_scan0024.dat',
+        HB2AReduce_ws_old = HB2AReduce('HB2A_exp0666_scan0024.dat',
+                                       IndividualDetectors=True,
+                                       SaveData=False)
+        HB2AReduce_ws_old.delete()
+
+        HB2AReduce_ws_new = HB2AReduce('HB2A_exp0742_scan0028.dat',
+                                       IndividualDetectors=True,
+                                       SaveData=False)
+        HB2AReduce_ws_new.delete()
+
+    def test_new_new_convention(self):
+        HB2AReduce_ws = HB2AReduce('HB2A_exp0755_scan0027.dat',
                                    IndividualDetectors=True,
                                    SaveData=False)
         HB2AReduce_ws.delete()
-
 
 if __name__ == '__main__':
     unittest.main()

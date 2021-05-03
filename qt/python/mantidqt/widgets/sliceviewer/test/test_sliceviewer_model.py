@@ -12,8 +12,8 @@ import unittest
 from unittest.mock import MagicMock, call, patch
 import sys
 
-from mantid.api import (MatrixWorkspace, IMDEventWorkspace, IMDHistoWorkspace,
-                        SpecialCoordinateSystem)
+from mantid.api import MatrixWorkspace, IMDEventWorkspace, IMDHistoWorkspace
+from mantid.kernel import SpecialCoordinateSystem
 from mantid.geometry import IMDDimension
 from numpy.testing import assert_equal
 import numpy as np

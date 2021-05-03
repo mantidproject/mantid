@@ -103,7 +103,7 @@ public:
     LoadILLSANS alg;
     alg.setChild(true);
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "027194.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "000410.nxs"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
@@ -116,27 +116,31 @@ public:
     TS_ASSERT(outputWS->isHistogramData())
     TS_ASSERT(!outputWS->isDistribution())
     const auto &instrument = outputWS->getInstrument();
+    const auto &run = outputWS->run();
+    TS_ASSERT(run.hasProperty("Detector 1.det_calc"));
+    TS_ASSERT(run.hasProperty("L2"));
+    const double detCalc = run.getPropertyAsSingleValue("Detector 1.det_calc");
+    const double l2 = run.getPropertyAsSingleValue("L2");
+    TS_ASSERT_EQUALS(detCalc, l2);
+    const double panelOffset = 0.105;
 
     IComponent_const_sptr component = instrument->getComponentByName("detector_center");
     V3D pos = component->getPos();
-    TS_ASSERT_DELTA(pos.Z(), 8.9274824298, 1E-3)
+    TS_ASSERT_DELTA(pos.Z(), l2, 1E-5)
 
     component = instrument->getComponentByName("detector_left");
     pos = component->getPos();
-    TS_ASSERT_DELTA(pos.Z(), 8.82248, 1E-5)
+    TS_ASSERT_DELTA(pos.Z(), l2 - panelOffset, 1E-5)
 
     component = instrument->getComponentByName("detector_right");
     pos = component->getPos();
-    TS_ASSERT_DELTA(pos.Z(), 8.82248, 1E-5)
+    TS_ASSERT_DELTA(pos.Z(), l2 - panelOffset, 1E-5)
 
     const auto &xAxis = outputWS->x(0).rawData();
-    const auto &spec = outputWS->y(3630).rawData();
-    const auto &err = outputWS->e(3630).rawData();
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 1);
     TS_ASSERT_EQUALS(xAxis.size(), 2)
-    TS_ASSERT_DELTA(xAxis[0], 6.685, 1E-5)
-    TS_ASSERT_DELTA(xAxis[1], 7.315, 1E-5)
-    TS_ASSERT_EQUALS(spec[0], 246)
-    TS_ASSERT_DELTA(err[0], sqrt(246), 1E-5)
+    TS_ASSERT_DELTA(xAxis[0], 5.73, 1E-5)
+    TS_ASSERT_DELTA(xAxis[1], 6.27, 1E-5)
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "Wavelength");
     checkTimeFormat(outputWS);

@@ -89,9 +89,16 @@ SXPeak::SXPeak(double t, double phi, double intensity, const std::vector<int> &s
   m_detId = spectrumInfo.detector(m_wsIndex).getID();
   m_nPixels = 1;
 
+  Mantid::Kernel::Units::TOF tof;
   const auto unit = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-  unit->initialize(l1, l2, m_twoTheta, 0, 0, 0);
-  m_dSpacing = unit->singleFromTOF(m_tof);
+  Kernel::UnitParametersMap pmap{};
+  spectrumInfo.getDetectorValues(tof, *unit, Kernel::DeltaEMode::Elastic, false, m_wsIndex, pmap);
+  unit->initialize(l1, 0, pmap);
+  try {
+    m_dSpacing = unit->singleFromTOF(m_tof);
+  } catch (std::exception &) {
+    m_dSpacing = 0;
+  }
 
   const auto samplePos = spectrumInfo.samplePosition();
   const auto sourcePos = spectrumInfo.sourcePosition();
@@ -341,9 +348,11 @@ double PeakFindingStrategy::convertToTOF(const double xValue, const size_t works
     return xValue;
   } else {
     const auto unit = UnitFactory::Instance().create("dSpacing");
+    Mantid::Kernel::Units::TOF tof;
+    Kernel::UnitParametersMap pmap{};
+    m_spectrumInfo.getDetectorValues(*unit, tof, Kernel::DeltaEMode::Elastic, false, workspaceIndex, pmap);
     // we're using d-spacing, convert the point to TOF
-    unit->initialize(m_spectrumInfo.l1(), m_spectrumInfo.l2(workspaceIndex), m_spectrumInfo.twoTheta(workspaceIndex), 0,
-                     0, 0);
+    unit->initialize(m_spectrumInfo.l1(), 0, pmap);
     return unit->singleToTOF(xValue);
   }
 }

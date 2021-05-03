@@ -280,7 +280,7 @@ class PlotSelectorView(QWidget):
             widget = self.table_widget.cellWidget(row, Column.Name)
             if widget.plot_number == plot_number:
                 return row, widget
-        raise RuntimeError(f'Unable to find row and widget from plot_number {plot_number}')
+        return None, None
 
     def remove_from_plot_list(self, plot_number):
         """
@@ -301,6 +301,9 @@ class PlotSelectorView(QWidget):
         """
         with QMutexLocker(self.mutex):
             row, widget = self._get_row_and_widget_from_plot_number(plot_number)
+            if row is None or widget is None:
+                raise ValueError(f'Unable to find row and/or widget from plot_number {plot_number}')
+
             font = self.table_widget.item(row, Column.Number).font()
             font.setBold(is_active)
             self.table_widget.item(row, Column.Number).setFont(font)
@@ -349,6 +352,8 @@ class PlotSelectorView(QWidget):
         """
         with QMutexLocker(self.mutex):
             row, widget = self._get_row_and_widget_from_plot_number(plot_number)
+            if row is None or widget is None:
+                raise ValueError(f'Unable to find row and/or widget from plot_number {plot_number}')
             widget.set_visibility_icon(is_visible)
 
     # ----------------------- Plot Filtering ------------------------

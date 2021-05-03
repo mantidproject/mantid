@@ -92,12 +92,13 @@ class SANSReductionCorePreprocess(SANSReductionCoreBase):
         # 5. Convert to Wavelength
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Converting to wavelength ...")
-        workspace = self._convert_to_wavelength(state=state, workspace=workspace)
+        workspace = self._convert_to_wavelength(wavelength_state=state.wavelength, workspace=workspace)
         # Convert and rebin the dummy workspace to get correct bin flags
         if use_dummy_workspace:
             dummy_mask_workspace = mask_bins(state.mask, dummy_mask_workspace,
                                              DetectorType(component_as_string))
-            dummy_mask_workspace = self._convert_to_wavelength(state=state, workspace=dummy_mask_workspace)
+            dummy_mask_workspace = self._convert_to_wavelength(wavelength_state=state.wavelength,
+                                                               workspace=dummy_mask_workspace)
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Multiply by volume and absolute scale

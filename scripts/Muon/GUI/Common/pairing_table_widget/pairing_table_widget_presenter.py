@@ -210,7 +210,7 @@ class PairingTablePresenter(object):
         safe_to_rm = []
         warnings = ""
         for name, index in pair_names:
-            used_by = self._model.check_pair_in_use(name)
+            used_by = self._model.check_if_used_by_diff(name)
             if used_by:
                 warnings+=used_by+"\n"
             else:
@@ -225,9 +225,9 @@ class PairingTablePresenter(object):
     def remove_last_row_in_view_and_model(self):
         if self._view.num_rows() > 0:
             name = self._view.get_table_contents()[-1][0]
-            warning = self._model.check_pair_in_use(name)
+            warning = self._model.check_if_used_by_diff(name)
             if warning:
-                self._View.warning_popup(warning)
+                self._view.warning_popup(warning)
             else:
                 self._view.remove_last_row()
                 self._model.remove_pair_from_analysis(name)

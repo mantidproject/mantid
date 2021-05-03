@@ -33,7 +33,9 @@ public:
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Integrate single-crystal peaks in reciprocal space, for "
-           "MDEventWorkspaces.";
+           "MDEventWorkspaces. \n\n"
+           "Sphere is the default shape: tick Ellipsoid or Cylinder "
+           "to change shape.";
   }
 
   /// Algorithm's version for identification
@@ -77,7 +79,7 @@ private:
 
   /// Calculate if this Q is on a detector
   void calculateE1(const Geometry::DetectorInfo &detectorInfo);
-  double detectorQ(Mantid::Kernel::V3D QLabFrame, double r);
+  double calculateDistanceToEdge(const Mantid::Kernel::V3D &QLabFrame);
   void runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS, const std::string &property,
                         const std::string &values);
 

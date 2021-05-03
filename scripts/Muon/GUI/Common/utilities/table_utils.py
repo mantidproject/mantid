@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import os
 from functools import wraps
 import sys
 from qtpy import QtWidgets, QtCore, QtGui
@@ -139,11 +138,10 @@ def addSpinBoxToTable(table,default,row,col=1):
 # the headers.
 def setTableHeaders(table):
     # is it not windows
-    if os.name != "nt":
+    if QtCore.QSysInfo.productType() != "windows":
         return
-    version = QtCore.QSysInfo.WindowsVersion
-    WINDOWS_10 = 160
-    if (version == WINDOWS_10):
+    WINDOWS_10 = "10"
+    if (QtCore.QSysInfo.productVersion() == WINDOWS_10):
         styleSheet = \
             "QHeaderView::section{" \
             + "border-top:0px solid #D8D8D8;" \

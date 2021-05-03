@@ -68,9 +68,11 @@ This method is an expansion of the Uniaxial method, that requires measurements o
 
       M = 2 \cdot \left(2 \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}} - \left(\frac{d\sigma_{x}}{\text{d}\Omega}\right)_{\text{nsf}} - \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{nsf}} \right)
 
-      N = \frac{1}{6} \cdot \left(2 \cdot \left( \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{d\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}} \right)
+.. math::
 
-      - \left( \left( \frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{sf}} + \left( \frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{sf}} + \left( \frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}} \right) \right)
+      N = \frac{1}{6} \cdot \left(2 \cdot \left( \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{d\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}} \right) - \left( \left( \frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{sf}} + \left( \frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{sf}} + \left( \frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}} \right) \right)
+
+.. math::
 
       I = \frac{1}{2} \cdot \left(\left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}} - M \right)
 
@@ -84,19 +86,27 @@ The 10-point method is an expansion of the XYZ method, that requires measurement
 
 where :math:`\alpha` is the Sharpf angle, which for elastic scattering is equal to half of the (signed) in-plane scattering angle and :math:`\theta_{0}` is an experimentally fixed offset (see more in Ref. [3]).
 
-.. math:: M_{1} = (2 c_{0} - 4) \cdot \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{nsf}} + (2c_{0} + 2) \cdot \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{nsf}} + (2-4c_{0}) \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}}
+.. math::
 
-.. math:: M_{2} = (2 c_{4} - 4) \cdot \left(\frac{\text{d}\sigma_{x+y}}{\text{d}\Omega}\right)_{\text{nsf}} + (2c_{4} + 2) \cdot \left(\frac{\text{d}\sigma_{x-y}}{\text{d}\Omega}\right)_{\text{nsf}} + (2-4c_{4}) \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}}
+   M_{1} = (2 c_{0} - 4) \cdot \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{nsf}} + (2c_{0} + 2) \cdot \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{nsf}} + (2-4c_{0}) \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}}
 
-.. math:: M = M_{1} \cdot \text{cos}(2\alpha) + M_{2} \cdot \text{sin}(2\alpha),
+.. math::
+
+   M_{2} = (2 c_{4} - 4) \cdot \left(\frac{\text{d}\sigma_{x+y}}{\text{d}\Omega}\right)_{\text{nsf}} + (2c_{4} + 2) \cdot \left(\frac{\text{d}\sigma_{x-y}}{\text{d}\Omega}\right)_{\text{nsf}} + (2-4c_{4}) \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}}
+
+.. math::
+
+   M = M_{1} \cdot \text{cos}(2\alpha) + M_{2} \cdot \text{sin}(2\alpha),
 
 where :math:`c_{0} = \text{cos}^{2} \alpha` and :math:`c_{4} = \text{cos}^{2} (\alpha - \frac{\pi}{4})`
 
-.. math:: N = \frac{1}{12} \cdot \left(2 \cdot \left( \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{nsf}} + 2 \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{x+y}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{x-y}}{\text{d}\Omega}\right)_{\text{nsf}} \right)
+.. math::
 
-      - \left( \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{x+y}}{\text{d}d\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{x-y}}{\text{d}\Omega}\right)_{\text{sf}} \right) \right)
+   N = \frac{1}{12} \cdot \left(2 \cdot \left( \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{nsf}} + 2 \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{x+y}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{x-y}}{\text{d}\Omega}\right)_{\text{nsf}} \right) - \left( \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{x+y}}{\text{d}d\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{x-y}}{\text{d}\Omega}\right)_{\text{sf}} \right) \right)
 
-.. math:: I = \frac{1}{4} \cdot \left(\left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}d\Omega}\right)_{\text{sf}} + 2 \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{x+y}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{x-y}}{\text{d}\Omega}\right)_{\text{sf}} - M \right)
+.. math::
+
+   I = \frac{1}{4} \cdot \left(\left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}d\Omega}\right)_{\text{sf}} + 2 \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{x+y}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{x-y}}{\text{d}\Omega}\right)_{\text{sf}} - M \right)
 
 
 Sample data normalisation
@@ -106,7 +116,9 @@ The sample data normalisation is the final step of data reduction of D7 sample, 
 
 There are three options for the normalisation; it uses either the input from a reference sample with a well-known cross-section, namely vanadium, or the output from the cross-section separation, either magnetic or spin-incoherent cross-sections. A relative normalisation of the sample workspace to the detector with the highest counts is always performed.
 
-.. math:: S \text{(#,} \pm \text{, chn/t/meV)} = I \text{(#,} \pm \text{, chn/t/meV)} \cdot D \text{(#,} \pm \text{, chn/t/meV)},
+.. math::
+
+   S (\#, \pm \text{, chn/t/meV)} = I (\#, \pm \text{, chn/t/meV)} \cdot D (\#, \pm \text{, chn/t/meV)},
 
 where `I` is the sample intensity distribution corrected for all effects, and `D` is the normalisation factor.
 
@@ -114,17 +126,17 @@ where `I` is the sample intensity distribution corrected for all effects, and `D
 
 If the data is to be expressed in absolute units, the normalisation factor is the reduced vanadium data, normalised by the number of formula units in the sample :math:`N_{S}`:
 
-.. math:: D \text{(#,} \pm \text{, chn/t/meV)} = \frac{1}{N_{S}} \cdot V \text{(#,} \pm \text{, chn/t/meV)}
+.. math:: D (\#, \pm \text{, chn/t/meV)} = \frac{1}{N_{S}} \cdot V (\#, \pm \text{, chn/t/meV)}
 
 If data is not to be expressed in absolute units, the normalisation factor depends only on the vanadium input:
 
-.. math:: D \text{(#,} \pm \text{, chn/t/meV)} = \frac{V \text{(#,} \pm \text{, chn/t/meV)}}{\text{max}(V \text{(#,} \pm \text{, chn/t/meV)})}
+.. math:: D (\#, \pm \text{, chn/t/meV)} = \frac{V (\#, \pm \text{, chn/t/meV)}}{\text{max}(V (\#, \pm \text{, chn/t/meV)})}
 
 2. Paramagnetic
 
 This normalisation is not valid for TOF data, and requires input from XYZ or 10-point cross-section separation. The paramagnetic measurement does not need to have background subtracted, as the background is self-subtracted in an XYZ measurement.
 
-.. math:: D \text{(#)} = \frac{2}{3} \frac{(\gamma r_{0})^{2} S(S+1)}{P \text{(#)}},
+.. math:: D (\#) = \frac{2}{3} \frac{(\gamma r_{0})^{2} S(S+1)}{P (\#)},
 
 where :math:`\gamma` is the neutron gyromagnetic ratio, :math:`r_{0}` is the electron's classical radius, and S is the spin of the sample.
 
@@ -134,11 +146,11 @@ Similarly to the paramagnetic normalisation, it is also not valid for TOF data, 
 
 The data can be put on absolute scale if the nuclear-spin-incoherent (NSI) cross-section for the sample is known, then:
 
-.. math:: D \text{(#)} = \frac{\text{d} \sigma_{NSI}}{\text{d} \Omega} \frac{1}{NSI \text{(#)}}.
+.. math:: D (\#) = \frac{\text{d} \sigma_{NSI}}{\text{d} \Omega} \frac{1}{NSI (\#)}.
 
 If only the detector efficiency is to be corrected, then it is sufficient to use only the nuclear-spin-incoherent cross-section input:
 
-.. math:: D \text{(#)} = \frac{\text{max}(NSI \text{(#)})}{NSI \text{(#)}}.
+.. math:: D (\#) = \frac{\text{max}(NSI (\#))}{NSI (\#)}.
 
 
 Usage

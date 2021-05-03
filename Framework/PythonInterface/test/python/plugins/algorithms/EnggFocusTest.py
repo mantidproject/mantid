@@ -5,18 +5,18 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from testhelpers import assertRaisesNothing
 from mantid.simpleapi import *
 from mantid.api import *
 
 
 class EnggFocusTest(unittest.TestCase):
-
     _data_ws = None
     _van_curves_ws = None
     _van_integ_tbl = None
 
-    _expected_yvals_bank1  = [0.016676032919961604, 0.015995344072536975, 0.047449159145519233,
-                              0.15629648148139513, 0.11018845452876322, 0.017291707350351286]
+    _expected_yvals_bank1 = [0.016676032919961604, 0.015995344072536975, 0.047449159145519233,
+                             0.15629648148139513, 0.11018845452876322, 0.017291707350351286]
 
     _expected_yvals_bank2 = [0.0, 0.018310873111703541, 0.071387646720910913,
                              0.061783574337739511, 0.13102948781549345, 0.001766956921862095]
@@ -129,7 +129,7 @@ class EnggFocusTest(unittest.TestCase):
         self.assertEqual(wks.getNumDims(), 2)
         self.assertEqual(wks.YUnit(), 'Counts')
         dimX = wks.getXDimension()
-        self.assertAlmostEqual( dimX.getMaximum(), 36938.078125)
+        self.assertAlmostEqual(dimX.getMaximum(), 36938.078125)
         self.assertEqual(dimX.name, 'Time-of-flight')
         self.assertEqual(dimX.getUnits(), 'microsecond')
         dimY = wks.getYDimension()
@@ -225,6 +225,24 @@ class EnggFocusTest(unittest.TestCase):
 
         self._check_output_ok(wks=out_bank_south, ws_name=out_name, y_dim_max=1201,
                               yvalues=self._expected_yvals_bank2)
+
+    def test_no_error_when_zero_proton_charge(self):
+        """
+        Run focusing on one bank but on a ws with no proton charge
+        """
+        assertRaisesNothing(self, self.run_with_zero_proton_charge)
+
+    def run_with_zero_proton_charge(self):
+        """
+        helper function so can run test test_no_error_when_zero_proton_charge with assertRaisesNothing
+        """
+        # remove proton charge log (getProtonCharge will then return 0)
+        ws = CloneWorkspace(self.__class__._data_ws)  # so don't interfere with other tests
+        DeleteLog(Workspace=ws, Name='gd_prtn_chrg')
+        EnggFocus(InputWorkspace=ws,
+                  VanIntegrationWorkspace=self.__class__._van_integ_tbl,
+                  VanCurvesWorkspace=self.__class__._van_curves_ws,
+                  Bank='South', OutputWorkspace='out_bank_south')
 
 
 if __name__ == '__main__':

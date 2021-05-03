@@ -56,6 +56,7 @@ public slots:
   void disablePlotGuessInSeparateWindow();
   void disableSpectrumPlotSelection();
   void handlePlotSpectrumChanged(WorkspaceIndex spectrum);
+  void setActiveSpectrum(WorkspaceIndex spectrum);
 
 signals:
   void selectedFitDataChanged(TableDatasetIndex /*_t1*/);
@@ -81,7 +82,6 @@ private slots:
   void plotCurrentPreview();
   void emitFitSingleSpectrum();
   void emitFWHMChanged(double minimum, double maximum);
-  void setActiveSpectrum(WorkspaceIndex spectrum);
   void handleSelectedFitDataChanged(TableDatasetIndex index);
 
 private:

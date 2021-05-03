@@ -226,6 +226,30 @@ public:
     loadDataFile("ILL/IN5/104007.nxs", histogramCount, monitorCount, channelCount, tofDelay, tofChannelWidth,
                  convertToTOF);
   }
+
+  void test_SHARP_load() {
+    // From the input test file.
+    const double tofDelay = 0;
+    const double tofChannelWidth = 0;
+    const size_t channelCount = 1;
+    const size_t histogramCount = 61441;
+    const size_t monitorCount = 1;
+    const bool convertToTOF = false;
+    loadDataFile("ILL/SHARP/000102.nxs", histogramCount, monitorCount, channelCount, tofDelay, tofChannelWidth,
+                 convertToTOF);
+  }
+
+  void test_SHARP_TOF_load() {
+    // From the input test file.
+    const double tofDelay = 4942.31;
+    const double tofChannelWidth = 14.6484;
+    const size_t channelCount = 512;
+    const size_t histogramCount = 61441;
+    const size_t monitorCount = 1;
+    const bool convertToTOF = true;
+    loadDataFile("ILL/SHARP/000103.nxs", histogramCount, monitorCount, channelCount, tofDelay, tofChannelWidth,
+                 convertToTOF);
+  }
 };
 
 //------------------------------------------------------------------------------

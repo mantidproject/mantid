@@ -20,6 +20,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Unit.h"
 
 #include <memory>
 #include <nexus/NeXusFile.hpp>
@@ -814,8 +815,6 @@ void Instrument::appendPlottable(const CompAssembly &ca, std::vector<IObjCompone
   }
 }
 
-const double CONSTANT = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants::NeutronMass * 1e6);
-
 //------------------------------------------------------------------------------------------------
 /** Get several instrument parameters used in tof to D-space conversion
  *
@@ -1291,46 +1290,9 @@ namespace Conversion {
  * @return
  */
 double tofToDSpacingFactor(const double l1, const double l2, const double twoTheta, const double offset) {
-  if (offset <= -1.) // not physically possible, means result is negative d-spacing
-  {
-    std::stringstream msg;
-    msg << "Encountered offset of " << offset << " which converts data to negative d-spacing\n";
-    throw std::logic_error(msg.str());
-  }
-
-  auto sinTheta = std::sin(twoTheta / 2);
-
-  const double numerator = (1.0 + offset);
-  sinTheta *= (l1 + l2);
-
-  return (numerator * CONSTANT) / sinTheta;
+  return Kernel::Units::tofToDSpacingFactor(l1, l2, twoTheta, offset);
 }
 
-/** Calculate the conversion factor from tof -> d-spacing
- * for a LIST of detector ids assigned to a single spectrum.
- * @brief tofToDSpacingFactor
- * @param l1
- * @param l2
- * @param twoTheta scattering angle
- * @param detectors
- * @param offsets
- * @return
- */
-double tofToDSpacingFactor(const double l1, const double l2, const double twoTheta,
-                           const std::vector<detid_t> &detectors, const std::map<detid_t, double> &offsets) {
-  double factor = 0.;
-  double offset;
-  for (auto detector : detectors) {
-    auto off_iter = offsets.find(detector);
-    if (off_iter != offsets.cend()) {
-      offset = offsets.find(detector)->second;
-    } else {
-      offset = 0.;
-    }
-    factor += tofToDSpacingFactor(l1, l2, twoTheta, offset);
-  }
-  return factor / static_cast<double>(detectors.size());
-}
 } // namespace Conversion
 } // namespace Geometry
 } // Namespace Mantid

@@ -72,8 +72,6 @@ class SliceViewer(ObservingPresenter):
         self.ads_observer = SliceViewerADSObserver(self.replace_workspace, self.rename_workspace,
                                                    self.ADS_cleared, self.delete_workspace)
 
-        self.view.destroyed.connect(self._on_view_destroyed)
-
     def new_plot_MDH(self):
         """
         Tell the view to display a new plot of an MDHistoWorkspace
@@ -201,8 +199,14 @@ class SliceViewer(ObservingPresenter):
 
     def show_all_data_requested(self):
         """Instructs the view to show all data"""
-        self.set_axes_limits(*self.model.get_dim_limits(self.get_slicepoint(),
-                                                        self.view.data_view.dimensions.transpose))
+        if self.model.is_ragged_matrix_plotted():
+            # get limits from full extent of image (which was calculated by looping over all spectra excl. monitors)
+            x0, x1, y0, y1 = self.view.data_view.get_full_extent()
+            limits = ((x0, x1), (y0, y1))
+        else:
+            # otherwise query data model based on slice info and transpose
+            limits = self.model.get_dim_limits(self.get_slicepoint(), self.view.data_view.dimensions.transpose)
+        self.set_axes_limits(*limits)
 
     def set_axes_limits(self, xlim, ylim, auto_transform=True):
         """Set the axes limits on the view.
@@ -407,6 +411,7 @@ class SliceViewer(ObservingPresenter):
         self.view.emit_close()
 
     def clear_observer(self):
+        """Called by ObservingView on close event"""
         self.ads_observer = None
         if self._peaks_presenter is not None:
             self._peaks_presenter.clear_observer()
@@ -461,6 +466,3 @@ class SliceViewer(ObservingPresenter):
     def _close_view_with_message(self, message: str):
         self.view.emit_close()  # inherited from ObservingView
         self._logger.warning(message)
-
-    def _on_view_destroyed(self):
-        self.clear_observer()

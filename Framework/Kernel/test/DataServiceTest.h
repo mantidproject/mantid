@@ -298,6 +298,11 @@ public:
     auto cit = std::find(names.cbegin(), names.cend(), "__Three");
     TS_ASSERT_DIFFERS(cit, names.cend());
     TS_ASSERT_EQUALS(objects.at(std::distance(names.cbegin(), cit)), three);
+
+    names = svc.getObjectNames(DataServiceSort::Unsorted, DataServiceHidden::Auto, "T");
+    TS_ASSERT_EQUALS(std::find(names.cbegin(), names.cend(), "One"), names.end());
+    TS_ASSERT_DIFFERS(std::find(names.cbegin(), names.cend(), "Two"), names.end());
+    TS_ASSERT_DIFFERS(std::find(names.cbegin(), names.cend(), "TwoAgain"), names.end());
   }
 
   void test_getObjectsReturnsConfigOption() {

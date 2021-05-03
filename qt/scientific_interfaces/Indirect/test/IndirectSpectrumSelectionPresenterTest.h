@@ -119,19 +119,6 @@ public:
   /// Unit tests to check for successful presenter instantiation
   ///----------------------------------------------------------------------
 
-  void test_that_the_model_and_view_have_been_instantiated_correctly() {
-    IDA::WorkspaceIndex const maxSpectrum(3);
-
-    ON_CALL(*m_view, maximumSpectrum()).WillByDefault(Return(maxSpectrum));
-    ON_CALL(*m_model, isMultiFit()).WillByDefault(Return(false));
-
-    EXPECT_CALL(*m_view, maximumSpectrum()).Times(1).WillOnce(Return(maxSpectrum));
-    EXPECT_CALL(*m_model, isMultiFit()).Times(1).WillOnce(Return(false));
-
-    m_view->maximumSpectrum();
-    m_model->isMultiFit();
-  }
-
   void test_that_invoking_a_presenter_method_will_call_the_relevant_methods_in_the_model_and_view() {
     std::string const excludeRegion("0-1");
 
@@ -204,107 +191,25 @@ public:
   }
 
   ///----------------------------------------------------------------------
-  /// Unit Tests that test the methods and slots of the view
+  /// Unit Tests that test the methods of the presenter
   ///----------------------------------------------------------------------
 
-  void test_that_minimumSpectrum_returns_the_spectrum_number_that_it_is_set_as() {
-    IDA::WorkspaceIndex const minSpectrum(3);
-
-    EXPECT_CALL(*m_view, setMinimumSpectrum(minSpectrum)).Times(1);
-    EXPECT_CALL(*m_view, minimumSpectrum()).Times(1).WillOnce(Return(minSpectrum));
-
-    m_view->setMinimumSpectrum(minSpectrum);
-    m_view->minimumSpectrum();
+  void test_setActiveModelIndex_updates_spectra_with_new_index() {
+    auto index = TableDatasetIndex{1};
+    SetUpADSWithWorkspace ads("WorkspaceName2", createWorkspace(10));
+    m_model->addWorkspace("WorkspaceName2");
+    auto spectra = m_model->getSpectra(index);
+    EXPECT_CALL(*m_view, setSpectraRange(spectra.front(), spectra.back())).Times(1);
+    m_presenter->setActiveModelIndex(index);
   }
 
-  void test_that_maximumSpectrum_returns_the_spectrum_number_that_it_is_set_as() {
-    IDA::WorkspaceIndex const maxSpectrum(3);
-
-    EXPECT_CALL(*m_view, setMaximumSpectrum(maxSpectrum)).Times(1);
-    EXPECT_CALL(*m_view, maximumSpectrum()).Times(1).WillOnce(Return(maxSpectrum));
-
-    m_view->setMaximumSpectrum(maxSpectrum);
-    m_view->maximumSpectrum();
-  }
-
-  void test_that_spectraString_returns_the_string_which_has_been_set() {
-    std::string const spectra("2,4-5");
-
-    EXPECT_CALL(*m_view, setSpectraString(spectra)).Times(1);
-    EXPECT_CALL(*m_view, spectraString()).Times(1).WillOnce(Return(spectra));
-
-    m_view->setSpectraString(spectra);
-    m_view->spectraString();
-  }
-
-  void test_that_maskString_returns_the_string_which_has_been_set() {
-    std::string const mask("2,4-5");
-
-    EXPECT_CALL(*m_view, setMaskString(mask)).Times(1);
-    EXPECT_CALL(*m_view, maskString()).Times(1).WillOnce(Return(mask));
-
-    m_view->setMaskString(mask);
-    m_view->maskString();
-  }
-
-  void test_that_displaySpectra_will_change_the_spectraString_to_the_string_provided() {
-    std::string const spectra("2,4-5");
-
-    EXPECT_CALL(*m_view, displaySpectra(spectra)).Times(1);
-    EXPECT_CALL(*m_view, spectraString()).Times(1).WillOnce(Return(spectra));
-
-    m_view->displaySpectra(spectra);
-    m_view->spectraString();
-  }
-
-  void test_that_displaySpectra_will_set_the_minimum_and_maximum_of_the_spectraString() {
-    IDA::WorkspaceIndex const minSpectrum(2);
-    IDA::WorkspaceIndex const maxSpectrum(5);
-
-    EXPECT_CALL(*m_view, displaySpectra(std::make_pair(minSpectrum, maxSpectrum))).Times(1);
-    EXPECT_CALL(*m_view, spectraString()).Times(1).WillOnce(Return("2-5"));
-
-    m_view->displaySpectra(std::make_pair(minSpectrum, maxSpectrum));
-    m_view->spectraString();
-  }
-
-  void test_that_setSpectraRange_will_set_the_minimum_and_maximum_spectrums() {
-    IDA::WorkspaceIndex const minSpectrum(2);
-    IDA::WorkspaceIndex const maxSpectrum(5);
-
-    EXPECT_CALL(*m_view, setSpectraRange(minSpectrum, maxSpectrum)).Times(1);
-    EXPECT_CALL(*m_view, minimumSpectrum()).Times(1).WillOnce(Return(2));
-    EXPECT_CALL(*m_view, maximumSpectrum()).Times(1).WillOnce(Return(2));
-
-    m_view->setSpectraRange(minSpectrum, maxSpectrum);
-    m_view->minimumSpectrum();
-    m_view->maximumSpectrum();
-  }
-
-  void test_that_clear_will_empty_the_spectraString_and_maskString() {
-    m_view->setSpectraString("2-5");
-    m_view->setMaskString("7-8");
-
-    EXPECT_CALL(*m_view, clear()).Times(1);
-    EXPECT_CALL(*m_view, spectraString()).Times(1).WillOnce(Return(""));
-    EXPECT_CALL(*m_view, maskString()).Times(1).WillOnce(Return(""));
-
-    m_view->clear();
-    m_view->spectraString();
-    m_view->maskString();
-  }
-
-  void test_that_clear_will_set_the_minimum_and_maximum_spectrums_to_be_zero() {
-    m_view->setMinimumSpectrum(2);
-    m_view->setMaximumSpectrum(4);
-
-    EXPECT_CALL(*m_view, clear()).Times(1);
-    EXPECT_CALL(*m_view, minimumSpectrum()).Times(1).WillOnce(Return(0));
-    EXPECT_CALL(*m_view, maximumSpectrum()).Times(1).WillOnce(Return(0));
-
-    m_view->clear();
-    m_view->minimumSpectrum();
-    m_view->maximumSpectrum();
+  void test_setActiveIndexToZero_updates_spectra_with_index_zero() {
+    auto index = TableDatasetIndex{0};
+    SetUpADSWithWorkspace ads("WorkspaceName2", createWorkspace(10));
+    m_model->addWorkspace("WorkspaceName2");
+    auto spectra = m_model->getSpectra(index);
+    EXPECT_CALL(*m_view, setSpectraRange(spectra.front(), spectra.back())).Times(1);
+    m_presenter->setActiveIndexToZero();
   }
 
 private:

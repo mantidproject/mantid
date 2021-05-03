@@ -323,7 +323,7 @@ class QLWidthTest(systemtesting.MantidSystemTest):
 #==============================================================================
 
 
-class JumpFitFunctionTestBase(metaclass=ABCMeta):
+class JumpFitFunctionTestBase(systemtesting.MantidSystemTest, metaclass=ABCMeta):
 
     def __init__(self):
         systemtesting.MantidSystemTest.__init__(self)

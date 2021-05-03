@@ -715,6 +715,119 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Test to fit multiple peaks on multiple spectra with back-to-back
+   * exponential convoluted with Gaussian. This test loads the Parameters.xml
+   * file and guesses the parameters for A,B rather than providing them
+   */
+  void test_multiPeaksMultiSpectraBackToBackExp_with_Param_xml() {
+    // run serially so values don't depend on no. cores etc.
+    FrameworkManager::Instance().setNumOMPThreads(1);
+
+    // Generate input workspace
+    std::string input_ws_name = generateTestDataBackToBackExponential();
+
+    // Load VULCAN_Parameters.xml
+    auto pLoaderPF = AlgorithmManager::Instance().create("LoadParameterFile");
+    pLoaderPF->initialize();
+    pLoaderPF->setPropertyValue("Filename", "VULCAN_Parameters.xml");
+    pLoaderPF->setPropertyValue("Workspace", input_ws_name);
+    pLoaderPF->execute();
+
+    API::MatrixWorkspace_sptr input_ws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(input_ws_name));
+
+    // Specify output workspaces names
+    std::string peak_pos_ws_name("PeakPositionsB2BmPmS");
+    std::string param_ws_name("PeakParametersB2BmPmS");
+    std::string model_ws_name("ModelB2BmPmS");
+
+    size_t min_ws_index = 7;
+    size_t max_ws_index = 15;
+
+    // Initialize FitPeak
+    FitPeaks fitpeaks;
+
+    fitpeaks.initialize();
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", input_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", static_cast<int>(min_ws_index)));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", static_cast<int>(max_ws_index)));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakFunction", "BackToBackExponential"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("BackgroundType", "Linear"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "0.728299, 0.817, 0.89198, 1.0758"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("FitWindowBoundaryList", "0.71, 0.76, 0.80, 0.84, 0.885, 0.91, 1.05, 1.11"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
+
+    fitpeaks.setProperty("OutputWorkspace", peak_pos_ws_name);
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", param_ws_name);
+    fitpeaks.setProperty("FittedPeaksWorkspace", model_ws_name);
+
+    fitpeaks.execute();
+    TS_ASSERT(fitpeaks.isExecuted());
+
+    // Verify the existence of output workspaces
+    bool peak_pos_ws_exist, peak_param_ws_exist, fitted_ws_exist;
+    API::MatrixWorkspace_sptr peak_pos_ws = CheckAndRetrieveMatrixWorkspace(peak_pos_ws_name, &peak_pos_ws_exist);
+    API::MatrixWorkspace_sptr model_ws = CheckAndRetrieveMatrixWorkspace(model_ws_name, &fitted_ws_exist);
+    API::ITableWorkspace_sptr peak_param_ws = CheckAndRetrieveTableWorkspace(param_ws_name, &peak_param_ws_exist);
+
+    size_t num_histograms = max_ws_index - min_ws_index + 1;
+
+    // Expected value: with one peak that cannot be fit
+    std::vector<double> exp_positions{-4, 0.8182, 0.8916, 1.0754};
+
+    // Verify peaks' positions
+    if (peak_pos_ws_exist) {
+      // workspace for peak positions from fitted value: must be a 16 x 4
+      // workspace2D
+      TS_ASSERT_EQUALS(peak_pos_ws->getNumberHistograms(), num_histograms);
+      TS_ASSERT_EQUALS(peak_pos_ws->histogram(0).y().size(), exp_positions.size());
+
+      for (size_t ih = 0; ih < num_histograms; ++ih) {
+        // Get histogram
+        HistogramData::HistogramY peak_pos_i = peak_pos_ws->histogram(ih).y();
+        HistogramData::HistogramE pos_error_i = peak_pos_ws->histogram(ih).e();
+        // Check value
+        for (size_t ip = 0; ip < exp_positions.size(); ++ip) {
+          // Check fitted peak positions with the expected positions
+          TS_ASSERT_DELTA(peak_pos_i[ip], exp_positions[ip], 0.0012);
+          if (peak_pos_i[ip] > 0) {
+            // a good fit: require error less than 100
+            TS_ASSERT(pos_error_i[ip] < 150.);
+          } else {
+            // failed fit
+            TS_ASSERT(pos_error_i[ip] > 1E20);
+          }
+        }
+      }
+    }
+
+    // Verify calcualated model
+    if (fitted_ws_exist) {
+      // workspace for calculated peaks from fitted data
+      TS_ASSERT_EQUALS(model_ws->getNumberHistograms(), input_ws->getNumberHistograms());
+    }
+
+    if (peak_param_ws_exist) {
+      // workspace for calcualted peak parameters
+      TS_ASSERT_EQUALS(peak_param_ws->rowCount(), (exp_positions.size() * num_histograms));
+    }
+
+    // clean
+    AnalysisDataService::Instance().remove(input_ws_name);
+    AnalysisDataService::Instance().remove(peak_pos_ws_name);
+    AnalysisDataService::Instance().remove(param_ws_name);
+    AnalysisDataService::Instance().remove(model_ws_name);
+
+    FrameworkManager::Instance().setNumOMPThreadsToConfigValue();
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Test the optional output for fit error of each peak parameters
    * It is modified from test_multiple_peak_profiles
    * @brief test_outputFitError

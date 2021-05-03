@@ -9,8 +9,9 @@ import unittest
 from unittest.mock import MagicMock, create_autospec, patch
 
 # thirdparty imports
-from mantid.api import MatrixWorkspace, SpecialCoordinateSystem
+from mantid.api import MatrixWorkspace
 from mantid.dataobjects import PeaksWorkspace
+from mantid.kernel import SpecialCoordinateSystem
 from numpy.testing import assert_allclose
 
 # local imports

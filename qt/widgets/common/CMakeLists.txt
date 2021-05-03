@@ -9,6 +9,7 @@ set(
   src/AlgorithmSelectorWidget.cpp
   src/AlternateCSPythonLexer.cpp
   src/ConvolutionFunctionModel.cpp
+  src/BasicFitOptionsBrowser.cpp
   src/BatchAlgorithmRunner.cpp
   src/BoolPropertyWidget.cpp
   src/DataSelector.cpp
@@ -20,12 +21,14 @@ set(
   src/FindFilesThreadPoolManager.cpp
   src/FindFilesWorker.cpp
   src/FindReplaceDialog.cpp
+  src/FitDomain.cpp
   src/FitOptionsBrowser.cpp
   src/FitPropertyBrowser.cpp
   src/FitScriptGeneratorDataTable.cpp
   src/FitScriptGeneratorModel.cpp
   src/FitScriptGeneratorPresenter.cpp
   src/FitScriptGeneratorView.cpp
+  src/FittingGlobals.cpp
   src/FlowLayout.cpp
   src/FunctionBrowser/FunctionBrowserUtils.cpp
   src/FunctionBrowser.cpp
@@ -156,6 +159,7 @@ set(
   inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
   inc/MantidQtWidgets/Common/AlgorithmRunner.h
   inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h
+  inc/MantidQtWidgets/Common/BasicFitOptionsBrowser.h
   inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
   inc/MantidQtWidgets/Common/BoolPropertyWidget.h
   inc/MantidQtWidgets/Common/DataSelector.h
@@ -257,8 +261,12 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
     inc/MantidQtWidgets/Common/DropEventHelper.h
     inc/MantidQtWidgets/Common/FileDialogHandler.h
+    inc/MantidQtWidgets/Common/FitDomain.h
+    inc/MantidQtWidgets/Common/FitScriptGeneratorMockObjects.h
     inc/MantidQtWidgets/Common/FitScriptGeneratorModel.h
     inc/MantidQtWidgets/Common/FitScriptGeneratorPresenter.h
+    inc/MantidQtWidgets/Common/FittingGlobals.h
+    inc/MantidQtWidgets/Common/FittingMode.h
     inc/MantidQtWidgets/Common/FlowLayout.h
     inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
     inc/MantidQtWidgets/Common/HelpWindow.h
@@ -448,12 +456,14 @@ set(
   src/FindFilesThreadPoolManager.cpp
   src/FindFilesWorker.cpp
   src/FindReplaceDialog.cpp
+  src/FitDomain.cpp
   src/FitOptionsBrowser.cpp
   src/FitPropertyBrowser.cpp
   src/FitScriptGeneratorDataTable.cpp
   src/FitScriptGeneratorModel.cpp
   src/FitScriptGeneratorPresenter.cpp
   src/FitScriptGeneratorView.cpp
+  src/FittingGlobals.cpp
   src/FunctionBrowser/FunctionBrowserUtils.cpp
   src/FunctionBrowser.cpp
   src/FunctionModel.cpp
@@ -652,8 +662,11 @@ set(
   inc/MantidQtWidgets/Common/FlowLayout.h
   inc/MantidQtWidgets/Common/GraphOptions.h
   inc/MantidQtWidgets/Common/DistributionOptions.h
+  inc/MantidQtWidgets/Common/FitDomain.h
   inc/MantidQtWidgets/Common/FitScriptGeneratorModel.h
   inc/MantidQtWidgets/Common/FitScriptGeneratorPresenter.h
+  inc/MantidQtWidgets/Common/FittingGlobals.h
+  inc/MantidQtWidgets/Common/FittingMode.h
   inc/MantidQtWidgets/Common/HelpWindow.h
   inc/MantidQtWidgets/Common/Hint.h
   inc/MantidQtWidgets/Common/IFitScriptGeneratorModel.h
@@ -897,12 +910,25 @@ if(ENABLE_WORKBENCH)
 
 endif()
 
+# If not sip header is defined we need to generate one with sip-module
+if (SIP_INCLUDE_DIR AND EXISTS ${SIP_INCLUDE_DIR}/sip.h)
+  set(_sip_include_dir ${SIP_INCLUDE_DIR})
+else()
+  set(_sip_include_dir ${CMAKE_CURRENT_BINARY_DIR})
+  # The final module name makes no difference here - we just want the api
+  add_custom_command(OUTPUT ${_sip_include_dir}/sip.h
+    COMMAND ${SIP_MODULE_EXECUTABLE} ARGS --sip-h
+      --abi-version ${PYQT5_SIP_ABI_VERSION} --target-dir=${_sip_include_dir} dummymodulename
+    COMMENT "Generating sip.h for common widgets target"
+  )
+endif()
+
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsCommon
   QT_VERSION 5
   SRC ${QT5_SRC_FILES}
   MOC ${QT5_MOC_FILES}
-  NOMOC ${QT5_INC_FILES}
+  NOMOC ${QT5_INC_FILES} ${_sip_include_dir}/sip.h
   UI ${QT5_UI_FILES}
   DEFS
     IN_MANTIDQT_COMMON
@@ -914,6 +940,7 @@ mtd_add_qt_library(
     inc
   SYSTEM_INCLUDE_DIRS
     ${Boost_INCLUDE_DIRS}
+    ${_sip_include_dir}
   LINK_LIBS
     ${TARGET_LIBRARIES}
     PUBLIC
@@ -1015,13 +1042,16 @@ mtd_add_qt_tests(
 set(
   QT5_TEST_FILES
   test/AddWorkspaceDialogTest.h
+  test/BasicFitOptionsBrowserTest.h
   test/BatchAlgorithmRunnerTest.h
   test/FileDialogHandlerTest.h
   test/FindFilesThreadPoolManagerTest.h
   test/FindFilesWorkerTest.h
+  test/FitDomainTest.h
   test/FitOptionsBrowserTest.h
   test/FitPropertyBrowserTest.h
   test/FitScriptGeneratorDataTableTest.h
+  test/FitScriptGeneratorModelTest.h
   test/FitScriptGeneratorPresenterTest.h
   test/FitScriptGeneratorViewTest.h
   test/FunctionTreeViewTest.h

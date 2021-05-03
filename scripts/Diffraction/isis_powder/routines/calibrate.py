@@ -43,21 +43,23 @@ def create_van(instrument, run_details, absorb):
         # Assume that create_van only uses Vanadium runs
         mantid.SetSampleMaterial(InputWorkspace=corrected_van_ws, ChemicalFormula='V')
 
-    aligned_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
-                                       CalibrationFile=run_details.offset_file_path)
+    mantid.ApplyDiffCal(InstrumentWorkspace=corrected_van_ws,
+                        CalibrationFile=run_details.offset_file_path)
+    aligned_ws = mantid.ConvertUnits(InputWorkspace=corrected_van_ws, Target="dSpacing")
     solid_angle = instrument.get_solid_angle_corrections(run_details.run_number, run_details)
     if solid_angle:
         aligned_ws = mantid.Divide(LHSWorkspace=aligned_ws,RHSWorkspace=solid_angle)
         mantid.DeleteWorkspace(solid_angle)
     focused_vanadium = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                                    GroupingFileName=run_details.grouping_file_path)
-
+    # convert back to TOF based on engineered detector positions
+    mantid.ApplyDiffCal(InstrumentWorkspace=focused_vanadium,
+                        ClearCalibration=True)
     focused_spectra = common.extract_ws_spectra(focused_vanadium)
     focused_spectra = instrument._crop_van_to_expected_tof_range(focused_spectra)
 
     d_spacing_group, tof_group = instrument._output_focused_ws(processed_spectra=focused_spectra,
                                                                run_details=run_details)
-
     _create_vanadium_splines(focused_spectra, instrument, run_details)
 
     common.keep_single_ws_unit(d_spacing_group=d_spacing_group, tof_group=tof_group,

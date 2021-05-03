@@ -11,7 +11,7 @@ the reduction of data measured on different ILL instruments. Here are the
 currently supported instruments:
 
     * D11: SANS
-    * D16: SANS
+    * D16: SANS, SANS Sample scan
     * D17: Reflectometry
     * D22: SANS
     * D33: SANS
@@ -67,7 +67,8 @@ acquisition mode.
 
 To get further information on the currently supported algorithms:
 
-    * SANS: :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`
+    * SANS: :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>` and
+      :ref:`SANSILLParameterScan <algm-SANSILLParameterScan>`
     * Reflectometry: :ref:`ReflectometryILLAutoProcess <algm-ReflectometryILLAutoProcess>`
     * Powder diffraction: :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` and
       :ref:`PowderILLParameterScan <algm-PowderILLParameterScan>`
@@ -208,9 +209,11 @@ For each acquisition mode, a list of adapated algorithms will be displayed in
 that dialog. Some of them are activated by default but the user is free to
 select the ones he wants. All checked algorithms will be applied on all output
 workspaces of all processed rows. The exported files are saved in the Mantid
-default save directory. If the algorithm is not adapted to the data, it will be
-skipped. For further information, the documentation of each algorithm can be
-obtained using the help button associated to it in the dialog.
+default save directory with an extension that is defined by the algorithm (if no
+default save directory is provided, there will be no export). If the algorithm
+is not adapted to the data, it will be skipped. For further information, the
+documentation of each algorithm can be obtained using the help button associated
+to it in the dialog.
 
 
 Import and export as Rundex file

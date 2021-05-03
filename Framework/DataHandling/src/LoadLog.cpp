@@ -27,6 +27,7 @@
 #include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
 #include <fstream> // used to get ifstream
+#include <regex>
 #include <sstream>
 #include <utility>
 
@@ -136,6 +137,11 @@ void LoadLog::exec() {
     throw std::invalid_argument("More than one log name provided. Invalid ISIS log file.");
   }
 
+  // If it's an old log file (pre-2007), then it is not currently supported.
+  if (isOldDateTimeFormat(logFileStream)) {
+    throw std::invalid_argument("File " + m_filename + " cannot be read because it has an old unsupported format.");
+  }
+
   int colNum = static_cast<int>(getProperty("NumberOfColumns"));
 
   if (colNum == Mantid::EMPTY_INT()) {
@@ -171,7 +177,7 @@ void LoadLog::loadTwoColumnLogFile(std::ifstream &logFileStream, std::string log
   std::string aLine;
   if (Mantid::Kernel::Strings::extractToEOL(logFileStream, aLine)) {
     if (!isDateTimeString(aLine)) {
-      throw std::invalid_argument("File" + m_filename +
+      throw std::invalid_argument("File " + m_filename +
                                   " is not a standard ISIS log file. Expected "
                                   "to be a two column file.");
     }
@@ -221,7 +227,7 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream, const std::st
 
   while (Mantid::Kernel::Strings::extractToEOL(logFileStream, str)) {
     if (!isDateTimeString(str) && !str.empty()) {
-      throw std::invalid_argument("File" + logFileName +
+      throw std::invalid_argument("File " + logFileName +
                                   " is not a standard ISIS log file. Expected "
                                   "to be a file starting with DateTime String "
                                   "format.");
@@ -246,7 +252,7 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream, const std::st
     }
 
     if (LoadLog::string != l_kind) {
-      throw std::invalid_argument("ISIS log file contains unrecognised second column entries:" + logFileName);
+      throw std::invalid_argument("ISIS log file contains unrecognised second column entries: " + logFileName);
     }
 
     std::string valuecolumn;
@@ -465,6 +471,26 @@ bool LoadLog::isDateTimeString(const std::string &str) const {
 }
 
 /**
+ * Check whether the string is consistent with the old log file
+ * date-time format, for example:
+ * Fri 31-JAN-2003 11:28:15
+ * Wed  9-FEB-2005 09:47:01
+ * @param logFileStream :: The file to test
+ * @return true if the format matches the old log file format.
+ */
+bool LoadLog::isOldDateTimeFormat(std::ifstream &logFileStream) const {
+  // extract first line of file
+  std::string firstLine;
+  Mantid::Kernel::Strings::extractToEOL(logFileStream, firstLine);
+  // reset file back to the beginning
+  logFileStream.seekg(0);
+
+  std::regex oldDateFormat(R"([A-Z][a-z]{2} [ 1-3]\d-[A-Z]{3}-\d{4} \d{2}:\d{2}:\d{2})");
+
+  return std::regex_match(firstLine.substr(0, 24), oldDateFormat);
+}
+
+/**
  * Read a line of a SNS-style text file.
  * @param str :: The string to test
  * @param out :: a vector that will be filled with the double values.
@@ -503,7 +529,7 @@ int LoadLog::countNumberColumns(std::ifstream &logFileStream, const std::string 
   Mantid::Kernel::Strings::extractToEOL(logFileStream, str);
 
   if (!isDateTimeString(str)) {
-    throw std::invalid_argument("File" + logFileName +
+    throw std::invalid_argument("File " + logFileName +
                                 " is not a standard ISIS log file. Expected to "
                                 "be a file starting with DateTime String "
                                 "format.");
@@ -518,7 +544,7 @@ int LoadLog::countNumberColumns(std::ifstream &logFileStream, const std::string 
   l_kind = classify(blockcolumn);
 
   if (LoadLog::string != l_kind && LoadLog::number != l_kind) {
-    throw std::invalid_argument("ISIS log file contains unrecognised second column entries:" + logFileName);
+    throw std::invalid_argument("ISIS log file contains unrecognised second column entries: " + logFileName);
   }
 
   std::string valuecolumn;

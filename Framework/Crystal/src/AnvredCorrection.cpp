@@ -173,12 +173,13 @@ void AnvredCorrection::exec() {
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
       continue;
 
-    // This is the scattered beam direction
     Instrument_const_sptr inst = m_inputWS->getInstrument();
-    double L2 = spectrumInfo.l2(i);
-    // Two-theta = polar angle = scattering angle = between +Z vector and the
-    // scattered beam
-    double scattering = spectrumInfo.twoTheta(i);
+    UnitParametersMap pmap{};
+    Mantid::Kernel::Units::Wavelength wl;
+    Mantid::Kernel::Units::TOF tof;
+    spectrumInfo.getDetectorValues(tof, wl, Kernel::DeltaEMode::Elastic, false, i, pmap);
+    double L2 = pmap.at(UnitParams::l2);
+    double scattering = pmap.at(UnitParams::twoTheta);
 
     double depth = 0.2;
 
@@ -190,7 +191,6 @@ void AnvredCorrection::exec() {
     if (m_useScaleFactors)
       scale_init(det, inst, L2, depth, pathlength, bankName);
 
-    Mantid::Kernel::Units::Wavelength wl;
     auto points = m_inputWS->points(i);
 
     // share bin boundaries
@@ -207,7 +207,7 @@ void AnvredCorrection::exec() {
     // Loop through the bins in the current spectrum
     for (int64_t j = 0; j < specSize; j++) {
 
-      double lambda = (unitStr == "TOF") ? wl.convertSingleFromTOF(points[j], L1, L2, scattering, 0, 0, 0) : points[j];
+      double lambda = (unitStr == "TOF") ? wl.convertSingleFromTOF(points[j], L1, 0, pmap) : points[j];
 
       if (m_returnTransmissionOnly) {
         Y[j] = 1.0 / this->getEventWeight(lambda, scattering);
@@ -270,17 +270,16 @@ void AnvredCorrection::execEvent() {
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
       continue;
 
-    // This is the scattered beam direction
-    double L2 = spectrumInfo.l2(i);
-    // Two-theta = polar angle = scattering angle = between +Z vector and the
-    // scattered beam
-    double scattering = spectrumInfo.twoTheta(i);
+    UnitParametersMap pmap{};
+    Mantid::Kernel::Units::Wavelength wl;
+    Mantid::Kernel::Units::TOF tof;
+    spectrumInfo.getDetectorValues(tof, wl, Kernel::DeltaEMode::Elastic, false, i, pmap);
+    double L2 = pmap.at(UnitParams::l2);
+    double scattering = pmap.at(UnitParams::twoTheta);
 
     EventList el = eventW->getSpectrum(i);
     el.switchTo(WEIGHTED_NOTIME);
     std::vector<WeightedEventNoTime> events = el.getWeightedEventsNoTime();
-
-    Mantid::Kernel::Units::Wavelength wl;
 
     double depth = 0.2;
     double pathlength = 0.0;
@@ -296,7 +295,7 @@ void AnvredCorrection::execEvent() {
       double lambda = ev.tof();
 
       if ("TOF" == unitStr)
-        lambda = wl.convertSingleFromTOF(lambda, L1, L2, scattering, 0, 0, 0);
+        lambda = wl.convertSingleFromTOF(lambda, L1, 0, pmap);
 
       double value = this->getEventWeight(lambda, scattering);
 

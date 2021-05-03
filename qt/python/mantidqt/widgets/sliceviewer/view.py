@@ -11,6 +11,7 @@ import sys
 # 3rd party imports
 
 import mantid.api
+from mantid.plots.resampling_image import samplingimage
 from mantid.plots.axesfunctions import _pcolormesh_nonortho as pcolormesh_nonorthogonal
 from mantid.plots.datafunctions import get_normalize_by_bin_width
 from matplotlib.figure import Figure
@@ -335,8 +336,9 @@ class SliceViewerDataView(QWidget):
 
     def draw_plot(self):
         self.ax.set_title('')
-        self.colorbar.set_mappable(self.image)
-        self.colorbar.update_clim()
+        if self.image:
+            self.colorbar.set_mappable(self.image)
+            self.colorbar.update_clim()
         self.mpl_toolbar.update()  # clear nav stack
         if self.line_plots_active:
             self._line_plots.plotter.delete_line_plot_lines()
@@ -439,6 +441,16 @@ class SliceViewerDataView(QWidget):
             return None
         else:
             return self.ax.get_xlim(), self.ax.get_ylim()
+
+    def get_full_extent(self):
+        """
+        Return the full extent of image - only applicable for plots of matrix workspaces
+        """
+        if self.image and isinstance(self.image, samplingimage.SamplingImage):
+            return self.image.get_full_extent()
+        else:
+            return None
+
 
     def set_axes_limits(self, xlim, ylim):
         """

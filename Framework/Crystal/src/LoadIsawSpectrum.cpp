@@ -153,7 +153,11 @@ void LoadIsawSpectrum::exec() {
     double theta2 = dir.angle(V3D(0.0, 0.0, 1.0));
 
     Mantid::Kernel::Unit_sptr unit = UnitFactory::Instance().create("Wavelength");
-    unit->toTOF(xdata, ydata, l1, l2, theta2, 0, 0.0, 0.0);
+    unit->toTOF(xdata, ydata, l1, 0,
+                {
+                    {UnitParams::l2, l2},
+                    {UnitParams::twoTheta, theta2},
+                });
     double one = xdata[0];
     double spect1 = spectrumCalc(one, iSpec, time, spectra, i);
 

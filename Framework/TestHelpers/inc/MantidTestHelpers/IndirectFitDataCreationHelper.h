@@ -53,6 +53,7 @@ Mantid::API::MatrixWorkspace_sptr setWorkspaceBinEdges(Mantid::API::MatrixWorksp
 Mantid::API::MatrixWorkspace_sptr setWorkspaceProperties(Mantid::API::MatrixWorkspace_sptr workspace,
                                                          int const &xLength, int const &yLength);
 Mantid::API::MatrixWorkspace_sptr createWorkspaceWithInstrument(int const &xLength, int const &yLength);
+Mantid::API::MatrixWorkspace_sptr createWorkspaceWithInelasticInstrument(int const &yLength);
 
 /// Simple struct used to access features of the ADS
 /// No destructor so ensure you tearDown the ADS

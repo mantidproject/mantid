@@ -73,6 +73,9 @@ protected:
   virtual void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr) {}
   void checkOptionalProperties();
   void runLoadInstrument(const DataObjects::Workspace2D_sptr &);
+  Mantid::API::Algorithm_sptr createSampleLogAlgorithm(DataObjects::Workspace2D_sptr &ws);
+  void addToSampleLog(const std::string &logName, const int logNumber, DataObjects::Workspace2D_sptr &ws);
+  void addToSampleLog(const std::string &logName, const std::string log, DataObjects::Workspace2D_sptr &ws);
 
   /// The name and path of the input file
   std::string m_filename;

@@ -142,7 +142,7 @@ void LoadILLSANS::exec() {
 
     // we move the parent "detector" component, but since it is at (0,0,0), we
     // need to find the distance it has to move and move it to this position
-    double finalDistance = firstEntry.getFloat(instrumentPath + "/detector/det_calc") / 1000.;
+    double finalDistance = firstEntry.getFloat(instrumentPath + "/Detector 1/det_calc");
     V3D pos = getComponentPosition("detector_center");
     double currentDistance = pos.Z();
 
@@ -170,7 +170,7 @@ void LoadILLSANS::exec() {
 
     // mm to meter
     offset = firstEntry.getFloat(instrumentPath + "/Detector 1/dtr1_actual");
-    moveDetectorHorizontal(-offset / 1000, "detector_front");
+    moveDetectorHorizontal(-offset / 1000, "detector_front"); // mm to meter
     double angle = firstEntry.getFloat(instrumentPath + "/Detector 1/dan1_actual");
     rotateInstrument(-angle, "detector_front");
 
@@ -278,15 +278,15 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
 void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::string &instrumentPath) {
   g_log.debug("Fetching data...");
 
-  NXData data1 = firstEntry.openNXData("data1");
+  NXData data1 = firstEntry.openNXData("D11/Detector 1/data");
   NXInt dataCenter = data1.openIntData();
   dataCenter.load();
-  NXData data2 = firstEntry.openNXData("data2");
-  NXInt dataRight = data2.openIntData();
-  dataRight.load();
-  NXData data3 = firstEntry.openNXData("data3");
-  NXInt dataLeft = data3.openIntData();
+  NXData data2 = firstEntry.openNXData("D11/Detector 2/data");
+  NXInt dataLeft = data2.openIntData();
   dataLeft.load();
+  NXData data3 = firstEntry.openNXData("D11/Detector 3/data");
+  NXInt dataRight = data3.openIntData();
+  dataRight.load();
 
   size_t numberOfHistograms =
       static_cast<size_t>(dataCenter.dim0() * dataCenter.dim1() + dataRight.dim0() * dataRight.dim1() +
@@ -756,6 +756,8 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry, const std::string &i
   // the start time is needed in the workspace when loading the parameter file
   std::string startDate = entry.getString("start_time");
   runDetails.addProperty<std::string>("start_time", m_loadHelper.dateTimeInIsoFormat(startDate));
+  // set the facility
+  runDetails.addProperty<std::string>("Facility", std::string("ILL"));
 }
 
 /**

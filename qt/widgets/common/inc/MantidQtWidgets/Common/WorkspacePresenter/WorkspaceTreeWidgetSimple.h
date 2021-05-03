@@ -38,6 +38,7 @@ public:
 
   // Context Menu Handlers
   void popupContextMenu() override;
+  void setOverplotDisabled(bool disabled);
 
 signals:
   void plotSpectrumClicked(const QStringList &workspaceNames);
@@ -56,6 +57,8 @@ signals:
   void plotSurfaceClicked(const QStringList &workspaceNames);
   void plotWireframeClicked(const QStringList &workspaceNames);
   void plotContourClicked(const QStringList &workspaceNames);
+  void sampleMaterialClicked(const QStringList &workspaceNames);
+  void contextMenuAboutToShow(void);
 
   void workspaceDoubleClicked(const QString &workspaceName);
   void treeSelectionChanged();
@@ -87,12 +90,13 @@ private slots:
   void onOverPlotMDHistoWorkspaceClicked();
   void onPlotMDHistoWorkspaceWithErrorsClicked();
   void onOverPlotMDHistoWorkspaceWithErrorsClicked();
+  void onSampleMaterialClicked();
 
 private:
   QAction *m_plotSpectrum, *m_plotBin, *m_overplotSpectrum, *m_plotSpectrumWithErrs, *m_overplotSpectrumWithErrs,
       *m_plotColorfill, *m_sampleLogs, *m_sliceViewer, *m_showInstrument, *m_showData, *m_showAlgorithmHistory,
       *m_showDetectors, *m_plotAdvanced, *m_plotSurface, *m_plotWireframe, *m_plotContour, *m_plotMDHisto1D,
-      *m_overplotMDHisto1D, *m_plotMDHisto1DWithErrs, *m_overplotMDHisto1DWithErrs;
+      *m_overplotMDHisto1D, *m_plotMDHisto1DWithErrs, *m_overplotMDHisto1DWithErrs, *m_sampleMaterial;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

@@ -132,7 +132,7 @@ is :ref:`FitPeak <algm-FitPeak>` which aims to fit single peaks
 with some checks to ensure results are physical.
 
 If you remain unsure if a given fit was successful then e.g. try the
-tool :ref:`CalculateChiSquared <algm-CalculateChiSquared>`, which allows
+tool :ref:`ProfileChiSquared1D <algm-ProfileChiSquared1D>`, which allows
 inspection of the cost function in the neighbourhood of a found minimum.
 
 

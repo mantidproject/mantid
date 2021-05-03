@@ -54,13 +54,12 @@ namespace LiveData {
  * Constructor
  * @param broker Kafka broker
  * @param histoTopic The name of the topic streaming the histo data
- * @param spDetTopic The name of the topic streaming the spectrum-detector
  * run mapping
  */
 KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(std::shared_ptr<IKafkaBroker> broker, const std::string &histoTopic,
-                                                 const std::string &runInfoTopic, const std::string &spDetTopic,
-                                                 const std::string &sampleEnvTopic, const std::string &chopperTopic)
-    : IKafkaStreamDecoder(std::move(broker), histoTopic, runInfoTopic, spDetTopic, sampleEnvTopic, chopperTopic, ""),
+                                                 const std::string &runInfoTopic, const std::string &sampleEnvTopic,
+                                                 const std::string &chopperTopic)
+    : IKafkaStreamDecoder(std::move(broker), histoTopic, runInfoTopic, sampleEnvTopic, chopperTopic, ""),
       m_workspace() {}
 
 /**

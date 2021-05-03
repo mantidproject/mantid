@@ -96,6 +96,15 @@ public:
     TS_ASSERT(!m_model->getPDFWorkspace());
   }
 
+  void test_that_isSelectedGroupPlottable_returns_true_when_passed_the_result_group_string_with_a_result_group_set() {
+    m_model->setResultWorkspace(m_groupWorkspace);
+    TS_ASSERT(m_model->isSelectedGroupPlottable("Result Group"));
+  }
+
+  void test_that_isSelectedGroupPlottable_returns_false_when_passed_the_pdf_group_string_when_a_pdf_group_is_not_set() {
+    TS_ASSERT(!m_model->isSelectedGroupPlottable("PDF Group"));
+  }
+
   void test_that_isResultGroupPlottable_returns_true_if_it_contains_a_workspace_with_more_than_one_data_point() {
     m_model->setResultWorkspace(m_groupWorkspace);
     TS_ASSERT(m_model->isResultGroupPlottable());
@@ -229,15 +238,6 @@ public:
       TS_ASSERT_EQUALS(name, "");
   }
 
-  void test_that_isSelectedGroupSelected_returns_true_when_passed_the_result_group_string_with_a_result_group_set() {
-    m_model->setResultWorkspace(m_groupWorkspace);
-    TS_ASSERT(m_model->isSelectedGroupPlottable("Result Group"));
-  }
-
-  void test_that_isSelectedGroupSelected_returns_false_when_passed_the_pdf_group_string_when_a_pdf_group_is_not_set() {
-    TS_ASSERT(!m_model->isSelectedGroupPlottable("PDF Group"));
-  }
-
   void test_that_isResultGroupSelected_returns_true_when_passed_the_result_group_string() {
     TS_ASSERT(m_model->isResultGroupSelected("Result Group"));
   }
@@ -246,21 +246,21 @@ public:
     TS_ASSERT(!m_model->isResultGroupSelected("PDF Group"));
   }
 
-  void test_that_replaceResultBin_will_throw_when_provided_an_empty_inputWorkspace_name() {
+  void test_that_replaceFitResult_will_throw_when_provided_an_empty_inputWorkspace_name() {
     auto const singleBinName("Workspace_s0_Result");
     auto const outputName("Output_Result");
 
     TS_ASSERT_THROWS(m_model->replaceFitResult("", singleBinName, outputName), const std::runtime_error &);
   }
 
-  void test_that_replaceResultBin_will_throw_when_provided_an_empty_singleBinWorkspace_name() {
+  void test_that_replaceFitResult_will_throw_when_provided_an_empty_singleBinWorkspace_name() {
     auto const inputName("Workspace_s0_to_s2_Result");
     auto const outputName("Output_Result");
 
     TS_ASSERT_THROWS(m_model->replaceFitResult(inputName, "", outputName), const std::runtime_error &);
   }
 
-  void test_that_replaceResultBin_will_throw_when_provided_an_empty_outputWorkspace_name() {
+  void test_that_replaceFitResult_will_throw_when_provided_an_empty_outputWorkspace_name() {
     auto const inputName("Workspace_s0_to_s2_Result");
     auto const singleBinName("Workspace_s0_Result");
 

@@ -22,7 +22,7 @@ namespace {
 
 MatrixWorkspace_sptr extractSpectrum(const MatrixWorkspace_sptr &inputWorkspace, const int workspaceIndex) {
   auto extracter = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
-  extracter->setChild(true);
+  extracter->setAlwaysStoreInADS(false);
   extracter->setProperty("InputWorkspace", inputWorkspace);
   extracter->setProperty("WorkspaceIndex", workspaceIndex);
   extracter->setPropertyValue("OutputWorkspace", "__NotUsed__");
@@ -34,7 +34,7 @@ MatrixWorkspace_sptr extractSpectrum(const MatrixWorkspace_sptr &inputWorkspace,
 MatrixWorkspace_sptr evaluateFunction(const IFunction_const_sptr &function,
                                       const MatrixWorkspace_sptr &inputWorkspace) {
   auto fit = AlgorithmManager::Instance().create("Fit");
-  fit->setChild(true);
+  fit->setAlwaysStoreInADS(false);
   fit->setProperty("Function", function->asString());
   fit->setProperty("InputWorkspace", inputWorkspace);
   fit->setProperty("MaxIterations", 0);
@@ -52,7 +52,7 @@ namespace CustomInterfaces {
 void ALCBaselineModellingModel::fit(IFunction_const_sptr function, const std::vector<Section> &sections) {
   // Create a copy of the data
   IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
-  clone->setChild(true);
+  clone->setAlwaysStoreInADS(false);
   clone->setProperty("InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(m_data));
   clone->setProperty("OutputWorkspace", "__NotUsed__");
   clone->execute();
@@ -66,7 +66,7 @@ void ALCBaselineModellingModel::fit(IFunction_const_sptr function, const std::ve
   IFunction_sptr funcToFit = FunctionFactory::Instance().createInitialized(function->asString());
 
   IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
-  fit->setChild(true);
+  fit->setAlwaysStoreInADS(false);
   fit->setProperty("Function", funcToFit);
   fit->setProperty("InputWorkspace", dataToFit);
   fit->setProperty("CreateOutput", true);
