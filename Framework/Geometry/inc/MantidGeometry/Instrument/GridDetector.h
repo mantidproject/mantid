@@ -31,8 +31,7 @@ class ComponentVisitor;
  * @date 2018-Jul-24
  */
 
-class MANTID_GEOMETRY_DLL GridDetector : public CompAssembly,
-                                         public IObjComponent {
+class MANTID_GEOMETRY_DLL GridDetector : public CompAssembly, public IObjComponent {
   friend class GridDetectorPixel;
 
 public:
@@ -49,17 +48,14 @@ public:
   static bool compareName(const std::string &proposedMatch);
 
   /// Create all the detector pixels of this grid detector.
-  void initialize(std::shared_ptr<IObject> shape, int xpixels, double xstart,
-                  double xstep, int ypixels, double ystart, double ystep,
-                  int zpixels, double zstart, double zstep, int idstart,
-                  const std::string &idFillOrder, int idstepbyrow,
-                  int idstep = 1);
+  void initialize(std::shared_ptr<IObject> shape, int xpixels, double xstart, double xstep, int ypixels, double ystart,
+                  double ystep, int zpixels, double zstart, double zstep, int idstart, const std::string &idFillOrder,
+                  int idstepbyrow, int idstep = 1);
 
   //! Make a clone of the present component
   GridDetector *clone() const override;
 
-  std::shared_ptr<Detector> getAtXYZ(const int x, const int y,
-                                     const int z) const;
+  std::shared_ptr<Detector> getAtXYZ(const int x, const int y, const int z) const;
 
   detid_t getDetectorIDAtXYZ(const int x, const int y, const int z) const;
   std::tuple<int, int, int> getXYZForDetectorID(const detid_t detectorID) const;
@@ -94,17 +90,14 @@ public:
   detid_t minDetectorID();
   /// maximum detector id
   detid_t maxDetectorID();
-  std::shared_ptr<const IComponent>
-  getComponentByName(const std::string &cname, int nlevels = 0) const override;
+  std::shared_ptr<const IComponent> getComponentByName(const std::string &cname, int nlevels = 0) const override;
 
   // This should inherit the getBoundingBox implementation from  CompAssembly
   // but the multiple inheritance seems to confuse it so we'll explicityly tell
   // it that here
   using CompAssembly::getBoundingBox;
 
-  void testIntersectionWithChildren(
-      Track &testRay,
-      std::deque<IComponent_const_sptr> &searchQueue) const override;
+  void testIntersectionWithChildren(Track &testRay, std::deque<IComponent_const_sptr> &searchQueue) const override;
 
   // ------------ IObjComponent methods ----------------
 
@@ -142,22 +135,18 @@ public:
   /// Returns the material of the detector
   const Kernel::Material material() const override;
 
-  virtual size_t
-  registerContents(class ComponentVisitor &componentVisitor) const override;
+  virtual size_t registerContents(class ComponentVisitor &componentVisitor) const override;
 
   // ------------ End of IObjComponent methods ----------------
 protected:
   /// initialize members to bare defaults
   void init();
-  void createLayer(const std::string &name, CompAssembly *parent, int iz,
-                   int &minDetID, int &maxDetID);
+  void createLayer(const std::string &name, CompAssembly *parent, int iz, int &minDetID, int &maxDetID);
 
 private:
-  void initializeValues(std::shared_ptr<IObject> shape, int xpixels,
-                        double xstart, double xstep, int ypixels, double ystart,
-                        double ystep, int zpixels, double zstart, double zstep,
-                        int idstart, const std::string &idFillOrder,
-                        int idstepbyrow, int idstep);
+  void initializeValues(std::shared_ptr<IObject> shape, int xpixels, double xstart, double xstep, int ypixels,
+                        double ystart, double ystep, int zpixels, double zstart, double zstep, int idstart,
+                        const std::string &idFillOrder, int idstepbyrow, int idstep);
 
   void validateInput() const;
   /// Pointer to the base GridDetector, for parametrized instruments
@@ -212,8 +201,7 @@ private:
   int m_idstep;
 };
 
-MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
-                                             const GridDetector &);
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &, const GridDetector &);
 
 using GridDetector_sptr = std::shared_ptr<GridDetector>;
 using GridDetector_const_sptr = std::shared_ptr<const GridDetector>;

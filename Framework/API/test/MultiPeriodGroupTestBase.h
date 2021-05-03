@@ -31,10 +31,8 @@ protected:
   void add_periods_logs(const WorkspaceGroup_sptr &ws) {
     int nperiods = static_cast<int>(ws->size());
     for (size_t i = 0; i < ws->size(); ++i) {
-      MatrixWorkspace_sptr currentWS =
-          std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(i));
-      PropertyWithValue<int> *nperiodsProp =
-          new PropertyWithValue<int>("nperiods", nperiods);
+      MatrixWorkspace_sptr currentWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(i));
+      PropertyWithValue<int> *nperiodsProp = new PropertyWithValue<int>("nperiods", nperiods);
       currentWS->mutableRun().addLogData(nperiodsProp);
       PropertyWithValue<int> *currentPeriodsProp =
           new PropertyWithValue<int>("current_period", static_cast<int>(i + 1));
@@ -44,8 +42,7 @@ protected:
 
   /// Helper to fabricate a workspace group consisting of equal sized
   /// matrixworkspaces.
-  WorkspaceGroup_sptr
-  create_good_multiperiod_workspace_group(const std::string &name) {
+  WorkspaceGroup_sptr create_good_multiperiod_workspace_group(const std::string &name) {
     MatrixWorkspace_sptr a = MatrixWorkspace_sptr(new WorkspaceTester);
     MatrixWorkspace_sptr b = MatrixWorkspace_sptr(new WorkspaceTester);
 

@@ -28,8 +28,7 @@ void GausDecay::init() {
   declareParameter("Sigma", 0.2, "Decay rate");
 }
 
-void GausDecay::function1D(double *out, const double *xValues,
-                           const size_t nData) const {
+void GausDecay::function1D(double *out, const double *xValues, const size_t nData) const {
   const double A = getParameter("A");
   const double G = getParameter("Sigma");
 
@@ -39,8 +38,7 @@ void GausDecay::function1D(double *out, const double *xValues,
   }
 }
 
-void GausDecay::functionDeriv1D(Jacobian *out, const double *xValues,
-                                const size_t nData) {
+void GausDecay::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
   const double A = getParameter("A");
   const double G = getParameter("Sigma");
 

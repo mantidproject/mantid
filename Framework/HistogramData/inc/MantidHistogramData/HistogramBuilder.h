@@ -23,21 +23,13 @@ namespace HistogramData {
 class MANTID_HISTOGRAMDATA_DLL HistogramBuilder {
 public:
   /// Sets X information. Can be a length or actual X data.
-  template <typename... T> void setX(T &&... data) {
-    m_x = Kernel::make_cow<HistogramX>(std::forward<T>(data)...);
-  }
+  template <typename... T> void setX(T &&...data) { m_x = Kernel::make_cow<HistogramX>(std::forward<T>(data)...); }
   /// Sets Y information. Can be a length or actual Y data.
-  template <typename... T> void setY(T &&... data) {
-    m_y = Kernel::make_cow<HistogramY>(std::forward<T>(data)...);
-  }
+  template <typename... T> void setY(T &&...data) { m_y = Kernel::make_cow<HistogramY>(std::forward<T>(data)...); }
   /// Sets E information. Can be a length or actual E data.
-  template <typename... T> void setE(T &&... data) {
-    m_e = Kernel::make_cow<HistogramE>(std::forward<T>(data)...);
-  }
+  template <typename... T> void setE(T &&...data) { m_e = Kernel::make_cow<HistogramE>(std::forward<T>(data)...); }
   /// Sets Dx information. Can be a length or actual Dx data.
-  template <typename... T> void setDx(T &&... data) {
-    d_x = Kernel::make_cow<HistogramDx>(std::forward<T>(data)...);
-  }
+  template <typename... T> void setDx(T &&...data) { d_x = Kernel::make_cow<HistogramDx>(std::forward<T>(data)...); }
   void setDistribution(bool isDistribution);
 
   Histogram build() const;

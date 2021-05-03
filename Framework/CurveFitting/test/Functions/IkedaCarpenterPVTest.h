@@ -22,9 +22,7 @@ class IkedaCarpenterPVTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static IkedaCarpenterPVTest *createSuite() {
-    return new IkedaCarpenterPVTest();
-  }
+  static IkedaCarpenterPVTest *createSuite() { return new IkedaCarpenterPVTest(); }
   static void destroySuite(IkedaCarpenterPVTest *suite) { delete suite; }
 
   void test_category() {

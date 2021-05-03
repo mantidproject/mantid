@@ -34,11 +34,9 @@ DECLARE_ALGORITHM(SaveDetectorsGrouping)
 /// Define input parameters
 void SaveDetectorsGrouping::init() {
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<DataObjects::GroupingWorkspace>>(
-          "InputWorkspace", "", Direction::Input),
+      std::make_unique<API::WorkspaceProperty<DataObjects::GroupingWorkspace>>("InputWorkspace", "", Direction::Input),
       "GroupingWorkspace to output to XML file (GroupingWorkspace)");
-  declareProperty(std::make_unique<FileProperty>("OutputFile", "",
-                                                 FileProperty::Save, ".xml"),
+  declareProperty(std::make_unique<FileProperty>("OutputFile", "", FileProperty::Save, ".xml"),
                   "File to save the detectors mask in XML format");
 }
 
@@ -66,8 +64,7 @@ void SaveDetectorsGrouping::exec() {
  * From GroupingWorkspace to generate a map.
  * Each entry, key = GroupID, value = vector of workspace index
  */
-void SaveDetectorsGrouping::createGroupDetectorIDMap(
-    std::map<int, std::vector<detid_t>> &groupwkspmap) {
+void SaveDetectorsGrouping::createGroupDetectorIDMap(std::map<int, std::vector<detid_t>> &groupwkspmap) {
 
   // 1. Create map
   for (size_t iws = 0; iws < mGroupWS->getNumberHistograms(); iws++) {
@@ -82,16 +79,15 @@ void SaveDetectorsGrouping::createGroupDetectorIDMap(
     }
     it = groupwkspmap.find(groupid);
     if (it == groupwkspmap.end()) {
-      throw std::invalid_argument(
-          "Could not find group ID the after creating it in the map.");
+      throw std::invalid_argument("Could not find group ID the after creating it in the map.");
     }
 
     // c) Convert workspace ID to detector ID
     const auto &mspec = mGroupWS->getSpectrum(iws);
     auto &detids = mspec.getDetectorIDs();
     if (detids.size() != 1) {
-      g_log.error() << "Spectrum " << mspec.getSpectrumNo() << " has "
-                    << detids.size() << " detectors.  Not allowed situation!\n";
+      g_log.error() << "Spectrum " << mspec.getSpectrumNo() << " has " << detids.size()
+                    << " detectors.  Not allowed situation!\n";
       throw;
     }
     it->second.insert(it->second.end(), detids.begin(), detids.end());
@@ -101,9 +97,8 @@ void SaveDetectorsGrouping::createGroupDetectorIDMap(
 /*
  * Convert
  */
-void SaveDetectorsGrouping::convertToDetectorsRanges(
-    std::map<int, std::vector<detid_t>> groupdetidsmap,
-    std::map<int, std::vector<detid_t>> &groupdetidrangemap) {
+void SaveDetectorsGrouping::convertToDetectorsRanges(std::map<int, std::vector<detid_t>> groupdetidsmap,
+                                                     std::map<int, std::vector<detid_t>> &groupdetidrangemap) {
 
   for (auto &groupdetids : groupdetidsmap) {
 
@@ -111,8 +106,7 @@ void SaveDetectorsGrouping::convertToDetectorsRanges(
     const int groupid = groupdetids.first;
     sort(groupdetids.second.begin(), groupdetids.second.end());
 
-    g_log.debug() << "Group " << groupid << "  has "
-                  << groupdetids.second.size() << " detectors. \n";
+    g_log.debug() << "Group " << groupid << "  has " << groupdetids.second.size() << " detectors. \n";
 
     // b) Group to ranges
     std::vector<detid_t> detranges;
@@ -142,9 +136,8 @@ void SaveDetectorsGrouping::convertToDetectorsRanges(
   } // ENDFOR GroupID
 }
 
-void SaveDetectorsGrouping::printToXML(
-    const std::map<int, std::vector<detid_t>> &groupdetidrangemap,
-    const std::string &xmlfilename) {
+void SaveDetectorsGrouping::printToXML(const std::map<int, std::vector<detid_t>> &groupdetidrangemap,
+                                       const std::string &xmlfilename) {
 
   // 1. Get Instrument information
   const auto &instrument = mGroupWS->getInstrument();
@@ -156,13 +149,11 @@ void SaveDetectorsGrouping::printToXML(
   AutoPtr<Element> pRoot = pDoc->createElement("detector-grouping");
   pDoc->appendChild(pRoot);
   pRoot->setAttribute("instrument", name);
-  pRoot->setAttribute("idf-date",
-                      instrument->getValidFromDate().toISO8601String());
+  pRoot->setAttribute("idf-date", instrument->getValidFromDate().toISO8601String());
 
   // Set description if was specified by user
   if (mGroupWS->run().hasProperty("Description")) {
-    const std::string description =
-        mGroupWS->run().getProperty("Description")->value();
+    const std::string description = mGroupWS->run().getProperty("Description")->value();
     pRoot->setAttribute("description", description);
   }
 
@@ -179,8 +170,7 @@ void SaveDetectorsGrouping::printToXML(
     // Set name if was specified by user
     std::string groupNameProp = "GroupName_" + sid.str();
     if (mGroupWS->run().hasProperty(groupNameProp)) {
-      const std::string groupName =
-          mGroupWS->run().getProperty(groupNameProp)->value();
+      const std::string groupName = mGroupWS->run().getProperty(groupNameProp)->value();
       pChildGroup->setAttribute("name", groupName);
     }
 
@@ -209,8 +199,8 @@ void SaveDetectorsGrouping::printToXML(
         ss << ",";
       }
 
-      g_log.debug() << "Detectors:  " << groupdetidrange.second[i * 2] << ", "
-                    << groupdetidrange.second[i * 2 + 1] << '\n';
+      g_log.debug() << "Detectors:  " << groupdetidrange.second[i * 2] << ", " << groupdetidrange.second[i * 2 + 1]
+                    << '\n';
     } // FOREACH Detectors Range Set
 
     const std::string textvalue = ss.str();

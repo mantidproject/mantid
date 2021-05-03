@@ -23,8 +23,7 @@ DataForParameterEstimation createEstimationData() {
   return DataForParameterEstimation{x, y};
 }
 
-void estimationFunctionForLinearBackground(IFunction_sptr &function,
-                                           const DataForParameterEstimation &) {
+void estimationFunctionForLinearBackground(IFunction_sptr &function, const DataForParameterEstimation &) {
 
   function->setParameter("A0", 2.00);
   function->setParameter("A1", 3.00);
@@ -33,15 +32,11 @@ void estimationFunctionForLinearBackground(IFunction_sptr &function,
 
 class IDAFunctionParameterEstimationTest : public CxxTest::TestSuite {
 public:
-  IDAFunctionParameterEstimationTest() {
-    m_estimationData = createEstimationData();
-  }
+  IDAFunctionParameterEstimationTest() { m_estimationData = createEstimationData(); }
 
-  void
-  test_estimateFunctionParameters_does_nothing_if_fit_esimate_does_not_exist() {
+  void test_estimateFunctionParameters_does_nothing_if_fit_esimate_does_not_exist() {
     IDAFunctionParameterEstimation parameterEstimation;
-    auto fun = FunctionFactory::Instance().createInitialized(
-        "name=LinearBackground,A0=0,A1=0");
+    auto fun = FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=0,A1=0");
     auto funCopy = fun->clone();
 
     parameterEstimation.estimateFunctionParameters(fun, m_estimationData);
@@ -52,10 +47,8 @@ public:
 
   void test_estimateFunctionParameters_correctly_updates_function() {
     IDAFunctionParameterEstimation parameterEstimation;
-    auto fun = FunctionFactory::Instance().createInitialized(
-        "name=LinearBackground,A0=0,A1=0");
-    parameterEstimation.addParameterEstimationFunction(
-        "LinearBackground", estimationFunctionForLinearBackground);
+    auto fun = FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=0,A1=0");
+    parameterEstimation.addParameterEstimationFunction("LinearBackground", estimationFunctionForLinearBackground);
 
     parameterEstimation.estimateFunctionParameters(fun, m_estimationData);
 

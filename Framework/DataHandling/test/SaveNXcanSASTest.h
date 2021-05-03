@@ -44,43 +44,35 @@ public:
 
   void test_that_workspace_without_momentum_transfer_units_is_invalid() {
     // Arrange
-    auto ws = WorkspaceCreationHelper::create1DWorkspaceConstantWithXerror(
-        10 /*size*/, 1.23 /*value&*/, 2.3 /*error*/, 23.4 /*xerror*/);
+    auto ws = WorkspaceCreationHelper::create1DWorkspaceConstantWithXerror(10 /*size*/, 1.23 /*value&*/, 2.3 /*error*/,
+                                                                           23.4 /*xerror*/);
     const std::string filename = "SaveNXcanSASTestFile.h5";
 
     // Act + Assert
-    auto saveAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-        "SaveNXcanSAS");
+    auto saveAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("SaveNXcanSAS");
     saveAlg->setChild(true);
     saveAlg->initialize();
     saveAlg->setProperty("Filename", filename);
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Should not save file without momentum transfer units.",
-        saveAlg->setProperty("InputWorkspace", ws));
+    TSM_ASSERT_THROWS_ANYTHING("Should not save file without momentum transfer units.",
+                               saveAlg->setProperty("InputWorkspace", ws));
   }
 
   void test_that_can_set_run_numbers_as_string_properties() {
-    auto saveAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-        "SaveNXcanSAS");
+    auto saveAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("SaveNXcanSAS");
     saveAlg->setChild(true);
     saveAlg->initialize();
 
-    TSM_ASSERT_THROWS_NOTHING(
-        "Should be able to set SampleTransmissionRunNumber property",
-        saveAlg->setProperty("SampleTransmissionRunNumber", "5"));
-    TSM_ASSERT_THROWS_NOTHING(
-        "Should be able to set SampleDirectRunNumber property",
-        saveAlg->setProperty("SampleDirectRunNumber", "6"));
-    TSM_ASSERT_THROWS_NOTHING(
-        "Should be able to set CanScatterRunNumber property",
-        saveAlg->setProperty("CanScatterRunNumber", "7"));
-    TSM_ASSERT_THROWS_NOTHING(
-        "Should be able to set CanDirectRunNumber property",
-        saveAlg->setProperty("CanDirectRunNumber", "8"));
+    TSM_ASSERT_THROWS_NOTHING("Should be able to set SampleTransmissionRunNumber property",
+                              saveAlg->setProperty("SampleTransmissionRunNumber", "5"));
+    TSM_ASSERT_THROWS_NOTHING("Should be able to set SampleDirectRunNumber property",
+                              saveAlg->setProperty("SampleDirectRunNumber", "6"));
+    TSM_ASSERT_THROWS_NOTHING("Should be able to set CanScatterRunNumber property",
+                              saveAlg->setProperty("CanScatterRunNumber", "7"));
+    TSM_ASSERT_THROWS_NOTHING("Should be able to set CanDirectRunNumber property",
+                              saveAlg->setProperty("CanDirectRunNumber", "8"));
   }
 
-  void
-  test_that_sample_run_numbers_included_if_sample_transmission_property_is_set() {
+  void test_that_sample_run_numbers_included_if_sample_transmission_property_is_set() {
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
 
@@ -102,8 +94,7 @@ public:
     transmissionParameters.usesTransmission = true;
 
     auto transmission = getTransmissionWorkspace(transmissionParameters);
-    setXValuesOn1DWorkspace(transmission, transmissionParameters.xmin,
-                            transmissionParameters.xmax);
+    setXValuesOn1DWorkspace(transmission, transmissionParameters.xmin, transmissionParameters.xmax);
 
     // Act
     save_file_no_issues(ws, parameters, transmission, nullptr);
@@ -115,8 +106,7 @@ public:
     removeFile(parameters.filename);
   }
 
-  void
-  test_that_can_run_numbers_included_if_can_transmission_property_is_set() {
+  void test_that_can_run_numbers_included_if_can_transmission_property_is_set() {
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
 
@@ -138,8 +128,7 @@ public:
     transmissionCanParameters.usesTransmission = true;
 
     auto transmissionCan = getTransmissionWorkspace(transmissionCanParameters);
-    setXValuesOn1DWorkspace(transmissionCan, transmissionCanParameters.xmin,
-                            transmissionCanParameters.xmax);
+    setXValuesOn1DWorkspace(transmissionCan, transmissionCanParameters.xmin, transmissionCanParameters.xmax);
 
     // Act
     save_file_no_issues(ws, parameters, nullptr, transmissionCan);
@@ -151,8 +140,7 @@ public:
     removeFile(parameters.filename);
   }
 
-  void
-  test_that_can_and_sample_runs_included_if_both_transmission_properties_are_set() {
+  void test_that_can_and_sample_runs_included_if_both_transmission_properties_are_set() {
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
 
@@ -179,12 +167,10 @@ public:
     transmissionCanParameters.usesTransmission = true;
 
     auto transmission = getTransmissionWorkspace(transmissionParameters);
-    setXValuesOn1DWorkspace(transmission, transmissionParameters.xmin,
-                            transmissionParameters.xmax);
+    setXValuesOn1DWorkspace(transmission, transmissionParameters.xmin, transmissionParameters.xmax);
 
     auto transmissionCan = getTransmissionWorkspace(transmissionCanParameters);
-    setXValuesOn1DWorkspace(transmissionCan, transmissionCanParameters.xmin,
-                            transmissionCanParameters.xmax);
+    setXValuesOn1DWorkspace(transmissionCan, transmissionCanParameters.xmin, transmissionCanParameters.xmax);
 
     // Act
     save_file_no_issues(ws, parameters, transmission, transmissionCan);
@@ -245,8 +231,7 @@ public:
     removeFile(parameters.filename);
   }
 
-  void
-  test_that_1D_workspace_without_transmissions_and_without_xerror_is_saved_correctly() {
+  void test_that_1D_workspace_without_transmissions_and_without_xerror_is_saved_correctly() {
     // Arrange
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
@@ -277,14 +262,12 @@ public:
     run_test_1D_workspace_with_transmissions_is_saved_correctly(isHistogram);
   }
 
-  void
-  test_that_1D_workspace_with_histogram_transmissions_is_saved_as_points() {
+  void test_that_1D_workspace_with_histogram_transmissions_is_saved_as_points() {
     const bool isHistogram{true};
     run_test_1D_workspace_with_transmissions_is_saved_correctly(isHistogram);
   }
 
-  void run_test_1D_workspace_with_transmissions_is_saved_correctly(
-      const bool isHistogram) {
+  void run_test_1D_workspace_with_transmissions_is_saved_correctly(const bool isHistogram) {
     // Arrange
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
@@ -375,20 +358,16 @@ public:
   }
 
 private:
-  void save_file_no_issues(
-      const Mantid::API::MatrixWorkspace_sptr &workspace,
-      NXcanSASTestParameters &parameters,
-      const Mantid::API::MatrixWorkspace_sptr &transmission = nullptr,
-      const Mantid::API::MatrixWorkspace_sptr &transmissionCan = nullptr) {
-    auto saveAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-        "SaveNXcanSAS");
+  void save_file_no_issues(const Mantid::API::MatrixWorkspace_sptr &workspace, NXcanSASTestParameters &parameters,
+                           const Mantid::API::MatrixWorkspace_sptr &transmission = nullptr,
+                           const Mantid::API::MatrixWorkspace_sptr &transmissionCan = nullptr) {
+    auto saveAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("SaveNXcanSAS");
     saveAlg->initialize();
     saveAlg->setProperty("Filename", parameters.filename);
     saveAlg->setProperty("InputWorkspace", workspace);
     saveAlg->setProperty("RadiationSource", parameters.radiationSource);
     if (!parameters.detectors.empty()) {
-      std::string detectorsAsString =
-          concatenateStringVector(parameters.detectors);
+      std::string detectorsAsString = concatenateStringVector(parameters.detectors);
       saveAlg->setProperty("DetectorNames", detectorsAsString);
     }
 
@@ -399,8 +378,7 @@ private:
       saveAlg->setProperty("TransmissionCan", transmissionCan);
     }
 
-    saveAlg->setProperty("SampleTransmissionRunNumber",
-                         parameters.sampleTransmissionRun);
+    saveAlg->setProperty("SampleTransmissionRunNumber", parameters.sampleTransmissionRun);
     saveAlg->setProperty("SampleDirectRunNumber", parameters.sampleDirectRun);
     saveAlg->setProperty("CanScatterRunNumber", parameters.canScatterRun);
     saveAlg->setProperty("CanDirectRunNumber", parameters.canDirectRun);
@@ -409,34 +387,25 @@ private:
     TSM_ASSERT("Should have executed", saveAlg->isExecuted());
   }
 
-  void do_assert_sasentry(H5::Group &entry, const std::string &run,
-                          const std::string &title) {
+  void do_assert_sasentry(H5::Group &entry, const std::string &run, const std::string &title) {
     using namespace Mantid::DataHandling::NXcanSAS;
     auto numAttributes = entry.getNumAttrs();
     TSM_ASSERT_EQUALS("Should have three attributes", 3, numAttributes);
 
     // canSAS_class and NX_class attribute
-    auto classAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(entry, sasclass);
-    TSM_ASSERT_EQUALS("Should be SASentry class", classAttribute,
-                      sasEntryClassAttr);
-    classAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(entry, nxclass);
-    TSM_ASSERT_EQUALS("Should be NXentr class", classAttribute,
-                      nxEntryClassAttr);
+    auto classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(entry, sasclass);
+    TSM_ASSERT_EQUALS("Should be SASentry class", classAttribute, sasEntryClassAttr);
+    classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(entry, nxclass);
+    TSM_ASSERT_EQUALS("Should be NXentr class", classAttribute, nxEntryClassAttr);
 
     // Version attribute
-    auto versionAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(
-        entry, sasEntryVersionAttr);
-    TSM_ASSERT_EQUALS("Version should be 1.0", versionAttribute,
-                      sasEntryVersionAttrValue);
+    auto versionAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(entry, sasEntryVersionAttr);
+    TSM_ASSERT_EQUALS("Version should be 1.0", versionAttribute, sasEntryVersionAttrValue);
 
     // Definition data set
     auto definitionDataSet = entry.openDataSet(sasEntryDefinition);
-    auto definitionValue =
-        Mantid::DataHandling::H5Util::readString(definitionDataSet);
-    TSM_ASSERT_EQUALS("File definition should be NXcanSAS", definitionValue,
-                      sasEntryDefinitionFormat);
+    auto definitionValue = Mantid::DataHandling::H5Util::readString(definitionDataSet);
+    TSM_ASSERT_EQUALS("File definition should be NXcanSAS", definitionValue, sasEntryDefinitionFormat);
 
     // Run data set
     auto runDataSet = entry.openDataSet(sasEntryRun);
@@ -446,9 +415,7 @@ private:
     // Title data set
     auto titleDataSet = entry.openDataSet(sasEntryTitle);
     auto titleValue = Mantid::DataHandling::H5Util::readString(titleDataSet);
-    TSM_ASSERT_EQUALS(
-        "The title should have been stored as the workspace name.", titleValue,
-        title);
+    TSM_ASSERT_EQUALS("The title should have been stored as the workspace name.", titleValue, title);
   }
 
   void do_assert_source(H5::Group &source, const std::string &radiationSource) {
@@ -457,43 +424,31 @@ private:
     TSM_ASSERT_EQUALS("Should have 2 attribute", 2, numAttributes);
 
     // canSAS_class and NX_class attribute
-    auto classAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(source, sasclass);
-    TSM_ASSERT_EQUALS("Should be SASsource class", classAttribute,
-                      sasInstrumentSourceClassAttr);
-    classAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(source, nxclass);
-    TSM_ASSERT_EQUALS("Should be NXsource class", classAttribute,
-                      nxInstrumentSourceClassAttr);
+    auto classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(source, sasclass);
+    TSM_ASSERT_EQUALS("Should be SASsource class", classAttribute, sasInstrumentSourceClassAttr);
+    classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(source, nxclass);
+    TSM_ASSERT_EQUALS("Should be NXsource class", classAttribute, nxInstrumentSourceClassAttr);
 
     // Radiation data set
     auto radiationDataSet = source.openDataSet(sasInstrumentSourceRadiation);
-    auto radiationValue =
-        Mantid::DataHandling::H5Util::readString(radiationDataSet);
-    TSM_ASSERT_EQUALS("Radiation sources should match.", radiationValue,
-                      radiationSource);
+    auto radiationValue = Mantid::DataHandling::H5Util::readString(radiationDataSet);
+    TSM_ASSERT_EQUALS("Radiation sources should match.", radiationValue, radiationSource);
   }
 
-  void do_assert_detector(H5::Group &instrument,
-                          const std::vector<std::string> &detectors) {
+  void do_assert_detector(H5::Group &instrument, const std::vector<std::string> &detectors) {
     for (auto &detector : detectors) {
       std::string detectorName = sasInstrumentDetectorGroupName + detector;
-      auto detectorNameSanitized =
-          Mantid::DataHandling::makeCanSASRelaxedName(detectorName);
+      auto detectorNameSanitized = Mantid::DataHandling::makeCanSASRelaxedName(detectorName);
       auto detectorGroup = instrument.openGroup(detectorNameSanitized);
 
       auto numAttributes = detectorGroup.getNumAttrs();
       TSM_ASSERT_EQUALS("Should have 2 attributes", 2, numAttributes);
 
       // canSAS_class and NX_class attribute
-      auto classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(
-          detectorGroup, sasclass);
-      TSM_ASSERT_EQUALS("Should be SASdetector class", classAttribute,
-                        sasInstrumentDetectorClassAttr);
-      classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(
-          detectorGroup, nxclass);
-      TSM_ASSERT_EQUALS("Should be NXdetector class", classAttribute,
-                        nxInstrumentDetectorClassAttr);
+      auto classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(detectorGroup, sasclass);
+      TSM_ASSERT_EQUALS("Should be SASdetector class", classAttribute, sasInstrumentDetectorClassAttr);
+      classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(detectorGroup, nxclass);
+      TSM_ASSERT_EQUALS("Should be NXdetector class", classAttribute, nxInstrumentDetectorClassAttr);
 
       // Detector name data set
       auto name = detectorGroup.openDataSet(sasInstrumentDetectorName);
@@ -515,40 +470,28 @@ private:
         auto subGroupName = instrument.getObjnameByIdx(index);
         auto subGroup = instrument.openGroup(subGroupName);
         // canSAS_class and NX_class attribute
-        auto classAttribute =
-            Mantid::DataHandling::H5Util::readAttributeAsString(subGroup,
-                                                                sasclass);
-        TSM_ASSERT("Should not be a detector",
-                   classAttribute != sasInstrumentDetectorClassAttr);
+        auto classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(subGroup, sasclass);
+        TSM_ASSERT("Should not be a detector", classAttribute != sasInstrumentDetectorClassAttr);
       }
     }
   }
 
-  void do_assert_instrument(H5::Group &instrument,
-                            const std::string &instrumentName,
-                            const std::string &idf,
-                            const std::string &radiationSource,
-                            const std::vector<std::string> &detectors,
+  void do_assert_instrument(H5::Group &instrument, const std::string &instrumentName, const std::string &idf,
+                            const std::string &radiationSource, const std::vector<std::string> &detectors,
                             bool invalidDetectors) {
     auto numAttributes = instrument.getNumAttrs();
     TSM_ASSERT_EQUALS("Should have 2 attribute", 2, numAttributes);
 
     // canSAS_class and NX_class attribute
-    auto classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(
-        instrument, sasclass);
-    TSM_ASSERT_EQUALS("Should be SASentry class", classAttribute,
-                      sasInstrumentClassAttr);
-    classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(
-        instrument, nxclass);
-    TSM_ASSERT_EQUALS("Should be NXentry class", classAttribute,
-                      nxInstrumentClassAttr);
+    auto classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(instrument, sasclass);
+    TSM_ASSERT_EQUALS("Should be SASentry class", classAttribute, sasInstrumentClassAttr);
+    classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(instrument, nxclass);
+    TSM_ASSERT_EQUALS("Should be NXentry class", classAttribute, nxInstrumentClassAttr);
 
     // Name data set
     auto instrumentNameDataSet = instrument.openDataSet(sasInstrumentName);
-    auto instrumentNameValue =
-        Mantid::DataHandling::H5Util::readString(instrumentNameDataSet);
-    TSM_ASSERT_EQUALS("Name of the instrument should have been stored",
-                      instrumentNameValue, instrumentName);
+    auto instrumentNameValue = Mantid::DataHandling::H5Util::readString(instrumentNameDataSet);
+    TSM_ASSERT_EQUALS("Name of the instrument should have been stored", instrumentNameValue, instrumentName);
 
     // IDF data set
     auto idfDataSet = instrument.openDataSet(sasInstrumentIDF);
@@ -568,103 +511,76 @@ private:
     }
   }
 
-  void do_assert_process(H5::Group &process, const bool &hasSampleRuns,
-                         const bool &hasCanRuns, const std::string &userFile,
-                         const std::string &sampleDirectRun,
+  void do_assert_process(H5::Group &process, const bool &hasSampleRuns, const bool &hasCanRuns,
+                         const std::string &userFile, const std::string &sampleDirectRun,
                          const std::string &canDirectRun) {
     auto numAttributes = process.getNumAttrs();
     TSM_ASSERT_EQUALS("Should have 2 attribute", 2, numAttributes);
 
     // canSAS_class and NX_class attribute
-    auto classAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(process, sasclass);
-    TSM_ASSERT_EQUALS("Should be SASprocess class", classAttribute,
-                      sasProcessClassAttr);
-    classAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(process, nxclass);
-    TSM_ASSERT_EQUALS("Should be NXprocess class", classAttribute,
-                      nxProcessClassAttr);
+    auto classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(process, sasclass);
+    TSM_ASSERT_EQUALS("Should be SASprocess class", classAttribute, sasProcessClassAttr);
+    classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(process, nxclass);
+    TSM_ASSERT_EQUALS("Should be NXprocess class", classAttribute, nxProcessClassAttr);
 
     // Date data set
     auto dateDataSet = process.openDataSet(sasProcessDate);
-    TS_ASSERT_THROWS_NOTHING(
-        Mantid::DataHandling::H5Util::readString(dateDataSet));
+    TS_ASSERT_THROWS_NOTHING(Mantid::DataHandling::H5Util::readString(dateDataSet));
 
     // SVN data set
     auto svnDataSet = process.openDataSet(sasProcessTermSvn);
-    TS_ASSERT_THROWS_NOTHING(
-        Mantid::DataHandling::H5Util::readString(svnDataSet));
+    TS_ASSERT_THROWS_NOTHING(Mantid::DataHandling::H5Util::readString(svnDataSet));
 
     // Name data set
     auto nameDataSet = process.openDataSet(sasProcessName);
     auto nameValue = Mantid::DataHandling::H5Util::readString(nameDataSet);
-    TSM_ASSERT_EQUALS("Should have the Mantid NXcanSAS process name", nameValue,
-                      sasProcessNameValue);
+    TSM_ASSERT_EQUALS("Should have the Mantid NXcanSAS process name", nameValue, sasProcessNameValue);
 
     // User file
     auto userFileDataSet = process.openDataSet(sasProcessTermUserFile);
-    auto userFileValue =
-        Mantid::DataHandling::H5Util::readString(userFileDataSet);
-    TSM_ASSERT_EQUALS("Should have the Mantid NXcanSAS process name",
-                      userFileValue, userFile);
+    auto userFileValue = Mantid::DataHandling::H5Util::readString(userFileDataSet);
+    TSM_ASSERT_EQUALS("Should have the Mantid NXcanSAS process name", userFileValue, userFile);
 
     // Check note
     if (hasSampleRuns || hasCanRuns) {
       auto note = process.openGroup(sasNoteGroupName);
-      do_assert_process_note(note, hasSampleRuns, hasCanRuns, sampleDirectRun,
-                             canDirectRun);
+      do_assert_process_note(note, hasSampleRuns, hasCanRuns, sampleDirectRun, canDirectRun);
     }
   }
 
-  void do_assert_process_note(H5::Group &note, const bool &hasSampleRuns,
-                              const bool &hasCanRuns,
-                              const std::string &sampleDirectRun,
-                              const std::string &canDirectRun) {
+  void do_assert_process_note(H5::Group &note, const bool &hasSampleRuns, const bool &hasCanRuns,
+                              const std::string &sampleDirectRun, const std::string &canDirectRun) {
     auto numAttributes = note.getNumAttrs();
     TSM_ASSERT_EQUALS("Should have 2 attributes", 2, numAttributes);
 
     // canSAS_class and NX_class attribute
-    auto classAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(note, sasclass);
-    TSM_ASSERT_EQUALS("Should be SASnote class", classAttribute,
-                      sasNoteClassAttr);
+    auto classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(note, sasclass);
+    TSM_ASSERT_EQUALS("Should be SASnote class", classAttribute, sasNoteClassAttr);
 
-    classAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(note, nxclass);
-    TSM_ASSERT_EQUALS("Should be NXnote class", classAttribute,
-                      nxNoteClassAttr);
+    classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(note, nxclass);
+    TSM_ASSERT_EQUALS("Should be NXnote class", classAttribute, nxNoteClassAttr);
 
     if (hasSampleRuns) {
-      auto sampleDirectRunDataSet =
-          note.openDataSet(sasProcessTermSampleDirect);
-      auto sampleDirectRunValue =
-          Mantid::DataHandling::H5Util::readString(sampleDirectRunDataSet);
-      TSM_ASSERT_EQUALS("Should have correct sample direct run number",
-                        sampleDirectRunValue, sampleDirectRun);
+      auto sampleDirectRunDataSet = note.openDataSet(sasProcessTermSampleDirect);
+      auto sampleDirectRunValue = Mantid::DataHandling::H5Util::readString(sampleDirectRunDataSet);
+      TSM_ASSERT_EQUALS("Should have correct sample direct run number", sampleDirectRunValue, sampleDirectRun);
     }
 
     if (hasCanRuns) {
       auto canDirectRunDataSet = note.openDataSet(sasProcessTermCanDirect);
-      auto canDirectRunValue =
-          Mantid::DataHandling::H5Util::readString(canDirectRunDataSet);
-      TSM_ASSERT_EQUALS("Should have correct can direct run number",
-                        canDirectRunValue, canDirectRun);
+      auto canDirectRunValue = Mantid::DataHandling::H5Util::readString(canDirectRunDataSet);
+      TSM_ASSERT_EQUALS("Should have correct can direct run number", canDirectRunValue, canDirectRun);
     }
   }
 
-  void do_assert_1D_vector_with_same_entries(H5::DataSet &dataSet,
-                                             double referenceValue, int size) {
-    auto data =
-        Mantid::DataHandling::H5Util::readArray1DCoerce<double>(dataSet);
+  void do_assert_1D_vector_with_same_entries(H5::DataSet &dataSet, double referenceValue, int size) {
+    auto data = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(dataSet);
     TS_ASSERT_EQUALS(data.size(), static_cast<size_t>(size));
     TS_ASSERT_EQUALS(data[0], referenceValue);
   }
 
-  void do_assert_1D_vector_with_increasing_entries(H5::DataSet &dataSet,
-                                                   double min, double increment,
-                                                   int size) {
-    const auto data =
-        Mantid::DataHandling::H5Util::readArray1DCoerce<double>(dataSet);
+  void do_assert_1D_vector_with_increasing_entries(H5::DataSet &dataSet, double min, double increment, int size) {
+    const auto data = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(dataSet);
     TS_ASSERT_EQUALS(data.size(), static_cast<size_t>(size));
     for (size_t index = 0; index < data.size(); ++index) {
       TS_ASSERT_EQUALS(data[index], min);
@@ -680,8 +596,7 @@ private:
     } catch (H5::AttributeIException &) {
       missingQUncertaintyAttribute = true;
     }
-    TSM_ASSERT("Should not have a Q_uncertainty attribute",
-               missingQUncertaintyAttribute);
+    TSM_ASSERT("Should not have a Q_uncertainty attribute", missingQUncertaintyAttribute);
 
     bool missingQUncertaintiesAttribute = false;
     try {
@@ -689,8 +604,7 @@ private:
     } catch (H5::AttributeIException &) {
       missingQUncertaintiesAttribute = true;
     }
-    TSM_ASSERT("Should not have a Q_uncertainties attribute",
-               missingQUncertaintiesAttribute);
+    TSM_ASSERT("Should not have a Q_uncertainties attribute", missingQUncertaintiesAttribute);
 
     // Check that Qdev data set does not exist
     bool missingQDevDataSet = false;
@@ -711,8 +625,7 @@ private:
     } catch (H5::AttributeIException &) {
       missingQUncertaintyOnQDataSet = true;
     }
-    TSM_ASSERT("Data set should not have an uncertainty",
-               missingQUncertaintyOnQDataSet);
+    TSM_ASSERT("Data set should not have an uncertainty", missingQUncertaintyOnQDataSet);
 
     bool missingQUncertaintiesOnQDataSet = false;
     try {
@@ -721,58 +634,43 @@ private:
     } catch (H5::AttributeIException &) {
       missingQUncertaintiesOnQDataSet = true;
     }
-    TSM_ASSERT("Data set should not have uncertainties",
-               missingQUncertaintiesOnQDataSet);
+    TSM_ASSERT("Data set should not have uncertainties", missingQUncertaintiesOnQDataSet);
   }
 
-  void do_assert_data(H5::Group &data, int size, double value, double error,
-                      double xmin, double xmax, double xerror, bool hasDx) {
+  void do_assert_data(H5::Group &data, int size, double value, double error, double xmin, double xmax, double xerror,
+                      bool hasDx) {
     auto numAttributes = data.getNumAttrs();
     if (hasDx) {
       TSM_ASSERT_EQUALS("Should have 9 attributes", 9, numAttributes);
     } else {
-      TSM_ASSERT_EQUALS(
-          "Should have 7 attributes, since Q_uncertainty is not present", 7,
-          numAttributes);
+      TSM_ASSERT_EQUALS("Should have 7 attributes, since Q_uncertainty is not present", 7, numAttributes);
     }
 
     // canSAS_class and NX_class attribute
-    auto classAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(data, sasclass);
-    TSM_ASSERT_EQUALS("Should be SASdata class", classAttribute,
-                      sasDataClassAttr);
-    classAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(data, nxclass);
-    TSM_ASSERT_EQUALS("Should be NXdata class", classAttribute,
-                      nxDataClassAttr);
+    auto classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(data, sasclass);
+    TSM_ASSERT_EQUALS("Should be SASdata class", classAttribute, sasDataClassAttr);
+    classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(data, nxclass);
+    TSM_ASSERT_EQUALS("Should be NXdata class", classAttribute, nxDataClassAttr);
 
     // I_axes attribute
-    auto intensityAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(data,
-                                                            sasDataIAxesAttr);
+    auto intensityAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(data, sasDataIAxesAttr);
     TSM_ASSERT_EQUALS("Should be just Q", intensityAttribute, sasDataQ);
 
     // I_uncertainty attribute
-    auto errorAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(
-        data, sasDataIUncertaintyAttr);
+    auto errorAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(data, sasDataIUncertaintyAttr);
     TSM_ASSERT_EQUALS("Should be just Idev", errorAttribute, sasDataIdev);
 
     // I_uncertainties attribute
     auto errorAlternativeAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(
-            data, sasDataIUncertaintiesAttr);
-    TSM_ASSERT_EQUALS("Should be just Idev", errorAlternativeAttribute,
-                      sasDataIdev);
+        Mantid::DataHandling::H5Util::readAttributeAsString(data, sasDataIUncertaintiesAttr);
+    TSM_ASSERT_EQUALS("Should be just Idev", errorAlternativeAttribute, sasDataIdev);
 
     // Q_indices attribute
-    auto qAttribute =
-        Mantid::DataHandling::H5Util::readNumArrayAttributeCoerce<int>(
-            data, sasDataQIndicesAttr);
+    auto qAttribute = Mantid::DataHandling::H5Util::readNumArrayAttributeCoerce<int>(data, sasDataQIndicesAttr);
     TSM_ASSERT_EQUALS("Should be just 0", qAttribute, std::vector<int>{0});
 
     // Signal attribute
-    auto signalAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(data, sasSignal);
+    auto signalAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(data, sasSignal);
     TSM_ASSERT_EQUALS("Should be just I", signalAttribute, sasDataI);
 
     // I data set
@@ -781,17 +679,13 @@ private:
 
     // I data set uncertainty attribute
     auto uncertaintyIAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(intensityDataSet,
-                                                            sasUncertaintyAttr);
-    TSM_ASSERT_EQUALS("Should be just Idev", uncertaintyIAttribute,
-                      sasDataIdev);
+        Mantid::DataHandling::H5Util::readAttributeAsString(intensityDataSet, sasUncertaintyAttr);
+    TSM_ASSERT_EQUALS("Should be just Idev", uncertaintyIAttribute, sasDataIdev);
 
     // I data set uncertainties attribute
     auto uncertaintiesIAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(
-            intensityDataSet, sasUncertaintiesAttr);
-    TSM_ASSERT_EQUALS("Should be just Idev", uncertaintiesIAttribute,
-                      sasDataIdev);
+        Mantid::DataHandling::H5Util::readAttributeAsString(intensityDataSet, sasUncertaintiesAttr);
+    TSM_ASSERT_EQUALS("Should be just Idev", uncertaintiesIAttribute, sasDataIdev);
 
     // I dev data set
     auto errorDataSet = data.openDataSet(sasDataIdev);
@@ -800,40 +694,30 @@ private:
     // Q data set
     auto qDataSet = data.openDataSet(sasDataQ);
     double increment = (xmax - xmin) / static_cast<double>(size - 1);
-    do_assert_1D_vector_with_increasing_entries(qDataSet, xmin, increment,
-                                                size);
+    do_assert_1D_vector_with_increasing_entries(qDataSet, xmin, increment, size);
 
     if (hasDx) {
       // Q data set uncertainty attribute
-      auto uncertaintyQAttribute =
-          Mantid::DataHandling::H5Util::readAttributeAsString(
-              qDataSet, sasUncertaintyAttr);
-      TSM_ASSERT_EQUALS("Should be just Qdev", uncertaintyQAttribute,
-                        sasDataQdev);
+      auto uncertaintyQAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(qDataSet, sasUncertaintyAttr);
+      TSM_ASSERT_EQUALS("Should be just Qdev", uncertaintyQAttribute, sasDataQdev);
 
       // Q data set uncertainties attribute
       auto uncertaintiesQAttribute =
-          Mantid::DataHandling::H5Util::readAttributeAsString(
-              qDataSet, sasUncertaintiesAttr);
-      TSM_ASSERT_EQUALS("Should be just Qdev", uncertaintiesQAttribute,
-                        sasDataQdev);
+          Mantid::DataHandling::H5Util::readAttributeAsString(qDataSet, sasUncertaintiesAttr);
+      TSM_ASSERT_EQUALS("Should be just Qdev", uncertaintiesQAttribute, sasDataQdev);
 
       // Q error data set
       auto xErrorDataSet = data.openDataSet(sasDataQdev);
       do_assert_1D_vector_with_same_entries(xErrorDataSet, xerror, size);
 
       // Q_uncertainty attribute on the SASdata group
-      auto qErrorAttribute =
-          Mantid::DataHandling::H5Util::readAttributeAsString(
-              data, sasDataQUncertaintyAttr);
+      auto qErrorAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(data, sasDataQUncertaintyAttr);
       TSM_ASSERT_EQUALS("Should be just Qdev", qErrorAttribute, sasDataQdev);
 
       // Q_uncertainties attribute on the SASdata group
       auto qErrorAlternativeAttribute =
-          Mantid::DataHandling::H5Util::readAttributeAsString(
-              data, sasDataQUncertaintiesAttr);
-      TSM_ASSERT_EQUALS("Should be just Qdev", qErrorAlternativeAttribute,
-                        sasDataQdev);
+          Mantid::DataHandling::H5Util::readAttributeAsString(data, sasDataQUncertaintiesAttr);
+      TSM_ASSERT_EQUALS("Should be just Qdev", qErrorAlternativeAttribute, sasDataQdev);
     } else {
       do_assert_that_Q_dev_information_is_not_present(data);
     }
@@ -841,152 +725,112 @@ private:
 
   void do_assert_2D_data(H5::Group &data) {
     auto numAttributes = data.getNumAttrs();
-    TSM_ASSERT_EQUALS(
-        "Should have 7 attributes, since Q_uncertainty is not present", 7,
-        numAttributes);
+    TSM_ASSERT_EQUALS("Should have 7 attributes, since Q_uncertainty is not present", 7, numAttributes);
 
     // canSAS_class and NX_class attribute
-    auto classAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(data, sasclass);
-    TSM_ASSERT_EQUALS("Should be SASdata class", classAttribute,
-                      sasDataClassAttr);
-    classAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(data, nxclass);
-    TSM_ASSERT_EQUALS("Should be NXdata class", classAttribute,
-                      nxDataClassAttr);
+    auto classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(data, sasclass);
+    TSM_ASSERT_EQUALS("Should be SASdata class", classAttribute, sasDataClassAttr);
+    classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(data, nxclass);
+    TSM_ASSERT_EQUALS("Should be NXdata class", classAttribute, nxDataClassAttr);
 
     // I_axes attribute
-    auto intensityAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(data,
-                                                            sasDataIAxesAttr);
-    TSM_ASSERT_EQUALS("Should be just Q,Q", intensityAttribute,
-                      sasDataQ + sasSeparator + sasDataQ);
+    auto intensityAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(data, sasDataIAxesAttr);
+    TSM_ASSERT_EQUALS("Should be just Q,Q", intensityAttribute, sasDataQ + sasSeparator + sasDataQ);
 
     // I_uncertainty attribute
-    auto errorAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(
-        data, sasDataIUncertaintyAttr);
+    auto errorAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(data, sasDataIUncertaintyAttr);
     TSM_ASSERT_EQUALS("Should be just Idev", errorAttribute, sasDataIdev);
 
     // I_uncertainties attribute
     auto errorAlternativeAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(
-            data, sasDataIUncertaintiesAttr);
-    TSM_ASSERT_EQUALS("Should be just Idev", errorAlternativeAttribute,
-                      sasDataIdev);
+        Mantid::DataHandling::H5Util::readAttributeAsString(data, sasDataIUncertaintiesAttr);
+    TSM_ASSERT_EQUALS("Should be just Idev", errorAlternativeAttribute, sasDataIdev);
 
     // Q_indices attribute
-    auto qAttribute =
-        Mantid::DataHandling::H5Util::readNumArrayAttributeCoerce<int>(
-            data, sasDataQIndicesAttr);
+    auto qAttribute = Mantid::DataHandling::H5Util::readNumArrayAttributeCoerce<int>(data, sasDataQIndicesAttr);
     std::vector<int> expectedQIndices{0, 1};
     TSM_ASSERT_EQUALS("Should be just 0,1", qAttribute, expectedQIndices);
 
     // Signal attribute
-    auto signalAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(data, sasSignal);
+    auto signalAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(data, sasSignal);
     TSM_ASSERT_EQUALS("Should be just I", signalAttribute, sasDataI);
 
     // Note: Acutal Values are being testin in LoadNXcanSAS to avoid redundant
     // testing
   }
 
-  void do_assert_transmission(H5::Group &entry,
-                              NXcanSASTestTransmissionParameters &parameters) {
+  void do_assert_transmission(H5::Group &entry, NXcanSASTestTransmissionParameters &parameters) {
     if (!parameters.usesTransmission) {
       return;
     }
 
-    auto transmission = entry.openGroup(sasTransmissionSpectrumGroupName + "_" +
-                                        parameters.name);
+    auto transmission = entry.openGroup(sasTransmissionSpectrumGroupName + "_" + parameters.name);
 
     // canSAS_class and NX_class attribute
-    auto classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(
-        transmission, sasclass);
-    TSM_ASSERT_EQUALS("Should be SAStransmission_spectrum class",
-                      classAttribute, sasTransmissionSpectrumClassAttr);
-    classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(
-        transmission, nxclass);
-    TSM_ASSERT_EQUALS("Should be NXdata class", classAttribute,
-                      nxTransmissionSpectrumClassAttr);
+    auto classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(transmission, sasclass);
+    TSM_ASSERT_EQUALS("Should be SAStransmission_spectrum class", classAttribute, sasTransmissionSpectrumClassAttr);
+    classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(transmission, nxclass);
+    TSM_ASSERT_EQUALS("Should be NXdata class", classAttribute, nxTransmissionSpectrumClassAttr);
 
     // Name attribute
-    auto nameAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(
-        transmission, sasTransmissionSpectrumNameAttr);
-    TSM_ASSERT_EQUALS("Should be either can or sample", nameAttribute,
-                      parameters.name);
+    auto nameAttribute =
+        Mantid::DataHandling::H5Util::readAttributeAsString(transmission, sasTransmissionSpectrumNameAttr);
+    TSM_ASSERT_EQUALS("Should be either can or sample", nameAttribute, parameters.name);
 
     // T indices attribute
     auto tIndicesAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(
-            transmission, sasTransmissionSpectrumTIndices);
-    TSM_ASSERT_EQUALS("Should be T", tIndicesAttribute,
-                      sasTransmissionSpectrumT);
+        Mantid::DataHandling::H5Util::readAttributeAsString(transmission, sasTransmissionSpectrumTIndices);
+    TSM_ASSERT_EQUALS("Should be T", tIndicesAttribute, sasTransmissionSpectrumT);
 
     // T uncertainty attribute
     auto tUncertaintyIndicesAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(
-            transmission, sasTransmissionSpectrumTUncertainty);
-    TSM_ASSERT_EQUALS("Should be Tdev", tUncertaintyIndicesAttribute,
-                      sasTransmissionSpectrumTdev);
+        Mantid::DataHandling::H5Util::readAttributeAsString(transmission, sasTransmissionSpectrumTUncertainty);
+    TSM_ASSERT_EQUALS("Should be Tdev", tUncertaintyIndicesAttribute, sasTransmissionSpectrumTdev);
 
     // T uncertainties attribute
     auto tUncertaintiesIndicesAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(
-            transmission, sasTransmissionSpectrumTUncertainties);
-    TSM_ASSERT_EQUALS("Should be Tdev", tUncertaintiesIndicesAttribute,
-                      sasTransmissionSpectrumTdev);
+        Mantid::DataHandling::H5Util::readAttributeAsString(transmission, sasTransmissionSpectrumTUncertainties);
+    TSM_ASSERT_EQUALS("Should be Tdev", tUncertaintiesIndicesAttribute, sasTransmissionSpectrumTdev);
 
     // Signal attribute
-    auto signalAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(
-        transmission, sasSignal);
+    auto signalAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(transmission, sasSignal);
     TSM_ASSERT_EQUALS("Should be T", signalAttribute, sasTransmissionSpectrumT);
 
     // Timestamp attribute
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::DataHandling::H5Util::readAttributeAsString(
-            transmission, sasTransmissionSpectrumTimeStampAttr));
+        Mantid::DataHandling::H5Util::readAttributeAsString(transmission, sasTransmissionSpectrumTimeStampAttr));
 
     // T data set
     auto tDataSet = transmission.openDataSet(sasTransmissionSpectrumT);
-    do_assert_1D_vector_with_same_entries(tDataSet, parameters.value,
-                                          parameters.size);
+    do_assert_1D_vector_with_same_entries(tDataSet, parameters.value, parameters.size);
 
     // Tdev data set
     auto tErrorDataSet = transmission.openDataSet(sasTransmissionSpectrumTdev);
-    do_assert_1D_vector_with_same_entries(tErrorDataSet, parameters.error,
-                                          parameters.size);
+    do_assert_1D_vector_with_same_entries(tErrorDataSet, parameters.error, parameters.size);
 
     // Lambda data set
-    auto lambdaDataSet =
-        transmission.openDataSet(sasTransmissionSpectrumLambda);
-    double increment = (parameters.xmax - parameters.xmin) /
-                       static_cast<double>(parameters.size - 1);
-    do_assert_1D_vector_with_increasing_entries(lambdaDataSet, parameters.xmin,
-                                                increment, parameters.size);
+    auto lambdaDataSet = transmission.openDataSet(sasTransmissionSpectrumLambda);
+    double increment = (parameters.xmax - parameters.xmin) / static_cast<double>(parameters.size - 1);
+    do_assert_1D_vector_with_increasing_entries(lambdaDataSet, parameters.xmin, increment, parameters.size);
 
     // Size check for matching T/Tdev/lambda
     do_assert_data_array_sizes_match(tDataSet, tErrorDataSet, lambdaDataSet);
   }
 
-  void do_assert_data_array_sizes_match(const H5::DataSet &tDataSet,
-                                        const H5::DataSet &tErrorDataSet,
+  void do_assert_data_array_sizes_match(const H5::DataSet &tDataSet, const H5::DataSet &tErrorDataSet,
                                         const H5::DataSet &lambdaDataSet) {
     auto arraySize = [](const H5::DataSet &dataSet) {
       const auto dataSpace = dataSet.getSpace();
       return dataSpace.getSelectNpoints();
     };
 
-    TSM_ASSERT_EQUALS("Expected T and Tdev array lengths to match",
-                      arraySize(tDataSet), arraySize(tErrorDataSet));
-    TSM_ASSERT_EQUALS("Expected T and Lambda array lengths to match",
-                      arraySize(lambdaDataSet), arraySize(tDataSet));
+    TSM_ASSERT_EQUALS("Expected T and Tdev array lengths to match", arraySize(tDataSet), arraySize(tErrorDataSet));
+    TSM_ASSERT_EQUALS("Expected T and Lambda array lengths to match", arraySize(lambdaDataSet), arraySize(tDataSet));
   }
 
   void do_assert(NXcanSASTestParameters &parameters,
-                 NXcanSASTestTransmissionParameters transmissionParameters =
-                     NXcanSASTestTransmissionParameters(),
-                 NXcanSASTestTransmissionParameters transmissionCanParameters =
-                     NXcanSASTestTransmissionParameters()) {
+                 NXcanSASTestTransmissionParameters transmissionParameters = NXcanSASTestTransmissionParameters(),
+                 NXcanSASTestTransmissionParameters transmissionCanParameters = NXcanSASTestTransmissionParameters()) {
     H5::H5File file(parameters.filename, H5F_ACC_RDONLY);
 
     // Check sasentry
@@ -995,24 +839,21 @@ private:
 
     // Check instrument
     auto instrument = entry.openGroup(sasInstrumentGroupName);
-    do_assert_instrument(instrument, parameters.instrumentName, parameters.idf,
-                         parameters.radiationSource, parameters.detectors,
-                         parameters.invalidDetectors);
+    do_assert_instrument(instrument, parameters.instrumentName, parameters.idf, parameters.radiationSource,
+                         parameters.detectors, parameters.invalidDetectors);
 
     // Check process
     auto process = entry.openGroup(sasProcessGroupName);
-    do_assert_process(process, parameters.hasSampleRuns, parameters.hasCanRuns,
-                      parameters.userFile, parameters.sampleDirectRun,
-                      parameters.canDirectRun);
+    do_assert_process(process, parameters.hasSampleRuns, parameters.hasCanRuns, parameters.userFile,
+                      parameters.sampleDirectRun, parameters.canDirectRun);
 
     // Check data
     auto data = entry.openGroup(sasDataGroupName);
     if (parameters.is2dData) {
       do_assert_2D_data(data);
     } else {
-      do_assert_data(data, parameters.size, parameters.value, parameters.error,
-                     parameters.xmin, parameters.xmax, parameters.xerror,
-                     parameters.hasDx);
+      do_assert_data(data, parameters.size, parameters.value, parameters.error, parameters.xmin, parameters.xmax,
+                     parameters.xerror, parameters.hasDx);
     }
 
     // Check the transmission

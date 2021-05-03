@@ -17,6 +17,7 @@ import matplotlib
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
 import numpy as np
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 # local imports
 from mantidqt.plotting.figuretype import figure_type, FigureType
@@ -48,7 +49,7 @@ class FigureTypeTest(TestCase):
 
     def test_surface_plot_returns_surface(self):
         a = np.array([[1]])
-        ax = plt.subplot(111, projection='3d')
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
         ax.plot_surface(a, a, a)
         self.assertEqual(FigureType.Surface, figure_type(ax.figure))
 
@@ -63,6 +64,13 @@ class FigureTypeTest(TestCase):
         ax.imshow([[1], [1]])
         ax.contour([[1, 1], [1, 1]])
         self.assertEqual(FigureType.Contour, figure_type(ax.figure))
+
+    def test_mesh_plot_returns_mesh(self):
+        a = np.array([[[1, 1, 1], [2, 2, 2], [3, 3, 3]]])
+        mesh_polygon = Poly3DCollection(a)
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
+        ax.add_collection3d(mesh_polygon)
+        self.assertEqual(FigureType.Mesh, figure_type(ax.figure))
 
 
 if __name__ == '__main__':

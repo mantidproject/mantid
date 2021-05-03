@@ -16,8 +16,7 @@ namespace MantidWidgets {
 
 /** LogValueSelector : Select a log name and mean/min/max/first/last
  */
-class EXPORT_OPT_MANTIDQT_COMMON LogValueSelector
-    : public MantidQt::API::MantidWidget {
+class EXPORT_OPT_MANTIDQT_COMMON LogValueSelector : public MantidQt::API::MantidWidget {
   Q_OBJECT
 public:
   /// Constructor
@@ -42,9 +41,7 @@ public:
   QComboBox *getLogComboBox() const;
 
   /// Set enabled/disabled
-  void setEnabled(bool enabled) {
-    this->setEnabled(enabled ? Qt::Checked : Qt::Unchecked);
-  }
+  void setEnabled(bool enabled) { this->setEnabled(enabled ? Qt::Checked : Qt::Unchecked); }
 
   /// Whether checkbox is ticked or not
   bool isCheckboxTicked() const;
@@ -65,8 +62,7 @@ private:
   Ui::LogValueSelector m_ui;
 
   /// Converts strings like "Mean" or "Max" to enum values
-  static const std::map<std::string, Mantid::Kernel::Math::StatisticType>
-      STRING_TO_FUNC;
+  static const std::map<std::string, Mantid::Kernel::Math::StatisticType> STRING_TO_FUNC;
 };
 
 } // namespace MantidWidgets

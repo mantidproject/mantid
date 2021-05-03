@@ -27,8 +27,7 @@ namespace Functions {
 /**
  * @brief Inelastic part of the IsoRotDiff function.
  */
-class MANTID_CURVEFITTING_DLL InelasticIsoRotDiff : public API::ParamFunction,
-                                                    public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL InelasticIsoRotDiff : public API::ParamFunction, public API::IFunction1D {
 public:
   InelasticIsoRotDiff();
 
@@ -42,8 +41,7 @@ public:
   const std::string category() const override { return "QuasiElastic"; }
 
 protected:
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
 };
 
 } // namespace Functions

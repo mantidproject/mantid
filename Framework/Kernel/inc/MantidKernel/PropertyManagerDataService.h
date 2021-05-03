@@ -20,13 +20,10 @@ class PropertyManager;
 /**
 PropertyManagerDataService Class. Derived from DataService.
 */
-class MANTID_KERNEL_DLL PropertyManagerDataServiceImpl final
-    : public DataService<PropertyManager> {
+class MANTID_KERNEL_DLL PropertyManagerDataServiceImpl final : public DataService<PropertyManager> {
 public:
-  PropertyManagerDataServiceImpl(const PropertyManagerDataServiceImpl &) =
-      delete;
-  PropertyManagerDataServiceImpl &
-  operator=(const PropertyManagerDataServiceImpl &) = delete;
+  PropertyManagerDataServiceImpl(const PropertyManagerDataServiceImpl &) = delete;
+  PropertyManagerDataServiceImpl &operator=(const PropertyManagerDataServiceImpl &) = delete;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<PropertyManagerDataServiceImpl>;
@@ -35,10 +32,8 @@ private:
   ~PropertyManagerDataServiceImpl() override = default;
 };
 
-EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
-    Mantid::Kernel::SingletonHolder<PropertyManagerDataServiceImpl>;
-using PropertyManagerDataService =
-    Mantid::Kernel::SingletonHolder<PropertyManagerDataServiceImpl>;
+EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<PropertyManagerDataServiceImpl>;
+using PropertyManagerDataService = Mantid::Kernel::SingletonHolder<PropertyManagerDataServiceImpl>;
 
 } // Namespace Kernel
 } // Namespace Mantid

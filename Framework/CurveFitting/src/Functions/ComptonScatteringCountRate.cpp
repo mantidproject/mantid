@@ -34,8 +34,8 @@ DECLARE_FUNCTION(ComptonScatteringCountRate)
 /** Constructor
  */
 ComptonScatteringCountRate::ComptonScatteringCountRate()
-    : CompositeFunction(), m_profiles(), m_fixedParamIndices(), m_cmatrix(),
-      m_eqMatrix(), m_bkgdOrderAttr("n"), m_bkgdPolyN(0), m_dataErrorRatio() {
+    : CompositeFunction(), m_profiles(), m_fixedParamIndices(), m_cmatrix(), m_eqMatrix(), m_bkgdOrderAttr("n"),
+      m_bkgdPolyN(0), m_dataErrorRatio() {
   // Must be a string to be able to be passed through Fit
   declareAttribute(CONSTRAINT_MATRIX_NAME, IFunction::Attribute("", true));
   declareAttribute(BKGD_ORDER_ATTR_NAME, IFunction::Attribute(m_bkgdOrderAttr));
@@ -49,8 +49,7 @@ ComptonScatteringCountRate::ComptonScatteringCountRate()
  * @param name The name of the attribute that is being set
  * @param value The attribute's value
  */
-void ComptonScatteringCountRate::setAttribute(
-    const std::string &name, const API::IFunction::Attribute &value) {
+void ComptonScatteringCountRate::setAttribute(const std::string &name, const API::IFunction::Attribute &value) {
   CompositeFunction::setAttribute(name, value);
   if (name == CONSTRAINT_MATRIX_NAME)
     parseIntensityConstraintMatrix(value.asUnquotedString());
@@ -66,11 +65,9 @@ void ComptonScatteringCountRate::setAttribute(
  * entries within the brackets. The number of columns must ultimately match the
  * total number of intensities within the problem
  */
-void ComptonScatteringCountRate::parseIntensityConstraintMatrix(
-    const std::string &value) {
+void ComptonScatteringCountRate::parseIntensityConstraintMatrix(const std::string &value) {
   if (value.empty())
-    throw std::invalid_argument(
-        "ComptonScatteringCountRate - Empty string not allowed.");
+    throw std::invalid_argument("ComptonScatteringCountRate - Empty string not allowed.");
   std::istringstream is(value);
   Mantid::Kernel::fillFromStream(is, m_eqMatrix, '|');
 }
@@ -82,8 +79,7 @@ namespace {
 struct NoBkgdNorm2 {
   /// Compute the value of the objective function
   NoBkgdNorm2(const Kernel::DblMatrix &cmatrix, const std::vector<double> &data)
-      : cm(cmatrix), nrows(cmatrix.numRows()), ncols(cmatrix.numCols()),
-        rhs(data) {}
+      : cm(cmatrix), nrows(cmatrix.numRows()), ncols(cmatrix.numCols()), rhs(data) {}
 
   double eval(const std::vector<double> &xpt) const {
     double norm2(0.0);
@@ -109,8 +105,7 @@ struct NoBkgdNorm2 {
 struct BkgdNorm2 {
   /// Compute the value of the objective function
   BkgdNorm2(const Kernel::DblMatrix &cmatrix, const std::vector<double> &data)
-      : cm(cmatrix), nrows(cmatrix.numRows()), ncols(cmatrix.numCols()),
-        rhs(data) {}
+      : cm(cmatrix), nrows(cmatrix.numRows()), ncols(cmatrix.numCols()), rhs(data) {}
 
   double eval(const size_t n, const double *xpt) const {
     double norm2(0.0);
@@ -165,17 +160,14 @@ void ComptonScatteringCountRate::iterationStarting() {
   if (m_bkgdPolyN > 0) {
     BkgdNorm2 objf(m_cmatrix, m_dataErrorRatio);
     using namespace std::placeholders;
-    AugmentedLagrangianOptimizer::ObjFunction objfunc =
-        std::bind(&BkgdNorm2::eval, objf, _1, _2);
-    AugmentedLagrangianOptimizer lsqmin(nparams, objfunc, m_eqMatrix,
-                                        m_cmatrix);
+    AugmentedLagrangianOptimizer::ObjFunction objfunc = std::bind(&BkgdNorm2::eval, objf, _1, _2);
+    AugmentedLagrangianOptimizer lsqmin(nparams, objfunc, m_eqMatrix, m_cmatrix);
     lsqmin.minimize(x0);
     // Set the parameters for the 'real' function calls
     setFixedParameterValues(x0);
   } else {
     NoBkgdNorm2 objfunc(m_cmatrix, m_dataErrorRatio);
-    Kernel::Math::SLSQPMinimizer lsqmin(nparams, objfunc, m_eqMatrix,
-                                        m_cmatrix);
+    Kernel::Math::SLSQPMinimizer lsqmin(nparams, objfunc, m_eqMatrix, m_cmatrix);
     auto res = lsqmin.minimize(x0);
     // Set the parameters for the 'real' function calls
     setFixedParameterValues(res);
@@ -186,8 +178,7 @@ void ComptonScatteringCountRate::iterationStarting() {
  * Set the first N fixed parameters to the values given by the N values vector
  * @param values A new set of N values to set
  */
-void ComptonScatteringCountRate::setFixedParameterValues(
-    const std::vector<double> &values) {
+void ComptonScatteringCountRate::setFixedParameterValues(const std::vector<double> &values) {
   assert(values.size() == m_fixedParamIndices.size());
 
   const size_t nparams = values.size();
@@ -211,8 +202,7 @@ void ComptonScatteringCountRate::updateCMatrixValues() const {
   const size_t nprofiles = m_profiles.size();
   for (size_t i = 0, start = 0; i < nprofiles; ++i) {
     auto *profile = m_profiles[i];
-    const size_t numFilled =
-        profile->fillConstraintMatrix(m_cmatrix, start, m_hist->e());
+    const size_t numFilled = profile->fillConstraintMatrix(m_cmatrix, start, m_hist->e());
     start += numFilled;
   }
   // Using different minimizer for background constraints as the original is not
@@ -240,20 +230,17 @@ void ComptonScatteringCountRate::updateCMatrixValues() const {
  * @param startX Starting x-value (unused).
  * @param endX Ending x-value (unused).
  */
-void ComptonScatteringCountRate::setMatrixWorkspace(
-    std::shared_ptr<const API::MatrixWorkspace> matrix, size_t wsIndex,
-    double startX, double endX) {
+void ComptonScatteringCountRate::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> matrix, size_t wsIndex,
+                                                    double startX, double endX) {
   CompositeFunction::setMatrixWorkspace(matrix, wsIndex, startX, endX);
 
-  this->m_hist =
-      std::make_shared<HistogramData::Histogram>(matrix->histogram(wsIndex));
+  this->m_hist = std::make_shared<HistogramData::Histogram>(matrix->histogram(wsIndex));
   this->wsIndex = wsIndex;
   const auto &values = m_hist->y();
   const auto &errors = m_hist->e();
   // Keep the errors for the constraint calculation
   m_dataErrorRatio.resize(errors.size());
-  std::transform(values.begin(), values.end(), errors.begin(),
-                 m_dataErrorRatio.begin(), std::divides<double>());
+  std::transform(values.begin(), values.end(), errors.begin(), m_dataErrorRatio.begin(), std::divides<double>());
 
   if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
     g_log.debug() << "-- data/error --\n";
@@ -282,8 +269,7 @@ void ComptonScatteringCountRate::cacheFunctions() {
 
   for (size_t i = 0; i < nfuncs; ++i) {
     auto func = this->getFunction(i);
-    const size_t paramsOffset =
-        this->paramOffset(i); // offset for ith function inside composite
+    const size_t paramsOffset = this->paramOffset(i); // offset for ith function inside composite
 
     if (auto profile = std::dynamic_pointer_cast<ComptonProfile>(func)) {
       this->cacheComptonProfile(profile, paramsOffset);
@@ -296,8 +282,7 @@ void ComptonScatteringCountRate::cacheFunctions() {
       foundBkgd = true;
     } else {
       std::ostringstream os;
-      os << "ComptonScatteringCountRate - Invalid function member at index '"
-         << i << "'. "
+      os << "ComptonScatteringCountRate - Invalid function member at index '" << i << "'. "
          << "All members must be of type ComptonProfile and at most a single "
             "1D function";
       throw std::runtime_error(os.str());
@@ -310,8 +295,8 @@ void ComptonScatteringCountRate::cacheFunctions() {
  * @param paramsOffset The offset of the given function's parameters within
  * composite
  */
-void ComptonScatteringCountRate::cacheComptonProfile(
-    const std::shared_ptr<ComptonProfile> &profile, const size_t paramsOffset) {
+void ComptonScatteringCountRate::cacheComptonProfile(const std::shared_ptr<ComptonProfile> &profile,
+                                                     const size_t paramsOffset) {
   m_profiles.emplace_back(profile.get());
   auto fixedParams = profile->intensityParameterIndices();
   for (auto fixedParam : fixedParams) {
@@ -326,8 +311,7 @@ void ComptonScatteringCountRate::cacheComptonProfile(
  * @param paramsOffset The offset of the given function's parameters within
  * composite
  */
-void ComptonScatteringCountRate::cacheBackground(
-    const API::IFunction1D_sptr &function1D, const size_t paramsOffset) {
+void ComptonScatteringCountRate::cacheBackground(const API::IFunction1D_sptr &function1D, const size_t paramsOffset) {
   // Check for the order attribute
   if (function1D->hasAttribute(m_bkgdOrderAttr)) {
     m_bkgdPolyN = function1D->getAttribute(m_bkgdOrderAttr).asInt();
@@ -344,8 +328,7 @@ void ComptonScatteringCountRate::cacheBackground(
     std::ostringstream os;
     os << "ComptonScatteringCountRate - Background function does not have "
           "attribute named '"
-       << m_bkgdOrderAttr << "' that specifies its order. Use the '"
-       << BKGD_ORDER_ATTR_NAME
+       << m_bkgdOrderAttr << "' that specifies its order. Use the '" << BKGD_ORDER_ATTR_NAME
        << "' attribute to specify the name of the order attribute.";
     throw std::runtime_error(os.str());
   }
@@ -366,9 +349,7 @@ void ComptonScatteringCountRate::createConstraintMatrices() {
     std::ostringstream os;
     os << "ComptonScatteringCountRate - Equality constraint matrix (Aeq) has "
           "incorrect number of columns ("
-       << m_eqMatrix.numCols()
-       << "). The number of columns should match the number of masses ("
-       << nmasses << ")";
+       << m_eqMatrix.numCols() << "). The number of columns should match the number of masses (" << nmasses << ")";
     throw std::invalid_argument(os.str());
   }
 
@@ -440,14 +421,12 @@ void ComptonScatteringCountRate::createEqualityCM(const size_t nmasses) {
   }
   const size_t nExtraColsLeft = (nFixedProfilePars - nmasses);
 
-  m_eqMatrix =
-      Kernel::DblMatrix(nconstr, nColsCMatrix); // all zeroed by default.
+  m_eqMatrix = Kernel::DblMatrix(nconstr, nColsCMatrix); // all zeroed by default.
   for (size_t i = 0; i < nconstr; ++i) {
     const double *userRow = userMatrix[i];
     double *destRow = m_eqMatrix[i];
     for (size_t j = 0; j < nFixedProfilePars; ++j) {
-      destRow[j] =
-          (j < nExtraColsLeft) ? userRow[0] : userRow[j - nExtraColsLeft];
+      destRow[j] = (j < nExtraColsLeft) ? userRow[0] : userRow[j - nExtraColsLeft];
     }
   }
 }

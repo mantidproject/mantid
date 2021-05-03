@@ -21,19 +21,13 @@ public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveMask"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Save a MaskWorkspace/SpecialWorkspace2D to an XML file.";
-  }
+  const std::string summary() const override { return "Save a MaskWorkspace/SpecialWorkspace2D to an XML file."; }
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveMask", "LoadMask"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveMask", "LoadMask"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "DataHandling\\Masking;Transforms\\Masking";
-  }
+  const std::string category() const override { return "DataHandling\\Masking;Transforms\\Masking"; }
 
 private:
   /// Define input parameters

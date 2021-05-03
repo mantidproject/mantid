@@ -40,22 +40,17 @@ const std::string FilterBadPulses::name() const { return "FilterBadPulses"; }
 int FilterBadPulses::version() const { return 1; }
 
 /// Algorithm's category for identification overriding a virtual method
-const std::string FilterBadPulses::category() const {
-  return "Events\\EventFiltering";
-}
+const std::string FilterBadPulses::category() const { return "Events\\EventFiltering"; }
 
 /// Initialise the properties
 void FilterBadPulses::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An event workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
   auto range = std::make_shared<BoundedValidator<double>>();
   range->setBounds(0., 100.);
-  declareProperty("LowerCutoff", 95., range,
-                  "The percentage of the average to use as the lower bound");
+  declareProperty("LowerCutoff", 95., range, "The percentage of the average to use as the lower bound");
 }
 
 /** Executes the algorithm */
@@ -70,32 +65,25 @@ void FilterBadPulses::exec() {
   if (runlogs.hasProperty(INT_CHARGE_NAME)) {
     auto value = runlogs.getPropertyValueAsType<double>(INT_CHARGE_NAME);
     if (value <= 0.) {
-      throw std::runtime_error("Found no integrated charge value in " +
-                               INT_CHARGE_NAME);
+      throw std::runtime_error("Found no integrated charge value in " + INT_CHARGE_NAME);
     }
   } else {
-    this->g_log.warning() << "Failed to find \"" << INT_CHARGE_NAME
-                          << "\" in run object.\n";
+    this->g_log.warning() << "Failed to find \"" << INT_CHARGE_NAME << "\" in run object.\n";
   }
 
   // get the proton charge exists in the run object
   if (!runlogs.hasProperty(LOG_CHARGE_NAME)) {
-    throw std::runtime_error("Failed to find \"" + LOG_CHARGE_NAME +
-                             "\" in sample logs");
+    throw std::runtime_error("Failed to find \"" + LOG_CHARGE_NAME + "\" in sample logs");
   }
-  auto *pcharge_log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-      runlogs.getLogData(LOG_CHARGE_NAME));
+  auto *pcharge_log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(runlogs.getLogData(LOG_CHARGE_NAME));
   if (!pcharge_log) {
-    throw std::logic_error("Failed to find \"" + LOG_CHARGE_NAME +
-                           "\" in sample logs");
+    throw std::logic_error("Failed to find \"" + LOG_CHARGE_NAME + "\" in sample logs");
   }
   Kernel::TimeSeriesPropertyStatistics stats = pcharge_log->getStatistics();
 
   // check that the maximum value is greater than zero
   if (stats.maximum <= 0.) {
-    throw std::runtime_error(
-        "Maximum value of charge is not greater than zero (" + LOG_CHARGE_NAME +
-        ")");
+    throw std::runtime_error("Maximum value of charge is not greater than zero (" + LOG_CHARGE_NAME + ")");
   }
 
   // set the range
@@ -104,11 +92,9 @@ void FilterBadPulses::exec() {
   double min_pcharge = stats.mean * min_percent;
   double max_pcharge = stats.maximum * 1.1; // make sure everything high is in
   if (min_pcharge >= max_pcharge) {
-    throw std::runtime_error(
-        "proton_charge window filters out all of the data");
+    throw std::runtime_error("proton_charge window filters out all of the data");
   }
-  this->g_log.information() << "Filtering pcharge outside of " << min_pcharge
-                            << " to " << max_pcharge << '\n';
+  this->g_log.information() << "Filtering pcharge outside of " << min_pcharge << " to " << max_pcharge << '\n';
   size_t inputNumEvents = inputWS->getNumberEvents();
 
   // Child Algorithme does all of the actual work - do not set the output
@@ -126,20 +112,16 @@ void FilterBadPulses::exec() {
   this->setProperty("OutputWorkspace", outputWS);
 
   // log the number of events deleted
-  double percent = static_cast<double>(inputNumEvents - outputNumEvents) /
-                   static_cast<double>(inputNumEvents);
+  double percent = static_cast<double>(inputNumEvents - outputNumEvents) / static_cast<double>(inputNumEvents);
   percent *= 100.;
   if (percent > 10.) {
-    this->g_log.warning() << "Deleted " << (inputNumEvents - outputNumEvents)
-                          << " of " << inputNumEvents << " events ("
+    this->g_log.warning() << "Deleted " << (inputNumEvents - outputNumEvents) << " of " << inputNumEvents << " events ("
                           << static_cast<int>(percent) << "%)\n";
   } else {
-    this->g_log.notice() << "Deleted " << (inputNumEvents - outputNumEvents)
-                         << " of " << inputNumEvents << " events ("
+    this->g_log.notice() << "Deleted " << (inputNumEvents - outputNumEvents) << " of " << inputNumEvents << " events ("
                          << static_cast<float>(percent) << "%)"
-                         << " by proton charge from " << min_pcharge << " to "
-                         << max_pcharge << " with mean = " << stats.mean
-                         << "\n";
+                         << " by proton charge from " << min_pcharge << " to " << max_pcharge
+                         << " with mean = " << stats.mean << "\n";
   }
 }
 

@@ -95,13 +95,9 @@ set ( PRE_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/prerm )
 set ( POST_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/postrm )
 
 if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedora" ) # RHEL/Fedora
-  if ( "${UNIX_CODENAME}" MATCHES "Santiago" )
-    set ( WRAPPER_PREFIX "scl enable mantidlibs34 \"" )
-    set ( WRAPPER_POSTFIX "\"" )
-  else()
-    set ( WRAPPER_PREFIX "" )
-    set ( WRAPPER_POSTFIX "" )
-  endif()
+  # these are used if we need to scl enable at runtime
+  set ( WRAPPER_PREFIX "" )
+  set ( WRAPPER_POSTFIX "" )
 
   if ("${UNIX_DIST}" MATCHES "^Fedora")
     # The instrument view doesn't work with the wayland compositor
@@ -200,7 +196,7 @@ fi" )
 set ( ERROR_CMD "-m mantidqt.dialogs.errorreports.main --exitcode=\$?" )
 
 ##### Local dev version
-set ( PYTHON_ARGS "-Wdefault::DeprecationWarning" )
+set ( PYTHON_ARGS "-Wdefault::DeprecationWarning -Werror:::mantid -Werror:::mantidqt" )
 
 set ( LOCAL_PYPATH "\${INSTALLDIR}/bin" )
 

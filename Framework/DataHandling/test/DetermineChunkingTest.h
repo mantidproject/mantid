@@ -23,9 +23,7 @@ class DetermineChunkingTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DetermineChunkingTest *createSuite() {
-    return new DetermineChunkingTest();
-  }
+  static DetermineChunkingTest *createSuite() { return new DetermineChunkingTest(); }
   static void destroySuite(DetermineChunkingTest *suite) { delete suite; }
 
   void test_Init() {
@@ -42,14 +40,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     if (events) {
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setPropertyValue("Filename", "CNCS_7860_event.nxs"));
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "CNCS_7860_event.nxs"));
     } else {
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setPropertyValue("Filename", "CNCS_7860_runinfo.xml"));
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "CNCS_7860_runinfo.xml"));
     }
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxChunkSize", 0.0005));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
@@ -57,9 +52,7 @@ public:
     // Retrieve the workspace from data service. TODO: Change to your desired
     // type
     DataObjects::TableWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance()
-                 .retrieveWS<DataObjects::TableWorkspace>(outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<DataObjects::TableWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;

@@ -10,10 +10,12 @@
 """
 Defines the QMainWindow of the application and the main() entry point.
 """
+import builtins
 import os
 
 from mantid.api import FrameworkManager
 from mantid.kernel import ConfigService, logger
+from workbench.config import SAVE_STATE_VERSION
 from workbench.app import MAIN_WINDOW_OBJECT_NAME, MAIN_WINDOW_TITLE
 from workbench.utils.windowfinder import find_window
 from workbench.widgets.about.presenter import AboutPresenter
@@ -39,10 +41,12 @@ from workbench.config import CONF  # noqa
 from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
 from workbench.utils.windowfinder import find_all_windows_that_are_savable  # noqa
 from workbench.utils.workspacehistorygeneration import get_all_workspace_history_from_ads  # noqa
+from workbench.utils.io import input_qinputdialog
 from workbench.projectrecovery.projectrecovery import ProjectRecovery  # noqa
 from workbench.utils.recentlyclosedscriptsmenu import RecentlyClosedScriptsMenu # noqa
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback  # noqa
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall  # noqa
+from workbench.config import get_window_config
 
 # -----------------------------------------------------------------------------
 # Splash screen
@@ -87,6 +91,7 @@ class MainWindow(QMainWindow):
         self.setObjectName(MAIN_WINDOW_OBJECT_NAME)
 
         # widgets
+        self.memorywidget = None
         self.messagedisplay = None
         self.ipythonconsole = None
         self.workspacewidget = None
@@ -124,6 +129,8 @@ class MainWindow(QMainWindow):
         self.interface_manager = None
         self.interface_executor = None
         self.interface_list = None
+
+        self.could_restore_state = False
 
     def setup(self):
         # menus must be done first so they can be filled by the
@@ -176,6 +183,12 @@ class MainWindow(QMainWindow):
         self.workspacewidget.workspacewidget.enableDeletePrompt(bool(prompt))
         self.widgets.append(self.workspacewidget)
 
+        self.set_splash("Loading memory widget")
+        from workbench.plugins.memorywidget import MemoryWidget
+        self.memorywidget = MemoryWidget(self)
+        self.memorywidget.register_plugin()
+        self.widgets.append(self.memorywidget)
+
         # set the link between the algorithm and workspace widget
         self.algorithm_selector.algorithm_selector.set_get_selected_workspace_fn(
             self.workspacewidget.workspacewidget.getSelectedWorkspaceNames)
@@ -195,6 +208,8 @@ class MainWindow(QMainWindow):
         self.create_actions()
         self.readSettings(CONF)
         self.config_updated()
+
+        self.override_python_input()
 
     def post_mantid_init(self):
         """Run any setup that requires mantid
@@ -324,7 +339,6 @@ class MainWindow(QMainWindow):
         add_actions(self.file_menu, self.file_menu_actions)
         add_actions(self.view_menu, self.view_menu_actions)
         add_actions(self.help_menu, self.help_menu_actions)
-        self.populate_interfaces_menu()
 
     def launch_custom_python_gui(self, filename):
         self.interface_executor.execute(open(filename).read(), filename)
@@ -338,9 +352,9 @@ class MainWindow(QMainWindow):
             interface = self.interface_manager.createSubWindow(interface_name)
             interface.setObjectName(object_name)
             interface.setAttribute(Qt.WA_DeleteOnClose, True)
-            # make indirect interfaces children of workbench
-            if submenu == "Indirect":
-                interface.setParent(self, interface.windowFlags())
+            parent, flags = get_window_config()
+            if parent:
+                interface.setParent(parent, flags)
             interface.show()
         else:
             if window.windowState() == Qt.WindowMinimized:
@@ -352,9 +366,8 @@ class MainWindow(QMainWindow):
         """Populate then Interfaces menu with all Python and C++ interfaces"""
         self.interfaces_menu.clear()
         interface_dir = ConfigService['mantidqt.python_interfaces_directory']
-        self.interface_list = self._discover_python_interfaces(interface_dir)
+        self.interface_list, registers_to_run = self._discover_python_interfaces(interface_dir)
         self._discover_cpp_interfaces(self.interface_list)
-
         hidden_interfaces = ConfigService['interfaces.categories.hidden'].split(';')
 
         keys = list(self.interface_list.keys())
@@ -374,6 +387,13 @@ class MainWindow(QMainWindow):
                         action = submenu.addAction(name)
                         action.triggered.connect(lambda checked_cpp, name=name, key=key: self.
                                                  launch_custom_cpp_gui(name, key))
+        # these register scripts contain code to register encoders and decoders to work with project save before the
+        # corresponding interface has been initialised. This is a temporary measure pending harmonisation of cpp/python
+        # interfaces
+        for reg_list in registers_to_run.values():
+            for register in reg_list:
+                file_path = os.path.join(interface_dir, register)
+                self.interface_executor.execute(open(file_path).read(), file_path)
 
     def redirect_python_warnings(self):
         """By default the warnings module writes warnings to sys.stderr. stderr is assumed to be
@@ -390,21 +410,27 @@ class MainWindow(QMainWindow):
     def _discover_python_interfaces(self, interface_dir):
         """Return a dictionary mapping a category to a set of named Python interfaces"""
         items = ConfigService['mantidqt.python_interfaces'].split()
-
+        try:
+            register_items = ConfigService['mantidqt.python_interfaces_io_registry'].split()
+        except KeyError:
+            register_items = []
         # detect the python interfaces
         interfaces = {}
+        registers_to_run = {}
         for item in items:
             key, scriptname = item.split('/')
+            reg_name = scriptname[:-3] + '_register.py'
+            if reg_name in register_items and os.path.exists(os.path.join(interface_dir, reg_name)):
+                registers_to_run.setdefault(key, []).append(reg_name)
             if not os.path.exists(os.path.join(interface_dir, scriptname)):
-                logger.warning('Failed to find script "{}" in "{}"'.format(
-                    scriptname, interface_dir))
+                logger.warning('Failed to find script "{}" in "{}"'.format(scriptname, interface_dir))
                 continue
             if scriptname in self.PYTHON_GUI_BLACKLIST:
                 logger.information('Not adding gui "{}"'.format(scriptname))
                 continue
             interfaces.setdefault(key, []).append(scriptname)
 
-        return interfaces
+        return interfaces, registers_to_run
 
     def _discover_cpp_interfaces(self, interfaces):
         """Return a dictionary mapping a category to a set of named C++ interfaces"""
@@ -450,7 +476,7 @@ class MainWindow(QMainWindow):
     def create_load_layout_action(self, layout_name, layout):
         action_load_layout = create_action(self,
                                            layout_name,
-                                           on_triggered=lambda: self.restoreState(layout))
+                                           on_triggered=lambda: self.attempt_to_restore_state(layout))
         return action_load_layout
 
     def prep_window_for_reset(self):
@@ -464,12 +490,18 @@ class MainWindow(QMainWindow):
     def setup_default_layouts(self):
         """Set the default layouts of the child widgets"""
         # layout definition
+        memorywidget = self.memorywidget
         logmessages = self.messagedisplay
         ipython = self.ipythonconsole
         workspacewidget = self.workspacewidget
         editor = self.editor
         algorithm_selector = self.algorithm_selector
         plot_selector = self.plot_selector
+
+        # If more than two rows are needed in a column,
+        # arrange_layout function needs to be revisited.
+        # In the first column, there are three widgets in two rows
+        # as the algorithm_selector and plot_selector are tabified.
         default_layout = {
             'widgets': [
                 # column 0
@@ -477,18 +509,8 @@ class MainWindow(QMainWindow):
                 # column 1
                 [[editor, ipython]],
                 # column 2
-                [[logmessages]]
+                [[memorywidget], [logmessages]]
             ],
-            'width-fraction': [
-                0.25,  # column 0 width
-                0.50,  # column 1 width
-                0.25
-            ],  # column 2 width
-            'height-fraction': [
-                [0.5, 0.5],  # column 0 row heights
-                [1.0],  # column 1 row heights
-                [1.0]
-            ]  # column 2 row heights
         }
 
         size = self.size()  # Preserve size on reset
@@ -515,6 +537,7 @@ class MainWindow(QMainWindow):
                     first_row, second_row = column[i], column[i + 1]
                     self.splitDockWidget(first_row[0].dockwidget, second_row[0].dockwidget,
                                          Qt.Vertical)
+
             # and finally tabify those in the same position
             for column in widgets_layout:
                 for row in column:
@@ -717,7 +740,10 @@ class MainWindow(QMainWindow):
 
         # restore window state
         if settings.has('MainWindow/state'):
-            self.restoreState(settings.get('MainWindow/state'))
+            if not self.restoreState(settings.get('MainWindow/state'), SAVE_STATE_VERSION):
+                logger.warning(
+                    "The previous layout of workbench is not compatible with this version, reverting to default layout."
+                )
         else:
             self.setWindowState(Qt.WindowMaximized)
 
@@ -730,10 +756,39 @@ class MainWindow(QMainWindow):
     def writeSettings(self, settings):
         settings.set('MainWindow/size', self.size())  # QSize
         settings.set('MainWindow/position', self.pos())  # QPoint
-        settings.set('MainWindow/state', self.saveState())  # QByteArray
+        settings.set('MainWindow/state', self.saveState(SAVE_STATE_VERSION))  # QByteArray
 
         # write out settings for children
         AlgorithmInputHistory().writeSettings(settings)
         for widget in self.widgets:
             if hasattr(widget, 'writeSettings'):
                 widget.writeSettings(settings)
+
+    def override_python_input(self):
+        """Replace python input with a call to a qinputdialog"""
+        builtins.input = QAppThreadCall(input_qinputdialog)
+
+    def attempt_to_restore_state(self, state):
+        if self.restoreState(state, SAVE_STATE_VERSION):
+            return
+
+        # The version number of the supplied state is older than the current version
+        reply = QMessageBox.question(
+            self,
+            "Layout Restoration",
+            "The selected layout is incompatible with this version of Workbench. Workbench will attempt to restore "
+            "the layout, but it may appear differently from before.\nDo you wish to continue?",
+            QMessageBox.Yes | QMessageBox.No)
+        if not reply == QMessageBox.Yes:
+            return
+
+        for version in range(0, SAVE_STATE_VERSION):
+            if self.restoreState(state, version):
+                QMessageBox.information(
+                    self,
+                    "Success",
+                    "The layout was successfully restored.\nTo hide this warning in the future, delete the old "
+                    "layout in File > Settings, and save this as a new layout."
+                )
+                return
+        QMessageBox.warning(self, "Failure", "The layout was unable to be restored.", QMessageBox.Ok)

@@ -22,7 +22,7 @@ calling this algorithm is not necessary, since it called as a child algorithm.
 Data loaded from Nexus File
 ###########################
 
-Not all of the nexus file is loaded. This section tells you what is loaded and where it goes in the workspace. 
+Not all of the nexus file is loaded. This section tells you what is loaded and where it goes in the workspace.
 Items missing from the Nexus file are simply not loaded.
 
 
@@ -66,7 +66,7 @@ Items missing from the Nexus file are simply not loaded.
 If the nexus file has a ``"proton_log"`` group, then this algorithm will do some event filtering to allow SANS2D files to load.
 
 The ``AllowList`` option skips loading of the entire sample log, and loads only log entries specified in the list. This can be
-useful if only particular log entries are needed. Likewise, the ``BlockList`` option will skip loading log entries specified in 
+useful if only particular log entries are needed. Likewise, the ``BlockList`` option will skip loading log entries specified in
 the list, while loading all other sample log entries that are not found in the list. For both of these options, log entry names
 should be separated by a space. Both ``AllowList`` and ``BlockList`` cannot be set at the same time.
 

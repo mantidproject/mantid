@@ -19,42 +19,33 @@
  * @param plotAsDistribution If true and the data is histogram and not already a
  * distribution then plot the Y values/X bin-width
  */
-QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(
-    const Mantid::API::MatrixWorkspace &workspace, int wsIndex,
-    const bool logScaleY, const bool plotAsDistribution)
-    : MantidQwtMatrixWorkspaceData(logScaleY), m_wsIndex(wsIndex),
-      m_X(workspace.readX(wsIndex)), m_Y(workspace.readY(wsIndex)),
-      m_E(workspace.readE(wsIndex)), m_xTitle(), m_yTitle(),
-      m_isHistogram(workspace.isHistogramData()),
-      m_dataIsNormalized(workspace.isDistribution()), m_binCentres(false),
+QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(const Mantid::API::MatrixWorkspace &workspace, int wsIndex,
+                                                   const bool logScaleY, const bool plotAsDistribution)
+    : MantidQwtMatrixWorkspaceData(logScaleY), m_wsIndex(wsIndex), m_X(workspace.readX(wsIndex)),
+      m_Y(workspace.readY(wsIndex)), m_E(workspace.readE(wsIndex)), m_xTitle(), m_yTitle(),
+      m_isHistogram(workspace.isHistogramData()), m_dataIsNormalized(workspace.isDistribution()), m_binCentres(false),
       m_isDistribution(false) {
   // Actual plotting based on what type of data we have
-  setAsDistribution(plotAsDistribution &&
-                    !m_dataIsNormalized); // takes into account if this is a
-                                          // histogram and sets m_isDistribution
+  setAsDistribution(plotAsDistribution && !m_dataIsNormalized); // takes into account if this is a
+                                                                // histogram and sets m_isDistribution
 
   m_xTitle = MantidQt::API::PlotAxis(workspace, 0).title();
-  m_yTitle = MantidQt::API::PlotAxis((m_dataIsNormalized || m_isDistribution),
-                                     workspace)
-                 .title();
+  m_yTitle = MantidQt::API::PlotAxis((m_dataIsNormalized || m_isDistribution), workspace).title();
 
   // Calculate the min and max values
   calculateYMinAndMax();
 }
 
 /// Virtual copy constructor
-QwtWorkspaceSpectrumData *QwtWorkspaceSpectrumData::copy() const {
-  return new QwtWorkspaceSpectrumData(*this);
-}
+QwtWorkspaceSpectrumData *QwtWorkspaceSpectrumData::copy() const { return new QwtWorkspaceSpectrumData(*this); }
 
 /**
  * @param workspace A new workspace source
  * @return
  */
-QwtWorkspaceSpectrumData *QwtWorkspaceSpectrumData::copyWithNewSource(
-    const Mantid::API::MatrixWorkspace &workspace) const {
-  return new QwtWorkspaceSpectrumData(workspace, m_wsIndex, logScaleY(),
-                                      m_isDistribution);
+QwtWorkspaceSpectrumData *
+QwtWorkspaceSpectrumData::copyWithNewSource(const Mantid::API::MatrixWorkspace &workspace) const {
+  return new QwtWorkspaceSpectrumData(workspace, m_wsIndex, logScaleY(), m_isDistribution);
 }
 
 /** Size of the data set
@@ -75,9 +66,7 @@ Return the x value of data point i
 @param i :: Index
 @return x X value of data point i
 */
-double QwtWorkspaceSpectrumData::getX(size_t i) const {
-  return m_binCentres ? (m_X[i] + m_X[i + 1]) / 2 : m_X[i];
-}
+double QwtWorkspaceSpectrumData::getX(size_t i) const { return m_binCentres ? (m_X[i] + m_X[i + 1]) / 2 : m_X[i]; }
 
 /**
 Return the y value of data point i
@@ -92,9 +81,7 @@ double QwtWorkspaceSpectrumData::getY(size_t i) const {
   return tmp;
 }
 
-double QwtWorkspaceSpectrumData::getEX(size_t i) const {
-  return m_isHistogram ? (m_X[i] + m_X[i + 1]) / 2 : m_X[i];
-}
+double QwtWorkspaceSpectrumData::getEX(size_t i) const { return m_isHistogram ? (m_X[i] + m_X[i + 1]) / 2 : m_X[i]; }
 
 double QwtWorkspaceSpectrumData::getE(size_t i) const {
   double ei = (i < m_E.size()) ? m_E[i] : m_E.back();

@@ -16,8 +16,7 @@ namespace API {
 /**
   An interface for those validators that require the MatrixWorkspace interface
 */
-class MANTID_API_DLL MatrixWorkspaceValidator
-    : public Kernel::TypedValidator<MatrixWorkspace_sptr> {};
+class MANTID_API_DLL MatrixWorkspaceValidator : public Kernel::TypedValidator<MatrixWorkspace_sptr> {};
 
 } // namespace API
 } // namespace Mantid

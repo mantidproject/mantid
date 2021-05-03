@@ -16,15 +16,12 @@ namespace Mantid {
 namespace DataHandling {
 
 /// Return offset between global spectrum index and detector ID for given banks.
-std::vector<int32_t> bankOffsets(const API::ExperimentInfo &ws,
-                                 const std::string &filename,
-                                 const std::string &groupName,
-                                 const std::vector<std::string> &bankNames) {
+std::vector<int32_t> bankOffsets(const API::ExperimentInfo &ws, const std::string &filename,
+                                 const std::string &groupName, const std::vector<std::string> &bankNames) {
   // Read an event ID for each bank. This is always a detector ID since
   // bankOffsetsSpectrumNumbers is used otherwise. It is assumed that detector
   // IDs within a bank are contiguous.
-  const auto &idToBank = Parallel::IO::EventLoader::makeAnyEventIdToBankMap(
-      filename, groupName, bankNames);
+  const auto &idToBank = Parallel::IO::EventLoader::makeAnyEventIdToBankMap(filename, groupName, bankNames);
 
   const auto &detInfo = ws.detectorInfo();
   const auto &detIds = detInfo.detectorIDs();
@@ -52,14 +49,13 @@ std::vector<int32_t> bankOffsets(const API::ExperimentInfo &ws,
 
 /// Return offset between global spectrum index and spectrum number for given
 /// banks.
-std::vector<int32_t> bankOffsetsSpectrumNumbers(
-    const API::MatrixWorkspace &ws, const std::string &filename,
-    const std::string &groupName, const std::vector<std::string> &bankNames) {
+std::vector<int32_t> bankOffsetsSpectrumNumbers(const API::MatrixWorkspace &ws, const std::string &filename,
+                                                const std::string &groupName,
+                                                const std::vector<std::string> &bankNames) {
   // Read an event ID for each bank. This is always a spectrum number since
   // bankOffsets is used otherwise. It is assumed that spectrum numbers within a
   // bank are contiguous.
-  const auto &idToBank = Parallel::IO::EventLoader::makeAnyEventIdToBankMap(
-      filename, groupName, bankNames);
+  const auto &idToBank = Parallel::IO::EventLoader::makeAnyEventIdToBankMap(filename, groupName, bankNames);
 
   // *Global* vector of spectrum numbers.
   const auto &specNums = ws.indexInfo().spectrumNumbers();
@@ -80,8 +76,7 @@ std::vector<int32_t> bankOffsetsSpectrumNumbers(
   return offsets;
 }
 
-std::vector<std::vector<Types::Event::TofEvent> *>
-getResultVector(DataObjects::EventWorkspace &ws) {
+std::vector<std::vector<Types::Event::TofEvent> *> getResultVector(DataObjects::EventWorkspace &ws) {
   const size_t size = ws.getNumberHistograms();
 
   std::vector<std::vector<Types::Event::TofEvent> *> eventLists(size, nullptr);
@@ -90,44 +85,32 @@ getResultVector(DataObjects::EventWorkspace &ws) {
   return eventLists;
 }
 
-std::vector<int32_t> getOffsets(const DataObjects::EventWorkspace &ws,
-                                const std::string &filename,
-                                const std::string &groupName,
-                                const std::vector<std::string> &bankNames,
+std::vector<int32_t> getOffsets(const DataObjects::EventWorkspace &ws, const std::string &filename,
+                                const std::string &groupName, const std::vector<std::string> &bankNames,
                                 const bool eventIDIsSpectrumNumber) {
-  const auto offsets =
-      eventIDIsSpectrumNumber
-          ? bankOffsetsSpectrumNumbers(ws, filename, groupName, bankNames)
-          : bankOffsets(ws, filename, groupName, bankNames);
+  const auto offsets = eventIDIsSpectrumNumber ? bankOffsetsSpectrumNumbers(ws, filename, groupName, bankNames)
+                                               : bankOffsets(ws, filename, groupName, bankNames);
   return offsets;
 }
 
 /// Load events from given banks into given EventWorkspace using MPI.
-void ParallelEventLoader::loadMPI(DataObjects::EventWorkspace &ws,
-                                  const std::string &filename,
-                                  const std::string &groupName,
-                                  const std::vector<std::string> &bankNames,
+void ParallelEventLoader::loadMPI(DataObjects::EventWorkspace &ws, const std::string &filename,
+                                  const std::string &groupName, const std::vector<std::string> &bankNames,
                                   const bool eventIDIsSpectrumNumber) {
-  std::vector<std::vector<Types::Event::TofEvent> *> eventLists =
-      getResultVector(ws);
-  std::vector<int32_t> offsets =
-      getOffsets(ws, filename, groupName, bankNames, eventIDIsSpectrumNumber);
-  Parallel::IO::EventLoader::load(ws.indexInfo().communicator(), filename,
-                                  groupName, bankNames, offsets,
+  std::vector<std::vector<Types::Event::TofEvent> *> eventLists = getResultVector(ws);
+  std::vector<int32_t> offsets = getOffsets(ws, filename, groupName, bankNames, eventIDIsSpectrumNumber);
+  Parallel::IO::EventLoader::load(ws.indexInfo().communicator(), filename, groupName, bankNames, offsets,
                                   std::move(eventLists));
 }
 
 /// Load events from given banks into given EventWorkspace using
 /// boost::interprocess.
-void ParallelEventLoader::loadMultiProcess(
-    DataObjects::EventWorkspace &ws, const std::string &filename,
-    const std::string &groupName, const std::vector<std::string> &bankNames,
-    const bool eventIDIsSpectrumNumber, const bool precalcEvents) {
+void ParallelEventLoader::loadMultiProcess(DataObjects::EventWorkspace &ws, const std::string &filename,
+                                           const std::string &groupName, const std::vector<std::string> &bankNames,
+                                           const bool eventIDIsSpectrumNumber, const bool precalcEvents) {
   auto eventLists = getResultVector(ws);
-  std::vector<int32_t> offsets =
-      getOffsets(ws, filename, groupName, bankNames, eventIDIsSpectrumNumber);
-  Parallel::IO::EventLoader::load(filename, groupName, bankNames, offsets,
-                                  std::move(eventLists), precalcEvents);
+  std::vector<int32_t> offsets = getOffsets(ws, filename, groupName, bankNames, eventIDIsSpectrumNumber);
+  Parallel::IO::EventLoader::load(filename, groupName, bankNames, offsets, std::move(eventLists), precalcEvents);
 }
 
 } // namespace DataHandling

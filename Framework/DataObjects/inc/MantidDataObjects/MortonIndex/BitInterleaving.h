@@ -220,8 +220,7 @@ template <> inline uint256_t pad<2, uint64_t, uint256_t>(uint64_t v) {
   x = (x | x << 16) & 0xff0000ff0000ff0000ff0000ff0000ff0000ff0000ff_cppui256;
   x = (x | x << 8) & 0xf00f00f00f00f00f00f00f00f00f00f00f00f00f00f00f_cppui256;
   x = (x | x << 4) & 0xc30c30c30c30c30c30c30c30c30c30c30c30c30c30c30c3_cppui256;
-  x = (x | x << 2) &
-      0x249249249249249249249249249249249249249249249249_cppui256;
+  x = (x | x << 2) & 0x249249249249249249249249249249249249249249249249_cppui256;
   return x;
 }
 
@@ -241,43 +240,27 @@ template <> inline uint256_t pad<3, uint64_t, uint256_t>(uint64_t v) {
 
   uint256_t x(v);
   x &= 0xffffffffffffffff_cppui256;
-  x = (x | x << 128) &
-      0xfffff800000000000000000000000000000007ffffffffff_cppui256;
-  x = (x | x << 64) &
-      0xfffff80000000000000007ffffc0000000000000003fffff_cppui256;
-  x = (x | x << 32) &
-      0xffc00000003ff800000007ff00000000ffc00000003ff800000007ff_cppui256;
-  x = (x | x << 16) &
-      0xf80007c0003f0000f80007c0003f0000f80007c0003f0000f80007c0003f_cppui256;
-  x = (x | x << 8) &
-      0xc0380700c0380700c0380700c0380700c0380700c0380700c0380700c03807_cppui256;
-  x = (x | x << 4) &
-      0x843084308430843084308430843084308430843084308430843084308430843_cppui256;
-  x = (x | x << 2) &
-      0x909090909090909090909090909090909090909090909090909090909090909_cppui256;
-  x = (x | x << 1) &
-      0x1111111111111111111111111111111111111111111111111111111111111111_cppui256;
+  x = (x | x << 128) & 0xfffff800000000000000000000000000000007ffffffffff_cppui256;
+  x = (x | x << 64) & 0xfffff80000000000000007ffffc0000000000000003fffff_cppui256;
+  x = (x | x << 32) & 0xffc00000003ff800000007ff00000000ffc00000003ff800000007ff_cppui256;
+  x = (x | x << 16) & 0xf80007c0003f0000f80007c0003f0000f80007c0003f0000f80007c0003f_cppui256;
+  x = (x | x << 8) & 0xc0380700c0380700c0380700c0380700c0380700c0380700c0380700c03807_cppui256;
+  x = (x | x << 4) & 0x843084308430843084308430843084308430843084308430843084308430843_cppui256;
+  x = (x | x << 2) & 0x909090909090909090909090909090909090909090909090909090909090909_cppui256;
+  x = (x | x << 1) & 0x1111111111111111111111111111111111111111111111111111111111111111_cppui256;
   return x;
 }
 
 template <> inline uint64_t compact<3, uint64_t, uint256_t>(uint256_t x) {
 
-  x &=
-      0x1111111111111111111111111111111111111111111111111111111111111111_cppui256;
-  x = (x | x >> 1) &
-      0x909090909090909090909090909090909090909090909090909090909090909_cppui256;
-  x = (x | x >> 2) &
-      0x843084308430843084308430843084308430843084308430843084308430843_cppui256;
-  x = (x | x >> 4) &
-      0xc0380700c0380700c0380700c0380700c0380700c0380700c0380700c03807_cppui256;
-  x = (x | x >> 8) &
-      0xf80007c0003f0000f80007c0003f0000f80007c0003f0000f80007c0003f_cppui256;
-  x = (x | x >> 16) &
-      0xffc00000003ff800000007ff00000000ffc00000003ff800000007ff_cppui256;
-  x = (x | x >> 32) &
-      0xfffff80000000000000007ffffc0000000000000003fffff_cppui256;
-  x = (x | x >> 64) &
-      0xfffff800000000000000000000000000000007ffffffffff_cppui256;
+  x &= 0x1111111111111111111111111111111111111111111111111111111111111111_cppui256;
+  x = (x | x >> 1) & 0x909090909090909090909090909090909090909090909090909090909090909_cppui256;
+  x = (x | x >> 2) & 0x843084308430843084308430843084308430843084308430843084308430843_cppui256;
+  x = (x | x >> 4) & 0xc0380700c0380700c0380700c0380700c0380700c0380700c0380700c03807_cppui256;
+  x = (x | x >> 8) & 0xf80007c0003f0000f80007c0003f0000f80007c0003f0000f80007c0003f_cppui256;
+  x = (x | x >> 16) & 0xffc00000003ff800000007ff00000000ffc00000003ff800000007ff_cppui256;
+  x = (x | x >> 32) & 0xfffff80000000000000007ffffc0000000000000003fffff_cppui256;
+  x = (x | x >> 64) & 0xfffff800000000000000000000000000000007ffffffffff_cppui256;
   x = (x | x >> 128) & 0xffffffffffffffff_cppui256;
   return (uint64_t)x;
 }
@@ -291,8 +274,7 @@ template <> inline uint64_t compact<3, uint64_t, uint256_t>(uint256_t x) {
  * @param coord Coordinate in intermediate integer space
  * @return Interleaved integer (Morton number)
  */
-template <size_t ND, typename IntT, typename MortonT>
-MortonT interleave(const IntArray<ND, IntT> &coord) {
+template <size_t ND, typename IntT, typename MortonT> MortonT interleave(const IntArray<ND, IntT> &coord) {
   MortonT retVal(0);
   for (size_t i = 0; i < ND; i++) {
     retVal |= pad<ND - 1, IntT, MortonT>(coord[i]) << static_cast<int>(i);
@@ -300,8 +282,7 @@ MortonT interleave(const IntArray<ND, IntT> &coord) {
   return retVal;
 }
 
-template <size_t ND, typename IntT>
-Morton96 interleave(const IntArray<3, uint32_t> &coord) {
+template <size_t ND, typename IntT> Morton96 interleave(const IntArray<3, uint32_t> &coord) {
   return Morton96(interleave<ND, IntT, uint128_t>(coord));
 }
 
@@ -314,18 +295,15 @@ Morton96 interleave(const IntArray<3, uint32_t> &coord) {
  * @param z Morton number
  * @return Integer coordinate
  */
-template <size_t ND, typename IntT, typename MortonT>
-IntArray<ND, IntT> deinterleave(const MortonT z) {
+template <size_t ND, typename IntT, typename MortonT> IntArray<ND, IntT> deinterleave(const MortonT z) {
   IntArray<ND, IntT> retVal;
   for (size_t i = 0; i < ND; i++) {
-    retVal[i] = static_cast<IntT>(
-        compact<ND - 1, IntT, MortonT>(z >> static_cast<int>(i)));
+    retVal[i] = static_cast<IntT>(compact<ND - 1, IntT, MortonT>(z >> static_cast<int>(i)));
   }
   return retVal;
 }
 
-template <size_t ND, typename IntT>
-IntArray<ND, IntT> deinterleave(const Morton96 &z) {
+template <size_t ND, typename IntT> IntArray<ND, IntT> deinterleave(const Morton96 &z) {
   return deinterleave<ND, IntT, uint128_t>(uint128_t(z));
 }
 
@@ -334,19 +312,13 @@ template <size_t ND, typename IntT, typename MortonT> struct Interleaver {
     return morton_index::interleave<ND, IntT, MortonT>(coord);
   }
 
-  static IntArray<ND, IntT> deinterleave(const MortonT z) {
-    return morton_index::deinterleave<ND, IntT, MortonT>(z);
-  }
+  static IntArray<ND, IntT> deinterleave(const MortonT z) { return morton_index::deinterleave<ND, IntT, MortonT>(z); }
 };
 
 template <size_t ND, typename IntT> struct Interleaver<ND, IntT, Morton96> {
-  static Morton96 interleave(const IntArray<ND, IntT> &coord) {
-    return morton_index::interleave<ND, IntT>(coord);
-  }
+  static Morton96 interleave(const IntArray<ND, IntT> &coord) { return morton_index::interleave<ND, IntT>(coord); }
 
-  static IntArray<ND, IntT> deinterleave(const Morton96 z) {
-    return morton_index::deinterleave<ND, IntT>(z);
-  }
+  static IntArray<ND, IntT> deinterleave(const Morton96 z) { return morton_index::deinterleave<ND, IntT>(z); }
 };
 
 } // namespace morton_index

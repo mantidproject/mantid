@@ -33,10 +33,8 @@ IMDWorkspace::IMDWorkspace(const Parallel::StorageMode storageMode)
  * @param function :: Implicit function limiting space to look at
  * @return a single IMDIterator pointer
  */
-std::unique_ptr<IMDIterator> IMDWorkspace::createIterator(
-    Mantid::Geometry::MDImplicitFunction *function) const {
-  std::vector<std::unique_ptr<IMDIterator>> iterators =
-      this->createIterators(1, function);
+std::unique_ptr<IMDIterator> IMDWorkspace::createIterator(Mantid::Geometry::MDImplicitFunction *function) const {
+  std::vector<std::unique_ptr<IMDIterator>> iterators = this->createIterators(1, function);
   if (iterators.empty())
     throw std::runtime_error("IMDWorkspace::createIterator(): iterator "
                              "creation was not successful. No iterators "
@@ -53,9 +51,7 @@ std::string IMDWorkspace::getConvention() const { return m_convention; }
 //---------------------------------------------------------------------------------------------
 /** @return the convention
  */
-void IMDWorkspace::setConvention(std::string convention) {
-  m_convention = std::move(convention);
-}
+void IMDWorkspace::setConvention(std::string convention) { m_convention = std::move(convention); }
 
 //---------------------------------------------------------------------------------------------
 /** @return the convention
@@ -75,9 +71,8 @@ std::string IMDWorkspace::changeQConvention() {
  * @param normalization :: how to normalize the signal returned
  * @return normalized signal
  */
-signal_t IMDWorkspace::getSignalAtVMD(
-    const Mantid::Kernel::VMD &coords,
-    const Mantid::API::MDNormalization &normalization) const {
+signal_t IMDWorkspace::getSignalAtVMD(const Mantid::Kernel::VMD &coords,
+                                      const Mantid::API::MDNormalization &normalization) const {
   return this->getSignalAtCoord(coords.getBareArray(), normalization);
 }
 
@@ -89,9 +84,8 @@ signal_t IMDWorkspace::getSignalAtVMD(
  * @param normalization :: how to normalize the signal returned
  * @return normalized signal
  */
-signal_t IMDWorkspace::getSignalWithMaskAtVMD(
-    const Mantid::Kernel::VMD &coords,
-    const Mantid::API::MDNormalization &normalization) const {
+signal_t IMDWorkspace::getSignalWithMaskAtVMD(const Mantid::Kernel::VMD &coords,
+                                              const Mantid::API::MDNormalization &normalization) const {
   return this->getSignalWithMaskAtCoord(coords.getBareArray(), normalization);
 }
 
@@ -103,8 +97,8 @@ const std::string IMDWorkspace::toString() const {
      << "Title: " + getTitle() << "\n";
   for (size_t i = 0; i < getNumDims(); i++) {
     const auto &dim = getDimension(i);
-    os << "Dim " << i << ": (" << dim->getName() << ") " << dim->getMinimum()
-       << " to " << dim->getMaximum() << " in " << dim->getNBins() << " bins";
+    os << "Dim " << i << ": (" << dim->getName() << ") " << dim->getMinimum() << " to " << dim->getMaximum() << " in "
+       << dim->getNBins() << " bins";
     // Also show the dimension ID string, if different than name
     if (dim->getDimensionId() != dim->getName())
       os << ". Id=" << dim->getDimensionId();
@@ -131,8 +125,7 @@ const std::string IMDWorkspace::toString() const {
  * @param y :: signal value
  * @param e :: error value
  */
-void IMDWorkspace::makeSinglePointWithNaN(std::vector<coord_t> &x,
-                                          std::vector<signal_t> &y,
+void IMDWorkspace::makeSinglePointWithNaN(std::vector<coord_t> &x, std::vector<signal_t> &y,
                                           std::vector<signal_t> &e) const {
   x.emplace_back(0.f);
   y.emplace_back(std::numeric_limits<signal_t>::quiet_NaN());
@@ -153,10 +146,8 @@ void IMDWorkspace::makeSinglePointWithNaN(std::vector<coord_t> &x,
  * each bin with Length = length(x) - 1 and e is set to the normalized
  * errors for each bin with Length = length(x) - 1.
  */
-IMDWorkspace::LinePlot
-IMDWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
-                          const Mantid::Kernel::VMD &end,
-                          Mantid::API::MDNormalization normalize) const {
+IMDWorkspace::LinePlot IMDWorkspace::getLinePlot(const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &end,
+                                                 Mantid::API::MDNormalization normalize) const {
   // TODO: Don't use a fixed number of points later
   size_t numPoints = 200;
 
@@ -184,17 +175,13 @@ IMDWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
 @return normalization preferred for visualization. Set to none for the generic
 case, but overriden elsewhere.
 */
-MDNormalization IMDWorkspace::displayNormalization() const {
-  return NoNormalization;
-}
+MDNormalization IMDWorkspace::displayNormalization() const { return NoNormalization; }
 
 /**
 @return normalization preferred for visualization of histo workspaces. Set to
 none for the generic case, but overriden elsewhere.
 */
-MDNormalization IMDWorkspace::displayNormalizationHisto() const {
-  return NoNormalization;
-}
+MDNormalization IMDWorkspace::displayNormalizationHisto() const { return NoNormalization; }
 } // namespace API
 } // namespace Mantid
 
@@ -204,17 +191,13 @@ namespace Kernel {
  * for the PropertyWithValue<IMDEventWorkspace> is required */
 template <>
 MANTID_API_DLL Mantid::API::IMDWorkspace_sptr
-IPropertyManager::getValue<Mantid::API::IMDWorkspace_sptr>(
-    const std::string &name) const {
-  auto *prop =
-      dynamic_cast<PropertyWithValue<Mantid::API::IMDWorkspace_sptr> *>(
-          getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::API::IMDWorkspace_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::IMDWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected shared_ptr<IMDWorkspace>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected shared_ptr<IMDWorkspace>.";
     throw std::runtime_error(message);
   }
 }
@@ -223,17 +206,13 @@ IPropertyManager::getValue<Mantid::API::IMDWorkspace_sptr>(
  * for the PropertyWithValue<IMDWorkspace_const_sptr> is required */
 template <>
 MANTID_API_DLL Mantid::API::IMDWorkspace_const_sptr
-IPropertyManager::getValue<Mantid::API::IMDWorkspace_const_sptr>(
-    const std::string &name) const {
-  auto *prop =
-      dynamic_cast<PropertyWithValue<Mantid::API::IMDWorkspace_sptr> *>(
-          getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::API::IMDWorkspace_const_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::IMDWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected const shared_ptr<IMDWorkspace>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected const shared_ptr<IMDWorkspace>.";
     throw std::runtime_error(message);
   }
 }

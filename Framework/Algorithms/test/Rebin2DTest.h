@@ -25,9 +25,7 @@ namespace {
  */
 
 /// Return the input workspace. All Y values are 2 and E values sqrt(2)
-MatrixWorkspace_sptr makeInputWS(const bool distribution,
-                                 const bool perf_test = false,
-                                 const bool small_bins = false,
+MatrixWorkspace_sptr makeInputWS(const bool distribution, const bool perf_test = false, const bool small_bins = false,
                                  const bool isHisto = true) {
   size_t nhist(0), nbins(0);
   double x0(0.0), deltax(0.0);
@@ -51,8 +49,7 @@ MatrixWorkspace_sptr makeInputWS(const bool distribution,
   MatrixWorkspace_sptr ws;
 
   if (isHisto) {
-    ws = WorkspaceCreationHelper::create2DWorkspaceBinned(
-        int(nhist), int(nbins), x0, deltax);
+    ws = WorkspaceCreationHelper::create2DWorkspaceBinned(int(nhist), int(nbins), x0, deltax);
     // We need something other than a spectrum axis, call this one theta
     auto thetaAxis = std::make_unique<BinEdgeAxis>(nhist + 1);
     for (size_t i = 0; i < nhist + 1; ++i) {
@@ -64,8 +61,7 @@ MatrixWorkspace_sptr makeInputWS(const bool distribution,
     }
   } else {
     // create histograms with points (which cannot be a distirbution)
-    ws = WorkspaceCreationHelper::create2DWorkspacePoints(
-        int(nhist), int(nbins), x0 + 0.5, deltax);
+    ws = WorkspaceCreationHelper::create2DWorkspacePoints(int(nhist), int(nbins), x0 + 0.5, deltax);
     // convert axis from spectrum to theta
     auto thetaAxis = std::make_unique<NumericAxis>(nhist);
     for (size_t i = 0; i < nhist; ++i) {
@@ -76,10 +72,8 @@ MatrixWorkspace_sptr makeInputWS(const bool distribution,
   return ws;
 }
 
-MatrixWorkspace_sptr runAlgorithm(const MatrixWorkspace_sptr &inputWS,
-                                  const std::string &axis1Params,
-                                  const std::string &axis2Params,
-                                  const bool UseFractionalArea = false) {
+MatrixWorkspace_sptr runAlgorithm(const MatrixWorkspace_sptr &inputWS, const std::string &axis1Params,
+                                  const std::string &axis2Params, const bool UseFractionalArea = false) {
   // Name of the output workspace.
   std::string outWSName("Rebin2DTest_OutputWS");
 
@@ -90,13 +84,12 @@ MatrixWorkspace_sptr runAlgorithm(const MatrixWorkspace_sptr &inputWS,
   TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
   TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Axis1Binning", axis1Params));
   TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Axis2Binning", axis2Params));
-  TS_ASSERT_THROWS_NOTHING(
-      alg.setProperty("UseFractionalArea", UseFractionalArea));
+  TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseFractionalArea", UseFractionalArea));
   TS_ASSERT_THROWS_NOTHING(alg.execute(););
   TS_ASSERT(alg.isExecuted());
 
-  MatrixWorkspace_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-      AnalysisDataService::Instance().retrieve(outWSName));
+  MatrixWorkspace_sptr outputWS =
+      std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outWSName));
   TS_ASSERT(outputWS);
   return outputWS;
 }
@@ -116,40 +109,33 @@ public:
 
   void test_Rebin2D_With_Axis2_Unchanged() {
     MatrixWorkspace_sptr inputWS = makeInputWS(false); // 10 histograms, 10 bins
-    MatrixWorkspace_sptr outputWS =
-        runAlgorithm(inputWS, "5.,2.,15.", "-0.5,1,9.5");
+    MatrixWorkspace_sptr outputWS = runAlgorithm(inputWS, "5.,2.,15.", "-0.5,1,9.5");
 
     checkData(outputWS, 6, 10, false, true);
   }
 
   void test_Rebin2D_With_Axis1_Unchanged() {
     MatrixWorkspace_sptr inputWS = makeInputWS(false); // 10 histograms, 10 bins
-    MatrixWorkspace_sptr outputWS =
-        runAlgorithm(inputWS, "5.,1.,15.", "-0.5,2,9.5");
+    MatrixWorkspace_sptr outputWS = runAlgorithm(inputWS, "5.,1.,15.", "-0.5,2,9.5");
     checkData(outputWS, 11, 5, false, false);
   }
 
   void test_Rebin2D_With_Input_Distribution() {
     MatrixWorkspace_sptr inputWS = makeInputWS(true); // 10 histograms, 10 bins
-    MatrixWorkspace_sptr outputWS =
-        runAlgorithm(inputWS, "5.,4.,25.", "-0.5,1,9.5");
+    MatrixWorkspace_sptr outputWS = runAlgorithm(inputWS, "5.,4.,25.", "-0.5,1,9.5");
     checkData(outputWS, 6, 10, true, true);
   }
 
   void test_Rebin2D_With_Bin_Width_Less_Than_One_And_Not_Distribution() {
-    MatrixWorkspace_sptr inputWS =
-        makeInputWS(false, false, true); // 10 histograms, 10 bins
-    MatrixWorkspace_sptr outputWS =
-        runAlgorithm(inputWS, "5.,0.2,6.", "-0.5,1,9.5");
+    MatrixWorkspace_sptr inputWS = makeInputWS(false, false, true); // 10 histograms, 10 bins
+    MatrixWorkspace_sptr outputWS = runAlgorithm(inputWS, "5.,0.2,6.", "-0.5,1,9.5");
     checkData(outputWS, 6, 10, false, true, true);
   }
 
   void test_BothAxes() {
     // 5,6,7,8,9,10,11,12,12,14,15
-    MatrixWorkspace_sptr inputWS =
-        makeInputWS(false, false, false); // 10 histograms, 10 bins
-    MatrixWorkspace_sptr outputWS =
-        runAlgorithm(inputWS, "5.,1.8,15", "-0.5,2.5,9.5");
+    MatrixWorkspace_sptr inputWS = makeInputWS(false, false, false); // 10 histograms, 10 bins
+    MatrixWorkspace_sptr outputWS = runAlgorithm(inputWS, "5.,1.8,15", "-0.5,2.5,9.5");
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 4);
     TS_ASSERT_EQUALS(outputWS->blocksize(), 6);
 
@@ -173,10 +159,8 @@ public:
   }
 
   void test_BothAxes_FractionalArea() {
-    MatrixWorkspace_sptr inputWS =
-        makeInputWS(false, false, false); // 10 histograms, 10 bins
-    MatrixWorkspace_sptr outputWS =
-        runAlgorithm(inputWS, "5.,1.8,15", "-0.5,2.5,9.5", true);
+    MatrixWorkspace_sptr inputWS = makeInputWS(false, false, false); // 10 histograms, 10 bins
+    MatrixWorkspace_sptr outputWS = runAlgorithm(inputWS, "5.,1.8,15", "-0.5,2.5,9.5", true);
     TS_ASSERT_EQUALS(outputWS->id(), "RebinnedOutput");
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 4);
     TS_ASSERT_EQUALS(outputWS->blocksize(), 6);
@@ -199,12 +183,9 @@ public:
   }
 
   void test_BothAxes_FractionalArea_Repeat() {
-    MatrixWorkspace_sptr inputWS =
-        makeInputWS(false, false, false); // 10 histograms, 10 bins
-    MatrixWorkspace_sptr outputWSa =
-        runAlgorithm(inputWS, "5.,0.9,15", "-0.5,1.25,9.5", true);
-    MatrixWorkspace_sptr outputWS =
-        runAlgorithm(outputWSa, "5.,1.8,15", "-0.5,2.5,9.5", true);
+    MatrixWorkspace_sptr inputWS = makeInputWS(false, false, false); // 10 histograms, 10 bins
+    MatrixWorkspace_sptr outputWSa = runAlgorithm(inputWS, "5.,0.9,15", "-0.5,1.25,9.5", true);
+    MatrixWorkspace_sptr outputWS = runAlgorithm(outputWSa, "5.,1.8,15", "-0.5,2.5,9.5", true);
     TS_ASSERT_EQUALS(outputWS->id(), "RebinnedOutput");
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 4);
     TS_ASSERT_EQUALS(outputWS->blocksize(), 6);
@@ -227,10 +208,8 @@ public:
   }
 
   void test_BothAxes_PointData() {
-    MatrixWorkspace_sptr inputWS =
-        makeInputWS(false, false, false, false); // 10 spectra, 10 points
-    MatrixWorkspace_sptr outputWS =
-        runAlgorithm(inputWS, "5.,1.8,15", "-0.5,2.5,9.5");
+    MatrixWorkspace_sptr inputWS = makeInputWS(false, false, false, false); // 10 spectra, 10 points
+    MatrixWorkspace_sptr outputWS = runAlgorithm(inputWS, "5.,1.8,15", "-0.5,2.5,9.5");
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 4);
     TS_ASSERT_EQUALS(outputWS->blocksize(), 6);
 
@@ -261,8 +240,7 @@ public:
     const auto midValue = thetaAxis->getValue(middle);
     thetaAxis->setValue(middle - 1, midValue);
     constexpr bool useFractionalBinning = false;
-    MatrixWorkspace_sptr outputWS = runAlgorithm(
-        inputWS, "5.,2.,15.", "-0.5,10.,9.5", useFractionalBinning);
+    MatrixWorkspace_sptr outputWS = runAlgorithm(inputWS, "5.,2.,15.", "-0.5,10.,9.5", useFractionalBinning);
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
     const auto expectedY = 2. * 9. * 2.;
     const auto expectedE = std::sqrt(expectedY);
@@ -284,8 +262,7 @@ public:
     const auto midValue = thetaAxis->getValue(middle);
     thetaAxis->setValue(middle - 1, midValue);
     constexpr bool useFractionalBinning = true;
-    MatrixWorkspace_sptr outputWS = runAlgorithm(
-        inputWS, "5.,2.,15.", "-0.5,10.,9.5", useFractionalBinning);
+    MatrixWorkspace_sptr outputWS = runAlgorithm(inputWS, "5.,2.,15.", "-0.5,10.,9.5", useFractionalBinning);
     const auto &rebinned = *dynamic_cast<RebinnedOutput *>(outputWS.get());
     TS_ASSERT_EQUALS(rebinned.getNumberHistograms(), 1)
     const auto expectedY = 2. * 9. * 2.;
@@ -301,8 +278,7 @@ public:
   }
 
 private:
-  void checkData(const MatrixWorkspace_const_sptr &outputWS,
-                 const size_t nxvalues, const size_t nhist, const bool dist,
+  void checkData(const MatrixWorkspace_const_sptr &outputWS, const size_t nxvalues, const size_t nhist, const bool dist,
                  const bool onAxis1, const bool small_bins = false) {
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), nhist);
     TS_ASSERT_EQUALS(outputWS->isDistribution(), dist);
@@ -324,11 +300,9 @@ private:
             TS_ASSERT_DELTA(x[j], 5.0 + 0.2 * static_cast<double>(j), epsilon);
           } else {
             if (dist) {
-              TS_ASSERT_DELTA(x[j], 5.0 + 4.0 * static_cast<double>(j),
-                              epsilon);
+              TS_ASSERT_DELTA(x[j], 5.0 + 4.0 * static_cast<double>(j), epsilon);
             } else {
-              TS_ASSERT_DELTA(x[j], 5.0 + 2.0 * static_cast<double>(j),
-                              epsilon);
+              TS_ASSERT_DELTA(x[j], 5.0 + 2.0 * static_cast<double>(j), epsilon);
             }
           }
         } else {
@@ -369,9 +343,7 @@ class Rebin2DTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static Rebin2DTestPerformance *createSuite() {
-    return new Rebin2DTestPerformance();
-  }
+  static Rebin2DTestPerformance *createSuite() { return new Rebin2DTestPerformance(); }
   static void destroySuite(Rebin2DTestPerformance *suite) { delete suite; }
 
   Rebin2DTestPerformance() {
@@ -381,14 +353,11 @@ public:
     m_inputWS = makeInputWS(distribution, perf_test, small_bins);
   }
 
-  void test_On_Large_Workspace() {
-    runAlgorithm(m_inputWS, "100,10,41000", "-0.5,0.5,499.5");
-  }
+  void test_On_Large_Workspace() { runAlgorithm(m_inputWS, "100,10,41000", "-0.5,0.5,499.5"); }
 
   void test_Use_Fractional_Area() {
     constexpr bool useFractionalArea = true;
-    runAlgorithm(m_inputWS, "100,10,41000", "-0.5,0.5,499.5",
-                 useFractionalArea);
+    runAlgorithm(m_inputWS, "100,10,41000", "-0.5,0.5,499.5", useFractionalArea);
   }
 
 private:

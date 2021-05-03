@@ -10,7 +10,7 @@ Data reduction for D7 instrument at the ILL
 There are three workflow algorithms supporting data reduction at ILL's D7 polarised diffraction and spectroscopy instrument. These algorithms are:
 
 :ref:`algm-D7YIGPOsitionCalibration`
-    Performs wavelength and position calibraiton for D7 instrument banks and individual detectors in banks. 
+    Performs wavelength and position calibraiton for D7 instrument banks and individual detectors in banks.
 
 :ref:`algm-PolDiffILLReduction`
     Performs data reduction and produces the unnormalised sample cross-sections in one of the available units.
@@ -51,7 +51,7 @@ A very basic reduction would include a vanadium reference and a sample, without 
 
     # Define vanadium properties:
     vanadiumProperties = {'FormulaUnits': 1, 'SampleMass': 8.54, 'FormulaUnitMass': 50.94}
-    
+
     # Vanadium reduction
     PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputTreatment='Sum',
 	                OutputWorkspace='reduced_vanadium',
@@ -78,7 +78,7 @@ Output:
 
     dS/dOmega (TwoTheta) detector position range: 13.14...144.06 (degrees)
 
-   
+
 
 Wavelength and position calibration
 ===================================
@@ -87,7 +87,8 @@ The first step of working with D7 data is to ensure that there exist a proper ca
 
 This algorithm performs wavelength and position calibration for both individual detectors and detector banks using measurement of a sample of powdered YIG. This data is fitted with Gaussian distributions at the expected peak positions. The output is an :ref:`Instrument Parameter File <InstrumentParameterFile>` readable by the :ref:`LoadILLPolarizedDiffraction <algm-LoadILLPolarizedDiffraction>` algorithm that will place the detector banks and detectors using the output of this algorithm.
 
-The provided YIG d-spacing values are loaded from an XML list. The default d-spacing distribution for YIG is coming from Ref. [#Nakatsuka]_. The peak positions are converted into :math:`2\theta` positions using the initial assumption of the neutron wavelength. YIG peaks in the detector's scan are fitted separately using a Gaussian distribution.
+The provided YIG d-spacing values are loaded from an XML list. The default d-spacing distribution for YIG available in Mantid in `D7_YIG_peaks.xml` file is coming from Ref. [#Nakatsuka]_.
+As long as this d-spacing list is sufficient and does not require changes, the `YIGPeaksFile` property does not need to be specified. The peak positions are converted into :math:`2\theta` positions using the initial assumption of the neutron wavelength. YIG peaks in the detector's scan are fitted separately using a Gaussian distribution.
 
 The workspace containing the peak fitting results is then fitted using a `Multidomain` function of the form:
 
@@ -95,18 +96,27 @@ The workspace containing the peak fitting results is then fitted using a `Multid
 
 where `m` is the bank slope, :math:`offset_{\text{pixel}}` is the relative offset to the initial assumption of the position inside the detector bank, and :math:`offset_{\text{bank}}` is the offset of the entire bank. This function allows to extract the information about the wavelength, detector bank slopes and offsets, and the distribution of detector offsets.
 
-It is strongly advised to first run the :ref:`D7YIGPositionCalibration <algm-D7YIGPositionCalibration>` algorithm with the `FittingMethod` set to `None`, so that the initial guesses for the positions of the YIG Bragg peaks can be inspected and corrected if needed.
+It is strongly advised to first run the :ref:`D7YIGPositionCalibration <algm-D7YIGPositionCalibration>` algorithm with the `FittingMethod` set to `None`, so that the initial guesses for the positions of the YIG Bragg peaks can be inspected and corrected if needed. Assuming the first python code-block below is used for this purpose, the workspace name to use for inspection of the initial guesses is named `peak_fits_fitting_test`. There, the initial guesses for individual detectors can be checked against the measured YIG Bragg peaks distribution. The correction can be done by changing the bank offsets, changing the desired peaks width and the minimal distance between them.
+
+To save time in this iterative process, `InputWorkspace` property can be specified instead of `Filenames`. This way, the 2D distribution of measured intensities does not have to be created each time from loaded data but can be cached and reused for time saving. To profit from this feature, comment the `Filenames` property and uncomment the `InputWorkspace` in the first example below.
 
 **Example - D7YIGPositionCalibration - initial guess check before fitting at the shortest wavelength**
 
 .. code-block:: python
 
    approximate_wavelength = '3.1' # Angstrom
-   D7YIGPositionCalibration(Filenames='402652:403041', ApproximateWavelength=approximate_wavelength,
-                            YIGPeaksFile='D7_YIG_peaks.xml',
-                            MinimalDistanceBetweenPeaks=1.5, BankOffsets=[0,0,0],
-                            MaskedBinsRange=[-50, -25, 15], FittingMethod='None', ClearCache=False,
-                            FitOutputWorkspace='fitting_test')
+   D7YIGPositionCalibration(
+		Filenames='402652:403041',
+   #		InputWorkspace='conjoined_input_fitting_test',
+		ApproximateWavelength=approximate_wavelength,
+		YIGPeaksFile='D7_YIG_peaks.xml',
+		MinimalDistanceBetweenPeaks=1.5,
+		BraggPeakWidth=1.5,
+		BankOffsets=[0,0,0],
+		MaskedBinsRange=[-50, -25, 15],
+		FittingMethod='None',
+		ClearCache=False,
+		FitOutputWorkspace='fitting_test')
 
 
 **Example - D7YIGPositionCalibration - calibration at the shortest wavelength**
@@ -126,7 +136,7 @@ It is strongly advised to first run the :ref:`D7YIGPositionCalibration <algm-D7Y
    print('The bank4 gradient is: {0:.3f}'.format(1.0 / mtd['shortWavelength'].column(1)[352]))
 
 
-	     
+
 Transmission calculation
 ========================
 
@@ -223,7 +233,7 @@ is not a problem, as the correction is given by a ratio and there is no spin-fli
 are calculated from ratios of non-spin-flip to spin-flip scattering, hence absolute numbers are not necessary.
 
 First, the data is normalised to monitor 1 (M1). Then, if the necessary inputs of container and absorber (please note this is a different measurement
-than mentioned in the `Transmission` section) measurements are provided, the background can be subtracted from the data: 
+than mentioned in the `Transmission` section) measurements are provided, the background can be subtracted from the data:
 
 .. math:: \dot{I_{B}} = \dot{I} - T\dot{E} - (1-T) \dot{C},
 

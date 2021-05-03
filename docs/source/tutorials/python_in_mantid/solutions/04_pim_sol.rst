@@ -18,7 +18,7 @@ A - Create a MatrixWorkspace
     import numpy as np
 
     ws = Load(Filename="HRP39182.RAW")
-    ws = Rebin(InputWorkspace=ws, Params=1e4) 
+    ws = Rebin(InputWorkspace=ws, Params=1e4)
     nbins = ws.blocksize()
     print(nbins)
 
@@ -49,7 +49,7 @@ A - Create a MatrixWorkspace
         for j in range(nbins):
             maxY = max(y[j], maxY) # Using the input Max method.
         new_y.append(maxY)
-        
+
     solution_2 = CreateWorkspace(DataY=new_y, DataX=xRange, NSpec=ws.getNumberHistograms())
 
     ''' ----------- Part One Solution  using single loop and numpy max function ----------- '''
@@ -58,7 +58,7 @@ A - Create a MatrixWorkspace
         y = ws.readY(i)
         maxY = np.max(y)
         new_y.append(maxY)
-        
+
     solution_3 = CreateWorkspace(DataY=new_y, DataX=xRange, NSpec=ws.getNumberHistograms())
 
 B - Create a TableWorkspace
@@ -67,7 +67,7 @@ B - Create a TableWorkspace
 .. code-block:: python
 
     ws = Load(Filename="HRP39182.RAW")
-    ws = Rebin(InputWorkspace=ws, Params=1e4) 
+    ws = Rebin(InputWorkspace=ws, Params=1e4)
     nbins = ws.blocksize()
     print(nbins)
 

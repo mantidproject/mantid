@@ -19,12 +19,9 @@ namespace API {
 class EXPORT_OPT_MANTIDQT_PLOTTING SignalRange {
 public:
   SignalRange(const Mantid::API::IMDWorkspace &workspace,
-              const Mantid::API::MDNormalization normalization =
-                  Mantid::API::NoNormalization);
-  SignalRange(const Mantid::API::IMDWorkspace &workspace,
-              Mantid::Geometry::MDImplicitFunction &function,
-              const Mantid::API::MDNormalization normalization =
-                  Mantid::API::NoNormalization);
+              const Mantid::API::MDNormalization normalization = Mantid::API::NoNormalization);
+  SignalRange(const Mantid::API::IMDWorkspace &workspace, Mantid::Geometry::MDImplicitFunction &function,
+              const Mantid::API::MDNormalization normalization = Mantid::API::NoNormalization);
 
   /// Disable default constructor
   SignalRange() = delete;
@@ -34,12 +31,10 @@ public:
 
 private:
   /// Find the min/max signal values in the entire workspace
-  void findFullRange(const Mantid::API::IMDWorkspace &workspace,
-                     Mantid::Geometry::MDImplicitFunction *function);
+  void findFullRange(const Mantid::API::IMDWorkspace &workspace, Mantid::Geometry::MDImplicitFunction *function);
 
   /// Get the range of signal, in parallel, given an iterator
-  QwtDoubleInterval getRange(
-      const std::vector<std::unique_ptr<Mantid::API::IMDIterator>> &iterators);
+  QwtDoubleInterval getRange(const std::vector<std::unique_ptr<Mantid::API::IMDIterator>> &iterators);
   /// Get the range of signal given an iterator
   QwtDoubleInterval getRange(Mantid::API::IMDIterator *it);
 

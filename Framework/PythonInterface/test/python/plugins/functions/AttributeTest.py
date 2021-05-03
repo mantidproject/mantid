@@ -13,7 +13,7 @@ import numpy
 
 
 class AttributeExample(IFunction1D):
-    
+
         def init(self):
             self.declareParameter("Amplitude",0.2)
             self.declareParameter("Baseline",0.1)
@@ -66,6 +66,6 @@ class AttributeTest(unittest.TestCase):
         self.assertEqual(fun.getAttributeValue('Frequency'), 0.26)
         fun.setAttributeValue('Frequency', 6.2)
         self.assertEqual(fun.getAttributeValue('Frequency'), 6.2)
-        
+
 if __name__ == '__main__':
     unittest.main()

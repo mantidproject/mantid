@@ -62,8 +62,7 @@ public:
     auto task4 = std::make_shared<TaskWithMutex>(mut2, 7.0);
     auto task5 = std::make_shared<TaskWithMutex>(mut2, 6.0);
     auto task6 = std::make_shared<TaskWithMutex>(mut3, 5.0);
-    auto task7 =
-        std::make_shared<TaskWithMutex>(std::shared_ptr<std::mutex>(), 4.0);
+    auto task7 = std::make_shared<TaskWithMutex>(std::shared_ptr<std::mutex>(), 4.0);
     sc.push(task1);
     sc.push(task2);
     sc.push(task3);
@@ -120,8 +119,7 @@ public:
   void test_clear() {
     ThreadSchedulerMutexes sc;
     for (size_t i = 0; i < 10; i++) {
-      std::shared_ptr<TaskWithMutex> task =
-          std::make_shared<TaskWithMutex>(std::make_shared<std::mutex>(), 10.0);
+      std::shared_ptr<TaskWithMutex> task = std::make_shared<TaskWithMutex>(std::make_shared<std::mutex>(), 10.0);
       sc.push(task);
     }
     TS_ASSERT_EQUALS(sc.size(), 10);
@@ -156,8 +154,7 @@ public:
     Timer tim0;
     size_t num = 500;
     for (size_t i = 0; i < num; i++) {
-      sc.push(std::make_shared<TaskWithMutex>(std::make_shared<std::mutex>(),
-                                              10.0));
+      sc.push(std::make_shared<TaskWithMutex>(std::make_shared<std::mutex>(), 10.0));
     }
     // std::cout << tim0.elapsed() << " secs to push.\n";
     TS_ASSERT_EQUALS(sc.size(), num);

@@ -37,17 +37,15 @@ public:
   ConvToMDBase();
 
   /// method which initiates all main class variables
-  virtual size_t initialize(const MDWSDescription &WSD,
-                            std::shared_ptr<MDEventWSWrapper> inWSWrapper,
+  virtual size_t initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper,
                             bool ignoreZeros);
   /// method which starts the conversion procedure
   virtual void runConversion(API::Progress *) = 0;
   /// virtual destructor
   virtual ~ConvToMDBase() = default;
   /// Set the normalization options
-  virtual void setDisplayNormalization(
-      Mantid::API::IMDEventWorkspace_sptr mdWorkspace,
-      const Mantid::API::MatrixWorkspace_sptr &underlyingWorkspace);
+  virtual void setDisplayNormalization(Mantid::API::IMDEventWorkspace_sptr mdWorkspace,
+                                       const Mantid::API::MatrixWorkspace_sptr &underlyingWorkspace);
 
   /** method returns unit conversion helper, used to convert input workspace
      units to the units, used by appropriate MD transformation
@@ -66,7 +64,7 @@ protected:
   /// number of target ws dimensions
   size_t m_NDims;
   // index of current run(workspace). Used for MD WS combining
-  uint16_t m_RunIndex;
+  uint16_t m_ExpInfoIndex;
   //---> preprocessed detectors information
   // number of valid spectra
   uint32_t m_NSpectra;

@@ -1,7 +1,7 @@
 .. _01_introduction_awh:
 
 ============
-Introduction 
+Introduction
 ============
 
 Workspaces are the data storage units of Mantid. If you

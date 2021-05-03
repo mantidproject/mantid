@@ -21,10 +21,9 @@ namespace API {
  * @param isDefault :: Flag to mark as default the value of an object associated
  * with this reference: a tie or a constraint.
  */
-ParameterTie::ParameterTie(IFunction *funct, const std::string &parName,
-                           const std::string &expr, bool isDefault)
-    : ParameterReference(funct, funct->parameterIndex(parName), isDefault),
-      m_parser(std::make_unique<mu::Parser>()), m_function1(funct) {
+ParameterTie::ParameterTie(IFunction *funct, const std::string &parName, const std::string &expr, bool isDefault)
+    : ParameterReference(funct, funct->parameterIndex(parName), isDefault), m_parser(std::make_unique<mu::Parser>()),
+      m_function1(funct) {
   m_parser->DefineNameChars("0123456789_."
                             "abcdefghijklmnopqrstuvwxyz"
                             "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
@@ -36,9 +35,7 @@ ParameterTie::ParameterTie(IFunction *funct, const std::string &parName,
 
 /// Destructor
 ParameterTie::~ParameterTie() {
-  for (std::map<double *, ParameterReference>::const_iterator it =
-           m_varMap.begin();
-       it != m_varMap.end(); ++it) {
+  for (std::map<double *, ParameterReference>::const_iterator it = m_varMap.begin(); it != m_varMap.end(); ++it) {
     delete it->first;
   }
 }
@@ -50,8 +47,7 @@ ParameterTie::~ParameterTie() {
  */
 double *ParameterTie::AddVariable(const char *varName, void *palg) {
   ParameterTie &tie = *reinterpret_cast<ParameterTie *>(palg);
-  ParameterReference ref(tie.m_function1,
-                         tie.m_function1->parameterIndex(std::string(varName)));
+  ParameterReference ref(tie.m_function1, tie.m_function1->parameterIndex(std::string(varName)));
 
   auto var = new double;
   *var = 0;
@@ -65,9 +61,7 @@ double *ParameterTie::AddVariable(const char *varName, void *palg) {
  * @param expr :: A math expression
  */
 void ParameterTie::set(const std::string &expr) {
-  for (std::map<double *, ParameterReference>::const_iterator it =
-           m_varMap.begin();
-       it != m_varMap.end(); ++it) {
+  for (std::map<double *, ParameterReference>::const_iterator it = m_varMap.begin(); it != m_varMap.end(); ++it) {
     delete it->first;
   }
   if (!m_varMap.empty()) {
@@ -77,8 +71,7 @@ void ParameterTie::set(const std::string &expr) {
     m_parser->SetExpr(expr);
     m_parser->Eval();
   } catch (Kernel::Exception::NotImplementedError &) {
-    throw std::invalid_argument(
-        "Function index was not specified in a parameter name");
+    throw std::invalid_argument("Function index was not specified in a parameter name");
   } catch (std::exception &) {
     throw;
   } catch (...) {
@@ -86,8 +79,7 @@ void ParameterTie::set(const std::string &expr) {
   }
 
   // Create the template m_expression
-  static const boost::regex rx(
-      R"(\b(([[:alpha:]]|_)([[:alnum:]]|_|\.)*)\b(?!(\s*\()))");
+  static const boost::regex rx(R"(\b(([[:alpha:]]|_)([[:alnum:]]|_|\.)*)\b(?!(\s*\()))");
   std::string input = expr;
   boost::smatch res;
   std::string::const_iterator start = input.begin();
@@ -95,11 +87,8 @@ void ParameterTie::set(const std::string &expr) {
 
   std::map<std::string, int> varNames;
   int i = 0;
-  for (std::map<double *, ParameterReference>::const_iterator it =
-           m_varMap.begin();
-       it != m_varMap.end(); ++it) {
-    varNames[m_function1->parameterName(
-        m_function1->getParameterIndex(it->second))] = i;
+  for (std::map<double *, ParameterReference>::const_iterator it = m_varMap.begin(); it != m_varMap.end(); ++it) {
+    varNames[m_function1->parameterName(m_function1->getParameterIndex(it->second))] = i;
     i++;
   }
 
@@ -115,9 +104,7 @@ void ParameterTie::set(const std::string &expr) {
 double ParameterTie::eval(bool setParameterValue) {
   double res = 0;
   try {
-    for (std::map<double *, ParameterReference>::const_iterator it =
-             m_varMap.begin();
-         it != m_varMap.end(); ++it) {
+    for (std::map<double *, ParameterReference>::const_iterator it = m_varMap.begin(); it != m_varMap.end(); ++it) {
       *(it->first) = it->second.getParameter();
     }
     res = m_parser->Eval();
@@ -161,8 +148,7 @@ std::string ParameterTie::asString(const IFunction *fun) const {
       int i = 0;
       for (const auto &var : m_varMap) {
         if (i == iTemp) {
-          res_expression +=
-              fun->parameterName(fun->getParameterIndex(var.second));
+          res_expression += fun->parameterName(fun->getParameterIndex(var.second));
           break;
         }
         i++;
@@ -172,8 +158,7 @@ std::string ParameterTie::asString(const IFunction *fun) const {
     }
     res_expression.append(start, end);
   } catch (...) { // parameters are not from function fun
-    throw std::logic_error("Corrupted tie " + m_expression + " in function " +
-                           getLocalFunction()->name());
+    throw std::logic_error("Corrupted tie " + m_expression + " in function " + getLocalFunction()->name());
   }
   return res_expression;
 }
@@ -188,9 +173,8 @@ bool ParameterTie::findParametersOf(const IFunction *fun) const {
   if (getLocalFunction() == fun) {
     return true;
   }
-  return std::any_of(
-      m_varMap.cbegin(), m_varMap.cend(),
-      [fun](const auto &element) { return element.second.isParameterOf(fun); });
+  return std::any_of(m_varMap.cbegin(), m_varMap.cend(),
+                     [fun](const auto &element) { return element.second.isParameterOf(fun); });
 }
 
 /**

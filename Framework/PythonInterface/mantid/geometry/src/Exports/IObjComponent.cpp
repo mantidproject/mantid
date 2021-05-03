@@ -31,8 +31,7 @@ std::shared_ptr<Mantid::Geometry::IObject> getShape(IObjComponent &self) {
 void export_IObjComponent() {
   register_ptr_to_python<std::shared_ptr<IObjComponent>>();
 
-  class_<IObjComponent, boost::python::bases<IComponent>, boost::noncopyable>(
-      "IObjComponent", no_init)
+  class_<IObjComponent, boost::python::bases<IComponent>, boost::noncopyable>("IObjComponent", no_init)
       .def("shape", &getShape, arg("self"),
            "Get the object that represents "
            "the physical shape of this "

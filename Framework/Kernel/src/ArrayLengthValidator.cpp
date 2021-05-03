@@ -19,31 +19,26 @@ namespace Kernel {
  */
 template <typename TYPE>
 ArrayLengthValidator<TYPE>::ArrayLengthValidator()
-    : TypedValidator<std::vector<TYPE>>(), m_arraySize(size_t(0)),
-      m_hasArraySize(false), m_arraySizeMin(size_t(0)),
-      m_hasArraySizeMin(false), m_arraySizeMax(size_t(0)),
-      m_hasArraySizeMax(false) {}
+    : TypedValidator<std::vector<TYPE>>(), m_arraySize(size_t(0)), m_hasArraySize(false), m_arraySizeMin(size_t(0)),
+      m_hasArraySizeMin(false), m_arraySizeMax(size_t(0)), m_hasArraySizeMax(false) {}
 //----------------------------------------------------------------------------------------------
 /** Constructor
  * @param len:: the legth of the array
  */
 template <typename TYPE>
 ArrayLengthValidator<TYPE>::ArrayLengthValidator(const size_t len)
-    : TypedValidator<std::vector<TYPE>>(), m_arraySize(size_t(len)),
-      m_hasArraySize(true), m_arraySizeMin(size_t(0)), m_hasArraySizeMin(false),
-      m_arraySizeMax(size_t(0)), m_hasArraySizeMax(false) {}
+    : TypedValidator<std::vector<TYPE>>(), m_arraySize(size_t(len)), m_hasArraySize(true), m_arraySizeMin(size_t(0)),
+      m_hasArraySizeMin(false), m_arraySizeMax(size_t(0)), m_hasArraySizeMax(false) {}
 //----------------------------------------------------------------------------------------------
 /** Constructor
  * @param lenmin:: the minimum legth of the array
  * @param lenmax:: the maximum legth of the array
  */
 template <typename TYPE>
-ArrayLengthValidator<TYPE>::ArrayLengthValidator(const size_t lenmin,
-                                                 const size_t lenmax)
-    : TypedValidator<std::vector<TYPE>>(), m_arraySize(size_t(0)),
-      m_hasArraySize(false), m_arraySizeMin(size_t(lenmin)),
-      m_hasArraySizeMin(true), m_arraySizeMax(size_t(lenmax)),
-      m_hasArraySizeMax(true) {}
+ArrayLengthValidator<TYPE>::ArrayLengthValidator(const size_t lenmin, const size_t lenmax)
+    : TypedValidator<std::vector<TYPE>>(), m_arraySize(size_t(0)), m_hasArraySize(false),
+      m_arraySizeMin(size_t(lenmin)), m_hasArraySizeMin(true), m_arraySizeMax(size_t(lenmax)), m_hasArraySizeMax(true) {
+}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
@@ -53,60 +48,44 @@ template <typename TYPE> ArrayLengthValidator<TYPE>::~ArrayLengthValidator() {}
   Check if length is set
   @returns true/false
  */
-template <typename TYPE> bool ArrayLengthValidator<TYPE>::hasLength() const {
-  return this->m_hasArraySize;
-}
+template <typename TYPE> bool ArrayLengthValidator<TYPE>::hasLength() const { return this->m_hasArraySize; }
 
 /**
   Check if minimum length is set
   @returns true/false
  */
-template <typename TYPE> bool ArrayLengthValidator<TYPE>::hasMinLength() const {
-  return this->m_hasArraySizeMin;
-}
+template <typename TYPE> bool ArrayLengthValidator<TYPE>::hasMinLength() const { return this->m_hasArraySizeMin; }
 
 /**
   Check if maximum length is set
   @returns true/false
  */
-template <typename TYPE> bool ArrayLengthValidator<TYPE>::hasMaxLength() const {
-  return this->m_hasArraySizeMax;
-}
+template <typename TYPE> bool ArrayLengthValidator<TYPE>::hasMaxLength() const { return this->m_hasArraySizeMax; }
 
 /**
   Function to retun the set length
   @returns  m_arraySize
  */
-template <typename TYPE>
-const size_t &ArrayLengthValidator<TYPE>::getLength() const {
-  return this->m_arraySize;
-}
+template <typename TYPE> const size_t &ArrayLengthValidator<TYPE>::getLength() const { return this->m_arraySize; }
 
 /**
   Function to retun the set minimum length
   @returns  m_arraySize
  */
-template <typename TYPE>
-const size_t &ArrayLengthValidator<TYPE>::getMinLength() const {
-  return this->m_arraySizeMin;
-}
+template <typename TYPE> const size_t &ArrayLengthValidator<TYPE>::getMinLength() const { return this->m_arraySizeMin; }
 
 /**
   Function to retun the set maximum length
   @returns  m_arraySize
  */
-template <typename TYPE>
-const size_t &ArrayLengthValidator<TYPE>::getMaxLength() const {
-  return this->m_arraySizeMax;
-}
+template <typename TYPE> const size_t &ArrayLengthValidator<TYPE>::getMaxLength() const { return this->m_arraySizeMax; }
 
 /**
   Function to set the length. It will automatically clear the minimum and
   maximum
   @param  value:: size_t type
  */
-template <typename TYPE>
-void ArrayLengthValidator<TYPE>::setLength(const size_t &value) {
+template <typename TYPE> void ArrayLengthValidator<TYPE>::setLength(const size_t &value) {
   this->m_hasArraySize = true;
   this->m_arraySize = value;
   this->clearLengthMax();
@@ -117,8 +96,7 @@ void ArrayLengthValidator<TYPE>::setLength(const size_t &value) {
   Function to set the minimum length. It will automatically clear the set length
   @param  value:: size_t type
  */
-template <typename TYPE>
-void ArrayLengthValidator<TYPE>::setLengthMin(const size_t &value) {
+template <typename TYPE> void ArrayLengthValidator<TYPE>::setLengthMin(const size_t &value) {
   this->m_hasArraySizeMin = true;
   this->m_arraySizeMin = value;
   this->clearLength();
@@ -127,8 +105,7 @@ void ArrayLengthValidator<TYPE>::setLengthMin(const size_t &value) {
   Function to set the maximum length. It will automatically clear the set length
   @param  value:: size_t type
  */
-template <typename TYPE>
-void ArrayLengthValidator<TYPE>::setLengthMax(const size_t &value) {
+template <typename TYPE> void ArrayLengthValidator<TYPE>::setLengthMax(const size_t &value) {
   this->m_hasArraySizeMax = true;
   this->m_arraySizeMax = value;
   this->clearLength();
@@ -165,8 +142,7 @@ template <typename TYPE> void ArrayLengthValidator<TYPE>::clearLengthMax() {
   Clone function
   @returns a clone of the validator
   */
-template <typename TYPE>
-IValidator_sptr ArrayLengthValidator<TYPE>::clone() const {
+template <typename TYPE> IValidator_sptr ArrayLengthValidator<TYPE>::clone() const {
   return std::make_shared<ArrayLengthValidator>(*this);
 }
 
@@ -175,9 +151,7 @@ Private function to check validity
 @returns a string. The string is emty if everything is OK, otherwise returns the
 error
 */
-template <typename TYPE>
-std::string ArrayLengthValidator<TYPE>::checkValidity(
-    const std::vector<TYPE> &value) const {
+template <typename TYPE> std::string ArrayLengthValidator<TYPE>::checkValidity(const std::vector<TYPE> &value) const {
   if (this->hasLength() && value.size() != this->m_arraySize) {
     return "Incorrect size";
   }

@@ -67,6 +67,8 @@ Linux
 -  Keeps track of allocs/deallocs and reports anything missing at exit.
 -  Slow but thorough
 -  Useful options to run with
+-  See :doc:`valgrind <ProfilingWithValgrind>` for details on how to install
+
 
 ``valgrind --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --track-origins=yes --freelist-vol=500000000 ``\ \ `` [args...]``
 
@@ -165,9 +167,9 @@ issues when a network interface is still active but very slow. More details can 
 Convert Wiki Docs to Sphinx
 ---------------------------
 
-``wiki2rst`` reads in mediawiki formatted webpages and converts them to ``.rst`` files, for use 
-in ``Sphinx``. The code attempts to take all images and internal links and re-create the 
-documentation structure in the ``Sphinx`` format. 
+``wiki2rst`` reads in mediawiki formatted webpages and converts them to ``.rst`` files, for use
+in ``Sphinx``. The code attempts to take all images and internal links and re-create the
+documentation structure in the ``Sphinx`` format.
 
 Use
 ~~~
@@ -258,15 +260,15 @@ For example, to convert all loops classified as *risky* or above, we would appen
 CMake-format
 ---------------------
 
-`CMake-format <https://github.com/cheshirekow/cmake_format/>`__ is a tool which is used to format individual ``CMakeLists.txt`` to make them easier to read. 
+`CMake-format <https://github.com/cheshirekow/cmake_format/>`__ is a tool which is used to format individual ``CMakeLists.txt`` to make them easier to read.
 The package can be installed using ``pip install cmake_format`` or ``sudo pip install cmake_format``.
 
-To use cmake-format on a specific ``CMakeLists.txt`` file in the command line run 
+To use cmake-format on a specific ``CMakeLists.txt`` file in the command line run
 
 .. code::
 
 	python -m cmake_format -c /path/to/mantid/.cmake-format.json -i /path/to/CMakeLists.txt
-	
+
 This will format the file using the config file ``.cmake-format.json`` which can be found in the root of the mantid directory.
 
 There is an official Visual Studio extension, details of which can be found `here <https://marketplace.visualstudio.com/items?itemName=cheshirekow.cmake-format>`__.
@@ -284,4 +286,3 @@ To format on all the CMakeLists run the following from within the mantid source 
 				cmakefile = os.path.join(path, file)
 				print("Formatting " + cmakefile)
 				os.system('python -m cmake_format -c ' + os.path.join(dir, '.cmake-format.json') +' -i ' + cmakefile)
-

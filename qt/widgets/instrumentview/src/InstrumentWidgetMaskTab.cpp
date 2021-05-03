@@ -19,7 +19,6 @@
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-// #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
@@ -624,10 +623,11 @@ void InstrumentWidgetMaskTab::shapeChanged() {
   m_userEditing =
       false; // this prevents resetting shape properties by doubleChanged(...)
   RectF rect = m_instrWidget->getSurface()->getCurrentBoundingRect();
-  m_doubleManager->setValue(m_left, rect.x0());
-  m_doubleManager->setValue(m_top, rect.y1());
-  m_doubleManager->setValue(m_right, rect.x1());
-  m_doubleManager->setValue(m_bottom, rect.y0());
+
+  m_doubleManager->setValue(m_left, std::min(rect.x0(), rect.x1()));
+  m_doubleManager->setValue(m_top, std::max(rect.y0(), rect.y1()));
+  m_doubleManager->setValue(m_right, std::max(rect.x0(), rect.x1()));
+  m_doubleManager->setValue(m_bottom, std::min(rect.y0(), rect.y1()));
   for (QMap<QtProperty *, QString>::iterator it = m_doublePropertyMap.begin();
        it != m_doublePropertyMap.end(); ++it) {
     m_doubleManager->setValue(
@@ -731,12 +731,21 @@ void InstrumentWidgetMaskTab::saveShapesToTable() const {
 void InstrumentWidgetMaskTab::doubleChanged(QtProperty *prop) {
   if (!m_userEditing)
     return;
+
   if (prop == m_left || prop == m_top || prop == m_right || prop == m_bottom) {
-    QRectF rect(
-        QPointF(m_doubleManager->value(m_left), m_doubleManager->value(m_top)),
-        QPointF(m_doubleManager->value(m_right),
-                m_doubleManager->value(m_bottom)));
+    m_userEditing = false;
+    double x0 = std::min(m_doubleManager->value(m_left),
+                         m_doubleManager->value(m_right));
+    double x1 = std::max(m_doubleManager->value(m_left),
+                         m_doubleManager->value(m_right));
+    double y0 = std::min(m_doubleManager->value(m_top),
+                         m_doubleManager->value(m_bottom));
+    double y1 = std::max(m_doubleManager->value(m_top),
+                         m_doubleManager->value(m_bottom));
+
+    QRectF rect(QPointF(x0, y0), QPointF(x1, y1));
     m_instrWidget->getSurface()->setCurrentBoundingRect(RectF(rect));
+
   } else {
     QString name = m_doublePropertyMap[prop];
     if (!name.isEmpty()) {
@@ -754,10 +763,9 @@ void InstrumentWidgetMaskTab::doubleChanged(QtProperty *prop) {
         m_instrWidget->getSurface()->setCurrentPoint(name, p);
       }
     }
-    // when the user validates the edit of the field, the view is immediatly
-    // updated this way
-    m_instrWidget->updateInstrumentView();
   }
+  // when the user validates the field's edit, the view is immediatly updated
+  m_instrWidget->updateInstrumentView();
   m_instrWidget->update();
 }
 
@@ -1329,7 +1337,9 @@ void InstrumentWidgetMaskTab::storeMask() {
 
 void InstrumentWidgetMaskTab::changedIntegrationRange(double /*unused*/,
                                                       double /*unused*/) {
-  enableApplyButtons();
+  if (m_instrWidget->isCurrentTab(this)) {
+    enableApplyButtons();
+  }
 }
 
 /** Load mask tab state from a Mantid project file

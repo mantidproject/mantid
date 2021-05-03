@@ -23,8 +23,7 @@ namespace ISISReflectometry {
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL Batch {
 public:
-  Batch(Experiment const &experiment, Instrument const &instrument,
-        RunsTable &runsTable, Slicing const &slicing);
+  Batch(Experiment const &experiment, Instrument const &instrument, RunsTable &runsTable, Slicing const &slicing);
 
   Experiment const &experiment() const;
   Instrument const &instrument() const;
@@ -35,15 +34,12 @@ public:
   std::vector<MantidWidgets::Batch::RowLocation> selectedRowLocations() const;
   std::vector<Group> selectedGroups() const;
   template <typename T>
-  bool isInSelection(T const &item,
-                     std::vector<MantidWidgets::Batch::RowLocation> const
-                         &selectedRowLocations) const;
+  bool isInSelection(T const &item, std::vector<MantidWidgets::Batch::RowLocation> const &selectedRowLocations) const;
   PerThetaDefaults const *defaultsForTheta(double thetaAngle) const;
   PerThetaDefaults const *wildcardDefaults() const;
   void resetState();
   void resetSkippedItems();
-  boost::optional<Item &>
-  getItemWithOutputWorkspaceOrNone(std::string const &wsName);
+  boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 
 private:
   Experiment const &m_experiment;
@@ -54,8 +50,7 @@ private:
 
 template <typename T>
 bool Batch::isInSelection(T const &item,
-                          std::vector<MantidWidgets::Batch::RowLocation> const
-                              &selectedRowLocations) const {
+                          std::vector<MantidWidgets::Batch::RowLocation> const &selectedRowLocations) const {
   return m_runsTable.isInSelection(item, selectedRowLocations);
 }
 } // namespace ISISReflectometry

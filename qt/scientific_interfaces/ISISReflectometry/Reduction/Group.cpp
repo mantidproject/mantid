@@ -17,8 +17,7 @@ namespace ISISReflectometry {
 
 Group::Group( // cppcheck-suppress passedByValue
     std::string name, std::vector<boost::optional<Row>> rows)
-    : m_name(std::move(name)), m_postprocessedWorkspaceName(),
-      m_rows(std::move(rows)) {}
+    : m_name(std::move(name)), m_postprocessedWorkspaceName(), m_rows(std::move(rows)) {}
 
 Group::Group(
     // cppcheck-suppress passedByValue
@@ -33,9 +32,8 @@ std::string const &Group::name() const { return m_name; }
  * has multiple valid rows whose outputs will be stitched
  */
 bool Group::hasPostprocessing() const {
-  auto numberOfValidRows = std::count_if(
-      m_rows.cbegin(), m_rows.cend(),
-      [](boost::optional<Row> const &row) { return row.is_initialized(); });
+  auto numberOfValidRows = std::count_if(m_rows.cbegin(), m_rows.cend(),
+                                         [](boost::optional<Row> const &row) { return row.is_initialized(); });
   return numberOfValidRows > 1;
 }
 
@@ -44,10 +42,9 @@ bool Group::hasPostprocessing() const {
  * postprocessing)
  */
 bool Group::requiresProcessing(bool reprocessFailed) const {
-  return std::any_of(m_rows.cbegin(), m_rows.cend(),
-                     [&reprocessFailed](boost::optional<Row> const &row) {
-                       return row && row->requiresProcessing(reprocessFailed);
-                     });
+  return std::any_of(m_rows.cbegin(), m_rows.cend(), [&reprocessFailed](boost::optional<Row> const &row) {
+    return row && row->requiresProcessing(reprocessFailed);
+  });
 }
 
 /** Returns true if the group is ready to be postprocessed, i.e. if its rows
@@ -64,22 +61,16 @@ bool Group::requiresPostprocessing(bool reprocessFailed) const {
     return false;
 
   // If all rows are valid and complete then we're ready to postprocess
-  return std::all_of(
-      m_rows.cbegin(), m_rows.cend(),
-      [](boost::optional<Row> const &row) { return row && row->success(); });
+  return std::all_of(m_rows.cbegin(), m_rows.cend(),
+                     [](boost::optional<Row> const &row) { return row && row->success(); });
 }
 
-std::string Group::postprocessedWorkspaceName() const {
-  return m_postprocessedWorkspaceName;
-}
+std::string Group::postprocessedWorkspaceName() const { return m_postprocessedWorkspaceName; }
 
-boost::optional<int> Group::indexOfRowWithTheta(double theta,
-                                                double tolerance) const {
-  return indexOf(m_rows,
-                 [theta, tolerance](boost::optional<Row> const &row) -> bool {
-                   return row.is_initialized() &&
-                          std::abs(row.get().theta() - theta) < tolerance;
-                 });
+boost::optional<int> Group::indexOfRowWithTheta(double theta, double tolerance) const {
+  return indexOf(m_rows, [theta, tolerance](boost::optional<Row> const &row) -> bool {
+    return row.is_initialized() && std::abs(row.get().theta() - theta) < tolerance;
+  });
 }
 
 void Group::setName(std::string const &name) { m_name = name; }
@@ -103,9 +94,7 @@ void Group::resetSkipped() {
 
 bool Group::allRowsAreValid() const {
   return std::all_of(m_rows.cbegin(), m_rows.cend(),
-                     [](boost::optional<Row> const &row) -> bool {
-                       return row.is_initialized();
-                     });
+                     [](boost::optional<Row> const &row) -> bool { return row.is_initialized(); });
 }
 
 std::vector<boost::optional<Row>> const &Group::rows() const { return m_rows; }
@@ -158,8 +147,7 @@ int Group::insertRowSortedByAngle(boost::optional<Row> const &row) {
       return false;
     return lhs < rhs->theta();
   };
-  auto insertIter = std::upper_bound(m_rows.cbegin(), m_rows.cend(),
-                                     row->theta(), valueLessThanRowTheta);
+  auto insertIter = std::upper_bound(m_rows.cbegin(), m_rows.cend(), row->theta(), valueLessThanRowTheta);
   auto const insertedRowIndex = std::distance(m_rows.cbegin(), insertIter);
   m_rows.insert(insertIter, row); // invalidates iterator
   return static_cast<int>(insertedRowIndex);
@@ -178,12 +166,9 @@ void Group::updateRow(int rowIndex, boost::optional<Row> const &row) {
   m_rows[rowIndex] = row;
 }
 
-boost::optional<Row> const &Group::operator[](int rowIndex) const {
-  return m_rows[rowIndex];
-}
+boost::optional<Row> const &Group::operator[](int rowIndex) const { return m_rows[rowIndex]; }
 
-boost::optional<Item &>
-Group::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
+boost::optional<Item &> Group::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   // Check if any of the child rows have this workspace output
   for (auto &row : m_rows) {
     if (row && row->hasOutputWorkspace(wsName)) {
@@ -194,8 +179,7 @@ Group::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   return boost::none;
 }
 
-void Group::renameOutputWorkspace(std::string const &oldName,
-                                  std::string const &newName) {
+void Group::renameOutputWorkspace(std::string const &oldName, std::string const &newName) {
   UNUSED_ARG(oldName);
   m_postprocessedWorkspaceName = newName;
 }
@@ -204,33 +188,30 @@ int Group::totalItems() const {
   // Include the group if postprocessing is applicable
   auto initCount = hasPostprocessing() ? 1 : 0;
   // Include all valid rows
-  return std::accumulate(rows().cbegin(), rows().cend(), initCount,
-                         [](int &count, boost::optional<Row> const &row) {
-                           if (row.is_initialized())
-                             return count + 1;
-                           else
-                             return count;
-                         });
+  return std::accumulate(rows().cbegin(), rows().cend(), initCount, [](int &count, boost::optional<Row> const &row) {
+    if (row.is_initialized())
+      return count + 1;
+    else
+      return count;
+  });
 }
 
 int Group::completedItems() const {
   // Include the group if it has been postprocessing
   auto initCount = complete() ? 1 : 0;
   // Include all valid rows that have been processed
-  return std::accumulate(rows().cbegin(), rows().cend(), initCount,
-                         [](int &count, boost::optional<Row> const &row) {
-                           if (row.is_initialized() && row->complete())
-                             return count + 1;
-                           else
-                             return count;
-                         });
+  return std::accumulate(rows().cbegin(), rows().cend(), initCount, [](int &count, boost::optional<Row> const &row) {
+    if (row.is_initialized() && row->complete())
+      return count + 1;
+    else
+      return count;
+  });
 }
 
 bool operator!=(Group const &lhs, Group const &rhs) { return !(lhs == rhs); }
 
 bool operator==(Group const &lhs, Group const &rhs) {
-  return lhs.name() == rhs.name() &&
-         lhs.postprocessedWorkspaceName() == rhs.postprocessedWorkspaceName() &&
+  return lhs.name() == rhs.name() && lhs.postprocessedWorkspaceName() == rhs.postprocessedWorkspaceName() &&
          lhs.rows() == rhs.rows();
 }
 } // namespace ISISReflectometry

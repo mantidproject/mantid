@@ -105,7 +105,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
         # Adjust icon size or they are too small in PyQt5 by default
         dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX() / 100
-        self.setIconSize(QtCore.QSize(24 * dpi_ratio, 24 * dpi_ratio))
+        self.setIconSize(QtCore.QSize(int(24 * dpi_ratio), int(24 * dpi_ratio)))
 
     def copy_to_clipboard(self):
         self.sig_copy_to_clipboard_triggered.emit()
@@ -243,7 +243,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         if figure_type(fig) in [FigureType.Wireframe, FigureType.Contour]:
             self.set_up_color_selector_toolbar_button(fig)
 
-        if figure_type(fig) in [FigureType.Surface, FigureType.Wireframe]:
+        if figure_type(fig) in [FigureType.Surface, FigureType.Wireframe, FigureType.Mesh]:
             self.adjust_for_3d_plots()
 
     def is_colormap(self, fig):

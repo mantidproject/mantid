@@ -23,8 +23,7 @@ using namespace MantidWidgets;
 
 enum class SpectrumSelectionMode { RANGE, STRING };
 
-class MANTIDQT_INDIRECT_DLL IndirectSpectrumSelectionView
-    : public API::MantidWidget {
+class MANTIDQT_INDIRECT_DLL IndirectSpectrumSelectionView : public API::MantidWidget {
   Q_OBJECT
 
 public:

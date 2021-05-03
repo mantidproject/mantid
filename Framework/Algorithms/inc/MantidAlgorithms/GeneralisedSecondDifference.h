@@ -38,13 +38,10 @@ namespace Algorithms {
     @author Laurent C Chapon, ISIS Facility Rutherford Appleton Laboratory
     @date 26/12/2008
 */
-class MANTID_ALGORITHMS_DLL GeneralisedSecondDifference
-    : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GeneralisedSecondDifference : public API::Algorithm {
 public:
   /// Algorithm's name
-  const std::string name() const override {
-    return "GeneralisedSecondDifference";
-  }
+  const std::string name() const override { return "GeneralisedSecondDifference"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Computes the generalised second difference of a spectrum or "

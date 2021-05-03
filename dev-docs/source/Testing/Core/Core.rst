@@ -3,9 +3,9 @@
 .. raw:: html
 
     <style> .r {color:#FF0000; font-weight:bold} </style>
-    <style> .g {color:#008000; font-weight:bold} </style>    
-    <style> .b {color:#0000FF; font-weight:bold} </style> 
-    <style> .o {color:#FF8C00; font-weight:bold} </style> 
+    <style> .g {color:#008000; font-weight:bold} </style>
+    <style> .b {color:#0000FF; font-weight:bold} </style>
+    <style> .o {color:#FF8C00; font-weight:bold} </style>
 
 
 .. role:: r
@@ -62,7 +62,8 @@ This was last updated for Release 5.1. Check if the organiser has considered if 
     Scripting Plots,,:b:`Y`,,:o:`Y`,"For some ideas: :ref:`01_basic_plot_scripting` :ref:`06_formatting_plots` :ref:`plotting` + run any `MPL code <https://matplotlib.org/gallery/index.html>`_ and check if Figure Options and Generate a script work."
     Settings (Preferences on Mac),:r:`Y`,,:g:`Y`,,"Check all options work. Some may need restart."
     Script Editor / Interpreter,:r:`Y`,,,:o:`Y`,"Check basic functionality, such as checking the buttons/options at the top of SE, running algorithms, accessing workspace properties in both environments. Does autocompletion work for mantid algorithms/numpy/matplotlib? :ref:`02_scripts`"
-    MantidPython and Jupyter Notebook,:r:`Y`,:b:`Y`,:g:`Y`,,"Open MantidPython and a Jupyter Notebook. Check you can import mantid.simpleapi and run a script/notebook. :ref:`Click here <JupyterNotebook>` for Further Instructions and an example Notebook (You may need to rename without spaces)"
+    MantidPython and Jupyter Notebook,:r:`Y`,:b:`Y`,:g:`Y`,,"Open MantidPython and a Jupyter Notebook. Check you can import mantid.simpleapi and run a script/notebook. `Click here <https://www.mantidproject.org/Using_IPython_Notebook>`_ for Further Instructions and an example Notebook (You may need to rename without spaces)"
+    Memory Widget,:r:`Y`,:b:`Y`,:g:`Y`,:o:`Y`,"Check that the System Memory Usage widget updates at a frequency of no more than once every two seconds, ideally on a system with limited resourses. Check that the default position of the widget is in the top right, in the same column as the Messages widget."
 
 .. csv-table:: Larger tasks
     :widths: 10 20 5 5 5 5 50

@@ -17,9 +17,7 @@ class SpectraAxisValidatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SpectraAxisValidatorTest *createSuite() {
-    return new SpectraAxisValidatorTest();
-  }
+  static SpectraAxisValidatorTest *createSuite() { return new SpectraAxisValidatorTest(); }
   static void destroySuite(SpectraAxisValidatorTest *suite) { delete suite; }
 
   void test_fail() {
@@ -28,9 +26,7 @@ public:
     auto newAxis = std::make_unique<NumericAxis>(2);
     ws->replaceAxis(1, std::move(newAxis));
     SpectraAxisValidator validator;
-    TS_ASSERT_EQUALS(
-        validator.isValid(ws),
-        "A workspace with axis being Spectra Number is required here.");
+    TS_ASSERT_EQUALS(validator.isValid(ws), "A workspace with axis being Spectra Number is required here.");
   }
 
   void test_success() {

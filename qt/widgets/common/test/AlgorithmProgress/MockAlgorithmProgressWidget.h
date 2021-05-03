@@ -24,15 +24,13 @@ class QWidget;
 class MockAlgorithmProgressWidget : public IAlgorithmProgressWidget {
 public:
   MockAlgorithmProgressWidget() {
-    m_presenter = std::make_shared<AlgorithmProgressPresenter>(
-        static_cast<QWidget *>(nullptr), this);
+    m_presenter = std::make_shared<AlgorithmProgressPresenter>(static_cast<QWidget *>(nullptr), this);
   }
   virtual ~MockAlgorithmProgressWidget() {}
 
   MOCK_METHOD0(algorithmStarted, void());
   MOCK_METHOD0(algorithmEnded, void());
-  MOCK_METHOD4(updateProgress,
-               void(const double, const QString &, const double, const int));
+  MOCK_METHOD4(updateProgress, void(const double, const QString &, const double, const int));
   MOCK_METHOD0(showDetailsDialog, void());
 
   std::shared_ptr<AlgorithmProgressPresenter> m_presenter;

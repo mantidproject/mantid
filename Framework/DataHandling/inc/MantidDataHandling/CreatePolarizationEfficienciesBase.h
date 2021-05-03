@@ -28,8 +28,7 @@ public:
 
 protected:
   void initOutputWorkspace();
-  std::vector<std::string>
-  getNonDefaultProperties(std::vector<std::string> const &props) const;
+  std::vector<std::string> getNonDefaultProperties(std::vector<std::string> const &props) const;
 
   /// Names of the efficiency properties
   static std::string const Pp;
@@ -45,8 +44,7 @@ private:
   void exec() override;
   /// Create the output workspace with efficiencies
   /// @param labels :: Names of the efficiencies to create
-  virtual API::MatrixWorkspace_sptr
-  createEfficiencies(std::vector<std::string> const &labels) = 0;
+  virtual API::MatrixWorkspace_sptr createEfficiencies(std::vector<std::string> const &labels) = 0;
 };
 
 } // namespace DataHandling

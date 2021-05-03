@@ -32,7 +32,7 @@ where,
 and :math:`\nu` is the frequency (MHz).
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np

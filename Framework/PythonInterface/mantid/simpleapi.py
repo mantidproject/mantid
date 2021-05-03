@@ -138,12 +138,12 @@ def Load(*args, **kwargs):
     try:
         algm.setProperty('Filename', filename)  # Must be set first
     except ValueError as ve:
-        raise ValueError('Problem when setting Filename. This is the detailed error '
-                         'description: ' + str(ve) + '\nIf the file has been found '
-                                                     'but you got this error, you might not have read permissions '
-                                                     'or the file might be corrupted.\nIf the file has not been found, '
-                                                     'you might have forgotten to add its location in the data search '
-                                                     'directories.')
+        msg = f'Problem setting "Filename" in Load: {ve}'
+        raise ValueError(msg + '\nIf the file has been found '
+                               'but you got this error, you might not have read permissions '
+                               'or the file might be corrupted.\nIf the file has not been found, '
+                               'you might have forgotten to add its location in the data search '
+                               'directories.')
     # Remove from keywords so it is not set twice
     if 'Filename' in kwargs:
         del kwargs['Filename']
@@ -210,8 +210,8 @@ def StartLiveData(*args, **kwargs):
             algm.setProperty(name, value)
 
         except ValueError as ve:
-            raise ValueError('Problem when setting %s. This is the detailed error '
-                             'description: %s' % (name, str(ve)))
+            raise ValueError('Problem setting "{}" in {}-v{}: {}'.format(name, algm.name(),
+                                                                         algm.version(), str(ve)))
         except KeyError:
             pass  # ignore if kwargs[name] doesn't exist
 
@@ -929,10 +929,15 @@ def set_properties(alg_object, *args, **kwargs):
     def do_set_property(name, new_value):
         if new_value is None:
             return
-        if isinstance(new_value, _kernel.DataItem) and new_value.name():
-            alg_object.setPropertyValue(key, new_value.name())
-        else:
-            alg_object.setProperty(key, new_value)
+        try:
+            if isinstance(new_value, _kernel.DataItem) and new_value.name():
+                alg_object.setPropertyValue(key, new_value.name())
+            else:
+                alg_object.setProperty(key, new_value)
+        except (RuntimeError, TypeError, ValueError) as e:
+            msg = 'Problem setting "{}" in {}-v{}: {}'.format(name, alg_object.name(), alg_object.version(),
+                                                              str(e))
+            raise e.__class__(msg) from e
 
     # end
     if len(args) > 0:
@@ -1039,7 +1044,8 @@ def _create_algorithm_function(name, version, algm_object):
                         # Check for missing mandatory parameters
                         _check_mandatory_args(name, algm, e, *args, **kwargs)
                     else:
-                        raise
+                        msg = '{}-v{}: {}'.format(algm.name(), algm.version(), str(e))
+                        raise RuntimeError(msg) from e
 
                 return _gather_returns(name, lhs, algm)
         # Set the signature of the callable to be one that is only generated on request.
@@ -1131,7 +1137,7 @@ def _create_fake_function(name):
 
     # ------------------------------------------------------------------------------------------------
     def fake_function(*args, **kwargs):
-        raise RuntimeError("Mantid import error. The mock simple API functions have not been replaced!" +
+        raise RuntimeError("Mantid import error. The mock simple API functions have not been replaced!"
                            " This is an error in the core setup logic of the mantid module, "
                            "please contact the development team.")
 
@@ -1164,7 +1170,7 @@ def _mockup(plugins):
 
         # ------------------------------------------------------------------------------------------------
         def fake_function(*args, **kwargs):
-            raise RuntimeError("Mantid import error. The mock simple API functions have not been replaced!" +
+            raise RuntimeError("Mantid import error. The mock simple API functions have not been replaced!"
                                " This is an error in the core setup logic of the mantid module, "
                                "please contact the development team.")
 

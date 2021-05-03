@@ -34,7 +34,7 @@ namespace CxxTest
         virtual OutputStream &operator<<( const char * /*string*/ ) { return *this; }
 
         typedef void (*Manipulator)( OutputStream & );
-        
+
         virtual OutputStream &operator<<( Manipulator m ) { m( *this ); return *this; }
         static void endl( OutputStream &o ) { (o << "\n").flush(); }
     };
@@ -90,8 +90,8 @@ namespace CxxTest
             (*_o).flush();
             _reported = false;
         }
-        
-        void leaveSuite( const SuiteDescription & sd ) 
+
+        void leaveSuite( const SuiteDescription & sd )
         {
             if ( !tracker().suiteFailed() ) {
                 (*_o) << "OK!" << endl;
@@ -246,7 +246,7 @@ namespace CxxTest
     private:
         MantidFormatter( const MantidFormatter & );
         MantidFormatter &operator=( const MantidFormatter & );
-        
+
         OutputStream &stop( const char *file, unsigned line )
         {
             newLine();
@@ -282,7 +282,7 @@ namespace CxxTest
         {
             (*_o) << "   (null)" << endl;
         }
-        
+
         void dumpBuffer( const void *buffer, unsigned size )
         {
             unsigned dumpSize = size;

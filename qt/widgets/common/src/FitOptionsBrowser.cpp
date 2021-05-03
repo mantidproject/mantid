@@ -50,8 +50,7 @@ namespace MantidWidgets {
  * @param fitType :: The type of the underlying fitting algorithm.
  */
 FitOptionsBrowser::FitOptionsBrowser(QWidget *parent, FittingMode fitType)
-    : QWidget(parent), m_fittingTypeProp(nullptr), m_minimizer(nullptr),
-      m_decimals(6), m_fittingType(fitType) {
+    : QWidget(parent), m_fittingTypeProp(nullptr), m_minimizer(nullptr), m_decimals(6), m_fittingType(fitType) {
   // create m_browser
   createBrowser();
   createProperties();
@@ -101,10 +100,8 @@ void FitOptionsBrowser::createBrowser() {
   // connect(m_browser, SIGNAL(customContextMenuRequested(const QPoint &)),
   // this, SLOT(popupMenu(const QPoint &)));
 
-  connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(enumChanged(QtProperty *)));
-  connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(doubleChanged(QtProperty *)));
+  connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(enumChanged(QtProperty *)));
+  connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(doubleChanged(QtProperty *)));
   // Fill in getter and setter maps
 }
 
@@ -120,8 +117,7 @@ void FitOptionsBrowser::initFittingTypeProp() {
   m_enumManager->setEnumNames(m_fittingTypeProp, types);
   if (m_fittingType == FittingMode::SEQUENTIAL_AND_SIMULTANEOUS) {
     m_browser->addProperty(m_fittingTypeProp);
-  } else if (m_fittingType == FittingMode::SIMULTANEOUS ||
-             m_fittingType == FittingMode::SEQUENTIAL) {
+  } else if (m_fittingType == FittingMode::SIMULTANEOUS || m_fittingType == FittingMode::SEQUENTIAL) {
     this->lockCurrentFittingType(m_fittingType);
   }
 }
@@ -132,12 +128,10 @@ void FitOptionsBrowser::initFittingTypeProp() {
 void FitOptionsBrowser::createProperties() {
   initFittingTypeProp();
   createCommonProperties();
-  if (m_fittingType == FittingMode::SIMULTANEOUS ||
-      m_fittingType == FittingMode::SEQUENTIAL_AND_SIMULTANEOUS) {
+  if (m_fittingType == FittingMode::SIMULTANEOUS || m_fittingType == FittingMode::SEQUENTIAL_AND_SIMULTANEOUS) {
     createSimultaneousFitProperties();
   }
-  if (m_fittingType == FittingMode::SEQUENTIAL ||
-      m_fittingType == FittingMode::SEQUENTIAL_AND_SIMULTANEOUS) {
+  if (m_fittingType == FittingMode::SEQUENTIAL || m_fittingType == FittingMode::SEQUENTIAL_AND_SIMULTANEOUS) {
     createSequentialFitProperties();
   }
   switchFitType();
@@ -151,8 +145,7 @@ void FitOptionsBrowser::createCommonProperties() {
     m_intManager->setMinimum(m_maxIterations, 0);
     m_browser->addProperty(m_maxIterations);
 
-    addProperty("MaxIterations", m_maxIterations,
-                &FitOptionsBrowser::getIntProperty,
+    addProperty("MaxIterations", m_maxIterations, &FitOptionsBrowser::getIntProperty,
                 &FitOptionsBrowser::setIntProperty);
   }
 
@@ -167,8 +160,7 @@ void FitOptionsBrowser::createCommonProperties() {
     m_minimizerGroup->addSubProperty(m_minimizer);
 
     // Get names of registered minimizers from the factory
-    std::vector<std::string> minimizerOptions =
-        Mantid::API::FuncMinimizerFactory::Instance().getKeys();
+    std::vector<std::string> minimizerOptions = Mantid::API::FuncMinimizerFactory::Instance().getKeys();
     QStringList minimizers;
 
     // Store them in the m_minimizer enum property
@@ -176,22 +168,19 @@ void FitOptionsBrowser::createCommonProperties() {
       minimizers << QString::fromStdString(minimizerOption);
     }
     m_enumManager->setEnumNames(m_minimizer, minimizers);
-    int i =
-        m_enumManager->enumNames(m_minimizer).indexOf("Levenberg-Marquardt");
+    int i = m_enumManager->enumNames(m_minimizer).indexOf("Levenberg-Marquardt");
     if (i >= 0) {
       m_enumManager->setValue(m_minimizer, i);
     }
     m_browser->addProperty(m_minimizerGroup);
-    addProperty("Minimizer", m_minimizer, &FitOptionsBrowser::getMinimizer,
-                &FitOptionsBrowser::setMinimizer);
+    addProperty("Minimizer", m_minimizer, &FitOptionsBrowser::getMinimizer, &FitOptionsBrowser::setMinimizer);
   }
 
   // Create cost function property
   m_costFunction = m_enumManager->addProperty("Cost Function");
   {
     // Get names of registered cost functions from the factory
-    std::vector<std::string> costOptions =
-        Mantid::API::CostFunctionFactory::Instance().getKeys();
+    std::vector<std::string> costOptions = Mantid::API::CostFunctionFactory::Instance().getKeys();
     QStringList costFunctions;
     // Store them in the m_minimizer enum property
     for (auto &costOption : costOptions) {
@@ -199,8 +188,7 @@ void FitOptionsBrowser::createCommonProperties() {
     }
     m_enumManager->setEnumNames(m_costFunction, costFunctions);
     m_browser->addProperty(m_costFunction);
-    addProperty("CostFunction", m_costFunction,
-                &FitOptionsBrowser::getStringEnumProperty,
+    addProperty("CostFunction", m_costFunction, &FitOptionsBrowser::getStringEnumProperty,
                 &FitOptionsBrowser::setStringEnumProperty);
   }
 
@@ -212,8 +200,7 @@ void FitOptionsBrowser::createCommonProperties() {
                     << "Histogram";
     m_enumManager->setEnumNames(m_evaluationType, evaluationTypes);
     m_browser->addProperty(m_evaluationType);
-    addProperty("EvaluationType", m_evaluationType,
-                &FitOptionsBrowser::getStringEnumProperty,
+    addProperty("EvaluationType", m_evaluationType, &FitOptionsBrowser::getStringEnumProperty,
                 &FitOptionsBrowser::setStringEnumProperty);
   }
   // Create PeakRadius property
@@ -222,8 +209,7 @@ void FitOptionsBrowser::createCommonProperties() {
     m_intManager->setValue(m_peakRadius, 0);
     m_intManager->setMinimum(m_peakRadius, 0);
     m_browser->addProperty(m_peakRadius);
-    addProperty("PeakRadius", m_peakRadius, &FitOptionsBrowser::getIntProperty,
-                &FitOptionsBrowser::setIntProperty);
+    addProperty("PeakRadius", m_peakRadius, &FitOptionsBrowser::getIntProperty, &FitOptionsBrowser::setIntProperty);
   }
 }
 
@@ -232,8 +218,7 @@ void FitOptionsBrowser::createSimultaneousFitProperties() {
   m_output = m_stringManager->addProperty("Output");
   {
     m_browser->addProperty(m_output);
-    addProperty("Output", m_output, &FitOptionsBrowser::getStringProperty,
-                &FitOptionsBrowser::setStringProperty);
+    addProperty("Output", m_output, &FitOptionsBrowser::getStringProperty, &FitOptionsBrowser::setStringProperty);
     m_simultaneousProperties << m_output;
   }
 
@@ -241,8 +226,7 @@ void FitOptionsBrowser::createSimultaneousFitProperties() {
   m_ignoreInvalidData = m_boolManager->addProperty("Ignore Invalid Data");
   {
     m_browser->addProperty(m_ignoreInvalidData);
-    addProperty("IgnoreInvalidData", m_ignoreInvalidData,
-                &FitOptionsBrowser::getBoolProperty,
+    addProperty("IgnoreInvalidData", m_ignoreInvalidData, &FitOptionsBrowser::getBoolProperty,
                 &FitOptionsBrowser::setBoolProperty);
     m_simultaneousProperties << m_ignoreInvalidData;
   }
@@ -257,8 +241,7 @@ void FitOptionsBrowser::createSequentialFitProperties() {
           << "Individual";
     m_enumManager->setEnumNames(m_plotPeakByLogValueFitType, types);
     m_enumManager->setValue(m_plotPeakByLogValueFitType, 0);
-    addProperty("FitType", m_plotPeakByLogValueFitType,
-                &FitOptionsBrowser::getStringEnumProperty,
+    addProperty("FitType", m_plotPeakByLogValueFitType, &FitOptionsBrowser::getStringEnumProperty,
                 &FitOptionsBrowser::setStringEnumProperty);
     m_sequentialProperties << m_plotPeakByLogValueFitType;
   }
@@ -266,8 +249,7 @@ void FitOptionsBrowser::createSequentialFitProperties() {
   // Create OutputWorkspace property
   m_outputWorkspace = m_stringManager->addProperty("OutputWorkspace");
   {
-    addProperty("OutputWorkspace", m_outputWorkspace,
-                &FitOptionsBrowser::getStringProperty,
+    addProperty("OutputWorkspace", m_outputWorkspace, &FitOptionsBrowser::getStringProperty,
                 &FitOptionsBrowser::setStringProperty);
     m_sequentialProperties << m_outputWorkspace;
   }
@@ -275,16 +257,14 @@ void FitOptionsBrowser::createSequentialFitProperties() {
   // Create CreateOutput property
   auto prop = m_boolManager->addProperty("Create Output");
   {
-    addProperty("CreateOutput", prop, &FitOptionsBrowser::getBoolProperty,
-                &FitOptionsBrowser::setBoolProperty);
+    addProperty("CreateOutput", prop, &FitOptionsBrowser::getBoolProperty, &FitOptionsBrowser::setBoolProperty);
     m_sequentialProperties << prop;
   }
 
   // Create OutputCompositeMembers property
   prop = m_boolManager->addProperty("Output Composite Members");
   {
-    addProperty("OutputCompositeMembers", prop,
-                &FitOptionsBrowser::getBoolProperty,
+    addProperty("OutputCompositeMembers", prop, &FitOptionsBrowser::getBoolProperty,
                 &FitOptionsBrowser::setBoolProperty);
     m_sequentialProperties << prop;
   }
@@ -292,16 +272,14 @@ void FitOptionsBrowser::createSequentialFitProperties() {
   // Create ConvolveMembers property
   prop = m_boolManager->addProperty("Convolve Members");
   {
-    addProperty("ConvolveMembers", prop, &FitOptionsBrowser::getBoolProperty,
-                &FitOptionsBrowser::setBoolProperty);
+    addProperty("ConvolveMembers", prop, &FitOptionsBrowser::getBoolProperty, &FitOptionsBrowser::setBoolProperty);
     m_sequentialProperties << prop;
   }
 
   // Create PassWSIndexToFunction property
   prop = m_boolManager->addProperty("Pass WS Index To Function");
   {
-    addProperty("PassWSIndexToFunction", prop,
-                &FitOptionsBrowser::getBoolProperty,
+    addProperty("PassWSIndexToFunction", prop, &FitOptionsBrowser::getBoolProperty,
                 &FitOptionsBrowser::setBoolProperty);
     m_sequentialProperties << prop;
   }
@@ -310,8 +288,7 @@ void FitOptionsBrowser::createSequentialFitProperties() {
   m_logValue = m_enumManager->addProperty("Log Value");
   {
     // m_enumManager->setValue(m_logValue,0);
-    addProperty("LogValue", m_logValue,
-                &FitOptionsBrowser::getStringEnumProperty,
+    addProperty("LogValue", m_logValue, &FitOptionsBrowser::getStringEnumProperty,
                 &FitOptionsBrowser::setStringEnumProperty);
     m_sequentialProperties << m_logValue;
   }
@@ -319,17 +296,15 @@ void FitOptionsBrowser::createSequentialFitProperties() {
   // Create LogValue property
   m_plotParameter = m_enumManager->addProperty("Plot parameter");
   {
-    addProperty("PlotParameter", m_plotParameter,
-                &FitOptionsBrowser::getStringEnumProperty,
+    addProperty("PlotParameter", m_plotParameter, &FitOptionsBrowser::getStringEnumProperty,
                 &FitOptionsBrowser::setStringEnumProperty);
     m_sequentialProperties << m_plotParameter;
   }
 }
 
-void FitOptionsBrowser::addProperty(
-    const QString &name, QtProperty *prop,
-    QString (FitOptionsBrowser::*getter)(QtProperty *) const,
-    void (FitOptionsBrowser::*setter)(QtProperty *, const QString &)) {
+void FitOptionsBrowser::addProperty(const QString &name, QtProperty *prop,
+                                    QString (FitOptionsBrowser::*getter)(QtProperty *) const,
+                                    void (FitOptionsBrowser::*setter)(QtProperty *, const QString &)) {
   m_propertyNameMap[name] = prop;
   m_getters[prop] = getter;
   m_setters[prop] = setter;
@@ -368,9 +343,7 @@ void FitOptionsBrowser::enumChanged(QtProperty *prop) {
 /**
  * @brief pass the signal emitted by m_doubleManager
  */
-void FitOptionsBrowser::doubleChanged(QtProperty *property) {
-  emit doublePropertyChanged(property->propertyName());
-}
+void FitOptionsBrowser::doubleChanged(QtProperty *property) { emit doublePropertyChanged(property->propertyName()); }
 
 /**
  * Update the browser when minimizer changes.
@@ -390,9 +363,7 @@ void FitOptionsBrowser::updateMinimizer() {
   }
 
   // Check if the new minimizer has its own properties
-  auto minimizer =
-      Mantid::API::FuncMinimizerFactory::Instance().createMinimizer(
-          minimizerName.toStdString());
+  auto minimizer = Mantid::API::FuncMinimizerFactory::Instance().createMinimizer(minimizerName.toStdString());
 
   // Create and add properties to the minimizer group
   auto minimizerProperties = minimizer->getProperties();
@@ -420,12 +391,8 @@ void FitOptionsBrowser::switchFitType() {
  * Show normal Fit properties and hide the others.
  */
 void FitOptionsBrowser::displayNormalFitProperties() {
-  foreach (QtProperty *prop, m_simultaneousProperties) {
-    m_browser->addProperty(prop);
-  }
-  foreach (QtProperty *prop, m_sequentialProperties) {
-    m_browser->removeProperty(prop);
-  }
+  foreach (QtProperty *prop, m_simultaneousProperties) { m_browser->addProperty(prop); }
+  foreach (QtProperty *prop, m_sequentialProperties) { m_browser->removeProperty(prop); }
   emit changedToSimultaneousFitting();
 }
 
@@ -434,35 +401,26 @@ void FitOptionsBrowser::displayNormalFitProperties() {
  * and attach it to the correct manager.
  * @param property :: An algorithm property.
  */
-QtProperty *
-FitOptionsBrowser::createPropertyProperty(Mantid::Kernel::Property *property) {
+QtProperty *FitOptionsBrowser::createPropertyProperty(Mantid::Kernel::Property *property) {
   QString propName = QString::fromStdString(property->name());
   QtProperty *prop = nullptr;
-  if (auto prp =
-          dynamic_cast<Mantid::Kernel::PropertyWithValue<bool> *>(property)) {
+  if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<bool> *>(property)) {
     prop = m_boolManager->addProperty(propName);
     bool val = *prp;
     m_boolManager->setValue(prop, val);
-  } else if (auto prp =
-                 dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(
-                     property)) {
+  } else if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(property)) {
     prop = this->addDoubleProperty(propName);
     double val = *prp;
     m_doubleManager->setValue(prop, val);
-  } else if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(
-                 property)) {
+  } else if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(property)) {
     prop = m_intManager->addProperty(propName);
     int val = *prp;
     m_intManager->setValue(prop, val);
-  } else if (auto prp =
-                 dynamic_cast<Mantid::Kernel::PropertyWithValue<size_t> *>(
-                     property)) {
+  } else if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<size_t> *>(property)) {
     prop = m_intManager->addProperty(propName);
     size_t val = *prp;
     m_intManager->setValue(prop, static_cast<int>(val));
-  } else if (auto prp =
-                 dynamic_cast<Mantid::Kernel::PropertyWithValue<std::string> *>(
-                     property)) {
+  } else if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<std::string> *>(property)) {
     prop = m_stringManager->addProperty(propName);
     QString val = QString::fromStdString(prp->value());
     m_stringManager->setValue(prop, val);
@@ -471,8 +429,7 @@ FitOptionsBrowser::createPropertyProperty(Mantid::Kernel::Property *property) {
     m_stringManager->setValue(prop, QString::fromStdString(property->value()));
   } else {
     QMessageBox::warning(this, "Mantid - Error",
-                         "Type of minimizer's property " + propName +
-                             " is not yet supported by the browser.");
+                         "Type of minimizer's property " + propName + " is not yet supported by the browser.");
     return nullptr;
   }
 
@@ -494,10 +451,8 @@ FitOptionsBrowser::createPropertyProperty(Mantid::Kernel::Property *property) {
  * Copy values of the properties to an algorithm.
  * @param fit :: An instance of the Fit algorithm.
  */
-void FitOptionsBrowser::copyPropertiesToAlgorithm(
-    Mantid::API::IAlgorithm &fit) const {
-  for (auto p = m_propertyNameMap.constBegin();
-       p != m_propertyNameMap.constEnd(); ++p) {
+void FitOptionsBrowser::copyPropertiesToAlgorithm(Mantid::API::IAlgorithm &fit) const {
+  for (auto p = m_propertyNameMap.constBegin(); p != m_propertyNameMap.constEnd(); ++p) {
     auto propertyName = p.key().toStdString();
     if (fit.existsProperty(propertyName)) {
       auto prop = p.value();
@@ -513,8 +468,7 @@ void FitOptionsBrowser::copyPropertiesToAlgorithm(
  */
 QString FitOptionsBrowser::getProperty(const QString &name) const {
   if (!m_propertyNameMap.contains(name)) {
-    throw std::runtime_error("Property " + name.toStdString() +
-                             " isn't supported by the browser.");
+    throw std::runtime_error("Property " + name.toStdString() + " isn't supported by the browser.");
   }
   auto prop = m_propertyNameMap[name];
   auto f = m_getters[prop];
@@ -528,8 +482,7 @@ QString FitOptionsBrowser::getProperty(const QString &name) const {
  */
 void FitOptionsBrowser::setProperty(const QString &name, const QString &value) {
   if (!m_propertyNameMap.contains(name)) {
-    throw std::runtime_error("Property " + name.toStdString() +
-                             " isn't supported by the browser.");
+    throw std::runtime_error("Property " + name.toStdString() + " isn't supported by the browser.");
   }
   auto prop = m_propertyNameMap[name];
   auto f = m_setters[prop];
@@ -576,8 +529,7 @@ QString FitOptionsBrowser::getMinimizer(QtProperty * /*unused*/) const {
  * Set new value to the Minimizer property.
  * @param value :: The new value.
  */
-void FitOptionsBrowser::setMinimizer(QtProperty * /*unused*/,
-                                     const QString &value) {
+void FitOptionsBrowser::setMinimizer(QtProperty * /*unused*/, const QString &value) {
   QStringList terms = value.split(',');
   int i = m_enumManager->enumNames(m_minimizer).indexOf(terms[0]);
   m_enumManager->setValue(m_minimizer, i);
@@ -590,9 +542,7 @@ void FitOptionsBrowser::setMinimizer(QtProperty * /*unused*/,
  * Get the value of an integer algorithm property.
  * @param prop :: The corresponding QtProperty.
  */
-QString FitOptionsBrowser::getIntProperty(QtProperty *prop) const {
-  return QString::number(m_intManager->value(prop));
-}
+QString FitOptionsBrowser::getIntProperty(QtProperty *prop) const { return QString::number(m_intManager->value(prop)); }
 
 /**
  * Set a new value of an integer algorithm property.
@@ -617,8 +567,7 @@ QString FitOptionsBrowser::getDoubleProperty(QtProperty *prop) const {
  * @param prop :: The corresponding QtProperty.
  * @param value :: The new value.
  */
-void FitOptionsBrowser::setDoubleProperty(QtProperty *prop,
-                                          const QString &value) {
+void FitOptionsBrowser::setDoubleProperty(QtProperty *prop, const QString &value) {
   m_doubleManager->setValue(prop, value.toDouble());
 }
 
@@ -635,8 +584,7 @@ QString FitOptionsBrowser::getBoolProperty(QtProperty *prop) const {
  * @param prop :: The corresponding QtProperty.
  * @param value :: The new value.
  */
-void FitOptionsBrowser::setBoolProperty(QtProperty *prop,
-                                        const QString &value) {
+void FitOptionsBrowser::setBoolProperty(QtProperty *prop, const QString &value) {
   bool boolValue = (value == "1") || (value.toLower() == "true");
   m_boolManager->setValue(prop, boolValue);
 }
@@ -657,8 +605,7 @@ QString FitOptionsBrowser::getStringEnumProperty(QtProperty *prop) const {
  * @param prop :: The corresponding QtProperty.
  * @param value :: The new value.
  */
-void FitOptionsBrowser::setStringEnumProperty(QtProperty *prop,
-                                              const QString &value) {
+void FitOptionsBrowser::setStringEnumProperty(QtProperty *prop, const QString &value) {
   int i = m_enumManager->enumNames(prop).indexOf(value);
   if (i >= 0)
     m_enumManager->setValue(prop, i);
@@ -668,17 +615,14 @@ void FitOptionsBrowser::setStringEnumProperty(QtProperty *prop,
  * Get the value of a string algorithm property.
  * @param prop :: The corresponding QtProperty.
  */
-QString FitOptionsBrowser::getStringProperty(QtProperty *prop) const {
-  return m_stringManager->value(prop);
-}
+QString FitOptionsBrowser::getStringProperty(QtProperty *prop) const { return m_stringManager->value(prop); }
 
 /**
  * Set a new value of a string algorithm property.
  * @param prop :: The corresponding QtProperty.
  * @param value :: The new value.
  */
-void FitOptionsBrowser::setStringProperty(QtProperty *prop,
-                                          const QString &value) {
+void FitOptionsBrowser::setStringProperty(QtProperty *prop, const QString &value) {
   m_stringManager->setValue(prop, value);
 }
 
@@ -689,8 +633,7 @@ void FitOptionsBrowser::setStringProperty(QtProperty *prop,
  * @param settings :: A QSettings instance provided by the user of this class.
  */
 void FitOptionsBrowser::saveSettings(QSettings &settings) const {
-  for (auto p = m_propertyNameMap.constBegin();
-       p != m_propertyNameMap.constEnd(); ++p) {
+  for (auto p = m_propertyNameMap.constBegin(); p != m_propertyNameMap.constEnd(); ++p) {
     auto prop = p.value();
     auto f = m_getters[prop];
     settings.setValue(p.key(), (this->*f)(prop));
@@ -702,8 +645,7 @@ void FitOptionsBrowser::saveSettings(QSettings &settings) const {
  * @param settings :: A QSettings instance provided by the user of this class.
  */
 void FitOptionsBrowser::loadSettings(const QSettings &settings) {
-  for (auto p = m_propertyNameMap.constBegin();
-       p != m_propertyNameMap.constEnd(); ++p) {
+  for (auto p = m_propertyNameMap.constBegin(); p != m_propertyNameMap.constEnd(); ++p) {
     QString value = settings.value(p.key()).toString();
     if (!value.isEmpty()) {
       auto prop = p.value();
@@ -747,17 +689,14 @@ void FitOptionsBrowser::lockCurrentFittingType(FittingMode fitType) {
 /**
  * Make the fitting type changeable again.
  */
-void FitOptionsBrowser::unlockCurrentFittingType() {
-  m_fittingTypeProp->setEnabled(true);
-}
+void FitOptionsBrowser::unlockCurrentFittingType() { m_fittingTypeProp->setEnabled(true); }
 
 /**
  * Set values for an enum property.
  * @param prop :: A property to set the values to.
  * @param values :: New enum values.
  */
-void FitOptionsBrowser::setPropertyEnumValues(QtProperty *prop,
-                                              const QStringList &values) {
+void FitOptionsBrowser::setPropertyEnumValues(QtProperty *prop, const QStringList &values) {
   auto i = m_enumManager->value(prop);
   if (!values.isEmpty() && values.front().isEmpty()) {
     m_enumManager->setEnumNames(prop, values);
@@ -777,15 +716,12 @@ void FitOptionsBrowser::setPropertyEnumValues(QtProperty *prop,
  * Define log names to use with the LogValue property.
  * @param logNames :: The log names
  */
-void FitOptionsBrowser::setLogNames(const QStringList &logNames) {
-  setPropertyEnumValues(m_logValue, logNames);
-}
+void FitOptionsBrowser::setLogNames(const QStringList &logNames) { setPropertyEnumValues(m_logValue, logNames); }
 
 /**
  * Define names of function parameters that can be plotted against the LogValue.
  */
-void FitOptionsBrowser::setParameterNamesForPlotting(
-    const QStringList &parNames) {
+void FitOptionsBrowser::setParameterNamesForPlotting(const QStringList &parNames) {
   setPropertyEnumValues(m_plotParameter, parNames);
 }
 
@@ -813,15 +749,12 @@ QString FitOptionsBrowser::getParameterToPlot() const {
  */
 QtProperty *FitOptionsBrowser::addDoubleProperty(const QString &propertyName) {
   if (m_propertyNameMap.contains(propertyName)) {
-    throw std::runtime_error("Property " + propertyName.toStdString() +
-                             " already added.");
+    throw std::runtime_error("Property " + propertyName.toStdString() + " already added.");
   }
   QtProperty *property = m_doubleManager->addProperty(propertyName);
   m_doubleManager->setDecimals(property, m_decimals);
-  m_doubleManager->setRange(property, std::numeric_limits<double>::lowest(),
-                            std::numeric_limits<double>::max());
-  this->addProperty(propertyName, property,
-                    &FitOptionsBrowser::getDoubleProperty,
+  m_doubleManager->setRange(property, std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
+  this->addProperty(propertyName, property, &FitOptionsBrowser::getDoubleProperty,
                     &FitOptionsBrowser::setDoubleProperty);
   return property;
 }
@@ -835,11 +768,9 @@ QtProperty *FitOptionsBrowser::addDoubleProperty(const QString &propertyName) {
  * @pre if property is to be hidden, property should not have been previously
  * removed from the browser
  */
-void FitOptionsBrowser::displayProperty(const QString &propertyName,
-                                        bool show) {
+void FitOptionsBrowser::displayProperty(const QString &propertyName, bool show) {
   if (!m_propertyNameMap.contains(propertyName)) {
-    throw std::runtime_error("Property " + propertyName.toStdString() +
-                             " isn't supported by the browser.");
+    throw std::runtime_error("Property " + propertyName.toStdString() + " isn't supported by the browser.");
   }
   auto prop = m_propertyNameMap[propertyName];
   if (show) {
@@ -867,12 +798,8 @@ bool FitOptionsBrowser::addPropertyToBlacklist(const QString &name) {
  * Show sequential fit (PlotPeakByLogValue) properties and hide the others.
  */
 void FitOptionsBrowser::displaySequentialFitProperties() {
-  foreach (QtProperty *prop, m_sequentialProperties) {
-    m_browser->addProperty(prop);
-  }
-  foreach (QtProperty *prop, m_simultaneousProperties) {
-    m_browser->removeProperty(prop);
-  }
+  foreach (QtProperty *prop, m_sequentialProperties) { m_browser->addProperty(prop); }
+  foreach (QtProperty *prop, m_simultaneousProperties) { m_browser->removeProperty(prop); }
   emit changedToSequentialFitting();
 }
 

@@ -19,9 +19,7 @@ class MANTID_ALGORITHMS_DLL LorentzCorrection : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"AnvredCorrection"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"AnvredCorrection"}; }
   const std::string category() const override;
   const std::string summary() const override;
   std::map<std::string, std::string> validateInputs() override;
@@ -29,10 +27,8 @@ public:
 private:
   void init() override;
   void exec() override;
-  void processTOF_SCD(Mantid::API::MatrixWorkspace_sptr &wksp,
-                      Mantid::API::Progress &prog);
-  void processTOF_PD(Mantid::API::MatrixWorkspace_sptr &wksp,
-                     Mantid::API::Progress &prog);
+  void processTOF_SCD(Mantid::API::MatrixWorkspace_sptr &wksp, Mantid::API::Progress &prog);
+  void processTOF_PD(Mantid::API::MatrixWorkspace_sptr &wksp, Mantid::API::Progress &prog);
 };
 
 } // namespace Algorithms

@@ -14,7 +14,7 @@
 #include <cxxtest/TestSuite.h>
 #include <cxxtest/GlobalFixture.h>
 
-namespace CxxTest 
+namespace CxxTest
 {
     class RealTestDescription : public TestDescription
     {
@@ -22,7 +22,7 @@ namespace CxxTest
         RealTestDescription();
         RealTestDescription( List &argList, SuiteDescription &argSuite, unsigned argLine, const char *argTestName );
         void initialize( List &argList, SuiteDescription &argSuite, unsigned argLine, const char *argTestName );
-        
+
         const char *file() const;
         unsigned line() const;
         const char *testName() const;
@@ -34,15 +34,15 @@ namespace CxxTest
         TestSuite *suite() const;
 
         bool setUp();
-        void run();        
+        void run();
         bool tearDown();
-        
+
     private:
         RealTestDescription( const RealTestDescription & );
         RealTestDescription &operator=( const RealTestDescription & );
 
         virtual void runTest() = 0;
-        
+
         SuiteDescription *_suite;
         unsigned _line;
         const char *_testName;
@@ -53,7 +53,7 @@ namespace CxxTest
     public:
         RealSuiteDescription();
         RealSuiteDescription( const char *argFile, unsigned argLine, const char *argSuiteName, List &argTests );
-        
+
         void initialize( const char *argFile, unsigned argLine, const char *argSuiteName, List &argTests );
 
         const char *file() const;
@@ -64,17 +64,17 @@ namespace CxxTest
         const TestDescription *firstTest() const;
         SuiteDescription *next();
         const SuiteDescription *next() const;
-        
+
         unsigned numTests() const;
         const TestDescription &testDescription( unsigned i ) const;
 
         void activateAllTests();
         bool leaveOnly( const char *testName );
-        
+
     private:
         RealSuiteDescription( const RealSuiteDescription & );
         RealSuiteDescription &operator=( const RealSuiteDescription & );
-        
+
         const char *_file;
         unsigned _line;
         const char *_suiteName;
@@ -96,16 +96,16 @@ namespace CxxTest
                          const char *argSuiteName, TestSuite &argSuite,
                          List &argTests );
         TestSuite *suite() const;
-        
+
         bool setUp();
         bool tearDown();
-        
+
     private:
         StaticSuiteDescription( const StaticSuiteDescription & );
         StaticSuiteDescription &operator=( const StaticSuiteDescription & );
 
         void doInitialize( TestSuite &argSuite );
-        
+
         TestSuite *_suite;
     };
 
@@ -127,7 +127,7 @@ namespace CxxTest
     private:
         void doInitialize( unsigned argCreateLine, unsigned argDestroyLine );
     };
-    
+
     template<class S>
     class DynamicSuiteDescription : public CommonDynamicSuiteDescription
     {
@@ -157,7 +157,7 @@ namespace CxxTest
 
         bool setUp();
         bool tearDown();
-        
+
     private:
         S *realSuite() const { return *_suite; }
         void setSuite( S *s ) { *_suite = s; }
@@ -166,7 +166,7 @@ namespace CxxTest
         {
             setSuite( S::createSuite() );
         }
-        
+
         void destroySuite()
         {
             S *s = realSuite();
@@ -194,7 +194,7 @@ namespace CxxTest
     {
         if ( !_suite )
             return true;
-            
+
         _TS_TRY {
             _TSM_ASSERT_THROWS_NOTHING( file(), _destroyLine, "destroySuite() failed", destroySuite() );
         }
@@ -202,7 +202,7 @@ namespace CxxTest
 
         return true;
     }
-        
+
     class RealWorldDescription : public WorldDescription
     {
     public:
@@ -215,7 +215,7 @@ namespace CxxTest
         const SuiteDescription &suiteDescription( unsigned i ) const;
         void activateAllTests();
         bool leaveOnly( const char *suiteName, const char *testName = 0 );
-        
+
         bool setUp();
         bool tearDown();
         static void reportError( const char *message );

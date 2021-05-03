@@ -34,11 +34,10 @@ template <typename WorkspaceType> struct WorkspacePropertyExporter {
    * @param direction :: The direction, @see Direction enum
    * @param validator :: A pointer validator object
    */
-  static TypedWorkspaceProperty *createPropertyWithValidator(
-      const std::string &name, const std::string &wsName,
-      const unsigned int direction, Kernel::IValidator *validator) {
-    return new TypedWorkspaceProperty(name, wsName, direction,
-                                      validator->clone());
+  static TypedWorkspaceProperty *createPropertyWithValidator(const std::string &name, const std::string &wsName,
+                                                             const unsigned int direction,
+                                                             Kernel::IValidator *validator) {
+    return new TypedWorkspaceProperty(name, wsName, direction, validator->clone());
   }
 
   /**
@@ -51,12 +50,11 @@ template <typename WorkspaceType> struct WorkspacePropertyExporter {
    * @param optional :: If true then the workspace is optional
    * @param validator :: A pointer validator object
    */
-  static TypedWorkspaceProperty *createPropertyWithOptionalFlag(
-      const std::string &name, const std::string &wsName,
-      const unsigned int direction, API::PropertyMode::Type optional,
-      Kernel::IValidator *validator) {
-    return new TypedWorkspaceProperty(name, wsName, direction, optional,
-                                      validator->clone());
+  static TypedWorkspaceProperty *createPropertyWithOptionalFlag(const std::string &name, const std::string &wsName,
+                                                                const unsigned int direction,
+                                                                API::PropertyMode::Type optional,
+                                                                Kernel::IValidator *validator) {
+    return new TypedWorkspaceProperty(name, wsName, direction, optional, validator->clone());
   }
 
   /**
@@ -71,12 +69,12 @@ template <typename WorkspaceType> struct WorkspacePropertyExporter {
    * @param locking :: If true then the workspace will be locked before running
    * an algorithm
    */
-  static TypedWorkspaceProperty *createPropertyWithLockFlag(
-      const std::string &name, const std::string &wsName,
-      const unsigned int direction, API::PropertyMode::Type optional,
-      API::LockMode::Type locking, Kernel::IValidator *validator) {
-    return new TypedWorkspaceProperty(name, wsName, direction, optional,
-                                      locking, validator->clone());
+  static TypedWorkspaceProperty *createPropertyWithLockFlag(const std::string &name, const std::string &wsName,
+                                                            const unsigned int direction,
+                                                            API::PropertyMode::Type optional,
+                                                            API::LockMode::Type locking,
+                                                            Kernel::IValidator *validator) {
+    return new TypedWorkspaceProperty(name, wsName, direction, optional, locking, validator->clone());
   }
 
   /**
@@ -84,9 +82,7 @@ template <typename WorkspaceType> struct WorkspacePropertyExporter {
    * This allows a reference to a Workspace_sptr to be used withh
    * boost::python::extract
    */
-  static Mantid::API::Workspace_sptr value(const TypedWorkspaceProperty &self) {
-    return self.operator()();
-  }
+  static Mantid::API::Workspace_sptr value(const TypedWorkspaceProperty &self) { return self.operator()(); }
 
   /**
    * Defines the necessary exports for a WorkspaceProperty<WorkspaceType>. This
@@ -101,37 +97,26 @@ template <typename WorkspaceType> struct WorkspacePropertyExporter {
     using Mantid::API::IWorkspaceProperty;
     using Mantid::Kernel::PropertyWithValue;
 
-    std::string basePropName =
-        std::string(pythonClassName) + "PropertyWithValue";
+    std::string basePropName = std::string(pythonClassName) + "PropertyWithValue";
     PropertyWithValueExporter<WorkspaceType_sptr>::define(basePropName.c_str());
     register_ptr_to_python<TypedWorkspaceProperty *>();
 
-    class_<TypedWorkspaceProperty,
-           bases<PropertyWithValue<WorkspaceType_sptr>, IWorkspaceProperty>,
+    class_<TypedWorkspaceProperty, bases<PropertyWithValue<WorkspaceType_sptr>, IWorkspaceProperty>,
            boost::noncopyable>(pythonClassName, no_init)
         .def(init<const std::string &, const std::string &, const unsigned int>(
             args("name", "defaultValue", "direction")))
-        .def(init<const std::string &, const std::string &, const unsigned int,
-                  API::PropertyMode::Type>(
+        .def(init<const std::string &, const std::string &, const unsigned int, API::PropertyMode::Type>(
             args("name", "defaultValue", "direction", "optional")))
-        .def(init<const std::string &, const std::string &, const unsigned int,
-                  API::PropertyMode::Type, API::LockMode::Type>(
-            args("name", "defaultValue", "direction", "optional", "locking")))
+        .def(init<const std::string &, const std::string &, const unsigned int, API::PropertyMode::Type,
+                  API::LockMode::Type>(args("name", "defaultValue", "direction", "optional", "locking")))
         // These variants require the validator object to be cloned
-        .def("__init__", make_constructor(&createPropertyWithValidator,
-                                          default_call_policies(),
-                                          (arg("name"), arg("defaultValue"),
-                                           arg("direction"), arg("validator"))))
+        .def("__init__", make_constructor(&createPropertyWithValidator, default_call_policies(),
+                                          (arg("name"), arg("defaultValue"), arg("direction"), arg("validator"))))
+        .def("__init__", make_constructor(&createPropertyWithOptionalFlag, default_call_policies(),
+                                          args("name", "defaultValue", "direction", "optional", "validator")))
         .def("__init__",
-             make_constructor(&createPropertyWithOptionalFlag,
-                              default_call_policies(),
-                              args("name", "defaultValue", "direction",
-                                   "optional", "validator")))
-        .def("__init__",
-             make_constructor(&createPropertyWithLockFlag,
-                              default_call_policies(),
-                              args("name", "defaultValue", "direction",
-                                   "optional", "locking", "validator")))
+             make_constructor(&createPropertyWithLockFlag, default_call_policies(),
+                              args("name", "defaultValue", "direction", "optional", "locking", "validator")))
         .def("isOptional", &TypedWorkspaceProperty::isOptional, arg("self"),
              "Returns true if the property has been marked as optional")
 

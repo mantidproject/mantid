@@ -37,11 +37,10 @@ public:
   };
 
 public:
-  KafkaEventStreamDecoder(
-      std::shared_ptr<IKafkaBroker> broker, const std::string &eventTopic,
-      const std::string &runInfoTopic, const std::string &spDetTopic,
-      const std::string &sampleEnvTopic, const std::string &chopperTopic,
-      const std::string &monitorTopic, const std::size_t bufferThreshold);
+  KafkaEventStreamDecoder(std::shared_ptr<IKafkaBroker> broker, const std::string &eventTopic,
+                          const std::string &runInfoTopic, const std::string &sampleEnvTopic,
+                          const std::string &chopperTopic, const std::string &monitorTopic,
+                          const std::size_t bufferThreshold);
   ~KafkaEventStreamDecoder() override;
   KafkaEventStreamDecoder(const KafkaEventStreamDecoder &) = delete;
   KafkaEventStreamDecoder &operator=(const KafkaEventStreamDecoder &) = delete;
@@ -58,8 +57,7 @@ public:
 private:
   void captureImplExcept() override;
 
-  void eventDataFromMessage(const std::string &buffer, size_t &eventCount,
-                            uint64_t &pulseTimeRet);
+  void eventDataFromMessage(const std::string &buffer, size_t &eventCount, uint64_t &pulseTimeRet);
 
   void flushIntermediateBuffer();
 
@@ -84,9 +82,9 @@ private:
   const std::size_t m_intermediateBufferFlushThreshold;
 };
 
-DLLExport std::vector<size_t> computeGroupBoundaries(
-    const std::vector<KafkaEventStreamDecoder::BufferedEvent> &eventBuffer,
-    const size_t numberOfGroups);
+DLLExport std::vector<size_t>
+computeGroupBoundaries(const std::vector<KafkaEventStreamDecoder::BufferedEvent> &eventBuffer,
+                       const size_t numberOfGroups);
 
 } // namespace LiveData
 } // namespace Mantid

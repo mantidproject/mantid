@@ -7,7 +7,8 @@
 import os
 from math import floor
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
-from Muon.GUI.Common.muon_group import MuonGroup, MuonDiff
+from Muon.GUI.Common.muon_diff import MuonDiff
+from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_phasequad import MuonPhasequad
 from Muon.GUI.Common.muon_base_pair import MuonBasePair
@@ -40,7 +41,7 @@ def get_grouping_psi(workspace):
                 grouping_list.append(MuonGroup(sample_log_value, [ii + 1]))
             sample_log_value_list.append(sample_log_value)
 
-    return grouping_list, [], ''
+    return grouping_list, [], [], ''
 
 
 def get_default_grouping(workspace, instrument, main_field_direction):
@@ -56,7 +57,7 @@ def get_default_grouping(workspace, instrument, main_field_direction):
                 grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
 
         except IndexError:
-            return [], [], ''
+            return [], [], [], ''
     else:
         return get_grouping_psi(workspace)
     instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()

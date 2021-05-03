@@ -39,35 +39,27 @@ Fit::Fit() : IFittingAlgorithm(), m_maxIterations() {}
 void Fit::initConcrete() {
 
   declareProperty("Ties", "", Kernel::Direction::Input);
-  getPointerToProperty("Ties")->setDocumentation(
-      "Math expressions defining ties between parameters of "
-      "the fitting function.");
+  getPointerToProperty("Ties")->setDocumentation("Math expressions defining ties between parameters of "
+                                                 "the fitting function.");
   declareProperty("Constraints", "", Kernel::Direction::Input);
   getPointerToProperty("Constraints")->setDocumentation("List of constraints");
   auto mustBePositive = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty(
-      "MaxIterations", 500, mustBePositive->clone(),
-      "Stop after this number of iterations if a good fit is not found");
+  declareProperty("MaxIterations", 500, mustBePositive->clone(),
+                  "Stop after this number of iterations if a good fit is not found");
   declareProperty("OutputStatus", "", Kernel::Direction::Output);
-  getPointerToProperty("OutputStatus")
-      ->setDocumentation("Whether the fit was successful");
-  declareProperty("OutputChi2overDoF", 0.0, "Returns the goodness of the fit",
-                  Kernel::Direction::Output);
+  getPointerToProperty("OutputStatus")->setDocumentation("Whether the fit was successful");
+  declareProperty("OutputChi2overDoF", 0.0, "Returns the goodness of the fit", Kernel::Direction::Output);
 
   // Disable default gsl error handler (which is to call abort!)
   gsl_set_error_handler_off();
 
-  std::vector<std::string> minimizerOptions =
-      API::FuncMinimizerFactory::Instance().getKeys();
-  Kernel::IValidator_sptr minimizerValidator =
-      std::make_shared<Kernel::StartsWithValidator>(minimizerOptions);
+  std::vector<std::string> minimizerOptions = API::FuncMinimizerFactory::Instance().getKeys();
+  Kernel::IValidator_sptr minimizerValidator = std::make_shared<Kernel::StartsWithValidator>(minimizerOptions);
 
-  declareProperty("Minimizer", "Levenberg-Marquardt", minimizerValidator,
-                  "Minimizer to use for fitting.");
+  declareProperty("Minimizer", "Levenberg-Marquardt", minimizerValidator, "Minimizer to use for fitting.");
 
-  std::vector<std::string> costFuncOptions =
-      API::CostFunctionFactory::Instance().getKeys();
+  std::vector<std::string> costFuncOptions = API::CostFunctionFactory::Instance().getKeys();
   // select only CostFuncFitting variety
   for (auto &costFuncOption : costFuncOptions) {
     auto costFunc = std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
@@ -76,30 +68,24 @@ void Fit::initConcrete() {
       costFuncOption = "";
     }
   }
-  Kernel::IValidator_sptr costFuncValidator =
-      std::make_shared<Kernel::ListValidator<std::string>>(costFuncOptions);
-  declareProperty(
-      "CostFunction", "Least squares", costFuncValidator,
-      "The cost function to be used for the fit, default is Least squares",
-      Kernel::Direction::InOut);
-  declareProperty(
-      "CreateOutput", false,
-      "Set to true to create output workspaces with the results of the fit"
-      "(default is false).");
-  declareProperty(
-      "Output", "",
-      "A base name for the output workspaces (if not "
-      "given default names will be created). The "
-      "default is to use the name of the original data workspace as prefix "
-      "followed by suffixes _Workspace, _Parameters, etc.");
+  Kernel::IValidator_sptr costFuncValidator = std::make_shared<Kernel::ListValidator<std::string>>(costFuncOptions);
+  declareProperty("CostFunction", "Least squares", costFuncValidator,
+                  "The cost function to be used for the fit, default is Least squares", Kernel::Direction::InOut);
+  declareProperty("CreateOutput", false,
+                  "Set to true to create output workspaces with the results of the fit"
+                  "(default is false).");
+  declareProperty("Output", "",
+                  "A base name for the output workspaces (if not "
+                  "given default names will be created). The "
+                  "default is to use the name of the original data workspace as prefix "
+                  "followed by suffixes _Workspace, _Parameters, etc.");
   declareProperty("CalcErrors", false,
                   "Set to true to calcuate errors when output isn't created "
                   "(default is false).");
   declareProperty("OutputCompositeMembers", false,
                   "If true and CreateOutput is true then the value of each "
                   "member of a Composite Function is also output.");
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
-                      "ConvolveMembers", false),
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("ConvolveMembers", false),
                   "If true and OutputCompositeMembers is true members of any "
                   "Convolution are output convolved\n"
                   "with corresponding resolution");
@@ -132,8 +118,7 @@ void Fit::readProperties() {
 void Fit::initializeMinimizer(size_t maxIterations) {
   m_costFunction = getCostFunctionInitialized();
   std::string minimizerName = getPropertyValue("Minimizer");
-  m_minimizer =
-      API::FuncMinimizerFactory::Instance().createMinimizer(minimizerName);
+  m_minimizer = API::FuncMinimizerFactory::Instance().createMinimizer(minimizerName);
   m_minimizer->initialize(m_costFunction, maxIterations);
 }
 
@@ -144,10 +129,8 @@ void Fit::initializeMinimizer(size_t maxIterations) {
 void Fit::copyMinimizerOutput(const API::IFuncMinimizer &minimizer) {
   auto &properties = minimizer.getProperties();
   for (auto property : properties) {
-    if ((*property).direction() == Kernel::Direction::Output &&
-        (*property).isValid().empty()) {
-      auto clonedProperty =
-          std::unique_ptr<Kernel::Property>((*property).clone());
+    if ((*property).direction() == Kernel::Direction::Output && (*property).isValid().empty()) {
+      auto clonedProperty = std::unique_ptr<Kernel::Property>((*property).clone());
       declareProperty(std::move(clonedProperty));
     }
   }
@@ -156,8 +139,7 @@ void Fit::copyMinimizerOutput(const API::IFuncMinimizer &minimizer) {
 /// Run the minimizer's iteration loop.
 /// @returns :: Number of actual iterations.
 size_t Fit::runMinimizer() {
-  const int64_t nsteps =
-      m_maxIterations * m_function->estimateNoProgressCalls();
+  const int64_t nsteps = m_maxIterations * m_function->estimateNoProgressCalls();
   auto prog = std::make_shared<API::Progress>(this, 0.0, 1.0, nsteps);
   m_function->setProgressReporter(prog);
 
@@ -202,15 +184,13 @@ void Fit::finalizeMinimizer(size_t nIterations) {
   m_minimizer->finalize();
 
   auto errorString = m_minimizer->getError();
-  g_log.debug() << "Iteration stopped. Minimizer status string=" << errorString
-                << "\n";
+  g_log.debug() << "Iteration stopped. Minimizer status string=" << errorString << "\n";
 
   if (nIterations >= m_maxIterations) {
     if (!errorString.empty()) {
       errorString += '\n';
     }
-    errorString += "Failed to converge after " +
-                   std::to_string(m_maxIterations) + " iterations.";
+    errorString += "Failed to converge after " + std::to_string(m_maxIterations) + " iterations.";
   }
 
   if (errorString.empty()) {
@@ -220,8 +200,7 @@ void Fit::finalizeMinimizer(size_t nIterations) {
   // return the status flag
   setPropertyValue("OutputStatus", errorString);
   if (!this->isChild()) {
-    auto &logStream =
-        errorString == "success" ? g_log.notice() : g_log.warning();
+    auto &logStream = errorString == "success" ? g_log.notice() : g_log.warning();
     logStream << "Fit status: " << errorString << '\n';
     logStream << "Stopped after " << nIterations << " iterations" << '\n';
   }
@@ -273,13 +252,11 @@ void Fit::createOutput() {
     }
     baseName += "_";
 
-    declareProperty(
-        std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-            "OutputNormalisedCovarianceMatrix", "", Kernel::Direction::Output),
-        "The name of the TableWorkspace in which to store the final covariance "
-        "matrix");
-    setPropertyValue("OutputNormalisedCovarianceMatrix",
-                     baseName + "NormalisedCovarianceMatrix");
+    declareProperty(std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("OutputNormalisedCovarianceMatrix",
+                                                                                   "", Kernel::Direction::Output),
+                    "The name of the TableWorkspace in which to store the final covariance "
+                    "matrix");
+    setPropertyValue("OutputNormalisedCovarianceMatrix", baseName + "NormalisedCovarianceMatrix");
 
     Mantid::API::ITableWorkspace_sptr covariance =
         Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
@@ -307,13 +284,11 @@ void Fit::createOutput() {
           row << 100.0;
         else {
           if (!covar.gsl()) {
-            throw std::runtime_error(
-                "There was an error while allocating the (GSL) covariance "
-                "matrix "
-                "which is needed to produce fitting error results.");
+            throw std::runtime_error("There was an error while allocating the (GSL) covariance "
+                                     "matrix "
+                                     "which is needed to produce fitting error results.");
           }
-          row << 100.0 * covar.get(ia, ja) /
-                     sqrt(covar.get(ia, ia) * covar.get(ja, ja));
+          row << 100.0 * covar.get(ia, ja) / sqrt(covar.get(ia, ia) * covar.get(ja, ja));
         }
         ++ja;
       }
@@ -325,16 +300,14 @@ void Fit::createOutput() {
     // create output parameter table workspace to store final fit parameters
     // including error estimates if derivative of fitting function defined
 
-    declareProperty(
-        std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-            "OutputParameters", "", Kernel::Direction::Output),
-        "The name of the TableWorkspace in which to store the "
-        "final fit parameters");
+    declareProperty(std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("OutputParameters", "",
+                                                                                   Kernel::Direction::Output),
+                    "The name of the TableWorkspace in which to store the "
+                    "final fit parameters");
 
     setPropertyValue("OutputParameters", baseName + "Parameters");
 
-    Mantid::API::ITableWorkspace_sptr result =
-        Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+    Mantid::API::ITableWorkspace_sptr result = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
     result->addColumn("str", "Name");
     // set plot type to Label = 6
     result->getColumn(result->columnCount() - 1)->setPlotType(6);
@@ -345,8 +318,7 @@ void Fit::createOutput() {
 
     for (size_t i = 0; i < m_function->nParams(); i++) {
       Mantid::API::TableRow row = result->appendRow();
-      row << m_function->parameterName(i) << m_function->getParameter(i)
-          << m_function->getError(i);
+      row << m_function->parameterName(i) << m_function->getParameter(i) << m_function->getError(i);
     }
     // Add chi-squared value at the end of parameter table
     Mantid::API::TableRow row = result->appendRow();
@@ -366,10 +338,8 @@ void Fit::createOutput() {
       if (convolveMembers) {
         convolveMembers = getProperty("ConvolveMembers");
       }
-      m_domainCreator->separateCompositeMembersInOutput(unrollComposites,
-                                                        convolveMembers);
-      m_domainCreator->createOutputWorkspace(baseName, m_function,
-                                             m_costFunction->getDomain(),
+      m_domainCreator->separateCompositeMembersInOutput(unrollComposites, convolveMembers);
+      m_domainCreator->createOutputWorkspace(baseName, m_function, m_costFunction->getDomain(),
                                              m_costFunction->getValues());
     }
   }

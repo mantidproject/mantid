@@ -38,28 +38,23 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"CalculateUMatrix"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CalculateUMatrix"}; }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override;
 
 private:
   void saveIsawDetCal(std::shared_ptr<Geometry::Instrument> &instrument,
-                      boost::container::flat_set<std::string> &AllBankName,
-                      double T0, const std::string &filename);
+                      boost::container::flat_set<std::string> &AllBankName, double T0, const std::string &filename);
 
   /// Function to calculate U
   void findU(const DataObjects::PeaksWorkspace_sptr &peaksWs);
   /// save workspaces
-  void saveNexus(const std::string &outputFile,
-                 const API::MatrixWorkspace_sptr &outputWS);
+  void saveNexus(const std::string &outputFile, const API::MatrixWorkspace_sptr &outputWS);
   /// Function to optimize L1
   void findL1(int nPeaks, const DataObjects::PeaksWorkspace_sptr &peaksWs);
   /// Function to optimize L2
-  void findL2(boost::container::flat_set<std::string> MyBankNames,
-              const DataObjects::PeaksWorkspace_sptr &peaksWs);
+  void findL2(boost::container::flat_set<std::string> MyBankNames, const DataObjects::PeaksWorkspace_sptr &peaksWs);
   /// Function to optimize T0
   void findT0(int nPeaks, const DataObjects::PeaksWorkspace_sptr &peaksWs);
 
@@ -83,8 +78,7 @@ private:
    * @param instrument   The instrument with the new values for the banks in
    *Groups
    */
-  void saveXmlFile(const std::string &FileName,
-                   const boost::container::flat_set<std::string> &AllBankNames,
+  void saveXmlFile(const std::string &FileName, const boost::container::flat_set<std::string> &AllBankNames,
                    const Geometry::Instrument &instrument) const;
 };
 

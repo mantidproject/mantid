@@ -13,8 +13,7 @@
 namespace Mantid {
 namespace API {
 
-ConstraintFactoryImpl::ConstraintFactoryImpl()
-    : Kernel::DynamicFactory<IConstraint>() {
+ConstraintFactoryImpl::ConstraintFactoryImpl() : Kernel::DynamicFactory<IConstraint>() {
   // we need to make sure the library manager has been loaded before we
   // are constructed so that it is destroyed after us and thus does
   // not close any loaded DLLs with loaded algorithms in them
@@ -30,9 +29,7 @@ ConstraintFactoryImpl::ConstraintFactoryImpl()
  * @param isDefault :: Is this initialization a default one?
  * @return A pointer to the created Constraint
  */
-IConstraint *ConstraintFactoryImpl::createInitialized(IFunction *fun,
-                                                      const std::string &input,
-                                                      bool isDefault) const {
+IConstraint *ConstraintFactoryImpl::createInitialized(IFunction *fun, const std::string &input, bool isDefault) const {
   Expression expr;
   expr.parse(input);
   return createInitialized(fun, expr, isDefault);
@@ -44,9 +41,7 @@ IConstraint *ConstraintFactoryImpl::createInitialized(IFunction *fun,
  * @param isDefault :: Is this initialization a default one?
  * @return A pointer to the created Constraint
  */
-IConstraint *ConstraintFactoryImpl::createInitialized(IFunction *fun,
-                                                      const Expression &expr,
-                                                      bool isDefault) const {
+IConstraint *ConstraintFactoryImpl::createInitialized(IFunction *fun, const Expression &expr, bool isDefault) const {
   IConstraint *c = nullptr;
   if (expr.name() == "==") {
     c = createUnwrapped("BoundaryConstraint");

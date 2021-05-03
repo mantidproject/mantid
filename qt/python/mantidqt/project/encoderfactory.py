@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
+from mantid.kernel import logger
 from mantidqt.usersubwindowfactory import UserSubWindowFactory
 
 
@@ -17,7 +18,7 @@ def default_encoder_compatability_check(obj, encoder_cls):
 
 
 class EncoderFactory(object):
-    encoder_list = set([])
+    encoder_dict = dict()  # cls name: (encoder, compatible check)
 
     @classmethod
     def find_encoder(cls, obj):
@@ -26,7 +27,7 @@ class EncoderFactory(object):
         :param obj: The object for encoding
         :return: Encoder or None; Returns the Encoder of the obj or None.
         """
-        obj_encoders = [encoder for encoder, compatible in cls.encoder_list if compatible(obj, encoder)]
+        obj_encoders = [encoder for (encoder, compatible) in cls.encoder_dict.values() if compatible(obj, encoder)]
 
         if len(obj_encoders) > 1:
             raise RuntimeError("EncoderFactory: One or more encoder type claims to work with the passed obj: "
@@ -47,4 +48,8 @@ class EncoderFactory(object):
         """
         if compatible_check is None:
             compatible_check = default_encoder_compatability_check
-        cls.encoder_list.add((encoder, compatible_check))
+        # check that an encoder of this class is not already registered
+        encoder_name = encoder.tags()[0]
+        if encoder_name in cls.encoder_dict:
+            logger.debug("Overriding existing encoder")
+        cls.encoder_dict[encoder_name] = (encoder, compatible_check)

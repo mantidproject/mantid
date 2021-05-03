@@ -33,10 +33,8 @@ DECLARE_ALGORITHM(SaveGSASInstrumentFile)
 class ChopperConfiguration {
 public:
   explicit ChopperConfiguration(vector<int> bankids);
-  ChopperConfiguration(const int freq, const std::string &bankidstr,
-                       const std::string &cwlstr, const std::string &mndspstr,
-                       const std::string &mxdspstr,
-                       const std::string &maxtofstr);
+  ChopperConfiguration(const int freq, const std::string &bankidstr, const std::string &cwlstr,
+                       const std::string &mndspstr, const std::string &mxdspstr, const std::string &maxtofstr);
 
   /// Get bank IDs in configuration
   std::vector<unsigned int> getBankIDs() const;
@@ -45,16 +43,14 @@ public:
   /// Get a parameter from a bank
   double getParameter(unsigned int bankid, const std::string &paramname) const;
   /// Set a parameter to a bank
-  void setParameter(unsigned int bankid, const std::string &paramname,
-                    double value);
+  void setParameter(unsigned int bankid, const std::string &paramname, double value);
 
 private:
   std::string parseString() const;
   /// Parse string to a double vector
   std::vector<double> parseStringDbl(const std::string &instring) const;
   /// Parse string to an integer vector
-  std::vector<unsigned int>
-  parseStringUnsignedInt(const std::string &instring) const;
+  std::vector<unsigned int> parseStringUnsignedInt(const std::string &instring) const;
 
   const double m_frequency;
   std::vector<unsigned int> m_bankIDs;
@@ -78,8 +74,7 @@ using ChopperConfiguration_sptr = std::shared_ptr<ChopperConfiguration>;
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ChopperConfiguration::ChopperConfiguration(vector<int> bankids)
-    : m_frequency(0) {
+ChopperConfiguration::ChopperConfiguration(vector<int> bankids) : m_frequency(0) {
   const size_t numbanks = bankids.size();
 
   // Initialize vectors
@@ -101,24 +96,19 @@ ChopperConfiguration::ChopperConfiguration(vector<int> bankids)
 /** Constructor of chopper configuration
  * Removed arguments: std::string splitdstr, std::string vrunstr
  */
-ChopperConfiguration::ChopperConfiguration(const int freq,
-                                           const std::string &bankidstr,
-                                           const std::string &cwlstr,
-                                           const std::string &mndspstr,
-                                           const std::string &mxdspstr,
+ChopperConfiguration::ChopperConfiguration(const int freq, const std::string &bankidstr, const std::string &cwlstr,
+                                           const std::string &mndspstr, const std::string &mxdspstr,
                                            const std::string &maxtofstr)
-    : m_frequency(freq), m_bankIDs(parseStringUnsignedInt(bankidstr)),
-      m_vecCWL(parseStringDbl(cwlstr)), m_mindsps(parseStringDbl(mndspstr)),
-      m_maxdsps(parseStringDbl(mxdspstr)), m_maxtofs(parseStringDbl(maxtofstr))
+    : m_frequency(freq), m_bankIDs(parseStringUnsignedInt(bankidstr)), m_vecCWL(parseStringDbl(cwlstr)),
+      m_mindsps(parseStringDbl(mndspstr)), m_maxdsps(parseStringDbl(mxdspstr)), m_maxtofs(parseStringDbl(maxtofstr))
 
 {
   size_t numbanks = m_bankIDs.size();
 
   // Check size
-  if (m_vecCWL.size() != numbanks || m_mindsps.size() != numbanks ||
-      m_maxdsps.size() != numbanks || m_maxtofs.size() != numbanks) {
-    std::string errmsg(
-        "Default chopper constants have different number of elements. ");
+  if (m_vecCWL.size() != numbanks || m_mindsps.size() != numbanks || m_maxdsps.size() != numbanks ||
+      m_maxtofs.size() != numbanks) {
+    std::string errmsg("Default chopper constants have different number of elements. ");
     throw runtime_error(errmsg);
   }
 
@@ -137,22 +127,18 @@ ChopperConfiguration::ChopperConfiguration(const int freq,
 //----------------------------------------------------------------------------------------------
 /** Get bank IDs in the chopper configuration
  */
-vector<unsigned int> ChopperConfiguration::getBankIDs() const {
-  return m_bankIDs;
-}
+vector<unsigned int> ChopperConfiguration::getBankIDs() const { return m_bankIDs; }
 
 //----------------------------------------------------------------------------------------------
 
 bool ChopperConfiguration::hasBank(unsigned int bankid) const {
-  return std::find(m_bankIDs.begin(), m_bankIDs.end(), bankid) !=
-         m_bankIDs.end();
+  return std::find(m_bankIDs.begin(), m_bankIDs.end(), bankid) != m_bankIDs.end();
 }
 
 //----------------------------------------------------------------------------------------------
 /** Get chopper configuration parameters value
  */
-double ChopperConfiguration::getParameter(unsigned int bankid,
-                                          const string &paramname) const {
+double ChopperConfiguration::getParameter(unsigned int bankid, const string &paramname) const {
   // Obtain index for the bank
   auto biter = m_bankIDIndexMap.find(bankid);
   if (biter == m_bankIDIndexMap.end()) {
@@ -182,8 +168,7 @@ double ChopperConfiguration::getParameter(unsigned int bankid,
     value = m_vecCWL[bindex];
   } else {
     stringstream errss;
-    errss << "ChopperConfiguration unable to locate: Bank ID = " << bankid
-          << ", Parameter = " << paramname;
+    errss << "ChopperConfiguration unable to locate: Bank ID = " << bankid << ", Parameter = " << paramname;
     throw runtime_error(errss.str());
   }
 
@@ -193,8 +178,7 @@ double ChopperConfiguration::getParameter(unsigned int bankid,
 //----------------------------------------------------------------------------------------------
 /** Set a parameter to a bank
  */
-void ChopperConfiguration::setParameter(unsigned int bankid,
-                                        const string &paramname, double value) {
+void ChopperConfiguration::setParameter(unsigned int bankid, const string &paramname, double value) {
   auto biter = m_bankIDIndexMap.find(bankid);
 
   if (biter == m_bankIDIndexMap.end()) {
@@ -222,8 +206,7 @@ void ChopperConfiguration::setParameter(unsigned int bankid,
       m_maxdsps[ibank] = value;
     else {
       stringstream errss;
-      errss << "In Chopper configuration's bank " << bankid
-            << ", there is no parameter named " << paramname;
+      errss << "In Chopper configuration's bank " << bankid << ", there is no parameter named " << paramname;
       throw runtime_error(errss.str());
     }
   }
@@ -232,8 +215,7 @@ void ChopperConfiguration::setParameter(unsigned int bankid,
 //----------------------------------------------------------------------------------------------
 /** Parse string to double vector
  */
-vector<double>
-ChopperConfiguration::parseStringDbl(const string &instring) const {
+vector<double> ChopperConfiguration::parseStringDbl(const string &instring) const {
   vector<string> strs;
   boost::split(strs, instring, boost::is_any_of(", "));
 
@@ -255,8 +237,7 @@ ChopperConfiguration::parseStringDbl(const string &instring) const {
 //----------------------------------------------------------------------------------------------
 /** Parse string to double vector
  */
-vector<unsigned int>
-ChopperConfiguration::parseStringUnsignedInt(const string &instring) const {
+vector<unsigned int> ChopperConfiguration::parseStringUnsignedInt(const string &instring) const {
   vector<string> strs;
   boost::split(strs, instring, boost::is_any_of(", "));
 
@@ -265,8 +246,7 @@ ChopperConfiguration::parseStringUnsignedInt(const string &instring) const {
     if (!str.empty()) {
       int item = std::stoi(str);
       if (item < 0) {
-        throw runtime_error(
-            "Found negative number in a string for unsigned integers.");
+        throw runtime_error("Found negative number in a string for unsigned integers.");
       }
       vecinteger.emplace_back(static_cast<unsigned int>(item));
     }
@@ -282,58 +262,45 @@ ChopperConfiguration::parseStringUnsignedInt(const string &instring) const {
 /** Constructor
  */
 SaveGSASInstrumentFile::SaveGSASInstrumentFile()
-    : API::Algorithm(), m_instrument(), m_L1(0.), m_L2(0.), m_2theta(0.),
-      m_frequency(0), m_id_line(), m_sample(), m_vecBankID2File(),
-      m_gsasFileName(), m_configuration(), m_profileMap(), m_gdsp(), m_gdt(),
-      m_galpha(), m_gbeta(), m_bank_mndsp(), m_bank_mxtof() {}
+    : API::Algorithm(), m_instrument(), m_L1(0.), m_L2(0.), m_2theta(0.), m_frequency(0), m_id_line(), m_sample(),
+      m_vecBankID2File(), m_gsasFileName(), m_configuration(), m_profileMap(), m_gdsp(), m_gdt(), m_galpha(), m_gbeta(),
+      m_bank_mndsp(), m_bank_mxtof() {}
 
 //----------------------------------------------------------------------------------------------
 /** Declare properties
  */
 void SaveGSASInstrumentFile::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-          "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Name of the table workspace containing the parameters.");
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("InputWorkspace", "", Direction::Input,
+                                                                       PropertyMode::Optional),
+                  "Name of the table workspace containing the parameters.");
 
   vector<string> infileexts{".irf"};
-  auto infileprop = std::make_unique<FileProperty>(
-      "InputFileName", "", FileProperty::OptionalLoad, infileexts);
-  declareProperty(std::move(infileprop),
-                  "Name of the input Fullprof resolution file (.irf).");
+  auto infileprop = std::make_unique<FileProperty>("InputFileName", "", FileProperty::OptionalLoad, infileexts);
+  declareProperty(std::move(infileprop), "Name of the input Fullprof resolution file (.irf).");
 
   vector<string> outfileexts{".iparam", ".prm"};
-  auto fileprop = std::make_unique<FileProperty>(
-      "OutputFileName", "", FileProperty::Save, outfileexts);
-  declareProperty(std::move(fileprop),
-                  "Name of the output GSAS instrument file.");
+  auto fileprop = std::make_unique<FileProperty>("OutputFileName", "", FileProperty::Save, outfileexts);
+  declareProperty(std::move(fileprop), "Name of the output GSAS instrument file.");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<unsigned int>>("BankIDs"),
-      "Bank IDs of the banks to be written to GSAS instrument file.");
+  declareProperty(std::make_unique<ArrayProperty<unsigned int>>("BankIDs"),
+                  "Bank IDs of the banks to be written to GSAS instrument file.");
 
   vector<string> instruments{"powgen", "nomad"};
-  declareProperty("Instrument", "powgen",
-                  std::make_shared<StringListValidator>(instruments),
+  declareProperty("Instrument", "powgen", std::make_shared<StringListValidator>(instruments),
                   "Name of the instrument that parameters are belonged to. "
                   "So far, only PG3 and NOM are supported.");
 
   vector<string> vecfreq{"10", "30", "60"};
-  declareProperty("ChopperFrequency", "60",
-                  std::make_shared<StringListValidator>(vecfreq),
+  declareProperty("ChopperFrequency", "60", std::make_shared<StringListValidator>(vecfreq),
                   "Frequency of the chopper. ");
 
-  declareProperty("IDLine", "",
-                  "ID line to be written in GSAS instrument file");
-  declareProperty("Sample", "",
-                  "Sample information written to header (title) ");
+  declareProperty("IDLine", "", "ID line to be written in GSAS instrument file");
+  declareProperty("Sample", "", "Sample information written to header (title) ");
 
-  std::shared_ptr<BoundedValidator<double>> mustBePositive(
-      new BoundedValidator<double>());
+  std::shared_ptr<BoundedValidator<double>> mustBePositive(new BoundedValidator<double>());
   mustBePositive->setLower(0.0);
 
-  declareProperty("L1", EMPTY_DBL(), mustBePositive,
-                  "L1 (primary flight path) of the instrument. ");
+  declareProperty("L1", EMPTY_DBL(), mustBePositive, "L1 (primary flight path) of the instrument. ");
   declareProperty("L2", EMPTY_DBL(),
                   "L2 (secondary flight path) of the instrument. "
                   "It must be given if 2Theta is not given. ");
@@ -365,8 +332,7 @@ void SaveGSASInstrumentFile::exec() {
     }
     sort(m_vecBankID2File.begin(), m_vecBankID2File.end());
   }
-  g_log.debug() << "Number of banks to output = " << m_vecBankID2File.size()
-                << ".\n";
+  g_log.debug() << "Number of banks to output = " << m_vecBankID2File.size() << ".\n";
 
   // Convert to GSAS
   convertToGSAS(m_vecBankID2File, m_gsasFileName, bankprofileparammap);
@@ -382,8 +348,7 @@ void SaveGSASInstrumentFile::exec() {
     fit->setProperty("OutputFilename", m_gsasFileName);
     fit->execute();
   } catch (Exception::NotFoundError &) {
-    std::string errorstr(
-        "FindPeaks algorithm requires the CurveFitting library");
+    std::string errorstr("FindPeaks algorithm requires the CurveFitting library");
     g_log.error(errorstr);
     throw std::runtime_error(errorstr);
   }
@@ -406,10 +371,8 @@ void SaveGSASInstrumentFile::processProperties() {
 
     if (!m_inpWS) {
       stringstream errss;
-      errss << "Neither input table workspace ("
-            << getPropertyValue("InputWorkspace") << ") nor "
-            << "input .irf file " << getPropertyValue("InputFileName")
-            << " is valid. ";
+      errss << "Neither input table workspace (" << getPropertyValue("InputWorkspace") << ") nor "
+            << "input .irf file " << getPropertyValue("InputFileName") << " is valid. ";
       g_log.error(errss.str());
       throw runtime_error(errss.str());
     }
@@ -417,10 +380,8 @@ void SaveGSASInstrumentFile::processProperties() {
 
   // Instrument information
   m_instrument = getPropertyValue("Instrument");
-  m_id_line = getPropertyValue(
-      "IDLine"); // Standard Run LB4844 Vanadium: 4866 J.P. Hodges 2011-09-01
-  m_sample = getPropertyValue(
-      "Sample"); // titleline = "LaB6 NIST RT 4844[V=4866] 60Hz CW=.533"
+  m_id_line = getPropertyValue("IDLine"); // Standard Run LB4844 Vanadium: 4866 J.P. Hodges 2011-09-01
+  m_sample = getPropertyValue("Sample");  // titleline = "LaB6 NIST RT 4844[V=4866] 60Hz CW=.533"
 
   m_gsasFileName = getPropertyValue("OutputFileName");
   m_vecBankID2File = getProperty("BankIDs");
@@ -463,8 +424,7 @@ void SaveGSASInstrumentFile::processProperties() {
   // Set default value for L2
   if (isEmpty(m_2theta)) {
     if (isEmpty(m_L2)) {
-      string errmsg(
-          "User must specify either 2theta or L2.  Neither of them is given.");
+      string errmsg("User must specify either 2theta or L2.  Neither of them is given.");
       g_log.error(errmsg);
       throw runtime_error(errmsg);
     }
@@ -479,8 +439,7 @@ void SaveGSASInstrumentFile::processProperties() {
  * Output--> m_configuration
  * @param profmap :: map of parameters
  */
-void SaveGSASInstrumentFile::initConstants(
-    const map<unsigned int, map<string, double>> &profmap) {
+void SaveGSASInstrumentFile::initConstants(const map<unsigned int, map<string, double>> &profmap) {
   m_configuration = setupInstrumentConstants(profmap);
 
   /*
@@ -504,9 +463,8 @@ void SaveGSASInstrumentFile::initConstants(
 //----------------------------------------------------------------------------------------------
 /** Parse profile table workspace to a map (the new ...
  */
-void SaveGSASInstrumentFile::parseProfileTableWorkspace(
-    const ITableWorkspace_sptr &ws,
-    map<unsigned int, map<string, double>> &profilemap) {
+void SaveGSASInstrumentFile::parseProfileTableWorkspace(const ITableWorkspace_sptr &ws,
+                                                        map<unsigned int, map<string, double>> &profilemap) {
   size_t numbanks = ws->columnCount() - 1;
   size_t numparams = ws->rowCount();
   vector<map<string, double>> vec_maptemp(numbanks);
@@ -539,8 +497,7 @@ void SaveGSASInstrumentFile::parseProfileTableWorkspace(
 
   // debug output
   stringstream db1ss;
-  db1ss << "[DBx912] Number of banks in profile table = " << vecbankindex.size()
-        << " containing bank ";
+  db1ss << "[DBx912] Number of banks in profile table = " << vecbankindex.size() << " containing bank ";
   for (auto bankIndex : vecbankindex)
     db1ss << bankIndex << ", ";
   g_log.information(db1ss.str());
@@ -557,8 +514,8 @@ void SaveGSASInstrumentFile::parseProfileTableWorkspace(
 //----------------------------------------------------------------------------------------------
 /** Set up chopper/instrument constant parameters from profile map
  */
-ChopperConfiguration_sptr SaveGSASInstrumentFile::setupInstrumentConstants(
-    const map<unsigned int, map<string, double>> &profmap) {
+ChopperConfiguration_sptr
+SaveGSASInstrumentFile::setupInstrumentConstants(const map<unsigned int, map<string, double>> &profmap) {
   // Collect bank ids
   vector<int> bankids;
   map<unsigned int, map<string, double>>::const_iterator bmiter;
@@ -568,8 +525,7 @@ ChopperConfiguration_sptr SaveGSASInstrumentFile::setupInstrumentConstants(
   }
 
   // Create a configuration object
-  ChopperConfiguration_sptr chconfig =
-      std::make_shared<ChopperConfiguration>(bankids);
+  ChopperConfiguration_sptr chconfig = std::make_shared<ChopperConfiguration>(bankids);
 
   // Add chopper/instrument constants by banks
   for (bmiter = profmap.begin(); bmiter != profmap.end(); ++bmiter) {
@@ -589,8 +545,7 @@ ChopperConfiguration_sptr SaveGSASInstrumentFile::setupInstrumentConstants(
     chconfig->setParameter(bankid, "MinDsp", dmin);
     chconfig->setParameter(bankid, "MaxDsp", dmax);
 
-    g_log.information() << "Import bank " << bankid
-                        << ".  TOF range: " << mintof << ", " << maxtof
+    g_log.information() << "Import bank " << bankid << ".  TOF range: " << mintof << ", " << maxtof
                         << "; D-space range: " << dmin << ", " << dmax << ".\n";
   }
 
@@ -600,8 +555,7 @@ ChopperConfiguration_sptr SaveGSASInstrumentFile::setupInstrumentConstants(
 //----------------------------------------------------------------------------------------------
 /** Set up the chopper/instrument constant parameters for PG3
  */
-ChopperConfiguration_sptr
-SaveGSASInstrumentFile::setupPG3Constants(int intfrequency) {
+ChopperConfiguration_sptr SaveGSASInstrumentFile::setupPG3Constants(int intfrequency) {
   string bankidstr, cwlstr, mndspstr, mxdspstr, maxtofstr;
 
   // Create string
@@ -639,16 +593,14 @@ SaveGSASInstrumentFile::setupPG3Constants(int intfrequency) {
   }
 
   // Return
-  return std::make_shared<ChopperConfiguration>(intfrequency, bankidstr, cwlstr,
-                                                mndspstr, mxdspstr, maxtofstr);
+  return std::make_shared<ChopperConfiguration>(intfrequency, bankidstr, cwlstr, mndspstr, mxdspstr, maxtofstr);
 }
 
 //----------------------------------------------------------------------------------------------
 /** Set up the converting constants for NOMAD
  * @param intfrequency :: frequency in integer
  */
-ChopperConfiguration_sptr
-SaveGSASInstrumentFile::setupNOMConstants(int intfrequency) {
+ChopperConfiguration_sptr SaveGSASInstrumentFile::setupNOMConstants(int intfrequency) {
   // Set up string
   string bankidstr, cwlstr, mndspstr, mxdspstr, maxtofstr;
 
@@ -670,8 +622,7 @@ SaveGSASInstrumentFile::setupNOMConstants(int intfrequency) {
   }
 
   // Create configuration
-  return std::make_shared<ChopperConfiguration>(intfrequency, bankidstr, cwlstr,
-                                                mndspstr, mxdspstr, maxtofstr);
+  return std::make_shared<ChopperConfiguration>(intfrequency, bankidstr, cwlstr, mndspstr, mxdspstr, maxtofstr);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -682,10 +633,8 @@ SaveGSASInstrumentFile::setupNOMConstants(int intfrequency) {
  * in map.
  */
 void SaveGSASInstrumentFile::convertToGSAS(
-    const std::vector<unsigned int> &outputbankids,
-    const std::string &gsasinstrfilename,
-    const std::map<unsigned int, std::map<std::string, double>>
-        &bankprofilemap) {
+    const std::vector<unsigned int> &outputbankids, const std::string &gsasinstrfilename,
+    const std::map<unsigned int, std::map<std::string, double>> &bankprofilemap) {
   // Check
   if (!m_configuration)
     throw runtime_error("Not set up yet!");
@@ -693,8 +642,7 @@ void SaveGSASInstrumentFile::convertToGSAS(
   // Set up min-dsp, max-tof
   for (auto bankid : outputbankids) {
     if (!m_configuration->hasBank(bankid))
-      throw runtime_error(
-          "Chopper configuration does not have some certain bank.");
+      throw runtime_error("Chopper configuration does not have some certain bank.");
 
     double mndsp = m_configuration->getParameter(bankid, "MinDsp");
     m_bank_mndsp.emplace(bankid, mndsp);
@@ -703,8 +651,7 @@ void SaveGSASInstrumentFile::convertToGSAS(
   }
 
   // Write bank header
-  g_log.information() << "Export header of GSAS instrument file "
-                      << gsasinstrfilename << ".\n";
+  g_log.information() << "Export header of GSAS instrument file " << gsasinstrfilename << ".\n";
   writePRMHeader(outputbankids, gsasinstrfilename);
 
   //  Convert and write
@@ -717,8 +664,7 @@ void SaveGSASInstrumentFile::convertToGSAS(
     } else {
       vector<unsigned int> bankids = m_configuration->getBankIDs();
       stringstream errss;
-      errss << "Bank " << bankid
-            << " does not exist in source resolution file. "
+      errss << "Bank " << bankid << " does not exist in source resolution file. "
             << "There are " << bankids.size() << " banks given, including "
             << ".\n";
       for (size_t i = 0; i < bankids.size(); ++i) {
@@ -740,8 +686,7 @@ void SaveGSASInstrumentFile::convertToGSAS(
  * @param bankid :: the ID of the bank to be converted
  */
 void SaveGSASInstrumentFile::buildGSASTabulatedProfile(
-    const std::map<unsigned int, std::map<std::string, double>> &bankprofilemap,
-    unsigned int bankid) {
+    const std::map<unsigned int, std::map<std::string, double>> &bankprofilemap, unsigned int bankid) {
   // Locate the profile map
   auto biter = bankprofilemap.find(bankid);
   if (biter == bankprofilemap.end())
@@ -795,24 +740,21 @@ void SaveGSASInstrumentFile::buildGSASTabulatedProfile(
     double rd = 1.0 / m_gdsp[k];
     double dmX = mx - rd;
     gpkX[k] = 0.5 * erfc(mxb * dmX); //  # this is n in the formula
-    gtof[k] =
-        calTOF(gpkX[k], zero, dtt1, dtt2, zerot, dtt1t, -dtt2t, m_gdsp[k]);
+    gtof[k] = calTOF(gpkX[k], zero, dtt1, dtt2, zerot, dtt1t, -dtt2t, m_gdsp[k]);
     m_gdt[k] = gtof[k] - (instC * m_gdsp[k]);
     m_galpha[k] = aaba(gpkX[k], alph0, alph1, alph0t, alph1t, m_gdsp[k]);
     m_gbeta[k] = aaba(gpkX[k], beta0, beta1, beta0t, beta1t, m_gdsp[k]);
 
-    g_log.debug() << k << "\t" << setw(20) << setprecision(10) << gtof[k]
-                  << "\t  " << setw(20) << setprecision(10) << m_gdsp[k]
-                  << "\t  " << setw(20) << setprecision(10) << instC << "\t "
-                  << setw(20) << setprecision(10) << m_gdt[k] << ".\n";
+    g_log.debug() << k << "\t" << setw(20) << setprecision(10) << gtof[k] << "\t  " << setw(20) << setprecision(10)
+                  << m_gdsp[k] << "\t  " << setw(20) << setprecision(10) << instC << "\t " << setw(20)
+                  << setprecision(10) << m_gdt[k] << ".\n";
   }
 }
 
 //----------------------------------------------------------------------------------------------
 /** Write the header of the file
  */
-void SaveGSASInstrumentFile::writePRMHeader(const vector<unsigned int> &banks,
-                                            const string &prmfilename) {
+void SaveGSASInstrumentFile::writePRMHeader(const vector<unsigned int> &banks, const string &prmfilename) {
   auto numbanks = static_cast<int>(banks.size());
 
   FILE *pFile;
@@ -839,8 +781,8 @@ void SaveGSASInstrumentFile::writePRMHeader(const vector<unsigned int> &banks,
  * @param prmfilename: output file name
  */
 void SaveGSASInstrumentFile::writePRMSingleBank(
-    const std::map<unsigned int, std::map<std::string, double>> &bankprofilemap,
-    unsigned int bankid, const std::string &prmfilename) {
+    const std::map<unsigned int, std::map<std::string, double>> &bankprofilemap, unsigned int bankid,
+    const std::string &prmfilename) {
   // Get access to the profile map
   auto biter = bankprofilemap.find(bankid);
   if (biter == bankprofilemap.end())
@@ -873,8 +815,7 @@ void SaveGSASInstrumentFile::writePRMSingleBank(
 
   // Calculate L2
   double instC = dtt1 - (4 * (alph0 + alph1));
-  g_log.debug() << "Bank " << bankid << ": MaxTOF = " << maxtof
-                << "; Dtt1 = " << dtt1 << ", Alph0 = " << alph0
+  g_log.debug() << "Bank " << bankid << ": MaxTOF = " << maxtof << "; Dtt1 = " << dtt1 << ", Alph0 = " << alph0
                 << ", Alph1 = " << alph1 << ", MinDsp = " << mindsp << ".\n";
 
   if (m_L2 <= 0. || m_L2 == EMPTY_DBL()) {
@@ -883,8 +824,7 @@ void SaveGSASInstrumentFile::writePRMSingleBank(
 
   // Title line
   stringstream titless;
-  titless << m_sample << " " << static_cast<int>(m_frequency)
-          << "Hz CW=" << cwl;
+  titless << m_sample << " " << static_cast<int>(m_frequency) << "Hz CW=" << cwl;
   string titleline(titless.str());
 
   // Write to file
@@ -896,76 +836,55 @@ void SaveGSASInstrumentFile::writePRMSingleBank(
     throw runtime_error(errss.str());
   }
 
-  fprintf(pFile, "INS %2u ICONS%10.3f%10.3f%10.3f          %10.3f%5d%10.3f\n",
-          bankid, instC * 1.00009, 0.0, zero, 0.0, 0, 0.0);
-  fprintf(pFile, "INS %2uBNKPAR%10.3f%10.3f%10.3f%10.3f%10.3f%5d%5d\n", bankid,
-          m_L2, twotheta, 0., 0., 0.2, 1, 1);
+  fprintf(pFile, "INS %2u ICONS%10.3f%10.3f%10.3f          %10.3f%5d%10.3f\n", bankid, instC * 1.00009, 0.0, zero, 0.0,
+          0, 0.0);
+  fprintf(pFile, "INS %2uBNKPAR%10.3f%10.3f%10.3f%10.3f%10.3f%5d%5d\n", bankid, m_L2, twotheta, 0., 0., 0.2, 1, 1);
 
   fprintf(pFile, "INS %2uBAKGD     1    4    Y    0    Y\n", bankid);
   fprintf(pFile, "INS %2uI HEAD %s\n", bankid, titleline.c_str());
-  fprintf(pFile, "INS %2uI ITYP%5d%10.4f%10.4f%10i\n", bankid, 0,
-          mindsp * 0.001 * instC, maxtof, randint);
+  fprintf(pFile, "INS %2uI ITYP%5d%10.4f%10.4f%10i\n", bankid, 0, mindsp * 0.001 * instC, maxtof, randint);
   fprintf(pFile, "INS %2uINAME   %s \n", bankid, m_instrument.c_str());
   fprintf(pFile, "INS %2uPRCF1 %5d%5d%10.5f\n", bankid, -3, 21, 0.002);
-  fprintf(pFile, "INS %2uPRCF11%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
-          0.0, sig0);
-  fprintf(pFile, "INS %2uPRCF12%15.6f%15.6f%15.6f%15.6f\n", bankid, sig1, sig2,
-          gam0, gam1);
-  fprintf(pFile, "INS %2uPRCF13%15.6f%15.6f%15.6f%15.6f\n", bankid, gam2, 0.0,
-          0.0, 0.0);
-  fprintf(pFile, "INS %2uPRCF14%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
-          0.0, 0.0);
-  fprintf(pFile, "INS %2uPRCF15%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
-          0.0, 0.0);
+  fprintf(pFile, "INS %2uPRCF11%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, sig0);
+  fprintf(pFile, "INS %2uPRCF12%15.6f%15.6f%15.6f%15.6f\n", bankid, sig1, sig2, gam0, gam1);
+  fprintf(pFile, "INS %2uPRCF13%15.6f%15.6f%15.6f%15.6f\n", bankid, gam2, 0.0, 0.0, 0.0);
+  fprintf(pFile, "INS %2uPRCF14%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
+  fprintf(pFile, "INS %2uPRCF15%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
   fprintf(pFile, "INS %2uPRCF16%15.6f\n", bankid, 0.0);
   fprintf(pFile, "INS %2uPAB3    %3d\n", bankid, 90);
 
   for (size_t k = 0; k < 90; ++k) {
-    fprintf(pFile, "INS %2uPAB3%2d%10.5f%10.5f%10.5f%10.5f\n", bankid,
-            static_cast<int>(k) + 1, m_gdsp[k], m_gdt[k], m_galpha[k],
-            m_gbeta[k]);
+    fprintf(pFile, "INS %2uPAB3%2d%10.5f%10.5f%10.5f%10.5f\n", bankid, static_cast<int>(k) + 1, m_gdsp[k], m_gdt[k],
+            m_galpha[k], m_gbeta[k]);
   }
   fprintf(pFile, "INS %2uPRCF2 %5i%5i%10.5f\n", bankid, -4, 27, 0.002);
-  fprintf(pFile, "INS %2uPRCF21%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
-          0.0, sig1);
-  fprintf(pFile, "INS %2uPRCF22%15.6f%15.6f%15.6f%15.6f\n", bankid, sig2, gam2,
-          0.0, 0.0);
-  fprintf(pFile, "INS %2uPRCF23%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
-          0.0, 0.0);
-  fprintf(pFile, "INS %2uPRCF24%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
-          0.0, 0.0);
-  fprintf(pFile, "INS %2uPRCF25%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
-          0.0, 0.0);
-  fprintf(pFile, "INS %2uPRCF26%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
-          0.0, 0.0);
+  fprintf(pFile, "INS %2uPRCF21%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, sig1);
+  fprintf(pFile, "INS %2uPRCF22%15.6f%15.6f%15.6f%15.6f\n", bankid, sig2, gam2, 0.0, 0.0);
+  fprintf(pFile, "INS %2uPRCF23%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
+  fprintf(pFile, "INS %2uPRCF24%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
+  fprintf(pFile, "INS %2uPRCF25%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
+  fprintf(pFile, "INS %2uPRCF26%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
   fprintf(pFile, "INS %2uPRCF27%15.6f%15.6f%15.6f \n", bankid, 0.0, 0.0, 0.0);
 
   fprintf(pFile, "INS %2uPAB4    %3i\n", bankid, 90);
   for (size_t k = 0; k < 90; ++k) {
-    fprintf(pFile, "INS %2uPAB4%2d%10.5f%10.5f%10.5f%10.5f\n", bankid,
-            static_cast<int>(k) + 1, m_gdsp[k], m_gdt[k], m_galpha[k],
-            m_gbeta[k]);
+    fprintf(pFile, "INS %2uPAB4%2d%10.5f%10.5f%10.5f%10.5f\n", bankid, static_cast<int>(k) + 1, m_gdsp[k], m_gdt[k],
+            m_galpha[k], m_gbeta[k]);
   }
 
   fprintf(pFile, "INS %2uPRCF3 %5i%5i%10.5f\n", bankid, -5, 21, 0.002);
-  fprintf(pFile, "INS %2uPRCF31%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
-          0.0, sig0);
-  fprintf(pFile, "INS %2uPRCF32%15.6f%15.6f%15.6f%15.6f\n", bankid, sig1, sig2,
-          gam0, gam1);
-  fprintf(pFile, "INS %2uPRCF33%15.6f%15.6f%15.6f%15.6f\n", bankid, gam2, 0.0,
-          0.0, 0.0);
-  fprintf(pFile, "INS %2uPRCF34%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
-          0.0, 0.0);
-  fprintf(pFile, "INS %2uPRCF35%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0,
-          0.0, 0.0);
+  fprintf(pFile, "INS %2uPRCF31%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, sig0);
+  fprintf(pFile, "INS %2uPRCF32%15.6f%15.6f%15.6f%15.6f\n", bankid, sig1, sig2, gam0, gam1);
+  fprintf(pFile, "INS %2uPRCF33%15.6f%15.6f%15.6f%15.6f\n", bankid, gam2, 0.0, 0.0, 0.0);
+  fprintf(pFile, "INS %2uPRCF34%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
+  fprintf(pFile, "INS %2uPRCF35%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
   fprintf(pFile, "INS %2uPRCF36%15.6f\n", bankid, 0.0);
 
   fprintf(pFile, "INS %2uPAB5    %3i\n", bankid,
           90); // 90 means there will be 90 lines of table
   for (size_t k = 0; k < 90; k++) {
-    fprintf(pFile, "INS %2uPAB5%2d%10.5f%10.5f%10.5f%10.5f\n", bankid,
-            static_cast<int>(k) + 1, m_gdsp[k], m_gdt[k], m_galpha[k],
-            m_gbeta[k]);
+    fprintf(pFile, "INS %2uPAB5%2d%10.5f%10.5f%10.5f%10.5f\n", bankid, static_cast<int>(k) + 1, m_gdsp[k], m_gdt[k],
+            m_galpha[k], m_gbeta[k]);
   }
 
   fclose(pFile);
@@ -975,11 +894,9 @@ void SaveGSASInstrumentFile::writePRMSingleBank(
 /** Calculate L2 from DIFFC and L1
  * DIFC = 252.816*2sin(theta)sqrt(L1+L2)
  */
-double SaveGSASInstrumentFile::calL2FromDtt1(double difc, double L1,
-                                             double twotheta) {
+double SaveGSASInstrumentFile::calL2FromDtt1(double difc, double L1, double twotheta) {
   double l2 = difc / (252.816 * 2.0 * sin(0.5 * twotheta * M_PI / 180.0)) - L1;
-  g_log.debug() << "DIFC = " << difc << ", L1 = " << L1
-                << ", 2Theta = " << twotheta << " ==> L2 = " << l2 << ".\n";
+  g_log.debug() << "DIFC = " << difc << ", L1 = " << L1 << ", 2Theta = " << twotheta << " ==> L2 = " << l2 << ".\n";
 
   return l2;
 }
@@ -999,8 +916,7 @@ double SaveGSASInstrumentFile::calL2FromDtt1(double difc, double L1,
  * @param tr :: dtt2t
  * @param dsp :: d-space value
  */
-double SaveGSASInstrumentFile::calTOF(double n, double ep, double eq, double er,
-                                      double tp, double tq, double tr,
+double SaveGSASInstrumentFile::calTOF(double n, double ep, double eq, double er, double tp, double tq, double tr,
                                       double dsp) {
   double te = ep + (eq * dsp) + er * 0.5 * erfc(((1.0 / dsp) - 1.05) * 10.0);
   double tt = tp + (tq * dsp) + (tr / dsp);
@@ -1013,8 +929,7 @@ double SaveGSASInstrumentFile::calTOF(double n, double ep, double eq, double er,
 /** Calculate a value related to alph0, alph1, alph0t, alph1t or
  * beta0, beta1, beta0t, beta1t
  */
-double SaveGSASInstrumentFile::aaba(double n, double ea1, double ea2,
-                                    double ta1, double ta2, double dsp) {
+double SaveGSASInstrumentFile::aaba(double n, double ea1, double ea2, double ta1, double ta2, double dsp) {
   double ea = ea1 + (ea2 * dsp);
   double ta = ta1 - (ta2 / dsp);
   double am1 = (n * ea) + ta - (n * ta);
@@ -1026,15 +941,12 @@ double SaveGSASInstrumentFile::aaba(double n, double ea1, double ea2,
 //----------------------------------------------------------------------------------------------
 /** Get parameter value from a map
  */
-double
-SaveGSASInstrumentFile::getValueFromMap(const map<string, double> &profilemap,
-                                        const string &parname) {
+double SaveGSASInstrumentFile::getValueFromMap(const map<string, double> &profilemap, const string &parname) {
   std::map<std::string, double>::const_iterator piter;
   piter = profilemap.find(parname);
   if (piter == profilemap.end()) {
     stringstream errss;
-    errss << "Profile parameter map does not contain parameter" << parname
-          << ". ";
+    errss << "Profile parameter map does not contain parameter" << parname << ". ";
     g_log.error(errss.str());
     throw runtime_error(errss.str());
   }
@@ -1047,13 +959,12 @@ SaveGSASInstrumentFile::getValueFromMap(const map<string, double> &profilemap,
 //----------------------------------------------------------------------------------------------
 /** Get parameter value from m_configuration/m_profile
  */
-double SaveGSASInstrumentFile::getProfileParameterValue(
-    const map<string, double> &profilemap, const string &paramname) {
+double SaveGSASInstrumentFile::getProfileParameterValue(const map<string, double> &profilemap,
+                                                        const string &paramname) {
   auto piter = profilemap.find(paramname);
   if (piter == profilemap.end()) {
     stringstream errss;
-    errss << "Profile map does not contain parameter " << paramname
-          << ". Available parameters are ";
+    errss << "Profile map does not contain parameter " << paramname << ". Available parameters are ";
     for (const auto &parameter : profilemap) {
       errss << parameter.first << ", ";
     }
@@ -1073,8 +984,7 @@ double SaveGSASInstrumentFile::getProfileParameterValue(
  * on d ralated.
  * @return :: d-space value
  */
-double SaveGSASInstrumentFile::calDspRange(double dtt1, double zero,
-                                           double tof) {
+double SaveGSASInstrumentFile::calDspRange(double dtt1, double zero, double tof) {
   double dsp = (tof - zero) / dtt1;
   return dsp;
 }
@@ -1085,8 +995,7 @@ double SaveGSASInstrumentFile::calDspRange(double dtt1, double zero,
  * - set output table workspace to m_inpWS
  * @param irffilename
  */
-void SaveGSASInstrumentFile::loadFullprofResolutionFile(
-    const std::string &irffilename) {
+void SaveGSASInstrumentFile::loadFullprofResolutionFile(const std::string &irffilename) {
   IAlgorithm_sptr loadfpirf;
   try {
     loadfpirf = createChildAlgorithm("LoadFullprofResolution");
@@ -1116,12 +1025,8 @@ void SaveGSASInstrumentFile::loadFullprofResolutionFile(
 double SaveGSASInstrumentFile::erfc(double xx) {
   double x = fabs(xx);
   double t = 1.0 / (1.0 + (0.5 * x));
-  double ty = (0.27886807 +
-               t * (-1.13520398 +
-                    t * (1.48851587 + t * (-0.82215223 + t * 0.17087277))));
-  double tx =
-      (1.00002368 +
-       t * (0.37409196 + t * (0.09678418 + t * (-0.18628806 + t * ty))));
+  double ty = (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277))));
+  double tx = (1.00002368 + t * (0.37409196 + t * (0.09678418 + t * (-0.18628806 + t * ty))));
   double y = t * exp(-x * x - 1.26551223 + t * tx);
   if (xx < 0)
     y = 2.0 - y;

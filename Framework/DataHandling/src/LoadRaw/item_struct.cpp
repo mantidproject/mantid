@@ -15,8 +15,7 @@
 @param value :: A pointer to the item
 @return 0 on success
 */
-template <typename T>
-int item_struct<T>::getItem(const std::string &item_name, T &value) {
+template <typename T> int item_struct<T>::getItem(const std::string &item_name, T &value) {
   int n;
   long spec_no;
   // handle case of item_spectrum which means we average the array
@@ -39,9 +38,7 @@ nspec number of 0 means no spec average
 @param lVal :: A pointer to the item
 @return 0 on success
 */
-template <typename T>
-int item_struct<T>::getItem(const std::string &item_name, long *spec_array,
-                            int nspec, T *lVal) {
+template <typename T> int item_struct<T>::getItem(const std::string &item_name, long *spec_array, int nspec, T *lVal) {
   int i, j, n;
   const T *pVal = NULL;
   const item_t *item;
@@ -91,9 +88,7 @@ int item_struct<T>::getItem(const std::string &item_name, long *spec_array,
 @param ndims :: the number of dimensions in the array
 @return 0 on success
 */
-template <typename T>
-int item_struct<T>::getArrayItemSize(const std::string &item_name,
-                                     int *dims_array, int &ndims) {
+template <typename T> int item_struct<T>::getArrayItemSize(const std::string &item_name, int *dims_array, int &ndims) {
   const item_t *item;
   item = findItem(item_name, false);
   if (item == NULL) {
@@ -119,9 +114,7 @@ int item_struct<T>::getArrayItemSize(const std::string &item_name,
 @param larray :: The returned array
 @return 0 on success
 */
-template <typename T>
-int item_struct<T>::getArrayItem(const std::string &item_name, int nspec,
-                                 T *larray) {
+template <typename T> int item_struct<T>::getArrayItem(const std::string &item_name, int nspec, T *larray) {
   const item_t *item;
   item = findItem(item_name, false);
   if (item == NULL) {
@@ -149,8 +142,7 @@ int item_struct<T>::getArrayItem(const std::string &item_name, int nspec,
 @param larray :: The returned array
 @return 0 on success
 */
-template <typename T>
-int item_struct<T>::getArrayItem(const std::string &item_name, T *larray) {
+template <typename T> int item_struct<T>::getArrayItem(const std::string &item_name, T *larray) {
   int n;
   long spec_no;
   n = item_name.find('_');

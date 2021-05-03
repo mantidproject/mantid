@@ -12,12 +12,10 @@
  * subscribe method.
  */
 
-#define DECLARE_DIALOG(classname)                                              \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_dialog_##classname((             \
-      (MantidQt::API::AlgorithmDialogFactory::Instance().subscribe<classname>( \
-          #classname)),                                                        \
-      0));                                                                     \
+#define DECLARE_DIALOG(classname)                                                                                      \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper register_dialog_##classname(                                                      \
+      ((MantidQt::API::AlgorithmDialogFactory::Instance().subscribe<classname>(#classname)), 0));                      \
   }
 
 //----------------------------------
@@ -74,9 +72,7 @@ class InterfaceManager;
     @author Martyn Gigg, Tessella Support Services plc
     @date 24/02/2009
 */
-class EXPORT_OPT_MANTIDQT_COMMON AlgorithmDialog
-    : public QDialog,
-      Mantid::API::AlgorithmObserver {
+class EXPORT_OPT_MANTIDQT_COMMON AlgorithmDialog : public QDialog, Mantid::API::AlgorithmObserver {
 
   Q_OBJECT
 
@@ -167,8 +163,7 @@ protected:
   /** @name Helper functions */
   //@{
   /// Tie a widget to a property
-  QWidget *tie(QWidget *widget, const QString &property,
-               QLayout *parent_layout = nullptr, bool readHistory = true);
+  QWidget *tie(QWidget *widget, const QString &property, QLayout *parent_layout = nullptr, bool readHistory = true);
 
   /// Untie a widget to a property
   void untie(const QString &property);
@@ -186,11 +181,9 @@ protected:
   void fillLineEdit(const QString &propName, QLineEdit *field);
 
   /// Create a row layout of buttons with specified text
-  QLayout *
-  createDefaultButtonLayout(const QString &helpText = QString("?"),
-                            const QString &loadText = QString("Run"),
-                            const QString &cancelText = QString("Close"),
-                            const QString &keepOpenText = QString("Keep Open"));
+  QLayout *createDefaultButtonLayout(const QString &helpText = QString("?"), const QString &loadText = QString("Run"),
+                                     const QString &cancelText = QString("Close"),
+                                     const QString &keepOpenText = QString("Keep Open"));
 
   /// Create a help button for this algorithm
   QPushButton *createHelpButton(const QString &helpText = QString("?")) const;
@@ -247,8 +240,7 @@ protected:
   /// Handle completion of algorithm started while staying open
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
   /// Handle completion of algorithm started while staying open
-  void errorHandle(const Mantid::API::IAlgorithm *alg,
-                   const std::string &what) override;
+  void errorHandle(const Mantid::API::IAlgorithm *alg, const std::string &what) override;
   void closeEvent(QCloseEvent *evt) override;
 
   /// The following methods were made public for testing in
@@ -265,8 +257,7 @@ public:
   /// Set an optional message to be displayed at the top of the dialog
   void setOptionalMessage(const QString &message);
   /// Set comma-separated-list of enabled parameter names
-  void addEnabledAndDisableLists(const QStringList &enabled,
-                                 const QStringList &disabled);
+  void addEnabledAndDisableLists(const QStringList &enabled, const QStringList &disabled);
   /// Add an AlgorithmObserver to the algorithm
   void addAlgorithmObserver(Mantid::API::AlgorithmObserver *observer);
 

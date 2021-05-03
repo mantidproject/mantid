@@ -18,8 +18,7 @@
 namespace Mantid {
 namespace Kernel {
 
-bool get_proxy_configuration_win(const std::string &target_url,
-                                 std::string &proxy_str, std::string &err_msg) {
+bool get_proxy_configuration_win(const std::string &target_url, std::string &proxy_str, std::string &err_msg) {
   HINTERNET hSession = NULL;
   std::wstring proxy;
   std::wstring wtarget_url;
@@ -39,20 +38,17 @@ bool get_proxy_configuration_win(const std::string &target_url,
   // the loop is just to allow us to go out of this session whenever we want
   while (true) {
     // Use WinHttpOpen to obtain a session handle.
-    hSession = WinHttpOpen(L"NetworkProxyWin FindingProxy/1.0",
-                           WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
+    hSession = WinHttpOpen(L"NetworkProxyWin FindingProxy/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
                            WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
     if (!hSession) {
       fail = true;
-      info << "Failed to create the session (Error Code: " << GetLastError()
-           << ").";
+      info << "Failed to create the session (Error Code: " << GetLastError() << ").";
       break;
     }
     // get the configuration of the web browser
     if (!WinHttpGetIEProxyConfigForCurrentUser(&ie_proxy)) {
       fail = true;
-      info << "Could not find the proxy settings (Error code :"
-           << GetLastError();
+      info << "Could not find the proxy settings (Error code :" << GetLastError();
       break;
     }
 
@@ -75,10 +71,8 @@ bool get_proxy_configuration_win(const std::string &target_url,
       proxy_options.lpszAutoConfigUrl = ie_proxy.lpszAutoConfigUrl;
     }
 
-    if (!WinHttpGetProxyForUrl(hSession, wtarget_url.c_str(), &proxy_options,
-                               &proxy_info)) {
-      info << "Could not find the proxy for this url (Error code :"
-           << GetLastError() << ").";
+    if (!WinHttpGetProxyForUrl(hSession, wtarget_url.c_str(), &proxy_options, &proxy_info)) {
+      info << "Could not find the proxy for this url (Error code :" << GetLastError() << ").";
       fail = true;
       break;
     }
@@ -138,9 +132,7 @@ ProxyInfo NetworkProxy::getHttpProxy(const std::string &targetURLString) {
 
   ProxyInfo proxyInfo; // No proxy
   std::string errmsg, proxy_option;
-  m_logger.debug()
-      << "Attempt to get the windows proxy configuration for this connection"
-      << std::endl;
+  m_logger.debug() << "Attempt to get the windows proxy configuration for this connection" << std::endl;
   if (get_proxy_configuration_win(targetURLString, proxy_option, errmsg)) {
     std::string proxyServer;
     int proxyPort = 0;
@@ -152,11 +144,9 @@ ProxyInfo NetworkProxy::getHttpProxy(const std::string &targetURLString) {
           proxyServer = proxy_option;
           proxyPort = 8080; // default port for proxy
         } else {
-          proxyServer =
-              std::string(proxy_option.begin(), proxy_option.begin() + pos);
+          proxyServer = std::string(proxy_option.begin(), proxy_option.begin() + pos);
           std::stringstream port_str;
-          port_str << std::string(proxy_option.begin() + pos + 1,
-                                  proxy_option.end());
+          port_str << std::string(proxy_option.begin() + pos + 1, proxy_option.end());
           port_str >> proxyPort;
         }
       } else {

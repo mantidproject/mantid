@@ -40,20 +40,14 @@ public:
   const std::string name() const override { return "LoadFITS"; }
 
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Load FITS files into workspaces of type Workspace2D.";
-  }
+  const std::string summary() const override { return "Load FITS files into workspaces of type Workspace2D."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"Load", "SaveFITS"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"Load", "SaveFITS"}; }
 
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Imaging";
-  }
+  const std::string category() const override { return "DataHandling\\Imaging"; }
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
@@ -69,8 +63,7 @@ private:
   void exec() override;
 
   /// Load a block of FITS header(s) at once
-  void doLoadHeaders(const std::vector<std::string> &paths,
-                     std::vector<FITSInfo> &headers, size_t firstIndex,
+  void doLoadHeaders(const std::vector<std::string> &paths, std::vector<FITSInfo> &headers, size_t firstIndex,
                      size_t lastIndex);
 
   /// Load the FITS header(s) from one fits file into a struct
@@ -80,44 +73,38 @@ private:
   void headerSanityCheck(const FITSInfo &hdr, const FITSInfo &hdrFirst);
 
   /// Loads files into workspace(s)
-  void doLoadFiles(const std::vector<std::string> &paths,
-                   const std::string &outWSName, bool loadAsRectImg,
-                   int binSize, double noiseThresh);
+  void doLoadFiles(const std::vector<std::string> &paths, const std::string &outWSName, bool loadAsRectImg, int binSize,
+                   double noiseThresh);
 
   /// Parses the header values for the FITS file
   void parseHeader(FITSInfo &headerInfo);
 
   /// Initialises a workspace with IDF and fills it with data
-  DataObjects::Workspace2D_sptr makeWorkspace(
-      const FITSInfo &fileInfo, size_t &newFileNumber,
-      std::vector<char> &buffer, API::MantidImage &imageY,
-      API::MantidImage &imageE, const DataObjects::Workspace2D_sptr &parent,
-      bool loadAsRectImg = false, int binSize = 1, double noiseThresh = false);
+  DataObjects::Workspace2D_sptr makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
+                                              std::vector<char> &buffer, API::MantidImage &imageY,
+                                              API::MantidImage &imageE, const DataObjects::Workspace2D_sptr &parent,
+                                              bool loadAsRectImg = false, int binSize = 1, double noiseThresh = false);
 
-  void addAxesInfoAndLogs(const DataObjects::Workspace2D_sptr &ws,
-                          bool loadAsRectImg, const FITSInfo &fileInfo,
+  void addAxesInfoAndLogs(const DataObjects::Workspace2D_sptr &ws, bool loadAsRectImg, const FITSInfo &fileInfo,
                           int binSize, double cmpp);
 
   // Reads the data from a single FITS file into a workspace (directly, fast)
-  void readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
-                           const DataObjects::Workspace2D_sptr &ws,
+  void readDataToWorkspace(const FITSInfo &fileInfo, double cmpp, const DataObjects::Workspace2D_sptr &ws,
                            std::vector<char> &buffer);
 
   // Reads the data from a single FITS file into image objects (Y and E) that
   // then can/will be copied into a workspace
-  void readDataToImgs(const FITSInfo &fileInfo, API::MantidImage &imageY,
-                      API::MantidImage &imageE, std::vector<char> &buffer);
+  void readDataToImgs(const FITSInfo &fileInfo, API::MantidImage &imageY, API::MantidImage &imageE,
+                      std::vector<char> &buffer);
 
-  void readInBuffer(const FITSInfo &fileInfo, std::vector<char> &buffer,
-                    size_t len);
+  void readInBuffer(const FITSInfo &fileInfo, std::vector<char> &buffer, size_t len);
 
   /// filter noise pixel by pixel
-  void doFilterNoise(double thresh, API::MantidImage &imageY,
-                     API::MantidImage &imageE);
+  void doFilterNoise(double thresh, API::MantidImage &imageY, API::MantidImage &imageE);
 
   /// rebin the matrix/image
-  void doRebin(size_t rebin, API::MantidImage &imageY, API::MantidImage &imageE,
-               API::MantidImage &rebinnedY, API::MantidImage &rebinnedE);
+  void doRebin(size_t rebin, API::MantidImage &imageY, API::MantidImage &imageE, API::MantidImage &rebinnedY,
+               API::MantidImage &rebinnedE);
 
   /// identifies fits coming from 'other' cameras by specific headers
   bool isInstrOtherThanIMAT(const FITSInfo &hdr);

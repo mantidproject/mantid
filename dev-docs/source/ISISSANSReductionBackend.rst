@@ -281,9 +281,9 @@ reduction. It contains the following parameters:
 =============================== ===================================================== ============================================== ========= =============== ===========================================
 Name                            Comment                                               Type                                           Optional? Auto-generated? Default value
 =============================== ===================================================== ============================================== ========= =============== ===========================================
-reduction_mode                  The type of reduction, i.e. LAB, HAB, merged or both  *Enum(ReductionMode)*            N         N               *ReductionMode.LAB* enum value
-reduction_dimensionality        If 1D or 2D reduction                                 *Enum(ReductionDimensionality)*  N         N               *ReductionDimensionality.OneDim* enum value
-merge_fit_mode                  The fit mode for merging                              *Enum(FitModeForMerge)*          Y         N               *FitModeForMerge.NoFit* enum value
+reduction_mode                  The type of reduction, i.e. LAB, HAB, merged or both  *Enum(ReductionMode)*                          N         N               *ReductionMode.LAB* enum value
+reduction_dimensionality        If 1D or 2D reduction                                 *Enum(ReductionDimensionality)*                N         N               *ReductionDimensionality.OneDim* enum value
+merge_fit_mode                  The fit mode for merging                              *Enum(FitModeForMerge)*                        Y         N               *FitModeForMerge.NoFit* enum value
 merge_shift                     The shift value for merging                           *FloatParameter*                               Y         N               0.0
 merge_scale                     The scale value for merging                           *FloatParameter*                               Y         N               1.0
 merge_range_min                 The min q value for merging                           *FloatWithNoneParameter*                       Y         N               *None*
@@ -529,11 +529,11 @@ incident_monitor                The incident monitor                            
 prompt_peak_correction_min      The start time of a prompt peak correction                                          *PositiveFloatParameter*            Y         N               -
 prompt_peak_correction_max      The stop time of a prompt peak correction                                           *PositiveFloatParameter*            Y         N               -
 prompt_peak_correction_enabled  If the prompt peak correction should occur                                          *BoolParameter*                     Y         N               False
-rebin_type                      The type of wavelength rebinning, i.e. standard or interpolating                    *Enum(RebinType)*     Y         N               *RebinType.Rebin* enum value
+rebin_type                      The type of wavelength rebinning, i.e. standard or interpolating                    *Enum(RebinType)*                   Y         N               *RebinType.Rebin* enum value
 wavelength_low                  The lower wavelength boundary                                                       *PositiveFloatParameter*            Y         N               -
 wavelength_high                 The upper wavelength boundary                                                       *PositiveFloatParameter*            Y         N               -
 wavelength_step                 The wavelength step                                                                 *PositiveFloatParameter*            Y         N               -
-wavelength_step_type            The wavelength step type, i.e. lin or log                                           *Enum(RangeStepType)* Y         N               -
+wavelength_step_type            The wavelength step type, i.e. lin or log                                           *Enum(RangeStepType)*               Y         N               -
 background_TOF_general_start    General lower boundary for background correction                                    *FloatParameter*                    Y         N               -
 background_TOF_general_stop     General upper boundary for background correction                                    *FloatParameter*                    Y         N               -
 background_TOF_monitor_start    Monitor specific lower boundary for background correction (monitor vs. start value) *DictParameter*                     Y         N               -
@@ -583,7 +583,7 @@ The parameters are:
 ================================ ============================================= ============================================= =============================== =============== ===========================================
 Name                             Comment                                       Type                                          Optional?                       Auto-generated? Default
 ================================ ============================================= ============================================= =============================== =============== ===========================================
-reduction_dimensionality         1D or 2D                                      *Enum(ReductionDimensionality)* N                               N               *ReductionDimensionality.OneDim* enum value
+reduction_dimensionality         1D or 2D                                      *Enum(ReductionDimensionality)*               N                               N               *ReductionDimensionality.OneDim* enum value
 use_gravity                      If gravity correction should be applied       *BoolParameter*                               Y                               N                False
 gravity_extra_length             Extra length for gravity correction           *PositiveFloatParameter*                      Y                               N                0
 radius_cuto-off                  Radius above which pixels are not considered  *PositiveFloatParameter*                      Y                               N                0
@@ -593,7 +593,7 @@ q_max                            Max momentum transfer value for 1D reduction  *
 q_1d_rebin_string                Rebin string for Q1D                          *StringParameter*                             N,                              if 1D  N         -
 q_xy_max                         Max momentum transfer value for 2D reduction  *PositiveFloatParameter*                      N,                              if 2D  N         -
 q_xy_step                        Momentum transfer step for 2D reduction       *PositiveFloatParameter*                      N,                              if 2D  N         -
-q_xy_step_type                   The step type, i.e. lin or log                *Enum(RangeStepType)*           N,                              if 2D  N         -
+q_xy_step_type                   The step type, i.e. lin or log                *Enum(RangeStepType)*                         N,                              if 2D  N         -
 use_q_resolution                 If should perform a q resolution calculation  *BoolParameter*                               Y                               N                False
 q_resolution_collimation_length  Collimation length                            *PositiveFloatParameter*                      N, if performing q resolution   N                -
 q_resolution_delta_r             Virtual ring width on the detector            *PositiveFloatParameter*                      N, if performing q resolution   N                -
@@ -1037,8 +1037,8 @@ manual selection takes precedence.
 *Normalize To SANS Monitor*
 ---------------------------
 
-This step provides a monitor normalization workspace for subsequent 
-wavelength correction in :ref:`algm-Q1D` or :ref:`algm-Qxy`. 
+This step provides a monitor normalization workspace for subsequent
+wavelength correction in :ref:`algm-Q1D` or :ref:`algm-Qxy`.
 The user can provide a *ScaleFactor* which is
 normally obtained during event slicing.
 

@@ -25,25 +25,18 @@ namespace MDF {
 ///    #0 - original data (the same as in wsName[wsIndex]), #1 - calculated
 ///    data, #3 - difference.
 ///    If empty - ignore this workspace.
-DatasetPlotData::DatasetPlotData(const QString &wsName, int wsIndex,
-                                 const QString &outputWSName)
-    : m_dataCurve(new QwtPlotCurve(wsName + QString(" (%1)").arg(wsIndex))),
-      m_dataErrorCurve(nullptr), m_calcCurve(nullptr), m_diffCurve(nullptr),
-      m_showDataErrorBars(false) {
+DatasetPlotData::DatasetPlotData(const QString &wsName, int wsIndex, const QString &outputWSName)
+    : m_dataCurve(new QwtPlotCurve(wsName + QString(" (%1)").arg(wsIndex))), m_dataErrorCurve(nullptr),
+      m_calcCurve(nullptr), m_diffCurve(nullptr), m_showDataErrorBars(false) {
   // get the data workspace
-  auto ws = Mantid::API::AnalysisDataService::Instance()
-                .retrieveWS<Mantid::API::MatrixWorkspace>(wsName.toStdString());
+  auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(wsName.toStdString());
   if (!ws) {
-    QString mess =
-        QString("Workspace %1 either doesn't exist or isn't a MatrixWorkspace")
-            .arg(wsName);
+    QString mess = QString("Workspace %1 either doesn't exist or isn't a MatrixWorkspace").arg(wsName);
     throw std::runtime_error(mess.toStdString());
   }
   // check that the index is in range
   if (static_cast<size_t>(wsIndex) >= ws->getNumberHistograms()) {
-    QString mess = QString("Spectrum %1 doesn't exist in workspace %2")
-                       .arg(wsIndex)
-                       .arg(wsName);
+    QString mess = QString("Spectrum %1 doesn't exist in workspace %2").arg(wsIndex).arg(wsName);
     throw std::runtime_error(mess.toStdString());
   }
 
@@ -51,17 +44,12 @@ DatasetPlotData::DatasetPlotData(const QString &wsName, int wsIndex,
   Mantid::API::MatrixWorkspace_sptr outputWS;
   if (!outputWSName.isEmpty()) {
     std::string stdOutputWSName = outputWSName.toStdString();
-    if (Mantid::API::AnalysisDataService::Instance().doesExist(
-            stdOutputWSName)) {
+    if (Mantid::API::AnalysisDataService::Instance().doesExist(stdOutputWSName)) {
       try {
         outputWS =
-            Mantid::API::AnalysisDataService::Instance()
-                .retrieveWS<Mantid::API::MatrixWorkspace>(stdOutputWSName);
+            Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(stdOutputWSName);
       } catch (Mantid::Kernel::Exception::NotFoundError &) {
-        QString mess =
-            QString(
-                "Workspace %1 either doesn't exist or isn't a MatrixWorkspace")
-                .arg(outputWSName);
+        QString mess = QString("Workspace %1 either doesn't exist or isn't a MatrixWorkspace").arg(outputWSName);
         throw std::runtime_error(mess.toStdString());
       }
     }
@@ -95,26 +83,21 @@ DatasetPlotData::~DatasetPlotData() {
 /// for.
 /// @param outputWS :: The output workspace from Fit containing the calculated
 /// spectrum.
-void DatasetPlotData::setData(const Mantid::API::MatrixWorkspace *ws,
-                              int wsIndex,
+void DatasetPlotData::setData(const Mantid::API::MatrixWorkspace *ws, int wsIndex,
                               const Mantid::API::MatrixWorkspace *outputWS) {
   bool haveFitCurves = outputWS && outputWS->getNumberHistograms() >= 3;
   auto xValues = ws->points(wsIndex);
 
-  m_dataCurve->setData(xValues.rawData().data(),
-                       ws->y(wsIndex).rawData().data(),
-                       static_cast<int>(xValues.size()));
+  m_dataCurve->setData(xValues.rawData().data(), ws->y(wsIndex).rawData().data(), static_cast<int>(xValues.size()));
 
   if (m_dataErrorCurve) {
     m_dataErrorCurve->detach();
     delete m_dataErrorCurve;
   }
-  m_dataErrorCurve = new MantidQt::MantidWidgets::ErrorCurve(
-      m_dataCurve, ws->e(wsIndex).rawData());
+  m_dataErrorCurve = new MantidQt::MantidWidgets::ErrorCurve(m_dataCurve, ws->e(wsIndex).rawData());
 
   if (haveFitCurves) {
-    auto xBegin = std::lower_bound(xValues.begin(), xValues.end(),
-                                   outputWS->x(1).front());
+    auto xBegin = std::lower_bound(xValues.begin(), xValues.end(), outputWS->x(1).front());
     if (xBegin == xValues.end())
       return;
     int i0 = static_cast<int>(std::distance(xValues.begin(), xBegin));
@@ -122,13 +105,11 @@ void DatasetPlotData::setData(const Mantid::API::MatrixWorkspace *ws,
     if (i0 + n > static_cast<int>(xValues.size()))
       return;
     m_calcCurve = new QwtPlotCurve("calc");
-    m_calcCurve->setData(xValues.rawData().data() + i0,
-                         outputWS->y(1).rawData().data(), n);
+    m_calcCurve->setData(xValues.rawData().data() + i0, outputWS->y(1).rawData().data(), n);
     QPen penCalc("red");
     m_calcCurve->setPen(penCalc);
     m_diffCurve = new QwtPlotCurve("diff");
-    m_diffCurve->setData(xValues.rawData().data() + i0,
-                         outputWS->y(2).rawData().data(), n);
+    m_diffCurve->setData(xValues.rawData().data() + i0, outputWS->y(2).rawData().data(), n);
     QPen penDiff("green");
     m_diffCurve->setPen(penDiff);
   }

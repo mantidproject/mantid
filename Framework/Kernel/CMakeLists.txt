@@ -1,4 +1,5 @@
 set(SRC_FILES
+    src/SetValueWhenProperty.cpp
     src/ANN_complete.cpp
     src/ArrayBoundedValidator.cpp
     src/ArrayLengthValidator.cpp
@@ -23,7 +24,6 @@ set(SRC_FILES
     src/DateTimeValidator.cpp
     src/DateValidator.cpp
     src/DeltaEMode.cpp
-    src/Diffraction.cpp
     src/DirectoryValidator.cpp
     src/DiskBuffer.cpp
     src/DllOpen.cpp
@@ -140,6 +140,7 @@ set(SRC_UNITY_IGNORE_FILES
     src/System.cpp)
 
 set(INC_FILES
+    inc/MantidKernel/SetValueWhenProperty.h
     inc/MantidKernel/ANN/ANN.h
     inc/MantidKernel/ANN/ANNperf.h
     inc/MantidKernel/ANN/ANNx.h
@@ -173,7 +174,6 @@ set(INC_FILES
     inc/MantidKernel/DateTimeValidator.h
     inc/MantidKernel/DateValidator.h
     inc/MantidKernel/DeltaEMode.h
-    inc/MantidKernel/Diffraction.h
     inc/MantidKernel/DirectoryValidator.h
     inc/MantidKernel/DiskBuffer.h
     inc/MantidKernel/DllConfig.h
@@ -343,7 +343,6 @@ set(TEST_FILES
     DateTimeValidatorTest.h
     DateValidatorTest.h
     DeltaEModeTest.h
-    DiffractionTest.h
     DirectoryValidatorTest.h
     DiskBufferISaveableTest.h
     DiskBufferTest.h

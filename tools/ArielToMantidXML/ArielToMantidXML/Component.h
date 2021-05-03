@@ -21,7 +21,7 @@ public:
   void findChildren();
   // Sets the parent of the current component
   void setParent(Component* parent);
-  // Sets the 
+  // Sets the
   void setSpherical(const double& r, const double& theta, const double& phi);
   // Finds the primary flightpath.
   // Only works on an 'instrument'/top component(returns empty string otherwise)
@@ -48,7 +48,7 @@ private:
 
   const std::string m_name;
   const std::string m_type;
-  
+
   bool m_isAssembly;
 
   Component* m_parent;

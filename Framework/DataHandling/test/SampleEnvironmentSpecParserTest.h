@@ -27,12 +27,8 @@ class SampleEnvironmentSpecParserTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SampleEnvironmentSpecParserTest *createSuite() {
-    return new SampleEnvironmentSpecParserTest();
-  }
-  static void destroySuite(SampleEnvironmentSpecParserTest *suite) {
-    delete suite;
-  }
+  static SampleEnvironmentSpecParserTest *createSuite() { return new SampleEnvironmentSpecParserTest(); }
+  static void destroySuite(SampleEnvironmentSpecParserTest *suite) { delete suite; }
 
   //----------------------------------------------------------------------------
   // Success tests
@@ -335,8 +331,7 @@ public:
     std::string xml;
     std::istringstream instream(xml);
     SampleEnvironmentSpecParser parser;
-    TS_ASSERT_THROWS(parser.parse("name", "", instream),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(parser.parse("name", "", instream), const std::runtime_error &);
   }
 
   void test_Root_Tag_Must_Be_EnvironmentSpec() {
@@ -349,28 +344,27 @@ public:
     using Mantid::Geometry::Container_const_sptr;
 
     const std::string name = "CRYO001";
-    TS_ASSERT_THROWS(parseSpec(name,
-                               "<environmentspec>"
-                               " <materials>"
-                               "  <material id=\"van\" formula=\"V\"/>"
-                               " </materials>"
-                               " <components>"
-                               "  <containers>"
-                               "   <container id=\"10mm\" material=\"van\">"
-                               "     <sphere id=\"sp-1\">"
-                               "      <radius val=\"0.1\"/>"
-                               "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
-                               "     </sphere>"
-                               "    <samplegeometry>"
-                               "     <sphere id=\"sp-1\">"
-                               "      <radius val=\"0.1\"/>"
-                               "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
-                               "     </sphere>"
-                               "    </samplegeometry>"
-                               "   </container>"
-                               "  </containers>"
-                               " </components>"
-                               "</environmentspec>"),
+    TS_ASSERT_THROWS(parseSpec(name, "<environmentspec>"
+                                     " <materials>"
+                                     "  <material id=\"van\" formula=\"V\"/>"
+                                     " </materials>"
+                                     " <components>"
+                                     "  <containers>"
+                                     "   <container id=\"10mm\" material=\"van\">"
+                                     "     <sphere id=\"sp-1\">"
+                                     "      <radius val=\"0.1\"/>"
+                                     "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
+                                     "     </sphere>"
+                                     "    <samplegeometry>"
+                                     "     <sphere id=\"sp-1\">"
+                                     "      <radius val=\"0.1\"/>"
+                                     "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
+                                     "     </sphere>"
+                                     "    </samplegeometry>"
+                                     "   </container>"
+                                     "  </containers>"
+                                     " </components>"
+                                     "</environmentspec>"),
                      const std::runtime_error &);
   }
 
@@ -378,28 +372,27 @@ public:
     using Mantid::Geometry::Container_const_sptr;
 
     const std::string name = "CRYO001";
-    TS_ASSERT_THROWS(parseSpec(name,
-                               "<environmentspec>"
-                               " <materials>"
-                               "  <material id=\"van\" formula=\"V\"/>"
-                               " </materials>"
-                               " <components>"
-                               "  <containers>"
-                               "   <container material=\"van\">"
-                               "     <sphere id=\"sp-1\">"
-                               "      <radius val=\"0.1\"/>"
-                               "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
-                               "     </sphere>"
-                               "    <samplegeometry>"
-                               "     <sphere id=\"sp-1\">"
-                               "      <radius val=\"0.1\"/>"
-                               "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
-                               "     </sphere>"
-                               "    </samplegeometry>"
-                               "   </container>"
-                               "  </containers>"
-                               " </components>"
-                               "</environmentspec>"),
+    TS_ASSERT_THROWS(parseSpec(name, "<environmentspec>"
+                                     " <materials>"
+                                     "  <material id=\"van\" formula=\"V\"/>"
+                                     " </materials>"
+                                     " <components>"
+                                     "  <containers>"
+                                     "   <container material=\"van\">"
+                                     "     <sphere id=\"sp-1\">"
+                                     "      <radius val=\"0.1\"/>"
+                                     "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
+                                     "     </sphere>"
+                                     "    <samplegeometry>"
+                                     "     <sphere id=\"sp-1\">"
+                                     "      <radius val=\"0.1\"/>"
+                                     "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
+                                     "     </sphere>"
+                                     "    </samplegeometry>"
+                                     "   </container>"
+                                     "  </containers>"
+                                     " </components>"
+                                     "</environmentspec>"),
                      const std::runtime_error &);
   }
 
@@ -407,28 +400,27 @@ public:
     using Mantid::Geometry::Container_const_sptr;
 
     const std::string name = "CRYO001";
-    TS_ASSERT_THROWS(parseSpec(name,
-                               "<environmentspec>"
-                               " <materials>"
-                               "  <material id=\"van\" formula=\"V\"/>"
-                               " </materials>"
-                               " <components>"
-                               "  <containers>"
-                               "   <container id=\"10mm\">"
-                               "     <sphere id=\"sp-1\">"
-                               "      <radius val=\"0.1\"/>"
-                               "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
-                               "     </sphere>"
-                               "    <samplegeometry>"
-                               "     <sphere id=\"sp-1\">"
-                               "      <radius val=\"0.1\"/>"
-                               "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
-                               "     </sphere>"
-                               "    </samplegeometry>"
-                               "   </container>"
-                               "  </containers>"
-                               " </components>"
-                               "</environmentspec>"),
+    TS_ASSERT_THROWS(parseSpec(name, "<environmentspec>"
+                                     " <materials>"
+                                     "  <material id=\"van\" formula=\"V\"/>"
+                                     " </materials>"
+                                     " <components>"
+                                     "  <containers>"
+                                     "   <container id=\"10mm\">"
+                                     "     <sphere id=\"sp-1\">"
+                                     "      <radius val=\"0.1\"/>"
+                                     "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
+                                     "     </sphere>"
+                                     "    <samplegeometry>"
+                                     "     <sphere id=\"sp-1\">"
+                                     "      <radius val=\"0.1\"/>"
+                                     "      <centre x=\"0.0\"  y=\"0.0\" z=\"0.0\"/>"
+                                     "     </sphere>"
+                                     "    </samplegeometry>"
+                                     "   </container>"
+                                     "  </containers>"
+                                     " </components>"
+                                     "</environmentspec>"),
                      const std::runtime_error &);
   }
 
@@ -505,8 +497,7 @@ public:
   // Non-test methods
   //----------------------------------------------------------------------------
 private:
-  Mantid::DataHandling::SampleEnvironmentSpec_uptr
-  parseSpec(const std::string &name, const std::string &text) {
+  Mantid::DataHandling::SampleEnvironmentSpec_uptr parseSpec(const std::string &name, const std::string &text) {
     std::istringstream instream(text);
     SampleEnvironmentSpecParser parser;
     return parser.parse(name, "", instream);

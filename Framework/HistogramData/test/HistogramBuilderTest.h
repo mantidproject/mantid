@@ -16,24 +16,20 @@ class HistogramBuilderTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static HistogramBuilderTest *createSuite() {
-    return new HistogramBuilderTest();
-  }
+  static HistogramBuilderTest *createSuite() { return new HistogramBuilderTest(); }
   static void destroySuite(HistogramBuilderTest *suite) { delete suite; }
 
   void test_missing_x_failure() {
     HistogramBuilder builder;
     builder.setY(5);
-    TS_ASSERT_THROWS_EQUALS(builder.build(), const std::runtime_error &e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(builder.build(), const std::runtime_error &e, std::string(e.what()),
                             "HistogramBuilder: No X data has been set");
   }
 
   void test_missing_y_failure() {
     HistogramBuilder builder;
     builder.setX(5);
-    TS_ASSERT_THROWS_EQUALS(builder.build(), const std::runtime_error &e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(builder.build(), const std::runtime_error &e, std::string(e.what()),
                             "HistogramBuilder: No Y data has been set");
   }
 

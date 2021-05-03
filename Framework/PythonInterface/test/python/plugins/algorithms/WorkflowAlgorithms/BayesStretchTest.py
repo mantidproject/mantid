@@ -120,7 +120,7 @@ if platform.system() == "Windows":
             self.assertAlmostEqual(fit_ws_beta.dataY(0)[12], 0., places=tol_places)
             self.assertAlmostEqual(fit_ws_beta.dataY(0)[21], 0., places=tol_places)
             self.assertAlmostEqual(fit_ws_beta.dataY(0)[22], 0., places=tol_places)
-     
+
 
     if __name__=="__main__":
         unittest.main()

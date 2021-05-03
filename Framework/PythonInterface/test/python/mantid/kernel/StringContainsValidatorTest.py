@@ -57,7 +57,7 @@ class StringContainsValidatorTest(unittest.TestCase):
         self.assertRaises(ValueError, alg.setProperty, "Input", "Homeowner")
         testhelpers.assertRaisesNothing(self, alg.setProperty, "Input", "HomeOwner")
         testhelpers.assertRaisesNothing(self, alg.setProperty, "Input", "cat, meOws")
-        
+
     def test_StringContainsValidator_with_multiple_required_strings(self):
         """
             Test that a string-contains validator that requires
@@ -80,10 +80,10 @@ class StringContainsValidatorTest(unittest.TestCase):
         self.assertRaises(ValueError, alg.setProperty, "Input", "HomeRenter")
         self.assertRaises(ValueError, alg.setProperty, "Input", "catmeOw")
         testhelpers.assertRaisesNothing(self, alg.setProperty, "Input", "HomeOwner")
-        
+
     def test_StringContainsValidator_with_multiple_required_strings_constructor(self):
         """
-            Test that a string-contains validator made from constructor that 
+            Test that a string-contains validator made from constructor that
             supplies multiple strings required to all be contained in the input string
         """
 

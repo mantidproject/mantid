@@ -57,9 +57,9 @@ Usage
    print("Beta0 type = {}".format(inst.getParameterType('Beta0')))
    print("SigmaSquared type = {}".format(inst.getParameterType('SigmaSquared')))
 
-   # As of the time of writing, 
-   # fitting instrument parameters cannot be 
-   # accessed through the python API.  
+   # As of the time of writing,
+   # fitting instrument parameters cannot be
+   # accessed through the python API.
    # They can be accessed via the file in the lext line, if uncommented:
    #SaveParameterFile(ws[0][0], "instParam.xml")
 

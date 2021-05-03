@@ -17,8 +17,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 
 double getQSign() {
-  const auto convention =
-      Kernel::ConfigService::Instance().getString("Q.convention");
+  const auto convention = Kernel::ConfigService::Instance().getString("Q.convention");
   return (convention == "Crystallography") ? -1.0 : 1.0;
 }
 
@@ -30,13 +29,10 @@ double getQSign() {
  * @param instrument :: the instrument to find detectors in
  * @param detInfo :: the Geometry::DetectorInfo object for this instrument
  */
-DetectorSearcher::DetectorSearcher(
-    const Geometry::Instrument_const_sptr &instrument,
-    const Geometry::DetectorInfo &detInfo)
-    : m_usingFullRayTrace(instrument->containsRectDetectors() ==
-                          Geometry::Instrument::ContainsState::Full),
-      m_crystallography_convention(getQSign()), m_detInfo(detInfo),
-      m_instrument(instrument) {
+DetectorSearcher::DetectorSearcher(const Geometry::Instrument_const_sptr &instrument,
+                                   const Geometry::DetectorInfo &detInfo)
+    : m_usingFullRayTrace(instrument->containsRectDetectors() == Geometry::Instrument::ContainsState::Full),
+      m_crystallography_convention(getQSign()), m_detInfo(detInfo), m_instrument(instrument) {
 
   /* Choose the search strategy to use
    * If the instrument uses rectangular detectors (e.g. TOPAZ) then it is faster
@@ -92,8 +88,7 @@ void DetectorSearcher::createDetectorCache() {
   }
 
   // create KDtree of cached detector Q vectors
-  m_detectorCacheSearch =
-      std::make_unique<Kernel::NearestNeighbours<3>>(points);
+  m_detectorCacheSearch = std::make_unique<Kernel::NearestNeighbours<3>>(points);
 }
 
 /** Find the index of a detector given a vector in Qlab space
@@ -103,8 +98,7 @@ void DetectorSearcher::createDetectorCache() {
  * @param q :: the Qlab vector to find a detector for
  * @return tuple with data <detector found, detector index>
  */
-DetectorSearcher::DetectorSearchResult
-DetectorSearcher::findDetectorIndex(const V3D &q) {
+DetectorSearcher::DetectorSearchResult DetectorSearcher::findDetectorIndex(const V3D &q) {
   // quick check to see if this Q is valid
   if (q.nullVector())
     return std::make_tuple(false, 0);
@@ -125,8 +119,7 @@ DetectorSearcher::findDetectorIndex(const V3D &q) {
  * @param q :: the Qlab vector to find a detector for
  * @return tuple with data <detector found, detector index>
  */
-DetectorSearcher::DetectorSearchResult
-DetectorSearcher::searchUsingInstrumentRayTracing(const V3D &q) {
+DetectorSearcher::DetectorSearchResult DetectorSearcher::searchUsingInstrumentRayTracing(const V3D &q) {
   const auto direction = convertQtoDirection(q);
   m_rayTracer->traceFromSample(direction);
   const auto det = m_rayTracer->getDetectorResult();
@@ -150,12 +143,10 @@ DetectorSearcher::searchUsingInstrumentRayTracing(const V3D &q) {
  * @param q :: the Qlab vector to find a detector for
  * @return tuple with data <detector found, detector index>
  */
-DetectorSearcher::DetectorSearchResult
-DetectorSearcher::searchUsingNearestNeighbours(const V3D &q) {
+DetectorSearcher::DetectorSearchResult DetectorSearcher::searchUsingNearestNeighbours(const V3D &q) {
   const auto detectorDir = convertQtoDirection(q);
   // find where this Q vector should intersect with "extended" space
-  const auto neighbours =
-      m_detectorCacheSearch->findNearest(Eigen::Vector3d(q[0], q[1], q[2]), 5);
+  const auto neighbours = m_detectorCacheSearch->findNearest(Eigen::Vector3d(q[0], q[1], q[2]), 5);
   if (neighbours.empty())
     return std::make_tuple(false, 0);
 
@@ -183,9 +174,9 @@ DetectorSearcher::searchUsingNearestNeighbours(const V3D &q) {
  * @param neighbours :: the NearestNeighbour results to check interception with
  * @return a detector search result with whether a detector was hit
  */
-DetectorSearcher::DetectorSearchResult DetectorSearcher::handleTubeGap(
-    const V3D &detectorDir,
-    const Kernel::NearestNeighbours<3>::NearestNeighbourResults &neighbours) {
+DetectorSearcher::DetectorSearchResult
+DetectorSearcher::handleTubeGap(const V3D &detectorDir,
+                                const Kernel::NearestNeighbours<3>::NearestNeighbourResults &neighbours) {
   std::vector<double> gaps = m_instrument->getNumberParameter("tube-gap", true);
   if (!gaps.empty()) {
     const auto gap = static_cast<double>(gaps.front());
@@ -221,9 +212,7 @@ DetectorSearcher::DetectorSearchResult DetectorSearcher::handleTubeGap(
  * @return tuple of <detector hit, index of correct index in m_IndexMap>
  */
 std::tuple<bool, size_t> DetectorSearcher::checkInteceptWithNeighbours(
-    const V3D &direction,
-    const Kernel::NearestNeighbours<3>::NearestNeighbourResults &neighbours)
-    const {
+    const V3D &direction, const Kernel::NearestNeighbours<3>::NearestNeighbourResults &neighbours) const {
   Geometry::Track track(m_detInfo.samplePosition(), direction);
   // Find which of the neighbours we actually intersect with
   for (const auto &neighbour : neighbours) {

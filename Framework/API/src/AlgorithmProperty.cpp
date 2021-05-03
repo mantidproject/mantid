@@ -30,12 +30,9 @@ namespace API {
  *  @param direction :: Whether this is a Direction::Input, Direction::Output or
  * Direction::InOut (Input & Output) property
  */
-AlgorithmProperty::AlgorithmProperty(const std::string &propName,
-                                     Kernel::IValidator_sptr validator,
+AlgorithmProperty::AlgorithmProperty(const std::string &propName, Kernel::IValidator_sptr validator,
                                      unsigned int direction)
-    : Kernel::PropertyWithValue<HeldType>(propName, HeldType(),
-                                          std::move(validator), direction),
-      m_algmStr() {}
+    : Kernel::PropertyWithValue<HeldType>(propName, HeldType(), std::move(validator), direction), m_algmStr() {}
 
 /**
  * Return the algorithm as string
@@ -46,9 +43,7 @@ std::string AlgorithmProperty::value() const { return m_algmStr; }
 /**
  * @return A Json::Value objectValue encoding the algorithm
  */
-Json::Value AlgorithmProperty::valueAsJson() const {
-  return (*this)()->toJson();
-}
+Json::Value AlgorithmProperty::valueAsJson() const { return (*this)()->toJson(); }
 
 /**
  * Get the default
@@ -91,8 +86,7 @@ std::string AlgorithmProperty::setValueFromJson(const Json::Value &value) {
  * @return An empty string if the value is valid, otherwise the string will
  * contain the error
  */
-std::string
-AlgorithmProperty::setBaseValue(const AlgorithmProperty::HeldType &algm) {
+std::string AlgorithmProperty::setBaseValue(const AlgorithmProperty::HeldType &algm) {
   std::string message;
   try {
     Kernel::PropertyWithValue<IAlgorithm_sptr>::m_value = algm;

@@ -33,7 +33,7 @@ The following units are available in the default Mantid distribution. These unit
 +-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
 | Momentum (k)                              | Momentum                        | :math:`\mathrm{\AA}^{-1}`   | :math:`k = \frac{2 \pi }{\lambda}=\frac{2 \pi \times m_N \times L_{tot}}{h \times \mathrm{tof}}`                 |
 +-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
-| d-spacing                                 | dSpacing                        | :math:`\mathrm{\AA}`        | :math:`d = \frac{n \, \lambda}{2 \, sin \, \theta}`                                                              |
+| d-spacing                                 | dSpacing                        | :math:`\mathrm{\AA}`        | :math:`TOF = DIFA \, d^2 + DIFC d + TZERO` (see below)                                                           |
 +-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
 | Momentum transfer (Q)                     | MomentumTransfer                | :math:`\mathrm{\AA}^{-1}`   | :math:`Q = 2 \, k \, sin \, \theta = \frac{4 \pi sin \theta}{\lambda}`                                           |
 +-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
@@ -67,6 +67,15 @@ conversion to wavelength will take into account the fixed initial/final
 energy respectively. Units conversion into elastic momentum transfer
 (MomentumTransfer) will throw in elastic mode (emode=0) on inelastic
 workspace (when energy transfer is specified along x-axis)
+
+**Note on d-spacing**: The coefficients DIFA, DIFC and TZERO may be obtained
+via calibration of a TOF diffraction instrument. In the absence of a calibration,
+DIFA=TZERO=0 and the default value of DIFC is:
+
+:math:`DIFC = 10^{-4} \frac{m_N}{h} (L_1 + L_2) 2 \sin(\theta)`
+
+where the scaling factor adjusts for the fact that DIFC is required in units
+of :math:`\mu s` per :math:`\mathrm{\AA}`.
 
 **d-spacingPerpendicular** is a unit invented in `J. Appl. Cryst. (2015) 48, pp. 1627--1636 <https://doi.org/10.1107/S1600576715016520>`_ for 2D Rietveld refinement
 of angular and wavelength-dispersive neutron time-of-flight powder diffraction data. Together with the d-Spacing :math:`d`,

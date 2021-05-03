@@ -40,9 +40,9 @@ FitType defines the way of setting initial values. If it is set to
 previous fit. If set to "Individual" each fit starts with the same
 initial values defined in the Function property.
 
-The Function property can be a single domain function in which case this 
+The Function property can be a single domain function in which case this
 function is used to fit each of the inputs, or it can be a multi-domain function.
-In the latter case the number of domains must equal the number of inputs and 
+In the latter case the number of domains must equal the number of inputs and
 each input is fitted to the equivalent function from the multi-domain function.
 
 LogValue property specifies a log value to be included into the output.

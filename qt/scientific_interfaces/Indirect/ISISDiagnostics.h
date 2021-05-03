@@ -57,8 +57,7 @@ private slots:
   void doublePropertyChanged(QtProperty * /*prop*/, double /*val*/);
   void setDefaultInstDetails();
   void sliceAlgDone(bool error);
-  void
-  pbRunEditing(); //< Called when a user starts to type / edit the runs to load.
+  void pbRunEditing();  //< Called when a user starts to type / edit the runs to load.
   void pbRunFinding();  //< Called when the FileFinder starts finding the files.
   void pbRunFinished(); //< Called when the FileFinder has finished finding the
   // files.
@@ -67,10 +66,8 @@ private slots:
 
   void setRunEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
-  void updateRunButton(bool enabled = true,
-                       std::string const &enableOutputButtons = "unchanged",
-                       QString const &message = "Run",
-                       QString const &tooltip = "");
+  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
+                       QString const &message = "Run", QString const &tooltip = "");
 
 private:
   void setDefaultInstDetails(QMap<QString, QString> const &instrumentDetails);
@@ -79,10 +76,8 @@ private:
 
   void setPeakRangeLimits(double peakMin, double peakMax);
   void setBackgroundRangeLimits(double backgroundMin, double backgroundMax);
-  void setRangeLimits(MantidWidgets::RangeSelector *rangeSelector,
-                      double minimum, double maximum,
-                      QString const &minPropertyName,
-                      QString const &maxPropertyName);
+  void setRangeLimits(MantidWidgets::RangeSelector *rangeSelector, double minimum, double maximum,
+                      QString const &minPropertyName, QString const &maxPropertyName);
   void setPeakRange(double minimum, double maximum);
   void setBackgroundRange(double minimum, double maximum);
 

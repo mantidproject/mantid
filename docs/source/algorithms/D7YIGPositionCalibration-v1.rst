@@ -19,6 +19,8 @@ Currently the algorithm is focused on the D7 instrument that has three detector 
 
 The property `MaskedBinsRange` allows to mask multiple :math:`2\theta` ranges of the :math:`2\theta` scan. If the number of provided arguments is even, arguments will be paired and the angular range between the first and the second element of the pair will be masked, and for all pairs. In the case where the number of arguments is odd, the first argument is assumed to be a lower cut-off, and all :math:`2\theta` detector positions below that value will be masked.
 
+The values of the fitted wavelength, three bank gradients, and the :math:`chi^{2}` value are logged on the notice level.
+
 Calibration method
 ##################
 
@@ -48,7 +50,7 @@ Usage
 			    YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_shortWavelength.xml',
 			    MinimalDistanceBetweenPeaks=1.5, BankOffsets=[3, 3, 1], ClearCache=True,
 			    FittingMethod='Individual', FitOutputWorkspace='shortWavelength')
-		       
+
    print('The calibrated wavelength is: {0:.2f}'.format(float(approximate_wavelength)*mtd['shortWavelength'].column(1)[1]))
    print('The bank2 gradient is: {0:.3f}'.format(1.0 / mtd['shortWavelength'].column(1)[0]))
    print('The bank3 gradient is: {0:.3f}'.format(1.0 / mtd['shortWavelength'].column(1)[176]))
