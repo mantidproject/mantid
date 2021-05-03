@@ -468,6 +468,27 @@ class DrillView(QMainWindow):
                 and event.modifiers() == Qt.ControlModifier):
             self.setMasterRow.emit()
 
+    def event(self, event):
+        """
+        Override of QMainWindow::event. This method catches the keyboard
+        shortcuts when the window in in "on top" mode in mantid settings.
+        """
+        if event.type() == QEvent.ShortcutOverride:
+            if event.modifiers() == Qt.ControlModifier:
+                if event.key() == Qt.Key_S:
+                    self.actionSave.trigger()
+                    event.accept()
+                    return True
+                elif event.key() == Qt.Key_O:
+                    self.actionLoadRundex.trigger()
+                    event.accept()
+                    return True
+                elif event.key() == Qt.Key_Q:
+                    self.close()
+                    event.accept()
+                    return True
+        return super().event(event)
+
     def show_directory_manager(self):
         """
         Open the Mantid user directories manager.
