@@ -10,10 +10,10 @@ Description
 -----------
 
 This algorithm can be used to remove negative intensity values from workspaces created by the :ref:`Bin2DPowderDiffraction
-<algm-Bin2DPowderDiffraction>` algorithm. The algorithm looks for the lowest negative intensity value and adds this value 
+<algm-Bin2DPowderDiffraction>` algorithm. The algorithm looks for the lowest negative intensity value and adds this value
 to all other intensities, leading to a workspace with 0 as the lowest intensity. The existing :ref:`ResetNegatives
-<algm-ResetNegatives>` algorithm does not produce the same results, as it looks for the lowest negative intensity in each 
-spectrum and adds this value for the corresponding spectrum only. 
+<algm-ResetNegatives>` algorithm does not produce the same results, as it looks for the lowest negative intensity in each
+spectrum and adds this value for the corresponding spectrum only.
 
 Usage
 -----

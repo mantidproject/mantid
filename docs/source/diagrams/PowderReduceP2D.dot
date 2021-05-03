@@ -27,7 +27,7 @@ digraph PowderReduceP2D {
     isVanRunDefined [label="Is Vanadium run\nspecified?"]
     mustDataPositive [label="Does data have to\nbe positive?"]
   }
-  
+
 
   subgraph values {
     $value_style
@@ -36,7 +36,7 @@ digraph PowderReduceP2D {
 
   SampleData	    -> ProcessSampleRun
   CalibrationFile   -> ProcessSampleRun
-  
+
   ProcessSampleRun  -> SamRun
   SamRun            -> isCanRunDefined
 

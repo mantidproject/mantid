@@ -36,7 +36,7 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         '''
         self.declareProperty(WorkspaceProperty('SampleWorkspace', '',
                                           direction = Direction.Input),
-                             doc='Workspace containing sample data.')     
+                             doc='Workspace containing sample data.')
         '''
         self.declareProperty('DoIntensityCorrection',
                              False,

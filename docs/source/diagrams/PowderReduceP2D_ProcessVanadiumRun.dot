@@ -30,7 +30,7 @@ digraph PowderReduceP2D_ProcessVanRun {
     $decision_style
     edgebinning     [label="Is edgebinning specified?"]
   }
-  
+
 
   subgraph values {
     $value_style
@@ -40,8 +40,8 @@ digraph PowderReduceP2D_ProcessVanRun {
   FindDetectorsPar          -> FilterBadPulses
   FilterBadPulses           -> RemovePromptPulse
   RemovePromptPulse         -> LoadDiffCal
-  LoadDiffCal               -> MaskDetectors	
-  MaskDetectors             -> AlignDetectors	
+  LoadDiffCal               -> MaskDetectors
+  MaskDetectors             -> AlignDetectors
   AlignDetectors            -> ConvertUnits
   ConvertUnits              -> CylinderAbsorption
   CylinderAbsorption        -> Divide
@@ -51,7 +51,7 @@ digraph PowderReduceP2D_ProcessVanRun {
   Bin2DPowderDiffraction1   -> StripVanadiumPeaks
   Bin2DPowderDiffraction2   -> StripVanadiumPeaks
   StripVanadiumPeaks        -> FFTSmooth
-  FFTSmooth                 -> OutputWorkspace	
+  FFTSmooth                 -> OutputWorkspace
 
 
 

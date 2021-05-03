@@ -26,7 +26,7 @@ digraph PowderReduceP2D_ProcessCanRun {
     $decision_style
     edgebinning     [label="Is edgebinning specified?"]
   }
-  
+
 
   subgraph values {
     $value_style
@@ -36,8 +36,8 @@ digraph PowderReduceP2D_ProcessCanRun {
   FindDetectorsPar          -> FilterBadPulses
   FilterBadPulses           -> RemovePromptPulse
   RemovePromptPulse         -> LoadDiffCal
-  LoadDiffCal               -> MaskDetectors	
-  MaskDetectors             -> AlignDetectors	
+  LoadDiffCal               -> MaskDetectors
+  MaskDetectors             -> AlignDetectors
   AlignDetectors            -> ConvertUnits
   ConvertUnits              -> edgebinning
   edgebinning               -> Bin2DPowderDiffraction1  [label="Yes"]

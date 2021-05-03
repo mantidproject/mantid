@@ -26,7 +26,7 @@ digraph PowderReduceP2D_FocusAndSum {
     $decision_style
     edgebinning     [label="Is edgebinning specified?"]
   }
-  
+
 
   subgraph values {
     $value_style
@@ -36,14 +36,14 @@ digraph PowderReduceP2D_FocusAndSum {
   FindDetectorsPar          -> FilterBadPulses
   FilterBadPulses           -> RemovePromptPulse
   RemovePromptPulse         -> LoadDiffCal
-  LoadDiffCal               -> MaskDetectors	
-  MaskDetectors             -> AlignDetectors	
+  LoadDiffCal               -> MaskDetectors
+  MaskDetectors             -> AlignDetectors
   AlignDetectors            -> ConvertUnits
   ConvertUnits              -> edgebinning
   edgebinning               -> Bin2DPowderDiffraction1  [label="Yes"]
   edgebinning               -> Bin2DPowderDiffraction2  [label="No"]
   Bin2DPowderDiffraction1   -> OutputWorkspace
-  Bin2DPowderDiffraction2   -> OutputWorkspace		
+  Bin2DPowderDiffraction2   -> OutputWorkspace
 
 
 }
