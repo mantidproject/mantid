@@ -32,13 +32,15 @@ public:
   /// base objective function
   void function1D(double *out, const double *xValues, const size_t order) const override;
 
-  void setPeakWorkspace(Mantid::API::IPeaksWorkspace_sptr &pws, const std::string componentName);
+  void setPeakWorkspace(Mantid::API::IPeaksWorkspace_sptr &pws, const std::string componentName,
+                        const std::vector<double> tofs);
 
 private:
   /// temp workspace holder
   mutable std::string m_cmpt;
   mutable Mantid::API::IPeaksWorkspace_sptr m_pws;
   mutable int n_iter;
+  mutable std::vector<double> m_tofs;
 
   const bool LOGCHILDALG{false};
   const Mantid::Kernel::V3D UNSET_HKL{0, 0, 0};
