@@ -28,15 +28,12 @@ class PeakActionsPresenter:
     def __init__(self,
                  model: PeakActionsModel,
                  view: PeakActionsView):
-        self._model = model
-        self._view = view
+        self._model: PeakActionsModel = model
+        self._view: PeakActionsView = view
         self._collection_presenter: Optional[PeaksViewerCollectionPresenter] = None
 
     @property
     def active_presenter(self) -> PeaksViewerPresenter:
-        workspace_index = self._view.selected_workspace_index
-        return self._collection_presenter.child_presenter(workspace_index)
-
-
-
+        table_index = self._view.selected_table_index
+        return self._collection_presenter.child_presenter(table_index)
 

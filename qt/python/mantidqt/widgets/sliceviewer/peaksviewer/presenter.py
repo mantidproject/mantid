@@ -68,7 +68,6 @@ class PeaksViewerPresenter:
         self._model = model
         self._raise_error_if_workspace_incompatible(model.peaks_workspace)
         self._peaks_table_presenter = PeaksWorkspaceDataPresenter(model, view.table_view)
-
         self._view = view
         view.subscribe(self)
         view.set_title(model.peaks_workspace.name())
