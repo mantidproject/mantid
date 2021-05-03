@@ -12,7 +12,8 @@ class PeakActionsModel:
         pass
 
     def erase_peak(self):
-        return NotImplementedError;
+        return NotImplementedError
 
     def add_peak(self):
         return NotImplementedError
+
