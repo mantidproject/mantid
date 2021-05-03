@@ -132,8 +132,8 @@ public:
     TS_ASSERT_EQUALS(tnames[8], "f1.PeakCentre_Err");
     TS_ASSERT_EQUALS(tnames[9], "f1.Sigma");
     TS_ASSERT_EQUALS(tnames[10], "f1.Sigma_Err");
-    TS_ASSERT_EQUALS(tnames[11], "f1.Intensity");
-    TS_ASSERT_EQUALS(tnames[12], "f1.Intensity_Err");
+    TS_ASSERT_EQUALS(tnames[11], "f1.Integrated Intensity");
+    TS_ASSERT_EQUALS(tnames[12], "f1.Integrated Intensity_Err");
     TS_ASSERT_EQUALS(tnames[13], "Chi_squared");
 
     TS_ASSERT_DELTA(result->Double(0, 0), 1, 1e-10);
@@ -196,8 +196,8 @@ public:
     TS_ASSERT_EQUALS(tnames[8], "f1.PeakCentre_Err");
     TS_ASSERT_EQUALS(tnames[9], "f1.Sigma");
     TS_ASSERT_EQUALS(tnames[10], "f1.Sigma_Err");
-    TS_ASSERT_EQUALS(tnames[11], "f1.Intensity");
-    TS_ASSERT_EQUALS(tnames[12], "f1.Intensity_Err");
+    TS_ASSERT_EQUALS(tnames[11], "f1.Integrated Intensity");
+    TS_ASSERT_EQUALS(tnames[12], "f1.Integrated Intensity_Err");
     TS_ASSERT_EQUALS(tnames[13], "Chi_squared");
 
     TS_ASSERT_DELTA(result->Double(0, 0), 1, 1e-10);
