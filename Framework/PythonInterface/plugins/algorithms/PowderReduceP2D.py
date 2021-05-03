@@ -4,11 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
 import math
-from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator
+from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator, EnabledWhenProperty, PropertyCriterion
 from mantid.api import (AlgorithmFactory, DistributedDataProcessorAlgorithm,
-                        FileProperty, FileAction)
+                        FileProperty, FileAction, WorkspaceProperty)
 from mantid.simpleapi import Load, FindDetectorsPar, FilterBadPulses, RemovePromptPulse, LoadDiffCal, MaskDetectors, AlignDetectors, \
     ConvertUnits, CylinderAbsorption, Divide, Bin2DPowderDiffraction, StripVanadiumPeaks, FFTSmooth, Minus, SaveP2D, ResetNegatives2D
 
@@ -35,9 +34,14 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         # Input files
         self.declareProperty(FileProperty('SampleData',
                                           '',
-                                          action=FileAction.Load,
+                                          action=FileAction.OptionalLoad,
                                           direction=Direction.Input),
                              doc='Datafile that should be used.')
+        '''
+        self.declareProperty(WorkspaceProperty('SampleWorkspace', '',
+                                          direction = Direction.Input),
+                             doc='Workspace containing sample data.')     
+        '''
         self.declareProperty(
             'DoIntensityCorrection',
             False,
@@ -51,6 +55,11 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
                          action=FileAction.OptionalLoad,
                          direction=Direction.Input),
             doc='Vanadium measurement for intensity correction.')
+        '''
+        self.declareProperty(WorkspaceProperty('VanaWorkspace', '',
+                                          direction = Direction.Input),
+                             doc='Workspace containing vanadium data.')
+        '''
         self.declareProperty(
             'DoBackgroundCorrection',
             False,
@@ -64,6 +73,11 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
                          action=FileAction.OptionalLoad,
                          direction=Direction.Input),
             doc='Empty measurement of the can for background correction.')
+        '''
+        self.declareProperty(WorkspaceProperty('EmptyWorkspace', '',
+                                          direction = Direction.Input),
+                             doc='Workspace containing empty data.')
+        '''
         self.declareProperty(FileProperty('CalFile',
                                           '',
                                           action=FileAction.OptionalLoad,
@@ -81,10 +95,13 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
                              doc='BinEdges file used for edgebinning.')
         grp1 = 'Input and Output Files'
         self.setPropertyGroup('SampleData', grp1)
+        #self.setPropertyGroup('SampleWorkspace', grp1)
         self.setPropertyGroup('DoIntensityCorrection', grp1)
         self.setPropertyGroup('VanaData', grp1)
+        #self.setPropertyGroup('VanaWorkspace', grp1)
         self.setPropertyGroup('DoBackgroundCorrection', grp1)
         self.setPropertyGroup('EmptyData', grp1)
+        #self.setPropertyGroup('EmptyWorkspace', grp1)
         self.setPropertyGroup('CalFile', grp1)
         self.setPropertyGroup('DoEdgebinning', grp1)
         self.setPropertyGroup('BinEdgesFile', grp1)
@@ -104,7 +121,7 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             doc='Minimum value for 2 Theta. Everything smaller gets removed.')
         self.declareProperty(
             'TwoThetaMax',
-            132,
+            120,
             validator=IntBoundedValidator(lower=0),
             direction=Direction.Input,
             doc='Maximum value for 2 Theta. Everything bigger gets removed.')
@@ -118,7 +135,7 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         )
         self.declareProperty(
             'LambdaMin',
-            0.2,
+            0.3,
             validator=FloatBoundedValidator(lower=0.0),
             direction=Direction.Input,
             doc=
@@ -127,7 +144,7 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         )
         self.declareProperty(
             'LambdaMax',
-            2.0,
+            1.1,
             validator=FloatBoundedValidator(lower=0.0),
             direction=Direction.Input,
             doc=
@@ -136,7 +153,7 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         )
         self.declareProperty(
             'DMin',
-            0.5,
+            0.11,
             validator=FloatBoundedValidator(lower=0.0),
             direction=Direction.Input,
             doc=
@@ -145,7 +162,7 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         )
         self.declareProperty(
             'DMax',
-            6.0,
+            1.37,
             validator=FloatBoundedValidator(lower=0.0),
             direction=Direction.Input,
             doc=
@@ -153,7 +170,7 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         )
         self.declareProperty(
             'DpMin',
-            0.2,
+            0.48,
             validator=FloatBoundedValidator(lower=0.0),
             direction=Direction.Input,
             doc=
@@ -162,7 +179,7 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         )
         self.declareProperty(
             'DpMax',
-            2.0,
+            1.76,
             validator=FloatBoundedValidator(lower=0.0),
             direction=Direction.Input,
             doc=
@@ -259,6 +276,11 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         self.setPropertyGroup('StartWorkspaceIndex', grp7)
         self.setPropertyGroup('EndWorkspaceIndex', grp7)
         self.setPropertyGroup('ComponentList', grp7)
+        # Input for AlignDetectors
+        #self.copyProperties('AlignDetectors', ['CalibrationWorkspace', 'OffsetsWorkspace'])
+        #grp8 = 'AlignDetectors'
+        #self.setPropertyGroup('CalibrationWorkspace', grp8)
+        #self.setPropertyGroup('OffsetsWorkspace', grp8)
         # Input for CylinderAbsorption
         self.declareProperty(
             'AttenuationXSection',
@@ -440,13 +462,13 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         self._dpMin = self.getProperty('DpMin').value
         self._dpMax = self.getProperty('DpMax').value
         self._calcDMin = self._lambdaMin / (
-            2. * math.sin(math.radians(self._tthMax / 2.))
+            2. * math.sin(self._tthMax / 2. / 180. * math.pi))
         self._calcDMax = self._lambdaMax / (
-            2. * math.sin(math.radians(self._tthMin / 2.))
+            2. * math.sin(self._tthMin / 2. / 180. * math.pi))
         self._calcDpMin = math.sqrt(
-            self._lambdaMin**2 - 2. * math.log(math.cos(math.radians(self._tthMin / 2.)))
+            self._lambdaMin**2 - 2. * math.log(math.cos(self._tthMin / 2. / 180. * math.pi)))
         self._calcDpMax = math.sqrt(
-            self._lambdaMax**2 - 2. * math.log(math.cos(math.radians(self._tthMax / 2.)))
+            self._lambdaMax**2 - 2. * math.log(math.cos(self._tthMax / 2. / 180. * math.pi)))
         if self._calcDMin > self._dMin:
             self._dMin = self._calcDMin
         if self._calcDMax < self._dMax:
@@ -463,6 +485,12 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         self._sample = self.getPropertyValue('SampleData')
         self._vana = self.getPropertyValue('VanaData')
         self._empty = self.getPropertyValue('EmptyData')
+        #if self._sample == '':
+            #self._sampleWS = self.getPropertyValue('SampleWorkspace')
+        #if self._vana == '':
+            #self._vanaWS = self.getPropertyValue('VanaWorkspace')
+        #if self._empty == '':
+            #self._emptyWS = self.getPropertyValue('EmptyWorkspace')
         # FindDetectorsPar
         self._outputParTable = self.getProperty('OutputParTable').value
         self._returnLinearRanges = self.getProperty('ReturnLinearRanges').value
@@ -542,7 +570,8 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         self._allSpectra = self.getProperty('AllSpectra').value
 
     def processData(self, filename, wsName):
-        Load(Filename=filename, OutputWorkspace=wsName)
+        if filename != '':
+            Load(Filename=filename, OutputWorkspace=wsName)
         FindDetectorsPar(InputWorkspace=wsName,
                          ReturnLinearRanges=self._returnLinearRanges,
                          ParFile=self._parFile,
@@ -614,8 +643,8 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
                                    self._dMax + dSpaceBinning
                                ],
                                dPerpendicularBinning=[
-                                   self._dPMin - dPerpBinning, dPerpBinning,
-                                   self.dPMax + dPerpBinning
+                                   self._dpMin - dPerpBinning, dPerpBinning,
+                                   self._dpMax + dPerpBinning
                                ])
 
     def postProcessVana(self, wsName):
@@ -660,11 +689,13 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
 
         # Process Sample data
         self.processData(self._sample, self._sampleWS)
+        print(self._sampleWS, self._dSpaceBinning,
+                            self._dPerpendicularBinning)
         if self._doEdge:
             self.binDataEdge(self._sampleWS)
         else:
-            self.binDataLog(self._sampleWS, self._dSpaceBinning,
-                            self._dPerpendicularBinning)
+            self.binDataLog(self._sampleWS, self._dSpaceBinning[0],
+                            self._dPerpendicularBinning[0])
 
         # Process empty data if given
         if self._doEmpty:
@@ -672,8 +703,8 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             if self._doEdge:
                 self.binDataEdge(self._emptyWS)
             else:
-                self.binDataLog(self._emptyWS, self._dSpaceBinning,
-                                self._dPerpendicularBinning)
+                self.binDataLog(self._emptyWS, self._dSpaceBinning[0],
+                                self._dPerpendicularBinning[0])
 
         # Process vana data if given
         if self._doVana:
@@ -682,8 +713,8 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             if self._doEdge:
                 self.binDataEdge(self._vanaWS)
             else:
-                self.binDataLog(self._vanaWS, self._dSpaceBinning,
-                                self._dPerpendicularBinning)
+                self.binDataLog(self._vanaWS, self._dSpaceBinning[0],
+                                self._dPerpendicularBinning[0])
             self.postProcessVana(self._vanaWS)
 
         # Check all datafiles for negative Values and correct those
@@ -691,7 +722,6 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
                                self._doEmpty, self._emptyWS)
 
         # Correct sample data with empty and vana data if they are there
-        print(self._doVana, self._doEmpty)
         if self._doVana or self._doEmpty:
             self.correctSampleData(self._sampleWS, self._doVana, self._vanaWS,
                                    self._doEmpty, self._emptyWS)
