@@ -24,11 +24,11 @@ class ResetNegatives2DTest(unittest.TestCase):
 
     def setUp(self):
         self._workspace1 = self._create_workspace()
-        self._workspace2 = self._create_workspace()
+        #self._workspace2 = self._create_workspace()
 
     def tearDown(self):
         DeleteWorkspace(self._workspace1)
-        DeleteWorkspace(self._workspace2)
+        #DeleteWorkspace(self._workspace2)
 
     def _create_workspace(self):
         """Create a dummy workspace for testing purposes"""
@@ -84,8 +84,8 @@ class ResetNegatives2DTest(unittest.TestCase):
             os.path.join(self._test_dir, "test_resetNegatives_addMinimum.p2d"))
 
     def test_resetNegatives2D_resetValue(self):
-        ResetNegatives2D(self._workspace2, AddMinimum=False, ResetValue=0)
-        SaveP2D(Workspace=self._workspace2,
+        ResetNegatives2D(self._workspace1, AddMinimum=False, ResetValue=0)
+        SaveP2D(Workspace=self._workspace1,
                 OutputFile=os.path.join(self._test_dir,
                                         "test_ResetNegatives2D"),
                 RemoveNaN=False,
