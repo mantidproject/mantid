@@ -31,25 +31,13 @@ class ResetNegatives2D(PythonAlgorithm):
         return ["PowderReduceP2D", "Bin2DPowderDiffraction", "SaveP2D"]
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty('Workspace',
-                                               '',
-                                               direction=Direction.Input),
-                             doc='Workspace that should be used.')
-        self.declareProperty(
-            'AddMinimum',
-            True,
-            direction=Direction.Input,
-            doc=
-            'If set to True, adds the most negative intensity to all intensities.'
-        )
-        self.declareProperty(
-            'ResetValue',
-            0,
-            direction=Direction.Input,
-            doc='Set negative intensities to the specified value (default=0).')
-        self.setPropertySettings(
-            'ResetValue',
-            EnabledWhenProperty('AddMinimum', PropertyCriterion.IsNotDefault))
+        self.declareProperty(WorkspaceProperty('Workspace', '', direction=Direction.Input), doc='Workspace that should be used.')
+        self.declareProperty('AddMinimum',
+                             True,
+                             direction=Direction.Input,
+                             doc='If set to True, adds the most negative intensity to all intensities.')
+        self.declareProperty('ResetValue', 0, direction=Direction.Input, doc='Set negative intensities to the specified value (default=0).')
+        self.setPropertySettings('ResetValue', EnabledWhenProperty('AddMinimum', PropertyCriterion.IsNotDefault))
 
     def getInputs(self):
         self.data = mtd[self.getPropertyValue('Workspace')]
@@ -67,10 +55,7 @@ class ResetNegatives2D(PythonAlgorithm):
             intMin = np.min(yData)
             # Check if minimal Intensity is negative. If it is, add -1*intMin to all intensities
             if intMin < 0:
-                Scale(InputWorkspace=self.data,
-                      OutputWorkspace=self.data,
-                      Factor=-intMin,
-                      Operation="Add")
+                Scale(InputWorkspace=self.data, OutputWorkspace=self.data, Factor=-intMin, Operation="Add")
         else:
             yDataNew = np.where(yData < 0, self._resetValue, yData)
             CreateWorkspace(OutputWorkspace=self.data,
