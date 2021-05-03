@@ -51,7 +51,7 @@ class HomeTabRunInfoPresenterTest(unittest.TestCase):
                                 'GoodFrames:88540', 'CountsperGoodFrame:226.753',
                                 'CountsperGoodFrameperdet:3.543', 'AverageTemperature(K):19.69992',
                                 'SampleTemperature(K):1.0', 'SampleMagneticField(G):100.0',
-                                'NumberofPeriods:1']
+                                'NumberofDAQPeriods:1']
 
         self.assertEqual(str(self.view.run_info_box.toPlainText()).replace(' ', '').splitlines(), expected_string_list)
 

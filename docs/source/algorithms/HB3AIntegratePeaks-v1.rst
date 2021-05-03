@@ -74,6 +74,54 @@ Usage
 
 .. figure:: ../images/HB3A_exp0724.png
 
+**Example - DEMAND Workflow predicting satellite peaks**
+
+Following on from the previous example we will predict some (fictional) satellite peaks.
+
+.. code-block:: python
+
+    # Using a modulation vector of ±0.4H.
+    satellites_peaks = HB3APredictPeaks(InputWorkspace=data,
+		                        ReflectionCondition='B-face centred',
+                                        SatellitePeaks=True,
+                                        ModVector1='0.4,0,0',
+                                        MaxOrder=1,
+                                        IncludeIntegerHKL=False)
+    integrated_satellites_peaks = HB3AIntegratePeaks(InputWorkspace=data, PeaksWorkspace=satellites_peaks,
+                                                     PeakRadius=0.15,
+						     OutputFormat="Fullprof",
+						     OutputFile="./integrated_satellite_peaks.hkl")
+
+You will see the modulation vectors in the output file
+
+.. code-block:: shell
+
+    head -15 ./integrated_satellite_peaks.hkl
+
+gives
+
+.. code-block:: text
+
+    integrated_satellites_peaks
+    (4i4,2f12.2,i5,4f10.4)
+      1.00800 0 0
+           2
+        1     0.400000     0.000000     0.000000
+        2    -0.400000    -0.000000    -0.000000
+     #  h   k   l   m      Fsqr       s(Fsqr)   Cod   Lambda
+       -1   1 -11   1        0.56        1.00    1    1.0080
+        0   1 -12   2        3.60        2.45    1    1.0080
+        0   1 -10   2       10.75        4.58    1    1.0080
+        0   1  -8   2        2.94        2.65    1    1.0080
+        0   0 -12   1       17.45        5.48    1    1.0080
+        0   0 -10   1       28.58        7.62    1    1.0080
+        0   0  -8   1       43.19       10.39    1    1.0080
+        0   1 -10   1       17.98        5.83    1    1.0080
+
+Red is the predicted nuclear peaks and green is the predicted satellite peaks
+
+.. figure:: ../images/HB3A_exp0724_satellites.png
+
 **Example - DEMAND Workflow finding peaks and determining the UB**
 
 .. code-block:: python

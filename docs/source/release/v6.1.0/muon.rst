@@ -15,6 +15,7 @@ Muon Analysis 2 and Frequency Domain Analysis
 
 New Features
 ############
+- Added a new "periods" button to the grouping tab which displays a table of information on periods (currently only supporting nexus V1 files).
 
 Improvements
 ############
@@ -56,6 +57,8 @@ Algorithms
 ----------
 - Added the ability to specify the spectrum number in :ref:`FindPeaksAutomatic <algm-FindPeaksAutomatic>`.
 - Added :ref:`PeakMatching <algm-PeakMatching>` algorithm.
+- Added the ability to specify a Start and End X in :ref:`PSIBackgroundSubtraction <algm-PSIBackgroundSubtraction>`.
+- Added the ability to specify an optional Function to add onto the end of the default function in :ref:`PSIBackgroundSubtraction <algm-PSIBackgroundSubtraction>`.
 
 Fit Functions
 -------------

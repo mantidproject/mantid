@@ -41,6 +41,8 @@ class FigureType(Enum):
     Wireframe = 6
     # A contour plot
     Contour = 7
+    # A 3D Mesh plot
+    Mesh = 8
     # Any other type of plot
     Other = 100
 
@@ -65,7 +67,10 @@ def axes_type(ax):
 
     elif isinstance(ax, Axes3D):
         if any(isinstance(col, Poly3DCollection) for col in ax.collections):
-            axtype = FigureType.Surface
+            if hasattr(ax, "original_data_surface"):
+                axtype = FigureType.Surface
+            else:
+                axtype = FigureType.Mesh
         elif any(isinstance(col, Line3DCollection) for col in ax.collections):
             axtype = FigureType.Wireframe
     elif len(ax.images) > 0 or len(ax.collections) > 0:

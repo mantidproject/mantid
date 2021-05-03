@@ -147,6 +147,7 @@ set(TEST_FILES
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratoraxes.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorcolorfills.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorfigure.py
+    workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorlegend.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorlines.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorutils.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorfitting.py

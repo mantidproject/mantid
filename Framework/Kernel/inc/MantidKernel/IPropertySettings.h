@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidKernel/System.h"
+#include <string>
 
 namespace Mantid {
 namespace Kernel {
@@ -44,18 +45,20 @@ public:
   }
   /** to verify if the properties, this one depends on have changed
       or other special condition occurs which needs the framework to react to */
-  virtual bool isConditionChanged(const IPropertyManager *algo) const {
+  virtual bool isConditionChanged(const IPropertyManager *algo, const std::string &changedPropName = "") const {
     UNUSED_ARG(algo);
+    UNUSED_ARG(changedPropName);
     return false;
   }
-  /** The function user have to overload it in his custom code to modify the
+
+  /** The function user have to overload it in their custom code to modify the
    property
       according to the changes to other properties.
    *
    *  Currently it has been tested to modify the property values as function of
    other properties
    *
-   *  Allowed property valies are obtrained from property's allowedValues
+   *  Allowed property values are obtained from property's allowedValues
    function, and the purpose the
    *  function interfaced here is to modify its output.
    *

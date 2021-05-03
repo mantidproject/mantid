@@ -25,16 +25,30 @@ set ( TEST_PY_FILES
    elemental_analysis_2/EA_grouping_tab/elemental_analysis_grouping_tab_model_test.py
    elemental_analysis_2/EA_grouping_tab/elemental_analysis_grouping_tab_presenter_test.py
    elemental_analysis_2/EA_grouping_tab/elemental_analysis_grouping_table_presenter_test.py
+   elemental_analysis_2/EA_auto_tab/ea_auto_tab_model_test.py
+   elemental_analysis_2/EA_auto_tab/ea_auto_tab_presenter_test.py
+   elemental_analysis_2/EA_auto_tab/ea_match_table_presenter_test.py
    external_plotting_model_test.py
-   fft_presenter_context_interaction_test.py
    FFTModel_test.py
    FFTPresenter_test.py
+   fft_presenter_context_interaction_test.py
    fit_information_test.py
    fit_parameters_test.py
    fitting_context_test.py
-   fitting_tab_widget/fitting_tab_model_test.py
-   fitting_tab_widget/fitting_tab_presenter_test.py
    fitting_tab_widget/workspace_selector_dialog_presenter_test.py
+   fitting_widgets/basic_fitting/basic_fitting_model_test.py
+   fitting_widgets/basic_fitting/basic_fitting_presenter_test.py
+   fitting_widgets/basic_fitting/basic_fitting_view_test.py
+   fitting_widgets/basic_fitting/fit_controls_view_test.py
+   fitting_widgets/basic_fitting/fit_function_options_view_test.py
+   fitting_widgets/general_fitting/general_fitting_model_test.py
+   fitting_widgets/general_fitting/general_fitting_presenter_test.py
+   fitting_widgets/general_fitting/general_fitting_options_view_test.py
+   fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_model_test.py
+   fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_options_view_test.py
+   fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_presenter_test.py
+   fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_view_test.py
+   fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_mode_switcher_view_test.py
    frequency_domain_context_test.py
    grouping_tab/calculate_pair_and_group_test.py
    grouping_tab/difference_table_presenter_test.py
@@ -73,6 +87,7 @@ set ( TEST_PY_FILES
    muon_data_context_test.py
    muon_group_pair_context_test.py
    muon_gui_context_test.py
+   muon_period_info_widget_test.py
    phase_table_widget/phase_table_context_test.py
    phase_table_widget/phase_table_presenter_test.py
    plot_widget/plot_widget_model_test.py

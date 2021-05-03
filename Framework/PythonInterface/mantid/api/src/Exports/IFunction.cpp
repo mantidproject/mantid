@@ -75,6 +75,7 @@ using getErrorType2 = double (IFunction::*)(const std::string &) const;
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getErrorType2_Overloads, getError, 1, 1)
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(tie_Overloads, tie, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(addTies_Overloads, addTies, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(addConstraints_Overloads, addConstraints, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fixParameter_Overloads, fixParameter, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fix_Overloads, fix, 1, 2)
@@ -205,6 +206,9 @@ void export_IFunction() {
            tie_Overloads((arg("self"), arg("name"), arg("expr"), arg("isDefault")),
                          "Tie a named parameter to an expression"))
 
+      .def("addTies", &IFunction::addTies,
+           addTies_Overloads((arg("self"), arg("ties"), arg("isDefault")), "Add several ties to an IFunction."))
+
       .def("removeTie", (bool (IFunction::*)(size_t)) & IFunction::removeTie, (arg("self"), arg("i")),
            "Remove the tie of the ith parameter")
 
@@ -251,6 +255,8 @@ void export_IFunction() {
            "Return whether the ith parameter needs to be explicitely set")
       .def("getParamValue", (double (IFunction::*)(std::size_t) const) & IFunction::getParameter,
            (arg("self"), arg("i")), "Get the value of the ith parameter")
+      .def("getParameterIndex", &IFunction::parameterIndex, (arg("self"), arg("name")),
+           "Returns the index of the provided parameter.")
 
       //-- Python special methods --
       .def("__repr__", &IFunction::asString, arg("self"), "Return a string representation of the function");

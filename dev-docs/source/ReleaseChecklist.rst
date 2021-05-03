@@ -30,7 +30,8 @@ are responsible for ensuring that the work gets done.
   decision of the release. The main task is to reiterate the timeline and be the collection
   point for information between all of the *Local Project Managers*.
 * :ref:`Technical Release Manager <technical-release-manager-checklist>` - Person responsible
-  for technical tasks such as renaming branches, creating tags, configuring build servers.
+  for technical tasks such as renaming branches, creating tags, configuring build servers, and
+  ensuring problems on the Release Pipeline get fixed (by themselves or others).
 
 Timeline
 ########
@@ -239,7 +240,8 @@ Technical Release Manager Checklist
 ###################################
 
 **Role**: Person responsible for technical tasks such as renaming branches, creating
-tags, configuring build servers.
+tags, configuring build servers, and ensuring problems on the Release Pipeline get fixed
+(by themselves or others).
 
 Monday, 3 weeks
 ---------------
@@ -254,9 +256,17 @@ Monday, 3 weeks
    to create the release branch and prepare build jobs by clicking ``Build Now``.
 *  Check the state of all open pull requests for this milestone and decide which
    should be kept for the release, liaise with the Release Manager on this. Move any
-   pull requests not targeted for release out of the milestone. To update the base
-   branches of these pull requests run `update-pr-base-branch.py
+   pull requests not targeted for release out of the milestone, and then change the base branch
+   of the remaining pull requests to ``release-next``. You can use the following script
+   to update the base branches of these pull requests `update-pr-base-branch.py
    <https://github.com/mantidproject/mantid/blob/master/tools/scripts/update-pr-base-branch.py>`__
+   A quick example to show how the arguments should be provided to this script is seen below:
+
+.. code-block:: bash
+
+    python update-pr-base-branch.py [milestone] [newbase] --token [generated_token]
+    python update-pr-base-branch.py "Release 6.1" "release-next" --token fake123gener8ed456token
+
 *  Inform other developers that release-next has been created by posting to the
    *\#announcements* slack channel. You can use an adapted version of the
    following announcement:
@@ -272,6 +282,11 @@ Monday, 3 weeks
    <https://github.com/mantidproject/mantid/blob/master/tools/release_generator/release.py>`_
    and open a pull request to put them on ``master``. Make sure the
    ``docs/source/release/index.rst`` file has a link to the new release docs.
+
+.. code-block:: bash
+
+    python release.py --release [X.Y.Z] --milestone [milestone]
+    python release.py --release 6.1.0 --milestone "Release 6.1"
 
 Monday, Release Day
 -------------------

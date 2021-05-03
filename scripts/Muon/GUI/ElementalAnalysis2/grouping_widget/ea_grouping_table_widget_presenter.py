@@ -9,10 +9,9 @@ from Muon.GUI.Common.utilities import run_string_utils as run_utils
 from Muon.GUI.ElementalAnalysis2.ea_group import EAGroup
 from mantidqt.utils.observer_pattern import GenericObservable
 from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view import INVERSE_GROUP_TABLE_COLUMNS
-from Muon.GUI.Common import message_box
-
 
 MAXIMUM_NUMBER_OF_GROUPS = 20
+REBIN_NONE_OPTION = "0"
 REBIN_FIXED_OPTION = "1"
 REBIN_VARIABLE_OPTION = "2"
 
@@ -35,7 +34,10 @@ class EAGroupingTablePresenter(object):
 
         self.rebin_notifier = GenericObservable()
 
+        self.data_changed_notifier = GenericObservable()
+
     def notify_data_changed(self):
+        self.data_changed_notifier.notify_subscribers()
         self._dataChangedNotifier()
 
     def _is_edited_name_duplicated(self, new_name):
@@ -111,18 +113,15 @@ class EAGroupingTablePresenter(object):
                 self._view.rebin_fixed_chosen(row)
             elif changed_item.text() == REBIN_VARIABLE_OPTION:
                 self._view.rebin_variable_chosen(row)
+            elif changed_item.text() == REBIN_NONE_OPTION:
+                self._view.rebin_none_chosen(row)
 
     def handle_rebin_option_column_changed(self, col, changed_item, workspace_name):
         if col == INVERSE_GROUP_TABLE_COLUMNS['rebin_options']:
             params = changed_item.text().split(":")
             if len(params) == 2:
                 if params[0] == "Steps":
-                    if len(params[1]) >= 1:
-                        try:
-                            self._model.handle_rebin(name=workspace_name, rebin_type="Fixed",
-                                                     rebin_param=float(params[1]))
-                        except ValueError:
-                            message_box.warning("Given rebin step is invalid", None)
+                    self._model.handle_rebin(name=workspace_name, rebin_type="Fixed", rebin_param=float(params[1]))
                 if params[0] == "Bin Boundaries":
                     if len(params[1]) >= 1:
                         self._model.handle_rebin(name=workspace_name, rebin_type="Variable", rebin_param=params[1])
