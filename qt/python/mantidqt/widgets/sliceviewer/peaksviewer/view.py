@@ -11,10 +11,8 @@ from qtpy.QtCore import QSortFilterProxyModel
 from qtpy.QtWidgets import QGroupBox, QVBoxLayout, QWidget
 
 # local imports
-from .presenter import PeaksViewerPresenter
 from .representation.painter import MplPainter
 from mantidqt.widgets.workspacedisplay.table.view import QTableView, TableWorkspaceDisplayView
-from mantidqt.widgets.sliceviewer.presenter import SliceViewer
 
 # standard
 from typing import Optional
@@ -78,7 +76,7 @@ class PeaksViewerView(QWidget):
 
     def __init__(self,
                  painter: MplPainter,
-                 sliceinfo_provider: SliceViewer,
+                 sliceinfo_provider: 'SliceViewer',
                  parent=None):
         """
         :param painter: An object responsible for draw the peaks representations
@@ -87,9 +85,9 @@ class PeaksViewerView(QWidget):
         """
         super().__init__(parent)
         self._painter: MplPainter = painter
-        self._sliceinfo_provider: SliceViewer = sliceinfo_provider
+        self._sliceinfo_provider: 'SliceViewer' = sliceinfo_provider
         self._group_box: Optional[QGroupBox] = None
-        self._presenter: Optional[PeaksViewerPresenter] = None  # handle to its presenter
+        self._presenter: Optional['PeaksViewerPresenter'] = None  # handle to its presenter
         self._table_view: Optional[_PeaksWorkspaceTableView] = None
         self._setup_ui()
 
@@ -202,7 +200,7 @@ class PeaksViewerCollectionView(QWidget):
     """
     def __init__(self,
                  painter: MplPainter,
-                 sliceinfo_provider: SliceViewer,
+                 sliceinfo_provider: 'SliceViewer',
                  parent=None):
         """
         :param painter: An object responsible for draw the peaks representations
@@ -223,7 +221,7 @@ class PeaksViewerCollectionView(QWidget):
         self._peaks_layout.addWidget(child_view)
         return child_view
 
-    def remove_peaksviewer(self, widget):
+    def remove_peaksviewer(self, widget: PeaksViewerView):
         """
         Remove a PeaksViewer from the collection
         :param widget: A reference to the PeaksViewerView

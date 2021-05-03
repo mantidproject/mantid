@@ -6,9 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-# local
-from mantidqt.widgets.sliceviewer.view import SliceViewerDataView
-
 # 3rdparty imports
 from matplotlib.path import Path
 from matplotlib.patches import Circle, Ellipse, Patch, PathPatch, Wedge
@@ -90,7 +87,7 @@ class MplPainter:
     Implementation of a PeakPainter that uses matplotlib to draw
     """
 
-    def __init__(self, view: SliceViewerDataView):
+    def __init__(self, view: 'SliceViewerDataView'):
         """
         :param view: An object defining an axes property.
         """
