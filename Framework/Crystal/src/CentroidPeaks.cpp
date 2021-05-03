@@ -139,11 +139,11 @@ void CentroidPeaks::integrate() {
       }
     }
     // Set pixelID to change row and col
-    row = int(rowcentroid / intensity);
+    row = std::round(rowcentroid / intensity);
     boost::algorithm::clamp(row, 0, nRows - 1);
-    col = int(colcentroid / intensity);
+    col = std::round(colcentroid / intensity);
     boost::algorithm::clamp(col, 0, nCols - 1);
-    chan = int(chancentroid / intensity);
+    chan = std::round(chancentroid / intensity);
     boost::algorithm::clamp(chan, 0, inBlocksize);
 
     // Set wavelength to change tof for peak object
