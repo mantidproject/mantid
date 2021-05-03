@@ -35,7 +35,7 @@ lineCont_re = re.compile('(.*)\\\s*$')
 
 def scanInputFile(fileName):
     '''Scan single input file for test suites'''
-    file = open(fileName)
+    file = open(fileName, encoding='utf-8')
     prev = ""
     lineNo = 0
     contNo = 0

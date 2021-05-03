@@ -65,6 +65,7 @@ public:
   void tearDown() override { Mantid::API::AnalysisDataService::Instance().clear(); }
 
   void test_that_the_FitDomain_has_been_instantiated_with_the_correct_data() {
+    TS_ASSERT_EQUALS(m_fitDomain->domainName(), m_wsName + " (" + std::to_string(m_wsIndex.value) + ")");
     TS_ASSERT_EQUALS(m_fitDomain->workspaceName(), m_wsName);
     TS_ASSERT_EQUALS(m_fitDomain->workspaceIndex(), m_wsIndex);
     TS_ASSERT_EQUALS(m_fitDomain->startX(), m_startX);
@@ -211,6 +212,24 @@ public:
     TS_ASSERT_EQUALS(m_fitDomain->getParameterValue("A0"), 3.0);
   }
 
+  void test_that_setParameterFixed_sets_the_parameter_as_fixed_if_the_parameter_exists_when_in_sequential_mode() {
+    std::string const parameter("A0");
+    m_fitDomain->setFunction(m_flatBackground);
+
+    m_fitDomain->setParameterFixed(parameter, true);
+    TS_ASSERT(m_fitDomain->isParameterFixed(parameter));
+
+    m_fitDomain->setParameterFixed(parameter, false);
+    TS_ASSERT(!m_fitDomain->isParameterFixed(parameter));
+  }
+
+  void
+  test_that_setParameterFixed_will_throw_if_the_parameter_if_the_parameter_does_not_exist_when_in_sequential_mode() {
+    m_fitDomain->setFunction(m_flatBackground);
+
+    TS_ASSERT_THROWS(m_fitDomain->setParameterFixed("f0.BadParam", true), std::runtime_error const &);
+  }
+
   void test_that_getAttributeValue_will_get_the_attribute_value_if_it_exists() {
     m_fitDomain->setFunction(m_composite);
     TS_ASSERT(!m_fitDomain->getAttributeValue("NumDeriv").asBool());
@@ -299,27 +318,36 @@ public:
   }
 
   void test_that_updateParameterTie_will_give_a_parameter_a_tie_if_both_are_valid() {
+    std::string const parameter("f0.A0");
+    std::string const tie("f1.Height");
     m_fitDomain->setFunction(m_composite);
 
-    TS_ASSERT(m_fitDomain->updateParameterTie("f0.A0", "f1.Height"));
-    TS_ASSERT(!m_fitDomain->isParameterActive("f0.A0"));
+    TS_ASSERT(m_fitDomain->updateParameterTie(parameter, tie));
+    TS_ASSERT(!m_fitDomain->isParameterActive(parameter));
+    TS_ASSERT_EQUALS(m_fitDomain->getParameterTie(parameter), tie);
   }
 
   void test_that_updateParameterTie_will_not_throw_and_return_false_if_a_tie_is_invalid() {
+    std::string const parameter("f0.A0");
     m_fitDomain->setFunction(m_composite);
 
-    TS_ASSERT(!m_fitDomain->updateParameterTie("f0.A0", "f1.f0.BadData"));
-    TS_ASSERT(m_fitDomain->isParameterActive("f0.A0"));
+    TS_ASSERT(!m_fitDomain->updateParameterTie(parameter, "f1.f0.BadData"));
+    TS_ASSERT(m_fitDomain->isParameterActive(parameter));
+    TS_ASSERT_EQUALS(m_fitDomain->getParameterTie(parameter), "");
   }
 
   void test_that_updateParameterTie_will_clear_all_ties_if_the_provided_tie_is_a_blank_string() {
+    std::string const parameter("f0.A0");
+    std::string const tie("f1.Height");
     m_fitDomain->setFunction(m_composite);
 
-    TS_ASSERT(m_fitDomain->updateParameterTie("f0.A0", "f1.Height"));
-    TS_ASSERT(!m_fitDomain->isParameterActive("f0.A0"));
+    TS_ASSERT(m_fitDomain->updateParameterTie(parameter, tie));
+    TS_ASSERT(!m_fitDomain->isParameterActive(parameter));
+    TS_ASSERT_EQUALS(m_fitDomain->getParameterTie(parameter), tie);
 
-    TS_ASSERT(m_fitDomain->updateParameterTie("f0.A0", ""));
-    TS_ASSERT(m_fitDomain->isParameterActive("f0.A0"));
+    TS_ASSERT(m_fitDomain->updateParameterTie(parameter, ""));
+    TS_ASSERT(m_fitDomain->isParameterActive(parameter));
+    TS_ASSERT_EQUALS(m_fitDomain->getParameterTie(parameter), "");
   }
 
   void test_that_clearParameterTie_does_not_throw_if_the_stored_function_is_a_nullptr() {
@@ -357,6 +385,7 @@ public:
     m_fitDomain->updateParameterConstraint("", "A0", constraint);
 
     TS_ASSERT_EQUALS(m_flatBackground->getConstraint(0)->asString(), constraint);
+    TS_ASSERT_EQUALS(m_fitDomain->getParameterConstraint("A0"), constraint);
   }
 
   void test_that_updateParameterConstraint_will_add_a_constraint_as_expected_to_a_composite_function() {
@@ -366,6 +395,7 @@ public:
     m_fitDomain->updateParameterConstraint("f1.", "Height", constraint);
 
     TS_ASSERT_EQUALS(m_composite->getConstraint(1)->asString(), constraint);
+    TS_ASSERT_EQUALS(m_fitDomain->getParameterConstraint("f1.Height"), constraint);
   }
 
   void test_that_removeParameterConstraint_will_not_throw_if_the_stored_function_is_a_nullptr() {

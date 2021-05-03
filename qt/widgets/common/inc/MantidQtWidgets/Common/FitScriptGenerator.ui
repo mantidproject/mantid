@@ -14,13 +14,6 @@
    <string>Fit Script Generator</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="5">
-    <widget class="QPushButton" name="pbGenerateFitScript">
-     <property name="text">
-      <string>Generate Fit Script</string>
-     </property>
-    </widget>
-   </item>
    <item row="0" column="0" colspan="6">
     <widget class="QFrame" name="fDataTableAndFunctionTree">
      <layout class="QHBoxLayout" name="horizontalLayout">
@@ -62,22 +55,8 @@
            <number>0</number>
           </property>
           <property name="bottomMargin">
-           <number>0</number>
+           <number>10</number>
           </property>
-          <item row="0" column="0">
-           <widget class="QPushButton" name="pbRemove">
-            <property name="text">
-             <string>Remove</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QPushButton" name="pbAddWorkspace">
-            <property name="text">
-             <string>Add Workspace</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="2">
            <spacer name="horizontalSpacer">
             <property name="orientation">
@@ -90,6 +69,32 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item row="0" column="1">
+           <widget class="QPushButton" name="pbAddDomain">
+            <property name="minimumSize">
+             <size>
+              <width>90</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Add Domains</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QPushButton" name="pbRemoveDomain">
+            <property name="minimumSize">
+             <size>
+              <width>90</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Remove Domains</string>
+            </property>
+           </widget>
           </item>
           <item row="1" column="0" colspan="3">
            <widget class="QFrame" name="fDataTable">
@@ -107,6 +112,16 @@
               <number>0</number>
              </property>
             </layout>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="3">
+           <widget class="QLabel" name="lbMessage">
+            <property name="styleSheet">
+             <string notr="true">QLabel { color: green; }</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
            </widget>
           </item>
          </layout>
@@ -162,13 +177,6 @@
             </layout>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Apply function changes to:</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="2" colspan="2">
            <widget class="QComboBox" name="cbApplyFunctionChangesTo">
             <property name="minimumSize">
@@ -195,18 +203,50 @@
             </item>
            </widget>
           </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Apply function changes to:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1" colspan="3">
+           <widget class="QFrame" name="frame">
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="pbGenerateScriptToFile">
+               <property name="text">
+                <string>Generate Script to File</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pbGenerateScriptToClipboard">
+               <property name="text">
+                <string>Generate Script to Clipboard</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
          </layout>
         </widget>
        </widget>
       </item>
      </layout>
-    </widget>
-   </item>
-   <item row="1" column="3" colspan="2">
-    <widget class="QLineEdit" name="leScriptName">
-     <property name="text">
-      <string>new_fit_script.py</string>
-     </property>
     </widget>
    </item>
   </layout>

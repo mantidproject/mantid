@@ -76,7 +76,7 @@ void ALCDataLoadingPresenter::handleRunsFound() {
     return;
   }
 
-  // Check for errors as files might not have been found
+  // Check for errors
   if (!m_view->getRunsError().empty()) {
     m_view->setLoadStatus("Error", "red");
     m_view->displayError(m_view->getRunsError());
@@ -284,16 +284,14 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
     loadedWs = loadAlg->getProperty("OutputWorkspace");
     firstGoodData = loadAlg->getProperty("FirstGoodData");
     timeZero = loadAlg->getProperty("TimeZero");
-
-    // Get actual file path and set on view
-    auto path = loadAlg->getPropertyValue("Filename");
-    path = path.substr(0, path.find_last_of("/\\"));
-    m_view->setPath(path);
   }
   catch (const std::exception &error) {
     m_view->setAvailableInfoToEmpty();
     throw std::runtime_error(error.what());
   }
+
+  // Set path
+  m_view->setPath(getPathFromFiles());
 
   // Set logs
   MatrixWorkspace_const_sptr ws = MuonAnalysisHelper::firstPeriod(loadedWs);
@@ -348,6 +346,19 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
 
   // Update number of detectors for this new first run
   m_numDetectors = ws->getInstrument()->getNumberDetectors();
+}
+
+std::string ALCDataLoadingPresenter::getPathFromFiles() const {
+  const auto files = m_view->getFiles();
+  if (files.empty())
+    return "";
+  const auto firstDirectory = files[0u].substr(0u, files[0u].find_last_of("/\\"));
+  // Lambda to compare directories from a path
+  const auto hasSameDirectory = [&firstDirectory](const auto &path) {
+    return path.substr(0u, path.find_last_of("/\\")) == firstDirectory;
+  };
+  const auto sameDirectory = std::all_of(files.cbegin(), files.cend(), hasSameDirectory);
+  return sameDirectory ? firstDirectory : "Multiple Directories";
 }
 
 MatrixWorkspace_sptr ALCDataLoadingPresenter::exportWorkspace() {

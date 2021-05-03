@@ -72,7 +72,7 @@ workspace, so no checks are performed
 
 *@param sigErr   -- pointer to the beginning of 2*data_size array containing
 signal and squared error
-*@param runIndex -- pointer to the beginning of data_size  containing run index
+*@param expInfoIndex -- pointer to the beginning of data_size  containing associated experiment-info index
 *@param goniometerIndex -- 0-based index determines the goniometer
 settings when this event occurred
 *@param detId    -- pointer to the beginning of dataSize array containing
@@ -83,13 +83,13 @@ coordinates of nd-dimensional events
 *@param dataSize -- the length of the vector of MD events
 */
 template <size_t nd>
-void MDEventWSWrapper::addMDDataND(float *sigErr, uint16_t *runIndex, uint16_t *goniometerIndex, uint32_t *detId,
+void MDEventWSWrapper::addMDDataND(float *sigErr, uint16_t *expInfoIndex, uint16_t *goniometerIndex, uint32_t *detId,
                                    coord_t *Coord, size_t dataSize) const {
 
   auto *const pWs = dynamic_cast<DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(m_Workspace.get());
   if (pWs) {
     for (size_t i = 0; i < dataSize; i++) {
-      pWs->addEvent(DataObjects::MDEvent<nd>(*(sigErr + 2 * i), *(sigErr + 2 * i + 1), *(runIndex + i),
+      pWs->addEvent(DataObjects::MDEvent<nd>(*(sigErr + 2 * i), *(sigErr + 2 * i + 1), *(expInfoIndex + i),
                                              *(goniometerIndex + i), *(detId + i), (Coord + i * nd)));
     }
   } else {
@@ -192,7 +192,7 @@ void MDEventWSWrapper::setMDWS(API::IMDEventWorkspace_sptr spWS) {
 /** method adds the data to the workspace which was initiated before;
  *@param sigErr : pointer to the beginning of 2*data_size array containing
  *signal and squared error
- *@param runIndex : pointer to the beginnign of data_size  containing run index
+ *@param expInfoIndex : pointer to the beginnign of data_size  containing associated experiment-info index
  *@param goniometerIndex : 0-based index determines the goniometer
  * settings when this event occurred
  *@param detId : pointer to the beginning of dataSize array containing
@@ -201,14 +201,14 @@ void MDEventWSWrapper::setMDWS(API::IMDEventWorkspace_sptr spWS) {
  *coordinates od nd-dimensional events
  *@param dataSize -- the length of the vector of MD events
  */
-void MDEventWSWrapper::addMDData(std::vector<float> &sigErr, std::vector<uint16_t> &runIndex,
+void MDEventWSWrapper::addMDData(std::vector<float> &sigErr, std::vector<uint16_t> &expInfoIndex,
                                  std::vector<uint16_t> &goniometerIndex, std::vector<uint32_t> &detId,
                                  std::vector<coord_t> &Coord, size_t dataSize) const {
 
   if (dataSize == 0)
     return;
   // perform the actual dimension-dependent addition
-  (this->*(mdEvAddAndForget[m_NDimensions]))(&sigErr[0], &runIndex[0], &goniometerIndex[0], &detId[0], &Coord[0],
+  (this->*(mdEvAddAndForget[m_NDimensions]))(&sigErr[0], &expInfoIndex[0], &goniometerIndex[0], &detId[0], &Coord[0],
                                              dataSize);
 }
 
