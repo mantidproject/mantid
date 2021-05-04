@@ -76,7 +76,7 @@ def generate_script(fig, exclude_headers=False):
                 continue
             plot_commands.extend(get_plot_cmds(ax, ax_object_var))  # ax.plot
 
-        plot_commands.extend(generate_tick_commands(ax))
+        plot_commands.extend(get_tick_commands(ax, ax_object_var))
         plot_commands.extend(get_title_cmds(ax, ax_object_var))  # ax.set_title
         plot_commands.extend(get_axis_label_cmds(ax, ax_object_var))  # ax.set_label
         plot_commands.extend(get_axis_limit_cmds(ax, ax_object_var))  # ax.set_lim
@@ -162,6 +162,12 @@ def get_legend_cmds(ax, ax_object_var):
         cmds.extend(generate_label_font_commands(ax.legend_, LEGEND_VARIABLE))
         cmds.extend(generate_visible_command(ax.legend_, LEGEND_VARIABLE))
     return cmds
+
+
+def get_tick_commands(ax, ax_object_var):
+    """Get ax.tick_params commands for setting properties of tick marks and grid lines."""
+    tick_commands = generate_tick_commands(ax)
+    return ["{ax_obj}.{cmd}".format(ax_obj=ax_object_var, cmd=cmd) for cmd in tick_commands]
 
 
 def get_axes_object_variable(ax):
