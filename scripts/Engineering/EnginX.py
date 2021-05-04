@@ -639,16 +639,20 @@ def _run_focus(input_workspace,
                vanadium_integration_ws,
                vanadium_curves_ws,
                df_kwarg,
-               full_calib_ws=None):
-    ws = simple.CloneWorkspace(input_workspace)
-    ws = simple.NormaliseByCurrent(ws)
-    ws_d = simple.ConvertUnits(ws, Target='dSpacing')
-    ws_d /= vanadium_integration_ws
+               full_calib,
+               region_calib):
+    simple.NormaliseByCurrent(InputWorkspace=input_workspace, OutputWorkspace=input_workspace)
+    input_workspace /= vanadium_integration_ws
+    simple.ReplaceSpecialValues(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, NaNValue=0,
+                                InfinityValue=0)
+    simple.ApplyDiffCal(InstrumentWorkspace=input_workspace, CalibrationWorkspace=full_calib)
+    ws_d = simple.ConvertUnits(InputWorkspace=input_workspace, Target='dSpacing')
     focused_sample = simple.DiffractionFocussing(InputWorkspace=ws_d, **df_kwarg)
     curves_rebinned = simple.RebinToWorkspace(WorkspaceToRebin=vanadium_curves_ws, WorkspaceToMatch=focused_sample)
     normalised = simple.Divide(LHSWorkspace=focused_sample, RHSWorkspace=curves_rebinned,
                                AllowDifferentNumberSpectra=True)
-    output_workspace = simple.ConvertUnits(InputWorkspace=normalised, OutputWorkspace=output_workspace, Target='TOF')
+    simple.ApplyDiffCal(InstrumentWorkspace=normalised, CalibrationWorkspace=region_calib)
+    simple.ConvertUnits(InputWorkspace=normalised, OutputWorkspace=output_workspace, Target='TOF')
     return output_workspace
 
 

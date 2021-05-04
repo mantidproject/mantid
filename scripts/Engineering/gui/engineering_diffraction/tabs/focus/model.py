@@ -60,13 +60,16 @@ class FocusModel(object):
         integration_workspace = Ads.retrieve(vanadium_corrections.INTEGRATED_WORKSPACE_NAME)
         curves_workspace = Ads.retrieve(vanadium_corrections.CURVES_WORKSPACE_NAME)
         output_workspaces = []  # List of collated workspaces to plot.
-        df_kwarg, name = None, None
+        df_kwarg, name, region_calib = None, None, None
         if spectrum_numbers:
             grp_ws = create_custom_grouping_workspace(spectrum_numbers, sample_paths[0])
             df_kwarg = {"GroupingWorkspace": grp_ws}
+            region_calib = "enggui_calibration_cropped"
             name = 'cropped'
         elif custom_cal:
+            # TODO this functionality has not yet been fully implemented
             df_kwarg = {"GroupingFileName": custom_cal}
+            region_calib = "enggui_calibration_cropped"
             name = 'customcal'
         if df_kwarg:
             for sample_path in sample_paths:
@@ -74,7 +77,7 @@ class FocusModel(object):
                 run_no = path_handling.get_run_number_from_path(sample_path, instrument)
                 output_workspace_name = str(run_no) + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + name
                 self._run_focus(sample_workspace, output_workspace_name, integration_workspace,
-                                curves_workspace, df_kwarg, full_calib_workspace, full_calib_workspace)
+                                curves_workspace, df_kwarg, full_calib_workspace, region_calib)
                 output_workspaces.append([output_workspace_name])
                 self._save_output(instrument, sample_path, "cropped", output_workspace_name, rb_num)
                 self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
@@ -87,10 +90,12 @@ class FocusModel(object):
                     output_workspace_name = str(run_no) + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + str(name)
                     if name == '1':
                         df_kwarg = {"GroupingFileName": NORTH_BANK_CAL}
+                        region_calib = "enggui_calibration_bank_1"
                     else:
                         df_kwarg = {"GroupingFileName": SOUTH_BANK_CAL}
+                        region_calib = "enggui_calibration_bank_2"
                     self._run_focus(sample_workspace, output_workspace_name, integration_workspace,
-                                    curves_workspace, df_kwarg, full_calib_workspace)
+                                    curves_workspace, df_kwarg, full_calib_workspace, region_calib)
                     workspaces_for_run.append(output_workspace_name)
                     # Save the output to the file system.
                     self._save_output(instrument, sample_path, name, output_workspace_name, rb_num)
@@ -108,9 +113,8 @@ class FocusModel(object):
                    vanadium_integration_ws,
                    vanadium_curves_ws,
                    df_kwarg,
-                   full_calib):
-        import pydevd_pycharm
-        pydevd_pycharm.settrace('localhost', port=8080, stdoutToServer=True, stderrToServer=True)
+                   full_calib,
+                   region_calib):
         NormaliseByCurrent(InputWorkspace=input_workspace, OutputWorkspace=input_workspace)
         input_workspace /= vanadium_integration_ws
         ReplaceSpecialValues(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, NaNValue=0,
@@ -121,8 +125,8 @@ class FocusModel(object):
         curves_rebinned = RebinToWorkspace(WorkspaceToRebin=vanadium_curves_ws, WorkspaceToMatch=focused_sample)
         normalised = Divide(LHSWorkspace=focused_sample, RHSWorkspace=curves_rebinned,
                             AllowDifferentNumberSpectra=True)
-        ws_d = ConvertUnits(InputWorkspace=normalised, OutputWorkspace=output_workspace, Target='TOF')
-        output_workspace = ApplyDiffCal(InstrumentWorkspace=ws_d, CalibrationWorkspace=CALIB_PARAMS_WORKSPACE_NAME)
+        ApplyDiffCal(InstrumentWorkspace=normalised, CalibrationWorkspace=region_calib)
+        ConvertUnits(InputWorkspace=normalised, OutputWorkspace=output_workspace, Target='TOF')
         return output_workspace
 
     @staticmethod
