@@ -293,9 +293,9 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         if vanadium:
             if normaliseBy == "Monitor":
-                scale /= np.sum(vanadium.getExperimentInfo(0).run().getProperty('monitor').value)
+                scale /= vanadium.getExperimentInfo(0).run().getProperty('monitor').value[0]
             elif normaliseBy == "Time":
-                scale /= np.sum(vanadium.getExperimentInfo(0).run().getProperty('time').value)
+                scale /= vanadium.getExperimentInfo(0).run().getProperty('time').value[0]
 
         norm_data.setSignalArray(norm_data.getSignalArray()/scale)
         norm_data.setErrorSquaredArray(norm_data.getErrorSquaredArray()/scale**2)

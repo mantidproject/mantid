@@ -44,7 +44,7 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                                               direction=Direction.Input), doc="ROI upper_right")
 
         self.declareProperty("ScaleFactor", 1.0, doc="scale the integrated intensity by this value")
-        self.declareProperty("ChiSqMax", 1.0, doc="Fitting resulting in chisq higher than this won't be added to the output")
+        self.declareProperty("ChiSqMax", 10.0, doc="Fitting resulting in chisq higher than this won't be added to the output")
         self.declareProperty("SignalNoiseMin", 1.0, doc="Minimum Signal/Noice ratio of peak to be added to the output")
         self.declareProperty("ApplyLorentz", True, doc="If to apply Lorentz Correction to intensity")
 
@@ -139,17 +139,17 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                 if integrated_intensity/integrated_intensity_error > signalNoiseMin:
                     __tmp_pw.addPeak(peak)
 
-                    if use_lorentz:
-                        peak = __tmp_pw.getPeak(0)
-                        lorentz = abs(np.sin(peak.getScattering() * np.cos(peak.getAzimuthal())))
-                        peak.setIntensity(peak.getIntensity() * lorentz)
-                        peak.setSigmaIntensity(peak.getSigmaIntensity() * lorentz)
-
                     # correct q-vector using CentroidPeaksMD
                     if optmize_q:
                         __tmp_q_ws = HB3AAdjustSampleNorm(InputWorkspaces=inWS, NormaliseBy='None', EnableLogging=False)
                         __tmp_pw = CentroidPeaksMD(__tmp_q_ws, __tmp_pw, EnableLogging=False)
                         DeleteWorkspace(__tmp_q_ws, EnableLogging=False)
+
+                    if use_lorentz:
+                        peak = __tmp_pw.getPeak(0)
+                        lorentz = abs(np.sin(peak.getScattering() * np.cos(peak.getAzimuthal())))
+                        peak.setIntensity(peak.getIntensity() * lorentz)
+                        peak.setSigmaIntensity(peak.getSigmaIntensity() * lorentz)
 
                     CombinePeaksWorkspaces(outWS, __tmp_pw, OutputWorkspace=outWS, EnableLogging=False)
                     DeleteWorkspace(__tmp_pw, EnableLogging=False)
