@@ -56,7 +56,7 @@ Output:
 
 **Example - skipping error calculation**
 
-In special cases, users may not have enough peaks to find the error. 
+In special cases, users may not have enough peaks to find the error.
 For example, if peaks are constrained to two dimensions in HKL space,
 the error calculation will fail. In this case, `FindError=False` can be
 specified to skip the calculation. In this case, the lattice parameter
