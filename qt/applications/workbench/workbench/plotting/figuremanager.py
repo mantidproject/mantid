@@ -148,8 +148,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
             if isinstance(ax, MantidAxes):
                 ws = AnalysisDataService.retrieve(newName)
                 if isinstance(ws, MatrixWorkspace):
-                    ax.rename_creation_args_workspace(newName, oldName)
-                    ax.rename_workspace_artists(newName, oldName)
+                    ax.rename_workspace(newName, oldName)
                 elif isinstance(ws, ITableWorkspace):
                     ax.wsName = newName
                 ax.make_legend()

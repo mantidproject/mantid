@@ -444,24 +444,21 @@ class MantidAxes(Axes):
 
         return True
 
-    def rename_workspace_artists(self, new_name, old_name):
+    def rename_workspace(self, new_name, old_name):
         """
-        Rename a workspace and update the artists accordingly
+        Rename a workspace, and update the artists, creation arguments and tracked workspaces accordingly
+        :param new_name : the new name of workspace
+        :param old_name : the old name of workspace
         """
+        for cargs in self.creation_args:
+            if cargs['workspaces'] == old_name:
+                cargs['workspaces'] = new_name
         for ws_name, ws_artist_list in list(self.tracked_workspaces.items()):
             for ws_artist in ws_artist_list:
                 if ws_artist.workspace_name == old_name:
                     ws_artist.rename_data(new_name)
             if ws_name == old_name:
                 self.tracked_workspaces[new_name] = self.tracked_workspaces.pop(old_name)
-
-    def rename_creation_args_workspace(self, new_name, old_name):
-        """
-        Replace the workspace name in the axes creation args
-        """
-        for cargs in self.creation_args:
-            if cargs['workspaces'] == old_name:
-                cargs['workspaces'] = new_name
 
     def replot_artist(self, artist, errorbars=False, **kwargs):
         """
