@@ -44,19 +44,22 @@ class FocusModel(object):
         :param spectrum_numbers: The specific spectra that should be focused. Used instead of banks.
         :param custom_cal: User defined calibration file to crop the focus to
         """
-
+        full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
+                                      path_handling.ENGINEERING_PREFIX, "full_calibration")
+        if not Ads.doesExist("full_inst_calib"):
+            try:
+                full_calib_workspace = Load(full_calib_path, OutputWorkspace="full_inst_calib")
+            except RuntimeError:
+                logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
+                return
+        else:
+            full_calib_workspace = Ads.Instance().retrieve("full_inst_calib")
         if not Ads.doesExist(vanadium_corrections.INTEGRATED_WORKSPACE_NAME) and not Ads.doesExist(
                 vanadium_corrections.CURVES_WORKSPACE_NAME):
             return
         integration_workspace = Ads.retrieve(vanadium_corrections.INTEGRATED_WORKSPACE_NAME)
         curves_workspace = Ads.retrieve(vanadium_corrections.CURVES_WORKSPACE_NAME)
         output_workspaces = []  # List of collated workspaces to plot.
-        full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
-                                      path_handling.ENGINEERING_PREFIX, "full_calibration")
-        if full_calib_path is not None and path.exists(full_calib_path):
-            full_calib_workspace = Load(full_calib_path, OutputWorkspace="full_inst_calib")
-        else:
-            full_calib_workspace = None
         df_kwarg, name = None, None
         if spectrum_numbers:
             grp_ws = create_custom_grouping_workspace(spectrum_numbers, sample_paths[0])

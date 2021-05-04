@@ -55,11 +55,11 @@ class CalibrationModel(object):
         ceria_workspace = path_handling.load_workspace(ceria_path)
         full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
                                       path_handling.ENGINEERING_PREFIX, "full_calibration")
-        if full_calib_path is not None and path.exists(full_calib_path):
+        try:
             full_calib = Load(full_calib_path, OutputWorkspace="full_inst_calib")
-        else:
-            raise RuntimeError("Full instrument calibration has not been supplied - this is set in the interface"
-                               " settings.")
+        except RuntimeError:
+            logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
+            return
         cal_params, cal_grp, van_curves, ceria_raw = self.run_calibration(ceria_workspace,
                                                                           vanadium_path,
                                                                           van_integration,
