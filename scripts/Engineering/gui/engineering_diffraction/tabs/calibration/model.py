@@ -12,7 +12,7 @@ from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger
 from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, DiffractionFocussing, \
     CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace, NormaliseByCurrent, \
-    ConvertUnits, Load, ReplaceSpecialValues, \
+    ConvertUnits, Load, ReplaceSpecialValues, SaveNexus, \
     EnggEstimateFocussedBackground, ApplyDiffCal
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file, default_ceria_expected_peaks, \
     create_custom_grouping_workspace, create_spectrum_list_from_string
@@ -120,7 +120,7 @@ class CalibrationModel(object):
 
         return [params_north, params_south]
 
-    def load_existing_gsas_parameters(self, file_path):
+    def load_existing_calibration_files(self, file_path):
         if not path.exists(file_path):
             logger.warning("Could not open GSAS calibration file: ", file_path)
             return
@@ -131,7 +131,35 @@ class CalibrationModel(object):
             logger.error("Invalid file selected: ", file_path)
             return
         vanadium_corrections.fetch_correction_workspaces(instrument+van_no, instrument)
+        self._load_relevant_pdcal_outputs(file_path)
         return instrument, van_no, ceria_no
+
+    @staticmethod
+    def _load_relevant_pdcal_outputs(file_path):
+        """
+        Determine which pdcal output .nxs files to Load from the .prm file selected, and Load them
+        :param file_path: path to the calibration .prm file selected
+        """
+        # fname has form INSTRUMENT_VanadiumRunNo_ceriaRunNo_BANKS
+        # BANKS can be "all_banks, "bank_North", "bank_South", "cropped"
+        basepath, fname = path.split(file_path)
+        fname_words = fname.split('_')
+        prefix = '_'.join(fname_words[0:3])
+        suffix = fname_words[-1]
+        if "banks" in suffix:
+            path_to_load = path.join(basepath, prefix + "_bank_North.nxs")
+            Load(Filename=path_to_load, OutputWorkspace="engggui_calibration_bank_1")
+            path_to_load = path.join(basepath, prefix + "_bank_South.nxs")
+            Load(Filename=path_to_load, OutputWorkspace="engggui_calibration_bank_2")
+        elif "North" in suffix:
+            path_to_load = path.join(basepath, prefix + "_bank_North.nxs")
+            Load(Filename=path_to_load, OutputWorkspace="engggui_calibration_bank_1")
+        elif "South" in suffix:
+            path_to_load = path.join(basepath, prefix + "_bank_South.nxs")
+            Load(Filename=path_to_load, OutputWorkspace="engggui_calibration_bank_2")
+        else:  # cropped case
+            path_to_load = path.join(basepath, prefix + "_cropped.nxs")
+            Load(Filename=path_to_load, OutputWorkspace="engggui_calibration_cropped")
 
     @staticmethod
     def update_calibration_params_table(params_table):
@@ -389,29 +417,40 @@ class CalibrationModel(object):
             kwargs["template_file"] = NORTH_BANK_TEMPLATE_FILE
             kwargs["bank_names"] = ["North"]
 
-        def generate_output_file(difa_list, difc_list, tzero_list, bank_name, kwargs_to_pass):
+        def generate_prm_output_file(difa_list, difc_list, tzero_list, bank_name, kwargs_to_pass):
             file_path = calibration_dir + self._generate_output_file_name(vanadium_path, ceria_path, instrument,
                                                                           bank=bank_name)
             write_ENGINX_GSAS_iparam_file(file_path, difa_list, difc_list, tzero_list, bk2bk_params, **kwargs_to_pass)
+
+        def save_pdcal_output_file(ws_name_suffix, bank_name):
+            file_path = calibration_dir + self._generate_output_file_name(vanadium_path, ceria_path, instrument,
+                                                                          bank=bank_name, ext=".nxs")
+            ws_name = "enggui_calibration_" + ws_name_suffix
+            SaveNexus(InputWorkspace=ws_name, Filename=file_path)
 
         if not path.exists(calibration_dir):
             makedirs(calibration_dir)
 
         if bank is None and spectrum_numbers is None:
-            generate_output_file(difa, difc, tzero, "all", kwargs)
+            generate_prm_output_file(difa, difc, tzero, "all", kwargs)
             north_kwargs()
-            generate_output_file([difa[0]], [difc[0]], [tzero[0]], "north", kwargs)
+            generate_prm_output_file([difa[0]], [difc[0]], [tzero[0]], "north", kwargs)
+            save_pdcal_output_file("bank_1", "north")
             south_kwargs()
-            generate_output_file([difa[1]], [difc[1]], [tzero[1]], "south", kwargs)
+            generate_prm_output_file([difa[1]], [difc[1]], [tzero[1]], "south", kwargs)
+            save_pdcal_output_file("bank_2", "south")
         elif bank == "1":
             north_kwargs()
-            generate_output_file([difa[0]], [difc[0]], [tzero[0]], "north", kwargs)
+            generate_prm_output_file([difa[0]], [difc[0]], [tzero[0]], "north", kwargs)
+            save_pdcal_output_file("bank_1", "north")
         elif bank == "2":
             south_kwargs()
-            generate_output_file([difa[0]], [difc[0]], [tzero[0]], "south", kwargs)
+            generate_prm_output_file([difa[0]], [difc[0]], [tzero[0]], "south", kwargs)
+            save_pdcal_output_file("bank_2", "south")
         elif bank is None:  # Custom cropped files use the north bank template.
             north_kwargs()
-            generate_output_file([difa[0]], [difc[0]], [tzero[0]], "cropped", kwargs)
+            generate_prm_output_file([difa[0]], [difc[0]], [tzero[0]], "cropped", kwargs)
+            save_pdcal_output_file("cropped", "cropped")
         logger.notice(f"\n\nCalibration files saved to: \"{calibration_dir}\"\n\n")
 
     @staticmethod
@@ -448,7 +487,7 @@ class CalibrationModel(object):
         return "engggui_calibration_bank_" + str(bank_num)
 
     @staticmethod
-    def _generate_output_file_name(vanadium_path, ceria_path, instrument, bank):
+    def _generate_output_file_name(vanadium_path, ceria_path, instrument, bank, ext='.prm'):
         """
         Generate an output filename in the form INSTRUMENT_VanadiumRunNo_ceriaRunNo_BANKS
         :param vanadium_path: Path to vanadium data file
@@ -461,13 +500,13 @@ class CalibrationModel(object):
         ceria_no = path_handling.get_run_number_from_path(ceria_path, instrument)
         filename = instrument + "_" + vanadium_no + "_" + ceria_no + "_"
         if bank == "all":
-            filename = filename + "all_banks.prm"
+            filename = filename + "all_banks" + ext
         elif bank == "north":
-            filename = filename + "bank_North.prm"
+            filename = filename + "bank_North" + ext
         elif bank == "south":
-            filename = filename + "bank_South.prm"
+            filename = filename + "bank_South" + ext
         elif bank == "cropped":
-            filename = filename + "cropped.prm"
+            filename = filename + "cropped" + ext
         else:
             raise ValueError("Invalid bank name entered")
         return filename
