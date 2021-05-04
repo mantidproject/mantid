@@ -451,6 +451,52 @@ class GeneralFittingModelTest(unittest.TestCase):
 
         self.assertEqual(self.model.get_all_fit_functions(), [self.model.simultaneous_fit_function])
 
+    def test_that_the_existing_functions_are_reused_when_new_datasets_are_loaded(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.simultaneous_fit_function = self.simultaneous_fit_function
+        self.model.simultaneous_fitting_mode = True
+        self.model.current_dataset_index = 0
+        self.model.simultaneous_fit_function.setParameter("f0.A0", 1)
+        self.model.simultaneous_fit_function.setParameter("f1.A0", 5)
+
+        self.model.dataset_names = ["New Name1", "New Name2"]
+
+        self.assertEqual(str(self.model.simultaneous_fit_function), "composite=MultiDomainFunction,NumDeriv=true;"
+                                                                    "name=FlatBackground,A0=1,$domains=i;"
+                                                                    "name=FlatBackground,A0=5,$domains=i")
+
+    def test_that_the_currently_selected_function_is_copied_for_when_a_larger_number_of_new_datasets_are_loaded(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.simultaneous_fit_function = self.simultaneous_fit_function
+        self.model.simultaneous_fitting_mode = True
+        self.model.current_dataset_index = 0
+        self.model.simultaneous_fit_function.setParameter("f0.A0", 1)
+        self.model.simultaneous_fit_function.setParameter("f1.A0", 5)
+
+        # The last two datasets are the same as the previously loaded datasets. This means their functions should be
+        # reused for these last two domains. The first two domain functions are completely new, and so
+        # are just given a copy of the previous currently selected function (i.e. A0=1).
+        self.model.dataset_names = ["New Name1", "New Name2", "Name1", "Name2"]
+
+        self.assertEqual(str(self.model.simultaneous_fit_function), "composite=MultiDomainFunction,NumDeriv=true;"
+                                                                    "name=FlatBackground,A0=1,$domains=i;"
+                                                                    "name=FlatBackground,A0=1,$domains=i;"
+                                                                    "name=FlatBackground,A0=1,$domains=i;"
+                                                                    "name=FlatBackground,A0=5,$domains=i")
+
+    def test_that_newly_loaded_datasets_will_reuse_the_existing_functions_when_there_are_fewer_new_datasets(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.simultaneous_fit_function = self.simultaneous_fit_function
+        self.model.simultaneous_fitting_mode = True
+        self.model.current_dataset_index = 0
+        self.model.simultaneous_fit_function.setParameter("f0.A0", 1)
+        self.model.simultaneous_fit_function.setParameter("f1.A0", 5)
+
+        # This dataset is the second dataset previously and so the A0=5 fit function should be reused. There is also
+        # now only one domain, so a MultiDomainFunction is no longer used.
+        self.model.dataset_names = ["Name2"]
+        self.assertEqual(str(self.model.simultaneous_fit_function), "name=FlatBackground,A0=5")
+
 
 if __name__ == '__main__':
     unittest.main()
