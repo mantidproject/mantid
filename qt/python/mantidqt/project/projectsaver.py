@@ -19,8 +19,7 @@ class ProjectSaver(object):
     def __init__(self, project_file_ext):
         self.project_file_ext = project_file_ext
 
-    def save_project(self, file_name, workspace_to_save=None, plots_to_save=None, interfaces_to_save=None,
-                     project_recovery=True):
+    def save_project(self, file_name, workspace_to_save=None, plots_to_save=None, interfaces_to_save=None, project_recovery=True):
         """
         The method that will actually save the project and call relevant savers for workspaces, plots, interfaces etc.
         :param file_name: String; The file_name of the
@@ -99,8 +98,7 @@ class ProjectWriter(object):
         Write out the project file that contains workspace names, interfaces information, plot preferences etc.
         """
         # Get the JSON string versions
-        to_save_dict = {"workspaces": self.workspace_names, "plots": self.plots_to_save,
-                        "interfaces": self.interfaces_to_save}
+        to_save_dict = {"workspaces": self.workspace_names, "plots": self.plots_to_save, "interfaces": self.interfaces_to_save}
 
         # Open file and save the string to it alongside the workspace_names
         if self.project_file_ext not in os.path.basename(self.file_name):
@@ -111,7 +109,7 @@ class ProjectWriter(object):
         except KeyboardInterrupt:
             # Catch any exception and log it
             raise
-        except (IOError, OSError, WindowsError) as e:
+        except (IOError, OSError) as e:
             logger.warning("JSON project file unable to be opened/written to.")
             logger.debug("Full error: {}".format(e))
         except Exception as e:

@@ -194,6 +194,12 @@ class SliceViewerModel:
         xdim, ydim = workspace.getDimension(xindex), workspace.getDimension(yindex)
         return (xdim.getMinimum(), xdim.getMaximum()), (ydim.getMinimum(), ydim.getMaximum())
 
+    def is_ragged_matrix_plotted(self):
+        """
+        :return: bool for if workspace is matrix workspace with non common bins
+        """
+        return self.get_ws_type() == WS_TYPE.MATRIX and not self._get_ws().isCommonBins()
+
     def get_dim_info(self, n: int) -> dict:
         """
         returns dict of (minimum :float, maximum :float, number_of_bins :int,
