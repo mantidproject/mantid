@@ -24,11 +24,11 @@ class ResetNegatives2DTest(unittest.TestCase):
 
     def setUp(self):
         self._workspace1 = self._create_workspace()
-        self._workspace2 = self._create_workspace()
+        #self._workspace2 = self._create_workspace()
 
     def tearDown(self):
         DeleteWorkspace(self._workspace1)
-        DeleteWorkspace(self._workspace2)
+        #DeleteWorkspace(self._workspace2)
 
     def _create_workspace(self):
         """Create a dummy workspace for testing purposes"""
