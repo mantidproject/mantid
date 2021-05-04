@@ -67,7 +67,7 @@ class EngineeringDiffractionDecoder(EngineeringDiffractionUIAttributes):
         gui.tabs.setCurrentIndex(obj_dic["current_tab"])
         presenter.settings_presenter.model.set_settings_dict(obj_dic["settings_dict"])
         presenter.settings_presenter.settings = obj_dic["settings_dict"]
-        if ws_names:
+        if ws_names is not None:
             fit_data_widget = presenter.fitting_presenter.data_widget
             fit_data_widget.model._bg_params = obj_dic["background_params"]
             fit_data_widget.model.restore_files(ws_names)
@@ -75,12 +75,12 @@ class EngineeringDiffractionDecoder(EngineeringDiffractionUIAttributes):
             fit_data_widget.presenter.restore_table()
 
             fit_results = obj_dic.get("fit_results", None)
-            if fit_results:
+            if fit_results is not None:
                 fit_data_widget.model._fit_results = fit_results
                 fit_data_widget.model.create_fit_tables()
 
             fit_properties = obj_dic.get("fit_properties", None)
-            if fit_properties:
+            if fit_properties is not None:
                 fit_browser = presenter.fitting_presenter.plot_widget.view.fit_browser
                 fit_browser.show()  # show the fit browser, default is off
                 presenter.fitting_presenter.plot_widget.view.fit_toggle()  # show the fit browser, default is off
