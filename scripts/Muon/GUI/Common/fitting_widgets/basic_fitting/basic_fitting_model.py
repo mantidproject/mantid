@@ -500,7 +500,7 @@ class BasicFittingModel:
         alg = self._create_fit_algorithm()
         output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix = run_Fit(parameters,
                                                                                                           alg)
-        CopyLogs(InputWorkspace=self.current_dataset_name, OutputWorkspace=output_workspace, StoreInADS=False)
+        CopyLogs(InputWorkspace=parameters["InputWorkspace"], OutputWorkspace=output_workspace, StoreInADS=False)
         return output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix
 
     def _get_parameters_for_single_fit(self, dataset_name: str, single_fit_function: IFunction) -> dict:
