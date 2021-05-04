@@ -26,7 +26,6 @@ from mantidqt.utils.observer_pattern import Observable
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_diff import MuonDiff
 from typing import List
-from mantid.dataobjects import TableWorkspace
 
 
 MUON_ANALYSIS_DEFAULT_X_RANGE = [0.0, 15.0]
@@ -537,13 +536,6 @@ class MuonContext(object):
             workspace_name = workspace
         else:
             workspace_name = workspace.name()
-
-            # If we are removing a table workspace we are removing an existing results table
-            # which is done if we are overwriting a results table of the same name. see
-            # create_results_table in results_tab_model.py
-            # Therefore we do not need to update the contexts
-            if isinstance(workspace, TableWorkspace):
-                return
 
         self.data_context.remove_workspace_by_name(workspace_name)
         self.group_pair_context.remove_workspace_by_name(workspace_name)

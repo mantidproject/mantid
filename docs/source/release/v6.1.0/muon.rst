@@ -27,8 +27,6 @@ Bug fixes
 - Fixed a bug where rows in the difference table were not being highlighted correctly.
 - Fixed a bug in the Grouping tab where an error message would appear when changing the source of
   Group Asymmetry Range with no data loaded.
-- Fixed a bug where column names in a results table wouldn't update when creating a results table of
-  the same name with the table open.
 
 ALC
 ---
