@@ -39,22 +39,22 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                              doc="Workspace or comma-separated workspace list containing input MDHisto scan data.")
 
         self.declareProperty(IntArrayProperty("LowerLeft", [128, 128], IntArrayLengthValidator(2),
-                                              direction=Direction.Input), doc="ROI lower-left")
+                                              direction=Direction.Input), doc="Region of interest lower-left corner, in detector pixels")
         self.declareProperty(IntArrayProperty("UpperRight", [384, 384], IntArrayLengthValidator(2),
-                                              direction=Direction.Input), doc="ROI upper_right")
+                                              direction=Direction.Input), doc="Region of interest upper-right corner, in detector pixels")
 
         self.declareProperty("ScaleFactor", 1.0, doc="scale the integrated intensity by this value")
         self.declareProperty("ChiSqMax", 10.0, doc="Fitting resulting in chisq higher than this won't be added to the output")
         self.declareProperty("SignalNoiseMin", 1.0, doc="Minimum Signal/Noice ratio of peak to be added to the output")
         self.declareProperty("ApplyLorentz", True, doc="If to apply Lorentz Correction to intensity")
 
-        self.declareProperty("OutputFitResults", False, doc="This will include the fitting result workspace")
+        self.declareProperty("OutputFitResults", False, doc="This will output the fitting result workspace and a ROI workspace")
 
         self.declareProperty("OptimizeQVector", True,
                              doc="This will convert the data to q and optimize the peak location using CentroidPeaksdMD")
 
         self.declareProperty(IPeaksWorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output),
-                             doc="Output MDWorkspace in Q-space, name is prefix if multiple input files were provided.")
+                             doc="Output Peaks Workspace")
 
     def PyExec(self):
         input_workspaces = self._expand_groups()
