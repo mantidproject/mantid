@@ -84,7 +84,7 @@ class ResetNegatives2DTest(unittest.TestCase):
             os.path.join(self._test_dir, "test_ResetNegatives_addMinimum.p2d"))
 
     def test_resetNegatives2D_resetValue(self):
-        ResetNegatives2D(self._workspace2, AddMinimum=False, ResetValue=0)
+        ResetNegatives2D(self._workspace1, AddMinimum=False, ResetValue=0)
         SaveP2D(Workspace=self._workspace1,
                 OutputFile=os.path.join(self._test_dir,
                                         "test_ResetNegatives2D"),
