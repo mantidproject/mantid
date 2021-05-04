@@ -44,7 +44,8 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                                               direction=Direction.Input), doc="ROI upper_right")
 
         self.declareProperty("ScaleFactor", 1.0, doc="scale the integrated intensity by this value")
-        self.declareProperty("ChiSqMax", 10.0, doc="Fitting resulting in chisq higher than this won't be added to the output")
+        self.declareProperty("ChiSqMax", 1.0, doc="Fitting resulting in chisq higher than this won't be added to the output")
+        self.declareProperty("SignalNoiseMin", 1.0, doc="Minimum Signal/Noice ratio of peak to be added to the output")
         self.declareProperty("ApplyLorentz", True, doc="If to apply Lorentz Correction to intensity")
 
         self.declareProperty("OutputFitResults", False, doc="This will include the fitting result workspace")
@@ -61,10 +62,11 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
         CreatePeaksWorkspace(OutputType='LeanElasticPeak',
                              InstrumentWorkspace=input_workspaces[0],
                              NumberOfPeaks=0,
-                             OutputWorkspace=outWS)
+                             OutputWorkspace=outWS, EnableLogging=False)
 
         scale = self.getProperty("ScaleFactor").value
         chisqmax = self.getProperty("ChiSqMax").value
+        signalNoiseMin = self.getProperty("SignalNoiseMin").value
         ll = self.getProperty("LowerLeft").value
         ur = self.getProperty("UpperRight").value
         use_lorentz = self.getProperty("ApplyLorentz").value
@@ -80,9 +82,10 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
             IntegrateMDHistoWorkspace(InputWorkspace=inWS,
                                       P1Bin=f'{ll[1]},{ur[1]}',
                                       P2Bin=f'{ll[0]},{ur[0]}',
-                                      OutputWorkspace=tmp_inWS)
-            ConvertMDHistoToMatrixWorkspace(tmp_inWS, OutputWorkspace=tmp_inWS)
-            data = ConvertToPointData(tmp_inWS, OutputWorkspace=tmp_inWS)
+                                      OutputWorkspace=tmp_inWS,
+                                      EnableLogging=False)
+            ConvertMDHistoToMatrixWorkspace(tmp_inWS, OutputWorkspace=tmp_inWS, EnableLogging=False)
+            data = ConvertToPointData(tmp_inWS, OutputWorkspace=tmp_inWS, EnableLogging=False)
 
             run = mtd[inWS].getExperimentInfo(0).run()
             scan_log = 'omega' if np.isclose(run.getTimeAveragedStd('phi'), 0.0) else 'phi'
@@ -96,22 +99,27 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
             try:
                 fit_result = Fit(function, data, Output=str(data),
                                  OutputParametersOnly=not output_fit,
-                                 Constraints=constraints)
+                                 Constraints=constraints,
+                                 EnableLogging=False)
             except RuntimeError as e:
                 self.log().warning("Failed to fit workspace {}: {}".format(inWS, e))
                 continue
+
             if fit_result.OutputStatus == 'success' and fit_result.OutputChi2overDoF < chisqmax:
                 __tmp_pw = CreatePeaksWorkspace(OutputType='LeanElasticPeak',
                                                 InstrumentWorkspace=inWS,
-                                                NumberOfPeaks=0)
+                                                NumberOfPeaks=0,
+                                                EnableLogging=False)
 
                 _, A, x, s, _ = fit_result.OutputParameters.toDict()['Value']
                 _, errA, _, errs, _ = fit_result.OutputParameters.toDict()['Error']
 
                 if scan_log == 'omega':
-                    SetGoniometer(Workspace=__tmp_pw, Axis0=f'{x},0,1,0,-1', Axis1='chi,0,0,1,-1', Axis2='phi,0,1,0,-1')
+                    SetGoniometer(Workspace=__tmp_pw, Axis0=f'{x},0,1,0,-1', Axis1='chi,0,0,1,-1', Axis2='phi,0,1,0,-1',
+                                  EnableLogging=False)
                 else:
-                    SetGoniometer(Workspace=__tmp_pw, Axis0='omega,0,1,0,-1', Axis1='chi,0,0,1,-1', Axis2=f'{x},0,1,0,-1')
+                    SetGoniometer(Workspace=__tmp_pw, Axis0='omega,0,1,0,-1', Axis1='chi,0,0,1,-1', Axis2=f'{x},0,1,0,-1',
+                                  EnableLogging=False)
 
                 peak = __tmp_pw.createPeakHKL([run['h'].getStatistics().median,
                                                run['k'].getStatistics().median,
@@ -128,36 +136,45 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                 integrated_intensity_error = np.sqrt(2*np.pi * (A**2 * errs**2 +  s**2 * errA**2 + 2*A*s*cor_As)) * scale
                 peak.setSigmaIntensity(integrated_intensity_error)
 
-                __tmp_pw.addPeak(peak)
+                if integrated_intensity/integrated_intensity_error > signalNoiseMin:
+                    __tmp_pw.addPeak(peak)
 
-                if use_lorentz:
-                    peak = __tmp_pw.getPeak(0)
-                    lorentz = abs(np.sin(peak.getScattering() * np.cos(peak.getAzimuthal())))
-                    peak.setIntensity(peak.getIntensity() * lorentz)
-                    peak.setSigmaIntensity(peak.getSigmaIntensity() * lorentz)
+                    if use_lorentz:
+                        peak = __tmp_pw.getPeak(0)
+                        lorentz = abs(np.sin(peak.getScattering() * np.cos(peak.getAzimuthal())))
+                        peak.setIntensity(peak.getIntensity() * lorentz)
+                        peak.setSigmaIntensity(peak.getSigmaIntensity() * lorentz)
 
-                # correct q-vector using CentroidPeaksdMD
-                if optmize_q:
-                    __tmp_q_ws = HB3AAdjustSampleNorm(InputWorkspaces=inWS, NormaliseBy='None')
-                    __tmp_pw = CentroidPeaksMD(__tmp_q_ws, __tmp_pw)
-                    DeleteWorkspace(__tmp_q_ws)
+                    # correct q-vector using CentroidPeaksMD
+                    if optmize_q:
+                        __tmp_q_ws = HB3AAdjustSampleNorm(InputWorkspaces=inWS, NormaliseBy='None', EnableLogging=False)
+                        __tmp_pw = CentroidPeaksMD(__tmp_q_ws, __tmp_pw, EnableLogging=False)
+                        DeleteWorkspace(__tmp_q_ws, EnableLogging=False)
 
-                CombinePeaksWorkspaces(outWS, __tmp_pw, OutputWorkspace=outWS)
-                DeleteWorkspace(__tmp_pw)
+                    CombinePeaksWorkspaces(outWS, __tmp_pw, OutputWorkspace=outWS, EnableLogging=False)
+                    DeleteWorkspace(__tmp_pw, EnableLogging=False)
 
-                if output_fit:
-                    fit_results.addWorkspace(RenameWorkspace(tmp_inWS+'_Workspace', inWS+'_Workspace'))
-                    fit_results.addWorkspace(RenameWorkspace(tmp_inWS+'_Parameters', inWS+'_Parameters'))
-                    fit_results.addWorkspace(RenameWorkspace(tmp_inWS+'_NormalisedCovarianceMatrix', inWS+'_NormalisedCovarianceMatrix'))
-                    fit_results.addWorkspace(IntegrateMDHistoWorkspace(InputWorkspace=inWS,
-                                                                       P1Bin=f'{ll[1]},0,{ur[1]}',
-                                                                       P2Bin=f'{ll[0]},0,{ur[0]}',
-                                                                       P3Bin='0,{}'.format(mtd[inWS].getDimension(2).getNBins()),
-                                                                       OutputWorkspace=inWS+"_ROI"))
+                    if output_fit:
+                        fit_results.addWorkspace(RenameWorkspace(tmp_inWS+'_Workspace', inWS+'_Workspace', EnableLogging=False))
+                        fit_results.addWorkspace(RenameWorkspace(tmp_inWS+'_Parameters', inWS+'_Parameters', EnableLogging=False))
+                        fit_results.addWorkspace(RenameWorkspace(tmp_inWS+'_NormalisedCovarianceMatrix',
+                                                                 inWS+'_NormalisedCovarianceMatrix', EnableLogging=False))
+                        fit_results.addWorkspace(IntegrateMDHistoWorkspace(InputWorkspace=inWS,
+                                                                           P1Bin=f'{ll[1]},0,{ur[1]}',
+                                                                           P2Bin=f'{ll[0]},0,{ur[0]}',
+                                                                           P3Bin='0,{}'.format(mtd[inWS].getDimension(2).getNBins()),
+                                                                           OutputWorkspace=inWS+"_ROI", EnableLogging=False))
                 else:
-                    DeleteWorkspace(tmp_inWS+'_Parameters')
-                    DeleteWorkspace(tmp_inWS+'_NormalisedCovarianceMatrix')
-            DeleteWorkspace(tmp_inWS)
+                    self.log().warning("Skipping peak from {} because Signal/Noise={:.3f} which is less than {}"
+                                       .format(inWS, integrated_intensity/integrated_intensity_error, signalNoiseMin))
+            else:
+                self.log().warning("Failed to fit workspace {}: Output Status={}, ChiSq={}".format(inWS,
+                                                                                                   fit_result.OutputStatus,
+                                                                                                   fit_result.OutputChi2overDoF))
+
+            for tmp_ws in (tmp_inWS, tmp_inWS+'_Workspace', tmp_inWS+'_Parameters', tmp_inWS+'_NormalisedCovarianceMatrix'):
+                if mtd.doesExist(tmp_ws):
+                    DeleteWorkspace(tmp_ws, EnableLogging=False)
 
         self.setProperty("OutputWorkspace", mtd[outWS])
 
