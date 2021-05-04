@@ -497,6 +497,18 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.model.dataset_names = ["Name2"]
         self.assertEqual(str(self.model.simultaneous_fit_function), "name=FlatBackground,A0=5")
 
+    def test_that_reseting_the_simultaneous_fit_function_does_not_crash_when_there_is_a_single_domain(self):
+        self.model.dataset_names = ["Name1"]
+        self.model.simultaneous_fit_function = self.fit_function
+        self.model.simultaneous_fitting_mode = False
+        self.model.current_dataset_index = 0
+        self.model.simultaneous_fit_function.setParameter("A0", 5)
+
+        self.model.simultaneous_fitting_mode = True
+        self.model.dataset_names = ["Name2"]
+
+        self.assertEqual(str(self.model.simultaneous_fit_function), "name=FlatBackground,A0=5")
+
 
 if __name__ == '__main__':
     unittest.main()

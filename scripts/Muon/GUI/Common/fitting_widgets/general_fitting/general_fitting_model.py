@@ -179,8 +179,11 @@ class GeneralFittingModel(BasicFittingModel):
     def _get_new_domain_functions_using_existing_datasets(self, new_dataset_names: list) -> list:
         """Returns the domain functions to use within a MultiDomainFunction for the new datasets."""
         if len(self.dataset_names) == len(new_dataset_names) and self.simultaneous_fit_function is not None:
-            return [self.simultaneous_fit_function.getFunction(i).clone()
-                    for i in range(self.simultaneous_fit_function.nFunctions())]
+            if len(self.dataset_names) == 1:
+                return [self.simultaneous_fit_function.clone()]
+            else:
+                return [self.simultaneous_fit_function.getFunction(i).clone()
+                        for i in range(self.simultaneous_fit_function.nFunctions())]
         elif len(self.dataset_names) <= 1:
             return [self._clone_function(self.simultaneous_fit_function) for _ in range(len(new_dataset_names))]
         else:
