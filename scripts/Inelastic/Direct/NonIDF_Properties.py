@@ -70,6 +70,7 @@ class NonIDF_Properties(object):
         super(NonIDF_Properties,self).__setattr__('sample_run',None)
         super(NonIDF_Properties,self).__setattr__('wb_run',None)
         super(NonIDF_Properties,self).__setattr__('monovan_run',None)
+        super(NonIDF_Properties,self).__setattr__('empty_bg_run',None)
 
         super(NonIDF_Properties,self).__setattr__('mask_run',None)
         super(NonIDF_Properties,self).__setattr__('wb_for_monovan_run',None)
@@ -89,6 +90,13 @@ class NonIDF_Properties(object):
         # TODO: reconcile this with Mantid.
             if lev <= self._current_log_level:
                 print(msg)
+
+    def get_property_fun(self,prop_name):
+        """ Return the instance of a property if such property exist"""
+
+        prop = NonIDF_Properties.__getattribute__(NonIDF_Properties,prop_name)
+        return prop
+
     #-----------------------------------------------------------------------------
     # Complex properties with personal descriptors
     #-----------------------------------------------------------------------------
@@ -114,6 +122,8 @@ class NonIDF_Properties(object):
     monovan_run = RunDescriptor("MV_","""Run number, workspace or symbolic presentation of such run
                   containing results of monochromatic neutron beam scattering from vanadium sample
                   used in absolute units normalization.\n None disables absolute units calculations.""")
+    empty_bg_run = RunDescriptor("EBG_","""Run number, workspace or symbolic presentation of such run
+                  containing results of the empty instrument background measurements""")
 
     mask_run    = RunDescriptorDependent(sample_run,"MSK_","""Run number, workspace or symbolic presentation of such run
                   containing results of experiment, used to find masks.\n If not explicitly set, sample_run is used.""")

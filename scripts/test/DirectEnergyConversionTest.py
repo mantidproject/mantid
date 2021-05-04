@@ -615,6 +615,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    # test = DirectEnergyConversionTest('test_sum_monitors')
-    # test.run()
+    #test = DirectEnergyConversionTest('test_sum_monitors')
+    #test.run()
     unittest.main()

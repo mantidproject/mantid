@@ -795,12 +795,12 @@ class RunDescriptor(PropDescriptor):
 
         if self._ws_name in mtd:
             ws = mtd[self._ws_name]
-            if ws.run().hasProperty("calibrated"):
-                return ws # already calibrated
-            else:
+            if not ws.run().hasProperty("calibrated"):
                 prefer_ws_calibration = self._check_calibration_source()
                 self.apply_calibration(ws,RunDescriptor._holder.det_cal_file,prefer_ws_calibration)
-                return ws
+            self.remove_empty_backgound(ws)
+
+            return ws
         else:
             if self._run_number is not None:
                 prefer_ws_calibration = self._check_calibration_source()
@@ -814,6 +814,7 @@ class RunDescriptor(PropDescriptor):
 
                 self.synchronize_ws(ws)
                 self.apply_calibration(ws,calibration,prefer_ws_calibration)
+                self.remove_empty_backgound(ws)
 
                 return ws
             else:
@@ -1148,6 +1149,7 @@ class RunDescriptor(PropDescriptor):
             loaded_ws = self.load_file(inst_name,ws_name,None,mon_load_option,filePath,fileExt,**kwargs)
         ######## Now we have the workspace
         self.apply_calibration(loaded_ws,calibration,use_ws_calibration)
+        self.remove_empty_backgound(loaded_ws)
         return loaded_ws
 #--------------------------------------------------------------------------------------------------------------------
 #pylint: disable=too-many-branches
@@ -1301,7 +1303,6 @@ class RunDescriptor(PropDescriptor):
     def clear_resulting_ws(self):
         """Remove workspace from memory as if it has not been processed
            and clear all operations indicators except cashes and run lists.
-
            Attempt to get workspace for a file based run should in this case
            load workspace again
         """
@@ -1496,6 +1497,30 @@ class RunDescriptor(PropDescriptor):
             ws = mtd[sum_ws_name]
         return ws
 
+    def remove_empty_backgound(self,ws):
+        """Remove empty background from the input workspace.
+
+           The background removed only if the background have not been removed before and
+           the RunDescriptor belongs to the properties:
+           'sample_run','wb_run','monovan_run','wb_for_monovan_run'
+        """
+        if self._prop_name not in {'SR_','WB_','MV_','MV_WB_'}: # Remove background only from the following properties
+            return
+        if ws.run().hasProperty('empty_bg_removed_with'):  # return if background has been already removed
+            return
+        if RunDescriptor._holder.empty_bg_run is None: # do nothing if bg workspace has not been defined
+            return
+        RunDescriptor._logger('Removing empty instrument background from workspace {0}: '.format(ws.name()),'debug')
+        #print(RunDescriptor._holder.__dict__)
+        #empty_bg_property = RunDescriptor._holder.__getattribute__('empty_bg_run')
+        empty_bg_property = super(NonIDF_Properties,RunDescriptor._holder).__getattr__('empty_bg_run')
+        print(empty_bg_property)
+        ebg_ws = empty_bg_property.get_workspace()
+        ebg_current = ebg_ws.run().getProperty('gd_prtn_chrg').value
+        ws_current = ws.run().getProperty('gd_prtn_chrg').value
+        # normalize by current and remove normalised background
+        ws = ws - ebg_ws*(ws_current/ebg_current)
+        AddSampleLog(Workspace=ws,LogName="empty_bg_removed_with",LogText=str(ebg_ws.name()))
 #-------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------
