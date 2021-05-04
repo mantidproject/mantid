@@ -101,13 +101,14 @@ class BasicFittingModel:
     def dataset_names(self, names: list) -> None:
         """Sets the dataset names stored by the model. Resets the other fitting data."""
         start_xs, end_xs = self._get_new_start_xs_and_end_xs_using_existing_datasets(names)
+        functions = self._get_new_functions_using_existing_datasets(names)
 
         self._dataset_names = names
 
         self.start_xs = start_xs
         self.end_xs = end_xs
 
-        self.reset_fit_functions()
+        self.reset_fit_functions(functions)
         self.reset_current_dataset_index()
         self.reset_fit_statuses_and_chi_squared()
         self.clear_cached_fit_functions()
@@ -406,10 +407,9 @@ class BasicFittingModel:
         self.fit_statuses = [DEFAULT_FIT_STATUS] * self.number_of_datasets
         self.chi_squared = [DEFAULT_CHI_SQUARED] * self.number_of_datasets
 
-    def reset_fit_functions(self) -> None:
+    def reset_fit_functions(self, new_functions: list) -> None:
         """Reset the fit functions stored by the model. Attempts to use the currently selected function."""
-        fit_function = None if len(self.single_fit_functions) == 0 else self.current_single_fit_function
-        self.single_fit_functions = [self._clone_function(fit_function)] * self.number_of_datasets
+        self.single_fit_functions = new_functions
 
     def _reset_start_xs(self) -> None:
         """Resets the start Xs stored by the model."""
@@ -442,6 +442,20 @@ class BasicFittingModel:
             return self.end_xs[self.dataset_names.index(new_dataset_name)]
         else:
             return self.current_end_x if len(self.end_xs) > 0 else self._default_end_x
+
+    def _get_new_functions_using_existing_datasets(self, new_dataset_names: list) -> list:
+        """Returns the functions to use for the new datasets. It tries to use the existing functions if possible."""
+        if len(self.dataset_names) == len(new_dataset_names):
+            return self.single_fit_functions
+        else:
+            return [self._get_new_function_for(name) for name in new_dataset_names]
+
+    def _get_new_function_for(self, new_dataset_name: str) -> IFunction:
+        """Returns the function to use for the new dataset. It tries to use an existing function if possible."""
+        if new_dataset_name in self.dataset_names:
+            return self._clone_function(self.single_fit_functions[self.dataset_names.index(new_dataset_name)])
+        else:
+            return self._clone_function(self.current_single_fit_function)
 
     def retrieve_first_good_data_from_run(self, workspace_name: str) -> float:
         """Returns the first good data value from a run number within a workspace name."""
