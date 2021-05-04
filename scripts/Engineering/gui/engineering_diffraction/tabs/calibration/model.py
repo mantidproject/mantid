@@ -425,7 +425,7 @@ class CalibrationModel(object):
         def save_pdcal_output_file(ws_name_suffix, bank_name):
             file_path = calibration_dir + self._generate_output_file_name(vanadium_path, ceria_path, instrument,
                                                                           bank=bank_name, ext=".nxs")
-            ws_name = "enggui_calibration_" + ws_name_suffix
+            ws_name = "engggui_calibration_" + ws_name_suffix
             SaveNexus(InputWorkspace=ws_name, Filename=file_path)
 
         if not path.exists(calibration_dir):

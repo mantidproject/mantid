@@ -236,7 +236,7 @@ def create_calibration_files(ceria_run, van_run, full_inst_calib, int_van, van_c
     # check which cropping method to use
 
     if use_spectrum_number:
-        spectrum_numbers = spec_nos # this will probably have to be altered to str? in the test calls
+        spectrum_numbers = spec_nos
         bank = None
     else:
         if spec_nos.lower() == "north" or spec_nos == '1':
@@ -333,22 +333,6 @@ def run_calibration(sample_ws,
 
     # need to clone the data as PDCalibration rebins
     sample_raw = simple.CloneWorkspace(InputWorkspace=sample_ws)
-
-    kwargs = {
-        "InputWorkspace": sample_ws,
-        "PeakPositions": Utils.default_ceria_expected_peaks(final=False),
-        "TofBinning": [10000, -0.0005, 46000],
-        "PeakWindow": 0.03,
-        "MinimumPeakHeight": 0.5,
-        "PeakFunction": 'BackToBackExponential',
-        "CalibrationParameters": 'DIFC+TZERO',
-        "OutputCalibrationTable": 'cal_inst',
-        "DiagnosticWorkspaces": 'diag_inst',
-        "UseChiSq": True
-    }
-
-    # initial calibration of instrument
-    #cal_initial = run_pd_calibration(kwargs)[0]
 
     ws_van = simple.CloneWorkspace(vanadium_workspace)
     simple.NormaliseByCurrent(InputWorkspace=ws_van, OutputWorkspace=ws_van)
@@ -456,6 +440,15 @@ def load_van_curves_file(curves_van):
     """
     van_curves_ws = simple.Load(curves_van, OutputWorkspace="curves_van")
     return van_curves_ws
+# TODO what is to be done here tomorrow
+# TODO save appropriate calibration files from PDcal as per the gui L453
+# TODO load appropriate calibration files from fs similar to the gui, expected cals present L136
+# TODO handle the focus texture mode case
+# TODO add a metric shitload of unit tests to the gui bit
+# TODO verify the enginx script running side by side with the gui version
+# TODO once verified update system tests for enginx
+# TODO
+# TODO
 
 
 def save_calibration(ceria_run, van_run, calibration_directory, calibration_general, name, bank_names, zeros, difcs,

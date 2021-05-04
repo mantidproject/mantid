@@ -13,7 +13,7 @@ from Engineering.gui.engineering_diffraction.tabs.common import vanadium_correct
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from Engineering.EnggUtils import create_custom_grouping_workspace
 from mantid.simpleapi import logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE, \
-    Load, NormaliseByCurrent, Divide, DiffractionFocussing, RebinToWorkspace, \
+    Load, NormaliseByCurrent, Divide, DiffractionFocussing, RebinToWorkspace, CloneWorkspace, DeleteWorkspace, \
     ConvertUnits, ReplaceSpecialValues, ApplyDiffCal
 
 SAMPLE_RUN_WORKSPACE_NAME = "engggui_focusing_input_ws"
@@ -64,22 +64,24 @@ class FocusModel(object):
         if spectrum_numbers:
             grp_ws = create_custom_grouping_workspace(spectrum_numbers, sample_paths[0])
             df_kwarg = {"GroupingWorkspace": grp_ws}
-            region_calib = "enggui_calibration_cropped"
+            region_calib = "engggui_calibration_cropped"
             name = 'cropped'
         elif custom_cal:
             # TODO this functionality has not yet been fully implemented
             df_kwarg = {"GroupingFileName": custom_cal}
-            region_calib = "enggui_calibration_cropped"
+            region_calib = "engggui_calibration_cropped"
             name = 'customcal'
         if df_kwarg:
             for sample_path in sample_paths:
                 sample_workspace = path_handling.load_workspace(sample_path)
                 run_no = path_handling.get_run_number_from_path(sample_path, instrument)
-                output_workspace_name = str(run_no) + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + name
-                self._run_focus(sample_workspace, output_workspace_name, integration_workspace,
+                tof_output_name = str(run_no) + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + name
+                dspacing_output_name = tof_output_name + "_dSpacing"
+                self._run_focus(sample_workspace, tof_output_name, integration_workspace,
                                 curves_workspace, df_kwarg, full_calib_workspace, region_calib)
-                output_workspaces.append([output_workspace_name])
-                self._save_output(instrument, sample_path, "cropped", output_workspace_name, rb_num)
+                output_workspaces.append(tof_output_name)
+                self._save_output(instrument, sample_path, "cropped", tof_output_name, rb_num)
+                self._save_output(instrument, sample_path, "cropped", dspacing_output_name, rb_num)
                 self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
         else:
             for sample_path in sample_paths:
@@ -87,18 +89,25 @@ class FocusModel(object):
                 run_no = path_handling.get_run_number_from_path(sample_path, instrument)
                 workspaces_for_run = []
                 for name in banks:
-                    output_workspace_name = str(run_no) + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + str(name)
+                    tof_output_name = str(run_no) + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + str(name)
+                    dspacing_output_name = tof_output_name + "_dSpacing"
                     if name == '1':
                         df_kwarg = {"GroupingFileName": NORTH_BANK_CAL}
-                        region_calib = "enggui_calibration_bank_1"
+                        region_calib = "engggui_calibration_bank_1"
                     else:
                         df_kwarg = {"GroupingFileName": SOUTH_BANK_CAL}
-                        region_calib = "enggui_calibration_bank_2"
-                    self._run_focus(sample_workspace, output_workspace_name, integration_workspace,
-                                    curves_workspace, df_kwarg, full_calib_workspace, region_calib)
-                    workspaces_for_run.append(output_workspace_name)
+                        region_calib = "engggui_calibration_bank_2"
+                    # need to clone these workspaces as they're altered in each run of focus
+                    sample_ws_clone = CloneWorkspace(sample_workspace)
+                    curves_ws_clone = CloneWorkspace(curves_workspace)
+                    self._run_focus(sample_ws_clone, tof_output_name, integration_workspace,
+                                    curves_ws_clone, df_kwarg, full_calib_workspace, region_calib)
+                    workspaces_for_run.append(tof_output_name)
                     # Save the output to the file system.
-                    self._save_output(instrument, sample_path, name, output_workspace_name, rb_num)
+                    self._save_output(instrument, sample_path, name, tof_output_name, rb_num)
+                    self._save_output(instrument, sample_path, name, dspacing_output_name, rb_num)
+                    DeleteWorkspace(sample_ws_clone)
+                    DeleteWorkspace(curves_ws_clone)
                 output_workspaces.append(workspaces_for_run)
                 self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
 
@@ -109,7 +118,7 @@ class FocusModel(object):
 
     @staticmethod
     def _run_focus(input_workspace,
-                   output_workspace,
+                   tof_output_name,
                    vanadium_integration_ws,
                    vanadium_curves_ws,
                    df_kwarg,
@@ -126,8 +135,9 @@ class FocusModel(object):
         normalised = Divide(LHSWorkspace=focused_sample, RHSWorkspace=curves_rebinned,
                             AllowDifferentNumberSpectra=True)
         ApplyDiffCal(InstrumentWorkspace=normalised, CalibrationWorkspace=region_calib)
-        ConvertUnits(InputWorkspace=normalised, OutputWorkspace=output_workspace, Target='TOF')
-        return output_workspace
+        dspacing_output_name = tof_output_name + "_dSpacing"
+        CloneWorkspace(InputWorkspace=normalised, OutputWorkspace=dspacing_output_name)
+        ConvertUnits(InputWorkspace=normalised, OutputWorkspace=tof_output_name, Target='TOF')
 
     @staticmethod
     def _plot_focused_workspaces(focused_workspaces):
