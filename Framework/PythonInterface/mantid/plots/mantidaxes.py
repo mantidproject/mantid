@@ -455,6 +455,14 @@ class MantidAxes(Axes):
             if ws_name == old_name:
                 self.tracked_workspaces[new_name] = self.tracked_workspaces.pop(old_name)
 
+    def rename_creation_args_workspace(self, new_name, old_name):
+        """
+        Replace the workspace name in the axes creation args
+        """
+        for cargs in self.creation_args:
+            if cargs['workspaces'] == old_name:
+                cargs['workspaces'] = new_name
+
     def replot_artist(self, artist, errorbars=False, **kwargs):
         """
         Replot an artist with a new set of kwargs via 'plot' or 'errorbar'
