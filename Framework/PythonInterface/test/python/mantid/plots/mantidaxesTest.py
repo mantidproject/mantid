@@ -793,6 +793,13 @@ class MantidAxesTest(unittest.TestCase):
         self.ax.rename_workspace(new_name="new_name", old_name="ws")
         self.assertEqual(artist.get_label(), new_label)
 
+    def test_rename_workspace_updates_creation_args(self):
+        ws = CreateSampleWorkspace()
+        self.ax.plot(ws, specNum=2)
+        self.assertEqual("ws", self.ax.creation_args[0]["workspaces"])
+        self.ax.rename_workspace(new_name="new_name", old_name="ws")
+        self.assertEqual("new_name", self.ax.creation_args[0]["workspaces"])
+
     def _run_check_axes_distribution_consistency(self, normalization_states):
         mock_tracked_workspaces = {
             'ws': [
