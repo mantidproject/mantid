@@ -487,6 +487,10 @@ class DrillView(QMainWindow):
                     self.close()
                     event.accept()
                     return True
+                elif event.key() == Qt.Key_N:
+                    self.actionNew.trigger()
+                    event.accept()
+                    return True
         return super().event(event)
 
     def show_directory_manager(self):
