@@ -36,7 +36,8 @@ else:
             # This is necessary to ensure settings for 'On top'/'Floating' window behaviour are propagated to DRILL
             # if they are changed by the user after DRILL has been opened.
             drillInterface.setParent(parent)
-            drillInterface.setWindowFlags(flags)
+            if flags is not None:
+                drillInterface.setWindowFlags(flags)
         drillInterface.show()
         if not within_mantid:
             sys.exit(app.exec_())
