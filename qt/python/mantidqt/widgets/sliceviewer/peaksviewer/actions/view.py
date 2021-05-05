@@ -36,9 +36,9 @@ class PeakActionsView:
         self.add_btn.clicked.connect(self.add_btn_click)
         self.rm_btn.clicked.connect(self.rm_btn_click)
 
-        peak_grid.addWidget(self.add_btn)
-        peak_grid.addWidget(self.rm_btn)
-        peak_grid.addWidget(self.peaks_menu)
+        peak_grid.addWidget(self.add_btn, 1, 2)
+        peak_grid.addWidget(self.rm_btn, 2, 2)
+        peak_grid.addWidget(self.peaks_menu, 1, 1)
 
         self.setLayout(peak_grid)
 
