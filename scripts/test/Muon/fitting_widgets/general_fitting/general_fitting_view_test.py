@@ -28,21 +28,9 @@ class GeneralFittingViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertTrue(self.view.close())
         QApplication.sendPostedEvents()
 
-    def test_that_the_view_has_been_initialized_with_the_simultaneous_options_shown_when_it_is_not_a_frequency_domain(self):
-        self.view = GeneralFittingView(is_frequency_domain=False)
+    def test_that_the_view_can_be_initialized_without_an_error(self):
+        self.view = GeneralFittingView()
         self.view.show()
-
-        self.assertTrue(not self.view.general_fitting_options.simul_fit_checkbox.isHidden())
-        self.assertTrue(not self.view.general_fitting_options.simul_fit_by_combo.isHidden())
-        self.assertTrue(not self.view.general_fitting_options.simul_fit_by_specifier.isHidden())
-
-    def test_that_the_view_has_been_initialized_with_the_simultaneous_options_hidden_when_it_is_a_frequency_domain(self):
-        self.view = GeneralFittingView(is_frequency_domain=True)
-        self.view.show()
-
-        self.assertTrue(self.view.general_fitting_options.simul_fit_checkbox.isHidden())
-        self.assertTrue(self.view.general_fitting_options.simul_fit_by_combo.isHidden())
-        self.assertTrue(self.view.general_fitting_options.simul_fit_by_specifier.isHidden())
 
     def test_that_update_dataset_name_combo_box_will_set_the_names_in_the_dataset_name_combobox(self):
         dataset_names = ["Name1", "Name2", "Name3"]
@@ -119,17 +107,6 @@ class GeneralFittingViewTest(unittest.TestCase, QtWidgetFinder):
         self.view.switch_to_simultaneous()
         self.view.switch_to_single()
         self.assertEqual(self.view.workspace_selector.workspace_combo_box_label.text(), SINGLE_FIT_LABEL)
-
-    def test_that_hide_simultaneous_fit_options_will_hide_the_simultaneous_fitting_options(self):
-        self.assertTrue(not self.view.general_fitting_options.simul_fit_checkbox.isHidden())
-        self.assertTrue(not self.view.general_fitting_options.simul_fit_by_combo.isHidden())
-        self.assertTrue(not self.view.general_fitting_options.simul_fit_by_specifier.isHidden())
-
-        self.view.hide_simultaneous_fit_options()
-
-        self.assertTrue(self.view.general_fitting_options.simul_fit_checkbox.isHidden())
-        self.assertTrue(self.view.general_fitting_options.simul_fit_by_combo.isHidden())
-        self.assertTrue(self.view.general_fitting_options.simul_fit_by_specifier.isHidden())
 
     def test_that_setup_fit_by_specifier_will_add_fit_specifiers_to_the_relevant_checkbox(self):
         fit_specifiers = ["long", "fwd", "bwd"]

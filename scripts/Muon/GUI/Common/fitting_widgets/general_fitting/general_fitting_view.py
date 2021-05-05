@@ -79,10 +79,6 @@ class GeneralFittingView(BasicFittingView):
         self.set_workspace_combo_box_label(SINGLE_FIT_LABEL)
         self.general_fitting_options.disable_simultaneous_fit_options()
 
-    def hide_simultaneous_fit_options(self) -> None:
-        """Hides the simultaneous fit options."""
-        self.general_fitting_options.hide_simultaneous_fit_options()
-
     def disable_simultaneous_fit_options(self) -> None:
         """Disables the simultaneous fit options."""
         self.general_fitting_options.disable_simultaneous_fit_options()

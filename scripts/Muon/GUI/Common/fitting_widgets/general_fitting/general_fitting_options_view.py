@@ -63,12 +63,6 @@ class GeneralFittingOptionsView(QWidget, ui_general_fitting_options):
         """Returns the run, group or pair name."""
         return self.simul_fit_by_specifier.currentText()
 
-    def hide_simultaneous_fit_options(self) -> None:
-        """Hides the simultaneous fit options."""
-        self.simul_fit_checkbox.hide()
-        self.simul_fit_by_combo.hide()
-        self.simul_fit_by_specifier.hide()
-
     def disable_simultaneous_fit_options(self) -> None:
         """Disables the simultaneous fit options."""
         self.simul_fit_by_combo.setEnabled(False)

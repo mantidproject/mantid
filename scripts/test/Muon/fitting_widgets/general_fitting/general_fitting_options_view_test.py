@@ -26,21 +26,9 @@ class GeneralFittingOptionsViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertTrue(self.view.close())
         QApplication.sendPostedEvents()
 
-    def test_that_the_view_has_been_initialized_with_the_simultaneous_options_shown_when_it_is_not_a_frequency_domain(self):
-        self.view = GeneralFittingOptionsView(is_frequency_domain=False)
+    def test_that_the_view_can_be_initialized_without_an_error(self):
+        self.view = GeneralFittingOptionsView()
         self.view.show()
-
-        self.assertTrue(not self.view.simul_fit_checkbox.isHidden())
-        self.assertTrue(not self.view.simul_fit_by_combo.isHidden())
-        self.assertTrue(not self.view.simul_fit_by_specifier.isHidden())
-
-    def test_that_the_view_has_been_initialized_with_the_simultaneous_options_hidden_when_it_is_a_frequency_domain(self):
-        self.view = GeneralFittingOptionsView(is_frequency_domain=True)
-        self.view.show()
-
-        self.assertTrue(self.view.simul_fit_checkbox.isHidden())
-        self.assertTrue(self.view.simul_fit_by_combo.isHidden())
-        self.assertTrue(self.view.simul_fit_by_specifier.isHidden())
 
     def test_that_the_simultaneous_fit_by_can_be_set_as_expected(self):
         self.assertEqual(self.view.simultaneous_fit_by, "Run")
@@ -48,17 +36,6 @@ class GeneralFittingOptionsViewTest(unittest.TestCase, QtWidgetFinder):
         self.view.simultaneous_fit_by = "Group/Pair"
 
         self.assertEqual(self.view.simultaneous_fit_by, "Group/Pair")
-
-    def test_that_hide_simultaneous_fit_options_will_hide_the_simultaneous_fitting_options(self):
-        self.assertTrue(not self.view.simul_fit_checkbox.isHidden())
-        self.assertTrue(not self.view.simul_fit_by_combo.isHidden())
-        self.assertTrue(not self.view.simul_fit_by_specifier.isHidden())
-
-        self.view.hide_simultaneous_fit_options()
-
-        self.assertTrue(self.view.simul_fit_checkbox.isHidden())
-        self.assertTrue(self.view.simul_fit_by_combo.isHidden())
-        self.assertTrue(self.view.simul_fit_by_specifier.isHidden())
 
     def test_that_enable_simultaneous_fit_options_will_hide_the_simultaneous_fitting_options(self):
         self.assertTrue(not self.view.simul_fit_by_combo.isEnabled())

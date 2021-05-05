@@ -32,14 +32,15 @@ class FitFunctionOptionsViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertTrue(self.view.close())
         QApplication.sendPostedEvents()
 
-    def test_that_the_view_has_been_initialized_with_the_raw_data_option_shown_when_it_is_not_a_frequency_domain(self):
-        self.view = FitFunctionOptionsView(is_frequency_domain=False)
+    def test_that_the_view_has_been_initialized_with_the_raw_data_option_shown(self):
+        self.view = FitFunctionOptionsView()
         self.view.show()
 
         self.assertTrue(not self.view.fit_options_table.isRowHidden(RAW_DATA_TABLE_ROW))
 
-    def test_that_the_view_has_been_initialized_with_the_raw_data_option_hidden_when_it_is_a_frequency_domain(self):
-        self.view = FitFunctionOptionsView(is_frequency_domain=True)
+    def test_that_the_view_has_been_initialized_with_the_raw_data_option_hidden(self):
+        self.view = FitFunctionOptionsView()
+        self.view.hide_fit_raw_checkbox()
         self.view.show()
 
         self.assertTrue(self.view.fit_options_table.isRowHidden(RAW_DATA_TABLE_ROW))
