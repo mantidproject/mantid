@@ -13,6 +13,7 @@ from qtpy.QtWidgets import QGroupBox, QVBoxLayout, QWidget
 # local imports
 from .representation.painter import MplPainter
 from mantidqt.widgets.workspacedisplay.table.view import QTableView, TableWorkspaceDisplayView
+from .actions.view import PeakActionsView
 
 # standard
 from typing import Optional
@@ -201,7 +202,7 @@ class PeaksViewerCollectionView(QWidget):
     def __init__(self,
                  painter: MplPainter,
                  sliceinfo_provider: 'SliceViewer',
-                 peakactions: 'PeakActionsView',
+                 peakactions=None,
                  parent=None):
         """
         :param painter: An object responsible for draw the peaks representations
