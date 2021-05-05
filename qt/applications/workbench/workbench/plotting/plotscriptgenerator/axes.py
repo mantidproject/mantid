@@ -73,3 +73,31 @@ def generate_tick_commands(ax):
                                 f"{generate_tick_params_kwargs(ax.yaxis, tick_type)})")
 
     return commands
+
+
+def generate_grid_commands(ax):
+    axes_grid_params = list()
+    axes = ['xaxis', 'yaxis']
+    for axis_name in axes:
+        axis = getattr(ax, axis_name, None)
+        if axis:
+            name = getattr(axis, "axis_name", None)  # x or y
+            is_gridOnMinor = getattr(axis, "_gridOnMinor", False)
+            is_gridOnMajor = getattr(axis, "_gridOnMajor", False)
+            if is_gridOnMinor and is_gridOnMajor:
+                which = 'both'
+            elif is_gridOnMinor:
+                which = 'minor'
+            elif is_gridOnMajor:
+                which = 'major'
+            else:
+                continue  # in this case no grid lines for this axis, this is default so no point making a command
+            axes_grid_params.append((name, which))
+    commands = []
+    if len(axes_grid_params) == 2:  # check 'which' equality - this lets us use only one command for both axes
+        if axes_grid_params[0][1] == axes_grid_params[1][1]:
+            commands.append(f"axes.grid(b=True, axis='both', which='{axes_grid_params[0][1]}')")
+            return commands
+    for params in axes_grid_params:  # in the very rare event that only one axis has a grid or the options differ
+        commands.append(f"axes.grid(b=True, axis='{params[0]}', which='{params[1]}')")
+    return commands
