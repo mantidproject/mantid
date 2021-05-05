@@ -1504,17 +1504,17 @@ class RunDescriptor(PropDescriptor):
            the RunDescriptor belongs to the properties:
            'sample_run','wb_run','monovan_run','wb_for_monovan_run'
         """
-        if self._prop_name not in {'SR_','WB_','MV_','MV_WB_'}: # Remove background only from the following properties
+
+        # Remove background only from the following run descriptors:
+        if self._prop_name not in {'SR_','WB_','MV_','MV_WB_'}:
             return
         if ws.run().hasProperty('empty_bg_removed_with'):  # return if background has been already removed
             return
         if RunDescriptor._holder.empty_bg_run is None: # do nothing if bg workspace has not been defined
             return
         RunDescriptor._logger('Removing empty instrument background from workspace {0}: '.format(ws.name()),'debug')
-        #print(RunDescriptor._holder.__dict__)
-        #empty_bg_property = RunDescriptor._holder.__getattribute__('empty_bg_run')
-        empty_bg_property = super(NonIDF_Properties,RunDescriptor._holder).__getattr__('empty_bg_run')
-        print(empty_bg_property)
+
+        empty_bg_property = RunDescriptor._holder.get_prop_class('empty_bg_run')
         ebg_ws = empty_bg_property.get_workspace()
         ebg_current = ebg_ws.run().getProperty('gd_prtn_chrg').value
         ws_current = ws.run().getProperty('gd_prtn_chrg').value

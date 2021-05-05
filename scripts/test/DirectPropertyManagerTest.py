@@ -1297,14 +1297,20 @@ class DirectPropertyManagerTest(unittest.TestCase):
         os.remove(test_file)
 
     #
-    def test_get_property(self):
+    def test_get_property_class(self):
         propman = self.prop_man
 
-        p1 = propman.get_property_fun('empty_bg_run')
+        p1 = propman.get_prop_class('empty_bg_run')
+
         self.assertTrue(isinstance(p1,RunDescriptor))
+        self.assertEqual(p1._prop_name,'EBG_')
+        self.assertTrue(p1.run_number() is None)
+
+        propman.empty_bg_run = 1024
+        self.assertEqual(p1.run_number(),1024)
 
 
 if __name__ == "__main__":
-    tester = DirectPropertyManagerTest('test_get_property')
-    tester.run()
-    #unittest.main()
+    #tester = DirectPropertyManagerTest('test_get_property')
+    #tester.run()
+    unittest.main()

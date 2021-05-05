@@ -91,7 +91,7 @@ class NonIDF_Properties(object):
             if lev <= self._current_log_level:
                 print(msg)
 
-    def get_property_fun(self,prop_name):
+    def get_prop_class(self,prop_name):
         """ Return the instance of a property if such property exist"""
 
         prop = NonIDF_Properties.__getattribute__(NonIDF_Properties,prop_name)
