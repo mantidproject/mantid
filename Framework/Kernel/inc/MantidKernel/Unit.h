@@ -88,11 +88,9 @@ public:
    *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
    *                    Delta (not currently used)
    */
-  void toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
-             const double &_l1, const int &_emode,
+  void toTOF(std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1, const int &_emode,
              std::initializer_list<std::pair<const UnitParams, double>> params);
-  void toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
-             const double &_l1, const int &_emode,
+  void toTOF(std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1, const int &_emode,
              const UnitParametersMap &params);
 
   /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
@@ -107,8 +105,7 @@ public:
    *                    Delta (not currently used)
    *  @return the value in TOF units.
    */
-  double convertSingleToTOF(const double xvalue, const double &l1,
-                            const int &emode, const UnitParametersMap &params);
+  double convertSingleToTOF(const double xvalue, const double &l1, const int &emode, const UnitParametersMap &params);
 
   /** Convert from time-of-flight to the concrete unit. TOF is in microseconds.
    *  @param xdata ::    The array of X data to be converted
@@ -123,13 +120,10 @@ public:
    *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
    *                    Delta (not currently used)
    */
-  void
-  fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
-          const double &_l1, const int &_emode,
-          std::initializer_list<std::pair<const UnitParams, double>> params);
+  void fromTOF(std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1, const int &_emode,
+               std::initializer_list<std::pair<const UnitParams, double>> params);
 
-  void fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
-               const double &_l1, const int &_emode,
+  void fromTOF(std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1, const int &_emode,
                const UnitParametersMap &params);
 
   /** Convert from the time-of-flight to the concrete unit. TOF is in
@@ -145,9 +139,7 @@ public:
    *                    Delta (not currently used)
    *  @return the value in these units.
    */
-  double convertSingleFromTOF(const double xvalue, const double &l1,
-                              const int &emode,
-                              const UnitParametersMap &params);
+  double convertSingleFromTOF(const double xvalue, const double &l1, const int &emode, const UnitParametersMap &params);
 
   /** Initialize the unit to perform conversion using singleToTof() and
    *singleFromTof()
@@ -162,8 +154,7 @@ public:
    *                      Diffractometer constants (DIFA, DIFC, TZERO)
    *                      Delta: unused
    */
-  void initialize(const double &_l1, const int &_emode,
-                  const UnitParametersMap &params);
+  void initialize(const double &_l1, const int &_emode, const UnitParametersMap &params);
 
   /** Finalize the initialization. This will be overridden by subclasses as
    * needed. */
@@ -201,52 +192,10 @@ protected:
   // Add a 'quick conversion' for a unit pair
   void addConversion(std::string to, const double &factor, const double &power = 1.0) const;
 
-  virtual void
-  validateExtraParams(int emode,
-                      std::map<UnitConversionParameters, double> &params);
-
-  virtual void
-  validateExtraParams(const int emode,
-                      const std::map<UnitConversionParameters, double> &params);
-
-  virtual void validateExtraParams(const int emode,
-                                   const ExtraParametersMap &params);
-
   // validate the contents of the unit parameters map. Throw
   // std::invalid_argument if it's a global error or std::runtime_error if it's
   // a detector specific error
-  virtual void validateUnitParams(const int emode,
-                                  const UnitParametersMap &params);
-
-  // validate the contents of the unit parameters map. Throw
-  // std::invalid_argument if it's a global error or std::runtime_error if it's
-  // a detector specific error
-  virtual void validateUnitParams(const int emode,
-                                  const UnitParametersMap &params);
-
-  // validate the contents of the unit parameters map. Throw
-  // std::invalid_argument if it's a global error or std::runtime_error if it's
-  // a detector specific error
-  virtual void validateUnitParams(const int emode,
-                                  const UnitParametersMap &params);
-
-  // validate the contents of the unit parameters map. Throw
-  // std::invalid_argument if it's a global error or std::runtime_error if it's
-  // a detector specific error
-  virtual void validateUnitParams(const int emode,
-                                  const UnitParametersMap &params);
-
-  // validate the contents of the unit parameters map. Throw
-  // std::invalid_argument if it's a global error or std::runtime_error if it's
-  // a detector specific error
-  virtual void validateUnitParams(const int emode,
-                                  const UnitParametersMap &params);
-
-  // validate the contents of the unit parameters map. Throw
-  // std::invalid_argument if it's a global error or std::runtime_error if it's
-  // a detector specific error
-  virtual void validateUnitParams(const int emode,
-                                  const UnitParametersMap &params);
+  virtual void validateUnitParams(const int emode, const UnitParametersMap &params);
 
   /// The unit values have been initialized
   bool initialized;
@@ -368,8 +317,7 @@ public:
   Wavelength();
 
 protected:
-  void validateUnitParams(const int emode,
-                          const UnitParametersMap &params) override;
+  void validateUnitParams(const int emode, const UnitParametersMap &params) override;
   double efixed;
   double sfpTo;      ///< Extra correction factor in to conversion
   double factorTo;   ///< Constant factor for to conversion
@@ -421,14 +369,12 @@ public:
   Energy_inWavenumber();
 
 protected:
-  void validateUnitParams(const int emode,
-                          const UnitParametersMap &params) override;
+  void validateUnitParams(const int emode, const UnitParametersMap &params) override;
   double factorTo;   ///< Constant factor for to conversion
   double factorFrom; ///< Constant factor for from conversion
 };
 
-MANTID_KERNEL_DLL double tofToDSpacingFactor(const double l1, const double l2,
-                                             const double twoTheta,
+MANTID_KERNEL_DLL double tofToDSpacingFactor(const double l1, const double l2, const double twoTheta,
                                              const double offset);
 
 //=================================================================================================
@@ -444,17 +390,14 @@ public:
   Unit *clone() const override;
   double conversionTOFMin() const override;
   double conversionTOFMax() const override;
-  double calcTofMin(const double difc, const double difa, const double tzero,
-                    const double tofmin = 0.);
-  double calcTofMax(const double difc, const double difa, const double tzero,
-                    const double tofmax = 0.);
+  double calcTofMin(const double difc, const double difa, const double tzero, const double tofmin = 0.);
+  double calcTofMax(const double difc, const double difa, const double tzero, const double tofmax = 0.);
 
   /// Constructor
   dSpacing();
 
 protected:
-  void validateUnitParams(const int emode,
-                          const UnitParametersMap &params) override;
+  void validateUnitParams(const int emode, const UnitParametersMap &params) override;
   std::string toDSpacingError;
   double difa;
   double difc;
@@ -480,8 +423,7 @@ public:
   dSpacingPerpendicular();
 
 protected:
-  void validateUnitParams(const int emode,
-                          const UnitParametersMap &params) override;
+  void validateUnitParams(const int emode, const UnitParametersMap &params) override;
   double twoTheta;
   double factorTo;   ///< Constant factor for to conversion
   double sfpTo;      ///< Extra correction factor in to conversion
@@ -507,8 +449,7 @@ public:
   MomentumTransfer();
 
 protected:
-  void validateUnitParams(const int emode,
-                          const UnitParametersMap &params) override;
+  void validateUnitParams(const int emode, const UnitParametersMap &params) override;
   double difc;
 };
 
@@ -550,8 +491,7 @@ public:
   DeltaE();
 
 protected:
-  void validateUnitParams(const int emode,
-                          const UnitParametersMap &params) override;
+  void validateUnitParams(const int emode, const UnitParametersMap &params) override;
   double efixed;
   double factorTo;    ///< Constant factor for to conversion
   double factorFrom;  ///< Constant factor for from conversion
@@ -611,8 +551,7 @@ public:
   Momentum();
 
 protected:
-  void validateUnitParams(const int emode,
-                          const UnitParametersMap &params) override;
+  void validateUnitParams(const int emode, const UnitParametersMap &params) override;
   double efixed;
   double sfpTo;      ///< Extra correction factor in to conversion
   double factorTo;   ///< Constant factor for to conversion
