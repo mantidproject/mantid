@@ -103,7 +103,7 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.view.set_datasets_in_function_browser(dataset_names)
 
-        self.assertEqual(self.view.number_of_datasets(), 3)
+        self.assertEqual(self.view.fit_function_options.number_of_datasets(), 3)
 
     def test_that_set_current_dataset_index_will_set_the_current_dataset_index_in_the_function_browser(self):
         dataset_names = ["Name1", "Name2", "Name3"]
