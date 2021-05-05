@@ -358,10 +358,11 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice_o
 
     def needs_reload(slice: ReducedSlice):
         output_parts_bundle = slice.parts_bundle
-        is_invalid_partial_workspaces = ((output_parts_bundle.output_workspace_count is None
-                                          and output_parts_bundle.output_workspace_norm is not None)
-                                         or (output_parts_bundle.output_workspace_count is not None
-                                             and output_parts_bundle.output_workspace_norm is None))
+
+        # Invalid partial when one is set to none, but not the other
+        is_invalid_partial_workspaces = \
+            (output_parts_bundle.output_workspace_count is None) ^ (output_parts_bundle.output_workspace_norm is None)
+
         output_transmission_bundle = slice.transmission_bundle
         is_invalid_transmission_workspaces = (output_transmission_bundle.calculated_transmission_workspace is None
                                               or output_transmission_bundle.unfitted_transmission_workspace is None)
