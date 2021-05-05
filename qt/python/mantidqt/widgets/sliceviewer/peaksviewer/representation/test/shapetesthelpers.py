@@ -73,19 +73,21 @@ def create_ellipsoid_info(radii, axes, bkgd_radii, translation = [0,0,0]):
     }
 
 
-def create_sphere_info(radius, bkgd_radii=(0.0, 0.0)):
+def create_sphere_info(radius, bkgd_radii=(0.0, 0.0), specify_bkgd=True):
     """
     Create description of a sphere
     :param radius: The radius of the sphere
     :param bkgd_radii: An tuple of (inner,outer) radii (0 by default)
+    :param specify_bkgd: have fields in dict for bkgd radii (in some instances they are not in JSON dict)
     """
     shape_descr = {
         "radius": radius,
     }
-    shape_descr.update({
-        "background_inner_radius": bkgd_radii[0],
-        "background_outer_radius": bkgd_radii[1]
-    })
+    if specify_bkgd:
+        shape_descr.update({
+            "background_inner_radius": bkgd_radii[0],
+            "background_outer_radius": bkgd_radii[1]
+        })
 
     return shape_descr
 

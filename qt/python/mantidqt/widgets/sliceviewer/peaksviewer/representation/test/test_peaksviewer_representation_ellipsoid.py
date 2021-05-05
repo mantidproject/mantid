@@ -43,7 +43,7 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
         peak_center = [1, 2, 3]
         sphere = create_sphere_info(radius=0.4, bkgd_radii=(0.8, 0.9))
         painter = MagicMock()
-        fg_color, bg_color = 'r', 'unused'
+        fg_color, bg_color = 'r', 'g'
         fake_alpha = 0.5
         compute_alpha_mock.return_value = fake_alpha
 
@@ -64,6 +64,29 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
             bkgd_height=1.8,
             thickness=0.1,
             bg_color=bg_color)
+
+    def test_draw_creates_circle_with_expected_properties_with_nonzero_alpha_and_no_background_in_JSON_shape(
+            self, compute_alpha_mock):
+        peak_center = [1, 2, 3]
+        sphere = create_sphere_info(radius=0.4, specify_bkgd=False)
+        painter = MagicMock()
+        fg_color, bg_color = 'r', 'unused'
+        fake_alpha = 0.5
+        compute_alpha_mock.return_value = fake_alpha
+
+        painted = draw_representation(EllipsoidalIntergratedPeakRepresentation, peak_center, sphere,
+                                      painter, fg_color, bg_color, shape_name="spherical")
+
+        self.assertTrue(painted is not None)
+        self._assert_painter_calls(
+            painter,
+            peak_center[:2],
+            cross_width=0.08,
+            signal_width=0.8,
+            signal_height=0.8,
+            angle=0,
+            alpha=fake_alpha,
+            fg_color=fg_color)
 
     def test_draw_creates_nothing_when_alpha_lt_zero(self, compute_alpha_mock):
         ellipsoid = create_test_ellipsoid()
