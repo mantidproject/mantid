@@ -32,7 +32,7 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
         return "HB3AIntegrateDetectorPeaks"
 
     def summary(self):
-        return "Integrate rocking-scan peak in detector space"
+        return "Integrate four-circle rocking-scan peak in detector space from HB3A"
 
     def PyInit(self):
         self.declareProperty(StringArrayProperty("InputWorkspace", direction=Direction.Input, validator=ADSValidator()),
