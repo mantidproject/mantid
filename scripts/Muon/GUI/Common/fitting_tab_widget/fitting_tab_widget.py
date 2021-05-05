@@ -24,11 +24,13 @@ class FittingTabWidget(object):
         is_frequency_domain = isinstance(context, FrequencyDomainAnalysisContext)
 
         if is_frequency_domain:
-            self.fitting_tab_view = BasicFittingView(parent, is_frequency_domain)
+            self.fitting_tab_view = BasicFittingView(parent)
+            self.fitting_tab_view.hide_fit_raw_checkbox()
             self.fitting_tab_model = BasicFittingModel(context, is_frequency_domain)
             self.fitting_tab_presenter = BasicFittingPresenter(self.fitting_tab_view, self.fitting_tab_model)
         else:
-            self.fitting_tab_view = TFAsymmetryFittingView(parent, is_frequency_domain)
+            self.fitting_tab_view = TFAsymmetryFittingView(parent)
+            self.fitting_tab_view.set_start_and_end_x_labels("Time Start", "Time End")
             self.fitting_tab_model = TFAsymmetryFittingModel(context, is_frequency_domain)
             self.fitting_tab_presenter = TFAsymmetryFittingPresenter(self.fitting_tab_view, self.fitting_tab_model)
 

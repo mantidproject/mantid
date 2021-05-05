@@ -18,17 +18,14 @@ class GeneralFittingOptionsView(QWidget, ui_general_fitting_options):
     The GeneralFittingOptionsView includes the Simultaneous fitting options, and the cyclic dataset display combobox.
     """
 
-    def __init__(self, parent: QWidget = None, is_frequency_domain: bool = False):
+    def __init__(self, parent: QWidget = None):
         """Initializes the GeneralFittingOptionsView. By default the simultaneous options are disabled."""
         super(GeneralFittingOptionsView, self).__init__(parent)
         self.setupUi(self)
 
         self.disable_simultaneous_fit_options()
 
-        if is_frequency_domain:
-            self.hide_simultaneous_fit_options()
-        else:
-            self._setup_simultaneous_fit_by_combo_box(MA_FIT_BY_OPTIONS)
+        self._setup_simultaneous_fit_by_combo_box(MA_FIT_BY_OPTIONS)
 
     def set_slot_for_fitting_mode_changed(self, slot) -> None:
         """Connect the slot for the simultaneous fit check box."""

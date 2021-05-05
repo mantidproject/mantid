@@ -23,14 +23,14 @@ class BasicFittingView(QWidget, ui_fitting_layout):
     The BasicFittingView has a FitControlsView and a FitFunctionOptionsView. It can be used for Single Fitting.
     """
 
-    def __init__(self, parent: QWidget = None, is_frequency_domain: bool = False):
+    def __init__(self, parent: QWidget = None):
         """Initialize the BasicFittingView and create the FitControlsView and a FitFunctionOptionsView."""
         super(BasicFittingView, self).__init__(parent)
         self.setupUi(self)
 
         self.fit_controls = FitControlsView(self)
         self.workspace_selector = WorkspaceSelectorView(self)
-        self.fit_function_options = FitFunctionOptionsView(self, is_frequency_domain)
+        self.fit_function_options = FitFunctionOptionsView(self)
 
         self.fit_controls_layout.addWidget(self.fit_controls)
         self.workspace_selector_layout.addWidget(self.workspace_selector)
@@ -233,6 +233,14 @@ class BasicFittingView(QWidget, ui_fitting_layout):
     def switch_to_single(self) -> None:
         """Switches the view to single fit mode."""
         self.fit_function_options.switch_to_single()
+
+    def hide_fit_raw_checkbox(self) -> None:
+        """Hides the Fit Raw checkbox in the fitting options."""
+        self.fit_function_options.hide_fit_raw_checkbox()
+
+    def set_start_and_end_x_labels(self, start_x_label: str, end_x_label: str) -> None:
+        """Sets the labels to use for the start and end X labels in the fit options table."""
+        self.fit_function_options.set_start_and_end_x_labels(start_x_label, end_x_label)
 
     def disable_view(self) -> None:
         """Disable all widgets in this fitting widget."""

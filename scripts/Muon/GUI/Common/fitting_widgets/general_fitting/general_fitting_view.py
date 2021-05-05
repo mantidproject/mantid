@@ -20,11 +20,11 @@ class GeneralFittingView(BasicFittingView):
     The GeneralFittingView derives from the BasicFittingView. It adds the GeneralFittingOptionsView to the widget.
     """
 
-    def __init__(self, parent: QWidget = None, is_frequency_domain: bool = False):
+    def __init__(self, parent: QWidget = None):
         """Initializes the GeneralFittingView, and adds the GeneralFittingOptionsView widget."""
         super(GeneralFittingView, self).__init__(parent)
 
-        self.general_fitting_options = GeneralFittingOptionsView(self, is_frequency_domain)
+        self.general_fitting_options = GeneralFittingOptionsView(self)
         self.general_fitting_options_layout.addWidget(self.general_fitting_options)
 
     def set_slot_for_fitting_mode_changed(self, slot) -> None:

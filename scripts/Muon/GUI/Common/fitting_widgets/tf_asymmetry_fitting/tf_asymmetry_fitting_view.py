@@ -19,9 +19,9 @@ class TFAsymmetryFittingView(GeneralFittingView):
     widget.
     """
 
-    def __init__(self, parent: QWidget = None, is_frequency_domain: bool = False):
+    def __init__(self, parent: QWidget = None):
         """Initializes the TFAsymmetryFittingView, and adds the TFAsymmetryFittingOptionsView widget."""
-        super(TFAsymmetryFittingView, self).__init__(parent, is_frequency_domain)
+        super(TFAsymmetryFittingView, self).__init__(parent)
 
         self.tf_asymmetry_mode_switcher = TFAsymmetryModeSwitcherView(self)
         self.tf_asymmetry_mode_switcher_layout.addWidget(self.tf_asymmetry_mode_switcher)
