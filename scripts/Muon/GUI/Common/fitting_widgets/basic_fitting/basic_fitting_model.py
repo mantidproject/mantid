@@ -241,7 +241,6 @@ class BasicFittingModel:
     def clear_cached_fit_functions(self) -> None:
         """Clears the cached fit functions and removes all fits from the fitting context."""
         self.single_fit_functions_cache = [None] * self.number_of_datasets
-        self.remove_all_fits_from_context()
 
     @property
     def fit_statuses(self) -> list:
