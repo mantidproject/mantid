@@ -19,7 +19,7 @@ from sans.common.general_functions import (quaternion_to_angle_and_axis, create_
                                            convert_instrument_and_detector_type_to_bank_name,
                                            convert_bank_name_to_detector_type_isis,
                                            get_facility, parse_diagnostic_settings, get_transmission_output_name,
-                                           get_output_name, parse_event_slice_setting)
+                                           get_output_name, parse_event_slice_setting, wav_range_to_str)
 from sans.state.StateObjects.StateData import StateData
 from sans.test_helper.test_director import TestDirector
 
@@ -603,6 +603,11 @@ class SANSFunctionsTest(unittest.TestCase):
         alg_manager_mock.reset_mock()
         create_managed_non_child_algorithm("TestAlg", **{"test_val": 5})
         alg_manager_mock.create.assert_called_once_with("TestAlg")
+
+    def test_wav_range_to_str(self):
+        input_values = (2, 200)
+        expected_output = "2-200"
+        self.assertEqual(expected_output, wav_range_to_str(input_values))
 
 
 class SANSEventSliceParsing(unittest.TestCase):
