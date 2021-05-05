@@ -232,7 +232,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
             # Use ConvertHFIRSCDtoQ (and normalize van), or use ConvertWANDSCtoQ which handles normalization itself
             if output == "Q-sample events":
-                norm_data = self.__normalization(scan, vanws)
+                norm_data = self.__normalization(scan, vanws, load_files)
                 minvals = self.getProperty("MinValues").value
                 maxvals = self.getProperty("MaxValues").value
                 merge = self.getProperty("MergeInputs").value
@@ -248,12 +248,11 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                                   Wavelength=wavelength, NormaliseBy=self.getProperty("NormaliseBy").value,
                                   BinningDim0=bin0, BinningDim1=bin1, BinningDim2=bin2,
                                   OutputWorkspace=out_ws_name)
+                if load_files:
+                    DeleteWorkspace(scan)
             else:
-                norm_data = self.__normalization(scan, vanws)
+                norm_data = self.__normalization(scan, vanws, load_files)
                 RenameWorkspace(norm_data, OutputWorkspace=out_ws_name)
-
-            if load_files:
-                DeleteWorkspace(scan)
 
         if has_multiple:
             out_ws_name = out_ws
@@ -269,10 +268,12 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace", out_ws_name)
 
-    def __normalization(self, data, vanadium):
+    def __normalization(self, data, vanadium, load_files):
         if vanadium:
             norm_data = ReplicateMD(ShapeWorkspace=data, DataWorkspace=vanadium)
             norm_data = DivideMD(LHSWorkspace=data, RHSWorkspace=norm_data)
+        elif load_files:
+            norm_data = data
         else:
             norm_data = CloneMDWorkspace(data)
 
@@ -284,10 +285,17 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             norm_data *= scan_step
 
         normaliseBy = self.getProperty("NormaliseBy").value
+
+        monitors = np.asarray(data.getExperimentInfo(0).run().getProperty('monitor').value)
+        times = np.asarray(data.getExperimentInfo(0).run().getProperty('time').value)
+
+        if load_files and vanadium:
+            DeleteWorkspace(data)
+
         if normaliseBy == "Monitor":
-            scale = np.asarray(data.getExperimentInfo(0).run().getProperty('monitor').value)
+            scale = monitors
         elif normaliseBy == "Time":
-            scale = np.asarray(data.getExperimentInfo(0).run().getProperty('time').value)
+            scale = times
         else:
             return norm_data
 

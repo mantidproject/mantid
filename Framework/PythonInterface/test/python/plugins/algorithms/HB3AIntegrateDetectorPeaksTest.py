@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import numpy as np
-from mantid.simpleapi import HB3AIntegrateDetectorPeaks, HB3AAdjustSampleNorm
+from mantid.simpleapi import HB3AIntegrateDetectorPeaks, HB3AAdjustSampleNorm, DeleteWorkspace
 
 
 class HB3ADetectorPeaksTest(unittest.TestCase):
@@ -101,6 +101,9 @@ class HB3ADetectorPeaksTest(unittest.TestCase):
         self.assertAlmostEqual(peak0.getL(), 6, places=1)
         self.assertAlmostEqual(peak0.getIntensity(), 960.977625, delta=1e-5)
         self.assertAlmostEqual(peak0.getSigmaIntensity(), 10.621905, delta=1e-5)
+
+        DeleteWorkspace(data)
+        DeleteWorkspace(peaks)
 
 
 if __name__ == '__main__':
