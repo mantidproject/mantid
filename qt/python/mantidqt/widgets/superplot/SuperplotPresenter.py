@@ -26,6 +26,9 @@ class SuperplotPresenter:
         self._model = SuperplotModel()
         self._canvas = canvas
 
+        if parent:
+            parent.plot_updated.connect(self.onPlotUpdated)
+
         self._model.workspaceDeleted.connect(self.onWorkspaceDeleted)
         self._model.workspaceRenamed.connect(self.onWorkspaceRenamed)
         self._model.workspaceReplaced.connect(self.onWorkspaceReplaced)
@@ -408,3 +411,33 @@ class SuperplotPresenter:
             wsName (str): name of the workspace
         """
         self._updatePlot()
+
+    def onPlotUpdated(self):
+        """
+        Triggered when the plot window is updated (drag and drop only for now).
+        This methods redo an init procedure to synchronize the list with the
+        plot.
+        """
+        selection = self._view.getSelection()
+        figure = self._canvas.figure
+        axes = figure.gca()
+        artists = axes.get_tracked_artists()
+        self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
+                                      self.BIN_MODE_TEXT])
+        for artist in artists:
+            ws, specIndex = \
+                    axes.get_artists_workspace_and_workspace_index(artist)
+            if ws.blocksize() > 1:
+                self._model.setSpectrumMode()
+                self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT])
+            else:
+                self._model.setBinMode()
+                self._view.setAvailableModes([self.BIN_MODE_TEXT])
+            wsName = ws.name()
+            self._model.addWorkspace(wsName)
+            self._model.addData(wsName, specIndex)
+
+        self._updateList()
+        self._updateSpectrumSlider()
+        self._updatePlot()
+        self._view.setSelection(selection)

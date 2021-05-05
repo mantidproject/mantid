@@ -29,6 +29,7 @@ class FigureWindow(QMainWindow, ObservingView):
     visibility_changed = Signal()
     show_context_menu = Signal()
     close_signal = Signal()
+    plot_updated = Signal()
 
     def __init__(self, canvas, parent=None, window_flags=None):
         if window_flags is not None:
@@ -105,6 +106,7 @@ class FigureWindow(QMainWindow, ObservingView):
 
         self._plot_on_here(workspace_names, ax)
         QMainWindow.dropEvent(self, event)
+        self.plot_updated.emit()
 
     # private api
 
