@@ -276,23 +276,22 @@ class GeneralFittingModelTest(unittest.TestCase):
                                                                                                                       mock_sort,
                                                                                                                       mock_get_workspaces):
         workspace_names = ["Name"]
-        runs = ["62260"]
+        runs = "All"
         group_or_pair = "long"
         self.model.simultaneous_fitting_mode = False
 
-        self.model._get_selected_runs_groups_and_pairs_for_single_fit_mode = \
-            mock.MagicMock(return_value=(runs, [group_or_pair]))
+        self.model._get_selected_groups_and_pairs = mock.MagicMock(return_value=([group_or_pair]))
 
         mock_get_workspaces.return_value = workspace_names
         mock_sort.return_value = workspace_names
 
         self.assertEqual(self.model.get_workspace_names_to_display_from_context(), workspace_names)
 
-        self.model._get_selected_runs_groups_and_pairs_for_single_fit_mode.assert_called_with()
+        self.model._get_selected_groups_and_pairs.assert_called_with()
         mock_get_workspaces.assert_called_with(runs, group_or_pair)
         mock_sort.assert_called_with(workspace_names)
 
-        self.assertEqual(1, self.model._get_selected_runs_groups_and_pairs_for_single_fit_mode.call_count)
+        self.assertEqual(1, self.model._get_selected_groups_and_pairs.call_count)
         self.assertEqual(1, mock_get_workspaces.call_count)
         self.assertEqual(1, mock_sort.call_count)
 
