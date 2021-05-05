@@ -209,8 +209,7 @@ class SuperplotPresenter:
 
         figure = self._canvas.figure
         axes = figure.gca()
-        for line in axes.get_lines():
-            line.remove()
+        axes.remove_all_curves()
         legend = axes.get_legend()
         if legend:
             legend.remove()
