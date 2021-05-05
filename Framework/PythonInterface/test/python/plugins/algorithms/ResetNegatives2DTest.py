@@ -81,8 +81,8 @@ class ResetNegatives2DTest(unittest.TestCase):
             of.write(text)
         self._assert_workspace_positive(
             os.path.join(self._test_dir, "ref_resetNegatives_addMinimum.txt"),
-            os.path.join(self._test_dir, "test_ResetNegatives2D_addMinimum.p2d"))
-        
+            os.path.join(self._test_dir, "test_ResetNegatives2D_addMinimum.p2d"))
+
 
     #def test_resetNegatives2D_resetValue(self):
     #    ResetNegatives2D(self._workspace1, AddMinimum=False, ResetValue=0)
