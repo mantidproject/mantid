@@ -107,7 +107,7 @@ class BasicFittingPresenter:
         """Handle when undo fit is clicked."""
         self.model.use_cached_function()
         self.clear_cached_fit_functions()
-        self.model.remove_all_fits_from_context()
+        self.model.remove_latest_fit_from_context()
 
         self.reset_fit_status_and_chi_squared_information()
 

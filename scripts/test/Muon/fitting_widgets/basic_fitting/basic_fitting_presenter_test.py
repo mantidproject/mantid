@@ -149,7 +149,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.presenter.reset_fit_status_and_chi_squared_information.assert_called_once_with()
         self.presenter.update_fit_function_in_view_from_model.assert_called_once_with()
         self.model.update_plot_guess.assert_called_once_with(True)
-        self.model.remove_all_fits_from_context.assert_called_once_with()
+        self.model.remove_latest_fit_from_context.assert_called_once_with()
         self.presenter.selected_fit_results_changed.notify_subscribers.assert_called_once_with([])
 
     def test_that_handle_fit_clicked_will_show_a_warning_if_no_data_is_loaded(self):
