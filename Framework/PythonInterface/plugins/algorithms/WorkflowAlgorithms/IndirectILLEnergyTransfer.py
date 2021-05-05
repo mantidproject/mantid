@@ -186,7 +186,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 issues['ManualPSDIntegrationRange'] = 'Specify comma separated pixel range, e.g. 1,128'
             elif self._psd_int_range[0] < 1 or self._psd_int_range[1] > N_PIXELS_PER_TUBE \
                     or self._psd_int_range[0] >= self._psd_int_range[1]:
-                issues['ManualPSDIntegrationRange'] = 'Start or end pixel number out is of range [1-128], or has wrong order'
+                issues['ManualPSDIntegrationRange'] = 'Start or end pixel number is out of range [1-128], or has wrong order'
 
         group_by = self.getProperty('GroupPixelsBy').value
         if group_by <= 0 or (group_by & (group_by - 1)) != 0:  # quick check if the number is a power of 2
@@ -217,15 +217,11 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         self._pulse_chopper = self.getPropertyValue('PulseChopper')
         self._group_detectors = self.getProperty('GroupDetectors').value
 
-        if self._map_file or (self._psd_int_range[0] == 1 and self._psd_int_range[1] == N_PIXELS_PER_TUBE):
-            self._use_map_file = True
-        else:
-            self._use_map_file = False
+        self._use_map_file = self._map_file != ""
 
-    def _load_map_file(self, ws):
+    def _load_map_file(self):
         """
         Loads the detector grouping map file
-        @param ws :: the workspace
         @throws RuntimeError :: if neither the user defined nor the default file is found
         """
 
@@ -236,20 +232,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         ipf_name = self._instrument_name + '_' + self._analyser + '_' + self._reflection + '_Parameters.xml'
         self._parameter_file = os.path.join(idf_directory, ipf_name)
         self.log().information('Set parameter file : {0}'.format(self._parameter_file))
-
-        if self._use_map_file:
-            if self._map_file == '':
-                # path name for default map file
-                if self.getProperty('DiscardSingleDetectors').value:
-                    grouping_filename = self._instrument.getStringParameter('Workflow.GroupingFile.PSDOnly')[0]
-                else:
-                    sd_count = self._get_single_detectors_number(ws)
-                    grouping_file = 'Workflow.GroupingFile' if sd_count else 'Workflow.GroupingFile.3SD'
-                    grouping_filename = self._instrument.getStringParameter(grouping_file)[0]
-
-                self._map_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
-
-            self.log().information('Set detector map file : {0}'.format(self._map_file))
 
     def _mask(self, ws, xstart, xend):
         """
@@ -319,10 +301,10 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         """
 
         y = mtd[ws].readY(0)
-        nonzero = np.argwhere(y!=0)
+        nonzero = np.argwhere(y != 0)
         start = nonzero[0][0] if nonzero.any() else 0
         end = nonzero[-1][0] if nonzero.any() else len(y)
-        return start,end
+        return start, end
 
     def _setup_run_properties(self):
         """
@@ -337,22 +319,22 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         if run.hasProperty('Doppler.mirror_sense'):
             self._mirror_sense = run.getLogData('Doppler.mirror_sense').value
         else:
-            raise RuntimeError('Mirror sense '+ message)
+            raise RuntimeError('Mirror sense ' + message)
 
         if run.hasProperty('Doppler.maximum_delta_energy'):
             self._doppler_energy = run.getLogData('Doppler.maximum_delta_energy').value
         else:
-            raise RuntimeError('Maximum delta energy '+ message)
+            raise RuntimeError('Maximum delta energy ' + message)
 
         if run.hasProperty('Doppler.doppler_speed'):
             self._doppler_speed = run.getLogData('Doppler.doppler_speed').value
         else:
-            raise RuntimeError('Doppler speed '+ message)
+            raise RuntimeError('Doppler speed ' + message)
 
         if run.hasProperty('Doppler.velocity_profile'):
             self._velocity_profile = run.getLogData('Doppler.velocity_profile').value
         else:
-            raise RuntimeError('Velocity profile '+ message)
+            raise RuntimeError('Velocity profile ' + message)
 
         if self._doppler_energy == 0.:
             self._reduction_type = 'EFWS'
@@ -376,7 +358,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         self._instrument = mtd[self._red_ws].getInstrument()
 
-        self._load_map_file(self._red_ws)
+        self._load_map_file()
 
         run = str(mtd[self._red_ws].getRun().getLogData('run_number').value)[:6]
 
@@ -401,12 +383,12 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 size = mtd[self._ws].blocksize()
                 left = self._ws + '_left'
                 right = self._ws + '_right'
-                _extract_workspace(self._ws, left, 0, int(size/2))
-                _extract_workspace(self._ws, right, int(size/2), size)
+                _extract_workspace(self._ws, left, 0, size//2)
+                _extract_workspace(self._ws, right, size//2, size)
                 DeleteWorkspace(self._ws)
                 self._reduce_one_wing_doppler(left)
                 self._reduce_one_wing_doppler(right)
-                GroupWorkspaces(InputWorkspaces=[left,right],OutputWorkspace=self._red_ws)
+                GroupWorkspaces(InputWorkspaces=[left, right], OutputWorkspace=self._red_ws)
 
             elif self._mirror_sense == 16:    # one wing
 
@@ -781,6 +763,11 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                                .format(pattern))
 
         GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws, GroupingPattern=pattern)
+
+        # detector grouping using a pattern does not use the same convention for spectrum numbering than
+        # with grouping files, so to keep consistency (and the tests happy), we set them manually
+        for i in range(mtd[ws].getNumberHistograms()):
+            mtd[ws].getSpectrum(i).setSpectrumNo(i)
 
     @staticmethod
     def _get_single_detectors_number(ws):
