@@ -20,10 +20,12 @@ detector scan, either omega or chi in degrees. This reduced workspace
 is then fitted using :ref:`Fit <algm-Fit>` with a :ref:`flat
 background <func-FlatBackground>` and a :ref:`Gaussian
 <func-Gaussian>`, then the area of the Gaussian is used as the peak
-intensity and added to the output workspace.
+intensity and added to the output workspace. An optionally fitting
+range of the scan axis can be provided with `StartX` and `EndX` in
+degrees.
 
 The `OptimizeQVector` option will convert the input data into Q and
-use :ref:`CentroidPeaksdMD <algm-CentroidPeaksdMD>` to find the
+use :ref:`CentroidPeaksdMD <algm-CentroidPeaksMD>` to find the
 correct Q-vector starting from the known HKL and UB matrix of the
 peaks. This will not effect the integration of the peak but allows the
 UB matrix to be refined afterwards.
@@ -40,15 +42,19 @@ Usage
    import matplotlib.pyplot as plt
 
    data = HB3AAdjustSampleNorm(Filename='HB3A_data.nxs', OutputType='Detector')
-   integrated_peaks = HB3AIntegrateDetectorPeaks(data, ChiSqMax=100, OutputFitResults=True)
+   peaks = HB3AIntegrateDetectorPeaks(data,
+                                      ChiSqMax=100,
+                                      OutputFitResults=True,
+                                      LowerLeft=[200, 200],
+                                      UpperRight=[312, 312])
    fig = plt.figure(figsize=(9.6, 4.8))
    ax1 = fig.add_subplot(121, projection='mantid')
    ax2 = fig.add_subplot(122, projection='mantid')
-   ax1.pcolormesh(mtd['data_ROI'], transpose=True)
+   ax1.pcolormesh(mtd['peaks_data_ROI'], transpose=True)
    ax1.set_title("ROI")
-   ax2.plot(mtd['data_Workspace'], wkspIndex=0, label='data')
-   ax2.plot(mtd['data_Workspace'], wkspIndex=1, label='calc')
-   ax2.plot(mtd['data_Workspace'], wkspIndex=2, label='diff')
+   ax2.plot(mtd['peaks_data_Workspace'], wkspIndex=0, label='data')
+   ax2.plot(mtd['peaks_data_Workspace'], wkspIndex=1, label='calc')
+   ax2.plot(mtd['peaks_data_Workspace'], wkspIndex=2, label='diff')
    ax2.legend()
    ax2.set_title("Fitted integrated peak")
    fig.tight_layout()

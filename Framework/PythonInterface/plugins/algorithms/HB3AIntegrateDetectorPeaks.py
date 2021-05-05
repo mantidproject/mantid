@@ -7,7 +7,7 @@
 from mantid.api import (AlgorithmFactory, IPeaksWorkspaceProperty,
                         PythonAlgorithm, PropertyMode, ADSValidator,
                         WorkspaceGroup)
-from mantid.kernel import (Direction, IntArrayProperty,
+from mantid.kernel import (Direction, IntArrayProperty, Property,
                            IntArrayLengthValidator, StringArrayProperty)
 from mantid.simpleapi import (mtd, IntegrateMDHistoWorkspace,
                               CreatePeaksWorkspace, DeleteWorkspace,
@@ -43,9 +43,15 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
         self.declareProperty(IntArrayProperty("UpperRight", [384, 384], IntArrayLengthValidator(2),
                                               direction=Direction.Input), doc="Region of interest upper-right corner, in detector pixels")
 
+        self.declareProperty("StartX", Property.EMPTY_DBL,
+                             doc="The start of the scan axis fitting range in degrees, either omega or chi axis.")
+        self.declareProperty("EndX", Property.EMPTY_DBL,
+                             doc="The end of the scan axis fitting range in degrees, either omega or chi axis.")
+
         self.declareProperty("ScaleFactor", 1.0, doc="scale the integrated intensity by this value")
-        self.declareProperty("ChiSqMax", 10.0, doc="Fitting resulting in chisq higher than this won't be added to the output")
-        self.declareProperty("SignalNoiseMin", 1.0, doc="Minimum Signal/Noice ratio of peak to be added to the output")
+        self.declareProperty("ChiSqMax", 10.0, doc="Fitting resulting in chi-sqaured higher than this won't be added to the output")
+        self.declareProperty("SignalNoiseMin", 1.0,
+                             doc="Minimum Signal/Noice ratio (Intensity/SigmaIntensity) of peak to be added to the output")
         self.declareProperty("ApplyLorentz", True, doc="If to apply Lorentz Correction to intensity")
 
         self.declareProperty("OutputFitResults", False, doc="This will output the fitting result workspace and a ROI workspace")
@@ -69,6 +75,8 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
         signalNoiseMin = self.getProperty("SignalNoiseMin").value
         ll = self.getProperty("LowerLeft").value
         ur = self.getProperty("UpperRight").value
+        startX = self.getProperty('StartX').value
+        endX = self.getProperty('EndX').value
         use_lorentz = self.getProperty("ApplyLorentz").value
         optmize_q = self.getProperty("OptimizeQVector").value
         output_fit = self.getProperty("OutputFitResults").value
@@ -100,6 +108,7 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                 fit_result = Fit(function, data, Output=str(data),
                                  OutputParametersOnly=not output_fit,
                                  Constraints=constraints,
+                                 StartX=startX, EndX=endX,
                                  EnableLogging=False)
             except RuntimeError as e:
                 self.log().warning("Failed to fit workspace {}: {}".format(inWS, e))
@@ -155,15 +164,15 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                     DeleteWorkspace(__tmp_pw, EnableLogging=False)
 
                     if output_fit:
-                        fit_results.addWorkspace(RenameWorkspace(tmp_inWS+'_Workspace', inWS+'_Workspace', EnableLogging=False))
-                        fit_results.addWorkspace(RenameWorkspace(tmp_inWS+'_Parameters', inWS+'_Parameters', EnableLogging=False))
+                        fit_results.addWorkspace(RenameWorkspace(tmp_inWS+'_Workspace', outWS+"_"+inWS+'_Workspace', EnableLogging=False))
+                        fit_results.addWorkspace(RenameWorkspace(tmp_inWS+'_Parameters', outWS+"_"+inWS+'_Parameters', EnableLogging=False))
                         fit_results.addWorkspace(RenameWorkspace(tmp_inWS+'_NormalisedCovarianceMatrix',
-                                                                 inWS+'_NormalisedCovarianceMatrix', EnableLogging=False))
+                                                                 outWS+"_"+inWS+'_NormalisedCovarianceMatrix', EnableLogging=False))
                         fit_results.addWorkspace(IntegrateMDHistoWorkspace(InputWorkspace=inWS,
                                                                            P1Bin=f'{ll[1]},0,{ur[1]}',
                                                                            P2Bin=f'{ll[0]},0,{ur[0]}',
                                                                            P3Bin='0,{}'.format(mtd[inWS].getDimension(2).getNBins()),
-                                                                           OutputWorkspace=inWS+"_ROI", EnableLogging=False))
+                                                                           OutputWorkspace=outWS+"_"+inWS+"_ROI", EnableLogging=False))
                 else:
                     self.log().warning("Skipping peak from {} because Signal/Noise={:.3f} which is less than {}"
                                        .format(inWS, integrated_intensity/integrated_intensity_error, signalNoiseMin))

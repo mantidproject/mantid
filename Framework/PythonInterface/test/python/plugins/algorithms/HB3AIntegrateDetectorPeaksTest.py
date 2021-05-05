@@ -91,6 +91,17 @@ class HB3ADetectorPeaksTest(unittest.TestCase):
         for i in range(3):
             self.assertNotAlmostEqual(q_sample[i], expected_q_sample[i])
 
+        # Try StartX and EndX, should just change the peak intensity slightly
+        peaks = HB3AIntegrateDetectorPeaks(data, ChiSqMax=100, ApplyLorentz=False, OptimizeQVector=False,
+                                           StartX=12.6, EndX=100)
+        self.assertEqual(peaks.getNumberPeaks(), 1)
+        peak0 = peaks.getPeak(0)
+        self.assertAlmostEqual(peak0.getH(), 0, places=1)
+        self.assertAlmostEqual(peak0.getK(), 0, places=1)
+        self.assertAlmostEqual(peak0.getL(), 6, places=1)
+        self.assertAlmostEqual(peak0.getIntensity(), 960.977625, delta=1e-5)
+        self.assertAlmostEqual(peak0.getSigmaIntensity(), 10.621905, delta=1e-5)
+
 
 if __name__ == '__main__':
     unittest.main()
