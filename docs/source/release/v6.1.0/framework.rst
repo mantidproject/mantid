@@ -75,6 +75,7 @@ Bugfixes
 - Fix calculation of region where scattering points are sampled in :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` when a shape is defined for the environment but not the sample
 - Fix crash on macOS when creating a UnitLabel with non-ascii characters using the single argument constructor
 - Fix bug in the ass calculation in :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>` when run on shapes already present on input workspace
+- Integrated spherical peaks are now plotted correctly in the non-orthogonal view of sliceviewer.
 - Prevent crash when attempting to sort invalid data when overlaying a peaks workspace in sliceviewer.
 
 :ref:`Release 6.1.0 <v6.1.0>`
