@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>595</width>
-    <height>23</height>
+    <height>25</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,6 +26,25 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
+   <item row="0" column="0">
+    <widget class="QCheckBox" name="plot_guess_checkbox">
+     <property name="minimumSize">
+      <size>
+       <width>250</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>250</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Plot guess</string>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="1">
     <widget class="QFrame" name="frame">
      <layout class="QHBoxLayout" name="horizontalLayout">
@@ -79,25 +98,6 @@
        </widget>
       </item>
      </layout>
-    </widget>
-   </item>
-   <item row="0" column="0">
-    <widget class="QCheckBox" name="plot_guess_checkbox">
-     <property name="minimumSize">
-      <size>
-       <width>180</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>180</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>Plot guess</string>
-     </property>
     </widget>
    </item>
   </layout>

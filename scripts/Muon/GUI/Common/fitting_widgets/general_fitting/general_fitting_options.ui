@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -27,47 +27,29 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QFrame" name="frame">
-     <layout class="QGridLayout" name="gridLayout_2">
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
-       <number>0</number>
-      </property>
-      <item row="0" column="3" colspan="2">
-       <widget class="QComboBox" name="simul_fit_by_specifier"/>
-      </item>
-      <item row="0" column="0">
-       <widget class="QCheckBox" name="simul_fit_checkbox">
-        <property name="minimumSize">
-         <size>
-          <width>120</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>300</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Simultaneous over</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1" colspan="2">
-       <widget class="QComboBox" name="simul_fit_by_combo"/>
-      </item>
-     </layout>
+    <widget class="QCheckBox" name="simul_fit_checkbox">
+     <property name="minimumSize">
+      <size>
+       <width>250</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>300</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Simultaneous over</string>
+     </property>
     </widget>
+   </item>
+   <item>
+    <widget class="QComboBox" name="simul_fit_by_combo"/>
+   </item>
+   <item>
+    <widget class="QComboBox" name="simul_fit_by_specifier"/>
    </item>
   </layout>
  </widget>

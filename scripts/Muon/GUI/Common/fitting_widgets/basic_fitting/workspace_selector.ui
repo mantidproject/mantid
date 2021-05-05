@@ -30,7 +30,7 @@
     <widget class="QLabel" name="workspace_combo_box_label">
      <property name="minimumSize">
       <size>
-       <width>120</width>
+       <width>250</width>
        <height>0</height>
       </size>
      </property>
