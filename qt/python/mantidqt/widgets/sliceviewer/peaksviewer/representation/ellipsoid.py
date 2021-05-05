@@ -108,7 +108,10 @@ class EllipsoidalIntergratedPeakRepresentation():
 def convert_spherical_representation_to_ellipsoid(shape_info):
     # convert shape_info dict from sphere to ellipsoid for plotting
     for key in ['radius', 'background_inner_radius', 'background_outer_radius']:
-        shape_info[f"{key}{0}"] = shape_info.pop(key)
+        if key in shape_info:
+            shape_info[f"{key}{0}"] = shape_info.pop(key)
+        else:
+            shape_info[f"{key}{0}"] = 0.0  # null value
         for idim in [1, 2]:
             shape_info[f"{key}{idim}"] = shape_info[f"{key}{0}"]
     # add axes along basis vecs of frame and set 0 translation
