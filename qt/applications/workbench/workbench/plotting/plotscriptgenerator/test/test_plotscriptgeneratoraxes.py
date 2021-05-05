@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from unittest.mock import Mock
 from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands,
                                                          generate_axis_label_commands)
+from workbench.plotting.plotscriptgenerator import generate_script
 
 
 class PlotGeneratorAxisTest(unittest.TestCase):
@@ -70,6 +71,20 @@ class PlotGeneratorAxisTest(unittest.TestCase):
         ax.set_ylim([0, 4])
         self.assertEqual(['set_xlim([-5.0, 5.0])', 'set_ylim([0.0, 4.0])'],
                          generate_axis_limit_commands(ax))
+        plt.close()
+        del fig
+
+    def test_generate_tick_commands_for_tiled_plot(self):
+        fig, axes = plt.subplots(ncols=2, nrows=2, subplot_kw={'projection': 'mantid'})
+        for ax in fig.get_axes():
+            ax.plot([-10, 10], [1, 2])
+        script = generate_script(fig)
+        # Should be axes[i][j].tick_params for multiple subplots.
+        self.assertNotIn("axes.tick_params", script)
+        self.assertIn("axes[0][0].tick_params", script)
+        self.assertIn("axes[0][1].tick_params", script)
+        self.assertIn("axes[1][0].tick_params", script)
+        self.assertIn("axes[1][1].tick_params", script)
         plt.close()
         del fig
 
