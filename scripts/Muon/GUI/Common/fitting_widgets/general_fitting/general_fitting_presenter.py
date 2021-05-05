@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import IFunction
-from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable, GenericObserverWithArgPassing
+from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
 
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_presenter import BasicFittingPresenter
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model import GeneralFittingModel
@@ -24,11 +24,8 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.fitting_mode_changed_notifier = GenericObservable()
         self.simultaneous_fit_by_specifier_changed = GenericObservable()
 
-        self.selected_group_pair_observer = GenericObserver(self.handle_selected_group_pair_changed)
-        self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
         self.fit_parameter_updated_observer = GenericObserver(self.update_fit_function_in_view_from_model)
 
-        self.double_pulse_observer = GenericObserverWithArgPassing(self.handle_pulse_type_changed)
         self.model.context.gui_context.add_non_calc_subscriber(self.double_pulse_observer)
 
         self.view.set_slot_for_fitting_mode_changed(self.handle_fitting_mode_changed)
@@ -43,27 +40,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.model.simultaneous_fit_by = self.view.simultaneous_fit_by
         self.model.simultaneous_fit_by_specifier = self.view.simultaneous_fit_by_specifier
         self.model.global_parameters = self.view.global_parameters
-
-    def handle_instrument_changed(self) -> None:
-        """Handles when an instrument is changed and switches to normal fitting mode. Overridden by child."""
-        self._update_plot = False
-        self.update_and_reset_all_data()
-        self._update_plot = True
-        self.clear_cached_fit_functions()
-        self.model.remove_all_fits_from_context()
-
-    def handle_pulse_type_changed(self, updated_variables: dict) -> None:
-        """Handles when double pulse mode is switched on and switches to normal fitting mode."""
-        if "DoublePulseEnabled" in updated_variables:
-            self._update_plot = False
-            self.update_and_reset_all_data()
-            self._update_plot = True
-
-    def handle_selected_group_pair_changed(self) -> None:
-        """Update the displayed workspaces when the selected group/pairs change in grouping tab."""
-        self._update_plot = False
-        self.update_and_reset_all_data()
-        self._update_plot = True
 
     def handle_fitting_mode_changed(self) -> None:
         """Handle when the fitting mode is changed to or from simultaneous fitting."""
@@ -132,6 +108,11 @@ class GeneralFittingPresenter(BasicFittingPresenter):
     def update_simultaneous_fit_by_specifiers_in_view(self) -> None:
         """Updates the entries in the simultaneous fit by specifier combo box."""
         self.view.setup_fit_by_specifier(self.model.get_simultaneous_fit_by_specifiers_to_display_from_context())
+
+    def update_fit_function_in_view_from_model(self) -> None:
+        """Updates the parameters of a fit function shown in the view."""
+        self.view.set_current_dataset_index(self.model.current_dataset_index)
+        self.view.update_fit_function(self.model.get_active_fit_function(), self.model.global_parameters)
 
     def update_fit_functions_in_model_from_view(self) -> None:
         """Updates the fit functions stored in the model using the view."""

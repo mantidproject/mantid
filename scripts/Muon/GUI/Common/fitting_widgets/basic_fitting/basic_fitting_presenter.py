@@ -45,6 +45,9 @@ class BasicFittingPresenter:
         self.gui_context_observer = GenericObserverWithArgPassing(self.handle_gui_changes_made)
         self.update_view_from_model_observer = GenericObserverWithArgPassing(
             self.handle_ads_clear_or_remove_workspace_event)
+        self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
+        self.selected_group_pair_observer = GenericObserver(self.handle_selected_group_pair_changed)
+        self.double_pulse_observer = GenericObserverWithArgPassing(self.handle_pulse_type_changed)
 
         self.fsg_model = None
         self.fsg_view = None
@@ -97,6 +100,27 @@ class BasicFittingPresenter:
             self.disable_fitting_notifier.notify_subscribers()
         else:
             self.enable_editing_notifier.notify_subscribers()
+
+    def handle_instrument_changed(self) -> None:
+        """Handles when an instrument is changed and switches to normal fitting mode. Overridden by child."""
+        self._update_plot = False
+        self.update_and_reset_all_data()
+        self._update_plot = True
+        self.clear_cached_fit_functions()
+        self.model.remove_all_fits_from_context()
+
+    def handle_selected_group_pair_changed(self) -> None:
+        """Update the displayed workspaces when the selected group/pairs change in grouping tab."""
+        self._update_plot = False
+        self.update_and_reset_all_data()
+        self._update_plot = True
+
+    def handle_pulse_type_changed(self, updated_variables: dict) -> None:
+        """Handles when double pulse mode is switched on and switches to normal fitting mode."""
+        if "DoublePulseEnabled" in updated_variables:
+            self._update_plot = False
+            self.update_and_reset_all_data()
+            self._update_plot = True
 
     def handle_plot_mode_changed(self, plot_mode: PlotMode) -> None:
         """Handles when the tab has been changed. Updates the plot guess."""
@@ -316,7 +340,7 @@ class BasicFittingPresenter:
     def update_fit_function_in_view_from_model(self) -> None:
         """Updates the parameters of a fit function shown in the view."""
         self.view.set_current_dataset_index(self.model.current_dataset_index)
-        self.view.update_fit_function(self.model.get_active_fit_function(), self.model.global_parameters)
+        self.view.update_fit_function(self.model.get_active_fit_function())
 
     def update_fit_functions_in_model_from_view(self) -> None:
         """Updates the fit functions stored in the model using the view."""

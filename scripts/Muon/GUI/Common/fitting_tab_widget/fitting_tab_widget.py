@@ -5,9 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.contexts.frequency_domain_analysis_context import FrequencyDomainAnalysisContext
-from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model import GeneralFittingModel
-from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_presenter import GeneralFittingPresenter
-from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_view import GeneralFittingView
+from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
+from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_presenter import BasicFittingPresenter
+from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_view import BasicFittingView
 from Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_model import TFAsymmetryFittingModel
 from Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_presenter \
     import TFAsymmetryFittingPresenter
@@ -24,9 +24,9 @@ class FittingTabWidget(object):
         is_frequency_domain = isinstance(context, FrequencyDomainAnalysisContext)
 
         if is_frequency_domain:
-            self.fitting_tab_view = GeneralFittingView(parent, is_frequency_domain)
-            self.fitting_tab_model = GeneralFittingModel(context, is_frequency_domain)
-            self.fitting_tab_presenter = GeneralFittingPresenter(self.fitting_tab_view, self.fitting_tab_model)
+            self.fitting_tab_view = BasicFittingView(parent, is_frequency_domain)
+            self.fitting_tab_model = BasicFittingModel(context, is_frequency_domain)
+            self.fitting_tab_presenter = BasicFittingPresenter(self.fitting_tab_view, self.fitting_tab_model)
         else:
             self.fitting_tab_view = TFAsymmetryFittingView(parent, is_frequency_domain)
             self.fitting_tab_model = TFAsymmetryFittingModel(context, is_frequency_domain)
