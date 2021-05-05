@@ -79,7 +79,7 @@ class SuperplotView(QWidget):
         side.resized.connect(self._presenter.onResize)
         side.visibilityChanged.connect(self._presenter.onVisibilityChanged)
         side.addButton.clicked.connect(self._presenter.onAddButtonClicked)
-        side.workspacesList.itemClicked.connect(
+        side.workspacesList.itemSelectionChanged.connect(
                 self._presenter.onWorkspaceSelectionChanged)
         bottom = self._bottomView
         bottom.resized.connect(self._presenter.onResize)
