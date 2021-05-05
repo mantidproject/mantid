@@ -19,8 +19,8 @@ from typing import Optional
 
 class PeakActionsEvent(enum.Enum):
     ACTIVE_WORKSPACE_CHANGED = 1
-    ERASE_PEAK_CHANGED = 2
-    ADD_PEAK_CHANGED = 3
+    ERASE_BUTTON_CHANGED = 2
+    ADD_BUTTON_CHANGED = 3
 
 
 class PeakActionsPresenter:
@@ -30,6 +30,7 @@ class PeakActionsPresenter:
                  view: PeakActionsView):
         self._model: PeakActionsModel = model
         self._view: PeakActionsView = view
+        view.subscribe(self)  # subscribe to event notifications from the viewer
         self._collection_presenter: Optional[PeaksViewerCollectionPresenter] = None
 
     @property
@@ -37,3 +38,7 @@ class PeakActionsPresenter:
         table_index = self._view.selected_table_index
         return self._collection_presenter.child_presenter(table_index)
 
+    def notified(self, event: PeakActionsEvent):
+        r"""
+        Notification of an event by the viewer, that the presenter should react to
+        """

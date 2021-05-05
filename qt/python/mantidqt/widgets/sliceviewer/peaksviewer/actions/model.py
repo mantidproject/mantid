@@ -8,10 +8,10 @@
 #  This file is part of the mantidqt package.
 
 class PeakActionsModel:
-    def __init__(self):
-        pass
+    def __init__(self, viewer_model):
+        self.viever_model
 
-    def erase_peak(self):
+    def delete_peaks(self):
         return NotImplementedError
 
     def add_peak(self):
