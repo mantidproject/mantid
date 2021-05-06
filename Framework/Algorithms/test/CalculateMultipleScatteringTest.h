@@ -53,14 +53,14 @@ public:
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
-    const size_t NSCATTERINGS = 2;
+    const int NSCATTERINGS = 3;
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("NumberScatterings", NSCATTERINGS));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsSingle", 10));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsMultiple", 10));
     TS_ASSERT_THROWS_NOTHING(alg->execute(););
     TS_ASSERT(alg->isExecuted());
     Mantid::API::WorkspaceGroup_sptr output = alg->getProperty("OutputWorkspace");
-    std::vector<std::string> wsNames = {"Scatter_1_NoAbs", "Scatter_1", "Scatter_2", "Scatter_1_2_Summed"};
+    std::vector<std::string> wsNames = {"Scatter_1_NoAbs", "Scatter_1", "Scatter_2", "Scatter_3", "Scatter_2_3_Summed"};
     for (auto &name : wsNames) {
       Mantid::API::Workspace_sptr wsPtr = output->getItem(name);
       auto matrixWsPtr = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
@@ -76,7 +76,7 @@ public:
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
-    const size_t NSCATTERINGS = 1;
+    const int NSCATTERINGS = 1;
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("NumberScatterings", NSCATTERINGS));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsSingle", 10000));
     TS_ASSERT_THROWS_NOTHING(alg->execute(););
@@ -101,7 +101,7 @@ public:
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
-    const size_t NSCATTERINGS = 2;
+    const int NSCATTERINGS = 2;
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("NumberScatterings", NSCATTERINGS));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsSingle", 10000));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsMultiple", 10000));
@@ -131,7 +131,7 @@ public:
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
-    const size_t NSCATTERINGS = 2;
+    const int NSCATTERINGS = 2;
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("NumberScatterings", NSCATTERINGS));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsSingle", 10000));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsMultiple", 10000));
@@ -174,7 +174,7 @@ public:
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
-    const size_t NSCATTERINGS = 2;
+    const int NSCATTERINGS = 2;
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("NumberScatterings", NSCATTERINGS));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsSingle", 10000));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsMultiple", 10000));
@@ -246,7 +246,7 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWorkspace));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SofqWorkspace", SofQWorkspaceTwoSp));
-    const size_t NSCATTERINGS = 2;
+    const int NSCATTERINGS = 2;
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberScatterings", NSCATTERINGS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronPathsSingle", 1));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronPathsMultiple", 1));
