@@ -12,6 +12,7 @@ from qtpy.QtWidgets import QGroupBox, QVBoxLayout, QWidget
 
 # local imports
 from .representation.painter import MplPainter
+from .actions.presenter import PeakActionsPresenter
 from mantidqt.widgets.workspacedisplay.table.view import QTableView, TableWorkspaceDisplayView
 from .actions.view import PeakActionsView
 
@@ -91,6 +92,10 @@ class PeaksViewerView(QWidget):
         self._presenter: Optional['PeaksViewerPresenter'] = None  # handle to its presenter
         self._table_view: Optional[_PeaksWorkspaceTableView] = None
         self._setup_ui()
+
+    @property
+    def presenter(self):
+        return self._presenter
 
     @property
     def painter(self):
@@ -213,7 +218,19 @@ class PeaksViewerCollectionView(QWidget):
         self._painter = painter
         self._sliceinfo_provider = sliceinfo_provider
         self._peakactions = peakactions
+        self._actions_view = None
+        self._peaks_layout: Optional[QVBoxLayout] = None
         self._setup_ui()
+
+    def __getitem__(self, item: int) -> PeaksViewerView:
+        viewers = self._peaks_layout.children()
+        if len(viewers) > item:
+            raise IndexError(f'PeaksViewerCollectionView index out of range')
+        return viewers[item]
+
+    @property
+    def peaks_actions_presenter(self) -> PeakActionsPresenter:
+        return self._actions_view._presenter
 
     def append_peaksviewer(self) -> PeaksViewerView:
         """
@@ -246,4 +263,3 @@ class PeaksViewerCollectionView(QWidget):
         self._outer_layout.addWidget(self._peaks_layout)
         self._outer_layout.addWidget(self._peak_actions_widget)
         self.setLayout(outer_layout)
-

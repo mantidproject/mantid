@@ -7,13 +7,25 @@
 # coding=utf-8
 #  This file is part of the mantidqt package.
 
+# local
+from ..model import PeaksViewerModel
+
+# standard
+from typing import Optional
+
+
 class PeakActionsModel:
-    def __init__(self, viewer_model):
-        self.viever_model
+    def __init__(self):
+        self._viewer_model: Optional[PeaksViewerModel] = None
+
+    @property
+    def viewer_model(self):
+        return self._viewer_model
+
+    @viewer_model
+    def viewer_model(self, model: PeaksViewerModel):
+        self._viewer_model = model
 
     def delete_peaks(self):
-        return NotImplementedError
-
-    def add_peak(self):
-        return NotImplementedError
-
+        r"""Delete the first peak of the model"""
+        self._viewer_model.delete_rows(0)

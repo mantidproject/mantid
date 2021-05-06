@@ -14,6 +14,7 @@ from mantidqt.widgets.workspacedisplay.table.presenter_standard \
     import TableWorkspaceDataPresenterStandard, create_table_item
 from .model import create_peaksviewermodel, PeaksViewerModel
 from .view import PeaksViewerView, PeaksViewerCollectionView
+from .actions.presenter import PeakActionsPresenter
 from ..adsobsever import SliceViewerADSObserver
 
 # standard
@@ -100,6 +101,10 @@ class PeaksViewerPresenter:
             from mantid.kernel import logger
             logger.warning("PeaksViewer: Unknown event detected: {}".format(event))
 
+    def redraw_peaks(self):
+        self.model.clear_peak_representations()
+        self.model.draw_peaks(self._view.sliceinfo, self._view.painter)
+
     def _clear_peaks(self):
         """Clear all peaks from this view"""
         self.view.clear_table_selection()
@@ -166,6 +171,7 @@ class PeaksViewerCollectionPresenter:
         :param view: View displaying the model information
         """
         self._view = view
+        self._actions: PeakActionsPresenter = view.peaks_actions_presenter
         self._child_presenters: List[PeaksViewerPresenter] = []
         self._ads_observer = None
         self.setup_ads_observer()
