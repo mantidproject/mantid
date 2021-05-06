@@ -469,38 +469,17 @@ class SuperplotPresenter:
         plot.
         """
         selection = self._view.getSelection()
-        figure = self._canvas.figure
-        axes = figure.gca()
-        artists = axes.get_tracked_artists()
-        if not artists:
-            self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
-                                          self.BIN_MODE_TEXT])
-        else:
-            try:
-                args = axes.creation_args[0]
-            except:
-                args = {}
-            if "axis" in args:
-                if (args["axis"] == MantidAxType.BIN
-                    or args["axis"] == MantidAxType.BIN.value):
-                    self._model.setBinMode()
-                    self._view.setAvailableModes([self.BIN_MODE_TEXT])
-                else:
-                    self._model.setSpectrumMode()
-                    self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT])
-            else:
-                self._model.setSpectrumMode()
-                self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT])
-        for artist in artists:
-            ws, specIndex = \
-                    axes.get_artists_workspace_and_workspace_index(artist)
-            wsName = ws.name()
-            self._model.addWorkspace(wsName)
-            if self._model.isBinMode():
-                specIndex = ws.getIndexFromSpectrumNumber(specIndex)
-            self._model.addData(wsName, specIndex)
-
+        currentIndex = self._view.getSpectrumSliderPosition()
+        plottedData = self._model.getPlottedData()
+        noHeld = list()
+        for ws in selection:
+            if (ws, currentIndex) not in plottedData:
+                noHeld.append((ws, currentIndex))
+        self._syncWithCurrentPlot()
+        for (ws, index) in noHeld:
+            self._model.removeData(ws, index)
         self._updateList()
-        self._updateSpectrumSlider()
-        self._updatePlot()
+        self._view.setSpectrumSliderPosition(currentIndex)
+        self._view.setSpectrumSpinBoxValue(currentIndex)
         self._view.setSelection(selection)
+        self._updatePlot()
