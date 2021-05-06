@@ -394,6 +394,10 @@ class SuperplotPresenter:
         selection = self._view.getSelection()
         self._updateSpectrumSlider()
         self._updatePlot()
+        figure = self._canvas.figure
+        axes = figure.gca()
+        axes.relim()
+        axes.autoscale()
 
     def onWorkspaceDeleted(self, wsName):
         """
