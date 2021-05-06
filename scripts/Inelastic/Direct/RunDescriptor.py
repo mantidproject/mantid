@@ -10,6 +10,7 @@
 """ File contains Descriptors used describe run for direct inelastic reduction """
 
 from mantid.simpleapi import *
+from mantid.dataobjects import *
 from mantid.kernel import funcinspect
 from Direct.PropertiesDescriptors import *
 import re
@@ -798,8 +799,6 @@ class RunDescriptor(PropDescriptor):
             if not ws.run().hasProperty("calibrated"):
                 prefer_ws_calibration = self._check_calibration_source()
                 self.apply_calibration(ws,RunDescriptor._holder.det_cal_file,prefer_ws_calibration)
-            self.remove_empty_backgound(ws)
-
             return ws
         else:
             if self._run_number is not None:
@@ -814,7 +813,6 @@ class RunDescriptor(PropDescriptor):
 
                 self.synchronize_ws(ws)
                 self.apply_calibration(ws,calibration,prefer_ws_calibration)
-                self.remove_empty_backgound(ws)
 
                 return ws
             else:
@@ -1149,7 +1147,6 @@ class RunDescriptor(PropDescriptor):
             loaded_ws = self.load_file(inst_name,ws_name,None,mon_load_option,filePath,fileExt,**kwargs)
         ######## Now we have the workspace
         self.apply_calibration(loaded_ws,calibration,use_ws_calibration)
-        self.remove_empty_backgound(loaded_ws)
         return loaded_ws
 #--------------------------------------------------------------------------------------------------------------------
 #pylint: disable=too-many-branches
@@ -1497,30 +1494,88 @@ class RunDescriptor(PropDescriptor):
             ws = mtd[sum_ws_name]
         return ws
 
-    def remove_empty_backgound(self,ws):
-        """Remove empty background from the input workspace.
+    def remove_empty_backgound(self):
+        """Remove empty background from the workspace, described by the run descriptor.
 
            The background removed only if the background have not been removed before and
-           the RunDescriptor belongs to the properties:
-           'sample_run','wb_run','monovan_run','wb_for_monovan_run'
+           the empty background property is defined.
         """
-
-        # Remove background only from the following run descriptors:
-        if self._prop_name not in {'SR_','WB_','MV_','MV_WB_'}:
-            return
-        if ws.run().hasProperty('empty_bg_removed_with'):  # return if background has been already removed
+        ws = self.get_workspace()
+        if ws.run().hasProperty('empty_bg_removed'):  # return if background has been already removed
             return
         if RunDescriptor._holder.empty_bg_run is None: # do nothing if bg workspace has not been defined
             return
-        RunDescriptor._logger('Removing empty instrument background from workspace {0}: '.format(ws.name()),'debug')
+        RunDescriptor._logger('**** Removing empty instrument background from workspace {0}: '.format(ws.name()),'notice')
 
         empty_bg_property = RunDescriptor._holder.get_prop_class('empty_bg_run')
         ebg_ws = empty_bg_property.get_workspace()
+        old_name = ebg_ws.name()
+
+        if ebg_ws.getNumberBins() != ws.getNumberBins():
+            # workspace type. Events or Histogramm
+            preserve_events = False
+            if isinstance(ws,EventWorkspace):
+                preserve_events = True
+            ebg_ws = RebinToWorkspace(ebg_ws,ws,PreserveEvents = preserve_events)
+
+            if ebg_ws.getNumberHistograms() != ws.getNumberHistograms():
+                if RunDescriptor._holder.load_monitors_with_workspace:
+                    # sample workspace was loaded with monitors in and bg_ws with monitors out.
+                    # Add zero monitor spectra to smaller workspace
+                    n_monitors =ws.getNumberHistograms() - ebg_ws.getNumberHistograms()
+                    monitors_at_start = ws.getDetector(0).isMonitor()
+                    if n_monitors > 0:
+                        ebg_ws = self._add_fake_monitors(ebg_ws,n_monitors,monitors_at_start)
+                    else:
+                        old_ws_name = ws.name()
+                        ws = self._add_fake_monitors(ws,-n_monitors,monitors_at_start)
+                        RenameWorkspace(ws,old_ws_name,RenameMonitors=True)
+                else: # for some reasons (nothing to do with monitors) workspaces have different number of spectra. Can not handle this
+                    raise RuntimeError(
+                        'Number of spectra in background workspace (N={0}) and in Workspace {1} (N={2}) must be the same'.
+                        format(ebg_ws.getNumberHistograms(),ws.name(),ws.getNumberHistograms()))
+            #end
+            RenameWorkspace(ebg_ws,old_name,RenameMonitors=True)
+            empty_bg_property.synchronize_ws(ebg_ws)
+
+        # Get current for both workspaces
         ebg_current = ebg_ws.run().getProperty('gd_prtn_chrg').value
         ws_current = ws.run().getProperty('gd_prtn_chrg').value
         # normalize by current and remove normalised background
-        ws = ws - ebg_ws*(ws_current/ebg_current)
-        AddSampleLog(Workspace=ws,LogName="empty_bg_removed_with",LogText=str(ebg_ws.name()))
+        correction =  ebg_ws*(ws_current/ebg_current)
+        Minus(ws,correction,OutputWorkspace = ws.name(),ClearRHSWorkspace=True)
+
+        AddSampleLog(Workspace=ws,LogName="empty_bg_removed",LogText=str(ebg_ws.name()))
+        RunDescriptor._logger('**** Empty instrument background described by {0} has been removed from workspace'.format(old_name),'notice')
+    #
+    @staticmethod
+    def _add_fake_monitors(expanded_ws,n_spectra,add_from_start=False):
+        """Add zeroed spectra to a matrix workspace
+
+           Input:
+           expanded_ws -- Matrix2D workspace to expand
+           n_spectra   -- number of spectra to add
+           add_from_start -- if True, add extra-spectra to the start of workspace,
+                          if False -- to the end
+           Returns:
+               pointer to the workspace, containing extra spectra
+        """
+        source_spec = expanded_ws.readX(0)
+        zero_signal = [0]*n_spectra
+        fake_spectra = CreateWorkspace(DataX=[source_spec[0],source_spec[-1]],DataY=zero_signal,
+                                       Nspec=n_spectra,UnitX = "TOF",
+                                       ParentWorkspace=expanded_ws)
+        fake_spectra  = RebinToWorkspace(fake_spectra,expanded_ws)
+
+        if add_from_start:
+            target = 'fake_spectra'
+            ConjoinWorkspaces(fake_spectra,expanded_ws)
+        else:
+            target = 'expanded_ws'
+            ConjoinWorkspaces(expanded_ws,fake_spectra)
+        return mtd[target]
+
+
 #-------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------

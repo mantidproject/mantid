@@ -620,8 +620,32 @@ class RunDescriptorTest(unittest.TestCase):
         except:
             self.fail()
 
+    def test_remove_background_matching_workspaces(self):
+        wksp = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Event',
+                                     NumBanks=3, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
+                                     XMin=2000, XMax=20000, BinWidth=1)
+        CloneWorkspace(wksp,OutputWorkspace='bg_ws')
+        AddSampleLog(Workspace=wksp,LogName='gd_prtn_chrg', LogText='10', LogType='Number')
+        AddSampleLog(Workspace='bg_ws',LogName='gd_prtn_chrg', LogText='100', LogType='Number')
 
-if __name__ == "__main__":
-    #tester=RunDescriptorTest('test_alsk_one_find_another_ext_blocked')
-    #tester.test_alsk_one_find_another_ext_blocked()
+        self.assertFalse(wksp.run().hasProperty('empty_bg_removed'))
+
+        propman = self.prop_man
+
+        propman.sample_run = wksp
+        propman.empty_bg_run = 'bg_ws'
+
+        PropertyManager.sample_run.remove_empty_backgound()
+        ws = PropertyManager.sample_run.get_workspace()
+
+        self.assertTrue(ws.run().hasProperty('empty_bg_removed'))
+        resWs = 0.9*wksp
+        difr = CompareWorkspaces(resWs,ws)
+        self.assertTrue(difr.Result)
+
+
+if __name__ == "__main__" or __name__ == "mantidqt.widgets.codeeditor.execution":
+    #tester=RunDescriptorTest('test_remove_background_matching_workspaces')
+    #tester.run()
+
     unittest.main()
