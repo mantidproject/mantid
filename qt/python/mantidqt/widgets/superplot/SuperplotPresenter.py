@@ -37,17 +37,28 @@ class SuperplotPresenter:
         figure = self._canvas.figure
         axes = figure.gca()
         artists = axes.get_tracked_artists()
-        self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
-                                      self.BIN_MODE_TEXT])
+        if not artists:
+            self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
+                                          self.BIN_MODE_TEXT])
+        else:
+            try:
+                args = axes.creation_args[0]
+            except:
+                args = {}
+            if "axis" in args:
+                if (args["axis"] == MantidAxType.BIN
+                    or args["axis"] == MantidAxType.BIN.value):
+                    self._model.setBinMode()
+                    self._view.setAvailableModes([self.BIN_MODE_TEXT])
+                else:
+                    self._model.setSpectrumMode()
+                    self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT])
+            else:
+                self._model.setSpectrumMode()
+                self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT])
         for artist in artists:
             ws, specIndex = \
                     axes.get_artists_workspace_and_workspace_index(artist)
-            if ws.blocksize() > 1:
-                self._model.setSpectrumMode()
-                self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT])
-            else:
-                self._model.setBinMode()
-                self._view.setAvailableModes([self.BIN_MODE_TEXT])
             wsName = ws.name()
             self._model.addWorkspace(wsName)
             self._model.addData(wsName, specIndex)
