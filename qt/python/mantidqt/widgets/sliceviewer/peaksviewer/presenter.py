@@ -15,6 +15,7 @@ from mantidqt.widgets.workspacedisplay.table.presenter_standard \
 from .model import create_peaksviewermodel, PeaksViewerModel
 from .view import PeaksViewerView, PeaksViewerCollectionView
 from .actions.presenter import PeakActionsPresenter
+from .actions.model import PeakActionsModel
 from ..adsobsever import SliceViewerADSObserver
 
 # standard
@@ -171,10 +172,13 @@ class PeaksViewerCollectionPresenter:
         :param view: View displaying the model information
         """
         self._view = view
-        self._actions: PeakActionsPresenter = view.peaks_actions_presenter
+        self._actions: PeakActionsPresenter = self._create_peaks_actions_presenter()
         self._child_presenters: List[PeaksViewerPresenter] = []
         self._ads_observer = None
         self.setup_ads_observer()
+
+    def _create_peaks_actions_presenter(self):
+        return PeakActionsPresenter(PeakActionsModel(), self._view.peaks_actions_view)
 
     def setup_ads_observer(self):
         if self._ads_observer is None:

@@ -16,14 +16,17 @@ from typing import Optional
 
 class PeakActionsModel:
     def __init__(self):
+        # PeaksViewerModel susceptible of actions like peak removal/addition
         self._viewer_model: Optional[PeaksViewerModel] = None
 
     @property
-    def viewer_model(self):
+    def viewer_model(self) -> PeaksViewerModel:
+        r"""PeaksViewerModel susceptible of actions like peak removal/addition"""
         return self._viewer_model
 
-    @viewer_model
+    @viewer_model.setter
     def viewer_model(self, model: PeaksViewerModel):
+        assert isinstance(model, PeaksViewerModel)
         self._viewer_model = model
 
     def delete_peaks(self):

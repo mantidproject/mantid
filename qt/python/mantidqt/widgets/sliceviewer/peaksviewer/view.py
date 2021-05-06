@@ -207,7 +207,6 @@ class PeaksViewerCollectionView(QWidget):
     def __init__(self,
                  painter: MplPainter,
                  sliceinfo_provider: 'SliceViewer',
-                 peakactions=None,
                  parent=None):
         """
         :param painter: An object responsible for draw the peaks representations
@@ -217,8 +216,7 @@ class PeaksViewerCollectionView(QWidget):
         super(PeaksViewerCollectionView, self).__init__(parent)
         self._painter = painter
         self._sliceinfo_provider = sliceinfo_provider
-        self._peakactions = peakactions
-        self._actions_view = None
+        self._peak_actions_view = PeakActionsView()
         self._peaks_layout: Optional[QVBoxLayout] = None
         self._setup_ui()
 
@@ -229,8 +227,8 @@ class PeaksViewerCollectionView(QWidget):
         return viewers[item]
 
     @property
-    def peaks_actions_presenter(self) -> PeakActionsPresenter:
-        return self._actions_view._presenter
+    def peaks_actions_view(self) ->PeakActionsView :
+        return self._peak_actions_view
 
     def append_peaksviewer(self) -> PeaksViewerView:
         """
@@ -258,8 +256,7 @@ class PeaksViewerCollectionView(QWidget):
         # create vertical layouts for outer widget
         self._outer_layout = QVBoxLayout()  # contains everything
         self._peaks_layout = QVBoxLayout()  # contains the tables of peaks
-        self._peak_actions_widget = PeakActionsView()
 
         self._outer_layout.addWidget(self._peaks_layout)
-        self._outer_layout.addWidget(self._peak_actions_widget)
-        self.setLayout(outer_layout)
+        self._outer_layout.addWidget(self._peak_actions_view)
+        self.setLayout(self._outer_layout)

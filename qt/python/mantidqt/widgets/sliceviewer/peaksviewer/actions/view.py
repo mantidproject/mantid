@@ -7,9 +7,6 @@
 # coding=utf-8
 #  This file is part of the mantidqt package.
 
-# local
-from .presenter import PeakActionsEvent, PeakActionsPresenter
-
 # 3rd party
 from qtpy import QtWidgets, QtGui
 from mantid.kernel import logger
@@ -20,7 +17,7 @@ from typing import List
 
 class PeakActionsView:
     def __init__(self):
-        self._subscribers: List[PeakActionsPresenter] = None
+        self._presenter: 'PeakActionsPresenter' = None
         peak_grid = QtGui.QGridLayout()
 
         self.add_btn = QtWidgets.QPushButton('Add peak', self)
@@ -42,7 +39,11 @@ class PeakActionsView:
 
         self.setLayout(peak_grid)
 
-    def subscribe(self, presenter: PeakActionsPresenter) -> None:
+    @property
+    def presenter(self):
+        return self._presenter
+
+    def subscribe(self, presenter: 'PeakActionsPresenter') -> None:
         r"""
         @brief Subscribe a presenter to the viever
         @details The presenter must have method 'notified' able to handle the event
@@ -50,20 +51,11 @@ class PeakActionsView:
         if getattr(presenter, 'notified') is False:
             logger.error(f'{presenter} lacks method "notified"')
         else:
-            self._subscribers.append(presenter)
+            self._presenter = presenter
 
-    def unsubscribe(self, presenter: PeakActionsPresenter) -> None:
-        r"""
-        @brief Unsubscribe a presenter to the viever
-        """
-        try:
-            index = self._subscribers.index(presenter)
-        except ValueError:
-            logger.warning(f'{presenter} not Found in the list of subscribers')
-
-    def _notify(self, event: PeakActionsEvent):
+    def _notify(self, event: 'PeakActionsEvent'):
         r"""Notify of a PeakActionsEvent to the subscribers"""
-        [subscriber.notified(event) for subscriber in self._subscribers]
+        self._presenter.notified(event)
 
     def add_btn_click(self):
         pass  # self._notify(PeakActionsEvent.ACTIVE_WORKSPACE_CHANGED) or some other event more appropriate

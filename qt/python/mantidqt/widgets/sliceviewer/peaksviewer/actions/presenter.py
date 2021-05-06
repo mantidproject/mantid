@@ -8,8 +8,6 @@
 #  This file is part of the mantidqt package.
 
 # local
-from ..presenter import PeaksViewerPresenter
-from ..view import PeaksViewerView, PeaksViewerCollectionView
 from .model import PeakActionsModel
 from .view import PeakActionsView
 
@@ -45,11 +43,11 @@ class PeakActionsPresenter:
         view.subscribe(self)  # subscribe to event notifications from the viewer
 
     @property
-    def viewer_presenter(self) -> PeaksViewerPresenter:
+    def viewer_presenter(self) -> 'PeaksViewerPresenter':
         r"""PeaksViewerPresenter associated to the active PeaksWorkspace"""
         table_index = self._view.selected_table_index
-        collection_viewer: PeaksViewerCollectionView = self._view.collection_viewer
-        peak_viewer: PeaksViewerView = collection_viewer[table_index]
+        collection_viewer: 'PeaksViewerCollectionView' = self._view.collection_viewer
+        peak_viewer: 'PeaksViewerView' = collection_viewer[table_index]
         return peak_viewer.presenter
 
     def notified(self, event: PeakActionsEvent):
