@@ -25,9 +25,10 @@ class SuperplotPresenter:
         self._view = SuperplotView(self, parent)
         self._model = SuperplotModel()
         self._canvas = canvas
+        self.parent = parent
 
-        if parent:
-            parent.plot_updated.connect(self.onPlotUpdated)
+        if self.parent:
+            self.parent.plot_updated.connect(self.onPlotUpdated)
 
         self._model.workspaceDeleted.connect(self.onWorkspaceDeleted)
         self._model.workspaceRenamed.connect(self.onWorkspaceRenamed)
@@ -76,6 +77,11 @@ class SuperplotPresenter:
         return self._view.getBottomWidget()
 
     def close(self):
+        if self.parent:
+            try:
+                self.parent.plot_updated.disconnect()
+            except:
+                pass
         self._view.close()
         del self._model
 
