@@ -124,6 +124,36 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 2051, 984)
 
+    def test_equatorial_fit(self):
+        args = {'Run': self._runs['3_single_dets'],
+                'OutputWorkspace': "res",
+                'DiscardSingleDetectors': False,
+                'GroupDetectors': False,
+                'ElasticPeakFitting': 'FitEquatorialOnly',
+                'OutputElasticChannelWorkspace': 'out_epp_ws'}
+
+        IndirectILLEnergyTransfer(**args)
+
+        self._check_workspace_group(mtd["res"], 1, 2051, 984)
+
+        epp_ws = mtd['out_epp_ws']
+        self.assertEquals(epp_ws.rowCount(), 4)
+
+    def test_fit_all(self):
+        args = {'Run': self._runs['3_single_dets'],
+                'OutputWorkspace': "res",
+                'DiscardSingleDetectors': False,
+                'GroupDetectors': False,
+                'ElasticPeakFitting': 'FitAllPixelGroups',
+                'OutputElasticChannelWorkspace': 'out_epp_ws'}
+
+        IndirectILLEnergyTransfer(**args)
+
+        self._check_workspace_group(mtd["res"], 1, 2051, 984)
+
+        epp_ws = mtd['out_epp_ws']
+        self.assertEquals(epp_ws.rowCount(), 516)
+
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
 
         self.assertTrue(isinstance(wsgroup, WorkspaceGroup))

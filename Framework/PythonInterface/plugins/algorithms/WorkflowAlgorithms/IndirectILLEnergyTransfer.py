@@ -622,7 +622,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 ExtractSpectra(InputWorkspace=ws,
                                OutputWorkspace=single_det_ws,
                                StartWorkspaceIndex=N_TUBES*N_PIXELS_PER_TUBE + offset,
-                               EndWorkspaceIndex=N_TUBES*N_PIXELS_PER_TUBE + single_detectors + offset)
+                               EndWorkspaceIndex=N_TUBES*N_PIXELS_PER_TUBE + single_detectors + offset - 1)
                 FindEPP(InputWorkspace=single_det_ws, OutputWorkspace=epp_ws)
                 self._create_elastic_channel_ws(mtd[epp_ws], mtd[ws].getRun(), mtd[equator_epp_ws],
                                                 single_detectors=single_detectors)
