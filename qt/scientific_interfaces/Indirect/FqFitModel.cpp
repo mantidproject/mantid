@@ -234,10 +234,9 @@ FqFitParameters &FqFitModel::addFqFitParameters(MatrixWorkspace *workspace, cons
   const auto parameters = createFqFitParameters(workspace);
   if (parameters.widths.empty() && parameters.eisf.empty())
     throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
-  if (parameters.eisf.empty())
-    return m_fqFitParameters[workspace->getName()] = std::move(parameters);
-  else
-    return m_fqFitParameters[hwhmName] = std::move(parameters);
+  if (parameters.widths.empty())
+    throw std::invalid_argument("Workspace contains EISF spectra, but no Width spectra.");
+  return m_fqFitParameters[hwhmName] = std::move(parameters);
 }
 
 std::unordered_map<std::string, FqFitParameters>::const_iterator

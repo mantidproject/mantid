@@ -46,7 +46,6 @@ class QuickEditView(QtWidgets.QWidget):
         button_layout.addWidget(self.y_axis_changer.view)
         button_layout.addWidget(self.errors)
         self.setLayout(button_layout)
-        self.setFixedHeight(65)
 
     """ plot selection """
     def add_subplot(self, name):

@@ -76,6 +76,7 @@ public:
   MOCK_CONST_METHOD0(isResolutionHidden, bool());
   MOCK_METHOD1(setResolutionHidden, void(bool hide));
   MOCK_METHOD1(setXRange, void(std::pair<double, double> const &range));
+  MOCK_CONST_METHOD0(getXRange, std::pair<double, double>());
   MOCK_METHOD1(setStartX, void(double startX));
   MOCK_METHOD1(setEndX, void(double endX));
   MOCK_METHOD0(disableMultipleDataTab, void());
@@ -195,6 +196,15 @@ public:
   ///----------------------------------------------------------------------
   /// Unit Tests that test the signals, methods and slots of the presenter
   ///----------------------------------------------------------------------
+
+  void test_that_getXRange_calls_the_correct_method_in_the_view() {
+    auto const xRange = std::make_pair(0.0, 1.0);
+
+    ON_CALL(*m_view, getXRange()).WillByDefault(Return(xRange));
+    EXPECT_CALL(*m_view, getXRange()).Times(1);
+
+    TS_ASSERT_EQUALS(m_presenter->getXRange(), xRange);
+  }
 
 private:
   std::unique_ptr<QTableWidget> m_dataTable;

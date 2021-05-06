@@ -16,8 +16,7 @@ namespace IDA {
 
 IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectFittingModel *model, IIndirectFitDataView *view)
     : IndirectFitDataPresenter(
-          model, view,
-          std::make_unique<IndirectDataTablePresenter>(model->m_fitDataModel.get(), view->getDataTable())) {}
+          model, view, std::make_unique<IndirectDataTablePresenter>(model->getFitDataModel(), view->getDataTable())) {}
 
 IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectFittingModel *model, IIndirectFitDataView *view,
                                                    std::unique_ptr<IndirectDataTablePresenter> tablePresenter)
@@ -224,6 +223,8 @@ void IndirectFitDataPresenter::updateRanges() {
     m_view->setXRange(range);
   }
 }
+
+std::pair<double, double> IndirectFitDataPresenter::getXRange() const { return m_view->getXRange(); }
 
 void IndirectFitDataPresenter::addModelData(const std::string &name) {
   try {

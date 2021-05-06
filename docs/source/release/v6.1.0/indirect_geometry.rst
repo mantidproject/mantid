@@ -28,4 +28,10 @@ Improvements
 ############
 - In Indirect Data Analysis F(Q) fit the default fitting function remains None when switching to EISF.
 
+Bug Fixes
+#########
+- Fixed a bug causing the x range markers on the Symmetrise plot of Data Reduction to be restricted in movement.
+- Fixed a bug causing the x range markers on the ISISDiagnostics plot of Data Reduction to go missing.
+- Fixed a crash on the Data Analysis interface when attempting to drag the Start and End X sliders on the preview plot.
+
 :ref:`Release 6.1.0 <v6.1.0>`
