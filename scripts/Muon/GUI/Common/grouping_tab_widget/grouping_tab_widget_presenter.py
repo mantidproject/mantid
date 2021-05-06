@@ -35,14 +35,15 @@ class GroupingTabPresenter(object):
     def __init__(self, view, model,
                  grouping_table_widget=None,
                  pairing_table_widget=None,
-                 diff_table=None):
+                 diff_table=None,
+                 parent=None):
         self._view = view
         self._model = model
 
         self.grouping_table_widget = grouping_table_widget
         self.pairing_table_widget = pairing_table_widget
         self.diff_table = diff_table
-        self.period_info_widget = MuonPeriodInfoWidget()
+        self.period_info_widget = MuonPeriodInfoWidget(parent=parent)
 
         self._view.set_description_text('')
         self._view.on_add_pair_requested(self.add_pair_from_grouping_table)
