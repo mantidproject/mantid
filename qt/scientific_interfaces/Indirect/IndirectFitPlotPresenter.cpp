@@ -112,6 +112,10 @@ void IndirectFitPlotPresenter::setStartX(double startX) { m_view->setFitRangeMin
 
 void IndirectFitPlotPresenter::setEndX(double endX) { m_view->setFitRangeMaximum(endX); }
 
+void IndirectFitPlotPresenter::setXBounds(std::pair<double, double> const &bounds) {
+  m_view->setFitRangeBounds(bounds);
+}
+
 void IndirectFitPlotPresenter::updatePlotSpectrum(WorkspaceIndex spectrum) {
   setActiveSpectrum(spectrum);
   updatePlots();

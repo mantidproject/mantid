@@ -45,6 +45,8 @@ public:
   void setEndX(double endX, TableDatasetIndex dataIndex);
   void setExclude(const std::string &exclude, TableDatasetIndex dataIndex, WorkspaceIndex spectrumIndex);
 
+  std::pair<double, double> getXRange() const;
+
   void loadSettings(const QSettings &settings);
   UserInputValidator &validate(UserInputValidator &validator);
 
