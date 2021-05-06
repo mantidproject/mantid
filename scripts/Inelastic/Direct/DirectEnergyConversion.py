@@ -447,6 +447,10 @@ class DirectEnergyConversion(object):
             n_spectra = 0
         prop_man.log(header.format(n_spectra,n_masked_spectra),'notice')
 #--------------------------------------------------------------------------------------------------
+#       Remove emtpy background if one is defined
+#--------------------------------------------------------------------------------------------------
+        self.remove_empty_background(masking)
+#--------------------------------------------------------------------------------------------------
 #  now reduction
 #--------------------------------------------------------------------------------------------------
         # ISIS or GUI motor stuff
@@ -577,6 +581,27 @@ class DirectEnergyConversion(object):
 
         self.clean_up_convert_to_energy(start_time)
         return result
+
+#------------------------------------------------------------------------------------------
+    def remove_empty_background(self,masking_ws=None):
+        """Remove empty background from the workspaces, described by RunDescriptors, specified here
+           Inputs:
+           masking_ws -- if provided, mask empty background workspace before extracting it from
+                         workspaces requested
+        """
+        prop_man = self.prop_man
+        if prop_man.empty_bg_run is None: # Nothing to do. No empty background
+            return
+
+        # list of RunDescriptors to extract and process workspaces
+        rd_to_process = ['sample_run','wb_run','monovan_run']
+
+        if masking_ws: # Mask empty background workspace
+            empty_bg_ws = PropertyManager.empty_bg_run.get_workspace()
+            MaskDetectors(empty_bg_ws, MaskedWorkspace=masking_ws)
+        for rd_name in rd_to_process:
+            rd = prop_man.get_prop_class(rd_name)
+            rd.remove_empty_background()
 
 
 #------------------------------------------------------------------------------------------

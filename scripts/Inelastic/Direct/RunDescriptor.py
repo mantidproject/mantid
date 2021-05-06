@@ -1494,22 +1494,26 @@ class RunDescriptor(PropDescriptor):
             ws = mtd[sum_ws_name]
         return ws
 
-    def remove_empty_backgound(self):
+    def remove_empty_background(self):
         """Remove empty background from the workspace, described by the run descriptor.
 
            The background removed only if the background have not been removed before and
            the empty background property is defined.
         """
         ws = self.get_workspace()
+        if ws is None: # undefined run descriptor. Nothing to do
+            return
         if ws.run().hasProperty('empty_bg_removed'):  # return if background has been already removed
             return
         if RunDescriptor._holder.empty_bg_run is None: # do nothing if bg workspace has not been defined
             return
-        RunDescriptor._logger('**** Removing empty instrument background from workspace {0}: '.format(ws.name()),'notice')
+        RunDescriptor._logger('**** Removing empty instrument background from workspace {0}: '
+                              .format(ws.name()),'information')
 
         empty_bg_property = RunDescriptor._holder.get_prop_class('empty_bg_run')
-        ebg_ws = empty_bg_property.get_workspace()
-        old_name = ebg_ws.name()
+        ebg_ws = empty_bg_property.get_ws_clone('ebg_ws')
+        # the name of the original background workspace used as source for backgound
+        bg_name = empty_bg_property._ws_name
 
         if ebg_ws.getNumberBins() != ws.getNumberBins():
             # workspace type. Events or Histogramm
@@ -1535,18 +1539,18 @@ class RunDescriptor(PropDescriptor):
                         'Number of spectra in background workspace (N={0}) and in Workspace {1} (N={2}) must be the same'.
                         format(ebg_ws.getNumberHistograms(),ws.name(),ws.getNumberHistograms()))
             #end
-            RenameWorkspace(ebg_ws,old_name,RenameMonitors=True)
-            empty_bg_property.synchronize_ws(ebg_ws)
 
-        # Get current for both workspaces
+        # Get dose for both workspaces
         ebg_current = ebg_ws.run().getProperty('gd_prtn_chrg').value
         ws_current = ws.run().getProperty('gd_prtn_chrg').value
         # normalize by current and remove normalised background
-        correction =  ebg_ws*(ws_current/ebg_current)
-        Minus(ws,correction,OutputWorkspace = ws.name(),ClearRHSWorkspace=True)
+        ebg_ws  =  ebg_ws*(ws_current/ebg_current)
+        Minus(ws,ebg_ws  ,OutputWorkspace = ws.name(),ClearRHSWorkspace=True)
+        DeleteWorkspace('ebg_ws')
 
         AddSampleLog(Workspace=ws,LogName="empty_bg_removed",LogText=str(ebg_ws.name()))
-        RunDescriptor._logger('**** Empty instrument background described by {0} has been removed from workspace'.format(old_name),'notice')
+        RunDescriptor._logger('**** Empty instrument background {0} has been removed from workspace {1}'.
+                              format(bg_name,ws.name()),'information')
     #
     @staticmethod
     def _add_fake_monitors(expanded_ws,n_spectra,add_from_start=False):

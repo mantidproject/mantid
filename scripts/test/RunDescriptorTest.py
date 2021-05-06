@@ -635,11 +635,17 @@ class RunDescriptorTest(unittest.TestCase):
         propman.sample_run = wksp
         propman.empty_bg_run = 'bg_ws'
 
-        PropertyManager.sample_run.remove_empty_backgound()
+        PropertyManager.sample_run.remove_empty_background()
         ws = PropertyManager.sample_run.get_workspace()
 
         self.assertTrue(ws.run().hasProperty('empty_bg_removed'))
         resWs = 0.9*wksp
+        difr = CompareWorkspaces(resWs,ws)
+        self.assertTrue(difr.Result)
+
+        # the subtaction occurs only once
+        PropertyManager.sample_run.remove_empty_background()
+        ws = PropertyManager.sample_run.get_workspace()
         difr = CompareWorkspaces(resWs,ws)
         self.assertTrue(difr.Result)
 
