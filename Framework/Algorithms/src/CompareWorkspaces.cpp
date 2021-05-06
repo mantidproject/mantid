@@ -828,11 +828,9 @@ bool CompareWorkspaces::checkInstrument(const API::MatrixWorkspace_const_sptr &w
   const bool checkAllData = getProperty("CheckAllData");
   auto errorStr = ws1_parmap.diff(ws2_parmap, !checkAllData);
   if (!errorStr.empty()) {
-    g_log.debug()
-        << "Here information to help understand parameter map differences:\n";
+    g_log.debug() << "Here information to help understand parameter map differences:\n";
     g_log.debug() << errorStr;
-    recordMismatch(
-        "Instrument ParameterMap mismatch (differences in ordering ignored)");
+    recordMismatch("Instrument ParameterMap mismatch (differences in ordering ignored)");
     return false;
   }
 

@@ -81,9 +81,7 @@ boost::optional<std::vector<std::string>> getParamLinesFromGSASFile(const std::s
 
 DECLARE_ALGORITHM(SaveGDA)
 
-SaveGDA::CalibrationParams::CalibrationParams(const double _difc,
-                                              const double _difa,
-                                              const double _tzero)
+SaveGDA::CalibrationParams::CalibrationParams(const double _difc, const double _difa, const double _tzero)
     : difa(_difa), difc(_difc), tzero(_tzero) {}
 
 const std::string SaveGDA::name() const { return "SaveGDA"; }

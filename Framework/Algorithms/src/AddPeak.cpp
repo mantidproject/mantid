@@ -81,8 +81,7 @@ void AddPeak::exec() {
   double l1 = detectorInfo.l1();
   double l2 = detectorInfo.l2(detectorIndex);
   std::vector<int> emptyWarningVec;
-  auto [difa, difc, tzero] = detectorInfo.diffractometerConstants(
-      detectorIndex, emptyWarningVec, emptyWarningVec);
+  auto [difa, difc, tzero] = detectorInfo.diffractometerConstants(detectorIndex, emptyWarningVec, emptyWarningVec);
 
   Mantid::Kernel::Unit_sptr unit = runWS->getAxis(0)->unit();
   if (unit->unitID() != "TOF") {

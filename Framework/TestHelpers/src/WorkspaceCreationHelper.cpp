@@ -1237,10 +1237,8 @@ Mantid::DataObjects::PeaksWorkspace_sptr createPeaksWorkspace(const int numPeaks
   return peaksWS;
 }
 
-void create2DAngles(std::vector<double> &L2, std::vector<double> &polar,
-                    std::vector<double> &azim, size_t nPolar, size_t nAzim,
-                    double polStart, double polEnd, double azimStart,
-                    double azimEnd) {
+void create2DAngles(std::vector<double> &L2, std::vector<double> &polar, std::vector<double> &azim, size_t nPolar,
+                    size_t nAzim, double polStart, double polEnd, double azimStart, double azimEnd) {
   size_t nDet = nPolar * nAzim;
   L2.resize(nDet, 10);
   polar.resize(nDet);

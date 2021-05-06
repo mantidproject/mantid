@@ -58,12 +58,9 @@ private:
   double convertToDouble(std::string inputstring);
 
   /// Create an instrument geometry.
-  void createInstrumentGeometry(const API::MatrixWorkspace_sptr &workspace,
-                                const std::string &instrumentname,
-                                const double &primaryflightpath,
-                                const std::vector<int> &detectorids,
-                                const std::vector<double> &totalflightpaths,
-                                const std::vector<double> &twothetas,
+  void createInstrumentGeometry(const API::MatrixWorkspace_sptr &workspace, const std::string &instrumentname,
+                                const double &primaryflightpath, const std::vector<int> &detectorids,
+                                const std::vector<double> &totalflightpaths, const std::vector<double> &twothetas,
                                 const std::vector<double> &difcs);
 };
 } // namespace DataHandling

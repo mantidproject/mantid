@@ -62,13 +62,10 @@ std::string createTruncatedList(const std::set<int> &elements);
 void populateTable(Mantid::API::ITableWorkspace_sptr &t, const Mantid::API::MatrixWorkspace_sptr &ws, const int nrows,
                    const std::vector<int> &indices, const Mantid::API::SpectrumInfo &spectrumInfo,
                    bool signedThetaParamRetrieved, bool showSignedTwoTheta,
-                   const Mantid::Geometry::PointingAlong &beamAxisIndex,
-                   const double sampleDist, const bool isScanning,
-                   const bool include_data, const bool calcQ,
-                   const bool includeDiffConstants, Kernel::Logger &logger);
-std::vector<std::pair<std::string, std::string>>
-createColumns(const bool isScanning, const bool includeData, const bool calcQ,
-              const bool hasDiffConstants);
+                   const Mantid::Geometry::PointingAlong &beamAxisIndex, const double sampleDist, const bool isScanning,
+                   const bool include_data, const bool calcQ, const bool includeDiffConstants, Kernel::Logger &logger);
+std::vector<std::pair<std::string, std::string>> createColumns(const bool isScanning, const bool includeData,
+                                                               const bool calcQ, const bool hasDiffConstants);
 
 } // namespace Algorithms
 } // namespace Mantid

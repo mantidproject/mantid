@@ -253,9 +253,7 @@ void RemoveBins::transformRangeUnit(const int index, double &startX, double &end
     double l1 = m_spectrumInfo->l1();
 
     Kernel::UnitParametersMap pmap{};
-    m_spectrumInfo->getDetectorValues(*m_rangeUnit, *inputUnit,
-                                      Kernel::DeltaEMode::Elastic, false, index,
-                                      pmap);
+    m_spectrumInfo->getDetectorValues(*m_rangeUnit, *inputUnit, Kernel::DeltaEMode::Elastic, false, index, pmap);
     double l2 = 0.;
     if (pmap.find(UnitParams::l2) != pmap.end()) {
       l2 = pmap[UnitParams::l2];
@@ -264,8 +262,7 @@ void RemoveBins::transformRangeUnit(const int index, double &startX, double &end
     if (pmap.find(UnitParams::twoTheta) != pmap.end()) {
       l2 = pmap[UnitParams::twoTheta];
     }
-    g_log.debug() << "Detector for index " << index << " has L1+L2=" << l1 + l2
-                  << " & 2theta= " << theta << '\n';
+    g_log.debug() << "Detector for index " << index << " has L1+L2=" << l1 + l2 << " & 2theta= " << theta << '\n';
     std::vector<double> endPoints;
     endPoints.emplace_back(startX);
     endPoints.emplace_back(endX);
@@ -288,8 +285,8 @@ void RemoveBins::transformRangeUnit(const int index, double &startX, double &end
     endX = temp;
   }
 
-  g_log.debug() << "For index " << index << ", X range given corresponds to "
-                << startX << "-" << endX << " in workspace's unit\n";
+  g_log.debug() << "For index " << index << ", X range given corresponds to " << startX << "-" << endX
+                << " in workspace's unit\n";
 }
 
 /** Finds the index in an ordered vector which follows the given value

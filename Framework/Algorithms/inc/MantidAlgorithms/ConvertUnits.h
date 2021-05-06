@@ -89,9 +89,8 @@ protected:
 
   /// Convert the workspace units according to a simple output = a * (input^b)
   /// relationship
-  API::MatrixWorkspace_sptr
-  convertQuickly(const API::MatrixWorkspace_const_sptr &inputWS,
-                 const double &factor, const double &power);
+  API::MatrixWorkspace_sptr convertQuickly(const API::MatrixWorkspace_const_sptr &inputWS, const double &factor,
+                                           const double &power);
 
   /// Convert the workspace units using TOF as an intermediate step in the
   /// conversion

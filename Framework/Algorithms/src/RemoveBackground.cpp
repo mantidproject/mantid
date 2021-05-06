@@ -146,10 +146,9 @@ void RemoveBackground::exec() {
 //-------------------------------------------------------------------------------------------------------------------------------
 /// Constructor
 BackgroundHelper::BackgroundHelper()
-    : m_WSUnit(), m_bgWs(), m_wkWS(), m_spectrumInfo(nullptr), m_pgLog(nullptr),
-      m_inPlace(true), m_singleValueBackground(false), m_NBg(0), m_dtBg(1),
-      m_ErrSq(0), m_Emode(DeltaEMode::Elastic), m_nullifyNegative(false),
-      m_previouslyRemovedBkgMode(false) {}
+    : m_WSUnit(), m_bgWs(), m_wkWS(), m_spectrumInfo(nullptr), m_pgLog(nullptr), m_inPlace(true),
+      m_singleValueBackground(false), m_NBg(0), m_dtBg(1), m_ErrSq(0), m_Emode(DeltaEMode::Elastic),
+      m_nullifyNegative(false), m_previouslyRemovedBkgMode(false) {}
 
 /** Initialization method:
 *@param bkgWS    -- shared pointer to the workspace which contains background
@@ -164,10 +163,8 @@ BackgroundHelper::BackgroundHelper()
 or target workspace has to be cloned.
 */
 void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
-                                  const API::MatrixWorkspace_sptr &sourceWS,
-                                  Kernel::DeltaEMode::Type emode,
-                                  Kernel::Logger *pLog, int nThreads,
-                                  bool inPlace, bool nullifyNegative) {
+                                  const API::MatrixWorkspace_sptr &sourceWS, Kernel::DeltaEMode::Type emode,
+                                  Kernel::Logger *pLog, int nThreads, bool inPlace, bool nullifyNegative) {
   m_bgWs = bkgWS;
   m_wkWS = sourceWS;
   m_Emode = emode;
@@ -255,8 +252,7 @@ void BackgroundHelper::removeBackground(int nHist, HistogramX &x_data, Histogram
     // use thread-specific unit conversion class to avoid multithreading issues
     Kernel::Unit *unitConv = m_WSUnit[threadNum].get();
     Kernel::UnitParametersMap pmap{};
-    m_spectrumInfo->getDetectorValues(*unitConv, Kernel::Units::TOF{}, m_Emode,
-                                      false, nHist, pmap);
+    m_spectrumInfo->getDetectorValues(*unitConv, Kernel::Units::TOF{}, m_Emode, false, nHist, pmap);
     unitConv->initialize(L1, m_Emode, pmap);
 
     x_data[0] = XValues[0];
@@ -299,9 +295,7 @@ void BackgroundHelper::removeBackground(int nHist, HistogramX &x_data, Histogram
     // no background removal for this spectra as it does not have a detector or
     // other reason
     if (m_pgLog)
-      m_pgLog->debug()
-          << " Can not remove background for the spectra with number (id)"
-          << nHist;
+      m_pgLog->debug() << " Can not remove background for the spectra with number (id)" << nHist;
   }
 }
 

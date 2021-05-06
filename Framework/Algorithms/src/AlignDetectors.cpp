@@ -47,8 +47,7 @@ public:
     this->generateDetidToRow(table);
   }
 
-  std::tuple<double, double, double>
-  getDiffConstants(const std::set<detid_t> &detIds) const {
+  std::tuple<double, double, double> getDiffConstants(const std::set<detid_t> &detIds) const {
     const std::set<size_t> rows = this->getRow(detIds);
     double difc = 0.;
     double difa = 0.;
@@ -86,14 +85,11 @@ private:
       }
     }
     if (rows.empty()) {
-      std::string detIdsStr = std::accumulate(
-          std::begin(detIds), std::end(detIds), std::string{},
-          [](const std::string &a, const detid_t &b) {
-            return a.empty() ? std::to_string(b) : a + ',' + std::to_string(b);
-          });
-      throw Exception::NotFoundError(
-          "None of the detectors were found in the calibration table",
-          detIdsStr);
+      std::string detIdsStr = std::accumulate(std::begin(detIds), std::end(detIds), std::string{},
+                                              [](const std::string &a, const detid_t &b) {
+                                                return a.empty() ? std::to_string(b) : a + ',' + std::to_string(b);
+                                              });
+      throw Exception::NotFoundError("None of the detectors were found in the calibration table", detIdsStr);
     }
     return rows;
   }
@@ -267,8 +263,7 @@ void AlignDetectors::exec() {
   align(converter, progress, outputWS);
 }
 
-void AlignDetectors::align(const ConversionFactors &converter,
-                           Progress &progress, MatrixWorkspace_sptr &outputWS) {
+void AlignDetectors::align(const ConversionFactors &converter, Progress &progress, MatrixWorkspace_sptr &outputWS) {
   auto eventW = std::dynamic_pointer_cast<EventWorkspace>(outputWS);
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < m_numberOfSpectra; ++i) {
@@ -276,17 +271,15 @@ void AlignDetectors::align(const ConversionFactors &converter,
     try {
       // Get the input spectrum number at this workspace index
       auto &spec = outputWS->getSpectrum(size_t(i));
-      auto [difc, difa, tzero] =
-          converter.getDiffConstants(spec.getDetectorIDs());
+      auto [difc, difa, tzero] = converter.getDiffConstants(spec.getDetectorIDs());
 
       auto &x = outputWS->dataX(i);
       Kernel::Units::dSpacing dSpacingUnit;
       std::vector<double> yunused;
-      dSpacingUnit.fromTOF(
-          x, yunused, -1., 0,
-          UnitParametersMap{{Kernel::UnitParams::difa, difa},
-                            {Kernel::UnitParams::difc, difc},
-                            {Kernel::UnitParams::tzero, tzero}});
+      dSpacingUnit.fromTOF(x, yunused, -1., 0,
+                           UnitParametersMap{{Kernel::UnitParams::difa, difa},
+                                             {Kernel::UnitParams::difc, difc},
+                                             {Kernel::UnitParams::tzero, tzero}});
 
       if (eventW) {
         Kernel::Units::TOF tofUnit;
@@ -298,8 +291,7 @@ void AlignDetectors::align(const ConversionFactors &converter,
       if (!eventW) {
         // Zero the data in this case (detectors not found in cal table or
         // conversion fails)
-        outputWS->setHistogram(i, BinEdges(outputWS->x(i).size()),
-                               Counts(outputWS->y(i).size()));
+        outputWS->setHistogram(i, BinEdges(outputWS->x(i).size()), Counts(outputWS->y(i).size()));
       }
     }
     progress.report();

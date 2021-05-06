@@ -1289,8 +1289,7 @@ namespace Conversion {
  * @param offset
  * @return
  */
-double tofToDSpacingFactor(const double l1, const double l2,
-                           const double twoTheta, const double offset) {
+double tofToDSpacingFactor(const double l1, const double l2, const double twoTheta, const double offset) {
   return Kernel::Units::tofToDSpacingFactor(l1, l2, twoTheta, offset);
 }
 

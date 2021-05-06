@@ -39,8 +39,7 @@ public:
   ImageInfoModel::ImageInfo info(const double x, const double y, const double signal) const override;
 
 private:
-  void setUnitsInfo(ImageInfoModel::ImageInfo *info, int infoIndex,
-                    const size_t wsIndex, const double x) const;
+  void setUnitsInfo(ImageInfoModel::ImageInfo *info, int infoIndex, const size_t wsIndex, const double x) const;
   void cacheWorkspaceInfo();
   void createItemNames();
 

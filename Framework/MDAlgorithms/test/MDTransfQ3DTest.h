@@ -40,10 +40,8 @@ std::tuple<MDTransfQ3DTestHelper, MDWSDescription> createTestTransform(const dou
   MDTransfQ3DTestHelper q3dTransform;
   // set wide limits to catch everything
   wsDescription.setMinMax({-100, -100, -100, -100}, {100, 100, 100, 100});
-  wsDescription.buildFromMatrixWS(indirectInelasticWS, q3dTransform.transfID(),
-                                  DeltaEMode::asString(emode), {});
-  auto ppDets_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-      "PreprocessDetectorsToMD");
+  wsDescription.buildFromMatrixWS(indirectInelasticWS, q3dTransform.transfID(), DeltaEMode::asString(emode), {});
+  auto ppDets_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("PreprocessDetectorsToMD");
   ppDets_alg->initialize();
   ppDets_alg->setChild(true);
   ppDets_alg->setProperty("InputWorkspace", indirectInelasticWS);
@@ -139,8 +137,7 @@ public:
                       const std::runtime_error &)
 
     // let's preprocess detectors positions to go any further
-    auto ppDets_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-        "PreprocessDetectorsToMD");
+    auto ppDets_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("PreprocessDetectorsToMD");
     ppDets_alg->initialize();
     ppDets_alg->setChild(true);
     ppDets_alg->setProperty("InputWorkspace", elasticTestWS);

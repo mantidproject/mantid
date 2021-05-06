@@ -98,8 +98,7 @@ void ConvertSpectrumAxis::exec() {
       double efixedProp = getProperty("Efixed");
       if (efixedProp != EMPTY_DBL()) {
         pmap[UnitParams::efixed] = efixedProp;
-        g_log.debug() << "Detector: " << spectrumInfo.detector(i).getID()
-                      << " Efixed: " << efixedProp << "\n";
+        g_log.debug() << "Detector: " << spectrumInfo.detector(i).getID() << " Efixed: " << efixedProp << "\n";
       }
 
       spectrumInfo.getDetectorValues(*fromUnit, *toUnit, emode, false, i, pmap);
@@ -118,8 +117,7 @@ void ConvertSpectrumAxis::exec() {
       indexMap.emplace(value, i);
     }
     if (nfailures == nHist) {
-      throw std::runtime_error(
-          "Unable to convert spectrum axis values on all spectra");
+      throw std::runtime_error("Unable to convert spectrum axis values on all spectra");
     }
   } else {
     // Set up binding to memeber funtion. Avoids condition as part of loop over

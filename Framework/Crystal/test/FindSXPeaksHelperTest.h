@@ -123,9 +123,7 @@ public:
   void testThatFindsAllPeaksWhenAbsoluteBackgroundStrategyIsUsed() {
     // GIVEN
     auto backgroundStrategy = std::make_unique<AbsoluteBackgroundStrategy>(3.);
-    auto workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            2 /*nhist*/, 15 /*nbins*/);
+    auto workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2 /*nhist*/, 15 /*nbins*/);
     const int workspaceIndex = 1;
     auto &mutableY = workspace->mutableY(workspaceIndex);
     doAddDoublePeakToData(mutableY);
@@ -328,9 +326,7 @@ public:
 private:
   void doRunStrongestPeakTest(BackgroundStrategy *backgroundStrategy) {
     // GIVEN
-    auto workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            2 /*nhist*/, 15 /*nbins*/);
+    auto workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2 /*nhist*/, 15 /*nbins*/);
     const int workspaceIndex = 1;
     auto &mutableY = workspace->mutableY(workspaceIndex);
     doAddDoublePeakToData(mutableY);

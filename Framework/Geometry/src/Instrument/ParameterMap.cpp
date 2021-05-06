@@ -128,9 +128,7 @@ bool ParameterMap::operator!=(const ParameterMap &rhs) const { return !(this->op
  * @param rhs A reference to a ParameterMap object to compare it to
  * @return true if the objects are considered equal, false otherwise
  */
-bool ParameterMap::operator==(const ParameterMap &rhs) const {
-  return diff(rhs, true, false, 0.).empty();
-}
+bool ParameterMap::operator==(const ParameterMap &rhs) const { return diff(rhs, true, false, 0.).empty(); }
 
 /** Get the component description by name
  *  @param compName :: The name of the component
@@ -215,9 +213,7 @@ bool ParameterMap::relErr(double x1, double x2, double errorVal) const {
  * of type double
  * @return diff as a string
  */
-const std::string ParameterMap::diff(const ParameterMap &rhs,
-                                     const bool &firstDiffOnly,
-                                     const bool relative,
+const std::string ParameterMap::diff(const ParameterMap &rhs, const bool &firstDiffOnly, const bool relative,
                                      const double doubleTolerance) const {
   if (this == &rhs)
     return std::string(""); // True for the same object
@@ -249,14 +245,11 @@ const std::string ParameterMap::diff(const ParameterMap &rhs,
       const std::string rhsFullName = rhsIt->first;
       const auto &rhsParam = rhsIt->second;
       if ((fullName == rhsFullName) && (param->name() == (rhsParam->name()))) {
-        if ((param->type() == rhsParam->type()) &&
-            (rhsParam->type() == "double")) {
+        if ((param->type() == rhsParam->type()) && (rhsParam->type() == "double")) {
           if (relative) {
-            if (!relErr(param->value<double>(), rhsParam->value<double>(),
-                        doubleTolerance))
+            if (!relErr(param->value<double>(), rhsParam->value<double>(), doubleTolerance))
               match = true;
-          } else if (std::abs(param->value<double>() -
-                              rhsParam->value<double>()) <= doubleTolerance)
+          } else if (std::abs(param->value<double>() - rhsParam->value<double>()) <= doubleTolerance)
             match = true;
         } else if (param->asString() == rhsParam->asString()) {
           match = true;

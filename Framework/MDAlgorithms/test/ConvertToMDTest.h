@@ -166,8 +166,7 @@ public:
     pAlg->setPropertyValue("MaxValues", " 10,20,40");
     pAlg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(pAlg->execute());
-    checkHistogramsHaveBeenStored("WS3DmodQ", 7000, 6489.5591101441796,
-                                  7300.7539989122024);
+    checkHistogramsHaveBeenStored("WS3DmodQ", 7000, 6489.5591101441796, 7300.7539989122024);
 
     auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS3DmodQ");
     TS_ASSERT_EQUALS(Mantid::Kernel::None, outWS->getSpecialCoordinateSystem());

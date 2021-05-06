@@ -164,16 +164,14 @@ public:
                       const std::runtime_error &);
 
     // let's preprocess detectors positions to go any further
-    auto ppDets_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-        "PreprocessDetectorsToMD");
+    auto ppDets_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("PreprocessDetectorsToMD");
     ppDets_alg->initialize();
     ppDets_alg->setChild(true);
     ppDets_alg->setProperty("InputWorkspace", ws2Dbig);
     ppDets_alg->setProperty("OutputWorkspace", "UnitsConversionHelperTableWs");
     ppDets_alg->execute();
     WSDescr.m_PreprDetTable = ppDets_alg->getProperty("OutputWorkspace");
-    TSM_ASSERT_THROWS_NOTHING("should initialize properly: ",
-                              ModQTransf.initialize(WSDescr));
+    TSM_ASSERT_THROWS_NOTHING("should initialize properly: ", ModQTransf.initialize(WSDescr));
     std::vector<coord_t> coord(4);
     TSM_ASSERT("Generic coordinates should be in range, so should be true ", ModQTransf.calcGenericVariables(coord, 4));
     TSM_ASSERT_DELTA("3th Generic coordinates should be temperature ", 70, coord[2], 2.e-8);

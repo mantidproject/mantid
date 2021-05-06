@@ -417,8 +417,7 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
     pmap[UnitParams::efixed] = efixedProp;
   }
   size_t checkIndex = 0;
-  spectrumInfo.getDetectorValues(*fromUnit, *outputUnit, emode, signedTheta,
-                                 checkIndex, pmap);
+  spectrumInfo.getDetectorValues(*fromUnit, *outputUnit, emode, signedTheta, checkIndex, pmap);
   // copy the X values for the check
   auto checkXValues = inputWS->readX(checkIndex);
   try {
@@ -426,8 +425,7 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
     checkFromUnit->toTOF(checkXValues, emptyVec, l1, emode, pmap);
     // Convert from time-of-flight to the desired unit
     checkOutputUnit->fromTOF(checkXValues, emptyVec, l1, emode, pmap);
-  } catch (
-      std::runtime_error) { // if it's a detector specific problem then ignore
+  } catch (std::runtime_error) { // if it's a detector specific problem then ignore
   }
 
   // create the output workspace
@@ -454,8 +452,7 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
     if (efixedProp != EMPTY_DBL()) {
       pmap[UnitParams::efixed] = efixed;
     }
-    outSpectrumInfo.getDetectorValues(*fromUnit, *outputUnit, emode,
-                                      signedTheta, i, pmap);
+    outSpectrumInfo.getDetectorValues(*fromUnit, *outputUnit, emode, signedTheta, i, pmap);
     try {
       localFromUnit->toTOF(outputWS->dataX(i), emptyVec, l1, emode, pmap);
       // Convert from time-of-flight to the desired unit
@@ -463,8 +460,7 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
 
       // EventWorkspace part, modifying the EventLists.
       if (m_inputEvents) {
-        eventWS->getSpectrum(i).convertUnitsViaTof(localFromUnit.get(),
-                                                   localOutputUnit.get());
+        eventWS->getSpectrum(i).convertUnitsViaTof(localFromUnit.get(), localOutputUnit.get());
       }
     } catch (std::runtime_error) {
       // Get to here if exception thrown in unit conversion eg when calculating

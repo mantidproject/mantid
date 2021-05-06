@@ -209,8 +209,7 @@ double PoldiPeakSearch::getTransformedCenter(double value, const Unit_sptr &unit
 
   // Transform value to d-spacing.
   Unit_sptr dUnit = UnitFactory::Instance().create("dSpacing");
-  return UnitConversion::run((*transformUnit), (*dUnit), value, 0,
-                             DeltaEMode::Elastic);
+  return UnitConversion::run((*transformUnit), (*dUnit), value, 0, DeltaEMode::Elastic);
 }
 
 /** Creates PoldiPeak-objects from peak position iterators

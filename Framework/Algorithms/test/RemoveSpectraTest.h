@@ -92,16 +92,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", ouputWsName));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            ouputWsName);
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(ouputWsName);
     // Removed specs are workspace indices 94 and 144/specNum 95 and 145
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 147);
     TS_ASSERT_DELTA(outputWS->x(93).front(), 0.41157, 0.0001);  // was 93
     TS_ASSERT_DELTA(outputWS->x(94).front(), 0.05484, 0.0001);  // was 95
     TS_ASSERT_DELTA(outputWS->x(95).front(), -0.15111, 0.0001); // was 96
-    TS_ASSERT(outputWS->spectrumInfo().hasDetectors(
-        143)); // Would be 144 if 144 wasn't also removed
+    TS_ASSERT(outputWS->spectrumInfo().hasDetectors(143));      // Would be 144 if 144 wasn't also removed
   }
 
 private:

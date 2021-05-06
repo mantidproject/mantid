@@ -157,8 +157,7 @@ void CentroidPeaks::integrate() {
       double scattering = peak.getScattering();
       double L1 = peak.getL1();
       double L2 = peak.getL2();
-      wl.fromTOF(timeflight, timeflight, L1, 0,
-                 {{UnitParams::l2, L2}, {UnitParams::twoTheta, scattering}});
+      wl.fromTOF(timeflight, timeflight, L1, 0, {{UnitParams::l2, L2}, {UnitParams::twoTheta, scattering}});
       const double lambda = timeflight[0];
       timeflight.clear();
 
@@ -276,8 +275,7 @@ void CentroidPeaks::integrateEvent() {
       double scattering = peak.getScattering();
       double L1 = peak.getL1();
       double L2 = peak.getL2();
-      wl.fromTOF(timeflight, timeflight, L1, 0,
-                 {{UnitParams::l2, L2}, {UnitParams::twoTheta, scattering}});
+      wl.fromTOF(timeflight, timeflight, L1, 0, {{UnitParams::l2, L2}, {UnitParams::twoTheta, scattering}});
       const double lambda = timeflight[0];
       timeflight.clear();
 

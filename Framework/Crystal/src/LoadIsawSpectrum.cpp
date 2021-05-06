@@ -152,8 +152,7 @@ void LoadIsawSpectrum::exec() {
     // scattered beam
     double theta2 = dir.angle(V3D(0.0, 0.0, 1.0));
 
-    Mantid::Kernel::Unit_sptr unit =
-        UnitFactory::Instance().create("Wavelength");
+    Mantid::Kernel::Unit_sptr unit = UnitFactory::Instance().create("Wavelength");
     unit->toTOF(xdata, ydata, l1, 0,
                 {
                     {UnitParams::l2, l2},

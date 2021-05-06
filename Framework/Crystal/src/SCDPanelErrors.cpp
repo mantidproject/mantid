@@ -197,9 +197,7 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift, double xr
       DataObjects::Peak peak2(inst, peak.getDetectorID(), peak.getWavelength(), hkl, peak.getGoniometerMatrix());
       Units::Wavelength wl;
 
-      wl.initialize(peak2.getL1(), 0,
-                    {{UnitParams::l2, peak2.getL2()},
-                     {UnitParams::twoTheta, peak2.getScattering()}});
+      wl.initialize(peak2.getL1(), 0, {{UnitParams::l2, peak2.getL2()}, {UnitParams::twoTheta, peak2.getScattering()}});
       peak2.setWavelength(wl.singleFromTOF(peak.getTOF() + tShift));
       V3D Q3 = peak2.getQSampleFrame();
       out[i * 3] = Q3[0] - Q2[0];

@@ -83,18 +83,15 @@ public:
     Algorithms::BackgroundHelper bgRemoval;
     // create workspace with units of energy transfer
     auto bkgWS = WorkspaceCreationHelper::createProcessedInelasticWS(
-        std::vector<double>(1, 1.), std::vector<double>(1, 20.),
-        std::vector<double>(1, 10.));
-    TSM_ASSERT_THROWS(
-        "Should throw if background workspace is not in TOF units",
-        bgRemoval.initialize(bkgWS, SourceWS, Kernel::DeltaEMode::Elastic),
-        const std::invalid_argument &);
+        std::vector<double>(1, 1.), std::vector<double>(1, 20.), std::vector<double>(1, 10.));
+    TSM_ASSERT_THROWS("Should throw if background workspace is not in TOF units",
+                      bgRemoval.initialize(bkgWS, SourceWS, Kernel::DeltaEMode::Elastic),
+                      const std::invalid_argument &);
 
     bkgWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 15);
-    TSM_ASSERT_THROWS(
-        "Should throw if background is not 1 or equal to source",
-        bgRemoval.initialize(bkgWS, SourceWS, Kernel::DeltaEMode::Elastic),
-        const std::invalid_argument &);
+    TSM_ASSERT_THROWS("Should throw if background is not 1 or equal to source",
+                      bgRemoval.initialize(bkgWS, SourceWS, Kernel::DeltaEMode::Elastic),
+                      const std::invalid_argument &);
   }
 
   void testBackgroundHelper() {

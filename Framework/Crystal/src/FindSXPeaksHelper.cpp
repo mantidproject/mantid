@@ -92,8 +92,7 @@ SXPeak::SXPeak(double t, double phi, double intensity, const std::vector<int> &s
   Mantid::Kernel::Units::TOF tof;
   const auto unit = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
   Kernel::UnitParametersMap pmap{};
-  spectrumInfo.getDetectorValues(tof, *unit, Kernel::DeltaEMode::Elastic, false,
-                                 m_wsIndex, pmap);
+  spectrumInfo.getDetectorValues(tof, *unit, Kernel::DeltaEMode::Elastic, false, m_wsIndex, pmap);
   unit->initialize(l1, 0, pmap);
   try {
     m_dSpacing = unit->singleFromTOF(m_tof);
@@ -351,8 +350,7 @@ double PeakFindingStrategy::convertToTOF(const double xValue, const size_t works
     const auto unit = UnitFactory::Instance().create("dSpacing");
     Mantid::Kernel::Units::TOF tof;
     Kernel::UnitParametersMap pmap{};
-    m_spectrumInfo.getDetectorValues(*unit, tof, Kernel::DeltaEMode::Elastic,
-                                     false, workspaceIndex, pmap);
+    m_spectrumInfo.getDetectorValues(*unit, tof, Kernel::DeltaEMode::Elastic, false, workspaceIndex, pmap);
     // we're using d-spacing, convert the point to TOF
     unit->initialize(m_spectrumInfo.l1(), 0, pmap);
     return unit->singleToTOF(xValue);

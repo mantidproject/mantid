@@ -700,11 +700,8 @@ public:
    * if
    * sorting flips the direction
    */
-  void do_testExecEvent_RemainsSorted(EventSortType sortType,
-                                      const std::string &targetUnit) {
-    EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10,
-                                                                        false);
+  void do_testExecEvent_RemainsSorted(EventSortType sortType, const std::string &targetUnit) {
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10, false);
     ws->getAxis(0)->setUnit("TOF");
     ws->sortAll(sortType, nullptr);
 
@@ -760,21 +757,13 @@ public:
     }
   }
 
-  void testExecEvent_RemainsSorted_TOF() {
-    do_testExecEvent_RemainsSorted(TOF_SORT, "dSpacing");
-  }
+  void testExecEvent_RemainsSorted_TOF() { do_testExecEvent_RemainsSorted(TOF_SORT, "dSpacing"); }
 
-  void testExecEvent_RemainsSorted_Pulsetime() {
-    do_testExecEvent_RemainsSorted(PULSETIME_SORT, "dSpacing");
-  }
+  void testExecEvent_RemainsSorted_Pulsetime() { do_testExecEvent_RemainsSorted(PULSETIME_SORT, "dSpacing"); }
 
-  void testExecEvent_RemainsSorted_TOF_to_Energy() {
-    do_testExecEvent_RemainsSorted(TOF_SORT, "Energy");
-  }
+  void testExecEvent_RemainsSorted_TOF_to_Energy() { do_testExecEvent_RemainsSorted(TOF_SORT, "Energy"); }
 
-  void testExecEvent_RemainsSorted_Pulsetime_to_Energy() {
-    do_testExecEvent_RemainsSorted(PULSETIME_SORT, "Energy");
-  }
+  void testExecEvent_RemainsSorted_Pulsetime_to_Energy() { do_testExecEvent_RemainsSorted(PULSETIME_SORT, "Energy"); }
 
   void testDeltaEFailDoesNotAlterInPlaceWorkspace() {
 

@@ -81,12 +81,9 @@ public:
     // TS_ASSERT_THROWS_NOTHING(
     // editdetector.setPropertyValue("SpectrumIDs","3072,19456,40960,55296,74752,93184")
     // );
-    TS_ASSERT_THROWS_NOTHING(
-        editdetector.setPropertyValue("L2", "1.1,2.2,3.3,4.4,5.5,6.6"));
-    TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue(
-        "Polar", "90.1,90.2,90.3,90.4,90.5,90.6"));
-    TS_ASSERT_THROWS_NOTHING(
-        editdetector.setPropertyValue("Azimuthal", "1,2,3,4,5,6"));
+    TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue("L2", "1.1,2.2,3.3,4.4,5.5,6.6"));
+    TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue("Polar", "90.1,90.2,90.3,90.4,90.5,90.6"));
+    TS_ASSERT_THROWS_NOTHING(editdetector.setPropertyValue("Azimuthal", "1,2,3,4,5,6"));
 
     // 4. Run
     TS_ASSERT_THROWS_NOTHING(editdetector.execute());

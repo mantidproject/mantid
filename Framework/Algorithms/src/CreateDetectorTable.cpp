@@ -136,8 +136,7 @@ ITableWorkspace_sptr createDetectorTableWorkspace(const MatrixWorkspace_sptr &ws
   }
 
   // Prepare column names
-  auto colNames =
-      createColumns(isScanning, includeData, calcQ, hasDiffConstants);
+  auto colNames = createColumns(isScanning, includeData, calcQ, hasDiffConstants);
 
   const int ncols = static_cast<int>(colNames.size());
   const int nrows = indices.empty() ? static_cast<int>(ws->getNumberHistograms()) : static_cast<int>(indices.size());
@@ -158,16 +157,14 @@ ITableWorkspace_sptr createDetectorTableWorkspace(const MatrixWorkspace_sptr &ws
   bool signedThetaParamRetrieved{false}, showSignedTwoTheta{false}; // If true, signedVersion of the two theta
                                                                     // value should be displayed
 
-  populateTable(t, ws, nrows, indices, spectrumInfo, signedThetaParamRetrieved,
-                showSignedTwoTheta, beamAxisIndex, sampleDist, isScanning,
-                includeData, calcQ, hasDiffConstants, logger);
+  populateTable(t, ws, nrows, indices, spectrumInfo, signedThetaParamRetrieved, showSignedTwoTheta, beamAxisIndex,
+                sampleDist, isScanning, includeData, calcQ, hasDiffConstants, logger);
 
   return t;
 }
 
-std::vector<std::pair<std::string, std::string>>
-createColumns(const bool isScanning, const bool includeData, const bool calcQ,
-              const bool hasDiffConstants) {
+std::vector<std::pair<std::string, std::string>> createColumns(const bool isScanning, const bool includeData,
+                                                               const bool calcQ, const bool hasDiffConstants) {
   std::vector<std::pair<std::string, std::string>> colNames;
   colNames.emplace_back("double", "Index");
   colNames.emplace_back("int", "Spectrum No");
@@ -195,13 +192,10 @@ createColumns(const bool isScanning, const bool includeData, const bool calcQ,
   return colNames;
 }
 
-void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws,
-                   const int nrows, const std::vector<int> &indices,
-                   const SpectrumInfo &spectrumInfo,
-                   bool signedThetaParamRetrieved, bool showSignedTwoTheta,
-                   const PointingAlong &beamAxisIndex, const double sampleDist,
-                   const bool isScanning, const bool includeData,
-                   const bool calcQ, const bool includeDiffConstants,
+void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws, const int nrows,
+                   const std::vector<int> &indices, const SpectrumInfo &spectrumInfo, bool signedThetaParamRetrieved,
+                   bool showSignedTwoTheta, const PointingAlong &beamAxisIndex, const double sampleDist,
+                   const bool isScanning, const bool includeData, const bool calcQ, const bool includeDiffConstants,
                    Logger &logger) {
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
   for (int row = 0; row < nrows; ++row) {
@@ -303,8 +297,7 @@ void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws,
           auto diffConsts = spectrumInfo.diffractometerConstants(wsIndex);
           auto difcValueUncalibrated = spectrumInfo.difcUncalibrated(wsIndex);
           // map will create an entry with zero value if not present already
-          colValues << diffConsts[UnitParams::difa]
-                    << diffConsts[UnitParams::difc] << difcValueUncalibrated
+          colValues << diffConsts[UnitParams::difa] << diffConsts[UnitParams::difc] << difcValueUncalibrated
                     << diffConsts[UnitParams::tzero];
         }
       }

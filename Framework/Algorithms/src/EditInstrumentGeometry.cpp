@@ -83,8 +83,7 @@ void EditInstrumentGeometry::init() {
 template <typename NumT> std::string checkValues(const std::vector<NumT> &thingy, const size_t numHist) {
   if ((!thingy.empty()) && thingy.size() != numHist) {
     stringstream msg;
-    msg << "Must equal number of spectra or be empty (" << numHist
-        << " != " << thingy.size() << ")";
+    msg << "Must equal number of spectra or be empty (" << numHist << " != " << thingy.size() << ")";
     return msg.str();
   } else {
     return "";
@@ -253,8 +252,7 @@ void EditInstrumentGeometry::exec() {
     if (renameDetID)
       storDetIDs[workspaceindex] = vec_detids[i];
 
-    g_log.debug() << "workspace index = " << workspaceindex
-                  << " is for Spectrum " << specids[i] << '\n';
+    g_log.debug() << "workspace index = " << workspaceindex << " is for Spectrum " << specids[i] << '\n';
   }
 
   // Generate a new instrument
@@ -286,8 +284,7 @@ void EditInstrumentGeometry::exec() {
   instrument->markAsSamplePos(samplepos);
   samplepos->setPos(0.0, 0.0, 0.0);
 
-  Geometry::ObjComponent *source =
-      new Geometry::ObjComponent("Source", instrument.get());
+  Geometry::ObjComponent *source = new Geometry::ObjComponent("Source", instrument.get());
   instrument->add(source);
   instrument->markAsSource(source);
   source->setPos(0.0, 0.0, -1.0 * l1);
@@ -301,8 +298,7 @@ void EditInstrumentGeometry::exec() {
       newdetid = storDetIDs[i];
     else
       newdetid = detid_t(i) + 100;
-    Geometry::Detector *detector =
-        new Geometry::Detector("det", newdetid, samplepos);
+    Geometry::Detector *detector = new Geometry::Detector("det", newdetid, samplepos);
 
     // Set up new detector parameters related to new instrument
     double l2 = storL2s[i];

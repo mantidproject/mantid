@@ -315,10 +315,9 @@ void UnitsConversionHelper::updateConversion(size_t i) {
     m_DIFC = (*m_pDIFCs)[i];
     m_TZERO = (*m_pTZEROs)[i];
 
-    Kernel::UnitParametersMap pmap = {
-        {UnitParams::l2, m_L2},     {UnitParams::twoTheta, m_TwoTheta},
-        {UnitParams::efixed, Efix}, {UnitParams::difa, m_DIFA},
-        {UnitParams::difc, m_DIFC}, {UnitParams::tzero, m_TZERO}};
+    Kernel::UnitParametersMap pmap = {{UnitParams::l2, m_L2},     {UnitParams::twoTheta, m_TwoTheta},
+                                      {UnitParams::efixed, Efix}, {UnitParams::difa, m_DIFA},
+                                      {UnitParams::difc, m_DIFC}, {UnitParams::tzero, m_TZERO}};
     m_TargetUnit->initialize(m_L1, m_Emode, pmap);
     m_SourceWSUnit->initialize(m_L1, m_Emode, pmap);
     return;
@@ -378,12 +377,9 @@ UnitsConversionHelper::UnitsConversionHelper(const UnitsConversionHelper &anothe
 }
 
 UnitsConversionHelper::UnitsConversionHelper()
-    : m_UnitCnvrsn(CnvrtToMD::ConvertNo), m_Factor(1), m_Power(1),
-      m_Emode(-1), // undefined
-      m_L1(1), m_Efix(1), m_TwoTheta(0), m_L2(1), m_DIFA(0.), m_DIFC(0.),
-      m_TZERO(0.), m_pTwoThetas(nullptr), m_pL2s(nullptr),
-      m_pEfixedArray(nullptr), m_pDIFAs(nullptr), m_pDIFCs(nullptr),
-      m_pTZEROs(nullptr) {}
+    : m_UnitCnvrsn(CnvrtToMD::ConvertNo), m_Factor(1), m_Power(1), m_Emode(-1), // undefined
+      m_L1(1), m_Efix(1), m_TwoTheta(0), m_L2(1), m_DIFA(0.), m_DIFC(0.), m_TZERO(0.), m_pTwoThetas(nullptr),
+      m_pL2s(nullptr), m_pEfixedArray(nullptr), m_pDIFAs(nullptr), m_pDIFCs(nullptr), m_pTZEROs(nullptr) {}
 
 } // namespace MDAlgorithms
 } // namespace Mantid

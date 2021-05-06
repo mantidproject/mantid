@@ -75,10 +75,8 @@ public:
   static const std::string &pQuat();
   static const std::string &scale();
 
-  const std::string
-  diff(const ParameterMap &rhs, const bool &firstDiffOnly = false,
-       const bool relative = false,
-       const double doubleTolerance = Kernel::Tolerance) const;
+  const std::string diff(const ParameterMap &rhs, const bool &firstDiffOnly = false, const bool relative = false,
+                         const double doubleTolerance = Kernel::Tolerance) const;
 
   /// Inquality comparison operator
   bool operator!=(const ParameterMap &rhs) const;
@@ -304,8 +302,7 @@ private:
   component_map_it positionOf(const IComponent *comp, const char *name, const char *type);
   /// const version of the internal function to get position of the parameter in
   /// the parameter map
-  component_map_cit positionOf(const IComponent *comp, const char *name,
-                               const char *type) const;
+  component_map_cit positionOf(const IComponent *comp, const char *name, const char *type) const;
   /// calculate relative error for use in diff
   bool relErr(double x1, double x2, double errorVal) const;
 

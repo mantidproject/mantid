@@ -635,22 +635,18 @@ double ExperimentInfo::getEFixed(const std::shared_ptr<const Geometry::IDetector
   return getEFixedGivenEMode(detector, emode);
 }
 
-double ExperimentInfo::getEFixedForIndirect(
-    const std::shared_ptr<const Geometry::IDetector> &detector,
-    const std::vector<std::string> &parameterNames) const {
+double ExperimentInfo::getEFixedForIndirect(const std::shared_ptr<const Geometry::IDetector> &detector,
+                                            const std::vector<std::string> &parameterNames) const {
   double efixed = 0.;
   for (auto &parameterName : parameterNames) {
-    Parameter_sptr par =
-        constInstrumentParameters().getRecursive(detector.get(), parameterName);
+    Parameter_sptr par = constInstrumentParameters().getRecursive(detector.get(), parameterName);
     if (par) {
       efixed = par->value<double>();
     } else {
-      std::vector<double> efixedVec =
-          detector->getNumberParameter(parameterName);
+      std::vector<double> efixedVec = detector->getNumberParameter(parameterName);
       if (efixedVec.empty()) {
         int detid = detector->getID();
-        IDetector_const_sptr detectorSingle =
-            getInstrument()->getDetector(detid);
+        IDetector_const_sptr detectorSingle = getInstrument()->getDetector(detid);
         efixedVec = detectorSingle->getNumberParameter(parameterName);
       }
       if (!efixedVec.empty()) {
@@ -675,9 +671,8 @@ double ExperimentInfo::getEFixedForIndirect(
  * @param emode :: enum value indicating whether elastic, direct or indirect
  * @return The current efixed value
  */
-double ExperimentInfo::getEFixedGivenEMode(
-    const std::shared_ptr<const Geometry::IDetector> &detector,
-    const Kernel::DeltaEMode::Type emode) const {
+double ExperimentInfo::getEFixedGivenEMode(const std::shared_ptr<const Geometry::IDetector> &detector,
+                                           const Kernel::DeltaEMode::Type emode) const {
   if (emode == Kernel::DeltaEMode::Direct) {
     double efixed = 0.;
     for (auto &parameterName : {"Ei", "EnergyRequested", "EnergyEstimate"}) {

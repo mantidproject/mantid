@@ -147,9 +147,7 @@ Kernel::V3D SpectrumInfo::position(const size_t index) const {
  * some don't
  *  @return map containing the average constants
  */
-UnitParametersMap
-SpectrumInfo::diffractometerConstants(const size_t index,
-                                      std::vector<detid_t> &warningDets) const {
+UnitParametersMap SpectrumInfo::diffractometerConstants(const size_t index, std::vector<detid_t> &warningDets) const {
   if (m_detectorInfo.isScanning()) {
     throw std::runtime_error("Retrieval of diffractometer constants not "
                              "implemented for scanning instrument");
@@ -158,33 +156,27 @@ SpectrumInfo::diffractometerConstants(const size_t index,
   std::vector<size_t> detectorIndicesOnly;
   std::vector<detid_t> calibratedDets;
   std::vector<detid_t> uncalibratedDets;
-  std::transform(spectrumDef.begin(), spectrumDef.end(),
-                 std::back_inserter(detectorIndicesOnly),
+  std::transform(spectrumDef.begin(), spectrumDef.end(), std::back_inserter(detectorIndicesOnly),
                  [](auto const &pair) { return pair.first; });
   double difa{0.}, difc{0.}, tzero{0.};
   for (const auto &detIndex : detectorIndicesOnly) {
-    auto newDiffConstants = m_detectorInfo.diffractometerConstants(
-        detIndex, calibratedDets, uncalibratedDets);
+    auto newDiffConstants = m_detectorInfo.diffractometerConstants(detIndex, calibratedDets, uncalibratedDets);
     difa += std::get<0>(newDiffConstants);
     difc += std::get<1>(newDiffConstants);
     tzero += std::get<2>(newDiffConstants);
   }
 
   if (calibratedDets.size() > 0 && uncalibratedDets.size() > 0) {
-    warningDets.insert(warningDets.end(), uncalibratedDets.begin(),
-                       uncalibratedDets.end());
+    warningDets.insert(warningDets.end(), uncalibratedDets.begin(), uncalibratedDets.end());
   };
   // if no calibration is found then return difc only based on the average
   // of the detector L2 and twoThetas.
   if (calibratedDets.size() == 0) {
     return {{UnitParams::difc, difcUncalibrated(index)}};
   }
-  return {{UnitParams::difa,
-           difa / static_cast<double>(spectrumDefinition(index).size())},
-          {UnitParams::difc,
-           difc / static_cast<double>(spectrumDefinition(index).size())},
-          {UnitParams::tzero,
-           tzero / static_cast<double>(spectrumDefinition(index).size())}};
+  return {{UnitParams::difa, difa / static_cast<double>(spectrumDefinition(index).size())},
+          {UnitParams::difc, difc / static_cast<double>(spectrumDefinition(index).size())},
+          {UnitParams::tzero, tzero / static_cast<double>(spectrumDefinition(index).size())}};
 }
 
 /** Calculate average diffractometer constants (DIFA, DIFC, TZERO) of
@@ -193,8 +185,7 @@ SpectrumInfo::diffractometerConstants(const size_t index,
  *  @param index Index of the spectrum that constants are required for
  *  @return map containing the average constants
  */
-UnitParametersMap
-SpectrumInfo::diffractometerConstants(const size_t index) const {
+UnitParametersMap SpectrumInfo::diffractometerConstants(const size_t index) const {
   std::vector<int> warningDets;
   return diffractometerConstants(index, warningDets);
 }
@@ -209,8 +200,7 @@ double SpectrumInfo::difcUncalibrated(const size_t index) const {
   // This will be different to the average of the per detector difcs. This is
   // for backwards compatibility because Mantid always used to calculate
   // spectrum level difc's this way
-  return 1. / Kernel::Units::tofToDSpacingFactor(l1(), l2(index),
-                                                 twoTheta(index), 0.);
+  return 1. / Kernel::Units::tofToDSpacingFactor(l1(), l2(index), twoTheta(index), 0.);
 }
 
 /** Get the detector values relevant to unit conversion for a workspace index
@@ -224,10 +214,8 @@ required by unit classes to perform their conversions eg efixed. It can
 contain values on the way in if a look up isn't desired here eg if value
 supplied in parameters to the calling algorithm
  */
-void SpectrumInfo::getDetectorValues(const Kernel::Unit &inputUnit,
-                                     const Kernel::Unit &outputUnit,
-                                     const Kernel::DeltaEMode::Type emode,
-                                     const bool signedTheta, int64_t wsIndex,
+void SpectrumInfo::getDetectorValues(const Kernel::Unit &inputUnit, const Kernel::Unit &outputUnit,
+                                     const Kernel::DeltaEMode::Type emode, const bool signedTheta, int64_t wsIndex,
                                      UnitParametersMap &pmap) const {
   if (!hasDetectors(wsIndex))
     return;
@@ -243,15 +231,11 @@ void SpectrumInfo::getDetectorValues(const Kernel::Unit &inputUnit,
     } catch (const std::runtime_error &e) {
       g_log.warning(e.what());
     }
-    if (emode != Kernel::DeltaEMode::Elastic &&
-        pmap.find(UnitParams::efixed) == pmap.end()) {
-      std::shared_ptr<const Geometry::IDetector> det(&detector(wsIndex),
-                                                     Mantid::NoDeleting());
+    if (emode != Kernel::DeltaEMode::Elastic && pmap.find(UnitParams::efixed) == pmap.end()) {
+      std::shared_ptr<const Geometry::IDetector> det(&detector(wsIndex), Mantid::NoDeleting());
       try {
-        pmap[UnitParams::efixed] =
-            m_experimentInfo.getEFixedGivenEMode(det, emode);
-        g_log.debug() << "Detector: " << det->getID()
-                      << " EFixed: " << pmap[UnitParams::efixed] << "\n";
+        pmap[UnitParams::efixed] = m_experimentInfo.getEFixedGivenEMode(det, emode);
+        g_log.debug() << "Detector: " << det->getID() << " EFixed: " << pmap[UnitParams::efixed] << "\n";
       } catch (std::runtime_error) {
         // let the unit classes work out if this is a problem
       }
@@ -259,11 +243,9 @@ void SpectrumInfo::getDetectorValues(const Kernel::Unit &inputUnit,
 
     std::vector<detid_t> warnDetIds;
     try {
-      std::set<std::string> diffConstUnits = {"dSpacing", "MomentumTransfer",
-                                              "Empty"};
+      std::set<std::string> diffConstUnits = {"dSpacing", "MomentumTransfer", "Empty"};
       if ((emode == Kernel::DeltaEMode::Elastic) &&
-          (diffConstUnits.count(inputUnit.unitID()) ||
-           diffConstUnits.count(outputUnit.unitID()))) {
+          (diffConstUnits.count(inputUnit.unitID()) || diffConstUnits.count(outputUnit.unitID()))) {
         auto diffConstsMap = diffractometerConstants(wsIndex, warnDetIds);
         pmap.insert(diffConstsMap.begin(), diffConstsMap.end());
         if (warnDetIds.size() > 0) {
@@ -286,8 +268,7 @@ void SpectrumInfo::getDetectorValues(const Kernel::Unit &inputUnit,
   }
 }
 
-void SpectrumInfo::createDetectorIdLogMessages(
-    const std::vector<detid_t> &detids, int64_t wsIndex) const {
+void SpectrumInfo::createDetectorIdLogMessages(const std::vector<detid_t> &detids, int64_t wsIndex) const {
   std::string detIDstring;
   auto iter = detids.begin();
   auto itEnd = detids.end();
@@ -298,11 +279,9 @@ void SpectrumInfo::createDetectorIdLogMessages(
   if (!detIDstring.empty()) {
     detIDstring.pop_back(); // Drop last comma
   }
-  g_log.warning(
-      "Incomplete set of calibrated diffractometer constants found for "
-      "workspace index" +
-      std::to_string(wsIndex) + ". Using uncalibrated values for detectors " +
-      detIDstring);
+  g_log.warning("Incomplete set of calibrated diffractometer constants found for "
+                "workspace index" +
+                std::to_string(wsIndex) + ". Using uncalibrated values for detectors " + detIDstring);
 }
 
 /// Returns true if the spectrum is associated with detectors in the

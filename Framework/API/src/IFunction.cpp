@@ -1061,15 +1061,11 @@ void IFunction::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> w
               // if unit specified convert centre value to unit required by
               // formula or look-up-table
               if (centreUnit) {
-                g_log.debug()
-                    << "For FitParameter " << parameterName(i)
-                    << " centre of peak before any unit conversion is "
-                    << centreValue << '\n';
-                centreValue =
-                    convertValue(centreValue, centreUnit, workspace, wi);
                 g_log.debug() << "For FitParameter " << parameterName(i)
-                              << " centre of peak after any unit conversion is "
-                              << centreValue << '\n';
+                              << " centre of peak before any unit conversion is " << centreValue << '\n';
+                centreValue = convertValue(centreValue, centreUnit, workspace, wi);
+                g_log.debug() << "For FitParameter " << parameterName(i)
+                              << " centre of peak after any unit conversion is " << centreValue << '\n';
               }
 
               double paramValue = fitParam.getValue(centreValue);
@@ -1081,15 +1077,12 @@ void IFunction::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> w
               // www.mantidproject.org/IDF
               if (fitParam.getFormula().empty()) {
                 // so from look up table
-                Kernel::Unit_sptr resultUnit =
-                    fitParam.getLookUpTable().getYUnit(); // from table
-                g_log.debug()
-                    << "The FitParameter " << parameterName(i) << " = "
-                    << paramValue << " before y-unit conversion\n";
+                Kernel::Unit_sptr resultUnit = fitParam.getLookUpTable().getYUnit(); // from table
+                g_log.debug() << "The FitParameter " << parameterName(i) << " = " << paramValue
+                              << " before y-unit conversion\n";
                 paramValue /= convertValue(1.0, resultUnit, workspace, wi);
-                g_log.debug()
-                    << "The FitParameter " << parameterName(i) << " = "
-                    << paramValue << " after y-unit conversion\n";
+                g_log.debug() << "The FitParameter " << parameterName(i) << " = " << paramValue
+                              << " after y-unit conversion\n";
               } else {
                 // so from formula
 
@@ -1111,14 +1104,11 @@ void IFunction::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> w
                   try {
                     mu::Parser p;
                     p.SetExpr(resultUnitStr);
-                    g_log.debug() << "The FitParameter " << parameterName(i)
-                                  << " = " << paramValue
-                                  << " before result-unit conversion (using "
-                                  << resultUnitStr << ")\n";
+                    g_log.debug() << "The FitParameter " << parameterName(i) << " = " << paramValue
+                                  << " before result-unit conversion (using " << resultUnitStr << ")\n";
                     paramValue *= p.Eval();
-                    g_log.debug()
-                        << "The FitParameter " << parameterName(i) << " = "
-                        << paramValue << " after result-unit conversion\n";
+                    g_log.debug() << "The FitParameter " << parameterName(i) << " = " << paramValue
+                                  << " after result-unit conversion\n";
                   } catch (mu::Parser::exception_type &e) {
                     g_log.error() << "Cannot convert formula unit to workspace unit"
                                   << " Formula unit which cannot be passed is " << resultUnitStr
@@ -1214,9 +1204,8 @@ void IFunction::convertValue(std::vector<double> &values, Kernel::Unit_sptr &out
     Instrument_const_sptr instrument = ws->getInstrument();
     Geometry::IComponent_const_sptr sample = instrument->getSample();
     if (sample == nullptr) {
-      g_log.error()
-          << "No sample defined instrument. Cannot convert units for function\n"
-          << "Ignore conversion.";
+      g_log.error() << "No sample defined instrument. Cannot convert units for function\n"
+                    << "Ignore conversion.";
       return;
     }
     const auto &spectrumInfo = ws->spectrumInfo();
@@ -1225,15 +1214,13 @@ void IFunction::convertValue(std::vector<double> &values, Kernel::Unit_sptr &out
     auto emode = ws->getEMode();
 
     Kernel::UnitParametersMap pmap{};
-    spectrumInfo.getDetectorValues(*wsUnit, *outUnit, emode, false, wsIndex,
-                                   pmap);
+    spectrumInfo.getDetectorValues(*wsUnit, *outUnit, emode, false, wsIndex, pmap);
     std::vector<double> emptyVec;
     try {
       wsUnit->toTOF(values, emptyVec, l1, emode, pmap);
       outUnit->fromTOF(values, emptyVec, l1, emode, pmap);
     } catch (std::exception &) {
-      throw std::runtime_error("Unable to perform unit conversion to " +
-                               outUnit->unitID());
+      throw std::runtime_error("Unable to perform unit conversion to " + outUnit->unitID());
     }
   }
 }

@@ -152,11 +152,9 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(Kernel::Unit_
     UnitParametersMap pmap{{UnitParams::l2, l2Column[detectorRow]},
                            {UnitParams::twoTheta, twoThetaColumn[detectorRow]},
                            {UnitParams::efixed, efixedColumn[detectorRow]}};
-    checkFromUnit->toTOF(checkXValues, emptyVec, l1Column[detectorRow],
-                         emodeColumn[detectorRow], pmap);
+    checkFromUnit->toTOF(checkXValues, emptyVec, l1Column[detectorRow], emodeColumn[detectorRow], pmap);
     // Convert from time-of-flight to the desired unit
-    checkOutputUnit->fromTOF(checkXValues, emptyVec, l1Column[detectorRow],
-                             emodeColumn[detectorRow], pmap);
+    checkOutputUnit->fromTOF(checkXValues, emptyVec, l1Column[detectorRow], emodeColumn[detectorRow], pmap);
   }
 
   // create the output workspace
@@ -209,12 +207,9 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(Kernel::Unit_
         auto localFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
         auto localOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
         /// @todo Don't yet consider hold-off (delta)
-        std::vector<double> values(outputWS->x(wsid).begin(),
-                                   outputWS->x(wsid).end());
+        std::vector<double> values(outputWS->x(wsid).begin(), outputWS->x(wsid).end());
 
-        UnitParametersMap pmap{{UnitParams::l2, l2},
-                               {UnitParams::twoTheta, twoTheta},
-                               {UnitParams::efixed, efixed}};
+        UnitParametersMap pmap{{UnitParams::l2, l2}, {UnitParams::twoTheta, twoTheta}, {UnitParams::efixed, efixed}};
         // Convert the input unit to time-of-flight
         localFromUnit->toTOF(values, emptyVec, l1, emode, pmap);
         // Convert from time-of-flight to the desired unit

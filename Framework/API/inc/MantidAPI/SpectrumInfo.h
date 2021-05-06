@@ -70,9 +70,7 @@ public:
   double azimuthal(const size_t index) const;
   std::pair<double, double> geographicalAngles(const size_t index) const;
   Kernel::V3D position(const size_t index) const;
-  Kernel::UnitParametersMap
-  diffractometerConstants(const size_t index,
-                          std::vector<detid_t> &uncalibratedDets) const;
+  Kernel::UnitParametersMap diffractometerConstants(const size_t index, std::vector<detid_t> &uncalibratedDets) const;
   Kernel::UnitParametersMap diffractometerConstants(const size_t index) const;
   double difcUncalibrated(const size_t index) const;
   bool hasDetectors(const size_t index) const;
@@ -91,13 +89,10 @@ public:
   Kernel::V3D samplePosition() const;
   double l1() const;
 
-  void getDetectorValues(const Kernel::Unit &inputUnit,
-                         const Kernel::Unit &outputUnit,
-                         const Kernel::DeltaEMode::Type emode,
-                         const bool signedTheta, int64_t wsIndex,
+  void getDetectorValues(const Kernel::Unit &inputUnit, const Kernel::Unit &outputUnit,
+                         const Kernel::DeltaEMode::Type emode, const bool signedTheta, int64_t wsIndex,
                          Kernel::UnitParametersMap &pmap) const;
-  void createDetectorIdLogMessages(const std::vector<detid_t> &detids,
-                                   int64_t wsIndex) const;
+  void createDetectorIdLogMessages(const std::vector<detid_t> &detids, int64_t wsIndex) const;
 
   SpectrumInfoIterator<SpectrumInfo> begin();
   SpectrumInfoIterator<SpectrumInfo> end();
