@@ -153,3 +153,28 @@ class PlotsLoaderTest(unittest.TestCase):
     def test_load_plot_from_dict(self, pass_func):
         # The fact this runs is the test
         self.plots_loader.load_plots([self.dictionary])
+
+    @mock.patch("matplotlib.colors.LogNorm", autospec=True)
+    def test_restore_normalise_obj_from_dict_creates_correct_norm_instance_from_supported_norm(self, mock_LogNorm):
+        norm_dict = {'type': 'LogNorm', 'vmin': 1, 'vmax': 2, 'clip': True}
+
+        _ = self.plots_loader.restore_normalise_obj_from_dict(norm_dict)
+
+        mock_LogNorm.assert_called_once_with(norm_dict['vmin'], norm_dict['vmax'], norm_dict['clip'])
+
+    def test_restore_normalise_obj_from_dict_returns_none_with_unsupported_norm(self):
+        norm_dict = {'type': 'unsupported_norm', 'vmin': 1, 'vmax': 2, 'clip': True}
+
+        return_value = self.plots_loader.restore_normalise_obj_from_dict(norm_dict)
+
+        self.assertIsNone(return_value)
+
+    @mock.patch("matplotlib.colors.Normalize", autospec=True)
+    def test_restore_normalise_obj_from_dict_returns_Normalize_type_with_unspecified_norm(self, mock_Normalize):
+        """If the type of the norm is unspecified, the method should return a Normalize object,
+        which is the most general norm and is subclassed by LogNorm, etc."""
+        norm_dict = {'vmin': 1, 'vmax': 2, 'clip': True}
+
+        _ = self.plots_loader.restore_normalise_obj_from_dict(norm_dict)
+
+        mock_Normalize.assert_called_once_with(norm_dict['vmin'], norm_dict['vmax'], norm_dict['clip'])
