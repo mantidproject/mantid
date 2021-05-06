@@ -7,7 +7,9 @@
 #include "MantidAlgorithms/PDCalibration.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IEventList.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -246,6 +248,12 @@ void PDCalibration::init() {
                   "Range for allowable DIFA from calibration (default "
                   "is all)");
 
+  declareProperty("UseChiSq", false,
+                  "By default the square of the peak height is used as weights "
+                  "in the least-squares fit to find the diffractometer "
+                  "constants, if UseChiSq is true then the inverse square of "
+                  "the error on the fitted peak centres will be used instead.");
+
   declareProperty(
       std::make_unique<WorkspaceProperty<API::ITableWorkspace>>("OutputCalibrationTable", "", Direction::Output),
       "Output table workspace containing the calibration");
@@ -279,6 +287,7 @@ void PDCalibration::init() {
   setPropertyGroup("CalibrationParameters", calGroup);
   setPropertyGroup("TZEROrange", calGroup);
   setPropertyGroup("DIFArange", calGroup);
+  setPropertyGroup("UseChiSq", calGroup);
 }
 
 std::map<std::string, std::string> PDCalibration::validateInputs() {
@@ -467,8 +476,10 @@ void PDCalibration::exec() {
   algFitPeaks->setProperty("Minimizer", "Levenberg-Marquardt");
   algFitPeaks->setProperty("CostFunction", "Least squares");
 
-  // FitPeaks will abstract the peak parameters if you ask
-  algFitPeaks->setProperty("RawPeakParameters", false);
+  // FitPeaks will abstract the peak parameters if you ask (if using chisq then
+  // need FitPeaks to output fitted params rather than height, width)
+  const bool useChiSq = getProperty("UseChiSq");
+  algFitPeaks->setProperty("RawPeakParameters", useChiSq);
 
   // Analysis output
   // If using a Gaussian peak shape plus a constant background, then
@@ -485,6 +496,9 @@ void PDCalibration::exec() {
   // the actual intensities are replaced with the values resulting from
   // evaluating the peak function (e.g. a Gaussian peak function)
   algFitPeaks->setPropertyValue("FittedPeaksWorkspace", diagnostic_prefix + "_fitted");
+  if (useChiSq) {
+    algFitPeaks->setPropertyValue("OutputParameterFitErrorsWorkspace", diagnostic_prefix + "_fiterrors");
+  }
 
   // run and get the result
   algFitPeaks->executeAsChildAlg();
@@ -493,6 +507,10 @@ void PDCalibration::exec() {
   // get the fit result
   API::ITableWorkspace_sptr fittedTable = algFitPeaks->getProperty("OutputPeakParametersWorkspace");
   API::MatrixWorkspace_sptr calculatedWS = algFitPeaks->getProperty("FittedPeaksWorkspace");
+  API::ITableWorkspace_sptr errorTable; // or nullptr as in FitPeaks L1997
+  if (useChiSq) {
+    errorTable = algFitPeaks->getProperty("OutputParameterFitErrorsWorkspace");
+  }
 
   // check : for Pete
   if (!fittedTable)
@@ -543,7 +561,7 @@ void PDCalibration::exec() {
      std::vector<double> width_vec_full(numPeaks, std::nan(""));
      // height of fitted peak centers, default `nan` for failed fitted peaks
      std::vector<double> height_vec_full(numPeaks, std::nan(""));
-     std::vector<double> height2; // the square of the peak height
+     std::vector<double> weights; // weights for diff const fits
      // for (size_t i = 0; i < fittedTable->rowCount(); ++i) {
      const size_t rowNumInFitTableOffset = wkspIndex * numPeaks;
      // We assumed that the current spectrum contains peaks near the nominal
@@ -557,11 +575,30 @@ void PDCalibration::exec() {
        if (fittedTable->getRef<int>("peakindex", rowIndexInFitTable) != static_cast<int>(peakIndex))
          throw std::runtime_error("peak index mismatch but workspace index matched");
 
-       // get the effective peak parameters
-       const double centre = fittedTable->getRef<double>("centre", rowIndexInFitTable);
-       const double width = fittedTable->getRef<double>("width", rowIndexInFitTable);
-       const double height = fittedTable->getRef<double>("height", rowIndexInFitTable);
        const double chi2 = fittedTable->getRef<double>("chi2", rowIndexInFitTable);
+       double centre = 0.0;
+       double centre_error = 0.0; // only used if useChiSq true
+       double width = 0.0;
+       double height = 0.0;
+       if (!useChiSq) {
+         // get the effective peak parameters from FitPeaks output
+         centre = fittedTable->getRef<double>("centre", rowIndexInFitTable);
+         width = fittedTable->getRef<double>("width", rowIndexInFitTable);
+         height = fittedTable->getRef<double>("height", rowIndexInFitTable);
+       } else {
+         // FitPeaks outputs actual fitting parameters
+         // extract these from the peak function (not efficient)
+         auto peakfunc = std::dynamic_pointer_cast<API::IPeakFunction>(
+             API::FunctionFactory::Instance().createFunction(peakFunction));
+         // set peak functio nparameters from fit
+         for (size_t ipar = 0; ipar < peakfunc->nParams(); ipar++) {
+           peakfunc->setParameter(ipar, fittedTable->getRef<double>(peakfunc->parameterName(ipar), rowIndexInFitTable));
+         }
+         centre = peakfunc->centre();
+         width = peakfunc->fwhm();
+         height = peakfunc->height();
+         centre_error = errorTable->getRef<double>(peakfunc->getCentreParameterName(), rowIndexInFitTable);
+       }
 
        // check chi-square
        if (chi2 > maxChiSquared || chi2 < 0.) {
@@ -579,26 +616,14 @@ void PDCalibration::exec() {
          continue; // peak fit deemed as failure
        }
 
-       // background value at the fitted peak center
-       double back_intercept = fittedTable->getRef<double>("A0", rowIndexInFitTable);
-       double back_slope = 0.;
-       double back_quad = 0.;
-       switch (backgroundType[0]) {
-       case 'Q':                                                            // Quadratic
-         back_quad = fittedTable->getRef<double>("A2", rowIndexInFitTable); // fall through
-       case 'L':                                                            // Linear
-         back_slope = fittedTable->getRef<double>("A1", rowIndexInFitTable);
-       }
-       double background = back_intercept + back_slope * centre + back_quad * centre * centre;
-
-       // ban peaks that are not outside of error bars for the background
-       if (height < 0.5 * std::sqrt(height + background)) {
-         continue; // peak fit deemed as failure
-       }
        // the peak fit was a success. Collect info
        d_vec.emplace_back(m_peaksInDspacing[peakIndex]);
        tof_vec.emplace_back(centre);
-       height2.emplace_back(height * height);
+       if (!useChiSq) {
+         weights.emplace_back(height * height);
+       } else {
+         weights.emplace_back(1 / (centre_error * centre_error));
+       }
        tof_vec_full[peakIndex] = centre;
        width_vec_full[peakIndex] = width;
        height_vec_full[peakIndex] = height;
@@ -614,7 +639,7 @@ void PDCalibration::exec() {
        // positions, in d-spacing against the fitted peak center positions, in
        // TOF units.
        double difc = 0., t0 = 0., difa = 0.;
-       fitDIFCtZeroDIFA_LM(d_vec, tof_vec, height2, difc, t0, difa);
+       fitDIFCtZeroDIFA_LM(d_vec, tof_vec, weights, difc, t0, difa);
        for (auto iter = peaks.detid.begin(); iter != peaks.detid.end(); ++iter) {
          auto det = *iter;
          const auto rowIndexOutputPeaks = m_detidToRow[det];
@@ -674,6 +699,10 @@ void PDCalibration::exec() {
    diagnosticGroup->addWorkspace(fittedTable);
    API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_fitted", calculatedWS);
    diagnosticGroup->addWorkspace(calculatedWS);
+   if (useChiSq) {
+     API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_fiterror", errorTable);
+     diagnosticGroup->addWorkspace(errorTable);
+   }
 
    // add workspaces calculated by PDCalibration
    API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_dspacing", m_peakPositionTable);
@@ -697,7 +726,7 @@ namespace { // anonymous namespace
              */
 double gsl_costFunction(const gsl_vector *v, void *peaks) {
   // this array is [numPeaks, numParams, vector<tof>, vector<dspace>,
-  // vector<height^2>]
+  // vector<weights>]
   // index as      [0,        1,         2,         , 2+n           , 2+2n]
   const std::vector<double> *peakVec = reinterpret_cast<std::vector<double> *>(peaks);
   // number of peaks being fit
@@ -747,7 +776,7 @@ double gsl_costFunction(const gsl_vector *v, void *peaks) {
  * three fit parameters: TOF = DIFC * d + TZERO + DIFA * d^2
  *
  * @param peaks :: array with structure (numpeaks, numfitparms, tof_1,
- * ...tof_numpeaks, d1,...d_numpeaks, height^2_1,...height^2_numpeaks)
+ * ...tof_numpeaks, d1,...d_numpeaks, weight_1,...weight_numpeaks)
  * @param difc :: will store optimized DIFC fit parameter
  * @param t0 :: will store optimized TZERO fit parameter
  * @param difa :: will store optimized DIFA fit parameter
@@ -832,13 +861,13 @@ double fitDIFCtZeroDIFA(std::vector<double> &peaks, double &difc, double &t0, do
  *
  * @param d  :: nominal peak center positions, in d-spacing units
  * @param tof :: fitted peak center positions, in TOF units
- * @param height2 :: square of the fitted peak heights
+ * @param weights :: weights for leastsq fit
  * @param difc :: output optimized DIFC parameter
  * @param t0 :: output optimized TZERO parameter
  * @param difa :: output optimized DIFA parameter
  */
 void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d, const std::vector<double> &tof,
-                                        const std::vector<double> &height2, double &difc, double &t0, double &difa) {
+                                        const std::vector<double> &weights, double &difc, double &t0, double &difa) {
   const size_t numPeaks = d.size();
   if (numPeaks <= 1) {
     return; // don't do anything
@@ -858,7 +887,7 @@ void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d, const std:
   for (size_t i = 0; i < numPeaks; ++i) {
     peaks[i + 2] = tof[i];
     peaks[i + 2 + numPeaks] = d[i];
-    peaks[i + 2 + 2 * numPeaks] = height2[i];
+    peaks[i + 2 + 2 * numPeaks] = weights[i];
   }
 
   // calculate a starting DIFC
@@ -1160,7 +1189,7 @@ void PDCalibration::createCalTableNew() {
   m_calibrationTable->addColumn("double", "tofmax");
   setProperty("OutputCalibrationTable", m_calibrationTable);
 
-  const detid2index_map allDetectors = difcWS->getDetectorIDToWorkspaceIndexMap(true);
+  const detid2index_map allDetectors = difcWS->getDetectorIDToWorkspaceIndexMap(false);
 
   // copy over the values
   auto it = allDetectors.begin();
