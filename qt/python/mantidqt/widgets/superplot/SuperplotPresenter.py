@@ -61,6 +61,8 @@ class SuperplotPresenter:
                     axes.get_artists_workspace_and_workspace_index(artist)
             wsName = ws.name()
             self._model.addWorkspace(wsName)
+            if self._model.isBinMode():
+                specIndex = ws.getIndexFromSpectrumNumber(specIndex)
             self._model.addData(wsName, specIndex)
 
         self._updateList()
@@ -230,7 +232,9 @@ class SuperplotPresenter:
                 axisType = MantidAxType.SPECTRUM
             else:
                 axisType = MantidAxType.BIN
-            lines = axes.plot(mtd[wsName], wkspIndex=sp, axis=axisType)
+            ws = mtd[wsName]
+            specNum = ws.getSpectrumNumbers()[sp]
+            lines = axes.plot(mtd[wsName], specNum=specNum, axis=axisType)
             line = lines[0]
             self._view.modifySpectrumLabel(wsName, sp, line.get_label(),
                                            line.get_color())
@@ -247,7 +251,9 @@ class SuperplotPresenter:
                         axisType = MantidAxType.SPECTRUM
                     else:
                         axisType = MantidAxType.BIN
-                    lines = axes.plot(mtd[wsName], wkspIndex=spectrum,
+                    ws = mtd[wsName]
+                    specNum = ws.getSpectrumNumbers()[spectrum]
+                    lines = axes.plot(mtd[wsName], specNum=specNum,
                                       axis=axisType)
                     line = lines[0]
                     self._view.modifySpectrumLabel(wsName, spectrum,
