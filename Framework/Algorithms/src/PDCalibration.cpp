@@ -10,6 +10,7 @@
 #include "MantidAPI/IEventList.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -120,9 +121,8 @@ public:
    * @param difc :: difc diffractometer constant (linear term)
    * @param tzero :: tzero diffractometer constant (constant term)
    */
-  void setPositions(const std::vector<double> &peaksInD,
-                    const std::vector<double> &peaksInDWindows,
-                    const double difa, const double difc, const double tzero) {
+  void setPositions(const std::vector<double> &peaksInD, const std::vector<double> &peaksInDWindows, const double difa,
+                    const double difc, const double tzero) {
     // clear out old values
     inDPos.clear();
     inTofPos.clear();
@@ -136,14 +136,12 @@ public:
     // convert the bits that matter to TOF
     Kernel::Units::dSpacing dSpacingUnit;
     std::vector<double> yunused;
-    dSpacingUnit.toTOF(inTofPos, yunused, -1, 0,
-                       {{Kernel::UnitParams::difa, difa},
-                        {Kernel::UnitParams::difc, difc},
-                        {Kernel::UnitParams::tzero, tzero}});
-    dSpacingUnit.toTOF(inTofWindows, yunused, -1, 0,
-                       {{Kernel::UnitParams::difa, difa},
-                        {Kernel::UnitParams::difc, difc},
-                        {Kernel::UnitParams::tzero, tzero}});
+    dSpacingUnit.toTOF(
+        inTofPos, yunused, -1, 0,
+        {{Kernel::UnitParams::difa, difa}, {Kernel::UnitParams::difc, difc}, {Kernel::UnitParams::tzero, tzero}});
+    dSpacingUnit.toTOF(
+        inTofWindows, yunused, -1, 0,
+        {{Kernel::UnitParams::difa, difa}, {Kernel::UnitParams::difc, difc}, {Kernel::UnitParams::tzero, tzero}});
   }
 
   std::size_t wkspIndex;
@@ -521,8 +519,7 @@ void PDCalibration::exec() {
    PRAGMA_OMP(parallel for schedule(dynamic, 1))
    for (int wkspIndex = 0; wkspIndex < NUMHIST; ++wkspIndex) {
      PARALLEL_START_INTERUPT_REGION
-     if ((isEvent && uncalibratedEWS->getSpectrum(wkspIndex).empty()) ||
-         !spectrumInfo.hasDetectors(wkspIndex) ||
+     if ((isEvent && uncalibratedEWS->getSpectrum(wkspIndex).empty()) || !spectrumInfo.hasDetectors(wkspIndex) ||
          spectrumInfo.isMonitor(wkspIndex)) {
        prog.report();
        continue;
@@ -531,10 +528,8 @@ void PDCalibration::exec() {
      // object to hold the information about the peak positions, detid, and wksp
      // index
      PDCalibration::FittedPeaks peaks(m_uncalibratedWS, wkspIndex);
-     auto [difc, difa, tzero] = getDSpacingToTof(
-         peaks.detid); // doesn't matter which one - all have same difc etc.
-     peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, difa, difc,
-                        tzero);
+     auto [difc, difa, tzero] = getDSpacingToTof(peaks.detid); // doesn't matter which one - all have same difc etc.
+     peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, difa, difc, tzero);
 
      // includes peaks that aren't used in the fit
      // The following data structures will hold information for the peaks
@@ -559,20 +554,14 @@ void PDCalibration::exec() {
        // check indices in PeaksTable
        if (fittedTable->getRef<int>("wsindex", rowIndexInFitTable) != wkspIndex)
          throw std::runtime_error("workspace index mismatch!");
-       if (fittedTable->getRef<int>("peakindex", rowIndexInFitTable) !=
-           static_cast<int>(peakIndex))
-         throw std::runtime_error(
-             "peak index mismatch but workspace index matched");
+       if (fittedTable->getRef<int>("peakindex", rowIndexInFitTable) != static_cast<int>(peakIndex))
+         throw std::runtime_error("peak index mismatch but workspace index matched");
 
        // get the effective peak parameters
-       const double centre =
-           fittedTable->getRef<double>("centre", rowIndexInFitTable);
-       const double width =
-           fittedTable->getRef<double>("width", rowIndexInFitTable);
-       const double height =
-           fittedTable->getRef<double>("height", rowIndexInFitTable);
-       const double chi2 =
-           fittedTable->getRef<double>("chi2", rowIndexInFitTable);
+       const double centre = fittedTable->getRef<double>("centre", rowIndexInFitTable);
+       const double width = fittedTable->getRef<double>("width", rowIndexInFitTable);
+       const double height = fittedTable->getRef<double>("height", rowIndexInFitTable);
+       const double chi2 = fittedTable->getRef<double>("chi2", rowIndexInFitTable);
 
        // check chi-square
        if (chi2 > maxChiSquared || chi2 < 0.) {
@@ -581,8 +570,7 @@ void PDCalibration::exec() {
 
        // rule out of peak with wrong position. `centre` should be within its
        // left and right window ranges
-       if (peaks.inTofWindows[2 * peakIndex] >= centre ||
-           peaks.inTofWindows[2 * peakIndex + 1] <= centre) {
+       if (peaks.inTofWindows[2 * peakIndex] >= centre || peaks.inTofWindows[2 * peakIndex + 1] <= centre) {
          continue; // peak fit deemed as failure
        }
 
@@ -592,19 +580,16 @@ void PDCalibration::exec() {
        }
 
        // background value at the fitted peak center
-       double back_intercept =
-           fittedTable->getRef<double>("A0", rowIndexInFitTable);
+       double back_intercept = fittedTable->getRef<double>("A0", rowIndexInFitTable);
        double back_slope = 0.;
        double back_quad = 0.;
        switch (backgroundType[0]) {
-       case 'Q': // Quadratic
-         back_quad = fittedTable->getRef<double>(
-             "A2", rowIndexInFitTable); // fall through
-       case 'L':                        // Linear
+       case 'Q':                                                            // Quadratic
+         back_quad = fittedTable->getRef<double>("A2", rowIndexInFitTable); // fall through
+       case 'L':                                                            // Linear
          back_slope = fittedTable->getRef<double>("A1", rowIndexInFitTable);
        }
-       double background =
-           back_intercept + back_slope * centre + back_quad * centre * centre;
+       double background = back_intercept + back_slope * centre + back_quad * centre * centre;
 
        // ban peaks that are not outside of error bars for the background
        if (height < 0.5 * std::sqrt(height + background)) {
@@ -630,8 +615,7 @@ void PDCalibration::exec() {
        // TOF units.
        double difc = 0., t0 = 0., difa = 0.;
        fitDIFCtZeroDIFA_LM(d_vec, tof_vec, height2, difc, t0, difa);
-       for (auto iter = peaks.detid.begin(); iter != peaks.detid.end();
-            ++iter) {
+       for (auto iter = peaks.detid.begin(); iter != peaks.detid.end(); ++iter) {
          auto det = *iter;
          const auto rowIndexOutputPeaks = m_detidToRow[det];
          // chisq represent the deviations between the nominal peak positions
@@ -639,11 +623,10 @@ void PDCalibration::exec() {
          // difa, and tzero
          double chisq = 0.;
          Mantid::Kernel::Units::dSpacing dSpacingUnit;
-         dSpacingUnit.initialize(
-             -1., 0,
-             Kernel::UnitParametersMap{{Kernel::UnitParams::difa, difa},
-                                       {Kernel::UnitParams::difc, difc},
-                                       {Kernel::UnitParams::tzero, t0}});
+         dSpacingUnit.initialize(-1., 0,
+                                 Kernel::UnitParametersMap{{Kernel::UnitParams::difa, difa},
+                                                           {Kernel::UnitParams::difc, difc},
+                                                           {Kernel::UnitParams::tzero, t0}});
          for (std::size_t i = 0; i < numPeaks; ++i) {
            if (std::isnan(tof_vec_full[i]))
              continue;
@@ -654,17 +637,13 @@ void PDCalibration::exec() {
            // the current peak, and the fitted position in d-spacing
            const double temp = m_peaksInDspacing[i] - dspacing;
            chisq += (temp * temp);
-           m_peakPositionTable->cell<double>(rowIndexOutputPeaks, i + 1) =
-               dspacing;
+           m_peakPositionTable->cell<double>(rowIndexOutputPeaks, i + 1) = dspacing;
            m_peakWidthTable->cell<double>(rowIndexOutputPeaks, i + 1) =
                WIDTH_TO_FWHM * dSpacingUnit.singleFromTOF(width_vec_full[i]);
-           m_peakHeightTable->cell<double>(rowIndexOutputPeaks, i + 1) =
-               height_vec_full[i];
+           m_peakHeightTable->cell<double>(rowIndexOutputPeaks, i + 1) = height_vec_full[i];
          }
-         m_peakPositionTable->cell<double>(
-             rowIndexOutputPeaks, m_peaksInDspacing.size() + 1) = chisq;
-         m_peakPositionTable->cell<double>(rowIndexOutputPeaks,
-                                           m_peaksInDspacing.size() + 2) =
+         m_peakPositionTable->cell<double>(rowIndexOutputPeaks, m_peaksInDspacing.size() + 1) = chisq;
+         m_peakPositionTable->cell<double>(rowIndexOutputPeaks, m_peaksInDspacing.size() + 2) =
              chisq / static_cast<double>(numPeaks - 1);
 
          setCalibrationValues(det, difc, difa, t0);
@@ -691,25 +670,19 @@ void PDCalibration::exec() {
    // set the diagnostic workspaces out
    auto diagnosticGroup = std::make_shared<API::WorkspaceGroup>();
    // add workspaces calculated by FitPeaks
-   API::AnalysisDataService::Instance().addOrReplace(
-       diagnostic_prefix + "_fitparam", fittedTable);
+   API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_fitparam", fittedTable);
    diagnosticGroup->addWorkspace(fittedTable);
-   API::AnalysisDataService::Instance().addOrReplace(
-       diagnostic_prefix + "_fitted", calculatedWS);
+   API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_fitted", calculatedWS);
    diagnosticGroup->addWorkspace(calculatedWS);
 
    // add workspaces calculated by PDCalibration
-   API::AnalysisDataService::Instance().addOrReplace(
-       diagnostic_prefix + "_dspacing", m_peakPositionTable);
+   API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_dspacing", m_peakPositionTable);
    diagnosticGroup->addWorkspace(m_peakPositionTable);
-   API::AnalysisDataService::Instance().addOrReplace(
-       diagnostic_prefix + "_width", m_peakWidthTable);
+   API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_width", m_peakWidthTable);
    diagnosticGroup->addWorkspace(m_peakWidthTable);
-   API::AnalysisDataService::Instance().addOrReplace(
-       diagnostic_prefix + "_height", m_peakHeightTable);
+   API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_height", m_peakHeightTable);
    diagnosticGroup->addWorkspace(m_peakHeightTable);
-   API::AnalysisDataService::Instance().addOrReplace(
-       diagnostic_prefix + "_resolution", resolutionWksp);
+   API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_resolution", resolutionWksp);
    diagnosticGroup->addWorkspace(resolutionWksp);
    setProperty("DiagnosticWorkspaces", diagnosticGroup);
 }
@@ -735,7 +708,7 @@ double gsl_costFunction(const gsl_vector *v, void *peaks) {
   // isn't strictly necessary, but makes reading the code much easier
   const std::vector<double> tofObs(peakVec->begin() + 2, peakVec->begin() + 2 + numPeaks);
   const std::vector<double> dspace(peakVec->begin() + (2 + numPeaks), peakVec->begin() + (2 + 2 * numPeaks));
-  const std::vector<double> height2(peakVec->begin() + (2 + 2 * numPeaks), peakVec->begin() + (2 + 3 * numPeaks));
+  const std::vector<double> weights(peakVec->begin() + (2 + 2 * numPeaks), peakVec->begin() + (2 + 3 * numPeaks));
 
   // create the function to convert tof to dspacing
   double difc = gsl_vector_get(v, 0);
@@ -747,11 +720,10 @@ double gsl_costFunction(const gsl_vector *v, void *peaks) {
       difa = gsl_vector_get(v, 2);
   }
   Mantid::Kernel::Units::dSpacing dSpacingUnit;
-  dSpacingUnit.initialize(
-      -1., 0,
-      Kernel::UnitParametersMap{{Kernel::UnitParams::difa, difa},
-                                {Kernel::UnitParams::difc, difc},
-                                {Kernel::UnitParams::tzero, tzero}});
+  dSpacingUnit.initialize(-1., 0,
+                          Kernel::UnitParametersMap{{Kernel::UnitParams::difa, difa},
+                                                    {Kernel::UnitParams::difc, difc},
+                                                    {Kernel::UnitParams::tzero, tzero}});
 
   // calculate the sum of the residuals from observed peaks
   double errsum = 0.0;
@@ -994,8 +966,7 @@ vector<double> PDCalibration::dSpacingWindows(const std::vector<double> &centres
  *
  * @param detIds :: set of detector IDs
  */
-std::tuple<double, double, double>
-PDCalibration::getDSpacingToTof(const std::set<detid_t> &detIds) {
+std::tuple<double, double, double> PDCalibration::getDSpacingToTof(const std::set<detid_t> &detIds) {
   // to start this is the old calibration values
   double difc = 0.;
   double difa = 0.;
@@ -1189,8 +1160,7 @@ void PDCalibration::createCalTableNew() {
   m_calibrationTable->addColumn("double", "tofmax");
   setProperty("OutputCalibrationTable", m_calibrationTable);
 
-  const detid2index_map allDetectors =
-      difcWS->getDetectorIDToWorkspaceIndexMap(true);
+  const detid2index_map allDetectors = difcWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // copy over the values
   auto it = allDetectors.begin();
