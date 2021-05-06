@@ -38,6 +38,7 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.mFigure = self.mCanvas.figure
         self.mAxes = self.mCanvas.figure.gca.return_value
         self.mAxes.get_lines.return_value = list()
+        self.mAxes.creation_args = [{}]
         a1 = mock.Mock()
         ws = mock.Mock()
         sp = mock.Mock()

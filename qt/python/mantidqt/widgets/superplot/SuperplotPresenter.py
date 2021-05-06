@@ -85,6 +85,59 @@ class SuperplotPresenter:
         self._view.close()
         del self._model
 
+    def _syncWithCurrentPlot(self):
+        """
+        This methods synchronize the model with the current plotted data. It
+        first checks that the plotted data are consistent (i.e. only bins, only
+        spectra), if not, it returns without updating the model.
+        """
+        figure = self._canvas.figure
+        axes = figure.gca()
+        artists = axes.get_tracked_artists()
+        if not artists:
+            self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
+                                          self.BIN_MODE_TEXT])
+        else:
+            try:
+                args = axes.creation_args
+            except:
+                args = [{}]
+            if "axis" in args[0]:
+                if (args[0]["axis"] == MantidAxType.BIN
+                    or args[0]["axis"] == MantidAxType.BIN.value):
+                    for arg in args:
+                        if ("axis" not in arg
+                            or (arg["axis"] != MantidAxType.BIN
+                                and arg["axis"] != MantidAxType.BIN.value)):
+                            return
+                    self._model.setBinMode()
+                    self._view.setAvailableModes([self.BIN_MODE_TEXT])
+                else:
+                    for arg in args:
+                        if ("axis" in arg
+                            and (arg["axis"] == MantidAxType.BIN
+                                 or arg["axis"] == MantidAxType.BIN.value)):
+                            return
+                    self._model.setSpectrumMode()
+                    self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT])
+            else:
+                for arg in args:
+                    if ("axis" in arg
+                        and (arg["axis"] != MantidAxType.SPECTRUM
+                             or arg["axis"] != MantidAxType.SPECTRUM.value)):
+                        return
+                self._model.setSpectrumMode()
+                self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT])
+
+        for artist in artists:
+            ws, specIndex = \
+                    axes.get_artists_workspace_and_workspace_index(artist)
+            wsName = ws.name()
+            self._model.addWorkspace(wsName)
+            if self._model.isBinMode():
+                specIndex = ws.getIndexFromSpectrumNumber(specIndex)
+            self._model.addData(wsName, specIndex)
+
     def onResize(self):
         """
         Triggered when one of the dockwidgets is resized.
