@@ -41,8 +41,6 @@ class SuperplotPresenterTest(unittest.TestCase):
         a1 = mock.Mock()
         ws = mock.Mock()
         sp = mock.Mock()
-        ws.blocksize.return_value = 10
-        ws.getNumberHistograms.return_value = 10
         self.mAxes.get_artists_workspace_and_workspace_index.return_value = \
             ws, sp
         self.mAxes.get_tracked_artists.return_value = [a1]
@@ -58,9 +56,7 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.mModel.workspaceReplaced.connect.assert_called_once()
         self.mView.setAvailableModes.assert_called()
         self.mModel.setSpectrumMode.assert_called_once()
-        ws, sp = self.mAxes.get_artists_workspace_and_workspace_index \
-                 .return_value
-        ws.blocksize.return_value = 1
+        self.mAxes.creation_args = [{"axis": 0}]
         self.presenter = SuperplotPresenter(self.mCanvas)
         self.mModel.setBinMode.assert_called_once()
 
@@ -177,9 +173,10 @@ class SuperplotPresenterTest(unittest.TestCase):
         calls = [mock.call("ws5"), mock.call("ws2")]
         self.mMtd.__getitem__.assert_has_calls(calls)
         ws = self.mMtd.__getitem__.return_value
-        calls = [mock.call(ws, axis=MantidAxType.SPECTRUM, wkspIndex=5),
-                 mock.call(ws, axis=MantidAxType.SPECTRUM, wkspIndex=1),
-                 mock.call(ws, axis=MantidAxType.SPECTRUM, wkspIndex=10)]
+        sp = ws.getSpectrumNumbers.return_value.__getitem__.return_value
+        calls = [mock.call(ws, axis=MantidAxType.SPECTRUM, specNum=sp),
+                 mock.call(ws, axis=MantidAxType.SPECTRUM, specNum=sp),
+                 mock.call(ws, axis=MantidAxType.SPECTRUM, specNum=sp)]
         self.mAxes.plot.assert_has_calls(calls)
 
     def test_onWorkspaceSelectionChanged(self):
