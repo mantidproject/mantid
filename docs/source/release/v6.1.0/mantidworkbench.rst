@@ -48,6 +48,7 @@ Bugfixes
 - Fixed a bug applying constraints with the conjugate gradient minimizer.
 - Fixed a bug where panning on a colour fill plot stretches dataset along spectrum axis instead of panning
 - Fixed a bug where TableWorkspace column names would not update correctly if the table was open.
+- Fixed a bug where plotting a 3D Contour plot would produce the error reporter in some cases.
 - Fixed a problem with scripts generated from tiled plots.
 
 Interfaces
