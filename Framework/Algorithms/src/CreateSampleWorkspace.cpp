@@ -421,7 +421,9 @@ std::vector<double> CreateSampleWorkspace::evalFunction(const std::string &funct
     auto index = static_cast<int>((xSize / 10) * x);
     if ((x == 10) && (index > 0))
       --index;
-    double replace_val = xVal[index];
+    // originally xVal[0] is always 0.  Now it is changed to x0
+    // this is to keep the previously generated functions
+    double replace_val = xVal[index] - xVal[0];
     std::ostringstream tokenStream;
     tokenStream << "$PC" << x << "$";
     std::string token = tokenStream.str();
