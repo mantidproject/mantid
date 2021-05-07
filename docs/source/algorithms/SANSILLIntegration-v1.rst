@@ -15,6 +15,10 @@ That is, it has to have instrument associated with it, and be in units of Wavele
 The output can be chosen among :math:`I(Q)` (default), :math:`I(Phi,Q)` or :math:`I(Qx,Qy)`.
 Separate outputs can be generated for each of the detector components, if so desired.
 
+The resolution can be calculated either by following [Mildner-Carpenter]_ approach or using fitted horizontal
+size of the direct beam, when the property `CalculateResolution` is set to `DirectBeam`. The latter is currently
+supported only for D11, D11lr, and D11B.
+
 OutputBinning
 -------------
 
