@@ -25,6 +25,8 @@ Bug fixes
 - Fixed a bug where removing a pair in use would cause a crash.
 - Fixed a bug where an error message would appear in workbench after loading a run in both MA and FDA.
 - Fixed a bug where rows in the difference table were not being highlighted correctly.
+- Fixed a bug where the color of the fitted line would sometimes match the color of the raw data line, making it
+  difficult to see.
 - Fixed a bug in the Grouping tab where an error message would appear when changing the source of
   Group Asymmetry Range with no data loaded.
 
