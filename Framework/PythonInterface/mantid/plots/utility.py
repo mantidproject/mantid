@@ -180,11 +180,13 @@ def zoom_axis(ax, coord, x_or_y, factor):
     new_ax_min = coord - dist_to_min/factor
     new_ax_max = coord + dist_to_max/factor
 
-    # Don't allow further zooming out if we're beyond the limit.
-    if abs(new_ax_max) > ZOOM_LIMIT and new_ax_max > ax_max:
+    # Don't allow further zooming out if we're beyond the limit. Zooming in is allowed.
+    # The abs in the second half of the conditional statements accounts for the case when the min and max axis limits
+    # are flipped, which is possible in matplotlib.
+    if abs(new_ax_max) > ZOOM_LIMIT and abs(new_ax_max) > abs(ax_max):
         new_ax_max = ax_max
 
-    if abs(new_ax_min) > ZOOM_LIMIT and new_ax_min < ax_min:
+    if abs(new_ax_min) > ZOOM_LIMIT and abs(new_ax_min) > abs(ax_min):
         new_ax_min = ax_min
 
     set_lims((new_ax_min, new_ax_max))
@@ -222,6 +224,7 @@ def get_single_workspace_log_value(ws_index, *, log_values=None, matrix_ws=None,
             return 0
 
         return log_values[ws_index]
+
 
 def colormap_as_plot_color(number_colors: int, colormap_name: str = 'viridis', cmap=None):
     if not cmap:
