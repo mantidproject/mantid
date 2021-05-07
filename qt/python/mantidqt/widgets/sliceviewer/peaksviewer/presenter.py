@@ -172,7 +172,7 @@ class PeaksViewerCollectionPresenter:
         :param view: View displaying the model information
         """
         self._view = view
-        self._actions: PeakActionsPresenter = self._create_peaks_actions_presenter()
+        self._actions_presenter: PeakActionsPresenter = self._create_peaks_actions_presenter()
         self._child_presenters: List[PeaksViewerPresenter] = []
         self._ads_observer = None
         self.setup_ads_observer()
@@ -202,6 +202,7 @@ class PeaksViewerCollectionPresenter:
         presenter = PeaksViewerPresenter(self._create_peaksviewer_model(name),
                                          self._view.append_peaksviewer())
         self._child_presenters.append(presenter)
+        self._actions_presenter.append_peaksworkspace(name)
         return presenter
 
     def overlay_peaksworkspaces(self, names_to_overlay):
@@ -246,6 +247,7 @@ class PeaksViewerCollectionPresenter:
                 self._view.remove_peaksviewer(child.view)
 
         child_presenters.remove(presenter_to_remove)
+        self._actions_presenter.remove_peaksworkspace(name)
 
     def workspace_names(self):
         """

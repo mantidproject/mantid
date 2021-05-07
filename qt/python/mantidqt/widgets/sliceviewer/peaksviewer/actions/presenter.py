@@ -20,9 +20,8 @@ from typing import Optional
 
 
 class PeakActionsEvent(enum.Enum):
-    ACTIVE_WORKSPACE_CHANGED = 1
-    ERASER_BUTTON_CHANGED = 2
-    INSERTER_BUTTON_CHANGED = 3
+    ERASING_MODE_CHANGED = 1
+    ADDING_MODE_CHANGED = 2
 
 
 class PeakActionsPresenter:
@@ -30,7 +29,7 @@ class PeakActionsPresenter:
     @staticmethod
     def _validate_view(view):
         r"""We require the actions view object to have certain attributes"""
-        for attribute in ('collection_viewer', 'selected_table_index', 'erasing_mode_on'):
+        for attribute in ('collection_view', 'active_peaksworkspace_index', 'erasing_mode_on'):
             if getattr(view, attribute) is False:
                 raise TypeError(f'{view} is not a valid PeakActionsView')
 
@@ -39,34 +38,43 @@ class PeakActionsPresenter:
                  view: PeakActionsView):
         PeakActionsPresenter._validate_view(view)
         self._model: PeakActionsModel = model
+        self._model.presenter = self.
         self._view: PeakActionsView = view
         view.subscribe(self)  # subscribe to event notifications from the viewer
 
     @property
-    def viewer_presenter(self) -> 'PeaksViewerPresenter':
+    def viewer_presenter(self) -> Optional['PeaksViewerPresenter']:
         r"""PeaksViewerPresenter associated to the active PeaksWorkspace"""
-        table_index = self._view.selected_table_index
-        collection_viewer: 'PeaksViewerCollectionView' = self._view.collection_viewer
-        peak_viewer: 'PeaksViewerView' = collection_viewer[table_index]
+        index = self._view.active_peaksworkspace_index
+        if index < 0:
+            return None  # No peaksworkspace has yet been selected
+        collection_view: 'PeaksViewerCollectionView' = self._view.collection_view
+        peak_viewer: 'PeaksViewerView' = collection_view[index]
         return peak_viewer.presenter
 
-    def notified(self, event: PeakActionsEvent):
+    def response_function(self, event: PeakActionsEvent):
         r"""
-        Notification of an event by the viewer, that the presenter should react to
+        Factory of response functions to signals emitted by the view (events)
         """
         def response_invalid():
             logger.error(f'{event} is an invalid PeakActionsEvent')
-        responses = {'ACTIVE_WORKSPACE_CHANGED': self._update_viewer_model_active,
-                     'ERASER_BUTTON_CHANGED': self._delete_peaks}
-        response = responses.get(event, response_invalid)
-        response()
+        responses = {'ERASING_MODE_CHANGED': self._remove_peaks,
+                     'ADDING_MODE_CHANGED': self._add_peaks
+                     }
+        return responses.get(event, response_invalid)
 
-    def _update_viewer_model_active(self) -> None:
-        r"""Update the active PeaksViewerModel cached in the PeakActionsModel"""
-        self._model.viewer_model = self.viewer_presenter.model
+    def append_peaksworkspace(self, name: str):
+        self._view.append_peaksworkspace(name)
 
-    def _delete_peaks(self):
+    def remove_peaksworkspace(self, name: str):
+        self._view.remove_peaksworkspace(name)
+
+    def _remove_peaks(self):
         r"""Delete peaks if the button is pressed"""
         if self._view.erasing_mode_on:
-            self._model.delete_peaks()
+            self._model.delete_peaks()  # delete peaks from the underlying workspace
             self.viewer_presenter.redraw_peaks()
+
+    def _add_peaks(self):
+        return NotImplementedError()
+

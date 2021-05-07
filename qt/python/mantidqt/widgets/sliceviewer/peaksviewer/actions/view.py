@@ -10,37 +10,46 @@
 # 3rd party
 from qtpy import QtWidgets, QtGui
 from mantid.kernel import logger
+from mantidqt.utils.qt import load_ui
+
+# local
+from ..view import PeaksViewerCollectionView
+from .presenter import PeakActionsEvent, PeakActionsPresenter
 
 # standard
-from typing import List
+from typing import Optional
 
 
-class PeakActionsView:
-    def __init__(self):
+class NotifierFactory:
+    r"""
+    @brief Factory of functions that are invoked when the widgets of the view emit a signal
+    @details The function is a wrapper to one of the methods of the PeakActionsPresenter object aggregated to the view
+    """
+
+    def __init__(self,
+                 presenter: PeakActionsPresenter,
+                 event: PeakActionsEvent) -> None:
+        self._presenter = presenter
+        self._event = event
+
+    def __call__(self):
+        r"""Instances of this class can be called, thus behaving as functions"""
+        self._presenter.notified(self._event)
+
+
+class PeakActionsView(QtWidgets.QWidget):
+    def __init__(self, parent: Optional[PeaksViewerCollectionView] = None):
+        super(PeakActionsView, self).__init__(parent=parent)
+        self._collection_view = parent
         self._presenter: 'PeakActionsPresenter' = None
-        peak_grid = QtGui.QGridLayout()
-
-        self.add_btn = QtWidgets.QPushButton('Add peak', self)
-        self.rm_btn = QtWidgets.QPushButton('Remove peak', self)
-        self.peaks_menu = QtWidgets.QComboBox()
-
-        wksp_list = ["Workspace 1", "Workspace 2"]
-        self.peaks_menu.addItems(wksp_list)
-
-        self.add_btn.setStyleSheet("background-color:lightgrey")
-        self.rm_btn.setStyleSheet("background-color:lightgrey")
-
-        self.add_btn.clicked.connect(self.add_btn_click)
-        self.rm_btn.clicked.connect(self.rm_btn_click)
-
-        peak_grid.addWidget(self.add_btn, 1, 2)
-        peak_grid.addWidget(self.rm_btn, 2, 2)
-        peak_grid.addWidget(self.peaks_menu, 1, 1)
-
-        self.setLayout(peak_grid)
+        self._setup_ui()
 
     @property
-    def presenter(self):
+    def collection_view(self) -> PeaksViewerCollectionView:
+        return self._collection_view
+
+    @property
+    def presenter(self) -> PeakActionsPresenter:
         return self._presenter
 
     def subscribe(self, presenter: 'PeakActionsPresenter') -> None:
@@ -53,12 +62,32 @@ class PeakActionsView:
         else:
             self._presenter = presenter
 
-    def _notify(self, event: 'PeakActionsEvent'):
-        r"""Notify of a PeakActionsEvent to the subscribers"""
-        self._presenter.notified(event)
+    @property
+    def erasing_mode_on(self):
+        r"""Find if the button to remove peaks is checked"""
+        return self.ui.remove_peaks_button.isChecked()
 
-    def add_btn_click(self):
-        pass  # self._notify(PeakActionsEvent.ACTIVE_WORKSPACE_CHANGED) or some other event more appropriate
+    @property
+    def active_peaksworkspace_index(self):
+        r"""Find index of the currently selected PeaksWorkspace. Returns -1 is nothing is selected"""
+        return self.ui.active_peaks_combobox.currentIndex()
 
-    def rm_btn_click(self):
-        pass
+    def append_peaksworkspace(self, name: str) -> None:
+        self.ui.active_peaks_combobox.addItem(name)
+
+    def remove_peaksworkspace(self, name: str):
+        box = self.ui.active_peaks_combobox
+        index = box.findText(name)
+        box.removeItem(index)
+
+    def _setup_ui(self):
+        self.ui = load_ui(__file__, 'actions.ui', self)
+        # Styling
+        self.ui.add_peaks_button.setStyleSheet("background-color:lightgrey")
+        self.ui.remove_peaks_button.setStyleSheet("background-color:lightgrey")
+        # Associate a QSignal to a response function of the presenter
+        signal_translator = [(self.ui.remove_peaks_button.clicked, PeakActionsEvent.ERASING_MODE_CHANGED),
+                             (self.ui.add_peaks_button.clicked, PeakActionsEvent.ADDING_MODE_CHANGED)]
+        # Link the QSignal to a method of the presenter
+        for qsignal, event in signal_translator:
+            qsignal.connect(self._presenter.response_function(event))

@@ -25,7 +25,7 @@
    <property name="title">
     <string>Peak Actions</string>
    </property>
-   <widget class="QComboBox" name="activePeaksBox">
+   <widget class="QComboBox" name="active_peaks_combobox">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -35,7 +35,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="addPeaksButton">
+   <widget class="QPushButton" name="add_peaks_button">
     <property name="geometry">
      <rect>
       <x>250</x>
@@ -51,7 +51,7 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QPushButton" name="removePeaksButton">
+   <widget class="QPushButton" name="remove_peaks_button">
     <property name="geometry">
      <rect>
       <x>250</x>

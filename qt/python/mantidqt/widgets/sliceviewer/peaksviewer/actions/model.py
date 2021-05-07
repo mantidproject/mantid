@@ -9,6 +9,7 @@
 
 # local
 from ..model import PeaksViewerModel
+from .presenter import PeakActionsPresenter
 
 # standard
 from typing import Optional
@@ -16,19 +17,14 @@ from typing import Optional
 
 class PeakActionsModel:
     def __init__(self):
-        # PeaksViewerModel susceptible of actions like peak removal/addition
-        self._viewer_model: Optional[PeaksViewerModel] = None
+        self.presenter: Optional[PeakActionsPresenter] = None
 
     @property
-    def viewer_model(self) -> PeaksViewerModel:
-        r"""PeaksViewerModel susceptible of actions like peak removal/addition"""
-        return self._viewer_model
-
-    @viewer_model.setter
-    def viewer_model(self, model: PeaksViewerModel):
-        assert isinstance(model, PeaksViewerModel)
-        self._viewer_model = model
+    def viewer_model(self) -> Optional[PeaksViewerModel]:
+        r"""current model subject to potential peak actions"""
+        viewer_presenter = self.presenter.viewer_presenter
+        return viewer_presenter.model
 
     def delete_peaks(self):
         r"""Delete the first peak of the model"""
-        self._viewer_model.delete_rows(0)
+        self.viewer_model.delete_rows(0)

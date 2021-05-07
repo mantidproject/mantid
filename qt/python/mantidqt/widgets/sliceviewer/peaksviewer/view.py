@@ -216,7 +216,7 @@ class PeaksViewerCollectionView(QWidget):
         super(PeaksViewerCollectionView, self).__init__(parent)
         self._painter = painter
         self._sliceinfo_provider = sliceinfo_provider
-        self._peak_actions_view = PeakActionsView()
+        self._peak_actions_view = PeakActionsView(parent=self)
         self._peaks_layout: Optional[QVBoxLayout] = None
         self._setup_ui()
 
