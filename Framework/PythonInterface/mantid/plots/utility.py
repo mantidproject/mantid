@@ -180,13 +180,15 @@ def zoom_axis(ax, coord, x_or_y, factor):
     new_ax_min = coord - dist_to_min/factor
     new_ax_max = coord + dist_to_max/factor
 
-    if abs(new_ax_max) > ZOOM_LIMIT:
+    # Don't allow further zooming out if we're beyond the limit.
+    if abs(new_ax_max) > ZOOM_LIMIT and new_ax_max > ax_max:
         new_ax_max = ax_max
 
-    if abs(new_ax_min) > ZOOM_LIMIT:
+    if abs(new_ax_min) > ZOOM_LIMIT and new_ax_min < ax_min:
         new_ax_min = ax_min
 
     set_lims((new_ax_min, new_ax_max))
+
     return new_ax_min, new_ax_max
 
 
