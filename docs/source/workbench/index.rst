@@ -49,3 +49,4 @@ allow us to keep developing the Workbench long after MantidPlot is no longer ava
     * :ref:`WorkbenchWorkspaceHistoryWindow` displays the algorithms that have been applied to a workspace
     * :ref:`Plotting <plotting>` describes how mantid workspaces have been integrated with the matplotlib framework and
       how to create these plots via scripts.
+    * :ref:`WorkbenchSuperplot`: Decorator widget of the plot window that provides tools to overplot data.
