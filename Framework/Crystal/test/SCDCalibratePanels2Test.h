@@ -413,7 +413,7 @@ private:
     rot_alg->setProperty("Z", rvz);
     rot_alg->setProperty("Angle", drotang);
     rot_alg->setProperty("RelativeRotation", true);
-    rot_alg->executeAsChildAlg();
+    rot_alg->execute();
 
     // translation
     IAlgorithm_sptr mv_alg = Mantid::API::AlgorithmFactory::Instance().create("MoveInstrumentComponent", -1);
@@ -425,22 +425,7 @@ private:
     mv_alg->setProperty("Y", dy);
     mv_alg->setProperty("Z", dz);
     mv_alg->setProperty("RelativePosition", true);
-    mv_alg->executeAsChildAlg();
-
-    // since moving instrument does not trigger the update the embedded peaks,
-    // we need to do this manually
-    double tof;
-    Units::Wavelength wl;
-    for (int i = 0; i < pws->getNumberPeaks(); ++i) {
-      tof = pws->getPeak(i).getTOF();
-      pws->getPeak(i).setInstrument(pws->getInstrument());
-      wl.initialize(pws->getPeak(i).getL1(), 0,
-                    {{UnitParams::l2, pws->getPeak(i).getL2()},
-                     {UnitParams::twoTheta, pws->getPeak(i).getScattering()},
-                     {UnitParams::efixed, pws->getPeak(i).getInitialEnergy()}});
-      pws->getPeak(i).setDetectorID(pws->getPeak(i).getDetectorID());
-      pws->getPeak(i).setWavelength(wl.singleFromTOF(tof));
-    }
+    mv_alg->execute();
   }
 
   /**

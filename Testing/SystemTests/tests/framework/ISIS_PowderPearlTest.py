@@ -31,6 +31,7 @@ calibration_folder_name = os.path.join("calibration", inst_name.lower())
 calibration_map_rel_path = os.path.join("yaml_files", "pearl_system_test_mapping.yaml")
 cycle = "17_1"
 spline_rel_path = os.path.join(cycle, "VanSplined_98472_tt70_pearl_offset_16_4.cal.nxs")
+summed_empty_rel_path = os.path.join(cycle, "summed_empty_98485.nxs")
 
 # Generate paths for the tests
 # This implies DIRS[0] is the system test data folder
@@ -42,6 +43,7 @@ output_dir = os.path.join(working_dir, output_folder_name)
 calibration_map_path = os.path.join(input_dir, calibration_map_rel_path)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
 spline_path = os.path.join(calibration_dir, spline_rel_path)
+summed_empty_path = os.path.join(calibration_dir, summed_empty_rel_path)
 
 
 class _CreateVanadiumTest(systemtesting.MantidSystemTest):
@@ -73,6 +75,7 @@ class _CreateVanadiumTest(systemtesting.MantidSystemTest):
         try:
             _try_delete(output_dir)
             _try_delete(spline_path)
+            _try_delete(summed_empty_path)
         finally:
             mantid.mtd.clear()
             config['datasearch.directories'] = self.existing_config
@@ -220,7 +223,6 @@ class FocusWithAbsorbCorrectionsTest(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         try:
-            _try_delete(spline_path)
             _try_delete(output_dir)
         finally:
             config['datasearch.directories'] = self.existing_config
@@ -279,8 +281,6 @@ class CreateCalTest(systemtesting.MantidSystemTest):
     def cleanup(self):
         try:
             _try_delete(self.run_details.offset_file_path)
-            _try_delete(spline_path)
-            _try_delete(output_dir)
         finally:
             config['datasearch.directories'] = self.existing_config
             mantid.mtd.clear()
