@@ -80,6 +80,8 @@ class WorkspaceWidget(PluginWidget):
         self.workspacewidget.plotContourClicked.connect(
             partial(self._do_plot_3D, plot_type='contour'))
         self.workspacewidget.sampleMaterialClicked.connect(self._do_sample_material)
+        self.workspacewidget.superplotClicked.connect(
+                partial(self._do_plot_spectrum, errors=False, overplot=False))
         self.workspacewidget.contextMenuAboutToShow.connect(
             self._on_context_menu)
 
