@@ -103,6 +103,11 @@ class SuperplotPresenter:
         for artist in artists:
             ws, specIndex = \
                     axes.get_artists_workspace_and_workspace_index(artist)
+            if specIndex is None:
+                i = artists.index(artist)
+                if i >= len(args):
+                    i = 0
+                specIndex = args[i]["wkspIndex"]
             wsName = ws.name()
             self._model.addWorkspace(wsName)
             self._model.addData(wsName, specIndex)
