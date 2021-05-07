@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from mantid.plots.legend import LegendProperties
 from numpy import testing as np_testing
 
-from mantid.plots.utility import zoom, zoom_axis
+from mantid.plots.utility import zoom, zoom_axis, ZOOM_LIMIT
 from testhelpers import assertRaisesNothing
 
 
@@ -54,6 +54,32 @@ class TestUtility(unittest.TestCase):
 
         # zoom function will attempt to set the y-axis limits to +/-1e310.
         assertRaisesNothing(self, zoom, ax, *zoom_point, zoom_factor)
+
+    def test_zoom_in_from_outside_zoom_limit(self):
+        """
+        Manually set the axis range so it is outside of the zoom out limit, and make sure it's possible to zoom in.
+        """
+        fig, ax = plt.subplots()
+        ax.plot([0, 1, 2], [1e10, -1e10, 1e10])
+
+        # Set axis limits outside of the maximum zoom out range.
+        axis_max = ZOOM_LIMIT * 2.0
+        axis_min = ZOOM_LIMIT * -2.0
+        ax.set_xlim([axis_min, axis_max])
+        ax.set_ylim([axis_min, axis_max])
+
+        # Attempt to zoom in.
+        zoom_point = [0, 0]
+        zoom_factor = 1.05
+        zoom(ax, *zoom_point, zoom_factor)
+
+        # Check that we were able to zoom in.
+        x_min, x_max = ax.get_xlim()
+        y_min, y_max = ax.get_ylim()
+        self.assertTrue(x_min > axis_min)
+        self.assertTrue(x_max < axis_max)
+        self.assertTrue(y_min > axis_min)
+        self.assertTrue(y_max < axis_max)
 
 
 if __name__ == '__main__':
