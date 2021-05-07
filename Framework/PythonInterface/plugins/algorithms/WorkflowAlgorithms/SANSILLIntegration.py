@@ -11,6 +11,7 @@ from mantid.kernel import EnabledWhenProperty, FloatArrayProperty, Direction, St
     FloatArrayLengthValidator, CompositeValidator
 from mantid.simpleapi import *
 from MildnerCarpenter import *
+from DirectBeamResolution import *
 import numpy as np
 
 
@@ -81,7 +82,7 @@ class SANSILLIntegration(PythonAlgorithm):
 
         self.declareProperty(name='CalculateResolution',
                              defaultValue='None',
-                             validator=StringListValidator(['MildnerCarpenter', 'None']),
+                             validator=StringListValidator(['MildnerCarpenter', 'DirectBeam', 'None']),
                              doc='Choose to calculate the Q resolution.')
 
         output_iq = EnabledWhenProperty('OutputType', PropertyCriterion.IsEqualTo, 'I(Q)')
@@ -367,6 +368,17 @@ class SANSILLIntegration(PythonAlgorithm):
             else:
                 self._deltaQ = MonochromaticScalarQCylindric(wavelength, delta_wavelength, r1, r2, x3, y3, l1, l2)
 
+    def _resolution_direct_beam(self):
+        if self._is_tof:
+            raise RuntimeError('TOF resolution is not supported yet')
+        run = mtd[self._input_ws].getRun()
+        wavelength = run.getLogData('wavelength').value
+        beam_width = run.getLogData('BeamWidthX').value
+        delta_wavelength = run.getLogData('selector.wavelength_res').value * 0.01
+        l2 = run.getLogData('L2').value
+        type(DirectBeamResolution(wavelength, delta_wavelength, beam_width, l2))
+        self._deltaQ = DirectBeamResolution(wavelength, delta_wavelength, beam_width, l2)
+
     def _integrate_iqxy(self, ws_in, ws_out):
         """
         Calls Qxy
@@ -395,6 +407,8 @@ class SANSILLIntegration(PythonAlgorithm):
         """
         if self._resolution == 'MildnerCarpenter':
             self._setup_mildner_carpenter()
+        elif self._resolution == 'DirectBeam':
+            self._resolution_direct_beam()
         run = mtd[ws_in].getRun()
         q_min_name = 'qmin'
         q_max_name = 'qmax'
@@ -440,7 +454,7 @@ class SANSILLIntegration(PythonAlgorithm):
                 # if there is a shape table, the final number of wedges cannot be known beforehand
                 # (because of possible symmetry issues)
                 n_wedges = mtd[wedge_ws].size()
-            if self._resolution == 'MildnerCarpenter':
+            if self._resolution != 'None':
                 x = mtd[ws_out].readX(0)
                 mid_x = (x[1:] + x[:-1]) / 2
                 res = self._deltaQ(mid_x)
@@ -466,7 +480,7 @@ class SANSILLIntegration(PythonAlgorithm):
             ConjoinSpectra(InputWorkspaces=wedge_ws, OutputWorkspace=ws_out)
             mtd[ws_out].replaceAxis(1, azimuth_axis)
             DeleteWorkspace(wedge_ws)
-            if self._resolution == 'MildnerCarpenter':
+            if self._resolution != 'None':
                 x = mtd[ws_out].readX(0)
                 mid_x = (x[1:] + x[:-1]) / 2
                 res = self._deltaQ(mid_x)
