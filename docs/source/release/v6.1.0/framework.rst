@@ -66,7 +66,7 @@ SliceViewer
 Improvements
 ############
 
-- The line plots now respect the status of the Track Cursor checkbox.
+- Line plots now respect the status of the Track Cursor checkbox.
 
 Bugfixes
 ########
