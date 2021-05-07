@@ -52,7 +52,7 @@ class TestUtility(unittest.TestCase):
         zoom_point = [0, 0]
         zoom_factor = 1e-300
 
-        # zoom function will attempt to set the y-axis limits to +/-1e300.
+        # zoom function will attempt to set the y-axis limits to +/-1e310.
         assertRaisesNothing(self, zoom, ax, *zoom_point, zoom_factor)
 
 

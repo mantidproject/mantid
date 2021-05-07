@@ -24,6 +24,8 @@ from matplotlib.container import ErrorbarContainer
 MPLVersionInfo = collections.namedtuple("MPLVersionInfo", ("major", "minor", "patch"))
 MATPLOTLIB_VERSION_INFO = MPLVersionInfo._make(map(int, mpl_version_str.split(".")))
 
+# Restrict zooming out of plots.
+ZOOM_LIMIT = 1e300
 
 # Use the correct draggable method based on the matplotlib version
 if hasattr(Legend, "set_draggable"):
@@ -177,6 +179,12 @@ def zoom_axis(ax, coord, x_or_y, factor):
     dist_to_max = ax_max - coord
     new_ax_min = coord - dist_to_min/factor
     new_ax_max = coord + dist_to_max/factor
+
+    if abs(new_ax_max) > ZOOM_LIMIT:
+        new_ax_max = ax_max
+
+    if abs(new_ax_min) > ZOOM_LIMIT:
+        new_ax_min = ax_min
 
     set_lims((new_ax_min, new_ax_max))
     return new_ax_min, new_ax_max
