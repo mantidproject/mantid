@@ -385,8 +385,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         """Toggle fit browser and tool on/off"""
         if self.fit_browser.isVisible():
             self.fit_browser.hide()
+            self.toolbar._actions["toggle_superplot"].setEnabled(True)
         else:
             self.fit_browser.show()
+            self.toolbar._actions["toggle_superplot"].setEnabled(False)
 
     def superplot_toggle(self):
         """Toggle superplot dockwidgets on/off"""
@@ -395,12 +397,14 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.window.removeDockWidget(self.superplot.getBottomView())
             self.superplot.close()
             self.superplot = None
+            self.toolbar._actions["toggle_fit"].setEnabled(True)
         else:
             self.superplot = Superplot(self.canvas, self.window)
             self.window.addDockWidget(Qt.LeftDockWidgetArea,
                                       self.superplot.getSideView())
             self.window.addDockWidget(Qt.BottomDockWidgetArea,
                                       self.superplot.getBottomView())
+            self.toolbar._actions["toggle_fit"].setEnabled(False)
 
     def handle_fit_browser_close(self):
         """
