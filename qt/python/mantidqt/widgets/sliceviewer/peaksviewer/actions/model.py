@@ -9,7 +9,6 @@
 
 # local
 from ..model import PeaksViewerModel
-from .presenter import PeakActionsPresenter
 
 # standard
 from typing import Optional
@@ -17,7 +16,7 @@ from typing import Optional
 
 class PeakActionsModel:
     def __init__(self):
-        self.presenter: Optional[PeakActionsPresenter] = None
+        self.presenter: Optional['PeakActionsPresenter'] = None
 
     @property
     def viewer_model(self) -> Optional[PeaksViewerModel]:

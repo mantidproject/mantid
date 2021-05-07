@@ -13,8 +13,7 @@ from mantid.kernel import logger
 from mantidqt.utils.qt import load_ui
 
 # local
-from ..view import PeaksViewerCollectionView
-from .presenter import PeakActionsEvent, PeakActionsPresenter
+from .presenter import PeakActionsEvent
 
 # standard
 from typing import Optional
@@ -27,7 +26,7 @@ class NotifierFactory:
     """
 
     def __init__(self,
-                 presenter: PeakActionsPresenter,
+                 presenter: 'PeakActionsPresenter',
                  event: PeakActionsEvent) -> None:
         self._presenter = presenter
         self._event = event
@@ -38,18 +37,18 @@ class NotifierFactory:
 
 
 class PeakActionsView(QtWidgets.QWidget):
-    def __init__(self, parent: Optional[PeaksViewerCollectionView] = None):
+    def __init__(self, parent: Optional['PeaksViewerCollectionView'] = None):
         super(PeakActionsView, self).__init__(parent=parent)
         self._collection_view = parent
         self._presenter: 'PeakActionsPresenter' = None
         self._setup_ui()
 
     @property
-    def collection_view(self) -> PeaksViewerCollectionView:
+    def collection_view(self) -> 'PeaksViewerCollectionView':
         return self._collection_view
 
     @property
-    def presenter(self) -> PeakActionsPresenter:
+    def presenter(self) -> 'PeakActionsPresenter':
         return self._presenter
 
     def subscribe(self, presenter: 'PeakActionsPresenter') -> None:

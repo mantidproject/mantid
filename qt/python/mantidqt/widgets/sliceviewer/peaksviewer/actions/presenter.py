@@ -9,7 +9,6 @@
 
 # local
 from .model import PeakActionsModel
-from .view import PeakActionsView
 
 # 3rd party
 from mantid.kernel import logger
@@ -35,11 +34,11 @@ class PeakActionsPresenter:
 
     def __init__(self,
                  model: PeakActionsModel,
-                 view: PeakActionsView):
+                 view: 'PeakActionsView'):
         PeakActionsPresenter._validate_view(view)
         self._model: PeakActionsModel = model
-        self._model.presenter = self.
-        self._view: PeakActionsView = view
+        self._model.presenter = self
+        self._view: 'PeakActionsView' = view
         view.subscribe(self)  # subscribe to event notifications from the viewer
 
     @property
