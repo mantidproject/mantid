@@ -49,11 +49,24 @@ class TestUtility(unittest.TestCase):
         fig, ax = plt.subplots()
         ax.plot([0, 1, 2], [1e10, -1e10, 1e10])
 
-        zoom_point = [0, 0]
-        zoom_factor = 1e-300
+        axis_min = -1e10
+        axis_max = 1e10
+        ax.set_xlim([axis_min, axis_max])
+        ax.set_ylim([axis_min, axis_max])
 
-        # zoom function will attempt to set the y-axis limits to +/-1e310.
+        zoom_point = [0, 0]
+        zoom_factor = 1/ZOOM_LIMIT
+
+        # Attempt to zoom to +/-10^310
         assertRaisesNothing(self, zoom, ax, *zoom_point, zoom_factor)
+
+        # Check the axis limits haven't changed.
+        new_x_min, new_x_max = ax.get_xlim()
+        new_y_min, new_y_max = ax.get_ylim()
+        self.assertEqual(axis_min, new_x_min)
+        self.assertEqual(axis_min, new_y_min)
+        self.assertEqual(axis_max, new_x_max)
+        self.assertEqual(axis_max, new_y_max)
 
     def test_zoom_in_from_outside_zoom_limit(self):
         """
@@ -80,6 +93,35 @@ class TestUtility(unittest.TestCase):
         self.assertTrue(x_max < axis_max)
         self.assertTrue(y_min > axis_min)
         self.assertTrue(y_max < axis_max)
+
+    def test_zoom_out_with_flipped_limits(self):
+        """
+        It is possible to set x_min > x_max, so we need to make sure we can't zoom out beyond
+        max zoom in that case.
+        """
+        fig, ax = plt.subplots()
+        ax.plot([0, 1, 2], [1e10, -1e10, 1e10])
+
+        # Set min > max.
+        axis_max = -1e10
+        axis_min = 1e10
+
+        ax.set_xlim([axis_min, axis_max])
+        ax.set_ylim([axis_min, axis_max])
+
+        zoom_point = [0, 0]
+        zoom_factor = 1/ZOOM_LIMIT
+
+        # Attempt to zoom to -/+10^310
+        assertRaisesNothing(self, zoom, ax, *zoom_point, zoom_factor)
+
+        # Check the axis limits haven't changed.
+        new_x_min, new_x_max = ax.get_xlim()
+        new_y_min, new_y_max = ax.get_ylim()
+        self.assertEqual(axis_min, new_x_min)
+        self.assertEqual(axis_min, new_y_min)
+        self.assertEqual(axis_max, new_x_max)
+        self.assertEqual(axis_max, new_y_max)
 
 
 if __name__ == '__main__':
