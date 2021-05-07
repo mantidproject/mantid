@@ -172,7 +172,7 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.mAxes.reset_mock()
         self.presenter._updatePlot()
         calls = [mock.call("ws5"), mock.call("ws2")]
-        self.mMtd.__getitem__.assert_has_calls(calls)
+        self.mMtd.__getitem__.assert_has_calls(calls, any_order=True)
         ws = self.mMtd.__getitem__.return_value
         sp = ws.getSpectrumNumbers.return_value.__getitem__.return_value
         calls = [mock.call(ws, axis=MantidAxType.SPECTRUM, specNum=sp),

@@ -105,8 +105,6 @@ class SuperplotPresenter:
                     axes.get_artists_workspace_and_workspace_index(artist)
             wsName = ws.name()
             self._model.addWorkspace(wsName)
-            if self._model.isBinMode():
-                specIndex = ws.getIndexFromSpectrumNumber(specIndex)
             self._model.addData(wsName, specIndex)
 
     def onResize(self):
@@ -258,13 +256,14 @@ class SuperplotPresenter:
             legend.remove()
         axes.set_prop_cycle(None)
         for wsName, sp in plottedData:
+            ws = mtd[wsName]
             if self._model.isSpectrumMode():
                 axisType = MantidAxType.SPECTRUM
+                specNum = ws.getSpectrumNumbers()[sp]
+                lines = axes.plot(ws, specNum=specNum, axis=axisType)
             else:
                 axisType = MantidAxType.BIN
-            ws = mtd[wsName]
-            specNum = ws.getSpectrumNumbers()[sp]
-            lines = axes.plot(mtd[wsName], specNum=specNum, axis=axisType)
+                lines = axes.plot(ws, wkspIndex=sp, axis=axisType)
             line = lines[0]
             self._view.modifySpectrumLabel(wsName, sp, line.get_label(),
                                            line.get_color())
@@ -273,21 +272,20 @@ class SuperplotPresenter:
             if (currentSpectrumIndex not in spectra
                 and not self._view.isSpectrumDisabled()):
                 spectra.append(currentSpectrumIndex)
-            for spectrum in spectra:
-                if spectrum == -1:
+            for sp in spectra:
+                if sp == -1:
                     continue
-                if (wsName, spectrum) not in plottedData:
+                if (wsName, sp) not in plottedData:
+                    ws = mtd[wsName]
                     if mode == self.SPECTRUM_MODE_TEXT:
                         axisType = MantidAxType.SPECTRUM
+                        specNum = ws.getSpectrumNumbers()[sp]
+                        lines = axes.plot(ws, specNum=specNum, axis=axisType)
                     else:
                         axisType = MantidAxType.BIN
-                    ws = mtd[wsName]
-                    specNum = ws.getSpectrumNumbers()[spectrum]
-                    lines = axes.plot(mtd[wsName], specNum=specNum,
-                                      axis=axisType)
+                        lines = axes.plot(ws, wkspIndex=sp, axis=axisType)
                     line = lines[0]
-                    self._view.modifySpectrumLabel(wsName, spectrum,
-                                                   line.get_label(),
+                    self._view.modifySpectrumLabel(wsName, sp, line.get_label(),
                                                    line.get_color())
 
         if selection or plottedData:
