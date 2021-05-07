@@ -93,6 +93,19 @@ public:
     TS_ASSERT_DELTA(fn->intensity(), 0.26611675485780654483, 1e-10);
   }
 
+  void testIntensityError() {
+    std::shared_ptr<Gaussian> fn = std::make_shared<Gaussian>();
+    fn->initialize();
+    fn->setHeight(2.0);
+    fn->setFwhm(0.125);
+    fn->setCentre(-200.0);
+
+    fn->setError("Height", 0.04);
+    fn->setError("Sigma", 0.002);
+
+    TS_ASSERT_DELTA(fn->intensityError(), 0.01135157327427759437, 1e-10);
+  }
+
   void testSetIntensity() {
     std::shared_ptr<Gaussian> fn = std::make_shared<Gaussian>();
     fn->initialize();
