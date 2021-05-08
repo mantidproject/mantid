@@ -613,8 +613,31 @@ class DirectEnergyConversionTest(unittest.TestCase):
         ei2b, mon1_peak2 = tReducer.get_ei(monitor_ws, 62.2)
         self.assertAlmostEqual(ei2b, 64.95, 2)
 
+    def test_remove_empty_bg(self):
+        # create test workspace
+        wksp = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Event',
+                                     NumBanks=3, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
+                                     XMin=2000, XMax=20000, BinWidth=1)
+        CloneWorkspace(wksp,OutputWorkspace='bg_ws')
+        AddSampleLog(Workspace=wksp,LogName='gd_prtn_chrg', LogText='10', LogType='Number')
+        AddSampleLog(Workspace='bg_ws',LogName='gd_prtn_chrg', LogText='100', LogType='Number')
+
+        # Prepare reducer
+        tReducer = DirectEnergyConversion('MAR')
+        tReducer.prop_man.sample_run = wksp
+        tReducer.prop_man.empty_bg_run = 'bg_ws'
+
+        tReducer.remove_empty_background()
+
+        ws = PropertyManager.sample_run.get_workspace()
+        self.assertTrue(ws.run().hasProperty('empty_bg_removed'))
+
+        resWs = 0.9*wksp
+        difr = CompareWorkspaces(resWs,ws)
+        self.assertTrue(difr.Result)
+
 
 if __name__ == "__main__":
-    #test = DirectEnergyConversionTest('test_sum_monitors')
+    #test = DirectEnergyConversionTest('test_remove_empty_bg')
     #test.run()
     unittest.main()
