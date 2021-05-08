@@ -1548,7 +1548,7 @@ class RunDescriptor(PropDescriptor):
         ws_current = ws.run().getProperty('gd_prtn_chrg').value
         # normalize by current and remove normalised background
         ebg_ws  =  ebg_ws*(ws_current/ebg_current)
-        Minus(ws,ebg_ws  ,OutputWorkspace = ws.name(),ClearRHSWorkspace=True)
+        Minus(ws,ebg_ws  ,OutputWorkspace = ws.name(),ClearRHSWorkspace=copy_created)
         if copy_created:
             DeleteWorkspace('ebg_ws')
             if 'ebg_ws_monitors' in mtd:
