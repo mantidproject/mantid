@@ -1517,6 +1517,9 @@ class RunDescriptor(PropDescriptor):
         bg_name = empty_bg_property._ws_name
 
         if ebg_ws.getNumberBins() != ws.getNumberBins() or ebg_ws.getNumberHistograms() != ws.getNumberHistograms():
+            # The RD and background workspaces are different if it is just binning or difference is in monitors
+            # we can dial with the issue
+
             # workspace type. Events or Histogramm
             preserve_events = False
             if isinstance(ws,EventWorkspace):
