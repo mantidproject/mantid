@@ -1511,29 +1511,32 @@ class RunDescriptor(PropDescriptor):
                               .format(ws.name()),'information')
 
         empty_bg_property = RunDescriptor._holder.get_prop_class('empty_bg_run')
-        ebg_ws = empty_bg_property.get_ws_clone('ebg_ws')
-        # the name of the original background workspace used as source for backgound
+        ebg_ws = empty_bg_property.get_workspace()
+        copy_created  = False
+        # the name of the original background workspace used as source for background
         bg_name = empty_bg_property._ws_name
 
-        if ebg_ws.getNumberBins() != ws.getNumberBins():
+        if ebg_ws.getNumberBins() != ws.getNumberBins() or ebg_ws.getNumberHistograms() != ws.getNumberHistograms():
             # workspace type. Events or Histogramm
             preserve_events = False
             if isinstance(ws,EventWorkspace):
                 preserve_events = True
+            # background workspace will be modified. Use copy
+            copy_created = True
             ebg_ws = RebinToWorkspace(ebg_ws,ws,PreserveEvents = preserve_events)
 
             if ebg_ws.getNumberHistograms() != ws.getNumberHistograms():
                 if RunDescriptor._holder.load_monitors_with_workspace:
+
                     # sample workspace was loaded with monitors in and bg_ws with monitors out.
                     # Add zero monitor spectra to smaller workspace
                     n_monitors =ws.getNumberHistograms() - ebg_ws.getNumberHistograms()
                     monitors_at_start = ws.getDetector(0).isMonitor()
                     if n_monitors > 0:
-                        ebg_ws = self._add_fake_monitors(ebg_ws,n_monitors,monitors_at_start)
+                        ebg_ws = self._add_empty_spectra(ebg_ws,n_monitors,monitors_at_start)
                     else:
-                        old_ws_name = ws.name()
-                        ws = self._add_fake_monitors(ws,-n_monitors,monitors_at_start)
-                        RenameWorkspace(ws,old_ws_name,RenameMonitors=True)
+                        ExtractMonitors(InputWorkspace=ebg_ws, DetectorWorkspace='ebg_ws', MonitorWorkspace='ebg_ws_monitors')
+                        ebg_ws = mtd['ebg_ws']
                 else: # for some reasons (nothing to do with monitors) workspaces have different number of spectra. Can not handle this
                     raise RuntimeError(
                         'Number of spectra in background workspace (N={0}) and in Workspace {1} (N={2}) must be the same'.
@@ -1546,38 +1549,44 @@ class RunDescriptor(PropDescriptor):
         # normalize by current and remove normalised background
         ebg_ws  =  ebg_ws*(ws_current/ebg_current)
         Minus(ws,ebg_ws  ,OutputWorkspace = ws.name(),ClearRHSWorkspace=True)
-        DeleteWorkspace('ebg_ws')
+        if copy_created:
+            DeleteWorkspace('ebg_ws')
+            if 'ebg_ws_monitors' in mtd:
+                DeleteWorkspace('ebg_ws_monitors')
 
         AddSampleLog(Workspace=ws,LogName="empty_bg_removed",LogText=str(ebg_ws.name()))
         RunDescriptor._logger('**** Empty instrument background {0} has been removed from workspace {1}'.
                               format(bg_name,ws.name()),'information')
     #
     @staticmethod
-    def _add_fake_monitors(expanded_ws,n_spectra,add_from_start=False):
+    def _add_empty_spectra(expand_ws,n_spectra,add_from_start=False):
         """Add zeroed spectra to a matrix workspace
 
            Input:
-           expanded_ws -- Matrix2D workspace to expand
+           expand_ws -- Matrix2D workspace to expand
            n_spectra   -- number of spectra to add
            add_from_start -- if True, add extra-spectra to the start of workspace,
                           if False -- to the end
            Returns:
                pointer to the workspace, containing extra spectra
         """
-        source_spec = expanded_ws.readX(0)
+
+        source_spec = expand_ws.readX(0)
         zero_signal = [0]*n_spectra
         fake_spectra = CreateWorkspace(DataX=[source_spec[0],source_spec[-1]],DataY=zero_signal,
                                        Nspec=n_spectra,UnitX = "TOF",
-                                       ParentWorkspace=expanded_ws)
-        fake_spectra  = RebinToWorkspace(fake_spectra,expanded_ws)
+                                       ParentWorkspace=expand_ws)
+        fake_spectra  = RebinToWorkspace(fake_spectra,expand_ws)
 
+        source_name = expand_ws.name()
         if add_from_start:
-            target = 'fake_spectra'
-            ConjoinWorkspaces(fake_spectra,expanded_ws)
+            ConjoinWorkspaces(InputWorkspace1='fake_spectra',InputWorkspace2=source_name,
+                              CheckOverlapping=False)
+            RenameWorkspace('fake_spectra',source_name)
         else:
-            target = 'expanded_ws'
-            ConjoinWorkspaces(expanded_ws,fake_spectra)
-        return mtd[target]
+            ConjoinWorkspaces(InputWorkspace1=source_name,InputWorkspace2='fake_spectra',
+                              CheckOverlapping=False)
+        return mtd[source_name]
 
 
 #-------------------------------------------------------------------------------------------------------------------------------
