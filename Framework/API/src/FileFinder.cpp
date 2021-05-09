@@ -515,6 +515,7 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
   static const boost::regex digits("[0-9]+");
   auto h = hints.begin();
 
+  std::string instrSName;
   for (; h != hints.end(); ++h) {
     // Quick check for a filename
     bool fileSuspected = false;
@@ -568,7 +569,11 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
         }
       }
     } else {
-      std::string path = findRun(*h, exts, useExtsOnly);
+        std::pair<std::string, std::string> p0 = toInstrumentAndNumber(*h);
+        if (h == hints.begin()) {
+          instrSName = p0.first;
+        }
+        std::string path = findRun(instrSName + p0.second, exts, useExtsOnly);
       if (!path.empty()) {
         res.emplace_back(path);
       } else {
