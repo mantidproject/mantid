@@ -7,8 +7,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/ArchiveSearchFactory.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/ArchiveSearchFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IArchiveSearch.h"
 #include "MantidKernel/ConfigService.h"
@@ -17,7 +17,6 @@
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Strings.h"
-
 
 #include "MantidKernel/StringTokenizer.h"
 #include <Poco/Exception.h>
