@@ -573,12 +573,12 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
       if (h == hints.begin()) {
         instrSName = p0.first;
       }
-	  if (instrSName == "PG3") {
+      if (instrSName == "PG3") {
         std::string path = findRun(instrSName + p0.second, exts, useExtsOnly);
       } else {
-		std::string path = findRun(*h, exts, useExtsOnly);
-	  }
-	  if (!path.empty()) {
+        std::string path = findRun(*h, exts, useExtsOnly);
+      }
+      if (!path.empty()) {
         res.emplace_back(path);
       } else {
         throw Kernel::Exception::NotFoundError("Unable to find file:", *h);
