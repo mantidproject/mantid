@@ -570,13 +570,14 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
       }
     } else {
       std::pair<std::string, std::string> p0 = toInstrumentAndNumber(*h);
+      std::string path;
       if (h == hints.begin()) {
         instrSName = p0.first;
       }
       if (instrSName == "PG3") {
-        std::string path = findRun(instrSName + p0.second, exts, useExtsOnly);
+        path = findRun(instrSName + p0.second, exts, useExtsOnly);
       } else {
-        std::string path = findRun(*h, exts, useExtsOnly);
+        path = findRun(*h, exts, useExtsOnly);
       }
       if (!path.empty()) {
         res.emplace_back(path);
