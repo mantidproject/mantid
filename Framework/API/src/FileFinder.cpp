@@ -7,8 +7,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/ArchiveSearchFactory.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IArchiveSearch.h"
 #include "MantidKernel/ConfigService.h"
@@ -17,6 +17,7 @@
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Strings.h"
+
 
 #include "MantidKernel/StringTokenizer.h"
 #include <Poco/Exception.h>
@@ -569,11 +570,11 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
         }
       }
     } else {
-        std::pair<std::string, std::string> p0 = toInstrumentAndNumber(*h);
-        if (h == hints.begin()) {
-          instrSName = p0.first;
-        }
-        std::string path = findRun(instrSName + p0.second, exts, useExtsOnly);
+      std::pair<std::string, std::string> p0 = toInstrumentAndNumber(*h);
+      if (h == hints.begin()) {
+        instrSName = p0.first;
+      }
+      std::string path = findRun(instrSName + p0.second, exts, useExtsOnly);
       if (!path.empty()) {
         res.emplace_back(path);
       } else {
