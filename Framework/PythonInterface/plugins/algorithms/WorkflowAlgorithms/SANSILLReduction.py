@@ -333,9 +333,8 @@ class SANSILLReduction(PythonAlgorithm):
         background = 'name=FlatBackground, A0=1e-4'
         distribution_width = np.max(mtd[tmp_ws].getAxis(0).extractValues())
         function = "name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2}".format(
-            0, np.max(mtd[tmp_ws].getAxis(1).extractValues()), 0.05*distribution_width)
-        constraints = "f0.A0 >= 0, f1.Height > 0, {0} < f1.PeakCentre < {1}".format(-0.1*distribution_width,
-                                                                                    0.1*distribution_width)
+            0, np.max(mtd[tmp_ws].getAxis(1).extractValues()), 0.1*distribution_width)
+        constraints = "{0} < f1.PeakCentre < {1}".format(-0.1*distribution_width, 0.1*distribution_width)
         fit_function = [background, function]
         fit_output = Fit(Function=';'.join(fit_function),
                          InputWorkspace=tmp_ws,
