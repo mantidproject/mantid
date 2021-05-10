@@ -24,6 +24,7 @@ class SingleFileFindPeaksIntegrate(systemtesting.MantidSystemTest):
     def runTest(self):
         ws_name = 'SingleFileFindPeaksIntegrate'
         HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0183.nxs",
+                             NormaliseBy='None',
                              OutputWorkspace=ws_name+'_data')
 
         HB3AFindPeaks(InputWorkspace=ws_name+'_data',
@@ -56,6 +57,7 @@ class SingleFilePredictPeaksIntegrate(systemtesting.MantidSystemTest):
     def runTest(self):
         ws_name = 'SingleFilePredictPeaksIntegrate'
         HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0183.nxs",
+                             NormaliseBy='None',
                              OutputWorkspace=ws_name+'_data')
 
         HB3APredictPeaks(InputWorkspace=ws_name+"_data",
@@ -86,6 +88,7 @@ class SingleFilePredictPeaksUBFromFindPeaksIntegrate(systemtesting.MantidSystemT
     def runTest(self):
         ws_name = 'SingleFilePredictPeaksUBFromFindPeaksIntegrate'
         HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0183.nxs",
+                             NormaliseBy='None',
                              OutputWorkspace=ws_name+'_data')
 
         HB3AFindPeaks(InputWorkspace=ws_name+'_data',
@@ -123,6 +126,7 @@ class MultiFileFindPeaksIntegrate(systemtesting.MantidSystemTest):
     def runTest(self):
         ws_name = 'MultiFileFindPeaksIntegrate'
         HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0182.nxs, HB3A_exp0724_scan0183.nxs",
+                             NormaliseBy='None',
                              OutputWorkspace=ws_name+'_data')
 
         HB3AFindPeaks(InputWorkspace=ws_name+'_data',
@@ -178,6 +182,7 @@ class MultiFilePredictPeaksIntegrate(systemtesting.MantidSystemTest):
     def runTest(self):
         ws_name = 'MultiFilePredictPeaksIntegrate'
         HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0182.nxs, HB3A_exp0724_scan0183.nxs",
+                             NormaliseBy='None',
                              OutputWorkspace=ws_name+'_data')
 
         HB3APredictPeaks(InputWorkspace=ws_name+"_data",
@@ -233,6 +238,7 @@ class MultiFilePredictPeaksUBFromFindPeaksIntegrate(systemtesting.MantidSystemTe
     def runTest(self):
         ws_name = 'MultiFilePredictPeaksUBFromFindPeaksIntegrate'
         HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0182.nxs, HB3A_exp0724_scan0183.nxs",
+                             NormaliseBy='None',
                              OutputWorkspace=ws_name+'_data')
 
         HB3AFindPeaks(InputWorkspace=ws_name+'_data',
