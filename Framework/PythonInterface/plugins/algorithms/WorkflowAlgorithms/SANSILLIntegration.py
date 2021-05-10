@@ -375,9 +375,7 @@ class SANSILLIntegration(PythonAlgorithm):
         wavelength = run.getLogData('wavelength').value
         beam_width = run.getLogData('BeamWidthX').value
         delta_wavelength = run.getLogData('selector.wavelength_res').value * 0.01
-        l2 = run.getLogData('L2').value
-        type(DirectBeamResolution(wavelength, delta_wavelength, beam_width, l2))
-        self._deltaQ = DirectBeamResolution(wavelength, delta_wavelength, beam_width, l2)
+        self._deltaQ = DirectBeamResolution(wavelength, delta_wavelength, beam_width)
 
     def _integrate_iqxy(self, ws_in, ws_out):
         """

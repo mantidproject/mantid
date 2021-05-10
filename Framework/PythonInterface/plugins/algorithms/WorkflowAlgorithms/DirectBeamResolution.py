@@ -22,7 +22,7 @@ class DirectBeamResolution:
         else:
             return self._delta_q(q)
 
-    def __init__(self, wavelength, delta_wavelength, beam_width, l2):
+    def __init__(self, wavelength, delta_wavelength, beam_width):
         """
         Sets up the parametrized formula
         Args:
@@ -31,12 +31,9 @@ class DirectBeamResolution:
             beam_width: Fitted horizontal beam width resolution [rad]
             l2: Sample to detector distance [m]
         """
-        k = 2 * math.pi / wavelength
-        self._coeff = k**2
-        self._coeff_r2 = delta_wavelength**2 / l2**2
-        self._beam_width = beam_width**2
-        self._l2 = l2
         self._wavelength = wavelength
+        self._delta_wavelength = delta_wavelength**2
+        self._delta_theta = beam_width**2
 
     def _delta_q(self, q):
         """
@@ -45,7 +42,6 @@ class DirectBeamResolution:
             q: Momentum transfer [inverse Angstrom]
         Returns: Absolute Q resolution [inverse Angstrom]
         """
-        sin = q * self._wavelength / (4 * math.pi)
-        sin_2theta = 2 * sin * math.sqrt(1 - sin ** 2)
-        r = self._l2 * sin_2theta / math.sqrt(1 - sin_2theta ** 2)
-        return math.sqrt(self._coeff * (self._beam_width + self._coeff_r2 * r ** 2))
+        wavelength_coeff = (1/(2.0 * math.sqrt(2.0*math.log(2.0))))**2
+        k = 4.0 * math.pi / self._wavelength
+        return math.sqrt(q**2 * wavelength_coeff * self._delta_wavelength + self._delta_theta * (k**2 - q**2))
