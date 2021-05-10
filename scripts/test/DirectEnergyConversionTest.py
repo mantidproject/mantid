@@ -578,7 +578,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         ei, mon1_peak, mon1_index, tzero = \
             GetEi(InputWorkspace=monitor_ws, Monitor1Spec=1, Monitor2Spec=4,
                   EnergyEstimate=62.2, FixEi=False)
-        self.assertAlmostEqual(ei, 62.1449, 3)
+        self.assertAlmostEqual(ei, 59.15082, 3)
 
         # Provide instrument parameter, necessary to define
         # DirectEnergyConversion class properly
