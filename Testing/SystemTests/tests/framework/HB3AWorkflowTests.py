@@ -15,7 +15,7 @@ from mantid.simpleapi import (HB3AAdjustSampleNorm, HB3AFindPeaks,
                               FakeMDEventData, FindPeaksMD,
                               ShowPossibleCells, FindUBUsingFFT,
                               OptimizeLatticeForCellType,
-                              SelectCellOfType)
+                              SelectCellOfType, HasUB)
 from mantid.kernel import V3D
 from mantid.geometry import OrientedLattice, SpaceGroupFactory
 
@@ -396,3 +396,21 @@ class SatellitePeaksFakeData(systemtesting.MantidSystemTest):
         for n in range(satellites.getNumberPeaks()):
             HKL = satellites.getPeak(n).getHKL()
             self.assertTrue(HKL in sat_hkl, msg=f"Peak {n} with HKL={HKL}")
+
+
+class HB3AFindPeaksTest(systemtesting.MantidSystemTest):
+    # test moved from unittests because of large memory usage
+    def runTest(self):
+        # Test with vanadium normalization to make sure UB matrix and peaks can still be found
+
+        norm = HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0182.nxs",
+                                    VanadiumFile="HB3A_exp0722_scan0220.nxs",
+                                    NormaliseBy='None')
+        peaks = HB3AFindPeaks(InputWorkspace=norm,
+                              CellType="Orthorhombic",
+                              Centering="F",
+                              PeakDistanceThreshold=0.25,
+                              Wavelength=1.008)
+        # Verify UB and peaks were found
+        self.assertTrue(HasUB(peaks))
+        self.assertGreater(peaks.getNumberPeaks(), 0)
