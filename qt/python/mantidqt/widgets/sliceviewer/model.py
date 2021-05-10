@@ -155,6 +155,7 @@ class SliceViewerModel:
                        not provided the full extent of each dimension is used
         """
         workspace = self._get_ws()
+
         params, _, __ = _roi_binmd_parameters(workspace, slicepoint, bin_params, limits)
         params['EnableLogging'] = LOG_GET_WS_MDE_ALGORITHM_CALLS
         return BinMD(InputWorkspace=workspace, OutputWorkspace=self._rebinned_name, **params)
