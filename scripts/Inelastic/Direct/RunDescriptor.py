@@ -1494,27 +1494,26 @@ class RunDescriptor(PropDescriptor):
             ws = mtd[sum_ws_name]
         return ws
 
-    def remove_empty_background(self):
+    def remove_empty_background(self,ebg_ws = None):
         """Remove empty background from the workspace, described by the run descriptor.
 
            The background removed only if the background have not been removed before and
-           the empty background property is defined.
+           the empty background workspace provided as input is defined.
         """
+
+        if ebg_ws is None: # do nothing if bg workspace has not been defined
+            return
         ws = self.get_workspace()
         if ws is None: # undefined run descriptor. Nothing to do
             return
         if ws.run().hasProperty('empty_bg_removed'):  # return if background has been already removed
             return
-        if RunDescriptor._holder.empty_bg_run is None: # do nothing if bg workspace has not been defined
-            return
         RunDescriptor._logger('**** Removing empty instrument background from workspace {0}: '
                               .format(ws.name()),'information')
 
-        empty_bg_property = RunDescriptor._holder.get_prop_class('empty_bg_run')
-        ebg_ws = empty_bg_property.get_workspace()
         copy_created  = False
         # the name of the original background workspace used as source for background
-        bg_name = empty_bg_property._ws_name
+        bg_name = ebg_ws.name()
 
         if ebg_ws.getNumberBins() != ws.getNumberBins() or ebg_ws.getNumberHistograms() != ws.getNumberHistograms():
             # The RD and background workspaces are different if it is just binning or difference is in monitors
@@ -1526,7 +1525,7 @@ class RunDescriptor(PropDescriptor):
                 preserve_events = True
             # background workspace will be modified. Use copy
             copy_created = True
-            ebg_ws = RebinToWorkspace(ebg_ws,ws,PreserveEvents = preserve_events)
+            ebg_ws = RebinToWorkspace(ebg_ws,ws,PreserveEvents = preserve_events,OutputWorkspace='ebg_ws_rebinned')
 
             if ebg_ws.getNumberHistograms() != ws.getNumberHistograms():
                 if RunDescriptor._holder.load_monitors_with_workspace:
@@ -1538,8 +1537,9 @@ class RunDescriptor(PropDescriptor):
                     if n_monitors > 0:
                         ebg_ws = self._add_empty_spectra(ebg_ws,n_monitors,monitors_at_start)
                     else:
-                        ExtractMonitors(InputWorkspace=ebg_ws, DetectorWorkspace='ebg_ws', MonitorWorkspace='ebg_ws_monitors')
-                        ebg_ws = mtd['ebg_ws']
+                        ExtractMonitors(InputWorkspace=ebg_ws, DetectorWorkspace='ebg_ws_rebinned',
+                                        MonitorWorkspace='ebg_ws_rebinned_monitors')
+                        ebg_ws = mtd['ebg_ws_rebinned']
                 else: # for some reasons (nothing to do with monitors) workspaces have different number of spectra. Can not handle this
                     raise RuntimeError(
                         'Number of spectra in background workspace (N={0}) and in Workspace {1} (N={2}) must be the same'.
@@ -1553,9 +1553,9 @@ class RunDescriptor(PropDescriptor):
         ebg_ws  =  ebg_ws*(ws_current/ebg_current)
         Minus(ws,ebg_ws  ,OutputWorkspace = ws.name(),ClearRHSWorkspace=copy_created)
         if copy_created:
-            DeleteWorkspace('ebg_ws')
-            if 'ebg_ws_monitors' in mtd:
-                DeleteWorkspace('ebg_ws_monitors')
+            DeleteWorkspace('ebg_ws_rebinned')
+            if 'ebg_ws_rebinned_monitors' in mtd:
+                DeleteWorkspace('ebg_ws_rebinned_monitors')
 
         AddSampleLog(Workspace=ws,LogName="empty_bg_removed",LogText=str(ebg_ws.name()))
         RunDescriptor._logger('**** Empty instrument background {0} has been removed from workspace {1}'.

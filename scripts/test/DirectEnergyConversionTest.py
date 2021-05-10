@@ -636,8 +636,106 @@ class DirectEnergyConversionTest(unittest.TestCase):
         difr = CompareWorkspaces(resWs,ws)
         self.assertTrue(difr.Result)
 
+    def test_remove_empty_bg_with_monovan(self):
+        # create test workspace
+        wksp = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Event',
+                                     NumBanks=3, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
+                                     XMin=2000, XMax=20000, BinWidth=1)
+        CloneWorkspace(wksp,OutputWorkspace='bg_ws')
+        CloneWorkspace(wksp,OutputWorkspace='bg_ws4wb')
+        CloneWorkspace(wksp,OutputWorkspace='wb_ws')
+        CloneWorkspace(wksp,OutputWorkspace='monovan_ws')
+        AddSampleLog(Workspace=wksp,LogName='gd_prtn_chrg', LogText='10', LogType='Number')
+        AddSampleLog(Workspace='bg_ws',LogName='gd_prtn_chrg', LogText='100', LogType='Number')
+        AddSampleLog(Workspace='bg_ws4wb',LogName='gd_prtn_chrg', LogText='100', LogType='Number')
+        AddSampleLog(Workspace='wb_ws',LogName='gd_prtn_chrg', LogText='10', LogType='Number')
+        AddSampleLog(Workspace='monovan_ws',LogName='gd_prtn_chrg', LogText='10', LogType='Number')
+
+        # Prepare reducer
+        tReducer = DirectEnergyConversion('MAR')
+        tReducer.prop_man.sample_run = wksp
+        tReducer.prop_man.empty_bg_run = 'bg_ws'
+        tReducer.prop_man.wb_run = 'wb_ws'
+        tReducer.prop_man.empty_bg_run_for_wb = 'bg_ws4wb'
+        tReducer.prop_man.monovan_run = 'monovan_ws'
+
+        tReducer.remove_empty_background()
+
+        ws = PropertyManager.sample_run.get_workspace()
+        self.assertTrue(ws.run().hasProperty('empty_bg_removed'))
+
+        resWs = 0.9*wksp
+        difr = CompareWorkspaces(resWs,ws)
+        self.assertTrue(difr.Result)
+
+        ws = PropertyManager.wb_run.get_workspace()
+        self.assertTrue(ws.run().hasProperty('empty_bg_removed'))
+        difr = CompareWorkspaces(resWs,ws)
+        self.assertTrue(difr.Result)
+
+        ws = PropertyManager.monovan_run.get_workspace()
+        self.assertTrue(ws.run().hasProperty('empty_bg_removed'))
+        difr = CompareWorkspaces(resWs,ws)
+        self.assertTrue(difr.Result)
+
+        ws = PropertyManager.wb_for_monovan_run.get_workspace()
+        self.assertTrue(ws.run().hasProperty('empty_bg_removed'))
+        difr = CompareWorkspaces(resWs,ws)
+        self.assertTrue(difr.Result)
+
+    def test_remove_empty_bg_all_different(self):
+        # create test workspace
+        wksp = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Event',
+                                     NumBanks=3, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
+                                     XMin=2000, XMax=20000, BinWidth=1)
+        CloneWorkspace(wksp,OutputWorkspace='bg_ws')
+        AddSampleLog(Workspace=wksp,LogName='gd_prtn_chrg', LogText='10', LogType='Number')
+        AddSampleLog(Workspace='bg_ws',LogName='gd_prtn_chrg', LogText='100', LogType='Number')
+
+        CloneWorkspace(wksp,OutputWorkspace='wb_ws')
+        CloneWorkspace(wksp,OutputWorkspace='monovan_ws')
+        CloneWorkspace(wksp,OutputWorkspace='wb4monovan_ws')
+        CloneWorkspace('bg_ws',OutputWorkspace='bg_ws4wb')
+        CloneWorkspace('bg_ws',OutputWorkspace='bg_for_monovan')
+        CloneWorkspace('bg_ws',OutputWorkspace='bg_for_wb4monovan_ws')
+
+        # Prepare reducer
+        tReducer = DirectEnergyConversion('MAR')
+        tReducer.prop_man.sample_run = wksp
+        tReducer.prop_man.empty_bg_run = 'bg_ws'
+        tReducer.prop_man.wb_run = 'wb_ws'
+        tReducer.prop_man.empty_bg_run_for_wb = 'bg_ws4wb'
+        tReducer.prop_man.monovan_run = 'monovan_ws'
+        tReducer.prop_man.empty_bg_run_for_monovan = 'bg_for_monovan'
+        tReducer.wb_for_monovan_run = 'wb4monovan_ws'
+        tReducer.empty_bg_run_for_monoWb = 'bg_for_wb4monovan_ws'
+
+        tReducer.remove_empty_background()
+
+        ws = PropertyManager.sample_run.get_workspace()
+        self.assertTrue(ws.run().hasProperty('empty_bg_removed'))
+
+        resWs = 0.9*wksp
+        difr = CompareWorkspaces(resWs,ws)
+        self.assertTrue(difr.Result)
+
+        ws = PropertyManager.wb_run.get_workspace()
+        self.assertTrue(ws.run().hasProperty('empty_bg_removed'))
+        difr = CompareWorkspaces(resWs,ws)
+        self.assertTrue(difr.Result)
+
+        ws = PropertyManager.monovan_run.get_workspace()
+        self.assertTrue(ws.run().hasProperty('empty_bg_removed'))
+        difr = CompareWorkspaces(resWs,ws)
+        self.assertTrue(difr.Result)
+
+        ws = PropertyManager.wb_for_monovan_run.get_workspace()
+        self.assertTrue(ws.run().hasProperty('empty_bg_removed'))
+        difr = CompareWorkspaces(resWs,ws)
+        self.assertTrue(difr.Result)
+
 
 if __name__ == "__main__":
-    #test = DirectEnergyConversionTest('test_remove_empty_bg')
+    #test = DirectEnergyConversionTest('test_remove_empty_bg_all_different')
     #test.run()
     unittest.main()

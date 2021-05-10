@@ -594,14 +594,17 @@ class DirectEnergyConversion(object):
             return
 
         # list of RunDescriptors to extract and process workspaces
-        rd_to_process = ['sample_run','wb_run','monovan_run']
+        rd_to_process = ['sample_run','wb_run','monovan_run','wb_for_monovan_run']
+        # list of Background properties
+        bg_to_process = ['empty_bg_run','empty_bg_run_for_wb','empty_bg_run_for_monovan','empty_bg_run_for_monoWb']
 
-        if masking_ws: # Mask empty background workspace
-            empty_bg_ws = PropertyManager.empty_bg_run.get_workspace()
-            MaskDetectors(empty_bg_ws, MaskedWorkspace=masking_ws)
-        for rd_name in rd_to_process:
-            rd = prop_man.get_prop_class(rd_name)
-            rd.remove_empty_background()
+        for rd_name,bg_rd_name in zip(rd_to_process,bg_to_process):
+            rd_prop = prop_man.get_prop_class(rd_name)
+            bg_prop = prop_man.get_prop_class(bg_rd_name)
+            empty_bg_ws = bg_prop.get_workspace()
+            if masking_ws is not None and empty_bg_ws is not None:
+                MaskDetectors(empty_bg_ws, MaskedWorkspace=masking_ws)
+            rd_prop.remove_empty_background(empty_bg_ws)
 
 
 #------------------------------------------------------------------------------------------

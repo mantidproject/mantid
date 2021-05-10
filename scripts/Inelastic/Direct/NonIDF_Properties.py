@@ -71,9 +71,12 @@ class NonIDF_Properties(object):
         super(NonIDF_Properties,self).__setattr__('wb_run',None)
         super(NonIDF_Properties,self).__setattr__('monovan_run',None)
         super(NonIDF_Properties,self).__setattr__('empty_bg_run',None)
+        super(NonIDF_Properties,self).__setattr__('empty_bg_run_for_wb',None)
+        super(NonIDF_Properties,self).__setattr__('empty_bg_run_for_monovan',None)
 
         super(NonIDF_Properties,self).__setattr__('mask_run',None)
         super(NonIDF_Properties,self).__setattr__('wb_for_monovan_run',None)
+        super(NonIDF_Properties,self).__setattr__('empty_bg_run_for_monoWb',None)
         super(NonIDF_Properties,self).__setattr__('second_white',None)
         super(NonIDF_Properties,self).__setattr__('_tmp_run',None)
         super(NonIDF_Properties,self).__setattr__('_cashe_sum_ws',False)
@@ -124,13 +127,20 @@ class NonIDF_Properties(object):
                   used in absolute units normalization.\n None disables absolute units calculations.""")
     empty_bg_run = RunDescriptor("EBG_","""Run number, workspace or symbolic presentation of such run
                   containing results of the empty instrument background measurements""")
+    empty_bg_run_for_wb = RunDescriptor("EBG4WB_","""Run number, workspace or symbolic presentation of such run
+                  containing results of the empty instrument background measurements for Vanadium""")
 
     mask_run    = RunDescriptorDependent(sample_run,"MSK_","""Run number, workspace or symbolic presentation of such run
                   containing results of experiment, used to find masks.\n If not explicitly set, sample_run is used.""")
+    empty_bg_run_for_monovan = RunDescriptorDependent(empty_bg_run,"EBG4Mono_","""Run number, workspace or symbolic presentation of such run
+                  containing results of the empty instrument background measurements for monochromatic vanadium (WB normalisatiion)""")
     wb_for_monovan_run = RunDescriptorDependent(wb_run,"MV_WB_","""Run number, workspace or symbolic presentation of such run
                          containing results of white beam neutrons scattering from vanadium, used to calculate monovanadium
                          integrals for monochromatic vanadium.\n
                          If not explicitly set, white beam for sample run is used.""")
+    empty_bg_run_for_monoWb = RunDescriptorDependent(empty_bg_run_for_wb,"EBG4MonoWB_","""Run number, workspace or symbolic presentation of such run
+                  containing results of the empty instrument background measurements for detector Vanadium for Mono""")
+
     # TODO: do something about it.  Second white is explicitly used in
     # diagnostics but not accessed at all
     second_white  = RunDescriptor("""Second white beam run results currently unused in the workflow

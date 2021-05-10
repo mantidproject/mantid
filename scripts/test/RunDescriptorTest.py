@@ -636,7 +636,8 @@ class RunDescriptorTest(unittest.TestCase):
         propman.sample_run = wksp
         propman.empty_bg_run = 'bg_ws'
 
-        PropertyManager.sample_run.remove_empty_background()
+        bgws = PropertyManager.empty_bg_run.get_workspace()
+        PropertyManager.sample_run.remove_empty_background(bgws)
         ws = PropertyManager.sample_run.get_workspace()
 
         self.assertTrue(ws.run().hasProperty('empty_bg_removed'))
@@ -694,7 +695,8 @@ class RunDescriptorTest(unittest.TestCase):
         propman.sample_run = wksp
         propman.empty_bg_run = bg_ws
 
-        PropertyManager.sample_run.remove_empty_background()
+        bgws = PropertyManager.empty_bg_run.get_workspace()
+        PropertyManager.sample_run.remove_empty_background(bgws)
         resWs = PropertyManager.sample_run.get_workspace()
         self.assertTrue(resWs.run().hasProperty('empty_bg_removed'))
 
@@ -732,7 +734,8 @@ class RunDescriptorTest(unittest.TestCase):
         propman.sample_run = wksp
         propman.empty_bg_run = bg_ws
 
-        PropertyManager.sample_run.remove_empty_background()
+        bgws = PropertyManager.empty_bg_run.get_workspace()
+        PropertyManager.sample_run.remove_empty_background(bgws)
         resWs = PropertyManager.sample_run.get_workspace()
         self.assertTrue(resWs.run().hasProperty('empty_bg_removed'))
 
