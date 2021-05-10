@@ -11,12 +11,14 @@ New and Improved
 General
 #######
 - **Added setting to allow user to select Floating/On Top behaviour for all the windows that are opened by workbench (plots, interfaces, etc.). For more detail see** :ref:`Window Behavior <WorkbenchWindowBehavior>`.
+
 .. figure:: ../../images/OntopfloatingWindows.gif
    :width: 400px
    :align: center
+
 - New command line options ``--version`` will print the version on mantid and exit. ``--error-on-warning`` will convert python warnings into exceptions. This is intended for developers so they can find deprecation warnings more easily.
 - Calling python's `input` now raises an input dialog in the script editor and the iPython shell.
-- Improved the performance of the table workspace display for large datasets
+- Improved the performance of the table workspace display for large datasets.
 - Added a sample material dialog that is accessed via the context menu in the workspace widget.
 - A new empty facility with empty instrument is the default facility now, and  user has to select their choice of facility (including ISIS) and instrument for the first time.
 - **Added memory widget to display total memory usage. This means that your widget layout will be reset when starting workbench v6.1.0 for the first time (see** :ref:`Workbench Main Window <main_window>` **for more details). Previously saved layouts accessible from** ``View > User Layouts`` **may need to be saved again to include the memory bar widget.**
