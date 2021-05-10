@@ -19,22 +19,22 @@ New features
 - New diagnostic plotting tool `Calibration.tofpd.diagnostics.plot_peak_info` which plots fitted peak parameters for instrument banks.
 - New algorithm :ref:`IndirectILLReductionDIFF <algm-IndirectILLReductionDIFF>` to reduce Doppler diffraction data for ILL's IN16B instrument.
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has additional property, ``DeltaRagged``, which allows using :ref:`RebinRagged <algm-RebinRagged>` to bin each spectrum differently.
-- New caching feature is added to :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to speed up calculation using same sample and container.
+- A new caching feature is added to :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to speed up calculation using same sample and container.
 - New property `CleanCache` in algorithm :ref:`SNSPowderReduction <algm-SNSPowderReduction>`.
-- New options, including three "cache directory" and one "clean cache" in the Advanced Setup tab of the SNS Powder Reduction interface.
+- Including three options for "cache directory" and one for "clean cache" in the Advanced Setup tab of the SNS Powder Reduction interface.
 
 Improvements
 ############
 
 - New motor convention for HB2A implemented in :ref:`HB2AReduce <algm-HB2AReduce>`.
-- Improve algorithm :ref:`FitPeaks <algm-FitPeaks>` to enable it to fit with multiple peaks in same spectrum with Back-to-back Exponential function starting from user specified parameters.
+- :ref:`FitPeaks <algm-FitPeaks>` can now fit multiple peaks in same spectrum with Back-to-back Exponential function starting from user specified parameters.
 - :ref:`PDCalibration <algm-PDCalibration>` now initialises A,B and S of BackToBackExponential if corresponding coefficients are in the instrument parameter.xml file.
-- Support fitting diffractometer constants with chi-squared cost function in :ref:`PDCalibration <algm-PDCalibration>`.
-- :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now check if previous container is created using the same method before reusing it.
-- Differential evolution minimizer added to :ref:`AlignComponents <algm-AlignComponents>`.
-- Differential evolution minimizer added to :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>`.
-- Added option to fix banks' vertical coordinate :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>`.
-- Loading a CORELLI tube calibration returns a ``MaskWorkspace``.
+- Support for fitting diffractometer constants with chi-squared cost function in :ref:`PDCalibration <algm-PDCalibration>`.
+- :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now checks if a previous container was created using the same method before reusing it.
+- A differential evolution minimizer was added to :ref:`AlignComponents <algm-AlignComponents>`.
+- A differential evolution minimizer was added to :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>`.
+- Added option to fix banks' vertical coordinate in :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>`.
+- Loading a CORELLI tube calibration also returns a ``MaskWorkspace``.
 - :ref:`AlignComponents <algm-AlignComponents>` has option to output a table listing the changes in position and orientation for each component
 - :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>` now outputs a table listing the changes in position and orientation for each bank
 - :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` now outputs flipping ratios along with polarisation corrections.
@@ -44,7 +44,7 @@ Improvements
 Bugfixes
 ########
 
-- Fix the issue in saving reduced data as GSAS format using :ref:`HB2AReduce <algm-HB2AReduce>`.
+- Fix an issue when saving reduced data as GSAS format using :ref:`HB2AReduce <algm-HB2AReduce>`.
 - Fix the format inconsistency (with data saved from autoreduction workflow) issue for saving GSAS data using :ref:`HB2AReduce <algm-HB2AReduce>` - both are now using :ref:`SaveGSSCW <algm-SaveGSSCW>` for saving GSAS data.
 - Fix out-of-range bug in :ref:`FitPeaks <algm-FitPeaks>` for histogram data.
 - Fix bug in :ref:`FitPeaks <algm-FitPeaks>` not correctly checking right window for an individual peak.
@@ -74,7 +74,7 @@ Bugfixes
 
 - Engineering diffraction interface now converts fitted TOF centre to d-spacing using diffractometer constants post sequential fit (in a matrix workspace).
 - Error on the fitted peak centre converted from TOF to d-spacing will now be correct for non-zero difa in the Engineering diffraction interface.
-- Added checks on existence of non-zero proton charge before attempting to average log values weighted by proton charge in the fitting tab of the engineering diffraction interface.
+- Added checks for the existence of non-zero proton charge before attempting to average log values weighted by proton charge in the fitting tab of the engineering diffraction interface.
 - :ref:`EnggFocus <algm-EnggFocus>` algorithm doesn't attempt to normalise by current if the run has no proton charge and will not throw an error (but will print a warning to the log).
 
 
@@ -139,8 +139,8 @@ Improvements
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` now allows ellipsoidal shapes to be manually defined for the PeakRadius and Background radii options.
 - The :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` input dialog has been reorganised to present the many input properties in a more user-friendly manner.
 - :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>` calculates intensity for satellite peaks with fractional HKL.
-- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` now update attached UB matrix with given lattice constants (optional).
-- :ref:`FilterPeaks <algm-FilterPeaks>` now can select banks in addition to filtering by values.
+- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` can optionally update the attached UB matrix with given lattice constants.
+- :ref:`FilterPeaks <algm-FilterPeaks>` can select banks in addition to filtering by values.
 - :ref:`FindPeaksMD <algm-FindPeaksMD>` has been modified to make use of the multiple goniometers add to :ref:`Run <mantid.api.Run>` and `goniometerIndex` add to MDEvents.
 - :ref:`HB3APredictPeaks <algm-HB3APredictPeaks>` can now predict satellite peaks for DEMAND data.
 - :ref:`MDNorm <algm-MDNorm>` algorithm can now efficiently process background.
