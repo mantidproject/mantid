@@ -153,6 +153,9 @@ PreprocessDetectorsToMD::createTableWorkspace(const API::MatrixWorkspace_const_s
   m_getEFixed = this->getProperty("GetEFixed");
   if (m_getEFixed)
     targWS->addColumn("float", "eFixed");
+  targWS->addColumn("double", "DIFA");
+  targWS->addColumn("double", "DIFC");
+  targWS->addColumn("double", "TZERO");
 
   // will see about that
   // sin^2(Theta)
@@ -208,6 +211,9 @@ void PreprocessDetectorsToMD::processDetectorsPositions(const API::MatrixWorkspa
   auto &TwoTheta = targWS->getColVector<double>("TwoTheta");
   auto &Azimuthal = targWS->getColVector<double>("Azimuthal");
   auto &detDir = targWS->getColVector<Kernel::V3D>("DetDirections");
+  auto &DIFA = targWS->getColVector<double>("DIFA");
+  auto &DIFC = targWS->getColVector<double>("DIFC");
+  auto &TZERO = targWS->getColVector<double>("TZERO");
 
   // Efixed; do we need one and does one exist?
   auto Efi = targWS->getLogs()->getPropertyValueAsType<double>("Ei");
@@ -259,6 +265,13 @@ void PreprocessDetectorsToMD::processDetectorsPositions(const API::MatrixWorkspa
     double azim = spDet.getPhi();
     TwoTheta[liveDetectorsCount] = polar;
     Azimuthal[liveDetectorsCount] = azim;
+
+    std::vector<int> warningDets;
+    auto diffConsts = spectrumInfo.diffractometerConstants(i, warningDets);
+    // map will create an entry with zero value if not present already
+    DIFA[liveDetectorsCount] = diffConsts[Kernel::UnitParams::difa];
+    DIFC[liveDetectorsCount] = diffConsts[Kernel::UnitParams::difc];
+    TZERO[liveDetectorsCount] = diffConsts[Kernel::UnitParams::tzero];
 
     double sPhi = sin(polar);
     double ez = cos(polar);

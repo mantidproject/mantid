@@ -92,11 +92,6 @@ protected:
   API::MatrixWorkspace_sptr convertQuickly(const API::MatrixWorkspace_const_sptr &inputWS, const double &factor,
                                            const double &power);
 
-  /// Internal function to gather detector specific L2, theta and efixed values
-  bool getDetectorValues(const API::SpectrumInfo &spectrumInfo, const Kernel::Unit &outputUnit, int emode,
-                         const API::MatrixWorkspace &ws, const bool signedTheta, int64_t wsIndex, double &efixed,
-                         double &l2, double &twoTheta);
-
   /// Convert the workspace units using TOF as an intermediate step in the
   /// conversion
   virtual API::MatrixWorkspace_sptr convertViaTOF(Kernel::Unit_const_sptr fromUnit,

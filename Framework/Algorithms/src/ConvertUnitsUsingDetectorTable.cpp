@@ -149,13 +149,12 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(Kernel::Unit_
     // Convert the input unit to time-of-flight
     auto checkFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
     auto checkOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
-    double checkdelta = 0;
-    checkFromUnit->toTOF(checkXValues, emptyVec, l1Column[detectorRow], l2Column[detectorRow],
-                         twoThetaColumn[detectorRow], emodeColumn[detectorRow], efixedColumn[detectorRow], checkdelta);
+    UnitParametersMap pmap{{UnitParams::l2, l2Column[detectorRow]},
+                           {UnitParams::twoTheta, twoThetaColumn[detectorRow]},
+                           {UnitParams::efixed, efixedColumn[detectorRow]}};
+    checkFromUnit->toTOF(checkXValues, emptyVec, l1Column[detectorRow], emodeColumn[detectorRow], pmap);
     // Convert from time-of-flight to the desired unit
-    checkOutputUnit->fromTOF(checkXValues, emptyVec, l1Column[detectorRow], l2Column[detectorRow],
-                             twoThetaColumn[detectorRow], emodeColumn[detectorRow], efixedColumn[detectorRow],
-                             checkdelta);
+    checkOutputUnit->fromTOF(checkXValues, emptyVec, l1Column[detectorRow], emodeColumn[detectorRow], pmap);
   }
 
   // create the output workspace
@@ -208,13 +207,13 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(Kernel::Unit_
         auto localFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
         auto localOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
         /// @todo Don't yet consider hold-off (delta)
-        const double delta = 0.0;
         std::vector<double> values(outputWS->x(wsid).begin(), outputWS->x(wsid).end());
 
+        UnitParametersMap pmap{{UnitParams::l2, l2}, {UnitParams::twoTheta, twoTheta}, {UnitParams::efixed, efixed}};
         // Convert the input unit to time-of-flight
-        localFromUnit->toTOF(values, emptyVec, l1, l2, twoTheta, emode, efixed, delta);
+        localFromUnit->toTOF(values, emptyVec, l1, emode, pmap);
         // Convert from time-of-flight to the desired unit
-        localOutputUnit->fromTOF(values, emptyVec, l1, l2, twoTheta, emode, efixed, delta);
+        localOutputUnit->fromTOF(values, emptyVec, l1, emode, pmap);
 
         outputWS->mutableX(wsid) = std::move(values);
 

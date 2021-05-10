@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument_fwd.h"
 
 #include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -108,6 +109,10 @@ public:
   /// Easy access to the efixed value for this run & optional detector
   double getEFixed(const std::shared_ptr<const Geometry::IDetector> &detector =
                        std::shared_ptr<const Geometry::IDetector>{nullptr}) const;
+  double getEFixedGivenEMode(const std::shared_ptr<const Geometry::IDetector> &detector,
+                             const Kernel::DeltaEMode::Type emode) const;
+  double getEFixedForIndirect(const std::shared_ptr<const Geometry::IDetector> &detector,
+                              const std::vector<std::string> &parameterNames) const;
   /// Set the efixed value for a given detector ID
   void setEFixed(const detid_t detID, const double value);
 

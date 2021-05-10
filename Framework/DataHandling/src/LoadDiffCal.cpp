@@ -17,9 +17,9 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Diffraction.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Unit.h"
 
 #include <H5Cpp.h>
 #include <cmath>
@@ -282,14 +282,15 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids, const std
       newrow << offsets[i];
 
     // calculate tof range for information
-    const double tofMinRow = Kernel::Diffraction::calcTofMin(difc[i], difa[i], tzero[i], tofMin);
+    Kernel::Units::dSpacing dspacingUnit;
+    const double tofMinRow = dspacingUnit.calcTofMin(difc[i], difa[i], tzero[i], tofMin);
     std::stringstream msg;
     if (tofMinRow != tofMin) {
       msg << "TofMin shifted from " << tofMin << " to " << tofMinRow << " ";
     }
     newrow << tofMinRow;
     if (useTofMax) {
-      const double tofMaxRow = Kernel::Diffraction::calcTofMax(difc[i], difa[i], tzero[i], tofMax);
+      const double tofMaxRow = dspacingUnit.calcTofMax(difc[i], difa[i], tzero[i], tofMax);
       newrow << tofMaxRow;
 
       if (tofMaxRow != tofMax) {

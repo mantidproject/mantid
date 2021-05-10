@@ -89,31 +89,35 @@ void ConvertSpectrumAxis::exec() {
     std::vector<double> emptyVector;
     const double l1 = spectrumInfo.l1();
     const std::string emodeStr = getProperty("EMode");
-    int emode = 0;
-    if (emodeStr == "Direct")
-      emode = 1;
-    else if (emodeStr == "Indirect")
-      emode = 2;
-    const double delta = 0.0;
-    double efixed;
+    auto emode = Kernel::DeltaEMode::fromString(emodeStr);
+    size_t nfailures = 0;
     for (size_t i = 0; i < nHist; i++) {
       std::vector<double> xval{inputWS->x(i).front(), inputWS->x(i).back()};
-      double twoTheta, l1val, l2;
-      if (!spectrumInfo.isMonitor(i)) {
-        twoTheta = spectrumInfo.twoTheta(i);
-        l2 = spectrumInfo.l2(i);
-        l1val = l1;
-        efixed = getEfixed(spectrumInfo.detector(i), inputWS, emode); // get efixed
-      } else {
-        twoTheta = 0.0;
-        l2 = l1;
-        l1val = 0.0;
-        efixed = DBL_MIN;
+      UnitParametersMap pmap{};
+
+      double efixedProp = getProperty("Efixed");
+      if (efixedProp != EMPTY_DBL()) {
+        pmap[UnitParams::efixed] = efixedProp;
+        g_log.debug() << "Detector: " << spectrumInfo.detector(i).getID() << " Efixed: " << efixedProp << "\n";
       }
-      fromUnit->toTOF(xval, emptyVector, l1val, l2, twoTheta, emode, efixed, delta);
-      toUnit->fromTOF(xval, emptyVector, l1val, l2, twoTheta, emode, efixed, delta);
-      double value = (xval.front() + xval.back()) / 2;
+
+      spectrumInfo.getDetectorValues(*fromUnit, *toUnit, emode, false, i, pmap);
+      double value = 0.;
+      try {
+        fromUnit->toTOF(xval, emptyVector, l1, emode, pmap);
+        toUnit->fromTOF(xval, emptyVector, l1, emode, pmap);
+        value = (xval.front() + xval.back()) / 2;
+      } catch (std::runtime_error &) {
+        nfailures++;
+        g_log.warning() << "Unable to calculate new spectrum axis value for "
+                           "workspace index "
+                        << i;
+        value = inputWS->getAxis(1)->getValue(i);
+      }
       indexMap.emplace(value, i);
+    }
+    if (nfailures == nHist) {
+      throw std::runtime_error("Unable to convert spectrum axis values on all spectra");
     }
   } else {
     // Set up binding to memeber funtion. Avoids condition as part of loop over
