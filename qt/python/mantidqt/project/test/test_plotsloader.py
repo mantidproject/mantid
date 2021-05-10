@@ -6,19 +6,20 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-import matplotlib
-matplotlib.use('AGG')
-
 import unittest  # noqa
+from unittest import mock  # noqa
+
+import matplotlib
 import matplotlib.pyplot as plt  # noqa
 import matplotlib.figure  # noqa
 import matplotlib.text  # noqa
+from matplotlib.ticker import LogFormatterSciNotation, ScalarFormatter
+matplotlib.use('AGG')
 
 from mantidqt.project.plotsloader import PlotsLoader  # noqa
 import mantid.plots.axesfunctions  # noqa
 from mantid.api import AnalysisDataService as ADS  # noqa
 from mantid.dataobjects import Workspace2D  # noqa
-from unittest import mock  # noqa
 
 
 def pass_func():
@@ -59,7 +60,7 @@ class PlotsLoaderTest(unittest.TestCase):
                                                                 u'position': u'Left',
                                                                 u'visible': True},
                                            u'yAxisScale': u'linear', u'yLim': (0.0, 1.0), u'showMinorGrid': False,
-                                           u"xAutoScale":False, u"yAutoScale":False},
+                                           u"xAutoScale": False, u"yAutoScale": False},
                            u'textFromArtists': {}, u'texts': [], u'title': u'', u'xAxisTitle': u'', u'yAxisTitle': u''}
 
     def test_load_plots_does_the_right_calls(self):
@@ -124,14 +125,14 @@ class PlotsLoaderTest(unittest.TestCase):
 
     def test_update_properties_limits_autoscale(self):
         dic = self.dictionary[u"properties"]
-        dic.update({"xAutoScale":True, "yAutoScale":True})
+        dic.update({"xAutoScale": True, "yAutoScale": True})
         mock_ax = mock.Mock()
 
         plots_loader = self.plots_loader
         with mock.patch.object(plots_loader, "update_axis", mock.Mock()):
             plots_loader.update_properties(mock_ax, dic)
 
-        mock_ax.autoscale.assert_has_calls([mock.call(True, axis="x"),mock.call(True, axis="y")])
+        mock_ax.autoscale.assert_has_calls([mock.call(True, axis="x"), mock.call(True, axis="y")])
         mock_ax.set_xlim.assert_not_called()
         mock_ax.set_xlim.assert_not_called()
 
@@ -153,3 +154,15 @@ class PlotsLoaderTest(unittest.TestCase):
     def test_load_plot_from_dict(self, pass_func):
         # The fact this runs is the test
         self.plots_loader.load_plots([self.dictionary])
+
+    def test_update_axis_ticks_format(self):
+        fig, ax = plt.subplots()
+        x_axis = ax.xaxis
+        x_axis.set_major_formatter(LogFormatterSciNotation())
+        PlotsLoader.update_axis_ticks(x_axis, self.dictionary['properties']['xAxisProperties'])
+
+        self.assertIsInstance(x_axis.get_major_formatter(), ScalarFormatter)
+
+
+if __name__ == "__main__":
+    unittest.main()
