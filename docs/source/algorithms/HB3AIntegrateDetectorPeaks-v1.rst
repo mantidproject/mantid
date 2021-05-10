@@ -35,11 +35,7 @@ Usage
 
 **Example - DEMAND single detector peak integration**
 
-.. plot::
-   :include-source:
-
-   from mantid.simpleapi import *
-   import matplotlib.pyplot as plt
+.. testcode::
 
    data = HB3AAdjustSampleNorm(Filename='HB3A_data.nxs', OutputType='Detector')
    peaks = HB3AIntegrateDetectorPeaks(data,
@@ -47,6 +43,17 @@ Usage
                                       OutputFitResults=True,
                                       LowerLeft=[200, 200],
                                       UpperRight=[312, 312])
+   print('HKL={h:.0f}{k:.0f}{l:.0f} λ={Wavelength}Å Intensity={Intens:.3f}'.format(**peaks.row(0)))
+
+.. testoutput::
+
+   HKL=006 λ=1.008Å Intensity=211.753
+
+To check the ROI and peak fitting you can plot the results
+
+.. code-block:: python
+
+   import matplotlib.pyplot as plt
    fig = plt.figure(figsize=(9.6, 4.8))
    ax1 = fig.add_subplot(121, projection='mantid')
    ax2 = fig.add_subplot(122, projection='mantid')
@@ -58,9 +65,9 @@ Usage
    ax2.legend()
    ax2.set_title("Fitted integrated peak")
    fig.tight_layout()
+   fig.show()
 
-   # uncomment the following line to show the plot window
-   #fig.show()
+.. figure:: /images/HB3AIntegrateDetectorPeaks.png
 
 **Example - DEMAND multiple files, indexing with modulation vector**
 
