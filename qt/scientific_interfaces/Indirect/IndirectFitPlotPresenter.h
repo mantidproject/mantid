@@ -37,6 +37,8 @@ public:
   void setFitSingleSpectrumIsFitting(bool fitting);
   void setFitSingleSpectrumEnabled(bool enable);
 
+  void setXBounds(std::pair<double, double> const &bounds);
+
 public slots:
   void setStartX(double /*startX*/);
   void setEndX(double /*endX*/);
@@ -56,6 +58,7 @@ public slots:
   void disablePlotGuessInSeparateWindow();
   void disableSpectrumPlotSelection();
   void handlePlotSpectrumChanged(WorkspaceIndex spectrum);
+  void setActiveSpectrum(WorkspaceIndex spectrum);
 
 signals:
   void selectedFitDataChanged(TableDatasetIndex /*_t1*/);
@@ -81,7 +84,6 @@ private slots:
   void plotCurrentPreview();
   void emitFitSingleSpectrum();
   void emitFWHMChanged(double minimum, double maximum);
-  void setActiveSpectrum(WorkspaceIndex spectrum);
   void handleSelectedFitDataChanged(TableDatasetIndex index);
 
 private:

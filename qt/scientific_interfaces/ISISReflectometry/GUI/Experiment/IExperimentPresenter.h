@@ -27,7 +27,6 @@ public:
   virtual void notifyAutoreductionPaused() = 0;
   virtual void notifyAutoreductionResumed() = 0;
   virtual void notifyInstrumentChanged(std::string const &instrumentName) = 0;
-  virtual void notifyAllWorkspacesDeleted() = 0;
   virtual void restoreDefaults() = 0;
 };
 } // namespace ISISReflectometry

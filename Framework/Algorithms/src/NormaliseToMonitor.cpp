@@ -64,7 +64,8 @@ bool MonIDPropChanger::isEnabled(const IPropertyManager *algo) const {
 
 // method checks if other properties have changed and these changes affected
 // MonID property
-bool MonIDPropChanger::isConditionChanged(const IPropertyManager *algo) const {
+bool MonIDPropChanger::isConditionChanged(const IPropertyManager *algo, const std::string &changedPropName) const {
+  UNUSED_ARG(changedPropName);
   // is enabled is based on other properties:
   if (!is_enabled)
     return false;

@@ -29,6 +29,7 @@ class DrillPresenterTest(unittest.TestCase):
         self.addCleanup(patch.stop)
 
         self.view = mock.Mock()
+        self.view.windowTitle.return_value = ""
         self.presenter = DrillPresenter(self.view)
         self.model = self.mModel.return_value
 
@@ -38,9 +39,41 @@ class DrillPresenterTest(unittest.TestCase):
         self.presenter.onDataChanged(1, 2)
         self.view.getCellContents.assert_called_once_with(1, 2)
         self.view.unsetRowBackground.assert_not_called()
-        self.view.setWindowModified.assert_called_once_with(True)
+        self.view.setWindowModified.assert_called()
         self.presenter.onDataChanged(2, 2)
         self.view.unsetRowBackground.assert_called_once_with(2)
+
+    def test_onAutomaticFilling(self):
+        # no selection
+        self.view.increment.value.return_value = 1
+        self.view.table.getSelectedCells.return_value = []
+        self.view.table.getRowsFromSelectedCells.return_value = []
+        self.presenter.onAutomaticFilling()
+        self.view.table.setCellContents.assert_not_called()
+        # single row
+        self.view.increment.value.return_value = 1
+        self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1)]
+        self.view.table.getRowsFromSelectedCells.return_value = [0]
+        self.view.table.getCellContents.return_value = "10,100,1000"
+        self.presenter.onAutomaticFilling()
+        self.view.table.setCellContents.assert_called_with(0, 1, "11,101,1001")
+        self.view.table.setCellContents.reset_mock()
+        self.view.table.getCellContents.return_value = "test1,test,test_10"
+        self.presenter.onAutomaticFilling()
+        self.view.table.setCellContents.assert_called_with(0, 1,
+                                                           "test2,test,test_11")
+        self.view.table.setCellContents.reset_mock()
+        # multiple columns
+        self.view.increment.value.return_value = 7
+        self.view.table.getSelectedCells.return_value = [(0, 0), (1, 0),
+                                                         (0, 1), (1, 1)]
+        self.view.table.getRowsFromSelectedCells.return_value = [0, 1]
+        self.view.table.getCellContents.return_value = "10+15,100:200,1:10:2"
+        self.presenter.onAutomaticFilling()
+        calls = [mock.call(1, 0, "17+22,207:307,17:26:2"),
+                 mock.call(1, 1, "17+22,207:307,17:26:2")]
+        self.view.table.setCellContents.assert_has_calls(calls)
+
 
     def test_onParamOk(self):
         self.view.columns = ["test1", "test2"]
@@ -142,14 +175,14 @@ class DrillPresenterTest(unittest.TestCase):
         mDialog.getOpenFileName.return_value = ("test", "test")
         self.presenter.onLoad()
         self.model.setIOFile.assert_called_once_with("test")
-        self.view.setWindowModified.assert_called_once_with(False)
+        self.view.setWindowModified.assert_called()
 
     def test_onSave(self):
         self.presenter.onSaveAs = mock.Mock()
         self.model.getIOFile.return_value = 1
         self.presenter.onSave()
         self.model.exportRundexData.assert_called_once()
-        self.view.setWindowModified.assert_called_once_with(False)
+        self.view.setWindowModified.assert_called()
         self.presenter.onSaveAs.assert_not_called()
         self.model.getIOFile.return_value = None
         self.presenter.onSave()
@@ -161,7 +194,7 @@ class DrillPresenterTest(unittest.TestCase):
         self.presenter.onSaveAs()
         self.model.setIOFile.assert_called_once_with("test")
         self.model.exportRundexData.assert_called_once()
-        self.view.setWindowModified.assert_called_once_with(False)
+        self.view.setWindowModified.assert_called()
 
     def test_settingsWindow(self):
         self.model.getSettingsTypes.return_value = ({}, {}, {})

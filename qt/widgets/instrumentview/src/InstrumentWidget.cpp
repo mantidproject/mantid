@@ -830,6 +830,10 @@ void InstrumentWidget::pickBackgroundColor() {
   setBackgroundColor(color);
 }
 
+void InstrumentWidget::freezeRotation(bool freeze) {
+  getSurface()->freezeRotation(freeze);
+}
+
 /**
  * Saves the current image buffer as a png file.
  * @param filename Optional filename. Empty string raises a save dialog
@@ -1605,6 +1609,10 @@ std::shared_ptr<UnwrappedSurface> InstrumentWidget::getUnwrappedSurface() {
 
 int InstrumentWidget::getCurrentTab() const {
   return mControlsTab->currentIndex();
+}
+
+bool InstrumentWidget::isCurrentTab(InstrumentWidgetTab* tab) const {
+  return this->getCurrentTab() == mControlsTab->indexOf(tab);
 }
 
 /**

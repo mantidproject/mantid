@@ -81,11 +81,23 @@ def initialize():
 
     :return: A reference to the existing application instance
     """
-    if sys.version_info.major >= 3 and sys.platform == 'win32':
+    if sys.platform == 'win32':
         # Tornado requires WindowsSelectorEventLoop
         # https://www.tornadoweb.org/en/stable/#installation
         import asyncio
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    if sys.platform == 'darwin':
+        # Force layer-backing on macOS >= Big Sur (11)
+        # or the application hangs
+        # A fix inside Qt is yet to be released:
+        # https://codereview.qt-project.org/gitweb?p=qt/qtbase.git;a=commitdiff;h=c5d904639dbd690a36306e2b455610029704d821
+        # A complication with Big Sur numbering means we check for 10.16 and 11:
+        #   https://eclecticlight.co/2020/08/13/macos-version-numbering-isnt-so-simple/
+        from distutils.version import LooseVersion
+        import platform
+        mac_vers = LooseVersion(platform.mac_ver()[0])
+        if mac_vers >= '11' or mac_vers == '10.16':
+            os.environ['QT_MAC_WANTS_LAYER'] = '1'
 
     app = qapplication()
 

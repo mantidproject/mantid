@@ -26,7 +26,6 @@ public:
 
   void addWorkspace(const std::string &workspaceName) override;
   void removeWorkspace(TableDatasetIndex index) override;
-  void setFitType(const std::string &fitType);
 
   bool zeroWidths(TableDatasetIndex dataIndex) const;
   bool zeroEISF(TableDatasetIndex dataIndex) const;

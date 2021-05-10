@@ -126,6 +126,9 @@ public:
   /// Change the interaction mode
   virtual void setInteractionMode(int mode);
 
+  /// Save masks to a table workspace
+  virtual void saveShapesToTableWorkspace();
+
   //-----------------------------------
 
   Mantid::Kernel::V3D getDetectorPos(int x, int y) const;
@@ -148,6 +151,7 @@ public:
   virtual std::string saveToProject() const;
 
   void setCurrentTab(QString currentTab) { m_currentTab = currentTab; }
+  void freezeRotation(bool freeze);
 
   //-----------------------------------
   //    Mask methods
@@ -234,8 +238,7 @@ public:
   void changeBorderColor(const QColor &color) {
     m_maskShapes.changeBorderColor(color);
   }
-  /// Save masks to a table workspace
-  void saveShapesToTableWorkspace();
+
   /// Load masks from a table workspace
   void loadShapesFromTableWorkspace(
       const Mantid::API::ITableWorkspace_const_sptr &ws);

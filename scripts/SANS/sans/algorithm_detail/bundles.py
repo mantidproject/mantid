@@ -17,6 +17,11 @@ from collections import namedtuple
 # 6. A handle to the scatter monitor workspace (sample or can)
 # 7. A handle to the transmission workspace (sample or can)
 # 8. A handle to the direct workspace (sample or can)
+from typing import List
+
+from mantid.py36compat import dataclass
+from sans.state.StateObjects.wavelength_interval import WavRange
+
 ReductionSettingBundle = namedtuple('ReductionSettingBundle', 'state, data_type, reduction_mode, '
                                                               'output_parts, '
                                                               'scatter_workspace, '
@@ -43,6 +48,7 @@ OutputBundle = namedtuple('OutputBundle', 'state, data_type, reduction_mode, out
 # 3. The reduction mode, ie HAB, LAB, All or Merged.
 # 4. Handle to the partial output workspace which contains the counts.
 # 5. Handle to the partial output workspace which contains the normalization.
+
 OutputPartsBundle = namedtuple('OutputPartsBundle', 'state, data_type, reduction_mode, '
                                                     'output_workspace_count, output_workspace_norm')
 
@@ -56,3 +62,14 @@ EventSliceSettingBundle = namedtuple('EventSliceSettingBundle', 'state, data_typ
                                                                 'scatter_monitor_workspace, '
                                                                 'direct_workspace, '
                                                                 'transmission_workspace')
+
+
+@dataclass
+class ReducedSlice:
+    wav_range: WavRange
+    output_bundle: OutputBundle
+    parts_bundle: OutputPartsBundle
+    transmission_bundle: OutputTransmissionBundle
+
+
+CompletedSlices = List[ReducedSlice]

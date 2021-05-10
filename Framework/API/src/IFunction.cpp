@@ -30,6 +30,7 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/UsageService.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -60,13 +61,30 @@ struct TieNode {
     return std::find(other.right.begin(), other.right.end(), left) != other.right.end();
   }
 };
+const std::vector<std::string> EXCLUDEUSAGE = {"CompositeFunction"};
 } // namespace
+/**
+ * Constructor
+ */
+IFunction ::IFunction() : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0) {}
 
 /**
  * Destructor
  */
 IFunction::~IFunction() { m_attrs.clear(); }
 
+/**
+Registers the usage of the function with the UsageService
+ */
+void IFunction::registerFunctionUsage(bool internal) {
+  if (!Kernel::UsageService::Instance().isEnabled()) {
+    return;
+  }
+  if (std::find(EXCLUDEUSAGE.cbegin(), EXCLUDEUSAGE.cend(), name()) == EXCLUDEUSAGE.cend() && !m_isRegistered) {
+    m_isRegistered = true;
+    Kernel::UsageService::Instance().registerFeatureUsage(Kernel::FeatureType::Function, name(), internal);
+  }
+}
 /**
  * Virtual copy constructor
  */

@@ -115,7 +115,7 @@ int Cylinder::setSurface(const std::string &Pstr)
   m_centre = Kernel::V3D(cent[0], cent[1], cent[2]);
   m_normal = Kernel::V3D(norm[0], norm[1], norm[2]);
   m_normVec = ptype + 1;
-  m_radius = R;
+  setRadiusInternal(R);
   setBaseEqn();
   return 0;
 }
@@ -136,10 +136,9 @@ int Cylinder::side(const Kernel::V3D &Pt) const
       double x = Pt[m_normVec % 3] - m_centre[m_normVec % 3];
       x *= x;
       double y = Pt[(m_normVec + 1) % 3] - m_centre[(m_normVec + 1) % 3];
-      ;
       y *= y;
-      const double displace = x + y - m_radius * m_radius;
-      if (fabs(displace / m_radius) < Tolerance)
+      double displace = x + y - m_radius * m_radius;
+      if (fabs(displace * m_oneoverradius) < Tolerance)
         return 0;
       return (displace > 0.0) ? 1 : -1;
     } else {
@@ -392,7 +391,7 @@ void Cylinder::getBoundingBox(double &xmax, double &ymax, double &zmax, double &
   }
   if (!listOfPoints.empty()) {
     xmin = ymin = zmin = std::numeric_limits<double>::max();
-    xmax = ymax = zmax = std::numeric_limits<double>::min();
+    xmax = ymax = zmax = std::numeric_limits<double>::lowest();
     for (std::vector<V3D>::const_iterator it = listOfPoints.begin(); it != listOfPoints.end(); ++it) {
       //			std::cout<<(*it)<<'\n';
       if ((*it)[0] < xmin)

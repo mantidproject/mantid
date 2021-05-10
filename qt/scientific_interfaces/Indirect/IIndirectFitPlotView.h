@@ -67,6 +67,7 @@ public:
   virtual void setFitRange(double minimum, double maximum) = 0;
   virtual void setFitRangeMinimum(double minimum) = 0;
   virtual void setFitRangeMaximum(double maximum) = 0;
+  virtual void setFitRangeBounds(std::pair<double, double> const &bounds) = 0;
 
   virtual void setBackgroundRangeVisible(bool visible) = 0;
   virtual void setHWHMRangeVisible(bool visible) = 0;

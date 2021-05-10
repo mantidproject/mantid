@@ -64,6 +64,7 @@ private:
                          const std::string &flavour, const std::vector<const std::string *> &keys);
   void setMaterial(ReadMaterial::MaterialParameters &materialParams, const Kernel::PropertyManager &materialArgs);
   Kernel::PropertyManager materialSettingsEnsureLegacyCompatibility(const Kernel::PropertyManager &materialArgs);
+  bool isDictionaryPopulated(const Kernel::PropertyManager_const_sptr &dict) const;
 };
 
 } // namespace DataHandling

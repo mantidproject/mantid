@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -74,6 +75,7 @@ using getErrorType2 = double (IFunction::*)(const std::string &) const;
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getErrorType2_Overloads, getError, 1, 1)
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(tie_Overloads, tie, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(addTies_Overloads, addTies, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(addConstraints_Overloads, addConstraints, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fixParameter_Overloads, fixParameter, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fix_Overloads, fix, 1, 2)
@@ -83,6 +85,13 @@ using removeTieByName = void (IFunction::*)(const std::string &);
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
+
+void setMatrixWorkspace(IFunction &self, const boost::python::object &workspace, int wi, float startX, float endX) {
+  Mantid::API::MatrixWorkspace_sptr matWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      Mantid::PythonInterface::ExtractSharedPtr<Mantid::API::Workspace>(workspace)());
+  self.setMatrixWorkspace(matWS, wi, startX, endX);
+}
+
 } // namespace
 
 void export_IFunction() {
@@ -197,6 +206,9 @@ void export_IFunction() {
            tie_Overloads((arg("self"), arg("name"), arg("expr"), arg("isDefault")),
                          "Tie a named parameter to an expression"))
 
+      .def("addTies", &IFunction::addTies,
+           addTies_Overloads((arg("self"), arg("ties"), arg("isDefault")), "Add several ties to an IFunction."))
+
       .def("removeTie", (bool (IFunction::*)(size_t)) & IFunction::removeTie, (arg("self"), arg("i")),
            "Remove the tie of the ith parameter")
 
@@ -229,6 +241,10 @@ void export_IFunction() {
 
       .def("nDomains", &IFunction::getNumberDomains, arg("self"), "Get the number of domains.")
 
+      .def("setMatrixWorkspace", &setMatrixWorkspace,
+           (arg("self"), arg("workspace"), arg("wi"), arg("startX"), arg("endX")),
+           "Set matrix workspace to parse Parameters.xml")
+
       //-- Deprecated functions that have the wrong names --
       .def("categories", &getCategories, arg("self"), "Returns a list of the categories for an algorithm")
       .def("numParams", &IFunction::nParams, arg("self"), "Return the number of parameters")
@@ -239,6 +255,8 @@ void export_IFunction() {
            "Return whether the ith parameter needs to be explicitely set")
       .def("getParamValue", (double (IFunction::*)(std::size_t) const) & IFunction::getParameter,
            (arg("self"), arg("i")), "Get the value of the ith parameter")
+      .def("getParameterIndex", &IFunction::parameterIndex, (arg("self"), arg("name")),
+           "Returns the index of the provided parameter.")
 
       //-- Python special methods --
       .def("__repr__", &IFunction::asString, arg("self"), "Return a string representation of the function");

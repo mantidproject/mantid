@@ -10,7 +10,7 @@ from Muon.GUI.Common.muon_base import MuonBase
 
 class MuonBasePair(MuonBase):
     def __init__(self, pair_name, periods=[1]):
-        super(MuonBasePair,self).__init__(pair_name, periods)
+        super(MuonBasePair, self).__init__(pair_name, periods)
 
     def get_asymmetry_workspace_for_run(self, run, rebin):
         # return the first element as it will always be a single value list

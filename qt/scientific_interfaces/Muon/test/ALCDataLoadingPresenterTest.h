@@ -204,7 +204,7 @@ public:
 
     EXPECT_CALL(*m_view, getFirstFile()).WillRepeatedly(Return("MUSR00015189.nxs"));
     // Test logs
-    EXPECT_CALL(*m_view, setAvailableLogs(AllOf(Property(&std::vector<std::string>::size, 39), Contains("run_number"),
+    EXPECT_CALL(*m_view, setAvailableLogs(AllOf(Property(&std::vector<std::string>::size, 46), Contains("run_number"),
                                                 Contains("sample_magn_field"), Contains("Field_Danfysik"))))
         .Times(1);
     // Test periods
@@ -223,7 +223,7 @@ public:
 
     EXPECT_CALL(*m_view, getFirstFile()).WillRepeatedly(Return("MUSR00015189.nxs"));
     // Test logs
-    EXPECT_CALL(*m_view, setAvailableLogs(AllOf(Property(&std::vector<std::string>::size, 39), Contains("run_number"),
+    EXPECT_CALL(*m_view, setAvailableLogs(AllOf(Property(&std::vector<std::string>::size, 46), Contains("run_number"),
                                                 Contains("sample_magn_field"), Contains("Field_Danfysik"))))
         .Times(1);
     // Test periods
@@ -473,5 +473,26 @@ public:
     EXPECT_CALL(*m_view, setPath(std::string{})).Times(1);
 
     m_view->emitRunsEditingSignal();
+  }
+
+  void test_get_path_from_files_multiple_directories() {
+    std::vector<std::string> files = {"path1/file.nxs", "path2/file.nxs"};
+    ON_CALL(*m_view, getFiles()).WillByDefault(Return(files));
+    EXPECT_CALL(*m_view, setPath(std::string{"Multiple Directories"})).Times(1);
+    m_view->foundRuns();
+  }
+
+  void test_get_path_from_files_single_directory() {
+    std::vector<std::string> files = {"path/file1.nxs", "path/file2.nxs"};
+    ON_CALL(*m_view, getFiles()).WillByDefault(Return(files));
+    EXPECT_CALL(*m_view, setPath(std::string{"path"})).Times(1);
+    m_view->foundRuns();
+  }
+
+  void test_get_path_from_empty_files() {
+    std::vector<std::string> files = {};
+    ON_CALL(*m_view, getFiles()).WillByDefault(Return(files));
+    EXPECT_CALL(*m_view, setPath(std::string{""})).Times(1);
+    m_view->foundRuns();
   }
 };

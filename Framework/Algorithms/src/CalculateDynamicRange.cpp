@@ -71,7 +71,7 @@ void CalculateDynamicRange::init() {
 void CalculateDynamicRange::calculateQMinMax(const MatrixWorkspace_sptr &workspace, const std::vector<size_t> &indices,
                                              const std::string &compName = "") {
   const auto &spectrumInfo = workspace->spectrumInfo();
-  double min = std::numeric_limits<double>::max(), max = std::numeric_limits<double>::min();
+  double min = std::numeric_limits<double>::max(), max = std::numeric_limits<double>::lowest();
   // PARALLEL_FOR_NO_WSP_CHECK does not work with range-based for so NOLINT this
   // block
   PARALLEL_FOR_NO_WSP_CHECK()

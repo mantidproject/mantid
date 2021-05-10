@@ -51,7 +51,7 @@ public:
   void setFunction(const QString &funStr);
   int getNumberOfDatasets() const;
   QString getSingleFunctionStr() const;
-  MultiDomainFunction_sptr getFittingFunction() const;
+  MultiDomainFunction_sptr getFitFunction() const;
   std::string minimizer(bool withProperties = false) const;
   int maxIterations() const;
   int getPeakRadius() const;
@@ -64,8 +64,9 @@ public:
   void updateParameters(const IFunction &fun);
   void updateMultiDatasetParameters(const IFunction &fun);
   void updateMultiDatasetParameters(const ITableWorkspace &params);
-  void updateFitStatusData(const std::vector<std::string> &status, const std::vector<double> &chiSquared);
   void updateFitStatus(const FitDomainIndex index);
+  void updateFitStatusData(const std::vector<std::string> &status, const std::vector<double> &chiSquared);
+  FittingMode getFittingMode() const;
   QString selectedFitType() const;
   void setConvolveMembers(bool convolveEnabled);
   void setOutputCompositeMembers(bool outputEnabled);

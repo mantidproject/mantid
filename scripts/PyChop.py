@@ -28,13 +28,6 @@ else:
     else:
         parent, flags = None, None
 
-app, within_mantid = get_qapplication()
-if 'workbench' in sys.modules:
-    from workbench.config import get_window_config
-
-    parent, flags = get_window_config()
-else:
-    parent, flags = None, None
 window = PyChopGui.PyChopGui(parent, flags)
 window.show()
 if not within_mantid:

@@ -36,12 +36,17 @@ private:
   Kernel::V3D m_centre;  ///< Kernel::V3D for centre
   Kernel::V3D m_normal;  ///< Direction of centre line
   std::size_t m_normVec; ///< Normal vector is x,y or z :: (1-3) (0 if general)
-  double m_radius;       ///< Radius of cylinder
+  double m_oneoverradius;
+  double m_radius; ///< Radius of cylinder
 
   void rotate(const Kernel::Matrix<double> &) override;
   void displace(const Kernel::V3D &) override;
   void setNormVec(); ///< check to obtain orientation
   Cylinder *doClone() const override;
+  void setRadiusInternal(const double &r) {
+    m_radius = r;
+    m_oneoverradius = 1 / m_radius;
+  };
 
 protected:
   Cylinder(const Cylinder &) = default;
@@ -71,7 +76,7 @@ public:
   double getRadius() const { return m_radius; }      ///< Get Radius
   /// Set Radius
   void setRadius(const double &r) {
-    m_radius = r;
+    setRadiusInternal(r);
     setBaseEqn();
   }
   void setBaseEqn() override;

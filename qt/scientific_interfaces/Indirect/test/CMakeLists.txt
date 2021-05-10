@@ -4,16 +4,21 @@ set(
   ConvFitDataPresenterTest.h
   ConvFitModelTest.h
   ConvFunctionModelTest.h
+  FqFitDataPresenterTest.h
+  FqFitModelTest.h
+  IDAFunctionParameterEstimationTest.h
   IndirectDataValidationHelperTest.h
   IndirectDataTablePresenterTest.h
   IndirectFitAnalysisTabTest.h
   IndirectFitDataPresenterTest.h
   IndirectFitDataTest.h
-  IndirectFitDataModelTest.h
+  IndirectFitDataTableModelTest.h
+  IndirectFitOutputModelTest.h
   IndirectFitOutputOptionsModelTest.h
   IndirectFitOutputOptionsPresenterTest.h
   IndirectFitPlotModelTest.h
   IndirectFitPlotPresenterTest.h
+  IndirectFitPropertyBrowserTest.h
   IndirectFittingModelTest.h
   IndirectPlotOptionsModelTest.h
   IndirectPlotOptionsPresenterTest.h
@@ -22,9 +27,6 @@ set(
   IndirectSettingsPresenterTest.h
   IndirectSpectrumSelectionPresenterTest.h
   IqtFitModelTest.h
-  FqFitDataPresenterTest.h
-  FqFitModelTest.h
-  IDAFunctionParameterEstimationTest.h
 )
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE

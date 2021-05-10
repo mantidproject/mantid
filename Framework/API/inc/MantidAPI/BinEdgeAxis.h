@@ -28,6 +28,7 @@ public:
   std::vector<double> createBinBoundaries() const override;
   void setValue(const std::size_t &index, const double &value) override;
   size_t indexOfValue(const double value) const override;
+  std::string label(const std::size_t &index) const override;
 };
 
 } // namespace API

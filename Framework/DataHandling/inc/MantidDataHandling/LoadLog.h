@@ -96,9 +96,13 @@ private:
   /// Checks if the file is an ASCII file
   bool isAscii(const std::string &filename);
 
-  /// Check if first 19 characters of a string is data-time string according to
+  /// Check if first 19 characters of a string is date-time string according to
   /// yyyy-mm-ddThh:mm:ss
   bool isDateTimeString(const std::string &str) const;
+
+  /// Check whether the first 24 characters of a string are consistent with
+  /// the date-time format used in older unsupported log files.
+  bool isOldDateTimeFormat(std::ifstream &logFileStream) const;
 
   /// Checks if a log file name was provided (e.g. through setPropertyValue). If
   /// not it creates one based on provided path.

@@ -21,6 +21,7 @@ New features
 - New diagnostic plotting tool `Calibration.tofpd.diagnostics.plot_peakd` which plots the d-spacing relative strain of peak positions.
 - New diagnostic plotting tool `Calibration.tofpd.diagnostics.plot_corr` which plots the Pearson correlation coefficient for time-of-flight and d-spacing for each detector.
 - New diagnostic plotting tool `Calibration.tofpd.diagnostics.plot_peak_info` which plots fitted peak parameters for instrument banks.
+- New algorithm :ref:`IndirectILLReductionDIFF <algm-IndirectILLReductionDIFF>` to reduce Doppler diffraction data for ILL's IN16B instrument.
 
 Improvements
 ############
@@ -33,6 +34,7 @@ Improvements
 - Added option to fix banks' vertical coordinate :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>`.
 - :ref:`AlignComponents <algm-AlignComponents>` has option to output a table listing the changes in position and orientation for each component
 - :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>` now outputs a table listing the changes in position and orientation for each bank
+- :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` now outputs flipping ratios along with polarisation corrections.
 
 - :ref:`WANDPowderReduction <algm-WANDPowderReduction>` GUI now only shows relevant items in drop down menu and no longer has a confusing copy input workspace name button.
 
@@ -52,16 +54,34 @@ Bugfixes
 - New caching feature is added to :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to speed up calculation using same sample and container.
 - New property `CleanCache` in algorithm :ref:`SNSPowderReduction <algm-SNSPowderReduction>`
 - New options "cache directory" and "clean cache" in the Advanced Setup tab of the SNS Powder Reduction interface
+- Correct unit to TOF for ``_tof_xye`` files output for PEARL, when the focusing mode is set to *all*.
 - Use caching for Va in :ref:`SNSPowderReduction <algm-SNSPowderReduction>`.
 - Improve algorithm :ref:`FitPeaks <algm-FitPeaks>` to enable it to fit with multiple peaks in same spectrum with Back-to-back Exponential function starting from user specified parameters.
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has additional property, ``DeltaRagged``, which allows using :ref:`RebinRagged <algm-RebinRagged>` to bin each spectrum differently.
 - Allow a different number of spectra for absorption correction division of PEARL data. This allows ``create_vanadium`` to work for a non-standard dataset.
-
+- Saved filenames for summed empty workspaces now include spline properties to avoid long_mode confusion when focussing.
+- Fix segmentation violation issues for ILL instruments D1B, D2B, and D20, caused by change of scanned data type
+- :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` fixed the wrong assumption on the order of spin-flip and non-spin-flip data, and fixed the relative normalisation issues.
 - The :ref:`ConvertUnits <algm-ConvertUnits>` algorithm has been extended to use a quadratic relationship between d spacing and TOF when doing conversions between these units. The diffractometer constants DIFA, DIFC and TZERO that determine the form of the quadratic can be loaded into a workspace using a new :ref:`ApplyDiffCal <algm-ApplyDiffCal>` algorithm. This functionality was previously only available in :ref:`AlignDetectors <algm-AlignDetectors>` which only performed the conversion in the direction TOF to d spacing. This change will ensure that the conversion of focussed datasets from d spacing back to TOF at the end of the ISIS powder diffraction data reduction is performed correctly.
 
 Engineering Diffraction
 -----------------------
+
 - New IDF for upgraded VULCAN instrument
+
+Improvements
+############
+
+- BackToBackExponential fitting parameters read from .xml file and output to .prm file for GSAS-II.
+- The Engineering Diffraction interface can now be saved as part of a project file, and can save/restore in the event of a crash as part of the general project save system.
+
+Bugfixes
+########
+- Engineering diffraction interface now converts fitted TOF centre to d-spacing using diffractometer constants post sequential fit (in a matrix workspace).
+- Error on the fitted peak centre converted from TOF to d-spacing will now be correct for non-zero difa (in preparation for supporting this in the interface).
+- Added checks on existance of non-zero proton charge before attempting to average log values weighted by proton charge in the fitting tab of the engineering difraction interface.
+- :ref:`EnggFocus <algm-EnggFocus>` algorithm doesn't attempt to normalise by current if the run has no proton charge and will not throw an error (but will print a warning to the log).
+
 
 Single Crystal Diffraction
 --------------------------
@@ -69,13 +89,16 @@ Single Crystal Diffraction
 - Modified some logs in output workspace from :ref:`LoadWANDSCD <algm-LoadWANDSCD>` to be TimeSeriesProperty so they work with :ref:`SetGoniometer <algm-SetGoniometer>`.
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` has option to integrate ellipsoids around estimated centroid instead of nominal position.
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` has option to determine ellipsoid covariance iteratively and to use the estimated standard deviation rather than scale the major axis of the ellipsoid to the spherical radius.
+- Sample Shapes from .stl mesh files can now be plotted in Workbench. For more details see :ref:`Mesh_Plots`.
 - :ref:`ConvertHFIRSCDtoMDE <algm-ConvertHFIRSCDtoMDE>` has new geometrical correction factor `ObliquityParallaxCoefficient` for shift in vertical beam position due to wide beam.
 - :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ>` has new geometrical correction factor `ObliquityParallaxCoefficient` for shift in vertical beam position due to wide beam.
 - :ref:`TransformHKL <algm-TransformHKL>` has new keyword argument `FindError` allowing the lattice parameter error calculation to be skipped. This can be used to transform HKL of a peaks workspace without enough peaks to do an optimization so they are simply set to zero.
 
+
 Improvements
 ############
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` now allows ellipsoidal shapes to be manually defined for the PeakRadius and Background radii options.
+- The :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` input dialog has been reorganised to present the many input properties in a more user-friendly manner.
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now check if previous container is created using the same method before reusing it.
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` now update attached UB matrix with given lattice constants (optional).
 - :ref:`FilterPeaks <algm-FilterPeaks>` now can select banks in addition to filtering by values.
@@ -84,11 +107,13 @@ Improvements
 - :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>` calculates intensity for satellite peaks with fractional HKL
 - :ref:`MDNorm <algm-MDNorm>` algorithm can now efficiently process background.
 - method ``IPeaksWorkspaceaddPeak(V3D, SpecialCoordinateSystem)`` exposed to the python interface.
+- Added option to :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` to stop masking the first and last tubes of each bank (masked pixels are used to determine whether the integration region of a peak is near the edge of the detector). Previously adjacent tubes on adjacent banks were masked which are not always to be considered edges (e.g. on WISH). A custom masking can be applied to the peak workspace (e.g. using :ref:`MaskBTP <algm-MaskBTP>`) prior to integration to denote detector edges.
 
 Bugfixes
 ########
 - Correctly format FullProf files in :ref:`SaveReflections <algm-SaveReflections>` - there is now a title line in the header, the multiplicity is by default 1 and there are two rows per modulation vector.
 - :ref:`SaveReflections <algm-SaveReflections>` now determines the parent HKL of a satellite correctly, previously the satellite HKL was rounded.
+- Fixed changes in :ref:`ConvertQtoHKLMDHisto <algm-ConvertQtoHKLMDHisto>` to accomodate zoom in slice viewer, as a result this algorithm will now drop the connection to the original workspace
 
 Instrument Updates
 ##################
@@ -100,6 +125,7 @@ Known Defects
 
 Bugfixes
 ########
+- :ref:`PredictPeaks <algm-PredictPeaks>` no longer segfaults when the instrument of the input workspace doesn't have the sample position set
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` no longer returns null calibration outputs.
 - Fix failure in :ref:`HB3AFindPeaks <algm-HB3AFindPeaks>` when switching to crystallographic convention.
 - Make :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ>` awear of k convention.

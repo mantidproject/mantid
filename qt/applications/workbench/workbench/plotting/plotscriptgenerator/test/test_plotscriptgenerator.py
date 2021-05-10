@@ -11,6 +11,7 @@ import unittest
 import matplotlib
 
 matplotlib.use("Agg")  # noqa
+import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.legend import Legend
 from matplotlib.ticker import NullLocator
@@ -18,7 +19,7 @@ from matplotlib.ticker import NullLocator
 from mantid.plots import MantidAxes
 from unittest.mock import Mock, patch
 from mantid.simpleapi import CreateWorkspace
-from workbench.plotting.plotscriptgenerator import generate_script
+from workbench.plotting.plotscriptgenerator import generate_script, get_legend_cmds
 
 GEN_WS_RETRIEVAL_CMDS = 'workbench.plotting.plotscriptgenerator.generate_workspace_retrieval_commands'
 GEN_PLOT_CMDS = 'workbench.plotting.plotscriptgenerator.generate_plot_command'
@@ -159,41 +160,32 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         output_script = generate_script(mock_fig, exclude_headers=True)
         self.assertEqual(SAMPLE_SCRIPT, output_script)
 
-    @patch(GET_AUTOSCALE_LIMITS)
-    @patch(GEN_WS_RETRIEVAL_CMDS)
-    @patch(GEN_PLOT_CMDS)
-    @patch(GEN_SUBPLOTS_CMD)
-    def test_generate_script_adds_legend_command_if_legend_present(
-            self, mock_subplots_cmd, mock_plot_cmd, mock_retrieval_cmd,
-            mock_autoscale_lims):
-        mock_retrieval_cmd.return_value = self.retrieval_cmds
-        mock_subplots_cmd.return_value = self.subplots_cmd
-        mock_plot_cmd.return_value = self.plot_cmd
-        mock_autoscale_lims.return_value = (-0.02, 1.02)
+    def test_generate_script_adds_legend_commands_if_legend_present(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1, projection='mantid')
+        ax.plot(self.test_ws, wkspIndex=0)
+        ax.plot(self.test_ws, wkspIndex=1)
+        ax.legend()
+        legend_commands = get_legend_cmds(ax, "axes")
+        # Should be some legend commands.
+        self.assertTrue(len(legend_commands) > 0)
 
-        mock_ax = self._gen_mock_axes(legend_=True)
-        mock_fig = Mock(get_axes=lambda: [mock_ax])
-        mock_fig.canvas.manager.fit_browser.fit_result_ws_name = ""
         if hasattr(Legend, "set_draggable"):
-            self.assertIn('.legend().set_draggable(True)', generate_script(mock_fig))
+            self.assertIn('.legend().set_draggable(True)', legend_commands[0])
         else:
-            self.assertIn('.legend().draggable()', generate_script(mock_fig))
+            self.assertIn('.legend().draggable()', legend_commands[0])
+        plt.close()
 
-    @patch(GET_AUTOSCALE_LIMITS)
-    @patch(GEN_WS_RETRIEVAL_CMDS)
-    @patch(GEN_PLOT_CMDS)
-    @patch(GEN_SUBPLOTS_CMD)
-    def test_generate_script_does_not_add_legend_command_if_figure_has_no_legend(
-            self, mock_subplots_cmd, mock_plot_cmd, mock_retrieval_cmd,
-            mock_autoscale_lims):
-        mock_retrieval_cmd.return_value = self.retrieval_cmds
-        mock_subplots_cmd.return_value = self.subplots_cmd
-        mock_plot_cmd.return_value = self.plot_cmd
-        mock_autoscale_lims.return_value = (-0.02, 1.02)
-
-        mock_fig = Mock(get_axes=lambda: [self._gen_mock_axes()])
-        mock_fig.canvas.manager.fit_browser.fit_result_ws_name = ""
-        self.assertNotIn('.legend()', generate_script(mock_fig))
+    def test_generate_script_does_not_add_legend_commands_if_figure_has_no_legend(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1, projection='mantid')
+        ax.plot(self.test_ws, wkspIndex=0)
+        ax.plot(self.test_ws, wkspIndex=1)
+        # Attempt to generate legend commands when no legend is present.
+        legend_commands = get_legend_cmds(ax, "axes")
+        # Should be no legend commands.
+        self.assertEqual(0, len(legend_commands))
+        plt.close()
 
     @patch(GET_AUTOSCALE_LIMITS)
     @patch(GEN_WS_RETRIEVAL_CMDS)
