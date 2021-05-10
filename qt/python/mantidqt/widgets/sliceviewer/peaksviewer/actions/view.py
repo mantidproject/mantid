@@ -24,6 +24,7 @@ class PeakActionsView(QtWidgets.QWidget):
         super(PeakActionsView, self).__init__(parent=parent)
         self._collection_view = parent
         self._presenter: 'PeakActionsPresenter' = None
+        self.ui = None
         self._setup_ui()
 
     @property

@@ -595,7 +595,7 @@ class SliceViewerView(QWidget, ObservingView):
         return self._data_view.dimensions
 
     @property
-    def peaks_view(self):  # -> PeaksViewerCollectionView:
+    def peaks_view(self) -> PeaksViewerCollectionView:
         """Lazily instantiates PeaksViewer and returns it"""
         if self._peaks_view is None:
             self._peaks_view = PeaksViewerCollectionView(MplPainter(self.data_view), self.presenter)

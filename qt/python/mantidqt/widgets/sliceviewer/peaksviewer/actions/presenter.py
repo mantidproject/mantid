@@ -29,8 +29,8 @@ class PeakActionsPresenter:
     def _validate_view(view):
         r"""We require the actions view object to have certain attributes"""
         for attribute in ('collection_view', 'active_peaksworkspace_index', 'erasing_mode_on'):
-            if getattr(view, attribute) is False:
-                raise TypeError(f'{view} is not a valid PeakActionsView')
+            if hasattr(view, attribute) is False:
+                raise TypeError(f'Attribute {attribute} not found in {view}')
 
     def __init__(self,
                  model: PeakActionsModel,
