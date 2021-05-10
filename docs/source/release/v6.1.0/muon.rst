@@ -10,7 +10,13 @@ Muon Analysis 2 and Frequency Domain Analysis
 
 New Features
 ############
-- Added a new "periods" button to the grouping tab which displays a table of information on periods (currently only supporting nexus V1 files).
+- **Added a new "periods" button to the grouping tab which displays a table of information on periods (currently only supporting nexus V1 files).**
+
+.. figure:: ../../images/MuonAnalysis_PeriodsTable.png
+   :class: screenshot
+   :width: 500px
+   :align: right
+
 
 Bug fixes
 #########
