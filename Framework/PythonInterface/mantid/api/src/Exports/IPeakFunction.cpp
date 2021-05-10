@@ -27,6 +27,8 @@ void export_IPeakFunction() {
            "output should be stored in the out array")
       .def("fwhm", &IPeakFunction::fwhm, arg("self"), "Returns the fwhm of the peak function.")
       .def("intensity", &IPeakFunction::intensity, arg("self"), "Returns the integral intensity of the peak function.")
+      .def("intensityError", &IPeakFunction::intensityError, arg("self"),
+           "Returns the integral intensity error of the peak function.")
       .def("setIntensity", &IPeakFunction::setIntensity, (arg("self"), arg("new_intensity")),
            "Changes the integral intensity of the peak function by setting its "
            "height.");

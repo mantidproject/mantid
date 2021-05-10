@@ -45,6 +45,18 @@ class RectangularFunction(IPeakFunction):
     def setFwhm(self, newFwhm):
         self.setParameter("Fwhm", newFwhm)
 
+    def heightError(self):
+        return self.getParameterValue("Height_error")
+
+    def setHeightError(self, newHeight):
+        self.setParameter("Height_error", newHeight)
+
+    def fwhmError(self):
+        return self.getParameterValue("Fwhm_error")
+
+    def setFwhmError(self, newFwhm):
+        self.setParameter("Fwhm_error", newFwhm)
+
     def functionLocal(self, xvals):
         center = self.getParameterValue("Center")
         fwhm = self.getParameterValue("Fwhm")
