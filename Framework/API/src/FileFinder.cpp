@@ -578,10 +578,16 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
       }
     } else {
       std::string path;
+      // Special check for "PG3", to cope with situation like '48314,48316'.
       if (boost::algorithm::istarts_with(hint, "PG3")) {
-        path = findRun(instrSName + run, exts, useExtsOnly);
+        if (h == hints.begin()) {
+          instrSName = "PG3";
+          path = findRun(*h, exts, useExtsOnly);
+        } else {
+          path = findRun(instrSName + *h, exts, useExtsOnly);
+        }
       } else {
-        path = findRun(p1.first + run, exts, useExtsOnly);
+        path = findRun(*h, exts, useExtsOnly);
       }
       if (!path.empty()) {
         res.emplace_back(path);
