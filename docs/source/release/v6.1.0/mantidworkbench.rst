@@ -49,6 +49,7 @@ Bugfixes
 - Fixed a bug where panning on a colour fill plot stretches dataset along spectrum axis instead of panning
 - Fixed a bug where TableWorkspace column names would not update correctly if the table was open.
 - Fixed a problem with scripts generated from tiled plots.
+- Restrict scroll wheel zooming out to +/-10^300 to avoid crash.
 
 Interfaces
 ----------
