@@ -138,6 +138,10 @@ class FocusModel(object):
         dspacing_output_name = tof_output_name + "_dSpacing"
         CloneWorkspace(InputWorkspace=normalised, OutputWorkspace=dspacing_output_name)
         ConvertUnits(InputWorkspace=normalised, OutputWorkspace=tof_output_name, Target='TOF')
+        DeleteWorkspace(curves_rebinned)
+        DeleteWorkspace(focused_sample)
+        DeleteWorkspace(normalised)
+        DeleteWorkspace(ws_d)
 
     @staticmethod
     def _plot_focused_workspaces(focused_workspaces):
