@@ -10,7 +10,12 @@ New Features
 ------------
 
 - :ref:`SANSILLReduction <algm-SANSILLReduction>` has a new property `SolventInputWorkspace`, to provide reduced solvent data to be subtracted from the sample data.
-- Sectors drawn in the instrument viewer can now be used to define wedges in :ref:`Q1DWeighted <algm-Q1DWeighted>`.
+- **Sectors drawn in the instrument viewer can now be used to define wedges in** :ref:`Q1DWeighted <algm-Q1DWeighted>`.
+
+.. figure:: ../../images/Q1DWeightedShapeIntegration.png
+   :class: screenshot
+   :width: 600px
+   :align: center
 
 Improvements
 ------------

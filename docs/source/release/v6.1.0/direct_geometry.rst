@@ -12,7 +12,13 @@ New Features
 ############
 
 * Added a new algorithm :ref:`PelicanReduction <algm-PelicanReduction>` for the ANSTO PELICAN instrument that reduces time of flight data versus two theta to S(Q,w).
-* Added SNS instruments to :ref:`PyChop <PyChop>`
+* **Added SNS instruments to** :ref:`PyChop <PyChop>`
+
+.. figure:: ../../images/PyChop_HYSPEC.png
+   :class: screenshot
+   :width: 400px
+   :align: center
+
 * Updated instrument geometry for CHESS
 * Loading of SHARP TOF and single-channel data has been added to :ref:`LoadILLTOF <algm-LoadILLTOF-v2>`
 * New function to calculate angles for final momentum and for momentum transfer, in the `mantid.utils.dgs` library
