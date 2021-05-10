@@ -1514,22 +1514,22 @@ class RunDescriptor(PropDescriptor):
         copy_created  = False
         # the name of the original background workspace used as source for background
         bg_name = ebg_ws.name()
+        ebg_local_name = bg_name
 
         if ebg_ws.getNumberBins() != ws.getNumberBins() or ebg_ws.getNumberHistograms() != ws.getNumberHistograms():
             # The RD and background workspaces are different if it is just binning or difference is in monitors
             # we can deal with the issue
-
-            # workspace type. Events or Histogramm
             preserve_events = False
+            # workspace type. Events or Histogramm
             if isinstance(ws,EventWorkspace):
                 preserve_events = True
             # background workspace will be modified. Use copy
             copy_created = True
-            ebg_ws = RebinToWorkspace(ebg_ws,ws,PreserveEvents = preserve_events,OutputWorkspace='ebg_ws_rebinned')
+            ebg_local_name = 'ebg_ws_rebinned'
+            ebg_ws = RebinToWorkspace(ebg_ws,ws,PreserveEvents = preserve_events,OutputWorkspace=ebg_local_name)
 
             if ebg_ws.getNumberHistograms() != ws.getNumberHistograms():
                 if RunDescriptor._holder.load_monitors_with_workspace:
-
                     # sample workspace was loaded with monitors in and bg_ws with monitors out.
                     # Add zero monitor spectra to smaller workspace
                     n_monitors =ws.getNumberHistograms() - ebg_ws.getNumberHistograms()
@@ -1537,25 +1537,44 @@ class RunDescriptor(PropDescriptor):
                     if n_monitors > 0:
                         ebg_ws = self._add_empty_spectra(ebg_ws,n_monitors,monitors_at_start)
                     else:
-                        ExtractMonitors(InputWorkspace=ebg_ws, DetectorWorkspace='ebg_ws_rebinned',
-                                        MonitorWorkspace='ebg_ws_rebinned_monitors')
-                        ebg_ws = mtd['ebg_ws_rebinned']
+                        ExtractMonitors(InputWorkspace=ebg_ws, DetectorWorkspace=ebg_local_name,
+                                        MonitorWorkspace=ebg_local_name+'_monitors')
+                        ebg_ws = mtd[ebg_local_name]
                 else: # for some reasons (nothing to do with monitors) workspaces have different number of spectra. Can not handle this
                     raise RuntimeError(
                         'Number of spectra in background workspace (N={0}) and in Workspace {1} (N={2}) must be the same'.
                         format(ebg_ws.getNumberHistograms(),ws.name(),ws.getNumberHistograms()))
             #end
-
-        # Get dose for both workspaces
-        ebg_current = ebg_ws.run().getProperty('gd_prtn_chrg').value
-        ws_current = ws.run().getProperty('gd_prtn_chrg').value
-        # normalize by current and remove normalised background
-        ebg_ws  =  ebg_ws*(ws_current/ebg_current)
+        normalised_log = "DirectInelasticReductionNormalisedBy"
+        if ws.run().hasProperty(normalised_log):
+            if ws.run().getProperty(normalised_log).value != 'current':
+                raise RuntimeError(
+                    'At the moment only "normalise_method" = "current" works with empty instrument background removal')
+            if not (ebg_ws.run().hasProperty(normalised_log) or ebg_ws.run().hasProperty('NormalizationFactor')):
+                NormaliseByCurrent(InputWorkspace=ebg_ws,OutputWorkspace=ebg_local_name)
+                AddSampleLog(Workspace=ebg_local_name, LogName=normalised_log,LogText='current')
+                ebg_ws = mtd[ebg_local_name] # just in case
+            else: # both normalized
+                pass
+        else:
+            if ebg_ws.run().hasProperty(normalised_log):
+                # NOTE: within the workflow, if ws is normalized, bg may be normalised or not
+                # But if ws is not normalised, bg would never be normalised. This is not the case
+                # if the bg_removal method applied separately.
+                raise RuntimeError(
+                    'empty bg workspace is normalized wile run is not. Error in the script usage logic')
+            # Get dose for both workspaces. Normalisation will occur later
+            ebg_current = ebg_ws.run().getProperty('gd_prtn_chrg').value
+            ws_current = ws.run().getProperty('gd_prtn_chrg').value
+            # normalize by current
+            ebg_ws  =  ebg_ws*(ws_current/ebg_current)
+        # End normalization check
+        # remove normalised background
         Minus(ws,ebg_ws  ,OutputWorkspace = ws.name(),ClearRHSWorkspace=copy_created)
         if copy_created:
-            DeleteWorkspace('ebg_ws_rebinned')
-            if 'ebg_ws_rebinned_monitors' in mtd:
-                DeleteWorkspace('ebg_ws_rebinned_monitors')
+            DeleteWorkspace(ebg_local_name)
+            if ebg_local_name+'_monitors' in mtd:
+                DeleteWorkspace(ebg_local_name+'_monitors')
 
         AddSampleLog(Workspace=ws,LogName="empty_bg_removed",LogText=str(ebg_ws.name()))
         RunDescriptor._logger('**** Empty instrument background {0} has been removed from workspace {1}'.
