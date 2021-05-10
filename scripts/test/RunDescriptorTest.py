@@ -715,7 +715,7 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertTrue(difr_sample.Result)
 
     def test_remove_background_matrix_minus_matrix(self):
-        # Verify situation if sampe workspace is in event mode and
+        # Verify situation if sample workspace is in event mode and
         # and background loaded as a histogram with monitors included
         bg_ws = CreateSampleWorkspace(Function='Multiple Peaks', WorkspaceType='Histogram',
                                       NumBanks=3, NumMonitors=3, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
