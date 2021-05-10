@@ -1545,30 +1545,20 @@ class RunDescriptor(PropDescriptor):
                         'Number of spectra in background workspace (N={0}) and in Workspace {1} (N={2}) must be the same'.
                         format(ebg_ws.getNumberHistograms(),ws.name(),ws.getNumberHistograms()))
             #end
-        normalised_log = "DirectInelasticReductionNormalisedBy"
-        if ws.run().hasProperty(normalised_log):
-            if ws.run().getProperty(normalised_log).value != 'current':
-                raise RuntimeError(
-                    'At the moment only "normalise_method" = "current" works with empty instrument background removal')
-            if not (ebg_ws.run().hasProperty(normalised_log) or ebg_ws.run().hasProperty('NormalizationFactor')):
-                NormaliseByCurrent(InputWorkspace=ebg_ws,OutputWorkspace=ebg_local_name)
-                AddSampleLog(Workspace=ebg_local_name, LogName=normalised_log,LogText='current')
-                ebg_ws = mtd[ebg_local_name] # just in case
-            else: # both normalized
-                pass
+        ws,run_normalised = self._check_normalised_and_normalise(ws,False)
+        ebg_ws,bg_normalised = self._check_normalised_and_normalise(ebg_ws,False)
+        if run_normalised or bg_normalised: # Both workspaces have to be normalized for correct operations
+            if not (run_normalised and bg_normalised):
+                ws,run_normalised = self._check_normalised_and_normalise(ws,True)
+                ebg_ws,bg_normalised = self._check_normalised_and_normalise(ebg_ws,True)
         else:
-            if ebg_ws.run().hasProperty(normalised_log):
-                # NOTE: within the workflow, if ws is normalized, bg may be normalised or not
-                # But if ws is not normalised, bg would never be normalised. This is not the case
-                # if the bg_removal method applied separately.
-                raise RuntimeError(
-                    'empty bg workspace is normalized wile run is not. Error in the script usage logic')
             # Get dose for both workspaces. Normalisation will occur later
             ebg_current = ebg_ws.run().getProperty('gd_prtn_chrg').value
             ws_current = ws.run().getProperty('gd_prtn_chrg').value
             # normalize by current
             ebg_ws  =  ebg_ws*(ws_current/ebg_current)
         # End normalization check
+
         # remove normalised background
         Minus(ws,ebg_ws  ,OutputWorkspace = ws.name(),ClearRHSWorkspace=copy_created)
         if copy_created:
@@ -1579,6 +1569,28 @@ class RunDescriptor(PropDescriptor):
         AddSampleLog(Workspace=ws,LogName="empty_bg_removed",LogText=str(ebg_ws.name()))
         RunDescriptor._logger('**** Empty instrument background {0} has been removed from workspace {1}'.
                               format(bg_name,ws.name()),'information')
+    #
+    @staticmethod
+    def _check_normalised_and_normalise(input_ws,do_normalise = False):
+        "Check if input workpsace is normalised and normalise it if do_normalise==True"
+        normalised_log = "DirectInelasticReductionNormalisedBy"
+        if input_ws.run().hasProperty(normalised_log):
+            if input_ws.run().getProperty(normalised_log).value != 'current':
+                raise RuntimeError(
+                    'At the moment only "normalise_method" == "current" works with empty instrument background removal')
+            is_normalised = True
+        else:
+            is_normalised = False
+
+        if do_normalise and not is_normalised:
+            ws_name = input_ws.name()
+            NormaliseByCurrent(InputWorkspace=input_ws,OutputWorkspace=ws_name)
+            AddSampleLog(Workspace=ws_name, LogName=normalised_log,LogText='current')
+            is_normalised = True
+            mod_ws = mtd[ws_name] # just in case
+        else:
+            mod_ws = input_ws
+        return (mod_ws,is_normalised)
     #
     @staticmethod
     def _add_empty_spectra(expand_ws,n_spectra,add_from_start=False):
