@@ -60,12 +60,12 @@ class CalibrationModel(object):
         except RuntimeError:
             logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
             return
-        cal_params, cal_grp, van_curves, ceria_raw = self.run_calibration(ceria_workspace,
-                                                                          vanadium_path,
-                                                                          van_integration,
-                                                                          bank,
-                                                                          spectrum_numbers,
-                                                                          full_calib)
+        cal_params, van_curves, ceria_raw = self.run_calibration(ceria_workspace,
+                                                                 vanadium_path,
+                                                                 van_integration,
+                                                                 bank,
+                                                                 spectrum_numbers,
+                                                                 full_calib)
         vanadium_corrections.handle_van_curves(van_curves, vanadium_path, instrument, rb_num)
         if plot_output:
             for i in range(len(cal_params)):
@@ -374,7 +374,6 @@ class CalibrationModel(object):
         DeleteWorkspace(ws_van_d)
         DeleteWorkspace(ws_d)
 
-        # TODO save the PDcal outputs as well
         cal_params = list()
         # in the output calfile, rows are present for all detids, only read one from the region of interest
         north_read_row = 0
@@ -389,7 +388,7 @@ class CalibrationModel(object):
             row = cal_output[bank_cal].row(read)
             current_fit_params = {'difc': row['difc'], 'difa': row['difa'], 'tzero': row['tzero']}
             cal_params.append(current_fit_params)
-        return cal_params, cal_output, curves_output, ceria_raw
+        return cal_params, curves_output, ceria_raw
 
     def create_output_files(self, calibration_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path,
                             instrument, bank, spectrum_numbers):
