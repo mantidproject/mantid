@@ -65,6 +65,8 @@ Plotting
 - Fixed a scenario where workbench could hang if the user closed a plot while live data was being read.
 - Fixed a crash that happens when multiple plot windows are open, and the users closes one of them.
 - Fixed a bug where panning on a colour fill plot stretches dataset along spectrum axis instead of panning
+- Fixed a bug where renaming a workspace with an active plot would make it impossible to change the normalisation of the plot without first creating a new one.
+- Fixed a bug where TableWorkspace column names would not update correctly if the table was open.
 - Fixed a problem with scripts generated from tiled plots.
 
 

@@ -98,7 +98,7 @@ public:
   getDataForParameterEstimation(const EstimationDataSelector &selector) const = 0;
   virtual void removeFittingData() = 0;
 
-  std::unique_ptr<IIndirectFitDataTableModel> m_fitDataModel;
+  virtual IIndirectFitDataTableModel *getFitDataModel() = 0;
 };
 
 } // namespace IDA

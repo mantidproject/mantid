@@ -55,6 +55,8 @@ Improvements
    :width: 400px
    :align: right
 
+- Line plots now respect the status of the Track Cursor checkbox.
+
 Bugfixes
 ########
 - Fix crash on macOS when creating a UnitLabel with non-ascii characters using the single argument constructor
