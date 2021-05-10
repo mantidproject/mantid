@@ -9,11 +9,10 @@
 # 3rd party imports
 from qtpy.QtCore import QSortFilterProxyModel
 from qtpy.QtWidgets import QGroupBox, QVBoxLayout, QWidget
+from mantidqt.widgets.workspacedisplay.table.view import QTableView, TableWorkspaceDisplayView
 
 # local imports
 from .representation.painter import MplPainter
-from .actions.presenter import PeakActionsPresenter
-from mantidqt.widgets.workspacedisplay.table.view import QTableView, TableWorkspaceDisplayView
 from .actions.view import PeakActionsView
 
 # standard
@@ -227,7 +226,7 @@ class PeaksViewerCollectionView(QWidget):
         return viewers[item]
 
     @property
-    def peaks_actions_view(self) ->PeakActionsView :
+    def peaks_actions_view(self) -> PeakActionsView :
         return self._peak_actions_view
 
     def append_peaksviewer(self) -> PeaksViewerView:
@@ -260,3 +259,6 @@ class PeaksViewerCollectionView(QWidget):
         self._outer_layout.addWidget(self._peaks_layout)
         self._outer_layout.addWidget(self._peak_actions_view)
         self.setLayout(self._outer_layout)
+
+#TypeError: addWidget(self, QWidget, stretch: int = 0, alignment: Union[Qt.Alignment, Qt.AlignmentFlag] =
+#Qt.Alignment()): argument 1 has unexpected type 'QVBoxLayout'

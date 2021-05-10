@@ -8,7 +8,7 @@
 #  This file is part of the mantidqt package.
 
 # 3rd party
-from qtpy import QtWidgets, QtGui
+from qtpy import QtWidgets
 from mantid.kernel import logger
 from mantidqt.utils.qt import load_ui
 
@@ -17,23 +17,6 @@ from .presenter import PeakActionsEvent
 
 # standard
 from typing import Optional
-
-
-class NotifierFactory:
-    r"""
-    @brief Factory of functions that are invoked when the widgets of the view emit a signal
-    @details The function is a wrapper to one of the methods of the PeakActionsPresenter object aggregated to the view
-    """
-
-    def __init__(self,
-                 presenter: 'PeakActionsPresenter',
-                 event: PeakActionsEvent) -> None:
-        self._presenter = presenter
-        self._event = event
-
-    def __call__(self):
-        r"""Instances of this class can be called, thus behaving as functions"""
-        self._presenter.notified(self._event)
 
 
 class PeakActionsView(QtWidgets.QWidget):
@@ -60,6 +43,7 @@ class PeakActionsView(QtWidgets.QWidget):
             logger.error(f'{presenter} lacks method "notified"')
         else:
             self._presenter = presenter
+        self._route_signals_to_presenter()
 
     @property
     def erasing_mode_on(self):
@@ -84,6 +68,9 @@ class PeakActionsView(QtWidgets.QWidget):
         # Styling
         self.ui.add_peaks_button.setStyleSheet("background-color:lightgrey")
         self.ui.remove_peaks_button.setStyleSheet("background-color:lightgrey")
+
+    def _route_signals_to_presenter(self):
+        r"""Link viewer particular viewer signals to particular methods of the presenter"""
         # Associate a QSignal to a response function of the presenter
         signal_translator = [(self.ui.remove_peaks_button.clicked, PeakActionsEvent.ERASING_MODE_CHANGED),
                              (self.ui.add_peaks_button.clicked, PeakActionsEvent.ADDING_MODE_CHANGED)]

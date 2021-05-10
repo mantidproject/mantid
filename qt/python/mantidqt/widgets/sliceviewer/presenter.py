@@ -421,9 +421,7 @@ class SliceViewer(ObservingPresenter):
     # private api
     def _create_peaks_presenter_if_necessary(self):
         if self._peaks_presenter is None:
-            self._peaks_presenter = \
-                PeaksViewerCollectionPresenter(self.view.peaks_view)
-
+            self._peaks_presenter = PeaksViewerCollectionPresenter(self.view.peaks_view)
         return self._peaks_presenter
 
     def _call_peaks_presenter_if_created(self, attr, *args, **kwargs):
