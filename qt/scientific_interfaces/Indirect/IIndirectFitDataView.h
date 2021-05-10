@@ -50,6 +50,7 @@ public:
   virtual UserInputValidator &validate(UserInputValidator &validator) = 0;
 
   virtual void setXRange(std::pair<double, double> const &range) = 0;
+  virtual std::pair<double, double> getXRange() const = 0;
 
 public slots:
   virtual void displayWarning(std::string const &warning) = 0;

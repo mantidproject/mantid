@@ -113,7 +113,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
-        self.grouping_tab_widget = GroupingTabWidget(self.context)
+        self.grouping_tab_widget = GroupingTabWidget(self.context, parent)
         self.home_tab = HomeTabWidget(self.context, self)
         self.phase_tab = PhaseTabWidget(self.context, self)
         self.transform = TransformWidget(

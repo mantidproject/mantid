@@ -57,6 +57,10 @@ void TransformHKL::init() {
       "Specify 3x3 HKL transform matrix as a comma separated list of 9 "
       "numbers");
 
+  this->declareProperty("FindError", true,
+                        "Whether to obtain the error in the lattice parameters. "
+                        "Set this to false if there are not enough peaks to do an optimization");
+
   this->declareProperty(std::make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
                         "Gets set with the number of indexed peaks.");
 
@@ -110,8 +114,16 @@ void TransformHKL::exec() {
   g_log.notice() << "Transformed UB = " << UB << '\n';
   o_lattice.setUB(UB);
   std::vector<double> sigabc(6);
-  SelectCellWithForm::DetermineErrors(sigabc, UB, ws, tolerance);
-  o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4], sigabc[5]);
+
+  bool redetermine_error = this->getProperty("FindError");
+
+  if (redetermine_error) {
+    SelectCellWithForm::DetermineErrors(sigabc, UB, ws, tolerance);
+    o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4], sigabc[5]);
+  } else {
+    o_lattice.setError(0, 0, 0, 0, 0, 0);
+  }
+
   ws->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>(o_lattice));
 
   int n_peaks = ws->getNumberPeaks();

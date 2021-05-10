@@ -49,6 +49,7 @@ class EncoderFactory(object):
         if compatible_check is None:
             compatible_check = default_encoder_compatability_check
         # check that an encoder of this class is not already registered
-        if cls.__name__ in cls.encoder_dict:
+        encoder_name = encoder.tags()[0]
+        if encoder_name in cls.encoder_dict:
             logger.debug("Overriding existing encoder")
-        cls.encoder_dict[cls.__name__] = (encoder, compatible_check)
+        cls.encoder_dict[encoder_name] = (encoder, compatible_check)

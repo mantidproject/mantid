@@ -138,8 +138,7 @@ def Load(*args, **kwargs):
     try:
         algm.setProperty('Filename', filename)  # Must be set first
     except ValueError as ve:
-        msg = 'Problem setting "Filename" in {}-v{}: {}'.format(name, algm.name(), algm.version(),
-                                                                str(ve))
+        msg = f'Problem setting "Filename" in Load: {ve}'
         raise ValueError(msg + '\nIf the file has been found '
                                'but you got this error, you might not have read permissions '
                                'or the file might be corrupted.\nIf the file has not been found, '

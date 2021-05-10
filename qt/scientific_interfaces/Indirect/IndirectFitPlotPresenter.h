@@ -37,6 +37,8 @@ public:
   void setFitSingleSpectrumIsFitting(bool fitting);
   void setFitSingleSpectrumEnabled(bool enable);
 
+  void setXBounds(std::pair<double, double> const &bounds);
+
 public slots:
   void setStartX(double /*startX*/);
   void setEndX(double /*endX*/);

@@ -112,6 +112,7 @@ public:
   MOCK_METHOD2(setFitRange, void(double minimum, double maximum));
   MOCK_METHOD1(setFitRangeMinimum, void(double minimum));
   MOCK_METHOD1(setFitRangeMaximum, void(double maximum));
+  MOCK_METHOD1(setFitRangeBounds, void(std::pair<double, double> const &bounds));
 
   MOCK_METHOD1(setBackgroundRangeVisible, void(bool visible));
   MOCK_METHOD1(setHWHMRangeVisible, void(bool visible));
@@ -583,6 +584,14 @@ public:
     EXPECT_CALL(*m_view, enablePlotGuess(false)).Times(1);
 
     m_presenter->updateFit();
+  }
+
+  void test_that_setXBounds_calls_the_correct_method_in_the_view() {
+    auto const bounds = std::make_pair(0.0, 1.0);
+
+    EXPECT_CALL(*m_view, setFitRangeBounds(bounds)).Times(1);
+
+    m_presenter->setXBounds(bounds);
   }
 
 private:
