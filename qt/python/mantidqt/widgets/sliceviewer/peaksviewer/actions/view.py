@@ -40,7 +40,7 @@ class PeakActionsView(QtWidgets.QWidget):
         @brief Subscribe a presenter to the viever
         @details The presenter must have method 'notified' able to handle the event
         """
-        if getattr(presenter, 'notified') is False:
+        if hasattr(presenter, 'notified') is False:
             logger.error(f'{presenter} lacks method "notified"')
         else:
             self._presenter = presenter
