@@ -90,6 +90,7 @@ class CalibrationModel(object):
         tzero = [row['tzero'] for row in cal_params]
 
         bk2bk_params = self.extract_b2b_params(ceria_raw)
+        DeleteWorkspace(ceria_raw)
 
         params_table = []
 
@@ -332,7 +333,9 @@ class CalibrationModel(object):
                 curves_north = CloneWorkspace(curves_North)
                 curves_output.append(curves_north)
 
-                #DeleteWorkspace(focused_North)
+                DeleteWorkspace(ws_d_clone)
+                DeleteWorkspace(ws_van_d_clone)
+                DeleteWorkspace(curves_North)
 
             if bank == '2' or bank is None:
                 df_kwarg = {"GroupingFileName": SOUTH_BANK_CAL}
@@ -350,11 +353,14 @@ class CalibrationModel(object):
                 curves_south = CloneWorkspace(curves_South)
                 curves_output.append(curves_south)
 
-                #DeleteWorkspace(focused_South)
-
+                DeleteWorkspace(ws_d_clone)
+                DeleteWorkspace(ws_van_d_clone)
+                DeleteWorkspace(curves_South)
         else:
             grp_ws = create_custom_grouping_workspace(spectrum_numbers, ceria_raw)
             df_kwarg = {"GroupingWorkspace": grp_ws}
+            ws_d_clone = CloneWorkspace(ws_d)
+            ws_van_d_clone = CloneWorkspace(ws_van_d)
             focused_Cropped, curves_Cropped = focus_and_make_van_curves(ws_d, ws_van_d, df_kwarg)
 
             # final calibration of focused data
@@ -367,12 +373,14 @@ class CalibrationModel(object):
             curves_cropped = CloneWorkspace(curves_Cropped)
             curves_output.append(curves_cropped)
 
-            DeleteWorkspace(curves_cropped)
-            DeleteWorkspace(focused_Cropped)
+            DeleteWorkspace(ws_d_clone)
+            DeleteWorkspace(ws_van_d_clone)
+            DeleteWorkspace(curves_Cropped)
 
         DeleteWorkspace(ws_van)
         DeleteWorkspace(ws_van_d)
         DeleteWorkspace(ws_d)
+        DeleteWorkspace("tof_focused")
 
         cal_params = list()
         # in the output calfile, rows are present for all detids, only read one from the region of interest

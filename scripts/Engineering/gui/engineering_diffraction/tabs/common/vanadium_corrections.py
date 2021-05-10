@@ -139,6 +139,6 @@ def handle_van_curves(van_curves, van_path, instrument, rb_num):
         DeleteWorkspace(van_curves[1])
     else:
         curves_ws = van_curves[0]
-    #DeleteWorkspace(van_curves[0])
+    DeleteWorkspace(van_curves[0])
     save_van_workspace(curves_ws, curves_path)
     RenameWorkspace(InputWorkspace=curves_ws, OutputWorkspace=CURVES_WORKSPACE_NAME)
