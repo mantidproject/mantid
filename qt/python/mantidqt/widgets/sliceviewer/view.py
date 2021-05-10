@@ -64,6 +64,7 @@ class SliceViewerDataView(QWidget):
 
         self._line_plots = None
         self._image_info_tracker = None
+        self._region_selection_on = False
 
         # Dimension widget
         self.dimensions_layout = QGridLayout()
@@ -250,7 +251,7 @@ class SliceViewerDataView(QWidget):
                                     transpose=self.dimensions.transpose,
                                     norm=self.colorbar.get_norm(),
                                     **kwargs)
-        self.on_track_cursor_state_change(self.track_cursor.isChecked())
+        self.on_track_cursor_state_change(self.track_cursor_checked())
 
         # ensure the axes data limits are updated to match the
         # image. For example if the axes were zoomed and the
@@ -270,7 +271,7 @@ class SliceViewerDataView(QWidget):
                                               transpose=self.dimensions.transpose,
                                               norm=self.colorbar.get_norm(),
                                               **kwargs)
-        self.on_track_cursor_state_change(self.track_cursor.isChecked())
+        self.on_track_cursor_state_change(self.track_cursor_checked())
 
         # swapping dimensions in nonorthogonal mode currently resets back to the
         # full data limits as the whole axes has been recreated so we don't have
@@ -303,7 +304,7 @@ class SliceViewerDataView(QWidget):
                                     norm=self.colorbar.get_norm(),
                                     extent=old_extent,
                                     **kwargs)
-        self.on_track_cursor_state_change(self.track_cursor.isChecked())
+        self.on_track_cursor_state_change(self.track_cursor_checked())
 
         self.draw_plot()
 
@@ -366,12 +367,17 @@ class SliceViewerDataView(QWidget):
                 self.ax.set_ylim((extent[2], extent[3]))
         self.colorbar.update_clim()
 
+    def track_cursor_checked(self):
+        return self.track_cursor.isChecked() if self.track_cursor else False
+
     def on_track_cursor_state_change(self, state):
         """
         Called to notify the current state of the track cursor box
         """
         if self._image_info_tracker is not None:
             self._image_info_tracker.disconnect()
+        if self._line_plots is not None and not self._region_selection_on:
+            self._line_plots.disconnect()
 
         self._image_info_tracker = ImageInfoTracker(image=self.image,
                                                     transpose_xy=self.dimensions.transpose,
@@ -379,8 +385,12 @@ class SliceViewerDataView(QWidget):
 
         if state:
             self._image_info_tracker.connect()
+            if self._line_plots and not self._region_selection_on:
+                self._line_plots.connect()
         else:
             self._image_info_tracker.disconnect()
+            if self._line_plots and not self._region_selection_on:
+                self._line_plots.disconnect()
 
     def on_home_clicked(self):
         """Reset the view to encompass all of the data"""
@@ -393,6 +403,11 @@ class SliceViewerDataView(QWidget):
     def on_region_selection_toggle(self, state):
         """Switch state of the region selection"""
         self.presenter.region_selection(state)
+        self._region_selection_on = state
+        # If state is off and track cursor is on, make sure line plots are re-connected to move cursor
+        if not state and self.track_cursor_checked():
+            if self._line_plots:
+                self._line_plots.connect()
 
     def on_non_orthogonal_axes_toggle(self, state):
         """
@@ -495,6 +510,8 @@ class SliceViewerDataView(QWidget):
         self.canvas.setFocus()
         if event.button == 1:
             self._image_info_tracker.on_cursor_at(event.xdata, event.ydata)
+            if self.line_plots_active and not self._region_selection_on:
+                self._line_plots.on_cursor_at(event.xdata, event.ydata)
         if event.button == 3:
             self.on_home_clicked()
 

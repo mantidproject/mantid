@@ -235,6 +235,8 @@ class SliceViewer(ObservingPresenter):
         data_view = self.view.data_view
         if state:
             data_view.add_line_plots(tool, self)
+            if data_view.track_cursor_checked():
+                data_view._line_plots.connect()
         else:
             data_view.deactivate_tool(ToolItemText.REGIONSELECTION)
             data_view.remove_line_plots()

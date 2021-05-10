@@ -265,7 +265,7 @@ class PixelLinePlot(CursorTracker, KeyHandler):
         """
         See RegionExtractionTool for parameter descriptions
         """
-        CursorTracker.__init__(self, image_axes=plotter.image_axes)
+        CursorTracker.__init__(self, image_axes=plotter.image_axes, autoconnect=False)
         KeyHandler.__init__(self, plotter, exporter)
 
         # cache most current cursor position

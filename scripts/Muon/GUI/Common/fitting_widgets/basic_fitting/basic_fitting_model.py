@@ -242,7 +242,6 @@ class BasicFittingModel:
     def clear_cached_fit_functions(self) -> None:
         """Clears the cached fit functions and removes all fits from the fitting context."""
         self.single_fit_functions_cache = [None] * self.number_of_datasets
-        self.remove_all_fits_from_context()
 
     @property
     def fit_statuses(self) -> list:
@@ -389,6 +388,10 @@ class BasicFittingModel:
     def remove_all_fits_from_context(self) -> None:
         """Removes all fit results from the context."""
         self.context.fitting_context.remove_all_fits()
+
+    def remove_latest_fit_from_context(self) -> None:
+        """Removes the most recent fit performed from the fitting context"""
+        self.context.fitting_context.remove_latest_fit()
 
     def reset_current_dataset_index(self) -> None:
         """Resets the current dataset index stored by the model."""

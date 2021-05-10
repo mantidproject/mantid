@@ -29,10 +29,10 @@ enum class FitType {
   StretchedExpFT,
   IsoRotDiff,
   DiffSphere,
-  DiffRotDiscreteCircle,
   ElasticDiffSphere,
-  ElasticDiffRotDiscreteCircle,
   InelasticDiffSphere,
+  DiffRotDiscreteCircle,
+  ElasticDiffRotDiscreteCircle,
   InelasticDiffRotDiscreteCircle,
 };
 

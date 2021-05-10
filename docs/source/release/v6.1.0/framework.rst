@@ -31,6 +31,7 @@ Algorithms
 Improvements
 ------------
 - Loading a CORELLI tube calibration returns a ``MaskWorkspace``.
+- The algorithm :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>` now accepts a negative angle for the SampleAngle parameter of the FlatPlate shape
 
 Data Objects
 ------------
@@ -65,6 +66,8 @@ SliceViewer
 
 Improvements
 ############
+
+- Line plots now respect the status of the Track Cursor checkbox.
 
 Bugfixes
 ########

@@ -25,6 +25,8 @@ APP_NAME_SWITCHER = {"DGS_Reduction.py": "python",
                      "ORNL_SANS.py": "python",
                      "Powder_Diffraction_Reduction.py": "python"}
 
+CLOSE_CODE_SWITCHER = {"Muon_Analysis.py": "\nmuon_analysis.close()"}
+
 
 def set_instrument(interface_script_name):
     instrument = INSTRUMENT_SWITCHER.get(interface_script_name, None)
@@ -64,8 +66,10 @@ class PythonInterfacesStartupTest(systemtesting.MantidSystemTest):
         set_application_name(interface_script)
         # Prevents a QDialog popping up when opening certain interfaces
         set_instrument(interface_script)
+        # Some interfaces need to be closed after opening. This also ensures they process all their events
+        close_code = CLOSE_CODE_SWITCHER.get(interface_script, "")
 
         try:
-            exec(open(os.path.join(self._interface_directory, interface_script)).read())
+            exec(open(os.path.join(self._interface_directory, interface_script)).read() + close_code)
         except Exception as ex:
             self.fail(f"Exception thrown when attempting to open the {interface_script} interface: {ex}.")
