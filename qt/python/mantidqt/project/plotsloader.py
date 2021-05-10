@@ -12,6 +12,8 @@ import matplotlib.axes
 import matplotlib.cm as cm
 import matplotlib.colors
 from matplotlib import axis, ticker  # noqa
+from matplotlib.ticker import NullFormatter,\
+    ScalarFormatter, LogFormatterSciNotation
 
 from mantid import logger
 from mantid.api import AnalysisDataService as ADS
@@ -22,6 +24,26 @@ from mantidqt.plotting.functions import pcolormesh
 
 SUBPLOT_WSPACE = 0.5
 SUBPLOT_HSPACE = 0.5
+
+TICK_FORMATTERS = {"NullFormatter": NullFormatter(),
+                   "ScalarFormatter": ScalarFormatter(useOffset=True),
+                   "LogFormatterSciNotation": LogFormatterSciNotation()
+                   }
+
+
+def get_tick_format(tick_formatters: dict, tick_formatter: str,
+                    tick_format):
+    if tick_formatter == "FixedFormatter":
+        fmt = ticker.FixedFormatter(tick_format)
+    else:
+        try:
+            fmt = tick_formatters[tick_formatter]
+        except KeyError:
+            # If the formatter is not FixedFormatter or
+            # does not exist in global_tick_format_dict,
+            # default to ScalarFormatter
+            fmt = tick_formatters["ScalarFormatter"]
+    return fmt
 
 
 class PlotsLoader(object):
@@ -267,14 +289,6 @@ class PlotsLoader(object):
         ax.set_frame_on(properties["frameOn"])
         ax.set_visible(properties["visible"])
 
-        # Update X Axis
-        if "xAxisProperties" in properties:
-            self.update_axis(ax.xaxis, properties["xAxisProperties"])
-
-        # Update Y Axis
-        if "yAxisProperties" in properties:
-            self.update_axis(ax.yaxis, properties["yAxisProperties"])
-
         ax.set_xscale(properties["xAxisScale"])
         ax.set_yscale(properties["yAxisScale"])
         if "xAutoScale" in properties and properties["xAutoScale"]:
@@ -286,6 +300,14 @@ class PlotsLoader(object):
         else:
             ax.set_ylim(properties["yLim"])
         ax.show_minor_gridlines = properties["showMinorGrid"]
+
+        # Update X Axis
+        if "xAxisProperties" in properties:
+            self.update_axis(ax.xaxis, properties["xAxisProperties"])
+
+        # Update Y Axis
+        if "yAxisProperties" in properties:
+            self.update_axis(ax.yaxis, properties["yAxisProperties"])
 
     def update_axis(self, axis_, properties):
         if isinstance(axis_, matplotlib.axis.XAxis):
@@ -335,12 +357,15 @@ class PlotsLoader(object):
         elif properties["minorTickLocator"] == "AutoMinorLocator":
             axis_.set_minor_locator(ticker.AutoMinorLocator())
 
-        # Update Major and Minor Formatter
-        if properties["majorTickFormatter"] == "FixedFormatter":
-            axis_.set_major_formatter(ticker.FixedFormatter(properties["majorTickFormat"]))
-
-        if properties["minorTickFormatter"] == "FixedFormatter":
-            axis_.set_major_formatter(ticker.FixedLocator(properties["minorTickFormat"]))
+        # Update Major and Minor TickFormatter
+        fmt = get_tick_format(TICK_FORMATTERS,
+                              properties["majorTickFormatter"],
+                              properties["majorTickFormat"])
+        axis_.set_major_formatter(fmt)
+        fmt = get_tick_format(TICK_FORMATTERS,
+                              properties["minorTickFormatter"],
+                              properties["minorTickFormat"])
+        axis_.set_minor_formatter(fmt)
 
     @staticmethod
     def update_colorbar_from_dict(image, dic):
