@@ -536,16 +536,22 @@ void AlignAndFocusPowder::exec() {
   m_progress->report();
 
   if (m_calibrationWS) {
-    g_log.information() << "running AlignDetectors started at " << Types::Core::DateAndTime::getCurrentTime() << "\n";
-    API::IAlgorithm_sptr alignAlg = createChildAlgorithm("AlignDetectors");
-    alignAlg->setProperty("InputWorkspace", m_outputW);
-    alignAlg->setProperty("OutputWorkspace", m_outputW);
-    alignAlg->setProperty("CalibrationWorkspace", m_calibrationWS);
-    alignAlg->executeAsChildAlg();
-    m_outputW = alignAlg->getProperty("OutputWorkspace");
-  } else {
-    m_outputW = convertUnits(m_outputW, "dSpacing");
+    // ApplyDiffCal and update m_outputW
+    g_log.information() << "apply calibration workspace to input workspace at "
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
+    Workspace_sptr outputw = std::dynamic_pointer_cast<Workspace>(m_outputW);
+    API::IAlgorithm_sptr applyDiffCalAlg = createChildAlgorithm("ApplyDiffCal");
+    applyDiffCalAlg->setProperty("InstrumentWorkspace", outputw);
+    applyDiffCalAlg->setProperty("CalibrationWorkspace", m_calibrationWS);
+    applyDiffCalAlg->executeAsChildAlg();
+    // grab and cast
+    outputw = applyDiffCalAlg->getProperty("InstrumentWorkspace");
+    m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(outputw);
   }
+
+  m_outputW = convertUnits(m_outputW, "dSpacing");
+  // update the other pointer that people use
+  m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   m_progress->report();
 
   // ----------------- WACKY LORENTZ THING HERE
