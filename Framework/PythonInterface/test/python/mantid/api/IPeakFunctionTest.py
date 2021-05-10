@@ -44,6 +44,18 @@ class RectangularFunction(IPeakFunction):
     def setFwhm(self, newFwhm):
         self.setParameter("Fwhm", newFwhm)
 
+    def heightError(self):
+        return self.getParameterValue("Height_error")
+
+    def setHeightError(self, newHeight):
+        self.setParameter("Height_error", newHeight)
+
+    def fwhmError(self):
+        return self.getParameterValue("Fwhm_error")
+
+    def setFwhmError(self, newFwhm):
+        self.setParameter("Fwhm_error", newFwhm)
+
     def functionLocal(self, xvals):
         center = self.getParameterValue("Center")
         fwhm = self.getParameterValue("Fwhm")
@@ -98,6 +110,19 @@ class IPeakFunctionTest(unittest.TestCase):
         self.assertEqual(func.fwhm(), 3.0)
         self.assertAlmostEquals(func.height(), 4.0, places=10)
         self.assertAlmostEquals(func.intensity(), 12.0, places=10)
+
+    def test_get_set_intensityError(self):
+        func = RectangularFunction()
+        func.initialize()
+        func.setCentre(1.0)
+        func.setHeight(2.0)
+        func.setFwhm(3.0)
+        func.setFwhmError(5.0)
+        func.setHeightError(7.0)
+
+        # This is a rectangle function with height 2 and width 3, centered
+        # around 1.0. The intensity error should be 31.0 (Height * Fwhm_error + Height_error * Fwhm)
+        self.assertAlmostEquals(func.intensityError(), 31.0, places=10)
 
 if __name__ == '__main__':
     unittest.main()

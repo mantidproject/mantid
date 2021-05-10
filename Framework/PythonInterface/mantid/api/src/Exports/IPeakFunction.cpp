@@ -22,6 +22,8 @@ void export_IPeakFunction() {
            "Calculate the values of the function for the given x values. The "
            "output should be stored in the out array")
       .def("intensity", &IPeakFunction::intensity, arg("self"), "Returns the integral intensity of the peak function.")
+      .def("intensityError", &IPeakFunction::intensityError, arg("self"),
+           "Returns the integral intensity error of the peak function.")
       .def("setIntensity", &IPeakFunction::setIntensity, (arg("self"), arg("new_intensity")),
            "Changes the integral intensity of the peak function by setting its "
            "height.");
