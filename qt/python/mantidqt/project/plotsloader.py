@@ -136,7 +136,7 @@ class PlotsLoader(object):
         func = function_dict[function_to_call]
         # Plotting is done via an Axes object unless a colorbar needs to be added
         if function_to_call in ["imshow", "pcolormesh"]:
-            func([workspace], fig, norm=creation_arg['norm'], normalize_by_bin_width=creation_arg['normalize_by_bin_width'])
+            func([workspace], fig, color_norm=creation_arg['norm'], normalize_by_bin_width=creation_arg['normalize_by_bin_width'])
             self.color_bar_remade = True
         else:
             func(workspace, **creation_arg)

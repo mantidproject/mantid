@@ -207,7 +207,7 @@ def use_imshow(ws):
 
 
 @manage_workspace_names
-def pcolormesh(workspaces, fig=None, norm=None, normalize_by_bin_width=None):
+def pcolormesh(workspaces, fig=None, color_norm=None, normalize_by_bin_width=None):
     """
     Create a figure containing pcolor subplots
 
@@ -232,7 +232,7 @@ def pcolormesh(workspaces, fig=None, norm=None, normalize_by_bin_width=None):
         ax = axes[row_idx][col_idx]
         if subplot_idx < workspaces_len:
             ws = workspaces[subplot_idx]
-            pcm = pcolormesh_on_axis(ax, ws, norm, normalize_by_bin_width)
+            pcm = pcolormesh_on_axis(ax, ws, color_norm, normalize_by_bin_width)
             plots.append(pcm)
             if col_idx < ncols - 1:
                 col_idx += 1
@@ -271,18 +271,18 @@ def pcolormesh(workspaces, fig=None, norm=None, normalize_by_bin_width=None):
     return fig
 
 
-def pcolormesh_on_axis(ax, ws, norm=None, normalize_by_bin_width=None):
+def pcolormesh_on_axis(ax, ws, color_norm=None, normalize_by_bin_width=None):
     """
     Plot a pcolormesh plot of the given workspace on the given axis
     :param ax: A matplotlib axes instance
     :param ws: A mantid workspace instance
-    :param norm: A matplotlib.colours Normalize instance (or any of its subclasses)
+    :param color_norm: A matplotlib.colours Normalize instance (or any of its subclasses)
     :param normalize_by_bin_width: Optional keyword argument to pass to imshow in the event of a plot restoration
     :return:
     """
     ax.clear()
     ax.set_title(ws.name())
-    scale = _get_colorbar_scale() if not norm else norm
+    scale = _get_colorbar_scale() if not color_norm else color_norm
 
     if use_imshow(ws):
         pcm = ax.imshow(ws, cmap=ConfigService.getString("plots.images.Colormap"), aspect='auto', origin='lower',
