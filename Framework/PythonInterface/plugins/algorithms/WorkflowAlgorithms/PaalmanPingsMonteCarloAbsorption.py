@@ -152,7 +152,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='SampleCenter', defaultValue=0.0,
                              doc='Center of the sample environment')
         self.declareProperty(name='SampleAngle', defaultValue=0.0,
-                             validator=FloatBoundedValidator(0.0),
+                             validator=FloatBoundedValidator(-180.0, 180.0),
                              doc='Angle of the sample environment with respect to the beam (degrees)')
 
         self.setPropertySettings('SampleWidth', flat_plate_visible)

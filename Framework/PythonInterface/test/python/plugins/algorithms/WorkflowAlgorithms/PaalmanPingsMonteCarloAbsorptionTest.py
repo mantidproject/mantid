@@ -62,6 +62,8 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
     def _flat_plate_test(self, test_func):
         self._test_arguments['SampleWidth'] = 2.0
         self._test_arguments['SampleThickness'] = 2.0
+        self._test_arguments['SampleCenter'] = 1.0
+        self._test_arguments['SampleAngle'] = -10.0
         test_func('FlatPlate')
 
     def _cylinder_test(self, test_func):
