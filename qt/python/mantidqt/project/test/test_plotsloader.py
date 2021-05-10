@@ -13,7 +13,7 @@ import matplotlib
 import matplotlib.pyplot as plt  # noqa
 import matplotlib.figure  # noqa
 import matplotlib.text  # noqa
-from matplotlib.ticker import LogFormatterSciNotation, ScalarFormatter
+from matplotlib.ticker import LogFormatterSciNotation, ScalarFormatter, NullFormatter
 matplotlib.use('AGG')
 
 from mantidqt.project.plotsloader import PlotsLoader  # noqa
@@ -159,9 +159,11 @@ class PlotsLoaderTest(unittest.TestCase):
         fig, ax = plt.subplots()
         x_axis = ax.xaxis
         x_axis.set_major_formatter(LogFormatterSciNotation())
+        x_axis.set_minor_formatter(LogFormatterSciNotation())
         PlotsLoader.update_axis_ticks(x_axis, self.dictionary['properties']['xAxisProperties'])
 
         self.assertIsInstance(x_axis.get_major_formatter(), ScalarFormatter)
+        self.assertIsInstance(x_axis.get_minor_formatter(), NullFormatter)
 
 
 if __name__ == "__main__":
