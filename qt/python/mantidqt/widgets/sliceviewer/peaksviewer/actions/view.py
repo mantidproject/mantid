@@ -38,13 +38,13 @@ class PeakActionsView(QtWidgets.QWidget):
     def subscribe(self, presenter: 'PeakActionsPresenter') -> None:
         r"""
         @brief Subscribe a presenter to the viever
-        @details The presenter must have method 'notified' able to handle the event
+        @details The presenter must have method 'response_function' able to handle the event
         """
-        if hasattr(presenter, 'notified') is False:
-            logger.error(f'{presenter} lacks method "notified"')
+        if hasattr(presenter, 'response_function') is False:
+            logger.error(f'{presenter} lacks method "response_function"')
         else:
             self._presenter = presenter
-        self._route_signals_to_presenter()
+            self._route_signals_to_presenter()
 
     @property
     def erasing_mode_on(self):

@@ -254,8 +254,7 @@ class PeaksViewerCollectionView(QWidget):
         """
         # create vertical layouts for outer widget
         self._outer_layout = QVBoxLayout()  # contains everything
-        self._peaks_layout = QVBoxLayout()  # contains the tables of peaks
-
-        self._outer_layout.addLayout(self._peaks_layout)
         self._outer_layout.addWidget(self._peak_actions_view)
+        self._peaks_layout = QVBoxLayout()  # contains the tables of peaks
+        self._outer_layout.addLayout(self._peaks_layout)
         self.setLayout(self._outer_layout)
