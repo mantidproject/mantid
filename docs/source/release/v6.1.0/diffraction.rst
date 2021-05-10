@@ -111,6 +111,7 @@ Bugfixes
 ########
 - Correctly format FullProf files in :ref:`SaveReflections <algm-SaveReflections>` - there is now a title line in the header, the multiplicity is by default 1 and there are two rows per modulation vector.
 - :ref:`SaveReflections <algm-SaveReflections>` now determines the parent HKL of a satellite correctly, previously the satellite HKL was rounded.
+- Fixed changes in :ref:`ConvertQtoHKLMDHisto <algm-ConvertQtoHKLMDHisto>` to accomodate zoom in slice viewer, as a result this algorithm will now drop the connection to the original workspace
 
 Instrument Updates
 ##################
