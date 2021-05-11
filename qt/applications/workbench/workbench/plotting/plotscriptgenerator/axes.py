@@ -63,13 +63,13 @@ def generate_tick_commands(ax):
     for tick_type in ["minor", "major"]:
         if not isinstance(getattr(ax.xaxis, tick_type).locator, NullLocator):
             if tick_type == "minor":
-                commands.append("axes.minorticks_on()")
+                commands.append("minorticks_on()")
 
             if isinstance(getattr(ax.xaxis, f"{tick_type}Ticks"), list) and \
                     len(getattr(ax.xaxis, f"{tick_type}Ticks")) > 0:
-                commands.append(f"axes.tick_params(axis='x', which='{tick_type}', **"
+                commands.append(f"tick_params(axis='x', which='{tick_type}', **"
                                 f"{generate_tick_params_kwargs(ax.xaxis, tick_type)})")
-                commands.append(f"axes.tick_params(axis='y', which='{tick_type}', **"
+                commands.append(f"tick_params(axis='y', which='{tick_type}', **"
                                 f"{generate_tick_params_kwargs(ax.yaxis, tick_type)})")
 
     return commands

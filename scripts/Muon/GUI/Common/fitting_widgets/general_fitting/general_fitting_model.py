@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import AnalysisDataService, FunctionFactory, IFunction, MultiDomainFunction
+from mantid.api import AnalysisDataService, IFunction, MultiDomainFunction
 from mantid.simpleapi import RenameWorkspace, CopyLogs
 
 from Muon.GUI.Common.ADSHandler.workspace_naming import (create_fitted_workspace_name,
@@ -150,26 +150,52 @@ class GeneralFittingModel(BasicFittingModel):
         self.simultaneous_fit_function = self.simultaneous_fit_function_cache
         super().use_cached_function()
 
-    def reset_fit_functions(self) -> None:
+    def reset_fit_functions(self, new_functions: list) -> None:
         """Reset the fit functions stored by the model. Attempts to use the currently selected function."""
-        if self.number_of_datasets == 0:
+        if len(new_functions) == 0 or None in new_functions:
             self.simultaneous_fit_function = None
-
-        if self.simultaneous_fit_function is not None:
-            single_function = self.current_domain_fit_function()
-            if single_function is not None:
-                single_function = single_function.clone()
-            self._construct_new_simultaneous_function_from(single_function)
-
-        super().reset_fit_functions()
-
-    def _construct_new_simultaneous_function_from(self, single_function: IFunction) -> None:
-        """Constructs the new simultaneous function using a single domain function."""
-        if self.number_of_datasets == 1:
-            self.simultaneous_fit_function = single_function
+        elif len(new_functions) == 1:
+            self.simultaneous_fit_function = new_functions[0]
         else:
-            self.simultaneous_fit_function = self._create_multi_domain_function_from(single_function)
+            self._create_multi_domain_function_using(new_functions)
             self._add_global_ties_to_simultaneous_function()
+
+        super().reset_fit_functions(new_functions)
+
+    def _create_multi_domain_function_using(self, domain_functions: list) -> None:
+        """Creates a new MultiDomainFunction using the provided functions corresponding to a domain each."""
+        self.simultaneous_fit_function = MultiDomainFunction()
+        for i, function in enumerate(domain_functions):
+            self.simultaneous_fit_function.add(function)
+            self.simultaneous_fit_function.setDomainIndex(i, i)
+
+    def _get_new_functions_using_existing_datasets(self, new_dataset_names: list) -> list:
+        """Returns the functions to use for the new datasets. It tries to use the existing functions if possible."""
+        if self.simultaneous_fitting_mode:
+            return self._get_new_domain_functions_using_existing_datasets(new_dataset_names)
+        else:
+            return super()._get_new_functions_using_existing_datasets(new_dataset_names)
+
+    def _get_new_domain_functions_using_existing_datasets(self, new_dataset_names: list) -> list:
+        """Returns the domain functions to use within a MultiDomainFunction for the new datasets."""
+        if len(self.dataset_names) == len(new_dataset_names) and self.simultaneous_fit_function is not None:
+            if len(self.dataset_names) == 1:
+                return [self.simultaneous_fit_function.clone()]
+            else:
+                return [self.simultaneous_fit_function.getFunction(i).clone()
+                        for i in range(self.simultaneous_fit_function.nFunctions())]
+        elif len(self.dataset_names) <= 1:
+            return [self._clone_function(self.simultaneous_fit_function) for _ in range(len(new_dataset_names))]
+        else:
+            return [self._get_new_domain_function_for(name) for name in new_dataset_names]
+
+    def _get_new_domain_function_for(self, new_dataset_name: str) -> IFunction:
+        """Returns the function to use for a specific domain when new datasets are loaded."""
+        if new_dataset_name in self.dataset_names and self.simultaneous_fit_function is not None:
+            return self._clone_function(self.simultaneous_fit_function.getFunction(
+                self.dataset_names.index(new_dataset_name)))
+        else:
+            return self._clone_function(self.current_domain_fit_function())
 
     def _add_global_ties_to_simultaneous_function(self) -> None:
         """Creates and adds ties to the simultaneous function to represent the global parameters."""
@@ -183,10 +209,6 @@ class GeneralFittingModel(BasicFittingModel):
                 for i in range(self.simultaneous_fit_function.nFunctions()) if i != index]
         ties.append("f" + str(index) + "." + global_parameter)
         return "=".join(ties)
-
-    def _create_multi_domain_function_from(self, fit_function: IFunction) -> MultiDomainFunction:
-        """Create a MultiDomainFunction containing the same fit function for each domain."""
-        return FunctionFactory.createInitializedMultiDomainFunction(str(fit_function), self.number_of_datasets)
 
     def get_simultaneous_fit_by_specifiers_to_display_from_context(self) -> list:
         """Returns the simultaneous fit by specifiers to display in the view from the context."""

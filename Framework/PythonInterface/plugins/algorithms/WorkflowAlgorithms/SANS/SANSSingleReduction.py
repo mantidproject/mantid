@@ -283,7 +283,6 @@ class SANSSingleReduction(SANSSingleReductionBase):
     def set_transmission_workspaces_on_output(self, completed_event_slices, fit_state):
         calc_can, calc_sample = WorkspaceGroup(), WorkspaceGroup()
         unfit_can, unfit_sample = WorkspaceGroup(), WorkspaceGroup()
-
         output_hab_or_lab = None
         for bundle in completed_event_slices:
             if output_hab_or_lab is not None and output_hab_or_lab != bundle.output_bundle.reduction_mode:

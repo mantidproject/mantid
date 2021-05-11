@@ -5,12 +5,19 @@ Direct Geometry Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
+General
+-------
 
-New
-###
+New Features
+############
+
+* Added a new algorithm :ref:`PelicanReduction <algm-PelicanReduction>` for the ANSTO PELICAN instrument that reduces time of flight data versus two theta to S(Q,w).
+* **Added SNS instruments to** :ref:`PyChop <PyChop>`
+
+.. figure:: ../../images/PyChop_HYSPEC.png
+   :class: screenshot
+   :width: 400px
+   :align: center
 
 * Updated instrument geometry for CHESS
 * Loading of SHARP TOF and single-channel data has been added to :ref:`LoadILLTOF <algm-LoadILLTOF-v2>`
@@ -21,13 +28,13 @@ New
 Improvements
 ############
 * :ref:`MDNorm <algm-MDNorm>` algorithm can now efficiently process background.
-* Added SNS instruments to :ref:`PyChop <PyChop>`
+
 
 MSlice
 ------
 
-New
-###
+New Features
+############
 
 - Implemented floating/ontop window behaviour.
 - Added a 'close all' command for plots in the command line interface.

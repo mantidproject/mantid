@@ -69,6 +69,7 @@ public:
   MOCK_METHOD1(readSettings, void(QSettings const &settings));
   MOCK_METHOD1(validate, UserInputValidator &(UserInputValidator &validator));
   MOCK_METHOD1(setXRange, void(std::pair<double, double> const &range));
+  MOCK_CONST_METHOD0(getXRange, std::pair<double, double>());
 
   /// Public slots
   MOCK_METHOD1(displayWarning, void(std::string const &warning));
@@ -137,6 +138,15 @@ public:
   ///----------------------------------------------------------------------
   /// Unit Tests that test the signals, methods and slots of the presenter
   ///----------------------------------------------------------------------
+
+  void test_that_getXRange_calls_the_correct_method_in_the_view() {
+    auto const xRange = std::make_pair(0.0, 1.0);
+
+    ON_CALL(*m_view, getXRange()).WillByDefault(Return(xRange));
+    EXPECT_CALL(*m_view, getXRange()).Times(1);
+
+    TS_ASSERT_EQUALS(m_presenter->getXRange(), xRange);
+  }
 
 private:
   std::unique_ptr<QTableWidget> m_dataTable;
