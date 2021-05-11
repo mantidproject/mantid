@@ -144,8 +144,11 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
 
     def _check_tf_asymmetry_compliance(self, tf_asymmetry_on: bool) -> None:
         """Check that the current datasets are compatible with TF Asymmetry fitting mode."""
-        if tf_asymmetry_on and not self.model.check_datasets_are_tf_asymmetry_compliant():
-            self.view.warning_popup("Only Groups can be fitted in TF Asymmetry mode.")
+        tf_compliant, pair_names = self.model.check_datasets_are_tf_asymmetry_compliant()
+        if tf_asymmetry_on and not tf_compliant:
+            pair_names_str = "'" + "', '".join(pair_names) + "'"
+            self.view.warning_popup(f"Only Groups can be fitted in TF Asymmetry mode. Please unselect the following "
+                                    f"Pairs/Diffs in the grouping tab: {pair_names_str}")
             self._switch_to_normal_fitting()
             return False
         return True
