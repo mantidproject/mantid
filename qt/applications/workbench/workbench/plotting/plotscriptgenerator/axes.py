@@ -30,6 +30,9 @@ TICK_FORMATTERS = {"NullFormatter": "NullFormatter()",
                    "LogFormatterSciNotation": "LogFormatterSciNotation()"
                    }
 
+DEFAULT_TICK_FORMATTERS = {"major": ScalarFormatter,
+                           "minor": NullFormatter}
+
 
 def generate_axis_limit_commands(ax):
     """Generate commands to set the axes' limits"""
@@ -74,12 +77,15 @@ def generate_tick_formatter_commands(ax):
     axes_types = ["xaxis", "yaxis"]
     tick_types = ["major", "minor"]  # Currently there is no way to change minor tick format in GUI
 
-    for selected_axis in axes_types:
-        for selected_tick_type in tick_types:
+    for axis in axes_types:
+        for tick_type in tick_types:
             for key, value in TICK_FORMATTERS.items():
-                if isinstance(getattr(getattr(ax, selected_axis), f"get_{selected_tick_type}_formatter")(),
-                              TICK_FORMATTER_INSTANCES[key]):
-                    commands.append(f"axes.{selected_axis}.set_{selected_tick_type}_formatter({value})")
+                formatter = getattr(getattr(ax, axis), f"get_{tick_type}_formatter")()
+                # Don't write the command to the script if it's default.
+                if isinstance(formatter, DEFAULT_TICK_FORMATTERS[tick_type]):
+                    continue
+                if isinstance(formatter, TICK_FORMATTER_INSTANCES[key]):
+                    commands.append(f"axes.{axis}.set_{tick_type}_formatter({value})")
     return commands
 
 
