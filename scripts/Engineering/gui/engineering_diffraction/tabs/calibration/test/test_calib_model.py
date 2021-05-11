@@ -67,25 +67,29 @@ class CalibrationModelTest(unittest.TestCase):
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
         self.assertEqual(van_corr.call_count, 1)
 
+    @patch(class_path + ".get_info_from_file")
+    @patch(file_path + ".path")
     @patch(class_path + "._load_relevant_pdcal_outputs")
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
     @patch(class_path + ".update_calibration_params_table")
-    def test_load_existing_calibration_files(self, update_table, fetch_ws, load_cals):
+    def test_load_existing_calibration_files(self, update_table, fetch_ws, load_cals, path, get_info):
+        path.exists.return_value = True
+        get_info.return_value = "TESTINST", "van_no", "ceria_no", [["params"], ["table"]]
         inst, van_no, ceria_no = self.model.load_existing_calibration_files(TEST_PRM_FILE)
 
-        table_test_params = ([[0, 18306.98, 2.99, 14.44], [1, 18497.75, -29.68, -26.5]],)
-        self.assertEqual(table_test_params, update_table.call_args.args)
+        table_test_params = [["params"], ["table"]]
+        update_table.assert_called_with(table_test_params)
         self.assertEqual(1, update_table.call_count)
 
-        fetch_test_params = ("ENGINX236516", "ENGINX")
+        fetch_test_params = ("TESTINSTvan_no", "TESTINST")
         self.assertEqual(fetch_test_params, fetch_ws.call_args.args)
         self.assertEqual(1, fetch_ws.call_count)
 
         self.assertEqual(1, load_cals.call_count)
 
-        self.assertEqual("ENGINX", inst)
-        self.assertEqual("236516", van_no)
-        self.assertEqual("241391", ceria_no)
+        self.assertEqual("TESTINST", inst)
+        self.assertEqual("van_no", van_no)
+        self.assertEqual("ceria_no", ceria_no)
 
     @patch(file_path + ".Load")
     def test_load_relevant_pdcal_outputs(self, load):

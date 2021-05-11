@@ -122,6 +122,7 @@ class CalibrationModel(object):
         return [params_north, params_south]
 
     def load_existing_calibration_files(self, file_path):
+        # TODO write test this function in conjunction with get_info_from_file once neat way of getting test file found
         if not path.exists(file_path):
             msg = "Could not open GSAS calibration file: " + file_path
             logger.warning(msg)
