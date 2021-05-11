@@ -287,7 +287,7 @@ class SANSILLIntegration(PythonAlgorithm):
         bins = []
         q = 0.
         pixels = 1
-        while (q < q_max):
+        while q < q_max:
             two_theta = np.arctan(pixel_size * pixels / l2)
             q = 4 * np.pi * np.sin(two_theta / 2) / wavelength
             bins.append(q)

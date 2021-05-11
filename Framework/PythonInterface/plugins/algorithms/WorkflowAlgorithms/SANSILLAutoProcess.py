@@ -435,7 +435,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                         OutputWorkspace=self.output)
         self.setProperty('OutputWorkspace', mtd[self.output])
 
-        if outputWedges:
+        if self.getProperty('NumberOfWedges').value != 0 and outputWedges:
             self.outputWedges(outputWedges)
 
         if self.output_sens:
