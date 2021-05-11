@@ -15,7 +15,8 @@ from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_com
                                                          generate_axis_label_commands,
                                                          generate_set_title_command,
                                                          generate_axis_scale_commands,
-                                                         generate_tick_commands)
+                                                         generate_tick_commands,
+                                                         generate_tick_formatter_commands)
 from workbench.plotting.plotscriptgenerator.figure import generate_subplots_command
 from workbench.plotting.plotscriptgenerator.lines import generate_plot_command
 from workbench.plotting.plotscriptgenerator.legend import (generate_legend_commands,
@@ -82,6 +83,7 @@ def generate_script(fig, exclude_headers=False):
         plot_commands.extend(get_axis_limit_cmds(ax, ax_object_var))  # ax.set_lim
         plot_commands.extend(get_axis_scale_cmds(ax, ax_object_var))  # ax.set_scale
         plot_commands.extend(get_legend_cmds(ax, ax_object_var))  # ax.legend
+        plot_commands.extend(generate_tick_formatter_commands(ax))
         plot_commands.append('')
 
     if not plot_commands:

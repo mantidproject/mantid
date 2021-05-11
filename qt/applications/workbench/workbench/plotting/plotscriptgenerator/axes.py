@@ -9,6 +9,8 @@
 from numpy import isclose
 
 from matplotlib.ticker import NullLocator
+from matplotlib.ticker import NullFormatter, \
+    ScalarFormatter, LogFormatterSciNotation
 
 from mantid.plots.utility import get_autoscale_limits
 from workbench.plotting.plotscriptgenerator.utils import convert_value_to_arg_string
@@ -17,6 +19,16 @@ BASE_AXIS_LABEL_COMMAND = "set_{}label({})"
 BASE_AXIS_LIM_COMMAND = "set_{}lim({})"
 BASE_SET_TITLE_COMMAND = "set_title({})"
 BASE_AXIS_SCALE_COMMAND = "set_{}scale('{}')"
+
+TICK_FORMATTER_INSTANCES = {"NullFormatter": NullFormatter,
+                            "ScalarFormatter": ScalarFormatter,
+                            "LogFormatterSciNotation": LogFormatterSciNotation
+                            }
+
+TICK_FORMATTERS = {"NullFormatter": "NullFormatter()",
+                   "ScalarFormatter": "ScalarFormatter(useOffset=True)",
+                   "LogFormatterSciNotation": "LogFormatterSciNotation()"
+                   }
 
 
 def generate_axis_limit_commands(ax):
@@ -55,6 +67,20 @@ def generate_axis_scale_commands(ax):
 
 def generate_tick_params_kwargs(axis, tick_type="major"):
     return getattr(axis, f"_{tick_type}_tick_kw")
+
+
+def generate_tick_formatter_commands(ax):
+    commands = [f"from matplotlib.ticker import NullFormatter, ScalarFormatter, LogFormatterSciNotation"]
+    axes_types = ["xaxis", "yaxis"]
+    tick_types = ["major", "minor"]  # Currently there is no way to change minor tick format in GUI
+
+    for selected_axis in axes_types:
+        for selected_tick_type in tick_types:
+            for key, value in TICK_FORMATTERS.items():
+                if isinstance(getattr(getattr(ax, selected_axis), f"get_{selected_tick_type}_formatter")(),
+                              TICK_FORMATTER_INSTANCES[key]):
+                    commands.append(f"axes.{selected_axis}.set_{selected_tick_type}_formatter({value})")
+    return commands
 
 
 def generate_tick_commands(ax):
