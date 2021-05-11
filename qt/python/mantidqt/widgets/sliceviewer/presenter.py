@@ -418,6 +418,11 @@ class SliceViewer(ObservingPresenter):
         if self._peaks_presenter is not None:
             self._peaks_presenter.clear_observer()
 
+    def peak_selected(self, event):
+        if event.inaxes:
+            xdata, ydata = event.xdata, event.ydata
+            self.view.peaks_view.peaks_actions_view.presenter.peak_selected(xdata, ydata)
+
     # private api
     def _create_peaks_presenter_if_necessary(self):
         if self._peaks_presenter is None:
