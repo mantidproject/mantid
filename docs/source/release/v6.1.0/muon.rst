@@ -17,6 +17,8 @@ New Features
    :width: 500px
    :align: right
 
+- Plotting ranges can now be edited individually for tile plots.
+- The muon fitting interface has been simplified.
 
 Bug fixes
 #########
