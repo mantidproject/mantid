@@ -191,16 +191,26 @@ void ApplyDiffCal::exec() {
     Column_const_sptr difaColumn = m_calibrationWS->getColumn("difa");
     Column_const_sptr tzeroColumn = m_calibrationWS->getColumn("tzero");
 
+    auto detids = instrument->getDetectorIDs();
+
     for (size_t i = 0; i < m_calibrationWS->rowCount(); ++i) {
       auto detid = static_cast<detid_t>((*detIdColumn)[i]);
       double difc = (*difcColumn)[i];
       double difa = (*difaColumn)[i];
       double tzero = (*tzeroColumn)[i];
 
-      auto det = instrument->getDetector(detid);
-      paramMap.addDouble(det->getComponentID(), "DIFC", difc);
-      paramMap.addDouble(det->getComponentID(), "DIFA", difa);
-      paramMap.addDouble(det->getComponentID(), "TZERO", tzero);
+      // auto det = instrument->getDetector(detid);
+      auto it = std::find(detids.begin(), detids.end(), detid);
+      if (it != detids.end()) {
+        // found the detector
+        auto det = instrument->getDetector(detid);
+        paramMap.addDouble(det->getComponentID(), "DIFC", difc);
+        paramMap.addDouble(det->getComponentID(), "DIFA", difa);
+        paramMap.addDouble(det->getComponentID(), "TZERO", tzero);
+      } else {
+        // cannot find the detector, use default zero for difc, difa, and tzero
+        g_log.information() << "Cannot find det " << detid << ", skipping.\n";
+      }
     }
   }
 }
