@@ -77,7 +77,9 @@ Plotting
 - Fixed a bug where panning on a colour fill plot stretches dataset along spectrum axis instead of panning
 - Fixed a bug where renaming a workspace with an active plot would make it impossible to change the normalisation of the plot without first creating a new one.
 - Fixed a bug where TableWorkspace column names would not update correctly if the table was open.
+- Fixed a bug where plotting a 3D Contour plot would produce the error reporter in some cases.
 - Fixed a problem with scripts generated from tiled plots.
+- Restrict scroll wheel zooming out to +/-10^300 to avoid crash.
 
 
 :ref:`Release 6.1.0 <v6.1.0>`

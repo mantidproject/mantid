@@ -349,10 +349,12 @@ def plot_contour(workspaces, fig=None):
     for ws in workspaces:
         fig = pcolormesh(workspaces, fig)
         ax = fig.get_axes()[0]
-
-        ax.contour(ws, levels=DEFAULT_CONTOUR_LEVELS,
-                   colors=DEFAULT_CONTOUR_COLOUR,
-                   linewidths=DEFAULT_CONTOUR_WIDTH)
+        try:
+            ax.contour(ws, levels=DEFAULT_CONTOUR_LEVELS,
+                       colors=DEFAULT_CONTOUR_COLOUR,
+                       linewidths=DEFAULT_CONTOUR_WIDTH)
+        except TypeError as type_error:
+            LOGGER.warning(str(type_error))
 
         fig.show()
 

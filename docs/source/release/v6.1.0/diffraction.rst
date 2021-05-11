@@ -90,6 +90,7 @@ New features
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` has option to determine ellipsoid covariance iteratively and to use the estimated standard deviation rather than scale the major axis of the ellipsoid to the spherical radius.
 - :ref:`ConvertHFIRSCDtoMDE <algm-ConvertHFIRSCDtoMDE>` has new geometrical correction factor `ObliquityParallaxCoefficient` for shift in vertical beam position due to wide beam.
 - :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ>` has new geometrical correction factor `ObliquityParallaxCoefficient` for shift in vertical beam position due to wide beam.
+- :ref:`TransformHKL <algm-TransformHKL>` has new keyword argument `FindError` allowing the lattice parameter error calculation to be skipped. This can be used to transform HKL of a peaks workspace without enough peaks to do an optimization so they are simply set to zero.
 - Added new detector to MANDI instrument geometry with updated calibration. Valid-to dates changed in previous files ``MANDI_Definition_2020_04_01.xml`` and ``MANDI_Parameters_2020_04_01.xml``. Valid-from dates changed in newly added files ``MANDI_Definition_2021_02_01.xml`` and ``MANDI_Parameters_2021_02_01.xml``.
 
 LeanElasticPeak
@@ -154,5 +155,7 @@ Bugfixes
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` no longer returns null calibration outputs.
 - Fix failure in :ref:`HB3AFindPeaks <algm-HB3AFindPeaks>` when switching to crystallographic convention.
 - Make :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ>` aware of k convention.
+- Output of :ref:`ConvertQtoHKLMDHisto <algm-ConvertQtoHKLMDHisto>` now accommodates zoom in slice viewer, as a result this algorithm will now drop the connection to the original workspace
+
 
 :ref:`Release 6.1.0 <v6.1.0>`

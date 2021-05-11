@@ -29,6 +29,7 @@ Improvements
 - :ref:`LoadLog <algm-LoadLog>` will now detect old unsupported log files and will provide a user-friendly error explaining the problem.
 - :ref:`Stitch1DMany <algm-Stitch1DMany>` has additional property `IndexOfReference` to allow user to decide which of the provided workspaces should give reference for scaling
 - :ref:`SaveAscii <algm-SaveAscii>` can now create a header for the output file containing sample logs specified through the new property `LogList`.
+- The algorithm :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>` now accepts a negative angle for the SampleAngle parameter of the FlatPlate shape
 
 Bugfixes
 ########
