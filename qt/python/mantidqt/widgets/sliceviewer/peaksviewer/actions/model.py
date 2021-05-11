@@ -27,3 +27,8 @@ class PeakActionsModel:
     def delete_peaks(self):
         r"""Delete the first peak of the model"""
         self.viewer_model.delete_rows(0)
+
+    def add_peak(self):
+        """Add a peak to the model"""
+        sliceinfo = self.presenter.viewer_presenter.view.sliceinfo
+        self.viewer_model.peaks_workspace.addPeak([1,2,3], sliceinfo.frame)

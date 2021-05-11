@@ -52,6 +52,11 @@ class PeakActionsView(QtWidgets.QWidget):
         return self.ui.remove_peaks_button.isChecked()
 
     @property
+    def adding_mode_on(self):
+        r"""Find if the button to add peaks is checked"""
+        return self.ui.add_peaks_button.isChecked()
+
+    @property
     def active_peaksworkspace_index(self):
         r"""Find index of the currently selected PeaksWorkspace. Returns -1 is nothing is selected"""
         return self.ui.active_peaks_combobox.currentIndex()

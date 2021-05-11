@@ -74,4 +74,6 @@ class PeakActionsPresenter:
             self.viewer_presenter.redraw_peaks()
 
     def _add_peaks(self):
-        return NotImplementedError()
+        """Add peaks if the button is pressed"""
+        if self._view.adding_mode_on:
+            self._model.add_peak()
