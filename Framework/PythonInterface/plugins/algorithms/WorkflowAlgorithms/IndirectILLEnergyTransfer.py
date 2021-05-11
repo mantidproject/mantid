@@ -15,7 +15,6 @@ from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, \
     WorkspaceGroupProperty, FileAction, Progress, WorkspaceProperty, PropertyMode
 from mantid.simpleapi import *
 
-
 N_TUBES = 16
 N_PIXELS_PER_TUBE = 128
 N_MONITOR = 1
@@ -26,7 +25,7 @@ def _ws_or_none(s):
 
 
 def _make_name(name, suffix):
-    return '__'+name+'_'+suffix
+    return '__' + name + '_' + suffix
 
 
 def _extract_workspace(ws, ws_out, x_start, x_end):
@@ -43,7 +42,6 @@ def _extract_workspace(ws, ws_out, x_start, x_end):
 
 
 class IndirectILLEnergyTransfer(PythonAlgorithm):
-
     _run_file = None
     _map_file = None
     _parameter_file = None
@@ -79,7 +77,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         return 'Performs initial energy transfer reduction for ILL indirect geometry data, instrument IN16B.'
 
     def seeAlso(self):
-        return [ "IndirectILLReductionQENS","IndirectILLReductionFWS" ]
+        return ["IndirectILLReductionQENS", "IndirectILLReductionFWS"]
 
     def name(self):
         return "IndirectILLEnergyTransfer"
@@ -97,7 +95,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                                  'Use .map or .xml file (see GroupDetectors documentation) '
                                  'only if different range is needed for each tube.')
 
-        self.declareProperty(name='ManualPSDIntegrationRange',defaultValue=[1, 128],
+        self.declareProperty(name='ManualPSDIntegrationRange', defaultValue=[1, 128],
                              doc='Integration range of vertical pixels in each PSD tube. \n'
                                  'By default all the pixels will be summed per each tube. \n'
                                  'Use this option if the same range (other than default) '
@@ -113,7 +111,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                              validator=StringListValidator(['111', '311']),
                              doc='Analyser reflection.')
 
-        self.declareProperty(name='CropDeadMonitorChannels',defaultValue=False,
+        self.declareProperty(name='CropDeadMonitorChannels', defaultValue=False,
                              doc='Whether or not to exclude the first and last few channels '
                                  'with 0 monitor count in the energy transfer formula.')
 
@@ -150,7 +148,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         self.declareProperty(name='GroupPixelsBy', defaultValue=4, validator=IntBoundedValidator(lower=1, upper=128),
                              doc='Choose how to group the pixels for elastic peak fitting; must be a power of 2.')
 
-        self.declareProperty(FloatArrayProperty("SampleCoordinates", [0.,0.,0.], FloatArrayLengthValidator(3), direction=Direction.Input),
+        self.declareProperty(FloatArrayProperty("SampleCoordinates", [0., 0., 0.], FloatArrayLengthValidator(3),
+                                                direction=Direction.Input),
                              doc='The sample coordinates X, Y, Z.')
 
         self.declareProperty(name='PulseChopper', defaultValue='Auto',
@@ -186,7 +185,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 issues['ManualPSDIntegrationRange'] = 'Specify comma separated pixel range, e.g. 1,128'
             elif self._psd_int_range[0] < 1 or self._psd_int_range[1] > N_PIXELS_PER_TUBE \
                     or self._psd_int_range[0] >= self._psd_int_range[1]:
-                issues['ManualPSDIntegrationRange'] = 'Start or end pixel number is out of range [1-128], or has wrong order'
+                issues[
+                    'ManualPSDIntegrationRange'] = 'Start or end pixel number is out of range [1-128], or has wrong order'
 
         group_by = self.getProperty('GroupPixelsBy').value
         if group_by <= 0 or (group_by & (group_by - 1)) != 0:  # quick check if the number is a power of 2
@@ -264,10 +264,10 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             # the doppler channels are linear in velocity (not time, neither deltaE)
             # so we perform 2-step conversion, first linear to v, then quadratic to deltaE
             efixed = mtd[ws].getInstrument().getNumberParameter('Efixed')[0]
-            vfixed = math.sqrt(2 * efixed * c**2 / (nm * 1E+9))
+            vfixed = math.sqrt(2 * efixed * c ** 2 / (nm * 1E+9))
             vformula = '-2/({0}-1)*{1}*(x-{0}/2)+{2}'.format(bsize, self._doppler_speed, vfixed)
             ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=vformula)
-            nmass = nm * 1E+9 / c**2  # mev / (m/s)**2
+            nmass = nm * 1E+9 / c ** 2  # mev / (m/s)**2
             eformula = '{0}*x*x/2 - {1}'.format(nmass, efixed)
             ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=eformula, AxisUnits='DeltaE')
         else:
@@ -378,22 +378,22 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         if self._reduction_type == 'BATS':
             self._reduce_bats(self._ws)
         else:
-            if self._mirror_sense == 14:      # two wings, extract left and right
+            if self._mirror_sense == 14:  # two wings, extract left and right
 
                 size = mtd[self._ws].blocksize()
                 left = self._ws + '_left'
                 right = self._ws + '_right'
-                _extract_workspace(self._ws, left, 0, size//2)
-                _extract_workspace(self._ws, right, size//2, size)
+                _extract_workspace(self._ws, left, 0, size // 2)
+                _extract_workspace(self._ws, right, size // 2, size)
                 DeleteWorkspace(self._ws)
                 self._reduce_one_wing_doppler(left)
                 self._reduce_one_wing_doppler(right)
                 GroupWorkspaces(InputWorkspaces=[left, right], OutputWorkspace=self._red_ws)
 
-            elif self._mirror_sense == 16:    # one wing
+            elif self._mirror_sense == 16:  # one wing
 
                 self._reduce_one_wing_doppler(self._ws)
-                GroupWorkspaces(InputWorkspaces=[self._ws],OutputWorkspace=self._red_ws)
+                GroupWorkspaces(InputWorkspaces=[self._ws], OutputWorkspace=self._red_ws)
 
         if self._normalise_to == 'Monitor':
             for ws in mtd[self._red_ws]:
@@ -438,11 +438,13 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 epp_ws.setCell('TOF_Delay', row, delay)
 
     @staticmethod
-    def _t0_offset(center_chopper_speed, center_chopper_phase, shifted_chopper_phase, center_psd_delay, shifted_psd_delay):
+    def _t0_offset(center_chopper_speed, center_chopper_phase, shifted_chopper_phase, center_psd_delay,
+                   shifted_psd_delay):
         """
         Calculates the t0 offset between measurements with and without inelastic offset.
         """
-        return - (shifted_chopper_phase - center_chopper_phase) / center_chopper_speed / 6 + (shifted_psd_delay - center_psd_delay) * 1E-6
+        return - (shifted_chopper_phase - center_chopper_phase) / center_chopper_speed / 6 + (
+                    shifted_psd_delay - center_psd_delay) * 1E-6
 
     def _get_pulse_chopper_info(self, run, pulse):
         """
@@ -459,9 +461,9 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             if run.hasProperty('monitor.master_pickup'):
                 trigger = run.getLogData('monitor.master_pickup').value
                 if not 1 <= trigger <= 4:
-                    self.log().information('Unexpected trigger chopper '+str(trigger))
+                    self.log().information('Unexpected trigger chopper ' + str(trigger))
                 else:
-                    if trigger == 1 or trigger == 2: # and low repetition rate
+                    if trigger == 1 or trigger == 2:  # and low repetition rate
                         pulse_index = 3
                         distance = 33.388
         elif pulse == '34':
@@ -490,7 +492,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         detector_info = ws.detectorInfo()
         l1 = detector_info.l1()
         middle = N_PIXELS_PER_TUBE // 2
-        l2_equator = (detector_info.l2(middle) + detector_info.l2(middle+1)) / 2.
+        l2_equator = (detector_info.l2(middle) + detector_info.l2(middle + 1)) / 2.
         v_fixed = self._instrument.getNumberParameter('Vfixed')[0]
         elastic_tof_equator = ((l1 + l2_equator) / v_fixed + t0_offset) * 1E+6
         run = ws.getRun()
@@ -499,7 +501,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         output_epp = self.getPropertyValue('OutputElasticChannelWorkspace')
         rows = epp_ws.rowCount()
 
-        elastic_channel_equator = epp_ws.cell('PeakCentre', rows-1)
+        elastic_channel_equator = epp_ws.cell('PeakCentre', rows - 1)
         x = ws.extractX()
 
         elastic_tof = elastic_tof_equator
@@ -507,6 +509,14 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         x_new = elastic_tof + (x[0] - elastic_channel) * channel_width
         ws.setX(0, x_new)
+
+        expected_row_count = (N_TUBES * N_PIXELS_PER_TUBE) // self._group_by + \
+                              self._get_single_detectors_number(ws.name()) + 1
+
+        if self._fit_option == "FitAllPixelGroups" and rows != expected_row_count:
+            self._fit_option = "FitEquatorialOnly"
+            self.log().notice("Not enough rows in the elastic channel workspace to use all pixel groups fitting. "
+                              "Switching to using only the equatorial fitting.")
 
         for pixel in range(1, N_PIXELS_PER_TUBE * N_TUBES + N_MONITOR):
 
@@ -530,8 +540,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             else:
                 elastic_tof = elastic_tof_equator
                 elastic_channel = elastic_channel_equator
-                self.log.warning("Single detector number {0}'s peak was not found. Using equatorial peak instead."
-                                 " The result is likely erroneous.".format(single_detector + 1))
+                self.log().warning("Single detector number {0}'s peak was not found. Using equatorial peak instead."
+                                   " The result is likely erroneous.".format(single_detector + 1))
 
             x_new = elastic_tof + (x[single_detector] - elastic_channel) * channel_width
             ws.setX(single_detector, x_new)
@@ -575,7 +585,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=mon_ws, OutputWorkspace=ws)
         if self._normalise_to == 'Monitor':
             Divide(LHSWorkspace=ws, RHSWorkspace=mon_ws, OutputWorkspace=ws)
-            ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0)
+            ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0, NaNError=0, InfinityValue=0,
+                                 InfinityError=0)
         DeleteWorkspace(mon_ws)
 
     def _reduce_bats(self, ws):
@@ -584,8 +595,9 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         @param ws :: input workspace name
         """
         x, y, z = self._sample_coords
-        if x**2+y**2+z**2 != 0.:
-            MoveInstrumentComponent(Workspace=ws, ComponentName='sample-position', X=x, Y=y, Z=z, RelativePosition=False)
+        if x ** 2 + y ** 2 + z ** 2 != 0.:
+            MoveInstrumentComponent(Workspace=ws, ComponentName='sample-position', X=x, Y=y, Z=z,
+                                    RelativePosition=False)
         distance = self._get_pulse_chopper_info(mtd[ws].getRun(), self._pulse_chopper)[2]
         if distance != 0.:
             MoveInstrumentComponent(Workspace=ws, ComponentName='chopper', Z=-distance, RelativePosition=False)
@@ -604,7 +616,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             grouping_file = os.path.join(config['groupingFiles.directory'], equator_grouping_filename)
             GroupDetectors(InputWorkspace=ws, OutputWorkspace=equator_ws, MapFile=grouping_file)
             to_crop = mtd[ws].blocksize() / 4
-            CropWorkspace(InputWorkspace=equator_ws, OutputWorkspace=equator_ws, XMin=to_crop, XMax=3*to_crop)
+            CropWorkspace(InputWorkspace=equator_ws, OutputWorkspace=equator_ws, XMin=to_crop, XMax=3 * to_crop)
             FindEPP(InputWorkspace=equator_ws, OutputWorkspace=equator_epp_ws)
             DeleteWorkspace(equator_ws)
 
@@ -621,8 +633,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 single_det_ws = _make_name(ws, "sds")
                 ExtractSpectra(InputWorkspace=ws,
                                OutputWorkspace=single_det_ws,
-                               StartWorkspaceIndex=N_TUBES*N_PIXELS_PER_TUBE + offset,
-                               EndWorkspaceIndex=N_TUBES*N_PIXELS_PER_TUBE + single_detectors + offset - 1)
+                               StartWorkspaceIndex=N_TUBES * N_PIXELS_PER_TUBE + offset,
+                               EndWorkspaceIndex=N_TUBES * N_PIXELS_PER_TUBE + single_detectors + offset - 1)
                 FindEPP(InputWorkspace=single_det_ws, OutputWorkspace=epp_ws)
                 self._create_elastic_channel_ws(mtd[epp_ws], mtd[ws].getRun(), mtd[equator_epp_ws],
                                                 single_detectors=single_detectors)
@@ -654,7 +666,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         rebin_ws = _make_name(ws, 'rebin')
         ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='DeltaE', EMode='Indirect')
-        ExtractSingleSpectrum(InputWorkspace=ws, OutputWorkspace=rebin_ws, WorkspaceIndex=int(N_PIXELS_PER_TUBE/2))
+        ExtractSingleSpectrum(InputWorkspace=ws, OutputWorkspace=rebin_ws, WorkspaceIndex=int(N_PIXELS_PER_TUBE / 2))
         RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=rebin_ws, OutputWorkspace=ws)
         if self._group_detectors:
             self._do_group_detectors(ws)
@@ -674,7 +686,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             for j in range(N_PIXELS_PER_TUBE // by):
                 start = i * N_PIXELS_PER_TUBE + j * by + offset
                 end = start + by - 1
-                pattern += str(start)+'-'+str(end)+','
+                pattern += str(start) + '-' + str(end) + ','
 
         for single_det in range(single_detectors):
             sd_index = N_TUBES * N_PIXELS_PER_TUBE + single_det + offset
@@ -699,7 +711,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         @param ws :: input workspace name
         """
 
-        mon = '__mon_'+ws
+        mon = '__mon_' + ws
 
         ExtractSingleSpectrum(InputWorkspace=ws, OutputWorkspace=mon, WorkspaceIndex=0)
 
@@ -713,7 +725,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         if self._reduction_type == 'QENS':
             if self._dead_channels:
-                CropWorkspace(InputWorkspace=ws,OutputWorkspace=ws,XMin=float(xmin),XMax=float(xmax+1.))
+                CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws, XMin=float(xmin), XMax=float(xmax + 1.))
                 ScaleX(InputWorkspace=ws, OutputWorkspace=ws, Factor=-float(xmin), Operation='Add')
             else:
                 self._mask(ws, xmin, xmax)
@@ -731,8 +743,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             target = 'ElasticQSquared'
 
         if self._spectrum_axis != 'SpectrumNumber':
-            ConvertSpectrumAxis(InputWorkspace=ws,OutputWorkspace=ws,
-                                EMode='Indirect',Target=target,EFixed=self._efixed)
+            ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws,
+                                EMode='Indirect', Target=target, EFixed=self._efixed)
 
     def _group_detectors_with_range(self, ws):
         """
@@ -789,7 +801,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         if self._reduction_type == 'QENS':
             # Normalise bin-to-bin, do not use NormaliseToMonitor, it uses scaling that we don't want
-            Divide(LHSWorkspace=ws,OutputWorkspace=ws,RHSWorkspace=mon)
+            Divide(LHSWorkspace=ws, OutputWorkspace=ws, RHSWorkspace=mon)
 
         elif self._reduction_type == 'EFWS':
             # Integrate over the whole range
@@ -798,7 +810,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             Integration(InputWorkspace=mon, OutputWorkspace=int_ws,
                         RangeLower=x[0], RangeUpper=x[-1])
 
-            if mtd[int_ws].readY(0)[0] !=0: # this needs to be checked
+            if mtd[int_ws].readY(0)[0] != 0:  # this needs to be checked
                 Scale(InputWorkspace=ws, OutputWorkspace=ws, Factor=1. / mtd[int_ws].readY(0)[0])
 
             # remember the integral of the monitor
@@ -817,22 +829,23 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             int_ws = '__integral_' + ws
 
             Integration(InputWorkspace=mon, OutputWorkspace=i1,
-                        RangeLower=x[0], RangeUpper=x[2*x_start])
+                        RangeLower=x[0], RangeUpper=x[2 * x_start])
 
             Integration(InputWorkspace=mon, OutputWorkspace=i2,
-                        RangeLower=x[-2*(size - x_end)], RangeUpper=x[-1])
+                        RangeLower=x[-2 * (size - x_end)], RangeUpper=x[-1])
 
-            Plus(LHSWorkspace=i1,RHSWorkspace=i2,OutputWorkspace=int_ws)
+            Plus(LHSWorkspace=i1, RHSWorkspace=i2, OutputWorkspace=int_ws)
 
-            if mtd[int_ws].readY(0)[0] != 0: # this needs to be checked
-                Scale(InputWorkspace=ws, OutputWorkspace=ws, Factor=1./mtd[int_ws].readY(0)[0])
+            if mtd[int_ws].readY(0)[0] != 0:  # this needs to be checked
+                Scale(InputWorkspace=ws, OutputWorkspace=ws, Factor=1. / mtd[int_ws].readY(0)[0])
 
             # remember the integral of the monitor
             AddSampleLog(Workspace=ws, LogName="MonitorIntegral", LogType="Number",
                          LogText=str(mtd[int_ws].readY(0)[0]), EnableLogging=False)
 
             # store the x_start and x_end derived from monitor, needed later for integration
-            AddSampleLogMultiple(Workspace=ws,LogNames=['MonitorLeftPeak', 'MonitorRightPeak'],LogValues=[x_start, x_end])
+            AddSampleLogMultiple(Workspace=ws, LogNames=['MonitorLeftPeak', 'MonitorRightPeak'],
+                                 LogValues=[x_start, x_end])
 
             DeleteWorkspace(i1)
             DeleteWorkspace(i2)
