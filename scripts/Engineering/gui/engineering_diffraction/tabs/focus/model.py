@@ -53,7 +53,7 @@ class FocusModel(object):
                 logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
                 return
         else:
-            full_calib_workspace = Ads.Instance().retrieve("full_inst_calib")
+            full_calib_workspace = Ads.retrieve("full_inst_calib")
         if not Ads.doesExist(vanadium_corrections.INTEGRATED_WORKSPACE_NAME) and not Ads.doesExist(
                 vanadium_corrections.CURVES_WORKSPACE_NAME):
             return

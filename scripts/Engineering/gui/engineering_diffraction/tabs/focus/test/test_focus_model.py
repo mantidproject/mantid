@@ -17,6 +17,14 @@ from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import
 
 file_path = "Engineering.gui.engineering_diffraction.tabs.focus.model"
 
+DF_KWARG_NORTH = {'GroupingFileName': 'EnginX_NorthBank.cal'}
+DF_KWARG_SOUTH = {'GroupingFileName': 'EnginX_SouthBank.cal'}
+DF_KWARG_CUSTOM = {'GroupingWorkspace': 'custom_grouping_wsp'}
+
+
+def clone_ws_side_effect(ws):
+    return ws
+
 
 class FocusModelTest(unittest.TestCase):
     def setUp(self):
@@ -29,47 +37,68 @@ class FocusModelTest(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.test_dir)
 
+    @patch(file_path + ".Load")
     @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + ".vanadium_corrections.Ads.doesExist")
-    def test_focus_cancelled_if_van_wsp_missing(self, ads_exist, load):
+    def test_focus_cancelled_if_van_wsp_missing(self, ads_exist, load_sample, load):
         ads_exist.return_value = False
-        self.model.focus_run("307593", ["1", "2"], False, "ENGINX", "0", None)
-        self.assertEqual(load.call_count, 0)
+        self.model.focus_run("307593", ["1", "2"], False, "ENGINX", "0", None, None)
+        self.assertEqual(load_sample.call_count, 0)
 
+    @patch(file_path + ".DeleteWorkspace")
+    @patch(file_path + ".CloneWorkspace")
+    @patch(file_path + ".Load")
     @patch(file_path + ".FocusModel._output_sample_logs")
     @patch(file_path + ".Ads")
     @patch(file_path + ".FocusModel._save_output")
     @patch(file_path + ".FocusModel._run_focus")
     @patch(file_path + ".path_handling.load_workspace")
-    def test_focus_run_for_each_bank(self, load_focus, run_focus, output, ads, logs):
+    def test_focus_run_for_each_bank(self, load_focus, run_focus, output, ads, logs, load, clone, delete):
         ads.retrieve.return_value = "test_wsp"
         banks = ["1", "2"]
         load_focus.return_value = "mocked_sample"
+        clone.side_effect = clone_ws_side_effect
 
-        self.model.focus_run(["305761"], banks, False, "ENGINX", "0", None)
+        self.model.focus_run(["305761"], banks, False, "ENGINX", "0", None, None)
 
         self.assertEqual(len(banks), run_focus.call_count)
         run_focus.assert_called_with("mocked_sample",
                                      "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + banks[-1],
-                                     "test_wsp", "test_wsp", banks[-1], None)
+                                     "test_wsp", "test_wsp", DF_KWARG_SOUTH, "test_wsp", "engggui_calibration_bank_2")
 
+                    #"""input_workspace,
+                   # tof_output_name,
+                   # vanadium_integration_ws,
+                   # vanadium_curves_ws,
+                   # df_kwarg,
+                   # full_calib,
+                   # region_calib)"""
+
+    @patch(file_path + ".create_custom_grouping_workspace")
+    @patch(file_path + ".DeleteWorkspace")
+    @patch(file_path + ".CloneWorkspace")
+    @patch(file_path + ".Load")
     @patch(file_path + ".FocusModel._output_sample_logs")
     @patch(file_path + ".Ads")
     @patch(file_path + ".FocusModel._save_output")
     @patch(file_path + ".FocusModel._run_focus")
     @patch(file_path + ".path_handling.load_workspace")
-    def test_focus_run_for_custom_spectra(self, load_focus, run_focus, output, ads, logs):
+    def test_focus_run_for_custom_spectra(self, load_focus, run_focus, output, ads, logs, load, clone, delete, cgw):
         ads.retrieve.return_value = "test_wsp"
         spectra = "20-50"
         load_focus.return_value = "mocked_sample"
+        cgw.return_value = "custom_grouping_wsp"
 
-        self.model.focus_run(["305761"], None, False, "ENGINX", "0", spectra)
+        self.model.focus_run(["305761"], None, False, "ENGINX", "0", spectra, None)
 
         self.assertEqual(1, run_focus.call_count)
         run_focus.assert_called_with("mocked_sample",
                                      "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + "cropped",
-                                     "test_wsp", "test_wsp", None, None, spectra)
+                                     "test_wsp", "test_wsp", DF_KWARG_CUSTOM, "test_wsp", "engggui_calibration_cropped")
 
+    @patch(file_path + ".DeleteWorkspace")
+    @patch(file_path + ".CloneWorkspace")
+    @patch(file_path + ".Load")
     @patch(file_path + ".FocusModel._output_sample_logs")
     @patch(file_path + ".Ads")
     @patch(file_path + ".FocusModel._save_output")
@@ -77,17 +106,20 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + ".FocusModel._run_focus")
     @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
-    def test_focus_plotted_when_checked(self, fetch_van, load_focus, run_focus, plot_focus, output,
-                                        ads, logs):
+    def test_focus_plotted_when_checked(self, fetch_van, load_focus, run_focus, plot_focus, output, ads, logs, load,
+                                        clone, delete):
         ads.doesExist.return_value = True
         fetch_van.return_value = ("mocked_integ", "mocked_curves")
         banks = ["1", "2"]
         load_focus.return_value = "mocked_sample"
 
-        self.model.focus_run(["305761"], banks, True, "ENGINX", "0", None)
+        self.model.focus_run(["305761"], banks, True, "ENGINX", "0", None, None)
 
         self.assertEqual(1, plot_focus.call_count)
 
+    @patch(file_path + ".DeleteWorkspace")
+    @patch(file_path + ".CloneWorkspace")
+    @patch(file_path + ".Load")
     @patch(file_path + ".FocusModel._output_sample_logs")
     @patch(file_path + ".Ads")
     @patch(file_path + ".FocusModel._save_output")
@@ -95,13 +127,13 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + ".FocusModel._run_focus")
     @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
-    def test_focus_not_plotted_when_not_checked(self, fetch_van, load_focus, run_focus, plot_focus,
-                                                output, ads, logs):
+    def test_focus_not_plotted_when_not_checked(self, fetch_van, load_focus, run_focus, plot_focus, output, ads, logs,
+                                                load, clone, delete):
         fetch_van.return_value = ("mocked_integ", "mocked_curves")
         banks = ["1", "2"]
         load_focus.return_value = "mocked_sample"
 
-        self.model.focus_run("305761", banks, False, "ENGINX", "0", None)
+        self.model.focus_run("305761", banks, False, "ENGINX", "0", None, None)
         self.assertEqual(0, plot_focus.call_count)
 
     @patch(file_path + ".SaveFocusedXYE")
