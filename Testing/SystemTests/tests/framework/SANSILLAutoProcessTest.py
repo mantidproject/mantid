@@ -448,14 +448,11 @@ class D11B_AutoProcess_DirectBeamResolution_Test(systemtesting.MantidSystemTest)
         thickness = 0.2
 
         # reduce samples
-        # this also tests that already loaded workspace can be passed instead of a file
-        LoadNexusProcessed(Filename='sens-lamp.nxs', OutputWorkspace='sens-lamp')
         SANSILLAutoProcess(
             SampleRuns=samples,
             BeamRuns=beams,
             ContainerRuns=containers,
             MaskFiles='002652_mask_bs_2m,002692_mask_bs_8m,002712_mask_bs_28m',
-            SensitivityMaps='sens-lamp',
             SampleTransmissionRuns=sample_tr,
             ContainerTransmissionRuns=container_tr,
             TransmissionBeamRuns=beam_tr,
