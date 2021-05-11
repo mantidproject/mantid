@@ -19,7 +19,7 @@ CURVES_WORKSPACE_NAME = "engggui_vanadium_curves"
 INPUT_WORKSPACE_NAME = "engggui_vanadium_ws"
 TEST_PRM_FILE = "ENGINX_241391_236516_testall_banks.prm"
 class_path = "Engineering.gui.engineering_diffraction.tabs.calibration.model.CalibrationModel"
-file_path = "Engineering.gui.engineering_diffraction.tabs.calibration.model" # todo replace dis
+file_path = "Engineering.gui.engineering_diffraction.tabs.calibration.model"
 
 
 def _convert_units_returns(bank):
@@ -52,6 +52,7 @@ class CalibrationModelTest(unittest.TestCase):
         self.assertRaises(RuntimeError, self.model.create_new_calibration, "307521", "FAIL", True,
                           "ENGINX")
 
+    @patch(file_path + ".DeleteWorkspace")
     @patch(class_path + ".update_calibration_params_table")
     @patch(class_path + ".create_output_files")
     @patch(file_path + ".vanadium_corrections.handle_van_curves")
@@ -60,7 +61,7 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(class_path + ".run_calibration")
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
     def test_fetch_vanadium_is_called(self, van_corr, calibrate_alg, load_sample, load, handle_vc, output_files,
-                                      update_table):
+                                      update_table, delet):
         van_corr.return_value = ("mocked_integration", "mocked_curves")
         calibrate_alg.return_value = _run_calibration_returns()
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
@@ -95,6 +96,7 @@ class CalibrationModelTest(unittest.TestCase):
                                    OutputWorkspace="engggui_calibration_bank_2")
         self.assertEqual([expected_call_north, expected_call_south], load.call_args_list)
 
+    @patch(file_path + ".DeleteWorkspace")
     @patch(class_path + ".update_calibration_params_table")
     @patch(class_path + ".create_output_files")
     @patch(file_path + ".path_handling.load_workspace")
@@ -104,8 +106,8 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(class_path + "._generate_tof_fit_workspace")
     @patch(class_path + "._plot_tof_fit")
     @patch(class_path + ".run_calibration")
-    def test_plotting_check(self, calib, plot_tof, gen_tof, load, handle_vc, van, sample,
-                            output_files, update_table):
+    def test_plotting_check(self, calib, plot_tof, gen_tof, load, handle_vc, van, sample, output_files, update_table,
+                            delete):
         calib.return_value = _run_calibration_returns()
         van.return_value = ("A", "B")
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
@@ -115,6 +117,7 @@ class CalibrationModelTest(unittest.TestCase):
         self.assertEqual(gen_tof.call_count, 2)
         self.assertEqual(plot_tof.call_count, 1)
 
+    @patch(file_path + ".DeleteWorkspace")
     @patch(class_path + ".update_calibration_params_table")
     @patch(class_path + ".create_output_files")
     @patch(file_path + ".path_handling.load_workspace")
@@ -125,8 +128,8 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(class_path + "._plot_tof_fit")
     @patch(class_path + "._plot_tof_fit_single_bank_or_custom")
     @patch(class_path + ".run_calibration")
-    def test_plotting_check_cropped(self, calib, plot_tof_cus, plot_tof_fit, gen_tof, load, handle_vc,
-                                    van, sample, output_files, update_table):
+    def test_plotting_check_cropped(self, calib, plot_tof_cus, plot_tof_fit, gen_tof, load, handle_vc, van, sample,
+                                    output_files, update_table, delete):
         calib.return_value = _run_calibration_returns(single_output=True)
         van.return_value = ("A", "B")
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
@@ -138,6 +141,7 @@ class CalibrationModelTest(unittest.TestCase):
         plot_tof_fit.assert_not_called()
         self.assertEqual(plot_tof_cus.call_count, 1)
 
+    @patch(file_path + ".DeleteWorkspace")
     @patch(class_path + ".update_calibration_params_table")
     @patch(class_path + ".create_output_files")
     @patch(file_path + ".path_handling.load_workspace")
@@ -146,9 +150,8 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(file_path + ".Load")
     @patch(class_path + "._plot_tof_fit")
     @patch(class_path + ".run_calibration")
-    def test_present_RB_number_results_in_user_output_files(self, calib, plot_tof, load, handle_vc,
-                                                            van, sample, output_files,
-                                                            update_table):
+    def test_present_RB_number_results_in_user_output_files(self, calib, plot_tof, load, handle_vc, van, sample,
+                                                            output_files, update_table, delete):
         van.return_value = ("A", "B")
         calib.return_value = _run_calibration_returns()
         self.model.create_new_calibration(VANADIUM_NUMBER,
@@ -158,6 +161,7 @@ class CalibrationModelTest(unittest.TestCase):
                                           rb_num="00110")
         self.assertEqual(output_files.call_count, 2)
 
+    @patch(file_path + ".DeleteWorkspace")
     @patch(class_path + ".update_calibration_params_table")
     @patch(class_path + ".create_output_files")
     @patch(file_path + ".path_handling.load_workspace")
@@ -167,13 +171,13 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(class_path + "._plot_tof_fit")
     @patch(class_path + ".run_calibration")
     def test_absent_run_number_results_in_no_user_output_files(self, calib, plot_tof, load, handle_vc,
-                                                               van, sample, output_files,
-                                                               update_table):
+                                                               van, sample, output_files, update_table, delete):
         calib.return_value = _run_calibration_returns()
         van.return_value = ("A", "B")
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
         self.assertEqual(output_files.call_count, 1)
 
+    @patch(file_path + ".DeleteWorkspace")
     @patch(class_path + ".update_calibration_params_table")
     @patch(class_path + ".create_output_files")
     @patch(file_path + ".path_handling.load_workspace")
@@ -182,7 +186,7 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
     @patch(class_path + ".run_calibration")
     def test_calibration_params_table_is_updated(self, calibrate_alg, vanadium_alg, load, handle_vc, load_sample,
-                                                 output_files, update_table):
+                                                 output_files, update_table, delete):
         calibrate_alg.return_value = _run_calibration_returns()
         vanadium_alg.return_value = ("A", "B")
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
