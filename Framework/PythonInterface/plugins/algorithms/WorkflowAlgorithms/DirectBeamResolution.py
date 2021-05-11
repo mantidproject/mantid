@@ -33,7 +33,7 @@ class DirectBeamResolution:
         """
         self._wavelength = wavelength
         self._delta_wavelength = delta_wavelength**2
-        self._delta_theta = beam_width**2
+        self._delta_theta = (beam_width*0.5)**2 # converts 2theta to theta
 
     def _delta_q(self, q):
         """
