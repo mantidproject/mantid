@@ -532,6 +532,16 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
                       << "half-height point will not be as accurate.\n";
       ip1--;
     }
+    // similarly, noise may cause two points around the
+    while (peak_y[ip1] == peak_y[ip2]) { // TODO: shold be smoothing with runnign average here
+      g_log.warning() << "A peak with a constant values on the trailing edge has "
+                         "been found. The estimation of the "
+                      << "half-height point will not be as accurate.\n";
+      ip1--;
+      if (ip1 < 0)
+        throw std::invalid_argument("trailing edge values are equal unil the start of the peak");
+    }
+
     xp_hh = peak_x[ip2] + (peak_x[ip1] - peak_x[ip2]) * ((hby2 - peak_y[ip2]) / (peak_y[ip1] - peak_y[ip2]));
   } else {
     xp_hh = peak_x[nyvals - 1];
@@ -565,6 +575,15 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
                       << "half-height point will not be as accurate.\n";
       im1++;
     }
+    while (peak_y[im1] == peak_y[im2]) { // TODO: shoile be smoothing with runnign average here
+      g_log.warning() << "A peak with a constant values on the rising edge has "
+                         "been found. The estimation of the "
+                      << "half-height point will not be as accurate.\n";
+      im1++;
+      if (im1 >= peak_y.size())
+        throw std::invalid_argument("the rising edge values are equal unil the end of the peak");
+    }
+
     xm_hh = peak_x[im2] + (peak_x[im1] - peak_x[im2]) * ((hby2 - peak_y[im2]) / (peak_y[im1] - peak_y[im2]));
   } else {
     xm_hh = peak_x.front();
