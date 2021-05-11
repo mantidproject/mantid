@@ -229,9 +229,10 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
             if self.tf_asymmetry_mode:
                 self.function_name += TF_ASYMMETRY_FUNCTION_NAME_APPENDAGE
 
-    def check_datasets_are_tf_asymmetry_compliant(self) -> bool:
+    def check_datasets_are_tf_asymmetry_compliant(self, workspace_names: list = None) -> bool:
         """Returns true if the datasets stored in the model are compatible with TF Asymmetry mode."""
-        pair_names = [get_group_or_pair_from_name(item) for item in self.dataset_names if "Group" not in item]
+        workspace_names = self.dataset_names if workspace_names is None else workspace_names
+        pair_names = [get_group_or_pair_from_name(name) for name in workspace_names if "Group" not in name]
         return len(pair_names) == 0, pair_names
 
     def get_all_fit_functions(self) -> list:
