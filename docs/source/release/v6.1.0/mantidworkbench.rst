@@ -41,6 +41,7 @@ Plotting
 - It is now possible to overplot bin data from the matrix workspace view.
 - When a workspace is renamed it now updates the relevant plot labels with the new workspace name.
 - Added legend property commands to the plot script generator.
+- Plotting will accept grouped workspaces in addition to single workspaces in the list of workspaces to plot.
 
 Bugfixes
 --------
