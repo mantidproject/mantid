@@ -554,6 +554,24 @@ void AlignAndFocusPowder::exec() {
   m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   m_progress->report();
 
+  if (m_calibrationWS) {
+    // NOTE:
+    //  The conventional workflow for AlignAndFocusPowder allows users to modify the instrument so that the averaged
+    //  pixel position can be used when converting back to TOF.
+    //  With the recent changes in Unit.h, Mantid is using the averaged DIFC attached to workspace to convert from
+    //  d-spacing to TOF by default, which unfortunately breaks the intended workflow here.
+    //  To bypass this issue, we are going to remove the attached paramter map so taht Unit.h cannot perform the default
+    //  conversion, which will effectively forcing Mantid to revert back to the original intended method.
+    Workspace_sptr outputw = std::dynamic_pointer_cast<Workspace>(m_outputW);
+    API::IAlgorithm_sptr applyDiffCalAlg = createChildAlgorithm("ApplyDiffCal");
+    applyDiffCalAlg->setProperty("InstrumentWorkspace", outputw);
+    applyDiffCalAlg->setProperty("ClearCalibration", true);
+    applyDiffCalAlg->executeAsChildAlg();
+    // grab and cast
+    outputw = applyDiffCalAlg->getProperty("InstrumentWorkspace");
+    m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(outputw);
+  }
+
   // ----------------- WACKY LORENTZ THING HERE
   // TODO should call LorentzCorrection as a sub-algorithm
   if (applyLorentz) {
