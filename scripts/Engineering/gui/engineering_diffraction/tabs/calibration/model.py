@@ -123,7 +123,8 @@ class CalibrationModel(object):
 
     def load_existing_calibration_files(self, file_path):
         if not path.exists(file_path):
-            logger.warning("Could not open GSAS calibration file: ", file_path)
+            msg = "Could not open GSAS calibration file: " + file_path
+            logger.warning(msg)
             return
         try:
             instrument, van_no, ceria_no, params_table = self.get_info_from_file(file_path)
