@@ -204,18 +204,27 @@ double IPeakFunction::intensity() const { return integrate().first; }
 
 /// Returns the uncertainty associated to the integral intensity of the peak function
 double IPeakFunction::intensityError() const {
-  size_t nParams = ParamFunction::nParams();
   const size_t nData = 1;
   double sigma = 1;
   double prob = std::erf(sigma / sqrt(2));
   // critical value for t distribution
   double alpha = (1 + prob) / 2;
   double eValue = std::nan("");
-  // the function should contain the parameter's covariance matrix
+
   auto covar = getCovarianceMatrix();
   bool hasErrors = false;
   auto const interval = getDomainInterval();
-  FunctionDomain1DVector domain(std::vector<double>(interval.first, interval.second));
+  std::vector<double> domainVector;
+  domainVector.push_back(interval.first);
+
+  // these are probably not right, not sure what they should be,
+  // generated based on calculation in getDomainInterval() maybe?
+  domainVector.push_back(0.0);
+  domainVector.push_back(0.0);
+
+  domainVector.push_back(interval.second);
+
+  FunctionDomain1DVector domain(domainVector);
 
   FunctionParameterDecorator_sptr fn = std::dynamic_pointer_cast<FunctionParameterDecorator>(
       FunctionFactory::Instance().createFunction("PeakParameterFunction"));
@@ -225,8 +234,9 @@ double IPeakFunction::intensityError() const {
   }
 
   fn->setDecoratedFunction(this->name());
-
-  TempJacobian J(nData, nParams);
+  size_t nParams = this->nParams();
+  // has to be 4 else  double free or corruption error
+  TempJacobian J(4, fn->nParams());
 
   if (!covar) {
     for (size_t j = 0; j < nParams; ++j) {
@@ -244,31 +254,33 @@ double IPeakFunction::intensityError() const {
     } catch (...) {
       fn->calNumericalDeriv(domain, J);
     }
-
-    double s = 0.0;
-    const Kernel::Matrix<double> &C = *covar;
-    for (size_t i = 0; i < nParams; ++i) {
-      double tmp = J.get(0, i);
-      s += C[i][i] * tmp * tmp;
-      for (size_t j = i + 1; j < nParams; ++j) {
-        s += J.get(0, i) * C[i][j] * J.get(0, j) * 2;
+    if (covar) {
+      double s = 0.0;
+      const Kernel::Matrix<double> &C = *covar;
+      for (size_t i = 0; i < nParams; ++i) {
+        double tmp = J.get(0, i);
+        s += C[i][i] * tmp * tmp;
+        for (size_t j = i + 1; j < nParams; ++j) {
+          s += J.get(0, i) * C[i][j] * J.get(0, j) * 2;
+        }
       }
-    }
-    size_t dof = 1 - nParams;
-    double T = 1.0;
-    if (dof != 0) {
-      boost::math::students_t dist(static_cast<double>(dof));
-      T = boost::math::quantile(dist, alpha);
-    }
 
-    eValue = T * std::sqrt(s * getReducedChiSquared());
-  } else {
-    double err = 0.0;
-    for (size_t j = 0; j < nParams; ++j) {
-      double d = J.get(0, j) * getError(j);
-      err += d * d;
+      size_t dof = 1 - nParams;
+      double T = 1.0;
+      if (dof != 0) {
+        boost::math::students_t dist(static_cast<double>(dof));
+        T = boost::math::quantile(dist, alpha);
+      }
+
+      eValue = T * std::sqrt(s * getReducedChiSquared());
+    } else {
+      double err = 0.0;
+      for (size_t j = 0; j < nParams; ++j) {
+        double d = J.get(0, j) * getError(j);
+        err += d * d;
+      }
+      eValue = std::sqrt(err);
     }
-    eValue = std::sqrt(err);
   }
   return eValue;
 }

@@ -23,9 +23,12 @@ class MyPeak(IPeakFunction):
 
 class RectangularFunction(IPeakFunction):
     def init(self):
-        self.declareParameter("Height")
-        self.declareParameter("Fwhm")
-        self.declareParameter("Center")
+        if not self.hasParameter("Height"):
+            self.declareParameter("Height")
+        if not self.hasParameter("Fwhm"):
+            self.declareParameter("Fwhm")
+        if not self.hasParameter("Center"):
+            self.declareParameter("Center")
 
     def centre(self):
         return self.getParameterValue("Center")

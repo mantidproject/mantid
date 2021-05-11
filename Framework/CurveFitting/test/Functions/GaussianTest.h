@@ -155,17 +155,6 @@ public:
     TS_ASSERT(result1 != result2);
   }
 
-  void testIntensityError() {
-    std::shared_ptr<Gaussian> fn = std::make_shared<Gaussian>();
-    fn->initialize();
-    fn->setHeight(2.0);
-    fn->setFwhm(0.125);
-    fn->setCentre(-200.0);
-
-    // Area under a gaussian is height * sigma * sqrt(2 * pi)
-    TS_ASSERT_DELTA(fn->intensityError(), 0.0000000001, 1e-10);
-  }
-
   void testGetCentreParameterName() {
     std::shared_ptr<Gaussian> fn = std::make_shared<Gaussian>();
     fn->initialize();
