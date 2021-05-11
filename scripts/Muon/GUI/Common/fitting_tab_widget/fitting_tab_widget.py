@@ -25,11 +25,11 @@ class FittingTabWidget(object):
 
         if is_frequency_domain:
             self.fitting_tab_view = GeneralFittingView(parent, is_frequency_domain)
-            self.fitting_tab_model = GeneralFittingModel(context, is_frequency_domain)
+            self.fitting_tab_model = GeneralFittingModel(context)
             self.fitting_tab_presenter = GeneralFittingPresenter(self.fitting_tab_view, self.fitting_tab_model)
         else:
             self.fitting_tab_view = TFAsymmetryFittingView(parent, is_frequency_domain)
-            self.fitting_tab_model = TFAsymmetryFittingModel(context, is_frequency_domain)
+            self.fitting_tab_model = TFAsymmetryFittingModel(context)
             self.fitting_tab_presenter = TFAsymmetryFittingPresenter(self.fitting_tab_view, self.fitting_tab_model)
 
         self.fitting_tab_presenter.disable_fitting_notifier.add_subscriber(self.fitting_tab_view.disable_tab_observer)

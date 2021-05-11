@@ -16,30 +16,21 @@ class DataAnalysisContext(MuonContext):
         self.workspace_suffix = ' MA'
         self.base_directory = 'Muon Data'
 
-    def get_names_of_workspaces_to_fit(
-            self, runs='', group_and_pair='', rebin=False, freq="None"):
-        return self.get_names_of_time_domain_workspaces_to_fit(
-            runs=runs, group_and_pair=group_and_pair, rebin=rebin)
-
-    def get_names_of_time_domain_workspaces_to_fit(
-            self, runs='', group_and_pair='', rebin=False):
-        group, pair = self.get_group_and_pair(group_and_pair)
-
-        if runs.find(',') != -1 or runs.find('-') != -1:
-            # Can assume to be all as if found then must be using co-add which is all runs
-            runs = 'All'
-        run_list = self.get_runs(runs)
-
-        group_names = self.group_pair_context.get_group_workspace_names(
-            run_list, group, rebin)
-        pair_names = self.group_pair_context.get_pair_workspace_names(
-            run_list, pair, rebin)
-
-        return group_names + pair_names
+    def get_workspace_names_of_fit_data_with_run(self, run: int, group_and_pair: str) -> list:
+        """Returns the workspace names of the data to fit with the provided run and group/pair."""
+        return self.get_workspace_names_of_data_with_run(run, group_and_pair)
 
     @property
     def default_fitting_plot_range(self):
         return self.default_data_plot_range
+
+    @property
+    def default_end_x(self):
+        return 15.0
+
+    @property
+    def guess_workspace_prefix(self):
+        return "__muon_analysis_fitting_guess"
 
     @property
     def window_title(self):

@@ -49,8 +49,10 @@ def get_y_min_max_between_x_range(line, x_min, x_max, y_min, y_max):
 
 class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
-    def __init__(self, quick_edit, min_y_range, y_axis_margin, parent=None):
+    def __init__(self, quick_edit, min_y_range, y_axis_margin, context, parent=None):
         super().__init__(parent)
+        self._context = context
+
         # later we will allow these to be changed in the settings
         self._min_y_range = min_y_range
         self._y_axis_margin = y_axis_margin
@@ -291,9 +293,22 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
     def _redraw_legend(self):
         for ax in self.fig.axes:
-            if ax.get_legend_handles_labels()[0]:
-                legend = ax.legend(prop=dict(size=5))
+            handles, labels = ax.get_legend_handles_labels()
+            if handles:
+                handles, labels = self._sort_labels(handles, labels)
+                legend = ax.legend(handles, labels, prop=dict(size=5))
                 legend_set_draggable(legend, True)
+
+    def _sort_labels(self, handles, labels):
+        indices = self._context.get_indices_to_reorder_workspace_names([plot_info.workspace_name for plot_info in
+                                                                        self.plotted_workspace_information])
+        if len(indices) == len(labels):
+            handles, labels = self._sort_labels_with(indices, handles, labels)
+        return handles, labels
+
+    def _sort_labels_with(self, indices, handles, labels) -> list:
+        handles_and_labels = [item for _, item in sorted(zip(indices, zip(handles, labels)), key=lambda x: x[0])]
+        return zip(*handles_and_labels)
 
     def _get_plot_kwargs(self, workspace_info: WorkspacePlotInformation):
         label = workspace_info.label

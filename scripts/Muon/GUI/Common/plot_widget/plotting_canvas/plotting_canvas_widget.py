@@ -17,7 +17,7 @@ class PlottingCanvasWidget(object):
 
         self._figure_options = QuickEditWidget(context.plotting_context, parent)
         self._plotting_view = PlottingCanvasView(self._figure_options.widget, context.plotting_context.min_y_range,
-                                                 context.plotting_context.y_axis_margin, parent)
+                                                 context.plotting_context.y_axis_margin, context, parent=parent)
         self._model = PlottingCanvasModel(context)
         self._presenter = PlottingCanvasPresenter(self._plotting_view, self._model, self._figure_options,
                                                   context.plotting_context)

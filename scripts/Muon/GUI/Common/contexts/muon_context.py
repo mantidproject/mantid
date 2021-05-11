@@ -530,6 +530,40 @@ class MuonContext(object):
 
         return equivalent_list
 
+    def get_indices_to_reorder_workspace_names(self, unordered_names: list) -> list:
+        """Returns a list of indices used to reorder the provided names to match the order seen in the grouping tab."""
+        ordered_names = self.get_all_workspace_names_of_data()
+        order = []
+        for name1 in unordered_names:
+            for name2 in ordered_names:
+                if name2 in name1:
+                    order.append(ordered_names.index(name2))
+                    break
+        return order
+
+    def get_all_workspace_names_of_data(self) -> list:
+        """Returns the names of all workspaces loaded into the interface including non-selected workspaces."""
+        return self.get_workspace_names_for("All", self.group_pair_context.all_group_pair_and_diff_names,
+                                            self.get_workspace_names_of_data_with_run)
+
+    def get_workspace_names_for(self, runs: str, groups_and_pairs: list, get_workspace_names) -> list:
+        """Returns the workspace names for the provided runs and groups/pairs using a specific function."""
+        workspace_names = []
+        for run in self.get_runs(runs):
+            for group_and_pair in groups_and_pairs:
+                workspace_names += get_workspace_names(run, group_and_pair)
+
+        return workspace_names
+
+    def get_workspace_names_of_data_with_run(self, run: int, group_and_pair: str):
+        """Returns the workspace names of the loaded data with the provided run and group/pair."""
+        group, pair = self.get_group_and_pair(group_and_pair)
+
+        group_names = self.group_pair_context.get_group_workspace_names([run], group, not self.fitting_context.fit_raw)
+        pair_names = self.group_pair_context.get_pair_workspace_names([run], pair, not self.fitting_context.fit_raw)
+
+        return group_names + pair_names
+
     def remove_workspace(self, workspace):
         # required as the renameHandler returns a name instead of a workspace.
         if isinstance(workspace, str):
