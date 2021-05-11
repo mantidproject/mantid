@@ -302,23 +302,19 @@ class SANSILLReduction(PythonAlgorithm):
         # masking however is needed to get more reasonable scales in the instrument view
         MaskDetectors(Workspace=ws, DetectorList=[monID, monID+1])
 
-    def _fit_beam_width(self, input_ws):
+    def _get_vertical_grouping_pattern(self, ws):
         """
-            Groups detectors vertically and fits the horizontal beam width with a Gaussian distribution to obtain
-            horizontal beam resolution wich is added to sample logs under 'BeamWidthVertical' entry.
-            :param input_ws: Empty beam workspace
+        Provides vertical grouping pattern and crops to the main detector panel where counts from the beam are measured.
+        :param ws: Empty beam workspace.
         """
-        tmp_ws = input_ws + '_beam_width'
-        CloneWorkspace(InputWorkspace=input_ws, OutputWorkspace=tmp_ws)
-        instrument = mtd[input_ws].getInstrument()
-        inst_name = instrument.getName()
+        inst_name = mtd[ws].getInstrument().getName()
         min_id = 0
         if 'D11' in inst_name:
             step = 128
             if 'lr' in inst_name:
                 max_id = 16383
             elif 'B' in inst_name:
-                CropToComponent(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws, ComponentNames='detector_center')
+                CropToComponent(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames='detector_center')
                 max_id = 49152
                 step = 192
             else:
@@ -330,15 +326,27 @@ class SANSILLReduction(PythonAlgorithm):
                 step = 128
                 max_id = 16383
             elif 'B' in inst_name:
-                CropToComponent(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws, ComponentNames='detector_back')
+                CropToComponent(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames='detector_back')
         elif 'D33' in inst_name:
-            CropToComponent(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws, ComponentNames='back_detector')
+            CropToComponent(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames='back_detector')
             max_id = 32768
             step = 128
         else:
             self.log().warning('Instruments other than D11, D22, and D33 are not yet supported.')
             return
-        grouping_pattern = ','.join(["{}-{}".format(start, start+step-1) for start in range(min_id, max_id, step)])
+        return ','.join(["{}-{}".format(start, start + step - 1) for start in range(min_id, max_id, step)])
+
+    def _fit_beam_width(self, input_ws):
+        """
+            Groups detectors vertically and fits the horizontal beam width with a Gaussian distribution to obtain
+            horizontal beam resolution wich is added to sample logs under 'BeamWidthVertical' entry.
+            :param input_ws: Empty beam workspace
+        """
+        tmp_ws = input_ws + '_beam_width'
+        CloneWorkspace(InputWorkspace=input_ws, OutputWorkspace=tmp_ws)
+        grouping_pattern = self._get_vertical_grouping_pattern(tmp_ws)
+        if not grouping_pattern: # unsupported instrument
+            return
         GroupDetectors(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws, GroupingPattern=grouping_pattern)
         ConvertSpectrumAxis(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws, Target='SignedInPlaneTwoTheta')
         Transpose(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws)
