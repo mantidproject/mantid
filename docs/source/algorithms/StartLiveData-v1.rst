@@ -63,14 +63,9 @@ Due to the nature of the intermediate buffer it is not possible to avoid having 
 Live Plots
 ##########
 
-Once live data monitoring has started, you can open a plot in
-MantidPlot. For example, you can right-click a workspace and choose
-"Plot Spectra".
+Once live data monitoring has started, you can open a plot and as the data is
+acquired, this plot updates automatically.
 
-As the data is acquired, this plot updates automatically.
-
-Another way to start plots is to use `python MantidPlot
-commands <MantidPlot:_Help#Python_Scripting_in_MantidPlot>`__. The
 StartLiveData algorithm returns after the first chunk of data has been
 loaded and processed. This makes it simple to write a script that will
 open a live plot. For example:

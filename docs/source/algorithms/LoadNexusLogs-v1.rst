@@ -11,8 +11,8 @@ Description
 
 The **LoadNexusLogs**
 algorithm loads the sample logs from the given `NeXus <http://www.nexusformat.org>`__
-file. The logs are visible from MantidPlot if you right-click on a workspace and
-select "Sample Logs...".
+file. The logs are visible from :ref:`MantidWorkbench <workbench>`
+if you right-click on a workspace and select "Sample Logs...".
 
 If you use :ref:`LoadEventNexus <algm-LoadEventNexus>`
 or
