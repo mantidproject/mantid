@@ -37,6 +37,7 @@ else:
     SET_DRAGGABLE_METHOD = "draggable()"
 FIT_DOCUMENTATION_STRING = "# Fit definition, see https://docs.mantidproject.org/algorithms/Fit-v1.html for more " \
                            "details"
+TICKER_FORMATTER_IMPORT = "from matplotlib.ticker import NullFormatter, ScalarFormatter, LogFormatterSciNotation"
 
 
 def generate_script(fig, exclude_headers=False):
@@ -65,8 +66,7 @@ def generate_script(fig, exclude_headers=False):
     :return: A String. A script to recreate the given figure
     """
     plot_commands = []
-    plot_headers = ['import matplotlib.pyplot as plt', "from mantid.plots.utility import MantidAxType",
-                    "from matplotlib.ticker import NullFormatter, ScalarFormatter, LogFormatterSciNotation"]
+    plot_headers = ['import matplotlib.pyplot as plt', "from mantid.plots.utility import MantidAxType"]
 
     for ax in fig.get_axes():
         if not isinstance(ax, MantidAxes):
@@ -86,6 +86,14 @@ def generate_script(fig, exclude_headers=False):
         plot_commands.extend(get_axis_label_cmds(ax, ax_object_var))  # ax.set_label
         plot_commands.extend(get_axis_limit_cmds(ax, ax_object_var))  # ax.set_lim
         plot_commands.extend(get_axis_scale_cmds(ax, ax_object_var))  # ax.set_scale
+
+        # Only add the ticker import to headers if it's needed.
+        formatter_commands = get_tick_formatter_commands(ax, ax_object_var)
+        if len(formatter_commands) > 0:
+            plot_commands.extend(formatter_commands)
+            if TICKER_FORMATTER_IMPORT not in plot_headers:
+                plot_headers.append(TICKER_FORMATTER_IMPORT)
+
         plot_commands.extend(get_tick_formatter_commands(ax, ax_object_var))  # ax.{x,y}axis.set_major_formatter
         plot_commands.extend(get_legend_cmds(ax, ax_object_var))  # ax.legend
         plot_commands.append('')
