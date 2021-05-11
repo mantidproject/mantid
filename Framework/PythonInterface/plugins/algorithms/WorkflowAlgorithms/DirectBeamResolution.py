@@ -39,7 +39,9 @@ class DirectBeamResolution:
 
     def _delta_q(self, q):
         """
-        Returns the sigma_Q at given q
+        Returns the sigma_Q at given q. Based on formula 59 in Small-Angle Neutron Scattering
+        and Applications in Soft Condensed Matter (2001), p. 723-782, doi:10.1007/978-1-4020-4465-6_13.
+        Please note that delta_theta refers to theta, which is half of the scattering angle.
         Args:
             q: Momentum transfer [inverse Angstrom]
         Returns: Absolute Q resolution [inverse Angstrom]
