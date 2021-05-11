@@ -57,9 +57,8 @@ class PeakActionsPresenter:
         """
         def response_invalid():
             logger.error(f'{event} is an invalid PeakActionsEvent')
-        responses = {'ERASING_MODE_CHANGED': self._remove_peaks,
-                     'ADDING_MODE_CHANGED': self._add_peaks
-                     }
+        responses = {PeakActionsEvent.ERASING_MODE_CHANGED: self._remove_peaks,
+                     PeakActionsEvent.ADDING_MODE_CHANGED: self._add_peaks}
         return responses.get(event, response_invalid)
 
     def append_peaksworkspace(self, name: str):
@@ -76,4 +75,3 @@ class PeakActionsPresenter:
 
     def _add_peaks(self):
         return NotImplementedError()
-

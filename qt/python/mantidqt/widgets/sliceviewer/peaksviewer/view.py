@@ -220,10 +220,9 @@ class PeaksViewerCollectionView(QWidget):
         self._setup_ui()
 
     def __getitem__(self, item: int) -> PeaksViewerView:
-        viewers = self._peaks_layout.children()
-        if len(viewers) > item:
-            raise IndexError(f'PeaksViewerCollectionView index out of range')
-        return viewers[item]
+        if item > self._peaks_layout.count():
+            raise IndexError('PeaksViewerCollectionView index out of range')
+        return self._peaks_layout.itemAt(item).widget()
 
     @property
     def peaks_actions_view(self) -> PeakActionsView :
