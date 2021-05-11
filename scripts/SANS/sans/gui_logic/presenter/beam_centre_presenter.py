@@ -68,10 +68,10 @@ class BeamCentrePresenter(object):
         # Enable button
         self._view.set_run_button_to_normal()
         # Update Centre Positions in model and GUI
-        self._view.lab_pos_1 = round(self._beam_centre_model.lab_pos_1, self.DECIMAL_PLACES_CENTRE_POS)
-        self._view.lab_pos_2 = round(self._beam_centre_model.lab_pos_2, self.DECIMAL_PLACES_CENTRE_POS)
-        self._view.hab_pos_1 = round(self._beam_centre_model.hab_pos_1, self.DECIMAL_PLACES_CENTRE_POS)
-        self._view.hab_pos_2 = round(self._beam_centre_model.hab_pos_2, self.DECIMAL_PLACES_CENTRE_POS)
+        self._view.lab_pos_1 = round(float(self._beam_centre_model.lab_pos_1), self.DECIMAL_PLACES_CENTRE_POS)
+        self._view.lab_pos_2 = round(float(self._beam_centre_model.lab_pos_2), self.DECIMAL_PLACES_CENTRE_POS)
+        self._view.hab_pos_1 = round(float(self._beam_centre_model.hab_pos_1), self.DECIMAL_PLACES_CENTRE_POS)
+        self._view.hab_pos_2 = round(float(self._beam_centre_model.hab_pos_2), self.DECIMAL_PLACES_CENTRE_POS)
 
     def on_processing_error_centre_finder(self, error):
         self._logger.warning("There has been an error. See more: {}".format(error))
@@ -129,11 +129,11 @@ class BeamCentrePresenter(object):
         hab_pos_1 = getattr(state_model, 'hab_pos_1') if getattr(state_model, 'hab_pos_1') else lab_pos_1
         hab_pos_2 = getattr(state_model, 'hab_pos_2') if getattr(state_model, 'hab_pos_2') else lab_pos_2
 
-        self._view.lab_pos_1 = round(lab_pos_1, self.DECIMAL_PLACES_CENTRE_POS)
-        self._view.lab_pos_2 = round(lab_pos_2, self.DECIMAL_PLACES_CENTRE_POS)
+        self._view.lab_pos_1 = round(float(lab_pos_1), self.DECIMAL_PLACES_CENTRE_POS)
+        self._view.lab_pos_2 = round(float(lab_pos_2), self.DECIMAL_PLACES_CENTRE_POS)
 
-        self._view.hab_pos_1 = round(hab_pos_1, self.DECIMAL_PLACES_CENTRE_POS)
-        self._view.hab_pos_2 = round(hab_pos_2, self.DECIMAL_PLACES_CENTRE_POS)
+        self._view.hab_pos_1 = round(float(hab_pos_1), self.DECIMAL_PLACES_CENTRE_POS)
+        self._view.hab_pos_2 = round(float(hab_pos_2), self.DECIMAL_PLACES_CENTRE_POS)
 
     def update_hab_selected(self):
         self._beam_centre_model.update_hab = True

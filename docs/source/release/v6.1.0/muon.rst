@@ -5,20 +5,20 @@ MuSR Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
-
 Muon Analysis 2 and Frequency Domain Analysis
 ---------------------------------------------
 
 New Features
 ############
-- Added a new "periods" button to the grouping tab which displays a table of information on periods (currently only supporting nexus V1 files).
+- **Added a new "periods" button to the grouping tab which displays a table of information on periods (currently only supporting nexus V1 files).**
 
-Improvements
-############
+.. figure:: ../../images/MuonAnalysis_PeriodsTable.png
+   :class: screenshot
+   :width: 500px
+   :align: right
+
+- Plotting ranges can now be edited individually for tile plots.
+- The muon fitting interface has been simplified.
 
 Bug fixes
 #########
@@ -31,36 +31,29 @@ Bug fixes
 ALC
 ---
 
-New Features
-############
-
 Improvements
 ############
 - Exported workspaces now have history.
 - The interface saves previous settings if possible instead of resetting.
 - The interface can now load runs from different directories/cycles
 
-Bug fixes
-##########
 
 Elemental Analysis
 ------------------
 
-New Features
+Improvements
 ############
-
-Bug fixes
-#########
 - Updated :ref:`LoadElementalAnalysisData <algm-LoadElementalAnalysisData>` algorithm to crop workspace.
 
 Algorithms
 ----------
+
+New Features
+############
+
 - Added the ability to specify the spectrum number in :ref:`FindPeaksAutomatic <algm-FindPeaksAutomatic>`.
 - Added :ref:`PeakMatching <algm-PeakMatching>` algorithm.
 - Added the ability to specify a Start and End X in :ref:`PSIBackgroundSubtraction <algm-PSIBackgroundSubtraction>`.
 - Added the ability to specify an optional Function to add onto the end of the default function in :ref:`PSIBackgroundSubtraction <algm-PSIBackgroundSubtraction>`.
-
-Fit Functions
--------------
 
 :ref:`Release 6.1.0 <v6.1.0>`
