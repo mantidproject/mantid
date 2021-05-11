@@ -312,8 +312,8 @@ class SANSILLReduction(PythonAlgorithm):
         CloneWorkspace(InputWorkspace=input_ws, OutputWorkspace=tmp_ws)
         instrument = mtd[input_ws].getInstrument()
         inst_name = instrument.getName()
+        min_id = 0
         if 'D11' in inst_name:
-            min_id = 0
             step = 128
             if 'lr' in inst_name:
                 max_id = 16383
@@ -323,8 +323,20 @@ class SANSILLReduction(PythonAlgorithm):
                 step = 192
             else:
                 max_id = 65536
+        elif 'D22' in inst_name:
+            max_id = 32768
+            step = 256
+            if 'lr' in inst_name:
+                step = 128
+                max_id = 16383
+            elif 'B' in inst_name:
+                CropToComponent(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws, ComponentNames='detector_back')
+        elif 'D33' in inst_name:
+            CropToComponent(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws, ComponentNames='back_detector')
+            max_id = 32768
+            step = 128
         else:
-            self.log().warning('Instruments other than D11 are not yet supported.')
+            self.log().warning('Instruments other than D11, D22, and D33 are not yet supported.')
             return
         grouping_pattern = ','.join(["{}-{}".format(start, start+step-1) for start in range(min_id, max_id, step)])
         GroupDetectors(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws, GroupingPattern=grouping_pattern)
