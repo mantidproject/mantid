@@ -19,7 +19,6 @@ Improvements
 
 Bugfixes
 ########
-- Fix crashing issue in :ref:`AlignAndFocusPowder<algm-AlignAndFocusPowder>` due to using new unit conversion APIs.
 
 Engineering Diffraction
 -----------------------
