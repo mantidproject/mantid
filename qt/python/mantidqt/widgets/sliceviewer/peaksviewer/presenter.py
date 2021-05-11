@@ -98,6 +98,7 @@ class PeaksViewerPresenter:
 
     def _clear_peaks(self):
         """Clear all peaks from this view"""
+        self.view.clear_table_selection()
         self.model.clear_peak_representations()
 
     def _overlay_peaks(self):
