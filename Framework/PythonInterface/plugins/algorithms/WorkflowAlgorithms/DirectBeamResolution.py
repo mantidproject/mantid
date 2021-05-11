@@ -34,6 +34,8 @@ class DirectBeamResolution:
         self._wavelength = wavelength
         self._delta_wavelength = delta_wavelength**2
         self._delta_theta = (beam_width*0.5)**2 # converts 2theta to theta
+        self._wavelength_coeff = (1/(2.0 * math.sqrt(2.0*math.log(2.0))))**2
+        self._k2 = (4.0 * math.pi / self._wavelength)**2
 
     def _delta_q(self, q):
         """
@@ -42,6 +44,4 @@ class DirectBeamResolution:
             q: Momentum transfer [inverse Angstrom]
         Returns: Absolute Q resolution [inverse Angstrom]
         """
-        wavelength_coeff = (1/(2.0 * math.sqrt(2.0*math.log(2.0))))**2
-        k = 4.0 * math.pi / self._wavelength
-        return math.sqrt(q**2 * wavelength_coeff * self._delta_wavelength + self._delta_theta * (k**2 - q**2))
+        return math.sqrt(q**2 * self._wavelength_coeff * self._delta_wavelength + self._delta_theta * (self._k2 - q**2))
