@@ -80,3 +80,4 @@ class PeakActionsPresenter:
     def peak_selected(self, x, y):
         if self._view.adding_mode_on:
             self._model.add_peak(x, y)
+            self.viewer_presenter.redraw_peaks()
