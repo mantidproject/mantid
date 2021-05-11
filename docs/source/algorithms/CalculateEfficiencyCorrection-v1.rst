@@ -85,10 +85,10 @@ Ouptut:
 
 .. testoutput:: ExBasicCalcualteEfficiencyCorrectionWithAlpha
 
-    Input workspace: [ 38.  38.  38.  38.  38.]
+    Input workspace: [ 40.  40.  40.  40.  40.]
     Correction workspace: [ 10.26463773   9.81128219   9.39826191   9.02042771   8.67347109]
-    Output workspace: [ 390.05623383  372.82872321  357.13395265  342.77625306  329.59190131]
-    Output workspace using WavelengthRange: [ 390.05623383  372.82872321  357.13395265  342.77625306  329.59190131]
+    Output workspace: [ 410.58550929  392.45128759  375.93047648  360.81710849  346.93884349]
+    Output workspace using WavelengthRange: [ 410.58550929  392.45128759  375.93047648  360.81710849  346.93884349]
 
 **Example - Basics of running CalculateEfficiencyCorrection with Density and ChemicalFormula.**
 
