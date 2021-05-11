@@ -126,6 +126,11 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         else:
             super().update_fit_function_in_model(fit_function)
 
+    def update_dataset_names_in_view_and_model(self):
+        """Updates the datasets currently displayed. TF Asymmetry mode is switched off if the datasets don't comply."""
+        super().update_dataset_names_in_view_and_model()
+        self._check_tf_asymmetry_compliance(self.model.tf_asymmetry_mode)
+
     def update_fit_function_in_view_from_model(self) -> None:
         """Updates the parameters of a fit function shown in the view."""
         super().update_fit_function_in_view_from_model()

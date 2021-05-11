@@ -129,7 +129,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
 
     def recalculate_tf_asymmetry_functions(self) -> bool:
         """Recalculates the TF Asymmetry functions based on the datasets and normal functions in the model."""
-        if self.tf_asymmetry_mode:
+        if self.tf_asymmetry_mode and self.check_datasets_are_tf_asymmetry_compliant():
             try:
                 self._recalculate_tf_asymmetry_functions()
             except RuntimeError:
