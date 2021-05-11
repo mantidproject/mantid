@@ -41,8 +41,8 @@ Improvements
 Elemental Analysis
 ------------------
 
-Bug fixes
-#########
+Improvements
+############
 - Updated :ref:`LoadElementalAnalysisData <algm-LoadElementalAnalysisData>` algorithm to crop workspace.
 
 Algorithms

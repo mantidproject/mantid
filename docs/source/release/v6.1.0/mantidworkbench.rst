@@ -13,10 +13,10 @@ General
 - **Added setting to allow user to select Floating/On Top behaviour for all the windows that are opened by workbench (plots, interfaces, etc.). For more detail see** :ref:`Window Behavior <WorkbenchWindowBehavior>`.
 
 .. figure:: ../../images/OntopfloatingWindows.gif
-   :width: 400px
+   :width: 800px
    :align: center
 
-- New command line options ``--version`` will print the version on mantid and exit. ``--error-on-warning`` will convert python warnings into exceptions. This is intended for developers so they can find deprecation warnings more easily.
+- New command line options: ``--version`` will print the version on mantid, ``--error-on-warning`` will convert python warnings into exceptions. This is intended for developers so they can find deprecation warnings more easily.
 - Calling python's `input` now raises an input dialog in the script editor and the iPython shell.
 - Improved the performance of the table workspace display for large datasets.
 - Added a sample material dialog that is accessed via the context menu in the workspace widget.
@@ -32,7 +32,7 @@ Interfaces
 ##########
 - Add a checkbox to freeze the rotation in the instrument viewer in Full 3D mode.
 - In instrument view when in tube selection mode, the sum of pixel counts is now output to the selection pane.
-- Automatic data export in DrILL now creates a header for ASCII files, through the new property in :ref:`SaveAscii <algm-SaveAscii>`. See the :ref:`SaveAscii <algm-SaveAscii>` for more information.
+- Automatic data export in DrILL now creates a header for ASCII files, through the new property in :ref:`SaveAscii <algm-SaveAscii>`.
 
 
 Plotting
@@ -56,7 +56,7 @@ General
 
 Interfaces
 ##########
-- Fixed a bug that use wrong help links in certain interfaces
+- Correct help links in certain interfaces.
 - Fixed a bug that would not let the user input the bounding box of a shape in the instrument viewer.
 - Fixed a bug that would cause a crash if the user right clicked on the plot in the instrument view pick tab after the stored curves were cleared.
 - The y-axis in the instrument view's pick tab will now rescale if the range changes.
@@ -67,6 +67,7 @@ Interfaces
 - Prevent crash when attempting to sort invalid data when overlaying a peaks workspace in sliceviewer.
 - Fixed a bug which occurred when switching to a log scale in sliceviewer with negative data.
 - Axes limits correctly reset when home clicked on sliceviewer plot of ragged matrix workspace.
+- Line plots in sliceviewer now respect the status of the Track Cursor checkbox.
 
 
 Plotting

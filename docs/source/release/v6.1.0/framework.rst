@@ -58,7 +58,6 @@ Improvements
 - ``BinEdgeAxis`` now overrides the label in order to return the bin center and not the edge.
 - :ref:`Run <mantid.api.Run>` has been modified to allow multiple goniometers to be stored.
 - :ref:`FileFinder <mantid.api.FileFinderImpl>` has been modified to improve search times when loading multiple runs on the same instrument.
-- Line plots now respect the status of the Track Cursor checkbox.
 
 Bugfixes
 ########
