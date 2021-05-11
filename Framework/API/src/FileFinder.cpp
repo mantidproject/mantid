@@ -612,7 +612,6 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
           path = findRun(p1.first + run, exts, useExtsOnly);
         }
 
-        std::string path = findRun(p1.first + run, exts, useExtsOnly);
         if (!path.empty()) {
           // Cache successfully found path and extension
           auto tempPath = Poco::Path(path);
