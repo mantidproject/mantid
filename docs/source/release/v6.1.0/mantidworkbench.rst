@@ -52,6 +52,7 @@ Bugfixes
 - Fixed a bug where plotting a 3D Contour plot would produce the error reporter in some cases.
 - Fixed a problem with scripts generated from tiled plots.
 - Restrict scroll wheel zooming out to +/-10^300 to avoid crash.
+- Restore axis tick format for plots on project save and load.
 
 Interfaces
 ----------
