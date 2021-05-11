@@ -11,6 +11,7 @@ import unittest
 import matplotlib as mpl
 mpl.use('Agg')  # noqa
 import matplotlib.pyplot as plt
+from matplotlib.ticker import LogFormatterSciNotation
 
 from unittest.mock import Mock
 from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands,
@@ -75,6 +76,9 @@ class PlotGeneratorAxisTest(unittest.TestCase):
         del fig
 
     def test_generate_tick_commands_for_tiled_plot(self):
+        """
+        Check that the tick commands are generated for every plot in the figure.
+        """
         fig, axes = plt.subplots(ncols=2, nrows=2, subplot_kw={'projection': 'mantid'})
         for ax in fig.get_axes():
             ax.plot([-10, 10], [1, 2])
@@ -87,6 +91,33 @@ class PlotGeneratorAxisTest(unittest.TestCase):
         self.assertIn("axes[1][1].tick_params", script)
         plt.close()
         del fig
+
+    def test_generate_tick_format_commands(self):
+        """
+        Check that the tick format commands are correctly generated if they are set different to the default.
+        """
+        fig, axes = plt.subplots(ncols=2, nrows=2, subplot_kw={'projection': 'mantid'})
+        for ax in fig.get_axes():
+            ax.plot([-10, 10], [1, 2])
+
+        # Only change the major formatter for one of the x axes and one of the y axes.
+        # The rest will be default, and shouldn't generate any lines in the script.
+        axes[0][1].xaxis.set_major_formatter(LogFormatterSciNotation())
+        axes[1][0].yaxis.set_major_formatter(LogFormatterSciNotation())
+
+        script = generate_script(fig)
+        # Check the import is there exactly once.
+        self.assertEqual(script.count("from matplotlib.ticker import"), 1)
+        # We only set the major formatter for axes[0][1].xaxis, so the command should only be present there.
+        self.assertNotIn("axes[0][0].xaxis.set_major_formatter", script)
+        self.assertIn("axes[0][1].xaxis.set_major_formatter", script)
+        self.assertNotIn("axes[1][0].xaxis.set_major_formatter", script)
+        self.assertNotIn("axes[1][1].xaxis.set_major_formatter", script)
+        # We only set the major formatter for axes[1][0].yaxis, so the command should only be present there.
+        self.assertNotIn("axes[0][0].yaxis.set_major_formatter", script)
+        self.assertNotIn("axes[0][1].yaxis.set_major_formatter", script)
+        self.assertIn("axes[1][0].yaxis.set_major_formatter", script)
+        self.assertNotIn("axes[1][1].yaxis.set_major_formatter", script)
 
 
 if __name__ == '__main__':
