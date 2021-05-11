@@ -54,7 +54,10 @@ def generate_script(fig, exclude_headers=False):
         axes.set_xlabel and axes.set_ylabel()
         axes.set_xlim() and axes.set_ylim()
         axes.set_xscale() and axes.set_yscale()
+        <Set axes major tick formatters if non-default>
         axes.legend().set_draggable(True)     (if legend present, or just draggable() for earlier matplotlib versions)
+        <Legend title and label commands if non-default>
+
         plt.show()
 
     :param fig: A matplotlib.pyplot.Figure object you want to create a script from
@@ -62,7 +65,8 @@ def generate_script(fig, exclude_headers=False):
     :return: A String. A script to recreate the given figure
     """
     plot_commands = []
-    plot_headers = ['import matplotlib.pyplot as plt', "from mantid.plots.utility import MantidAxType"]
+    plot_headers = ['import matplotlib.pyplot as plt', "from mantid.plots.utility import MantidAxType",
+                    "from matplotlib.ticker import NullFormatter, ScalarFormatter, LogFormatterSciNotation"]
 
     for ax in fig.get_axes():
         if not isinstance(ax, MantidAxes):
@@ -82,8 +86,8 @@ def generate_script(fig, exclude_headers=False):
         plot_commands.extend(get_axis_label_cmds(ax, ax_object_var))  # ax.set_label
         plot_commands.extend(get_axis_limit_cmds(ax, ax_object_var))  # ax.set_lim
         plot_commands.extend(get_axis_scale_cmds(ax, ax_object_var))  # ax.set_scale
+        plot_commands.extend(get_tick_formatter_commands(ax, ax_object_var))  # ax.{x,y}axis.set_major_formatter
         plot_commands.extend(get_legend_cmds(ax, ax_object_var))  # ax.legend
-        plot_commands.extend(generate_tick_formatter_commands(ax))
         plot_commands.append('')
 
     if not plot_commands:
@@ -170,6 +174,12 @@ def get_tick_commands(ax, ax_object_var):
     """Get ax.tick_params commands for setting properties of tick marks and grid lines."""
     tick_commands = generate_tick_commands(ax)
     return ["{ax_obj}.{cmd}".format(ax_obj=ax_object_var, cmd=cmd) for cmd in tick_commands]
+
+
+def get_tick_formatter_commands(ax, ax_object_var):
+    """Get commands for setting the format of the tick labels."""
+    commands = generate_tick_formatter_commands(ax)
+    return ["{ax_obj}.{cmd}".format(ax_obj=ax_object_var, cmd=cmd) for cmd in commands]
 
 
 def get_axes_object_variable(ax):

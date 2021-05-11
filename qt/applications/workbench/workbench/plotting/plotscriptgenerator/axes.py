@@ -9,8 +9,7 @@
 from numpy import isclose
 
 from matplotlib.ticker import NullLocator
-from matplotlib.ticker import NullFormatter, \
-    ScalarFormatter, LogFormatterSciNotation
+from matplotlib.ticker import NullFormatter, ScalarFormatter, LogFormatterSciNotation
 
 from mantid.plots.utility import get_autoscale_limits
 from workbench.plotting.plotscriptgenerator.utils import convert_value_to_arg_string
@@ -73,19 +72,17 @@ def generate_tick_params_kwargs(axis, tick_type="major"):
 
 
 def generate_tick_formatter_commands(ax):
-    commands = [f"from matplotlib.ticker import NullFormatter, ScalarFormatter, LogFormatterSciNotation"]
-    axes_types = ["xaxis", "yaxis"]
-    tick_types = ["major", "minor"]  # Currently there is no way to change minor tick format in GUI
+    commands = []
 
-    for axis in axes_types:
-        for tick_type in tick_types:
+    for axis in ["xaxis", "yaxis"]:
+        for tick_type in ["major", "minor"]:  # Currently there is no way to change minor tick format in GUI
             for key, value in TICK_FORMATTERS.items():
                 formatter = getattr(getattr(ax, axis), f"get_{tick_type}_formatter")()
                 # Don't write the command to the script if it's default.
                 if isinstance(formatter, DEFAULT_TICK_FORMATTERS[tick_type]):
                     continue
                 if isinstance(formatter, TICK_FORMATTER_INSTANCES[key]):
-                    commands.append(f"axes.{axis}.set_{tick_type}_formatter({value})")
+                    commands.append(f"{axis}.set_{tick_type}_formatter({value})")
     return commands
 
 
