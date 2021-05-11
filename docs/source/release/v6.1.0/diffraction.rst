@@ -98,7 +98,7 @@ LeanElasticPeak
 
 **A new Peak concept has been create, a LeanElasticPeak where the instrument is not included as part of Peak. The only requirement for this peak is a Q-sample vector. There are a number of modifications made to facilitate this. The new LeanElasticPeak and LeanElasticPeakWorkspace concept is show in detail at** :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`
 
-.. figure:: ../../images/WAND2_LeanPeaks_satellites.png
+.. figure:: ../../images/WAND2_LeanPeaks_satellites.PNG
    :width: 400px
    :align: right
 
