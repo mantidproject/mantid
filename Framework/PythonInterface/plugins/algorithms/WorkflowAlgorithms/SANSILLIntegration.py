@@ -329,13 +329,12 @@ class SANSILLIntegration(PythonAlgorithm):
             y3 = instrument.getNumberParameter('y-pixel-size')[0] / 1000
         else:
             raise RuntimeError('Unable to calculate resolution, missing pixel size.')
-        try:
+        if 'selector.wavelength_res' in run:
             delta_wavelength = run.getLogData('selector.wavelength_res').value * 0.01
-        except RuntimeError:
-            try:
-                delta_wavelength = run.getLogData('selector.wave_lenght_res').value * 0.01 # sic! log name for at least some D22 data
-            except RuntimeError:
-                raise RuntimeError("Wavelength resolution log not available.")
+        elif 'selector.wave_lenght_res' in run:
+            delta_wavelength = run.getLogData('selector.wave_lenght_res').value * 0.01 # sic! log name for at least some D22 data
+        else:
+            raise RuntimeError("Wavelength resolution log not available.")
         if run.hasProperty('collimation.sourceAperture'):
             source_aperture = run.getLogData('collimation.sourceAperture').value
         elif run.hasProperty('collimation.ap_size'):
@@ -381,16 +380,15 @@ class SANSILLIntegration(PythonAlgorithm):
             raise RuntimeError('TOF resolution is not supported yet')
         run = mtd[self._input_ws].getRun()
         wavelength = run.getLogData('wavelength').value
-        try:
+        if 'selector.wavelength_res' in run:
             delta_wavelength = run.getLogData('selector.wavelength_res').value * 0.01
-        except RuntimeError:
-            try:
-                delta_wavelength = run.getLogData('selector.wave_lenght_res').value * 0.01 # sic! log name for at least some D22 data
-            except RuntimeError:
-                raise RuntimeError("Wavelength resolution log not available.")
-        try:
+        elif 'selector.wave_lenght_res' in run:
+            delta_wavelength = run.getLogData('selector.wave_lenght_res').value * 0.01 # sic! log name for at least some D22 data
+        else:
+            raise RuntimeError("Wavelength resolution log not available.")
+        if 'BeamWidthX' in run:
             beam_width = run.getLogData('BeamWidthX').value
-        except RuntimeError:
+        else:
             raise RuntimeError("BeamWidthX log not available. Have you provided empty beam measurement?")
         self._deltaQ = DirectBeamResolution(wavelength, delta_wavelength, beam_width)
 
