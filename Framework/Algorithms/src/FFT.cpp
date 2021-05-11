@@ -193,7 +193,7 @@ void FFT::transformForward(std::vector<double> &data, const int xSize, const int
       double c = cos(m_outWS->x(m_iRe)[i] * shift);
       double s = sin(m_outWS->x(m_iRe)[i] * shift);
       double re1 = re * c - im * s;
-      double im1 = re * s + im * c;
+      double im1 = -re * s + im * c;
       re = re1;
       im = im1;
     }
