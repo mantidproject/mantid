@@ -580,8 +580,8 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
                          "been found. The estimation of the "
                       << "half-height point will not be as accurate.\n";
       im1++;
-      if (im1 >= peak_y.size())
-        throw std::invalid_argument("the rising edge values are equal unil the end of the peak");
+      if (im1 >= nyvals)
+        throw std::invalid_argument("the rising edge values are equal up to the end of the peak");
     }
 
     xm_hh = peak_x[im2] + (peak_x[im1] - peak_x[im2]) * ((hby2 - peak_y[im2]) / (peak_y[im1] - peak_y[im2]));
