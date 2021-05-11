@@ -56,21 +56,28 @@ bool compareInterval(const MatrixWorkspace_sptr ws1, const MatrixWorkspace_sptr 
  * @param ws1 : input workspace 1
  * @param ws2 : input workspace 2
  * @return the x-axis covered by both
+ * @throw runtime error if there is no overlap
  */
 std::pair<double, double> getOverlap(const MatrixWorkspace_sptr ws1, const MatrixWorkspace_sptr ws2) {
   const auto minmax1 = getInterval(*ws1);
   const auto minmax2 = getInterval(*ws2);
+  if (minmax1.second < minmax2.first || minmax2.second < minmax1.first) {
+    std::stringstream ss;
+    ss << "No overlap is found between the intervals: [" << minmax1.first << "," << minmax1.second << "] and ["
+       << minmax2.first << ", " << minmax2.second << "]";
+    throw std::runtime_error(ss.str());
+  }
   return std::make_pair(std::max(minmax1.first, minmax2.first), std::min(minmax1.second, minmax2.second));
 }
 
 /**
  * @brief Calculates the median of a vector
  * @param vec : input vector
- * @return the median
+ * @return the median if not empty, 1 otherwise
  */
 double median(std::vector<double> &vec) {
   if (vec.empty())
-    return 0;
+    return 1;
   std::sort(vec.begin(), vec.end());
   const size_t s = vec.size();
   if (s % 2 == 0) {
@@ -161,7 +168,8 @@ void Stitch::init() {
   declareProperty(REFERENCE_WORKSPACE_NAME, "",
                   "The name of the workspace that will serve as the reference; "
                   "that is, the one that will not be scaled. If left blank, "
-                  "stitching will be performed left to right.");
+                  "stitching will be performed left to right in the order of x-axes ascending, "
+                  "no matter the order of workspaces names in the input.");
   declareProperty(COMBINATION_BEHAVIOUR, "Interleave",
                   std::make_unique<ListValidator<std::string>>(std::array<std::string, 1>{"Interleave"}));
   declareProperty(SCALE_FACTOR_CALCULATION, "MedianOfRatios",
@@ -256,6 +264,7 @@ std::string Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr w
     auto interpolator = createChildAlgorithm("SplineInterpolation");
     interpolator->setProperty("WorkspaceToMatch", croppedToMatch);
     interpolator->setProperty("WorkspaceToInterpolate", croppedToScale);
+    interpolator->setProperty("Linear2Points", true);
     interpolator->setPropertyValue("OutputWorkspace", "__interpolated");
     interpolator->execute();
     rebinnedToScale = interpolator->getProperty("OutputWorkspace");
