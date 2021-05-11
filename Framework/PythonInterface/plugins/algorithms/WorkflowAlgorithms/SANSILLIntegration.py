@@ -345,8 +345,7 @@ class SANSILLIntegration(PythonAlgorithm):
             raise RuntimeError('Unable to calculate resolution, missing source aperture size.')
         if not run.hasProperty('tof_mode'):
             self.log().information('No TOF flag available, assuming monochromatic.')
-        else:
-            self._is_tof = run.getLogData('tof_mode').value == 'TOF'
+
         to_meter = 0.001
         is_rectangular = True
         if 'x' not in source_aperture:
