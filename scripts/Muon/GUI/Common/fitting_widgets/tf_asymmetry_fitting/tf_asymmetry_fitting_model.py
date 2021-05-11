@@ -233,7 +233,9 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         """Returns true if the datasets stored in the model are compatible with TF Asymmetry mode."""
         workspace_names = self.dataset_names if workspace_names is None else workspace_names
         pair_names = [get_group_or_pair_from_name(name) for name in workspace_names if "Group" not in name]
-        return len(pair_names) == 0, pair_names
+        # Remove duplicates from the list
+        pair_names = list(dict.fromkeys(pair_names))
+        return len(pair_names) == 0, "'" + "', '".join(pair_names) + "'"
 
     def get_all_fit_functions(self) -> list:
         """Returns all the fit functions for the current fitting mode."""

@@ -139,15 +139,15 @@ class SeqFittingTabPresenter(object):
         if self.model.get_active_fit_function() is None or len(workspace_names) == 0:
             self.view.warning_popup("No data or fit function selected for fitting.")
             return False
+        else:
+            return self._check_tf_asymmetry_compliance(self._flatten_workspace_names(workspace_names))
 
-        if self.model.tf_asymmetry_mode:
-            tf_compliant, pair_names = self.model.check_datasets_are_tf_asymmetry_compliant(
-                self._flatten_workspace_names(workspace_names))
-            if not tf_compliant:
-                pair_names_str = "'" + "', '".join(pair_names) + "'"
-                self.view.warning_popup(f"Only Groups can be fitted in TF Asymmetry mode. Please unselect the "
-                                        f"following Pairs/Diffs in the grouping tab: {pair_names_str}")
-                return False
+    def _check_tf_asymmetry_compliance(self, workspace_names):
+        tf_compliant, non_compliant_names = self.model.check_datasets_are_tf_asymmetry_compliant(workspace_names)
+        if self.model.tf_asymmetry_mode and not tf_compliant:
+            self.view.warning_popup(f"Only Groups can be fitted in TF Asymmetry mode. Please unselect the following "
+                                    f"Pairs/Diffs in the grouping tab: {non_compliant_names}")
+            return False
         return True
 
     @staticmethod
