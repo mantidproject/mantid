@@ -310,21 +310,22 @@ class SANSILLReduction(PythonAlgorithm):
         inst_name = mtd[ws].getInstrument().getName()
         min_id = 0
         if 'D11' in inst_name:
-            step = 128
             if 'lr' in inst_name:
-                max_id = 16383
+                step = 128
+                max_id = 16384
             elif 'B' in inst_name:
                 CropToComponent(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames='detector_center')
                 max_id = 49152
                 step = 192
             else:
+                step = 256
                 max_id = 65536
         elif 'D22' in inst_name:
             max_id = 32768
             step = 256
             if 'lr' in inst_name:
                 step = 128
-                max_id = 16383
+                max_id = 16384
             elif 'B' in inst_name:
                 CropToComponent(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames='detector_back')
         elif 'D33' in inst_name:
