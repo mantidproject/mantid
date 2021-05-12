@@ -560,10 +560,11 @@ class SANSILLReduction(PythonAlgorithm):
             AddSampleLog(Workspace=ws, LogName='BeamCenterX', LogText=str(beam_x), LogType='Number')
             AddSampleLog(Workspace=ws, LogName='BeamCenterY', LogText=str(beam_y), LogType='Number')
             MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
-            try:
+            if 'BeamWidthX' in beam_ws.getRun():
                 beam_width_x = beam_ws.getRun().getLogData('BeamWidthX').value
-                AddSampleLog(Workspace=ws, LogName='BeamWidthX', LogText=str(beam_width_x), LogType='Number')
-            except RuntimeError:
+                AddSampleLog(Workspace=ws, LogName='BeamWidthX', LogText=str(beam_width_x), LogType='Number',
+                             LogUnit='rad')
+            else:
                 self.log().warning("Beam width resolution not available.")
         self._check_distances_match(mtd[ws], beam_ws)
         if self._mode != 'TOF':
