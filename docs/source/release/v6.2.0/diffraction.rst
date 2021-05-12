@@ -11,6 +11,14 @@ Diffraction Changes
 
 Powder Diffraction
 ------------------
+New features
+############
+
+Improvements
+############
+
+Bugfixes
+########
 
 Engineering Diffraction
 -----------------------
