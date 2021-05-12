@@ -22,24 +22,6 @@ Usage
 
 **Example - Stitch**
 
-.. testcode:: StitchExample
-
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
-
-   wsOut = Stitch()
-
-   # Print the result
-   print "The output workspace has %%i spectra" %% wsOut.getNumberHistograms()
-
-Output:
-
-.. testoutput:: StitchExample
-
-  The output workspace has ?? spectra
-
 .. categories::
 
 .. sourcelink::
