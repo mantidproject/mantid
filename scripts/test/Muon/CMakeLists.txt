@@ -35,7 +35,6 @@ set ( TEST_PY_FILES
    fit_information_test.py
    fit_parameters_test.py
    fitting_context_test.py
-   fitting_tab_widget/workspace_selector_dialog_presenter_test.py
    fitting_widgets/basic_fitting/basic_fitting_model_test.py
    fitting_widgets/basic_fitting/basic_fitting_presenter_test.py
    fitting_widgets/basic_fitting/basic_fitting_view_test.py
@@ -114,60 +113,6 @@ set ( TEST_PY_FILES
    utilities/run_string_utils_operator_test.py
    utilities/thread_model_test.py
    xml_utils_test.py
-)
-
-# LoadWidgetModel_test.py, LoadWidgetPresenter_test.py and LoadWidgetView_test.py are currently not Qt5 compatible
-set ( TEST_PY_FILES_QT4
-   LoadWidgetPresenter_test.py
-   LoadWidgetView_test.py
-   FFTPresenter_test.py
-   fft_presenter_context_interaction_test.py
-   ADSHandler/workspace_naming_test.py
-   fitting_tab_widget/workspace_selector_dialog_presenter_test.py
-   fitting_tab_widget/fitting_tab_presenter_test.py
-   fitting_tab_widget/fitting_tab_model_test.py
-   seq_fitting_tab_widget/seq_fitting_tab_presenter_test.py
-   seq_fitting_tab_widget/sequential_table_test.py
-   fit_information_test.py
-   fit_parameters_test.py
-   fitting_context_test.py
-   home_instrument_widget_test.py
-   plot_widget/plot_widget_presenter_test.py
-   plot_widget/plot_widget_model_test.py
-   plotting_canvas/plotting_canvas_presenter_test.py
-   plotting_canvas/plotting_canvas_model_test.py
-   external_plotting_model_test.py
-   home_runinfo_presenter_test.py
-   list_selector/list_selector_view_test.py
-   list_selector/list_selector_presenter_test.py
-   load_run_widget/loadrun_presenter_current_run_test.py
-   load_run_widget/loadrun_presenter_single_file_test.py
-   load_run_widget/loadrun_presenter_multiple_file_test.py
-   load_file_widget/loadfile_presenter_single_file_test.py
-   load_file_widget/loadfile_presenter_multiple_file_test.py
-   load_file_widget/loadfile_view_test.py
-   load_run_widget/loadrun_presenter_increment_decrement_test.py
-   load_run_widget/loadrun_view_test.py
-   loading_tab/loadwidget_presenter_test.py
-   loading_tab/loadwidget_presenter_multiple_file_test.py
-   loading_tab/loadwidget_presenter_failure_test.py
-   phase_table_widget/phase_table_presenter_test.py
-   grouping_tab/grouping_table_presenter_test.py
-   grouping_tab/pairing_table_presenter_test.py
-   grouping_tab/grouping_tab_presenter_test.py
-   grouping_tab/pairing_table_group_selector_test.py
-   grouping_tab/pairing_table_alpha_test.py
-   MaxEntPresenter_test.py
-   max_ent_presenter_load_interaction_test.py
-   results_tab_widget/results_tab_presenter_test.py
-   transformWidget_test.py
-   transform_widget_new_test.py
-   help_widget_presenter_test.py
-   elemental_analysis/PeriodicTableModel_test.py
-   elemental_analysis/PeriodicTablePresenter_test.py
-   elemental_analysis/load_utils_test.py
-   elemental_analysis_2/elemental_analysis_context_test.py
-   elemental_analysis_2/elemental_analysis_main_GUI_test.py
 )
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
