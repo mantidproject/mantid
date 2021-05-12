@@ -90,11 +90,10 @@ def generate_script(fig, exclude_headers=False):
         # Only add the ticker import to headers if it's needed.
         formatter_commands = get_tick_formatter_commands(ax, ax_object_var)
         if len(formatter_commands) > 0:
-            plot_commands.extend(formatter_commands)
+            plot_commands.extend(formatter_commands) # ax.{x,y}axis.set_major_formatter
             if TICKER_FORMATTER_IMPORT not in plot_headers:
                 plot_headers.append(TICKER_FORMATTER_IMPORT)
 
-        plot_commands.extend(get_tick_formatter_commands(ax, ax_object_var))  # ax.{x,y}axis.set_major_formatter
         plot_commands.extend(get_legend_cmds(ax, ax_object_var))  # ax.legend
         plot_commands.append('')
 
