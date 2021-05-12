@@ -95,26 +95,88 @@ void SCDCalibratePanels2::init() {
   setPropertySettings("gamma", std::make_unique<EnabledWhenProperty>("RecalculateUB", IS_DEFAULT));
 
   // Calibration options group
-  declareProperty("CalibrateT0", false, "Calibrate the T0 (initial TOF)");
+  // NOTE:
+  //  The general workflow of calibration is
+  //  - calibrate L1 using all peaks
+  //  - calibrate each bank
+  //  - calibrate/update L1 again since bank movement will affect L1
+  //  - calibrate T0
+  //  - calibrate samplePos
+  const std::string CALIBRATION("Calibration Options");
+  // --------------
+  // ----- L1 -----
+  // --------------
   declareProperty("CalibrateL1", true, "Change the L1(source to sample) distance");
+  declareProperty("ToleranceL1", 5e-4, mustBePositive, "Delta L1 below this value (in meter) is treated as 0.0");
+  declareProperty("SearchRadiusL1", 0.1, mustBePositive,
+                  "Search radius of delta L1 in meters, which is used to constrain optimization search space"
+                  "when calibrating L1");
+  // editability
+  setPropertySettings("ToleranceL1", std::make_unique<EnabledWhenProperty>("CalibrateL1", IS_EQUAL_TO, "1"));
+  setPropertySettings("SearchRadiusL1", std::make_unique<EnabledWhenProperty>("CalibrateL1", IS_EQUAL_TO, "1"));
+  // grouping
+  setPropertyGroup("CalibrateL1", CALIBRATION);
+  setPropertyGroup("ToleranceL1", CALIBRATION);
+  setPropertyGroup("SearchRadiusL1", CALIBRATION);
+  // ----------------
+  // ----- bank -----
+  // ----------------
   declareProperty("CalibrateBanks", true, "Calibrate position and orientation of each bank.");
-  // TODO:
-  //  - add support to ignore edge pixels (EdgePixels)
-  //  - add support for calibration panels with non-standard size
-  //  (ChangePanelSize)
-  //     Once the core functionality of calibration is done, we can consider
-  //     adding the following control calibration parameters.
-  const std::string PARAMETERS("Calibration Parameters");
-  setPropertyGroup("CalibrateT0", PARAMETERS);
-  setPropertyGroup("CalibrateL1", PARAMETERS);
-  setPropertyGroup("CalibrateBanks", PARAMETERS);
-
-  // Profiling option
-  declareProperty("ProfileL1", false, "Perform profiling of objective function with given input for L1");
-  declareProperty("ProfileBanks", false, "Perform profiling of objective function with given input for Banks");
-  const std::string PROFILING("Profiling objective function");
-  setPropertyGroup("ProfileL1", PROFILING);
-  setPropertyGroup("ProfileBanks", PROFILING);
+  declareProperty("ToleranceTransBank", 1e-6, mustBePositive,
+                  "Delta translation of bank (in meter) below this value is treated as 0.0");
+  declareProperty(
+      "SearchRadiusTransBank", 5e-2, mustBePositive,
+      "This is the search radius (in meter) when calibrating component translations, used to constrain optimization"
+      "search space when calibration translation of banks");
+  declareProperty("ToleranceRotBank", 1e-3, mustBePositive,
+                  "Misorientation of bank (in deg) below this value is treated as 0.0");
+  declareProperty("SearchradiusRotBank", 1.0, mustBePositive,
+                  "This is the search radius (in deg) when calibrating component reorientation, used to constrain "
+                  "optimization search space");
+  // editability
+  setPropertySettings("ToleranceTransBank", std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
+  setPropertySettings("SearchRadiusTransBank",
+                      std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
+  setPropertySettings("ToleranceRotBank", std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
+  setPropertySettings("SearchradiusRotBank", std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
+  // grouping
+  setPropertyGroup("CalibrateBanks", CALIBRATION);
+  setPropertyGroup("ToleranceTransBank", CALIBRATION);
+  setPropertyGroup("SearchRadiusTransBank", CALIBRATION);
+  setPropertyGroup("ToleranceRotBank", CALIBRATION);
+  setPropertyGroup("SearchradiusRotBank", CALIBRATION);
+  // --------------
+  // ----- T0 -----
+  // --------------
+  declareProperty("CalibrateT0", true, "Calibrate the T0 (initial TOF)");
+  declareProperty("ToleranceT0", 1e-3, mustBePositive,
+                  "Shift of initial TOF (in ms) below this value is treated as 0.0");
+  declareProperty("SearchRadiusT0", 10, mustBePositive,
+                  "Search radius of T0 (in ms), used to constrain optimization search space");
+  // editability
+  setPropertySettings("ToleranceT0", std::make_unique<EnabledWhenProperty>("CalibrateT0", IS_EQUAL_TO, "1"));
+  setPropertySettings("SearchRadiusT0", std::make_unique<EnabledWhenProperty>("CalibrateT0", IS_EQUAL_TO, "1"));
+  // grouping
+  setPropertyGroup("CalibrateT0", CALIBRATION);
+  setPropertyGroup("ToleranceT0", CALIBRATION);
+  setPropertyGroup("SearchRadiusT0", CALIBRATION);
+  // ---------------------
+  // ----- samplePos -----
+  // ---------------------
+  declareProperty("TuneSamplePosition", true, "Fine tunning sample position");
+  declareProperty("ToleranceSamplePos", 1e-6, mustBePositive,
+                  "Sample position change (in meter) below this value is treated as 0.0");
+  declareProperty("SearchRadiusSamplePos", 0.1, mustBePositive,
+                  "Search radius of sample position change (in meters), used to constrain optimization search space");
+  // editability
+  setPropertySettings("ToleranceSamplePos",
+                      std::make_unique<EnabledWhenProperty>("TuneSamplePosition", IS_EQUAL_TO, "1"));
+  setPropertySettings("SearchRadiusSamplePos",
+                      std::make_unique<EnabledWhenProperty>("TuneSamplePosition", IS_EQUAL_TO, "1"));
+  // grouping
+  setPropertyGroup("TuneSamplePosition", CALIBRATION);
+  setPropertyGroup("ToleranceSamplePos", CALIBRATION);
+  setPropertyGroup("SearchRadiusSamplePos", CALIBRATION);
 
   // Output options group
   declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
@@ -138,33 +200,15 @@ void SCDCalibratePanels2::init() {
   setPropertyGroup("CSVFilename", OUTPUT);
 
   // Add new section for advanced control of the calibration/optimization
-  declareProperty("ToleranceOfTranslation", 5e-4, mustBePositive,
-                  "Translations in meters found below this value will be set "
-                  "to 0");
-  declareProperty("ToleranceOfReorientation", 5e-2, mustBePositive,
-                  "Reorientation (rotation) angles in degree found below "
-                  "this value will be set to 0");
-  declareProperty("TranslationSearchRadius", 5e-2, mustBePositive,
-                  "This is the search radius when calibrating component translations "
-                  "using optimization. For CORELLI instrument, most panels will shift "
-                  "within 5cm, therefore the search radius is set to 5e-2.");
-  declareProperty("RotationSearchRadius", 5.0, mustBePositive,
-                  "This is the search radius when calibrating component orientations "
-                  "using optimization.  For CORELLI instrument, most panels will wobble "
-                  "within 5 degrees, therefore the default values is set to 5 here.");
-  declareProperty("SourceShiftSearchRadius", 0.1, mustBePositive,
-                  "This is the search radius when calibrating source shift, L1, using "
-                  "optimization.  For CORELLI instrument, the source shift is often "
-                  "within 10 cm, therefore the default value is set to 0.1.");
+  // NOTE: profiling is expensive, think twice before start
   declareProperty("VerboseOutput", false, "Toggle of child algorithm console output.");
+  declareProperty("ProfileL1", false, "Perform profiling of objective function with given input for L1");
+  declareProperty("ProfileBanks", false, "Perform profiling of objective function with given input for Banks");
   // grouping into one category
-  const std::string ADVCNTRL("AdvancedControl");
-  setPropertyGroup("ToleranceOfTranslation", ADVCNTRL);
-  setPropertyGroup("ToleranceOfReorientation", ADVCNTRL);
-  setPropertyGroup("TranslationSearchRadius", ADVCNTRL);
-  setPropertyGroup("RotationSearchRadius", ADVCNTRL);
-  setPropertyGroup("SourceShiftSearchRadius", ADVCNTRL);
+  const std::string ADVCNTRL("Advanced Option");
   setPropertyGroup("VerboseOutput", ADVCNTRL);
+  setPropertyGroup("ProfileL1", ADVCNTRL);
+  setPropertyGroup("ProfileBanks", ADVCNTRL);
 }
 
 /**
@@ -233,12 +277,6 @@ void SCDCalibratePanels2::exec() {
   const std::string XmlFilename = getProperty("XmlFilename");
   const std::string CSVFilename = getProperty("CSVFilename");
 
-  // parsing advance control parameters
-  m_tolerance_translation = getProperty("ToleranceOfTranslation");
-  m_tolerance_rotation = getProperty("ToleranceOfReorientation");
-  m_bank_translation_bounds = getProperty("TranslationSearchRadius");
-  m_bank_rotation_bounds = getProperty("RotationSearchRadius");
-  m_source_translation_bounds = getProperty("SourceShiftSearchRadius");
   LOGCHILDALG = getProperty("VerboseOutput");
 
   // STEP_0: sort the peaks
@@ -396,28 +434,39 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
 
   //-- bounds&constraints def
   std::ostringstream tie_str;
-  tie_str << "DeltaX=0.0,DeltaY=0.0,Theta=1.0,Phi=0.0,DeltaRotationAngle=0.0,"
-             "DeltaT0="
-          << m_T0;
+  tie_str << "DeltaX=0.0,DeltaY=0.0,Theta=1.0,Phi=0.0,DeltaRotationAngle=0.0,DeltaT0=" << m_T0;
+  std::ostringstream constraint_str;
+  double r_L1 = getProperty("SearchRadiusL1"); // get search radius
+  r_L1 = std::abs(r_L1);
+  constraint_str << -r_L1 << "<DeltaZ<" << r_L1;
   //-- set and go
   fitL1_alg->setProperty("Ties", tie_str.str());
+  fitL1_alg->setProperty("Constraints", constraint_str.str());
   fitL1_alg->setProperty("InputWorkspace", l1ws);
   fitL1_alg->setProperty("CreateOutput", true);
   fitL1_alg->setProperty("Output", "fit");
   fitL1_alg->executeAsChildAlg();
 
   //-- parse output
+  std::ostringstream calilog;
   double chi2OverDOF = fitL1_alg->getProperty("OutputChi2overDoF");
   ITableWorkspace_sptr rst = fitL1_alg->getProperty("OutputParameters");
   double dL1_optimized = rst->getRef<double>("Value", 2);
-  adjustComponent(0.0, 0.0, dL1_optimized, 1.0, 0.0, 0.0, 0.0, pws->getInstrument()->getSource()->getName(), pws);
+  double tor_dL1 = getProperty("ToleranceL1");
+  if (std::abs(dL1_optimized) < std::abs(tor_dL1)) {
+    calilog << "-- Fit L1 results below tolerance, skippping\n";
+  } else {
+    // output to console and update L1 for subsequent calibration
+    int npks = pws->getNumberPeaks();
+    calilog << "-- Fit L1 results using " << npks << " peaks:\n"
+            << "    dL1: " << dL1_optimized << " \n"
+            << "    L1 " << original_L1 << " -> " << -pws->getInstrument()->getSource()->getPos().Z() << " \n"
+            << "    chi2/DOF = " << chi2OverDOF << "\n";
+    adjustComponent(0.0, 0.0, dL1_optimized, 1.0, 0.0, 0.0, 0.0, pws->getInstrument()->getSource()->getName(), pws);
+  }
 
   //-- log
-  int npks = pws->getNumberPeaks();
-  g_log.notice() << "-- Fit L1 results using " << npks << " peaks:\n"
-                 << "    dL1: " << dL1_optimized << " \n"
-                 << "    L1 " << original_L1 << " -> " << -pws->getInstrument()->getSource()->getPos().Z() << " \n"
-                 << "    chi2/DOF = " << chi2OverDOF << "\n";
+  g_log.notice() << calilog.str();
 }
 
 /**
@@ -467,9 +516,11 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
     std::ostringstream tie_str;
     tie_str << "DeltaT0=" << m_T0;
     std::ostringstream constraint_str;
-    double brb = std::abs(m_bank_rotation_bounds);
+    double brb = getProperty("SearchradiusRotBank");
+    brb = std::abs(brb);
     constraint_str << "0.0<Theta<3.1415926,0<Phi<6.28318530718," << -brb << "<DeltaRotationAngle<" << brb << ",";
-    double btb = std::abs(m_bank_translation_bounds);
+    double btb = getProperty("SearchRadiusTransBank");
+    btb = std::abs(btb);
     constraint_str << -btb << "<DeltaX<" << btb << "," << -btb << "<DeltaY<" << btb << "," << -btb << "<DeltaZ<" << btb;
 
     //---- set&go
@@ -496,8 +547,12 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
     std::ostringstream calilog;
     if (pws->getInstrument()->getName().compare("CORELLI") == 0)
       bn.append("/sixteenpack");
-    if ((std::abs(dx) < m_tolerance_translation) && (std::abs(dy) < m_tolerance_translation) &&
-        (std::abs(dz) < m_tolerance_translation) && (std::abs(rotang) < m_tolerance_rotation)) {
+    double tolerance_translation = getProperty("ToleranceTransBank");
+    tolerance_translation = std::abs(tolerance_translation);
+    double tolerance_rotation = getProperty("ToleranceRotBank");
+    tolerance_rotation = std::abs(tolerance_rotation);
+    if ((std::abs(dx) < tolerance_translation) && (std::abs(dy) < tolerance_translation) &&
+        (std::abs(dz) < tolerance_translation) && (std::abs(rotang) < tolerance_rotation)) {
       // skip the adjustment of the component as it is juat noise
       calilog << "-- Fit " << bn << " results below tolerance, skippping\n";
     } else {

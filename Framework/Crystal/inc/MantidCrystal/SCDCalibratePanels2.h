@@ -123,13 +123,6 @@ private:
   /// unique vars for a given instance of calibration
   double m_a, m_b, m_c, m_alpha, m_beta, m_gamma;
   double m_T0 = 0.0;
-  double m_tolerance_translation = 1e-4; // meters
-  double m_tolerance_rotation = 1e-3;    // degree
-  // The following bounds are set based on information provided by the
-  // CORELLI team
-  double m_bank_translation_bounds = 5e-2;  // meter
-  double m_bank_rotation_bounds = 5.0;      // degree
-  double m_source_translation_bounds = 0.1; // meter
   bool LOGCHILDALG{true};
   const int MINIMUM_PEAKS_PER_BANK{6};
   const double PI{3.1415926535897932384626433832795028841971693993751058209};
