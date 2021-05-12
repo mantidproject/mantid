@@ -102,10 +102,12 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
 
             y = data.extractY().flatten()
             x = data.extractX().flatten()
-            function = f"name=FlatBackground, A0={y.min()}; name=Gaussian, PeakCentre={x[y.argmax()]}, Height={y.max()-y.min()}, Sigma=0.25"
+            function = f"name=FlatBackground, A0={np.nanmin(y)};" \
+                f"name=Gaussian, PeakCentre={x[np.nanargmax(y)]}, Height={np.nanmax(y)-np.nanmin(y)}, Sigma=0.25"
             constraints = f"f0.A0 > 0, f1.Height > 0, {x.min()} < f1.PeakCentre < {x.max()}"
             try:
                 fit_result = Fit(function, data, Output=str(data),
+                                 IgnoreInvalidData=True,
                                  OutputParametersOnly=not output_fit,
                                  Constraints=constraints,
                                  StartX=startX, EndX=endX,
@@ -155,6 +157,7 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                         DeleteWorkspace(__tmp_q_ws, EnableLogging=False)
 
                     if use_lorentz:
+                        # ILL Neutron Data Booklet, Second Edition, Section 2.9, Part 4.1, Equation 7
                         peak = __tmp_pw.getPeak(0)
                         lorentz = abs(np.sin(peak.getScattering() * np.cos(peak.getAzimuthal())))
                         peak.setIntensity(peak.getIntensity() * lorentz)
