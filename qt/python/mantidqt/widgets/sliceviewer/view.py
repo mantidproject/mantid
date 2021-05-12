@@ -516,11 +516,15 @@ class SliceViewerDataView(QWidget):
         if event.button == 3:
             self.on_home_clicked()
 
-    def enable_peak_selection(self, state):
+    def enable_peak_addition(self, state):
         if state:
-            self._peak_selection_cid = self.canvas.mpl_connect('button_press_event', self.presenter.peak_selected)
+            self.deactivate_tool(ToolItemText.PAN)
+            self.deactivate_tool(ToolItemText.ZOOM)
+            self._peak_addition_cid = self.canvas.mpl_connect('button_press_event', self.presenter.peak_addition)
+            self.mpl_toolbar.set_cursor(Qt.CrossCursor)
         else:
-            self.canvas.mpl_disconnect(self._peak_selection_cid)
+            self.canvas.mpl_disconnect(self._peak_addition_cid)
+            self.mpl_toolbar.set_cursor(Qt.ArrowCursor)
 
     def update_data_clim(self):
         self.image.set_clim(self.colorbar.colorbar.mappable.get_clim())

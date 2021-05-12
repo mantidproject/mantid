@@ -84,6 +84,9 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
 
         self._representations = representations
 
+    def add_peak(self, pos, frame):
+        self.peaks_workspace.addPeak(pos, frame)
+
     def slicepoint(self, selected_index, slice_info):
         """
         Return the value of the center in the slice dimension for the peak at the given index

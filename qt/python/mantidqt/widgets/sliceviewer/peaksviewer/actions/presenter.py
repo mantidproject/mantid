@@ -51,6 +51,10 @@ class PeakActionsPresenter:
         peak_viewer: 'PeaksViewerView' = collection_view[index]
         return peak_viewer.presenter
 
+    @property
+    def active_peaksworkspace_index(self) -> int:
+        return self._view.active_peaksworkspace_index
+
     def response_function(self, event: PeakActionsEvent):
         r"""
         Factory of response functions to signals emitted by the view (events)
@@ -75,9 +79,4 @@ class PeakActionsPresenter:
 
     def _add_peaks(self):
         """Add peaks if the button is pressed"""
-        self._view.collection_view._sliceinfo_provider.view.data_view.enable_peak_selection(self._view.adding_mode_on)
-
-    def peak_selected(self, pos, frame):
-        if self._view.adding_mode_on:
-            self._model.add_peak(pos, frame)
-            self.viewer_presenter.redraw_peaks()
+        self._view.collection_view._sliceinfo_provider.view.data_view.enable_peak_addition(self._view.adding_mode_on)

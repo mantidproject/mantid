@@ -106,6 +106,10 @@ class PeaksViewerPresenter:
         self.model.clear_peak_representations()
         self.model.draw_peaks(self._view.sliceinfo, self._view.painter)
 
+    def add_peak(self, pos, frame):
+        self.model.add_peak(pos, frame)
+        self.redraw_peaks()
+
     def _clear_peaks(self):
         """Clear all peaks from this view"""
         self.view.clear_table_selection()
@@ -276,6 +280,9 @@ class PeaksViewerCollectionPresenter:
         self.setup_ads_observer()
         for presenter in self._child_presenters:
             presenter.notify(event)
+
+    def add_peak(self, pos, frame):
+        self.child_presenter(self._actions_presenter.active_peaksworkspace_index).add_peak(pos, frame)
 
     # private api
     def _create_peaksviewer_model(self, name: str) -> PeaksViewerModel:
