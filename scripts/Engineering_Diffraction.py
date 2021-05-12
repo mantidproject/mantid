@@ -6,12 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from Engineering.gui.engineering_diffraction.engineering_diffraction import EngineeringDiffractionGui
-from qtpy import QtCore
+from qtpy.QtCore import QSettings, Qt
 import sys
 
 if 'engineering_gui' in globals() and not globals()['engineering_gui'].isHidden():
     engineering_gui = globals()['engineering_gui']
-    engineering_gui.setWindowState(engineering_gui.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
+    engineering_gui.setWindowState(engineering_gui.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
     engineering_gui.activateWindow()
 else:
     if 'workbench' in sys.modules:
@@ -22,3 +22,7 @@ else:
         parent, flags = None, None
     engineering_gui = EngineeringDiffractionGui(parent=parent, window_flags=flags)
     engineering_gui.show()
+
+    # This is used to close the interface when running the PythonInterfacesStartupTest
+    if QSettings().value("close_interface", False):
+        engineering_gui.close()

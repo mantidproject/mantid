@@ -13,9 +13,6 @@ from mantidqt.utils.qt.testing import get_application
 from qtpy.QtCore import QCoreApplication, QSettings
 
 
-# Frequency_Domain_Analysis.py      -  Excluded because it is causing a crash
-EXCLUDED_SCRIPTS = ["Frequency_Domain_Analysis.py"]
-
 INSTRUMENT_SWITCHER = {"DGS_Reduction.py": "ARCS",
                        "ORNL_SANS.py": "EQSANS",
                        "Powder_Diffraction_Reduction.py": "NOM"}
@@ -23,8 +20,6 @@ INSTRUMENT_SWITCHER = {"DGS_Reduction.py": "ARCS",
 APP_NAME_SWITCHER = {"DGS_Reduction.py": "python",
                      "ORNL_SANS.py": "python",
                      "Powder_Diffraction_Reduction.py": "python"}
-
-CLOSE_CODE_SWITCHER = {"Muon_Analysis.py": "\nmuon_analysis.close()"}
 
 
 def set_instrument(interface_script_name):
@@ -50,8 +45,7 @@ class PythonInterfacesStartupTest(systemtesting.MantidSystemTest):
 
         self._interface_directory = ConfigService.getString('mantidqt.python_interfaces_directory')
         self._interface_scripts = [interface.split("/")[1] for interface in
-                                   ConfigService.getString('mantidqt.python_interfaces').split()
-                                   if interface.split("/")[1] not in EXCLUDED_SCRIPTS]
+                                   ConfigService.getString('mantidqt.python_interfaces').split()]
 
     def runTest(self):
         if len(self._interface_scripts) == 0:
@@ -65,10 +59,10 @@ class PythonInterfacesStartupTest(systemtesting.MantidSystemTest):
         set_application_name(interface_script)
         # Prevents a QDialog popping up when opening certain interfaces
         set_instrument(interface_script)
-        # Some interfaces need to be closed after opening. This also ensures they process all their events
-        close_code = CLOSE_CODE_SWITCHER.get(interface_script, "")
+        # Some interfaces need to be closed after opening. The close_event ensures they unsubscribe from the ADS.
+        QSettings().setValue("close_interface", True)
 
         try:
-            exec(open(os.path.join(self._interface_directory, interface_script)).read() + close_code)
+            exec(open(os.path.join(self._interface_directory, interface_script)).read())
         except Exception as ex:
             self.fail(f"Exception thrown when attempting to open the {interface_script} interface: {ex}.")
