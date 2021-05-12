@@ -5,12 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from Muon.GUI.FrequencyDomainAnalysis.frequency_domain_analysis_2 import FrequencyAnalysisGui
+from Muon.GUI.FrequencyDomainAnalysis.frequency_domain_analysis import FrequencyAnalysisGui
 from qtpy import QtCore
 from Muon.GUI.Common.usage_report import report_interface_startup
 import sys
 
-Name = "Frequency_Domain_Analysis_2"
+Name = "Frequency_Domain_Analysis"
 if 'workbench' in sys.modules:
     from workbench.config import get_window_config
 
