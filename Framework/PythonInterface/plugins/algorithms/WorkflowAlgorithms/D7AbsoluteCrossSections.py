@@ -183,22 +183,17 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             measurements.add(name[last_underscore+1:])
         nMeasurements = len(measurements)
         error_msg = "The provided data cannot support {} measurement cross-section separation."
-        if nMeasurements == 10:
-            nComponents = 3
-        elif nMeasurements == 6:
-            nComponents = 3
-            if user_method == '10p' and self.getProperty('RotatedXYZWorkspace').isDefault:
-                raise RuntimeError(error_msg.format(user_method))
+        if nMeasurements == 6 and user_method == '10p' and self.getProperty('RotatedXYZWorkspace').isDefault:
+            raise RuntimeError(error_msg.format(user_method))
         elif nMeasurements == 2:
-            nComponents = 2
             if user_method == '10p':
                 raise RuntimeError(error_msg.format(user_method))
             if user_method == 'XYZ':
                 raise RuntimeError(error_msg.format(user_method))
-        else:
+        if nMeasurements not in [2, 6, 10]:
             raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10p. "
                                + "The provided input does not fit in any of these measurement types.")
-        return nMeasurements, nComponents
+        return nMeasurements
 
     def _read_experiment_properties(self, ws):
         """Reads the user-provided dictionary that contains sample geometry (type, dimensions) and experimental conditions,
@@ -217,7 +212,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             formula_unit_mass = self._sampleAndEnvironmentProperties['FormulaUnitMass'].value
             self._sampleAndEnvironmentProperties['NMoles'] = (sample_mass / formula_unit_mass) * formula_units
 
-    def _cross_section_separation(self, ws, nMeasurements, nComponents):
+    def _cross_section_separation(self, ws, nMeasurements):
         """Separates coherent, incoherent, and magnetic components based on spin-flip and non-spin-flip intensities of the
         current sample. The method used is based on either the user's choice or the provided data structure."""
         DEG_2_RAD =  np.pi / 180.0
@@ -552,7 +547,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         input_ws = self.getPropertyValue('InputWorkspace')
         output_ws = self.getPropertyValue('OutputWorkspace')
         self._read_experiment_properties(input_ws)
-        nMeasurements, nComponents = self._data_structure_helper(input_ws)
+        nMeasurements = self._data_structure_helper(input_ws)
         normalisation_method = self.getPropertyValue('NormalisationMethod')
         if self.getPropertyValue('CrossSectionSeparationMethod') == 'None':
             if normalisation_method =='Vanadium':
@@ -564,7 +559,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             else:
                 CloneWorkspace(InputWorkspace=input_ws, OutputWorkspace=output_ws)
         else:
-            component_ws = self._cross_section_separation(input_ws, nMeasurements, nComponents)
+            component_ws = self._cross_section_separation(input_ws, nMeasurements)
             self._set_as_distribution(component_ws)
             if normalisation_method != 'None':
                 if normalisation_method == 'Vanadium':
