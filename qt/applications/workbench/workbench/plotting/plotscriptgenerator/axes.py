@@ -76,11 +76,11 @@ def generate_tick_formatter_commands(ax):
 
     for axis in ["xaxis", "yaxis"]:
         for tick_type in ["major", "minor"]:  # Currently there is no way to change minor tick format in GUI
+            formatter = getattr(getattr(ax, axis), f"get_{tick_type}_formatter")()
+            # Don't write the command to the script if it's default.
+            if isinstance(formatter, DEFAULT_TICK_FORMATTERS[tick_type]):
+                continue
             for key, value in TICK_FORMATTERS.items():
-                formatter = getattr(getattr(ax, axis), f"get_{tick_type}_formatter")()
-                # Don't write the command to the script if it's default.
-                if isinstance(formatter, DEFAULT_TICK_FORMATTERS[tick_type]):
-                    continue
                 if isinstance(formatter, TICK_FORMATTER_INSTANCES[key]):
                     commands.append(f"{axis}.set_{tick_type}_formatter({value})")
     return commands

@@ -11,7 +11,7 @@ import unittest
 import matplotlib as mpl
 mpl.use('Agg')  # noqa
 import matplotlib.pyplot as plt
-from matplotlib.ticker import LogFormatterSciNotation
+from matplotlib.ticker import LogFormatterSciNotation, ScalarFormatter
 
 from unittest.mock import Mock
 from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands,
@@ -118,6 +118,22 @@ class PlotGeneratorAxisTest(unittest.TestCase):
         self.assertNotIn("axes[0][1].yaxis.set_major_formatter", script)
         self.assertIn("axes[1][0].yaxis.set_major_formatter", script)
         self.assertNotIn("axes[1][1].yaxis.set_major_formatter", script)
+
+    def test_generate_tick_format_commands_log_scale(self):
+        """
+        Check that tick format commands are correctly generated for a log axis scale.
+        """
+        fig = plt.figure()
+        axes = fig.add_subplot(1, 1, 1, projection='mantid')
+        axes.plot([-10, 10], [1, 2])
+        axes.set_yscale('log')
+        axes.yaxis.set_major_formatter(ScalarFormatter())
+
+        script = generate_script(fig)
+        # Scalar format is not the default for log axis, so should appear in script.
+        self.assertIn("axes.yaxis.set_major_formatter(ScalarFormatter(", script)
+        # LogFormatterSciNotation is default for log axis, so shouldn't appear in script for minor or major ticks.
+        self.assertNotIn("_formatter(LogFormatterSciNotation", script)
 
 
 if __name__ == '__main__':
