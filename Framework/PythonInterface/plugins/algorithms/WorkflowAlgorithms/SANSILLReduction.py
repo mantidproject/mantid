@@ -366,7 +366,7 @@ class SANSILLReduction(PythonAlgorithm):
         param_table = fit_output.OutputParameters
         beam_width = param_table.column(1)[3] * np.pi / 180.0
         AddSampleLog(Workspace=input_ws, LogName='BeamWidthX', LogText=str(beam_width), LogType='Number',
-                     LogUnit='degrees')
+                     LogUnit='rad')
         DeleteWorkspaces(WorkspaceList=[tmp_ws, tmp_ws+'_fit_output_Parameters', tmp_ws+'_fit_output_Workspace',
                                         tmp_ws+'_fit_output_NormalisedCovarianceMatrix'])
 
