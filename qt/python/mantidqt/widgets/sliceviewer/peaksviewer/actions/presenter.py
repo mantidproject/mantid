@@ -77,7 +77,7 @@ class PeakActionsPresenter:
         """Add peaks if the button is pressed"""
         self._view.collection_view._sliceinfo_provider.view.data_view.enable_peak_selection(self._view.adding_mode_on)
 
-    def peak_selected(self, x, y):
+    def peak_selected(self, pos, frame):
         if self._view.adding_mode_on:
-            self._model.add_peak(x, y)
+            self._model.add_peak(pos, frame)
             self.viewer_presenter.redraw_peaks()

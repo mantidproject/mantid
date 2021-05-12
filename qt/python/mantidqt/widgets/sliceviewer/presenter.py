@@ -421,7 +421,11 @@ class SliceViewer(ObservingPresenter):
     def peak_selected(self, event):
         if event.inaxes:
             xdata, ydata = event.xdata, event.ydata
-            self.view.peaks_view.peaks_actions_view.presenter.peak_selected(xdata, ydata)
+            sliceinfo = self.get_sliceinfo()
+            pos = sliceinfo.transform([xdata, ydata, sliceinfo.z_value])
+            self._logger.debug(f"Coordinates selected x={xdata} y={ydata} z={sliceinfo.z_value}")
+            self._logger.debug(f"Coordinates transformed into {sliceinfo.frame} frame, pos={pos}")
+            self.view.peaks_view.peaks_actions_view.presenter.peak_selected(pos, sliceinfo.frame)
 
     # private api
     def _create_peaks_presenter_if_necessary(self):
