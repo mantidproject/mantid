@@ -748,7 +748,7 @@ class RunDescriptorTest(unittest.TestCase):
         ref_ws = ref_ws - 0.1*ref_ws
         difr = CompareWorkspaces(ref_ws,resWs)
         self.assertTrue(difr.Result)
-        # bg Workspace remais unchanged
+        # bg Workspace remains unchanged
         bg_ws_restored = PropertyManager.empty_bg_run.get_workspace()
         difr = CompareWorkspaces(bg_ws_restored,bg_ws)
         self.assertTrue(difr.Result)
