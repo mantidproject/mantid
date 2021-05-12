@@ -452,6 +452,7 @@ class D11B_AutoProcess_DirectBeamResolution_Test(systemtesting.MantidSystemTest)
             SampleRuns=samples,
             BeamRuns=beams,
             ContainerRuns=containers,
+            DefaultMaskFile='002692_mask_edges_8m',
             MaskFiles='002652_mask_bs_2m,002692_mask_bs_8m,002712_mask_bs_28m',
             SampleTransmissionRuns=sample_tr,
             ContainerTransmissionRuns=container_tr,
