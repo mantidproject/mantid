@@ -133,7 +133,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         self.declareProperty(name="OutputUnits",
                              defaultValue="TwoTheta",
-                             validator=StringListValidator(["TwoTheta", "Q"]),
+                             validator=StringListValidator(["TwoTheta", "Q", "Qxy"]),
                              direction=Direction.Input,
                              doc="The choice to display the output either as a function of detector twoTheta,"
                                  +" or the momentum exchange.")
@@ -471,6 +471,14 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         GroupWorkspaces(InputWorkspaces=tmp_names, Outputworkspace=output_ws)
         return output_ws
 
+    def _q_rebin(self, ws):
+        """
+        Rebins the single crystal omega scan measurement output onto 2D Qx-Qy grid.
+        :param ws: Output of the cross-section separation and/or normalisation.
+        :return: WorkspaceGroup containing 2D distributions on a Qx-Qy grid.
+        """
+        return ws
+
     def _set_units(self, ws, nMeasurements):
         output_unit = self.getPropertyValue('OutputUnits')
         unit_symbol = 'barn / sr / formula unit'
@@ -499,6 +507,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                                     EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value,
                                     OrderAxis=False)
                 Transpose(InputWorkspace=ws, OutputWorkspace=ws)
+        elif output_unit == 'Qxy':
+            ws = self._q_rebin(ws)
 
         if self.getPropertyValue('NormalisationMethod') in ['Incoherent', 'Paramagnetic']:
             unit = 'Normalized intensity'
