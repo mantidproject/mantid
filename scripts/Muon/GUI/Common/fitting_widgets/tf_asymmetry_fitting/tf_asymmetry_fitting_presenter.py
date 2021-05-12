@@ -38,11 +38,6 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         self._switch_to_normal_fitting()
         super().handle_instrument_changed()
 
-    def handle_selected_group_pair_changed(self) -> None:
-        """Disable TF Asymmetry mode when the selected group/pairs change in the grouping tab."""
-        self._switch_to_normal_fitting()
-        super().handle_selected_group_pair_changed()
-
     def handle_ads_clear_or_remove_workspace_event(self, _: str = None) -> None:
         """Handle when there is a clear or remove workspace event in the ADS."""
         super().handle_ads_clear_or_remove_workspace_event()
