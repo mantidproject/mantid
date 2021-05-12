@@ -569,7 +569,7 @@ public:
     EXPECT_CALL(*m_view, clearDataSelection()).Times(1);
     EXPECT_CALL(*m_view, appendToDataSelection("DisplayName-0")).Times(1);
     EXPECT_CALL(*m_view, appendToDataSelection("DisplayName-1")).Times(1);
-    EXPECT_CALL(*m_view, setPlotSpectrum(IDA::WorkspaceIndex{0})).Times(1);
+    EXPECT_CALL(*m_view, setPlotSpectrum(IDA::WorkspaceIndex{0})).Times(2);
     TS_ASSERT_EQUALS(m_presenter->getSelectedSpectrum(), IDA::WorkspaceIndex{0});
 
     m_presenter->updateDataSelection();
