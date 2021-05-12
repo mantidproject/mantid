@@ -13,6 +13,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAlgorithms/AddSampleLog.h"
 #include "MantidAlgorithms/AddTimeSeriesLog.h"
+#include "MantidAlgorithms/ChangeBinOffset.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CreateGroupingWorkspace.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
@@ -87,10 +88,12 @@ public:
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[80], 1609.2800, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[80], 20);
-    TS_ASSERT_DELTA(m_outWS->x(0)[880], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[880], 587);
+    // [99] 1920.2339999999983, 41
+    TS_ASSERT_DELTA(m_outWS->x(0)[99], 1920.23400, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[99], 41.);
+    // [899] 673.0, 15013.033999999987
+    TS_ASSERT_DELTA(m_outWS->x(0)[899], 15013.03400, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[899], 673.0);
   }
 
   void testEventWksp_preserveEvents_useGroupAll() {
@@ -109,10 +112,12 @@ public:
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[423], 1634.3791, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[423], 2702);
-    TS_ASSERT_DELTA(m_outWS->x(0)[970], 14719.8272, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[970], 149165);
+    // [465] 1934.8418434567402, 3086.0
+    TS_ASSERT_DELTA(m_outWS->x(0)[465], 1934.8418, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[465], 3086.0);
+    // [976] 15079.01917808858: 55032.0
+    TS_ASSERT_DELTA(m_outWS->x(0)[976], 15079.019178, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[976], 55032.0);
   }
 
   void testEventWksp_doNotPreserveEvents() {
@@ -131,10 +136,12 @@ public:
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[80], 1609.2800, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[80], 20);
-    TS_ASSERT_DELTA(m_outWS->x(0)[880], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[880], 587);
+    // [99] 1920.2339999999983, 41
+    TS_ASSERT_DELTA(m_outWS->x(0)[99], 1920.23400, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[99], 41.);
+    // [899] 673.0, 15013.033999999987
+    TS_ASSERT_DELTA(m_outWS->x(0)[899], 15013.03400, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[899], 673.0);
   }
 
   void testEventWksp_doNotPreserveEvents_useGroupAll() {
@@ -153,10 +160,12 @@ public:
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[423], 1634.3791, 0.0001);
-    TS_ASSERT_DELTA(m_outWS->y(0)[423], 2419.5680, 0.0001);
-    TS_ASSERT_DELTA(m_outWS->x(0)[970], 14719.8272, 0.0001);
-    TS_ASSERT_DELTA(m_outWS->y(0)[970], 148503.3853, 0.0001);
+    // [465] 1934.8418434567402, 3086.0
+    TS_ASSERT_DELTA(m_outWS->x(0)[465], 1934.8418, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->y(0)[465], 2699.3, 0.1);
+    // [976] 15079.01917808858: 55032.0
+    TS_ASSERT_DELTA(m_outWS->x(0)[976], 15079.019178, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->y(0)[976], 55549.5, 0.1);
   }
 
   void testEventWksp_rebin_preserveEvents() {
@@ -172,16 +181,16 @@ public:
     doTestEventWksp();
 
     // Test the input
-    TS_ASSERT_DELTA(m_inWS->x(0)[170], 1628.3764, 0.0001);
-    TS_ASSERT_EQUALS(m_inWS->y(0)[170], 48);
-    TS_ASSERT_DELTA(m_inWS->x(0)[391], 14681.7696, 0.0001);
-    TS_ASSERT_EQUALS(m_inWS->y(0)[391], 2540);
+    TS_ASSERT_DELTA(m_inWS->x(0)[187], 1928.4933786037175, 0.0001);
+    TS_ASSERT_EQUALS(m_inWS->y(0)[187], 53);
+    TS_ASSERT_DELTA(m_inWS->x(0)[393], 14976.873144731135, 0.0001);
+    TS_ASSERT_EQUALS(m_inWS->y(0)[393], 2580);
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[1693], 1629.3502, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[1693], 6);
-    TS_ASSERT_DELTA(m_outWS->x(0)[3895], 14718.1436, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[3895], 612);
+    TS_ASSERT_DELTA(m_outWS->x(0)[1872], 1948.5623011850066, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[1872], 4);
+    TS_ASSERT_DELTA(m_outWS->x(0)[3915], 15015.319796791482, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[3915], 620);
   }
 
   void testEventWksp_preserveEvents_dmin_dmax() {
@@ -206,10 +215,10 @@ public:
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[116], 3270.3908, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[116], 37);
-    TS_ASSERT_DELTA(m_outWS->x(0)[732], 6540.7817, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[732], 25);
+    TS_ASSERT_DELTA(m_outWS->x(0)[172], 3567.6990819051966, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[172], 37);
+    TS_ASSERT_DELTA(m_outWS->x(0)[789], 6843.398982999533, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[789], 27);
   }
 
   void testEventWksp_preserveEvents_tmin_tmax() {
@@ -221,7 +230,7 @@ public:
     m_useGroupAll = false;
     m_useResamplex = true;
     m_tmin = "2000.0";
-    m_tmax = "10000.0";
+    m_tmax = "12000.0";
 
     // Run the main test function
     doTestEventWksp();
@@ -234,10 +243,10 @@ public:
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[149], 3270.7563, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[149], 51);
-    TS_ASSERT_DELTA(m_outWS->x(0)[982], 9814.5378, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[982], 138);
+    TS_ASSERT_DELTA(m_outWS->x(0)[149], 3563.380399999972, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[149], 63);
+    TS_ASSERT_DELTA(m_outWS->x(0)[816], 10113.053600000023, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[816], 175);
   }
 
   void testEventWksp_preserveEvents_lambdamin_lambdamax() {
@@ -262,12 +271,12 @@ public:
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[181], 3262.2460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[181], 105);
-    TS_ASSERT_DELTA(m_outWS->x(0)[581], 9808.6460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[581], 290);
-    TS_ASSERT_DELTA(m_outWS->x(0)[880], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[880], 0);
+    TS_ASSERT_DELTA(m_outWS->x(0)[199], 3556.833999999997, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[199], 92.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[599], 10103.233999999991, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[599], 277.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[899], 15013.033999999987, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[899], 0);
   }
 
   void testEventWksp_preserveEvents_maskbins() {
@@ -290,12 +299,12 @@ public:
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[181], 3262.2460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[181], 105);
-    TS_ASSERT_DELTA(m_outWS->x(0)[581], 9808.6460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[581], 290);
-    TS_ASSERT_DELTA(m_outWS->x(0)[880], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[880], 0);
+    TS_ASSERT_DELTA(m_outWS->x(0)[199], 3556.833999999997, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[199], 92.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[599], 10103.233999999991, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[599], 277.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[899], 15013.033999999987, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[899], 0);
   }
 
   void testEventWksp_preserveEvents_noCompressTolerance() {
@@ -318,12 +327,12 @@ public:
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[181], 3262.2460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[181], 105);
-    TS_ASSERT_DELTA(m_outWS->x(0)[581], 9808.6460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[581], 290);
-    TS_ASSERT_DELTA(m_outWS->x(0)[880], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[880], 587);
+    TS_ASSERT_DELTA(m_outWS->x(0)[199], 3556.833999999997, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[199], 92.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[599], 10103.233999999991, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[599], 277.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[899], 15013.033999999987, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[899], 673.);
   }
 
   void testEventWksp_preserveEvents_highCompressTolerance() {
@@ -346,12 +355,12 @@ public:
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[181], 3262.2460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[181], 96);
-    TS_ASSERT_DELTA(m_outWS->x(0)[581], 9808.6460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[581], 427);
-    TS_ASSERT_DELTA(m_outWS->x(0)[880], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[880], 672);
+    TS_ASSERT_DELTA(m_outWS->x(0)[199], 3556.833999999997, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[199], 119.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[599], 10103.233999999991, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[599], 263.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[899], 15013.033999999987, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[899], 827.);
   }
 
   void testEventWksp_preserveEvents_compressWallClockTolerance() {
@@ -374,13 +383,14 @@ public:
     // Test the input
     docheckEventInputWksp();
 
-    // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[181], 3262.2460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[181], 105);
-    TS_ASSERT_DELTA(m_outWS->x(0)[581], 9808.6460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[581], 290);
-    TS_ASSERT_DELTA(m_outWS->x(0)[880], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[880], 587);
+    // Test the output: expected result shall be same as testEventWksp_preserveEvents_noCompressTolerance
+    // because comparess time clock won't change the result
+    TS_ASSERT_DELTA(m_outWS->x(0)[199], 3556.833999999997, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[199], 92.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[599], 10103.233999999991, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[599], 277.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[899], 15013.033999999987, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[899], 673.);
   }
 
   void testEventWksp_preserveEvents_removePromptPulse() {
@@ -404,10 +414,10 @@ public:
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[181], 3262.2460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[181], 105);
-    TS_ASSERT_DELTA(m_outWS->x(0)[581], 9808.6460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[581], 0);
+    TS_ASSERT_DELTA(m_outWS->x(0)[199], 3556.833999999997, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[199], 92.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[599], 10103.233999999991, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[599], 0.);
   }
 
   void testEventWksp_preserveEvents_compressStartTime() {
@@ -433,10 +443,10 @@ public:
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[181], 3262.2460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[181], 72);
-    TS_ASSERT_DELTA(m_outWS->x(0)[581], 9808.6460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[581], 197);
+    TS_ASSERT_DELTA(m_outWS->x(0)[199], 3556.833999999997, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[199], 68.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[599], 10103.233999999991, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[599], 190.);
   }
 
   /** Setup for testing HRPD NeXus data */
@@ -552,16 +562,21 @@ public:
   }
 
   void docheckEventInputWksp() {
-    TS_ASSERT_DELTA(m_inWS->x(0)[8], 1609.2800, 0.0001);
-    TS_ASSERT_EQUALS(m_inWS->y(0)[8], 97);
-    TS_ASSERT_DELTA(m_inWS->x(0)[18], 3245.8800, 0.0001);
-    TS_ASSERT_EQUALS(m_inWS->y(0)[18], 237);
-    TS_ASSERT_DELTA(m_inWS->x(0)[38], 6519.0800, 0.0001);
-    TS_ASSERT_EQUALS(m_inWS->y(0)[38], 199);
-    TS_ASSERT_DELTA(m_inWS->x(0)[58], 9792.2800, 0.0001);
-    TS_ASSERT_EQUALS(m_inWS->y(0)[58], 772);
-    TS_ASSERT_DELTA(m_inWS->x(0)[88], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(m_inWS->y(0)[88], 2162);
+    // peak 0
+    TS_ASSERT_DELTA(m_inWS->x(0)[9], 1772.94, 0.01);
+    TS_ASSERT_EQUALS(m_inWS->y(0)[9], 50);
+    // peak 1
+    TS_ASSERT_DELTA(m_inWS->x(0)[19], 3409.54, 0.01);
+    TS_ASSERT_EQUALS(m_inWS->y(0)[19], 125);
+    // peak 3: index = 39  6682.74  118
+    TS_ASSERT_DELTA(m_inWS->x(0)[39], 6682.74, 0.01);
+    TS_ASSERT_EQUALS(m_inWS->y(0)[39], 118);
+    // peak 5: index = 59  9955.94  483
+    TS_ASSERT_DELTA(m_inWS->x(0)[59], 9955.94, 0.01);
+    TS_ASSERT_EQUALS(m_inWS->y(0)[59], 483);
+    // peak 7: index = 89  14865.7  1524
+    TS_ASSERT_DELTA(m_inWS->x(0)[89], 14865.7, 0.1);
+    TS_ASSERT_EQUALS(m_inWS->y(0)[89], 1524);
   }
 
   void doTestEventWksp() {
@@ -724,7 +739,7 @@ public:
     TableRow row1 = m_maskBinTableWS->appendRow();
     row1 << "" << 0.0 << 2000.0;
     TableRow row2 = m_maskBinTableWS->appendRow();
-    row2 << "" << 10000.0 << m_xmax + 1000.0;
+    row2 << "" << 12000.0 << m_xmax + 1000.0;
     return m_maskBinTableWS;
   }
 
