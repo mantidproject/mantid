@@ -7,6 +7,8 @@
 #  This file is part of the mantid package
 # std imports
 import math
+from typing import List
+
 import numpy as np
 from collections.abc import Sequence
 
@@ -16,7 +18,7 @@ from matplotlib.legend import Legend
 import matplotlib as mpl
 
 # local imports
-from mantid.api import AnalysisDataService, MatrixWorkspace
+from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
 from mantid.api import IMDHistoWorkspace
 from mantid.kernel import ConfigService
 from mantid.plots import datafunctions, MantidAxes
@@ -143,6 +145,10 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
 
     if plot_kwargs is None:
         plot_kwargs = {}
+
+    if any(isinstance(i, WorkspaceGroup) for i in workspaces):
+        workspaces = _unpack_grouped_workspaces(workspaces)
+
     _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled, overplot)
     workspaces = [ws for ws in workspaces if isinstance(ws, MatrixWorkspace)]
 
@@ -398,6 +404,14 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
 # -----------------------------------------------------------------------------
 # Private Methods
 # -----------------------------------------------------------------------------
+def _unpack_grouped_workspaces(mixed_list: List):
+    assert isinstance(mixed_list, list), f"Expected list of group + non-group workspaces, got {repr(mixed_list)}"
+    ret = []
+    for ws in mixed_list:
+        ret.extend([i for i in ws]) if isinstance(ws, WorkspaceGroup) else ret.append(ws)
+    return ret
+
+
 def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled=False, overplot=False):
     """Raises a ValueError if any arguments have the incorrect types"""
     if spectrum_nums is not None and wksp_indices is not None:

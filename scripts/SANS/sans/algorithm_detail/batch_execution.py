@@ -238,38 +238,7 @@ def plot_workspace(reduction_package, output_graph):
     :param output_graph: Name to the plot window
     """
     plotting_module = get_plotting_module()
-    if hasattr(plotting_module, 'graph'):
-        plot_workspace_mantidplot(reduction_package, output_graph, plotting_module)
-    else:
-        plot_workspace_mantidqt(reduction_package, output_graph, plotting_module)
-
-
-def plot_workspace_mantidplot(reduction_package, output_graph, plotting_module):
-    """
-    Plotting continuous output when on MantidPlot
-    This function should be deleted if and when MantidPlot is no longer a part of Mantid
-
-    :param reduction_package: An object containing the reduced workspaces
-    :param output_graph: Name to the plot window
-    :param plotting_module: The MantidPlot plotting module
-    """
-    plotSpectrum, graph = plotting_module.plotSpectrum, plotting_module.graph
-
-    if reduction_package.reduction_mode == ReductionMode.ALL:
-        graph_handle = plotSpectrum([reduction_package.reduced_hab, reduction_package.reduced_lab], 0,
-                                    window=graph(output_graph), clearWindow=True)
-        graph_handle.activeLayer().logLogAxes()
-    elif reduction_package.reduction_mode == ReductionMode.HAB:
-        graph_handle = plotSpectrum(reduction_package.reduced_hab, 0, window=graph(output_graph), clearWindow=True)
-        graph_handle.activeLayer().logLogAxes()
-    elif reduction_package.reduction_mode == ReductionMode.LAB:
-        graph_handle = plotSpectrum(reduction_package.reduced_lab, 0, window=graph(output_graph), clearWindow=True)
-        graph_handle.activeLayer().logLogAxes()
-    elif reduction_package.reduction_mode == ReductionMode.MERGED:
-        graph_handle = plotSpectrum([reduction_package.reduced_merged,
-                                     reduction_package.reduced_hab, reduction_package.reduced_lab], 0,
-                                    window=graph(output_graph), clearWindow=True)
-        graph_handle.activeLayer().logLogAxes()
+    plot_workspace_mantidqt(reduction_package, output_graph, plotting_module)
 
 
 def plot_workspace_mantidqt(reduction_package, output_graph, plotting_module):

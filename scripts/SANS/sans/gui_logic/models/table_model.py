@@ -44,11 +44,9 @@ class TableModel(object):
     def add_multiple_table_entries(self, table_index_model_list):
         for row in table_index_model_list:
             self._add_single_table_entry(row_entry=row)
-        self.notify_subscribers()
 
     def append_table_entry(self, table_index_model):
         self._add_single_table_entry(row_entry=table_index_model)
-        self.notify_subscribers()
 
     def get_all_rows(self):
         return self._table_entries
@@ -63,7 +61,6 @@ class TableModel(object):
         # Insert a None to effectively bookmark the space
         self._table_entries.insert(row_index, None)
         self._add_single_table_entry(row_entry=row_entry, row_index=row_index)
-        self.notify_subscribers()
 
     def replace_table_entry(self, row_index, row_entry):
         self._add_single_table_entry(row_index=row_index, row_entry=row_entry)
