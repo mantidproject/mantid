@@ -291,8 +291,14 @@ void Fit::createOutput() {
           row << 100.0 * covar.get(ia, ja) / sqrt(covar.get(ia, ia) * covar.get(ja, ja));
         }
         ++ja;
+
+        if (ja >= covar.size2())
+          break;
       }
       ++ia;
+
+      if (ia >= covar.size1())
+        break;
     }
 
     setProperty("OutputNormalisedCovarianceMatrix", covariance);

@@ -82,10 +82,14 @@ class GeneralFittingPresenterTest(unittest.TestCase):
 
     def test_that_handle_instrument_changed_will_update_and_reset_the_data(self):
         self.presenter.update_and_reset_all_data = mock.Mock()
+        self.presenter.clear_cached_fit_functions = mock.Mock()
+        self.presenter.model.remove_all_fits_from_context = mock.Mock()
 
         self.presenter.handle_instrument_changed()
 
         self.presenter.update_and_reset_all_data.assert_called_with()
+        self.presenter.clear_cached_fit_functions.assert_called_once_with()
+        self.presenter.model.remove_all_fits_from_context.assert_called_once_with()
 
     def test_that_handle_pulse_type_changed_will_update_and_reset_the_data_if_it_contains_DoublePulseEnabled(self):
         updated_variables = {"DoublePulseEnabled": True, "OtherVariable": False}

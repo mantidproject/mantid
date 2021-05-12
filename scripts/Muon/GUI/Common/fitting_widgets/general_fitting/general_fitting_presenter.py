@@ -53,6 +53,8 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self._update_plot = False
         self.update_and_reset_all_data()
         self._update_plot = True
+        self.clear_cached_fit_functions()
+        self.model.remove_all_fits_from_context()
 
     def handle_pulse_type_changed(self, updated_variables: dict) -> None:
         """Handles when double pulse mode is switched on and switches to normal fitting mode."""

@@ -467,6 +467,46 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.assertEqual(self.model.get_all_fit_functions(), self.model.single_fit_functions)
 
+    def test_that_the_existing_functions_are_reused_when_new_datasets_are_loaded(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+        self.model.current_dataset_index = 0
+        self.model.single_fit_functions[0].setParameter("A0", 1)
+        self.model.single_fit_functions[1].setParameter("A0", 5)
+
+        self.model.dataset_names = ["New Name1", "New Name2"]
+
+        self.assertEqual(str(self.model.single_fit_functions[0]), "name=FlatBackground,A0=1")
+        self.assertEqual(str(self.model.single_fit_functions[1]), "name=FlatBackground,A0=5")
+
+    def test_that_the_currently_selected_function_is_copied_for_when_a_larger_number_of_new_datasets_are_loaded(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+        self.model.current_dataset_index = 0
+        self.model.single_fit_functions[0].setParameter("A0", 1)
+        self.model.single_fit_functions[1].setParameter("A0", 5)
+
+        # The last two datasets are the same as the previously loaded datasets. This means their functions should be
+        # reused for these last two single fit functions. The first two single fit functions are completely new, and so
+        # are just given a copy of the previous currently selected function (i.e. A0=1).
+        self.model.dataset_names = ["New Name1", "New Name2", "Name1", "Name2"]
+
+        self.assertEqual(str(self.model.single_fit_functions[0]), "name=FlatBackground,A0=1")
+        self.assertEqual(str(self.model.single_fit_functions[1]), "name=FlatBackground,A0=1")
+        self.assertEqual(str(self.model.single_fit_functions[2]), "name=FlatBackground,A0=1")
+        self.assertEqual(str(self.model.single_fit_functions[3]), "name=FlatBackground,A0=5")
+
+    def test_that_newly_loaded_datasets_will_reuse_the_existing_functions_when_there_are_fewer_new_datasets(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+        self.model.current_dataset_index = 0
+        self.model.single_fit_functions[0].setParameter("A0", 1)
+        self.model.single_fit_functions[1].setParameter("A0", 5)
+
+        # This dataset is the second dataset previously and so the A0=5 fit function should be reused.
+        self.model.dataset_names = ["Name2"]
+        self.assertEqual(str(self.model.single_fit_functions[0]), "name=FlatBackground,A0=5")
+
 
 if __name__ == '__main__':
     unittest.main()

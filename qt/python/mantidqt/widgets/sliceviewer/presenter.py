@@ -199,8 +199,14 @@ class SliceViewer(ObservingPresenter):
 
     def show_all_data_requested(self):
         """Instructs the view to show all data"""
-        self.set_axes_limits(*self.model.get_dim_limits(self.get_slicepoint(),
-                                                        self.view.data_view.dimensions.transpose))
+        if self.model.is_ragged_matrix_plotted():
+            # get limits from full extent of image (which was calculated by looping over all spectra excl. monitors)
+            x0, x1, y0, y1 = self.view.data_view.get_full_extent()
+            limits = ((x0, x1), (y0, y1))
+        else:
+            # otherwise query data model based on slice info and transpose
+            limits = self.model.get_dim_limits(self.get_slicepoint(), self.view.data_view.dimensions.transpose)
+        self.set_axes_limits(*limits)
 
     def set_axes_limits(self, xlim, ylim, auto_transform=True):
         """Set the axes limits on the view.
@@ -229,6 +235,8 @@ class SliceViewer(ObservingPresenter):
         data_view = self.view.data_view
         if state:
             data_view.add_line_plots(tool, self)
+            if data_view.track_cursor_checked():
+                data_view._line_plots.connect()
         else:
             data_view.deactivate_tool(ToolItemText.REGIONSELECTION)
             data_view.remove_line_plots()

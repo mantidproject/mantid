@@ -210,6 +210,11 @@ void IndirectFitPlotView::setFitRangeMaximum(double maximum) {
   selector->setMaximum(maximum);
 }
 
+void IndirectFitPlotView::setFitRangeBounds(std::pair<double, double> const &bounds) {
+  auto selector = m_topPlot->getRangeSelector("FitRange");
+  selector->setBounds(bounds.first, bounds.second);
+}
+
 void IndirectFitPlotView::appendToDataSelection(const std::string &dataName) {
   MantidQt::API::SignalBlocker blocker(m_plotForm->cbDataSelection);
   m_plotForm->cbDataSelection->addItem(QString::fromStdString(dataName));

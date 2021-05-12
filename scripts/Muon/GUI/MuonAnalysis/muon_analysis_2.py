@@ -113,7 +113,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         # set up other widgets
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
         self.home_tab = HomeTabWidget(self.context, self)
-        self.grouping_tab_widget = GroupingTabWidget(self.context)
+        self.grouping_tab_widget = GroupingTabWidget(self.context, parent)
         self.phase_tab = PhaseTabWidget(self.context, self)
         self.seq_fitting_tab = SeqFittingTabWidget(self.context, self.fitting_tab.fitting_tab_model, self)
         self.results_tab = ResultsTabWidget(self.context.fitting_context, self.context, self)

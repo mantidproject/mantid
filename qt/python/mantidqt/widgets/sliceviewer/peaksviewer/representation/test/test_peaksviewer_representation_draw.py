@@ -56,15 +56,16 @@ class DrawTest(unittest.TestCase):
         painter = draw_shape("spherical", json.dumps(shape_descr))
 
         painter.cross.assert_called_once()
-        painter.circle.assert_called_once()
+        painter.ellipse.assert_called_once()
+        painter.elliptical_shell.assert_not_called()
 
     def test_draw_peak_representation_for_spherical_shape_including_background(self):
         shape_descr = create_sphere_info(0.5, (1.1, 1.2))
         painter = draw_shape("spherical", json.dumps(shape_descr))
 
         painter.cross.assert_called_once()
-        painter.circle.assert_called_once()
-        painter.shell.assert_called_once()
+        painter.ellipse.assert_called_once()
+        painter.elliptical_shell.assert_called_once()
 
     def test_draw_peak_representation_for_ellipsoid_shape(self):
         shape_descr = create_ellipsoid_info((0.5, 0.3, 0.2), ("1 0 0", "0 1 0", "0 0 1"),

@@ -51,7 +51,7 @@
       <item>
        <widget class="QPushButton" name="undo_fit_button">
         <property name="text">
-         <string>Undo Fits</string>
+         <string>Undo Fit</string>
         </property>
        </widget>
       </item>
@@ -85,13 +85,13 @@
     <widget class="QCheckBox" name="plot_guess_checkbox">
      <property name="minimumSize">
       <size>
-       <width>120</width>
+       <width>180</width>
        <height>0</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>120</width>
+       <width>180</width>
        <height>16777215</height>
       </size>
      </property>

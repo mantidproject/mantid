@@ -545,7 +545,7 @@ def _workspace_indices(y_bins, workspace):
             workspace_index = workspace.getAxis(1).indexOfValue(y)
             workspace_indices.append(workspace_index)
         except IndexError:
-            continue
+            workspace_indices.append(-1)
     return workspace_indices
 
 
@@ -560,7 +560,7 @@ def _workspace_indices_maxpooling(y_bins, workspace):
             workspace_index = workspace_range[np.argmax(summed_spectra[workspace_range])]
             workspace_indices.append(workspace_index)
         except IndexError:
-            continue
+            workspace_indices.append(-1)
     return workspace_indices
 
 
@@ -585,6 +585,9 @@ def interpolate_y_data(workspace, x, y, normalize_by_bin_width, spectrum_info=No
     index = -1
     for workspace_index in workspace_indices:
         index += 1
+        # if workspace axis is beyond limits carry on
+        if workspace_index == -1:
+            continue
         # avoid repeating calculations
         if previous_index == workspace_index:
             counts[index, :] = counts[index - 1]
