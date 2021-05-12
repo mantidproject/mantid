@@ -7,11 +7,11 @@
 #  This file is part of the mantidqt package
 #
 #
-from qtpy.QtCore import QTimer
+from threading import Timer
 
 from ..memorywidget.memoryinfo import get_memory_info
 
-TIME_INTERVAL_MEMORY_USAGE_UPDATE = 2000  # in ms
+TIME_INTERVAL_MEMORY_USAGE_UPDATE = 2.000  # in s
 
 
 class MemoryPresenter(object):
@@ -25,18 +25,29 @@ class MemoryPresenter(object):
     """
     def __init__(self, view):
         self.view = view
-        self.timer = QTimer()
+        self.timer = Timer(TIME_INTERVAL_MEMORY_USAGE_UPDATE, self.update_memory_usage)
+        self.thread_on = False
+        self.closing_workbench = False
         self.update_memory_usage()
         self.set_bar_color_at_start()
-        self.update_at_regular_intervals()
+        self.start_memory_widget_update_thread()
 
-    def update_at_regular_intervals(self):
+    def start_memory_widget_update_thread(self):
         """
         Sets timer so that the memory usage is updated
         every TIME_INTERVAL_MEMORY_USAGE_UPDATE (ms)
         """
-        self.timer.timeout.connect(self.update_memory_usage)
-        self.timer.start(TIME_INTERVAL_MEMORY_USAGE_UPDATE)
+        if not self.thread_on:
+            self.timer.start()
+
+    def _spin_off_another_time_thread(self):
+        """
+        Spins off another timer thread, by creating a new Timer thread object and starting it
+        """
+        if not self.thread_on and not self.closing_workbench:
+            self.thread = Timer(TIME_INTERVAL_MEMORY_USAGE_UPDATE, self.update_memory_usage)
+            self.thread.start()
+            self.thread_on = True
 
     def set_bar_color_at_start(self):
         """
@@ -54,5 +65,12 @@ class MemoryPresenter(object):
         """
         Gets memory usage information and passes it to the view
         """
+        self.thread_on = False
         mem_used_percent, mem_used, mem_avail = get_memory_info()
         self.view.set_value(mem_used_percent, mem_used, mem_avail)
+        self._spin_off_another_time_thread()
+
+    def cancel_memory_update(self):
+        if self.timer is not None:
+            self.timer.cancel()
+            self.thread_on = False

@@ -580,6 +580,11 @@ class MainWindow(QMainWindow):
             self.project_recovery.closing_workbench = True
             self.project_recovery.remove_current_pid_folder()
 
+            # Cancel memory widget thread
+            if self.memorywidget is not None:
+                self.memorywidget.presenter.closing_workbench = True
+                self.memorywidget.presenter.cancel_memory_update()
+
             self.interface_manager.closeHelpWindow()
 
             event.accept()
