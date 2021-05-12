@@ -729,10 +729,11 @@ class PolDiffILLReduction(PythonAlgorithm):
         calibration_setting = 'YIGFile'
         if self.getProperty('InstrumentCalibration').isDefault:
             calibration_setting = 'None'
-        progress.report('Loading data')
-        Load(Filename=self.getPropertyValue('Run'), LoaderName='LoadILLPolarizedDiffraction',
-             PositionCalibration=calibration_setting, YIGFileName=self.getPropertyValue('InstrumentCalibration'),
-             OutputWorkspace=ws)
+        progress.report(0, 'Loading data')
+        LoadAndMerge(Filename=self.getPropertyValue('Run'), LoaderName='LoadILLPolarizedDiffraction',
+                     LoaderOptions={'PositionCalibration':calibration_setting,
+                                    'YIGFileName':self.getPropertyValue('InstrumentCalibration')},
+                     OutputWorkspace=ws, startProgress=0.0, endProgress=0.6)
 
         self._instrument = mtd[ws][0].getInstrument().getName()
         run = mtd[ws][0].getRun()
@@ -753,7 +754,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                 progress.report('Calculating transmission')
                 self._calculate_transmission(ws, beam_ws)
         else:
-            progress.report('Normalising to monitor')
+            progress.report(7, 'Normalising to monitor')
             self._normalise(ws)
 
         if process in ['Quartz', 'Vanadium', 'Sample']:
