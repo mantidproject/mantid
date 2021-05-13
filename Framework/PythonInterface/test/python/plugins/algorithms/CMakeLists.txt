@@ -51,6 +51,7 @@ set(TEST_PY_FILES
     HB2AReduceTest.py
     HB3AAdjustSampleNormTest.py
     HB3AFindPeaksTest.py
+    HB3AIntegrateDetectorPeaksTest.py
     HB3AIntegratePeaksTest.py
     HB3APredictPeaksTest.py
     HFIRCalculateGoniometerTest.py
