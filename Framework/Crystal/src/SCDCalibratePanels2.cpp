@@ -151,7 +151,7 @@ void SCDCalibratePanels2::init() {
   declareProperty("CalibrateT0", false, "Calibrate the T0 (initial TOF)");
   declareProperty("ToleranceT0", 1e-3, mustBePositive,
                   "Shift of initial TOF (in ms) below this value is treated as 0.0");
-  declareProperty("SearchRadiusT0", 10, mustBePositive,
+  declareProperty("SearchRadiusT0", 10.0, mustBePositive,
                   "Search radius of T0 (in ms), used to constrain optimization search space");
   // editability
   setPropertySettings("ToleranceT0", std::make_unique<EnabledWhenProperty>("CalibrateT0", IS_EQUAL_TO, "1"));
@@ -395,13 +395,13 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   if (std::abs(dL1_optimized) < std::abs(tor_dL1)) {
     calilog << "-- Fit L1 results below tolerance, skippping\n";
   } else {
+    adjustComponent(0.0, 0.0, dL1_optimized, 1.0, 0.0, 0.0, 0.0, pws->getInstrument()->getSource()->getName(), pws);
     // output to console and update L1 for subsequent calibration
     int npks = pws->getNumberPeaks();
     calilog << "-- Fit L1 results using " << npks << " peaks:\n"
             << "    dL1: " << dL1_optimized << " \n"
             << "    L1 " << original_L1 << " -> " << -pws->getInstrument()->getSource()->getPos().Z() << " \n"
             << "    chi2/DOF = " << chi2OverDOF << "\n";
-    adjustComponent(0.0, 0.0, dL1_optimized, 1.0, 0.0, 0.0, 0.0, pws->getInstrument()->getSource()->getName(), pws);
   }
 
   //-- log
@@ -548,9 +548,14 @@ void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   std::ostringstream tie_str;
   tie_str << "DeltaX=0.0,DeltaY=0.0,DeltaZ=0.0,Theta=1.0,Phi=0.0,"
              "DeltaRotationAngle=0.0";
+  std::ostringstream constraint_str;
+  double r_dT0 = getProperty("SearchRadiusT0");
+  r_dT0 = std::abs(r_dT0);
+  constraint_str << -r_dT0 << "<DeltaT0<" << r_dT0;
 
   //-- set&go
   fitT0_alg->setProperty("Ties", tie_str.str());
+  fitT0_alg->setProperty("Constraints", constraint_str.str());
   fitT0_alg->setProperty("InputWorkspace", t0ws);
   fitT0_alg->setProperty("CreateOutput", true);
   fitT0_alg->setProperty("Output", "fit");
@@ -562,14 +567,21 @@ void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   double dT0_optimized = rst->getRef<double>("Value", 6);
 
   // update T0
-  // NOTE: since m_T0 is being used for all optimization, so we only need to update this variable
-  m_T0 = dT0_optimized;
+  double tor_dT0 = getProperty("ToleranceT0");
+  std::ostringstream calilog;
+  if (std::abs(dT0_optimized) < std::abs(tor_dT0)) {
+    calilog << "-- Fit T0=" << dT0_optimized << " is below tolerance(" << tor_dT0 << "), skippping\n";
+  } else {
+    // NOTE: since m_T0 is being used for all optimization, so we only need to update this variable
+    m_T0 = dT0_optimized;
+    int npks = pws->getNumberPeaks();
+    calilog << "-- Fit T0 results using " << npks << " peaks:\n"
+            << "    dT0: " << m_T0 << " \n"
+            << "    chi2/DOF = " << chi2OverDOF << "\n";
+  }
 
   //-- log
-  int npks = pws->getNumberPeaks();
-  g_log.notice() << "-- Fit T0 results using " << npks << " peaks:\n"
-                 << "    dT0: " << dT0_optimized << " \n"
-                 << "    chi2/DOF = " << chi2OverDOF << "\n";
+  g_log.notice() << calilog.str();
 }
 
 /// ---------------- ///

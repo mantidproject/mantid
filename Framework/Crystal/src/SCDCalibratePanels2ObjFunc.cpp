@@ -114,16 +114,17 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
   IPeaksWorkspace_sptr pws_ref = m_pws->clone();
 
   // NOTE: when optimizing T0, a none component will be passed in.
-  if (m_cmpt != "none/sixteenpack") {
+  //       -- For Corelli, this will be none/sixteenpack
+  //       -- For others, this will be none
+  bool calibrateT0 = (m_cmpt == "none/sixteenpack") || (m_cmpt == "none");
+  // we don't need to move the instrument if we are calibrating T0
+  if (!calibrateT0) {
     // rotation
     pws = rotateInstrumentComponentBy(vx, vy, vz, drotang, m_cmpt, pws);
 
     // translation
     pws = moveInstruentComponentBy(dx, dy, dz, m_cmpt, pws);
   }
-
-  // TODO:
-  // need to do something with dT0
 
   // calculate residual
   // double residual = 0.0;
