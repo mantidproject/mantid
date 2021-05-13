@@ -60,11 +60,15 @@ IPeak *createPeakQSample(IPeaksWorkspace &self, const object &data) {
 }
 
 /// Create a peak via it's QLab value from a list or numpy array
-void addPeak(IPeaksWorkspace &self, const IPeak &peak) { self.addPeak(peak); }
+void addPeak(IPeaksWorkspace &self, const IPeak &peak) {
+  self.addPeak(peak);
+  self.modified();
+}
 
 /// Add a peak with its Q-vector (using a list of numpy array) and the coordinate frm (Qlab, Qsmaple, HKL)
 void addPeak2(IPeaksWorkspace &self, const object &data, const SpecialCoordinateSystem &frame) {
   self.addPeak(PyObjectToV3D(data)(), frame);
+  self.modified();
 }
 
 /**

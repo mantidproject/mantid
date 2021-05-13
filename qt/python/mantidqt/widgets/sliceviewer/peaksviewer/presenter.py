@@ -108,7 +108,6 @@ class PeaksViewerPresenter:
 
     def add_peak(self, pos, frame):
         self.model.add_peak(pos, frame)
-        self.redraw_peaks()
 
     def _clear_peaks(self):
         """Clear all peaks from this view"""
