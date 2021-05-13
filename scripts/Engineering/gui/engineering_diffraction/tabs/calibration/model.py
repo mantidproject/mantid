@@ -15,7 +15,7 @@ from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, Dif
     ConvertUnits, Load, ReplaceSpecialValues, SaveNexus, \
     EnggEstimateFocussedBackground, ApplyDiffCal
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file, default_ceria_expected_peaks, \
-    create_custom_grouping_workspace, create_spectrum_list_from_string
+    create_custom_grouping_workspace, create_spectrum_list_from_string, load_relevant_pdcal_outputs
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
@@ -134,35 +134,8 @@ class CalibrationModel(object):
             logger.error("Invalid file selected: ", file_path)
             return
         vanadium_corrections.fetch_correction_workspaces(instrument+van_no, instrument)
-        self._load_relevant_pdcal_outputs(file_path)
+        load_relevant_pdcal_outputs(file_path)
         return instrument, van_no, ceria_no
-
-    @staticmethod
-    def _load_relevant_pdcal_outputs(file_path):
-        """
-        Determine which pdcal output .nxs files to Load from the .prm file selected, and Load them
-        :param file_path: path to the calibration .prm file selected
-        """
-        # fname has form INSTRUMENT_VanadiumRunNo_ceriaRunNo_BANKS
-        # BANKS can be "all_banks, "bank_North", "bank_South", "cropped"
-        basepath, fname = path.split(file_path)
-        fname_words = fname.split('_')
-        prefix = '_'.join(fname_words[0:3])
-        suffix = fname_words[-1]
-        if "banks" in suffix:
-            path_to_load = path.join(basepath, prefix + "_bank_North.nxs")
-            Load(Filename=path_to_load, OutputWorkspace="engggui_calibration_bank_1")
-            path_to_load = path.join(basepath, prefix + "_bank_South.nxs")
-            Load(Filename=path_to_load, OutputWorkspace="engggui_calibration_bank_2")
-        elif "North" in suffix:
-            path_to_load = path.join(basepath, prefix + "_bank_North.nxs")
-            Load(Filename=path_to_load, OutputWorkspace="engggui_calibration_bank_1")
-        elif "South" in suffix:
-            path_to_load = path.join(basepath, prefix + "_bank_South.nxs")
-            Load(Filename=path_to_load, OutputWorkspace="engggui_calibration_bank_2")
-        else:  # cropped case
-            path_to_load = path.join(basepath, prefix + "_cropped.nxs")
-            Load(Filename=path_to_load, OutputWorkspace="engggui_calibration_cropped")
 
     @staticmethod
     def update_calibration_params_table(params_table):

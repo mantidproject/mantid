@@ -45,8 +45,8 @@ def main(vanadium_run, user, focus_run, **kwargs):
     ceria_run = kwargs.get("ceria_run", "241391")
 
     # force parameters
-    do_van = kwargs.get("force_vanadium", False)
-    do_cal = kwargs.get("force_cal", False)
+    force_van = kwargs.get("force_vanadium", False)
+    force_cal = kwargs.get("force_cal", False)
 
     # full instrument_calibration
     try:
@@ -92,7 +92,7 @@ def main(vanadium_run, user, focus_run, **kwargs):
         focus_directory = focus_general
 
     # call methods with set parameters
-    run(ceria_run, do_cal, do_van, full_inst_calib, vanadium_run, calibration_directory, calibration_general, cropped,
+    run(ceria_run, force_cal, force_van, full_inst_calib, vanadium_run, calibration_directory, calibration_general, cropped,
         crop_name, crop_on, focus_directory, focus_general, do_pre_process, params, time_period, focus_run,
         grouping_file)
 
@@ -135,10 +135,9 @@ def run(ceria_run, do_cal, do_van, full_inst_calib, van_run, calibration_directo
     expected_cals = ["ENGINX_{0}_{1}_{2}.prm".format(van_run, ceria_run, ending) for ending in cal_endings.get(cropped)]
     expected_cals_present = [os.path.isfile(os.path.join(calibration_directory, cal_file)) for cal_file in
                              expected_cals]
-    bank_no = 1 if crop_on == 'North' else 2
-    pdcal_table_endings = {"banks": ["bank_{}".format(bank_no)],
+    pdcal_table_endings = {"banks": ["bank_{}".format(crop_on)],
                            "spectra": ["cropped"],
-                           None: ["bank_1", "bank_2"]}
+                           None: ["bank_North", "bank_South"]}
     expected_pdcal_tables = ["ENGINX_{0}_{1}_{2}.nxs".format(van_run, ceria_run, ending) for ending in
                              pdcal_table_endings.get(cropped)]
     expected_tables_present = [os.path.isfile(os.path.join(calibration_directory, cal_file)) for cal_file in
@@ -149,6 +148,13 @@ def run(ceria_run, do_cal, do_van, full_inst_calib, van_run, calibration_directo
     if not all(expected_cals_present) or not all(expected_tables_present) or do_cal:
         create_calibration(ceria_run, van_run, full_inst_calib, calibration_directory, calibration_general, cropped,
                            crop_name, crop_on)
+    else:
+        ending_to_load = {"banks": "bank_{}".format(crop_on),
+                          "spectra": crop_name,
+                          None: "all_banks"}
+        file_name = os.path.join(calibration_directory,
+                                 "ENGINX_{0}_{1}_{2}.prm".format(van_run, ceria_run, ending_to_load.get(cropped)))
+        Utils.load_relevant_pdcal_outputs(file_name, "engg")
 
     # if a focus is requested, run the focus
     if focus_run is not None:
@@ -273,8 +279,9 @@ def create_calibration_files(ceria_run, van_run, full_inst_calib, int_van, van_c
         difa = [output[0]['difa']]
         difc = [output[0]['difc']]
         tzero = [output[0]['tzero']]
-        save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", [crop_name],
-                         tzero, difc, difa)
+        if bank is None and spectrum_numbers is None:
+            save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", [crop_name],
+                             tzero, difc, difa)
         if spectrum_numbers is not None:
             save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
                              "bank_cropped", [crop_name], tzero, difc, difa)
@@ -419,7 +426,7 @@ def run_calibration(sample_ws,
 
         # final calibration of focused data
         kwargs["InputWorkspace"] = focused_Cropped
-        kwargs["OutputCalibrationTable"] = 'engggui_calibration_cropped'
+        kwargs["OutputCalibrationTable"] = 'engg_calibration_cropped'
         kwargs["DiagnosticWorkspaces"] = 'diag_Cropped'
 
         cal_cropped = run_pd_calibration(kwargs)[0]
@@ -448,7 +455,7 @@ def run_calibration(sample_ws,
         elif bank_cal == 'south':
             read = south_read_row
         else:
-            read = Utils.create_spectrum_list_from_string(spectrum_numbers)[0]
+            read = int(Utils.create_spectrum_list_from_string(spectrum_numbers)[0])  # this can be int64
         row = cal_output[bank_cal].row(read)
         current_fit_params = {'difc': row['difc'], 'difa': row['difa'], 'tzero': row['tzero']}
         cal_params.append(current_fit_params)
@@ -804,8 +811,7 @@ def focus_cropped(run_number, van_curves, van_int, full_inst_calib, focus_direct
 
 
 def focus_texture_mode(run_number, van_curves, van_int, full_inst_calib, focus_directory, focus_general, do_pre_process, params,
-                       time_period,
-                       dg_file):
+                       time_period, dg_file):
     """
     perform a texture mode focusing using the grouping csv file
 
@@ -841,7 +847,7 @@ def focus_texture_mode(run_number, van_curves, van_int, full_inst_calib, focus_d
         dspacing_output_name = tof_output_name + "_dSpacing"
         grp_ws = Utils.create_custom_grouping_workspace(banks[bank], ws_to_focus)
         df_kwarg = {"GroupingWorkspace": grp_ws}
-        _run_focus(input_workspace=sample_ws_clone, tof_output_name=tof_output_name, region_calib='engg_calibration_cropped',
+        _run_focus(input_workspace=sample_ws_clone, tof_output_name=tof_output_name, region_calib=full_inst_calib,
                    vanadium_curves_ws=curves_ws_clone, full_calib=full_inst_calib, df_kwarg=df_kwarg,
                    vanadium_integration_ws=van_integrated_ws)
         _save_out(run_number, focus_directory, focus_general, tof_output_name, "ENGINX_{}_texture_{}{{}}", bank)

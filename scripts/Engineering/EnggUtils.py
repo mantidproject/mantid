@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from os import path
 from mantid.api import *
 from mantid.kernel import IntArrayProperty
 import mantid.simpleapi as mantid
@@ -12,6 +13,33 @@ ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']
 
 ENGINX_MASK_BIN_MINS = [0, 19930, 39960, 59850, 79930]
 ENGINX_MASK_BIN_MAXS = [5300, 20400, 40450, 62000, 82670]
+
+
+def load_relevant_pdcal_outputs(file_path, output_prefix="engggui"):
+    """
+    Determine which pdcal output .nxs files to Load from the .prm file selected, and Load them
+    :param file_path: path to the calibration .prm file selected
+    """
+    # fname has form INSTRUMENT_VanadiumRunNo_ceriaRunNo_BANKS
+    # BANKS can be "all_banks, "bank_North", "bank_South", "cropped"
+    basepath, fname = path.split(file_path)
+    fname_words = fname.split('_')
+    prefix = '_'.join(fname_words[0:3])
+    suffix = fname_words[-1]
+    if "banks" in suffix:
+        path_to_load = path.join(basepath, prefix + "_bank_North.nxs")
+        mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration_bank_1")
+        path_to_load = path.join(basepath, prefix + "_bank_South.nxs")
+        mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration_bank_2")
+    elif "North" in suffix:
+        path_to_load = path.join(basepath, prefix + "_bank_North.nxs")
+        mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration_bank_1")
+    elif "South" in suffix:
+        path_to_load = path.join(basepath, prefix + "_bank_South.nxs")
+        mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration_bank_2")
+    else:  # cropped case
+        path_to_load = path.join(basepath, prefix + "_cropped.nxs")
+        mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration_cropped")
 
 
 def create_spectrum_list_from_string(str_list):
