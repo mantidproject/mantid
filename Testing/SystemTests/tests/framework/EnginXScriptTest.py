@@ -30,6 +30,7 @@ class FocusBothBanks(systemtesting.MantidSystemTest):
              full_inst_calib_path=WHOLE_INST_CALIB)
 
     def validate(self):
+        self.tolerance = 1e-6
         return ("engg_focus_output_bank_1", "enggui_focusing_output_ws_bank_1.nxs",
                 "engg_focus_output_bank_2", "enggui_focusing_output_ws_bank_2.nxs")
 
@@ -46,6 +47,7 @@ class FocusCropped(systemtesting.MantidSystemTest):
              crop_type="spectra", crop_on="1-20", full_inst_calib_path=WHOLE_INST_CALIB)
 
     def validate(self):
+        self.tolerance = 1e-6
         return "engg_focus_output_cropped", "enggui_focusing_output_ws_bank_cropped.nxs"
 
     def cleanup(self):
@@ -74,6 +76,7 @@ class FocusTextureMode(systemtesting.MantidSystemTest):
         simple.GroupWorkspaces(InputWorkspaces=group, OutputWorkspace="test")
 
     def validate(self):
+        self.tolerance = 1e-6
         outputlist = ["engg_focusing_output_ws_texture_bank_{}".format(i) for i in range(1, 11)]
         filelist = ["enggui_texture_Bank_{}.nxs".format(i) for i in range(1, 11)]
         validation_list = [x for t in zip(*[outputlist, filelist]) for x in t]
