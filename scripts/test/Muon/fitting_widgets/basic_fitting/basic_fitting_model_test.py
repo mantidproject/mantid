@@ -54,8 +54,29 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.model.dataset_names = ["NewName", "Name1"]
 
-        self.assertEqual(self.model.start_xs, [0.0, 2.0])
-        self.assertEqual(self.model.end_xs, [4.0, 4.0])
+        self.assertEqual(self.model.start_xs, [2.0, 3.0])
+        self.assertEqual(self.model.end_xs, [4.0, 5.0])
+
+    def test_that_the_currently_selected_start_and_end_xs_are_used_for_when_a_larger_number_of_new_datasets_are_loaded(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.current_dataset_index = 1
+        self.model.start_xs = [2.0, 3.0]
+        self.model.end_xs = [4.0, 5.0]
+
+        self.model.dataset_names = ["Name1", "Name2", "Name3"]
+
+        self.assertEqual(self.model.start_xs, [2.0, 3.0, 3.0])
+        self.assertEqual(self.model.end_xs, [4.0, 5.0, 5.0])
+
+    def test_that_newly_loaded_datasets_will_reuse_the_existing_xs_when_there_are_fewer_new_datasets(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.start_xs = [2.0, 3.0]
+        self.model.end_xs = [4.0, 5.0]
+
+        self.model.dataset_names = ["Name2"]
+
+        self.assertEqual(self.model.start_xs, [3.0])
+        self.assertEqual(self.model.end_xs, [5.0])
 
     def test_that_current_dataset_index_will_raise_if_the_index_is_greater_than_or_equal_to_the_number_of_datasets(self):
         self.model.dataset_names = self.dataset_names
