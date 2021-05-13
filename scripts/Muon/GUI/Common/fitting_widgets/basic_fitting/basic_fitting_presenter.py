@@ -109,9 +109,8 @@ class BasicFittingPresenter:
         self.clear_cached_fit_functions()
         self.model.remove_latest_fit_from_context()
 
-        self.reset_fit_status_and_chi_squared_information()
-
         self.update_fit_function_in_view_from_model()
+        self.update_fit_statuses_and_chi_squared_in_view_from_model()
 
         self.model.update_plot_guess(self.view.plot_guess)
 

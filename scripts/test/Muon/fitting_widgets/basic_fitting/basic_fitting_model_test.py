@@ -210,6 +210,8 @@ class BasicFittingModelTest(unittest.TestCase):
     def test_that_clear_cached_fit_functions_will_clear_the_cache_of_fit_functions(self):
         self.model.dataset_names = self.dataset_names
         self.model.single_fit_functions = [self.fit_function, None]
+        self.model.fit_statuses = ["success", None]
+        self.model.chi_squared = [1.0, None]
 
         self.model.cache_the_current_fit_functions()
         self.model.clear_cached_fit_functions()
@@ -217,6 +219,8 @@ class BasicFittingModelTest(unittest.TestCase):
         self.assertEqual(len(self.model.single_fit_functions), 2)
         self.assertEqual(self.model.single_fit_functions_cache[0], None)
         self.assertEqual(self.model.single_fit_functions_cache[1], None)
+        self.assertEqual(self.model.fit_statuses_cache, [None, None])
+        self.assertEqual(self.model.chi_squared_cache, [None, None])
 
     def test_that_setting_the_fit_statuses_will_raise_if_the_number_of_fit_statuses_is_not_equal_to_the_number_of_datasets(self):
         self.model.dataset_names = self.dataset_names
@@ -281,13 +285,19 @@ class BasicFittingModelTest(unittest.TestCase):
     def test_that_use_cached_function_will_replace_the_single_functions_with_the_cached_functions(self):
         self.model.dataset_names = self.dataset_names
         self.model.single_fit_functions = [self.fit_function, None]
+        self.model.fit_statuses = ["success", "success"]
+        self.model.chi_squared = [1.0, 2.0]
         self.model.cache_the_current_fit_functions()
         self.model.single_fit_functions = [None, None]
+        self.model.fit_statuses = [None, None]
+        self.model.chi_squared = [None, None]
 
         self.model.use_cached_function()
 
         self.assertEqual(str(self.model.single_fit_functions[0]), "name=FlatBackground,A0=0")
         self.assertEqual(self.model.single_fit_functions[1], None)
+        self.assertEqual(self.model.fit_statuses, ["success", "success"])
+        self.assertEqual(self.model.chi_squared, [1.0, 2.0])
 
     def test_that_the_minimizer_property_can_be_set_as_expected(self):
         minimizer = "A Minimizer"
