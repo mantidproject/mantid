@@ -434,7 +434,8 @@ double AnvredCorrection::absor_sphere(double &twoth, double &wl) {
     throw std::runtime_error("muR cannot be negative");
   } else if (mur > 2.5) {
     g_log.warning() << "muR (" << mur
-                    << ") is not in range of Dwiggins' table ( 0 < muR < 2.5) so using extrapolation of cubic fit";
+                    << ") is not in range of Dwiggins' table ( 0 < muR < 2.5) so using extrapolation of cubic fit."
+                    << std::endl;
   }
 
   theta = twoth * radtodeg_half;
