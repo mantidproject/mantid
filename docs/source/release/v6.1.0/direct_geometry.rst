@@ -52,5 +52,6 @@ BugFixes
 - Corrected workspace names in scripts generated from plots.
 - Prevented crashes when converting Intensity from S(Q,E) to GDOS.
 - Fixed bug that caused specifying the fixed final energy for more than one workspace at once to fail.
+- Release active interactive cuts on existing slice plots to enable a new slice plot in order to prevent crash.
 
 :ref:`Release 6.1.0 <v6.1.0>`
