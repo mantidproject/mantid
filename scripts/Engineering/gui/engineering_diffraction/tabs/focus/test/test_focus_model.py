@@ -66,14 +66,6 @@ class FocusModelTest(unittest.TestCase):
                                      "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + banks[-1],
                                      "test_wsp", "test_wsp", DF_KWARG_SOUTH, "test_wsp", "engggui_calibration_bank_2")
 
-                    #"""input_workspace,
-                   # tof_output_name,
-                   # vanadium_integration_ws,
-                   # vanadium_curves_ws,
-                   # df_kwarg,
-                   # full_calib,
-                   # region_calib)"""
-
     @patch(file_path + ".create_custom_grouping_workspace")
     @patch(file_path + ".DeleteWorkspace")
     @patch(file_path + ".CloneWorkspace")
