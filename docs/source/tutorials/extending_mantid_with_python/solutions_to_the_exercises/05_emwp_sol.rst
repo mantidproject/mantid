@@ -1,4 +1,4 @@
-.. _05_exercise_5_solutions:
+.. _05_emwp_sol:
 
 ====================
 Exercise 5 Solutions

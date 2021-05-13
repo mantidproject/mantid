@@ -1,4 +1,4 @@
-.. _02_exercise_2_solutions:
+.. _02_emwp_sol:
 
 ====================
 Exercise 2 Solutions

@@ -1,4 +1,4 @@
-.. _06_exercise_6_solutions:
+.. _06_emwp_sol:
 
 ====================
 Exercise 6 Solutions
