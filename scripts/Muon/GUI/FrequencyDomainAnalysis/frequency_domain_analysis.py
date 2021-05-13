@@ -26,8 +26,8 @@ from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
 from Muon.GUI.Common.home_tab.home_tab_widget import HomeTabWidget
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_widget import TransformWidget
-from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_widget_new import FFTWidget
-from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_widget_new import MaxEntWidget
+from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_widget import FFTWidget
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_widget import MaxEntWidget
 from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
 from Muon.GUI.Common.phase_table_widget.phase_table_widget import PhaseTabWidget
 from Muon.GUI.Common.results_tab_widget.results_tab_widget import ResultsTabWidget
