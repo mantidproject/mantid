@@ -1,4 +1,4 @@
-.. _04_exercise_4_solutions:
+.. _04_emwp_sol:
 
 ====================
 Exercise 4 Solutions
