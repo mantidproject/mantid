@@ -20,6 +20,10 @@ New Features
 - Plotting ranges can now be edited individually for tile plots.
 - The muon fitting interface has been simplified.
 
+Improvements
+############
+- Frequency Domain Analysis default values have been improved.
+
 Bug fixes
 #########
 - Fixed a bug where removing a pair in use would cause a crash.
