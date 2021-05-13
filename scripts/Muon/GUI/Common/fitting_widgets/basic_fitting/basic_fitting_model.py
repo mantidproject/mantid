@@ -458,8 +458,7 @@ class BasicFittingModel:
 
     def _reset_end_xs(self) -> None:
         """Resets the end Xs stored by the model."""
-        end_x = self.current_end_x if len(self.end_xs) > 0 else self._default_end_x
-        self.end_xs = [end_x] * self.number_of_datasets
+        self.end_xs = [self.current_end_x] * self.number_of_datasets
 
     def _get_new_start_xs_and_end_xs_using_existing_datasets(self, new_dataset_names: list) -> tuple:
         """Returns the start and end Xs to use for the new datasets. It tries to use existing ranges if possible."""
@@ -483,7 +482,7 @@ class BasicFittingModel:
         if new_dataset_name in self.dataset_names:
             return self.end_xs[self.dataset_names.index(new_dataset_name)]
         else:
-            return self.current_end_x if self.current_dataset_index is not None else self._default_end_x
+            return self.current_end_x
 
     def _get_new_functions_using_existing_datasets(self, new_dataset_names: list) -> list:
         """Returns the functions to use for the new datasets. It tries to use the existing functions if possible."""
