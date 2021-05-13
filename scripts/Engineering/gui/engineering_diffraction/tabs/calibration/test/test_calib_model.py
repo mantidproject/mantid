@@ -7,7 +7,7 @@
 import unittest
 from unittest import mock
 
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock
 
 from Engineering.gui.engineering_diffraction.tabs.calibration.model import CalibrationModel
 from testhelpers import assert_any_call_partial
@@ -69,7 +69,7 @@ class CalibrationModelTest(unittest.TestCase):
 
     @patch(class_path + ".get_info_from_file")
     @patch(file_path + ".path")
-    @patch(class_path + "._load_relevant_pdcal_outputs")
+    @patch(file_path + ".load_relevant_pdcal_outputs")
     @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
     @patch(class_path + ".update_calibration_params_table")
     def test_load_existing_calibration_files(self, update_table, fetch_ws, load_cals, path, get_info):
@@ -90,15 +90,6 @@ class CalibrationModelTest(unittest.TestCase):
         self.assertEqual("TESTINST", inst)
         self.assertEqual("van_no", van_no)
         self.assertEqual("ceria_no", ceria_no)
-
-    @patch(file_path + ".Load")
-    def test_load_relevant_pdcal_outputs(self, load):
-        self.model._load_relevant_pdcal_outputs(TEST_PRM_FILE)
-        expected_call_north = call(Filename="ENGINX_241391_236516_bank_North.nxs",
-                                   OutputWorkspace="engggui_calibration_bank_1")
-        expected_call_south = call(Filename="ENGINX_241391_236516_bank_South.nxs",
-                                   OutputWorkspace="engggui_calibration_bank_2")
-        self.assertEqual([expected_call_north, expected_call_south], load.call_args_list)
 
     @patch(file_path + ".DeleteWorkspace")
     @patch(class_path + ".update_calibration_params_table")
