@@ -19,13 +19,15 @@ ref_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(DIRS[0]))
 root_directory = os.path.join(DIRS[0], "ENGINX")
 cal_directory = os.path.join(root_directory, "cal")
 focus_directory = os.path.join(root_directory, "focus")
+WHOLE_INST_CALIB = os.path.join(root_directory, "ENGINX_whole_inst_calib.nxs")
 
 
 class FocusBothBanks(systemtesting.MantidSystemTest):
 
     def runTest(self):
         _make_test_directories()
-        main(vanadium_run="236516", user="test", focus_run="299080", do_cal=True, directory=focus_directory)
+        main(vanadium_run="236516", user="test", focus_run="299080", do_cal=True, directory=focus_directory,
+             full_inst_calib_path=WHOLE_INST_CALIB)
 
     def validate(self):
         return ("engg_focus_output_bank_1", "enggui_focusing_output_ws_bank_1.nxs",
@@ -41,7 +43,7 @@ class FocusCropped(systemtesting.MantidSystemTest):
     def runTest(self):
         _make_test_directories()
         main(vanadium_run="236516", user="test", focus_run="299080", directory=focus_directory,
-             crop_type="spectra", crop_on="1-20")
+             crop_type="spectra", crop_on="1-20", full_inst_calib_path=WHOLE_INST_CALIB)
 
     def validate(self):
         return "engg_focus_output", "enggui_focusing_output_ws_bank_cropped.nxs"
@@ -55,7 +57,8 @@ class FocusTextureMode(systemtesting.MantidSystemTest):
 
     def runTest(self):
         _make_test_directories()
-        main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, directory=focus_directory)
+        main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, directory=focus_directory,
+             full_inst_calib_path=WHOLE_INST_CALIB)
         simple.mtd.clear()
         csv_file = os.path.join(root_directory, "EnginX.csv")
         location = os.path.join(focus_directory, "User", "test", "Calibration")
