@@ -81,8 +81,7 @@ class CalibrationModelTest(unittest.TestCase):
         update_table.assert_called_with(table_test_params)
         self.assertEqual(1, update_table.call_count)
 
-        fetch_test_params = ("TESTINSTvan_no", "TESTINST")
-        self.assertEqual(fetch_test_params, fetch_ws.call_args.args)
+        fetch_ws.assert_called_with("TESTINSTvan_no", "TESTINST")
         self.assertEqual(1, fetch_ws.call_count)
 
         self.assertEqual(1, load_cals.call_count)
