@@ -97,9 +97,10 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
   double vz = cos(theta);
   //
   const double drotang = getParameter("DeltaRotationAngle");
-
   //-- delta in TOF
-  // const double dT0 = getParameter("DeltaT0");
+  //  NOTE: The T0 here is a universal offset for all peaks
+  double dT0 = getParameter("DeltaT0");
+
   //-- NOTE: given that these components are never used as
   //         one vector, there is no need to construct a
   //         xValues
@@ -141,7 +142,7 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
                   {{UnitParams::l2, pk.getL2()},
                    {UnitParams::twoTheta, pk.getScattering()},
                    {UnitParams::efixed, pk.getInitialEnergy()}});
-    pk.setWavelength(wl.singleFromTOF(tof));
+    pk.setWavelength(wl.singleFromTOF(tof + dT0));
 
     V3D qv = pk.getQSampleFrame();
     for (int j = 0; j < 3; ++j)

@@ -121,7 +121,7 @@ void SCDCalibratePanels2::init() {
   // ----------------
   // ----- bank -----
   // ----------------
-  declareProperty("CalibrateBanks", true, "Calibrate position and orientation of each bank.");
+  declareProperty("CalibrateBanks", false, "Calibrate position and orientation of each bank.");
   declareProperty("ToleranceTransBank", 1e-6, mustBePositive,
                   "Delta translation of bank (in meter) below this value is treated as 0.0");
   declareProperty(
@@ -148,7 +148,7 @@ void SCDCalibratePanels2::init() {
   // --------------
   // ----- T0 -----
   // --------------
-  declareProperty("CalibrateT0", true, "Calibrate the T0 (initial TOF)");
+  declareProperty("CalibrateT0", false, "Calibrate the T0 (initial TOF)");
   declareProperty("ToleranceT0", 1e-3, mustBePositive,
                   "Shift of initial TOF (in ms) below this value is treated as 0.0");
   declareProperty("SearchRadiusT0", 10, mustBePositive,
@@ -163,7 +163,7 @@ void SCDCalibratePanels2::init() {
   // ---------------------
   // ----- samplePos -----
   // ---------------------
-  declareProperty("TuneSamplePosition", true, "Fine tunning sample position");
+  declareProperty("TuneSamplePosition", false, "Fine tunning sample position");
   declareProperty("ToleranceSamplePos", 1e-6, mustBePositive,
                   "Sample position change (in meter) below this value is treated as 0.0");
   declareProperty("SearchRadiusSamplePos", 0.1, mustBePositive,
@@ -218,13 +218,6 @@ void SCDCalibratePanels2::init() {
  */
 std::map<std::string, std::string> SCDCalibratePanels2::validateInputs() {
   std::map<std::string, std::string> issues;
-
-  // T0 calibration is not ready for production, raise an error
-  // if requested by user
-  bool calibrateT0 = getProperty("CalibrateT0");
-  if (calibrateT0)
-    issues["CalibrateT0"] = "Caliration of T0 is not ready for production, "
-                            "please set it to False to continue";
 
   // Lattice constants are required if no UB is attached to the input
   // peak workspace
@@ -297,12 +290,11 @@ void SCDCalibratePanels2::exec() {
     profileBanks(m_pws, pws_original);
   }
 
-  // STEP_3: optimize T0,L1,L2,etc.
-  if (calibrateT0) {
-    g_log.notice() << "** Calibrating T0 as requested\n";
-    optimizeT0(m_pws, pws_original);
-  }
-
+  // STEP_3: optimize
+  //  - L1
+  //  - Banks
+  //  - T0
+  //  - sample position
   if (calibrateL1) {
     g_log.notice() << "** Calibrating L1 (moderator) as requested\n";
     optimizeL1(m_pws, pws_original);
@@ -332,6 +324,11 @@ void SCDCalibratePanels2::exec() {
     // }
   }
 
+  if (calibrateT0) {
+    g_log.notice() << "** Calibrating T0 as requested\n";
+    optimizeT0(m_pws, pws_original);
+  }
+
   // STEP_4: generate a table workspace to save the calibration results
   g_log.notice() << "-- Generate calibration table\n";
   Instrument_sptr instCalibrated = std::const_pointer_cast<Geometry::Instrument>(m_pws->getInstrument());
@@ -353,64 +350,6 @@ void SCDCalibratePanels2::exec() {
 /// ------------------------------------------- ///
 /// Core functions for Calibration&Optimizatoin ///
 /// ------------------------------------------- ///
-
-/**
- * @brief adjusting the deltaT0 to match the qSample_calculated and
- *        qSameple_measured
- *
- * @note this function currently only returns dT0=0, and the reason
- *       is still unkown.
- *
- * @param pws
- * @param pws_original
- */
-void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_sptr pws_original) {
-  // create child Fit alg to optimize T0
-  IAlgorithm_sptr fitT0_alg = createChildAlgorithm("Fit", -1, -1, false);
-  //-- obj func def
-  //  dl;dr;
-  //    Fit algorithm requires a IFunction1D to fit
-  //  details
-  //    Fit algorithm requires a class derived from IFunction1D as its
-  //    input, so we have to implement the objective function as a separate
-  //    class just to get Fit serving as an optimizer.
-  //    For this particular case, we are constructing an objective function
-  //    based on IFunction1D that outputs a fake histogram consist of
-  //    qSample calculated based on perturbed instrument positions and
-  //    orientations.
-  MatrixWorkspace_sptr t0ws = getIdealQSampleAsHistogram1D(pws);
-
-  auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
-  // NOTE: always use the original pws to get the tofs
-  std::vector<double> tofs = captureTOF(pws_original);
-  objf->setPeakWorkspace(pws, "none", tofs);
-  fitT0_alg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(objf));
-
-  //-- bounds&constraints def
-  std::ostringstream tie_str;
-  tie_str << "DeltaX=0.0,DeltaY=0.0,DeltaZ=0.0,Theta=1.0,Phi=0.0,"
-             "DeltaRotationAngle=0.0";
-
-  //-- set&go
-  fitT0_alg->setProperty("Ties", tie_str.str());
-  fitT0_alg->setProperty("InputWorkspace", t0ws);
-  fitT0_alg->setProperty("CreateOutput", true);
-  fitT0_alg->setProperty("Output", "fit");
-  fitT0_alg->executeAsChildAlg();
-
-  //-- parse output
-  double chi2OverDOF = fitT0_alg->getProperty("OutputChi2overDoF");
-  ITableWorkspace_sptr rst = fitT0_alg->getProperty("OutputParameters");
-  double dT0_optimized = rst->getRef<double>("Value", 6);
-  // update T0 for all peaks
-  adjustT0(dT0_optimized, pws);
-
-  //-- log
-  int npks = pws->getNumberPeaks();
-  g_log.notice() << "-- Fit T0 results using " << npks << " peaks:\n"
-                 << "    dT0: " << dT0_optimized << " \n"
-                 << "    chi2/DOF = " << chi2OverDOF << "\n";
-}
 
 /**
  * @brief
@@ -571,6 +510,66 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+}
+
+/**
+ * @brief adjusting the deltaT0 to match the qSample_calculated and
+ *        qSameple_measured
+ *
+ * @note this function currently only returns dT0=0, and the reason
+ *       is still unkown.
+ *
+ * @param pws
+ * @param pws_original
+ */
+void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_sptr pws_original) {
+  // create child Fit alg to optimize T0
+  IAlgorithm_sptr fitT0_alg = createChildAlgorithm("Fit", -1, -1, false);
+  //-- obj func def
+  //  dl;dr;
+  //    Fit algorithm requires a IFunction1D to fit
+  //  details
+  //    Fit algorithm requires a class derived from IFunction1D as its
+  //    input, so we have to implement the objective function as a separate
+  //    class just to get Fit serving as an optimizer.
+  //    For this particular case, we are constructing an objective function
+  //    based on IFunction1D that outputs a fake histogram consist of
+  //    qSample calculated based on perturbed instrument positions and
+  //    orientations.
+  MatrixWorkspace_sptr t0ws = getIdealQSampleAsHistogram1D(pws);
+
+  auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
+  // NOTE: always use the original pws to get the tofs
+  std::vector<double> tofs = captureTOF(pws_original);
+  objf->setPeakWorkspace(pws, "none", tofs);
+  fitT0_alg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(objf));
+
+  //-- bounds&constraints def
+  std::ostringstream tie_str;
+  tie_str << "DeltaX=0.0,DeltaY=0.0,DeltaZ=0.0,Theta=1.0,Phi=0.0,"
+             "DeltaRotationAngle=0.0";
+
+  //-- set&go
+  fitT0_alg->setProperty("Ties", tie_str.str());
+  fitT0_alg->setProperty("InputWorkspace", t0ws);
+  fitT0_alg->setProperty("CreateOutput", true);
+  fitT0_alg->setProperty("Output", "fit");
+  fitT0_alg->executeAsChildAlg();
+
+  //-- parse output
+  double chi2OverDOF = fitT0_alg->getProperty("OutputChi2overDoF");
+  ITableWorkspace_sptr rst = fitT0_alg->getProperty("OutputParameters");
+  double dT0_optimized = rst->getRef<double>("Value", 6);
+
+  // update T0
+  // NOTE: since m_T0 is being used for all optimization, so we only need to update this variable
+  m_T0 = dT0_optimized;
+
+  //-- log
+  int npks = pws->getNumberPeaks();
+  g_log.notice() << "-- Fit T0 results using " << npks << " peaks:\n"
+                 << "    dT0: " << dT0_optimized << " \n"
+                 << "    chi2/DOF = " << chi2OverDOF << "\n";
 }
 
 /// ---------------- ///
