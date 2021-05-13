@@ -418,14 +418,8 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
                 if self.drag_end_pos.x() != 0 and self.drag_end_pos.y() != 0:
                     drop_action = QtCore.Qt.MoveAction
 
-                # If the drag completed outside of the tab bar, detach the tab and move
-                # the content to the current cursor position
-                if drop_action == QtCore.Qt.IgnoreAction:
-                    event.accept()
-                    self.onDetachTabSignal.emit(self.tabAt(self.drag_start_pos), self.mouse_cursor.pos())
-
-                # Else if the drag completed inside the tab bar, move the selected tab to the new position
-                elif drop_action == QtCore.Qt.MoveAction:
+                # If the drag completed inside the tab bar, move the selected tab to the new position
+                if drop_action == QtCore.Qt.MoveAction:
                     if not self.drag_end_pos.isNull():
                         event.accept()
                         self.onMoveTabSignal.emit(self.tabAt(self.drag_start_pos), self.tabAt(self.drag_end_pos))
