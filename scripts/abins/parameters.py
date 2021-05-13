@@ -84,7 +84,7 @@ try:
     from scipy import oaconvolve  # noqa: F401
     _use_oaconvolve = True
 except ImportError:
-    _use_oaconvolve = True
+    _use_oaconvolve = False
 
 performance = {
     'optimal_size': 5000000,  # this is used to create optimal size of chunk energies for which S is calculated
