@@ -7,13 +7,13 @@
 from qtpy import QtWidgets
 
 from mantidqt.utils.qt import load_ui
-from Muon.GUI.Common.plot_widget.plot_widget_view_interface import PlotWidgetViewInterface
+#from Muon.GUI.Common.plot_widget.plot_widget_view_interface import PlotWidgetViewInterface
 import Muon.GUI.Common.message_box as message_box
 
 ui_plotting_view, _ = load_ui(__file__, "plotting_widget_view.ui")
 
 
-class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_view):
+class SharedPlotWidgetView(QtWidgets.QWidget, ui_plotting_view):
 
     @staticmethod
     def warning_popup(message):
@@ -23,7 +23,7 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
         super().__init__(parent=parent)
         self.setupUi(self)
         self.setMinimumSize(600,600)
-        self.setEnabled(False)
+        #self.setEnabled(False)
 
     def show_plot_diff(self):
         self.plot_diff_checkbox.setVisible(True)
@@ -65,12 +65,6 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
         """
         return self.plot_type_combo.currentText()
 
-    def get_plot_mode(self):
-        """
-        Returns the current plot mode
-        """
-        return self.fit_or_data_combo_box.currentText()
-
     def is_tiled_plot(self):
         """
         Checks if tiled plot is currently requested
@@ -106,12 +100,6 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
         Connect the plot_type combo box to the input slot
         """
         self.plot_type_combo.currentIndexChanged.connect(slot)
-
-    def on_plot_mode_changed(self, slot):
-        """
-        Connect the plot mode combo box
-        """
-        self.fit_or_data_combo_box.currentIndexChanged.connect(slot)
 
     def on_plot_tiled_checkbox_changed(self, slot):
         """
@@ -159,16 +147,6 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
             self.plot_type_combo.setCurrentIndex(index)
         self.plot_type_combo.blockSignals(False)
 
-    def set_plot_mode(self, plot_mode: str):
-        """
-        Sets the plot mode to the input string
-        """
-        self.fit_or_data_combo_box.blockSignals(True)
-        index = self.fit_or_data_combo_box.findText(plot_mode)
-        if index >= 0:  # find text returns -1 if string plot_type doesn't exist
-            self.fit_or_data_combo_box.setCurrentIndex(index)
-        self.fit_or_data_combo_box.blockSignals(False)
-
     def enable_plot_type_combo(self):
         """
         Enable plot type collection
@@ -207,3 +185,28 @@ class PlotWidgetView(QtWidgets.QWidget, PlotWidgetViewInterface, ui_plotting_vie
         Enable plot raw option
         """
         self.plot_raw_checkbox.setEnabled(True)
+
+
+class PlotWidgetView(QtWidgets.QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
+        self._panes = None
+        self.setMinimumSize(600,600)
+        self.setEnabled(True)
+        self._plot_mode = QtWidgets.QComboBox()
+        self._layout = QtWidgets.QVBoxLayout()
+        self._layout.addWidget(self._plot_mode)
+        self.setLayout(self._layout)
+
+    def add_panes(self, panes):
+        for name in panes:
+            self._layout.addWidget(panes[name].view)
+            self._plot_mode.addItem(name)
+        self.setLayout(self._layout)
+
+    @property
+    def get_plot_mode(self):
+        return self._plot_mode.currentText()
+
+    def plot_mode_change_connect(self, slot):
+        self._plot_mode.currentIndexChanged.connect(slot)
