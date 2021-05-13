@@ -49,11 +49,19 @@ class PeakActionsView(QtWidgets.QWidget):
     @property
     def erasing_mode_on(self):
         r"""Find if the button to remove peaks is checked"""
+        if self.ui.remove_peaks_button.isChecked():
+           self.ui.remove_peaks_button.setChecked(True)
+           self.ui.add_peaks_button.setChecked(False)
+
         return self.ui.remove_peaks_button.isChecked()
 
     @property
     def adding_mode_on(self):
         r"""Find if the button to add peaks is checked"""
+        if self.ui.add_peaks_button.isChecked():
+           self.ui.add_peaks_button.setChecked(True)
+           self.ui.remove_peaks_button.setChecked(False)
+
         return self.ui.add_peaks_button.isChecked()
 
     @property
