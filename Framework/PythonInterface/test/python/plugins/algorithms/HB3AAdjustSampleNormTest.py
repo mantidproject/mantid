@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import numpy as np
-from mantid.simpleapi import CreateMDHistoWorkspace, DeleteWorkspace, HB3AAdjustSampleNorm, LoadMD
+from mantid.simpleapi import CreateMDHistoWorkspace, DeleteWorkspace, HB3AAdjustSampleNorm, LoadMD, SliceMDHisto, AddSampleLog
 
 
 class HB3AAdjustSampleNormTest(unittest.TestCase):
@@ -74,6 +74,42 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
                                  Wavelength=2.0)
 
         DeleteWorkspace(samplews)
+
+    def testDetectorNormalisation(self):
+        data1 =  HB3AAdjustSampleNorm('HB3A_data.nxs', OutputType='Detector', NormaliseBy='None')
+        self.assertEqual(data1.getSignalArray().max(), 16)
+        self.assertEqual(data1.getErrorSquaredArray().max(), 16)
+
+        # normlise by time, data 2 seconds
+        data2 =  HB3AAdjustSampleNorm('HB3A_data.nxs', OutputType='Detector', NormaliseBy='Time')
+        self.assertEqual(data2.getSignalArray().max(), 16/2)
+        self.assertEqual(data2.getErrorSquaredArray().max(), 16/2**2)
+
+        # normalize by monitor, about 621 counts
+        data3 =  HB3AAdjustSampleNorm('HB3A_data.nxs', OutputType='Detector', NormaliseBy='Monitor')
+        self.assertAlmostEqual(data3.getSignalArray().max(), 16/621)
+        self.assertAlmostEqual(data3.getErrorSquaredArray().max(), 16/621**2)
+
+        # create van data
+        van = SliceMDHisto(data1, '0,0,0', '1536,512,1')
+        van.setSignalArray(np.full_like(van.getSignalArray(), 25))
+        van.setErrorSquaredArray(np.full_like(van.getSignalArray(), 25))
+        AddSampleLog(van, LogName='time', LogText='42', LogType='Number Series', NumberType='Double')
+        AddSampleLog(van, LogName='monitor', LogText='420', LogType='Number Series', NumberType='Double')
+
+        data1 =  HB3AAdjustSampleNorm('HB3A_data.nxs', VanadiumWorkspace=van, OutputType='Detector', NormaliseBy='None')
+        self.assertAlmostEqual(data1.getSignalArray().max(), 16/25)
+        self.assertAlmostEqual(data1.getErrorSquaredArray().max(), (16/25)**2*(1/16+1/25))
+
+        # normlise by time, data 2 seconds
+        data2 =  HB3AAdjustSampleNorm('HB3A_data.nxs', VanadiumWorkspace=van, OutputType='Detector', NormaliseBy='Time')
+        self.assertAlmostEqual(data2.getSignalArray().max(), 16/25*42/2)
+        self.assertAlmostEqual(data2.getErrorSquaredArray().max(), (16/25)**2*(1/16+1/25) * (42/2)**2)
+
+        # normalize by monitor, about 621 counts
+        data3 =  HB3AAdjustSampleNorm('HB3A_data.nxs', VanadiumWorkspace=van, OutputType='Detector', NormaliseBy='Monitor')
+        self.assertAlmostEqual(data3.getSignalArray().max(), 16/25*420/621)
+        self.assertAlmostEqual(data3.getErrorSquaredArray().max(), (16/25)**2*(1/16+1/25) * (420/621)**2)
 
 
 if __name__ == '__main__':
