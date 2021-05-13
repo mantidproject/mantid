@@ -30,7 +30,6 @@ set ( TEST_PY_FILES
    elemental_analysis_2/EA_auto_tab/ea_match_table_presenter_test.py
    external_plotting_model_test.py
    FFTModel_test.py
-   FFTPresenter_test.py
    fft_presenter_context_interaction_test.py
    fit_information_test.py
    fit_parameters_test.py
@@ -98,8 +97,7 @@ set ( TEST_PY_FILES
    results_tab_widget/results_tab_presenter_test.py
    seq_fitting_tab_widget/seq_fitting_tab_presenter_test.py
    seq_fitting_tab_widget/sequential_table_test.py
-   transform_widget_new_test.py
-   transformWidget_test.py
+   transform_widget_test.py
    utilities/load_utils_test.py
    utilities/muon_base_pair_test.py
    utilities/muon_file_utils_test.py
