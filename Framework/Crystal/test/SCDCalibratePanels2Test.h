@@ -138,7 +138,11 @@ public:
     // No need to change anything
 
     // Run the calibration
-    runCalibration(filenamebase.string(), pws, false, true, false);
+    bool calibrateL1 = true;
+    bool calibrateBanks = false;
+    bool calibrateT0 = false;
+    bool tuneSamplePos = false;
+    runCalibration(filenamebase.string(), pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
 
     // Apply the calibration results
     MatrixWorkspace_sptr ws = generateSimulatedWorkspace();
@@ -158,7 +162,7 @@ public:
                    << "L1_cali = " << L1_cali << "\n";
   }
 
-  void test_L1() {
+  void run_L1() {
     g_log.notice() << "test_L1() starts.\n";
     // Generate unique temp files
     auto filenamebase = boost::filesystem::temp_directory_path();
@@ -173,7 +177,11 @@ public:
     // Run the calibration
     // NOTE: this should bring the instrument back to engineering position,
     //       which is the solution
-    runCalibration(filenamebase.string(), pws, false, true, false);
+    bool calibrateL1 = true;
+    bool calibrateBanks = false;
+    bool calibrateT0 = false;
+    bool tuneSamplePos = false;
+    runCalibration(filenamebase.string(), pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
 
     // Apply the calibration results
     MatrixWorkspace_sptr ws = generateSimulatedWorkspace();
@@ -223,7 +231,11 @@ public:
     // Run the calibration
     // NOTE: this should bring the instrument back to engineering position,
     //       which is the solution
-    runCalibration(filenamebase.string(), pws, false, false, true);
+    bool calibrateL1 = false;
+    bool calibrateBanks = true;
+    bool calibrateT0 = false;
+    bool tuneSamplePos = false;
+    runCalibration(filenamebase.string(), pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
 
     // Apply the calibration results
     MatrixWorkspace_sptr ws = generateSimulatedWorkspace();
@@ -267,6 +279,25 @@ public:
     g_log.notice() << "with\n"
                    << "ang(q_ref, q_cali) = " << dang << " (deg) \n";
     TS_ASSERT_LESS_THAN(dang, TOLERANCE_R);
+  }
+
+  void test_T0() {
+    g_log.notice() << "test_T0() starts.\n";
+
+    // Generate unique temp files
+    auto filenamebase = boost::filesystem::temp_directory_path();
+    filenamebase /= boost::filesystem::unique_path("testT0_%%%%%%%%");
+    // Make a clone of the standard peak workspace
+    PeaksWorkspace_sptr pws = m_pws->clone();
+
+    // Do nothing regarding T0, see if we can get a zero back
+
+    // Run the calibration
+    bool calibrateL1 = false;
+    bool calibrateBanks = false;
+    bool calibrateT0 = true;
+    bool tuneSamplePos = false;
+    runCalibration(filenamebase.string(), pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
   }
 
   // NOTE: skipped to prevent time out on build server
@@ -314,7 +345,11 @@ public:
     // Run the calibration
     // NOTE: this should bring the instrument back to engineering position,
     //       which is the solution
-    runCalibration(filenamebase.string(), pws, false, true, true);
+    bool calibrateL1 = false;
+    bool calibrateBanks = true;
+    bool calibrateT0 = false;
+    bool tuneSamplePos = false;
+    runCalibration(filenamebase.string(), pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
 
     // Apply the calibration results
     MatrixWorkspace_sptr ws = generateSimulatedWorkspace();
@@ -550,12 +585,13 @@ private:
    *
    * @param filenameBase
    * @param pws
-   * @param calibrateT0
    * @param calibrateL1
    * @param calibrateBanks
+   * @param calibrateT0
+   * @param tuneSamplePosition
    */
-  void runCalibration(const std::string filenameBase, PeaksWorkspace_sptr pws, bool calibrateT0, bool calibrateL1,
-                      bool calibrateBanks) {
+  void runCalibration(const std::string filenameBase, PeaksWorkspace_sptr pws, bool calibrateL1, bool calibrateBanks,
+                      bool calibrateT0, bool tuneSamplePosition) {
     // generate isaw, xml, and csv filename
     const std::string isawFilename = filenameBase + ".DetCal";
     const std::string xmlFilename = filenameBase + ".xml";
@@ -572,9 +608,10 @@ private:
     alg.setProperty("beta", silicon_beta);
     alg.setProperty("gamma", silicon_gamma);
     alg.setProperty("RecalculateUB", false);
-    alg.setProperty("CalibrateT0", calibrateT0);
     alg.setProperty("CalibrateL1", calibrateL1);
     alg.setProperty("CalibrateBanks", calibrateBanks);
+    alg.setProperty("CalibrateT0", calibrateT0);
+    alg.setProperty("TuneSamplePosition", tuneSamplePosition);
     alg.setProperty("OutputWorkspace", "caliTableTest");
     alg.setProperty("DetCalFilename", isawFilename);
     alg.setProperty("XmlFilename", xmlFilename);
