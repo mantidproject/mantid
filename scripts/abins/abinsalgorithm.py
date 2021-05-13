@@ -438,7 +438,7 @@ class AbinsAlgorithm:
             information but is used in-place to save on time instantiating large arrays.
         :param substitution: True if isotope substitution and False otherwise
         """
-        from abins.constants import FUNDAMENTALS, MASS_EPS
+        from abins.constants import MASS_EPS
 
         atom_workspaces = []
         s_atom_data.fill(0.0)
