@@ -69,6 +69,7 @@ Interfaces
 - Fixed a bug which occurred when switching to a log scale in sliceviewer with negative data.
 - Axes limits correctly reset when home clicked on sliceviewer plot of ragged matrix workspace.
 - Line plots in sliceviewer now respect the status of the Track Cursor checkbox.
+- Cursor coordinates in sliceviewer are now correct for transposed and non-orthogonal data.
 
 
 Plotting
