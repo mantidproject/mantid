@@ -69,6 +69,7 @@ Interfaces
 - Fixed a bug which occurred when switching to a log scale in sliceviewer with negative data.
 - Axes limits correctly reset when home clicked on sliceviewer plot of ragged matrix workspace.
 - Line plots in sliceviewer now respect the status of the Track Cursor checkbox.
+- Cursor coordinates in sliceviewer are now correct for transposed and non-orthogonal data.
 
 
 Plotting
@@ -83,6 +84,7 @@ Plotting
 - Fixed a problem with scripts generated from tiled plots.
 - Restrict scroll wheel zooming out to +/-10^300 to avoid crash.
 - Exported axis tick formatter related commands to plot script.
+- Restore axis tick format for plots on project save and load.
 - Fixed a bug where colorfill plots with a Log scale could not be saved during project save.
 
 

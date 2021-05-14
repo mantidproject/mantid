@@ -123,6 +123,7 @@ if(ENABLE_WORKBENCH)
         mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
         mantidqt/widgets/samplematerialdialog/test/test_samplematerial_presenter.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_cursortracker.py
+        mantidqt/widgets/sliceviewer/test/test_sliceviewer_imageinfowidget.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_model.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_movemousecursor.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_presenter.py
