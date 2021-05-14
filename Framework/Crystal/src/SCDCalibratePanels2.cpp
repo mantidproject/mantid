@@ -204,11 +204,13 @@ void SCDCalibratePanels2::init() {
   declareProperty("VerboseOutput", false, "Toggle of child algorithm console output.");
   declareProperty("ProfileL1", false, "Perform profiling of objective function with given input for L1");
   declareProperty("ProfileBanks", false, "Perform profiling of objective function with given input for Banks");
+  declareProperty("ProfileT0", false, "Perform profiling of objective function with given input for T0");
   // grouping into one category
   const std::string ADVCNTRL("Advanced Option");
   setPropertyGroup("VerboseOutput", ADVCNTRL);
   setPropertyGroup("ProfileL1", ADVCNTRL);
   setPropertyGroup("ProfileBanks", ADVCNTRL);
+  setPropertyGroup("ProfileT0", ADVCNTRL);
 }
 
 /**
@@ -265,6 +267,7 @@ void SCDCalibratePanels2::exec() {
 
   bool profL1 = getProperty("ProfileL1");
   bool profBanks = getProperty("ProfileBanks");
+  bool profT0 = getProperty("ProfileT0");
 
   const std::string DetCalFilename = getProperty("DetCalFilename");
   const std::string XmlFilename = getProperty("XmlFilename");
@@ -288,6 +291,9 @@ void SCDCalibratePanels2::exec() {
   }
   if (profBanks) {
     profileBanks(m_pws, pws_original);
+  }
+  if (profT0) {
+    profileT0(m_pws, pws_original);
   }
 
   // STEP_3: optimize
@@ -327,6 +333,15 @@ void SCDCalibratePanels2::exec() {
   if (calibrateT0) {
     g_log.notice() << "** Calibrating T0 as requested\n";
     optimizeT0(m_pws, pws_original);
+
+    if (calibrateL1) {
+      for (int i = 0; i < 20; i++) {
+        g_log.notice() << "** Test L1+T0 stability\n"
+                       << "@iter_" << i << "\n";
+        optimizeL1(m_pws, pws_original);
+        optimizeT0(m_pws, pws_original);
+      }
+    }
   }
 
   // STEP_4: generate a table workspace to save the calibration results
@@ -546,7 +561,7 @@ void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
 
   //-- bounds&constraints def
   std::ostringstream tie_str;
-  tie_str << "DeltaX=0.0,DeltaY=0.0,DeltaZ=0.0,Theta=1.0,Phi=0.0,"
+  tie_str << "DeltaX=0.0,DeltaY=0.0,DeltaZ=0.0,Theta=0.0,Phi=0.0,"
              "DeltaRotationAngle=0.0";
   std::ostringstream constraint_str;
   double r_dT0 = getProperty("SearchRadiusT0");
@@ -570,13 +585,13 @@ void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   double tor_dT0 = getProperty("ToleranceT0");
   std::ostringstream calilog;
   if (std::abs(dT0_optimized) < std::abs(tor_dT0)) {
-    calilog << "-- Fit T0=" << dT0_optimized << " is below tolerance(" << tor_dT0 << "), skippping\n";
+    calilog << "-- Fit dT0 = " << dT0_optimized << " is below tolerance(" << tor_dT0 << "), skippping\n";
   } else {
     // NOTE: since m_T0 is being used for all optimization, so we only need to update this variable
     m_T0 = dT0_optimized;
     int npks = pws->getNumberPeaks();
     calilog << "-- Fit T0 results using " << npks << " peaks:\n"
-            << "    dT0: " << m_T0 << " \n"
+            << "    dT0 = " << m_T0 << " \n"
             << "    chi2/DOF = " << chi2OverDOF << "\n";
   }
 
@@ -1073,6 +1088,14 @@ void SCDCalibratePanels2::saveCalibrationTable(const std::string &FileName, ITab
 void SCDCalibratePanels2::profileL1(Mantid::API::IPeaksWorkspace_sptr &pws,
                                     Mantid::API::IPeaksWorkspace_sptr pws_original) {
   g_log.notice() << "START of profiling objective func along L1\n";
+
+  // control option
+  bool verbose = getProperty("VerboseOutput");
+  if (verbose) {
+    // header to console
+    g_log.notice() << "deltaL1 -- residual\n";
+  }
+
   // prepare container for profile information
   std::ostringstream msgrst;
   msgrst.precision(12);
@@ -1106,6 +1129,7 @@ void SCDCalibratePanels2::profileL1(Mantid::API::IPeaksWorkspace_sptr &pws,
   while (deltaL1 < 4e-2) {
     std::unique_ptr<double[]> out(new double[n_peaks * 3]);
     objf->setParameter("DeltaZ", deltaL1);
+    objf->setParameter("DeltaT0", 0.0); // need to set dT0 to 0.0 if we are not cali it
     objf->function1D(out.get(), xValues, 1);
 
     // calc residual
@@ -1116,6 +1140,10 @@ void SCDCalibratePanels2::profileL1(Mantid::API::IPeaksWorkspace_sptr &pws,
     residual = std::sqrt(residual) / (n_peaks - 1); // only 1 deg of freedom here
     // log rst
     msgrst << deltaL1 << "\t" << residual << "\n";
+
+    if (verbose) {
+      g_log.notice() << deltaL1 << " -- " << residual << "\n";
+    }
 
     // increment
     deltaL1 += 1e-4; // 0.1mm step size
@@ -1142,6 +1170,13 @@ void SCDCalibratePanels2::profileL1(Mantid::API::IPeaksWorkspace_sptr &pws,
 void SCDCalibratePanels2::profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws,
                                        Mantid::API::IPeaksWorkspace_sptr pws_original) {
   g_log.notice() << "START of profiling all banks along six degree of freedom\n";
+
+  // control option
+  bool verbose = getProperty("VerboseOutput");
+  if (verbose) {
+    // header to console
+    g_log.notice() << "--bankname: residual\n";
+  }
 
   // Use OPENMP to speed up the profiling
   PARALLEL_FOR_IF(Kernel::threadSafe(*pws))
@@ -1193,17 +1228,17 @@ void SCDCalibratePanels2::profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws,
     double xValues[7] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // xValues is not used
 
     // NOTE: very expensive scan of the parameter space
-    for (double dx = -1e-2; dx < 1e-2; dx += 2e-2 / 20) {
+    for (double dx = -1e-2; dx < 1e-2; dx += 2e-2 / 20.0) {
       // deltaX: meter
-      for (double dy = -1e-2; dy < 1e-2; dy += 2e-2 / 20) {
+      for (double dy = -1e-2; dy < 1e-2; dy += 2e-2 / 20.0) {
         // deltaY: meter
-        for (double dz = -1e-2; dz < 1e-2; dz += 2e-2 / 20) {
+        for (double dz = -1e-2; dz < 1e-2; dz += 2e-2 / 20.0) {
           // deltaZ: meter
-          for (double theta = 0.0; theta < PI; theta += PI / 20) {
+          for (double theta = 0.0; theta < PI; theta += PI / 20.0) {
             // theta: rad
-            for (double phi = 0.0; phi < 2 * PI; phi += 2 * PI / 20) {
+            for (double phi = 0.0; phi < 2 * PI; phi += 2 * PI / 20.0) {
               // phi: rad
-              for (double ang = -5.0; ang < 5.0; ang += 5 / 20) {
+              for (double ang = -5.0; ang < 5.0; ang += 5.0 / 20.0) {
                 // ang: degrees
                 // configure the objfunc
                 std::unique_ptr<double[]> out(new double[n_peaks * 3]);
@@ -1213,6 +1248,7 @@ void SCDCalibratePanels2::profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws,
                 objf->setParameter("Theta", theta);
                 objf->setParameter("Phi", phi);
                 objf->setParameter("DeltaRotationAngle", ang);
+                objf->setParameter("DeltaT0", 0.0); // need to set dT0 to 0.0 if we are not cali it
                 objf->function1D(out.get(), xValues, 1);
                 // calc residual
                 double residual = 0.0;
@@ -1224,7 +1260,9 @@ void SCDCalibratePanels2::profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws,
                 msgrst << dx << "\t" << dy << "\t" << dz << "\t" << theta << "\t" << phi << "\t" << ang << "\t"
                        << residual << "\n";
 
-                g_log.notice() << "--" << bankname << ": " << residual << "\n";
+                if (verbose) {
+                  g_log.notice() << "--" << bankname << ": " << residual << "\n";
+                }
               }
             }
           }
@@ -1250,6 +1288,86 @@ void SCDCalibratePanels2::profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws,
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+}
+
+/**
+ * @brief Profile obj func along T0 axis
+ *
+ * @param pws
+ * @param pws_original
+ */
+void SCDCalibratePanels2::profileT0(Mantid::API::IPeaksWorkspace_sptr &pws,
+                                    Mantid::API::IPeaksWorkspace_sptr pws_original) {
+  g_log.notice() << "START of profiling objective func along T0\n";
+
+  // control option
+  bool verbose = getProperty("VerboseOutput");
+  if (verbose) {
+    // print the header to console
+    g_log.notice() << "deltaT0 -- residual\n";
+  }
+
+  // prepare container for profile information
+  std::ostringstream msgrst;
+  msgrst.precision(12);
+  msgrst << "dT0\tresidual\n";
+
+  // setting up as if we are doing optimization
+  auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
+  // NOTE: always use the original pws to get the tofs
+  std::vector<double> tofs = captureTOF(pws_original);
+  objf->setPeakWorkspace(pws, "none", tofs);
+
+  // call the obj to perform evaluation
+  const int n_peaks = pws->getNumberPeaks();
+  std::unique_ptr<double[]> target(new double[n_peaks * 3]);
+
+  // generate the target
+  auto ubmatrix = pws->sample().getOrientedLattice().getUB();
+  for (int i = 0; i < n_peaks; ++i) {
+    V3D qv = ubmatrix * pws->getPeak(i).getIntHKL();
+    qv *= 2 * PI;
+    for (int j = 0; j < 3; ++j) {
+      target[i * 3 + j] = qv[j];
+    }
+  }
+
+  double xValues[7] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // xValues is not used
+
+  // scan from -10 ~ 10 ms along dT0
+  double deltaT0 = -10;
+  while (deltaT0 < 10) {
+    std::unique_ptr<double[]> out(new double[n_peaks * 3]);
+    objf->setParameter("DeltaT0", deltaT0);
+    objf->function1D(out.get(), xValues, 1);
+
+    // calc residual
+    double residual = 0.0;
+    for (int i = 0; i < n_peaks * 3; ++i) {
+      residual += (out[i] - target[i]) * (out[i] - target[i]);
+    }
+    residual = std::sqrt(residual) / (n_peaks - 1); // only 1 deg of freedom here
+    // log rst
+    msgrst << deltaT0 << "\t" << residual << "\n";
+
+    if (verbose) {
+      g_log.notice() << deltaT0 << " -- " << residual << "\n";
+    }
+
+    // increment
+    deltaT0 += 0.01; // 20/2000.0
+  }
+
+  // output to file
+  auto filenamebase = boost::filesystem::temp_directory_path();
+  filenamebase /= boost::filesystem::unique_path("profileSCDCalibratePanels2_T0.csv");
+  std::ofstream profL1File;
+  profL1File.open(filenamebase.string());
+  profL1File << msgrst.str();
+  profL1File.close();
+  g_log.notice() << "Profile data is saved at:\n"
+                 << filenamebase << "\n"
+                 << "END of profiling objective func along T0\n";
 }
 
 } // namespace Crystal

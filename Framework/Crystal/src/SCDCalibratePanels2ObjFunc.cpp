@@ -49,7 +49,9 @@ SCDCalibratePanels2ObjFunc::SCDCalibratePanels2ObjFunc() {
   declareParameter("Phi", PI / 4, "Polar coordinates phi in radians");
   // rotation angle
   declareParameter("DeltaRotationAngle", 0.0, "angle of relative rotation in degree");
-  declareParameter("DeltaT0", 0.0, "delta of TOF");
+  // TOF offset for all peaks
+  // NOTE: need to have a non-zero value here
+  declareParameter("DeltaT0", 0.1, "delta of TOF");
 }
 
 void SCDCalibratePanels2ObjFunc::setPeakWorkspace(IPeaksWorkspace_sptr &pws, const std::string componentName,
@@ -166,7 +168,8 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
   // msgiter.precision(8);
   // msgiter << "residual@iter_" << n_iter << ": " << residual << "\n"
   //         << "-- (dx, dy, dz) = " << dtrans << "\n"
-  //         << "-- ang@axis = " << drotang << "@" << rotaxis << "\n\n";
+  //         << "-- ang@axis = " << drotang << "@" << rotaxis << "\n"
+  //         << "-- dT0 = " << dT0 << "\n\n";
   // g_log.notice() << msgiter.str();
 }
 
