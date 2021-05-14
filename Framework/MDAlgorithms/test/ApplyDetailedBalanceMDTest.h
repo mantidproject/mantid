@@ -45,6 +45,15 @@ public:
     // Check whether the MD to test does exist
     auto singlemd = Mantid::API::AnalysisDataService::Instance().retrieve(mMDWorkspace1Name);
     TS_ASSERT(singlemd);
+
+    ApplyDetailedBalanceMD alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    alg.setPropertyValue("InputWorkspace", mMDWorkspace1Name);
+    alg.setProperty("Temperature", "SampTemp");
+    alg.setProperty("OutputWorkspace", "Whatever");
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
   }
 
   void setUp() override {
