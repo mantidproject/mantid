@@ -61,7 +61,7 @@ of the workspace, **including zeros**.
 
 This can be useful in cases where the experimental coverage needs to be
 tracked. With one MDEvent for each bin, you can count which regions in
-Q-space have been measured. The `SliceViewer <http://www.mantidproject.org/SliceViewer>`__ has an
+Q-space have been measured. The :ref:`sliceviewer` has an
 option to view normalized by number of events. This means that, for
 example, areas with overlap from two runs will appear scaled down.
 

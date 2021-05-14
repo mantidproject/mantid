@@ -21,9 +21,7 @@ Viewing a PeaksWorkspace
 * Double-click a PeaksWorkspace to see the full list of data of each Peak object.
 * In MantidWorkbench, you can drag/drop a PeaksWorkspace from the list of workspaces onto the
   :ref:`Instrument View <InstrumentViewer>`. This will overlay the peaks onto the detector face.
-* `PeaksViewer <http://www.mantidproject.org/PeaksViewer>`__ in the
-  `SliceViewer <http://www.mantidproject.org/SliceViewer>`__.
-
+* :ref:`Peaks overlay <sliceviewer_peaks_overlay>` in the :ref:`sliceviewer`.
 
 Each peak object contains several pieces of information. Not all of them are necessary
 

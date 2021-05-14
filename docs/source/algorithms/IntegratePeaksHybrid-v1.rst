@@ -29,7 +29,9 @@ work.
 .. figure:: /images/ClusterImage.png
    :alt: ClusterImage.png
 
-   Cluster Label region displayed in the SliceViewer. Peak centre is marked with an X. The green circle illustrates the integration region used by :ref:`algm-IntegratePeaksMD`
+   Cluster Label region displayed in the :ref:`sliceviewer`.
+   Peak centre is marked with an X.
+   The green circle illustrates the integration region used by :ref:`algm-IntegratePeaksMD`
 
 Warnings and Logging
 --------------------

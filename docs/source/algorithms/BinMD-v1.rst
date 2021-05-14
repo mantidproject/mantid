@@ -124,7 +124,7 @@ Output:
 
     Number of events = 250734
 
-The output looks like the following in the `SliceViewer <http://www.mantidproject.org/MantidPlot:_SliceViewer>`_:
+The output looks like the following in the :ref:`sliceviewer`:
 
 .. image:: /images/BinMD_AxisAligned.png
     :alt: The sliceveiwer with the axis aligned cut
@@ -147,7 +147,7 @@ Output:
 
     Number of events = 300000
 
-The output looks like the following in the `SliceViewer <http://www.mantidproject.org/MantidPlot:_SliceViewer>`_:
+The output looks like the following in the :ref:`sliceviewer`:
 
 .. image:: /images/BinMD_NonAxisAligned.png
     :alt: The sliceveiwer with the non axis aligned cut

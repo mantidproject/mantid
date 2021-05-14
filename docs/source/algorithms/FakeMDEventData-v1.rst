@@ -36,7 +36,7 @@ Output:
 
     Number of events = 1000000
 
-The output looks like the following in the `SliceViewer <http://www.mantidproject.org/MantidPlot:_SliceViewer>`_:
+The output looks like the following in the :ref:`sliceviewer`:
 
 .. image:: /images/FakeMDEventData_Uniform2D.png
     :alt: Uniform 2D FakeMDEventData
@@ -62,7 +62,7 @@ Output:
 
     Number of events = 150000
 
-The output looks like the following in the `SliceViewer <http://www.mantidproject.org/MantidPlot:_SliceViewer>`_:
+The output looks like the following in the :ref:`sliceviewer`:
 
 .. image:: /images/FakeMDEventData_Peaks3D.png
     :alt: Peaks 3D FakeMDEventData
@@ -86,7 +86,7 @@ Output:
 
     Number of events = 1000000
 
-The output looks like the following in the `SliceViewer <http://www.mantidproject.org/MantidPlot:_SliceViewer>`_ when
+The output looks like the following in the :ref:`sliceviewer` when
 the T slider is moved to ~5K:
 
 .. image:: /images/FakeMDEventData_Peaks4D.png
