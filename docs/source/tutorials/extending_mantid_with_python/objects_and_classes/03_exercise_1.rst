@@ -9,10 +9,10 @@ within Python.
 
 #. Write a ``Detector`` class contains two attributes id and name. The
    attributes should be able to be set by a call like:
-   ``Detector(1,"bank1_1")``.
+   ``Detector(1, "bank1_1")``.
 #. Write an Instrument class with 2 attributes: **name** and list of
    **detectors**. These attributes should also be able to be set by a
-   call like: ``Instrument('MyInst',dets)``.
+   call like: ``Instrument('MyInst', dets)``.
 #. Add a method to the ``Instrument`` class called ``printTree`` that will
    print the **names** & **ids** of the detectors contained within it
 #. Write a class called ``Component`` that stores a single **name** attribute
