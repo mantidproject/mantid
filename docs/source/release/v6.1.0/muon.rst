@@ -18,7 +18,17 @@ New Features
    :align: right
 
 - Plotting ranges can now be edited individually for tile plots.
-- The muon fitting interface has been simplified.
+
+Improvements
+############
+
+- The muon fitting tab has been redesigned making it easier to use and more stable. TF Asymmetry fitting has seen
+  the largest improvement in usability as the fit function is now displayed in a much simpler form.
+
+.. figure:: ../../images/MuonFittingTabRedesign.PNG
+   :class: screenshot
+   :width: 500px
+   :align: right
 
 Improvements
 ############
