@@ -81,7 +81,7 @@ autoconvolution = {
 
 # Parameters related to performance optimisation that do NOT impact calculation results
 try:
-    from scipy import oaconvolve  # noqa: F401
+    from scipy.signal import oaconvolve  # noqa: F401
     _use_oaconvolve = True
 except ImportError:
     _use_oaconvolve = False
