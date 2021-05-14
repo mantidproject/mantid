@@ -924,6 +924,14 @@ void SCDCalibratePanels2::saveXmlFile(const std::string &FileName,
   parafile.put("<xmlattr>.instrument", instrument->getName());
   parafile.put("<xmlattr>.valid-from", instrument->getValidFromDate().toISO8601String());
 
+  // add node for T0
+  ptree tof0;
+  ptree tof0_val;
+  tof0.put("<xmlattr>.name", "T0");
+  tof0_val.put("<xmlattr>.val", m_T0);
+  tof0.add_child("value", tof0_val);
+  // TODO: still not clear what is the proper label for T0 in XML file
+
   // configure and add each bank
   for (auto bankName : AllBankNames) {
     // Prepare data for node
@@ -1412,7 +1420,7 @@ void SCDCalibratePanels2::profileL1T0(Mantid::API::IPeaksWorkspace_sptr &pws,
 
   // profile begin
   for (double deltaL1 = -4e-2; deltaL1 < 4e-2; deltaL1 += 1e-4) {
-    for (double deltaT0 = -5.0; deltaT0 < 5.0; deltaT0 += 1e-3) {
+    for (double deltaT0 = -4.0; deltaT0 < 4.0; deltaT0 += 1e-2) {
       std::unique_ptr<double[]> out(new double[n_peaks * 3]);
       objf->setParameter("DeltaZ", deltaL1);
       objf->setParameter("DeltaT0", deltaT0);
@@ -1424,12 +1432,12 @@ void SCDCalibratePanels2::profileL1T0(Mantid::API::IPeaksWorkspace_sptr &pws,
         residual += (out[i] - target[i]) * (out[i] - target[i]);
       }
       residual = std::sqrt(residual) / (n_peaks - 2); // only 1 deg of freedom here
-      // log rst
-      msgrst << deltaL1 << "\t" << deltaT0 << "\t" << residual << "\n";
 
       if (verbose) {
         g_log.notice() << deltaL1 << " -- " << deltaT0 << " -- " << residual << "\n";
       }
+      // log rst
+      msgrst << deltaL1 << "\t" << deltaT0 << "\t" << residual << "\n";
     }
   }
 
