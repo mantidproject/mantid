@@ -79,17 +79,9 @@ autoconvolution = {
     'fine_bin_factor': 10
     }
 
-# Parameters related to performance optimisation that do NOT impact calculation results
-try:
-    from scipy.signal import oaconvolve  # noqa: F401
-    _use_oaconvolve = True
-except ImportError:
-    _use_oaconvolve = False
-
 performance = {
     'optimal_size': 5000000,  # this is used to create optimal size of chunk energies for which S is calculated
     'threads': 4,  # number of threads used in parallel calculations
-    'use_oaconvolve': _use_oaconvolve,
     }
 
 all_parameters = {'instruments': instruments,
