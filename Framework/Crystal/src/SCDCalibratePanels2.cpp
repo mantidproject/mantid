@@ -792,34 +792,6 @@ MatrixWorkspace_sptr SCDCalibratePanels2::getIdealQSampleAsHistogram1D(IPeaksWor
 }
 
 /**
- * @brief shift T0 for both peakworkspace and all peaks
- *
- * @param dT0
- * @param pws
- */
-void SCDCalibratePanels2::adjustT0(double dT0, IPeaksWorkspace_sptr &pws) {
-  // update the T0 record in peakworkspace
-  Mantid::API::Run &run = pws->mutableRun();
-  double T0 = 0.0;
-  if (run.hasProperty("T0")) {
-    T0 = run.getPropertyValueAsType<double>("T0");
-  }
-  T0 += dT0;
-  run.addProperty<double>("T0", T0, true);
-
-  // update wavelength of each peak using new T0
-  for (int i = 0; i < pws->getNumberPeaks(); ++i) {
-    IPeak &pk = pws->getPeak(i);
-    Units::Wavelength wl;
-    wl.initialize(pk.getL1(), 0,
-                  {{UnitParams::l2, pk.getL2()},
-                   {UnitParams::twoTheta, pk.getScattering()},
-                   {UnitParams::efixed, pk.getInitialEnergy()}});
-    pk.setWavelength(wl.singleFromTOF(pk.getTOF() + dT0));
-  }
-}
-
-/**
  * @brief adjust instrument component position and orientation
  *
  * @param dx

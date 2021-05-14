@@ -95,9 +95,6 @@ private:
   /// integer HKL
   Mantid::API::MatrixWorkspace_sptr getIdealQSampleAsHistogram1D(Mantid::API::IPeaksWorkspace_sptr pws);
 
-  /// Helper functions for adjusting T0 for all peaks
-  void adjustT0(double dT0, Mantid::API::IPeaksWorkspace_sptr &pws);
-
   /// Helper functions for adjusting components
   void adjustComponent(double dx, double dy, double dz, double rvx, double rvy, double rvz, double rang,
                        std::string cmptName, Mantid::API::IPeaksWorkspace_sptr &pws);
