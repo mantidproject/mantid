@@ -297,11 +297,12 @@ void SCDCalibratePanels2::exec() {
   }
 
   // STEP_3: optimize
-  //  - L1
+  //  - L1 (with or without T0 cali attached)
   //  - Banks
-  //  - T0
   //  - sample position
   if (calibrateL1) {
+    // NOTE:
+    //    L1 and T0 can be calibrated together to provide stable calibration results.
     g_log.notice() << "** Calibrating L1 (moderator) as requested\n";
     optimizeL1(m_pws, pws_original);
   }
@@ -330,18 +331,13 @@ void SCDCalibratePanels2::exec() {
     // }
   }
 
-  if (calibrateT0) {
-    g_log.notice() << "** Calibrating T0 as requested\n";
+  if (calibrateT0 && !calibrateL1) {
+    // NOTE:
+    //    L1 and T0 can be calibrated together to provide a stable results, which is the
+    //    recommended way.
+    //    However, one can still calibrate T0 only if desired.
+    g_log.notice() << "** Calibrating T0 only as requested\n";
     optimizeT0(m_pws, pws_original);
-
-    if (calibrateL1) {
-      for (int i = 0; i < 20; i++) {
-        g_log.notice() << "** Test L1+T0 stability\n"
-                       << "@iter_" << i << "\n";
-        optimizeL1(m_pws, pws_original);
-        optimizeT0(m_pws, pws_original);
-      }
-    }
   }
 
   // STEP_4: generate a table workspace to save the calibration results
@@ -375,6 +371,8 @@ void SCDCalibratePanels2::exec() {
 void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_sptr pws_original) {
   // cache starting L1 position
   double original_L1 = std::abs(pws->getInstrument()->getSource()->getPos().Z());
+  // T0 can be calibrate along with L1 to provide a more stable results
+  bool caliT0 = getProperty("CalibrateT0");
 
   MatrixWorkspace_sptr l1ws = getIdealQSampleAsHistogram1D(pws);
 
@@ -388,11 +386,21 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
 
   //-- bounds&constraints def
   std::ostringstream tie_str;
-  tie_str << "DeltaX=0.0,DeltaY=0.0,Theta=1.0,Phi=0.0,DeltaRotationAngle=0.0,DeltaT0=" << m_T0;
+  if (caliT0) {
+    tie_str << "DeltaX=0.0,DeltaY=0.0,Theta=1.0,Phi=0.0,DeltaRotationAngle=0.0";
+  } else {
+    tie_str << "DeltaX=0.0,DeltaY=0.0,Theta=1.0,Phi=0.0,DeltaRotationAngle=0.0,DeltaT0=" << m_T0;
+  }
   std::ostringstream constraint_str;
   double r_L1 = getProperty("SearchRadiusL1"); // get search radius
   r_L1 = std::abs(r_L1);
   constraint_str << -r_L1 << "<DeltaZ<" << r_L1;
+  // throw in the constrain for T0 cali if needed
+  if (caliT0) {
+    double r_dT0 = getProperty("SearchRadiusT0");
+    r_dT0 = std::abs(r_dT0);
+    constraint_str << "," << -r_dT0 << "<DeltaT0<" << r_dT0;
+  }
   //-- set and go
   fitL1_alg->setProperty("Ties", tie_str.str());
   fitL1_alg->setProperty("Constraints", constraint_str.str());
@@ -405,21 +413,32 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   std::ostringstream calilog;
   double chi2OverDOF = fitL1_alg->getProperty("OutputChi2overDoF");
   ITableWorkspace_sptr rst = fitL1_alg->getProperty("OutputParameters");
+  // get results for L1
   double dL1_optimized = rst->getRef<double>("Value", 2);
   double tor_dL1 = getProperty("ToleranceL1");
   if (std::abs(dL1_optimized) < std::abs(tor_dL1)) {
-    calilog << "-- Fit L1 results below tolerance, skippping\n";
-  } else {
-    adjustComponent(0.0, 0.0, dL1_optimized, 1.0, 0.0, 0.0, 0.0, pws->getInstrument()->getSource()->getName(), pws);
-    // output to console and update L1 for subsequent calibration
-    int npks = pws->getNumberPeaks();
-    calilog << "-- Fit L1 results using " << npks << " peaks:\n"
-            << "    dL1: " << dL1_optimized << " \n"
-            << "    L1 " << original_L1 << " -> " << -pws->getInstrument()->getSource()->getPos().Z() << " \n"
-            << "    chi2/DOF = " << chi2OverDOF << "\n";
+    calilog << "-- Fit L1 results below tolerance, zero it\n";
+    dL1_optimized = 0.0;
   }
-
-  //-- log
+  // get results for T0 (optional)
+  double dT0_optimized = rst->getRef<double>("Value", 6);
+  double tor_dT0 = getProperty("ToleranceT0");
+  if (caliT0) {
+    if (std::abs(dT0_optimized) < std::abs(tor_dT0)) {
+      calilog << "-- Fit dT0 = " << dT0_optimized << " is below tolerance(" << tor_dT0 << "), zero it\n";
+      dT0_optimized = 0.0;
+    }
+  }
+  // apply the cali results (for output cali table and file)
+  adjustComponent(0.0, 0.0, dL1_optimized, 1.0, 0.0, 0.0, 0.0, pws->getInstrument()->getSource()->getName(), pws);
+  m_T0 = dT0_optimized;
+  // logging
+  int npks = pws->getNumberPeaks();
+  calilog << "-- Fit L1 results using " << npks << " peaks:\n"
+          << "    dL1: " << dL1_optimized << " \n"
+          << "    L1 " << original_L1 << " -> " << -pws->getInstrument()->getSource()->getPos().Z() << " \n"
+          << "    dT0 = " << m_T0 << " \n"
+          << "    chi2/DOF = " << chi2OverDOF << "\n";
   g_log.notice() << calilog.str();
 }
 
@@ -507,18 +526,21 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
     tolerance_rotation = std::abs(tolerance_rotation);
     if ((std::abs(dx) < tolerance_translation) && (std::abs(dy) < tolerance_translation) &&
         (std::abs(dz) < tolerance_translation) && (std::abs(rotang) < tolerance_rotation)) {
-      // skip the adjustment of the component as it is juat noise
-      calilog << "-- Fit " << bn << " results below tolerance, skippping\n";
-    } else {
-      double rvx = sin(theta) * cos(phi);
-      double rvy = sin(theta) * sin(phi);
-      double rvz = cos(theta);
-      adjustComponent(dx, dy, dz, rvx, rvy, rvz, rotang, bn, pws);
-      calilog << "-- Fit " << bn << " results using " << nBankPeaks << " peaks:\n "
-              << "    d(x,y,z) = (" << dx << "," << dy << "," << dz << ")\n"
-              << "    rotang(rx,ry,rz) =" << rotang << "(" << rvx << "," << rvy << "," << rvz << ")\n"
-              << "    chi2/DOF = " << chi2OverDOF << "\n";
+      calilog << "-- Fit " << bn << " results below tolerance, zero all\n";
+      dx = 0.0;
+      dy = 0.0;
+      dz = 0.0;
+      rotang = 0.0;
     }
+    double rvx = sin(theta) * cos(phi);
+    double rvy = sin(theta) * sin(phi);
+    double rvz = cos(theta);
+    adjustComponent(dx, dy, dz, rvx, rvy, rvz, rotang, bn, pws);
+    // logging
+    calilog << "-- Fit " << bn << " results using " << nBankPeaks << " peaks:\n "
+            << "    d(x,y,z) = (" << dx << "," << dy << "," << dz << ")\n"
+            << "    rotang(rx,ry,rz) =" << rotang << "(" << rvx << "," << rvy << "," << rvz << ")\n"
+            << "    chi2/DOF = " << chi2OverDOF << "\n";
     g_log.notice() << calilog.str();
 
     // -- cleanup
@@ -561,8 +583,7 @@ void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
 
   //-- bounds&constraints def
   std::ostringstream tie_str;
-  tie_str << "DeltaX=0.0,DeltaY=0.0,DeltaZ=0.0,Theta=0.0,Phi=0.0,"
-             "DeltaRotationAngle=0.0";
+  tie_str << "DeltaX=0.0,DeltaY=0.0,DeltaZ=0.0,Theta=0.0,Phi=0.0,DeltaRotationAngle=0.0";
   std::ostringstream constraint_str;
   double r_dT0 = getProperty("SearchRadiusT0");
   r_dT0 = std::abs(r_dT0);
@@ -580,22 +601,20 @@ void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   double chi2OverDOF = fitT0_alg->getProperty("OutputChi2overDoF");
   ITableWorkspace_sptr rst = fitT0_alg->getProperty("OutputParameters");
   double dT0_optimized = rst->getRef<double>("Value", 6);
-
-  // update T0
   double tor_dT0 = getProperty("ToleranceT0");
   std::ostringstream calilog;
   if (std::abs(dT0_optimized) < std::abs(tor_dT0)) {
-    calilog << "-- Fit dT0 = " << dT0_optimized << " is below tolerance(" << tor_dT0 << "), skippping\n";
-  } else {
-    // NOTE: since m_T0 is being used for all optimization, so we only need to update this variable
-    m_T0 = dT0_optimized;
-    int npks = pws->getNumberPeaks();
-    calilog << "-- Fit T0 results using " << npks << " peaks:\n"
-            << "    dT0 = " << m_T0 << " \n"
-            << "    chi2/DOF = " << chi2OverDOF << "\n";
+    calilog << "-- Fit dT0 = " << dT0_optimized << " is below tolerance(" << tor_dT0 << "), zero it\n";
+    dT0_optimized = 0.0;
   }
 
-  //-- log
+  // apply calibration results (for output file and caliTable)
+  m_T0 = dT0_optimized;
+  int npks = pws->getNumberPeaks();
+  // logging
+  calilog << "-- Fit T0 results using " << npks << " peaks:\n"
+          << "    dT0 = " << m_T0 << " \n"
+          << "    chi2/DOF = " << chi2OverDOF << "\n";
   g_log.notice() << calilog.str();
 }
 
