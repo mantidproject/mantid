@@ -22,7 +22,8 @@ New Features
 Improvements
 ############
 
-- The muon fitting tab has been redesigned allowing it to be simpler to use and making it more stable.
+- The muon fitting tab has been redesigned making it easier to use and more stable. TF Asymmetry fitting has seen
+  the largest improvement in usability as the fit function is now displayed in a much simpler form.
 
 .. figure:: ../../images/MuonFittingTabRedesign.PNG
    :class: screenshot
