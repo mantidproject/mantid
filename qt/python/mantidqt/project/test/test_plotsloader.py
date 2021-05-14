@@ -189,7 +189,7 @@ class PlotsLoaderTest(unittest.TestCase):
         _ = self.plots_loader.restore_normalise_obj_from_dict(norm_dict)
 
         mock_Normalize.assert_called_once_with(norm_dict['vmin'], norm_dict['vmax'], norm_dict['clip'])
-        
-        
+
+
 if __name__ == "__main__":
     unittest.main()
