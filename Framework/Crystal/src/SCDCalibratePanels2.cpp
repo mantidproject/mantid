@@ -205,12 +205,14 @@ void SCDCalibratePanels2::init() {
   declareProperty("ProfileL1", false, "Perform profiling of objective function with given input for L1");
   declareProperty("ProfileBanks", false, "Perform profiling of objective function with given input for Banks");
   declareProperty("ProfileT0", false, "Perform profiling of objective function with given input for T0");
+  declareProperty("ProfileL1&T0", false, "Perform profiling of objective function along L1 and T0");
   // grouping into one category
   const std::string ADVCNTRL("Advanced Option");
   setPropertyGroup("VerboseOutput", ADVCNTRL);
   setPropertyGroup("ProfileL1", ADVCNTRL);
   setPropertyGroup("ProfileBanks", ADVCNTRL);
   setPropertyGroup("ProfileT0", ADVCNTRL);
+  setPropertyGroup("ProfileL1&T0", ADVCNTRL);
 }
 
 /**
@@ -268,6 +270,7 @@ void SCDCalibratePanels2::exec() {
   bool profL1 = getProperty("ProfileL1");
   bool profBanks = getProperty("ProfileBanks");
   bool profT0 = getProperty("ProfileT0");
+  bool profL1T0 = getProperty("ProfileL1&T0");
 
   const std::string DetCalFilename = getProperty("DetCalFilename");
   const std::string XmlFilename = getProperty("XmlFilename");
@@ -286,6 +289,9 @@ void SCDCalibratePanels2::exec() {
   getBankNames(m_pws);
 
   // DEV ONLY
+  // !!!WARNNING!!!
+  //    Profiling a parameter space can be time-consuming and may freeze up your
+  //    computing resources for days, therefore please proceed with caution.
   if (profL1) {
     profileL1(m_pws, pws_original);
   }
@@ -294,6 +300,9 @@ void SCDCalibratePanels2::exec() {
   }
   if (profT0) {
     profileT0(m_pws, pws_original);
+  }
+  if (profL1T0) {
+    profileL1T0(m_pws, pws_original);
   }
 
   // STEP_3: optimize
@@ -1153,7 +1162,7 @@ void SCDCalibratePanels2::profileL1(Mantid::API::IPeaksWorkspace_sptr &pws,
 }
 
 /**
- * @brief Profiling obj func along six degree of freedom, which can very slow.
+ * @brief Profiling obj func along six degree of freedom, which can be very slow.
  *
  * @param pws
  * @param pws_original
@@ -1309,11 +1318,9 @@ void SCDCalibratePanels2::profileT0(Mantid::API::IPeaksWorkspace_sptr &pws,
   std::vector<double> tofs = captureTOF(pws_original);
   objf->setPeakWorkspace(pws, "none", tofs);
 
-  // call the obj to perform evaluation
+  // generate the target
   const int n_peaks = pws->getNumberPeaks();
   std::unique_ptr<double[]> target(new double[n_peaks * 3]);
-
-  // generate the target
   auto ubmatrix = pws->sample().getOrientedLattice().getUB();
   for (int i = 0; i < n_peaks; ++i) {
     V3D qv = ubmatrix * pws->getPeak(i).getIntHKL();
@@ -1359,6 +1366,85 @@ void SCDCalibratePanels2::profileT0(Mantid::API::IPeaksWorkspace_sptr &pws,
   g_log.notice() << "Profile data is saved at:\n"
                  << filenamebase << "\n"
                  << "END of profiling objective func along T0\n";
+}
+
+/**
+ * @brief Profile obj func along L1 and T0 axis
+ *
+ * @param pws
+ * @param pws_original
+ */
+void SCDCalibratePanels2::profileL1T0(Mantid::API::IPeaksWorkspace_sptr &pws,
+                                      Mantid::API::IPeaksWorkspace_sptr pws_original) {
+  g_log.notice() << "START of profiling objective func along L1 and T0\n";
+
+  // control option
+  bool verbose = getProperty("VerboseOutput");
+  if (verbose) {
+    // print the header to console
+    g_log.notice() << "deltaL1 -- deltaT0 -- residual\n";
+  }
+
+  // prepare container for profile information
+  std::ostringstream msgrst;
+  msgrst.precision(12);
+  msgrst << "dL1\tdT0\tresidual\n";
+
+  // setting up as if we are doing optimization
+  auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
+  // NOTE: always use the original pws to get the tofs
+  std::vector<double> tofs = captureTOF(pws_original);
+  objf->setPeakWorkspace(pws, "moderator", tofs);
+
+  // generate the target
+  const int n_peaks = pws->getNumberPeaks();
+  std::unique_ptr<double[]> target(new double[n_peaks * 3]);
+  auto ubmatrix = pws->sample().getOrientedLattice().getUB();
+  for (int i = 0; i < n_peaks; ++i) {
+    V3D qv = ubmatrix * pws->getPeak(i).getIntHKL();
+    qv *= 2 * PI;
+    for (int j = 0; j < 3; ++j) {
+      target[i * 3 + j] = qv[j];
+    }
+  }
+
+  double xValues[7] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // xValues is not used
+
+  // profile begin
+  for (double deltaL1 = -4e-2; deltaL1 < 4e-2; deltaL1 += 1e-4) {
+    for (double deltaT0 = -5.0; deltaT0 < 5.0; deltaT0 += 1e-3) {
+      std::unique_ptr<double[]> out(new double[n_peaks * 3]);
+      objf->setParameter("DeltaZ", deltaL1);
+      objf->setParameter("DeltaT0", deltaT0);
+      objf->function1D(out.get(), xValues, 1);
+
+      // calc residual
+      double residual = 0.0;
+      for (int i = 0; i < n_peaks * 3; ++i) {
+        residual += (out[i] - target[i]) * (out[i] - target[i]);
+      }
+      residual = std::sqrt(residual) / (n_peaks - 2); // only 1 deg of freedom here
+      // log rst
+      msgrst << deltaL1 << "\t" << deltaT0 << "\t" << residual << "\n";
+
+      if (verbose) {
+        g_log.notice() << deltaL1 << " -- " << deltaT0 << " -- " << residual << "\n";
+      }
+    }
+  }
+
+  // output to file
+  auto filenamebase = boost::filesystem::temp_directory_path();
+  filenamebase /= boost::filesystem::unique_path("profileSCDCalibratePanels2_L1T0.csv");
+  std::ofstream profL1File;
+  profL1File.open(filenamebase.string());
+  profL1File << msgrst.str();
+  profL1File.close();
+
+  // log
+  g_log.notice() << "Profile data is saved at:\n"
+                 << filenamebase << "\n"
+                 << "END of profiling objective func along L1 and T0\n";
 }
 
 } // namespace Crystal

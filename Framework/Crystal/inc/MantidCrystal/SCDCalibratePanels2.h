@@ -117,6 +117,7 @@ private:
   void profileL1(Mantid::API::IPeaksWorkspace_sptr &pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
   void profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
   void profileT0(Mantid::API::IPeaksWorkspace_sptr &pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
+  void profileL1T0(Mantid::API::IPeaksWorkspace_sptr &pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
 
   /// unique vars for a given instance of calibration
   double m_a, m_b, m_c, m_alpha, m_beta, m_gamma;
