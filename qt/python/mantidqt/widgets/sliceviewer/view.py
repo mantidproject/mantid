@@ -124,6 +124,7 @@ class SliceViewerDataView(QWidget):
         self.mpl_toolbar.regionSelectionClicked.connect(self.on_region_selection_toggle)
         self.mpl_toolbar.homeClicked.connect(self.on_home_clicked)
         self.mpl_toolbar.nonOrthogonalClicked.connect(self.on_non_orthogonal_axes_toggle)
+        self.mpl_toolbar.zoomPanClicked.connect(self.presenter.deactivate_peak_adding)
         self.mpl_toolbar.zoomPanFinished.connect(self.on_data_limits_changed)
         self.toolbar_layout.addWidget(self.mpl_toolbar)
 
@@ -518,15 +519,13 @@ class SliceViewerDataView(QWidget):
 
     def enable_peak_addition(self, state):
         if state:
-            self.deactivate_and_disable_tool(ToolItemText.PAN)
-            self.deactivate_and_disable_tool(ToolItemText.ZOOM)
+            self.deactivate_tool(ToolItemText.PAN)
+            self.deactivate_tool(ToolItemText.ZOOM)
             self._peak_addition_cid = self.canvas.mpl_connect('button_press_event', self.presenter.peak_addition)
             self.mpl_toolbar.set_cursor(Qt.CrossCursor)
         else:
             self.canvas.mpl_disconnect(self._peak_addition_cid)
             self.mpl_toolbar.set_cursor(Qt.ArrowCursor)
-            self.enable_tool_button(ToolItemText.PAN)
-            self.enable_tool_button(ToolItemText.ZOOM)
 
     def update_data_clim(self):
         self.image.set_clim(self.colorbar.colorbar.mappable.get_clim())

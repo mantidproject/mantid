@@ -50,8 +50,8 @@ class PeakActionsView(QtWidgets.QWidget):
     def erasing_mode_on(self):
         r"""Find if the button to remove peaks is checked"""
         if self.ui.remove_peaks_button.isChecked():
-           self.ui.remove_peaks_button.setChecked(True)
-           self.ui.add_peaks_button.setChecked(False)
+            self.ui.remove_peaks_button.setChecked(True)
+            self.ui.add_peaks_button.setChecked(False)
 
         return self.ui.remove_peaks_button.isChecked()
 
@@ -59,8 +59,8 @@ class PeakActionsView(QtWidgets.QWidget):
     def adding_mode_on(self):
         r"""Find if the button to add peaks is checked"""
         if self.ui.add_peaks_button.isChecked():
-           self.ui.add_peaks_button.setChecked(True)
-           self.ui.remove_peaks_button.setChecked(False)
+            self.ui.add_peaks_button.setChecked(True)
+            self.ui.remove_peaks_button.setChecked(False)
 
         return self.ui.add_peaks_button.isChecked()
 
@@ -68,6 +68,10 @@ class PeakActionsView(QtWidgets.QWidget):
     def active_peaksworkspace_index(self):
         r"""Find index of the currently selected PeaksWorkspace. Returns -1 is nothing is selected"""
         return self.ui.active_peaks_combobox.currentIndex()
+
+    def deactivate_peak_adding(self):
+        self.ui.add_peaks_button.setChecked(False)
+        self.ui.remove_peaks_button.setChecked(False)
 
     def append_peaksworkspace(self, name: str) -> None:
         self.ui.active_peaks_combobox.addItem(name)

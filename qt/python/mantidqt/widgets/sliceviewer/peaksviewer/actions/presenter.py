@@ -82,3 +82,7 @@ class PeakActionsPresenter:
 
         # this is very ugly, need a better way of doing this
         self._view.collection_view._sliceinfo_provider.view.data_view.enable_peak_addition(self._view.adding_mode_on)
+
+    def deactivate_peak_adding(self):
+        self._view.deactivate_peak_adding()
+        self._add_peaks()

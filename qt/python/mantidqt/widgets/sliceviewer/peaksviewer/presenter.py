@@ -283,6 +283,9 @@ class PeaksViewerCollectionPresenter:
     def add_peak(self, pos, frame):
         self.child_presenter(self._actions_presenter.active_peaksworkspace_index).add_peak(pos, frame)
 
+    def deactivate_peak_adding(self):
+        self._actions_presenter.deactivate_peak_adding()
+
     # private api
     def _create_peaksviewer_model(self, name: str) -> PeaksViewerModel:
         """
