@@ -689,9 +689,13 @@ void IndirectFitAnalysisTab::respondToDataChanged() {
 void IndirectFitAnalysisTab::respondToSingleDataViewSelected() {
   m_spectrumPresenter->setActiveIndexToZero();
   m_plotPresenter->hideMultipleDataSelection();
+  m_plotPresenter->updateDataSelection();
 }
 
-void IndirectFitAnalysisTab::respondToMultipleDataViewSelected() { m_plotPresenter->showMultipleDataSelection(); }
+void IndirectFitAnalysisTab::respondToMultipleDataViewSelected() {
+  m_plotPresenter->showMultipleDataSelection();
+  m_plotPresenter->updateDataSelection();
+}
 
 void IndirectFitAnalysisTab::respondToDataAdded() {
   updateDataReferences();

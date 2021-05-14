@@ -167,6 +167,7 @@ void IndirectFitPlotPresenter::updateDataSelection() {
   for (TableDatasetIndex i{0}; i < m_model->numberOfWorkspaces(); ++i)
     m_view->appendToDataSelection(m_model->getFitDataName(i));
   setActiveIndex(TableDatasetIndex{0});
+  setActiveSpectrum(WorkspaceIndex{0});
   updateAvailableSpectra();
   emitSelectedFitDataChanged();
 }
