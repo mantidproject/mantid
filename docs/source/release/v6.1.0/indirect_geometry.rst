@@ -5,24 +5,13 @@ Indirect Geometry Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 New Features
 ############
 - A new algorithm :ref:`IndirectILLReductionDIFF <algm-IndirectILLReductionDIFF>` added for treatment of diffraction detector data from the indirect geometry beamline IN16B at the ILL.
 - Three fitting functions `IsoRotDiff`, `DiffSphere` and `DiffRotDiscreteCircle` have been made available in the fitting browser
 - `IsoRotDiff`, `DiffSphere` and `DiffRotDiscreteCircle` have been added to the function options in Indirect Data Analysis ConvFit.
-- The Abins Algorithm has an additional "setting" option which may be
-  used to select between configurations of a given instrument. (For
-  TOSCA this is a choice of forward/back detector banks, for Lagrange
-  this is a choice between monochromator crystals.)
-- Support has been added to Abins for the ILL-Lagrange
-  instrument. As Lagrange collects inelastically scattered neutrons
-  over a wide solid angle, the spectrum is computed at several angles
-  and averaged. Resolution functions are applied depending on the
-  monochromator setting.
+- The Abins Algorithm has an additional "setting" option which may be used to select between configurations of a given instrument. (For TOSCA this is a choice of forward/back detector banks, for Lagrange this is a choice between monochromator crystals.)
+- Support has been added to :ref:`Abins <algm-Abins>` for the ILL-Lagrange instrument. As Lagrange collects inelastically scattered neutrons over a wide solid angle, the spectrum is computed at several angles and averaged. Resolution functions are applied depending on the monochromator setting.
 
 Improvements
 ############
@@ -34,5 +23,7 @@ Bug Fixes
 - Fixed a bug causing the x range markers on the ISISDiagnostics plot of Data Reduction to go missing.
 - Fixed a crash on the Data Analysis interface when attempting to drag the Start and End X sliders on the preview plot.
 - In IsoRotDiff, DiffSphere, and DiffRotDiscreteCircle Aliases have been removed to avoid clashes with interfaces.
+- Fixed a bug that caused an error warning when adding EISF data to F(q) fit if Width has already been added.
+- Fixed a bug that caused the spectra list in F(q) fit to be blank when reopening the add workspace dialog.
 
 :ref:`Release 6.1.0 <v6.1.0>`

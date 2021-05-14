@@ -63,8 +63,21 @@ class PlotsLoader(object):
                 logger.warning("A plot was unable to be loaded from the save file. Error: " + str(e))
 
     def restore_normalise_obj_from_dict(self, norm_dict):
-        norm = matplotlib.colors.Normalize(norm_dict['vmin'], norm_dict['vmax'], norm_dict['clip'])
-        return norm
+        supported_norm_types = {
+            # matplotlib norms that are supported.
+            'Normalize': matplotlib.colors.Normalize,
+            'LogNorm': matplotlib.colors.LogNorm,
+        }
+        # If there is a norm dict, but the type is not specified, default to base Normalize class.
+        type = norm_dict['type'] if 'type' in norm_dict.keys() else 'Normalize'
+
+        if type not in supported_norm_types.keys():
+            logger.debug(
+                f"Color normalisation of type {norm_dict['type']} is not supported. Normalisation will not be set on this plot")
+            return None
+
+        norm = supported_norm_types[type]
+        return norm(vmin=norm_dict['vmin'], vmax=norm_dict['vmax'], clip=norm_dict['clip'])
 
     def make_fig(self, plot_dict, create_plot=True):
         """
@@ -145,7 +158,7 @@ class PlotsLoader(object):
         func = function_dict[function_to_call]
         # Plotting is done via an Axes object unless a colorbar needs to be added
         if function_to_call in ["imshow", "pcolormesh"]:
-            func([workspace], fig, normalize_by_bin_width=creation_arg['normalize_by_bin_width'])
+            func([workspace], fig, color_norm=creation_arg['norm'], normalize_by_bin_width=creation_arg['normalize_by_bin_width'])
             self.color_bar_remade = True
         else:
             func(workspace, **creation_arg)

@@ -168,8 +168,8 @@ class FFTPresenterTest(unittest.TestCase):
         self.presenter.getWorkspaceNames()
         self.view.ws.setCurrentIndex(1)
         self.assertEqual(self.presenter.get_fft_inputs('input_workspace', 'imaginary_input_workspace'),
-                         {'AcceptXRoundingErrors': True, 'AutoShift': True, 'Imaginary': 0,
-                          'InputImagWorkspace': 'imaginary_input_workspace', 'InputWorkspace': 'input_workspace',
+                         {'AcceptXRoundingErrors': True, 'AutoShift': True,
+                          'InputWorkspace': 'input_workspace',
                           'Real': 0, 'Transform': 'Forward'})
 
     def test_get_fft_inputs_with_no_imaginary_workspace_specified(self):

@@ -157,14 +157,6 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.assertEqual(self.mock_view_tf_asymmetry_mode.call_count, 2)
         self.assertEqual(self.mock_model_tf_asymmetry_mode.call_count, 2)
 
-    def test_that_handle_selected_group_pair_changed_will_turn_off_tf_asymmetry_mode(self):
-        self.presenter.handle_selected_group_pair_changed()
-
-        self.mock_view_tf_asymmetry_mode.assert_called_with(False)
-        self.mock_model_tf_asymmetry_mode.assert_called_with(False)
-        self.assertEqual(self.mock_view_tf_asymmetry_mode.call_count, 2)
-        self.assertEqual(self.mock_model_tf_asymmetry_mode.call_count, 2)
-
     def test_that_handle_function_structure_changed_will_attempt_to_update_the_tf_asymmetry_functions(self):
         self.presenter.update_tf_asymmetry_functions_in_model_and_view = mock.Mock()
 
