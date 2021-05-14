@@ -13,6 +13,7 @@ from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.project.plotsloader import PlotsLoader
 from mantidqt.project.plotssaver import PlotsSaver
+from matplotlib.colors import Normalize, LogNorm
 
 matplotlib.use('AGG')
 
@@ -205,6 +206,28 @@ class PlotsSaverTest(unittest.TestCase):
         expected_value = {u'dpi': 100.0, u'figHeight': 4.8, u'figWidth': 6.4}
 
         self.assertDictEqual(return_value, expected_value)
+
+    def test_get_dict_from_fig_with_Normalize(self):
+        self.fig.axes[0].creation_args = [{u"specNum": None, "function": "pcolormesh",
+                                                         "norm": Normalize()}]
+        return_value = self.plot_saver.get_dict_from_fig(self.fig)
+        expected_creation_args = [[{'specNum': None, 'function': 'pcolormesh', 'norm':
+                                    {'type': 'Normalize', 'clip': False, 'vmin': None, 'vmax': None}, 'normalize_by_bin_width': True}]]
+
+        self.loader_plot_dict[u'creationArguments'] = expected_creation_args
+
+        self.assertDictEqual(return_value, self.loader_plot_dict)
+
+    def test_get_dict_from_fig_with_LogNorm(self):
+        self.fig.axes[0].creation_args = [{u"specNum": None, "function": "pcolormesh",
+                                                         "norm": LogNorm()}]
+        return_value = self.plot_saver.get_dict_from_fig(self.fig)
+        expected_creation_args = [[{'specNum': None, 'function': 'pcolormesh', 'norm':
+                                    {'type': 'LogNorm', 'clip': False, 'vmin': None, 'vmax': None}, 'normalize_by_bin_width': True}]]
+
+        self.loader_plot_dict[u'creationArguments'] = expected_creation_args
+
+        self.assertDictEqual(return_value, self.loader_plot_dict)
 
 
 if __name__ == "__main__":
