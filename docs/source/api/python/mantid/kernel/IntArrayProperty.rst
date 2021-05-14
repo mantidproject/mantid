@@ -1,3 +1,5 @@
+.. _mantid.kernel.IntArrayProperty:
+
 ==================
  IntArrayProperty
 ==================
