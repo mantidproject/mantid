@@ -7,9 +7,9 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
-#include "MantidMDAlgorithms/BinaryOperationMD.h"
-#include "MantidMDAlgorithms/BooleanBinaryOperationMD.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -18,15 +18,24 @@ namespace MDAlgorithms {
 
   @date 2011-11-08
 */
-class DLLExport ApplyDetailedBalanceMD : public BooleanBinaryOperationMD {
+class MANTID_MDALGORITHMS_DLL ApplyDetailedBalanceMD : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override { return {"XorMD", "OrMD", "NotMD"}; }
+  const std::string category() const override;
+  const std::string summary() const override;
 
 private:
-  void execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
-                      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) override;
+  /// Initialize the proeprties
+  void init() override;
+  /// Run the algorithm
+  void exec() override;
+  /// Validate inputs
+  std::map<std::string, std::string> validateInputs() override;
+
+  /// Apply detailed balance to each MDEvent
+  template <typename MDE, size_t nd>
+  void applyDetailedBalance(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 };
 
 } // namespace MDAlgorithms
