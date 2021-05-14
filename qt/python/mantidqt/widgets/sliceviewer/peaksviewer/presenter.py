@@ -308,6 +308,9 @@ class PeaksViewerCollectionPresenter:
         if ws_name in self.workspace_names():
             self.remove_peaksworkspace(ws_name)
             self.overlay_peaksworkspaces(self.workspace_names() + [ws_name])
+        # need to force draw because removing an artist doesn't automatically do that
+        # this is ugly, need a better way to do this
+        self._view._sliceinfo_provider.view.data_view.canvas.draw_idle()
 
     def delete_handle(self, ws_name):
         if ws_name in self.workspace_names():
@@ -322,3 +325,6 @@ class PeaksViewerCollectionPresenter:
         if ws_name in self.workspace_names():
             self.remove_peaksworkspace(ws_name)
             self.overlay_peaksworkspaces(self.workspace_names() + [new_name])
+        # need to force draw because removing an artist doesn't automatically do that
+        # this is ugly, need a better way to do this
+        self._view._sliceinfo_provider.view.data_view.canvas.draw_idle()
