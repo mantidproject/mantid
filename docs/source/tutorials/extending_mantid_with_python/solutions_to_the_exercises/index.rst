@@ -10,18 +10,18 @@ Solutions To The Exercises
    :glob:
    :maxdepth: 1
 
-   01_exercise_1_solutions
-   02_exercise_2_solutions
-   03_exercise_3_solutions
-   04_exercise_4_solutions
-   05_exercise_5_solutions
-   06_exercise_6_solutions
+   01_emwp_sol
+   02_emwp_sol
+   03_emwp_sol
+   04_emwp_sol
+   05_emwp_sol
+   06_emwp_sol
 
 **Contents**
 
-* :ref:`01_exercise_1_solutions`
-* :ref:`02_exercise_2_solutions`
-* :ref:`03_exercise_3_solutions`
-* :ref:`04_exercise_4_solutions`
-* :ref:`05_exercise_5_solutions`
-* :ref:`06_exercise_6_solutions`
+* :ref:`01_emwp_sol`
+* :ref:`02_emwp_sol`
+* :ref:`03_emwp_sol`
+* :ref:`04_emwp_sol`
+* :ref:`05_emwp_sol`
+* :ref:`06_emwp_sol`
