@@ -19,4 +19,5 @@ within Python.
 #. Reorganise the ``Instrument`` & ``Detector`` classes to use ``Component``
    as a super class and share its **name** attribute
 #. Check the ``printTree`` method still functions correctly.
-#. Check :ref:`01_emwp_sol`
+
+Once finished check your answer with the provided :ref:`01_emwp_sol`

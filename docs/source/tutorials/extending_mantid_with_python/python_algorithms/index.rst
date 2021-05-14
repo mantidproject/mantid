@@ -16,6 +16,19 @@ Python Algorithms
    05_logging
    06_exercise_2
 
+Mantid ships with many predefined :ref:`Algorithms List`.
+
+Python algorithms provide a mechanism to define extra algorithms at run time
+that Mantid treats exactly the same as if they were shipped with the package.
+
+Benefits of an algorithm over just writing in a script:
+
+#. Create workspaces that are seen by Mantid - Improved performance for your
+specific task
+#. History tracking - Python processing in a standard script isn't tracked in
+the workspace history but it is through a Python algorithm
+#. Free GUI - All algorithms have a default auto-generated input GUI
+
 **Contents**
 
 * :ref:`01_basic_algorithm_structure`
