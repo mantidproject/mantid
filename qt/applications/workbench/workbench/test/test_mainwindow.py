@@ -30,6 +30,9 @@ class MainWindowTest(unittest.TestCase):
         from workbench.app.mainwindow import MainWindow
         self.main_window = MainWindow()
 
+    def tearDown(self):
+        self.main_window.close()
+
     @patch("workbench.app.mainwindow.find_window")
     def test_launch_custom_cpp_gui_creates_interface_if_not_already_open(self, mock_find_window):
         mock_find_window.return_value = None

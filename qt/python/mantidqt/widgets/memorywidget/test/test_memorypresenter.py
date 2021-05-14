@@ -7,9 +7,12 @@
 #    This file is part of the mantid workbench.
 #
 #
+import time
+
 from mantidqt.widgets.memorywidget.memoryview import MemoryView, \
     from_normal_to_critical, from_critical_to_normal
 from mantidqt.widgets.memorywidget.memorypresenter import MemoryPresenter
+import mantidqt.widgets.memorywidget.memorypresenter
 
 import unittest
 from unittest import mock
@@ -20,6 +23,9 @@ class MemoryPresenterTest(unittest.TestCase):
         self.view = mock.create_autospec(MemoryView)
         self.mock_view_internals()
         self.presenter = MemoryPresenter(self.view)
+
+    def tearDown(self):
+        self.presenter.cancel_memory_update()
 
     def mock_view_internals(self):
         self.view.critical = 90
@@ -44,6 +50,12 @@ class MemoryPresenterTest(unittest.TestCase):
 
         self.presenter.update_memory_usage()
         self.assertEqual(self.presenter.view.set_value.call_count, 2)
+
+    def test_memory_usage_is_updated_based_on_a_constant(self):
+        mantidqt.widgets.memorywidget.memorypresenter.TIME_INTERVAL_MEMORY_USAGE_UPDATE = 0.1
+        # Sleep for just longer than the default so the test can run
+        time.sleep(2.05)
+        self.assertGreater(self.view.set_value.call_count, 1)
 
 
 if __name__ == "__main__":
