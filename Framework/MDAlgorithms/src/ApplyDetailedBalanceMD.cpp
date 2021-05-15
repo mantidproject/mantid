@@ -35,6 +35,9 @@ const std::string ApplyDetailedBalanceMD::summary() const { return "Apply detail
 /// category
 const std::string ApplyDetailedBalanceMD::category() const { return "MDAlgorithms"; }
 
+/**
+ * @brief Define input and output properties
+ */
 void ApplyDetailedBalanceMD::init() {
 
   declareProperty(
@@ -48,6 +51,9 @@ void ApplyDetailedBalanceMD::init() {
       "The output MDEventWorkspace with detailed balance applied");
 }
 
+/**
+ * @brief Main execution body
+ */
 void ApplyDetailedBalanceMD::exec() {
   // Process inputs
   // - input workspace
@@ -85,6 +91,16 @@ void ApplyDetailedBalanceMD::exec() {
   setProperty("OutputWorkspace", input_ws);
 }
 
+/**
+ * @brief Validate inputs
+ * Input MDEventWorkspace dimensions:
+ * - in Q_sample or Q_lab frame, the 4th dimension is DeltaE, or
+ * - the first dimension is |Q| and second is DeltaE
+ * validate that run objects have Ei defined (number greater than 0)
+ * first input is an MD event workspace as validated above
+second input is Temperature - must be either a float>0, or a string pointing to a log name.
+if temperature points to a log name, it must be present in each experiment info, and the average must be greater than 0
+ */
 std::map<std::string, std::string> ApplyDetailedBalanceMD::validateInputs() {
   std::map<std::string, std::string> output;
 
