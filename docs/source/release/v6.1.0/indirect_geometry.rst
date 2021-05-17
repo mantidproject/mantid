@@ -15,6 +15,7 @@ New Features
 
 Improvements
 ############
+
 - In Indirect Data Analysis F(Q) fit the default fitting function remains None when switching to EISF.
 - Added a scroll bar to the Bayes interface tabs and Elwin and I(Q, t) in data analysis for users on small screens.
 - IN16B's single detectors are now correctly taken into account when computing the energy transfer in :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>`.
