@@ -14,7 +14,7 @@ Initial Setup
 
 Some initial setup is required on your Windows system before the Linux environment of your choice can be installed. Before you start this process make sure you have the latest version of Windows 10.
 
-1. Install [Docker Desktop for Windows](https://hub.docker.com/editions/community/docker-ce-desktop-windows). This will install WSL2 for you, and also enables us to get a centos7 image later on.
+1. Install `Docker Desktop for Windows <https://hub.docker.com/editions/community/docker-ce-desktop-windows>`_. This will install WSL2 for you, and also enables us to get a centos7 image later on.
 2. In the Windows Start menu open `Turn Windows features on or off`.
 3. Make sure `Windows System for Linux` and `Virtual Machine Platform` are ticked. Click OK.
 
@@ -68,9 +68,9 @@ where [OS] is replaced by `Ubuntu-18.04` or `Centos7`.
 Getting the Mantid Code
 #######################
 
-Before you get the Mantid code, follow the instructions [here](https://developer.mantidproject.org/GettingStarted.html) to install all of the required dependencies for your linux environment.
+Before you get the Mantid code, follow the :ref:`getting started <GettingStarted>` instructions to install all of the required dependencies for your linux environment.
 
-The Mantid code can then be retrieved in the usual way using `git clone` from the Ubuntu or Centos7 terminal. The first time you do this you might need to set up an [ssh key](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh) for authentication.
+The Mantid code can then be retrieved in the usual way using `git clone` from the Ubuntu or Centos7 terminal. The first time you do this you might need to set up an `ssh key <https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh>`_ for authentication.
 
 You are now ready to CMake and build the Mantid code.
 
@@ -97,5 +97,5 @@ Build on Centos 7
 Tips
 ####
 
-* Make sure you install [devtoolset-7](https://developer.mantidproject.org/BuildingWithCMake.html#from-the-command-line) for Centos 7 as described in the provided link before CMake and build.
+* Make sure you install `devtoolset-7 <https://developer.mantidproject.org/BuildingWithCMake.html#from-the-command-line>`_ for Centos 7 as described in the provided link before CMake and build.
 * It might also be necessary to install some addition packages for Ubuntu 18.04, including `libnexus0-dev`.
