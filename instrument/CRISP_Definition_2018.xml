@@ -86,7 +86,7 @@
   <type name="monitor2" is="monitor">
     <!-- Shape specified as a minimum needs to cover the beam which
          is 10mm high and 40mm wide. The 'top' shape is included to
-	 more easily recognise this monitor when visualised in MantidPlot.
+	 more easily recognise this monitor when visualised in instrument view.
 	 This monitor is suppose to look a bit like a German hand grenade.
     -->    
     <percent-transparency val="95" />

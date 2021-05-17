@@ -40,7 +40,7 @@ Noise is modeled by a linear background:
 :math:`S(Q,E) = R(Q,E) \otimes (\alpha \delta(E) + StretchedExpFT(Q,E)) + (a+bE)`
 
 Obtaining an initial guess close to the optimal fit is critical. For this model, it is recommended to follow these steps:
-- In the Fit Function window of MantidPlot, construct the model.
+- In the Fit Function window of a plot in MantidWorkbench, construct the model.
 - Tie parameter :math:`Height` of StretchedExpFT to zero, then carry out the Fit. This will result in optimized elastic line and background.
 - Untie parameter :math:`Height` of StretchedExpFT and tie parameter :math:`Beta` to 1.0, then carry out the fit. This will result in optimized model using an exponential.
 - Release the tie on Beta  and redo the fit.
@@ -52,7 +52,7 @@ Obtaining an initial guess close to the optimal fit is critical. For this model,
    qens_data = LoadNexus(Filename="qens_data_14955.nxs")
 
    # This function_string is obtained by constructing the model
-   # with the Fit Function window of MantidPlot, then
+   # with the Fit Function window of a plot in MantidWorkbench, then
    # Setup--> Manage Setup --> Copy to Clipboard
    function_string  = "(composite=Convolution,FixResolution=true,NumDeriv=true;"
    function_string += "name=TabulatedFunction,Workspace=resolution,WorkspaceIndex=0,Scaling=1,Shift=0,XScaling=1;"

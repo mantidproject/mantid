@@ -135,8 +135,8 @@ Testing your Calibration
 
 The first thing that should be done is to convert the calibration
 workspace (either table or ``OffsetsWorkspace`` to a workspace of
-:math:`DIFC` values to inspect using the :py:obj:`instrument view
-<mantidplot.InstrumentView>`. This can be done using
+:math:`DIFC` values to inspect using the :ref:`instrument view
+<InstrumentViewer>`. This can be done using
 :ref:`CalculateDIFC <algm-CalculateDIFC>`. The values of :math:`DIFC`
 should vary continuously across the detectors that are close to each
 other (e.g. neighboring pixels in an LPSD).
