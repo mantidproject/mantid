@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench
 from unittest import TestCase
 
-from unittest.mock import call, patch
+from unittest.mock import call, Mock, patch
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.strict_mock import StrictMock
 from workbench.widgets.about.presenter import AboutPresenter
@@ -123,45 +123,49 @@ class AboutPresenterTest(TestCase):
         self.assertEqual(0, mock_ConfigService.mock_instrument.name.call_count)
         presenter = AboutPresenter(None)
         self.assertEqual(0, mock_ConfigService.setFacility.call_count)
-        self.assertEqual(2, mock_ConfigService.getFacility.call_count)
-        self.assertEqual(2, mock_ConfigService.mock_facility.name.call_count)
-        self.assert_connected_once(presenter.view.cbFacility, presenter.view.cbFacility.currentTextChanged)
-
-        mock_ConfigService.getInstrument.assert_called_once_with()
-        self.assertEqual(2, mock_ConfigService.mock_instrument.name.call_count)
-        self.assert_connected_once(presenter.view.cbInstrument, presenter.view.cbInstrument.currentTextChanged)
+        self.assertEqual(3, mock_ConfigService.getFacility.call_count)
+        self.assertEqual(3, mock_ConfigService.mock_facility.name.call_count)
+        self.assert_connected_once(presenter.view.cb_facility, presenter.view.cb_facility.currentTextChanged)
 
     def test_setup_checkbox_signals(self):
         presenter = AboutPresenter(None)
 
-        self.assert_connected_once(presenter.view.chkDoNotShowUntilNextRelease,
-                                   presenter.view.chkDoNotShowUntilNextRelease.stateChanged)
+        self.assert_connected_once(presenter.view.chk_do_not_show_until_next_release,
+                                   presenter.view.chk_do_not_show_until_next_release.stateChanged)
 
-        self.assert_connected_once(presenter.view.chkAllowUsageData,
-                                   presenter.view.chkAllowUsageData.stateChanged)
+        self.assert_connected_once(presenter.view.chk_allow_usage_data,
+                                   presenter.view.chk_allow_usage_data.stateChanged)
 
     def test_setup_button_signals(self):
         presenter = AboutPresenter(None)
 
-        self.assert_connected_once(presenter.view.clbReleaseNotes,
-                                   presenter.view.clbReleaseNotes.clicked)
-        self.assert_connected_once(presenter.view.clbSampleDatasets,
-                                   presenter.view.clbSampleDatasets.clicked)
-        self.assert_connected_once(presenter.view.clbMantidIntroduction,
-                                   presenter.view.clbMantidIntroduction.clicked)
-        self.assert_connected_once(presenter.view.clbPythonIntroduction,
-                                   presenter.view.clbPythonIntroduction.clicked)
-        self.assert_connected_once(presenter.view.clbPythonInMantid,
-                                   presenter.view.clbPythonInMantid.clicked)
-        self.assert_connected_once(presenter.view.clbExtendingMantid,
-                                   presenter.view.clbExtendingMantid.clicked)
-        self.assert_connected_once(presenter.view.pbMUD,
-                                   presenter.view.pbMUD.clicked)
-        self.assert_connected_once(presenter.view.lblPrivacyPolicy,
-                                   presenter.view.lblPrivacyPolicy.linkActivated)
+        self.assert_connected_once(presenter.view.clb_release_notes,
+                                   presenter.view.clb_release_notes.clicked)
+        self.assert_connected_once(presenter.view.clb_sample_datasets,
+                                   presenter.view.clb_sample_datasets.clicked)
+        self.assert_connected_once(presenter.view.clb_mantid_introduction,
+                                   presenter.view.clb_mantid_introduction.clicked)
+        self.assert_connected_once(presenter.view.clb_python_introduction,
+                                   presenter.view.clb_python_introduction.clicked)
+        self.assert_connected_once(presenter.view.clb_python_in_mantid,
+                                   presenter.view.clb_python_in_mantid.clicked)
+        self.assert_connected_once(presenter.view.clb_extending_mantid,
+                                   presenter.view.clb_extending_mantid.clicked)
+        self.assert_connected_once(presenter.view.pb_manage_user_directories,
+                                   presenter.view.pb_manage_user_directories.clicked)
+        self.assert_connected_once(presenter.view.lbl_privacy_policy,
+                                   presenter.view.lbl_privacy_policy.linkActivated)
 
     def test_setup_link_signals(self):
         presenter = AboutPresenter(None)
 
-        self.assert_connected_once(presenter.view.clbReleaseNotes,
-                                   presenter.view.clbReleaseNotes.clicked)
+        self.assert_connected_once(presenter.view.clb_release_notes,
+                                   presenter.view.clb_release_notes.clicked)
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_that_about_presenter_is_instantiated_without_error_when_getFacility_causes_exception(self, MockConfigService):
+        MockConfigService.getFacility.side_effect = RuntimeError(Mock(status=101), "No facility")
+        presenter = AboutPresenter(None)
+
+        self.assertEqual(3, MockConfigService.getFacility.call_count)
+        self.assertEqual(presenter._get_current_facility(), None)

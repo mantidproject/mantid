@@ -70,7 +70,10 @@ class BasicFittingModel:
         self._single_fit_functions_cache = []
 
         self._fit_statuses = []
+        self._fit_statuses_cache = []
+
         self._chi_squared = []
+        self._chi_squared_cache = []
 
         self._function_name = ""
         self._function_name_auto_update = True
@@ -238,11 +241,14 @@ class BasicFittingModel:
     def cache_the_current_fit_functions(self) -> None:
         """Caches the existing single fit functions. Used before a fit is performed to save the old state."""
         self.single_fit_functions_cache = [self._clone_function(function) for function in self.single_fit_functions]
+        self.fit_statuses_cache = self.fit_statuses.copy()
+        self.chi_squared_cache = self.chi_squared.copy()
 
     def clear_cached_fit_functions(self) -> None:
         """Clears the cached fit functions and removes all fits from the fitting context."""
         self.single_fit_functions_cache = [None] * self.number_of_datasets
-        self.remove_all_fits_from_context()
+        self.fit_statuses_cache = [None] * self.number_of_datasets
+        self.chi_squared_cache = [None] * self.number_of_datasets
 
     @property
     def fit_statuses(self) -> list:
@@ -256,6 +262,19 @@ class BasicFittingModel:
             raise RuntimeError(f"The provided number of fit statuses is not equal to the number of datasets.")
 
         self._fit_statuses = fit_statuses
+
+    @property
+    def fit_statuses_cache(self) -> list:
+        """Returns all of the cached fit statuses in a list."""
+        return self._fit_statuses_cache
+
+    @fit_statuses_cache.setter
+    def fit_statuses_cache(self, fit_statuses: list) -> None:
+        """Sets the value of the cached fit statuses."""
+        if len(fit_statuses) != self.number_of_datasets:
+            raise RuntimeError(f"The provided number of fit statuses is not equal to the number of datasets.")
+
+        self._fit_statuses_cache = fit_statuses
 
     @property
     def current_fit_status(self) -> str:
@@ -282,6 +301,19 @@ class BasicFittingModel:
             raise RuntimeError(f"The provided number of chi squared is not equal to the number of datasets.")
 
         self._chi_squared = chi_squared
+
+    @property
+    def chi_squared_cache(self) -> list:
+        """Returns all of the cached chi squares in a list."""
+        return self._chi_squared_cache
+
+    @chi_squared_cache.setter
+    def chi_squared_cache(self, chi_squared: list) -> None:
+        """Sets the value of the cached fit statuses."""
+        if len(chi_squared) != self.number_of_datasets:
+            raise RuntimeError(f"The provided number of chi squared is not equal to the number of datasets.")
+
+        self._chi_squared_cache = chi_squared
 
     @property
     def current_chi_squared(self) -> float:
@@ -380,6 +412,8 @@ class BasicFittingModel:
     def use_cached_function(self) -> None:
         """Sets the current function as being the cached function."""
         self.single_fit_functions = self.single_fit_functions_cache
+        self.fit_statuses = self.fit_statuses_cache.copy()
+        self.chi_squared = self.chi_squared_cache.copy()
 
     def update_plot_guess(self, plot_guess: bool) -> None:
         """Updates the guess plot using the current dataset and function."""
@@ -389,6 +423,10 @@ class BasicFittingModel:
     def remove_all_fits_from_context(self) -> None:
         """Removes all fit results from the context."""
         self.context.fitting_context.remove_all_fits()
+
+    def remove_latest_fit_from_context(self) -> None:
+        """Removes the most recent fit performed from the fitting context"""
+        self.context.fitting_context.remove_latest_fit()
 
     def reset_current_dataset_index(self) -> None:
         """Resets the current dataset index stored by the model."""
