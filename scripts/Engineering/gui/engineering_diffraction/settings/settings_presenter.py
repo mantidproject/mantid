@@ -6,10 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from os import path
+from mantid.api import FunctionFactory
+from mantid.kernel import ConfigService
 from mantidqt.utils.observer_pattern import Observable
 
 SETTINGS_DICT = {"save_location": str, "full_calibration": str, "recalc_vanadium": bool, "logs": str,
-                 "primary_log": str, "sort_ascending": bool}
+                 "primary_log": str, "sort_ascending": bool, "default_peak": str}
 
 DEFAULT_SETTINGS = {
     "full_calibration": "",
@@ -18,7 +20,8 @@ DEFAULT_SETTINGS = {
     "logs": ','.join(
         ['Temp_1', 'W_position', 'X_position', 'Y_position', 'Z_position', 'stress', 'strain', 'stressrig_go']),
     "primary_log": 'strain',
-    "sort_ascending": True
+    "sort_ascending": True,
+    "default_peak": "BackToBackExponential"
 }
 
 ALL_LOGS = ','.join(
@@ -33,6 +36,8 @@ ALL_LOGS = ','.join(
      'strain_sp_rbv', 'strain_step_time', 'stress', 'stress_sp_rbv', 'stress_step_time', 'stressrig_go',
      'wave_running', 'wave_start', 'wave_type'])
 
+ALL_PEAKS = ','.join(["BackToBackExponential", "Gaussian", "Lorentzian", "Voigt"])
+
 
 class SettingsPresenter(object):
     def __init__(self, model, view):
@@ -41,8 +46,9 @@ class SettingsPresenter(object):
         self.settings = {}
         self.savedir_notifier = self.SavedirNotifier(self)
 
-        # add logs to list in view
+        # populate lists in view
         self.view.add_log_checkboxs(ALL_LOGS)
+        self.view.populate_peak_function_list(ALL_PEAKS)
 
         # Connect view signals
         self.view.set_on_apply_clicked(self.save_new_settings)
@@ -51,8 +57,11 @@ class SettingsPresenter(object):
         self.view.set_on_log_changed(self.update_logs)
         self.view.set_on_check_ascending_changed(self.ascending_changed)
         self.view.set_on_check_descending_changed(self.descending_changed)
+        self.view.set_on_peak_func_changed(self.update_peak_function)
 
     def show(self):
+        # get current peak function in case user has changed it
+        self.settings["default_peak"] = ConfigService.getString("curvefitting.defaultPeak")
         self._show_settings_in_view()
         self.view.show()
 
@@ -72,6 +81,12 @@ class SettingsPresenter(object):
     def descending_changed(self, state):
         self.view.set_ascending_checked(not bool(state))
 
+    def update_peak_function(self, peak_func):
+        ConfigService.setString("curvefitting.defaultPeak", peak_func)
+
+    def set_peak_function_from_settings(self):
+        ConfigService.setString("curvefitting.defaultPeak", self.settings["default_peak"])
+
     def save_new_settings(self):
         self._collect_new_settings_from_view()
         self._save_settings_to_file()
@@ -83,6 +98,7 @@ class SettingsPresenter(object):
         self.settings["logs"] = self.view.get_checked_logs()
         self.settings["primary_log"] = self.view.get_primary_log()
         self.settings["sort_ascending"] = self.view.get_ascending_checked()
+        self.settings["default_peak"] = self.view.get_peak_function()
 
     def _show_settings_in_view(self):
         if self._validate_settings(self.settings):
@@ -92,6 +108,7 @@ class SettingsPresenter(object):
             self.view.set_checked_logs(self.settings["logs"])
             self.view.set_primary_log_combobox(self.settings["primary_log"])
             self.view.set_ascending_checked(self.settings["sort_ascending"])
+            self.view.set_peak_function(self.settings["default_peak"])
         self._find_files()
 
     def _find_files(self):
@@ -119,7 +136,8 @@ class SettingsPresenter(object):
             save_valid = save_location != ""
             log_valid = settings["logs"] != ""
             ascending_valid = settings["sort_ascending"] != ""
-            return all_keys and not_none and save_valid and log_valid and ascending_valid
+            peak_valid = settings["default_peak"] in FunctionFactory.Instance().getPeakFunctionNames()
+            return all_keys and not_none and save_valid and log_valid and ascending_valid and peak_valid
         except KeyError:  # Settings contained invalid key.
             return False
 

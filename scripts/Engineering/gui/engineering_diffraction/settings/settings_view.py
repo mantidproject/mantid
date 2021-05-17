@@ -30,6 +30,7 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
         self.primary_log_label.setText(
             "Sort workspaces by selected log average in sequential fitting (default is ascending order)\n"
             "If the box below is empty the workspaces will be fitted in the order they appear in the table.")
+        self.peak_list_label.setText("Default Peak Function")
 
     # ===============
     # Slot Connectors
@@ -53,6 +54,9 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def set_on_check_descending_changed(self, slot):
         self.check_descending.stateChanged.connect(slot)
 
+    def set_on_peak_func_changed(self, slot):
+        self.peak_list.currentTextChanged.connect(slot)
+
     # =================
     # Component Getters
     # =================
@@ -75,6 +79,9 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def get_ascending_checked(self):
         return self.check_ascending.isChecked()
+
+    def get_peak_function(self):
+        return self.peak_list.currentText()
 
     # =================
     # Component Setters
@@ -118,6 +125,13 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def set_descending_checked(self, checked):
         self.check_descending.setChecked(checked)
+
+    def set_peak_function(self, peak_name):
+        self.peak_list.setCurrentText(peak_name)
+
+    def populate_peak_function_list(self, peak_names):
+        self.peak_list.addItems(peak_names.split(','))
+        # self.peak_func.setCurrentText(peak_names[0])  # required?
 
     # =================
     # Force Actions
