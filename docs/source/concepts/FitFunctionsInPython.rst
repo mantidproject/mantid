@@ -221,8 +221,8 @@ on ``A1`` in the above polynomial, the code is:
 
 Plotting
 --------
+
 Functions may be plotted by calling the ``plot`` method of the function.
-``mantidplot`` must be available to import for ``plot`` to work.
 
 This method can be called in any of the following manners:
 

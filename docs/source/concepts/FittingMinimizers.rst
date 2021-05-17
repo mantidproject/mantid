@@ -43,8 +43,7 @@ concept page on :ref:`Fitting <Fitting>` for a broader discussion of
 how these components interplay when fitting a model with Mantid.
 
 Several minimizers are included with Mantid and can be selected in the
-`Fit Function property browser
-<http://www.mantidproject.org/MantidPlot:_Creating_Fit_Functions>`__
+:ref:`Fit Function property browser <WorkbenchPlotWindow_Fitting>`
 or when using the algorithm :ref:`Fit <algm-Fit>` The following
 options are available:
 

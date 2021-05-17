@@ -13,9 +13,8 @@ from mantidqt.utils.qt.testing import get_application
 from qtpy.QtCore import QCoreApplication, QSettings
 
 
-# Frequency_Domain_Analysis_Old.py  -  Excluded because is being deleted in Mantid Version 6.0
 # Frequency_Domain_Analysis.py      -  Excluded because it is causing a crash
-EXCLUDED_SCRIPTS = ["Frequency_Domain_Analysis_Old.py", "Frequency_Domain_Analysis.py"]
+EXCLUDED_SCRIPTS = ["Frequency_Domain_Analysis.py"]
 
 INSTRUMENT_SWITCHER = {"DGS_Reduction.py": "ARCS",
                        "ORNL_SANS.py": "EQSANS",

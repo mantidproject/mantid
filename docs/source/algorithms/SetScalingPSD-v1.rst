@@ -55,8 +55,8 @@ necessary to modify the code depending on the type of detectors present
 and how they are numbered.
 
 If the tube detector performance enhancement is used the results of the
-algorithm will not be visible in the instrument view in MantidPlot, at
-the same time all calclations will be performed correctly.
+algorithm will not be visible in the instrument viewer, however
+all subsequent calclations on the workspace will be performed correctly.
 
 Optional properties
 ###################

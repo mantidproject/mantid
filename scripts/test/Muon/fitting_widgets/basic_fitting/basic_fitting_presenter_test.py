@@ -388,6 +388,14 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.view.update_global_fit_status.assert_called_once_with([self.fit_status] * len(self.dataset_names),
                                                                    self.current_dataset_index)
 
+    def test_that_update_start_and_end_x_in_view_from_model_will_update_the_start_and_end_x_in_the_view(self):
+        self.presenter.update_start_and_end_x_in_view_from_model()
+
+        self.mock_model_current_start_x.assert_called_once_with()
+        self.mock_view_start_x.assert_called_once_with(self.start_x)
+        self.mock_model_current_end_x.assert_called_once_with()
+        self.mock_view_end_x.assert_called_once_with(self.end_x)
+
     def _setup_mock_view(self):
         self.view = mock.Mock(spec=BasicFittingView)
         self.view = add_mock_methods_to_basic_fitting_view(self.view)

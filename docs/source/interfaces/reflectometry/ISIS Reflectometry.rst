@@ -62,7 +62,7 @@ To see a list of directories, click on **File -> Manage User Directories**.
 Processing Runs
 ~~~~~~~~~~~~~~~
 
-Open either ``MantidWorkbench`` or ``MantidPlot``, and open the ISIS
+Open ``MantidWorkbench`` and open the ISIS
 Reflectometry interface from the menu: **Interfaces -> Reflectometry -> ISIS
 Reflectometry**
 

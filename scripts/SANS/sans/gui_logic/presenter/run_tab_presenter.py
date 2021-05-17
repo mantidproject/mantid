@@ -476,6 +476,8 @@ class RunTabPresenter(PresenterCommon):
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
             self.display_warning_box('Warning', 'Loading of the batch file failed', str(e))
 
+        self.on_update_rows()
+
     def _add_multiple_rows_to_table_model(self, rows):
         self._table_model.add_multiple_table_entries(table_index_model_list=rows)
 
