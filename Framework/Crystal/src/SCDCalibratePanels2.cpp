@@ -266,6 +266,7 @@ void SCDCalibratePanels2::exec() {
   bool calibrateT0 = getProperty("CalibrateT0");
   bool calibrateL1 = getProperty("CalibrateL1");
   bool calibrateBanks = getProperty("CalibrateBanks");
+  bool tuneSamplePos = getProperty("TuneSamplePosition");
 
   bool profL1 = getProperty("ProfileL1");
   bool profBanks = getProperty("ProfileBanks");
@@ -349,6 +350,11 @@ void SCDCalibratePanels2::exec() {
     optimizeT0(m_pws, pws_original);
   }
 
+  if (tuneSamplePos) {
+    g_log.notice() << "** Tunning sample position as requested\n";
+    optimizeSamplePos(m_pws, pws_original);
+  }
+
   // STEP_4: generate a table workspace to save the calibration results
   g_log.notice() << "-- Generate calibration table\n";
   Instrument_sptr instCalibrated = std::const_pointer_cast<Geometry::Instrument>(m_pws->getInstrument());
@@ -395,10 +401,11 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
 
   //-- bounds&constraints def
   std::ostringstream tie_str;
-  if (caliT0) {
-    tie_str << "DeltaX=0.0,DeltaY=0.0,Theta=1.0,Phi=0.0,DeltaRotationAngle=0.0";
-  } else {
-    tie_str << "DeltaX=0.0,DeltaY=0.0,Theta=1.0,Phi=0.0,DeltaRotationAngle=0.0,DeltaT0=" << m_T0;
+  tie_str << "DeltaX=0.0,DeltaY=0.0,"
+          << "Theta=1.0,Phi=0.0,DeltaRotationAngle=0.0,"
+          << "DeltaSampleX=0.0,DeltaSampleY=0.0,DeltaSampleZ=0.0";
+  if (!caliT0) {
+    tie_str << ",DeltaT0=" << m_T0;
   }
   std::ostringstream constraint_str;
   double r_L1 = getProperty("SearchRadiusL1"); // get search radius
@@ -496,7 +503,8 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
 
     //---- bounds&constraints def
     std::ostringstream tie_str;
-    tie_str << "DeltaT0=" << m_T0;
+    tie_str << "DeltaSampleX=0.0,DeltaSampleY=0.0,DeltaSampleZ=0.0,"
+            << "DeltaT0=" << m_T0;
     std::ostringstream constraint_str;
     double brb = getProperty("SearchradiusRotBank");
     brb = std::abs(brb);
@@ -592,7 +600,9 @@ void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
 
   //-- bounds&constraints def
   std::ostringstream tie_str;
-  tie_str << "DeltaX=0.0,DeltaY=0.0,DeltaZ=0.0,Theta=0.0,Phi=0.0,DeltaRotationAngle=0.0";
+  tie_str << "DeltaX=0.0,DeltaY=0.0,DeltaZ=0.0,"
+          << "Theta=0.0,Phi=0.0,DeltaRotationAngle=0.0,"
+          << "DeltaSampleX=0.0,DeltaSampleY=0.0,DeltaSampleZ=0.0";
   std::ostringstream constraint_str;
   double r_dT0 = getProperty("SearchRadiusT0");
   r_dT0 = std::abs(r_dT0);
@@ -624,6 +634,72 @@ void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   calilog << "-- Fit T0 results using " << npks << " peaks:\n"
           << "    dT0 = " << m_T0 << " \n"
           << "    chi2/DOF = " << chi2OverDOF << "\n";
+  g_log.notice() << calilog.str();
+}
+
+/**
+ * @brief fine tuning sample position to better match QSample
+ *
+ * @param pws
+ * @param pws_original
+ */
+void SCDCalibratePanels2::optimizeSamplePos(IPeaksWorkspace_sptr pws, IPeaksWorkspace_sptr pws_original) {
+  // create child Fit alg to optimize T0
+  IAlgorithm_sptr fitSamplePos_alg = createChildAlgorithm("Fit", -1, -1, false);
+
+  // creat input 1DHist from qSample
+  MatrixWorkspace_sptr samplePosws = getIdealQSampleAsHistogram1D(pws);
+
+  auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
+  // NOTE: always use the original pws to get the tofs
+  std::vector<double> tofs = captureTOF(pws_original);
+  objf->setPeakWorkspace(pws, "none", tofs);
+  fitSamplePos_alg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(objf));
+
+  //-- bounds&constraints def
+  std::ostringstream tie_str;
+  tie_str << "DeltaX=0.0,DeltaY=0.0,DeltaZ=0.0,"
+          << "Theta=0.0,Phi=0.0,DeltaRotationAngle=0.0,"
+          << "DeltaT0=" << m_T0;
+  std::ostringstream constraint_str;
+  double r_dsp = getProperty("SearchRadiusSamplePos");
+  r_dsp = std::abs(r_dsp);
+  constraint_str << -r_dsp << "<DeltaSampleX<" << r_dsp << "," << -r_dsp << "<DeltaSampleY<" << r_dsp << "," << -r_dsp
+                 << "<DeltaSampleZ<" << r_dsp;
+
+  //-- set&go
+  fitSamplePos_alg->setProperty("Ties", tie_str.str());
+  fitSamplePos_alg->setProperty("Constraints", constraint_str.str());
+  fitSamplePos_alg->setProperty("InputWorkspace", samplePosws);
+  fitSamplePos_alg->setProperty("CreateOutput", true);
+  fitSamplePos_alg->setProperty("Output", "fit");
+  fitSamplePos_alg->executeAsChildAlg();
+
+  //-- parse output
+  double chi2OverDOF = fitSamplePos_alg->getProperty("OutputChi2overDoF");
+  ITableWorkspace_sptr rst = fitSamplePos_alg->getProperty("OutputParameters");
+  double dsx_optimized = rst->getRef<double>("Value", 7);
+  double dsy_optimized = rst->getRef<double>("Value", 8);
+  double dsz_optimized = rst->getRef<double>("Value", 9);
+  double tor_dsp = getProperty("ToleranceSamplePos");
+  tor_dsp = std::abs(tor_dsp);
+  std::ostringstream calilog;
+  if ((std::abs(dsx_optimized) < tor_dsp) && (std::abs(dsy_optimized) < tor_dsp) &&
+      (std::abs(dsz_optimized) < tor_dsp)) {
+    calilog << "-- Tune SamplePos = (" << dsx_optimized << "," << dsy_optimized << "," << dsz_optimized
+            << ") is below tolerance (" << tor_dsp << "), zero it\n";
+    dsx_optimized = 0.0;
+    dsy_optimized = 0.0;
+    dsz_optimized = 0.0;
+  }
+
+  // apply the calibration results to pws for ouptut file
+  adjustComponent(dsx_optimized, dsy_optimized, dsz_optimized, 1.0, 0.0, 0.0, 0.0, "sample-position", pws);
+  int npks = pws->getNumberPeaks();
+  // logging
+  calilog << "-- Tune SamplePos results using " << npks << " peaks:\n"
+          << "  deltaSamplePos = (" << dsx_optimized << "," << dsy_optimized << "," << dsz_optimized << ")\n"
+          << "  chi2/DOF = " << chi2OverDOF << "\n";
   g_log.notice() << calilog.str();
 }
 

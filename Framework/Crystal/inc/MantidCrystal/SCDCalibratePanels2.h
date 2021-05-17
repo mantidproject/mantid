@@ -87,6 +87,9 @@ private:
   /// Private function for calibrating banks
   void optimizeBanks(Mantid::API::IPeaksWorkspace_sptr pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
 
+  /// Private function for fine tunning sample position
+  void optimizeSamplePos(Mantid::API::IPeaksWorkspace_sptr pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
+
   /// Helper function for selecting peaks based on given bank name
   Mantid::API::IPeaksWorkspace_sptr selectPeaksByBankName(Mantid::API::IPeaksWorkspace_sptr pws,
                                                           const std::string bankname, const std::string outputwsn);

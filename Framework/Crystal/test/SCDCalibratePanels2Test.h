@@ -162,7 +162,7 @@ public:
                    << "L1_cali = " << L1_cali << "\n";
   }
 
-  void run_L1() {
+  void test_L1() {
     g_log.notice() << "test_L1() starts.\n";
     // Generate unique temp files
     auto filenamebase = boost::filesystem::temp_directory_path();
@@ -298,6 +298,51 @@ public:
     bool calibrateT0 = true;
     bool tuneSamplePos = false;
     runCalibration(filenamebase.string(), pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
+    // NOTE:
+    //  It is recommended to have L1 and T0 calibrated at the same time.
+  }
+
+  void test_samplePos() {
+    g_log.notice() << "test_samplePos() starts.\n";
+    // Generate unique temp files
+    auto filenamebase = boost::filesystem::temp_directory_path();
+    filenamebase /= boost::filesystem::unique_path("testSamplePos_%%%%%%%%");
+    // Make a clone of the standard peak workspace
+    PeaksWorkspace_sptr pws = m_pws->clone();
+
+    // shift the sample pos to a "wrong" state
+    double dsx = -0.01;
+    adjustComponent(dsx, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, "sample-position", pws);
+
+    // Run the calibration
+    // NOTE: this should bring the instrument back to engineering position,
+    //       which is the solution
+    bool calibrateL1 = false;
+    bool calibrateBanks = false;
+    bool calibrateT0 = false;
+    bool tuneSamplePos = true;
+    runCalibration(filenamebase.string(), pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
+
+    // Apply the calibration results
+    MatrixWorkspace_sptr ws = generateSimulatedWorkspace();
+    const std::string xmlFileName = filenamebase.string() + ".xml";
+    IAlgorithm_sptr lpf_alg = AlgorithmFactory::Instance().create("LoadParameterFile", 1);
+    lpf_alg->initialize();
+    lpf_alg->setLogging(LOGCHILDALG);
+    lpf_alg->setProperty("Workspace", ws);
+    lpf_alg->setProperty("Filename", xmlFileName);
+    lpf_alg->execute();
+
+    // Checking sample.x since it is the only thing we calibrated
+    double dsx_wrng = pws->getInstrument()->getSample()->getPos().X();
+    double dsx_ref = m_pws->getInstrument()->getSample()->getPos().X();
+    double dsx_cali = ws->getInstrument()->getSample()->getPos().X();
+    TS_ASSERT_DELTA(dsx_cali, dsx_ref, TOLERANCE_L);
+
+    g_log.notice() << "@calibration:\n"
+                   << dsx_wrng << " --> " << dsx_cali << "\n"
+                   << "@solution:\n"
+                   << "dsx_ref = " << dsx_ref << "\n";
   }
 
   // NOTE: skipped to prevent time out on build server

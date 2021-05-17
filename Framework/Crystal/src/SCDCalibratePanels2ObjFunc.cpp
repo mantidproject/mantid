@@ -52,6 +52,10 @@ SCDCalibratePanels2ObjFunc::SCDCalibratePanels2ObjFunc() {
   // TOF offset for all peaks
   // NOTE: need to have a non-zero value here
   declareParameter("DeltaT0", 0.1, "delta of TOF");
+  // This part is for fine tuning the sample position
+  declareParameter("DeltaSampleX", 0.0, "relative shift of sample position along X.");
+  declareParameter("DeltaSampleY", 0.0, "relative shift of sample position along Y.");
+  declareParameter("DeltaSampleZ", 0.0, "relative shift of sample position along Z.");
 }
 
 void SCDCalibratePanels2ObjFunc::setPeakWorkspace(IPeaksWorkspace_sptr &pws, const std::string componentName,
@@ -102,6 +106,10 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
   //-- delta in TOF
   //  NOTE: The T0 here is a universal offset for all peaks
   double dT0 = getParameter("DeltaT0");
+  //
+  const double dsx = getParameter("DeltaSampleX");
+  const double dsy = getParameter("DeltaSampleY");
+  const double dsz = getParameter("DeltaSampleZ");
 
   //-- NOTE: given that these components are never used as
   //         one vector, there is no need to construct a
@@ -128,6 +136,9 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
     pws = moveInstruentComponentBy(dx, dy, dz, m_cmpt, pws);
   }
 
+  // tweak sample position
+  pws = moveInstruentComponentBy(dsx, dsy, dsz, "sample-position", pws);
+
   // calculate residual
   // double residual = 0.0;
   for (int i = 0; i < pws->getNumberPeaks(); ++i) {
@@ -136,6 +147,8 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
 
     Peak pk = Peak(pws->getPeak(i));
     // update instrument
+    // - this will update the instrument position attached to the peak
+    // - this will update the sample position attached to the peak
     pk.setInstrument(pws->getInstrument());
     // update detector ID
     pk.setDetectorID(pk.getDetectorID());
