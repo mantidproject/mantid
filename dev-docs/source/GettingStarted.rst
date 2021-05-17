@@ -52,6 +52,8 @@ Unfortunately CMake can't find it out of the box and the following steps are req
 * create a new string value named ``InstallPath`` within this key and set the value
   to point to the install directory of Graphviz.
 
+It is also possible to install a Linux subsystem within Windows by following :ref:`these <WindowsSubSystemsForLinux>` instructions. This step is optional.
+
 Linux
 -----
 
