@@ -139,6 +139,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         maxqxy_dim = len(self.maxqxy)
         deltaq_dim = len(self.deltaq)
         radius_dim = len(self.radius)
+        q_bin_dim = self.getPropertyValue('OutputBinning')
+        if q_bin_dim and q_bin_dim.count(';')+1 != sample_dim:
+            result['OutputBinning'] = 'Number of Q ranges must be equal to the number of samples.'
         if self.getPropertyValue('SampleRuns') == '':
             result['SampleRuns'] = 'Please provide at least one sample run.'
         if abs_dim != sample_dim and abs_dim > 1:
@@ -357,11 +360,12 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         self.copyProperties('SANSILLIntegration',
                             ['OutputType', 'CalculateResolution',
-                             'DefaultQBinning', 'BinningFactor',
-                             'OutputBinning', 'NPixelDivision',
+                             'DefaultQBinning', 'BinningFactor', 'NPixelDivision',
                              'NumberOfWedges', 'WedgeAngle', 'WedgeOffset',
                              'AsymmetricWedges', 'IQxQyLogBinning', 'WavelengthRange'])
 
+        self.declareProperty('OutputBinning', '', doc='Output binning for each distance. ; separated list of qmin,qmax pairs.')
+        self.setPropertyGroup('OutputBinning', 'Integration Options')
         self.setPropertyGroup('OutputType', 'Integration Options')
         self.setPropertyGroup('CalculateResolution', 'Integration Options')
         self.declareProperty('ClearCorrected2DWorkspace', True,
@@ -841,6 +845,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         if self.getProperty('SensitivityWithOffsets').value:
             CloneWorkspace(InputWorkspace=sample_name, OutputWorkspace=output_sens)
 
+        qbinning = self.getPropertyValue('OutputBinning').split(';')[i]
+        qbinning = [float(q) for q in qbinning.split(',')]
         SANSILLIntegration(
                 InputWorkspace=sample_name,
                 OutputWorkspace=output_sample,
@@ -849,7 +855,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 self.getPropertyValue('CalculateResolution'),
                 DefaultQBinning=self.getPropertyValue('DefaultQBinning'),
                 BinningFactor=self.getProperty('BinningFactor').value,
-                OutputBinning=self.getPropertyValue('OutputBinning'),
+                OutputBinning=qbinning,
                 NPixelDivision=self.getProperty('NPixelDivision').value,
                 NumberOfWedges=self.n_wedges,
                 WedgeAngle=self.getProperty('WedgeAngle').value,
