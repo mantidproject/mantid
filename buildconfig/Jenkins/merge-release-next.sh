@@ -1,6 +1,7 @@
 #!/bin/sh
+git fetch origin --prune
 git checkout master
-git pull --rebase
+git reset --hard origin/master
 
 git config user.name mantid-builder
 git config user.email "mantid-buildserver@mantidproject.org"
