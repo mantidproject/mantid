@@ -45,6 +45,7 @@ Bug fixes
   Group Asymmetry Range with no data loaded.
 - Fixed a crash caused when switching between tabs in Muon Analysis.
 - Fixed a usability issue where tabs became unattached too easily. It is now possible to unattach the tabs only by double clicking on them.
+- Fixed a bug where the start and end X would reset in the fitting tab when stepping to the next or previous run.
 
 ALC
 ---
