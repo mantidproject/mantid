@@ -1,7 +1,7 @@
 ﻿.. _interface-inelastic-data-analysis:
 
 Inelastic Data Analysis
-======================
+=======================
 
 Overview
 --------
@@ -15,11 +15,6 @@ reduced files (*_red.nxs*) and workspaces (*_red*) created using the Indirect Da
 Reduction interface or using :math:`S(Q, \omega)` files (*_sqw.nxs*) and
 workspaces (*_sqw*) created using either the Indirect Data Reduction interface or
 taken from a bespoke algorithm or auto reduction.
-
-Restrict allowed input files by name (via Settings symbol at the left-bottom corner)
-  This will allow you to load input files with any names if unticked. This is particulary
-  useful to be able to access *.nxs files while working with the data from Direct spectrometer
-  LET.
 
 Four of the available tabs are QENS fitting interfaces and share common features and
 layout. These tabs are documented in :ref:`QENS Fitting <QENS-fitting-ref>`.
