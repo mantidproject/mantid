@@ -70,7 +70,7 @@ Interfaces
 - Axes limits correctly reset when home clicked on sliceviewer plot of ragged matrix workspace.
 - Line plots in sliceviewer now respect the status of the Track Cursor checkbox.
 - Cursor coordinates in sliceviewer are now correct for transposed and non-orthogonal data.
-
+- Stop sliceviewer crash when selecting the same peak after the overlaid peak workspace replaced or renamed.
 
 Plotting
 ########
