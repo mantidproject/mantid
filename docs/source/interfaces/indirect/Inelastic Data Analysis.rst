@@ -1,12 +1,12 @@
-﻿.. _interface-indirect-data-analysis:
+﻿.. _interface-inelastic-data-analysis:
 
-Direct/Indirect Data Analysis
+Inelastic Data Analysis
 ======================
 
 Overview
 --------
 
-The Data Analysis interface is a collection of tools within Mantid
+The Inelastic Data Analysis interface is a collection of tools within Mantid
 for analysing reduced data from indirect geometry spectrometers, such as IRIS and
 OSIRIS and data from direct geometry spectrometer LET.
 
@@ -18,7 +18,7 @@ taken from a bespoke algorithm or auto reduction.
 
 Restrict allowed input files by name (via Settings symbol at the left-bottom corner)
   This will allow you to load input files with any names if unticked. This is particulary
-  useful to be able to access *.nxs files while working with data from Direct spectrometer
+  useful to be able to access *.nxs files while working with the data from Direct spectrometer
   LET.
 
 Four of the available tabs are QENS fitting interfaces and share common features and
