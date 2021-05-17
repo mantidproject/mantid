@@ -16,7 +16,7 @@ from Muon.GUI.Common.contexts.frequency_domain_analysis_context import Frequency
 from Muon.GUI.Common.plot_widget.plot_widget_model import PlotWidgetModel
 from Muon.GUI.Common.plot_widget.plot_widget_view_interface import PlotWidgetViewInterface
 from Muon.GUI.Common.contexts.plotting_context import PlotMode
-from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable, Observer
+from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 from mantid.dataobjects import Workspace2D
 
 
@@ -48,8 +48,8 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         # gui observers
         self._setup_gui_observers()
         self._setup_view_connections()
-        self.enable_observer = PlotWidgetPresenterCommon.EnableObserver(self)
-        self.disable_observer = PlotWidgetPresenterCommon.DisableObserver(self)
+        self.enable_observer = GenericObserver(self.enableView)
+        self.disable_observer = GenericObserver(self.disableView)
 
         self.update_view_from_model()
 
@@ -377,19 +377,3 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
 
     def disableView(self):
         self._view.setEnabled(False)
-
-    class EnableObserver(Observer):
-        def __init__(self, outer):
-            Observer.__init__(self)
-            self.outer = outer
-
-        def update(self, observable, arg):
-            self.outer.enableView()
-
-    class DisableObserver(Observer):
-        def __init__(self, outer):
-            Observer.__init__(self)
-            self.outer = outer
-
-        def update(self, observable, arg):
-            self.outer.disableView()
