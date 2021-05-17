@@ -16,7 +16,7 @@ from Muon.GUI.Common.contexts.frequency_domain_analysis_context import Frequency
 from Muon.GUI.Common.plot_widget.plot_widget_model import PlotWidgetModel
 from Muon.GUI.Common.plot_widget.plot_widget_view_interface import PlotWidgetViewInterface
 from Muon.GUI.Common.contexts.plotting_context import PlotMode
-from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
+from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable, Observer
 from mantid.dataobjects import Workspace2D
 
 
@@ -48,6 +48,8 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         # gui observers
         self._setup_gui_observers()
         self._setup_view_connections()
+        self.enable_observer = PlotWidgetPresenterCommon.EnableObserver(self)
+        self.disable_observer = PlotWidgetPresenterCommon.DisableObserver(self)
 
         self.update_view_from_model()
 
@@ -354,10 +356,11 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
                                                                                      self._view.get_plot_type())
 
+        # Disables plot view when clear all is pressed
         if workspace_list:
-            self._view.setEnabled(True)
+            self.enableView()
         else:
-            self._view.setEnabled(False)
+            self.disableView()
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=hold_on, autoscale=autoscale)
 
     def _check_if_counts_and_groups_selected(self):
@@ -368,3 +371,25 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
                 'Pair workspaces have no counts workspace, plotting Asymmetry')
             return True
         return False
+
+    def enableView(self):
+        self._view.setEnabled(True)
+
+    def disableView(self):
+        self._view.setEnabled(False)
+
+    class EnableObserver(Observer):
+        def __init__(self, outer):
+            Observer.__init__(self)
+            self.outer = outer
+
+        def update(self, observable, arg):
+            self.outer.enableView()
+
+    class DisableObserver(Observer):
+        def __init__(self, outer):
+            Observer.__init__(self)
+            self.outer = outer
+
+        def update(self, observable, arg):
+            self.outer.disableView()
