@@ -46,7 +46,7 @@ The following substitutions are then performed in order to make it more convenie
 
 :math:`p_i = \frac{\phi_i}{2 \pi}`
 
-:math:`\int_0^{2k} Q_i S(Q_i) dQ = k^2`
+:math:`\int_0^{2k} Q_i S(Q_i) dQ = 2 k^2`
 
 Using the new variables the integral is:
 
@@ -85,7 +85,7 @@ The algorithm outputs a workspace group containing the following workspaces:
 
 The output can be applied to a workspace containing a real sample measurement in one of two ways:
 
-- subtraction method. :math:`(\sum_{n=2}^{\infty} J_n) I_0` can be subtracted from the real sample measurement where :math:`I_0` is the incident intensity
+- subtraction method. :math:`(\sum_{n=2}^{\infty} J_n) I_0(\lambda)` can be subtracted from the real sample measurement where :math:`I_0(\lambda)` is the incident intensity
 - factor method. The correction can be applied by multiplying the real sample measurement by :math:`J_1/\sum_{n=1}^{\infty} J_n`
 
 The multiple scattering correction should be applied before applying an absorption correction.

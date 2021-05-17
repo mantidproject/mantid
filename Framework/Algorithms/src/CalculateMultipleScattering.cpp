@@ -311,7 +311,9 @@ void CalculateMultipleScattering::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   if (useSparseInstrument) {
-    const std::string reportMsg = "Interpolating";
+    Poco::Thread::sleep(200); // to ensure prog message changes
+    const std::string reportMsg = "Spatial Interpolation";
+    prog.report(reportMsg);
     interpolateFromSparse(*noAbsOutputWS, *std::dynamic_pointer_cast<SparseWorkspace>(noAbsSimulationWS),
                           interpolateOpt);
     for (size_t ne = 0; ne < static_cast<size_t>(nScatters); ne++) {
@@ -539,28 +541,19 @@ std::tuple<bool, double, double> CalculateMultipleScattering::scatter(
 void CalculateMultipleScattering::q_dir(Geometry::Track &track, const MatrixWorkspace_sptr SOfQ, const double kinc,
                                         const double scatteringXSection, Kernel::PseudoRandomNumberGenerator &rng,
                                         double &QSS, double &weight) {
-  auto qvalues = SOfQ->histogram(0).x().rawData();
-  // For elastic just select a q value in range 0 to 2k
-  // The following will eventually be used for inelastic where it's less trivial
-  double QQ, cosT;
-  bool foundQ = false;
-  for (auto m = 0; m < 1000; m++) {
-    QQ = qvalues.back() * rng.nextValue();
-    // T = 2theta
-    cosT = 1 - QQ * QQ / (2 * kinc * kinc);
-    if (abs(cosT) <= 1) {
-      foundQ = true;
-      break;
-    }
-  }
-  if (!foundQ) {
-    throw std::runtime_error("Unable to select a new q for kinc=" + std::to_string(kinc));
-  } else {
-    double SQ = interpolateLogQuadratic(SOfQ, QQ);
-    QSS += QQ * SQ;
-    weight = weight * scatteringXSection * SQ * QQ;
-    updateTrackDirection(track, cosT, rng.nextValue() * 2 * M_PI);
-  }
+  double QQ, cosT, qrange, kf;
+  kf = kinc; // elastic only so far
+  double qmin = abs(kf - kinc);
+  qrange = 2 * kinc;
+
+  QQ = qmin + qrange * rng.nextValue();
+  // T = 2theta
+  cosT = (kinc * kinc + kf * kf - QQ * QQ) / (2 * kinc * kf);
+
+  double SQ = interpolateLogQuadratic(SOfQ, QQ);
+  QSS += QQ * SQ;
+  weight = weight * scatteringXSection * SQ * QQ;
+  updateTrackDirection(track, cosT, rng.nextValue() * 2 * M_PI);
 }
 
 /**
@@ -722,7 +715,7 @@ MatrixWorkspace_sptr CalculateMultipleScattering::createOutputWorkspace(const Ma
   // be treated as a distribution
   outputWS->setDistribution(true);
   outputWS->setYUnit("");
-  outputWS->setYUnitLabel("Scattered Intensity");
+  outputWS->setYUnitLabel("Scattered Weight");
   return outputWS;
 }
 
