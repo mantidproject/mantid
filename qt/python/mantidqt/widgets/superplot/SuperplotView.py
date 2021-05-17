@@ -27,6 +27,8 @@ class SuperplotViewSide(QDockWidget):
         uic.loadUi(os.path.join(self.here, SuperplotViewSide.UI), self)
         wsList = self.workspacesList
         wsList.header().resizeSection(0, 120)
+        self.workspaceSelector.setWorkspaceTypes(["Workspace2D",
+                                                  "WorkspaceGroup"])
 
 
 class SuperplotViewBottom(QDockWidget):
