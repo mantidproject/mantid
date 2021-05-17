@@ -273,6 +273,8 @@ class DrillExportModel:
                     if 'Reflectometry' in algo:
                         kwargs['WriteHeader'] = True
                         kwargs['FileExtension'] = 'custom'
+                    else:
+                        kwargs['WriteXError'] = True
                 task = DrillTask(name, algo, InputWorkspace=wsName,
                                  FileName=filename, **kwargs)
                 tasks.append(task)
