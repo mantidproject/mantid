@@ -20,6 +20,7 @@ class SuperplotPresenter:
     _view = None
     _model = None
     _canvas = None
+    _plotFunction = None
 
     def __init__(self, canvas, parent=None):
         self._view = SuperplotView(self, parent)
@@ -99,6 +100,8 @@ class SuperplotPresenter:
                         return
                 self._model.setSpectrumMode()
                 self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT])
+            if "function" in args[0]:
+                self._plotFunction = args[0]["function"]
 
         for artist in artists:
             ws, specIndex = \
@@ -252,16 +255,23 @@ class SuperplotPresenter:
         axes.set_prop_cycle(None)
         for wsName, sp in plottedData:
             ws = mtd[wsName]
+            kwargs = {}
             if self._model.isSpectrumMode():
-                axisType = MantidAxType.SPECTRUM
-                specNum = ws.getSpectrumNumbers()[sp]
-                lines = axes.plot(ws, specNum=specNum, axis=axisType)
+                kwargs["axis"] = MantidAxType.SPECTRUM
+                kwargs["specNum"] = ws.getSpectrumNumbers()[sp]
             else:
-                axisType = MantidAxType.BIN
-                lines = axes.plot(ws, wkspIndex=sp, axis=axisType)
-            line = lines[0]
-            self._view.modifySpectrumLabel(wsName, sp, line.get_label(),
-                                           line.get_color())
+                kwargs["axis"] = MantidAxType.BIN
+                kwargs["wkspIndex"] = sp
+
+            if self._plotFunction == "errorbar":
+                lines = axes.errorbar(ws, **kwargs)
+                label = lines.get_label()
+                color = lines.lines[0].get_color()
+            else:
+                lines = axes.plot(ws, **kwargs)
+                label = lines[0].get_label()
+                color = lines[0].get_color()
+            self._view.modifySpectrumLabel(wsName, sp, label, color)
 
         for wsName, spectra in selection.items():
             if (currentSpectrumIndex not in spectra
@@ -272,16 +282,23 @@ class SuperplotPresenter:
                     continue
                 if (wsName, sp) not in plottedData:
                     ws = mtd[wsName]
+                    kwargs = {}
                     if mode == self.SPECTRUM_MODE_TEXT:
-                        axisType = MantidAxType.SPECTRUM
-                        specNum = ws.getSpectrumNumbers()[sp]
-                        lines = axes.plot(ws, specNum=specNum, axis=axisType)
+                        kwargs["axis"] = MantidAxType.SPECTRUM
+                        kwargs["specNum"] = ws.getSpectrumNumbers()[sp]
                     else:
-                        axisType = MantidAxType.BIN
-                        lines = axes.plot(ws, wkspIndex=sp, axis=axisType)
-                    line = lines[0]
-                    self._view.modifySpectrumLabel(wsName, sp, line.get_label(),
-                                                   line.get_color())
+                        kwargs["axis"] = MantidAxType.BIN
+                        kwargs["wkspIndex"] = sp
+
+                    if self._plotFunction == "errorbar":
+                        lines = axes.errorbar(ws, **kwargs)
+                        label = lines.get_label()
+                        color = lines.lines[0].get_color()
+                    else:
+                        lines = axes.plot(ws, **kwargs)
+                        label = lines[0].get_label()
+                        color = lines[0].get_color()
+                    self._view.modifySpectrumLabel(wsName, sp, label, color)
 
         if selection or plottedData:
             figure.tight_layout()
