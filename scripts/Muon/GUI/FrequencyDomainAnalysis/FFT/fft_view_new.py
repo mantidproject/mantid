@@ -49,15 +49,17 @@ class FFTView(QtWidgets.QWidget):
             self.Im_box_row,
             "Imaginary Data")
         self.Im_box = table_utils.addCheckBoxToTable(
-            self.FFTTable, True, self.Im_box_row)
+            self.FFTTable, False, self.Im_box_row)
 
         table_utils.setRowName(self.FFTTable, 2, "Imaginary Workspace")
         self.Im_ws = table_utils.addComboToTable(self.FFTTable, 2, options)
+        self.FFTTable.hideRow(2)
 
         self.shift_box_row = 3
         table_utils.setRowName(self.FFTTable, self.shift_box_row, "Auto shift")
         self.shift_box = table_utils.addCheckBoxToTable(
             self.FFTTable, True, self.shift_box_row)
+        self.FFTTable.hideRow(3)
 
         table_utils.setRowName(self.FFTTable, 4, "Shift")
         self.shift = table_utils.addDoubleToTable(self.FFTTable, 0.0, 4)

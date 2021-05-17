@@ -516,13 +516,17 @@ void AlignAndFocusPowder::exec() {
 
   if (m_maskWS) {
     g_log.information() << "running MaskDetectors started at " << Types::Core::DateAndTime::getCurrentTime() << "\n";
-    const auto &maskedDetectors = m_maskWS->getMaskedDetectors();
-    API::IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskInstrument");
-    maskAlg->setProperty("InputWorkspace", m_outputW);
-    maskAlg->setProperty("OutputWorkspace", m_outputW);
-    maskAlg->setProperty("DetectorIDs", std::vector<detid_t>(maskedDetectors.begin(), maskedDetectors.end()));
-    maskAlg->executeAsChildAlg();
-    m_outputW = maskAlg->getProperty("OutputWorkspace");
+
+    API::IAlgorithm_sptr maskDetAlg = createChildAlgorithm("MaskDetectors");
+    // cast to Workspace for MaksDetectors alg
+    Workspace_sptr outputw = std::dynamic_pointer_cast<Workspace>(m_outputW);
+    maskDetAlg->setProperty("Workspace", outputw);
+    MatrixWorkspace_sptr mksws = std::dynamic_pointer_cast<MatrixWorkspace>(m_maskWS);
+    maskDetAlg->setProperty("MaskedWorkspace", mksws);
+    maskDetAlg->executeAsChildAlg();
+    outputw = maskDetAlg->getProperty("Workspace");
+    // casting
+    m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(outputw);
     m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
   m_progress->report();
@@ -532,17 +536,41 @@ void AlignAndFocusPowder::exec() {
   m_progress->report();
 
   if (m_calibrationWS) {
-    g_log.information() << "running AlignDetectors started at " << Types::Core::DateAndTime::getCurrentTime() << "\n";
-    API::IAlgorithm_sptr alignAlg = createChildAlgorithm("AlignDetectors");
-    alignAlg->setProperty("InputWorkspace", m_outputW);
-    alignAlg->setProperty("OutputWorkspace", m_outputW);
-    alignAlg->setProperty("CalibrationWorkspace", m_calibrationWS);
-    alignAlg->executeAsChildAlg();
-    m_outputW = alignAlg->getProperty("OutputWorkspace");
-  } else {
-    m_outputW = convertUnits(m_outputW, "dSpacing");
+    // ApplyDiffCal and update m_outputW
+    g_log.information() << "apply calibration workspace to input workspace at "
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
+    Workspace_sptr outputw = std::dynamic_pointer_cast<Workspace>(m_outputW);
+    API::IAlgorithm_sptr applyDiffCalAlg = createChildAlgorithm("ApplyDiffCal");
+    applyDiffCalAlg->setProperty("InstrumentWorkspace", outputw);
+    applyDiffCalAlg->setProperty("CalibrationWorkspace", m_calibrationWS);
+    applyDiffCalAlg->executeAsChildAlg();
+    // grab and cast
+    outputw = applyDiffCalAlg->getProperty("InstrumentWorkspace");
+    m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(outputw);
   }
+
+  m_outputW = convertUnits(m_outputW, "dSpacing");
+  // update the other pointer that people use
+  m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   m_progress->report();
+
+  if (m_calibrationWS) {
+    // NOTE:
+    //  The conventional workflow for AlignAndFocusPowder allows users to modify the instrument so that the averaged
+    //  pixel position can be used when converting back to TOF.
+    //  With the recent changes in Unit.h, Mantid is using the averaged DIFC attached to workspace to convert from
+    //  d-spacing to TOF by default, which unfortunately breaks the intended workflow here.
+    //  To bypass this issue, we are going to remove the attached paramter map so taht Unit.h cannot perform the default
+    //  conversion, which will effectively forcing Mantid to revert back to the original intended method.
+    Workspace_sptr outputw = std::dynamic_pointer_cast<Workspace>(m_outputW);
+    API::IAlgorithm_sptr applyDiffCalAlg = createChildAlgorithm("ApplyDiffCal");
+    applyDiffCalAlg->setProperty("InstrumentWorkspace", outputw);
+    applyDiffCalAlg->setProperty("ClearCalibration", true);
+    applyDiffCalAlg->executeAsChildAlg();
+    // grab and cast
+    outputw = applyDiffCalAlg->getProperty("InstrumentWorkspace");
+    m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(outputw);
+  }
 
   // ----------------- WACKY LORENTZ THING HERE
   // TODO should call LorentzCorrection as a sub-algorithm

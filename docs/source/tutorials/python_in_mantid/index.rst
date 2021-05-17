@@ -16,7 +16,7 @@ Python In Mantid
    solutions/index
 
 
-The following tutorial introduces how to interact with Mantid through Python. Some knowledge of Python is assumed (see `Introduction to Python <https://www.mantidproject.org/Introduction_To_Python>`_).
+The following tutorial introduces how to interact with Mantid through Python. Some knowledge of Python is assumed (see :ref:`introduction_to_python`).
 
 
 **Contents**
