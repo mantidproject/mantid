@@ -109,6 +109,7 @@ class MuonBase(object):
 
         for run in runs:
             run_object = MuonRun(run)
+            print("moo", run_object,self._workspace.keys() )
             if run_object in self._workspace and self._workspace[run_object].workspace_name:
                 workspace_list.append(
                     self._workspace[run_object].workspace_name)

@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 
 class PlotMuonDataPanetModel(object):
@@ -27,6 +27,18 @@ class PlotMuonDataPanetModel(object):
         indices = self._generate_run_indices(workspace_list)
 
         return workspace_list, indices
+
+    def get_workspaces_to_remove(self, group_pair_names, is_raw, plot_type):
+        """
+        :param is_raw: Whether to use raw or rebinned data
+        :param plot_type: plotting type, e.g Counts, Frequency Re
+        :return: a list of workspace names
+        """
+        workspace_list = []
+        for grouppair in group_pair_names:
+            workspace_list += self.get_time_workspaces_to_plot(grouppair, is_raw, plot_type)
+        print("test", workspace_list)
+        return workspace_list
 
     def get_workspaces_to_plot(self, is_raw, plot_type):
         """
@@ -77,3 +89,10 @@ class PlotMuonDataPanetModel(object):
         indices = self._generate_run_indices(workspace_list)
 
         return workspace_list, indices
+
+    def create_tiled_keys(self, tiled_by):
+        if tiled_by == "Group/Pair":
+            keys = self.context.group_pair_context.selected_groups_and_pairs
+        else:
+            keys = [run_list_to_string(item) for item in self.context.data_context.current_runs]
+        return keys

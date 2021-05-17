@@ -30,11 +30,20 @@ class PlotMuonPresenter():
         self._external_plotting_model = ExternalPlottingModel()
         self.add_or_remove_plot_observer = GenericObserverWithArgPassing(
             self.handle_added_or_removed_plot)
-        self.rebin_options_set_observer = GenericObserver(self.handle_rebin_options_changed)
         self._view.on_rebin_options_changed(self.handle_use_raw_workspaces_changed)
         self.workspace_replaced_in_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_replaced_in_ads)
+
+        self._setup_view_connections()
+
+    def _setup_view_connections(self):
+        # tile plots
+        self._view.on_tiled_by_type_changed(self.handle_tiled_by_type_changed)
+        self._view.on_plot_tiled_checkbox_changed(self.handle_plot_tiled_state_changed)
+        # external plot
         self._view.on_external_plot_pressed(self.handle_external_plot_requested)
         self._view.on_plot_type_changed(self.handle_data_type_changed)
+        # rebin
+        self.rebin_options_set_observer = GenericObserver(self.handle_rebin_options_changed)
 
     def handle_data_type_changed(self):
         """
@@ -73,19 +82,16 @@ class PlotMuonPresenter():
         is_added = plot_info["is_added"]
         name = plot_info["name"]
         if is_added:
-            self.add_to_plot(name)
+            self.add_list_to_plot([name],[0])
         else:
-            self.remove_from_plot(name)
+            self.remove_list_from_plot([name])
 
     def add_list_to_plot(self, ws_names: List[str], indicies: List[int],hold: bool = False, autoscale=False):
-
+        self._update_tile_plot()
         self._figure_presenter.plot_workspaces(ws_names, indicies, hold_on=hold, autoscale=False)
 
-    def add_to_plot(self, ws_name: str, hold: bool = False):
-
-        self._figure_presenter.plot_workspaces([ws_name], [0], hold_on=hold, autoscale=False)
-
     def remove_list_from_plot(self, names: List[str]):
+        self._update_tile_plot()
         self._figure_presenter.remove_workspace_names_from_plot(names)
 
     def update_view(self):
@@ -142,6 +148,37 @@ class PlotMuonPresenter():
 
     def handle_use_raw_workspaces_changed(self):
         return
+
+    def handle_plot_tiled_state_changed(self):
+        """
+        Handles the tiled plots checkbox being changed in the view. This leads to two behaviors:
+        If switching to tiled plot, create a new figure based on the number of tiles and replot the data
+        If switching from a tiled plot, create a new single figure and replot the data
+        """
+        if self._view.is_tiled_plot():
+            tiled_by = self._view.tiled_by()
+            keys = self._model.create_tiled_keys(tiled_by)
+            self._figure_presenter.convert_plot_to_tiled_plot(keys, tiled_by)
+        else:
+            self._figure_presenter.convert_plot_to_single_plot()
+
+    def handle_tiled_by_type_changed(self):
+        """
+        Handles the tiled type changing, this will cause the tiles (and the key for each tile) to change.
+        This is handled by generating the new keys and replotting the data based on these new tiles.
+        """
+        if not self._view.is_tiled_plot():
+            return
+        tiled_by = self._view.tiled_by()
+        keys = self._model.create_tiled_keys(tiled_by)
+        self._figure_presenter.convert_plot_to_tiled_plot(keys, tiled_by)
+
+    def _update_tile_plot(self):
+        if self._view.is_tiled_plot():
+            tiled_by = self._view.tiled_by()
+            keys = self._model.create_tiled_keys(tiled_by)
+            print("tiles",keys)
+            self._figure_presenter.create_tiled_plot(keys, tiled_by)
 
 
 class PlotMuonDataPresenter(PlotMuonPresenter):
@@ -212,19 +249,17 @@ class PlotMuonDataPresenter(PlotMuonPresenter):
         unsafe_to_add = self._check_if_counts_and_groups_selected()
         if unsafe_to_add:
             return
-
-        workspace_list, indices = self._model.get_workspace_and_indices_for_group_or_pair(
-            group_or_pair_name, is_raw=self._view.is_raw_plot(), plot_type=self._view.get_plot_type())
-        self.add_list_to_plot(workspace_list, indices, hold=True)
+        self.handle_data_updated()
 
     def handle_removed_group_or_pair_to_plot(self, group_or_pair_name: str):
         """
         Handles a group or pair being removed in grouping widget analysis table
         :param group_or_pair_name: The group or pair name that was removed from the analysis
         """
-        workspace_list, indices = self._model.get_workspace_and_indices_for_group_or_pair(
-            group_or_pair_name, is_raw=True, plot_type=self._view.get_plot_type())
+        workspace_list = self._model.get_workspaces_to_remove(
+            [group_or_pair_name], is_raw=self._view.is_raw_plot(), plot_type=self._view.get_plot_type())
         self.remove_list_from_plot(workspace_list)
+        self.handle_data_updated()
 
     def handle_use_raw_workspaces_changed(self):
         self.handle_data_updated()
