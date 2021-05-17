@@ -50,8 +50,7 @@ algorithm will attempt to fill in the details:
 * **Directory** - Note that in the examples table above, the directory
   of the files have not been provided.  In cases such as this,
   standard Mantid behaviour is observed and the files will be loaded
-  as long as they exist in the folders specified in your `user
-  directories <https://www.mantidproject.org/ManageUserDirectories>`_
+  as long as they exist in the folders specified in your :ref:`user directories <ManageUserDirectories>`
   list.
 * **Instrument** - If the instrument is not specified then runs from
   your chosen default instrument will be loaded.
@@ -119,9 +118,8 @@ Limitations
   ``TSC1-3.raw`` instead.
 * For the ILL data, since the file names (numors) do not contain
   instrument prefixes, multiple file loading will work only if the
-  default facility and instrument are set correspondingly from the
-  `first time setup page
-  <http://www.mantidproject.org/MBC_Getting_set_up#MantidPlot_First-Time_Setup>`_.
+  :ref:`default facility and instrument <Properties File>` are set correspondingly.
+  In MantidWorkbench this can be achieved from the Help->About dialog.
 
 
 Detailed API Documentation
