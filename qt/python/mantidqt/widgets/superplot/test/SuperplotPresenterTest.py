@@ -73,13 +73,6 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.presenter.close()
         self.mView.close.assert_called_once()
 
-    def test_onResize(self):
-        self.mCanvas.reset_mock()
-        self.mFigure.resetMock()
-        self.presenter.onResize()
-        self.mFigure.tight_layout.assert_called_once()
-        self.mCanvas.draw_idle.assert_called_once()
-
     def test_onVisibilityChanged(self):
         self.mCanvas.reset_mock()
         self.mFigure.resetMock()

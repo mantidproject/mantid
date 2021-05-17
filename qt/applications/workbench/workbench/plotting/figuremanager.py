@@ -185,6 +185,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.window.closing.connect(canvas.close_event)
         self.window.closing.connect(self.destroy)
         self.window.visibility_changed.connect(self.fig_visibility_changed)
+        self.window.resized.connect(self.onResize)
 
         self.window.setWindowTitle("Figure %d" % num)
         canvas.figure.set_label("Figure %d" % num)
@@ -342,6 +343,15 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             # It seems that when the python session is killed,
             # Gcf can get destroyed before the Gcf.destroy
             # line is run, leading to a useless AttributeError.
+
+    def onResize(self):
+        """
+        Triggered when the plot window is resized. This method updates the plot
+        layout to fit the actual size.
+        """
+        if self.canvas:
+            self.canvas.figure.tight_layout()
+            self.canvas.draw_idle()
 
     def launch_plot_options(self):
         self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure, parent=self.window)

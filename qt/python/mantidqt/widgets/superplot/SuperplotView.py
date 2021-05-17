@@ -21,11 +21,6 @@ class SuperplotViewSide(QDockWidget):
 
     UI = "superplotSide.ui"
 
-    """
-    Emitted when the widget is resized.
-    """
-    resized = Signal()
-
     def __init__(self, parent=None):
         super().__init__(parent)
         self.here = os.path.dirname(os.path.realpath(__file__))
@@ -33,34 +28,15 @@ class SuperplotViewSide(QDockWidget):
         wsList = self.workspacesList
         wsList.header().resizeSection(0, 120)
 
-    def resizeEvent(self, event):
-        """
-        Override of QWidget::resizeEvent.
-        """
-        super().resizeEvent(event)
-        self.resized.emit()
-
 
 class SuperplotViewBottom(QDockWidget):
 
     UI = "superplotBottom.ui"
 
-    """
-    Emitted when the widget is resized.
-    """
-    resized = Signal()
-
     def __init__(self, parent=None):
         super().__init__(parent)
         self.here = os.path.dirname(os.path.realpath(__file__))
         uic.loadUi(os.path.join(self.here, SuperplotViewBottom.UI), self)
-
-    def resizeEvent(self, event):
-        """
-        Override of QWidget::resizeEvent.
-        """
-        super().resizeEvent(event)
-        self.resized.emit()
 
 
 class SuperplotView(QWidget):
@@ -76,13 +52,11 @@ class SuperplotView(QWidget):
         self._bottomView = SuperplotViewBottom(self)
 
         side = self._sideView
-        side.resized.connect(self._presenter.onResize)
         side.visibilityChanged.connect(self._presenter.onVisibilityChanged)
         side.addButton.clicked.connect(self._presenter.onAddButtonClicked)
         side.workspacesList.itemSelectionChanged.connect(
                 self._presenter.onWorkspaceSelectionChanged)
         bottom = self._bottomView
-        bottom.resized.connect(self._presenter.onResize)
         bottom.holdButton.toggled.connect(self._presenter.onHoldButtonToggled)
         bottom.spectrumSlider.valueChanged.connect(
                 self._presenter.onSpectrumSliderMoved)
