@@ -162,7 +162,7 @@ public:
                    << "L1_cali = " << L1_cali << "\n";
   }
 
-  void test_L1() {
+  void run_L1() {
     g_log.notice() << "test_L1() starts.\n";
     // Generate unique temp files
     auto filenamebase = boost::filesystem::temp_directory_path();
@@ -281,7 +281,7 @@ public:
     TS_ASSERT_LESS_THAN(dang, TOLERANCE_R);
   }
 
-  void test_T0() {
+  void run_T0() {
     g_log.notice() << "test_T0() starts.\n";
 
     // Generate unique temp files
@@ -317,9 +317,9 @@ public:
     // Run the calibration
     // NOTE: this should bring the instrument back to engineering position,
     //       which is the solution
-    bool calibrateL1 = false;
+    bool calibrateL1 = true;
     bool calibrateBanks = false;
-    bool calibrateT0 = false;
+    bool calibrateT0 = true;
     bool tuneSamplePos = true;
     runCalibration(filenamebase.string(), pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
 

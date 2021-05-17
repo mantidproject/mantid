@@ -362,7 +362,8 @@ void SCDCalibratePanels2::exec() {
 
   // STEP_5: Write to disk if required
   if (!XmlFilename.empty())
-    saveXmlFile(XmlFilename, m_BankNames, instCalibrated);
+    saveXmlFile(m_pws, XmlFilename);
+  // saveXmlFile(XmlFilename, m_BankNames, instCalibrated);
 
   if (!DetCalFilename.empty())
     saveIsawDetCal(DetCalFilename, m_BankNames, instCalibrated, m_T0);
@@ -971,6 +972,22 @@ ITableWorkspace_sptr SCDCalibratePanels2::generateCalibrationTable(std::shared_p
 }
 
 /**
+ * @brief Save the calibrated instrument into a IDF using SaveParameterFile alg
+ *
+ * @param pws
+ * @param FileName
+ */
+void SCDCalibratePanels2::saveXmlFile(IPeaksWorkspace_sptr pws, const std::string &FileName) {
+  g_log.notice() << "Save instrument via IDF saver\n";
+
+  IAlgorithm_sptr saveIDF_alg = createChildAlgorithm("SaveParameterFile", -1, -1, false);
+  saveIDF_alg->setLogging(LOGCHILDALG);
+  saveIDF_alg->setProperty("Workspace", pws);
+  saveIDF_alg->setProperty("FileName", FileName);
+  saveIDF_alg->execute();
+}
+
+/**
  * Saves the new instrument to an xml file that can be used with the
  * LoadParameterFile Algorithm. If the filename is empty, nothing gets
  * done.
@@ -989,8 +1006,7 @@ ITableWorkspace_sptr SCDCalibratePanels2::generateCalibrationTable(std::shared_p
 void SCDCalibratePanels2::saveXmlFile(const std::string &FileName,
                                       boost::container::flat_set<std::string> &AllBankNames,
                                       std::shared_ptr<Instrument> &instrument) {
-  g_log.notice() << "Generating xml tree"
-                 << "\n";
+  g_log.notice() << "Generating xml tree \n";
 
   using boost::property_tree::ptree;
   ptree root;

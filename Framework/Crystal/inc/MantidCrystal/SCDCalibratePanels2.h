@@ -105,7 +105,10 @@ private:
   /// Generate a Table workspace to store the calibration results
   Mantid::API::ITableWorkspace_sptr generateCalibrationTable(std::shared_ptr<Geometry::Instrument> &instrument);
 
-  /// Save to xml file for Mantid to load
+  /// Save to xml file for Mantid to load using existing algorithm
+  void saveXmlFile(Mantid::API::IPeaksWorkspace_sptr pws, const std::string &FileName);
+
+  /// Save to xml file for Mantid to load by manual crafting
   void saveXmlFile(const std::string &FileName, boost::container::flat_set<std::string> &AllBankNames,
                    std::shared_ptr<Geometry::Instrument> &instrument);
 
