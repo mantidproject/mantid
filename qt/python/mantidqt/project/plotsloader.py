@@ -295,6 +295,14 @@ class PlotsLoader(object):
             LegendProperties.create_legend(legend, ax)
 
     def update_properties(self, ax, properties):
+        # Support for additonal plot options accessible from general settings
+        if "tickParams" in properties.keys():
+            ax.xaxis.set_tick_params(which="major", **properties["tickParams"]["xaxis"]["major"])
+            ax.xaxis.set_tick_params(which="minor", **properties["tickParams"]["xaxis"]["minor"])
+
+            ax.yaxis.set_tick_params(which="major", **properties["tickParams"]["yaxis"]["major"])
+            ax.yaxis.set_tick_params(which="minor", **properties["tickParams"]["yaxis"]["minor"])
+
         if properties["bounds"]:
             ax.set_position(properties["bounds"])
         ax.set_navigate(properties["dynamic"])
@@ -322,18 +330,25 @@ class PlotsLoader(object):
         if "yAxisProperties" in properties:
             self.update_axis(ax.yaxis, properties["yAxisProperties"])
 
-    def update_axis(self, axis_, properties):
-        if isinstance(axis_, matplotlib.axis.XAxis):
-            if properties["position"] == "top":
-                axis_.tick_top()
-            else:
-                axis_.tick_bottom()
+        if 'spineWidths' in properties:
+            for (spine, width) in properties['spineWidths'].items():
+                ax.spines[spine].set_linewidth(width)
 
-        if isinstance(axis_, matplotlib.axis.YAxis):
-            if properties["position"] == "right":
-                axis_.tick_right()
-            else:
-                axis_.tick_left()
+    def update_axis(self, axis_, properties):
+        if "position" in properties.keys():
+            # Support for older .mtdproj files that did not include additional
+            # plot settings introduced in PR #30121
+            if isinstance(axis_, matplotlib.axis.XAxis):
+                if properties["position"] == "top":
+                    axis_.tick_top()
+                else:
+                    axis_.tick_bottom()
+
+            if isinstance(axis_, matplotlib.axis.YAxis):
+                if properties["position"] == "right":
+                    axis_.tick_right()
+                else:
+                    axis_.tick_left()
 
         labels = axis_.get_ticklabels()
         if properties["fontSize"] != "":
