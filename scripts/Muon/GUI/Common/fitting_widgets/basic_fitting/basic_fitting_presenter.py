@@ -283,6 +283,11 @@ class BasicFittingPresenter:
                                                           self.model.current_chi_squared)
         self.view.update_global_fit_status(self.model.fit_statuses, self.model.current_dataset_index)
 
+    def update_start_and_end_x_in_view_from_model(self) -> None:
+        """Updates the start and end x in the view using the current values in the model."""
+        self.view.start_x = self.model.current_start_x
+        self.view.end_x = self.model.current_end_x
+
     def _get_single_fit_functions_from_view(self) -> list:
         """Returns the fit functions corresponding to each domain as a list."""
         if self.view.fit_object:
