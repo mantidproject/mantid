@@ -285,23 +285,31 @@ class MuonContextTest(unittest.TestCase):
 
         self.assertEqual(deadtime_table, 'deadtime_table_name')
 
-    def test_get_workspace_names_returns_all_stored_workspaces_if_all_selected(self):
+    def test_get_all_workspace_names_of_data_returns_all_stored_workspaces_if_all_selected(self):
         self.populate_ADS()
-        workspace_list = self.context.get_names_of_workspaces_to_fit('19489', 'fwd, bwd, long')
+        workspace_list = self.context.get_all_workspace_names_of_data()
 
         self.assertEqual(Counter(workspace_list),
                          Counter(['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; MA',
                                   'EMU19489; Pair Asym; long; MA']))
 
-    def test_get_workspace_names_returns_nothing_if_no_parameters_passed(self):
+    def test_get_workspace_names_for_returns_the_expected_data_names_for_the_provided_arguments(self):
         self.populate_ADS()
-        workspace_list = self.context.get_names_of_workspaces_to_fit()
+        workspace_list = self.context.get_workspace_names_for("19489", ["fwd", "long"],
+                                                              self.context.get_workspace_names_of_data_with_run)
 
-        self.assertEqual(workspace_list, [])
+        self.assertEqual(workspace_list, ['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Pair Asym; long; MA'])
+
+    def test_get_workspace_names_of_data_with_run_returns_the_expected_names_for_a_single_run_and_group_pair(self):
+        self.populate_ADS()
+        workspace_list = self.context.get_workspace_names_of_data_with_run([19489], "bwd")
+
+        self.assertEqual(workspace_list, ["EMU19489; Group; bwd; Asymmetry; MA"])
 
     def test_get_workspaces_names_copes_with_bad_groups(self):
         self.populate_ADS()
-        workspace_list = self.context.get_names_of_workspaces_to_fit('19489', 'fwd, bwd, long, random, wrong')
+        workspace_list = self.context.get_workspace_names_for('19489', ['fwd', 'bwd', 'long', 'random', 'wrong'],
+                                                              self.context.get_workspace_names_of_data_with_run)
 
         self.assertEqual(Counter(workspace_list),
                          Counter(['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; MA',
@@ -310,7 +318,8 @@ class MuonContextTest(unittest.TestCase):
     def test_get_workspaces_names_copes_with_non_existent_runs(self):
         self.populate_ADS()
 
-        workspace_list = self.context.get_names_of_workspaces_to_fit('19489, 22222', 'fwd, bwd, long')
+        workspace_list = self.context.get_workspace_names_for('19489, 22222', ['fwd', 'bwd', 'long'],
+                                                              self.context.get_workspace_names_of_data_with_run)
 
         self.assertEqual(Counter(workspace_list),
                          Counter(['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; MA',
@@ -319,7 +328,8 @@ class MuonContextTest(unittest.TestCase):
     def test_that_run_ranged_correctly_parsed(self):
         self.populate_ADS()
 
-        workspace_list = self.context.get_names_of_workspaces_to_fit('19489-95', 'fwd, bwd, long')
+        workspace_list = self.context.get_workspace_names_for('19489-95', ['fwd', 'bwd', 'long'],
+                                                              self.context.get_workspace_names_of_data_with_run)
 
         self.assertEqual(Counter(workspace_list),
                          Counter(['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; MA',
