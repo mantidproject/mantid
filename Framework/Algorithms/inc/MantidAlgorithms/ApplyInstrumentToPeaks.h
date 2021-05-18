@@ -6,15 +6,26 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
-
 namespace Mantid {
 namespace Algorithms {
 
 /** ApplyInstrumentToPeaks : TODO: DESCRIPTION
  */
-class MANTID_ALGORITHMS_DLL ApplyInstrumentToPeaks {
+class MANTID_ALGORITHMS_DLL ApplyInstrumentToPeaks : public API::Algorithm {
 public:
+  const std::string name() const override { return "ApplyInstrumentToPeaks"; }
+  int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override { return {}; }
+  const std::string category() const override { return "Crystal\\Peaks"; }
+  const std::string summary() const override {
+    return "Update the peaks within a PeaksWorkspace with a different instrument, keeping the same detectorID and TOF";
+  }
+
+private:
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Algorithms
