@@ -5,9 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import AlgorithmManager, logger
-from mantid.api import AnalysisDataService, CompositeFunction, IAlgorithm, IFunction
+from mantid.api import CompositeFunction, IAlgorithm, IFunction
 from mantid.simpleapi import CopyLogs, EvaluateFunction, RenameWorkspace
 
+from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 from Muon.GUI.Common.ADSHandler.workspace_naming import create_fitted_workspace_name, create_parameter_table_name
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.contexts.fitting_context import FitInformation
@@ -412,11 +413,10 @@ class BasicFittingModel:
     def x_limits_of_current_dataset(self) -> tuple:
         """Returns the x data limits of the currently selected dataset."""
         if self.current_dataset_index is not None:
-            workspace = AnalysisDataService.retrieve(self.current_dataset_name)
-            x_data = workspace.dataX(0)
-            return x_data[0], x_data[-1]
-        else:
-            return self.current_start_x, self.current_end_x
+            x_data = retrieve_ws(self.current_dataset_name).dataX(0)
+            if len(x_data) > 0:
+                return x_data[0], x_data[-1]
+        return self.current_start_x, self.current_end_x
 
     def use_cached_function(self) -> None:
         """Sets the current function as being the cached function."""
