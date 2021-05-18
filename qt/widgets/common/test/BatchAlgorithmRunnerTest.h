@@ -16,6 +16,8 @@
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MockConfiguredAlgorithm.h"
 
+#include <QSignalSpy>
+
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
 
@@ -122,12 +124,13 @@ public:
   void test_basicBatchWorkspaceFailure() {
     BatchAlgorithmRunner runner(nullptr);
 
-    inputFromCreateProps["InputWorkspace"] = "BatchAlgorithmRunner_NoWorkspace";
+    auto props = inputFromCreateProps;
+    props["InputWorkspace"] = "BatchAlgorithmRunner_NoWorkspace";
 
     // Add them to the queue
     // Define the input (and inout, if used) WS properties here
     runner.addAlgorithm(createWsAlg);
-    runner.addAlgorithm(cropWsAlg, inputFromCreateProps);
+    runner.addAlgorithm(cropWsAlg, props);
 
     // Run queue
     TS_ASSERT(!runner.executeBatch());
@@ -140,16 +143,88 @@ public:
   void test_basicBatchPropertyFailure() {
     BatchAlgorithmRunner runner(nullptr);
 
-    inputFromCreateProps["NotAValidProperty"] = "sample_data.nxs";
+    auto props = inputFromCreateProps;
+    props["NotAValidProperty"] = "sample_data.nxs";
 
     // Add them to the queue
     // Define the input (and inout, if used) WS properties here
     runner.addAlgorithm(createWsAlg);
-    runner.addAlgorithm(cropWsAlg, inputFromCreateProps);
+    runner.addAlgorithm(cropWsAlg, props);
 
     // Run queue
     TS_ASSERT(!runner.executeBatch());
     TS_ASSERT_EQUALS(runner.queueLength(), 0);
+  }
+
+  /**
+   * The following tests check that notifications are handled
+   */
+
+  void test_batchCompleteNotification() {
+    BatchAlgorithmRunner runner(nullptr);
+    QSignalSpy spy(&runner, &BatchAlgorithmRunner::batchComplete);
+
+    runner.addAlgorithm(createWsAlg);
+    runner.addAlgorithm(cropWsAlg, inputFromCreateProps);
+    runner.addAlgorithm(scaleWsAlg, inputFromCropProps);
+    runner.executeBatch();
+
+    TS_ASSERT_EQUALS(spy.count(), 1);
+    auto args = spy.takeFirst();
+    auto const error = false;
+    TS_ASSERT_EQUALS(args.at(0).toBool(), error);
+  }
+
+  void test_batchFailedNotification() {
+    BatchAlgorithmRunner runner(nullptr);
+    QSignalSpy spy(&runner, &BatchAlgorithmRunner::batchComplete);
+    auto props = inputFromCreateProps;
+    props["InputWorkspace"] = "BatchAlgorithmRunner_NoWorkspace";
+    runner.addAlgorithm(createWsAlg);
+    runner.addAlgorithm(cropWsAlg, props);
+    runner.executeBatch();
+
+    TS_ASSERT_EQUALS(spy.count(), 1);
+    auto args = spy.takeFirst();
+    auto const error = true;
+    TS_ASSERT_EQUALS(args.at(0).toBool(), error);
+  }
+
+  void test_algorithmStartedNotification() {
+    BatchAlgorithmRunner runner(nullptr);
+    QSignalSpy spy(&runner, &BatchAlgorithmRunner::algorithmStarted);
+
+    runner.addAlgorithm(createWsAlg);
+    runner.addAlgorithm(cropWsAlg, inputFromCreateProps);
+    runner.addAlgorithm(scaleWsAlg, inputFromCropProps);
+    runner.executeBatch();
+
+    TS_ASSERT_EQUALS(spy.count(), 3);
+  }
+
+  void test_algorithmCompleteNotification() {
+    BatchAlgorithmRunner runner(nullptr);
+    QSignalSpy spy(&runner, &BatchAlgorithmRunner::algorithmComplete);
+
+    runner.addAlgorithm(createWsAlg);
+    runner.addAlgorithm(cropWsAlg, inputFromCreateProps);
+    runner.addAlgorithm(scaleWsAlg, inputFromCropProps);
+    runner.executeBatch();
+
+    TS_ASSERT_EQUALS(spy.count(), 3);
+  }
+
+  void test_algorithmErrorNotification() {
+    BatchAlgorithmRunner runner(nullptr);
+    QSignalSpy spy(&runner, &BatchAlgorithmRunner::algorithmError);
+
+    auto props = inputFromCreateProps;
+    props["InputWorkspace"] = "BatchAlgorithmRunner_NoWorkspace";
+    runner.addAlgorithm(createWsAlg);
+    runner.addAlgorithm(cropWsAlg, props);
+    runner.executeBatch();
+
+    TS_ASSERT_EQUALS(spy.count(), 1);
   }
 
 private:
