@@ -300,7 +300,7 @@ class BasicFittingPresenter:
 
     def _check_start_x_is_within_x_limits(self) -> None:
         """Checks the Start X is within the x limits of the current dataset. If not it is set to one of the limits."""
-        x_lower, x_upper = self.model.x_limits_of_current_dataset()
+        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
         if self.view.start_x < x_lower:
             self.view.start_x = x_lower
         elif self.view.start_x > x_upper:
@@ -308,7 +308,7 @@ class BasicFittingPresenter:
 
     def _check_end_x_is_within_x_limits(self) -> None:
         """Checks the End X is within the x limits of the current dataset. If not it is set to one of the limits."""
-        x_lower, x_upper = self.model.x_limits_of_current_dataset()
+        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
         if self.view.end_x < x_lower:
             self.view.end_x = x_lower
         elif self.view.end_x > x_upper:
