@@ -6,9 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-# std imports
-from enum import Enum
-
 # local imports
 from mantidqt.widgets.workspacedisplay.table.presenter_standard \
     import TableWorkspaceDataPresenterStandard, create_table_item
@@ -18,7 +15,11 @@ from .actions.presenter import PeakActionsPresenter
 from .actions.model import PeakActionsModel
 from ..adsobsever import SliceViewerADSObserver
 
+# 3rd party
+from mantid.kernel import logger
+
 # standard
+from enum import Enum
 from typing import List, Union
 
 
@@ -175,13 +176,14 @@ class PeaksViewerCollectionPresenter:
         :param view: View displaying the model information
         """
         self._view = view
+        self._actions_view = view.peak_actions_view
         self._actions_presenter: PeakActionsPresenter = self._create_peaks_actions_presenter()
         self._child_presenters: List[PeaksViewerPresenter] = []
         self._ads_observer = None
         self.setup_ads_observer()
 
     def _create_peaks_actions_presenter(self):
-        return PeakActionsPresenter(PeakActionsModel(), self._view.peaks_actions_view)
+        return PeakActionsPresenter(PeakActionsModel(), self._view.peak_actions_view)
 
     def setup_ads_observer(self):
         if self._ads_observer is None:
@@ -205,7 +207,7 @@ class PeaksViewerCollectionPresenter:
         presenter = PeaksViewerPresenter(self._create_peaksviewer_model(name),
                                          self._view.append_peaksviewer())
         self._child_presenters.append(presenter)
-        self._actions_presenter.append_peaksworkspace(name)
+        self._actions_view.append_peaksworkspace(name)
         return presenter
 
     def overlay_peaksworkspaces(self, names_to_overlay):
@@ -216,7 +218,10 @@ class PeaksViewerCollectionPresenter:
         # being what is displayed. If anything is currently displayed that is
         # not in names_to_overlay then it will be removed from display
         names_already_overlayed = self.workspace_names()
-
+        # DEBUG start
+        msg = f'names_to_overlay ={names_to_overlay}, names_already_overlayed = {names_already_overlayed}'
+        logger.error(msg)
+        # DEBUG end
         # first calculate what is to be removed. make a copy to avoid mutation while iterating
         names_to_overlay_final = names_to_overlay[:]
         for name in names_to_overlay:
@@ -230,6 +235,9 @@ class PeaksViewerCollectionPresenter:
             for name in names_already_overlayed:
                 self.remove_peaksworkspace(name)
 
+        # DEBUG start
+        logger.error(f'names_to_overlay_final ={names_to_overlay_final}')
+        # DEBUG end
         for name in names_to_overlay_final:
             self.append_peaksworkspace(name)
 
@@ -250,7 +258,7 @@ class PeaksViewerCollectionPresenter:
                 self._view.remove_peaksviewer(child.view)
 
         child_presenters.remove(presenter_to_remove)
-        self._actions_presenter.remove_peaksworkspace(name)
+        self._actions_view.remove_peaksworkspace(name)
 
     def workspace_names(self):
         """
@@ -281,10 +289,11 @@ class PeaksViewerCollectionPresenter:
             presenter.notify(event)
 
     def add_peak(self, pos, frame):
-        self.child_presenter(self._actions_presenter.active_peaksworkspace_index).add_peak(pos, frame)
+        self.child_presenter(self._actions_view.active_peaksworkspace_index).add_peak(pos, frame)
 
     def deactivate_peak_adding(self):
-        self._actions_presenter.deactivate_peak_adding()
+        self._actions_view.deactivate_peak_adding()
+        self._view._sliceinfo_provider.view.data_view.enable_peak_addition(self._actions_view.adding_mode_on)
 
     # private api
     def _create_peaksviewer_model(self, name: str) -> PeaksViewerModel:

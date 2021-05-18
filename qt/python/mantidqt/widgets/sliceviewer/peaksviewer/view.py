@@ -225,7 +225,7 @@ class PeaksViewerCollectionView(QWidget):
         return self._peaks_layout.itemAt(item).widget()
 
     @property
-    def peaks_actions_view(self) -> PeakActionsView :
+    def peak_actions_view(self) -> PeakActionsView:
         return self._peak_actions_view
 
     def append_peaksviewer(self) -> PeaksViewerView:

@@ -65,12 +65,6 @@ class PeakActionsPresenter:
                      PeakActionsEvent.ADDING_MODE_CHANGED: self._add_peaks}
         return responses.get(event, response_invalid)
 
-    def append_peaksworkspace(self, name: str):
-        self._view.append_peaksworkspace(name)
-
-    def remove_peaksworkspace(self, name: str):
-        self._view.remove_peaksworkspace(name)
-
     def _remove_peaks(self):
         r"""Delete peaks if the button is pressed"""
         if self._view.erasing_mode_on:
@@ -82,7 +76,3 @@ class PeakActionsPresenter:
 
         # this is very ugly, need a better way of doing this
         self._view.collection_view._sliceinfo_provider.view.data_view.enable_peak_addition(self._view.adding_mode_on)
-
-    def deactivate_peak_adding(self):
-        self._view.deactivate_peak_adding()
-        self._add_peaks()
