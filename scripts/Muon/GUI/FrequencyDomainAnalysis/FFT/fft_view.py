@@ -62,18 +62,18 @@ class FFTView(QtWidgets.QWidget):
             self.FFTTable, True, self.shift_box_row)
 
         table_utils.setRowName(self.FFTTable, 4, "Shift")
-        self.shift = table_utils.addDoubleToTable(self.FFTTable, 0.0, 4)
+        self.shift, _ = table_utils.addDoubleToTable(self.FFTTable, 0.0, 4)
         self.FFTTable.hideRow(4)
 
         table_utils.setRowName(self.FFTTable, 5, "Use Raw data")
         self.Raw_box = table_utils.addCheckBoxToTable(self.FFTTable, True, 5)
 
         table_utils.setRowName(self.FFTTable, 6, "First Good Data")
-        self.x0 = table_utils.addDoubleToTable(self.FFTTable, 0.1, 6)
+        self.x0, _ = table_utils.addDoubleToTable(self.FFTTable, 0.1, 6)
         self.FFTTable.hideRow(6)
 
         table_utils.setRowName(self.FFTTable, 7, "Last Good Data")
-        self.xN = table_utils.addDoubleToTable(self.FFTTable, 15.0, 7)
+        self.xN, _ = table_utils.addDoubleToTable(self.FFTTable, 15.0, 7)
         self.FFTTable.hideRow(7)
 
         table_utils.setRowName(self.FFTTable, 8, "Construct Phase Table")
