@@ -10,6 +10,27 @@ from sans.state.AllStates import AllStates
 from sans.gui_logic.gui_common import (meter_2_millimeter, millimeter_2_meter)
 
 
+def _apply_selective_view_scaling(getter):
+    def wrapper(self):
+        val = getter(self)
+        try:
+            return meter_2_millimeter(val) if self._apply_scaling else val
+        except TypeError:
+            return val
+    return wrapper
+
+
+def _undo_selective_view_scaling(setter):
+    def wrapper(self, val):
+        try:
+            val = millimeter_2_meter(val) if self._apply_scaling else val
+        except TypeError:
+            pass
+        finally:
+            setter(self, val)  # Always take user val including blank string
+    return wrapper
+
+
 class BeamCentreModel(object):
     logger = Logger("CentreFinder")
 
@@ -33,6 +54,8 @@ class BeamCentreModel(object):
         self.update_lab = True
         self.update_hab = True
 
+        self._apply_scaling = True
+
         self.reset_inst_defaults(instrument=SANSInstrument.NO_INSTRUMENT)
 
         self.SANSCentreFinder = SANSCentreFinder
@@ -50,6 +73,8 @@ class BeamCentreModel(object):
             # All other instruments hard-code this as follows
             self._r_min = 0.06 # metres
             self._r_max = 0.280 # metres
+        # Larmor does not use scaling, as one measurement is angle not length
+        self._apply_scaling = instrument is not SANSInstrument.LARMOR
 
     def find_beam_centre(self, state: AllStates):
         """
@@ -192,36 +217,44 @@ class BeamCentreModel(object):
         self._tolerance = millimeter_2_meter(value)
 
     @property
+    @_apply_selective_view_scaling
     def lab_pos_1(self):
-        return meter_2_millimeter(self._lab_pos_1) if self._lab_pos_1 else ''
+        return self._lab_pos_1 if self._lab_pos_1 else ''
 
     @lab_pos_1.setter
+    @_undo_selective_view_scaling
     def lab_pos_1(self, value):
-        self._lab_pos_1 = millimeter_2_meter(value)
+        self._lab_pos_1 = value
 
     @property
+    @_apply_selective_view_scaling
     def lab_pos_2(self):
-        return meter_2_millimeter(self._lab_pos_2) if self._lab_pos_2 else ''
+        return self._lab_pos_2 if self._lab_pos_2 else ''
 
     @lab_pos_2.setter
+    @_undo_selective_view_scaling
     def lab_pos_2(self, value):
-        self._lab_pos_2 = millimeter_2_meter(value)
+        self._lab_pos_2 = value
 
     @property
+    @_apply_selective_view_scaling
     def hab_pos_1(self):
-        return meter_2_millimeter(self._hab_pos_1) if self._hab_pos_1 else ''
+        return self._hab_pos_1 if self._hab_pos_1 else ''
 
     @hab_pos_1.setter
+    @_undo_selective_view_scaling
     def hab_pos_1(self, value):
-        self._hab_pos_1 = millimeter_2_meter(value)
+        self._hab_pos_1 = value
 
     @property
+    @_apply_selective_view_scaling
     def hab_pos_2(self):
-        return meter_2_millimeter(self._hab_pos_2) if self._hab_pos_2 else ''
+        return self._hab_pos_2 if self._hab_pos_2 else ''
 
     @hab_pos_2.setter
+    @_undo_selective_view_scaling
     def hab_pos_2(self, value):
-        self._hab_pos_2 = millimeter_2_meter(value)
+        self._hab_pos_2 = value
 
     @property
     def component(self):
