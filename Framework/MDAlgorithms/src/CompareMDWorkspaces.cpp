@@ -12,6 +12,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
+#include <sstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -30,6 +31,151 @@ public:
 
 namespace Mantid {
 namespace MDAlgorithms {
+
+class SimpleMDEvent {
+
+public:
+  SimpleMDEvent(const std::vector<float> &coordinates, const float &signal, const float &error)
+      : mCoordinates(coordinates), mSignal(signal), mError(error) {
+    //        mCoordinates = coordinates;
+    //        mSignal = signal;
+    //        mError = error;
+  }
+
+  // pretty output
+  std::string str() const {
+    std::stringstream ss;
+    size_t numdirs = mCoordinates.size();
+    for (auto i = 0; i < numdirs; ++i)
+      ss << mCoordinates[i] << ", ";
+    ss << "signal = " << mSignal << ", error = " << mError;
+
+    return ss.str();
+  }
+
+  float getSignal() const { return mSignal; }
+
+  float getError() const { return mError; }
+
+  bool operator()(SimpleMDEvent &event1, const SimpleMDEvent &event2) {
+    std::cout << "() is called\n";
+    return event1 < event2;
+  }
+
+  /**
+   * @brief override operator <
+   * order
+   * 1. coordinate
+   * 2. signal
+   * 3. error
+   * @return
+   */
+  bool operator<(const SimpleMDEvent &event2) {
+
+    bool less(true);
+    bool equal(false);
+
+    // compare coordinates
+    size_t numdirs = mCoordinates.size();
+    for (auto i = 0; i < numdirs; ++i) {
+      if (mCoordinates[i] < event2.mCoordinates[i])
+        less = true;
+      else if (mCoordinates[i] > event2.mCoordinates[i])
+        less = false;
+      else
+        equal = true;
+      // no need to continue
+      if (!equal)
+        break;
+    }
+
+    // signal
+    if (equal && mSignal < event2.mSignal) {
+      less = true;
+      equal = false;
+    } else if (equal && mSignal > event2.mSignal) {
+      less = false;
+      equal = false;
+    }
+
+    // error: no need to continue the comparison
+    if (equal && mError >= event2.mError)
+      less = false;
+
+    //        if (less)
+    //            std::cout << this->str() << " < " << event2.str() << "\n";
+    //        else
+    //            std::cout << this->str() << " > " << event2.str() << "\n";
+
+    return less;
+  }
+
+  bool operator>(const SimpleMDEvent &event2) {
+
+    std::cout << " > is called ... \n";
+
+    // compare coordinates
+    size_t numdirs = mCoordinates.size();
+    for (size_t i = 0; i < numdirs; ++i) {
+      if (mCoordinates[i] <= event2.mCoordinates[i])
+        return false;
+    }
+
+    // signal
+    if (mSignal <= event2.mSignal)
+      return false;
+
+    // error
+    if (mError <= event2.mError)
+      return false;
+
+    return true;
+  }
+
+  bool operator==(const SimpleMDEvent &event2) {
+
+    std::cout << " == is called ... \n";
+
+    // compare coordinates
+    size_t numdirs = mCoordinates.size();
+    for (size_t i = 0; i < numdirs; ++i) {
+      if (mCoordinates[i] != event2.mCoordinates[i])
+        return false;
+    }
+
+    // signal
+    if (mSignal != event2.mSignal)
+      return false;
+
+    // error
+    if (mError != event2.mError)
+      return false;
+
+    return true;
+  }
+
+  bool operator=(const SimpleMDEvent &event2) {
+
+    //        std::cout << " Assigning = is called.... \n";
+
+    // coordiate
+    size_t numdirs = mCoordinates.size();
+    for (size_t i = 0; i < numdirs; ++i)
+      mCoordinates[i] = event2.mCoordinates[i];
+    // signal and error
+    mSignal = event2.mSignal;
+    mError = event2.mError;
+
+    return true;
+  }
+
+private:
+  std::vector<float> mCoordinates;
+  float mSignal;
+  float mError;
+};
+
+bool compareSimpleEvents(SimpleMDEvent &self, const SimpleMDEvent &other) { return (self < other); }
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CompareMDWorkspaces)
@@ -221,17 +367,65 @@ void CompareMDWorkspaces::compareMDWorkspaces(typename MDEventWorkspace<MDE, nd>
       if (m_CheckEvents) {
         const std::vector<MDE> &events1 = mdbox1->getConstEvents();
         const std::vector<MDE> &events2 = mdbox2->getConstEvents();
+
         try {
           this->compare(events1.size(), events2.size(), "Box event vectors are not the same length");
+
           if (events1.size() == events2.size() && events1.size() > 2) {
+
+            std::vector<SimpleMDEvent> events_vec1;
+            std::vector<SimpleMDEvent> events_vec2;
+
             // Check first and last event
             for (size_t i = 0; i < events1.size(); i++) {
+
+              std::vector<float> centers1;
+              std::vector<float> centers2;
+
               for (size_t d = 0; d < nd; d++) {
-                this->compareTol(events1[i].getCenter(d), events2[i].getCenter(d), "Event center does not match");
+                // FIXME this->compareTol(events1[i].getCenter(d), events2[i].getCenter(d), "Event center does not
+                // match");
+                //
+                centers1.push_back(events1[i].getCenter(d));
+                centers2.push_back(events2[i].getCenter(d));
               }
-              this->compareTol(events1[i].getSignal(), events2[i].getSignal(), "Event signal does not match");
-              this->compareTol(events1[i].getErrorSquared(), events2[i].getErrorSquared(),
-                               "Event error does not match");
+              SimpleMDEvent se1(centers1, events1[i].getSignal(), events1[i].getErrorSquared());
+              SimpleMDEvent se2(centers2, events2[i].getSignal(), events2[i].getErrorSquared());
+              events_vec1.push_back(se1);
+              events_vec2.push_back(se2);
+
+              //      FIXME        this->compareTol(events1[i].getSignal(), events2[i].getSignal(), "Event signal does
+              //      not match");
+              //      FIXME        this->compareTol(events1[i].getErrorSquared(), events2[i].getErrorSquared(),
+              //                               "Event error does not match");
+            }
+
+            // sort events and compare
+            std::sort(events_vec1.begin(), events_vec1.end());
+            std::sort(events_vec2.begin(), events_vec2.end());
+
+            //            for (size_t i = 0; i < events_vec1.size(); ++i) {
+            //                g_log.notice() << "Box " << j << " Event " << i << "  :  " << events_vec1[i].str() << "
+            //                ... " << events_vec2[i].str() << "\n";
+            //            }
+            bool same = true;
+
+            for (size_t i = 0; i < events_vec1.size(); ++i) {
+
+              m_tolerance = 1E-5;
+              try {
+                compareTol(events_vec1[i].getSignal(), events_vec2[i].getSignal(), "");
+                compareTol(events_vec1[i].getError(), events_vec2[i].getError(), "");
+              } catch (CompareFailsException &) {
+                g_log.error() << "Box " << j << " event " << i << " signal difference = "
+                              << fabs(events_vec1[i].getSignal() - events_vec2[i].getSignal()) << "\n";
+                g_log.error() << "Box " << j << " Event " << i << "  :  " << events_vec1[i].str() << " ... "
+                              << events_vec2[i].str() << "\n";
+                same = false;
+              }
+            }
+            if (!same) {
+              throw CompareFailsException("MDEvents are not the same");
             }
           }
         } catch (CompareFailsException &) {
@@ -242,8 +436,11 @@ void CompareMDWorkspaces::compareMDWorkspaces(typename MDEventWorkspace<MDE, nd>
         }
         mdbox1->releaseEvents();
         mdbox2->releaseEvents();
-      } // Don't compare if BoxStructureOnly
-    }   // is mdbox1
+      }      // Don't compare if BoxStructureOnly
+    } else { // is mdbox1
+      g_log.error() << "Box " << j << ", MDEvent box 1 and/or box2 are NULL"
+                    << "\n";
+    }
   }
 }
 
