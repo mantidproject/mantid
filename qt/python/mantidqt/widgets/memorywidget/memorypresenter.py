@@ -27,6 +27,7 @@ class MemoryPresenter(object):
         self.view = view
         self.timer = Timer(TIME_INTERVAL_MEMORY_USAGE_UPDATE, self.update_memory_usage)
         self.thread_on = False
+        self.updating_cancelled = False
         self.closing_workbench = False
         self.update_memory_usage()
         self.set_bar_color_at_start()
@@ -68,11 +69,13 @@ class MemoryPresenter(object):
         """
         Gets memory usage information and passes it to the view
         """
-        self.thread_on = False
-        mem_used_percent, mem_used, mem_avail = get_memory_info()
-        self.view.set_value(mem_used_percent, mem_used, mem_avail)
-        self._spin_off_another_time_thread()
+        if not self.updating_cancelled:
+            self.thread_on = False
+            mem_used_percent, mem_used, mem_avail = get_memory_info()
+            self.view.set_value(mem_used_percent, mem_used, mem_avail)
+            self._spin_off_another_time_thread()
 
     def cancel_memory_update(self):
         self.timer.cancel()
+        self.updating_cancelled = True
         self.thread_on = False
