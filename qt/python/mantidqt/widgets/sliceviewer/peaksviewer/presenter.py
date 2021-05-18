@@ -14,7 +14,8 @@ from mantidqt.widgets.workspacedisplay.table.presenter_standard \
     import TableWorkspaceDataPresenterStandard, create_table_item
 from .model import create_peaksviewermodel, PeaksViewerModel
 from .view import PeaksViewerView, PeaksViewerCollectionView
-from .actions.view import PeakActionsView
+from .actions.presenter import PeakActionsPresenter
+from .actions.model import PeakActionsModel
 from ..adsobsever import SliceViewerADSObserver
 
 # standard
@@ -155,8 +156,8 @@ class PeaksViewerPresenter:
 
 
 class PeaksViewerCollectionPresenter:
-    """Controls a widget comprising of multiple PeasViewerViews to display and interact with multiple PeaksWorkspaces,
-     as well as a widget of PeakActions to add and remove peaks"""
+    """Controls a widget comprising of multiple PeasViewerViews to display and
+    interact with multiple PeaksWorkspaces"""
 
     # constants
     # colors for each peaks workspace - it is unlikely there will be more than 3 at once
@@ -174,10 +175,13 @@ class PeaksViewerCollectionPresenter:
         :param view: View displaying the model information
         """
         self._view = view
-        self._actions_view: PeakActionsView = view.peak_actions_view
+        self._actions_presenter: PeakActionsPresenter = self._create_peaks_actions_presenter()
         self._child_presenters: List[PeaksViewerPresenter] = []
         self._ads_observer = None
         self.setup_ads_observer()
+
+    def _create_peaks_actions_presenter(self):
+        return PeakActionsPresenter(PeakActionsModel(), self._view.peaks_actions_view)
 
     def setup_ads_observer(self):
         if self._ads_observer is None:
@@ -201,7 +205,7 @@ class PeaksViewerCollectionPresenter:
         presenter = PeaksViewerPresenter(self._create_peaksviewer_model(name),
                                          self._view.append_peaksviewer())
         self._child_presenters.append(presenter)
-        self._actions_view.append_peaksworkspace(name)
+        self._actions_presenter.append_peaksworkspace(name)
         return presenter
 
     def overlay_peaksworkspaces(self, names_to_overlay):
@@ -246,7 +250,7 @@ class PeaksViewerCollectionPresenter:
                 self._view.remove_peaksviewer(child.view)
 
         child_presenters.remove(presenter_to_remove)
-        self._actions_view.remove_peaksworkspace(name)
+        self._actions_presenter.remove_peaksworkspace(name)
 
     def workspace_names(self):
         """
@@ -255,6 +259,7 @@ class PeaksViewerCollectionPresenter:
         names = []
         for presenter in self._child_presenters:
             names.append(presenter.model.peaks_workspace.name())
+
         return names
 
     def child_presenter(self, identifier: Union[int, str]) -> PeaksViewerPresenter:
@@ -276,11 +281,10 @@ class PeaksViewerCollectionPresenter:
             presenter.notify(event)
 
     def add_peak(self, pos, frame):
-        self.child_presenter(self._actions_view.active_peaksworkspace_index).add_peak(pos, frame)
+        self.child_presenter(self._actions_presenter.active_peaksworkspace_index).add_peak(pos, frame)
 
     def deactivate_peak_adding(self):
-        self._actions_view.deactivate_peak_adding()
-        self._view._sliceinfo_provider.view.data_view.enable_peak_addition(self._actions_view.adding_mode_on)
+        self._actions_presenter.deactivate_peak_adding()
 
     # private api
     def _create_peaksviewer_model(self, name: str) -> PeaksViewerModel:
