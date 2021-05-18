@@ -7,17 +7,17 @@ Superplot
 Superplot is a decorator widget of the plot window. It facilitates over-plotting
 and manipulation of overplotted data. The superplot is accessible:
 
-* directly in the plot window through the menu bar
-* in the context menu of supported workspaces
+* Directly in the plot window through the menu bar
+* In the context menu of supported workspaces
 
 
 **Widget description**
 
 The superplot widget is composed of two distinct parts:
 
-* left side of the plot window: a list of selected workspaces and spectra. This
+* Left side of the plot window: a list of selected workspaces and spectra. This
   list contains workspaces names and under them the plotted data if any.
-* bottom of the plot: a navigation bar that contains a slider and different
+* Bottom of the plot: a navigation bar that contains a slider and different
   buttons to navigate through the bins/spectra and control the plotted data.
 
 .. image:: ../images/superplot_1.png
