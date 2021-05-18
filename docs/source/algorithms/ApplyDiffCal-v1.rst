@@ -1,3 +1,5 @@
+.. _algorithms.ApplyDiffCal.v1:
+
 .. algorithm::
 
 .. summary::

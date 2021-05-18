@@ -46,7 +46,7 @@ disallow table workspace types, by simply using a different class in the
 
 As an example, consider the definition above using ``WorkspaceProperty``.
 If we wanted to restrict the type to a ``MatrixWorkspace`` type then we
-can simply make the replacement ``WorkspaceProperty`` \rightarrow
+can simply replace ``WorkspaceProperty`` with
 ``MatrixWorkspaceProperty``
 
 .. code-block:: python

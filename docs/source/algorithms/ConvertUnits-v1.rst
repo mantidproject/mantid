@@ -1,3 +1,5 @@
+.. _algorithms.ConvertUnits.v1:
+
 .. algorithm::
 
 .. summary::

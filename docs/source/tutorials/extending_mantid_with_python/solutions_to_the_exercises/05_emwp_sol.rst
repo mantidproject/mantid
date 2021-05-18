@@ -9,7 +9,7 @@ defined as:
 
 .. math::
 
-    y = A_0 + A_1x
+    \LARGE y = A_0 + A_1x
 
 .. code-block:: python
 

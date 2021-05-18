@@ -15,7 +15,7 @@ automatically:
    :height: 500
 
 The image above shows the configuration item that controls where Mantid
-looks for Python extensions. This is a semi-colon(;) separated list of
+looks for Python extensions. This is a semi-colon (**;**) separated list of
 directories that should be search on startup.
 
 **Warning**: The search is recursive so be careful with directories you put

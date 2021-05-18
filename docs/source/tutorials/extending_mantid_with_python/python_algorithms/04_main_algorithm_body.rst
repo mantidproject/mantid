@@ -18,7 +18,7 @@ another function called ``PyExec``, whose definition should look like:
 
 Inside ``PyExec`` you can write any python code that is necessary to run
 your desired processing. It can of course call Mantid python functions but
-you can also run any python code you like, i.e
+you can also run any python code you like, i.e.
 
 .. code-block:: python
 

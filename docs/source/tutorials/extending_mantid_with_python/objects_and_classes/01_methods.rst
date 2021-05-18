@@ -13,7 +13,7 @@ object that called the method and the standard convention is to name the
 variable ``self``.
 
 Python puts the ``self`` argument in automatically. For example, we can
-add a ``sleep()`` method to our Person class:
+add a ``sleep()`` method to our ``Person`` class:
 
 .. code-block:: python
 
@@ -24,14 +24,14 @@ add a ``sleep()`` method to our Person class:
         def sleep(self):
             print(self.name + ' is sleeping')
 
-The method can only used through an object so one must have been constructed
+The method can only be used through an object so one must have been constructed
 first, e.g.
 
 .. code-block:: python
 
     person1 = Person()
     # Note: We call it with no arguments, Python inserts self automatically.
-    # We use parantheses because sleep is a function
+    # We use parentheses because sleep is a function
     person1.sleep()
 
 Other than the ``self`` argument, methods behave in the same manner as

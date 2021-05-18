@@ -18,8 +18,9 @@ script that focuses some powder diffraction data.
 
     # The steps the algorithm should perform are
     #  - Use the Load algorithm to load the TOF data
-    #  - Run AlignDetectors on the TOF data using the file given by the CalFilename property
-    #  - Run DiffractionFocussing on the previous output & focus the data using the same cal file as the previous step
+    #  - Apply the calibration file using ApplyDiffCalc
+    #  - Run ConvertUnits on the TOF data to convert to dSpacing
+    #  - Run DiffractionFocusing on the previous output & focus the data using the same cal file from the earlier step
     #   (called a grouping file here)
     #  - Set the output from the DiffractionFocussing algorithm as the output of PowerDiffractionReduce.
     #  - Delete the temporary reference using DeleteWorkspace
@@ -52,14 +53,15 @@ script that focuses some powder diffraction data.
                                                    direction=Direction.Output))
 
         def PyExec(self):
-            from mantid.simpleapi import Load, AlignDetectors, DiffractionFocussing
+            from mantid.simpleapi import Load, ApplyDiffCal, ConvertUnits, DiffractionFocussing, DeleteWorkspace
 
             # Load file to workspace
             _tmpws = Load(Filename=self.getPropertyValue("Filename"))
 
-            # AlignDetectors
+            # Apply Calibration and Convert Units
             calfile = self.getProperty("CalFilename").value
-            _tmpws = AlignDetectors(InputWorkspace=_tmpws, CalibrationFile=calfile)
+            ApplyDiffCal(InstrumentWorkspace=_tmpws, CalibrationFile=calfile)
+            _tmpws = ConvertUnits(InputWorkspace=_tmpws, Target="dSpacing")
 
             # Focus
             _tmpws = DiffractionFocussing(InputWorkspace=_tmpws, GroupingFileName=calfile)

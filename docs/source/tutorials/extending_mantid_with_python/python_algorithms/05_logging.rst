@@ -4,12 +4,12 @@
 Logging
 =======
 
-In Mantid logging can be used to issue messages that appear in a variety of
+In Mantid, logging can be used to issue messages that appear in a variety of
 places depending on the running environment. For example, in MantidWorkbench
-the Messages window is used to display log messages to users and everything
+the Messages Box is used to display log messages to users and everything
 is also logged to a file.
 
-The level of detail is controlled by right-clicking on the Messages window in
+The level of detail is controlled by right-clicking on the Messages Box in
 MantidWorkbench and selecting "log level". Alternatively it can be controlled
 by the **logging.loggers.root.level** key in the *Mantid.user.properties*
 file. There are several levels of logging available, ordered in terms of
@@ -23,7 +23,7 @@ increasing priority:
 
 Any log message that is sent at a priority level above or equal to the value
 set in the properties file will appear in the appropriate location, i.e.
-Messages window, log file.
+Messages Box, log file.
 
 Within a Python algorithm the log can be accessed using ``self.log()``. To
 post a message, simply choose a priority level and call a function that has

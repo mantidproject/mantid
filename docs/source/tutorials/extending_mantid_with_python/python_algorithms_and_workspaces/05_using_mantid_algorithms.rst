@@ -6,11 +6,11 @@ Using Mantid Algorithms
 
 Any of the defined algorithms in Mantid, this includes other extensions,
 can be used as part of your new algorithm. To call an algorithm simply use
-the standard syntax for calling algorithms in Mantid, i.e the algorithm
+the standard syntax for calling algorithms in Mantid, i.e. the algorithm
 name followed by the arguments.
 
-A good example might be wanting to load a file, as Load is a very flexible
-algorithm:
+A good example might be wanting to load a file, as
+:ref:`Load <algorithms.Load.v1>` is a very flexible algorithm:
 
 .. code-block:: python
 

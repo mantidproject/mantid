@@ -1,3 +1,5 @@
+.. _algorithms.DeleteWorkspace.v1:
+
 .. algorithm::
 
 .. summary::

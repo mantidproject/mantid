@@ -31,11 +31,12 @@ The objects are then combined together to form the program as a whole.
 Classes
 =======
 
-A ``class`` is a blueprint that is used to construct an object, i.e tells it
+A ``class`` is a blueprint that is used to construct an object, i.e. tells it
 what data it knows about and what actions can be applied to it.
 
-In Python this is done using the ``class`` keyword, for example, a Person class
-with a single piece of data (attribute) that stores their name would look like:
+In Python this is done using the ``class`` keyword, for example, a ``Person``
+class with a single piece of data (attribute) that stores their name would
+look like:
 
 .. code-block:: python
 

@@ -9,8 +9,7 @@ are declared. In some cases, however, the fit can be unstable in one or more
 of the parameters. As an example consider a Gaussian:
 
 .. math::
-
-    Ae^{-\frac{(x-c)^2}{2σ^2}}
+    \LARGE Ae^{-\frac{(x-c)^2}{2σ^2}}
 
 The simple function fits over 3 parameters:
 
@@ -18,13 +17,14 @@ The simple function fits over 3 parameters:
 #. ``c`` - Peak centre
 #. ``σ`` - Measure of the width
 
-However, the :math:`\frac{1}{σ^2}` dependence causes the fit to become
+However, the :math:`\Large\frac{1}{σ^2}` dependence causes the fit to become
 unstable if the σ parameter is varied by the minimization routine. A more
-stable fit can be achieved by fitting in :math:`\frac{1}{σ^2}`.
+stable fit can be achieved by fitting in :math:`\Large\frac{1}{σ^2}`.
 
-We could just naively change the σ parameter to :math:`\frac{1}{σ^2}` and fit
-over this. The function is now much less user-friendly though as we still want
-to think terms of the values of A, c, σ and not A, c, :math:`\frac{1}{σ^2}`.
+We could just naively change the **σ** parameter to :math:`\Large\frac{1}{σ^2}`
+and fit over this. The function is now much less user-friendly though as we
+still want to think terms of the values of **A**, **c**, **σ** and not **A**,
+**c**, :math:`\Large\frac{1}{σ^2}`.
 
 Our optimisation framework actually works with the concept of active
 parameters, where we allow the fitting to proceed over different parameter

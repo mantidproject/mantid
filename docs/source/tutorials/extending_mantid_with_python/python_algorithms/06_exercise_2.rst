@@ -5,8 +5,8 @@ Exercise 2
 ==========
 
 The aim of this exercise is to write a small Python algorithm that is able
-to print to the results log the first ``n`` numbers of the Fibonacci series.
-The series starts with ``0,1`` and then the next term is the sum of the
+to print to the Messages Box the first ``n`` numbers of the Fibonacci series.
+The series starts with ``0, 1`` and then the next term is the sum of the
 two previous terms.
 
 The algorithm should:
@@ -20,7 +20,7 @@ The algorithm should:
    the GUI.
 #. The log message for the value of each term should be at ``notice`` level
    and in the format: "Term 1 in the Fibonacci series is: 0"
-#. Add log message at debug level that prints the value of the ``NTerms``
+#. Add a log message at the debug level that prints the value of the ``NTerms``
    property after it has been retrieved.
 
 As an additional exercise in understanding errors:

@@ -16,14 +16,14 @@ Python Fit Functions
 
 Mantid's optimisation framework is split into different components:
 
-* Function evalution.
+* Function evaluation.
 * Cost function calculation.
 * Minimization algorithms.
 
 Each of these can be swapped out for a different component that has some
 other behaviour to maximise flexibility. Only the functions themselves
 can be written in Python. The new Python functions are treated on exactly the
-same level as the shipped C++ functions and offer the same level of
+same level as the shipped ``C++`` functions and offer the same level of
 interactivity within the GUI.
 
 Function Types

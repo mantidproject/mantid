@@ -5,7 +5,7 @@ Analytical Derivatives
 ======================
 
 By default, currently for ``IFunction1D`` types, a numerical derivative
-is calculated. An analytical deriviative can be supplied by defining a
+is calculated. An analytical derivative can be supplied by defining a
 ``functionDeriv1D`` method, which takes three arguments: ``self``,
 ``xvals`` and ``jacobian``. The jacobian matrix *(notice how it is not square)*
 stores the values of the partial derivatives with respect to each of the

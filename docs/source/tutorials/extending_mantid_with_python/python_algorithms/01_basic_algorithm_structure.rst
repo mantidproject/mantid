@@ -4,8 +4,8 @@
 Basic Algorithm Structure
 =========================
 
-Each Python algorithm within Mantid must contain a few elements in order that
-it can be recognised as an algorithm.
+Each Python algorithm within Mantid must contain a few elements in order for
+it to be recognised as an algorithm.
 
 The basic layout should look like:
 
@@ -53,12 +53,12 @@ the ``category()`` function in the definition, i.e.
 
        # The rest is the same as above
 
-Subcategories can be defined using a "\\" (you need two \'s as the first is
+Subcategories can be defined using a **"\\\\\\\\"** (you need two **\\\\**'s as the first is
 the escape character) to separate the categories. You can also state that
-your algorithm should appear in multiple categories by seperating them with
-a semi-colon ";".
+your algorithm should appear in multiple categories by separating them with
+a semi-colon **";"**.
 
-i.e The following code defines that the algorithm should be stored in
+i.e. The following code defines that the algorithm should be stored in
 Useful->Tools and MyTools.
 
 .. code-block:: python

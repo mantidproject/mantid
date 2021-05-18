@@ -1,3 +1,5 @@
+.. _algorithms.DiffractionFocussing.v2:
+
 .. algorithm::
 
 .. summary::

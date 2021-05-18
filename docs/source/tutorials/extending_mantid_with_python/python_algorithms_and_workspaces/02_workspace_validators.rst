@@ -4,7 +4,7 @@
 Workspace Validators
 ====================
 
-As with the basic (int, float etc) types there are some special validators for
+As with the basic types (int, float, etc.) there are some special validators for
 checking input workspaces.
 
 Those currently available are:

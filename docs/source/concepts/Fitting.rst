@@ -82,7 +82,7 @@ sum and convolution of other fit functions. For more information for
 how to create a model see the documentation for :ref:`Fit <algm-Fit>`, the
 Fitting section of the Mantid Introduction :ref:`tutorial <mantid_basic_course>`
 for how to do this using the Fit Function Toolbox and
-this Python fit tutorial: https://www.mantidproject.org/Introduction_to_Python_Fit_Functions.
+this Python fit tutorial: :ref:`emwp_py_fit_funcs`.
 
 From the class diagram above note fitting also support constraints (IConstraint),
 see :ref:`here <algm-Fit>` for more on this. Further fitting parameters can be

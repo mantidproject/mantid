@@ -29,7 +29,7 @@ to store it locally once after it has been set by the user. A method called
 ``setAttributeValue`` is defined by the super class and is called
 automatically by the framework when a user sets an attribute.
 
-If defined on your class then you can use it to set a python attribute on your object, e.g.
+If defined in your class then you can use it to set a python attribute on your object, e.g.
 
 .. code-block:: python
 

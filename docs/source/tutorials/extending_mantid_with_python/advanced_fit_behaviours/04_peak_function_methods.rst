@@ -5,7 +5,7 @@ Peak Function Methods
 =====================
 
 ``IPeakFunction`` defines 6 special methods for dealing with the peak shape.
-The first 3 all return an **estimate** for the values of the ``centre``,
+The first 3 all return an *estimate* for the values of the ``centre``,
 ``height`` & ``fwhm`` for the current parameter values.
 
 The second 3: ``setCentre``, ``setHeight``, ``setFwhm``, all pass along

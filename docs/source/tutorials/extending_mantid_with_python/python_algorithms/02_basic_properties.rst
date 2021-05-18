@@ -24,7 +24,7 @@ are declared using ``declareProperty`` and a default value, e.g.
 This will create an ``int`` input property called *InputValue* with a
 default value of -1.
 
-A property is an input by default. To change this use the ``direction``
+A property is an input by default. To change this, use the ``direction``
 keyword within ``declareProperty`` call:
 
 .. code-block:: python

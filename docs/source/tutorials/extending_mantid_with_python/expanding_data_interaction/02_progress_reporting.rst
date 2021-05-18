@@ -14,14 +14,14 @@ e.g.
 .. code-block:: python
 
     def PyExec(self):
-        endrange=100000
+        endrange = 100000
 
         # Create a Progress object that covers the progress
         # of the whole algorithm (start=0.0,end=1.0) and will
         # report a maximum of endrange times
-        prog_reporter = Progress(self,start=0.0,end=1.0,
+        prog_reporter = Progress(self, start=0.0, end=1.0,
                                  nreports=endrange)
-        for i in range(0,endrange):
+        for i in range(0, endrange):
             prog_reporter.report("Processing")
 
 Each time the ``report`` is called it can be passed an optional message and
@@ -33,7 +33,7 @@ called. The current value can be set using a variant of report, e.g.
 .. code-block:: python
 
     def PyExec(self):
-        endrange=100000
+        endrange = 100000
 
         # Create a Progress object that covers the progress
         # of the whole algorithm (start=0.0, end=1.0)
@@ -52,7 +52,7 @@ It is also possible to step the progress in different increments using
 .. code-block:: python
 
     def PyExec(self):
-        endrange=100000
+        endrange = 100000
 
         # Create a Progress object that covers the progress
         # of the whole algorithm (start=0.0,end=1.0)

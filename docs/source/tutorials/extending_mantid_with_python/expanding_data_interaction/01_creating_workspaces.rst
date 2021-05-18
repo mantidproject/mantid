@@ -34,7 +34,7 @@ method called ``create``. To create a brand new workspace from scratch:
                                             XLength=10, YLength=9)
         self.setProperty("OutputWorkspace", output_ws)
 
-The above code will create new 2D workspace filled with zeroes. The
+The above code will create a new 2D workspace filled with zeroes. The
 ``setProperty`` call is important as it is required for Mantid to store the
 workspace outside of the algorithm.
 

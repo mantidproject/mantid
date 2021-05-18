@@ -5,8 +5,8 @@ Exercise 2 Solutions
 ====================
 
 The aim of this exercise is to write a small Python algorithm that is able
-to print to the results log the first ``n`` numbers of the Fibonacci series.
-The series starts with ``0,1`` and then the next term is the sum of the
+to print to the Messages Box the first ``n`` numbers of the Fibonacci series.
+The series starts with ``0, 1`` and then the next term is the sum of the
 two previous terms.
 
 .. code-block:: python

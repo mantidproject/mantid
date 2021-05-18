@@ -11,7 +11,7 @@ parameters. Their main use is to improve the choosing of starting values
 for these types of function from the GUI.
 
 The function calculation also only occurs around a given *peak radius*
-(defined in the View->Preferences->Mantid->CurveFitting menu). Any function
+(defined in Settings->Fitting->CurveFitting menu). Any function
 values outside this radius are automatically zeroed. The best description
 here is to walk through defining an example. Here will implement a ``Gaussian``
 (called PyGaussian so as not interfere with Mantid's Gaussian).

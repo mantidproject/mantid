@@ -76,7 +76,7 @@ derivative.
         def functionDeriv1D(self, xvals, out):
             # xvals is a 1D numpy array that contains the X values for the defined fitting range.
             # out is a Jacobian matrix object. Mantid expects the partial derivatives
-            # w.r.t the paramaters and x values to be stored here
+            # w.r.t the parameters and x values to be stored here
             # Get the current values of the 3 parameters
 
             amplitude = self.getParameterValue("Amplitude")
@@ -130,8 +130,8 @@ The aim of this exercise is to implement a peak fit function function to fit.
 
         def functionDerivLocal(self, xvals, out):
             # xvals is a 1D numpy array that contains the X values for the defined fitting range.
-            # out is a Jacobian matrix object. Mantid expects the partial deriviatives
-            # w.r.t the paramaters and x values to be stored here
+            # out is a Jacobian matrix object. Mantid expects the partial derivatives
+            # w.r.t the parameters and x values to be stored here
 
             # Get the current parameter values
             amplitude = self.getParameterValue("Amplitude")
