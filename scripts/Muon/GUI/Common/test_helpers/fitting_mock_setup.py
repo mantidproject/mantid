@@ -24,6 +24,7 @@ def add_mock_methods_to_basic_fitting_view(view):
 
     view.set_datasets_in_function_browser = mock.Mock()
     view.set_current_dataset_index = mock.Mock()
+    view.set_x_data_limits = mock.Mock()
     view.update_local_fit_status_and_chi_squared = mock.Mock()
     view.update_global_fit_status = mock.Mock()
     view.update_fit_function = mock.Mock()
@@ -36,7 +37,7 @@ def add_mock_methods_to_basic_fitting_view(view):
     return view
 
 
-def add_mock_methods_to_basic_fitting_model(model, dataset_names, current_dataset_index, fit_function, start_x,
+def add_mock_methods_to_basic_fitting_model(model, dataset_names, current_dataset_index, fit_function, start_x, end_x,
                                             fit_status, chi_squared):
     # Mock the methods of the model
     model.clear_single_fit_functions = mock.Mock()
@@ -51,6 +52,7 @@ def add_mock_methods_to_basic_fitting_model(model, dataset_names, current_datase
     model.reset_start_xs_and_end_xs = mock.Mock()
     model.reset_fit_statuses_and_chi_squared = mock.Mock()
     model.reset_fit_functions = mock.Mock()
+    model.x_limits_of_current_dataset = mock.Mock(return_value=(start_x, end_x))
     model.retrieve_first_good_data_from_run = mock.Mock(return_value=start_x)
     model.get_active_fit_function = mock.Mock(return_value=fit_function)
     model.get_active_workspace_names = mock.Mock(return_value=[dataset_names[current_dataset_index]])

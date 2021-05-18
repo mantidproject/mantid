@@ -371,8 +371,8 @@ class GeneralFittingPresenterTest(unittest.TestCase):
     def _setup_mock_model(self):
         self.model = mock.Mock(spec=GeneralFittingModel)
         self.model = add_mock_methods_to_basic_fitting_model(self.model, self.dataset_names, self.current_dataset_index,
-                                                             self.fit_function, self.start_x, self.fit_status,
-                                                             self.chi_squared)
+                                                             self.fit_function, self.start_x, self.end_x,
+                                                             self.fit_status, self.chi_squared)
         # Mock the context
         self.model.context = mock.Mock()
 
