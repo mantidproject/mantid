@@ -70,6 +70,7 @@ New features
 ############
 
 - New IDF for upgraded VULCAN instrument
+- New setting for default peak function to fit in the Engineering Diffraction interface (initial default is :ref:`BackToBackExponential <func-BackToBackExponential>`).
 
 Improvements
 ############

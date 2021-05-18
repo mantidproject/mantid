@@ -36,7 +36,11 @@ Settings
     providing the option to change the default output directory and force the
     recalculation of the vanadium correction files. The user can also select the
     log values from a list which are loaded with data in the fitting tab and select
-    a log by which to sort the runs in a sequential fit.
+    a log by which to sort the runs in a sequential fit. There is also an option to
+    specify a peak function to fit (limited to a subset of all peak functions that
+    are recommended for the UI) which will be set on opening the interface. Note that
+    the user can select any peak function to fit (even a non-recommended one) at a
+    later point when adding a peak in the fitting tab.
 
 Close
     Close the interface.
@@ -186,13 +190,12 @@ Fitting
 
 This tab will allow for single peak fitting of focused run files.
 
-Focused run files can be loaded from the file system into mantid from the interface and converted to units TOF or d-sapcing. The interface will keep track of all the
-workspaces that it has created from these files. When a focussed run is loaded, the proton charge weighted average (and standard deviation) of the log values set in the
+Focused run files can be loaded from the file system into mantid from the interface and converted to units TOF or d-spacing. The interface will keep track of all the
+workspaces that it has created from these files. When a focused run is loaded, the proton charge weighted average (and standard deviation) of the log values set in the
 settings options are calculated and stored in a grouped workspace accessible in the main mantid window.
 
 Loaded workspaces can be plotted in the interface and the mantid fitting capability can be accessed from the 'Fit' button on the plot toolbar.
-This allows for the user to select peaks of any supported type (e.g. :ref:`Pseudo-Voigt <func-PseudoVoigt>` and
-:ref:`BackToBackExponential <func-BackToBackExponential>`) by right-clicking on the plot. The inital parameters can be varied interactively by dragging sliders (vertical lines on the plot).
+This allows for the user to select peaks of any supported type (the default is :ref:`BackToBackExponential <func-BackToBackExponential>`) by right-clicking on the plot. The initial parameters can be varied interactively by dragging sliders (vertical lines on the plot).
 After a successful fit the best-fit model is stored as a setup in the fit browser (Setup > Custom Setup) with the name of the workspace fitted.
 Selecting this loads the function and the parameters and the curve can be inspected by doing Display > Plot Guess.
 
