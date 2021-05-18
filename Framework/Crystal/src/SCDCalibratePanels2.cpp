@@ -181,6 +181,7 @@ void SCDCalibratePanels2::init() {
   // Output options group
   declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The workspace containing the calibration table.");
+  declareProperty("T0", 0.0, "Returns the TOF offset from optimization", Kernel::Direction::Output);
   const std::vector<std::string> detcalExts{".DetCal", ".Det_Cal"};
   declareProperty(
       std::make_unique<FileProperty>("DetCalFilename", "SCDCalibrate2.DetCal", FileProperty::OptionalSave, detcalExts),
@@ -1034,13 +1035,67 @@ void SCDCalibratePanels2::saveXmlFile(const std::string &FileName,
   parafile.put("<xmlattr>.instrument", instrument->getName());
   parafile.put("<xmlattr>.valid-from", instrument->getValidFromDate().toISO8601String());
 
+  // get L1 info for source
+  ptree src;
+  ptree src_dx, src_dy, src_dz;
+  ptree src_dx_val, src_dy_val, src_dz_val;
+  // -- get positional data from source
+  IComponent_const_sptr source = instrument->getSource();
+  V3D sourceRelPos = source->getRelativePos();
+  // -- add data to node
+  src_dx_val.put("<xmlattr>.val", sourceRelPos.X());
+  src_dy_val.put("<xmlattr>.val", sourceRelPos.Y());
+  src_dz_val.put("<xmlattr>.val", sourceRelPos.Z());
+  src_dx.put("<xmlattr>.name", "x");
+  src_dy.put("<xmlattr>.name", "y");
+  src_dz.put("<xmlattr>.name", "z");
+  src.put("<xmlattr>.name", source->getName());
+
+  src_dx.add_child("value", src_dx_val);
+  src_dy.add_child("value", src_dy_val);
+  src_dz.add_child("value", src_dz_val);
+  src.add_child("parameter", src_dx);
+  src.add_child("parameter", src_dy);
+  src.add_child("parameter", src_dz);
+
+  parafile.add_child("component-link", src);
+
   // add node for T0
+  // -- property_root is a dumping group for property type values that are not tied to particular
+  //    component (i.e. virtual properties)
+  ptree property_root;
+  property_root.put("<xmlattr>.name", instrument->getName());
   ptree tof0;
   ptree tof0_val;
   tof0.put("<xmlattr>.name", "T0");
   tof0_val.put("<xmlattr>.val", m_T0);
   tof0.add_child("value", tof0_val);
-  // TODO: still not clear what is the proper label for T0 in XML file
+  property_root.add_child("parameter", tof0);
+  parafile.add_child("component-link", property_root);
+
+  // save sample position as a standalone component-link
+  ptree samplePos;
+  ptree samplePos_dx, samplePos_dy, samplePos_dz;
+  ptree samplePos_dx_val, samplePos_dy_val, samplePos_dz_val;
+  // -- get positional data from sample
+  std::shared_ptr<const IComponent> sp = instrument->getComponentByName("sample-position");
+  V3D sppos = sp->getRelativePos();
+  samplePos_dx_val.put("<xmlattr>.val", sppos.X());
+  samplePos_dy_val.put("<xmlattr>.val", sppos.Y());
+  samplePos_dz_val.put("<xmlattr>.val", sppos.Z());
+  samplePos_dx.put("<xmlattr>.name", "x");
+  samplePos_dy.put("<xmlattr>.name", "y");
+  samplePos_dz.put("<xmlattr>.name", "z");
+  samplePos.put("<xmlattr>.name", "sample-position");
+
+  samplePos_dx.add_child("value", samplePos_dx_val);
+  samplePos_dy.add_child("value", samplePos_dy_val);
+  samplePos_dz.add_child("value", samplePos_dz_val);
+  samplePos.add_child("parameter", samplePos_dx);
+  samplePos.add_child("parameter", samplePos_dy);
+  samplePos.add_child("parameter", samplePos_dz);
+
+  parafile.add_child("component-link", samplePos);
 
   // configure and add each bank
   for (auto bankName : AllBankNames) {
@@ -1112,31 +1167,6 @@ void SCDCalibratePanels2::saveXmlFile(const std::string &FileName,
 
     parafile.add_child("component-link", bank_root);
   }
-
-  // get L1 info for source
-  ptree src;
-  ptree src_dx, src_dy, src_dz;
-  ptree src_dx_val, src_dy_val, src_dz_val;
-  // -- get positional data from source
-  IComponent_const_sptr source = instrument->getSource();
-  V3D sourceRelPos = source->getRelativePos();
-  // -- add date to node
-  src_dx_val.put("<xmlattr>.val", sourceRelPos.X());
-  src_dy_val.put("<xmlattr>.val", sourceRelPos.Y());
-  src_dz_val.put("<xmlattr>.val", sourceRelPos.Z());
-  src_dx.put("<xmlattr>.name", "x");
-  src_dy.put("<xmlattr>.name", "y");
-  src_dz.put("<xmlattr>.name", "z");
-  src.put("<xmlattr>.name", source->getName());
-
-  src_dx.add_child("value", src_dx_val);
-  src_dy.add_child("value", src_dy_val);
-  src_dz.add_child("value", src_dz_val);
-  src.add_child("parameter", src_dx);
-  src.add_child("parameter", src_dy);
-  src.add_child("parameter", src_dz);
-
-  parafile.add_child("component-link", src);
 
   // give everything to root
   root.add_child("parameter-file", parafile);
