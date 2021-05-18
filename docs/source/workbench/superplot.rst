@@ -28,7 +28,8 @@ The superplot widget is composed of two distinct parts:
 
 When the superplot is activated, its state is updated based on the current plot.
 The list will contain the names of the selected workspaces and below each of
-them, the plotted bins/spectra.
+them, the plotted bins/spectra. One can then add a workspace in the list by
+dragging and dropping it in the list or by using the combobox.
 
 When one or many workspace(s) is(are) clicked in the list, the navigation bar
 can be used to slide over the bins/spectra and update the plot accordingly. One
