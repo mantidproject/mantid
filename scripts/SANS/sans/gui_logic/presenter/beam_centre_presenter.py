@@ -63,6 +63,7 @@ class BeamCentrePresenter(object):
 
     def on_update_rows(self):
         self._beam_centre_model.reset_inst_defaults(self._parent_presenter.instrument)
+        self.update_centre_positions()
 
     def on_processing_finished_centre_finder(self):
         # Enable button
@@ -122,12 +123,27 @@ class BeamCentrePresenter(object):
         self._beam_centre_model.update_hab = self._view.update_hab
         self._beam_centre_model.update_lab = self._view.update_lab
 
-    def update_centre_positions(self, state_model):
+    def copy_centre_positions(self, state_model):
+        """
+        Copies LAB / HAB positions from an external model
+        """
         lab_pos_1 = getattr(state_model, 'lab_pos_1')
         lab_pos_2 = getattr(state_model, 'lab_pos_2')
 
-        hab_pos_1 = getattr(state_model, 'hab_pos_1') if getattr(state_model, 'hab_pos_1') else lab_pos_1
-        hab_pos_2 = getattr(state_model, 'hab_pos_2') if getattr(state_model, 'hab_pos_2') else lab_pos_2
+        self._beam_centre_model.lab_pos_1 = lab_pos_1
+        self._beam_centre_model.lab_pos_2 = lab_pos_2
+
+        self._beam_centre_model.hab_pos_1 = \
+            getattr(state_model, 'hab_pos_1') if getattr(state_model, 'hab_pos_1') else lab_pos_1
+        self._beam_centre_model.hab_pos_2 = \
+            getattr(state_model, 'hab_pos_2') if getattr(state_model, 'hab_pos_2') else lab_pos_2
+
+    def update_centre_positions(self):
+        lab_pos_1 = self._beam_centre_model.lab_pos_1
+        lab_pos_2 = self._beam_centre_model.lab_pos_2
+
+        hab_pos_1 = self._beam_centre_model.hab_pos_1 if self._beam_centre_model.hab_pos_1 else lab_pos_1
+        hab_pos_2 = self._beam_centre_model.hab_pos_2 if self._beam_centre_model.hab_pos_2 else lab_pos_2
 
         self._view.lab_pos_1 = round(float(lab_pos_1), self.DECIMAL_PLACES_CENTRE_POS)
         self._view.lab_pos_2 = round(float(lab_pos_2), self.DECIMAL_PLACES_CENTRE_POS)

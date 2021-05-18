@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+import random
 from unittest import mock
 
 from sans.common.enums import SANSInstrument
@@ -122,6 +123,46 @@ class BeamCentrePresenterTest(unittest.TestCase):
         # Check that we called a method to enable the HAB and a method to enable the LAB
         self.presenter._view.enable_update_hab.assert_called_once_with(True)
         self.presenter._view.enable_update_lab.assert_called_once_with(True)
+
+    def test_copies_into_internal_model(self):
+        mocked_external_model = mock.NonCallableMock()
+
+        attr_list = ["lab_pos_1", "lab_pos_2", "hab_pos_1", "hab_pos_2"]
+
+        for attr in attr_list:
+            setattr(mocked_external_model, attr, random.randint(0, 1000)/100)  # Simulate a random FP value
+        self.presenter.copy_centre_positions(mocked_external_model)
+
+        for attr in attr_list:
+            self.assertEqual(getattr(mocked_external_model, attr), getattr(self.presenter._beam_centre_model, attr))
+
+    def test_copies_without_hab_into_internal_model(self):
+        mocked_external_model = mock.NonCallableMock()
+        lab_attr = ["lab_pos_1", "lab_pos_2"]
+        hab_list = ["hab_pos_1", "hab_pos_2"]
+
+        for attr in hab_list:
+            # On instruments with no HAB this can be a blank string
+            setattr(mocked_external_model, attr, '')
+
+        for attr in lab_attr:
+            setattr(mocked_external_model, attr, random.randint(0, 1000)/100)  # Simulate a random FP value
+        self.presenter.copy_centre_positions(mocked_external_model)
+
+        for attr in lab_attr:
+            self.assertEqual(getattr(mocked_external_model, attr), getattr(self.presenter._beam_centre_model, attr))
+
+        # When HAB isn't present we should take LAB values
+        for hab_attr, lab_attr in zip(hab_list, lab_attr):
+            self.assertEqual(getattr(mocked_external_model, lab_attr),
+                             getattr(self.presenter._beam_centre_model, hab_attr))
+
+    def test_on_update_rows_updates_centres(self):
+        # As the LAB centres can update when the rows change (due to different run number groups)
+        # we should always update from the model
+        self.presenter.update_centre_positions = mock.Mock()
+        self.presenter.on_update_rows()
+        self.presenter.update_centre_positions.assert_called_once()
 
 
 if __name__ == '__main__':
