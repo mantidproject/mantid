@@ -206,14 +206,14 @@ void SCDCalibratePanels2::init() {
   declareProperty("ProfileL1", false, "Perform profiling of objective function with given input for L1");
   declareProperty("ProfileBanks", false, "Perform profiling of objective function with given input for Banks");
   declareProperty("ProfileT0", false, "Perform profiling of objective function with given input for T0");
-  declareProperty("ProfileL1&T0", false, "Perform profiling of objective function along L1 and T0");
+  declareProperty("ProfileL1T0", false, "Perform profiling of objective function along L1 and T0");
   // grouping into one category
   const std::string ADVCNTRL("Advanced Option");
   setPropertyGroup("VerboseOutput", ADVCNTRL);
   setPropertyGroup("ProfileL1", ADVCNTRL);
   setPropertyGroup("ProfileBanks", ADVCNTRL);
   setPropertyGroup("ProfileT0", ADVCNTRL);
-  setPropertyGroup("ProfileL1&T0", ADVCNTRL);
+  setPropertyGroup("ProfileL1T0", ADVCNTRL);
 }
 
 /**
@@ -272,7 +272,7 @@ void SCDCalibratePanels2::exec() {
   bool profL1 = getProperty("ProfileL1");
   bool profBanks = getProperty("ProfileBanks");
   bool profT0 = getProperty("ProfileT0");
-  bool profL1T0 = getProperty("ProfileL1&T0");
+  bool profL1T0 = getProperty("ProfileL1T0");
 
   const std::string DetCalFilename = getProperty("DetCalFilename");
   const std::string XmlFilename = getProperty("XmlFilename");
