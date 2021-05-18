@@ -23,7 +23,6 @@ Usage
 
 .. testcode:: ExSliceByTime
 
-    from __future__ import print_function
     input_ws = CreateSampleWorkspace("Event",BankPixelWidth=1,BinWidth=20000)
     AddTimeSeriesLog(input_ws, Name="proton_charge", Time="2010-01-01T00:00:00", Value=100)
     AddTimeSeriesLog(input_ws, Name="proton_charge", Time="2010-01-01T00:10:00", Value=100)
