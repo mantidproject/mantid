@@ -285,6 +285,9 @@ class BasicFittingPresenter:
 
     def update_start_and_end_x_in_view_from_model(self) -> None:
         """Updates the start and end x in the view using the current values in the model."""
+        x_lower, x_upper = self.model.x_limits_of_current_dataset()
+        self.view.set_x_data_limits(x_lower, x_upper)
+
         self.view.start_x = self.model.current_start_x
         self.view.end_x = self.model.current_end_x
 

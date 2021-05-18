@@ -117,6 +117,13 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
         """Sets the index of the current dataset."""
         self.function_browser.setCurrentDataset(dataset_index)
 
+    def set_x_data_limits(self, x_lower: float, x_upper: float) -> None:
+        """Sets the minimum and maximum allowable x values for the start and end X."""
+        self.start_x_validator.setBottom(x_lower)
+        self.start_x_validator.setTop(x_upper)
+        self.end_x_validator.setBottom(x_lower)
+        self.end_x_validator.setTop(x_upper)
+
     def update_function_browser_parameters(self, is_simultaneous_fit: bool, fit_function: IFunction,
                                            global_parameters: list = []) -> None:
         """Updates the parameters in the function browser."""
