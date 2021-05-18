@@ -380,20 +380,29 @@ private:
    * @brief compare MD events
    */
   bool compareMDEvents(const std::string &ws1, const std::string &ws2) {
-    // Compare
+    // Compare number of MDEvents
+    API::IMDEventWorkspace_sptr md1 =
+        std::dynamic_pointer_cast<IMDEventWorkspace>(API::AnalysisDataService::Instance().retrieve(ws1));
+    API::IMDEventWorkspace_sptr md2 =
+        std::dynamic_pointer_cast<IMDEventWorkspace>(API::AnalysisDataService::Instance().retrieve(ws2));
+
+    // compare number of events
+    if (md1->getNEvents() != md2->getNEvents()) {
+      return false;
+    }
+
+    // Compare MDWorkspaces
     CompareMDWorkspaces compare_alg;
     compare_alg.initialize();
     compare_alg.setPropertyValue("Workspace1", ws1);
     compare_alg.setPropertyValue("Workspace2", ws2);
     compare_alg.setProperty("Tolerance", 0.0001);
+    compare_alg.setProperty("CheckEvents", false);
     compare_alg.execute();
     TS_ASSERT(compare_alg.isExecuted());
 
     // retrieve result
     bool equals = compare_alg.getProperty("Equals");
-    std::string result = compare_alg.getPropertyValue("Result");
-    if (!equals) {
-    }
 
     return equals;
   }
