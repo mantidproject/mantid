@@ -13,6 +13,8 @@ import functools
 import os
 import pathlib
 from typing import List
+from io import StringIO
+from contextlib import redirect_stdout
 
 if os.environ.get('MANTID_FRAMEWORK_CONDA_SYSTEMTEST'):
     # conda build of mantid-framework sometimes require importing matplotlib before mantid
@@ -630,7 +632,7 @@ class TestRunner(object):
     NOT_A_TEST = 98
     SKIP_TEST = 97
 
-    def __init__(self, executable, exec_args=None, escape_quotes=False, clean=False):
+    def __init__(self, executable=None, exec_args=None, escape_quotes=False, clean=False):
         self._executable = executable
         self._exec_args = exec_args
         self._test_dir = ''
@@ -655,6 +657,8 @@ class TestRunner(object):
 
     def start(self, script):
         '''Run the given test code in a new subprocess'''
+        if self._executable is None:
+            return self.start_in_parent_thread(script)
         exec_call = self._executable
         if self._exec_args:
             exec_call += ' ' + self._exec_args
@@ -666,6 +670,46 @@ class TestRunner(object):
         results = self.spawnSubProcess(cmd)
         os.remove(tmp_file.name)
         return results
+
+    def start_in_parent_thread(self, script):
+        """Run the given test code within the current Python process
+        Error handling adapted from: https://stackoverflow.com/questions/28836078/how-to-get-the-line-number-of-an-error-from-exec-or-execfile-in-python
+        Do not use in multithreading environment due to stdout context manager"""
+        exec_globals = dict()
+        exec_locals = dict()
+        exitcode = None
+        dual_stdout = DualStdOut()
+        try:
+            write_to_dual_stdout = redirect_stdout(dual_stdout)
+            with write_to_dual_stdout:
+                exec(script.asStringSingleThread(self._clean), exec_globals, exec_locals)
+            exitcode = exec_locals['exitcode']
+            dump = dual_stdout.dump.getvalue()
+            return exitcode, dump
+        except SyntaxError as e:
+            error_class = e.__class__.__name__
+            detail = e.args[0]
+            line_number = e.lineno
+        except Exception as ex:
+            import traceback
+            error_class = ex.__class__.__name__
+            detail = ex.args[0]
+            cl, exc, tb = sys.exc_info()
+            line_number = traceback.extract_tb(tb)[-1][1]
+        print("%s at line %d of SystemTest for %s.%s: %s" % (error_class, line_number, script._modname,
+                                                             script._test_cls_name, detail))
+        if exitcode is None:
+            if "exitcode" in exec_locals:
+                exitcode = exec_locals['exitcode']
+            else:
+                # assign to generic fail code
+                exitcode = 1
+        if dual_stdout.dump.getvalue():
+            dump = dual_stdout.dump.getvalue()
+        else:
+            # Need to give some string output or caller function will fail when trying to parse results
+            dump = "SystemTest runner script produced no output to StdOut"
+        return exitcode, dump
 
 
 #########################################################################
@@ -699,6 +743,12 @@ if {self._exclude_in_pr_builds}:
             code += "exitcode = 0\n"
         code += "systest.cleanup()\nsys.exit(exitcode)\n"
         return code
+
+    def asStringSingleThread(self, clean=False):
+        code = self.asString(clean)
+        # this removes the last line before the EOF \n, in this case the sys.exit
+        code_noexit = code[:code.rfind('\n', 0, code.rindex('\n'))]
+        return code_noexit
 
 
 #########################################################################
@@ -739,6 +789,9 @@ class TestSuite(object):
     def markAsSkipped(self, reason):
         self.setOutputMsg(reason)
         self._result.status = 'skipped'
+
+    def getMapResultNameToStatus(self):
+        return {self._result.name: self._result.status}
 
     def execute(self, runner, exclude_in_pr_builds):
         if self._test_cls_name is not None:
@@ -1023,7 +1076,7 @@ class TestManager(object):
                 return False
         return True
 
-    def executeTests(self, tests_done=None):
+    def executeTests(self, tests_done=None, status_dict=None):
         # Get the defined tests
         for suite in self._tests:
             if self.__shouldTest(suite):
@@ -1034,11 +1087,31 @@ class TestManager(object):
                 self._skippedTests += 1
             else:
                 self._failedTests += 1
-            with tests_done.get_lock():
-                tests_done.value += 1
-            if not self._clean:
-                suite.reportResults(self._reporters, tests_done.value)
+            if tests_done:
+                with tests_done.get_lock():
+                    tests_done.value += 1
+                if not self._clean:
+                    suite.reportResults(self._reporters, tests_done.value)
+            else:
+                # tests_done=None indicates running tests on parent thread, no need to worry about the Lock
+                if not self._clean:
+                    sum_tests = self._passedTests + self._skippedTests + self._failedTests
+                    suite.reportResults(self._reporters, sum_tests)
+                    status_dict.update(suite.getMapResultNameToStatus())
             self._lastTestRun += 1
+
+    def replaceRunner(self, new_runner):
+        self._runner = new_runner
+
+    def executeTestsListUnderParentThread(self, tests_to_run, status_dict):
+        """This is used when running the tests under the single parent thread, removing the test executable so that the
+         provided test list is run under the parent python thread"""
+        self._tests = tests_to_run
+        self.executeTests(status_dict=status_dict)
+
+    def getTestResultStats(self):
+        """Return the numbers of skipped, failed, and total tests to be used for result and output collation"""
+        return self._skippedTests, self._failedTests, self._lastTestRun
 
     def markSkipped(self, reason=None, tests_done_value=0):
         for suite in self._tests[self._lastTestRun:]:
@@ -1418,3 +1491,22 @@ def testThreadsLoopImpl(mtdconf, options, tests_dict, tests_lock, tests_left, re
 
     for key in local_dict.keys():
         stat_dict[key] = local_dict[key]
+
+
+class DualStdOut:
+    """This helper class is used when running SystemTests under the parent Python thread, allowing the output of the
+    test to be printed both to for display and a StringIO object to collate the test results from.
+    """
+    def __init__(self):
+        self.stdout = sys.stdout
+        self.dump = StringIO()
+
+    def __del__(self):
+        self.dump.close()
+
+    def write(self, message):
+        self.stdout.write(message)
+        self.dump.write(message)
+
+    def flush(self):
+        self.stdout.flush()

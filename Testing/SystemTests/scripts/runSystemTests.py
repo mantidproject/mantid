@@ -55,7 +55,7 @@ def main():
     parser.add_argument("-a",
                         "--exec-args",
                         dest="execargs",
-                        help="Arguments passed to executable for each test Default=[]")
+                        help="Arguments passed to executable for each test Default=\" --classic\"")
     parser.add_argument("--frameworkLoc",
                         help="location of the system test framework (default=%s)" %
                         DEFAULT_FRAMEWORK_LOC)
@@ -138,6 +138,7 @@ def main():
     parser.set_defaults(frameworkLoc=DEFAULT_FRAMEWORK_LOC,
                         qt_api=DEFAULT_QT_API,
                         executable=sys.executable,
+                        execargs=" --classic",  # this default is set in the systemtest.bat runner script anyway
                         makeprop=True,
                         loglevel="information",
                         ncores=1,
@@ -203,99 +204,120 @@ def main():
     total_number_of_tests = test_stats[0]
     maximum_name_length = test_stats[1]
 
-    #########################################################################
-    # Run the tests with a task scheduler
-    #########################################################################
+    # Variables updated as tests run, used in result collation
+    status_dict = dict()
+    skipped_tests, failed_tests, total_tests, success = None, None, None, None
 
-    # Print message if this is a cleanup run instead of a normal test run
-    if options.clean:
-        print("Performing cleanup run")
-
-    # Cleanup any pre-existing XML reporter files
-    entries = os.listdir(mtdconf.saveDir)
-    for file in entries:
-        if file.startswith('TEST-systemtests-') and file.endswith('.xml'):
-            os.remove(os.path.join(mtdconf.saveDir, file))
-
-    if not options.dry_run:
-        # Multi-core processes --------------
-        # An array to hold the processes
-        processes = []
-        # A shared array to hold skipped and failed tests + status
-        results_array = Array('i', [0] * (3 * options.ncores))
-        # A manager to create a shared dict to store names of skipped and failed tests
-        manager = Manager()
-        # A shared dict to store names of skipped and failed tests
-        status_dict = manager.dict()
-        # A shared dict to store the global list of tests
-        tests_dict = manager.dict()
-        # A shared array with 0s and 1s to keep track of completed tests
-        tests_lock = Array('i', [0] * number_of_test_modules)
-        # A shared value to count the number of remaining test modules
-        tests_left = Value('i', number_of_test_modules)
-        # A shared value to count the number of completed tests
-        tests_done = Value('i', 0)
-        # A shared dict to store which data files are required by each test module
-        required_files_dict = manager.dict()
-        for key in files_required_by_test_module.keys():
-            required_files_dict[key] = files_required_by_test_module[key]
-        # A shared dict to store the locked status of each data file
-        locked_files_dict = manager.dict()
-        for key in data_file_lock_status.keys():
-            locked_files_dict[key] = data_file_lock_status[key]
-
-        # Store in reverse number of number of tests in each module into the shared dictionary
-        reverse_sorted_dict = [(k, test_counts[k])
-                               for k in sorted(test_counts, key=test_counts.get, reverse=True)]
-        counter = 0
-        for key, value in reverse_sorted_dict:
-            tests_dict[str(counter)] = tuple([test_sub_directories[key], test_list[key]])
-            counter += 1
+    if options.ncores == 1:
+        #####################################################################
+        # Run the tests sequentially within the current Python thread
+        #####################################################################
+        no_exec_runner = systemtesting.TestRunner(clean=options.clean)
+        tmgr.replaceRunner(no_exec_runner)
+        for modname, suite_list in test_list.items():
+            mod_test_counts = test_counts[modname]
             if not options.quiet:
-                print("Test module {} has {} tests:".format(key, value))
-                for t in test_list[key]:
-                    print(" - {}".format(t._fqtestname))
-                print()
-
-        # Define a lock
-        lock = Lock()
-
-        # Prepare ncores processes
-        for ip in range(options.ncores):
-            processes.append(
-                Process(target=systemtesting.testThreadsLoop,
-                        args=(mtdconf, options, tests_dict, tests_lock, tests_left, results_array,
-                              status_dict, total_number_of_tests, maximum_name_length, tests_done,
-                              ip, lock, required_files_dict, locked_files_dict)))
-        # Start and join processes
-        exitcodes = []
-        try:
-            for p in processes:
-                p.start()
-
-            for p in processes:
-                p.join()
-                exitcodes.append(p.exitcode)
-
-        except KeyboardInterrupt:
-            print("Killed via KeyboardInterrupt")
-            kill_children(processes)
-        except Exception as e:
-            print("Unexpected exception occured: {}".format(e))
-            kill_children(processes)
-
-        # test processes could have failed to even start the tests. In this case skip printing the results
-        if systemtesting.TESTING_PROC_FAILURE_CODE in exitcodes:
-            sys.exit("\nFailed to execute tests. See traceback for more details.")
-
-        # Gather results
-        skipped_tests = sum(results_array[:options.ncores]) + (test_stats[2] - test_stats[0])
-        failed_tests = sum(results_array[options.ncores:2 * options.ncores])
-        total_tests = test_stats[2]
-        # Find minimum of status: if min == 0, then success is False
-        success = bool(min(results_array[2 * options.ncores:3 * options.ncores]))
+                test_suffix = '' if mod_test_counts == 1 else 's'
+                print("Test module {} has {} test{}:".format(modname, mod_test_counts, test_suffix))
+                for suite in suite_list:
+                    print("    - {}".format(suite._fqtestname))
+            tmgr.executeTestsListUnderParentThread(suite_list, status_dict)
+        skipped_tests, failed_tests, total_tests = tmgr.getTestResultStats()
+        success = failed_tests == 0
     else:
-        print("Dry run requested. Skipping execution")
+        #####################################################################
+        # Run the tests with a task scheduler
+        #####################################################################
+
+        # Print message if this is a cleanup run instead of a normal test run
+        if options.clean:
+            print("Performing cleanup run")
+
+        # Cleanup any pre-existing XML reporter files
+        entries = os.listdir(mtdconf.saveDir)
+        for file in entries:
+            if file.startswith('TEST-systemtests-') and file.endswith('.xml'):
+                os.remove(os.path.join(mtdconf.saveDir, file))
+
+        if not options.dry_run:
+            # Multi-core processes --------------
+            # An array to hold the processes
+            processes = []
+            # A shared array to hold skipped and failed tests + status
+            results_array = Array('i', [0] * (3 * options.ncores))
+            # A manager to create a shared dict to store names of skipped and failed tests
+            manager = Manager()
+            # A shared dict to store names of skipped and failed tests
+            status_dict = manager.dict()
+            # A shared dict to store the global list of tests
+            tests_dict = manager.dict()
+            # A shared array with 0s and 1s to keep track of completed tests
+            tests_lock = Array('i', [0] * number_of_test_modules)
+            # A shared value to count the number of remaining test modules
+            tests_left = Value('i', number_of_test_modules)
+            # A shared value to count the number of completed tests
+            tests_done = Value('i', 0)
+            # A shared dict to store which data files are required by each test module
+            required_files_dict = manager.dict()
+            for key in files_required_by_test_module.keys():
+                required_files_dict[key] = files_required_by_test_module[key]
+            # A shared dict to store the locked status of each data file
+            locked_files_dict = manager.dict()
+            for key in data_file_lock_status.keys():
+                locked_files_dict[key] = data_file_lock_status[key]
+
+            # Store in reverse number of number of tests in each module into the shared dictionary
+            reverse_sorted_dict = [(k, test_counts[k])
+                                   for k in sorted(test_counts, key=test_counts.get, reverse=True)]
+            counter = 0
+            for key, value in reverse_sorted_dict:
+                tests_dict[str(counter)] = tuple([test_sub_directories[key], test_list[key]])
+                counter += 1
+                if not options.quiet:
+                    print("Test module {} has {} tests:".format(key, value))
+                    for t in test_list[key]:
+                        print(" - {}".format(t._fqtestname))
+                    print()
+
+            # Define a lock
+            lock = Lock()
+
+            # Prepare ncores processes
+            for ip in range(options.ncores):
+                processes.append(
+                    Process(target=systemtesting.testThreadsLoop,
+                            args=(mtdconf, options, tests_dict, tests_lock, tests_left, results_array,
+                                  status_dict, total_number_of_tests, maximum_name_length, tests_done,
+                                  ip, lock, required_files_dict, locked_files_dict)))
+            # Start and join processes
+            exitcodes = []
+            try:
+                for p in processes:
+                    p.start()
+
+                for p in processes:
+                    p.join()
+                    exitcodes.append(p.exitcode)
+
+            except KeyboardInterrupt:
+                print("Killed via KeyboardInterrupt")
+                kill_children(processes)
+            except Exception as e:
+                print("Unexpected exception occurred: {}".format(e))
+                kill_children(processes)
+
+            # test processes could have failed to even start the tests. In this case skip printing the results
+            if systemtesting.TESTING_PROC_FAILURE_CODE in exitcodes:
+                sys.exit("\nFailed to execute tests. See traceback for more details.")
+
+            # Gather results
+            skipped_tests = sum(results_array[:options.ncores]) + (test_stats[2] - test_stats[0])
+            failed_tests = sum(results_array[options.ncores:2 * options.ncores])
+            total_tests = test_stats[2]
+            # Find minimum of status: if min == 0, then success is False
+            success = bool(min(results_array[2 * options.ncores:3 * options.ncores]))
+        else:
+            print("Dry run requested. Skipping execution")
 
     #########################################################################
     # Cleanup
