@@ -351,6 +351,21 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             self.setPropertyGroup('AllSpectra', grp12)
             self.setPropertyGroup('WorkspaceIndexSmooth', grp12)
 
+        def loadResetNegatives2D():
+            # input for ResetNegatives2D
+            self.copyProperties('AddMinimum', 'ResetValue')
+            grp13 = 'ResetNegatives2D'
+            self.setPropertyGroup('AddMinimum', grp13)
+            self.setPropertyGroup('ResetValue', grp13)
+
+        def loadResetNegatives2DVana():
+            # Input for ResetNegatives2D for Vanadium Data
+            self.copyProperties('AddMinimumVana')
+            self.declareProperty('ResetValueVana', 1, direction = Direction.Input, doc = 'Set negative intensities to the specified value (default=1).'')
+            grp14 = 'ResetNegatives2DVana'
+            self.setPropertyGroup('AddMinimumVana', grp14)
+            self.setPropertyGroup('ResetValueVana', grp14)
+
         loadInputOutputFiles()
         loadDataRanges()
         loadFindDetectorsPar()
@@ -363,6 +378,8 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         loadBin2DPowderDiffraction()
         loadStripVanadiumPeaks()
         loadFFTSmooth()
+        loadResetNegatives2D()
+        loadResetNegatives2DVana()
 
     def getInputs(self):
         # Output File
@@ -473,6 +490,12 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         self._params = self.getProperty('Params').value
         self._ignoreXBins = self.getProperty('IgnoreXBins').value
         self._allSpectra = self.getProperty('AllSpectra').value
+        # ResetNegatives2D
+        self._addMinimum = self.getProperty('AddMinimum').value
+        self._resetValue = self.getProperty('ResetValue').value
+        # ResetNegatives2DVana
+        self._addMinimumVana = self.getProperty('AddMinimumVana').value
+        self._resetValueVana = self.getProperty('ResetValueVana').value
 
     def processData(self, filename, wsName):
         if filename != '':
@@ -557,12 +580,12 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         if useVana:
             Divide(LHSWorkspace=sampleWsName, RHSWorkspace=vanaWsName, OutputWorkspace=sampleWsName)
 
-    def checkForNegatives(self, wsName, useVana, vanaWsName, useEmpty, emptyWsName):
-        ResetNegatives2D(wsName)
+    def checkForNegatives(self, wsName, useVana, vanaWsName, useEmpty, emptyWsName, addMinimum, resetValue, addMinimumVana, resetValueVana):
+        ResetNegatives2D(wsName, addMinimum, resetValue)
         if useVana:
-            ResetNegatives2D(vanaWsName)
+            ResetNegatives2D(vanaWsName, addMinimumVana, resetValueVana)
         if useEmpty:
-            ResetNegatives2D(emptyWsName)
+            ResetNegatives2D(emptyWsName, addMinimum, resetValue)
 
     def PyExec(self):
         # Input laden
@@ -595,14 +618,14 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             self.postProcessVana(self._vanaWS)
 
         # Check all datafiles for negative Values and correct those
-        self.checkForNegatives(self._sampleWS, self._doVana, self._vanaWS, self._doEmpty, self._emptyWS)
+        self.checkForNegatives(self._sampleWS, self._doVana, self._vanaWS, self._doEmpty, self._emptyWS, self._addMinimum, self._resetValue, self._addMinimumVana, self._addMinimumVana)
 
         # Correct sample data with empty and vana data if they are there
         if self._doVana or self._doEmpty:
             self.correctSampleData(self._sampleWS, self._doVana, self._vanaWS, self._doEmpty, self._emptyWS)
 
         # Check final results again for negative Values and correct those
-        self.checkForNegatives(self._sampleWS, self._doVana, self._vanaWS, self._doEmpty, self._emptyWS)
+        self.checkForNegatives(self._sampleWS, self._doVana, self._vanaWS, self._doEmpty, self._emptyWS, self._addMinimum, self._resetValue, self._addMinimumVana, self._addMinimumVana)
 
         # Print sample data to p2d file
         SaveP2D(Workspace=self._sampleWS,
