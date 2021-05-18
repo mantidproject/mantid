@@ -30,9 +30,8 @@ Improvements
    :width: 500px
    :align: right
 
-Improvements
-############
 - Frequency Domain Analysis default values have been improved.
+- Improved the validation on the start and end X so that their values could not be outside the data x range.
 
 Bug fixes
 #########
@@ -47,6 +46,7 @@ Bug fixes
 - Fixed a usability issue where tabs became unattached too easily. It is now possible to unattach the tabs only by double clicking on them.
 - Fixed a bug that caused the `AutoScale` check box to reset when editing the selected groups/pairs.
 - Fixed a bug where the start and end X would reset in the fitting tab when stepping to the next or previous run.
+- Fixed a bug caused by entering an empty string into the start and end X fields.
 
 ALC
 ---
