@@ -139,9 +139,20 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         maxqxy_dim = len(self.maxqxy)
         deltaq_dim = len(self.deltaq)
         radius_dim = len(self.radius)
-        q_bin_dim = self.getPropertyValue('OutputBinning')
-        if q_bin_dim and q_bin_dim.count(';')+1 != sample_dim:
-            result['OutputBinning'] = 'Number of Q ranges must be equal to the number of samples.'
+        qbinning = self.getPropertyValue('OutputBinning')
+        if qbinning:
+            if qbinning.count(':') + 1 != sample_dim:
+                result['OutputBinning'] = 'Number of Q binning params must be equal to the number of distances.'
+            else:
+                for qbin_params in qbinning.split(':'):
+                    if qbin_params:
+                        for qbin_param in qbin_params.split(','):
+                            try:
+                                float(qbin_param)
+                            except ValueError:
+                                result['OutputBinning'] = 'Q binning params must be float.'
+                                break
+
         if self.getPropertyValue('SampleRuns') == '':
             result['SampleRuns'] = 'Please provide at least one sample run.'
         if abs_dim != sample_dim and abs_dim > 1:
@@ -364,7 +375,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              'NumberOfWedges', 'WedgeAngle', 'WedgeOffset',
                              'AsymmetricWedges', 'IQxQyLogBinning', 'WavelengthRange'])
 
-        self.declareProperty('OutputBinning', '', doc='Output binning for each distance. ; separated list of qmin,qmax pairs.')
+        self.declareProperty('OutputBinning', '',
+                             doc='Output binning for each distance. : separated list of binning params.')
         self.setPropertyGroup('OutputBinning', 'Integration Options')
         self.setPropertyGroup('OutputType', 'Integration Options')
         self.setPropertyGroup('CalculateResolution', 'Integration Options')
@@ -845,8 +857,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         if self.getProperty('SensitivityWithOffsets').value:
             CloneWorkspace(InputWorkspace=sample_name, OutputWorkspace=output_sens)
 
-        qbinning = self.getPropertyValue('OutputBinning').split(';')[i]
-        qbinning = [float(q) for q in qbinning.split(',')]
+        qbinning = self.getPropertyValue('OutputBinning')
+        if qbinning:
+            qbinning = qbinning.split(':')[i]
         SANSILLIntegration(
                 InputWorkspace=sample_name,
                 OutputWorkspace=output_sample,

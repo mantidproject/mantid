@@ -205,7 +205,7 @@ void SaveCanSAS1D2::createSASProcessElement(std::string &sasProcess) {
   if (run.hasProperty("UserFile")) {
     user_file = run.getLogData("UserFile")->value();
   } else {
-    g_log.warning("No user file was found in the input workspace.");
+    g_log.information("No user file was found in the input workspace.");
   }
 
   std::string sasProcuserfile = "\n\t\t\t<term name=\"user_file\">";
