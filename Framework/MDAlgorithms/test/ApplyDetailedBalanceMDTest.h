@@ -16,14 +16,17 @@
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidMDAlgorithms/ApplyDetailedBalanceMD.h"
+#include "MantidMDAlgorithms/CompareMDWorkspaces.h"
 #include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidMDAlgorithms/MergeMD.h"
-#include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
+
 // only needed for local test
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataHandling/SaveNexus.h"
-#include "MantidMDAlgorithms/CompareMDWorkspaces.h"
+#include "MantidMDAlgorithms/CloneMDWorkspace.h"
 #include "MantidMDAlgorithms/SaveMD.h"
 
 using namespace Mantid;
@@ -39,28 +42,118 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  /* Test apply detailed balance to 1 run
+  //---------------------------------------------------------------------------------------------
+  /**
+   * @brief Test apply detailed balance to 1 run
    */
-  void test_1run() {
+  void Passed_test_1run() {
     // Check whether the MD to test does exist
     auto singlemd = Mantid::API::AnalysisDataService::Instance().retrieve(mMDWorkspace1Name);
     TS_ASSERT(singlemd);
 
+    // specify the output
+    std::string outputname("DetailedBalanceSingleQ3Test");
+
+    // Calculate detailed balance for the single MDEventWorkspace
     ApplyDetailedBalanceMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     alg.setPropertyValue("InputWorkspace", mMDWorkspace1Name);
-    alg.setProperty("Temperature", "SampTemp");
-    alg.setProperty("OutputWorkspace", "Whatever");
+    alg.setProperty("Temperature", "SampleTemp");
+    alg.setProperty("OutputWorkspace", outputname);
     alg.execute();
     TS_ASSERT(alg.isExecuted());
+
+    // Verify
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(outputname));
+    // alg.showAnyEvents(GoldDetailedBalanceSingleWSName);
+    // alg.showAnyEvents(outputname);
+    // alg.showAnyEvents(mMDWorkspace1Name);
+    // alg.showAnyEvents("ClonedSingleMD0");
+
+    bool equals = compareMDEvents(outputname, GoldDetailedBalanceSingleWSName);
+    TS_ASSERT(equals);
+
+    // Clean up
+    cleanWorkspace(outputname, false);
+  }
+
+  /**
+   * @brief Test applying detailed balance to 2 merged runs
+   */
+  void Next_test_merged_runs() {
+    auto mergedmd = Mantid::API::AnalysisDataService::Instance().retrieve(mMergedWorkspaceName);
+    TS_ASSERT(mergedmd);
+
+    // specify the output
+    std::string outputname("DetailedBalanceMergedQ3Test");
+
+    ApplyDetailedBalanceMD alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    alg.setPropertyValue("InputWorkspace", mMergedWorkspaceName);
+    alg.setProperty("Temperature", "SampleTemp");
+    alg.setProperty("OutputWorkspace", outputname);
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    // Verify
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(outputname));
+
+    bool equals = compareMDEvents(outputname, gold_detail_balanced_merged_name);
+    TS_ASSERT(equals);
+
+    // clean up
+    cleanWorkspace(outputname, false);
+  }
+
+  /**
+   * @brief Test input workspace with |Q| and without temperature
+   */
+  void Passed_test_q1d_run() {
+    auto q1dmd = Mantid::API::AnalysisDataService::Instance().retrieve(mMDWorkspaceQ1Dname);
+    TS_ASSERT(q1dmd);
+
+    ApplyDetailedBalanceMD alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    alg.setPropertyValue("InputWorkspace", mMDWorkspaceQ1Dname);
+    alg.setProperty("Temperature", "SampleTemp");
+    alg.setProperty("OutputWorkspace", "OutputDetaiedBalanceQ1D");
+
+    // Expect to fail due to missing temperature sample log
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
+
+    // Set temperature explicitly
+    alg.setProperty("Temperature", "1.2345");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    // Check existence and clean
+    cleanWorkspace("OutputDetaiedBalanceQ1D", true);
+  }
+
+  /**
+   * @brief Clean workspace from ADS if it does exist
+   */
+  void cleanWorkspace(const std::string &wsname, bool assert_existence) {
+    bool ws_exist = Mantid::API::AnalysisDataService::Instance().doesExist(wsname);
+    // assert existence
+    if (assert_existence)
+      TS_ASSERT(ws_exist);
+    // clean from ADS
+    if (ws_exist)
+      Mantid::API::AnalysisDataService::Instance().remove(wsname);
   }
 
   void setUp() override {
     // Define workspace names
-    mEventWSName = "DetailedBalanceSampleWS";
-    mMDWorkspace1Name = "DetailedBalanceMDEvent";
-    mMergedWorkspaceName = "DetailedBalanceMergedMDEvent";
+    mEventWSName = "DetailedBalanceRawEvent";
+    mMDWorkspace1Name = "DetailedBalanceInputSingleMDEvent";
+    mMergedWorkspaceName = "DetailedBalanceInputMergedMDEvent";
+    mMDWorkspaceQ1Dname = "DetaledBalanceInputQ1DMDEvent";
+    // Gold workspace names
+    gold_detail_balanced_merged_name = "DetaildBalancedMergedGoldMD";
+    GoldDetailedBalanceSingleWSName = "DetailedBalanceSingleGoldMD";
 
     // Prepare (first) sample workspace
     createSampleWorkspace(mEventWSName);
@@ -94,6 +187,20 @@ public:
     // convert to MD
     convertToMD(event_ws_name2, md_ws_name2, "Q3D");
 
+    // Prepare the 3rd MDEventWorkspace for |Q| and without sample temperature
+    const std::string event_ws_name3("DetailedBalance3WS");
+    createSampleWorkspace(event_ws_name3);
+    // add sample log Ei
+    addSampleLog(event_ws_name3, "Ei", "20.", "Number");
+    // move bank 1
+    moveBank(event_ws_name3, "bank1", 3, 3);
+    // move bank 2
+    moveBank(event_ws_name3, "bank2", -3, -3);
+    // set geoniometer
+    setGoniometer(event_ws_name3, "Axis0", "30,0,1,0,1");
+    // convert to MD
+    convertToMD(event_ws_name3, mMDWorkspaceQ1Dname, "|Q|");
+
     // Merge 2 workspace
     std::string workspaces(mMDWorkspace1Name + ", " + md_ws_name2);
     MergeMD merge_alg;
@@ -103,23 +210,27 @@ public:
     merge_alg.execute();
 
     // Calculate the expected result from existing algorithms
-    calculate_detailed_balance(mEventWSName, event_ws_name2, "DetaildBalancedGoldMD");
+    calculate_detailed_balance(mEventWSName, event_ws_name2, GoldDetailedBalanceSingleWSName,
+                               gold_detail_balanced_merged_name);
 
-    //    // save for verification
-    //    SaveMD save_alg;
-    //    save_alg.initialize();
-    //    save_alg.setProperty("InputWorkspace", mMDWorkspace1Name);
-    //    save_alg.setProperty("Filename", "/tmp/detailed_balance_1md.nxs");
-    //    save_alg.execute();
-    //    TS_ASSERT(save_alg.isExecuted());
-    //    // merged one
-    //    save_alg.setProperty("InputWorkspace", mMergedWorkspaceName);
-    //    save_alg.setProperty("Filename", "/tmp/detailed_balance_merged_md.nxs");
-    //    save_alg.execute();
+    // save for verification
+    //            SaveMD save_alg;
+    //            save_alg.initialize();
+    //        save_alg.setProperty("InputWorkspace", mMDWorkspace1Name);
+    //        save_alg.setProperty("Filename", "/tmp/detailed_balance_1md.nxs");
+    //        save_alg.execute();
+    //        TS_ASSERT(save_alg.isExecuted());
+    // merged one
+    //            save_alg.setProperty("InputWorkspace", gold_single_md_name);
+    //            save_alg.setProperty("Filename", "/tmp/detailed_balance_single_gold.nxs");
+    //            save_alg.execute();
 
     // clean the temporary workspaces
     Mantid::API::AnalysisDataService::Instance().remove(event_ws_name2);
     Mantid::API::AnalysisDataService::Instance().remove(md_ws_name2);
+
+    // FIXME: clean DetailedBalance3WS
+    // FIXME: clean DetailedBalance2WS
   }
 
   void tearDown() override {
@@ -143,6 +254,10 @@ private:
   std::string mEventWSName;
   std::string mMDWorkspace1Name;
   std::string mMergedWorkspaceName;
+  std::string mMDWorkspaceQ1Dname;
+  // gold data (workspace) names
+  std::string gold_detail_balanced_merged_name;
+  std::string GoldDetailedBalanceSingleWSName;
 
   /**
    * @brief Create an EventWorkspace with flat background in unit of DeltaE
@@ -217,28 +332,41 @@ private:
 
   /**
    * @brief Calculate detailed balance, convert to MD and merge as the old way
+   *
    */
   void calculate_detailed_balance(const std::string &event_ws_1, const std::string &event_ws_2,
-                                  const std::string &output_md_name) {
+                                  const std::string &output_sigle_md_name, const std::string &output_merged_md_name) {
     const std::string temp_event_ws1("DetailedBalanceTempEvent1");
     const std::string temp_event_ws2("DetailedBalanceTempEvent2");
-    const std::string temp_md1("DetailedBalanceMD1GoldTemp");
     const std::string temp_md2("DetailedBalanceMD2GoldTemp");
 
+    // apply detailed balance and convert to MD for event workspace 1
+    convertToMD(event_ws_1, "ClonedSingleMD0", "Q3D"); // FIXME --- remove
     applyDetailedBalance(event_ws_1, temp_event_ws1);
-    convertToMD(temp_event_ws1, temp_md1, "Q3D");
+    convertToMD(temp_event_ws1, output_sigle_md_name, "Q3D");
+    // FIXME -- remove till
+    CloneMDWorkspace cloner;
+    cloner.initialize();
+    cloner.setPropertyValue("InputWorkspace", temp_event_ws1);
+    cloner.setPropertyValue("OutputWorkspace", "ClonedSingleMD1");
+    cloner.execute();
+    // FIXEM -- here
+    // apply detailed balance and convert to MD for event workspace 2
     applyDetailedBalance(event_ws_2, temp_event_ws2);
     convertToMD(temp_event_ws2, temp_md2, "Q3D");
 
     // Merge 2 workspace
-    std::string workspaces(temp_md1 + ", " + temp_md2);
+    std::string workspaces(output_sigle_md_name + ", " + temp_md2);
     MergeMD merge_alg;
     merge_alg.initialize();
     merge_alg.setProperty("InputWorkspaces", workspaces);
-    merge_alg.setProperty("OutputWorkspace", output_md_name);
+    merge_alg.setProperty("OutputWorkspace", output_merged_md_name);
     merge_alg.execute();
   }
 
+  /**
+   * @brief Apply detailed balance to event workspace
+   */
   void applyDetailedBalance(const std::string &input_ws_name, const std::string &output_ws_name) {
     auto apply_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("ApplyDetailedBalance");
     apply_alg->initialize();
@@ -248,40 +376,25 @@ private:
     apply_alg->execute();
   }
 
-  /*
-   * # import mantid algorithms, numpy and matplotlib
-from mantid.simpleapi import *
-import matplotlib.pyplot as plt
-import numpy as np
-
-we1 = CreateSampleWorkspace(WorkspaceType='Event',
-                           Function='Flat background',
-                           BankPixelWidth=1,
-                           XUnit='DeltaE',
-                           XMin=-10,
-                           XMax=19,
-                           BinWidth=0.5)
-
-AddSampleLog(Workspace=we1,LogName='Ei', LogText='20.', LogType='Number')
-MoveInstrumentComponent(Workspace=we1, ComponentName='bank1', X=3, Z=3, RelativePosition=False)
-MoveInstrumentComponent(Workspace=we1, ComponentName='bank2', X=-3, Z=-3, RelativePosition=False)
-we2=CloneWorkspace(we1)
-AddSampleLog(Workspace=we1,LogName='SampleTemp', LogText='25.0', LogType='Number Series')
-AddSampleLog(Workspace=we2,LogName='SampleTemp', LogText='250.0', LogType='Number Series')
-SetGoniometer(Workspace=we1, Axis0='0,0,1,0,1')
-SetGoniometer(Workspace=we2, Axis0='30,0,1,0,1')
-
-# old way
-weadb1 = ApplyDetailedBalance(InputWorkspace=we1, Temperature='SampleTemp')
-mdabd1 = ConvertToMD(InputWorkspace=weadb1, QDimensions='Q3D')
-weadb2 = ApplyDetailedBalance(InputWorkspace=we2, Temperature='SampleTemp')
-mdabd2 = ConvertToMD(InputWorkspace=weadb2, QDimensions='Q3D')
-mdabd = MergeMD(InputWorkspaces='mdabd1, mdabd2')
-
-# new way
-md1 = ConvertToMD(InputWorkspace=we1, QDimensions='Q3D')
-md2 = ConvertToMD(InputWorkspace=we2, QDimensions='Q3D')
-md = MergeMD(InputWorkspaces='md1,md2')
-
+  /**
+   * @brief compare MD events
    */
+  bool compareMDEvents(const std::string &ws1, const std::string &ws2) {
+    // Compare
+    CompareMDWorkspaces compare_alg;
+    compare_alg.initialize();
+    compare_alg.setPropertyValue("Workspace1", ws1);
+    compare_alg.setPropertyValue("Workspace2", ws2);
+    compare_alg.setProperty("Tolerance", 0.0001);
+    compare_alg.execute();
+    TS_ASSERT(compare_alg.isExecuted());
+
+    // retrieve result
+    bool equals = compare_alg.getProperty("Equals");
+    std::string result = compare_alg.getPropertyValue("Result");
+    if (!equals) {
+    }
+
+    return equals;
+  }
 };

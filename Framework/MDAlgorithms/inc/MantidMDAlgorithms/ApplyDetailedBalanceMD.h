@@ -20,10 +20,12 @@ namespace MDAlgorithms {
 */
 class MANTID_MDALGORITHMS_DLL ApplyDetailedBalanceMD : public API::Algorithm {
 public:
+  ApplyDetailedBalanceMD() : mDeltaEIndex(999), mTemperature(-1.) {}
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
   const std::string summary() const override;
+  void showAnyEvents(const std::string &mdwsname);
 
 private:
   /// Initialize the proeprties
@@ -33,9 +35,25 @@ private:
   /// Validate inputs
   std::map<std::string, std::string> validateInputs() override;
 
+  template <typename MDE, size_t nd>
+  void showMDEvents(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+
   /// Apply detailed balance to each MDEvent
   template <typename MDE, size_t nd>
   void applyDetailedBalance(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+
+  /// Get temperature
+  std::string getTemperature(API::IMDEventWorkspace_sptr mdws);
+  /// Check input workspace dimension
+  std::string checkInputMDDimension();
+
+  /// index of the MD dimension index for DeltaE
+  size_t mDeltaEIndex;
+
+  /// user specified sample temperture
+  float mTemperature;
+  /// map of temperature retrieved from sample logs
+  std::map<uint16_t, double> mExpinfoTemperatureMean;
 };
 
 } // namespace MDAlgorithms
