@@ -30,309 +30,326 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         return ["SaveP2D"]
 
     def PyInit(self):
-        # Input files
-        self.declareProperty(FileProperty('SampleData', '', action=FileAction.OptionalLoad, direction=Direction.Input),
+        def loadInputOutputFiles():
+            # Input files
+            self.declareProperty(FileProperty('SampleData', '', action=FileAction.OptionalLoad, direction=Direction.Input),
                              doc='Datafile that should be used.')
-        '''
-        self.declareProperty(WorkspaceProperty('SampleWorkspace', '',
-                                          direction = Direction.Input),
-                             doc='Workspace containing sample data.')
-        '''
-        self.declareProperty('DoIntensityCorrection',
+            self.declareProperty('DoIntensityCorrection',
                              False,
                              direction=Direction.Input,
                              doc='If set to True you have to declare a vanadium measurement for intensity correction.')
-        self.declareProperty(FileProperty('VanaData', '', action=FileAction.OptionalLoad, direction=Direction.Input),
+            self.declareProperty(FileProperty('VanaData', '', action=FileAction.OptionalLoad, direction=Direction.Input),
                              doc='Vanadium measurement for intensity correction.')
-        '''
-        self.declareProperty(WorkspaceProperty('VanaWorkspace', '',
-                                          direction = Direction.Input),
-                             doc='Workspace containing vanadium data.')
-        '''
-        self.declareProperty('DoBackgroundCorrection',
+            self.declareProperty('DoBackgroundCorrection',
                              False,
                              direction=Direction.Input,
                              doc='If set to True you have to declare an empty can measurement for background correction.')
-        self.declareProperty(FileProperty('EmptyData', '', action=FileAction.OptionalLoad, direction=Direction.Input),
+            self.declareProperty(FileProperty('EmptyData', '', action=FileAction.OptionalLoad, direction=Direction.Input),
                              doc='Empty measurement of the can for background correction.')
-        '''
-        self.declareProperty(WorkspaceProperty('EmptyWorkspace', '',
-                                          direction = Direction.Input),
-                             doc='Workspace containing empty data.')
-        '''
-        self.declareProperty(FileProperty('CalFile', '', action=FileAction.OptionalLoad, direction=Direction.Input),
+            self.declareProperty(FileProperty('CalFile', '', action=FileAction.OptionalLoad, direction=Direction.Input),
                              doc='Calibration file.')
-        self.declareProperty('DoEdgebinning', False, direction=Direction.Input, doc='If set to True you have to declare a BinEdges file.')
-        self.declareProperty(FileProperty('BinEdgesFile', '', action=FileAction.OptionalLoad, direction=Direction.Input),
+            self.declareProperty('DoEdgebinning', False, direction=Direction.Input, doc='If set to True you have to declare a BinEdges file.')
+            self.declareProperty(FileProperty('BinEdgesFile', '', action=FileAction.OptionalLoad, direction=Direction.Input),
                              doc='BinEdges file used for edgebinning.')
-        grp1 = 'Input and Output Files'
-        self.setPropertyGroup('SampleData', grp1)
-        #self.setPropertyGroup('SampleWorkspace', grp1)
-        self.setPropertyGroup('DoIntensityCorrection', grp1)
-        self.setPropertyGroup('VanaData', grp1)
-        #self.setPropertyGroup('VanaWorkspace', grp1)
-        self.setPropertyGroup('DoBackgroundCorrection', grp1)
-        self.setPropertyGroup('EmptyData', grp1)
-        #self.setPropertyGroup('EmptyWorkspace', grp1)
-        self.setPropertyGroup('CalFile', grp1)
-        self.setPropertyGroup('DoEdgebinning', grp1)
-        self.setPropertyGroup('BinEdgesFile', grp1)
-        # OutputFile
-        self.declareProperty(FileProperty('OutputFile', '', action=FileAction.Save, direction=Direction.Input),
+            grp1 = 'Input and Output Files'
+            self.setPropertyGroup('SampleData', grp1)
+            self.setPropertyGroup('DoIntensityCorrection', grp1)
+            self.setPropertyGroup('VanaData', grp1)
+            self.setPropertyGroup('DoBackgroundCorrection', grp1)
+            self.setPropertyGroup('EmptyData', grp1)
+            self.setPropertyGroup('CalFile', grp1)
+            self.setPropertyGroup('DoEdgebinning', grp1)
+            self.setPropertyGroup('BinEdgesFile', grp1)
+            # OutputFile
+            self.declareProperty(FileProperty('OutputFile', '', action=FileAction.Save, direction=Direction.Input),
                              doc='Output File for p2d Data.')
-        self.setPropertyGroup('OutputFile', grp1)
-        # Data range
-        self.declareProperty('TwoThetaMin',
+            self.setPropertyGroup('OutputFile', grp1)
+
+        def loadDataRanges():
+            # Data range
+            self.declareProperty('TwoThetaMin',
                              50,
                              validator=IntBoundedValidator(lower=0),
                              direction=Direction.Input,
                              doc='Minimum value for 2 Theta. Everything smaller gets removed.')
-        self.declareProperty('TwoThetaMax',
+            self.declareProperty('TwoThetaMax',
                              120,
                              validator=IntBoundedValidator(lower=0),
                              direction=Direction.Input,
                              doc='Maximum value for 2 Theta. Everything bigger gets removed.')
-        self.declareProperty(
-            'WavelengthCenter',
-            0.7,
-            validator=FloatBoundedValidator(lower=0.0),
-            direction=Direction.Input,
-            doc='Center Wavelength is used to calculate automatic values for lambdaMin and lambdaMax if they are not specified.')
-        self.declareProperty(
-            'LambdaMin',
-            0.3,
-            validator=FloatBoundedValidator(lower=0.0),
-            direction=Direction.Input,
-            doc='Minimum value for lambda. Everything smaller gets removed. If zero it is not used and values get calculated from '
-            'center wavelength.')
-        self.declareProperty(
-            'LambdaMax',
-            1.1,
-            validator=FloatBoundedValidator(lower=0.0),
-            direction=Direction.Input,
-            doc='Maximum value for lambda. Everything bigger gets removed. If zero it is not used and values get calculated from '
-            'center wavelength.')
-        self.declareProperty(
-            'DMin',
-            0.11,
-            validator=FloatBoundedValidator(lower=0.0),
-            direction=Direction.Input,
-            doc='Minimum value for d. Everything smaller gets removed. If zero it is not used and values get calculated from 2 '
-            'theta and lambda.')
-        self.declareProperty(
-            'DMax',
-            1.37,
-            validator=FloatBoundedValidator(lower=0.0),
-            direction=Direction.Input,
-            doc=
-            'Maximum value for d. Everything bigger gets removed. If zero it is not used and values get calculated from 2 theta and lambda.'
-        )
-        self.declareProperty(
-            'DpMin',
-            0.48,
-            validator=FloatBoundedValidator(lower=0.0),
-            direction=Direction.Input,
-            doc='Minimum value for dp. Everything smaller gets removed. If zero it is not used and values get calculated from '
-            '2 theta and lambda.')
-        self.declareProperty(
-            'DpMax',
-            1.76,
-            validator=FloatBoundedValidator(lower=0.0),
-            direction=Direction.Input,
-            doc='Maximum value for dp. Everything bigger gets removed. If zero it is not used and values get calculated from 2 '
-            'theta and lambda.')
-        grp2 = 'Data Ranges'
-        self.setPropertyGroup('TwoThetaMin', grp2)
-        self.setPropertyGroup('TwoThetaMax', grp2)
-        self.setPropertyGroup('WavelengthCenter', grp2)
-        self.setPropertyGroup('LambdaMin', grp2)
-        self.setPropertyGroup('LambdaMax', grp2)
-        self.setPropertyGroup('DMin', grp2)
-        self.setPropertyGroup('DMax', grp2)
-        self.setPropertyGroup('DpMin', grp2)
-        self.setPropertyGroup('DpMax', grp2)
-        # Input for FindDetectorsPar
-        self.copyProperties('FindDetectorsPar', ['ReturnLinearRanges', 'ParFile'])
-        self.declareProperty(
-            'OutputParTable',
-            'Detec',
-            direction=Direction.Input,
-            doc='If not empty, a name of a table workspace which will contain the calculated par or phx values for the detectors.')
-        grp3 = 'FindDetectorsPar'
-        self.setPropertyGroup('ReturnLinearRanges', grp3)
-        self.setPropertyGroup('ParFile', grp3)
-        self.setPropertyGroup('OutputParTable', grp3)
-        # Input for FilterBadPulses
-        self.declareProperty('LowerCutoff',
+            self.declareProperty(
+                            'WavelengthCenter',
+                            0.7,
+                            validator=FloatBoundedValidator(lower=0.0),
+                            direction=Direction.Input,
+                            doc='Center Wavelength is used to calculate automatic values for lambdaMin and lambdaMax if they are not specified.')
+            self.declareProperty(
+                            'LambdaMin',
+                            0.3,
+                            validator=FloatBoundedValidator(lower=0.0),
+                            direction=Direction.Input,
+                            doc='Minimum value for lambda. Everything smaller gets removed. If zero it is not used and values get calculated from '
+                            'center wavelength.')
+            self.declareProperty(
+                            'LambdaMax',
+                            1.1,
+                            validator=FloatBoundedValidator(lower=0.0),
+                            direction=Direction.Input,
+                            doc='Maximum value for lambda. Everything bigger gets removed. If zero it is not used and values get calculated from '
+                            'center wavelength.')
+            self.declareProperty(
+                            'DMin',
+                            0.11,
+                            validator=FloatBoundedValidator(lower=0.0),
+                            direction=Direction.Input,
+                            doc='Minimum value for d. Everything smaller gets removed. If zero it is not used and values get calculated from 2 '
+                            'theta and lambda.')
+            self.declareProperty(
+                            'DMax',
+                            1.37,
+                            validator=FloatBoundedValidator(lower=0.0),
+                            direction=Direction.Input,
+                            doc=
+                            'Maximum value for d. Everything bigger gets removed. If zero it is not used and values get calculated from 2 theta and lambda.'
+                        )
+            self.declareProperty(
+                            'DpMin',
+                            0.48,
+                            validator=FloatBoundedValidator(lower=0.0),
+                            direction=Direction.Input,
+                            doc='Minimum value for dp. Everything smaller gets removed. If zero it is not used and values get calculated from '
+                            '2 theta and lambda.')
+            self.declareProperty(
+                            'DpMax',
+                            1.76,
+                            validator=FloatBoundedValidator(lower=0.0),
+                            direction=Direction.Input,
+                            doc='Maximum value for dp. Everything bigger gets removed. If zero it is not used and values get calculated from 2 '
+                            'theta and lambda.')
+            grp2 = 'Data Ranges'
+            self.setPropertyGroup('TwoThetaMin', grp2)
+            self.setPropertyGroup('TwoThetaMax', grp2)
+            self.setPropertyGroup('WavelengthCenter', grp2)
+            self.setPropertyGroup('LambdaMin', grp2)
+            self.setPropertyGroup('LambdaMax', grp2)
+            self.setPropertyGroup('DMin', grp2)
+            self.setPropertyGroup('DMax', grp2)
+            self.setPropertyGroup('DpMin', grp2)
+            self.setPropertyGroup('DpMax', grp2)
+
+        def loadFindDetectorsPar():
+            # Input for FindDetectorsPar
+            self.copyProperties('FindDetectorsPar', ['ReturnLinearRanges', 'ParFile'])
+            self.declareProperty(
+                            'OutputParTable',
+                            'Detec',
+                            direction=Direction.Input,
+                            doc='If not empty, a name of a table workspace which will contain the calculated par or phx values for the detectors.')
+            grp3 = 'FindDetectorsPar'
+            self.setPropertyGroup('ReturnLinearRanges', grp3)
+            self.setPropertyGroup('ParFile', grp3)
+            self.setPropertyGroup('OutputParTable', grp3)
+        def loadFilterBadPulses():
+            # Input for FilterBadPulses
+            self.declareProperty('LowerCutoff',
                              99.998,
                              direction=Direction.Input,
                              doc='The percentage of the average to use as the lower bound.')
-        grp4 = 'FilterBadPulses'
-        self.setPropertyGroup('LowerCutoff', grp4)
-        # Input for RemovePromptPulse
-        self.declareProperty('Width',
+            grp4 = 'FilterBadPulses'
+            self.setPropertyGroup('LowerCutoff', grp4)
+
+        def loadRemovePromptPulse():
+            # Input for RemovePromptPulse
+            self.declareProperty('Width',
                              150,
                              direction=Direction.Input,
                              doc='The width of the time of flight (in microseconds) to remove from the data.')
-        self.copyProperties('RemovePromptPulse', ['Frequency'])
-        grp5 = 'RemovePromptPulse'
-        self.setPropertyGroup('Width', grp5)
-        self.setPropertyGroup('Frequency', grp5)
-        # Input for LoadDiffCal
-        self.declareProperty('WorkspaceName',
+            self.copyProperties('RemovePromptPulse', ['Frequency'])
+            grp5 = 'RemovePromptPulse'
+            self.setPropertyGroup('Width', grp5)
+            self.setPropertyGroup('Frequency', grp5)
+
+        def loadLoadDiffCal():
+            # Input for LoadDiffCal
+            self.declareProperty('WorkspaceName',
                              'POWTEX',
                              direction=Direction.Input,
                              doc='The base of the output workspace names. Names will have _group, _cal, _mask appended to them.')
-        self.copyProperties('LoadDiffCal', [
-            'InstrumentName', 'InstrumentFilename', 'MakeGroupingWorkspace', 'MakeCalWorkspace', 'MakeMaskWorkspace', 'TofMin', 'TofMax',
-            'FixConversionIssues'
-        ])
-        grp6 = 'LoadDiffCal'
-        self.setPropertyGroup('WorkspaceName', grp6)
-        self.setPropertyGroup('InstrumentName', grp6)
-        self.setPropertyGroup('InstrumentFilename', grp6)
-        self.setPropertyGroup('MakeGroupingWorkspace', grp6)
-        self.setPropertyGroup('MakeCalWorkspace', grp6)
-        self.setPropertyGroup('MakeMaskWorkspace', grp6)
-        self.setPropertyGroup('TofMin', grp6)
-        self.setPropertyGroup('TofMax', grp6)
-        self.setPropertyGroup('FixConversionIssues', grp6)
-        # Input for MaskDetectors
-        self.declareProperty('MaskedWorkspace',
+            self.copyProperties('LoadDiffCal', [
+                            'InstrumentName', 'InstrumentFilename', 'MakeGroupingWorkspace', 'MakeCalWorkspace', 'MakeMaskWorkspace', 'TofMin', 'TofMax',
+                            'FixConversionIssues'
+            ])
+            grp6 = 'LoadDiffCal'
+            self.setPropertyGroup('WorkspaceName', grp6)
+            self.setPropertyGroup('InstrumentName', grp6)
+            self.setPropertyGroup('InstrumentFilename', grp6)
+            self.setPropertyGroup('MakeGroupingWorkspace', grp6)
+            self.setPropertyGroup('MakeCalWorkspace', grp6)
+            self.setPropertyGroup('MakeMaskWorkspace', grp6)
+            self.setPropertyGroup('TofMin', grp6)
+            self.setPropertyGroup('TofMax', grp6)
+            self.setPropertyGroup('FixConversionIssues', grp6)
+
+        def loadMaskDetectors():
+            # Input for MaskDetectors
+            self.declareProperty('MaskedWorkspace',
                              self.getProperty('WorkspaceName').value + '_mask',
                              direction=Direction.Input,
                              doc='If given but not as a SpecialWorkspace2D, the masking from this workspace will be copied. If given as a '
                              'SpecialWorkspace2D, the masking is read from its Y values.')
-        self.copyProperties('MaskDetectors', [
-            'SpectraList', 'DetectorList', 'WorkspaceIndexList', 'ForceInstrumentMasking', 'StartWorkspaceIndex', 'EndWorkspaceIndex',
-            'ComponentList'
-        ])
-        grp7 = 'MaskDetectors'
-        self.setPropertyGroup('MaskedWorkspace', grp7)
-        self.setPropertyGroup('SpectraList', grp7)
-        self.setPropertyGroup('DetectorList', grp7)
-        self.setPropertyGroup('WorkspaceIndexList', grp7)
-        self.setPropertyGroup('ForceInstrumentMasking', grp7)
-        self.setPropertyGroup('StartWorkspaceIndex', grp7)
-        self.setPropertyGroup('EndWorkspaceIndex', grp7)
-        self.setPropertyGroup('ComponentList', grp7)
-        # Input for AlignDetectors
-        #self.copyProperties('AlignDetectors', ['CalibrationWorkspace', 'OffsetsWorkspace'])
-        #grp8 = 'AlignDetectors'
-        #self.setPropertyGroup('CalibrationWorkspace', grp8)
-        #self.setPropertyGroup('OffsetsWorkspace', grp8)
-        # Input for CylinderAbsorption
-        self.declareProperty(
-            'AttenuationXSection',
-            5.08,
-            direction=Direction.Input,
-            doc='The ABSORPTION cross-section, at 1.8 Angstroms, for the sample material in barns. Column 8 of a table generated '
-            'from http://www.ncnr.nist.gov/resources/n-lengths/.')
-        self.declareProperty(
-            'ScatteringXSection',
-            5.1,
-            direction=Direction.Input,
-            doc='The (coherent + incoherent) scattering cross-section for the sample material in barns. Column 7 of a table generated '
-            'from http://www.ncnr.nist.gov/resources/n-lengths/.')
-        self.declareProperty(
-            'SampleNumberDensity',
-            0.07192,
-            direction=Direction.Input,
-            doc='The number density of the sample in number of atoms per cubic angstrom if not set with SetSampleMaterial.')
-        self.declareProperty('CylinderSampleHeight',
+            self.copyProperties('MaskDetectors', [
+                            'SpectraList', 'DetectorList', 'WorkspaceIndexList', 'ForceInstrumentMasking', 'StartWorkspaceIndex', 'EndWorkspaceIndex',
+                            'ComponentList'
+            ])
+            grp7 = 'MaskDetectors'
+            self.setPropertyGroup('MaskedWorkspace', grp7)
+            self.setPropertyGroup('SpectraList', grp7)
+            self.setPropertyGroup('DetectorList', grp7)
+            self.setPropertyGroup('WorkspaceIndexList', grp7)
+            self.setPropertyGroup('ForceInstrumentMasking', grp7)
+            self.setPropertyGroup('StartWorkspaceIndex', grp7)
+            self.setPropertyGroup('EndWorkspaceIndex', grp7)
+            self.setPropertyGroup('ComponentList', grp7)
+
+        def loadAlignDetectors():
+            # Input for AlignDetectors
+            #self.copyProperties('AlignDetectors', ['CalibrationWorkspace', 'OffsetsWorkspace'])
+            #grp8 = 'AlignDetectors'
+            #self.setPropertyGroup('CalibrationWorkspace', grp8)
+            #self.setPropertyGroup('OffsetsWorkspace', grp8)
+
+        def loadCylinderAbsorption():
+            # Input for CylinderAbsorption
+            self.declareProperty(
+                            'AttenuationXSection',
+                            5.08,
+                            direction=Direction.Input,
+                            doc='The ABSORPTION cross-section, at 1.8 Angstroms, for the sample material in barns. Column 8 of a table generated '
+                            'from http://www.ncnr.nist.gov/resources/n-lengths/.')
+            self.declareProperty(
+                            'ScatteringXSection',
+                            5.1,
+                            direction=Direction.Input,
+                            doc='The (coherent + incoherent) scattering cross-section for the sample material in barns. Column 7 of a table generated '
+                            'from http://www.ncnr.nist.gov/resources/n-lengths/.')
+            self.declareProperty(
+                            'SampleNumberDensity',
+                            0.07192,
+                            direction=Direction.Input,
+                            doc='The number density of the sample in number of atoms per cubic angstrom if not set with SetSampleMaterial.')
+            self.declareProperty('CylinderSampleHeight',
                              4,
                              direction=Direction.Input,
                              doc='The height of the cylindrical sample in centimetres.')
-        self.declareProperty('CylinderSampleRadius',
+            self.declareProperty('CylinderSampleRadius',
                              0.4,
                              direction=Direction.Input,
                              doc='The radius of the cylindrical sample in centimetres.')
-        self.declareProperty('NumberOfSlices',
+            self.declareProperty('NumberOfSlices',
                              10,
                              direction=Direction.Input,
                              doc='The number of slices into which the cylinder is divided for the calculation.')
-        self.declareProperty('NumberOfAnnuli',
+            self.declareProperty('NumberOfAnnuli',
                              10,
                              direction=Direction.Input,
                              doc='The number of annuli into which each slice is divided for the calculation.')
-        self.copyProperties('CylinderAbsorption',
+            self.copyProperties('CylinderAbsorption',
                             ['ScatterFrom', 'NumberOfWavelengthPoints', 'ExpMethod', 'EMode', 'EFixed', 'CylinderAxis'])
-        grp9 = 'CylinderAbsorption'
-        self.setPropertyGroup('ScatterFrom', grp9)
-        self.setPropertyGroup('AttenuationXSection', grp9)
-        self.setPropertyGroup('ScatteringXSection', grp9)
-        self.setPropertyGroup('SampleNumberDensity', grp9)
-        self.setPropertyGroup('CylinderSampleHeight', grp9)
-        self.setPropertyGroup('CylinderSampleRadius', grp9)
-        self.setPropertyGroup('NumberOfSlices', grp9)
-        self.setPropertyGroup('NumberOfAnnuli', grp9)
-        self.setPropertyGroup('NumberOfWavelengthPoints', grp9)
-        self.setPropertyGroup('ExpMethod', grp9)
-        self.setPropertyGroup('EMode', grp9)
-        self.setPropertyGroup('EFixed', grp9)
-        self.setPropertyGroup('CylinderAxis', grp9)
-        # Input for Bin2DPowderDiffraction
-        self.copyProperties('Bin2DPowderDiffraction', ['dSpaceBinning', 'dPerpendicularBinning'])
-        self.declareProperty('NormalizeByBinArea', False, direction=Direction.Input, doc='Normalize the binned workspace by the bin area.')
-        grp10 = 'Bin2DPowderDiffraction'
-        self.setPropertyGroup('dSpaceBinning', grp10)
-        self.setPropertyGroup('dPerpendicularBinning', grp10)
-        self.setPropertyGroup('NormalizeByBinArea', grp10)
-        # Input for StripVanadiumPeaks
-        self.declareProperty('FWHM',
+            grp9 = 'CylinderAbsorption'
+            self.setPropertyGroup('ScatterFrom', grp9)
+            self.setPropertyGroup('AttenuationXSection', grp9)
+            self.setPropertyGroup('ScatteringXSection', grp9)
+            self.setPropertyGroup('SampleNumberDensity', grp9)
+            self.setPropertyGroup('CylinderSampleHeight', grp9)
+            self.setPropertyGroup('CylinderSampleRadius', grp9)
+            self.setPropertyGroup('NumberOfSlices', grp9)
+            self.setPropertyGroup('NumberOfAnnuli', grp9)
+            self.setPropertyGroup('NumberOfWavelengthPoints', grp9)
+            self.setPropertyGroup('ExpMethod', grp9)
+            self.setPropertyGroup('EMode', grp9)
+            self.setPropertyGroup('EFixed', grp9)
+            self.setPropertyGroup('CylinderAxis', grp9)
+
+        def loadBin2DPowderDiffraction():
+            # Input for Bin2DPowderDiffraction
+            self.copyProperties('Bin2DPowderDiffraction', ['dSpaceBinning', 'dPerpendicularBinning'])
+            self.declareProperty('NormalizeByBinArea', False, direction=Direction.Input, doc='Normalize the binned workspace by the bin area.')
+            grp10 = 'Bin2DPowderDiffraction'
+            self.setPropertyGroup('dSpaceBinning', grp10)
+            self.setPropertyGroup('dPerpendicularBinning', grp10)
+            self.setPropertyGroup('NormalizeByBinArea', grp10)
+
+        def loadStripVanadiumPeaks():
+            # Input for StripVanadiumPeaks
+            self.declareProperty('FWHM',
                              2,
                              direction=Direction.Input,
                              doc='The number of points covered, on average, by the fwhm of a peak. Passed through to FindPeaks. Default 7.')
-        self.declareProperty(
-            'Tolerance',
-            2,
-            direction=Direction.Input,
-            doc='A measure of the strictness desired in meeting the condition on peak candidates. Passed through to FindPeaks. Default 4.')
-        self.declareProperty(
-            'PeakPositionTolerance',
-            0.05,
-            direction=Direction.Input,
-            doc='Tolerance on the found peaks positions against the input peak positions. A non-positive value turns this option off.')
-        self.declareProperty(
-            'BackgroundType',
-            'Quadratic',
-            direction=Direction.Input,
-            doc='The type of background of the histogram. Present choices include Linear and Quadratic. Allowed values: [Linear, Quadratic]'
-        )
-        self.copyProperties('StripVanadiumPeaks', ['HighBackground', 'WorkspaceIndex'])
-        grp11 = 'StripVanadiumPeaks'
-        self.setPropertyGroup('FWHM', grp11)
-        self.setPropertyGroup('Tolerance', grp11)
-        self.setPropertyGroup('BackgroundType', grp11)
-        self.setPropertyGroup('HighBackground', grp11)
-        self.setPropertyGroup('PeakPositionTolerance', grp11)
-        self.setPropertyGroup('WorkspaceIndex', grp11)
-        # Input for FFTSmooth
-        self.declareProperty('Filter',
+            self.declareProperty(
+                            'Tolerance',
+                            2,
+                            direction=Direction.Input,
+                            doc='A measure of the strictness desired in meeting the condition on peak candidates. Passed through to FindPeaks. Default 4.')
+            self.declareProperty(
+                            'PeakPositionTolerance',
+                            0.05,
+                            direction=Direction.Input,
+                            doc='Tolerance on the found peaks positions against the input peak positions. A non-positive value turns this option off.')
+            self.declareProperty(
+                            'BackgroundType',
+                            'Quadratic',
+                            direction=Direction.Input,
+                            doc='The type of background of the histogram. Present choices include Linear and Quadratic. Allowed values: [Linear, Quadratic]'
+            )
+            self.copyProperties('StripVanadiumPeaks', ['HighBackground', 'WorkspaceIndex'])
+            grp11 = 'StripVanadiumPeaks'
+            self.setPropertyGroup('FWHM', grp11)
+            self.setPropertyGroup('Tolerance', grp11)
+            self.setPropertyGroup('BackgroundType', grp11)
+            self.setPropertyGroup('HighBackground', grp11)
+            self.setPropertyGroup('PeakPositionTolerance', grp11)
+            self.setPropertyGroup('WorkspaceIndex', grp11)
+
+        def loadFFTSmooth():
+            # Input for FFTSmooth
+            self.declareProperty('Filter',
                              'Butterworth',
                              direction=Direction.Input,
                              doc='The type of the applied filter. Allowed values: [Zeroing, Butterworth]')
-        self.declareProperty(
-            'Params',
-            '20,2',
-            direction=Direction.Input,
-            doc='The filter parameters: For Zeroing, 1 parameter: n - an integer greater than 1 meaning that the Fourier coefficients with '
-            'frequencies outside the 1/n of the original range will be set to zero. For Butterworth, 2 parameters: n and order, '
-            'giving the 1/n truncation and the smoothing order.')
-        self.declareProperty(
-            'IgnoreXBins',
-            True,
-            direction=Direction.Input,
-            doc='Ignores the requirement that X bins be linear and of the same size. Set this to true if you are using log binning. '
-            'The output X axis will be the same as the input either way.')
-        self.declareProperty('AllSpectra', True, direction=Direction.Input, doc='Smooth all spectra.')
-        self.declareProperty('WorkspaceIndexSmooth', 0, direction=Direction.Input, doc='Workspace index for smoothing')
-        grp12 = 'FFTSmooth'
-        self.setPropertyGroup('Filter', grp12)
-        self.setPropertyGroup('Params', grp12)
-        self.setPropertyGroup('IgnoreXBins', grp12)
-        self.setPropertyGroup('AllSpectra', grp12)
-        self.setPropertyGroup('WorkspaceIndexSmooth', grp12)
+            self.declareProperty(
+                            'Params',
+                            '20,2',
+                            direction=Direction.Input,
+                            doc='The filter parameters: For Zeroing, 1 parameter: n - an integer greater than 1 meaning that the Fourier coefficients with '
+                            'frequencies outside the 1/n of the original range will be set to zero. For Butterworth, 2 parameters: n and order, '
+                            'giving the 1/n truncation and the smoothing order.')
+            self.declareProperty(
+                            'IgnoreXBins',
+                            True,
+                            direction=Direction.Input,
+                            doc='Ignores the requirement that X bins be linear and of the same size. Set this to true if you are using log binning. '
+                            'The output X axis will be the same as the input either way.')
+            self.declareProperty('AllSpectra', True, direction=Direction.Input, doc='Smooth all spectra.')
+            self.declareProperty('WorkspaceIndexSmooth', 0, direction=Direction.Input, doc='Workspace index for smoothing')
+            grp12 = 'FFTSmooth'
+            self.setPropertyGroup('Filter', grp12)
+            self.setPropertyGroup('Params', grp12)
+            self.setPropertyGroup('IgnoreXBins', grp12)
+            self.setPropertyGroup('AllSpectra', grp12)
+            self.setPropertyGroup('WorkspaceIndexSmooth', grp12)
+
+        loadInputOutputFiles()
+        loadDataRanges()
+        loadFindDetectorsPar()
+        loadFilterBadPulses()
+        loadRemovePromptPulse()
+        loadLoadDiffCal()
+        loadMaskDetectors()
+        loadAlignDetectors()
+        loadCylinderAbsorption()
+        loadBin2DPowderDiffraction()
+        loadStripVanadiumPeaks()
+        loadFFTSmooth()
 
     def getInputs(self):
         # Output File
@@ -378,12 +395,6 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         self._sample = self.getPropertyValue('SampleData')
         self._vana = self.getPropertyValue('VanaData')
         self._empty = self.getPropertyValue('EmptyData')
-        #if self._sample == '':
-        #self._sampleWS = self.getPropertyValue('SampleWorkspace')
-        #if self._vana == '':
-        #self._vanaWS = self.getPropertyValue('VanaWorkspace')
-        #if self._empty == '':
-        #self._emptyWS = self.getPropertyValue('EmptyWorkspace')
         # FindDetectorsPar
         self._outputParTable = self.getProperty('OutputParTable').value
         self._returnLinearRanges = self.getProperty('ReturnLinearRanges').value
