@@ -76,6 +76,7 @@ class SuperplotModelTest(unittest.TestCase):
         self.model._workspaces = ["ws1", "ws2", "ws3"]
         wsList = self.model.getWorkspaces()
         self.assertEqual(wsList, self.model._workspaces)
+        # test that getWorkspace is returning a copy
         wsList = wsList[0:2]
         self.assertEqual(wsList, ["ws1", "ws2"])
         self.assertEqual(self.model._workspaces, ["ws1", "ws2", "ws3"])
