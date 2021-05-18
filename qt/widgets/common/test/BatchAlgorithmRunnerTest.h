@@ -14,6 +14,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MockConfiguredAlgorithm.h"
 
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
