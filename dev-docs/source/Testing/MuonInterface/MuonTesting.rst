@@ -207,7 +207,7 @@ This users the same sample as the single pulse test
 - Load the next run
 - Go to the **Fitting** tab
      - Add a **StaticKuboToyabeTimeExpDecay** and **FlatBackground**
-	 - Click the **Fit** button
+     - click the **Fit** button
 - Expected Values are (similar):
 	- **A:** ``0.12``
 	- **Delta:** ``0.55``
