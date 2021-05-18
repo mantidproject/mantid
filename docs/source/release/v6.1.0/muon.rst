@@ -18,7 +18,17 @@ New Features
    :align: right
 
 - Plotting ranges can now be edited individually for tile plots.
-- The muon fitting interface has been simplified.
+
+Improvements
+############
+
+- The muon fitting tab has been redesigned making it easier to use and more stable. TF Asymmetry fitting has seen
+  the largest improvement in usability as the fit function is now displayed in a much simpler form.
+
+.. figure:: ../../images/MuonFittingTabRedesign.PNG
+   :class: screenshot
+   :width: 500px
+   :align: right
 
 Improvements
 ############
@@ -35,6 +45,8 @@ Bug fixes
   Group Asymmetry Range with no data loaded.
 - Fixed a crash caused when switching between tabs in Muon Analysis.
 - Fixed a usability issue where tabs became unattached too easily. It is now possible to unattach the tabs only by double clicking on them.
+- Fixed a bug that caused the `AutoScale` check box to reset when editing the selected groups/pairs.
+- Fixed a bug where the start and end X would reset in the fitting tab when stepping to the next or previous run.
 
 ALC
 ---

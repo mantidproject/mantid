@@ -192,6 +192,7 @@ void IndirectFitDataPresenter::closeDialog() {
   disconnect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
   disconnect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeDialog()));
   m_addWorkspaceDialog->close();
+  m_addWorkspaceDialog = nullptr;
 }
 
 void IndirectFitDataPresenter::addData(IAddWorkspaceDialog const *dialog) {

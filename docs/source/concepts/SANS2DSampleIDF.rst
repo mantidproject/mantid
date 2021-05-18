@@ -12,7 +12,8 @@ This page annotates the small angle scattering SANS2D IDF, with the purpose of (
 Instrument view of SANS2D
 -------------------------
 
-SANS2D consists of two square detector banks and some monitors. Below is shown data from run 14515 (using the Load button on MantidPlot and then selecting instrument view) and for this run zero counts where recorded for the front-detector bank (the SANS2D front-detector was taken off for a period of time, although zero count data were still recorded for this bank, and as of this writing the SANS2D scientists have chosen to stick with the same IDF regardless of weather the front-detector bank is on the instrument or not).
+SANS2D consists of two square detector banks and some monitors.
+Below is shown data from run 14515 (using the Load button on MantidWorkbench and then selecting instrument view) and for this run zero counts where recorded for the front-detector bank (the SANS2D front-detector was taken off for a period of time, although zero count data were still recorded for this bank, and as of this writing the SANS2D scientists have chosen to stick with the same IDF regardless of weather the front-detector bank is on the instrument or not).
 
 The view of the instrument is generated using the 'Pick' mode. This mode is, for example, useful to check how detector IDs have been assigned. Try this out yourself. In pick mode simply hover the mouse over the banks and you will in the left hand panel above 'Plotting detector spectra' see information about the individual detectors.
 

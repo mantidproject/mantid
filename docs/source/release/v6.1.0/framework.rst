@@ -5,6 +5,10 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+.. figure:: ../../images/Multiple_Scatter_Intensity.png
+   :class: screenshot
+   :width: 350px
+   :align: right
 
 Algorithms
 ----------
@@ -13,7 +17,7 @@ New Features
 ############
 
 - New algorithm :ref:`RebinRagged <algm-RebinRagged>` which can rebin a workspace with different binning parameters for each spectrum.
-- New algorithm :ref:`CalculateMultipleScattering <algm-CalculateMultipleScattering>` to calculate multiple scattering corrections using a Monte Carlo integration approach that doesn't rely on an isotropic scattering assumption. The implementation is based on Fortran code developed by Mike Johnson and Spencer Howells under the names Muscat, MODES and DISCUS. The algorithm only supports elastic instruments so far but support for inelastic instruments will be added at a later date.
+- **New algorithm** :ref:`CalculateMultipleScattering <algm-CalculateMultipleScattering>` **to calculate multiple scattering corrections using a Monte Carlo integration approach that doesn't rely on assumptions about isotropic scattering or constant ratios between different scattering orders and can run on any sample shape (mesh or CSG)**. The implementation is based on Fortran code developed by Mike Johnson and Spencer Howells under the names Muscat, MODES and DISCUS. The algorithm only supports elastic instruments so far but support for inelastic instruments will be added at a later date.
 - New algorithm :ref:`GeneratePythonFitScript <algm-GeneratePythonFitScript>` allows the creation of a python script for sequential fitting.
 - New algorithm :ref:`GenerateLogbook <algm-GenerateLogbook>`, that allows creating TableWorkspace logbooks based on provided directory path with raw data.
 - New algorithm :ref:`ProfileChiSquared1D <algm-ProfileChiSquared1D>` to profile chi squared after a fit. This can be used to find better estimates of parameter errors.
@@ -30,6 +34,7 @@ Improvements
 - :ref:`Stitch1DMany <algm-Stitch1DMany>` has additional property `IndexOfReference` to allow user to decide which of the provided workspaces should give reference for scaling
 - :ref:`SaveAscii <algm-SaveAscii>` can now create a header for the output file containing sample logs specified through the new property `LogList`.
 - The algorithm :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>` now accepts a negative angle for the SampleAngle parameter of the FlatPlate shape
+- :ref:`AnvredCorrection <algm-AnvredCorrection>` now extrapolates to determine the spherical absorption correction factor for very absorbing samples (a warning is printed to the log to inform the user when this occurs).
 
 Bugfixes
 ########

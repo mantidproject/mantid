@@ -98,6 +98,7 @@ class PeaksViewerPresenter:
 
     def _clear_peaks(self):
         """Clear all peaks from this view"""
+        self.view.clear_table_selection()
         self.model.clear_peak_representations()
 
     def _overlay_peaks(self):
@@ -272,7 +273,7 @@ class PeaksViewerCollectionPresenter:
     def replace_handle(self, ws_name, _):
         if ws_name in self.workspace_names():
             self.remove_peaksworkspace(ws_name)
-            self.append_peaksworkspace(ws_name)
+            self.overlay_peaksworkspaces(self.workspace_names() + [ws_name])
 
     def delete_handle(self, ws_name):
         if ws_name in self.workspace_names():
@@ -286,4 +287,4 @@ class PeaksViewerCollectionPresenter:
     def rename_handle(self, ws_name, new_name):
         if ws_name in self.workspace_names():
             self.remove_peaksworkspace(ws_name)
-            self.append_peaksworkspace(new_name)
+            self.overlay_peaksworkspaces(self.workspace_names() + [new_name])

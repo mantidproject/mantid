@@ -63,7 +63,7 @@ Usage
     try:
         plotSpectrum([ws,wsOut],0)
     except NameError:
-        #plotSpectrum was not available, Mantidplot is probably not running
+        # plotSpectrum was not available
         pass
 
 

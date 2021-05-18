@@ -380,7 +380,8 @@ class SliceViewerDataView(QWidget):
             self._line_plots.disconnect()
 
         self._image_info_tracker = ImageInfoTracker(image=self.image,
-                                                    transpose_xy=self.dimensions.transpose,
+                                                    transform=self.nonortho_transform,
+                                                    do_transform=self.nonorthogonal_mode,
                                                     widget=self.image_info_widget)
 
         if state:
