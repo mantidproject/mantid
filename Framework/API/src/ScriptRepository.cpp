@@ -8,6 +8,10 @@
 #ifdef _WIN32
 #define snprintf _snprintf
 #endif
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-truncation"
+
 namespace Mantid {
 namespace API {
 
