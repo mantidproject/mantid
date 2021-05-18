@@ -28,7 +28,8 @@ class SuperplotViewSide(QDockWidget):
         wsList = self.workspacesList
         wsList.header().resizeSection(0, 120)
         self.workspaceSelector.setWorkspaceTypes(["Workspace2D",
-                                                  "WorkspaceGroup"])
+                                                  "WorkspaceGroup",
+                                                  "EventWorkspace"])
 
 
 class SuperplotViewBottom(QDockWidget):
