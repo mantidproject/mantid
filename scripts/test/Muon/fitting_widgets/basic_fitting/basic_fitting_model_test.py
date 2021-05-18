@@ -544,13 +544,19 @@ class BasicFittingModelTest(unittest.TestCase):
         workspace = CreateSampleWorkspace()
         AnalysisDataService.addOrReplace("Name1", workspace)
 
-        x_lower, x_upper = self.model.x_limits_of_current_dataset()
+        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
 
         self.assertEqual(x_lower, 0.0)
         self.assertEqual(x_upper, 20000.0)
 
     def test_that_x_limits_of_current_dataset_will_return_the_default_x_values_if_there_are_no_workspaces_loaded(self):
-        x_lower, x_upper = self.model.x_limits_of_current_dataset()
+        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
+
+        self.assertEqual(x_lower, 0.0)
+        self.assertEqual(x_upper, 15.0)
+
+    def test_that_x_limits_of_current_dataset_will_return_the_default_x_values_if_the_workspace_does_not_exist(self):
+        x_lower, x_upper = self.model.x_limits_of_workspace("FakeName")
 
         self.assertEqual(x_lower, 0.0)
         self.assertEqual(x_upper, 15.0)

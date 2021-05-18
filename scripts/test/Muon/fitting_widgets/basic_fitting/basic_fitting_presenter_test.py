@@ -299,7 +299,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
 
     def test_that_handle_start_x_updated_will_use_the_min_start_x_when_the_set_start_x_is_too_small(self):
         x_lower = 3.0
-        self.model.x_limits_of_current_dataset = mock.Mock(return_value=(x_lower, self.end_x))
+        self.model.x_limits_of_workspace = mock.Mock(return_value=(x_lower, self.end_x))
 
         self.presenter.handle_start_x_updated()
 
@@ -307,7 +307,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
 
     def test_that_handle_start_x_updated_will_use_the_max_start_x_when_the_set_start_x_is_too_large(self):
         x_upper = -0.1
-        self.model.x_limits_of_current_dataset = mock.Mock(return_value=(self.start_x, x_upper))
+        self.model.x_limits_of_workspace = mock.Mock(return_value=(self.start_x, x_upper))
 
         self.presenter.handle_start_x_updated()
 
@@ -328,7 +328,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
 
     def test_that_handle_end_x_updated_will_use_the_min_end_x_when_the_set_end_x_is_too_small(self):
         x_lower = 16.0
-        self.model.x_limits_of_current_dataset = mock.Mock(return_value=(x_lower, self.end_x))
+        self.model.x_limits_of_workspace = mock.Mock(return_value=(x_lower, self.end_x))
 
         self.presenter.handle_start_x_updated()
 
@@ -336,7 +336,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
 
     def test_that_handle_end_x_updated_will_use_the_max_end_x_when_the_set_end_x_is_too_large(self):
         x_upper = -0.1
-        self.model.x_limits_of_current_dataset = mock.Mock(return_value=(self.start_x, x_upper))
+        self.model.x_limits_of_workspace = mock.Mock(return_value=(self.start_x, x_upper))
 
         self.presenter.handle_end_x_updated()
 
