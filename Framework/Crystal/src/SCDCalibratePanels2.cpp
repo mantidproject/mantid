@@ -1192,6 +1192,13 @@ void SCDCalibratePanels2::saveIsawDetCal(const std::string &filename,
                                          std::shared_ptr<Instrument> &instrument, double T0) {
   g_log.notice() << "Saving DetCal file in " << filename << "\n";
 
+  bool tuneSamplePos = getProperty("TuneSamplePosition");
+  if (tuneSamplePos) {
+    g_log.warning() << "!!!WARNING!!!\n"
+                    << "DetCal format cannot retain sample position info, therefore the calibrated "
+                    << "sample position will be lost if DetCal format is the only output!\n";
+  }
+
   // create a workspace to pass to SaveIsawDetCal
   const size_t number_spectra = instrument->getNumberDetectors();
   Workspace2D_sptr wksp =
