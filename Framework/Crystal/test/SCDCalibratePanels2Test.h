@@ -299,6 +299,7 @@ public:
     bool tuneSamplePos = false;
 
     double t0 = runCalibration(filenamebase.string(), pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
+    g_log.notice() << "calibrated T0 = " << t0 << "\n";
     // NOTE:
     //  It is recommended to have L1 and T0 calibrated at the same time.
   }
