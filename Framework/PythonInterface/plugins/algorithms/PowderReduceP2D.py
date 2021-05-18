@@ -361,7 +361,10 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         def loadResetNegatives2DVana():
             # Input for ResetNegatives2D for Vanadium Data
             self.copyProperties('AddMinimumVana')
-            self.declareProperty('ResetValueVana', 1, direction = Direction.Input, doc = 'Set negative intensities to the specified value (default=1).'')
+            self.declareProperty('ResetValueVana',
+                                 1,
+                                 direction=Direction.Input,
+                                 doc='Set negative intensities to the specified value (default=1).')
             grp14 = 'ResetNegatives2DVana'
             self.setPropertyGroup('AddMinimumVana', grp14)
             self.setPropertyGroup('ResetValueVana', grp14)
@@ -618,14 +621,16 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             self.postProcessVana(self._vanaWS)
 
         # Check all datafiles for negative Values and correct those
-        self.checkForNegatives(self._sampleWS, self._doVana, self._vanaWS, self._doEmpty, self._emptyWS, self._addMinimum, self._resetValue, self._addMinimumVana, self._addMinimumVana)
+        self.checkForNegatives(self._sampleWS, self._doVana, self._vanaWS, self._doEmpty, self._emptyWS, self._addMinimum, self._resetValue,
+                               self._addMinimumVana, self._addMinimumVana)
 
         # Correct sample data with empty and vana data if they are there
         if self._doVana or self._doEmpty:
             self.correctSampleData(self._sampleWS, self._doVana, self._vanaWS, self._doEmpty, self._emptyWS)
 
         # Check final results again for negative Values and correct those
-        self.checkForNegatives(self._sampleWS, self._doVana, self._vanaWS, self._doEmpty, self._emptyWS, self._addMinimum, self._resetValue, self._addMinimumVana, self._addMinimumVana)
+        self.checkForNegatives(self._sampleWS, self._doVana, self._vanaWS, self._doEmpty, self._emptyWS, self._addMinimum, self._resetValue,
+                               self._addMinimumVana, self._addMinimumVana)
 
         # Print sample data to p2d file
         SaveP2D(Workspace=self._sampleWS,
