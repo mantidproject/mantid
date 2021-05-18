@@ -81,7 +81,7 @@ class WorkspaceWidget(PluginWidget):
             partial(self._do_plot_3D, plot_type='contour'))
         self.workspacewidget.sampleMaterialClicked.connect(self._do_sample_material)
         self.workspacewidget.superplotClicked.connect(
-                partial(self._do_plot_spectrum, errors=False, overplot=False))
+                partial(self._do_plot_spectrum, errors=False, overplot=False, superplot=True))
         self.workspacewidget.contextMenuAboutToShow.connect(
             self._on_context_menu)
 
@@ -110,7 +110,8 @@ class WorkspaceWidget(PluginWidget):
         ableToOverplot = can_overplot()
         self.workspacewidget.setOverplotDisabled(not ableToOverplot)
 
-    def _do_plot_spectrum(self, names, errors, overplot, advanced=False):
+    def _do_plot_spectrum(self, names, errors, overplot, advanced=False,
+                          superplot=False):
         """
         Plot spectra from the selected workspaces
 
@@ -122,7 +123,8 @@ class WorkspaceWidget(PluginWidget):
                          the spectra selector dialog.
         """
         try:
-            plot_from_names(names, errors, overplot, advanced=advanced)
+            plot_from_names(names, errors, overplot, advanced=advanced,
+                            superplot=superplot)
         except RuntimeError as re:
             logger.error(str(re))
 

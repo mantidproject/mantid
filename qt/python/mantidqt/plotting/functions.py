@@ -102,7 +102,8 @@ def plot_md_ws_from_names(names, errors, overplot, fig=None):
                                 ax_properties=None, window_title=None)
 
 
-def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False, advanced=False):
+def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False, advanced=False,
+                    superplot=False):
     """
     Given a list of names of workspaces, raise a dialog asking for the
     a selection of what to plot and then plot it.
@@ -167,7 +168,7 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False,
                     wksp_indices=selection.wksp_indices,
                     errors=errors, overplot=overplot, fig=fig, tiled=selection.plot_type == selection.Tiled,
                     waterfall=selection.plot_type == selection.Waterfall,
-                    log_name=selection.log_name, log_values=log_values)
+                    log_name=selection.log_name, log_values=log_values, superplot=superplot)
 
 
 def pcolormesh_from_names(names, fig=None, ax=None):
