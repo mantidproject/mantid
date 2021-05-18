@@ -24,7 +24,6 @@ def add_mock_methods_to_basic_fitting_view(view):
 
     view.set_datasets_in_function_browser = mock.Mock()
     view.set_current_dataset_index = mock.Mock()
-    view.set_x_data_limits = mock.Mock()
     view.update_local_fit_status_and_chi_squared = mock.Mock()
     view.update_global_fit_status = mock.Mock()
     view.update_fit_function = mock.Mock()
