@@ -361,15 +361,17 @@ void SCDCalibratePanels2::exec() {
   ITableWorkspace_sptr tablews = generateCalibrationTable(instCalibrated);
 
   // STEP_5: Write to disk if required
-  if (!XmlFilename.empty())
-    saveXmlFile(m_pws, XmlFilename);
-  // saveXmlFile(XmlFilename, m_BankNames, instCalibrated);
+  if (!XmlFilename.empty()) {
+    saveXmlFile(XmlFilename, m_BankNames, instCalibrated);
+  }
 
-  if (!DetCalFilename.empty())
+  if (!DetCalFilename.empty()) {
     saveIsawDetCal(DetCalFilename, m_BankNames, instCalibrated, m_T0);
+  }
 
-  if (!CSVFilename.empty())
+  if (!CSVFilename.empty()) {
     saveCalibrationTable(CSVFilename, tablews);
+  }
 
   // STEP_4: Cleanup
 }
@@ -389,6 +391,7 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   double original_L1 = std::abs(pws->getInstrument()->getSource()->getPos().Z());
   // T0 can be calibrate along with L1 to provide a more stable results
   bool caliT0 = getProperty("CalibrateT0");
+  bool tuneSamplepos = getProperty("TuneSamplePosition");
 
   MatrixWorkspace_sptr l1ws = getIdealQSampleAsHistogram1D(pws);
 
@@ -403,8 +406,10 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   //-- bounds&constraints def
   std::ostringstream tie_str;
   tie_str << "DeltaX=0.0,DeltaY=0.0,"
-          << "Theta=1.0,Phi=0.0,DeltaRotationAngle=0.0,"
-          << "DeltaSampleX=0.0,DeltaSampleY=0.0,DeltaSampleZ=0.0";
+          << "Theta=1.0,Phi=0.0,DeltaRotationAngle=0.0";
+  if (!tuneSamplepos) {
+    tie_str << ",DeltaSampleX=0.0,DeltaSampleY=0.0,DeltaSampleZ=0.0";
+  }
   if (!caliT0) {
     tie_str << ",DeltaT0=" << m_T0;
   }
@@ -417,6 +422,13 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
     double r_dT0 = getProperty("SearchRadiusT0");
     r_dT0 = std::abs(r_dT0);
     constraint_str << "," << -r_dT0 << "<DeltaT0<" << r_dT0;
+  }
+  if (tuneSamplepos) {
+    double r_dsp = getProperty("SearchRadiusSamplePos");
+    r_dsp = std::abs(r_dsp);
+    constraint_str << "," << -r_dsp << "<DeltaSampleX<" << r_dsp  // dsx
+                   << "," << -r_dsp << "<DeltaSampleY<" << r_dsp  // dsy
+                   << "," << -r_dsp << "<DeltaSampleZ<" << r_dsp; // dsz
   }
   //-- set and go
   fitL1_alg->setProperty("Ties", tie_str.str());
@@ -446,15 +458,37 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
       dT0_optimized = 0.0;
     }
   }
+  // get results for sample pos
+  // NOTE:
+  //    if samplePos is not part of calibration, we will get zeros here, which means zero
+  //    negative impact on the whole pws
+  double dsx_optimized = rst->getRef<double>("Value", 7);
+  double dsy_optimized = rst->getRef<double>("Value", 8);
+  double dsz_optimized = rst->getRef<double>("Value", 9);
+  double tor_dsp = getProperty("ToleranceSamplePos");
+  tor_dsp = std::abs(tor_dsp);
+  if (tuneSamplepos) {
+    if ((std::abs(dsx_optimized) < tor_dsp) && (std::abs(dsy_optimized) < tor_dsp) &&
+        (std::abs(dsz_optimized) < tor_dsp)) {
+      calilog << "-- Tune SamplePos = (" << dsx_optimized << "," << dsy_optimized << "," << dsz_optimized
+              << ") is below tolerance (" << tor_dsp << "), zero it\n";
+      dsx_optimized = 0.0;
+      dsy_optimized = 0.0;
+      dsz_optimized = 0.0;
+    }
+  }
+
   // apply the cali results (for output cali table and file)
   adjustComponent(0.0, 0.0, dL1_optimized, 1.0, 0.0, 0.0, 0.0, pws->getInstrument()->getSource()->getName(), pws);
   m_T0 = dT0_optimized;
+  adjustComponent(dsx_optimized, dsy_optimized, dsz_optimized, 1.0, 0.0, 0.0, 0.0, "sample-position", pws);
   // logging
   int npks = pws->getNumberPeaks();
   calilog << "-- Fit L1 results using " << npks << " peaks:\n"
           << "    dL1: " << dL1_optimized << " \n"
           << "    L1 " << original_L1 << " -> " << -pws->getInstrument()->getSource()->getPos().Z() << " \n"
           << "    dT0 = " << m_T0 << " \n"
+          << "    dSamplePos = (" << dsx_optimized << "," << dsy_optimized << "," << dsz_optimized << ")\n"
           << "    chi2/DOF = " << chi2OverDOF << "\n";
   g_log.notice() << calilog.str();
 }
@@ -969,22 +1003,6 @@ ITableWorkspace_sptr SCDCalibratePanels2::generateCalibrationTable(std::shared_p
   setProperty("OutputWorkspace", itablews);
 
   return itablews;
-}
-
-/**
- * @brief Save the calibrated instrument into a IDF using SaveParameterFile alg
- *
- * @param pws
- * @param FileName
- */
-void SCDCalibratePanels2::saveXmlFile(IPeaksWorkspace_sptr pws, const std::string &FileName) {
-  g_log.notice() << "Save instrument via IDF saver\n";
-
-  IAlgorithm_sptr saveIDF_alg = createChildAlgorithm("SaveParameterFile", -1, -1, false);
-  saveIDF_alg->setLogging(LOGCHILDALG);
-  saveIDF_alg->setProperty("Workspace", pws);
-  saveIDF_alg->setProperty("FileName", FileName);
-  saveIDF_alg->execute();
 }
 
 /**
