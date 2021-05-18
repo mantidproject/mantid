@@ -117,13 +117,6 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
         """Sets the index of the current dataset."""
         self.function_browser.setCurrentDataset(dataset_index)
 
-    def set_x_data_limits(self, x_lower: float, x_upper: float) -> None:
-        """Sets the minimum and maximum allowable x values for the start and end X."""
-        self.start_x_validator.setBottom(x_lower)
-        self.start_x_validator.setTop(x_upper)
-        self.end_x_validator.setBottom(x_lower)
-        self.end_x_validator.setTop(x_upper)
-
     def update_function_browser_parameters(self, is_simultaneous_fit: bool, fit_function: IFunction,
                                            global_parameters: list = []) -> None:
         """Updates the parameters in the function browser."""
@@ -159,8 +152,8 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
     def start_x(self, value: float) -> None:
         """Sets the selected start X."""
         if value <= self.end_x:
-            self.start_x_validator.last_valid_value = str(value)
-            self.start_x_line_edit.setText(str(value))
+            self.start_x_validator.last_valid_value = f"{value:.3f}"
+            self.start_x_line_edit.setText(f"{value:.3f}")
 
     @property
     def end_x(self) -> float:
@@ -171,8 +164,8 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
     def end_x(self, value: float) -> None:
         """Sets the selected end X."""
         if value >= self.start_x:
-            self.end_x_validator.last_valid_value = str(value)
-            self.end_x_line_edit.setText(str(value))
+            self.end_x_validator.last_valid_value = f"{value:.3f}"
+            self.end_x_line_edit.setText(f"{value:.3f}")
 
     @property
     def evaluation_type(self) -> str:

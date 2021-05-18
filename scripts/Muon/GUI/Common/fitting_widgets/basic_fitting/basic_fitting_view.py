@@ -95,10 +95,6 @@ class BasicFittingView(QWidget, ui_fitting_layout):
         if dataset_index is not None:
             self.fit_function_options.set_current_dataset_index(dataset_index)
 
-    def set_x_data_limits(self, x_lower: float, x_upper: float) -> None:
-        """Sets the minimum and maximum allowable x values for the start and end X."""
-        self.fit_function_options.set_x_data_limits(x_lower, x_upper)
-
     def update_local_fit_status_and_chi_squared(self, fit_status: str, chi_squared: float) -> None:
         """Updates the view to show the status and results from a fit."""
         if fit_status is not None:
