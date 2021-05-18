@@ -374,7 +374,8 @@ void SCDCalibratePanels2::exec() {
     saveCalibrationTable(CSVFilename, tablews);
   }
 
-  // STEP_4: Cleanup
+  // STEP_4: Set the output
+  setProperty("T0", m_T0); // output the calibrated T0 as a single value
 }
 
 /// ------------------------------------------- ///
