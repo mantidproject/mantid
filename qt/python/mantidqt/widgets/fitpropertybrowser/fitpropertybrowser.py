@@ -159,7 +159,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         super(FitPropertyBrowser, self).show()
         self.tool = FitInteractiveTool(self.canvas,
                                        self.toolbar_manager,
-                                       current_peak_type=self.defaultPeakType(),
                                        default_background=self.defaultBackgroundType())
         self.tool.fit_range_changed.connect(self.set_fit_range)
         self.tool.peak_added.connect(self.peak_added_slot)
@@ -320,7 +319,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         if self.tool is not None:
             self.tool.add_to_menu(menu,
                                   peak_names=self.registeredPeaks(),
-                                  current_peak_type=self.defaultPeakType(),
                                   background_names=self.registeredBackgrounds(),
                                   other_names=self.registeredOthers())
         return menu

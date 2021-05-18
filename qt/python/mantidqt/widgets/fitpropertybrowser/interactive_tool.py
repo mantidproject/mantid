@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy.QtCore import QObject, Signal, Slot
-
+from mantid.kernel import ConfigService
 from mantidqt.plotting.markers import PeakMarker, RangeMarker
 from .mouse_state_machine import StateMachine
 from .addfunctiondialog.presenter import AddFunctionDialog
@@ -26,14 +26,14 @@ class FitInteractiveTool(QObject):
 
     default_background = 'LinearBackground'
 
-    def __init__(self, canvas, toolbar_manager, current_peak_type, default_background=None):
+    def __init__(self, canvas, toolbar_manager, default_background=None):
         """
         Create an instance of FitInteractiveTool.
         :param canvas: A MPL canvas to draw on.
         :param toolbar_manager: A helper object that checks and manipulates
             the state of the plot toolbar. It is necessary to disable this
             tool's editing when zoom/pan is enabled by the user.
-        :param current_peak_type: A name of a peak fit function to create by default.
+        :param default_background: optional name of background function
         """
         super(FitInteractiveTool, self).__init__()
         self.canvas = canvas
@@ -55,8 +55,6 @@ class FitInteractiveTool(QObject):
         self.selected_peak = None
         # A width to set to newly created peaks
         self.fwhm = dx
-        # The name of the currently selected peak
-        self.current_peak_type = current_peak_type
         # A cache for peak function names to use in the add function dialog
         self.peak_names = []
         # A cache for background function names to use in the add function dialog
@@ -194,7 +192,7 @@ class FitInteractiveTool(QObject):
         A QAction callback. Start adding a new peak. The tool will expect the user to click on the canvas to
         where the peak should be placed.
         """
-        self.mouse_state.transition_to('add_peak')
+        self.action_peak_added(ConfigService.getString("curvefitting.defaultPeak"))
 
     def add_peak_dialog(self):
         """
@@ -203,7 +201,7 @@ class FitInteractiveTool(QObject):
         """
         dialog = AddFunctionDialog(parent=self.canvas,
                                    function_names=self.peak_names,
-                                   default_function_name=self.current_peak_type)
+                                   default_function_name=ConfigService.getString("curvefitting.defaultPeak"))
         dialog.view.function_added.connect(self.action_peak_added)
         dialog.view.open()
 
@@ -357,14 +355,13 @@ class FitInteractiveTool(QObject):
         """
         return self.fit_range.patch.get_transform()
 
-    def add_to_menu(self, menu, peak_names, current_peak_type, background_names, other_names):
+    def add_to_menu(self, menu, peak_names, background_names, other_names):
         """
         Adds the fit tool menu actions to the given menu and returns the menu
 
         :param menu: A reference to a menu that will accept the actions
         :param peak_names: A list of registered fit function peak names to be offered to choose from by the "Add a peak"
             dialog.
-        :param current_peak_type:
         :param background_names: A list of registered background fit functions to be offered to choose from by the
             "Add a background" dialog.
         :param other_names:  A list of other registered fit functions to be offered to choose from by the
@@ -372,7 +369,6 @@ class FitInteractiveTool(QObject):
         :returns: The menu reference passed in
         """
         self.peak_names = peak_names
-        self.current_peak_type = current_peak_type
         self.background_names = background_names
         self.other_names = other_names
         if not self.toolbar_manager.is_tool_active():
