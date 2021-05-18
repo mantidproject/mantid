@@ -33,24 +33,27 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         def loadInputOutputFiles():
             # Input files
             self.declareProperty(FileProperty('SampleData', '', action=FileAction.OptionalLoad, direction=Direction.Input),
-                             doc='Datafile that should be used.')
+                                 doc='Datafile that should be used.')
             self.declareProperty('DoIntensityCorrection',
-                             False,
-                             direction=Direction.Input,
-                             doc='If set to True you have to declare a vanadium measurement for intensity correction.')
+                                 False,
+                                 direction=Direction.Input,
+                                 doc='If set to True you have to declare a vanadium measurement for intensity correction.')
             self.declareProperty(FileProperty('VanaData', '', action=FileAction.OptionalLoad, direction=Direction.Input),
-                             doc='Vanadium measurement for intensity correction.')
+                                 doc='Vanadium measurement for intensity correction.')
             self.declareProperty('DoBackgroundCorrection',
-                             False,
-                             direction=Direction.Input,
-                             doc='If set to True you have to declare an empty can measurement for background correction.')
+                                 False,
+                                 direction=Direction.Input,
+                                 doc='If set to True you have to declare an empty can measurement for background correction.')
             self.declareProperty(FileProperty('EmptyData', '', action=FileAction.OptionalLoad, direction=Direction.Input),
-                             doc='Empty measurement of the can for background correction.')
+                                 doc='Empty measurement of the can for background correction.')
             self.declareProperty(FileProperty('CalFile', '', action=FileAction.OptionalLoad, direction=Direction.Input),
-                             doc='Calibration file.')
-            self.declareProperty('DoEdgebinning', False, direction=Direction.Input, doc='If set to True you have to declare a BinEdges file.')
+                                 doc='Calibration file.')
+            self.declareProperty('DoEdgebinning',
+                                 False,
+                                 direction=Direction.Input,
+                                 doc='If set to True you have to declare a BinEdges file.')
             self.declareProperty(FileProperty('BinEdgesFile', '', action=FileAction.OptionalLoad, direction=Direction.Input),
-                             doc='BinEdges file used for edgebinning.')
+                                 doc='BinEdges file used for edgebinning.')
             grp1 = 'Input and Output Files'
             self.setPropertyGroup('SampleData', grp1)
             self.setPropertyGroup('DoIntensityCorrection', grp1)
@@ -62,70 +65,70 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             self.setPropertyGroup('BinEdgesFile', grp1)
             # OutputFile
             self.declareProperty(FileProperty('OutputFile', '', action=FileAction.Save, direction=Direction.Input),
-                             doc='Output File for p2d Data.')
+                                 doc='Output File for p2d Data.')
             self.setPropertyGroup('OutputFile', grp1)
 
         def loadDataRanges():
             # Data range
             self.declareProperty('TwoThetaMin',
-                             50,
-                             validator=IntBoundedValidator(lower=0),
-                             direction=Direction.Input,
-                             doc='Minimum value for 2 Theta. Everything smaller gets removed.')
+                                 50,
+                                 validator=IntBoundedValidator(lower=0),
+                                 direction=Direction.Input,
+                                 doc='Minimum value for 2 Theta. Everything smaller gets removed.')
             self.declareProperty('TwoThetaMax',
-                             120,
-                             validator=IntBoundedValidator(lower=0),
-                             direction=Direction.Input,
-                             doc='Maximum value for 2 Theta. Everything bigger gets removed.')
+                                 120,
+                                 validator=IntBoundedValidator(lower=0),
+                                 direction=Direction.Input,
+                                 doc='Maximum value for 2 Theta. Everything bigger gets removed.')
             self.declareProperty(
-                            'WavelengthCenter',
-                            0.7,
-                            validator=FloatBoundedValidator(lower=0.0),
-                            direction=Direction.Input,
-                            doc='Center Wavelength is used to calculate automatic values for lambdaMin and lambdaMax if they are not specified.')
+                'WavelengthCenter',
+                0.7,
+                validator=FloatBoundedValidator(lower=0.0),
+                direction=Direction.Input,
+                doc='Center Wavelength is used to calculate automatic values for lambdaMin and lambdaMax if they are not specified.')
             self.declareProperty(
-                            'LambdaMin',
-                            0.3,
-                            validator=FloatBoundedValidator(lower=0.0),
-                            direction=Direction.Input,
-                            doc='Minimum value for lambda. Everything smaller gets removed. If zero it is not used and values get calculated from '
-                            'center wavelength.')
+                'LambdaMin',
+                0.3,
+                validator=FloatBoundedValidator(lower=0.0),
+                direction=Direction.Input,
+                doc='Minimum value for lambda. Everything smaller gets removed. If zero it is not used and values get calculated from '
+                'center wavelength.')
             self.declareProperty(
-                            'LambdaMax',
-                            1.1,
-                            validator=FloatBoundedValidator(lower=0.0),
-                            direction=Direction.Input,
-                            doc='Maximum value for lambda. Everything bigger gets removed. If zero it is not used and values get calculated from '
-                            'center wavelength.')
+                'LambdaMax',
+                1.1,
+                validator=FloatBoundedValidator(lower=0.0),
+                direction=Direction.Input,
+                doc='Maximum value for lambda. Everything bigger gets removed. If zero it is not used and values get calculated from '
+                'center wavelength.')
             self.declareProperty(
-                            'DMin',
-                            0.11,
-                            validator=FloatBoundedValidator(lower=0.0),
-                            direction=Direction.Input,
-                            doc='Minimum value for d. Everything smaller gets removed. If zero it is not used and values get calculated from 2 '
-                            'theta and lambda.')
+                'DMin',
+                0.11,
+                validator=FloatBoundedValidator(lower=0.0),
+                direction=Direction.Input,
+                doc='Minimum value for d. Everything smaller gets removed. If zero it is not used and values get calculated from 2 '
+                'theta and lambda.')
             self.declareProperty(
-                            'DMax',
-                            1.37,
-                            validator=FloatBoundedValidator(lower=0.0),
-                            direction=Direction.Input,
-                            doc=
-                            'Maximum value for d. Everything bigger gets removed. If zero it is not used and values get calculated from 2 theta and lambda.'
-                        )
+                'DMax',
+                1.37,
+                validator=FloatBoundedValidator(lower=0.0),
+                direction=Direction.Input,
+                doc=
+                'Maximum value for d. Everything bigger gets removed. If zero it is not used and values get calculated from 2 theta and lambda.'
+            )
             self.declareProperty(
-                            'DpMin',
-                            0.48,
-                            validator=FloatBoundedValidator(lower=0.0),
-                            direction=Direction.Input,
-                            doc='Minimum value for dp. Everything smaller gets removed. If zero it is not used and values get calculated from '
-                            '2 theta and lambda.')
+                'DpMin',
+                0.48,
+                validator=FloatBoundedValidator(lower=0.0),
+                direction=Direction.Input,
+                doc='Minimum value for dp. Everything smaller gets removed. If zero it is not used and values get calculated from '
+                '2 theta and lambda.')
             self.declareProperty(
-                            'DpMax',
-                            1.76,
-                            validator=FloatBoundedValidator(lower=0.0),
-                            direction=Direction.Input,
-                            doc='Maximum value for dp. Everything bigger gets removed. If zero it is not used and values get calculated from 2 '
-                            'theta and lambda.')
+                'DpMax',
+                1.76,
+                validator=FloatBoundedValidator(lower=0.0),
+                direction=Direction.Input,
+                doc='Maximum value for dp. Everything bigger gets removed. If zero it is not used and values get calculated from 2 '
+                'theta and lambda.')
             grp2 = 'Data Ranges'
             self.setPropertyGroup('TwoThetaMin', grp2)
             self.setPropertyGroup('TwoThetaMax', grp2)
@@ -141,29 +144,30 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             # Input for FindDetectorsPar
             self.copyProperties('FindDetectorsPar', ['ReturnLinearRanges', 'ParFile'])
             self.declareProperty(
-                            'OutputParTable',
-                            'Detec',
-                            direction=Direction.Input,
-                            doc='If not empty, a name of a table workspace which will contain the calculated par or phx values for the detectors.')
+                'OutputParTable',
+                'Detec',
+                direction=Direction.Input,
+                doc='If not empty, a name of a table workspace which will contain the calculated par or phx values for the detectors.')
             grp3 = 'FindDetectorsPar'
             self.setPropertyGroup('ReturnLinearRanges', grp3)
             self.setPropertyGroup('ParFile', grp3)
             self.setPropertyGroup('OutputParTable', grp3)
+
         def loadFilterBadPulses():
             # Input for FilterBadPulses
             self.declareProperty('LowerCutoff',
-                             99.998,
-                             direction=Direction.Input,
-                             doc='The percentage of the average to use as the lower bound.')
+                                 99.998,
+                                 direction=Direction.Input,
+                                 doc='The percentage of the average to use as the lower bound.')
             grp4 = 'FilterBadPulses'
             self.setPropertyGroup('LowerCutoff', grp4)
 
         def loadRemovePromptPulse():
             # Input for RemovePromptPulse
             self.declareProperty('Width',
-                             150,
-                             direction=Direction.Input,
-                             doc='The width of the time of flight (in microseconds) to remove from the data.')
+                                 150,
+                                 direction=Direction.Input,
+                                 doc='The width of the time of flight (in microseconds) to remove from the data.')
             self.copyProperties('RemovePromptPulse', ['Frequency'])
             grp5 = 'RemovePromptPulse'
             self.setPropertyGroup('Width', grp5)
@@ -172,12 +176,12 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         def loadLoadDiffCal():
             # Input for LoadDiffCal
             self.declareProperty('WorkspaceName',
-                             'POWTEX',
-                             direction=Direction.Input,
-                             doc='The base of the output workspace names. Names will have _group, _cal, _mask appended to them.')
+                                 'POWTEX',
+                                 direction=Direction.Input,
+                                 doc='The base of the output workspace names. Names will have _group, _cal, _mask appended to them.')
             self.copyProperties('LoadDiffCal', [
-                            'InstrumentName', 'InstrumentFilename', 'MakeGroupingWorkspace', 'MakeCalWorkspace', 'MakeMaskWorkspace', 'TofMin', 'TofMax',
-                            'FixConversionIssues'
+                'InstrumentName', 'InstrumentFilename', 'MakeGroupingWorkspace', 'MakeCalWorkspace', 'MakeMaskWorkspace', 'TofMin',
+                'TofMax', 'FixConversionIssues'
             ])
             grp6 = 'LoadDiffCal'
             self.setPropertyGroup('WorkspaceName', grp6)
@@ -192,14 +196,15 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
 
         def loadMaskDetectors():
             # Input for MaskDetectors
-            self.declareProperty('MaskedWorkspace',
-                             self.getProperty('WorkspaceName').value + '_mask',
-                             direction=Direction.Input,
-                             doc='If given but not as a SpecialWorkspace2D, the masking from this workspace will be copied. If given as a '
-                             'SpecialWorkspace2D, the masking is read from its Y values.')
+            self.declareProperty(
+                'MaskedWorkspace',
+                self.getProperty('WorkspaceName').value + '_mask',
+                direction=Direction.Input,
+                doc='If given but not as a SpecialWorkspace2D, the masking from this workspace will be copied. If given as a '
+                'SpecialWorkspace2D, the masking is read from its Y values.')
             self.copyProperties('MaskDetectors', [
-                            'SpectraList', 'DetectorList', 'WorkspaceIndexList', 'ForceInstrumentMasking', 'StartWorkspaceIndex', 'EndWorkspaceIndex',
-                            'ComponentList'
+                'SpectraList', 'DetectorList', 'WorkspaceIndexList', 'ForceInstrumentMasking', 'StartWorkspaceIndex', 'EndWorkspaceIndex',
+                'ComponentList'
             ])
             grp7 = 'MaskDetectors'
             self.setPropertyGroup('MaskedWorkspace', grp7)
@@ -217,44 +222,45 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             #grp8 = 'AlignDetectors'
             #self.setPropertyGroup('CalibrationWorkspace', grp8)
             #self.setPropertyGroup('OffsetsWorkspace', grp8)
+            pass
 
         def loadCylinderAbsorption():
             # Input for CylinderAbsorption
             self.declareProperty(
-                            'AttenuationXSection',
-                            5.08,
-                            direction=Direction.Input,
-                            doc='The ABSORPTION cross-section, at 1.8 Angstroms, for the sample material in barns. Column 8 of a table generated '
-                            'from http://www.ncnr.nist.gov/resources/n-lengths/.')
+                'AttenuationXSection',
+                5.08,
+                direction=Direction.Input,
+                doc='The ABSORPTION cross-section, at 1.8 Angstroms, for the sample material in barns. Column 8 of a table generated '
+                'from http://www.ncnr.nist.gov/resources/n-lengths/.')
             self.declareProperty(
-                            'ScatteringXSection',
-                            5.1,
-                            direction=Direction.Input,
-                            doc='The (coherent + incoherent) scattering cross-section for the sample material in barns. Column 7 of a table generated '
-                            'from http://www.ncnr.nist.gov/resources/n-lengths/.')
+                'ScatteringXSection',
+                5.1,
+                direction=Direction.Input,
+                doc='The (coherent + incoherent) scattering cross-section for the sample material in barns. Column 7 of a table generated '
+                'from http://www.ncnr.nist.gov/resources/n-lengths/.')
             self.declareProperty(
-                            'SampleNumberDensity',
-                            0.07192,
-                            direction=Direction.Input,
-                            doc='The number density of the sample in number of atoms per cubic angstrom if not set with SetSampleMaterial.')
+                'SampleNumberDensity',
+                0.07192,
+                direction=Direction.Input,
+                doc='The number density of the sample in number of atoms per cubic angstrom if not set with SetSampleMaterial.')
             self.declareProperty('CylinderSampleHeight',
-                             4,
-                             direction=Direction.Input,
-                             doc='The height of the cylindrical sample in centimetres.')
+                                 4,
+                                 direction=Direction.Input,
+                                 doc='The height of the cylindrical sample in centimetres.')
             self.declareProperty('CylinderSampleRadius',
-                             0.4,
-                             direction=Direction.Input,
-                             doc='The radius of the cylindrical sample in centimetres.')
+                                 0.4,
+                                 direction=Direction.Input,
+                                 doc='The radius of the cylindrical sample in centimetres.')
             self.declareProperty('NumberOfSlices',
-                             10,
-                             direction=Direction.Input,
-                             doc='The number of slices into which the cylinder is divided for the calculation.')
+                                 10,
+                                 direction=Direction.Input,
+                                 doc='The number of slices into which the cylinder is divided for the calculation.')
             self.declareProperty('NumberOfAnnuli',
-                             10,
-                             direction=Direction.Input,
-                             doc='The number of annuli into which each slice is divided for the calculation.')
+                                 10,
+                                 direction=Direction.Input,
+                                 doc='The number of annuli into which each slice is divided for the calculation.')
             self.copyProperties('CylinderAbsorption',
-                            ['ScatterFrom', 'NumberOfWavelengthPoints', 'ExpMethod', 'EMode', 'EFixed', 'CylinderAxis'])
+                                ['ScatterFrom', 'NumberOfWavelengthPoints', 'ExpMethod', 'EMode', 'EFixed', 'CylinderAxis'])
             grp9 = 'CylinderAbsorption'
             self.setPropertyGroup('ScatterFrom', grp9)
             self.setPropertyGroup('AttenuationXSection', grp9)
@@ -273,7 +279,10 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         def loadBin2DPowderDiffraction():
             # Input for Bin2DPowderDiffraction
             self.copyProperties('Bin2DPowderDiffraction', ['dSpaceBinning', 'dPerpendicularBinning'])
-            self.declareProperty('NormalizeByBinArea', False, direction=Direction.Input, doc='Normalize the binned workspace by the bin area.')
+            self.declareProperty('NormalizeByBinArea',
+                                 False,
+                                 direction=Direction.Input,
+                                 doc='Normalize the binned workspace by the bin area.')
             grp10 = 'Bin2DPowderDiffraction'
             self.setPropertyGroup('dSpaceBinning', grp10)
             self.setPropertyGroup('dPerpendicularBinning', grp10)
@@ -281,25 +290,28 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
 
         def loadStripVanadiumPeaks():
             # Input for StripVanadiumPeaks
-            self.declareProperty('FWHM',
-                             2,
-                             direction=Direction.Input,
-                             doc='The number of points covered, on average, by the fwhm of a peak. Passed through to FindPeaks. Default 7.')
             self.declareProperty(
-                            'Tolerance',
-                            2,
-                            direction=Direction.Input,
-                            doc='A measure of the strictness desired in meeting the condition on peak candidates. Passed through to FindPeaks. Default 4.')
+                'FWHM',
+                2,
+                direction=Direction.Input,
+                doc='The number of points covered, on average, by the fwhm of a peak. Passed through to FindPeaks. Default 7.')
             self.declareProperty(
-                            'PeakPositionTolerance',
-                            0.05,
-                            direction=Direction.Input,
-                            doc='Tolerance on the found peaks positions against the input peak positions. A non-positive value turns this option off.')
+                'Tolerance',
+                2,
+                direction=Direction.Input,
+                doc=
+                'A measure of the strictness desired in meeting the condition on peak candidates. Passed through to FindPeaks. Default 4.')
             self.declareProperty(
-                            'BackgroundType',
-                            'Quadratic',
-                            direction=Direction.Input,
-                            doc='The type of background of the histogram. Present choices include Linear and Quadratic. Allowed values: [Linear, Quadratic]'
+                'PeakPositionTolerance',
+                0.05,
+                direction=Direction.Input,
+                doc='Tolerance on the found peaks positions against the input peak positions. A non-positive value turns this option off.')
+            self.declareProperty(
+                'BackgroundType',
+                'Quadratic',
+                direction=Direction.Input,
+                doc=
+                'The type of background of the histogram. Present choices include Linear and Quadratic. Allowed values: [Linear, Quadratic]'
             )
             self.copyProperties('StripVanadiumPeaks', ['HighBackground', 'WorkspaceIndex'])
             grp11 = 'StripVanadiumPeaks'
@@ -313,22 +325,23 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         def loadFFTSmooth():
             # Input for FFTSmooth
             self.declareProperty('Filter',
-                             'Butterworth',
-                             direction=Direction.Input,
-                             doc='The type of the applied filter. Allowed values: [Zeroing, Butterworth]')
+                                 'Butterworth',
+                                 direction=Direction.Input,
+                                 doc='The type of the applied filter. Allowed values: [Zeroing, Butterworth]')
             self.declareProperty(
-                            'Params',
-                            '20,2',
-                            direction=Direction.Input,
-                            doc='The filter parameters: For Zeroing, 1 parameter: n - an integer greater than 1 meaning that the Fourier coefficients with '
-                            'frequencies outside the 1/n of the original range will be set to zero. For Butterworth, 2 parameters: n and order, '
-                            'giving the 1/n truncation and the smoothing order.')
+                'Params',
+                '20,2',
+                direction=Direction.Input,
+                doc=
+                'The filter parameters: For Zeroing, 1 parameter: n - an integer greater than 1 meaning that the Fourier coefficients with '
+                'frequencies outside the 1/n of the original range will be set to zero. For Butterworth, 2 parameters: n and order, '
+                'giving the 1/n truncation and the smoothing order.')
             self.declareProperty(
-                            'IgnoreXBins',
-                            True,
-                            direction=Direction.Input,
-                            doc='Ignores the requirement that X bins be linear and of the same size. Set this to true if you are using log binning. '
-                            'The output X axis will be the same as the input either way.')
+                'IgnoreXBins',
+                True,
+                direction=Direction.Input,
+                doc='Ignores the requirement that X bins be linear and of the same size. Set this to true if you are using log binning. '
+                'The output X axis will be the same as the input either way.')
             self.declareProperty('AllSpectra', True, direction=Direction.Input, doc='Smooth all spectra.')
             self.declareProperty('WorkspaceIndexSmooth', 0, direction=Direction.Input, doc='Workspace index for smoothing')
             grp12 = 'FFTSmooth'
