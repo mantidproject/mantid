@@ -147,7 +147,7 @@ class SuperplotPresenter:
         """
         selection = self._view.getSelection()
         if wsName is None:
-            selectedWorkspaces = [ws for ws in selection]
+            selectedWorkspaces = selection.copy()
         else:
             selectedWorkspaces = [wsName]
         for selectedWorkspace in selectedWorkspaces:

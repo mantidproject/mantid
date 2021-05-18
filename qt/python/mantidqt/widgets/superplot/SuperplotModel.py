@@ -110,7 +110,7 @@ class SuperplotModel(QObject):
         Returns:
             list(str): list of workspace names
         """
-        return [name for name in self._workspaces]
+        return self._workspaces.copy()
 
     def setBinMode(self):
         """
@@ -173,7 +173,7 @@ class SuperplotModel(QObject):
         Returns:
             list(tuple(str, int)): list of workspace, spectrum index pairs
         """
-        return [data for data in self._plottedData]
+        return self._plottedData.copy()
 
     def onWorkspaceDeleted(self, wsName):
         """
