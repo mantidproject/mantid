@@ -48,6 +48,18 @@ class AboutView(QDialog):
         self.deleteLater()
         super(AboutView, self).closeEvent(event)
 
+    def resizeEvent(self, event):
+        """
+        Hide the scroll bars if the dialog reaches the size of the about widget.
+        """
+        if hasattr(self, 'scroll_area'):
+            if self.width() < self.about_widget.width() or self.height() < self.about_widget.height():
+                self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+                self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+            else:
+                self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+                self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
 
 class AboutViewWidget(QWidget):
     def __init__(self, parent, version_text, date_text):
