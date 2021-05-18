@@ -65,7 +65,6 @@ class SuperplotModel(QObject):
         super().__init__()
         self._workspaces = list()
         self._plottedData = list()
-        self._plotMode = None
         self._adsObserver = SuperplotAdsObserver()
         self._adsObserver.signals.wsDeleted.connect(self.onWorkspaceDeleted)
         self._adsObserver.signals.wsRenamed.connect(self.onWorkspaceRenamed)
