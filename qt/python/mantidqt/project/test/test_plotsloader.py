@@ -10,6 +10,7 @@ import unittest  # noqa
 from unittest import mock  # noqa
 
 import matplotlib
+import matplotlib.axis
 import matplotlib.pyplot as plt  # noqa
 import matplotlib.figure  # noqa
 import matplotlib.text  # noqa
@@ -250,6 +251,36 @@ class PlotsLoaderTest(unittest.TestCase):
         _ = self.plots_loader.restore_normalise_obj_from_dict(norm_dict)
 
         mock_Normalize.assert_called_once_with(norm_dict['vmin'], norm_dict['vmax'], norm_dict['clip'])
+
+    def test_update_properties_without_spineWidths(self):
+        # Test that old versions of the .mtdproj file that don't include spine widths
+        # still load. The fact this runs is the test
+        props = self.dictionary['properties']
+        props.pop("spineWidths")
+        mock_ax = mock.Mock()
+
+        plots_loader = self.plots_loader
+        with mock.patch.object(plots_loader, "update_axis", mock.Mock()):
+            plots_loader.update_properties(mock_ax, props)
+
+    def test_update_axis_with_old_tick_position(self):
+        # Test that old versions of the .mtdproj file that represented which side of the
+        # plot had ticks differently.
+        mock_xaxis = mock.MagicMock(spec=matplotlib.axis.XAxis)
+        mock_yaxis = mock.MagicMock(spec=matplotlib.axis.YAxis)
+        mock_ax = mock.MagicMock()
+        mock_ax.xaxis = mock_xaxis
+        mock_ax.yaxis = mock_yaxis
+        dic = self.dictionary["properties"]
+        dic.pop("tickParams")
+        dic["xAxisProperties"]["position"] = "top"
+        dic["yAxisProperties"]["position"] = "right"
+
+        self.plots_loader.update_properties(mock_ax, dic)
+
+        mock_ax.set_tick_params.assert_not_called()
+        mock_xaxis.tick_top.assert_called()
+        mock_yaxis.tick_right.assert_called()
 
 
 if __name__ == "__main__":
