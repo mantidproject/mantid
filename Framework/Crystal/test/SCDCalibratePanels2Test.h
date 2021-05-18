@@ -297,7 +297,8 @@ public:
     bool calibrateBanks = false;
     bool calibrateT0 = true;
     bool tuneSamplePos = false;
-    runCalibration(filenamebase.string(), pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
+
+    double t0 = runCalibration(filenamebase.string(), pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
     // NOTE:
     //  It is recommended to have L1 and T0 calibrated at the same time.
   }
@@ -635,8 +636,8 @@ private:
    * @param calibrateT0
    * @param tuneSamplePosition
    */
-  void runCalibration(const std::string filenameBase, PeaksWorkspace_sptr pws, bool calibrateL1, bool calibrateBanks,
-                      bool calibrateT0, bool tuneSamplePosition) {
+  double runCalibration(const std::string filenameBase, PeaksWorkspace_sptr pws, bool calibrateL1, bool calibrateBanks,
+                        bool calibrateT0, bool tuneSamplePosition) {
     // generate isaw, xml, and csv filename
     const std::string isawFilename = filenameBase + ".DetCal";
     const std::string xmlFilename = filenameBase + ".xml";
@@ -663,6 +664,10 @@ private:
     alg.setProperty("CSVFilename", csvFilename);
     alg.execute();
     TS_ASSERT(alg.isExecuted());
+
+    double t0 = alg.getProperty("T0");
+
+    return t0;
   }
 
   /**
