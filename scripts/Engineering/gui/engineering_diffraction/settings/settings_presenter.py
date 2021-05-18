@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from os import path
-from mantid.api import FunctionFactory
 from mantid.kernel import ConfigService
 from mantidqt.utils.observer_pattern import Observable
 
@@ -61,7 +60,11 @@ class SettingsPresenter(object):
 
     def show(self):
         # get current peak function in case user has changed it
-        self.settings["default_peak"] = ConfigService.getString("curvefitting.defaultPeak")
+        current_peak = ConfigService.getString("curvefitting.defaultPeak")
+        if current_peak in ALL_PEAKS:
+            self.settings['default_peak'] = current_peak
+        else:
+            self.set_peak_function_from_settings()
         self._show_settings_in_view()
         self.view.show()
 
@@ -136,7 +139,7 @@ class SettingsPresenter(object):
             save_valid = save_location != ""
             log_valid = settings["logs"] != ""
             ascending_valid = settings["sort_ascending"] != ""
-            peak_valid = settings["default_peak"] in FunctionFactory.Instance().getPeakFunctionNames()
+            peak_valid = settings["default_peak"] in ALL_PEAKS
             return all_keys and not_none and save_valid and log_valid and ascending_valid and peak_valid
         except KeyError:  # Settings contained invalid key.
             return False
