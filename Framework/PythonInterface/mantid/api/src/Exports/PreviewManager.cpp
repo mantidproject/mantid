@@ -20,11 +20,16 @@ PreviewManagerImpl &instance() { return PreviewManager::Instance(); }
 
 void export_PreviewManager() {
   class_<PreviewManagerImpl, boost::noncopyable>("PreviewManager", no_init)
-      .def("getPreview", &PreviewManagerImpl::getPreview, (arg("self"), arg("facility"), arg("technique"), arg("name")),
-           "Get the preview by the facility, technique and the name.", return_value_policy<reference_existing_object>())
-      .def("getPreviews", &PreviewManagerImpl::getPreviews, (arg("self"), arg("facility"), arg("technique") = ""),
-           "Get the names of the previews available for the facility and "
-           "technique.")
+
+      .def("getPreview", &PreviewManagerImpl::getPreview,
+           (arg("self"), arg("facility"), arg("technique"), arg("acquisition"), arg("geometry"), arg("name")),
+           "Get the preview by the facility, technique, acquisition mode, "
+           "instrument geometry and name.",
+           return_value_policy<reference_existing_object>())
+      .def("getPreviews", &PreviewManagerImpl::getPreviews,
+           (arg("self"), arg("facility"), arg("technique") = "", arg("acquisition") = "", arg("geometry") = ""),
+           "Get the names of the previews available for the facility, "
+           "technique, acquisition mode and geometry.")
       .def("Instance", instance, "Return a reference to the singleton instance",
            return_value_policy<reference_existing_object>())
       .staticmethod("Instance");
