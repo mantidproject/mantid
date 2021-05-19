@@ -12,14 +12,14 @@ from qtpy.QtCore import Qt
 from qtpy.QtGui import QPen
 from matplotlib.backends.backend_qt5agg import (  # noqa: F401
     FigureCanvasQTAgg, draw_if_interactive, show)
+from mantid.plots.mantidimage import MantidImage, ImageIntensity
 
 
 class MantidFigureCanvas(FigureCanvasQTAgg):
-
     def __init__(self, figure):
         super().__init__(figure=figure)
         self._pen_color = Qt.black
-        self._pen_thickness = 1
+        self._pen_thickness = 1.5
 
     # options controlling the pen used by tools that manipulate the graph - e.g the zoom box
     @property
@@ -40,16 +40,38 @@ class MantidFigureCanvas(FigureCanvasQTAgg):
 
     # Method used by the zoom box tool on the matplotlib toolbar
     def drawRectangle(self, rect):
+        self.update_pen_color()
         # Draw the zoom rectangle to the QPainter.  _draw_rect_callback needs
         # to be called at the end of paintEvent.
         if rect is not None:
+
             def _draw_rect_callback(painter):
-                pen = QPen(self.pen_color, self.pen_thickness / self._dpi_ratio,
-                           Qt.DotLine)
+                pen = QPen(self.pen_color, self.pen_thickness / self._dpi_ratio, Qt.DotLine)
                 painter.setPen(pen)
                 painter.drawRect(*(pt / self._dpi_ratio for pt in rect))
         else:
+
             def _draw_rect_callback(painter):
                 return
+
         self._draw_rect_callback = _draw_rect_callback
         self.update()
+
+    def update_pen_color(self):
+        """Update the pen color used to draw tool in the matplotlib toolbar, e.g
+        the zoombox. The color is automatically determined
+        by considering how dark, or light the image is and setting a pen appropriately.
+        Only works if the figure contains a MantidImage.
+        """
+        for ax in self.figure.get_axes():
+            for img in ax.get_images():
+                if (not isinstance(img, MantidImage)):
+                    continue
+                intensity = img.calculate_greyscale_intensity()
+                if intensity == ImageIntensity.DARK:
+                    color = Qt.white
+                else:
+                    color = Qt.black
+                self.pen_color = color
+                # break after we find the first MantidImage
+                break
