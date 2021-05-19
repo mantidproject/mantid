@@ -244,7 +244,7 @@ void GetAllEi::exec() {
         "Can not find any chopper opening time within TOF range: " + boost::lexical_cast<std::string>(TOF_range.first) +
         ':' + boost::lexical_cast<std::string>(TOF_range.second));
   } else {
-    destUnit->initialize(mon1Distance, static_cast<int>(Kernel::DeltaEMode::Elastic), {});
+    destUnit->initialize(mon1Distance, static_cast<int>(Kernel::DeltaEMode::Elastic), {{Kernel::UnitParams::l2, 0.}});
     printDebugModeInfo(guess_opening, TOF_range, destUnit);
   }
   std::pair<double, double> Mon1_Erange = monitorWS->getSpectrum(0).getXDataRange();
@@ -257,7 +257,7 @@ void GetAllEi::exec() {
   // convert to energy
   std::vector<double> guess_ei;
   guess_ei.reserve(guess_opening.size());
-  destUnit->initialize(mon1Distance, static_cast<int>(Kernel::DeltaEMode::Elastic), {});
+  destUnit->initialize(mon1Distance, static_cast<int>(Kernel::DeltaEMode::Elastic), {{Kernel::UnitParams::l2, 0.}});
   for (double time : guess_opening) {
     double eGuess = destUnit->singleFromTOF(time);
     if (eGuess > eMin && eGuess < eMax) {

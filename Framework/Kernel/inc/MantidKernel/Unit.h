@@ -346,6 +346,7 @@ public:
   Energy();
 
 protected:
+  void validateUnitParams(const int emode, const UnitParametersMap &params) override;
   double factorTo;   ///< Constant factor for to conversion
   double factorFrom; ///< Constant factor for from conversion
 };
