@@ -52,6 +52,7 @@ class AboutView(QDialog):
         """
         Hide the scroll bars if the dialog reaches the size of the about widget.
         """
+        super().resizeEvent(event)
         if hasattr(self, 'scroll_area'):
             if self.width() < self.about_widget.width() or self.height() < self.about_widget.height():
                 self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
