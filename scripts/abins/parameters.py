@@ -84,10 +84,14 @@ performance = {
     'threads': 4,  # number of threads used in parallel calculations
     }
 
+# Experimental / debug features
+development = {'isotropic_fundamentals': False}
+
 all_parameters = {'instruments': instruments,
                   'hdf_groups': hdf_groups,
                   'sampling': sampling,
-                  'performance': performance}
+                  'performance': performance,
+                  'development': development}
 
 non_performance_parameters = {'instruments': instruments,
                               'hdf_groups': hdf_groups,

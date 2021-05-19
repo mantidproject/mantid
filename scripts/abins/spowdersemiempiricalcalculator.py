@@ -253,7 +253,8 @@ class SPowderSemiEmpiricalCalculator:
 
         # Dispatch to appropriate routine
         if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
-            return self._calculate_s_powder_1d()
+            return self._calculate_s_powder_1d(
+                isotropic_fundamentals=abins.parameters.development.get('isotropic_fundamentals', False))
         elif self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
             return self._calculate_s_powder_2d()
         else:
