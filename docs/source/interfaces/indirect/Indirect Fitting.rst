@@ -61,7 +61,6 @@ Under 'Fit Function', you can view the selected model and associated parameters 
 There are two modes which can be used to select functions. The default version allows easy selection of the most commonly used function models. The options
 in this mode differ for each of the four fitting tabs so more detailed information is given in the specific sections below. The other mode, which may be switched to
 bu ticking the `See full function` box, displays the generic function browser in which any function model can be specified.
-This generic browser functions in a very similar way to the one in :ref:`Multi-dataset Fitting Interface <Multi-dataset-Fitting-Interface>`.
 
 Parameters may be tied by right-clicking on a parameter and selecting either 'Tie > To Function' to tie the parameter
 to a parameter of the same name in a different function, or by selecting 'Tie > Custom Tie' to tie to parameters of

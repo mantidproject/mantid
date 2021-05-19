@@ -70,7 +70,10 @@ class BasicFittingModel:
         self._single_fit_functions_cache = []
 
         self._fit_statuses = []
+        self._fit_statuses_cache = []
+
         self._chi_squared = []
+        self._chi_squared_cache = []
 
         self._function_name = ""
         self._function_name_auto_update = True
@@ -238,11 +241,14 @@ class BasicFittingModel:
     def cache_the_current_fit_functions(self) -> None:
         """Caches the existing single fit functions. Used before a fit is performed to save the old state."""
         self.single_fit_functions_cache = [self._clone_function(function) for function in self.single_fit_functions]
+        self.fit_statuses_cache = self.fit_statuses.copy()
+        self.chi_squared_cache = self.chi_squared.copy()
 
     def clear_cached_fit_functions(self) -> None:
         """Clears the cached fit functions and removes all fits from the fitting context."""
         self.single_fit_functions_cache = [None] * self.number_of_datasets
-        self.remove_all_fits_from_context()
+        self.fit_statuses_cache = [None] * self.number_of_datasets
+        self.chi_squared_cache = [None] * self.number_of_datasets
 
     @property
     def fit_statuses(self) -> list:
@@ -256,6 +262,19 @@ class BasicFittingModel:
             raise RuntimeError(f"The provided number of fit statuses is not equal to the number of datasets.")
 
         self._fit_statuses = fit_statuses
+
+    @property
+    def fit_statuses_cache(self) -> list:
+        """Returns all of the cached fit statuses in a list."""
+        return self._fit_statuses_cache
+
+    @fit_statuses_cache.setter
+    def fit_statuses_cache(self, fit_statuses: list) -> None:
+        """Sets the value of the cached fit statuses."""
+        if len(fit_statuses) != self.number_of_datasets:
+            raise RuntimeError(f"The provided number of fit statuses is not equal to the number of datasets.")
+
+        self._fit_statuses_cache = fit_statuses
 
     @property
     def current_fit_status(self) -> str:
@@ -282,6 +301,19 @@ class BasicFittingModel:
             raise RuntimeError(f"The provided number of chi squared is not equal to the number of datasets.")
 
         self._chi_squared = chi_squared
+
+    @property
+    def chi_squared_cache(self) -> list:
+        """Returns all of the cached chi squares in a list."""
+        return self._chi_squared_cache
+
+    @chi_squared_cache.setter
+    def chi_squared_cache(self, chi_squared: list) -> None:
+        """Sets the value of the cached fit statuses."""
+        if len(chi_squared) != self.number_of_datasets:
+            raise RuntimeError(f"The provided number of chi squared is not equal to the number of datasets.")
+
+        self._chi_squared_cache = chi_squared
 
     @property
     def current_chi_squared(self) -> float:
@@ -380,6 +412,8 @@ class BasicFittingModel:
     def use_cached_function(self) -> None:
         """Sets the current function as being the cached function."""
         self.single_fit_functions = self.single_fit_functions_cache
+        self.fit_statuses = self.fit_statuses_cache.copy()
+        self.chi_squared = self.chi_squared_cache.copy()
 
     def update_plot_guess(self, plot_guess: bool) -> None:
         """Updates the guess plot using the current dataset and function."""
@@ -389,6 +423,10 @@ class BasicFittingModel:
     def remove_all_fits_from_context(self) -> None:
         """Removes all fit results from the context."""
         self.context.fitting_context.remove_all_fits()
+
+    def remove_latest_fit_from_context(self) -> None:
+        """Removes the most recent fit performed from the fitting context"""
+        self.context.fitting_context.remove_latest_fit()
 
     def reset_current_dataset_index(self) -> None:
         """Resets the current dataset index stored by the model."""
@@ -420,28 +458,31 @@ class BasicFittingModel:
 
     def _reset_end_xs(self) -> None:
         """Resets the end Xs stored by the model."""
-        end_x = self.current_end_x if len(self.end_xs) > 0 else self._default_end_x
-        self.end_xs = [end_x] * self.number_of_datasets
+        self.end_xs = [self.current_end_x] * self.number_of_datasets
 
     def _get_new_start_xs_and_end_xs_using_existing_datasets(self, new_dataset_names: list) -> tuple:
         """Returns the start and end Xs to use for the new datasets. It tries to use existing ranges if possible."""
-        start_xs = [self._get_new_start_x_for(name) for name in new_dataset_names]
-        end_xs = [self._get_new_end_x_for(name) for name in new_dataset_names]
-        return start_xs, end_xs
+        if len(self.dataset_names) == len(new_dataset_names):
+            return self.start_xs, self.end_xs
+        else:
+            start_xs = [self._get_new_start_x_for(name) for name in new_dataset_names]
+            end_xs = [self._get_new_end_x_for(name) for name in new_dataset_names]
+            return start_xs, end_xs
 
     def _get_new_start_x_for(self, new_dataset_name: str) -> float:
         """Returns the start X to use for the new dataset. It tries to use an existing start X if possible."""
         if new_dataset_name in self.dataset_names:
             return self.start_xs[self.dataset_names.index(new_dataset_name)]
         else:
-            return self.retrieve_first_good_data_from_run(new_dataset_name)
+            return self.current_start_x if self.current_dataset_index is not None \
+                else self.retrieve_first_good_data_from_run(new_dataset_name)
 
     def _get_new_end_x_for(self, new_dataset_name: str) -> float:
         """Returns the end X to use for the new dataset. It tries to use an existing end X if possible."""
         if new_dataset_name in self.dataset_names:
             return self.end_xs[self.dataset_names.index(new_dataset_name)]
         else:
-            return self.current_end_x if len(self.end_xs) > 0 else self._default_end_x
+            return self.current_end_x
 
     def _get_new_functions_using_existing_datasets(self, new_dataset_names: list) -> list:
         """Returns the functions to use for the new datasets. It tries to use the existing functions if possible."""

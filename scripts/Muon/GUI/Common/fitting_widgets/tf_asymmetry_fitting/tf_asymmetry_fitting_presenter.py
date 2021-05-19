@@ -38,11 +38,6 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         self._switch_to_normal_fitting()
         super().handle_instrument_changed()
 
-    def handle_selected_group_pair_changed(self) -> None:
-        """Disable TF Asymmetry mode when the selected group/pairs change in the grouping tab."""
-        self._switch_to_normal_fitting()
-        super().handle_selected_group_pair_changed()
-
     def handle_ads_clear_or_remove_workspace_event(self, _: str = None) -> None:
         """Handle when there is a clear or remove workspace event in the ADS."""
         super().handle_ads_clear_or_remove_workspace_event()
@@ -126,6 +121,11 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         else:
             super().update_fit_function_in_model(fit_function)
 
+    def update_dataset_names_in_view_and_model(self):
+        """Updates the datasets currently displayed. TF Asymmetry mode is switched off if the datasets don't comply."""
+        super().update_dataset_names_in_view_and_model()
+        self._check_tf_asymmetry_compliance(self.model.tf_asymmetry_mode)
+
     def update_fit_function_in_view_from_model(self) -> None:
         """Updates the parameters of a fit function shown in the view."""
         super().update_fit_function_in_view_from_model()
@@ -139,8 +139,11 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
 
     def _check_tf_asymmetry_compliance(self, tf_asymmetry_on: bool) -> None:
         """Check that the current datasets are compatible with TF Asymmetry fitting mode."""
-        if tf_asymmetry_on and not self.model.check_datasets_are_tf_asymmetry_compliant():
-            self.view.warning_popup("Only Groups can be fitted in TF Asymmetry mode.")
+        tf_compliant, non_compliant_names = self.model.check_datasets_are_tf_asymmetry_compliant()
+        if tf_asymmetry_on and not tf_compliant:
+            self.view.warning_popup(f"Switching to Normal Fitting mode because only Groups can be fitted in TF "
+                                    f"Asymmetry mode. Please unselect the following Pairs/Diffs in the grouping tab: "
+                                    f"{non_compliant_names}")
             self._switch_to_normal_fitting()
             return False
         return True

@@ -22,21 +22,8 @@ else:
         from Interface.ui.drill.view.DrillView import DrillView
 
         app, within_mantid = get_qapplication()
-        if 'workbench' in sys.modules:
-            from workbench.config import get_window_config
-
-            parent, flags = get_window_config()
-        else:
-            parent, flags = None, None
-
         if 'drillInterface' not in globals():
-            drillInterface = DrillView(parent, flags)
-        if 'drillInterface' in globals():
-            # 'unresolved reference drillInterface' if we use an else statement.
-            # This is necessary to ensure settings for 'On top'/'Floating' window behaviour are propagated to DRILL
-            # if they are changed by the user after DRILL has been opened.
-            drillInterface.setParent(parent)
-            drillInterface.setWindowFlags(flags)
+            drillInterface = DrillView()
         drillInterface.show()
         if not within_mantid:
             sys.exit(app.exec_())

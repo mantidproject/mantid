@@ -139,16 +139,17 @@ class BasicFittingPresenterTest(unittest.TestCase):
 
     def test_that_handle_undo_fit_clicked_will_attempt_to_reset_the_fit_data_and_notify_that_the_data_has_changed(self):
         self.presenter.clear_cached_fit_functions = mock.Mock()
-        self.presenter.reset_fit_status_and_chi_squared_information = mock.Mock()
         self.presenter.update_fit_function_in_view_from_model = mock.Mock()
+        self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model = mock.Mock()
 
         self.presenter.handle_undo_fit_clicked()
 
         self.model.use_cached_function.assert_called_once_with()
         self.presenter.clear_cached_fit_functions.assert_called_once_with()
-        self.presenter.reset_fit_status_and_chi_squared_information.assert_called_once_with()
         self.presenter.update_fit_function_in_view_from_model.assert_called_once_with()
+        self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model.assert_called_once_with()
         self.model.update_plot_guess.assert_called_once_with(True)
+        self.model.remove_latest_fit_from_context.assert_called_once_with()
         self.presenter.selected_fit_results_changed.notify_subscribers.assert_called_once_with([])
 
     def test_that_handle_fit_clicked_will_show_a_warning_if_no_data_is_loaded(self):
@@ -313,7 +314,6 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.presenter.clear_cached_fit_functions()
 
         self.view.enable_undo_fit.assert_called_once_with(False)
-        self.model.remove_all_fits_from_context.assert_called_once_with()
         self.model.clear_cached_fit_functions.assert_called_once_with()
 
     def test_that_reset_fit_status_and_chi_squared_information_will_reset_the_info_in_the_model(self):
@@ -387,6 +387,14 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.view.update_local_fit_status_and_chi_squared.assert_called_once_with(self.fit_status, self.chi_squared)
         self.view.update_global_fit_status.assert_called_once_with([self.fit_status] * len(self.dataset_names),
                                                                    self.current_dataset_index)
+
+    def test_that_update_start_and_end_x_in_view_from_model_will_update_the_start_and_end_x_in_the_view(self):
+        self.presenter.update_start_and_end_x_in_view_from_model()
+
+        self.mock_model_current_start_x.assert_called_once_with()
+        self.mock_view_start_x.assert_called_once_with(self.start_x)
+        self.mock_model_current_end_x.assert_called_once_with()
+        self.mock_view_end_x.assert_called_once_with(self.end_x)
 
     def _setup_mock_view(self):
         self.view = mock.Mock(spec=BasicFittingView)

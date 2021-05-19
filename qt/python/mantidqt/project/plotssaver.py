@@ -46,7 +46,7 @@ class PlotsSaver(object):
 
     @staticmethod
     def _convert_normalise_obj_to_dict(norm):
-        norm_dict = {'clip': norm.clip, 'vmin': norm.vmin, 'vmax': norm.vmax}
+        norm_dict = {'type': type(norm).__name__, 'clip': norm.clip, 'vmin': norm.vmin, 'vmax': norm.vmax}
         return norm_dict
 
     @staticmethod
@@ -65,7 +65,7 @@ class PlotsSaver(object):
                 for args_dict in creation_args:
                     if 'axis' in args_dict and type(args_dict['axis']) is MantidAxType:
                         args_dict['axis'] = args_dict['axis'].value
-                    if 'norm' in args_dict.keys() and type(args_dict['norm']) is Normalize:
+                    if 'norm' in args_dict.keys() and isinstance(args_dict['norm'], Normalize):
                         norm_dict = self._convert_normalise_obj_to_dict(args_dict['norm'])
                         args_dict['norm'] = norm_dict
                 create_list.append(creation_args)

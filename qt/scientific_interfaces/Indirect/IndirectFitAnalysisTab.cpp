@@ -678,6 +678,7 @@ void IndirectFitAnalysisTab::respondToDataChanged() {
   updateDataReferences();
   m_fittingModel->removeFittingData();
   m_spectrumPresenter->updateSpectra();
+  m_plotPresenter->setXBounds(m_dataPresenter->getXRange());
   m_plotPresenter->updateAvailableSpectra();
   m_plotPresenter->updatePlots();
   m_plotPresenter->updateGuessAvailability();
@@ -688,9 +689,13 @@ void IndirectFitAnalysisTab::respondToDataChanged() {
 void IndirectFitAnalysisTab::respondToSingleDataViewSelected() {
   m_spectrumPresenter->setActiveIndexToZero();
   m_plotPresenter->hideMultipleDataSelection();
+  m_plotPresenter->updateDataSelection();
 }
 
-void IndirectFitAnalysisTab::respondToMultipleDataViewSelected() { m_plotPresenter->showMultipleDataSelection(); }
+void IndirectFitAnalysisTab::respondToMultipleDataViewSelected() {
+  m_plotPresenter->showMultipleDataSelection();
+  m_plotPresenter->updateDataSelection();
+}
 
 void IndirectFitAnalysisTab::respondToDataAdded() {
   updateDataReferences();

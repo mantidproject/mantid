@@ -15,6 +15,7 @@ from matplotlib.collections import QuadMesh
 from matplotlib.image import AxesImage
 
 from .lineplots import CursorTracker, cursor_info
+from .transform import NonOrthogonalTransform
 
 # Constants
 DBLMAX = sys.float_info.max
@@ -23,8 +24,8 @@ ImageInfoWidget = import_qt('.._common', 'mantidqt.widgets', 'ImageInfoWidget')
 
 
 class ImageInfoTracker(CursorTracker):
-    def __init__(self, image: Union[AxesImage, QuadMesh], transpose_xy: bool,
-                 widget: ImageInfoWidget):
+    def __init__(self, image: Union[AxesImage, QuadMesh], transform: NonOrthogonalTransform,
+                 do_transform: bool, widget: ImageInfoWidget):
         """
         Update the image that the widget refers too.
         :param: An AxesImage or Mesh instance to track
@@ -33,7 +34,8 @@ class ImageInfoTracker(CursorTracker):
         """
         super().__init__(image_axes=image.axes, autoconnect=False)
         self._image = image
-        self._transpose_xy = transpose_xy
+        self.transform = transform
+        self.do_transform = do_transform
         self._widget = widget
 
         if hasattr(image, 'get_extent'):
@@ -61,8 +63,6 @@ class ImageInfoTracker(CursorTracker):
         if cinfo is not None:
             arr, _, (i, j) = cinfo
             if (0 <= i < arr.shape[0]) and (0 <= j < arr.shape[1]) and not np.ma.is_masked(arr[i, j]):
-                if self._transpose_xy:
-                    ydata, xdata = xdata, ydata
                 self._widget.cursorAt(xdata, ydata, arr[i, j])
 
     def _on_cursor_at_mesh(self, xdata: float, ydata: float):
@@ -76,4 +76,6 @@ class ImageInfoTracker(CursorTracker):
         """
         if self._image is None:
             return
+        if self.do_transform:
+            xdata, ydata = self.transform.inv_tr(xdata, ydata)
         self._widget.cursorAt(xdata, ydata, DBLMAX)

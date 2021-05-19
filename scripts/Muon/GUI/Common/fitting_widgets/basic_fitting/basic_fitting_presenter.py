@@ -107,10 +107,10 @@ class BasicFittingPresenter:
         """Handle when undo fit is clicked."""
         self.model.use_cached_function()
         self.clear_cached_fit_functions()
-
-        self.reset_fit_status_and_chi_squared_information()
+        self.model.remove_latest_fit_from_context()
 
         self.update_fit_function_in_view_from_model()
+        self.update_fit_statuses_and_chi_squared_in_view_from_model()
 
         self.model.update_plot_guess(self.view.plot_guess)
 
@@ -231,7 +231,6 @@ class BasicFittingPresenter:
     def clear_cached_fit_functions(self) -> None:
         """Clear the cached fit functions."""
         self.view.enable_undo_fit(False)
-        self.model.remove_all_fits_from_context()
         self.model.clear_cached_fit_functions()
 
     def reset_fit_status_and_chi_squared_information(self) -> None:
@@ -283,6 +282,11 @@ class BasicFittingPresenter:
         self.view.update_local_fit_status_and_chi_squared(self.model.current_fit_status,
                                                           self.model.current_chi_squared)
         self.view.update_global_fit_status(self.model.fit_statuses, self.model.current_dataset_index)
+
+    def update_start_and_end_x_in_view_from_model(self) -> None:
+        """Updates the start and end x in the view using the current values in the model."""
+        self.view.start_x = self.model.current_start_x
+        self.view.end_x = self.model.current_end_x
 
     def _get_single_fit_functions_from_view(self) -> list:
         """Returns the fit functions corresponding to each domain as a list."""

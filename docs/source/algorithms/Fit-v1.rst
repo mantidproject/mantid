@@ -79,8 +79,8 @@ Using the Minimizer property, Fit can be set to use different algorithms
 to perform the minimization. By default if the function's derivatives
 can be evaluated then Fit uses the GSL Levenberg-Marquardt minimizer.
 
-In Mantidplot this algorithm can be run from the `Fit Property
-Browser <http://www.mantidproject.org/MantidPlot:_Data_Analysis_and_Curve_Fitting>`__
+In :ref:`MantidWorkbench <workbench>` this algorithm can be run from the
+:ref:`Fit Property Browser <WorkbenchPlotWindow_Fitting>`
 which allows all the settings to be specified via its graphical user
 interface.
 

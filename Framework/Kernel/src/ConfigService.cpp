@@ -1268,7 +1268,7 @@ std::string ConfigServiceImpl::getPathToExecutable() const {
  * @param path :: The path to be checked
  * @return True if the path is on a network drive.
  */
-bool ConfigServiceImpl::isNetworkDrive(const std::string &path) {
+bool ConfigServiceImpl::isNetworkDrive([[maybe_unused]] const std::string &path) {
 #ifdef _WIN32
   // if path is relative get the full one
   char buff[MAX_PATH];
@@ -1335,7 +1335,6 @@ bool ConfigServiceImpl::isNetworkDrive(const std::string &path) {
   }
   return false;
 #else
-  UNUSED_ARG(path);
   // Not yet implemented for the mac
   return false;
 #endif
@@ -1575,7 +1574,7 @@ const std::vector<std::string> ConfigServiceImpl::getFacilityFilenames(const std
   // update the iterator, this means we will skip the folder in HOME and
   // look in the instrument folder in mantid install directory or mantid source
   // code directory
-  if (!(updateInstrStr == "1" || updateInstrStr == "on" || updateInstrStr == "On")) {
+  if (!(updateInstrStr == "1" || updateInstrStr == "on" || updateInstrStr == "On") && directoryNames.size() > 1) {
     instrDir++;
   }
 

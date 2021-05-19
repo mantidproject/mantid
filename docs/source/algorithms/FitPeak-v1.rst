@@ -44,7 +44,6 @@ Default function parameters' names
 ==================================
 
 Input function parameters' names should be exactly the same as those defined in Mantid.
-This brings some inconvenience to users through MantidPlot GUI.
 Thus user can input function parameters values in the default order,
 which is instructed in the list of functions.
 For example, one background function type is defined as 'Linear (A0, A1)'.

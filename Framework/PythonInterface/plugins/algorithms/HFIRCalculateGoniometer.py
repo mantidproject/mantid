@@ -9,7 +9,6 @@ import math
 from mantid.api import AlgorithmFactory, PythonAlgorithm, IPeaksWorkspaceProperty
 from mantid.kernel import Direction, Property, V3D, FloatBoundedValidator, VisibleWhenProperty, PropertyCriterion
 from mantid.geometry import Goniometer
-from mantid import logger
 
 
 class HFIRCalculateGoniometer(PythonAlgorithm):
@@ -53,7 +52,7 @@ class HFIRCalculateGoniometer(PythonAlgorithm):
 
         wavelength = self.getProperty("Wavelength").value
         if wavelength == Property.EMPTY_DBL:
-            wavelength = peaks.run()['wavelength'].value
+            wavelength = float(peaks.run()['wavelength'].value)
 
         if self.getProperty("OverrideProperty").value:
             flip_x = self.getProperty("FlipX").value
@@ -73,8 +72,8 @@ class HFIRCalculateGoniometer(PythonAlgorithm):
             g = Goniometer()
             g.setR(starting_goniometer)
             g.calcFromQSampleAndWavelength(V3D(*p.getQSampleFrame()), wavelength, flip_x, inner)
-            logger.information("Found goniometer omega={:.2f} chi={:.2f} phi={:.2f} for peak {} with Q_sample {}"
-                               .format(*g.getEulerAngles('YZY'), n, p.getQSampleFrame()))
+            self.log().information("Found goniometer omega={:.2f} chi={:.2f} phi={:.2f} for peak {} with Q_sample {}"
+                                   .format(*g.getEulerAngles('YZY'), n, p.getQSampleFrame()))
             p.setWavelength(wavelength)
             p.setGoniometerMatrix(g.getR())
 
