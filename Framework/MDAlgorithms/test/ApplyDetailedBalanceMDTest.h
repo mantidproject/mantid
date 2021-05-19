@@ -23,12 +23,6 @@
 #include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidMDAlgorithms/MergeMD.h"
 
-// only needed for local test
-#include "MantidDataHandling/LoadNexus.h"
-#include "MantidDataHandling/SaveNexus.h"
-#include "MantidMDAlgorithms/CloneMDWorkspace.h"
-#include "MantidMDAlgorithms/SaveMD.h"
-
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
@@ -46,7 +40,7 @@ public:
   /**
    * @brief Test apply detailed balance to 1 run
    */
-  void Passed_test_1run() {
+  void test_1run() {
     // Check whether the MD to test does exist
     auto singlemd = Mantid::API::AnalysisDataService::Instance().retrieve(mMDWorkspace1Name);
     TS_ASSERT(singlemd);
@@ -66,10 +60,6 @@ public:
 
     // Verify
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputname));
-    // alg.showAnyEvents(GoldDetailedBalanceSingleWSName);
-    // alg.showAnyEvents(outputname);
-    // alg.showAnyEvents(mMDWorkspace1Name);
-    // alg.showAnyEvents("ClonedSingleMD0");
 
     bool equals = compareMDEvents(outputname, GoldDetailedBalanceSingleWSName);
     TS_ASSERT(equals);
@@ -81,7 +71,7 @@ public:
   /**
    * @brief Test applying detailed balance to 2 merged runs
    */
-  void Next_test_merged_runs() {
+  void test_merged_runs() {
     auto mergedmd = Mantid::API::AnalysisDataService::Instance().retrieve(mMergedWorkspaceName);
     TS_ASSERT(mergedmd);
 
@@ -110,7 +100,7 @@ public:
   /**
    * @brief Test input workspace with |Q| and without temperature
    */
-  void Passed_test_q1d_run() {
+  void test_q1d_run() {
     auto q1dmd = Mantid::API::AnalysisDataService::Instance().retrieve(mMDWorkspaceQ1Dname);
     TS_ASSERT(q1dmd);
 
@@ -212,18 +202,6 @@ public:
     // Calculate the expected result from existing algorithms
     calculate_detailed_balance(mEventWSName, event_ws_name2, GoldDetailedBalanceSingleWSName,
                                gold_detail_balanced_merged_name);
-
-    // save for verification
-    //            SaveMD save_alg;
-    //            save_alg.initialize();
-    //        save_alg.setProperty("InputWorkspace", mMDWorkspace1Name);
-    //        save_alg.setProperty("Filename", "/tmp/detailed_balance_1md.nxs");
-    //        save_alg.execute();
-    //        TS_ASSERT(save_alg.isExecuted());
-    // merged one
-    //            save_alg.setProperty("InputWorkspace", gold_single_md_name);
-    //            save_alg.setProperty("Filename", "/tmp/detailed_balance_single_gold.nxs");
-    //            save_alg.execute();
 
     // clean the temporary workspaces
     Mantid::API::AnalysisDataService::Instance().remove(event_ws_name2);
@@ -341,16 +319,8 @@ private:
     const std::string temp_md2("DetailedBalanceMD2GoldTemp");
 
     // apply detailed balance and convert to MD for event workspace 1
-    convertToMD(event_ws_1, "ClonedSingleMD0", "Q3D"); // FIXME --- remove
     applyDetailedBalance(event_ws_1, temp_event_ws1);
     convertToMD(temp_event_ws1, output_sigle_md_name, "Q3D");
-    // FIXME -- remove till
-    CloneMDWorkspace cloner;
-    cloner.initialize();
-    cloner.setPropertyValue("InputWorkspace", temp_event_ws1);
-    cloner.setPropertyValue("OutputWorkspace", "ClonedSingleMD1");
-    cloner.execute();
-    // FIXEM -- here
     // apply detailed balance and convert to MD for event workspace 2
     applyDetailedBalance(event_ws_2, temp_event_ws2);
     convertToMD(temp_event_ws2, temp_md2, "Q3D");

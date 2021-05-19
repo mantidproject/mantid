@@ -25,7 +25,6 @@ public:
   int version() const override;
   const std::string category() const override;
   const std::string summary() const override;
-  void showAnyEvents(const std::string &mdwsname);
 
 private:
   /// Initialize the proeprties
@@ -34,9 +33,6 @@ private:
   void exec() override;
   /// Validate inputs
   std::map<std::string, std::string> validateInputs() override;
-
-  template <typename MDE, size_t nd>
-  void showMDEvents(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Apply detailed balance to each MDEvent
   template <typename MDE, size_t nd>
