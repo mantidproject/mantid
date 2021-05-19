@@ -391,6 +391,11 @@ public:
     }
   }
 
+  void testWavelength_WithoutParams() {
+    std::vector<double> x(1, 2.0), y(1, 1.0);
+    TS_ASSERT_THROWS(lambda.fromTOF(x, y, 1.0, 1, {}), const std::runtime_error &)
+  }
+
   //----------------------------------------------------------------------
   // Energy tests
   //----------------------------------------------------------------------
@@ -460,6 +465,11 @@ public:
     }
   }
 
+  void testEnergy_WithoutParams() {
+    std::vector<double> x(1, 4.0), y(1, 1.0);
+    TS_ASSERT_THROWS(energy.fromTOF(x, y, 1.0, 1, {}), const std::runtime_error &)
+  }
+
   //----------------------------------------------------------------------
   // Energy_inWavenumber tests
   //----------------------------------------------------------------------
@@ -513,6 +523,11 @@ public:
     energyk.toTOF(x2, x2, 99.0, 99, {{UnitParams::l2, 99.0}});
     lambda.fromTOF(x2, x2, 99.0, 99, {{UnitParams::l2, 99.0}, {UnitParams::efixed, 99.0}});
     TS_ASSERT_DELTA(x2[0], result, 1.0e-15)
+  }
+
+  void testEnergy_inWavenumber_WithoutParams() {
+    std::vector<double> x(1, 2.0), y(1, 1.0);
+    TS_ASSERT_THROWS(energyk.fromTOF(x, y, 1.0, 1, {}), const std::runtime_error &)
   }
 
   //----------------------------------------------------------------------
@@ -583,6 +598,11 @@ public:
         d.fromTOF(x, y, 1.0, 1, {{UnitParams::difc, 3.0}, {UnitParams::difa, -2.0}, {UnitParams::tzero, 1.0}}))
     TS_ASSERT_DELTA(x[0], 1.5, 0.0001)
     TS_ASSERT(yy == y)
+  }
+
+  void testdSpacing_WithoutParams() {
+    std::vector<double> x(1, 2.0), y(1, 1.0);
+    TS_ASSERT_THROWS(d.fromTOF(x, y, 1.0, 1, {}), const std::runtime_error &)
   }
 
   void testdSpacing_quickConversions() {
@@ -727,6 +747,11 @@ public:
     }
   }
 
+  void testdSpacingPerpendicular_WithoutParams() {
+    std::vector<double> x(1, 2.0), y(1, 1.0);
+    TS_ASSERT_THROWS(dp.fromTOF(x, y, 1.0, 1, {}), const std::runtime_error &)
+  }
+
   //----------------------------------------------------------------------
   // Momentum Transfer tests
   //----------------------------------------------------------------------
@@ -804,6 +829,12 @@ public:
                          rezult[i] / sample[i], 1., 10 * FLT_EPSILON);
       }
     }
+  }
+
+  void testMomentumTransfer_WithoutParams() {
+    std::vector<double> x(1, 2.0), y(1, 1.0);
+    TS_ASSERT_THROWS(q.fromTOF(x, y, 1.0, 1, {}), const std::runtime_error &)
+    TS_ASSERT_THROWS(q.fromTOF(x, y, 1.0, 1, {{UnitParams::l2, 1.0}}), const std::runtime_error &)
   }
 
   //----------------------------------------------------------------------
@@ -889,6 +920,12 @@ public:
     }
   }
 
+  void testQ2_WithoutParams() {
+    std::vector<double> x(1, 2.0), y(1, 1.0);
+    TS_ASSERT_THROWS(q2.fromTOF(x, y, 1.0, 1, {}), const std::runtime_error &)
+    TS_ASSERT_THROWS(q2.fromTOF(x, y, 1.0, 1, {{UnitParams::l2, 1.0}}), const std::runtime_error &)
+  }
+
   //----------------------------------------------------------------------
   // Energy transfer tests
   //----------------------------------------------------------------------
@@ -970,6 +1007,14 @@ public:
                      10 * FLT_EPSILON);
     TSM_ASSERT_DELTA("Indirect energy transfer limits Failed for conversion e_max: ", sample[3], rezult[3],
                      10 * FLT_EPSILON);
+  }
+
+  void testDeltaE_WithoutParams() {
+    std::vector<double> x(1, 2.0), y(1, 1.0);
+    TS_ASSERT_THROWS(dE.fromTOF(x, y, 1.0, 1, {}), const std::invalid_argument &)
+    TS_ASSERT_THROWS(dE.fromTOF(x, y, 1.0, 2, {}), const std::runtime_error &)
+    TS_ASSERT_THROWS(dE.fromTOF(x, y, 1.0, 2, {{UnitParams::l2, 1.0}}), const std::runtime_error &)
+    TS_ASSERT_THROWS(dE.fromTOF(x, y, 1.0, 1, {{UnitParams::efixed, -1.0}}), const std::runtime_error &)
   }
 
   //----------------------------------------------------------------------
@@ -1254,6 +1299,12 @@ public:
                          rezult[i] / sample[i], 1., 10 * FLT_EPSILON);
       }
     }
+  }
+
+  void testK_WithoutParams() {
+    std::vector<double> x(1, 2.0), y(1, 1.0);
+    TS_ASSERT_THROWS(k_i.fromTOF(x, y, 1.0, 0, {}), const std::runtime_error &)
+    TS_ASSERT_THROWS(k_i.fromTOF(x, y, 1.0, 1, {{UnitParams::l2, 1.0}}), const std::runtime_error &)
   }
 
   //----------------------------------------------------------------------
