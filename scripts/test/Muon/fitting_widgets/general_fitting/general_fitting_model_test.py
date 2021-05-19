@@ -339,21 +339,21 @@ class GeneralFittingModelTest(unittest.TestCase):
 
         self.assertEqual(1, self.model._get_selected_runs_groups_and_pairs_for_simultaneous_fit_mode.call_count)
 
-    def test_that_get_selected_runs_groups_and_pairs_will_attempt_to_get_runs_and_groups_for_single_fit_mode(self):
-        runs = ["62260"]
+    def test_that_get_selected_runs_groups_and_pairs_will_attempt_to_get_run_and_groups_for_single_fit_mode(self):
+        run = "62260"
         group_or_pair = "long"
         self.model.simultaneous_fitting_mode = True
+        self.model.simultaneous_fit_by = "Run"
+        self.model.simultaneous_fit_by_specifier = run
 
-        self.model._get_selected_runs_groups_and_pairs_for_single_fit_mode = \
-            mock.MagicMock(return_value=(runs, [group_or_pair]))
+        self.model._get_selected_groups_and_pairs = mock.MagicMock(return_value=[group_or_pair])
 
         output_runs, output_group_pairs = self.model.get_selected_runs_groups_and_pairs()
-        self.assertEqual(output_runs, runs)
+        self.assertEqual(output_runs, run)
         self.assertEqual(output_group_pairs, [group_or_pair])
 
-        self.model._get_selected_runs_groups_and_pairs_for_single_fit_mode.assert_called_with()
-
-        self.assertEqual(1, self.model._get_selected_runs_groups_and_pairs_for_single_fit_mode.call_count)
+        self.model._get_selected_groups_and_pairs.assert_called_with()
+        self.assertEqual(1, self.model._get_selected_groups_and_pairs.call_count)
 
     def test_that_get_active_fit_function_will_return_the_simultaneous_fit_function_if_in_simultaneous_mode(self):
         self.model.dataset_names = self.dataset_names
