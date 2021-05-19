@@ -192,11 +192,6 @@ std::string ApplyDetailedBalanceMD::checkInputMDDimension() {
  */
 template <typename MDE, size_t nd>
 void ApplyDetailedBalanceMD::applyDetailedBalance(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws) {
-  // toy around
-  g_log.notice() << "[DEVELOP] " << ws->getName() << "\n";
-  uint64_t numevents = ws->getNEvents();
-  g_log.notice() << "[DEVELOP] number of events = " << numevents << "\n";
-
   // Get Box from MDEventWorkspace
   MDBoxBase<MDE, nd> *box1 = ws->getBox();
   std::vector<API::IMDNode *> boxes;

@@ -43,20 +43,38 @@ Usage
 
 .. testcode:: ExApplyDetailedBalanceMDSimple
 
-   ws = CreateWorkspace(DataX='-5,-4,-3,-2,-1,0,1,2,3,4,5',DataY='2,2,2,2,2,2,2,2,2,2',DataE='1,1,1,1,1,1,1,1,1,1',UnitX='DeltaE')
-   ows = ApplyDetailedBalance(InputWorkspace='ws',OutputWorkspace='ows',Temperature='100', OutputUnits='Frequency')
+   we1 = CreateSampleWorkspace(WorkspaceType='Event',
+                              Function='Flat background',
+                              BankPixelWidth=1,
+                              XUnit='DeltaE',
+                              XMin=-10,
+                              XMax=19,
+                              BinWidth=0.5)
 
-   print("The Y values in the Output Workspace are")
-   print(ows.readY(0)[0:5])
-   print(ows.readY(0)[5:10])
+   AddSampleLog(Workspace=we1,LogName='Ei', LogText='20.', LogType='Number')
+   MoveInstrumentComponent(Workspace=we1, ComponentName='bank1', X=3, Z=3, RelativePosition=False)
+   MoveInstrumentComponent(Workspace=we1, ComponentName='bank2', X=-3, Z=-3, RelativePosition=False)
+   AddSampleLog(Workspace=we1,LogName='SampleTemp', LogText='25.0', LogType='Number Series')
+   SetGoniometer(Workspace=we1, Axis0='0,0,1,0,1')
+
+   # old way
+   weadb1 = ApplyDetailedBalance(InputWorkspace=we1, Temperature='SampleTemp')
+   mdabd1 = ConvertToMD(InputWorkspace=weadb1, QDimensions='Q3D')
+
+   # use algorithm ApplyDetailedBalanceMD
+   md1 = ConvertToMD(InputWorkspace=we1, QDimensions='Q3D')
+   test_db_md = ApplyDetailedBalanceMD(md1, 'SampleTemp')
+
+   r = CompareMDWorkspaces(test_db_md, mdabd1, CheckEvents=True, Tolerance=0.00001)
+   print('Number of MDEvents: {} == {}'.format(test_db_md.getNEvents(), mdabd1.getNEvents()))
+   print('Workspaces are {} equal'.format(r.Equals))
 
 Output:
 
 .. testoutput:: ExApplyDetailedBalanceSimple
 
-   The Y values in the Output Workspace are
-   [-4.30861792 -3.14812682 -2.11478496 -1.19466121 -0.37535083]
-   [ 0.35419179  1.00380206  1.58223777  2.09729717  2.55592407]
+   Number of MDEvents: 1972 == 1972
+   Workspaces are True equal
 
 .. categories::
 
