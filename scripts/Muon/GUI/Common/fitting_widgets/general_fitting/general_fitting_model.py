@@ -253,7 +253,7 @@ class GeneralFittingModel(BasicFittingModel):
 
     def _get_selected_runs_groups_and_pairs_for_simultaneous_fit_mode(self) -> tuple:
         """Returns the runs, groups and pairs that are currently selected for simultaneous fit mode."""
-        runs, groups_and_pairs = self._get_selected_runs_groups_and_pairs_for_single_fit_mode()
+        runs, groups_and_pairs = super().get_selected_runs_groups_and_pairs()
 
         if self.simultaneous_fit_by == "Run":
             runs = self.simultaneous_fit_by_specifier

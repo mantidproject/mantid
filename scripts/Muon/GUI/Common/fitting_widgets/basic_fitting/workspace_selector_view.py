@@ -38,8 +38,11 @@ class WorkspaceSelectorView(QWidget, ui_workspace_selector):
         new_index = self.dataset_name_combo_box.findText(old_name)
         new_index = new_index if new_index != -1 else 0
 
+        self.dataset_name_combo_box.blockSignals(True)
         self.dataset_name_combo_box.setCurrentIndex(new_index)
-        # This signal isn't always sent, so I will emit it manually.
+        self.dataset_name_combo_box.blockSignals(False)
+
+        # Signal is emitted manually in case the dataset index has not changed (but the loaded dataset may be different)
         self.dataset_name_combo_box.currentIndexChanged.emit(new_index)
 
     def update_dataset_names_combo_box(self, dataset_names: list) -> None:
