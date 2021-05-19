@@ -428,6 +428,11 @@ class SliceViewer(ObservingPresenter):
             if self._peaks_presenter is not None:
                 self._peaks_presenter.add_peak(pos, sliceinfo.frame)
 
+        self.view.data_view.canvas.draw_idle()
+
+    def enable_peak_addition(self, active):
+        self.view.data_view.enable_peak_addition(active)
+
     def deactivate_peak_adding(self, active):
         if active and self._peaks_presenter is not None:
             self._peaks_presenter.deactivate_peak_adding()

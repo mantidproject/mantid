@@ -108,7 +108,6 @@ class PeaksViewerPresenter:
 
     def add_peak(self, pos, frame):
         self.model.add_peak(pos, frame)
-        self.redraw_peaks()
 
     def _clear_peaks(self):
         """Clear all peaks from this view"""
@@ -304,9 +303,6 @@ class PeaksViewerCollectionPresenter:
         if ws_name in self.workspace_names():
             self.remove_peaksworkspace(ws_name)
             self.overlay_peaksworkspaces(self.workspace_names() + [ws_name])
-        # need to force draw because removing an artist doesn't automatically do that
-        # this is ugly, need a better way to do this
-        self._view._sliceinfo_provider.view.data_view.canvas.draw_idle()
 
     def delete_handle(self, ws_name):
         if ws_name in self.workspace_names():
@@ -321,20 +317,10 @@ class PeaksViewerCollectionPresenter:
         if ws_name in self.workspace_names():
             self.remove_peaksworkspace(ws_name)
             self.overlay_peaksworkspaces(self.workspace_names() + [new_name])
-        # need to force draw because removing an artist doesn't automatically do that
-        # this is ugly, need a better way to do this
-        self._view._sliceinfo_provider.view.data_view.canvas.draw_idle()
 
     #
     # Peak Actions Functionality
     #
-    @staticmethod
-    def _validate_view(view):
-        r"""We require the actions view object to have certain attributes"""
-        for attribute in ('collection_view', 'active_peaksworkspace_index', 'erasing_mode_on'):
-            if hasattr(view, attribute) is False:
-                raise TypeError(f'Attribute {attribute} not found in {view}')
-
     def add_peak(self, pos, frame):
         self.child_presenter(self._actions_view.active_peaksworkspace_index).add_peak(pos, frame)
 
@@ -364,5 +350,4 @@ class PeaksViewerCollectionPresenter:
             self.delete_peak()
 
     def _add_peaks(self):
-        # this is very ugly, need a better way of doing this
-        self._view._sliceinfo_provider.view.data_view.enable_peak_addition(self._actions_view.adding_mode_on)
+        self.view.enable_peak_addition(self._actions_view.adding_mode_on)
