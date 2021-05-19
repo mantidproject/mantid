@@ -125,7 +125,10 @@ class SuperplotPresenter:
             state (bool): True if the widget is now visible
         """
         if state:
-            self._canvas.figure.tight_layout()
+            try:
+                self._canvas.figure.tight_layout()
+            except:
+                pass
             self._canvas.draw_idle()
 
     def onAddButtonClicked(self):

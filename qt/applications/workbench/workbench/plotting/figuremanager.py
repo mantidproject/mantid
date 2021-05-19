@@ -351,7 +351,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         layout to fit the actual size.
         """
         if self.canvas:
-            self.canvas.figure.tight_layout()
+            try:
+                self.canvas.figure.tight_layout()
+            except:
+                pass
             self.canvas.draw_idle()
 
     def launch_plot_options(self):
