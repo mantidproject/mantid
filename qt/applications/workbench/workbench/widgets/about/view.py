@@ -118,8 +118,8 @@ class AboutViewWidget(QWidget):
             screen = QGuiApplication.primaryScreen()
 
         if screen is not None:
-            screen_width = screen.size().width()
-            screen_height = screen.size().height()
+            screen_width = screen.availableSize().width()
+            screen_height = screen.availableSize().height()
 
             # the proportion of the whole window size for the about screen
             window_scaling = 0.4
