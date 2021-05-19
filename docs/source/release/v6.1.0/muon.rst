@@ -44,6 +44,7 @@ Bug fixes
 - Fixed a bug in the Grouping tab where an error message would appear when changing the source of
   Group Asymmetry Range with no data loaded.
 - Fixed a crash caused when switching between tabs in Muon Analysis.
+- Fixed a bug where the plot window would sometimes become disabled when loading new data.
 - Fixed a usability issue where tabs became unattached too easily. It is now possible to unattach the tabs only by double clicking on them.
 - Fixed a bug that caused the `AutoScale` check box to reset when editing the selected groups/pairs.
 - Fixed a bug where the start and end X would reset in the fitting tab when stepping to the next or previous run.
