@@ -91,6 +91,66 @@ const int MAX_PEAK_RADIUS = std::numeric_limits<int>::max();
 } // namespace
 
 /**
+An implementation of Jacobian using std::vector.
+
+@author Roman Tolchenov
+@date 17/02/2012
+*/
+class CurveFittingJacobian : public API::Jacobian {
+  /// Number of data points
+  size_t m_ny;
+  /// Number of parameters in a function (== IFunction::nParams())
+  size_t m_np;
+  /// Storage for the derivatives
+  std::vector<double> m_data;
+
+public:
+  /// Constructor.
+  /// @param ny :: Number of data points
+  /// @param np :: Number of parameters
+  CurveFittingJacobian(size_t ny, size_t np) : m_ny(ny), m_np(np) { m_data.resize(ny * np, 0.0); }
+  /// overwrite base method
+  /// @param value :: the value
+  /// @param iP :: the index of the parameter
+  ///  @throw runtime_error Thrown if column of Jacobian to add number to does
+  ///  not exist
+  void addNumberToColumn(const double &value, const size_t &iP) override {
+    if (iP < m_np) {
+      // add penalty to first and last point and every 10th point in between
+      m_data[iP] += value;
+      m_data[(m_ny - 1) * m_np + iP] += value;
+      for (size_t iY = 9; iY < m_ny; iY += 10)
+        m_data[iY * m_np + iP] += value;
+    } else {
+      throw std::runtime_error("Try to add number to column of Jacobian matrix "
+                               "which does not exist.");
+    }
+  }
+  /// overwrite base method
+  void set(size_t iY, size_t iP, double value) override {
+    if (iY >= m_ny) {
+      throw std::out_of_range("Data index in Jacobian is out of range");
+    }
+    if (iP >= m_np) {
+      throw Kernel::Exception::FitSizeWarning(m_np);
+    }
+    m_data[iY * m_np + iP] = value;
+  }
+  /// overwrite base method
+  double get(size_t iY, size_t iP) override {
+    if (iY >= m_ny) {
+      throw std::out_of_range("Data index in Jacobian is out of range");
+    }
+    if (iP >= m_np) {
+      throw Kernel::Exception::FitSizeWarning(m_np);
+    }
+    return m_data[iY * m_np + iP];
+  }
+  /// overwrite base method
+  void zero() override { m_data.assign(m_data.size(), 0.0); }
+};
+
+/**
  * Constructor.
  */
 IPeakFunction::IPeakFunction() : m_peakRadius(MAX_PEAK_RADIUS) {}
@@ -203,43 +263,36 @@ IntegrationResultCache IPeakFunction::integrate() const {
 double IPeakFunction::intensity() const { return integrate().first; }
 
 /// Returns the uncertainty associated to the integral intensity of the peak function
-double IPeakFunction::intensityError() const {
-  const size_t nData = 1;
+double IPeakFunction::intensityError() {
+
+  auto const interval = getDomainInterval();
+  const size_t nData = 2;
+  double *domainArray = new double[2];
+  domainArray[0] = interval.first;
+  domainArray[1] = interval.second;
+
+  FunctionDomain1DView domain(domainArray, nData);
+  FunctionValues values(domain);
+  values->zeroCalucated();
+
   double sigma = 1;
   double prob = std::erf(sigma / sqrt(2));
   // critical value for t distribution
   double alpha = (1 + prob) / 2;
   double eValue = std::nan("");
 
-  auto covar = getCovarianceMatrix();
   bool hasErrors = false;
-  auto const interval = getDomainInterval();
-  std::vector<double> domainVector;
-  domainVector.push_back(interval.first);
 
-  // these are probably not right, not sure what they should be,
-  // generated based on calculation in getDomainInterval() maybe?
-  domainVector.push_back(0.0);
-  domainVector.push_back(0.0);
+  function(domain, values);
+  auto covar = getCovarianceMatrix();
 
-  domainVector.push_back(interval.second);
-
-  FunctionDomain1DVector domain(domainVector);
-
-  FunctionParameterDecorator_sptr fn = std::dynamic_pointer_cast<FunctionParameterDecorator>(
-      FunctionFactory::Instance().createFunction("PeakParameterFunction"));
-
-  if (!fn) {
-    throw std::runtime_error("PeakParameterFunction could not be created successfully.");
-  }
-
-  fn->setDecoratedFunction(this->name());
   size_t nParams = this->nParams();
-  // has to be 4 else  double free or corruption error
-  TempJacobian J(4, fn->nParams());
+
+  CurveFittingJacobian J(nData, this->nParams());
 
   if (!covar) {
     for (size_t j = 0; j < nParams; ++j) {
+      // throw std::runtime_error(fn->parameterName(j+3));
       if (getError(j) != 0.0) {
         hasErrors = true;
         break;
@@ -250,10 +303,11 @@ double IPeakFunction::intensityError() const {
   if (covar || hasErrors) {
 
     try {
-      fn->functionDeriv(domain, J);
+      functionDeriv(domain, J);
     } catch (...) {
-      fn->calNumericalDeriv(domain, J);
+      calNumericalDeriv(domain, J);
     }
+
     if (covar) {
       double s = 0.0;
       const Kernel::Matrix<double> &C = *covar;
@@ -275,11 +329,14 @@ double IPeakFunction::intensityError() const {
       eValue = T * std::sqrt(s * getReducedChiSquared());
     } else {
       double err = 0.0;
-      for (size_t j = 0; j < nParams; ++j) {
-        double d = J.get(0, j) * getError(j);
-        err += d * d;
+      for (size_t i = 0; i < nData; i++) {
+        for (size_t j = 0; j < nParams; ++j) {
+          double d = J.get(i, j) * getError(j);
+          err += d * d;
+        }
       }
-      eValue = std::sqrt(err);
+      if (err != 0.0)
+        eValue = std::sqrt(err);
     }
   }
   return eValue;

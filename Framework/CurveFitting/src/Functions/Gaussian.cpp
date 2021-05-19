@@ -92,7 +92,7 @@ double Gaussian::intensity() const {
   }
   return m_intensityCache;
 }
-double Gaussian::intensityError() const {
+double Gaussian::intensityError() {
   const double heightError = getError("Height");
   const double sigmaError = getError("Sigma");
 

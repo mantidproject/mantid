@@ -39,7 +39,7 @@ public:
   virtual double intensity() const;
 
   /// Returns the uncertainty associated to the integral intensity of the peak
-  virtual double intensityError() const;
+  virtual double intensityError();
 
   /// Sets the integral intensity of the peak
   virtual void setIntensity(const double newIntensity);
