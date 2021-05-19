@@ -16,11 +16,12 @@ namespace Algorithms {
 class MANTID_ALGORITHMS_DLL ApplyInstrumentToPeaks : public API::Algorithm {
 public:
   const std::string name() const override { return "ApplyInstrumentToPeaks"; }
-  int version() const override { return 1; };
+  int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override { return {}; }
   const std::string category() const override { return "Crystal\\Peaks"; }
   const std::string summary() const override {
-    return "Update the peaks within a PeaksWorkspace with a different instrument, keeping the same detectorID and TOF";
+    return "Update the instrument attached to peaks within a PeaksWorkspace to match the one provided or the one "
+           "attached to the input workspace while keeping detectorID and TOF unchanged";
   }
 
 private:

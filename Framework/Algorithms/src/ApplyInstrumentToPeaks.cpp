@@ -50,13 +50,17 @@ void ApplyInstrumentToPeaks::exec() {
     instrument = outputWS->getInstrument();
   }
 
+  Units::Energy energyUnit;
   for (int i = 0; i < outputWS->getNumberPeaks(); ++i) {
     Peak &peak = outputWS->getPeak(i);
+
     const auto tof = peak.getTOF();
+
     peak.setInstrument(instrument);
     peak.setDetectorID(peak.getDetectorID());
-    const double energy = pow((peak.getL1() + peak.getL2()) / tof * 1e6, 2) * PhysicalConstants::NeutronMass / 2.0 /
-                          PhysicalConstants::meV;
+
+    energyUnit.initialize(peak.getL1(), 0, {{UnitParams::l2, peak.getL2()}});
+    const double energy = energyUnit.singleFromTOF(tof);
     peak.setInitialEnergy(energy);
     peak.setFinalEnergy(energy);
   }

@@ -62,8 +62,8 @@ public:
       TS_ASSERT_EQUALS(p.getDetectorID(), p2.getDetectorID());
       TS_ASSERT_EQUALS(p.getDetectorID(), p0.getDetectorID());
 
-      TS_ASSERT_EQUALS(p.getTOF(), p2.getTOF());
-      TS_ASSERT_EQUALS(p.getTOF(), p0.getTOF());
+      TS_ASSERT_DELTA(p.getTOF(), p2.getTOF(), 1e-12);
+      TS_ASSERT_DELTA(p.getTOF(), p0.getTOF(), 1e-12);
 
       TS_ASSERT_DELTA(p.getWavelength(), p2.getWavelength(), 1e-12);
       TS_ASSERT_DELTA(p.getWavelength(), p0.getWavelength() / 2., 1e-12);
@@ -116,8 +116,8 @@ public:
       TS_ASSERT_EQUALS(p.getDetectorID(), p2.getDetectorID());
       TS_ASSERT_EQUALS(p.getDetectorID(), p0.getDetectorID());
 
-      TS_ASSERT_EQUALS(p.getTOF(), p2.getTOF());
-      TS_ASSERT_EQUALS(p.getTOF(), p0.getTOF());
+      TS_ASSERT_DELTA(p.getTOF(), p2.getTOF(), 1e-12);
+      TS_ASSERT_DELTA(p.getTOF(), p0.getTOF(), 1e-12);
 
       TS_ASSERT_DELTA(p.getWavelength(), p2.getWavelength(), 1e-12);
       TS_ASSERT_DELTA(p.getWavelength(), p0.getWavelength() / 2., 1e-12);
