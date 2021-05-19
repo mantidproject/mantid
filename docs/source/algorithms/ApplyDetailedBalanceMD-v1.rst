@@ -71,7 +71,7 @@ Usage
 
 Output:
 
-.. testoutput:: ExApplyDetailedBalanceSimple
+.. testoutput:: ExApplyDetailedBalanceMDSimple
 
    Number of MDEvents: 1972 == 1972
    Workspaces are True equal
