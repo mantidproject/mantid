@@ -351,9 +351,15 @@ void SCDCalibratePanels2::exec() {
     optimizeT0(m_pws, pws_original);
   }
 
-  if (tuneSamplePos) {
-    g_log.notice() << "** Tunning sample position as requested\n";
+  if (tuneSamplePos && !calibrateL1) {
+    g_log.notice() << "** Tunning sample position only as requested\n";
     optimizeSamplePos(m_pws, pws_original);
+  }
+
+  if (calibrateT0 && tuneSamplePos && !calibrateL1) {
+    g_log.warning() << "** You have chosen to calibrate T0 and sample position while ignoring"
+                    << "   L1, which means an iterative search outside this calibration is needed"
+                    << "   in order to find the minimum.\n";
   }
 
   // STEP_4: generate a table workspace to save the calibration results
@@ -489,7 +495,7 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   calilog << "-- Fit L1 results using " << npks << " peaks:\n"
           << "    dL1: " << dL1_optimized << " \n"
           << "    L1 " << original_L1 << " -> " << -pws->getInstrument()->getSource()->getPos().Z() << " \n"
-          << "    dT0 = " << m_T0 << " \n"
+          << "    dT0 = " << m_T0 << " (ms)\n"
           << "    dSamplePos = (" << dsx_optimized << "," << dsy_optimized << "," << dsz_optimized << ")\n"
           << "    chi2/DOF = " << chi2OverDOF << "\n";
   g_log.notice() << calilog.str();
@@ -669,7 +675,7 @@ void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   int npks = pws->getNumberPeaks();
   // logging
   calilog << "-- Fit T0 results using " << npks << " peaks:\n"
-          << "    dT0 = " << m_T0 << " \n"
+          << "    dT0 = " << m_T0 << " (ms)\n"
           << "    chi2/DOF = " << chi2OverDOF << "\n";
   g_log.notice() << calilog.str();
 }
