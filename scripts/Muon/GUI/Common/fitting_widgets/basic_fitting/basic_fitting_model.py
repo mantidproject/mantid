@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import AlgorithmManager, AnalysisDataService, logger
 from mantid.api import CompositeFunction, IAlgorithm, IFunction
-from mantid.simpleapi import CopyLogs, EvaluateFunction, RenameWorkspace
+from mantid.simpleapi import CopyLogs, EvaluateFunction
 
 from Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws
 from Muon.GUI.Common.ADSHandler.workspace_naming import (create_fitted_workspace_name, create_parameter_table_name,
@@ -25,13 +25,6 @@ DEFAULT_CHI_SQUARED = 0.0
 DEFAULT_FIT_STATUS = None
 DEFAULT_SINGLE_FIT_FUNCTION = None
 DEFAULT_START_X = 0.0
-DEFAULT_FDA_END_X = 250.0
-DEFAULT_MA_END_X = 15.0
-
-FDA_GUESS_WORKSPACE = "__frequency_domain_analysis_fitting_guess"
-MA_GUESS_WORKSPACE = "__muon_analysis_fitting_guess"
-FDA_SUFFIX = " FD"
-MA_SUFFIX = " MA"
 
 
 def get_function_name_for_composite(composite: CompositeFunction) -> str:
@@ -57,14 +50,11 @@ class BasicFittingModel:
     The BasicFittingModel stores the datasets, start Xs, end Xs, fit statuses and chi squared for Single Fitting.
     """
 
-    def __init__(self, context: MuonContext, is_frequency_domain: bool = False):
+    def __init__(self, context: MuonContext):
         """Initializes the model with empty fit data."""
         self.context = context
 
-        self._x_data_type = self.context._frequency_context.plot_type if is_frequency_domain else "None"
         self._group_or_pair_index = {}
-
-        self._default_end_x = DEFAULT_FDA_END_X if is_frequency_domain else DEFAULT_MA_END_X
 
         self._current_dataset_index = None
         self._dataset_names = []
@@ -186,7 +176,7 @@ class BasicFittingModel:
         if self.current_dataset_index is not None:
             return self.end_xs[self.current_dataset_index]
         else:
-            return self._default_end_x
+            return self.context.default_end_x
 
     @current_end_x.setter
     def current_end_x(self, value: float) -> None:
@@ -555,7 +545,7 @@ class BasicFittingModel:
     def _get_workspace_names_to_display_from_context(self, runs: list, group_and_pair: str) -> list:
         """Returns the workspace names for the given runs and group/pair to be displayed in the view."""
         return self.context.get_names_of_workspaces_to_fit(runs=runs, group_and_pair=group_and_pair,
-                                                           rebin=not self.fit_to_raw, freq=self._x_data_type)
+                                                           rebin=not self.fit_to_raw)
 
     def _sort_workspace_names(self, workspace_names: list) -> list:
         """Sort the workspace names and check the workspaces exist in the ADS."""
@@ -760,20 +750,12 @@ class BasicFittingModel:
         alg.setProperty("Minimizer", self.minimizer)
         alg.setProperty("EvaluationType", self.evaluation_type)
         alg.setProperty("MaxIterations", 0)
-        alg.setProperty("Output", "__double_pulse_guess")
+        alg.setProperty("Output", output_workspace)
         alg.execute()
-
-        self.context.ads_observer.observeRename(False)
-        RenameWorkspace(InputWorkspace=alg.getPropertyValue("OutputWorkspace"),
-                        OutputWorkspace=output_workspace)
-        self.context.ads_observer.observeRename(True)
 
     def _get_plot_guess_name(self) -> str:
         """Returns the name to use for the plot guess workspace."""
-        if self.context.workspace_suffix == MA_SUFFIX:
-            return MA_GUESS_WORKSPACE + self.current_dataset_name
-        else:
-            return FDA_GUESS_WORKSPACE + self.current_dataset_name
+        return self.context.guess_workspace_prefix + self.current_dataset_name
 
     def _get_plot_guess_fit_function(self) -> IFunction:
         """Returns the fit function to evaluate when plotting a guess."""

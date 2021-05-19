@@ -7,7 +7,6 @@
 from typing import NamedTuple, List
 from Muon.GUI.Common.ADSHandler.workspace_naming import *
 from Muon.GUI.Common.contexts.muon_context import MuonContext
-from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import MA_GUESS_WORKSPACE, FDA_GUESS_WORKSPACE
 
 FIT_FUNCTION_GUESS_LABEL = "Fit function guess"
 
@@ -173,7 +172,4 @@ class PlottingCanvasModel(object):
         return label
 
     def _is_guess_workspace(self, workspace_name):
-        if MA_GUESS_WORKSPACE in workspace_name or FDA_GUESS_WORKSPACE in workspace_name:
-            return True
-        else:
-            return False
+        return self._context.guess_workspace_prefix in workspace_name
