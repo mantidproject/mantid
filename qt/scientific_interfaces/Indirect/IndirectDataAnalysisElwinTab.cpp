@@ -132,11 +132,13 @@ void IndirectDataAnalysisElwinTab::setup() {
   // We always want one range selector... the second one can be controlled from
   // within the elwinTwoRanges(bool state) function
   auto integrationRangeSelector = m_uiForm.ppPlot->addRangeSelector("ElwinIntegrationRange");
+  integrationRangeSelector->setBounds(-1.0, 1.0);
   connect(integrationRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
   connect(integrationRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
   // create the second range
   auto backgroundRangeSelector = m_uiForm.ppPlot->addRangeSelector("ElwinBackgroundRange");
   backgroundRangeSelector->setColour(Qt::darkGreen); // dark green for background
+  backgroundRangeSelector->setBounds(-1.0, 1.0);
   connect(integrationRangeSelector, SIGNAL(selectionChanged(double, double)), backgroundRangeSelector,
           SLOT(setRange(double, double)));
   connect(backgroundRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
