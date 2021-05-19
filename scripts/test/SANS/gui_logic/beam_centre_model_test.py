@@ -101,7 +101,7 @@ class BeamCentreModelTest(unittest.TestCase):
                                                            reduction_method=False, component=DetectorType.LAB)
 
     def test_beam_centre_scales_to_mills(self):
-        self.assertTrue(self.beam_centre_model._apply_scaling)
+        self.assertIsNot(SANSInstrument.LARMOR, self.beam_centre_model.instrument)
 
         value_in_mm = 1200
         self.beam_centre_model.lab_pos_1 = value_in_mm
@@ -114,7 +114,7 @@ class BeamCentreModelTest(unittest.TestCase):
         self.assertEqual((value_in_mm * 2 / 1000), self.beam_centre_model._hab_pos_2)
 
     def test_beam_centre_does_not_scale(self):
-        self.beam_centre_model._apply_scaling = False
+        self.beam_centre_model.instrument = SANSInstrument.LARMOR
 
         value_in_m = 1.2
         self.beam_centre_model.lab_pos_1 = value_in_m
@@ -125,30 +125,22 @@ class BeamCentreModelTest(unittest.TestCase):
         self.assertEqual((value_in_m * 2), self.beam_centre_model.hab_pos_1)
         self.assertEqual((value_in_m * 2), self.beam_centre_model._hab_pos_1)
 
-    def test_setting_to_larmor_sets_scaling_off(self):
-        self.assertTrue(self.beam_centre_model._apply_scaling)
-        self.beam_centre_model.reset_inst_defaults(SANSInstrument.LARMOR)
-        self.assertFalse(self.beam_centre_model._apply_scaling)
-
-    def test_setting_other_instruments_sets_true(self):
+    def test_instrument_is_set(self):
         for inst in SANSInstrument:
-            if inst is SANSInstrument.LARMOR:
-                continue
-            self.beam_centre_model._apply_scaling = False
             self.beam_centre_model.reset_inst_defaults(inst)
-            self.assertTrue(self.beam_centre_model._apply_scaling)
+            self.assertEqual(inst, self.beam_centre_model.instrument)
 
     def test_scaling_does_not_affect_non_lab_hab_values(self):
         value_in_mm = 100  # 0.1 m
 
-        for scaling in [True, False]:
-            self.beam_centre_model._apply_scaling = scaling
+        for inst in [SANSInstrument.LARMOR, SANSInstrument.LOQ]:
+            self.beam_centre_model.instrument = inst
             self.beam_centre_model.tolerance = value_in_mm
             self.assertEqual((value_in_mm / 1000), self.beam_centre_model._tolerance)
             self.assertEqual(self.beam_centre_model.tolerance, value_in_mm)
 
     def test_scaling_can_handle_non_float_types(self):
-        self.beam_centre_model._apply_scaling = True
+        self.beam_centre_model.instrument = SANSInstrument.NO_INSTRUMENT
 
         # When in doubt it should just forward the value as is
         self.beam_centre_model.lab_pos_1 = 'a'

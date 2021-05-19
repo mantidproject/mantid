@@ -62,6 +62,32 @@ MERGED = ReductionMode.MERGED.value
 GENERIC_SETTINGS = "Mantid/ISISSANS"
 
 JSON_SUFFIX = ".json"
+# The following instruments do not scale for specific attributes
+SCALING_EXCLUDED = [SANSInstrument.LARMOR]
+
+
+def apply_selective_view_scaling(getter):
+    """
+    Scales
+    """
+    def wrapper(self):
+        val = getter(self)
+        try:
+            return meter_2_millimeter(val) if self.instrument not in SCALING_EXCLUDED else val
+        except TypeError:
+            return val
+    return wrapper
+
+
+def undo_selective_view_scaling(setter):
+    def wrapper(self, val):
+        try:
+            val = millimeter_2_meter(val) if self.instrument not in SCALING_EXCLUDED else val
+        except TypeError:
+            pass
+        finally:
+            setter(self, val)  # Always take user val including blank string
+    return wrapper
 
 
 def meter_2_millimeter(num):
