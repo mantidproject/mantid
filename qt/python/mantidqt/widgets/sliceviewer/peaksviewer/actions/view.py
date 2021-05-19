@@ -12,11 +12,14 @@ from qtpy import QtWidgets
 from mantid.kernel import logger
 from mantidqt.utils.qt import load_ui
 
-# local
-from .presenter import PeakActionsEvent
-
 # standard
+import enum
 from typing import Optional
+
+
+class PeakActionsEvent(enum.Enum):
+    ERASING_MODE_CHANGED = 1
+    ADDING_MODE_CHANGED = 2
 
 
 class PeakActionsView(QtWidgets.QWidget):

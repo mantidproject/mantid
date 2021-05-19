@@ -7,6 +7,7 @@
 #  This file is part of the mantid workbench.
 # std imports
 import sys
+from typing import Optional
 
 # 3rd party imports
 
@@ -142,6 +143,9 @@ class SliceViewerDataView(QWidget):
         layout.addWidget(self.canvas, 2, 0, 1, 1)
         layout.addWidget(self.status_bar, 3, 0, 1, 1)
         layout.setRowStretch(2, 1)
+
+        # peak actions
+        self._peak_addition_cid: Optional[int] = None
 
     @property
     def grid_on(self):

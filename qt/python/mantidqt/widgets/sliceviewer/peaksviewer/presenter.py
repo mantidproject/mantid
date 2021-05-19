@@ -11,8 +11,9 @@ from mantidqt.widgets.workspacedisplay.table.presenter_standard \
     import TableWorkspaceDataPresenterStandard, create_table_item
 from .model import create_peaksviewermodel, PeaksViewerModel
 from .view import PeaksViewerView, PeaksViewerCollectionView
-from .actions.presenter import PeakActionsPresenter
-from .actions.model import PeakActionsModel
+#from .actions.presenter import PeakActionsPresenter
+from .actions.view import PeakActionsEvent
+#from .actions.model import PeakActionsModel
 from ..adsobsever import SliceViewerADSObserver
 
 # 3rd party
@@ -109,6 +110,7 @@ class PeaksViewerPresenter:
 
     def add_peak(self, pos, frame):
         self.model.add_peak(pos, frame)
+        self.redraw_peaks()
 
     def _clear_peaks(self):
         """Clear all peaks from this view"""
@@ -177,13 +179,11 @@ class PeaksViewerCollectionPresenter:
         """
         self._view = view
         self._actions_view = view.peak_actions_view
-        self._actions_presenter: PeakActionsPresenter = self._create_peaks_actions_presenter()
+        self._actions_view.subscribe(self)
+        #self._actions_presenter: PeakActionsPresenter = self._create_peaks_actions_presenter()
         self._child_presenters: List[PeaksViewerPresenter] = []
         self._ads_observer = None
         self.setup_ads_observer()
-
-    def _create_peaks_actions_presenter(self):
-        return PeakActionsPresenter(PeakActionsModel(), self._view.peak_actions_view)
 
     def setup_ads_observer(self):
         if self._ads_observer is None:
@@ -218,10 +218,7 @@ class PeaksViewerCollectionPresenter:
         # being what is displayed. If anything is currently displayed that is
         # not in names_to_overlay then it will be removed from display
         names_already_overlayed = self.workspace_names()
-        # DEBUG start
-        msg = f'names_to_overlay ={names_to_overlay}, names_already_overlayed = {names_already_overlayed}'
-        logger.error(msg)
-        # DEBUG end
+
         # first calculate what is to be removed. make a copy to avoid mutation while iterating
         names_to_overlay_final = names_to_overlay[:]
         for name in names_to_overlay:
@@ -235,9 +232,6 @@ class PeaksViewerCollectionPresenter:
             for name in names_already_overlayed:
                 self.remove_peaksworkspace(name)
 
-        # DEBUG start
-        logger.error(f'names_to_overlay_final ={names_to_overlay_final}')
-        # DEBUG end
         for name in names_to_overlay_final:
             self.append_peaksworkspace(name)
 
@@ -288,14 +282,6 @@ class PeaksViewerCollectionPresenter:
         for presenter in self._child_presenters:
             presenter.notify(event)
 
-    def add_peak(self, pos, frame):
-        self.child_presenter(self._actions_view.active_peaksworkspace_index).add_peak(pos, frame)
-
-    def deactivate_peak_adding(self):
-        self._actions_view.deactivate_peak_adding()
-        self._view._sliceinfo_provider.view.data_view.enable_peak_addition(self._actions_view.adding_mode_on)
-
-    # private api
     def _create_peaksviewer_model(self, name: str) -> PeaksViewerModel:
         """
         Create a model for the given PeaksWorkspace with an appropriate color
@@ -340,3 +326,45 @@ class PeaksViewerCollectionPresenter:
         # need to force draw because removing an artist doesn't automatically do that
         # this is ugly, need a better way to do this
         self._view._sliceinfo_provider.view.data_view.canvas.draw_idle()
+
+    #
+    # Peak Actions Functionality
+    #
+    @staticmethod
+    def _validate_view(view):
+        r"""We require the actions view object to have certain attributes"""
+        for attribute in ('collection_view', 'active_peaksworkspace_index', 'erasing_mode_on'):
+            if hasattr(view, attribute) is False:
+                raise TypeError(f'Attribute {attribute} not found in {view}')
+
+    def add_peak(self, pos, frame):
+        self.child_presenter(self._actions_view.active_peaksworkspace_index).add_peak(pos, frame)
+
+    def delete_peak(self):
+        r"""Remove the first peak of the active workspace when invoked"""
+        active_presenter: PeaksViewerPresenter = self.child_presenter(self._actions_view.active_peaksworkspace_index)
+        active_presenter.model.delete_rows(0)
+        active_presenter.redraw_peaks()
+
+    def deactivate_peak_adding(self):
+        self._actions_view.deactivate_peak_adding()
+        self._view._sliceinfo_provider.view.data_view.enable_peak_addition(self._actions_view.adding_mode_on)
+
+    def response_function(self, event: PeakActionsEvent):
+        r"""
+        Factory of response functions to signals emitted by the PeakActionsView (events)
+        """
+        def response_invalid():
+            logger.error(f'{event} is an invalid PeakActionsEvent')
+        responses = {PeakActionsEvent.ERASING_MODE_CHANGED: self._remove_peaks,
+                     PeakActionsEvent.ADDING_MODE_CHANGED: self._add_peaks}
+        return responses.get(event, response_invalid)
+
+    def _remove_peaks(self):
+        r"""Delete peaks if the button is pressed"""
+        if self._actions_view.erasing_mode_on:
+            self.delete_peak()
+
+    def _add_peaks(self):
+        # this is very ugly, need a better way of doing this
+        self._view._sliceinfo_provider.view.data_view.enable_peak_addition(self._actions_view.adding_mode_on)
