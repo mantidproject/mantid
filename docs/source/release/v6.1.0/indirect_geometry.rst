@@ -28,5 +28,6 @@ Bug Fixes
 - In IsoRotDiff, DiffSphere, and DiffRotDiscreteCircle Aliases have been removed to avoid clashes with interfaces.
 - Fixed a bug that caused an error warning when adding EISF data to F(q) fit if Width has already been added.
 - Fixed a bug that caused the spectra list in F(q) fit to be blank when reopening the add workspace dialog.
+- Fixed a bug that erased previous fits in the Indirect Data Analysis fit tabs when changing to the full function view.
 
 :ref:`Release 6.1.0 <v6.1.0>`
