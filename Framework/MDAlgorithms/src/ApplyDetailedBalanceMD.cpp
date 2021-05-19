@@ -55,12 +55,13 @@ void ApplyDetailedBalanceMD::init() {
       "An input MDEventWorkspace.  Must be in Q_sample/Q_lab frame.  Must have an axis as DeltaE");
 
   declareProperty(std::make_unique<PropertyWithValue<std::string>>("Temperature", "", Direction::Input),
-                  "SampleLog variable name that contains the temperature");
+                  "SampleLog variable name that contains the temperature or a number");
   declareProperty(
       std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
       "The output MDEventWorkspace with detailed balance applied");
 }
 
+//---------------------------------------------------------------------------------------------------------
 /**
  * @brief Main execution body
  */
@@ -202,8 +203,6 @@ void ApplyDetailedBalanceMD::applyDetailedBalance(typename Mantid::DataObjects::
   box1->getBoxes(boxes, 1000, true);
   auto numBoxes = int(boxes.size());
 
-  g_log.notice() << "[DEVELOP]  Number of boxex = " << numBoxes << "\n";
-
   // Add the boxes in parallel. They should be spread out enough on each
   // core to avoid stepping on each other.
   // cppcheck-suppress syntaxError
@@ -217,32 +216,24 @@ void ApplyDetailedBalanceMD::applyDetailedBalance(typename Mantid::DataObjects::
       // Add events, with bounds checking
       for (auto it = events.begin(); it != events.end(); ++it) {
         // Create the event
-        // MDE newEvent(it->getSignal(), it->getErrorSquared(), it->getCenter());
-        // std::cout << it->getSignal() << "\n";
         // do calculattion
         float temperatue(mTemperature);
-        if (temperatue < 0) {
-          const uint16_t exp_info_index(it->getExpInfoIndex());
-          double ot = mExpinfoTemperatureMean[exp_info_index];
-          temperatue = static_cast<float>(ot);
-        }
-        float delta_e = it->getCenter(mDeltaEIndex);
-        double one_over_kb_t(PhysicalConstants::meVtoKelvin / temperatue);
-        float x = static_cast<float>(one_over_kb_t);
-        float pi = static_cast<float>(M_PI);
-        float factor = pi * (static_cast<float>(1.) - exp(-delta_e * x));
+        if (temperatue < 0)
+          temperatue = static_cast<float>(mExpinfoTemperatureMean[it->getExpInfoIndex()]);
 
-        //        g_log.notice() << "[DEVELOP] signal = " << it->getSignal() << ", factor = " << factor
-        //                       << ", DeltaE = " << delta_e << "\n";
+        // delta_e = it->getCenter(mDeltaEIndex);
+        // factor = pi * (1 - exp(-deltaE/(kb*T)))
+        float factor = static_cast<float>(M_PI) *
+                       (static_cast<float>(1.) - exp(-it->getCenter(mDeltaEIndex) *
+                                                     static_cast<float>(PhysicalConstants::meVtoKelvin / temperatue)));
 
         // calcalate and set intesity
-        auto intensity = it->getSignal();
-        intensity *= factor;
+        auto intensity = it->getSignal() * factor;
         it->setSignal(intensity);
 
         // calculate and set error
-        auto error2 = it->getErrorSquared();
-        error2 *= factor * factor;
+        auto error2 = it->getErrorSquared() * factor * factor;
+        // error2 *= factor * factor;
         it->setErrorSquared(error2);
       }
     }
@@ -250,32 +241,6 @@ void ApplyDetailedBalanceMD::applyDetailedBalance(typename Mantid::DataObjects::
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  //  g_log.notice() << "[DEVELOP] traverse  events = " << count << "\n";
-
-  //  for (int i = 0; i < numBoxes; ++i) {
-  //    // FIXME PARALLEL_START_INTERUPT_REGION
-  //    auto *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
-  //    if (box && !box->getIsMasked()) {
-  //      // Copy the events from WS2 and add them into WS1
-  //      std::vector<MDE> &events = box->getEvents();
-  //      // Add events, with bounds checking
-  //      for (auto it = events.begin(); it != events.end(); ++it) {
-  //        // Create the event
-  //        // MDE newEvent(it->getSignal(), it->getErrorSquared(), it->getCenter());
-  //        // std::cout << it->getSignal() << "\n";
-  //        count += 1;
-  //        // get the experiment info
-  //        const uint16_t exp_index(it->getExpInfoIndex());
-  //        // get the coordiate
-  //        auto deltae = it->getCenter(mDeltaEIndex);
-
-  //        g_log.notice() << "[DEBUG] signal = " << it->getSignal()
-  //                       << " DeltaE = " << deltae
-  //                       << "Q = " << it->getCenter(0) << "\n";
-  //      }
-  //    }
-  //    // FIXME PARALLEL_END_INTERUPT_REGION
-  //  }
 
   return;
 }
@@ -327,54 +292,6 @@ std::string ApplyDetailedBalanceMD::getTemperature(API::IMDEventWorkspace_sptr m
   }
 
   return temperature_error;
-}
-
-void ApplyDetailedBalanceMD::showAnyEvents(const std::string &mdwsname) {
-  // Compare
-  // showMDEvents(outputname, 3);
-  // showMDEvents(gold_detail_balanced_singe_name, 3);
-  // Get workspace
-  API::IMDEventWorkspace_sptr ws =
-      std::dynamic_pointer_cast<API::IMDEventWorkspace>(API::AnalysisDataService::Instance().retrieve(mdwsname));
-  if (ws == nullptr) {
-    throw std::runtime_error("It is not an MDEventWorkspace");
-  }
-  // Work with MDEvents
-  CALL_MDEVENT_FUNCTION(showMDEvents, ws); // , gold_detail_balanced_singe_name, 3);
-}
-
-template <typename MDE, size_t nd>
-void ApplyDetailedBalanceMD::showMDEvents(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws) {
-
-  // Print out summary
-  size_t num_events = ws->getNEvents();
-  g_log.notice() << "[Verify] " << ws->getName() << ": MD events = " << num_events << "\n";
-  for (size_t i = 0; i < ws->getNumDims(); ++i)
-    g_log.error() << "[Verify] " << i << "-th dim: " << ws->getDimension(i)->getName() << "\n";
-
-  // Get Box from MDEventWorkspace
-  MDBoxBase<MDE, nd> *box1 = ws->getBox();
-  std::vector<API::IMDNode *> boxes;
-  box1->getBoxes(boxes, 1000, true);
-  auto numBoxes = int(boxes.size());
-
-  g_log.notice() << "[Verify] Number of boxes = " << numBoxes << "\n";
-
-  for (int i = 0; i < numBoxes; ++i) {
-    auto *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
-    if (box && !box->getIsMasked()) {
-      std::vector<MDE> &events = box->getEvents();
-      for (auto it = events.begin(); it != events.end(); ++it) {
-        // get the coordiate
-        auto deltae = it->getCenter(mDeltaEIndex);
-
-        g_log.notice() << "[Verify] Signal = " << it->getSignal() << " DeltaE = " << deltae
-                       << " Coordinate = " << it->getCenter(0) << ", " << it->getCenter(1) << ", " << it->getCenter(2)
-                       << "\n";
-      }
-    }
-    // FIXME PARALLEL_END_INTERUPT_REGION
-  }
 }
 
 } // namespace MDAlgorithms
