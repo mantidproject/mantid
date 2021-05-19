@@ -25,6 +25,7 @@ public:
   std::string facility() const override { return "TestFacility"; }
   std::string technique() const override { return "SANS"; }
   std::string acquisition() const override { return "Mono"; }
+  std::string geometry() const override { return "1D"; }
 
 private:
   Workspace_sptr preview(Workspace_sptr ws) const override { return ws->clone(); }
@@ -73,7 +74,7 @@ public:
     TS_ASSERT_EQUALS(previews[0], "BasicPreview");
   }
   void test_get_preview_by_name() {
-    auto &preview = PreviewManager::Instance().getPreview("TestFacility", "SANS", "Mono", "BasicPreview");
+    auto &preview = PreviewManager::Instance().getPreview("TestFacility", "SANS", "Mono", "1D", "BasicPreview");
     TS_ASSERT_EQUALS(preview.name(), "BasicPreview");
     TS_ASSERT_EQUALS(preview.facility(), "TestFacility");
     TS_ASSERT_EQUALS(preview.technique(), "SANS");

@@ -8,69 +8,80 @@
 
 namespace Mantid::API {
 
-std::vector<std::string>
-PreviewManagerImpl::getPreviews(const std::string &facility,
-                                const std::string &technique,
-                                const std::string &acquisition) const {
+std::vector<std::string> PreviewManagerImpl::getPreviews(const std::string &facility, const std::string &technique,
+                                                         const std::string &acquisition,
+                                                         const std::string &geometry) const {
   std::vector<std::string> previews;
-  if (checkFacility(facility)) {
-    for (const auto &facility_preview : m_previews.at(facility)) {
-      for (const auto &technique_preview : facility_preview.second) {
-        if (technique.empty() || facility_preview.first == technique) {
-          for (const auto &acquisition_preview : technique_preview.second) {
-            if (acquisition.empty() || technique_preview.first == acquisition) {
-              previews.emplace_back(acquisition_preview.first);
-            }
-          }
-        }
-      }
+  for (const auto &preview : m_previews) {
+    if (preview->facility() == facility && (technique.empty() || preview->technique() == technique) &&
+        (acquisition.empty() || preview->acquisition() == acquisition) &&
+        (geometry.empty() || preview->geometry() == geometry)) {
+      previews.emplace_back(preview->name());
     }
   }
   return previews;
 }
 
-const IPreview &PreviewManagerImpl::getPreview(
-    const std::string &facility, const std::string &technique,
-    const std::string &acquisition, const std::string &preview) const {
-  if (!checkPreview(facility, technique, acquisition, preview)) {
-    throw std::runtime_error(
-        "Preview with the given name is not registered "
-        "under the facility, technique and acquisition mode.");
+const IPreview &PreviewManagerImpl::getPreview(const std::string &facility, const std::string &technique,
+                                               const std::string &acquisition, const std::string &geometry,
+                                               const std::string &preview_name) const {
+  for (const auto &preview : m_previews) {
+    if (preview->facility() == facility && preview->technique() == technique && preview->acquisition() == acquisition &&
+        preview->geometry() == geometry && preview->name() == preview_name) {
+      return *preview;
+    }
   }
-  return *m_previews.at(facility).at(technique).at(acquisition).at(preview);
+  throw std::runtime_error("Preview with the given name is not registered "
+                           "under the facility, technique and acquisition mode.");
 }
 
 bool PreviewManagerImpl::checkFacility(const std::string &facility) const {
-  return m_previews.count(facility) > 0;
-}
-bool PreviewManagerImpl::checkTechnique(const std::string &facility,
-                                        const std::string &technique) const {
-  if (checkFacility(facility)) {
-    return m_previews.at(facility).count(technique) > 0;
-  } else {
-    return false;
-  }
-}
-
-bool PreviewManagerImpl::checkAcquisition(
-    const std::string &facility, const std::string &technique,
-    const std::string &acquisition) const {
-  if (checkFacility(facility)) {
-    if (checkTechnique(facility, technique))
-      return m_previews.at(facility).at(technique).count(acquisition) > 0;
+  for (const auto &preview : m_previews) {
+    if (preview->facility() == facility) {
+      return true;
+    }
   }
   return false;
 }
 
-bool PreviewManagerImpl::checkPreview(const std::string &facility,
-                                      const std::string &technique,
-                                      const std::string &acquisition,
-                                      const std::string &preview) const {
-  if (checkAcquisition(facility, technique, acquisition)) {
-    return m_previews.at(facility)
-               .at(technique)
-               .at(acquisition)
-               .count(preview) > 0;
+bool PreviewManagerImpl::checkTechnique(const std::string &facility, const std::string &technique) const {
+  for (const auto &preview : m_previews) {
+    if (preview->facility() == facility && preview->technique() == technique) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool PreviewManagerImpl::checkAcquisition(const std::string &facility, const std::string &technique,
+                                          const std::string &acquisition) const {
+  for (const auto &preview : m_previews) {
+    if (preview->facility() == facility && preview->technique() == technique && preview->acquisition() == acquisition) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool PreviewManagerImpl::checkGeometry(const std::string &facility, const std::string &technique,
+                                       const std::string &acquisition, const std::string &geometry) const {
+  for (const auto &preview : m_previews) {
+    if (preview->facility() == facility && preview->technique() == technique && preview->acquisition() == acquisition &&
+        preview->geometry() == geometry) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool PreviewManagerImpl::checkPreview(const std::string &facility, const std::string &technique,
+                                      const std::string &acquisition, const std::string &geometry,
+                                      const std::string &preview_name) const {
+  for (const auto &preview : m_previews) {
+    if (preview->facility() == facility && preview->technique() == technique && preview->acquisition() == acquisition &&
+        preview->name() == preview_name && preview->geometry() == geometry) {
+      return true;
+    }
   }
   return false;
 }
