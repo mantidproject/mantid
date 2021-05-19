@@ -7,17 +7,15 @@
 #  This file is part of the mantid workbench.
 
 # local imports
-from mantidqt.widgets.workspacedisplay.table.presenter_standard \
-    import TableWorkspaceDataPresenterStandard, create_table_item
 from .model import create_peaksviewermodel, PeaksViewerModel
 from .view import PeaksViewerView, PeaksViewerCollectionView
-#from .actions.presenter import PeakActionsPresenter
-from .actions.view import PeakActionsEvent
-#from .actions.model import PeakActionsModel
+from .actions import PeakActionsEvent
 from ..adsobsever import SliceViewerADSObserver
 
 # 3rd party
 from mantid.kernel import logger
+from mantidqt.widgets.workspacedisplay.table.presenter_standard \
+    import TableWorkspaceDataPresenterStandard, create_table_item
 
 # standard
 from enum import Enum

@@ -13,7 +13,7 @@ from mantidqt.widgets.workspacedisplay.table.view import QTableView, TableWorksp
 
 # local imports
 from .representation.painter import MplPainter
-from .actions.view import PeakActionsView
+from .actions import PeakActionsView
 
 # standard
 from typing import Optional
