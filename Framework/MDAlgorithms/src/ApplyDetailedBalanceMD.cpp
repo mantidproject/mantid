@@ -75,7 +75,7 @@ void ApplyDetailedBalanceMD::exec() {
   if (mDeltaEIndex != 1 && mDeltaEIndex != 3)
     throw std::runtime_error("Workspace dimension is not checked.");
 
-  // Process and create output workspace
+  // Process input workspace and create output workspace
   std::string output_ws_name = getPropertyValue("OutputWorkspace");
 
   API::IMDEventWorkspace_sptr output_ws(0);
@@ -260,12 +260,10 @@ std::string ApplyDetailedBalanceMD::getTemperature(API::IMDEventWorkspace_sptr m
   uint16_t numexpinfo = mdws->getNumExperimentInfo();
 
   for (uint16_t i = 0; i < numexpinfo; ++i) {
-
     if (temperature < 0) {
       // if user specified is not a valid float
       ExperimentInfo_const_sptr expinfo = mdws->getExperimentInfo(i);
-      bool has_temp = expinfo->run().hasProperty(Tstring);
-      if (has_temp) {
+      if (expinfo->run().hasProperty(Tstring)) {
         auto log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(expinfo->run().getProperty(Tstring));
         if (!log) {
           // wrong type of sample log: must be TimeSeriesProperty<double>
