@@ -664,7 +664,7 @@ void PDCalibration::exec() {
            chisq += (temp * temp);
            m_peakPositionTable->cell<double>(rowIndexOutputPeaks, i + 1) = dspacing;
            m_peakWidthTable->cell<double>(rowIndexOutputPeaks, i + 1) =
-               WIDTH_TO_FWHM * dSpacingUnit.singleFromTOF(width_vec_full[i]);
+               WIDTH_TO_FWHM * (width_vec_full[i] / (2 * difa * dspacing + difc));
            m_peakHeightTable->cell<double>(rowIndexOutputPeaks, i + 1) = height_vec_full[i];
          }
          m_peakPositionTable->cell<double>(rowIndexOutputPeaks, m_peaksInDspacing.size() + 1) = chisq;
