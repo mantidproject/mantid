@@ -115,8 +115,8 @@ class RunTabPresenterTest(unittest.TestCase):
             self.presenter.on_user_file_load()
             mocked_loader.load_user_file.assert_called_once_with(file_path=user_file_path, file_information=mock.ANY)
 
+        self.presenter._beam_centre_presenter.copy_centre_positions.assert_called()
         self.presenter._beam_centre_presenter.update_centre_positions.assert_called()
-        self.presenter._beam_centre_presenter.on_update_rows.assert_called()
         self.presenter._masking_table_presenter.on_update_rows.assert_called()
         self.presenter._workspace_diagnostic_presenter.on_user_file_loadassert_called()
 
