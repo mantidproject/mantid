@@ -353,14 +353,17 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
 
         def loadResetNegatives2D():
             # input for ResetNegatives2D
-            self.copyProperties('AddMinimum', 'ResetValue')
+            self.copyProperties('ResetNegatives2D', ['AddMinimum', 'ResetValue'])
             grp13 = 'ResetNegatives2D'
             self.setPropertyGroup('AddMinimum', grp13)
             self.setPropertyGroup('ResetValue', grp13)
 
         def loadResetNegatives2DVana():
             # Input for ResetNegatives2D for Vanadium Data
-            self.copyProperties('AddMinimumVana')
+            self.declareProperty('AddMinimumVana',
+                                 True,
+                                 direction=Direction.Input,
+                                 doc='If set to True, adds the most negative intensity to all intensities.')
             self.declareProperty('ResetValueVana',
                                  1,
                                  direction=Direction.Input,
