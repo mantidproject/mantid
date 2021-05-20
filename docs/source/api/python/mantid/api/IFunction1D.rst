@@ -1,3 +1,5 @@
+.. _mantid.api.IFunction1D:
+
 =============
  IFunction1D
 =============
