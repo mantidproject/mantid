@@ -33,14 +33,6 @@ warnings.simplefilter("ignore", category=DeprecationWarning)
 
 sanslog = Logger("SANS")
 
-# disable plotting if running outside Mantidplot
-try:
-    import mantidplot
-except (Exception, Warning):
-    mantidplot = None
-    # this should happen when this is called from outside Mantidplot and only then,
-    # the result is that attempting to plot will raise an exception
-
 try:
     from qtpy.QtWidgets import qApp
 
@@ -820,8 +812,9 @@ def CompWavRanges(wavelens, plot=True, combineDet=None, resetSetup=True):
     if resetSetup:
         _refresh_singleton()
 
-    if plot and mantidplot:
-        mantidplot.plotSpectrum(calculated, 0)
+    if plot:
+        raise NotImplementedError("Plotting on the deprecated ISISCommandInterface required MantidPlot and is no"
+                                  " longer implemented. Please switch to sans.command_interface.ISISCommandInterface")
 
     # return just the workspace name of the full range
     return calculated[0]
@@ -854,8 +847,9 @@ def PhiRanges(phis, plot=True):
     finally:
         _refresh_singleton()
 
-    if plot and mantidplot:
-        mantidplot.plotSpectrum(calculated, 0)
+    if plot:
+        raise NotImplementedError("Plotting on the deprecated ISISCommandInterface required MantidPlot and is no"
+                                  " longer implemented. Please switch to sans.command_interface.ISISCommandInterface")
 
     # return just the workspace name of the full range
     return calculated[0]
@@ -1018,28 +1012,8 @@ def PlotResult(workspace, canvas=None):
         @param canvas: optional handle to an existing graph to write the plot to
         @return: a handle to the graph that was written to
     """
-    if not mantidplot:
-        issueWarning('Plot functions are not available, is this being run from outside Mantidplot?')
-        return
-
-    # ensure that we are dealing with a workspace handle rather than its name
-    workspace = mtd[str(workspace)]
-    if isinstance(workspace, WorkspaceGroup):
-        numSpecs = workspace[0].getNumberHistograms()
-    else:
-        numSpecs = workspace.getNumberHistograms()
-
-    if numSpecs == 1:
-        graph = mantidplot.plotSpectrum(workspace, 0)
-    else:
-        graph = mantidplot.importMatrixWorkspace(workspace.name()).plotGraph2D()
-
-    if canvas is not None:
-        # we were given a handle to an existing graph, use it
-        mantidplot.mergePlots(canvas, graph)
-        graph = canvas
-
-    return graph
+    raise NotImplementedError("Plotting on the deprecated ISISCommandInterface required MantidPlot and is no"
+                              " longer implemented. Please switch to sans.command_interface.ISISCommandInterface")
 
 
 # #################### View mask details #####################################################
@@ -1218,8 +1192,6 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
 
     # take first trial step
     COORD1NEW, COORD2NEW = centre_positioner.increment_position(COORD1NEW, COORD2NEW)
-    graph_handle = None
-    it = 0
     for i in range(1, MaxIter + 1):
         it = i
         centre_reduction.set_beam_finder(
@@ -1231,17 +1203,6 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
 
         beam_center_logger.report_status(it, COORD1NEW, COORD2NEW, resCoord1, resCoord2)
 
-        if mantidplot:
-            try:
-                if not graph_handle:
-                    # once we have a plot it will be updated automatically when the workspaces are updated
-                    graph_handle = mantidplot.plotSpectrum(centre.QUADS, 0)
-                graph_handle.activeLayer().setTitle(
-                    beam_center_logger.get_status_message(it, COORD1NEW, COORD2NEW, resCoord1, resCoord2))
-            except (Exception, Warning):
-                # if plotting is not available it probably means we are running outside a GUI, in which case
-                # do everything but don't plot
-                pass
         # have we stepped across the y-axis that goes through the beam center?
         if resCoord1 > resCoord1_old:
             # yes with stepped across the middle, reverse direction and half the step size
@@ -2078,10 +2039,11 @@ def LimitsQ(*args):
 @deprecated
 def ViewCurrentMask():
     """
-        In MantidPlot this opens InstrumentView to display the masked
+        This opens InstrumentView to display the masked
         detectors in the bank in a different colour
     """
-    ReductionSingleton().ViewCurrentMask()
+    raise NotImplementedError("This is no longer implemented as it required MantidPlot, please switch"
+                              "to sans.command_interface.ISISCommandInterface instead")
 
 
 ###############################################################################
