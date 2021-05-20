@@ -89,11 +89,12 @@ def SCDCalibratePanels2DiagnosticsPlotBank(
     axes[1].set_title(f"Detector Column Number Comparison, {bankname}")
     axes[1].text(0.5, 0.2, f"Number of Peaks = {npeaks}", transform=axes[1].transAxes)
     axes[1].set_aspect(aspect='equal')
+    # save
+    # NOTE: save first, then display to avoid weird corruption of written figure
+    fig.savefig(os.path.join(savedir, figname))
     # display
     if showPlots:
         fig.show()
-    # save
-    fig.savefig(os.path.join(savedir, figname))
     # notify users
     logging.info(f"Figure {figname} is saved to {savedir}.")
 
