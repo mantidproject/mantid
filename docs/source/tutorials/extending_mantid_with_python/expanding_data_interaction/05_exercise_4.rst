@@ -21,12 +21,12 @@ Write an algorithm called ``ConvertToEnergy``. The algorithm should have
 
 The steps the algorithm should perform are:
 
-* Use the :ref:`Load <algorithms.Load.v1>` algorithm to load the file to a
+* Use the :ref:`Load <algm-Load-v1>` algorithm to load the file to a
   workspace, setting ``LoadMonitors = "Exclude"``.
-* Run the :ref:`ConvertUnits <algorithms.ConvertUnits.v1>` algorithm on the previous workspace and put the
+* Run the :ref:`ConvertUnits <algm-ConvertUnits-v1>` algorithm on the previous workspace and put the
   output in the same workspace. Use
   ``Target='DeltaE', EMode='Direct', EFixed=value`` of Ei property.
-* Run the :ref:`Rebin <algorithms.Rebin.v1>` algorithm on the previous
+* Run the :ref:`Rebin <algm-Rebin-v1>` algorithm on the previous
   workspace and put the output in the same workspace. Use ``Params=value`` of
   the ``BinParams`` property.
 * Create a new workspace that is the sum of all of the spectra in the output
@@ -39,7 +39,7 @@ The steps the algorithm should perform are:
   the first value in spectra 0, 1, 2 ... together, then the same for the
   second value, and so on.
 * Delete the temporary workspace using
-  :ref:`DeleteWorkspace <algorithms.DeleteWorkspace.v1>`.
+  :ref:`DeleteWorkspace <algm-DeleteWorkspace-v1>`.
 * Set the new workspace to the ``OutputWorkspace`` property.
 
 To test the algorithm, execute the file that contains the algorithm to

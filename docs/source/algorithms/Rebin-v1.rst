@@ -1,5 +1,3 @@
-.. _algorithms.Rebin.v1:
-
 .. algorithm::
 
 .. summary::

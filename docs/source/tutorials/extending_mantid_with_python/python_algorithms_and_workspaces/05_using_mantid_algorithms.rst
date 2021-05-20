@@ -10,7 +10,7 @@ the standard syntax for calling algorithms in Mantid, i.e. the algorithm
 name followed by the arguments.
 
 A good example might be wanting to load a file, as
-:ref:`Load <algorithms.Load.v1>` is a very flexible algorithm:
+:ref:`Load <algm-Load-v1>` is a very flexible algorithm:
 
 .. code-block:: python
 

@@ -1,5 +1,3 @@
-.. _algorithms.Load.v1:
-
 .. algorithm::
 
 .. summary::

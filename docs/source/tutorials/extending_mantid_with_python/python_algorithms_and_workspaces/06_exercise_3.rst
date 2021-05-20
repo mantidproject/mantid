@@ -16,19 +16,19 @@ have 3 properties:
 
 The steps the algorithm should perform are:
 
-#. Use the :ref:`Load <algorithms.Load.v1>` algorithm to load the TOF
+#. Use the :ref:`Load <algm-Load-v1>` algorithm to load the TOF
    data
 #. Apply the calibration file using
-   :ref:`ApplyDiffCal <algorithms.ApplyDiffCal.v1>`
-#. Run :ref:`ConvertUnits <algorithms.ConvertUnits.v1>` on the TOF data
+   :ref:`ApplyDiffCal <algm-ApplyDiffCal-v1>`
+#. Run :ref:`ConvertUnits <algm-ConvertUnits-v1>` on the TOF data
    to convert to ``dSpacing``
-#. Run :ref:`DiffractionFocussing <algorithms.DiffractionFocussing.v2>`
+#. Run :ref:`DiffractionFocussing <algm-DiffractionFocussing-v2>`
    on the previous output & focus the data using
    the same cal file from the earlier step (called a grouping file here)
 #. Set the output from the ``DiffractionFocussing`` algorithm as the output of
    ``PowderDiffractionReduce``
 #. Delete the temporary reference using
-   :ref:`DeleteWorkspace <algorithms.DeleteWorkspace.v1>`
+   :ref:`DeleteWorkspace <algm-DeleteWorkspace-v1>`
 
 To test the algorithm, execute the script that contains the algorithm to
 register it with Mantid. It will then show up in the list of algorithms.
