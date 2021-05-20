@@ -311,10 +311,15 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         for plot in selected_subplots:
             self._context.update_autoscale_state(plot, state)
         if len(selected_subplots) > 1:
-            self._context.set_autoscale_all = state
+            self._context.set_autoscale_all(state)
         if not state:
             self._options_presenter.enable_yaxis_changer()
             return
+        self.force_autoscale()
+        self._options_presenter.disable_yaxis_changer()
+
+    def force_autoscale(self):
+        selected_subplots, axes = self._get_selected_subplots_from_quick_edit_widget()
         # get min and max
         ymin = Y_MIN
         ymax = Y_MAX
@@ -332,7 +337,6 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
             self._context.update_ylim_all([ymin, ymax])
 
         self._options_presenter.set_plot_y_range([ymin, ymax])
-        self._options_presenter.disable_yaxis_changer()
         self._view.redraw_figure()
 
     def autoscale_y_axes(self):
