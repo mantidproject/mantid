@@ -236,7 +236,7 @@ void SpectrumInfo::getDetectorValues(const Kernel::Unit &inputUnit, const Kernel
       try {
         pmap[UnitParams::efixed] = m_experimentInfo.getEFixedGivenEMode(det, emode);
         g_log.debug() << "Detector: " << det->getID() << " EFixed: " << pmap[UnitParams::efixed] << "\n";
-      } catch (std::runtime_error) {
+      } catch (std::runtime_error &) {
         // let the unit classes work out if this is a problem
       }
     }
