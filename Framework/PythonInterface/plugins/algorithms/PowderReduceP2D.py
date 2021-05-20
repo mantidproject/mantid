@@ -113,7 +113,8 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
                 validator=FloatBoundedValidator(lower=0.0),
                 direction=Direction.Input,
                 doc=
-                'Maximum value for d. Everything bigger gets removed. If zero it is not used and values get calculated from 2 theta and lambda.'
+                'Maximum value for d. Everything bigger gets removed. If zero it is not used and values get calculated from '
+                '2 theta and lambda.'
             )
             self.declareProperty(
                 'DpMin',
