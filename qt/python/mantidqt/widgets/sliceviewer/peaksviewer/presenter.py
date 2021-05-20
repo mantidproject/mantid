@@ -330,11 +330,10 @@ class PeaksViewerCollectionPresenter:
         else:
             logger.debug("PeaksViewer: Ignoring peak action position {} in {} frame".format(pos, frame))
 
-    def delete_peak(self):
+    def delete_peak(self, pos, frame):
         r"""Remove the first peak of the active workspace when invoked"""
         active_presenter: PeaksViewerPresenter = self.child_presenter(self._actions_view.active_peaksworkspace_index)
-        active_presenter.model.delete_rows(0)
-        active_presenter.redraw_peaks()
+        active_presenter.model.delete_peak(pos, frame)
 
     def deactivate_peak_add_delete(self):
         self._actions_view.deactivate_peak_adding()

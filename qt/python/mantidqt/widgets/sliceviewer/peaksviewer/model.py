@@ -6,14 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-# 3rd party imports
-from mantid.api import AnalysisDataService, IPeaksWorkspace
-from mantid.kernel import logger, SpecialCoordinateSystem
 # local imports
 from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayModel
 from .representation.draw import draw_peak_representation
 from .representation.painter import Painted
+
+# 3rd party imports
+from mantid.api import AnalysisDataService, IPeaksWorkspace
+from mantid.kernel import logger, SpecialCoordinateSystem
+
 # standard library
+import numpy as np
 from typing import List
 
 # map coordinate system to correct Peak getter
@@ -86,6 +89,22 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
 
     def add_peak(self, pos, frame):
         self.peaks_workspace.addPeak(pos, frame)
+
+    def delete_peak(self, pos, frame):
+        r"""Delete the peak closest to the input position"""
+        frame_name = str(frame)
+        if frame_name == 'QLab':
+            positions = np.array(self.peaks_workspace.column('QLab'))
+        elif frame_name == 'QSample':
+            positions = np.array(self.peaks_workspace.column('QSample'))
+        elif frame_name == 'HKL':
+            positions = np.array([peak.getHKL() for peak in self.peaks_workspace])
+        else:
+            raise ValueError(f'Frame {frame_name} not understood')  # should not reach here
+        positions -= pos  # peak positions relative to the input position
+        distances_squared = np.sum(positions * positions, axis=1)
+        closest_peak_index = np.argmin(distances_squared)
+        self.delete_rows(int(closest_peak_index))  # required cast from numpy.int64 to int
 
     def slicepoint(self, selected_index, slice_info):
         """
