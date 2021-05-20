@@ -291,7 +291,9 @@ class SData(collections.abc.Sequence):
                 spectrum = convolve(atom_data['s'][f'order_{order_index}'], kernel, mode='same')
                 self._data[atom_key]['s'][f'order_{order_index + 1}'] = spectrum
 
-    def check_thresholds(self, return_cases=False, logger=None):
+    def check_thresholds(self, return_cases: bool = False,
+                         logger=None,
+                         logging_level: str = 'warning'):
         """
         Compare the S data values to minimum thresholds and warn if the threshold appears large relative to the data
 
@@ -300,6 +302,9 @@ class SData(collections.abc.Sequence):
 
         :param return_cases: If True, return a list of cases where S was small compared to threshold.
         :type return_cases: bool
+        :param logger: Alternative logging object. (Defaults to Mantid logger)
+        :param logging_level: logging level of warnings that a significant
+            portion of S is being removed. Usually this will be 'information' or 'warning'.
 
         :returns: If return_cases=True, this method returns a list of cases which failed the test, as tuples of
             ``(atom_key, order_number, max(S))``. Otherwise, the method returns ``None``.
@@ -308,8 +313,10 @@ class SData(collections.abc.Sequence):
 
         if logger is None:
             logger = mantid_logger
+        logger_call = getattr(logger, logging_level)
 
         warning_cases = []
+
         absolute_threshold = abins.parameters.sampling['s_absolute_threshold']
         relative_threshold = abins.parameters.sampling['s_relative_threshold']
         for key, entry in self._data.items():
@@ -319,10 +326,10 @@ class SData(collections.abc.Sequence):
                         warning_cases.append((key, order, max(s.flatten())))
 
         if len(warning_cases) > 0:
-            logger.warning("Warning: some contributions had small S compared to threshold.")
-            logger.warning("The minimum S threshold ({}) is greater than {}% of the "
-                           "maximum S for the following:".format(absolute_threshold,
-                                                                 relative_threshold * 100))
+            logger_call("Warning: some contributions had small S compared to threshold.")
+            logger_call("The minimum S threshold ({}) is greater than {}% of the "
+                        "maximum S for the following:".format(absolute_threshold,
+                                                              relative_threshold * 100))
 
             # Sort the warnings by atom number, order number
             # Assuming that keys will be of form "atom_1", "atom_2", ...
@@ -332,7 +339,7 @@ class SData(collections.abc.Sequence):
                 return (int(key.split('_')[-1]), int(order.split('_')[-1]))
 
             for case in sorted(warning_cases, key=int_key):
-                logger.warning("{0}, {1}: max S {2:10.4E}".format(*case))
+                logger_call("{0}, {1}: max S {2:10.4E}".format(*case))
 
         if return_cases:
             return warning_cases

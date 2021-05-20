@@ -145,7 +145,7 @@ class SPowderSemiEmpiricalCalculator:
 
             self._report_progress(f"{data} has been calculated.", reporter=self.progress_reporter)
 
-        data.check_thresholds()
+        data.check_thresholds(logging_level='information')
         return data
 
     def load_formatted_data(self) -> SData:
@@ -277,10 +277,13 @@ class SPowderSemiEmpiricalCalculator:
         :returns: object of type SData with 1D dynamical structure factors for the powder case
         """
         if self.progress_reporter:
-            self.progress_reporter.setNumSteps(self._num_k * self._num_atoms + 1)
+            self.progress_reporter.setNumSteps(len(self._instrument.get_angles())
+                                               * (self._num_k * self._num_atoms + 1))
 
         sdata_by_angle = []
         for angle in self._instrument.get_angles():
+            self._report_progress(msg=f'Calculating S for angle: {angle:} degrees',
+                                  reporter=self.progress_reporter)
             sdata_by_angle.append(self._calculate_s_powder_over_k(angle=angle,
                                                                   isotropic_fundamentals=isotropic_fundamentals,
                                                                   autoconvolution=self._autoconvolution))
