@@ -263,18 +263,19 @@ std::string ApplyDetailedBalanceMD::getTemperature(API::IMDEventWorkspace_sptr m
 
     if (temperature < 0) {
       // if user specified is not a valid float
-
       ExperimentInfo_const_sptr expinfo = mdws->getExperimentInfo(i);
       bool has_temp = expinfo->run().hasProperty(Tstring);
       if (has_temp) {
         auto log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(expinfo->run().getProperty(Tstring));
         if (!log) {
+          // wrong type of sample log: must be TimeSeriesProperty<double>
           std::stringstream errss;
           errss << "ExperimentInfo" << i << " has " << Tstring << ", which is not a valid double-valuesd log";
           temperature_error += errss.str() + "\n";
         }
         mExpinfoTemperatureMean[i] = log->getStatistics().mean;
       } else {
+        // specified sample log does not exist
         std::stringstream errss;
         errss << "ExperimentInfo " << i << " does not have tempertaure log " << Tstring;
         temperature_error += errss.str() + "\n";
