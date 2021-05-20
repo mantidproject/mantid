@@ -15,6 +15,32 @@
 namespace Mantid {
 namespace API {
 
+class TempJacobian : public Jacobian {
+public:
+  TempJacobian(size_t y, size_t p) : m_y(y), m_p(p), m_J(y * p) {}
+  void set(size_t iY, size_t iP, double value) override { m_J[iY * m_p + iP] = value; }
+  double get(size_t iY, size_t iP) override { return m_J[iY * m_p + iP]; }
+  size_t maxParam(size_t iY) {
+    double max = -DBL_MAX;
+    size_t maxIndex = 0;
+    for (size_t i = 0; i < m_p; ++i) {
+      double current = get(iY, i);
+      if (current > max) {
+        maxIndex = i;
+        max = current;
+      }
+    }
+
+    return maxIndex;
+  }
+  void zero() override { m_J.assign(m_J.size(), 0.0); }
+
+protected:
+  size_t m_y;
+  size_t m_p;
+  std::vector<double> m_J;
+};
+
 using IntegrationResultCache = std::pair<double, double>;
 /** An interface to a peak function, which extend the interface of
     IFunctionWithLocation by adding methods to set and get peak width.

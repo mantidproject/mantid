@@ -8,6 +8,7 @@
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "gsl/gsl_errno.h"
+#include <boost/math/distributions/students_t.hpp>
 #include <iomanip>
 
 namespace Mantid {
@@ -120,6 +121,83 @@ IntegrationResult PeakFunctionIntegrator::integrate(const IPeakFunction &peakFun
   result.intervals = m_integrationWorkspace->size;
 
   return result;
+}
+
+double PeakFunctionIntegrator::integrateError(IPeakFunction &peakFunction) {
+  auto const interval = peakFunction.getDomainInterval();
+  const size_t nData = m_integrationWorkspace->size;
+  double *domainArray = m_integrationWorkspace->elist;
+
+  FunctionDomain1DView domain(domainArray, nData);
+  FunctionValues values(domain);
+  values.zeroCalculated();
+
+  double sigma = 1;
+  double prob = std::erf(sigma / sqrt(2));
+  // critical value for t distribution
+  double alpha = (1 + prob) / 2;
+  double eValue = std::nan("");
+
+  bool hasErrors = false;
+
+  peakFunction.function(domain, values);
+  auto covar = peakFunction.getCovarianceMatrix();
+
+  size_t nParams = peakFunction.nParams();
+
+  TempJacobian J(nData, peakFunction.nParams());
+
+  if (!covar) {
+    for (size_t j = 0; j < nParams; ++j) {
+      // throw std::runtime_error(fn->parameterName(j+3));
+      if (peakFunction.getError(j) != 0.0) {
+        hasErrors = true;
+        break;
+      }
+    }
+  }
+
+  if (covar || hasErrors) {
+
+    try {
+      peakFunction.functionDeriv(domain, J);
+    } catch (...) {
+      peakFunction.calNumericalDeriv(domain, J);
+    }
+
+    if (covar) {
+      double s = 0.0;
+      const Kernel::Matrix<double> &C = *covar;
+      for (size_t i = 0; i < nParams; ++i) {
+        double tmp = J.get(0, i);
+        s += C[i][i] * tmp * tmp;
+        for (size_t j = i + 1; j < nParams; ++j) {
+          s += J.get(0, i) * C[i][j] * J.get(0, j) * 2;
+        }
+      }
+      // values.getCalculated(i);
+
+      size_t dof = 1 - nParams;
+      double T = 1.0;
+      if (dof != 0) {
+        boost::math::students_t dist(static_cast<double>(dof));
+        T = boost::math::quantile(dist, alpha);
+      }
+
+      eValue = T * std::sqrt(s * peakFunction.getReducedChiSquared());
+    } else {
+      double err = 0.0;
+      for (size_t i = 0; i < nData; i++) {
+        for (size_t j = 0; j < nParams; ++j) {
+          double d = J.get(i, j) * peakFunction.getError(j);
+          err += d * d;
+        }
+      }
+      if (err != 0.0)
+        eValue = std::sqrt(err);
+    }
+  }
+  return eValue;
 }
 
 /** Method that wraps an IPeakFunction for use with GSL functions.

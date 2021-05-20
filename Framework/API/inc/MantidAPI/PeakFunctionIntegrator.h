@@ -48,6 +48,8 @@ public:
 
   IntegrationResult integrate(const IPeakFunction &peakFunction, double lowerLimit, double upperLimit) const;
 
+  double integrateError(IPeakFunction &peakFunction);
+
 protected:
   gsl_function getGSLFunction(const IPeakFunction &peakFunction) const;
 

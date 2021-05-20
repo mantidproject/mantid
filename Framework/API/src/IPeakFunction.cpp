@@ -15,7 +15,6 @@
 #include "MantidAPI/PeakFunctionIntegrator.h"
 #include "MantidKernel/Exception.h"
 #include "boost/make_shared.hpp"
-#include <boost/math/distributions/students_t.hpp>
 
 #include <cmath>
 #include <limits>
@@ -57,98 +56,12 @@ public:
   }
 };
 
-class TempJacobian : public Jacobian {
-public:
-  TempJacobian(size_t y, size_t p) : m_y(y), m_p(p), m_J(y * p) {}
-  void set(size_t iY, size_t iP, double value) override { m_J[iY * m_p + iP] = value; }
-  double get(size_t iY, size_t iP) override { return m_J[iY * m_p + iP]; }
-  size_t maxParam(size_t iY) {
-    double max = -DBL_MAX;
-    size_t maxIndex = 0;
-    for (size_t i = 0; i < m_p; ++i) {
-      double current = get(iY, i);
-      if (current > max) {
-        maxIndex = i;
-        max = current;
-      }
-    }
-
-    return maxIndex;
-  }
-  void zero() override { m_J.assign(m_J.size(), 0.0); }
-
-protected:
-  size_t m_y;
-  size_t m_p;
-  std::vector<double> m_J;
-};
-
 /// Tolerance for determining the smallest significant value on the peak
 const double PEAK_TOLERANCE = 1e-14;
 /// "Infinite" value for the peak radius
 const int MAX_PEAK_RADIUS = std::numeric_limits<int>::max();
 
 } // namespace
-
-/**
-An implementation of Jacobian using std::vector.
-
-@author Roman Tolchenov
-@date 17/02/2012
-*/
-class CurveFittingJacobian : public API::Jacobian {
-  /// Number of data points
-  size_t m_ny;
-  /// Number of parameters in a function (== IFunction::nParams())
-  size_t m_np;
-  /// Storage for the derivatives
-  std::vector<double> m_data;
-
-public:
-  /// Constructor.
-  /// @param ny :: Number of data points
-  /// @param np :: Number of parameters
-  CurveFittingJacobian(size_t ny, size_t np) : m_ny(ny), m_np(np) { m_data.resize(ny * np, 0.0); }
-  /// overwrite base method
-  /// @param value :: the value
-  /// @param iP :: the index of the parameter
-  ///  @throw runtime_error Thrown if column of Jacobian to add number to does
-  ///  not exist
-  void addNumberToColumn(const double &value, const size_t &iP) override {
-    if (iP < m_np) {
-      // add penalty to first and last point and every 10th point in between
-      m_data[iP] += value;
-      m_data[(m_ny - 1) * m_np + iP] += value;
-      for (size_t iY = 9; iY < m_ny; iY += 10)
-        m_data[iY * m_np + iP] += value;
-    } else {
-      throw std::runtime_error("Try to add number to column of Jacobian matrix "
-                               "which does not exist.");
-    }
-  }
-  /// overwrite base method
-  void set(size_t iY, size_t iP, double value) override {
-    if (iY >= m_ny) {
-      throw std::out_of_range("Data index in Jacobian is out of range");
-    }
-    if (iP >= m_np) {
-      throw Kernel::Exception::FitSizeWarning(m_np);
-    }
-    m_data[iY * m_np + iP] = value;
-  }
-  /// overwrite base method
-  double get(size_t iY, size_t iP) override {
-    if (iY >= m_ny) {
-      throw std::out_of_range("Data index in Jacobian is out of range");
-    }
-    if (iP >= m_np) {
-      throw Kernel::Exception::FitSizeWarning(m_np);
-    }
-    return m_data[iY * m_np + iP];
-  }
-  /// overwrite base method
-  void zero() override { m_data.assign(m_data.size(), 0.0); }
-};
 
 /**
  * Constructor.
@@ -264,82 +177,12 @@ double IPeakFunction::intensity() const { return integrate().first; }
 
 /// Returns the uncertainty associated to the integral intensity of the peak function
 double IPeakFunction::intensityError() {
-
   auto const interval = getDomainInterval();
-  const size_t nData = 2;
-  double *domainArray = new double[2];
-  domainArray[0] = interval.first;
-  domainArray[1] = interval.second;
 
-  FunctionDomain1DView domain(domainArray, nData);
-  FunctionValues values(domain);
-  values->zeroCalucated();
+  PeakFunctionIntegrator integrator;
 
-  double sigma = 1;
-  double prob = std::erf(sigma / sqrt(2));
-  // critical value for t distribution
-  double alpha = (1 + prob) / 2;
-  double eValue = std::nan("");
-
-  bool hasErrors = false;
-
-  function(domain, values);
-  auto covar = getCovarianceMatrix();
-
-  size_t nParams = this->nParams();
-
-  CurveFittingJacobian J(nData, this->nParams());
-
-  if (!covar) {
-    for (size_t j = 0; j < nParams; ++j) {
-      // throw std::runtime_error(fn->parameterName(j+3));
-      if (getError(j) != 0.0) {
-        hasErrors = true;
-        break;
-      }
-    }
-  }
-
-  if (covar || hasErrors) {
-
-    try {
-      functionDeriv(domain, J);
-    } catch (...) {
-      calNumericalDeriv(domain, J);
-    }
-
-    if (covar) {
-      double s = 0.0;
-      const Kernel::Matrix<double> &C = *covar;
-      for (size_t i = 0; i < nParams; ++i) {
-        double tmp = J.get(0, i);
-        s += C[i][i] * tmp * tmp;
-        for (size_t j = i + 1; j < nParams; ++j) {
-          s += J.get(0, i) * C[i][j] * J.get(0, j) * 2;
-        }
-      }
-
-      size_t dof = 1 - nParams;
-      double T = 1.0;
-      if (dof != 0) {
-        boost::math::students_t dist(static_cast<double>(dof));
-        T = boost::math::quantile(dist, alpha);
-      }
-
-      eValue = T * std::sqrt(s * getReducedChiSquared());
-    } else {
-      double err = 0.0;
-      for (size_t i = 0; i < nData; i++) {
-        for (size_t j = 0; j < nParams; ++j) {
-          double d = J.get(i, j) * getError(j);
-          err += d * d;
-        }
-      }
-      if (err != 0.0)
-        eValue = std::sqrt(err);
-    }
-  }
-  return eValue;
+  auto const result = integrator.integrate(*this, interval.first, interval.second);
+  return integrator.integrateError(*this);
 }
 
 /// Sets the integral intensity of the peak by adjusting the height.
@@ -393,6 +236,7 @@ std::pair<double, double> IPeakFunction::getDomainInterval(double level) const {
   double right = 0.0;
   auto h = height();
   auto w = fwhm();
+
   auto c = centre();
   if (h == 0.0 || w == 0.0 || level >= 1.0) {
     return std::make_pair(c, c);
