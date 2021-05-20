@@ -20,7 +20,7 @@ namespace MDAlgorithms {
 */
 class MANTID_MDALGORITHMS_DLL ApplyDetailedBalanceMD : public API::Algorithm {
 public:
-  ApplyDetailedBalanceMD() : mDeltaEIndex(999), mTemperature(-1.) {}
+  ApplyDetailedBalanceMD() : mDeltaEIndex(999) {}
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
@@ -46,8 +46,6 @@ private:
   /// index of the MD dimension index for DeltaE
   size_t mDeltaEIndex;
 
-  /// user specified sample temperture
-  float mTemperature;
   /// map of temperature retrieved from sample logs
   std::map<uint16_t, double> mExpinfoTemperatureMean;
 };
