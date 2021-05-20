@@ -1,8 +1,8 @@
-.. _WindowsSubSystemsForLinux:
+.. _WindowsSubsystemForLinux:
 
-===================================
-Windows Subsystems for Linux (WSL2)
-===================================
+==================================
+Windows Subsystem for Linux (WSL2)
+==================================
 
 .. contents::
   :local:
@@ -18,7 +18,7 @@ Some initial setup is required on your Windows system before the Linux environme
 2. In the Windows Start menu open `Turn Windows features on or off`.
 3. Make sure `Windows System for Linux` and `Virtual Machine Platform` are ticked. Click OK.
 
-If you now open a File Explorer and go to the `\\wsl$` directory. This will be the location of your linux subsystems.
+If you now open a File Explorer and go to the `\\wsl$` directory. This will be the location of your linux subsystem.
 
 Install a Ubuntu-18.04 Subsystem
 ################################

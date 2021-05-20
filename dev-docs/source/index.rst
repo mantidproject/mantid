@@ -108,7 +108,7 @@ Tools
    PyCharm
    VSCode
    Eclipse
-   WindowsSubSystemsForLinux
+   WindowsSubsystemForLinux
 
 :doc:`ToolsOverview`
    Describes ``class_maker``, ``valgrind`` and related tools.
@@ -131,7 +131,7 @@ Tools
 :doc:`Eclipse`
    Guide to setting up Eclipse on Ubuntu
 
-:doc:`WindowsSubSystemsForLinux`
+:doc:`WindowsSubsystemForLinux`
    Guide for setting up Ubuntu 18.04 and Centos7 as subsystems on Windows (WSL2).
 
 =======
