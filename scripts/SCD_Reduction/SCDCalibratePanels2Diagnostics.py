@@ -91,7 +91,7 @@ def SCDCalibratePanels2DiagnosticsPlotBank(
     axes[1].set_aspect(aspect='equal')
     # display
     if showPlots:
-        plt.show(block=False)
+        fig.show()
     # save
     fig.savefig(os.path.join(savedir, figname))
     # notify users
@@ -118,6 +118,7 @@ def SCDCalibratePanels2DiagnosticsPlot(
 
     @returs: None
     """
+    # parse input
     pws = mtd[peaksWorkspace] if isinstance(peaksWorkspace, str) else peaksWorkspace
     logging.info(f"Start diagnostics with {peaksWorkspace.name()}.")
 

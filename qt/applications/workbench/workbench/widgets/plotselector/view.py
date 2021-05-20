@@ -280,7 +280,11 @@ class PlotSelectorView(QWidget):
             widget = self.table_widget.cellWidget(row, Column.Name)
             if widget.plot_number == plot_number:
                 return row, widget
-        raise RuntimeError(f'Unable to find row and widget from plot_number {plot_number}')
+        # NOTE:
+        #    This runtime error will mess up the internal figure counter in matplotlib,
+        #    turnning it off so that Mantid and Matplotlib is not fighting for the previlige
+        #    of tracking number of figures.
+        # raise RuntimeError(f'Unable to find row and widget from plot_number {plot_number}')
 
     def remove_from_plot_list(self, plot_number):
         """
