@@ -70,6 +70,7 @@ class SliceViewerTest(unittest.TestCase):
         data_view.dimensions = mock.Mock()
         data_view.norm_opts = mock.Mock()
         data_view.image_info_widget = mock.Mock()
+        data_view.canvas = mock.Mock()
         data_view.nonorthogonal_mode = False
         data_view.nonortho_transform = None
         data_view.get_axes_limits.return_value = None
@@ -499,6 +500,34 @@ class SliceViewerTest(unittest.TestCase):
 
         # Will raise exception if misbehaving.
         presenter.clear_observer()
+
+    @patch("sip.isdeleted", return_value=False)
+    @mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceInfo")
+    @mock.patch("mantidqt.widgets.sliceviewer.presenter.PeaksViewerCollectionPresenter",
+                spec=PeaksViewerCollectionPresenter)
+    def test_peak_add_delete_event(self, mock_peaks_presenter, mock_sliceinfo_cls, _):
+        mock_sliceinfo_cls().transform = mock.Mock(side_effect=lambda pos: pos[::-1])
+        mock_sliceinfo_cls().frame = 'Frame'
+        mock_sliceinfo_cls().z_value = 3
+
+        presenter, _ = _create_presenter(self.model,
+                                         self.view,
+                                         mock_sliceinfo_cls,
+                                         enable_nonortho_axes=False,
+                                         supports_nonortho=True)
+        presenter._peaks_presenter = mock_peaks_presenter
+
+        event = mock.Mock()
+        event.inaxes = True
+        event.xdata = 1.0
+        event.ydata = 2.0
+
+        presenter.peak_add_delete(event)
+
+        mock_sliceinfo_cls.get_sliceinfo.assert_not_called()
+
+        mock_peaks_presenter.add_delete_peak.assert_called_once_with([3, 2, 1], 'Frame')
+        self.view.data_view.canvas.draw_idle.assert_called_once()
 
 
 if __name__ == '__main__':
