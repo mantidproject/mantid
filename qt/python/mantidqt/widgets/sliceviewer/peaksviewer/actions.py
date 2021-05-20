@@ -9,11 +9,9 @@
 
 # 3rd party
 from qtpy import QtWidgets
-from mantid.kernel import logger
 from mantidqt.utils.qt import load_ui
 
 # standard
-import enum
 from typing import Optional
 
 
@@ -38,19 +36,11 @@ class PeakActionsView(QtWidgets.QWidget):
     @property
     def erasing_mode_on(self):
         r"""Find if the button to remove peaks is checked"""
-        if self.ui.remove_peaks_button.isChecked():
-            self.ui.remove_peaks_button.setChecked(True)
-            self.ui.add_peaks_button.setChecked(False)
-
         return self.ui.remove_peaks_button.isChecked()
 
     @property
     def adding_mode_on(self):
         r"""Find if the button to add peaks is checked"""
-        if self.ui.add_peaks_button.isChecked():
-            self.ui.add_peaks_button.setChecked(True)
-            self.ui.remove_peaks_button.setChecked(False)
-
         return self.ui.add_peaks_button.isChecked()
 
     @property
@@ -76,7 +66,18 @@ class PeakActionsView(QtWidgets.QWidget):
         self.ui.add_peaks_button.setStyleSheet("background-color:lightgrey")
         self.ui.remove_peaks_button.setStyleSheet("background-color:lightgrey")
 
+        self.ui.add_peaks_button.clicked.connect(self._add_button_clicked)
+        self.ui.remove_peaks_button.clicked.connect(self._delete_button_clicked)
+
     def _route_signals_to_presenter(self):
         r"""Link viewer particular viewer signals to particular methods of the presenter"""
-        self.ui.remove_peaks_button.clicked.connect(self.presenter.deactivate_zoom_pan)
         self.ui.add_peaks_button.clicked.connect(self.presenter.deactivate_zoom_pan)
+        self.ui.remove_peaks_button.clicked.connect(self.presenter.deactivate_zoom_pan)
+
+    def _add_button_clicked(self, state):
+        if state:
+            self.ui.remove_peaks_button.setChecked(False)
+
+    def _delete_button_clicked(self, state):
+        if state:
+            self.ui.add_peaks_button.setChecked(False)
