@@ -45,6 +45,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
             # evaluate string to make a dict (replace case of bool values)
             fitprop = eval(dict_str.replace('true', 'True').replace('false', 'False'))
             fitprop['peak_centre_params'] = self._get_center_param_names()
+            fitprop['status'] = self.getFitResultStatus().strip("Status:").strip()  # sometimes space after colon
             return fitprop
         else:
             # if no fit has been performed
@@ -67,6 +68,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
             if exclude:
                 fitprop['properties']['Exclude'] = [int(s) for s in exclude.split(',')]
             fitprop['peak_centre_params'] = self._get_center_param_names()
+            fitprop['status'] = None  # not guaranteed to relate to these parameters
             return fitprop
         except BaseException:  # The cpp passes up an 'unknown' error if getFunctionString() fails, i.e. if no fit
             return None
@@ -124,9 +126,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         This is called after Fit finishes to update the fit curves.
         :param name: The name of Fit's output workspace.
         """
-        ws = ADS.retrieve(name)
-        self.do_plot(ws, plot_diff=self.plotDiff())
-        self.fit_result_ws_name = name
+        super(EngDiffFitPropertyBrowser, self).fitting_done_slot(name)
         self.save_current_setup(self.workspaceName())
         self.fit_notifier.notify_subscribers([self.get_fitprop()])
 

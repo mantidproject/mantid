@@ -1677,6 +1677,13 @@ void FitPropertyBrowser::showFitResultStatus(const QString &status) {
   m_status->show();
 }
 
+/// Display the status string returned from Fit
+/// @param status :: A status string as returned by OutputStatus Fit property.
+std::string FitPropertyBrowser::getFitResultStatus() const {
+  std::string status = m_status->text().toStdString();
+  return status;
+}
+
 /// Clear the Fit status display
 void FitPropertyBrowser::clearFitResultStatus() {
   m_status->setText("Status:");

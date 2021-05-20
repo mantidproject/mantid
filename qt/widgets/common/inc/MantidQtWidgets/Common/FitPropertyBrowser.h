@@ -109,6 +109,8 @@ public:
   QStringList getParameterNames() const;
   // Get parameters used to run the Fit algorithm
   std::string getFitAlgorithmParameters() const;
+  // Get the status string returned from Fit
+  std::string getFitResultStatus() const;
 
   /// Load function
   void loadFunction(const QString &funcString);
