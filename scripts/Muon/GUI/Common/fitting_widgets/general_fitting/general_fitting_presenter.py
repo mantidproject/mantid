@@ -53,6 +53,8 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self._update_plot = False
         self.update_and_reset_all_data()
         self._update_plot = True
+        self.clear_cached_fit_functions()
+        self.model.remove_all_fits_from_context()
 
     def handle_pulse_type_changed(self, updated_variables: dict) -> None:
         """Handles when double pulse mode is switched on and switches to normal fitting mode."""
@@ -110,7 +112,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         # Triggers handle_dataset_name_changed
         self.update_dataset_names_in_view_and_model()
 
-        self.reset_start_xs_and_end_xs()
         self.reset_fit_status_and_chi_squared_information()
         self.clear_cached_fit_functions()
 
@@ -120,11 +121,9 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         """Handle when the display workspace combo box is changed."""
         self.model.current_dataset_index = self.view.current_dataset_index
 
-        self.view.start_x = self.model.current_start_x
-        self.view.end_x = self.model.current_end_x
-
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
         self.update_fit_function_in_view_from_model()
+        self.update_start_and_end_x_in_view_from_model()
 
         if self._update_plot:
             self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())

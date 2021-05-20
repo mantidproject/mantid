@@ -87,13 +87,24 @@ void CreatePeaksWorkspace::exec() {
     out = std::make_shared<LeanElasticPeaksWorkspace>();
     setProperty("OutputWorkspace", out);
 
+    if (instMDWS) {
+      if (instMDWS->getNumExperimentInfo() > 0) {
+        ei = std::dynamic_pointer_cast<ExperimentInfo>(instMDWS->getExperimentInfo(0));
+      }
+    } else {
+      ei = std::dynamic_pointer_cast<ExperimentInfo>(instWS);
+    }
+
+    if (ei)
+      out->copyExperimentInfoFrom(ei.get());
+
     Progress progress(this, 0.0, 1.0, NumberOfPeaks);
     for (int i = 0; i < NumberOfPeaks; i++) {
       out->addPeak(LeanElasticPeak());
       progress.report();
     }
   } else {
-    throw std::invalid_argument("OutputType MUST be either Full or Lean!");
+    throw std::invalid_argument("OutputType MUST be either Peak or LeanElasticPeak!");
   }
   // ALG END
 }

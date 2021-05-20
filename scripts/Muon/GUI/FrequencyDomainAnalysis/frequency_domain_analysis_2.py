@@ -113,7 +113,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
-        self.grouping_tab_widget = GroupingTabWidget(self.context)
+        self.grouping_tab_widget = GroupingTabWidget(self.context, parent)
         self.home_tab = HomeTabWidget(self.context, self)
         self.phase_tab = PhaseTabWidget(self.context, self)
         self.transform = TransformWidget(
@@ -231,6 +231,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.disable_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.disable_tab_observer)
 
+        self.disable_notifier.add_subscriber(self.plot_widget.presenter.disable_observer)
+
     def setup_enable_notifier(self):
 
         self.enable_notifier.add_subscriber(self.home_tab.home_tab_widget.enable_observer)
@@ -246,6 +248,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.enable_notifier.add_subscriber(self.transform.enable_observer)
 
         self.enable_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.enable_tab_observer)
+
+        self.enable_notifier.add_subscriber(self.plot_widget.presenter.enable_observer)
 
     def setup_load_observers(self):
         self.load_widget.load_widget.loadNotifier.add_subscriber(

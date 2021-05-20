@@ -236,7 +236,7 @@ template <class Base> Workspace_sptr GenericDataProcessorAlgorithm<Base>::assemb
  */
 template <class Base>
 Workspace_sptr GenericDataProcessorAlgorithm<Base>::assemble(const std::string &partialWSName,
-                                                             const std::string &outputWSName) {
+                                                             [[maybe_unused]] const std::string &outputWSName) {
 #ifdef MPI_BUILD
   std::string threadOutput = partialWSName;
   Workspace_sptr partialWS = AnalysisDataService::Instance().retrieve(partialWSName);
@@ -251,7 +251,6 @@ Workspace_sptr GenericDataProcessorAlgorithm<Base>::assemble(const std::string &
   if (isMainThread())
     threadOutput = outputWSName;
 #else
-  UNUSED_ARG(outputWSName)
   const std::string &threadOutput = partialWSName;
 
 #endif

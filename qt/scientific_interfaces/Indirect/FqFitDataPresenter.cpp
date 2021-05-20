@@ -141,6 +141,7 @@ void FqFitDataPresenter::dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dia
 
 void FqFitDataPresenter::updateParameterOptions(FqFitAddWorkspaceDialog *dialog) {
   setDataIndexToCurrentWorkspace(dialog);
+  setActiveParameterType(dialog->parameterType());
   if (m_activeParameterType == "Width")
     dialog->setParameterNames(m_fqFitModel->getWidths(m_dataIndex));
   else if (m_activeParameterType == "EISF")
@@ -207,7 +208,7 @@ void FqFitDataPresenter::setDataIndexToCurrentWorkspace(IAddWorkspaceDialog cons
   //  indirectFittingModel get table workspace index
   const auto wsName = dialog->workspaceName().append("_HWHM");
   // This a vector of workspace names currently loaded
-  auto wsVector = m_fqFitModel->m_fitDataModel->getWorkspaceNames();
+  auto wsVector = m_fqFitModel->getFitDataModel()->getWorkspaceNames();
   // this is an iterator pointing to the current wsName in wsVector
   auto wsIt = std::find(wsVector.begin(), wsVector.end(), wsName);
   // this is the index of the workspace.

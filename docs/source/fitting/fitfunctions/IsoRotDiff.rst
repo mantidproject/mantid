@@ -117,7 +117,7 @@ and the overal intensity of the signal with a fit to the following model:
     # This is the template fitting model for each spectrum (each Q-value):
     single_model_template="""(composite=Convolution,FixResolution=true,NumDeriv=true;
     name=TabulatedFunction,Workspace=resolution,WorkspaceIndex=_WI_,Scaling=1,Shift=0,XScaling=1;
-    (name=IsoRotDiff,NumDeriv=true,Q=_Q_,f0.Height=1,f0.Centre=0,f0.Radius=0.98,Tau=10));
+    (name=IsoRotDiff,NumDeriv=true,Q=_Q_,f0.Height=1,f0.Centre=0,f0.Radius=0.98,f1.Tau=10));
     name=LinearBackground,A0=0,A1=0"""
     # Now create the string representation of the global model (all spectra, all Q-values):
     global_model="composite=MultiDomainFunction,NumDeriv=true;"
@@ -150,13 +150,13 @@ and the overal intensity of the signal with a fit to the following model:
     parameter_ws = mtd[output_workspace+"_Parameters"]
     for irow in range(parameter_ws.rowCount()):
         row = parameter_ws.row(irow)
-        if row["Name"]=="f0.f0.f1.Radius":
+        if row["Name"]=="f0.f0.f1.f1.Radius":
             Radius=row["Value"]
             nparms+=1
-        elif row["Name"]=="f0.f0.f1.Height":
+        elif row["Name"]=="f0.f0.f1.f1.Height":
             Height=row["Value"]
             nparms+=1
-        elif row["Name"]=="f0.f0.f1.Tau":
+        elif row["Name"]=="f0.f0.f1.f1.Tau":
             Tau=row["Value"]
             nparms+=1
         if nparms==3:

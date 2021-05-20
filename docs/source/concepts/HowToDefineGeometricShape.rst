@@ -346,8 +346,8 @@ the "axis" rotation.
 Bounding-Box
 ------------
 
-When a geometric shape is rendered in the MantidPlot instrument viewer, Mantid
-will attempt to automatically construct an axis-aligned bounding box for every
+When a geometric shape is rendered in the :ref:`instrument viewer <InstrumentViewer>`,
+Mantid will attempt to automatically construct an axis-aligned bounding box for every
 geometric shape that does not have one yet. Well-defined bounding boxes are
 required by many features of Mantid, from correctly rendering the instrument
 to performing calculations in various algorithms.

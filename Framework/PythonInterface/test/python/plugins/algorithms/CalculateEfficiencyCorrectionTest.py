@@ -7,7 +7,7 @@
 import unittest
 from mantid.simpleapi import \
     CalculateEfficiencyCorrection, CloneWorkspace, ConvertToPointData, \
-    CreateSampleWorkspace, DeleteWorkspace, LoadAscii, Multiply
+    CreateSampleWorkspace, DeleteWorkspace, LoadAscii, Multiply, ChangeBinOffset
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
 
@@ -57,7 +57,7 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
         self.assertEqual(output_wksp.getAxis(0).getUnit().unitID(), 'Wavelength')
         self.assertAlmostEqual(output_wksp.readX(0)[79], 0.995)
         if eventCheck:
-            self.assertAlmostEqual(output_wksp.readY(0)[79], 62.22517501)
+            self.assertAlmostEqual(output_wksp.readY(0)[79], 66.23970242900438)
         else:
             if xsection == "AttenuationXSection":
                 self.assertAlmostEqual(output_wksp.readY(0)[79], 3250.28183501)

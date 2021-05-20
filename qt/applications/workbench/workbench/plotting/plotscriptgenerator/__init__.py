@@ -15,7 +15,8 @@ from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_com
                                                          generate_axis_label_commands,
                                                          generate_set_title_command,
                                                          generate_axis_scale_commands,
-                                                         generate_tick_commands)
+                                                         generate_tick_commands,
+                                                         generate_tick_formatter_commands)
 from workbench.plotting.plotscriptgenerator.figure import generate_subplots_command
 from workbench.plotting.plotscriptgenerator.lines import generate_plot_command
 from workbench.plotting.plotscriptgenerator.legend import (generate_legend_commands,
@@ -36,6 +37,7 @@ else:
     SET_DRAGGABLE_METHOD = "draggable()"
 FIT_DOCUMENTATION_STRING = "# Fit definition, see https://docs.mantidproject.org/algorithms/Fit-v1.html for more " \
                            "details"
+TICKER_FORMATTER_IMPORT = "from matplotlib.ticker import NullFormatter, ScalarFormatter, LogFormatterSciNotation"
 
 
 def generate_script(fig, exclude_headers=False):
@@ -53,7 +55,10 @@ def generate_script(fig, exclude_headers=False):
         axes.set_xlabel and axes.set_ylabel()
         axes.set_xlim() and axes.set_ylim()
         axes.set_xscale() and axes.set_yscale()
+        <Set axes major tick formatters if non-default>
         axes.legend().set_draggable(True)     (if legend present, or just draggable() for earlier matplotlib versions)
+        <Legend title and label commands if non-default>
+
         plt.show()
 
     :param fig: A matplotlib.pyplot.Figure object you want to create a script from
@@ -76,11 +81,19 @@ def generate_script(fig, exclude_headers=False):
                 continue
             plot_commands.extend(get_plot_cmds(ax, ax_object_var))  # ax.plot
 
-        plot_commands.extend(generate_tick_commands(ax))
+        plot_commands.extend(get_tick_commands(ax, ax_object_var))
         plot_commands.extend(get_title_cmds(ax, ax_object_var))  # ax.set_title
         plot_commands.extend(get_axis_label_cmds(ax, ax_object_var))  # ax.set_label
         plot_commands.extend(get_axis_limit_cmds(ax, ax_object_var))  # ax.set_lim
         plot_commands.extend(get_axis_scale_cmds(ax, ax_object_var))  # ax.set_scale
+
+        # Only add the ticker import to headers if it's needed.
+        formatter_commands = get_tick_formatter_commands(ax, ax_object_var)
+        if len(formatter_commands) > 0:
+            plot_commands.extend(formatter_commands) # ax.{x,y}axis.set_major_formatter
+            if TICKER_FORMATTER_IMPORT not in plot_headers:
+                plot_headers.append(TICKER_FORMATTER_IMPORT)
+
         plot_commands.extend(get_legend_cmds(ax, ax_object_var))  # ax.legend
         plot_commands.append('')
 
@@ -162,6 +175,18 @@ def get_legend_cmds(ax, ax_object_var):
         cmds.extend(generate_label_font_commands(ax.legend_, LEGEND_VARIABLE))
         cmds.extend(generate_visible_command(ax.legend_, LEGEND_VARIABLE))
     return cmds
+
+
+def get_tick_commands(ax, ax_object_var):
+    """Get ax.tick_params commands for setting properties of tick marks and grid lines."""
+    tick_commands = generate_tick_commands(ax)
+    return ["{ax_obj}.{cmd}".format(ax_obj=ax_object_var, cmd=cmd) for cmd in tick_commands]
+
+
+def get_tick_formatter_commands(ax, ax_object_var):
+    """Get commands for setting the format of the tick labels."""
+    commands = generate_tick_formatter_commands(ax)
+    return ["{ax_obj}.{cmd}".format(ax_obj=ax_object_var, cmd=cmd) for cmd in commands]
 
 
 def get_axes_object_variable(ax):

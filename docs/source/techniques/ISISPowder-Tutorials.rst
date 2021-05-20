@@ -44,10 +44,10 @@ no prior knowledge or usage of the scripts and a fresh install of Mantid.
 Copying instrument example files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Open your Mantid install location, by default this
-will be `C:\\MantidInstall` on Windows, `/opt/Mantid` on Linux, and `/Applications/MantidPlot.app/` on OSX.
+will be `C:\\MantidInstall` on Windows, `/opt/Mantid` on Linux, and `/Applications/MantidWorkbench.app/` on OSX.
 
-.. note:: In Finder on OSX to see files inside the MantidPlot application you
-   need to right click on the MantidPlot application then choose "Show Package
+.. note:: In Finder on OSX to see files inside the MantidWorkbench application you
+   need to right click on the MantidWorkbench application then choose "Show Package
    Contents"
 
 Open *scripts* > *Diffraction* > *isis_powder*.

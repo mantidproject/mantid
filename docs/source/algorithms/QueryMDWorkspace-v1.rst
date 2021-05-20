@@ -11,7 +11,7 @@ Description
 
 This algorithm outputs a table workspace containing summary data about
 each box within an IMDWorkspace. The table workspace can be used as a
-basis for plotting within MantidPlot.
+basis for plotting.
 
 Format
 ------

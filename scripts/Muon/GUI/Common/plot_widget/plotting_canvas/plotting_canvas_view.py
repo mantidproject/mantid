@@ -28,7 +28,8 @@ else:
 
 
 # Default color cycle using Matplotlib color codes C0, C1...ect
-DEFAULT_COLOR_CYCLE = ["C" + str(index) for index in range(10)]
+NUMBER_OF_COLOURS = 10
+DEFAULT_COLOR_CYCLE = ["C" + str(index) for index in range(NUMBER_OF_COLOURS)]
 
 
 def _do_single_plot(ax, workspace, index, errors, plot_kwargs):
@@ -143,6 +144,9 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                             plot_kwargs=plot_kwargs)
 
     def remove_workspace_info_from_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
+        # We reverse the workspace info list so that we can maintain a unique color queue
+        # See _update_color_queue_on_workspace_removal for more
+        workspace_plot_info_list.reverse()
         for workspace_plot_info in workspace_plot_info_list:
             workspace_name = workspace_plot_info.workspace_name
             if not AnalysisDataService.Instance().doesExist(workspace_name):
@@ -182,6 +186,16 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                     color = artist[0].get_color()
                 else:
                     color = artist.get_color()
+                # When we repeat colors we don't want to add colors to the queue if they are already plotted.
+                # We know we are repeating colors if we have more lines than colors, then we check if the color
+                # removed is already the color of an existing line. If it is we don't manually re-add the color
+                # to the queue. This ensures we only plot lines of the same colour if we have more lines
+                # plotted than colours
+                lines = self.fig.axes[axis_number].get_lines()
+                if len(lines) > NUMBER_OF_COLOURS:
+                    current_colors = [line.get_c() for line in lines]
+                    if color in current_colors:
+                        return
                 self._color_queue[axis_number] += color
 
     # Ads observer functions

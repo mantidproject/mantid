@@ -69,6 +69,7 @@ label. To make sure the legend is updated ensure you have ticked the
 You can set default settings using Matplotlib's :code:`rcParams` for a guide to
 this see :ref:`Change Matplotlib Defaults <mplDefaults>`.
 
+.. _WorkbenchPlotWindow_Fitting:
 
 Fitting
 -------

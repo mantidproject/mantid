@@ -304,20 +304,6 @@ class MainWindowTest(unittest.TestCase):
         self.assertDictEqual({}, registration_files)
         mock_logger.warning.assert_called()
 
-    @patch('workbench.app.mainwindow.logger')
-    @patch('os.path.exists')
-    def test_that_blacklisted_python_interface_is_ignored_gracefully(self, mock_os_path_exists, mock_logger):
-        interface_str = 'blacklisted/interface.py'
-        self.main_window.PYTHON_GUI_BLACKLIST = 'interface.py'
-        mock_os_path_exists.return_value = True
-
-        with patch('workbench.app.mainwindow.ConfigService', new={'mantidqt.python_interfaces': interface_str}):
-            returned_interfaces, registration_files = self.main_window._discover_python_interfaces('')
-
-        self.assertDictEqual({}, returned_interfaces)
-        self.assertDictEqual({}, registration_files)
-        mock_logger.information.assert_called()
-
     @patch('workbench.app.mainwindow.UserSubWindowFactory')
     def test_cpp_interfaces_are_discovered_correctly(self, mock_UserSubWindowFactory):
         """Assuming we have already found some python interfaces, test that

@@ -826,7 +826,7 @@ FunctionEnd
 ;---------------------------------------------
 ; Check if mantid is running
 Function in.abortIfRunning
-  !insertmacro HandleRunningMantid "MantidPlot.exe" "$INSTDIR" "$INSTDIR\bin\MantidPlot.exe appears to be running. Please shut down MantidPlot and try again."
+  !insertmacro HandleRunningMantid "MantidWorkbench.exe" "$INSTDIR" "$INSTDIR\bin\MantidWorkbench.exe appears to be running. Please shut down MantidWorkbench and try again."
 FunctionEnd
 
 ;---------------------------------------------
