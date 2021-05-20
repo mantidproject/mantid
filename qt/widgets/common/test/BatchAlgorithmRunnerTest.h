@@ -268,6 +268,54 @@ public:
     TS_ASSERT_EQUALS(args.at(0).toBool(), false);
   }
 
+  void test_cancelBatchWithQueue() {
+    BatchAlgorithmRunner runner(nullptr);
+
+    QSignalSpy batchCompleteSpy(&runner, &BatchAlgorithmRunner::batchComplete);
+    QSignalSpy batchCancelledSpy(&runner, &BatchAlgorithmRunner::batchCancelled);
+    QSignalSpy algStartSpy(&runner, &BatchAlgorithmRunner::algorithmStarted);
+    QSignalSpy algCompleteSpy(&runner, &BatchAlgorithmRunner::algorithmComplete);
+    QSignalSpy algErrorSpy(&runner, &BatchAlgorithmRunner::algorithmError);
+
+    runner.addAlgorithm(createWsAlg);
+    runner.addAlgorithm(cropWsAlg, inputFromCreateProps);
+    runner.addAlgorithm(scaleWsAlg, inputFromCropProps);
+
+    runner.cancelBatch();
+    runner.executeBatch();
+
+    // No algorithms are run if they were in the queue before we cancelled
+    TS_ASSERT_EQUALS(batchCompleteSpy.count(), 0);
+    TS_ASSERT_EQUALS(batchCancelledSpy.count(), 1);
+    TS_ASSERT_EQUALS(algStartSpy.count(), 0);
+    TS_ASSERT_EQUALS(algCompleteSpy.count(), 0);
+    TS_ASSERT_EQUALS(algErrorSpy.count(), 0);
+  }
+
+  void test_cancelBatchWithEmptyQueueThenAddAlgsToQueue() {
+    BatchAlgorithmRunner runner(nullptr);
+
+    QSignalSpy batchCompleteSpy(&runner, &BatchAlgorithmRunner::batchComplete);
+    QSignalSpy batchCancelledSpy(&runner, &BatchAlgorithmRunner::batchCancelled);
+    QSignalSpy algStartSpy(&runner, &BatchAlgorithmRunner::algorithmStarted);
+    QSignalSpy algCompleteSpy(&runner, &BatchAlgorithmRunner::algorithmComplete);
+    QSignalSpy algErrorSpy(&runner, &BatchAlgorithmRunner::algorithmError);
+
+    runner.cancelBatch();
+
+    runner.addAlgorithm(createWsAlg);
+    runner.addAlgorithm(cropWsAlg, inputFromCreateProps);
+    runner.addAlgorithm(scaleWsAlg, inputFromCropProps);
+    runner.executeBatch();
+
+    // The empty queue was cancelled immediately so any subsequent queue is executed as normal
+    TS_ASSERT_EQUALS(batchCompleteSpy.count(), 1);
+    TS_ASSERT_EQUALS(batchCancelledSpy.count(), 1);
+    TS_ASSERT_EQUALS(algStartSpy.count(), 3);
+    TS_ASSERT_EQUALS(algCompleteSpy.count(), 3);
+    TS_ASSERT_EQUALS(algErrorSpy.count(), 0);
+  }
+
 private:
   IAlgorithm_sptr createWsAlg;
   IAlgorithm_sptr cropWsAlg;
