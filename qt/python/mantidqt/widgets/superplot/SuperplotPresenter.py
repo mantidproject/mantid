@@ -251,31 +251,23 @@ class SuperplotPresenter:
 
         figure = self._canvas.figure
         axes = figure.gca()
-        axes.remove_all_curves()
-        legend = axes.get_legend()
-        if legend:
-            legend.remove()
-        axes.set_prop_cycle(None)
-        for wsName, sp in plottedData:
-            ws = mtd[wsName]
-            kwargs = {}
-            if self._model.isSpectrumMode():
-                kwargs["axis"] = MantidAxType.SPECTRUM
-                kwargs["specNum"] = ws.getSpectrumNumbers()[sp]
-            else:
-                kwargs["axis"] = MantidAxType.BIN
-                kwargs["wkspIndex"] = sp
+        artists = axes.get_tracked_artists()
 
-            if self._plotFunction == "errorbar":
-                lines = axes.errorbar(ws, **kwargs)
-                label = lines.get_label()
-                color = lines.lines[0].get_color()
+        # remove curves not in plottedData
+        for artist in artists:
+            ws, sp = axes.get_artists_workspace_and_workspace_index(artist)
+            wsName = ws.name()
+            if (wsName, sp) not in plottedData:
+                axes.remove_artists_if(lambda a: a==artist)
             else:
-                lines = axes.plot(ws, **kwargs)
-                label = lines[0].get_label()
-                color = lines[0].get_color()
-            self._view.modifySpectrumLabel(wsName, sp, label, color)
+                label = artist.get_label()
+                try:
+                    color = artist.get_color()
+                except:
+                    color = artist.lines[0].get_color()
+                self._view.modifySpectrumLabel(wsName, sp, label, color)
 
+        # add selection to plot
         for wsName, spectra in selection.items():
             if (currentSpectrumIndex not in spectra
                 and not self._view.isSpectrumDisabled()):
