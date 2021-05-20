@@ -34,12 +34,23 @@ namespace MDAlgorithms {
 
 class SimpleMDEvent {
 
+private:
+  std::vector<float> mCoordinates;
+  float mSignal;
+  float mError;
+
 public:
   SimpleMDEvent(const std::vector<float> &coordinates, const float &signal, const float &error)
       : mCoordinates(coordinates), mSignal(signal), mError(error) {
     //        mCoordinates = coordinates;
     //        mSignal = signal;
     //        mError = error;
+  }
+
+  SimpleMDEvent(const SimpleMDEvent &other) {
+    mCoordinates = other.mCoordinates;
+    mSignal = other.mSignal;
+    mError = other.mError;
   }
 
   // pretty output
@@ -154,7 +165,7 @@ public:
     return true;
   }
 
-  bool operator=(const SimpleMDEvent &event2) {
+  void &operator=(const SimpleMDEvent &event2) {
 
     //        std::cout << " Assigning = is called.... \n";
 
@@ -166,13 +177,8 @@ public:
     mSignal = event2.mSignal;
     mError = event2.mError;
 
-    return true;
+    return;
   }
-
-private:
-  std::vector<float> mCoordinates;
-  float mSignal;
-  float mError;
 };
 
 bool compareSimpleEvents(SimpleMDEvent &self, const SimpleMDEvent &other) { return (self < other); }
