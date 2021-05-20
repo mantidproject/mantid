@@ -18,6 +18,7 @@ from typing import Optional
 class PeakActionsView(QtWidgets.QWidget):
     def __init__(self, parent: Optional['PeaksViewerCollectionView'] = None):
         super(PeakActionsView, self).__init__(parent=parent)
+        self._presenter: 'PeakActionsPresenter' = None
         self.ui = None
         self._setup_ui()
 

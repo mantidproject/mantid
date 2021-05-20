@@ -108,6 +108,17 @@ class PeaksViewerModelTest(unittest.TestCase):
         self.assertEqual((None, None), xlim)
         self.assertEqual((None, None), ylim)
 
+    def test_peaks_workspace_add_peak(self):
+        peaks_workspace = create_autospec(PeaksWorkspace)
+        model = PeaksViewerModel(peaks_workspace, 'b', '1.0')
+
+        model.add_peak([1, 1, 1], SpecialCoordinateSystem.QLab)
+        peaks_workspace.addPeak.assert_called_with([1, 1, 1], SpecialCoordinateSystem.QLab)
+        model.add_peak([2, 2, 2], SpecialCoordinateSystem.QSample)
+        peaks_workspace.addPeak.assert_called_with([2, 2, 2], SpecialCoordinateSystem.QSample)
+        model.add_peak([3, 3, 3], SpecialCoordinateSystem.HKL)
+        peaks_workspace.addPeak.assert_called_with([3, 3, 3], SpecialCoordinateSystem.HKL)
+
     # -------------------------- Failure Tests --------------------------------
     def test_model_accepts_only_peaks_workspaces(self):
         self.assertRaises(ValueError, PeaksViewerModel, create_autospec(MatrixWorkspace), 'w',

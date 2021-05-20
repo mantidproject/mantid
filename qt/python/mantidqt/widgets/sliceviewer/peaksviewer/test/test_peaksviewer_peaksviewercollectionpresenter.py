@@ -186,6 +186,25 @@ class PeaksViewerCollectionPresenterTest(unittest.TestCase):
 
         self.assertEqual(presenter._ads_observer, None)
 
+    def test_adding_peak(self, _):
+        view = MagicMock()
+        presenter = PeaksViewerCollectionPresenter(view)
+
+        # test deactivating peak adding mode from sliceviewer
+        presenter.deactivate_peak_add_delete()
+        view.peak_actions_view.deactivate_peak_adding.assert_called_once()
+
+        # test adding peak to peaksworkspace
+        presenter.child_presenter = MagicMock()
+        presenter.add_delete_peak([1,1,1], 'Frame')
+        presenter.child_presenter().add_peak.assert_called_once_with([1,1,1], 'Frame')
+
+        # test deactivate_zoom_pan
+        presenter.deactivate_zoom_pan(False)
+        view.deactivate_zoom_pan.assert_not_called()
+        presenter.deactivate_zoom_pan(True)
+        view.deactivate_zoom_pan.assert_called_once()
+
 
 if __name__ == '__main__':
     unittest.main()
