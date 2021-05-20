@@ -12,7 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from typing import List, Dict, Union
 from mantid.dataobjects import PeaksWorkspace
-from mantid.simpleapi import FilterPeaks
+from mantid.simpleapi import mtd, FilterPeaks
 
 
 def SCDCalibratePanels2DiagnosticsPlotBank(
@@ -60,7 +60,7 @@ def SCDCalibratePanels2DiagnosticsPlotBank(
         colsID_calculated[i] = entry_new["Col"]
 
     # plotting
-    fig, axes = plt.subplots(1, 2)  # side by side
+    fig, axes = plt.subplots(1, 2, figsize=(10, 5))  # side by side
     # plot col cmp
     # -- plot the diagnal helper line
     max_rown = max(rowsID_observed.max(), rowsID_calculated.max())
@@ -71,9 +71,10 @@ def SCDCalibratePanels2DiagnosticsPlotBank(
     axes[0].grid(color='k', linestyle='--', alpha=0.25)
     # -- config axes
     axes[0].set_xlabel("calculated row number")
-    axes[0].set_ylable("observed row number")
+    axes[0].set_ylabel("observed row number")
     axes[0].set_title(f"Detector Row Number Comparison, {bankname}")
-    axes[0].figtext(0.5, 0.2, f"Number of Peaks = {npeaks}")
+    axes[0].text(0.5, 0.2, f"Number of Peaks = {npeaks}", transform=axes[0].transAxes)
+    axes[0].set_aspect(aspect='equal')
     # plot row cmp
     # -- plot the diagnal helper line
     max_coln = max(colsID_observed.max(), colsID_calculated.max())
@@ -84,12 +85,13 @@ def SCDCalibratePanels2DiagnosticsPlotBank(
     axes[1].grid(color='k', linestyle='--', alpha=0.25)
     # -- config axes
     axes[1].set_xlabel("calculated column number")
-    axes[1].set_ylable("observed column number")
+    axes[1].set_ylabel("observed column number")
     axes[1].set_title(f"Detector Column Number Comparison, {bankname}")
-    axes[1].figtext(0.5, 0.2, f"Number of Peaks = {npeaks}")
+    axes[1].text(0.5, 0.2, f"Number of Peaks = {npeaks}", transform=axes[1].transAxes)
+    axes[1].set_aspect(aspect='equal')
     # display
     if showPlots:
-        fig.show(block=False)
+        plt.show(block=False)
     # save
     fig.savefig(os.path.join(savedir, figname))
     # notify users
@@ -97,7 +99,7 @@ def SCDCalibratePanels2DiagnosticsPlotBank(
 
 
 def SCDCalibratePanels2DiagnosticsPlot(
-    peaksWorkspace: PeaksWorkspace,
+    peaksWorkspace: Union[PeaksWorkspace, str],
     banknames: Union[str, List[str]] = None,
     config: Dict[str, str] = {
         "prefix": "fig",
@@ -116,29 +118,39 @@ def SCDCalibratePanels2DiagnosticsPlot(
 
     @returs: None
     """
+    pws = mtd[peaksWorkspace] if isinstance(peaksWorkspace, str) else peaksWorkspace
     logging.info(f"Start diagnostics with {peaksWorkspace.name()}.")
-    pws = peaksWorkspace
+
     # process all banks if banknames is None
     if banknames is None:
         banknames = set([pws.row(i)["BankName"] for i in range(pws.getNumberPeaks())])
+    elif isinstance(banknames, str):
+        banknames = [me.strip() for me in banknames.split(",")]
+    else:
+        pass
+
     # one bank at a time
     for bn in banknames:
         logging.info(f"--processing bank: {bn}")
         pws_filtered = FilterPeaks(
-            InputWorkspace='pws',
+            InputWorkspace=pws,
             FilterVariable='h^2+k^2+l^2',
             FilterValue=0,
             Operator='>',
             BankName=bn,
         )
         # generate the plot
-        figname = f"{config['prefix']}_{bn}.{type}"
+        figname = f"{config['prefix']}_{bn}.{config['type']}"
         SCDCalibratePanels2DiagnosticsPlotBank(
             filteredPeaksWS=pws_filtered,
             figname=figname,
             savedir=config["saveto"],
             showPlots=showPlots,
         )
+
+    # close backend handle
+    if not showPlots:
+        plt.close("all")
 
 
 if __name__ == "__main__":
