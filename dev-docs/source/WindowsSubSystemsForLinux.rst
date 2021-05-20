@@ -72,27 +72,7 @@ Before you get the Mantid code, follow the :ref:`getting started <GettingStarted
 
 The Mantid code can then be retrieved in the usual way using `git clone` from the Ubuntu or Centos7 terminal. The first time you do this you might need to set up an `ssh key <https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh>`_ for authentication.
 
-You are now ready to CMake and build the Mantid code.
-
-Build on Ubuntu 18.04
----------------------
-
-.. code-block:: sh
-
-  mkdir build
-  cd build
-  cmake -GNinja [mantid source]
-  cmake --build .
-
-Build on Centos 7
------------------
-
-.. code-block:: sh
-
-  mkdir build
-  cd build
-  scl enable devtoolset-7 "cmake3 [mantid source]"
-  cmake3 --build .
+You are now ready to CMake and build the Mantid code. Follow the Ubuntu 18.04 or Centos 7 build instructions `here <https://developer.mantidproject.org/GettingStarted.html#linux>`_.
 
 Tips
 ####
