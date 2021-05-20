@@ -19,16 +19,7 @@ from sans.common.enums import DetectorType
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
 from ui.sans_isis.work_handler import WorkHandler
-
-from qtpy import PYQT4
-if PYQT4:
-    try:
-        import mantidplot
-        IN_MANTIDPLOT = True
-    except ImportError:
-        IN_MANTIDPLOT = False
-else:
-    from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
+from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 
 masking_information = namedtuple("masking_information", "first, second, third")
 
@@ -449,9 +440,5 @@ class MaskingTablePresenter(object):
     @staticmethod
     def _display(masked_workspace):
         if masked_workspace and AnalysisDataService.doesExist(masked_workspace.name()):
-            if PYQT4:
-                instrument_win = mantidplot.getInstrumentView(masked_workspace.name())
-                instrument_win.show()
-            else:
-                instrument_win = InstrumentViewPresenter(masked_workspace)
-                instrument_win.container.show()
+            instrument_win = InstrumentViewPresenter(masked_workspace)
+            instrument_win.container.show()
