@@ -484,13 +484,7 @@ class SuperplotPresenter:
         selection = self._view.getSelection()
         currentIndex = self._view.getSpectrumSliderPosition()
         plottedData = self._model.getPlottedData()
-        noHeld = list()
-        for ws in selection:
-            if (ws, currentIndex) not in plottedData:
-                noHeld.append((ws, currentIndex))
         self._syncWithCurrentPlot()
-        for (ws, index) in noHeld:
-            self._model.removeData(ws, index)
         self._updateList()
         self._view.setSpectrumSliderPosition(currentIndex)
         self._view.setSpectrumSpinBoxValue(currentIndex)
