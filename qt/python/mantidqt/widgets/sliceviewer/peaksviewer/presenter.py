@@ -9,7 +9,6 @@
 # local imports
 from .model import create_peaksviewermodel, PeaksViewerModel
 from .view import PeaksViewerView, PeaksViewerCollectionView
-from .actions import PeakActionsEvent
 from ..adsobsever import SliceViewerADSObserver
 
 # 3rd party
@@ -321,8 +320,15 @@ class PeaksViewerCollectionPresenter:
     #
     # Peak Actions Functionality
     #
-    def add_peak(self, pos, frame):
-        self.child_presenter(self._actions_view.active_peaksworkspace_index).add_peak(pos, frame)
+    def add_delete_peak(self, pos, frame):
+        if self._actions_view.adding_mode_on:
+            logger.debug("PeaksViewer: Adding peak position {} in {} frame".format(pos, frame))
+            self.child_presenter(self._actions_view.active_peaksworkspace_index).add_peak(pos, frame)
+        elif self._actions_view.erasing_mode_on:
+            logger.debug("PeaksViewer: Deleting peak poisiton {} in {} frame".format(pos, frame))
+            self.delete_peak()
+        else:
+            logger.debug("PeaksViewer: Ignoring peak action position {} in {} frame".format(pos, frame))
 
     def delete_peak(self):
         r"""Remove the first peak of the active workspace when invoked"""
@@ -330,24 +336,9 @@ class PeaksViewerCollectionPresenter:
         active_presenter.model.delete_rows(0)
         active_presenter.redraw_peaks()
 
-    def deactivate_peak_adding(self):
+    def deactivate_peak_add_delete(self):
         self._actions_view.deactivate_peak_adding()
-        self._view._sliceinfo_provider.view.data_view.enable_peak_addition(self._actions_view.adding_mode_on)
 
-    def response_function(self, event: PeakActionsEvent):
-        r"""
-        Factory of response functions to signals emitted by the PeakActionsView (events)
-        """
-        def response_invalid():
-            logger.error(f'{event} is an invalid PeakActionsEvent')
-        responses = {PeakActionsEvent.ERASING_MODE_CHANGED: self._remove_peaks,
-                     PeakActionsEvent.ADDING_MODE_CHANGED: self._add_peaks}
-        return responses.get(event, response_invalid)
-
-    def _remove_peaks(self):
-        r"""Delete peaks if the button is pressed"""
-        if self._actions_view.erasing_mode_on:
-            self.delete_peak()
-
-    def _add_peaks(self):
-        self.view.enable_peak_addition(self._actions_view.adding_mode_on)
+    def deactivate_zoom_pan(self, active):
+        if active:
+            self.view.deactivate_zoom_pan()

@@ -246,8 +246,8 @@ class PeaksViewerCollectionView(QWidget):
         item = layout.takeAt(layout.indexOf(widget))
         item.widget().deleteLater()
 
-    def enable_peak_addition(self, active):
-        self._sliceinfo_provider.enable_peak_addition(active)
+    def deactivate_zoom_pan(self):
+        self._sliceinfo_provider.deactivate_zoom_pan()
 
     # private api
     def _setup_ui(self):

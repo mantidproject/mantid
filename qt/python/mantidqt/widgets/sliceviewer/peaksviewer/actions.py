@@ -17,22 +17,11 @@ import enum
 from typing import Optional
 
 
-class PeakActionsEvent(enum.Enum):
-    ERASING_MODE_CHANGED = 1
-    ADDING_MODE_CHANGED = 2
-
-
 class PeakActionsView(QtWidgets.QWidget):
     def __init__(self, parent: Optional['PeaksViewerCollectionView'] = None):
         super(PeakActionsView, self).__init__(parent=parent)
-        self._collection_view = parent
-        self._presenter: 'PeakActionsPresenter' = None
         self.ui = None
         self._setup_ui()
-
-    @property
-    def collection_view(self) -> 'PeaksViewerCollectionView':
-        return self._collection_view
 
     @property
     def presenter(self) -> 'PeakActionsPresenter':
@@ -43,11 +32,8 @@ class PeakActionsView(QtWidgets.QWidget):
         @brief Subscribe a presenter to the viever
         @details The presenter must have method 'response_function' able to handle the event
         """
-        if hasattr(presenter, 'response_function') is False:
-            logger.error(f'{presenter} lacks method "response_function"')
-        else:
-            self._presenter = presenter
-            self._route_signals_to_presenter()
+        self._presenter = presenter
+        self._route_signals_to_presenter()
 
     @property
     def erasing_mode_on(self):
@@ -92,9 +78,5 @@ class PeakActionsView(QtWidgets.QWidget):
 
     def _route_signals_to_presenter(self):
         r"""Link viewer particular viewer signals to particular methods of the presenter"""
-        # Associate a QSignal to a response function of the presenter
-        signal_translator = [(self.ui.remove_peaks_button.clicked, PeakActionsEvent.ERASING_MODE_CHANGED),
-                             (self.ui.add_peaks_button.clicked, PeakActionsEvent.ADDING_MODE_CHANGED)]
-        # Link the QSignal to a method of the presenter
-        for qsignal, event in signal_translator:
-            qsignal.connect(self._presenter.response_function(event))
+        self.ui.remove_peaks_button.clicked.connect(self.presenter.deactivate_zoom_pan)
+        self.ui.add_peaks_button.clicked.connect(self.presenter.deactivate_zoom_pan)

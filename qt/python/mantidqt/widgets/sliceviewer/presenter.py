@@ -418,24 +418,23 @@ class SliceViewer(ObservingPresenter):
         if self._peaks_presenter is not None:
             self._peaks_presenter.clear_observer()
 
-    def peak_addition(self, event):
-        if event.inaxes:
-            xdata, ydata = event.xdata, event.ydata
-            sliceinfo = self.get_sliceinfo()
-            pos = sliceinfo.transform([xdata, ydata, sliceinfo.z_value])
-            self._logger.debug(f"Coordinates selected x={xdata} y={ydata} z={sliceinfo.z_value}")
-            self._logger.debug(f"Coordinates transformed into {sliceinfo.frame} frame, pos={pos}")
-            if self._peaks_presenter is not None:
-                self._peaks_presenter.add_peak(pos, sliceinfo.frame)
+    def peak_add_delete(self, event):
+        if self._peaks_presenter is not None:
+            if event.inaxes:
+                xdata, ydata = event.xdata, event.ydata
+                sliceinfo = self.get_sliceinfo()
+                pos = sliceinfo.transform([xdata, ydata, sliceinfo.z_value])
+                self._logger.debug(f"Coordinates selected x={xdata} y={ydata} z={sliceinfo.z_value}")
+                self._logger.debug(f"Coordinates transformed into {sliceinfo.frame} frame, pos={pos}")
+                self._peaks_presenter.add_delete_peak(pos, sliceinfo.frame)
+                self.view.data_view.canvas.draw_idle()
 
-        self.view.data_view.canvas.draw_idle()
-
-    def enable_peak_addition(self, active):
-        self.view.data_view.enable_peak_addition(active)
+    def deactivate_zoom_pan(self):
+        self.view.data_view.deactivate_zoom_pan()
 
     def deactivate_peak_adding(self, active):
         if active and self._peaks_presenter is not None:
-            self._peaks_presenter.deactivate_peak_adding()
+            self._peaks_presenter.deactivate_peak_add_delete()
 
     # private api
     def _create_peaks_presenter_if_necessary(self):
