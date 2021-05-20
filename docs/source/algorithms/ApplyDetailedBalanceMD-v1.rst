@@ -24,8 +24,8 @@ For the MD events, the detailed balance is calculated and applied as below.
 
 
 where :math:`E` is the energy transfer to the system. The algorithm
-assumes that the y axis of the input workspace contains the scattering
-function :math:`S`. The y axis of the output workspace will contain the
+assumes that the signal of the input workspace contains the scattering
+function :math:`S`. The signal of the output workspace will contain the
 dynamic susceptibility. The temperature is either extracted as the average of the
 values stored in the appropriate entry of the log attached to the workspace
 (user supplies the name of the entry) or user can pass a number for the temperature.

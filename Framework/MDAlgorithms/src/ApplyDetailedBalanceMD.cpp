@@ -66,16 +66,16 @@ void ApplyDetailedBalanceMD::init() {
  * @brief Main execution body
  */
 void ApplyDetailedBalanceMD::exec() {
-  // Process inputs
+  // Get input workspace
+  API::IMDEventWorkspace_sptr input_ws = getProperty("InputWorkspace");
   // Check temperature log
-  if (mTemperature < 0 && mExpinfoTemperatureMean.size() == 0) {
+  if (mExpinfoTemperatureMean.size() != input_ws->getNumExperimentInfo()) {
     throw std::runtime_error("Temperature log is not set up correct.");
   }
   if (mDeltaEIndex != 1 && mDeltaEIndex != 3)
     throw std::runtime_error("Workspace dimension is not checked.");
 
-  // Process input workspace and create output workspace
-  API::IMDEventWorkspace_sptr input_ws = getProperty("InputWorkspace");
+  // Process and create output workspace
   std::string output_ws_name = getPropertyValue("OutputWorkspace");
 
   API::IMDEventWorkspace_sptr output_ws(0);
@@ -116,19 +116,16 @@ std::map<std::string, std::string> ApplyDetailedBalanceMD::validateInputs() {
 
   // Get input workspace
   API::IMDEventWorkspace_sptr input_ws = getProperty("InputWorkspace");
-  if (input_ws == nullptr) {
-    output["InputWorkspace"] = "Input workspace is Null";
-  } else {
-    // check input dimension
-    std::string dim_error = checkInputMDDimension();
-    if (dim_error != "") {
-      output["InputWorkspace"] = dim_error;
-    }
 
-    std::string kerror = getTemperature(input_ws);
-    if (kerror != "")
-      output["Temperature"] = kerror;
+  // check input dimension
+  std::string dim_error = checkInputMDDimension();
+  if (dim_error != "") {
+    output["InputWorkspace"] = dim_error;
   }
+
+  std::string kerror = getTemperature(input_ws);
+  if (kerror != "")
+    output["Temperature"] = kerror;
 
   return output;
 }
@@ -206,15 +203,13 @@ void ApplyDetailedBalanceMD::applyDetailedBalance(typename Mantid::DataObjects::
     PARALLEL_START_INTERUPT_REGION
     auto *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
     if (box && !box->getIsMasked()) {
-      // Copy the events from WS2 and add them into WS1
+      // get the MEEvents from box
       std::vector<MDE> &events = box->getEvents();
       // Add events, with bounds checking
       for (auto it = events.begin(); it != events.end(); ++it) {
         // Create the event
         // do calculattion
-        float temperatue(mTemperature);
-        if (temperatue < 0)
-          temperatue = static_cast<float>(mExpinfoTemperatureMean[it->getExpInfoIndex()]);
+        float temperatue(static_cast<float>(mExpinfoTemperatureMean[it->getExpInfoIndex()]));
 
         // delta_e = it->getCenter(mDeltaEIndex);
         // factor = pi * (1 - exp(-deltaE/(kb*T)))
@@ -251,39 +246,43 @@ std::string ApplyDetailedBalanceMD::getTemperature(API::IMDEventWorkspace_sptr m
   std::string Tstring = getProperty("Temperature");
   std::string temperature_error("");
 
+  // Try to convert Tstring to a float
+  float temperature;
   try {
-    // Check whether it is a sample log
-    bool all_have_temp(true);
-    mExpinfoTemperatureMean.clear();
-    uint16_t numexpinfo = mdws->getNumExperimentInfo();
+    temperature = boost::lexical_cast<float>(Tstring);
+  } catch (...) {
+    // set to a unphysical value
+    temperature = -10;
+  }
 
-    for (uint16_t i = 0; i < numexpinfo; ++i) {
+  // the input property could be a valid float; if not must search the experiment info
+  mExpinfoTemperatureMean.clear();
+  uint16_t numexpinfo = mdws->getNumExperimentInfo();
+
+  for (uint16_t i = 0; i < numexpinfo; ++i) {
+
+    if (temperature < 0) {
+      // if user specified is not a valid float
+
       ExperimentInfo_const_sptr expinfo = mdws->getExperimentInfo(i);
       bool has_temp = expinfo->run().hasProperty(Tstring);
       if (has_temp) {
         auto log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(expinfo->run().getProperty(Tstring));
         if (!log) {
-          g_log.error() << Tstring << " is not a valid double-valued log"
-                        << "\n";
-          throw std::invalid_argument(Tstring + " is not a double-valued log.");
+          std::stringstream errss;
+          errss << "ExperimentInfo" << i << " has " << Tstring << ", which is not a valid double-valuesd log";
+          temperature_error += errss.str() + "\n";
         }
         mExpinfoTemperatureMean[i] = log->getStatistics().mean;
       } else {
-        g_log.error() << "Spectrum info " << i << " does not have tempertaure log " << Tstring << "\n";
-        all_have_temp = false;
+        std::stringstream errss;
+        errss << "ExperimentInfo " << i << " does not have tempertaure log " << Tstring;
+        temperature_error += errss.str() + "\n";
       }
+    } else {
+      // set user specified temperature to map
+      mExpinfoTemperatureMean[i] = temperature;
     }
-
-    // If at least 1 experiment info does not have temperature log
-    if (!all_have_temp) {
-      // convert from string to double
-      mTemperature = boost::lexical_cast<float>(Tstring);
-      // reset map
-      mExpinfoTemperatureMean.clear();
-    }
-  } catch (...) {
-    Tstring += " is not a valid log, nor is it a number";
-    temperature_error += Tstring;
   }
 
   return temperature_error;
