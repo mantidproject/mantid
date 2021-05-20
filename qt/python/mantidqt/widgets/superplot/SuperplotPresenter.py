@@ -96,7 +96,7 @@ class SuperplotPresenter:
                 for arg in args:
                     if ("axis" in arg
                         and (arg["axis"] != MantidAxType.SPECTRUM
-                             or arg["axis"] != MantidAxType.SPECTRUM.value)):
+                             and arg["axis"] != MantidAxType.SPECTRUM.value)):
                         return
                 self._model.setSpectrumMode()
                 self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT])
