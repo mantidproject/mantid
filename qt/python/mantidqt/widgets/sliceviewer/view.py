@@ -522,16 +522,6 @@ class SliceViewerDataView(QWidget):
         self.deactivate_tool(ToolItemText.PAN)
         self.deactivate_tool(ToolItemText.ZOOM)
 
-    def enable_peak_deletion(self, state):
-        if state:
-            self.deactivate_tool(ToolItemText.PAN)
-            self.deactivate_tool(ToolItemText.ZOOM)
-            self._peak_deletion_cid = self.canvas.mpl_connect('button_press_event', self.presenter.peak_deletion)
-            self.mpl_toolbar.set_cursor(Qt.CrossCursor)
-        else:
-            self.canvas.mpl_disconnect(self._peak_deletion_cid)
-            self.mpl_toolbar.set_cursor(Qt.ArrowCursor)
-
     def update_data_clim(self):
         self.image.set_clim(self.colorbar.colorbar.mappable.get_clim())
         if self.line_plots_active:

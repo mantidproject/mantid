@@ -108,6 +108,9 @@ class PeaksViewerPresenter:
     def add_peak(self, pos, frame):
         self.model.add_peak(pos, frame)
 
+    def delete_peak(self, pos, frame):
+        self.model.delete_peak(pos, frame)
+
     def _clear_peaks(self):
         """Clear all peaks from this view"""
         self.view.clear_table_selection()
@@ -321,19 +324,15 @@ class PeaksViewerCollectionPresenter:
     # Peak Actions Functionality
     #
     def add_delete_peak(self, pos, frame):
+        presenter_active = self.child_presenter(self._actions_view.active_peaksworkspace_index)
         if self._actions_view.adding_mode_on:
             logger.debug("PeaksViewer: Adding peak position {} in {} frame".format(pos, frame))
-            self.child_presenter(self._actions_view.active_peaksworkspace_index).add_peak(pos, frame)
+            presenter_active.add_peak(pos, frame)
         elif self._actions_view.erasing_mode_on:
-            logger.debug("PeaksViewer: Deleting peak poisiton {} in {} frame".format(pos, frame))
-            self.delete_peak()
+            logger.debug("PeaksViewer: Deleting peak position {} in {} frame".format(pos, frame))
+            presenter_active.delete_peak(pos, frame)
         else:
             logger.debug("PeaksViewer: Ignoring peak action position {} in {} frame".format(pos, frame))
-
-    def delete_peak(self, pos, frame):
-        r"""Remove the first peak of the active workspace when invoked"""
-        active_presenter: PeaksViewerPresenter = self.child_presenter(self._actions_view.active_peaksworkspace_index)
-        active_presenter.model.delete_peak(pos, frame)
 
     def deactivate_peak_add_delete(self):
         self._actions_view.deactivate_peak_adding()
