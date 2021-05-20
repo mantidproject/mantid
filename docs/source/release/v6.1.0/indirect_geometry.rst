@@ -29,5 +29,6 @@ Bug Fixes
 - Fixed a bug that caused an error warning when adding EISF data to F(q) fit if Width has already been added.
 - Fixed a bug that caused the spectra list in F(q) fit to be blank when reopening the add workspace dialog.
 - Fixed a bug that erased previous fits in the Indirect Data Analysis fit tabs when changing to the full function view.
+- Fixed a bug that prevented fit ranges in Indirect Data Analysis from being negative.
 
 :ref:`Release 6.1.0 <v6.1.0>`

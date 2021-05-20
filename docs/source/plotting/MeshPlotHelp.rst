@@ -59,7 +59,7 @@ Basic example of plotting a general Poly3DCollection `Polygon <https://matplotli
     mesh = shape.getMesh()
 
     # Create 3D Polygon and set facecolor
-    mesh_polygon = Poly3DCollection(mesh, facecolors = ['g'])
+    mesh_polygon = Poly3DCollection(mesh, facecolors = ['g'], edgecolors = ['b'], alpha = 0.5, linewidths=0.1)
 
     fig, axes = plt.subplots(subplot_kw={'projection':'mantid3d'})
     axes.add_collection3d(mesh_polygon)
