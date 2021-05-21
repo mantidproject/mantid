@@ -600,7 +600,6 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
 
         # Process Sample data
         self.processData(self._sample, self._sampleWS)
-        print(self._sampleWS, self._dSpaceBinning, self._dPerpendicularBinning)
         if self._doEdge:
             self.binDataEdge(self._sampleWS)
         else:
