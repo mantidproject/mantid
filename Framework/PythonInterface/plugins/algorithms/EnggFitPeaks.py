@@ -7,6 +7,7 @@
 import math
 
 from mantid.kernel import *
+from mantid.api import *
 from mantid.simpleapi import *
 
 
@@ -293,7 +294,7 @@ class EnggFitPeaks(PythonAlgorithm):
         """
 
         # Find approximate peak positions, assuming Gaussian shapes
-        found_peaks = mantid.FindPeaks(
+        found_peaks = FindPeaks(
             InputWorkspace=in_wks,
             PeakPositions=expected_peaks_tof,
             PeakFunction='Gaussian',
@@ -325,8 +326,8 @@ class EnggFitPeaks(PythonAlgorithm):
 
     def _convert_peaks_to_d_using_convert_units(self, expected_peaks, input_ws):
         y_values = [1] * (len(expected_peaks) - 1)
-        ws_tof = mantid.CreateWorkspace(UnitX="TOF", DataX=expected_peaks, DataY=y_values, ParentWorkspace=input_ws)
-        ws_d = mantid.ConvertUnits(InputWorkspace=ws_tof, Target="dSpacing")
+        ws_tof = CreateWorkspace(UnitX="TOF", DataX=expected_peaks, DataY=y_values, ParentWorkspace=input_ws)
+        ws_d = ConvertUnits(InputWorkspace=ws_tof, Target="dSpacing")
         return ws_d.readX(0)
 
     def _expected_peaks_in_tof(self, expected_peaks, in_wks, wks_index):
@@ -386,7 +387,7 @@ class EnggFitPeaks(PythonAlgorithm):
         y_vals = [1] * (len(expected_peaks) - 1)
         # Do like: ws_from = sapi.CreateWorkspace(UnitX='dSpacing', DataX=expected_peaks, DataY=yVals,
         #                                         ParentWorkspace=self.getProperty("InputWorkspace").value)
-        ws_from = mantid.CreateWorkspace(
+        ws_from = CreateWorkspace(
             UnitX='dSpacing',
             DataX=expected_peaks,
             DataY=y_vals,
@@ -397,7 +398,7 @@ class EnggFitPeaks(PythonAlgorithm):
         try:
             # note: this implicitly uses default property "EMode" value 'Elastic'
             target_units = 'TOF'
-            output_ws = mantid.ConvertUnits(
+            output_ws = ConvertUnits(
                 InputWorkspace=ws_from,
                 Target=target_units
             )
@@ -456,8 +457,7 @@ class EnggFitPeaks(PythonAlgorithm):
             alg.execute()
             table = alg.getProperty('OutputWorkspace').value
         else:
-            import mantid.simpleapi as sapi
-            table = sapi.CreateEmptyTableWorkspace(OutputWorkspace=tbl_name)
+            table = CreateEmptyTableWorkspace(OutputWorkspace=tbl_name)
 
         table.addColumn('double', 'dSpacing')
 
