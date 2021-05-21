@@ -23,14 +23,13 @@ class BasePaneModelTest(unittest.TestCase):
         workspaces, indices = self.model.get_workspace_list_and_indices_to_plot(True, "Asymmetry")
 
         self.assertEqual(workspaces, [])
-        self.assertEqual(expected_indices, [])
+        self.assertEqual(indices, [])
 
     def test_get_workspaces_to_remove(self):
 
-        workspaces, indices = self.model.get_workspaces_to_remove("fwd",True, "Asymmetry")
+        workspaces = self.model.get_workspaces_to_remove("fwd",True, "Asymmetry")
 
         self.assertEqual(workspaces, [])
-        self.assertEqual(expected_indices, [])
 
     def test_create_tiled_keys_returns_correctly_for_tiled_by_group(self):
 

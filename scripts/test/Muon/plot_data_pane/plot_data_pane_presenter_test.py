@@ -7,9 +7,9 @@
 import unittest
 from unittest import mock
 
-from Muon.GUI.Common.plot_widget.data_pane.data_pane_model import PlotDataPaneModel
-from Muon.GUI.Common.plot_widget.data_pane_data_pane_view import PlotDataPaneView
-from Muon.GUI.Common.plot_widget.data_pane_data_pane_presenter import PlotDataPanePresenter
+from Muon.GUI.Common.plot_widget.data_pane.plot_data_pane_model import PlotDataPaneModel
+from Muon.GUI.Common.plot_widget.base_pane.base_pane_view import BasePaneView
+from Muon.GUI.Common.plot_widget.data_pane.plot_data_pane_presenter import PlotDataPanePresenter
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import \
     PlottingCanvasPresenterInterface
 
@@ -22,7 +22,7 @@ class PlotDataPanePresenterTest(unittest.TestCase):
     def setUp(self):
         self.context = mock.MagicMock()
         self.model = mock.Mock(spec=PlotDataPaneModel)
-        self.view = mock.Mock(spec=PlotDataPaneView)
+        self.view = mock.Mock(spec=BasePaneView)
         self.view.warning_popup = mock.MagicMock()
         self.figure_presenter = mock.Mock(spec=PlottingCanvasPresenterInterface)
 
@@ -55,27 +55,27 @@ class PlotDataPanePresenterTest(unittest.TestCase):
 
     def test_check_if_counts_and_pairs_selected_true(self):
         self.context.group_pair_context.selected_pairs = ["long"]
-        self._view.get_plot_type.return_value = "Counts"
+        self.view.get_plot_type.return_value = "Counts"
 
         state = self.presenter._check_if_count_and_pairs_selected()
         self.assertEqual(state, True)
-        self._view.set_plot_type.assert_called_once_with("Asymmetry")
-        self._view.warning_popup.assert_called_once()
+        self.view.set_plot_type.assert_called_once_with("Asymmetry")
+        self.view.warning_popup.assert_called_once()
 
     def test_check_if_counts_and_pairs_selected_false(self):
         self.context.group_pair_context.selected_pairs = []
-        self._view.get_plot_type.return_value = "Counts"
+        self.view.get_plot_type.return_value = "Counts"
 
         state = self.presenter._check_if_count_and_pairs_selected()
         self.assertEqual(state, False)
-        self._view.set_plot_type.assert_not_called()
-        self._view.warning_popup.assert_not_called()
+        self.view.set_plot_type.assert_not_called()
+        self.view.warning_popup.assert_not_called()
 
     def test_handle_data_updated(self):
         self.model.get_workspace_list_and_indices_to_plot.return_value = ["fwd","bwd"],[0,1]
         self.presenter.add_list_to_plot = mock.Mock()
-        self._view.is_raw_plot.return_value = True
-        self._view.get_plot_type.return_value = "Counts"
+        self.view.is_raw_plot.return_value = True
+        self.view.get_plot_type.return_value = "Counts"
 
         self.presenter.handle_data_updated(True, False)
 
@@ -120,8 +120,8 @@ class PlotDataPanePresenterTest(unittest.TestCase):
         self.model.get_workspaces_to_remove.return_value = ["EMU52; fwd"]
         self.presenter.remove_list_from_plot = mock.Mock()
         self.presenter.handle_data_updated = mock.Mock()
-        self._view.is_raw_plot.return_value = True
-        self._view.get_plot_type.return_value = "Counts"
+        self.view.is_raw_plot.return_value = True
+        self.view.get_plot_type.return_value = "Counts"
 
         self.presenter.handle_removed_group_or_pair_from_plot("fwd")
         self.presenter.remove_list_from_plot.assert_called_once_with(["fwd"], True, "Counts")

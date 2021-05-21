@@ -5,7 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from Muon.GUI.Common.plot_widget.data_pane.data_pane_model import PlotDataPaneModel
+from unittest import mock
+from Muon.GUI.Common.muon_group import MuonGroup
+from Muon.GUI.Common.plot_widget.data_pane.plot_data_pane_model import PlotDataPaneModel
 from mantidqt.utils.qt.testing import start_qapplication
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
@@ -36,18 +38,19 @@ class PlotDataPaneModelTest(unittest.TestCase):
 
         self.model.get_time_workspaces_to_plot("fwd", True, "Asymmetry")
 
-        self.assertEquals(self.context.group_pair_context["fwd"].get_asymmetry_workspace_names.call_count, 1)
+        self.assertEqual(self.context.group_pair_context["fwd"].get_asymmetry_workspace_names.call_count, 1)
         self.context.group_pair_context["fwd"].get_asymmetry_workspace_names.assert_called_once_with(runs)
 
     def test_get_workspace_to_plot_time_rebin(self):
         runs = [[62260]]
         self.context.data_context.current_runs = runs
         self.context.group_pair_context["fwd"].get_asymmetry_workspace_names = mock.MagicMock()
+        self.context.group_pair_context["fwd"].get_asymmetry_workspace_names_rebinned = mock.MagicMock()
 
         self.model.get_time_workspaces_to_plot("fwd", False, "Asymmetry")
 
-        self.assertEquals(self.context.group_pair_context["fwd"].get_asymmetry_workspace_names.call_count, 0)
-        self.assertEquals(self.context.group_pair_context["fwd"].get_asymmetry_workspace_names_rebinned.call_count, 1)
+        self.assertEqual(self.context.group_pair_context["fwd"].get_asymmetry_workspace_names.call_count, 0)
+        self.assertEqual(self.context.group_pair_context["fwd"].get_asymmetry_workspace_names_rebinned.call_count, 1)
         self.context.group_pair_context["fwd"].get_asymmetry_workspace_names_rebinned.assert_called_once_with(runs)
 
     def test_get_workspace_to_plot_time_counts(self):
@@ -57,7 +60,7 @@ class PlotDataPaneModelTest(unittest.TestCase):
 
         ws_list = self.model.get_time_workspaces_to_plot("fwd", True, "Counts")
 
-        self.assertEquals([""], ws_list)
+        self.assertEqual([], ws_list)
 
     def test_get_workspace_and_indices_for_group_or_pair_returns_correctly(self):
         self.model.get_time_workspaces_to_plot = mock.Mock(return_value=["62260;bwd"])
@@ -69,14 +72,15 @@ class PlotDataPaneModelTest(unittest.TestCase):
         self.assertEqual(workspaces, expected_workspaces)
         self.assertEqual(expected_indices, indices)
 
-    def test_get_workspaces_to_plot(self, is_raw, plot_type):
-        self.model.get_time_workspace_to_plot = mock.Mock(return_value="test")
-        self.context.group_pair_context._selected_groups_and_pairs = ["fwd", "bwd", "top"]
+    def test_get_workspaces_to_plot(self):
+        self.model.get_time_workspaces_to_plot = mock.Mock(return_value="test")
+        self.context.group_pair_context._selected_groups = ["fwd", "bwd", "top"]
 
-        self.model.get_Workspaces_to_plot(True, "Counts")
-        self.model.get_time_workspace_to_plot.assert_called_once_with("fwd", True, "Counts")
-        self.model.get_time_workspace_to_plot.assert_called_once_with("bwd", True, "Counts")
-        self.model.get_time_workspace_to_plot.assert_called_once_with("top", True, "Counts")
+        self.model.get_workspaces_to_plot(True, "Counts")
+        self.assertEqual(self.model.get_time_workspaces_to_plot.call_count,3)
+        self.model.get_time_workspaces_to_plot.assert_any_call("fwd", True, "Counts")
+        self.model.get_time_workspaces_to_plot.assert_any_call("bwd", True, "Counts")
+        self.model.get_time_workspaces_to_plot.assert_any_call("top", True, "Counts")
 
     def test_get_workspace_list_and_indices_to_plot(self):
         self.model.get_workspaces_to_plot = mock.Mock(return_value=["test"])
@@ -86,14 +90,15 @@ class PlotDataPaneModelTest(unittest.TestCase):
         self.model.get_workspaces_to_plot.assert_called_once_with(True, "Counts")
         self.model._generate_run_indices.assert_called_once_with(["test"])
 
-    def test_get_workspaces_to_remove(self, is_raw, plot_type):
-        self.model.get_time_workspace_to_plot = mock.Mock(return_value="test")
+    def test_get_workspaces_to_remove(self):
+        self.model.get_time_workspaces_to_plot = mock.Mock(return_value="test")
         names = ["fwd", "bwd", "top"]
 
-        self.model.get_Workspaces_to_remove(names, True, "Counts")
-        self.model.get_time_workspace_to_plot.assert_called_once_with("fwd", True, "Counts")
-        self.model.get_time_workspace_to_plot.assert_called_once_with("bwd", True, "Counts")
-        self.model.get_time_workspace_to_plot.assert_called_once_with("top", True, "Counts")
+        self.model.get_workspaces_to_remove(names, True, "Counts")
+        self.assertEqual(self.model.get_time_workspaces_to_plot.call_count,3)
+        self.model.get_time_workspaces_to_plot.assert_any_call("fwd", True, "Counts")
+        self.model.get_time_workspaces_to_plot.assert_any_call("bwd", True, "Counts")
+        self.model.get_time_workspaces_to_plot.assert_any_call("top", True, "Counts")
 
     def test_create_tiled_keys_returns_correctly_for_tiled_by_run(self):
         self.context.group_pair_context._selected_groups = ["fwd", "bwd", "top"]
