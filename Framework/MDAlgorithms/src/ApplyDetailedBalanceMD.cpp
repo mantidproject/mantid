@@ -68,12 +68,6 @@ void ApplyDetailedBalanceMD::init() {
 void ApplyDetailedBalanceMD::exec() {
   // Get input workspace
   API::IMDEventWorkspace_sptr input_ws = getProperty("InputWorkspace");
-  // Check temperature log
-  if (mExpinfoTemperatureMean.size() != input_ws->getNumExperimentInfo()) {
-    throw std::runtime_error("Temperature log is not set up correct.");
-  }
-  if (mDeltaEIndex != 1 && mDeltaEIndex != 3)
-    throw std::runtime_error("Workspace dimension is not checked.");
 
   // Process input workspace and create output workspace
   std::string output_ws_name = getPropertyValue("OutputWorkspace");
