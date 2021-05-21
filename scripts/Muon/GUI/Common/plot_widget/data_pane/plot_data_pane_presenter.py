@@ -28,13 +28,13 @@ class PlotDataPanePresenter(BasePanePresenter):
         """
         Handles the data type being changed in the view by plotting the workspaces corresponding to the new data type
         """
-        if self._check_if_counts_and_groups_selected():
+        if self._check_if_counts_and_pairs_selected():
             return
         self.handle_data_updated(autoscale=True, hold_on=False)
         # the data change probably means its the wrong scale
         self._figure_presenter.force_autoscale()
 
-    def _check_if_counts_and_groups_selected(self):
+    def _check_if_counts_and_pairs_selected(self):
         if len(self.context.group_pair_context.selected_pairs) != 0 and \
                 self._view.get_plot_type() == "Counts":
             self._view.set_plot_type("Asymmetry")
@@ -57,21 +57,20 @@ class PlotDataPanePresenter(BasePanePresenter):
         is_added = group_pair_info["is_added"]
         name = group_pair_info["name"]
         if is_added:
-            self.handle_added_group_or_pair_to_plot(name)
+            self.handle_added_group_or_pair_to_plot()
         else:
-            self.handle_removed_group_or_pair_to_plot(name)
+            self.handle_removed_group_or_pair_from_plot(name)
 
-    def handle_added_group_or_pair_to_plot(self, group_or_pair_name: str):
+    def handle_added_group_or_pair_to_plot(self):
         """
         Handles a group or pair being added from the view
-        :param group_or_pair_name: The group or pair name that was added to the analysis
         """
-        unsafe_to_add = self._check_if_counts_and_groups_selected()
+        unsafe_to_add = self._check_if_counts_and_pairs_selected()
         if unsafe_to_add:
             return
         self.handle_data_updated()
 
-    def handle_removed_group_or_pair_to_plot(self, group_or_pair_name: str):
+    def handle_removed_group_or_pair_from_plot(self, group_or_pair_name: str):
         """
         Handles a group or pair being removed in grouping widget analysis table
         :param group_or_pair_name: The group or pair name that was removed from the analysis
@@ -82,4 +81,5 @@ class PlotDataPanePresenter(BasePanePresenter):
         self.handle_data_updated()
 
     def handle_use_raw_workspaces_changed(self):
-        self.handle_data_updated()
+        if self.check_if_can_use_rebin():
+            self.handle_data_updated()

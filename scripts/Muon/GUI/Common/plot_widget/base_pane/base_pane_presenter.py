@@ -12,7 +12,7 @@ from mantid.dataobjects import Workspace2D
 
 class BasePanePresenter():
 
-    def __init__(self, view, model, context, figure_presenter):
+    def __init__(self, view, model, context, figure_presenter, external_plotting_view=None, external_plotting_model=None):
 
         self._name = "Plot"
         self._data_type = [""]
@@ -22,8 +22,8 @@ class BasePanePresenter():
         self.context = context
         self._figure_presenter = figure_presenter
         self._x_data_range = context.default_data_plot_range
-        self._external_plotting_view = ExternalPlottingView()
-        self._external_plotting_model = ExternalPlottingModel()
+        self._external_plotting_view = external_plotting_view if external_plotting_view else ExternalPlottingView()
+        self._external_plotting_model = external_plotting_model if external_plotting_model else ExternalPlottingModel()
         self.add_or_remove_plot_observer = GenericObserverWithArgPassing(
             self.handle_added_or_removed_plot)
         self._view.on_rebin_options_changed(self.handle_use_raw_workspaces_changed)
@@ -150,7 +150,15 @@ class BasePanePresenter():
             self._view.set_raw_checkbox_state(True)
 
     def handle_use_raw_workspaces_changed(self):
+        self.check_if_can_use_rebin()
         return
+
+    def check_if_can_use_rebin(self):
+        if not self._view.is_raw_plot() and not self.context._do_rebin():
+            self._view.set_raw_checkbox_state(True)
+            self._view.warning_popup("No rebin options specified")
+            return False
+        return True
 
     def handle_plot_tiled_state_changed(self):
         """

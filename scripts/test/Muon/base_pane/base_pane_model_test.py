@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from Muon.GUI.Common.plot_widget.base_pane.base_pane_model import BasePaneModel
+from mantidqt.utils.qt.testing import start_qapplication
 
 
 @start_qapplication
