@@ -618,16 +618,16 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         progress.report('Loading experiment properties')
         self._read_experiment_properties(input_ws)
         nMeasurements = self._data_structure_helper(input_ws)
+        to_clean = []
         normalisation_method = self.getPropertyValue('NormalisationMethod')
         if self.getPropertyValue('CrossSectionSeparationMethod') == 'None':
-            if normalisation_method =='Vanadium':
+            if normalisation_method == 'Vanadium':
                 det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
                 progress.report('Calculating detector efficiency correction')
                 det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
                 progress.report('Normalising sample data')
                 output_ws = self._normalise_sample_data(input_ws, det_efficiency_ws)
-                if self.getProperty('ClearCache').value:
-                    DeleteWorkspace(det_efficiency_ws)
+                to_clean.append(det_efficiency_ws)
             else:
                 CloneWorkspace(InputWorkspace=input_ws, OutputWorkspace=output_ws)
         else:
@@ -643,14 +643,15 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
                 progress.report('Normalising sample data')
                 output_ws = self._normalise_sample_data(component_ws, det_efficiency_ws)
-                if self.getProperty('ClearCache').value:
-                    DeleteWorkspaces(WorkspaceList=[component_ws, det_efficiency_ws])
+                to_clean += [component_ws, det_efficiency_ws]
             else:
                 RenameWorkspace(InputWorkspace=component_ws, OutputWorkspace=output_ws)
         progress.report('Setting units')
         output_ws = self._set_units(output_ws, nMeasurements)
         self._set_as_distribution(output_ws)
         self.setProperty('OutputWorkspace', mtd[output_ws])
+        if self.getProperty('ClearCache').value and len(to_clean) != 0:
+            DeleteWorkspaces(WorkspaceList=to_clean)
 
 
 AlgorithmFactory.subscribe(D7AbsoluteCrossSections)
