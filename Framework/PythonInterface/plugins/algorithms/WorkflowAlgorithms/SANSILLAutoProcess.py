@@ -202,7 +202,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         retval = ''
         qbinning = self.getPropertyValue('OutputBinning')
         if qbinning:
-            if qbinning.count(':') + 1 != sample_dim:
+            if qbinning.count(':') + 1 != len(self.sample):
                 retval = 'Number of Q binning params must be equal to the number of distances.'
             else:
                 for qbin_params in qbinning.split(':'):
@@ -473,28 +473,34 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             UnGroupWorkspace(wg)
         for w in range(self.n_wedges):
             group_name = self.output + "_wedge_" + str(w + 1)
-            to_group = [self.output + "_wedge_#" + str(i + 1) + '_' + str(w + 1) for i in range(self.dimensionality)]
-            GroupWorkspaces(InputWorkspaces=to_group, OutputWorkspace=group_name)
+            to_group_all = [self.output + "_wedge_#" + str(i + 1) + '_' + str(w + 1) for i in range(self.dimensionality)]
+            to_group = []
+            for ws_name in to_group_all:
+                if mtd.doesExist(ws_name):
+                    to_group.append(ws_name)
+            if to_group:
+                GroupWorkspaces(InputWorkspaces=to_group, OutputWorkspace=group_name)
 
         for i in range(self.dimensionality):
             for w in range(self.n_wedges):
                 old_name = self.output + "_wedge_#" + str(i + 1) + '_' + str(w + 1)
                 new_name = self.output + "_wedge_" + str(w + 1) + '_#' + str(i + 1)
-                RenameWorkspace(InputWorkspace=old_name, OutputWorkspace=new_name)
-                ConvertToPointData(InputWorkspace=new_name, OutputWorkspace=new_name)
-                ReplaceSpecialValues(InputWorkspace=new_name, OutputWorkspace=new_name, NaNValue=0)
-                y = mtd[new_name].readY(0)
-                x = mtd[new_name].readX(0)
-                nonzero = np.nonzero(y)
-                CropWorkspace(InputWorkspace=new_name, XMin=x[nonzero][0] - 1,
-                              XMax=x[nonzero][-1], OutputWorkspace=new_name)
-                suffix = self.createCustomSuffix(new_name)
-                RenameWorkspace(InputWorkspace=new_name,
-                                OutputWorkspace=new_name + suffix)
+                if mtd.doesExist(old_name):
+                    RenameWorkspace(InputWorkspace=old_name, OutputWorkspace=new_name)
+                    ConvertToPointData(InputWorkspace=new_name, OutputWorkspace=new_name)
+                    ReplaceSpecialValues(InputWorkspace=new_name, OutputWorkspace=new_name, NaNValue=0)
+                    y = mtd[new_name].readY(0)
+                    x = mtd[new_name].readX(0)
+                    nonzero = np.nonzero(y)
+                    CropWorkspace(InputWorkspace=new_name, XMin=x[nonzero][0] - 1,
+                                  XMax=x[nonzero][-1], OutputWorkspace=new_name)
+                    suffix = self.createCustomSuffix(new_name)
+                    RenameWorkspace(InputWorkspace=new_name,
+                                    OutputWorkspace=new_name + suffix)
 
         for w in range(self.n_wedges):
             group_name = self.output + '_wedge_' + str(w + 1)
-            if mtd[group_name].getNumberOfEntries() > 1:
+            if mtd.doesExist(group_name) and mtd[group_name].getNumberOfEntries() > 1:
                 stitched = group_name + '_stitched'
                 try:
                     Stitch(InputWorkspaces=group_name,
@@ -519,18 +525,20 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
     def outputPanels(self, panel_output_groups):
         panel_names = set()
         for groupName in panel_output_groups:
-            old_names = mtd[groupName].getNames()
-            UnGroupWorkspace(InputWorkspace=groupName)
-            for old_name in old_names:
-                hash_suffix = old_name.split('#')[1]
-                panel_name_start = hash_suffix.find('_')
-                panel_name = hash_suffix[panel_name_start+1:]
-                panel_names.add(panel_name)
-                distance_mark = hash_suffix[:panel_name_start]
-                new_name = self.output + '_' + panel_name + '_#' + distance_mark
-                RenameWorkspace(InputWorkspace=old_name, OutputWorkspace=new_name)
-                suffix = self.createCustomSuffix(new_name)
-                RenameWorkspace(InputWorkspace=new_name, OutputWorkspace=new_name + suffix)
+            if mtd.doesExist(groupName):
+                old_names = mtd[groupName].getNames()
+                UnGroupWorkspace(InputWorkspace=groupName)
+                for old_name in old_names:
+                    hash_suffix = old_name.split('#')[1]
+                    panel_name_start = hash_suffix.find('_')
+                    panel_name = hash_suffix[panel_name_start+1:]
+                    panel_names.add(panel_name)
+                    distance_mark = hash_suffix[:panel_name_start]
+                    new_name = self.output + '_' + panel_name + '_#' + distance_mark
+                    if mtd.doesExist(old_name):
+                        RenameWorkspace(InputWorkspace=old_name, OutputWorkspace=new_name)
+                        suffix = self.createCustomSuffix(new_name)
+                        RenameWorkspace(InputWorkspace=new_name, OutputWorkspace=new_name + suffix)
 
         for panel_name in panel_names:
             GroupWorkspaces(GlobExpression=self.output + '_' + panel_name + '_*',
