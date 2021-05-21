@@ -2,6 +2,7 @@
 set(SRC_FILES
     src/AccumulateMD.cpp
     src/AndMD.cpp
+    src/ApplyDetailedBalanceMD.cpp
     src/BaseConvertToDiffractionMDWorkspace.cpp
     src/BinMD.cpp
     src/BinaryOperationMD.cpp
@@ -117,6 +118,7 @@ set(
   INC_FILES
   inc/MantidMDAlgorithms/AccumulateMD.h
   inc/MantidMDAlgorithms/AndMD.h
+  inc/MantidMDAlgorithms/ApplyDetailedBalanceMD.h
   inc/MantidMDAlgorithms/BaseConvertToDiffractionMDWorkspace.h
   inc/MantidMDAlgorithms/BinMD.h
   inc/MantidMDAlgorithms/BinaryOperationMD.h
@@ -234,6 +236,7 @@ set(TEST_FILES
     # these tests are as they test verify different parts of the CPR algorithms
     AccumulateMDTest.h
     AndMDTest.h
+    ApplyDetailedBalanceMDTest.h
     BooleanBinaryOperationMDTest.h
     CalculateCoverageDGSTest.h
     CentroidPeaksMD2Test.h
