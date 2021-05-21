@@ -461,9 +461,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         if outputWedges:
             self.outputWedges(outputWedges)
 
-        print(outputSens)
-        #if outputSens:
-        #    self.outputSensitivity(outputSens)
+        if outputSens:
+            self.outputSensitivity(outputSens)
 
         print(outputPanels)
         #if outputPanels:
