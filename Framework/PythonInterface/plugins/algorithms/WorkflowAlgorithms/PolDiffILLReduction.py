@@ -212,6 +212,12 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.setPropertySettings("ScatteringAngleBinSize", EnabledWhenProperty('OutputTreatment',
                                                                                PropertyCriterion.IsEqualTo, 'Sum'))
 
+        self.declareProperty(name="MeasurementTechnique",
+                             defaultValue="Powder",
+                             validator=StringListValidator(["Powder", "SingleCrystal"]),
+                             direction=Direction.Input,
+                             doc="What type of measurement technique has been used to collect the data.")
+
         self.declareProperty(FileProperty('InstrumentCalibration', '',
                                           action=FileAction.OptionalLoad,
                                           extensions=['.xml']),
@@ -246,6 +252,21 @@ class PolDiffILLReduction(PythonAlgorithm):
             raise RuntimeError('Cannot calculate transmission; beam monitor has 0 counts.')
         Divide(LHSWorkspace=ws, RHSWorkspace=beam_ws, OutputWorkspace=ws)
         return ws
+
+    @staticmethod
+    def _merge_omega_scan(ws, nMeasurements, group_name):
+        names_list = [list() for _ in range(nMeasurements)]
+        for entry_no, entry in enumerate(mtd[ws]):
+            ConvertToPointData(InputWorkspace=entry, OutputWorkspace=entry)
+            names_list[entry_no % nMeasurements].append(entry.name())
+        tmp_names = [''] * nMeasurements
+        for entry_no in range(nMeasurements):
+            tmp_name = group_name + '_{}'.format(entry_no)
+            tmp_names[entry_no] = tmp_name
+            ConjoinXRuns(InputWorkspaces=names_list[entry_no], OutputWorkspace=tmp_name,
+                         SampleLogAsXAxis='omega.actual')
+        GroupWorkspaces(InputWorkspaces=tmp_names, OutputWorkspace=group_name)
+        return group_name
 
     def _figure_out_measurement_method(self, ws):
         """Figures out the measurement method based on the structure of the input files."""
@@ -722,8 +743,11 @@ class PolDiffILLReduction(PythonAlgorithm):
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')
         processes = ['Cadmium', 'EmptyBeam', 'BeamWithCadmium', 'Transmission', 'Empty', 'Quartz', 'Vanadium', 'Sample']
-        nReports = [3, 2, 2, 3, 3, 3, 10, 10]
-        progress = Progress(self, start=0.0, end=1.0, nreports=nReports[processes.index(process)])
+        nReports = np.array([3, 2, 2, 3, 3, 3, 10, 10])
+        measurement_technique = self.getPropertyValue('MeasurementTechnique')
+        if measurement_technique == 'SingleCrystal':
+            nReports += 2
+        progress = Progress(self, start=0.0, end=1.0, nreports=int(nReports[processes.index(process)]))
         ws = '__' + self.getPropertyValue('OutputWorkspace')
 
         calibration_setting = 'YIGFile'
@@ -734,13 +758,16 @@ class PolDiffILLReduction(PythonAlgorithm):
                      LoaderOptions={'PositionCalibration':calibration_setting,
                                     'YIGFileName':self.getPropertyValue('InstrumentCalibration')},
                      OutputWorkspace=ws, startProgress=0.0, endProgress=0.6)
-
         self._instrument = mtd[ws][0].getInstrument().getName()
         run = mtd[ws][0].getRun()
         if run['acquisition_mode'].value == 1:
             raise RuntimeError("TOF data reduction is not supported at the moment.")
         self._figure_out_measurement_method(ws)
-
+        if measurement_technique == 'SingleCrystal':
+            progress.report(7, 'Merging omega scan')
+            input_ws = self._merge_omega_scan(ws, self._data_structure_helper(), ws+'_conjoined')
+            DeleteWorkspace(Workspace=ws)
+            RenameWorkspace(InputWorkspace=input_ws, OutputWorkspace=ws)
         if process in ['EmptyBeam', 'BeamWithCadmium', 'Transmission']:
             if mtd[ws].getNumberOfEntries() > 1:
                 self._merge_polarisations(ws, average_detectors=True)
@@ -783,7 +810,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                     self._normalise_vanadium(ws)
                 self._set_units(ws, process)
 
-        self._finalize(ws, process, progress)
+        self._finalize(ws, process)
 
 
 AlgorithmFactory.subscribe(PolDiffILLReduction)
