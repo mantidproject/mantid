@@ -152,26 +152,27 @@ void LoadILLSANS::exec() {
 
   } else if (m_instrumentName == "D22B") {
     initWorkSpaceD22B(firstEntry, instrumentPath);
-    progress.report("Loading the instrument " + m_instrumentName);
-    runLoadInstrument();
 
-    // first we move the central detector
-    double distance = firstEntry.getFloat(instrumentPath + "/Detector 2/det2_calc");
+    const std::string backIndex = m_localWorkspace->getInstrument()->getStringParameter("back_detector_index")[0];
+    const std::string frontIndex = m_localWorkspace->getInstrument()->getStringParameter("front_detector_index")[0];
+
+    // first we move the central (back) detector
+    double distance = firstEntry.getFloat(instrumentPath + "/Detector " + backIndex + "/det" + backIndex + "_calc");
     moveDetectorDistance(distance, "detector_back");
     API::Run &runDetails = m_localWorkspace->mutableRun();
     runDetails.addProperty<double>("L2", distance, true);
 
-    double offset = firstEntry.getFloat(instrumentPath + "/Detector 2/dtr2_actual");
+    double offset = firstEntry.getFloat(instrumentPath + "/Detector " + backIndex + "/dtr" + backIndex + "_actual");
     moveDetectorHorizontal(-offset / 1000, "detector_back"); // mm to meter
 
-    // then the right one
-    distance = firstEntry.getFloat(instrumentPath + "/Detector 1/det1_calc");
+    // then the front (right) one
+    distance = firstEntry.getFloat(instrumentPath + "/Detector " + frontIndex + "/det" + frontIndex + "_calc");
     moveDetectorDistance(distance, "detector_front");
 
     // mm to meter
-    offset = firstEntry.getFloat(instrumentPath + "/Detector 1/dtr1_actual");
+    offset = firstEntry.getFloat(instrumentPath + "/Detector " + frontIndex + "/dtr" + frontIndex + "_actual");
     moveDetectorHorizontal(-offset / 1000, "detector_front"); // mm to meter
-    double angle = firstEntry.getFloat(instrumentPath + "/Detector 1/dan1_actual");
+    double angle = firstEntry.getFloat(instrumentPath + "/Detector " + frontIndex + "/dan" + frontIndex + "_actual");
     rotateInstrument(-angle, "detector_front");
 
   } else {
@@ -312,21 +313,28 @@ void LoadILLSANS::initWorkSpaceD22B(NeXus::NXEntry &firstEntry, const std::strin
   g_log.debug("Fetching data...");
 
   NXData data2 = firstEntry.openNXData("data2");
-  NXInt dataCenter = data2.openIntData();
-  dataCenter.load();
+  NXInt data2_data = data2.openIntData();
+  data2_data.load();
   NXData data1 = firstEntry.openNXData("data1");
-  NXInt dataSide = data1.openIntData();
-  dataSide.load();
+  NXInt data1_data = data1.openIntData();
+  data1_data.load();
 
   size_t numberOfHistograms =
-      static_cast<size_t>(dataCenter.dim0() * dataCenter.dim1() + dataSide.dim0() * dataSide.dim1()) + N_MONITORS;
+      static_cast<size_t>(data2_data.dim0() * data2_data.dim1() + data1_data.dim0() * data1_data.dim1()) + N_MONITORS;
 
   createEmptyWorkspace(numberOfHistograms, 1);
   loadMetaData(firstEntry, instrumentPath);
+  runLoadInstrument();
 
+  const std::string backIndex = m_localWorkspace->getInstrument()->getStringParameter("back_detector_index")[0];
   size_t nextIndex;
-  nextIndex = loadDataFromTubes(dataCenter, m_defaultBinning, 0);
-  nextIndex = loadDataFromTubes(dataSide, m_defaultBinning, nextIndex);
+  if (backIndex == "2") {
+    nextIndex = loadDataFromTubes(data2_data, m_defaultBinning, 0);
+    nextIndex = loadDataFromTubes(data1_data, m_defaultBinning, nextIndex);
+  } else {
+    nextIndex = loadDataFromTubes(data1_data, m_defaultBinning, 0);
+    nextIndex = loadDataFromTubes(data2_data, m_defaultBinning, nextIndex);
+  }
   nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
 }
 
