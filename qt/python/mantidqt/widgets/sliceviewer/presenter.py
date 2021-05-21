@@ -418,7 +418,7 @@ class SliceViewer(ObservingPresenter):
         if self._peaks_presenter is not None:
             self._peaks_presenter.clear_observer()
 
-    def peak_add_delete(self, event):
+    def add_delete_peak(self, event):
         if self._peaks_presenter is not None:
             if event.inaxes:
                 sliceinfo = self.get_sliceinfo()

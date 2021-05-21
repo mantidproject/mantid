@@ -521,7 +521,7 @@ class SliceViewerTest(unittest.TestCase):
         event.xdata = 1.0
         event.ydata = 2.0
 
-        presenter.peak_add_delete(event)
+        presenter.add_delete_peak(event)
 
         mock_sliceinfo_cls.get_sliceinfo.assert_not_called()
 

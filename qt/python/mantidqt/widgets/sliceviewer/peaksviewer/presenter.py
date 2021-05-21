@@ -326,13 +326,13 @@ class PeaksViewerCollectionPresenter:
     def add_delete_peak(self, pos):
         presenter_active = self.child_presenter(self._actions_view.active_peaksworkspace_index)
         if self._actions_view.adding_mode_on:
-            logger.debug("PeaksViewer: Adding peak position {}".format(pos))
+            logger.debug(f"PeaksViewer: Adding peak position {pos}")
             presenter_active.add_peak(pos)
         elif self._actions_view.erasing_mode_on:
-            logger.debug("PeaksViewer: Deleting peak position {}".format(pos))
+            logger.debug(f"PeaksViewer: Deleting peak nearest to position {pos}")
             presenter_active.delete_peak(pos)
         else:
-            logger.debug("PeaksViewer: Ignoring peak action position {}".format(pos))
+            logger.debug(f"PeaksViewer: Ignoring peak action position {pos}")
 
     def deactivate_peak_add_delete(self):
         self._actions_view.deactivate_peak_adding()

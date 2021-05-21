@@ -92,15 +92,12 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
 
     def delete_peak(self, pos, frame):
         r"""Delete the peak closest to the input position"""
-        frame_name = str(frame)
-        if frame_name == 'QLab':
-            positions = np.array(self.peaks_workspace.column('QLab'))
-        elif frame_name == 'QSample':
-            positions = np.array(self.peaks_workspace.column('QSample'))
-        elif frame_name == 'HKL':
-            positions = np.array([peak.getHKL() for peak in self.peaks_workspace])
-        else:
-            raise ValueError(f'Frame {frame_name} not understood')  # should not reach here
+
+        if self.peaks_workspace.getNumberPeaks() == 0:
+            return
+
+        frame_to_slice_fn = self._frame_to_slice_fn(frame)
+        positions = np.array([getattr(peak, frame_to_slice_fn)() for peak in self.peaks_workspace])
         positions -= pos  # peak positions relative to the input position
         distances_squared = np.sum(positions * positions, axis=1)
         closest_peak_index = np.argmin(distances_squared)
