@@ -464,9 +464,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         if outputSens:
             self.outputSensitivity(outputSens)
 
-        print(outputPanels)
-        #if outputPanels:
-        #    self.outputPanels(outputPanels)
+        if outputPanels:
+            self.outputPanels(outputPanels)
 
     def outputWedges(self, outputWedges):
         # ungroup and regroup wedge outputs per wedge
@@ -518,17 +517,24 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setProperty('SensitivityOutputWorkspace', mtd[self.output_sens])
 
     def outputPanels(self, panel_output_groups):
-        panelWs = []
+        panel_names = set()
         for groupName in panel_output_groups:
-            wsNames = mtd[groupName].getNames()
+            old_names = mtd[groupName].getNames()
             UnGroupWorkspace(InputWorkspace=groupName)
-            for ws in wsNames:
-                suffix = self.createCustomSuffix(ws)
-                RenameWorkspace(InputWorkspace=ws,
-                                OutputWorkspace=ws + suffix)
-                panelWs.append(ws + suffix)
-        GroupWorkspaces(InputWorkspaces=panelWs,
-                        OutputWorkspace=self.output_panels)
+            for old_name in old_names:
+                hash_suffix = old_name.split('#')[1]
+                panel_name_start = hash_suffix.find('_')
+                panel_name = hash_suffix[panel_name_start+1:]
+                panel_names.add(panel_name)
+                distance_mark = hash_suffix[:panel_name_start]
+                new_name = self.output + '_' + panel_name + '_#' + distance_mark
+                RenameWorkspace(InputWorkspace=old_name, OutputWorkspace=new_name)
+                suffix = self.createCustomSuffix(new_name)
+                RenameWorkspace(InputWorkspace=new_name, OutputWorkspace=new_name + suffix)
+
+        for panel_name in panel_names:
+            GroupWorkspaces(GlobExpression=self.output + '_' + panel_name + '_*',
+                            OutputWorkspace=self.output + '_' + panel_name)
 
     def processTransmissions(self):
         absorber_transmission_names = []
