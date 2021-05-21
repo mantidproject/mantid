@@ -800,7 +800,8 @@ void InstrumentActor::initMaskHelper() const {
   } catch (...) {
     // don't know what to do here yet ...
     QMessageBox::warning(nullptr, "Mantid - Warning",
-                         "An error occurred when extracting the mask.", "OK");
+                         "An error occurred when extracting the mask. "
+                         "Instrument Viewer is not supported yet for workspaces containing a detector scan.", "OK");
   }
 }
 
