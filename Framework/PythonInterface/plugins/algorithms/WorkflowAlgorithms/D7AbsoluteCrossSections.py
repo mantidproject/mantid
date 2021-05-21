@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import AlgorithmFactory, PropertyMode, PythonAlgorithm, \
+from mantid.api import AlgorithmFactory, NumericAxis, PropertyMode, Progress, PythonAlgorithm, \
     WorkspaceGroupProperty, WorkspaceGroup
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, \
     PropertyCriterion, PropertyManagerProperty, StringListValidator
@@ -528,6 +528,69 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         :param ws: Output of the cross-section separation and/or normalisation.
         :return: WorkspaceGroup containing 2D distributions on a Qx-Qy grid.
         """
+        fld = self._sampleAndEnvironmentProperties['fld'].value if 'fld' in self._sampleAndEnvironmentProperties else 1
+        nQ = self._sampleAndEnvironmentProperties['nQ'].value if 'nQ' in self._sampleAndEnvironmentProperties else 80
+        omega_shift = self._sampleAndEnvironmentProperties['OmegaShift'].value \
+            if 'OmegaShift' in self._sampleAndEnvironmentProperties else 0
+        wavelength = mtd[ws][0].getRun().getLogData('monochromator.wavelength').value
+        ki = 2 * np.pi / wavelength
+        dE = 0.0  # monochromatic data
+        kf = np.sqrt(ki * ki - dE / 2.07194)
+        ConvertSpectrumAxis(InputWorkspace=mtd[ws][0], OutputWorkspace='w_theta', Target='SignedTheta', OrderAxis=False)
+        twoTheta = 1.0 * mtd['w_theta'].getAxis(1).extractValues() * np.pi / 180.0  # detector positions in radians
+        DeleteWorkspace(Workspace='w_theta')
+        omega = 1.0 * mtd[ws][0].getAxis(0).extractValues() * np.pi / 180.0  # omega scan angle in radians
+        ntheta = len(twoTheta)
+        nomega = len(omega)
+        # omega = -1.0 * np.matrix(np.flip(omega, 0)) - omega_shift * np.pi / 180.0
+        omega = np.matrix(omega) + omega_shift * np.pi / 180.0
+        Qmag = np.sqrt(ki * ki + kf * kf - 2 * ki * kf * np.cos(twoTheta))
+        # beta is the angle between ki and Q
+        beta = (twoTheta / np.abs(twoTheta)) * np.arccos((ki * ki - kf * kf + Qmag * Qmag) / (2 * ki * Qmag))
+        alpha = -np.pi/2 + omega.T * np.ones(shape=(1, ntheta)) + np.ones(shape=(nomega, 1)) * beta
+        Qx = np.multiply((np.ones(shape=(nomega, 1)) * Qmag), np.cos(alpha)).T
+        Qy = np.multiply((np.ones(shape=(nomega, 1)) * Qmag), np.sin(alpha)).T
+        Qmax = 1.1 * np.max(Qmag)
+        dQ = Qmax / nQ
+        output_names = []
+        for entry in mtd[ws]:
+            w_out = np.zeros(shape=((fld + 1) * nQ, (fld + 1) * nQ))
+            e_out = np.zeros(shape=((fld + 1) * nQ, (fld + 1) * nQ))
+            n_out = np.zeros(shape=((fld + 1) * nQ, (fld + 1) * nQ))
+            w_in = entry.extractY()
+            e_in = entry.extractE()
+            for theta in range(ntheta):
+                for omega in range(nomega):
+                    if fld == 1:
+                        ix = int(((Qx[theta, omega] + dQ / 2.) / dQ) + nQ)
+                        iy = int(((Qy[theta, omega] + dQ / 2.) / dQ) + nQ)
+                        if Qx[theta, omega] > 0.99 * Qmax or Qy[theta, omega] > 0.99 * Qmax:
+                            continue
+                    else:
+                        ix = int(abs((Qx[theta, omega]) + dQ / 2.) / dQ)
+                        iy = int(abs((Qy[theta, omega]) + dQ / 2.) / dQ)
+                    w_out[ix, iy] += w_in[theta, omega]
+                    e_out[ix, iy] += e_in[theta, omega]**2
+                    n_out[ix, iy] += 1.
+            w_out /= n_out
+            e_out = np.sqrt(e_out / n_out)
+            w_out_name = entry.name() + '_qxqy'
+            output_names.append(w_out_name)
+            data_x = [(val-(fld*nQ)) * dQ for val in range((fld+1)*nQ)]
+            # data_x = [(val-(fld*nQ)) * dQ * 6.759 * np.cos(17.26*np.pi/180.0)/(2*np.pi) for val in range((fld+1)*nQ)]
+            y_axis = NumericAxis.create(int((fld+1)*nQ))
+            for q_index in range(int((fld+1)*nQ)):
+                y_axis.setValue(q_index, (q_index-(fld*nQ))*dQ)
+                # y_axis.setValue(q_index, (q_index-(fld*nQ))*dQ*10.412/(2*np.pi))
+            CreateWorkspace(DataX=data_x, DataY=w_out, DataE=e_out, NSpec=int((fld+1)*nQ),
+                            OutputWorkspace=w_out_name)
+            mtd[w_out_name].replaceAxis(1, y_axis)
+            mtd[w_out_name].getAxis(0).setUnit('Label').setLabel('Qx', r'\AA^{-1})')
+            mtd[w_out_name].getAxis(1).setUnit('Label').setLabel('Qy', r'\AA^{-1})')
+            ReplaceSpecialValues(InputWorkspace=w_out_name, OutputWorkspace=w_out_name, NaNValue=0,
+                                 NaNError=0, InfinityValue=0, InfinityError=0)
+        DeleteWorkspace(Workspace=ws)
+        GroupWorkspaces(InputWorkspaces=output_names, OutputWorkspace=ws)
         return ws
 
     def _set_units(self, ws, nMeasurements):
