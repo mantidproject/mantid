@@ -25,8 +25,16 @@ Engineering Diffraction
 
 Single Crystal Diffraction
 --------------------------
+New features
+############
 - New algorithm :ref:`HB3AIntegrateDetectorPeaks <algm-HB3AIntegrateDetectorPeaks>` for integrating four-circle data from HB3A in detector space.
 - New algorithm :ref:`ApplyInstrumentToPeaks <algm-ApplyInstrumentToPeaks>` to update the instrument of peaks within a PeaksWorkspace.
+- New plotting script that provides diagnostic plots of SCDCalibratePanels output.
 
+Improvements
+############
+
+Bugfixes
+########
 
 :ref:`Release 6.2.0 <v6.2.0>`

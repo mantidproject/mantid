@@ -280,7 +280,7 @@ class PlotSelectorView(QWidget):
             widget = self.table_widget.cellWidget(row, Column.Name)
             if widget.plot_number == plot_number:
                 return row, widget
-        raise RuntimeError(f'Unable to find row and widget from plot_number {plot_number}')
+        return None, None
 
     def remove_from_plot_list(self, plot_number):
         """
