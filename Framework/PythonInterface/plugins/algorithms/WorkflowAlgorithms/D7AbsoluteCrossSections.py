@@ -172,6 +172,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         self.declareProperty('AbsoluteUnitsNormalisation', True,
                              doc='Whether or not express the output in absolute units.')
 
+        self.declareProperty("IsotropicMagnetism", True,
+                             doc="Whether the paramagnetism is isotropic (Steward, Ehlers) or anisotropic (Schweika).")
+
         self.declareProperty('ClearCache', True,
                              doc='Whether or not to delete intermediate workspaces.')
 
@@ -212,17 +215,48 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             formula_unit_mass = self._sampleAndEnvironmentProperties['FormulaUnitMass'].value
             self._sampleAndEnvironmentProperties['NMoles'] = (sample_mass / formula_unit_mass) * formula_units
 
+    def _create_angle_dists(self, ws):
+        """
+        Calculates sin^2 (alpha) and cos^2 (alpha) for all detectors, needed by Schweika's anisotropic cross-section
+        separation.
+        :param ws: Sample workspace.
+        :return: Tuple with two workspaces containing sin^2 (alpha) and cos^2 (alpha)
+        """
+        angle_ws = mtd[ws][0].name() + "_tmp_angle"
+        ConvertSpectrumAxis(InputWorkspace=mtd[ws][0],
+                            OutputWorkspace=angle_ws,
+                            Target='SignedTheta',
+                            OrderAxis=False)
+        Transpose(InputWorkspace=angle_ws, OutputWorkspace=angle_ws)
+        theta = -0.5 * mtd[angle_ws].extractX()[0]
+        alpha = (theta - 90.0 - self._sampleAndEnvironmentProperties['KiXAngle'].value) * np.pi / 180.0
+        cos2_alpha_arr = np.power(np.cos(alpha), 2)
+        sin2_alpha_arr = np.power(np.sin(alpha), 2)
+        sin2_alpha_name = 'sin2_alpha'
+        cos2_alpha_name = 'cos2_alpha'
+        cos2_m_sin2_alpha_name = 'cos2_m_sin2_alpha'
+        CreateWorkspace(OutputWorkspace=sin2_alpha_name, DataX=np.arange(1), DataY=sin2_alpha_arr, NSpec=len(alpha))
+        CreateWorkspace(OutputWorkspace=cos2_alpha_name, DataX=np.arange(1), DataY=cos2_alpha_arr, NSpec=len(alpha))
+        Minus(LHSWorkspace=cos2_alpha_name, RHSWorkspace=sin2_alpha_name, OutputWorkspace=cos2_m_sin2_alpha_name)
+        if self.getProperty('ClearCache').value:
+            DeleteWorkspaces(WorkspaceList=[angle_ws, sin2_alpha_name, cos2_alpha_name])
+        return cos2_m_sin2_alpha_name
+
     def _cross_section_separation(self, ws, nMeasurements):
         """Separates coherent, incoherent, and magnetic components based on spin-flip and non-spin-flip intensities of the
         current sample. The method used is based on either the user's choice or the provided data structure."""
         DEG_2_RAD =  np.pi / 180.0
         user_method = self.getPropertyValue('CrossSectionSeparationMethod')
+        isotropic_magnetism = self.getProperty('IsotropicMagnetism').value
+        tmp_names = set()
+        if user_method == "XYZ" and not isotropic_magnetism:
+            cos2_m_sin2_alpha = self._create_angle_dists(ws)
+            tmp_names.add(cos2_m_sin2_alpha)
         n_detectors = mtd[ws][0].getNumberHistograms()
         double_xyz_method = False
         if not self.getProperty('RotatedXYZWorkspace').isDefault:
             double_xyz_method = True
             second_xyz_ws = self.getPropertyValue('RotatedXYZWorkspace')
-        tmp_names = set()
         separated_cs = []
 
         for entry_no in range(0, mtd[ws].getNumberOfEntries(), nMeasurements):
@@ -247,33 +281,50 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 sigma_x_sf = mtd[ws][entry_no+4]
                 sigma_x_nsf = mtd[ws][entry_no+5]
                 average_magnetic_cs = mtd[ws][entry_no].name() + '_AverageMagnetic'
-                sf_magnetic_cs = mtd[ws][entry_no].name() + '_SFMagnetic'
-                nsf_magnetic_cs = mtd[ws][entry_no].name() + '_NSFMagnetic'
+                if isotropic_magnetism:
+                    magnetic_name_1 = '_SFMagnetic'
+                    magnetic_name_2 = '_NSFMagnetic'
+                else:
+                    magnetic_name_1 = '_PerpendicularMagnetic_Y'
+                    magnetic_name_2 = '_PerpendicularMagnetic_Z'
+                magnetic_1_cs = mtd[ws][entry_no].name() + magnetic_name_1
+                magnetic_2_cs = mtd[ws][entry_no].name() + magnetic_name_2
                 if nMeasurements == 6 and user_method == 'XYZ':
                     # Total cross-section:
                     data_total = (sigma_z_nsf + sigma_x_nsf + sigma_y_nsf + sigma_z_sf + sigma_x_sf + sigma_y_sf) / 3.0
                     RenameWorkspace(InputWorkspace=data_total, OutputWorkspace=total_cs)
                     separated_cs.append(total_cs)
-                    # Magnetic component
-                    data_nsf_magnetic = 2.0 * (2.0 * sigma_z_nsf - sigma_x_nsf - sigma_y_nsf)
-                    data_sf_magnetic = 2.0 * (-2.0 * sigma_z_sf + sigma_x_sf + sigma_y_sf)
-                    data_average_magnetic = WeightedMean(InputWorkspace1=data_nsf_magnetic,
-                                                         InputWorkspace2=data_sf_magnetic)
-                    # Nuclear coherent component
-                    data_nuclear = (2.0*(sigma_x_nsf + sigma_y_nsf + sigma_z_nsf)
-                                    - (sigma_x_sf + sigma_y_sf + sigma_z_sf)) / 6.0
+                    if isotropic_magnetism: # Steward's isotropic cross-section separation
+                        # Magnetic component
+                        data_sf_magnetic = 2.0 * (-2.0 * sigma_z_sf + sigma_x_sf + sigma_y_sf)
+                        data_nsf_magnetic = 2.0 * (2.0 * sigma_z_nsf - sigma_x_nsf - sigma_y_nsf)
+                        RenameWorkspace(InputWorkspace=data_sf_magnetic, OutputWorkspace=magnetic_1_cs)
+                        RenameWorkspace(InputWorkspace=data_nsf_magnetic, OutputWorkspace=magnetic_2_cs)
+                        data_average_magnetic = WeightedMean(InputWorkspace1=magnetic_1_cs,
+                                                             InputWorkspace2=magnetic_2_cs)
+                        RenameWorkspace(InputWorkspace=data_average_magnetic, OutputWorkspace=average_magnetic_cs)
+                        separated_cs.append(average_magnetic_cs)
+                        # Nuclear coherent component
+                        data_nuclear = (2.0*(sigma_x_nsf + sigma_y_nsf + sigma_z_nsf)
+                                        - (sigma_x_sf + sigma_y_sf + sigma_z_sf)) / 6.0
+                        # Incoherent component
+                        data_incoherent = 0.5 * (sigma_x_sf + sigma_y_sf + sigma_z_sf) - data_average_magnetic
+                    else: # anisotropic, Schweika's cross-section separation
+                        # Nuclear coherent component
+                        data_nuclear = 0.5 * (sigma_x_nsf + sigma_y_nsf - sigma_z_sf)
+                        # Incoherent component
+                        data_incoherent = 1.5 * ((sigma_x_nsf - sigma_y_nsf) / mtd[cos2_m_sin2_alpha] + sigma_z_sf)
+                        # Magnetic components
+                        data_perp_magnetic_y = sigma_z_sf - (2.0/3.0) * data_incoherent
+                        data_perp_magnetic_z = sigma_z_nsf - data_incoherent / 3.0 - data_nuclear
+                        RenameWorkspace(InputWorkspace=data_perp_magnetic_y, OutputWorkspace=magnetic_1_cs)
+                        RenameWorkspace(InputWorkspace=data_perp_magnetic_z, OutputWorkspace=magnetic_2_cs)
                     RenameWorkspace(InputWorkspace=data_nuclear, OutputWorkspace=nuclear_cs)
                     separated_cs.append(nuclear_cs)
-                    # Incoherent component
-                    data_incoherent= 0.5 * (sigma_x_sf + sigma_y_sf + sigma_z_sf) - data_average_magnetic
                     RenameWorkspace(InputWorkspace=data_incoherent, OutputWorkspace=incoherent_cs)
                     separated_cs.append(incoherent_cs)
-                    RenameWorkspace(InputWorkspace=data_average_magnetic, OutputWorkspace=average_magnetic_cs)
-                    separated_cs.append(average_magnetic_cs)
-                    RenameWorkspace(InputWorkspace=data_sf_magnetic, OutputWorkspace=sf_magnetic_cs)
-                    separated_cs.append(sf_magnetic_cs)
-                    RenameWorkspace(InputWorkspace=data_nsf_magnetic, OutputWorkspace=nsf_magnetic_cs)
-                    separated_cs.append(nsf_magnetic_cs)
+                    separated_cs.append(magnetic_1_cs)
+                    separated_cs.append(magnetic_2_cs)
                 else:
                     if not double_xyz_method:
                         sigma_xmy_sf = mtd[ws][entry_no+6]
@@ -357,12 +408,12 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                     separated_cs.append(incoherent_cs)
                     RenameWorkspace(InputWorkspace=data_average_magnetic, OutputWorkspace=average_magnetic_cs)
                     separated_cs.append(average_magnetic_cs)
-                    RenameWorkspace(InputWorkspace=data_sf_magnetic, OutputWorkspace=sf_magnetic_cs)
-                    separated_cs.append(sf_magnetic_cs)
-                    RenameWorkspace(InputWorkspace=data_nsf_magnetic, OutputWorkspace=nsf_magnetic_cs)
-                    separated_cs.append(nsf_magnetic_cs)
+                    RenameWorkspace(InputWorkspace=data_sf_magnetic, OutputWorkspace=magnetic_1_cs)
+                    separated_cs.append(magnetic_1_cs)
+                    RenameWorkspace(InputWorkspace=data_nsf_magnetic, OutputWorkspace=magnetic_2_cs)
+                    separated_cs.append(magnetic_2_cs)
 
-        if tmp_names != set(): # clean only when non-empty
+        if self.getProperty('ClearCache').value and tmp_names != set(): # clean only when non-empty
             DeleteWorkspaces(WorkspaceList=list(tmp_names))
         output_name = ws + '_separated_cs'
         GroupWorkspaces(InputWorkspaces=separated_cs, OutputWorkspace=output_name)
