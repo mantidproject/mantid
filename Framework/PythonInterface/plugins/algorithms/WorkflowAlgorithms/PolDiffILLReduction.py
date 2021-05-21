@@ -677,6 +677,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                  or (self._method_data_structure == '10p' and entry_no % 10 == 0) ):
                 correction_ws = self._match_attenuation_workspace(entry.name(), attenuation_ws)
             ApplyPaalmanPingsCorrection(SampleWorkspace=entry,
+                                        CanWorkspace=empty_ws,
                                         CorrectionsWorkspace=correction_ws,
                                         OutputWorkspace=entry)
         if self.getProperty('ClearCache').value:
