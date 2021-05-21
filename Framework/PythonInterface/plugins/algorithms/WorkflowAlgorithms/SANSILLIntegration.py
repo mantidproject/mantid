@@ -449,6 +449,7 @@ class SANSILLIntegration(PythonAlgorithm):
             if panel:
                 # do not process wedges for panels
                 n_wedges = 0
+                shape_table = ''
             wedge_ws = self.getPropertyValue('WedgeWorkspace')
             wedge_angle = self.getProperty('WedgeAngle').value
             wedge_offset = self.getProperty('WedgeOffset').value
