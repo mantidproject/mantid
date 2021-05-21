@@ -743,7 +743,9 @@ class PolDiffILLReduction(PythonAlgorithm):
             entry.setYUnitLabel("{} ({})".format(unit, unit_symbol))
         return ws
 
-    def _finalize(self, ws, process, progress):
+    def _finalize(self, ws, process):
+        if process in ['Empty', 'Cadmium']:
+            ws = self._merge_polarisations(ws, average_detectors=self.getProperty('OutputTreatment').value == 'Average')
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
                              NaNError=0, InfinityValue=0, InfinityError=0)
         mtd[ws][0].getRun().addProperty('ProcessedAs', process, True)
