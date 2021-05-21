@@ -19,7 +19,12 @@
 #include <QSignalSpy>
 
 using namespace Mantid::API;
+using namespace MantidQt::API;
 using MantidQt::API::BatchAlgorithmRunner;
+using testing::NiceMock;
+using testing::Return;
+
+using IConfiguredAlgorithm_sptr = std::shared_ptr<IConfiguredAlgorithm>;
 
 class BatchAlgorithmRunnerTest : public CxxTest::TestSuite {
 public:
@@ -153,6 +158,34 @@ public:
 
     // Run queue
     TS_ASSERT(!runner.executeBatch());
+    TS_ASSERT_EQUALS(runner.queueLength(), 0);
+  }
+
+  /**
+   * Tests setting the entire queue in one call
+   */
+  void test_setQueue() {
+    BatchAlgorithmRunner runner(nullptr);
+
+    auto queue = makeQueueWithThreeMockAlgs();
+    runner.setQueue(queue);
+
+    TS_ASSERT_EQUALS(runner.queueLength(), 3);
+
+    TS_ASSERT(runner.executeBatch());
+    TS_ASSERT_EQUALS(runner.queueLength(), 0);
+  }
+
+  /**
+   * Tests clearing a queue
+   */
+  void test_clearQueue() {
+    BatchAlgorithmRunner runner(nullptr);
+
+    auto queue = makeQueueWithThreeMockAlgs();
+    runner.setQueue(queue);
+    runner.clearQueue();
+
     TS_ASSERT_EQUALS(runner.queueLength(), 0);
   }
 
@@ -355,5 +388,16 @@ private:
     runner.addAlgorithm(createWsAlg);
     runner.addAlgorithm(cropWsAlg, props);
     runner.executeBatch();
+  }
+
+  BatchAlgorithmRunner::AlgorithmRuntimeProps emptyProperties() {
+    return BatchAlgorithmRunner::AlgorithmRuntimeProps();
+  }
+
+  std::deque<IConfiguredAlgorithm_sptr> makeQueueWithThreeMockAlgs() {
+    auto mockAlg = std::make_shared<NiceMock<MockConfiguredAlgorithm>>();
+    ON_CALL(*mockAlg, algorithm).WillByDefault(Return(createWsAlg));
+    ON_CALL(*mockAlg, properties).WillByDefault(Return(emptyProperties()));
+    return std::deque<IConfiguredAlgorithm_sptr>{mockAlg, mockAlg, mockAlg};
   }
 };
