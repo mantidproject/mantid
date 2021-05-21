@@ -154,6 +154,7 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.mView.setSpectraList.assert_has_calls(calls)
 
     def test_updatePlot(self):
+        self.mAxes.reset_mock()
         self.mModel.getPlottedData.return_value = [("ws5", 5), ("ws2", 1)]
         self.mModel.isSpectrumMode.return_value = True
         self.mModel.isBinMode.return_value = False
@@ -161,17 +162,34 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.mView.getSelection.return_value = {"ws1": [10]}
         self.mView.getSpectrumSliderPosition.return_value = 10
         self.mAxes.plot.return_value = [mock.Mock()]
-        self.mMtd.reset_mock()
-        self.mAxes.reset_mock()
+        a1 = mock.Mock()
+        a1.get_label.return_value = "label"
+        a1.get_color.return_value = "color"
+        a2 = mock.Mock()
+        a2.get_label.return_value = "label"
+        a2.get_color.return_value = "color"
+        a3 = mock.Mock()
+        a3.get_label.return_value = "label"
+        a3.get_color.return_value = "color"
+        self.mAxes.get_tracked_artists.return_value = [a1, a2, a3]
+        ws5 = mock.Mock()
+        ws5.name.return_value = "ws5"
+        ws2 = mock.Mock()
+        ws2.name.return_value = "ws2"
+        ws1 = mock.Mock()
+        ws1.name.return_value = "ws1"
+        self.mAxes.get_artists_workspace_and_workspace_index.side_effect = \
+                [(ws5, 5), (ws2, 1), (ws1, 1)]
+        line = mock.Mock()
+        line.get_label.return_value = "label"
+        line.get_color.return_value = "color"
+        self.mAxes.plot.return_value = [line]
         self.presenter._updatePlot()
-        calls = [mock.call("ws5"), mock.call("ws2")]
-        self.mMtd.__getitem__.assert_has_calls(calls, any_order=True)
-        ws = self.mMtd.__getitem__.return_value
-        sp = ws.getSpectrumNumbers.return_value.__getitem__.return_value
-        calls = [mock.call(ws, axis=MantidAxType.SPECTRUM, specNum=sp),
-                 mock.call(ws, axis=MantidAxType.SPECTRUM, specNum=sp),
-                 mock.call(ws, axis=MantidAxType.SPECTRUM, specNum=sp)]
-        self.mAxes.plot.assert_has_calls(calls)
+        self.mAxes.remove_artists_if.assert_called_once()
+        calls = [mock.call("ws5", 5, "label", "color"),
+                 mock.call("ws2", 1, "label", "color"),
+                 mock.call("ws1", 10, "label", "color")]
+        self.mView.modifySpectrumLabel.assert_has_calls(calls)
 
     def test_onWorkspaceSelectionChanged(self):
         self.presenter._updatePlot = mock.Mock()
