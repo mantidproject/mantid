@@ -1595,7 +1595,6 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     observeFinish(alg);
     alg->executeAsync();
     m_fitAlgParameters = alg->toString();
-
   } catch (const std::exception &e) {
     QString msg = "Fit algorithm failed.\n\n" + QString(e.what()) + "\n";
     QMessageBox::critical(this, "Mantid - Error", msg);
@@ -1637,8 +1636,9 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
     std::string out = alg->getProperty("OutputWorkspace");
     emit algorithmFinished(QString::fromStdString(out));
   }
-  // Update Status string
-  auto status = QString::fromStdString(alg->getPropertyValue("OutputStatus"));
+  // Update Status string in member variable (so can be retrieved)
+  m_fitAlgOutputStatus = alg->getPropertyValue("OutputStatus");
+  auto status = QString::fromStdString(m_fitAlgOutputStatus);
   emit fitResultsChanged(status);
   // update Quality string
   if (m_displayActionQuality->isChecked()) {
@@ -1646,9 +1646,7 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
     std::string costFunction = alg->getProperty("CostFunction");
     std::shared_ptr<Mantid::API::ICostFunction> costfun =
         Mantid::API::CostFunctionFactory::Instance().create(costFunction);
-    if (status != "success") {
-      status = "failed";
-    }
+    status = (status == "success") ? "success" : "failed";
     emit changeWindowTitle(QString("Fit Function (") + costfun->shortName().c_str() + " = " + QString::number(quality) +
                            ", " + status + ")");
   } else
@@ -1675,13 +1673,6 @@ void FitPropertyBrowser::showFitResultStatus(const QString &status) {
 
   m_status->setText(QString("Status: <span style='color:%2'>%1</span>").arg(text, color));
   m_status->show();
-}
-
-/// Display the status string returned from Fit
-/// @param status :: A status string as returned by OutputStatus Fit property.
-std::string FitPropertyBrowser::getFitResultStatus() const {
-  std::string status = m_status->text().toStdString();
-  return status;
 }
 
 /// Clear the Fit status display
@@ -3218,6 +3209,11 @@ QStringList FitPropertyBrowser::getParameterNames() const {
  * Get Fit Algorithm parameters
  */
 std::string FitPropertyBrowser::getFitAlgorithmParameters() const { return m_fitAlgParameters; }
+
+/**=================================================================================================
+ * Get Fit Algorithm output statuss
+ */
+std::string FitPropertyBrowser::getFitAlgorithmOutputStatus() const { return m_fitAlgOutputStatus; }
 
 /**=================================================================================================
  * Show online function help

@@ -45,7 +45,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
             # evaluate string to make a dict (replace case of bool values)
             fitprop = eval(dict_str.replace('true', 'True').replace('false', 'False'))
             fitprop['peak_centre_params'] = self._get_center_param_names()
-            fitprop['status'] = self.getFitResultStatus().strip("Status:").strip()  # sometimes space after colon
+            fitprop['status'] = self.getFitAlgorithmOutputStatus()
             return fitprop
         else:
             # if no fit has been performed
