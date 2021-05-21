@@ -196,8 +196,8 @@ class PeaksViewerCollectionPresenterTest(unittest.TestCase):
 
         # test adding peak to peaksworkspace
         presenter.child_presenter = MagicMock()
-        presenter.add_delete_peak([1,1,1], 'Frame')
-        presenter.child_presenter().add_peak.assert_called_once_with([1,1,1], 'Frame')
+        presenter.add_delete_peak([1, 2, 3])
+        presenter.child_presenter().add_peak.assert_called_once_with([1, 2, 3])
 
         # test deactivate_zoom_pan
         presenter.deactivate_zoom_pan(False)

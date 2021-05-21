@@ -425,7 +425,7 @@ class SliceViewer(ObservingPresenter):
                 self._logger.debug(f"Coordinates selected x={event.xdata} y={event.ydata} z={sliceinfo.z_value}")
                 pos = sliceinfo.transform([event.xdata, event.ydata, sliceinfo.z_value])
                 self._logger.debug(f"Coordinates transformed into {sliceinfo.frame} frame, pos={pos}")
-                self._peaks_presenter.add_delete_peak(pos, sliceinfo.frame)
+                self._peaks_presenter.add_delete_peak(pos)
                 self.view.data_view.canvas.draw_idle()
 
     def deactivate_zoom_pan(self):

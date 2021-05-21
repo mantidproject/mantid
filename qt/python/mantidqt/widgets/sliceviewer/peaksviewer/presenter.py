@@ -105,11 +105,11 @@ class PeaksViewerPresenter:
         self.model.clear_peak_representations()
         self.model.draw_peaks(self._view.sliceinfo, self._view.painter)
 
-    def add_peak(self, pos, frame):
-        self.model.add_peak(pos, frame)
+    def add_peak(self, pos):
+        self.model.add_peak(pos, self._view.sliceinfo.frame)
 
-    def delete_peak(self, pos, frame):
-        self.model.delete_peak(pos, frame)
+    def delete_peak(self, pos):
+        self.model.delete_peak(pos, self._view.sliceinfo.frame)
 
     def _clear_peaks(self):
         """Clear all peaks from this view"""
@@ -323,16 +323,16 @@ class PeaksViewerCollectionPresenter:
     #
     # Peak Actions Functionality
     #
-    def add_delete_peak(self, pos, frame):
+    def add_delete_peak(self, pos):
         presenter_active = self.child_presenter(self._actions_view.active_peaksworkspace_index)
         if self._actions_view.adding_mode_on:
-            logger.debug("PeaksViewer: Adding peak position {} in {} frame".format(pos, frame))
-            presenter_active.add_peak(pos, frame)
+            logger.debug("PeaksViewer: Adding peak position {}".format(pos))
+            presenter_active.add_peak(pos)
         elif self._actions_view.erasing_mode_on:
-            logger.debug("PeaksViewer: Deleting peak position {} in {} frame".format(pos, frame))
-            presenter_active.delete_peak(pos, frame)
+            logger.debug("PeaksViewer: Deleting peak position {}".format(pos))
+            presenter_active.delete_peak(pos)
         else:
-            logger.debug("PeaksViewer: Ignoring peak action position {} in {} frame".format(pos, frame))
+            logger.debug("PeaksViewer: Ignoring peak action position {}".format(pos))
 
     def deactivate_peak_add_delete(self):
         self._actions_view.deactivate_peak_adding()

@@ -507,7 +507,6 @@ class SliceViewerTest(unittest.TestCase):
                 spec=PeaksViewerCollectionPresenter)
     def test_peak_add_delete_event(self, mock_peaks_presenter, mock_sliceinfo_cls, _):
         mock_sliceinfo_cls().transform = mock.Mock(side_effect=lambda pos: pos[::-1])
-        mock_sliceinfo_cls().frame = 'Frame'
         mock_sliceinfo_cls().z_value = 3
 
         presenter, _ = _create_presenter(self.model,
@@ -526,7 +525,7 @@ class SliceViewerTest(unittest.TestCase):
 
         mock_sliceinfo_cls.get_sliceinfo.assert_not_called()
 
-        mock_peaks_presenter.add_delete_peak.assert_called_once_with([3, 2, 1], 'Frame')
+        mock_peaks_presenter.add_delete_peak.assert_called_once_with([3, 2, 1])
         self.view.data_view.canvas.draw_idle.assert_called_once()
 
 
