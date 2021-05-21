@@ -17,8 +17,6 @@ widths the results are not impressive:
 
 .. plot::
 
-   from __future__ import (absolute_import, division, print_function, unicode_literals)
-
    import numpy as np
    from scipy.optimize import curve_fit
    import matplotlib.pyplot as plt
@@ -72,8 +70,6 @@ But if we optimise the mixing parameter at each width then the
 magnitudes improve significantly, even if the shapes remain distinctly non-Gaussian:
 
 .. plot::
-
-   from __future__ import (absolute_import, division, print_function, unicode_literals)
 
    import numpy as np
    from scipy.optimize import curve_fit
@@ -146,8 +142,6 @@ and the resulting functions are visually quite convincing
 
 .. plot::
 
-   from __future__ import (absolute_import, division, print_function, unicode_literals)
-
    import numpy as np
    from scipy.optimize import curve_fit
    import matplotlib.pyplot as plt
@@ -215,8 +209,6 @@ and the resulting functions are visually quite convincing
 while a gap of :math:`\sqrt{2}` is practically indistinguishable with error below 1% of the peak maximum.
 
 .. plot::
-
-   from __future__ import (absolute_import, division, print_function, unicode_literals)
 
    import numpy as np
    from scipy.optimize import curve_fit
@@ -288,8 +280,6 @@ This could present a significant cost saving compared to full evaluation of ~400
 We can build on this by performing convolution of the full spectrum with each of the sampled kernels, and then interpolate *between the spectra* using the predetermined mixing weights. The convolution is performed efficiently using FFTs, and relatively little memory is required to hold this limited number of spectra and interpolate between them.
 
 .. plot::
-
-   from __future__ import (absolute_import, division, print_function, unicode_literals)
 
    import matplotlib.pyplot as plt
    import numpy as np

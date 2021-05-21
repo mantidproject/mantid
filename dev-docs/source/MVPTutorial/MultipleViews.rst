@@ -17,7 +17,6 @@ previous section into a single view. To achieve this we will create a
 
 .. code-block:: python
 
-    from __future__ import (absolute_import, division, print_function)
     from qtpy import QtWidgets, QtCore, QtGui
 
     import numpy as np
