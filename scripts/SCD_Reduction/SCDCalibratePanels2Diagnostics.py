@@ -182,7 +182,7 @@ def SCDCalibratePanels2DiagnosticsPlotBank(
         # compute the calculated entry now
         pk = pws.getPeak(i)
         gm = pk.getGoniometerMatrix()
-        hkl = np.array(pk.getHKL())
+        hkl = np.array(pk.getIntHKL())
         qsample = 2 * np.pi * (ub @ hkl)
         qlab = gm @ qsample
         # utilize the IDF embeded in current pws
