@@ -322,39 +322,48 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _subtract_background(self, ws, empty_ws, transmission_ws):
         """Subtracts empty container and cadmium absorber scaled by transmission."""
+        cadmium_present = True
         cadmium_ws = self.getPropertyValue('CadmiumInputWorkspace')
         if cadmium_ws == "":
-            return ws
+            cadmium_present = False
         unit_ws = 'unit_ws'
         CreateSingleValuedWorkspace(DataValue=1.0, OutputWorkspace=unit_ws)
         background_ws = 'background_ws'
         tmp_names = [unit_ws, background_ws]
         nMeasurements = self._data_structure_helper()
         singleEmptyPerPOL = mtd[empty_ws].getNumberOfEntries() < mtd[ws].getNumberOfEntries()
-        singleCadmiumPerPOL = mtd[empty_ws].getNumberOfEntries() < mtd[ws].getNumberOfEntries()
+        if cadmium_present:
+            singleCadmiumPerPOL = mtd[empty_ws].getNumberOfEntries() < mtd[ws].getNumberOfEntries()
         for entry_no, entry in enumerate(mtd[ws]):
             if singleEmptyPerPOL:
                 empty_entry = mtd[empty_ws][entry_no % nMeasurements].name()
             else:
                 empty_entry = mtd[empty_ws][entry_no].name()
-            if singleCadmiumPerPOL:
-                cadmium_entry = mtd[cadmium_ws][entry_no % nMeasurements].name()
-            else:
-                cadmium_entry = mtd[cadmium_ws][entry_no].name()
+
+            if cadmium_present:
+                if singleCadmiumPerPOL:
+                    cadmium_entry = mtd[cadmium_ws][entry_no % nMeasurements].name()
+                else:
+                    cadmium_entry = mtd[cadmium_ws][entry_no].name()
             empty_corr = empty_entry + '_corr'
             tmp_names.append(empty_corr)
             Multiply(LHSWorkspace=transmission_ws, RHSWorkspace=empty_entry, OutputWorkspace=empty_corr)
-            transmission_corr = transmission_ws + '_corr'
-            tmp_names.append(transmission_corr)
-            Minus(LHSWorkspace=unit_ws, RHSWorkspace=transmission_ws, OutputWorkspace=transmission_corr)
-            cadmium_corr = cadmium_entry + '_corr'
-            tmp_names.append(cadmium_corr)
-            Multiply(LHSWorkspace=transmission_corr, RHSWorkspace=cadmium_entry, OutputWorkspace=cadmium_corr)
-            Plus(LHSWorkspace=empty_corr, RHSWorkspace=cadmium_corr, OutputWorkspace=background_ws)
+            if cadmium_present:
+                transmission_corr = transmission_ws + '_corr'
+                tmp_names.append(transmission_corr)
+                Minus(LHSWorkspace=unit_ws, RHSWorkspace=transmission_ws, OutputWorkspace=transmission_corr)
+                cadmium_corr = cadmium_entry + '_corr'
+                tmp_names.append(cadmium_corr)
+                Multiply(LHSWorkspace=transmission_corr, RHSWorkspace=cadmium_entry, OutputWorkspace=cadmium_corr)
+                Plus(LHSWorkspace=empty_corr, RHSWorkspace=cadmium_corr, OutputWorkspace=background_ws)
+            else:
+                tmp_names.pop()
+                RenameWorkspace(InputWorkspace=empty_corr, OutputWorkspace=background_ws)
             Minus(LHSWorkspace=entry,
                   RHSWorkspace=background_ws,
                   OutputWorkspace=entry)
-        DeleteWorkspaces(WorkspaceList=tmp_names)
+        if self.getProperty('ClearCache').value and len(tmp_names) > 0:
+            DeleteWorkspaces(WorkspaceList=tmp_names)
         return ws
 
     def _calculate_polarising_efficiencies(self, ws):
