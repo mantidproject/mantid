@@ -605,22 +605,33 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                             Normalise=True, HeightAxis='-0.1,0.1')
         return output_name
 
+    def _get_number_reports(self):
+        nreports = 4
+        if self.getPropertyValue('CrossSectionSeparationMethod') != 'None':
+            nreports += 1
+        return nreports
+
     def PyExec(self):
+        progress = Progress(self, start=0.0, end=1.0, nreports=self._get_number_reports())
         input_ws = self.getPropertyValue('InputWorkspace')
         output_ws = self.getPropertyValue('OutputWorkspace')
+        progress.report('Loading experiment properties')
         self._read_experiment_properties(input_ws)
         nMeasurements = self._data_structure_helper(input_ws)
         normalisation_method = self.getPropertyValue('NormalisationMethod')
         if self.getPropertyValue('CrossSectionSeparationMethod') == 'None':
             if normalisation_method =='Vanadium':
                 det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
+                progress.report('Calculating detector efficiency correction')
                 det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
+                progress.report('Normalising sample data')
                 output_ws = self._normalise_sample_data(input_ws, det_efficiency_ws)
                 if self.getProperty('ClearCache').value:
                     DeleteWorkspace(det_efficiency_ws)
             else:
                 CloneWorkspace(InputWorkspace=input_ws, OutputWorkspace=output_ws)
         else:
+            progress.report('Separating cross-sections')
             component_ws = self._cross_section_separation(input_ws, nMeasurements)
             self._set_as_distribution(component_ws)
             if normalisation_method != 'None':
@@ -628,13 +639,16 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                     det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
                 else:
                     det_efficiency_input = component_ws
+                progress.report('Calculating detector efficiency correction')
                 det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
+                progress.report('Normalising sample data')
                 output_ws = self._normalise_sample_data(component_ws, det_efficiency_ws)
                 if self.getProperty('ClearCache').value:
                     DeleteWorkspaces(WorkspaceList=[component_ws, det_efficiency_ws])
             else:
                 RenameWorkspace(InputWorkspace=component_ws, OutputWorkspace=output_ws)
-        self._set_units(output_ws, nMeasurements)
+        progress.report('Setting units')
+        output_ws = self._set_units(output_ws, nMeasurements)
         self._set_as_distribution(output_ws)
         self.setProperty('OutputWorkspace', mtd[output_ws])
 
