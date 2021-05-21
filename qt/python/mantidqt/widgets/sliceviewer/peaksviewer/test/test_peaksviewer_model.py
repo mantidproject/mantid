@@ -5,6 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 # std imports
+import numpy as np
 import unittest
 from unittest.mock import MagicMock, create_autospec, patch
 
@@ -88,6 +89,13 @@ class PeaksViewerModelTest(unittest.TestCase):
         peak0.getQLabFrame.assert_not_called()
         peak0.getHKL.assert_not_called()
         self.assertEqual([1, None, None], slicepoint)
+
+    def test_delete_peak(self):
+        peak_centers = [[1.0, 0.0, 0.0], [1.0, 1.0, 0.0]]
+        model = create_peaks_viewer_model(centers=peak_centers, fg_color="red")
+        assert model.delete_peak(np.array([1.0, 0.9, 0.1]), SpecialCoordinateSystem.QLab) == 1
+        assert model.delete_peak(np.array([1.1, 0.0, 0.1]), SpecialCoordinateSystem.QSample) == 0
+        assert model.delete_peak(np.array([0.0, 0.0, 0.0]), SpecialCoordinateSystem.QSample) == 0
 
     def test_viewlimits(self):
         visible_peak_center, invisible_center = (0.5, 0.2, 0.25), (0.4, 0.3, 25)

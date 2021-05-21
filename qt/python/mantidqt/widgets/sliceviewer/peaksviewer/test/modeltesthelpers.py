@@ -37,11 +37,21 @@ def create_peaks_viewer_model(centers, fg_color, name=None):
     def get_peak(index):
         return peaks[index]
 
+    def column(name: str):
+        if name in ('QLab', 'QSample'):
+            return centers
+
+    def remove_peak(peak_number: int):
+        return peak_number
+
     model = PeaksViewerModel(create_autospec(PeaksWorkspace), fg_color, 'unused')
     if name is not None:
         model.ws.name.return_value = name
     model.ws.__iter__.return_value = peaks
     model.ws.getPeak.side_effect = get_peak
+    model.ws.column.side_effect = column
+    model.ws.removePeak.side_effect = remove_peak
+
     return model
 
 

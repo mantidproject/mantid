@@ -104,7 +104,7 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         positions -= pos  # peak positions relative to the input position
         distances_squared = np.sum(positions * positions, axis=1)
         closest_peak_index = np.argmin(distances_squared)
-        self.delete_rows(int(closest_peak_index))  # required cast from numpy.int64 to int
+        return self.peaks_workspace.removePeak(int(closest_peak_index))  # required cast from numpy.int64 to int
 
     def slicepoint(self, selected_index, slice_info):
         """
