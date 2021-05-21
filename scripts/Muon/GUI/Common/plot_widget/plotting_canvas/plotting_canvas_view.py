@@ -57,6 +57,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         # create the figure
         self.fig = Figure()
         self.fig.canvas = FigureCanvas(self.fig)
+        self.fig.canvas.setMinimumHeight(500)
         self.toolBar = PlotToolbar(self.fig.canvas, self)
 
         # Create a set of Mantid axis for the figure
@@ -70,9 +71,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         splitter.addWidget(self.fig.canvas)
         self._quick_edit = quick_edit
         splitter.addWidget(self._quick_edit)
-        splitter.setStretchFactor(0, 9)
-        splitter.setStretchFactor(1, 1)
-        splitter.setCollapsible(1, False)
+        splitter.setChildrenCollapsible(False)
 
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.toolBar)
