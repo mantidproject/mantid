@@ -85,7 +85,7 @@ void DiffractionEventCalibrateDetectors::movedetector(double x, double y, double
                                                       double rotz, const std::string &detname,
                                                       const EventWorkspace_sptr &inputW) {
 
-  IAlgorithm_sptr alg1 = createChildAlgorithm("MoveInstrumentComponent");
+  auto alg1 = createChildAlgorithm("MoveInstrumentComponent");
   alg1->setProperty<EventWorkspace_sptr>("Workspace", inputW);
   alg1->setPropertyValue("ComponentName", detname);
   // Move in cm for small shifts
@@ -95,7 +95,7 @@ void DiffractionEventCalibrateDetectors::movedetector(double x, double y, double
   alg1->setPropertyValue("RelativePosition", "1");
   alg1->executeAsChildAlg();
 
-  IAlgorithm_sptr algx = createChildAlgorithm("RotateInstrumentComponent");
+  auto algx = createChildAlgorithm("RotateInstrumentComponent");
   algx->setProperty<EventWorkspace_sptr>("Workspace", inputW);
   algx->setPropertyValue("ComponentName", detname);
   algx->setProperty("X", 1.0);
@@ -105,7 +105,7 @@ void DiffractionEventCalibrateDetectors::movedetector(double x, double y, double
   algx->setPropertyValue("RelativeRotation", "1");
   algx->executeAsChildAlg();
 
-  IAlgorithm_sptr algy = createChildAlgorithm("RotateInstrumentComponent");
+  auto algy = createChildAlgorithm("RotateInstrumentComponent");
   algy->setProperty<EventWorkspace_sptr>("Workspace", inputW);
   algy->setPropertyValue("ComponentName", detname);
   algy->setProperty("X", 0.0);
@@ -115,7 +115,7 @@ void DiffractionEventCalibrateDetectors::movedetector(double x, double y, double
   algy->setPropertyValue("RelativeRotation", "1");
   algy->executeAsChildAlg();
 
-  IAlgorithm_sptr algz = createChildAlgorithm("RotateInstrumentComponent");
+  auto algz = createChildAlgorithm("RotateInstrumentComponent");
   algz->setProperty<EventWorkspace_sptr>("Workspace", inputW);
   algz->setPropertyValue("ComponentName", detname);
   algz->setProperty("X", 0.0);
@@ -155,7 +155,7 @@ double DiffractionEventCalibrateDetectors::intensity(double x, double y, double 
   movedetector(x, y, z, rotx, roty, rotz, detname, inputW);
   g_log.debug() << tim << " to movedetector()\n";
 
-  IAlgorithm_sptr alg3 = createChildAlgorithm("ConvertUnits");
+  auto alg3 = createChildAlgorithm("ConvertUnits");
   alg3->setProperty<EventWorkspace_sptr>("InputWorkspace", inputW);
   alg3->setPropertyValue("OutputWorkspace", outname);
   alg3->setPropertyValue("Target", "dSpacing");
@@ -164,7 +164,7 @@ double DiffractionEventCalibrateDetectors::intensity(double x, double y, double 
 
   g_log.debug() << tim << " to ConvertUnits\n";
 
-  IAlgorithm_sptr alg4 = createChildAlgorithm("DiffractionFocussing");
+  auto alg4 = createChildAlgorithm("DiffractionFocussing");
   alg4->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputW);
   alg4->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputW);
   alg4->setPropertyValue("GroupingFileName", "");
@@ -175,7 +175,7 @@ double DiffractionEventCalibrateDetectors::intensity(double x, double y, double 
   // Remove file
   g_log.debug() << tim << " to DiffractionFocussing\n";
 
-  IAlgorithm_sptr alg5 = createChildAlgorithm("Rebin");
+  auto alg5 = createChildAlgorithm("Rebin");
   alg5->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputW);
   alg5->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputW);
   alg5->setPropertyValue("Params", rb_param);
@@ -345,7 +345,7 @@ void DiffractionEventCalibrateDetectors::exec() {
   std::string inname = getProperty("InputWorkspace");
   std::string outname = inname + "2"; // getProperty("OutputWorkspace");
 
-  IAlgorithm_sptr algS = createChildAlgorithm("SortEvents");
+  auto algS = createChildAlgorithm("SortEvents");
   algS->setProperty("InputWorkspace", inputW);
   algS->setPropertyValue("SortBy", "X Value");
   algS->executeAsChildAlg();
@@ -390,7 +390,7 @@ void DiffractionEventCalibrateDetectors::exec() {
 
     // --- Create a GroupingWorkspace for this detector name ------
     CPUTimer tim;
-    IAlgorithm_sptr alg2 = AlgorithmFactory::Instance().create("CreateGroupingWorkspace", 1);
+    auto alg2 = AlgorithmFactory::Instance().create("CreateGroupingWorkspace", 1);
     alg2->initialize();
     alg2->setProperty("InputWorkspace", inputW);
     alg2->setPropertyValue("GroupNames", detList[det]->getName());

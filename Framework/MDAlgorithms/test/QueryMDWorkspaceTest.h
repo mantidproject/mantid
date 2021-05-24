@@ -188,7 +188,7 @@ public:
     auto in_ws = MDEventsTestHelper::makeMDEW<2>(2, -10.0, 10, 3);
 
     // Create a line slice at 45 degrees to the original workspace.
-    IAlgorithm_sptr binMDAlg = AlgorithmManager::Instance().create("BinMD");
+    auto binMDAlg = AlgorithmManager::Instance().create("BinMD");
     binMDAlg->setRethrows(true);
     binMDAlg->initialize();
     binMDAlg->setChild(true);
@@ -298,7 +298,7 @@ public:
      */
     MDEventWorkspace3Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<3>(64, 0.0, 10.0, 3);
 
-    IAlgorithm_sptr binMDAlg = AlgorithmManager::Instance().create("BinMD");
+    auto binMDAlg = AlgorithmManager::Instance().create("BinMD");
     binMDAlg->initialize();
     binMDAlg->setRethrows(true);
     binMDAlg->setChild(true);
@@ -311,7 +311,7 @@ public:
     Workspace_sptr binned_temp = binMDAlg->getProperty("OutputWorkspace");
     IMDWorkspace_sptr binned_md_temp = std::dynamic_pointer_cast<IMDWorkspace>(binned_temp);
 
-    IAlgorithm_sptr maskMDAlg = AlgorithmManager::Instance().create("MaskMD");
+    auto maskMDAlg = AlgorithmManager::Instance().create("MaskMD");
     maskMDAlg->initialize();
     maskMDAlg->setRethrows(true);
     maskMDAlg->setChild(true);

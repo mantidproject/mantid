@@ -65,7 +65,7 @@ void ApplyDeadTimeCorr::exec() {
 
       // Duplicate the input workspace. Only need to change Y values based on
       // dead time corrections
-      IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace");
+      auto duplicate = createChildAlgorithm("CloneWorkspace");
       duplicate->initialize();
       duplicate->setProperty<Workspace_sptr>("InputWorkspace", std::dynamic_pointer_cast<Workspace>(inputWs));
       duplicate->execute();

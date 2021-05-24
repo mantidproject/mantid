@@ -150,7 +150,7 @@ void MaskPeaksWorkspace::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   // Mask bins
-  API::IAlgorithm_sptr maskbinstb = this->createChildAlgorithm("MaskBinsFromTable", 0.5, 1.0, true);
+  auto maskbinstb = createChildAlgorithm("MaskBinsFromTable", 0.5, 1.0, true);
   maskbinstb->setProperty("InputWorkspace", m_inputW);
   maskbinstb->setPropertyValue("OutputWorkspace", m_inputW->getName());
   maskbinstb->setProperty("MaskingInformation", tablews);

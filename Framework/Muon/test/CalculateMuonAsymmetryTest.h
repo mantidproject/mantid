@@ -90,7 +90,7 @@ ITableWorkspace_sptr genTable() {
 }
 
 IAlgorithm_sptr setUpFuncAlg(const std::vector<std::string> &wsNames, const IFunction_sptr &func) {
-  IAlgorithm_sptr asymmAlg = AlgorithmManager::Instance().create("ConvertFitFunctionForMuonTFAsymmetry");
+  auto asymmAlg = AlgorithmManager::Instance().create("ConvertFitFunctionForMuonTFAsymmetry");
   asymmAlg->initialize();
   asymmAlg->setChild(true);
   asymmAlg->setProperty("WorkspaceList", wsNames);
@@ -102,7 +102,7 @@ IAlgorithm_sptr setUpFuncAlg(const std::vector<std::string> &wsNames, const IFun
 
 IFunction_sptr genSingleFunc(const std::vector<std::string> &wsNames) {
   IFunction_sptr func = FunctionFactory::Instance().createInitialized("name=GausOsc,Frequency=3.0");
-  IAlgorithm_sptr alg = setUpFuncAlg(std::move(wsNames), func);
+  auto alg = setUpFuncAlg(std::move(wsNames), func);
   alg->execute();
   IFunction_sptr funcOut = alg->getProperty("OutputFunction");
   return funcOut;
@@ -113,7 +113,7 @@ IFunction_sptr genDoubleFunc(const std::vector<std::string> &wsNames) {
   multiFuncString += "name=GausOsc,$domains=i,Frequency=3.0;";
   multiFuncString += "name=GausOsc,$domains=i,Frequency=3.0;";
   IFunction_sptr func = FunctionFactory::Instance().createInitialized(multiFuncString);
-  IAlgorithm_sptr alg = setUpFuncAlg(std::move(wsNames), func);
+  auto alg = setUpFuncAlg(std::move(wsNames), func);
   alg->execute();
   IFunction_sptr funcOut = alg->getProperty("OutputFunction");
   std::cout << funcOut << std::endl;
@@ -122,7 +122,7 @@ IFunction_sptr genDoubleFunc(const std::vector<std::string> &wsNames) {
 
 IAlgorithm_sptr setUpAlg(ITableWorkspace_sptr &table, const IFunction_sptr &func,
                          const std::vector<std::string> &wsNamesNorm, const std::vector<std::string> &wsOut) {
-  IAlgorithm_sptr asymmAlg = AlgorithmManager::Instance().create("CalculateMuonAsymmetry");
+  auto asymmAlg = AlgorithmManager::Instance().create("CalculateMuonAsymmetry");
   asymmAlg->initialize();
   asymmAlg->setChild(true);
   asymmAlg->setProperty("NormalizationTable", table);
@@ -168,7 +168,7 @@ public:
     auto func = genSingleFunc(wsNames);
     auto table = genTable();
 
-    IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
+    auto alg = setUpAlg(table, func, wsNames, wsOut);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
     std::vector<std::string> output = alg->getProperty("ReNormalizedWorkspaceList");
@@ -203,7 +203,7 @@ public:
     auto func = genSingleFunc(wsNames);
     auto table = genTable();
 
-    IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
+    auto alg = setUpAlg(table, func, wsNames, wsOut);
     alg->setProperty("StartX", 10.);
     alg->setProperty("EndX", 1.);
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
@@ -246,7 +246,7 @@ public:
     auto func = genSingleFunc(wsNames);
     auto table = genTable();
 
-    IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
+    auto alg = setUpAlg(table, func, wsNames, wsOut);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
     std::vector<std::string> output = alg->getProperty("ReNormalizedWorkspaceList");
@@ -265,7 +265,7 @@ public:
     auto func = genDoubleFunc(wsNames);
     auto table = genTable();
 
-    IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
+    auto alg = setUpAlg(table, func, wsNames, wsOut);
 
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -304,7 +304,7 @@ public:
     auto func = genDoubleFunc(wsNames);
     auto table = genTable();
 
-    IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
+    auto alg = setUpAlg(table, func, wsNames, wsOut);
     alg->setProperty("EnableDoublePulse", true);
     alg->setProperty("PulseOffset", 0.33);
     alg->setProperty("FirstPulseWeight", 0.5);

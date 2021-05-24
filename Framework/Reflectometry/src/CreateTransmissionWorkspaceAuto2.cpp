@@ -71,7 +71,7 @@ void CreateTransmissionWorkspaceAuto2::init() {
  */
 void CreateTransmissionWorkspaceAuto2::exec() {
 
-  IAlgorithm_sptr alg = createChildAlgorithm("CreateTransmissionWorkspace");
+  auto alg = createChildAlgorithm("CreateTransmissionWorkspace");
   alg->initialize();
 
   // First transmission run

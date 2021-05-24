@@ -1053,7 +1053,7 @@ size_t GroupDetectors2::formGroupsEvent(const DataObjects::EventWorkspace_const_
 
   if (bhv == 1 && requireDivide) {
     g_log.debug() << "Running Divide algorithm to perform averaging.\n";
-    Mantid::API::IAlgorithm_sptr divide = createChildAlgorithm("Divide");
+    auto divide = createChildAlgorithm("Divide");
     divide->initialize();
     divide->setProperty<API::MatrixWorkspace_sptr>("LHSWorkspace", outputWS);
     divide->setProperty<API::MatrixWorkspace_sptr>("RHSWorkspace", beh);

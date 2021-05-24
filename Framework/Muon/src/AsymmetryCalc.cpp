@@ -85,7 +85,7 @@ void AsymmetryCalc::exec() {
     // grouped
 
     // First group spectra from the backward list leaving the rest ungrouped
-    API::IAlgorithm_sptr group = createChildAlgorithm("GroupDetectors");
+    auto group = createChildAlgorithm("GroupDetectors");
     group->setProperty("InputWorkspace", inputWS);
     group->setProperty("SpectraList", backward_list);
     group->setProperty("KeepUngroupedSpectra", true);

@@ -196,7 +196,7 @@ private:
   }
 
   IAlgorithm_sptr loadWorkspaceAlgorithm(const std::string &fileName) {
-    IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("Load");
+    auto loadAlg = AlgorithmManager::Instance().create("Load");
     loadAlg->setChild(true);
     loadAlg->setProperty("Filename", fileName);
     loadAlg->setProperty("OutputWorkspace", "__temp");

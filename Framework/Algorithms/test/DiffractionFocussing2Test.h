@@ -258,7 +258,7 @@ public:
   EventWorkspace_sptr ws;
 
   DiffractionFocussing2TestPerformance() {
-    IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
+    auto alg = AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
     alg->initialize();
     alg->setRethrows(true);
     alg->setPropertyValue("Filename", "SNAP_Definition_2011-09-07.xml");
@@ -302,7 +302,7 @@ public:
   }
 
   void test_SNAP_event_one_group() {
-    IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
+    auto alg = AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", "SNAP_empty");
     alg->setPropertyValue("GroupingWorkspace", "SNAP_group_bank1");
@@ -317,7 +317,7 @@ public:
   }
 
   void test_SNAP_event_six_groups() {
-    IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
+    auto alg = AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", "SNAP_empty");
     alg->setPropertyValue("GroupingWorkspace", "SNAP_group_several");
@@ -332,7 +332,7 @@ public:
   }
 
   void test_SNAP_event_one_group_dontPreserveEvents() {
-    IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
+    auto alg = AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", "SNAP_empty");
     alg->setPropertyValue("GroupingWorkspace", "SNAP_group_bank1");
@@ -346,7 +346,7 @@ public:
   }
 
   void test_SNAP_event_six_groups_dontPreserveEvents() {
-    IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
+    auto alg = AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", "SNAP_empty");
     alg->setPropertyValue("GroupingWorkspace", "SNAP_group_several");

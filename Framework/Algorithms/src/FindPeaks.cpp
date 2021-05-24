@@ -960,7 +960,7 @@ int FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input, int spectru
   const auto &vecX = input->x(spectrum);
 
   // Call FindPeakBackground
-  IAlgorithm_sptr estimate = createChildAlgorithm("FindPeakBackground");
+  auto estimate = createChildAlgorithm("FindPeakBackground");
   estimate->setLoggingOffset(1);
   estimate->setProperty("InputWorkspace", input);
   estimate->setProperty("WorkspaceIndex", spectrum);

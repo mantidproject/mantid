@@ -68,8 +68,8 @@ private:
   API::IAlgorithm_sptr createLoader(const double startProgress = -1.0, const double endProgress = -1.0,
                                     const bool logging = true) const;
   /// Set the loader option for use as a Child Algorithm.
-  void setUpLoader(API::IAlgorithm_sptr &loader, const double startProgress = -1.0, const double endProgress = -1.0,
-                   const bool logging = true) const;
+  void setUpLoader(const API::IAlgorithm_sptr &loader, const double startProgress = -1.0,
+                   const double endProgress = -1.0, const bool logging = true) const;
   /// Set the output workspace(s)
   void setOutputWorkspace(const API::IAlgorithm_sptr &loader);
   /// Retrieve a pointer to the output workspace from the Child Algorithm

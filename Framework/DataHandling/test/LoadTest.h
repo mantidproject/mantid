@@ -50,7 +50,7 @@ public:
   }
 
   void testViaProxy() {
-    IAlgorithm_sptr proxy = AlgorithmManager::Instance().create("Load");
+    auto proxy = AlgorithmManager::Instance().create("Load");
     TS_ASSERT_EQUALS(proxy->existsProperty("Filename"), true);
     TS_ASSERT_EQUALS(proxy->existsProperty("OutputWorkspace"), true);
 
@@ -68,7 +68,7 @@ public:
   }
 
   void testPropertyValuesViaProxy() {
-    IAlgorithm_sptr proxy = AlgorithmManager::Instance().create("Load");
+    auto proxy = AlgorithmManager::Instance().create("Load");
     TS_ASSERT_EQUALS(proxy->existsProperty("Filename"), true);
     TS_ASSERT_EQUALS(proxy->existsProperty("OutputWorkspace"), true);
 
@@ -84,7 +84,7 @@ public:
   }
 
   void testSwitchingLoaderViaProxy() {
-    IAlgorithm_sptr proxy = AlgorithmManager::Instance().create("Load");
+    auto proxy = AlgorithmManager::Instance().create("Load");
     TS_ASSERT_EQUALS(proxy->existsProperty("Filename"), true);
     TS_ASSERT_EQUALS(proxy->existsProperty("OutputWorkspace"), true);
     TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("Filename", "IRS38633.raw"));

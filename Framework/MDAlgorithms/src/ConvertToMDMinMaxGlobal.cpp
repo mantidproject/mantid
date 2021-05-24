@@ -128,7 +128,7 @@ void ConvertToMDMinMaxGlobal::exec() {
   } else // need to calculate the appropriate q values
   {
     double qmax, deltaEmax, deltaEmin;
-    IAlgorithm_sptr conv = createChildAlgorithm("ConvertUnits", 0.0, 0.9);
+    auto conv = createChildAlgorithm("ConvertUnits", 0.0, 0.9);
     conv->setProperty<MatrixWorkspace_sptr>("InputWorkspace", ws);
     conv->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", wstemp);
     // Calculate maxumum momentum transfer Q

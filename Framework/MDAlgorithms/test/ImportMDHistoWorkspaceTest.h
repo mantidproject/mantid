@@ -66,7 +66,7 @@ private:
   Helps make tests easy to read.
   */
   std::shared_ptr<IAlgorithm> make_standard_algorithm(const MDFileObject &fileObject) {
-    IAlgorithm_sptr alg = IAlgorithm_sptr(new ImportMDHistoWorkspace());
+    auto alg = IAlgorithm_sptr(new ImportMDHistoWorkspace());
     alg->initialize();
     alg->setRethrows(true);
     alg->setPropertyValue("FileName", fileObject.getFileName());
@@ -98,37 +98,37 @@ public:
 
   void test_throws_if_dimensionality_less_than_one() {
     MDFileObject fileObject("test_file_for_load_md_histo_workspace_test_.txt", 2 * 2);
-    IAlgorithm_sptr alg = make_standard_algorithm(fileObject);
+    auto alg = make_standard_algorithm(fileObject);
     TS_ASSERT_THROWS(alg->setProperty("Dimensionality", 0), const std::invalid_argument &);
   }
 
   void test_throws_if_dimensionality_greater_than_nine() {
     MDFileObject fileObject("test_file_for_load_md_histo_workspace_test_.txt", 2 * 2);
-    IAlgorithm_sptr alg = make_standard_algorithm(fileObject);
+    auto alg = make_standard_algorithm(fileObject);
     TS_ASSERT_THROWS(alg->setProperty("Dimensionality", 10), const std::invalid_argument &);
   }
 
   void test_set_dimensionality() {
     MDFileObject fileObject("test_file_for_load_md_histo_workspace_test_.txt", 2 * 2);
-    IAlgorithm_sptr alg = make_standard_algorithm(fileObject);
+    auto alg = make_standard_algorithm(fileObject);
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("Dimensionality", 9));
   }
 
   void test_throws_without_filename() {
     MDFileObject fileObject("test_file_for_load_md_histo_workspace_test_.txt", 2 * 2);
-    IAlgorithm_sptr alg = make_standard_algorithm(fileObject);
+    auto alg = make_standard_algorithm(fileObject);
     TS_ASSERT_THROWS(alg->setProperty("Filename", ""), const std::invalid_argument &);
   }
 
   void test_throws_with_non_existant_filename() {
     MDFileObject fileObject("test_file_for_load_md_histo_workspace_test_.txt", 2 * 2);
-    IAlgorithm_sptr alg = make_standard_algorithm(fileObject);
+    auto alg = make_standard_algorithm(fileObject);
     TS_ASSERT_THROWS(alg->setProperty("Filename", "does_not_exist.txt"), const std::invalid_argument &);
   }
 
   void test_throws_when_wrong_number_of_extent_entries() {
     MDFileObject fileObject("test_file_for_load_md_histo_workspace_test_.txt", 2 * 2);
-    IAlgorithm_sptr alg = make_standard_algorithm(fileObject);
+    auto alg = make_standard_algorithm(fileObject);
     alg->setPropertyValue("Extents",
                           "1,-1"); // Extents only provided for 1Dimension!
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
@@ -136,21 +136,21 @@ public:
 
   void test_throws_when_wrong_number_of_name_entries() {
     MDFileObject fileObject("test_file_for_load_md_histo_workspace_test_.txt", 2 * 2);
-    IAlgorithm_sptr alg = make_standard_algorithm(fileObject);
+    auto alg = make_standard_algorithm(fileObject);
     alg->setPropertyValue("Names", "A"); // Names only provided for 1Dimension!
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
 
   void test_throws_when_wrong_number_of_unit_entries() {
     MDFileObject fileObject("test_file_for_load_md_histo_workspace_test_.txt", 2 * 2);
-    IAlgorithm_sptr alg = make_standard_algorithm(fileObject);
+    auto alg = make_standard_algorithm(fileObject);
     alg->setPropertyValue("Units", "U1"); // Units only provided for 1Dimension!
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
 
   void test_throws_when_wrong_number_of_bin_entries() {
     MDFileObject fileObject("test_file_for_load_md_histo_workspace_test_.txt", 2 * 2);
-    IAlgorithm_sptr alg = make_standard_algorithm(fileObject);
+    auto alg = make_standard_algorithm(fileObject);
     alg->setPropertyValue("Names",
                           "2"); // bin numbers only provided for 1Dimension!
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
@@ -161,7 +161,7 @@ public:
                             3 * 3); // bin size set to 3, so 3*3*2, entries will
                                     // be in the file! i.e file corrsponds to 2D
                                     // md workspace.
-    IAlgorithm_sptr alg = make_standard_algorithm(fileObject);
+    auto alg = make_standard_algorithm(fileObject);
     alg->setPropertyValue("Extents", "-1,1,-1,1,-1,1");
     alg->setPropertyValue("NumberOfBins",
                           "3,3,3"); // but the number of bins has been set to 3!
@@ -177,7 +177,7 @@ public:
                             3 * 3 * 3); // bin size set to 3, so 3*3*3*2,
                                         // entries will be in the file! i.e file
                                         // corrsponds to 3D md workspace.
-    IAlgorithm_sptr alg = make_standard_algorithm(fileObject);
+    auto alg = make_standard_algorithm(fileObject);
     alg->setPropertyValue("Extents", "-1,1,-1,1,-1,1");
     alg->setPropertyValue("NumberOfBins", "3,3,2"); // but the number of bins
                                                     // has been set to 3*3*2, so
@@ -193,7 +193,7 @@ public:
   /// Test execution with as specific output dimensionality required.
   void test_executes_2D() {
     MDFileObject fileObject("test_file_for_load_md_histo_workspace_test_.txt", 2 * 2);
-    IAlgorithm_sptr alg = IAlgorithm_sptr(new ImportMDHistoWorkspace());
+    auto alg = IAlgorithm_sptr(new ImportMDHistoWorkspace());
     alg->initialize();
     alg->setPropertyValue("FileName", fileObject.getFileName());
     alg->setProperty("Dimensionality", 2);
@@ -250,7 +250,7 @@ public:
   /// required.
   void test_executes_3D() {
     MDFileObject fileObject("test_file_for_load_md_histo_workspace_test_.txt", 2 * 2 * 2);
-    IAlgorithm_sptr alg = IAlgorithm_sptr(new ImportMDHistoWorkspace());
+    auto alg = IAlgorithm_sptr(new ImportMDHistoWorkspace());
     alg->initialize();
     alg->setPropertyValue("FileName", fileObject.getFileName());
     alg->setProperty("Dimensionality", 3);

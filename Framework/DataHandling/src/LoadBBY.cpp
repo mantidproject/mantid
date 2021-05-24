@@ -319,7 +319,7 @@ void LoadBBY::exec() {
       if (!roi[i])
         maskIndexList[maskIndex++] = i;
 
-    API::IAlgorithm_sptr maskingAlg = createChildAlgorithm("MaskDetectors");
+    auto maskingAlg = createChildAlgorithm("MaskDetectors");
     maskingAlg->setProperty("Workspace", eventWS);
     maskingAlg->setProperty("WorkspaceIndexList", maskIndexList);
     maskingAlg->executeAsChildAlg();
@@ -366,7 +366,7 @@ void LoadBBY::exec() {
     AddSinglePointTimeSeriesProperty(logManager, time_str, x.first, x.second);
   }
 
-  API::IAlgorithm_sptr loadInstrumentAlg = createChildAlgorithm("LoadInstrument");
+  auto loadInstrumentAlg = createChildAlgorithm("LoadInstrument");
   loadInstrumentAlg->setProperty("Workspace", eventWS);
   loadInstrumentAlg->setPropertyValue("InstrumentName", "BILBY");
   loadInstrumentAlg->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));

@@ -30,8 +30,8 @@ public:
   }
   void exec() override {}
 
-  bool existsProperty(const std::string &name) const override { return PropertyManagerOwner::existsProperty(name); }
-  const std::vector<Property *> &getProperties() const override { return PropertyManagerOwner::getProperties(); }
+  bool existsProperty(const std::string &name) const override { return Algorithm::existsProperty(name); }
+  const std::vector<Property *> &getProperties() const override { return Algorithm::getProperties(); }
 };
 
 class ToyAlgorithmTwo : public Algorithm {

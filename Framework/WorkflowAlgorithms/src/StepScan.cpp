@@ -80,7 +80,7 @@ void StepScan::exec() {
   }
 
   // Run the SumEventsByLogValue algorithm with the log fixed to 'scan_index'
-  IAlgorithm_sptr sumEvents = createChildAlgorithm("SumEventsByLogValue");
+  auto sumEvents = createChildAlgorithm("SumEventsByLogValue");
   sumEvents->setProperty<EventWorkspace_sptr>("InputWorkspace", inputWorkspace);
   if (monitorWorkspace) {
     sumEvents->setProperty<EventWorkspace_sptr>("MonitorWorkspace", monitorWorkspace);
@@ -111,7 +111,7 @@ DataObjects::EventWorkspace_sptr StepScan::getMonitorWorkspace(const API::Matrix
 }
 
 DataObjects::EventWorkspace_sptr StepScan::cloneInputWorkspace(const API::Workspace_sptr &inputWS) {
-  IAlgorithm_sptr clone = createChildAlgorithm("CloneWorkspace");
+  auto clone = createChildAlgorithm("CloneWorkspace");
   clone->setProperty("InputWorkspace", inputWS);
   clone->executeAsChildAlg();
 
@@ -124,7 +124,7 @@ DataObjects::EventWorkspace_sptr StepScan::cloneInputWorkspace(const API::Worksp
  *  @param maskWS  A masking workspace
  */
 void StepScan::runMaskDetectors(const MatrixWorkspace_sptr &inputWS, const MatrixWorkspace_sptr &maskWS) {
-  IAlgorithm_sptr maskingAlg = createChildAlgorithm("MaskDetectors");
+  auto maskingAlg = createChildAlgorithm("MaskDetectors");
   maskingAlg->setProperty<MatrixWorkspace_sptr>("Workspace", inputWS);
   maskingAlg->setProperty<MatrixWorkspace_sptr>("MaskedWorkspace", maskWS);
   maskingAlg->executeAsChildAlg();
@@ -140,7 +140,7 @@ void StepScan::runFilterByXValue(const MatrixWorkspace_sptr &inputWS, const doub
   // Run ConvertUnits on the input workspace if xmin/max were given in a
   // different unit
   if (rangeUnit != "TOF") {
-    IAlgorithm_sptr convertUnits = createChildAlgorithm("ConvertUnits");
+    auto convertUnits = createChildAlgorithm("ConvertUnits");
     convertUnits->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
     convertUnits->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputWS);
     convertUnits->setProperty("Target", rangeUnit);
@@ -148,7 +148,7 @@ void StepScan::runFilterByXValue(const MatrixWorkspace_sptr &inputWS, const doub
     convertUnits->executeAsChildAlg();
   }
 
-  IAlgorithm_sptr filter = createChildAlgorithm("FilterByXValue");
+  auto filter = createChildAlgorithm("FilterByXValue");
   filter->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
   filter->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputWS);
   filter->setProperty("XMin", xmin);

@@ -81,7 +81,7 @@ void FFTSmooth::exec() {
     symmWS->mutableX(0).back() = m_inWS->x(spec).back();
 
   // Forward Fourier transform
-  IAlgorithm_sptr fft = createChildAlgorithm("RealFFT", 0, 0.5);
+  auto fft = createChildAlgorithm("RealFFT", 0, 0.5);
   fft->setProperty("InputWorkspace", symmWS);
   fft->setProperty("WorkspaceIndex", 0);
   try {

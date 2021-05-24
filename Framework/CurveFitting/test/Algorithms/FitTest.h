@@ -1131,7 +1131,7 @@ public:
     mf->setDomainIndices(0, ind);
     TS_ASSERT_EQUALS(mf->getMaxIndex(), 1);
 
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     Mantid::API::IAlgorithm &fit = *alg;
     fit.initialize();
     fit.setProperty("Function", std::dynamic_pointer_cast<IFunction>(mf));
@@ -1187,7 +1187,7 @@ public:
     // fix ZeroShift
     pawleyFn->fix(pawleyFn->parameterIndex("f0.ZeroShift"));
 
-    IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
+    auto fit = AlgorithmManager::Instance().create("Fit");
     fit->setProperty("Function", std::dynamic_pointer_cast<IFunction>(pawleyFn));
     fit->setProperty("InputWorkspace", ws);
     fit->execute();
@@ -1220,7 +1220,7 @@ public:
     pawleyFn->setUnitCell("5.433 5.433 5.433");
     pawleyFn->setParameter("f0.ZeroShift", 0.001);
 
-    IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
+    auto fit = AlgorithmManager::Instance().create("Fit");
     fit->setProperty("Function", std::dynamic_pointer_cast<IFunction>(pawleyFn));
     fit->setProperty("InputWorkspace", ws);
     fit->execute();

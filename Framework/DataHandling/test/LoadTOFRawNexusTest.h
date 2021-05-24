@@ -119,9 +119,8 @@ public:
                                       "PreserveEvents", "0");
 
     // Compare workspaces
-    Mantid::API::IAlgorithm_sptr alg =
-        FrameworkManager::Instance().exec("CompareWorkspaces", 8, "Workspace1", "outWS", "Workspace2", "outWS_event_2D",
-                                          "Tolerance", "1e-4", "CheckAxes", "0");
+    auto alg = FrameworkManager::Instance().exec("CompareWorkspaces", 8, "Workspace1", "outWS", "Workspace2",
+                                                 "outWS_event_2D", "Tolerance", "1e-4", "CheckAxes", "0");
     // We skip Axis check because of floating point imprecision makes a false
     // negative.
 

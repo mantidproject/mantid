@@ -328,7 +328,7 @@ void SCDCalibratePanels2::exec() {
  */
 void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_sptr pws_original) {
   // create child Fit alg to optimize T0
-  IAlgorithm_sptr fitT0_alg = createChildAlgorithm("Fit", -1, -1, false);
+  auto fitT0_alg = createChildAlgorithm("Fit", -1, -1, false);
   //-- obj func def
   //  dl;dr;
   //    Fit algorithm requires a IFunction1D to fit
@@ -387,7 +387,7 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   MatrixWorkspace_sptr l1ws = getIdealQSampleAsHistogram1D(pws);
 
   // fit algorithm for the optimization of L1
-  IAlgorithm_sptr fitL1_alg = createChildAlgorithm("Fit", -1, -1, false);
+  auto fitL1_alg = createChildAlgorithm("Fit", -1, -1, false);
   auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
   // NOTE: always use the original pws to get the tofs
   std::vector<double> tofs = captureTOF(pws_original);
@@ -457,7 +457,7 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
     MatrixWorkspace_sptr wsBankCali = getIdealQSampleAsHistogram1D(pwsBanki);
 
     //-- step 2&3: invoke fit to find both traslation and rotation
-    IAlgorithm_sptr fitBank_alg = createChildAlgorithm("Fit", -1, -1, false);
+    auto fitBank_alg = createChildAlgorithm("Fit", -1, -1, false);
     //---- setup obj fun def
     auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
     objf->setPeakWorkspace(pwsBanki, bankname, tofs);
@@ -556,7 +556,7 @@ void SCDCalibratePanels2::parseLatticeConstant(IPeaksWorkspace_sptr pws) {
  * @param pws
  */
 void SCDCalibratePanels2::updateUBMatrix(IPeaksWorkspace_sptr pws) {
-  IAlgorithm_sptr calcUB_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
+  auto calcUB_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
   calcUB_alg->setLogging(LOGCHILDALG);
   calcUB_alg->setProperty("PeaksWorkspace", pws);
   calcUB_alg->setProperty("a", m_a);
@@ -568,7 +568,7 @@ void SCDCalibratePanels2::updateUBMatrix(IPeaksWorkspace_sptr pws) {
   calcUB_alg->executeAsChildAlg();
 
   // Since UB is updated, we need to redo the indexation
-  IAlgorithm_sptr idxpks_alg = createChildAlgorithm("IndexPeaks", -1, -1, false);
+  auto idxpks_alg = createChildAlgorithm("IndexPeaks", -1, -1, false);
   idxpks_alg->setLogging(LOGCHILDALG);
   idxpks_alg->setProperty("PeaksWorkspace", pws);
   idxpks_alg->setProperty("RoundHKLs", true); // both are using default
@@ -583,7 +583,7 @@ void SCDCalibratePanels2::updateUBMatrix(IPeaksWorkspace_sptr pws) {
  * @return IPeaksWorkspace_sptr
  */
 IPeaksWorkspace_sptr SCDCalibratePanels2::removeUnindexedPeaks(Mantid::API::IPeaksWorkspace_sptr pws) {
-  IAlgorithm_sptr fltpk_alg = createChildAlgorithm("FilterPeaks");
+  auto fltpk_alg = createChildAlgorithm("FilterPeaks");
   fltpk_alg->setLogging(LOGCHILDALG);
   fltpk_alg->setProperty("InputWorkspace", pws);
   fltpk_alg->setProperty("FilterVariable", "h^2+k^2+l^2");
@@ -640,7 +640,7 @@ void SCDCalibratePanels2::getBankNames(IPeaksWorkspace_sptr pws) {
  */
 IPeaksWorkspace_sptr SCDCalibratePanels2::selectPeaksByBankName(IPeaksWorkspace_sptr pws, const std::string bankname,
                                                                 const std::string outputwsn) {
-  IAlgorithm_sptr fltpk_alg = createChildAlgorithm("FilterPeaks");
+  auto fltpk_alg = createChildAlgorithm("FilterPeaks");
   fltpk_alg->setLogging(LOGCHILDALG);
   fltpk_alg->setProperty("InputWorkspace", pws);
   fltpk_alg->setProperty("BankName", bankname);
@@ -736,7 +736,7 @@ void SCDCalibratePanels2::adjustComponent(double dx, double dy, double dz, doubl
                                           double rang, std::string cmptName, IPeaksWorkspace_sptr &pws) {
 
   // orientation
-  IAlgorithm_sptr rot_alg = createChildAlgorithm("RotateInstrumentComponent", -1, -1, false);
+  auto rot_alg = createChildAlgorithm("RotateInstrumentComponent", -1, -1, false);
   rot_alg->setLogging(LOGCHILDALG);
   rot_alg->setProperty<Workspace_sptr>("Workspace", pws);
   rot_alg->setProperty("ComponentName", cmptName);
@@ -748,7 +748,7 @@ void SCDCalibratePanels2::adjustComponent(double dx, double dy, double dz, doubl
   rot_alg->executeAsChildAlg();
 
   // translation
-  IAlgorithm_sptr mv_alg = createChildAlgorithm("MoveInstrumentComponent", -1, -1, false);
+  auto mv_alg = createChildAlgorithm("MoveInstrumentComponent", -1, -1, false);
   mv_alg->setLogging(LOGCHILDALG);
   mv_alg->setProperty<Workspace_sptr>("Workspace", pws);
   mv_alg->setProperty("ComponentName", cmptName);
@@ -973,7 +973,7 @@ void SCDCalibratePanels2::saveIsawDetCal(const std::string &filename,
   std::vector<std::string> banknames(AllBankName.begin(), AllBankName.end());
 
   // call SaveIsawDetCal
-  API::IAlgorithm_sptr alg = createChildAlgorithm("SaveIsawDetCal");
+  auto alg = createChildAlgorithm("SaveIsawDetCal");
   alg->setProperty("InputWorkspace", wksp);
   alg->setProperty("Filename", filename);
   alg->setProperty("TimeOffset", T0);
@@ -987,8 +987,8 @@ void SCDCalibratePanels2::saveIsawDetCal(const std::string &filename,
  * @param FileName
  * @param tws
  */
-void SCDCalibratePanels2::saveCalibrationTable(const std::string &FileName, ITableWorkspace_sptr &tws) {
-  API::IAlgorithm_sptr alg = createChildAlgorithm("SaveAscii");
+void SCDCalibratePanels2::saveCalibrationTable(const std::string &FileName, Mantid::API::ITableWorkspace_sptr &tws) {
+  auto alg = createChildAlgorithm("SaveAscii");
   alg->setProperty("InputWorkspace", tws);
   alg->setProperty("Filename", FileName);
   alg->setPropertyValue("CommentIndicator", "#");

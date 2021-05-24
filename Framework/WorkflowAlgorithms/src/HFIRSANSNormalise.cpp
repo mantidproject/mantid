@@ -51,7 +51,7 @@ void HFIRSANSNormalise::exec() {
     factor = 1.0 / norm_count;
   }
 
-  IAlgorithm_sptr scaleAlg = createChildAlgorithm("Scale");
+  auto scaleAlg = createChildAlgorithm("Scale");
   scaleAlg->setProperty("InputWorkspace", inputWS);
   scaleAlg->setProperty("OutputWorkspace", outputWS);
   scaleAlg->setProperty("Factor", factor);

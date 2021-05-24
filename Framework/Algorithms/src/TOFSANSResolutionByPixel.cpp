@@ -193,7 +193,7 @@ void TOFSANSResolutionByPixel::exec() {
  * @returns a copy of the input workspace
  */
 MatrixWorkspace_sptr TOFSANSResolutionByPixel::setupOutputWorkspace(const MatrixWorkspace_sptr &inputWorkspace) {
-  IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace");
+  auto duplicate = createChildAlgorithm("CloneWorkspace");
   duplicate->initialize();
   duplicate->setProperty<Workspace_sptr>("InputWorkspace", inputWorkspace);
   duplicate->execute();
@@ -210,7 +210,7 @@ MatrixWorkspace_sptr
 TOFSANSResolutionByPixel::getModeratorWorkspace(const Mantid::API::MatrixWorkspace_sptr &inputWorkspace) {
 
   MatrixWorkspace_sptr sigmaModerator = getProperty("SigmaModerator");
-  IAlgorithm_sptr rebinned = createChildAlgorithm("RebinToWorkspace");
+  auto rebinned = createChildAlgorithm("RebinToWorkspace");
   rebinned->initialize();
   rebinned->setProperty("WorkspaceToRebin", sigmaModerator);
   rebinned->setProperty("WorkspaceToMatch", inputWorkspace);

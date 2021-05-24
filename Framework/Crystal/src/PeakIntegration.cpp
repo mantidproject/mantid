@@ -295,7 +295,7 @@ int PeakIntegration::fitneighbours(int ipeak, const std::string &det_name, int x
   // Number of slices
   int TOFmax = 0;
 
-  IAlgorithm_sptr slice_alg = createChildAlgorithm("IntegratePeakTimeSlices");
+  auto slice_alg = createChildAlgorithm("IntegratePeakTimeSlices");
   slice_alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
   std::ostringstream tab_str;
   tab_str << "LogTable" << ipeak;

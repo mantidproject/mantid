@@ -825,7 +825,7 @@ API::MatrixWorkspace_sptr GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspa
   working_ws->setSharedE(1, inputWS->sharedE(wsIndex1));
 
   if (inputWS->getAxis(0)->unit()->caption() != "Energy") {
-    API::IAlgorithm_sptr conv = createChildAlgorithm("ConvertUnits");
+    auto conv = createChildAlgorithm("ConvertUnits");
     conv->initialize();
     conv->setProperty("InputWorkspace", working_ws);
     conv->setProperty("OutputWorkspace", working_ws);

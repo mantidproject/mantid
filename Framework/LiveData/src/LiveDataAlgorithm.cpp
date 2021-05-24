@@ -273,7 +273,7 @@ IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm(bool postProcessing) {
     std::string props = this->getPropertyValue(prefix + "ProcessingProperties");
 
     // Create the UNMANAGED algorithm
-    IAlgorithm_sptr alg = this->createChildAlgorithm(algoName);
+    auto alg = this->createChildAlgorithm(algoName);
 
     // Skip some of the properties when setting
     std::unordered_set<std::string> ignoreProps;
@@ -290,7 +290,7 @@ IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm(bool postProcessing) {
     return alg;
   } else if (!script.empty() || !scriptfile.empty()) {
     // Run a snippet of python
-    IAlgorithm_sptr alg = this->createChildAlgorithm("RunPythonScript");
+    auto alg = this->createChildAlgorithm("RunPythonScript");
     alg->setLogging(false);
     if (scriptfile.empty()) {
       g_log.information("Creating python algorithm from string");
@@ -382,7 +382,7 @@ std::map<std::string, std::string> LiveDataAlgorithm::validateInputs() {
     auto runningLiveAlgorithms = AlgorithmManager::Instance().runningInstancesOf("MonitorLiveData");
     auto runningAlgs_it = runningLiveAlgorithms.begin();
     while (runningAlgs_it != runningLiveAlgorithms.end()) {
-      IAlgorithm_const_sptr alg = *runningAlgs_it;
+      auto alg = *runningAlgs_it;
       // MonitorLiveData thread that is running, except THIS one.
       if (alg->getAlgorithmID() != this->getAlgorithmID()) {
         if (!accumName.empty() && alg->getPropertyValue("AccumulationWorkspace") == accumName)

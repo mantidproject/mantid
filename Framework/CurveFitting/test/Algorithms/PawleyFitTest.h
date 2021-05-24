@@ -54,7 +54,7 @@ public:
     MatrixWorkspace_sptr ws =
         getWorkspace(getFunctionString(hkls, true), (2.0 * M_PI) / 2.1, (2.0 * M_PI) / 1.0, 1000, "MomentumTransfer");
 
-    IAlgorithm_sptr pFit = AlgorithmManager::Instance().create("PawleyFit");
+    auto pFit = AlgorithmManager::Instance().create("PawleyFit");
     pFit->setProperty("InputWorkspace", ws);
     pFit->setProperty("WorkspaceIndex", 0);
     pFit->setProperty("LatticeSystem", "Hexagonal");
@@ -99,7 +99,7 @@ public:
     ITableWorkspace_sptr hkls = getOrthorhombicTable();
     MatrixWorkspace_sptr ws = getWorkspace(getFunctionString(hkls, false), 1.5, 2.1, 1000, "dSpacing");
 
-    IAlgorithm_sptr pFit = AlgorithmManager::Instance().create("PawleyFit");
+    auto pFit = AlgorithmManager::Instance().create("PawleyFit");
     pFit->setProperty("InputWorkspace", ws);
     pFit->setProperty("WorkspaceIndex", 0);
     pFit->setProperty("LatticeSystem", "Orthorhombic");

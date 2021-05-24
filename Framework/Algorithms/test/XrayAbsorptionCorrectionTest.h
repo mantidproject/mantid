@@ -91,7 +91,7 @@ public:
     for (size_t i = 0; i < yData.size(); i++) {
       yData[i] = std::exp(-1);
     }
-    API::IAlgorithm_sptr comparison = algo.createChildAlgorithm("CompareWorkspaces");
+    auto comparison = algo.createChildAlgorithm("CompareWorkspaces");
     comparison->setProperty("Workspace1", inputWS);
     comparison->setProperty("Workspace2", "outputWS");
     comparison->setProperty("Tolerance", 1.0e-05);

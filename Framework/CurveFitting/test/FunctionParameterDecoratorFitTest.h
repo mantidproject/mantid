@@ -76,7 +76,7 @@ public:
     fn->setDecoratedFunction("FlatBackground");
     fn->setParameter("A0", 10.5);
 
-    IAlgorithm_sptr fitAlg = AlgorithmManager::Instance().create("Fit");
+    auto fitAlg = AlgorithmManager::Instance().create("Fit");
     fitAlg->setProperty("Function", std::static_pointer_cast<IFunction>(fn));
     fitAlg->setProperty("InputWorkspace", ws);
 

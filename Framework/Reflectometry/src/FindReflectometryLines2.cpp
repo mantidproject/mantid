@@ -189,7 +189,7 @@ double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
   func->setParameter("A1", 0.);
   sum->addFunction(func);
   // call Fit child algorithm
-  API::IAlgorithm_sptr fit = createChildAlgorithm("Fit");
+  auto fit = createChildAlgorithm("Fit");
   fit->initialize();
   fit->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(sum));
   fit->setProperty("InputWorkspace", transposedWS);
@@ -216,7 +216,7 @@ API::MatrixWorkspace_sptr FindReflectometryLines2::integrate(API::MatrixWorkspac
   int const endIndex = getProperty(Prop::END_INDEX);
   double const startX = getProperty(Prop::RANGE_LOWER);
   double const endX = getProperty(Prop::RANGE_UPPER);
-  API::IAlgorithm_sptr integration = createChildAlgorithm("Integration");
+  auto integration = createChildAlgorithm("Integration");
   integration->initialize();
   integration->setProperty("InputWorkspace", ws);
   integration->setProperty("OutputWorkspace", "__unused_for_child");
@@ -234,7 +234,7 @@ API::MatrixWorkspace_sptr FindReflectometryLines2::integrate(API::MatrixWorkspac
  *  @return a transposed workspace
  */
 API::MatrixWorkspace_sptr FindReflectometryLines2::transpose(API::MatrixWorkspace_sptr &ws) {
-  API::IAlgorithm_sptr transpose = createChildAlgorithm("Transpose");
+  auto transpose = createChildAlgorithm("Transpose");
   transpose->initialize();
   transpose->setProperty("InputWorkspace", ws);
   transpose->setProperty("OutputWorkspace", "__unused_for_child");

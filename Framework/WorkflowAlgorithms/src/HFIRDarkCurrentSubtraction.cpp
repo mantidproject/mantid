@@ -119,7 +119,7 @@ void HFIRDarkCurrentSubtraction::exec() {
   // Perform subtraction
   double darkTimer = getCountingTime(darkWS);
   double dataTimer = getCountingTime(inputWS);
-  IAlgorithm_sptr scaleAlg = createChildAlgorithm("Scale", 0.3, 0.5);
+  auto scaleAlg = createChildAlgorithm("Scale", 0.3, 0.5);
   scaleAlg->setProperty("InputWorkspace", darkWS);
   scaleAlg->setProperty("Factor", dataTimer / darkTimer);
   scaleAlg->setProperty("Operation", "Multiply");
@@ -133,7 +133,7 @@ void HFIRDarkCurrentSubtraction::exec() {
     scaledDarkWS->dataY(DEFAULT_MONITOR_ID)[i] = 0.0;
     scaledDarkWS->dataE(DEFAULT_MONITOR_ID)[i] = 0.0;
   }
-  IAlgorithm_sptr minusAlg = createChildAlgorithm("Minus", 0.5, 0.7);
+  auto minusAlg = createChildAlgorithm("Minus", 0.5, 0.7);
   minusAlg->setProperty("LHSWorkspace", inputWS);
   minusAlg->setProperty("RHSWorkspace", scaledDarkWS);
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");

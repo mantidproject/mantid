@@ -78,7 +78,7 @@ void ChangeLogTime::exec() {
   // Just overwrite if the change is in place
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (outputWS != inputWS) {
-    IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace");
+    auto duplicate = createChildAlgorithm("CloneWorkspace");
     duplicate->initialize();
     duplicate->setProperty<Workspace_sptr>("InputWorkspace", std::dynamic_pointer_cast<Workspace>(inputWS));
     duplicate->execute();

@@ -782,7 +782,7 @@ bool FitPowderDiffPeaks::doFit1PeakBackground(const Workspace2D_sptr &dataws, si
                  << cominfoa << "Fit range = " << startx << ", " << endx << '\n';
 
   // 3. Set
-  IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
+  auto fitalg = createChildAlgorithm("Fit", -1, -1, true);
   fitalg->initialize();
 
   fitalg->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(compfunc));
@@ -1685,7 +1685,7 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(const DataObjects::Workspace2D_sptr &
   gaussianpeak->addConstraint(std::move(centerbound));
 
   // 3. Fit
-  API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
+  auto fitalg = createChildAlgorithm("Fit", -1, -1, true);
   fitalg->initialize();
 
   fitalg->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(gaussianpeak));
@@ -2776,7 +2776,7 @@ bool FitPowderDiffPeaks::getHKLFromMap(map<string, int> intmap, vector<int> &hkl
  * @param tofmax:  maximum value for cropping
  */
 void FitPowderDiffPeaks::cropWorkspace(double tofmin, double tofmax) {
-  API::IAlgorithm_sptr cropalg = this->createChildAlgorithm("CropWorkspace", -1, -1, true);
+  auto cropalg = createChildAlgorithm("CropWorkspace", -1, -1, true);
   cropalg->initialize();
 
   cropalg->setProperty("InputWorkspace", m_dataWS);

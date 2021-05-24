@@ -495,7 +495,7 @@ void FilterEvents::groupOutputWorkspace() {
   progress(m_progress, "Group workspaces");
 
   std::string groupname = m_outputWSNameBase;
-  API::IAlgorithm_sptr groupws = createChildAlgorithm("GroupWorkspaces", 0.95, 1.00, true);
+  auto groupws = createChildAlgorithm("GroupWorkspaces", 0.95, 1.00, true);
   groupws->setAlwaysStoreInADS(true);
   groupws->setProperty("InputWorkspaces", m_wsNames);
   groupws->setProperty("OutputWorkspace", groupname);

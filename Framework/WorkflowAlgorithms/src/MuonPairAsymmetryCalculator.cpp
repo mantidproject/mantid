@@ -80,7 +80,7 @@ MatrixWorkspace_sptr MuonPairAsymmetryCalculator::asymmetryCalc(const Workspace_
     std::vector<int> fwd(1, m_firstPairIndex + 1);
     std::vector<int> bwd(1, m_secondPairIndex + 1);
 
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("AsymmetryCalc");
+    auto alg = AlgorithmManager::Instance().create("AsymmetryCalc");
     alg->setChild(true);
     alg->setProperty("InputWorkspace", inputWS);
     alg->setProperty("ForwardSpectra", fwd);

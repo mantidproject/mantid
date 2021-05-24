@@ -927,7 +927,7 @@ bool RefinePowderInstrumentParameters3::doFitFunction(const IFunction_sptr &func
   g_log.information() << outss.str();
 
   // 1. Create and setup fit algorithm
-  API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
+  auto fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
   fitalg->initialize();
 
   fitalg->setProperty("Function", function);

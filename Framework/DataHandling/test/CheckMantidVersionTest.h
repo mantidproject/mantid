@@ -111,9 +111,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    std::string currentVersion = alg.PropertyManagerOwner::getProperty("CurrentVersion");
-    alg.PropertyManagerOwner::getProperty("MostRecentVersion");
-    bool isNewVersionAvailable = alg.PropertyManagerOwner::getProperty("IsNewVersionAvailable");
+    std::string currentVersion = alg.getProperty("CurrentVersion");
+    alg.getProperty("MostRecentVersion");
+    bool isNewVersionAvailable = alg.getProperty("IsNewVersionAvailable");
 
     // Check the results
     TS_ASSERT_EQUALS(alg.CurrentVersion, currentVersion);

@@ -139,7 +139,7 @@ void CreateSimulationWorkspace::exec() {
  */
 void CreateSimulationWorkspace::createInstrument() {
   const bool enableLogging(false);
-  IAlgorithm_sptr loadInstrument = createChildAlgorithm("LoadInstrument", 0.0, 0.5, enableLogging);
+  auto loadInstrument = createChildAlgorithm("LoadInstrument", 0.0, 0.5, enableLogging);
   MatrixWorkspace_sptr tempWS = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
   // We need to set the correct start date for this workspace
@@ -355,7 +355,7 @@ void CreateSimulationWorkspace::adjustInstrument(const std::string &filename) {
 
   std::string value = updateDets->value<std::string>();
   if (value.substr(0, 8) == "datafile") {
-    IAlgorithm_sptr updateInst = createChildAlgorithm("UpdateInstrumentFromFile", 0.75, 1.0);
+    auto updateInst = createChildAlgorithm("UpdateInstrumentFromFile", 0.75, 1.0);
     updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_outputWS);
     updateInst->setPropertyValue("Filename", filename);
     if (value == "datafile-ignore-phi") {

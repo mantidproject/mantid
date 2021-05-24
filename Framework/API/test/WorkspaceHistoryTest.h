@@ -112,13 +112,13 @@ public:
     auto second = history.getAlgorithmHistory(1);
     TS_ASSERT_EQUALS(second->name(), "SimpleSum2");
 
-    IAlgorithm_sptr first = history.getAlgorithm(0);
+    auto first = history.getAlgorithm(0);
     TS_ASSERT_EQUALS(first->name(), "SimpleSum");
     TS_ASSERT_EQUALS(first->getPropertyValue("Input1"), "5");
     TS_ASSERT_EQUALS(first->getPropertyValue("Output1"), "6");
 
     // Last algorithm
-    IAlgorithm_sptr lastAlg = history.lastAlgorithm();
+    auto lastAlg = history.lastAlgorithm();
     TS_ASSERT_EQUALS(lastAlg->name(), "SimpleSum2");
 
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("SimpleSum", 1);

@@ -325,7 +325,7 @@ bool ConvertEmptyToTof::doFitGaussianPeak(int workspaceindex, double &center, do
 
   g_log.debug("Calling createChildAlgorithm : Fit...");
   // 4. Fit
-  API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
+  auto fitalg = createChildAlgorithm("Fit", -1, -1, true);
   fitalg->initialize();
 
   fitalg->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(gaussianpeak));

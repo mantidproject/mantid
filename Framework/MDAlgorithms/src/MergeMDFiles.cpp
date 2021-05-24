@@ -362,7 +362,7 @@ void MergeMDFiles::exec() {
   // Start by loading the first file but just the box structure, no events, and
   // not file-backed
   // m_BoxStruct.loadBoxStructure(firstFile,
-  IAlgorithm_sptr loader = createChildAlgorithm("LoadMD", 0.0, 0.05, false);
+  auto loader = createChildAlgorithm("LoadMD", 0.0, 0.05, false);
   loader->setPropertyValue("Filename", firstFile);
   loader->setProperty("MetadataOnly", false);
   loader->setProperty("BoxStructureOnly", true);

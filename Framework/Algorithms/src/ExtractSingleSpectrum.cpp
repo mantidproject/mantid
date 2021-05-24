@@ -39,7 +39,7 @@ void ExtractSingleSpectrum::exec() {
   }
 
   // Let crop do the rest
-  IAlgorithm_sptr cropper = this->createChildAlgorithm("CropWorkspace", 0.0, 1.0);
+  auto cropper = this->createChildAlgorithm("CropWorkspace", 0.0, 1.0);
   cropper->setProperty("InputWorkspace", inputWorkspace);
   cropper->setProperty("StartWorkspaceIndex", indexToExtract);
   cropper->setProperty("EndWorkspaceIndex", indexToExtract);

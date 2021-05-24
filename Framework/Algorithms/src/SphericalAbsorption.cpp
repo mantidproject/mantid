@@ -86,7 +86,7 @@ void SphericalAbsorption::exec() {
 
   progress.report("AnvredCorrection");
 
-  IAlgorithm_sptr anvred = createChildAlgorithm("AnvredCorrection");
+  auto anvred = createChildAlgorithm("AnvredCorrection");
   anvred->setProperty<MatrixWorkspace_sptr>("InputWorkspace", m_inputWS);
   anvred->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", correctionFactors);
   anvred->setProperty("PreserveEvents", true);

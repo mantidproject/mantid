@@ -35,7 +35,7 @@ public:
   void testNoQuotes() {
     ITableWorkspace_sptr ws = CreatePopulatedWorkspace();
 
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveTBL");
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("SaveTBL");
     alg->setRethrows(true);
     alg->setPropertyValue("InputWorkspace", m_name);
     alg->setPropertyValue("Filename", m_filename);
@@ -99,7 +99,7 @@ public:
         << "5"
         << "";
 
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveTBL");
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("SaveTBL");
     alg->setRethrows(true);
     alg->setPropertyValue("InputWorkspace", m_name);
     alg->setPropertyValue("Filename", m_filename);
@@ -170,7 +170,7 @@ public:
         << ""
         << "Some Other Value";
 
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveTBL");
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("SaveTBL");
     alg->setRethrows(true);
     alg->setPropertyValue("InputWorkspace", m_name);
     alg->setPropertyValue("Filename", m_filename);
@@ -217,7 +217,7 @@ public:
         << "2.0"
         << "1"
         << "";
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveTBL");
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("SaveTBL");
     alg->setRethrows(true);
     alg->setPropertyValue("InputWorkspace", m_name);
     alg->setPropertyValue("Filename", m_filename);
@@ -258,7 +258,7 @@ public:
         << "0.04"
         << "2.0" << 1 << "";
 
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveTBL");
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("SaveTBL");
     alg->setRethrows(true);
     alg->setPropertyValue("InputWorkspace", m_name);
     alg->setPropertyValue("Filename", m_filename);
@@ -273,7 +273,7 @@ public:
   void testLoadWithLoadTBL() {
     ITableWorkspace_sptr ws = CreatePopulatedWorkspace();
 
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveTBL");
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("SaveTBL");
     alg->setRethrows(true);
     alg->setPropertyValue("InputWorkspace", m_name);
     alg->setPropertyValue("Filename", m_filename);
@@ -284,8 +284,7 @@ public:
     }
 
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(m_name));
-
-    Mantid::API::IAlgorithm_sptr algLoad = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
+    auto algLoad = Mantid::API::AlgorithmManager::Instance().create("LoadTBL");
     algLoad->setRethrows(true);
     algLoad->setPropertyValue("OutputWorkspace", m_name);
     algLoad->setPropertyValue("Filename", m_abspath);

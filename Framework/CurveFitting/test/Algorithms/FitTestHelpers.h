@@ -75,7 +75,7 @@ static std::string generateFunctionDescrForFit(CurveBenchmarks ctype) {
 // X0=10000, S=400", NumBanks=1, BankPixelWidth=1, Random=True)
 static API::MatrixWorkspace_sptr generatePeaksCurveWorkspace() {
 
-  Mantid::API::IAlgorithm_sptr sampleAlg = Mantid::API::AlgorithmManager::Instance().create("CreateSampleWorkspace");
+  auto sampleAlg = Mantid::API::AlgorithmManager::Instance().create("CreateSampleWorkspace");
   sampleAlg->initialize();
   sampleAlg->setChild(true);
   sampleAlg->setProperty("Function", "User Defined");
@@ -102,7 +102,7 @@ static API::MatrixWorkspace_sptr generatePeaksCurveWorkspace() {
 // NumBanks=1, BankPixelWidth=1, XMin=0, XMax=10, BinWidth=0.01, Random=True)
 static API::MatrixWorkspace_sptr generateSmoothCurveWorkspace() {
 
-  Mantid::API::IAlgorithm_sptr sampleAlg = Mantid::API::AlgorithmManager::Instance().create("CreateSampleWorkspace");
+  auto sampleAlg = Mantid::API::AlgorithmManager::Instance().create("CreateSampleWorkspace");
   sampleAlg->initialize();
   sampleAlg->setChild(true);
   sampleAlg->setProperty("Function", "User Defined");

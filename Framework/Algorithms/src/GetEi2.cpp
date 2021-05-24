@@ -333,7 +333,7 @@ double GetEi2::calculatePeakPosition(size_t ws_index, double t_min, double t_max
  *  @throw invalid_argument if the input workspace does not have common binning
  */
 MatrixWorkspace_sptr GetEi2::extractSpectrum(size_t ws_index, const double start, const double end) {
-  IAlgorithm_sptr childAlg = createChildAlgorithm("CropWorkspace");
+  auto childAlg = createChildAlgorithm("CropWorkspace");
   childAlg->setProperty("InputWorkspace", m_input_ws);
   childAlg->setProperty<int>("StartWorkspaceIndex", static_cast<int>(ws_index));
   childAlg->setProperty<int>("EndWorkspaceIndex", static_cast<int>(ws_index));
@@ -604,7 +604,7 @@ double GetEi2::calculateFirstMoment(const API::MatrixWorkspace_sptr &monitor_ws,
 */
 API::MatrixWorkspace_sptr GetEi2::rebin(const API::MatrixWorkspace_sptr &monitor_ws, const double first,
                                         const double width, const double end) {
-  IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin");
+  auto childAlg = createChildAlgorithm("Rebin");
   childAlg->setProperty("InputWorkspace", monitor_ws);
   std::ostringstream binParams;
   binParams << first << "," << width << "," << end;

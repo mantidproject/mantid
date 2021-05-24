@@ -21,6 +21,7 @@ add_definitions(-D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
 # Suppress warnings about std::iterator as a base. TBB emits this warning
 # and it is not yet fixed.
 add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING)
+add_definitions(-D_SILENCE_CXX17_SHARED_PTR_UNIQUE_DEPRECATION_WARNING)
 
 # ##############################################################################
 # Additional compiler flags

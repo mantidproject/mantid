@@ -131,7 +131,7 @@ std::map<std::string, std::string> ApplyDiffCal::validateInputs() {
 }
 
 void ApplyDiffCal::loadCalFile(const Workspace_sptr &inputWS, const std::string &filename) {
-  IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
+  auto alg = createChildAlgorithm("LoadDiffCal");
   alg->setProperty("InputWorkspace", inputWS);
   alg->setPropertyValue("Filename", filename);
   alg->setProperty<bool>("MakeCalWorkspace", true);

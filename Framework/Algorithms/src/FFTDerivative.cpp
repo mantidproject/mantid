@@ -66,7 +66,7 @@ void FFTDerivative::execComplexFFT() {
 
     // Transform symmetrized spectrum
     const bool isHisto = copyWS->isHistogramData();
-    IAlgorithm_sptr fft = createChildAlgorithm("FFT");
+    auto fft = createChildAlgorithm("FFT");
     fft->setProperty("InputWorkspace", copyWS);
     fft->setProperty("Real", 0);
     fft->setProperty("Transform", "Forward");
@@ -88,7 +88,7 @@ void FFTDerivative::execComplexFFT() {
 
     // If the input was histogram data, convert the output to histogram data too
     if (isHisto) {
-      IAlgorithm_sptr toHisto = createChildAlgorithm("ConvertToHistogram");
+      auto toHisto = createChildAlgorithm("ConvertToHistogram");
       toHisto->setProperty("InputWorkspace", transWS);
       toHisto->execute();
       transWS = toHisto->getProperty("OutputWorkspace");

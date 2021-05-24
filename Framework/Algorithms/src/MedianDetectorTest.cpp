@@ -184,7 +184,7 @@ API::MatrixWorkspace_sptr MedianDetectorTest::getSolidAngles(int firstSpec, int 
   g_log.debug("Calculating solid angles");
   // get percentage completed estimates for now, t0 and when we've finished t1
   double t0 = m_fracDone, t1 = advanceProgress(RTGetSolidAngle);
-  IAlgorithm_sptr childAlg = createChildAlgorithm("SolidAngle", t0, t1, true);
+  auto childAlg = createChildAlgorithm("SolidAngle", t0, t1, true);
   childAlg->setProperty("InputWorkspace", m_inputWS);
   childAlg->setProperty("StartWorkspaceIndex", firstSpec);
   childAlg->setProperty("EndWorkspaceIndex", lastSpec);

@@ -99,7 +99,7 @@ void FilterBadPulses::exec() {
 
   // Child Algorithme does all of the actual work - do not set the output
   // workspace
-  IAlgorithm_sptr filterAlgo = createChildAlgorithm("FilterByLogValue", 0., 1.);
+  auto filterAlgo = createChildAlgorithm("FilterByLogValue", 0., 1.);
   filterAlgo->setProperty("InputWorkspace", inputWS);
   filterAlgo->setProperty("LogName", "proton_charge");
   filterAlgo->setProperty("MinimumValue", min_pcharge);

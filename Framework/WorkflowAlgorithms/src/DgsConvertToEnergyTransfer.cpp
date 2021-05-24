@@ -155,7 +155,7 @@ void DgsConvertToEnergyTransfer::exec() {
         }
 
         // Load the monitors
-        IAlgorithm_sptr loadmon = this->createChildAlgorithm(loadAlgName);
+        auto loadmon = createChildAlgorithm(loadAlgName);
         loadmon->setProperty(fileProp, runFileName);
         loadmon->setProperty("OutputWorkspace", monWsName);
         loadmon->executeAsChildAlg();
@@ -171,7 +171,7 @@ void DgsConvertToEnergyTransfer::exec() {
       }
 
       // Calculate Ei
-      IAlgorithm_sptr getei = this->createChildAlgorithm("GetEi");
+      auto getei = createChildAlgorithm("GetEi");
       getei->setProperty("InputWorkspace", monWS);
       getei->setProperty("Monitor1Spec", eiMon1Spec);
       getei->setProperty("Monitor2Spec", eiMon2Spec);
@@ -182,7 +182,7 @@ void DgsConvertToEnergyTransfer::exec() {
     }
 
     g_log.notice() << "Adjusting for T0\n";
-    IAlgorithm_sptr alg = this->createChildAlgorithm("ChangeBinOffset");
+    auto alg = createChildAlgorithm("ChangeBinOffset");
     alg->setProperty("InputWorkspace", inputWS);
     alg->setProperty("OutputWorkspace", outputWS);
     alg->setProperty("Offset", -tZero);
@@ -190,7 +190,7 @@ void DgsConvertToEnergyTransfer::exec() {
     outputWS = alg->getProperty("OutputWorkspace");
 
     // Add T0 to sample logs
-    IAlgorithm_sptr addLog = this->createChildAlgorithm("AddSampleLog");
+    auto addLog = createChildAlgorithm("AddSampleLog");
     addLog->setProperty("Workspace", outputWS);
     addLog->setProperty("LogName", "CalculatedT0");
     addLog->setProperty("LogType", "Number");
@@ -199,7 +199,7 @@ void DgsConvertToEnergyTransfer::exec() {
   }
   // Do ISIS
   else {
-    IAlgorithm_sptr getei = this->createChildAlgorithm("GetEi");
+    auto getei = createChildAlgorithm("GetEi");
     getei->setProperty("InputWorkspace", inputWS);
     getei->setProperty("Monitor1Spec", eiMon1Spec);
     getei->setProperty("Monitor2Spec", eiMon2Spec);
@@ -211,7 +211,7 @@ void DgsConvertToEnergyTransfer::exec() {
     // Why did the old way get it from the log?
     incidentEnergy = getei->getProperty("IncidentEnergy");
 
-    IAlgorithm_sptr cbo = this->createChildAlgorithm("ChangeBinOffset");
+    auto cbo = createChildAlgorithm("ChangeBinOffset");
     cbo->setProperty("InputWorkspace", inputWS);
     cbo->setProperty("OutputWorkspace", outputWS);
     cbo->setProperty("Offset", -monPeak);
@@ -222,7 +222,7 @@ void DgsConvertToEnergyTransfer::exec() {
     const V3D &monPos = specInfo.position(monIndex);
     std::string srcName = inputWS->getInstrument()->getSource()->getName();
 
-    IAlgorithm_sptr moveInstComp = this->createChildAlgorithm("MoveInstrumentComponent");
+    auto moveInstComp = createChildAlgorithm("MoveInstrumentComponent");
     moveInstComp->setProperty("Workspace", outputWS);
     moveInstComp->setProperty("ComponentName", srcName);
     moveInstComp->setProperty("X", monPos.X());
@@ -243,7 +243,7 @@ void DgsConvertToEnergyTransfer::exec() {
       detcalFile = inputWS->run().getProperty("Filename")->value();
     if (!detcalFile.empty()) {
       const bool relocateDets = reductionManager->getProperty("RelocateDetectors");
-      IAlgorithm_sptr loaddetinfo = this->createChildAlgorithm("LoadDetectorInfo");
+      auto loaddetinfo = createChildAlgorithm("LoadDetectorInfo");
       loaddetinfo->setProperty("Workspace", outputWS);
       loaddetinfo->setProperty("DataFilename", detcalFile);
       loaddetinfo->setProperty("RelocateDets", relocateDets);
@@ -258,7 +258,7 @@ void DgsConvertToEnergyTransfer::exec() {
   const bool doTibSub = reductionManager->getProperty("TimeIndepBackgroundSub");
   if (doTibSub) {
     // Setup for later use
-    IAlgorithm_sptr cnvToDist = this->createChildAlgorithm("ConvertToDistribution");
+    auto cnvToDist = createChildAlgorithm("ConvertToDistribution");
 
     // Set the binning parameters for the background region
     double tibTofStart = getDblPropOrParam("TibTofRangeStart", reductionManager, "bkgd-range-min", inputWS);
@@ -289,7 +289,7 @@ void DgsConvertToEnergyTransfer::exec() {
       if (treatTibAsEvents) {
         g_log.notice("TIB removal using event mode.");
         // Treat background as events
-        IAlgorithm_sptr createBkg = this->createChildAlgorithm("CreateFlatEventWorkspace");
+        auto createBkg = createChildAlgorithm("CreateFlatEventWorkspace");
         createBkg->setProperty("InputWorkspace", outputWS);
         createBkg->setProperty("RangeStart", tibTofStart);
         createBkg->setProperty("RangeEnd", tibTofEnd);
@@ -300,7 +300,7 @@ void DgsConvertToEnergyTransfer::exec() {
         // Create an original background workspace from a portion of the
         // result workspace.
         std::string origBkgWsName = "background_origin_ws";
-        IAlgorithm_sptr rebin = this->createChildAlgorithm("Rebin");
+        auto rebin = createChildAlgorithm("Rebin");
         rebin->setProperty("InputWorkspace", outputWS);
         rebin->setProperty("OutputWorkspace", origBkgWsName);
         rebin->setProperty("Params", params);
@@ -310,7 +310,7 @@ void DgsConvertToEnergyTransfer::exec() {
         MatrixWorkspace_sptr origBkgWS = rebin->getProperty("OutputWorkspace");
 
         // Convert result workspace to DeltaE since we have Et binning
-        IAlgorithm_sptr cnvun = this->createChildAlgorithm("ConvertUnits");
+        auto cnvun = createChildAlgorithm("ConvertUnits");
         cnvun->setProperty("InputWorkspace", outputWS);
         cnvun->setProperty("OutputWorkspace", outputWS);
         cnvun->setProperty("Target", "DeltaE");
@@ -342,7 +342,7 @@ void DgsConvertToEnergyTransfer::exec() {
         outputWS = cnvToDist->getProperty("Workspace");
 
         // Calculate the background
-        IAlgorithm_sptr flatBg = this->createChildAlgorithm("CalculateFlatBackground");
+        auto flatBg = createChildAlgorithm("CalculateFlatBackground");
         flatBg->setProperty("InputWorkspace", origBkgWS);
         flatBg->setProperty("StartX", tibTofStart);
         flatBg->setProperty("EndX", tibTofEnd);
@@ -361,7 +361,7 @@ void DgsConvertToEnergyTransfer::exec() {
       }
 
       // Subtract background from result workspace
-      IAlgorithm_sptr minus = this->createChildAlgorithm("Minus");
+      auto minus = createChildAlgorithm("Minus");
       minus->setProperty("LHSWorkspace", outputWS);
       minus->setProperty("RHSWorkspace", bkgWS);
       minus->setProperty("OutputWorkspace", outputWS);
@@ -376,7 +376,7 @@ void DgsConvertToEnergyTransfer::exec() {
       cnvToDist->executeAsChildAlg();
       outputWS = cnvToDist->getProperty("Workspace");
 
-      IAlgorithm_sptr flatBg = this->createChildAlgorithm("CalculateFlatBackground");
+      auto flatBg = createChildAlgorithm("CalculateFlatBackground");
       flatBg->setProperty("InputWorkspace", outputWS);
       flatBg->setProperty("OutputWorkspace", outputWS);
       flatBg->setProperty("StartX", tibTofStart);
@@ -388,7 +388,7 @@ void DgsConvertToEnergyTransfer::exec() {
 
     if (!treatTibAsEvents) {
       // Convert result workspace back to histogram
-      IAlgorithm_sptr cnvFrDist = this->createChildAlgorithm("ConvertFromDistribution");
+      auto cnvFrDist = createChildAlgorithm("ConvertFromDistribution");
       cnvFrDist->setProperty("Workspace", outputWS);
       cnvFrDist->executeAsChildAlg();
       outputWS = cnvFrDist->getProperty("Workspace");
@@ -396,7 +396,7 @@ void DgsConvertToEnergyTransfer::exec() {
   }
 
   // Normalise result workspace to incident beam parameter
-  IAlgorithm_sptr norm = this->createChildAlgorithm("DgsPreprocessData");
+  auto norm = createChildAlgorithm("DgsPreprocessData");
   norm->setProperty("InputWorkspace", outputWS);
   norm->setProperty("OutputWorkspace", outputWS);
   norm->setProperty("InputMonitorWorkspace", monWS);
@@ -406,7 +406,7 @@ void DgsConvertToEnergyTransfer::exec() {
 
   // Convert to energy transfer
   g_log.notice() << "Converting to energy transfer.\n";
-  IAlgorithm_sptr cnvun = this->createChildAlgorithm("ConvertUnits");
+  auto cnvun = createChildAlgorithm("ConvertUnits");
   cnvun->setProperty("InputWorkspace", outputWS);
   cnvun->setProperty("OutputWorkspace", outputWS);
   cnvun->setProperty("Target", "DeltaE");
@@ -416,7 +416,7 @@ void DgsConvertToEnergyTransfer::exec() {
   outputWS = cnvun->getProperty("OutputWorkspace");
 
   g_log.notice() << "Rebinning data\n";
-  IAlgorithm_sptr rebin = this->createChildAlgorithm("Rebin");
+  auto rebin = createChildAlgorithm("Rebin");
   rebin->setProperty("InputWorkspace", outputWS);
   rebin->setProperty("OutputWorkspace", outputWS);
   rebin->setProperty("Params", etBinning);
@@ -435,7 +435,7 @@ void DgsConvertToEnergyTransfer::exec() {
     outputWS = cnvun->getProperty("OutputWorkspace");
 
     // Do the correction
-    IAlgorithm_sptr alg2 = this->createChildAlgorithm("He3TubeEfficiency");
+    auto alg2 = this->createChildAlgorithm("He3TubeEfficiency");
     alg2->setProperty("InputWorkspace", outputWS);
     alg2->setProperty("OutputWorkspace", outputWS);
     alg2->executeAsChildAlg();
@@ -450,7 +450,7 @@ void DgsConvertToEnergyTransfer::exec() {
   }
   // Do ISIS
   else {
-    IAlgorithm_sptr alg = this->createChildAlgorithm("DetectorEfficiencyCor");
+    auto alg = createChildAlgorithm("DetectorEfficiencyCor");
     alg->setProperty("InputWorkspace", outputWS);
     alg->setProperty("OutputWorkspace", outputWS);
     alg->executeAsChildAlg();
@@ -460,7 +460,7 @@ void DgsConvertToEnergyTransfer::exec() {
   const bool correctKiKf = reductionManager->getProperty("CorrectKiKf");
   if (correctKiKf) {
     // Correct for Ki/Kf
-    IAlgorithm_sptr kikf = this->createChildAlgorithm("CorrectKiKf");
+    auto kikf = createChildAlgorithm("CorrectKiKf");
     kikf->setProperty("InputWorkspace", outputWS);
     kikf->setProperty("OutputWorkspace", outputWS);
     kikf->setProperty("EMode", "Direct");
@@ -482,13 +482,13 @@ void DgsConvertToEnergyTransfer::exec() {
 
   if (sofphieIsDistribution) {
     g_log.notice() << "Making distribution\n";
-    IAlgorithm_sptr distrib = this->createChildAlgorithm("ConvertToDistribution");
+    auto distrib = createChildAlgorithm("ConvertToDistribution");
     distrib->setProperty("Workspace", outputWS);
     distrib->executeAsChildAlg();
     outputWS = distrib->getProperty("Workspace");
   } else {
     // Discard events outside nominal bounds
-    IAlgorithm_sptr crop = this->createChildAlgorithm("CropWorkspace");
+    auto crop = createChildAlgorithm("CropWorkspace");
     crop->setProperty("InputWorkspace", outputWS);
     crop->setProperty("OutputWorkspace", outputWS);
     crop->setProperty("XMin", etBinning[0]);
@@ -500,7 +500,7 @@ void DgsConvertToEnergyTransfer::exec() {
   // Normalise by the detector vanadium if necessary
   MatrixWorkspace_sptr detVanWS = this->getProperty("IntegratedDetectorVanadium");
   if (detVanWS) {
-    IAlgorithm_sptr divide = this->createChildAlgorithm("Divide");
+    auto divide = createChildAlgorithm("Divide");
     divide->setProperty("LHSWorkspace", outputWS);
     divide->setProperty("RHSWorkspace", detVanWS);
     divide->setProperty("OutputWorkspace", outputWS);
@@ -516,7 +516,7 @@ void DgsConvertToEnergyTransfer::exec() {
   std::string fileProp = filePropMod + "OldGroupingFilename";
   if (reductionManager->existsProperty(fileProp))
     oldGroupFile = reductionManager->getPropertyValue(fileProp);
-  IAlgorithm_sptr remap = this->createChildAlgorithm("DgsRemap");
+  auto remap = createChildAlgorithm("DgsRemap");
   remap->setProperty("InputWorkspace", outputWS);
   remap->setProperty("OutputWorkspace", outputWS);
   remap->setProperty("MaskWorkspace", maskWS);
@@ -527,7 +527,7 @@ void DgsConvertToEnergyTransfer::exec() {
 
   if ("ISIS" == facility) {
     double scaleFactor = inputWS->getInstrument()->getNumberParameter("scale-factor")[0];
-    IAlgorithm_sptr scaleAlg = this->createChildAlgorithm("Scale");
+    auto scaleAlg = createChildAlgorithm("Scale");
     scaleAlg->setProperty("InputWorkspace", outputWS);
     scaleAlg->setProperty("Factor", scaleFactor);
     scaleAlg->setProperty("Operation", "Multiply");

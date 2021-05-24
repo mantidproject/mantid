@@ -156,7 +156,7 @@ void LoadMcStas::exec() {
  * @return Workspace group
  */
 API::WorkspaceGroup_sptr LoadMcStas::groupWorkspaces(const std::vector<std::string> &workspaces) const {
-  API::IAlgorithm_sptr groupAlgorithm = API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+  auto groupAlgorithm = API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
   groupAlgorithm->setChild(true);
   groupAlgorithm->setLogging(false);
   groupAlgorithm->initialize();
