@@ -106,7 +106,7 @@ Matplotlib with Mantid see
 `NumPy <https://docs.scipy.org/doc/numpy/user/quickstart.html>`_ is
 ubiquitous within scientific computing in Python and its data structures can be
 used within Mantid. For a short introduction to NumPy see Mantid's
-`Numpy Introduction <https://www.mantidproject.org/Numpy_Introduction>`__.
+:ref:`Numpy Introduction <NumPyIntroduction>`.
 
 Editor Status
 -------------
