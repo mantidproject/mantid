@@ -18,7 +18,6 @@ First we need to import the relevant packages, this includes PyQt.
 
 .. code-block:: python
 
-    from __future__ import (absolute_import,division,print_function)
     from qtpy import QtWidgets, QtCore, QtGui
 
 We then create the View class as a QWidget. Each view will have a
@@ -63,8 +62,6 @@ To run the GUI we need a 'main' module. Assuming that the above has
 all been saved in ``view.py``, the ``main.py`` will contain:
 
 .. code-block:: python
-
-    from __future__ import (absolute_import,division,print_function)
 
     from qtpy import QtWidgets
 

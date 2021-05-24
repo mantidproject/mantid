@@ -27,8 +27,6 @@ Usage
 
 .. testcode:: ConvolutionFitSequentialExample
 
-  from __future__ import print_function
-
   # Load sample and resolution files
   sample = Load('irs26176_graphite002_red.nxs')
   resolution = Load('irs26173_graphite002_red.nxs')
