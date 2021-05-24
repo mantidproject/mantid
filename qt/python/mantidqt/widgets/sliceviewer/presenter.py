@@ -423,7 +423,7 @@ class SliceViewer(ObservingPresenter):
             if event.inaxes:
                 sliceinfo = self.get_sliceinfo()
                 self._logger.debug(f"Coordinates selected x={event.xdata} y={event.ydata} z={sliceinfo.z_value}")
-                pos = sliceinfo.transform([event.xdata, event.ydata, sliceinfo.z_value])
+                pos = sliceinfo.inverse_transform([event.xdata, event.ydata, sliceinfo.z_value])
                 self._logger.debug(f"Coordinates transformed into {sliceinfo.frame} frame, pos={pos}")
                 self._peaks_presenter.add_delete_peak(pos)
                 self.view.data_view.canvas.draw_idle()

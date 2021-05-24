@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt.
 # std imports
-from typing import Any, Tuple, Sequence, Optional
+from typing import Tuple, Sequence, Optional
 
 # 3rd party
 from mantid.kernel import SpecialCoordinateSystem
@@ -55,6 +55,7 @@ class SliceInfo:
         self._slicevalue_z, self._slicewidth_z = (None, ) * 2
         self._display_x, self._display_y, self._display_z = (None, ) * 3
         self._axes_tr = _unit_transform if nonortho_transform is None else nonortho_transform.tr
+        self._axes_inv_tr = _unit_transform if nonortho_transform is None else nonortho_transform.inv_tr
 
         self._init(transpose, qflags)
 
@@ -87,6 +88,20 @@ class SliceInfo:
         """
         return np.array((*self._axes_tr(point[self._display_x], point[self._display_y]),
                          point[self._display_z]))
+
+    def inverse_transform(self, point: Sequence) -> np.ndarray:
+        """Does the inverse fransform (inverse of self.transform) from slice
+        frame to data frame
+
+        :param point: A 3D point in the slice frame
+        """
+        transform = np.zeros((3,3))
+        transform[0][self._display_x]=1
+        transform[1][self._display_y]=1
+        transform[2][self._display_z]=1
+        inv_trans = np.linalg.inv(transform)
+        point = np.dot(inv_trans, point)
+        return np.array((*self._axes_inv_tr(point[0], point[1]), point[2]))
 
     # private api
     def _init(self, transpose: bool, qflags: Sequence[bool]):
