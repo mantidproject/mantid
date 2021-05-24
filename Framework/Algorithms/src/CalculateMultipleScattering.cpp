@@ -31,7 +31,7 @@ using Mantid::DataObjects::Workspace2D;
 namespace {
 constexpr int DEFAULT_NPATHS = 1000;
 constexpr int DEFAULT_SEED = 123456789;
-constexpr int DEFAULT_NSCATTERINGS = 1;
+constexpr int DEFAULT_NSCATTERINGS = 2;
 constexpr int DEFAULT_LATITUDINAL_DETS = 5;
 constexpr int DEFAULT_LONGITUDINAL_DETS = 10;
 } // namespace
