@@ -26,10 +26,9 @@ struct HoldRedrawing {
 
 using namespace Mantid::API;
 
-IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model, IIndirectFitPlotView *view,
-                                                   IPyRunner *pythonRunner)
+IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model, IIndirectFitPlotView *view)
     : m_model(new IndirectFitPlotModel(model)), m_view(view), m_plotGuessInSeparateWindow(false),
-      m_plotter(std::make_unique<IndirectPlotter>(pythonRunner)) {
+      m_plotter(std::make_unique<IndirectPlotter>()) {
   connect(m_view, SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
           SLOT(handleSelectedFitDataChanged(TableDatasetIndex)));
 

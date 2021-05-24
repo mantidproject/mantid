@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IPythonRunner.h"
 #include "IndirectPlotter.h"
 
 #include "DllConfig.h"
@@ -20,8 +19,7 @@ namespace CustomInterfaces {
 
 class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsModel {
 public:
-  IndirectPlotOptionsModel(IPyRunner *pythonRunner = nullptr,
-                           boost::optional<std::map<std::string, std::string>> const &availableActions = boost::none);
+  IndirectPlotOptionsModel(boost::optional<std::map<std::string, std::string>> const &availableActions = boost::none);
   /// Used by the unit tests so that m_plotter can be mocked
   IndirectPlotOptionsModel(IndirectPlotter *plotter,
                            boost::optional<std::map<std::string, std::string>> const &availableActions = boost::none);

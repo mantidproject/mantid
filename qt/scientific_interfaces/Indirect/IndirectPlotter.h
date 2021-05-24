@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IPythonRunner.h"
-
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -19,10 +17,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-class IPyRunner;
-#endif
-
 enum MantidAxis { Spectrum, Bin };
 
 /**
@@ -33,7 +27,7 @@ class MANTIDQT_INDIRECT_DLL IndirectPlotter : public QObject {
   Q_OBJECT
 
 public:
-  IndirectPlotter(IPyRunner *parent = nullptr);
+  IndirectPlotter();
   virtual ~IndirectPlotter();
 
   virtual void plotSpectra(std::string const &workspaceName, std::string const &workspaceIndices);
@@ -53,12 +47,6 @@ private:
   bool validateSpectra(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
                        std::string const &workspaceIndices) const;
   bool validateBins(const Mantid::API::MatrixWorkspace_const_sptr &workspace, std::string const &binIndices) const;
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  void runPythonCode(std::string const &pythonCode);
-
-  IPyRunner *m_pyRunner;
-#endif
 };
 
 } // namespace CustomInterfaces

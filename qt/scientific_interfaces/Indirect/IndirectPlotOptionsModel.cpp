@@ -113,9 +113,9 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 IndirectPlotOptionsModel::IndirectPlotOptionsModel(
-    IPyRunner *pythonRunner, boost::optional<std::map<std::string, std::string>> const &availableActions)
+    boost::optional<std::map<std::string, std::string>> const &availableActions)
     : m_actions(constructActions(availableActions)), m_fixedIndices(false), m_workspaceIndices(boost::none),
-      m_workspaceName(boost::none), m_plotter(std::make_unique<IndirectPlotter>(pythonRunner)) {}
+      m_workspaceName(boost::none), m_plotter(std::make_unique<IndirectPlotter>()) {}
 
 /// Used by the unit tests so that m_plotter can be mocked
 IndirectPlotOptionsModel::IndirectPlotOptionsModel(

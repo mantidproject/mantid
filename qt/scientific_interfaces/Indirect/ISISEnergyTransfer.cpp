@@ -218,7 +218,7 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI, QWidget *pa
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraContour));
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraContour));
 
   // SIGNAL/SLOT CONNECTIONS
   // Update instrument information when a new instrument config is selected
