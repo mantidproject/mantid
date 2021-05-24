@@ -10,8 +10,8 @@ from qtpy import QtCore
 from Muon.GUI.Common.usage_report import report_interface_startup
 import sys
 
-
 Name = "Muon_Analysis_2"
+
 if 'workbench' in sys.modules:
     from workbench.config import get_window_config
 

@@ -73,6 +73,6 @@ class PythonInterfacesStartupTest(systemtesting.MantidSystemTest):
         python script runs to completion, but the python object itself is not. This means it is still subscribed to the
         ADS because the 'close_event' is not called, but the Qt objects no longer exist. This causes problems when
         an ADS change is observed."""
-        for i, widget in enumerate(QApplication.topLevelWidgets()):
+        for widget in QApplication.topLevelWidgets():
             if not widget.isHidden():
                 widget.close()
