@@ -10,48 +10,24 @@
 from threading import Timer
 
 from ..memorywidget.memoryinfo import get_memory_info
+from ...utils.asynchronous import set_interval
 
 TIME_INTERVAL_MEMORY_USAGE_UPDATE = 2.000  # in s
 
 
 class MemoryPresenter(object):
     """
-    Gets system memory usage information and passes it to
-    the memory view
-    This happens at the beginning as well as every
-    TIME_INTERVAL_MEMORY_USAGE_UPDATE (ms) using QTimer
-    Besides, sets the style of the memory(progress) bar
-    at the beginning
+    Gets system memory usage information and passes it to the memory view this happens at the beginning as well as
+    every TIME_INTERVAL_MEMORY_USAGE_UPDATE (s) using threading.Timer; Also, sets the style of the memory(progress) bar
+    on construction.
     """
     def __init__(self, view):
         self.view = view
-        self.timer = Timer(TIME_INTERVAL_MEMORY_USAGE_UPDATE, self.update_memory_usage)
-        self.thread_on = False
-        self.updating_cancelled = False
-        self.application_closing = False
-        self.update_memory_usage()
         self.set_bar_color_at_start()
-        self.start_memory_widget_update_thread()
+        self.thread_stopper = self.update_memory_usage()
 
     def __del__(self):
         self.cancel_memory_update()
-
-    def start_memory_widget_update_thread(self):
-        """
-        Sets timer so that the memory usage is updated
-        every TIME_INTERVAL_MEMORY_USAGE_UPDATE (ms)
-        """
-        if not self.thread_on:
-            self.timer.start()
-
-    def _spin_off_another_time_thread(self):
-        """
-        Spins off another timer thread, by creating a new Timer thread object and starting it
-        """
-        if not self.thread_on and not self.application_closing:
-            self.timer = Timer(TIME_INTERVAL_MEMORY_USAGE_UPDATE, self.update_memory_usage)
-            self.timer.start()
-            self.thread_on = True
 
     def set_bar_color_at_start(self):
         """
@@ -65,18 +41,16 @@ class MemoryPresenter(object):
         else:
             pass
 
+    @set_interval(TIME_INTERVAL_MEMORY_USAGE_UPDATE)
     def update_memory_usage(self):
         """
         Gets memory usage information and passes it to the view
         """
-        if not self.updating_cancelled:
-            self.thread_on = False
-            mem_used_percent, mem_used, mem_avail = get_memory_info()
-            self.view.set_value(mem_used_percent, mem_used, mem_avail)
-            self._spin_off_another_time_thread()
+        mem_used_percent, mem_used, mem_avail = get_memory_info()
+        self.view.set_value(mem_used_percent, mem_used, mem_avail)
 
     def cancel_memory_update(self):
-        self.updating_cancelled = True
-        self.thread_on = False
-        self.application_closing = True
-        self.timer.cancel()
+        """
+        Ensures that the thread will not restart after it finishes next, as well as attempting to cancel it.
+        """
+        self.thread_stopper.set()
