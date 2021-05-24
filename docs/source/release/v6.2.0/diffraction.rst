@@ -33,6 +33,7 @@ New features
 
 Improvements
 ############
+- Find detector in peaks will check which det is closer when dealing with peak-in-gap situation for tube-type detectors.
 
 Bugfixes
 ########
