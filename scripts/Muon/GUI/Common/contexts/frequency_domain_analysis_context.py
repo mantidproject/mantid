@@ -31,7 +31,7 @@ class FrequencyDomainAnalysisContext(MuonContext):
 
     @property
     def default_end_x(self):
-        return 250.0
+        return self._freq_plotting_context.default_xlims[1]
 
     @property
     def guess_workspace_prefix(self):

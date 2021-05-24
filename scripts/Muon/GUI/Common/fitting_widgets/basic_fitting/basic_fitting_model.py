@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid import AlgorithmManager, AnalysisDataService, logger
+from mantid import AlgorithmManager, logger
 from mantid.api import CompositeFunction, IAlgorithm, IFunction
 from mantid.simpleapi import CopyLogs, EvaluateFunction
 
@@ -576,7 +576,7 @@ class BasicFittingModel:
     @staticmethod
     def _check_data_exists(workspace_names: list) -> list:
         """Returns only the workspace names that exist in the ADS."""
-        return [workspace_name for workspace_name in workspace_names if AnalysisDataService.doesExist(workspace_name)]
+        return [workspace_name for workspace_name in workspace_names if check_if_workspace_exist(workspace_name)]
 
     def get_selected_runs_groups_and_pairs(self) -> tuple:
         """Returns the runs, groups and pairs to use for single fit mode."""

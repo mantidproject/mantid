@@ -17,7 +17,7 @@ from Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_v
 class FittingTabWidget(object):
     """
     The FittingTabWidget creates the tab used for fitting. Muon Analysis uses the TF Asymmetry fitting widget, and
-    Frequency Domain Analysis uses the General fitting widget.
+    Frequency Domain Analysis uses the Basic fitting widget.
     """
 
     def __init__(self, context, parent):
