@@ -9,4 +9,15 @@ Direct Geometry Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+CrystalField
+------------
+
+New
+###
+
+
+BugFixes
+########
+- A bug has been fixed in the plot methods for CrystalField and CrystalFieldMultiSite
+
 :ref:`Release 6.2.0 <v6.2.0>`
