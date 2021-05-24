@@ -1,0 +1,70 @@
+name: mantid
+
+channels:
+  - conda-forge
+  - DLR-SC # Required for OpenCascade
+
+dependencies:
+  - python=3.8.10
+  - cmake=3.19.7
+  - texlive-core=20180414
+  - doxygen=1.9.1
+  - tbb=2020.2.0
+  - tbb-devel=2020.2.0
+  - boost-cpp=1.75.0
+  - boost=1.75.0 # Include only boost-python and boost-numpy
+  - poco=1.10.1
+  - nexus=4.4.3
+  - hdf5=1.10.6 # pinned here for Nexus compatibility
+  - jemalloc=5.2.1
+  - gsl=2.6
+  - jsoncpp=1.9.4
+  - ninja=1.10.2
+  - graphviz=2.47.0
+  - librdkafka=1.6.0
+  - eigen=3.3.9
+  - opencascade=7.4.0
+  - zlib=1.2.11
+  - muparser=2.3.2
+  - qt=5.12.9
+  # Not Windows, OpenGL implementation:
+  - mesalib=18.0.0
+  - mesa-libgl-devel-cos7-x86_64=18.3.4
+  - mesa-libgl-cos7-x86_64=18.3.4
+  # Needed for test suite on Linux
+  - xorg-libxcomposite=0.4.5
+  - xorg-libxcursor=1.2.0
+  - xorg-libxdamage=1.1.5
+  - xorg-libxi=1.7.10
+  - xorg-libxtst=1.2.3
+  - xorg-libxscrnsaver=1.2.3
+  - pciutils-libs-cos7-x86_64=3.5.1
+  # Linux only
+  - gxx_linux-64=9.3.0
+  - libglu=9.0.0
+  # Python Packages:
+  - setuptools=48.0.0
+  - qtwebkit=5.212
+  - qscintilla2=2.11.2 # Needs to be in conda, not pip due to C++ packages
+  - pyqt=5.12.3 # Has to be conda, not pip, installed to ensure that the sip packages are availiable in the share/sip/PyQt5 directory
+  - qtpy=1.9.0
+  - qtconsole=5.0.3
+  - numpy=1.20.2
+  - scipy=1.6.2
+  - sphinx=3.5.4
+  - pycifrw=4.4.1
+  - python-dateutil=2.8.1
+  - h5py=2.10.0 # Pushed back due to api differences
+  - psutil=5.8.0
+  - requests=2.25.1
+  - toml=0.10.2
+  - pyyaml=5.4.1
+  - pip=21.0.1
+  # Needed only for development
+  - pre-commit=2.12.0
+  - cppcheck=2.4.1
+  - cxxtest=4.4
+  - pip:
+    - sphinx-bootstrap-theme==0.7.1
+    - matplotlib==3.1.3 # Pip used for package compatibility (Conda seems to have a broken dependancy list), otherwise a high version number is needed which doesn't work right now for workbench.
+
