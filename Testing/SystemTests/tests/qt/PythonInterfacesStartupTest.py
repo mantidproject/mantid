@@ -11,6 +11,7 @@ from mantid.kernel import ConfigService
 from mantidqt.utils.qt.testing import get_application
 
 from qtpy.QtCore import QCoreApplication, QSettings
+from qtpy.QtWidgets import QApplication
 
 
 INSTRUMENT_SWITCHER = {"DGS_Reduction.py": "ARCS",
@@ -41,8 +42,6 @@ class PythonInterfacesStartupTest(systemtesting.MantidSystemTest):
     def __init__(self):
         super(PythonInterfacesStartupTest, self).__init__()
 
-        self._app = get_application()
-
         self._interface_directory = ConfigService.getString('mantidqt.python_interfaces_directory')
         self._interface_scripts = [interface.split("/")[1] for interface in
                                    ConfigService.getString('mantidqt.python_interfaces').split()]
@@ -59,10 +58,21 @@ class PythonInterfacesStartupTest(systemtesting.MantidSystemTest):
         set_application_name(interface_script)
         # Prevents a QDialog popping up when opening certain interfaces
         set_instrument(interface_script)
-        # Some interfaces need to be closed after opening. The close_event ensures they unsubscribe from the ADS.
-        QSettings().setValue("close_interface", True)
 
         try:
+            self._app = get_application()
             exec(open(os.path.join(self._interface_directory, interface_script)).read())
+            self._close_interface()
         except Exception as ex:
             self.fail(f"Exception thrown when attempting to open the {interface_script} interface: {ex}.")
+
+    @staticmethod
+    def _close_interface():
+        """Close the interface after opening to ensure it is unsubscribed from the ADS. Must be done before the
+        next interface is opened because it appears the Qt objects of the previous interface get deleted when a
+        python script runs to completion, but the python object itself is not. This means it is still subscribed to the
+        ADS because the 'close_event' is not called, but the Qt objects no longer exist. This causes problems when
+        an ADS change is observed."""
+        for i, widget in enumerate(QApplication.topLevelWidgets()):
+            if not widget.isHidden():
+                widget.close()

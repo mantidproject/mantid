@@ -6,10 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from Muon.GUI.FrequencyDomainAnalysis.frequency_domain_analysis_2 import FrequencyAnalysisGui
+from qtpy import QtCore
 from Muon.GUI.Common.usage_report import report_interface_startup
 import sys
 
-from qtpy.QtCore import QSettings, Qt
 
 Name = "Frequency_Domain_Analysis_2"
 if 'workbench' in sys.modules:
@@ -28,23 +28,17 @@ if 'muon_freq' in globals():
     except RuntimeError:
         is_hidden = True
     if not is_hidden:
-        muon_freq.setWindowState(muon_freq.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
+        muon_freq.setWindowState(
+            muon_freq.windowState(
+            ) & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
         muon_freq.activateWindow()
     else:
         muon_freq = FrequencyAnalysisGui(parent, flags)
         report_interface_startup(Name)
         muon_freq.resize(700, 700)
         muon_freq.show()
-
-        # This is used to close the interface when running the PythonInterfacesStartupTest
-        if QSettings().value("close_interface", False):
-            muon_freq.close()
 else:
     muon_freq = FrequencyAnalysisGui(parent, flags)
     report_interface_startup(Name)
     muon_freq.resize(700, 700)
     muon_freq.show()
-
-    # This is used to close the interface when running the PythonInterfacesStartupTest
-    if QSettings().value("close_interface", False):
-        muon_freq.close()
