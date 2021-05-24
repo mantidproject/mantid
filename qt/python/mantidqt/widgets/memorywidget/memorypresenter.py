@@ -28,7 +28,7 @@ class MemoryPresenter(object):
         self.timer = Timer(TIME_INTERVAL_MEMORY_USAGE_UPDATE, self.update_memory_usage)
         self.thread_on = False
         self.updating_cancelled = False
-        self.closing_workbench = False
+        self.application_closing = False
         self.update_memory_usage()
         self.set_bar_color_at_start()
         self.start_memory_widget_update_thread()
@@ -48,7 +48,7 @@ class MemoryPresenter(object):
         """
         Spins off another timer thread, by creating a new Timer thread object and starting it
         """
-        if not self.thread_on and not self.closing_workbench:
+        if not self.thread_on and not self.application_closing:
             self.timer = Timer(TIME_INTERVAL_MEMORY_USAGE_UPDATE, self.update_memory_usage)
             self.timer.start()
             self.thread_on = True
@@ -76,6 +76,7 @@ class MemoryPresenter(object):
             self._spin_off_another_time_thread()
 
     def cancel_memory_update(self):
-        self.timer.cancel()
         self.updating_cancelled = True
         self.thread_on = False
+        self.application_closing = True
+        self.timer.cancel()

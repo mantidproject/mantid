@@ -584,7 +584,6 @@ class MainWindow(QMainWindow):
 
             # Cancel memory widget thread
             if self.memorywidget is not None:
-                self.memorywidget.presenter.closing_workbench = True
                 self.memorywidget.presenter.cancel_memory_update()
 
             if self.interface_manager is not None:
