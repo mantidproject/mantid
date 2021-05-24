@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ApplyAbsorptionCorrections.h"
 #include "IndirectDataValidationHelper.h"
+#include "IndirectSettingsHelper.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -518,7 +519,7 @@ void ApplyAbsorptionCorrections::plotCurrentPreview() {
     indices.emplace_back(index);
   }
 
-  m_plotter->plotCorrespondingSpectra(workspaces, indices);
+  m_plotter->plotCorrespondingSpectra(workspaces, indices, IndirectSettingsHelper::externalPlotErrorBars());
 }
 
 /*

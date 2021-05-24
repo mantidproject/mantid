@@ -12,8 +12,6 @@
 #include <boost/none_t.hpp>
 #include <boost/optional.hpp>
 
-#include <QObject>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -23,19 +21,18 @@ enum MantidAxis { Spectrum, Bin };
  @class IndirectPlotter
  IndirectPlotter is a class used for external plotting within Indirect
  */
-class MANTIDQT_INDIRECT_DLL IndirectPlotter : public QObject {
-  Q_OBJECT
+class MANTIDQT_INDIRECT_DLL IndirectPlotter {
 
 public:
   IndirectPlotter();
   virtual ~IndirectPlotter();
 
-  virtual void plotSpectra(std::string const &workspaceName, std::string const &workspaceIndices);
+  virtual void plotSpectra(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars);
   virtual void plotCorrespondingSpectra(std::vector<std::string> const &workspaceNames,
-                                        std::vector<int> const &workspaceIndices);
-  virtual void plotBins(std::string const &workspaceName, std::string const &binIndices);
+                                        std::vector<int> const &workspaceIndices, bool errorBars);
+  virtual void plotBins(std::string const &workspaceName, std::string const &binIndices, bool errorBars);
   virtual void plotContour(std::string const &workspaceName);
-  virtual void plotTiled(std::string const &workspaceName, std::string const &workspaceIndices);
+  virtual void plotTiled(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars);
 
   bool validate(std::string const &workspaceName, boost::optional<std::string> const &workspaceIndices = boost::none,
                 boost::optional<MantidAxis> const &axisType = boost::none) const;

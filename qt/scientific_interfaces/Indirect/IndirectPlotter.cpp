@@ -105,7 +105,7 @@ boost::optional<Python::Object> workbenchPlot(QStringList const &workspaceNames,
 namespace MantidQt {
 namespace CustomInterfaces {
 
-IndirectPlotter::IndirectPlotter() : QObject(nullptr) {}
+IndirectPlotter::IndirectPlotter() {}
 
 IndirectPlotter::~IndirectPlotter() {}
 
@@ -116,9 +116,9 @@ IndirectPlotter::~IndirectPlotter() {}
  * @param workspaceIndices The indices within the workspace to plot (e.g.
  * '0-2,5,7-10')
  */
-void IndirectPlotter::plotSpectra(std::string const &workspaceName, std::string const &workspaceIndices) {
+void IndirectPlotter::plotSpectra(std::string const &workspaceName, std::string const &workspaceIndices,
+                                  bool errorBars) {
   if (validate(workspaceName, workspaceIndices, MantidAxis::Spectrum)) {
-    auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
     workbenchPlot(QStringList(QString::fromStdString(workspaceName)), createIndicesVector<int>(workspaceIndices),
                   errorBars, boost::none);
   }
@@ -132,12 +132,12 @@ void IndirectPlotter::plotSpectra(std::string const &workspaceName, std::string 
  * @param workspaceIndices List of indices to plot
  */
 void IndirectPlotter::plotCorrespondingSpectra(std::vector<std::string> const &workspaceNames,
-                                               std::vector<int> const &workspaceIndices) {
+                                               std::vector<int> const &workspaceIndices, bool errorBars) {
   if (workspaceNames.empty() || workspaceIndices.empty())
     return;
   if (workspaceNames.size() > 1 && workspaceNames.size() != workspaceIndices.size())
     return;
-  auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
+
   auto figure = workbenchPlot(QStringList(QString::fromStdString(workspaceNames[0])), {workspaceIndices[0]}, errorBars);
   for (auto i = 1u; i < workspaceNames.size(); ++i) {
     if (figure)
@@ -153,9 +153,8 @@ void IndirectPlotter::plotCorrespondingSpectra(std::vector<std::string> const &w
  * @param binIndices The indices within the workspace to plot (e.g.
  * '0-2,5,7-10')
  */
-void IndirectPlotter::plotBins(std::string const &workspaceName, std::string const &binIndices) {
+void IndirectPlotter::plotBins(std::string const &workspaceName, std::string const &binIndices, bool errorBars) {
   if (validate(workspaceName, binIndices, MantidAxis::Bin)) {
-    auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
     QHash<QString, QVariant> plotKwargs;
     plotKwargs["axis"] = static_cast<int>(MantidAxType::Bin);
     workbenchPlot(QStringList(QString::fromStdString(workspaceName)), createIndicesVector<int>(binIndices), errorBars,
@@ -180,9 +179,8 @@ void IndirectPlotter::plotContour(std::string const &workspaceName) {
  * @param workspaceIndices The indices within the workspace to tile plot (e.g.
  * '0-2,5,7-10')
  */
-void IndirectPlotter::plotTiled(std::string const &workspaceName, std::string const &workspaceIndices) {
+void IndirectPlotter::plotTiled(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars) {
   if (validate(workspaceName, workspaceIndices, MantidAxis::Spectrum)) {
-    auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
     QHash<QString, QVariant> plotKwargs;
     if (errorBars)
       plotKwargs["capsize"] = ERROR_CAPSIZE;

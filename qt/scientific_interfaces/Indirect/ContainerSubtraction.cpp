@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ContainerSubtraction.h"
+#include "IndirectSettingsHelper.h"
 
 #include <utility>
 
@@ -370,7 +371,7 @@ void ContainerSubtraction::plotCurrentPreview() {
     indices.emplace_back(index);
   }
 
-  m_plotter->plotCorrespondingSpectra(workspaces, indices);
+  m_plotter->plotCorrespondingSpectra(workspaces, indices, IndirectSettingsHelper::externalPlotErrorBars());
 }
 
 /*

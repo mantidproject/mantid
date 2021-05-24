@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectPlotOptionsModel.h"
+#include "IndirectSettingsHelper.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -198,12 +199,12 @@ void IndirectPlotOptionsModel::plotSpectra() {
   auto const workspaceName = workspace();
   auto const indicesString = indices();
   if (workspaceName && indicesString)
-    m_plotter->plotSpectra(workspaceName.get(), indicesString.get());
+    m_plotter->plotSpectra(workspaceName.get(), indicesString.get(), IndirectSettingsHelper::externalPlotErrorBars());
 }
 
 void IndirectPlotOptionsModel::plotBins(std::string const &binIndices) {
   if (auto const workspaceName = workspace())
-    m_plotter->plotBins(workspaceName.get(), binIndices);
+    m_plotter->plotBins(workspaceName.get(), binIndices, IndirectSettingsHelper::externalPlotErrorBars());
 }
 
 void IndirectPlotOptionsModel::plotContour() {
@@ -215,7 +216,7 @@ void IndirectPlotOptionsModel::plotTiled() {
   auto const workspaceName = workspace();
   auto const indicesString = indices();
   if (workspaceName && indicesString)
-    m_plotter->plotTiled(workspaceName.get(), indicesString.get());
+    m_plotter->plotTiled(workspaceName.get(), indicesString.get(), IndirectSettingsHelper::externalPlotErrorBars());
 }
 
 boost::optional<std::string> IndirectPlotOptionsModel::singleDataPoint(MantidAxis const &axisType) const {
