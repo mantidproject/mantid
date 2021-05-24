@@ -60,12 +60,13 @@ class FittingPlotPresenter(object):
             # do fit
             fit_output = Fit(**fitprop['properties'])
             # update results
-            funcstr = str(fit_output.Function.fun)
             fitprop['status'] = fit_output.OutputStatus
+            funcstr = str(fit_output.Function.fun)
+            fitprop['properties']['Function'] = funcstr
             if "success" in fitprop['status'].lower():
                 # update function in prev fitprop to use for next workspace
                 prev_fitprop['properties']['Function'] = funcstr
-            # update last fit in fit browser
+            # update last fit in fit browser and save setup
             self.view.update_browser(fit_output.OutputStatus, funcstr, ws)
             # append a deep copy to output list (will be initial parameters if not successful)
             fitprop_list.append(fitprop)

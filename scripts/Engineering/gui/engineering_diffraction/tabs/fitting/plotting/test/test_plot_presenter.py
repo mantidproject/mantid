@@ -57,10 +57,9 @@ class FittingPlotPresenterTest(unittest.TestCase):
         fun_str_list = ['name=Gaussian,Height=11,PeakCentre=30000,Sigma=40',  # initial
                         'name=Gaussian,Height=10,PeakCentre=35000,Sigma=50',  # fit result of ws1
                         'name=Gaussian,Height=9,PeakCentre=40000,Sigma=60']  # fit result of ws2
-        in_fun_str = iter(fun_str_list[0:-1])
-        self.view.read_fitprop_from_browser.return_value = {'properties': {'Function': next(in_fun_str)}}
+        self.view.read_fitprop_from_browser.return_value = {'properties': {'Function': fun_str_list[0]}}
         mock_fit_output = [mock.MagicMock(), mock.MagicMock()]
-        mock_fit_output[0].OutputStatus = "sucess"
+        mock_fit_output[0].OutputStatus = "success"
         mock_fit_output[0].Function.fun = fun_str_list[1]
         mock_fit_output[1].OutputStatus = "fail"
         mock_fit_output[1].Function.fun = fun_str_list[2]
@@ -80,7 +79,8 @@ class FittingPlotPresenterTest(unittest.TestCase):
             _, args, _ = self.view.update_browser.mock_calls[iws]
             self.assertEquals(args, (mock_fit_output[iws].OutputStatus, fun_str_list[iws + 1], ws))
             # collect all fitprop dicts together to test notifier
-            fitprop_list.append({'properties': {'Function': fun_str_list[iws + 1], 'InputWorkspace': ws, 'Output': ws}})
+            fitprop_list.append({'properties': {'Function': fun_str_list[iws + 1], 'InputWorkspace': ws, 'Output': ws},
+                                 'status':mock_fit_output[iws].OutputStatus})
         mock_notifier.notify_subscribers.assert_called_once_with(fitprop_list)
 
 

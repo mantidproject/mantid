@@ -381,7 +381,7 @@ class TestFittingDataModel(unittest.TestCase):
                                                  'Function': func_str,
                                                  'InputWorkspace': "name1", 'Output': "name1",
                                                  'OutputCompositeMembers': True, 'StartX': 50000},
-                   'peak_centre_params': ['Gaussian_PeakCentre'], 'version': 1}
+                   'status': 'success', 'peak_centre_params': ['Gaussian_PeakCentre'], 'version': 1}
         self.model.update_fit([fitprop])
 
         self.assertEqual(self.model._fit_results['name1']['model'], func_str)
@@ -407,7 +407,7 @@ class TestFittingDataModel(unittest.TestCase):
         self.model._log_workspaces.name.return_value = 'some_log'
         func_str = 'name=Gaussian,Height=11,PeakCentre=40000,Sigma=54;name=Gaussian,Height=10,PeakCentre=30000,Sigma=51'
         self.model._fit_results = dict()
-        self.model._fit_results['name1'] = {'model': func_str,
+        self.model._fit_results['name1'] = {'model': func_str, 'status': 'success',
                                             'results': {'Gaussian_Height': [[11.0, 1.0], [10.0, 1.0]],
                                                         'Gaussian_PeakCentre': [[40000.0, 10.0],
                                                                                 [30000.0, 10.0]],
@@ -428,11 +428,12 @@ class TestFittingDataModel(unittest.TestCase):
                                                                                             mock_groupws)
         self.model.create_fit_tables()
 
-        # test the workspaces were created and added to fit_workspaces (and the mdoel table workspace)
+        # test the workspaces were created and added to fit_workspaces (and the model table workspace)
         self.assertEqual(self.model._fit_workspaces, (mock_ws_list + [mock_create_table.return_value]))
         # test the table stores the correct function strings (empty string if no function present)
         mock_writerow.assert_any_call(mock_create_table.return_value,
                                       ['name1', self.model._fit_results['name1']['costFunction'],
+                                       self.model._fit_results['name1']['status'],
                                        self.model._fit_results['name1']['model']], 0)
         mock_writerow.assert_any_call(mock_create_table.return_value, ['', nan, ''], 1)  # name2 has no entry
         # check the matrix workspaces corresponding to the fit parameters
@@ -464,7 +465,7 @@ class TestFittingDataModel(unittest.TestCase):
                                                                                             mock_groupws)
         mock_ws_list.append(mock.MagicMock())  # adding an additional parameter into model for name2
         func_str2 = self.model._fit_results['name1']['model'] + ';name=FlatBackground,A0=1'
-        self.model._fit_results['name2'] = {'model': func_str2,
+        self.model._fit_results['name2'] = {'model': func_str2, 'status': 'success',
                                             'results': dict(self.model._fit_results['name1']['results'],
                                                             FlatBackground_A0=[[1.0, 0.1]]),
                                             'costFunction': 2.0}
@@ -475,9 +476,11 @@ class TestFittingDataModel(unittest.TestCase):
         # test the table stores the correct function strings (empty string if no function present)
         mock_writerow.assert_any_call(mock_create_table.return_value,
                                       ['name1', self.model._fit_results['name1']['costFunction'],
+                                       self.model._fit_results['name1']['status'],
                                        self.model._fit_results['name1']['model']], 0)
         mock_writerow.assert_any_call(mock_create_table.return_value,
                                       ['name2', self.model._fit_results['name2']['costFunction'],
+                                       self.model._fit_results['name1']['status'],
                                        self.model._fit_results['name2']['model']], 1)
         # check the matrix workspaces corresponding to the fit parameters
         # 4 unique params plus the peak centre converted to dSpacing
