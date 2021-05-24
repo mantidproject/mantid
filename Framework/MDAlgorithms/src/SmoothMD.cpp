@@ -42,8 +42,8 @@ using KernelVector = std::vector<double>;
 using OptionalIMDHistoWorkspace_const_sptr = boost::optional<IMDHistoWorkspace_const_sptr>;
 
 // Typedef for a smoothing function
-using SmoothFunction = std::function<IMDHistoWorkspace_sptr(IMDHistoWorkspace_const_sptr, const WidthVector &,
-                                                            OptionalIMDHistoWorkspace_const_sptr)>;
+using SmoothFunction =
+    std::function<IMDHistoWorkspace_sptr(IMDHistoWorkspace_const_sptr, const WidthVector &, IMDHistoWorkspace_sptr)>;
 
 // Typedef for a smoothing function map keyed by name.
 using SmoothFunctionMap = std::map<std::string, SmoothFunction>;
@@ -161,10 +161,10 @@ const std::string SmoothMD::summary() const { return "Smooth an MDHistoWorkspace
  * @param weightingWS : Weighting workspace (optional)
  * @return Smoothed MDHistoWorkspace
  */
-IMDHistoWorkspace_sptr SmoothMD::hatSmooth(const IMDHistoWorkspace_const_sptr &toSmooth, const WidthVector &widthVector,
-                                           OptionalIMDHistoWorkspace_const_sptr weightingWS) {
+IMDHistoWorkspace_sptr SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth, const WidthVector &widthVector,
+                                           IMDHistoWorkspace_sptr weightingWS) {
 
-  const bool useWeights = weightingWS.is_initialized();
+  const bool useWeights = weightingWS.get() != 0;
   uint64_t nPoints = toSmooth->getNPoints();
   Progress progress(this, 0.0, 1.0, size_t(double(nPoints) * 1.1));
   // Create the output workspace.
@@ -192,7 +192,7 @@ IMDHistoWorkspace_sptr SmoothMD::hatSmooth(const IMDHistoWorkspace_const_sptr &t
       if (useWeights) {
 
         // Check that we could measure here.
-        if ((*weightingWS)->getSignalAt(iteratorIndex) == 0) {
+        if (weightingWS->getSignalAt(iteratorIndex) == 0) {
 
           outWS->setSignalAt(iteratorIndex, std::numeric_limits<double>::quiet_NaN());
           outWS->setErrorSquaredAt(iteratorIndex, std::numeric_limits<double>::quiet_NaN());
@@ -216,7 +216,7 @@ IMDHistoWorkspace_sptr SmoothMD::hatSmooth(const IMDHistoWorkspace_const_sptr &t
       double sumSqError = iterator->getError();
       for (auto neighbourIndex : neighbourIndexes) {
         if (useWeights) {
-          if ((*weightingWS)->getSignalAt(neighbourIndex) == 0) {
+          if (weightingWS->getSignalAt(neighbourIndex) == 0) {
             // Nothing measured here. We cannot use that neighbouring point.
             nNeighbours -= 1;
             continue;
@@ -254,10 +254,8 @@ IMDHistoWorkspace_sptr SmoothMD::hatSmooth(const IMDHistoWorkspace_const_sptr &t
  * @return Smoothed MDHistoWorkspace
  */
 IMDHistoWorkspace_sptr SmoothMD::gaussianSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
-                                                const WidthVector &widthVector,
-                                                OptionalIMDHistoWorkspace_const_sptr weightingWS) {
-
-  const bool useWeights = weightingWS.is_initialized();
+                                                const WidthVector &widthVector, IMDHistoWorkspace_sptr weightingWS) {
+  const bool useWeights = weightingWS.get() != 0;
   uint64_t nPoints = toSmooth->getNPoints();
   Progress progress(this, 0.0, 1.0, size_t(double(nPoints) * 1.1));
   // Create the output workspace
@@ -308,7 +306,7 @@ IMDHistoWorkspace_sptr SmoothMD::gaussianSmooth(const IMDHistoWorkspace_const_sp
         if (useWeights) {
 
           // Check that we could measure here.
-          if ((*weightingWS)->getSignalAt(iteratorIndex) == 0) {
+          if (weightingWS->getSignalAt(iteratorIndex) == 0) {
 
             write_ws->setSignalAt(iteratorIndex, std::numeric_limits<double>::quiet_NaN());
             write_ws->setErrorSquaredAt(iteratorIndex, std::numeric_limits<double>::quiet_NaN());
@@ -423,7 +421,7 @@ void SmoothMD::exec() {
   SmoothFunctionMap functionMap = makeFunctionMap(this);
   SmoothFunction smoothFunction = functionMap[smoothFunctionName];
   // invoke the smoothing operation
-  auto smoothed = smoothFunction(toSmooth, widthVector, optionalWeightingWS);
+  auto smoothed = smoothFunction(toSmooth, widthVector, weightingWS);
 
   setProperty("OutputWorkspace", smoothed);
 }
