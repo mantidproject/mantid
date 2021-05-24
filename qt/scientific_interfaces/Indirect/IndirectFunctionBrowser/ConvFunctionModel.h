@@ -119,13 +119,15 @@ private:
   std::string buildFitTypeString() const;
   std::string buildBackgroundFunctionString() const;
   std::string buildStretchExpFTFunctionString() const;
-  std::string buildIsoRotDiffFunctionString() const;
   std::string buildDiffSphereFunctionString() const;
   std::string buildElasticDiffSphereFunctionString() const;
   std::string buildInelasticDiffSphereFunctionString() const;
   std::string buildDiffRotDiscreteCircleFunctionString() const;
   std::string buildInelasticDiffRotDiscreteCircleFunctionString() const;
   std::string buildElasticDiffRotDiscreteCircleFunctionString() const;
+  std::string buildIsoRotDiffFunctionString() const;
+  std::string buildElasticIsoRotDiffFunctionString() const;
+  std::string buildInelasticIsoRotDiffFunctionString() const;
   void addGlobal(const QString &parName);
   void removeGlobal(const QString &parName);
   QStringList makeGlobalList() const;
