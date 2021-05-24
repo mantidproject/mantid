@@ -1014,8 +1014,9 @@ class CrystalField(object):
             for bparam in CrystalField.field_parameter_names:
                 params['ion0.' + bparam] = self[bparam]
                 params['ion1.' + bparam] = other[bparam]
-            for x in range(self.NumberOfSpectra):
-                params['sp'+str(x)+'.IntensityScaling'] = self.IntensityScaling[x]
+            if self.NumberOfSpectra > 1:
+                for x in range(self.NumberOfSpectra):
+                    params['sp'+str(x)+'.IntensityScaling'] = self.IntensityScaling[x]
             ties = {}
             fixes = []
             for prefix, obj in {'ion0.':self, 'ion1.':other}.items():
@@ -1215,8 +1216,9 @@ class CrystalFieldSite(object):
         for bparam in CrystalField.field_parameter_names:
             params['ion0.' + bparam] = self.crystalField[bparam]
             params['ion1.' + bparam] = other[bparam]
-        for x in range(self.crystalField.NumberOfSpectra):
-            params['sp'+str(x)+'.IntensityScaling'] = self.crystalField.IntensityScaling[x]
+        if self.crystalField.NumberOfSpectra > 1:
+            for x in range(self.crystalField.NumberOfSpectra):
+                params['sp'+str(x)+'.IntensityScaling'] = self.crystalField.IntensityScaling[x]
         params['ion0.IntensityScaling'] = abundances[0]
         params['ion1.IntensityScaling'] = abundances[1]
         if self.crystalField.ResolutionModel is None:
