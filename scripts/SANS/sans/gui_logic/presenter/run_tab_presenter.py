@@ -416,9 +416,10 @@ class RunTabPresenter(PresenterCommon):
                 SettingsAdjustmentModel(all_states=user_file_items))
             # 5. Update the views.
             self.update_view_from_model()
-            self._beam_centre_presenter.update_centre_positions(self._model)
 
-            self._beam_centre_presenter.on_update_rows()
+            self._beam_centre_presenter.copy_centre_positions(self._model)
+            self._beam_centre_presenter.update_centre_positions()
+
             self._masking_table_presenter.on_update_rows()
             self._workspace_diagnostic_presenter.on_user_file_load(user_file_path)
 
@@ -528,6 +529,7 @@ class RunTabPresenter(PresenterCommon):
 
     def on_instrument_changed(self):
         self._setup_instrument_specific_settings()
+        self._beam_centre_presenter.on_update_instrument(self.instrument)
 
     # ----------------------------------------------------------------------------------------------
     # Processing
