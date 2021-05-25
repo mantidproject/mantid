@@ -49,7 +49,13 @@ SCDCalibratePanels2ObjFunc::SCDCalibratePanels2ObjFunc() {
   declareParameter("Phi", PI / 4, "Polar coordinates phi in radians");
   // rotation angle
   declareParameter("DeltaRotationAngle", 0.0, "angle of relative rotation in degree");
-  declareParameter("DeltaT0", 0.0, "delta of TOF");
+  // TOF offset for all peaks
+  // NOTE: need to have a non-zero value here
+  declareParameter("DeltaT0", 0.1, "delta of TOF");
+  // This part is for fine tuning the sample position
+  declareParameter("DeltaSampleX", 0.0, "relative shift of sample position along X.");
+  declareParameter("DeltaSampleY", 0.0, "relative shift of sample position along Y.");
+  declareParameter("DeltaSampleZ", 0.0, "relative shift of sample position along Z.");
 }
 
 void SCDCalibratePanels2ObjFunc::setPeakWorkspace(IPeaksWorkspace_sptr &pws, const std::string componentName,
@@ -97,9 +103,14 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
   double vz = cos(theta);
   //
   const double drotang = getParameter("DeltaRotationAngle");
-
   //-- delta in TOF
-  // const double dT0 = getParameter("DeltaT0");
+  //  NOTE: The T0 here is a universal offset for all peaks
+  double dT0 = getParameter("DeltaT0");
+  //
+  const double dsx = getParameter("DeltaSampleX");
+  const double dsy = getParameter("DeltaSampleY");
+  const double dsz = getParameter("DeltaSampleZ");
+
   //-- NOTE: given that these components are never used as
   //         one vector, there is no need to construct a
   //         xValues
@@ -113,7 +124,11 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
   IPeaksWorkspace_sptr pws_ref = m_pws->clone();
 
   // NOTE: when optimizing T0, a none component will be passed in.
-  if (m_cmpt != "none/sixteenpack") {
+  //       -- For Corelli, this will be none/sixteenpack
+  //       -- For others, this will be none
+  bool calibrateT0 = (m_cmpt == "none/sixteenpack") || (m_cmpt == "none");
+  // we don't need to move the instrument if we are calibrating T0
+  if (!calibrateT0) {
     // rotation
     pws = rotateInstrumentComponentBy(vx, vy, vz, drotang, m_cmpt, pws);
 
@@ -121,8 +136,8 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
     pws = moveInstruentComponentBy(dx, dy, dz, m_cmpt, pws);
   }
 
-  // TODO:
-  // need to do something with dT0
+  // tweak sample position
+  pws = moveInstruentComponentBy(dsx, dsy, dsz, "sample-position", pws);
 
   // calculate residual
   // double residual = 0.0;
@@ -132,6 +147,8 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
 
     Peak pk = Peak(pws->getPeak(i));
     // update instrument
+    // - this will update the instrument position attached to the peak
+    // - this will update the sample position attached to the peak
     pk.setInstrument(pws->getInstrument());
     // update detector ID
     pk.setDetectorID(pk.getDetectorID());
@@ -141,7 +158,7 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
                   {{UnitParams::l2, pk.getL2()},
                    {UnitParams::twoTheta, pk.getScattering()},
                    {UnitParams::efixed, pk.getInitialEnergy()}});
-    pk.setWavelength(wl.singleFromTOF(tof));
+    pk.setWavelength(wl.singleFromTOF(tof + dT0));
 
     V3D qv = pk.getQSampleFrame();
     for (int j = 0; j < 3; ++j)
@@ -164,7 +181,8 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
   // msgiter.precision(8);
   // msgiter << "residual@iter_" << n_iter << ": " << residual << "\n"
   //         << "-- (dx, dy, dz) = " << dtrans << "\n"
-  //         << "-- ang@axis = " << drotang << "@" << rotaxis << "\n\n";
+  //         << "-- ang@axis = " << drotang << "@" << rotaxis << "\n"
+  //         << "-- dT0 = " << dT0 << "\n\n";
   // g_log.notice() << msgiter.str();
 }
 
