@@ -35,17 +35,11 @@ class MemoryPresenterTest(unittest.TestCase):
 
     def test_presenter(self):
         self.presenter.cancel_memory_update()
-        self.assertTrue(from_normal_to_critical(self.presenter.view.critical,
-                        75, 95))
-        self.assertFalse(from_critical_to_normal(self.presenter.view.critical,
-                         75, 95))
+        self.assertTrue(from_normal_to_critical(self.presenter.view.critical, 75, 95))
+        self.assertFalse(from_critical_to_normal(self.presenter.view.critical, 75, 95))
+        self.assertFalse(from_normal_to_critical(self.presenter.view.critical, 95, 75))
+        self.assertTrue(from_critical_to_normal(self.presenter.view.critical, 95, 75))
 
-        self.assertFalse(from_normal_to_critical(self.presenter.view.critical,
-                         95, 75))
-        self.assertTrue(from_critical_to_normal(self.presenter.view.critical,
-                        95, 75))
-
-        self.assertEqual(self.presenter.view.set_value.call_count, 1)
         self.assertEqual(self.presenter.view.set_bar_color.call_count, 1)
 
     def test_memory_usage_is_updated_based_on_a_constant(self):
