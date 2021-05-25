@@ -71,7 +71,7 @@ void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng, c
                                      const std::vector<double> &lambdas, const double lambdaFixed,
                                      std::vector<double> &attenuationFactors, std::vector<double> &attFactorErrors,
                                      MCInteractionStatistics &stats) {
-  const auto scatterBounds = m_scatterVol.getBoundingBox();
+  const auto scatterBounds = m_scatterVol.getFullBoundingBox();
   const auto nbins = static_cast<int>(lambdas.size());
 
   std::vector<double> wgtMean(attenuationFactors.size()), wgtM2(attenuationFactors.size());

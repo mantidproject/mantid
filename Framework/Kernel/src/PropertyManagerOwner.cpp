@@ -51,6 +51,10 @@ void PropertyManagerOwner::declareOrReplaceProperty(std::unique_ptr<Property> p,
   m_properties->declareOrReplaceProperty(std::move(p), doc);
 }
 
+/** Reset property values back to initial values (blank or default values)
+ */
+void PropertyManagerOwner::resetProperties() { m_properties->resetProperties(); }
+
 /** Set the ordered list of properties by one string of values, separated by
  *semicolons.
  *

@@ -148,8 +148,8 @@ void IndirectSpectrumSelectionPresenter::setActiveIndexToZero() { setActiveModel
 
 void IndirectSpectrumSelectionPresenter::updateSpectra() {
   const auto ws = m_model->getWorkspace(m_activeIndex);
-  if (ws) {
-    const auto spectra = m_model->getSpectra(m_activeIndex);
+  const auto spectra = m_model->getSpectra(m_activeIndex);
+  if (ws && !spectra.empty()) {
     setSpectraRange(spectra.front(), spectra.back());
     SetViewSpectra(m_view.get())(spectra);
     enableView();

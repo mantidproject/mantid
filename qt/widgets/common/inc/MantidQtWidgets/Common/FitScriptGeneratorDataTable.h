@@ -48,7 +48,13 @@ public:
   [[nodiscard]] double startX(FitDomainIndex row) const;
   [[nodiscard]] double endX(FitDomainIndex row) const;
 
+  [[nodiscard]] std::vector<FitDomainIndex> allRows() const;
   [[nodiscard]] std::vector<FitDomainIndex> selectedRows() const;
+  [[nodiscard]] FitDomainIndex currentRow() const;
+
+  [[nodiscard]] bool hasLoadedData() const;
+
+  [[nodiscard]] QString selectedDomainFunctionPrefix() const;
 
   void removeDomain(std::string const &workspaceName, MantidWidgets::WorkspaceIndex workspaceIndex);
   void addDomain(QString const &workspaceName, MantidWidgets::WorkspaceIndex workspaceIndex, double startX,
@@ -57,15 +63,20 @@ public:
   void formatSelection();
   void resetSelection();
 
+  void setFunctionPrefixVisible(bool visible);
+
 signals:
   void itemExited(int newRowIndex);
 
 private slots:
   void handleItemClicked(QTableWidgetItem *item);
+  void handleItemSelectionChanged();
 
 private:
   bool eventFilter(QObject *widget, QEvent *event) override;
   QPersistentModelIndex hoveredRowIndex(QEvent *event);
+
+  void updateVerticalHeaders();
 
   int indexOfDomain(std::string const &workspaceName, MantidWidgets::WorkspaceIndex workspaceIndex) const;
 
@@ -73,10 +84,10 @@ private:
 
   void setSelectedXValue(double xValue);
 
-  int m_selectedRow;
+  std::vector<FitDomainIndex> m_selectedRows;
   int m_selectedColumn;
   double m_selectedValue;
-  QPersistentModelIndex m_lastIndex;
+  QPersistentModelIndex m_lastHoveredIndex;
 };
 
 using ColumnIndex = FitScriptGeneratorDataTable::ColumnIndex;

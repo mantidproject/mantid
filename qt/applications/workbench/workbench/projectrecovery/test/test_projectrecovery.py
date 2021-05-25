@@ -23,8 +23,7 @@ from unittest import mock
 from workbench.projectrecovery.projectrecovery import ProjectRecovery, SAVING_TIME_KEY, NO_OF_CHECKPOINTS_KEY, \
     RECOVERY_ENABLED_KEY
 
-if sys.version_info.major >= 3:
-    unicode = str
+unicode = str
 
 
 def is_macOS():
@@ -159,12 +158,7 @@ class ProjectRecoveryTest(unittest.TestCase):
         os.makedirs(two)
 
         # There is no concern for list order in this equality assertion
-        if sys.version_info.major < 3:
-            # Python 2.7 way of doing it
-            self.assertItemsEqual([one, two], self.pr.listdir_fullpath(self.working_directory))
-        else:
-            # Python 3.2+ way of doing it
-            self.assertCountEqual([one, two], self.pr.listdir_fullpath(self.working_directory))
+        self.assertCountEqual([one, two], self.pr.listdir_fullpath(self.working_directory))
 
     def test_recovery_save_when_nothing_is_present(self):
         self.pr.saver._spin_off_another_time_thread = mock.MagicMock()

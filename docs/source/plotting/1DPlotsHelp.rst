@@ -14,6 +14,7 @@ Basic 1D and Tiled Plots
 * :ref:`Waterfall_Plots`
 * :ref:`Colorfill_Plots`
 * :ref:`3D_Plots`
+* :ref:`Mesh_Plots`
 
 **General Plot Help**
 

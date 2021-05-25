@@ -1,4 +1,5 @@
 set(SRC_FILES
+    src/SetValueWhenProperty.cpp
     src/ANN_complete.cpp
     src/ArrayBoundedValidator.cpp
     src/ArrayLengthValidator.cpp
@@ -139,6 +140,7 @@ set(SRC_UNITY_IGNORE_FILES
     src/System.cpp)
 
 set(INC_FILES
+    inc/MantidKernel/SetValueWhenProperty.h
     inc/MantidKernel/ANN/ANN.h
     inc/MantidKernel/ANN/ANNperf.h
     inc/MantidKernel/ANN/ANNx.h

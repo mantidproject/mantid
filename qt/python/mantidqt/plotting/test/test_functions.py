@@ -78,17 +78,16 @@ class FunctionsTest(TestCase):
         plt.close('all')
 
     def test_can_overplot_returns_false_with_no_active_plots(self):
-        self.assertFalse(can_overplot()[0])
+        self.assertFalse(can_overplot())
 
     def test_can_overplot_returns_true_for_active_line_plot(self):
         plt.plot([1, 2])
-        self.assertTrue(can_overplot()[0])
+        self.assertTrue(can_overplot())
 
     def test_can_overplot_returns_false_for_active_patch_plot(self):
         plt.pcolormesh(np.arange(9.).reshape(3, 3))
-        allowed, msg = can_overplot()
+        allowed = can_overplot()
         self.assertFalse(allowed)
-        self.assertGreater(len(msg), 0)
 
     def test_current_figure_or_none_returns_none_if_no_figures_exist(self):
         self.assertEqual(current_figure_or_none(), None)

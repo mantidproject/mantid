@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.simpleapi import mtd
+from mantid.simpleapi import mtd, AlgorithmManager
 from mantid.kernel import config, logger
 from mantid.api import WorkspaceGroup
 
@@ -14,6 +14,7 @@ from .DrillAlgorithmPool import DrillAlgorithmPool
 from .DrillTask import DrillTask
 
 import re
+import os
 
 
 class DrillExportModel:
@@ -22,6 +23,16 @@ class DrillExportModel:
     Dictionnary containing algorithms and activation state.
     """
     _exportAlgorithms = None
+
+    """
+    Dictionnary of export file extensions.
+    """
+    _exportExtensions = None
+
+    """
+    Dictionnary of export algorithm short doc.
+    """
+    _exportDocs = None
 
     """
     ThreadPool to run export algorithms asynchronously.
@@ -48,6 +59,17 @@ class DrillExportModel:
         self._exportAlgorithms = {k:v
                 for k,v
                 in RundexSettings.EXPORT_ALGORITHMS[acquisitionMode].items()}
+        self._exportExtensions = dict()
+        self._exportDocs = dict()
+        for a in self._exportAlgorithms.keys():
+            if a in RundexSettings.EXPORT_ALGO_EXTENSION:
+                self._exportExtensions[a] = \
+                    RundexSettings.EXPORT_ALGO_EXTENSION[a]
+            try:
+                alg = AlgorithmManager.createUnmanaged(a)
+                self._exportDocs[a] = alg.summary()
+            except:
+                pass
         self._pool = DrillAlgorithmPool()
         self._pool.signals.taskError.connect(self._onTaskError)
         self._pool.signals.taskSuccess.connect(self._onTaskSuccess)
@@ -62,6 +84,24 @@ class DrillExportModel:
             list(str): names of algorithms
         """
         return [algo for algo in self._exportAlgorithms.keys()]
+
+    def getAlgorithmExtentions(self):
+        """
+        Get the extension used for the output file of each export algorithm.
+
+        Returns:
+            dict(str:str): dictionnary algo:extension
+        """
+        return {k:v for k,v in self._exportExtensions.items()}
+
+    def getAlgorithmDocs(self):
+        """
+        Get the short documentation of each export algorithm.
+
+        Return:
+            dict(str:str): dictionnary algo:doc
+        """
+        return {k:v for k,v in self._exportDocs.items()}
 
     def isAlgorithmActivated(self, algorithm):
         """
@@ -110,8 +150,8 @@ class DrillExportModel:
         if not criteria:
             return True
 
-        processingAlgo = mtd[ws].getHistory().lastAlgorithm()
         try:
+            processingAlgo = mtd[ws].getHistory().lastAlgorithm()
             params = re.findall("%[a-zA-Z]*%", criteria)
             for param in params:
                 value = processingAlgo.getPropertyValue(param[1:-1])
@@ -178,34 +218,63 @@ class DrillExportModel:
 
     def run(self, sample):
         """
-        Run the export algorithms on a workspace. If the provided workspace is
-        a groupworkspace, the export algorithms will be run on each member of
-        the group.
+        Run the export algorithms on a sample. For each export algorithm, the
+        function will try to validate the criteria (using _validCriteria()) on
+        the output workspace that corresponds to the sample. If the criteria are
+        valid, the export will be run on all workspaces whose name contains the
+        sample name.
 
         Args:
-            workspaceName (str): name of the workspace
+            sample (DrillSample): sample to be exported
         """
         exportPath = config.getString("defaultsave.directory")
+        if not exportPath:
+            logger.warning("Default save directory is not defined. Please "
+                           "specify one in the data directories dialog to "
+                           "enable exports.")
+            return
         workspaceName = sample.getOutputName()
 
+        try:
+            outputWs = mtd[workspaceName]
+            if isinstance(outputWs, WorkspaceGroup):
+                names = outputWs.getNames()
+                outputWs = names[0]
+            else:
+                outputWs = workspaceName
+        except:
+            return
+
         tasks = list()
-        for wsName in mtd.getObjectNames():
-            if ((workspaceName in wsName)
-                    and (not isinstance(mtd[wsName], WorkspaceGroup))):
-                for a,s in self._exportAlgorithms.items():
-                    if s:
-                        if not self._validCriteria(wsName, a):
-                            logger.notice("Export of {} with {} was skipped "
-                                          "because the workspace is not "
-                                          "compatible.".format(wsName, a))
-                            continue
-                        filename = exportPath + wsName \
-                                   + RundexSettings.EXPORT_ALGO_EXTENSION[a]
-                        name = wsName + ":" + filename
-                        if wsName not in self._exports:
-                            self._exports[wsName] = set()
-                        self._exports[wsName].add(filename)
-                        task = DrillTask(name, a, InputWorkspace=wsName,
-                                         FileName=filename)
-                        tasks.append(task)
+        for algo,active in self._exportAlgorithms.items():
+            if not active:
+                continue
+            if not self._validCriteria(outputWs, algo):
+                logger.notice("Export of sample {} with {} was skipped "
+                              "because workspaces are not compatible."
+                              .format(outputWs, algo))
+                continue
+
+            for wsName in mtd.getObjectNames(contain=workspaceName):
+                if isinstance(mtd[wsName], WorkspaceGroup):
+                    continue
+
+                filename = os.path.join(
+                        exportPath,
+                        wsName + RundexSettings.EXPORT_ALGO_EXTENSION[algo])
+                name = wsName + ":" + filename
+                if wsName not in self._exports:
+                    self._exports[wsName] = set()
+                self._exports[wsName].add(filename)
+                kwargs = {}
+                if 'Ascii' in algo:
+                    log_list = (mtd[wsName].getInstrument().getStringParameter('log_list_to_save')[0]).split(',')
+                    kwargs['LogList'] = [log.strip() for log in log_list] # removes white spaces
+                    if 'Reflectometry' in algo:
+                        kwargs['WriteHeader'] = True
+                        kwargs['FileExtension'] = 'custom'
+                task = DrillTask(name, algo, InputWorkspace=wsName,
+                                 FileName=filename, **kwargs)
+                tasks.append(task)
+
         self._pool.addProcesses(tasks)

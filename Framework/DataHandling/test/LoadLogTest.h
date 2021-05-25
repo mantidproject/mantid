@@ -127,6 +127,34 @@ public:
     AnalysisDataService::Instance().remove(outputSpace);
   }
 
+  void testOldLogFileWithSingleDigitDate() {
+    // Snippet from an old log file with unsupported format.
+    std::string oldLogText("Sat  8-FEB-2003 11:29:24 EXECUTING DOSANS\n"
+                           "Sat  8-FEB-2003 11:29:25 LOAD INST.UPD\n"
+                           "Sat  8-FEB-2003 11:29:25 CHANGE RUNTABLE "
+                           "LOQ$DISK0:[LOQ]INST.UPD;15625\n"
+                           "Sat  8-FEB-2003 11:29:27 CSET TRANS OUT\n"
+                           "Sat  8-FEB-2003 11:29:27 COMND TRANS    WR 05     2 1 16 4\n");
+
+    TS_ASSERT(oldLogFileGivesCorrectWarning(oldLogText));
+  }
+
+  void testOldLogFileWithDoubleDigitDate() {
+    // Snippet from an old log file with unsupported format.
+    std::string oldLogText("Fri 31-JAN-2003 11:28:15 EXECUTING DOTRANS\n"
+                           "Fri 31-JAN-2003 11:28:41 STOPD A2       _LTA5007: "
+                           "     2.7000         2.7000\n"
+                           "Fri 31-JAN-2003 11:28:42 LOAD INST.UPD\n"
+                           "Fri 31-JAN-2003 11:28:42 CHANGE RUNTABLE "
+                           "LOQ$DISK0:[LOQ]INST.UPD;14965\n"
+                           "Fri 31-JAN-2003 11:28:42 DEBUG 1 ack 001 suc 000\n"
+                           "Fri 31-JAN-2003 11:28:42 DEBUG 1 res 001 suc 002  "
+                           "H000000F0  H00000006\n"
+                           "Fri 31-JAN-2003 11:28:43 CSET TRANS IN\n");
+
+    TS_ASSERT(oldLogFileGivesCorrectWarning(oldLogText));
+  }
+
   void test_log_file_has_error() {
     std::string logFileText("2007-11-16T13:25:48 i1 0 \n"
                             "2007-11-16T13:29:36 str1  a\n"
@@ -280,4 +308,32 @@ private:
   std::string inputFile;
   std::string outputSpace;
   std::string inputSpace;
+
+  bool oldLogFileGivesCorrectWarning(std::string &logFileText) {
+
+    ScopedFile oldLogFile(logFileText, "oldLogFile.log");
+
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+
+    LoadLog loadAlg;
+    loadAlg.initialize();
+    loadAlg.setPropertyValue("Filename", oldLogFile.getFileName());
+    loadAlg.setProperty("Workspace", ws);
+    // We want to see what the exception message is.
+    loadAlg.setRethrows(true);
+
+    // LoadLog algorithm should throw exception with an error message that
+    // contains ""
+    try {
+      loadAlg.execute();
+    } catch (std::exception &ex) {
+      std::string errorMessage(ex.what());
+
+      if (errorMessage.find("old unsupported format") != std::string::npos) {
+        return true;
+      }
+    }
+
+    return false;
+  }
 };

@@ -12,7 +12,7 @@ import os
 import shutil
 
 from abc import ABCMeta, abstractmethod
-from Direct.PropertyManager  import PropertyManager
+from Direct.PropertyManager import PropertyManager
 #----------------------------------------------------------------------
 
 

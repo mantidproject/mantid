@@ -192,7 +192,7 @@ class DataFunctionsTest(unittest.TestCase):
         index, dist, kwargs = funcs.get_wksp_index_dist_and_label(self.ws2d_histo, specNum=2)
         self.assertEqual(index, 1)
         self.assertTrue(dist)
-        self.assertEqual(kwargs['label'], 'ws2d_histo: 6')
+        self.assertEqual(kwargs['label'], 'ws2d_histo: 7')
         # get info from default spectrum in the 1d case
         index, dist, kwargs = funcs.get_wksp_index_dist_and_label(self.ws1d_point, wkspIndex=0)
         self.assertEqual(index, 0)
@@ -467,6 +467,16 @@ class DataFunctionsTest(unittest.TestCase):
                                              extent=[2, 6, 5, 9], xbins=8, ybins=5)
         np.testing.assert_allclose(x, np.array([2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6]))
         np.testing.assert_allclose(y, np.array([5, 6, 7, 8, 9]))
+
+        x, y, z = funcs.get_matrix_2d_ragged(self.ws2d_histo_rag, False, histogram2D=True,
+                                             extent=[2, 6, -5, 9], xbins=8, ybins=5)
+        np.testing.assert_allclose(x, np.array([2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6]))
+        np.testing.assert_allclose(y, np.array([-5, -1.5, 2, 5.5, 9]))
+        # first z array is off the spectrum axis scale so should be masked
+        np.testing.assert_array_equal(z[0].data, [np.nan]*8)
+        np.testing.assert_array_equal(z[0].mask, [1] * 8)
+        np.testing.assert_array_equal(z[4].data, [2.0]*8)
+        np.testing.assert_array_equal(z[4].mask, [0] * 8)
 
     def test_get_matrix_2d_ragged_when_transpose_is_true(self):
         x, y, z_transposed = funcs.get_matrix_2d_ragged(self.ws2d_histo_rag, False, histogram2D=True,

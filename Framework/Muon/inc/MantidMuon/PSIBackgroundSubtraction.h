@@ -7,6 +7,8 @@
 #pragma once
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAPI/IFunction_fwd.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidMuon/DllConfig.h"
 
 namespace Mantid {
@@ -35,6 +37,9 @@ private:
 
   /// Perform validation of inputs to the algorithm
   std::map<std::string, std::string> validateInputs() override;
+
+  API::IFunction_sptr getFunction() const;
+  std::pair<double, double> getRange(API::MatrixWorkspace const &inputWorkspace, const std::size_t &index) const;
 };
 } // namespace Muon
 } // namespace Mantid

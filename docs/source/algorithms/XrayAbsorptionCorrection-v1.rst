@@ -13,7 +13,10 @@ This algorithm calculates the correction factors due to the absorption of Xrays
 by the sample. This is done by determining path of an xray from a
 muon in sample to detector and using the calculated distance travelled by emitted xray in sample to
 calculate correction factor using
-.. math:: \exp(-absorptioncoefficient(energy) * distance)
+
+.. math::
+
+   \exp(-absorptionCoefficient(energy) \cdot distance) .
 
 Input Workspace Requirements
 ############################
@@ -21,11 +24,11 @@ Input Workspace Requirements
 The algorithm will compute the correction factors on a bin-by-bin basis for each spectrum within
 the input workspace. The following assumptions on the input workspace are made:
 
-     - properties of the sample and optionally its environment have been set with :ref:`SetSample <algm-SetSample>`
+- properties of the sample and optionally its environment have been set with :ref:`SetSample <algm-SetSample>`
 
-     - Xray Attenuation profile data is provided by using :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
+- Xray Attenuation profile data is provided by using :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
 
-     - Muon Implantation Profile has a single spectrum. The x data is the muon depth in cm and the y data is intensity in counts.
+- Muon Implantation Profile has a single spectrum. The x data is the muon depth in cm and the y data is intensity in counts.
 
 Usage
 -----

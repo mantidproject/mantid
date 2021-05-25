@@ -1575,7 +1575,7 @@ const std::vector<std::string> ConfigServiceImpl::getFacilityFilenames(const std
   // update the iterator, this means we will skip the folder in HOME and
   // look in the instrument folder in mantid install directory or mantid source
   // code directory
-  if (!(updateInstrStr == "1" || updateInstrStr == "on" || updateInstrStr == "On")) {
+  if (!(updateInstrStr == "1" || updateInstrStr == "on" || updateInstrStr == "On") && directoryNames.size() > 1) {
     instrDir++;
   }
 

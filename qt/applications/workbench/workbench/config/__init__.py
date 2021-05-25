@@ -45,12 +45,6 @@ ORG_DOMAIN = 'mantidproject.org'
 APPNAME = 'mantidworkbench'
 
 DEFAULT_SCRIPT_CONTENT = ""
-if sys.version_info < (3, 0):
-    DEFAULT_SCRIPT_CONTENT += "# The following line helps with future compatibility with Python 3" + os.linesep + \
-                              "# print must now be used as a function, e.g print('Hello','World')" + os.linesep + \
-                              "from __future__ import (absolute_import, division, print_function, unicode_literals)" + \
-                              os.linesep + os.linesep
-
 DEFAULT_SCRIPT_CONTENT += "# import mantid algorithms, numpy and matplotlib" + os.linesep + \
                           "from mantid.simpleapi import *" + os.linesep + \
                           "import matplotlib.pyplot as plt" + os.linesep + \
@@ -88,6 +82,10 @@ DEFAULTS = {
         'save_altered_workspaces_only': False
     }
 }
+
+# State encodes widget layout (among other things).
+# Increment this when the state of the next version is incompatible with the previous.
+SAVE_STATE_VERSION = 1
 
 # 'Singleton' instance
 QSettings.setDefaultFormat(QSettings.IniFormat)

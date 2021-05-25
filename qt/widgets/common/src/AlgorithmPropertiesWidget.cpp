@@ -268,12 +268,10 @@ void AlgorithmPropertiesWidget::initLayout() {
 //--------------------------------------------------------------------------------------
 /** SLOT to be called whenever a property's value has just been changed
  * and the widget has lost focus/value has been changed.
- * @param pName :: name of the property that was changed
+ * @param changedPropName :: name of the property that was changed
  */
-void AlgorithmPropertiesWidget::propertyChanged(const QString &pName) {
-  UNUSED_ARG(pName);
-  // PropertyWidget * widget = m_propWidgets[pName];
-  this->hideOrDisableProperties();
+void AlgorithmPropertiesWidget::propertyChanged(const QString &changedPropName) {
+  this->hideOrDisableProperties(changedPropName);
 }
 
 bool isCalledInputWorkspace(PropertyWidget *const candidate) {
@@ -370,28 +368,19 @@ bool AlgorithmPropertiesWidget::isWidgetEnabled(Property *property, const QStrin
  * It also shows/hids the validators.
  * All properties' values should be set already, otherwise the validators
  * will be running on old data.
+ * @param changedPropName :: name of the property that was changed
  */
-void AlgorithmPropertiesWidget::hideOrDisableProperties() {
-  for (auto pitr = m_propWidgets.begin(); pitr != m_propWidgets.end(); ++pitr) {
-    PropertyWidget *widget = pitr.value();
+void AlgorithmPropertiesWidget::hideOrDisableProperties(const QString &changedPropName) {
+  // SetValueWhenProperty as appropriate
+  for (auto &widget : m_propWidgets) {
     Mantid::Kernel::Property *prop = widget->getProperty();
-    const QString &propName = pitr.key();
     IPropertySettings *settings = prop->getSettings();
 
-    // Set the enabled and visible flags based on what the validators say.
-    // Default is always true.
-    bool visible = true;
-    // Dynamically check if the widget should be enabled.
-    bool enabled = this->isWidgetEnabled(prop, propName);
-
-    // Do we have a custom IPropertySettings?
     if (settings) {
-      // Set the visible flag
-      visible = settings->isVisible(m_algo.get());
-
-      // Dynamic PropertySettings objects allow a property to change validators.
-      // This removes the old widget and creates a new one instead.
-      if (settings->isConditionChanged(m_algo.get())) {
+      // Dynamic PropertySettings objects allow a property to change
+      // validators. This removes the old widget and creates a new one
+      // instead.
+      if (settings->isConditionChanged(m_algo.get(), changedPropName.toStdString())) {
         settings->applyChanges(m_algo.get(), prop);
 
         // Delete the old widget
@@ -403,13 +392,29 @@ void AlgorithmPropertiesWidget::hideOrDisableProperties() {
         // Create the appropriate widget at this row in the grid.
         widget = PropertyWidgetFactory::createWidget(prop, this, layout, row);
 
-        // Replace in the list of prop widgets
-        pitr.value() = widget;
-
         // Whenever the value changes in the widget, this fires
         // propertyChanged()
         connect(widget, SIGNAL(valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
       }
+    }
+  } // for each property
+
+  // set Visible and Enabled as appropriate
+  for (auto &widget : m_propWidgets) {
+    Mantid::Kernel::Property *prop = widget->getProperty();
+    IPropertySettings *settings = prop->getSettings();
+    const auto &propName = QString::fromStdString(prop->name());
+
+    // Set the enabled and visible flags based on what the validators say.
+    // Default is always true.
+    bool visible = true;
+    // Dynamically check if the widget should be enabled.
+    bool enabled = this->isWidgetEnabled(prop, propName);
+
+    // Do we have a custom IPropertySettings?
+    if (settings) {
+      // Set the visible flag
+      visible = settings->isVisible(m_algo.get());
     }
 
     // Show/hide the validator label (that red star)

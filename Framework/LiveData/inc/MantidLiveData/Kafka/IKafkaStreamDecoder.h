@@ -61,7 +61,7 @@ public:
 
 public:
   IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker, const std::string &streamTopic,
-                      const std::string &runInfoTopic, const std::string &spDetTopic, const std::string &sampleEnvTopic,
+                      const std::string &runInfoTopic, const std::string &sampleEnvTopic,
                       const std::string &chopperTopic, const std::string &monitorTopic);
   virtual ~IKafkaStreamDecoder();
   IKafkaStreamDecoder(const IKafkaStreamDecoder &) = delete;
@@ -69,7 +69,6 @@ public:
 
   IKafkaStreamDecoder(IKafkaStreamDecoder &&) noexcept;
 
-public:
   ///@name Start/stop
   ///@{
   void startCapture(bool startNow = true);
@@ -140,7 +139,6 @@ protected:
   /// Topic names
   const std::string m_streamTopic;
   const std::string m_runInfoTopic;
-  const std::string m_spDetTopic;
   const std::string m_sampleEnvTopic;
   const std::string m_chopperTopic;
   const std::string m_monitorTopic;

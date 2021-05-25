@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 #include <vector>
@@ -82,6 +83,7 @@ private:
   /// Create a simple function
   std::shared_ptr<IFunction> createSimple(const Expression &expr,
                                           std::map<std::string, std::string> &parentAttributes) const;
+  std::shared_ptr<IPeakFunction> createPeakFunction(const Expression &expr, const std::string &name) const;
   /// Create a composite function
   std::shared_ptr<CompositeFunction> createComposite(const Expression &expr,
                                                      std::map<std::string, std::string> &parentAttributes) const;

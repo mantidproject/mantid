@@ -111,24 +111,6 @@ class StateCalculateTransmissionTest(unittest.TestCase):
                                        good_trans={"wavelength_low": [1.], "wavelength_high": [2.],
                                                    "wavelength_step": 0.5, "wavelength_step_type": RangeStepType.LIN})
 
-    def test_that_raises_for_lower_bound_larger_than_upper_bound_for_wavelength(self):
-        self.check_bad_and_good_values(bad_trans={"wavelength_low": [2.], "wavelength_high": [1.],
-                                                  "wavelength_step": 0.5, "wavelength_step_type": RangeStepType.LIN},
-                                       good_trans={"wavelength_low": [1.], "wavelength_high": [2.],
-                                                   "wavelength_step": 0.5, "wavelength_step_type": RangeStepType.LIN})
-
-    def test_that_raises_for_missing_full_wavelength_entry(self):
-        self.check_bad_and_good_values(bad_trans={"use_full_wavelength_range": True, "wavelength_full_range_low": None,
-                                                  "wavelength_full_range_high": 12.},
-                                       good_trans={"use_full_wavelength_range": True, "wavelength_full_range_low": 11.,
-                                                   "wavelength_full_range_high": 12.})
-
-    def test_that_raises_for_lower_bound_larger_than_upper_bound_for_full_wavelength(self):
-        self.check_bad_and_good_values(bad_trans={"use_full_wavelength_range": True, "wavelength_full_range_low": 2.,
-                                                  "wavelength_full_range_high": 1.},
-                                       good_trans={"use_full_wavelength_range": True, "wavelength_full_range_low": 1.,
-                                                   "wavelength_full_range_high": 2.})
-
     def test_that_raises_for_inconsistent_general_background(self):
         self.check_bad_and_good_values(bad_trans={"background_TOF_general_start": 1.,
                                                   "background_TOF_general_stop": None},
@@ -180,14 +162,6 @@ class StateCalculateTransmissionTest(unittest.TestCase):
     def test_that_polynomial_order_can_only_be_set_with_polynomial_setting(self):
         self.check_bad_and_good_values(bad_fit={"fit_type": FitType.POLYNOMIAL, "polynomial_order": 0},
                                        good_fit={"fit_type": FitType.POLYNOMIAL, "polynomial_order": 4})
-
-    def test_that_raises_for_inconsistent_wavelength_in_fit(self):
-        self.check_bad_and_good_values(bad_trans={"wavelength_low": None, "wavelength_high": [2.]},
-                                       good_trans={"wavelength_low": [1.], "wavelength_high": [2.]})
-
-    def test_that_raises_for_lower_bound_larger_than_upper_bound_for_wavelength_in_fit(self):
-        self.check_bad_and_good_values(bad_trans={"wavelength_low": [2.], "wavelength_high": [1.]},
-                                       good_trans={"wavelength_low": [1.], "wavelength_high": [2.]})
 
     def test_convert_step_type_from_RANGE_LIN_to_LIN(self):
         state = StateCalculateTransmission()
@@ -244,7 +218,7 @@ class StateCalculateTransmissionBuilderTest(unittest.TestCase):
         state_transmission.rebin_type = RebinType.REBIN
         state_transmission.wavelength_low = [1.5]
         state_transmission.wavelength_high = [2.7]
-        state_transmission.wavelength_step = 0.5
+        state_transmission.wavelength_interval.wavelength_step = 0.5
         state_transmission.wavelength_step_type = RangeStepType.LIN
         state_transmission.use_full_wavelength_range = True
         state_transmission.wavelength_full_range_low = 12.
@@ -282,7 +256,7 @@ class StateCalculateTransmissionBuilderTest(unittest.TestCase):
         self.assertEqual(state_transmission.rebin_type, RebinType.REBIN)
         self.assertEqual(state_transmission.wavelength_low, [1.5])
         self.assertEqual(state_transmission.wavelength_high, [2.7])
-        self.assertEqual(state_transmission.wavelength_step, 0.5)
+        self.assertEqual(state_transmission.wavelength_interval.wavelength_step, 0.5)
         self.assertEqual(state_transmission.wavelength_step_type, RangeStepType.LIN)
         self.assertEqual(state_transmission.use_full_wavelength_range, True)
         self.assertEqual(state_transmission.wavelength_full_range_low, 12.)

@@ -92,11 +92,7 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
 
     def _makeVerticalHeader(self, section, role):
         def _numeric_axis_value_unit(axis):
-            # binned/point data
-            if axis.length() == self.ws.getNumberHistograms() + 1:
-                value = 0.5 * (float(axis.label(section)) + float(axis.label(section + 1)))
-            else:
-                value = float(axis.label(section))
+            value = float(axis.label(section))
             return value, axis.getUnit().symbol().utf8()
 
         axis_index = 1

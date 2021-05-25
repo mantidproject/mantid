@@ -107,15 +107,13 @@ using Types::Event::TofEvent;
  * Constructor
  * @param broker A reference to a Broker object for creating topic streams
  * @param eventTopic The name of the topic streaming the event data
- * @param spDetTopic The name of the topic streaming the spectrum-detector
  * run mapping
  */
 KafkaEventStreamDecoder::KafkaEventStreamDecoder(std::shared_ptr<IKafkaBroker> broker, const std::string &eventTopic,
-                                                 const std::string &runInfoTopic, const std::string &spDetTopic,
-                                                 const std::string &sampleEnvTopic, const std::string &chopperTopic,
-                                                 const std::string &monitorTopic, const std::size_t bufferThreshold)
-    : IKafkaStreamDecoder(std::move(broker), eventTopic, runInfoTopic, spDetTopic, sampleEnvTopic, chopperTopic,
-                          monitorTopic),
+                                                 const std::string &runInfoTopic, const std::string &sampleEnvTopic,
+                                                 const std::string &chopperTopic, const std::string &monitorTopic,
+                                                 const std::size_t bufferThreshold)
+    : IKafkaStreamDecoder(std::move(broker), eventTopic, runInfoTopic, sampleEnvTopic, chopperTopic, monitorTopic),
       m_intermediateBufferFlushThreshold(bufferThreshold) {
 #ifndef _OPENMP
   g_log.warning() << "Multithreading is not available on your system. This "

@@ -10,6 +10,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidAPI/ImmutableCompositeFunction.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
@@ -39,7 +40,7 @@ bool isBackground(const IFunction *fun) { return static_cast<bool>(dynamic_cast<
 
 bool isLorentzianFunction(const IFunction *fun) { return fun->name() == "Lorentzian"; }
 bool isfitTypeFunction(const IFunction *fun) {
-  if (dynamic_cast<const CompositeFunction *>(fun)) {
+  if (dynamic_cast<const CompositeFunction *>(fun) && !dynamic_cast<const ImmutableCompositeFunction *>(fun)) {
     return false;
   }
   return true;
@@ -220,8 +221,10 @@ void ConvolutionFunctionModel::iterateThroughFunction(IFunction *func, const QSt
   if (numberOfSubFunction == 0) {
     return;
   }
-  for (size_t k = 0; k < numberOfSubFunction; ++k) {
-    iterateThroughFunction(func->getFunction(k).get(), prefix + QString("f%1.").arg(k));
+  if (!isfitTypeFunction(func)) {
+    for (size_t k = 0; k < numberOfSubFunction; ++k) {
+      iterateThroughFunction(func->getFunction(k).get(), prefix + QString("f%1.").arg(k));
+    }
   }
 }
 

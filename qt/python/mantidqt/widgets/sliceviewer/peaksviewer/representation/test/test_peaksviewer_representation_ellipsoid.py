@@ -16,7 +16,7 @@ from mantidqt.widgets.sliceviewer.peaksviewer.representation.ellipsoid \
     import EllipsoidalIntergratedPeakRepresentation, slice_ellipsoid
 
 from mantidqt.widgets.sliceviewer.peaksviewer.representation.test.shapetesthelpers \
-    import FuzzyMatch, create_ellipsoid_info, draw_representation
+    import FuzzyMatch, create_ellipsoid_info, draw_representation, create_sphere_info
 
 
 def create_test_ellipsoid(bg_shell=True, do_translate=False):
@@ -38,6 +38,56 @@ def create_test_ellipsoid(bg_shell=True, do_translate=False):
 
 @patch("mantidqt.widgets.sliceviewer.peaksviewer.representation.ellipsoid.compute_alpha")
 class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
+    def test_draw_creates_circle_with_expected_properties_with_nonzero_alpha_and_background(
+            self, compute_alpha_mock):
+        peak_center = [1, 2, 3]
+        sphere = create_sphere_info(radius=0.4, bkgd_radii=(0.8, 0.9))
+        painter = MagicMock()
+        fg_color, bg_color = 'r', 'g'
+        fake_alpha = 0.5
+        compute_alpha_mock.return_value = fake_alpha
+
+        painted = draw_representation(EllipsoidalIntergratedPeakRepresentation, peak_center, sphere,
+                                      painter, fg_color, bg_color, shape_name="spherical")
+
+        self.assertTrue(painted is not None)
+        self._assert_painter_calls(
+            painter,
+            peak_center[:2],
+            cross_width=0.08,
+            signal_width=0.8,
+            signal_height=0.8,
+            angle=0,
+            alpha=fake_alpha,
+            fg_color=fg_color,
+            bkgd_width=1.8,
+            bkgd_height=1.8,
+            thickness=0.1,
+            bg_color=bg_color)
+
+    def test_draw_creates_circle_with_expected_properties_with_nonzero_alpha_and_no_background_in_JSON_shape(
+            self, compute_alpha_mock):
+        peak_center = [1, 2, 3]
+        sphere = create_sphere_info(radius=0.4, specify_bkgd=False)
+        painter = MagicMock()
+        fg_color, bg_color = 'r', 'unused'
+        fake_alpha = 0.5
+        compute_alpha_mock.return_value = fake_alpha
+
+        painted = draw_representation(EllipsoidalIntergratedPeakRepresentation, peak_center, sphere,
+                                      painter, fg_color, bg_color, shape_name="spherical")
+
+        self.assertTrue(painted is not None)
+        self._assert_painter_calls(
+            painter,
+            peak_center[:2],
+            cross_width=0.08,
+            signal_width=0.8,
+            signal_height=0.8,
+            angle=0,
+            alpha=fake_alpha,
+            fg_color=fg_color)
+
     def test_draw_creates_nothing_when_alpha_lt_zero(self, compute_alpha_mock):
         ellipsoid = create_test_ellipsoid()
         painter = MagicMock()
@@ -117,12 +167,16 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
                                       ellipsoid, painter, fg_color, bg_color, slice_transform)
 
         slice_diff = 1  # difference between peak_center and slice_point in plane normal to slice (3 - 2)
-        major_outer_radius = np.cos(np.arcsin(slice_diff/ellipsoid['background_outer_radius1']))*ellipsoid['background_outer_radius0']
-        minor_outer_radius = np.cos(np.arcsin(slice_diff/ellipsoid['background_outer_radius1']))*ellipsoid['background_outer_radius2']
-        major_inner_radius = np.cos(np.arcsin(slice_diff/ellipsoid['background_inner_radius1']))*ellipsoid['background_inner_radius0']
-        minor_inner_radius = np.cos(np.arcsin(slice_diff/ellipsoid['background_inner_radius1']))*ellipsoid['background_inner_radius2']
-        fractional_thickness = ((major_outer_radius-major_inner_radius)/major_outer_radius,
-                                (minor_outer_radius-minor_inner_radius)/minor_outer_radius)
+        major_outer_radius = np.cos(np.arcsin(slice_diff / ellipsoid['background_outer_radius1'])) * ellipsoid[
+            'background_outer_radius0']
+        minor_outer_radius = np.cos(np.arcsin(slice_diff / ellipsoid['background_outer_radius1'])) * ellipsoid[
+            'background_outer_radius2']
+        major_inner_radius = np.cos(np.arcsin(slice_diff / ellipsoid['background_inner_radius1'])) * ellipsoid[
+            'background_inner_radius0']
+        minor_inner_radius = np.cos(np.arcsin(slice_diff / ellipsoid['background_inner_radius1'])) * ellipsoid[
+            'background_inner_radius2']
+        fractional_thickness = ((major_outer_radius - major_inner_radius) / major_outer_radius,
+                                (minor_outer_radius - minor_inner_radius) / minor_outer_radius)
 
         self.assertTrue(painted is not None)
         self._assert_painter_calls(
@@ -166,8 +220,8 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
             fg_color=fg_color,
             bkgd_width=1.2,
             bkgd_height=2.0,
-            thickness=((0.6-0.5)/0.6,
-                       (1.0-0.6)/1.0),
+            thickness=((0.6 - 0.5) / 0.6,
+                       (1.0 - 0.6) / 1.0),
             bg_color=bg_color)
 
     def test_draw_with_nonzero_translation(self, compute_alpha_mock):

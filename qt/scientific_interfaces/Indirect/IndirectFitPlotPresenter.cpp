@@ -112,8 +112,11 @@ void IndirectFitPlotPresenter::setStartX(double startX) { m_view->setFitRangeMin
 
 void IndirectFitPlotPresenter::setEndX(double endX) { m_view->setFitRangeMaximum(endX); }
 
+void IndirectFitPlotPresenter::setXBounds(std::pair<double, double> const &bounds) {
+  m_view->setFitRangeBounds(bounds);
+}
+
 void IndirectFitPlotPresenter::updatePlotSpectrum(WorkspaceIndex spectrum) {
-  m_view->setPlotSpectrum(spectrum);
   setActiveSpectrum(spectrum);
   updatePlots();
 }
@@ -164,6 +167,7 @@ void IndirectFitPlotPresenter::updateDataSelection() {
   for (TableDatasetIndex i{0}; i < m_model->numberOfWorkspaces(); ++i)
     m_view->appendToDataSelection(m_model->getFitDataName(i));
   setActiveIndex(TableDatasetIndex{0});
+  setActiveSpectrum(WorkspaceIndex{0});
   updateAvailableSpectra();
   emitSelectedFitDataChanged();
 }

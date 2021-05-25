@@ -48,8 +48,6 @@ ATOMIC_LENGTH_2_ANGSTROM = constants.codata.value(
 
 M_2_HARTREE = constants.codata.value("atomic mass unit-hartree relationship")  # amu * m2_hartree =  Hartree
 
-ALL_INSTRUMENTS = ["TOSCA"]  # supported instruments
-
 # ALL_SAMPLE_FORMS = ["SingleCrystal", "Powder"]  # valid forms of samples
 ALL_SAMPLE_FORMS = ["Powder"]  # valid forms of samples
 
@@ -103,6 +101,9 @@ HZ2INV_CM_DECOMPOSITION = math.frexp(HZ2INV_CM)
 # Conversion factor from VASP internal units
 VASP_FREQ_TO_THZ = 15.633302
 
+# Energy units
+MILLI_EV_TO_WAVENUMBER = 8.06554465
+
 #
 # u = H_BAR [J s ]/ ( 2 m [kg] omega [s^-1]) = CONSTANT / ( m [amu] nu [cm^-1])
 #
@@ -143,7 +144,10 @@ MAX_ORDER = 4  # max quantum order event
 ALL_SUPPORTED_AB_INITIO_PROGRAMS = ["CRYSTAL", "CASTEP", "DMOL3", "GAUSSIAN", "VASP"]
 AB_INITIO_FILE_EXTENSIONS = ["phonon", "out", "outmol", "log", "LOG", "xml"]
 
-ONE_DIMENSIONAL_INSTRUMENTS = ["TOSCA"]
+ONE_DIMENSIONAL_INSTRUMENTS = ["TOSCA", "Lagrange"]
+TWO_DIMENSIONAL_INSTRUMENTS = []
+ALL_INSTRUMENTS = ONE_DIMENSIONAL_INSTRUMENTS + TWO_DIMENSIONAL_INSTRUMENTS
+
 ONE_DIMENSIONAL_SPECTRUM = 1
 
 FIRST_BIN_INDEX = 1
@@ -152,6 +156,10 @@ GAMMA_POINT = 0
 BUF = 65536
 
 CRYSTAL = False
+
+# Bin limits for q rebinning during semi-empirical powder sum
+Q_BEGIN = 0.7
+Q_END = 30.0
 
 # definition of momentum transfer range
 ACOUSTIC_PHONON_THRESHOLD = 10.0  # acoustic threshold in cm^-1
@@ -192,3 +200,9 @@ MASS_EPS = 1e-2  # in amu units.
 # this constant is used to check if in a system for the given symbol of an element all atoms with this symbol have
 # the same mass
 ONLY_ONE_MASS = 1
+
+DIGITS_NUM = 5
+S_PLOT_SPACING = 4.0
+ENERGY_PLOT_STEP = 500.0
+Q_PLOT_STEP = 6.0
+S_PLOT_THRESHOLD = 1e-7

@@ -27,7 +27,7 @@ from ..plugins.base import PluginWidget # noqa
 # from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 
 # should we share this with plugins.editor?
-STARTUP_CODE = """from __future__ import (absolute_import, division, print_function, unicode_literals)
+STARTUP_CODE = """
 from mantid.simpleapi import *
 import matplotlib.pyplot as plt
 import numpy as np

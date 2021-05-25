@@ -70,7 +70,8 @@ void CreateMDHistoWorkspace::init() {
                   "Number of bin in each dimension.");
 
   declareProperty(std::make_unique<ArrayProperty<std::string>>("Names", mandatoryStrArrayValidator),
-                  "A comma separated list of the name of each dimension.");
+                  "A comma separated list of the name of each dimension. "
+                  "e.g. ('[H,0,0]','[0,K,0]','[0,0,L]') ");
 
   declareProperty(std::make_unique<ArrayProperty<std::string>>("Units", mandatoryStrArrayValidator),
                   "A comma separated list of the units of each dimension.");

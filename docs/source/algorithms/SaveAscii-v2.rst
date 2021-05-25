@@ -16,6 +16,10 @@ the X-values, followed by pairs of Y and E values. Columns are separated by
 commas. The resulting file can normally be loaded into a workspace by the
 :ref:`algm-LoadAscii` algorithm.
 
+It is possible to create a header for the ASCII file containing selected sample log entries and its unit,
+specified through `LogList` property. In case the requested log does not exist, it will be printed as
+`Not defined`. This feature is not enabled for :ref:`TableWorkspace <Table Workspaces>`.
+
 Limitations
 ###########
 

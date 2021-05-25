@@ -28,8 +28,6 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
             _testdocstring = "This is a doc string"
             def PyInit(self):
                 self.declareProperty('SimpleInput', 1)
-                if sys.version_info[0] < 3:
-                    self.declareProperty('SimpleLongInput', long(5))
                 self.declareProperty('Switch', True)
                 self.declareProperty('SimpleOutput', 1.0, Direction.Output)
                 self.declareProperty('InputString', "", Direction.Input)
@@ -45,18 +43,11 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
         self.assertEqual(0, len(props))
         alg.initialize()
         props = alg.getProperties()
-        if sys.version_info[0] < 3:
-            self.assertEqual(7, len(props))
-        else:
-            self.assertEqual(6, len(props))
+        self.assertEqual(6, len(props))
 
         input = alg.getProperty("SimpleInput")
         self.assertEqual(input.direction, Direction.Input)
         self.assertEqual(input.value, 1)
-        if sys.version_info < (3,):
-            input_long = alg.getProperty("SimpleLongInput")
-            self.assertEqual(input_long.direction, Direction.Input)
-            self.assertEqual(input_long.value, 5)
         switch = alg.getProperty("Switch")
         self.assertEqual(switch.direction, Direction.Input)
         self.assertEqual(switch.value, True)

@@ -6,7 +6,9 @@ set(
   ALCDataLoadingPresenterTest.h
   ALCLatestFileFinderTest.h
   ALCPeakFittingModelTest.h
-  ALCPeakFittingPresenterTest.h)
+  ALCPeakFittingPresenterTest.h
+  MuonAnalysisHelperTest.h
+)
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE
     ${CMAKE_CURRENT_LIST_DIR}/InterfacesMuonTestInitialization.h)

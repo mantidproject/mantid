@@ -16,6 +16,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
+#include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
@@ -38,6 +39,14 @@ using namespace MantidQt::MantidWidgets;
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+
+struct ScopedSignalBlocker {
+  // block signals on construction
+  ScopedSignalBlocker(QWidget *myObject) : m_object(myObject) { m_object->blockSignals(true); }
+  // enable signals on destruction
+  ~ScopedSignalBlocker() { m_object->blockSignals(false); }
+  QWidget *m_object;
+};
 
 /**
  * Constructor
@@ -71,9 +80,9 @@ void IndirectFitPropertyBrowser::initFitOptionsBrowser() {
   // this object is added as a child to the stacked widget m_templateBrowser
   // which is a child of this class so the lifetime of this pointer is handled
   // by Qt
-  m_fitOptionsBrowser = new FitOptionsBrowser(nullptr, FitOptionsBrowser::SimultaneousAndSequential);
+  m_fitOptionsBrowser = new FitOptionsBrowser(nullptr, FittingMode::SEQUENTIAL_AND_SIMULTANEOUS);
   m_fitOptionsBrowser->setObjectName("fitOptionsBrowser");
-  m_fitOptionsBrowser->setCurrentFittingType(FitOptionsBrowser::Sequential);
+  m_fitOptionsBrowser->setCurrentFittingType(FittingMode::SEQUENTIAL);
 }
 
 void IndirectFitPropertyBrowser::setHiddenProperties(std::vector<std::string> hiddenProperties) {
@@ -115,6 +124,7 @@ QStringList IndirectFitPropertyBrowser::getLocalParameters() const {
 
 void IndirectFitPropertyBrowser::syncFullBrowserWithTemplate() {
   auto const fun = m_templateBrowser->getFunction();
+  auto signalBlocker = ScopedSignalBlocker(m_functionBrowser);
   if (fun) {
     m_functionBrowser->setFunction(fun);
     m_functionBrowser->updateMultiDatasetParameters(*m_templateBrowser->getGlobalFunction());
@@ -125,6 +135,7 @@ void IndirectFitPropertyBrowser::syncFullBrowserWithTemplate() {
 
 void IndirectFitPropertyBrowser::syncTemplateBrowserWithFull() {
   auto const funStr = m_functionBrowser->getFunctionString();
+  auto signalBlocker = ScopedSignalBlocker(m_templateBrowser);
   if (auto const fun = m_functionBrowser->getGlobalFunction()) {
     m_templateBrowser->setFunction(funStr);
     m_templateBrowser->updateMultiDatasetParameters(*fun);
@@ -180,7 +191,7 @@ void IndirectFitPropertyBrowser::setFunction(const QString &funStr) {
   }
 }
 
-MultiDomainFunction_sptr IndirectFitPropertyBrowser::getFittingFunction() const {
+MultiDomainFunction_sptr IndirectFitPropertyBrowser::getFitFunction() const {
   try {
     if (getNumberOfDatasets() > 0) {
       return getGlobalFunction();
@@ -276,12 +287,9 @@ void IndirectFitPropertyBrowser::updateFitStatus(const FitDomainIndex index) {
 }
 
 /**
- * @return  The selected fit type in the fit type combo box.
+ * @return  The currently active fitting mode (Sequential or Simultaneous).
  */
-QString IndirectFitPropertyBrowser::selectedFitType() const {
-  return m_fitOptionsBrowser->getCurrentFittingType() == FitOptionsBrowser::Simultaneous ? "Simultaneous"
-                                                                                         : "Sequential";
-}
+FittingMode IndirectFitPropertyBrowser::getFittingMode() const { return m_fitOptionsBrowser->getCurrentFittingType(); }
 
 /**
  * Sets whether fit members should be convolved with the resolution after a fit.
@@ -335,7 +343,7 @@ void IndirectFitPropertyBrowser::setBackgroundA0(double value) {
 }
 
 void IndirectFitPropertyBrowser::setCurrentDataset(FitDomainIndex i) {
-  if (m_functionBrowser->getNumberOfDatasets() == 0)
+  if (getNumberOfDatasets() == 0)
     return;
   updateFitStatus(i);
   if (isFullFunctionBrowserActive()) {
@@ -346,7 +354,11 @@ void IndirectFitPropertyBrowser::setCurrentDataset(FitDomainIndex i) {
 }
 
 FitDomainIndex IndirectFitPropertyBrowser::currentDataset() const {
-  return FitDomainIndex{static_cast<size_t>(m_functionBrowser->getCurrentDataset())};
+  if (isFullFunctionBrowserActive()) {
+    return FitDomainIndex{static_cast<size_t>(m_functionBrowser->getCurrentDataset())};
+  } else {
+    return FitDomainIndex{static_cast<size_t>(m_templateBrowser->getCurrentDataset())};
+  }
 }
 
 void IndirectFitPropertyBrowser::updateFunctionBrowserData(
@@ -399,9 +411,9 @@ void IndirectFitPropertyBrowser::browserVisibilityChanged(bool isVisible) {
 void IndirectFitPropertyBrowser::updateFitType() {
   auto const nGlobals = m_functionBrowser->getGlobalParameters().size();
   if (nGlobals == 0) {
-    m_fitOptionsBrowser->setCurrentFittingType(FitOptionsBrowser::Sequential);
+    m_fitOptionsBrowser->setCurrentFittingType(FittingMode::SEQUENTIAL);
   } else {
-    m_fitOptionsBrowser->setCurrentFittingType(FitOptionsBrowser::Simultaneous);
+    m_fitOptionsBrowser->setCurrentFittingType(FittingMode::SIMULTANEOUS);
   }
 }
 

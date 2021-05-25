@@ -4,10 +4,10 @@ Credits
 -------
 
 Author:
-    Krzysztof Dymkowski
+    Krzysztof Dymkowski, Adam Jackson
 
 Contributors:
-   Sanghamitra Mukhopadhyay, Elliot Oram, Leonardo Bernasconi, Leandro Liborio, Adam Jackson
+   Sanghamitra Mukhopadhyay, Elliot Oram, Leonardo Bernasconi, Leandro Liborio
 
 .. summary::
 
@@ -25,7 +25,7 @@ Abins requires a file with the ab-initio phonon data to perform INS analysis. Cu
 (.phonon), CRYSTAL (.out), GAUSSIAN (.log), DMOL3 (.outmol) or VASP (.xml) DFT programs can be used to perform analysis.
 Optionally, a user can provide an experimental file with measured dynamical structure factor S in order to directly
 compare theoretical and experimental spectra.
-A user can produce one dimensional INS spectrum which can be compared against TOSCA and TOSCA-like instruments;
+A user can produce one dimensional INS spectrum which can be compared against TOSCA, IN1-LAGRANGE and similar instruments;
 Abins uses a semi-empirical powder averaging model to account for q- and energy-dependent phenomena in this system.
 The user-input temperature value is included in a Debye-Waller term, recreating the intensity fall-off with increasing
 wavelength.

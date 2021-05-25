@@ -47,26 +47,24 @@ namespace LiveData {
  * @param broker A reference to a Broker object for creating topic streams
  * @param streamTopic The name of the topic streaming the stream data
  * @param runInfoTopic The name of the topic streaming the run information
- * @param spDetTopic The name of the topic streaming the spectrum-detector
  * @param sampleEnvTopic The name of the topic stream sample environment
  * information. run mapping
  */
 IKafkaStreamDecoder::IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker, const std::string &streamTopic,
-                                         const std::string &runInfoTopic, const std::string &spDetTopic,
-                                         const std::string &sampleEnvTopic, const std::string &chopperTopic,
-                                         const std::string &monitorTopic)
-    : m_broker(std::move(broker)), m_streamTopic(streamTopic), m_runInfoTopic(runInfoTopic), m_spDetTopic(spDetTopic),
+                                         const std::string &runInfoTopic, const std::string &sampleEnvTopic,
+                                         const std::string &chopperTopic, const std::string &monitorTopic)
+    : m_broker(std::move(broker)), m_streamTopic(streamTopic), m_runInfoTopic(runInfoTopic),
       m_sampleEnvTopic(sampleEnvTopic), m_chopperTopic(chopperTopic), m_monitorTopic(monitorTopic), m_interrupt(false),
       m_specToIdx(), m_runStart(), m_runId(""), m_thread(), m_capturing(false), m_exception(), m_extractWaiting(false),
       m_cbIterationEnd([] {}), m_cbError([] {}) {}
 
 IKafkaStreamDecoder::IKafkaStreamDecoder(IKafkaStreamDecoder &&o) noexcept
     : m_broker(std::move(o.m_broker)), m_streamTopic(o.m_streamTopic), m_runInfoTopic(o.m_runInfoTopic),
-      m_spDetTopic(std::move(o.m_spDetTopic)), m_sampleEnvTopic(o.m_sampleEnvTopic), m_chopperTopic(o.m_chopperTopic),
-      m_monitorTopic(o.m_monitorTopic), m_interrupt(o.m_interrupt.load()), m_specToIdx(std::move(o.m_specToIdx)),
-      m_runStart(std::move(o.m_runStart)), m_runId(std::move(o.m_runId)), m_thread(std::move(o.m_thread)),
-      m_capturing(o.m_capturing.load()), m_exception(std::move(o.m_exception)),
-      m_cbIterationEnd(std::move(o.m_cbIterationEnd)), m_cbError(std::move(o.m_cbError)) {
+      m_sampleEnvTopic(o.m_sampleEnvTopic), m_chopperTopic(o.m_chopperTopic), m_monitorTopic(o.m_monitorTopic),
+      m_interrupt(o.m_interrupt.load()), m_specToIdx(std::move(o.m_specToIdx)), m_runStart(o.m_runStart),
+      m_runId(std::move(o.m_runId)), m_thread(std::move(o.m_thread)), m_capturing(o.m_capturing.load()),
+      m_exception(std::move(o.m_exception)), m_cbIterationEnd(std::move(o.m_cbIterationEnd)),
+      m_cbError(std::move(o.m_cbError)) {
   std::scoped_lock lck(m_runStatusMutex, m_waitMutex, m_mutex);
   m_runStatusSeen = o.m_runStatusSeen;
   m_extractWaiting = o.m_extractWaiting.load();

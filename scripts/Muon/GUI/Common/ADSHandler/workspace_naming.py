@@ -6,10 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
 
-group_str = "; Group; "
-DIFF_STR = "; Diff;"
-pair_str = "; Pair Asym; "
-phaseQuad_str = '; PhaseQuad; '
+GROUP_STR = "; Group; "
+DIFF_STR = "; Diff; "
+PAIR_STR = "; Pair Asym; "
+PHASEQUAD_STR = '; PhaseQuad; '
 PHASEQUAD_RE = '_Re_' # use _ on both sides to prevent accidental ID (e.g. Red)
 PHASEQUAD_IM = "_Im_"
 TF_ASYMMETRY_PREFIX = "TFAsymmetry"
@@ -34,7 +34,7 @@ def _base_run_name(instrument, run=None):
 
 
 def get_group_data_workspace_name(context, group_name, run, period_string, rebin):
-    name = context.data_context._base_run_name(run) + group_str + group_name + "; Counts;"
+    name = context.data_context._base_run_name(run) + GROUP_STR + group_name + "; Counts;"
 
     if rebin:
         name += "".join([' ', REBIN_STR, ';'])
@@ -45,7 +45,7 @@ def get_group_data_workspace_name(context, group_name, run, period_string, rebin
 
 
 def get_group_asymmetry_name(context, group_name, run, period_string, rebin):
-    name = context.data_context._base_run_name(run) + group_str + group_name + "; Asymmetry;"
+    name = context.data_context._base_run_name(run) + GROUP_STR + group_name + "; Asymmetry;"
 
     if rebin:
         name += "".join([' ', REBIN_STR, ';'])
@@ -65,7 +65,7 @@ def get_diff_asymmetry_name(context, diff_name, run,  rebin):
 
 
 def get_pair_asymmetry_name(context, pair_name, run, rebin):
-    name = context.data_context._base_run_name(run) + pair_str + pair_name + ";"
+    name = context.data_context._base_run_name(run) + PAIR_STR + pair_name + ";"
 
     if rebin:
         name += "".join([' ', REBIN_STR, ';'])
@@ -86,7 +86,7 @@ def add_phasequad_extensions(pair_name):
 
 def get_pair_phasequad_name(context, pair_name, run, rebin):
 
-    name = context.data_context._base_run_name(run) + phaseQuad_str + pair_name +";"
+    name = context.data_context._base_run_name(run) + PHASEQUAD_STR + pair_name +";"
 
     if rebin:
         name += "".join([' ', REBIN_STR, ';'])
@@ -96,8 +96,8 @@ def get_pair_phasequad_name(context, pair_name, run, rebin):
 
 
 def get_group_or_pair_from_name(name):
-    if group_str in name:
-        index = name.find(group_str) + len(group_str)
+    if GROUP_STR in name:
+        index = name.find(GROUP_STR) + len(GROUP_STR)
         end = name.find(";", index)
         group_found = name[index: end]
         return group_found.replace(" ", "")
@@ -106,13 +106,13 @@ def get_group_or_pair_from_name(name):
         end = name.find(";", index)
         diff_found = name[index: end]
         return diff_found.replace(" ", "")
-    elif pair_str in name:
-        index = name.find(pair_str) + len(pair_str)
+    elif PAIR_STR in name:
+        index = name.find(PAIR_STR) + len(PAIR_STR)
         end = name.find(";", index)
         pair_found = name[index: end]
         return pair_found.replace(" ", "")
-    elif phaseQuad_str in name:
-        index = name.find(phaseQuad_str) + len(phaseQuad_str)
+    elif PHASEQUAD_STR in name:
+        index = name.find(PHASEQUAD_STR) + len(PHASEQUAD_STR)
         end = name.find(";", index)
         pair_found = name[index: end]
         return pair_found.replace(" ", "")
@@ -162,7 +162,7 @@ def get_fft_workspace_group_name(insertion_workspace_name, instrument, workspace
 
 
 def get_phase_quad_workspace_name(input_workspace, phase_table):
-    return input_workspace.replace('_raw_data', phaseQuad_str) + ' ' + phase_table
+    return input_workspace.replace('_raw_data', PHASEQUAD_STR) + ' ' + phase_table
 
 
 def get_fitting_workspace_name(base_name):
@@ -273,7 +273,7 @@ def create_parameter_table_name(input_workspace_name, function_name):
 def remove_rebin_from_name(name):
     if REBIN_STR not in name:
         return name
-    index =  [ch.start() for ch in re.finditer(r";",name)]
+    index = [ch.start() for ch in re.finditer(r";",name)]
     return name[:index[-2]]+name[index[-1]:]
 
 

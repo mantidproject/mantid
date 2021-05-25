@@ -29,6 +29,7 @@ from mantidqt.widgets.sliceviewer.view import SliceViewerView, SliceViewerDataVi
 
 def _create_presenter(model, view, mock_sliceinfo_cls, enable_nonortho_axes, supports_nonortho):
     model.get_ws_type = mock.Mock(return_value=WS_TYPE.MDH)
+    model.is_ragged_matrix_plotted.return_value = False
     model.get_dim_limits.return_value = ((-1, 1), (-2, 2))
     data_view_mock = view.data_view
     data_view_mock.plot_MDH = mock.Mock()
@@ -205,6 +206,7 @@ class SliceViewerTest(unittest.TestCase):
     def test_non_orthogonal_axes_toggled_on(self, _):
         self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MDE)
         self.model.get_dim_limits.return_value = ((-1, 1), (-2, 2))
+        self.model.is_ragged_matrix_plotted.return_value = False
         data_view_mock = self.view.data_view
         data_view_mock.plot_MDH = mock.Mock()
 
@@ -247,8 +249,9 @@ class SliceViewerTest(unittest.TestCase):
             (mock.call(ToolItemText.LINEPLOTS), mock.call(ToolItemText.REGIONSELECTION)))
 
     @patch("sip.isdeleted", return_value=False)
-    def test_request_to_show_all_data_sets_correct_limits_on_view(self, _):
+    def test_request_to_show_all_data_sets_correct_limits_on_view_MD(self, _):
         presenter = SliceViewer(None, model=self.model, view=self.view)
+        self.model.is_ragged_matrix_plotted.return_value = False
         self.model.get_dim_limits.return_value = ((-1, 1), (-2, 2))
 
         presenter.show_all_data_requested()
@@ -256,6 +259,19 @@ class SliceViewerTest(unittest.TestCase):
         data_view = self.view.data_view
         self.model.get_dim_limits.assert_called_once_with([None, None, 0.5],
                                                           data_view.dimensions.transpose)
+        data_view.get_full_extent.assert_not_called()
+        data_view.set_axes_limits.assert_called_once_with((-1, 1), (-2, 2))
+
+    @patch("sip.isdeleted", return_value=False)
+    def test_request_to_show_all_data_sets_correct_limits_on_view_ragged_matrix(self, _):
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        self.model.is_ragged_matrix_plotted.return_value = True
+        self.view.data_view.get_full_extent.return_value = [-1, 1, -2, 2]
+
+        presenter.show_all_data_requested()
+
+        data_view = self.view.data_view
+        self.model.get_dim_limits.assert_not_called()
         data_view.set_axes_limits.assert_called_once_with((-1, 1), (-2, 2))
 
     @patch("sip.isdeleted", return_value=False)

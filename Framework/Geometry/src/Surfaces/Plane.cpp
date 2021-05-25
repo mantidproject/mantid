@@ -399,7 +399,7 @@ void Plane::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmi
   //	std::cout<<listOfPoints.size()<<'\n';
   if (!listOfPoints.empty()) {
     xmin = ymin = zmin = std::numeric_limits<double>::max();
-    xmax = ymax = zmax = -std::numeric_limits<double>::max();
+    xmax = ymax = zmax = std::numeric_limits<double>::lowest();
     for (std::vector<V3D>::const_iterator it = listOfPoints.begin(); it != listOfPoints.end(); ++it) {
       //			std::cout<<(*it)<<'\n';
       if ((*it)[0] < xmin)

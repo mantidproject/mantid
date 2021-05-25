@@ -459,7 +459,7 @@ When *long_mode* is **False** the TOF window processed is
 between 0-20,000 μs
 
 When *long_mode* is **True** the TOF window processed is
-between 0-40,000 μs
+between 20,000-40,000 μs
 
 This also affects the :ref:`advanced_parameters_pearl_isis-powder-diffraction-ref`
 used. More detail can be found for each individual parameter

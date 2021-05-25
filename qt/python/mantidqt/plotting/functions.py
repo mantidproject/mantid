@@ -56,15 +56,13 @@ def can_overplot():
     compatible.
     """
     compatible = False
-    msg = "Unable to overplot on currently active plot type.\n" \
-          "Please select another plot."
     fig = current_figure_or_none()
     if fig is not None:
         figtype = figure_type(fig)
         if figtype in [FigureType.Line, FigureType.Errorbar, FigureType.Waterfall]:
-            compatible, msg = True, None
+            compatible = True
 
-    return compatible, msg
+    return compatible
 
 
 def current_figure_or_none():
@@ -209,7 +207,7 @@ def use_imshow(ws):
 
 
 @manage_workspace_names
-def pcolormesh(workspaces, fig=None, normalize_by_bin_width=None):
+def pcolormesh(workspaces, fig=None, color_norm=None, normalize_by_bin_width=None):
     """
     Create a figure containing pcolor subplots
 
@@ -234,7 +232,7 @@ def pcolormesh(workspaces, fig=None, normalize_by_bin_width=None):
         ax = axes[row_idx][col_idx]
         if subplot_idx < workspaces_len:
             ws = workspaces[subplot_idx]
-            pcm = pcolormesh_on_axis(ax, ws, normalize_by_bin_width)
+            pcm = pcolormesh_on_axis(ax, ws, color_norm, normalize_by_bin_width)
             plots.append(pcm)
             if col_idx < ncols - 1:
                 col_idx += 1
@@ -273,25 +271,27 @@ def pcolormesh(workspaces, fig=None, normalize_by_bin_width=None):
     return fig
 
 
-def pcolormesh_on_axis(ax, ws, normalize_by_bin_width=None):
+def pcolormesh_on_axis(ax, ws, color_norm=None, normalize_by_bin_width=None):
     """
     Plot a pcolormesh plot of the given workspace on the given axis
     :param ax: A matplotlib axes instance
     :param ws: A mantid workspace instance
+    :param color_norm: A matplotlib.colours Normalize instance (or any of its subclasses)
     :param normalize_by_bin_width: Optional keyword argument to pass to imshow in the event of a plot restoration
     :return:
     """
     ax.clear()
     ax.set_title(ws.name())
-    scale = _get_colorbar_scale()
+    scale = _get_colorbar_scale() if not color_norm else color_norm
+
     if use_imshow(ws):
         pcm = ax.imshow(ws, cmap=ConfigService.getString("plots.images.Colormap"), aspect='auto', origin='lower',
-                        norm=scale(), normalize_by_bin_width=normalize_by_bin_width)
+                        norm=scale, normalize_by_bin_width=normalize_by_bin_width)
         # remove normalize_by_bin_width from cargs if present so that this can be toggled in future
         for cargs in pcm.axes.creation_args:
             cargs.pop('normalize_by_bin_width')
     else:
-        pcm = ax.pcolormesh(ws, cmap=ConfigService.getString("plots.images.Colormap"), norm=scale())
+        pcm = ax.pcolormesh(ws, cmap=ConfigService.getString("plots.images.Colormap"), norm=scale)
 
     return pcm
 
@@ -305,9 +305,9 @@ def _get_colorbar_scale():
     """Get the scale type (Linear, Log) for the colorbar in image type plots"""
     scale = ConfigService.getString("plots.images.ColorBarScale")
     if scale == "Log":
-        return matplotlib.colors.LogNorm
+        return matplotlib.colors.LogNorm()
     else:
-        return matplotlib.colors.Normalize
+        return matplotlib.colors.Normalize()
 
 
 @manage_workspace_names
@@ -351,10 +351,12 @@ def plot_contour(workspaces, fig=None):
     for ws in workspaces:
         fig = pcolormesh(workspaces, fig)
         ax = fig.get_axes()[0]
-
-        ax.contour(ws, levels=DEFAULT_CONTOUR_LEVELS,
-                   colors=DEFAULT_CONTOUR_COLOUR,
-                   linewidths=DEFAULT_CONTOUR_WIDTH)
+        try:
+            ax.contour(ws, levels=DEFAULT_CONTOUR_LEVELS,
+                       colors=DEFAULT_CONTOUR_COLOUR,
+                       linewidths=DEFAULT_CONTOUR_WIDTH)
+        except TypeError as type_error:
+            LOGGER.warning(str(type_error))
 
         fig.show()
 

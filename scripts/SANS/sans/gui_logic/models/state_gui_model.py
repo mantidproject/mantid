@@ -21,7 +21,7 @@ from sans.user_file.parser_helpers.wavelength_parser import parse_range_waveleng
 
 class StateGuiModel(ModelCommon):
     def __init__(self, all_states: AllStates):
-        assert(isinstance(all_states, AllStates)), \
+        assert (isinstance(all_states, AllStates)), \
             "Expected AllStates, got %r, could be a legacy API caller" % repr(all_states)
         super(StateGuiModel, self).__init__(all_states)
 
@@ -167,7 +167,9 @@ class StateGuiModel(ModelCommon):
     @event_slices.setter
     def event_slices(self, value):
         self._all_states.slice.event_slice_str = value
-        start, stop = get_ranges_from_event_slice_setting(value)
+        pairs = get_ranges_from_event_slice_setting(value)
+        start = [i[0] for i in pairs]
+        stop = [i[1] for i in pairs]
         self._all_states.slice.start_time = start
         self._all_states.slice.end_time = stop
 
@@ -323,23 +325,30 @@ class StateGuiModel(ModelCommon):
     # - wavelength_and_pixel_adjustment
     # --------------------------------------------------------------------------------------------------------------
 
+    def _get_wavelength_objs(self, attr_name):
+        if attr_name in ["wavelength_full_range", "wavelength_step", "selected_ranges"]:
+            # These attrs are in wavelength_interval
+            to_check = [self._all_states.adjustment.calculate_transmission.wavelength_interval,
+                        self._all_states.adjustment.normalize_to_monitor.wavelength_interval,
+                        self._all_states.adjustment.wavelength_and_pixel_adjustment.wavelength_interval,
+                        self._all_states.wavelength.wavelength_interval]
+        else:
+            to_check = [self._all_states.adjustment.calculate_transmission,
+                        self._all_states.adjustment.normalize_to_monitor,
+                        self._all_states.adjustment.wavelength_and_pixel_adjustment,
+                        self._all_states.wavelength]
+        return to_check
+
     def _assert_all_wavelength_same(self, attr_name):
         # For god knows what reason we have the same data duplicated in 4 places
         # Ensure they stay in sync
-        calc_trans = self._all_states.adjustment.calculate_transmission
-        norm_mon = self._all_states.adjustment.normalize_to_monitor
-        wav_pixel = self._all_states.adjustment.wavelength_and_pixel_adjustment
-        wavelength = self._all_states.wavelength
-        to_check = [getattr(calc_trans, attr_name), getattr(norm_mon, attr_name),
-                    getattr(wav_pixel, attr_name), getattr(wavelength, attr_name)]
-        assert all(x == to_check[0] for x in to_check), \
-            "Wavelength attributes have got out of sync. This should not happen!"
+        to_check = self._get_wavelength_objs(attr_name)
+        seen = getattr(to_check[0], attr_name)
+        for o in to_check:
+            assert(getattr(o, attr_name) == seen)
 
     def _set_on_all_wavelength(self, attr_name, value):
-        objs_to_set = [self._all_states.adjustment.calculate_transmission,
-                       self._all_states.adjustment.normalize_to_monitor,
-                       self._all_states.adjustment.wavelength_and_pixel_adjustment,
-                       self._all_states.wavelength]
+        objs_to_set = self._get_wavelength_objs(attr_name)
         for obj in objs_to_set:
             setattr(obj, attr_name, value)
 
@@ -352,35 +361,38 @@ class StateGuiModel(ModelCommon):
     @wavelength_step_type.setter
     def wavelength_step_type(self, value):
         self._set_on_all_wavelength("wavelength_step_type", value)
+        if value is not RangeStepType.RANGE_LIN and value is not RangeStepType.RANGE_LOG:
+            # Convert range input to the min/max of full range
+            self.wavelength_range = f"{self.wavelength_min}, {self.wavelength_max}"
 
     @property
     def wavelength_min(self):
-        self._assert_all_wavelength_same("wavelength_low")
-        val = self._all_states.wavelength.wavelength_low
-        val = val[0] if isinstance(val, list) else val
+        self._assert_all_wavelength_same("wavelength_full_range")
+        val = self._all_states.wavelength.wavelength_interval.wavelength_full_range[0]
         return self._get_val_or_default(val)
 
     @wavelength_min.setter
     def wavelength_min(self, value):
-        value = [value] if not isinstance(value, list) else value
-        self._set_on_all_wavelength("wavelength_low", value)
+        range = (float(value), self.wavelength_max)
+        self._set_on_all_wavelength("wavelength_full_range", range)
+        self._set_on_all_wavelength("selected_ranges", [(value, self.wavelength_max)])
 
     @property
     def wavelength_max(self):
-        self._assert_all_wavelength_same("wavelength_high")
-        val = self._all_states.wavelength.wavelength_high
-        val = val[0] if isinstance(val, list) else val
+        self._assert_all_wavelength_same("wavelength_full_range")
+        val = self._all_states.wavelength.wavelength_interval.wavelength_full_range[1]
         return self._get_val_or_default(val)
 
     @wavelength_max.setter
     def wavelength_max(self, value):
-        value = [value] if not isinstance(value, list) else value
-        self._set_on_all_wavelength("wavelength_high", value)
+        range = (self.wavelength_min, float(value))
+        self._set_on_all_wavelength("wavelength_full_range", range)
+        self._set_on_all_wavelength("selected_ranges", [(self.wavelength_min, value)])
 
     @property
     def wavelength_step(self):
         self._assert_all_wavelength_same("wavelength_step")
-        val = self._all_states.wavelength.wavelength_step
+        val = self._all_states.wavelength.wavelength_interval.wavelength_step
         return self._get_val_or_default(val)
 
     @wavelength_step.setter
@@ -394,9 +406,10 @@ class StateGuiModel(ModelCommon):
 
     @wavelength_range.setter
     def wavelength_range(self, value):
-        wav_start, wav_stop = parse_range_wavelength(value)
-        self.wavelength_min = wav_start
-        self.wavelength_max = wav_stop
+        full_range, pairs = parse_range_wavelength(value)
+        self._set_on_all_wavelength("wavelength_full_range", full_range)
+        self._set_on_all_wavelength('selected_ranges', pairs)
+        # Ensure the GUI remembers the original user string
         self._wavelength_range = value
 
     # ------------------------------------------------------------------------------------------------------------------

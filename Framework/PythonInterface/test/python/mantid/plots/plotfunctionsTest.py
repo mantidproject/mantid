@@ -20,8 +20,8 @@ import matplotlib.pyplot as plt
 
 # local imports
 # register mantid projection
-from mantid.api import AnalysisDataService, WorkspaceFactory
-from mantid.simpleapi import CreateMDHistoWorkspace
+from mantid.api import AnalysisDataService, WorkspaceFactory, WorkspaceGroup
+from mantid.simpleapi import CreateMDHistoWorkspace, CloneWorkspace, GroupWorkspaces
 from mantid.kernel import config
 from mantid.plots import MantidAxes
 from mantid.plots.plotfunctions import (figure_title, manage_workspace_names,
@@ -152,6 +152,36 @@ class FunctionsTest(unittest.TestCase):
         plot([ws], wksp_indices=[1], fig=fig, overplot=True)
         ax = plt.gca()
         self.assertIn(ws.name(), ax.tracked_workspaces)
+
+    def test_grouped_workspaces_in_ads_unpacked(self):
+        fig = plt.figure()
+        plt.plot([0, 1], [0, 1])
+        ws1 = CloneWorkspace(self._test_ws, StoreInADS=True)
+        ws2 = CloneWorkspace(self._test_ws, StoreInADS=True)
+        group_list = [ws1, ws2]
+        ws_group = GroupWorkspaces(group_list)
+
+        plot([ws_group], wksp_indices=[1], fig=fig, overplot=True)
+        ax = plt.gca()
+        self.assertIn(ws1.name(), ax.tracked_workspaces)
+        self.assertIn(ws2.name(), ax.tracked_workspaces)
+
+    def test_grouped_workspaces_not_in_ads(self):
+        fig = plt.figure()
+        plt.plot([0, 1], [0, 1])
+
+        num_plots = 3
+        ws_list = []
+        ws_group = WorkspaceGroup()
+        for i in range(num_plots):
+            ws = CloneWorkspace(self._test_ws, StoreInADS=False)
+            ws_list.append(ws)
+            ws_group.addWorkspace(ws)
+
+        plot([ws_group], wksp_indices=[1], fig=fig, overplot=True)
+        ax = plt.gca()
+        self.assertEqual(len(ws_group) + 1, len(ax.lines))
+        self.assertEqual(len(ws_group) + 1, len(ax.lines))
 
     def test_from_mpl_axes_success_with_default_args(self):
         plt.figure()

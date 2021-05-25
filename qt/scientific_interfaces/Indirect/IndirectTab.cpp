@@ -364,7 +364,7 @@ void IndirectTab::setPlotPropertyRange(RangeSelector *rs, QtProperty *min, QtPro
   m_dblManager->setMaximum(min, bounds.second);
   m_dblManager->setMinimum(max, bounds.first);
   m_dblManager->setMaximum(max, bounds.second);
-  rs->setRange(bounds.first, bounds.second);
+  rs->setBounds(bounds.first, bounds.second);
 }
 
 /**

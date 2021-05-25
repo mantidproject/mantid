@@ -149,10 +149,7 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI, QWidget *pa
   m_uiForm.dsInput->isForRunFiles(false);
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IndirectSymmetrise::~IndirectSymmetrise() {}
+IndirectSymmetrise::~IndirectSymmetrise() { m_propTrees["SymmPropTree"]->unsetFactoryForManager(m_dblManager); }
 
 void IndirectSymmetrise::setup() {}
 
@@ -260,8 +257,12 @@ void IndirectSymmetrise::plotNewData(QString const &workspaceName) {
   double symmRange = std::max(fabs(axisRange.first), fabs(axisRange.second));
 
   // Set valid range for range selectors
-  m_uiForm.ppRawPlot->getRangeSelector("NegativeE")->setRange(-symmRange, 0);
-  m_uiForm.ppRawPlot->getRangeSelector("PositiveE")->setRange(0, symmRange);
+  auto negativeESelector = m_uiForm.ppRawPlot->getRangeSelector("NegativeE");
+  negativeESelector->setBounds(axisRange.first, axisRange.second);
+  negativeESelector->setRange(-symmRange, 0);
+  auto positiveESelector = m_uiForm.ppRawPlot->getRangeSelector("PositiveE");
+  positiveESelector->setBounds(axisRange.first, axisRange.second);
+  positiveESelector->setRange(0, symmRange);
 
   // Set some default (and valid) values for E range
   m_dblManager->setValue(m_properties["EMax"], axisRange.second);

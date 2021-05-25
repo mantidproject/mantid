@@ -13,6 +13,7 @@ from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.project.plotsloader import PlotsLoader
 from mantidqt.project.plotssaver import PlotsSaver
+from matplotlib.colors import Normalize, LogNorm
 
 matplotlib.use('AGG')
 
@@ -76,7 +77,6 @@ class PlotsSaverTest(unittest.TestCase):
                                                      u'minorTickFormatter': u'NullFormatter',
                                                      u'minorTickLocator': u'NullLocator',
                                                      u'minorTickLocatorValues': None,
-                                                     u'position': u'Bottom',
                                                      u'visible': True},
                                 u'xAxisScale': u'linear',
                                 u'xLim': (0.0, 1.0),u"xAutoScale":False,
@@ -90,11 +90,45 @@ class PlotsSaverTest(unittest.TestCase):
                                                      u'minorTickFormatter': u'NullFormatter',
                                                      u'minorTickLocator': u'NullLocator',
                                                      u'minorTickLocatorValues': None,
-                                                     u'position': u'Left',
                                                      u'visible': True},
                                 u'yAxisScale': u'linear',
                                 u'yLim': (0.0, 1.0),u"yAutoScale":False,
-                                u'showMinorGrid': False},
+                                u'showMinorGrid': False,
+                                u'tickParams': {
+                                    'xaxis': {
+                                        'major': {
+                                            'bottom': True,
+                                            'top': True,
+                                            'labelbottom': True,
+                                            'labeltop': True,
+                                            'direction': 'inout',
+                                            'width': 1,
+                                            'size': 6},
+                                        'minor': {
+                                            'bottom': True,
+                                            'top': True,
+                                            'labelbottom': True,
+                                            'labeltop': True,
+                                            'direction': 'inout',
+                                            'width': 1,
+                                            'size': 3}},
+                                    'yaxis': {
+                                        'major': {
+                                            'left': True,
+                                            'right': True,
+                                            'labelleft': True,
+                                            'labelright': True,
+                                            'direction': 'inout',
+                                            'width': 1, 'size': 6},
+                                        'minor': {
+                                            'left': True,
+                                            'right': True,
+                                            'labelleft': True,
+                                            'labelright': True,
+                                            'direction': 'inout',
+                                            'width': 1,
+                                            'size': 3}}},
+                                u'spineWidths': {'left': 0.4, 'right': 0.4, 'bottom': 0.4, 'top': 0.4}},
                 u'textFromArtists': {},
                 u'texts': [{u'position': (0, 0),
                             u'style': {u'alpha': 1,
@@ -159,6 +193,20 @@ class PlotsSaverTest(unittest.TestCase):
         self.maxDiff = None
         self.assertDictEqual(return_value, expected_value)
 
+    def test_get_dict_from_tick_properties(self):
+        return_value = self.plot_saver.get_dict_from_tick_properties(self.fig.axes[0])
+
+        expected_value = self.loader_plot_dict["axes"][0]["properties"]["tickParams"]
+
+        self.assertDictEqual(return_value, expected_value)
+
+    def test_get_dict_from_spine_widths(self):
+        return_value = self.plot_saver.get_dict_from_spine_widths(self.fig.axes[0])
+
+        expected_value = self.loader_plot_dict["axes"][0]["properties"]["spineWidths"]
+
+        self.assertDictEqual(return_value, expected_value)
+
     def test_get_dict_from_axis_properties(self):
         return_value = self.plot_saver.get_dict_from_axis_properties(self.fig.axes[0].xaxis)
 
@@ -205,6 +253,28 @@ class PlotsSaverTest(unittest.TestCase):
         expected_value = {u'dpi': 100.0, u'figHeight': 4.8, u'figWidth': 6.4}
 
         self.assertDictEqual(return_value, expected_value)
+
+    def test_get_dict_from_fig_with_Normalize(self):
+        self.fig.axes[0].creation_args = [{u"specNum": None, "function": "pcolormesh",
+                                                         "norm": Normalize()}]
+        return_value = self.plot_saver.get_dict_from_fig(self.fig)
+        expected_creation_args = [[{'specNum': None, 'function': 'pcolormesh', 'norm':
+                                    {'type': 'Normalize', 'clip': False, 'vmin': None, 'vmax': None}, 'normalize_by_bin_width': True}]]
+
+        self.loader_plot_dict[u'creationArguments'] = expected_creation_args
+
+        self.assertDictEqual(return_value, self.loader_plot_dict)
+
+    def test_get_dict_from_fig_with_LogNorm(self):
+        self.fig.axes[0].creation_args = [{u"specNum": None, "function": "pcolormesh",
+                                                         "norm": LogNorm()}]
+        return_value = self.plot_saver.get_dict_from_fig(self.fig)
+        expected_creation_args = [[{'specNum': None, 'function': 'pcolormesh', 'norm':
+                                    {'type': 'LogNorm', 'clip': False, 'vmin': None, 'vmax': None}, 'normalize_by_bin_width': True}]]
+
+        self.loader_plot_dict[u'creationArguments'] = expected_creation_args
+
+        self.assertDictEqual(return_value, self.loader_plot_dict)
 
 
 if __name__ == "__main__":

@@ -25,7 +25,6 @@ class TableModel(QAbstractTableModel):
 
     def __init__(self, data_model, parent=None):
         super().__init__(parent=parent)
-        self._row_count = 0
         self._data_model = data_model
         self._row_count = 0
         self._headers = []
@@ -109,6 +108,7 @@ class TableModel(QAbstractTableModel):
     def load_data(self, data_model):
         self.beginResetModel()
         self._data_model = data_model
+        self._headers = self._data_model.get_column_headers()
         self._row_count = 0
         self._update_row_batch_size()
         self.endResetModel()

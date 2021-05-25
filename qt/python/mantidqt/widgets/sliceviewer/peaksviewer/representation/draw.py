@@ -7,14 +7,13 @@
 
 # local imports
 from .noshape import NonIntegratedPeakRepresentation
-from .spherical import SphericallyIntergratedPeakRepresentation
 from .ellipsoid import EllipsoidalIntergratedPeakRepresentation
 
 # map shape names to representation classes
 # the strings need to match whatever Peak.getPeakShape.shapeName returns
 _PEAK_REPRESENTATION_FACTORY = {
     "none": NonIntegratedPeakRepresentation,
-    "spherical": SphericallyIntergratedPeakRepresentation,
+    "spherical": EllipsoidalIntergratedPeakRepresentation,
     "ellipsoid": EllipsoidalIntergratedPeakRepresentation
 }
 

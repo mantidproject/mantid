@@ -29,11 +29,15 @@
 
 // The below can be replaced with global_control when all platforms
 // have 2019U4
+#if __has_include("tbb/tbb_stddef.h")
 #include "tbb/tbb_stddef.h"
-
 #if TBB_INTERFACE_VERSION_MAJOR < 11
 #include "tbb/task_scheduler_init.h"
 #include <thread>
+#else
+#define TBB_HAS_GLOBAL_CONTROL
+#include "tbb/global_control.h"
+#endif
 #else
 #define TBB_HAS_GLOBAL_CONTROL
 #include "tbb/global_control.h"

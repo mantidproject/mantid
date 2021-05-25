@@ -111,7 +111,7 @@ void IqtFitModel::setFitFunction(Mantid::API::MultiDomainFunction_sptr function)
 
 std::unordered_map<std::string, ParameterValue> IqtFitModel::createDefaultParameters(TableDatasetIndex index) const {
   std::unordered_map<std::string, ParameterValue> parameters;
-  parameters["Height"] = ParameterValue(computeHeightApproximation(getFittingFunction()));
+  parameters["Height"] = ParameterValue(computeHeightApproximation(getFitFunction()));
 
   const auto inputWs = getWorkspace(index);
   const auto tau = inputWs ? computeTauApproximation(inputWs) : 0.0;

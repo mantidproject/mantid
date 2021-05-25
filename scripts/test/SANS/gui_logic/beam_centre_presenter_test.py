@@ -32,6 +32,20 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter._work_handler.process.call_count, 1)
         self.assertEqual(self.presenter._work_handler.process.call_args[0][1],  self.presenter._beam_centre_model.find_beam_centre)
 
+    def test_beam_centre_finder_update_handles_str(self):
+        # Since the view might give us mixed types check we can handle str
+        model = self.BeamCentreModel
+        model.lab_pos_1 = "1"
+        model.lab_pos_2 = 1
+        model.hab_pos_1 = 2
+        model.hab_pos_2 = "2"
+
+        self.presenter.on_processing_finished_centre_finder()
+        for i in [self.view.lab_pos_1, self.view.lab_pos_2]:
+            self.assertEquals(1, i)
+        for i in [self.view.hab_pos_1, self.view.hab_pos_2]:
+            self.assertEquals(2, i)
+
     def test_that_on_run_clicked_updates_model_from_view(self):
         self.view.left_right = False
         self.view.lab_pos_1 = 100

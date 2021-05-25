@@ -209,6 +209,11 @@ class ComponentInfoTest(unittest.TestCase):
         # Root index and the discovered index should be the same
         self.assertEqual(index, info.root())
 
+    def test_uniqueName(self):
+        info = self._ws.componentInfo()
+        self.assertTrue(info.uniqueName(info.name(info.root())))
+        self.assertFalse(info.uniqueName("fictional-name"))
+
     def test_indexOfAny_throws(self):
         info = self._ws.componentInfo()
         with self.assertRaises(ValueError):

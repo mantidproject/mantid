@@ -51,19 +51,42 @@
 #include <regex>
 #include <utility>
 
+using namespace Mantid::API;
+
 namespace {
 const char *globalOptionName = "Global";
 Mantid::Kernel::Logger g_log("Function Browser");
-QString addPrefix(QString &param) { return QString("f0.") + param; }
 const std::regex PREFIX_REGEX("(^[f][0-9](.*))");
 inline bool variableIsPrefixed(const std::string &name) { return std::regex_match(name, PREFIX_REGEX); }
-QString removePrefix(QString &param) {
-  if (variableIsPrefixed(param.toStdString()))
-    return param.split(QString("."))[1];
-  else {
+
+QString insertPrefix(const QString &param) {
+  return param.left(param.indexOf(".") + 1) + "f0." + param.right(param.size() - param.indexOf(".") - 1);
+}
+
+QString addPrefix(const QString &param) { return "f0." + param; }
+
+QString removeEmbeddedPrefix(const QString &param) {
+  if (variableIsPrefixed(param.toStdString())) {
+    const auto paramSplit = param.split(".");
+    return paramSplit[0] + "." + paramSplit[paramSplit.size() - 1];
+  } else {
     return param;
   }
 }
+
+QString removePrefix(const QString &param) {
+  if (variableIsPrefixed(param.toStdString())) {
+    const auto paramSplit = param.split(".");
+    return paramSplit[paramSplit.size() - 1];
+  } else {
+    return param;
+  }
+}
+
+bool containsOneOf(std::string const &str, std::string const &delimiters) {
+  return !str.empty() && str.find_first_of(delimiters) != std::string::npos;
+}
+
 // These attributes require the function to be fully reconstructed, as a
 // different number of properties will be required
 const std::vector<QString> REQUIRESRECONSTRUCTIONATTRIBUTES = {QString("n")};
@@ -80,7 +103,8 @@ namespace MantidWidgets {
  * dialog. An empty vector means include all available categories.
  */
 FunctionTreeView::FunctionTreeView(QWidget *parent, bool multi, const std::vector<std::string> &categories)
-    : IFunctionView(parent), m_multiDataset(multi), m_allowedCategories(categories), m_selectFunctionDialog(nullptr)
+    : IFunctionView(parent), m_multiDataset(multi), m_multiDomainFunctionPrefix(), m_allowedCategories(categories),
+      m_selectFunctionDialog(nullptr)
 
 {
   // create m_browser
@@ -146,12 +170,13 @@ void FunctionTreeView::createBrowser() {
 
   QtAbstractEditorFactory<ParameterPropertyManager> *parameterEditorFactory(nullptr);
   if (m_multiDataset) {
-    auto buttonFactory = new DoubleDialogEditorFactory(this);
-    auto compositeFactory = new CompositeEditorFactory<ParameterPropertyManager>(this, buttonFactory);
+    m_doubleEditorFactory = new DoubleDialogEditorFactory(this);
+    auto compositeFactory = new CompositeEditorFactory<ParameterPropertyManager>(this, m_doubleEditorFactory);
     compositeFactory->setSecondaryFactory(globalOptionName, paramEditorFactory);
     parameterEditorFactory = compositeFactory;
-    connect(buttonFactory, SIGNAL(buttonClicked(QtProperty *)), this, SLOT(parameterButtonClicked(QtProperty *)));
-    connect(buttonFactory, SIGNAL(closeEditor()), m_browser, SLOT(closeEditor()));
+    connect(m_doubleEditorFactory, SIGNAL(buttonClicked(QtProperty *)), this,
+            SLOT(parameterButtonClicked(QtProperty *)));
+    connect(m_doubleEditorFactory, SIGNAL(closeEditor()), m_browser, SLOT(closeEditor()));
   } else {
     parameterEditorFactory = paramEditorFactory;
   }
@@ -402,6 +427,8 @@ void FunctionTreeView::setFunction(QtProperty *prop, const Mantid::API::IFunctio
   auto children = prop->subProperties();
   foreach (QtProperty *child, children) { removeProperty(child); }
   // m_localParameterValues.clear();
+  if (!m_multiDomainFunctionPrefix.isEmpty())
+    addMultiDomainIndexProperty(prop);
   addAttributeAndParameterProperties(prop, std::move(fun));
 }
 
@@ -602,8 +629,13 @@ FunctionTreeView::AProperty FunctionTreeView::addAttributeProperty(QtProperty *p
  *  adds all member functions' properties
  * @param prop :: A function property
  * @param fun :: Shared pointer to a created function
+ * @param parentComposite :: If relevant, the composite the function is part of.
+ * @param parentIndex :: If relevant, the index of the function within its
+ * composite.
  */
-void FunctionTreeView::addAttributeAndParameterProperties(QtProperty *prop, const Mantid::API::IFunction_sptr &fun) {
+void FunctionTreeView::addAttributeAndParameterProperties(QtProperty *prop, const IFunction_sptr &fun,
+                                                          const CompositeFunction_sptr &parentComposite,
+                                                          const std::size_t &parentIndex) {
   // add the function index property
   addIndexProperty(prop);
 
@@ -617,10 +649,11 @@ void FunctionTreeView::addAttributeAndParameterProperties(QtProperty *prop, cons
   }
 
   auto cf = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
-  if (cf) { // if composite add members
+  if (cf) {
+    // if composite add members
     for (size_t i = 0; i < cf->nFunctions(); ++i) {
       AProperty ap = addFunctionProperty(prop, QString::fromStdString(cf->getFunction(i)->name()));
-      addAttributeAndParameterProperties(ap.prop, cf->getFunction(i));
+      addAttributeAndParameterProperties(ap.prop, cf->getFunction(i), cf, i);
     }
   } else { // if simple add parameters
     for (size_t i = 0; i < fun->nParams(); ++i) {
@@ -629,20 +662,105 @@ void FunctionTreeView::addAttributeAndParameterProperties(QtProperty *prop, cons
       double value = fun->getParameter(i);
       AProperty ap = addParameterProperty(prop, name, desc, value);
       // if parameter has a tie
-      if (!fun->isActive(i)) {
-        auto tie = fun->getTie(i);
-        if (tie) {
-          addTieProperty(ap.prop, QString::fromStdString(tie->asString()));
-        } else {
-          addTieProperty(ap.prop, QString::number(fun->getParameter(i)));
-        }
-      }
-      auto c = fun->getConstraint(i);
-      if (c) {
-        addConstraintProperties(ap.prop, QString::fromStdString(c->asString()));
+      if (!fun->isActive(i))
+        addParameterTie(ap.prop, fun, name.toStdString(), i, parentComposite, parentIndex);
+      else
+        addGlobalParameterTie(ap.prop, name.toStdString(), parentComposite, parentIndex);
+
+      if (const auto constraint = fun->getConstraint(i)) {
+        addConstraintProperties(ap.prop, QString::fromStdString(constraint->asString()));
       }
     }
   }
+}
+
+/**
+ * Add a tie to a function property. If the tie is stored within the wider
+ * composite function, it will find this tie and apply it.
+ * @param property :: A function property.
+ * @param function :: Shared pointer to the function.
+ * @param parameterName :: The name of the parameter to be tied.
+ * @param parameterIndex :: The index of the parameter within its function.
+ * @param parentComposite :: If relevant, the composite the function is part of.
+ * @param parentIndex :: If relevant, the index of the function within its
+ * composite.
+ */
+void FunctionTreeView::addParameterTie(QtProperty *property, const IFunction_sptr &function,
+                                       const std::string &parameterName, const std::size_t &parameterIndex,
+                                       const CompositeFunction_sptr &parentComposite, const std::size_t &parentIndex) {
+  if (const auto tie = function->getTie(parameterIndex)) {
+    addTieProperty(property, QString::fromStdString(tie->asString()));
+  } else {
+    auto tieAdded = false;
+    if (parentComposite)
+      tieAdded = addParameterTieInComposite(property, parameterName, parentComposite, parentIndex);
+
+    if (!tieAdded)
+      addTieProperty(property, QString::number(function->getParameter(parameterIndex)));
+  }
+}
+
+/**
+ * Add a tie to a function property. Used if a tie is stored within the wider
+ * composite function.
+ * @param property :: A function property.
+ * @param parameterName :: The name of the parameter to be tied.
+ * @param composite :: The composite function containing the tie.
+ * @param index :: The index of the function within the composite function.
+ * @returns true if a tie was found, and a tie property was added.
+ */
+bool FunctionTreeView::addParameterTieInComposite(QtProperty *property, const std::string &parameterName,
+                                                  const CompositeFunction_sptr &composite, const std::size_t &index) {
+  for (auto i = 0u; i < composite->nParams(); ++i) {
+    const auto fullName = "f" + std::to_string(index) + "." + parameterName;
+    if (fullName == composite->parameterName(i)) {
+      if (const auto tie = composite->getTie(i)) {
+        const auto tieStr = QString::fromStdString(tie->asString());
+        addTieProperty(property, tieStr.mid(tieStr.indexOf('=') + 1));
+        return true;
+      }
+      return false;
+    }
+  }
+  return false;
+}
+
+/**
+ * Add a global tie to a function property if one exists for the specified
+ * parameter.
+ * @param property :: A function property.
+ * @param parameterName :: The name of the parameter to check for a global tie.
+ * @param parentComposite :: The composite function the parameter is in. This is
+ * a nullptr if the parameter is not in a composite function.
+ * @param parentIndex :: The index of the parameter within its composite.
+ */
+void FunctionTreeView::addGlobalParameterTie(QtProperty *property, const std::string &parameterName,
+                                             const CompositeFunction_sptr &parentComposite,
+                                             const std::size_t &parentIndex) {
+  if (m_multiDomainFunctionPrefix.isEmpty() || m_globalTies.empty())
+    return;
+
+  auto const fullName = getFullParameterName(parameterName, parentComposite ? static_cast<int>(parentIndex) : -1);
+
+  for (auto const &globalTie : m_globalTies) {
+    if (fullName == globalTie.m_parameter) {
+      addTieProperty(property, QString::fromStdString(globalTie.m_tie), true);
+      break;
+    }
+  }
+}
+
+/**
+ * Adds a property showing the function index of a domain within a
+ * MultiDomainFunction. It is used when we don't want to display an entire
+ * MultiDomainFunction, just a specific function within it.
+ * @param prop :: The property to add the function index on to.
+ */
+void FunctionTreeView::addMultiDomainIndexProperty(QtProperty *prop) {
+  QtProperty *indexProperty = m_indexManager->addProperty("Index");
+  indexProperty->setEnabled(false);
+  m_indexManager->setValue(indexProperty, m_multiDomainFunctionPrefix);
+  (void)addProperty(prop, indexProperty);
 }
 
 /**
@@ -692,7 +810,7 @@ void FunctionTreeView::updateFunctionIndices(QtProperty *prop, const QString &in
       updateFunctionIndices(child, index + "f" + QString::number(i) + ".");
       ++i;
     } else if (isIndex(child)) {
-      m_indexManager->setValue(child, index);
+      m_indexManager->setValue(child, m_multiDomainFunctionPrefix + index);
     }
   }
 }
@@ -864,8 +982,9 @@ QtProperty *FunctionTreeView::getFunctionProperty(const QString &index) const {
  * Add a tie property
  * @param prop :: Parent parameter property
  * @param tie :: A tie string
+ * @param globalTie :: true if the tie is a global tie.
  */
-void FunctionTreeView::addTieProperty(QtProperty *prop, const QString &tie) {
+void FunctionTreeView::addTieProperty(QtProperty *prop, const QString &tie, bool globalTie) {
   if (!prop) {
     throw std::runtime_error("FunctionTreeView: null property pointer");
   }
@@ -878,7 +997,7 @@ void FunctionTreeView::addTieProperty(QtProperty *prop, const QString &tie) {
   // Create and add a QtProperty for the tie.
   m_tieManager->blockSignals(true);
   QtProperty *tieProp = m_tieManager->addProperty("Tie");
-  m_tieManager->setValue(tieProp, tie);
+  m_tieManager->setValue(tieProp, globalTie ? tie : getFullTie(tie));
   addProperty(prop, tieProp);
   m_tieManager->blockSignals(false);
 
@@ -889,6 +1008,35 @@ void FunctionTreeView::addTieProperty(QtProperty *prop, const QString &tie) {
   atie.paramName = parName;
   atie.tieProp = tieProp;
   m_ties.insert(funProp, atie);
+}
+
+/**
+ * Returns the full tie to add as a Tie property. This will add the
+ * m_multiDomainFunctionPrefix to the start if we are using multiple datasets.
+ * @param tie :: The original tie.
+ * @returns The full tie to use as a tie property.
+ */
+QString FunctionTreeView::getFullTie(const QString &tie) const {
+  if (!isNumber(tie.toStdString()) && !containsOneOf(tie.toStdString(), "="))
+    return m_multiDomainFunctionPrefix + tie;
+  return tie;
+}
+
+/**
+ * Returns the full parameter name. This will add the
+ * m_multiDomainFunctionPrefix to the start if we are using multiple datasets,
+ * and will add the composite index if it is within a composite.
+ * @param parameter :: The original parameter.
+ * @param compositeIndex :: The index of the function within the composite that
+ * the parameter is in.
+ * @returns The full parameter name.
+ */
+std::string FunctionTreeView::getFullParameterName(const std::string &parameter, int compositeIndex) const {
+  auto fullParameterName = m_multiDomainFunctionPrefix.toStdString();
+  if (compositeIndex != -1)
+    fullParameterName += "f" + std::to_string(compositeIndex) + ".";
+  fullParameterName += parameter;
+  return fullParameterName;
 }
 
 /**
@@ -1164,7 +1312,8 @@ void FunctionTreeView::addFunctionEnd(int result) {
       auto f0 = getFunction(prop);
       if (f0) {
         // Modify the previous globals so they have a function prefix
-        std::transform(globalParameters.begin(), globalParameters.end(), globalParameters.begin(), addPrefix);
+        std::transform(globalParameters.begin(), globalParameters.end(), globalParameters.begin(),
+                       m_multiDomainFunctionPrefix.isEmpty() ? addPrefix : insertPrefix);
         cf->addFunction(f0);
       }
       cf->addFunction(f);
@@ -1474,6 +1623,7 @@ void FunctionTreeView::removeFunction() {
   QtProperty *prop = item->property();
   if (!isFunction(prop))
     return;
+  auto const functionString = QString::fromStdString(getFunction(prop)->asString());
   auto const functionIndex = getIndex(prop);
   removeProperty(prop);
   updateFunctionIndices();
@@ -1490,19 +1640,18 @@ void FunctionTreeView::removeFunction() {
     // Check if the current function in the browser is a
     // composite function
     auto topProp = props[0];
-    auto fun = Mantid::API::FunctionFactory::Instance().createFunction(topProp->propertyName().toStdString());
-    auto cf = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
+    auto cf = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(getFunction(topProp));
     if (cf) {
       // If it is a composite function
       // check that there are more than one function
       // which means more than two subproperties
-      size_t nFunctions = props[0]->subProperties().size() - 1;
 
-      if (nFunctions == 1 && cf->name() == "CompositeFunction") {
+      if (cf->nFunctions() == 1 && cf->name() == "CompositeFunction") {
         // If only one function remains, remove the composite function:
         // Temporary copy the remaining function
         auto func = getFunction(props[0]->subProperties()[1]);
-        std::transform(globalParameters.begin(), globalParameters.end(), globalParameters.begin(), removePrefix);
+        std::transform(globalParameters.begin(), globalParameters.end(), globalParameters.begin(),
+                       m_multiDomainFunctionPrefix.isEmpty() ? removePrefix : removeEmbeddedPrefix);
         // Remove the composite function
         m_browser->removeProperty(topProp);
         // Add the temporary stored function
@@ -1510,6 +1659,7 @@ void FunctionTreeView::removeFunction() {
       }
     }
   }
+  emit functionRemovedString(functionString);
   emit functionRemoved(functionIndex);
   setGlobalParameters(globalParameters);
   emit globalsChanged(globalParameters);
@@ -1621,7 +1771,8 @@ void FunctionTreeView::addConstraints() {
     return;
   QString functionIndex, name;
   std::tie(functionIndex, name) = splitParameterName(getParameterName(prop));
-  auto const constraint = "0<" + name + "<0";
+  auto const value = QString::number(getParameter(prop));
+  auto const constraint = value + "<" + name + "<" + value;
   addConstraintProperties(prop, constraint);
   emit parameterConstraintAdded(functionIndex, constraint);
 }
@@ -1869,10 +2020,33 @@ bool FunctionTreeView::hasFunction() const { return !m_functionManager->properti
 /// @param s2 :: New size for the third optional column (Global).
 void FunctionTreeView::setColumnSizes(int s0, int s1, int s2) { m_browser->setColumnSizes(s0, s1, s2); }
 
+void FunctionTreeView::setStretchLastColumn(bool stretch) { m_browser->setStretchLastColumn(stretch); }
+
 /// Show global column
 void FunctionTreeView::hideGlobals() { m_browser->hideColumn(2); }
 // Hide global column
 void FunctionTreeView::showGlobals() { m_browser->showColumn(2); }
+
+/**
+ * The function index displayed as a multi-domain function index at the top of
+ * the FunctionTreeView. It is used as an offset for the other function
+ * prefixes. It is used when we don't want to display an entire
+ * MultiDomainFunction, just a specific function within it.
+ * @param functionPrefix :: The function prefix of the domain currently being
+ * displayed in the FunctionTreeView.
+ */
+void FunctionTreeView::setMultiDomainFunctionPrefix(const QString &functionPrefix) {
+  m_multiDomainFunctionPrefix = functionPrefix;
+}
+
+/**
+ * The global ties within a multi-domain function. It is used when we don't want
+ * to display an entire MultiDomainFunction, and so we have to store the
+ * GlobalTies manually in this vector.
+ * @param globalTies :: A vector of global ties to be displayed within the
+ * function tree.
+ */
+void FunctionTreeView::setGlobalTies(std::vector<GlobalTie> const &globalTies) { m_globalTies = globalTies; }
 
 /**
  * Emit a signal when any of the Global options change.
@@ -1946,7 +2120,11 @@ void FunctionTreeView::setGlobalParameters(const QStringList &globals) {
     auto prop = ap.prop;
     if (!prop->hasOption(globalOptionName))
       continue;
-    auto isGlobal = globals.contains(getParameterName(prop));
+
+    auto const parameterName = getParameterName(prop);
+    auto const isGlobal = std::any_of(globals.cbegin(), globals.cend(), [&](QString const &global) {
+      return m_multiDomainFunctionPrefix + global == parameterName;
+    });
     prop->setOption(globalOptionName, isGlobal);
   }
 }
@@ -1990,6 +2168,10 @@ QWidget *FunctionTreeView::getParamWidget(const QString &paramName) const {
 }
 
 QTreeWidget *FunctionTreeView::treeWidget() const { return m_browser->treeWidget(); }
+
+QtTreePropertyBrowser *FunctionTreeView::treeBrowser() { return m_browser; }
+
+DoubleDialogEditorFactory *FunctionTreeView::doubleEditorFactory() { return m_doubleEditorFactory; }
 
 } // namespace MantidWidgets
 } // namespace MantidQt
