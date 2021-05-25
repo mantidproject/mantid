@@ -712,9 +712,7 @@ void PreviewPlot::setScaleType(AxisID id, const QString &actionName) {
     break;
   }
 
-  // If linear scale need to reset tick labels
-  if (strcmp(scaleType.constData(), "linear") == 0)
-    tickLabelFormat(m_axis, m_style, m_useOffset);
+  tickLabelFormat(m_axis, m_style, m_useOffset);
 
   this->replot();
 }
