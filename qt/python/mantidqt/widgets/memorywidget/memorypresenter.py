@@ -23,6 +23,7 @@ class MemoryPresenter(object):
     """
     def __init__(self, view):
         self.view = view
+        self.update_allowed = True
         self.set_bar_color_at_start()
         self.update_memory_usage()
         self.thread_stopper = self.update_memory_usage_threaded()
@@ -53,11 +54,13 @@ class MemoryPresenter(object):
         """
         Gets memory usage information and passes it to the view
         """
-        mem_used_percent, mem_used, mem_avail = get_memory_info()
-        self.view.set_value(mem_used_percent, mem_used, mem_avail)
+        if self.update_allowed:
+            mem_used_percent, mem_used, mem_avail = get_memory_info()
+            self.view.set_value(mem_used_percent, mem_used, mem_avail)
 
     def cancel_memory_update(self):
         """
         Ensures that the thread will not restart after it finishes next, as well as attempting to cancel it.
         """
+        self.update_allowed = False
         self.thread_stopper.set()
