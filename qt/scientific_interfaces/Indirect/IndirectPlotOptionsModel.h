@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectPlotter.h"
+#include "ExternalPlotter.h"
 
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -21,7 +21,7 @@ class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsModel {
 public:
   IndirectPlotOptionsModel(boost::optional<std::map<std::string, std::string>> const &availableActions = boost::none);
   /// Used by the unit tests so that m_plotter can be mocked
-  IndirectPlotOptionsModel(IndirectPlotter *plotter,
+  IndirectPlotOptionsModel(ExternalPlotter *plotter,
                            boost::optional<std::map<std::string, std::string>> const &availableActions = boost::none);
   virtual ~IndirectPlotOptionsModel();
 
@@ -60,7 +60,7 @@ private:
   bool m_fixedIndices;
   boost::optional<std::string> m_workspaceIndices;
   boost::optional<std::string> m_workspaceName;
-  std::unique_ptr<IndirectPlotter> m_plotter;
+  std::unique_ptr<ExternalPlotter> m_plotter;
 };
 
 } // namespace CustomInterfaces

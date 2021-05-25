@@ -18,14 +18,14 @@ namespace CustomInterfaces {
 enum MantidAxis { Spectrum, Bin };
 
 /**
- @class IndirectPlotter
- IndirectPlotter is a class used for external plotting within Indirect
+ @class ExternalPlotter
+ ExternalPlotter is a class used for external plotting within Indirect
  */
-class MANTIDQT_INDIRECT_DLL IndirectPlotter {
+class MANTIDQT_INDIRECT_DLL ExternalPlotter {
 
 public:
-  IndirectPlotter();
-  virtual ~IndirectPlotter();
+  ExternalPlotter();
+  virtual ~ExternalPlotter();
 
   virtual void plotSpectra(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars);
   virtual void plotCorrespondingSpectra(std::vector<std::string> const &workspaceNames,

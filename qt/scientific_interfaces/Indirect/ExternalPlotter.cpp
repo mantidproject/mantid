@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectPlotter.h"
+#include "ExternalPlotter.h"
 #include "IndirectSettingsHelper.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -22,7 +22,7 @@ using namespace Mantid::API;
 using namespace MantidQt::Widgets::MplCpp;
 
 namespace {
-Mantid::Kernel::Logger g_log("IndirectPlotter");
+Mantid::Kernel::Logger g_log("ExternalPlotter");
 
 auto constexpr ERROR_CAPSIZE = 3;
 
@@ -105,9 +105,9 @@ boost::optional<Python::Object> workbenchPlot(QStringList const &workspaceNames,
 namespace MantidQt {
 namespace CustomInterfaces {
 
-IndirectPlotter::IndirectPlotter() {}
+ExternalPlotter::ExternalPlotter() {}
 
-IndirectPlotter::~IndirectPlotter() {}
+ExternalPlotter::~ExternalPlotter() {}
 
 /**
  * Produces an external plot of workspace spectra
@@ -116,7 +116,7 @@ IndirectPlotter::~IndirectPlotter() {}
  * @param workspaceIndices The indices within the workspace to plot (e.g.
  * '0-2,5,7-10')
  */
-void IndirectPlotter::plotSpectra(std::string const &workspaceName, std::string const &workspaceIndices,
+void ExternalPlotter::plotSpectra(std::string const &workspaceName, std::string const &workspaceIndices,
                                   bool errorBars) {
   if (validate(workspaceName, workspaceIndices, MantidAxis::Spectrum)) {
     workbenchPlot(QStringList(QString::fromStdString(workspaceName)), createIndicesVector<int>(workspaceIndices),
@@ -131,7 +131,7 @@ void IndirectPlotter::plotSpectra(std::string const &workspaceName, std::string 
  * @param workspaceNames List of names of workspaces to plot
  * @param workspaceIndices List of indices to plot
  */
-void IndirectPlotter::plotCorrespondingSpectra(std::vector<std::string> const &workspaceNames,
+void ExternalPlotter::plotCorrespondingSpectra(std::vector<std::string> const &workspaceNames,
                                                std::vector<int> const &workspaceIndices, bool errorBars) {
   if (workspaceNames.empty() || workspaceIndices.empty())
     return;
@@ -153,7 +153,7 @@ void IndirectPlotter::plotCorrespondingSpectra(std::vector<std::string> const &w
  * @param binIndices The indices within the workspace to plot (e.g.
  * '0-2,5,7-10')
  */
-void IndirectPlotter::plotBins(std::string const &workspaceName, std::string const &binIndices, bool errorBars) {
+void ExternalPlotter::plotBins(std::string const &workspaceName, std::string const &binIndices, bool errorBars) {
   if (validate(workspaceName, binIndices, MantidAxis::Bin)) {
     QHash<QString, QVariant> plotKwargs;
     plotKwargs["axis"] = static_cast<int>(MantidAxType::Bin);
@@ -167,7 +167,7 @@ void IndirectPlotter::plotBins(std::string const &workspaceName, std::string con
  *
  * @param workspaceName The name of the workspace to plot
  */
-void IndirectPlotter::plotContour(std::string const &workspaceName) {
+void ExternalPlotter::plotContour(std::string const &workspaceName) {
   if (validate(workspaceName))
     pcolormesh(QStringList(QString::fromStdString(workspaceName)));
 }
@@ -179,7 +179,7 @@ void IndirectPlotter::plotContour(std::string const &workspaceName) {
  * @param workspaceIndices The indices within the workspace to tile plot (e.g.
  * '0-2,5,7-10')
  */
-void IndirectPlotter::plotTiled(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars) {
+void ExternalPlotter::plotTiled(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars) {
   if (validate(workspaceName, workspaceIndices, MantidAxis::Spectrum)) {
     QHash<QString, QVariant> plotKwargs;
     if (errorBars)
@@ -199,7 +199,7 @@ void IndirectPlotter::plotTiled(std::string const &workspaceName, std::string co
  * @param axisType The axis to validate (i.e. Spectrum or Bin)
  * @return True if the data is valid
  */
-bool IndirectPlotter::validate(std::string const &workspaceName, boost::optional<std::string> const &workspaceIndices,
+bool ExternalPlotter::validate(std::string const &workspaceName, boost::optional<std::string> const &workspaceIndices,
                                boost::optional<MantidAxis> const &axisType) const {
   auto &ads = AnalysisDataService::Instance();
   if (ads.doesExist(workspaceName))
@@ -217,7 +217,7 @@ bool IndirectPlotter::validate(std::string const &workspaceName, boost::optional
  * @param axisType The axis to validate (i.e. Spectrum or Bin)
  * @return True if the data is valid
  */
-bool IndirectPlotter::validate(const MatrixWorkspace_const_sptr &workspace,
+bool ExternalPlotter::validate(const MatrixWorkspace_const_sptr &workspace,
                                boost::optional<std::string> const &workspaceIndices,
                                boost::optional<MantidAxis> const &axisType) const {
   if (workspaceIndices && axisType && axisType.get() == MantidAxis::Spectrum)
@@ -235,7 +235,7 @@ bool IndirectPlotter::validate(const MatrixWorkspace_const_sptr &workspace,
  * '0-2,5,7-10')
  * @return True if the indices exist
  */
-bool IndirectPlotter::validateSpectra(const MatrixWorkspace_const_sptr &workspace,
+bool ExternalPlotter::validateSpectra(const MatrixWorkspace_const_sptr &workspace,
                                       std::string const &workspaceIndices) const {
   auto const numberOfHistograms = workspace->getNumberHistograms();
   auto const lastIndex = std::stoul(splitStringBy(workspaceIndices, ",-").back());
@@ -250,7 +250,7 @@ bool IndirectPlotter::validateSpectra(const MatrixWorkspace_const_sptr &workspac
  * '0-2,5,7-10')
  * @return True if the bin indices exist
  */
-bool IndirectPlotter::validateBins(const MatrixWorkspace_const_sptr &workspace, std::string const &binIndices) const {
+bool ExternalPlotter::validateBins(const MatrixWorkspace_const_sptr &workspace, std::string const &binIndices) const {
   auto const numberOfBins = workspace->y(0).size();
   auto const lastIndex = std::stoul(splitStringBy(binIndices, ",-").back());
   return lastIndex < numberOfBins;

@@ -116,11 +116,11 @@ namespace CustomInterfaces {
 IndirectPlotOptionsModel::IndirectPlotOptionsModel(
     boost::optional<std::map<std::string, std::string>> const &availableActions)
     : m_actions(constructActions(availableActions)), m_fixedIndices(false), m_workspaceIndices(boost::none),
-      m_workspaceName(boost::none), m_plotter(std::make_unique<IndirectPlotter>()) {}
+      m_workspaceName(boost::none), m_plotter(std::make_unique<ExternalPlotter>()) {}
 
 /// Used by the unit tests so that m_plotter can be mocked
 IndirectPlotOptionsModel::IndirectPlotOptionsModel(
-    IndirectPlotter *plotter, boost::optional<std::map<std::string, std::string>> const &availableActions)
+    ExternalPlotter *plotter, boost::optional<std::map<std::string, std::string>> const &availableActions)
     : m_actions(constructActions(availableActions)), m_fixedIndices(false), m_workspaceIndices(boost::none),
       m_workspaceName(boost::none), m_plotter(std::move(plotter)) {}
 

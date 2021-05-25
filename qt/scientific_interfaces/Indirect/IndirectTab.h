@@ -7,7 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "IndirectPlotter.h"
+#include "ExternalPlotter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -187,7 +187,7 @@ protected:
   Mantid::Types::Core::DateAndTime m_tabEndTime;
   std::string m_pythonExportWsName;
 
-  std::unique_ptr<IndirectPlotter> m_plotter;
+  std::unique_ptr<ExternalPlotter> m_plotter;
 
 private:
   std::string getInterfaceProperty(std::string const &interfaceName, std::string const &propertyName,

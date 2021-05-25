@@ -113,7 +113,7 @@ IndirectTab::IndirectTab(QObject *parent)
     : QObject(parent), m_properties(), m_dblManager(new QtDoublePropertyManager()),
       m_blnManager(new QtBoolPropertyManager()), m_grpManager(new QtGroupPropertyManager()),
       m_dblEdFac(new DoubleEditorFactory()), m_tabStartTime(DateAndTime::getCurrentTime()),
-      m_tabEndTime(DateAndTime::maximum()), m_plotter(std::make_unique<IndirectPlotter>()) {
+      m_tabEndTime(DateAndTime::maximum()), m_plotter(std::make_unique<ExternalPlotter>()) {
   m_parentWidget = dynamic_cast<QWidget *>(parent);
 
   m_batchAlgoRunner = new MantidQt::API::BatchAlgorithmRunner(m_parentWidget);

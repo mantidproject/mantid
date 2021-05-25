@@ -8,8 +8,8 @@
 
 #include "DllConfig.h"
 
+#include "ExternalPlotter.h"
 #include "IndirectFitPlotModel.h"
-#include "IndirectPlotter.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include "IIndirectFitPlotView.h"
@@ -114,7 +114,7 @@ private:
 
   bool m_plotGuessInSeparateWindow;
   QtLazyAsyncRunner<std::function<void()>> m_plotExternalGuessRunner;
-  std::unique_ptr<IndirectPlotter> m_plotter;
+  std::unique_ptr<ExternalPlotter> m_plotter;
 };
 
 } // namespace IDA

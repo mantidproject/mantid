@@ -10,6 +10,7 @@ set(
         ConvFitDataTablePresenter.cpp
         ConvFitModel.cpp
         DensityOfStates.cpp
+        ExternalPlotter.cpp
         FitStatusWidget.cpp
         FqFitAddWorkspaceDialog.cpp
         FqFitDataPresenter.cpp
@@ -72,7 +73,6 @@ set(
         IndirectPlotOptionsModel.cpp
         IndirectPlotOptionsPresenter.cpp
         IndirectPlotOptionsView.cpp
-        IndirectPlotter.cpp
         IndirectSassena.cpp
         IndirectSettings.cpp
         IndirectSettingsHelper.cpp
@@ -108,6 +108,7 @@ set(
         ConvFitDataTablePresenter.h
         CorrectionsTab.h
         DensityOfStates.h
+        ExternalPlotter.h
         FqFitAddWorkspaceDialog.h
         FqFitDataPresenter.h
         FqFitDataTablePresenter.h
@@ -157,7 +158,6 @@ set(
         IndirectMoments.h
         IndirectPlotOptionsPresenter.h
         IndirectPlotOptionsView.h
-        IndirectPlotter.h
         IndirectSassena.h
         IndirectSettings.h
         IndirectSettingsPresenter.h
