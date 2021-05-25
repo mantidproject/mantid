@@ -236,6 +236,32 @@ properties, go to ```Command Arguments``` and append flags as appropriate.
 For example, adding ``-R ISIS`` will run any tests which match the regular
 expression ``ISIS``.
 
+Debugging System Tests in Pycharm
+---------------------------------
+
+System tests can be debugged from Pycharm without finding and attaching to
+the process, or using a remote debugger.
+
+To do this, create a new Configuration (Run -> Edit Configurations), and add
+a new Python configuration with the script path set to ``runSystemtests.py``
+This is found in ``/Testing/SystemTests/Scripts/runSystemTests.py``
+
+The parameters for the configuration can be set just like the command line
+args when running the tests from the ``systemtest.bat`` script, e.g pass
+``-R="EnginX"`` to run all tests containing the string ``EnginX`` in their
+name.
+
+Note that running the system tests this way will not update the system test
+data, so if your data need to be updated, the system tests should be called
+via the normal method in the first case.
+
+Do not use the multiprocessing ``-j`` flag in your configuration parameters
+as this will render you unable to debug the system tests directly, as they
+will no longer be running under the parent Python thread.
+
+N.B. Windows users do not need to specify the configuration with the ``-C``
+flag as when using the ``systemtest.bat`` script, as this is not passed to
+``runSystemtests.py`` and will result in an error.
 
 Selecting Tests To Run
 ----------------------
