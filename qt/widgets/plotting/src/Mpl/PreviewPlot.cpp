@@ -741,37 +741,22 @@ void PreviewPlot::toggleLegend(const bool checked) {
  * calculated as needed, False no offset will be used
  */
 void PreviewPlot::tickLabelFormat(char *axis, char *style, bool useOffset) {
-  const auto xTickLabelFormatChanged = tickLabelFormatX(axis, style, useOffset);
-  const auto yTickLabelFormatChanged = tickLabelFormatY(axis, style, useOffset);
+  auto axes = m_canvas->gca();
+  const auto formatXTicks = (*axis == 'x' || *axis == 'both') && axes.getXScale().toStdString() == "linear";
+  const auto formatYTicks = (*axis == 'y' || *axis == 'both') && axes.getYScale().toStdString() == "linear";
 
-  if (xTickLabelFormatChanged || yTickLabelFormatChanged) {
+  if (formatXTicks)
+    axes.tickLabelFormat(std::string("x").c_str(), style, useOffset);
+
+  if (formatYTicks)
+    axes.tickLabelFormat(std::string("y").c_str(), style, useOffset);
+
+  if (formatXTicks || formatYTicks) {
     // Need to save parameters to re-format on scale change
     m_axis = axis;
     m_style = style;
     m_useOffset = useOffset;
   }
-}
-
-bool PreviewPlot::tickLabelFormatX(char *axis, char *style, bool useOffset) {
-  auto axes = m_canvas->gca();
-  const auto isXLinear = (*axis == 'x' || *axis == 'both') && axes.getXScale().toStdString() == "linear";
-  if (isXLinear) {
-    char *axisType;
-    axisType = "x";
-    axes.tickLabelFormat(axisType, style, useOffset);
-  }
-  return isXLinear;
-}
-
-bool PreviewPlot::tickLabelFormatY(char *axis, char *style, bool useOffset) {
-  auto axes = m_canvas->gca();
-  const auto isYLinear = (*axis == 'y' || *axis == 'both') && axes.getYScale().toStdString() == "linear";
-  if (isYLinear) {
-    char *axisType;
-    axisType = "y";
-    axes.tickLabelFormat(axisType, style, useOffset);
-  }
-  return isYLinear;
 }
 
 } // namespace MantidWidgets
