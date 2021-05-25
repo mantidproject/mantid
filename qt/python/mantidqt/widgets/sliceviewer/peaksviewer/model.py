@@ -97,7 +97,12 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
             return
 
         frame_to_slice_fn = self._frame_to_slice_fn(frame)
-        positions = np.array([getattr(peak, frame_to_slice_fn)() for peak in self.peaks_workspace])
+
+        def unpack_pos(peak):
+            v3d_vector = getattr(peak, frame_to_slice_fn)()
+            return [v3d_vector.X(), v3d_vector.Y(), v3d_vector.Z()]
+
+        positions = np.array([unpack_pos(peak) for peak in self.peaks_workspace])
         positions -= pos  # peak positions relative to the input position
         distances_squared = np.sum(positions * positions, axis=1)
         closest_peak_index = np.argmin(distances_squared)
