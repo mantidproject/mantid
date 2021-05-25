@@ -113,6 +113,17 @@ public:
     TS_ASSERT_DELTA(lor.intensity(), M_PI, 1e-10);
   }
 
+  void testIntensityError() {
+    Lorentzian lor;
+    lor.initialize();
+    lor.setFwhm(1.0);
+    lor.setHeight(2.0);
+    lor.setCentre(3.0);
+
+    TS_ASSERT_DELTA(lor.intensity(), M_PI, 1e-10);
+    TS_ASSERT_DELTA(lor.intensityError(), lor.getError("Amplitude"), 1e-10);
+  }
+
   void testIntensity_special_case() {
     Lorentzian lor;
     lor.initialize();

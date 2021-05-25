@@ -14,6 +14,8 @@
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/PeakFunctionIntegrator.h"
 #include "MantidKernel/Exception.h"
+#include "boost/make_shared.hpp"
+#include <boost/math/distributions/students_t.hpp>
 
 #include <cmath>
 #include <limits>
@@ -169,19 +171,106 @@ void IPeakFunction::setPeakRadius(int r) const {
   }
 }
 
+void IPeakFunction::setParameter(size_t i, const double &value, bool explicitlySet) {
+  m_parameterContextDirty = true;
+  ParamFunction::setParameter(i, value, explicitlySet);
+}
+
+void IPeakFunction::setParameter(const std::string &name, const double &value, bool explicitlySet) {
+  m_parameterContextDirty = true;
+  ParamFunction::setParameter(name, value, explicitlySet);
+}
+
+// integrate based on dirty parameters then cache the result
+IntegrationResultCache IPeakFunction::integrate() const {
+  if (!integrationResult || m_parameterContextDirty) {
+    auto const interval = getDomainInterval();
+
+    PeakFunctionIntegrator integrator;
+
+    auto const result = integrator.integrate(*this, interval.first, interval.second);
+    if (result.success)
+      integrationResult = boost::make_shared<IntegrationResultCache>(result.result, result.error);
+    else
+      integrationResult = boost::make_shared<IntegrationResultCache>(std::nan(""), std::nan(""));
+    m_parameterContextDirty = false;
+  }
+  return *integrationResult;
+}
+
 /// Returns the integral intensity of the peak function, using the peak radius
 /// to determine integration borders.
-double IPeakFunction::intensity() const {
-  auto interval = getDomainInterval();
+double IPeakFunction::intensity() const { return integrate().first; }
 
-  PeakFunctionIntegrator integrator;
-  IntegrationResult result = integrator.integrate(*this, interval.first, interval.second);
+/// Returns the uncertainty associated to the integral intensity of the peak function
+double IPeakFunction::intensityError() const {
+  size_t nParams = ParamFunction::nParams();
+  const size_t nData = 1;
+  double sigma = 1;
+  double prob = std::erf(sigma / sqrt(2));
+  // critical value for t distribution
+  double alpha = (1 + prob) / 2;
+  double eValue = std::nan("");
+  // the function should contain the parameter's covariance matrix
+  auto covar = getCovarianceMatrix();
+  bool hasErrors = false;
+  auto const interval = getDomainInterval();
+  FunctionDomain1DVector domain(std::vector<double>(interval.first, interval.second));
 
-  if (!result.success) {
-    return 0.0;
+  FunctionParameterDecorator_sptr fn = std::dynamic_pointer_cast<FunctionParameterDecorator>(
+      FunctionFactory::Instance().createFunction("PeakParameterFunction"));
+
+  if (!fn) {
+    throw std::runtime_error("PeakParameterFunction could not be created successfully.");
   }
 
-  return result.result;
+  fn->setDecoratedFunction(this->name());
+
+  TempJacobian J(nData, nParams);
+
+  if (!covar) {
+    for (size_t j = 0; j < nParams; ++j) {
+      if (getError(j) != 0.0) {
+        hasErrors = true;
+        break;
+      }
+    }
+  }
+
+  if (covar || hasErrors) {
+
+    try {
+      fn->functionDeriv(domain, J);
+    } catch (...) {
+      fn->calNumericalDeriv(domain, J);
+    }
+
+    double s = 0.0;
+    const Kernel::Matrix<double> &C = *covar;
+    for (size_t i = 0; i < nParams; ++i) {
+      double tmp = J.get(0, i);
+      s += C[i][i] * tmp * tmp;
+      for (size_t j = i + 1; j < nParams; ++j) {
+        s += J.get(0, i) * C[i][j] * J.get(0, j) * 2;
+      }
+    }
+    size_t dof = 1 - nParams;
+    double T = 1.0;
+    if (dof != 0) {
+      boost::math::students_t dist(static_cast<double>(dof));
+      T = boost::math::quantile(dist, alpha);
+    }
+
+    eValue = T * std::sqrt(s * getReducedChiSquared());
+  } else {
+    double err = 0.0;
+    for (size_t j = 0; j < nParams; ++j) {
+      double d = J.get(0, j) * getError(j);
+      err += d * d;
+    }
+    eValue = std::sqrt(err);
+  }
+  return eValue;
 }
 
 /// Sets the integral intensity of the peak by adjusting the height.
