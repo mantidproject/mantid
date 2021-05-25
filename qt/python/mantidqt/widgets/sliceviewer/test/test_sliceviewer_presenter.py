@@ -506,7 +506,7 @@ class SliceViewerTest(unittest.TestCase):
     @mock.patch("mantidqt.widgets.sliceviewer.presenter.PeaksViewerCollectionPresenter",
                 spec=PeaksViewerCollectionPresenter)
     def test_peak_add_delete_event(self, mock_peaks_presenter, mock_sliceinfo_cls, _):
-        mock_sliceinfo_cls().transform = mock.Mock(side_effect=lambda pos: pos[::-1])
+        mock_sliceinfo_cls().inverse_transform = mock.Mock(side_effect=lambda pos: pos[::-1])
         mock_sliceinfo_cls().z_value = 3
 
         presenter, _ = _create_presenter(self.model,
