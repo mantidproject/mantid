@@ -48,11 +48,6 @@ class MemoryPresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter.view.set_value.call_count, 1)
         self.assertEqual(self.presenter.view.set_bar_color.call_count, 1)
 
-    def test_memory_usage_calls_set_value(self):
-        self.presenter.cancel_memory_update()
-        self.presenter.update_memory_usage()
-        self.assertEqual(self.presenter.view.set_value.call_count, 1)
-
     def test_memory_usage_is_updated_based_on_a_constant(self):
         # Sleep for just longer than the default so the test can run
         time.sleep(2.5)
