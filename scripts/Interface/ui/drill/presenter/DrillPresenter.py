@@ -443,6 +443,7 @@ class DrillPresenter:
         QDialog only if no file was previously used to load or save.
         """
         if self.model.getIOFile():
+            self.model.setVisualSettings(self.view.getVisualSettings())
             self.model.exportRundexData()
             self.view.setWindowModified(False)
         else:
