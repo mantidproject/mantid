@@ -51,13 +51,13 @@ class CalibrationModel(object):
         :param spectrum_numbers: Optional parameter to crop using spectrum numbers.
         """
         van_integration, van_curves = vanadium_corrections.fetch_correction_workspaces(
-            vanadium_path, instrument, rb_num=rb_num)  # van_curves = None at this point
+            vanadium_path, instrument, rb_num=rb_num)  # van_curves = None at this point if recalc vanadium
         ceria_workspace = path_handling.load_workspace(ceria_path)
         full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
                                       path_handling.ENGINEERING_PREFIX, "full_calibration")
         try:
             full_calib = Load(full_calib_path, OutputWorkspace="full_inst_calib")
-        except RuntimeError:
+        except ValueError:
             logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
             return
         cal_params, van_curves, ceria_raw = self.run_calibration(ceria_workspace,
