@@ -36,8 +36,7 @@ Viewing a MDHistoWorkspace
 
    -  **Plot MD**: to perform a 1D plot of the signal in the workspace
       (only works on 1D MDHistoWorkspaces).
-   -  **Show Slice Viewer**: to open the `Slice
-      Viewer <http://www.mantidproject.org/MantidPlot:_SliceViewer>`__, which shows 2D slices of the
+   -  **Show Slice Viewer**: to open the :ref:`sliceviewer`, which shows 2D slices of the
       multiple-dimension workspace.
 
 
