@@ -137,6 +137,9 @@ private:
   boost::optional<char const *> overrideAxisLabel(AxisID const &axisID);
   void setAxisLabel(AxisID const &axisID, char const *const label);
 
+  bool tickLabelFormatX(char *axis, char *style, bool useOffset);
+  bool tickLabelFormatY(char *axis, char *style, bool useOffset);
+
   // Block redrawing from taking place
   bool m_allowRedraws = true;
 
