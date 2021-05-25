@@ -30,7 +30,6 @@ using MantidQt::Widgets::MplCpp::FigureCanvasQt;
 using MantidQt::Widgets::MplCpp::Line2D;
 using MantidQt::Widgets::MplCpp::MantidAxes;
 namespace Python = MantidQt::Widgets::Common::Python;
-using Mantid::PythonInterface::PythonException;
 
 namespace {
 Mantid::Kernel::Logger g_log("PreviewPlot");
