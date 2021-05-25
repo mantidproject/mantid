@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IndirectPlotter.h"
+#include "ExternalPlotter.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -41,67 +41,48 @@ TableWorkspace_sptr createTableWorkspace(std::size_t const &size) { return std::
 
 } // namespace
 
-GNU_DIAG_OFF_SUGGEST_OVERRIDE
-
-/// Mock object to mock an IndirectTab
-class MockIPyRunner : public IPyRunner {
+class ExternalPlotterTest : public CxxTest::TestSuite {
 public:
-  /// Public Methods
-  MOCK_METHOD1(runPythonCode, void(std::string const &pythonCode));
-};
-
-GNU_DIAG_ON_SUGGEST_OVERRIDE
-
-class IndirectPlotterTest : public CxxTest::TestSuite {
-public:
-  IndirectPlotterTest() : m_ads(AnalysisDataService::Instance()) {
+  ExternalPlotterTest() : m_ads(AnalysisDataService::Instance()) {
     MantidQt::Widgets::MplCpp::backendModule();
     m_ads.clear();
   }
 
-  static IndirectPlotterTest *createSuite() { return new IndirectPlotterTest(); }
+  static ExternalPlotterTest *createSuite() { return new ExternalPlotterTest(); }
 
-  static void destroySuite(IndirectPlotterTest *suite) { delete suite; }
+  static void destroySuite(ExternalPlotterTest *suite) { delete suite; }
 
-  void setUp() override {
-    m_pyRunner = std::make_unique<MockIPyRunner>();
-    m_plotter = std::make_unique<IndirectPlotter>(m_pyRunner.get());
-  }
+  void setUp() override { m_plotter = std::make_unique<ExternalPlotter>(); }
 
   void tearDown() override {
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_pyRunner));
-
     m_plotter.reset();
     m_ads.clear();
   }
 
-  void test_that_the_plotter_has_been_instantiated() {
-    TS_ASSERT(m_pyRunner);
-    TS_ASSERT(m_plotter);
-  }
+  void test_that_the_plotter_has_been_instantiated() { TS_ASSERT(m_plotter); }
 
   void test_that_plotSpectra_will_not_throw() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
 
-    TS_ASSERT_THROWS_NOTHING(m_plotter->plotSpectra(WORKSPACE_NAME, WORKSPACE_INDICES));
+    TS_ASSERT_THROWS_NOTHING(m_plotter->plotSpectra(WORKSPACE_NAME, WORKSPACE_INDICES, true));
   }
 
   void test_that_plotBins_will_not_throw() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
 
-    TS_ASSERT_THROWS_NOTHING(m_plotter->plotBins(WORKSPACE_NAME, WORKSPACE_INDICES));
+    TS_ASSERT_THROWS_NOTHING(m_plotter->plotBins(WORKSPACE_NAME, WORKSPACE_INDICES, true));
   }
 
   void test_that_plotCorrespondingSpectra_will_not_cause_an_exception_when_the_workspaces_names_are_empty() {
     std::vector<std::string> workspaceNames;
     std::vector<int> workspaceIndices{0};
-    m_plotter->plotCorrespondingSpectra(workspaceNames, workspaceIndices);
+    m_plotter->plotCorrespondingSpectra(workspaceNames, workspaceIndices, true);
   }
 
   void test_that_plotCorrespondingSpectra_will_not_cause_an_exception_when_the_workspaces_indices_are_empty() {
     std::vector<std::string> workspaceNames{WORKSPACE_NAME};
     std::vector<int> workspaceIndices;
-    m_plotter->plotCorrespondingSpectra(workspaceNames, workspaceIndices);
+    m_plotter->plotCorrespondingSpectra(workspaceNames, workspaceIndices, true);
   }
 
   void test_that_validate_will_return_true_if_the_matrix_workspace_and_workspace_indices_exist() {
@@ -153,6 +134,5 @@ public:
 private:
   AnalysisDataServiceImpl &m_ads;
 
-  std::unique_ptr<MockIPyRunner> m_pyRunner;
-  std::unique_ptr<IndirectPlotter> m_plotter;
+  std::unique_ptr<ExternalPlotter> m_plotter;
 };
