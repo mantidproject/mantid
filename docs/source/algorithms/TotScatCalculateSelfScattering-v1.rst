@@ -29,3 +29,7 @@ Workflow
 ########
 
 .. diagram:: TotScatCalculateSelfScattering-v1_wkflw.dot
+
+.. categories::
+
+.. sourcelink::

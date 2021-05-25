@@ -14,6 +14,7 @@ from typing import Dict
 from sans.common.configurations import Configurations
 from sans.common.enums import (RebinType, RangeStepType, FitType, DataType, SANSInstrument)
 from sans.state.JsonSerializable import JsonSerializable
+from sans.state.StateObjects.wavelength_interval import WavelengthInterval
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message,
                                         is_not_none_and_first_larger_than_second, one_is_none)
 
@@ -86,15 +87,11 @@ class StateCalculateTransmission(metaclass=JsonSerializable):
         # ----------------
         # Wavelength rebin
         # ----------------
-        self.wavelength_low = None  # : List[Float] (Positive)
-        self.wavelength_high = None  # : List[Float] (Positive)
-        self.wavelength_step = None  # : Float (Positive)
+        self.wavelength_interval: WavelengthInterval = WavelengthInterval()
         self.rebin_type = RebinType.REBIN
         self.wavelength_step_type = RangeStepType.NOT_SET
 
         self.use_full_wavelength_range = False  # : Bool
-        self.wavelength_full_range_low = None  # : Float (Positive)
-        self.wavelength_full_range_high = None  # : Float (Positive)
 
         # -----------------------
         # Background correction
@@ -195,12 +192,10 @@ class StateCalculateTransmission(metaclass=JsonSerializable):
         # -----------------
         # Wavelength rebin
         # -----------------
-        if one_is_none([self.wavelength_low, self.wavelength_high, self.wavelength_step, self.rebin_type]):
+        if one_is_none([self.wavelength_interval, self.rebin_type]):
             entry = validation_message("A wavelength entry has not been set.",
                                        "Make sure that all entries are set.",
-                                       {"wavelength_low": self.wavelength_low,
-                                        "wavelength_high": self.wavelength_high,
-                                        "wavelength_step": self.wavelength_step,
+                                       {"wavelength_low": self.wavelength_interval,
                                         "wavelength_step_type": self.wavelength_step_type,
                                         "rebin_type": self.rebin_type})
             is_invalid.update(entry)
@@ -210,28 +205,6 @@ class StateCalculateTransmission(metaclass=JsonSerializable):
                                        "Make sure that all entries are set.",
                                        {"wavelength_step_type": self.wavelength_step_type})
             is_invalid.update(entry)
-
-        if is_not_none_and_first_larger_than_second([self.wavelength_low, self.wavelength_high]):
-            entry = validation_message("Incorrect wavelength bounds.",
-                                       "Make sure that lower wavelength bound is smaller then upper bound.",
-                                       {"wavelength_low": self.wavelength_low,
-                                        "wavelength_high": self.wavelength_high})
-            is_invalid.update(entry)
-
-        if self.use_full_wavelength_range:
-            if self.wavelength_full_range_low is None or self.wavelength_full_range_high is None:
-                entry = validation_message("Incorrect full wavelength settings.",
-                                           "Make sure that both full wavelength entries have been set.",
-                                           {"wavelength_full_range_low": self.wavelength_full_range_low,
-                                            "wavelength_full_range_high": self.wavelength_full_range_high})
-                is_invalid.update(entry)
-            if is_not_none_and_first_larger_than_second([self.wavelength_full_range_low,
-                                                         self.wavelength_full_range_high]):
-                entry = validation_message("Incorrect wavelength bounds.",
-                                           "Make sure that lower full wavelength bound is smaller then upper bound.",
-                                           {"wavelength_full_range_low": self.wavelength_full_range_low,
-                                            "wavelength_full_range_high": self.wavelength_full_range_high})
-                is_invalid.update(entry)
 
         # ----------------------
         # Background correction

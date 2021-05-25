@@ -10,13 +10,19 @@ Powder Diffraction
 New features
 ############
 
-- The :ref:`ConvertUnits <algm-ConvertUnits>` algorithm has been extended to use a quadratic relationship between d spacing and TOF when doing conversions between these units. The diffractometer constants DIFA, DIFC and TZERO that determine the form of the quadratic can be loaded into a workspace using a new :ref:`ApplyDiffCal <algm-ApplyDiffCal>` algorithm. This functionality was previously only available in :ref:`AlignDetectors <algm-AlignDetectors>` which only performed the conversion in the direction TOF to d spacing. This change will ensure that the conversion of focussed datasets from d spacing back to TOF at the end of the ISIS powder diffraction data reduction is performed correctly.
+- The :ref:`ConvertUnits <algm-ConvertUnits>` algorithm has been extended to use a calibration when converting between d spacing, momentum transfer and TOF. A calibration can be loaded into a workspace using a new :ref:`ApplyDiffCal <algm-ApplyDiffCal>` algorithm and then viewed in the Show Detectors screen. The calibration consists of the diffractometer constants DIFA, DIFC and TZERO that determine the form of the quadratic relationship between d spacing and TOF. This functionality was previously only available in :ref:`AlignDetectors <algm-AlignDetectors>` which only performed the conversion in the direction TOF to d spacing. This change will provide several benefits:
+
+  - allow the user to choose the calibration to use when converting focussed data from d-spacing to TOF
+  - improved integration with GSAS eg both the calibration and the data will be loaded from GSAS files when running the algorithm :ref:`LoadGSS <algm-LoadGSS>` and subsequent unit conversions will respect the calibration
+  - make the unit conversions based on a calibration more accessible in the main ConvertUnits algorithm
 - :ref:`PDCalibration <algm-PDCalibration>` now supports workspaces with grouped detectors (i.e. more than one detector per spectrum).
-- New diagnostic plotting tool `Calibration.tofpd..diagnostics.plot2d` which adds markers for expected peak positions.
-- New diagnostic plotting tool `Calibration.tofpd.diagnostics.difc_plot2d` which plots the change in DIFC between two instrument calibrations.
-- New diagnostic plotting tool `Calibration.tofpd.diagnostics.plot_peakd` which plots the d-spacing relative strain of peak positions.
-- New diagnostic plotting tool `Calibration.tofpd.diagnostics.plot_corr` which plots the Pearson correlation coefficient for time-of-flight and d-spacing for each detector.
-- New diagnostic plotting tool `Calibration.tofpd.diagnostics.plot_peak_info` which plots fitted peak parameters for instrument banks.
+- New diagnostic plotting tools:
+
+  - `Calibration.tofpd..diagnostics.plot2d` which adds markers for expected peak positions.
+  - `Calibration.tofpd.diagnostics.difc_plot2d` which plots the change in DIFC between two instrument calibrations.
+  - `Calibration.tofpd.diagnostics.plot_peakd` which plots the d-spacing relative strain of peak positions.
+  - `Calibration.tofpd.diagnostics.plot_corr` which plots the Pearson correlation coefficient for time-of-flight and d-spacing for each detector.
+  - `Calibration.tofpd.diagnostics.plot_peak_info` which plots fitted peak parameters for instrument banks.
 - New algorithm :ref:`IndirectILLReductionDIFF <algm-IndirectILLReductionDIFF>` to reduce Doppler diffraction data for ILL's IN16B instrument.
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has additional property, ``DeltaRagged``, which allows using :ref:`RebinRagged <algm-RebinRagged>` to bin each spectrum differently.
 - A new caching feature is added to :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to speed up calculation using same sample and container.
@@ -56,6 +62,7 @@ Bugfixes
 - Fix segmentation violation issues for ILL instruments D1B, D2B, and D20, caused by change of scanned data type
 - :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` fixed the wrong assumption on the order of spin-flip and non-spin-flip data, and fixed the relative normalisation issues.
 - Fix crashing issue in :ref:`AlignAndFocusPowder<algm-AlignAndFocusPowder>` due to using new unit conversion APIs.
+- Support for data with x-axis unit of TOF has been deprecated in :ref:`DiffractionFocussing version 2 <algm-DiffractionFocussing-v2>`, please use :ref:`GroupDetectors <algm-GroupDetectors>` instead.
 
 Engineering Diffraction
 -----------------------

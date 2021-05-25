@@ -84,6 +84,8 @@ class CalibrationModel(object):
         difc = [i.DIFC for i in output]
         tzero = [i.TZERO for i in output]
 
+        bk2bk_params = self.extract_b2b_params(sample_workspace)
+
         params_table = []
 
         for i in range(len(difc)):
@@ -91,13 +93,26 @@ class CalibrationModel(object):
         self.update_calibration_params_table(params_table)
 
         calib_dir = path.join(path_handling.get_output_path(), "Calibration", "")
-        self.create_output_files(calib_dir, difa, difc, tzero, sample_path, vanadium_path, instrument,
+        self.create_output_files(calib_dir, difa, difc, tzero, bk2bk_params, sample_path, vanadium_path, instrument,
                                  bank, spectrum_numbers)
         if rb_num:
             user_calib_dir = path.join(path_handling.get_output_path(), "User", rb_num,
                                        "Calibration", "")
-            self.create_output_files(user_calib_dir, difa, difc, tzero, sample_path, vanadium_path,
+            self.create_output_files(user_calib_dir, difa, difc, tzero, bk2bk_params, sample_path, vanadium_path,
                                      instrument, bank, spectrum_numbers)
+
+    def extract_b2b_params(self, workspace):
+
+        ws_inst = workspace.getInstrument()
+        NorthBank = ws_inst.getComponentByName("NorthBank")
+        SouthBank = ws_inst.getComponentByName("SouthBank")
+        params_north = []
+        params_south = []
+        for param_name in ["alpha", "beta_0","beta_1","sigma_0_sq", "sigma_1_sq", "sigma_2_sq"]:
+            params_north += [NorthBank.getNumberParameter(param_name)[0]]
+            params_south += [SouthBank.getNumberParameter(param_name)[0]]
+
+        return [params_north,params_south]
 
     def load_existing_gsas_parameters(self, file_path):
         if not path.exists(file_path):
@@ -268,18 +283,19 @@ class CalibrationModel(object):
             output[0] = run_engg_calibrate(kwargs)
         return output
 
-    def create_output_files(self, calibration_dir, difa, difc, tzero, sample_path, vanadium_path,
+    def create_output_files(self, calibration_dir, difa, difc, tzero, bk2bk_params, sample_path, vanadium_path,
                             instrument, bank, spectrum_numbers):
         """
         Create output files from the algorithms in the specified directory
         :param calibration_dir: The directory to save the files into.
-        :param difa: DIFA values from calibration algorithm
+        :param difa: DIFA values from calibration algorithm.
         :param difc: DIFC values from the calibration algorithm.
         :param tzero: TZERO values from the calibration algorithm.
+        :param bk2bk_params: BackToBackExponential parameters from Parameters.xml file.
         :param sample_path: The path to the sample data file.
         :param vanadium_path: The path to the vanadium data file.
-        :param instrument: The instrument (ENGINX or IMAT)
-        :param bank: Optional parameter to crop by bank
+        :param instrument: The instrument (ENGINX or IMAT).
+        :param bank: Optional parameter to crop by bank.
         :param spectrum_numbers: Optional parameter to crop using spectrum numbers.
         """
         kwargs = {"ceria_run": path_handling.get_run_number_from_path(sample_path, instrument),
@@ -296,7 +312,7 @@ class CalibrationModel(object):
         def generate_output_file(difa_list, difc_list, tzero_list, bank_name, kwargs_to_pass):
             file_path = calibration_dir + self._generate_output_file_name(vanadium_path, sample_path, instrument,
                                                                           bank=bank_name)
-            write_ENGINX_GSAS_iparam_file(file_path, difa_list, difc_list, tzero_list, **kwargs_to_pass)
+            write_ENGINX_GSAS_iparam_file(file_path, difa_list, difc_list, tzero_list, bk2bk_params, **kwargs_to_pass)
 
         if not path.exists(calibration_dir):
             makedirs(calibration_dir)

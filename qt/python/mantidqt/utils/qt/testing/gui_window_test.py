@@ -8,21 +8,14 @@
 #
 #
 import inspect
-import platform
 import sys
 from unittest import TestCase
 
 from mantidqt.utils.qt.testing.gui_test_runner import open_in_window
-from qtpy import PYQT_VERSION
 from qtpy.QtWidgets import QPushButton, QMenu, QAction, QApplication, QWidget
 from qtpy.QtGui import QMouseEvent
 from qtpy.QtCore import Qt, QMetaObject, QTime, QEvent
 from qtpy.QtTest import QTest
-
-
-def on_ubuntu_or_darwin():
-    return ('Ubuntu' in platform.platform() and sys.version[0] == '2'
-            or sys.platform == 'darwin' and PYQT_VERSION[0] == '4')
 
 
 def not_on_windows():

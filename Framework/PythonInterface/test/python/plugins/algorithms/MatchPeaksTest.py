@@ -115,7 +115,6 @@ class MatchPeaksTest(unittest.TestCase):
 
     def testValidateInputWorkspace(self):
         self._args['OutputWorkspace'] = 'output'
-        self.assertTrue(sys.version_info >= (2, 7))
         with self.assertRaises(RuntimeError) as contextManager:
             self._args['InputWorkspace'] = self._in1
             run1 = run_algorithm('MatchPeaks', **self._args)
@@ -130,7 +129,6 @@ class MatchPeaksTest(unittest.TestCase):
     def testValidateInputWorkspace2(self):
         self._args['InputWorkspace'] = self._ws_shift
         self._args['OutputWorkspace'] = 'output'
-        self.assertTrue(sys.version_info >= (2, 7))
         with self.assertRaises(RuntimeError) as contextManager:
             self._args['InputWorkspace2'] = self._in1
             run_algorithm('MatchPeaks', **self._args)
@@ -144,7 +142,6 @@ class MatchPeaksTest(unittest.TestCase):
         self._args['InputWorkspace'] = self._ws_shift
         self._args['InputWorkspace3'] = self._ws_in_3
         self._args['OutputWorkspace'] = 'output'
-        self.assertTrue(sys.version_info >= (2, 7))
         with self.assertRaises(RuntimeError) as contextManager:
             run_algorithm('MatchPeaks', **self._args)
         self.assertEqual('Some invalid Properties found: [ InputWorkspace2 InputWorkspace3 ]', str(contextManager.exception))

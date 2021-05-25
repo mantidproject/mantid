@@ -153,6 +153,7 @@ class RunTabPresenterTest(unittest.TestCase):
     def test_that_gets_states_from_view(self):
         # Arrange
         batch_file_path, user_file_path, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
+        self.presenter.on_update_rows = mock.Mock()
         self.presenter.on_user_file_load()
         self.presenter.on_batch_file_load()
 
@@ -186,6 +187,8 @@ class RunTabPresenterTest(unittest.TestCase):
 
         self.assertEqual(state0.all_states.reduction.reduction_dimensionality, ReductionDimensionality.ONE_DIM)
         self.assertEqual(state0.all_states.move.detectors['LAB'].sample_centre_pos1, 0.15544999999999998)
+
+        self.presenter.on_update_rows.assert_called_once()
 
         # Clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)

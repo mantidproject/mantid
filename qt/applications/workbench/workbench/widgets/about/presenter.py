@@ -95,10 +95,9 @@ class AboutPresenter(object):
             return
         self.view.cb_facility.addItems(facilities)
 
-        try:
-            default_facility = ConfigService.getFacility().name()
-        except RuntimeError:
-            default_facility = facilities[0]
+        current_facility = self._get_current_facility()
+        default_facility = current_facility if current_facility is not None else facilities[0]
+
         self.view.cb_facility.setCurrentIndex(self.view.cb_facility.findText(default_facility))
         self.action_facility_changed(default_facility)
         self.view.cb_facility.currentTextChanged.connect(self.action_facility_changed)
@@ -108,19 +107,26 @@ class AboutPresenter(object):
         When the facility is changed, refreshes all available instruments that can be selected in the dropdown.
         :param new_facility: The name of the new facility that was selected
         """
-        current_value = ConfigService.getFacility().name()
+        current_facility = self._get_current_facility()
         self.store_facility(new_facility)
         # refresh the instrument selection to contain instruments about the selected facility only
         self.view.cb_instrument.facility = new_facility
-        if new_facility != current_value:
+        if new_facility != current_facility:
             self.view.cb_instrument.setCurrentIndex(0)
 
     def store_facility(self, new_facility):
-        current_value = ConfigService.getFacility().name()
-        if new_facility != current_value:
+        current_facility = self._get_current_facility()
+        if new_facility != current_facility:
             ConfigService.setFacility(new_facility)
             return True
         return False
+
+    @staticmethod
+    def _get_current_facility() -> str:
+        try:
+            return ConfigService.getFacility().name()
+        except RuntimeError:
+            return None
 
     def action_instrument_changed(self, new_instrument):
         current_value = ConfigService.getString(self.INSTRUMENT)

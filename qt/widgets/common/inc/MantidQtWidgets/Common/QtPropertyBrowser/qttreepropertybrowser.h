@@ -157,6 +157,7 @@ public:
 
   void editItem(QtBrowserItem *item);
   void setColumnSizes(int s0, int s1, int s2 = -1);
+  void setStretchLastColumn(bool stretch);
 
   QTreeWidgetItem *getItemWidget(QtBrowserItem *item);
   QTreeWidget *treeWidget();
@@ -284,6 +285,7 @@ public:
 
   const QStringList &options() const { return m_options; }
   void setColumnSizes(int s0, int s1, int s2);
+  void setStretchLastColumn(bool stretch);
 
 private:
   void updateItem(QTreeWidgetItem *item);

@@ -13,7 +13,9 @@
 #include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSphere.h"
 
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidQtWidgets/Common/InputController.h"
@@ -490,6 +492,21 @@ std::string Projection3D::saveToProject() const {
   throw std::runtime_error(
       "Projection3D::saveToProject not implemented for Qt >= 5");
 #endif
+}
+
+void Projection3D::saveShapesToTableWorkspace() {
+  m_maskShapes.saveToTableWorkspace();
+
+  // WARNING: Q1DWeighted heavily depends on the format of this function's
+  // output.
+  // Modify with great caution.
+  std::shared_ptr<Mantid::API::ITableWorkspace> table =
+      AnalysisDataService::Instance()
+          .retrieveWS<typename Mantid::API::ITableWorkspace>(
+              std::string("MaskShapes"));
+  Mantid::API::TableRow row = table->appendRow();
+  auto viewPortStr = m_viewport.saveToProject();
+  row << std::to_string(-1) << viewPortStr;
 }
 
 } // namespace MantidWidgets

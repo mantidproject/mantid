@@ -27,7 +27,7 @@ using namespace MantidWidgets;
 class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter : public QObject, public AnalysisDataServiceObserver {
   Q_OBJECT
 public:
-  IndirectFitDataPresenter(IndirectFittingModel *model, IIndirectFitDataView *view);
+  IndirectFitDataPresenter(IIndirectFittingModel *model, IIndirectFitDataView *view);
   ~IndirectFitDataPresenter();
 
   void setSampleWSSuffices(const QStringList &suffices);
@@ -44,6 +44,8 @@ public:
   void setEndX(double endX, TableDatasetIndex dataIndex, WorkspaceIndex spectrumIndex);
   void setEndX(double endX, TableDatasetIndex dataIndex);
   void setExclude(const std::string &exclude, TableDatasetIndex dataIndex, WorkspaceIndex spectrumIndex);
+
+  std::pair<double, double> getXRange() const;
 
   void loadSettings(const QSettings &settings);
   UserInputValidator &validate(UserInputValidator &validator);
@@ -79,7 +81,7 @@ signals:
   void updateAvailableFitTypes();
 
 protected:
-  IndirectFitDataPresenter(IndirectFittingModel *model, IIndirectFitDataView *view,
+  IndirectFitDataPresenter(IIndirectFittingModel *model, IIndirectFitDataView *view,
                            std::unique_ptr<IndirectDataTablePresenter> tablePresenter);
   IIndirectFitDataView const *getView() const;
   void addData(IAddWorkspaceDialog const *dialog);
@@ -102,7 +104,7 @@ private:
   virtual void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog);
 
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
-  IndirectFittingModel *m_model;
+  IIndirectFittingModel *m_model;
   IIndirectFitDataView *m_view;
   std::unique_ptr<IndirectDataTablePresenter> m_tablePresenter;
 };

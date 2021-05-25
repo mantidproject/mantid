@@ -56,13 +56,14 @@ This was last updated for Release 5.1. Check if the organiser has considered if 
     Project Save/Load,:r:`Y`,:b:`Y`,:g:`Y`,:o:`Y`, "Test the small areas below and do not delete workspaces or plots you produce and manipulate, maybe open a few interfaces. Then File > Save Project and try to reload it! Diagnose any problems."
     About / First Time Setup Menu,:r:`Y`,,,,"Check Opens Successfully + all buttons and links work"
     Help Documentation,,:b:`Y`,:g:`Y`,,"Open all `Help` menu bar options. Load a few algorithm dialogs and click the **?**. Produce some plots (1D, Waterfall,Colorfill,3D Surface) and check **?** links."
-    SliceViewer,:r:`Y`,:b:`Y`,,:o:`Y`, "All that is expected here is to test basic functionality. For some inspiration, here are the full :ref:`SliceViewer Manual Testing instructions <sliceviewer_testing>`"
+    SliceViewer,:r:`Y`,:b:`Y`,,:o:`Y`, "Please **only** test basic SliceViewer functionality, such as outlined :ref:`here <04_displaying_2D_data>`, and please use SV with unusual data and in unusual ways! If you want extra inspiration, here are the advanced :ref:`SliceViewer Manual Testing instructions <sliceviewer_testing>`. Do NOT complete these advanced tests, however you may find the initial Data section useful."
     GUI Plotting,,:b:`Y`,:g:`Y`,,"Produce 1D (Individual, Waterfall, Tiled), 2D (Colorfill and Contour) and 3D (Surface and Wireframe) plots with different data types. :ref:`03_displaying_1D_data` :ref:`3D_Plots`"
     Manipulating Plots,:r:`Y`,,:g:`Y`,:o:`Y`,"See Plot Help Docs for info on Toolbar **?** buttons, Click Menus, Plots Toolbox, Settings"
     Scripting Plots,,:b:`Y`,,:o:`Y`,"For some ideas: :ref:`01_basic_plot_scripting` :ref:`06_formatting_plots` :ref:`plotting` + run any `MPL code <https://matplotlib.org/gallery/index.html>`_ and check if Figure Options and Generate a script work."
     Settings (Preferences on Mac),:r:`Y`,,:g:`Y`,,"Check all options work. Some may need restart."
     Script Editor / Interpreter,:r:`Y`,,,:o:`Y`,"Check basic functionality, such as checking the buttons/options at the top of SE, running algorithms, accessing workspace properties in both environments. Does autocompletion work for mantid algorithms/numpy/matplotlib? :ref:`02_scripts`"
     MantidPython and Jupyter Notebook,:r:`Y`,:b:`Y`,:g:`Y`,,"Open MantidPython and a Jupyter Notebook. Check you can import mantid.simpleapi and run a script/notebook. `Click here <https://www.mantidproject.org/Using_IPython_Notebook>`_ for Further Instructions and an example Notebook (You may need to rename without spaces)"
+    Memory Widget,:r:`Y`,:b:`Y`,:g:`Y`,:o:`Y`,"Check that the System Memory Usage widget updates at a frequency of no more than once every two seconds, ideally on a system with limited resourses. Check that the default position of the widget is in the top right, in the same column as the Messages widget."
 
 .. csv-table:: Larger tasks
     :widths: 10 20 5 5 5 5 50

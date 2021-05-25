@@ -157,8 +157,7 @@ void MonteCarloAbsorption::exec() {
   const bool resimulateTracks = getProperty("ResimulateTracksForDifferentWavelengths");
   const int seed = getProperty("SeedValue");
   InterpolationOption interpolateOpt;
-  interpolateOpt.set(getPropertyValue("Interpolation"));
-  interpolateOpt.setIndependentErrors(resimulateTracks);
+  interpolateOpt.set(getPropertyValue("Interpolation"), true, resimulateTracks);
   const bool useSparseInstrument = getProperty("SparseInstrument");
   const int maxScatterPtAttempts = getProperty("MaxScatterPtAttempts");
   auto simulatePointsIn = MCInteractionVolume::ScatteringPointVicinity::SAMPLEANDENVIRONMENT;
@@ -185,7 +184,7 @@ std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
     const int nlambda = getProperty("NumberOfWavelengthPoints");
     InterpolationOption interpOpt;
     const std::string interpValue = getPropertyValue("Interpolation");
-    interpOpt.set(interpValue);
+    interpOpt.set(interpValue, true, resimulateTracksForDiffWavelengths);
     const auto nlambdaIssue = interpOpt.validateInputSize(nlambda);
     if (!nlambdaIssue.empty()) {
       issues["NumberOfWavelengthPoints"] = nlambdaIssue;
@@ -412,7 +411,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::createOutputWorkspace(const MatrixWor
 /**
  * Create the beam profile. Currently only supports Rectangular or Circular. The
  * dimensions are either specified by those provided by `SetBeam` algorithm or
- * default to the width and height of the samples bounding box
+ * default to the width and height of the sample's bounding box
  * @param instrument A reference to the instrument object
  * @param sample A reference to the sample object
  * @return A new IBeamProfile object
@@ -439,6 +438,8 @@ std::unique_ptr<IBeamProfile> MonteCarloAbsorption::createBeamProfile(const Inst
       return std::make_unique<CircularBeamProfile>(*frame, source->getPos(), beamRadius);
     }
   } // revert to sample dimensions if no return by this point
+  if (!sample.getShape().hasValidShape())
+    throw std::invalid_argument("Cannot determine beam profile without a sample shape");
   const auto bbox = sample.getShape().getBoundingBox().width();
   beamWidth = bbox[frame->pointingHorizontal()];
   beamHeight = bbox[frame->pointingUp()];

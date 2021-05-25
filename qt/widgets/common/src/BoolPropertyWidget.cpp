@@ -20,6 +20,10 @@ BoolPropertyWidget::BoolPropertyWidget(Mantid::Kernel::PropertyWithValue<bool> *
     : PropertyWidget(prop, parent, layout, row) {
   m_checkBox = new QCheckBox(QString::fromStdString(prop->name()), m_parent);
   m_checkBox->setToolTip(m_doc);
+  // Make current value visible
+  this->setValue(QString::fromStdString(m_prop->value()));
+
+  // Make sure the connection comes after updating any values
   connect(m_checkBox, SIGNAL(stateChanged(int)), this, SLOT(userEditedProperty()));
   m_widgets.push_back(m_checkBox);
 

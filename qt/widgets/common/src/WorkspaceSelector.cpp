@@ -180,6 +180,8 @@ void WorkspaceSelector::handleRemEvent(Mantid::API::WorkspacePostDeleteNotificat
 
 void WorkspaceSelector::handleClearEvent(Mantid::API::ClearADSNotification_ptr /*unused*/) {
   this->clear();
+  if (m_optional)
+    addItem("");
   emit emptied();
 }
 

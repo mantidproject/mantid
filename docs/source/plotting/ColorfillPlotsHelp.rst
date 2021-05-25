@@ -11,6 +11,7 @@ Colorfill and Contour Plots
 * :ref:`Basic_1D_Plots`
 * :ref:`Waterfall_Plots`
 * :ref:`3D_Plots`
+* :ref:`Mesh_Plots`
 
 **General Plot Help**
 

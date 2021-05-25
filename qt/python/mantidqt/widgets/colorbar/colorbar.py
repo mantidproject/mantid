@@ -18,7 +18,7 @@ from matplotlib.colors import Normalize, SymLogNorm, PowerNorm, LogNorm
 from matplotlib import cm
 import numpy as np
 from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QComboBox, QCheckBox, QLabel
-from qtpy.QtCore import Signal
+from qtpy.QtCore import Signal, Qt
 from qtpy.QtGui import QDoubleValidator
 
 NORM_OPTS = ["Linear", "Log", "SymmetricLog10", "Power"]
@@ -125,6 +125,8 @@ class ColorbarWidget(QWidget):
         """
         When a new plot is created this method should be called with the new mappable
         """
+        # sanity check the mappable
+        mappable = self._validate_mappable(mappable)
         self.ax.clear()
         try:  # Use current cmap
             cmap = get_current_cmap(self.colorbar)
@@ -307,3 +309,30 @@ class ColorbarWidget(QWidget):
                 self.cmax_value = cmax
             else:  # reset values back
                 self.update_clim_text()
+
+    def _create_linear_normalize_object(self):
+        if self.autoscale.isChecked():
+            cmin = cmax = None
+        else:
+            cmin = self.cmin_value
+            cmax = self.cmax_value
+        return Normalize(vmin=cmin, vmax=cmax)
+
+    def _validate_mappable(self, mappable):
+        index = NORM_OPTS.index("Log")
+        if mappable.get_array() is not None:
+            if np.any(mappable.get_array() <= 0):
+                self.norm.model().item(index, 0).setEnabled(False)
+                self.norm.setItemData(index, "Log scale is disabled for non-positive data",
+                                      Qt.ToolTipRole)
+                if isinstance(mappable.norm, LogNorm):
+                    mappable.norm = self._create_linear_normalize_object()
+                    self.norm.blockSignals(True)
+                    self.norm.setCurrentIndex(0)
+                    self.norm.blockSignals(False)
+            else:
+                if not self.norm.model().item(index, 0).isEnabled():
+                    self.norm.model().item(index, 0).setEnabled(True)
+                    self.norm.setItemData(index, "", Qt.ToolTipRole)
+
+        return mappable

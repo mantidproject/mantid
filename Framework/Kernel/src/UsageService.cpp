@@ -67,6 +67,8 @@ std::string FeatureUsage::featureTypeToString() const {
     return "Feature";
   case FeatureType::Interface:
     return "Interface";
+  case FeatureType::Function:
+    return "Function";
   }
   return "Unknown";
 }

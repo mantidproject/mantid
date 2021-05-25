@@ -12,6 +12,7 @@ from mantid.simpleapi import *
 from math import fabs
 import numpy as np
 import os
+import re
 
 
 class SANSILLReduction(PythonAlgorithm):
@@ -92,9 +93,26 @@ class SANSILLReduction(PythonAlgorithm):
                '<radius val="{0}"/></infinite-cylinder>'.format(radius)
 
     @staticmethod
-    def _mask(ws, masked_ws):
-        if masked_ws.detectorInfo().hasMaskedDetectors():
+    def _mask(ws, masked_ws, check_if_masked_detectors=True):
+        if not check_if_masked_detectors or masked_ws.detectorInfo().hasMaskedDetectors():
             MaskDetectors(Workspace=ws, MaskedWorkspace=masked_ws)
+
+    @staticmethod
+    def _return_numors(paths):
+        regex_all = r'(\+)'
+        p = re.compile(regex_all)
+        list_entries = []
+        binary_op = []
+        prev_pos = 0
+        for obj in p.finditer(paths):
+            list_entries.append(paths[prev_pos:obj.span()[0]])
+            prev_pos = obj.span()[1]
+            binary_op.append(obj.group())
+        list_entries.append(paths[prev_pos:])  # add the last remaining file
+        list_entries = [os.path.split(entry)[1] for entry in list_entries]
+        binary_op.append('') # there is one fewer binary operator than there are numors
+        list_entries = [entry + operation for entry, operation in zip(list_entries, binary_op)]
+        return ''.join(list_entries)
 
     def PyInit(self):
 
@@ -243,13 +261,25 @@ class SANSILLReduction(PythonAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='Input workspace containing already loaded raw data, used for parameter scans.')
 
+        self.declareProperty(MatrixWorkspaceProperty('SolventInputWorkspace', '',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='The name of the solvent workspace.')
+
+        self.setPropertySettings('SolventInputWorkspace', sample)
+
     def _normalise(self, ws):
         """
             Normalizes the workspace by time (SampleLog Timer) or Monitor (ID=100000)
             @param ws : the input workspace
         """
         normalise_by = self.getPropertyValue('NormaliseBy')
-        monID = 100000 if (self._instrument != 'D33' and self._instrument != 'D16') else 500000
+        if self._instrument == "D33":
+            monID = 500000
+        elif self._instrument == "D16":
+            monID = 500001
+        else:
+            monID = 100000
         if normalise_by == 'Monitor':
             mon = ws + '_mon'
             ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=mon)
@@ -386,6 +416,9 @@ class SANSILLReduction(PythonAlgorithm):
             Scale(InputWorkspace=ws, Factor=self.getProperty('WaterCrossSection').value, OutputWorkspace=ws)
             self._mask(ws, reference_ws)
             self._rescale_flux(ws, reference_ws)
+        solvent_ws = self.getProperty('SolventInputWorkspace').value
+        if solvent_ws:
+            self._apply_solvent(ws, solvent_ws)
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
                              NaNValue=0., NaNError=0., InfinityValue=0., InfinityError=0.)
 
@@ -469,6 +502,15 @@ class SANSILLReduction(PythonAlgorithm):
             @param transmission_ws: transmission workspace
         """
         theta_dependent = self.getProperty('ThetaDependent').value
+        run = mtd[ws].getRun()
+
+        if theta_dependent and run.hasProperty("Gamma.value") and 75 < run.getLogData('Gamma.value').value < 105:
+            # range in which it possible some pixels are nearing 90 degrees
+            # normally, we are talking about D16 here
+
+            epsilon = 1
+            MaskAngle(Workspace=ws, MinAngle=90-epsilon, MaxAngle=90+epsilon, Angle='TwoTheta')
+
         if not self._check_processed_flag(transmission_ws, 'Transmission'):
             self.log().warning('Transmission input workspace is not processed as transmission.')
         if transmission_ws.blocksize() == 1:
@@ -534,6 +576,24 @@ class SANSILLReduction(PythonAlgorithm):
         else:
             self.log().information('No tau available in IPF, skipping dead time correction.')
 
+    def _apply_solvent(self, ws, solvent_ws):
+        """
+            Applies solvent subtraction
+            @param ws: input workspace
+            @param solvent_ws: empty container workspace
+        """
+        solvent_ws.setDistribution(False)
+        if not self._check_processed_flag(solvent_ws, 'Sample'):
+            self.log().warning('Solvent input workspace is not processed as sample.')
+        self._check_distances_match(mtd[ws], solvent_ws)
+        solvent_ws_name = solvent_ws.getName()
+        if self._mode != 'TOF':
+            self._check_wavelengths_match(mtd[ws], solvent_ws)
+        else:
+            solvent_ws_name += '_tmp'
+            RebinToWorkspace(WorkspaceToRebin=solvent_ws, WorkspaceToMatch=ws, OutputWorkspace=solvent_ws_name)
+        Minus(LHSWorkspace=ws, RHSWorkspace=solvent_ws_name, OutputWorkspace=ws)
+
     def _finalize(self, ws, process):
         if process != 'Transmission':
             if self._instrument in ['D33', 'D11B', 'D22B']:
@@ -547,6 +607,9 @@ class SANSILLReduction(PythonAlgorithm):
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
                              NaNError=0, InfinityValue=0, InfinityError=0)
         mtd[ws].getRun().addProperty('ProcessedAs', process, True)
+        mtd[ws].getRun().addProperty('numor_list', self._return_numors(self.getPropertyValue('Run')), True)
+        mtd[ws].getRun().addProperty('sample_transmission_numors',
+                                     self._return_numors(self.getPropertyValue('TransmissionInputWorkspace')), True)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
         self.setProperty('OutputWorkspace', mtd[ws[2:]])
 
@@ -554,11 +617,11 @@ class SANSILLReduction(PythonAlgorithm):
         # apply the default mask, e.g. the bad detector edges
         default_mask_ws = self.getProperty('DefaultMaskedInputWorkspace').value
         if default_mask_ws:
-            self._mask(ws, default_mask_ws)
+            self._mask(ws, default_mask_ws, False)
         # apply the beam stop mask
         mask_ws = self.getProperty('MaskedInputWorkspace').value
         if mask_ws:
-            self._mask(ws, mask_ws)
+            self._mask(ws, mask_ws, False)
 
     def _apply_thickness(self, ws):
         """

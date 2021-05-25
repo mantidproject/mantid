@@ -259,6 +259,11 @@ public:
   /// Unit Tests that test the public member functions of the presenter
   ///----------------------------------------------------------------------
 
+  void test_setPlotType_sets_the_view() {
+    EXPECT_CALL(*m_view, setPlotType(PlotWidget::Spectra, constructActions(boost::none))).Times(1);
+    m_presenter->setPlotType(PlotWidget::Spectra);
+  }
+
   void test_that_setWorkspaces_will_set_the_workspaces_in_the_view_and_model() {
     std::vector<std::string> const workspaceNames{WORKSPACE_NAME};
     ON_CALL(*m_model, getAllWorkspaceNames(workspaceNames)).WillByDefault(Return(workspaceNames));

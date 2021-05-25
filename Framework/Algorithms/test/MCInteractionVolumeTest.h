@@ -41,7 +41,7 @@ public:
     MCInteractionVolume interactor(sample);
     interactor.setActiveRegion(sampleBox);
 
-    const auto interactionBox = interactor.getBoundingBox();
+    const auto interactionBox = interactor.getFullBoundingBox();
     TS_ASSERT_EQUALS(sampleBox.minPoint(), interactionBox.minPoint());
     TS_ASSERT_EQUALS(sampleBox.maxPoint(), interactionBox.maxPoint());
   }
@@ -96,8 +96,8 @@ public:
 
     auto sample = createTestSample(TestSampleType::SamplePlusContainer);
     MockRNG rng;
-    // force scatter in segment can (1)
-    EXPECT_CALL(rng, nextInt(0, 1)).Times(Exactly(1)).WillOnce(Return(1)); // MCInteractionVolume::generatePoint
+    // force scatter in segment can (0)
+    EXPECT_CALL(rng, nextInt(-1, 0)).Times(Exactly(1)).WillOnce(Return(0)); // MCInteractionVolume::generatePoint
     EXPECT_CALL(rng, nextValue())
         .Times(Exactly(3))
         .WillOnce(Return(0.02)) // RandomPoint::bounded r1
@@ -112,8 +112,8 @@ public:
     TestGeneratedTracks(startPos, endPos, beforeScatter, afterScatter, sample.getEnvironment().getContainer());
     TS_ASSERT(Mock::VerifyAndClearExpectations(&rng));
 
-    // force scatter in sample (0)
-    EXPECT_CALL(rng, nextInt(0, 1)).Times(Exactly(1)).WillOnce(Return(0));        // MCInteractionVolume::generatePoint
+    // force scatter in sample (-1)
+    EXPECT_CALL(rng, nextInt(-1, 0)).Times(Exactly(1)).WillOnce(Return(-1));      // MCInteractionVolume::generatePoint
     EXPECT_CALL(rng, nextValue()).Times(Exactly(3)).WillRepeatedly(Return(0.25)); // RandomPoint::bounded r1, r2, r3
     std::tie(success, beforeScatter, afterScatter) =
         interactor.calculateBeforeAfterTrack(rng, startPos, endPos, trackStatistics);
@@ -171,7 +171,7 @@ public:
     // Generate "random" sequence
     MockRNG rng;
     // Selects first component
-    EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(1));
+    EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(0));
     EXPECT_CALL(rng, nextValue()).Times(3).WillOnce(Return(0.55)).WillOnce(Return(0.65)).WillOnce(Return(0.70));
     ComponentScatterPoint comp1Point;
     TS_ASSERT_THROWS_NOTHING(comp1Point = interactor.generatePoint(rng));
@@ -183,7 +183,7 @@ public:
     MCInteractionVolume interactor2(sample, maxAttempts);
     interactor2.setActiveRegion(kit->getComponent(1).getBoundingBox());
 
-    EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(2));
+    EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(1));
     EXPECT_CALL(rng, nextValue()).Times(3).WillOnce(Return(0.55)).WillOnce(Return(0.65)).WillOnce(Return(0.70));
     ComponentScatterPoint comp2Point;
     TS_ASSERT_THROWS_NOTHING(comp2Point = interactor2.generatePoint(rng));
@@ -195,7 +195,7 @@ public:
     // Selects third component
     MCInteractionVolume interactor3(sample, maxAttempts);
     interactor3.setActiveRegion(kit->getComponent(2).getBoundingBox());
-    EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(3));
+    EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(2));
     EXPECT_CALL(rng, nextValue()).Times(3).WillOnce(Return(0.55)).WillOnce(Return(0.65)).WillOnce(Return(0.70));
     ComponentScatterPoint comp3Point;
     TS_ASSERT_THROWS_NOTHING(comp3Point = interactor3.generatePoint(rng));
@@ -214,7 +214,7 @@ public:
     // Generate "random" sequence
     MockRNG rng;
     // Sequence will try to select one of the non-container pieces
-    EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(2));
+    EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(1));
     EXPECT_CALL(rng, nextValue()).Times(3).WillRepeatedly(Return(0.5));
 
     using Mantid::API::Sample;

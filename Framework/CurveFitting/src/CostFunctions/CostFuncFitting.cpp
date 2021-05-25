@@ -188,11 +188,17 @@ void CostFuncFitting::calFittingErrors(const GSLMatrix &covar, double chi2) {
         if (m_function->isActive(j)) {
           (*covarMatrix)[i][j] = covar.get(ia, ja);
           ++ja;
+
+          if (ja >= covar.size2())
+            break;
         }
       }
       double err = sqrt(covar.get(ia, ia));
       m_function->setError(i, err);
       ++ia;
+
+      if (ia >= covar.size1())
+        break;
     }
   }
   m_function->setCovarianceMatrix(covarMatrix);
@@ -420,7 +426,7 @@ double CostFuncFitting::valDerivHessian(bool evalDeriv, bool evalHessian) const 
         if (!m_function->isActive(ip))
           continue;
         API::IConstraint *c = m_function->getConstraint(ip);
-        if (c) {
+        if (c && !m_hessian.isEmpty()) {
           double d = m_hessian.get(i, i) + c->checkDeriv2();
           m_hessian.set(i, i, d);
         }

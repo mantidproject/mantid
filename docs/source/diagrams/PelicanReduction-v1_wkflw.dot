@@ -1,0 +1,82 @@
+digraph PelicanReduction {
+  label="PelicanReduction Flowchart"
+  $global_style
+
+  subgraph values {
+    $value_style
+    SOFQWWorkspaces
+    NXSPEWorkspace
+  }
+
+  subgraph decision {
+    $decision_style
+    ProcessMode
+  }
+
+  subgraph params {
+  	$param_style
+  	SampleRuns
+    EmptyRuns
+  	CalibrationRuns
+    EmptyCalibrationRuns
+  }
+
+  subgraph algorithms {
+  	$algorithm_style
+  	ScaleA [label="Scale"]
+  	ScaleB [label="Scale"]
+  	MinusA [label="Minus"]
+  	MinusB [label="Minus"]
+  	Integration
+  	ExtractMonitors
+  	SaveNXSPE
+  	SOFQW
+  	CorrectKiKf
+  	Divide
+  	MergeRuns
+  	LoadPLN
+  	ConvertUnits
+  }
+
+  subgraph cluster {
+
+      label="LoadMergeTransfer"
+      color="orange"
+      LoadPLN -> MergeRuns
+      MergeRuns -> ConvertUnits
+  }
+
+  subgraph mydefs {
+      node[fillcolor="orange", style = filled]
+      LoadMergeTransfer
+      LoadMergeTransferA [label="LoadMergeTransfer"]
+      LoadMergeTransferB [label="LoadMergeTransfer"]
+      LoadMergeTransferC [label="LoadMergeTransfer"]
+  }
+
+
+  SampleRuns -> LoadMergeTransfer
+  EmptyRuns -> LoadMergeTransferA
+  LoadMergeTransferA -> ScaleA
+  LoadMergeTransfer -> MinusA
+  ScaleA -> MinusA
+
+  CalibrationRuns -> LoadMergeTransferB
+  LoadMergeTransferB -> MinusB
+  EmptyCalibrationRuns -> LoadMergeTransferC
+  LoadMergeTransferC -> ScaleB
+  ScaleB -> MinusB
+  MinusB -> Integration
+
+  MinusA -> Divide
+  Integration -> Divide
+  Divide -> ProcessMode
+
+  ProcessMode -> ExtractMonitors [label="NXSPE"]
+  ExtractMonitors -> SaveNXSPE
+  SaveNXSPE -> NXSPEWorkspace
+
+  ProcessMode -> SOFQW [label="SOFQW"]
+  SOFQW -> CorrectKiKf
+  CorrectKiKf -> SOFQWWorkspaces
+}

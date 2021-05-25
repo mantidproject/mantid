@@ -72,12 +72,6 @@ void DiffRotDiscreteCircle::init() {
   this->declareAttribute("Q", API::IFunction::Attribute(0.5));
   this->declareAttribute("N", API::IFunction::Attribute(3));
 
-  // Set the aliases
-  this->setAlias("f1.Intensity", "Intensity");
-  this->setAlias("f1.Radius", "Radius");
-  this->setAlias("f1.Decay", "Decay");
-  this->setAlias("f1.Shift", "Shift");
-
   // Set the ties between Elastic and Inelastic parameters
   this->addDefaultTies("f0.Height=f1.Intensity,f0.Radius=f1.Radius");
   this->applyTies();

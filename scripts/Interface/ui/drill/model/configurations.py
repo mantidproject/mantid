@@ -28,6 +28,7 @@ class RundexSettings(object):
 
     # acquisition modes
     SANS_ACQ =     "SANS"
+    SANS_PSCAN =   "Sample scan"
     REFL_POL =     "Polarized"
     REFL_NPOL =    "Unpolarized"
     POWDER_DSCAN = "Detector scan"
@@ -52,7 +53,7 @@ class RundexSettings(object):
     ACQUISITION_MODES = {
             D11:    [SANS_ACQ],
             D11B:    [SANS_ACQ],
-            D16:    [SANS_ACQ],
+            D16:    [SANS_ACQ, SANS_PSCAN],
             D22:    [SANS_ACQ],
             D22B:    [SANS_ACQ],
             D33:    [SANS_ACQ],
@@ -77,8 +78,17 @@ class RundexSettings(object):
                 "TransmissionBeamRuns",
                 "MaskFiles",
                 "ReferenceFiles",
+                "SolventFiles",
                 "OutputWorkspace",
                 "SampleThickness",
+                "CustomOptions"
+                ],
+            SANS_PSCAN: [
+                "SampleRuns",
+                "AbsorberRuns",
+                "ContainerRuns",
+                "OutputWorkspace",
+                "OutputJoinedWorkspace",
                 "CustomOptions"
                 ],
             REFL_POL: [
@@ -120,9 +130,19 @@ class RundexSettings(object):
                 ],
             }
 
+    VISUAL_SETTINGS = {
+            SANS_ACQ: {
+                "HiddenColumns": [
+                    "FluxRuns",
+                    "TransmissionAbsorberRuns"
+                    ]
+                }
+            }
+
     # algo name for each acquisition mode
     ALGORITHM = {
             SANS_ACQ:     "SANSILLAutoProcess",
+            SANS_PSCAN:   "SANSILLParameterScan",
             REFL_POL:     "ReflectometryILLAutoProcess",
             REFL_NPOL:    "ReflectometryILLAutoProcess",
             POWDER_DSCAN: "PowderILLDetectorScan",
@@ -151,7 +171,7 @@ class RundexSettings(object):
             POWDER_DSCAN: {
                 "SaveNexusProcessed": False,
                 "SaveAscii": False,
-                "SaveFocussedXYE": True
+                "SaveFocusedXYE": True
                 },
             POWDER_PSCAN: {
                 "SaveNexusProcessed": False,
@@ -179,6 +199,7 @@ class RundexSettings(object):
     # for the moment, limit those to 1 until the algorithms are made truly thread safe
     THREADS_NUMBER = {
             SANS_ACQ:     1,
+            SANS_PSCAN:   1,
             REFL_POL:     1,
             REFL_NPOL:    1,
             POWDER_DSCAN: 1,
@@ -186,6 +207,16 @@ class RundexSettings(object):
             }
 
     # settings for each acquisition mode
+
+    # optionnal flags
+    FLAGS = {
+            REFL_POL : {
+                "PolarizationOption": "Polarized"
+                },
+            REFL_NPOL : {
+                "PolarizationOption": "NonPolarized"
+                }
+            }
     SETTINGS = {
             SANS_ACQ : [
                 "ThetaDependent",
@@ -210,7 +241,19 @@ class RundexSettings(object):
                 "DeltaQ",
                 "IQxQyLogBinning",
                 "OutputPanels",
-                "WavelengthRange"
+                "WavelengthRange",
+                "StitchReferenceIndex",
+                "ClearCorrected2DWorkspace",
+                "ShapeTable"
+                ],
+            SANS_PSCAN : [
+                "SensitivityMap",
+                "DefaultMaskFile",
+                "NormaliseBy",
+                "Observable",
+                "PixelYMin",
+                "PixelYMax",
+                "Wavelength"
                 ],
             REFL_POL : [
                 "PolarizationEfficiencyFile",
@@ -306,16 +349,6 @@ class RundexSettings(object):
                 "ZeroCountingCells",
                 "Unit"
                 ]
-            }
-
-    # optionnal flags
-    FLAGS = {
-            REFL_POL : {
-                "PolarizationOption": "Polarized"
-                },
-            REFL_NPOL : {
-                "PolarizationOption": "NonPolarized"
-                }
             }
 
     # Json keys

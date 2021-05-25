@@ -13,7 +13,7 @@ Uses the specular reflection condition :math:`\theta_{In} \equiv \theta_{Out}` a
 
 .. math::
 
-   2\centerdot\theta = tan^{-1}\left(\frac{UpOffset}{BeamOffset}\right)
+   2\theta = \tan^{-1}\left(\frac{UpOffset}{BeamOffset}\right)
 
 For LineDetectors and MultiDetectors, the algorithm uses an average of
 grouped detector locations to determine the detector position.

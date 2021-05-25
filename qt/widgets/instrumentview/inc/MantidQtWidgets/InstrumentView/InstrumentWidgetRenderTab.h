@@ -76,9 +76,7 @@ public slots:
   void saveImage(const QString &filename = "");
 
 private slots:
-
-  void showResetView(int /*iv*/);
-  void showFlipControl(int /*iv*/);
+  void showOrHideBoxes(int /*iv*/);
   /// Called before the display setting menu opens. Filters out menu options.
   void displaySettingsAboutToshow();
   /// Change the type of the surfac
@@ -117,6 +115,7 @@ private: // members
   QCheckBox *m_flipCheckBox;
   QPushButton *m_peakOverlaysButton;
   QCheckBox *m_autoscaling;
+  QCheckBox *m_freezeRotation;
 
   QActionGroup *m_surfaceTypeActionGroup;
   QAction *m_full3D;

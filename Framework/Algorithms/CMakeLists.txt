@@ -28,6 +28,7 @@ set(SRC_FILES
     src/CalculateEfficiency2.cpp
     src/CalculateFlatBackground.cpp
     src/CalculateIqt.cpp
+    src/CalculateMultipleScattering.cpp
     src/CalculatePlaczekSelfScattering.cpp
     src/CalculatePolynomialBackground.cpp
     src/CalculateTransmission.cpp
@@ -154,6 +155,7 @@ set(SRC_FILES
     src/GenerateEventsFilter.cpp
     src/GenerateIPythonNotebook.cpp
     src/GeneratePeaks.cpp
+    src/GeneratePythonFitScript.cpp
     src/GeneratePythonScript.cpp
     src/GetAllEi.cpp
     src/GetDetOffsetsMultiPeaks.cpp
@@ -361,6 +363,7 @@ set(INC_FILES
     inc/MantidAlgorithms/CalculateEfficiency2.h
     inc/MantidAlgorithms/CalculateFlatBackground.h
     inc/MantidAlgorithms/CalculateIqt.h
+    inc/MantidAlgorithms/CalculateMultipleScattering.h
     inc/MantidAlgorithms/CalculatePlaczekSelfScattering.h
     inc/MantidAlgorithms/CalculatePolynomialBackground.h
     inc/MantidAlgorithms/CalculateTransmission.h
@@ -488,6 +491,7 @@ set(INC_FILES
     inc/MantidAlgorithms/GenerateEventsFilter.h
     inc/MantidAlgorithms/GenerateIPythonNotebook.h
     inc/MantidAlgorithms/GeneratePeaks.h
+    inc/MantidAlgorithms/GeneratePythonFitScript.h
     inc/MantidAlgorithms/GeneratePythonScript.h
     inc/MantidAlgorithms/GetAllEi.h
     inc/MantidAlgorithms/GetDetOffsetsMultiPeaks.h
@@ -712,6 +716,7 @@ set(TEST_FILES
     CalculateEfficiencyTest.h
     CalculateFlatBackgroundTest.h
     CalculateIqtTest.h
+    CalculateMultipleScatteringTest.h
     CalculatePlaczekSelfScatteringTest.h
     CalculatePolynomialBackgroundTest.h
     CalculateTransmissionBeamSpreaderTest.h
@@ -835,6 +840,7 @@ set(TEST_FILES
     GenerateEventsFilterTest.h
     GenerateIPythonNotebookTest.h
     GeneratePeaksTest.h
+    GeneratePythonFitScriptTest.h
     GeneratePythonScriptTest.h
     GetAllEiTest.h
     GetDetOffsetsMultiPeaksTest.h

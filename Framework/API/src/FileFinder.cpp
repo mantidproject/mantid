@@ -43,6 +43,11 @@ Mantid::Kernel::Logger g_log("FileFinder");
  * @returns true if extension contains a "*", else false.
  */
 bool containsWildCard(const std::string &ext) { return std::string::npos != ext.find('*'); }
+
+bool isASCII(const std::string &str) {
+  return !std::any_of(str.cbegin(), str.cend(), [](char c) { return static_cast<unsigned char>(c) > 127; });
+}
+
 } // namespace
 
 namespace Mantid {
@@ -420,6 +425,9 @@ std::string FileFinderImpl::findRun(const std::string &hintstr, const std::vecto
     }
   }
 
+  if (filename.empty())
+    return "";
+
   // Look first at the original filename then for case variations. This is
   // important
   // on platforms where file names ARE case sensitive.
@@ -491,6 +499,18 @@ void FileFinderImpl::getUniqueExtensions(const std::vector<std::string> &extensi
 }
 
 /**
+ * Performs validation on the search text entered into the File Finder. It will
+ * return an error message if a problem is found.
+ * @param searchText :: The text to validate.
+ * @return An error message if something is invalid.
+ */
+std::string FileFinderImpl::validateRuns(const std::string &searchText) const {
+  if (!isASCII(searchText))
+    return "An unsupported non-ASCII character was found in the search text.";
+  return "";
+}
+
+/**
  * Find a list of files file given a hint. Calls findRun internally.
  * @param hintstr :: Comma separated list of hints to findRun method.
  *  Can also include ranges of runs, e.g. 123-135 or equivalently 123-35.
@@ -507,6 +527,10 @@ void FileFinderImpl::getUniqueExtensions(const std::vector<std::string> &extensi
  */
 std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, const std::vector<std::string> &exts,
                                                   const bool useExtsOnly) const {
+  auto const error = validateRuns(hintstr);
+  if (!error.empty())
+    throw std::invalid_argument(error);
+
   std::string hint = Kernel::Strings::strip(hintstr);
   g_log.debug() << "findRuns hint = " << hint << "\n";
   std::vector<std::string> res;
@@ -560,17 +584,39 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
       if (runEndNumber < runNumber) {
         throw std::invalid_argument("Malformed range of runs: " + *h);
       }
+      std::string previousPath, previousExt;
       for (int irun = runNumber; irun <= runEndNumber; ++irun) {
         run = std::to_string(irun);
         while (run.size() < nZero)
           run.insert(0, "0");
+
+        // Quick check if file can be created from previous successfully found
+        // path/extension
+        if (!previousPath.empty() && !previousExt.empty()) {
+          try {
+            const Poco::File file(previousPath + p1.first + run + previousExt);
+            if (file.exists()) {
+              res.emplace_back(file.path());
+              continue;
+            }
+          } catch (...) {
+            // Clear cached path and extension
+            previousPath = previousExt = "";
+          }
+        }
+
         std::string path;
         if (boost::algorithm::istarts_with(hint, "PG3")) {
           path = findRun(instrSName + run, exts, useExtsOnly);
         } else {
           path = findRun(p1.first + run, exts, useExtsOnly);
         }
+
         if (!path.empty()) {
+          // Cache successfully found path and extension
+          auto tempPath = Poco::Path(path);
+          previousExt = "." + tempPath.getExtension();
+          previousPath = tempPath.makeParent().toString();
           res.emplace_back(path);
         } else {
           throw Kernel::Exception::NotFoundError("Unable to find file:", run);

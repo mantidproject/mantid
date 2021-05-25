@@ -28,9 +28,8 @@ public:
   // Indices must match the order in static string array
   enum class Value : uint8_t { Linear, CSpline };
 
-  void set(Value kind);
-  void set(const std::string &kind);
-  void setIndependentErrors(const bool independent);
+  void set(const Value &kind, const bool calculateErrors, const bool independentErrors);
+  void set(const std::string &kind, const bool calculateErrors, const bool independentErrors);
 
   std::unique_ptr<Kernel::Property> property() const;
   std::string propertyDoc() const;
@@ -41,6 +40,7 @@ public:
 
 private:
   Value m_value = Value::Linear;
+  bool m_calculateErrors;
   bool m_independentErrors;
 };
 

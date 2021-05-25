@@ -86,6 +86,53 @@
 		<parameter name="detector_for_height_axis" type="string">
 			<value val="tube_1" />
 		</parameter>
-	</component-link>
+
+		<!-- These parameters are used to define headers and entries for GenerateLogbook algorithm -->
+		<parameter name="logbook_default_parameters" type="string">
+		  <value val="acq_mode:/entry0/acquisition_mode:d,
+			      start_time:/entry0/start_time:s,
+			      end_time:/entry0/end_time:s,
+			      Sapphire:/entry0/instrument/SapphirFilter/value_string:s,
+			      A2:/entry0/instrument/a2/value:f,
+			      A1:/entry0/instrument/a1/value:f,
+			      TM:/entry0/instrument/tm/value:f,
+			      GM:/entry0/instrument/gm/value:f,
+			      DCV:/entry0/instrument/dcv/value:f,
+			      DCH:/entry0/instrument/dch/value:f,
+			      RMVpg:/entry0/instrument/rmvpg/value:f,
+			      RMHpg:/entry0/instrument/rmhpg/value:f,
+			      L12:/entry0/instrument/bctr/value:f,
+			      BC2:/entry0/instrument/BC2/rotation_speed:f,
+			      Ph2:/entry0/instrument/BC2/phase:f,
+			      FC:/entry0/instrument/FC/rotation_speed:f,
+			      PhF:/entry0/instrument/FC/setpoint_phase:f,
+			      NCH:/entry0/monitor/time_of_flight/1:f,
+			      CHW:/entry0/monitor/time_of_flight/0:f,
+			      delay:/entry0/monitor/time_of_flight/2:f,
+			      D1h:/entry0/instrument/d1t/value+/entry0/instrument/d1b/value:f,
+			      D1w:/entry0/instrument/d1l/value+/entry0/instrument/d1r/value:f,
+			      Monrate:/entry0/monitor/monsum//entry0/actual_time:f,
+			      cps:/entry0/instrument/Detector/detsum//entry0/actual_time:f,
+			      Treg:/entry0/sample/regulation_temperature:f,
+			      Tsamp:/entry0/sample/temperature:f,
+			      subtitle:/entry0/experiment_identifier:f" />
+		</parameter>
+		<parameter name="logbook_optional_parameters" type="string">
+		  <value val="lambda:/entry0/wavelength:f,
+			      duration:/entry0/duration:d,
+			      FilterVal:/entry0/instrument/SapphirFilter/value:f,
+			      BC1:/entry0/instrument/BC1/rotation_speed:f,
+			      CH:/entry0/instrument/ch/value:f,
+			      D1t:/entry0/instrument/d1t/value:f,
+			      D1b:/entry0/instrument/d1b/value:f,
+			      D1l:/entry0/instrument/d1l/value:f,
+			      D1r:/entry0/instrument/d1r/value:f,
+			      Tset:/entry0/sample/setpoint_temperature:f,
+			      NTubes:/entry0/instrument/Detector/num_tubes:d,
+			      Monsum:/entry0/monitor/monsum:d,
+			      Detrate:entry0/instrument/Detector/detrate:f" />
+		</parameter>
+
+        </component-link>
 
 </parameter-file>

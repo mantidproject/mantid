@@ -94,7 +94,8 @@ class PlotWidgetModelTest(unittest.TestCase):
     def test_get_fit_workspaces_to_plot_returns_correctly_for_tf_fit(self):
         fit = FitInformation(mock.MagicMock(), 'GaussOsc',
                              ['MUSR62260; Group; bottom; Asymmetry; MA'],
-                             ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted' + TF_ASYMMETRY_PREFIX])
+                             ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted' + TF_ASYMMETRY_PREFIX],
+                             tf_asymmetry_fit=True)
         expected_workspaces = ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted' + TF_ASYMMETRY_PREFIX] * 2
         expected_indices = [3, 2]
 

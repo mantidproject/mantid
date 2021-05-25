@@ -20,19 +20,24 @@ class _LessThanOperatorSortFilterModel(QSortFilterProxyModel):
     support for some basic types and resorts to string comparisons
     for the rest: https://doc.qt.io/qt-5/qsortfilterproxymodel.html#lessThan
     """
+
     def lessThan(self, left_index, right_index):
         """Return True if the data at left_index
         is considered less than the data at the right_index.
         """
         left = left_index.model().data(left_index, self.sortRole())
         right = right_index.model().data(right_index, self.sortRole())
-        return left < right
+        try:
+            return left < right
+        except TypeError:
+            return True
 
 
 class _PeaksWorkspaceTableView(TableWorkspaceDisplayView):
     """Specialization of a table view to display peaks
     Designed specifically to be used by PeaksViewerView
     """
+
     def __init__(self, *args, **kwargs):
         self._key_handler = kwargs.pop('key_handler')
         TableWorkspaceDisplayView.__init__(self, *args, **kwargs)
@@ -96,6 +101,9 @@ class PeaksViewerView(QWidget):
     @property
     def selected_index(self):
         return self._selected_index()
+
+    def clear_table_selection(self):
+        self.table_view.clearSelection()
 
     def set_axes_limits(self, xlim, ylim, auto_transform):
         """
@@ -183,6 +191,7 @@ class PeaksViewerView(QWidget):
 class PeaksViewerCollectionView(QWidget):
     """Display a collection of PeaksViewerView objects in a scrolling view.
     """
+
     def __init__(self, painter, sliceinfo_provider, parent=None):
         """
         :param painter: An object responsible for draw the peaks representations

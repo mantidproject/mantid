@@ -115,24 +115,6 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         two_theta_fg = (outWS.spectrumInfo().twoTheta(peakLeft) + outWS.spectrumInfo().twoTheta(peakRight))/2.
         self.assertAlmostEqual(numpy.rad2deg(two_theta_fg), 3.097, delta=0.01)
 
-    def testDefaultRunFIGARO(self):
-        args = {
-            'Run': 'ILL/Figaro/000002.nxs',
-            'OutputWorkspace': 'outWS',
-            'rethrow': True,
-            'child': True
-        }
-        alg = create_algorithm('ReflectometryILLPreprocess', **args)
-        assertRaisesNothing(self, alg.execute)
-        outWS = alg.getProperty('OutputWorkspace').value
-        self.assertEqual(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
-        fgCentre = outWS.run().getProperty(common.SampleLogs.LINE_POSITION).value
-        self.assertAlmostEqual(fgCentre, 127.801, delta=0.001)
-        peakLeft = math.floor(fgCentre)
-        peakRight = peakLeft + 1
-        two_theta_fg = (outWS.spectrumInfo().twoTheta(peakLeft) + outWS.spectrumInfo().twoTheta(peakRight)) / 2.
-        self.assertAlmostEqual(numpy.rad2deg(two_theta_fg), 0., delta=0.1)
-
     def testTwoInputFiles(self):
         outWSName = 'outWS'
         args = {

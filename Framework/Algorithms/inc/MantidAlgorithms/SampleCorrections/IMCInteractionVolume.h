@@ -38,7 +38,6 @@ public:
   virtual ~IMCInteractionVolume() = default;
   virtual TrackPair calculateBeforeAfterTrack(Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &startPos,
                                               const Kernel::V3D &endPos, MCInteractionStatistics &stats) const = 0;
-  virtual const Geometry::BoundingBox &getBoundingBox() const = 0;
   virtual const Geometry::BoundingBox getFullBoundingBox() const = 0;
   virtual void setActiveRegion(const Geometry::BoundingBox &region) = 0;
 };

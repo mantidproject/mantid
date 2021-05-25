@@ -121,7 +121,9 @@ if(ENABLE_WORKBENCH)
         mantidqt/widgets/plotconfigdialog/imagestabwidget/test/test_imagestabwidgetpresenter.py
         mantidqt/widgets/plotconfigdialog/test/test_plotconfigdialogpresenter.py
         mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
+        mantidqt/widgets/samplematerialdialog/test/test_samplematerial_presenter.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_cursortracker.py
+        mantidqt/widgets/sliceviewer/test/test_sliceviewer_imageinfowidget.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_model.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_movemousecursor.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_presenter.py
@@ -140,7 +142,6 @@ if(ENABLE_WORKBENCH)
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_painter.py
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_nonintegrated.py
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_ellipsoid.py
-        mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_spherical.py
         mantidqt/widgets/test/test_jupyterconsole.py
         mantidqt/widgets/workspacedisplay/test/test_data_copier.py
         mantidqt/widgets/workspacedisplay/test/test_workspacedisplay_view.py

@@ -38,9 +38,9 @@ public:
 
 public:
   KafkaEventStreamDecoder(std::shared_ptr<IKafkaBroker> broker, const std::string &eventTopic,
-                          const std::string &runInfoTopic, const std::string &spDetTopic,
-                          const std::string &sampleEnvTopic, const std::string &chopperTopic,
-                          const std::string &monitorTopic, const std::size_t bufferThreshold);
+                          const std::string &runInfoTopic, const std::string &sampleEnvTopic,
+                          const std::string &chopperTopic, const std::string &monitorTopic,
+                          const std::size_t bufferThreshold);
   ~KafkaEventStreamDecoder() override;
   KafkaEventStreamDecoder(const KafkaEventStreamDecoder &) = delete;
   KafkaEventStreamDecoder &operator=(const KafkaEventStreamDecoder &) = delete;

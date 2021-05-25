@@ -20,6 +20,7 @@ This release includes several improvements to the user experience, notably a new
 and an additional setting to the window behaviour of plots and interfaces.
 
 Other highlights from this release include:
+
 - A new LeanElasticPeak object for constant wavelength instruments that is supported in existing algorithms for e.g. peak prediction and integration.
 - Added setting to allow user to select Floating/On Top behaviour.
 - Sectors drawn in the instrument viewer can now be used to define wedges for azimuthal averaging of 2D SANS data using :ref:`Q1DWeighted <algm-Q1DWeighted>`.

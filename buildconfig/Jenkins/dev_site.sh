@@ -1,4 +1,5 @@
 #!/bin/bash -ex
+
 if [ -z "$BUILD_DIR" ]; then
  if [ -z "$WORKSPACE" ]; then
      echo "WORKSPACE not set. Cannot continue"
@@ -27,10 +28,10 @@ fi
 ###############################################################################
 VIRTUAL_ENV=$BUILD_DIR/virtualenv
 if [[ ! -d $VIRTUAL_ENV ]]; then
-    virtualenv --system-site-packages "$VIRTUAL_ENV"
+    virtualenv --python=/usr/bin/python3 --no-pip --no-setuptools --system-site-packages "$VIRTUAL_ENV"
     source $VIRTUAL_ENV/bin/activate
-    pip install sphinx
-    pip install sphinx_bootstrap_theme
+    python -m pip install sphinx==1.8
+    python -m pip install sphinx_bootstrap_theme
 else
     source $VIRTUAL_ENV/bin/activate
 fi
@@ -42,7 +43,7 @@ which python
 # the wacky long line is what is run from inside "sphinx-build" which is not
 # installed by virtualenv for some reason
 ###############################################################################
-SPHINX_VERS=$(python -c "import sphinx;print sphinx.__version__")
+SPHINX_VERS=$(python -c "import sphinx;print(sphinx.__version__)")
 python -c "import sys;from pkg_resources import load_entry_point;sys.exit(load_entry_point('Sphinx==$SPHINX_VERS', 'console_scripts', 'sphinx-build')())" $WORKSPACE/dev-docs/source $BUILD_DIR
 
 ###############################################################################

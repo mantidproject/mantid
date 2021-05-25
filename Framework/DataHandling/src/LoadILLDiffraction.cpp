@@ -65,7 +65,10 @@ int LoadILLDiffraction::confidence(NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL Diffraction
   // the second one is to recognize D1B
-  if (descriptor.pathExists("/entry0/instrument/2theta") || descriptor.pathExists("/entry0/instrument/Canne")) {
+  // the third one is to recognize IN5/PANTHER/SHARP scan mode
+  if (descriptor.pathExists("/entry0/instrument/2theta") || descriptor.pathExists("/entry0/instrument/Canne") ||
+      (descriptor.pathExists("/entry0/data_scan") && descriptor.pathExists("/entry0/experiment_identifier") &&
+       descriptor.pathExists("/entry0/instrument/Detector"))) {
     return 80;
   } else {
     return 0;
@@ -87,8 +90,8 @@ const std::string LoadILLDiffraction::summary() const { return "Loads ILL diffra
 /**
  * Constructor
  */
-LoadILLDiffraction::LoadILLDiffraction() : IFileLoader<NexusDescriptor>(), m_instNames({"D20", "D2B", "D1B"}) {}
-
+LoadILLDiffraction::LoadILLDiffraction()
+    : IFileLoader<NexusDescriptor>(), m_instNames({"D20", "D2B", "D1B", "IN5", "PANTHER", "SHARP"}) {}
 /**
  * Initialize the algorithm's properties.
  */
@@ -156,6 +159,9 @@ void LoadILLDiffraction::loadDataScan() {
   NXRoot dataRoot(m_filename);
   NXEntry firstEntry = dataRoot.openFirstEntry();
   m_instName = firstEntry.getString("instrument/name");
+  if (m_instName == "IN5" || m_instName == "PANTHER" || m_instName == "SHARP") {
+    m_isSpectrometer = true;
+  }
   m_startTime = DateAndTime(m_loadHelper.dateTimeInIsoFormat(firstEntry.getString("start_time")));
   const std::string dataType = getPropertyValue("DataType");
   const bool hasCalibratedData = containsCalibratedData(m_filename);
@@ -186,7 +192,7 @@ void LoadILLDiffraction::loadDataScan() {
   axis.load();
 
   // read the starting two theta
-  double twoThetaValue;
+  double twoThetaValue = 0;
   if (m_instName == "D1B") {
     if (getPointerToProperty("TwoThetaOffset")->isDefault()) {
       g_log.notice("A 2theta offset angle is necessary for D1B data.");
@@ -194,7 +200,7 @@ void LoadILLDiffraction::loadDataScan() {
     } else {
       twoThetaValue = getProperty("TwoThetaOffset");
     }
-  } else {
+  } else if (!m_isSpectrometer) {
     std::string twoThetaPath = "instrument/2theta/value";
     NXFloat twoTheta0 = firstEntry.openNXFloat(twoThetaPath);
     twoTheta0.load();
@@ -496,18 +502,26 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data, const NXDo
   const std::vector<double> axis = getAxis(scan);
   const std::vector<double> monitor = getMonitor(scan);
 
+  size_t monitorIndex = 0;
+  size_t startIndex = NUMBER_MONITORS;
+  if (m_isSpectrometer) {
+    startIndex = 0;
+    monitorIndex = m_numberDetectorsActual;
+  }
+
   // Assign monitor counts
-  m_outWorkspace->mutableX(0) = axis;
-  m_outWorkspace->mutableY(0) = monitor;
-  std::transform(monitor.begin(), monitor.end(), m_outWorkspace->mutableE(0).begin(), [](double e) { return sqrt(e); });
+  m_outWorkspace->mutableX(monitorIndex) = axis;
+  m_outWorkspace->mutableY(monitorIndex) = monitor;
+  std::transform(monitor.begin(), monitor.end(), m_outWorkspace->mutableE(monitorIndex).begin(),
+                 [](double e) { return sqrt(e); });
 
   // Assign detector counts
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_outWorkspace))
-  for (int i = NUMBER_MONITORS; i < static_cast<int>(m_numberDetectorsActual + NUMBER_MONITORS); ++i) {
+  for (int i = static_cast<int>(startIndex); i < static_cast<int>(m_numberDetectorsActual + startIndex); ++i) {
     auto &spectrum = m_outWorkspace->mutableY(i);
     auto &errors = m_outWorkspace->mutableE(i);
-    const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
-    auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
+    const auto tubeNumber = (i - startIndex) / m_sizeDim2;
+    auto pixelInTubeNumber = (i - startIndex) % m_sizeDim2;
     if (m_instName == "D2B" && !m_useCalibratedData && tubeNumber % 2 == 1) {
       pixelInTubeNumber = D2B_NUMBER_PIXELS_IN_TUBES - 1 - pixelInTubeNumber;
     }
@@ -521,9 +535,10 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data, const NXDo
 
   // Link the instrument
   loadStaticInstrument();
-
-  // Move to the starting 2theta
-  moveTwoThetaZero(twoTheta0);
+  if (!m_isSpectrometer) {
+    // Move to the starting 2theta
+    moveTwoThetaZero(twoTheta0);
+  }
 }
 
 /**
@@ -565,6 +580,9 @@ void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
       const std::string scanVarName = boost::algorithm::to_lower_copy(m_scanVar[i].name);
       const std::string scanVarProp = boost::algorithm::to_lower_copy(m_scanVar[i].property);
       const std::string propName = scanVarName + "." + scanVarProp;
+      if (m_scanVar[i].scanned == 1) {
+        mutableRun.addProperty("ScanVar", propName, true);
+      }
       auto property = std::make_unique<TimeSeriesProperty<double>>(propName);
       for (size_t j = 0; j < m_numberScanPoints; ++j) {
         property->addValue(absoluteTimes[j], scan(static_cast<int>(i), static_cast<int>(j)));
@@ -608,14 +626,14 @@ std::vector<double> LoadILLDiffraction::getScannedVaribleByPropertyName(const NX
  * Returns the monitor spectrum
  * @param scan : scan data
  * @return monitor spectrum
- * @throw std::runtime_error If there are no entries named Monitor1 or Monitor_1
- * in the NeXus file
+ * @throw std::runtime_error If there are no entries named Monitor1 or
+ * Monitor_1, or monitor1 in the NeXus file
  */
 std::vector<double> LoadILLDiffraction::getMonitor(const NXDouble &scan) const {
 
   std::vector<double> monitor = {0.};
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
-    if ((m_scanVar[i].name == "Monitor1") || (m_scanVar[i].name == "Monitor_1")) {
+    if ((m_scanVar[i].name == "Monitor1") || (m_scanVar[i].name == "Monitor_1") || (m_scanVar[i].name == "monitor1")) {
       monitor.assign(scan() + m_numberScanPoints * i, scan() + m_numberScanPoints * (i + 1));
       return monitor;
     }
@@ -822,9 +840,8 @@ void LoadILLDiffraction::setSampleLogs() {
   }
   double lambda = run.getLogAsSingleValue("wavelength");
   double eFixed = WAVE_TO_E / (lambda * lambda);
-  run.addLogData(new PropertyWithValue<double>("Ei", eFixed));
+  run.addLogData(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyWithValue<double>("Ei", eFixed)), true);
   run.addLogData(new PropertyWithValue<size_t>("NumberOfDetectors", m_numberDetectorsActual));
-
   if (m_pixelHeight != 0.) {
     run.addLogData(new PropertyWithValue<double>("PixelHeight", m_pixelHeight));
   }

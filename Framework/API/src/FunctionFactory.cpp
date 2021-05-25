@@ -12,6 +12,7 @@
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/ImmutableCompositeFunction.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/ConfigService.h"
@@ -374,6 +375,8 @@ void FunctionFactoryImpl::addTie(const IFunction_sptr &fun, const Expression &ex
 
 std::vector<std::string> FunctionFactoryImpl::getFunctionNamesGUI() const {
   auto allNames = getFunctionNames<IFunction1D>();
+  auto ImmutableCompositeFunctions = getFunctionNames<ImmutableCompositeFunction>();
+  allNames.insert(allNames.end(), ImmutableCompositeFunctions.begin(), ImmutableCompositeFunctions.end());
   allNames.emplace_back("ProductFunction");
   allNames.emplace_back("CompositeFunction");
   allNames.emplace_back("Convolution");

@@ -21,10 +21,10 @@
 namespace Mantid {
 namespace Kernel {
 
-/** An enum specifying the 3 possible features types that can be logged in the
+/** An enum specifying the 4 possible features types that can be logged in the
     usage service
 */
-enum class FeatureType { Algorithm, Interface, Feature };
+enum class FeatureType { Algorithm, Interface, Feature, Function };
 
 /** UsageReporter : The Usage reporter is responsible for collating, and sending
   all usage data.

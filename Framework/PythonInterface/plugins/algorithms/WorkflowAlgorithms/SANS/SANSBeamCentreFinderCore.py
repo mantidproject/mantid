@@ -317,9 +317,9 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         wavelength_name = "SANSConvertToWavelengthAndRebin"
         wavelength_options = {"InputWorkspace": workspace,
                               "OutputWorkspace": EMPTY_NAME,
-                              "WavelengthLow": wavelength_state.wavelength_low[0],
-                              "WavelengthHigh": wavelength_state.wavelength_high[0],
-                              "WavelengthStep": wavelength_state.wavelength_step,
+                              "WavelengthLow": wavelength_state.wavelength_interval.wavelength_full_range[0],
+                              "WavelengthHigh": wavelength_state.wavelength_interval.wavelength_full_range[1],
+                              "WavelengthStep": wavelength_state.wavelength_interval.wavelength_step,
                               "WavelengthStepType": wavelength_state.wavelength_step_type_lin_log.value,
                               "RebinMode": wavelength_state.rebin_type.value}
 
@@ -347,8 +347,9 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
 
         alg = CreateSANSAdjustmentWorkspaces(state_adjustment=state.adjustment,
                                              data_type=data_type, component=component_as_string)
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
         returned_dict = alg.create_sans_adjustment_workspaces(direct_ws=direct_workspace, monitor_ws=monitor_workspace,
-                                                              sample_data=workspace,
+                                                              sample_data=workspace, wav_range=wav_range,
                                                               transmission_ws=transmission_workspace)
         wavelength_adjustment = returned_dict["wavelength_adj"]
         pixel_adjustment = returned_dict["pixel_adj"]

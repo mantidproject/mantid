@@ -396,10 +396,9 @@ CSGObject::CSGObject(const std::string &shapeXML)
     : m_topRule(nullptr), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0), AABBxMin(0), AABByMin(0), AABBzMin(0),
       boolBounded(false), m_objNum(0), m_handler(), bGeometryCaching(false),
       vtkCacheReader(std::shared_ptr<vtkGeometryCacheReader>()),
-      vtkCacheWriter(std::shared_ptr<vtkGeometryCacheWriter>()), m_shapeXML(shapeXML), m_id(),
-      m_material() // empty by default
-{
+      vtkCacheWriter(std::shared_ptr<vtkGeometryCacheWriter>()), m_shapeXML(shapeXML), m_id() {
   m_handler = std::make_shared<GeometryHandler>(this);
+  m_material = std::make_unique<Material>();
 }
 
 /**
@@ -449,12 +448,7 @@ void CSGObject::setMaterial(const Kernel::Material &material) { m_material = std
 /**
  * @return The Material that the object is composed from
  */
-const Kernel::Material &CSGObject::material() const {
-  if (!m_material) {
-    m_material = std::make_unique<Material>();
-  }
-  return *m_material;
-}
+const Kernel::Material &CSGObject::material() const { return *m_material; }
 
 /**
  * Returns whether this object has a valid shape

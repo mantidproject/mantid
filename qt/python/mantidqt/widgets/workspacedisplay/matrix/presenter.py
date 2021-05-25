@@ -169,7 +169,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
     def action_copy_cells(self, table):
         self.copy_cells(table)
 
-    def _do_action_plot(self, table, axis, get_index, plot_errors=False):
+    def _do_action_plot(self, table, axis, get_index, plot_errors=False, overplot=False):
         if self.plot is None:
             raise ValueError("Trying to do a plot, but no plotting class dependency was injected in the constructor")
         selection_model = table.selectionModel()
@@ -191,7 +191,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
 
         ws_list = [self.model._ws]
         self.plot(ws_list, wksp_indices=[get_index(index) for index in selected], errors=plot_errors,
-                  plot_kwargs=plot_kwargs)
+                  overplot=overplot, plot_kwargs=plot_kwargs)
 
     def action_plot_spectrum(self, table):
         self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row())
@@ -199,11 +199,25 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
     def action_plot_spectrum_with_errors(self, table):
         self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(), plot_errors=True)
 
+    def action_overplot_spectrum(self, table):
+        self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(),
+                             plot_errors=False, overplot=True)
+
+    def action_overplot_spectrum_with_errors(self, table):
+        self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(),
+                             plot_errors=True, overplot=True)
+
     def action_plot_bin(self, table):
         self._do_action_plot(table, MantidAxType.BIN, lambda index: index.column())
 
     def action_plot_bin_with_errors(self, table):
         self._do_action_plot(table, MantidAxType.BIN, lambda index: index.column(), plot_errors=True)
+
+    def action_overplot_bin(self, table):
+        self._do_action_plot(table, MantidAxType.BIN, lambda index: index.column(), plot_errors=False, overplot=True)
+
+    def action_overplot_bin_with_errors(self, table):
+        self._do_action_plot(table, MantidAxType.BIN, lambda index: index.column(), plot_errors=True, overplot=True)
 
     def action_keypress_copy(self, table):
         selectionModel = table.selectionModel()

@@ -17,7 +17,7 @@ IndirectBayesTab::IndirectBayesTab(QWidget *parent) : IndirectTab(parent), m_pro
           SLOT(updateProperties(QtProperty *, double)));
 }
 
-IndirectBayesTab::~IndirectBayesTab() {}
+IndirectBayesTab::~IndirectBayesTab() { m_propTree->unsetFactoryForManager(m_dblManager); }
 
 /**
  * Prevents the loading of data with incorrect naming if passed true

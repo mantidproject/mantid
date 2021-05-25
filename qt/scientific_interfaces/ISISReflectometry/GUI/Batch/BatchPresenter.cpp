@@ -320,7 +320,6 @@ void BatchPresenter::renameHandle(const std::string &oldName, const std::string 
 }
 
 void BatchPresenter::clearADSHandle() {
-  m_experimentPresenter->notifyAllWorkspacesDeleted();
   m_jobRunner->notifyAllWorkspacesDeleted();
   m_runsPresenter->notifyRowOutputsChanged();
   m_runsPresenter->notifyRowStateChanged();

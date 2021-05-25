@@ -22,7 +22,7 @@ class EllipsoidalIntergratedPeakRepresentation():
     @classmethod
     def draw(cls, peak_origin, peak_shape, slice_info, painter, fg_color, bg_color):
         """
-        Draw the representation of a slice through an ellipsoid
+        Draw the representation of a slice through an ellipsoid or sphere
         :param peak_origin: Peak origin in original workspace frame
         :param peak_shape: A reference to the object describing the PeakShape
         :param slice_info: A SliceInfo object detailing the current slice
@@ -32,6 +32,9 @@ class EllipsoidalIntergratedPeakRepresentation():
         :return: A new instance of this class
         """
         shape_info = json_loads(peak_shape.toJSON())
+        if peak_shape.shapeName().lower() == "spherical":
+            convert_spherical_representation_to_ellipsoid(shape_info)
+
         # use signal ellipse to see if it is valid at this slice
         axes, signal_radii = _signal_ellipsoid_info(shape_info)
         # apply a translation if present in shape_info (required for backwards compatibility)
@@ -100,6 +103,20 @@ class EllipsoidalIntergratedPeakRepresentation():
                 )
             )
         return Painted(painter, artists)
+
+
+def convert_spherical_representation_to_ellipsoid(shape_info):
+    # convert shape_info dict from sphere to ellipsoid for plotting
+    for key in ['radius', 'background_inner_radius', 'background_outer_radius']:
+        if key in shape_info:
+            shape_info[f"{key}{0}"] = shape_info.pop(key)
+        else:
+            shape_info[f"{key}{0}"] = 0.0  # null value
+        for idim in [1, 2]:
+            shape_info[f"{key}{idim}"] = shape_info[f"{key}{0}"]
+    # add axes along basis vecs of frame and set 0 translation
+    shape_info.update({'direction0': '1 0 0', 'direction1': '0 1 0', 'direction2': '0 0 1',
+                       'translation0': 0.0, 'translation1': 0.0, 'translation2': 0.0})
 
 
 def _signal_ellipsoid_info(shape_info):

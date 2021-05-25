@@ -27,6 +27,7 @@ set _IPYTHON_CMD=%PYTHONHOME%\Scripts\ipython.cmd
 :: QtPy should use Qt5 by unless specified
 if "%QT_API%"=="" (
   set QT_API=pyqt5
+  set QT_PLUGIN_PATH=%_BIN_DIR%\..\plugins\qt5
 )
 
 :: Matplotlib backend should default to Qt if not set (requires matplotlib >= 1.5)

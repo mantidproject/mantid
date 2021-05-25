@@ -63,12 +63,12 @@ class CreateSANSWavelengthPixelAdjustmentTest(unittest.TestCase):
             wavelength_and_pixel_builder.set_HAB_wavelength_adjustment_file(hab_wavelength_file)
         if wavelength_step_type:
             wavelength_and_pixel_builder.set_wavelength_step_type(wavelength_step_type)
-        if wavelength_low:
-            wavelength_and_pixel_builder.set_wavelength_low([wavelength_low])
-        if wavelength_high:
-            wavelength_and_pixel_builder.set_wavelength_high([wavelength_high])
+        if wavelength_low and wavelength_high:
+            wav_range = (wavelength_low, wavelength_high)
+            wavelength_and_pixel_builder.state.wavelength_interval.wavelength_full_range = wav_range
+            wavelength_and_pixel_builder.state.wavelength_interval.selected_ranges = [wav_range]
         if wavelength_step:
-            wavelength_and_pixel_builder.set_wavelength_step(wavelength_step)
+            wavelength_and_pixel_builder.state.wavelength_interval.wavelength_step = wavelength_step
         wavelength_and_pixel_state = wavelength_and_pixel_builder.build()
         state.adjustment.wavelength_and_pixel_adjustment = wavelength_and_pixel_state
         return state
@@ -88,6 +88,7 @@ class CreateSANSWavelengthPixelAdjustmentTest(unittest.TestCase):
     @staticmethod
     def _run_test(transmission_workspace, norm_workspace, state, is_lab=True):
         state_to_send = state.adjustment.wavelength_and_pixel_adjustment
+        wav_range = state_to_send.wavelength_interval.wavelength_full_range
 
         component = DetectorType.LAB.value if is_lab else DetectorType.HAB.value
 
@@ -95,7 +96,7 @@ class CreateSANSWavelengthPixelAdjustmentTest(unittest.TestCase):
                                                   component=component)
 
         wavelength_adjustment, pixel_adjustment = alg.create_sans_wavelength_and_pixel_adjustment(
-            transmission_ws=transmission_workspace, monitor_norm_ws=norm_workspace)
+            transmission_ws=transmission_workspace, monitor_norm_ws=norm_workspace, wav_range=wav_range)
 
         return wavelength_adjustment, pixel_adjustment
 

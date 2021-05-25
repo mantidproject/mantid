@@ -243,7 +243,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         if figure_type(fig) in [FigureType.Wireframe, FigureType.Contour]:
             self.set_up_color_selector_toolbar_button(fig)
 
-        if figure_type(fig) in [FigureType.Surface, FigureType.Wireframe]:
+        if figure_type(fig) in [FigureType.Surface, FigureType.Wireframe, FigureType.Mesh]:
             self.adjust_for_3d_plots()
 
     def is_colormap(self, fig):

@@ -74,7 +74,7 @@ void FqFitDataPresenter::showParameterComboBoxes() {
 
 void FqFitDataPresenter::setActiveParameterType(const std::string &type) { m_activeParameterType = type; }
 
-void FqFitDataPresenter::updateActiveDataIndex() { m_dataIndex = m_fqFitModel->numberOfWorkspaces(); }
+void FqFitDataPresenter::updateActiveDataIndex() { m_dataIndex = m_fqFitModel->getNumberOfWorkspaces(); }
 
 void FqFitDataPresenter::updateActiveDataIndex(int index) { m_dataIndex = index; }
 
@@ -100,7 +100,7 @@ void FqFitDataPresenter::updateAvailableParameterTypes() {
 }
 
 void FqFitDataPresenter::updateParameterSelectionEnabled() {
-  const auto enabled = m_fqFitModel->numberOfWorkspaces() > TableDatasetIndex{0};
+  const auto enabled = m_fqFitModel->getNumberOfWorkspaces() > TableDatasetIndex{0};
   m_cbParameter->setEnabled(enabled);
   m_cbParameterType->setEnabled(enabled);
   m_lbParameter->setEnabled(enabled);
@@ -141,6 +141,7 @@ void FqFitDataPresenter::dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dia
 
 void FqFitDataPresenter::updateParameterOptions(FqFitAddWorkspaceDialog *dialog) {
   setDataIndexToCurrentWorkspace(dialog);
+  setActiveParameterType(dialog->parameterType());
   if (m_activeParameterType == "Width")
     dialog->setParameterNames(m_fqFitModel->getWidths(m_dataIndex));
   else if (m_activeParameterType == "EISF")
@@ -164,7 +165,7 @@ std::vector<std::string> FqFitDataPresenter::getParameterTypes(TableDatasetIndex
 }
 
 void FqFitDataPresenter::addWorkspace(IndirectFittingModel *model, const std::string &name) {
-  if (model->numberOfWorkspaces() > m_dataIndex)
+  if (model->getNumberOfWorkspaces() > m_dataIndex)
     model->removeWorkspace(m_dataIndex);
   model->addWorkspace(name);
 }
@@ -207,7 +208,7 @@ void FqFitDataPresenter::setDataIndexToCurrentWorkspace(IAddWorkspaceDialog cons
   //  indirectFittingModel get table workspace index
   const auto wsName = dialog->workspaceName().append("_HWHM");
   // This a vector of workspace names currently loaded
-  auto wsVector = m_fqFitModel->m_fitDataModel->getWorkspaceNames();
+  auto wsVector = m_fqFitModel->getFitDataModel()->getWorkspaceNames();
   // this is an iterator pointing to the current wsName in wsVector
   auto wsIt = std::find(wsVector.begin(), wsVector.end(), wsName);
   // this is the index of the workspace.
@@ -216,7 +217,7 @@ void FqFitDataPresenter::setDataIndexToCurrentWorkspace(IAddWorkspaceDialog cons
 }
 
 void FqFitDataPresenter::closeDialog() {
-  if (m_fqFitModel->numberOfWorkspaces() > m_dataIndex)
+  if (m_fqFitModel->getNumberOfWorkspaces() > m_dataIndex)
     m_fqFitModel->removeWorkspace(m_dataIndex);
   IndirectFitDataPresenter::closeDialog();
 }

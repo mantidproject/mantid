@@ -9,6 +9,7 @@
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Line.h"
 #include "MantidKernel/V3D.h"
+#include <boost/container/small_vector.hpp>
 #include <list>
 
 namespace Mantid {
@@ -36,10 +37,13 @@ class General;
 Creates interaction with a line
 */
 class MANTID_GEOMETRY_DLL LineIntersectVisit : public BaseVisit {
+public:
+  using DType = boost::container::small_vector<double, 5>;
+
 private:
-  Line ATrack;                    ///< The line
-  std::vector<Kernel::V3D> PtOut; ///< The intersection point
-  std::vector<double> DOut;       ///< The distance
+  Line ATrack;       ///< The line
+  Line::PType PtOut; ///< The intersection point
+  DType DOut;        ///< The distance
 
   void procTrack();
 
@@ -55,9 +59,9 @@ public:
 
   // Accessor
   /// Get the distance
-  const std::vector<double> &getDistance() const { return DOut; }
+  const DType &getDistance() const { return DOut; }
   /// Get the intersection points
-  const std::vector<Kernel::V3D> &getPoints() const { return PtOut; }
+  const Line::PType &getPoints() const { return PtOut; }
   /// Get the number of intersection points
   unsigned long getNPoints() const { return (unsigned long)PtOut.size(); }
 

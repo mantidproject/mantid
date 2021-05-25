@@ -53,7 +53,7 @@ set(
         IndirectFitPlotView.cpp
         IndirectFitPropertyBrowser.cpp
         IndirectFittingModel.cpp
-        IndirectFitDataModel.cpp
+        IndirectFitDataTableModel.cpp
         IndirectFitOutputModel.cpp
         IndirectFunctionBrowser/ConvTypes.cpp
         IndirectFunctionBrowser/ConvFunctionModel.cpp
@@ -113,7 +113,7 @@ set(
         IndirectFitPlotModel.h
         IndirectFitPlotPresenter.h
         IndirectFittingModel.h
-        IndirectFitDataModel.h
+        IndirectFitDataTableModel.h
         IndirectFitOutputModel.h
         IndirectFunctionBrowser/ConvFunctionModel.h
         IndirectFunctionBrowser/IqtFunctionModel.h
@@ -143,7 +143,7 @@ set(
         FqFitDataTablePresenter.h
         FunctionTemplateBrowser.h
         IAddWorkspaceDialog.h
-        IIndirectFitDataModel.h
+        IIndirectFitDataTableModel.h
         IIndirectFitDataView.h
         IIndirectFitOutputOptionsView.h
         IIndirectFitPlotView.h
@@ -352,7 +352,7 @@ set(
         IndirectFitPlotView.cpp
         IndirectFitPropertyBrowser.cpp
         IndirectFittingModel.cpp
-        IndirectFitDataModel.cpp
+        IndirectFitDataTableModel.cpp
         IndirectFitOutputModel.cpp
         IndirectFunctionBrowser/ConvTypes.cpp
         IndirectFunctionBrowser/ConvFunctionModel.cpp
@@ -413,7 +413,7 @@ set(
         FqFitDataTablePresenter.h
         FunctionTemplateBrowser.h
         IAddWorkspaceDialog.h
-        IIndirectFitDataModel.h
+        IIndirectFitDataTableModel.h
         IIndirectFitDataView.h
         IIndirectFitOutputOptionsView.h
         IIndirectFitPlotView.h
@@ -494,7 +494,7 @@ set(
         IndirectFitPlotModel.h
         IndirectFitPlotPresenter.h
         IndirectFittingModel.h
-        IndirectFitDataModel.h
+        IndirectFitDataTableModel.h
         IndirectFitOutputModel.h
         IndirectFunctionBrowser/ConvFunctionModel.h
         IndirectPlotOptionsModel.h

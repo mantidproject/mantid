@@ -24,7 +24,7 @@ namespace {
 
 MatrixWorkspace_sptr extractSpectrum(const MatrixWorkspace_sptr &inputWorkspace, const int workspaceIndex) {
   auto extracter = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
-  extracter->setChild(true);
+  extracter->setAlwaysStoreInADS(false);
   extracter->setProperty("InputWorkspace", inputWorkspace);
   extracter->setProperty("WorkspaceIndex", workspaceIndex);
   extracter->setPropertyValue("OutputWorkspace", "__NotUsed__");
@@ -36,7 +36,7 @@ MatrixWorkspace_sptr extractSpectrum(const MatrixWorkspace_sptr &inputWorkspace,
 MatrixWorkspace_sptr evaluateFunction(const IFunction_const_sptr &function,
                                       const MatrixWorkspace_sptr &inputWorkspace) {
   auto fit = AlgorithmManager::Instance().create("Fit");
-  fit->setChild(true);
+  fit->setAlwaysStoreInADS(false);
   fit->setProperty("Function", function->asString());
   fit->setProperty("InputWorkspace", inputWorkspace);
   fit->setProperty("MaxIterations", 0);
@@ -85,7 +85,7 @@ void ALCPeakFittingModel::setFittedPeaks(IFunction_const_sptr fittedPeaks) {
 
 void ALCPeakFittingModel::fitPeaks(IFunction_const_sptr peaks) {
   IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
-  fit->setChild(true);
+  fit->setAlwaysStoreInADS(false);
   fit->setProperty("Function", peaks->asString());
   fit->setProperty("InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(m_data));
   fit->setProperty("CreateOutput", true);

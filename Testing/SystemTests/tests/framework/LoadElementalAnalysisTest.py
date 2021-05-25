@@ -36,21 +36,18 @@ class LoadElementalAnalysisTest(systemtesting.MantidSystemTest):
         detectorSpectrumAxis = detector1_ws.getAxis(1)
         self.assertEqual(detectorSpectrumAxis.length(), 3)
         # Check that Bin 3318 of the Prompt spectra of the workspace of Detector 1 is 0.206791
-        self.assertAlmostEqual(detector1_ws.extractY()[1, 3318], 0.206791, places=4, delta=0.0001)
+        self.assertAlmostEqual(detector1_ws.readY(1)[3318], 0.206791, places=4, delta=0.0001)
         # Check that Bin 230 of the Total spectra of the workspace of Detector 2 is 243.729
         detector2_ws = AnalysisDataService.retrieve('9999; Detector 2')
-        self.assertAlmostEqual(detector2_ws.extractY()[2, 230], 243.729, places=4, delta=0.0001)
+        self.assertAlmostEqual(detector2_ws.readY(2)[230], 243.729, places=4, delta=0.0001)
         # Check that Bin 6029 of the Delayed spectra of the workspace of Detector 3 is 62.0691
         detector3_ws = AnalysisDataService.retrieve('9999; Detector 3')
-        self.assertAlmostEqual(detector3_ws.extractY()[0, 6029], 62.0691, places=4, delta=0.0001)
+        self.assertAlmostEqual(detector3_ws.readY(0)[2915], 99.0456, places=4, delta=0.0001)
         # Check that the Bin 4083 of the Total spectra of the workspace of Detecror 4 is 120.457
         detector4_ws = AnalysisDataService.retrieve('9999; Detector 4')
-        self.assertAlmostEqual(detector4_ws.extractY()[2, 4083], 120.457, places=4, delta=0.0001)
+        self.assertAlmostEqual(detector4_ws.readY(2)[4083], 120.457, places=4, delta=0.0001)
         # Check that the directory output is not empty
         self.assertIsNotNone(ws[1])
-
-    def validate(self):
-        return ['9999', 'ElementalAnalysisLoad.nxs']
 
 
 class LoadPartialElementalAnalysisTest(systemtesting.MantidSystemTest):
@@ -76,19 +73,16 @@ class LoadPartialElementalAnalysisTest(systemtesting.MantidSystemTest):
         self.assertEqual(detectorSpectrumAxis.length(), 3)
         # Check that the Prompt and Delay Spectra in Dectector 1 workspace do not contain any values
         # and therefore max and min should be 0
-        detector1_prompt = detector1_ws.extractY()[0, :]
-        detector1_delay = detector1_ws.extractY()[1, :]
+        detector1_prompt = detector1_ws.readY(0)
+        detector1_delay = detector1_ws.readY(1)
         self.assertEqual(np.amax(detector1_prompt), 0.0)
         self.assertEqual(np.amax(detector1_delay), 0.0)
         self.assertEqual(np.amin(detector1_prompt), 0.0)
         self.assertEqual(np.amin(detector1_delay), 0.0)
         # Check that Bin 5237 of the Total spectra of the workspace of Detector 1 is 4.0
-        self.assertAlmostEqual(detector1_ws.extractY()[2, 5237], 4.0, places=4, delta=0.0001)
+        self.assertAlmostEqual(detector1_ws.readY(2)[5237], 4.0, places=4, delta=0.0001)
         # Check that Bin 4697 of the Total spectra of the workspace of Detector 3 is 10.0
         detector3_ws = AnalysisDataService.retrieve('2683; Detector 3')
-        self.assertAlmostEqual(detector3_ws.extractY()[2, 4697], 10.0, places=4, delta=0.0001)
+        self.assertAlmostEqual(detector3_ws.readY(2)[4697], 10.0, places=4, delta=0.0001)
         # Check that the directory output is not empty
         self.assertIsNotNone(ws[1])
-
-    def validate(self):
-        return ['2683', 'PartialElementalAnalysisLoad.nxs']

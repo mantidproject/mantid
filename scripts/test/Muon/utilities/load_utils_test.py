@@ -81,7 +81,7 @@ class MuonFileUtilsTest(unittest.TestCase):
         ConfigService.Instance().setString("default.facility", " ")
 
     def test_load_workspace_from_filename_for_file_path(self):
-        filename = 'PSI'+ os.sep + 'run_1529_templs0.mon'
+        filename = 'PSI' + os.sep + 'run_1529_templs0.mon'
         inputs = {
               "DeadTimeTable": "__notUsed",
               "DetectorGroupingTable": "__notUsed"}

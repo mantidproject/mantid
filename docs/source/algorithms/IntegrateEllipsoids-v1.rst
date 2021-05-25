@@ -185,15 +185,15 @@ going through:
 Calculate a point at a fixed momentum, say k=1.
 Q in the lab frame:
 
-:math:`\vec{E}=(-k*sin(\theta)*cos(\phi),-k*sin(\theta)*sin(\phi),k-k*cos(\phi))`
+:math:`\vec{E}=(-k \cdot \sin(\theta) \cdot \cos(\phi), -k \cdot \sin(\theta) \cdot \sin(\phi), k - k \cdot \cos(\phi))`
 
 Normalize E to 1:
 
-:math:`\vec{E}=\vec{E}*(1./\left|\vec{E}\right|)`
+:math:`\vec{E}=\vec{E} \cdot (1./\left|\vec{E}\right|)`
 
 The distance from C to OE is given by:
 
-:math:`dv=\vec{C}-\vec{E}*(\vec{C} \cdot \vec{E})`
+:math:`dv=\vec{C}-\vec{E} \cdot (\vec{C} \cdot \vec{E})`
 
 If:
 
