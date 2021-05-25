@@ -11,7 +11,7 @@ import time
 
 from mantidqt.widgets.memorywidget.memoryview import MemoryView, \
     from_normal_to_critical, from_critical_to_normal
-from mantidqt.widgets.memorywidget.memorypresenter import MemoryPresenter
+from mantidqt.widgets.memorywidget.memorypresenter import MemoryPresenter, TIME_INTERVAL_MEMORY_USAGE_UPDATE
 
 import unittest
 from unittest import mock
@@ -50,7 +50,7 @@ class MemoryPresenterTest(unittest.TestCase):
 
     def test_memory_usage_is_updated_based_on_a_constant(self):
         # Sleep for just longer than the default so the test can run
-        time.sleep(2.5)
+        time.sleep(TIME_INTERVAL_MEMORY_USAGE_UPDATE + 0.5)
         self.assertGreater(self.view.set_value.call_count, 1)
 
 
