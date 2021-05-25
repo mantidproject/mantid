@@ -1217,8 +1217,13 @@ class CrystalFieldSite(object):
             params['ion0.' + bparam] = self.crystalField[bparam]
             params['ion1.' + bparam] = other[bparam]
         if self.crystalField.NumberOfSpectra > 1:
+            differentIntensities = False
             for x in range(self.crystalField.NumberOfSpectra):
                 params['sp'+str(x)+'.IntensityScaling'] = self.crystalField.IntensityScaling[x]
+                if self.crystalField.IntensityScaling[x] is not other.IntensityScaling[x]:
+                    differentIntensities = True
+            if differentIntensities:
+                warnings.warn('Mismatch between IntensityScaling values of CrystalField objects', RuntimeWarning)
         params['ion0.IntensityScaling'] = abundances[0]
         params['ion1.IntensityScaling'] = abundances[1]
         if self.crystalField.ResolutionModel is None:
