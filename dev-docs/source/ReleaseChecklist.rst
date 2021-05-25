@@ -295,6 +295,8 @@ Monday, Release Day
 
 Once the manual testing has passed (check with the Quality Assurance Manager):
 
+*  Email ``mantid-builder@mantidproject.org`` and ask that a new token be generated for
+   the instrument updates and placed in the appropriate place in Jenkins.
 *  Check the release notes and remove the "Under Construction" paragraph on the main
    index page.
 *  Disable release deploy jobs by building the
