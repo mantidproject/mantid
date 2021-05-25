@@ -24,7 +24,8 @@ class MemoryPresenter(object):
     def __init__(self, view):
         self.view = view
         self.set_bar_color_at_start()
-        self.thread_stopper = self.update_memory_usage()
+        self.update_memory_usage()
+        self.thread_stopper = self.update_memory_usage_threaded()
 
     def __del__(self):
         self.cancel_memory_update()
@@ -42,6 +43,12 @@ class MemoryPresenter(object):
             pass
 
     @set_interval(TIME_INTERVAL_MEMORY_USAGE_UPDATE)
+    def update_memory_usage_threaded(self):
+        """
+        Calls update_memory_usage once every TIME_INTERVAL_MEMORY_USAGE_UPDATE
+        """
+        self.update_memory_usage()
+
     def update_memory_usage(self):
         """
         Gets memory usage information and passes it to the view

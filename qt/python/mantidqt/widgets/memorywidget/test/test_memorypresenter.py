@@ -51,6 +51,12 @@ class MemoryPresenterTest(unittest.TestCase):
         self.presenter.update_memory_usage()
         self.assertEqual(self.presenter.view.set_value.call_count, 2)
 
+    def test_memory_usage_is_updated_based_on_a_constant(self):
+        mantidqt.widgets.memorywidget.memorypresenter.TIME_INTERVAL_MEMORY_USAGE_UPDATE = 0.1
+        # Sleep for just longer than the default so the test can run
+        time.sleep(2.5)
+        self.assertGreater(self.view.set_value.call_count, 1)
+
 
 if __name__ == "__main__":
     unittest.main()
