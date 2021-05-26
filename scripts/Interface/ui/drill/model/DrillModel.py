@@ -18,9 +18,10 @@ from mantid.api import *
 from .configurations import RundexSettings
 from .DrillAlgorithmPool import DrillAlgorithmPool
 from .DrillTask import DrillTask
-from .DrillParameterController import DrillParameter, DrillParameterController
+from .DrillParameterController import DrillParameterController
 from .DrillExportModel import DrillExportModel
 from .DrillRundexIO import DrillRundexIO
+from .DrillParameter import DrillParameter
 
 
 class DrillModel(QObject):
@@ -307,25 +308,7 @@ class DrillModel(QObject):
         """
         Initialize the parameter controller.
         """
-        def onParamOk(p):
-            if ((p.sample != -1) and (p.name not in self.columns)):
-                self.paramOk.emit(p.sample, RundexSettings.CUSTOM_OPT_JSON_KEY)
-            elif ((p.name in self.columns) or (p.name in self.settings)):
-                self.paramOk.emit(p.sample, p.name)
-
-        def onParamError(p):
-            if ((p.sample != -1) and (p.name not in self.columns)):
-                self.paramError.emit(p.sample,
-                                     RundexSettings.CUSTOM_OPT_JSON_KEY,
-                                     p.errorMsg)
-            elif ((p.name in self.columns) or (p.name in self.settings)):
-                self.paramError.emit(p.sample, p.name, p.errorMsg)
-
-        if (self.algorithm is None):
-            return
         self.controller = DrillParameterController(self.algorithm)
-        self.controller.signals.okParam.connect(onParamOk)
-        self.controller.signals.wrongParam.connect(onParamError)
         self.controller.start()
 
     def setSettings(self, settings):
@@ -430,7 +413,26 @@ class DrillModel(QObject):
             value (any): parameter value. Can be str, bool
             sample (int): sample index if it is a sample specific parameter
         """
-        self.controller.addParameter(DrillParameter(param, value, sample))
+        param = DrillParameter(sample, param, self.controller)
+        def onParamOk():
+            p = self.sender()
+            if ((p._sample != -1) and (p._name not in self.columns)):
+                self.paramOk.emit(p._sample, RundexSettings.CUSTOM_OPT_JSON_KEY)
+            elif ((p._name in self.columns) or (p._name in self.settings)):
+                self.paramOk.emit(p._sample, p._name)
+
+        def onParamError(msg):
+            p = self.sender()
+            if ((p._sample != -1) and (p._name not in self.columns)):
+                self.paramError.emit(p._sample,
+                                     RundexSettings.CUSTOM_OPT_JSON_KEY,
+                                     msg)
+            elif ((p._name in self.columns) or (p._name in self.settings)):
+                self.paramError.emit(p._sample, p._name, msg)
+
+        param.valid.connect(onParamOk)
+        param.invalid.connect(onParamError)
+        param.setValue(value)
 
     def changeParameter(self, sampleIndex, name, value):
         """
