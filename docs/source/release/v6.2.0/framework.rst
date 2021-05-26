@@ -14,10 +14,12 @@ Concepts
 
 Algorithms
 ----------
+- All remote algorithms have been deprecated as they have not been used since v3.8.
 
 Fit Functions
 -------------
 - new method `IPeakFunction::intensityError` calculates the error in the integrated intensity of the peak due to uncertainties in the values of the fit parameters.
+
 
 Data Objects
 ------------
