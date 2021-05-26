@@ -711,9 +711,7 @@ void PreviewPlot::setScaleType(AxisID id, const QString &actionName) {
     break;
   }
 
-  // If linear scale need to reset tick labels
-  if (strcmp(scaleType.constData(), "linear") == 0)
-    tickLabelFormat(m_axis, m_style, m_useOffset);
+  tickLabelFormat(m_axis, m_style, m_useOffset);
 
   this->replot();
 }
@@ -743,12 +741,22 @@ void PreviewPlot::toggleLegend(const bool checked) {
  * calculated as needed, False no offset will be used
  */
 void PreviewPlot::tickLabelFormat(char *axis, char *style, bool useOffset) {
-  m_canvas->gca().tickLabelFormat(axis, style, useOffset);
+  auto axes = m_canvas->gca();
+  const auto formatXTicks = *axis != 'y' && axes.getXScale().toStdString() == "linear";
+  const auto formatYTicks = *axis != 'x' && axes.getYScale().toStdString() == "linear";
 
-  // Need to save parameters to re-format on scale change
-  m_axis = axis;
-  m_style = style;
-  m_useOffset = useOffset;
+  if (formatXTicks)
+    axes.tickLabelFormat(std::string("x").c_str(), style, useOffset);
+
+  if (formatYTicks)
+    axes.tickLabelFormat(std::string("y").c_str(), style, useOffset);
+
+  if (formatXTicks || formatYTicks) {
+    // Need to save parameters to re-format on scale change
+    m_axis = axis;
+    m_style = style;
+    m_useOffset = useOffset;
+  }
 }
 
 } // namespace MantidWidgets
