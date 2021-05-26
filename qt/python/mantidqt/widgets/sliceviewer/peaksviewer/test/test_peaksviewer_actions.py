@@ -48,6 +48,31 @@ class PeaksActionViewTest(unittest.TestCase):
 
         mock_PeaksViewerCollectionPresenter.deactivate_zoom_pan.assert_called_once_with(False)
 
+    def test_set_peaksworkspace(self):
+        view = PeakActionsView()
+
+        self.assertEqual(view.active_peaksworkspace, '')
+
+        view.set_peaksworkspace(['ws1', 'ws2', 'ws3'])
+
+        self.assertEqual(view.active_peaksworkspace, 'ws1')
+
+        # select ws3 from the combobox
+        view.ui.active_peaks_combobox.setCurrentText('ws3')
+        self.assertEqual(view.active_peaksworkspace, 'ws3')
+
+        # remove ws1, check that ws3 is still active
+        view.set_peaksworkspace(['ws2', 'ws3'])
+        self.assertEqual(view.active_peaksworkspace, 'ws3')
+
+        # remove ws3, check that ws2 is now active
+        view.set_peaksworkspace(['ws2'])
+        self.assertEqual(view.active_peaksworkspace, 'ws2')
+
+        # add them all back, check that ws2 is still active
+        view.set_peaksworkspace(['ws1', 'ws2', 'ws3'])
+        self.assertEqual(view.active_peaksworkspace, 'ws2')
+
 
 if __name__ == '__main__':
     unittest.main()
