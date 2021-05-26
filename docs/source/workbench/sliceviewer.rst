@@ -49,6 +49,27 @@ been integrated.
    :width: 75%
    :align: center
 
+Adding or removing peaks
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Peaks can be added or removed from an overlayed peaks workspace by
+selecting the desired peaks workspace from the drop down box and
+selected either ``Add Peaks`` or ``Remove Peaks``, then clicking on
+the plot.
+
+.. figure:: ../images/wb-sliceviewer52-peaks-actions.png
+   :class: screenshot
+   :align: center
+
+When adding peaks the position selected with the mouse click and the
+sliders are used, along with the MD Frame (Q_lab, Q_sample, HKL) to
+create and add a peak to the peaks workspace. If units are HKL then
+the peaks workspace requires an orientated lattice to be defined on
+it, one can be copied from the data workspace with :ref:`CopySample
+<algm-CopySample>` or can be set with :ref:`SetUB <algm-SetUB>`..
+
+When removing peaks, the closest peak to the position selected will be
+removed from the peaks workspace.
 
 Non-Orthogonal Axes View
 ------------------------
