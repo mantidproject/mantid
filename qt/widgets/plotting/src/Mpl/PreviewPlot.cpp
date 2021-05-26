@@ -742,8 +742,8 @@ void PreviewPlot::toggleLegend(const bool checked) {
  */
 void PreviewPlot::tickLabelFormat(char *axis, char *style, bool useOffset) {
   auto axes = m_canvas->gca();
-  const auto formatXTicks = (*axis == 'x' || *axis == 'both') && axes.getXScale().toStdString() == "linear";
-  const auto formatYTicks = (*axis == 'y' || *axis == 'both') && axes.getYScale().toStdString() == "linear";
+  const auto formatXTicks = *axis != 'y' && axes.getXScale().toStdString() == "linear";
+  const auto formatYTicks = *axis != 'x' && axes.getYScale().toStdString() == "linear";
 
   if (formatXTicks)
     axes.tickLabelFormat(std::string("x").c_str(), style, useOffset);
