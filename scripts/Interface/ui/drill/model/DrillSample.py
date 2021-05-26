@@ -5,8 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from qtpy.QtCore import QObject, Signal
 
-class DrillSample:
+from .DrillParameter import DrillParameter
+
+
+class DrillSample(QObject):
 
     """
     Processing parameters.
@@ -14,78 +18,80 @@ class DrillSample:
     _parameters = None
 
     """
-    Name of the output workspace.
+    Name of the sample.
     """
-    _outputName = None
+    _name = None
 
-    def __init__(self):
+    """
+    Index of the sample.
+    """
+    _index = None
+
+    def __init__(self, index):
         """
         Create an empty sample.
         """
+        super().__init__()
         self._parameters = dict()
+        self._index = index
 
-    def setParameters(self, parameters):
+    def setIndex(self, index):
         """
-        Set the processing parameters.
+        Set the sample index.
 
         Args:
-            parameters (dict(str:str)): parameter key:value pairs
+            index (int): index of the sample
         """
-        self._parameters = {k:v for k,v in parameters.items()}
+        self._index = index
 
-    def getParameters(self):
+    def getIndex(self):
         """
-        Get the processing parameters.
+        Get the sample index.
 
         Returns:
-            dict(str:str): parameter key:value pairs
+            int: index of the sample
         """
-        return {k:v for k,v in self._parameters.items()}
+        return self._index
+
+    def setName(self, name):
+        """
+        Set the sample name.
+
+        Args:
+            name (str): name of the sample
+        """
+        self._name = name
+
+    def getName(self):
+        """
+        Get the sample name.
+
+        Returns:
+            str: name of the sample
+        """
+        return self._name
+
+    def addParameter(self, parameter):
+        """
+        Add a sample parameter.
+
+        Args:
+            parameter (DrillParameter): new sample parameter
+        """
+        name = parameter.getName()
+        self._parameters[name] = parameter
 
     def getParameter(self, name):
         """
-        Get the value of a parameter.
+        Get the parameter from its name or None if it does not exist.
 
         Args:
             name (str): name of the parameter
 
         Returns:
-            value of the parameter, None if it does not exist
+            DrillParameter: the sample parameter
         """
         if name in self._parameters:
             return self._parameters[name]
         else:
             return None
-
-    def changeParameter(self, name, value):
-        """
-        Change a parameter value. If this parameter is not already present, it
-        will be created. If the value is empty, the parameter is deleted.
-
-        Args:
-            name (str): name of the parameter name
-            value (str): value of the parameter
-        """
-        if value == "":
-            if name in self._parameters:
-                del self._parameters[name]
-        else:
-            self._parameters[name] = value
-
-    def setOutputName(self, name):
-        """
-        Set the name of the output.
-
-        Args:
-            name (str): name
-        """
-        self._outputName = name
-
-    def getOutputName(self):
-        """
-        Get the name of the output.
-
-        Returns:
-            str: name
-        """
-        return self._outputName
