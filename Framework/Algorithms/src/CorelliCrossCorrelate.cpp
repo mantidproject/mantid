@@ -6,11 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CorelliCrossCorrelate.h"
 #include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/IComponent.h"
@@ -20,7 +17,6 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -242,12 +238,6 @@ void CorelliCrossCorrelate::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-
-  outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
-  Unit_sptr unit = outputWS->getAxis(0)->unit();
-  std::shared_ptr<Units::Label> label = std::dynamic_pointer_cast<Units::Label>(unit);
-  label->setLabel("Bins of Shift", "\\mathbb{Z}");
-
   setProperty("OutputWorkspace", outputWS);
 }
 
