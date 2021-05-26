@@ -12,7 +12,6 @@ from qtpy.QtWidgets import QFileDialog, QMessageBox
 
 from ..view.DrillSettingsDialog import DrillSettingsDialog
 from ..model.DrillModel import DrillModel
-from ..model.DrillSample import DrillSample
 from .DrillExportPresenter import DrillExportPresenter
 from .DrillContextMenuPresenter import DrillContextMenuPresenter
 
@@ -56,8 +55,7 @@ class DrillPresenter:
         self.view.acquisitionModeChanged.connect(self.acquisitionModeChanged)
         self.view.cycleAndExperimentChanged.connect(
                 self.model.setCycleAndExperiment)
-        self.view.rowAdded.connect(
-                lambda position : self.model.addSample(position, DrillSample()))
+        self.view.rowAdded.connect(self.onRowAdded)
         self.view.rowDeleted.connect(self.model.deleteSample)
         self.view.dataChanged.connect(self.onDataChanged)
         self.view.groupSelectedRows.connect(self.onGroupSelectedRows)
@@ -88,6 +86,15 @@ class DrillPresenter:
 
         self._syncViewHeader()
         self._syncViewTable()
+
+    def onRowAdded(self, position):
+        """
+        Triggered when a row is added to the table.
+
+        Args:
+            position (int): new row position
+        """
+        self.model.addSample(position)
 
     def onDataChanged(self, row, column):
         """
@@ -561,7 +568,7 @@ class DrillPresenter:
         self.view.set_table(columns, tooltips)
         if not samples:
             self.view.add_row_after(1)
-            self.model.addSample(-1, DrillSample())
+            self.model.addSample(-1)
         else:
             for i in range(len(samples)):
                 self.view.add_row_after(1)
