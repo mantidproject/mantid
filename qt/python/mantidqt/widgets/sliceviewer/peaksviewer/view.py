@@ -223,23 +223,27 @@ class PeaksViewerCollectionView(QWidget):
     def peak_actions_view(self) -> PeakActionsView:
         return self._peak_actions_view
 
-    def append_peaksviewer(self) -> PeaksViewerView:
+    def append_peaksviewer(self, index=-1) -> PeaksViewerView:
         """
         Append a view widget to end of the current list of views
         :param peaks_view: A reference to a single view widget for a PeaksWorkspace
+        :param index: the index to insert the PeaksViewerView within the PeaksViewerCollectionView
         """
         child_view = PeaksViewerView(self._painter, self._sliceinfo_provider, parent=self)
-        self._peaks_layout.addWidget(child_view)
+        self._peaks_layout.insertWidget(index, child_view)
         return child_view
 
     def remove_peaksviewer(self, widget: PeaksViewerView):
         """
         Remove a PeaksViewer from the collection
         :param widget: A reference to the PeaksViewerView
+        :return: index of removed PeaksViewerView within PeaksViewerCollectionView
         """
         layout = self._peaks_layout
-        item = layout.takeAt(layout.indexOf(widget))
+        index = layout.indexOf(widget)
+        item = layout.takeAt(index)
         item.widget().deleteLater()
+        return index
 
     def deactivate_zoom_pan(self):
         self._sliceinfo_provider.deactivate_zoom_pan()

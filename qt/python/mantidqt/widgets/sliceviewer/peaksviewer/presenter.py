@@ -191,21 +191,23 @@ class PeaksViewerCollectionPresenter:
     def view(self):
         return self._view
 
-    def append_peaksworkspace(self, name: str) -> PeaksViewerPresenter:
+    def append_peaksworkspace(self, name: str, index=-1) -> PeaksViewerPresenter:
         """
         Create and append a view for the given named workspace
         :param name: The name of a PeaksWorkspace.
+        :param index: the index to insert the peaksworkspace in the PeaksViewerCollectionView
         :returns: The child presenter
         """
         self.setup_ads_observer()
         presenter = PeaksViewerPresenter(self._create_peaksviewer_model(name),
-                                         self._view.append_peaksviewer())
+                                         self._view.append_peaksviewer(index))
         self._child_presenters.append(presenter)
         return presenter
 
-    def overlay_peaksworkspaces(self, names_to_overlay):
+    def overlay_peaksworkspaces(self, names_to_overlay, index=-1):
         """
         :param names_to_overlay: The list of names to overlay
+        :param index: the index to insert the new peaksworkspace in the PeaksViewerCollectionView
         """
         # The final outcome should be the set of names in names_to_overlay
         # being what is displayed. If anything is currently displayed that is
@@ -226,7 +228,7 @@ class PeaksViewerCollectionPresenter:
                 self.remove_peaksworkspace(name)
 
         for name in names_to_overlay_final:
-            self.append_peaksworkspace(name)
+            self.append_peaksworkspace(name, index=index)
 
         self.notify(PeaksViewerPresenter.Event.OverlayPeaks)
 
@@ -236,6 +238,7 @@ class PeaksViewerCollectionPresenter:
         """
         Remove the named workspace from display. No op if no workspace can be found with that name
         :param name: The name of a workspace
+        :return: index of removed PeaksViewerView within PeaksViewerCollectionView
         """
         self.setup_ads_observer()
         child_presenters = self._child_presenters
@@ -244,9 +247,10 @@ class PeaksViewerCollectionPresenter:
             if child.model.peaks_workspace.name() == name:
                 presenter_to_remove = child
                 child.notify(PeaksViewerPresenter.Event.ClearPeaks)
-                self._view.remove_peaksviewer(child.view)
+                index = self._view.remove_peaksviewer(child.view)
 
         child_presenters.remove(presenter_to_remove)
+        return index
 
     def workspace_names(self):
         """
@@ -298,8 +302,9 @@ class PeaksViewerCollectionPresenter:
 
     def replace_handle(self, ws_name, _):
         if ws_name in self.workspace_names():
-            self.remove_peaksworkspace(ws_name)
-            self.overlay_peaksworkspaces(self.workspace_names() + [ws_name])
+            # get the index of the removed workspace so we can insert it back into the same position
+            index = self.remove_peaksworkspace(ws_name)
+            self.overlay_peaksworkspaces(self.workspace_names() + [ws_name], index=index)
 
     def delete_handle(self, ws_name):
         if ws_name in self.workspace_names():
@@ -312,8 +317,9 @@ class PeaksViewerCollectionPresenter:
 
     def rename_handle(self, ws_name, new_name):
         if ws_name in self.workspace_names():
-            self.remove_peaksworkspace(ws_name)
-            self.overlay_peaksworkspaces(self.workspace_names() + [new_name])
+            # get the index of the removed workspace so we can insert it back into the same position
+            index = self.remove_peaksworkspace(ws_name)
+            self.overlay_peaksworkspaces(self.workspace_names() + [new_name], index=index)
 
     #
     # Peak Actions Functionality
