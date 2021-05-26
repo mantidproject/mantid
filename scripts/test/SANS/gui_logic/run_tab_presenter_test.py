@@ -115,8 +115,8 @@ class RunTabPresenterTest(unittest.TestCase):
             self.presenter.on_user_file_load()
             mocked_loader.load_user_file.assert_called_once_with(file_path=user_file_path, file_information=mock.ANY)
 
+        self.presenter._beam_centre_presenter.copy_centre_positions.assert_called()
         self.presenter._beam_centre_presenter.update_centre_positions.assert_called()
-        self.presenter._beam_centre_presenter.on_update_rows.assert_called()
         self.presenter._masking_table_presenter.on_update_rows.assert_called()
         self.presenter._workspace_diagnostic_presenter.on_user_file_loadassert_called()
 
@@ -153,6 +153,7 @@ class RunTabPresenterTest(unittest.TestCase):
     def test_that_gets_states_from_view(self):
         # Arrange
         batch_file_path, user_file_path, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
+        self.presenter.on_update_rows = mock.Mock()
         self.presenter.on_user_file_load()
         self.presenter.on_batch_file_load()
 
@@ -186,6 +187,8 @@ class RunTabPresenterTest(unittest.TestCase):
 
         self.assertEqual(state0.all_states.reduction.reduction_dimensionality, ReductionDimensionality.ONE_DIM)
         self.assertEqual(state0.all_states.move.detectors['LAB'].sample_centre_pos1, 0.15544999999999998)
+
+        self.presenter.on_update_rows.assert_called_once()
 
         # Clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
@@ -291,6 +294,13 @@ class RunTabPresenterTest(unittest.TestCase):
         self.presenter._view.set_instrument_settings.called_once_with(instrument)
         self.presenter._beam_centre_presenter.on_update_instrument.called_once_with(instrument)
         self.presenter._workspace_diagnostic_presenter.called_once_with(instrument)
+
+    def test_on_instrument_change_notifies_child_presenters(self):
+        self.presenter._beam_centre_presenter = mock.Mock()
+        self.presenter._setup_instrument_specific_settings = mock.Mock()
+        self.presenter.on_instrument_changed()
+        self.presenter._setup_instrument_specific_settings.assert_called_once()
+        self.presenter._beam_centre_presenter.on_update_instrument.assert_called_once()
 
     def test_setup_instrument_specific_settings_sets_facility_in_config(self):
         config.setFacility('TEST_LIVE')

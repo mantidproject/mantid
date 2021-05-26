@@ -472,46 +472,6 @@ Both can be found `online <https://www.rapidtables.com/web/color/html-color-code
    fig.suptitle('Line Plots: Color Cycle', fontsize='x-large')
    #fig.show()
 
-Custom Colormap (MantidPlot)
-############################
-
-In MantidPlot, a Custom Colormap (256 entries of Red, Green and Blue values [0-255 for each]) can be created and saved with:
-
-.. code-block:: python
-
-   from __future__ import (absolute_import, division, print_function, unicode_literals)
-   from mantid.simpleapi import *
-   import matplotlib.pyplot as plt
-   import numpy as np
-
-   r = np.zeros(256)
-   g = np.zeros(256)
-   b = np.zeros(256)
-   for i in range(256):
-      '''Control how the RGB values change throughout the Colormap'''
-      r[i] = i          #linear increase in Red
-      g[i] = 255 - i    #linear decrease in Green
-
-   f = open("C:\MantidInstall\colormaps\GreenRed.map","w+") #Change the .map filename as you wish!
-   for i in range(256):
-      f.write(str(int(r[i])))
-      f.write(' ')
-      f.write(str(int(g[i])))
-      f.write(' ')
-      f.write(str(int(b[i])))
-      f.write('\n')
-   f.close()
-
-Then open up any dataset (such as EMU00020884.nxs from the `TrainingCourseData <https://sourceforge.net/projects/mantid/files/Sample%20Data/TrainingCourseData.zip/download>`_) and produce a Colorfill plot. Change the Colormap by following `these instructions <https://docs.mantidproject.org/nightly/tutorials/mantid_basic_course/loading_and_displaying_data/04_displaying_2D_data.html#changing-the-colour-map>`_ and selecting the newly created `Greenred.map`.
-
-.. figure:: ../images/ColorMapCustomPlot.PNG
-   :class: screenshot
-   :width: 500px
-   :align: center
-
-This New Colormap is saved within the MantidInstall folder so it can be used without re-running this script!
-
-
 Custom Colormap (MantidWorkbench)
 #################################
 

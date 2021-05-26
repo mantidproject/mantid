@@ -190,6 +190,7 @@ void IndirectDataAnalysisIqtTab::setup() {
   setPreviewSpectrumMaximum(0);
 
   auto xRangeSelector = m_uiForm.ppPlot->addRangeSelector("IqtRange");
+  xRangeSelector->setBounds(-1.0, 1.0);
 
   // signals / slots & validators
   connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));

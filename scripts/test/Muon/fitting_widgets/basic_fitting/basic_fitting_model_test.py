@@ -7,7 +7,8 @@
 import unittest
 from unittest import mock
 
-from mantid.api import FrameworkManager, FunctionFactory
+from mantid.api import AnalysisDataService, FrameworkManager, FunctionFactory
+from mantid.simpleapi import CreateSampleWorkspace
 
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel, DEFAULT_START_X
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
@@ -54,8 +55,29 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.model.dataset_names = ["NewName", "Name1"]
 
-        self.assertEqual(self.model.start_xs, [0.0, 2.0])
-        self.assertEqual(self.model.end_xs, [4.0, 4.0])
+        self.assertEqual(self.model.start_xs, [2.0, 3.0])
+        self.assertEqual(self.model.end_xs, [4.0, 5.0])
+
+    def test_that_the_currently_selected_start_and_end_xs_are_used_for_when_a_larger_number_of_new_datasets_are_loaded(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.current_dataset_index = 1
+        self.model.start_xs = [2.0, 3.0]
+        self.model.end_xs = [4.0, 5.0]
+
+        self.model.dataset_names = ["Name1", "Name2", "Name3"]
+
+        self.assertEqual(self.model.start_xs, [2.0, 3.0, 3.0])
+        self.assertEqual(self.model.end_xs, [4.0, 5.0, 5.0])
+
+    def test_that_newly_loaded_datasets_will_reuse_the_existing_xs_when_there_are_fewer_new_datasets(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.start_xs = [2.0, 3.0]
+        self.model.end_xs = [4.0, 5.0]
+
+        self.model.dataset_names = ["Name2"]
+
+        self.assertEqual(self.model.start_xs, [3.0])
+        self.assertEqual(self.model.end_xs, [5.0])
 
     def test_that_current_dataset_index_will_raise_if_the_index_is_greater_than_or_equal_to_the_number_of_datasets(self):
         self.model.dataset_names = self.dataset_names
@@ -516,6 +538,28 @@ class BasicFittingModelTest(unittest.TestCase):
         # This dataset is the second dataset previously and so the A0=5 fit function should be reused.
         self.model.dataset_names = ["Name2"]
         self.assertEqual(str(self.model.single_fit_functions[0]), "name=FlatBackground,A0=5")
+
+    def test_that_x_limits_of_current_dataset_will_return_the_x_limits_of_the_workspace(self):
+        self.model.dataset_names = self.dataset_names
+        workspace = CreateSampleWorkspace()
+        AnalysisDataService.addOrReplace("Name1", workspace)
+
+        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
+
+        self.assertEqual(x_lower, 0.0)
+        self.assertEqual(x_upper, 20000.0)
+
+    def test_that_x_limits_of_current_dataset_will_return_the_default_x_values_if_there_are_no_workspaces_loaded(self):
+        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
+
+        self.assertEqual(x_lower, 0.0)
+        self.assertEqual(x_upper, 15.0)
+
+    def test_that_x_limits_of_current_dataset_will_return_the_default_x_values_if_the_workspace_does_not_exist(self):
+        x_lower, x_upper = self.model.x_limits_of_workspace("FakeName")
+
+        self.assertEqual(x_lower, 0.0)
+        self.assertEqual(x_upper, 15.0)
 
 
 if __name__ == '__main__':

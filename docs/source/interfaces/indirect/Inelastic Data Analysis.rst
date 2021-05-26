@@ -1,14 +1,14 @@
-﻿.. _interface-indirect-data-analysis:
+﻿.. _interface-inelastic-data-analysis:
 
-Indirect Data Analysis
-======================
+Inelastic Data Analysis
+=======================
 
 Overview
 --------
 
-The Indirect Data Analysis interface is a collection of tools within Mantid
+The Inelastic Data Analysis interface is a collection of tools within Mantid
 for analysing reduced data from indirect geometry spectrometers, such as IRIS and
-OSIRIS.
+OSIRIS and data from direct geometry spectrometer LET.
 
 The majority of the functions used within this interface can be used with both
 reduced files (*_red.nxs*) and workspaces (*_red*) created using the Indirect Data
@@ -17,7 +17,7 @@ workspaces (*_sqw*) created using either the Indirect Data Reduction interface o
 taken from a bespoke algorithm or auto reduction.
 
 Four of the available tabs are QENS fitting interfaces and share common features and
-layout. These tabs are documented in :ref:`Indirect Fitting <QENS-fitting-ref>`.
+layout. These tabs are documented in :ref:`QENS Fitting <QENS-fitting-ref>`.
 
 The other two tabs in the interface perform transformations on data and are documented in :ref:`Elwin and I(Q,t) <Elwin-iqt-ref>`.
 
@@ -45,4 +45,4 @@ Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
   and default save directory and enable/disable data archive search.
 
-.. categories:: Interfaces Indirect
+.. categories:: Interfaces Indirect Direct

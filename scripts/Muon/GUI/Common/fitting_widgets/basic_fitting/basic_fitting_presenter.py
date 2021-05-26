@@ -208,8 +208,13 @@ class BasicFittingPresenter:
         if self.view.start_x > self.view.end_x:
             self.view.start_x, self.view.end_x = self.view.end_x, self.view.start_x
             self.model.current_end_x = self.view.end_x
+        elif self.view.start_x == self.view.end_x:
+            self.view.start_x = self.model.current_start_x
 
         self.model.current_start_x = self.view.start_x
+
+        self._check_start_x_is_within_x_limits()
+        self._check_end_x_is_within_x_limits()
 
         self.model.update_plot_guess(self.view.plot_guess)
 
@@ -218,8 +223,13 @@ class BasicFittingPresenter:
         if self.view.end_x < self.view.start_x:
             self.view.start_x, self.view.end_x = self.view.end_x, self.view.start_x
             self.model.current_start_x = self.view.start_x
+        elif self.view.end_x == self.view.start_x:
+            self.view.end_x = self.model.current_end_x
 
         self.model.current_end_x = self.view.end_x
+
+        self._check_start_x_is_within_x_limits()
+        self._check_end_x_is_within_x_limits()
 
         self.model.update_plot_guess(self.view.plot_guess)
 
@@ -282,6 +292,27 @@ class BasicFittingPresenter:
         self.view.update_local_fit_status_and_chi_squared(self.model.current_fit_status,
                                                           self.model.current_chi_squared)
         self.view.update_global_fit_status(self.model.fit_statuses, self.model.current_dataset_index)
+
+    def update_start_and_end_x_in_view_from_model(self) -> None:
+        """Updates the start and end x in the view using the current values in the model."""
+        self.view.start_x = self.model.current_start_x
+        self.view.end_x = self.model.current_end_x
+
+    def _check_start_x_is_within_x_limits(self) -> None:
+        """Checks the Start X is within the x limits of the current dataset. If not it is set to one of the limits."""
+        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
+        if self.view.start_x < x_lower:
+            self.view.start_x = x_lower
+        elif self.view.start_x > x_upper:
+            self.view.start_x = x_upper
+
+    def _check_end_x_is_within_x_limits(self) -> None:
+        """Checks the End X is within the x limits of the current dataset. If not it is set to one of the limits."""
+        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
+        if self.view.end_x < x_lower:
+            self.view.end_x = x_lower
+        elif self.view.end_x > x_upper:
+            self.view.end_x = x_upper
 
     def _get_single_fit_functions_from_view(self) -> list:
         """Returns the fit functions corresponding to each domain as a list."""

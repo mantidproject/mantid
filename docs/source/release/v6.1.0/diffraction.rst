@@ -62,6 +62,7 @@ Bugfixes
 - Fix segmentation violation issues for ILL instruments D1B, D2B, and D20, caused by change of scanned data type
 - :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` fixed the wrong assumption on the order of spin-flip and non-spin-flip data, and fixed the relative normalisation issues.
 - Fix crashing issue in :ref:`AlignAndFocusPowder<algm-AlignAndFocusPowder>` due to using new unit conversion APIs.
+- Support for data with x-axis unit of TOF has been deprecated in :ref:`DiffractionFocussing version 2 <algm-DiffractionFocussing-v2>`, please use :ref:`GroupDetectors <algm-GroupDetectors>` instead.
 
 Engineering Diffraction
 -----------------------

@@ -102,6 +102,9 @@ class PeaksViewerView(QWidget):
     def selected_index(self):
         return self._selected_index()
 
+    def clear_table_selection(self):
+        self.table_view.clearSelection()
+
     def set_axes_limits(self, xlim, ylim, auto_transform):
         """
         Set the view limits on the image axes to the given extents

@@ -8,6 +8,7 @@ from mantid import AlgorithmManager, logger
 from mantid.api import CompositeFunction, IAlgorithm, IFunction
 from mantid.simpleapi import CopyLogs, EvaluateFunction, RenameWorkspace
 
+from Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws
 from Muon.GUI.Common.ADSHandler.workspace_naming import create_fitted_workspace_name, create_parameter_table_name
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.contexts.fitting_context import FitInformation
@@ -409,6 +410,14 @@ class BasicFittingModel:
         """Returns true if rebin is selected within the context."""
         return self.context._do_rebin()
 
+    def x_limits_of_workspace(self, workspace_name: str) -> tuple:
+        """Returns the x data limits of a provided workspace or the current dataset."""
+        if workspace_name is not None and check_if_workspace_exist(workspace_name):
+            x_data = retrieve_ws(workspace_name).dataX(0)
+            if len(x_data) > 0:
+                return x_data[0], x_data[-1]
+        return self.current_start_x, self.current_end_x
+
     def use_cached_function(self) -> None:
         """Sets the current function as being the cached function."""
         self.single_fit_functions = self.single_fit_functions_cache
@@ -458,28 +467,32 @@ class BasicFittingModel:
 
     def _reset_end_xs(self) -> None:
         """Resets the end Xs stored by the model."""
-        end_x = self.current_end_x if len(self.end_xs) > 0 else self._default_end_x
-        self.end_xs = [end_x] * self.number_of_datasets
+        self.end_xs = [self.current_end_x] * self.number_of_datasets
 
     def _get_new_start_xs_and_end_xs_using_existing_datasets(self, new_dataset_names: list) -> tuple:
         """Returns the start and end Xs to use for the new datasets. It tries to use existing ranges if possible."""
-        start_xs = [self._get_new_start_x_for(name) for name in new_dataset_names]
-        end_xs = [self._get_new_end_x_for(name) for name in new_dataset_names]
-        return start_xs, end_xs
+        if len(self.dataset_names) == len(new_dataset_names):
+            return self.start_xs, self.end_xs
+        else:
+            start_xs = [self._get_new_start_x_for(name) for name in new_dataset_names]
+            end_xs = [self._get_new_end_x_for(name) for name in new_dataset_names]
+            return start_xs, end_xs
 
     def _get_new_start_x_for(self, new_dataset_name: str) -> float:
         """Returns the start X to use for the new dataset. It tries to use an existing start X if possible."""
         if new_dataset_name in self.dataset_names:
             return self.start_xs[self.dataset_names.index(new_dataset_name)]
         else:
-            return self.retrieve_first_good_data_from_run(new_dataset_name)
+            return self.current_start_x if self.current_dataset_index is not None \
+                else self.retrieve_first_good_data_from_run(new_dataset_name)
 
     def _get_new_end_x_for(self, new_dataset_name: str) -> float:
         """Returns the end X to use for the new dataset. It tries to use an existing end X if possible."""
         if new_dataset_name in self.dataset_names:
             return self.end_xs[self.dataset_names.index(new_dataset_name)]
         else:
-            return self.current_end_x if len(self.end_xs) > 0 else self._default_end_x
+            x_lower, x_upper = self.x_limits_of_workspace(new_dataset_name)
+            return self.current_end_x if x_lower < self.current_end_x < x_upper else x_upper
 
     def _get_new_functions_using_existing_datasets(self, new_dataset_names: list) -> list:
         """Returns the functions to use for the new datasets. It tries to use the existing functions if possible."""

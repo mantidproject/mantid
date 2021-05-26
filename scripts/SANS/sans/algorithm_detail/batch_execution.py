@@ -253,18 +253,20 @@ def plot_workspace_mantidqt(reduction_package, output_graph, plotting_module):
 
     plot_kwargs = {"scalex": True,
                    "scaley": True}
+    ax_options = {"xscale": "linear", "yscale": "linear"}
+
     if reduction_package.reduction_mode == ReductionMode.ALL:
         plot([reduction_package.reduced_hab, reduction_package.reduced_lab],
-             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs)
+             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs, ax_properties=ax_options)
     elif reduction_package.reduction_mode == ReductionMode.HAB:
         plot([reduction_package.reduced_hab],
-             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs)
+             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs, ax_properties=ax_options)
     elif reduction_package.reduction_mode == ReductionMode.LAB:
         plot([reduction_package.reduced_lab],
-             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs)
+             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs, ax_properties=ax_options)
     elif reduction_package.reduction_mode == ReductionMode.MERGED:
         plot([reduction_package.reduced_merged, reduction_package.reduced_hab, reduction_package.reduced_lab],
-             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs)
+             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs, ax_properties=ax_options)
 
 
 # ----------------------------------------------------------------------------------------------------------------------

@@ -36,7 +36,9 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
         self.setupUi(self)
 
         self.start_x_line_edit = None
+        self.start_x_validator = None
         self.end_x_line_edit = None
+        self.end_x_validator = None
         self.minimizer_combo = None
         self.fit_to_raw_data_checkbox = None
         self.evaluation_combo = None
@@ -149,8 +151,9 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
     @start_x.setter
     def start_x(self, value: float) -> None:
         """Sets the selected start X."""
-        if value < self.end_x:
-            self.start_x_line_edit.setText(str(value))
+        if value <= self.end_x:
+            self.start_x_validator.last_valid_value = f"{value:.3f}"
+            self.start_x_line_edit.setText(f"{value:.3f}")
 
     @property
     def end_x(self) -> float:
@@ -160,8 +163,9 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
     @end_x.setter
     def end_x(self, value: float) -> None:
         """Sets the selected end X."""
-        if value > self.start_x:
-            self.end_x_line_edit.setText(str(value))
+        if value >= self.start_x:
+            self.end_x_validator.last_valid_value = f"{value:.3f}"
+            self.end_x_line_edit.setText(f"{value:.3f}")
 
     @property
     def evaluation_type(self) -> str:
@@ -228,10 +232,12 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
         self.fit_options_table.setHorizontalHeaderLabels(["Property", "Value"])
 
         table_utils.setRowName(self.fit_options_table, START_X_TABLE_ROW, "Time Start")
-        self.start_x_line_edit = table_utils.addDoubleToTable(self.fit_options_table, 0.0, START_X_TABLE_ROW, 1)
+        self.start_x_line_edit, self.start_x_validator = table_utils.addDoubleToTable(self.fit_options_table, 0.0,
+                                                                                      START_X_TABLE_ROW, 1)
 
         table_utils.setRowName(self.fit_options_table, END_X_TABLE_ROW, "Time End")
-        self.end_x_line_edit = table_utils.addDoubleToTable(self.fit_options_table, 15.0, END_X_TABLE_ROW, 1)
+        self.end_x_line_edit, self.end_x_validator = table_utils.addDoubleToTable(self.fit_options_table, 15.0,
+                                                                                  END_X_TABLE_ROW, 1)
 
         table_utils.setRowName(self.fit_options_table, MINIMIZER_TABLE_ROW, "Minimizer")
         self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, MINIMIZER_TABLE_ROW, [])

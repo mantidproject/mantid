@@ -30,9 +30,8 @@ Improvements
    :width: 500px
    :align: right
 
-Improvements
-############
 - Frequency Domain Analysis default values have been improved.
+- Improved the validation on the start and end X so that their values could not be outside the data x range.
 
 Bug fixes
 #########
@@ -44,7 +43,11 @@ Bug fixes
 - Fixed a bug in the Grouping tab where an error message would appear when changing the source of
   Group Asymmetry Range with no data loaded.
 - Fixed a crash caused when switching between tabs in Muon Analysis.
+- Fixed a bug where the plot window would sometimes become disabled when loading new data.
 - Fixed a usability issue where tabs became unattached too easily. It is now possible to unattach the tabs only by double clicking on them.
+- Fixed a bug that caused the `AutoScale` check box to reset when editing the selected groups/pairs.
+- Fixed a bug where the start and end X would reset in the fitting tab when stepping to the next or previous run.
+- Fixed a bug caused by entering an empty string into the start and end X fields.
 
 ALC
 ---
@@ -55,6 +58,10 @@ Improvements
 - The interface saves previous settings if possible instead of resetting.
 - The interface can now load runs from different directories/cycles
 
+Bug fixes
+#########
+- Fixed a bug where after changing the axis scales of the plot, when loading new data the default scale would be used instead.
+- Fixed a crash when changing between log and linear scale on the preview plot.
 
 Elemental Analysis
 ------------------

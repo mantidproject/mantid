@@ -61,7 +61,6 @@ Under 'Fit Function', you can view the selected model and associated parameters 
 There are two modes which can be used to select functions. The default version allows easy selection of the most commonly used function models. The options
 in this mode differ for each of the four fitting tabs so more detailed information is given in the specific sections below. The other mode, which may be switched to
 bu ticking the `See full function` box, displays the generic function browser in which any function model can be specified.
-This generic browser functions in a very similar way to the one in :ref:`Multi-dataset Fitting Interface <Multi-dataset-Fitting-Interface>`.
 
 Parameters may be tied by right-clicking on a parameter and selecting either 'Tie > To Function' to tie the parameter
 to a parameter of the same name in a different function, or by selecting 'Tie > Custom Tie' to tie to parameters of
@@ -489,6 +488,6 @@ then it is possible to plot this PDF data using the output options at the bottom
 1. Peters & Kneller, Journal of Chemical Physics, 139, 165102 (2013)
 2. Yi et al, J Phys Chem B 116, 5028 (2012)
 
-:ref:`Indirect Data Analysis <interface-indirect-data-analysis>`
+:ref:`Indirect Data Analysis <interface-inelastic-data-analysis>`
 
-.. categories:: Interfaces Indirect
+.. categories:: Interfaces Indirect Direct

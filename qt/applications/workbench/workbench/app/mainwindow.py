@@ -546,21 +546,22 @@ class MainWindow(QMainWindow):
 
     # ----------------------- Events ---------------------------------
     def closeEvent(self, event):
-        if self.project.is_saving or self.project.is_loading:
-            event.ignore()
-            self.project.inform_user_not_possible()
-            return
-
-        # Check whether or not to save project
-        if not self.project.saved:
-            # Offer save
-            if self.project.offer_save(self):
-                # Cancel has been clicked
+        if self.project is not None:
+            if self.project.is_saving or self.project.is_loading:
                 event.ignore()
+                self.project.inform_user_not_possible()
                 return
 
+            # Check whether or not to save project
+            if not self.project.saved:
+                # Offer save
+                if self.project.offer_save(self):
+                    # Cancel has been clicked
+                    event.ignore()
+                    return
+
         # Close editors
-        if self.editor.app_closing():
+        if self.editor is None or self.editor.app_closing():
             # write out any changes to the mantid config file
             ConfigService.saveConfig(ConfigService.getUserFilename())
             # write current window information to global settings object
@@ -576,11 +577,17 @@ class MainWindow(QMainWindow):
 
             # Kill the project recovery thread and don't restart should a save be in progress and clear out current
             # recovery checkpoint as it is closing properly
-            self.project_recovery.stop_recovery_thread()
-            self.project_recovery.closing_workbench = True
-            self.project_recovery.remove_current_pid_folder()
+            if self.project_recovery is not None:
+                self.project_recovery.stop_recovery_thread()
+                self.project_recovery.closing_workbench = True
+                self.project_recovery.remove_current_pid_folder()
 
-            self.interface_manager.closeHelpWindow()
+            # Cancel memory widget thread
+            if self.memorywidget is not None:
+                self.memorywidget.presenter.cancel_memory_update()
+
+            if self.interface_manager is not None:
+                self.interface_manager.closeHelpWindow()
 
             event.accept()
         else:

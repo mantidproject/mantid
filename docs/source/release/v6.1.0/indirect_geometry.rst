@@ -15,8 +15,11 @@ New Features
 
 Improvements
 ############
+
 - In Indirect Data Analysis F(Q) fit the default fitting function remains None when switching to EISF.
 - Added a scroll bar to the Bayes interface tabs and Elwin and I(Q, t) in data analysis for users on small screens.
+- IN16B's single detectors are now correctly taken into account when computing the energy transfer in :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>`.
+- Detector tables produced from `_red` and `_sqw` workspaces now use `Q elastic` as the label for its column instead of `Q`.
 
 Bug Fixes
 #########
@@ -26,5 +29,7 @@ Bug Fixes
 - In IsoRotDiff, DiffSphere, and DiffRotDiscreteCircle Aliases have been removed to avoid clashes with interfaces.
 - Fixed a bug that caused an error warning when adding EISF data to F(q) fit if Width has already been added.
 - Fixed a bug that caused the spectra list in F(q) fit to be blank when reopening the add workspace dialog.
+- Fixed a bug that erased previous fits in the Indirect Data Analysis fit tabs when changing to the full function view.
+- Fixed a bug that prevented fit ranges in Indirect Data Analysis from being negative.
 
 :ref:`Release 6.1.0 <v6.1.0>`
