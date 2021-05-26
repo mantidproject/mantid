@@ -1220,7 +1220,7 @@ class CrystalFieldSite(object):
             differentIntensities = False
             for x in range(self.crystalField.NumberOfSpectra):
                 params['sp'+str(x)+'.IntensityScaling'] = self.crystalField.IntensityScaling[x]
-                if self.crystalField.IntensityScaling[x] is not other.IntensityScaling[x]:
+                if self.crystalField.IntensityScaling[x] is not other.IntensityScaling[x] and other.IntensityScaling[x] != 1.0 :
                     differentIntensities = True
             if differentIntensities:
                 warnings.warn('Mismatch between IntensityScaling values of CrystalField objects', RuntimeWarning)
