@@ -89,6 +89,8 @@ void CrossCorrelate::init() {
   declareProperty("WorkspaceIndexMax", 0, mustBePositive,
                   " The workspace index of the last member of the range of "
                   "spectra to cross-correlate against.");
+  declareProperty("MaxDSpaceShift", 0, mustBePositive,
+                  "Optional variable for maximum shift to calculate (in d-spacing)");
   // Only the data in the range X_min, X_max will be used
   declareProperty("XMin", 0.0, "The starting point of the region to be cross correlated.");
   declareProperty("XMax", 0.0, "The ending point of the region to be cross correlated.");
@@ -100,6 +102,7 @@ void CrossCorrelate::init() {
  */
 void CrossCorrelate::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  int maxDSpaceShift = getProperty("MaxDSpaceShift");
 
   int reference = getProperty("ReferenceSpectra");
   const auto index_ref = static_cast<size_t>(reference);
@@ -211,7 +214,12 @@ void CrossCorrelate::exec() {
     auto &outY = out->mutableY(i);
     auto &outE = out->mutableE(i);
 
-    for (int k = -nY + 2; k <= nY - 2; ++k) {
+    // max the shift
+    int shiftCorrection = 0;
+    if (maxDSpaceShift > 0)
+      shiftCorrection = abs(abs((-nY + 2) - (nY - 2)) - maxDSpaceShift) / 2;
+
+    for (int k = -nY + 2 + shiftCorrection; k <= nY - 2 - shiftCorrection; ++k) {
       const int kp = abs(k);
       double val = 0, err2 = 0, x, y, xE, yE;
       for (int j = nY - 1 - kp; j >= 0; --j) {
