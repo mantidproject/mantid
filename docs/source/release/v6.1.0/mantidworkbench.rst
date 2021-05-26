@@ -70,7 +70,7 @@ Interfaces
 - Axes limits correctly reset when home clicked on sliceviewer plot of ragged matrix workspace.
 - Line plots in sliceviewer now respect the status of the Track Cursor checkbox.
 - Cursor coordinates in sliceviewer are now correct for transposed and non-orthogonal data.
-
+- Remove a "failed to build unwrapped surface" warning when viewing certain instruments in the instrument viewer using the cylindrical projections
 
 Plotting
 ########
