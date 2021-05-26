@@ -549,12 +549,16 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
     tie_str << "DeltaSampleX=0.0,DeltaSampleY=0.0,DeltaSampleZ=0.0,"
             << "DeltaT0=" << m_T0;
     std::ostringstream constraint_str;
-    double brb = getProperty("SearchradiusRotBank");
-    brb = std::abs(brb);
-    constraint_str << "0.0<Theta<3.1415926,0<Phi<6.28318530718," << -brb << "<DeltaRotationAngle<" << brb << ",";
-    double btb = getProperty("SearchRadiusTransBank");
-    btb = std::abs(btb);
-    constraint_str << -btb << "<DeltaX<" << btb << "," << -btb << "<DeltaY<" << btb << "," << -btb << "<DeltaZ<" << btb;
+    double searchRadiusRot = getProperty("SearchradiusRotBank");
+    searchRadiusRot = std::abs(searchRadiusRot);
+    constraint_str << -searchRadiusRot << "<RotX<" << searchRadiusRot << ","  // constrain rotation around X-axis
+                   << -searchRadiusRot << "<RotY<" << searchRadiusRot << ","  // constrain rotation around Y-axis
+                   << -searchRadiusRot << "<RotZ<" << searchRadiusRot << ","; // constrain rotation around Z-axis
+    double searchRadiusTran = getProperty("SearchRadiusTransBank");
+    searchRadiusTran = std::abs(searchRadiusTran);
+    constraint_str << -searchRadiusTran << "<DeltaX<" << searchRadiusTran << "," // restrict tranlastion along X
+                   << -searchRadiusTran << "<DeltaY<" << searchRadiusTran << "," // restrict tranlastion along Y
+                   << -searchRadiusTran << "<DeltaZ<" << searchRadiusTran;       // restrict tranlastion along Z
 
     //---- set&go
     fitBank_alg->setProperty("Ties", tie_str.str());
@@ -570,36 +574,49 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
     double dx = rstFitBank->getRef<double>("Value", 0);
     double dy = rstFitBank->getRef<double>("Value", 1);
     double dz = rstFitBank->getRef<double>("Value", 2);
-    double theta = rstFitBank->getRef<double>("Value", 3);
-    double phi = rstFitBank->getRef<double>("Value", 4);
-    double rotang = rstFitBank->getRef<double>("Value", 5);
+    double drx = rstFitBank->getRef<double>("Value", 3);
+    double dry = rstFitBank->getRef<double>("Value", 4);
+    double drz = rstFitBank->getRef<double>("Value", 5);
 
     //-- step 4: update the instrument with optimization results
     //           if the fit results are above the tolerance/threshold
     std::string bn = bankname;
     std::ostringstream calilog;
-    if (pws->getInstrument()->getName().compare("CORELLI") == 0)
+    if (pws->getInstrument()->getName().compare("CORELLI") == 0) {
       bn.append("/sixteenpack");
+    }
+    // check if translation results need zeroing
     double tolerance_translation = getProperty("ToleranceTransBank");
     tolerance_translation = std::abs(tolerance_translation);
-    double tolerance_rotation = getProperty("ToleranceRotBank");
-    tolerance_rotation = std::abs(tolerance_rotation);
-    if ((std::abs(dx) < tolerance_translation) && (std::abs(dy) < tolerance_translation) &&
-        (std::abs(dz) < tolerance_translation) && (std::abs(rotang) < tolerance_rotation)) {
-      calilog << "-- Fit " << bn << " results below tolerance, zero all\n";
+    if ((std::abs(dx) < tolerance_translation) && // is dx<tor?
+        (std::abs(dy) < tolerance_translation) && // is dy<tor?
+        (std::abs(dz) < tolerance_translation) && // is dz<tor?
+        true) {
+      calilog << "-- Fit " << bn << " translation below tolerance, zero (dx, dy, dz)\n";
       dx = 0.0;
       dy = 0.0;
       dz = 0.0;
-      rotang = 0.0;
     }
-    double rvx = sin(theta) * cos(phi);
-    double rvy = sin(theta) * sin(phi);
-    double rvz = cos(theta);
-    adjustComponent(dx, dy, dz, rvx, rvy, rvz, rotang, bn, pws);
+    // check if rotation results need zeroing
+    double tolerance_rotation = getProperty("ToleranceRotBank");
+    tolerance_rotation = std::abs(tolerance_rotation);
+    if ((std::abs(drx) < tolerance_rotation) && //
+        (std::abs(dry) < tolerance_rotation) && //
+        (std::abs(drz) < tolerance_rotation) && //
+        true) {
+      calilog << "-- Fit " << bn << " rotatoin below tolerance, zero (drx, dry, drz)\n";
+      drx = 0.0;
+      dry = 0.0;
+      drz = 0.0;
+    }
+    // update instrument for output
+    adjustComponent(dx, dy, dz, drx, dry, drz, bn, pws);
     // logging
+    V3D dtrans(dx, dy, dz);
+    V3D drots(drx, dry, drz);
     calilog << "-- Fit " << bn << " results using " << nBankPeaks << " peaks:\n "
-            << "    d(x,y,z) = (" << dx << "," << dy << "," << dz << ")\n"
-            << "    rotang(rx,ry,rz) =" << rotang << "(" << rvx << "," << rvy << "," << rvz << ")\n"
+            << "    d(x,y,z) = " << dtrans << "\n"
+            << "    r(x,y,z) = " << drots << "\n"
             << "    chi2/DOF = " << chi2OverDOF << "\n";
     g_log.notice() << calilog.str();
 
@@ -925,28 +942,14 @@ MatrixWorkspace_sptr SCDCalibratePanels2::getIdealQSampleAsHistogram1D(IPeaksWor
  * @param dx
  * @param dy
  * @param dz
- * @param rvx
- * @param rvy
- * @param rvz
- * @param rang
+ * @param drx
+ * @param dry
+ * @param drz
  * @param cmptName
  * @param pws
  */
-void SCDCalibratePanels2::adjustComponent(double dx, double dy, double dz, double rvx, double rvy, double rvz,
-                                          double rang, std::string cmptName, IPeaksWorkspace_sptr &pws) {
-
-  // orientation
-  IAlgorithm_sptr rot_alg = createChildAlgorithm("RotateInstrumentComponent", -1, -1, false);
-  rot_alg->setLogging(LOGCHILDALG);
-  rot_alg->setProperty<Workspace_sptr>("Workspace", pws);
-  rot_alg->setProperty("ComponentName", cmptName);
-  rot_alg->setProperty("X", rvx);
-  rot_alg->setProperty("Y", rvy);
-  rot_alg->setProperty("Z", rvz);
-  rot_alg->setProperty("Angle", rang);
-  rot_alg->setProperty("RelativeRotation", true);
-  rot_alg->executeAsChildAlg();
-
+void SCDCalibratePanels2::adjustComponent(double dx, double dy, double dz, double drx, double dry, double drz,
+                                          std::string cmptName, IPeaksWorkspace_sptr &pws) {
   // translation
   IAlgorithm_sptr mv_alg = createChildAlgorithm("MoveInstrumentComponent", -1, -1, false);
   mv_alg->setLogging(LOGCHILDALG);
@@ -957,6 +960,37 @@ void SCDCalibratePanels2::adjustComponent(double dx, double dy, double dz, doubl
   mv_alg->setProperty("Z", dz);
   mv_alg->setProperty("RelativePosition", true);
   mv_alg->executeAsChildAlg();
+
+  // rotation
+  IAlgorithm_sptr rot_alg = createChildAlgorithm("RotateInstrumentComponent", -1, -1, false);
+  rot_alg->setLogging(LOGCHILDALG);
+  // - x-axis
+  rot_alg->setProperty<Workspace_sptr>("Workspace", pws);
+  rot_alg->setProperty("ComponentName", cmptName);
+  rot_alg->setProperty("X", 1.0);
+  rot_alg->setProperty("Y", 0.0);
+  rot_alg->setProperty("Z", 0.0);
+  rot_alg->setProperty("Angle", drx);
+  rot_alg->setProperty("RelativeRotation", true);
+  rot_alg->executeAsChildAlg();
+  // - y-axis
+  rot_alg->setProperty<Workspace_sptr>("Workspace", pws);
+  rot_alg->setProperty("ComponentName", cmptName);
+  rot_alg->setProperty("X", 0.0);
+  rot_alg->setProperty("Y", 1.0);
+  rot_alg->setProperty("Z", 0.0);
+  rot_alg->setProperty("Angle", dry);
+  rot_alg->setProperty("RelativeRotation", true);
+  rot_alg->executeAsChildAlg();
+  // - z-axis
+  rot_alg->setProperty<Workspace_sptr>("Workspace", pws);
+  rot_alg->setProperty("ComponentName", cmptName);
+  rot_alg->setProperty("X", 0.0);
+  rot_alg->setProperty("Y", 0.0);
+  rot_alg->setProperty("Z", 1.0);
+  rot_alg->setProperty("Angle", drz);
+  rot_alg->setProperty("RelativeRotation", true);
+  rot_alg->executeAsChildAlg();
 }
 
 /**
@@ -1025,9 +1059,6 @@ ITableWorkspace_sptr SCDCalibratePanels2::generateCalibrationTable(std::shared_p
  *
  * @param instrument   The instrument with the new values for the banks
  * in Groups
- *
- * TODO:
- *  - Need to find a way to add the information regarding calibrated T0
  */
 void SCDCalibratePanels2::saveXmlFile(const std::string &FileName,
                                       boost::container::flat_set<std::string> &AllBankNames,

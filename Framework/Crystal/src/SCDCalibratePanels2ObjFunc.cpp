@@ -39,16 +39,14 @@ DECLARE_FUNCTION(SCDCalibratePanels2ObjFunc)
 /// Core functions ///
 /// ---------------///
 SCDCalibratePanels2ObjFunc::SCDCalibratePanels2ObjFunc() {
-  // parameters
-  declareParameter("DeltaX", 0.0, "relative shift along X");
-  declareParameter("DeltaY", 0.0, "relative shift along Y");
-  declareParameter("DeltaZ", 0.0, "relative shift along Z");
-  // rotation axis is defined as (1, theta, phi)
-  // https://en.wikipedia.org/wiki/Spherical_coordinate_system
-  declareParameter("Theta", PI / 4, "Polar coordinates theta in radians");
-  declareParameter("Phi", PI / 4, "Polar coordinates phi in radians");
-  // rotation angle
-  declareParameter("DeltaRotationAngle", 0.0, "angle of relative rotation in degree");
+  // parameters for translation
+  declareParameter("DeltaX", 0.0, "relative shift along X in meter");
+  declareParameter("DeltaY", 0.0, "relative shift along Y in meter");
+  declareParameter("DeltaZ", 0.0, "relative shift along Z in meter");
+  // parameters for rotation
+  declareParameter("RotX", 0.0, "relative rotation around X in degree");
+  declareParameter("RotY", 0.0, "relative rotation around Y in degree");
+  declareParameter("RotZ", 0.0, "relative rotation around Z in degree");
   // TOF offset for all peaks
   // NOTE: need to have a non-zero value here
   declareParameter("DeltaT0", 0.1, "delta of TOF");
@@ -92,21 +90,14 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
   const double dx = getParameter("DeltaX");
   const double dy = getParameter("DeltaY");
   const double dz = getParameter("DeltaZ");
-  //-- delta in rotation/orientation as angle axis pair
-  //   using polar coordinates to ensure a unit vector
-  //   (r, theta, phi) where r=1
-  const double theta = getParameter("Theta");
-  const double phi = getParameter("Phi");
-  // compute the rotation axis
-  double vx = sin(theta) * cos(phi);
-  double vy = sin(theta) * sin(phi);
-  double vz = cos(theta);
-  //
-  const double drotang = getParameter("DeltaRotationAngle");
+  //-- delta in rotation
+  const double drx = getParameter("RotX");
+  const double dry = getParameter("RotY");
+  const double drz = getParameter("RotZ");
   //-- delta in TOF
   //  NOTE: The T0 here is a universal offset for all peaks
   double dT0 = getParameter("DeltaT0");
-  //
+  //-- delta of sample position
   const double dsx = getParameter("DeltaSampleX");
   const double dsy = getParameter("DeltaSampleY");
   const double dsz = getParameter("DeltaSampleZ");
@@ -129,18 +120,18 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
   bool calibrateT0 = (m_cmpt == "none/sixteenpack") || (m_cmpt == "none");
   // we don't need to move the instrument if we are calibrating T0
   if (!calibrateT0) {
-    // rotation
-    pws = rotateInstrumentComponentBy(vx, vy, vz, drotang, m_cmpt, pws);
-
     // translation
     pws = moveInstruentComponentBy(dx, dy, dz, m_cmpt, pws);
+
+    // rotation
+    pws = rotateInstrumentComponentBy(drx, dry, drz, m_cmpt, pws);
   }
 
   // tweak sample position
   pws = moveInstruentComponentBy(dsx, dsy, dsz, "sample-position", pws);
 
   // calculate residual
-  // double residual = 0.0;
+  double residual = 0.0;
   for (int i = 0; i < pws->getNumberPeaks(); ++i) {
     // use the provided cached tofs
     const double tof = m_tofs[i];
@@ -165,25 +156,25 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
       out[i * 3 + j] = qv[j];
 
     // check the difference between n and target
-    // auto ubm = pws->sample().getOrientedLattice().getUB();
-    // V3D qv_target = ubm * pws->getPeak(i).getIntHKL();
-    // qv_target *= 2 * PI;
-    // V3D delta_qv = qv - qv_target;
-    // residual += delta_qv.norm2();
+    auto ubm = pws->sample().getOrientedLattice().getUB();
+    V3D qv_target = ubm * pws->getPeak(i).getIntHKL();
+    qv_target *= 2 * PI;
+    V3D delta_qv = qv - qv_target;
+    residual += delta_qv.norm2();
   }
 
   n_iter += 1;
 
-  // V3D dtrans = V3D(dx, dy, dz);
-  // V3D rotaxis = V3D(vx, vy, vz);
-  // residual /= pws->getNumberPeaks();
-  // std::ostringstream msgiter;
-  // msgiter.precision(8);
-  // msgiter << "residual@iter_" << n_iter << ": " << residual << "\n"
-  //         << "-- (dx, dy, dz) = " << dtrans << "\n"
-  //         << "-- ang@axis = " << drotang << "@" << rotaxis << "\n"
-  //         << "-- dT0 = " << dT0 << "\n\n";
-  // g_log.notice() << msgiter.str();
+  V3D dtrans = V3D(dx, dy, dz);
+  V3D drots = V3D(drx, dry, drz);
+  residual /= pws->getNumberPeaks();
+  std::ostringstream msgiter;
+  msgiter.precision(8);
+  msgiter << "residual@iter_" << n_iter << ": " << residual << "\n"
+          << "-- (dx, dy, dz) = " << dtrans << "\n"
+          << "-- (drx, dry, drz) = " << drots << "\n"
+          << "-- dT0 = " << dT0 << "\n\n";
+  g_log.notice() << msgiter.str();
 }
 
 // -------///
@@ -224,29 +215,52 @@ IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::moveInstruentComponentBy(double
 /**
  * @brief Rotate the instrument by angle axis
  *
- * @param rotVx  :: x of rotation axis
- * @param rotVy  :: y of rotation axis
- * @param rotVz  :: z of rotation axis
- * @param rotAng  :: rotation angle (in degree)
+ * @param rotX  :: rotate around X
+ * @param rotY  :: rotate around Y
+ * @param rotZ  :: rotate around Z
  * @param componentName  :: component name
  * @param pws  :: peak workspace
  * @return IPeaksWorkspace_sptr
  */
-IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::rotateInstrumentComponentBy(double rotVx, double rotVy, double rotVz,
-                                                                             double rotAng, std::string componentName,
+IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::rotateInstrumentComponentBy(double rotX, double rotY, double rotZ,
+                                                                             std::string componentName,
                                                                              IPeaksWorkspace_sptr &pws) const {
   // rotate
   IAlgorithm_sptr rot_alg = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
-  //
+  // around X
   rot_alg->initialize();
   rot_alg->setChild(true);
   rot_alg->setLogging(LOGCHILDALG);
   rot_alg->setProperty("Workspace", pws);
   rot_alg->setProperty("ComponentName", componentName);
-  rot_alg->setProperty("X", rotVx);
-  rot_alg->setProperty("Y", rotVy);
-  rot_alg->setProperty("Z", rotVz);
-  rot_alg->setProperty("Angle", rotAng);
+  rot_alg->setProperty("X", 1.0);
+  rot_alg->setProperty("Y", 0.0);
+  rot_alg->setProperty("Z", 0.0);
+  rot_alg->setProperty("Angle", rotX);
+  rot_alg->setProperty("RelativeRotation", true);
+  rot_alg->executeAsChildAlg();
+  // around Y
+  rot_alg->initialize();
+  rot_alg->setChild(true);
+  rot_alg->setLogging(LOGCHILDALG);
+  rot_alg->setProperty("Workspace", pws);
+  rot_alg->setProperty("ComponentName", componentName);
+  rot_alg->setProperty("X", 0.0);
+  rot_alg->setProperty("Y", 1.0);
+  rot_alg->setProperty("Z", 0.0);
+  rot_alg->setProperty("Angle", rotY);
+  rot_alg->setProperty("RelativeRotation", true);
+  rot_alg->executeAsChildAlg();
+  // around Z
+  rot_alg->initialize();
+  rot_alg->setChild(true);
+  rot_alg->setLogging(LOGCHILDALG);
+  rot_alg->setProperty("Workspace", pws);
+  rot_alg->setProperty("ComponentName", componentName);
+  rot_alg->setProperty("X", 0.0);
+  rot_alg->setProperty("Y", 0.0);
+  rot_alg->setProperty("Z", 1.0);
+  rot_alg->setProperty("Angle", rotZ);
   rot_alg->setProperty("RelativeRotation", true);
   rot_alg->executeAsChildAlg();
 

@@ -51,7 +51,7 @@ private:
                                                              std::string componentName,
                                                              Mantid::API::IPeaksWorkspace_sptr &pws) const;
 
-  Mantid::API::IPeaksWorkspace_sptr rotateInstrumentComponentBy(double rotVx, double rotVy, double rotVz, double rotAng,
+  Mantid::API::IPeaksWorkspace_sptr rotateInstrumentComponentBy(double rotX, double rotY, double rotZ,
                                                                 std::string componentName,
                                                                 Mantid::API::IPeaksWorkspace_sptr &pws) const;
 };

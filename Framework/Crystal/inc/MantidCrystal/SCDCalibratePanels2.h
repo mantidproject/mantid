@@ -99,8 +99,8 @@ private:
   Mantid::API::MatrixWorkspace_sptr getIdealQSampleAsHistogram1D(Mantid::API::IPeaksWorkspace_sptr pws);
 
   /// Helper functions for adjusting components
-  void adjustComponent(double dx, double dy, double dz, double rvx, double rvy, double rvz, double rang,
-                       std::string cmptName, Mantid::API::IPeaksWorkspace_sptr &pws);
+  void adjustComponent(double dx, double dy, double dz, double drx, double dry, double drz, std::string cmptName,
+                       Mantid::API::IPeaksWorkspace_sptr &pws);
 
   /// Generate a Table workspace to store the calibration results
   Mantid::API::ITableWorkspace_sptr generateCalibrationTable(std::shared_ptr<Geometry::Instrument> &instrument);
