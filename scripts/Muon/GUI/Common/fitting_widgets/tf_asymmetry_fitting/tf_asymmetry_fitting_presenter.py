@@ -20,7 +20,7 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
 
     def __init__(self, view: TFAsymmetryFittingView, model: TFAsymmetryFittingModel):
         """Initialize the TFAsymmetryFittingPresenter. Sets up the slots and event observers."""
-        super(TFAsymmetryFittingPresenter, self).__init__(view, model)
+        super(self.__class__, self).__init__(view, model)
 
         self.sequential_fit_finished_observer = GenericObserver(self.handle_sequential_fit_finished)
 

@@ -23,7 +23,7 @@ class GeneralFittingModel(BasicFittingModel):
 
     def __init__(self, context: MuonContext):
         """Initialize the GeneralFittingModel with emtpy fit data."""
-        super(GeneralFittingModel, self).__init__(context)
+        super(self.__class__, self).__init__(context)
 
         # This is a MultiDomainFunction if there are multiple domains in the function browser.
         self._simultaneous_fit_function = None

@@ -12,7 +12,7 @@ from Muon.GUI.Common.utilities import table_utils
 
 from qtpy.QtWidgets import QWidget
 
-ui_fit_function_options, _ = load_ui(__file__, "fit_function_options.ui")
+ui_fit_function_options, base_widget = load_ui(__file__, "fit_function_options.ui")
 
 ALLOWED_MINIMIZERS = ["Levenberg-Marquardt", "BFGS", "Conjugate gradient (Fletcher-Reeves imp.)",
                       "Conjugate gradient (Polak-Ribiere imp.)", "Damped GaussNewton",
@@ -24,7 +24,7 @@ RAW_DATA_TABLE_ROW = 3
 EVALUATE_AS_TABLE_ROW = 4
 
 
-class FitFunctionOptionsView(QWidget, ui_fit_function_options):
+class FitFunctionOptionsView(base_widget, ui_fit_function_options):
     """
     The FitFunctionOptionsView includes the Function Name line edit, FunctionBrowser and the fitting options table
     widget. It also holds the Fit Status and Chi Squared labels.
@@ -32,7 +32,7 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
 
     def __init__(self, parent: QWidget = None):
         """Initializes the FitFunctionOptionsView and sets up the fit options table and FunctionBrowser."""
-        super(FitFunctionOptionsView, self).__init__(parent)
+        super(self.__class__, self).__init__(parent)
         self.setupUi(self)
 
         self.start_x_line_edit = None

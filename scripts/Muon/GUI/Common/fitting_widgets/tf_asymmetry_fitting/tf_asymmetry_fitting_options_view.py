@@ -9,17 +9,17 @@ from mantidqt.utils.qt.line_edit_double_validator import LineEditDoubleValidator
 
 from qtpy.QtWidgets import QWidget
 
-ui_tf_asymmetry_fitting_options, _ = load_ui(__file__, "tf_asymmetry_fitting_options.ui")
+ui_tf_asymmetry_fitting_options, base_widget = load_ui(__file__, "tf_asymmetry_fitting_options.ui")
 
 
-class TFAsymmetryFittingOptionsView(QWidget, ui_tf_asymmetry_fitting_options):
+class TFAsymmetryFittingOptionsView(base_widget, ui_tf_asymmetry_fitting_options):
     """
     The TFAsymmetryFittingOptionsView has a line edit to display the normalisation factor option.
     """
 
     def __init__(self, parent: QWidget = None):
         """Initializes the TFAsymmetryFittingOptionsView."""
-        super(TFAsymmetryFittingOptionsView, self).__init__(parent)
+        super(self.__class__, self).__init__(parent)
         self.setupUi(self)
 
         self.normalisation_validator = LineEditDoubleValidator(self.normalisation_line_edit, 0.0)
