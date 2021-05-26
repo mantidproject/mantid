@@ -154,7 +154,11 @@ void IPeakFunction::setParameter(const std::string &name, const double &value, b
   ParamFunction::setParameter(name, value, explicitlySet);
 }
 
-// integrate based on dirty parameters then cache the result
+/*
+ * @brief Integrate based on dirty parameters then cache the result
+ * @details Returns the integrated intensity of the peak function, using the peak radius
+ * to determine integration borders.
+ */
 IntegrationResultCache IPeakFunction::integrate() const {
   if (!integrationResult || m_parameterContextDirty) {
     auto const interval = getDomainInterval();
@@ -171,18 +175,14 @@ IntegrationResultCache IPeakFunction::integrate() const {
   return *integrationResult;
 }
 
-/// Returns the integral intensity of the peak function, using the peak radius
+/// Returns the integrated intensity of the peak function, using the peak radius
 /// to determine integration borders.
 double IPeakFunction::intensity() const { return integrate().first; }
 
-/// Returns the uncertainty associated to the integral intensity of the peak function
-double IPeakFunction::intensityError() {
+double IPeakFunction::intensityError() const {
   auto const interval = getDomainInterval();
-
   PeakFunctionIntegrator integrator;
-
-  auto const result = integrator.integrate(*this, interval.first, interval.second);
-  return integrator.integrateError(*this);
+  return integrator.integrateError(*this, interval.first, interval.second);
 }
 
 /// Sets the integral intensity of the peak by adjusting the height.

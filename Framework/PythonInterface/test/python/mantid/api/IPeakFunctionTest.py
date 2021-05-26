@@ -70,6 +70,16 @@ class RectangularFunction(IPeakFunction):
 
         return values
 
+    def intensityErrorLocal(self):
+        r"""Analytical expression for the error in the integrated intensity arising from errors in
+        uncorrelated fit paramaters"""
+        height = self.getParameterValue("Height")
+        height_error = self.getError("Height")
+        fwhm = self.getParameterValue("Fwhm")
+        fwhm_error = self.getError("Fwhm")
+        intensity = height * fwhm
+        return intensity * np.sqrt((height / height_error)**2 + (fwhm / fwhm_error)**2)
+
 
 class IPeakFunctionTest(unittest.TestCase):
 
@@ -114,22 +124,21 @@ class IPeakFunctionTest(unittest.TestCase):
         self.assertAlmostEquals(func.height(), 4.0, places=10)
         self.assertAlmostEquals(func.intensity(), 12.0, places=10)
 
-    def test_get_set_intensityError(self):
-        FunctionFactory.subscribe(RectangularFunction)
-        func_name = RectangularFunction.__name__
-        func = FunctionFactory.createFunction(func_name)
+    def test_intensityError(self):
+        func = RectangularFunction()
         func.initialize()
-        func.setParameter("Center", 1.0)
-        func.setParameter("Height", 2.0)
-        func.setParameter("Fwhm", 3.0)
-        func.setError("Height", 7.0)
-        func.setError("Fwhm", 5.0)
+        func.setCentre(1.0)
+        func.setHeight(2.0)
+        func.setFwhm(3.0)
+        # shifting the box doesn't change its area
+        func.setError("Center", 0.1)
+        self.assertEqual(func.intensityError(), 0.0, 1e-6)
+        # general case
+        func.setError("Center", 0.1)
+        func.setError("Height", 0.2)
+        func.setError("Fwhm", 0.3)
+        self.assertEqual(func.intensityError(), func.intensityErrorLocal(), 1e-6)
 
-        # This is a rectangle function with height 2 and width 3, centered
-        # around 1.0. The intensity error should be 31.0 (Height * Fwhm_error + Height_error * Fwhm)
-        result = func.intensityError()
-        self.assertAlmostEquals(result, 31.0, places=10)
-        FunctionFactory.unsubscribe(func_name)
 
 if __name__ == '__main__':
     unittest.main()

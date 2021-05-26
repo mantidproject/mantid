@@ -64,8 +64,13 @@ public:
   /// Returns the integral intensity of the peak
   virtual double intensity() const;
 
-  /// Returns the uncertainty associated to the integral intensity of the peak
-  virtual double intensityError();
+  /**
+   * Error in the integrated intensity of the peak due to uncertainties in the values of the fit parameters.
+   * @details if the peak function contains no fit-parameter uncertainties, then the integration error is set to NaN.
+   * Also, this function assumes no correlation between the fit parameters, so that their corresponding errors are
+   * summed up in quadrature.
+   */
+  virtual double intensityError() const;
 
   /// Sets the integral intensity of the peak
   virtual void setIntensity(const double newIntensity);
@@ -117,7 +122,6 @@ public:
   }
 
 protected:
-  // helper function for intensity() and intensityError()
   virtual IntegrationResultCache integrate() const;
 
 private:
