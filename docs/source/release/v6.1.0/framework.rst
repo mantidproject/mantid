@@ -9,6 +9,9 @@ Framework Changes
    :class: screenshot
    :width: 350px
    :align: right
+   :figwidth: 350px
+
+   Calculated multiple scattering intensity using POLARIS data for a cylindrical Si sample
 
 Algorithms
 ----------
