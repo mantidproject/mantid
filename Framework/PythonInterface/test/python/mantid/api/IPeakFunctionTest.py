@@ -67,7 +67,7 @@ class RectangularFunction(IPeakFunction):
         fwhm = self.getParameterValue("Fwhm")
         fwhm_error = self.getError("Fwhm")
         intensity = height * fwhm
-        return intensity * np.sqrt((height / height_error)**2 + (fwhm / fwhm_error)**2)
+        return intensity * np.sqrt((height_error / height)**2 + (fwhm_error / fwhm)**2)
 
 
 FunctionFactory.subscribe(RectangularFunction)
