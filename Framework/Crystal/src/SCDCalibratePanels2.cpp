@@ -414,7 +414,7 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   //-- bounds&constraints def
   std::ostringstream tie_str;
   tie_str << "DeltaX=0.0,DeltaY=0.0,"
-          << "Theta=1.0,Phi=0.0,DeltaRotationAngle=0.0";
+          << "RotX=0.0,RotY=0.0,RotZ=0.0";
   if (!tuneSamplepos) {
     tie_str << ",DeltaSampleX=0.0,DeltaSampleY=0.0,DeltaSampleZ=0.0";
   }
@@ -661,7 +661,7 @@ void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   //-- bounds&constraints def
   std::ostringstream tie_str;
   tie_str << "DeltaX=0.0,DeltaY=0.0,DeltaZ=0.0,"
-          << "Theta=0.0,Phi=0.0,DeltaRotationAngle=0.0,"
+          << "RotX=0.0,RotY=0.0,RotZ=0.0,"
           << "DeltaSampleX=0.0,DeltaSampleY=0.0,DeltaSampleZ=0.0";
   std::ostringstream constraint_str;
   double r_dT0 = getProperty("SearchRadiusT0");
@@ -719,7 +719,7 @@ void SCDCalibratePanels2::optimizeSamplePos(IPeaksWorkspace_sptr pws, IPeaksWork
   //-- bounds&constraints def
   std::ostringstream tie_str;
   tie_str << "DeltaX=0.0,DeltaY=0.0,DeltaZ=0.0,"
-          << "Theta=0.0,Phi=0.0,DeltaRotationAngle=0.0,"
+          << "RotX=0.0,RotY=0.0,RotZ=0.0,"
           << "DeltaT0=" << m_T0;
   std::ostringstream constraint_str;
   double r_dsp = getProperty("SearchRadiusSamplePos");

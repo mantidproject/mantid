@@ -131,7 +131,7 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
   pws = moveInstruentComponentBy(dsx, dsy, dsz, "sample-position", pws);
 
   // calculate residual
-  double residual = 0.0;
+  // double residual = 0.0;
   for (int i = 0; i < pws->getNumberPeaks(); ++i) {
     // use the provided cached tofs
     const double tof = m_tofs[i];
@@ -156,25 +156,25 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
       out[i * 3 + j] = qv[j];
 
     // check the difference between n and target
-    auto ubm = pws->sample().getOrientedLattice().getUB();
-    V3D qv_target = ubm * pws->getPeak(i).getIntHKL();
-    qv_target *= 2 * PI;
-    V3D delta_qv = qv - qv_target;
-    residual += delta_qv.norm2();
+    // auto ubm = pws->sample().getOrientedLattice().getUB();
+    // V3D qv_target = ubm * pws->getPeak(i).getIntHKL();
+    // qv_target *= 2 * PI;
+    // V3D delta_qv = qv - qv_target;
+    // residual += delta_qv.norm2();
   }
 
   n_iter += 1;
 
-  V3D dtrans = V3D(dx, dy, dz);
-  V3D drots = V3D(drx, dry, drz);
-  residual /= pws->getNumberPeaks();
-  std::ostringstream msgiter;
-  msgiter.precision(8);
-  msgiter << "residual@iter_" << n_iter << ": " << residual << "\n"
-          << "-- (dx, dy, dz) = " << dtrans << "\n"
-          << "-- (drx, dry, drz) = " << drots << "\n"
-          << "-- dT0 = " << dT0 << "\n\n";
-  g_log.notice() << msgiter.str();
+  // V3D dtrans = V3D(dx, dy, dz);
+  // V3D drots = V3D(drx, dry, drz);
+  // residual /= pws->getNumberPeaks();
+  // std::ostringstream msgiter;
+  // msgiter.precision(8);
+  // msgiter << "residual@iter_" << n_iter << ": " << residual << "\n"
+  //         << "-- (dx, dy, dz) = " << dtrans << "\n"
+  //         << "-- (drx, dry, drz) = " << drots << "\n"
+  //         << "-- dT0 = " << dT0 << "\n\n";
+  // g_log.notice() << msgiter.str();
 }
 
 // -------///
