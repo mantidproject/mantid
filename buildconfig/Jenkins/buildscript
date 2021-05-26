@@ -28,9 +28,9 @@ function onexit {
 
 function run_with_xvfb {
     if [ $(command -v xvfb-run) ]; then
-        # -e=--error-file. A bug in Xvfb on RHEL7 means --error-file
-        # produces an error: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=337703;msg=2
-        xvfb-run -e /dev/stderr --server-args="-screen 0 640x480x24" \
+        # Use -e because a bug on RHEL7 means --error-file produces an error: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=337703;msg=2
+        # Use -noreset because of an X Display bug caused by a race condition in xvfb: https://gitlab.freedesktop.org/xorg/xserver/-/issues/1102
+        xvfb-run -e /dev/stderr --server-args="-core -noreset -screen 0 640x480x24" \
         --server-num=${XVFB_SERVER_NUM} $@
     else
         eval $@
