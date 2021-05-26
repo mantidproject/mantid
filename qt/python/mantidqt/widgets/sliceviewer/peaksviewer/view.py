@@ -219,11 +219,6 @@ class PeaksViewerCollectionView(QWidget):
         self._peaks_layout: Optional[QVBoxLayout] = None
         self._setup_ui()
 
-    def __getitem__(self, item: int) -> PeaksViewerView:
-        if item > self._peaks_layout.count():
-            raise IndexError('PeaksViewerCollectionView index out of range')
-        return self._peaks_layout.itemAt(item).widget()
-
     @property
     def peak_actions_view(self) -> PeakActionsView:
         return self._peak_actions_view

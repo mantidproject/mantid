@@ -101,10 +101,6 @@ class PeaksViewerPresenter:
             from mantid.kernel import logger
             logger.warning("PeaksViewer: Unknown event detected: {}".format(event))
 
-    def redraw_peaks(self):
-        self.model.clear_peak_representations()
-        self.model.draw_peaks(self._view.sliceinfo, self._view.painter)
-
     def add_peak(self, pos):
         self.model.add_peak(pos, self._view.sliceinfo.frame)
 
@@ -179,7 +175,6 @@ class PeaksViewerCollectionPresenter:
         self._view = view
         self._actions_view = view.peak_actions_view
         self._actions_view.subscribe(self)
-        #self._actions_presenter: PeakActionsPresenter = self._create_peaks_actions_presenter()
         self._child_presenters: List[PeaksViewerPresenter] = []
         self._ads_observer = None
         self.setup_ads_observer()
@@ -206,7 +201,6 @@ class PeaksViewerCollectionPresenter:
         presenter = PeaksViewerPresenter(self._create_peaksviewer_model(name),
                                          self._view.append_peaksviewer())
         self._child_presenters.append(presenter)
-        self._actions_view.append_peaksworkspace(name)
         return presenter
 
     def overlay_peaksworkspaces(self, names_to_overlay):
@@ -236,6 +230,8 @@ class PeaksViewerCollectionPresenter:
 
         self.notify(PeaksViewerPresenter.Event.OverlayPeaks)
 
+        self._actions_view.set_peaksworkspace(self.workspace_names())
+
     def remove_peaksworkspace(self, name):
         """
         Remove the named workspace from display. No op if no workspace can be found with that name
@@ -251,7 +247,6 @@ class PeaksViewerCollectionPresenter:
                 self._view.remove_peaksviewer(child.view)
 
         child_presenters.remove(presenter_to_remove)
-        self._actions_view.remove_peaksworkspace(name)
 
     def workspace_names(self):
         """
@@ -324,7 +319,7 @@ class PeaksViewerCollectionPresenter:
     # Peak Actions Functionality
     #
     def add_delete_peak(self, pos):
-        presenter_active = self.child_presenter(self._actions_view.active_peaksworkspace_index)
+        presenter_active = self.child_presenter(self._actions_view.active_peaksworkspace)
         if self._actions_view.adding_mode_on:
             logger.debug(f"PeaksViewer: Adding peak position {pos}")
             presenter_active.add_peak(pos)

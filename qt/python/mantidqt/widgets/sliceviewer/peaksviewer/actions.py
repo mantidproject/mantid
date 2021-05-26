@@ -18,15 +18,15 @@ from typing import Optional
 class PeakActionsView(QtWidgets.QWidget):
     def __init__(self, parent: Optional['PeaksViewerCollectionView'] = None):
         super(PeakActionsView, self).__init__(parent=parent)
-        self._presenter: 'PeakActionsPresenter' = None
+        self._presenter: 'PeaksViewerCollectionPresenter' = None
         self.ui = None
         self._setup_ui()
 
     @property
-    def presenter(self) -> 'PeakActionsPresenter':
+    def presenter(self) -> 'PeaksViewerCollectionPresenter':
         return self._presenter
 
-    def subscribe(self, presenter: 'PeakActionsPresenter') -> None:
+    def subscribe(self, presenter: 'PeaksViewerCollectionPresenter') -> None:
         r"""
         @brief Subscribe a presenter to the viever
         @details The presenter must have method 'response_function' able to handle the event
@@ -45,21 +45,26 @@ class PeakActionsView(QtWidgets.QWidget):
         return self.ui.add_peaks_button.isChecked()
 
     @property
-    def active_peaksworkspace_index(self):
-        r"""Find index of the currently selected PeaksWorkspace. Returns -1 is nothing is selected"""
-        return self.ui.active_peaks_combobox.currentIndex()
+    def active_peaksworkspace(self):
+        r"""Return the currently selected PeaksWorkspace."""
+        return self.ui.active_peaks_combobox.currentText()
 
     def deactivate_peak_adding(self):
         self.ui.add_peaks_button.setChecked(False)
         self.ui.remove_peaks_button.setChecked(False)
 
-    def append_peaksworkspace(self, name: str) -> None:
-        self.ui.active_peaks_combobox.addItem(name)
+    def set_peaksworkspace(self, names):
+        """Set the items in the combobox.
 
-    def remove_peaksworkspace(self, name: str):
-        box = self.ui.active_peaks_combobox
-        index = box.findText(name)
-        box.removeItem(index)
+        The names are sorted to prevent reordering when the workspace
+        is replaced in the ADS after adding or removing a peak.
+
+        The current name set back after we replace all the items.
+        """
+        current_name = self.ui.active_peaks_combobox.currentText()
+        self.ui.active_peaks_combobox.clear()
+        self.ui.active_peaks_combobox.addItems(sorted(names))
+        self.ui.active_peaks_combobox.setCurrentText(current_name)
 
     def _setup_ui(self):
         self.ui = load_ui(__file__, 'actions.ui', self)

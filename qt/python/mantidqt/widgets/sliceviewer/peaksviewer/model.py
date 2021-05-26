@@ -88,6 +88,7 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         self._representations = representations
 
     def add_peak(self, pos, frame):
+        """Add a peak to the workspace using the given position and frame"""
         self.peaks_workspace.addPeak(pos, frame)
 
     def delete_peak(self, pos, frame):
