@@ -541,16 +541,15 @@ std::tuple<bool, double, double> CalculateMultipleScattering::scatter(
 void CalculateMultipleScattering::q_dir(Geometry::Track &track, const MatrixWorkspace_sptr SOfQ, const double kinc,
                                         const double scatteringXSection, Kernel::PseudoRandomNumberGenerator &rng,
                                         double &QSS, double &weight) {
-  double QQ, cosT, qrange, kf;
-  kf = kinc; // elastic only so far
-  double qmin = abs(kf - kinc);
-  qrange = 2 * kinc;
+  const double kf = kinc; // elastic only so far
+  const double qmin = abs(kf - kinc);
+  const double qrange = 2 * kinc;
 
-  QQ = qmin + qrange * rng.nextValue();
+  const double QQ = qmin + qrange * rng.nextValue();
   // T = 2theta
-  cosT = (kinc * kinc + kf * kf - QQ * QQ) / (2 * kinc * kf);
+  const double cosT = (kinc * kinc + kf * kf - QQ * QQ) / (2 * kinc * kf);
 
-  double SQ = interpolateLogQuadratic(SOfQ, QQ);
+  const double SQ = interpolateLogQuadratic(SOfQ, QQ);
   QSS += QQ * SQ;
   weight = weight * scatteringXSection * SQ * QQ;
   updateTrackDirection(track, cosT, rng.nextValue() * 2 * M_PI);
