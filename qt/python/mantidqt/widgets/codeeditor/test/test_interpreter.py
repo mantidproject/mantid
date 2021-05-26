@@ -57,8 +57,8 @@ class PythonFileInterpreterTest(unittest.TestCase):
     @mock.patch("mantidqt.utils.asynchronous.Receiver.on_error")
     def test_variables_reset(self, mock_on_error):
         w = PythonFileInterpreter(content='x=\'this is a string\'\r\nprint(x)')
-        w.code_completer.update_completion_api = mock.MagicMock()
-        w.code_completer.add_simpleapi_to_completions_if_required = mock.MagicMock()
+        w.sig_editor_modified = mock.MagicMock()
+        w._presenter.model.sig_exec_success = mock.MagicMock()
         w.execute_async_blocking()
         self.assertTrue('x' in w._presenter.model._globals_ns.keys())
 
