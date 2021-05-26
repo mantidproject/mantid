@@ -54,9 +54,12 @@ class PythonFileInterpreterTest(unittest.TestCase):
                 self.assertEqual(w.clear_key_binding(key_combo), None,
                                  msg=fail_msg)
 
-    def test_variables_reset(self):
+    @mock.patch("mantidqt.utils.asynchronous.Receiver.on_error")
+    def test_variables_reset(self, mock_on_error):
         w = PythonFileInterpreter(content='x=\'this is a string\'\r\nprint(x)')
-        w.execute_async()
+        w.code_completer.update_completion_api = mock.MagicMock()
+        w.code_completer.add_simpleapi_to_completions_if_required = mock.MagicMock()
+        w.execute_async_blocking()
         self.assertTrue('x' in w._presenter.model._globals_ns.keys())
 
         w._presenter.is_executing = False
@@ -66,15 +69,16 @@ class PythonFileInterpreterTest(unittest.TestCase):
         w._presenter.view.editor.selectedText.return_value = 'print(x)'
         w._presenter.view.editor.getSelection = mock.MagicMock()
         w._presenter.view.editor.getSelection.return_value = [0, 0, 0, 0]
-        w.execute_async()
+        w.execute_async_blocking()
         self.assertTrue('x' in w._presenter.model._globals_ns.keys())
 
         w._presenter.view.editor.text = mock.MagicMock()
         w._presenter.view.editor.text.return_value = 'print(x)'
         w._presenter.is_executing = False
         w._presenter.view.editor.hasSelectedText.return_value = False
-        w.execute_async()
+        w.execute_async_blocking()
         self.assertFalse('x' in w._presenter.model._globals_ns.keys())
+        mock_on_error.assert_called_once()
 
     def test_connect_to_progress_reports_connects_sig_process_to_the_code_editor_progress(self):
         w = PythonFileInterpreter()
