@@ -487,9 +487,9 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   }
 
   // apply the cali results (for output cali table and file)
-  adjustComponent(0.0, 0.0, dL1_optimized, 1.0, 0.0, 0.0, 0.0, pws->getInstrument()->getSource()->getName(), pws);
+  adjustComponent(0.0, 0.0, dL1_optimized, 0.0, 0.0, 0.0, pws->getInstrument()->getSource()->getName(), pws);
   m_T0 = dT0_optimized;
-  adjustComponent(dsx_optimized, dsy_optimized, dsz_optimized, 1.0, 0.0, 0.0, 0.0, "sample-position", pws);
+  adjustComponent(dsx_optimized, dsy_optimized, dsz_optimized, 0.0, 0.0, 0.0, "sample-position", pws);
   // logging
   int npks = pws->getNumberPeaks();
   calilog << "-- Fit L1 results using " << npks << " peaks:\n"
@@ -754,7 +754,7 @@ void SCDCalibratePanels2::optimizeSamplePos(IPeaksWorkspace_sptr pws, IPeaksWork
   }
 
   // apply the calibration results to pws for ouptut file
-  adjustComponent(dsx_optimized, dsy_optimized, dsz_optimized, 1.0, 0.0, 0.0, 0.0, "sample-position", pws);
+  adjustComponent(dsx_optimized, dsy_optimized, dsz_optimized, 0.0, 0.0, 0.0, "sample-position", pws);
   int npks = pws->getNumberPeaks();
   // logging
   calilog << "-- Tune SamplePos results using " << npks << " peaks:\n"
