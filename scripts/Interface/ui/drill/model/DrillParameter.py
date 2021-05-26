@@ -11,10 +11,6 @@ from qtpy.QtCore import QObject, Signal
 class DrillParameter(QObject):
 
     """
-    """
-    _sample = None
-
-    """
     Name of the parameter.
     """
     _name = None
@@ -41,9 +37,8 @@ class DrillParameter(QObject):
     """
     invalid = Signal(str)
 
-    def __init__(self, sample, name, controller):
+    def __init__(self, name, controller):
         super().__init__()
-        self._sample = sample
         self._name = name
         self._controller = controller
 
