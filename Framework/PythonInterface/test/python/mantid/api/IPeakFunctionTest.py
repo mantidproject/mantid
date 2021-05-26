@@ -124,6 +124,18 @@ class IPeakFunctionTest(unittest.TestCase):
         self.assertAlmostEquals(func.height(), 4.0, places=10)
         self.assertAlmostEquals(func.intensity(), 12.0, places=10)
 
+    def test_get_set_matrix_workspace(self):
+        ws = LoadEmptyInstrument(InstrumentName='ENGIN-X', OutputWorkspace='ws')
+        LoadParameterFile(Workspace=ws, Filename='ENGIN-X_Parameters.xml')
+        axis = ws.getAxis(0)
+        unit = axis.getUnit()
+        axis.setUnit("TOF")
+
+        func = FunctionFactory.Instance().createPeakFunction("BackToBackExponential")
+        func.setParameter(3, 24000)  # set centre
+        func.setMatrixWorkspace(ws, 800, 0.0, 0.0)  # calculate A,B,S
+        self.assertTrue(func.isExplicitlySet(1))
+
     def test_intensityError(self):
         func = RectangularFunction()
         func.initialize()
