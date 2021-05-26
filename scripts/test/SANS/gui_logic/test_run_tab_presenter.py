@@ -664,10 +664,9 @@ class RunTabPresenterTest(unittest.TestCase):
         view.output_mode_both_radio_button.isChecked = mock.MagicMock(return_value=False)
         self.presenter.set_view(view)
 
-        self.assertRaises(RuntimeError, self.presenter._validate_output_modes)
+        self.assertRaises(ValueError, self.presenter._validate_output_modes)
 
     def test_that_validate_output_modes_raises_if_no_file_types_selected_for_both_mode(self):
-
         view = mock.MagicMock()
 
         view.save_types = [SaveType.NO_TYPE]
@@ -677,7 +676,7 @@ class RunTabPresenterTest(unittest.TestCase):
         view.output_mode_both_radio_button.isChecked = mock.MagicMock(return_value=True)
         self.presenter.set_view(view)
 
-        self.assertRaises(RuntimeError, self.presenter._validate_output_modes)
+        self.assertRaises(ValueError, self.presenter._validate_output_modes)
 
     def test_that_validate_output_modes_does_not_raise_if_no_file_types_selected_for_memory_mode(self):
 
