@@ -70,6 +70,9 @@ class RectangularFunction(IPeakFunction):
         return intensity * np.sqrt((height / height_error)**2 + (fwhm / fwhm_error)**2)
 
 
+FunctionFactory.subscribe(RectangularFunction)
+
+
 class IPeakFunctionTest(unittest.TestCase):
 
     def test_instance_can_be_created_standalone(self):
