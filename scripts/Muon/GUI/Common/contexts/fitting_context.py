@@ -7,10 +7,11 @@
 from collections import OrderedDict
 import re
 
-from mantid.api import AnalysisDataService
 import numpy as np
 
 from mantidqt.utils.observer_pattern import Observable
+from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
+
 
 # Magic values for names of columns in the fit parameter table
 NAME_COL = 'Name'
@@ -232,7 +233,7 @@ class FitInformation(object):
 
         all_names = []
         for ws_name in self.output_workspace_names:
-            logs = _run(ws_name).getLogData()
+            logs = retrieve_ws(ws_name).run().getLogData()
             all_names.extend([log.name for log in logs if filter_fn(log)])
 
         return all_names
@@ -243,7 +244,7 @@ class FitInformation(object):
         :return: True if the log exists on all of the input workspaces False, otherwise
         """
         for ws_name in self.output_workspace_names:
-            run = _run(ws_name)
+            run = retrieve_ws(ws_name).run()
             if not run.hasProperty(log_name):
                 return False
 
@@ -260,10 +261,9 @@ class FitInformation(object):
         :param log_name: The name of an existing log
         :return: A single double value
         """
-        ads = AnalysisDataService.Instance()
 
         def value_from_workspace(wksp_name):
-            run = ads.retrieve(wksp_name).run()
+            run = retrieve_ws(wksp_name).run()
             prop = run.getProperty(log_name)
             if hasattr(prop, 'timeAverageValue'):
                 return prop.timeAverageValue()
@@ -491,12 +491,3 @@ class FittingContext(object):
     @guess_ws.setter
     def guess_ws(self, value):
         self._guess = value
-
-
-# Private functions
-def _run(ws_name):
-    """
-    :param ws_name: A workspace name in the ADS
-    :return: A list of the log data for a workspace
-    """
-    return AnalysisDataService.Instance().retrieve(ws_name).run()
