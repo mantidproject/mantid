@@ -28,7 +28,8 @@ void export_IPeakFunction() {
       .def("fwhm", &IPeakFunction::fwhm, arg("self"), "Returns the fwhm of the peak function.")
       .def("intensity", &IPeakFunction::intensity, arg("self"), "Returns the integral intensity of the peak function.")
       .def("intensityError", &IPeakFunction::intensityError, arg("self"),
-           "Returns the integral intensity error of the peak function.")
+           "Returns the integral intensity error of the peak function due to uncertainties in uncorrelated fit "
+           "parameters.")
       .def("setIntensity", &IPeakFunction::setIntensity, (arg("self"), arg("new_intensity")),
            "Changes the integral intensity of the peak function by setting its "
            "height.");

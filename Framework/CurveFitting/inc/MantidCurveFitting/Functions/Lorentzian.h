@@ -37,7 +37,7 @@ public:
   double height() const override;
   double fwhm() const override { return getParameter("FWHM"); }
   double intensity() const override { return getParameter("Amplitude"); }
-  double intensityError() override { return getError("Amplitude"); }
+  double intensityError() const override { return getError("Amplitude"); }
   void setCentre(const double c) override { setParameter("PeakCentre", c); }
   void setHeight(const double h) override;
   void setFwhm(const double w) override;

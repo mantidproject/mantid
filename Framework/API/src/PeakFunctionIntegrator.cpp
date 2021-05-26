@@ -10,6 +10,7 @@
 #include "gsl/gsl_errno.h"
 #include <boost/math/distributions/students_t.hpp>
 #include <iomanip>
+#include <numeric>
 
 namespace Mantid {
 namespace API {
@@ -119,85 +120,62 @@ IntegrationResult PeakFunctionIntegrator::integrate(const IPeakFunction &peakFun
                                           m_integrationWorkspace, &result.result, &result.error);
   result.success = (result.errorCode == GSL_SUCCESS);
   result.intervals = m_integrationWorkspace->size;
-
   return result;
 }
 
-double PeakFunctionIntegrator::integrateError(IPeakFunction &peakFunction) {
-  auto const interval = peakFunction.getDomainInterval();
-  const size_t nData = m_integrationWorkspace->size;
-  double *domainArray = m_integrationWorkspace->elist;
-
-  FunctionDomain1DView domain(domainArray, nData);
-  FunctionValues values(domain);
-  values.zeroCalculated();
-
-  double sigma = 1;
-  double prob = std::erf(sigma / sqrt(2));
-  // critical value for t distribution
-  double alpha = (1 + prob) / 2;
-  double eValue = std::nan("");
-
-  bool hasErrors = false;
-
-  peakFunction.function(domain, values);
-  auto covar = peakFunction.getCovarianceMatrix();
-
+/**
+ * @brief Error in the integrated intensity within an continuous interval due to uncertainties in the values
+ * of the fit parameters.
+ * @details if the peak function contains no fit-parameter uncertainties, then the integration error is set to NaN.
+ * Also, this function assumes no correlation between the fit parameters, so that their corresponding errors are
+ * summed up in quadrature.
+ * @param peakFunction: the peak function to integrate
+ * @param lowerLimit: lower limit of the interval over which we integrate
+ * @param upperLimit: upper limit of the interval over which we integrate
+ */
+double PeakFunctionIntegrator::integrateError(const IPeakFunction &peakFunction, double lowerLimit,
+                                              double upperLimit) const {
+  const double DBL_EPS = std::numeric_limits<double>::epsilon();
   size_t nParams = peakFunction.nParams();
 
-  TempJacobian J(nData, peakFunction.nParams());
+  std::vector<double> parameterErrors(nParams);
+  bool hasErrors = false;
+  for (size_t i = 0; i < nParams; ++i) {
+    parameterErrors[i] = peakFunction.getError(i);
+    if (parameterErrors[i] > DBL_EPS)
+      hasErrors = true;
+  }
+  if (!hasErrors)
+    return std::nan("");
 
-  if (!covar) {
-    for (size_t j = 0; j < nParams; ++j) {
-      // throw std::runtime_error(fn->parameterName(j+3));
-      if (peakFunction.getError(j) != 0.0) {
-        hasErrors = true;
-        break;
-      }
-    }
+  // estimate the partial derivatives of the integrated intensity with respect to the fit parameters
+  std::vector<double> gradients(nParams);
+  auto peakFunctionClone = std::dynamic_pointer_cast<IPeakFunction>(peakFunction.clone());
+  for (size_t i = 0; i < nParams; i++) {
+    double parameterValue = peakFunction.getParameter(i);
+    double parameterError = parameterErrors[i];
+    if (parameterError > DBL_EPS) {
+      double step(parameterError / 2.0);
+      // evaluate the integrated intensity after increasing parameter `i`
+      peakFunctionClone->setParameter(i, parameterValue + step);
+      std::shared_ptr<const IPeakFunction> functionPlus(
+          std::const_pointer_cast<const IPeakFunction>(peakFunctionClone));
+      auto resultPlus = integrate(*functionPlus, lowerLimit, upperLimit);
+      // evaluate the integrated intensity after decreasing parameter `i`
+      peakFunctionClone->setParameter(i, parameterValue - step);
+      auto functionMinus(std::const_pointer_cast<const IPeakFunction>(peakFunctionClone));
+      auto resultMinus = integrate(*functionMinus, lowerLimit, upperLimit);
+      // restore the original value and compute the partial derivative
+      peakFunctionClone->setParameter(i, parameterValue);
+      gradients[i] = (resultPlus.result - resultMinus.result) / parameterError;
+    } else
+      gradients[i] = 0.0; // don't bother to calculate since the parameter's error is negligible
   }
 
-  if (covar || hasErrors) {
-
-    try {
-      peakFunction.functionDeriv(domain, J);
-    } catch (...) {
-      peakFunction.calNumericalDeriv(domain, J);
-    }
-
-    if (covar) {
-      double s = 0.0;
-      const Kernel::Matrix<double> &C = *covar;
-      for (size_t i = 0; i < nParams; ++i) {
-        double tmp = J.get(0, i);
-        s += C[i][i] * tmp * tmp;
-        for (size_t j = i + 1; j < nParams; ++j) {
-          s += J.get(0, i) * C[i][j] * J.get(0, j) * 2;
-        }
-      }
-      // values.getCalculated(i);
-
-      size_t dof = 1 - nParams;
-      double T = 1.0;
-      if (dof != 0) {
-        boost::math::students_t dist(static_cast<double>(dof));
-        T = boost::math::quantile(dist, alpha);
-      }
-
-      eValue = T * std::sqrt(s * peakFunction.getReducedChiSquared());
-    } else {
-      double err = 0.0;
-      for (size_t i = 0; i < nData; i++) {
-        for (size_t j = 0; j < nParams; ++j) {
-          double d = J.get(i, j) * peakFunction.getError(j);
-          err += d * d;
-        }
-      }
-      if (err != 0.0)
-        eValue = std::sqrt(err);
-    }
-  }
-  return eValue;
+  double error(0.0);
+  for (size_t i = 0; i < nParams; i++)
+    error += pow(gradients[i] * parameterErrors[i], 2);
+  return sqrt(error);
 }
 
 /** Method that wraps an IPeakFunction for use with GSL functions.
