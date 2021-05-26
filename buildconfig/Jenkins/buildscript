@@ -412,7 +412,7 @@ userprops_file=$userconfig_dir/Mantid.user.properties
 echo MultiThreaded.MaxCores=2 > $userprops_file
 
 if [[ ${DO_UNITTESTS} == true ]]; then
-    run_with_xvfb $CTEST_EXE --no-compress-output -R "widget|view|qt" -j${BUILD_THREADS:?} --output-on-failure
+    run_with_xvfb $CTEST_EXE --repeat-until-fail 500 --no-compress-output -R test_interpreter -j${BUILD_THREADS:?} --output-on-failure
     terminate_xvfb_sessions
 fi
 
