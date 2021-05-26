@@ -64,6 +64,21 @@ class QtAsyncTaskDecoratorTest(unittest.TestCase):
         # instead of using .start()
         self.assertFalse(tasks.finished_called)
 
+    def test_unit_test_mode_uses_run(self, mocked_adaptor):
+        class StubTestFixture(IQtAsync):
+            def __init__(self):
+                super().__init__()
+                self.set_unit_test_mode(True)
+
+            @qt_async_task
+            def run_synchronous(self):
+                pass
+
+        test_fixture = StubTestFixture()
+        test_fixture.run_synchronous()
+        mocked_adaptor.return_value.start.assert_not_called()
+        mocked_adaptor.return_value.run.assert_called_once()
+
     @mock.patch("mantidqt.utils.async_qt_adaptor.Logger", autospec=True)
     def test_abort_called_in_progress(self, mocked_logger, mocked_adaptor):
         task = StubTask()

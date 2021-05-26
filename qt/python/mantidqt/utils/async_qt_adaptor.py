@@ -33,6 +33,23 @@ class IQtAsync:
     """
     def __init__(self):
         self._worker = None
+        self._run_synchronously = False
+
+    def set_unit_test_mode(self, value: bool):
+        """
+        Enables unit test mode to prevent having to deal with race-y tests due
+        to threading. Instead it forces the target to run as a blocking call.
+
+        Note: Call backs will NOT fire in unit test mode, as they still use signals.
+
+        Test your callback separately by manually triggering it in your test
+        (as per best practice) and treat the callback "glue"
+        in this class as a tested blackbox rather than trying to re-test it.
+
+        @param value: True: Force tasks to run on current thread instead of async
+                      False: Tasks will run in async.
+        """
+        self._run_synchronously = value
 
     def success_cb_slot(self, result: AsyncTaskSuccess) -> None:
         pass
@@ -79,7 +96,10 @@ def qt_async_task(method: Callable):
                                           success_cb=self.success_cb_slot,
                                           error_cb=self.error_cb_slot,
                                           finished_cb=self._internal_finished_handler)
-        self._worker.start()
+        if self._run_synchronously:
+            self._worker.run()
+        else:
+            self._worker.start()
     return _inner
 
 
