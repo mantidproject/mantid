@@ -141,7 +141,7 @@ class IPeakFunctionTest(unittest.TestCase):
         func.setError("Center", 0.1)
         func.setError("Height", 0.2)
         func.setError("Fwhm", 0.3)
-        self.assertEqual(func.intensityError(), func.intensityErrorLocal(), 1e-6)
+        self.assertAlmostEquals(func.intensityError(), func.intensityErrorLocal(), places=6)
 
 
 if __name__ == '__main__':
