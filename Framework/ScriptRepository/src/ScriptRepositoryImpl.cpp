@@ -10,6 +10,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InternetHelper.h"
+#include "MantidKernel/Json.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NetworkProxy.h"
 #include "MantidKernel/ProxyInfo.h"
@@ -86,8 +87,7 @@ void writeJsonFile(const std::string &filename, const Json::Value &json, const s
   if (!filestream.good()) {
     g_log.error() << error << '\n';
   }
-  Json::StyledWriter writer;
-  filestream << writer.write(json);
+  filestream << Mantid::Kernel::JsonHelpers::jsonToString(json, " ");
   filestream.close();
 }
 
@@ -95,15 +95,19 @@ void writeJsonFile(const std::string &filename, const Json::Value &json, const s
 Read json object from file
 */
 Json::Value readJsonFile(const std::string &filename, const std::string &error) {
-  Poco::FileInputStream filestream(filename);
-  if (!filestream.good()) {
+  Poco::FileInputStream fileStream(filename);
+  if (!fileStream.good()) {
     g_log.error() << error << '\n';
   }
-  Json::Reader json_reader;
+
+  ::Json::CharReaderBuilder readerBuilder;
   Json::Value read;
-  if (!json_reader.parse(filestream, read)) {
+  std::string errors;
+  Json::parseFromStream(readerBuilder, fileStream, &read, &errors);
+  if (errors.size() != 0) {
     throw ScriptRepoException("Bad JSON string from file: " + filename + ". " + error);
   }
+  fileStream.close();
 
   return read;
 }
@@ -841,8 +845,8 @@ void ScriptRepositoryImpl::upload(const std::string &file_path, const std::strin
     std::string published_date;
 
     Json::Value pt;
-    Json::Reader json_reader;
-    if (!json_reader.parse(answer, pt)) {
+    auto answerString = answer.str();
+    if (!Mantid::Kernel::JsonHelpers::parse(answerString, &pt)) {
       throw ScriptRepoException("Bad answer from the Server");
     }
     info = pt.get("message", "").asString();
@@ -1021,11 +1025,11 @@ void ScriptRepositoryImpl::remove(const std::string &file_path, const std::strin
     std::string info;
     std::string detail;
     Json::Value answer_json;
-
-    Json::Reader json_reader;
-    if (!json_reader.parse(answer, answer_json)) {
+    auto answerString = answer.str();
+    if (!Mantid::Kernel::JsonHelpers::parse(answerString, &answer_json)) {
       throw ScriptRepoException("Bad answer from the Server");
     }
+
     info = answer_json.get("message", "").asString();
     detail = answer_json.get("detail", "").asString();
     std::string cmd = answer_json.get("shell", "").asString();
