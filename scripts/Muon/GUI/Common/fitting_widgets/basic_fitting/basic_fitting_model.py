@@ -24,8 +24,8 @@ from typing import List, NamedTuple
 
 DEFAULT_CHI_SQUARED = 0.0
 DEFAULT_FIT_STATUS = None
-DEFAULT_START_X = 0.0
 DEFAULT_SINGLE_FIT_FUNCTION = None
+DEFAULT_START_X = 0.0
 
 
 def get_function_name_for_composite(composite: CompositeFunction) -> str:

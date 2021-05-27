@@ -8,7 +8,7 @@ import unittest
 from unittest import mock
 
 from Muon.GUI.Common.ADSHandler.workspace_naming import TF_ASYMMETRY_PREFIX
-from Muon.GUI.Common.contexts.fitting_context import FitInformation
+from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.plot_widget.plot_widget_model import PlotWidgetModel, TILED_BY_GROUP_TYPE, TILED_BY_RUN_TYPE
 from mantidqt.utils.qt.testing import start_qapplication
