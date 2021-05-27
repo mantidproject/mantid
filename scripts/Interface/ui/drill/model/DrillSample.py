@@ -100,6 +100,16 @@ class DrillSample(QObject):
         self._parameters[name] = parameter
         return parameter
 
+    def delParameter(self, name):
+        """
+        Delete a parameter from its name.
+
+        Args:
+            name (str): name of the parameter
+        """
+        if name in self._parameters:
+            del self._parameters[name]
+
     def getParameter(self, name):
         """
         Get the parameter from its name or None if it does not exist.
