@@ -41,9 +41,11 @@ set ( TEST_PY_FILES
    fitting_widgets/basic_fitting/basic_fitting_view_test.py
    fitting_widgets/basic_fitting/fit_controls_view_test.py
    fitting_widgets/basic_fitting/fit_function_options_view_test.py
+   fitting_widgets/basic_fitting/workspace_selector_view_test.py
    fitting_widgets/general_fitting/general_fitting_model_test.py
    fitting_widgets/general_fitting/general_fitting_presenter_test.py
    fitting_widgets/general_fitting/general_fitting_options_view_test.py
+   fitting_widgets/general_fitting/general_fitting_view_test.py
    fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_model_test.py
    fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_options_view_test.py
    fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_presenter_test.py

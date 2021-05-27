@@ -35,8 +35,10 @@ Bugfixes
 - Fix a bug that made it impossible to process flux in SANSILLAutoprocess.
 - On D16 using :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, now uses the correct monitor for normalization, fix a bug where processing transmission would yield undefined values at 90 degrees when using ThetaDependent correction, and improve the q binning used.
 - Fixed the ISIS SANS interface crashing if a new row is created using the enter key, then the user immediately uses process or load without clicking away.
-
-
+- ISIS SANS beam finder no longer attempts to scale LAB (and HAB) values from m into mm for LARMOR. This resolves an issue where the angle was
+  incorrectly scaled by 1000 in the GUI (but correctly used the unscaled value).
+  All other fields in the beam finder are still scaled into mm for LARMOR, such as tolerance and radius limits.
+  Other instruments will continue to show mm for all applicable fields as per previous releases.
 
 
 :ref:`Release 6.1.0 <v6.1.0>`

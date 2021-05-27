@@ -16,6 +16,7 @@ New features
 
 Improvements
 ############
+- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` major interface update along with enabling the calibration of T0 and sample position.
 
 Bugfixes
 ########
@@ -33,6 +34,7 @@ New features
 
 Improvements
 ############
+- Find detector in peaks will check which det is closer when dealing with peak-in-gap situation for tube-type detectors.
 
 Bugfixes
 ########

@@ -58,6 +58,10 @@ Improvements
 - The interface saves previous settings if possible instead of resetting.
 - The interface can now load runs from different directories/cycles
 
+Bug fixes
+#########
+- Fixed a bug where after changing the axis scales of the plot, when loading new data the default scale would be used instead.
+- Fixed a crash when changing between log and linear scale on the preview plot.
 
 Elemental Analysis
 ------------------
