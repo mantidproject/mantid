@@ -85,15 +85,20 @@ class DrillSample(QObject):
         """
         return self._name
 
-    def addParameter(self, parameter):
+    def addParameter(self, name):
         """
-        Add a sample parameter.
+        Add a new sample parameter. If this parameter exists, it will be
+        replaced.
 
         Args:
             parameter (DrillParameter): new sample parameter
+
+        Returns:
+            DrillParameter: the new empty parameter
         """
-        name = parameter.getName()
+        parameter = DrillParameter(name, self._controller)
         self._parameters[name] = parameter
+        return parameter
 
     def getParameter(self, name):
         """
