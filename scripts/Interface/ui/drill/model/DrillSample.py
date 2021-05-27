@@ -32,6 +32,18 @@ class DrillSample(QObject):
     """
     _controller = None
 
+    """
+    Triggered when the processing of the sample started.
+    """
+    processStarted = Signal()
+
+    """
+    Triggered when the processing of the sample finished.
+    Args:
+        int: return code. 0: success; -1: error
+    """
+    processDone = Signal(int)
+
     def __init__(self, index):
         """
         Create an empty sample.
