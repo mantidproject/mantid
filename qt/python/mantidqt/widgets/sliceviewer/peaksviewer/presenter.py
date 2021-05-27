@@ -234,6 +234,9 @@ class PeaksViewerCollectionPresenter:
 
         self._actions_view.set_peaksworkspace(self.workspace_names())
 
+        visible = True if names_to_overlay_final else False
+        self.view.setVisible(visible)
+
     def remove_peaksworkspace(self, name):
         """
         Remove the named workspace from display. No op if no workspace can be found with that name
