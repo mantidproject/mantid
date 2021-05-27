@@ -10,6 +10,7 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/Json.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/PropertyWithValueJSON.h"
 #include "MantidKernel/StringTokenizer.h"
@@ -316,10 +317,9 @@ void PropertyManager::setProperties(const std::string &propertiesJson,
  */
 void PropertyManager::setProperties(const std::string &propertiesJson, IPropertyManager *targetPropertyManager,
                                     const std::unordered_set<std::string> &ignoreProperties, bool createMissing) {
-  ::Json::Reader reader;
   ::Json::Value jsonValue;
 
-  if (reader.parse(propertiesJson, jsonValue)) {
+  if (Mantid::Kernel::JsonHelpers::parse(propertiesJson, &jsonValue)) {
     setProperties(jsonValue, targetPropertyManager, ignoreProperties, createMissing);
   } else {
     throw std::invalid_argument("propertiesArray was not valid json");
@@ -405,10 +405,9 @@ void PropertyManager::setPropertiesWithString(const std::string &propertiesStrin
 */
 void PropertyManager::setPropertiesWithJSONString(const std::string &propertiesString,
                                                   const std::unordered_set<std::string> &ignoreProperties) {
-  ::Json::Reader reader;
   ::Json::Value propertyJson;
 
-  if (reader.parse(propertiesString, propertyJson)) {
+  if (Mantid::Kernel::JsonHelpers::parse(propertiesString, &propertyJson)) {
     setProperties(propertyJson, ignoreProperties);
   } else {
     throw std::invalid_argument("Could not parse JSON string when trying to set a property from: " + propertiesString);
@@ -567,8 +566,9 @@ std::string PropertyManager::getPropertyValue(const std::string &name) const {
  * @returns A serialized version of the manager
  */
 std::string PropertyManager::asString(bool withDefaultValues) const {
-  ::Json::FastWriter writer;
-  const string output = writer.write(asJson(withDefaultValues));
+  Json::StreamWriterBuilder builder;
+  builder.settings_["indentation"] = "";
+  const string output = Json::writeString(builder, asJson(withDefaultValues));
 
   return output;
 }
