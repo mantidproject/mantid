@@ -106,8 +106,7 @@ class SData(collections.abc.Sequence):
 
             for order in range(min_order, max_order + 1):
                 order_key = f'order_{order}'
-                if int(order) >= min_order and ((max_order is None) or int(order) <= max_order):
-                    self._data[atom_key]['s'][order_key] *= dw_row
+                self._data[atom_key]['s'][order_key] *= dw_row
 
     @classmethod
     def get_empty(cls: SD, *,
