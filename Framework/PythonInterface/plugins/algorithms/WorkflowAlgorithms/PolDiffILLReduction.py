@@ -736,6 +736,11 @@ class PolDiffILLReduction(PythonAlgorithm):
         if process == 'Sample' and self.getPropertyValue('OutputTreatment') in  ['Average','Sum']:
             self._merge_polarisations(ws, average_detectors=(self.getPropertyValue('OutputTreatment') == 'Average'))
 
+        if self.getPropertyValue('MeasurementTechnique') == 'SingleCrystal':
+            SortXAxis(InputWorkspace=ws, OutputWorkspace=ws, Ordering='Ascending')
+            ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='SignedTheta', OrderAxis=False)
+            ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='Y', Formula='-y')
+
         for entry in mtd[ws]:
             if not self.getProperty('AbsoluteNormalisation').value:
                 unit = 'Intensity'

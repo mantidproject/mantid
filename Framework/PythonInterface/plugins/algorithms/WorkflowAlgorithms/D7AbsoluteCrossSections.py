@@ -150,6 +150,12 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                              direction=Direction.Input,
                              doc="Which treatment of the provided scan should be used to create output.")
 
+        self.declareProperty(name="MeasurementTechnique",
+                             defaultValue="Powder",
+                             validator=StringListValidator(["Powder", "SingleCrystal"]),
+                             direction=Direction.Input,
+                             doc="What type of measurement technique has been used to collect the data.")
+
         self.declareProperty(PropertyManagerProperty('SampleAndEnvironmentProperties', dict()),
                              doc="Dictionary for the information about sample and its environment.")
 
