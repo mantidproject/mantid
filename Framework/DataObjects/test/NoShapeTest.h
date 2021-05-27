@@ -16,6 +16,7 @@
 #endif
 
 #include "MantidDataObjects/NoShape.h"
+#include "MantidKernel/Json.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
@@ -48,9 +49,8 @@ public:
     ;
     const std::string json = shape.toJSON();
 
-    Json::Reader reader;
     Json::Value output;
-    TSM_ASSERT("Should parse as JSON", reader.parse(json, output));
+    TSM_ASSERT("Should parse as JSON", Mantid::Kernel::JsonHelpers::parse(json, &output));
 
     TS_ASSERT_EQUALS("none", output["shape"].asString());
   }
