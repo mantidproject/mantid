@@ -10,6 +10,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InternetHelper.h"
+#include "MantidKernel/Json.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 
@@ -268,8 +269,7 @@ std::string UsageServiceImpl::generateStartupMessage() {
 
   message["application"] = m_application;
 
-  ::Json::FastWriter writer;
-  return writer.write(message);
+  return Mantid::Kernel::JsonHelpers::jsonToString(message);
 }
 
 std::string UsageServiceImpl::generateFeatureUsageMessage() {
@@ -292,7 +292,6 @@ std::string UsageServiceImpl::generateFeatureUsageMessage() {
   }
 
   if (!featureCountMap.empty()) {
-    ::Json::FastWriter writer;
     ::Json::Value features;
     auto message = this->generateFeatureHeader();
     for (auto const &featureItem : featureCountMap) {
@@ -302,7 +301,7 @@ std::string UsageServiceImpl::generateFeatureUsageMessage() {
     }
     if (!features.empty()) {
       message["features"] = features;
-      return writer.write(message);
+      return Mantid::Kernel::JsonHelpers::jsonToString(message);
     }
   }
   return "";
