@@ -228,13 +228,19 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         :param ws: Sample workspace.
         :return: Tuple with two workspaces containing sin^2 (alpha) and cos^2 (alpha)
         """
+        ws_to_transpose = mtd[ws][0].name()
         angle_ws = mtd[ws][0].name() + "_tmp_angle"
-        ConvertSpectrumAxis(InputWorkspace=mtd[ws][0],
-                            OutputWorkspace=angle_ws,
-                            Target='SignedTheta',
-                            OrderAxis=False)
-        Transpose(InputWorkspace=angle_ws, OutputWorkspace=angle_ws)
-        theta = -0.5 * mtd[angle_ws].extractX()[0]
+        conv_to_theta = 0.5  # conversion to half of the scattering angle
+        if self.getPropertyValue('MeasurementTechnique') != 'SingleCrystal':
+            # for single crystal, the spectrum axis is already converted
+            ConvertSpectrumAxis(InputWorkspace=mtd[ws][0],
+                                OutputWorkspace=angle_ws,
+                                Target='SignedTheta',
+                                OrderAxis=False)
+            ws_to_transpose = angle_ws
+            conv_to_theta *= -1.0  # the sign needs to be flipped
+        Transpose(InputWorkspace=ws_to_transpose, OutputWorkspace=angle_ws)
+        theta = conv_to_theta * mtd[angle_ws].extractX()[0]
         alpha = (theta - 90.0 - self._sampleAndEnvironmentProperties['KiXAngle'].value) * np.pi / 180.0
         cos2_alpha_arr = np.power(np.cos(alpha), 2)
         sin2_alpha_arr = np.power(np.sin(alpha), 2)
@@ -505,6 +511,11 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         """Normalises the sample data using the detector efficiency calibration workspace."""
 
         normalisation_method = self.getPropertyValue('NormalisationMethod')
+        is_single_crystal = self.getPropertyValue('MeasurementTechnique') == 'SingleCrystal'
+        if is_single_crystal and normalisation_method == 'Vanadium':
+            # the length of the spectrum axis is twice the size of Vanadium, as data comes from two omega scans
+            AppendSpectra(InputWorkspace1=det_efficiency_ws, InputWorkspace2=det_efficiency_ws,
+                          OutputWorkspace=det_efficiency_ws)
 
         single_efficiency_per_POL = False
         if mtd[sample_ws].getNumberOfEntries() != mtd[det_efficiency_ws].getNumberOfEntries():
@@ -542,10 +553,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         ki = 2 * np.pi / wavelength
         dE = 0.0  # monochromatic data
         kf = np.sqrt(ki * ki - dE / 2.07194)
-        ConvertSpectrumAxis(InputWorkspace=mtd[ws][0], OutputWorkspace='w_theta', Target='SignedTheta', OrderAxis=False)
-        twoTheta = 1.0 * mtd['w_theta'].getAxis(1).extractValues() * np.pi / 180.0  # detector positions in radians
-        DeleteWorkspace(Workspace='w_theta')
-        omega = 1.0 * mtd[ws][0].getAxis(0).extractValues() * np.pi / 180.0  # omega scan angle in radians
+        twoTheta = -mtd[ws][0].getAxis(1).extractValues() * np.pi / 180.0  # detector positions in radians
+        omega = mtd[ws][0].getAxis(0).extractValues() * np.pi / 180.0  # omega scan angle in radians
         ntheta = len(twoTheta)
         nomega = len(omega)
         # omega = -1.0 * np.matrix(np.flip(omega, 0)) - omega_shift * np.pi / 180.0
