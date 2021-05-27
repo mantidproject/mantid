@@ -341,11 +341,11 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         return ws_list
 
     def handle_remove_plot_guess(self):
-        if self.context.fitting_context.guess_workspace_name != "":
+        if self.context.fitting_context.guess_workspace_name is not None:
             self._figure_presenter.remove_workspace_names_from_plot([self.context.fitting_context.guess_workspace_name])
 
     def handle_update_plot_guess(self):
-        if self.context.fitting_context.guess_workspace_name != "" and self.context.fitting_context.plot_guess:
+        if self.context.fitting_context.guess_workspace_name is not None and self.context.fitting_context.plot_guess:
             self._figure_presenter.plot_guess_workspace(self.context.fitting_context.guess_workspace_name)
 
     def plot_all_selected_data(self, autoscale, hold_on):

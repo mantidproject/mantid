@@ -205,6 +205,14 @@ class GeneralFittingModel(BasicFittingModel):
         ties.append("f" + str(index) + "." + global_parameter)
         return "=".join(ties)
 
+    def _get_plot_guess_fit_function(self) -> IFunction:
+        """Returns the fit function to evaluate when plotting a guess."""
+        fit_function = self.get_active_fit_function()
+        if fit_function is not None and self.simultaneous_fitting_mode:
+            return fit_function.createEquivalentFunctions()[self.fitting_context.current_dataset_index]
+        else:
+            return fit_function
+
     def get_simultaneous_fit_by_specifiers_to_display_from_context(self) -> list:
         """Returns the simultaneous fit by specifiers to display in the view from the context."""
         if self.simultaneous_fit_by == "Run":
