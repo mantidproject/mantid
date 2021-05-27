@@ -353,11 +353,6 @@ class BasicFittingModel:
             # Avoids resetting the start/end xs and etc. by not using the dataset_names setter.
             self.fitting_context.dataset_names = self._get_equivalent_binned_or_unbinned_workspaces()
 
-    @property
-    def simultaneous_fitting_mode(self) -> bool:
-        """Returns true if the fitting mode is simultaneous. Override this method if you require simultaneous."""
-        return False
-
     def update_parameter_value(self, full_parameter: str, value: float) -> None:
         """Update the value of a parameter in the fit function."""
         if self.current_single_fit_function is not None:
@@ -419,7 +414,7 @@ class BasicFittingModel:
     def _reset_start_xs(self) -> None:
         """Resets the start Xs stored by the model."""
         if self.fitting_context.number_of_datasets > 0:
-            self.fitting_context.start_xs = [self.retrieve_first_good_data_from_run(name)
+            self.fitting_context.start_xs = [self.retrieve_first_good_data_from(name)
                                              for name in self.fitting_context.dataset_names]
         else:
             self.fitting_context.start_xs = []
@@ -444,7 +439,7 @@ class BasicFittingModel:
             return self.fitting_context.start_xs[dataset_names.index(new_dataset_name)]
         else:
             return self.current_start_x if self.fitting_context.current_dataset_index is not None \
-                else self.retrieve_first_good_data_from_run(new_dataset_name)
+                else self.retrieve_first_good_data_from(new_dataset_name)
 
     def _get_new_end_x_for(self, new_dataset_name: str) -> float:
         """Returns the end X to use for the new dataset. It tries to use an existing end X if possible."""
@@ -471,8 +466,8 @@ class BasicFittingModel:
         else:
             return self._clone_function(self.current_single_fit_function)
 
-    def retrieve_first_good_data_from_run(self, workspace_name: str) -> float:
-        """Returns the first good data value from a run number within a workspace name."""
+    def retrieve_first_good_data_from(self, workspace_name: str) -> float:
+        """Returns the first good data value from a workspace."""
         try:
             return self.context.first_good_data([float(re.search("[0-9]+", workspace_name).group())])
         except AttributeError:
@@ -617,7 +612,7 @@ class BasicFittingModel:
 
     def _double_pulse_enabled(self) -> bool:
         """Returns true of Double Pulse fit is selected in the context."""
-        return "DoublePulseEnabled" in self.context.gui_context and self.context.gui_context["DoublePulseEnabled"]
+        return self.fitting_context.allow_double_pulse_fitting and self.context.do_double_pulse_fit()
 
     @staticmethod
     def _get_pulse_weightings(offset: float, muon_halflife: float) -> tuple:

@@ -419,6 +419,9 @@ class MuonContext(object):
                (self.gui_context['RebinType'] == 'Variable'
                 and 'RebinVariable' in self.gui_context and self.gui_context['RebinVariable'])
 
+    def do_double_pulse_fit(self):
+        return "DoublePulseEnabled" in self.gui_context and self.gui_context["DoublePulseEnabled"]
+
     def get_detectors_excluded_from_default_grouping_tables(self):
         groups, _, _ = get_default_grouping(
             self.data_context.current_workspace, self.data_context.instrument,

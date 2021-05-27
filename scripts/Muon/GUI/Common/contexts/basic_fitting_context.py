@@ -10,8 +10,10 @@ from Muon.GUI.Common.contexts.fitting_context import FittingContext
 
 class BasicFittingContext(FittingContext):
 
-    def __init__(self, fit_list=None):
-        super(BasicFittingContext, self).__init__(fit_list)
+    def __init__(self, allow_double_pulse_fitting: bool = False):
+        super(BasicFittingContext, self).__init__()
+
+        self._allow_double_pulse_fitting: bool = allow_double_pulse_fitting
 
         self._current_dataset_index: int = None
         self._dataset_names: list = []
@@ -37,6 +39,11 @@ class BasicFittingContext(FittingContext):
         self._minimizer: str = ""
         self._evaluation_type: str = ""
         self._fit_to_raw: bool = True
+
+    @property
+    def allow_double_pulse_fitting(self) -> bool:
+        """Returns true if double pulse fitting should be allowed in the model owning this fitting context."""
+        return self._allow_double_pulse_fitting
 
     @property
     def current_dataset_index(self) -> int:

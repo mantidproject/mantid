@@ -10,8 +10,8 @@ from Muon.GUI.Common.contexts.basic_fitting_context import BasicFittingContext
 
 class GeneralFittingContext(BasicFittingContext):
 
-    def __init__(self, fit_list=None):
-        super(GeneralFittingContext, self).__init__(fit_list)
+    def __init__(self, allow_double_pulse_fitting: bool = False):
+        super(GeneralFittingContext, self).__init__(allow_double_pulse_fitting)
 
         # This is a MultiDomainFunction if there are multiple domains in the function browser.
         self._simultaneous_fit_function: IFunction = None

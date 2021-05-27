@@ -8,10 +8,10 @@ from mantidqt.utils.qt import load_ui
 
 from qtpy.QtWidgets import QWidget
 
-ui_form, _ = load_ui(__file__, "fit_controls.ui")
+ui_form, base_widget = load_ui(__file__, "fit_controls.ui")
 
 
-class FitControlsView(ui_form, QWidget):
+class FitControlsView(ui_form, base_widget):
     """
     The FitControlsView includes the Fit, Undo Fit and Fit Script Generator buttons. It also has the Plot Guess
     checkbox, and the global fit status label.

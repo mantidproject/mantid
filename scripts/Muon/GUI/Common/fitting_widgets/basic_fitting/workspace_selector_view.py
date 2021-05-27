@@ -8,10 +8,10 @@ from mantidqt.utils.qt import load_ui
 
 from qtpy.QtWidgets import QWidget
 
-ui_form, _ = load_ui(__file__, "workspace_selector.ui")
+ui_form, base_widget = load_ui(__file__, "workspace_selector.ui")
 
 
-class WorkspaceSelectorView(ui_form, QWidget):
+class WorkspaceSelectorView(ui_form, base_widget):
     """
     The WorkspaceSelectorView is the cyclic workspace selector combobox, and is used to choose the workspace that
     is currently active in an interface.

@@ -296,14 +296,14 @@ class FittingContext(object):
        - function names
     """
 
-    def __init__(self, fit_list=None):
-        self.fit_list = fit_list if fit_list is not None else []
-        # Register callbacks with this object to observe when new fits
-        # are added
+    def __init__(self):
+        self.fit_list: list = []
+
+        self._number_of_fits: int = 0
+        self._number_of_fits_cache: int = 0
+
         self.new_fit_results_notifier = Observable()
         self.fit_removed_notifier = Observable()
-        self._number_of_fits = 0
-        self._number_of_fits_cache = 0
 
     def __len__(self):
         """

@@ -80,7 +80,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.group_pair_context = MuonGroupPairContext(
             self.data_context.check_group_contains_valid_detectors)
         self.phase_context = PhaseTableContext()
-        self.fitting_context = TFAsymmetryFittingContext()
+        self.fitting_context = TFAsymmetryFittingContext(allow_double_pulse_fitting=True)
         self.plotting_context = PlottingContext()
         self.context = DataAnalysisContext(muon_data_context=self.data_context,
                                            muon_gui_context=self.gui_context,

@@ -10,8 +10,8 @@ from Muon.GUI.Common.contexts.general_fitting_context import GeneralFittingConte
 
 class TFAsymmetryFittingContext(GeneralFittingContext):
 
-    def __init__(self, fit_list=None):
-        super(TFAsymmetryFittingContext, self).__init__(fit_list)
+    def __init__(self, allow_double_pulse_fitting: bool = False):
+        super(TFAsymmetryFittingContext, self).__init__(allow_double_pulse_fitting)
 
         self._tf_asymmetry_mode: bool = False
         self._tf_asymmetry_single_functions: list = []
