@@ -614,7 +614,7 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
     // logging
     V3D dtrans(dx, dy, dz);
     V3D drots(drx, dry, drz);
-    calilog << "-- Fit " << bn << " results using " << nBankPeaks << " peaks:\n "
+    calilog << "-- Fit " << bn << " results using " << nBankPeaks << " peaks:\n"
             << "    d(x,y,z) = " << dtrans << "\n"
             << "    r(x,y,z) = " << drots << "\n"
             << "    chi2/DOF = " << chi2OverDOF << "\n";
