@@ -12,6 +12,7 @@ from qtpy.QtCore import *
 
 from .DrillHeaderView import DrillHeaderView
 from .DrillItemDelegate import DrillItemDelegate
+from .DrillTableItem import DrillTableItem
 
 
 class DrillTableWidget(QTableWidget):
@@ -39,6 +40,8 @@ class DrillTableWidget(QTableWidget):
 
         self.horizontalHeader().setHighlightSections(False)
         self.verticalHeader().setHighlightSections(False)
+
+        self.setItemPrototype(DrillTableItem())
 
         self._samplePresenters = list()
 
