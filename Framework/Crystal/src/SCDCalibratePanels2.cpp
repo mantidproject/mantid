@@ -926,10 +926,19 @@ MatrixWorkspace_sptr SCDCalibratePanels2::getIdealQSampleAsHistogram1D(IPeaksWor
     V3D qv = ubmatrix * pws->getPeak(i).getIntHKL();
     qv *= 2 * PI;
     // qv = qv / qv.norm();
+    double wgt = 1.0;
+    if (pws->getPeak(i).getSigmaIntensity() > 0.0) {
+      wgt = 1.0 / pws->getPeak(i).getSigmaIntensity();
+    } else if (pws->getPeak(i).getIntensity() > 0.0) {
+      wgt = 1.0 / pws->getPeak(i).getIntensity();
+    } else if (pws->getPeak(i).getBinCount()) {
+      wgt = 1.0 / pws->getPeak(i).getBinCount();
+    }
+    // make 1dhist
     for (int j = 0; j < 3; ++j) {
       xvector[i * 3 + j] = i * 3 + j;
       yvector[i * 3 + j] = qv[j];
-      evector[i * 3 + j] = 1;
+      evector[i * 3 + j] = wgt;
     }
   }
 
