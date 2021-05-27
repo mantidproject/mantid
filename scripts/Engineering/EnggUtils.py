@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from os import path
 from mantid.api import *
-from mantid.kernel import IntArrayProperty
+from mantid.kernel import IntArrayProperty, UnitConversion, DeltaEModeType
 import mantid.simpleapi as mantid
 
 ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']
@@ -51,6 +51,47 @@ def get_diffractometer_constants_from_workspace(ws):
     si = ws.spectrumInfo()
     diff_consts = si.diffractometerConstants(0)  # output is a UnitParametersMap
     return diff_consts
+
+
+def generate_tof_fit_workspace(bank, name=None):
+
+    if bank == '1' or bank == "North":
+        diag_ws_name = 'diag_North'
+    elif bank == '2' or bank == "South":
+        diag_ws_name = 'diag_South'
+    else:
+        if name is None:
+            diag_ws_name = 'diag_' + bank
+        else:
+            diag_ws_name = 'diag_' + name
+
+    fitparam_ws = mantid.AnalysisDataService.Instance().retrieve(diag_ws_name + '_fitparam')
+    fitted_ws = mantid.AnalysisDataService.Instance().retrieve(diag_ws_name + '_fitted')
+    expected_dspacing_peaks = default_ceria_expected_peaks(final=True)
+
+    expected_d_peaks_x = []
+    fitted_tof_peaks_y = []
+    calculated_d_peaks_y2 = []
+    for irow in range(0, fitparam_ws.rowCount()):
+        expected_d_peaks_x.append(expected_dspacing_peaks[-(irow + 1)])
+        fitted_tof_peaks_y.append(fitparam_ws.cell(irow, 5))
+        diff_consts = get_diffractometer_constants_from_workspace(fitted_ws)
+        calculated_d_peaks_y2.append(UnitConversion.run("TOF", "dSpacing", expected_d_peaks_x[irow], 0,
+                                                        DeltaEModeType.Elastic, diff_consts))
+
+    ws1 = mantid.CreateWorkspace(DataX=expected_d_peaks_x,
+                                 DataY=fitted_tof_peaks_y,
+                                 UnitX="Expected Peaks Centre (dSpacing A)",
+                                 YUnitLabel="Fitted Peaks Centre(TOF, us)")
+    ws2 = mantid.CreateWorkspace(DataX=expected_d_peaks_x, DataY=calculated_d_peaks_y2)
+
+    output_ws = "engggui_tof_peaks_bank_" + str(bank)
+    if mantid.AnalysisDataService.Instance().doesExist(output_ws):
+        mantid.DeleteWorkspace(output_ws)
+
+    mantid.AppendSpectra(ws1, ws2, OutputWorkspace=output_ws)
+    mantid.DeleteWorkspace(ws1)
+    mantid.DeleteWorkspace(ws2)
 
 
 def create_spectrum_list_from_string(str_list):

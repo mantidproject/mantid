@@ -13,7 +13,6 @@ from shutil import copy2
 import mantid.plots  # noqa
 import Engineering.EnggUtils as Utils
 import mantid.simpleapi as simple
-from mantid.kernel import UnitConversion, DeltaEModeType
 
 NORTH_BANK_CAL = "EnginX_NorthBank.cal"
 SOUTH_BANK_CAL = "EnginX_SouthBank.cal"
@@ -293,7 +292,7 @@ def create_calibration_files(ceria_run, van_run, full_inst_calib, int_van, van_c
         # create the table workspace containing the parameters
         param_tbl_name = crop_name if crop_name is not None else "cropped"
         create_params_table(difc, tzero, difa)
-        create_difc_zero_workspace(difc, tzero, spec_nos, param_tbl_name)
+        Utils.generate_tof_fit_workspace(spec_nos, param_tbl_name)
     else:
         difas = [row['difa'] for row in output]
         difcs = [row['difc'] for row in output]
@@ -306,7 +305,7 @@ def create_calibration_files(ceria_run, van_run, full_inst_calib, int_van, van_c
                          tzeros, difcs, difas)
         # create the table workspace containing the parameters
         create_params_table(difcs, tzeros, difas)
-        create_difc_zero_workspace(difcs, tzeros, "", None)
+        Utils.generate_tof_fit_workspace("", None)
 
 
 def run_calibration(sample_ws,
@@ -360,6 +359,7 @@ def run_calibration(sample_ws,
     ws_van_d = ws_initial_process(ws_van)
     # sensitivity correction
     ws_van_d /= van_integration
+    simple.ReplaceSpecialValues(InputWorkspace=ws_van_d, OutputWorkspace=ws_van_d, NaNValue=0, InfinityValue=0)
 
     ws_d = ws_initial_process(sample_ws)
 
@@ -556,59 +556,6 @@ def create_params_table(difc, tzero, difa):
     for i in range(len(difc)):
         next_row = {"bankid": i, "difc": difc[i], "difa": difa[i], "tzero": tzero[i]}
         param_table.addRow(next_row)
-
-
-def create_difc_zero_workspace(difc, tzero, crop_on, name):
-    """
-    create a workspace that can be used to plot the expected peaks against the fitted ones
-
-    @param difc :: the list of difc values to add to the table
-    @param tzero :: the list of tzero values to add to the table
-    @param crop_on :: where the cropping occurred, either a bank, a spectra, or empty. Empty indicates both banks
-    @param name :: the name of a cropped workspace to use, if it is a non default name
-
-    """
-    if not crop_on:
-        banks = ["North", "South"]
-    elif crop_on != "North" and crop_on != "South":
-        banks = ["Cropped"]
-    else:
-        banks = [crop_on]
-
-    # loop through used banks
-    for bank_name in banks:
-        # retrieve required workspace
-        fitparam_ws = simple.AnalysisDataService.retrieve(f"diag_{bank_name}_fitparam")
-        fitted_ws = simple.AnalysisDataService.retrieve(f"diag_{bank_name}_fitted")
-        expected_dspacing_peaks = Utils.default_ceria_expected_peaks(final=True)
-        # get the data to be used
-        expected_d_peaks_x = []
-        fitted_tof_peaks_y = []
-        calculated_d_peaks_y2 = []
-        for irow in range(0, fitparam_ws.rowCount()):
-            expected_d_peaks_x.append(expected_dspacing_peaks[-(irow+1)])
-            fitted_tof_peaks_y.append(fitparam_ws.cell(irow, 5))
-            diff_consts = Utils.get_diffractometer_constants_from_workspace(fitted_ws)
-            calculated_d_peaks_y2.append(UnitConversion.run("TOF", "dSpacing", expected_d_peaks_x[irow], 0,
-                                                            DeltaEModeType.Elastic, diff_consts))
-
-        # create workspaces to temporary hold the data
-        simple.CreateWorkspace(OutputWorkspace="ws1", DataX=expected_d_peaks_x, DataY=fitted_tof_peaks_y,
-                               UnitX="Expected Peaks Centre(dSpacing, A)",
-                               YUnitLabel="Fitted Peaks Centre(TOF, us)")
-        simple.CreateWorkspace(OutputWorkspace="ws2", DataX=expected_d_peaks_x, DataY=calculated_d_peaks_y2)
-
-        # get correct name for output
-        output_name = f"Engg difc Zero Peaks Bank {bank_name}"
-
-        # use the two workspaces to creat the output
-        output = simple.AppendSpectra(InputWorkspace1="ws1", InputWorkspace2="ws2",
-                                      OutputWorkspace=output_name)
-        plot_calibration(output, output_name)
-
-    # remove the left-over workspaces
-    simple.DeleteWorkspace("ws1")
-    simple.DeleteWorkspace("ws2")
 
 
 def plot_calibration(workspace, name):

@@ -80,9 +80,8 @@ def _calculate_vanadium_correction(vanadium_path):
     van_ws = Ads.Instance().retrieve(VANADIUM_INPUT_WORKSPACE_NAME)
     NormaliseByCurrent(InputWorkspace=van_ws, OutputWorkspace=van_ws)
     # sensitivity correction for van
-    nbins = van_ws.blocksize()
     ws_van_int = Integration(InputWorkspace=van_ws)
-    ws_van_int /= nbins
+    ws_van_int /= van_ws.blocksize()
     RenameWorkspace(InputWorkspace=ws_van_int, OutputWorkspace=INTEGRATED_WORKSPACE_NAME)
     return ws_van_int
 

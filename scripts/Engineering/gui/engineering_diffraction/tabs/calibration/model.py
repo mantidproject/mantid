@@ -11,11 +11,12 @@ import matplotlib.pyplot as plt
 from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger
 from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, DiffractionFocussing, \
-    CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace, NormaliseByCurrent, \
+    CreateEmptyTableWorkspace, NormaliseByCurrent, \
     ConvertUnits, Load, ReplaceSpecialValues, SaveNexus, \
     EnggEstimateFocussedBackground, ApplyDiffCal
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file, default_ceria_expected_peaks, \
-    create_custom_grouping_workspace, create_spectrum_list_from_string, load_relevant_pdcal_outputs
+    create_custom_grouping_workspace, create_spectrum_list_from_string, load_relevant_pdcal_outputs,\
+    generate_tof_fit_workspace
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
@@ -75,10 +76,7 @@ class CalibrationModel(object):
                     bank_name = str(i + 1)
                 else:
                     bank_name = bank
-                difa = cal_params[i]['difa']
-                difc = cal_params[i]['difc']
-                tzero = cal_params[i]['tzero']
-                self._generate_tof_fit_workspace(difa, difc, tzero, bank_name)
+                generate_tof_fit_workspace(bank_name)
             if bank is None and spectrum_numbers is None:
                 self._plot_tof_fit()
             elif spectrum_numbers is None:
@@ -156,46 +154,6 @@ class CalibrationModel(object):
         for row in params_table:
             workspace.addRow(row)
 
-    @staticmethod
-    def _generate_tof_fit_workspace(difa, difc, tzero, bank):
-
-        if bank == '1':
-            diag_ws_name = 'diag_North'
-        elif bank == '2':
-            diag_ws_name = 'diag_South'
-        else:
-            diag_ws_name = 'diag_' + bank
-
-        fitparam_ws = Ads.retrieve(diag_ws_name + '_fitparam')
-        expected_dspacing_peaks = default_ceria_expected_peaks(final=True)
-
-        x_val = []
-        y_val = []
-        y2_val = []
-
-        difa_to_plot = difa
-        difc_to_plot = difc
-        tzero_to_plot = tzero
-
-        for irow in range(0, fitparam_ws.rowCount()):
-            x_val.append(expected_dspacing_peaks[-(irow+1)])
-            y_val.append(fitparam_ws.cell(irow, 5))
-            y2_val.append(pow(x_val[irow], 2) * difa_to_plot + x_val[irow] * difc_to_plot + tzero_to_plot)
-
-        ws1 = CreateWorkspace(DataX=x_val,
-                              DataY=y_val,
-                              UnitX="Expected Peaks Centre (dSpacing A)",
-                              YUnitLabel="Fitted Peaks Centre(TOF, us)")
-        ws2 = CreateWorkspace(DataX=x_val, DataY=y2_val)
-
-        output_ws = "engggui_tof_peaks_bank_" + str(bank)
-        if Ads.doesExist(output_ws):
-            DeleteWorkspace(output_ws)
-
-        AppendSpectra(ws1, ws2, OutputWorkspace=output_ws)
-        DeleteWorkspace(ws1)
-        DeleteWorkspace(ws2)
-
     def _plot_tof_fit(self):
         bank_1_ws = Ads.retrieve("engggui_tof_peaks_bank_1")
         bank_2_ws = Ads.retrieve("engggui_tof_peaks_bank_2")
@@ -262,20 +220,24 @@ class CalibrationModel(object):
 
             return tof_focused, background_van
 
+        def ws_initial_process(ws):
+            """Run some processing common to both the sample and vanadium workspaces"""
+            NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws)
+            ApplyDiffCal(InstrumentWorkspace=ws, CalibrationWorkspace=full_calib)
+            ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='dSpacing')
+            return ws
+
         # need to clone the data as PDCalibration rebins
         ceria_raw = CloneWorkspace(InputWorkspace=ceria_ws)
 
         ws_van = Load(vanadium_workspace)
-        NormaliseByCurrent(InputWorkspace=ws_van, OutputWorkspace=ws_van)
-        ApplyDiffCal(InstrumentWorkspace=ws_van, CalibrationWorkspace=full_calib)
-        ws_van_d = ConvertUnits(InputWorkspace=ws_van, Target='dSpacing')
+        ws_van_d = ws_initial_process(ws_van)
 
         # van sensitivity correction
         ws_van_d /= van_integration
         ReplaceSpecialValues(InputWorkspace=ws_van_d, OutputWorkspace=ws_van_d, NaNValue=0, InfinityValue=0)
 
-        ApplyDiffCal(InstrumentWorkspace=ceria_ws, CalibrationWorkspace=full_calib)
-        ws_d = ConvertUnits(InputWorkspace=ceria_ws, Target='dSpacing')
+        ws_d = ws_initial_process(ceria_ws)
 
         DeleteWorkspace(ceria_ws)
 
