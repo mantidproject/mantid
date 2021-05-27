@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/NoShape.h"
+#include "MantidKernel/Json.h"
 #include <json/json.h>
 #include <stdexcept>
 
@@ -21,8 +22,7 @@ std::string NoShape::toJSON() const {
   Json::Value shape(this->shapeName());
   root["shape"] = shape;
 
-  Json::StyledWriter writer;
-  return writer.write(root);
+  return Mantid::Kernel::JsonHelpers::jsonToString(root);
 }
 
 /**
