@@ -32,8 +32,10 @@ const std::string CatalogAlgorithmHelper::getIDSError(HTTPResponse::HTTPStatus &
   if (successHTTPStatus.find(HTTPStatus) == successHTTPStatus.end()) {
     // Attempt to parse response as json stream
     Json::Value json;
-    Json::Reader json_reader;
-    auto json_valid = json_reader.parse(responseStream, json);
+    ::Json::CharReaderBuilder readerBuilder;
+    std::string errors;
+    Json::parseFromStream(readerBuilder, responseStream, &json, &errors);
+    auto json_valid = errors.size() != 0;
 
     // Error messages from IDS are returned as json
     if (json_valid) {
