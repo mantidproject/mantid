@@ -131,6 +131,42 @@ class AbinsSDataTest(unittest.TestCase):
         self.assertTrue(np.allclose(sliced_items[1]['order_1'],
                                     self.sample_data['atom_1']['s']['order_1']))
 
+    def test_s_data_apply_dw(self):
+        from copy import deepcopy
+        sdata_dict = {'atom_0':
+                            {'s': {'order_1': np.linspace(0, 2, 5),
+                                   'order_2': np.linspace(2, 4, 5)}},
+                      'atom_1':
+                            {'s': {'order_1': np.linspace(3, 1, 5),
+                                   'order_2': np.linspace(2, 1, 5)}}}
+
+        dw = np.random.RandomState(42).rand(2, 5)
+
+        for min_order, max_order, expected in [
+            (1, 1, {'atom_0': {'order_1': np.linspace(0, 2, 5) * dw[0, :],
+                               'order_2': np.linspace(2, 4, 5)},
+                    'atom_1': {'order_1': np.linspace(3, 1, 5) * dw[1, :],
+                               'order_2': np.linspace(2, 1, 5)}}),
+            (2, 2, {'atom_0': {'order_1': np.linspace(0, 2, 5),
+                               'order_2': np.linspace(2, 4, 5) * dw[0, :]},
+                    'atom_1': {'order_1': np.linspace(3, 1, 5),
+                               'order_2': np.linspace(2, 1, 5) * dw[1, :]}}),
+            (1, 2, {'atom_0': {'order_1': np.linspace(0, 2, 5) * dw[0, :],
+                               'order_2': np.linspace(2, 4, 5) * dw[0, :]},
+                    'atom_1': {'order_1': np.linspace(3, 1, 5) * dw[1, :],
+                               'order_2': np.linspace(2, 1, 5) * dw[1, :]}})
+                               ]:
+
+            sdata = SData(data=deepcopy(sdata_dict),
+                          frequencies=self.frequencies)
+            sdata.apply_dw(dw, min_order=min_order, max_order=max_order)
+            for atom_key, atom_data in sdata.extract().items():
+                if atom_key == 'frequencies':
+                    continue
+                for order_key in atom_data['s']:
+                    assert_almost_equal(atom_data['s'][order_key],
+                                        expected[atom_key][order_key])
+
     def test_sample_form(self):
         sample_form = 'Polycrystalline'
 
