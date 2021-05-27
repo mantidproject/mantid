@@ -40,8 +40,6 @@
 #include <stdexcept>
 #include <vector>
 
-#include <boost/timer/timer.hpp>
-
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
