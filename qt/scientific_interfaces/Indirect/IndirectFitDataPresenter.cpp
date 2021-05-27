@@ -53,30 +53,34 @@ IndirectFitDataPresenter::~IndirectFitDataPresenter() { observeReplace(false); }
 
 IIndirectFitDataView const *IndirectFitDataPresenter::getView() const { return m_view; }
 
-void IndirectFitDataPresenter::setSampleWSSuffices(const QStringList &suffices) {
-  m_view->setSampleWSSuffices(suffices);
+void IndirectFitDataPresenter::setSampleWSSuffices(const QStringList &suffixes) {
+  m_wsSampleSuffixes = suffixes;
+  m_view->setSampleWSSuffixes(suffixes);
 }
 
-void IndirectFitDataPresenter::setSampleFBSuffices(const QStringList &suffices) {
-  m_view->setSampleFBSuffices(suffices);
+void IndirectFitDataPresenter::setSampleFBSuffices(const QStringList &suffixes) {
+  m_fbSampleSuffixes = suffixes;
+  m_view->setSampleFBSuffixes(suffixes);
 }
 
-void IndirectFitDataPresenter::setResolutionWSSuffices(const QStringList &suffices) {
-  m_view->setResolutionWSSuffices(suffices);
+void IndirectFitDataPresenter::setResolutionWSSuffices(const QStringList &suffixes) {
+  m_wsResolutionSuffixes = suffixes;
+  m_view->setResolutionWSSuffixes(suffixes);
 }
 
-void IndirectFitDataPresenter::setResolutionFBSuffices(const QStringList &suffices) {
-  m_view->setResolutionFBSuffices(suffices);
+void IndirectFitDataPresenter::setResolutionFBSuffices(const QStringList &suffixes) {
+  m_fbResolutionSuffixes = suffixes;
+  m_view->setResolutionFBSuffixes(suffixes);
 }
 
 void IndirectFitDataPresenter::setMultiInputSampleWSSuffixes() {
   if (m_addWorkspaceDialog)
-    m_addWorkspaceDialog->setWSSuffices(m_view->getSampleWSSuffices());
+    m_addWorkspaceDialog->setWSSuffices(m_wsSampleSuffixes);
 }
 
 void IndirectFitDataPresenter::setMultiInputSampleFBSuffixes() {
   if (m_addWorkspaceDialog)
-    m_addWorkspaceDialog->setFBSuffices(m_view->getSampleFBSuffices());
+    m_addWorkspaceDialog->setFBSuffices(m_fbSampleSuffixes);
 }
 
 void IndirectFitDataPresenter::setMultiInputResolutionWSSuffixes() {
@@ -175,8 +179,8 @@ UserInputValidator &IndirectFitDataPresenter::validate(UserInputValidator &valid
 void IndirectFitDataPresenter::showAddWorkspaceDialog() {
   if (!m_addWorkspaceDialog)
     m_addWorkspaceDialog = getAddWorkspaceDialog(m_view->parentWidget());
-  m_addWorkspaceDialog->setWSSuffices(m_view->getSampleWSSuffices());
-  m_addWorkspaceDialog->setFBSuffices(m_view->getSampleFBSuffices());
+  m_addWorkspaceDialog->setWSSuffices(m_wsSampleSuffixes);
+  m_addWorkspaceDialog->setFBSuffices(m_fbSampleSuffixes);
   m_addWorkspaceDialog->updateSelectedSpectra();
   m_addWorkspaceDialog->show();
   connect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));

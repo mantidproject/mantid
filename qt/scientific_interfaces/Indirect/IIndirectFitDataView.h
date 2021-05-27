@@ -33,15 +33,15 @@ public:
   virtual std::string getSelectedSample() const = 0;
   virtual std::string getSelectedResolution() const = 0;
 
-  virtual QStringList getSampleWSSuffices() const = 0;
-  virtual QStringList getSampleFBSuffices() const = 0;
-  virtual QStringList getResolutionWSSuffices() const = 0;
-  virtual QStringList getResolutionFBSuffices() const = 0;
+  virtual QStringList getSampleWSSuffixes() const = 0;
+  virtual QStringList getSampleFBSuffixes() const = 0;
+  virtual QStringList getResolutionWSSuffixes() const = 0;
+  virtual QStringList getResolutionFBSuffixes() const = 0;
 
-  virtual void setSampleWSSuffices(QStringList const &suffices) = 0;
-  virtual void setSampleFBSuffices(QStringList const &suffices) = 0;
-  virtual void setResolutionWSSuffices(QStringList const &suffices) = 0;
-  virtual void setResolutionFBSuffices(QStringList const &suffices) = 0;
+  virtual void setSampleWSSuffixes(QStringList const &suffices) = 0;
+  virtual void setSampleFBSuffixes(QStringList const &suffices) = 0;
+  virtual void setResolutionWSSuffixes(QStringList const &suffices) = 0;
+  virtual void setResolutionFBSuffixes(QStringList const &suffices) = 0;
 
   virtual bool isSampleWorkspaceSelectorVisible() const = 0;
   virtual void setSampleWorkspaceSelectorIndex(QString const &workspaceName) = 0;

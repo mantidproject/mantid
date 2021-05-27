@@ -74,19 +74,19 @@ void ConvFitDataPresenter::addModelData(const std::string &name) {
 
 std::unique_ptr<IAddWorkspaceDialog> ConvFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
   auto dialog = std::make_unique<ConvFitAddWorkspaceDialog>(parent);
-  dialog->setResolutionFBSuffices(getView()->getResolutionFBSuffices());
-  dialog->setResolutionWSSuffices(getView()->getResolutionWSSuffices());
+  dialog->setResolutionFBSuffices(getView()->getResolutionFBSuffixes());
+  dialog->setResolutionWSSuffices(getView()->getResolutionWSSuffixes());
   return dialog;
 }
 
 void ConvFitDataPresenter::setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog) {
   if (auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog *>(dialog))
-    convDialog->setResolutionFBSuffices(getView()->getResolutionFBSuffices());
+    convDialog->setResolutionFBSuffices(m_fbResolutionSuffixes);
 }
 
 void ConvFitDataPresenter::setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog) {
   if (auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog *>(dialog))
-    convDialog->setResolutionWSSuffices(getView()->getResolutionWSSuffices());
+    convDialog->setResolutionWSSuffices(m_wsResolutionSuffixes);
 }
 
 } // namespace IDA

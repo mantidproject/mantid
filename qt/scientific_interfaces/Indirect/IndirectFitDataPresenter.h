@@ -91,6 +91,10 @@ protected:
   virtual void addModelData(const std::string &name);
   void setResolutionHidden(bool hide);
   void displayWarning(const std::string &warning);
+  QStringList m_wsSampleSuffixes;
+  QStringList m_fbSampleSuffixes;
+  QStringList m_wsResolutionSuffixes;
+  QStringList m_fbResolutionSuffixes;
 
 private slots:
   void addData();

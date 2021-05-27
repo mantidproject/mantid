@@ -74,28 +74,28 @@ void IndirectFitDataView::readSettings(const QSettings &settings) {
 
 void IndirectFitDataView::disableMultipleDataTab() { setTabEnabled(1, false); }
 
-QStringList IndirectFitDataView::getSampleWSSuffices() const { return m_dataForm->dsSample->getWSSuffixes(); }
+QStringList IndirectFitDataView::getSampleWSSuffixes() const { return m_dataForm->dsSample->getWSSuffixes(); }
 
-QStringList IndirectFitDataView::getSampleFBSuffices() const { return m_dataForm->dsSample->getFBSuffixes(); }
+QStringList IndirectFitDataView::getSampleFBSuffixes() const { return m_dataForm->dsSample->getFBSuffixes(); }
 
-QStringList IndirectFitDataView::getResolutionWSSuffices() const { return m_dataForm->dsResolution->getWSSuffixes(); }
+QStringList IndirectFitDataView::getResolutionWSSuffixes() const { return m_dataForm->dsResolution->getWSSuffixes(); }
 
-QStringList IndirectFitDataView::getResolutionFBSuffices() const { return m_dataForm->dsResolution->getFBSuffixes(); }
+QStringList IndirectFitDataView::getResolutionFBSuffixes() const { return m_dataForm->dsResolution->getFBSuffixes(); }
 
-void IndirectFitDataView::setSampleWSSuffices(const QStringList &suffices) {
-  m_dataForm->dsSample->setWSSuffixes(suffices);
+void IndirectFitDataView::setSampleWSSuffixes(const QStringList &suffixes) {
+  m_dataForm->dsSample->setWSSuffixes(suffixes);
 }
 
-void IndirectFitDataView::setSampleFBSuffices(const QStringList &suffices) {
-  m_dataForm->dsSample->setFBSuffixes(suffices);
+void IndirectFitDataView::setSampleFBSuffixes(const QStringList &suffixes) {
+  m_dataForm->dsSample->setFBSuffixes(suffixes);
 }
 
-void IndirectFitDataView::setResolutionWSSuffices(const QStringList &suffices) {
-  m_dataForm->dsResolution->setWSSuffixes(suffices);
+void IndirectFitDataView::setResolutionWSSuffixes(const QStringList &suffixes) {
+  m_dataForm->dsResolution->setWSSuffixes(suffixes);
 }
 
-void IndirectFitDataView::setResolutionFBSuffices(const QStringList &suffices) {
-  m_dataForm->dsResolution->setFBSuffixes(suffices);
+void IndirectFitDataView::setResolutionFBSuffixes(const QStringList &suffixes) {
+  m_dataForm->dsResolution->setFBSuffixes(suffixes);
 }
 
 bool IndirectFitDataView::isSampleWorkspaceSelectorVisible() const {

@@ -34,15 +34,15 @@ public:
   virtual std::string getSelectedSample() const override;
   std::string getSelectedResolution() const override;
 
-  virtual QStringList getSampleWSSuffices() const override;
-  virtual QStringList getSampleFBSuffices() const override;
-  QStringList getResolutionWSSuffices() const override;
-  QStringList getResolutionFBSuffices() const override;
+  virtual QStringList getSampleWSSuffixes() const override;
+  virtual QStringList getSampleFBSuffixes() const override;
+  QStringList getResolutionWSSuffixes() const override;
+  QStringList getResolutionFBSuffixes() const override;
 
-  virtual void setSampleWSSuffices(const QStringList &suffices) override;
-  virtual void setSampleFBSuffices(const QStringList &suffices) override;
-  virtual void setResolutionWSSuffices(const QStringList &suffices) override;
-  virtual void setResolutionFBSuffices(const QStringList &suffices) override;
+  virtual void setSampleWSSuffixes(const QStringList &suffices) override;
+  virtual void setSampleFBSuffixes(const QStringList &suffices) override;
+  virtual void setResolutionWSSuffixes(const QStringList &suffices) override;
+  virtual void setResolutionFBSuffixes(const QStringList &suffices) override;
 
   bool isSampleWorkspaceSelectorVisible() const override;
   void setSampleWorkspaceSelectorIndex(const QString &workspaceName) override;
