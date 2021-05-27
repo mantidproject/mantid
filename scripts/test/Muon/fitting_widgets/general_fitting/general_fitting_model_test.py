@@ -20,7 +20,8 @@ class GeneralFittingModelTest(unittest.TestCase):
         FrameworkManager.Instance()
 
     def setUp(self):
-        self.model = GeneralFittingModel(setup_context())
+        context = setup_context()
+        self.model = GeneralFittingModel(context, context.fitting_context)
         self.dataset_names = ["Name1", "Name2"]
         self.fit_function = FunctionFactory.createFunction("FlatBackground")
         self.single_fit_functions = [self.fit_function.clone(), self.fit_function.clone()]

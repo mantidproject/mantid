@@ -87,9 +87,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
 
     def test_that_handle_plot_mode_changed_will_update_the_plot_guess_if_in_fitting_mode(self):
         self.presenter.handle_plot_mode_changed(PlotMode.Fitting)
-
-        self.mock_view_plot_guess.assert_called_once_with()
-        self.model.update_plot_guess.assert_called_once_with(self.plot_guess)
+        self.model.update_plot_guess.assert_called_once_with()
 
     def test_that_handle_gui_changes_made_will_reset_the_start_and_end_x_in_the_model_and_view(self):
         self.presenter.handle_gui_changes_made({"FirstGoodDataFromFile": True})
@@ -107,6 +105,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
 
         self.presenter.update_and_reset_all_data.assert_called_with()
         self.mock_view_plot_guess.assert_called_once_with(False)
+        self.mock_model_plot_guess.assert_called_once_with(False)
         self.presenter.clear_cached_fit_functions.assert_called_with()
         self.presenter.enable_editing_notifier.notify_subscribers.assert_called_once_with()
 
@@ -119,23 +118,13 @@ class BasicFittingPresenterTest(unittest.TestCase):
 
         self.presenter.update_and_reset_all_data.assert_called_with()
         self.mock_view_plot_guess.assert_called_once_with(False)
+        self.mock_model_plot_guess.assert_called_once_with(False)
         self.presenter.clear_cached_fit_functions.assert_called_with()
         self.presenter.disable_fitting_notifier.notify_subscribers.assert_called_once_with()
 
     def test_that_handle_plot_guess_changed_will_update_plot_guess_using_the_model(self):
         self.presenter.handle_plot_guess_changed()
-
-        self.mock_view_plot_guess.assert_called_once_with()
-        self.model.update_plot_guess.assert_called_once_with(self.plot_guess)
-
-    def test_that_handle_plot_guess_changed_will_update_plot_guess_using_the_model_if_plot_guess_is_false(self):
-        self.mock_view_plot_guess = mock.PropertyMock(return_value=False)
-        type(self.view).plot_guess = self.mock_view_plot_guess
-
-        self.presenter.handle_plot_guess_changed()
-
-        self.mock_view_plot_guess.assert_called_once_with()
-        self.model.update_plot_guess(False)
+        self.model.update_plot_guess.assert_called_once_with()
 
     def test_that_handle_undo_fit_clicked_will_attempt_to_reset_the_fit_data_and_notify_that_the_data_has_changed(self):
         self.presenter.clear_cached_fit_functions = mock.Mock()
@@ -148,7 +137,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.presenter.clear_cached_fit_functions.assert_called_once_with()
         self.presenter.update_fit_function_in_view_from_model.assert_called_once_with()
         self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model.assert_called_once_with()
-        self.model.update_plot_guess.assert_called_once_with(True)
+        self.model.update_plot_guess.assert_called_once_with()
         self.model.remove_latest_fit_from_context.assert_called_once_with()
         self.presenter.selected_fit_results_changed.notify_subscribers.assert_called_once_with([])
 
@@ -192,6 +181,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
                                                                        self.chi_squared)
         self.view.enable_undo_fit.assert_called_once_with(True)
         self.mock_view_plot_guess.assert_called_once_with(False)
+        self.mock_model_plot_guess.assert_called_once_with(False)
 
     def test_that_handle_finished_will_enable_the_tab_but_not_call_handle_the_fitting_results_if_the_thread_is_unsuccessful(self):
         self.presenter.thread_success = False
@@ -261,8 +251,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.presenter.automatically_update_function_name.assert_called_once_with()
         self.model.get_active_fit_function.assert_called_once_with()
         self.presenter.reset_fit_status_and_chi_squared_information.assert_called_once_with()
-        self.mock_view_plot_guess.assert_called_once_with()
-        self.model.update_plot_guess.assert_called_once_with(self.plot_guess)
+        self.model.update_plot_guess.assert_called_once_with()
         self.presenter.fit_function_changed_notifier.notify_subscribers.assert_called_once_with()
 
     def test_that_handle_function_parameter_changed_will_update_the_fit_functions_and_notify_they_are_updated(self):
@@ -280,8 +269,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.view.parameter_value.assert_called_once_with(full_parameter)
         self.model.update_parameter_value.assert_called_once_with(full_parameter, parameter_value)
 
-        self.mock_view_plot_guess.assert_called_once_with()
-        self.model.update_plot_guess.assert_called_once_with(self.plot_guess)
+        self.model.update_plot_guess.assert_called_once_with()
         self.presenter.fit_parameter_changed_notifier.notify_subscribers.assert_called_once_with()
 
     def test_that_handle_start_x_updated_will_attempt_to_update_the_start_x_in_the_model(self):
@@ -492,6 +480,8 @@ class BasicFittingPresenterTest(unittest.TestCase):
         type(self.model).end_xs = self.mock_model_end_xs
         self.mock_model_current_end_x = mock.PropertyMock(return_value=self.end_x)
         type(self.model).current_end_x = self.mock_model_current_end_x
+        self.mock_model_plot_guess = mock.PropertyMock(return_value=self.plot_guess)
+        type(self.model).plot_guess = self.mock_model_plot_guess
         self.mock_model_minimizer = mock.PropertyMock(return_value=self.minimizer)
         type(self.model).minimizer = self.mock_model_minimizer
         self.mock_model_evaluation_type = mock.PropertyMock(return_value=self.evaluation_type)
