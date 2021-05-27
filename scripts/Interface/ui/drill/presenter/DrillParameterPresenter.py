@@ -43,8 +43,10 @@ class DrillParameterPresenter:
         """
         Triggered when the parameter is valid.
         """
-        self._item.setData(0, Qt.BackgroundRole, None)
+        self._item.signals.blockSignals(True)
+        self._item.setData(Qt.BackgroundRole, None)
         self._item.setToolTip("")
+        self._item.signals.blockSignals(False)
 
     def onInvalid(self, msg):
         """
@@ -53,6 +55,8 @@ class DrillParameterPresenter:
         Args:
             msg (str): error message associated to the invalid state
         """
+        self._item.signals.blockSignals(True)
         brush = QBrush(QColor(self.ERROR_COLOR))
         self._item.setBackground(brush)
         self._item.setToolTip(msg)
+        self._item.signals.blockSignals(False)
