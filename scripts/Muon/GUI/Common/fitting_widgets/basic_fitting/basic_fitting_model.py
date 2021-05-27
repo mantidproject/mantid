@@ -292,6 +292,16 @@ class BasicFittingModel:
         self.fitting_context.plot_guess = plot_guess
 
     @property
+    def plot_guess(self) -> bool:
+        """Returns true if plot guess is turned on."""
+        return self.fitting_context.plot_guess
+
+    @plot_guess.setter
+    def plot_guess(self, plot_guess: bool) -> None:
+        """Sets that the plot guess should or should not be plotted."""
+        self.fitting_context.plot_guess = plot_guess
+
+    @property
     def function_name(self) -> str:
         """Returns the function name to add to the end of a fitted workspace."""
         return self.fitting_context.function_name
