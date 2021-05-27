@@ -344,7 +344,7 @@ class BasicFittingModel:
     @fit_to_raw.setter
     def fit_to_raw(self, fit_to_raw: bool) -> None:
         """Sets the fit to raw property."""
-        if fit_to_raw != self.fit_to_raw:
+        if fit_to_raw != self.fitting_context.fit_to_raw:
             self.fitting_context.fit_to_raw = fit_to_raw
             # Avoids resetting the start/end xs and etc. by not using the dataset_names setter.
             self.fitting_context.dataset_names = self._get_equivalent_binned_or_unbinned_workspaces()
@@ -649,12 +649,12 @@ class BasicFittingModel:
     def _evaluate_plot_guess(self, plot_guess: bool) -> str:
         """Evaluate the plot guess fit function and returns the name of the resulting guess workspace."""
         if not plot_guess or self.current_dataset_name is None:
-            return None
+            return ""
 
         fit_function = self._get_plot_guess_fit_function()
         if fit_function is not None:
             return self._evaluate_function(fit_function, self._get_plot_guess_name())
-        return None
+        return ""
 
     def _evaluate_function(self, fit_function: IFunction, output_workspace: str) -> str:
         """Evaluate the plot guess fit function and returns the name of the resulting guess workspace."""
@@ -669,7 +669,7 @@ class BasicFittingModel:
                                  OutputWorkspace=output_workspace)
         except RuntimeError:
             logger.error("Failed to plot guess.")
-            return None
+            return ""
         return output_workspace
 
     def _evaluate_double_pulse_function(self, fit_function: IFunction, output_workspace: str) -> None:
