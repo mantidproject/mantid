@@ -13,6 +13,7 @@ from shutil import copy2
 import mantid.plots  # noqa
 import Engineering.EnggUtils as Utils
 import mantid.simpleapi as simple
+from mantid.kernel import UnitConversion, DeltaEModeType
 
 NORTH_BANK_CAL = "EnginX_NorthBank.cal"
 SOUTH_BANK_CAL = "EnginX_SouthBank.cal"
@@ -20,8 +21,10 @@ SOUTH_BANK_CAL = "EnginX_SouthBank.cal"
 
 def main(vanadium_run, user, focus_run, **kwargs):
     """
-    sets up all defaults, then calls run
-
+    This is the main method to be called by an external user wishing to use this library. Based on user input, this
+    can run the whole workflow of vanadium correction calculations, calibration and focussing of ENGINX data, or make
+    use of preexisting workspaces to perform only a part of the workflow. See keyword argument descriptions below for
+    information on configuring the flow of execution of these scripts.
 
     @param vanadium_run :: the run number of the vanadium to be used
     @param user :: the username to save under
@@ -129,16 +132,16 @@ def run(ceria_run, do_cal, do_van, full_inst_calib, van_run, calibration_directo
         create_vanadium_integration(van_run, calibration_directory)
 
     # find the file names of calibration files that would be created by this run
-    cal_endings = {"banks": ["all_banks", "bank_{}".format(crop_on)],
-                   "spectra": ["all_banks", "bank_{}".format(crop_name)],
+    cal_endings = {"banks": ["all_banks", f"bank_{crop_on}"],
+                   "spectra": ["all_banks", f"bank_{crop_name}"],
                    None: ["all_banks", "bank_North", "bank_South"]}
-    expected_cals = ["ENGINX_{0}_{1}_{2}.prm".format(van_run, ceria_run, ending) for ending in cal_endings.get(cropped)]
+    expected_cals = [f"ENGINX_{van_run}_{ceria_run}_{ending}.prm" for ending in cal_endings.get(cropped)]
     expected_cals_present = [os.path.isfile(os.path.join(calibration_directory, cal_file)) for cal_file in
                              expected_cals]
-    pdcal_table_endings = {"banks": ["bank_{}".format(crop_on)],
+    pdcal_table_endings = {"banks": [f"bank_{crop_on}"],
                            "spectra": ["cropped"],
                            None: ["bank_North", "bank_South"]}
-    expected_pdcal_tables = ["ENGINX_{0}_{1}_{2}.nxs".format(van_run, ceria_run, ending) for ending in
+    expected_pdcal_tables = [f"ENGINX_{van_run}_{ceria_run}_{ending}.nxs" for ending in
                              pdcal_table_endings.get(cropped)]
     expected_tables_present = [os.path.isfile(os.path.join(calibration_directory, cal_file)) for cal_file in
                                expected_pdcal_tables]
@@ -149,11 +152,11 @@ def run(ceria_run, do_cal, do_van, full_inst_calib, van_run, calibration_directo
         create_calibration(ceria_run, van_run, full_inst_calib, calibration_directory, calibration_general, cropped,
                            crop_name, crop_on)
     else:
-        ending_to_load = {"banks": "bank_{}".format(crop_on),
+        ending_to_load = {"banks": f"bank_{crop_on}",
                           "spectra": crop_name,
                           None: "all_banks"}
         file_name = os.path.join(calibration_directory,
-                                 "ENGINX_{0}_{1}_{2}.prm".format(van_run, ceria_run, ending_to_load.get(cropped)))
+                                 f"ENGINX_{van_run}_{ceria_run}_{ending_to_load.get(cropped)}.prm")
         Utils.load_relevant_pdcal_outputs(file_name, "engg")
 
     # if a focus is requested, run the focus
@@ -178,9 +181,8 @@ def create_vanadium_integration(van_run, calibration_directory):
     # make the integration workspace
     simple.NormaliseByCurrent(InputWorkspace=van_ws, OutputWorkspace=van_ws)
     # sensitivity correction for van
-    nbins = van_ws.blocksize()
     ws_van_int = simple.Integration(InputWorkspace=van_ws)
-    ws_van_int /= nbins
+    ws_van_int /= van_ws.blocksize()
     # save out the vanadium and delete the original workspace
     simple.SaveNexus(ws_van_int, van_int_file)
     simple.DeleteWorkspace(van_name)
@@ -344,22 +346,22 @@ def run_calibration(sample_ws,
 
         return tof_focused, background_van
 
+    def ws_initial_process(ws):
+        """Run some processing common to both the sample and vanadium workspaces"""
+        simple.NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws)
+        simple.ApplyDiffCal(InstrumentWorkspace=ws, CalibrationWorkspace=full_inst_calib)
+        simple.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='dSpacing')
+        return ws
+
     # need to clone the data as PDCalibration rebins
     sample_raw = simple.CloneWorkspace(InputWorkspace=sample_ws)
 
     ws_van = simple.CloneWorkspace(vanadium_workspace)
-    simple.NormaliseByCurrent(InputWorkspace=ws_van, OutputWorkspace=ws_van)
-    simple.ApplyDiffCal(InstrumentWorkspace=ws_van, CalibrationWorkspace=full_inst_calib)
-    ws_van_d = simple.ConvertUnits(InputWorkspace=ws_van, Target='dSpacing')
-
+    ws_van_d = ws_initial_process(ws_van)
+    # sensitivity correction
     ws_van_d /= van_integration
 
-    # sensitivity correction for sample
-    simple.NormaliseByCurrent(InputWorkspace=sample_ws, OutputWorkspace=sample_ws)
-    simple.ApplyDiffCal(InstrumentWorkspace=sample_ws, CalibrationWorkspace=full_inst_calib)
-    ws_d = simple.ConvertUnits(InputWorkspace=sample_ws, Target='dSpacing')
-
-    ws_d /= van_integration
+    ws_d = ws_initial_process(sample_ws)
 
     simple.DeleteWorkspace(van_integration)
     simple.DeleteWorkspace(sample_ws)
@@ -562,54 +564,42 @@ def create_difc_zero_workspace(difc, tzero, crop_on, name):
 
     @param difc :: the list of difc values to add to the table
     @param tzero :: the list of tzero values to add to the table
-    @param crop_on :: where the cropping occured, either a bank, a spectra, or empty
+    @param crop_on :: where the cropping occurred, either a bank, a spectra, or empty. Empty indicates both banks
     @param name :: the name of a cropped workspace to use, if it is a non default name
 
     """
-    plot_spec_num = False
-    # check what banks to use
-    banks = [1]
-    correction = 0
-    if crop_on == "":
-        banks = [1, 2]
-    elif crop_on.lower() == "south":
-        correction = 1
-    elif not crop_on == "":
-        plot_spec_num = True
+    if not crop_on:
+        banks = ["North", "South"]
+    elif crop_on != "North" and crop_on != "South":
+        banks = ["Cropped"]
+    else:
+        banks = [crop_on]
 
     # loop through used banks
-    for i in banks:
-        actual_i = correction + i
+    for bank_name in banks:
         # retrieve required workspace
-        if not plot_spec_num:
-            if actual_i == 1:
-                fitparam_ws = simple.AnalysisDataService.retrieve("diag_North_fitparam")
-            elif actual_i == 2:
-                fitparam_ws = simple.AnalysisDataService.retrieve("diag_South_fitparam")
-        else:
-            fitparam_ws = simple.AnalysisDataService.retrieve("diag_Cropped_fitparam")
-
+        fitparam_ws = simple.AnalysisDataService.retrieve(f"diag_{bank_name}_fitparam")
+        fitted_ws = simple.AnalysisDataService.retrieve(f"diag_{bank_name}_fitted")
         expected_dspacing_peaks = Utils.default_ceria_expected_peaks(final=True)
-
         # get the data to be used
-        x_val = []
-        y_val = []
-        y2_val = []
+        expected_d_peaks_x = []
+        fitted_tof_peaks_y = []
+        calculated_d_peaks_y2 = []
         for irow in range(0, fitparam_ws.rowCount()):
-            x_val.append(expected_dspacing_peaks[-(irow+1)])
-            y_val.append(fitparam_ws.cell(irow, 5))
-            y2_val.append(x_val[irow] * difc[i - 1] + tzero[i - 1])
+            expected_d_peaks_x.append(expected_dspacing_peaks[-(irow+1)])
+            fitted_tof_peaks_y.append(fitparam_ws.cell(irow, 5))
+            diff_consts = Utils.get_diffractometer_constants_from_workspace(fitted_ws)
+            calculated_d_peaks_y2.append(UnitConversion.run("TOF", "dSpacing", expected_d_peaks_x[irow], 0,
+                                                            DeltaEModeType.Elastic, diff_consts))
 
         # create workspaces to temporary hold the data
-        simple.CreateWorkspace(OutputWorkspace="ws1", DataX=x_val, DataY=y_val,
+        simple.CreateWorkspace(OutputWorkspace="ws1", DataX=expected_d_peaks_x, DataY=fitted_tof_peaks_y,
                                UnitX="Expected Peaks Centre(dSpacing, A)",
                                YUnitLabel="Fitted Peaks Centre(TOF, us)")
-        simple.CreateWorkspace(OutputWorkspace="ws2", DataX=x_val, DataY=y2_val)
+        simple.CreateWorkspace(OutputWorkspace="ws2", DataX=expected_d_peaks_x, DataY=calculated_d_peaks_y2)
 
         # get correct name for output
-        if not plot_spec_num:
-            name = actual_i
-        output_name = "Engg difc Zero Peaks Bank {}".format(name)
+        output_name = f"Engg difc Zero Peaks Bank {bank_name}"
 
         # use the two workspaces to creat the output
         output = simple.AppendSpectra(InputWorkspace1="ws1", InputWorkspace2="ws2",

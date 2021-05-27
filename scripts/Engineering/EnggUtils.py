@@ -42,6 +42,17 @@ def load_relevant_pdcal_outputs(file_path, output_prefix="engggui"):
         mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration_cropped")
 
 
+def get_diffractometer_constants_from_workspace(ws):
+    """
+    Get diffractometer constants from workspace
+    TOF = difc*d + difa*(d^2) + tzero
+    """
+    ws = AnalysisDataService.Instance().retrieve(ws)
+    si = ws.spectrumInfo()
+    diff_consts = si.diffractometerConstants(0)  # output is a UnitParametersMap
+    return diff_consts
+
+
 def create_spectrum_list_from_string(str_list):
     array = IntArrayProperty('var', str_list).value
     int_list = list(array)
@@ -54,8 +65,7 @@ def create_custom_grouping_workspace(str_list, sample_raw):
     for spec in int_spectrum_numbers:
         ws_ind = int(spec - 1)
         det_ids = grp_ws.getDetectorIDs(ws_ind)
-        det_id = det_ids[0]
-        grp_ws.setValue(det_id, 1)
+        grp_ws.setValue(det_ids[0], 1)
     return grp_ws
 
 
