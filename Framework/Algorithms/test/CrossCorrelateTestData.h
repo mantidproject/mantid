@@ -64,63 +64,76 @@ class CrossCorrelateTestData
     inline static std::string const gaussian_default = "name=Gaussian,Height=20,Sigma=4";
 
     /*
-Code to generate parameters for b2bexpconvpv:
+     
+    Code to generate parameters for b2bexpconvpv:
 
-       import numpy as np
+      import numpy as np
 
-       diam_d = {"111": 2.05995, "220": 1.26146, "311": 1.07577}
+      diam_d = {"111": 2.05995, "220": 1.26146, "311": 1.07577}
 
-       alp = 0.791431E-01
-       beta0 = 0.580874E-01
-       beta1 = 0.947427E-01
-       sig0 = 0.0E+00
-       sig1 = 0.157741E+03
-       sig2 = 0.402182E+02
+      alp = 0.791431E-01
+      beta0 = 0.580874E-01
+      beta1 = 0.947427E-01
+      sig0 = 0.0E+00
+      sig1 = 0.157741E+03
+      sig2 = 0.402182E+02
+      gamma1 = 0.302644E+01
 
-       print("===============================================")
-       print("Back-to-back shape parameters for diamond peaks")
-       print("===============================================")
-       for key, item in diam_d.items():
-       A = alp / item
-       B = beta0 + beta1 / item**4
-       S = np.sqrt(sig0 + sig1 * item**2 + sig2 * item**4)
-       print("\n--------------------")
-       print("({0:3s})".format(key))
-       print("--------------------")
-       print("A = {0:<10.5F}".format(A))
-       print("B = {0:<10.5F}".format(B))
-       print("S = {0:<10.5F}".format(S))
-       print("===============================================")
+      print("===============================================")
+      print("Back-to-back shape parameters for diamond peaks")
+      print("===============================================")
+      for key, item in diam_d.items():
+        A = alp / item
+        B = beta0 + beta1 / item**4
+        S = np.sqrt(sig0 + sig1 * item**2 + sig2 * item**4)
+        Gamma = gamma1 * item
 
-Result:
-       --------------------
-       (111)
-       --------------------
-       A = 0.03842   
-       B = 0.06335   
-       S = 37.33017  
-       ===============================================
+        print("\n--------------------")
+        print("({0:3s})".format(key))
+        print("--------------------")
+        print("A = {0:<10.5F}".format(A))
+        print("B = {0:<10.5F}".format(B))
+        print("S = {0:<10.5F}".format(S))
+        print("Gamma = {0:<10.5F}".format(Gamma))
+        print("===============================================")
 
-       --------------------
-       (220)
-       --------------------
-       A = 0.06274   
-       B = 0.09550   
-       S = 18.78430  
-       ===============================================
+      Result:
 
-       --------------------
-       (311)
-       --------------------
-       A = 0.07357   
-       B = 0.12883   
-       S = 15.37579  
-       ===============================================
+        ===============================================
+        Back-to-back shape parameters for diamond peaks
+        ===============================================
 
+        --------------------
+        (111)
+        --------------------
+        A = 0.03842   
+        B = 0.06335   
+        S = 37.33017  
+        Gamma = 6.23432   
+        ===============================================
+
+        --------------------
+        (220)
+        --------------------
+        A = 0.06274   
+        B = 0.09550   
+        S = 18.78430  
+        Gamma = 3.81773   
+        ===============================================
+
+        --------------------
+        (311)
+        --------------------
+        A = 0.07357   
+        B = 0.12883   
+        S = 15.37579  
+        Gamma = 3.25575   
+        ===============================================
     */
-    inline static std::string const b2bexp_default_111 = "name=Bk2BkExpConvPV,Alpha=0.03842,Beta=0.06335,Sigma2=37.33017";
-    inline static std::string const b2bexp_default_220 = "name=Bk2BkExpConvPV,Alpha=0.06274,Beta=0.09550,Sigma2=18.78430"; 
-    inline static std::string const b2bexp_default_311 = "name=Bk2BkExpConvPV,Alpha=0.07357,Beta=0.12883,Sigma2=15.37579";  
+
+    inline static std::string const b2bexp_default_111 = "name=Bk2BkExpConvPV,Alpha=0.03842,Beta=0.06335,Sigma2=37.33017,Gamma = 6.23432,Intensity=100";
+    inline static std::string const b2bexp_default_220 = "name=Bk2BkExpConvPV,Alpha=0.06274,Beta=0.09550,Sigma2=18.78430,Gamma=3.81773,Intensity=100"; 
+    inline static std::string const b2bexp_default_311 = "name=Bk2BkExpConvPV,Alpha=0.07357,Beta=0.12883,Sigma2=15.37579,Gamma=3.25575,Intensity=100";  
 
     /* Specify default values */
     CrossCorrelateTestData( std::string function_specifier = gaussian_default,
