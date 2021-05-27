@@ -29,6 +29,15 @@ class DrillParameterPresenter:
         self._parameter = parameter
         self._parameter.valid.connect(self.onValid)
         self._parameter.invalid.connect(self.onInvalid)
+        self._item.signals.dataChanged.connect(self.onDataChanged)
+
+    def onDataChanged(self):
+        """
+        Triggered when the data changed in the view. This function propagates
+        the changes to the model.
+        """
+        value = self._item.text()
+        self._parameter.setValue(value)
 
     def onValid(self):
         """
