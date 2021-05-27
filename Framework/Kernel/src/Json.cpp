@@ -7,6 +7,7 @@
 
 #include "MantidKernel/Json.h"
 #include <boost/algorithm/string/erase.hpp>
+#include <sstream>
 
 namespace Mantid {
 namespace Kernel {
@@ -38,7 +39,8 @@ std::string jsonToString(const Json::Value &json, const std::string &indentation
  * @return Json::Value
  */
 Json::Value stringToJson(const std::string &json) {
-  std::stringstream sstr(json);
+  std::stringstream sstr;
+  sstr.str(json);
   Json::Value jsonValue;
   sstr >> jsonValue;
   return jsonValue;
