@@ -40,6 +40,18 @@ class DrillTableWidget(QTableWidget):
         self.horizontalHeader().setHighlightSections(False)
         self.verticalHeader().setHighlightSections(False)
 
+        self._samplePresenters = list()
+
+    def addSamplePresenter(self, presenter, index):
+        """
+        Add a sample presenter.
+
+        Args:
+            presenter (DrillSamplePresenter): reference to the presenter
+            index (int): sample index
+        """
+        self._samplePresenters.insert(index, presenter)
+
     def setHorizontalHeaderLabels(self, labels):
         """
         Overrides QTableWidget::setHorizontalHeaderLabels. This methods calls
@@ -78,6 +90,7 @@ class DrillTableWidget(QTableWidget):
         if ((position < 0) or (position >= n_rows)):
             return
         self.removeRow(position)
+        del self._samplePresenters[position]
 
     def eraseRow(self, position):
         """

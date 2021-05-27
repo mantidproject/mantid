@@ -23,6 +23,7 @@ class DrillSamplePresenter:
     def __init__(self, table, sample):
         self._table = table
         self._sample = sample
+        self._table.addSamplePresenter(self, self._sample.getIndex())
 
     def onNewItem(self, name, item):
         """
