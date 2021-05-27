@@ -93,10 +93,6 @@ class SPowderSemiEmpiricalCalculator:
         self._progress_reporter = None
         self._powder_data = None
 
-        self._a_traces = None              # These three are very stateful
-        self._b_traces = None              # and get mutated as we move
-        self._fundamentals_freq = None     # through angles/qpts/atoms.
-
         # Set up caching
         self._clerk = abins.IO(
             input_filename=filename,
