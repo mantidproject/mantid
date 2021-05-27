@@ -11,6 +11,7 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (create_fitted_workspace
                                                          create_multi_domain_fitted_workspace_name,
                                                          create_parameter_table_name,
                                                          get_run_numbers_as_string_from_workspace_name)
+from Muon.GUI.Common.contexts.general_fitting_context import GeneralFittingContext
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
 from Muon.GUI.Common.utilities.algorithm_utils import run_simultaneous_Fit
@@ -21,111 +22,100 @@ class GeneralFittingModel(BasicFittingModel):
     The GeneralFittingModel derives from BasicFittingModel. It adds the ability to do simultaneous fitting.
     """
 
-    def __init__(self, context: MuonContext, fitting_context):
+    def __init__(self, context: MuonContext, fitting_context: GeneralFittingContext):
         """Initialize the GeneralFittingModel with emtpy fit data."""
         super(GeneralFittingModel, self).__init__(context, fitting_context)
 
-        # This is a MultiDomainFunction if there are multiple domains in the function browser.
-        self._simultaneous_fit_function = None
-        self._simultaneous_fit_function_cache = None
-        self._simultaneous_fitting_mode = False
-
-        self._simultaneous_fit_by = ""
-        self._simultaneous_fit_by_specifier = ""
-
-        self._global_parameters = []
-
     def clear_simultaneous_fit_function(self) -> None:
         """Clears the simultaneous fit function."""
-        self.simultaneous_fit_function = None
+        self.fitting_context.simultaneous_fit_function = None
 
     @property
     def simultaneous_fit_function(self) -> IFunction:
         """Returns the simultaneous fit function stored in the model."""
-        return self._simultaneous_fit_function
+        return self.fitting_context.simultaneous_fit_function
 
     @simultaneous_fit_function.setter
     def simultaneous_fit_function(self, fit_function: IFunction) -> None:
         """Sets the simultaneous fit function stored in the model."""
-        if fit_function is not None and self.number_of_datasets == 0:
-            raise RuntimeError(f"Cannot set a simultaneous fit function when there are no datasets in the model.")
-
-        self._simultaneous_fit_function = fit_function
+        self.fitting_context.simultaneous_fit_function = fit_function
 
     def current_domain_fit_function(self):
         """Returns the fit function in the simultaneous function corresponding to the currently displayed dataset."""
-        if not isinstance(self.simultaneous_fit_function, MultiDomainFunction):
-            return self.simultaneous_fit_function
+        simultaneous_function = self.fitting_context.simultaneous_fit_function
+        if not isinstance(simultaneous_function, MultiDomainFunction):
+            return simultaneous_function
 
-        index = self.current_dataset_index if self.current_dataset_index is not None else 0
-        return self.simultaneous_fit_function.getFunction(index)
+        current_dataset_index = self.fitting_context.current_dataset_index
+        return simultaneous_function.getFunction(current_dataset_index if current_dataset_index is not None else 0)
 
     @property
     def simultaneous_fit_function_cache(self) -> IFunction:
         """Returns the simultaneous fit function cache stored in the model."""
-        return self._simultaneous_fit_function_cache
+        return self.fitting_context.simultaneous_fit_function_cache
 
     @simultaneous_fit_function_cache.setter
     def simultaneous_fit_function_cache(self, fit_function: IFunction) -> None:
         """Sets the simultaneous fit function cache stored in the model."""
-        if fit_function is not None and self.number_of_datasets == 0:
+        if fit_function is not None and self.fitting_context.number_of_datasets == 0:
             raise RuntimeError(f"Cannot cache a simultaneous fit function when there are no datasets in the model.")
 
-        self._simultaneous_fit_function_cache = fit_function
+        self.fitting_context.simultaneous_fit_function_cache = fit_function
 
     def cache_the_current_fit_functions(self) -> None:
         """Caches the simultaneous fit function, and the single fit functions defined in the base class."""
-        self.simultaneous_fit_function_cache = self._clone_function(self.simultaneous_fit_function)
+        self.fitting_context.simultaneous_fit_function_cache = self._clone_function(
+            self.fitting_context.simultaneous_fit_function)
         super().cache_the_current_fit_functions()
 
     def clear_cached_fit_functions(self) -> None:
         """Clears the simultaneous fit function cache, and the single fit function cache defined in the base class."""
-        self.simultaneous_fit_function_cache = None
+        self.fitting_context.simultaneous_fit_function_cache = None
         super().clear_cached_fit_functions()
 
     @property
     def simultaneous_fitting_mode(self) -> bool:
         """Returns whether or not simultaneous fitting is currently active. If not, single fitting is active."""
-        return self._simultaneous_fitting_mode
+        return self.fitting_context.simultaneous_fitting_mode
 
     @simultaneous_fitting_mode.setter
     def simultaneous_fitting_mode(self, enable_simultaneous: bool) -> None:
         """Sets whether or not simultaneous fitting is currently active in the model."""
-        self._simultaneous_fitting_mode = enable_simultaneous
+        self.fitting_context.simultaneous_fitting_mode = enable_simultaneous
 
     @property
     def simultaneous_fit_by(self) -> str:
         """Returns the simultaneous fit by parameter stored in the model."""
-        return self._simultaneous_fit_by
+        return self.fitting_context.simultaneous_fit_by
 
     @simultaneous_fit_by.setter
     def simultaneous_fit_by(self, simultaneous_fit_by: str) -> None:
         """Sets the simultaneous fit by parameter stored in the model."""
-        self._simultaneous_fit_by = simultaneous_fit_by
+        self.fitting_context.simultaneous_fit_by = simultaneous_fit_by
 
     @property
     def simultaneous_fit_by_specifier(self) -> str:
         """Returns the simultaneous fit by specifier stored in the model."""
-        return self._simultaneous_fit_by_specifier
+        return self.fitting_context.simultaneous_fit_by_specifier
 
     @simultaneous_fit_by_specifier.setter
     def simultaneous_fit_by_specifier(self, simultaneous_fit_by_specifier: str) -> None:
         """Sets the simultaneous fit by specifier stored in the model."""
-        self._simultaneous_fit_by_specifier = simultaneous_fit_by_specifier
+        self.fitting_context.simultaneous_fit_by_specifier = simultaneous_fit_by_specifier
 
     @property
     def global_parameters(self) -> list:
         """Returns the global parameters stored in the model."""
-        return self._global_parameters
+        return self.fitting_context.global_parameters
 
     @global_parameters.setter
     def global_parameters(self, global_parameters: list) -> None:
         """Sets the global parameters stored in the model."""
-        self._global_parameters = global_parameters
+        self.fitting_context.global_parameters = global_parameters
 
     def update_parameter_value(self, full_parameter: str, value: float) -> None:
         """Update the value of a parameter in the fit function."""
-        if self.simultaneous_fitting_mode:
+        if self.fitting_context.simultaneous_fitting_mode:
             current_domain_function = self.current_domain_fit_function()
             if current_domain_function is not None:
                 current_domain_function.setParameter(full_parameter, value)
@@ -134,23 +124,24 @@ class GeneralFittingModel(BasicFittingModel):
 
     def automatically_update_function_name(self) -> None:
         """Attempt to update the function name automatically."""
-        if self.function_name_auto_update:
-            if self.simultaneous_fitting_mode:
-                self.function_name = self._get_function_name(self.simultaneous_fit_function)
+        if self.fitting_context.function_name_auto_update:
+            if self.fitting_context.simultaneous_fitting_mode:
+                self.fitting_context.function_name = self._get_function_name(
+                    self.fitting_context.simultaneous_fit_function)
             else:
                 super().automatically_update_function_name()
 
     def use_cached_function(self) -> None:
         """Sets the current function as being the cached function."""
-        self.simultaneous_fit_function = self.simultaneous_fit_function_cache
+        self.fitting_context.simultaneous_fit_function = self.fitting_context.simultaneous_fit_function_cache
         super().use_cached_function()
 
     def reset_fit_functions(self, new_functions: list) -> None:
         """Reset the fit functions stored by the model. Attempts to use the currently selected function."""
         if len(new_functions) == 0 or None in new_functions:
-            self.simultaneous_fit_function = None
+            self.fitting_context.simultaneous_fit_function = None
         elif len(new_functions) == 1:
-            self.simultaneous_fit_function = new_functions[0]
+            self.fitting_context.simultaneous_fit_function = new_functions[0]
         else:
             self._create_multi_domain_function_using(new_functions)
             self._add_global_ties_to_simultaneous_function()
@@ -159,102 +150,108 @@ class GeneralFittingModel(BasicFittingModel):
 
     def _create_multi_domain_function_using(self, domain_functions: list) -> None:
         """Creates a new MultiDomainFunction using the provided functions corresponding to a domain each."""
-        self.simultaneous_fit_function = MultiDomainFunction()
+        self.fitting_context.simultaneous_fit_function = MultiDomainFunction()
         for i, function in enumerate(domain_functions):
-            self.simultaneous_fit_function.add(function)
-            self.simultaneous_fit_function.setDomainIndex(i, i)
+            self.fitting_context.simultaneous_fit_function.add(function)
+            self.fitting_context.simultaneous_fit_function.setDomainIndex(i, i)
 
     def _get_new_functions_using_existing_datasets(self, new_dataset_names: list) -> list:
         """Returns the functions to use for the new datasets. It tries to use the existing functions if possible."""
-        if self.simultaneous_fitting_mode:
+        if self.fitting_context.simultaneous_fitting_mode:
             return self._get_new_domain_functions_using_existing_datasets(new_dataset_names)
         else:
             return super()._get_new_functions_using_existing_datasets(new_dataset_names)
 
     def _get_new_domain_functions_using_existing_datasets(self, new_dataset_names: list) -> list:
         """Returns the domain functions to use within a MultiDomainFunction for the new datasets."""
-        if len(self.dataset_names) == len(new_dataset_names) and self.simultaneous_fit_function is not None:
-            if len(self.dataset_names) == 1:
-                return [self.simultaneous_fit_function.clone()]
+        dataset_names = self.fitting_context.dataset_names
+        simultaneous_function = self.fitting_context.simultaneous_fit_function
+
+        if len(dataset_names) == len(new_dataset_names) and simultaneous_function is not None:
+            if len(dataset_names) == 1:
+                return [simultaneous_function.clone()]
             else:
-                return [self.simultaneous_fit_function.getFunction(i).clone()
-                        for i in range(self.simultaneous_fit_function.nFunctions())]
-        elif len(self.dataset_names) <= 1:
-            return [self._clone_function(self.simultaneous_fit_function) for _ in range(len(new_dataset_names))]
+                return [simultaneous_function.getFunction(i).clone() for i in range(simultaneous_function.nFunctions())]
+        elif len(dataset_names) <= 1:
+            return [self._clone_function(simultaneous_function) for _ in range(len(new_dataset_names))]
         else:
             return [self._get_new_domain_function_for(name) for name in new_dataset_names]
 
     def _get_new_domain_function_for(self, new_dataset_name: str) -> IFunction:
         """Returns the function to use for a specific domain when new datasets are loaded."""
-        if new_dataset_name in self.dataset_names and self.simultaneous_fit_function is not None:
-            return self._clone_function(self.simultaneous_fit_function.getFunction(
-                self.dataset_names.index(new_dataset_name)))
+        dataset_names = self.fitting_context.dataset_names
+        simultaneous_function = self.fitting_context.simultaneous_fit_function
+
+        if new_dataset_name in dataset_names and simultaneous_function is not None:
+            return self._clone_function(simultaneous_function.getFunction(dataset_names.index(new_dataset_name)))
         else:
             return self._clone_function(self.current_domain_fit_function())
 
     def _add_global_ties_to_simultaneous_function(self) -> None:
         """Creates and adds ties to the simultaneous function to represent the global parameters."""
-        index = self.current_dataset_index if self.current_dataset_index is not None else 0
-        for global_parameter in self.global_parameters:
+        current_dataset_index = self.fitting_context.current_dataset_index
+
+        for global_parameter in self.fitting_context.global_parameters:
+            index = current_dataset_index if current_dataset_index is not None else 0
             self.simultaneous_fit_function.addTies(self._create_global_tie_string(index, global_parameter))
 
     def _create_global_tie_string(self, index: int, global_parameter: str) -> str:
         """Create a string to represent the tying of a global parameter."""
         ties = ["f" + str(i) + "." + global_parameter
-                for i in range(self.simultaneous_fit_function.nFunctions()) if i != index]
+                for i in range(self.fitting_context.simultaneous_fit_function.nFunctions()) if i != index]
         ties.append("f" + str(index) + "." + global_parameter)
         return "=".join(ties)
 
     def _get_plot_guess_fit_function(self) -> IFunction:
         """Returns the fit function to evaluate when plotting a guess."""
         fit_function = self.get_active_fit_function()
-        if fit_function is not None and self.simultaneous_fitting_mode:
+        if fit_function is not None and self.fitting_context.simultaneous_fitting_mode:
             return fit_function.createEquivalentFunctions()[self.fitting_context.current_dataset_index]
         else:
             return fit_function
 
     def get_simultaneous_fit_by_specifiers_to_display_from_context(self) -> list:
         """Returns the simultaneous fit by specifiers to display in the view from the context."""
-        if self.simultaneous_fit_by == "Run":
+        if self.fitting_context.simultaneous_fit_by == "Run":
             return self._get_selected_runs()
-        elif self.simultaneous_fit_by == "Group/Pair":
+        elif self.fitting_context.simultaneous_fit_by == "Group/Pair":
             return self._get_selected_groups_and_pairs()
         return []
 
     def get_fit_function_parameters(self) -> list:
         """Returns the names of the fit parameters in the fit functions."""
-        if self.simultaneous_fitting_mode:
-            if self.simultaneous_fit_function is not None:
-                return [self.simultaneous_fit_function.parameterName(i)
-                        for i in range(self.simultaneous_fit_function.nParams())]
+        if self.fitting_context.simultaneous_fitting_mode:
+            simultaneous_function = self.fitting_context.simultaneous_fit_function
+            if simultaneous_function is not None:
+                return [simultaneous_function.parameterName(i) for i in range(simultaneous_function.nParams())]
             return []
         else:
             return super().get_fit_function_parameters()
 
     def get_all_fit_functions(self) -> list:
         """Returns all the fit functions for the current fitting mode."""
-        if self.simultaneous_fitting_mode:
-            return [self.simultaneous_fit_function]
+        if self.fitting_context.simultaneous_fitting_mode:
+            return [self.fitting_context.simultaneous_fit_function]
         else:
             return super().get_all_fit_functions()
 
     def get_active_fit_function(self) -> IFunction:
         """Returns the fit function that is active and will be used for a fit."""
-        if self.simultaneous_fitting_mode:
-            return self.simultaneous_fit_function
+        if self.fitting_context.simultaneous_fitting_mode:
+            return self.fitting_context.simultaneous_fit_function
         else:
             return super().get_active_fit_function()
 
     def get_active_workspace_names(self) -> list:
         """Returns the names of the workspaces that will be fitted. For simultaneous fitting, it is all loaded data."""
-        if self.simultaneous_fitting_mode:
-            return self.dataset_names
+        if self.fitting_context.simultaneous_fitting_mode:
+            return self.fitting_context.dataset_names
         else:
             return super().get_active_workspace_names()
 
     def get_selected_runs_groups_and_pairs(self) -> tuple:
         """Returns the runs, groups and pairs that are currently selected."""
-        if self.simultaneous_fitting_mode:
+        if self.fitting_context.simultaneous_fitting_mode:
             return self._get_selected_runs_groups_and_pairs_for_simultaneous_fit_mode()
         else:
             return super().get_selected_runs_groups_and_pairs()
@@ -263,10 +260,10 @@ class GeneralFittingModel(BasicFittingModel):
         """Returns the runs, groups and pairs that are currently selected for simultaneous fit mode."""
         runs, groups_and_pairs = super().get_selected_runs_groups_and_pairs()
 
-        if self.simultaneous_fit_by == "Run":
+        if self.fitting_context.simultaneous_fit_by == "Run":
             runs = self.simultaneous_fit_by_specifier
-        elif self.simultaneous_fit_by == "Group/Pair":
-            groups_and_pairs = [self.simultaneous_fit_by_specifier]
+        elif self.fitting_context.simultaneous_fit_by == "Group/Pair":
+            groups_and_pairs = [self.fitting_context.simultaneous_fit_by_specifier]
         return runs, groups_and_pairs
 
     def _get_selected_runs(self) -> list:
@@ -292,9 +289,10 @@ class GeneralFittingModel(BasicFittingModel):
 
     def perform_fit(self) -> tuple:
         """Performs a single or simultaneous fit and returns the resulting function, status and chi squared."""
-        if self.simultaneous_fitting_mode:
-            return self._do_simultaneous_fit(self._get_parameters_for_simultaneous_fit(
-                self.dataset_names, self.simultaneous_fit_function), self.global_parameters)
+        if self.fitting_context.simultaneous_fitting_mode:
+            parameters = self._get_parameters_for_simultaneous_fit(self.fitting_context.dataset_names,
+                                                                   self.fitting_context.simultaneous_fit_function)
+            return self._do_simultaneous_fit(parameters, self.fitting_context.global_parameters)
         else:
             return super().perform_fit()
 
@@ -318,7 +316,7 @@ class GeneralFittingModel(BasicFittingModel):
 
     def _copy_logs(self, input_workspaces, output_workspace: str) -> None:
         """Copy the logs from the input workspace(s) to the output workspaces."""
-        if self.number_of_datasets == 1:
+        if self.fitting_context.number_of_datasets == 1:
             CopyLogs(InputWorkspace=input_workspaces[0], OutputWorkspace=output_workspace, StoreInADS=False)
         else:
             self._copy_logs_for_all_datsets(input_workspaces, output_workspace)
@@ -333,15 +331,15 @@ class GeneralFittingModel(BasicFittingModel):
         params = self._get_common_parameters()
         params["Function"] = simultaneous_function
         params["InputWorkspace"] = dataset_names
-        params["StartX"] = self.start_xs
-        params["EndX"] = self.end_xs
+        params["StartX"] = self.fitting_context.start_xs
+        params["EndX"] = self.fitting_context.end_xs
         return params
 
     def _add_simultaneous_fit_results_to_ADS_and_context(self, input_workspace_names: list, parameter_table,
                                                          output_workspace, covariance_matrix,
                                                          global_parameters: list) -> None:
         """Adds the results of a simultaneous fit to the ADS and fitting context."""
-        if self.number_of_datasets > 1:
+        if self.fitting_context.number_of_datasets > 1:
             workspace_names, table_name, table_directory = self._add_multiple_fit_workspaces_to_ADS(
                 input_workspace_names, output_workspace, covariance_matrix)
         else:
@@ -354,7 +352,7 @@ class GeneralFittingModel(BasicFittingModel):
 
     def _add_multiple_fit_workspaces_to_ADS(self, input_workspace_names: list, output_workspace, covariance_matrix):
         """Adds the results of a simultaneous fit to the ADS and fitting context if multiple workspaces were fitted."""
-        suffix = self.function_name
+        suffix = self.fitting_context.function_name
         workspace_names, workspace_directory = create_multi_domain_fitted_workspace_name(input_workspace_names[0],
                                                                                          suffix)
         table_name, table_directory = create_parameter_table_name(input_workspace_names[0] + "+ ...", suffix)
@@ -383,7 +381,7 @@ class GeneralFittingModel(BasicFittingModel):
 
     def _rename_workspace(self, input_name: str, workspace_name: str) -> str:
         """Renames a resulting workspace from a simultaneous fit."""
-        new_name, _ = create_fitted_workspace_name(input_name, self.function_name)
+        new_name, _ = create_fitted_workspace_name(input_name, self.fitting_context.function_name)
         new_name += '; Simultaneous'
         RenameWorkspace(InputWorkspace=workspace_name, OutputWorkspace=new_name)
         return new_name
