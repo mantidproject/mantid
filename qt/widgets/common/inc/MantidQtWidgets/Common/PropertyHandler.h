@@ -215,6 +215,7 @@ protected:
   void initAttributes();
   void initParameters();
   void initWorkspace();
+  void initTies();
 
 private:
   FitPropertyBrowser *m_browser;
