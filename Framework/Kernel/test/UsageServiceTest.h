@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidKernel/Json.h"
 #include "MantidKernel/UsageService.h"
 #include <algorithm>
 #include <json/json.h>
@@ -61,9 +62,8 @@ public:
     usageService.setApplicationName(name);
     std::string message = usageService.generateStartupMessage();
 
-    ::Json::Reader reader;
     ::Json::Value root;
-    reader.parse(message, root);
+    Mantid::Kernel::JsonHelpers::parse(message, &root);
     auto members = root.getMemberNames();
     std::vector<std::string> expectedMembers{"ParaView", "application", "host",       "mantidSha1", "mantidVersion",
                                              "osArch",   "osName",      "osReadable", "osVersion",  "uid"};
@@ -89,9 +89,8 @@ public:
 
     std::string message = usageService.generateFeatureUsageMessage();
 
-    ::Json::Reader reader;
     ::Json::Value root;
-    reader.parse(message, root);
+    Mantid::Kernel::JsonHelpers::parse(message, &root);
     auto members = root.getMemberNames();
     std::vector<std::string> expectedMembers{"mantidVersion", "features"};
     for (auto expectedMember : expectedMembers) {
