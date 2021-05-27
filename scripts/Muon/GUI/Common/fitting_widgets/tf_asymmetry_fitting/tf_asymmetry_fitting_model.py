@@ -14,8 +14,8 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (check_phasequad_name, c
                                                          get_group_or_pair_from_name, get_pair_asymmetry_name,
                                                          get_pair_phasequad_name,
                                                          get_run_numbers_as_string_from_workspace_name)
+from Muon.GUI.Common.contexts.fitting_contexts.tf_asymmetry_fitting_context import TFAsymmetryFittingContext
 from Muon.GUI.Common.contexts.muon_context import MuonContext
-from Muon.GUI.Common.contexts.tf_asymmetry_fitting_context import TFAsymmetryFittingContext
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import DEFAULT_SINGLE_FIT_FUNCTION
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model import GeneralFittingModel
 from Muon.GUI.Common.utilities.algorithm_utils import run_CalculateMuonAsymmetry

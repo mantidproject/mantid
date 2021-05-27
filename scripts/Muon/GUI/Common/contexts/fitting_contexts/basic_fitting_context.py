@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist
-from Muon.GUI.Common.contexts.fitting_context import FittingContext
+from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FittingContext
 
 
 class BasicFittingContext(FittingContext):

@@ -11,7 +11,7 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (create_fitted_workspace
                                                          create_multi_domain_fitted_workspace_name,
                                                          create_parameter_table_name,
                                                          get_run_numbers_as_string_from_workspace_name)
-from Muon.GUI.Common.contexts.general_fitting_context import GeneralFittingContext
+from Muon.GUI.Common.contexts.fitting_contexts.general_fitting_context import GeneralFittingContext
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
 from Muon.GUI.Common.utilities.algorithm_utils import run_simultaneous_Fit

@@ -13,8 +13,8 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (create_fitted_workspace
                                                          get_group_or_pair_from_name,
                                                          get_run_number_from_workspace_name)
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-from Muon.GUI.Common.contexts.basic_fitting_context import BasicFittingContext
-from Muon.GUI.Common.contexts.fitting_context import FitInformation
+from Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import BasicFittingContext
+from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.utilities.algorithm_utils import run_Fit
 

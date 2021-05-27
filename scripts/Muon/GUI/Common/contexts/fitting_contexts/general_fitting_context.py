@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import IFunction
-from Muon.GUI.Common.contexts.basic_fitting_context import BasicFittingContext
+from Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import BasicFittingContext
 
 
 class GeneralFittingContext(BasicFittingContext):
