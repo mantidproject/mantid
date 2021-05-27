@@ -7,6 +7,7 @@
 #include "MantidKernel/GitHubApiHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Json.h"
 #include "MantidKernel/Logger.h"
 #include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
@@ -146,9 +147,10 @@ void GitHubApiHelper::processResponseHeaders(const Poco::Net::HTTPResponse &res)
 std::string GitHubApiHelper::getRateLimitDescription() {
   std::stringstream responseStream;
   this->sendRequest(RATE_LIMIT_URL, responseStream);
-  Json::Reader reader;
+  auto responseString = responseStream.str();
+
   Json::Value root;
-  if (!reader.parse(responseStream, root)) {
+  if (!Mantid::Kernel::JsonHelpers::parse(responseString, &root, NULL)) {
     return "Failed to parse json document from \"" + RATE_LIMIT_URL + "\"";
   }
 
