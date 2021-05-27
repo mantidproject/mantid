@@ -5,6 +5,9 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from .DrillParameterPresenter import DrillParameterPresenter
+
+
 class DrillSamplePresenter:
 
     """
@@ -20,3 +23,14 @@ class DrillSamplePresenter:
     def __init__(self, table, sample):
         self._table = table
         self._sample = sample
+
+    def onNewItem(self, name, item):
+        """
+        Triggered when a new item is added in the table concerning this sample.
+
+        Args:
+            name (str): name of the item (parameter name)
+            item (QTableWidgetItem): new item
+        """
+        parameter = self._sample.addParameter(name)
+        presenter = DrillParameterPresenter(item, parameter)
