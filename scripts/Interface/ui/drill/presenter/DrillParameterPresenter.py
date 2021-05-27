@@ -25,6 +25,7 @@ class DrillParameterPresenter:
 
     def __init__(self, item, parameter):
         self._item = item
+        self._item.setPresenter(self)
         self._parameter = parameter
         self._parameter.valid.connect(self.onValid)
         self._parameter.invalid.connect(self.onInvalid)
