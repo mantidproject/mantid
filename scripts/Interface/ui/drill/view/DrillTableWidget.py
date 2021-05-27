@@ -45,6 +45,8 @@ class DrillTableWidget(QTableWidget):
 
         self._samplePresenters = list()
 
+        self.itemChanged.connect(self.onItemChanged)
+
     def addSamplePresenter(self, presenter, index):
         """
         Add a sample presenter.
@@ -94,6 +96,21 @@ class DrillTableWidget(QTableWidget):
             return
         self.removeRow(position)
         del self._samplePresenters[position]
+
+    def onItemChanged(self, item):
+        """
+        Triggered when a item was changed in the table. This function create
+        a new MVP for any new item and forward the modification signals to the
+        item itself.
+
+        Args:
+            item (DrillTableItem): the item
+        """
+        if item.getPresenter() is None:
+            row = item.row()
+            col = item.column()
+            self._samplePresenters[row].onNewItem(self.columns[col], item)
+        item.signals.dataChanged.emit()
 
     def eraseRow(self, position):
         """
