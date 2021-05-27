@@ -9,9 +9,10 @@
 #define snprintf _snprintf
 #endif
 
+#ifdef __linux__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-truncation"
-
+#endif
 namespace Mantid {
 namespace API {
 
