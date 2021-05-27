@@ -21,6 +21,7 @@
 
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/PeakShapeSphericalFactory.h"
+#include "MantidKernel/Json.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/VMD.h"
 #include "MockObjects.h"
@@ -54,8 +55,7 @@ public:
     // Minimal valid JSON for describing the shape.
     Json::Value root;
     root["shape"] = "square";
-    Json::StyledWriter writer;
-    const std::string str_json = writer.write(root);
+    const std::string str_json = Mantid::Kernel::JsonHelpers::jsonToString(root);
 
     factory.create(str_json);
 

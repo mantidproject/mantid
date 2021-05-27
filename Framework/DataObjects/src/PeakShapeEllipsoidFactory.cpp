@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/PeakShapeEllipsoidFactory.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidKernel/Json.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 
 #include <json/json.h>
@@ -22,10 +23,9 @@ namespace DataObjects {
  * @return PeakShape via this factory or it's successors
  */
 Mantid::Geometry::PeakShape *PeakShapeEllipsoidFactory::create(const std::string &source) const {
-  Json::Reader reader;
   Json::Value root;
   Mantid::Geometry::PeakShape *product = nullptr;
-  if (reader.parse(source, root)) {
+  if (Mantid::Kernel::JsonHelpers::parse(source, &root)) {
     const std::string shape = root["shape"].asString();
     if (shape == PeakShapeEllipsoid::ellipsoidShapeName()) {
 

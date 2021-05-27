@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidKernel/Json.h"
 #include "MantidKernel/cow_ptr.h"
 #include <json/json.h>
 
@@ -92,8 +93,7 @@ std::string PeakShapeEllipsoid::toJSON() const {
   root["translation1"] = Json::Value(m_translation[1]);
   root["translation2"] = Json::Value(m_translation[2]);
 
-  Json::StyledWriter writer;
-  return writer.write(root);
+  return Mantid::Kernel::JsonHelpers::jsonToString(root);
 }
 
 PeakShapeEllipsoid *PeakShapeEllipsoid::clone() const { return new PeakShapeEllipsoid(*this); }
