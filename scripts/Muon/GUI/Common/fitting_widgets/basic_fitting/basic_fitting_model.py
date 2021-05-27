@@ -326,6 +326,16 @@ class BasicFittingModel:
         self.chi_squared[self.current_dataset_index] = chi_squared
 
     @property
+    def plot_guess(self) -> bool:
+        """Returns true if plot guess is turned on."""
+        return self.fitting_context.plot_guess
+
+    @plot_guess.setter
+    def plot_guess(self, plot_guess: bool) -> None:
+        """Sets that the plot guess should or should not be plotted."""
+        self.fitting_context.plot_guess = plot_guess
+
+    @property
     def function_name(self) -> str:
         """Returns the function name to add to the end of a fitted workspace."""
         return self._function_name
@@ -414,10 +424,9 @@ class BasicFittingModel:
         self.fit_statuses = self.fit_statuses_cache.copy()
         self.chi_squared = self.chi_squared_cache.copy()
 
-    def update_plot_guess(self, plot_guess: bool) -> None:
+    def update_plot_guess(self) -> None:
         """Updates the guess plot using the current dataset and function."""
-        guess_workspace_name = self._evaluate_plot_guess(plot_guess)
-        self.context.fitting_context.notify_plot_guess_changed(plot_guess, guess_workspace_name)
+        self.fitting_context.guess_workspace_name = self._evaluate_plot_guess(self.plot_guess)
 
     def remove_all_fits_from_context(self) -> None:
         """Removes all fit results from the context."""

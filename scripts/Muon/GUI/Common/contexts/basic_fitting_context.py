@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqt.utils.observer_pattern import Observable
 from Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist
 from Muon.GUI.Common.contexts.fitting_context import FittingContext
 
@@ -18,8 +17,6 @@ class BasicFittingContext(FittingContext):
         self._guess_workspace_name: str = ""
 
         self._fit_to_raw: bool = True
-
-        self.plot_guess_notifier = Observable()
 
     @property
     def plot_guess(self) -> bool:
@@ -50,12 +47,3 @@ class BasicFittingContext(FittingContext):
     def fit_to_raw(self, fit_to_raw: bool) -> None:
         """Sets the fit to raw property."""
         self._fit_to_raw = fit_to_raw
-
-    def notify_plot_guess_changed(self, plot_guess, guess_ws):
-        # First remove the previous plot_guess from plot
-        self.plot_guess = False
-        self.plot_guess_notifier.notify_subscribers()
-
-        self.plot_guess = plot_guess
-        self.guess_workspace_name = guess_ws
-        self.plot_guess_notifier.notify_subscribers()

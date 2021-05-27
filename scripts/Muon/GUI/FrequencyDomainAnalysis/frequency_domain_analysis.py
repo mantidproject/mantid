@@ -404,7 +404,11 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.fitting_context.new_fit_results_notifier.add_subscriber(
             self.results_tab.results_tab_presenter.new_fit_performed_observer)
 
-        self.fitting_context.plot_guess_notifier.add_subscriber(self.plot_widget.presenter.plot_guess_observer)
+        self.fitting_tab.fitting_tab_presenter.remove_plot_guess_notifier.add_subscriber(
+            self.plot_widget.presenter.remove_plot_guess_observer)
+
+        self.fitting_tab.fitting_tab_presenter.update_plot_guess_notifier.add_subscriber(
+            self.plot_widget.presenter.update_plot_guess_observer)
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)
