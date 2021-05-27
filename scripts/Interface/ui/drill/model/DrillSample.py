@@ -27,6 +27,11 @@ class DrillSample(QObject):
     """
     _index = None
 
+    """
+    Controller for the parameters.
+    """
+    _controller = None
+
     def __init__(self, index):
         """
         Create an empty sample.
@@ -34,6 +39,15 @@ class DrillSample(QObject):
         super().__init__()
         self._parameters = dict()
         self._index = index
+
+    def setController(self, controller):
+        """
+        Controller for the parameters.
+
+        Args:
+            controller (DrillParameterController): parameter controller
+        """
+        self._controller = controller
 
     def setIndex(self, index):
         """
