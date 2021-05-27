@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from .DrillParameterPresenter import DrillParameterPresenter
+from .DrillParametersPresenter import DrillParametersPresenter
 
 
 class DrillSamplePresenter:
@@ -19,6 +20,8 @@ class DrillSamplePresenter:
     Reference to the sample model.
     """
     _sample = None
+
+    CUSTOM_OPTIONS = "CustomOptions"
 
     # colors for the table rows
     OK_COLOR = "#3f00ff00"
@@ -35,13 +38,17 @@ class DrillSamplePresenter:
     def onNewItem(self, name, item):
         """
         Triggered when a new item is added in the table concerning this sample.
+        This function create a MVP for the specific item.
 
         Args:
             name (str): name of the item (parameter name)
             item (QTableWidgetItem): new item
         """
-        parameter = self._sample.addParameter(name)
-        presenter = DrillParameterPresenter(item, parameter)
+        if name == self.CUSTOM_OPTIONS:
+            presenter = DrillParametersPresenter(item, self._sample)
+        else:
+            parameter = self._sample.addParameter(name)
+            presenter = DrillParameterPresenter(item, parameter)
 
     def onProcessStarted(self):
         """
