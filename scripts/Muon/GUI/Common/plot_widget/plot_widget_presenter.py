@@ -328,7 +328,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         if type(workspace_names) != list:
             workspace_list = [workspace_names]
         for workspace_name in workspace_list:
-            fit_raw_data = self.context.fitting_context.fit_raw
+            fit_raw_data = self.context.fitting_context.fit_to_raw
             # binned data but want raw plot
             if plot_raw and not fit_raw_data:
                 ws_list.append(remove_rebin_from_name(workspace_name))
@@ -340,13 +340,13 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         return ws_list
 
     def handle_plot_guess_changed(self):
-        if self.context.fitting_context.guess_ws is None:
+        if self.context.fitting_context.guess_workspace_name == "":
             return
 
         if self.context.fitting_context.plot_guess:
-            self._figure_presenter.plot_guess_workspace(self.context.fitting_context.guess_ws)
+            self._figure_presenter.plot_guess_workspace(self.context.fitting_context.guess_workspace_name)
         else:
-            self._figure_presenter.remove_workspace_names_from_plot([self.context.fitting_context.guess_ws])
+            self._figure_presenter.remove_workspace_names_from_plot([self.context.fitting_context.guess_workspace_name])
 
     def plot_all_selected_data(self, autoscale, hold_on):
         """Plots all selected run data e.g runs and groups

@@ -17,7 +17,7 @@ from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContex
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.contexts.plotting_context import PlottingContext, PlotMode
-from Muon.GUI.Common.contexts.fitting_context import FittingContext
+from Muon.GUI.Common.contexts.basic_fitting_context import BasicFittingContext
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
 
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
@@ -85,7 +85,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.group_pair_context = MuonGroupPairContext(
             self.data_context.check_group_contains_valid_detectors)
         self.phase_context = PhaseTableContext()
-        self.fitting_context = FittingContext()
+        self.fitting_context = BasicFittingContext()
 
         self.frequency_context = FrequencyContext()
 

@@ -15,17 +15,17 @@ from Muon.GUI.Common.message_box import warning
 
 from qtpy.QtWidgets import QWidget
 
-ui_fitting_layout, base_widget = load_ui(__file__, "fitting_layout.ui")
+ui_form, _ = load_ui(__file__, "fitting_layout.ui")
 
 
-class BasicFittingView(base_widget, ui_fitting_layout):
+class BasicFittingView(ui_form, QWidget):
     """
     The BasicFittingView has a FitControlsView and a FitFunctionOptionsView. It can be used for Single Fitting.
     """
 
     def __init__(self, parent: QWidget = None):
         """Initialize the BasicFittingView and create the FitControlsView and a FitFunctionOptionsView."""
-        super(self.__class__, self).__init__(parent)
+        super(BasicFittingView, self).__init__(parent)
         self.setupUi(self)
 
         self.fit_controls = FitControlsView(self)

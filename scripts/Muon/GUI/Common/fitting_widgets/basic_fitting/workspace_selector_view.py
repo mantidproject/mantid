@@ -8,10 +8,10 @@ from mantidqt.utils.qt import load_ui
 
 from qtpy.QtWidgets import QWidget
 
-ui_workspace_selector, base_widget = load_ui(__file__, "workspace_selector.ui")
+ui_form, _ = load_ui(__file__, "workspace_selector.ui")
 
 
-class WorkspaceSelectorView(base_widget, ui_workspace_selector):
+class WorkspaceSelectorView(ui_form, QWidget):
     """
     The WorkspaceSelectorView is the cyclic workspace selector combobox, and is used to choose the workspace that
     is currently active in an interface.
@@ -19,7 +19,7 @@ class WorkspaceSelectorView(base_widget, ui_workspace_selector):
 
     def __init__(self, parent: QWidget = None):
         """Initialize the WorkspaceSelectorView."""
-        super(self.__class__, self).__init__(parent)
+        super(WorkspaceSelectorView, self).__init__(parent)
         self.setupUi(self)
 
         self.increment_parameter_display_button.clicked.connect(self.increment_dataset_name_combo_box)

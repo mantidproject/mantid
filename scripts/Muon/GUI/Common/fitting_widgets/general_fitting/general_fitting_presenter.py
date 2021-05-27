@@ -19,7 +19,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
     def __init__(self, view: GeneralFittingView, model: GeneralFittingModel):
         """Initialize the GeneralFittingPresenter. Sets up the slots and event observers."""
-        super(self.__class__, self).__init__(view, model)
+        super(GeneralFittingPresenter, self).__init__(view, model)
 
         self.fitting_mode_changed_notifier = GenericObservable()
         self.simultaneous_fit_by_specifier_changed = GenericObservable()

@@ -13,6 +13,7 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (create_fitted_workspace
                                                          get_group_or_pair_from_name,
                                                          get_run_number_from_workspace_name)
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
+from Muon.GUI.Common.contexts.basic_fitting_context import BasicFittingContext
 from Muon.GUI.Common.contexts.fitting_context import FitInformation
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.utilities.algorithm_utils import run_Fit
@@ -50,9 +51,10 @@ class BasicFittingModel:
     The BasicFittingModel stores the datasets, start Xs, end Xs, fit statuses and chi squared for Single Fitting.
     """
 
-    def __init__(self, context: MuonContext):
+    def __init__(self, context: MuonContext, fitting_context: BasicFittingContext):
         """Initializes the model with empty fit data."""
         self.context = context
+        self.fitting_context = fitting_context
 
         self._group_or_pair_index = {}
 
@@ -76,7 +78,6 @@ class BasicFittingModel:
 
         self._minimizer = ""
         self._evaluation_type = ""
-        self._fit_to_raw = True
 
     @property
     def current_dataset_index(self) -> int:
@@ -374,14 +375,13 @@ class BasicFittingModel:
     @property
     def fit_to_raw(self) -> bool:
         """Returns true if fit to raw is turned on."""
-        return self._fit_to_raw
+        return self.fitting_context.fit_to_raw
 
     @fit_to_raw.setter
     def fit_to_raw(self, fit_to_raw: bool) -> None:
         """Sets the fit to raw property."""
-        if fit_to_raw != self._fit_to_raw:
-            self._fit_to_raw = fit_to_raw
-            self.context.fitting_context.fit_raw = fit_to_raw
+        if fit_to_raw != self.fitting_context.fit_to_raw:
+            self.fitting_context.fit_to_raw = fit_to_raw
             # Avoids resetting the start/end xs and etc. by not using the dataset_names setter.
             self._dataset_names = self._get_equivalent_binned_or_unbinned_workspaces()
 
@@ -545,7 +545,7 @@ class BasicFittingModel:
     def _get_workspace_names_to_display_from_context(self, runs: list, group_and_pair: str) -> list:
         """Returns the workspace names for the given runs and group/pair to be displayed in the view."""
         return self.context.get_names_of_workspaces_to_fit(runs=runs, group_and_pair=group_and_pair,
-                                                           rebin=not self.fit_to_raw)
+                                                           rebin=not self.fitting_context.fit_to_raw)
 
     def _sort_workspace_names(self, workspace_names: list) -> list:
         """Sort the workspace names and check the workspaces exist in the ADS."""
@@ -715,12 +715,12 @@ class BasicFittingModel:
     def _evaluate_plot_guess(self, plot_guess: bool) -> str:
         """Evaluate the plot guess fit function and returns the name of the resulting guess workspace."""
         if not plot_guess or self.current_dataset_name is None:
-            return None
+            return ""
 
         fit_function = self._get_plot_guess_fit_function()
         if fit_function is not None:
             return self._evaluate_function(fit_function, self._get_plot_guess_name())
-        return None
+        return ""
 
     def _evaluate_function(self, fit_function: IFunction, output_workspace: str) -> str:
         """Evaluate the plot guess fit function and returns the name of the resulting guess workspace."""
@@ -735,7 +735,7 @@ class BasicFittingModel:
                                  OutputWorkspace=output_workspace)
         except RuntimeError:
             logger.error("Failed to plot guess.")
-            return None
+            return ""
         return output_workspace
 
     def _evaluate_double_pulse_function(self, fit_function: IFunction, output_workspace: str) -> None:

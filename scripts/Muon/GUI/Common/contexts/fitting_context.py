@@ -302,12 +302,8 @@ class FittingContext(object):
         # are added
         self.new_fit_results_notifier = Observable()
         self.fit_removed_notifier = Observable()
-        self.plot_guess_notifier = Observable()
         self._number_of_fits = 0
         self._number_of_fits_cache = 0
-        self._plot_guess = False
-        self._guess = None
-        self._fit_raw = True
 
     def __len__(self):
         """
@@ -353,15 +349,6 @@ class FittingContext(object):
             if updated_fit == fit:
                 fit._fit_parameters = updated_fit._fit_parameters
                 return
-
-    def notify_plot_guess_changed(self, plot_guess, guess_ws):
-        # First remove the previous plot_guess from plot
-        self.plot_guess = False
-        self.plot_guess_notifier.notify_subscribers()
-
-        self.plot_guess = plot_guess
-        self.guess_ws = guess_ws
-        self.plot_guess_notifier.notify_subscribers()
 
     def fit_function_names(self):
         """
@@ -458,27 +445,3 @@ class FittingContext(object):
     def number_of_fits(self, value):
         self._number_of_fits_cache = self._number_of_fits
         self._number_of_fits = value
-
-    @property
-    def plot_guess(self):
-        return self._plot_guess
-
-    @plot_guess.setter
-    def plot_guess(self, value):
-        self._plot_guess = value
-
-    @property
-    def fit_raw(self):
-        return self._fit_raw
-
-    @fit_raw.setter
-    def fit_raw(self, value):
-        self._fit_raw = value
-
-    @property
-    def guess_ws(self):
-        return self._guess
-
-    @guess_ws.setter
-    def guess_ws(self, value):
-        self._guess = value

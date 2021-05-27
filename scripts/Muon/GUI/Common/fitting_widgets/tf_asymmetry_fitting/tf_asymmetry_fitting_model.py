@@ -33,9 +33,9 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
     The TFAsymmetryFittingModel derives from GeneralFittingModel. It adds the ability to do TF Asymmetry fitting.
     """
 
-    def __init__(self, context: MuonContext):
+    def __init__(self, context: MuonContext, fitting_context):
         """Initialize the TFAsymmetryFittingModel with emtpy fit data."""
-        super(self.__class__, self).__init__(context)
+        super(TFAsymmetryFittingModel, self).__init__(context, fitting_context)
 
         self._tf_asymmetry_mode = False
         self._tf_asymmetry_single_functions = []

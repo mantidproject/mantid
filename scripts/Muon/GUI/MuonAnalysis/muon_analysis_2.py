@@ -15,7 +15,7 @@ from Muon.GUI.Common.contexts.data_analysis_context import DataAnalysisContext
 from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
-from Muon.GUI.Common.contexts.fitting_context import FittingContext
+from Muon.GUI.Common.contexts.basic_fitting_context import BasicFittingContext
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.contexts.plotting_context import PlottingContext, PlotMode
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
@@ -80,7 +80,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.group_pair_context = MuonGroupPairContext(
             self.data_context.check_group_contains_valid_detectors)
         self.phase_context = PhaseTableContext()
-        self.fitting_context = FittingContext()
+        self.fitting_context = BasicFittingContext()
         self.plotting_context = PlottingContext()
         self.context = DataAnalysisContext(muon_data_context=self.data_context,
                                            muon_gui_context=self.gui_context,

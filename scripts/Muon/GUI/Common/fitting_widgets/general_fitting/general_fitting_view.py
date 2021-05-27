@@ -22,7 +22,7 @@ class GeneralFittingView(BasicFittingView):
 
     def __init__(self, parent: QWidget = None):
         """Initializes the GeneralFittingView, and adds the GeneralFittingOptionsView widget."""
-        super(self.__class__, self).__init__(parent)
+        super(GeneralFittingView, self).__init__(parent)
 
         self.general_fitting_options = GeneralFittingOptionsView(self)
         self.general_fitting_options_layout.addWidget(self.general_fitting_options)

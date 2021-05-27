@@ -21,9 +21,9 @@ class GeneralFittingModel(BasicFittingModel):
     The GeneralFittingModel derives from BasicFittingModel. It adds the ability to do simultaneous fitting.
     """
 
-    def __init__(self, context: MuonContext):
+    def __init__(self, context: MuonContext, fitting_context):
         """Initialize the GeneralFittingModel with emtpy fit data."""
-        super(self.__class__, self).__init__(context)
+        super(GeneralFittingModel, self).__init__(context, fitting_context)
 
         # This is a MultiDomainFunction if there are multiple domains in the function browser.
         self._simultaneous_fit_function = None
