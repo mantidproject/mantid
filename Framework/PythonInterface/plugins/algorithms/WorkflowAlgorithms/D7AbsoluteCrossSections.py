@@ -241,7 +241,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             conv_to_theta *= -1.0  # the sign needs to be flipped
         Transpose(InputWorkspace=ws_to_transpose, OutputWorkspace=angle_ws)
         theta = conv_to_theta * mtd[angle_ws].extractX()[0]
-        alpha = (theta - 90.0 - self._sampleAndEnvironmentProperties['KiXAngle'].value) * np.pi / 180.0
+        alpha = (theta - self._sampleAndEnvironmentProperties['KiXAngle'].value) * np.pi / 180.0
         cos2_alpha_arr = np.power(np.cos(alpha), 2)
         sin2_alpha_arr = np.power(np.sin(alpha), 2)
         sin2_alpha_name = 'sin2_alpha'
