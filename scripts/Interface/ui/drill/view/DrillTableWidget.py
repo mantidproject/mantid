@@ -342,9 +342,8 @@ class DrillTableWidget(QTableWidget):
         for c in range(self.columnCount()):
             item = self.item(row, c)
             if not item:
-                item = QTableWidgetItem()
+                item = self.itemPrototype().clone()
                 self.setItem(row, c, item)
-
             self.item(row, c).setBackground(brush)
         self.blockSignals(False)
 
@@ -360,7 +359,7 @@ class DrillTableWidget(QTableWidget):
             item = self.item(row, c)
             if not item:
                 continue
-            self.setItem(row, c, QTableWidgetItem(item.text()))
+            item.setData(Qt.BackgroundRole, None)
         self.blockSignals(False)
 
     def setCellBackground(self, row, column, color):
