@@ -80,8 +80,6 @@ class DrillPresenter:
                 lambda progress: self.view.set_progress(progress, 100)
                 )
         self.model.processingDone.connect(self.onProcessingDone)
-        self.model.paramOk.connect(self.onParamOk)
-        self.model.paramError.connect(self.onParamError)
         self.model.groupsUpdated.connect(self.onGroupsUpdated)
 
         self._syncViewHeader()
@@ -265,33 +263,6 @@ class DrillPresenter:
         groups = self.model.getSamplesGroups()
         masters = self.model.getMasterSamples()
         self.view.updateLabelsFromGroups(groups, masters)
-
-    def onParamOk(self, row, columnName):
-        """
-        Triggered when a parameter is valid.
-
-        Args:
-            row (int): row index
-            columnName (str): parameter name
-        """
-        if columnName not in self.view.columns:
-            columnName = "CustomOptions"
-        self._invalidCells.discard((row, columnName))
-        self.view.setCellOk(row, columnName)
-
-    def onParamError(self, row, columnName, msg):
-        """
-        Triggered when a parameter is invalid.
-
-        Args:
-            row (int): row index
-            columnName (str): parameter name
-            msg (str): error message
-        """
-        if columnName not in self.view.columns:
-            columnName = "CustomOptions"
-        self._invalidCells.add((row, columnName))
-        self.view.setCellError(row, columnName, msg)
 
     def onProcess(self):
         """

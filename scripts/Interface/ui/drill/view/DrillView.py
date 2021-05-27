@@ -249,8 +249,6 @@ class DrillView(QMainWindow):
         """
         Setup the main table widget.
         """
-        self.table.cellChanged.connect(
-                lambda r,c: self.dataChanged.emit(r, self.columns[c]))
         self.table.setContextMenuPolicy(Qt.CustomContextMenu)
         self.table.customContextMenuRequested.connect(self.showContextMenu)
 
@@ -709,38 +707,6 @@ class DrillView(QMainWindow):
             row (int): the row index
         """
         self.table.setRowBackground(row, self.ERROR_COLOR)
-
-    def setCellOk(self, row, columnTitle):
-        """
-        Set a cell as OK. Change its color and remove the tooltip if it exists.
-
-        Args:
-            row (int): row index
-            columnTile (str): column header
-        """
-        if ((row < 0) or (row >= self.table.rowCount())
-                or (columnTitle not in self.columns)):
-            return
-        column = self.columns.index(columnTitle)
-        self.table.removeCellBackground(row, column)
-        self.table.setCellToolTip(row, column, "")
-
-    def setCellError(self, row, columnTitle, msg):
-        """
-        Set a cell a containing an invalid value. Change its colors, add a
-        tooltip containing the provided message.
-
-        Args:
-            row (int): row index
-            columnTitle (str): column header
-            msg (str): the error message
-        """
-        if ((row < 0) or (row >= self.table.rowCount())
-                or (columnTitle not in self.columns)):
-            return
-        column = self.columns.index(columnTitle)
-        self.table.setCellBackground(row, column, self.ERROR_COLOR)
-        self.table.setCellToolTip(row, column, msg)
 
     def setVisualSettings(self, visualSettings):
         """

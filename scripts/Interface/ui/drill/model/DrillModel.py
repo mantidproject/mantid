@@ -90,22 +90,6 @@ class DrillModel(QObject):
     progressUpdate = Signal(int)
 
     """
-    Raised when a new param is ok.
-    Args:
-        (int): sample index
-        (str): parameter name
-    """
-    paramOk = Signal(int, str)
-
-    """
-    Raised when a new parameter is wrong.
-    Args:
-        (int): sample index
-        (str): parameter name
-    """
-    paramError = Signal(int, str, str)
-
-    """
     Raised when groups are updated.
     """
     groupsUpdated = Signal()
@@ -402,55 +386,6 @@ class DrillModel(QObject):
                 self.settings[s] = ""
             else:
                 self.settings[s] = v
-
-    def checkParameter(self, param, value, sample=-1):
-        """
-        Check a parameter by giving it name and value. The sample index is a
-        facultative parameter. This method pushes the parameter on the
-        controller queue.
-
-        Args:
-            param (str): parameter name
-            value (any): parameter value. Can be str, bool
-            sample (int): sample index if it is a sample specific parameter
-        """
-        param = DrillParameter(sample, param, self.controller)
-        def onParamOk():
-            p = self.sender()
-            if ((p._sample != -1) and (p._name not in self.columns)):
-                self.paramOk.emit(p._sample, RundexSettings.CUSTOM_OPT_JSON_KEY)
-            elif ((p._name in self.columns) or (p._name in self.settings)):
-                self.paramOk.emit(p._sample, p._name)
-
-        def onParamError(msg):
-            p = self.sender()
-            if ((p._sample != -1) and (p._name not in self.columns)):
-                self.paramError.emit(p._sample,
-                                     RundexSettings.CUSTOM_OPT_JSON_KEY,
-                                     msg)
-            elif ((p._name in self.columns) or (p._name in self.settings)):
-                self.paramError.emit(p._sample, p._name, msg)
-
-        param.valid.connect(onParamOk)
-        param.invalid.connect(onParamError)
-        param.setValue(value)
-
-    def changeParameter(self, sampleIndex, name, value):
-        """
-        Change parameter value and update the model samples. It submits the new
-        value to the parameters controller to check it. In case of empty value,
-        the paramOk signal is sent without any submission to the controller.
-
-        Args:
-            sampleIndex (int): index of the sample in self.samples
-            name (str): name of the parameter
-            value (str): new value
-        """
-        self.samples[sampleIndex].changeParameter(name, value)
-        if (value == "DEFAULT") or value == "":
-            self.paramOk.emit(sampleIndex, name)
-        else:
-            self.checkParameter(name, value, sampleIndex)
 
     def groupSamples(self, sampleIndexes, groupName=None):
         """
