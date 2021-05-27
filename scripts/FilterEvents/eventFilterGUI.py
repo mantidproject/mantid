@@ -815,7 +815,6 @@ class MainWindow(QMainWindow):
         try:
             ws = api.Load(Filename=filename, OutputWorkspace=wsname)
         except RuntimeError as e:
-            ws = None
             return str(e)
 
         return ws
@@ -826,23 +825,31 @@ class MainWindow(QMainWindow):
         import datetime
         # Rebin events by pulse time
         try:
-            # Get run start and run stop
+            # Get run start
             if wksp.getRun().hasProperty("run_start"):
                 runstart = wksp.getRun().getProperty("run_start").value
-            else:
+            elif wksp.getRun().hasProperty("proton_charge"):
                 runstart = wksp.getRun().getProperty("proton_charge").times[0]
-            runstop = wksp.getRun().getProperty("proton_charge").times[-1]
+            else:
+                runstart = wksp.getRun().getProperty("start_time").value
+
+            # get run stop
+            if wksp.getRun().hasProperty("proton_charge"):
+                runstop = wksp.getRun().getProperty("proton_charge").times[-1]
+                runstop = str(runstop).split(".")[0].strip()
+                tf = datetime.datetime.strptime(runstop, "%Y-%m-%dT%H:%M:%S")
+            else:
+                last_pulse = wksp.getPulseTimeMax().toISO8601String()
+                tf = datetime.datetime.strptime(last_pulse[:19], "%Y-%m-%dT%H:%M:%S")
+                tf += datetime.timedelta(0, wksp.getTofMax() / 1000000)
 
             runstart = str(runstart).split(".")[0].strip()
-            runstop = str(runstop).split(".")[0].strip()
 
             t0 = datetime.datetime.strptime(runstart, "%Y-%m-%dT%H:%M:%S")
-            tf = datetime.datetime.strptime(runstop, "%Y-%m-%dT%H:%M:%S")
 
             # Calculate
             dt = tf-t0
             timeduration = dt.days*3600*24 + dt.seconds
-
             timeres = float(timeduration)/MAXTIMEBINSIZE
             if timeres < 1.0:
                 timeres = 1.0

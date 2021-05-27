@@ -78,7 +78,12 @@ void RebinByPulseTimes::doHistogramming(IEventWorkspace_sptr inWS, MatrixWorkspa
  * @return max time since epoch in nanoseconds.
  */
 uint64_t RebinByPulseTimes::getMaxX(Mantid::API::IEventWorkspace_sptr ws) const {
-  return ws->getPulseTimeMax().totalNanoseconds();
+  auto timeMax = ws->getPulseTimeMax().totalNanoseconds();
+
+  if (timeMax == getMinX(ws)) {
+    timeMax += ws->getTofMax() * 1e3;
+  }
+  return timeMax;
 }
 
 /**
