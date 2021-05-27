@@ -11,6 +11,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InternetHelper.h"
+#include "MantidKernel/Json.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 
@@ -114,8 +115,7 @@ std::string ErrorReporter::generateErrorMessage() const {
     message["stacktrace"] = "";
   }
 
-  ::Json::FastWriter writer;
-  return writer.write(message);
+  return Mantid::Kernel::JsonHelpers::jsonToString(message);
 }
 
 /** Submits a post request to the specified url with the message as the body
