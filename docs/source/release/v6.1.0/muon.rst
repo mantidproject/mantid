@@ -40,8 +40,7 @@ Bug fixes
 - Fixed a bug where rows in the difference table were not being highlighted correctly.
 - Fixed a bug where the color of the fitted line would sometimes match the color of the raw data line, making it
   difficult to see.
-- Fixed a bug in the Grouping tab where an error message would appear when changing the source of
-  Group Asymmetry Range with no data loaded.
+- Fixed a bug in the Grouping tab where an error message would appear when changing the source of Group Asymmetry Range with no data loaded.
 - Fixed a crash caused when switching between tabs in Muon Analysis.
 - Fixed a bug where the plot window would sometimes become disabled when loading new data.
 - Fixed a usability issue where tabs became unattached too easily. It is now possible to unattach the tabs only by double clicking on them.
