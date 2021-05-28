@@ -39,7 +39,7 @@ protected slots:
 private:
   UserInputValidator &validateMultipleData(UserInputValidator &validator);
 
-  std::unique_ptr<Ui::IndirectFitDataForm> m_dataForm;
+  std::unique_ptr<Ui::IndirectFitDataView> m_dataForm;
 };
 
 } // namespace IDA

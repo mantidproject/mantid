@@ -24,10 +24,9 @@ IndirectDockWidgetArea::IndirectDockWidgetArea(QWidget *parent)
   plotViewArea->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
   addDockWidget(Qt::BottomDockWidgetArea, m_fitPropertyBrowser);
   addDockWidget(Qt::BottomDockWidgetArea, plotViewArea);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
   resizeDocks({m_fitPropertyBrowser, plotViewArea}, {20, 20}, Qt::Horizontal);
-#endif
   m_fitDataView = m_uiForm->fitDataView;
+  m_fitDataView->setFixedHeight(300);
 }
 } // namespace IDA
 } // namespace CustomInterfaces

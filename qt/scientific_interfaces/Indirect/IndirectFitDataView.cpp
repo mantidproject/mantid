@@ -21,7 +21,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectFitDataView::IndirectFitDataView(QWidget *parent)
-    : IIndirectFitDataView(parent), m_dataForm(new Ui::IndirectFitDataForm) {
+    : IIndirectFitDataView(parent), m_dataForm(new Ui::IndirectFitDataView) {
   m_dataForm->setupUi(this);
 
   connect(m_dataForm->pbAdd, SIGNAL(clicked()), this, SIGNAL(addClicked()));
