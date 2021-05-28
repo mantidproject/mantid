@@ -421,6 +421,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                                       self.superplot.getBottomView())
             self.toolbar._actions["toggle_fit"].setEnabled(False)
             self.toolbar._actions["toggle_superplot"].setChecked(True)
+            self.superplot.getBottomView().setFocus()
 
     def handle_fit_browser_close(self):
         """
