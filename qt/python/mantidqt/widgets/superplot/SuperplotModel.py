@@ -81,6 +81,8 @@ class SuperplotModel(QObject):
         Args:
             name (str): name of the workspace
         """
+        if name not in mtd:
+            return
         if isinstance(mtd[name], WorkspaceGroup):
             names = mtd[name].getNames()
         else:
