@@ -86,7 +86,6 @@ protected:
 
 private:
   void setup() override;
-  void loadSettings(const QSettings &settings) override;
   bool validate() override;
   virtual void setupFitTab() = 0;
   virtual EstimationDataSelector getEstimationDataSelector() const = 0;

@@ -47,34 +47,10 @@ public:
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
   MOCK_CONST_METHOD0(isMultipleDataTabSelected, bool());
   MOCK_CONST_METHOD0(isResolutionHidden, bool());
-  MOCK_METHOD1(setResolutionHidden, void(bool hide));
-  MOCK_METHOD0(disableMultipleDataTab, void());
-
-  MOCK_CONST_METHOD0(getSelectedSample, std::string());
-  MOCK_CONST_METHOD0(getSelectedResolution, std::string());
-
-  MOCK_CONST_METHOD0(getSampleWSSuffices, QStringList());
-  MOCK_CONST_METHOD0(getSampleFBSuffices, QStringList());
-  MOCK_CONST_METHOD0(getResolutionWSSuffices, QStringList());
-  MOCK_CONST_METHOD0(getResolutionFBSuffices, QStringList());
-
-  MOCK_METHOD1(setSampleWSSuffices, void(QStringList const &suffices));
-  MOCK_METHOD1(setSampleFBSuffices, void(QStringList const &suffices));
-  MOCK_METHOD1(setResolutionWSSuffices, void(QStringList const &suffices));
-  MOCK_METHOD1(setResolutionFBSuffices, void(QStringList const &suffices));
-
-  MOCK_CONST_METHOD0(isSampleWorkspaceSelectorVisible, bool());
-  MOCK_METHOD1(setSampleWorkspaceSelectorIndex, void(QString const &workspaceName));
-
-  MOCK_METHOD1(readSettings, void(QSettings const &settings));
   MOCK_METHOD1(validate, UserInputValidator &(UserInputValidator &validator));
-  MOCK_METHOD1(setXRange, void(std::pair<double, double> const &range));
-  MOCK_CONST_METHOD0(getXRange, std::pair<double, double>());
 
   /// Public slots
   MOCK_METHOD1(displayWarning, void(std::string const &warning));
-  MOCK_METHOD1(setStartX, void(double));
-  MOCK_METHOD1(setEndX, void(double));
 };
 
 /// Mock object to mock the model

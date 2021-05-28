@@ -108,9 +108,9 @@ void IndirectDataAnalysis::loadSettings() {
   settings.setValue("last_directory", QString::fromStdString(saveDir));
 
   for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab)
-    tab->second->loadTabSettings(settings);
+    // tab->second->loadTabSettings(settings);
 
-  settings.endGroup();
+    settings.endGroup();
 }
 
 /**

@@ -45,12 +45,8 @@ public:
   void setEndX(double endX, TableDatasetIndex dataIndex);
   void setExclude(const std::string &exclude, TableDatasetIndex dataIndex, WorkspaceIndex spectrumIndex);
 
-  std::pair<double, double> getXRange() const;
-
-  void loadSettings(const QSettings &settings);
   UserInputValidator &validate(UserInputValidator &validator);
 
-  void replaceHandle(const std::string &workspaceName, const Workspace_sptr &workspace) override;
   DataForParameterEstimationCollection getDataForParameterEstimation(const EstimationDataSelector &selector) const;
 
 public slots:
@@ -58,8 +54,6 @@ public slots:
 
 protected slots:
   void setModelWorkspace(const QString &name);
-  void setModelFromSingleData();
-  void setModelFromMultipleData();
   void showAddWorkspaceDialog();
   virtual void handleSampleLoaded(const QString &);
 
@@ -87,9 +81,7 @@ protected:
   void addData(IAddWorkspaceDialog const *dialog);
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
   void setSingleModelData(const std::string &name);
-  void updateRanges();
   virtual void addModelData(const std::string &name);
-  void setResolutionHidden(bool hide);
   void displayWarning(const std::string &warning);
   QStringList m_wsSampleSuffixes;
   QStringList m_fbSampleSuffixes;
@@ -102,7 +94,6 @@ private slots:
 private:
   virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;
   void updateDataInTable(TableDatasetIndex dataIndex);
-  void selectReplacedWorkspace(const QString &workspaceName);
 
   virtual void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog);
   virtual void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog);

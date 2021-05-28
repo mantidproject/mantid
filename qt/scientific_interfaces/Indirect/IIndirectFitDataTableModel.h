@@ -69,9 +69,6 @@ public:
   virtual void setExcludeRegion(const std::string &exclude, FitDomainIndex index) = 0;
 
   virtual std::pair<TableDatasetIndex, WorkspaceIndex> getSubIndices(FitDomainIndex) const = 0;
-
-  virtual void switchToSingleInputMode() = 0;
-  virtual void switchToMultipleInputMode() = 0;
 };
 
 } // namespace IDA

@@ -14,25 +14,17 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-FqFitDataPresenter::FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *view, QComboBox *cbParameterType,
-                                       QComboBox *cbParameter, QLabel *lbParameterType, QLabel *lbParameter,
+FqFitDataPresenter::FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *view,
                                        IFQFitObserver *SingleFunctionTemplateBrowser)
     : IndirectFitDataPresenter(model, view, std::make_unique<FqFitDataTablePresenter>(model, view->getDataTable())),
-      m_activeParameterType("Width"), m_dataIndex(TableDatasetIndex{0}), m_cbParameterType(cbParameterType),
-      m_cbParameter(cbParameter), m_lbParameterType(lbParameterType), m_lbParameter(lbParameter), m_fqFitModel(model) {
+      m_activeParameterType("Width"), m_dataIndex(TableDatasetIndex{0}), m_fqFitModel(model) {
   connect(view, SIGNAL(singleDataViewSelected()), this, SLOT(handleSingleInputSelected()));
   connect(view, SIGNAL(multipleDataViewSelected()), this, SLOT(handleMultipleInputSelected()));
 
   connect(this, SIGNAL(requestedAddWorkspaceDialog()), this, SLOT(updateActiveDataIndex()));
 
-  connect(cbParameterType, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(handleParameterTypeChanged(const QString &)));
-  connect(cbParameter, SIGNAL(currentIndexChanged(int)), this, SLOT(handleSpectrumSelectionChanged(int)));
-
-  updateParameterSelectionEnabled();
   m_notifier = Notifier<IFQFitObserver>();
   m_notifier.subscribe(SingleFunctionTemplateBrowser);
-  showParameterComboBoxes();
 }
 
 void FqFitDataPresenter::handleSampleLoaded(const QString &workspaceName) {
@@ -45,34 +37,12 @@ void FqFitDataPresenter::handleSampleLoaded(const QString &workspaceName) {
   updateParameterSelectionEnabled();
   setModelSpectrum(0);
   emit dataChanged();
-  updateRanges();
   emit dataChanged();
   emit updateAvailableFitTypes();
 }
 
 void FqFitDataPresenter::handleMultipleInputSelected() {
   m_notifier.notify([](IFQFitObserver &obs) { obs.updateAvailableFunctions(availableFits.at(DataType::ALL)); });
-}
-
-void FqFitDataPresenter::handleSingleInputSelected() {
-  m_dataIndex = TableDatasetIndex{0};
-  std::string currentText = m_cbParameterType->currentText().toStdString();
-  auto dataType = m_cbParameterType->currentText() == QString("Width") ? DataType::WIDTH : DataType::EISF;
-  m_notifier.notify([&dataType](IFQFitObserver &obs) { obs.updateAvailableFunctions(availableFits.at(dataType)); });
-}
-
-void FqFitDataPresenter::hideParameterComboBoxes() {
-  m_cbParameter->hide();
-  m_cbParameterType->hide();
-  m_lbParameter->hide();
-  m_lbParameterType->hide();
-}
-
-void FqFitDataPresenter::showParameterComboBoxes() {
-  m_cbParameter->show();
-  m_cbParameterType->show();
-  m_lbParameter->show();
-  m_lbParameterType->show();
 }
 
 void FqFitDataPresenter::setActiveParameterType(const std::string &type) { m_activeParameterType = type; }
@@ -187,19 +157,6 @@ void FqFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
     setModelSpectrum(fqFitDialog->parameterNameIndex());
     updateActiveDataIndex();
   }
-}
-
-void FqFitDataPresenter::setSingleModelSpectrum(int parameterIndex) {
-  auto index = static_cast<std::size_t>(parameterIndex);
-  if (m_cbParameterType->currentIndex() == 0)
-    m_fqFitModel->setActiveWidth(index, TableDatasetIndex{0});
-  else
-    m_fqFitModel->setActiveEISF(index, TableDatasetIndex{0});
-}
-
-void FqFitDataPresenter::handleSpectrumSelectionChanged(int parameterIndex) {
-  setSingleModelSpectrum(parameterIndex);
-  emit dataChanged();
 }
 
 void FqFitDataPresenter::setModelSpectrum(int index) {

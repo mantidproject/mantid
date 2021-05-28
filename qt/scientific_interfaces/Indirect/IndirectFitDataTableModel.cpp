@@ -35,13 +35,11 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectFitDataTableModel::IndirectFitDataTableModel()
-    : m_fittingDataSingle(std::make_unique<std::vector<IndirectFitData>>()),
-      m_resolutionsSingle(std::make_unique<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>>()),
-      m_fittingDataMultiple(std::make_unique<std::vector<IndirectFitData>>()),
+    : m_fittingDataMultiple(std::make_unique<std::vector<IndirectFitData>>()),
       m_resolutionsMultiple(std::make_unique<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>>()) {
 
-  m_fittingData = m_fittingDataSingle.get();
-  m_resolutions = m_resolutionsSingle.get();
+  m_fittingData = m_fittingDataMultiple.get();
+  m_resolutions = m_resolutionsMultiple.get();
 }
 
 bool IndirectFitDataTableModel::hasWorkspace(std::string const &workspaceName) const {
@@ -278,16 +276,6 @@ void IndirectFitDataTableModel::removeDataByIndex(FitDomainIndex fitDomainIndex)
   if (spectra.empty()) {
     removeWorkspace(subIndices.first.value);
   }
-}
-
-void IndirectFitDataTableModel::switchToSingleInputMode() {
-  m_fittingData = m_fittingDataSingle.get();
-  m_resolutions = m_resolutionsSingle.get();
-}
-
-void IndirectFitDataTableModel::switchToMultipleInputMode() {
-  m_fittingData = m_fittingDataMultiple.get();
-  m_resolutions = m_resolutionsMultiple.get();
 }
 
 std::vector<double> IndirectFitDataTableModel::getExcludeRegionVector(TableDatasetIndex dataIndex,

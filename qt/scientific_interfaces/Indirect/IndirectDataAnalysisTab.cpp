@@ -55,7 +55,7 @@ void IndirectDataAnalysisTab::clearOutputPlotOptionsWorkspaces() { m_plotOptions
  *
  * @param settings :: the QSettings object from which to load
  */
-void IndirectDataAnalysisTab::loadTabSettings(const QSettings &settings) { loadSettings(settings); }
+void IndirectDataAnalysisTab::loadTabSettings(const QSettings &settings) {}
 
 /**
  * Prevents the loading of data with incorrect naming if passed true

@@ -24,8 +24,7 @@ namespace IDA {
 class MANTIDQT_INDIRECT_DLL FqFitDataPresenter : public IndirectFitDataPresenter {
   Q_OBJECT
 public:
-  FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *view, QComboBox *cbParameterType, QComboBox *cbParameter,
-                     QLabel *lbParameterType, QLabel *lbParameter, IFQFitObserver *SingleFunctionTemplateBrowser);
+  FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *view, IFQFitObserver *SingleFunctionTemplateBrowser);
 
 private slots:
   void hideParameterComboBoxes();
@@ -40,11 +39,7 @@ private slots:
   void setActiveParameterType(const std::string &type);
   void updateActiveDataIndex();
   void updateActiveDataIndex(int index);
-  void setSingleModelSpectrum(int index);
-  void handleParameterTypeChanged(const QString &parameter);
-  void handleSpectrumSelectionChanged(int parameterIndex);
   void handleMultipleInputSelected();
-  void handleSingleInputSelected();
 
 signals:
   void spectrumChanged(WorkspaceIndex);
@@ -53,7 +48,6 @@ protected slots:
   void handleSampleLoaded(const QString &) override;
 
 private:
-  void setAvailableParameters(const std::vector<std::string> &parameters);
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
   void closeDialog() override;
   std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const override;
@@ -70,10 +64,6 @@ private:
   std::string m_activeParameterType;
   TableDatasetIndex m_dataIndex;
 
-  QComboBox *m_cbParameterType;
-  QComboBox *m_cbParameter;
-  QLabel *m_lbParameterType;
-  QLabel *m_lbParameter;
   FqFitModel *m_fqFitModel;
   Notifier<IFQFitObserver> m_notifier;
 };

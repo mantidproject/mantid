@@ -26,8 +26,6 @@ namespace IDA {
 ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model, IIndirectFitDataView *view)
     : IndirectFitDataPresenter(model, view, std::make_unique<ConvFitDataTablePresenter>(model, view->getDataTable())),
       m_convModel(model) {
-  setResolutionHidden(false);
-
   connect(view, SIGNAL(resolutionLoaded(const QString &)), this, SLOT(setModelResolution(const QString &)));
   connect(view, SIGNAL(resolutionLoaded(const QString &)), this, SIGNAL(singleResolutionLoaded()));
 }
@@ -64,18 +62,18 @@ void ConvFitDataPresenter::addWorkspace(ConvFitAddWorkspaceDialog const &dialog,
 
 void ConvFitDataPresenter::addModelData(const std::string &name) {
   IndirectFitDataPresenter::addModelData(name);
-  const auto resolution = getView()->getSelectedResolution();
-  if (!resolution.empty() && isWorkspaceLoaded(resolution)) {
-    auto const index = TableDatasetIndex{0};
-    m_convModel->setResolution(resolution, index);
-    emit modelResolutionAdded(resolution, index);
-  }
+  // const auto resolution = getView()->getSelectedResolution();
+  // if (!resolution.empty() && isWorkspaceLoaded(resolution)) {
+  //  auto const index = TableDatasetIndex{0};
+  //  m_convModel->setResolution(resolution, index);
+  //  emit modelResolutionAdded(resolution, index);
+  //}
 }
 
 std::unique_ptr<IAddWorkspaceDialog> ConvFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
   auto dialog = std::make_unique<ConvFitAddWorkspaceDialog>(parent);
-  dialog->setResolutionFBSuffices(getView()->getResolutionFBSuffixes());
-  dialog->setResolutionWSSuffices(getView()->getResolutionWSSuffixes());
+  dialog->setResolutionFBSuffices(m_fbResolutionSuffixes);
+  dialog->setResolutionWSSuffices(m_wsResolutionSuffixes);
   return dialog;
 }
 

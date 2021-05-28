@@ -147,8 +147,6 @@ void IndirectFitAnalysisTab::setFitPropertyBrowser(IndirectFitPropertyBrowser *b
   m_fitPropertyBrowser = browser;
 }
 
-void IndirectFitAnalysisTab::loadSettings(const QSettings &settings) { m_dataPresenter->loadSettings(settings); }
-
 void IndirectFitAnalysisTab::setFileExtensionsByName(bool filter) {
   auto const tab = getTabName();
   setSampleSuffixes(tab, filter);
@@ -679,7 +677,7 @@ void IndirectFitAnalysisTab::respondToDataChanged() {
   updateDataReferences();
   m_fittingModel->removeFittingData();
   m_spectrumPresenter->updateSpectra();
-  m_plotPresenter->setXBounds(m_dataPresenter->getXRange());
+  // m_plotPresenter->setXBounds(m_dataPresenter->getXRange());
   m_plotPresenter->updateAvailableSpectra();
   m_plotPresenter->updatePlots();
   m_plotPresenter->updateGuessAvailability();
