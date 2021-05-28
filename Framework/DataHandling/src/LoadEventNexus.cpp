@@ -562,6 +562,8 @@ LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, T localWorksp
       // (this is used in LoadInstrument to find the right instrument file to
       // use).
       localWorkspace->mutableRun().addProperty("run_start", run_start.toISO8601String(), true);
+    } else if (run.hasProperty("start_time")) {
+      localWorkspace->mutableRun().addProperty("run_start", run.getProperty("start_time")->value(), true);
     } else {
       alg.getLogger().warning() << "Empty proton_charge sample log. You will "
                                    "not be able to filter by time.\n";
