@@ -300,6 +300,11 @@ class SuperplotPresenter:
             legend = axes.legend()
             if legend:
                 legend.draggable()
+        else:
+            legend = axes.get_legend()
+            if legend:
+                legend.remove()
+            axes.set_title("")
         self._canvas.draw_idle()
 
     def onWorkspaceSelectionChanged(self):
