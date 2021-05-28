@@ -51,8 +51,8 @@ General
 - Display Debug and Information messages generated during workbench start up
 - If the facility in `Mantid.user.properties` is empty, it is consistently reflected as empty in the GUI
 - First time dialog box will not appear recurrently, if user selected their choice of facility and instrument at least once and checked "Do not show again until next version".
-- Fixed a bug where Workbench would hang on startup when running on Big Sur.
-- Fixed a bug where TableWorkspace column names would not update correctly if the table was open.
+- Workbench no longer hangs on startup when running on Big Sur.
+- TableWorkspace column names are now updated correctly when a table is open.
 - Fixed a bug applying constraints with the conjugate gradient minimizer.
 
 Interfaces
@@ -62,6 +62,7 @@ Interfaces
 - Fixed a bug that would cause a crash if the user right clicked on the plot in the instrument view pick tab after the stored curves were cleared.
 - The y-axis in the instrument view's pick tab will now rescale if the range changes.
 - On the instrument view's pick tab, when the integration range is changed the current tool will stay selected.
+- Remove a "failed to build unwrapped surface" warning when viewing certain instruments in the instrument viewer using the cylindrical projections
 - In sliceveiwer the background shell of spherical and elliptical peaks is now correctly plotted when viewing slices that do not cut through the peak center
 - In sliceveiwer the elliptical shell of integrated peaks is plotted correctly for varying background thicknesses.
 - Integrated spherical peaks are now plotted correctly in the non-orthogonal view of sliceviewer.
@@ -70,7 +71,6 @@ Interfaces
 - Axes limits correctly reset when home clicked on sliceviewer plot of ragged matrix workspace.
 - Line plots in sliceviewer now respect the status of the Track Cursor checkbox.
 - Cursor coordinates in sliceviewer are now correct for transposed and non-orthogonal data.
-- Remove a "failed to build unwrapped surface" warning when viewing certain instruments in the instrument viewer using the cylindrical projections
 - Stop sliceviewer crash when selecting the same peak after the overlaid peak workspace replaced or renamed.
 
 Plotting
@@ -78,15 +78,14 @@ Plotting
 - The label of 1D curves in the legend of the plots is corrected to match the vertical axis bin center, if it is a BinEdgeAxis.
 - Fixed a scenario where workbench could hang if the user closed a plot while live data was being read.
 - Fixed a crash that happens when multiple plot windows are open, and the users closes one of them.
-- Fixed a bug where panning on a colour fill plot stretches dataset along spectrum axis instead of panning
-- Fixed a bug where renaming a workspace with an active plot would make it impossible to change the normalisation of the plot without first creating a new one.
-- Fixed a bug where TableWorkspace column names would not update correctly if the table was open.
+- Panning on a colour fill plot no longer stretches a dataset along spectrum axis instead of panning
+- It is now possible to change the normalisation of an active plot after renaming the corresponding workspace.
 - Fixed a bug where plotting a 3D Contour plot would produce the error reporter in some cases.
 - Fixed a problem with scripts generated from tiled plots.
 - Restrict scroll wheel zooming out to +/-10^300 to avoid crash.
 - Exported axis tick formatter related commands to plot script.
 - Restore axis tick format for plots on project save and load.
-- Fixed a bug where colorfill plots with a Log scale could not be saved during project save.
+- Log scale normalisation of colorfill plots is now saved correctly during project save.
 
 
 :ref:`Release 6.1.0 <v6.1.0>`
