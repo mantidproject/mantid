@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/PeakFunctionIntegrator.h"
+
 #include <cxxtest/TestSuite.h>
 
 #include "gsl/gsl_errno.h"
@@ -40,6 +42,12 @@ public:
   double height() const override { return getParameter("Height"); }
   void setHeight(const double h) override { setParameter("Height", h); }
 
+  void setParameterErrors(double heightError, double sigmaError, double centerError) {
+    setError("Height", heightError);
+    setError("Sigma", sigmaError);
+    setError("Center", centerError);
+  }
+
   void init() override {
     declareParameter("Center");
     declareParameter("Sigma");
@@ -56,14 +64,19 @@ public:
     }
   }
 
-  void functionDerivLocal(Jacobian *out, const double *xValues, const size_t nData) override {
-    UNUSED_ARG(out);
-    UNUSED_ARG(xValues);
-    UNUSED_ARG(nData);
-
-    // Do nothing - not required for this test.
+  /// Error in the integrated intensity due to error in the optimized fit parameters (assumed uncorrelated)
+  double intensityErrorLocal() {
+    const double h = getParameter("Height");
+    const double hE = getError("Height");
+    const double s = getParameter("Sigma");
+    const double sE = getError("Sigma");
+    return intensity() * sqrt(pow(hE / h, 2) + pow(sE / s, 2));
   }
 };
+
+// Declaration to the function factory is required if we want to clone LocalGaussian, as is done in
+// PeakFunctionIntegrator::intensityError
+DECLARE_FUNCTION(LocalGaussian)
 
 class PeakFunctionIntegratorTest : public CxxTest::TestSuite {
 private:
@@ -118,7 +131,7 @@ public:
   void testIntegrateInfinityGaussian() {
     IPeakFunction_sptr gaussian = getGaussian(0.0, 1.0, 1.0);
 
-    PeakFunctionIntegrator integrator;
+    TestablePeakFunctionIntegrator integrator;
     IntegrationResult result = integrator.integrateInfinity(*gaussian);
     TS_ASSERT_EQUALS(result.errorCode, static_cast<int>(GSL_SUCCESS));
     TS_ASSERT_DELTA(result.result, getGaussianAnalyticalInfiniteIntegral(gaussian),
@@ -173,5 +186,31 @@ public:
     IntegrationResult rThreeSigma = integrator.integrate(*gaussian, -3.0, 3.0);
     TS_ASSERT_EQUALS(rThreeSigma.errorCode, static_cast<int>(GSL_SUCCESS));
     TS_ASSERT_DELTA(rThreeSigma.result, 0.997300203936740, integrator.requiredRelativePrecision());
+  }
+
+  void testIntegrateErrorGaussian() {
+    PeakFunctionIntegrator integrator(1e-10);
+    double halfRange = 10.0; // we'll integrate in the interval [-halfRange, halfRange]
+
+    // Normal distribution with mu = 0, sigma = 1, height = 1/sqrt(2 * pi)
+    auto gaussian = LocalGaussian();
+    gaussian.initialize();
+    gaussian.setCentre(0.0);
+    gaussian.setHeight(1.0 / sqrt(2.0 * M_PI));
+    gaussian.setFwhm(2.0 * sqrt(2.0 * M_LN2));
+
+    // No errors should return Nan
+    double error = integrator.integrateError(gaussian, -halfRange, halfRange);
+    TS_ASSERT(std::isnan(error));
+
+    // Shifting the gaussian peak much less than the integration range doesn't alter the integrated intensity error
+    gaussian.setParameterErrors(0.0, 0.0, 0.1);
+    error = integrator.integrateError(gaussian, -halfRange, halfRange);
+    TS_ASSERT_DELTA(0.0, error, 1.e-06);
+
+    // General case of uncorrelated errors
+    gaussian.setParameterErrors(0.04, 0.1, 0.0);
+    error = integrator.integrateError(gaussian, -halfRange, halfRange);
+    TS_ASSERT_DELTA(gaussian.intensityErrorLocal(), error, 1.e-06);
   }
 };
