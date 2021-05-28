@@ -545,20 +545,28 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
     fitBank_alg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(objf));
 
     //---- bounds&constraints def
+    double searchRadiusRot = getProperty("SearchradiusRotBank");
+    searchRadiusRot = std::abs(searchRadiusRot);
+    double searchRadiusTran = getProperty("SearchRadiusTransBank");
+    searchRadiusTran = std::abs(searchRadiusTran);
     std::ostringstream tie_str;
     tie_str << "DeltaSampleX=0.0,DeltaSampleY=0.0,DeltaSampleZ=0.0,"
             << "DeltaT0=" << m_T0;
     std::ostringstream constraint_str;
-    double searchRadiusRot = getProperty("SearchradiusRotBank");
-    searchRadiusRot = std::abs(searchRadiusRot);
-    constraint_str << -searchRadiusRot << "<RotX<" << searchRadiusRot << ","  // constrain rotation around X-axis
-                   << -searchRadiusRot << "<RotY<" << searchRadiusRot << ","  // constrain rotation around Y-axis
-                   << -searchRadiusRot << "<RotZ<" << searchRadiusRot << ","; // constrain rotation around Z-axis
-    double searchRadiusTran = getProperty("SearchRadiusTransBank");
-    searchRadiusTran = std::abs(searchRadiusTran);
-    constraint_str << -searchRadiusTran << "<DeltaX<" << searchRadiusTran << "," // restrict tranlastion along X
-                   << -searchRadiusTran << "<DeltaY<" << searchRadiusTran << "," // restrict tranlastion along Y
-                   << -searchRadiusTran << "<DeltaZ<" << searchRadiusTran;       // restrict tranlastion along Z
+    if (searchRadiusRot < 1e-16) {
+      tie_str << ",RotX=0.0,RotY=0.0,RotZ=0.0";
+    } else {
+      constraint_str << -searchRadiusRot << "<RotX<" << searchRadiusRot << ","  // constrain rotation around X-axis
+                     << -searchRadiusRot << "<RotY<" << searchRadiusRot << ","  // constrain rotation around Y-axis
+                     << -searchRadiusRot << "<RotZ<" << searchRadiusRot << ","; // constrain rotation around Z-axis
+    }
+    if (searchRadiusTran) {
+      tie_str << ",DeltaX=0.0,DeltaY=0.0,DeltaZ=0.0";
+    } else {
+      constraint_str << -searchRadiusTran << "<DeltaX<" << searchRadiusTran << "," // restrict tranlastion along X
+                     << -searchRadiusTran << "<DeltaY<" << searchRadiusTran << "," // restrict tranlastion along Y
+                     << -searchRadiusTran << "<DeltaZ<" << searchRadiusTran;       // restrict tranlastion along Z
+    }
 
     //---- set&go
     fitBank_alg->setProperty("Ties", tie_str.str());
@@ -919,6 +927,20 @@ MatrixWorkspace_sptr SCDCalibratePanels2::getIdealQSampleAsHistogram1D(IPeaksWor
   auto &yvector = spectrum.mutableY();
   auto &evector = spectrum.mutableE();
 
+  // quick check to see what kind of weighting we can use
+  double totalSigmaInt = 0.0;
+  for (int i = 0; i < npeaks; ++i) {
+    totalSigmaInt += pws->getPeak(i).getSigmaIntensity();
+  }
+  double totalInt = 0.0;
+  for (int i = 0; i < npeaks; ++i) {
+    totalInt += pws->getPeak(i).getIntensity();
+  }
+  double totalCnt = 0.0;
+  for (int i = 0; i < npeaks; ++i) {
+    totalCnt += pws->getPeak(i).getBinCount();
+  }
+
   // directly compute qsample from UBmatrix and HKL
   auto ubmatrix = pws->sample().getOrientedLattice().getUB();
   for (int i = 0; i < npeaks; ++i) {
@@ -927,18 +949,18 @@ MatrixWorkspace_sptr SCDCalibratePanels2::getIdealQSampleAsHistogram1D(IPeaksWor
     qv *= 2 * PI;
     // qv = qv / qv.norm();
     double wgt = 1.0;
-    if (pws->getPeak(i).getSigmaIntensity() > 0.0) {
+    if (totalSigmaInt > 0.0) {
       wgt = 1.0 / pws->getPeak(i).getSigmaIntensity();
-    } else if (pws->getPeak(i).getIntensity() > 0.0) {
+    } else if (totalInt > 0.0) {
       wgt = 1.0 / pws->getPeak(i).getIntensity();
-    } else if (pws->getPeak(i).getBinCount()) {
+    } else if (totalCnt > 0.0) {
       wgt = 1.0 / pws->getPeak(i).getBinCount();
     }
     // make 1dhist
     for (int j = 0; j < 3; ++j) {
       xvector[i * 3 + j] = i * 3 + j;
       yvector[i * 3 + j] = qv[j];
-      evector[i * 3 + j] = wgt;
+      evector[i * 3 + j] = wgt * qv.norm();
     }
   }
 
