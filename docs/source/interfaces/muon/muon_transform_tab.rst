@@ -70,4 +70,4 @@ For large calculations the interface can be slow, therefore the ``Calculate`` bu
 Used By
 ^^^^^^^
 
-:ref:`Frequency Domain Analysis <Frequency_Domain_Analysis_2-ref>`
+:ref:`Frequency Domain Analysis <Frequency_Domain_Analysis-ref>`

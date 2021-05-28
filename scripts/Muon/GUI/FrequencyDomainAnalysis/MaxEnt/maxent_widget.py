@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_view import MaxEntView
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_presenter import MaxEntPresenter
-from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_model import MaxEntModel, MaxEntWrapper
 
 from qtpy import QtWidgets
 
@@ -16,10 +15,7 @@ class MaxEntWidget(QtWidgets.QWidget):
     def __init__(self, load, parent=None):
         super(MaxEntWidget, self).__init__(parent)
         view = MaxEntView(parent)
-
-        maxEnt = MaxEntModel()
-        model = MaxEntWrapper(maxEnt)
-        self._presenter = MaxEntPresenter(view, model, load)
+        self._presenter = MaxEntPresenter(view, load)
 
     @property
     def presenter(self):
@@ -37,3 +33,6 @@ class MaxEntWidget(QtWidgets.QWidget):
 
     def closeEvent(self, event):
         self._presenter.cancel()
+
+    def update_view_from_model(self):
+        self._presenter.update_view_from_model()

@@ -11,8 +11,8 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 # need to write tests for new GUI
 
-from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_widget_new import FFTWidget
-from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_widget_new import MaxEntWidget
+from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_widget import FFTWidget
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_widget import MaxEntWidget
 from Muon.GUI.FrequencyDomainAnalysis.Transform import transform_view
 from Muon.GUI.FrequencyDomainAnalysis.Transform import transform_widget
 from Muon.GUI.FrequencyDomainAnalysis.TransformSelection import transform_selection_view
