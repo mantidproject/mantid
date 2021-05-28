@@ -8,9 +8,6 @@
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "gsl/gsl_errno.h"
-#include <boost/math/distributions/students_t.hpp>
-#include <iomanip>
-#include <numeric>
 
 namespace Mantid {
 namespace API {
