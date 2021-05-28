@@ -23,6 +23,12 @@ where
 Note that the FWHM (Full Width Half Maximum) of a Gaussian equals
 :math:`2\sqrt{2\ln 2}*\mbox{Sigma}`.
 
+The integrated peak intensity for the Gaussian is given by
+:math:`\mbox{height} * \mbox{sigma} * \sqrt{2\pi}`.
+
+The uncertainty for the intensity is:
+:math:`\mbox{intensity} * \sqrt{\left(\frac{\delta \mbox{height}}{\mbox{height}}\right)^2 + \left(\frac{\delta \mbox{sigma}}{\mbox{sigma}}\right)^2}`.
+
 The figure below illustrate this symmetric peakshape function fitted to
 a TOF peak:
 
