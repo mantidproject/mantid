@@ -63,6 +63,7 @@ Bugfixes
 - :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` fixed the wrong assumption on the order of spin-flip and non-spin-flip data, and fixed the relative normalisation issues.
 - Fix crashing issue in :ref:`AlignAndFocusPowder<algm-AlignAndFocusPowder>` due to using new unit conversion APIs.
 - Support for data with x-axis unit of TOF has been deprecated in :ref:`DiffractionFocussing version 2 <algm-DiffractionFocussing-v2>`, please use :ref:`GroupDetectors <algm-GroupDetectors>` instead.
+- Fixed an error in the final calculation for the PEARLTransVoigt function, used in PEARLTransfit
 
 Engineering Diffraction
 -----------------------
