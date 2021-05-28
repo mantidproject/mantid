@@ -41,6 +41,21 @@ class SuperplotViewBottom(QDockWidget):
         self.here = os.path.dirname(os.path.realpath(__file__))
         uic.loadUi(os.path.join(self.here, SuperplotViewBottom.UI), self)
 
+    def keyPressEvent(self, event):
+        """
+        Override of QDockWidget::keyPressEvent. This method forward some key
+        press event to some relevant actions of the contained widgets.
+
+        Args:
+            event (QKeyEvent): the key press event
+        """
+        if event.key() == Qt.Key_Left:
+            self.spectrumSlider.keyPressEvent(event)
+        elif event.key() == Qt.Key_Right:
+            self.spectrumSlider.keyPressEvent(event)
+        elif event.key() == Qt.Key_Space:
+            self.holdButton.click()
+
 
 class SuperplotView(QWidget):
 
