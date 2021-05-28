@@ -48,6 +48,7 @@ Bug fixes
 - Fixed a bug that caused the `AutoScale` check box to reset when editing the selected groups/pairs.
 - Fixed a bug where the start and end X would reset in the fitting tab when stepping to the next or previous run.
 - Fixed a bug caused by entering an empty string into the start and end X fields.
+- Fixed a bug when loading PSI data in co-add mode
 
 ALC
 ---
