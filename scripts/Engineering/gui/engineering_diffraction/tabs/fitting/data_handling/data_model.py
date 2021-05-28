@@ -10,6 +10,7 @@ from mantid.simpleapi import Load, logger, EnggEstimateFocussedBackground, Conve
     CreateEmptyTableWorkspace, GroupWorkspaces, DeleteWorkspace, DeleteTableRows, RenameWorkspace, CreateWorkspace
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
+from Engineering.EnggUtils import convert_single_value_dSpacing_to_TOF
 from mantid.api import AnalysisDataService as ADS
 from mantid.api import TextAxis
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams
@@ -219,7 +220,7 @@ class FittingDataModel(object):
                         # param corresponds to a peak centre in TOF which we also need in dspacing
                         # add another entry into the results dictionary
                         key_d = key + "_dSpacing"
-                        dcen = self._convert_TOF_to_d(params_dict['Value'][irow], wsname)
+                        dcen = convert_single_value_dSpacing_to_TOF(params_dict['Value'][irow], wsname)
                         dcen_er = self._convert_TOFerror_to_derror(params_dict['Error'][irow], dcen, wsname)
                         self._fit_results[wsname]['results'][key_d].append([dcen, dcen_er])
                 istart += nparams[ifunc]

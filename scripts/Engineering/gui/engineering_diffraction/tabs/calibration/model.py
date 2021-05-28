@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger
 from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, DiffractionFocussing, \
-    CreateEmptyTableWorkspace, NormaliseByCurrent, \
+    CreateEmptyTableWorkspace, NormaliseByCurrent, RenameWorkspace, \
     ConvertUnits, Load, ReplaceSpecialValues, SaveNexus, \
     EnggEstimateFocussedBackground, ApplyDiffCal
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file, default_ceria_expected_peaks, \
@@ -71,9 +71,9 @@ class CalibrationModel(object):
         if plot_output:
             for i in range(len(cal_params)):
                 if spectrum_numbers:
-                    bank_name = "cropped"
+                    bank_name = "Cropped"
                 elif bank is None:
-                    bank_name = str(i + 1)
+                    bank_name = "bank_" + str(i + 1)
                 else:
                     bank_name = bank
                 generate_tof_fit_workspace(bank_name)
@@ -168,7 +168,7 @@ class CalibrationModel(object):
         fig.show()
 
     def _plot_tof_fit_single_bank_or_custom(self, bank):
-        bank_ws = Ads.retrieve("engggui_tof_peaks_bank_" + str(bank))
+        bank_ws = Ads.retrieve("engggui_tof_peaks_" + bank)
         fig = plt.figure()
         ax = fig.add_subplot(111, projection="mantid")
 
@@ -227,6 +227,19 @@ class CalibrationModel(object):
             ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='dSpacing')
             return ws
 
+        def calibrate_region_of_interest(roi, df_kwarg):
+            focused_roi, curves_roi = focus_and_make_van_curves(ws_d, ws_van_d, df_kwarg)
+            RenameWorkspace(curves_roi, ("curves_" + roi))
+            curves_output.append(curves_roi)
+
+            # final calibration of focused data
+            kwargs["InputWorkspace"] = focused_roi
+            kwargs["OutputCalibrationTable"] = "engggui_calibration_" + roi
+            kwargs["DiagnosticWorkspaces"] = "diag_" + roi
+
+            cal_roi = run_pd_calibration(kwargs)[0]
+            cal_output[roi] = cal_roi
+
         # need to clone the data as PDCalibration rebins
         ceria_raw = CloneWorkspace(InputWorkspace=ceria_ws)
 
@@ -238,8 +251,6 @@ class CalibrationModel(object):
         ReplaceSpecialValues(InputWorkspace=ws_van_d, OutputWorkspace=ws_van_d, NaNValue=0, InfinityValue=0)
 
         ws_d = ws_initial_process(ceria_ws)
-
-        DeleteWorkspace(ceria_ws)
 
         kwargs = {
             "PeakPositions": default_ceria_expected_peaks(final=True),
@@ -256,78 +267,27 @@ class CalibrationModel(object):
         if spectrum_numbers is None:
             if bank == '1' or bank is None:
                 df_kwarg = {"GroupingFileName": NORTH_BANK_CAL}
-                ws_d_clone = CloneWorkspace(ws_d)
-                ws_van_d_clone = CloneWorkspace(ws_van_d)
-                focused_North, curves_North = focus_and_make_van_curves(ws_d_clone, ws_van_d_clone, df_kwarg)
-
-                # final calibration of focused data
-                kwargs["InputWorkspace"] = focused_North
-                kwargs["OutputCalibrationTable"] = 'engggui_calibration_bank_1'
-                kwargs["DiagnosticWorkspaces"] = 'diag_North'
-
-                cal_north = run_pd_calibration(kwargs)[0]
-                cal_output['north'] = cal_north
-                curves_north = CloneWorkspace(curves_North)
-                curves_output.append(curves_north)
-
-                DeleteWorkspace(ws_d_clone)
-                DeleteWorkspace(ws_van_d_clone)
-                DeleteWorkspace(curves_North)
-
+                calibrate_region_of_interest("bank_1", df_kwarg)
             if bank == '2' or bank is None:
                 df_kwarg = {"GroupingFileName": SOUTH_BANK_CAL}
-                ws_d_clone = CloneWorkspace(ws_d)
-                ws_van_d_clone = CloneWorkspace(ws_van_d)
-                focused_South, curves_South = focus_and_make_van_curves(ws_d_clone, ws_van_d_clone, df_kwarg)
-
-                # final calibration of focused data
-                kwargs["InputWorkspace"] = focused_South
-                kwargs["OutputCalibrationTable"] = 'engggui_calibration_bank_2'
-                kwargs["DiagnosticWorkspaces"] = 'diag_South'
-
-                cal_south = run_pd_calibration(kwargs)[0]
-                cal_output['south'] = cal_south
-                curves_south = CloneWorkspace(curves_South)
-                curves_output.append(curves_south)
-
-                DeleteWorkspace(ws_d_clone)
-                DeleteWorkspace(ws_van_d_clone)
-                DeleteWorkspace(curves_South)
+                calibrate_region_of_interest("bank_2", df_kwarg)
         else:
             grp_ws = create_custom_grouping_workspace(spectrum_numbers, ceria_raw)
             df_kwarg = {"GroupingWorkspace": grp_ws}
-            ws_d_clone = CloneWorkspace(ws_d)
-            ws_van_d_clone = CloneWorkspace(ws_van_d)
-            focused_Cropped, curves_Cropped = focus_and_make_van_curves(ws_d, ws_van_d, df_kwarg)
-
-            # final calibration of focused data
-            kwargs["InputWorkspace"] = focused_Cropped
-            kwargs["OutputCalibrationTable"] = 'engggui_calibration_cropped'
-            kwargs["DiagnosticWorkspaces"] = 'diag_Cropped'
-
-            cal_cropped = run_pd_calibration(kwargs)[0]
-            cal_output['cropped'] = cal_cropped
-            curves_cropped = CloneWorkspace(curves_Cropped)
-            curves_output.append(curves_cropped)
-
-            DeleteWorkspace(ws_d_clone)
-            DeleteWorkspace(ws_van_d_clone)
-            DeleteWorkspace(curves_Cropped)
+            calibrate_region_of_interest("Cropped", df_kwarg)
 
         DeleteWorkspace(ws_van)
-        DeleteWorkspace(ws_van_d)
-        DeleteWorkspace(ws_d)
         DeleteWorkspace("tof_focused")
 
         cal_params = list()
         # in the output calfile, rows are present for all detids, only read one from the region of interest
-        north_read_row = 0
-        south_read_row = 1200
+        bank_1_read_row = 0
+        bank_2_read_row = 1200
         for bank_cal in cal_output:
-            if bank_cal == 'north':
-                read = north_read_row
-            elif bank_cal == 'south':
-                read = south_read_row
+            if bank_cal == "bank_1":
+                read = bank_1_read_row
+            elif bank_cal == "bank_2":
+                read = bank_2_read_row
             else:
                 read = create_spectrum_list_from_string(spectrum_numbers)[0]
             row = cal_output[bank_cal].row(read)
@@ -446,11 +406,11 @@ class CalibrationModel(object):
         if bank == "all":
             filename = filename + "all_banks" + ext
         elif bank == "north":
-            filename = filename + "bank_North" + ext
+            filename = filename + "bank_1" + ext
         elif bank == "south":
-            filename = filename + "bank_South" + ext
+            filename = filename + "bank_2" + ext
         elif bank == "cropped":
-            filename = filename + "cropped" + ext
+            filename = filename + "Cropped" + ext
         else:
             raise ValueError("Invalid bank name entered")
         return filename

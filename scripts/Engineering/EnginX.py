@@ -234,7 +234,7 @@ def create_calibration(ceria_run, van_run, full_inst_calib, calibration_director
 def create_calibration_files(ceria_run, van_run, full_inst_calib, int_van, van_curves_file, calibration_directory,
                              calibration_general, use_spectrum_number, crop_name, spec_nos):
     """
-    create and save a cropped calibration file
+    create and save a calibration
 
     @param ceria_run :: run number for the ceria used
     @param van_run :: the run number of the vanadium to use
@@ -290,9 +290,9 @@ def create_calibration_files(ceria_run, van_run, full_inst_calib, int_van, van_c
             save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
                              "bank_{}".format(spec_nos), [crop_name], tzero, difc, difa)
         # create the table workspace containing the parameters
-        param_tbl_name = crop_name if crop_name is not None else "cropped"
+        param_tbl_name = crop_name if crop_name is not None else "Cropped"
         create_params_table(difc, tzero, difa)
-        Utils.generate_tof_fit_workspace(spec_nos, param_tbl_name)
+        Utils.generate_tof_fit_workspace(spec_nos, param_tbl_name, "engg_tof_peaks_bank_")
     else:
         difas = [row['difa'] for row in output]
         difcs = [row['difc'] for row in output]
@@ -301,11 +301,11 @@ def create_calibration_files(ceria_run, van_run, full_inst_calib, int_van, van_c
             save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
                              "bank_{}".format(bank_names[i - 1]), [bank_names[i - 1]],
                              [tzeros[i - 1]], [difcs[i - 1]], [difas[i - 1]])
+            Utils.generate_tof_fit_workspace(bank_names[i-1], "", "engg_tof_peaks_bank_")
         save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", bank_names,
                          tzeros, difcs, difas)
         # create the table workspace containing the parameters
         create_params_table(difcs, tzeros, difas)
-        Utils.generate_tof_fit_workspace("", None)
 
 
 def run_calibration(sample_ws,
@@ -364,7 +364,6 @@ def run_calibration(sample_ws,
     ws_d = ws_initial_process(sample_ws)
 
     simple.DeleteWorkspace(van_integration)
-    simple.DeleteWorkspace(sample_ws)
 
     kwargs = {
         "PeakPositions": Utils.default_ceria_expected_peaks(final=True),

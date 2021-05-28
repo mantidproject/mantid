@@ -8,6 +8,7 @@ from os import path
 from mantid.api import *
 from mantid.kernel import IntArrayProperty, UnitConversion, DeltaEModeType
 import mantid.simpleapi as mantid
+from mantid.simpleapi import AnalysisDataService as ADS
 
 ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']
 
@@ -47,51 +48,60 @@ def get_diffractometer_constants_from_workspace(ws):
     Get diffractometer constants from workspace
     TOF = difc*d + difa*(d^2) + tzero
     """
-    ws = AnalysisDataService.Instance().retrieve(ws)
     si = ws.spectrumInfo()
     diff_consts = si.diffractometerConstants(0)  # output is a UnitParametersMap
     return diff_consts
 
 
-def generate_tof_fit_workspace(bank, name=None):
+def generate_tof_fit_workspace(bank, cal_name=None, output_prefix="engggui_tof_peaks_"):
 
-    if bank == '1' or bank == "North":
-        diag_ws_name = 'diag_North'
-    elif bank == '2' or bank == "South":
-        diag_ws_name = 'diag_South'
+    if not (bank or cal_name):
+        generate_tof_fit_workspace("bank_1")
+        generate_tof_fit_workspace("bank_2")
+    if bank[-1:] == '1':  # bank_1
+        diag_ws_name = "diag_bank_1"
+    elif bank[-1:] == '2':
+        diag_ws_name = "diag_bank_2"
     else:
-        if name is None:
-            diag_ws_name = 'diag_' + bank
+        if cal_name is None:
+            diag_ws_name = "diag_Cropped"
         else:
-            diag_ws_name = 'diag_' + name
+            diag_ws_name = "diag_" + cal_name
+    fitparam_ws_name = diag_ws_name + "_fitparam"
+    fitted_ws_name = diag_ws_name + "_fitted"
+    fitparam_ws = ADS.retrieve(fitparam_ws_name)
+    fitted_ws = ADS.retrieve(fitted_ws_name)
 
-    fitparam_ws = mantid.AnalysisDataService.Instance().retrieve(diag_ws_name + '_fitparam')
-    fitted_ws = mantid.AnalysisDataService.Instance().retrieve(diag_ws_name + '_fitted')
     expected_dspacing_peaks = default_ceria_expected_peaks(final=True)
 
     expected_d_peaks_x = []
     fitted_tof_peaks_y = []
-    calculated_d_peaks_y2 = []
+    calculated_tof_peaks_y2 = []
     for irow in range(0, fitparam_ws.rowCount()):
         expected_d_peaks_x.append(expected_dspacing_peaks[-(irow + 1)])
         fitted_tof_peaks_y.append(fitparam_ws.cell(irow, 5))
-        diff_consts = get_diffractometer_constants_from_workspace(fitted_ws)
-        calculated_d_peaks_y2.append(UnitConversion.run("TOF", "dSpacing", expected_d_peaks_x[irow], 0,
-                                                        DeltaEModeType.Elastic, diff_consts))
+        calculated_tof_peaks_y2.append(convert_single_value_dSpacing_to_TOF(expected_d_peaks_x[irow], fitted_ws))
 
     ws1 = mantid.CreateWorkspace(DataX=expected_d_peaks_x,
                                  DataY=fitted_tof_peaks_y,
                                  UnitX="Expected Peaks Centre (dSpacing A)",
                                  YUnitLabel="Fitted Peaks Centre(TOF, us)")
-    ws2 = mantid.CreateWorkspace(DataX=expected_d_peaks_x, DataY=calculated_d_peaks_y2)
+    ws2 = mantid.CreateWorkspace(DataX=expected_d_peaks_x, DataY=calculated_tof_peaks_y2)
 
-    output_ws = "engggui_tof_peaks_bank_" + str(bank)
-    if mantid.AnalysisDataService.Instance().doesExist(output_ws):
+    output_ws = output_prefix + bank
+    if ADS.doesExist(output_ws):
         mantid.DeleteWorkspace(output_ws)
 
     mantid.AppendSpectra(ws1, ws2, OutputWorkspace=output_ws)
     mantid.DeleteWorkspace(ws1)
     mantid.DeleteWorkspace(ws2)
+
+
+def convert_single_value_dSpacing_to_TOF(d, diff_consts_ws):
+    diff_consts = get_diffractometer_constants_from_workspace(diff_consts_ws)
+    # L1 = 0 is ignored when diff constants supplied
+    tof = UnitConversion.run("dSpacing", "TOF", d, 0, DeltaEModeType.Elastic, diff_consts)
+    return tof
 
 
 def create_spectrum_list_from_string(str_list):
@@ -277,7 +287,7 @@ def get_detector_ids_for_bank(bank):
     # LoadDetectorsGroupingFile produces a 'Grouping' workspace.
     # PropertyWithValue<GroupingWorkspace> not working (GitHub issue 13437)
     # => cannot run as child and get outputworkspace property properly
-    if not AnalysisDataService.doesExist(group_name):
+    if not ADS.doesExist(group_name):
         raise RuntimeError('LoadDetectorsGroupingFile did not run correctly. Could not '
                            'find its output workspace: ' + group_name)
     grouping = mtd[group_name]
