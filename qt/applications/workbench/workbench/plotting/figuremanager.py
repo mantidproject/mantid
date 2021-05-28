@@ -412,6 +412,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.superplot.close()
             self.superplot = None
             self.toolbar._actions["toggle_fit"].setEnabled(True)
+            self.toolbar._actions["toggle_superplot"].setChecked(False)
         else:
             self.superplot = Superplot(self.canvas, self.window)
             self.window.addDockWidget(Qt.LeftDockWidgetArea,
@@ -419,6 +420,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.window.addDockWidget(Qt.BottomDockWidgetArea,
                                       self.superplot.getBottomView())
             self.toolbar._actions["toggle_fit"].setEnabled(False)
+            self.toolbar._actions["toggle_superplot"].setChecked(True)
 
     def handle_fit_browser_close(self):
         """
