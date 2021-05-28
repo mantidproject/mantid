@@ -560,7 +560,7 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
                      << -searchRadiusRot << "<RotY<" << searchRadiusRot << ","  // constrain rotation around Y-axis
                      << -searchRadiusRot << "<RotZ<" << searchRadiusRot << ","; // constrain rotation around Z-axis
     }
-    if (searchRadiusTran) {
+    if (searchRadiusTran < 1e-16) {
       tie_str << ",DeltaX=0.0,DeltaY=0.0,DeltaZ=0.0";
     } else {
       constraint_str << -searchRadiusTran << "<DeltaX<" << searchRadiusTran << "," // restrict tranlastion along X
@@ -960,7 +960,7 @@ MatrixWorkspace_sptr SCDCalibratePanels2::getIdealQSampleAsHistogram1D(IPeaksWor
     for (int j = 0; j < 3; ++j) {
       xvector[i * 3 + j] = i * 3 + j;
       yvector[i * 3 + j] = qv[j];
-      evector[i * 3 + j] = wgt * qv.norm();
+      evector[i * 3 + j] = wgt;
     }
   }
 
