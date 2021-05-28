@@ -42,7 +42,7 @@ public:
   const double *getPointerAt(size_t i) const { return m_data + i; }
   /// Convert to a vector
   std::vector<double> toVector() const;
-  /// Set a peak redius to pass to peak functions.
+  /// Set a peak radius to pass to peak functions.
   void setPeakRadius(int radius);
   /// Get the peak radius.
   int getPeakRadius() const;

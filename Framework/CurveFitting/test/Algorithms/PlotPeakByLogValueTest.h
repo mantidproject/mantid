@@ -117,10 +117,10 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     TWS_type result = WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
-    TS_ASSERT_EQUALS(result->columnCount(), 13);
+    TS_ASSERT_EQUALS(result->columnCount(), 14);
 
     std::vector<std::string> tnames = result->getColumnNames();
-    TS_ASSERT_EQUALS(tnames.size(), 13);
+    TS_ASSERT_EQUALS(tnames.size(), 14);
     TS_ASSERT_EQUALS(tnames[0], "var");
     TS_ASSERT_EQUALS(tnames[1], "f0.A0");
     TS_ASSERT_EQUALS(tnames[2], "f0.A0_Err");
@@ -132,8 +132,9 @@ public:
     TS_ASSERT_EQUALS(tnames[8], "f1.PeakCentre_Err");
     TS_ASSERT_EQUALS(tnames[9], "f1.Sigma");
     TS_ASSERT_EQUALS(tnames[10], "f1.Sigma_Err");
-    TS_ASSERT_EQUALS(tnames[11], "f1.Intensity");
-    TS_ASSERT_EQUALS(tnames[12], "Chi_squared");
+    TS_ASSERT_EQUALS(tnames[11], "f1.Integrated Intensity");
+    TS_ASSERT_EQUALS(tnames[12], "f1.Integrated Intensity_Err");
+    TS_ASSERT_EQUALS(tnames[13], "Chi_squared");
 
     TS_ASSERT_DELTA(result->Double(0, 0), 1, 1e-10);
     TS_ASSERT_DELTA(result->Double(0, 1), 1, 1e-10);
@@ -180,10 +181,10 @@ public:
     alg.execute();
 
     TWS_type result = WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
-    TS_ASSERT_EQUALS(result->columnCount(), 13);
+    TS_ASSERT_EQUALS(result->columnCount(), 14);
 
     std::vector<std::string> tnames = result->getColumnNames();
-    TS_ASSERT_EQUALS(tnames.size(), 13);
+    TS_ASSERT_EQUALS(tnames.size(), 14);
     TS_ASSERT_EQUALS(tnames[0], "var");
     TS_ASSERT_EQUALS(tnames[1], "f0.A0");
     TS_ASSERT_EQUALS(tnames[2], "f0.A0_Err");
@@ -195,8 +196,9 @@ public:
     TS_ASSERT_EQUALS(tnames[8], "f1.PeakCentre_Err");
     TS_ASSERT_EQUALS(tnames[9], "f1.Sigma");
     TS_ASSERT_EQUALS(tnames[10], "f1.Sigma_Err");
-    TS_ASSERT_EQUALS(tnames[11], "f1.Intensity");
-    TS_ASSERT_EQUALS(tnames[12], "Chi_squared");
+    TS_ASSERT_EQUALS(tnames[11], "f1.Integrated Intensity");
+    TS_ASSERT_EQUALS(tnames[12], "f1.Integrated Intensity_Err");
+    TS_ASSERT_EQUALS(tnames[13], "Chi_squared");
 
     TS_ASSERT_DELTA(result->Double(0, 0), 1, 1e-10);
     TS_ASSERT_DELTA(result->Double(0, 1), 1, 1e-10);
@@ -243,10 +245,10 @@ public:
     alg.execute();
 
     TWS_type result = WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
-    TS_ASSERT_EQUALS(result->columnCount(), 13);
+    TS_ASSERT_EQUALS(result->columnCount(), 14);
 
     std::vector<std::string> tnames = result->getColumnNames();
-    TS_ASSERT_EQUALS(tnames.size(), 13);
+    TS_ASSERT_EQUALS(tnames.size(), 14);
     TS_ASSERT_EQUALS(tnames[0], "SourceName");
 
     TS_ASSERT_EQUALS(result->String(0, 0), "PlotPeakGroup_0");
@@ -276,10 +278,10 @@ public:
     alg.execute();
 
     TWS_type result = WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
-    TS_ASSERT_EQUALS(result->columnCount(), 13);
+    TS_ASSERT_EQUALS(result->columnCount(), 14);
 
     std::vector<std::string> tnames = result->getColumnNames();
-    TS_ASSERT_EQUALS(tnames.size(), 13);
+    TS_ASSERT_EQUALS(tnames.size(), 14);
     TS_ASSERT_EQUALS(tnames[0], "axis-1");
 
     TS_ASSERT_EQUALS(result->Double(0, 0), 0.5);
@@ -421,7 +423,7 @@ public:
     TS_ASSERT(alg.execute());
 
     TWS_type result = WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
-    TS_ASSERT_EQUALS(result->columnCount(), 13);
+    TS_ASSERT_EQUALS(result->columnCount(), 14);
 
     auto matrices =
         AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_NormalisedCovarianceMatrices");
