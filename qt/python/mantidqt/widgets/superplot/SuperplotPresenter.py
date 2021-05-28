@@ -297,7 +297,9 @@ class SuperplotPresenter:
 
         if selection or plottedData:
             figure.tight_layout()
-            axes.legend()
+            legend = axes.legend()
+            if legend:
+                legend.draggable()
         self._canvas.draw_idle()
 
     def onWorkspaceSelectionChanged(self):
