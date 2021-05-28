@@ -40,6 +40,7 @@ class SuperplotViewBottom(QDockWidget):
         super().__init__(parent)
         self.here = os.path.dirname(os.path.realpath(__file__))
         uic.loadUi(os.path.join(self.here, SuperplotViewBottom.UI), self)
+        self.setFocusPolicy(Qt.ClickFocus)
 
     def keyPressEvent(self, event):
         """
