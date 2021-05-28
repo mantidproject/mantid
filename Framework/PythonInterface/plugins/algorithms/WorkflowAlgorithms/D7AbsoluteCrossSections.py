@@ -600,8 +600,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             CreateWorkspace(DataX=data_x, DataY=w_out, DataE=e_out, NSpec=int((fld+1)*nQ),
                             OutputWorkspace=w_out_name)
             mtd[w_out_name].replaceAxis(1, y_axis)
-            mtd[w_out_name].getAxis(0).setUnit('Label').setLabel('Qx', r'\AA^{-1})')
-            mtd[w_out_name].getAxis(1).setUnit('Label').setLabel('Qy', r'\AA^{-1})')
+            mtd[w_out_name].getAxis(0).setUnit('Label').setLabel('Qx', r'\AA^{-1}')
+            mtd[w_out_name].getAxis(1).setUnit('Label').setLabel('Qy', r'\AA^{-1}')
             ReplaceSpecialValues(InputWorkspace=w_out_name, OutputWorkspace=w_out_name, NaNValue=0,
                                  NaNError=0, InfinityValue=0, InfinityError=0)
         DeleteWorkspace(Workspace=ws)
