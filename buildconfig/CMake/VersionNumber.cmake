@@ -1,12 +1,12 @@
 # Set the version number here for MantidVersion and the package filenames
 # This follows Semantic Versioning https://semver.org
 set ( VERSION_MAJOR 6 )
-set ( VERSION_MINOR 0 )
+set ( VERSION_MINOR 1 )
 
 # UNCOMMENT the next 'set' line to 'force' the patch version number to
 # a value (instead of using the count coming out of 'git describe')
 # DO NOT COMMIT THIS TO MASTER UNCOMMENTED, ONLY TO A RELEASE BRANCH
-# set ( VERSION_PATCH 0 )
+set ( VERSION_PATCH 0 )
 
 # The tweak is mean to keep in line with the pre-release numbering.
 # https://semver.org/

@@ -293,7 +293,7 @@ class PEARLTransfit(PythonAlgorithm):
                 firstFileName = fnNoExt
             fileName_Raw = fnNoExt + '_raw'
             fileName_3 = fnNoExt + '_3'
-            LoadRaw(Filename=fileName, OutputWorkspace=fileName_Raw)
+            LoadRaw(Filename=file, OutputWorkspace=fileName_Raw)
             CropWorkspace(InputWorkspace=fileName_Raw, OutputWorkspace=fileName_Raw, XMin=100, XMax=19990)
             NormaliseByCurrent(InputWorkspace=fileName_Raw, OutputWorkspace=fileName_Raw)
             ExtractSingleSpectrum(InputWorkspace=fileName_Raw, OutputWorkspace=fileName_3, WorkspaceIndex=3)
