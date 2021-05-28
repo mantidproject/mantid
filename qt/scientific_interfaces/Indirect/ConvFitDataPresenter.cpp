@@ -60,31 +60,11 @@ void ConvFitDataPresenter::addWorkspace(ConvFitAddWorkspaceDialog const &dialog,
   model.addWorkspace(dialog.workspaceName(), dialog.workspaceIndices());
 }
 
-void ConvFitDataPresenter::addModelData(const std::string &name) {
-  IndirectFitDataPresenter::addModelData(name);
-  // const auto resolution = getView()->getSelectedResolution();
-  // if (!resolution.empty() && isWorkspaceLoaded(resolution)) {
-  //  auto const index = TableDatasetIndex{0};
-  //  m_convModel->setResolution(resolution, index);
-  //  emit modelResolutionAdded(resolution, index);
-  //}
-}
-
 std::unique_ptr<IAddWorkspaceDialog> ConvFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
   auto dialog = std::make_unique<ConvFitAddWorkspaceDialog>(parent);
   dialog->setResolutionFBSuffices(m_fbResolutionSuffixes);
   dialog->setResolutionWSSuffices(m_wsResolutionSuffixes);
   return dialog;
-}
-
-void ConvFitDataPresenter::setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog) {
-  if (auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog *>(dialog))
-    convDialog->setResolutionFBSuffices(m_fbResolutionSuffixes);
-}
-
-void ConvFitDataPresenter::setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog) {
-  if (auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog *>(dialog))
-    convDialog->setResolutionWSSuffices(m_wsResolutionSuffixes);
 }
 
 } // namespace IDA

@@ -37,7 +37,6 @@ public:
 
   /// Public Methods
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
-  MOCK_CONST_METHOD0(isMultipleDataTabSelected, bool());
   MOCK_METHOD1(validate, UserInputValidator &(UserInputValidator &validator));
 
   /// Public slots

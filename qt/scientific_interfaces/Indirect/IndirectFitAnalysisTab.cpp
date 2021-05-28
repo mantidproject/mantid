@@ -93,8 +93,6 @@ void IndirectFitAnalysisTab::connectDataPresenter() {
 
   connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()), this, SLOT(respondToSingleResolutionLoaded()));
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this, SLOT(respondToDataChanged()));
-  connect(m_dataPresenter.get(), SIGNAL(singleDataViewSelected()), this, SLOT(respondToSingleDataViewSelected()));
-  connect(m_dataPresenter.get(), SIGNAL(multipleDataViewSelected()), this, SLOT(respondToMultipleDataViewSelected()));
   connect(m_dataPresenter.get(), SIGNAL(dataAdded()), this, SLOT(respondToDataAdded()));
   connect(m_dataPresenter.get(), SIGNAL(dataRemoved()), this, SLOT(respondToDataRemoved()));
 }
@@ -158,16 +156,12 @@ void IndirectFitAnalysisTab::setSampleSuffixes(std::string const &tab, bool filt
   QStringList const noSuffixes{""};
   setSampleWSSuffixes(filter ? getSampleWSSuffixes(tab) : noSuffixes);
   setSampleFBSuffixes(filter ? getSampleFBSuffixes(tab) : getExtensions(tab));
-  m_dataPresenter->setMultiInputSampleWSSuffixes();
-  m_dataPresenter->setMultiInputSampleFBSuffixes();
 }
 
 void IndirectFitAnalysisTab::setResolutionSuffixes(std::string const &tab, bool filter) {
   QStringList const noSuffixes{""};
   setResolutionWSSuffixes(filter ? getResolutionWSSuffixes(tab) : noSuffixes);
   setResolutionFBSuffixes(filter ? getResolutionFBSuffixes(tab) : getExtensions(tab));
-  m_dataPresenter->setMultiInputResolutionWSSuffixes();
-  m_dataPresenter->setMultiInputResolutionFBSuffixes();
 }
 
 void IndirectFitAnalysisTab::setSampleWSSuffixes(const QStringList &suffices) {
@@ -683,17 +677,6 @@ void IndirectFitAnalysisTab::respondToDataChanged() {
   m_plotPresenter->updateGuessAvailability();
   updateParameterEstimationData();
   updateResultOptions();
-}
-
-void IndirectFitAnalysisTab::respondToSingleDataViewSelected() {
-  m_spectrumPresenter->setActiveIndexToZero();
-  m_plotPresenter->hideMultipleDataSelection();
-  m_plotPresenter->updateDataSelection();
-}
-
-void IndirectFitAnalysisTab::respondToMultipleDataViewSelected() {
-  m_plotPresenter->showMultipleDataSelection();
-  m_plotPresenter->updateDataSelection();
 }
 
 void IndirectFitAnalysisTab::respondToDataAdded() {

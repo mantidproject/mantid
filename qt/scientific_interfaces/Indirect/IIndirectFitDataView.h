@@ -25,7 +25,6 @@ public:
   virtual ~IIndirectFitDataView() = default;
 
   virtual QTableWidget *getDataTable() const = 0;
-  virtual bool isMultipleDataTabSelected() const = 0;
 
   virtual UserInputValidator &validate(UserInputValidator &validator) = 0;
 
@@ -33,12 +32,9 @@ public slots:
   virtual void displayWarning(std::string const &warning) = 0;
 
 signals:
-  void sampleLoaded(QString const & /*_t1*/);
   void resolutionLoaded(QString const & /*_t1*/);
   void addClicked();
   void removeClicked();
-  void multipleDataViewSelected();
-  void singleDataViewSelected();
   void startXChanged(double);
   void endXChanged(double);
 };

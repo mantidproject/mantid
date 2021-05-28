@@ -144,8 +144,6 @@ private slots:
   void respondToChangeOfSpectraRange(TableDatasetIndex index);
   void respondToSingleResolutionLoaded();
   void respondToDataChanged();
-  void respondToSingleDataViewSelected();
-  void respondToMultipleDataViewSelected();
   void respondToDataAdded();
   void respondToDataRemoved();
   void respondToSelectedFitDataChanged(TableDatasetIndex index);
@@ -158,7 +156,6 @@ signals:
   void functionChanged();
   void parameterChanged(const Mantid::API::IFunction *fun);
   void customBoolChanged(const QString &key, bool value);
-  void updateAvailableFitTypes();
 };
 
 } // namespace IDA

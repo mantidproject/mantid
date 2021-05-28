@@ -18,8 +18,6 @@ FqFitDataPresenter::FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *
                                        IFQFitObserver *SingleFunctionTemplateBrowser)
     : IndirectFitDataPresenter(model, view, std::make_unique<FqFitDataTablePresenter>(model, view->getDataTable())),
       m_activeParameterType("Width"), m_dataIndex(TableDatasetIndex{0}), m_fqFitModel(model) {
-  connect(view, SIGNAL(singleDataViewSelected()), this, SLOT(handleSingleInputSelected()));
-  connect(view, SIGNAL(multipleDataViewSelected()), this, SLOT(handleMultipleInputSelected()));
 
   connect(this, SIGNAL(requestedAddWorkspaceDialog()), this, SLOT(updateActiveDataIndex()));
 
@@ -196,10 +194,6 @@ std::unique_ptr<IAddWorkspaceDialog> FqFitDataPresenter::getAddWorkspaceDialog(Q
           SLOT(dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *, const std::string &)));
   return dialog;
 }
-
-void FqFitDataPresenter::setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog) { UNUSED_ARG(dialog); }
-
-void FqFitDataPresenter::setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog) { UNUSED_ARG(dialog); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

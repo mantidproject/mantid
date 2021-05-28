@@ -26,19 +26,13 @@ public:
   ~IndirectFitDataView() override = default;
 
   QTableWidget *getDataTable() const override;
-  virtual bool isMultipleDataTabSelected() const override;
 
   UserInputValidator &validate(UserInputValidator &validator) override;
 
 public slots:
   void displayWarning(const std::string &warning) override;
 
-protected slots:
-  void emitViewSelected(int index);
-
 private:
-  UserInputValidator &validateMultipleData(UserInputValidator &validator);
-
   std::unique_ptr<Ui::IndirectFitDataView> m_dataForm;
 };
 

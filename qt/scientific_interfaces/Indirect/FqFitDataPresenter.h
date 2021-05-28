@@ -39,13 +39,11 @@ private slots:
   void setActiveParameterType(const std::string &type);
   void updateActiveDataIndex();
   void updateActiveDataIndex(int index);
-  void handleMultipleInputSelected();
 
 signals:
   void spectrumChanged(WorkspaceIndex);
 
 protected slots:
-  void handleSampleLoaded(const QString &) override;
 
 private:
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
@@ -57,9 +55,6 @@ private:
   void addWorkspace(IndirectFittingModel *model, const std::string &name);
   void setModelSpectrum(int index);
   void setDataIndexToCurrentWorkspace(IAddWorkspaceDialog const *dialog);
-
-  void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog) override;
-  void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog) override;
 
   std::string m_activeParameterType;
   TableDatasetIndex m_dataIndex;

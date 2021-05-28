@@ -34,10 +34,6 @@ public:
   void setSampleFBSuffices(const QStringList &suffices);
   void setResolutionWSSuffices(const QStringList &suffices);
   void setResolutionFBSuffices(const QStringList &suffices);
-  void setMultiInputSampleWSSuffixes();
-  void setMultiInputSampleFBSuffixes();
-  void setMultiInputResolutionWSSuffixes();
-  void setMultiInputResolutionFBSuffixes();
 
   void setStartX(double startX, TableDatasetIndex dataIndex, WorkspaceIndex spectrumIndex);
   void setStartX(double startX, TableDatasetIndex dataIndex);
@@ -53,9 +49,7 @@ public slots:
   void updateSpectraInTable(TableDatasetIndex dataIndex);
 
 protected slots:
-  void setModelWorkspace(const QString &name);
   void showAddWorkspaceDialog();
-  virtual void handleSampleLoaded(const QString &);
 
   virtual void closeDialog();
 
@@ -69,10 +63,7 @@ signals:
   void endXChanged(double, TableDatasetIndex, WorkspaceIndex);
   void endXChanged(double);
   void excludeRegionChanged(const std::string &, TableDatasetIndex, WorkspaceIndex);
-  void multipleDataViewSelected();
-  void singleDataViewSelected();
   void requestedAddWorkspaceDialog();
-  void updateAvailableFitTypes();
 
 protected:
   IndirectFitDataPresenter(IIndirectFittingModel *model, IIndirectFitDataView *view,
@@ -80,8 +71,6 @@ protected:
   IIndirectFitDataView const *getView() const;
   void addData(IAddWorkspaceDialog const *dialog);
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
-  void setSingleModelData(const std::string &name);
-  virtual void addModelData(const std::string &name);
   void displayWarning(const std::string &warning);
   QStringList m_wsSampleSuffixes;
   QStringList m_fbSampleSuffixes;
@@ -94,9 +83,6 @@ private slots:
 private:
   virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;
   void updateDataInTable(TableDatasetIndex dataIndex);
-
-  virtual void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog);
-  virtual void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog);
 
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   IIndirectFittingModel *m_model;
