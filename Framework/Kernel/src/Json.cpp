@@ -14,11 +14,12 @@ namespace Kernel {
 namespace JsonHelpers {
 
 /**
- * @brief Return a string given the json value passed
+ * @brief Return a string given the json value passed, this function handles errors by throwing instead of returning
+ * false and writing to a string the error.
  *
  * @param json the json to be converted to a string.
  * @param indentation the indentation can be anything, if nothing is passed then indentations and newline charecters
- * will be ignored.
+ * will be ignored. Defaults to nothing.
  * @return std::string
  */
 std::string jsonToString(const Json::Value &json, const std::string &indentation) {
@@ -47,13 +48,14 @@ Json::Value stringToJson(const std::string &json) {
 }
 
 /**
- * @brief A wrapper for the parse method used to read in a String as a Json::Value
+ * @brief A wrapper for the parse method used to read in a std::string as a Json::Value, this function shouldn't
+ * throw an exception but return false when it fails to parse the std::string.
  *
  * @param jsonString The string that is going to be parsed into a Json::Value
  * @param jsonValue InOut variable that has the Json::Value emplaced into it
  * @param errors InOut varable that has the error
- * @return true
- * @return false
+ * @return true on successful parse
+ * @return false on failed parse
  */
 bool parse(const std::string &jsonString, Json::Value *jsonValue, std::string *errors) {
   ::Json::CharReaderBuilder readerBuilder;
