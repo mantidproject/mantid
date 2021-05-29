@@ -7,7 +7,8 @@
 import unittest
 from unittest import mock
 
-from mantid.api import CompositeFunction, FrameworkManager, FunctionFactory
+from mantid.api import AnalysisDataService, CompositeFunction, FrameworkManager, FunctionFactory
+from mantid.simpleapi import CreateSampleWorkspace
 
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model import GeneralFittingModel
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
@@ -269,60 +270,48 @@ class GeneralFittingModelTest(unittest.TestCase):
     def test_that_get_simultaneous_fit_by_specifiers_to_display_from_context_returns_an_empty_list_if_fit_by_is_not_specified(self):
         self.assertEqual(self.model.get_simultaneous_fit_by_specifiers_to_display_from_context(), [])
 
-    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel.'
-                '_get_workspace_names_to_display_from_context')
-    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel.'
-                '_sort_workspace_names')
-    def test_that_get_workspace_names_to_display_from_context_will_attempt_to_get_runs_and_groups_for_single_fit_mode(self,
-                                                                                                                      mock_sort,
-                                                                                                                      mock_get_workspaces):
+    def test_that_get_workspace_names_to_display_from_context_will_attempt_to_get_runs_and_groups_for_single_fit_mode(self):
         workspace_names = ["Name"]
+        workspace = CreateSampleWorkspace()
+        AnalysisDataService.addOrReplace("Name", workspace)
         runs = "All"
-        group_or_pair = "long"
+        group_or_pair = ["long"]
         self.model.simultaneous_fitting_mode = False
 
-        self.model._get_selected_groups_and_pairs = mock.MagicMock(return_value=([group_or_pair]))
+        self.model._get_selected_groups_and_pairs = mock.MagicMock(return_value=(group_or_pair))
 
-        mock_get_workspaces.return_value = workspace_names
-        mock_sort.return_value = workspace_names
+        self.model.context.get_workspace_names_for = mock.MagicMock(return_value=workspace_names)
+        self.model.context.get_workspace_names_of_fit_data_with_run = mock.MagicMock()
 
         self.assertEqual(self.model.get_workspace_names_to_display_from_context(), workspace_names)
 
         self.model._get_selected_groups_and_pairs.assert_called_with()
-        mock_get_workspaces.assert_called_with(runs, group_or_pair)
-        mock_sort.assert_called_with(workspace_names)
+        self.model.context.get_workspace_names_for.assert_called_with(runs, group_or_pair, True)
 
         self.assertEqual(1, self.model._get_selected_groups_and_pairs.call_count)
-        self.assertEqual(1, mock_get_workspaces.call_count)
-        self.assertEqual(1, mock_sort.call_count)
+        self.assertEqual(1, self.model.context.get_workspace_names_for.call_count)
 
-    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel.'
-                '_get_workspace_names_to_display_from_context')
-    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel.'
-                '_sort_workspace_names')
-    def test_that_get_workspace_names_to_display_will_attempt_to_get_runs_and_groups_for_simultaneous_fit_mode(self,
-                                                                                                               mock_sort,
-                                                                                                               mock_get_workspaces):
+    def test_that_get_workspace_names_to_display_will_attempt_to_get_runs_and_groups_for_simultaneous_fit_mode(self):
         workspace_names = ["Name"]
+        workspace = CreateSampleWorkspace()
+        AnalysisDataService.addOrReplace("Name", workspace)
         runs = ["62260"]
-        group_or_pair = "long"
+        group_or_pair = ["long"]
         self.model.simultaneous_fitting_mode = True
 
         self.model._get_selected_runs_groups_and_pairs_for_simultaneous_fit_mode = \
-            mock.MagicMock(return_value=(runs, [group_or_pair]))
+            mock.MagicMock(return_value=(runs, group_or_pair))
 
-        mock_get_workspaces.return_value = workspace_names
-        mock_sort.return_value = workspace_names
+        self.model.context.get_workspace_names_for = mock.MagicMock(return_value=workspace_names)
+        self.model.context.get_workspace_names_of_fit_data_with_run = mock.MagicMock()
 
         self.assertEqual(self.model.get_workspace_names_to_display_from_context(), workspace_names)
 
         self.model._get_selected_runs_groups_and_pairs_for_simultaneous_fit_mode.assert_called_with()
-        mock_get_workspaces.assert_called_with(runs, group_or_pair)
-        mock_sort.assert_called_with(workspace_names)
+        self.model.context.get_workspace_names_for.assert_called_with(runs, group_or_pair, True)
 
         self.assertEqual(1, self.model._get_selected_runs_groups_and_pairs_for_simultaneous_fit_mode.call_count)
-        self.assertEqual(1, mock_get_workspaces.call_count)
-        self.assertEqual(1, mock_sort.call_count)
+        self.assertEqual(1, self.model.context.get_workspace_names_for.call_count)
 
     def test_that_get_selected_runs_groups_and_pairs_will_attempt_to_get_runs_and_groups_for_simultaneous_fit_mode(self):
         runs = ["62260"]

@@ -137,7 +137,10 @@ class PlotWidgetModelTest(unittest.TestCase):
         self.assertEqual(expected_indices, indices)
 
     def test_create_tiled_keys_returns_correctly_for_tiled_by_group(self):
-        self.context.group_pair_context._selected_groups = ["fwd", "bwd", "top"]
+        self.context.group_pair_context.add_group(MuonGroup(group_name="bwd", detector_ids=[6, 7, 8, 9, 10]))
+        self.context.group_pair_context.add_group(MuonGroup(group_name="bottom", detector_ids=[11, 12, 13, 14, 15]))
+        self.context.group_pair_context.add_group(MuonGroup(group_name="top", detector_ids=[16, 17, 18, 19, 20]))
+        self.context.group_pair_context._selected_groups = ["bwd", "fwd", "top"]
 
         keys = self.model.create_tiled_keys(TILED_BY_GROUP_TYPE)
 

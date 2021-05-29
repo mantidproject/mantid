@@ -9,9 +9,7 @@ from mantid.api import CompositeFunction, IAlgorithm, IFunction
 from mantid.simpleapi import CopyLogs, EvaluateFunction
 
 from Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws
-from Muon.GUI.Common.ADSHandler.workspace_naming import (create_fitted_workspace_name, create_parameter_table_name,
-                                                         get_group_or_pair_from_name,
-                                                         get_run_number_from_workspace_name)
+from Muon.GUI.Common.ADSHandler.workspace_naming import create_fitted_workspace_name, create_parameter_table_name
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import BasicFittingContext
 from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
@@ -55,8 +53,6 @@ class BasicFittingModel:
         """Initializes the model with empty fit data."""
         self.context = context
         self.fitting_context = fitting_context
-
-        self._group_or_pair_index = {}
 
     @property
     def current_dataset_index(self) -> int:
@@ -505,43 +501,9 @@ class BasicFittingModel:
     def get_workspace_names_to_display_from_context(self) -> list:
         """Returns the workspace names to display in the view based on the selected run and group/pair options."""
         runs, groups_and_pairs = self.get_selected_runs_groups_and_pairs()
+        workspace_names = self.context.get_workspace_names_for(runs, groups_and_pairs, self.fitting_context.fit_to_raw)
 
-        display_workspaces = []
-        for group_and_pair in groups_and_pairs:
-            display_workspaces += self._get_workspace_names_to_display_from_context(runs, group_and_pair)
-
-        return self._sort_workspace_names(display_workspaces)
-
-    def _get_workspace_names_to_display_from_context(self, runs: list, group_and_pair: str) -> list:
-        """Returns the workspace names for the given runs and group/pair to be displayed in the view."""
-        return self.context.get_names_of_workspaces_to_fit(runs=runs, group_and_pair=group_and_pair,
-                                                           rebin=not self.fitting_context.fit_to_raw)
-
-    def _sort_workspace_names(self, workspace_names: list) -> list:
-        """Sort the workspace names and check the workspaces exist in the ADS."""
-        workspace_names = list(set(self._check_data_exists(workspace_names)))
-        if len(workspace_names) > 1:
-            workspace_names.sort(key=self._workspace_list_sorter)
-        return workspace_names
-
-    def _workspace_list_sorter(self, workspace_name: str) -> int:
-        """Used to sort a list of workspace names based on run number and group/pair name."""
-        run_number = get_run_number_from_workspace_name(workspace_name, self.context.data_context.instrument)
-        grp_pair_number = self._transform_group_or_pair_to_float(workspace_name)
-        return int(run_number) + grp_pair_number
-
-    def _transform_group_or_pair_to_float(self, workspace_name: str) -> int:
-        """Converts the workspace group or pair name to a float which is used in sorting the workspace list."""
-        group_or_pair_name = get_group_or_pair_from_name(workspace_name)
-        if group_or_pair_name not in self._group_or_pair_index:
-            self._group_or_pair_index[group_or_pair_name] = len(self._group_or_pair_index)
-
-        group_or_pair_values = list(self._group_or_pair_index.values())
-        if len(self._group_or_pair_index) > 1:
-            return ((self._group_or_pair_index[group_or_pair_name] - group_or_pair_values[0])
-                    / (group_or_pair_values[-1] - group_or_pair_values[0])) * 0.99
-        else:
-            return 0
+        return self._check_data_exists(workspace_names)
 
     @staticmethod
     def _check_data_exists(workspace_names: list) -> list:
