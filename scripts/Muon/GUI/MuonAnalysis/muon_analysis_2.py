@@ -15,6 +15,7 @@ from Muon.GUI.Common.contexts.data_analysis_context import DataAnalysisContext
 from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
+from Muon.GUI.Common.contexts.fitting_contexts.model_fitting_context import ModelFittingContext
 from Muon.GUI.Common.contexts.fitting_contexts.tf_asymmetry_fitting_context import TFAsymmetryFittingContext
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.contexts.plotting_context import PlottingContext, PlotMode
@@ -24,6 +25,7 @@ from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
 from Muon.GUI.Common.home_tab.home_tab_widget import HomeTabWidget
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
+from Muon.GUI.Common.model_fitting_tab_widget.model_fitting_tab_widget import ModelFittingTabWidget
 from Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_widget import SeqFittingTabWidget
 from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
 from Muon.GUI.Common.phase_table_widget.phase_table_widget import PhaseTabWidget
@@ -34,7 +36,7 @@ from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
 
 
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
-TAB_ORDER = ["Home", "Grouping", "Phase Table", "Fitting", "Sequential Fitting", "Results"]
+TAB_ORDER = ["Home", "Grouping", "Phase Table", "Fitting", "Sequential Fitting", "Results", "Model Fitting"]
 
 
 def check_facility():
@@ -81,11 +83,13 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.data_context.check_group_contains_valid_detectors)
         self.phase_context = PhaseTableContext()
         self.fitting_context = TFAsymmetryFittingContext(allow_double_pulse_fitting=True)
+        self.model_fitting_context = ModelFittingContext(allow_double_pulse_fitting=False)
         self.plotting_context = PlottingContext()
         self.context = DataAnalysisContext(muon_data_context=self.data_context,
                                            muon_gui_context=self.gui_context,
                                            muon_group_context=self.group_pair_context,
                                            fitting_context=self.fitting_context,
+                                           model_fitting_context=self.model_fitting_context,
                                            muon_phase_context=self.phase_context,
                                            plotting_context=self.plotting_context)
 
@@ -117,6 +121,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.phase_tab = PhaseTabWidget(self.context, self)
         self.seq_fitting_tab = SeqFittingTabWidget(self.context, self.fitting_tab.fitting_tab_model, self)
         self.results_tab = ResultsTabWidget(self.context.fitting_context, self.context, self)
+        self.model_fitting_tab = ModelFittingTabWidget(self.context, self)
 
         self.setup_tabs()
         self.help_widget = HelpWidget("Muon Analysis 2")
@@ -176,6 +181,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.addTabWithOrder(self.fitting_tab.fitting_tab_view, 'Fitting')
         self.tabs.addTabWithOrder(self.seq_fitting_tab.seq_fitting_tab_view, 'Sequential Fitting')
         self.tabs.addTabWithOrder(self.results_tab.results_tab_view, 'Results')
+        self.tabs.addTabWithOrder(self.model_fitting_tab.model_fitting_tab_view, 'Model Fitting')
         self.update_plot_observer = GenericObserver(self.plot_widget.presenter.update_plot)
         self.tabs.set_slot_for_tab_changed(self.handle_tab_changed)
 
@@ -184,7 +190,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         if TAB_ORDER[index] in ["Home", "Grouping", "Phase Table"]:  # Plot all the selected data
             plot_mode = PlotMode.Data
         # Plot the displayed workspace
-        elif TAB_ORDER[index] in ["Fitting", "Sequential Fitting"]:
+        elif TAB_ORDER[index] in ["Fitting", "Sequential Fitting", "Model Fitting"]:
             plot_mode = PlotMode.Fitting
         else:
             return
