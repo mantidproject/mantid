@@ -39,8 +39,17 @@ class SuperplotPresenter:
         self._syncWithCurrentPlot()
 
         self._updateList()
-        self._updateSpectrumSlider()
         self._updatePlot()
+        plottedData = self._model.getPlottedData()
+        selection = dict()
+        for ws, sp in plottedData:
+            if ws not in selection:
+                selection[ws] = [sp]
+            else:
+                if selection[ws][0] < sp:
+                    selection[ws] = [sp]
+        self._view.setSelection(selection)
+        self._updateSpectrumSlider()
 
     def getSideView(self):
         return self._view.getSideWidget()
