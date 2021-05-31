@@ -26,11 +26,14 @@ class SuperplotViewSide(QDockWidget):
         self.here = os.path.dirname(os.path.realpath(__file__))
         uic.loadUi(os.path.join(self.here, SuperplotViewSide.UI), self)
         wsList = self.workspacesList
+        wsList.header().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         wsList.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        size = wsList.header().sectionSize(1)
-        wsList.header().setDefaultSectionSize(size)
+        size0 = wsList.header().sectionSize(0)
+        size1 = wsList.header().sectionSize(1)
+        wsList.header().setDefaultSectionSize(size1)
         wsList.header().setSectionResizeMode(QHeaderView.Stretch)
         wsList.header().setSectionResizeMode(1, QHeaderView.Interactive)
+        wsList.setMinimumSize(QSize(size0 + size1, 0))
         self.workspaceSelector.setWorkspaceTypes(["Workspace2D",
                                                   "WorkspaceGroup",
                                                   "EventWorkspace"])
