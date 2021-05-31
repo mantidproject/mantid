@@ -112,10 +112,8 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
                 1.37,
                 validator=FloatBoundedValidator(lower=0.0),
                 direction=Direction.Input,
-                doc=
-                'Maximum value for d. Everything bigger gets removed. If zero it is not used and values get calculated from '
-                '2 theta and lambda.'
-            )
+                doc='Maximum value for d. Everything bigger gets removed. If zero it is not used and values get calculated from '
+                '2 theta and lambda.')
             self.declareProperty(
                 'DpMin',
                 0.48,
@@ -410,7 +408,7 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             self._dpMin = self.getProperty('DpMin').value
             self._dpMax = self.getProperty('DpMax').value
 
-        def getReductionStyle()
+        def getReductionStyle():
             # True False questions for Vanadium, Empty and edgebinning
             self._doEdge = self.getProperty('DoEdgebinning').value
             self._doVana = self.getProperty('DoIntensityCorrection').value
