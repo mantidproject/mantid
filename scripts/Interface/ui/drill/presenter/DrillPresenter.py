@@ -14,6 +14,7 @@ from ..view.DrillSettingsDialog import DrillSettingsDialog
 from ..model.DrillModel import DrillModel
 from .DrillExportPresenter import DrillExportPresenter
 from .DrillContextMenuPresenter import DrillContextMenuPresenter
+from .DrillSamplePresenter import DrillSamplePresenter
 
 
 class DrillPresenter:
@@ -92,7 +93,8 @@ class DrillPresenter:
         Args:
             position (int): new row position
         """
-        self.model.addSample(position)
+        sample = self.model.addSample(position)
+        DrillSamplePresenter(self.view.table, sample)
 
     def onDataChanged(self, row, column):
         """
@@ -539,7 +541,8 @@ class DrillPresenter:
         self.view.set_table(columns, tooltips)
         if not samples:
             self.view.add_row_after(1)
-            self.model.addSample(-1)
+            sample = self.model.addSample(-1)
+            DrillSamplePresenter(self.view.table, sample)
         else:
             for i in range(len(samples)):
                 self.view.add_row_after(1)

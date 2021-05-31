@@ -543,7 +543,7 @@ class DrillModel(QObject):
                 if master is not None:
                     params.update(master.getParameters())
 
-        params.update(self.samples[sample].getParameters())
+        params.update(self.samples[sample].getParameterValues())
         # override global params with custom ones
         if "CustomOptions" in params:
             params.update(params["CustomOptions"])
@@ -726,11 +726,18 @@ class DrillModel(QObject):
         Args:
             index (int): sample index; if -1 the sample is added to the end
         """
-        sample = DrillSample()
-        if (index == -1):
+        if (index == -1) or (index >= len(self.samples)):
+            sample = DrillSample(len(self.samples))
             self.samples.append(sample)
         else:
+            sample = DrillSample(index)
             self.samples.insert(index, sample)
+            i = index + 1
+            while i < len(self.samples):
+                self.samples[i].setIndex(i)
+                i += 1
+        sample.setController(self.controller)
+        return sample
 
     def deleteSample(self, ref):
         """
@@ -741,6 +748,10 @@ class DrillModel(QObject):
         """
         sample = self.samples[ref]
         del self.samples[ref]
+        i = ref
+        while i < len(self.samples):
+            self.samples[i].setIndex(i)
+            i += 1
         # remove from groups if needed
         for group in self.groups:
             if sample in self.groups[group]:
