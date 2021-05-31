@@ -899,6 +899,11 @@ class MainWindow(QMainWindow):
         """ Filter by time
         """
         # Generate event filters
+        if not self._dataWS:
+            error_msg = "No workspace has been loaded for use!"
+            Logger("Filter_Events").error(error_msg)
+            return
+
         kwargs = {}
         if self.ui.lineEdit_3.text() != "":
             rel_starttime = float(self.ui.lineEdit_3.text())
