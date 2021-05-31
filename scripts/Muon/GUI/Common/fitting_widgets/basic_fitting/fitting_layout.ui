@@ -27,6 +27,9 @@
     <layout class="QGridLayout" name="general_fitting_options_layout"/>
    </item>
    <item>
+    <layout class="QGridLayout" name="workspace_selector_layout"/>
+   </item>
+   <item>
     <layout class="QGridLayout" name="tf_asymmetry_fitting_options_layout"/>
    </item>
    <item>

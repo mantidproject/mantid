@@ -407,7 +407,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
     def test_that_update_fit_function_in_view_from_model_will_update_the_function_and_index_in_the_view(self):
         self.presenter.update_fit_function_in_view_from_model()
 
-        self.view.update_fit_function.assert_called_once_with(self.fit_function, [])
+        self.view.update_fit_function.assert_called_once_with(self.fit_function)
         self.view.set_current_dataset_index.assert_called_once_with(self.current_dataset_index)
 
     def test_that_update_fit_functions_in_model_from_view_will_update_the_single_fit_functions_and_notify(self):
