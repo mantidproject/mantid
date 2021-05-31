@@ -57,27 +57,6 @@ class DrillModel(QObject):
     ###########################################################################
 
     """
-    Raised when a process is started.
-    Args:
-        (int): sample index
-    """
-    processStarted = Signal(int)
-
-    """
-    Raised when a process finished with success.
-    Args:
-        (int): sample index
-    """
-    processSuccess = Signal(int)
-
-    """
-    Raised when a process failed.
-    Args:
-        (int): sample index
-    """
-    processError = Signal(int)
-
-    """
     Raised when all the processing are done.
     """
     processingDone = Signal()
@@ -584,7 +563,7 @@ class DrillModel(QObject):
         name = str(ref + 1)
         logger.information("Starting of sample {0} processing"
                            .format(name))
-        self.processStarted.emit(ref)
+        self.samples[ref].processStarted.emit()
 
     def _onTaskSuccess(self, ref):
         """
@@ -597,7 +576,7 @@ class DrillModel(QObject):
         name = str(ref + 1)
         logger.information("Processing of sample {0} finished with sucess"
                            .format(name))
-        self.processSuccess.emit(ref)
+        self.samples[ref].processDone.emit(0)
         self.exportModel.run(self.samples[ref])
 
     def _onTaskError(self, ref, msg):
@@ -613,7 +592,7 @@ class DrillModel(QObject):
         name = str(ref + 1)
         logger.error("Error while processing sample {0}: {1}"
                      .format(name, msg))
-        self.processError.emit(ref)
+        self.samples[ref].processDone.emit(-1)
 
     def _onProcessingProgress(self, progress):
         """
