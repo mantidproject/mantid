@@ -26,11 +26,6 @@ class DrillPresenter:
     _invalidCells = set()
 
     """
-    Set of rows for which processing failed. This is used to display a report.
-    """
-    _processError = set()
-
-    """
     Set of custom options. Used to keep an history of the previous values.
     """
     _customOptions = set()
@@ -48,7 +43,6 @@ class DrillPresenter:
         self.view = view
         self.view.setWindowTitle("Untitled [*]")
         self._invalidCells = set()
-        self._processError = set()
         self._customOptions = set()
 
         # view signals connection
@@ -74,9 +68,6 @@ class DrillPresenter:
         self.view.automaticFilling.connect(self.onAutomaticFilling)
 
         # model signals connection
-        self.model.processStarted.connect(self.onProcessBegin)
-        self.model.processSuccess.connect(self.onProcessSuccess)
-        self.model.processError.connect(self.onProcessError)
         self.model.progressUpdate.connect(
                 lambda progress: self.view.set_progress(progress, 100)
                 )
@@ -105,9 +96,6 @@ class DrillPresenter:
             column (int): column index
         """
         contents = self.view.getCellContents(row, column)
-        if row in self._processError:
-            self.view.unsetRowBackground(row)
-            self._processError.remove(row)
         self.view.setWindowModified(True)
         if column == "CustomOptions":
             params = {}
@@ -270,6 +258,7 @@ class DrillPresenter:
         """
         Handles the processing of selected rows.
         """
+        self.view.set_disabled(True)
         rows = self.view.getSelectedRows()
         if not rows:
             rows = self.view.getAllRows()
@@ -309,7 +298,6 @@ class DrillPresenter:
                 QMessageBox.warning(self.view, "Error", "Please check the "
                                     "parameters value before processing.")
                 return
-        self._processError = set()
         self.view.set_disabled(True)
         self.view.set_progress(0, 100)
         self.model.process(rows)
@@ -322,50 +310,12 @@ class DrillPresenter:
         self.view.set_disabled(False)
         self.view.set_progress(0, 100)
 
-    def onProcessBegin(self, sample):
-        """
-        Triggered when the model signals that the processing of a specific
-        sample started.
-
-        Args:
-            sample (int): sample index
-        """
-        self.view.setRowProcessing(sample)
-
-    def onProcessError(self, sample):
-        """
-        Triggered when the model signals that the processing of a specific
-        sample finished with an error.
-
-        Args:
-            sample (int): sample index
-        """
-        self._processError.add(sample)
-        self.view.setRowError(sample)
-
-    def onProcessSuccess(self, sample):
-        """
-        Triggered when the model signals that the processing of a specific
-        sample finished with success.
-
-        Args:
-            sample (int): sample index
-        """
-        self.view.setRowDone(sample)
-
     def onProcessingDone(self):
         """
         Forward the processing done signal to the view.
         """
         self.view.set_disabled(False)
         self.view.set_progress(0, 100)
-        if self._processError:
-            labels = [self.view.getRowLabel(row) for row in self._processError]
-            w = QMessageBox(QMessageBox.Critical, "Processing error(s)",
-                            "Unable to process the row(s) {}. Please check the "
-                            "logs.".format(str(labels)[1:-1]),
-                            QMessageBox.Ok, self.view)
-            w.exec()
 
     def instrumentChanged(self, instrument):
         """
