@@ -38,6 +38,9 @@
       <property name="columnCount">
        <number>2</number>
       </property>
+      <attribute name="headerStretchLastSection">
+       <bool>false</bool>
+      </attribute>
       <column>
        <property name="text">
         <string notr="true">Workspace/curve</string>
