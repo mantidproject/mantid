@@ -337,7 +337,7 @@ class MainWindow(QMainWindow):
             self.ui.horizontalSlider_2.setValue(self._rightSlideValue)
 
     def set_stopTime(self):
-        """ Set the starting time and left slide bar
+        """ Set the stopping time and right slide bar
         """
         inps = str(self.ui.lineEdit_4.text())
         Logger("Filter_Events").information('Stopping time = {}'.format(inps))
@@ -367,7 +367,7 @@ class MainWindow(QMainWindow):
         else:
             resetT = False
 
-        if resetT is True:
+        if resetT:
             newtimef = xlim[0] + irightvalue*(xlim[1]-xlim[0])*0.01
 
         # Move the slide bar (right)
@@ -503,7 +503,7 @@ class MainWindow(QMainWindow):
         self.canvas.draw()
 
         # Change value
-        if setLineEdit is True:
+        if setLineEdit:
             self.ui.lineEdit_6.setText(str(newy))
             self._upperSlideValue = inewy
 
@@ -855,7 +855,7 @@ class MainWindow(QMainWindow):
                 timeres = 1.0
 
             sumwsname = '_Summed_{}'.format(wksp)
-            if AnalysisDataService.doesExist(sumwsname) is False:
+            if not AnalysisDataService.doesExist(sumwsname):
                 sumws = api.SumSpectra(InputWorkspace=wksp, OutputWorkspace=sumwsname)
                 sumws = api.RebinByPulseTimes(InputWorkspace=sumws, OutputWorkspace=sumwsname,
                                               Params='{}'.format(timeres))
@@ -868,8 +868,10 @@ class MainWindow(QMainWindow):
         vecx = sumws.readX(0)
         vecy = sumws.readY(0)
 
-        xmin = min(vecx)
-        xmax = max(vecx)
+        # get the x limits using the original workspace, as they are far more precise
+        xmin = min(wksp.readX(0)) / 1000000
+        xmax = max(wksp.readX(0)) / 1000000
+
         ymin = min(vecy)
         ymax = max(vecy)
 
