@@ -30,6 +30,7 @@ class PhaseTableView(QtWidgets.QWidget, ui_muon_phases_tab):
 
     @first_good_time.setter
     def first_good_time(self, value):
+        self.first_good_data_validator.last_valid_value = str(value)
         self.first_good_data_item.setText(str(value))
 
     @property
@@ -38,6 +39,7 @@ class PhaseTableView(QtWidgets.QWidget, ui_muon_phases_tab):
 
     @last_good_time.setter
     def last_good_time(self, value):
+        self.last_good_data_validator.last_valid_value = str(value)
         self.last_good_data_item.setText(str(value))
 
     @property
@@ -183,10 +185,12 @@ class PhaseTableView(QtWidgets.QWidget, ui_muon_phases_tab):
         self.backward_group_combo = table_utils.addComboToTable(self.phase_table_options_table, 2, options)
 
         table_utils.setRowName(self.phase_table_options_table, 3, "First Good Data")
-        self.first_good_data_item = table_utils.addDoubleToTable(self.phase_table_options_table, 0.1, 3)
+        self.first_good_data_item, self.first_good_data_validator = table_utils.addDoubleToTable(
+            self.phase_table_options_table, 0.1, 3)
 
         table_utils.setRowName(self.phase_table_options_table, 4, "Last Good Data")
-        self.last_good_data_item = table_utils.addDoubleToTable(self.phase_table_options_table, 15.0, 4)
+        self.last_good_data_item, self.last_good_data_validator = table_utils.addDoubleToTable(
+            self.phase_table_options_table, 15.0, 4)
 
         table_utils.setRowName(self.phase_table_options_table, 5, "Output fit information")
         self.output_fit_info_box = table_utils.addCheckBoxToTable(

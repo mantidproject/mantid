@@ -311,7 +311,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         for plot in selected_subplots:
             self._context.update_autoscale_state(plot, state)
         if len(selected_subplots) > 1:
-            self._context.set_autoscale_all = state
+            self._context.set_autoscale_all(state)
         if not state:
             self._options_presenter.enable_yaxis_changer()
             return

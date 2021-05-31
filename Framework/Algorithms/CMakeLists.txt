@@ -14,6 +14,7 @@ set(SRC_FILES
     src/ApplyCalibration.cpp
     src/ApplyDetailedBalance.cpp
     src/ApplyFloodWorkspace.cpp
+    src/ApplyInstrumentToPeaks.cpp
     src/ApplyTransmissionCorrection.cpp
     src/AverageLogData.cpp
     src/Bin2DPowderDiffraction.cpp
@@ -349,6 +350,7 @@ set(INC_FILES
     inc/MantidAlgorithms/ApplyCalibration.h
     inc/MantidAlgorithms/ApplyDetailedBalance.h
     inc/MantidAlgorithms/ApplyFloodWorkspace.h
+    inc/MantidAlgorithms/ApplyInstrumentToPeaks.h
     inc/MantidAlgorithms/ApplyTransmissionCorrection.h
     inc/MantidAlgorithms/AverageLogData.h
     inc/MantidAlgorithms/Bin2DPowderDiffraction.h
@@ -702,6 +704,7 @@ set(TEST_FILES
     ApplyCalibrationTest.h
     ApplyDetailedBalanceTest.h
     ApplyFloodWorkspaceTest.h
+    ApplyInstrumentToPeaksTest.h
     ApplyTransmissionCorrectionTest.h
     AverageLogDataTest.h
     Bin2DPowderDiffractionTest.h

@@ -12,6 +12,8 @@ import matplotlib.axes
 import matplotlib.cm as cm
 import matplotlib.colors
 from matplotlib import axis, ticker  # noqa
+from matplotlib.ticker import NullFormatter,\
+    ScalarFormatter, LogFormatterSciNotation
 
 from mantid import logger
 from mantid.api import AnalysisDataService as ADS
@@ -22,6 +24,26 @@ from mantidqt.plotting.functions import pcolormesh
 
 SUBPLOT_WSPACE = 0.5
 SUBPLOT_HSPACE = 0.5
+
+TICK_FORMATTERS = {"NullFormatter": NullFormatter(),
+                   "ScalarFormatter": ScalarFormatter(useOffset=True),
+                   "LogFormatterSciNotation": LogFormatterSciNotation()
+                   }
+
+
+def get_tick_format(tick_formatters: dict, tick_formatter: str,
+                    tick_format):
+    if tick_formatter == "FixedFormatter":
+        fmt = ticker.FixedFormatter(tick_format)
+    else:
+        try:
+            fmt = tick_formatters[tick_formatter]
+        except KeyError:
+            # If the formatter is not FixedFormatter or
+            # does not exist in global_tick_format_dict,
+            # default to ScalarFormatter
+            fmt = tick_formatters["ScalarFormatter"]
+    return fmt
 
 
 class PlotsLoader(object):
@@ -41,8 +63,21 @@ class PlotsLoader(object):
                 logger.warning("A plot was unable to be loaded from the save file. Error: " + str(e))
 
     def restore_normalise_obj_from_dict(self, norm_dict):
-        norm = matplotlib.colors.Normalize(norm_dict['vmin'], norm_dict['vmax'], norm_dict['clip'])
-        return norm
+        supported_norm_types = {
+            # matplotlib norms that are supported.
+            'Normalize': matplotlib.colors.Normalize,
+            'LogNorm': matplotlib.colors.LogNorm,
+        }
+        # If there is a norm dict, but the type is not specified, default to base Normalize class.
+        type = norm_dict['type'] if 'type' in norm_dict.keys() else 'Normalize'
+
+        if type not in supported_norm_types.keys():
+            logger.debug(
+                f"Color normalisation of type {norm_dict['type']} is not supported. Normalisation will not be set on this plot")
+            return None
+
+        norm = supported_norm_types[type]
+        return norm(vmin=norm_dict['vmin'], vmax=norm_dict['vmax'], clip=norm_dict['clip'])
 
     def make_fig(self, plot_dict, create_plot=True):
         """
@@ -123,7 +158,7 @@ class PlotsLoader(object):
         func = function_dict[function_to_call]
         # Plotting is done via an Axes object unless a colorbar needs to be added
         if function_to_call in ["imshow", "pcolormesh"]:
-            func([workspace], fig, normalize_by_bin_width=creation_arg['normalize_by_bin_width'])
+            func([workspace], fig, color_norm=creation_arg['norm'], normalize_by_bin_width=creation_arg['normalize_by_bin_width'])
             self.color_bar_remade = True
         else:
             func(workspace, **creation_arg)
@@ -260,20 +295,20 @@ class PlotsLoader(object):
             LegendProperties.create_legend(legend, ax)
 
     def update_properties(self, ax, properties):
+        # Support for additonal plot options accessible from general settings
+        if "tickParams" in properties.keys():
+            ax.xaxis.set_tick_params(which="major", **properties["tickParams"]["xaxis"]["major"])
+            ax.xaxis.set_tick_params(which="minor", **properties["tickParams"]["xaxis"]["minor"])
+
+            ax.yaxis.set_tick_params(which="major", **properties["tickParams"]["yaxis"]["major"])
+            ax.yaxis.set_tick_params(which="minor", **properties["tickParams"]["yaxis"]["minor"])
+
         if properties["bounds"]:
             ax.set_position(properties["bounds"])
         ax.set_navigate(properties["dynamic"])
         ax.axison = properties["axisOn"]
         ax.set_frame_on(properties["frameOn"])
         ax.set_visible(properties["visible"])
-
-        # Update X Axis
-        if "xAxisProperties" in properties:
-            self.update_axis(ax.xaxis, properties["xAxisProperties"])
-
-        # Update Y Axis
-        if "yAxisProperties" in properties:
-            self.update_axis(ax.yaxis, properties["yAxisProperties"])
 
         ax.set_xscale(properties["xAxisScale"])
         ax.set_yscale(properties["yAxisScale"])
@@ -287,18 +322,33 @@ class PlotsLoader(object):
             ax.set_ylim(properties["yLim"])
         ax.show_minor_gridlines = properties["showMinorGrid"]
 
-    def update_axis(self, axis_, properties):
-        if isinstance(axis_, matplotlib.axis.XAxis):
-            if properties["position"] == "top":
-                axis_.tick_top()
-            else:
-                axis_.tick_bottom()
+        # Update X Axis
+        if "xAxisProperties" in properties:
+            self.update_axis(ax.xaxis, properties["xAxisProperties"])
 
-        if isinstance(axis_, matplotlib.axis.YAxis):
-            if properties["position"] == "right":
-                axis_.tick_right()
-            else:
-                axis_.tick_left()
+        # Update Y Axis
+        if "yAxisProperties" in properties:
+            self.update_axis(ax.yaxis, properties["yAxisProperties"])
+
+        if 'spineWidths' in properties:
+            for (spine, width) in properties['spineWidths'].items():
+                ax.spines[spine].set_linewidth(width)
+
+    def update_axis(self, axis_, properties):
+        if "position" in properties.keys():
+            # Support for older .mtdproj files that did not include additional
+            # plot settings introduced in PR #30121
+            if isinstance(axis_, matplotlib.axis.XAxis):
+                if properties["position"] == "top":
+                    axis_.tick_top()
+                else:
+                    axis_.tick_bottom()
+
+            if isinstance(axis_, matplotlib.axis.YAxis):
+                if properties["position"] == "right":
+                    axis_.tick_right()
+                else:
+                    axis_.tick_left()
 
         labels = axis_.get_ticklabels()
         if properties["fontSize"] != "":
@@ -335,12 +385,15 @@ class PlotsLoader(object):
         elif properties["minorTickLocator"] == "AutoMinorLocator":
             axis_.set_minor_locator(ticker.AutoMinorLocator())
 
-        # Update Major and Minor Formatter
-        if properties["majorTickFormatter"] == "FixedFormatter":
-            axis_.set_major_formatter(ticker.FixedFormatter(properties["majorTickFormat"]))
-
-        if properties["minorTickFormatter"] == "FixedFormatter":
-            axis_.set_major_formatter(ticker.FixedLocator(properties["minorTickFormat"]))
+        # Update Major and Minor TickFormatter
+        fmt = get_tick_format(TICK_FORMATTERS,
+                              properties["majorTickFormatter"],
+                              properties["majorTickFormat"])
+        axis_.set_major_formatter(fmt)
+        fmt = get_tick_format(TICK_FORMATTERS,
+                              properties["minorTickFormatter"],
+                              properties["minorTickFormat"])
+        axis_.set_minor_formatter(fmt)
 
     @staticmethod
     def update_colorbar_from_dict(image, dic):

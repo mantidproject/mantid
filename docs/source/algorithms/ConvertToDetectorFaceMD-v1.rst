@@ -11,7 +11,7 @@ Description
 
 This algorithm takes a a :ref:`MatrixWorkspace <MatrixWorkspace>` and
 converts it into a :ref:`MDEventWorkspace <MDWorkspace>` that can be
-viewed in the `SliceViewer <http://www.mantidproject.org/SliceViewer>`_.
+viewed in the :ref:`sliceviewer`.
 
 The algorithm currently only works for instruments with
 :ref:`rectangular detectors <Creating Rectangular Area Detectors>`. The coordinates of the
@@ -26,7 +26,7 @@ Each MDEvent created has a weight given by the number of counts in that
 bin. Zero bins are not converted to events (saving memory).
 
 Once created, the :ref:`MDEventWorkspace <MDWorkspace>` can be viewed
-in the `SliceViewer <http://www.mantidproject.org/SliceViewer>`_. It can also be rebinned with
+in the :ref:`sliceviewer`. It can also be rebinned with
 different parameters using :ref:`algm-BinMD`. This allows you to view
 the data in detector-space. For example, you might use this feature to
 look at your detector's sensitivity as a function of position, as well

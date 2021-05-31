@@ -48,7 +48,7 @@ public:
   /// The name of the interface as registered into the factory
   static std::string name() { return "Data Analysis"; }
   /// This interface's categories.
-  static QString categoryInfo() { return "Indirect"; }
+  static QString categoryInfo() { return "Indirect; Direct"; }
   /// Default Constructor
   explicit IndirectDataAnalysis(QWidget *parent = nullptr);
 
