@@ -305,6 +305,7 @@ class SuperplotPresenter:
                     self._view.modifySpectrumLabel(wsName, sp, label, color)
 
         if selection or plottedData:
+            axes.set_axis_on()
             figure.tight_layout()
             legend = axes.legend()
             if legend:
@@ -313,6 +314,7 @@ class SuperplotPresenter:
             legend = axes.get_legend()
             if legend:
                 legend.remove()
+            axes.set_axis_off()
             axes.set_title("")
         self._canvas.draw_idle()
 
