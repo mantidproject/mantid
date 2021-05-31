@@ -101,12 +101,10 @@ class MainWindow(QMainWindow):
         self.ui.horizontalSlider_2.setTickPosition(QSlider.NoTicks)
         self.ui.horizontalSlider_2.valueChanged.connect(self.move_rightSlider)
 
-        # self.connect(self.ui.lineEdit_3, QtCore.SIGNAL("textChanged(QString)"),
-        #         self.set_startTime)
+        self.ui.lineEdit_3.editingFinished.connect(self.set_startTime)
         self.ui.lineEdit_3.setValidator(QDoubleValidator(self.ui.lineEdit_3))
         self.ui.pushButton_setT0.clicked.connect(self.set_startTime)
-        # self.connect(self.ui.lineEdit_4, QtCore.SIGNAL("textChanged(QString)"),
-        #         self.set_stopTime)
+        self.ui.lineEdit_4.editingFinished.connect(self.set_stopTime)
         self.ui.lineEdit_4.setValidator(QDoubleValidator(self.ui.lineEdit_4))
         self.ui.pushButton_setTf.clicked.connect(self.set_stopTime)
 
