@@ -136,3 +136,15 @@ class DrillSample(QObject):
             return self._parameters[name]
         else:
             return None
+
+    def getParameterValues(self):
+        """
+        Get the parameters as a dictionnary.
+
+        Returns:
+            dict(str: str): parameters
+        """
+        out = dict()
+        for name, param in self._parameters.items():
+            out[name] = param.getValue()
+        return out
