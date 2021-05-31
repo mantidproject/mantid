@@ -389,120 +389,149 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         loadResetNegatives2DVana()
 
     def getInputs(self):
-        # Output File
-        self._outputFile = self.getProperty('OutputFile').value
-        # Names for Workspaces
-        self._sampleWS = 'Sample'
-        self._vanaWS = 'Vana'
-        self._emptyWS = 'Empty'
-        # 2 theta and lambda limits
-        self._tthMin = self.getProperty('TwoThetaMin').value
-        self._tthMax = self.getProperty('TwoThetaMax').value
-        self._wlCenter = self.getProperty('WavelengthCenter').value
-        self._lambdaMin = self.getProperty('LambdaMin').value
-        self._lambdaMax = self.getProperty('LambdaMax').value
-        self._calcLambdaMin = self._wlCenter - 1.07 / 2.
-        self._calcLambdaMax = self._wlCenter + 1.07 / 2.
-        if self._calcLambdaMin > self._lambdaMin:
-            self._lambdaMin = self._calcLambdaMin
-        if self._calcLambdaMax < self._lambdaMax:
-            self._lambdaMax = self._calcLambdaMax
-        # d and dperp limits
-        self._dMin = self.getProperty('DMin').value
-        self._dMax = self.getProperty('DMax').value
-        self._dpMin = self.getProperty('DpMin').value
-        self._dpMax = self.getProperty('DpMax').value
-        self._calcDMin = self._lambdaMin / (2. * math.sin(self._tthMax / 2. / 180. * math.pi))
-        self._calcDMax = self._lambdaMax / (2. * math.sin(self._tthMin / 2. / 180. * math.pi))
-        self._calcDpMin = math.sqrt(self._lambdaMin**2 - 2. * math.log(math.cos(self._tthMin / 2. / 180. * math.pi)))
-        self._calcDpMax = math.sqrt(self._lambdaMax**2 - 2. * math.log(math.cos(self._tthMax / 2. / 180. * math.pi)))
-        if self._calcDMin > self._dMin:
-            self._dMin = self._calcDMin
-        if self._calcDMax < self._dMax:
-            self._dMax = self._calcDMax
-        if self._calcDpMin > self._dpMin:
-            self._dpMin = self._calcDpMin
-        if self._calcDpMax < self._dpMax:
-            self._dpMax = self._calcDpMax
-        # True False questions for Vanadium, Empty and edgebinning
-        self._doEdge = self.getProperty('DoEdgebinning').value
-        self._doVana = self.getProperty('DoIntensityCorrection').value
-        self._doEmpty = self.getProperty('DoBackgroundCorrection').value
-        # Load
-        self._sample = self.getPropertyValue('SampleData')
-        self._vana = self.getPropertyValue('VanaData')
-        self._empty = self.getPropertyValue('EmptyData')
-        # FindDetectorsPar
-        self._outputParTable = self.getProperty('OutputParTable').value
-        self._returnLinearRanges = self.getProperty('ReturnLinearRanges').value
-        self._parFile = self.getProperty('ParFile').value
-        # FilterBadPulses
-        self._lowerCutoff = self.getProperty('LowerCutoff').value
-        # RemovePromptPulse
-        self._width = self.getProperty('Width').value
-        self._frequency = self.getProperty('Frequency').value
-        # LoadDiffCal
-        self._filename = self.getPropertyValue('CalFile')
-        self._instrumentName = self.getProperty('InstrumentName').value
-        self._instrumentFilename = self.getProperty('InstrumentFilename').value
-        self._makeGroupingWorkspace = self.getProperty('MakeGroupingWorkspace').value
-        self._makeCalWorkspace = self.getProperty('MakeCalWorkspace').value
-        self._makeMaskWorkspace = self.getProperty('MakeMaskWorkspace').value
-        self._workspaceName = self.getProperty('WorkspaceName').value
-        self._tofMin = self.getProperty('TofMin').value
-        self._tofMax = self.getProperty('TofMax').value
-        self._fixConversionIssues = self.getProperty('FixConversionIssues').value
-        # MaskDetectors
-        self._spectraList = self.getProperty('SpectraList').value
-        self._detectorList = self.getProperty('DetectorList').value
-        self._workspaceIndexList = self.getProperty('WorkspaceIndexList').value
-        self._maskedWorkspace = self.getProperty('MaskedWorkspace').value
-        self._forceInstrumentMasking = self.getProperty('ForceInstrumentMasking').value
-        self._startWorkspaceIndex = self.getProperty('StartWorkspaceIndex').value
-        self._endWorkspaceIndex = self.getProperty('EndWorkspaceIndex').value
-        self._componentList = self.getProperty('ComponentList').value
-        # AlignDetectors
-        self._calibrationFile = self._filename
-        #self._calibrationWorkspace = self.getProperty('CalibrationWorkspace')
-        #self._offsetsWorkspace = self.getProperty('OffsetsWorkspace')
-        # CylinderAbsorption
-        self._scatterFrom = self.getProperty('ScatterFrom').value
-        self._attenuationXSection = self.getProperty('AttenuationXSection').value
-        self._scatteringXSection = self.getProperty('ScatteringXSection').value
-        self._sampleNumberDensity = self.getProperty('SampleNumberDensity').value
-        self._numberOfWavelengthPoints = self.getProperty('NumberOfWavelengthPoints').value
-        self._expMethod = self.getProperty('ExpMethod').value
-        self._eMode = self.getProperty('EMode').value
-        self._eFixed = self.getProperty('EFixed').value
-        self._cylinderSampleHeight = self.getProperty('CylinderSampleHeight').value
-        self._cylinderSampleRadius = self.getProperty('CylinderSampleRadius').value
-        self._cylinderAxis = self.getProperty('CylinderAxis').value
-        self._numberOfSlices = self.getProperty('NumberOfSlices').value
-        self._numberOfAnnuli = self.getProperty('NumberOfAnnuli').value
-        # Bin2DPowderDiffraction
-        self._dSpaceBinning = self.getProperty('dSpaceBinning').value
-        self._dPerpendicularBinning = self.getProperty('dPerpendicularBinning').value
-        self._binEdgesFile = self.getProperty('BinEdgesFile').value
-        self._normalizeByBinArea = self.getProperty('NormalizeByBinArea').value
-        # StripVanadiumPeaks
-        self._FWHM = self.getProperty('FWHM').value
-        self._tolerance = self.getProperty('Tolerance').value
-        self._backgroundType = self.getProperty('BackgroundType').value
-        self._highBackground = self.getProperty('HighBackground').value
-        self._peakPositionTolerance = self.getProperty('PeakPositionTolerance').value
-        self._workspaceIndex = self.getProperty('WorkspaceIndex').value
-        # FFTSmooth
-        self._workspaceIndexSmooth = self.getProperty('WorkspaceIndexSmooth').value
-        self._filter = self.getProperty('Filter').value
-        self._params = self.getProperty('Params').value
-        self._ignoreXBins = self.getProperty('IgnoreXBins').value
-        self._allSpectra = self.getProperty('AllSpectra').value
-        # ResetNegatives2D
-        self._addMinimum = self.getProperty('AddMinimum').value
-        self._resetValue = self.getProperty('ResetValue').value
-        # ResetNegatives2DVana
-        self._addMinimumVana = self.getProperty('AddMinimumVana').value
-        self._resetValueVana = self.getProperty('ResetValueVana').value
+        def getInputOutputFiles():
+            # Output File
+            self._outputFile = self.getProperty('OutputFile').value
+            # Names for Workspaces
+            self._sampleWS = 'Sample'
+            self._vanaWS = 'Vana'
+            self._emptyWS = 'Empty'
+
+        def getLimits():
+            # 2 theta and lambda limits
+            self._tthMin = self.getProperty('TwoThetaMin').value
+            self._tthMax = self.getProperty('TwoThetaMax').value
+            self._wlCenter = self.getProperty('WavelengthCenter').value
+            self._lambdaMin = self.getProperty('LambdaMin').value
+            self._lambdaMax = self.getProperty('LambdaMax').value
+            # d and dperp limits
+            self._dMin = self.getProperty('DMin').value
+            self._dMax = self.getProperty('DMax').value
+            self._dpMin = self.getProperty('DpMin').value
+            self._dpMax = self.getProperty('DpMax').value
+
+        def getReductionStyle()
+            # True False questions for Vanadium, Empty and edgebinning
+            self._doEdge = self.getProperty('DoEdgebinning').value
+            self._doVana = self.getProperty('DoIntensityCorrection').value
+            self._doEmpty = self.getProperty('DoBackgroundCorrection').value
+
+        def getLoadParameters():
+            # Load
+            self._sample = self.getPropertyValue('SampleData')
+            self._vana = self.getPropertyValue('VanaData')
+            self._empty = self.getPropertyValue('EmptyData')
+
+        def getFindDetectorsParParamters():
+            # FindDetectorsPar
+            self._outputParTable = self.getProperty('OutputParTable').value
+            self._returnLinearRanges = self.getProperty('ReturnLinearRanges').value
+            self._parFile = self.getProperty('ParFile').value
+
+        def getFilterBadPulsesParameters():
+            # FilterBadPulses
+            self._lowerCutoff = self.getProperty('LowerCutoff').value
+
+        def getRemovePromptPulseParameters():
+            # RemovePromptPulse
+            self._width = self.getProperty('Width').value
+            self._frequency = self.getProperty('Frequency').value
+
+        def getLoadDiffCalParameters():
+            # LoadDiffCal
+            self._filename = self.getPropertyValue('CalFile')
+            self._instrumentName = self.getProperty('InstrumentName').value
+            self._instrumentFilename = self.getProperty('InstrumentFilename').value
+            self._makeGroupingWorkspace = self.getProperty('MakeGroupingWorkspace').value
+            self._makeCalWorkspace = self.getProperty('MakeCalWorkspace').value
+            self._makeMaskWorkspace = self.getProperty('MakeMaskWorkspace').value
+            self._workspaceName = self.getProperty('WorkspaceName').value
+            self._tofMin = self.getProperty('TofMin').value
+            self._tofMax = self.getProperty('TofMax').value
+            self._fixConversionIssues = self.getProperty('FixConversionIssues').value
+
+        def getMaskDetectorsParameters():
+            # MaskDetectors
+            self._spectraList = self.getProperty('SpectraList').value
+            self._detectorList = self.getProperty('DetectorList').value
+            self._workspaceIndexList = self.getProperty('WorkspaceIndexList').value
+            self._maskedWorkspace = self.getProperty('MaskedWorkspace').value
+            self._forceInstrumentMasking = self.getProperty('ForceInstrumentMasking').value
+            self._startWorkspaceIndex = self.getProperty('StartWorkspaceIndex').value
+            self._endWorkspaceIndex = self.getProperty('EndWorkspaceIndex').value
+            self._componentList = self.getProperty('ComponentList').value
+
+        def getAlignDetectorsParameters():
+            # AlignDetectors
+            self._calibrationFile = self._filename
+            #self._calibrationWorkspace = self.getProperty('CalibrationWorkspace')
+            #self._offsetsWorkspace = self.getProperty('OffsetsWorkspace')
+
+        def getCylinderAbsorptionParameters():
+            # CylinderAbsorption
+            self._scatterFrom = self.getProperty('ScatterFrom').value
+            self._attenuationXSection = self.getProperty('AttenuationXSection').value
+            self._scatteringXSection = self.getProperty('ScatteringXSection').value
+            self._sampleNumberDensity = self.getProperty('SampleNumberDensity').value
+            self._numberOfWavelengthPoints = self.getProperty('NumberOfWavelengthPoints').value
+            self._expMethod = self.getProperty('ExpMethod').value
+            self._eMode = self.getProperty('EMode').value
+            self._eFixed = self.getProperty('EFixed').value
+            self._cylinderSampleHeight = self.getProperty('CylinderSampleHeight').value
+            self._cylinderSampleRadius = self.getProperty('CylinderSampleRadius').value
+            self._cylinderAxis = self.getProperty('CylinderAxis').value
+            self._numberOfSlices = self.getProperty('NumberOfSlices').value
+            self._numberOfAnnuli = self.getProperty('NumberOfAnnuli').value
+
+        def getBind2DPowderDiffractionParameters():
+            # Bin2DPowderDiffraction
+            self._dSpaceBinning = self.getProperty('dSpaceBinning').value
+            self._dPerpendicularBinning = self.getProperty('dPerpendicularBinning').value
+            self._binEdgesFile = self.getProperty('BinEdgesFile').value
+            self._normalizeByBinArea = self.getProperty('NormalizeByBinArea').value
+
+        def getStripVanadiumPeaksParameters():
+            # StripVanadiumPeaks
+            self._FWHM = self.getProperty('FWHM').value
+            self._tolerance = self.getProperty('Tolerance').value
+            self._backgroundType = self.getProperty('BackgroundType').value
+            self._highBackground = self.getProperty('HighBackground').value
+            self._peakPositionTolerance = self.getProperty('PeakPositionTolerance').value
+            self._workspaceIndex = self.getProperty('WorkspaceIndex').value
+
+        def getFFTSmoothParameters():
+            # FFTSmooth
+            self._workspaceIndexSmooth = self.getProperty('WorkspaceIndexSmooth').value
+            self._filter = self.getProperty('Filter').value
+            self._params = self.getProperty('Params').value
+            self._ignoreXBins = self.getProperty('IgnoreXBins').value
+            self._allSpectra = self.getProperty('AllSpectra').value
+
+        def getResetNegatives2DParameters():
+            # ResetNegatives2D
+            self._addMinimum = self.getProperty('AddMinimum').value
+            self._resetValue = self.getProperty('ResetValue').value
+
+        def getResetNegatives2DVanaParameters():
+            # ResetNegatives2DVana
+            self._addMinimumVana = self.getProperty('AddMinimumVana').value
+            self._resetValueVana = self.getProperty('ResetValueVana').value
+
+        getInputOutputFiles()
+        getLimits()
+        getReductionStyle()
+        getLoadParameters()
+        getFindDetectorsParParamters()
+        getFilterBadPulsesParameters()
+        getLoadDiffCalParameters()
+        getMaskDetectorsParameters()
+        getAlignDetectorsParameters()
+        getCylinderAbsorptionParameters()
+        getBind2DPowderDiffractionParameters()
+        getStripVanadiumPeaksParameters()
+        getFFTSmoothParameters()
+        getResetNegatives2DParameters()
+        getResetNegatives2DVanaParameters()
 
     def processData(self, filename, wsName):
         if filename != '':
