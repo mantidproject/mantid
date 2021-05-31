@@ -23,6 +23,11 @@ class DrillSample(QObject):
     _name = None
 
     """
+    Name used for the output workspace.
+    """
+    _outputName = None
+
+    """
     Index of the sample.
     """
     _index = None
@@ -96,6 +101,24 @@ class DrillSample(QObject):
             str: name of the sample
         """
         return self._name
+
+    def setOutputName(self, name):
+        """
+        Set the name of the output workspace.
+
+        Args:
+            name (str): name
+        """
+        self._outputName = name
+
+    def getOutputName(self):
+        """
+        Get the name of the output workspace.
+
+        Returns:
+            str: name
+        """
+        return self._outputName
 
     def addParameter(self, name):
         """
