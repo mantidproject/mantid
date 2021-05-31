@@ -686,7 +686,9 @@ void FilterEvents::splitTimeSeriesLogs(const std::vector<TimeSeriesProperty<int>
       g_log.information() << "Workspace target (indexed as " << tindex << ") does not have workspace associated.\n";
     } else {
       DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
-      ws_i->mutableRun().integrateProtonCharge();
+      if (ws_i->run().hasProperty("proton_charge")) {
+        ws_i->mutableRun().integrateProtonCharge();
+      }
     }
   }
 
