@@ -37,6 +37,11 @@ class DrillParameter(QObject):
     """
     invalid = Signal(str)
 
+    """
+    Sent when the parameter value changed.
+    """
+    valueChanged = Signal()
+
     def __init__(self, name, controller):
         super().__init__()
         self._name = name
@@ -48,6 +53,7 @@ class DrillParameter(QObject):
     def setValue(self, value):
         self._value = value
         self._controller.check(self)
+        self.valueChanged.emit()
 
     def getValue(self):
         return self._value

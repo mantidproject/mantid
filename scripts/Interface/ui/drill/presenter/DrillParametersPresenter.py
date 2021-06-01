@@ -43,6 +43,8 @@ class DrillParametersPresenter:
             name (str): new parameter name
         """
         self._parameters.append(name)
+        parameter = self._sample.getParameter(name)
+        parameter.valueChanged.connect(self.onValueChanged)
 
     def onDataChanged(self):
         """
@@ -91,4 +93,20 @@ class DrillParametersPresenter:
         brush = QBrush(QColor(self.ERROR_COLOR))
         self._item.setBackground(brush)
         self._item.setToolTip(msg)
+        self._item.signals.blockSignals(False)
+
+    def onValueChanged(self):
+        """
+        Triggered when one of the parameter values changed.
+        """
+        text = ""
+        for name in self._parameters:
+            value = self._sample.getParameter(name).getValue()
+            text += name
+            text += '='
+            text += str(value)
+            text += ';'
+        text = text[:-1]
+        self._item.signals.blockSignals(True)
+        self._item.setText(text)
         self._item.signals.blockSignals(False)
