@@ -222,12 +222,12 @@ class CalibrationModelTest(unittest.TestCase):
     def test_generate_output_file_name_for_north_bank(self):
         filename = self.model._generate_output_file_name("test/20.raw", "test/10.raw", "ENGINX",
                                                          "north")
-        self.assertEqual(filename, "ENGINX_20_10_bank_North.prm")
+        self.assertEqual(filename, "ENGINX_20_10_bank_1.prm")
 
     def test_generate_output_file_name_for_south_bank(self):
         filename = self.model._generate_output_file_name("test/20.raw", "test/10.raw", "ENGINX",
                                                          "south")
-        self.assertEqual(filename, "ENGINX_20_10_bank_South.prm")
+        self.assertEqual(filename, "ENGINX_20_10_bank_2.prm")
 
     def test_generate_output_file_name_for_both_banks(self):
         filename = self.model._generate_output_file_name("test/20.raw", "test/10.raw", "ENGINX",
@@ -237,7 +237,7 @@ class CalibrationModelTest(unittest.TestCase):
     def test_generate_output_file_name_for_cropped_bank(self):
         filename = self.model._generate_output_file_name("test/20.raw", "test/10.raw", "ENGINX",
                                                          "cropped")
-        self.assertEqual(filename, "ENGINX_20_10_cropped.prm")
+        self.assertEqual(filename, "ENGINX_20_10_Cropped.prm")
 
     def test_generate_output_file_name_for_invalid_bank(self):
         self.assertRaises(ValueError, self.model._generate_output_file_name, "test/20.raw",
@@ -246,11 +246,11 @@ class CalibrationModelTest(unittest.TestCase):
     def test_generate_output_file_name_with_no_ext_in_filename(self):
         filename = self.model._generate_output_file_name("test/20", "test/10.raw", "ENGINX",
                                                          "north")
-        self.assertEqual(filename, "ENGINX_20_10_bank_North.prm")
+        self.assertEqual(filename, "ENGINX_20_10_bank_1.prm")
 
     def test_generate_output_file_name_with_no_path_in_filename(self):
         filename = self.model._generate_output_file_name("20.raw", "test/10.raw", "ENGINX", "north")
-        self.assertEqual(filename, "ENGINX_20_10_bank_North.prm")
+        self.assertEqual(filename, "ENGINX_20_10_bank_1.prm")
 
     @patch(file_path + ".Ads")
     def test_update_calibration_params_table_retrieves_workspace(self, ads):
@@ -268,6 +268,7 @@ class CalibrationModelTest(unittest.TestCase):
 
         self.assertEqual(ads.retrieve.call_count, 0)
 
+    @patch(file_path + ".RenameWorkspace")
     @patch(file_path + ".ReplaceSpecialValues")
     @patch(file_path + ".EnggEstimateFocussedBackground")
     @patch(file_path + ".DiffractionFocussing")
@@ -280,16 +281,17 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(file_path + ".CloneWorkspace")
     @patch(file_path + ".PDCalibration")
     def test_run_calibration_no_bank_no_spec_nums(self, pdc, clone_ws, handle_vc, load, nbc, adc, conv, dw, df, eefb,
-                                                  rsv):
-        conv.side_effect = [MagicMock(), MagicMock(), "focused_North", "focused_South"]
+                                                  rsv, rw):
+        conv.side_effect = [MagicMock(), MagicMock(), "focused_bank_1", "focused_bank_2"]
         self.model.run_calibration("sample", "vanadium_ws", "vanadium_int", None, None, "full_calib_ws")
 
-        pdc.assert_any_call_partial(InputWorkspace="focused_North",
+        pdc.assert_any_call_partial(InputWorkspace="focused_bank_1",
                                     OutputCalibrationTable="engggui_calibration_bank_1")
-        pdc.assert_any_call_partial(InputWorkspace="focused_South",
+        pdc.assert_any_call_partial(InputWorkspace="focused_bank_2",
                                     OutputCalibrationTable="engggui_calibration_bank_2")
         self.assertEqual(2, pdc.call_count)
 
+    @patch(file_path + ".RenameWorkspace")
     @patch(file_path + ".ReplaceSpecialValues")
     @patch(file_path + ".EnggEstimateFocussedBackground")
     @patch(file_path + ".DiffractionFocussing")
@@ -301,7 +303,8 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(file_path + ".vanadium_corrections.handle_van_curves")
     @patch(file_path + ".CloneWorkspace")
     @patch(file_path + ".PDCalibration")
-    def test_run_calibration_bank_no_spec_nums(self, pdc, clone_ws, handle_vc, load, nbc, adc, conv, dw, df, eefb, rsv):
+    def test_run_calibration_bank_no_spec_nums(self, pdc, clone_ws, handle_vc, load, nbc, adc, conv, dw, df, eefb, rsv,
+                                               rw):
         conv.side_effect = [MagicMock(), MagicMock(), "focused_North"]
         self.model.run_calibration("sample", "vanadium_ws", "vanadium_int", '1', None, "full_calib_ws")
 
@@ -309,6 +312,7 @@ class CalibrationModelTest(unittest.TestCase):
                                     OutputCalibrationTable="engggui_calibration_bank_1")
         self.assertEqual(1, pdc.call_count)
 
+    @patch(file_path + ".RenameWorkspace")
     @patch(file_path + ".create_custom_grouping_workspace")
     @patch(file_path + ".ReplaceSpecialValues")
     @patch(file_path + ".EnggEstimateFocussedBackground")
@@ -322,13 +326,13 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(file_path + ".CloneWorkspace")
     @patch(file_path + ".PDCalibration")
     def test_run_calibration_no_bank_spec_nums(self, pdc, clone_ws, handle_vc, load, nbc, adc, conv, dw, df, eefb,
-                                               rsv, cgw):
+                                               rsv, cgw, rw):
         conv.side_effect = [MagicMock(), MagicMock(), "focused_Cropped"]
         cgw.return_value = MagicMock()
         self.model.run_calibration("sample", "vanadium_ws", "vanadium_int", None, '28-98', "full_calib_ws")
 
         pdc.assert_any_call_partial(InputWorkspace="focused_Cropped",
-                                    OutputCalibrationTable="engggui_calibration_cropped")
+                                    OutputCalibrationTable="engggui_calibration_Cropped")
         self.assertEqual(1, pdc.call_count)
 
 
