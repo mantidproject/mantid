@@ -80,8 +80,7 @@ public:
   /**
    * @brief Create an EventWorkspace with flat background in unit of DeltaE
    */
-  void createSampleWorkspace(const std::string &event_ws_name, const double &xmin = -10, const double &xmax = 19.,
-                             const double &binwidth = 0.5) {
+  void createSampleWorkspace(std::string outputWorkspace, double xmin = -10, double xmax = 19., double binwidth = 0.5) {
     // create sample workspace
     auto create_alg = AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
     create_alg->initialize();
@@ -94,75 +93,86 @@ public:
     create_alg->setProperty("XMax", xmax);
     create_alg->setProperty("BinWidth", binwidth);
     create_alg->setProperty("NumEvents", 1000);
-    create_alg->setPropertyValue("OutputWorkspace", event_ws_name);
+    create_alg->setPropertyValue("OutputWorkspace", outputWorkspace);
     create_alg->execute();
+    TS_ASSERT(create_alg->isExecuted());
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(outputWorkspace))
   }
 
   /**
    * @brief Add sample log to a workspace
    */
-  void addSampleLog(const std::string &event_ws_name, const std::string &log_name, const std::string &log_text,
-                    const std::string &log_type) {
-    auto addlog_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("AddSampleLog");
-    addlog_alg->initialize();
-    addlog_alg->setPropertyValue("Workspace", event_ws_name);
-    addlog_alg->setPropertyValue("LogName", log_name);
-    addlog_alg->setPropertyValue("LogText", log_text);
-    addlog_alg->setPropertyValue("LogType", log_type);
-    addlog_alg->execute();
+  void addSampleLog(std::string inputWorkspace, std::string log_name, std::string log_text, std::string log_type) {
+    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("AddSampleLog");
+    alg->initialize();
+    alg->setPropertyValue("Workspace", inputWorkspace);
+    alg->setPropertyValue("LogName", log_name);
+    alg->setPropertyValue("LogText", log_text);
+    alg->setPropertyValue("LogType", log_type);
+    alg->execute();
+    TS_ASSERT(alg->isExecuted());
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(inputWorkspace))
   }
 
   /**
    * @brief Move a bank in the workspace
    */
-  void moveBank(const std::string &event_ws_name, const std::string bank_name, const double &x_shift,
-                const double &z_shift) {
+  void moveBank(std::string inputWorkspace, std::string bankName, double xShift, double zShift) {
     auto alg = AlgorithmManager::Instance().createUnmanaged("MoveInstrumentComponent");
     alg->initialize();
-    alg->setPropertyValue("Workspace", event_ws_name);
-    alg->setPropertyValue("ComponentName", bank_name);
-    alg->setProperty("X", x_shift);
-    alg->setProperty("Z", z_shift);
+    alg->setPropertyValue("Workspace", inputWorkspace);
+    alg->setPropertyValue("ComponentName", bankName);
+    alg->setProperty("X", xShift);
+    alg->setProperty("Z", zShift);
     alg->setProperty("RelativePosition", false);
     alg->execute();
+    TS_ASSERT(alg->isExecuted());
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(inputWorkspace))
   }
 
   /**
    * @brief Set Goniometer axis
    */
-  void setGoniometer(const std::string &event_ws_name, const std::string &axis_name, const std::string &axis_value) {
+  void setGoniometer(std::string inputWorkspace, std::string axisName, std::string axisValue) {
     auto alg = AlgorithmManager::Instance().createUnmanaged("SetGoniometer");
     alg->initialize();
-    alg->setPropertyValue("Workspace", event_ws_name);
-    alg->setPropertyValue(axis_name, axis_value);
+    alg->setPropertyValue("Workspace", inputWorkspace);
+    alg->setPropertyValue(axisName, axisValue);
     alg->execute();
+    TS_ASSERT(alg->isExecuted());
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(inputWorkspace))
   }
 
   /**
    * @brief Convert to MD workspace
    */
-  void convertToMD(const std::string &event_ws_name, const std::string &md_ws_name, const std::string &q_dimensions) {
+  void convertToMD(std::string inputWorkspace, std::string outputWorkspace, std::string qDimensions) {
     auto alg = AlgorithmManager::Instance().createUnmanaged("ConvertToMD");
     alg->initialize();
     alg->initialize();
-    alg->setPropertyValue("InputWorkspace", event_ws_name);
-    alg->setPropertyValue("OutputWorkspace", md_ws_name);
-    alg->setPropertyValue("QDimensions", q_dimensions);
+    alg->setPropertyValue("InputWorkspace", inputWorkspace);
+    alg->setPropertyValue("OutputWorkspace", outputWorkspace);
+    alg->setPropertyValue("QDimensions", qDimensions);
     alg->execute();
+    TS_ASSERT(alg->isExecuted());
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(outputWorkspace))
   }
 
-  void scaleX(std::string event_ws_name, double factor, std::string operation, std::string outputWorkspace = "") {
+  void scaleX(std::string InputWorkspace, double factor, std::string operation, std::string outputWorkspace = "") {
+    if (outputWorkspace.size() == 0)
+      outputWorkspace = InputWorkspace;
     auto alg = AlgorithmManager::Instance().createUnmanaged("ScaleX");
     alg->initialize();
-    alg->setPropertyValue("InputWorkspace", event_ws_name);
+    alg->setPropertyValue("InputWorkspace", InputWorkspace);
     alg->setProperty("Factor", factor);
     alg->setProperty("Operation", operation);
-    if (outputWorkspace.size() > 0)
-      alg->setProperty("OutputWorkspace", outputWorkspace);
+    alg->setProperty("OutputWorkspace", outputWorkspace);
     alg->execute();
+    TS_ASSERT(alg->isExecuted());
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(outputWorkspace))
   }
 
-  void createEventWs(const std::string outputWsName, std::string Ei) {
+  void createEventWs(std::string outputWsName, std::string Ei) {
     double e = std::stod(Ei);
     createSampleWorkspace(outputWsName, -e / 2., e - 1.);
     addSampleLog(outputWsName, "deltaE-mode", "Direct", "String");
@@ -172,16 +182,18 @@ public:
     setGoniometer(outputWsName, "Axis0", "0,0,1,0,1");
   }
 
-  void applyCorrectionToMD(std::string inputWorkspace, double factor, const std::string outputWorkspace = "") {
+  void applyCorrectionToMD(std::string inputWorkspace, double factor, std::string outputWorkspace = "") {
+    if (outputWorkspace.size() == 0)
+      outputWorkspace = inputWorkspace;
     HYSPECScatteredTransmissionCorrectionMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     alg.setPropertyValue("InputWorkspace", inputWorkspace);
     alg.setProperty("ExponentFactor", factor);
-    if (outputWorkspace.size() > 0)
-      alg.setProperty("OutputWorkspace", outputWorkspace);
+    alg.setProperty("OutputWorkspace", outputWorkspace);
     alg.execute();
     TS_ASSERT(alg.isExecuted());
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(outputWorkspace))
   }
 
   void applyCorrectionToEvents(std::string inputWorkspace, double factor, std::string outputWorkspace = "") {
@@ -201,6 +213,8 @@ public:
     alg->setProperty("C0", 1.0);
     alg->setProperty("C1", -factor); // negative, because we want to apply exp(factor*Ef)
     alg->execute();
+    TS_ASSERT(alg->isExecuted());
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(outputWorkspace))
     // Change X-axis from Ef to deltaE
     scaleX(outputWorkspace, -1., "Multiply"); // the X-axis becomes -Ef
     scaleX(outputWorkspace, Ei, "Add");       // Ei - Ef converts back to DeltaE
