@@ -257,7 +257,6 @@ class DrillPresenter:
         """
         Handles the processing of selected rows.
         """
-        self.view.set_disabled(True)
         rows = self.view.getSelectedRows()
         if not rows:
             rows = self.view.getAllRows()
