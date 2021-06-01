@@ -68,11 +68,6 @@ class DrillModel(QObject):
     """
     progressUpdate = Signal(int)
 
-    """
-    Raised when groups are updated.
-    """
-    groupsUpdated = Signal()
-
     def __init__(self):
         super(DrillModel, self).__init__()
         self.instrument = None
@@ -366,6 +361,22 @@ class DrillModel(QObject):
             else:
                 self.settings[s] = v
 
+    def _getSamplesFromGroup(self, groupName):
+        """
+        Get the list of samples that belong to a group.
+
+        Args:
+            groupName (str): name of the group
+
+        Returns:
+            list(DrillSample): samples that belong to the group
+        """
+        out = []
+        for sample in self.samples:
+            if sample.getGroupName() == groupName:
+                out.append(sample)
+        return out
+
     def groupSamples(self, sampleIndexes, groupName=None):
         """
         Group samples.
@@ -374,17 +385,6 @@ class DrillModel(QObject):
             sampleIndexes (list(int)): sample indexes
             groupName (str): optional name for the new group
         """
-        for i in sampleIndexes:
-            sample = self.samples[i]
-            for group in self.groups:
-                if sample in self.groups[group]:
-                    self.groups[group].remove(sample)
-                if ((group in self.masterSamples)
-                        and (self.masterSamples[group] == sample)):
-                    del self.masterSamples[group]
-
-        self.groups = {k:v for k,v in self.groups.items() if v}
-
         def incrementName(name):
             """
             Increment the group name from A to Z, AA to AZ, ...
@@ -402,27 +402,23 @@ class DrillModel(QObject):
 
         if not groupName:
             groupName = 'A'
-            while groupName in self.groups:
+            while self._getSamplesFromGroup(groupName):
                 groupName = incrementName(groupName)
-        samples = set(self.samples[i] for i in sampleIndexes)
-        self.groups[groupName] = samples
 
-        self.groupsUpdated.emit()
-
-    def addToGroup(self, sampleIndexes, groupName):
-        """
-        Add some samples in an existing group.
-
-        Args:
-            sampleIndexes (list(int)): list of sample indexes
-            groupName (str): name of the group
-        """
-        if groupName not in self.groups:
-            return
-        self.ungroupSamples(sampleIndexes)
-        samples = set(self.samples[i] for i in sampleIndexes)
-        self.groups[groupName].update(samples)
-        self.groupsUpdated.emit()
+        i = 0
+        modifiedGroups = list()
+        for s in sampleIndexes:
+            sample = self.samples[s]
+            currentGroup = sample.getGroupName()
+            if currentGroup:
+                modifiedGroups.append(currentGroup)
+            sample.setGroup(groupName, i)
+            i += 1
+        for group in modifiedGroups:
+            i = 0
+            for s in self._getSamplesFromGroup(group):
+                s.setGroupName(group, i)
+                i += 1
 
     def ungroupSamples(self, sampleIndexes):
         """
@@ -431,17 +427,8 @@ class DrillModel(QObject):
         Args:
             sampleIndexes (list(int)): sample indexes
         """
-        for i in sampleIndexes:
-            sample = self.samples[i]
-            for group in self.groups:
-                if sample in self.groups[group]:
-                    self.groups[group].remove(sample)
-                if ((group in self.masterSamples)
-                        and (self.masterSamples[group] == sample)):
-                    del self.masterSamples[group]
-
-        self.groups = {k:v for k,v in self.groups.items() if v}
-        self.groupsUpdated.emit()
+        for s in sampleIndexes:
+            self.samples[s].setGroup(None)
 
     def setSamplesGroups(self, groups):
         """
@@ -489,12 +476,14 @@ class DrillModel(QObject):
         Args:
             sampleIndex (int): sample index
         """
-        for group in self.groups:
-            if self.samples[sampleIndex] in self.groups[group]:
-                self.masterSamples[group] = self.samples[sampleIndex]
-                self.groupsUpdated.emit()
+        sample = self.samples[sampleIndex]
+        groupName = sample.getGroupName()
+        for s in self._getSamplesFromGroup(groupName):
+            if s.isMaster():
+                s.setMaster(False)
+        self.samples[sampleIndex].setMaster(True)
 
-    def getProcessingParameters(self, sample):
+    def getProcessingParameters(self, index):
         """
         Get the keyword arguments to be provided to an algorithm. This will
         merge the global settings and the row specific settings in a single
@@ -512,17 +501,16 @@ class DrillModel(QObject):
             params.update(RundexSettings.FLAGS[self.acquisitionMode])
         params.update(self.settings)
 
+        sample = self.samples[index]
         # search for master sample
-        master = None
-        for group in self.groups:
-            if self.samples[sample] in self.groups[group]:
-                master = None
-                if group in self.masterSamples:
-                    master = self.masterSamples[group]
-                if master is not None:
-                    params.update(master.getParameters())
+        groupName = sample.getGroupName()
+        if groupName:
+            samplesFromGroup = self._getSamplesFromGroup(groupName)
+            for s in samplesFromGroup:
+                if s.isMaster():
+                    params.update(s.getParameterValues())
 
-        params.update(self.samples[sample].getParameterValues())
+        params.update(sample.getParameterValues())
         # override global params with custom ones
         if "CustomOptions" in params:
             params.update(params["CustomOptions"])
@@ -533,8 +521,8 @@ class DrillModel(QObject):
                 del params[k]
         # add the output workspace param
         if "OutputWorkspace" not in params:
-            params["OutputWorkspace"] = "sample_" + str(sample + 1)
-        self.samples[sample].setOutputName(params["OutputWorkspace"])
+            params["OutputWorkspace"] = "sample_" + str(index + 1)
+        sample.setOutputName(params["OutputWorkspace"])
         return params
 
     def process(self, elements):
