@@ -38,7 +38,7 @@ class ResultsTabModel(object):
     """Captures the data and operations
     for the results tab"""
 
-    def __init__(self, fitting_context):
+    def __init__(self, fitting_context, results_context):
         """
         Construct a model around the given FitContext object
 
@@ -46,6 +46,7 @@ class ResultsTabModel(object):
         fitting
         """
         self._fit_context = fitting_context
+        self._results_context = results_context
         self._results_table_name = DEFAULT_TABLE_NAME
         self._selected_fit_function = None
 
@@ -147,6 +148,7 @@ class ResultsTabModel(object):
                 self._add_parameters_to_table(row_dict, fit_parameters))
 
         ads.Instance().addOrReplace(self.results_table_name(), results_table)
+        self._results_context.add_result_table(self.results_table_name())
         return results_table
 
     def _add_logs_to_table(self, row_dict, fit, log_selection):

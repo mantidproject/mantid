@@ -35,13 +35,14 @@ MUON_ANALYSIS_DEFAULT_Y_RANGE = [-0.3, 0.3]
 class MuonContext(object):
     def __init__(self, muon_data_context=None, muon_gui_context=None,
                  muon_group_context=None, base_directory='Muon Data', muon_phase_context=None,
-                 workspace_suffix=' MA', fitting_context=None, model_fitting_context=None,
+                 workspace_suffix=' MA', fitting_context=None, results_context=None, model_fitting_context=None,
                  plotting_context=None, frequency_context=None):
         self._data_context = muon_data_context
         self._gui_context = muon_gui_context
         self._group_pair_context = muon_group_context
         self._phase_context = muon_phase_context
         self.fitting_context = fitting_context
+        self.results_context = results_context
         self.model_fitting_context = model_fitting_context
         self.base_directory = base_directory
         self.workspace_suffix = workspace_suffix

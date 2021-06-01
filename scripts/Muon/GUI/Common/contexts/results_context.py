@@ -4,21 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import BasicFittingContext
+from Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist
 
 
-class ModelFittingContext(BasicFittingContext):
+class ResultsContext:
 
-    def __init__(self, allow_double_pulse_fitting: bool = False):
-        super(ModelFittingContext, self).__init__(allow_double_pulse_fitting)
-
+    def __init__(self):
         self._result_table_names: list = []
-
-        self._x_parameters: list = []
-        self._x_selected_index: int = None
-
-        self._y_parameters: list = []
-        self._y_selected_index: int = None
 
     @property
     def result_table_names(self) -> list:
@@ -30,7 +22,7 @@ class ModelFittingContext(BasicFittingContext):
         """Sets the names of the results tables loaded into the model fitting tab."""
         self._result_table_names = table_names
 
-    @property
-    def number_of_result_tables(self):
-        """Returns the number of result tables which are held by the context."""
-        return len(self._result_table_names)
+    def add_result_table(self, table_name: str) -> None:
+        """Add a results table to the stored list of results tables."""
+        if check_if_workspace_exist(table_name):
+            self._result_table_names.append(table_name)

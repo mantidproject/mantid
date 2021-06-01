@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy.QtCore import QMetaObject, QObject, Slot
 
-from mantidqt.utils.observer_pattern import GenericObserver
+from mantidqt.utils.observer_pattern import GenericObservable, GenericObserver
 
 
 # Ordinarily this does not need to be a QObject but it is required to use some QMetaObject.invokeMethod
@@ -18,6 +18,7 @@ class ResultsTabPresenter(QObject):
         super(ResultsTabPresenter, self).__init__()
         self.view = view
         self.model = model
+
         self.new_fit_performed_observer = GenericObserver(
             self.on_new_fit_performed)
 
@@ -29,6 +30,8 @@ class ResultsTabPresenter(QObject):
                                                     setEnabled(False))
         self.enable_tab_observer = GenericObserver(lambda: self.view.
                                                    setEnabled(True))
+
+        self.results_table_created_notifier = GenericObservable()
 
     # callbacks
     def on_results_table_name_edited(self):
@@ -53,8 +56,13 @@ class ResultsTabPresenter(QObject):
         log_selection = self.view.selected_log_values()
         try:
             self.model.create_results_table(log_selection, results_selection)
+            QMetaObject.invokeMethod(self, "_notify_results_table_created")
         except Exception as exc:
             self.view.show_warning(str(exc))
+
+    @Slot()
+    def _notify_results_table_created(self):
+        self.results_table_created_notifier.notify_subscribers()
 
     def on_function_selection_changed(self):
         """React to the change in function selection"""

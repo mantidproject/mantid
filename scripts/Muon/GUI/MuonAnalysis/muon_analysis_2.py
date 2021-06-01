@@ -15,6 +15,7 @@ from Muon.GUI.Common.contexts.data_analysis_context import DataAnalysisContext
 from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
+from Muon.GUI.Common.contexts.results_context import ResultsContext
 from Muon.GUI.Common.contexts.fitting_contexts.model_fitting_context import ModelFittingContext
 from Muon.GUI.Common.contexts.fitting_contexts.tf_asymmetry_fitting_context import TFAsymmetryFittingContext
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
@@ -83,12 +84,14 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.data_context.check_group_contains_valid_detectors)
         self.phase_context = PhaseTableContext()
         self.fitting_context = TFAsymmetryFittingContext(allow_double_pulse_fitting=True)
+        self.results_context = ResultsContext()
         self.model_fitting_context = ModelFittingContext(allow_double_pulse_fitting=False)
         self.plotting_context = PlottingContext()
         self.context = DataAnalysisContext(muon_data_context=self.data_context,
                                            muon_gui_context=self.gui_context,
                                            muon_group_context=self.group_pair_context,
                                            fitting_context=self.fitting_context,
+                                           results_context=self.results_context,
                                            model_fitting_context=self.model_fitting_context,
                                            muon_phase_context=self.phase_context,
                                            plotting_context=self.plotting_context)
@@ -121,7 +124,6 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.phase_tab = PhaseTabWidget(self.context, self)
         self.seq_fitting_tab = SeqFittingTabWidget(self.context, self.fitting_tab.fitting_tab_model, self)
         self.results_tab = ResultsTabWidget(self.context.fitting_context, self.context, self)
-        self.model_fitting_tab = ModelFittingTabWidget(self.context, self)
 
         self.setup_tabs()
         self.help_widget = HelpWidget("Muon Analysis 2")
@@ -174,14 +176,18 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         """
         self.tabs = DetachableTabWidget(self)
         self.tabs.addTabWithOrder(self.home_tab.home_tab_view, 'Home')
-        self.tabs.addTabWithOrder(self.grouping_tab_widget.group_tab_view,
-                                  'Grouping')
-        self.tabs.addTabWithOrder(self.phase_tab.phase_table_view,
-                                  'Phase Table')
+        self.tabs.addTabWithOrder(self.grouping_tab_widget.group_tab_view, 'Grouping')
+        self.tabs.addTabWithOrder(self.phase_tab.phase_table_view, 'Phase Table')
         self.tabs.addTabWithOrder(self.fitting_tab.fitting_tab_view, 'Fitting')
         self.tabs.addTabWithOrder(self.seq_fitting_tab.seq_fitting_tab_view, 'Sequential Fitting')
         self.tabs.addTabWithOrder(self.results_tab.results_tab_view, 'Results')
-        self.tabs.addTabWithOrder(self.model_fitting_tab.model_fitting_tab_view, 'Model Fitting')
+        show_model_fitting = True
+        if show_model_fitting:
+            self.model_fitting_tab = ModelFittingTabWidget(self.context, self)
+            self.tabs.addTabWithOrder(self.model_fitting_tab.model_fitting_tab_view, 'Model Fitting')
+            self.results_tab.results_tab_presenter.results_table_created_notifier.add_subscriber(
+                self.model_fitting_tab.model_fitting_tab_presenter.input_workspace_observer)
+
         self.update_plot_observer = GenericObserver(self.plot_widget.presenter.update_plot)
         self.tabs.set_slot_for_tab_changed(self.handle_tab_changed)
 

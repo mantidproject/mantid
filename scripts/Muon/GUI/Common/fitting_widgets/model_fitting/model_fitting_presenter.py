@@ -21,3 +21,29 @@ class ModelFittingPresenter(BasicFittingPresenter):
     def initialize_model_options(self) -> None:
         """Returns the fitting options to be used when initializing the model."""
         super().initialize_model_options()
+
+    def handle_ads_clear_or_remove_workspace_event(self, _: str = None) -> None:
+        """Handle when there is a clear or remove workspace event in the ADS."""
+        self.update_and_reset_all_data()
+
+        if self.model.number_of_result_tables == 0:
+            self.view.disable_view()
+        else:
+            self.view.enable_view()
+
+    def handle_new_data_loaded(self) -> None:
+        """Handle when new results tables are created."""
+        self.update_and_reset_all_data()
+
+        self.view.plot_guess, self.model.plot_guess = False, False
+        self.clear_cached_fit_functions()
+
+        if self.model.number_of_result_tables == 0:
+            self.view.disable_view()
+        else:
+            self.view.enable_view()
+
+    def update_dataset_names_in_view_and_model(self) -> None:
+        """Updates the results tables currently displayed."""
+        self.model.result_table_names = self.model.get_workspace_names_to_display_from_context()
+        self.view.update_result_table_names(self.model.result_table_names)

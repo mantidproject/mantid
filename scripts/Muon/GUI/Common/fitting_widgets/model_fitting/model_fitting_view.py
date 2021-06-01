@@ -24,3 +24,7 @@ class ModelFittingView(BasicFittingView):
 
         # Hide the workspace selector which is used to store the generated matrix workspaces
         self.workspace_selector.hide()
+
+    def update_result_table_names(self, table_names: list) -> None:
+        """Update the data in the parameter display combo box."""
+        self.model_fitting_data_selector.update_result_table_names(table_names)

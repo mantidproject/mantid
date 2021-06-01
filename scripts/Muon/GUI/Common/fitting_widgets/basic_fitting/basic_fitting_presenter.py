@@ -325,7 +325,7 @@ class BasicFittingPresenter:
         self.update_dataset_names_in_view_and_model()
 
     def update_dataset_names_in_view_and_model(self) -> None:
-        """Updates the datasets currently displayed. The simultaneous fit by specifier must be updated before this."""
+        """Updates the datasets currently displayed."""
         self.model.dataset_names = self.model.get_workspace_names_to_display_from_context()
         self.view.set_datasets_in_function_browser(self.model.dataset_names)
         self.view.update_dataset_name_combo_box(self.model.dataset_names)

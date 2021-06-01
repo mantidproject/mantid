@@ -26,3 +26,7 @@ class ModelFittingDataSelectorView(ui_form, base_widget):
         self.result_table_selector = WorkspaceSelectorView(self)
         self.result_table_selector.set_workspace_combo_box_label("Results table")
         self.result_table_selector_layout.addWidget(self.result_table_selector)
+
+    def update_result_table_names(self, table_names: list) -> None:
+        """Update the data in the parameter display combo box."""
+        self.result_table_selector.update_dataset_name_combo_box(table_names)
