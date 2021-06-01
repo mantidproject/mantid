@@ -182,7 +182,7 @@ Tiled plots are essentially an array of axes (1D plots) on the same figure. As s
 Scripting
 ---------
 
-Click the generate a script button |GenerateAScript.png| on a Tiled Plot:
+An example script for a Tiled Plot:
 
 .. code-block:: python
 
