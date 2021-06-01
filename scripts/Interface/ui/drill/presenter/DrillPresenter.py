@@ -72,18 +72,29 @@ class DrillPresenter:
                 lambda progress: self.view.set_progress(progress, 100)
                 )
         self.model.processingDone.connect(self.onProcessingDone)
+        self.model.newSample.connect(self.onNewSample)
 
         self._syncViewHeader()
         self._syncViewTable()
 
     def onRowAdded(self, position):
         """
-        Triggered when a row is added to the table.
+        Triggered when a row is added to the table. This method add a sample to
+        the model.
 
         Args:
-            position (int): new row position
+            position (int): index of the new row
         """
-        sample = self.model.addSample(position)
+        self.model.addSample(position)
+
+    def onNewSample(self, sample):
+        """
+        Triggered when the model get a new sample.
+
+        Args:
+            sample (DrillSample): the new sample
+        """
+        self.view.table.addRow(sample.getIndex())
         DrillSamplePresenter(self.view.table, sample)
 
     def onDataChanged(self, row, column):
@@ -476,9 +487,7 @@ class DrillPresenter:
         self.view.blockSignals(True)
         self.view.set_table(columns, tooltips)
         if not samples:
-            self.view.add_row_after(1)
-            sample = self.model.addSample(-1)
-            DrillSamplePresenter(self.view.table, sample)
+            self.model.addSample(0)
         else:
             for i in range(len(samples)):
                 self.view.add_row_after(1)

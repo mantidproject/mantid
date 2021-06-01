@@ -68,6 +68,13 @@ class DrillModel(QObject):
     """
     progressUpdate = Signal(int)
 
+    """
+    Sent when the model get a new sample.
+    Args:
+        DrillSample: the new sample
+    """
+    newSample = Signal(DrillSample)
+
     def __init__(self):
         super(DrillModel, self).__init__()
         self.instrument = None
@@ -641,6 +648,7 @@ class DrillModel(QObject):
                 self.samples[i].setIndex(i)
                 i += 1
         sample.setController(self.controller)
+        self.newSample.emit(sample)
         return sample
 
     def deleteSample(self, ref):

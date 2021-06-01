@@ -170,7 +170,7 @@ class DrillView(QMainWindow):
         self.actionManageDirectories.triggered.connect(self.show_directory_manager)
         self.actionSettings.triggered.connect(self.showSettings.emit)
         self.actionClose.triggered.connect(self.close)
-        self.actionAddRow.triggered.connect(self.add_row_after)
+        self.actionAddRow.triggered.connect(self.addRowAfter)
         self.actionDelRow.triggered.connect(self.del_selected_rows)
         self.actionCopyRow.triggered.connect(self.copySelectedCells)
         self.actionCutRow.triggered.connect(self.cutSelectedCells)
@@ -222,7 +222,7 @@ class DrillView(QMainWindow):
         self.deleterow.clicked.connect(self.del_selected_rows)
 
         self.addrow.setIcon(icons.get_icon("mdi.table-row-plus-after"))
-        self.addrow.clicked.connect(self.add_row_after)
+        self.addrow.clicked.connect(self.addRowsAfter)
 
         self.save.setIcon(icons.get_icon("mdi.file-export"))
         self.save.clicked.connect(self.saveRundex.emit)
@@ -361,25 +361,28 @@ class DrillView(QMainWindow):
         for (r, c) in indexes:
             self.table.eraseCell(r, c)
 
-    def add_row_after(self, n=0):
+    def addRowAfter(self):
         """
-        Add row(s) after the selected ones. If no row selected, the row(s)
-        is(are) added at the end of the table. The number of row to add is
-        taken from the ui spinbox.
-
-        Args:
-            n(int): number of rows. If 0, it will be taken from the spinbox
+        Add a single row after the current position (or the end of the table if
+        nothing is selected).
         """
         position = self.table.getLastSelectedRow()
         if position == -1:
             position = self.table.getLastRow()
-        if not n:
-            n = self.nrows.value()
+        self._presenter.onRowAdded(position + 1)
+
+    def addRowsAfter(self):
+        """
+        Add several rows after the current position (or the end of the table if
+        nothing is selected). The number of rows to add is given by the spinbox.
+        """
+        position = self.table.getLastSelectedRow()
+        if position == -1:
+            position = self.table.getLastRow()
+        n = self.nrows.value()
         for i in range(n):
-            self.table.addRow(position + 1)
-            self.rowAdded.emit(position + 1)
+            self._presenter.onRowAdded(position + 1)
             position += 1
-            self.setWindowModified(True)
 
     def del_selected_rows(self):
         """
