@@ -59,7 +59,7 @@ std::map<std::string, std::string> HYSPECScatteredTransmissionCorrectionMD::vali
     output["InputWorkspace"] = workspace_error;
   // ExponentFactor should be positive
   double c = getProperty("ExponentFactor");
-  if (c < 0.0)
+  if (c <= 0.0)
     output["ExponentFactor"] = "ExponentFactor should be positive";
   return output;
 }
