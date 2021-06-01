@@ -283,48 +283,51 @@ class PlotsSaver(object):
         yaxis_major_kw = ax.yaxis._major_tick_kw
         yaxis_minor_kw = ax.yaxis._minor_tick_kw
 
-        return {
+        tick_dict = {
             "xaxis": {
                 "major": {
                     "bottom": xaxis_major_kw['tick1On'],
                     "top": xaxis_major_kw['tick2On'],
                     "labelbottom": xaxis_major_kw['label1On'],
-                    "labeltop": xaxis_major_kw['label2On'],
-                    "direction": xaxis_major_kw['tickdir'],
-                    "width": xaxis_major_kw['width'],
-                    "size": xaxis_major_kw['size']
+                    "labeltop": xaxis_major_kw['label2On']
                 },
                 "minor": {
                     "bottom": xaxis_minor_kw['tick1On'],
                     "top": xaxis_minor_kw['tick2On'],
                     "labelbottom": xaxis_minor_kw['label1On'],
-                    "labeltop": xaxis_minor_kw['label2On'],
-                    "direction": xaxis_minor_kw['tickdir'],
-                    "width": xaxis_minor_kw['width'],
-                    "size": xaxis_minor_kw['size']
-                },
+                    "labeltop": xaxis_minor_kw['label2On']
+                }
             },
             "yaxis": {
                 "major": {
                     "left": yaxis_major_kw['tick1On'],
                     "right": yaxis_major_kw['tick2On'],
                     "labelleft": yaxis_major_kw['label1On'],
-                    "labelright": yaxis_major_kw['label2On'],
-                    "direction": yaxis_major_kw['tickdir'],
-                    "width": yaxis_major_kw['width'],
-                    "size": yaxis_major_kw['size']
+                    "labelright": yaxis_major_kw['label2On']
                 },
                 "minor": {
                     "left": yaxis_minor_kw['tick1On'],
                     "right": yaxis_minor_kw['tick2On'],
                     "labelleft": yaxis_minor_kw['label1On'],
-                    "labelright": yaxis_minor_kw['label2On'],
-                    "direction": yaxis_minor_kw['tickdir'],
-                    "width": yaxis_minor_kw['width'],
-                    "size": yaxis_minor_kw['size']
-                },
+                    "labelright": yaxis_minor_kw['label2On']
+                }
             }
         }
+        # Set none guaranteed variables in tick_dict
+        for axis in tick_dict:
+            for size in tick_dict[axis]:
+                # Setup keyword dict for given axis and size (major/minor)
+                keyword_dict_variable_name = f"{axis}_{size}_kw"
+                keyword_dict = locals()[keyword_dict_variable_name]
+
+                if "tickdir" in keyword_dict:
+                    tick_dict[axis][size]["direction"] = keyword_dict["tickdir"]
+                if "size" in keyword_dict:
+                    tick_dict[axis][size]["size"] = keyword_dict["size"]
+                if "width" in keyword_dict:
+                    tick_dict[axis][size]["width"] = keyword_dict["width"]
+
+        return tick_dict
 
     @staticmethod
     def get_dict_from_spine_widths(ax):
