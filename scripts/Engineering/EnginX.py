@@ -248,7 +248,7 @@ def create_calibration_files(ceria_run, van_run, full_inst_calib, int_van, van_c
     @param spec_nos :: the value to crop on, either a spectra number, or a bank
     """
     van_integrated_ws = load_van_integration_file(int_van)
-    ceria_ws = simple.Load(Filename="ENGINX" + ceria_run, OutputWorkspace="eng_calib")
+    ceria_ws = simple.Load(Filename="ENGINX" + ceria_run, OutputWorkspace="engg_calib")
     van_file = _gen_filename(van_run)
     van_ws = simple.Load(Filename=van_file)
     bank_names = ["North", "South"]
@@ -292,16 +292,16 @@ def create_calibration_files(ceria_run, van_run, full_inst_calib, int_van, van_c
         # create the table workspace containing the parameters
         param_tbl_name = crop_name if crop_name is not None else "Cropped"
         create_params_table(difc, tzero, difa)
-        Utils.generate_tof_fit_workspace(spec_nos, param_tbl_name, "engg_tof_peaks_bank_")
+        Utils.generate_tof_fit_workspace(spec_nos, param_tbl_name, "engg_tof_peaks_")
     else:
         difas = [row['difa'] for row in output]
         difcs = [row['difc'] for row in output]
         tzeros = [row['tzero'] for row in output]
         for i in range(1, 3):
             save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
-                             "bank_{}".format(bank_names[i - 1]), [bank_names[i - 1]],
+                             f"bank_{i}", [bank_names[i - 1]],
                              [tzeros[i - 1]], [difcs[i - 1]], [difas[i - 1]])
-            Utils.generate_tof_fit_workspace(bank_names[i-1], "", "engg_tof_peaks_bank_")
+            Utils.generate_tof_fit_workspace(f"bank_{i}", "", "engg_tof_peaks_")
         save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", bank_names,
                          tzeros, difcs, difas)
         # create the table workspace containing the parameters
@@ -352,6 +352,19 @@ def run_calibration(sample_ws,
         simple.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='dSpacing')
         return ws
 
+    def calibrate_region_of_interest(roi, df_kwarg):
+        focused_roi, curves_roi = focus_and_make_van_curves(ws_d, ws_van_d, df_kwarg)
+        simple.RenameWorkspace(curves_roi, ("curves_" + roi))
+        curves_output.append(curves_roi)
+
+        # final calibration of focused data
+        kwargs["InputWorkspace"] = focused_roi
+        kwargs["OutputCalibrationTable"] = "engg_calibration_" + roi
+        kwargs["DiagnosticWorkspaces"] = "diag_" + roi
+
+        cal_roi = run_pd_calibration(kwargs)[0]
+        cal_output[roi] = cal_roi
+
     # need to clone the data as PDCalibration rebins
     sample_raw = simple.CloneWorkspace(InputWorkspace=sample_ws)
 
@@ -380,81 +393,29 @@ def run_calibration(sample_ws,
     if spectrum_numbers is None:
         if bank == '1' or bank is None:
             df_kwarg = {"GroupingFileName": NORTH_BANK_CAL}
-            ws_d_clone = simple.CloneWorkspace(ws_d)
-            ws_van_d_clone = simple.CloneWorkspace(ws_van_d)
-            focused_North, curves_North = focus_and_make_van_curves(ws_d_clone, ws_van_d_clone, df_kwarg)
-
-            # final calibration of focused data
-            kwargs["InputWorkspace"] = focused_North
-            kwargs["OutputCalibrationTable"] = 'engg_calibration_bank_1'
-            kwargs["DiagnosticWorkspaces"] = 'diag_North'
-
-            cal_north = run_pd_calibration(kwargs)[0]
-            cal_output['north'] = cal_north
-            curves_north = simple.CloneWorkspace(curves_North)
-            curves_output.append(curves_north)
-
-            simple.DeleteWorkspace(ws_d_clone)
-            simple.DeleteWorkspace(ws_van_d_clone)
-            simple.DeleteWorkspace(curves_North)
+            calibrate_region_of_interest("bank_1", df_kwarg)
 
         if bank == '2' or bank is None:
             df_kwarg = {"GroupingFileName": SOUTH_BANK_CAL}
-            ws_d_clone = simple.CloneWorkspace(ws_d)
-            ws_van_d_clone = simple.CloneWorkspace(ws_van_d)
-            focused_South, curves_South = focus_and_make_van_curves(ws_d_clone, ws_van_d_clone, df_kwarg)
-
-            # final calibration of focused data
-            kwargs["InputWorkspace"] = focused_South
-            kwargs["OutputCalibrationTable"] = 'engg_calibration_bank_2'
-            kwargs["DiagnosticWorkspaces"] = 'diag_South'
-
-            cal_south = run_pd_calibration(kwargs)[0]
-            cal_output['south'] = cal_south
-            curves_south = simple.CloneWorkspace(curves_South)
-            curves_output.append(curves_south)
-
-            simple.DeleteWorkspace(ws_d_clone)
-            simple.DeleteWorkspace(ws_van_d_clone)
-            simple.DeleteWorkspace(curves_South)
-
+            calibrate_region_of_interest("bank_2", df_kwarg)
     else:
         grp_ws = Utils.create_custom_grouping_workspace(spectrum_numbers, sample_raw)
         df_kwarg = {"GroupingWorkspace": grp_ws}
-        ws_d_clone = simple.CloneWorkspace(ws_d)
-        ws_van_d_clone = simple.CloneWorkspace(ws_van_d)
-        focused_Cropped, curves_Cropped = focus_and_make_van_curves(ws_d_clone, ws_van_d_clone, df_kwarg)
-
-        # final calibration of focused data
-        kwargs["InputWorkspace"] = focused_Cropped
-        kwargs["OutputCalibrationTable"] = 'engg_calibration_cropped'
-        kwargs["DiagnosticWorkspaces"] = 'diag_Cropped'
-
-        cal_cropped = run_pd_calibration(kwargs)[0]
-        cal_output['cropped'] = cal_cropped
-
-        curves_cropped = simple.CloneWorkspace(curves_Cropped)
-        curves_output.append(curves_cropped)
-
-        simple.DeleteWorkspace(ws_d_clone)
-        simple.DeleteWorkspace(ws_van_d_clone)
-        simple.DeleteWorkspace(curves_Cropped)
+        calibrate_region_of_interest("Cropped", df_kwarg)
 
     simple.DeleteWorkspace(sample_raw)
     simple.DeleteWorkspace(ws_van)
-    simple.DeleteWorkspace(ws_van_d)
-    simple.DeleteWorkspace(ws_d)
     simple.DeleteWorkspace("tof_focused")
 
     cal_params = list()
     # in the output calfile, rows are present for all detids, only read one from the region of interest
-    north_read_row = 0
-    south_read_row = 1200
+    bank_1_read_row = 0
+    bank_2_read_row = 1200
     for bank_cal in cal_output:
-        if bank_cal == 'north':
-            read = north_read_row
-        elif bank_cal == 'south':
-            read = south_read_row
+        if bank_cal == "bank_1":
+            read = bank_1_read_row
+        elif bank_cal == "bank_2":
+            read = bank_2_read_row
         else:
             read = int(Utils.create_spectrum_list_from_string(spectrum_numbers)[0])  # this can be int64
         row = cal_output[bank_cal].row(read)
@@ -501,7 +462,6 @@ def save_calibration(ceria_run, van_run, calibration_directory, calibration_gene
     @param zeros :: the list of tzero values to save
 
     """
-
     file_save_prefix = os.path.join(calibration_directory, "ENGINX_" + van_run + "_" + ceria_run + "_")
     gsas_iparm_fname = file_save_prefix + name + ".prm"
     pdcals_to_save = dict()  # fname: workspace
@@ -510,10 +470,10 @@ def save_calibration(ceria_run, van_run, calibration_directory, calibration_gene
         template_file = None
         pdcals_to_save[file_save_prefix + "bank_North.nxs"] = 'engg_calibration_bank_1'
         pdcals_to_save[file_save_prefix + "bank_South.nxs"] = 'engg_calibration_bank_2'
-    elif name == "bank_South":
+    elif name == "bank_2":
         template_file = "template_ENGINX_241391_236516_South_bank.prm"
         pdcals_to_save[file_save_prefix + "bank_South.nxs"] = 'engg_calibration_bank_2'
-    elif name == "bank_North":
+    elif name == "bank_1":
         template_file = "template_ENGINX_241391_236516_North_bank.prm"
         pdcals_to_save[file_save_prefix + "bank_North.nxs"] = 'engg_calibration_bank_1'
     else:  # cropped uses North bank template
