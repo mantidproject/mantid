@@ -89,8 +89,8 @@ void CrossCorrelate::init() {
   declareProperty("WorkspaceIndexMax", 0, mustBePositive,
                   " The workspace index of the last member of the range of "
                   "spectra to cross-correlate against.");
-  declareProperty("MaxDSpaceShift", 0, mustBePositive,
-                  "Optional variable for maximum shift to calculate (in d-spacing)");
+  // max is .1
+  declareProperty("MaxDSpaceShift", EMPTY_DBL(), "Optional float for maximum shift to calculate (in d-spacing)");
   // Only the data in the range X_min, X_max will be used
   declareProperty("XMin", 0.0, "The starting point of the region to be cross correlated.");
   declareProperty("XMax", 0.0, "The ending point of the region to be cross correlated.");
@@ -102,7 +102,7 @@ void CrossCorrelate::init() {
  */
 void CrossCorrelate::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  int maxDSpaceShift = getProperty("MaxDSpaceShift");
+  double maxDSpaceShift = getProperty("MaxDSpaceShift");
 
   int reference = getProperty("ReferenceSpectra");
   const auto index_ref = static_cast<size_t>(reference);
@@ -125,7 +125,6 @@ void CrossCorrelate::exec() {
 
   MantidVec::difference_type difminIt = std::distance(referenceX.cbegin(), minIt);
   MantidVec::difference_type difmaxIt = std::distance(referenceX.cbegin(), maxIt);
-
   // Now loop on the spectra in the range spectra_min and spectra_max and get
   // valid spectra
 
@@ -216,8 +215,12 @@ void CrossCorrelate::exec() {
 
     // max the shift
     int shiftCorrection = 0;
-    if (maxDSpaceShift > 0)
-      shiftCorrection = abs(abs((-nY + 2) - (nY - 2)) - maxDSpaceShift) / 2;
+    if (maxDSpaceShift != EMPTY_DBL()) {
+      // convert dspacing to bins, where maxDSpaceShift is at least 0.1
+      const auto maxBins = std::max(0.0 + maxDSpaceShift, 0.1) / (maxIt - minIt);
+      // calc range based on max bins
+      shiftCorrection = abs(abs((-nY + 2) - (nY - 2)) - maxBins) / 2;
+    }
 
     for (int k = -nY + 2 + shiftCorrection; k <= nY - 2 - shiftCorrection; ++k) {
       const int kp = abs(k);
