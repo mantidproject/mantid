@@ -9,6 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidCurveFitting/EstimatePeakParameters.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 
 namespace Mantid {
