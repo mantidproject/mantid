@@ -35,6 +35,15 @@ class DrillParametersPresenter:
         self._parameters = list()
         self._item.signals.dataChanged.connect(self.onDataChanged)
 
+    def addParameter(self, name):
+        """
+        Add a parameter name to the list.
+
+        Args:
+            name (str): new parameter name
+        """
+        self._parameters.append(name)
+
     def onDataChanged(self):
         """
         Triggered when the data changed in the view. This function propagates
@@ -69,7 +78,6 @@ class DrillParametersPresenter:
                 continue
             parameter = self._sample.addParameter(name)
             parameter.invalid.connect(self.onInvalid)
-            self._parameters.append(name)
             parameter.setValue(value)
 
     def onInvalid(self, msg):
