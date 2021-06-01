@@ -402,7 +402,7 @@ class SANSILLReduction(PythonAlgorithm):
                 else:
                     raise RuntimeError('Unable to find the attenuation coefficient for D33 attenuator #'+str(int(att_value)))
             else:
-                att_coeff = att_value
+                att_coeff = float(att_value)
             self.log().information('Found attenuator coefficient/value: {0}'.format(att_coeff))
         if run.hasProperty('attenuator2.attenuation_value'):
             # D22 can have the second, chopper attenuator
@@ -411,7 +411,7 @@ class SANSILLReduction(PythonAlgorithm):
             # If one is out, its attenuation_value is set to 1, so it's safe to take the product
             att2_value = run.getLogData('attenuator2.attenuation_value').value
             self.log().information('Found attenuator 2 value: {0}'.format(att2_value))
-            att_coeff *= att2_value
+            att_coeff *= float(att2_value)
         self.log().information('Attenuation coefficient used is: {0}'.format(att_coeff))
         flux_out = self.getPropertyValue('FluxOutputWorkspace')
         if flux_out:
