@@ -33,6 +33,21 @@ class DrillSample(QObject):
     _index = None
 
     """
+    Name of the group, if the sample is in a group.
+    """
+    _group = None
+
+    """
+    Index of the sample in its group.
+    """
+    _groupIndex = None
+
+    """
+    True if the sample is the master sample of its group.
+    """
+    _master = None
+
+    """
     Controller for the parameters.
     """
     _controller = None
@@ -49,6 +64,11 @@ class DrillSample(QObject):
     """
     processDone = Signal(int)
 
+    """
+    Sent if the group changed.
+    """
+    groupChanged = Signal()
+
     def __init__(self, index):
         """
         Create an empty sample.
@@ -56,6 +76,8 @@ class DrillSample(QObject):
         super().__init__()
         self._parameters = dict()
         self._index = index
+        self._group = None
+        self._master = False
 
     def setController(self, controller):
         """
@@ -119,6 +141,65 @@ class DrillSample(QObject):
             str: name
         """
         return self._outputName
+
+    def setGroup(self, group, index=None):
+        """
+        Set the group and index of the sample.
+
+        Args:
+            group (str): name of the group. None if the sample is not in a
+                         group.
+            index (int): index of the sample in its group
+        """
+        if not group:
+            self._group = None
+            self._groupIndex = None
+            self._master = False
+        else:
+            self._group = group
+            self._groupIndex = index
+        self.groupChanged.emit()
+
+    def getGroupName(self):
+        """
+        Get the name of the group.
+
+        Returns:
+            str: name of the group. None if the sample is not in a group
+        """
+        return self._group
+
+    def getGroupIndex(self):
+        """
+        Get the index of the sample in its group.
+
+        Returns:
+            int: index of the sample. None if the sample is not in a group
+        """
+        return self._groupIndex
+
+    def setMaster(self, state):
+        """
+        Set the master status.
+
+        Args:
+            state (bool): if True, the sample become the master sample of its
+                          group
+        """
+        if self._group is None:
+            self._master = False
+            return
+        self._master = state
+        self.groupChanged.emit()
+
+    def isMaster(self):
+        """
+        Return the "group master" status.
+
+        Returns:
+            bool: True if the sample is the master sample of its group.
+        """
+        return self._master
 
     def addParameter(self, name):
         """

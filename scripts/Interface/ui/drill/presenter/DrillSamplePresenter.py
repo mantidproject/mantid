@@ -31,6 +31,7 @@ class DrillSamplePresenter:
     def __init__(self, table, sample):
         self._table = table
         self._sample = sample
+        self._sample.groupChanged.connect(self.onGroupChanged)
         self._sample.processStarted.connect(self.onProcessStarted)
         self._sample.processDone.connect(self.onProcessDone)
         self._table.addSamplePresenter(self, self._sample.getIndex())
@@ -49,6 +50,20 @@ class DrillSamplePresenter:
         else:
             parameter = self._sample.addParameter(name)
             presenter = DrillParameterPresenter(item, parameter)
+
+    def onGroupChanged(self):
+        """
+        Triggered when the group of the sample changed.
+        """
+        groupName = self._sample.getGroupName()
+        index = self._sample.getIndex()
+        if groupName is None:
+            self._table.delRowLabel(index)
+        else:
+            isMaster = self._sample.isMaster()
+            groupIndex = self._sample.getGroupIndex()
+            self._table.setRowLabel(index, groupName + str(groupIndex),
+                                    bold=isMaster)
 
     def onProcessStarted(self):
         """

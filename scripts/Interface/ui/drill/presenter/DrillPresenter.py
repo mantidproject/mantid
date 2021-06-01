@@ -72,7 +72,6 @@ class DrillPresenter:
                 lambda progress: self.view.set_progress(progress, 100)
                 )
         self.model.processingDone.connect(self.onProcessingDone)
-        self.model.groupsUpdated.connect(self.onGroupsUpdated)
 
         self._syncViewHeader()
         self._syncViewTable()
