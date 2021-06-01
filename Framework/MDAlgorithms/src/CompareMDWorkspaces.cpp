@@ -57,7 +57,7 @@ public:
   std::string str() const {
     std::stringstream ss;
     size_t numdirs = mCoordinates.size();
-    for (auto i = 0; i < numdirs; ++i)
+    for (size_t i = 0; i < numdirs; ++i)
       ss << mCoordinates[i] << ", ";
     ss << "signal = " << mSignal << ", error = " << mError;
 
@@ -81,14 +81,14 @@ public:
    * 3. error
    * @return
    */
-  bool operator<(const SimpleMDEvent &event2) {
+  bool operator<(const SimpleMDEvent &event2) const {
 
     bool less(true);
     bool equal(false);
 
     // compare coordinates
     size_t numdirs = mCoordinates.size();
-    for (auto i = 0; i < numdirs; ++i) {
+    for (size_t i = 0; i < numdirs; ++i) {
       if (mCoordinates[i] < event2.mCoordinates[i])
         less = true;
       else if (mCoordinates[i] > event2.mCoordinates[i])
@@ -120,6 +120,8 @@ public:
 
     return less;
   }
+
+  bool operator()(const SimpleMDEvent &lx, const SimpleMDEvent &rx) const { return lx < rx; }
 
   bool operator>(const SimpleMDEvent &event2) {
 
@@ -165,7 +167,7 @@ public:
     return true;
   }
 
-  void &operator=(const SimpleMDEvent &event2) {
+  void operator=(const SimpleMDEvent &event2) {
 
     //        std::cout << " Assigning = is called.... \n";
 
