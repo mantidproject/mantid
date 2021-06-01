@@ -32,6 +32,7 @@ class DrillSamplePresenter:
         self._table = table
         self._sample = sample
         self._sample.groupChanged.connect(self.onGroupChanged)
+        self._sample.newParameter.connect(self.onNewParameter)
         self._sample.processStarted.connect(self.onProcessStarted)
         self._sample.processDone.connect(self.onProcessDone)
         self._table.addSamplePresenter(self, self._sample.getIndex())
@@ -49,7 +50,26 @@ class DrillSamplePresenter:
             presenter = DrillParametersPresenter(item, self._sample)
         else:
             parameter = self._sample.addParameter(name)
-            presenter = DrillParameterPresenter(item, parameter)
+            parameter.setValue(item.text())
+
+    def onNewParameter(self, parameter):
+        """
+        Triggered when the sample receives a new parameter.
+
+        Args:
+            parameter (Drillparameter): the new parameter
+        """
+        item = self._table.itemFromName(self._sample.getIndex(),
+                                        parameter.getName())
+        if item is None:
+            item = self._table.itemFromName(self._sample.getIndex(),
+                                            self.CUSTOM_OPTIONS)
+            presenter = item.getPresenter()
+            if presenter is None:
+                presenter = DrillParametersPresenter(item, self._sample)
+            presenter.addParameter(parameter.getName())
+        else:
+            DrillParameterPresenter(item, parameter)
 
     def onGroupChanged(self):
         """

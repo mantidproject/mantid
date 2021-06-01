@@ -71,6 +71,13 @@ class DrillSample(QObject):
     """
     groupChanged = Signal()
 
+    """
+    Sent when a new parameter is added.
+    Args:
+        DrillParameter: the new parameter
+    """
+    newParameter = Signal(DrillParameter)
+
     def __init__(self, index):
         """
         Create an empty sample.
@@ -216,6 +223,7 @@ class DrillSample(QObject):
         """
         parameter = DrillParameter(name, self._controller)
         self._parameters[name] = parameter
+        self.newParameter.emit(parameter)
         return parameter
 
     def delParameter(self, name):

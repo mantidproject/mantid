@@ -112,6 +112,29 @@ class DrillTableWidget(QTableWidget):
             self._samplePresenters[row].onNewItem(self.columns[col], item)
         item.signals.dataChanged.emit()
 
+    def itemFromName(self, row, name):
+        """
+        Get table item from row number and column name.
+
+        Args:
+            row (int): row index
+            name (str): name of the column
+
+        Returns:
+            QTableWidgetItem: the table item, None if the colum/row does not
+                              exist
+        """
+        if name not in self.columns or row >= self.rowCount():
+            return None
+        col = self.columns.index(name)
+        item = self.item(row, col)
+        if item is None:
+            item = self.itemPrototype().clone()
+            self.blockSignals(True)
+            self.setItem(row, col, item)
+            self.blockSignals(False)
+        return item
+
     def eraseRow(self, position):
         """
         Erase the contents of a whole row (if it exists).
