@@ -110,15 +110,22 @@ with the Release Manager.
 Monday, 3 weeks
 ---------------
 
-*  Ensure that Manual testing begins. The instructions for Manual testing are found
-   `here <https://www.mantidproject.org/Unscripted_Manual_Testing>`__.
+*  Ensure that Manual testing begins. An overview of what Manual testing is can be found
+   `here <https://www.mantidproject.org/Unscripted_Manual_Testing>`__. Generate the
+   Manual testing issues by following the instructions `here <https://github.com/mantidproject/documents/tree/master/Project-Management/Tools/RoadmapUpdate>`__.
+*  Over the next week or so, read through the Manual testing issues and ensure that any
+   serious problems are raised as an issue and marked against the relevant milestone.
 
 Tuesday, 4 days
 ---------------
 
 *  It is likely that many changes have been made over the beta test period, therefore
-   ensure the manual testing is redone following the instructions described `here
-   <https://www.mantidproject.org/Unscripted_Manual_Testing>`__.
+   we must do some more Manual testing to ensure everything still works. This stage is
+   called Smoke testing. Generate the Smoke testing issues by following the instructions
+   `here <https://github.com/mantidproject/documents/tree/master/Project-Management/Tools/RoadmapUpdate/SmokeTesting>`__.
+*  Liase with the Technical Release Manager to announce the creation of the Smoke testing
+   issues and Release Candidates in the *\#general* slack channel.
+
 
 .. _release-editor-checklist:
 
