@@ -388,6 +388,7 @@ class SANSILLReduction(PythonAlgorithm):
             MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
             self._fit_beam_width(input_ws=ws)
         run = mtd[ws].getRun()
+        att_coeff = 1.
         if run.hasProperty('attenuator.attenuation_coefficient'):
             att_coeff = run.getLogData('attenuator.attenuation_coefficient').value
             self.log().information('Found attenuator coefficient/value: {0}'.format(att_coeff))
@@ -403,9 +404,15 @@ class SANSILLReduction(PythonAlgorithm):
             else:
                 att_coeff = att_value
             self.log().information('Found attenuator coefficient/value: {0}'.format(att_coeff))
-        else:
-            att_coeff = 1
-            self.log().notice('Unable to process as beam: could not find attenuation coefficient nor value. Assuming 1.')
+        if run.hasProperty('attenuator2.attenuation_value'):
+            # D22 can have the second, chopper attenuator
+            # In principle, either of the 2 attenuators can be in or out
+            # In practice, only one (standard or chopper) is in at a time
+            # If one is out, its attenuation_value is set to 1, so it's safe to take the product
+            att2_value = run.getLogData('attenuator2.attenuation_value').value
+            self.log().information('Found attenuator 2 value: {0}'.format(att2_value))
+            att_coeff *= att2_value
+        self.log().information('Attenuation coefficient used is: {0}'.format(att_coeff))
         flux_out = self.getPropertyValue('FluxOutputWorkspace')
         if flux_out:
             flux = ws + '_flux'

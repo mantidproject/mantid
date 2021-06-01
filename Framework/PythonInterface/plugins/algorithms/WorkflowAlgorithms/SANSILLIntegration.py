@@ -238,7 +238,7 @@ class SANSILLIntegration(PythonAlgorithm):
         strategy = self.getPropertyValue('DefaultQBinning')
         if len(binning) == 0:
             if strategy == 'ResolutionBased':
-                q_binning = self._mildner_carpenter_q_binning(q_min, q_max, binning_factor)
+                q_binning = self._resolution_q_binning(q_min, q_max, binning_factor)
             else:
                 if wavelength != 0:
                     run = mtd[self._input_ws].getRun()
@@ -257,13 +257,15 @@ class SANSILLIntegration(PythonAlgorithm):
         elif len(binning) == 1:
             q_binning = [q_min, binning[0], q_max]
         elif len(binning) == 2:
+            q_min_actual = max(q_min, binning[0])
+            q_max_actual = min(q_max, binning[1])
             if strategy == 'ResolutionBased':
-                q_binning = self._mildner_carpenter_q_binning(binning[0], binning[1], binning_factor)
+                q_binning = self._resolution_q_binning(q_min_actual, q_max_actual, binning_factor)
             else:
                 if wavelength != 0:
-                    q_binning = self._pixel_q_binning(binning[0], binning[1], pixel_size * binning_factor, wavelength, l2)
+                    q_binning = self._pixel_q_binning(q_min_actual, q_max_actual, pixel_size * binning_factor, wavelength, l2)
                 else:
-                    q_binning = self._tof_default_q_binning(binning[0], binning[1])
+                    q_binning = self._tof_default_q_binning(q_min_actual, q_max_actual)
         else:
             q_binning = binning
         return q_binning
@@ -302,7 +304,7 @@ class SANSILLIntegration(PythonAlgorithm):
         q_binning[1::2] = q_bin_widths
         return q_binning
 
-    def _mildner_carpenter_q_binning(self, qmin, qmax, factor):
+    def _resolution_q_binning(self, qmin, qmax, factor):
         """
         Returns q binning such that at each q, bin width is almost factor*sigma
         """
@@ -454,15 +456,20 @@ class SANSILLIntegration(PythonAlgorithm):
             wedge_angle = self.getProperty('WedgeAngle').value
             wedge_offset = self.getProperty('WedgeOffset').value
             asymm_wedges = self.getProperty('AsymmetricWedges').value
-            Q1DWeighted(InputWorkspace=ws_in, OutputWorkspace=ws_out,
-                        NumberOfWedges=n_wedges, OutputBinning=q_binning,
-                        AccountForGravity=gravity, WedgeWorkspace=wedge_ws,
-                        WedgeAngle=wedge_angle, WedgeOffset=wedge_offset,
+            Q1DWeighted(InputWorkspace=ws_in,
+                        OutputWorkspace=ws_out,
+                        NumberOfWedges=n_wedges,
+                        OutputBinning=q_binning,
+                        AccountForGravity=gravity,
+                        WedgeWorkspace=wedge_ws,
+                        WedgeAngle=wedge_angle,
+                        WedgeOffset=wedge_offset,
                         AsymmetricWedges=asymm_wedges,
-                        NPixelDivision=pixel_division, ShapeTable=shape_table)
+                        NPixelDivision=pixel_division,
+                        ShapeTable=shape_table)
             if shape_table:
                 # if there is a shape table, the final number of wedges cannot be known beforehand
-                # (because of possible symmetry issues)
+                # (because of possible symmetry choices)
                 n_wedges = mtd[wedge_ws].size()
             if self._resolution != 'None':
                 x = mtd[ws_out].readX(0)
@@ -481,10 +488,14 @@ class SANSILLIntegration(PythonAlgorithm):
             azimuth_axis.setUnit("Phi")
             for i in range(n_wedges):
                 azimuth_axis.setValue(i, i * wedge_angle)
-            Q1DWeighted(InputWorkspace=ws_in, OutputWorkspace=iq_ws,
-                        NumberOfWedges=n_wedges, NPixelDivision=pixel_division,
-                        OutputBinning=q_binning, WedgeWorkspace=wedge_ws,
-                        WedgeAngle=wedge_angle, AsymmetricWedges=True,
+            Q1DWeighted(InputWorkspace=ws_in,
+                        OutputWorkspace=iq_ws,
+                        NumberOfWedges=n_wedges,
+                        NPixelDivision=pixel_division,
+                        OutputBinning=q_binning,
+                        WedgeWorkspace=wedge_ws,
+                        WedgeAngle=wedge_angle,
+                        AsymmetricWedges=True,
                         AccountForGravity=gravity)
             DeleteWorkspace(iq_ws)
             ConjoinSpectra(InputWorkspaces=wedge_ws, OutputWorkspace=ws_out)
