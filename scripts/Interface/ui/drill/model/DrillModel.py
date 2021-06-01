@@ -76,7 +76,6 @@ class DrillModel(QObject):
         self.experimentId = None
         self.algorithm = None
         self.samples = list()
-        self.masterSamples = dict()
         self.settings = dict()
         self.controller = None
         self.visualSettings = dict()
@@ -99,7 +98,6 @@ class DrillModel(QObject):
         Clear the sample list and the settings.
         """
         self.samples = list()
-        self.masterSamples = dict()
         self.visualSettings = dict()
         self._setDefaultSettings()
 
@@ -113,7 +111,6 @@ class DrillModel(QObject):
             instrument (str): instrument name
         """
         self.samples = list()
-        self.masterSamples = dict()
         self.settings = dict()
         self.columns = list()
         self.visualSettings = dict()
@@ -159,7 +156,6 @@ class DrillModel(QObject):
                     self.instrument])):
             return
         self.samples = list()
-        self.masterSamples = dict()
         self.visualSettings = dict()
         if mode in RundexSettings.VISUAL_SETTINGS:
             self.visualSettings = RundexSettings.VISUAL_SETTINGS[mode]
@@ -425,24 +421,6 @@ class DrillModel(QObject):
         """
         for s in sampleIndexes:
             self.samples[s].setGroup(None)
-
-    def setMasterSamples(self, masterSamples):
-        """
-        Set the dictionnary of master samples.
-
-        Args:
-            masterSamples (dict(str:int)): master samples
-        """
-        self.masterSamples = {k:self.samples[v] for k,v in masterSamples.items()}
-
-    def getMasterSamples(self):
-        """
-        Get the master samples of each groups.
-
-        Returns:
-            dict(str, int): master samples for each group.
-        """
-        return {k:self.samples.index(v) for k,v in self.masterSamples.items()}
 
     def setGroupMaster(self, sampleIndex):
         """
