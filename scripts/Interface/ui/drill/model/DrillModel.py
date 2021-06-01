@@ -511,10 +511,6 @@ class DrillModel(QObject):
                     params.update(s.getParameterValues())
 
         params.update(sample.getParameterValues())
-        # override global params with custom ones
-        if "CustomOptions" in params:
-            params.update(params["CustomOptions"])
-            del params["CustomOptions"]
         # remove empty params
         for (k, v) in list(params.items()):
             if v is None or v == "DEFAULT":
