@@ -76,7 +76,6 @@ class DrillModel(QObject):
         self.experimentId = None
         self.algorithm = None
         self.samples = list()
-        self.groups = dict()
         self.masterSamples = dict()
         self.settings = dict()
         self.controller = None
@@ -100,7 +99,6 @@ class DrillModel(QObject):
         Clear the sample list and the settings.
         """
         self.samples = list()
-        self.groups = dict()
         self.masterSamples = dict()
         self.visualSettings = dict()
         self._setDefaultSettings()
@@ -115,7 +113,6 @@ class DrillModel(QObject):
             instrument (str): instrument name
         """
         self.samples = list()
-        self.groups = dict()
         self.masterSamples = dict()
         self.settings = dict()
         self.columns = list()
@@ -162,7 +159,6 @@ class DrillModel(QObject):
                     self.instrument])):
             return
         self.samples = list()
-        self.groups = dict()
         self.masterSamples = dict()
         self.visualSettings = dict()
         if mode in RundexSettings.VISUAL_SETTINGS:
@@ -430,27 +426,6 @@ class DrillModel(QObject):
         for s in sampleIndexes:
             self.samples[s].setGroup(None)
 
-    def setSamplesGroups(self, groups):
-        """
-        Set the dictionnary of samples groups.
-
-        Args:
-            groups (dict(str:list(int))): samples groups
-        """
-        self.groups = {k:set(self.samples[i] for i in v) for k,v in groups.items()}
-
-    def getSamplesGroups(self):
-        """
-        Get the samples groups.
-
-        Returns:
-            dict(str, list(int)): groups of samples
-        """
-        groups = {}
-        for k,v in self.groups.items():
-            groups[k] = set(self.samples.index(s) for s in v)
-        return groups
-
     def setMasterSamples(self, masterSamples):
         """
         Set the dictionnary of master samples.
@@ -703,17 +678,6 @@ class DrillModel(QObject):
         while i < len(self.samples):
             self.samples[i].setIndex(i)
             i += 1
-        # remove from groups if needed
-        for group in self.groups:
-            if sample in self.groups[group]:
-                self.groups[group].remove(sample)
-                if not self.groups[group]:
-                    del self.groups[group]
-                if ((group in self.masterSamples)
-                        and (self.masterSamples[group] == sample)):
-                    del self.masterSamples[group]
-                self.groupsUpdated.emit()
-                return
 
     def getSamples(self):
         """
