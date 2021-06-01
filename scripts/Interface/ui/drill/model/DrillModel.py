@@ -547,11 +547,7 @@ class DrillModel(QObject):
         Args:
             ref (int): sample index
         """
-        ref = int(ref)
-        name = str(ref + 1)
-        logger.information("Starting of sample {0} processing"
-                           .format(name))
-        self.samples[ref].processStarted.emit()
+        self.samples[ref].onProcessStarted()
 
     def _onTaskSuccess(self, ref):
         """
@@ -560,11 +556,7 @@ class DrillModel(QObject):
         Args:
             ref (int): sample index
         """
-        ref = int(ref)
-        name = str(ref + 1)
-        logger.information("Processing of sample {0} finished with sucess"
-                           .format(name))
-        self.samples[ref].processDone.emit(0)
+        self.samples[ref].onProcessSuccess()
         self.exportModel.run(self.samples[ref])
 
     def _onTaskError(self, ref, msg):
@@ -576,11 +568,7 @@ class DrillModel(QObject):
             ref (int): sample index
             msg (str): error msg
         """
-        ref = int(ref)
-        name = str(ref + 1)
-        logger.error("Error while processing sample {0}: {1}"
-                     .format(name, msg))
-        self.samples[ref].processDone.emit(-1)
+        self.samples[ref].onProcessError(msg)
 
     def _onProcessingProgress(self, progress):
         """
