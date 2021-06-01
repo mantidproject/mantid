@@ -237,12 +237,19 @@ class MainWindow(QMainWindow):
         Triggered by a change in Qt Widget.  NO EVENT is required.
         """
         newx = self.ui.horizontalSlider.value()
+
         if newx <= self._rightSlideValue and newx != self._leftSlideValue:
             # Allowed value: move the value bar
             self._leftSlideValue = newx
 
             # Move the vertical line
             xlim = self.ui.mainplot.get_xlim()
+
+            if self.ui.lineEdit_4.text():
+                newx = max(xlim[0] + newx*(xlim[1] - xlim[0])*0.01, float(self.ui.lineEdit_4.text()))
+            else:
+                newx = xlim[0] + newx*(xlim[1] - xlim[0])*0.01
+
             newx = xlim[0] + newx*(xlim[1] - xlim[0])*0.01
             leftx = [newx, newx]
             lefty = self.ui.mainplot.get_ylim()
@@ -275,7 +282,7 @@ class MainWindow(QMainWindow):
         debug_msg = "iLeftSlide = %s" % str(ileftvalue)
         Logger("Filter_Events").debug(debug_msg)
 
-        # Skip if same as origina
+        # Skip if same as original
         if ileftvalue == self._leftSlideValue:
             return
 
@@ -321,7 +328,14 @@ class MainWindow(QMainWindow):
             self._rightSlideValue = newx
 
             xlim = self.ui.mainplot.get_xlim()
-            newx = xlim[0] + newx*(xlim[1] - xlim[0])*0.01
+
+            if self.ui.lineEdit_3.text():
+                # that is not entirely fool proof, as the user could still remove the value in the field after putting
+                # a non round percent, but this a) is unlikely and b) will not crash mantid, only show an artifact
+                newx = max(xlim[0] + newx*(xlim[1] - xlim[0])*0.01, float(self.ui.lineEdit_3.text()))
+            else:
+                newx = xlim[0] + newx*(xlim[1] - xlim[0])*0.01
+
             leftx = [newx, newx]
             lefty = self.ui.mainplot.get_ylim()
             setp(self.rightslideline, xdata=leftx, ydata=lefty)
