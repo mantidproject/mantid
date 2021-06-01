@@ -113,7 +113,7 @@ class AddDeletePeaksTest(unittest.TestCase):
         md = CreateMDWorkspace(Dimensions=3,
                                Extents='0,10,0,10,0,10',
                                Names='H,K,L',
-                               Units='r.l.u.,.r.l.u.,r.l.u.',
+                               Units='r.l.u.,r.l.u.,r.l.u.',
                                Frames='HKL,HKL,HKL')
 
         pw_name = 'peaks_add_delete_test'
