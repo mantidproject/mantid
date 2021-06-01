@@ -241,18 +241,6 @@ class DrillPresenter:
         row = rows[0]
         self.model.setGroupMaster(row)
 
-    def onGroupsUpdated(self):
-        """
-        Triggered when the groups are updated in the model. This method update
-        the row labels in the table.
-
-        Args:
-            group (str): name of the updated group
-        """
-        groups = self.model.getSamplesGroups()
-        masters = self.model.getMasterSamples()
-        self.view.updateLabelsFromGroups(groups, masters)
-
     def onProcess(self):
         """
         Handles the processing of selected rows.
