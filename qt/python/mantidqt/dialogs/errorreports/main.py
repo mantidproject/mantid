@@ -7,7 +7,6 @@
 import argparse
 import importlib
 import sys
-import os
 
 import mantid
 from qtpy import QT_VERSION
@@ -15,6 +14,7 @@ from qtpy.QtCore import QCoreApplication
 
 from mantidqt.dialogs.errorreports.presenter import ErrorReporterPresenter
 from mantidqt.dialogs.errorreports.report import CrashReportPage
+import mantidqt.utils.qt as qtutils
 
 
 def main() -> int:
@@ -33,18 +33,7 @@ def main() -> int:
     importlib.import_module(f'mantidqt.dialogs.errorreports.resources_qt{QT_VERSION[0]}')
 
     if sys.platform == 'darwin':
-        # Force layer-backing on macOS >= Big Sur (11)
-        # or the application hangs
-        # A fix inside Qt is yet to be released:
-        # https://codereview.qt-project.org/gitweb?p=qt/qtbase.git;a=commitdiff;h=c5d904639dbd690a36306e2b455610029704d821
-        # A complication with Big Sur numbering means we check for 10.16 and 11:
-        #   https://eclecticlight.co/2020/08/13/macos-version-numbering-isnt-so-simple/
-        from distutils.version import LooseVersion
-        import platform
-        mac_vers = LooseVersion(platform.mac_ver()[0])
-        if mac_vers >= '11' or mac_vers == '10.16':
-            os.environ['QT_MAC_WANTS_LAYER'] = '1'
-        print('############\nDANIEL WAS HERE\n##############\n')
+        qtutils.force_layer_backing_BigSur()
 
     from qtpy.QtWidgets import QApplication
     app = QApplication(sys.argv)
