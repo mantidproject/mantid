@@ -32,6 +32,9 @@
     </property>
     <item row="1" column="6">
      <widget class="QPushButton" name="holdButton">
+      <property name="toolTip">
+       <string>Click hold or press Space to persist (hold) or remove (unhold) a curve in the plot</string>
+      </property>
       <property name="text">
        <string>Hold</string>
       </property>
@@ -42,16 +45,27 @@
     </item>
     <item row="1" column="4">
      <widget class="QSlider" name="spectrumSlider">
+      <property name="toolTip">
+       <string>Slide through spectrum or bin index using the mouse or arrow keys</string>
+      </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
     </item>
     <item row="1" column="3">
-     <widget class="QComboBox" name="modeComboBox"/>
+     <widget class="QComboBox" name="modeComboBox">
+      <property name="toolTip">
+       <string>Select the curve type/dimension</string>
+      </property>
+     </widget>
     </item>
     <item row="1" column="5">
-     <widget class="QSpinBox" name="spectrumSpinBox"/>
+     <widget class="QSpinBox" name="spectrumSpinBox">
+      <property name="toolTip">
+       <string>The spectrum or bin index</string>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
