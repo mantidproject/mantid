@@ -23,7 +23,7 @@ Here we will show how to visually inspect entire datasets.
    :alt: ColourFillPlotMar11060
    :align: center
 
-If you would like to create your own colormap, there is `more information here <`https://docs.mantidproject.org/nightly/plotting/index.html#custom-colormap-mantidworkbench>`_.
+If you would like to create your own colormap, there is `more information here <https://docs.mantidproject.org/nightly/plotting/index.html#custom-colormap-mantidworkbench>`_.
 
 
 Slice Viewer
