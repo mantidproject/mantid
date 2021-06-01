@@ -38,6 +38,10 @@ class SuperplotModelTest(unittest.TestCase):
         self.mObs.signals.wsReplaced.connect.assert_called_once()
 
     def test_addWorkspace(self):
+        self.mMtd.__contains__.return_value = False
+        self.model.addWorkspace("ws1")
+        self.assertEqual(self.model._workspaces, [])
+        self.mMtd.__contains__.return_value = True
         self.model.addWorkspace("ws1")
         self.assertEqual(self.model._workspaces, ["ws1"])
         self.model.addWorkspace("ws1")
