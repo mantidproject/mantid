@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-#
 from qtpy.QtWidgets import QWidget, QProgressBar
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, QMetaObject, Q_ARG
+from PyQt5.QtCore import pyqtSlot
 
 NORMAL_STYLE = """
 QProgressBar::chunk {
@@ -71,7 +71,14 @@ class MemoryView(QWidget):
         else:
             pass
 
-    def set_value(self, new_value: int, mem_used: float, mem_avail: float):
+    def invoke_set_value(self, new_value: int, mem_used: float, mem_avail: float):
+        new_value = Q_ARG(int, new_value)
+        mem_used = Q_ARG(float, mem_used)
+        mem_avail = Q_ARG(float, mem_avail)
+        QMetaObject.invokeMethod(self, "_set_value", Qt.AutoConnection, new_value, mem_used, mem_avail)
+
+    @pyqtSlot(int, float, float)
+    def _set_value(self, new_value, mem_used, mem_avail):
         """
         Receives memory usage information passed by memory presenter
         and updates the displayed content as well as the style if needed
