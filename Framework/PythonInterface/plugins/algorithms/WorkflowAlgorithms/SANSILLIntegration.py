@@ -259,6 +259,13 @@ class SANSILLIntegration(PythonAlgorithm):
         elif len(binning) == 2:
             q_min_actual = max(q_min, binning[0])
             q_max_actual = min(q_max, binning[1])
+            if q_min_actual >= q_max_actual:
+                raise ValueError('The provided q range does not overlap with the actual range:\n'
+                                 'provided [{0:.5f}, {1:.5f}] \n'
+                                 'actual [{2:.5f}, {3:.5f}]'
+                                 .format(binning[0], binning[1], q_min, q_max))
+            else:
+                self.log().notice('Using qmin_actual={0:.5f}, qmax_actual={1:.5f}'.format(q_min_actual, q_max_actual))
             if strategy == 'ResolutionBased':
                 q_binning = self._resolution_q_binning(q_min_actual, q_max_actual, binning_factor)
             else:
@@ -431,7 +438,7 @@ class SANSILLIntegration(PythonAlgorithm):
             q_max_name += ('_' + panel)
         q_min = run.getLogData(q_min_name).value
         q_max = run.getLogData(q_max_name).value
-        self.log().information('Using qmin={0:.2f}, qmax={1:.2f}'.format(q_min, q_max))
+        self.log().information('From sample logs qmin={0:.5f}, qmax={1:.5f}'.format(q_min, q_max))
         instrument = mtd[self._input_ws].getInstrument()
         pixel_width = instrument.getNumberParameter('x-pixel-size')[0] / 1000
         pixel_height = instrument.getNumberParameter('y-pixel-size')[0] / 1000
