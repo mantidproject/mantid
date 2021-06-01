@@ -47,10 +47,11 @@ public:
     //        mError = error;
   }
 
-  SimpleMDEvent(const SimpleMDEvent &other) {
-    mCoordinates = other.mCoordinates;
-    mSignal = other.mSignal;
-    mError = other.mError;
+  SimpleMDEvent(const SimpleMDEvent &other)
+      : mCoordinates(other.mCoordinates), mSignal(other.mSignal), mError(other.mError) {
+    // mCoordinatesmCoordinates = other.mCoordinates;
+    // mSignal = other.mSignal;
+    // mError = other.mError;
   }
 
   // pretty output
@@ -167,10 +168,9 @@ public:
     return true;
   }
 
-  void operator=(const SimpleMDEvent &event2) {
+  SimpleMDEvent &operator=(const SimpleMDEvent &event2) {
 
     //        std::cout << " Assigning = is called.... \n";
-
     // coordiate
     size_t numdirs = mCoordinates.size();
     for (size_t i = 0; i < numdirs; ++i)
@@ -179,7 +179,7 @@ public:
     mSignal = event2.mSignal;
     mError = event2.mError;
 
-    return;
+    return *this;
   }
 };
 
