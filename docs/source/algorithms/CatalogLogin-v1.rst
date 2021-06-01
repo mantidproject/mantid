@@ -21,7 +21,7 @@ Usage
     # Attempts to authenticate the user against the ISIS catalog.
     # When logging into the catalog the session class is returned.
     # This can then be used throughout to perform other ICAT routines.
-    session = CatalogLogin(username='SECRET',password='SECRET',Facility="ISIS")
+    session = CatalogLogin(username='SECRET',password='SECRET',FacilityName="ISIS")
 
     # View the session ID for this catalog session.
     print("The session ID is: {}".format(session.getPropertyValue("Session")))
