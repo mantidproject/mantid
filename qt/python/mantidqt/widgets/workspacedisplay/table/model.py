@@ -36,7 +36,7 @@ class TableWorkspaceDisplayModel:
     ALLOWED_WORKSPACE_TYPES = [ITableWorkspace]
 
     @classmethod
-    def supports(cls, ws):
+    def supports(cls, ws: ITableWorkspace):
         """
         Checks that the provided workspace is supported by this display.
         :param ws: Workspace to be checked for support
@@ -45,7 +45,7 @@ class TableWorkspaceDisplayModel:
         if not any(isinstance(ws, allowed_type) for allowed_type in cls.ALLOWED_WORKSPACE_TYPES):
             raise ValueError("The workspace type is not supported: {0}".format(ws))
 
-    def __init__(self, ws):
+    def __init__(self, ws: ITableWorkspace):
         """
         Initialise the model with the workspace
         :param ws: Workspace to be used for providing data
@@ -53,7 +53,7 @@ class TableWorkspaceDisplayModel:
         """
         self.supports(ws)
 
-        self.ws = ws
+        self.ws: ITableWorkspace = ws
         self.ws_num_rows = self.ws.rowCount()
         self.ws_num_cols = self.ws.columnCount()
         self.marked_columns = MarkedColumns()
