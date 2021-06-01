@@ -7,6 +7,8 @@
 
 from qtpy.QtCore import QObject, Signal
 
+from mantid.kernel import logger
+
 from .DrillParameter import DrillParameter
 
 
@@ -252,3 +254,30 @@ class DrillSample(QObject):
         for name, param in self._parameters.items():
             out[name] = param.getValue()
         return out
+
+    def onProcessStarted(self):
+        """
+        Triggered when the sample processing starts.
+        """
+        logger.information("Starting of sample {0} processing"
+                           .format(self._index + 1))
+        self.processStarted.emit()
+
+    def onProcessSuccess(self):
+        """
+        Triggered when the sample process succeed.
+        """
+        logger.information("Processing of sample {0} finished with sucess"
+                           .format(self._index + 1))
+        self.processDone.emit(0)
+
+    def onProcessError(self, msg):
+        """
+        Triggered when the sample processing end with an error.
+
+        Args:
+            msg (str): error message
+        """
+        logger.error("Error while processing sample {0}: {1}"
+                     .format(self._index + 1, msg))
+        self.processDone.emit(-1)
