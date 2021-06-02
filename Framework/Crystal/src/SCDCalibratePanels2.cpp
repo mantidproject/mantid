@@ -130,7 +130,13 @@ void SCDCalibratePanels2::init() {
       "search space when calibration translation of banks");
   declareProperty("ToleranceRotBank", 1e-3, mustBePositive,
                   "Misorientation of bank (in deg) below this value is treated as 0.0");
-  declareProperty("SearchradiusRotBank", 1.0, mustBePositive,
+  declareProperty("SearchradiusRotXBank", 1.0, mustBePositive,
+                  "This is the search radius (in deg) when calibrating component reorientation, used to constrain "
+                  "optimization search space");
+  declareProperty("SearchradiusRotYBank", 1.0, mustBePositive,
+                  "This is the search radius (in deg) when calibrating component reorientation, used to constrain "
+                  "optimization search space");
+  declareProperty("SearchradiusRotZBank", 1.0, mustBePositive,
                   "This is the search radius (in deg) when calibrating component reorientation, used to constrain "
                   "optimization search space");
   // editability
@@ -138,13 +144,20 @@ void SCDCalibratePanels2::init() {
   setPropertySettings("SearchRadiusTransBank",
                       std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
   setPropertySettings("ToleranceRotBank", std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
-  setPropertySettings("SearchradiusRotBank", std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
+  setPropertySettings("SearchradiusRotXBank",
+                      std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
+  setPropertySettings("SearchradiusRotYBank",
+                      std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
+  setPropertySettings("SearchradiusRotZBank",
+                      std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
   // grouping
   setPropertyGroup("CalibrateBanks", CALIBRATION);
   setPropertyGroup("ToleranceTransBank", CALIBRATION);
   setPropertyGroup("SearchRadiusTransBank", CALIBRATION);
   setPropertyGroup("ToleranceRotBank", CALIBRATION);
-  setPropertyGroup("SearchradiusRotBank", CALIBRATION);
+  setPropertyGroup("SearchradiusRotXBank", CALIBRATION);
+  setPropertyGroup("SearchradiusRotYBank", CALIBRATION);
+  setPropertyGroup("SearchradiusRotZBank", CALIBRATION);
   // --------------
   // ----- T0 -----
   // --------------
@@ -545,21 +558,40 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
     fitBank_alg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(objf));
 
     //---- bounds&constraints def
-    double searchRadiusRot = getProperty("SearchradiusRotBank");
-    searchRadiusRot = std::abs(searchRadiusRot);
+    //
+    double searchRadiusRotX = getProperty("SearchradiusRotXBank");
+    searchRadiusRotX = std::abs(searchRadiusRotX);
+    double searchRadiusRotY = getProperty("SearchradiusRotYBank");
+    searchRadiusRotY = std::abs(searchRadiusRotY);
+    double searchRadiusRotZ = getProperty("SearchradiusRotZBank");
+    searchRadiusRotZ = std::abs(searchRadiusRotZ);
+    //
     double searchRadiusTran = getProperty("SearchRadiusTransBank");
     searchRadiusTran = std::abs(searchRadiusTran);
+    //
     std::ostringstream tie_str;
     tie_str << "DeltaSampleX=0.0,DeltaSampleY=0.0,DeltaSampleZ=0.0,"
             << "DeltaT0=" << m_T0;
     std::ostringstream constraint_str;
-    if (searchRadiusRot < 1e-16) {
-      tie_str << ",RotX=0.0,RotY=0.0,RotZ=0.0";
+    // rot x
+    if (searchRadiusRotX < 1e-16) {
+      tie_str << ",RotX=0.0";
     } else {
-      constraint_str << -searchRadiusRot << "<RotX<" << searchRadiusRot << ","  // constrain rotation around X-axis
-                     << -searchRadiusRot << "<RotY<" << searchRadiusRot << ","  // constrain rotation around Y-axis
-                     << -searchRadiusRot << "<RotZ<" << searchRadiusRot << ","; // constrain rotation around Z-axis
+      constraint_str << -searchRadiusRotX << "<RotX<" << searchRadiusRotX << ",";
     }
+    // rot y
+    if (searchRadiusRotY < 1e-16) {
+      tie_str << ",RotY=0.0";
+    } else {
+      constraint_str << -searchRadiusRotY << "<RotY<" << searchRadiusRotY << ",";
+    }
+    // rot z
+    if (searchRadiusRotZ < 1e-16) {
+      tie_str << ",RotZ=0.0";
+    } else {
+      constraint_str << -searchRadiusRotZ << "<RotZ<" << searchRadiusRotZ << ","; // constrain rotation around Z-axis
+    }
+    // translation
     if (searchRadiusTran < 1e-16) {
       tie_str << ",DeltaX=0.0,DeltaY=0.0,DeltaZ=0.0";
     } else {
