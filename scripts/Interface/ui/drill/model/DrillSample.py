@@ -221,7 +221,8 @@ class DrillSample(QObject):
         Returns:
             DrillParameter: the new empty parameter
         """
-        parameter = DrillParameter(name, self._controller)
+        parameter = DrillParameter(name)
+        parameter.setController(self._controller)
         self._parameters[name] = parameter
         self.newParameter.emit(parameter)
         return parameter
