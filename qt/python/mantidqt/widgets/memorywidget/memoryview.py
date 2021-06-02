@@ -7,8 +7,8 @@
 #  This file is part of the mantid workbench.
 #
 from qtpy.QtWidgets import QWidget, QProgressBar
-from qtpy.QtCore import Qt, QMetaObject, Q_ARG
-from PyQt5.QtCore import pyqtSlot
+from qtpy.QtCore import Qt
+from PyQt5.QtCore import pyqtSlot, pyqtSignal
 
 NORMAL_STYLE = """
 QProgressBar::chunk {
@@ -48,15 +48,16 @@ def from_critical_to_normal(critical: int, current_value: int, new_value: int) -
 
 
 class MemoryView(QWidget):
+    set_value = pyqtSignal(int, float, float)
     """
     Initializes and updates the view of memory(progress) bar.
     """
     def __init__(self, parent):
         super(MemoryView, self).__init__(parent)
-
         self.critical = CRITICAL_PERCENTAGE
         self.memory_bar = QProgressBar(self)
         self.memory_bar.setAlignment(Qt.AlignCenter)
+        self.set_value.connect(self._set_value)
 
     def set_bar_color(self, current_value: int, new_value: int):
         """
@@ -72,10 +73,7 @@ class MemoryView(QWidget):
             pass
 
     def invoke_set_value(self, new_value: int, mem_used: float, mem_avail: float):
-        new_value = Q_ARG(int, new_value)
-        mem_used = Q_ARG(float, mem_used)
-        mem_avail = Q_ARG(float, mem_avail)
-        QMetaObject.invokeMethod(self, "_set_value", Qt.AutoConnection, new_value, mem_used, mem_avail)
+        self.set_value.emit(new_value, mem_used, mem_avail)
 
     @pyqtSlot(int, float, float)
     def _set_value(self, new_value, mem_used, mem_avail):
