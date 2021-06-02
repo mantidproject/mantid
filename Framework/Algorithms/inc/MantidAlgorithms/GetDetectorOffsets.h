@@ -20,6 +20,9 @@ namespace Algorithms {
  @date 08/03/2009
  */
 class MANTID_ALGORITHMS_DLL GetDetectorOffsets : public API::Algorithm {
+
+  enum class offset_mode : int { signed_offset, relative_offset, absolute_offset };
+
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "GetDetectorOffsets"; }
@@ -42,7 +45,7 @@ private:
   void init() override;
   void exec() override;
   /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
-  double fitSpectra(const int64_t s, bool isAbsolbute);
+  double fitSpectra(const int64_t s);
   /// Create a function string from the given parameters and the algorithm
   /// inputs
   API::IFunction_sptr createFunction(const double peakHeight, const double peakLoc);
@@ -55,7 +58,8 @@ private:
   double m_Xmax = -DBL_MIN;                   ///< The end of the X range for fitting
   double m_maxOffset = 0.0;                   ///< The maximum absolute value of offsets
   double m_dreference = 0.0;                  ///< The expected peak position in d-spacing (?)
-  double m_dideal = 0.0;                      ///< The known peak centre value from the NIST standard
+  offset_mode mode;
+  double m_dideal = 0.0; ///< The known peak centre value from the NIST standard
   /// information
   double m_step = 0.0; ///< The step size
 };
