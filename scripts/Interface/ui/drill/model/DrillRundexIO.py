@@ -159,9 +159,12 @@ class DrillRundexIO:
             json_data[RundexSettings.VISUAL_SETTINGS_JSON_KEY] = visualSettings
 
         # global settings
-        settings = drill.getSettings()
-        if settings:
-            json_data[RundexSettings.SETTINGS_JSON_KEY] = settings
+        parameters = drill.getParameters()
+        parametersJson = dict()
+        for parameter in parameters:
+            parametersJson[parameter.getName()] = parameter.getValue()
+        if parametersJson:
+            json_data[RundexSettings.SETTINGS_JSON_KEY] = parametersJson
 
         # export settings
         exportModel = drill.getExportModel()
