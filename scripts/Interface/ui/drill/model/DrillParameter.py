@@ -42,9 +42,11 @@ class DrillParameter(QObject):
     """
     valueChanged = Signal()
 
-    def __init__(self, name, controller):
+    def __init__(self, name):
         super().__init__()
         self._name = name
+
+    def setController(self, controller):
         self._controller = controller
 
     def getName(self):
@@ -52,7 +54,8 @@ class DrillParameter(QObject):
 
     def setValue(self, value):
         self._value = value
-        self._controller.check(self)
+        if self._controller:
+            self._controller.check(self)
         self.valueChanged.emit()
 
     def getValue(self):
