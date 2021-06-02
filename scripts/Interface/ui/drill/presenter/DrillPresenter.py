@@ -317,6 +317,7 @@ class DrillPresenter:
         self.view.setWindowTitle(os.path.split(filename[0])[1] + " [*]")
         self.model.importRundexData()
         self._syncViewHeader()
+        self.view.setWindowModified(False)
 
     def onSave(self):
         """
