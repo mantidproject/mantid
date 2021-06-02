@@ -57,6 +57,14 @@ void IndirectFitDataPresenter::setResolutionFBSuffices(const QStringList &suffix
   m_fbResolutionSuffixes = suffixes;
 }
 
+QStringList IndirectFitDataPresenter::getSampleWSSuffices() const { return m_wsSampleSuffixes; }
+
+QStringList IndirectFitDataPresenter::getSampleFBSuffices() const { return m_fbSampleSuffixes; }
+
+QStringList IndirectFitDataPresenter::getResolutionWSSuffices() const { return m_wsResolutionSuffixes; }
+
+QStringList IndirectFitDataPresenter::getResolutionFBSuffices() const { return m_fbResolutionSuffixes; }
+
 void IndirectFitDataPresenter::setStartX(double startX, TableDatasetIndex, WorkspaceIndex) {
   m_tablePresenter->updateTableFromModel();
 }
@@ -89,8 +97,8 @@ UserInputValidator &IndirectFitDataPresenter::validate(UserInputValidator &valid
 void IndirectFitDataPresenter::showAddWorkspaceDialog() {
   if (!m_addWorkspaceDialog)
     m_addWorkspaceDialog = getAddWorkspaceDialog(m_view->parentWidget());
-  m_addWorkspaceDialog->setWSSuffices(m_wsSampleSuffixes);
-  m_addWorkspaceDialog->setFBSuffices(m_fbSampleSuffixes);
+  m_addWorkspaceDialog->setWSSuffices(getSampleWSSuffices());
+  m_addWorkspaceDialog->setFBSuffices(getSampleWSSuffices());
   m_addWorkspaceDialog->updateSelectedSpectra();
   m_addWorkspaceDialog->show();
   connect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));

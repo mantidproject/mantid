@@ -692,12 +692,6 @@ public:
     TS_ASSERT(paramMap.at("f0.f0.f1.f1.Amplitude").value == 1.5);
   }
 
-  void test_that_switching_input_mode_functions() {
-    auto model = createModelWithSingleWorkspace("Name", 1);
-    TS_ASSERT_THROWS_NOTHING(model->switchToSingleInputMode());
-    TS_ASSERT_THROWS_NOTHING(model->switchToMultipleInputMode());
-  }
-
   void test_set_fitting_mode_fucntions() {
     auto model = createModelWithSingleWorkspace("Name", 1);
     auto sequential = FittingMode::SEQUENTIAL;

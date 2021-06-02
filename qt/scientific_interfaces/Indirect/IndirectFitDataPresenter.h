@@ -34,6 +34,10 @@ public:
   void setSampleFBSuffices(const QStringList &suffices);
   void setResolutionWSSuffices(const QStringList &suffices);
   void setResolutionFBSuffices(const QStringList &suffices);
+  QStringList getSampleWSSuffices() const;
+  QStringList getSampleFBSuffices() const;
+  QStringList getResolutionWSSuffices() const;
+  QStringList getResolutionFBSuffices() const;
 
   void setStartX(double startX, TableDatasetIndex dataIndex, WorkspaceIndex spectrumIndex);
   void setStartX(double startX, TableDatasetIndex dataIndex);

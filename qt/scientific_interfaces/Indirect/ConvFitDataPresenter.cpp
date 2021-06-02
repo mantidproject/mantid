@@ -62,8 +62,8 @@ void ConvFitDataPresenter::addWorkspace(ConvFitAddWorkspaceDialog const &dialog,
 
 std::unique_ptr<IAddWorkspaceDialog> ConvFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
   auto dialog = std::make_unique<ConvFitAddWorkspaceDialog>(parent);
-  dialog->setResolutionFBSuffices(m_fbResolutionSuffixes);
-  dialog->setResolutionWSSuffices(m_wsResolutionSuffixes);
+  dialog->setResolutionWSSuffices(getResolutionWSSuffices());
+  dialog->setResolutionFBSuffices(getResolutionFBSuffices());
   return dialog;
 }
 

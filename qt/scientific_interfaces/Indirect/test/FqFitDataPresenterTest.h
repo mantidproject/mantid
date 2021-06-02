@@ -101,18 +101,12 @@ public:
     m_model = std::make_unique<NiceMock<MockFqFitModel>>();
 
     m_dataTable = createEmptyTableWidget(6, 5);
-    m_ParameterTypeCombo = createComboBox(getFqFitParameterTypes());
-    m_ParameterCombo = createComboBox(getFqFitParameters());
-    m_ParameterTypeLabel = createLabel(PARAMETER_TYPE_LABEL);
-    m_ParameterLabel = createLabel(PARAMETER_LABEL);
     m_SingleFunctionTemplateBrowser = std::make_unique<SingleFunctionTemplateBrowserMock>();
 
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_dataTable.get()));
 
-    m_presenter = std::make_unique<FqFitDataPresenter>(
-        std::move(m_model.get()), std::move(m_view.get()), std::move(m_ParameterTypeCombo.get()),
-        std::move(m_ParameterCombo.get()), std::move(m_ParameterTypeLabel.get()), std::move(m_ParameterLabel.get()),
-        m_SingleFunctionTemplateBrowser.get());
+    m_presenter = std::make_unique<FqFitDataPresenter>(std::move(m_model.get()), std::move(m_view.get()),
+                                                       m_SingleFunctionTemplateBrowser.get());
 
     SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspaceWithTextAxis(6, getTextAxisLabels()));
     m_model->addWorkspace("WorkspaceName");
@@ -129,10 +123,6 @@ public:
     m_view.reset();
 
     m_dataTable.reset();
-    m_ParameterTypeCombo.reset();
-    m_ParameterCombo.reset();
-    m_ParameterTypeLabel.reset();
-    m_ParameterLabel.reset();
   }
 
   ///----------------------------------------------------------------------
@@ -143,21 +133,6 @@ public:
     TS_ASSERT(m_presenter);
     TS_ASSERT(m_model);
     TS_ASSERT(m_view);
-  }
-
-  void test_that_the_comboboxes_contain_the_items_specified_during_the_setup() {
-    auto const parameterTypes = getFqFitParameterTypes();
-    auto const parameters = getFqFitParameters();
-
-    TS_ASSERT_EQUALS(m_ParameterTypeCombo->itemText(0), parameterTypes[0]);
-    TS_ASSERT_EQUALS(m_ParameterTypeCombo->itemText(1), parameterTypes[1]);
-    TS_ASSERT_EQUALS(m_ParameterCombo->itemText(0), parameters[0]);
-    TS_ASSERT_EQUALS(m_ParameterCombo->itemText(1), parameters[1]);
-  }
-
-  void test_that_the_labels_have_the_correct_text_after_setup() {
-    TS_ASSERT_EQUALS(m_ParameterTypeLabel->text(), PARAMETER_TYPE_LABEL);
-    TS_ASSERT_EQUALS(m_ParameterLabel->text(), PARAMETER_LABEL);
   }
 
   void test_that_the_model_contains_the_correct_number_of_workspace_after_instantiation() {
@@ -171,21 +146,8 @@ public:
   /// Unit Tests that test the signals, methods and slots of the presenter
   ///----------------------------------------------------------------------
 
-  void test_that_getXRange_calls_the_correct_method_in_the_view() {
-    auto const xRange = std::make_pair(0.0, 1.0);
-
-    ON_CALL(*m_view, getXRange()).WillByDefault(Return(xRange));
-    EXPECT_CALL(*m_view, getXRange()).Times(1);
-
-    TS_ASSERT_EQUALS(m_presenter->getXRange(), xRange);
-  }
-
 private:
   std::unique_ptr<QTableWidget> m_dataTable;
-  std::unique_ptr<QComboBox> m_ParameterTypeCombo;
-  std::unique_ptr<QComboBox> m_ParameterCombo;
-  std::unique_ptr<QLabel> m_ParameterTypeLabel;
-  std::unique_ptr<QLabel> m_ParameterLabel;
   std::unique_ptr<SingleFunctionTemplateBrowserMock> m_SingleFunctionTemplateBrowser;
 
   std::unique_ptr<MockFqFitDataView> m_view;
