@@ -110,8 +110,7 @@ class EAAutoTabView(QtWidgets.QWidget):
 
         self.plot_peaks_label = QtWidgets.QLabel("Plot Peaks", self)
         self.plot_peaks_checkbox = QtWidgets.QCheckBox(self)
-        self.default_peak_label = QtWidgets.QLabel(" "
-                                                   "Use default peak widths ? ", self)
+        self.default_peak_label = QtWidgets.QLabel("  Use default peak widths ?  ", self)
         self.default_peak_checkbox = QtWidgets.QCheckBox(self)
         size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         size_policy.setHorizontalStretch(0)

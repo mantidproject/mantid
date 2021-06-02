@@ -81,13 +81,18 @@ class EAAutoTabPresenter(object):
         Checks all tables in load run's groups and add to show peaks and show matches combobox
         """
         group_names = self.context.group_context.group_names
-        all_runs = []
+        find_peak_workspaces = {}
+
         for group in group_names:
-            all_runs.append(self.model.split_run_and_detector(group)[0])
+            group_workspace, detector = self.model.split_run_and_detector(group)
+            if group_workspace not in find_peak_workspaces:
+                find_peak_workspaces[group_workspace] = ["All"]
+
+            find_peak_workspaces[group_workspace].append(detector)
 
         show_peaks_options = []
         show_matches_option = []
-        all_runs = list(set(all_runs))
+        all_runs = list(find_peak_workspaces)
         for run in all_runs:
             group_ws = retrieve_ws(run)
             workspace_names = group_ws.getNames()
@@ -102,7 +107,7 @@ class EAAutoTabPresenter(object):
                     matches_group = retrieve_ws(name)
                     show_matches_option += matches_group.getNames()
 
-        self.view.add_options_to_find_peak_combobox(sorted(group_names + all_runs))
+        self.view.add_options_to_find_peak_comboboxes(find_peak_workspaces)
         self.view.add_options_to_show_peak_combobox(sorted(show_peaks_options))
         self.view.add_options_to_show_matches_combobox(sorted(show_matches_option))
 
