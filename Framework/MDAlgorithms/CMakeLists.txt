@@ -89,6 +89,7 @@ set(SRC_FILES
     src/NotMD.cpp
     src/OrMD.cpp
     src/PlusMD.cpp
+    src/PolarizationAngleCorrectionMD.cpp
     src/PowerMD.cpp
     src/PreprocessDetectorsToMD.cpp
     src/QueryMDWorkspace.cpp
@@ -207,6 +208,7 @@ set(
   inc/MantidMDAlgorithms/NotMD.h
   inc/MantidMDAlgorithms/OrMD.h
   inc/MantidMDAlgorithms/PlusMD.h
+  inc/MantidMDAlgorithms/PolarizationAngleCorrectionMD.h
   inc/MantidMDAlgorithms/PowerMD.h
   inc/MantidMDAlgorithms/PreprocessDetectorsToMD.h
   inc/MantidMDAlgorithms/QueryMDWorkspace.h
@@ -316,6 +318,7 @@ set(TEST_FILES
     NotMDTest.h
     OrMDTest.h
     PlusMDTest.h
+    PolarizationAngleCorrectionMDTest.h
     PowerMDTest.h
     PreprocessDetectorsToMDTest.h
     QueryMDWorkspaceTest.h
