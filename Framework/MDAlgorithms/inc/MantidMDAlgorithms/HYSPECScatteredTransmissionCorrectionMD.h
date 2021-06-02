@@ -32,9 +32,11 @@ private:
   void exec() override;
   /// Verify the input properties meets certain requirements.
   std::map<std::string, std::string> validateInputs() override;
-  /**@brief Verify the input workspace meets certain requirements
+  /**
+   * @brief Verify the input workspace meets certain requirements.
    * @details verify the input workspace is of type MDEventWorkspace; instrument is HYSPEC, meets certain dimensions
-   * requirements; and has positive "Ei" metadata*/
+   * requirements; and has positive "Ei" metadata
+   * */
   std::string checkInputWorkspace();
   /// Verify the input Workspace dimensions are either QSample (or QLab) frame plus DeltaE, or just |Q| plus DeltaE
   std::string checkInputMDDimensions();

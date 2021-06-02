@@ -37,7 +37,7 @@ DECLARE_ALGORITHM(HYSPECScatteredTransmissionCorrectionMD)
 
 void HYSPECScatteredTransmissionCorrectionMD::init() {
   declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("InputWorkspace", "", Direction::Input),
-                  "Input MDEventWorkspace. Either QSample (or QLab) frame plus DeltaE, or just |Q| plus DeltaE");
+                  "Input MDEventWorkspace. Either QSample (or QLab) frame plus DeltaE, or just Qmod plus DeltaE");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
