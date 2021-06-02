@@ -75,8 +75,8 @@ class DrillPresenter:
         self.model.newSample.connect(self.onNewSample)
 
         self._syncViewHeader()
-        self._resetTable()
-        self.model.addSample(0)
+        if self._resetTable():
+            self.model.addSample(0)
 
     def onRowAdded(self, position):
         """
@@ -283,8 +283,8 @@ class DrillPresenter:
         self.model.resetIOFile()
         self.view.setWindowTitle("Untitled [*]")
         self._syncViewHeader()
-        self._resetTable()
-        self.model.addSample(0)
+        if self._resetTable():
+            self.model.addSample(0)
 
     def acquisitionModeChanged(self, mode):
         """
@@ -300,8 +300,8 @@ class DrillPresenter:
         self.model.resetIOFile()
         self.view.setWindowTitle("Untitled [*]")
         self._syncViewHeader()
-        self._resetTable()
-        self.model.addSample(0)
+        if self._resetTable():
+            self.model.addSample(0)
 
     def onLoad(self):
         """
@@ -387,7 +387,8 @@ class DrillPresenter:
         self.model.resetIOFile()
         self.view.setWindowTitle("Untitled [*]")
         self._syncViewHeader()
-        self._resetTable()
+        if self._resetTable():
+            self.model.addSample(0)
 
     def _saveDataQuestion(self):
         """
@@ -415,8 +416,11 @@ class DrillPresenter:
         """
         Reset the table header.
         """
-        parameters = self.model.getParameters()
         acquisitionMode = self.model.getAcquisitionMode()
+        if acquisitionMode not in RundexSettings.COLUMNS:
+            self.view.set_table([], [])
+            return False
+        parameters = self.model.getParameters()
         columns = RundexSettings.COLUMNS[acquisitionMode]
         tooltips = list()
         for name in columns:
@@ -424,3 +428,4 @@ class DrillPresenter:
                 if p.getName() == name:
                     tooltips.append(p.getDocumentation())
         self.view.set_table(columns, tooltips)
+        return True
