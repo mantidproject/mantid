@@ -36,9 +36,7 @@ public:
   }
 
   //---------------------------------------------------------------------------------------------
-  /**
-   * @brief Test apply correction to 1 run
-   */
+
   void test_single_run() {
     std::vector<std::string> qDims = {"Q3D", "|Q|"};
     for (auto qDim : qDims) {
@@ -49,7 +47,7 @@ public:
       // correct, then convert
       applyCorrectionToEvents("events", 1. / 11);
       convertToMD("events", "expected", qDim);
-      TS_ASSERT(compareMDWorkspaces("md", "expected"))
+      TS_ASSERT(compareMDWorkspaces("md", "expected", true))
       std::vector<std::string> leftOvers{"events", "md", "expected"};
       cleanup(leftOvers);
     }
@@ -57,30 +55,29 @@ public:
 
   void test_merged_runs() {
     double factor(1. / 11);
-    std::vector<std::string> qDims = {"Q3D", "|Q|"};
-    for (const auto qDim : qDims) {
-      createEventWs("events1", "20.");
-      createEventWs("events2", "30.");
-      // convert, merge, then correct
-      convertToMD("events1", "md1", qDim);
-      convertToMD("events2", "md2", qDim);
-      mergeMD("md1", "md2", "md");
-      applyCorrectionToMD("md", factor);
-      // correct, convert, then merge
-      applyCorrectionToEvents("events1", factor);
-      applyCorrectionToEvents("events2", factor);
-      convertToMD("events1", "md1", qDim);
-      convertToMD("events2", "md2", qDim);
-      mergeMD("md1", "md2", "expected");
-      TS_ASSERT(compareMDWorkspaces("md", "expected"))
-      std::vector<std::string> leftOvers{"events1", "md1", "events2", "md2", "md", "expected"};
-      cleanup(leftOvers);
-    }
+    createEventWs("events1", "20.", "0,0,1,0,1");
+    createEventWs("events2", "20.", "30,0,1,0,1");
+    // convert, merge, then correct
+    convertToMD("events1", "md1", "Q3D");
+    convertToMD("events2", "md2", "Q3D");
+    mergeMD("md1", "md2", "md");
+    applyCorrectionToMD("md", factor);
+    // correct, convert, then merge
+    applyCorrectionToEvents("events1", factor);
+    applyCorrectionToEvents("events2", factor);
+    convertToMD("events1", "md1", "Q3D");
+    convertToMD("events2", "md2", "Q3D");
+    mergeMD("md1", "md2", "expected");
+    TS_ASSERT(compareMDWorkspaces("md", "expected", false));
+    std::vector<std::string> leftOvers{"events1", "md1", "events2", "md2", "md", "expected"};
+    cleanup(leftOvers);
   }
 
 private:
   /// Create an EventWorkspace with flat background in units of DeltaE
   void createSampleWorkspace(std::string outputWorkspace, double xmin = -10, double xmax = 19., double binwidth = 0.5) {
+    if (AnalysisDataService::Instance().doesExist(outputWorkspace))
+      AnalysisDataService::Instance().remove(outputWorkspace);
     // create sample workspace
     auto create_alg = AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
     create_alg->initialize();
@@ -139,6 +136,8 @@ private:
 
   /// Convert to MD workspace
   void convertToMD(std::string inputWorkspace, std::string outputWorkspace, std::string qDimensions) {
+    if (AnalysisDataService::Instance().doesExist(outputWorkspace))
+      AnalysisDataService::Instance().remove(outputWorkspace);
     auto alg = AlgorithmManager::Instance().createUnmanaged("ConvertToMD");
     alg->initialize();
     alg->initialize();
@@ -166,14 +165,16 @@ private:
   }
 
   /// Generate an event workspace in units of DeltaE with an initial energy
-  void createEventWs(std::string outputWsName, std::string Ei) {
+  void createEventWs(std::string outputWorkspace, std::string Ei, std::string goniometer = "0,0,1,0,1") {
+    if (AnalysisDataService::Instance().doesExist(outputWorkspace))
+      AnalysisDataService::Instance().remove(outputWorkspace);
     double e = std::stod(Ei);
-    createSampleWorkspace(outputWsName, -e / 2., e - 1.);
-    addSampleLog(outputWsName, "deltaE-mode", "Direct", "String");
-    addSampleLog(outputWsName, "Ei", Ei, "Number");
-    moveBank(outputWsName, "bank1", 3, 3);
-    moveBank(outputWsName, "bank2", -3, -3);
-    setGoniometer(outputWsName, "Axis0", "0,0,1,0,1");
+    createSampleWorkspace(outputWorkspace, -e / 2., e - 1.);
+    addSampleLog(outputWorkspace, "deltaE-mode", "Direct", "String");
+    addSampleLog(outputWorkspace, "Ei", Ei, "Number");
+    moveBank(outputWorkspace, "bank1", 3, 3);
+    moveBank(outputWorkspace, "bank2", -3, -3);
+    setGoniometer(outputWorkspace, "Axis0", goniometer);
   }
 
   /// Apply the transmission correction to an input MD workspace
@@ -218,6 +219,8 @@ private:
   }
 
   void mergeMD(std::string md1, std::string md2, std::string outputWorkspace) {
+    if (AnalysisDataService::Instance().doesExist(outputWorkspace))
+      AnalysisDataService::Instance().remove(outputWorkspace);
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("MergeMD");
     alg->initialize();
     TS_ASSERT(alg->isInitialized())
@@ -229,7 +232,7 @@ private:
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputWorkspace));
   }
 
-  bool compareMDWorkspaces(std::string ws1, std::string ws2) {
+  bool compareMDWorkspaces(std::string ws1, std::string ws2, bool checkEvents = false) {
     auto md1 = std::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(ws1));
     auto md2 = std::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(ws2));
     if (md1->getNEvents() != md2->getNEvents())
@@ -239,7 +242,7 @@ private:
     alg->setPropertyValue("Workspace1", ws1);
     alg->setPropertyValue("Workspace2", ws2);
     alg->setProperty("Tolerance", 0.001);
-    alg->setProperty("CheckEvents", false);
+    alg->setProperty("CheckEvents", checkEvents);
     alg->execute();
     TS_ASSERT(alg->isExecuted());
     return alg->getProperty("Equals");
