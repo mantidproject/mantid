@@ -9,13 +9,17 @@
 Description
 -----------
 
-The intensity :math:`I` of every event collected is corrected by:
+In instruments where there is a polarization analysis stage in the scattered beam, neutron intensity is reduced by
+an absorption factor [1]. This has an exponential dependence on the scattered energy. To correct for this,
+the detected intensity :math:`I` of every event collected is corrected by:
 
 :math:`E_f = E_i-\Delta E`
 
 :math:`I' = I e^{c E_f}`
 
 :math:`\delta I' = \delta I e^{c E_f}`
+
+[1]  Andrei T. Savici et al, 2017, J. Phys.: Conf. Ser. 862 012023
 
 Usage
 -----
