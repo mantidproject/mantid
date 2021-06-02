@@ -176,26 +176,30 @@ class CalibrationModel(object):
 
     def _plot_tof_fit_single_bank_or_custom(self, bank):
         bank_ws = Ads.retrieve("engggui_tof_peaks_" + bank)
+        residuals_ws = Ads.retrieve("engggui_tof_peaks_" + bank + "_residuals")
         fig = plt.figure()
-        ax = fig.add_subplot(111, projection="mantid")
+        gs = gridspec.GridSpec(2, 1)
+        plot_bank = fig.add_subplot(gs[0, 0], projection="mantid")
+        plot_res = fig.add_subplot(gs[1, 0], projection="mantid")
 
-        self._add_plot_to_axes(ax, bank_ws, bank)
+        self._add_plot_to_axes(plot_bank, bank_ws, bank)
+        self._add_residuals_to_axes(plot_res, residuals_ws)
+        fig.tight_layout()
         fig.show()
 
     @staticmethod
     def _add_plot_to_axes(ax, ws, bank):
-        ax.plot(ws, wkspIndex=0, linestyle="", marker="o", markersize="3")
-        ax.plot(ws, wkspIndex=1, linestyle="--", marker="o", markersize="3")
-        ax.errorbar(ws, wkspIndex=0, label="TOF Error", capsize=2)
+        ax.plot(ws, wkspIndex=1, linestyle="-", marker="None", color='r', label="TOF Quadratic Fit")
+        ax.errorbar(ws, wkspIndex=0, capsize=2, marker=".", color='b', label="Peaks Fitted", ls="None")
         ax.set_title("Engg Gui TOF Peaks Bank " + str(bank))
-        ax.legend(("Peaks Fitted", "TOF Quadratic Fit"))
+        ax.legend()
         ax.set_xlabel("")  # hide here as set automatically
         ax.set_ylabel("Fitted Peaks Centre(TOF, \u03BCs)")
 
     @staticmethod
     def _add_residuals_to_axes(ax, ws):
-        ax.errorbar(ws, 'o', wkspIndex=0, capsize=2)
-        ax.axhline()
+        ax.errorbar(ws, color='b', marker='.', wkspIndex=0, capsize=2, ls="None")
+        ax.axhline(color='r')
         ax.set_xlabel("Expected Peaks Centre(dSpacing, A)")
         ax.set_ylabel("Residuals \u03BCs")
 
