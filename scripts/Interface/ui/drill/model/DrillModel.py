@@ -377,6 +377,19 @@ class DrillModel(QObject):
                 sample.setGroup(None)
             self.groupSamples(sampleIndexes, group)
 
+    def addToGroup(self, sampleIndexes, groupName):
+        """
+        Add some samples to an existing group.
+
+        Args:
+            sampleIndexes (list(int)): sample indexes
+            groupName (str): name of the group
+        """
+        self.ungroupSamples(sampleIndexes)
+        samples = [sample.getIndex() for sample in self._getSamplesFromGroup(groupName)]
+        samples += sampleIndexes
+        self.groupSamples(samples, groupName)
+
     def setGroupMaster(self, sampleIndex):
         """
         Set the sample as master for its group.
