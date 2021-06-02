@@ -68,10 +68,6 @@ std::map<std::string, std::string> InelasticScatteredTransmissionCorrectionMD::v
 //---------------------------------------------------------------------------------------------------------
 
 std::string InelasticScatteredTransmissionCorrectionMD::checkInputWorkspace() {
-  // Verify the input workspace if of type MDEventWorkspace
-  IMDEventWorkspace_sptr inputws = getProperty("InputWorkspace");
-  if (!inputws)
-    return "Input workspace is not of type MDEventWorkspace";
 
   // Verify the dimension of the input workspace
   std::string dimensionError = checkInputMDDimensions();
