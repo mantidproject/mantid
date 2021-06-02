@@ -88,7 +88,10 @@ class DrillRundexIO:
         # global settings
         if (RundexSettings.SETTINGS_JSON_KEY in json_data):
             settings = json_data[RundexSettings.SETTINGS_JSON_KEY]
-            drill.setSettings(settings)
+            parameters = drill.getParameters()
+            for parameter in drill.getParameters():
+                if parameter.getName() in settings:
+                    parameter.setValue(settings[parameter.getName()])
         else:
             logger.warning("No global settings found when importing {0}. "
                            "Default settings will be used."
