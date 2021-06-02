@@ -87,6 +87,7 @@ class DrillPresenter:
             position (int): index of the new row
         """
         self.model.addSample(position)
+        self.view.setWindowModified(True)
 
     def onNewSample(self, sample):
         """
@@ -185,6 +186,7 @@ class DrillPresenter:
         """
         rows = self.view.table.getRowsFromSelectedCells()
         self.model.groupSamples(rows)
+        self.view.setWindowModified(True)
 
     def onUngroupSelectedRows(self):
         """
@@ -192,6 +194,7 @@ class DrillPresenter:
         """
         rows = self.view.table.getRowsFromSelectedCells()
         self.model.ungroupSamples(rows)
+        self.view.setWindowModified(True)
 
     def onSetMasterRow(self):
         """
@@ -202,6 +205,7 @@ class DrillPresenter:
             return
         row = rows[0]
         self.model.setGroupMaster(row)
+        self.view.setWindowModified(True)
 
     def onProcess(self):
         """
