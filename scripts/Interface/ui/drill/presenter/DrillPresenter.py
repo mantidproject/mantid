@@ -11,6 +11,7 @@ import os
 from qtpy.QtWidgets import QFileDialog, QMessageBox
 
 from ..model.DrillModel import DrillModel
+from ..model.configurations import RundexSettings
 from .DrillExportPresenter import DrillExportPresenter
 from .DrillContextMenuPresenter import DrillContextMenuPresenter
 from .DrillSamplePresenter import DrillSamplePresenter
@@ -74,7 +75,8 @@ class DrillPresenter:
         self.model.newSample.connect(self.onNewSample)
 
         self._syncViewHeader()
-        self._syncViewTable()
+        self._resetTable()
+        self.model.addSample(0)
 
     def onRowAdded(self, position):
         """
@@ -277,7 +279,8 @@ class DrillPresenter:
         self.model.resetIOFile()
         self.view.setWindowTitle("Untitled [*]")
         self._syncViewHeader()
-        self._syncViewTable()
+        self._resetTable()
+        self.model.addSample(0)
 
     def acquisitionModeChanged(self, mode):
         """
@@ -293,7 +296,8 @@ class DrillPresenter:
         self.model.resetIOFile()
         self.view.setWindowTitle("Untitled [*]")
         self._syncViewHeader()
-        self._syncViewTable()
+        self._resetTable()
+        self.model.addSample(0)
 
     def onLoad(self):
         """
@@ -304,14 +308,11 @@ class DrillPresenter:
                                                "Rundex (*.mrd);;All (*)")
         if not filename[0]:
             return
-        self.view.blockSignals(True)
+        self._resetTable()
         self.model.setIOFile(filename[0])
         self.view.setWindowTitle(os.path.split(filename[0])[1] + " [*]")
         self.model.importRundexData()
         self._syncViewHeader()
-        self._syncViewTable()
-        self.view.setWindowModified(False)
-        self.view.blockSignals(False)
 
     def onSave(self):
         """
@@ -381,7 +382,7 @@ class DrillPresenter:
         self.model.resetIOFile()
         self.view.setWindowTitle("Untitled [*]")
         self._syncViewHeader()
-        self._syncViewTable()
+        self._resetTable()
 
     def _saveDataQuestion(self):
         """
@@ -405,36 +406,16 @@ class DrillPresenter:
         self.view.set_acquisition_mode(acquisitionMode)
         self.view.setCycleAndExperiment(cycle, exp)
 
-    def _syncViewTable(self):
-        columns, tooltips = self.model.getColumnHeaderData()
-        if tooltips and tooltips[-1] == "CustomOptions":
-            tooltips[-1] = "Provide semicolon (;) separated key=value pairs"
-        samples = self.model.getSamples()
-        groups = self.model.getSamplesGroups()
-        masters = self.model.getMasterSamples()
-
-        self.view.blockSignals(True)
+    def _resetTable(self):
+        """
+        Reset the table header.
+        """
+        parameters = self.model.getParameters()
+        acquisitionMode = self.model.getAcquisitionMode()
+        columns = RundexSettings.COLUMNS[acquisitionMode]
+        tooltips = list()
+        for name in columns:
+            for p in parameters:
+                if p.getName() == name:
+                    tooltips.append(p.getDocumentation())
         self.view.set_table(columns, tooltips)
-        if not samples:
-            self.model.addSample(0)
-        else:
-            for i in range(len(samples)):
-                self.view.add_row_after(1)
-                params = samples[i].getParameters()
-                for k,v in params.items():
-                    if k not in self.view.columns:
-                        co = self.view.getCellContents(i, "CustomOptions")
-                        if co:
-                            co = co + ';' + str(k) + '=' + str(v)
-                        else:
-                            co = str(k) + '=' + str(v)
-                        self.view.setCellContents(i, "CustomOptions", co)
-                    else:
-                        self.view.setCellContents(i, k, v)
-        self.view.updateLabelsFromGroups(groups, masters)
-        # set the visual settings if they exist
-        vs = self.model.getVisualSettings()
-        if vs:
-            self.view.setVisualSettings(vs)
-        self.view.blockSignals(False)
-        self.view.setWindowModified(False)
