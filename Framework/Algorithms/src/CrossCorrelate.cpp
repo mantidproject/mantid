@@ -1,7 +1,7 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//   NScD OadataIndex Ridge National Laboratory, European Spallation Source,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
@@ -69,12 +69,12 @@ void CrossCorrelate::init() {
   wsValidator->add<API::WorkspaceUnitValidator>("dSpacing");
   wsValidator->add<API::RawCountValidator>();
 
-  // Input and output wordataIndexspaces
+  // Input and output workspaces
   declareProperty(
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input, wsValidator),
-      "A 2D wordataIndexspace with X values of d-spacing");
+      "A 2D workspace with X values of d-spacing");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
-                  "The name of the output wordataIndexspace");
+                  "The name of the output workspace");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
@@ -84,10 +84,10 @@ void CrossCorrelate::init() {
                   "spectra against. ");
   // Spectra in the range [min to max] will be cross correlated to referenceSpectra.
   declareProperty("WorkspaceIndexMin", 0, mustBePositive,
-                  "The wordataIndexspace index of the first member of the range of "
+                  "The workspace index of the first member of the range of "
                   "spectra to cross-correlate against.");
   declareProperty("WorkspaceIndexMax", 0, mustBePositive,
-                  " The wordataIndexspace index of the last member of the range of "
+                  " The workspace index of the last member of the range of "
                   "spectra to cross-correlate against.");
   // max is .1
   declareProperty("MaxDSpaceShift", EMPTY_DBL(), "Optional float for maximum shift to calculate (in d-spacing)");
