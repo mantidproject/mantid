@@ -52,6 +52,15 @@ class DrillSamplePresenter:
             parameter = self._sample.addParameter(name)
             parameter.setValue(item.text())
 
+    def onDelItem(self, name):
+        """
+        Triggered when an item is cleared.
+
+        Args:
+            name (str): name of the item (parameter name)
+        """
+        self._sample.delParameter(name)
+
     def onNewParameter(self, parameter):
         """
         Triggered when the sample receives a new parameter.
