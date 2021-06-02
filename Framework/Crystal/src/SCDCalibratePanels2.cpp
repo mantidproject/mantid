@@ -628,6 +628,9 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
     // check if translation results need zeroing
     double tolerance_translation = getProperty("ToleranceTransBank");
     tolerance_translation = std::abs(tolerance_translation);
+    // NOTE:
+    // if the translation vector is effectively a zero vector, we should make it a
+    // proper one.
     if ((std::abs(dx) < tolerance_translation) && // is dx<tor?
         (std::abs(dy) < tolerance_translation) && // is dy<tor?
         (std::abs(dz) < tolerance_translation) && // is dz<tor?
@@ -637,9 +640,29 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
       dy = 0.0;
       dz = 0.0;
     }
+    // NOTE:
+    // if the translation vector has one component that is hitting the search bounds, the
+    // optimization setting is too tight and we should inform the users about this issue,
+    // and cowardly reject this results by zero the vector
+    double ddx = std::abs(dx - searchRadiusTran);
+    double ddy = std::abs(dy - searchRadiusTran);
+    double ddz = std::abs(dz - searchRadiusTran);
+    if ((ddx < tolerance_translation) || // is dx too close to search bounds?
+        (ddy < tolerance_translation) || // is dy too close to search bounds?
+        (ddz < tolerance_translation) || // is dz too close to search bounds?
+        false) {
+      calilog << "-- Fit " << bn << " translation hitting search bounds, please increase bounds.\n"
+              << "       also, cowardly refusing calibration results by zeroing (dx, dy, dz)\n";
+      dx = 0.0;
+      dy = 0.0;
+      dz = 0.0;
+    }
+
     // check if rotation results need zeroing
     double tolerance_rotation = getProperty("ToleranceRotBank");
     tolerance_rotation = std::abs(tolerance_rotation);
+    // NOTE:
+    // if all components of the Euler angle vector is pratically zero, let's make it official
     if ((std::abs(drx) < tolerance_rotation) && //
         (std::abs(dry) < tolerance_rotation) && //
         (std::abs(drz) < tolerance_rotation) && //
@@ -649,6 +672,23 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
       dry = 0.0;
       drz = 0.0;
     }
+    // NOTE:
+    // if any components of the resulting Euler angle is hitting the search bounds, we should warn
+    // the user (so that they can increase search bounds) and cowardly refuse the calibration results
+    double ddrx = std::abs(drx - searchRadiusRotX);
+    double ddry = std::abs(dry - searchRadiusRotY);
+    double ddrz = std::abs(drz - searchRadiusRotZ);
+    if ((ddrx < tolerance_rotation) || // is rotx hitting the search bounds?
+        (ddry < tolerance_rotation) || // is roty hitting the search bounds?
+        (ddrz < tolerance_rotation) || // is rotz hitting the search bounds?
+        false) {
+      calilog << "-- Fit " << bn << " rotatoin hitting bounds, please increase search radius.\n"
+              << "       also, cowardly refusing calibration results by zeroing (drx, dry, drz)\n";
+      drx = 0.0;
+      dry = 0.0;
+      drz = 0.0;
+    }
+
     // update instrument for output
     adjustComponent(dx, dy, dz, drx, dry, drz, bn, pws);
     // logging
