@@ -58,7 +58,7 @@ public:
   template <typename TYPE> std::string isValid(const TYPE &value) const { return runCheck(value, IsPtrType<TYPE>()); }
 
   /**
-   * Deal with a C-style string by first coverting it to a std::string
+   * Deal with a C-style string by first converting it to a std::string
    * so that boost::any can deal with it, calls isValid(std::string)
    * @param value :: The value to be checked
    * @returns An error message to display to users or an empty string on no

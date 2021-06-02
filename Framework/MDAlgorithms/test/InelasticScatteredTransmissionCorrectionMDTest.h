@@ -27,14 +27,6 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_validation() {
-    createEventWs("events", "20.");
-    convertToMD("events", "md", "Q3D");
-    TS_ASSERT_THROWS(applyCorrectionToMD("md", 0.0), const std::runtime_error &); // must be positive
-    std::vector<std::string> leftOvers{"events", "md"};
-    cleanup(leftOvers);
-  }
-
   //---------------------------------------------------------------------------------------------
 
   void test_single_run() {
