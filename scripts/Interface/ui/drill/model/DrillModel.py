@@ -268,6 +268,9 @@ class DrillModel(QObject):
         """
         Initialize the parameter controller.
         """
+        if not self.algorithm:
+            self.controller = None
+            return
         self.controller = DrillParameterController(self.algorithm)
         self.controller.start()
 
