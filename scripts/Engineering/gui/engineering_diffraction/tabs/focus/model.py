@@ -78,11 +78,12 @@ class FocusModel(object):
                 run_no = path_handling.get_run_number_from_path(sample_path, instrument)
                 tof_output_name = str(run_no) + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + name
                 dspacing_output_name = tof_output_name + "_dSpacing"
-                self._run_focus(sample_workspace, tof_output_name, integration_workspace,
-                                curves_workspace, df_kwarg, full_calib_workspace, region_calib)
-                output_workspaces.append([tof_output_name])
-                self._save_output(instrument, sample_path, "Cropped", tof_output_name, rb_num)
-                self._save_output(instrument, sample_path, "Cropped", dspacing_output_name, rb_num)
+                success = self._run_focus(sample_workspace, tof_output_name, integration_workspace,
+                                          curves_workspace, df_kwarg, full_calib_workspace, region_calib)
+                if success:
+                    output_workspaces.append([tof_output_name])
+                    self._save_output(instrument, sample_path, "Cropped", tof_output_name, rb_num)
+                    self._save_output(instrument, sample_path, "Cropped", dspacing_output_name, rb_num)
                 self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
         else:
             for sample_path in sample_paths:
@@ -101,12 +102,13 @@ class FocusModel(object):
                     # need to clone these workspaces as they're altered in each run of focus
                     sample_ws_clone = CloneWorkspace(sample_workspace)
                     curves_ws_clone = CloneWorkspace(curves_workspace)
-                    self._run_focus(sample_ws_clone, tof_output_name, integration_workspace,
-                                    curves_ws_clone, df_kwarg, full_calib_workspace, region_calib)
-                    workspaces_for_run.append(tof_output_name)
-                    # Save the output to the file system.
-                    self._save_output(instrument, sample_path, name, tof_output_name, rb_num)
-                    self._save_output(instrument, sample_path, name, dspacing_output_name, rb_num)
+                    success = self._run_focus(sample_ws_clone, tof_output_name, integration_workspace,
+                                              curves_ws_clone, df_kwarg, full_calib_workspace, region_calib)
+                    if success:
+                        workspaces_for_run.append(tof_output_name)
+                        # Save the output to the file system.
+                        self._save_output(instrument, sample_path, name, tof_output_name, rb_num)
+                        self._save_output(instrument, sample_path, name, dspacing_output_name, rb_num)
                     DeleteWorkspace(sample_ws_clone)
                     DeleteWorkspace(curves_ws_clone)
                 output_workspaces.append(workspaces_for_run)
@@ -125,7 +127,11 @@ class FocusModel(object):
                    df_kwarg,
                    full_calib,
                    region_calib):
-        NormaliseByCurrent(InputWorkspace=input_workspace, OutputWorkspace=input_workspace)
+        if input_workspace.getProtonCharge() > 0:
+            NormaliseByCurrent(InputWorkspace=input_workspace, OutputWorkspace=input_workspace)
+        else:
+            logger.warning(f"Skipping focus of run {input_workspace.name()} because it has invalid proton charge.")
+            return False
         input_workspace /= vanadium_integration_ws
         ReplaceSpecialValues(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, NaNValue=0,
                              InfinityValue=0)
@@ -143,6 +149,7 @@ class FocusModel(object):
         DeleteWorkspace(focused_sample)
         DeleteWorkspace(normalised)
         DeleteWorkspace(ws_d)
+        return True
 
     @staticmethod
     def _plot_focused_workspaces(focused_workspaces):

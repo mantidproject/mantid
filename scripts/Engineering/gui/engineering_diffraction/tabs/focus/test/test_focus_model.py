@@ -85,7 +85,7 @@ class FocusModelTest(unittest.TestCase):
 
         self.assertEqual(1, run_focus.call_count)
         run_focus.assert_called_with("mocked_sample",
-                                     "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + "cropped",
+                                     "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + "Cropped",
                                      "test_wsp", "test_wsp", DF_KWARG_CUSTOM, "test_wsp", "engggui_calibration_Cropped")
 
     @patch(file_path + ".DeleteWorkspace")
