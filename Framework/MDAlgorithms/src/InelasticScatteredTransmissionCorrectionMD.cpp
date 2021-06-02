@@ -75,6 +75,7 @@ std::string InelasticScatteredTransmissionCorrectionMD::checkInputWorkspace() {
     return dimensionError;
 
   // Verify input workspace has an Efixed metadata
+  IMDEventWorkspace_sptr inputws = getProperty("InputWorkspace");
   uint16_t nRuns(inputws->getNumExperimentInfo());
   mEfixedValues.resize(nRuns);
   for (uint16_t i = 0; i < inputws->getNumExperimentInfo(); i++) {
