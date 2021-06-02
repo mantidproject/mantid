@@ -5,6 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
+import numpy
+
 from qtpy.QtCore import QObject, Signal
 
 from mantid.kernel import *
