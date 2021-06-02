@@ -315,7 +315,8 @@ class DrillTableWidget(QTableWidget):
         if ((row < 0) or (row >= n_rows)
                 or (column < 0) or (column >= n_columns)):
             return
-        cell = QTableWidgetItem(contents)
+        cell = self.itemPrototype().clone()
+        cell.setText(contents)
         self.setItem(row, column, cell)
 
     def getRowContents(self, row):
