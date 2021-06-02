@@ -52,6 +52,11 @@ class DrillModel(QObject):
     """
     PROCESSED_DATA_DIR = "processed"
 
+    """
+    List of processing parameter from the current algorithm.
+    """
+    _parameters = None
+
     ###########################################################################
     # signals                                                                 #
     ###########################################################################
@@ -83,7 +88,6 @@ class DrillModel(QObject):
         self.experimentId = None
         self.algorithm = None
         self.samples = list()
-        self.settings = dict()
         self.controller = None
         self.visualSettings = dict()
         self.rundexIO = None
@@ -106,7 +110,8 @@ class DrillModel(QObject):
         """
         self.samples = list()
         self.visualSettings = dict()
-        self._setDefaultSettings()
+        self._initController()
+        self._initProcessingParameters()
 
     def setInstrument(self, instrument, log=True):
         """
@@ -118,7 +123,6 @@ class DrillModel(QObject):
             instrument (str): instrument name
         """
         self.samples = list()
-        self.settings = dict()
         self.columns = list()
         self.visualSettings = dict()
         self.instrument = None
@@ -174,11 +178,9 @@ class DrillModel(QObject):
         else:
             nThreads = QThread.idealThreadCount()
         self.tasksPool.setMaxThreadCount(nThreads)
-        self.settings = dict.fromkeys(
-                RundexSettings.SETTINGS[self.acquisitionMode])
-        self._setDefaultSettings()
         self.exportModel = DrillExportModel(self.acquisitionMode)
         self._initController()
+        self._initProcessingParameters()
 
     def getAcquisitionMode(self):
         """
@@ -269,96 +271,31 @@ class DrillModel(QObject):
         self.controller = DrillParameterController(self.algorithm)
         self.controller.start()
 
-    def setSettings(self, settings):
+    def _initProcessingParameters(self):
         """
-        Update the settings from a dictionnary.
-
-        Args:
-            settings (dict(str: any)): settings key,value pairs. Value can be
-                                       str, int, float or bool
+        Initialize the processing parameters from the algorithm.
         """
-        for (k, v) in settings.items():
-            if k in self.settings:
-                self.settings[k] = v
-
-    def getSettings(self):
-        """
-        Get the settings.
-
-        Returns:
-            dict(str, any): the settings. Value can be str, int, float or bool
-        """
-        return self.settings
-
-    def getSettingsTypes(self):
-        """
-        Get informations about the algorithm settings. For all settings that
-        should appear in the settings dialog, the function will return their
-        type, allowed values and documentation. This method is used to generate
-        the settings dialog automatically.
-
-        Returns:
-            tuple(dict(str: str), dict(str: list(str)), dict(str: str)): three
-                dictionnaries for type, allowed values and documentation. Each
-                of them uses the setting name as key. The type is a str:
-                "file", "workspace", "combobox", "bool" or "string".
-        """
-        types = dict()
-        values = dict()
-        docs = dict()
-        if not self.algorithm:
-            return types, values, docs
-
-        alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
-        alg.initialize()
-        for s in self.settings:
-            p = alg.getProperty(s)
-            if (isinstance(p, FileProperty)):
-                t = "file"
-            elif (isinstance(p, MultipleFileProperty)):
-                t = "files"
-            elif (isinstance(p, (WorkspaceGroupProperty,
-                                 MatrixWorkspaceProperty))):
-                t = "workspace"
-            elif (isinstance(p, StringPropertyWithValue)):
-                if (p.allowedValues):
-                    t = "combobox"
-                else:
-                    t = "string"
-            elif (isinstance(p, BoolPropertyWithValue)):
-                t = "bool"
-            elif (isinstance(p, FloatArrayProperty)):
-                t = "floatArray"
-            elif (isinstance(p, IntArrayProperty)):
-                t = "intArray"
-            else:
-                t = "string"
-
-            types[s] = t
-            values[s] = p.allowedValues
-            docs[s] = p.documentation
-
-        return (types, values, docs)
-
-    def _setDefaultSettings(self):
-        """
-        Set the settings to their defautl values. This method takes the default
-        values directly from the algorithm.
-        """
+        self._parameters = list()
         if not self.algorithm:
             return
         alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
         alg.initialize()
 
-        for s in self.settings:
-            p = alg.getProperty(s)
-            v = p.value
-            if isinstance(v, numpy.ndarray):
-                self.settings[s] = v.tolist()
-            elif v is None:
-                self.settings[s] = ""
-            else:
-                self.settings[s] = v
+        properties = alg.getProperties()
+        for p in properties:
+            parameter = DrillParameter(p.name)
+            parameter.setController(self.controller)
+            parameter.initFromProperty(p)
+            self._parameters.append(parameter)
+
+    def getParameters(self):
+        """
+        Get the parameters of the current algorithm.
+
+        Returns:
+            list(DrillParameter): list of all parameters
+        """
+        return self._parameters
 
     def _getSamplesFromGroup(self, groupName):
         """
@@ -459,7 +396,8 @@ class DrillModel(QObject):
         params = dict()
         if self.acquisitionMode in RundexSettings.FLAGS:
             params.update(RundexSettings.FLAGS[self.acquisitionMode])
-        params.update(self.settings)
+        for p in self._parameters:
+            params[p.getName()] = p.getValue()
 
         sample = self.samples[index]
         # search for master sample
