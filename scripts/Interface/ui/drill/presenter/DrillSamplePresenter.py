@@ -91,7 +91,7 @@ class DrillSamplePresenter:
         else:
             isMaster = self._sample.isMaster()
             groupIndex = self._sample.getGroupIndex()
-            self._table.setRowLabel(index, groupName + str(groupIndex),
+            self._table.setRowLabel(index, groupName + str(groupIndex + 1),
                                     bold=isMaster)
 
     def onProcessStarted(self):

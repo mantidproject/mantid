@@ -127,7 +127,7 @@ class DrillRundexIO:
         samples = drill.getSamples()
         if "SamplesGroups" in json_data and json_data["SamplesGroups"]:
             for groupName, indexes in json_data["SamplesGroups"].items():
-                i = 1
+                i = 0
                 for index in indexes:
                     if index < len(samples):
                         samples[index].setGroup(groupName, i)
