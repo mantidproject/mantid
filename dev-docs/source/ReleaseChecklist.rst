@@ -110,9 +110,9 @@ with the Release Manager.
 Monday, 3 weeks
 ---------------
 
-*  Ensure that Manual testing begins. An overview of what Manual testing is can be found
-   `here <https://www.mantidproject.org/Unscripted_Manual_Testing>`__. Generate the
-   Manual testing issues by following the instructions `here <https://github.com/mantidproject/documents/tree/master/Project-Management/Tools/RoadmapUpdate>`__.
+*  Ensure that Manual testing begins. An overview of the Manual testing to be done is
+   found :ref:`here <Testing>`. Generate the Manual testing issues by following the instructions
+   `here <https://github.com/mantidproject/documents/tree/master/Project-Management/Tools/RoadmapUpdate>`__.
 *  Over the next week or so, read through the Manual testing issues and ensure that any
    serious problems are raised as an issue and marked against the relevant milestone.
 
