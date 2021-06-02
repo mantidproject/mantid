@@ -78,6 +78,10 @@ class DrillParametersPresenter:
                 self.onInvalid("Same parameter provided several times. Only "
                                "the first value will be used.")
                 continue
+            if isinstance(value, str) and value.lower() == "true":
+                value = True
+            if isinstance(value, str) and value.lower() == "false":
+                value = False
             parameter = self._sample.addParameter(name)
             parameter.invalid.connect(self.onInvalid)
             parameter.setValue(value)
