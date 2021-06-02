@@ -23,8 +23,37 @@ class ModelFittingView(BasicFittingView):
         self.general_fitting_options_layout.addWidget(self.model_fitting_data_selector)
 
         # Hide the workspace selector which is used to store the generated matrix workspaces
-        self.workspace_selector.hide()
+        # self.workspace_selector.hide()
+
+    def set_slot_for_results_table_changed(self, slot) -> None:
+        """Connect the slot for the result tables combo box being changed."""
+        self.model_fitting_data_selector.set_slot_for_results_table_changed(slot)
+
+    def set_slot_for_selected_x_changed(self, slot) -> None:
+        """Connect the slot for when the selected X changes."""
+        self.model_fitting_data_selector.set_slot_for_selected_x_changed(slot)
+
+    def set_slot_for_selected_y_changed(self, slot) -> None:
+        """Connect the slot for when the selected Y changes."""
+        self.model_fitting_data_selector.set_slot_for_selected_y_changed(slot)
 
     def update_result_table_names(self, table_names: list) -> None:
-        """Update the data in the parameter display combo box."""
+        """Update the data in the results table combo box."""
         self.model_fitting_data_selector.update_result_table_names(table_names)
+
+    def update_x_and_y_parameters(self, x_parameters: list, y_parameters: list) -> None:
+        """Update the available X and Y parameters in the relevant combo boxes."""
+        self.model_fitting_data_selector.update_x_and_y_parameters(x_parameters, y_parameters)
+
+    @property
+    def current_result_table_index(self) -> str:
+        """Returns the index of the currently displayed result table."""
+        return self.model_fitting_data_selector.current_result_table_index
+
+    def x_parameter(self) -> str:
+        """Returns the selected X parameter name."""
+        return self.model_fitting_data_selector.x_parameter
+
+    def y_parameter(self) -> str:
+        """Returns the selected Y parameter name."""
+        return self.model_fitting_data_selector.y_parameter

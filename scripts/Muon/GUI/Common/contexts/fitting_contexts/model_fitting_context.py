@@ -13,12 +13,14 @@ class ModelFittingContext(BasicFittingContext):
         super(ModelFittingContext, self).__init__(allow_double_pulse_fitting)
 
         self._result_table_names: list = []
+        self._current_result_table_index: int = None
 
-        self._x_parameters: list = []
-        self._x_selected_index: int = None
+        self._x_parameters: dict = {}
+        self._x_selected_parameter: str = None
 
-        self._y_parameters: list = []
-        self._y_selected_index: int = None
+        self._y_parameters: dict = {}
+        self._y_parameter_errors: dict = {}
+        self._y_selected_parameter: str = None
 
     @property
     def result_table_names(self) -> list:
@@ -31,6 +33,49 @@ class ModelFittingContext(BasicFittingContext):
         self._result_table_names = table_names
 
     @property
-    def number_of_result_tables(self):
+    def current_result_table_index(self) -> int:
+        """Returns the index of the currently selected result table."""
+        return self._current_result_table_index
+
+    @current_result_table_index.setter
+    def current_result_table_index(self, index: int) -> None:
+        """Sets the index of the currently selected result table."""
+        if index is not None and index >= self.number_of_result_tables:
+            raise RuntimeError(f"The provided result table index ({index}) is too large.")
+
+        self._current_result_table_index = index
+
+    @property
+    def number_of_result_tables(self) -> int:
         """Returns the number of result tables which are held by the context."""
         return len(self._result_table_names)
+
+    @property
+    def x_parameters(self) -> list:
+        """Returns the available x parameters for the selected results table."""
+        return self._x_parameters
+
+    @x_parameters.setter
+    def x_parameters(self, parameters: list) -> None:
+        """Sets the available x parameters for the selected results table."""
+        self._x_parameters = parameters
+
+    @property
+    def y_parameters(self) -> list:
+        """Returns the available y parameters for the selected results table."""
+        return self._y_parameters
+
+    @y_parameters.setter
+    def y_parameters(self, parameters: list) -> None:
+        """Sets the available y parameters for the selected results table."""
+        self._y_parameters = parameters
+
+    @property
+    def y_parameter_errors(self) -> list:
+        """Returns the available y parameter errors for the selected results table."""
+        return self._y_parameter_errors
+
+    @y_parameter_errors.setter
+    def y_parameter_errors(self, errors: list) -> None:
+        """Sets the available y parameter errors for the selected results table."""
+        self._y_parameter_errors = errors

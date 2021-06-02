@@ -34,7 +34,6 @@ class BasicFittingPresenter:
         self.thread_success = True
         self.enable_editing_notifier = GenericObservable()
         self.disable_editing_notifier = GenericObservable()
-        self.disable_fitting_notifier = GenericObservable()
         self.fitting_calculation_model = None
 
         self.remove_plot_guess_notifier = GenericObservable()
@@ -82,9 +81,9 @@ class BasicFittingPresenter:
         self.update_and_reset_all_data()
 
         if self.model.number_of_datasets == 0:
-            self.disable_fitting_notifier.notify_subscribers()
+            self.view.disable_view()
         else:
-            self.enable_editing_notifier.notify_subscribers()
+            self.view.enable_view()
 
     def handle_gui_changes_made(self, changed_values: dict) -> None:
         """Handle when the good data checkbox is changed in the home tab."""
@@ -100,9 +99,9 @@ class BasicFittingPresenter:
         self.clear_cached_fit_functions()
 
         if self.model.number_of_datasets == 0:
-            self.disable_fitting_notifier.notify_subscribers()
+            self.view.disable_view()
         else:
-            self.enable_editing_notifier.notify_subscribers()
+            self.view.enable_view()
 
     def handle_instrument_changed(self) -> None:
         """Handles when an instrument is changed and switches to normal fitting mode. Overridden by child."""
