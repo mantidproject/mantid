@@ -10,6 +10,7 @@
 """A selection of utility functions related to Qt functionality
 """
 # stdlib modules
+import os
 import os.path as osp
 from contextlib import contextmanager
 from importlib import import_module
@@ -210,3 +211,17 @@ def ensure_widget_is_on_screen(widget):
         y = desktop_geom.bottom() - widget_geom.height()
     window_pos = QPoint(x, y)
     widget.move(window_pos)
+
+
+def force_layer_backing_BigSur():
+    # Force layer-backing on macOS >= Big Sur (11)
+    # or the application hangs
+    # A fix inside Qt is yet to be released:
+    # https://codereview.qt-project.org/gitweb?p=qt/qtbase.git;a=commitdiff;h=c5d904639dbd690a36306e2b455610029704d821
+    # A complication with Big Sur numbering means we check for 10.16 and 11:
+    #   https://eclecticlight.co/2020/08/13/macos-version-numbering-isnt-so-simple/
+    from distutils.version import LooseVersion
+    import platform
+    mac_vers = LooseVersion(platform.mac_ver()[0])
+    if mac_vers >= '11' or mac_vers == '10.16':
+        os.environ['QT_MAC_WANTS_LAYER'] = '1'
