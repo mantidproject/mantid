@@ -544,30 +544,6 @@ class DrillModel(QObject):
         """
         return {k:v for k,v in self.visualSettings.items()}
 
-    def getColumnHeaderData(self):
-        """
-        Get the column names and tooltips in two lists with same length.
-
-        Returns:
-            list(str): list of column names
-            list(str): list of column tooltips
-        """
-        if not self.columns:
-            return [], []
-
-        alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
-        alg.initialize()
-
-        tooltips = list()
-        for c in self.columns:
-            try:
-                p = alg.getProperty(c)
-                tooltips.append(p.documentation)
-            except:
-                tooltips.append(c)
-
-        return self.columns, tooltips
-
     def addSample(self, index):
         """
         Add a sample to the model.
