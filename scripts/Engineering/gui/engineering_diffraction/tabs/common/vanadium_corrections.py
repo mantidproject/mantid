@@ -135,9 +135,9 @@ def handle_van_curves(van_curves, van_path, instrument, rb_num):
     curves_path = generate_van_ws_file_path(van_number, SAVED_FILE_CURVE_SUFFIX, rb_num)
     if len(van_curves) == 2:
         curves_ws = AppendSpectra(InputWorkspace1=van_curves[0], InputWorkspace2=van_curves[1])
+        DeleteWorkspace(van_curves[0])
         DeleteWorkspace(van_curves[1])
     else:
         curves_ws = van_curves[0]
-    DeleteWorkspace(van_curves[0])
     save_van_workspace(curves_ws, curves_path)
     RenameWorkspace(InputWorkspace=curves_ws, OutputWorkspace=CURVES_WORKSPACE_NAME)

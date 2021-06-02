@@ -106,7 +106,7 @@ def convert_single_value_dSpacing_to_TOF(d, diff_consts_ws):
 
 def create_spectrum_list_from_string(str_list):
     array = IntArrayProperty('var', str_list).value
-    int_list = list(array)
+    int_list = [int(i) for i in array]  # cast int32 to int
     return int_list
 
 

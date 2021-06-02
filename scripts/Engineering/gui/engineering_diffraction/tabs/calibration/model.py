@@ -82,7 +82,7 @@ class CalibrationModel(object):
             elif spectrum_numbers is None:
                 self._plot_tof_fit_single_bank_or_custom(bank)
             else:
-                self._plot_tof_fit_single_bank_or_custom("cropped")
+                self._plot_tof_fit_single_bank_or_custom("Cropped")
         difa = [row['difa'] for row in cal_params]
         difc = [row['difc'] for row in cal_params]
         tzero = [row['tzero'] for row in cal_params]

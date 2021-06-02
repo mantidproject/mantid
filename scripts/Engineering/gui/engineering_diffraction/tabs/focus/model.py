@@ -62,15 +62,16 @@ class FocusModel(object):
         output_workspaces = []  # List of collated workspaces to plot.
         df_kwarg, name, region_calib = None, None, None
         if spectrum_numbers:
-            grp_ws = create_custom_grouping_workspace(spectrum_numbers, sample_paths[0])
+            inst_ws = path_handling.load_workspace(sample_paths[0])
+            grp_ws = create_custom_grouping_workspace(spectrum_numbers, inst_ws)
             df_kwarg = {"GroupingWorkspace": grp_ws}
-            region_calib = "engggui_calibration_cropped"
-            name = 'cropped'
+            region_calib = "engggui_calibration_Cropped"
+            name = 'Cropped'
         elif custom_cal:
             # TODO this functionality has not yet been fully implemented
             df_kwarg = {"GroupingFileName": custom_cal}
-            region_calib = "engggui_calibration_cropped"
-            name = 'customcal'
+            region_calib = "engggui_calibration_Custom"
+            name = 'Custom'
         if df_kwarg:
             for sample_path in sample_paths:
                 sample_workspace = path_handling.load_workspace(sample_path)
@@ -79,9 +80,9 @@ class FocusModel(object):
                 dspacing_output_name = tof_output_name + "_dSpacing"
                 self._run_focus(sample_workspace, tof_output_name, integration_workspace,
                                 curves_workspace, df_kwarg, full_calib_workspace, region_calib)
-                output_workspaces.append(tof_output_name)
-                self._save_output(instrument, sample_path, "cropped", tof_output_name, rb_num)
-                self._save_output(instrument, sample_path, "cropped", dspacing_output_name, rb_num)
+                output_workspaces.append([tof_output_name])
+                self._save_output(instrument, sample_path, "Cropped", tof_output_name, rb_num)
+                self._save_output(instrument, sample_path, "Cropped", dspacing_output_name, rb_num)
                 self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
         else:
             for sample_path in sample_paths:
