@@ -12,12 +12,28 @@ using namespace Mantid::API;
 using namespace Mantid::CurveFitting::EstimatePeakParameters;
 using Mantid::HistogramData::Histogram;
 
-/*
-namespace {
-enum EstimatePeakWidth { NoEstimation, Observation, InstrumentResolution };
-enum PeakFitResult { NOSIGNAL, LOWPEAK, OUTOFBOUND, GOOD };
+/** Get an index of a value in a sorted vector.  The index should be the item
+ * with value nearest to X
+ */
+template <typename vector_like>
+size_t findXIndex(const vector_like &vecx, const double x, const size_t startindex = 0) {
+  size_t index;
+  if (x <= vecx.front()) {
+    index = 0;
+  } else if (x >= vecx.back()) {
+    index = vecx.size() - 1;
+  } else {
+    const auto fiter = std::lower_bound(vecx.cbegin() + startindex, vecx.cend(), x);
+    if (fiter == vecx.cend())
+      throw std::runtime_error("It seems impossible to have this value. ");
+
+    index = static_cast<size_t>(fiter - vecx.cbegin());
+    if (index > 0 && (x - vecx[index - 1] < vecx[index] - x))
+      --index;
+  }
+
+  return index;
 }
-*/
 
 //----------------------------------------------------------------------------------------------
 /** Guess/estimate peak center and thus height by observation

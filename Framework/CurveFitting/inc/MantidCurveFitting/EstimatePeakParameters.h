@@ -22,6 +22,8 @@ enum EstimatePeakWidth { NoEstimation, Observation, InstrumentResolution };
 enum PeakFitResult { NOSIGNAL, LOWPEAK, OUTOFBOUND, GOOD };
 } // namespace EstimatePeakParameters
 
+template <typename vector_like> size_t findXIndex(const vector_like &vecx, const double x, const size_t startindex = 0);
+
 /// observe peak center
 int observePeakCenter(const HistogramData::Histogram &histogram, API::FunctionValues &bkgd_values, size_t start_index,
                       size_t stop_index, double &peak_center, size_t &peak_center_index, double &peak_height);

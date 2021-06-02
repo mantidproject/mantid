@@ -194,34 +194,6 @@ void PeakFitResult::setBadRecord(size_t ipeak, const double peak_position) {
 } // namespace FitPeaksAlgorithm
 
 //----------------------------------------------------------------------------------------------
-namespace {
-
-/** Get an index of a value in a sorted vector.  The index should be the item
- * with value nearest to X
- */
-template <typename vector_like>
-size_t findXIndex(const vector_like &vecx, const double x, const size_t startindex = 0) {
-  size_t index;
-  if (x <= vecx.front()) {
-    index = 0;
-  } else if (x >= vecx.back()) {
-    index = vecx.size() - 1;
-  } else {
-    const auto fiter = lower_bound(vecx.cbegin() + startindex, vecx.cend(), x);
-    if (fiter == vecx.cend())
-      throw runtime_error("It seems impossible to have this value. ");
-
-    index = static_cast<size_t>(fiter - vecx.cbegin());
-    if (index > 0 && (x - vecx[index - 1] < vecx[index] - x))
-      --index;
-  }
-
-  return index;
-}
-
-} // namespace
-
-//----------------------------------------------------------------------------------------------
 FitPeaks::FitPeaks()
     : m_fitPeaksFromRight(true), m_fitIterations(50), m_numPeaksToFit(0), m_minPeakHeight(20.), m_bkgdSimga(1.),
       m_peakPosTolCase234(false) {}
