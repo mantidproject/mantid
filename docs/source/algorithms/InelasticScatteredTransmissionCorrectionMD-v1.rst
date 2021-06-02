@@ -22,10 +22,9 @@ Usage
 
 **Example - Run Transmission Correction**
 
-.. testcode:: ExApplyDetailedBalanceMDSimple
+.. testcode:: InelasticScatteredTransmissionCorrectionSingleRun
 
-   we1 = CreateSampleWorkspace(InstrumentName='HYSPEC',
-                               WorkspaceType='Event',
+   we1 = CreateSampleWorkspace(WorkspaceType='Event',
                                Function='Flat background',
                                BankPixelWidth=1,
                                XUnit='DeltaE',
@@ -49,9 +48,9 @@ Usage
    we1s = ScaleX(InputWorkspace=we1s, Factor=20., Operation='Add') # Ei - Ef converts back to DeltaE
    md1_old = ConvertToMD(InputWorkspace=we1s, QDimensions='Q3D')
 
-   # use algorithm HYSPECScatteredTransmissionCorrectionMD
+   # use algorithm InelasticScatteredTransmissionCorrectionMD
    md1 = ConvertToMD(InputWorkspace=we1, QDimensions='Q3D')
-   md1_new = HYSPECScatteredTransmissionCorrectionMD(md1, ExponentFactor=c)
+   md1_new = InelasticScatteredTransmissionCorrectionMD(md1, ExponentFactor=c)
 
    r = CompareMDWorkspaces(md1_old, md1_new, CheckEvents=True, Tolerance=0.00001)
    print('Number of MDEvents: {} == {}'.format(md1_old.getNEvents(), md1_new.getNEvents()))

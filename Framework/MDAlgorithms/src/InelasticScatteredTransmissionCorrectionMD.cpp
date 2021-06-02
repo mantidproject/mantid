@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 // local
-#include "MantidMDAlgorithms/HYSPECScatteredTransmissionCorrectionMD.h"
+#include "MantidMDAlgorithms/InelasticScatteredTransmissionCorrectionMD.h"
 
 // 3rd party
 #include "MantidAPI/ExperimentInfo.h"
@@ -31,11 +31,11 @@ namespace MDAlgorithms {
 constexpr double EMPTY_FLT() noexcept { return std::numeric_limits<float>::max() / 2; }
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(HYSPECScatteredTransmissionCorrectionMD)
+DECLARE_ALGORITHM(InelasticScatteredTransmissionCorrectionMD)
 
 //---------------------------------------------------------------------------------------------------------
 
-void HYSPECScatteredTransmissionCorrectionMD::init() {
+void InelasticScatteredTransmissionCorrectionMD::init() {
   declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Input MDEventWorkspace. Either QSample (or QLab) frame plus DeltaE, or just Qmod plus DeltaE");
 
@@ -51,7 +51,7 @@ void HYSPECScatteredTransmissionCorrectionMD::init() {
 
 //---------------------------------------------------------------------------------------------------------
 
-std::map<std::string, std::string> HYSPECScatteredTransmissionCorrectionMD::validateInputs() {
+std::map<std::string, std::string> InelasticScatteredTransmissionCorrectionMD::validateInputs() {
   std::map<std::string, std::string> output;
   // validate input workspace
   std::string workspace_error = checkInputWorkspace();
@@ -66,7 +66,7 @@ std::map<std::string, std::string> HYSPECScatteredTransmissionCorrectionMD::vali
 
 //---------------------------------------------------------------------------------------------------------
 
-std::string HYSPECScatteredTransmissionCorrectionMD::checkInputWorkspace() {
+std::string InelasticScatteredTransmissionCorrectionMD::checkInputWorkspace() {
   // Verify the input workspace if of type MDEventWorkspace
   IMDEventWorkspace_sptr inputws = getProperty("InputWorkspace");
   if (!inputws)
@@ -77,15 +77,8 @@ std::string HYSPECScatteredTransmissionCorrectionMD::checkInputWorkspace() {
   if (dimensionError != "")
     return dimensionError;
 
-  uint16_t nRuns(inputws->getNumExperimentInfo());
-  // Verify HYSPEC instrument
-  for (uint16_t i = 0; i < inputws->getNumExperimentInfo(); i++) {
-    const auto expInfo = inputws->getExperimentInfo(i);
-    if (expInfo->getInstrument()->getName() != "HYSPEC")
-      return "Instrument is not HYSPEC";
-  }
-
   // Verify input workspace has an Efixed metadata
+  uint16_t nRuns(inputws->getNumExperimentInfo());
   mEfixedValues.resize(nRuns);
   for (uint16_t i = 0; i < inputws->getNumExperimentInfo(); i++) {
     const auto expInfo = inputws->getExperimentInfo(i);
@@ -100,7 +93,7 @@ std::string HYSPECScatteredTransmissionCorrectionMD::checkInputWorkspace() {
 
 //---------------------------------------------------------------------------------------------------------
 
-std::string HYSPECScatteredTransmissionCorrectionMD::checkInputMDDimensions() {
+std::string InelasticScatteredTransmissionCorrectionMD::checkInputMDDimensions() {
   std::string errormsg("");
   IMDEventWorkspace_sptr inputws = getProperty("InputWorkspace");
   size_t numdims = inputws->getNumDims();
@@ -142,7 +135,7 @@ std::string HYSPECScatteredTransmissionCorrectionMD::checkInputMDDimensions() {
 //---------------------------------------------------------------------------------------------------------
 
 template <typename MDE, size_t nd>
-void HYSPECScatteredTransmissionCorrectionMD::correctForTransmission(typename MDEventWorkspace<MDE, nd>::sptr ws) {
+void InelasticScatteredTransmissionCorrectionMD::correctForTransmission(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   double cDouble = getProperty("ExponentFactor");
   float c = static_cast<float>(cDouble);
   size_t deltaEIndex = ws->getNumDims() - 1;
@@ -178,7 +171,7 @@ void HYSPECScatteredTransmissionCorrectionMD::correctForTransmission(typename MD
 
 //---------------------------------------------------------------------------------------------------------
 
-void HYSPECScatteredTransmissionCorrectionMD::exec() {
+void InelasticScatteredTransmissionCorrectionMD::exec() {
   // Get input workspace
   IMDEventWorkspace_sptr inputWs = getProperty("InputWorkspace");
 
