@@ -483,6 +483,7 @@ void CreateSampleWorkspace::replaceAll(std::string &str, const std::string &from
  * @param bankDistanceFromSample :: Distance of first bank from sample (defaults
  *to 5.0m)
  * @param sourceSampleDistance :: The distance from the source to the sample
+ * @param instrName :: Name of the underlying instrument, can be used to mock existing beamlines
  * @returns A shared pointer to the generated instrument
  */
 Instrument_sptr
