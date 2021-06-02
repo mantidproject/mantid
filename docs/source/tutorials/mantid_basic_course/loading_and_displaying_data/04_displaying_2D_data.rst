@@ -17,13 +17,13 @@ Here we will show how to visually inspect entire datasets.
    the other spectra, and the color scale has adjusted accordingly.
 #. To make the colour fill plot more sensitive to its smaller features,
    open the Plot Options Menu by clicking on the Gear Icon. Click on the Images Tab of this menu and adjust the Scale to "Logarithmic" and click "Apply". (Note you could have changed the scale by right-clicking on the plot image and setting "Color bar" to "Log")
-#. While you are here feel free to change the other Figure options to see what is possible! I personally like to change the Colormap to "twilight".
+#. While you are here feel free to change the other Figure options to see what is possible! e.g. change the Colormap to one you prefer.
 
 .. figure:: /images/ColourFillPlotMar11060.png
    :alt: ColourFillPlotMar11060
    :align: center
 
-If you would like to create your own colormap, there is `more information here <`https://docs.mantidproject.org/nightly/plotting/index.html#custom-colormap-mantidworkbench>`_.
+If you would like to create your own colormap, see :ref:`custom-colormap-mantidworkbench`.
 
 
 Slice Viewer
