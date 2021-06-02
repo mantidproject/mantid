@@ -13,4 +13,6 @@ New and Improved
 Bugfixes
 --------
 
+- Scroll bars added to about dialog if screen resolution is too low.
+
 :ref:`Release 6.2.0 <v6.2.0>`
