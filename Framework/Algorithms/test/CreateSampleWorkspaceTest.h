@@ -79,7 +79,7 @@ public:
 
     /* Check the property groups */
     std::vector<Property *> instrument_properties = alg.getPropertiesInGroup("Instrument");
-    TS_ASSERT_EQUALS(instrument_properties.size(), 8);
+    TS_ASSERT_EQUALS(instrument_properties.size(), 9);
 
     /* Execute the algorithm */
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
