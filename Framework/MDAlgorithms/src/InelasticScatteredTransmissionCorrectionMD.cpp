@@ -41,6 +41,7 @@ void InelasticScatteredTransmissionCorrectionMD::init() {
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
+  mustBePositive->setLowerExclusive(true);
   declareProperty(
       std::make_unique<PropertyWithValue<double>>("ExponentFactor", EMPTY_DBL(), mustBePositive, Direction::Input),
       "Depletion rate exponent");
