@@ -54,8 +54,8 @@ Click Menus
 |
 |
 
-|FigureOptionsGear.png| ptions Menu
------------------------------------
+Options Menu
+------------
 
 .. figure:: /images/PlotOptions.png
    :alt: Plot Options Axes Legend
@@ -152,8 +152,8 @@ Click Menus
 |
 |
 
-|FigureOptionsGear.png| ptions Menu
------------------------------------
+Options Menu
+------------
 
 Tiled plots are essentially an array of axes (1D plots) on the same figure. As such, when editing them in the Options Menu, you should take care to select the correct set of axes:
 
