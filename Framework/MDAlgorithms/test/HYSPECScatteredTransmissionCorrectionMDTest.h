@@ -41,14 +41,14 @@ public:
    */
   void test_single_run() {
     std::vector<std::string> qDims = {"Q3D", "|Q|"};
-    for (const auto qDim : qDims) {
+    for (auto qDim : qDims) {
       createEventWs("events", "20.");
       // convert, then correct
       convertToMD("events", "md", qDim);
       applyCorrectionToMD("md", 1. / 11);
       // correct, then convert
       applyCorrectionToEvents("events", 1. / 11);
-      convertToMD("events", "expected", "Q3D");
+      convertToMD("events", "expected", qDim);
       TS_ASSERT(compareMDWorkspaces("md", "expected"))
       std::vector<std::string> leftOvers{"events", "md", "expected"};
       cleanup(leftOvers);
@@ -56,6 +56,7 @@ public:
   }
 
   void test_merged_runs() {
+    double factor(1. / 11);
     std::vector<std::string> qDims = {"Q3D", "|Q|"};
     for (const auto qDim : qDims) {
       createEventWs("events1", "20.");
@@ -64,10 +65,10 @@ public:
       convertToMD("events1", "md1", qDim);
       convertToMD("events2", "md2", qDim);
       mergeMD("md1", "md2", "md");
-      applyCorrectionToMD("md", 1. / 11);
+      applyCorrectionToMD("md", factor);
       // correct, convert, then merge
-      applyCorrectionToEvents("events1", 1. / 11);
-      applyCorrectionToEvents("events2", 1. / 11);
+      applyCorrectionToEvents("events1", factor);
+      applyCorrectionToEvents("events2", factor);
       convertToMD("events1", "md1", qDim);
       convertToMD("events2", "md2", qDim);
       mergeMD("md1", "md2", "expected");
@@ -77,9 +78,8 @@ public:
     }
   }
 
-  /**
-   * @brief Create an EventWorkspace with flat background in unit of DeltaE
-   */
+private:
+  /// Create an EventWorkspace with flat background in units of DeltaE
   void createSampleWorkspace(std::string outputWorkspace, double xmin = -10, double xmax = 19., double binwidth = 0.5) {
     // create sample workspace
     auto create_alg = AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
@@ -93,15 +93,13 @@ public:
     create_alg->setProperty("XMax", xmax);
     create_alg->setProperty("BinWidth", binwidth);
     create_alg->setProperty("NumEvents", 1000);
-    create_alg->setPropertyValue("OutputWorkspace", outputWorkspace);
+    create_alg->setProperty("OutputWorkspace", outputWorkspace);
     create_alg->execute();
     TS_ASSERT(create_alg->isExecuted());
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputWorkspace))
   }
 
-  /**
-   * @brief Add sample log to a workspace
-   */
+  /// Add sample log to a workspace
   void addSampleLog(std::string inputWorkspace, std::string log_name, std::string log_text, std::string log_type) {
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("AddSampleLog");
     alg->initialize();
@@ -114,9 +112,7 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist(inputWorkspace))
   }
 
-  /**
-   * @brief Move a bank in the workspace
-   */
+  /// Move a bank in the workspace
   void moveBank(std::string inputWorkspace, std::string bankName, double xShift, double zShift) {
     auto alg = AlgorithmManager::Instance().createUnmanaged("MoveInstrumentComponent");
     alg->initialize();
@@ -130,9 +126,7 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist(inputWorkspace))
   }
 
-  /**
-   * @brief Set Goniometer axis
-   */
+  /// Set Goniometer axis
   void setGoniometer(std::string inputWorkspace, std::string axisName, std::string axisValue) {
     auto alg = AlgorithmManager::Instance().createUnmanaged("SetGoniometer");
     alg->initialize();
@@ -143,21 +137,20 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist(inputWorkspace))
   }
 
-  /**
-   * @brief Convert to MD workspace
-   */
+  /// Convert to MD workspace
   void convertToMD(std::string inputWorkspace, std::string outputWorkspace, std::string qDimensions) {
     auto alg = AlgorithmManager::Instance().createUnmanaged("ConvertToMD");
     alg->initialize();
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", inputWorkspace);
-    alg->setPropertyValue("OutputWorkspace", outputWorkspace);
-    alg->setPropertyValue("QDimensions", qDimensions);
+    alg->setProperty("OutputWorkspace", outputWorkspace);
+    alg->setProperty("QDimensions", qDimensions);
     alg->execute();
     TS_ASSERT(alg->isExecuted());
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputWorkspace))
   }
 
+  /// Add or rescale the "TOF" of an event. In these tests, the "TOF" is DeltaE
   void scaleX(std::string InputWorkspace, double factor, std::string operation, std::string outputWorkspace = "") {
     if (outputWorkspace.size() == 0)
       outputWorkspace = InputWorkspace;
@@ -172,6 +165,7 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputWorkspace))
   }
 
+  /// Generate an event workspace in units of DeltaE with an initial energy
   void createEventWs(std::string outputWsName, std::string Ei) {
     double e = std::stod(Ei);
     createSampleWorkspace(outputWsName, -e / 2., e - 1.);
@@ -182,6 +176,7 @@ public:
     setGoniometer(outputWsName, "Axis0", "0,0,1,0,1");
   }
 
+  /// Apply the transmission correction to an input MD workspace
   void applyCorrectionToMD(std::string inputWorkspace, double factor, std::string outputWorkspace = "") {
     if (outputWorkspace.size() == 0)
       outputWorkspace = inputWorkspace;
@@ -196,6 +191,7 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputWorkspace))
   }
 
+  /// Apply the transmission correction to an input events workspace in units of DeltaE
   void applyCorrectionToEvents(std::string inputWorkspace, double factor, std::string outputWorkspace = "") {
     if (outputWorkspace.size() == 0)
       outputWorkspace = inputWorkspace; // in-place changes
@@ -212,6 +208,7 @@ public:
     alg->setProperty("Operation", "Multiply");
     alg->setProperty("C0", 1.0);
     alg->setProperty("C1", -factor); // negative, because we want to apply exp(factor*Ef)
+    alg->setProperty("OutputWorkspace", outputWorkspace);
     alg->execute();
     TS_ASSERT(alg->isExecuted());
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputWorkspace))
@@ -235,10 +232,8 @@ public:
   bool compareMDWorkspaces(std::string ws1, std::string ws2) {
     auto md1 = std::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(ws1));
     auto md2 = std::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(ws2));
-
     if (md1->getNEvents() != md2->getNEvents())
       return false;
-
     auto alg = AlgorithmManager::Instance().createUnmanaged("CompareMDWorkspaces");
     alg->initialize();
     alg->setPropertyValue("Workspace1", ws1);
@@ -250,6 +245,7 @@ public:
     return alg->getProperty("Equals");
   }
 
+  /// Delete a series of input workspaces using the Analysis Data Service
   void cleanup(const std::vector<std::string> &workspaces) {
     for (const auto ws : workspaces) {
       if (AnalysisDataService::Instance().doesExist(ws))
