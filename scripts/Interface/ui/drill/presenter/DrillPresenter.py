@@ -10,11 +10,11 @@ import os
 
 from qtpy.QtWidgets import QFileDialog, QMessageBox
 
-from ..view.DrillSettingsDialog import DrillSettingsDialog
 from ..model.DrillModel import DrillModel
 from .DrillExportPresenter import DrillExportPresenter
 from .DrillContextMenuPresenter import DrillContextMenuPresenter
 from .DrillSamplePresenter import DrillSamplePresenter
+from .DrillSettingsPresenter import DrillSettingsPresenter
 
 
 class DrillPresenter:
@@ -399,28 +399,8 @@ class DrillPresenter:
         generates automatically its fields on the basis of settings types. It
         also connects the differents signals to get validation of user inputs.
         """
-        self.view.setDisabled(True)
-        sw = DrillSettingsDialog(self.view)
-        types, values, doc = self.model.getSettingsTypes()
-        sw.initWidgets(types, values, doc)
-        sw.setSettings(self.model.getSettings())
-        self.model.paramOk.connect(
-                lambda sample, param: sw.onSettingValidation(param, True)
-                )
-        self.model.paramError.connect(
-                lambda sample, param, msg: sw.onSettingValidation(param, False,
-                                                                  msg)
-                )
-        sw.valueChanged.connect(
-                lambda p : self.model.checkParameter(p, sw.getSettingValue(p))
-                )
-        sw.accepted.connect(
-                lambda : self.model.setSettings(sw.getSettings())
-                )
-        sw.finished.connect(
-                lambda : self.view.setDisabled(False)
-                )
-        sw.show()
+        parameters = self.model.getParameters()
+        presenter = DrillSettingsPresenter(self.view, parameters)
 
     def onShowExportDialog(self, dialog):
         exportModel = self.model.getExportModel()
