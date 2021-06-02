@@ -52,7 +52,6 @@ class DrillPresenter:
                 self.model.setCycleAndExperiment)
         self.view.rowAdded.connect(self.onRowAdded)
         self.view.rowDeleted.connect(self.model.deleteSample)
-        self.view.dataChanged.connect(self.onDataChanged)
         self.view.groupSelectedRows.connect(self.onGroupSelectedRows)
         self.view.ungroupSelectedRows.connect(self.onUngroupSelectedRows)
         self.view.setMasterRow.connect(self.onSetMasterRow)
@@ -96,56 +95,6 @@ class DrillPresenter:
         """
         self.view.table.addRow(sample.getIndex())
         DrillSamplePresenter(self.view.table, sample)
-
-    def onDataChanged(self, row, column):
-        """
-        Triggered when the view notifies a change in the table.
-
-        Args:
-            row (int): row index
-            column (int): column index
-        """
-        contents = self.view.getCellContents(row, column)
-        self.view.setWindowModified(True)
-        if column == "CustomOptions":
-            params = {}
-            if not contents:
-                self.onParamOk(row, column)
-                for name in self._customOptions:
-                    self.model.changeParameter(row, name, "")
-                self._customOptions = set()
-                return
-            for option in contents.split(';'):
-                if option and '=' not in option:
-                    self.onParamError(row, column, "Please provide semicolon "
-                                      "separated key=value pairs.")
-                    return
-                try:
-                    name = option.split("=")[0].strip()
-                    value = option.split("=")[1].strip()
-                except:
-                    self.onParamError(row, column, "Please provide semicolon "
-                                      "separated key=value pairs.")
-                    return
-                if name in self.view.columns:
-                    self.onParamError(row, column, "Please use the table to "
-                                      "set a parameter for which a column "
-                                      "exists.")
-                    return
-                if value in ['true', 'True', 'TRUE']:
-                    value = True
-                if value in ['false', 'False', 'FALSE']:
-                    value = False
-                params[name] = value
-                currentOptions = set()
-            for name,value in params.items():
-                currentOptions.add(name)
-                self.model.changeParameter(row, name, value)
-            for name in self._customOptions.difference(currentOptions):
-                self.model.changeParameter(row, name, "")
-            self._customOptions = currentOptions
-        else:
-            self.model.changeParameter(row, column, contents)
 
     def onAutomaticFilling(self):
         """

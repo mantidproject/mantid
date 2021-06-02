@@ -62,14 +62,6 @@ class DrillView(QMainWindow):
     rowDeleted = Signal(int)
 
     """
-    Sent when a cell contents has changed.
-    Args:
-        int: row index
-        str: column name
-    """
-    dataChanged = Signal(int, str)
-
-    """
     Sent when a new group is requested.
     """
     groupSelectedRows = Signal()
