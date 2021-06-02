@@ -7,7 +7,7 @@
 #pragma once
 
 // local
-#include "MantidMDAlgorithms/HYSPECScatteredTransmissionCorrectionMD.h"
+#include "MantidMDAlgorithms/InelasticScatteredTransmissionCorrectionMD.h"
 
 // 3rd party
 #include "MantidAPI/AlgorithmManager.h"
@@ -19,10 +19,10 @@
 using namespace Mantid::API;
 using namespace Mantid::MDAlgorithms;
 
-class HYSPECScatteredTransmissionCorrectionMDTest : public CxxTest::TestSuite {
+class InelasticScatteredTransmissionCorrectionMDTest : public CxxTest::TestSuite {
 public:
   void test_Init() {
-    HYSPECScatteredTransmissionCorrectionMD alg;
+    InelasticScatteredTransmissionCorrectionMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
@@ -83,7 +83,6 @@ private:
     create_alg->initialize();
     create_alg->setPropertyValue("WorkspaceType", "Event");
     create_alg->setPropertyValue("Function", "Flat background");
-    create_alg->setProperty("InstrumentName", "HYSPEC");
     create_alg->setProperty("BankPixelWidth", 1);
     create_alg->setProperty("XUnit", "DeltaE");
     create_alg->setProperty("XMin", xmin);
@@ -181,7 +180,7 @@ private:
   void applyCorrectionToMD(std::string inputWorkspace, double factor, std::string outputWorkspace = "") {
     if (outputWorkspace.size() == 0)
       outputWorkspace = inputWorkspace;
-    HYSPECScatteredTransmissionCorrectionMD alg;
+    InelasticScatteredTransmissionCorrectionMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     alg.setPropertyValue("InputWorkspace", inputWorkspace);
