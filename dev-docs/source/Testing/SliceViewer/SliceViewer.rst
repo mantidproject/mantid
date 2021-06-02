@@ -11,26 +11,25 @@ Introduction
 
 The Sliceviewer in Workbench has the joint functionality of the SpectrumViewer and SliceViewer from MantidPlot. So while the advanced use cases for multi-dimensional diffraction data are important to test, it is also worth checking more basic uses, for example opening a Workspace2D and examining the subplots and dynamic cursor data.
 
-See here for a brief :ref:`Overview of the Sliceviewer<mantid:sliceviewer_release>` in Workbench.
+See here for a brief overview of the :ref:`sliceviewer`.
 
 
 Data
 ----
 
-- 2D data (normal MatrixWorkspace), simply load ``CNCS_7860_event.nxs`` from the `TrainingCourseData <https://download.mantidproject.org/>`_.
+- Load 2D data (normal MatrixWorkspace), simply load ``CNCS_7860_event.nxs`` from the `TrainingCourseData <https://download.mantidproject.org/>`_. We will also load in some SXD data later on, it is good to test the Sliceviewer on both MatrixWorkspaces as the CNCS data was taken in event mode and the SXD data in histogram mode.
 
-- Create fake 4D data and take a 3D cut:
+- Create fake 4D data and take a 3D and 2D cut:
 
 .. code-block:: python
 
 	from mantid.simpleapi import *
 
-	md_4D = CreateMDWorkspace(Dimensions=4, Extents=[-1,1,-1,1,-1,1,-10,10],
-        Names="H,K,L,E", Frames='HKL,HKL,HKL,General Frame',Units='r.l.u.,r.l.u.,r.l.u.,meV')
+	md_4D = CreateMDWorkspace(Dimensions=4, Extents=[-1,1,-1,1,-1,1,-10,10], Names="H,K,L,E", Frames='HKL,HKL,HKL,General Frame',Units='r.l.u.,r.l.u.,r.l.u.,meV')
 	FakeMDEventData(InputWorkspace=md_4D, PeakParams='500000,0,0,0,0,3') # 4D data
 	# Create a histogrammed (binned) workspace with 100 bins in each of the H, K and L dimensions
 	mdHisto_3D = BinMD(InputWorkspace=md_4D, AlignedDim0='H,-1,1,100', AlignedDim1='K,-1,1,100', AlignedDim2='L,-1,1,100') # 3D cut
-    histoWS_2D = BinMD(InputWorkspace=md_4D, AlignedDim0='H,-1,1,100', AlignedDim1='K,-1,1,100') # 2D cut
+	mdHisto_2D = BinMD(InputWorkspace=md_4D, AlignedDim0='H,-1,1,100', AlignedDim1='K,-1,1,100') # 2D cut
 - Create an MD workspace with non-orthogonal axes:
 
 .. code-block:: python
@@ -58,11 +57,9 @@ Data
 
 .. code-block:: python
 
-	FindSXPeaks(InputWorkspace='SXD23767', PeakFindingStrategy='AllPeaks', AbsoluteBackground=1500, \
-	    ResolutionStrategy='AbsoluteResolution', XResolution=500, PhiResolution=5, TwoThetaResolution=5, \
-	    OutputWorkspace='peaks')
+	FindSXPeaks(InputWorkspace='SXD23767', PeakFindingStrategy='AllPeaks', AbsoluteBackground=1500, ResolutionStrategy='AbsoluteResolution', XResolution=500, PhiResolution=5, TwoThetaResolution=5, OutputWorkspace='peaks')
 	FindUBUsingLatticeParameters(PeaksWorkspace='peaks', a=5.65, b=5.65, c=5.65, alpha=90, beta=90, gamma=90, FixParameters=True)
-    IndexPeaks(PeaksWorkspace='peaks')
+	IndexPeaks(PeaksWorkspace='peaks')
 
 - Create an Integrated PeaksWorkspace:
 
@@ -143,7 +140,7 @@ This functionality only applies only to 3D MD workspaces - specifically you shou
 7. Line subplots and Region of Interest integration
 ###################################################
 
-**(disabled for non-orthogonal data)**
+**(this functionality is disabled when non-orthogonal view is enabled)**
 
 .. figure:: ../../../../docs/source/images/wb-sliceviewer51-roibutton.png
    :class: screenshot
@@ -179,7 +176,7 @@ This functionality only applies only to 3D MD workspaces - specifically you shou
 
 - Delete the workspace and Sliceviewer should close
 - Rename the workspace and Sliceviewer should stay open and continue to work
-- Change the data in the workspace by cropping or running some algorithm (e.g. double the data ``md_non_ortho *= 2``)
+- Change the data in the workspace by cropping or running some algorithm (e.g. double the data ``SXD_MD_nonortho *= 2``)
 - Delete rows or re-integrate a PeaksWorkspace that is overlaid.
 
 .. |PickTabAddPeakButton.png| image:: ../../../../docs/source/images/PickTabAddPeakButton.png
