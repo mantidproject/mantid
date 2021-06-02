@@ -179,7 +179,7 @@ class DrillRundexIO:
             json_data[RundexSettings.SAMPLES_JSON_KEY] = list()
             for sample in samples:
                 json_data[RundexSettings.SAMPLES_JSON_KEY].append(
-                        sample.getParameters())
+                        sample.getParameterValues())
 
         # groups
         groups = drill.getSamplesGroups()
