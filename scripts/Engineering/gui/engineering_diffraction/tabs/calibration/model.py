@@ -157,14 +157,21 @@ class CalibrationModel(object):
     def _plot_tof_fit(self):
         bank_1_ws = Ads.retrieve("engggui_tof_peaks_bank_1")
         bank_2_ws = Ads.retrieve("engggui_tof_peaks_bank_2")
+        bank_1_residuals_ws = Ads.retrieve("engggui_tof_peaks_bank_1_residuals")
+        bank_2_residuals_ws = Ads.retrieve("engggui_tof_peaks_bank_2_residuals")
         # Create plot
         fig = plt.figure()
-        gs = gridspec.GridSpec(1, 2)
-        plot_bank_1 = fig.add_subplot(gs[0], projection="mantid")
-        plot_bank_2 = fig.add_subplot(gs[1], projection="mantid")
+        gs = gridspec.GridSpec(2, 2)
+        plot_bank_1 = fig.add_subplot(gs[0, 0], projection="mantid")
+        plot_bank_2 = fig.add_subplot(gs[0, 1], projection="mantid")
+        plot_res_1 = fig.add_subplot(gs[1, 0], projection="mantid")
+        plot_res_2 = fig.add_subplot(gs[1, 1], projection="mantid")
 
         for ax, ws, bank in zip([plot_bank_1, plot_bank_2], [bank_1_ws, bank_2_ws], [1, 2]):
             self._add_plot_to_axes(ax, ws, bank)
+        for ax, ws in zip([plot_res_1, plot_res_2], [bank_1_residuals_ws, bank_2_residuals_ws]):
+            self._add_residuals_to_axes(ax, ws)
+        fig.tight_layout()
         fig.show()
 
     def _plot_tof_fit_single_bank_or_custom(self, bank):
@@ -179,10 +186,18 @@ class CalibrationModel(object):
     def _add_plot_to_axes(ax, ws, bank):
         ax.plot(ws, wkspIndex=0, linestyle="", marker="o", markersize="3")
         ax.plot(ws, wkspIndex=1, linestyle="--", marker="o", markersize="3")
+        ax.errorbar(ws, wkspIndex=0, label="TOF Error", capsize=2)
         ax.set_title("Engg Gui TOF Peaks Bank " + str(bank))
         ax.legend(("Peaks Fitted", "TOF Quadratic Fit"))
+        ax.set_xlabel("")  # hide here as set automatically
+        ax.set_ylabel("Fitted Peaks Centre(TOF, \u03BCs)")
+
+    @staticmethod
+    def _add_residuals_to_axes(ax, ws):
+        ax.errorbar(ws, 'o', wkspIndex=0, capsize=2)
+        ax.axhline()
         ax.set_xlabel("Expected Peaks Centre(dSpacing, A)")
-        ax.set_ylabel("Fitted Peaks Centre(TOF, us)")
+        ax.set_ylabel("Residuals \u03BCs")
 
     @staticmethod
     def run_calibration(ceria_ws,
