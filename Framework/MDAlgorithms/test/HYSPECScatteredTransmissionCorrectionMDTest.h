@@ -238,7 +238,7 @@ private:
     alg->initialize();
     alg->setPropertyValue("Workspace1", ws1);
     alg->setPropertyValue("Workspace2", ws2);
-    alg->setProperty("Tolerance", 0.0001);
+    alg->setProperty("Tolerance", 0.001);
     alg->setProperty("CheckEvents", false);
     alg->execute();
     TS_ASSERT(alg->isExecuted());
