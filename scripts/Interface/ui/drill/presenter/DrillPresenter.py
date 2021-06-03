@@ -393,15 +393,24 @@ class DrillPresenter:
     def _saveDataQuestion(self):
         """
         Open a dialog to ask the user if he wants to save the rundex file.
+
+        Returns:
+            bool: True if the user decided to continue
         """
         if self.view.isHidden():
             return
         q = QMessageBox.question(self.view, "DrILL: Unsaved data", "You have "
                                  "unsaved modifications, do you want to save "
                                  "them before?",
-                                 QMessageBox.Yes | QMessageBox.No)
-        if (q == QMessageBox.Yes):
+                                 QMessageBox.Yes | QMessageBox.No
+                                 | QMessageBox.Cancel)
+        if q == QMessageBox.Yes:
             self.onSaveAs()
+            return True
+        if q == QMessageBox.No:
+            return True
+        if q == QMessageBox.Cancel:
+            return False
 
     def _syncViewHeader(self):
         availableModes = self.model.getAvailableAcquisitionModes()
