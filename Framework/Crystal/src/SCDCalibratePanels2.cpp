@@ -58,25 +58,25 @@ void SCDCalibratePanels2::init() {
                   "Workspace of Indexed Peaks");
 
   // Lattice constant group
-  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
-  mustBePositive->setLower(0.0);
+  auto mustBeNonNegative = std::make_shared<BoundedValidator<double>>();
+  mustBeNonNegative->setLower(0.0);
   declareProperty("RecalculateUB", true, "Recalculate UB matrix using given lattice constants");
-  declareProperty("a", EMPTY_DBL(), mustBePositive,
+  declareProperty("a", EMPTY_DBL(), mustBeNonNegative,
                   "Lattice Parameter a (Leave empty to use lattice constants "
                   "in peaks workspace)");
-  declareProperty("b", EMPTY_DBL(), mustBePositive,
+  declareProperty("b", EMPTY_DBL(), mustBeNonNegative,
                   "Lattice Parameter b (Leave empty to use lattice constants "
                   "in peaks workspace)");
-  declareProperty("c", EMPTY_DBL(), mustBePositive,
+  declareProperty("c", EMPTY_DBL(), mustBeNonNegative,
                   "Lattice Parameter c (Leave empty to use lattice constants "
                   "in peaks workspace)");
-  declareProperty("alpha", EMPTY_DBL(), mustBePositive,
+  declareProperty("alpha", EMPTY_DBL(), mustBeNonNegative,
                   "Lattice Parameter alpha in degrees (Leave empty to use "
                   "lattice constants in peaks workspace)");
-  declareProperty("beta", EMPTY_DBL(), mustBePositive,
+  declareProperty("beta", EMPTY_DBL(), mustBeNonNegative,
                   "Lattice Parameter beta in degrees (Leave empty to use "
                   "lattice constants in peaks workspace)");
-  declareProperty("gamma", EMPTY_DBL(), mustBePositive,
+  declareProperty("gamma", EMPTY_DBL(), mustBeNonNegative,
                   "Lattice Parameter gamma in degrees (Leave empty to use "
                   "lattice constants in peaks workspace)");
   const std::string LATTICE("Lattice Constants");
@@ -107,8 +107,8 @@ void SCDCalibratePanels2::init() {
   // ----- L1 -----
   // --------------
   declareProperty("CalibrateL1", true, "Change the L1(source to sample) distance");
-  declareProperty("ToleranceL1", 5e-4, mustBePositive, "Delta L1 below this value (in meter) is treated as 0.0");
-  declareProperty("SearchRadiusL1", 0.1, mustBePositive,
+  declareProperty("ToleranceL1", 5e-4, mustBeNonNegative, "Delta L1 below this value (in meter) is treated as 0.0");
+  declareProperty("SearchRadiusL1", 0.1, mustBeNonNegative,
                   "Search radius of delta L1 in meters, which is used to constrain optimization search space"
                   "when calibrating L1");
   // editability
@@ -122,21 +122,21 @@ void SCDCalibratePanels2::init() {
   // ----- bank -----
   // ----------------
   declareProperty("CalibrateBanks", false, "Calibrate position and orientation of each bank.");
-  declareProperty("ToleranceTransBank", 1e-6, mustBePositive,
+  declareProperty("ToleranceTransBank", 1e-6, mustBeNonNegative,
                   "Delta translation of bank (in meter) below this value is treated as 0.0");
   declareProperty(
-      "SearchRadiusTransBank", 5e-2, mustBePositive,
+      "SearchRadiusTransBank", 5e-2, mustBeNonNegative,
       "This is the search radius (in meter) when calibrating component translations, used to constrain optimization"
       "search space when calibration translation of banks");
-  declareProperty("ToleranceRotBank", 1e-3, mustBePositive,
+  declareProperty("ToleranceRotBank", 1e-3, mustBeNonNegative,
                   "Misorientation of bank (in deg) below this value is treated as 0.0");
-  declareProperty("SearchradiusRotXBank", 1.0, mustBePositive,
+  declareProperty("SearchradiusRotXBank", 1.0, mustBeNonNegative,
                   "This is the search radius (in deg) when calibrating component reorientation, used to constrain "
                   "optimization search space");
-  declareProperty("SearchradiusRotYBank", 1.0, mustBePositive,
+  declareProperty("SearchradiusRotYBank", 1.0, mustBeNonNegative,
                   "This is the search radius (in deg) when calibrating component reorientation, used to constrain "
                   "optimization search space");
-  declareProperty("SearchradiusRotZBank", 1.0, mustBePositive,
+  declareProperty("SearchradiusRotZBank", 1.0, mustBeNonNegative,
                   "This is the search radius (in deg) when calibrating component reorientation, used to constrain "
                   "optimization search space");
   // editability
@@ -162,9 +162,9 @@ void SCDCalibratePanels2::init() {
   // ----- T0 -----
   // --------------
   declareProperty("CalibrateT0", false, "Calibrate the T0 (initial TOF)");
-  declareProperty("ToleranceT0", 1e-3, mustBePositive,
+  declareProperty("ToleranceT0", 1e-3, mustBeNonNegative,
                   "Shift of initial TOF (in ms) below this value is treated as 0.0");
-  declareProperty("SearchRadiusT0", 10.0, mustBePositive,
+  declareProperty("SearchRadiusT0", 10.0, mustBeNonNegative,
                   "Search radius of T0 (in ms), used to constrain optimization search space");
   // editability
   setPropertySettings("ToleranceT0", std::make_unique<EnabledWhenProperty>("CalibrateT0", IS_EQUAL_TO, "1"));
@@ -177,9 +177,9 @@ void SCDCalibratePanels2::init() {
   // ----- samplePos -----
   // ---------------------
   declareProperty("TuneSamplePosition", false, "Fine tunning sample position");
-  declareProperty("ToleranceSamplePos", 1e-6, mustBePositive,
+  declareProperty("ToleranceSamplePos", 1e-6, mustBeNonNegative,
                   "Sample position change (in meter) below this value is treated as 0.0");
-  declareProperty("SearchRadiusSamplePos", 0.1, mustBePositive,
+  declareProperty("SearchRadiusSamplePos", 0.1, mustBeNonNegative,
                   "Search radius of sample position change (in meters), used to constrain optimization search space");
   // editability
   setPropertySettings("ToleranceSamplePos",
@@ -574,25 +574,25 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
             << "DeltaT0=" << m_T0;
     std::ostringstream constraint_str;
     // rot x
-    if (searchRadiusRotX < 1e-16) {
+    if (searchRadiusRotX < Tolerance) {
       tie_str << ",RotX=0.0";
     } else {
       constraint_str << -searchRadiusRotX << "<RotX<" << searchRadiusRotX << ",";
     }
     // rot y
-    if (searchRadiusRotY < 1e-16) {
+    if (searchRadiusRotY < Tolerance) {
       tie_str << ",RotY=0.0";
     } else {
       constraint_str << -searchRadiusRotY << "<RotY<" << searchRadiusRotY << ",";
     }
     // rot z
-    if (searchRadiusRotZ < 1e-16) {
+    if (searchRadiusRotZ < Tolerance) {
       tie_str << ",RotZ=0.0";
     } else {
       constraint_str << -searchRadiusRotZ << "<RotZ<" << searchRadiusRotZ << ","; // constrain rotation around Z-axis
     }
     // translation
-    if (searchRadiusTran < 1e-16) {
+    if (searchRadiusTran < Tolerance) {
       tie_str << ",DeltaX=0.0,DeltaY=0.0,DeltaZ=0.0";
     } else {
       constraint_str << -searchRadiusTran << "<DeltaX<" << searchRadiusTran << "," // restrict tranlastion along X
@@ -644,9 +644,9 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
     // if the translation vector has one component that is hitting the search bounds, the
     // optimization setting is too tight and we should inform the users about this issue,
     // and cowardly reject this results by zero the vector
-    double ddx = std::abs(dx - searchRadiusTran);
-    double ddy = std::abs(dy - searchRadiusTran);
-    double ddz = std::abs(dz - searchRadiusTran);
+    double ddx = std::abs(std::abs(dx) - searchRadiusTran);
+    double ddy = std::abs(std::abs(dy) - searchRadiusTran);
+    double ddz = std::abs(std::abs(dz) - searchRadiusTran);
     if ((ddx < tolerance_translation) || // is dx too close to search bounds?
         (ddy < tolerance_translation) || // is dy too close to search bounds?
         (ddz < tolerance_translation) || // is dz too close to search bounds?
@@ -675,14 +675,14 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
     // NOTE:
     // if any components of the resulting Euler angle is hitting the search bounds, we should warn
     // the user (so that they can increase search bounds) and cowardly refuse the calibration results
-    double ddrx = std::abs(drx - searchRadiusRotX);
-    double ddry = std::abs(dry - searchRadiusRotY);
-    double ddrz = std::abs(drz - searchRadiusRotZ);
+    double ddrx = std::abs(std::abs(drx) - searchRadiusRotX);
+    double ddry = std::abs(std::abs(dry) - searchRadiusRotY);
+    double ddrz = std::abs(std::abs(drz) - searchRadiusRotZ);
     if ((ddrx < tolerance_rotation) || // is rotx hitting the search bounds?
         (ddry < tolerance_rotation) || // is roty hitting the search bounds?
         (ddrz < tolerance_rotation) || // is rotz hitting the search bounds?
         false) {
-      calilog << "-- Fit " << bn << " rotatoin hitting bounds, please increase search radius.\n"
+      calilog << "-- Fit " << bn << " rotation hitting bounds, please increase search radius.\n"
               << "       also, cowardly refusing calibration results by zeroing (drx, dry, drz)\n";
       drx = 0.0;
       dry = 0.0;
