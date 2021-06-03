@@ -20,7 +20,7 @@ namespace MDAlgorithms {
 */
 class MANTID_MDALGORITHMS_DLL PolarizationAngleCorrectionMD : public API::Algorithm {
 public:
-  PolarizationAngleCorrectionMD() : mDeltaEIndex(999) {}
+  PolarizationAngleCorrectionMD() : mIsQSample(false) {}
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
@@ -36,18 +36,19 @@ private:
 
   /// Apply detailed balance to each MDEvent
   template <typename MDE, size_t nd>
-  void applyDetailedBalance(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  void applyPolarizationAngleCorrection(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
-  /// Get temperature
-  std::string getTemperature(API::IMDEventWorkspace_sptr mdws);
   /// Check input workspace dimension
   std::string checkInputMDDimension();
 
-  /// index of the MD dimension index for DeltaE
-  size_t mDeltaEIndex;
+  /// Get Ei
+  std::string getEi(API::IMDEventWorkspace_sptr mdws);
 
-  /// map of temperature retrieved from sample logs
-  std::map<uint16_t, double> mExpinfoTemperatureMean;
+  /// Sample Ei
+  std::map<uint16_t, double> mEiMap;
+
+  /// coordinate system
+  bool mIsQSample;
 };
 
 } // namespace MDAlgorithms

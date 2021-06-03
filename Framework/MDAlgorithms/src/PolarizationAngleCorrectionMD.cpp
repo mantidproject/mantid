@@ -12,6 +12,7 @@
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -55,8 +56,19 @@ void PolarizationAngleCorrectionMD::init() {
       std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>("InputWorkspace", "", Kernel::Direction::Input),
       "An input MDEventWorkspace.  Must be in Q_sample/Q_lab frame.  Must have an axis as DeltaE");
 
-  declareProperty(std::make_unique<PropertyWithValue<std::string>>("Temperature", "", Direction::Input),
-                  "SampleLog variable name that contains the temperature or a number");
+  auto anglerange = std::make_shared<BoundedValidator<double>>();
+  anglerange->setLower(-180.);
+  anglerange->setUpper(180.);
+  declareProperty("PolarizationAngle", 0., anglerange,
+                  "An in-plane polarization angle PAP_APA​, between -180 and 180 degrees");
+
+  auto precisionrange = std::make_shared<BoundedValidator<double>>();
+  precisionrange->setLower(0.);
+  precisionrange->setUpper(1.);
+  declareProperty("Precision", 1., precisionrange,
+                  "Precision (between 0 and 1). Any event whose cosine of 2 of its schaf angle less than this "
+                  "precision will be ignored.");
+
   declareProperty(
       std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
       "The output MDEventWorkspace with detailed balance applied");
@@ -83,7 +95,7 @@ void PolarizationAngleCorrectionMD::exec() {
   }
 
   // Apply detailed balance to MDEvents
-  CALL_MDEVENT_FUNCTION(applyDetailedBalance, output_ws);
+  CALL_MDEVENT_FUNCTION(applyPolarizationAngleCorrection, output_ws);
 
   // refresh cache for MDBoxes: set correct Box signal
   output_ws->refreshCache();
@@ -118,10 +130,6 @@ std::map<std::string, std::string> PolarizationAngleCorrectionMD::validateInputs
     output["InputWorkspace"] = dim_error;
   }
 
-  std::string kerror = getTemperature(input_ws);
-  if (kerror != "")
-    output["Temperature"] = kerror;
-
   return output;
 }
 
@@ -137,42 +145,26 @@ std::string PolarizationAngleCorrectionMD::checkInputMDDimension() {
 
   API::IMDEventWorkspace_sptr inputws = getProperty("InputWorkspace");
   size_t numdims = inputws->getNumDims();
-
-  // Get and check the dimensions: Q3D or Q1D
-  const Mantid::Kernel::SpecialCoordinateSystem coordsys = inputws->getSpecialCoordinateSystem();
-  size_t qdim(0);
-  std::string qdimstr("Not Q3D or |Q|");
-  if (coordsys == Mantid::Kernel::SpecialCoordinateSystem::QLab ||
-      coordsys == Mantid::Kernel::SpecialCoordinateSystem::QSample) {
-    // q3d
-    qdim = 3;
-    qdimstr = "Q3D";
+  if (numdims < 4) {
+    errormsg = "Input workspace must have at least 4 dimensions";
   } else {
-    // search Q1D: at any place
-    for (size_t i = 0; i < numdims; ++i) {
-      if (inputws->getDimension(i)->getName() == "|Q|") {
-        qdim = 1;
-        qdimstr = "|Q|";
-        break;
-      }
+    // Get and check the dimensions: Q3D or Q1D
+    const Mantid::Kernel::SpecialCoordinateSystem coordsys = inputws->getSpecialCoordinateSystem();
+    if (coordsys == Mantid::Kernel::SpecialCoordinateSystem::QLab) {
+      mIsQSample = false;
+    } else if (coordsys == Mantid::Kernel::SpecialCoordinateSystem::QSample) {
+      // q3d
+      mIsQSample = true;
+    } else {
+      // not supported
+      errormsg = "InputWorkspace is not in Q-Sample or Q-lab frame";
     }
-  }
 
-  // Check DeltaE
-  if (qdim == 1 && inputws->getDimension(1)->getName() == "DeltaE") {
-    // 2nd dimension is DeltaE
-    mDeltaEIndex = 1;
-  } else if (qdim == 3 && inputws->getDimension(3)->getName() == "DeltaE") {
-    // 4th dimension is DeltaE
-    mDeltaEIndex = 3;
-  } else {
-    // Error
-    g_log.error() << "Coordiate system = " << coordsys << " does not meet requirement: \n";
-    for (size_t i = 0; i < numdims; ++i) {
-      g_log.error() << i << "-th dim: " << inputws->getDimension(i)->getName() << "\n";
+    // Check DeltaE
+    if (errormsg.size() > 0 && inputws->getDimension(3)->getName() != "DeltaE") {
+      errormsg = "4-th dimension is " + inputws->getDimension(3)->getName() + ".  Must be DeltaE";
+      return errormsg;
     }
-    errormsg += "Q Dimension (" + qdimstr +
-                ") is neither Q3D nor |Q|.  Or DeltaE is found in proper place (2nd or 4th dimension).";
   }
 
   return errormsg;
@@ -183,7 +175,7 @@ std::string PolarizationAngleCorrectionMD::checkInputMDDimension() {
  * @brief Apply detailed balance to each MDEvent in MDEventWorkspace
  */
 template <typename MDE, size_t nd>
-void PolarizationAngleCorrectionMD::applyDetailedBalance(
+void PolarizationAngleCorrectionMD::applyPolarizationAngleCorrection(
     typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws) {
   // Get Box from MDEventWorkspace
   MDBoxBase<MDE, nd> *box1 = ws->getBox();
@@ -203,15 +195,10 @@ void PolarizationAngleCorrectionMD::applyDetailedBalance(
       std::vector<MDE> &events = box->getEvents();
       // Add events, with bounds checking
       for (auto it = events.begin(); it != events.end(); ++it) {
-        // Create the event
-        // do calculattion
-        float temperatue(static_cast<float>(mExpinfoTemperatureMean[it->getExpInfoIndex()]));
+        // Modify the event
+        // FIXME TODO : SPEC TASK #109
 
-        // delta_e = it->getCenter(mDeltaEIndex);
-        // factor = pi * (1 - exp(-deltaE/(kb*T)))
-        float factor = static_cast<float>(M_PI) *
-                       (static_cast<float>(1.) - exp(-it->getCenter(mDeltaEIndex) *
-                                                     static_cast<float>(PhysicalConstants::meVtoKelvin / temperatue)));
+        float factor = 1.0;
 
         // calcalate and set intesity
         auto intensity = it->getSignal() * factor;
@@ -233,54 +220,47 @@ void PolarizationAngleCorrectionMD::applyDetailedBalance(
 
 //---------------------------------------------------------------------------------------------------------
 /**
- * @brief Retrieve sample temperature
+ * @brief Retrieve sample log Ei
  * Temperature value can be specified by either property Temperature, or
  * it can be calcualted from sample temperture log in the MDWorkspace
  */
-std::string PolarizationAngleCorrectionMD::getTemperature(API::IMDEventWorkspace_sptr mdws) {
+std::string PolarizationAngleCorrectionMD::getEi(API::IMDEventWorkspace_sptr mdws) {
   // Get temperture sample log name
-  std::string Tstring = getProperty("Temperature");
-  std::string temperature_error("");
-
-  // Try to convert Tstring to a float
-  float temperature;
-  try {
-    temperature = boost::lexical_cast<float>(Tstring);
-  } catch (...) {
-    // set to a unphysical value
-    temperature = -10;
-  }
+  std::string Estring("Ei");
+  std::stringstream eiss;
 
   // the input property could be a valid float; if not must search the experiment info
-  mExpinfoTemperatureMean.clear();
+  mEiMap.clear();
   uint16_t numexpinfo = mdws->getNumExperimentInfo();
 
   for (uint16_t i = 0; i < numexpinfo; ++i) {
-    if (temperature < 0) {
-      // if user specified is not a valid float
-      ExperimentInfo_const_sptr expinfo = mdws->getExperimentInfo(i);
-      if (expinfo->run().hasProperty(Tstring)) {
-        auto log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(expinfo->run().getProperty(Tstring));
-        if (!log) {
-          // wrong type of sample log: must be TimeSeriesProperty<double>
-          std::stringstream errss;
-          errss << "ExperimentInfo" << i << " has " << Tstring << ", which is not a valid double-valuesd log";
-          temperature_error += errss.str() + "\n";
+
+    // if user specified is not a valid float
+    ExperimentInfo_const_sptr expinfo = mdws->getExperimentInfo(i);
+    if (expinfo->run().hasProperty(Estring)) {
+      std::string eistr = expinfo->run().getProperty(Estring)->value();
+      try {
+        double ei = boost::lexical_cast<double>(eistr);
+        if (ei > 0) {
+          // Ei is allowed
+          mEiMap[i] = ei;
+        } else {
+          // Ei is not greater than 0 and is not allowed
+          eiss << "Experiment Info Ei " << ei << " cannot be zero or less than zero.";
         }
-        mExpinfoTemperatureMean[i] = log->getStatistics().mean;
-      } else {
-        // specified sample log does not exist
-        std::stringstream errss;
-        errss << "ExperimentInfo " << i << " does not have tempertaure log " << Tstring;
-        temperature_error += errss.str() + "\n";
+      } catch (...) {
+        // unable cast to double
+        eiss << "Experiment Info Ei " << eistr << " cannot be cast to a double number";
       }
     } else {
-      // set user specified temperature to map
-      mExpinfoTemperatureMean[i] = temperature;
+      // does not have Ei
+      eiss << "Experiment Info " << i << " does not have " << Estring;
     }
   }
 
-  return temperature_error;
+  std::string ei_error = eiss.str();
+
+  return ei_error;
 }
 
 } // namespace MDAlgorithms
