@@ -62,7 +62,7 @@ Usage
 
 Output:
 
-.. testoutput:: ExApplyDetailedBalanceMDSimple
+.. testoutput:: InelasticScatteredTransmissionCorrectionSingleRun
 
    Number of MDEvents: 1972 == 1972
    md1_old and md1_new being equal is True
