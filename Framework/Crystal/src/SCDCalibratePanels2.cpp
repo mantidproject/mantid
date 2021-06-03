@@ -633,8 +633,8 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
     // proper one.
     if ((std::abs(dx) < tolerance_translation) && // is dx<tor?
         (std::abs(dy) < tolerance_translation) && // is dy<tor?
-        (std::abs(dz) < tolerance_translation) && // is dz<tor?
-        true) {
+        (std::abs(dz) < tolerance_translation)    // is dz<tor?
+    ) {
       calilog << "-- Fit " << bn << " translation below tolerance, zero (dx, dy, dz)\n";
       dx = 0.0;
       dy = 0.0;
@@ -649,8 +649,8 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
     double ddz = std::abs(std::abs(dz) - searchRadiusTran);
     if ((ddx < tolerance_translation) || // is dx too close to search bounds?
         (ddy < tolerance_translation) || // is dy too close to search bounds?
-        (ddz < tolerance_translation) || // is dz too close to search bounds?
-        false) {
+        (ddz < tolerance_translation)    // is dz too close to search bounds?
+    ) {
       calilog << "-- Fit " << bn << " translation hitting search bounds, please increase bounds.\n"
               << "       also, cowardly refusing calibration results by zeroing (dx, dy, dz)\n";
       dx = 0.0;
@@ -665,8 +665,8 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
     // if all components of the Euler angle vector is pratically zero, let's make it official
     if ((std::abs(drx) < tolerance_rotation) && //
         (std::abs(dry) < tolerance_rotation) && //
-        (std::abs(drz) < tolerance_rotation) && //
-        true) {
+        (std::abs(drz) < tolerance_rotation)    //
+    ) {
       calilog << "-- Fit " << bn << " rotatoin below tolerance, zero (drx, dry, drz)\n";
       drx = 0.0;
       dry = 0.0;
@@ -680,8 +680,8 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
     double ddrz = std::abs(std::abs(drz) - searchRadiusRotZ);
     if ((ddrx < tolerance_rotation) || // is rotx hitting the search bounds?
         (ddry < tolerance_rotation) || // is roty hitting the search bounds?
-        (ddrz < tolerance_rotation) || // is rotz hitting the search bounds?
-        false) {
+        (ddrz < tolerance_rotation)    // is rotz hitting the search bounds?
+    ) {
       calilog << "-- Fit " << bn << " rotation hitting bounds, please increase search radius.\n"
               << "       also, cowardly refusing calibration results by zeroing (drx, dry, drz)\n";
       drx = 0.0;
