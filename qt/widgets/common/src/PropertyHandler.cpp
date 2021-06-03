@@ -195,8 +195,10 @@ void PropertyHandler::initTies() {
   for (size_t iparam = 0; iparam < function()->nParams(); iparam++) {
     Mantid::API::ParameterTie *tie = m_fun->getTie(iparam);
     if (tie) {
-      const auto [_, index] = m_cf->parseName(function()->parameterName(iparam));
-      Mantid::API::IFunction_sptr f = std::dynamic_pointer_cast<Mantid::API::IFunction>(m_cf->getFunction(index));
+      // get function index from prefix (second element of pair below)
+      const auto nameIndex_pair = m_cf->parseName(function()->parameterName(iparam));
+      Mantid::API::IFunction_sptr f =
+          std::dynamic_pointer_cast<Mantid::API::IFunction>(m_cf->getFunction(nameIndex_pair.second));
       auto *h = findHandler(f);
       h->addTie(QString::fromStdString(tie->asString()));
     }
