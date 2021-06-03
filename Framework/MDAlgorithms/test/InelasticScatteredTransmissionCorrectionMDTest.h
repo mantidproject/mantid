@@ -39,7 +39,7 @@ public:
       // correct, then convert
       applyCorrectionToEvents("events", 1. / 11);
       convertToMD("events", "expected", qDim);
-      TS_ASSERT(compareMDWorkspaces("md", "expected", true))
+      TS_ASSERT(compareMDEventWorkspaces("md", "expected", true))
       std::vector<std::string> leftOvers{"events", "md", "expected"};
       cleanup(leftOvers);
     }
@@ -54,13 +54,15 @@ public:
     convertToMD("events2", "md2", "Q3D");
     mergeMD("md1", "md2", "md");
     applyCorrectionToMD("md", factor);
+    binMD("md", "Q_sample_x,-9,9,1", "Q_sample_y,-9,9,1", "Q_sample_z,-9,9,1", "DeltaE, -10,19,100");
     // correct, convert, then merge
     applyCorrectionToEvents("events1", factor);
     applyCorrectionToEvents("events2", factor);
     convertToMD("events1", "md1", "Q3D");
     convertToMD("events2", "md2", "Q3D");
     mergeMD("md1", "md2", "expected");
-    TS_ASSERT(compareMDWorkspaces("md", "expected", false));
+    binMD("expected", "Q_sample_x,-9,9,1", "Q_sample_y,-9,9,1", "Q_sample_z,-9,9,1", "DeltaE, -10,19,100");
+    TS_ASSERT(compareMDHistoWorkspaces("md", "expected"));
     std::vector<std::string> leftOvers{"events1", "md1", "events2", "md2", "md", "expected"};
     cleanup(leftOvers);
   }
@@ -223,7 +225,26 @@ private:
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputWorkspace));
   }
 
-  bool compareMDWorkspaces(std::string ws1, std::string ws2, bool checkEvents = false) {
+  // Integrate over the Q-dimensions and bin over the DeltaE dimension
+  void binMD(std::string inputWorkspace, std::string qBinningX, std::string qBinningY, std::string qBinningZ,
+             std::string eBinning, std::string outputWorkspace = "") {
+    if (outputWorkspace.size() == 0)
+      outputWorkspace = inputWorkspace; // in-place changes
+    auto alg = AlgorithmManager::Instance().createUnmanaged("BinMD");
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspace", inputWorkspace);
+    alg->setProperty("AxisAligned", true);
+    alg->setProperty("AlignedDim0", qBinningX);
+    alg->setProperty("AlignedDim1", qBinningY);
+    alg->setProperty("AlignedDim2", qBinningZ);
+    alg->setProperty("AlignedDim3", eBinning);
+    alg->setProperty("OutputWorkspace", outputWorkspace);
+    alg->execute();
+    TS_ASSERT(alg->isExecuted());
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(outputWorkspace))
+  }
+
+  bool compareMDEventWorkspaces(std::string ws1, std::string ws2, bool checkEvents = false) {
     auto md1 = std::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(ws1));
     auto md2 = std::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(ws2));
     if (md1->getNEvents() != md2->getNEvents())
@@ -234,6 +255,17 @@ private:
     alg->setPropertyValue("Workspace2", ws2);
     alg->setProperty("Tolerance", 0.001);
     alg->setProperty("CheckEvents", checkEvents);
+    alg->execute();
+    TS_ASSERT(alg->isExecuted());
+    return alg->getProperty("Equals");
+  }
+
+  bool compareMDHistoWorkspaces(std::string ws1, std::string ws2) {
+    auto alg = AlgorithmManager::Instance().createUnmanaged("CompareMDWorkspaces");
+    alg->initialize();
+    alg->setPropertyValue("Workspace1", ws1);
+    alg->setPropertyValue("Workspace2", ws2);
+    alg->setProperty("Tolerance", 0.0001);
     alg->execute();
     TS_ASSERT(alg->isExecuted());
     return alg->getProperty("Equals");
