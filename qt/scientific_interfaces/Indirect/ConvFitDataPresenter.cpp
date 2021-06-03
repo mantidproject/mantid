@@ -10,15 +10,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 
-namespace {
-using namespace Mantid::API;
-
-bool isWorkspaceLoaded(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
-} // namespace
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {

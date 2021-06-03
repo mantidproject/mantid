@@ -241,25 +241,13 @@ public:
 
   void test_that_setStartX_with_TableDatasetIndex_alters_endX_column() {
     double startX = 1.0;
-    m_presenter->setStartX(startX, TableDatasetIndex{0});
-    assertValueIsGlobal(START_X_COLUMN, startX);
-  }
-
-  void test_that_setStartX_with_TableDatasetIndex_and_WorkspaceIndex_alters_endX_column() {
-    double startX = 1.0;
-    m_presenter->setStartX(startX, TableDatasetIndex{0}, IDA::WorkspaceIndex{0});
+    m_presenter->setStartX();
     assertValueIsGlobal(START_X_COLUMN, startX);
   }
 
   void test_that_setEndX_with_TableDatasetIndex_alters_endX_column() {
     double endX = 1.0;
-    m_presenter->setEndX(endX, TableDatasetIndex{0});
-    assertValueIsGlobal(END_X_COLUMN, endX);
-  }
-
-  void test_that_setEndX_with_TableDatasetIndex_and_WorkspaceIndex_alters_endX_column() {
-    double endX = 1.0;
-    m_presenter->setEndX(endX, TableDatasetIndex{0}, IDA::WorkspaceIndex{0});
+    m_presenter->setEndX();
     assertValueIsGlobal(END_X_COLUMN, endX);
   }
 

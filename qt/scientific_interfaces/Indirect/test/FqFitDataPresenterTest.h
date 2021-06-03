@@ -29,30 +29,8 @@ namespace {
 QString const PARAMETER_TYPE_LABEL("Fit Parameter:");
 QString const PARAMETER_LABEL("Width:");
 
-QStringList getFqFitParameters() {
-  QStringList parameters;
-  parameters << "f1.f1.FWHM"
-             << "f2.f1.FWHM";
-  return parameters;
-}
-
-QStringList getFqFitParameterTypes() {
-  QStringList parameterTypes;
-  parameterTypes << "Width"
-                 << "EISF";
-  return parameterTypes;
-}
-
 std::vector<std::string> getTextAxisLabels() {
   return {"f0.Width", "f1.Width", "f2.Width", "f0.EISF", "f1.EISF", "f2.EISF"};
-}
-
-std::unique_ptr<QLabel> createLabel(QString const &text) { return std::make_unique<QLabel>(text); }
-
-std::unique_ptr<QComboBox> createComboBox(QStringList const &items) {
-  auto combBox = std::make_unique<QComboBox>();
-  combBox->addItems(items);
-  return combBox;
 }
 
 std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {

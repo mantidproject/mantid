@@ -8,14 +8,6 @@
 
 using namespace Mantid::API;
 
-namespace {
-
-bool isWorkspaceLoaded(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
-} // namespace
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {

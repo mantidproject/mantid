@@ -65,25 +65,7 @@ QStringList IndirectFitDataPresenter::getResolutionWSSuffices() const { return m
 
 QStringList IndirectFitDataPresenter::getResolutionFBSuffices() const { return m_fbResolutionSuffixes; }
 
-void IndirectFitDataPresenter::setStartX(double startX, TableDatasetIndex, WorkspaceIndex) {
-  m_tablePresenter->updateTableFromModel();
-}
-
-void IndirectFitDataPresenter::setStartX(double startX, TableDatasetIndex) { m_tablePresenter->updateTableFromModel(); }
-
-void IndirectFitDataPresenter::setEndX(double endX, TableDatasetIndex, WorkspaceIndex) {
-  m_tablePresenter->updateTableFromModel();
-}
-
-void IndirectFitDataPresenter::setEndX(double endX, TableDatasetIndex) { m_tablePresenter->updateTableFromModel(); }
-
-void IndirectFitDataPresenter::setExclude(const std::string &, TableDatasetIndex, WorkspaceIndex) {
-  m_tablePresenter->updateTableFromModel();
-}
-
-void IndirectFitDataPresenter::updateSpectraInTable(TableDatasetIndex) { m_tablePresenter->updateTableFromModel(); }
-
-void IndirectFitDataPresenter::updateDataInTable(TableDatasetIndex) { m_tablePresenter->updateTableFromModel(); }
+void IndirectFitDataPresenter::updateDataInTable() { m_tablePresenter->updateTableFromModel(); }
 
 DataForParameterEstimationCollection
 IndirectFitDataPresenter::getDataForParameterEstimation(const EstimationDataSelector &selector) const {

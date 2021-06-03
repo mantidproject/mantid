@@ -115,9 +115,7 @@ protected slots:
   void setModelFitFunction();
   void setModelStartX(double startX);
   void setModelEndX(double endX);
-  void setDataTableStartX(double startX);
-  void setDataTableEndX(double endX);
-  void setDataTableExclude(const std::string &exclude);
+  void updateDataInTable();
   void tableStartXChanged(double startX, TableDatasetIndex dataIndex, WorkspaceIndex spectrum);
   void tableEndXChanged(double endX, TableDatasetIndex dataIndex, WorkspaceIndex spectrum);
   void tableExcludeChanged(const std::string &exclude, TableDatasetIndex dataIndex, WorkspaceIndex spectrum);

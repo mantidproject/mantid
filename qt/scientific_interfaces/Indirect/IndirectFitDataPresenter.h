@@ -39,18 +39,11 @@ public:
   QStringList getResolutionWSSuffices() const;
   QStringList getResolutionFBSuffices() const;
 
-  void setStartX(double startX, TableDatasetIndex dataIndex, WorkspaceIndex spectrumIndex);
-  void setStartX(double startX, TableDatasetIndex dataIndex);
-  void setEndX(double endX, TableDatasetIndex dataIndex, WorkspaceIndex spectrumIndex);
-  void setEndX(double endX, TableDatasetIndex dataIndex);
-  void setExclude(const std::string &exclude, TableDatasetIndex dataIndex, WorkspaceIndex spectrumIndex);
+  void updateDataInTable();
 
   UserInputValidator &validate(UserInputValidator &validator);
 
   DataForParameterEstimationCollection getDataForParameterEstimation(const EstimationDataSelector &selector) const;
-
-public slots:
-  void updateSpectraInTable(TableDatasetIndex dataIndex);
 
 protected slots:
   void showAddWorkspaceDialog();
@@ -86,7 +79,6 @@ private slots:
 
 private:
   virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;
-  void updateDataInTable(TableDatasetIndex dataIndex);
 
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   IIndirectFittingModel *m_model;
