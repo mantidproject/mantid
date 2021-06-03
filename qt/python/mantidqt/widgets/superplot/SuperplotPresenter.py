@@ -12,6 +12,8 @@ from mantid.api import mtd
 from mantid.plots.axesfunctions import plot
 from mantid.plots.utility import MantidAxType
 
+import matplotlib
+
 
 class SuperplotPresenter:
 
@@ -21,12 +23,14 @@ class SuperplotPresenter:
     _model = None
     _canvas = None
     _plotFunction = None
+    _matplotlibVersion = None
 
     def __init__(self, canvas, parent=None):
         self._view = SuperplotView(self, parent)
         self._model = SuperplotModel()
         self._canvas = canvas
         self.parent = parent
+        self._matplotlibVersion = matplotlib.__version__
 
         if self.parent:
             self.parent.plot_updated.connect(self.onPlotUpdated)
@@ -309,7 +313,12 @@ class SuperplotPresenter:
             figure.tight_layout()
             legend = axes.legend()
             if legend:
-                legend.draggable()
+                # Legend.draggable() deprecated since v3.0.0
+                # https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.0.0.html
+                if self._matplotlibVersion >= "3.0.0":
+                    legend.set_draggable(True)
+                else:
+                    legend.draggable()
         else:
             legend = axes.get_legend()
             if legend:
