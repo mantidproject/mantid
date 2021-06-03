@@ -240,10 +240,16 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         # resize the main window so it will display the canvas with the
         # requested size:
         cs = canvas.sizeHint()
+        ts = self.toolbar.sizeHint()
         sbs = self.window.statusBar().sizeHint()
         self._status_and_tool_height = tbs_height + sbs.height()
         height = cs.height() + self._status_and_tool_height
-        self.window.resize(cs.width(), height)
+        # get window width from toolbar/canvas width
+        if cs.width() > ts.width():
+            width = cs.width()
+        else:
+            width = ts.width()
+        self.window.resize(width, height)
 
         self.fit_browser = FitPropertyBrowser(canvas, ToolbarStateManager(self.toolbar))
         self.fit_browser.closing.connect(self.handle_fit_browser_close)
