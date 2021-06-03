@@ -12,14 +12,24 @@
 # and simply amounts to importing readline before a QApplication is created in the screenshots
 # directive
 import sys
-if sys.platform == "linux" or sys.platform == "linux2" or sys.platform == "darwin":
+if sys.platform.startswith('linux') or sys.platform == "darwin":
     import readline
+
+# Workaround module destruction order issues. If Qt is imported after
+# mantid then any active Qt widgets are deleted before the mantid
+# atexit handlers kick in. Some widgets, e.g. WorkspaceSelector,
+# subscribe to mantid notifications and deleting the widget references leaves
+# dangling references in the notification centre that cause a segfault
+import qtpy.QtCore
+
+from distutils.version import LooseVersion
 import os
-from sphinx import __version__ as sphinx_version
-import sphinx_bootstrap_theme  # checked at cmake time
+
 import mantid
 from mantid.kernel import ConfigService
-from distutils.version import LooseVersion
+from sphinx import __version__ as sphinx_version
+import sphinx_bootstrap_theme
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

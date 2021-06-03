@@ -132,7 +132,7 @@ set(DOCS_BUILDDIR ${CMAKE_BINARY_DIR}/docs)
 
 # Framework Build options
 option(CXXTEST_ADD_PERFORMANCE
-       "Switch to add Performance tests to the list of tests run by ctest?")
+       "Switch to add performance tests to the list of tests run by ctest?")
 
 add_subdirectory(Framework)
 
