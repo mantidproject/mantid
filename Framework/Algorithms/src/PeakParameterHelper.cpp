@@ -5,18 +5,20 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidCurveFitting/EstimatePeakParameters.h"
+#include "MantidAlgorithms/PeakParameterHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
-using namespace Mantid::CurveFitting::EstimatePeakParameters;
 using Mantid::HistogramData::Histogram;
+
+namespace Mantid {
+namespace Algorithms {
+namespace PeakParameterHelper {
 
 /** Get an index of a value in a sorted vector.  The index should be the item
  * with value nearest to X
  */
-template <typename vector_like>
-size_t findXIndex(const vector_like &vecx, const double x, const size_t startindex = 0) {
+template <typename vector_like> size_t findXIndex(const vector_like &vecx, const double x, const size_t startindex) {
   size_t index;
   if (x <= vecx.front()) {
     index = 0;
@@ -186,3 +188,11 @@ int estimatePeakParameters(const Histogram &histogram, const std::pair<size_t, s
 
   return GOOD;
 }
+
+template MANTID_ALGORITHMS_DLL size_t findXIndex(const HistogramData::Points &, const double, const size_t);
+template MANTID_ALGORITHMS_DLL size_t findXIndex(const HistogramData::HistogramX &, const double, const size_t);
+template MANTID_ALGORITHMS_DLL size_t findXIndex(const std::vector<double> &, const double, const size_t);
+
+} // namespace PeakParameterHelper
+} // namespace Algorithms
+} // namespace Mantid

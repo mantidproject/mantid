@@ -39,7 +39,6 @@ set(SRC_FILES
     src/CostFunctions/CostFuncRwp.cpp
     src/CostFunctions/CostFuncUnweightedLeastSquares.cpp
     src/CostFunctions/CostFuncPoisson.cpp
-    src/EstimatePeakParameters.cpp
     src/ExcludeRangeFinder.cpp
     src/FitMW.cpp
     src/FuncMinimizers/BFGS_Minimizer.cpp
@@ -209,7 +208,6 @@ set(INC_FILES
     inc/MantidCurveFitting/CostFunctions/CostFuncRwp.h
     inc/MantidCurveFitting/CostFunctions/CostFuncUnweightedLeastSquares.h
     inc/MantidCurveFitting/CostFunctions/CostFuncPoisson.h
-    inc/MantidCurveFitting/EstimatePeakParameters.h
     inc/MantidCurveFitting/ExcludeRangeFinder.h
     inc/MantidCurveFitting/FitMW.h
     inc/MantidCurveFitting/FortranDefs.h

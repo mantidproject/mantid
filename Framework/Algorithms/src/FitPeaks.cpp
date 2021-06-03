@@ -40,6 +40,7 @@
 #include <utility>
 
 using namespace Mantid;
+using namespace Algorithms::PeakParameterHelper;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;

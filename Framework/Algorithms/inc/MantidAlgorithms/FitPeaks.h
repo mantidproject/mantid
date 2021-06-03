@@ -14,7 +14,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidCurveFitting/EstimatePeakParameters.h"
+#include "MantidAlgorithms/PeakParameterHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/cow_ptr.h"
@@ -111,9 +111,6 @@ private:
   /// methods to retrieve fit range and peak centers
   std::vector<double> getExpectedPeakPositions(size_t wi);
   std::pair<double, double> getPeakFitWindow(size_t wi, size_t ipeak);
-
-  enum EstimatePeakWidth { NoEstimation, Observation, InstrumentResolution };
-  enum PeakFitResult { NOSIGNAL, LOWPEAK, OUTOFBOUND, GOOD };
 
   /// suites of method to fit peaks
   std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fitPeaks();
@@ -248,7 +245,7 @@ private:
 
   /// Flag for observing peak width: there are 3 states (1) no estimation (2)
   /// from 'observation' (3) calculated from instrument resolution
-  EstimatePeakWidth m_peakWidthEstimateApproach;
+  Algorithms::PeakParameterHelper::EstimatePeakWidth m_peakWidthEstimateApproach;
   bool m_constrainPeaksPosition;
 
   /// peak windows
