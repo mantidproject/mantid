@@ -12,6 +12,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 
 #include <boost/container/flat_set.hpp>
+#include <limits>
 
 namespace Mantid {
 namespace Crystal {
@@ -128,6 +129,7 @@ private:
   bool LOGCHILDALG{true};
   const int MINIMUM_PEAKS_PER_BANK{6};
   const double PI{3.1415926535897932384626433832795028841971693993751058209};
+  static constexpr double Tolerance = std::numeric_limits<double>::epsilon();
 
   // Column names and types
   const std::string calibrationTableColumnNames[8] = {"ComponentName",    "Xposition",        "Yposition",
