@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IndirectDataTablePresenter.h"
+#include "IndirectFitDataTablePresenter.h"
 #include "IndirectFittingModel.h"
 
 #include "MantidAPI/FrameworkManager.h"
@@ -106,19 +106,19 @@ public:
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 
-class IndirectDataTablePresenterTest : public CxxTest::TestSuite {
+class IndirectFitDataTablePresenterTest : public CxxTest::TestSuite {
 public:
   /// Needed to make sure everything is initialized
-  IndirectDataTablePresenterTest() { FrameworkManager::Instance(); }
+  IndirectFitDataTablePresenterTest() { FrameworkManager::Instance(); }
 
-  static IndirectDataTablePresenterTest *createSuite() { return new IndirectDataTablePresenterTest(); }
+  static IndirectFitDataTablePresenterTest *createSuite() { return new IndirectFitDataTablePresenterTest(); }
 
-  static void destroySuite(IndirectDataTablePresenterTest *suite) { delete suite; }
+  static void destroySuite(IndirectFitDataTablePresenterTest *suite) { delete suite; }
 
   void setUp() override {
     m_model = std::make_unique<NiceMock<MockIndirectDataTableModel>>();
     m_table = createEmptyTableWidget(5, 5);
-    m_presenter = std::make_unique<IndirectDataTablePresenter>(std::move(m_model.get()), std::move(m_table.get()));
+    m_presenter = std::make_unique<IndirectFitDataTablePresenter>(std::move(m_model.get()), std::move(m_table.get()));
 
     SetUpADSWithWorkspace ads("WorkspaceName", createWorkspace(5));
     m_model->addWorkspace("WorkspaceName");
@@ -212,5 +212,5 @@ private:
 
   std::unique_ptr<QTableWidget> m_table;
   std::unique_ptr<MockIndirectDataTableModel> m_model;
-  std::unique_ptr<IndirectDataTablePresenter> m_presenter;
+  std::unique_ptr<IndirectFitDataTablePresenter> m_presenter;
 };
