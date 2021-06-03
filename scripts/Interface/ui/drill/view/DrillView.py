@@ -491,6 +491,15 @@ class DrillView(QMainWindow):
     # for model calls                                                         #
     ###########################################################################
 
+    def setInstrument(self, instrument):
+        """
+        Set the instrument in the combobox.
+
+        Args:
+            instrument (str): instrument name
+        """
+        self.instrumentselector.setCurrentText(instrument)
+
     def set_available_modes(self, modes):
         """
         Set the available acquisition modes in the comboxbox.
