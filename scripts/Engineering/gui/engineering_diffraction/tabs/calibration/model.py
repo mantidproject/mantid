@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger
 from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, DiffractionFocussing, \
-    CreateEmptyTableWorkspace, NormaliseByCurrent, RenameWorkspace, \
+    CreateEmptyTableWorkspace, NormaliseByCurrent, RenameWorkspace, DeleteWorkspaces, \
     ConvertUnits, Load, ReplaceSpecialValues, SaveNexus, \
     EnggEstimateFocussedBackground, ApplyDiffCal
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file, default_ceria_expected_peaks, \
@@ -221,8 +221,7 @@ class CalibrationModel(object):
 
             background_van = EnggEstimateFocussedBackground(InputWorkspace=focused_van, NIterations='15', XWindow=0.03)
 
-            DeleteWorkspace(focused_ceria)
-            DeleteWorkspace(focused_van)
+            DeleteWorkspaces([focused_ceria, focused_van])
 
             return tof_focused, background_van
 
@@ -282,8 +281,7 @@ class CalibrationModel(object):
             df_kwarg = {"GroupingWorkspace": grp_ws}
             calibrate_region_of_interest("Cropped", df_kwarg)
 
-        DeleteWorkspace(ws_van)
-        DeleteWorkspace("tof_focused")
+        DeleteWorkspaces([ws_van, "tof_focused"])
 
         cal_params = list()
         # in the output calfile, rows are present for all detids, only read one from the region of interest

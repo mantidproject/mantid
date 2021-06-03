@@ -13,8 +13,8 @@ from Engineering.gui.engineering_diffraction.tabs.common import vanadium_correct
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from Engineering.EnggUtils import create_custom_grouping_workspace
 from mantid.simpleapi import logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE, \
-    Load, NormaliseByCurrent, Divide, DiffractionFocussing, RebinToWorkspace, CloneWorkspace, DeleteWorkspace, \
-    ConvertUnits, ReplaceSpecialValues, ApplyDiffCal
+    Load, NormaliseByCurrent, Divide, DiffractionFocussing, RebinToWorkspace, CloneWorkspace, DeleteWorkspaces, \
+    ConvertUnits, ReplaceSpecialValues, ApplyDiffCal, RenameWorkspace
 
 SAMPLE_RUN_WORKSPACE_NAME = "engggui_focusing_input_ws"
 FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_bank_"
@@ -109,8 +109,7 @@ class FocusModel(object):
                         # Save the output to the file system.
                         self._save_output(instrument, sample_path, name, tof_output_name, rb_num)
                         self._save_output(instrument, sample_path, name, dspacing_output_name, rb_num)
-                    DeleteWorkspace(sample_ws_clone)
-                    DeleteWorkspace(curves_ws_clone)
+                    DeleteWorkspaces([sample_ws_clone, curves_ws_clone])
                 output_workspaces.append(workspaces_for_run)
                 self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
 
@@ -143,12 +142,9 @@ class FocusModel(object):
                             AllowDifferentNumberSpectra=True)
         ApplyDiffCal(InstrumentWorkspace=normalised, CalibrationWorkspace=region_calib)
         dspacing_output_name = tof_output_name + "_dSpacing"
-        CloneWorkspace(InputWorkspace=normalised, OutputWorkspace=dspacing_output_name)
+        RenameWorkspace(InputWorkspace=normalised, OutputWorkspace=dspacing_output_name)
         ConvertUnits(InputWorkspace=normalised, OutputWorkspace=tof_output_name, Target='TOF')
-        DeleteWorkspace(curves_rebinned)
-        DeleteWorkspace(focused_sample)
-        DeleteWorkspace(normalised)
-        DeleteWorkspace(ws_d)
+        DeleteWorkspaces([curves_rebinned, focused_sample, ws_d])
         return True
 
     @staticmethod
