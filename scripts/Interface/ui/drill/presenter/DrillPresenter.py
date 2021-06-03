@@ -405,12 +405,16 @@ class DrillPresenter:
 
     def _syncViewHeader(self):
         availableModes = self.model.getAvailableAcquisitionModes()
+        instrument = self.model.getInstrument()
         acquisitionMode = self.model.getAcquisitionMode()
         cycle, exp = self.model.getCycleAndExperiment()
 
+        self.view.blockSignals(True)
+        self.view.setInstrument(instrument)
         self.view.set_available_modes(availableModes)
         self.view.set_acquisition_mode(acquisitionMode)
         self.view.setCycleAndExperiment(cycle, exp)
+        self.view.blockSignals(False)
 
     def _resetTable(self):
         """
