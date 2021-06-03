@@ -401,7 +401,7 @@ class BasicFittingPresenter:
     def _perform_fit(self) -> None:
         """Perform the fit in a thread."""
         try:
-            self.calculation_thread = self._create_thread(self.model.perform_fit)
+            self.calculation_thread = self._create_fitting_thread(self.model.perform_fit)
             self.calculation_thread.threadWrapperSetUp(self.handle_started,
                                                        self.handle_finished,
                                                        self.handle_error)
@@ -409,7 +409,7 @@ class BasicFittingPresenter:
         except ValueError as error:
             self.view.warning_popup(error)
 
-    def _create_thread(self, callback) -> ThreadModel:
+    def _create_fitting_thread(self, callback) -> ThreadModel:
         """Create a thread for fitting."""
         self.fitting_calculation_model = ThreadModelWrapperWithOutput(callback)
         return ThreadModel(self.fitting_calculation_model)

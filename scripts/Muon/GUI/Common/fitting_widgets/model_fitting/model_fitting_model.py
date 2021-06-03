@@ -55,21 +55,11 @@ class ModelFittingModel(BasicFittingModel):
         """Returns the number of result tables which are held by the context."""
         return self.fitting_context.number_of_result_tables
 
-    @property
-    def x_parameter_names(self) -> list:
-        """Returns the available x parameters names for the selected results table."""
-        return self.fitting_context.x_parameters.keys()
-
-    @property
-    def y_parameters_names(self) -> list:
-        """Returns the available y parameters names for the selected results table."""
-        return self.fitting_context.y_parameters.keys()
-
     def get_workspace_names_to_display_from_context(self) -> list:
         """Returns the names of results tables to display in the view."""
         return self._check_data_exists(self.context.results_context.result_table_names)
 
-    def discover_and_create_x_and_y_parameter_combinations(self) -> None:
+    def create_x_and_y_parameter_combination_workspaces(self) -> None:
         """Discovers the available X and Y parameters, and creates a MatrixWorkspace for each parameter combination."""
         self.fitting_context.x_parameters = {}
         self.fitting_context.y_parameters = {}
@@ -77,6 +67,8 @@ class ModelFittingModel(BasicFittingModel):
 
         self._extract_x_and_y_from_current_result_table()
         self.dataset_names = self._create_matrix_workspaces_for_parameter_combinations()
+
+        return self.fitting_context.x_parameters.keys(), self.fitting_context.y_parameters.keys()
 
     def _extract_x_and_y_from_current_result_table(self) -> None:
         """Extracts the X, Y and error values from the currently selected result table and saves them in the context."""
