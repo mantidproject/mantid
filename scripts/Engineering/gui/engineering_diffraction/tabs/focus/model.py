@@ -127,7 +127,7 @@ class FocusModel(object):
                    df_kwarg,
                    full_calib,
                    region_calib):
-        if input_workspace.getProtonCharge() > 0:
+        if input_workspace.getRun().getProtonCharge() > 0:
             NormaliseByCurrent(InputWorkspace=input_workspace, OutputWorkspace=input_workspace)
         else:
             logger.warning(f"Skipping focus of run {input_workspace.name()} because it has invalid proton charge.")
