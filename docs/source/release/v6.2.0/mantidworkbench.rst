@@ -14,6 +14,7 @@ New and Improved
     :width: 500px
     :align: center
 
+- Peaks can now be added or removed from a PeaksWorkspace using the :ref:`peaks overlay <sliceviewer_peaks_overlay>` in :ref:`sliceviewer`.
 
 Bugfixes
 --------

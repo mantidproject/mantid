@@ -1,6 +1,5 @@
 set(SRC_FILES
     src/AbsorptionCorrection.cpp
-    src/PaalmanPingsAbsorptionCorrection.cpp
     src/AddAbsorptionWeightedPathLengths.cpp
     src/AddLogDerivative.cpp
     src/AddNote.cpp
@@ -15,6 +14,7 @@ set(SRC_FILES
     src/ApplyCalibration.cpp
     src/ApplyDetailedBalance.cpp
     src/ApplyFloodWorkspace.cpp
+    src/ApplyInstrumentToPeaks.cpp
     src/ApplyTransmissionCorrection.cpp
     src/AverageLogData.cpp
     src/Bin2DPowderDiffraction.cpp
@@ -72,9 +72,9 @@ set(SRC_FILES
     src/CopyInstrumentParameters.cpp
     src/CopyLogs.cpp
     src/CopySample.cpp
-    src/CorelliCrossCorrelate.cpp
     src/CorelliCalibrationApply.cpp
     src/CorelliCalibrationDatabase.cpp
+    src/CorelliCrossCorrelate.cpp
     src/CorrectKiKf.cpp
     src/CorrectTOFAxis.cpp
     src/CorrectToFile.cpp
@@ -222,6 +222,7 @@ set(SRC_FILES
     src/PDDetermineCharacterizations.cpp
     src/PDFFourierTransform.cpp
     src/PDFFourierTransform2.cpp
+    src/PaalmanPingsAbsorptionCorrection.cpp
     src/PaddingAndApodization.cpp
     src/ParallaxCorrection.cpp
     src/Pause.cpp
@@ -334,7 +335,6 @@ set(SRC_FILES
 
 set(INC_FILES
     inc/MantidAlgorithms/AbsorptionCorrection.h
-    inc/MantidAlgorithms/PaalmanPingsAbsorptionCorrection.h
     inc/MantidAlgorithms/AddAbsorptionWeightedPathLengths.h
     inc/MantidAlgorithms/AddLogDerivative.h
     inc/MantidAlgorithms/AddNote.h
@@ -349,6 +349,7 @@ set(INC_FILES
     inc/MantidAlgorithms/ApplyCalibration.h
     inc/MantidAlgorithms/ApplyDetailedBalance.h
     inc/MantidAlgorithms/ApplyFloodWorkspace.h
+    inc/MantidAlgorithms/ApplyInstrumentToPeaks.h
     inc/MantidAlgorithms/ApplyTransmissionCorrection.h
     inc/MantidAlgorithms/AverageLogData.h
     inc/MantidAlgorithms/Bin2DPowderDiffraction.h
@@ -406,9 +407,9 @@ set(INC_FILES
     inc/MantidAlgorithms/CopyInstrumentParameters.h
     inc/MantidAlgorithms/CopyLogs.h
     inc/MantidAlgorithms/CopySample.h
-    inc/MantidAlgorithms/CorelliCrossCorrelate.h
     inc/MantidAlgorithms/CorelliCalibrationApply.h
     inc/MantidAlgorithms/CorelliCalibrationDatabase.h
+    inc/MantidAlgorithms/CorelliCrossCorrelate.h
     inc/MantidAlgorithms/CorrectKiKf.h
     inc/MantidAlgorithms/CorrectTOFAxis.h
     inc/MantidAlgorithms/CorrectToFile.h
@@ -560,6 +561,7 @@ set(INC_FILES
     inc/MantidAlgorithms/PDDetermineCharacterizations.h
     inc/MantidAlgorithms/PDFFourierTransform.h
     inc/MantidAlgorithms/PDFFourierTransform2.h
+    inc/MantidAlgorithms/PaalmanPingsAbsorptionCorrection.h
     inc/MantidAlgorithms/PaddingAndApodization.h
     inc/MantidAlgorithms/ParallaxCorrection.h
     inc/MantidAlgorithms/Pause.h
@@ -687,7 +689,6 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 set(TEST_FILES
-    PaalmanPingsAbsorptionCorrectionTest.h
     AddAbsorptionWeightedPathLengthsTest.h
     AddLogDerivativeTest.h
     AddNoteTest.h
@@ -701,6 +702,7 @@ set(TEST_FILES
     ApplyCalibrationTest.h
     ApplyDetailedBalanceTest.h
     ApplyFloodWorkspaceTest.h
+    ApplyInstrumentToPeaksTest.h
     ApplyTransmissionCorrectionTest.h
     AverageLogDataTest.h
     Bin2DPowderDiffractionTest.h
@@ -760,9 +762,9 @@ set(TEST_FILES
     CopyInstrumentParametersTest.h
     CopyLogsTest.h
     CopySampleTest.h
-    CorelliCrossCorrelateTest.h
     CorelliCalibrationApplyTest.h
     CorelliCalibrationDatabaseTest.h
+    CorelliCrossCorrelateTest.h
     CorrectKiKfTest.h
     CorrectTOFAxisTest.h
     CorrectToFileTest.h
@@ -781,8 +783,8 @@ set(TEST_FILES
     CreateUserDefinedBackgroundTest.h
     CreateWorkspaceTest.h
     CropToComponentTest.h
-    CropWorkspaceTest.h
     CropWorkspaceRaggedTest.h
+    CropWorkspaceTest.h
     CrossCorrelateTest.h
     CuboidGaugeVolumeAbsorptionTest.h
     CylinderAbsorptionTest.h
@@ -906,6 +908,7 @@ set(TEST_FILES
     PDDetermineCharacterizationsTest.h
     PDFFourierTransform2Test.h
     PDFFourierTransformTest.h
+    PaalmanPingsAbsorptionCorrectionTest.h
     PaddingAndApodizationTest.h
     ParallaxCorrectionTest.h
     PauseTest.h

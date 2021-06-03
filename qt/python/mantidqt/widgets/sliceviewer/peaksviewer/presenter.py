@@ -6,14 +6,19 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-# std imports
-from enum import Enum
-
 # local imports
+from .model import create_peaksviewermodel, PeaksViewerModel
+from .view import PeaksViewerView, PeaksViewerCollectionView
+from ..adsobsever import SliceViewerADSObserver
+
+# 3rd party
+from mantid.kernel import logger
 from mantidqt.widgets.workspacedisplay.table.presenter_standard \
     import TableWorkspaceDataPresenterStandard, create_table_item
-from .model import create_peaksviewermodel
-from ..adsobsever import SliceViewerADSObserver
+
+# standard
+from enum import Enum
+from typing import List, Union
 
 
 class PeaksWorkspaceDataPresenter(TableWorkspaceDataPresenterStandard):
@@ -51,7 +56,9 @@ class PeaksViewerPresenter:
         ClearPeaks = 4
         PeakSelected = 5
 
-    def __init__(self, model, view):
+    def __init__(self,
+                 model: PeaksViewerModel,
+                 view: PeaksViewerView):
         """
         Constructs the view for the given PeaksWorkspace
         :param model: A handle to the view-model wrapper for PeaksWorkspace to be displayed
@@ -61,9 +68,7 @@ class PeaksViewerPresenter:
         super().__init__()
         self._model = model
         self._raise_error_if_workspace_incompatible(model.peaks_workspace)
-        self._peaks_table_presenter = \
-            PeaksWorkspaceDataPresenter(model, view.table_view)
-
+        self._peaks_table_presenter = PeaksWorkspaceDataPresenter(model, view.table_view)
         self._view = view
         view.subscribe(self)
         view.set_title(model.peaks_workspace.name())
@@ -78,7 +83,7 @@ class PeaksViewerPresenter:
     def view(self):
         return self._view
 
-    def notify(self, event):
+    def notify(self, event: Event):
         """
         Notification of an event that the presenter should react to
         :param event:
@@ -95,6 +100,12 @@ class PeaksViewerPresenter:
         else:
             from mantid.kernel import logger
             logger.warning("PeaksViewer: Unknown event detected: {}".format(event))
+
+    def add_peak(self, pos):
+        self.model.add_peak(pos, self._view.sliceinfo.frame)
+
+    def delete_peak(self, pos):
+        self.model.delete_peak(pos, self._view.sliceinfo.frame)
 
     def _clear_peaks(self):
         """Clear all peaks from this view"""
@@ -157,12 +168,14 @@ class PeaksViewerCollectionPresenter:
     ]
     DEFAULT_BG_COLOR = '0.75'
 
-    def __init__(self, view):
+    def __init__(self, view: PeaksViewerCollectionView):
         """
         :param view: View displaying the model information
         """
         self._view = view
-        self._child_presenters = []
+        self._actions_view = view.peak_actions_view
+        self._actions_view.subscribe(self)
+        self._child_presenters: List[PeaksViewerPresenter] = []
         self._ads_observer = None
         self.setup_ads_observer()
 
@@ -178,21 +191,23 @@ class PeaksViewerCollectionPresenter:
     def view(self):
         return self._view
 
-    def append_peaksworkspace(self, name):
+    def append_peaksworkspace(self, name: str, index=-1) -> PeaksViewerPresenter:
         """
         Create and append a view for the given named workspace
         :param name: The name of a PeaksWorkspace.
+        :param index: the index to insert the peaksworkspace in the PeaksViewerCollectionView
         :returns: The child presenter
         """
         self.setup_ads_observer()
         presenter = PeaksViewerPresenter(self._create_peaksviewer_model(name),
-                                         self._view.append_peaksviewer())
+                                         self._view.append_peaksviewer(index))
         self._child_presenters.append(presenter)
         return presenter
 
-    def overlay_peaksworkspaces(self, names_to_overlay):
+    def overlay_peaksworkspaces(self, names_to_overlay, index=-1):
         """
         :param names_to_overlay: The list of names to overlay
+        :param index: the index to insert the new peaksworkspace in the PeaksViewerCollectionView
         """
         # The final outcome should be the set of names in names_to_overlay
         # being what is displayed. If anything is currently displayed that is
@@ -213,14 +228,21 @@ class PeaksViewerCollectionPresenter:
                 self.remove_peaksworkspace(name)
 
         for name in names_to_overlay_final:
-            self.append_peaksworkspace(name)
+            self.append_peaksworkspace(name, index=index)
 
         self.notify(PeaksViewerPresenter.Event.OverlayPeaks)
+
+        self._actions_view.set_peaksworkspace(self.workspace_names())
+
+        self.view.setVisible(bool(self.workspace_names()))
+        if not self.workspace_names():
+            self.view.peak_actions_view.deactivate_peak_adding()
 
     def remove_peaksworkspace(self, name):
         """
         Remove the named workspace from display. No op if no workspace can be found with that name
         :param name: The name of a workspace
+        :return: index of removed PeaksViewerView within PeaksViewerCollectionView
         """
         self.setup_ads_observer()
         child_presenters = self._child_presenters
@@ -229,9 +251,10 @@ class PeaksViewerCollectionPresenter:
             if child.model.peaks_workspace.name() == name:
                 presenter_to_remove = child
                 child.notify(PeaksViewerPresenter.Event.ClearPeaks)
-                self._view.remove_peaksviewer(child.view)
+                index = self._view.remove_peaksviewer(child.view)
 
         child_presenters.remove(presenter_to_remove)
+        return index
 
     def workspace_names(self):
         """
@@ -243,14 +266,25 @@ class PeaksViewerCollectionPresenter:
 
         return names
 
+    def child_presenter(self, identifier: Union[int, str]) -> PeaksViewerPresenter:
+        r"""
+        @brief Get one of the presenters corresponding to one workspace
+        :param identifier: name of the peaks workspace, or index in the list of peaks workspaces
+        """
+        if isinstance(identifier, int):
+            return self._child_presenters[identifier]
+        elif isinstance(identifier, str):
+            for index, name in enumerate(self.workspace_names()):
+                if identifier == name:
+                    return self._child_presenters[index]
+
     def notify(self, event):
         """Dispatch notification to all subpresenters"""
         self.setup_ads_observer()
         for presenter in self._child_presenters:
             presenter.notify(event)
 
-    # private api
-    def _create_peaksviewer_model(self, name):
+    def _create_peaksviewer_model(self, name: str) -> PeaksViewerModel:
         """
         Create a model for the given PeaksWorkspace with an appropriate color
         :param name: The name of a PeaksWorkspace.
@@ -272,8 +306,9 @@ class PeaksViewerCollectionPresenter:
 
     def replace_handle(self, ws_name, _):
         if ws_name in self.workspace_names():
-            self.remove_peaksworkspace(ws_name)
-            self.overlay_peaksworkspaces(self.workspace_names() + [ws_name])
+            # get the index of the removed workspace so we can insert it back into the same position
+            index = self.remove_peaksworkspace(ws_name)
+            self.overlay_peaksworkspaces(self.workspace_names() + [ws_name], index=index)
 
     def delete_handle(self, ws_name):
         if ws_name in self.workspace_names():
@@ -286,5 +321,27 @@ class PeaksViewerCollectionPresenter:
 
     def rename_handle(self, ws_name, new_name):
         if ws_name in self.workspace_names():
-            self.remove_peaksworkspace(ws_name)
-            self.overlay_peaksworkspaces(self.workspace_names() + [new_name])
+            # get the index of the removed workspace so we can insert it back into the same position
+            index = self.remove_peaksworkspace(ws_name)
+            self.overlay_peaksworkspaces(self.workspace_names() + [new_name], index=index)
+
+    #
+    # Peak Actions Functionality
+    #
+    def add_delete_peak(self, pos):
+        presenter_active = self.child_presenter(self._actions_view.active_peaksworkspace)
+        if self._actions_view.adding_mode_on:
+            logger.debug(f"PeaksViewer: Adding peak position {pos}")
+            presenter_active.add_peak(pos)
+        elif self._actions_view.erasing_mode_on:
+            logger.debug(f"PeaksViewer: Deleting peak nearest to position {pos}")
+            presenter_active.delete_peak(pos)
+        else:
+            logger.debug(f"PeaksViewer: Ignoring peak action position {pos}")
+
+    def deactivate_peak_add_delete(self):
+        self._actions_view.deactivate_peak_adding()
+
+    def deactivate_zoom_pan(self, active):
+        if active:
+            self.view.deactivate_zoom_pan()

@@ -182,6 +182,10 @@ private:
   char *m_style;
   bool m_useOffset;
 
+  // Axis scales
+  std::string m_xAxisScale;
+  std::string m_yAxisScale;
+
   // Context menu actions
   QActionGroup *m_contextPlotTools;
   QAction *m_contextResetView;

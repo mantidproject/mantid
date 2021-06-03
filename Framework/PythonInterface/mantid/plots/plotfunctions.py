@@ -129,7 +129,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     will be done on the axis passed in
     :param fig: If not None then use this Figure object to plot
     :param plot_kwargs: Arguments that will be passed onto the plot function
-    :param ax_properties: A dict of axes properties. E.g. {'yscale': 'log'}
+    :param ax_properties: A dict of axes properties. E.g. {'yscale': 'log', 'xscale': 'linear'}
     :param window_title: A string denoting name of the GUI window which holds the graph
     :param tiled: An optional flag controlling whether to do a tiled or overlayed plot
     :param waterfall: An optional flag controlling whether or not to do a waterfall plot

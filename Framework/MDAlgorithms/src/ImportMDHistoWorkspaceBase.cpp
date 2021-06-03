@@ -53,7 +53,8 @@ void ImportMDHistoWorkspaceBase::initGenericImportProps() {
   declareProperty(std::make_unique<ArrayProperty<int>>("NumberOfBins"), "Number of bin in each dimension.");
 
   declareProperty(std::make_unique<ArrayProperty<std::string>>("Names"),
-                  "A comma separated list of the name of each dimension.");
+                  "A comma separated list of the name of each dimension. "
+                  "e.g. ('[H,0,0]','[0,K,0]','[0,0,L]') ");
 
   declareProperty(std::make_unique<ArrayProperty<std::string>>("Units"),
                   "A comma separated list of the units of each dimension.");

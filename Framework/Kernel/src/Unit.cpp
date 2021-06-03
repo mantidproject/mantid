@@ -439,6 +439,14 @@ Energy::Energy() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {
   addConversion("Momentum", 2 * M_PI / factor, 0.5);
 }
 
+void Energy::validateUnitParams(const int, const UnitParametersMap &params) {
+  if (!ParamPresent(params, UnitParams::l2)) {
+    throw std::runtime_error("An l2 value must be supplied in the extra "
+                             "parameters when initialising " +
+                             this->unitID() + " for conversion via TOF");
+  }
+}
+
 void Energy::init() {
   double l2 = 0.0;
   ParamPresentAndSet(m_params, UnitParams::l2, l2);

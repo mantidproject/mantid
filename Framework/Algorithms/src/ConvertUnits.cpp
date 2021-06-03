@@ -425,7 +425,7 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
     checkFromUnit->toTOF(checkXValues, emptyVec, l1, emode, pmap);
     // Convert from time-of-flight to the desired unit
     checkOutputUnit->fromTOF(checkXValues, emptyVec, l1, emode, pmap);
-  } catch (std::runtime_error) { // if it's a detector specific problem then ignore
+  } catch (std::runtime_error &) { // if it's a detector specific problem then ignore
   }
 
   // create the output workspace
@@ -462,7 +462,7 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
       if (m_inputEvents) {
         eventWS->getSpectrum(i).convertUnitsViaTof(localFromUnit.get(), localOutputUnit.get());
       }
-    } catch (std::runtime_error) {
+    } catch (std::runtime_error &) {
       // Get to here if exception thrown in unit conversion eg when calculating
       // distance to detector
       failedDetectorCount++;

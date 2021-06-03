@@ -93,12 +93,12 @@ std::map<std::string, std::string> PSIBackgroundSubtraction::validateInputs() {
     int lastGood = 0;
     try {
       firstGood = std::stoi(run.getProperty(FIRST_GOOD + std::to_string(index))->value());
-    } catch (Kernel::Exception::NotFoundError) {
+    } catch (Kernel::Exception::NotFoundError &) {
       errors["InputWorkspace"] = "Input Workspace should should contain first good data. ";
     }
     try {
       lastGood = std::stoi(run.getProperty(LAST_GOOD + std::to_string(index))->value());
-    } catch (Kernel::Exception::NotFoundError) {
+    } catch (Kernel::Exception::NotFoundError &) {
       errors["InputWorkspace"] += "\n Input Workspace should should contain last good data. ";
     }
     if (lastGood <= firstGood) {

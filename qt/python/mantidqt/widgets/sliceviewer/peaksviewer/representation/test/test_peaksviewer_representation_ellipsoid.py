@@ -13,7 +13,7 @@ import numpy as np
 
 # local imports
 from mantidqt.widgets.sliceviewer.peaksviewer.representation.ellipsoid \
-    import EllipsoidalIntergratedPeakRepresentation, slice_ellipsoid
+    import EllipsoidalIntegratedPeakRepresentation, slice_ellipsoid
 
 from mantidqt.widgets.sliceviewer.peaksviewer.representation.test.shapetesthelpers \
     import FuzzyMatch, create_ellipsoid_info, draw_representation, create_sphere_info
@@ -47,7 +47,7 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
         fake_alpha = 0.5
         compute_alpha_mock.return_value = fake_alpha
 
-        painted = draw_representation(EllipsoidalIntergratedPeakRepresentation, peak_center, sphere,
+        painted = draw_representation(EllipsoidalIntegratedPeakRepresentation, peak_center, sphere,
                                       painter, fg_color, bg_color, shape_name="spherical")
 
         self.assertTrue(painted is not None)
@@ -74,7 +74,7 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
         fake_alpha = 0.5
         compute_alpha_mock.return_value = fake_alpha
 
-        painted = draw_representation(EllipsoidalIntergratedPeakRepresentation, peak_center, sphere,
+        painted = draw_representation(EllipsoidalIntegratedPeakRepresentation, peak_center, sphere,
                                       painter, fg_color, bg_color, shape_name="spherical")
 
         self.assertTrue(painted is not None)
@@ -94,7 +94,7 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
         fake_alpha = -0.1
         compute_alpha_mock.return_value = fake_alpha
 
-        painted = draw_representation(EllipsoidalIntergratedPeakRepresentation, [1, 2, 3],
+        painted = draw_representation(EllipsoidalIntegratedPeakRepresentation, [1, 2, 3],
                                       ellipsoid, painter, 'r', 'g')
 
         self.assertTrue(painted is None)
@@ -111,7 +111,7 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
         fake_alpha = 0.5
         compute_alpha_mock.return_value = fake_alpha
 
-        painted = draw_representation(EllipsoidalIntergratedPeakRepresentation, peak_center,
+        painted = draw_representation(EllipsoidalIntegratedPeakRepresentation, peak_center,
                                       ellipsoid, painter, fg_color, bg_color)
 
         self.assertTrue(painted is not None)
@@ -137,7 +137,7 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
         fake_alpha = 0.5
         compute_alpha_mock.return_value = fake_alpha
 
-        painted = draw_representation(EllipsoidalIntergratedPeakRepresentation, peak_center,
+        painted = draw_representation(EllipsoidalIntegratedPeakRepresentation, peak_center,
                                       ellipsoid, painter, fg_color, bg_color)
 
         self.assertTrue(painted is not None)
@@ -163,7 +163,7 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
         fake_alpha = 0.5
         compute_alpha_mock.return_value = fake_alpha
 
-        painted = draw_representation(EllipsoidalIntergratedPeakRepresentation, peak_center,
+        painted = draw_representation(EllipsoidalIntegratedPeakRepresentation, peak_center,
                                       ellipsoid, painter, fg_color, bg_color, slice_transform)
 
         slice_diff = 1  # difference between peak_center and slice_point in plane normal to slice (3 - 2)
@@ -206,7 +206,7 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
         fake_alpha = 0.5
         compute_alpha_mock.return_value = fake_alpha
 
-        painted = draw_representation(EllipsoidalIntergratedPeakRepresentation, peak_center,
+        painted = draw_representation(EllipsoidalIntegratedPeakRepresentation, peak_center,
                                       ellipsoid, painter, fg_color, bg_color, slice_transform)
 
         self.assertTrue(painted is not None)
@@ -237,7 +237,7 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
         compute_alpha_mock.return_value = fake_alpha
 
         # pass peak centre as list as modified in place
-        painted = draw_representation(EllipsoidalIntergratedPeakRepresentation, list(peak_center),
+        painted = draw_representation(EllipsoidalIntegratedPeakRepresentation, list(peak_center),
                                       ellipsoid, painter, fg_color, bg_color, slice_transform)
 
         self.assertTrue(painted is not None)
