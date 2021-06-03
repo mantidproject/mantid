@@ -5,13 +5,13 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ErrorReporter.h"
+#include "MantidJson/Json.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InternetHelper.h"
-#include "MantidKernel/Json.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 
@@ -115,7 +115,7 @@ std::string ErrorReporter::generateErrorMessage() const {
     message["stacktrace"] = "";
   }
 
-  return Mantid::Kernel::JsonHelpers::jsonToString(message);
+  return Mantid::JsonHelpers::jsonToString(message);
 }
 
 /** Submits a post request to the specified url with the message as the body

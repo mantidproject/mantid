@@ -5,9 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/GitHubApiHelper.h"
+#include "MantidJson/Json.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/Json.h"
 #include "MantidKernel/Logger.h"
 #include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
@@ -150,7 +150,7 @@ std::string GitHubApiHelper::getRateLimitDescription() {
   auto responseString = responseStream.str();
 
   Json::Value root;
-  if (!Mantid::Kernel::JsonHelpers::parse(responseString, &root, NULL)) {
+  if (!Mantid::JsonHelpers::parse(responseString, &root, NULL)) {
     return "Failed to parse json document from \"" + RATE_LIMIT_URL + "\"";
   }
 

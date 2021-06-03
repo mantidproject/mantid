@@ -14,10 +14,10 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 
+#include "MantidJson/Json.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EmptyValues.h"
-#include "MantidKernel/Json.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Strings.h"
@@ -891,7 +891,7 @@ void Algorithm::setupAsChildAlgorithm(const Algorithm_sptr &alg, const double st
  * a json formatted string.
  * @returns This object serialized as a string
  */
-std::string Algorithm::toString() const { return Mantid::Kernel::JsonHelpers::jsonToString(toJson()); }
+std::string Algorithm::toString() const { return Mantid::JsonHelpers::jsonToString(toJson()); }
 
 /**
  * Serialize this object to a json object)
@@ -932,7 +932,7 @@ IAlgorithm_sptr Algorithm::fromHistory(const AlgorithmHistory &history) {
   root["version"] = history.version();
   root["properties"] = jsonMap;
 
-  const std::string output = Mantid::Kernel::JsonHelpers::jsonToString(root);
+  const std::string output = Mantid::JsonHelpers::jsonToString(root);
   IAlgorithm_sptr alg;
 
   try {
@@ -955,7 +955,7 @@ IAlgorithm_sptr Algorithm::fromHistory(const AlgorithmHistory &history) {
  */
 IAlgorithm_sptr Algorithm::fromString(const std::string &input) {
   ::Json::Value root;
-  if (Mantid::Kernel::JsonHelpers::parse(input, &root)) {
+  if (Mantid::JsonHelpers::parse(input, &root)) {
     return fromJson(root);
   } else {
     throw std::runtime_error("Cannot create algorithm, invalid string format.");

@@ -20,7 +20,7 @@
 #include <json/json.h>
 
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
-#include "MantidKernel/Json.h"
+#include "MantidJson/Json.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/cow_ptr.h"
@@ -59,7 +59,7 @@ public:
     // Minimal valid JSON for describing the shape.
     Json::Value root;
     root["shape"] = "square";
-    const std::string str_json = Mantid::Kernel::JsonHelpers::jsonToString(root);
+    const std::string str_json = Mantid::JsonHelpers::jsonToString(root);
 
     factory.create(str_json);
 

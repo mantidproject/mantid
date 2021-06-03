@@ -13,8 +13,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidJson/Json.h"
 #include "MantidKernel/InstrumentInfo.h"
-#include "MantidKernel/Json.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
@@ -531,7 +531,7 @@ bool StepScan::runStepScanAlgLive(const std::string &stepScanProperties) {
 
   Json::Value root;
 
-  bool parsingSuccessful = Mantid::Kernel::JsonHelpers::parse(stepScanProperties, &root);
+  bool parsingSuccessful = Mantid::JsonHelpers::parse(stepScanProperties, &root);
   if (!parsingSuccessful) {
     throw std::runtime_error("Parsing parameters failed for StepScan.");
   }

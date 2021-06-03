@@ -8,8 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidJson/Json.h"
 #include "MantidKernel/ErrorReporter.h"
-#include "MantidKernel/Json.h"
 #include <algorithm>
 #include <json/json.h>
 
@@ -46,7 +46,7 @@ public:
     const std::string message = errorService.generateErrorMessage();
 
     ::Json::Value root;
-    Mantid::Kernel::JsonHelpers::parse(message, &root);
+    Mantid::JsonHelpers::parse(message, &root);
     auto members = root.getMemberNames();
     const std::vector<std::string> expectedMembers{
         "ParaView",   "application", "host", "mantidSha1", "mantidVersion", "osArch",  "osName",
@@ -68,7 +68,7 @@ public:
     const std::string message = errorService.generateErrorMessage();
 
     ::Json::Value root;
-    Mantid::Kernel::JsonHelpers::parse(message, &root);
+    Mantid::JsonHelpers::parse(message, &root);
     auto members = root.getMemberNames();
     const std::vector<std::string> expectedMembers{
         "ParaView",  "application", "host",     "mantidSha1", "mantidVersion", "osArch",  "osName", "osReadable",
@@ -93,7 +93,7 @@ public:
     const std::string message = errorService.generateErrorMessage();
 
     ::Json::Value root;
-    Mantid::Kernel::JsonHelpers::parse(message, &root);
+    Mantid::JsonHelpers::parse(message, &root);
     auto members = root.getMemberNames();
     const std::vector<std::string> expectedMembers{
         "ParaView", "application", "host",      "mantidSha1", "mantidVersion", "osArch",
@@ -120,7 +120,7 @@ public:
     const std::string message = errorService.generateErrorMessage();
 
     ::Json::Value root;
-    Mantid::Kernel::JsonHelpers::parse(message, &root);
+    Mantid::JsonHelpers::parse(message, &root);
     auto members = root.getMemberNames();
     const std::vector<std::string> expectedMembers{
         "ParaView", "application", "host",      "mantidSha1", "mantidVersion", "osArch",

@@ -5,9 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/CheckMantidVersion.h"
+#include "MantidJson/Json.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/GitHubApiHelper.h"
-#include "MantidKernel/Json.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/Strings.h"
 
@@ -91,7 +91,7 @@ void CheckMantidVersion::exec() {
   if (!json.empty()) {
     Json::Value root;
     std::string jsonErrors;
-    bool parseOK = Mantid::Kernel::JsonHelpers::parse(json, &root, &jsonErrors);
+    bool parseOK = Mantid::JsonHelpers::parse(json, &root, &jsonErrors);
     if (!parseOK) {
       // just warning. The parser is able to get relevant info even if there are
       // formatting issues like missing quotes or brackets.

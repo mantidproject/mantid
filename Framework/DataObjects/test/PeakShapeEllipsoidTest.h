@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
-#include "MantidKernel/Json.h"
+#include "MantidJson/Json.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
@@ -155,7 +155,7 @@ public:
     const std::string json = shape.toJSON();
 
     Json::Value output;
-    TSM_ASSERT("Should parse as JSON", Mantid::Kernel::JsonHelpers::parse(json, &output));
+    TSM_ASSERT("Should parse as JSON", Mantid::JsonHelpers::parse(json, &output));
 
     TS_ASSERT_EQUALS(directions[0].toString(), output["direction0"].asString());
     TS_ASSERT_EQUALS(directions[1].toString(), output["direction1"].asString());

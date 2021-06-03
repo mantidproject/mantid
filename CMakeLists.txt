@@ -137,6 +137,7 @@ option(CXXTEST_ADD_PERFORMANCE
 add_subdirectory(Framework)
 
 include_directories(Framework/Kernel/inc)
+include_directories(Framework/Json/inc)
 include_directories(Framework/HistogramData/inc)
 include_directories(Framework/Indexing/inc)
 include_directories(Framework/Parallel/inc)
@@ -146,7 +147,7 @@ include_directories(Framework/API/inc)
 include_directories(Framework/Types/inc)
 include_directories(Framework/NexusGeometry/inc)
 
-set(CORE_MANTIDLIBS Kernel HistogramData Indexing Beamline Geometry API Types)
+set(CORE_MANTIDLIBS Kernel Json HistogramData Indexing Beamline Geometry API Types)
 
 if(UNIX)
   # Experimental feature. Unix only at this point.

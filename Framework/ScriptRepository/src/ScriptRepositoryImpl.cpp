@@ -7,10 +7,10 @@
 // from mantid
 #include "MantidScriptRepository/ScriptRepositoryImpl.h"
 #include "MantidAPI/ScriptRepositoryFactory.h"
+#include "MantidJson/Json.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InternetHelper.h"
-#include "MantidKernel/Json.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NetworkProxy.h"
 #include "MantidKernel/ProxyInfo.h"
@@ -87,7 +87,7 @@ void writeJsonFile(const std::string &filename, const Json::Value &json, const s
   if (!filestream.good()) {
     g_log.error() << error << '\n';
   }
-  filestream << Mantid::Kernel::JsonHelpers::jsonToString(json, " ");
+  filestream << Mantid::JsonHelpers::jsonToString(json, " ");
   filestream.close();
 }
 
@@ -846,7 +846,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path, const std::strin
 
     Json::Value pt;
     auto answerString = answer.str();
-    if (!Mantid::Kernel::JsonHelpers::parse(answerString, &pt)) {
+    if (!Mantid::JsonHelpers::parse(answerString, &pt)) {
       throw ScriptRepoException("Bad answer from the Server");
     }
     info = pt.get("message", "").asString();
@@ -1026,7 +1026,7 @@ void ScriptRepositoryImpl::remove(const std::string &file_path, const std::strin
     std::string detail;
     Json::Value answer_json;
     auto answerString = answer.str();
-    if (!Mantid::Kernel::JsonHelpers::parse(answerString, &answer_json)) {
+    if (!Mantid::JsonHelpers::parse(answerString, &answer_json)) {
       throw ScriptRepoException("Bad answer from the Server");
     }
 

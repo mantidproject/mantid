@@ -8,11 +8,11 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidJson/Json.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
-#include "MantidKernel/Json.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PropertyManager.h"
@@ -465,20 +465,20 @@ public:
 
     ::Json::Value value;
 
-    TSM_ASSERT("value was not valid JSON", Mantid::Kernel::JsonHelpers::parse(mgr.asString(), &value));
+    TSM_ASSERT("value was not valid JSON", Mantid::JsonHelpers::parse(mgr.asString(), &value));
 
     TSM_ASSERT_EQUALS("value was not empty", value.size(), 0);
 
     TSM_ASSERT_EQUALS("Show the default", mgr.asString(true), "{\"Prop1\":10,\"Prop2\":15}");
 
-    TSM_ASSERT("value was not valid JSON", Mantid::Kernel::JsonHelpers::parse(mgr.asString(true), &value));
+    TSM_ASSERT("value was not valid JSON", Mantid::JsonHelpers::parse(mgr.asString(true), &value));
     TS_ASSERT_EQUALS(boost::lexical_cast<int>(value["Prop1"].asString()), 10);
     TS_ASSERT_EQUALS(boost::lexical_cast<int>(value["Prop2"].asString()), 15);
     mgr.setProperty("Prop1", 123);
     mgr.setProperty("Prop2", 456);
     TSM_ASSERT_EQUALS("Change the values", mgr.asString(false), "{\"Prop1\":123,\"Prop2\":456}");
 
-    TSM_ASSERT("value was not valid JSON", Mantid::Kernel::JsonHelpers::parse(mgr.asString(false), &value));
+    TSM_ASSERT("value was not valid JSON", Mantid::JsonHelpers::parse(mgr.asString(false), &value));
     TS_ASSERT_EQUALS(boost::lexical_cast<int>(value["Prop1"].asString()), 123);
     TS_ASSERT_EQUALS(boost::lexical_cast<int>(value["Prop2"].asString()), 456);
   }
@@ -489,19 +489,19 @@ public:
 
     ::Json::Value value;
 
-    TSM_ASSERT("value was not valid JSON", Mantid::Kernel::JsonHelpers::parse(mgr.asString(), &value));
+    TSM_ASSERT("value was not valid JSON", Mantid::JsonHelpers::parse(mgr.asString(), &value));
 
     TSM_ASSERT_EQUALS("value was not empty", value.size(), 0);
 
     TSM_ASSERT_EQUALS("Show the default", mgr.asString(true), "{\"ArrayProp\":[]}");
 
-    TSM_ASSERT("value was not valid JSON", Mantid::Kernel::JsonHelpers::parse(mgr.asString(true), &value));
+    TSM_ASSERT("value was not valid JSON", Mantid::JsonHelpers::parse(mgr.asString(true), &value));
 
     mgr.setProperty("ArrayProp", "10.1,12.5,23.5");
 
     TSM_ASSERT_EQUALS("Change the values", mgr.asString(false), "{\"ArrayProp\":[10.1,12.5,23.5]}");
 
-    TSM_ASSERT("value was not valid JSON", Mantid::Kernel::JsonHelpers::parse(mgr.asString(false), &value));
+    TSM_ASSERT("value was not valid JSON", Mantid::JsonHelpers::parse(mgr.asString(false), &value));
   }
 
   void test_asStringWithNonSerializableProperty() {

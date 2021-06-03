@@ -7,7 +7,7 @@
 #include <utility>
 
 #include "MantidAPI/NotebookWriter.h"
-#include "MantidKernel/Json.h"
+#include "MantidJson/Json.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 
@@ -61,7 +61,7 @@ std::string NotebookWriter::codeCell(const std::string &string_code) {
   cell_data["outputs"] = Json::Value(Json::arrayValue);
 
   m_cell_buffer.append(cell_data);
-  return Mantid::Kernel::JsonHelpers::jsonToString(cell_data, " ");
+  return Mantid::JsonHelpers::jsonToString(cell_data, " ");
 }
 
 /**
@@ -95,7 +95,7 @@ std::string NotebookWriter::markdownCell(const std::string &string_text) {
   cell_data["source"] = string_text;
 
   m_cell_buffer.append(cell_data);
-  return Mantid::Kernel::JsonHelpers::jsonToString(cell_data, " ");
+  return Mantid::JsonHelpers::jsonToString(cell_data, " ");
 }
 
 /**
@@ -174,7 +174,7 @@ Json::Value NotebookWriter::buildNotebook() {
 std::string NotebookWriter::writeNotebook() {
   const Json::Value root = buildNotebook();
 
-  std::string output_string = Mantid::Kernel::JsonHelpers::jsonToString(root, " ");
+  std::string output_string = Mantid::JsonHelpers::jsonToString(root, " ");
 
   return output_string;
 }

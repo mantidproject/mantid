@@ -5,12 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidKernel/Json.h"
+#include "MantidJson/Json.h"
 #include <boost/algorithm/string/erase.hpp>
 #include <sstream>
 
 namespace Mantid {
-namespace Kernel {
 namespace JsonHelpers {
 
 /**
@@ -65,5 +64,4 @@ bool parse(const std::string &jsonString, Json::Value *jsonValue, std::string *e
 }
 
 } // namespace JsonHelpers
-} // namespace Kernel
 } // namespace Mantid

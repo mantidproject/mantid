@@ -8,9 +8,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyManager.h"
+#include "MantidJson/Json.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/IPropertySettings.h"
-#include "MantidKernel/Json.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/PropertyWithValueJSON.h"
 #include "MantidKernel/StringTokenizer.h"
@@ -319,7 +319,7 @@ void PropertyManager::setProperties(const std::string &propertiesJson, IProperty
                                     const std::unordered_set<std::string> &ignoreProperties, bool createMissing) {
   ::Json::Value jsonValue;
 
-  if (Mantid::Kernel::JsonHelpers::parse(propertiesJson, &jsonValue)) {
+  if (Mantid::JsonHelpers::parse(propertiesJson, &jsonValue)) {
     setProperties(jsonValue, targetPropertyManager, ignoreProperties, createMissing);
   } else {
     throw std::invalid_argument("propertiesArray was not valid json");
@@ -407,7 +407,7 @@ void PropertyManager::setPropertiesWithJSONString(const std::string &propertiesS
                                                   const std::unordered_set<std::string> &ignoreProperties) {
   ::Json::Value propertyJson;
 
-  if (Mantid::Kernel::JsonHelpers::parse(propertiesString, &propertyJson)) {
+  if (Mantid::JsonHelpers::parse(propertiesString, &propertyJson)) {
     setProperties(propertyJson, ignoreProperties);
   } else {
     throw std::invalid_argument("Could not parse JSON string when trying to set a property from: " + propertiesString);

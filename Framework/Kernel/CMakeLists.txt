@@ -48,7 +48,6 @@ set(SRC_FILES
     src/InternetHelper.cpp
     src/Interpolation.cpp
     src/InvisibleProperty.cpp
-    src/Json.cpp
     src/LibraryManager.cpp
     src/LibraryWrapper.cpp
     src/LiveListenerInfo.cpp
@@ -210,7 +209,6 @@ set(INC_FILES
     inc/MantidKernel/InternetHelper.h
     inc/MantidKernel/Interpolation.h
     inc/MantidKernel/InvisibleProperty.h
-    inc/MantidKernel/Json.h
     inc/MantidKernel/LibraryManager.h
     inc/MantidKernel/LibraryWrapper.h
     inc/MantidKernel/ListValidator.h
@@ -371,7 +369,6 @@ set(TEST_FILES
     InternetHelperTest.h
     InterpolationTest.h
     InvisiblePropertyTest.h
-    JsonTest.h
     ListValidatorTest.h
     LiveListenerInfoTest.h
     LogFilterTest.h
@@ -521,6 +518,7 @@ target_link_libraries(Kernel
                       ${NETWORK_LIBRARIES}
                       span
                       ${HDF5_LIBRARIES}
+                      Json
                       )
 if(WIN32)
   target_link_libraries(Kernel LINK_PRIVATE Psapi.lib) # For memory usage
