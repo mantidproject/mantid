@@ -97,7 +97,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.is_searching.return_value = False
         self.view.get_load_checked.return_value = False
         validator.return_value = True
-        self.presenter.cropping_widget.is_valid.return_value = False
+        self.presenter.cropping_widget.is_valid_custom_spectra.return_value = False
 
         self.presenter.on_calibrate_clicked()
         worker_method.assert_not_called()

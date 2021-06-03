@@ -68,7 +68,6 @@ class FocusModel(object):
             region_calib = "engggui_calibration_Cropped"
             name = 'Cropped'
         elif custom_cal:
-            # TODO this functionality has not yet been fully implemented
             df_kwarg = {"GroupingFileName": custom_cal}
             region_calib = "engggui_calibration_Custom"
             name = 'Custom'

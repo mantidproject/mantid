@@ -140,7 +140,7 @@ class FocusPresenterTest(unittest.TestCase):
                                                              instrument="ENGINX")
         self.view.is_searching.return_value = False
         wsp_check.return_value = True
-        self.presenter.cropping_widget.is_valid.return_value = False
+        self.presenter.cropping_widget.is_valid_custom_spectra.return_value = False
 
         self.presenter._validate()
         create_error.assert_called_with(self.presenter.view, "Check cropping values are valid.")

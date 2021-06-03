@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from os import path, makedirs
+from matplotlib import gridspec
+import matplotlib.pyplot as plt
 
 from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger
@@ -13,8 +15,8 @@ from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, Dif
     ConvertUnits, Load, ReplaceSpecialValues, SaveNexus, \
     EnggEstimateFocussedBackground, ApplyDiffCal
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file, default_ceria_expected_peaks, \
-    create_custom_grouping_workspace, create_spectrum_list_from_string, load_relevant_pdcal_outputs,\
-    generate_tof_fit_dictionary, plot_tof_fit
+    generate_tof_fit_dictionary, plot_tof_fit, \
+    create_custom_grouping_workspace, get_first_unmasked_specno_from_mask_ws, load_relevant_pdcal_outputs
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
@@ -38,6 +40,7 @@ class CalibrationModel(object):
                                instrument,
                                rb_num=None,
                                bank=None,
+                               calfile=None,
                                spectrum_numbers=None):
         """
         Create a new calibration from a vanadium run and ceria run
@@ -47,6 +50,7 @@ class CalibrationModel(object):
         :param instrument: The instrument the data relates to.
         :param rb_num: The RB number for file creation.
         :param bank: Optional parameter to crop by bank
+        :param calfile: Optional parameter to crop using a custom calfile
         :param spectrum_numbers: Optional parameter to crop using spectrum numbers.
         """
         van_integration, van_curves = vanadium_corrections.fetch_correction_workspaces(
@@ -63,25 +67,26 @@ class CalibrationModel(object):
                                                                  vanadium_path,
                                                                  van_integration,
                                                                  bank,
+                                                                 calfile,
                                                                  spectrum_numbers,
                                                                  full_calib)
         vanadium_corrections.handle_van_curves(van_curves, vanadium_path, instrument, rb_num)
         if plot_output:
             plot_dicts = list()
-            for i in range(len(cal_params)):
-                if spectrum_numbers:
+            if len(cal_params) == 1:
+                if calfile:
+                    bank_name = "Custom"
+                elif spectrum_numbers:
                     bank_name = "Cropped"
-                elif bank is None:
-                    bank_name = "bank_" + str(i + 1)
                 else:
                     bank_name = bank
                 plot_dicts.append(generate_tof_fit_dictionary(bank_name))
-            if bank is None and spectrum_numbers is None:
-                plot_tof_fit(plot_dicts, ["bank_1", "bank_2"])
-            elif spectrum_numbers is None:
-                plot_tof_fit(plot_dicts, [bank])
+                plot_tof_fit(plot_dicts, [bank_name])
             else:
-                plot_tof_fit(plot_dicts, ["Cropped"])
+                plot_dicts.append(generate_tof_fit_dictionary("bank_1"))
+                plot_dicts.append(generate_tof_fit_dictionary("bank_2"))
+                plot_tof_fit(plot_dicts, ["bank_1", "bank_2"])
+
         difa = [row['difa'] for row in cal_params]
         difc = [row['difc'] for row in cal_params]
         tzero = [row['tzero'] for row in cal_params]
@@ -97,12 +102,12 @@ class CalibrationModel(object):
 
         calib_dir = path.join(path_handling.get_output_path(), "Calibration", "")
         self.create_output_files(calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path, instrument,
-                                 bank, spectrum_numbers)
+                                 bank, spectrum_numbers, calfile)
         if rb_num:
             user_calib_dir = path.join(path_handling.get_output_path(), "User", rb_num,
                                        "Calibration", "")
             self.create_output_files(user_calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path,
-                                     instrument, bank, spectrum_numbers)
+                                     instrument, bank, spectrum_numbers, calfile)
 
     @staticmethod
     def extract_b2b_params(workspace):
@@ -157,6 +162,7 @@ class CalibrationModel(object):
                         vanadium_workspace,
                         van_integration,
                         bank,
+                        calfile,
                         spectrum_numbers,
                         full_calib):
         """
@@ -165,6 +171,7 @@ class CalibrationModel(object):
         :param vanadium_workspace: The workspace with the vanadium data
         :param van_integration: The integration values from the vanadium corrections
         :param bank: The bank to crop to, both if none.
+        :param calfile: The custom calibration file to crop to, not used if none.
         :param spectrum_numbers: The spectrum numbers to crop to, no crop if none.
         :return: The calibration output files, the vanadium curves workspace(s), and a clone of the ceria file
         """
@@ -231,38 +238,36 @@ class CalibrationModel(object):
         cal_output = dict()
         curves_output = list()
 
-        if spectrum_numbers is None:
+        if (spectrum_numbers or calfile) is None:
             if bank == '1' or bank is None:
                 df_kwarg = {"GroupingFileName": NORTH_BANK_CAL}
                 calibrate_region_of_interest("bank_1", df_kwarg)
             if bank == '2' or bank is None:
                 df_kwarg = {"GroupingFileName": SOUTH_BANK_CAL}
                 calibrate_region_of_interest("bank_2", df_kwarg)
-        else:
+        elif calfile is None:
             grp_ws = create_custom_grouping_workspace(spectrum_numbers, ceria_raw)
             df_kwarg = {"GroupingWorkspace": grp_ws}
             calibrate_region_of_interest("Cropped", df_kwarg)
+        else:
+            df_kwarg = {"GroupingFileName": calfile}
+            calibrate_region_of_interest("Custom", df_kwarg)
 
         DeleteWorkspaces([ws_van, "tof_focused"])
 
         cal_params = list()
         # in the output calfile, rows are present for all detids, only read one from the region of interest
-        bank_1_read_row = 0
-        bank_2_read_row = 1200
         for bank_cal in cal_output:
-            if bank_cal == "bank_1":
-                read = bank_1_read_row
-            elif bank_cal == "bank_2":
-                read = bank_2_read_row
-            else:
-                read = create_spectrum_list_from_string(spectrum_numbers)[0]
-            row = cal_output[bank_cal].row(read)
+            mask_ws_name = "engggui_calibration_" + bank_cal + "_mask"
+            mask_ws = Ads.retrieve(mask_ws_name)
+            row_no = get_first_unmasked_specno_from_mask_ws(mask_ws)
+            row = cal_output[bank_cal].row(row_no)
             current_fit_params = {'difc': row['difc'], 'difa': row['difa'], 'tzero': row['tzero']}
             cal_params.append(current_fit_params)
         return cal_params, curves_output, ceria_raw
 
     def create_output_files(self, calibration_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path,
-                            instrument, bank, spectrum_numbers):
+                            instrument, bank, spectrum_numbers, calfile):
         """
         Create output files from the algorithms in the specified directory
         :param calibration_dir: The directory to save the files into.
@@ -275,6 +280,7 @@ class CalibrationModel(object):
         :param instrument: The instrument (ENGINX or IMAT).
         :param bank: Optional parameter to crop by bank.
         :param spectrum_numbers: Optional parameter to crop using spectrum numbers.
+        :param calfile: Optional parameter to crop with a custom calfile
         """
         kwargs = {"ceria_run": path_handling.get_run_number_from_path(ceria_path, instrument),
                   "vanadium_run": path_handling.get_run_number_from_path(vanadium_path, instrument)}
@@ -301,7 +307,8 @@ class CalibrationModel(object):
         if not path.exists(calibration_dir):
             makedirs(calibration_dir)
 
-        if bank is None and spectrum_numbers is None:
+        if not (bank or spectrum_numbers or calfile):
+            # both banks
             generate_prm_output_file(difa, difc, tzero, "all", kwargs)
             north_kwargs()
             generate_prm_output_file([difa[0]], [difc[0]], [tzero[0]], "north", kwargs)
@@ -317,10 +324,14 @@ class CalibrationModel(object):
             south_kwargs()
             generate_prm_output_file([difa[0]], [difc[0]], [tzero[0]], "south", kwargs)
             save_pdcal_output_file("bank_2", "south")
-        elif bank is None:  # Custom cropped files use the north bank template.
+        elif spectrum_numbers:  # Custom crops use the north bank template
             north_kwargs()
-            generate_prm_output_file([difa[0]], [difc[0]], [tzero[0]], "cropped", kwargs)
-            save_pdcal_output_file("cropped", "cropped")
+            generate_prm_output_file([difa[0]], [difc[0]], [tzero[0]], "Cropped", kwargs)
+            save_pdcal_output_file("Cropped", "Cropped")
+        else:  # custom calfile
+            north_kwargs()
+            generate_prm_output_file([difa[0]], [difc[0]], [tzero[0]], "Custom", kwargs)
+            save_pdcal_output_file("Custom", "Custom")
         logger.notice(f"\n\nCalibration files saved to: \"{calibration_dir}\"\n\n")
 
     @staticmethod
@@ -375,8 +386,10 @@ class CalibrationModel(object):
             filename = filename + "bank_1" + ext
         elif bank == "south":
             filename = filename + "bank_2" + ext
-        elif bank == "cropped":
+        elif bank == "Cropped":
             filename = filename + "Cropped" + ext
+        elif bank == "Custom":
+            filename = filename + "Custom" + ext
         else:
             raise ValueError("Invalid bank name entered")
         return filename

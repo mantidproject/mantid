@@ -18,8 +18,14 @@ class CroppingWidget(object):
         self.model = CroppingModel()
         self.presenter = CroppingPresenter(self.model, self.view)
 
-    def is_valid(self):
-        return self.presenter.is_valid()
+    def is_valid_custom_calfile(self):
+        return self.presenter.is_calfile_valid()
+
+    def is_valid_custom_spectra(self):
+        return self.presenter.is_spectra_valid()
+
+    def get_custom_calfile(self):
+        return self.presenter.get_custom_calfile()
 
     def get_custom_spectra(self):
         return self.presenter.get_custom_spectra()
@@ -27,5 +33,8 @@ class CroppingWidget(object):
     def get_bank(self):
         return str(self.presenter.get_bank())
 
-    def is_custom(self):
+    def is_custom_calfile(self):
+        return self.presenter.get_custom_calfile_enabled()
+
+    def is_custom_spectra(self):
         return self.presenter.get_custom_spectra_enabled()

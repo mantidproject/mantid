@@ -39,9 +39,12 @@ def load_relevant_pdcal_outputs(file_path, output_prefix="engggui"):
     elif "South" in suffix:
         path_to_load = path.join(basepath, prefix + "_bank_South.nxs")
         mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration_bank_2")
-    else:  # cropped case
-        path_to_load = path.join(basepath, prefix + "_cropped.nxs")
-        mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration_cropped")
+    elif "Custom" in suffix:  # custom calfile case
+        path_to_load = path.join(basepath, prefix + "_Custom.nxs")
+        mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration_Custom")
+    else:  # custom spectra numbers case
+        path_to_load = path.join(basepath, prefix + "_Cropped.nxs")
+        mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration_Cropped")
 
 
 def get_diffractometer_constants_from_workspace(ws):
@@ -176,6 +179,15 @@ def default_ceria_expected_peaks(final=False):
                                    0.914694494, 0.901900955, 0.855618487]
 
     return _CERIA_EXPECTED_PEAKS_FINAL if final else _CERIA_EXPECTED_PEAKS
+
+
+def get_first_unmasked_specno_from_mask_ws(ws):
+    num_spectra = ws.getNumberHistograms()
+    for specno in range(num_spectra):
+        detid = ws.getDetectorIDs(specno)[0]
+        val = ws.getValue(detid)
+        if val == 0:
+            return specno
 
 
 def read_in_expected_peaks(filename, expected_peaks):

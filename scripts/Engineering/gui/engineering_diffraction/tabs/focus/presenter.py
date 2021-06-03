@@ -46,10 +46,11 @@ class FocusPresenter(object):
     def on_focus_clicked(self):
         if not self._validate():
             return
-        banks, spectrum_numbers = self._get_banks()
+        banks, spectrum_numbers, calfile = self._get_banks()
         focus_paths = self.view.get_focus_filenames()
         if self._number_of_files_warning(focus_paths):
-            self.start_focus_worker(focus_paths, banks, self.view.get_plot_output(), self.rb_num, spectrum_numbers)
+            self.start_focus_worker(focus_paths, banks, self.view.get_plot_output(), self.rb_num, spectrum_numbers,
+                                    calfile)
 
     def start_focus_worker(self, focus_paths, banks, plot_output, rb_num, spectrum_numbers=None, custom_cal=None):
         """
@@ -59,7 +60,7 @@ class FocusPresenter(object):
         :param plot_output: True if the output should be plotted.
         :param rb_num: The RB Number from the main window (often an experiment id)
         :param spectrum_numbers: Optional parameter to crop to a specific list of spectrum numbers.
-        :param custom_cal: TODO
+        :param custom_cal: Optional parameter to crop with a user-provided calibration file.
         """
         self.worker = AsyncTask(self.model.focus_run,
                                 (focus_paths, banks, plot_output, self.instrument, rb_num, spectrum_numbers,
@@ -102,7 +103,7 @@ class FocusPresenter(object):
                 "Please make sure the selected instrument matches instrument for the current calibration.\n"
                 "The instrument for the current calibration is: " + self.current_calibration.get_instrument())
             return False
-        if self.view.get_crop_checked() and not self.cropping_widget.is_valid():
+        if self.view.get_crop_checked() and not self.cropping_widget.is_valid_custom_spectra():
             create_error_message(self.view, "Check cropping values are valid.")
             return False
         return True
@@ -124,14 +125,18 @@ class FocusPresenter(object):
         self.view.set_focus_button_enabled(enabled)
         self.view.set_plot_output_enabled(enabled)
 
-    def _get_banks(self):
+    def _get_banks(self):  # -> bank_number(s), spectrum_numbers, calfile
+        bank, spec_nums, calfile = None, None, None
         if self.view.get_crop_checked():
-            if self.cropping_widget.is_custom():
-                return None, self.cropping_widget.get_custom_spectra()
+            if self.cropping_widget.is_custom_calfile():
+                calfile = self.cropping_widget.get_custom_calfile()
+            elif self.cropping_widget.is_custom_spectra():
+                spec_nums = self.cropping_widget.get_custom_spectra()
             else:
-                return [self.cropping_widget.get_bank()], None
+                bank = [self.cropping_widget.get_bank()]
+            return bank, spec_nums, calfile
         else:
-            return ["1", "2"], None
+            return ["1", "2"], None, None
 
     def emit_enable_button_signal(self):
         self.view.sig_enable_controls.emit(True)
