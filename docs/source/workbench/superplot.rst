@@ -7,8 +7,8 @@ Superplot
 Superplot is a decorator widget of the plot window. It facilitates over-plotting
 and manipulation of overplotted data. The superplot is accessible:
 
-* Directly in the plot window through the menu bar
-* In the context menu of supported workspaces
+* Directly in the toolbar of the the plot window
+* In the context menu of supported workspaces, in the submenu "Plot"
 
 
 **Widget description**
@@ -32,10 +32,17 @@ them, the plotted bins/spectra. One can then add a workspace in the list by
 dragging and dropping it in the list or by using the combobox.
 
 When one or many workspace(s) is(are) clicked in the list, the navigation bar
-can be used to slide over the bins/spectra and update the plot accordingly. One
-can then add the bin/spectrum currently pointed by the slider to the list by
-pressing the hold button.
+can be used to slide over the bins/spectra and update the plot accordingly. The
+current curve indicated by the slider for the workspace(s) that is(are) selected
+from the list is plotted, but not persisted. If needed, one can click "Hold" to
+persist a curve on the plot.
 
-Each workspace and bin/spectrum is associated, in the list, with a delete
-button. To remove a curve, one can also slide to the specific position and
-release the hold button.
+Once persisted, the curve(s) is(are) added to the list on the left side. To
+delete a curve, one can use its delete button from the list or slide to the
+specific position and release the hold button.
+
+Note that for the raw data, the legend shows the spectrum number, whereas the
+navigation bar refers to the workspace index. The index always starts from 0 and
+is contiguous, whereas the spectrum number starts from 1 and might not be
+contiguous. So for raw data the index indicated in the spinbox will often be 1
+less than the spectrum number in the legend/workspace list.
