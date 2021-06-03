@@ -277,7 +277,9 @@ class DrillPresenter:
             instrument (str): instrument name
         """
         if self.view.isWindowModified():
-            self._saveDataQuestion()
+            if not self._saveDataQuestion():
+                self._syncViewHeader()
+                return
 
         self.model.setInstrument(instrument)
         self.model.resetIOFile()
@@ -294,7 +296,9 @@ class DrillPresenter:
             mode (str): acquisition mode name
         """
         if self.view.isWindowModified():
-            self._saveDataQuestion()
+            if not self._saveDataQuestion():
+                self._syncViewHeader()
+                return
 
         self.model.setAcquisitionMode(mode)
         self.model.resetIOFile()
@@ -375,14 +379,16 @@ class DrillPresenter:
         Triggered when the view is closed.
         """
         if self.view.isWindowModified():
-            self._saveDataQuestion()
+            return self._saveDataQuestion()
+        return True
 
     def onNew(self):
         """
         Triggered when the user wants an empty table.
         """
         if self.view.isWindowModified():
-            self._saveDataQuestion()
+            if not self._saveDataQuestion():
+                return
         self.model.clear()
         self.model.resetIOFile()
         self.view.setWindowTitle("Untitled [*]")
