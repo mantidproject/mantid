@@ -11,6 +11,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -79,8 +80,11 @@ void PolarizationAngleCorrectionMD::init() {
  * @brief Main execution body
  */
 void PolarizationAngleCorrectionMD::exec() {
-  // Get input workspace
+  // Get input workspace and other parameters
   API::IMDEventWorkspace_sptr input_ws = getProperty("InputWorkspace");
+  mPolarizationAngle = getProperty("PolarizationAngle");
+  mPolarizationAngle *= M_PI / 180.; // convert to arcs
+  mPrecision = getProperty("Precision");
 
   // Process input workspace and create output workspace
   std::string output_ws_name = getPropertyValue("OutputWorkspace");
@@ -133,43 +137,6 @@ std::map<std::string, std::string> PolarizationAngleCorrectionMD::validateInputs
   return output;
 }
 
-//---------------------------------------------------------------------------------------------------------
-/**
- * @brief Check input MDEventWorkspace dimension
- * validate dimensions: input workspace is in Q_sample or Q_lab frame, and the 4th dimension is DeltaE, or the first
- * dimension is |Q| and second is DeltaE
- * @return
- */
-std::string PolarizationAngleCorrectionMD::checkInputMDDimension() {
-  std::string errormsg("");
-
-  API::IMDEventWorkspace_sptr inputws = getProperty("InputWorkspace");
-  size_t numdims = inputws->getNumDims();
-  if (numdims < 4) {
-    errormsg = "Input workspace must have at least 4 dimensions";
-  } else {
-    // Get and check the dimensions: Q3D or Q1D
-    const Mantid::Kernel::SpecialCoordinateSystem coordsys = inputws->getSpecialCoordinateSystem();
-    if (coordsys == Mantid::Kernel::SpecialCoordinateSystem::QLab) {
-      mIsQSample = false;
-    } else if (coordsys == Mantid::Kernel::SpecialCoordinateSystem::QSample) {
-      // q3d
-      mIsQSample = true;
-    } else {
-      // not supported
-      errormsg = "InputWorkspace is not in Q-Sample or Q-lab frame";
-    }
-
-    // Check DeltaE
-    if (errormsg.size() > 0 && inputws->getDimension(3)->getName() != "DeltaE") {
-      errormsg = "4-th dimension is " + inputws->getDimension(3)->getName() + ".  Must be DeltaE";
-      return errormsg;
-    }
-  }
-
-  return errormsg;
-}
-
 //---------------------------------------------------------------------------------------------
 /**
  * @brief Apply detailed balance to each MDEvent in MDEventWorkspace
@@ -196,15 +163,38 @@ void PolarizationAngleCorrectionMD::applyPolarizationAngleCorrection(
       // Add events, with bounds checking
       for (auto it = events.begin(); it != events.end(); ++it) {
         // Modify the event
-        // FIXME TODO : SPEC TASK #109
 
-        float factor = 1.0;
+        double gamma(0.);
 
-        // calcalate and set intesity
+        // Calculate Gamma
+        if (!mIsQSample) {
+          // Q-lab: gamma = arctan2(Qx​,Qz​)
+          coord_t qx = it->getCenter(mQxIndex);
+          coord_t qz = it->getCenter(mQzIndex);
+          gamma = std::atan2(qx, qz);
+        } else {
+          // Q-sample
+          // Qlab = R * QSample
+          std::vector<double> qsample = {it->getCenter(0), it->getCenter(1), it->getCenter(2)};
+          std::vector<double> qlab = mRotationMatrixMap[it->getExpInfoIndex()] * qsample;
+          gamma = std::atan2(qlab[0], qlab[2]);
+        }
+
+        // The Scharpf angle \alphs = \gamma - P_A
+        double alpha = gamma - mPolarizationAngle;
+        // Calculate cosine 2*alpha
+        double cosine2alpha = std::cos(2 * alpha);
+        // If absolute value of consine 2*alpha is larger than Precision
+        float factor(0.);
+        if (fabs(cosine2alpha) > mPrecision) {
+          factor = static_cast<float>(1. / cosine2alpha);
+        }
+
+        // calcalate and set intesity: I *= F
         auto intensity = it->getSignal() * factor;
         it->setSignal(intensity);
 
-        // calculate and set error
+        // calculate and set error: Err2∗=F^2
         auto error2 = it->getErrorSquared() * factor * factor;
         // error2 *= factor * factor;
         it->setErrorSquared(error2);
@@ -220,17 +210,82 @@ void PolarizationAngleCorrectionMD::applyPolarizationAngleCorrection(
 
 //---------------------------------------------------------------------------------------------------------
 /**
- * @brief Retrieve sample log Ei
+ * @brief Check input MDEventWorkspace dimension
+ * validate dimensions: input workspace is in Q_sample or Q_lab frame, and the 4th dimension is DeltaE,
+ * determine Qx and Qz indexes
+ * check whether rotational matrix exists in each ExperimentInfo
+ * @return
+ */
+std::string PolarizationAngleCorrectionMD::checkInputMDDimension() {
+  std::string errormsg("");
+
+  // Check Q-dimension and determine Qx and Qz index
+  API::IMDEventWorkspace_sptr inputws = getProperty("InputWorkspace");
+  size_t numdims = inputws->getNumDims();
+  std::string qxname("Q_lab_x");
+  std::string qzname("Q_lab_z");
+  if (numdims < 4) {
+    errormsg = "Input workspace must have at least 4 dimensions";
+  } else {
+    // Get and check the dimensions: Q3D or Q1D
+    const Mantid::Kernel::SpecialCoordinateSystem coordsys = inputws->getSpecialCoordinateSystem();
+    if (coordsys == Mantid::Kernel::SpecialCoordinateSystem::QLab) {
+      mIsQSample = false;
+    } else if (coordsys == Mantid::Kernel::SpecialCoordinateSystem::QSample) {
+      // q3d
+      mIsQSample = true;
+      // reset Qx and Qz name
+      qxname = "Q_sample_x";
+      qzname = "Q_sample_z";
+    } else {
+      // not supported
+      errormsg = "InputWorkspace is not in Q-Sample or Q-lab frame";
+    }
+
+    // determine Qx and Qz index
+    for (size_t i = 0; i < numdims; ++i) {
+      g_log.information() << i << "-th dim: " << inputws->getDimension(i)->getName() << "\n";
+      if (inputws->getDimension(i)->getName() == qxname)
+        mQxIndex = i;
+      else if (inputws->getDimension(i)->getName() == qzname)
+        mQzIndex = i;
+    }
+    // verify and information
+    if (mQxIndex != 0 || mQzIndex != 2)
+      throw std::runtime_error("Qx, Qy and Qz are not in (Qx, Qy, Qz) order");
+    else
+      g_log.information() << "Found " << qxname << " at " << mQxIndex << ", " << qzname << " at " << mQzIndex << "\n";
+
+    // Check DeltaE
+    if (errormsg.size() > 0 && inputws->getDimension(3)->getName() != "DeltaE") {
+      errormsg = "4-th dimension is " + inputws->getDimension(3)->getName() + ".  Must be DeltaE";
+      return errormsg;
+    }
+  }
+
+  // Check rotation matrix
+  auto numexpinfo = inputws->getNumExperimentInfo();
+  for (uint16_t i = 0; i < numexpinfo; ++i) {
+    const Kernel::Matrix<double> &rotmatrix = inputws->getExperimentInfo(i)->run().getGoniometerMatrix();
+    mRotationMatrixMap[i] = rotmatrix;
+    g_log.information() << "ExperimentInfo " << i << ": Rotation matrix: " << rotmatrix.str() << "\n";
+  }
+
+  return errormsg;
+}
+
+//---------------------------------------------------------------------------------------------------------
+/**
+ * @brief Check whether sample log Ei is validad or not
  * Temperature value can be specified by either property Temperature, or
  * it can be calcualted from sample temperture log in the MDWorkspace
  */
-std::string PolarizationAngleCorrectionMD::getEi(API::IMDEventWorkspace_sptr mdws) {
+std::string PolarizationAngleCorrectionMD::checkEi(API::IMDEventWorkspace_sptr mdws) {
   // Get temperture sample log name
   std::string Estring("Ei");
   std::stringstream eiss;
 
   // the input property could be a valid float; if not must search the experiment info
-  mEiMap.clear();
   uint16_t numexpinfo = mdws->getNumExperimentInfo();
 
   for (uint16_t i = 0; i < numexpinfo; ++i) {
@@ -241,10 +296,7 @@ std::string PolarizationAngleCorrectionMD::getEi(API::IMDEventWorkspace_sptr mdw
       std::string eistr = expinfo->run().getProperty(Estring)->value();
       try {
         double ei = boost::lexical_cast<double>(eistr);
-        if (ei > 0) {
-          // Ei is allowed
-          mEiMap[i] = ei;
-        } else {
+        if (ei <= 0) {
           // Ei is not greater than 0 and is not allowed
           eiss << "Experiment Info Ei " << ei << " cannot be zero or less than zero.";
         }
@@ -258,8 +310,8 @@ std::string PolarizationAngleCorrectionMD::getEi(API::IMDEventWorkspace_sptr mdw
     }
   }
 
+  // return error string
   std::string ei_error = eiss.str();
-
   return ei_error;
 }
 

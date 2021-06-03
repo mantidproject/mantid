@@ -42,13 +42,13 @@ public:
    * @brief Test input workspace to test failed cases
    */
   void test_Failures() {
-    auto q1dmd = Mantid::API::AnalysisDataService::Instance().retrieve(mMDWorkspaceQ1Dname);
+    auto q1dmd = Mantid::API::AnalysisDataService::Instance().retrieve(mQ1DWorkspaceName);
     TS_ASSERT(q1dmd);
 
     PolarizationAngleCorrectionMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-    alg.setPropertyValue("InputWorkspace", mMDWorkspaceQ1Dname);
+    alg.setPropertyValue("InputWorkspace", mQ1DWorkspaceName);
     TS_ASSERT_THROWS_ANYTHING(alg.setProperty("PolarizationAngle", -181.));
     alg.setProperty("PolarizationAngle", 10.);
 
@@ -65,9 +65,9 @@ public:
   /**
    * @brief Test apply detailed balance to 1 run
    */
-  void Futuretest_1run() {
+  void Future_test_1run_qlab() {
     // Check whether the MD to test does exist
-    auto singlemd = Mantid::API::AnalysisDataService::Instance().retrieve(mMDWorkspace1Name);
+    auto singlemd = Mantid::API::AnalysisDataService::Instance().retrieve(mQLabWorkspaceName);
     TS_ASSERT(singlemd);
 
     // specify the output
@@ -77,7 +77,7 @@ public:
     PolarizationAngleCorrectionMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-    alg.setPropertyValue("InputWorkspace", mMDWorkspace1Name);
+    alg.setPropertyValue("InputWorkspace", mQLabWorkspaceName);
     alg.setProperty("Temperature", "SampleTemp");
     alg.setProperty("OutputWorkspace", outputname);
     alg.execute();
@@ -86,18 +86,20 @@ public:
     // Verify
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputname));
 
-    bool equals = compareMDEvents(outputname, GoldPolarizationAngleSingleWSName);
+    bool equals = compareMDEvents(outputname, mGoldCorrectedQLabWSName);
     TS_ASSERT(equals);
 
     // Clean up
     cleanWorkspace(outputname, false);
   }
 
+  void Future_test_1run_qsample() {}
+
   /**
    * @brief Test applying detailed balance to 2 merged runs
    */
-  void Futuretest_merged_runs() {
-    auto mergedmd = Mantid::API::AnalysisDataService::Instance().retrieve(mMergedWorkspaceName);
+  void Future_test_merged_runs() {
+    auto mergedmd = Mantid::API::AnalysisDataService::Instance().retrieve(mQSampleMergedWorkspaceName);
     TS_ASSERT(mergedmd);
 
     // specify the output
@@ -106,7 +108,7 @@ public:
     PolarizationAngleCorrectionMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-    alg.setPropertyValue("InputWorkspace", mMergedWorkspaceName);
+    alg.setPropertyValue("InputWorkspace", mQSampleMergedWorkspaceName);
     alg.setProperty("Temperature", "SampleTemp");
     alg.setProperty("OutputWorkspace", outputname);
     alg.execute();
@@ -115,24 +117,11 @@ public:
     // Verify
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputname));
 
-    bool equals = compareMDEvents(outputname, gold_detail_balanced_merged_name);
+    bool equals = compareMDEvents(outputname, mGoldCorrectedQSampleMergedWSName);
     TS_ASSERT(equals);
 
     // clean up
     cleanWorkspace(outputname, false);
-  }
-
-  /**
-   * @brief Clean workspace from ADS if it does exist
-   */
-  void cleanWorkspace(const std::string &wsname, bool assert_existence) {
-    bool ws_exist = Mantid::API::AnalysisDataService::Instance().doesExist(wsname);
-    // assert existence
-    if (assert_existence)
-      TS_ASSERT(ws_exist);
-    // clean from ADS
-    if (ws_exist)
-      Mantid::API::AnalysisDataService::Instance().remove(wsname);
   }
 
   void setUp() override {
@@ -175,101 +164,153 @@ public:
 
      */
     // Define workspace names
-    mEventWSName = "PolarizationAngleRawEvent";
-    mMDWorkspace1Name = "PolarizationAngleInputSingleMDEvent";
-    mMergedWorkspaceName = "PolarizationAngleInputMergedMDEvent";
-    mMDWorkspaceQ1Dname = "DetaledBalanceInputQ1DMDEvent";
-    // Gold workspace names
-    gold_detail_balanced_merged_name = "DetaildBalancedMergedGoldMD";
-    GoldPolarizationAngleSingleWSName = "PolarizationAngleSingleGoldMD";
+    std::string event_ws_0("PolarizationAngleRawEvent0");
+    std::string event_ws_1("PolarizationAngleRawEvent0");
 
-    // Prepare (first) sample workspace
-    createSampleWorkspace(mEventWSName);
-    // add sample log Ei
-    addSampleLog(mEventWSName, "Ei", "20.", "Number");
-    // move bank 1
-    moveBank(mEventWSName, "bank1", 3, 3);
-    // move bank 2
-    moveBank(mEventWSName, "bank2", -3, -3);
-    // set geoniometer
-    setGoniometer(mEventWSName, "Axis0", "0,0,1,0,1");
-    // convert to MD
-    convertToMD(mEventWSName, mMDWorkspace1Name, "Q3D");
+    mQSampleWorkspaceName = "PolarizationAngleInputQSampleMDEvent";
+    mQLabWorkspaceName = "PolarizationAngleInputQLabMDEvent";
+    mQSampleMergedWorkspaceName = "PolarizationAngleInputMergedQSampleMDEvent";
+    mQ1DWorkspaceName = "PolarizationAngleInputQ1DMDEvent";
+
+    // Gold workspace names
+    mGoldCorrectedQSampleWSName = "PAGoldCorrectedQSample";
+    mGoldCorrectedQLabWSName = "PAGoldCorrectedQLab";
+    mGoldCorrectedQSampleMergedWSName = "PAGoldCorrectedMergedQSample";
+
+    // Prepare first set of workspaces
+    std::string axis00("0,0,1,0,1");
+    generateTestSet(event_ws_0, mQSampleWorkspaceName, mQLabWorkspaceName, mQ1DWorkspaceName, axis00);
+
+    //    // Prepare (first) sample workspace
+    //    createSampleWorkspace(mEventWSName);
+    //    // add sample log Ei
+    //    addSampleLog(mEventWSName, "Ei", "20.", "Number");
+    //    // move bank 1
+    //    moveBank(mEventWSName, "bank1", 3, 3);
+    //    // move bank 2
+    //    moveBank(mEventWSName, "bank2", -3, -3);
+    //    // set geoniometer
+    //    setGoniometer(mEventWSName, "Axis0", "0,0,1,0,1");
+    //    // convert to MD
+    //    convertToMD(mEventWSName, mMDWorkspace1Name, "Q3D");
 
     // Prepare the 2nd MDEventWorkspace
-    const std::string event_ws_name2("PolarizationAngle2WS");
     const std::string md_ws_name2("PolarizationAngle2MD");
-    createSampleWorkspace(event_ws_name2);
-    // add sample log Ei
-    addSampleLog(event_ws_name2, "Ei", "20.", "Number");
-    // move bank 1
-    moveBank(event_ws_name2, "bank1", 3, 3);
-    // move bank 2
-    moveBank(event_ws_name2, "bank2", -3, -3);
-    // set geoniometer
-    setGoniometer(event_ws_name2, "Axis0", "30,0,1,0,1");
-    // convert to MD
-    convertToMD(event_ws_name2, md_ws_name2, "Q3D");
+    const std::string axis01("30,0,1,0,1");
+    generateTestSet(event_ws_1, md_ws_name2, "", "", axis01);
 
-    // Prepare the 3rd MDEventWorkspace for |Q| and without sample temperature
-    const std::string event_ws_name3("PolarizationAngle3WS");
-    createSampleWorkspace(event_ws_name3);
-    // add sample log Ei
-    addSampleLog(event_ws_name3, "Ei", "20.", "Number");
-    // move bank 1
-    moveBank(event_ws_name3, "bank1", 3, 3);
-    // move bank 2
-    moveBank(event_ws_name3, "bank2", -3, -3);
-    // set geoniometer
-    setGoniometer(event_ws_name3, "Axis0", "30,0,1,0,1");
-    // convert to MD
-    convertToMD(event_ws_name3, mMDWorkspaceQ1Dname, "|Q|");
+    //    const std::string event_ws_name2("PolarizationAngle2WS");
+    //    createSampleWorkspace(event_ws_name2);
+    //    // add sample log Ei
+    //    addSampleLog(event_ws_name2, "Ei", "20.", "Number");
+    //    // move bank 1
+    //    moveBank(event_ws_name2, "bank1", 3, 3);
+    //    // move bank 2
+    //    moveBank(event_ws_name2, "bank2", -3, -3);
+    //    // set geoniometer
+    //    setGoniometer(event_ws_name2, "Axis0", "30,0,1,0,1");
+    //    // convert to MD
+    //    convertToMD(event_ws_name2, md_ws_name2, "Q3D");
+
+    //    // Prepare the 3rd MDEventWorkspace for |Q| and without sample temperature
+    //    const std::string event_ws_name3("PolarizationAngle3WS");
+    //    createSampleWorkspace(event_ws_name3);
+    //    // add sample log Ei
+    //    addSampleLog(event_ws_name3, "Ei", "20.", "Number");
+    //    // move bank 1
+    //    moveBank(event_ws_name3, "bank1", 3, 3);
+    //    // move bank 2
+    //    moveBank(event_ws_name3, "bank2", -3, -3);
+    //    // set geoniometer
+    //    setGoniometer(event_ws_name3, "Axis0", "30,0,1,0,1");
+    //    // convert to MD
+    //    convertToMD(event_ws_name3, mMDWorkspaceQ1Dname, "|Q|");
 
     // Merge 2 workspace
-    std::string workspaces(mMDWorkspace1Name + ", " + md_ws_name2);
+    std::string workspaces(mQSampleWorkspaceName + ", " + md_ws_name2);
     MergeMD merge_alg;
     merge_alg.initialize();
     merge_alg.setProperty("InputWorkspaces", workspaces);
-    merge_alg.setProperty("OutputWorkspace", mMergedWorkspaceName);
+    merge_alg.setProperty("OutputWorkspace", mQSampleMergedWorkspaceName);
     merge_alg.execute();
 
     // Calculate the expected result from existing algorithms
-    calculate_polarization_angle_correction(mEventWSName, event_ws_name2, GoldPolarizationAngleSingleWSName,
-                                            gold_detail_balanced_merged_name);
+    calculate_polarization_angle_correction(event_ws_0, event_ws_1, mGoldCorrectedQSampleWSName,
+                                            mGoldCorrectedQLabWSName, mGoldCorrectedQSampleMergedWSName);
 
     // clean the temporary workspaces
-    Mantid::API::AnalysisDataService::Instance().remove(event_ws_name2);
+    Mantid::API::AnalysisDataService::Instance().remove(event_ws_0);
+    Mantid::API::AnalysisDataService::Instance().remove(event_ws_1);
     Mantid::API::AnalysisDataService::Instance().remove(md_ws_name2);
-
-    // FIXME: clean PolarizationAngle3WS
-    // FIXME: clean PolarizationAngle2WS
   }
 
   void tearDown() override {
     // clean up
-    bool exist = Mantid::API::AnalysisDataService::Instance().doesExist(mEventWSName);
-    TS_ASSERT(exist);
-    Mantid::API::AnalysisDataService::Instance().remove(mEventWSName);
-
     // single MD workspace
-    bool single_exist = Mantid::API::AnalysisDataService::Instance().doesExist(mMDWorkspace1Name);
-    TS_ASSERT(single_exist);
-    Mantid::API::AnalysisDataService::Instance().remove(mMDWorkspace1Name);
-
-    // merged MD workspace
-    bool merge_exist = Mantid::API::AnalysisDataService::Instance().doesExist(mMergedWorkspaceName);
-    TS_ASSERT(merge_exist);
-    Mantid::API::AnalysisDataService::Instance().remove(mMergedWorkspaceName);
+    cleanWorkspace(mQSampleWorkspaceName, true);
+    cleanWorkspace(mQLabWorkspaceName, true);
+    cleanWorkspace(mQSampleMergedWorkspaceName, true);
+    cleanWorkspace(mQ1DWorkspaceName, true);
+    // gold worksapces
+    cleanWorkspace(mGoldCorrectedQLabWSName, true);
   }
 
 private:
-  std::string mEventWSName;
-  std::string mMDWorkspace1Name;
-  std::string mMergedWorkspaceName;
-  std::string mMDWorkspaceQ1Dname;
-  // gold data (workspace) names
-  std::string gold_detail_balanced_merged_name;
-  std::string GoldPolarizationAngleSingleWSName;
+  // MDEventWorkspaces
+  std::string mQSampleWorkspaceName;
+  std::string mQLabWorkspaceName;
+  std::string mQSampleMergedWorkspaceName;
+  std::string mQ1DWorkspaceName;
+  // Gold data (workspace) names
+  std::string mGoldCorrectedQSampleWSName;
+  std::string mGoldCorrectedQLabWSName;
+  std::string mGoldCorrectedQSampleMergedWSName;
+
+  //---------------------------------------------------------------------------------------------
+  /**
+   * @brief Clean workspace from ADS if it does exist
+   */
+  void cleanWorkspace(const std::string &wsname, bool assert_existence) {
+    bool ws_exist = Mantid::API::AnalysisDataService::Instance().doesExist(wsname);
+    // assert existence
+    if (assert_existence)
+      TS_ASSERT(ws_exist);
+    // clean from ADS
+    if (ws_exist)
+      Mantid::API::AnalysisDataService::Instance().remove(wsname);
+  }
+
+  /**
+   * @brief Generate 1 set of test data/workspaces
+   * @param event_ws_name
+   * @param sample_md_name
+   * @param lab_md_name
+   * @param axis0
+   */
+  void generateTestSet(const std::string &event_ws_name, const std::string &sample_md_name,
+                       const std::string &lab_md_name, const std::string &q1d_md_name, const std::string &axis0) {
+    //        mQSampleWorkspaceName, mQLabWorkspaceName, axis0);
+
+    // Prepare (first) sample workspace
+    createSampleWorkspace(event_ws_name);
+    // add sample log Ei
+    addSampleLog(event_ws_name, "Ei", "20.", "Number");
+    // move bank 1
+    moveBank(event_ws_name, "bank1", 3, 3);
+    // move bank 2
+    moveBank(event_ws_name, "bank2", -3, -3);
+    // set geoniometer
+    setGoniometer(event_ws_name, "Axis0", axis0);
+    // convert to MD
+    if (sample_md_name != "")
+      convertToMD(event_ws_name, sample_md_name, "Q3D", "Q_sample");
+    // convert to MD
+    if (lab_md_name != "")
+      convertToMD(event_ws_name, lab_md_name, "Q3D", "Q_lab");
+    // convert to Q1D
+    if (q1d_md_name != "")
+      convertToMD(event_ws_name, q1d_md_name, "|Q|", "");
+  }
 
   /**
    * @brief Create an EventWorkspace with flat background in unit of DeltaE
@@ -333,12 +374,15 @@ private:
   /**
    * @brief Convert to MD workspace
    */
-  void convertToMD(const std::string &event_ws_name, const std::string &md_ws_name, const std::string &q_dimensions) {
+  void convertToMD(const std::string &event_ws_name, const std::string &md_ws_name, const std::string &q_dimensions,
+                   const std::string &q3dframe) {
     ConvertToMD convert_alg;
     convert_alg.initialize();
     convert_alg.setPropertyValue("InputWorkspace", event_ws_name);
     convert_alg.setPropertyValue("OutputWorkspace", md_ws_name);
     convert_alg.setPropertyValue("QDimensions", q_dimensions);
+    if (q3dframe != "")
+      convert_alg.setPropertyValue("Q3DFrames", q3dframe);
     convert_alg.execute();
   }
 
@@ -347,25 +391,28 @@ private:
    *
    */
   void calculate_polarization_angle_correction(const std::string &event_ws_1, const std::string &event_ws_2,
-                                               const std::string &output_sigle_md_name,
-                                               const std::string &output_merged_md_name) {
+                                               const std::string &corrected_qsample_name,
+                                               const std::string &corrected_qlab_name,
+                                               const std::string &corrected_qsample_merged_name) {
     const std::string temp_event_ws1("PolarizationAngleTempEvent1");
     const std::string temp_event_ws2("PolarizationAngleTempEvent2");
     const std::string temp_md2("PolarizationAngleMD2GoldTemp");
 
     // apply detailed balance and convert to MD for event workspace 1
     applyPolarizationAngleCorrection(event_ws_1, temp_event_ws1);
-    convertToMD(temp_event_ws1, output_sigle_md_name, "Q3D");
+    convertToMD(temp_event_ws1, corrected_qsample_name, "Q3D", "Q_sample");
+    convertToMD(temp_event_ws1, corrected_qlab_name, "Q3D", "Q_lab");
+
     // apply detailed balance and convert to MD for event workspace 2
     applyPolarizationAngleCorrection(event_ws_2, temp_event_ws2);
-    convertToMD(temp_event_ws2, temp_md2, "Q3D");
+    convertToMD(temp_event_ws2, temp_md2, "Q3D", "Q_sample");
 
     // Merge 2 workspace
-    std::string workspaces(output_sigle_md_name + ", " + temp_md2);
+    std::string workspaces(corrected_qsample_name + ", " + temp_md2);
     MergeMD merge_alg;
     merge_alg.initialize();
     merge_alg.setProperty("InputWorkspaces", workspaces);
-    merge_alg.setProperty("OutputWorkspace", output_merged_md_name);
+    merge_alg.setProperty("OutputWorkspace", corrected_qsample_merged_name);
     merge_alg.execute();
   }
 

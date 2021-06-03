@@ -9,6 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -20,7 +21,8 @@ namespace MDAlgorithms {
 */
 class MANTID_MDALGORITHMS_DLL PolarizationAngleCorrectionMD : public API::Algorithm {
 public:
-  PolarizationAngleCorrectionMD() : mIsQSample(false) {}
+  PolarizationAngleCorrectionMD()
+      : mIsQSample(false), mQxIndex(4), mQzIndex(4), mPolarizationAngle(0.), mPrecision(1.) {}
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
@@ -42,13 +44,23 @@ private:
   std::string checkInputMDDimension();
 
   /// Get Ei
-  std::string getEi(API::IMDEventWorkspace_sptr mdws);
-
-  /// Sample Ei
-  std::map<uint16_t, double> mEiMap;
+  std::string checkEi(API::IMDEventWorkspace_sptr mdws);
 
   /// coordinate system
   bool mIsQSample;
+
+  /// Map
+  std::map<uint16_t, Mantid::Kernel::Matrix<double>> mRotationMatrixMap;
+
+  /// Qx and Qz indexes
+  size_t mQxIndex;
+  size_t mQzIndex;
+
+  /// Polarization angle
+  double mPolarizationAngle;
+
+  /// Precision
+  double mPrecision;
 };
 
 } // namespace MDAlgorithms
