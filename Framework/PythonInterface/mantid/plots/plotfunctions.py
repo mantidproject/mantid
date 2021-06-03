@@ -214,7 +214,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
 
                 ax.lines += errorbar_cap_lines
 
-    if superplot:
+    if superplot and not waterfall and not tiled:
         fig.canvas.manager.superplot_toggle()
 
     # update and show figure
