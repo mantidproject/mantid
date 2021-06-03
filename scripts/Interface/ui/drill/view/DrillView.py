@@ -252,13 +252,15 @@ class DrillView(QMainWindow):
         Args:
             event (QCloseEvent): the close event
         """
-        self.assistant_process.close()
-        self.assistant_process.waitForFinished()
-        children = self.findChildren(QDialog)
-        for child in children:
-            child.close()
-        self._presenter.onClose()
-        super(DrillView, self).closeEvent(event)
+        if self._presenter.onClose():
+            self.assistant_process.close()
+            self.assistant_process.waitForFinished()
+            children = self.findChildren(QDialog)
+            for child in children:
+                child.close()
+            event.accept()
+        else:
+            event.ignore()
 
     ###########################################################################
     # actions                                                                 #
