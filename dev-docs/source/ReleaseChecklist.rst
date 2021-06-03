@@ -342,7 +342,7 @@ have been fixed.
 
 *  Draft a `new release <https://github.com/mantidproject/mantid/releases>`__ on
    GitHub. The new tag should be created based off the release branch in the form ``vX.Y.Z``. The
-   description of the new release can be copied from the release notes `index.rst` file.
+   description of the new release can be copied from the release notes ``index.rst`` file.
 *  Upload the packages to the GitHub release (essentially for a backup), and then publish it. This
    will create the tag required to generate the DOI.
 *  Update the `download page <https://download.mantidproject.org>`__ by creating a PR after
