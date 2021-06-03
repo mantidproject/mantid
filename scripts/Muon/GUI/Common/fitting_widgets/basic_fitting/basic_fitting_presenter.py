@@ -169,7 +169,7 @@ class BasicFittingPresenter:
             return
 
         fit_function, fit_status, fit_chi_squared = self.fitting_calculation_model.result
-        if any([not fit_function, not fit_status, not fit_chi_squared]):
+        if any([not fit_function, not fit_status, fit_chi_squared != 0.0 and not fit_chi_squared]):
             return
 
         self.handle_fitting_finished(fit_function, fit_status, fit_chi_squared)
