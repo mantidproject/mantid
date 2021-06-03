@@ -363,19 +363,31 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
     int64_t timeslot = 0;
 
     // Explicitly N time intervals
+    bool isLogarithmic = (timeinterval < 0);
     auto deltatime_ns = static_cast<int64_t>(timeinterval * m_timeUnitConvertFactorToNS);
 
-    int64_t curtime_ns = m_startTime.totalNanoseconds();
+    int64_t runStartTime = m_dataWS->run().startTime().totalNanoseconds();
+    int64_t startTime_ns = m_startTime.totalNanoseconds();
+
+    int64_t curtime_ns = startTime_ns - runStartTime;
+
     int wsindex = 0;
-    while (curtime_ns < m_stopTime.totalNanoseconds()) {
+    while (curtime_ns + runStartTime < m_stopTime.totalNanoseconds()) {
       // Calculate next.time
-      int64_t nexttime_ns = curtime_ns + deltatime_ns;
-      if (nexttime_ns > m_stopTime.totalNanoseconds())
-        nexttime_ns = m_stopTime.totalNanoseconds();
+      int64_t nexttime_ns;
+
+      if (isLogarithmic) {
+        nexttime_ns = static_cast<int64_t>(static_cast<double>(curtime_ns) * (1 + std::fabs(timeinterval)));
+      } else {
+        nexttime_ns = curtime_ns + deltatime_ns;
+      }
+
+      if (nexttime_ns + runStartTime > m_stopTime.totalNanoseconds())
+        nexttime_ns = m_stopTime.totalNanoseconds() - runStartTime;
 
       // Create splitter and information
-      Types::Core::DateAndTime t0(curtime_ns);
-      Types::Core::DateAndTime tf(nexttime_ns);
+      Types::Core::DateAndTime t0(curtime_ns + runStartTime);
+      Types::Core::DateAndTime tf(nexttime_ns + runStartTime);
       std::stringstream ss;
       ss << "Time.Interval.From." << t0 << ".to." << tf;
 
