@@ -78,11 +78,11 @@ class CalibrationModel(object):
                     bank_name = bank
                 generate_tof_fit_workspace(bank_name)
             if bank is None and spectrum_numbers is None:
-                self._plot_tof_fit()
+                self._plot_tof_fit(["bank_1", "bank_2"])
             elif spectrum_numbers is None:
-                self._plot_tof_fit_single_bank_or_custom(bank)
+                self._plot_tof_fit([bank])
             else:
-                self._plot_tof_fit_single_bank_or_custom("Cropped")
+                self._plot_tof_fit(["Cropped"])
         difa = [row['difa'] for row in cal_params]
         difc = [row['difc'] for row in cal_params]
         tzero = [row['tzero'] for row in cal_params]
@@ -154,36 +154,23 @@ class CalibrationModel(object):
         for row in params_table:
             workspace.addRow(row)
 
-    def _plot_tof_fit(self):
-        bank_1_ws = Ads.retrieve("engggui_tof_peaks_bank_1")
-        bank_2_ws = Ads.retrieve("engggui_tof_peaks_bank_2")
-        bank_1_residuals_ws = Ads.retrieve("engggui_tof_peaks_bank_1_residuals")
-        bank_2_residuals_ws = Ads.retrieve("engggui_tof_peaks_bank_2_residuals")
+    def _plot_tof_fit(self, regions):
+        n_workspaces = len(regions)
+        bank_ws_names = [f"engggui_tof_peaks_{region}" for region in regions]
+        residuals_ws_names = [f"{ws}_residuals" for ws in bank_ws_names]
+        bank_workspaces = [Ads.retrieve(ws_name) for ws_name in bank_ws_names]
+        residuals_workspaces = [Ads.retrieve(ws_name) for ws_name in residuals_ws_names]
+
         # Create plot
         fig = plt.figure()
-        gs = gridspec.GridSpec(2, 2)
-        plot_bank_1 = fig.add_subplot(gs[0, 0], projection="mantid")
-        plot_bank_2 = fig.add_subplot(gs[0, 1], projection="mantid")
-        plot_res_1 = fig.add_subplot(gs[1, 0], projection="mantid")
-        plot_res_2 = fig.add_subplot(gs[1, 1], projection="mantid")
+        gs = gridspec.GridSpec(2, n_workspaces)
+        bank_axes = [fig.add_subplot(gs[0, n], projection="mantid") for n in range(n_workspaces)]
+        residuals_axes = [fig.add_subplot(gs[1, n], projection="mantid") for n in range(n_workspaces)]
 
-        for ax, ws, bank in zip([plot_bank_1, plot_bank_2], [bank_1_ws, bank_2_ws], [1, 2]):
+        for ax, ws, bank in zip(bank_axes, bank_workspaces, regions):
             self._add_plot_to_axes(ax, ws, bank)
-        for ax, ws in zip([plot_res_1, plot_res_2], [bank_1_residuals_ws, bank_2_residuals_ws]):
+        for ax, ws in zip(residuals_axes, residuals_workspaces):
             self._add_residuals_to_axes(ax, ws)
-        fig.tight_layout()
-        fig.show()
-
-    def _plot_tof_fit_single_bank_or_custom(self, bank):
-        bank_ws = Ads.retrieve("engggui_tof_peaks_" + bank)
-        residuals_ws = Ads.retrieve("engggui_tof_peaks_" + bank + "_residuals")
-        fig = plt.figure()
-        gs = gridspec.GridSpec(2, 1)
-        plot_bank = fig.add_subplot(gs[0, 0], projection="mantid")
-        plot_res = fig.add_subplot(gs[1, 0], projection="mantid")
-
-        self._add_plot_to_axes(plot_bank, bank_ws, bank)
-        self._add_residuals_to_axes(plot_res, residuals_ws)
         fig.tight_layout()
         fig.show()
 
@@ -191,7 +178,7 @@ class CalibrationModel(object):
     def _add_plot_to_axes(ax, ws, bank):
         ax.plot(ws, wkspIndex=1, linestyle="-", marker="None", color='r', label="TOF Quadratic Fit")
         ax.errorbar(ws, wkspIndex=0, capsize=2, marker=".", color='b', label="Peaks Fitted", ls="None")
-        ax.set_title("Engg Gui TOF Peaks Bank " + str(bank))
+        ax.set_title("Engg Gui TOF Peaks " + str(bank))
         ax.legend()
         ax.set_xlabel("")  # hide here as set automatically
         ax.set_ylabel("Fitted Peaks Centre(TOF, \u03BCs)")
