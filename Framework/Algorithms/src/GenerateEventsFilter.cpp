@@ -146,11 +146,12 @@ void GenerateEventsFilter::init() {
   vector<string> processoptions{"Serial", "Parallel"};
   auto procvalidator = std::make_shared<StringListValidator>(processoptions);
   declareProperty("UseParallelProcessing", "Serial", procvalidator,
-                  "Use multiple cores to generate events filter by log values. \n"
-                  "Serial: Use a single core. Good for slow log. \n"
-                  "Parallel: Use multiple cores. Appropriate for fast log. ");
+                  "Use multiple cores to generate events filter by log values: \n"
+                  "Serial: Use a single core, good for slow log; \n"
+                  "Parallel: Use multiple cores, appropriate for fast log. ");
 
   declareProperty("NumberOfThreads", EMPTY_INT(), "Number of threads forced to use in the parallel mode. ");
+  declareProperty("UseReverseLogarithmic", false, "Use reverse logarithm for the time filtering.");
 }
 
 /** Main execute body
@@ -362,32 +363,57 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
     double timeinterval = vec_timeintervals[0];
     int64_t timeslot = 0;
 
-    // Explicitly N time intervals
+    int64_t runStartTime = m_dataWS->run().startTime().totalNanoseconds();
     bool isLogarithmic = (timeinterval < 0);
+    bool isReverseLogarithmic = this->getProperty("UseReverseLogarithmic");
+
+    if (isReverseLogarithmic && !isLogarithmic) {
+      g_log.warning("UseReverseLogarithmic checked but linear time interval provided. Using linear time interval.");
+      isReverseLogarithmic = false;
+    }
+    if (isLogarithmic && isReverseLogarithmic && m_stopTime >= m_runEndTime)
+      throw runtime_error(
+          "Cannot do reverse logarithmic time interval if the end time is not stricly less than the end of the run.");
+    if (isLogarithmic && !isReverseLogarithmic && m_startTime.totalNanoseconds() == runStartTime)
+      throw runtime_error("Cannot do logarithmic time interval if the start time is the same as the start of the run.");
+
     auto deltatime_ns = static_cast<int64_t>(timeinterval * m_timeUnitConvertFactorToNS);
 
-    int64_t runStartTime = m_dataWS->run().startTime().totalNanoseconds();
     int64_t startTime_ns = m_startTime.totalNanoseconds();
+    int64_t endTime_ns = m_stopTime.totalNanoseconds();
 
-    int64_t curtime_ns = startTime_ns - runStartTime;
+    int64_t runTotalTime_ns = m_runEndTime.totalNanoseconds() - runStartTime;
+
+    int64_t curtime_ns = !isReverseLogarithmic ? startTime_ns - runStartTime : endTime_ns - runStartTime;
 
     int wsindex = 0;
-    while (curtime_ns + runStartTime < m_stopTime.totalNanoseconds()) {
-      // Calculate next.time
-      int64_t nexttime_ns;
+
+    while ((curtime_ns + runStartTime < m_stopTime.totalNanoseconds() && !isReverseLogarithmic) ||
+           (curtime_ns + runStartTime > m_startTime.totalNanoseconds() && isReverseLogarithmic)) {
+      // Calculate next time
+      int64_t nexttime_ns; // note that this is the time since the start of the run
 
       if (isLogarithmic) {
-        nexttime_ns = static_cast<int64_t>(static_cast<double>(curtime_ns) * (1 + std::fabs(timeinterval)));
-      } else {
+        if (isReverseLogarithmic) {
+          nexttime_ns = runTotalTime_ns - static_cast<int64_t>(static_cast<double>(runTotalTime_ns - curtime_ns) *
+                                                               (1 + std::fabs(timeinterval)));
+        } else
+          nexttime_ns = static_cast<int64_t>(static_cast<double>(curtime_ns) * (1 + std::fabs(timeinterval)));
+
+        // TODO maybe internally store times as double then cast to int for the splitter ?
+        if (nexttime_ns == curtime_ns)
+          throw runtime_error("Logarithmic factor is too low, loop stuck at the same value.");
+      } else
         nexttime_ns = curtime_ns + deltatime_ns;
-      }
 
       if (nexttime_ns + runStartTime > m_stopTime.totalNanoseconds())
         nexttime_ns = m_stopTime.totalNanoseconds() - runStartTime;
+      if (nexttime_ns + runStartTime < m_startTime.totalNanoseconds())
+        nexttime_ns = m_startTime.totalNanoseconds() - runStartTime;
 
       // Create splitter and information
-      Types::Core::DateAndTime t0(curtime_ns + runStartTime);
-      Types::Core::DateAndTime tf(nexttime_ns + runStartTime);
+      Types::Core::DateAndTime t0(std::min(curtime_ns, nexttime_ns) + runStartTime);
+      Types::Core::DateAndTime tf(std::max(curtime_ns, nexttime_ns) + runStartTime);
       std::stringstream ss;
       ss << "Time.Interval.From." << t0 << ".to." << tf;
 
@@ -398,7 +424,8 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
       wsindex++;
 
       // Update progress
-      int64_t newtimeslot = (curtime_ns - m_startTime.totalNanoseconds()) * 90 / totaltime;
+      int64_t newtimeslot = isReverseLogarithmic ? (endTime_ns - (curtime_ns + runStartTime)) * 90 / totaltime
+                                                 : (curtime_ns + runStartTime - startTime_ns) * 90 / totaltime;
       if (newtimeslot > timeslot) {
         // There is change and update progress
         timeslot = newtimeslot;
