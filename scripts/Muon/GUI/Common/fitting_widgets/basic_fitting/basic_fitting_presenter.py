@@ -17,6 +17,8 @@ from Muon.GUI.Common.utilities.workspace_data_utils import (check_exclude_start_
                                                             check_exclude_end_x_is_valid, check_start_x_is_valid,
                                                             check_end_x_is_valid)
 
+from PyQt5.QtCore import Qt
+
 
 class BasicFittingPresenter:
     """
@@ -418,7 +420,8 @@ class BasicFittingPresenter:
                                              fit_options: dict) -> None:
         """Open the Fit Script Generator interface."""
         self.fsg_model = FitScriptGeneratorModel()
-        self.fsg_view = FitScriptGeneratorView(None, fitting_mode, fit_options)
+        self.fsg_view = FitScriptGeneratorView(self.view, fitting_mode, fit_options)
+        self.fsg_view.setWindowFlag(Qt.Window)
         self.fsg_presenter = FitScriptGeneratorPresenter(self.fsg_view, self.fsg_model, workspaces,
                                                          self.view.start_x, self.view.end_x)
 
