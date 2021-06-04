@@ -117,6 +117,15 @@ class ModelFittingModel(BasicFittingModel):
         else:
             return parameter_values[parameter_name]
 
+    def _get_new_start_xs_and_end_xs_using_existing_datasets(self, new_dataset_names: list) -> tuple:
+        """Returns the start and end Xs to use for the new datasets. It uses the limits of the new workspaces."""
+        start_xs, end_xs = [], []
+        for name in new_dataset_names:
+            x_lower, x_upper = self.x_limits_of_workspace(name)
+            start_xs.append(x_lower)
+            end_xs.append(x_upper)
+        return start_xs, end_xs
+
     def retrieve_first_good_data_from(self, workspace_name: str) -> float:
         """Returns the first good data value from a workspace."""
         x_lower, _ = self.x_limits_of_workspace(workspace_name)

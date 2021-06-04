@@ -24,6 +24,7 @@ DEFAULT_CHI_SQUARED = 0.0
 DEFAULT_FIT_STATUS = None
 DEFAULT_SINGLE_FIT_FUNCTION = None
 DEFAULT_START_X = 0.0
+X_OFFSET = 0.001
 
 
 def get_function_name_for_composite(composite: CompositeFunction) -> str:
@@ -377,7 +378,7 @@ class BasicFittingModel:
                 x_data.sort()
                 x_lower, x_higher = x_data[0], x_data[-1]
                 if x_lower == x_higher:
-                    return x_lower - 0.001, x_higher + 0.001
+                    return x_lower - X_OFFSET, x_higher + X_OFFSET
                 return x_lower, x_higher
         return self.current_start_x, self.current_end_x
 
