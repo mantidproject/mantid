@@ -8,8 +8,7 @@
 #include "MantidJson/Json.h"
 #include <sstream>
 
-namespace Mantid {
-namespace JsonHelpers {
+namespace Mantid::JsonHelpers {
 
 /**
  * @brief Return a string given the json value passed, this function handles errors by throwing instead of returning
@@ -62,5 +61,4 @@ bool parse(const std::string &jsonString, Json::Value *jsonValue, std::string *e
   return reader->parse(jsonString.c_str(), jsonString.c_str() + jsonString.length(), jsonValue, errors);
 }
 
-} // namespace JsonHelpers
-} // namespace Mantid
+} // namespace Mantid::JsonHelpers
