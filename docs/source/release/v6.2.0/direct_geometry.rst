@@ -12,7 +12,7 @@ New Algorithms
 ##############
 
 - :ref:`ApplyDetailedBalanceMD <algm-ApplyDetailedBalanceMD>` to apply detailed balance to MDEvents
-- :ref:`InelasticScatteredTransmissionCorrectionMD <algm-InelasticScatteredTransmissionCorrectionMD>` weights the intensity of each detected event according to its final energy.
+- :ref:`DgsScatteredTransmissionCorrectionMD <algm-DgsScatteredTransmissionCorrectionMD>` weights the intensity of each detected event according to its final energy.
 
 .. warning:: **Developers:** Sort changes under appropriate heading
     putting new features at the top of the section, followed by

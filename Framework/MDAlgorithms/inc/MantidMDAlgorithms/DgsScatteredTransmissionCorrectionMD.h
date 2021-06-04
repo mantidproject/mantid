@@ -15,10 +15,10 @@ using Mantid::DataObjects::MDEventWorkspace;
 namespace Mantid {
 namespace MDAlgorithms {
 
-class MANTID_MDALGORITHMS_DLL InelasticScatteredTransmissionCorrectionMD : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL DgsScatteredTransmissionCorrectionMD : public API::Algorithm {
 public:
-  InelasticScatteredTransmissionCorrectionMD() {}
-  const std::string name() const override { return "InelasticScatteredTransmissionCorrectionMD"; }
+  DgsScatteredTransmissionCorrectionMD() {}
+  const std::string name() const override { return "DgsScatteredTransmissionCorrectionMD"; }
   int version() const override { return 1; }
   const std::string category() const override { return "MDAlgorithms"; }
   const std::string summary() const override {
