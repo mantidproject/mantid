@@ -156,44 +156,6 @@ public:
   }
 
   void setUp() override {
-    /*
-     * # import mantid algorithms, numpy and matplotlib
-       from mantid.simpleapi import *
-       import matplotlib.pyplot as plt
-       import numpy as np
-
-       we1 = CreateSampleWorkspace(WorkspaceType='Event',
-                                  Function='Flat background',
-                                  BankPixelWidth=1,
-                                  XUnit='DeltaE',
-                                  XMin=-10,
-                                  XMax=19,
-                                  BinWidth=0.5)
-       AddSampleLog(Workspace=we1,LogName='Ei', LogText='20.', LogType='Number')
-       MoveInstrumentComponent(Workspace=we1, ComponentName='bank1', X=3, Z=3, RelativePosition=False)
-       MoveInstrumentComponent(Workspace=we1, ComponentName='bank2', X=-3, Z=-3, RelativePosition=False)
-       we2=CloneWorkspace(we1)
-       SetGoniometer(Workspace=we1, Axis0='0,0,1,0,1')
-       SetGoniometer(Workspace=we2, Axis0='30,0,1,0,1')
-
-       # old way
-       we1c = HyspecScharpfCorrection(InputWorkspace=we1,
-                                      PolarizationAngle=-10,
-                                      Precision=0.2)
-       md1c = ConvertToMD(InputWorkspace=we1c, QDimensions='Q3D')
-       we2c = HyspecScharpfCorrection(InputWorkspace=we2,
-                                      PolarizationAngle=-10,
-                                      Precision=0.2)
-       md2c = ConvertToMD(InputWorkspace=we2c, QDimensions='Q3D')
-       mdpac = MergeMD(InputWorkspaces='md1c, md2c')
-
-       # new way
-       md1 = ConvertToMD(InputWorkspace=we1, QDimensions='Q3D')
-       md2 = ConvertToMD(InputWorkspace=we2, QDimensions='Q3D')
-       md = MergeMD(InputWorkspaces='md1,md2')
-       # mdpacMD = PolarizationAngleCorrectionMD(InputWorkspace=md, PolarizationAngle=-10, Precision=0.2)
-
-     */
     // Define workspace names
     std::string event_ws_0("PolarizationAngleRawEvent0");
     std::string event_ws_1("PolarizationAngleRawEvent1");
