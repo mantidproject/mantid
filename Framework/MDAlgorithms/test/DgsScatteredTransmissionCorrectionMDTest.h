@@ -7,7 +7,7 @@
 #pragma once
 
 // local
-#include "MantidMDAlgorithms/InelasticScatteredTransmissionCorrectionMD.h"
+#include "MantidMDAlgorithms/DgsScatteredTransmissionCorrectionMD.h"
 
 // 3rd party
 #include "MantidAPI/AlgorithmManager.h"
@@ -19,10 +19,10 @@
 using namespace Mantid::API;
 using namespace Mantid::MDAlgorithms;
 
-class InelasticScatteredTransmissionCorrectionMDTest : public CxxTest::TestSuite {
+class DgsScatteredTransmissionCorrectionMDTest : public CxxTest::TestSuite {
 public:
   void test_Init() {
-    InelasticScatteredTransmissionCorrectionMD alg;
+    DgsScatteredTransmissionCorrectionMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
@@ -174,7 +174,7 @@ private:
   void applyCorrectionToMD(std::string inputWorkspace, double factor, std::string outputWorkspace = "") {
     if (outputWorkspace.size() == 0)
       outputWorkspace = inputWorkspace;
-    InelasticScatteredTransmissionCorrectionMD alg;
+    DgsScatteredTransmissionCorrectionMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     alg.setPropertyValue("InputWorkspace", inputWorkspace);

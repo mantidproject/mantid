@@ -26,7 +26,7 @@ Usage
 
 **Example - Run Transmission Correction**
 
-.. testcode:: InelasticScatteredTransmissionCorrectionSingleRun
+.. testcode:: DgsScatteredTransmissionCorrectionSingleRun
 
    we1 = CreateSampleWorkspace(WorkspaceType='Event',
                                Function='Flat background',
@@ -52,9 +52,9 @@ Usage
    we1s = ScaleX(InputWorkspace=we1s, Factor=20., Operation='Add') # Ei - Ef converts back to DeltaE
    md1_old = ConvertToMD(InputWorkspace=we1s, QDimensions='Q3D')
 
-   # use algorithm InelasticScatteredTransmissionCorrectionMD
+   # use algorithm DgsScatteredTransmissionCorrectionMD
    md1 = ConvertToMD(InputWorkspace=we1, QDimensions='Q3D')
-   md1_new = InelasticScatteredTransmissionCorrectionMD(md1, ExponentFactor=c)
+   md1_new = DgsScatteredTransmissionCorrectionMD(md1, ExponentFactor=c)
 
    r = CompareMDWorkspaces(md1_old, md1_new, CheckEvents=True, Tolerance=0.00001)
    print('Number of MDEvents: {} == {}'.format(md1_old.getNEvents(), md1_new.getNEvents()))
@@ -62,7 +62,7 @@ Usage
 
 Output:
 
-.. testoutput:: InelasticScatteredTransmissionCorrectionSingleRun
+.. testoutput:: DgsScatteredTransmissionCorrectionSingleRun
 
    Number of MDEvents: 1972 == 1972
    md1_old and md1_new being equal is True

@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 // local
-#include "MantidMDAlgorithms/InelasticScatteredTransmissionCorrectionMD.h"
+#include "MantidMDAlgorithms/DgsScatteredTransmissionCorrectionMD.h"
 
 // 3rd party
 #include "MantidAPI/ExperimentInfo.h"
@@ -31,11 +31,11 @@ namespace MDAlgorithms {
 constexpr double EMPTY_FLT() noexcept { return std::numeric_limits<float>::max() / 2; }
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(InelasticScatteredTransmissionCorrectionMD)
+DECLARE_ALGORITHM(DgsScatteredTransmissionCorrectionMD)
 
 //---------------------------------------------------------------------------------------------------------
 
-void InelasticScatteredTransmissionCorrectionMD::init() {
+void DgsScatteredTransmissionCorrectionMD::init() {
   declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Input MDEventWorkspace. Either QSample (or QLab) frame plus DeltaE, or just Qmod plus DeltaE");
 
@@ -52,7 +52,7 @@ void InelasticScatteredTransmissionCorrectionMD::init() {
 
 //---------------------------------------------------------------------------------------------------------
 
-std::map<std::string, std::string> InelasticScatteredTransmissionCorrectionMD::validateInputs() {
+std::map<std::string, std::string> DgsScatteredTransmissionCorrectionMD::validateInputs() {
   std::map<std::string, std::string> output;
   // validate input workspace
   std::string workspace_error = checkInputWorkspace();
@@ -67,7 +67,7 @@ std::map<std::string, std::string> InelasticScatteredTransmissionCorrectionMD::v
 
 //---------------------------------------------------------------------------------------------------------
 
-std::string InelasticScatteredTransmissionCorrectionMD::checkInputWorkspace() {
+std::string DgsScatteredTransmissionCorrectionMD::checkInputWorkspace() {
 
   // Verify the dimension of the input workspace
   std::string dimensionError = checkInputMDDimensions();
@@ -91,7 +91,7 @@ std::string InelasticScatteredTransmissionCorrectionMD::checkInputWorkspace() {
 
 //---------------------------------------------------------------------------------------------------------
 
-std::string InelasticScatteredTransmissionCorrectionMD::checkInputMDDimensions() {
+std::string DgsScatteredTransmissionCorrectionMD::checkInputMDDimensions() {
   std::string errormsg("");
   IMDEventWorkspace_sptr inputws = getProperty("InputWorkspace");
   size_t numdims = inputws->getNumDims();
@@ -133,7 +133,7 @@ std::string InelasticScatteredTransmissionCorrectionMD::checkInputMDDimensions()
 //---------------------------------------------------------------------------------------------------------
 
 template <typename MDE, size_t nd>
-void InelasticScatteredTransmissionCorrectionMD::correctForTransmission(typename MDEventWorkspace<MDE, nd>::sptr ws) {
+void DgsScatteredTransmissionCorrectionMD::correctForTransmission(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   double cDouble = getProperty("ExponentFactor");
   float c = static_cast<float>(cDouble);
   size_t deltaEIndex = ws->getNumDims() - 1;
@@ -169,7 +169,7 @@ void InelasticScatteredTransmissionCorrectionMD::correctForTransmission(typename
 
 //---------------------------------------------------------------------------------------------------------
 
-void InelasticScatteredTransmissionCorrectionMD::exec() {
+void DgsScatteredTransmissionCorrectionMD::exec() {
   // Get input workspace
   IMDEventWorkspace_sptr inputWs = getProperty("InputWorkspace");
 
