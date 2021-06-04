@@ -35,12 +35,16 @@ FitScriptGeneratorPresenter::~FitScriptGeneratorPresenter() {}
 
 void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event, std::string const &arg1,
                                                   std::string const &arg2) {
-  if (arg1.empty())
-    UNUSED_ARG(arg1);
-  if (arg2.empty())
-    UNUSED_ARG(arg2);
-
   switch (event) {
+  case ViewEvent::ADSDeleteEvent:
+    handleADSDeleteEvent(arg1);
+    return;
+  case ViewEvent::ADSClearEvent:
+    handleADSClearEvent();
+    return;
+  case ViewEvent::ADSRenameEvent:
+    handleADSRenameEvent(arg1, arg2);
+    return;
   case ViewEvent::RemoveDomainClicked:
     handleRemoveDomainClicked();
     return;
@@ -119,17 +123,23 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event, Fittin
 
 void FitScriptGeneratorPresenter::openFitScriptGenerator() { m_view->show(); }
 
-void FitScriptGeneratorPresenter::handleRemoveDomainClicked() {
-  for (auto const &index : m_view->selectedRows()) {
-    auto const workspaceName = m_view->workspaceName(index);
-    auto const workspaceIndex = m_view->workspaceIndex(index);
+void FitScriptGeneratorPresenter::handleADSDeleteEvent(std::string const &workspaceName) {
+  auto const differentWsName = [&](FitDomainIndex index) { return m_view->workspaceName(index) != workspaceName; };
 
-    m_view->removeWorkspaceDomain(workspaceName, workspaceIndex);
-    m_model->removeWorkspaceDomain(workspaceName, workspaceIndex);
-  }
+  auto workspaceRows = m_view->allRows();
+  workspaceRows.erase(std::remove_if(workspaceRows.begin(), workspaceRows.end(), differentWsName), workspaceRows.end());
 
-  handleSelectionChanged();
+  removeDomains(workspaceRows);
 }
+
+void FitScriptGeneratorPresenter::handleADSClearEvent() { removeDomains(m_view->allRows()); }
+
+void FitScriptGeneratorPresenter::handleADSRenameEvent(std::string const &workspaceName, std::string const &newName) {
+  m_model->renameWorkspace(workspaceName, newName);
+  m_view->renameWorkspace(workspaceName, newName);
+}
+
+void FitScriptGeneratorPresenter::handleRemoveDomainClicked() { removeDomains(m_view->selectedRows()); }
 
 void FitScriptGeneratorPresenter::handleAddDomainClicked() {
   if (m_view->openAddWorkspaceDialog()) {
@@ -294,6 +304,15 @@ void FitScriptGeneratorPresenter::addWorkspace(std::string const &workspaceName,
   } catch (std::invalid_argument const &ex) {
     m_warnings.emplace_back(ex.what());
   }
+}
+
+void FitScriptGeneratorPresenter::removeDomains(std::vector<FitDomainIndex> const &domainIndices) {
+  for (auto const &index : domainIndices) {
+    m_view->removeDomain(index);
+    m_model->removeDomain(index);
+  }
+
+  handleSelectionChanged();
 }
 
 void FitScriptGeneratorPresenter::updateStartX(std::string const &workspaceName, WorkspaceIndex workspaceIndex,

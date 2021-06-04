@@ -23,6 +23,8 @@
 #include <QClipboard>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QMetaObject>
+#include <QThread>
 
 using namespace Mantid::Kernel;
 using namespace MantidQt::API;
@@ -105,9 +107,17 @@ FitScriptGeneratorView::FitScriptGeneratorView(QWidget *parent, FittingMode fitt
   setFittingMode(fittingMode);
   setFitBrowserOptions(fitOptions);
   connectUiSignals();
+
+  observeDelete(true);
+  observeClear(true);
+  observeRename(true);
 }
 
 FitScriptGeneratorView::~FitScriptGeneratorView() {
+  observeDelete(false);
+  observeClear(false);
+  observeRename(false);
+
   m_dialog.reset();
   m_dataTable.reset();
   m_functionTreeView.reset();
@@ -172,18 +182,55 @@ void FitScriptGeneratorView::subscribePresenter(IFitScriptGeneratorPresenter *pr
   m_presenter->notifyPresenter(ViewEvent::FittingModeChanged, m_fitOptionsBrowser->getFittingMode());
 }
 
+void FitScriptGeneratorView::deleteHandle(std::string const &wsName, Workspace_sptr const &ws) {
+  if (QThread::currentThread() != QApplication::instance()->thread()) {
+    QMetaObject::invokeMethod(this, "notifyADSDeleteEvent", Qt::AutoConnection, Q_ARG(std::string const &, wsName));
+  } else {
+    notifyADSDeleteEvent(wsName);
+  }
+}
+
+void FitScriptGeneratorView::clearHandle() {
+  if (QThread::currentThread() != QApplication::instance()->thread()) {
+    QMetaObject::invokeMethod(this, "notifyADSClearEvent", Qt::AutoConnection);
+  } else {
+    notifyADSClearEvent();
+  }
+}
+
+void FitScriptGeneratorView::renameHandle(std::string const &wsName, std::string const &newName) {
+  if (QThread::currentThread() != QApplication::instance()->thread()) {
+    QMetaObject::invokeMethod(this, "notifyADSRenameEvent", Qt::AutoConnection, Q_ARG(std::string const &, wsName),
+                              Q_ARG(std::string const &, newName));
+  } else {
+    notifyADSRenameEvent(wsName, newName);
+  }
+}
+
+void FitScriptGeneratorView::notifyADSDeleteEvent(std::string const &workspaceName) {
+  m_presenter->notifyPresenter(ViewEvent::ADSDeleteEvent, workspaceName);
+}
+
+void FitScriptGeneratorView::notifyADSClearEvent() { m_presenter->notifyPresenter(ViewEvent::ADSClearEvent); }
+
+void FitScriptGeneratorView::notifyADSRenameEvent(std::string const &workspaceName, std::string const &newName) {
+  m_presenter->notifyPresenter(ViewEvent::ADSRenameEvent, workspaceName, newName);
+}
+
 void FitScriptGeneratorView::onRemoveDomainClicked() { m_presenter->notifyPresenter(ViewEvent::RemoveDomainClicked); }
 
 void FitScriptGeneratorView::onAddDomainClicked() { m_presenter->notifyPresenter(ViewEvent::AddDomainClicked); }
 
 void FitScriptGeneratorView::onCellChanged(int row, int column) {
   UNUSED_ARG(row);
-  m_dataTable->formatSelection();
 
-  if (column == ColumnIndex::StartX)
+  if (column == ColumnIndex::StartX) {
+    m_dataTable->formatSelection();
     m_presenter->notifyPresenter(ViewEvent::StartXChanged);
-  else if (column == ColumnIndex::EndX)
+  } else if (column == ColumnIndex::EndX) {
+    m_dataTable->formatSelection();
     m_presenter->notifyPresenter(ViewEvent::EndXChanged);
+  }
 }
 
 void FitScriptGeneratorView::onItemSelected() { m_presenter->notifyPresenter(ViewEvent::SelectionChanged); }
@@ -286,9 +333,11 @@ IFunction::Attribute FitScriptGeneratorView::attributeValue(std::string const &a
   return m_functionTreeView->getAttribute(QString::fromStdString(attribute));
 }
 
-void FitScriptGeneratorView::removeWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) {
-  m_dataTable->removeDomain(workspaceName, workspaceIndex);
+void FitScriptGeneratorView::renameWorkspace(std::string const &workspaceName, std::string const &newName) {
+  m_dataTable->renameWorkspace(QString::fromStdString(workspaceName), QString::fromStdString(newName));
 }
+
+void FitScriptGeneratorView::removeDomain(FitDomainIndex domainIndex) { m_dataTable->removeDomain(domainIndex); }
 
 void FitScriptGeneratorView::addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
                                                 double startX, double endX) {

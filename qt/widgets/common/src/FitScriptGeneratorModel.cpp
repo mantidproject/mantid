@@ -12,6 +12,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidKernel/Logger.h"
 
 #include <algorithm>
@@ -99,12 +100,9 @@ FitScriptGeneratorModel::~FitScriptGeneratorModel() {
 
 void FitScriptGeneratorModel::subscribePresenter(IFitScriptGeneratorPresenter *presenter) { m_presenter = presenter; }
 
-void FitScriptGeneratorModel::removeWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) {
-  auto const removeIter = findWorkspaceDomain(workspaceName, workspaceIndex);
-  if (removeIter != m_fitDomains.cend()) {
-    m_fitDomains.erase(removeIter);
-    checkGlobalTies();
-  }
+void FitScriptGeneratorModel::removeDomain(FitDomainIndex domainIndex) {
+  m_fitDomains.erase(m_fitDomains.begin() + domainIndex.value);
+  checkGlobalTies();
 }
 
 void FitScriptGeneratorModel::addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
@@ -119,6 +117,13 @@ void FitScriptGeneratorModel::addWorkspaceDomain(std::string const &workspaceNam
 bool FitScriptGeneratorModel::hasWorkspaceDomain(std::string const &workspaceName,
                                                  WorkspaceIndex workspaceIndex) const {
   return findWorkspaceDomain(workspaceName, workspaceIndex) != m_fitDomains.cend();
+}
+
+void FitScriptGeneratorModel::renameWorkspace(std::string const &workspaceName, std::string const &newName) {
+  for (auto const &fitDomain : m_fitDomains) {
+    if (fitDomain->workspaceName() == workspaceName)
+      fitDomain->setWorkspaceName(newName);
+  }
 }
 
 FitDomainIndex FitScriptGeneratorModel::findDomainIndex(std::string const &workspaceName,
@@ -634,6 +639,7 @@ std::string FitScriptGeneratorModel::generatePythonFitScript(
   generateScript->setProperty("StartXs", getStartXs());
   generateScript->setProperty("EndXs", getEndXs());
 
+  generateScript->setProperty("FittingType", getFittingType());
   generateScript->setProperty("Function", getFunction());
 
   auto const [maxIterations, minimizer, costFunction, evaluationType] = fitOptions;
@@ -676,13 +682,56 @@ std::vector<T> FitScriptGeneratorModel::transformDomains(Function const &func) c
   return domainData;
 }
 
+std::string FitScriptGeneratorModel::getFittingType() const {
+  switch (m_fittingMode) {
+  case FittingMode::SEQUENTIAL:
+    return "Sequential";
+  case FittingMode::SIMULTANEOUS:
+    return "Simultaneous";
+  default:
+    throw std::invalid_argument("Fitting mode must be SEQUENTIAL or SIMULTANEOUS.");
+  }
+}
+
 IFunction_sptr FitScriptGeneratorModel::getFunction() const {
   switch (m_fittingMode) {
   case FittingMode::SEQUENTIAL:
     return m_fitDomains[0u]->getFunctionCopy();
+  case FittingMode::SIMULTANEOUS:
+    return getMultiDomainFunction();
   default:
-    throw std::runtime_error("getFunction is not implemented for the simultaneous FittingMode.");
+    throw std::invalid_argument("Fitting mode must be SEQUENTIAL or SIMULTANEOUS.");
   }
+}
+
+IFunction_sptr FitScriptGeneratorModel::getMultiDomainFunction() const {
+  auto multiDomainFunction = std::make_shared<MultiDomainFunction>();
+
+  for (auto i = 0; i < numberOfDomains(); ++i) {
+    multiDomainFunction->addFunction(m_fitDomains[i]->getFunctionCopy());
+    multiDomainFunction->setDomainIndex(i, i);
+  }
+
+  addGlobalParameterTies(multiDomainFunction);
+  addGlobalTies(multiDomainFunction);
+  return multiDomainFunction;
+}
+
+void FitScriptGeneratorModel::addGlobalParameterTies(MultiDomainFunction_sptr &function) const {
+  for (auto const &globalParameter : m_globalParameters)
+    function->addTies(constructGlobalParameterTie(globalParameter));
+}
+
+std::string FitScriptGeneratorModel::constructGlobalParameterTie(GlobalParameter const &globalParameter) const {
+  std::string tie = "f0." + globalParameter.m_parameter;
+  for (auto i = 1u; i < numberOfDomains(); ++i)
+    tie += "=f" + std::to_string(i) + "." + globalParameter.m_parameter;
+  return tie;
+}
+
+void FitScriptGeneratorModel::addGlobalTies(MultiDomainFunction_sptr &function) const {
+  for (auto const &globalTie : m_globalTies)
+    function->addTies(globalTie.asString());
 }
 
 } // namespace MantidWidgets

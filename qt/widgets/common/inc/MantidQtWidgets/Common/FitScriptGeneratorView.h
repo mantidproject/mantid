@@ -9,6 +9,7 @@
 #include "DllOption.h"
 #include "ui_FitScriptGenerator.h"
 
+#include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
@@ -37,7 +38,8 @@ class IFitScriptGeneratorPresenter;
 struct GlobalParameter;
 struct GlobalTie;
 
-class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorView : public IFitScriptGeneratorView {
+class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorView : public IFitScriptGeneratorView,
+                                                          public Mantid::API::AnalysisDataServiceObserver {
   Q_OBJECT
 
 public:
@@ -46,6 +48,10 @@ public:
   ~FitScriptGeneratorView() override;
 
   void subscribePresenter(IFitScriptGeneratorPresenter *presenter) override;
+
+  void deleteHandle(std::string const &wsName, [[maybe_unused]] Workspace_sptr const &ws) override;
+  void clearHandle() override;
+  void renameHandle(std::string const &wsName, std::string const &newName) override;
 
   [[nodiscard]] std::string workspaceName(FitDomainIndex index) const override;
   [[nodiscard]] WorkspaceIndex workspaceIndex(FitDomainIndex index) const override;
@@ -61,7 +67,9 @@ public:
   [[nodiscard]] double parameterValue(std::string const &parameter) const override;
   [[nodiscard]] Mantid::API::IFunction::Attribute attributeValue(std::string const &attribute) const override;
 
-  void removeWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) override;
+  void renameWorkspace(std::string const &workspaceName, std::string const &newName) override;
+
+  void removeDomain(FitDomainIndex domainIndex) override;
   void addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX,
                           double endX) override;
 
@@ -106,6 +114,10 @@ public:
   QPushButton *generateScriptToClipboardButton() const override { return m_ui.pbGenerateScriptToClipboard; }
 
 private slots:
+  void notifyADSDeleteEvent(std::string const &workspaceName);
+  void notifyADSClearEvent();
+  void notifyADSRenameEvent(std::string const &workspaceName, std::string const &newName);
+
   void onRemoveDomainClicked();
   void onAddDomainClicked();
   void onCellChanged(int row, int column);
