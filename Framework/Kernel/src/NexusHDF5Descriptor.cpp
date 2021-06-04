@@ -106,9 +106,7 @@ herr_t readStringAttributeN(hid_t attr, char *data, int maxlen) {
   char *vdat = NULL;
   iRet = readStringAttribute(attr, &vdat);
   if (iRet >= 0) {
-    GNU_DIAG_OFF("stringop-truncation")
     strncpy(data, vdat, maxlen);
-    GNU_DIAG_ON("stringop-truncation")
     free(vdat);
   }
   data[maxlen - 1] = '\0';

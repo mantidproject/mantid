@@ -11,7 +11,7 @@ set (TEST_FILES
 )
 
 add_library(Json ${SRC_FILES} ${INC_FILES})
-target_link_libraries(Json ${JSONCPP_LIBRARIES})
+target_link_libraries(Json PUBLIC ${JSONCPP_LIBRARIES})
 set_target_properties(Json PROPERTIES OUTPUT_NAME MantidJson)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

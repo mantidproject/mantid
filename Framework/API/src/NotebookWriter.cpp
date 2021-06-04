@@ -174,9 +174,7 @@ Json::Value NotebookWriter::buildNotebook() {
 std::string NotebookWriter::writeNotebook() {
   const Json::Value root = buildNotebook();
 
-  std::string output_string = Mantid::JsonHelpers::jsonToString(root, " ");
-
-  return output_string;
+  return Mantid::JsonHelpers::jsonToString(root, " ");
 }
 } // namespace API
 } // namespace Mantid

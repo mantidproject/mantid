@@ -34,11 +34,9 @@ const std::string CatalogAlgorithmHelper::getIDSError(HTTPResponse::HTTPStatus &
     Json::Value json;
     ::Json::CharReaderBuilder readerBuilder;
     std::string errors;
-    Json::parseFromStream(readerBuilder, responseStream, &json, &errors);
-    auto json_valid = errors.size() != 0;
 
     // Error messages from IDS are returned as json
-    if (json_valid) {
+    if (Json::parseFromStream(readerBuilder, responseStream, &json, &errors)) {
       return json.get("code", "UNKNOWN").asString() + ": " + json.get("message", "Unknown Error").asString();
     } else {
       // Sometimes the HTTP server can throw an error (which is plain HTML)

@@ -147,7 +147,7 @@ include_directories(Framework/API/inc)
 include_directories(Framework/Types/inc)
 include_directories(Framework/NexusGeometry/inc)
 
-set(CORE_MANTIDLIBS Kernel Json HistogramData Indexing Beamline Geometry API Types)
+set(CORE_MANTIDLIBS Kernel HistogramData Indexing Beamline Geometry API Types)
 
 if(UNIX)
   # Experimental feature. Unix only at this point.
