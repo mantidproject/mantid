@@ -76,9 +76,23 @@ class DrillParameter(QObject):
         self._name = name
 
     def setController(self, controller):
+        """
+        Set the parameter controller.
+
+        Args:
+            controller (DrillParameterController): controller
+        """
         self._controller = controller
 
     def initFromProperty(self, mantidProperty):
+        """
+        Inititialize the parameter from a mantid property. This method populates
+        the type, documentation, allowed values of the parameters. It also sets
+        the value to the property default value.
+
+        Args:
+            mantidProperty (Property): the property
+        """
         self._documentation = mantidProperty.documentation
         self._allowedValues = mantidProperty.allowedValues
         value = mantidProperty.value
@@ -113,22 +127,59 @@ class DrillParameter(QObject):
             self._value = value
 
     def getName(self):
+        """
+        Get the name of the parameter.
+
+        Args:
+            name (str): name of the parameter
+        """
         return self._name
 
     def setValue(self, value):
+        """
+        Set the parameter value. If a controller is available, the value will
+        be checked.
+
+        Args:
+            value (any): value
+        """
         self._value = value
         if self._controller:
             self._controller.check(self)
         self.valueChanged.emit()
 
     def getValue(self):
+        """
+        Get the parameter value.
+
+        Returns:
+            (any): value
+        """
         return self._value
 
     def getType(self):
+        """
+        Get the parameter type.
+
+        Returns:
+            (str): type
+        """
         return self._type
 
     def getAllowedValues(self):
+        """
+        Get the allowed value.
+
+        Returns:
+            (list(str)): allowed values
+        """
         return self._allowedValues
 
     def getDocumentation(self):
+        """
+        Get the parameter documentation.
+
+        Returns:
+            (str): documentation
+        """
         return self._documentation
