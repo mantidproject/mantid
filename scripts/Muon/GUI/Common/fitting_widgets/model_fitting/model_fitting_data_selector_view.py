@@ -56,6 +56,10 @@ class ModelFittingDataSelectorView(ui_form, base_widget):
         self.x_selector.blockSignals(False)
         self.y_selector.blockSignals(False)
 
+    def number_of_result_tables(self) -> int:
+        """Returns the number of result tables loaded into the widget."""
+        return self.result_table_selector.number_of_datasets()
+
     @property
     def current_result_table_index(self) -> str:
         """Returns the index of the currently displayed result table."""

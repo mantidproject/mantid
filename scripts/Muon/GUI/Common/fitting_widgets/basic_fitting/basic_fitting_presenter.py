@@ -83,7 +83,7 @@ class BasicFittingPresenter:
         if self.model.number_of_datasets == 0:
             self.view.disable_view()
         else:
-            self.view.enable_view()
+            self.enable_editing_notifier.notify_subscribers()
 
     def handle_gui_changes_made(self, changed_values: dict) -> None:
         """Handle when the good data checkbox is changed in the home tab."""
@@ -101,7 +101,7 @@ class BasicFittingPresenter:
         if self.model.number_of_datasets == 0:
             self.view.disable_view()
         else:
-            self.view.enable_view()
+            self.enable_editing_notifier.notify_subscribers()
 
     def handle_instrument_changed(self) -> None:
         """Handles when an instrument is changed and switches to normal fitting mode. Overridden by child."""

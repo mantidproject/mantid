@@ -57,3 +57,8 @@ class ModelFittingView(BasicFittingView):
     def y_parameter(self) -> str:
         """Returns the selected Y parameter name."""
         return self.model_fitting_data_selector.y_parameter
+
+    def enable_view(self) -> None:
+        """Enable all widgets in this fitting widget."""
+        if self.model_fitting_data_selector.number_of_result_tables() > 0:
+            self.setEnabled(True)

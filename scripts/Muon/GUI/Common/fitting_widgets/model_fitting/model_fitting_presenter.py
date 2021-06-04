@@ -43,7 +43,7 @@ class ModelFittingPresenter(BasicFittingPresenter):
 
     def handle_parameter_combinations_started(self) -> None:
         """Handle when the creation of matrix workspaces starts for all the different parameter combinations."""
-        self.view.disable_view()
+        self.disable_editing_notifier.notify_subscribers()
         self.parameter_combination_thread_success = True
 
     def handle_parameter_combinations_finished(self) -> None:
@@ -56,7 +56,7 @@ class ModelFittingPresenter(BasicFittingPresenter):
             return
 
         self.handle_parameter_combinations_created_successfully(x_parameters, y_parameters)
-        self.view.enable_view()
+        self.enable_editing_notifier.notify_subscribers()
 
     def handle_parameter_combinations_created_successfully(self, x_parameters: list, y_parameters: list) -> None:
         """Handles when the parameter combination workspaces have been created successfully."""
@@ -68,7 +68,7 @@ class ModelFittingPresenter(BasicFittingPresenter):
 
     def handle_parameter_combinations_error(self, error: str) -> None:
         """Handle when an error occurs while creating workspaces for the different parameter combinations."""
-        self.view.disable_view()
+        self.disable_editing_notifier.notify_subscribers()
         self.parameter_combination_thread_success = False
         self.view.warning_popup(error)
 
