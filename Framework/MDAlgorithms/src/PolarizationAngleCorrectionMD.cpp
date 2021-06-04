@@ -164,21 +164,21 @@ void PolarizationAngleCorrectionMD::applyPolarizationAngleCorrection(
       for (auto it = events.begin(); it != events.end(); ++it) {
         // Modify the event
 
-        double gamma(0.);
-
         // Calculate Gamma
+        double qx(0.), qz(0.);
         if (!mIsQSample) {
           // Q-lab: gamma = arctan2(Qx​,Qz​)
-          coord_t qx = it->getCenter(mQxIndex);
-          coord_t qz = it->getCenter(mQzIndex);
-          gamma = std::atan2(qx, qz);
+          qx = static_cast<double>(it->getCenter(mQxIndex));
+          qz = static_cast<double>(it->getCenter(mQzIndex));
         } else {
           // Q-sample
           // Qlab = R * QSample
           std::vector<double> qsample = {it->getCenter(0), it->getCenter(1), it->getCenter(2)};
           std::vector<double> qlab = mRotationMatrixMap[it->getExpInfoIndex()] * qsample;
-          gamma = std::atan2(qlab[0], qlab[2]);
+          qx = qlab[0];
+          qz = qlab[2];
         }
+        double gamma(std::atan2(qx, qz)); // unit = arc
 
         // The Scharpf angle \alphs = \gamma - P_A
         double alpha = gamma - mPolarizationAngle;
