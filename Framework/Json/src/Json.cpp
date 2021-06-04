@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidJson/Json.h"
+#include <memory>
 #include <sstream>
 
 namespace Mantid::JsonHelpers {
