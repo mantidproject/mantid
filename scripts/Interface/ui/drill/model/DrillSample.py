@@ -167,6 +167,7 @@ class DrillSample(QObject):
         else:
             self._group = group
             self._groupIndex = index
+            self._master = False
         self.groupChanged.emit()
 
     def getGroupName(self):
