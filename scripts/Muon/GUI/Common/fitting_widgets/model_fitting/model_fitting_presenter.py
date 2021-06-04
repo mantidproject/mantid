@@ -37,7 +37,7 @@ class ModelFittingPresenter(BasicFittingPresenter):
 
     def handle_selected_x_and_y_changed(self) -> None:
         """Handles when the selected X and Y parameters are changed."""
-        dataset_name = self.view.x_parameter() + "_" + self.view.y_parameter()
+        dataset_name = self.model.parameter_combination_workspace_name(self.view.x_parameter(), self.view.y_parameter())
         self.model.current_dataset_index = self.model.dataset_names.index(dataset_name)
         self.view.current_dataset_name = dataset_name
 

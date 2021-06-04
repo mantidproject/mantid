@@ -24,5 +24,5 @@ class ResultsContext:
 
     def add_result_table(self, table_name: str) -> None:
         """Add a results table to the stored list of results tables."""
-        if check_if_workspace_exist(table_name):
+        if table_name not in self._result_table_names and check_if_workspace_exist(table_name):
             self._result_table_names.append(table_name)

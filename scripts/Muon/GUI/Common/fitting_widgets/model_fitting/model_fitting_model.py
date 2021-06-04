@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import CreateWorkspace
 
-from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
+from Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws
 from Muon.GUI.Common.contexts.fitting_contexts.model_fitting_context import ModelFittingContext
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
@@ -55,6 +55,10 @@ class ModelFittingModel(BasicFittingModel):
         """Returns the number of result tables which are held by the context."""
         return self.fitting_context.number_of_result_tables
 
+    def parameter_combination_workspace_name(self, x_parameter: str, y_parameter: str) -> str:
+        """Returns the workspace name being used for a particular parameter combination."""
+        return self.current_result_table_name + "_" + x_parameter + "_" + y_parameter
+
     def get_workspace_names_to_display_from_context(self) -> list:
         """Returns the names of results tables to display in the view."""
         return self._check_data_exists(self.context.results_context.result_table_names)
@@ -102,12 +106,21 @@ class ModelFittingModel(BasicFittingModel):
                 x_values = self._convert_str_column_values_to_int(x_parameter_name, self.fitting_context.x_parameters)
                 y_values = self._convert_str_column_values_to_int(y_parameter_name, self.fitting_context.y_parameters)
                 y_errors = self.fitting_context.y_parameter_errors[y_parameter_name]
-                output_name = x_parameter_name + "_" + y_parameter_name
 
-                CreateWorkspace(DataX=x_values, DataY=y_values, DataE=y_errors, OutputWorkspace=output_name)
+                output_name = self.parameter_combination_workspace_name(x_parameter_name, y_parameter_name)
+                if not self._parameter_combination_workspace_exists(output_name, x_values, y_values, y_errors):
+                    CreateWorkspace(DataX=x_values, DataY=y_values, DataE=y_errors, OutputWorkspace=output_name)
 
                 workspace_names.append(output_name)
         return workspace_names
+
+    @staticmethod
+    def _parameter_combination_workspace_exists(workspace_name: str, x_values: list, y_values: list, y_errors: list) -> bool:
+        """Returns true if a parameter combination workspace exists and contains the same data."""
+        if check_if_workspace_exist(workspace_name):
+            workspace = retrieve_ws(workspace_name)
+            return workspace.dataX(0) == x_values and workspace.dataY(0) == y_values and workspace.dataE(0) == y_errors
+        return False
 
     @staticmethod
     def _convert_str_column_values_to_int(parameter_name: str, parameter_values: list) -> list:
