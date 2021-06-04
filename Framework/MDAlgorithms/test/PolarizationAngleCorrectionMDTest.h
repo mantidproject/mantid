@@ -14,6 +14,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
+#include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -87,7 +88,8 @@ public:
     // Verify
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputname));
 
-    bool equals = compareMDEvents(outputname, mGoldCorrectedQLabWSName);
+    bool compare_events(false);
+    bool equals = compareMDEvents(outputname, mGoldCorrectedQLabWSName, compare_events);
     TS_ASSERT(equals);
 
     // Clean up
@@ -116,7 +118,7 @@ public:
     // Verify
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputname));
 
-    bool equals = compareMDEvents(outputname, mGoldCorrectedQSampleWSName);
+    bool equals = compareMDEvents(outputname, mGoldCorrectedQSampleWSName, false);
     TS_ASSERT(equals);
 
     // Clean up
@@ -124,20 +126,21 @@ public:
   }
 
   /**
-   * @brief Test applying detailed balance to 2 merged runs
+   * @brief Test applying detailed balance to 2 merged runs in Q_sample
    */
-  void Future_test_merged_runs() {
+  void test_merged_runs() {
     auto mergedmd = Mantid::API::AnalysisDataService::Instance().retrieve(mQSampleMergedWorkspaceName);
     TS_ASSERT(mergedmd);
 
     // specify the output
-    std::string outputname("PolarizationAngleMergedQ3Test");
+    std::string outputname("PolarizationAngleMergedQSampleTest");
 
     PolarizationAngleCorrectionMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     alg.setPropertyValue("InputWorkspace", mQSampleMergedWorkspaceName);
-    alg.setProperty("Temperature", "SampleTemp");
+    alg.setProperty("PolarizationAngle", -10.);
+    alg.setProperty("Precision", 0.2);
     alg.setProperty("OutputWorkspace", outputname);
     alg.execute();
     TS_ASSERT(alg.isExecuted());
@@ -145,7 +148,7 @@ public:
     // Verify
     TS_ASSERT(AnalysisDataService::Instance().doesExist(outputname));
 
-    bool equals = compareMDEvents(outputname, mGoldCorrectedQSampleMergedWSName);
+    bool equals = compareMDEvents(outputname, mGoldCorrectedQSampleMergedWSName, false);
     TS_ASSERT(equals);
 
     // clean up
@@ -193,7 +196,7 @@ public:
      */
     // Define workspace names
     std::string event_ws_0("PolarizationAngleRawEvent0");
-    std::string event_ws_1("PolarizationAngleRawEvent0");
+    std::string event_ws_1("PolarizationAngleRawEvent1");
 
     mQSampleWorkspaceName = "PolarizationAngleInputQSampleMDEvent";
     mQLabWorkspaceName = "PolarizationAngleInputQLabMDEvent";
@@ -209,50 +212,10 @@ public:
     std::string axis00("0,0,1,0,1");
     generateTestSet(event_ws_0, mQSampleWorkspaceName, mQLabWorkspaceName, mQ1DWorkspaceName, axis00);
 
-    //    // Prepare (first) sample workspace
-    //    createSampleWorkspace(mEventWSName);
-    //    // add sample log Ei
-    //    addSampleLog(mEventWSName, "Ei", "20.", "Number");
-    //    // move bank 1
-    //    moveBank(mEventWSName, "bank1", 3, 3);
-    //    // move bank 2
-    //    moveBank(mEventWSName, "bank2", -3, -3);
-    //    // set geoniometer
-    //    setGoniometer(mEventWSName, "Axis0", "0,0,1,0,1");
-    //    // convert to MD
-    //    convertToMD(mEventWSName, mMDWorkspace1Name, "Q3D");
-
     // Prepare the 2nd MDEventWorkspace
     const std::string md_ws_name2("PolarizationAngle2MD");
     const std::string axis01("30,0,1,0,1");
     generateTestSet(event_ws_1, md_ws_name2, "", "", axis01);
-
-    //    const std::string event_ws_name2("PolarizationAngle2WS");
-    //    createSampleWorkspace(event_ws_name2);
-    //    // add sample log Ei
-    //    addSampleLog(event_ws_name2, "Ei", "20.", "Number");
-    //    // move bank 1
-    //    moveBank(event_ws_name2, "bank1", 3, 3);
-    //    // move bank 2
-    //    moveBank(event_ws_name2, "bank2", -3, -3);
-    //    // set geoniometer
-    //    setGoniometer(event_ws_name2, "Axis0", "30,0,1,0,1");
-    //    // convert to MD
-    //    convertToMD(event_ws_name2, md_ws_name2, "Q3D");
-
-    //    // Prepare the 3rd MDEventWorkspace for |Q| and without sample temperature
-    //    const std::string event_ws_name3("PolarizationAngle3WS");
-    //    createSampleWorkspace(event_ws_name3);
-    //    // add sample log Ei
-    //    addSampleLog(event_ws_name3, "Ei", "20.", "Number");
-    //    // move bank 1
-    //    moveBank(event_ws_name3, "bank1", 3, 3);
-    //    // move bank 2
-    //    moveBank(event_ws_name3, "bank2", -3, -3);
-    //    // set geoniometer
-    //    setGoniometer(event_ws_name3, "Axis0", "30,0,1,0,1");
-    //    // convert to MD
-    //    convertToMD(event_ws_name3, mMDWorkspaceQ1Dname, "|Q|");
 
     // Merge 2 workspace
     std::string workspaces(mQSampleWorkspaceName + ", " + md_ws_name2);
@@ -418,20 +381,27 @@ private:
    * @brief Calculate detailed balance, convert to MD and merge as the old way
    *
    */
-  void calculate_polarization_angle_correction(const std::string &event_ws_1, const std::string &event_ws_2,
+  void calculate_polarization_angle_correction(const std::string &event_ws_0, const std::string &event_ws_2,
                                                const std::string &corrected_qsample_name,
                                                const std::string &corrected_qlab_name,
                                                const std::string &corrected_qsample_merged_name) {
-    const std::string temp_event_ws1("PolarizationAngleTempEvent1");
-    const std::string temp_event_ws2("PolarizationAngleTempEvent2");
-    const std::string temp_md2("PolarizationAngleMD2GoldTemp");
+    const std::string temp_event_ws0("PolarizationAngleTempEvent0");
 
     // apply detailed balance and convert to MD for event workspace 1
-    applyPolarizationAngleCorrection(event_ws_1, temp_event_ws1);
-    convertToMD(temp_event_ws1, corrected_qsample_name, "Q3D", "Q_sample");
-    convertToMD(temp_event_ws1, corrected_qlab_name, "Q3D", "Q_lab");
+    applyPolarizationAngleCorrection(event_ws_0, temp_event_ws0);
+
+    Mantid::DataHandling::SaveNexusProcessed save;
+    save.initialize();
+    save.setPropertyValue("InputWorkspace", temp_event_ws0);
+    save.setPropertyValue("Filename", "/tmp/gold0.nxs");
+    save.execute();
+
+    convertToMD(temp_event_ws0, corrected_qsample_name, "Q3D", "Q_sample");
+    convertToMD(temp_event_ws0, corrected_qlab_name, "Q3D", "Q_lab");
 
     // apply detailed balance and convert to MD for event workspace 2
+    const std::string temp_event_ws2("PolarizationAngleTempEvent2");
+    const std::string temp_md2("PolarizationAngleMD2GoldTemp");
     applyPolarizationAngleCorrection(event_ws_2, temp_event_ws2);
     convertToMD(temp_event_ws2, temp_md2, "Q3D", "Q_sample");
 
@@ -460,7 +430,7 @@ private:
   /**
    * @brief compare MD events
    */
-  bool compareMDEvents(const std::string &ws1, const std::string &ws2) {
+  bool compareMDEvents(const std::string &ws1, const std::string &ws2, const bool &compare_events = true) {
     // Compare number of MDEvents
     API::IMDEventWorkspace_sptr md1 =
         std::dynamic_pointer_cast<IMDEventWorkspace>(API::AnalysisDataService::Instance().retrieve(ws1));
@@ -478,7 +448,7 @@ private:
     compare_alg.setPropertyValue("Workspace1", ws1);
     compare_alg.setPropertyValue("Workspace2", ws2);
     compare_alg.setProperty("Tolerance", 0.001);
-    compare_alg.setProperty("CheckEvents", false);
+    compare_alg.setProperty("CheckEvents", compare_events);
     compare_alg.execute();
     TS_ASSERT(compare_alg.isExecuted());
 
