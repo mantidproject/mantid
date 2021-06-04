@@ -19,6 +19,8 @@ from Muon.GUI.Common.utilities.workspace_data_utils import (check_exclude_start_
 
 from PyQt5.QtCore import Qt
 
+from PyQt5.QtCore import Qt
+
 
 class BasicFittingPresenter:
     """
