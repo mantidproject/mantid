@@ -19,7 +19,7 @@ ScriptRepoException::ScriptRepoException(const std::string &info, const std::str
   } else {
     _file_path = file;
     if (line > 0) {
-      _file_path.append(std::to_string(line));
+      _file_path.append(": ").append(std::to_string(line));
     }
   }
 }
