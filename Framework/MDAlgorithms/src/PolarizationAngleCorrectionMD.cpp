@@ -161,9 +161,6 @@ void PolarizationAngleCorrectionMD::applyPolarizationAngleCorrection(
       // get the MEEvents from box
       std::vector<MDE> &events = box->getEvents();
       // Add events, with bounds checking
-
-      size_t counts(0);
-
       for (auto it = events.begin(); it != events.end(); ++it) {
         // Modify the event
 
@@ -192,9 +189,6 @@ void PolarizationAngleCorrectionMD::applyPolarizationAngleCorrection(
         if (fabs(cosine2alpha) > mPrecision) {
           factor = static_cast<float>(1. / cosine2alpha);
         }
-
-        g_log.notice() << "[DEV] Box " << i << " Index " << counts << " Gamma = " << gamma << " F = " << factor << "\n";
-        counts++;
 
         // calcalate and set intesity: I *= F
         auto intensity = it->getSignal() * factor;
@@ -250,7 +244,6 @@ std::string PolarizationAngleCorrectionMD::checkInputMDDimension() {
 
     // determine Qx and Qz index
     for (size_t i = 0; i < numdims; ++i) {
-      g_log.information() << i << "-th dim: " << inputws->getDimension(i)->getName() << "\n";
       if (inputws->getDimension(i)->getName() == qxname)
         mQxIndex = i;
       else if (inputws->getDimension(i)->getName() == qzname)
@@ -274,7 +267,6 @@ std::string PolarizationAngleCorrectionMD::checkInputMDDimension() {
   for (uint16_t i = 0; i < numexpinfo; ++i) {
     const Kernel::Matrix<double> &rotmatrix = inputws->getExperimentInfo(i)->run().getGoniometerMatrix();
     mRotationMatrixMap[i] = rotmatrix;
-    g_log.information() << "ExperimentInfo " << i << ": Rotation matrix: " << rotmatrix.str() << "\n";
   }
 
   return errormsg;

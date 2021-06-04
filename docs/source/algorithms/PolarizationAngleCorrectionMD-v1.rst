@@ -9,32 +9,30 @@
 Description
 -----------
 
-The fluctuation dissipation theorem [1,2] relates the dynamic
-susceptibility to the scattering function
+User inputs an in-plane polarization pa angle between -180 and 180 degrees,
+and a precision (between 0 and 1).
+Then for every MD event, a polarization angle correction is applied as below.
 
-:math:`\left(1-e^{-\frac{E}{k_B T}}\right) S(\mathbf{q}, E) = \frac{1}{\pi} \chi'' (\mathbf{q}, E)`
+1. If the MDEvent is in Q-sample frame, convert it to Q-lab by
+   :math:`Q_{lab} = R \times Q_{sample}`
+   where R is goniometer rotation matrix.
 
-For the MD events, the detailed balance is calculated and applied as below.
+1. Calculate the horizontal plane angle between momentum transfer and direct beam
+   :math:`\gamma = tan^{-1}(Q_{lab}_x, Q_{lab}_z)`
 
-:math:`F = \pi(1-e^{-\frac{\Delta E}{k_B T(i)}})`
+1. Calculate the Scharpf angle as
+   :math:`\alpha = \gamma - pa`
 
-:math:`I *= F`
+1. Correction factor :math:`F` is equal to :math:`1 / cos(2\alpha)` if :math:`abs(cos(2\alpha))` is greater than precision
 
-:math:`Err^2 *= F^2`
+1. Apply correction to each MDEvent as
+::math:`I = I \times F`
+::math:`Err^2 = Err^2 \times F^2`
 
+Inputs
+======
 
-where :math:`E` is the energy transfer to the system. The algorithm
-assumes that the signal of the input workspace contains the scattering
-function :math:`S`. The signal of the output workspace will contain the
-dynamic susceptibility. The temperature is either extracted as the average of the
-values stored in the appropriate entry of the log attached to the workspace
-(user supplies the name of the entry) or user can pass a number for the temperature.
-
-[1] S. W. Lovesey - Theory of Neutron Scattering from Condensed Matter,
-vol 1
-
-[2] I. A. Zaliznyak and S. H. Lee - Magnetic Neutron Scattering in
-"Modern techniques for characterizing magnetic materials"
+Input MDEventWorkspace must be in Q-lab or Q-sample. :math:`|Q|` is not allowed.
 
 Usage
 -----
@@ -50,31 +48,30 @@ Usage
                               XMin=-10,
                               XMax=19,
                               BinWidth=0.5)
-
    AddSampleLog(Workspace=we1,LogName='Ei', LogText='20.', LogType='Number')
    MoveInstrumentComponent(Workspace=we1, ComponentName='bank1', X=3, Z=3, RelativePosition=False)
    MoveInstrumentComponent(Workspace=we1, ComponentName='bank2', X=-3, Z=-3, RelativePosition=False)
-   AddSampleLog(Workspace=we1,LogName='SampleTemp', LogText='25.0', LogType='Number Series')
-   SetGoniometer(Workspace=we1, Axis0='0,0,1,0,1')
+   SetGoniometer(Workspace=we1, Axis0='30,0,1,0,1')
 
-   # old way
-   weadb1 = PolarizationAngleCorrection(InputWorkspace=we1, Temperature='SampleTemp')
-   mdabd1 = ConvertToMD(InputWorkspace=weadb1, QDimensions='Q3D')
+   # Old way
+   we1c = HyspecScharpfCorrection(InputWorkspace=we1,
+                                  PolarizationAngle=-10,
+                                  Precision=0.2)
+   md1c_sample = ConvertToMD(InputWorkspace=we1c, QDimensions='Q3D', Q3DFrames='Q_sample')
 
-   # use algorithm PolarizationAngleCorrectionMD
-   md1 = ConvertToMD(InputWorkspace=we1, QDimensions='Q3D')
-   test_db_md = PolarizationAngleCorrectionMD(md1, 'SampleTemp')
-
-   r = CompareMDWorkspaces(test_db_md, mdabd1, CheckEvents=True, Tolerance=0.00001)
-   print('Number of MDEvents: {} == {}'.format(test_db_md.getNEvents(), mdabd1.getNEvents()))
-   print('Workspaces are {} equal'.format(r.Equals))
+   # new way
+   md1sample = ConvertToMD(InputWorkspace=we1, QDimensions='Q3D')
+   mdpacMDsample = PolarizationAngleCorrectionMD(InputWorkspace=md1sample, PolarizationAngle=-10, Precision=0.2)
+   r = CompareMDWorkspaces(Workspace1=md1c_sample, Workspace2=mdpacMDsample, Tolerance=0.001, CheckEvents=True)
+   print('Number of MDEvents: {} == {}'.format(md1c_sample.getNEvents(), mdpacMDsample.getNEvents()))
+   print('MDEventWorkspaces are equal = {}.  Results: {}'.format(r.Equals, r.Result))
 
 Output:
 
 .. testoutput:: ExPolarizationAngleCorrectionMDSimple
 
    Number of MDEvents: 1972 == 1972
-   Workspaces are True equal
+   MDEventWorkspaces are equal = True.  Results: Success!
 
 .. categories::
 
