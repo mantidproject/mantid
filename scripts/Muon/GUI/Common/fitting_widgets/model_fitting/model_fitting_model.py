@@ -4,9 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantid.api import WorkspaceGroup
 from mantid.simpleapi import CreateWorkspace
 
-from Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws
+from Muon.GUI.Common.ADSHandler.ADS_calls import add_ws_to_ads, check_if_workspace_exist, retrieve_ws
 from Muon.GUI.Common.contexts.fitting_contexts.model_fitting_context import ModelFittingContext
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
@@ -59,6 +60,10 @@ class ModelFittingModel(BasicFittingModel):
         """Returns the workspace name being used for a particular parameter combination."""
         return self.current_result_table_name + "_" + x_parameter + "_" + y_parameter
 
+    def parameter_combination_group_name(self):
+        """Returns the workspace group name being used to store the current parameter combinations."""
+        return self.current_result_table_name + "_Parameter_Combinations"
+
     def get_workspace_names_to_display_from_context(self) -> list:
         """Returns the names of results tables to display in the view."""
         return self._check_data_exists(self.context.results_context.result_table_names)
@@ -70,7 +75,8 @@ class ModelFittingModel(BasicFittingModel):
         self.fitting_context.y_parameter_errors = {}
 
         self._extract_x_and_y_from_current_result_table()
-        self.dataset_names = self._create_matrix_workspaces_for_parameter_combinations()
+        workspace_group = self._create_workspace_group_to_store_combination_workspaces()
+        self.dataset_names = self._create_matrix_workspaces_for_parameter_combinations(workspace_group)
 
         return self.fitting_context.x_parameters.keys(), self.fitting_context.y_parameters.keys()
 
@@ -98,7 +104,17 @@ class ModelFittingModel(BasicFittingModel):
             if parameter_name not in y_parameter_error_names:
                 self.fitting_context.y_parameter_errors[parameter_name] = [0.0] * number_of_data_points
 
-    def _create_matrix_workspaces_for_parameter_combinations(self) -> list:
+    def _create_workspace_group_to_store_combination_workspaces(self) -> WorkspaceGroup:
+        """Return the Workspace Group used to store the different parameter combination matrix workspaces."""
+        group_name = self.parameter_combination_group_name()
+        if check_if_workspace_exist(group_name):
+            workspace_group = retrieve_ws(group_name)
+        else:
+            workspace_group = WorkspaceGroup()
+            add_ws_to_ads(group_name, workspace_group)
+        return workspace_group
+
+    def _create_matrix_workspaces_for_parameter_combinations(self, workspace_group: WorkspaceGroup) -> list:
         """Creates a MatrixWorkspace for each parameter combination. These are the workspaces that will be fitted."""
         workspace_names = []
         for x_parameter_name in self.fitting_context.x_parameters.keys():
@@ -107,20 +123,31 @@ class ModelFittingModel(BasicFittingModel):
                 y_values = self._convert_str_column_values_to_int(y_parameter_name, self.fitting_context.y_parameters)
                 y_errors = self.fitting_context.y_parameter_errors[y_parameter_name]
 
+                # Sort the data based on the x_values being in ascending order
+                x_values, y_values, y_errors = zip(*sorted(zip(x_values, y_values, y_errors)))
+
                 output_name = self.parameter_combination_workspace_name(x_parameter_name, y_parameter_name)
                 if not self._parameter_combination_workspace_exists(output_name, x_values, y_values, y_errors):
                     CreateWorkspace(DataX=x_values, DataY=y_values, DataE=y_errors, OutputWorkspace=output_name)
+                    workspace_group.add(output_name)
 
                 workspace_names.append(output_name)
+
         return workspace_names
 
-    @staticmethod
-    def _parameter_combination_workspace_exists(workspace_name: str, x_values: list, y_values: list, y_errors: list) -> bool:
+    def _parameter_combination_workspace_exists(self, workspace_name: str, x_values: list, y_values: list, y_errors: list) -> bool:
         """Returns true if a parameter combination workspace exists and contains the same data."""
         if check_if_workspace_exist(workspace_name):
             workspace = retrieve_ws(workspace_name)
-            return workspace.dataX(0) == x_values and workspace.dataY(0) == y_values and workspace.dataE(0) == y_errors
+            return self._data_is_equal(workspace.dataX(0), x_values) \
+                   and self._data_is_equal(workspace.dataY(0), y_values) \
+                   and self._data_is_equal(workspace.dataE(0), y_errors)
         return False
+
+    @staticmethod
+    def _data_is_equal(list1: list, list2: list) -> bool:
+        """Returns true if the two lists containing x, y or error data are equal to five decimal places."""
+        return all([f"{i:.5f}" == f"{j:.5f}" for i, j in zip(list1, list2)])
 
     @staticmethod
     def _convert_str_column_values_to_int(parameter_name: str, parameter_values: list) -> list:

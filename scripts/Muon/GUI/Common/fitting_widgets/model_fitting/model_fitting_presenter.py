@@ -48,15 +48,15 @@ class ModelFittingPresenter(BasicFittingPresenter):
 
     def handle_parameter_combinations_finished(self) -> None:
         """Handle when the creation of matrix workspaces finishes for all the different parameter combinations."""
+        self.enable_editing_notifier.notify_subscribers()
         if not self.parameter_combination_thread_success:
             return
 
         x_parameters, y_parameters = self.parameter_combinations_creator.result
-        if any([not x_parameters, not y_parameters]):
+        if len(x_parameters) == 0 or len(y_parameters) == 0:
             return
 
         self.handle_parameter_combinations_created_successfully(x_parameters, y_parameters)
-        self.enable_editing_notifier.notify_subscribers()
 
     def handle_parameter_combinations_created_successfully(self, x_parameters: list, y_parameters: list) -> None:
         """Handles when the parameter combination workspaces have been created successfully."""
