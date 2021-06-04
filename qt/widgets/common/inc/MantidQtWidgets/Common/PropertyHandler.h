@@ -205,6 +205,7 @@ public:
   QString updateStructureTooltip();
 
   QMap<QString, QtProperty *> getTies() { return m_ties; };
+  bool hasTies() { return !m_ties.isEmpty(); }; // added for testing purposes
 
 protected slots:
 

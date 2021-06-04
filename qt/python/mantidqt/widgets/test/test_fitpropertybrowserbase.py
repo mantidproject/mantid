@@ -80,6 +80,27 @@ class TestFitPropertyBrowser(unittest.TestCase):
         self.assertEqual(a, 'name=LinearBackground,A0=0,A1=0')
         self.assertEqual(self.widget.sizeOfFunctionsGroup(), 3)
 
+    def test_function_string_loaded_correctly(self):
+        property_browser = self.create_widget()
+        func = "name=Gaussian,Height=100,PeakCentre=1.45,Sigma=0.2,ties=(PeakCentre=1.45);name=Gaussian,Height=100," \
+               "PeakCentre=7.5,Sigma=0.2,constraints=(0.18<Sigma<0.22),ties=(PeakCentre=7.5);" \
+               "ties=(f0.Sigma=f1.Sigma,f1.Height=f0.Height)"
+
+        property_browser.loadFunction(func)
+
+        # tests composite func set correctly in browser (string incl. ties and constraints)
+        self.assertEqual(func, property_browser.getFunctionString())
+        for prefix in property_browser.getPeakPrefixes():
+            h = property_browser.getPeakHandler(prefix)
+            # check that the ties (as opposed to fixes) have been set on the child function property handlers
+            # note that the non-fix tie string lives on the composite function but the properties whereas
+            # the tie properties (m_ties in the C++ class) are on the child's handler
+            self.assertTrue(h.hasTies())
+            # check the peak centre is fixed
+            self.assertTrue(h.ifun().isFixed(1))
+        # check constraints on last function aren't empty
+        self.assertTrue(bool(h.ifun().getConstraints()))
+
     def test_copy_to_clipboard(self):
         self.widget.loadFunction('name=LinearBackground,A0=0,A1=0')
         yield self.start_setup_menu()
