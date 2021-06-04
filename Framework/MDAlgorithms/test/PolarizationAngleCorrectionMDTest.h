@@ -416,6 +416,10 @@ private:
 
     // retrieve result
     bool equals = compare_alg.getProperty("Equals");
+    if (!equals) {
+      std::string result = compare_alg.getProperty("Result");
+      std::cout << "Error reason: " << result << "\n";
+    }
 
     return equals;
   }
