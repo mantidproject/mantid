@@ -326,39 +326,6 @@ class DrillTableWidget(QTableWidget):
         cell.setText(contents)
         self.setItem(row, column, cell)
 
-    def getRowContents(self, row):
-        """
-        Get the contents of a whole row.
-
-        Args:
-            row (int): row index
-
-        Returns:
-            list(str): the row contents
-        """
-        contents = list()
-        for column in range(self.columnCount()):
-            contents.append(self.getCellContents(row, column))
-        return contents
-
-    def setRowContents(self, row, contents):
-        """
-        Set the content of an existing row.
-
-        Args:
-            row (int): row index
-            contents (list(str)): contents
-        """
-        if self._disabled:
-            return
-        n_rows = self.rowCount()
-        if ((row < 0) or (row >= n_rows)):
-            return
-        column = 0
-        for txt in contents:
-            self.setCellContents(row, column, txt)
-            column += 1
-
     def setRowBackground(self, row, color):
         """
         Set the background color of an existing row. If the row cells do not
