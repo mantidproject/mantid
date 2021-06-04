@@ -427,22 +427,6 @@ class DrillTableWidget(QTableWidget):
         if tooltip:
             self.verticalHeaderItem(row).setToolTip(tooltip)
 
-    def getRowLabel(self, row):
-        """
-        Get the label of a specific row.
-
-        Args:
-            row (int): row index
-
-        Returns:
-            str: row label
-        """
-        item = self.verticalHeaderItem(row)
-        if item:
-            return item.text()
-        else:
-            return str(row + 1)
-
     def delRowLabel(self, row):
         """
         Delete the row label.
