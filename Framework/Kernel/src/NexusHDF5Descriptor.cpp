@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidKernel/NexusHDF5Descriptor.h"
-#include "MantidKernel/WarningSuppressions.h"
 
 #include <boost/multi_index/detail/index_matcher.hpp>
 
