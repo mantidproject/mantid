@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidJson/Json.h"
-#include <boost/algorithm/string/erase.hpp>
 #include <sstream>
 
 namespace Mantid {
