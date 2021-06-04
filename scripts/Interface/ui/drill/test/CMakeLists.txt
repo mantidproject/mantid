@@ -11,6 +11,7 @@ set(TEST_PY_FILES
   DrillSettingsDialogTest.py
   DrillSampleTest.py
   DrillExportModelTest.py
+  DrillParameterTest.py
   )
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
