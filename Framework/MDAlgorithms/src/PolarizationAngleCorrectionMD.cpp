@@ -153,14 +153,17 @@ void PolarizationAngleCorrectionMD::applyPolarizationAngleCorrection(
   // Add the boxes in parallel. They should be spread out enough on each
   // core to avoid stepping on each other.
   // cppcheck-suppress syntaxError
-  PRAGMA_OMP( parallel for if (!ws->isFileBacked()))
+  // FIXME PRAGMA_OMP( parallel for if (!ws->isFileBacked()))
   for (int i = 0; i < numBoxes; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    // FIXME PARALLEL_START_INTERUPT_REGION
     auto *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
     if (box && !box->getIsMasked()) {
       // get the MEEvents from box
       std::vector<MDE> &events = box->getEvents();
       // Add events, with bounds checking
+
+      size_t counts(0);
+
       for (auto it = events.begin(); it != events.end(); ++it) {
         // Modify the event
 
@@ -190,6 +193,9 @@ void PolarizationAngleCorrectionMD::applyPolarizationAngleCorrection(
           factor = static_cast<float>(1. / cosine2alpha);
         }
 
+        g_log.notice() << "[DEV] Box " << i << " Index " << counts << " Gamma = " << gamma << " F = " << factor << "\n";
+        counts++;
+
         // calcalate and set intesity: I *= F
         auto intensity = it->getSignal() * factor;
         it->setSignal(intensity);
@@ -201,9 +207,9 @@ void PolarizationAngleCorrectionMD::applyPolarizationAngleCorrection(
       }
     }
     box->releaseEvents();
-    PARALLEL_END_INTERUPT_REGION
+    // FIXME PARALLEL_END_INTERUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  // FIXME  PARALLEL_CHECK_INTERUPT_REGION
 
   return;
 }

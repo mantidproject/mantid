@@ -65,20 +65,21 @@ public:
   /**
    * @brief Test apply detailed balance to 1 run
    */
-  void Future_test_1run_qlab() {
+  void test_1run_qlab() {
     // Check whether the MD to test does exist
     auto singlemd = Mantid::API::AnalysisDataService::Instance().retrieve(mQLabWorkspaceName);
     TS_ASSERT(singlemd);
 
     // specify the output
-    std::string outputname("PolarizationAngleSingleQ3Test");
+    std::string outputname("PolarizationAngleSingleQlabTest");
 
     // Calculate detailed balance for the single MDEventWorkspace
     PolarizationAngleCorrectionMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     alg.setPropertyValue("InputWorkspace", mQLabWorkspaceName);
-    alg.setProperty("Temperature", "SampleTemp");
+    alg.setProperty("PolarizationAngle", -10.);
+    alg.setProperty("Precision", 0.2);
     alg.setProperty("OutputWorkspace", outputname);
     alg.execute();
     TS_ASSERT(alg.isExecuted());
@@ -93,7 +94,34 @@ public:
     cleanWorkspace(outputname, false);
   }
 
-  void Future_test_1run_qsample() {}
+  void test_1run_qsample() {
+    // Check whether the MD to test does exist
+    auto singlemd = Mantid::API::AnalysisDataService::Instance().retrieve(mQLabWorkspaceName);
+    TS_ASSERT(singlemd);
+
+    // specify the output
+    std::string outputname("PolarizationAngleSingleQsampleTest");
+
+    // Calculate detailed balance for the single MDEventWorkspace
+    PolarizationAngleCorrectionMD alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    alg.setPropertyValue("InputWorkspace", mQSampleWorkspaceName);
+    alg.setProperty("PolarizationAngle", -10.);
+    alg.setProperty("Precision", 0.2);
+    alg.setProperty("OutputWorkspace", outputname);
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    // Verify
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(outputname));
+
+    bool equals = compareMDEvents(outputname, mGoldCorrectedQSampleWSName);
+    TS_ASSERT(equals);
+
+    // Clean up
+    cleanWorkspace(outputname, false);
+  }
 
   /**
    * @brief Test applying detailed balance to 2 merged runs
@@ -449,7 +477,7 @@ private:
     compare_alg.initialize();
     compare_alg.setPropertyValue("Workspace1", ws1);
     compare_alg.setPropertyValue("Workspace2", ws2);
-    compare_alg.setProperty("Tolerance", 0.0001);
+    compare_alg.setProperty("Tolerance", 0.001);
     compare_alg.setProperty("CheckEvents", false);
     compare_alg.execute();
     TS_ASSERT(compare_alg.isExecuted());
