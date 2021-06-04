@@ -146,9 +146,8 @@ class FitFunctionOptionsView(ui_form, base_widget):
     @start_x.setter
     def start_x(self, value: float) -> None:
         """Sets the selected start X."""
-        if value <= self.end_x:
-            self.start_x_validator.last_valid_value = f"{value:.3f}"
-            self.start_x_line_edit.setText(f"{value:.3f}")
+        self.start_x_validator.last_valid_value = f"{value:.3f}"
+        self.start_x_line_edit.setText(f"{value:.3f}")
 
     @property
     def end_x(self) -> float:
@@ -158,9 +157,8 @@ class FitFunctionOptionsView(ui_form, base_widget):
     @end_x.setter
     def end_x(self, value: float) -> None:
         """Sets the selected end X."""
-        if value >= self.start_x:
-            self.end_x_validator.last_valid_value = f"{value:.3f}"
-            self.end_x_line_edit.setText(f"{value:.3f}")
+        self.end_x_validator.last_valid_value = f"{value:.3f}"
+        self.end_x_line_edit.setText(f"{value:.3f}")
 
     @property
     def evaluation_type(self) -> str:

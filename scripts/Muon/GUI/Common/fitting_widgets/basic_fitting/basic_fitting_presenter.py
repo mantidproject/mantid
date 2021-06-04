@@ -254,31 +254,19 @@ class BasicFittingPresenter:
 
     def handle_start_x_updated(self) -> None:
         """Handle when the start X is changed."""
-        if self.view.start_x > self.view.end_x:
-            self.view.start_x, self.view.end_x = self.view.end_x, self.view.start_x
-            self.model.current_end_x = self.view.end_x
-        elif self.view.start_x == self.view.end_x:
-            self.view.start_x = self.model.current_start_x
+        self._check_start_x_is_valid()
 
         self.model.current_start_x = self.view.start_x
-
-        self._check_start_x_is_within_x_limits()
-        self._check_end_x_is_within_x_limits()
+        self.model.current_end_x = self.view.end_x
 
         self.update_plot_guess()
 
     def handle_end_x_updated(self) -> None:
         """Handle when the end X is changed."""
-        if self.view.end_x < self.view.start_x:
-            self.view.start_x, self.view.end_x = self.view.end_x, self.view.start_x
-            self.model.current_start_x = self.view.start_x
-        elif self.view.end_x == self.view.start_x:
-            self.view.end_x = self.model.current_end_x
+        self._check_end_x_is_valid()
 
+        self.model.current_start_x = self.view.start_x
         self.model.current_end_x = self.view.end_x
-
-        self._check_start_x_is_within_x_limits()
-        self._check_end_x_is_within_x_limits()
 
         self.update_plot_guess()
 
@@ -370,22 +358,6 @@ class BasicFittingPresenter:
         self.model.update_plot_guess()
         self.update_plot_guess_notifier.notify_subscribers()
 
-    def _check_start_x_is_within_x_limits(self) -> None:
-        """Checks the Start X is within the x limits of the current dataset. If not it is set to one of the limits."""
-        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
-        if self.view.start_x < x_lower:
-            self.view.start_x = x_lower
-        elif self.view.start_x > x_upper:
-            self.view.start_x = x_upper
-
-    def _check_end_x_is_within_x_limits(self) -> None:
-        """Checks the End X is within the x limits of the current dataset. If not it is set to one of the limits."""
-        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
-        if self.view.end_x < x_lower:
-            self.view.end_x = x_lower
-        elif self.view.end_x > x_upper:
-            self.view.end_x = x_upper
-
     def _get_single_fit_functions_from_view(self) -> list:
         """Returns the fit functions corresponding to each domain as a list."""
         if self.view.fit_object:
@@ -431,3 +403,38 @@ class BasicFittingPresenter:
             self.view.warning_popup("No rebin options specified.")
             return False
         return True
+
+    def _check_start_x_is_valid(self) -> None:
+        """Checks that the new start X is valid. If it isn't, the start and end X is adjusted."""
+        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
+        if self.view.start_x < x_lower:
+            self.view.start_x = x_lower
+        elif self.view.start_x > x_upper:
+            if not self._is_equal_to_three_decimals(self.view.end_x, x_upper):
+                self.view.start_x, self.view.end_x = self.view.end_x, x_upper
+            else:
+                self.view.start_x = self.model.current_start_x
+        elif self.view.start_x > self.view.end_x:
+            self.view.start_x, self.view.end_x = self.view.end_x, self.view.start_x
+        elif self.view.start_x == self.view.end_x:
+            self.view.start_x = self.model.current_start_x
+
+    def _check_end_x_is_valid(self) -> None:
+        """Checks that the new end X is valid. If it isn't, the start and end X is adjusted."""
+        x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
+        if self.view.end_x < x_lower:
+            if not self._is_equal_to_three_decimals(self.view.start_x, x_lower):
+                self.view.start_x, self.view.end_x = x_lower, self.view.start_x
+            else:
+                self.view.end_x = self.model.current_end_x
+        elif self.view.end_x > x_upper:
+            self.view.end_x = x_upper
+        elif self.view.end_x < self.view.start_x:
+            self.view.start_x, self.view.end_x = self.view.end_x, self.view.start_x
+        elif self.view.end_x == self.view.start_x:
+            self.view.end_x = self.model.current_end_x
+
+    @staticmethod
+    def _is_equal_to_three_decimals(value1: float, value2: float) -> bool:
+        """Checks that two floats are equal up to three decimal places."""
+        return f"{value1:.3f}" == f"{value2:.3f}"

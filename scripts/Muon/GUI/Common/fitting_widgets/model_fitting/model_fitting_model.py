@@ -116,3 +116,8 @@ class ModelFittingModel(BasicFittingModel):
             return range(len(parameter_values[parameter_name]))
         else:
             return parameter_values[parameter_name]
+
+    def retrieve_first_good_data_from(self, workspace_name: str) -> float:
+        """Returns the first good data value from a workspace."""
+        x_lower, _ = self.x_limits_of_workspace(workspace_name)
+        return x_lower

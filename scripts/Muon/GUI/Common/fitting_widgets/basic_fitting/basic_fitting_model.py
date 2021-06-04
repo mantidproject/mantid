@@ -374,7 +374,11 @@ class BasicFittingModel:
         if workspace_name is not None and check_if_workspace_exist(workspace_name):
             x_data = retrieve_ws(workspace_name).dataX(0)
             if len(x_data) > 0:
-                return x_data[0], x_data[-1]
+                x_data.sort()
+                x_lower, x_higher = x_data[0], x_data[-1]
+                if x_lower == x_higher:
+                    return x_lower - 0.001, x_higher + 0.001
+                return x_lower, x_higher
         return self.current_start_x, self.current_end_x
 
     def use_cached_function(self) -> None:
@@ -444,7 +448,8 @@ class BasicFittingModel:
         if new_dataset_name in dataset_names:
             return self.fitting_context.start_xs[dataset_names.index(new_dataset_name)]
         else:
-            return self.current_start_x if self.fitting_context.current_dataset_index is not None \
+            x_lower, x_upper = self.x_limits_of_workspace(new_dataset_name)
+            return self.current_start_x if x_lower < self.current_start_x < x_upper \
                 else self.retrieve_first_good_data_from(new_dataset_name)
 
     def _get_new_end_x_for(self, new_dataset_name: str) -> float:
@@ -477,7 +482,8 @@ class BasicFittingModel:
         try:
             return self.context.first_good_data([float(re.search("[0-9]+", workspace_name).group())])
         except AttributeError:
-            return DEFAULT_START_X
+            x_lower, _ = self.x_limits_of_workspace(workspace_name)
+            return x_lower
 
     def get_fit_function_parameters(self) -> list:
         """Returns the names of the fit parameters in the fit functions."""
