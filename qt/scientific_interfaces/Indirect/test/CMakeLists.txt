@@ -9,7 +9,7 @@ set(
   FqFitModelTest.h
   IDAFunctionParameterEstimationTest.h
   IndirectDataValidationHelperTest.h
-  IndirectDataTablePresenterTest.h
+  IndirectFitDataTablePresenterTest.h
   IndirectFitAnalysisTabTest.h
   IndirectFitDataPresenterTest.h
   IndirectFitDataTest.h

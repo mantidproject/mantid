@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectDataTablePresenter.h"
+#include "IndirectFitDataTablePresenter.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
@@ -81,11 +81,11 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IndirectDataTablePresenter::IndirectDataTablePresenter(IIndirectFitDataTableModel *model, QTableWidget *dataTable)
-    : IndirectDataTablePresenter(model, dataTable, defaultHeaders()) {}
+IndirectFitDataTablePresenter::IndirectFitDataTablePresenter(IIndirectFitDataTableModel *model, QTableWidget *dataTable)
+    : IndirectFitDataTablePresenter(model, dataTable, defaultHeaders()) {}
 
-IndirectDataTablePresenter::IndirectDataTablePresenter(IIndirectFitDataTableModel *model, QTableWidget *dataTable,
-                                                       const QStringList &headers)
+IndirectFitDataTablePresenter::IndirectFitDataTablePresenter(IIndirectFitDataTableModel *model, QTableWidget *dataTable,
+                                                             const QStringList &headers)
     : m_model(model), m_dataTable(dataTable) {
 
   setHorizontalHeaders(headers);
@@ -95,29 +95,29 @@ IndirectDataTablePresenter::IndirectDataTablePresenter(IIndirectFitDataTableMode
   connect(m_dataTable, SIGNAL(cellChanged(int, int)), this, SLOT(handleCellChanged(int, int)));
 }
 
-bool IndirectDataTablePresenter::isTableEmpty() const { return m_dataTable->rowCount() == 0; }
+bool IndirectFitDataTablePresenter::isTableEmpty() const { return m_dataTable->rowCount() == 0; }
 
-int IndirectDataTablePresenter::workspaceIndexColumn() const { return 1; }
+int IndirectFitDataTablePresenter::workspaceIndexColumn() const { return 1; }
 
-int IndirectDataTablePresenter::startXColumn() const { return 2; }
+int IndirectFitDataTablePresenter::startXColumn() const { return 2; }
 
-int IndirectDataTablePresenter::endXColumn() const { return 3; }
+int IndirectFitDataTablePresenter::endXColumn() const { return 3; }
 
-int IndirectDataTablePresenter::excludeColumn() const { return 4; }
+int IndirectFitDataTablePresenter::excludeColumn() const { return 4; }
 
-double IndirectDataTablePresenter::getDouble(FitDomainIndex row, int column) const {
+double IndirectFitDataTablePresenter::getDouble(FitDomainIndex row, int column) const {
   return getText(row, column).toDouble();
 }
 
-std::string IndirectDataTablePresenter::getString(FitDomainIndex row, int column) const {
+std::string IndirectFitDataTablePresenter::getString(FitDomainIndex row, int column) const {
   return getText(row, column).toStdString();
 }
 
-QString IndirectDataTablePresenter::getText(FitDomainIndex row, int column) const {
+QString IndirectFitDataTablePresenter::getText(FitDomainIndex row, int column) const {
   return m_dataTable->item(static_cast<int>(row.value), column)->text();
 }
 
-void IndirectDataTablePresenter::removeSelectedData() {
+void IndirectFitDataTablePresenter::removeSelectedData() {
   auto selectedIndices = m_dataTable->selectionModel()->selectedIndexes();
   std::sort(selectedIndices.begin(), selectedIndices.end());
   for (auto item = selectedIndices.end(); item != selectedIndices.begin();) {
@@ -127,7 +127,7 @@ void IndirectDataTablePresenter::removeSelectedData() {
   updateTableFromModel();
 }
 
-void IndirectDataTablePresenter::updateTableFromModel() {
+void IndirectFitDataTablePresenter::updateTableFromModel() {
   ScopedFalse _signalBlock(m_emitCellChanged);
   m_dataTable->setRowCount(0);
   for (auto domainIndex = FitDomainIndex{0}; domainIndex < m_model->getNumberOfDomains(); domainIndex++) {
@@ -135,7 +135,7 @@ void IndirectDataTablePresenter::updateTableFromModel() {
   }
 }
 
-void IndirectDataTablePresenter::handleCellChanged(int irow, int column) {
+void IndirectFitDataTablePresenter::handleCellChanged(int irow, int column) {
   if (!m_emitCellChanged) {
     return;
   }
@@ -150,33 +150,33 @@ void IndirectDataTablePresenter::handleCellChanged(int irow, int column) {
   }
 }
 
-void IndirectDataTablePresenter::setModelStartXAndEmit(double startX, FitDomainIndex row) {
+void IndirectFitDataTablePresenter::setModelStartXAndEmit(double startX, FitDomainIndex row) {
   auto subIndices = m_model->getSubIndices(row);
   m_model->setStartX(startX, subIndices.first, subIndices.second);
   emit startXChanged(startX, subIndices.first, subIndices.second);
 }
 
-void IndirectDataTablePresenter::setModelEndXAndEmit(double endX, FitDomainIndex row) {
+void IndirectFitDataTablePresenter::setModelEndXAndEmit(double endX, FitDomainIndex row) {
   auto subIndices = m_model->getSubIndices(row);
   m_model->setEndX(endX, subIndices.first, subIndices.second);
   emit endXChanged(endX, subIndices.first, subIndices.second);
 }
 
-void IndirectDataTablePresenter::setModelExcludeAndEmit(const std::string &exclude, FitDomainIndex row) {
+void IndirectFitDataTablePresenter::setModelExcludeAndEmit(const std::string &exclude, FitDomainIndex row) {
   auto subIndices = m_model->getSubIndices(row);
   m_model->setExcludeRegion(exclude, subIndices.first, subIndices.second);
   emit excludeRegionChanged(exclude, subIndices.first, subIndices.second);
 }
 
-void IndirectDataTablePresenter::clearTable() { m_dataTable->setRowCount(0); }
+void IndirectFitDataTablePresenter::clearTable() { m_dataTable->setRowCount(0); }
 
-void IndirectDataTablePresenter::setColumnValues(int column, const QString &value) {
+void IndirectFitDataTablePresenter::setColumnValues(int column, const QString &value) {
   MantidQt::API::SignalBlocker blocker(m_dataTable);
   for (int i = 0; i < m_dataTable->rowCount(); ++i)
     m_dataTable->item(i, column)->setText(value);
 }
 
-void IndirectDataTablePresenter::setHorizontalHeaders(const QStringList &headers) {
+void IndirectFitDataTablePresenter::setHorizontalHeaders(const QStringList &headers) {
   m_dataTable->setColumnCount(headers.size());
   m_dataTable->setHorizontalHeaderLabels(headers);
 
@@ -188,7 +188,7 @@ void IndirectDataTablePresenter::setHorizontalHeaders(const QStringList &headers
 #endif
 }
 
-void IndirectDataTablePresenter::addTableEntry(FitDomainIndex row) {
+void IndirectFitDataTablePresenter::addTableEntry(FitDomainIndex row) {
   m_dataTable->insertRow(static_cast<int>(row.value));
   const auto &name = m_model->getWorkspace(row)->getName();
   auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(name));
@@ -213,11 +213,11 @@ void IndirectDataTablePresenter::addTableEntry(FitDomainIndex row) {
   setCell(std::move(cell), row.value, excludeColumn());
 }
 
-void IndirectDataTablePresenter::setCell(std::unique_ptr<QTableWidgetItem> cell, FitDomainIndex row, int column) {
+void IndirectFitDataTablePresenter::setCell(std::unique_ptr<QTableWidgetItem> cell, FitDomainIndex row, int column) {
   m_dataTable->setItem(static_cast<int>(row.value), column, cell.release());
 }
 
-void IndirectDataTablePresenter::setCellText(const QString &text, FitDomainIndex row, int column) {
+void IndirectFitDataTablePresenter::setCellText(const QString &text, FitDomainIndex row, int column) {
   m_dataTable->item(static_cast<int>(row.value), column)->setText(text);
 }
 
