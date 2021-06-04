@@ -34,7 +34,6 @@ TEST_FILE = "ENGINX_277208_focused_bank_2.nxs"
 TEST_WS = 'ENGINX_277208_focused_bank_2_TOF'
 FIT_WS = TEST_WS + '_Workspace'
 FIT_DICT = {'peak_centre_params': ['Gaussian_PeakCentre', 'Gaussian_PeakCentre'],
-            'status': 'success',
             'properties': {'InputWorkspace': TEST_WS, 'Output': TEST_WS,
                            'StartX': 14547.950716043932, 'EndX': 52554.79335660165,
                            'Function': 'name=Gaussian,Height=0.0365604,PeakCentre=37490.'

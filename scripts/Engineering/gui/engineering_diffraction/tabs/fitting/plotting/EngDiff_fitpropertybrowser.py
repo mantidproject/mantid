@@ -37,7 +37,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
 
     def get_fitprop(self):
         """
-        Get the algorithm parameters updated post-fit
+        Get the algorithm parameters updated post-fit (including output status of fit)
         :return: dictionary of parameters
         """
         dict_str = self.getFitAlgorithmParameters()
@@ -53,7 +53,9 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
 
     def read_current_fitprop(self):
         """
-        Get algorithm parameters currently displayed in the UI browser (incl. defaults that user cannot change)
+        Get algorithm parameters currently displayed in the UI browser (incl. defaults that user cannot change) which
+        will be used as input for the sequential fit. This return does not include the output status of the last fit
+        which is not forced to be valid for the current parameters (i.e. could have been changed post-fit)
         :return: dict in style of self.getFitAlgorithmParameters()
         """
         try:
@@ -68,7 +70,6 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
             if exclude:
                 fitprop['properties']['Exclude'] = [int(s) for s in exclude.split(',')]
             fitprop['peak_centre_params'] = self._get_center_param_names()
-            fitprop['status'] = None  # not guaranteed to relate to these parameters
             return fitprop
         except BaseException:  # The cpp passes up an 'unknown' error if getFunctionString() fails, i.e. if no fit
             return None
