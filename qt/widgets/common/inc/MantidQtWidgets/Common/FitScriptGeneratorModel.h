@@ -40,10 +40,12 @@ public:
 
   void subscribePresenter(IFitScriptGeneratorPresenter *presenter) override;
 
-  void removeWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) override;
+  void removeDomain(FitDomainIndex domainIndex) override;
   void addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX,
                           double endX) override;
   [[nodiscard]] bool hasWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) const override;
+
+  void renameWorkspace(std::string const &workspaceName, std::string const &newName) override;
 
   [[nodiscard]] bool updateStartX(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
                                   double startX) override;

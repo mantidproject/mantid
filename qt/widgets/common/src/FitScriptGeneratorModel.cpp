@@ -100,12 +100,9 @@ FitScriptGeneratorModel::~FitScriptGeneratorModel() {
 
 void FitScriptGeneratorModel::subscribePresenter(IFitScriptGeneratorPresenter *presenter) { m_presenter = presenter; }
 
-void FitScriptGeneratorModel::removeWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) {
-  auto const removeIter = findWorkspaceDomain(workspaceName, workspaceIndex);
-  if (removeIter != m_fitDomains.cend()) {
-    m_fitDomains.erase(removeIter);
-    checkGlobalTies();
-  }
+void FitScriptGeneratorModel::removeDomain(FitDomainIndex domainIndex) {
+  m_fitDomains.erase(m_fitDomains.begin() + domainIndex.value);
+  checkGlobalTies();
 }
 
 void FitScriptGeneratorModel::addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
@@ -120,6 +117,13 @@ void FitScriptGeneratorModel::addWorkspaceDomain(std::string const &workspaceNam
 bool FitScriptGeneratorModel::hasWorkspaceDomain(std::string const &workspaceName,
                                                  WorkspaceIndex workspaceIndex) const {
   return findWorkspaceDomain(workspaceName, workspaceIndex) != m_fitDomains.cend();
+}
+
+void FitScriptGeneratorModel::renameWorkspace(std::string const &workspaceName, std::string const &newName) {
+  for (auto const &fitDomain : m_fitDomains) {
+    if (fitDomain->workspaceName() == workspaceName)
+      fitDomain->setWorkspaceName(newName);
+  }
 }
 
 FitDomainIndex FitScriptGeneratorModel::findDomainIndex(std::string const &workspaceName,
