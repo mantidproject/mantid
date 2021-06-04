@@ -395,24 +395,6 @@ class DrillTableWidget(QTableWidget):
             item.setData(Qt.BackgroundRole, None)
         self.blockSignals(False)
 
-    def setCellToolTip(self, row, column, contents):
-        """
-        Set a tooltip associated with a cell. If the cell does not contain
-        item, it will be created by this method.
-
-        Args:
-            row (int): row index
-            column (int): column index
-            contents (str): tooltip contents
-        """
-        self.blockSignals(True)
-        item = self.item(row, column)
-        if not item:
-            self.setItem(row, column, QTableWidgetItem())
-
-        self.item(row, column).setToolTip(contents)
-        self.blockSignals(False)
-
     def setColumnHeaderToolTips(self, tooltips):
         """
         Set the tooltip of each column header.
