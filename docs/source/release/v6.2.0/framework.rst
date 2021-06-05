@@ -15,6 +15,11 @@ Concepts
 Algorithms
 ----------
 
+Improvements
+############
+
+- :ref:`CreateSampleWorkspace <algm-CreateSampleWorkspace>` has new property InstrumentName.
+
 Fit Functions
 -------------
 - new method `IPeakFunction::intensityError` calculates the error in the integrated intensity of the peak due to uncertainties in the values of the fit parameters.
