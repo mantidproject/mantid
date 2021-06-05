@@ -30,7 +30,8 @@ are responsible for ensuring that the work gets done.
   decision of the release. The main task is to reiterate the timeline and be the collection
   point for information between all of the *Local Project Managers*.
 * :ref:`Technical Release Manager <technical-release-manager-checklist>` - Person responsible
-  for technical tasks such as renaming branches, creating tags, configuring build servers.
+  for technical tasks such as renaming branches, creating tags, configuring build servers, and
+  ensuring problems on the Release Pipeline get fixed (by themselves or others).
 
 Timeline
 ########
@@ -109,15 +110,22 @@ with the Release Manager.
 Monday, 3 weeks
 ---------------
 
-*  Ensure that Manual testing begins. The instructions for Manual testing are found
-   `here <https://www.mantidproject.org/Unscripted_Manual_Testing>`__.
+*  Ensure that Manual testing begins. An overview of the Manual testing to be done is
+   found :ref:`here <Testing>`. Generate the Manual testing issues by following the instructions
+   `here <https://github.com/mantidproject/documents/tree/master/Project-Management/Tools/RoadmapUpdate>`__.
+*  Over the next week or so, read through the Manual testing issues and ensure that any
+   serious problems are raised as an issue and marked against the relevant milestone.
 
 Tuesday, 4 days
 ---------------
 
 *  It is likely that many changes have been made over the beta test period, therefore
-   ensure the manual testing is redone following the instructions described `here
-   <https://www.mantidproject.org/Unscripted_Manual_Testing>`__.
+   we must do some more Manual testing to ensure everything still works. This stage is
+   called Smoke testing. Generate the Smoke testing issues by following the instructions
+   `here <https://github.com/mantidproject/documents/tree/master/Project-Management/Tools/RoadmapUpdate/SmokeTesting>`__.
+*  Liase with the Technical Release Manager to announce the creation of the Smoke testing
+   issues and Release Candidates in the *\#general* slack channel.
+
 
 .. _release-editor-checklist:
 
@@ -239,7 +247,8 @@ Technical Release Manager Checklist
 ###################################
 
 **Role**: Person responsible for technical tasks such as renaming branches, creating
-tags, configuring build servers.
+tags, configuring build servers, and ensuring problems on the Release Pipeline get fixed
+(by themselves or others).
 
 Monday, 3 weeks
 ---------------
@@ -254,9 +263,17 @@ Monday, 3 weeks
    to create the release branch and prepare build jobs by clicking ``Build Now``.
 *  Check the state of all open pull requests for this milestone and decide which
    should be kept for the release, liaise with the Release Manager on this. Move any
-   pull requests not targeted for release out of the milestone. To update the base
-   branches of these pull requests run `update-pr-base-branch.py
+   pull requests not targeted for release out of the milestone, and then change the base branch
+   of the remaining pull requests to ``release-next``. You can use the following script
+   to update the base branches of these pull requests `update-pr-base-branch.py
    <https://github.com/mantidproject/mantid/blob/master/tools/scripts/update-pr-base-branch.py>`__
+   A quick example to show how the arguments should be provided to this script is seen below:
+
+.. code-block:: bash
+
+    python update-pr-base-branch.py [milestone] [newbase] --token [generated_token]
+    python update-pr-base-branch.py "Release 6.1" "release-next" --token fake123gener8ed456token
+
 *  Inform other developers that release-next has been created by posting to the
    *\#announcements* slack channel. You can use an adapted version of the
    following announcement:
@@ -273,6 +290,11 @@ Monday, 3 weeks
    and open a pull request to put them on ``master``. Make sure the
    ``docs/source/release/index.rst`` file has a link to the new release docs.
 
+.. code-block:: bash
+
+    python release.py --release [X.Y.Z] --milestone [milestone]
+    python release.py --release 6.1.0 --milestone "Release 6.1"
+
 Monday, Release Day
 -------------------
 
@@ -280,6 +302,8 @@ Monday, Release Day
 
 Once the manual testing has passed (check with the Quality Assurance Manager):
 
+*  Email ``mantid-builder@mantidproject.org`` and ask that a new token be generated for
+   the instrument updates and placed in the appropriate place in Jenkins.
 *  Check the release notes and remove the "Under Construction" paragraph on the main
    index page.
 *  Disable release deploy jobs by building the
