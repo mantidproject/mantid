@@ -62,7 +62,7 @@ This refers to a set of X, Y and error data at a specific index of a :ref:`Matri
 Different domains can have the same function, and therefore have identically named parameters. A Function Index is used to differentiate
 between these identically named parameters by specifying the exact location of a parameter. For example if you are performing a simultaneous
 fit with two domains each containing a :ref:`FlatBackground <func-FlatBackground>`, the first domain will have a Function Index of `f0.`
-while the second domain has a Function Index of `f1.`. There are therefore two parameters, `f0.A` and `f1.A`.
+while the second domain has a Function Index of `f1.`. There are therefore two parameters, `f0.A0` and `f1.A0`.
 
 **Attribute**
 An attribute is a property of a function which doesn't change during fitting.
@@ -170,29 +170,32 @@ make sure you have access to the data archive. This will add a background to the
 
 1. Open the Fit Script Generator interface.
 
-2. Click ``Add Domains`` and select each of the loaded workspaces in turn.
+2. Click ``Add Domains`` and select each of the loaded workspaces in turn. For this example, add the 'MUSR62260; Group; bkwd; Asymmetry; MA' domain first.
 
 3. Double click the ``EndX`` cells and change each of them to 15.0.
 
 4. Change the ``Fitting Mode`` to Simultaneous.
 
-5. Make sure that ``All Domains`` is selected.
+5. Change ``All Domains`` to ``Selected Domains``, and then select the 'MUSR62260; Group; bkwd; Asymmetry; MA' domain table row.
 
-6. Right click on the ``Function Browser`` and add a ``GausOsc`` function.
+6. Right click on the Function Browser and add a ``FlatBackground``. This will only add this function to the selected domain.
+   Selecting the other table rows will show they do not have any fit functions yet.
 
-7. Change the ``Frequency`` parameter value to 1.3
+7. Change the 'A0' parameter in the ``FlatBackground`` to a value of 1.0, and 'Fix' it by right clicking on the parameter.
 
-8. Select the ``Frequency`` parameter in the ``f0.`` domain, and add a tie to ``f3.Frequency``. This is a global tie.
+8. Change ``Selected Domains`` back to ``All Domains``.
 
-9. Change ``All Domains`` to ``Selected Domains``.
+9. Right click on the Function Browser and add a ``GausOsc``. This will add the ``GausOsc`` function to all of the domains.
 
-10. Select the 'bkwd' domain and add a ``FlatBackground``.
+10. Change the ``Frequency`` parameter value in each of the domains to 1.3.
 
-11. Change the FlatBackground to a value of 1.0 and Fix it.
+11. Select any table row that isn't the first domain table row.
 
-12. Click ``Generate Script to Clipboard``, and then paste into an empty python script window.
+12. Select the Frequency parameter, right click and add a tie to ``f0.f1.Frequency``. This is a global tie.
 
-13. Run the script and you will see the results of a simultaneous fit. Notice the 'bkwd' background has been accounted for.
+13. Click ``Generate Script to Clipboard``, and then paste into an empty python script window.
+
+14. Run the script and you will see the results of a simultaneous fit. Notice the 'MUSR62260; Group; bkwd; Asymmetry; MA' background has been accounted for.
 
 .. image::  ../../images/FitScriptGenerator_SimultaneousFit.PNG
    :align: center

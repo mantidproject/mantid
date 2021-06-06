@@ -334,8 +334,10 @@ void FitScriptGeneratorModel::updateGlobalParameterTie(FitDomainIndex domainInde
       clearGlobalTie(fullParameter);
 
       auto const parameter = getAdjustedFunctionIndex(fullParameter);
+      auto const tieValue = getParameterValue(getDomainIndexOf(fullTie), fullTie);
+
       m_fitDomains[domainIndex.value]->clearParameterTie(parameter);
-      m_fitDomains[domainIndex.value]->setParameterValue(parameter, getParameterValue(domainIndex, fullTie));
+      m_fitDomains[domainIndex.value]->setParameterValue(parameter, tieValue);
 
       m_globalTies.emplace_back(GlobalTie(fullParameter, fullTie));
     } else {
