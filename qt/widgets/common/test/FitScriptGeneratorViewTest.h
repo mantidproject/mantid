@@ -134,9 +134,39 @@ public:
     m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
 
     TS_ASSERT_EQUALS(m_view->tableWidget()->rowCount(), 1);
-    m_view->removeWorkspaceDomain(m_wsName, m_wsIndex);
+    m_view->removeDomain(FitDomainIndex{0});
 
     TS_ASSERT_EQUALS(m_view->tableWidget()->rowCount(), 0);
+  }
+
+  void test_that_renameWorkspace_will_rename_the_all_rows_containing_that_workspace() {
+    openFitScriptGeneratorWidget();
+
+    std::string const newName("NewName");
+
+    m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
+    m_view->addWorkspaceDomain("Name2", m_wsIndex, 0.0, 2.0);
+    m_view->addWorkspaceDomain(m_wsName, MantidQt::MantidWidgets::WorkspaceIndex{1}, 0.0, 2.0);
+    m_view->addWorkspaceDomain("Name3", m_wsIndex, 0.0, 2.0);
+    m_view->addWorkspaceDomain(m_wsName, MantidQt::MantidWidgets::WorkspaceIndex{2}, 0.0, 2.0);
+
+    m_view->renameWorkspace(m_wsName, newName);
+
+    TS_ASSERT_EQUALS(m_view->workspaceName(0), newName);
+    TS_ASSERT_EQUALS(m_view->workspaceName(1), "Name2");
+    TS_ASSERT_EQUALS(m_view->workspaceName(2), newName);
+    TS_ASSERT_EQUALS(m_view->workspaceName(3), "Name3");
+    TS_ASSERT_EQUALS(m_view->workspaceName(4), newName);
+  }
+
+  void test_that_renameWorkspace_will_not_cause_an_exception_if_a_workspace_name_does_not_exist() {
+    openFitScriptGeneratorWidget();
+
+    m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
+
+    m_view->renameWorkspace("NonExistingName", "NewName");
+
+    TS_ASSERT_EQUALS(m_view->workspaceName(0), m_wsName);
   }
 
   void test_that_modifying_the_startX_in_the_table_will_notify_the_presenter() {

@@ -17,6 +17,9 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StartsWithValidator.h"
 
+#include <boost/algorithm/string/detail/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+
 #include <fstream>
 
 using namespace Mantid::API;

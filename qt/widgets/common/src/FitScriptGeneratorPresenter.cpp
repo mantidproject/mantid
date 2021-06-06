@@ -33,8 +33,8 @@ FitScriptGeneratorPresenter::FitScriptGeneratorPresenter(IFitScriptGeneratorView
 
 FitScriptGeneratorPresenter::~FitScriptGeneratorPresenter() {}
 
-void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event, std::string const &arg1,
-                                                  std::string const &arg2) {
+void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event, [[maybe_unused]] std::string const &arg1,
+                                                  [[maybe_unused]] std::string const &arg2) {
   switch (event) {
   case ViewEvent::ADSDeleteEvent:
     handleADSDeleteEvent(arg1);

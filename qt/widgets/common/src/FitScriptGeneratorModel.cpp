@@ -101,8 +101,11 @@ FitScriptGeneratorModel::~FitScriptGeneratorModel() {
 void FitScriptGeneratorModel::subscribePresenter(IFitScriptGeneratorPresenter *presenter) { m_presenter = presenter; }
 
 void FitScriptGeneratorModel::removeDomain(FitDomainIndex domainIndex) {
-  m_fitDomains.erase(m_fitDomains.begin() + domainIndex.value);
-  checkGlobalTies();
+  auto const removeIter = m_fitDomains.begin() + domainIndex.value;
+  if (removeIter < m_fitDomains.cend()) {
+    m_fitDomains.erase(m_fitDomains.begin() + domainIndex.value);
+    checkGlobalTies();
+  }
 }
 
 void FitScriptGeneratorModel::addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
@@ -609,7 +612,7 @@ bool FitScriptGeneratorModel::checkFunctionIsSameForAllDomains() const {
 
 std::tuple<bool, std::string> FitScriptGeneratorModel::isValid() const {
   std::string message;
-  if (numberOfDomains() == 0)
+  if (numberOfDomains() == 0u)
     message = "Domain data must be loaded before generating a python script.";
   else if (!checkFunctionExistsInAllDomains())
     message = "A function must exist in ALL domains to generate a python script.";
@@ -707,7 +710,7 @@ IFunction_sptr FitScriptGeneratorModel::getFunction() const {
 IFunction_sptr FitScriptGeneratorModel::getMultiDomainFunction() const {
   auto multiDomainFunction = std::make_shared<MultiDomainFunction>();
 
-  for (auto i = 0; i < numberOfDomains(); ++i) {
+  for (auto i = 0u; i < numberOfDomains(); ++i) {
     multiDomainFunction->addFunction(m_fitDomains[i]->getFunctionCopy());
     multiDomainFunction->setDomainIndex(i, i);
   }

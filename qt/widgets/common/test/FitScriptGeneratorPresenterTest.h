@@ -82,6 +82,68 @@ public:
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
+  void test_that_an_ADS_delete_event_will_delete_the_specified_workspace() {
+    std::string const deletedWorkspace("Deleted Workspace");
+
+    auto const allRows = std::vector<FitDomainIndex>{FitDomainIndex{0}};
+
+    ON_CALL(*m_view, allRows()).WillByDefault(Return(allRows));
+
+    ON_CALL(*m_view, workspaceName(FitDomainIndex{0})).WillByDefault(Return(m_wsName));
+
+    ON_CALL(*m_model, isSimultaneousMode()).WillByDefault(Return(false));
+
+    EXPECT_CALL(*m_view, allRows()).Times(1).WillOnce(Return(allRows));
+    EXPECT_CALL(*m_view, workspaceName(FitDomainIndex{0})).Times(1).WillOnce(Return(m_wsName));
+
+    EXPECT_CALL(*m_view, removeDomain(allRows[0])).Times(1);
+    EXPECT_CALL(*m_model, removeDomain(allRows[0])).Times(1);
+
+    EXPECT_CALL(*m_model, isSimultaneousMode()).Times(1);
+    EXPECT_CALL(*m_view, setSimultaneousMode(false)).Times(1);
+
+    EXPECT_CALL(*m_view, hasLoadedData()).Times(1);
+
+    EXPECT_CALL(*m_view, clearFunction()).Times(1);
+
+    m_presenter->notifyPresenter(ViewEvent::ADSDeleteEvent, m_wsName);
+  }
+
+  void test_that_an_ADS_clear_event_will_delete_all_workspaces() {
+    auto const allRows = std::vector<FitDomainIndex>{FitDomainIndex{0}, FitDomainIndex{1}, FitDomainIndex{2}};
+
+    ON_CALL(*m_view, allRows()).WillByDefault(Return(allRows));
+
+    ON_CALL(*m_model, isSimultaneousMode()).WillByDefault(Return(false));
+
+    EXPECT_CALL(*m_view, allRows()).Times(1).WillOnce(Return(allRows));
+
+    EXPECT_CALL(*m_view, removeDomain(allRows[0])).Times(1);
+    EXPECT_CALL(*m_model, removeDomain(allRows[0])).Times(1);
+    EXPECT_CALL(*m_view, removeDomain(allRows[1])).Times(1);
+    EXPECT_CALL(*m_model, removeDomain(allRows[1])).Times(1);
+    EXPECT_CALL(*m_view, removeDomain(allRows[2])).Times(1);
+    EXPECT_CALL(*m_model, removeDomain(allRows[2])).Times(1);
+
+    EXPECT_CALL(*m_model, isSimultaneousMode()).Times(1);
+    EXPECT_CALL(*m_view, setSimultaneousMode(false)).Times(1);
+
+    EXPECT_CALL(*m_view, hasLoadedData()).Times(1);
+
+    EXPECT_CALL(*m_view, clearFunction()).Times(1);
+
+    m_presenter->notifyPresenter(ViewEvent::ADSClearEvent);
+  }
+
+  void test_that_an_ADS_rename_event_will_attempt_to_rename_a_workspace() {
+    std::string const newName("New Name");
+
+    EXPECT_CALL(*m_model, renameWorkspace(m_wsName, newName)).Times(1);
+    EXPECT_CALL(*m_view, renameWorkspace(m_wsName, newName)).Times(1);
+
+    m_presenter->notifyPresenter(ViewEvent::ADSRenameEvent, m_wsName, newName);
+  }
+
   void test_that_a_remove_domain_event_will_attempt_to_remove_a_domain_in_the_view_and_model() {
     auto const selectedRow = FitDomainIndex(0);
     auto const selectedRows = std::vector<FitDomainIndex>{selectedRow};
@@ -98,12 +160,12 @@ public:
 
     ON_CALL(*m_model, getGlobalParameters()).WillByDefault(Return(globals));
 
-    EXPECT_CALL(*m_view, selectedRows()).Times(1).WillRepeatedly(Return(selectedRows));
-    EXPECT_CALL(*m_view, workspaceName(selectedRow)).Times(2).WillRepeatedly(Return(m_wsName));
-    EXPECT_CALL(*m_view, workspaceIndex(selectedRow)).Times(2).WillRepeatedly(Return(m_wsIndex));
+    EXPECT_CALL(*m_view, selectedRows()).Times(1).WillOnce(Return(selectedRows));
+    EXPECT_CALL(*m_view, workspaceName(selectedRow)).Times(1).WillOnce(Return(m_wsName));
+    EXPECT_CALL(*m_view, workspaceIndex(selectedRow)).Times(1).WillOnce(Return(m_wsIndex));
 
-    EXPECT_CALL(*m_view, removeWorkspaceDomain(m_wsName, m_wsIndex)).Times(1);
-    EXPECT_CALL(*m_model, removeWorkspaceDomain(m_wsName, m_wsIndex)).Times(1);
+    EXPECT_CALL(*m_view, removeDomain(selectedRow)).Times(1);
+    EXPECT_CALL(*m_model, removeDomain(selectedRow)).Times(1);
 
     EXPECT_CALL(*m_model, isSimultaneousMode()).Times(1);
     EXPECT_CALL(*m_view, setSimultaneousMode(false)).Times(1);

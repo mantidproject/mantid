@@ -182,7 +182,7 @@ void FitScriptGeneratorView::subscribePresenter(IFitScriptGeneratorPresenter *pr
   m_presenter->notifyPresenter(ViewEvent::FittingModeChanged, m_fitOptionsBrowser->getFittingMode());
 }
 
-void FitScriptGeneratorView::deleteHandle(std::string const &wsName, Workspace_sptr const &ws) {
+void FitScriptGeneratorView::deleteHandle(std::string const &wsName, [[maybe_unused]] Workspace_sptr const &ws) {
   if (QThread::currentThread() != QApplication::instance()->thread()) {
     QMetaObject::invokeMethod(this, "notifyADSDeleteEvent", Qt::AutoConnection, Q_ARG(std::string const &, wsName));
   } else {
