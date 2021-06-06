@@ -138,6 +138,7 @@ private slots:
   void onEditLocalParameterFinished(int result);
   void onGenerateScriptToFileClicked();
   void onGenerateScriptToClipboardClicked();
+  void onHelpClicked();
 
 private:
   void connectUiSignals();

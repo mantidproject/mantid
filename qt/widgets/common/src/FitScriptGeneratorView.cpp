@@ -9,6 +9,7 @@
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorDataTable.h"
 #include "MantidQtWidgets/Common/FittingGlobals.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
@@ -158,6 +159,7 @@ void FitScriptGeneratorView::connectUiSignals() {
 
   connect(m_ui.pbGenerateScriptToFile, SIGNAL(clicked()), this, SLOT(onGenerateScriptToFileClicked()));
   connect(m_ui.pbGenerateScriptToClipboard, SIGNAL(clicked()), this, SLOT(onGenerateScriptToClipboardClicked()));
+  connect(m_ui.pbHelp, SIGNAL(clicked()), this, SLOT(onHelpClicked()));
 
   /// Disconnected because it causes a crash when selecting a table row while
   /// editing a parameters value. This is because selecting a different row will
@@ -303,6 +305,10 @@ void FitScriptGeneratorView::onGenerateScriptToFileClicked() {
 
 void FitScriptGeneratorView::onGenerateScriptToClipboardClicked() {
   m_presenter->notifyPresenter(ViewEvent::GenerateScriptToClipboardClicked);
+}
+
+void FitScriptGeneratorView::onHelpClicked() {
+  MantidQt::API::HelpWindow::showCustomInterface(this, "Fit Script Generator", QString("utility"));
 }
 
 std::string FitScriptGeneratorView::workspaceName(FitDomainIndex index) const {

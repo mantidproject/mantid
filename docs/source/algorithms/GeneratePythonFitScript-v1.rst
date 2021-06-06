@@ -11,7 +11,7 @@ Description
 
 This algorithm can be used to generate a python script used for sequential or simultaneous fitting. The generated
 python script is intended to be a generic example for how you can perform a fit in Mantid, and can easily be adapted
-for specific needs. This algorithm is used by the **Fit Script Generator** interface.
+for specific needs. This algorithm is used by the :ref:`Fit Script Generator <Fit_Script_Generator-ref>` interface.
 
 Usage
 -----
