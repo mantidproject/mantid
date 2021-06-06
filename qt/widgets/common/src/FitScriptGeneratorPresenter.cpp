@@ -51,6 +51,9 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event, [[mayb
   case ViewEvent::AddDomainClicked:
     handleAddDomainClicked();
     return;
+  case ViewEvent::AddDomainAccepted:
+    handleAddDomainAccepted();
+    return;
   case ViewEvent::StartXChanged:
     handleStartXChanged();
     return;
@@ -141,14 +144,14 @@ void FitScriptGeneratorPresenter::handleADSRenameEvent(std::string const &worksp
 
 void FitScriptGeneratorPresenter::handleRemoveDomainClicked() { removeDomains(m_view->selectedRows()); }
 
-void FitScriptGeneratorPresenter::handleAddDomainClicked() {
-  if (m_view->openAddWorkspaceDialog()) {
-    auto const workspaces = m_view->getDialogWorkspaces();
-    auto const workspaceIndices = m_view->getDialogWorkspaceIndices();
+void FitScriptGeneratorPresenter::handleAddDomainClicked() { m_view->openAddWorkspaceDialog(); }
 
-    if (!workspaces.empty() && !workspaceIndices.empty())
-      addWorkspaces(workspaces, workspaceIndices);
-  }
+void FitScriptGeneratorPresenter::handleAddDomainAccepted() {
+  auto const workspaces = m_view->getDialogWorkspaces();
+  auto const workspaceIndices = m_view->getDialogWorkspaceIndices();
+
+  if (!workspaces.empty() && !workspaceIndices.empty())
+    addWorkspaces(workspaces, workspaceIndices);
 }
 
 void FitScriptGeneratorPresenter::handleSelectionChanged() {

@@ -24,6 +24,7 @@
 #include <tuple>
 #include <vector>
 
+#include <QCloseEvent>
 #include <QMap>
 #include <QString>
 #include <QStringList>
@@ -73,7 +74,7 @@ public:
   void addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX,
                           double endX) override;
 
-  [[nodiscard]] bool openAddWorkspaceDialog() override;
+  [[nodiscard]] void openAddWorkspaceDialog() override;
   [[nodiscard]] std::vector<Mantid::API::MatrixWorkspace_const_sptr> getDialogWorkspaces() override;
   [[nodiscard]] std::vector<WorkspaceIndex> getDialogWorkspaceIndices() const override;
 
@@ -109,14 +110,20 @@ public:
   FitScriptGeneratorDataTable *tableWidget() const override { return m_dataTable.get(); }
   QPushButton *removeButton() const override { return m_ui.pbRemoveDomain; }
   QPushButton *addWorkspaceButton() const override { return m_ui.pbAddDomain; }
-  AddWorkspaceDialog *addWorkspaceDialog() const override { return m_dialog.get(); }
+  AddWorkspaceDialog *addWorkspaceDialog() const override { return m_addWorkspaceDialog.get(); }
   QPushButton *generateScriptToFileButton() const override { return m_ui.pbGenerateScriptToFile; }
   QPushButton *generateScriptToClipboardButton() const override { return m_ui.pbGenerateScriptToClipboard; }
+
+public slots:
+  void closeEvent(QCloseEvent *event) override;
 
 private slots:
   void notifyADSDeleteEvent(std::string const &workspaceName);
   void notifyADSClearEvent();
   void notifyADSRenameEvent(std::string const &workspaceName, std::string const &newName);
+
+  void closeAddWorkspaceDialog();
+  void addWorkspaceDialogAccepted(bool close);
 
   void onRemoveDomainClicked();
   void onAddDomainClicked();
@@ -147,7 +154,7 @@ private:
   void setFittingMode(FittingMode fittingMode);
 
   IFitScriptGeneratorPresenter *m_presenter;
-  std::unique_ptr<AddWorkspaceDialog> m_dialog;
+  std::unique_ptr<AddWorkspaceDialog> m_addWorkspaceDialog;
   std::unique_ptr<FitScriptGeneratorDataTable> m_dataTable;
   std::unique_ptr<FunctionTreeView> m_functionTreeView;
   std::unique_ptr<BasicFitOptionsBrowser> m_fitOptionsBrowser;

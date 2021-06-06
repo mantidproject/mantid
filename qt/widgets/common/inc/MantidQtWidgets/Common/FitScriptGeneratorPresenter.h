@@ -50,6 +50,7 @@ private:
   void handleADSRenameEvent(std::string const &workspaceName, std::string const &newName);
   void handleRemoveDomainClicked();
   void handleAddDomainClicked();
+  void handleAddDomainAccepted();
   void handleSelectionChanged();
   void handleStartXChanged();
   void handleEndXChanged();

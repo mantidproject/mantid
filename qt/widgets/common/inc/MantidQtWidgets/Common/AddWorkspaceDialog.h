@@ -38,13 +38,15 @@ public:
   QComboBox *workspaceNameComboBox() const { return m_uiForm.cbWorkspaceName; }
   QLineEdit *workspaceIndiceLineEdit() const { return m_uiForm.leWSIndices; }
 
-public slots:
-  void accept() override;
+signals:
+  void closeDialog();
+  void okClicked(bool close);
 
 private slots:
-  void reject() override;
   void workspaceNameChanged(const QString & /*wsName*/);
   void selectAllSpectra(int state);
+  void handleCancelClicked();
+  void handleOKClicked();
 
 private:
   void addWorkspacesFromGroup(std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces,
