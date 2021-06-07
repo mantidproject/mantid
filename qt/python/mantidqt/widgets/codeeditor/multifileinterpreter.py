@@ -13,9 +13,10 @@ from os import linesep
 
 # 3rd party imports
 from qtpy.QtCore import Qt, Slot, Signal
-from qtpy.QtWidgets import QVBoxLayout, QWidget
+from qtpy.QtWidgets import QVBoxLayout, QWidget, QTabBar, QPushButton
 
 # local imports
+from mantidqt.icons import get_icon
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
 from mantidqt.widgets.codeeditor.scriptcompatibility import add_mantid_api_import, mantid_api_import_needed
 from mantidqt.widgets.codeeditor.tab_widget.codeeditor_tab_view import CodeEditorTabWidget
@@ -154,6 +155,14 @@ class MultiPythonFileInterpreter(QWidget):
         if content is not None:
             line_count = content.count(linesep)
             interpreter.editor.setCursorPosition(line_count,0)
+
+        # Replace the button on the tab bar so icon isn't weird.
+        close_button = QPushButton(self)
+        close_button.setFlat(True)
+        close_button.setIcon(get_icon("mdi.close", "black", 1.35))
+        close_button.clicked.connect(lambda tab_index=tab_idx: self.close_tab(tab_index))
+        self._tabs.tabBar().setTabButton(tab_idx, QTabBar.RightSide, close_button)
+
         return tab_idx
 
     def abort_current(self):
