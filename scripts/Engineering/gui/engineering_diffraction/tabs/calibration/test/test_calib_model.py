@@ -81,7 +81,7 @@ class CalibrationModelTest(unittest.TestCase):
         update_table.assert_called_with(table_test_params)
         self.assertEqual(1, update_table.call_count)
 
-        fetch_ws.assert_called_with("TESTINSTvan_no", "TESTINST")
+        fetch_ws.assert_called_with("TESTINSTvan_no", "TESTINST", is_load=True)
         self.assertEqual(1, fetch_ws.call_count)
 
         self.assertEqual(1, load_cals.call_count)
@@ -120,20 +120,17 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(file_path + ".Load")
     @patch(file_path + ".generate_tof_fit_workspace")
     @patch(class_path + "._plot_tof_fit")
-    @patch(class_path + "._plot_tof_fit_single_bank_or_custom")
     @patch(class_path + ".run_calibration")
-    def test_plotting_check_cropped(self, calib, plot_tof_cus, plot_tof_fit, gen_tof, load, handle_vc, van, sample,
+    def test_plotting_check_cropped(self, calib, plot_tof_fit, gen_tof, load, handle_vc, van, sample,
                                     output_files, update_table, delete):
         calib.return_value = _run_calibration_returns(single_output=True)
         van.return_value = ("A", "B")
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
-        plot_tof_cus.assert_not_called()
         plot_tof_fit.assert_not_called()
         gen_tof.assert_not_called()
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, True, "ENGINX", bank=1)
         self.assertEqual(gen_tof.call_count, 1)
-        plot_tof_fit.assert_not_called()
-        self.assertEqual(plot_tof_cus.call_count, 1)
+        self.assertEqual(plot_tof_fit.call_count, 1)
 
     @patch(file_path + ".DeleteWorkspace")
     @patch(class_path + ".update_calibration_params_table")
@@ -272,7 +269,7 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(file_path + ".ReplaceSpecialValues")
     @patch(file_path + ".EnggEstimateFocussedBackground")
     @patch(file_path + ".DiffractionFocussing")
-    @patch(file_path + ".DeleteWorkspace")
+    @patch(file_path + ".DeleteWorkspaces")
     @patch(file_path + ".ConvertUnits")
     @patch(file_path + ".ApplyDiffCal")
     @patch(file_path + ".NormaliseByCurrent")
@@ -295,7 +292,7 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(file_path + ".ReplaceSpecialValues")
     @patch(file_path + ".EnggEstimateFocussedBackground")
     @patch(file_path + ".DiffractionFocussing")
-    @patch(file_path + ".DeleteWorkspace")
+    @patch(file_path + ".DeleteWorkspaces")
     @patch(file_path + ".ConvertUnits")
     @patch(file_path + ".ApplyDiffCal")
     @patch(file_path + ".NormaliseByCurrent")
@@ -317,7 +314,7 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(file_path + ".ReplaceSpecialValues")
     @patch(file_path + ".EnggEstimateFocussedBackground")
     @patch(file_path + ".DiffractionFocussing")
-    @patch(file_path + ".DeleteWorkspace")
+    @patch(file_path + ".DeleteWorkspaces")
     @patch(file_path + ".ConvertUnits")
     @patch(file_path + ".ApplyDiffCal")
     @patch(file_path + ".NormaliseByCurrent")
