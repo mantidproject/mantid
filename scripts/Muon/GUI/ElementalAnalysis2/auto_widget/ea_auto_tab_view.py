@@ -24,11 +24,13 @@ class EAAutoTabView(QtWidgets.QWidget):
         super(EAAutoTabView, self).__init__(parent)
 
         self.find_peaks_workspaces = {}
+        self.show_matches_options = {}
+        self.show_peaks_options = {}
         self.match_table = match_table
         self.find_peaks_notifier = GenericObservable()
         self.show_peaks_table_notifier = GenericObservable()
-        self.show_match_table_notifier = GenericObservable()
-        self.clear_match_table_notifier = GenericObservable()
+        self.show_matches_table_notifier = GenericObservable()
+        self.clear_matches_table_notifier = GenericObservable()
 
         self.setup_interface_layout()
         self.setup_horizontal_layouts()
@@ -63,13 +65,13 @@ class EAAutoTabView(QtWidgets.QWidget):
         self.vertical_layout = QtWidgets.QVBoxLayout(self)
         self.vertical_layout.setObjectName("verticalLayout")
 
-        self.clear_match_table_button = QtWidgets.QPushButton("Clear Table", self)
+        self.clear_matches_table_button = QtWidgets.QPushButton("Clear Table", self)
         size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
-        size_policy.setHeightForWidth(self.clear_match_table_button.sizePolicy().hasHeightForWidth())
-        self.clear_match_table_button.setSizePolicy(size_policy)
-        self.clear_match_table_button.setToolTip("Removes all rows in table")
+        size_policy.setHeightForWidth(self.clear_matches_table_button.sizePolicy().hasHeightForWidth())
+        self.clear_matches_table_button.setSizePolicy(size_policy)
+        self.clear_matches_table_button.setToolTip("Removes all rows in table")
 
         self.vertical_layout.addItem(self.select_workspace_hlayout)
         self.vertical_layout.addItem(self.find_peaks_parameter_hlayout1)
@@ -78,7 +80,7 @@ class EAAutoTabView(QtWidgets.QWidget):
         self.vertical_layout.addWidget(self.peak_info_label)
         self.vertical_layout.addItem(self.show_peaks_hlayout)
         self.vertical_layout.addWidget(self.match_table)
-        self.vertical_layout.addWidget(self.clear_match_table_button)
+        self.vertical_layout.addWidget(self.clear_matches_table_button)
         self.vertical_layout.addItem(self.show_matches_hlayout)
 
         self.setLayout(self.vertical_layout)
@@ -108,20 +110,24 @@ class EAAutoTabView(QtWidgets.QWidget):
         self.find_peaks_parameter_hlayout1.addWidget(self.threshold_label)
         self.find_peaks_parameter_hlayout1.addWidget(self.threshold_line_edit)
 
-        self.plot_peaks_label = QtWidgets.QLabel("Plot Peaks", self)
+        self.plot_peaks_label = QtWidgets.QLabel("  Plot Peaks  ", self)
         self.plot_peaks_checkbox = QtWidgets.QCheckBox(self)
         self.default_peak_label = QtWidgets.QLabel("  Use default peak widths ?  ", self)
         self.default_peak_checkbox = QtWidgets.QCheckBox(self)
+
         size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
+
         self.default_peak_label.setSizePolicy(size_policy)
         self.default_peak_checkbox.setSizePolicy(size_policy)
+
         self.plot_peaks_label.setSizePolicy(size_policy)
         self.plot_peaks_checkbox.setSizePolicy(size_policy)
 
-        self.find_peaks_parameter_hlayout2.addWidget(self.default_peak_checkbox)
-        self.find_peaks_parameter_hlayout2.addWidget(self.default_peak_label)
+        self.find_peaks_parameter_hlayout2.addWidget(self.default_peak_checkbox, alignment=QtCore.Qt.AlignLeft)
+        self.find_peaks_parameter_hlayout2.addWidget(self.default_peak_label, alignment=QtCore.Qt.AlignLeft)
+        self.find_peaks_parameter_hlayout2.insertStretch(-1, 1)
         self.find_peaks_parameter_hlayout2.addWidget(self.plot_peaks_label, alignment=QtCore.Qt.AlignRight)
         self.find_peaks_parameter_hlayout2.addWidget(self.plot_peaks_checkbox, alignment=QtCore.Qt.AlignRight)
 
@@ -142,24 +148,30 @@ class EAAutoTabView(QtWidgets.QWidget):
         self.find_peaks_parameter_hlayout3.addWidget(self.estimate_width_line_edit)
 
         self.show_peaks_table_combobox = QtWidgets.QComboBox(self)
+        self.show_peaks_group_table_combobox = QtWidgets.QComboBox(self)
         self.show_peaks_table_button = QtWidgets.QPushButton(" Show peaks ", self)
 
+        self.show_peaks_hlayout.addWidget(self.show_peaks_group_table_combobox)
         self.show_peaks_hlayout.addWidget(self.show_peaks_table_combobox)
         self.show_peaks_hlayout.addWidget(self.show_peaks_table_button)
 
-        self.show_match_table_combobox = QtWidgets.QComboBox(self)
-        self.show_match_table_button = QtWidgets.QPushButton(" Show matches ", self)
+        self.show_matches_table_combobox = QtWidgets.QComboBox(self)
+        self.show_matches_group_table_combobox = QtWidgets.QComboBox(self)
+        self.show_matches_table_button = QtWidgets.QPushButton(" Show matches ", self)
 
-        self.show_matches_hlayout.addWidget(self.show_match_table_combobox)
-        self.show_matches_hlayout.addWidget(self.show_match_table_button)
+        self.show_matches_hlayout.addWidget(self.show_matches_group_table_combobox)
+        self.show_matches_hlayout.addWidget(self.show_matches_table_combobox)
+        self.show_matches_hlayout.addWidget(self.show_matches_table_button)
 
     def setup_buttons(self):
         self.find_peaks_button.clicked.connect(self.find_peaks_notifier.notify_subscribers)
         self.show_peaks_table_button.clicked.connect(self.show_peaks_table_notifier.notify_subscribers)
-        self.show_match_table_button.clicked.connect(self.show_match_table_notifier.notify_subscribers)
-        self.clear_match_table_button.clicked.connect(self.clear_match_table_notifier.notify_subscribers)
+        self.show_matches_table_button.clicked.connect(self.show_matches_table_notifier.notify_subscribers)
+        self.clear_matches_table_button.clicked.connect(self.clear_matches_table_notifier.notify_subscribers)
         self.default_peak_checkbox.clicked.connect(self.on_default_peak_checkbox_changed)
         self.group_combobox.currentIndexChanged.connect(self.on_group_combobox_changed)
+        self.show_peaks_group_table_combobox.currentIndexChanged.connect(self.on_show_peaks_combobox_changed)
+        self.show_matches_group_table_combobox.currentIndexChanged.connect(self.on_show_matches_combobox_changed)
 
     def get_parameters_for_find_peaks(self):
         parameters = {}
@@ -207,12 +219,16 @@ class EAAutoTabView(QtWidgets.QWidget):
         self.on_group_combobox_changed()
 
     def add_options_to_show_peak_combobox(self, options):
-        self.show_peaks_table_combobox.clear()
-        self.show_peaks_table_combobox.addItems(options)
+        self.show_peaks_group_table_combobox.clear()
+        self.show_peaks_options = options
+        self.show_peaks_group_table_combobox.addItems(sorted(list(options)))
+        self.on_show_peaks_combobox_changed()
 
     def add_options_to_show_matches_combobox(self, options):
-        self.show_match_table_combobox.clear()
-        self.show_match_table_combobox.addItems(options)
+        self.show_matches_group_table_combobox.clear()
+        self.show_matches_options = options
+        self.show_matches_group_table_combobox.addItems(sorted(list(options)))
+        self.on_show_matches_combobox_changed()
 
     def setup_intial_parameters(self):
         self.min_energy_line_edit.setText(MIN_ENERGY)
@@ -257,3 +273,17 @@ class EAAutoTabView(QtWidgets.QWidget):
             return
         detectors = self.find_peaks_workspaces[group_workspace]
         self.detector_combobox.addItems(detectors)
+
+    def on_show_peaks_combobox_changed(self):
+        self.show_peaks_table_combobox.clear()
+        group_workspace = self.show_peaks_group_table_combobox.currentText()
+        if not group_workspace:
+            return
+        self.show_peaks_table_combobox.addItems(self.show_peaks_options[group_workspace])
+
+    def on_show_matches_combobox_changed(self):
+        self.show_matches_table_combobox.clear()
+        group_workspace = self.show_matches_group_table_combobox.currentText()
+        if not group_workspace:
+            return
+        self.show_matches_table_combobox.addItems(self.show_matches_options[group_workspace])
