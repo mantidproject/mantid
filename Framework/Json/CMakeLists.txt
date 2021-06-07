@@ -36,3 +36,16 @@ mtd_install_targets(TARGETS
                     INSTALL_DIRS
                     ${LIB_DIR}
                     ${WORKBENCH_LIB_DIR})
+
+if(CXXTEST_FOUND)
+
+cxxtest_add_test(JsonTest ${TEST_FILES})
+target_include_directories(JsonTest SYSTEM PRIVATE ${CXXTEST_INCLUDE_DIR})
+target_link_libraries(JsonTest PUBLIC ${JSONCPP_LIBRARIES} Json)
+
+add_dependencies(FrameworkTests JsonTest)
+
+# Add to the 'FrameworkTests' group in VS
+set_property(TARGET JsonTest PROPERTY FOLDER "UnitTests")
+
+endif()
