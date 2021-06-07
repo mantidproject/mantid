@@ -70,7 +70,7 @@ public:
   float getError() const { return mError; }
 
   bool operator()(SimpleMDEvent &event1, const SimpleMDEvent &event2) {
-    std::cout << "() is called\n";
+    // std::cout << "() is called\n";
     return event1 < event2;
   }
 
@@ -90,12 +90,25 @@ public:
     // compare coordinates
     size_t numdirs = mCoordinates.size();
     for (size_t i = 0; i < numdirs; ++i) {
-      if (mCoordinates[i] < event2.mCoordinates[i])
-        less = true;
-      else if (mCoordinates[i] > event2.mCoordinates[i])
-        less = false;
-      else
+      // equal is hard to tell
+      coord_t diff = mCoordinates[i] - event2.mCoordinates[i];
+
+      if (fabs(mCoordinates[i]) > 1E-7 && fabs(diff / mCoordinates[i]) < 1E-6) {
+        // larger than epsilon and relative difference less than epsilon
         equal = true;
+        less = false;
+      } else if (fabs(mCoordinates[i]) < 1E-7 && diff < 1E-7) {
+        // less than epsilon and absolute difference less than epsilon
+        equal = true;
+        less = false;
+      } else if (diff < 0) {
+        // less
+        less = true;
+      } else {
+        // larger
+        less = false;
+      }
+
       // no need to continue
       if (!equal)
         break;
@@ -111,13 +124,15 @@ public:
     }
 
     // error: no need to continue the comparison
-    if (equal && mError >= event2.mError)
+    if (equal && mError >= event2.mError) {
       less = false;
+    }
 
-    //        if (less)
-    //            std::cout << this->str() << " < " << event2.str() << "\n";
-    //        else
-    //            std::cout << this->str() << " > " << event2.str() << "\n";
+    //            if (less)
+    //                ;
+    //                // std::cout << "... ... " << this->str() << " < " << event2.str() << "\n";
+    //            else
+    //                std::cout << "... ... " << this->str() << " >= " << event2.str() << "\n";
 
     return less;
   }
@@ -125,8 +140,6 @@ public:
   bool operator()(const SimpleMDEvent &lx, const SimpleMDEvent &rx) const { return lx < rx; }
 
   bool operator>(const SimpleMDEvent &event2) {
-
-    std::cout << " > is called ... \n";
 
     // compare coordinates
     size_t numdirs = mCoordinates.size();
@@ -147,8 +160,6 @@ public:
   }
 
   bool operator==(const SimpleMDEvent &event2) {
-
-    std::cout << " == is called ... \n";
 
     // compare coordinates
     size_t numdirs = mCoordinates.size();
@@ -181,6 +192,18 @@ public:
 
     return *this;
   }
+
+  //  void operator=(const SimpleMDEvent &event2) {
+
+  //    //        std::cout << " Assigning = is called.... \n";
+  //    // coordiate
+  //    size_t numdirs = mCoordinates.size();
+  //    for (size_t i = 0; i < numdirs; ++i)
+  //      mCoordinates[i] = event2.mCoordinates[i];
+  //    // signal and error
+  //    mSignal = event2.mSignal;
+  //    mError = event2.mError;
+  //  }
 };
 
 bool compareSimpleEvents(SimpleMDEvent &self, const SimpleMDEvent &other) { return (self < other); }
@@ -325,16 +348,16 @@ void CompareMDWorkspaces::compareMDWorkspaces(typename MDEventWorkspace<MDE, nd>
 
   this->compare(boxes1.size(), boxes2.size(), "Workspaces do not have the same number of boxes");
 
-  for (size_t j = 0; j < boxes1.size(); j++) {
+  for (size_t ibox = 0; ibox < boxes1.size(); ibox++) {
 
-    API::IMDNode *box1 = boxes1[j];
-    API::IMDNode *box2 = boxes2[j];
+    API::IMDNode *box1 = boxes1[ibox];
+    API::IMDNode *box2 = boxes2[ibox];
 
     if (m_CompareBoxID)
       this->compare(box1->getID(), box2->getID(), "Boxes have different ID");
     else {
       if (box1->getID() != box2->getID())
-        g_log.debug() << " Boxes N: " << j << " have box ID: " << box1->getID() << " and " << box2->getID()
+        g_log.debug() << " Boxes N: " << ibox << " have box ID: " << box1->getID() << " and " << box2->getID()
                       << " correspondingly\n";
     }
     this->compare(size_t(box1->getDepth()), size_t(box2->getDepth()), "Boxes are at a different depth");
@@ -345,8 +368,9 @@ void CompareMDWorkspaces::compareMDWorkspaces(typename MDEventWorkspace<MDE, nd>
         this->compare(box1->getChild(i)->getID(), box2->getChild(i)->getID(), "Child of boxes do not match IDs");
       else {
         if (box1->getID() != box2->getID())
-          g_log.debug() << " Boxes N: " << j << " children N: " << i << " have box ID: " << box1->getChild(i)->getID()
-                        << " and " << box2->getChild(i)->getID() << " correspondingly\n";
+          g_log.debug() << " Boxes N: " << ibox << " children N: " << i
+                        << " have box ID: " << box1->getChild(i)->getID() << " and " << box2->getChild(i)->getID()
+                        << " correspondingly\n";
       }
     }
 
@@ -387,6 +411,11 @@ void CompareMDWorkspaces::compareMDWorkspaces(typename MDEventWorkspace<MDE, nd>
             // Check first and last event
             for (size_t i = 0; i < events1.size(); i++) {
 
+              //      FIXME        this->compareTol(events1[i].getSignal(), events2[i].getSignal(), "Event signal does
+              //      not match");
+              //      FIXME        this->compareTol(events1[i].getErrorSquared(), events2[i].getErrorSquared(),
+              //                               "Event error does not match");
+
               std::vector<float> centers1;
               std::vector<float> centers2;
 
@@ -401,11 +430,6 @@ void CompareMDWorkspaces::compareMDWorkspaces(typename MDEventWorkspace<MDE, nd>
               SimpleMDEvent se2(centers2, events2[i].getSignal(), events2[i].getErrorSquared());
               events_vec1.push_back(se1);
               events_vec2.push_back(se2);
-
-              //      FIXME        this->compareTol(events1[i].getSignal(), events2[i].getSignal(), "Event signal does
-              //      not match");
-              //      FIXME        this->compareTol(events1[i].getErrorSquared(), events2[i].getErrorSquared(),
-              //                               "Event error does not match");
             }
 
             // sort events and compare
@@ -425,14 +449,31 @@ void CompareMDWorkspaces::compareMDWorkspaces(typename MDEventWorkspace<MDE, nd>
                 compareTol(events_vec1[i].getSignal(), events_vec2[i].getSignal(), "");
                 compareTol(events_vec1[i].getError(), events_vec2[i].getError(), "");
               } catch (CompareFailsException &) {
-                g_log.error() << "Box " << j << " event " << i << " signal difference = "
+                g_log.error() << "Box " << ibox << " Event " << i << " signal difference = "
                               << fabs(events_vec1[i].getSignal() - events_vec2[i].getSignal()) << "\n";
-                g_log.error() << "Box " << j << " Event " << i << "  :  " << events_vec1[i].str() << " ... "
-                              << events_vec2[i].str() << "\n";
+                g_log.error() << "Box " << ibox << " Event (Detailed) " << i << "  :  " << events_vec1[i].str()
+                              << " ... " << events_vec2[i].str() << "\n";
                 same = false;
               }
             }
+
             if (!same) {
+              //                // FIXME Remove Me
+              //                for (size_t i = 0; i < events_vec1.size(); ++i) {
+              //                    g_log.notice() << "Box " << j << " Event " << i << "  :  " << events_vec1[i].str()
+              //                    << " ... "
+              //                                  << events_vec2[i].str() << "\n";
+              //                  }
+
+              //                for (size_t i = 0; i < events_vec1.size(); ++i) {
+              //                    std::string greaterthanprev("");
+              //                    if (i > 0 && events_vec1[i] < events_vec1[i - 1])
+              //                        greaterthanprev = " v ";
+              //                    g_log.notice() << "Box " << ibox << " Event " << i << "  :  " <<
+              //                    events_vec1[i].str() << " " << greaterthanprev << "\n";
+
+              //                  }
+
               throw CompareFailsException("MDEvents are not the same");
             }
           }
@@ -446,7 +487,7 @@ void CompareMDWorkspaces::compareMDWorkspaces(typename MDEventWorkspace<MDE, nd>
         mdbox2->releaseEvents();
       }      // Don't compare if BoxStructureOnly
     } else { // is mdbox1
-      g_log.error() << "Box " << j << ", MDEvent box 1 and/or box2 are NULL"
+      g_log.error() << "Box " << ibox << ", MDEvent box 1 and/or box2 are NULL"
                     << "\n";
     }
   }
