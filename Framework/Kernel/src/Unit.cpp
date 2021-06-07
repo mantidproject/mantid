@@ -702,25 +702,19 @@ double dSpacing::singleFromTOF(const double tof) const {
     // NOTE:
     //   bottom line is that d has to be a positive number that is closer to 0
     double sqrtTerm = sqrt(difc * difc - 4 * difa * (tzero - tof));
-    double d1 = std::max(0.0, 0.5 / difa * (-difc + sqrtTerm));
-    double d2 = std::max(0.0, 0.5 / difa * (-difc - sqrtTerm));
-
-    return std::min(d1, d2);
+    double d1 = 0.5 / difa * (-difc + sqrtTerm);
+    double d2 = 0.5 / difa * (-difc - sqrtTerm);
+    double dspacing;
+    //
+    if (d1 * d2 < 0.0) {
+      dspacing = std::max(d1, d2);
+    } else {
+      d1 = std::max(0.0, d1);
+      d2 = std::max(0.0, d2);
+      dspacing = std::min(d1, d2);
+    }
+    return dspacing;
   }
-
-  // // and then solve quadratic using Muller formula
-  // double sqrtTerm;
-  // if (difa == 0) {
-  //   // avoid costly sqrt even though formula reduces to this
-  //   sqrtTerm = difc;
-  // } else {
-  //   sqrtTerm = sqrt(difc * difc - 4 * difa * (tzero - tof));
-  // }
-
-  // if (sqrtTerm < difc)
-  //   return (tof - tzero) / (0.5 * (difc - sqrtTerm));
-  // else
-  //   return (tof - tzero) / (0.5 * (difc + sqrtTerm));
 }
 
 double dSpacing::conversionTOFMin() const {
