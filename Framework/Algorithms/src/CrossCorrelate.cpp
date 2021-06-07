@@ -180,6 +180,16 @@ void CrossCorrelate::exec() {
   for (int i = 0; i < static_cast<int>(outX.size()); ++i) {
     outX[i] = static_cast<double>(i - numReferenceY + 2);
   }
+
+  // max the shift
+  int shiftCorrection = 0;
+  if (maxDSpaceShift != EMPTY_DBL()) {
+    // convert dspacing to bins, where maxDSpaceShift is at least 0.1
+    const auto maxBins = std::max(0.0 + maxDSpaceShift * 2, 0.1) / (xmax - xmin) * (rangeEnd - rangeStart);
+    // calc range based on max bins
+    shiftCorrection = abs(abs((-numReferenceY + 2) - (numReferenceY - 2)) - maxBins) / 2;
+  }
+
   // Initialise the progress reporting object
   m_progress = std::make_unique<Progress>(this, 0.0, 1.0, numSpectra);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *out))
@@ -212,15 +222,6 @@ void CrossCorrelate::exec() {
     // Get referenceSpectr to the ouput spectrum
     auto &outY = out->mutableY(currentSpecIndex);
     auto &outE = out->mutableE(currentSpecIndex);
-
-    // max the shift
-    int shiftCorrection = 0;
-    if (maxDSpaceShift != EMPTY_DBL()) {
-      // convert dspacing to bins, where maxDSpaceShift is at least 0.1
-      const auto maxBins = std::max(0.0 + maxDSpaceShift, 0.1) / (rangeEnd - rangeStart);
-      // calc range based on max bins
-      shiftCorrection = abs(abs((-numReferenceY + 2) - (numReferenceY - 2)) - maxBins) / 2;
-    }
 
     for (int dataIndex = -numReferenceY + 2 + shiftCorrection; dataIndex <= numReferenceY - 2 - shiftCorrection;
          ++dataIndex) {
