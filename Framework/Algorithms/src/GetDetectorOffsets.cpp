@@ -9,7 +9,10 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -32,8 +35,8 @@ using namespace DataObjects;
  */
 void GetDetectorOffsets::init() {
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                                        std::make_shared<WorkspaceUnitValidator>("dSpacing")),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+
                   "A 2D workspace with X values of d-spacing");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
@@ -66,6 +69,18 @@ void GetDetectorOffsets::init() {
                   "information, this is only used in Absolute OffsetMode.");
 }
 
+std::map<std::string, std::string> GetDetectorOffsets::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  const auto unit = inputWS->getAxis(0)->unit()->unitID();
+  const auto unitErrorMsg =
+      "GetDetectorOffsets only supports input workspaces with units 'Bins of Shift' or 'dSpacing'";
+  if (unit != "Bins of Shift" && unit != "dSpacing") {
+    result["InputWorkspace"] = unitErrorMsg;
+  }
+  return result;
+}
 //-----------------------------------------------------------------------------------------
 /** Executes the algorithm
  *
