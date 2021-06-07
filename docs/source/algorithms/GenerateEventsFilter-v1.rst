@@ -81,6 +81,10 @@ this algorithm:
    workspace index associated. These workspace indices are incremented
    by 1 from 0 along with their orders in time.
 
+-  A series of filters for multiple continuous time intervals, which have an exponentially increasing length,
+   or exponentially decreasing length. Each of them has an individual workspace index associated.
+   These workspace indices are incremented by 1 from 0 along with their orders in time.
+
 -  A series of filters for multiple continuous time intervals, which
    have various lengths of period.
    Each of them has an individual workspace index associated.
@@ -110,8 +114,9 @@ respectively.
 ``TimeInterval`` accepts an array of doubles.
 If the array size is zero, then there will be one and only splitter will be
 created from ``StartTime`` and ``StopTime``.
-If the size of the array is one, then all event splitters will have the same duration
-of time.
+If the size of the array is one, then  if the value is positive, all event splitters will have the same duration.
+If it is negative, the event splitters duration will exponentially increase (if ``UseReverseLogarithmic`` is unchecked)
+or exponentially decrease (if ``UseReverseLogarithmic`` is checked).
 In general if the array is composed as :math:`t_1, t_2, \cdots, t_n`,
 and :math:`T_0` is the run start time,
 then the event splitters will have the time boundaries as
@@ -183,6 +188,13 @@ Parameter: ``FastLog``
 
 When ``FastLog`` is set to True, a :ref:`MatrixWorkspace <MatrixWorkspace>` will be used to store the event
 splitters, which is more appropriate for fast changing logs. (see above for details).
+
+Parameter: ``UseReverseLogarithmic``
+####################################
+
+When ``UseReverseLogarithmic`` is checked, if only one ``TimeInterval`` value has been provided and it is negative,
+the logarithmic time splitting will start from the end of the run going back to the start, resulting in time splits
+shorter and shorter.
 
 Parameter: ``MinimumLogValue``, ``MaximumLogValue``, ``LogValueTolerance`` and ``LogValueInterval``
 ###################################################################################################

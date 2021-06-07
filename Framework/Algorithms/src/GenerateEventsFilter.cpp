@@ -51,8 +51,7 @@ void GenerateEventsFilter::init() {
       "An input Matrix workspace.");
 
   declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>("OutputWorkspace", "", Direction::Output),
-                  "The name to use for the output SplittersWorkspace object, "
-                  "i.e., the filter.");
+                  "The name to use for the output SplittersWorkspace object, ie the filter.");
 
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("InformationWorkspace", "", Direction::Output),
@@ -62,42 +61,38 @@ void GenerateEventsFilter::init() {
 
   // Time (general) range
   declareProperty("StartTime", "",
-                  "The start time, such that all events before this time are filtered out. "
-                  "It could be (1) relative time to run start time "
-                  "in unit as specified property 'UnitOfTime' or "
-                  "(2) absolute time. "
-                  "Absolute time takes a string in format as 1990-01-01T00:00:00, "
-                  "while the relative time takes integer or float. ");
+                  "The start time, such that all events before this time are filtered out: it could be \n"
+                  "(1) relative time to run start time in unit as specified property 'UnitOfTime'\n"
+                  "(2) absolute time\n"
+                  "Absolute time takes a string in format as 1990-01-01T00:00:00, while the relative time takes "
+                  "integer or float.");
 
   declareProperty("StopTime", "",
-                  "The stop time, such that all events after this time are filtered out. "
-                  "It could be (1) relative time to run start time "
-                  "in unit as specified property 'UnitOfTime' or "
-                  "(2) absolute time. "
-                  "Absolute time takes a string in format as 1990-01-01T00:00:00, "
-                  "while the relative time takes integer or float. ");
+                  "The stop time, such that all events after this time are filtered out: it could be \n"
+                  "(1) relative time to run start time in unit as specified property 'UnitOfTime'\n"
+                  "(2) absolute time\n"
+                  "Absolute time takes a string in format as 1990-01-01T00:00:00, while the relative time takes "
+                  "integer or float.");
 
   // Split by time (only) in steps
-  declareProperty(std::make_unique<ArrayProperty<double>>("TimeInterval"),
-                  "Array for lengths of time intervals for splitters.  "
-                  "If the array is empty, then there will be one splitter "
-                  "created from StartTime and StopTime. "
-                  "If the array has one value, then all splitters will have "
-                  "same time intervals. "
-                  "If the size of the array is larger than one, then the "
-                  "splitters can have various time interval values.");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>("TimeInterval"),
+      "Array for lengths of time intervals for splitters: \n"
+      "if the array is empty, then there will be one splitter created from StartTime and StopTime; \n"
+      "if the array has one value, then if this value is positive, all splitters will have same time intervals, else "
+      "the time intervals will be exponentially increasing;\n"
+      "if the size of the array is larger than one, then the splitters can have various time interval values.");
   setPropertySettings("TimeInterval", std::make_unique<VisibleWhenProperty>("LogName", IS_EQUAL_TO, ""));
 
   std::vector<std::string> timeoptions{"Seconds", "Nanoseconds", "Percent"};
   declareProperty("UnitOfTime", "Seconds", std::make_shared<Kernel::StringListValidator>(timeoptions),
-                  "StartTime, StopTime and DeltaTime can be given in various unit."
-                  "The unit can be 'Seconds' or 'Nanoseconds' from run start time."
-                  "They can also be defined as 'Percentage' of total run time.");
+                  "StartTime, StopTime and DeltaTime can be given in various unit; the unit can be 'Seconds' or "
+                  "'Nanoseconds' from run start time or can also be defined as 'Percentage' of total run time.");
 
   // Split by log value (only) in steps
-  declareProperty("LogName", "",
-                  "Name of the sample log to use to filter.\n"
-                  "For example, the pulse charge is recorded in 'ProtonCharge'.");
+  declareProperty(
+      "LogName", "",
+      "Name of the sample log to use to filter - for example, the pulse charge is recorded in 'ProtonCharge'.");
 
   declareProperty("MinimumLogValue", EMPTY_DBL(), "Minimum log value for which to keep events.");
   setPropertySettings("MinimumLogValue", std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
@@ -105,38 +100,34 @@ void GenerateEventsFilter::init() {
   declareProperty("MaximumLogValue", EMPTY_DBL(), "Maximum log value for which to keep events.");
   setPropertySettings("MaximumLogValue", std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
-  declareProperty("LogValueInterval", EMPTY_DBL(),
-                  "Delta of log value to be sliced into from min log value and "
-                  "max log value.\n"
-                  "If not given, then only value ");
+  declareProperty(
+      "LogValueInterval", EMPTY_DBL(),
+      "Delta of log value to be sliced into from min log value and max log value; if not given, then only value ");
   setPropertySettings("LogValueInterval", std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   std::vector<std::string> filteroptions{"Both", "Increase", "Decrease"};
   declareProperty("FilterLogValueByChangingDirection", "Both",
                   std::make_shared<Kernel::StringListValidator>(filteroptions),
-                  "d(log value)/dt can be positive and negative.  They can be put to "
-                  "different splitters."
-                  "There are 3 options, 'Both', 'Increase' and 'Decrease' corresponding to "
-                  "d(log value)/dt can be any value, positive only and negative only "
-                  "respectively.");
+                  "d(log value)/dt can be positive and negative, they can be put to different splitters\n"
+                  "there are 3 options, 'Both', 'Increase' and 'Decrease' corresponding to d(log value)/dt being any "
+                  "value, positive only and negative only respectively.");
   setPropertySettings("FilterLogValueByChangingDirection",
                       std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("TimeTolerance", 0.0,
-                  "Tolerance in time for the event times to keep. "
-                  "It is used in the case to filter by single value.");
+                  "Tolerance in time for the event times to keep; it is used in the case to filter by single value.");
   setPropertySettings("TimeTolerance", std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   vector<string> logboundoptions{"Centre", "Left", "Other"};
   auto logvalidator = std::make_shared<StringListValidator>(logboundoptions);
   declareProperty("LogBoundary", "Centre", logvalidator,
-                  "How to treat log values as being measured in the centre of time. "
+                  "How to treat log values as being measured in the centre of time\n"
                   "There are three options, 'Centre', 'Left' and 'Other'. ");
   setPropertySettings("LogBoundary", std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
-  declareProperty("LogValueTolerance", EMPTY_DBL(),
-                  "Tolerance of the log value to be included in filter.  It is "
-                  "used in the case to filter by multiple values.");
+  declareProperty(
+      "LogValueTolerance", EMPTY_DBL(),
+      "Tolerance of the log value to be included in filter, used in the case to filter by multiple values.");
   setPropertySettings("LogValueTolerance", std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   // Output workspaces' title and name
