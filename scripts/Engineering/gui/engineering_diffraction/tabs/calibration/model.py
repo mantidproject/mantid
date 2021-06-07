@@ -130,7 +130,7 @@ class CalibrationModel(object):
         except RuntimeError:
             logger.error("Invalid file selected: ", file_path)
             return
-        vanadium_corrections.fetch_correction_workspaces(instrument+van_no, instrument)
+        vanadium_corrections.fetch_correction_workspaces(instrument+van_no, instrument, is_load=True)
         load_relevant_pdcal_outputs(file_path)
         return instrument, van_no, ceria_no
 

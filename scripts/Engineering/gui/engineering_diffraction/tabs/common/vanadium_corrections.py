@@ -24,19 +24,23 @@ SAVED_FILE_CURVE_SUFFIX = "_precalculated_vanadium_run_bank_curves.nxs"
 SAVED_FILE_INTEG_SUFFIX = "_precalculated_vanadium_run_integration.nxs"
 
 
-def fetch_correction_workspaces(vanadium_path, instrument, rb_num=""):
+def fetch_correction_workspaces(vanadium_path, instrument, rb_num="", is_load=False):
     """
     Fetch workspaces from the file system or create new ones.
     :param vanadium_path: The path to the requested vanadium run raw data.
     :param instrument: The instrument the data came from.
     :param rb_num: A user identifier, usually an experiment number.
+    :param is_load: True if this is being called as part of loading a previous calibration (force_recalc ignored)
     :return: The resultant integration and curves workspaces.
     """
     vanadium_number = path_handling.get_run_number_from_path(vanadium_path, instrument)
     integ_path = generate_van_ws_file_path(vanadium_number, SAVED_FILE_INTEG_SUFFIX, rb_num)
     curves_path = generate_van_ws_file_path(vanadium_number, SAVED_FILE_CURVE_SUFFIX, rb_num)
-    force_recalc = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
-                               path_handling.ENGINEERING_PREFIX, "recalc_vanadium", return_type=bool)
+    if is_load:
+        force_recalc = False
+    else:
+        force_recalc = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
+                                   path_handling.ENGINEERING_PREFIX, "recalc_vanadium", return_type=bool)
     if path.exists(curves_path) and path.exists(integ_path) and not force_recalc:  # Check if the cached files exist.
         try:
             integ_workspace = Load(Filename=integ_path, OutputWorkspace=INTEGRATED_WORKSPACE_NAME)
