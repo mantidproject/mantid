@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantid.api import IFunction
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_view import BasicFittingView
 from Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_data_selector_view import ModelFittingDataSelectorView
 
@@ -23,7 +24,7 @@ class ModelFittingView(BasicFittingView):
         self.general_fitting_options_layout.addWidget(self.model_fitting_data_selector)
 
         # Hide the workspace selector which is used to store the generated matrix workspaces
-        # self.workspace_selector.hide()
+        self.workspace_selector.hide()
 
     def set_slot_for_results_table_changed(self, slot) -> None:
         """Connect the slot for the result tables combo box being changed."""
@@ -44,6 +45,10 @@ class ModelFittingView(BasicFittingView):
     def update_x_and_y_parameters(self, x_parameters: list, y_parameters: list) -> None:
         """Update the available X and Y parameters in the relevant combo boxes."""
         self.model_fitting_data_selector.update_x_and_y_parameters(x_parameters, y_parameters)
+
+    def update_fit_function(self, fit_function: IFunction) -> None:
+        """Updates the fit function shown in the view."""
+        self.fit_function_options.set_fit_function(fit_function)
 
     @property
     def current_result_table_index(self) -> str:

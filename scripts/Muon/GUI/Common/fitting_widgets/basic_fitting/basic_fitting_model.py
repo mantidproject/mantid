@@ -201,6 +201,10 @@ class BasicFittingModel:
         """Sets the cache of fit functions used for single fitting."""
         self.fitting_context.single_fit_functions_cache = fit_functions
 
+    def is_single_fit_functions_cache_empty(self) -> bool:
+        """Returns true if the cache of single functions is empty."""
+        return all([function is None for function in self.fitting_context.single_fit_functions_cache])
+
     def cache_the_current_fit_functions(self) -> None:
         """Caches the existing single fit functions. Used before a fit is performed to save the old state."""
         self.fitting_context.single_fit_functions_cache = [self._clone_function(function)
@@ -213,6 +217,12 @@ class BasicFittingModel:
         self.fitting_context.single_fit_functions_cache = [None] * self.fitting_context.number_of_datasets
         self.fitting_context.fit_statuses_cache = [None] * self.fitting_context.number_of_datasets
         self.fitting_context.chi_squared_cache = [None] * self.fitting_context.number_of_datasets
+
+    def clear_current_cached_fit_function(self) -> None:
+        """Clears the cached fit function for the currently selected dataset."""
+        self.fitting_context.single_fit_functions_cache[self.fitting_context.current_dataset_index] = None
+        self.fitting_context.fit_statuses_cache[self.fitting_context.current_dataset_index] = None
+        self.fitting_context.chi_squared_cache[self.fitting_context.current_dataset_index] = None
 
     @property
     def fit_statuses(self) -> list:
@@ -401,7 +411,7 @@ class BasicFittingModel:
         self.fitting_context.remove_latest_fit()
 
     def reset_current_dataset_index(self) -> None:
-        """Resets the current dataset index stored by the model."""
+        """Resets the current dataset index stored by the context."""
         if self.fitting_context.number_of_datasets == 0:
             self.fitting_context.current_dataset_index = None
         elif self.fitting_context.current_dataset_index is None or \
@@ -409,21 +419,26 @@ class BasicFittingModel:
             self.fitting_context.current_dataset_index = 0
 
     def reset_start_xs_and_end_xs(self) -> None:
-        """Resets the start and end Xs stored by the model."""
+        """Resets the start and end Xs stored by the context."""
         self._reset_start_xs()
         self._reset_end_xs()
 
     def reset_fit_statuses_and_chi_squared(self) -> None:
-        """Reset the fit statuses and chi squared stored by the model."""
+        """Reset the fit statuses and chi squared stored by the context."""
         self.fitting_context.fit_statuses = [DEFAULT_FIT_STATUS] * self.fitting_context.number_of_datasets
         self.fitting_context.chi_squared = [DEFAULT_CHI_SQUARED] * self.fitting_context.number_of_datasets
+
+    def reset_current_fit_status_and_chi_squared(self) -> None:
+        """Reset the current fit status and chi squared stored by the context."""
+        self.current_fit_status = DEFAULT_FIT_STATUS
+        self.current_chi_squared = DEFAULT_CHI_SQUARED
 
     def reset_fit_functions(self, new_functions: list) -> None:
         """Reset the fit functions stored by the model. Attempts to use the currently selected function."""
         self.fitting_context.single_fit_functions = new_functions
 
     def _reset_start_xs(self) -> None:
-        """Resets the start Xs stored by the model."""
+        """Resets the start Xs stored by the context."""
         if self.fitting_context.number_of_datasets > 0:
             self.fitting_context.start_xs = [self.retrieve_first_good_data_from(name)
                                              for name in self.fitting_context.dataset_names]
@@ -431,7 +446,7 @@ class BasicFittingModel:
             self.fitting_context.start_xs = []
 
     def _reset_end_xs(self) -> None:
-        """Resets the end Xs stored by the model."""
+        """Resets the end Xs stored by the context."""
         self.fitting_context.end_xs = [self.current_end_x] * self.fitting_context.number_of_datasets
 
     def _get_new_start_xs_and_end_xs_using_existing_datasets(self, new_dataset_names: list) -> tuple:

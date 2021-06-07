@@ -149,6 +149,10 @@ class BasicFittingView(ui_form, base_widget):
         """Returns the global fitting function."""
         return self.fit_function_options.fit_object
 
+    def current_fit_function(self) -> IFunction:
+        """Returns the current fitting function in the view."""
+        return self.fit_function_options.current_fit_function()
+
     @property
     def minimizer(self) -> str:
         """Returns the selected minimizer."""

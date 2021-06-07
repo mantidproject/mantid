@@ -72,11 +72,43 @@ class ModelFittingPresenter(BasicFittingPresenter):
         self.parameter_combination_thread_success = False
         self.view.warning_popup(error)
 
+    def handle_function_structure_changed(self) -> None:
+        """Handle when the function structure is changed."""
+        self.update_fit_functions_in_model_from_view()
+        self.automatically_update_function_name()
+
+        if self.model.get_active_fit_function() is None:
+            self.clear_current_cached_fit_function()
+            self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
+
+        self.reset_fit_status_and_chi_squared_information()
+
+        self.update_plot_guess()
+
+        self.fit_function_changed_notifier.notify_subscribers()
+
+        # Required to update the function browser to display the errors when first adding a function.
+        self.view.set_current_dataset_index(self.model.current_dataset_index)
+
     def update_dataset_names_in_view_and_model(self) -> None:
         """Updates the results tables currently displayed."""
         self.model.result_table_names = self.model.get_workspace_names_to_display_from_context()
         # Triggers handle_results_table_changed
         self.view.update_result_table_names(self.model.result_table_names)
+
+    def update_fit_functions_in_model_from_view(self) -> None:
+        """Update the fit function in the model only for the currently selected dataset."""
+        self.model.current_single_fit_function = self.view.current_fit_function()
+
+    def reset_fit_status_and_chi_squared_information(self) -> None:
+        """Reset the fit status and chi squared only for the currently selected dataset."""
+        self.model.reset_current_fit_status_and_chi_squared()
+        self.update_fit_statuses_and_chi_squared_in_view_from_model()
+
+    def clear_current_cached_fit_function(self) -> None:
+        """Clear the cached fit function for the currently selected dataset."""
+        self.model.clear_current_cached_fit_function()
+        self.view.enable_undo_fit(not self.model.is_single_fit_functions_cache_empty())
 
     def _create_parameter_combination_workspaces(self) -> None:
         """Creates a matrix workspace for each possible parameter combination to be used for fitting."""

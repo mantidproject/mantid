@@ -112,6 +112,16 @@ class FitFunctionOptionsView(ui_form, base_widget):
         """Sets the index of the current dataset."""
         self.function_browser.setCurrentDataset(dataset_index)
 
+    def set_fit_function(self, fit_function: IFunction) -> None:
+        """Set the fit function shown in the view."""
+        self.function_browser.blockSignals(True)
+        if fit_function is None:
+            self.function_browser.setFunction("")
+        else:
+            self.function_browser.setFunction(str(fit_function))
+        self.function_browser.blockSignals(False)
+        self.function_browser.setErrorsEnabled(True)
+
     def update_function_browser_parameters(self, is_simultaneous_fit: bool, fit_function: IFunction,
                                            global_parameters: list = []) -> None:
         """Updates the parameters in the function browser."""
@@ -132,6 +142,10 @@ class FitFunctionOptionsView(ui_form, base_widget):
     def fit_object(self) -> IFunction:
         """Returns the global fitting function."""
         return self.function_browser.getGlobalFunction()
+
+    def current_fit_function(self) -> IFunction:
+        """Returns the current fitting function in the view."""
+        return self.function_browser.getFunction()
 
     @property
     def minimizer(self) -> str:
