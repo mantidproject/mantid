@@ -187,7 +187,7 @@ void CrossCorrelate::exec() {
     // convert dspacing to bins, where maxDSpaceShift is at least 0.1
     const auto maxBins = std::max(0.0 + maxDSpaceShift * 2, 0.1) / (xmax - xmin) * (rangeEnd - rangeStart);
     // calc range based on max bins
-    shiftCorrection = abs(abs((-numReferenceY + 2) - (numReferenceY - 2)) - maxBins) / 2;
+    shiftCorrection = std::max(0.0, abs((-numReferenceY + 2) - (numReferenceY - 2)) - maxBins) / 2;
   }
 
   // Initialise the progress reporting object
