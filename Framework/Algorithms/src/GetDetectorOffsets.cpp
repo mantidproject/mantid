@@ -205,14 +205,14 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
   // Try to observe the peak height and location
   const auto &histogram = inputW->histogram(s);
   const auto &vector_x = histogram.points();
-  const auto start_index = Mantid::Algorithms::PeakParameterHelper::findXIndex(vector_x, m_Xmin);
+  const auto start_index = findXIndex(vector_x, m_Xmin);
   const auto stop_index = findXIndex(vector_x, m_Xmax, start_index);
   // observe parameters if we found a peak range, otherwise use defaults
   if (start_index != stop_index) {
     // create a background function
     auto bkgdFunction = std::dynamic_pointer_cast<IBackgroundFunction>(
         API::FunctionFactory::Instance().createFunction("LinearBackground"));
-    auto peakFunction = std::dynamic_pointer_cast<IPeakFunction>(fun_ptr);
+    auto peakFunction = std::dynamic_pointer_cast<IPeakFunction>(fun_ptr->getFunction(1));
 
     int result = estimatePeakParameters(histogram, std::pair<size_t, size_t>(start_index, stop_index), peakFunction,
                                         bkgdFunction, true, EstimatePeakWidth::Observation, EMPTY_DBL(), 0.0);
