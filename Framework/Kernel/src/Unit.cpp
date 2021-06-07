@@ -693,21 +693,19 @@ double dSpacing::singleFromTOF(const double tof) const {
     // 0.0 = DIFA * d^2 + DIFC * d + (T0 - TOF)
     // solve for this quadratic equation, we have
     //       -DIFC + SQRT(DIFC^2 - 4*DIFA*(T0 - TOF))
-    // d = ------------------------------------------- if DIFA > 0.0
+    // d = -------------------------------------------
     //                  2*DIFA
     // and
     //       -DIFC - SQRT(DIFC^2 - 4*DIFA*(T0 - TOF))
-    // d = ------------------------------------------- if DIFA < 0.0
+    // d = -------------------------------------------
     //                  2*DIFA
     // NOTE:
-    //   bottom line is that d has to be a positive number
+    //   bottom line is that d has to be a positive number that is closer to 0
     double sqrtTerm = sqrt(difc * difc - 4 * difa * (tzero - tof));
-    if (difa > 0) {
-      return 0.5 / difa * (-difc + sqrtTerm);
-    } else {
-      // here difa < 0 since difa == 0 is handled above
-      return 0.5 / difa * (-difc - sqrtTerm);
-    }
+    double d1 = std::max(0.0, 0.5 / difa * (-difc + sqrtTerm));
+    double d2 = std::max(0.0, 0.5 / difa * (-difc - sqrtTerm));
+
+    return std::min(d1, d2);
   }
 
   // // and then solve quadratic using Muller formula
@@ -724,6 +722,7 @@ double dSpacing::singleFromTOF(const double tof) const {
   // else
   //   return (tof - tzero) / (0.5 * (difc + sqrtTerm));
 }
+
 double dSpacing::conversionTOFMin() const {
   // quadratic only has a min if difa is positive
   if (difa > 0) {
@@ -738,6 +737,7 @@ double dSpacing::conversionTOFMin() const {
     return TOFmin;
   }
 }
+
 double dSpacing::conversionTOFMax() const {
   // quadratic only has a max if difa is negative
   if (difa < 0) {
