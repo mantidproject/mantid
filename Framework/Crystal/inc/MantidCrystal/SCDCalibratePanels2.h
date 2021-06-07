@@ -12,6 +12,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 
 #include <boost/container/flat_set.hpp>
+#include <limits>
 
 namespace Mantid {
 namespace Crystal {
@@ -63,6 +64,9 @@ private:
   /// Private validator for inputs
   std::map<std::string, std::string> validateInputs() override;
 
+  /// Cache TOF equivalent to those measured from experiment
+  std::vector<double> captureTOF(Mantid::API::IPeaksWorkspace_sptr pws);
+
   /// Private function dedicated for parsing lattice constant
   void parseLatticeConstant(Mantid::API::IPeaksWorkspace_sptr pws);
 
@@ -76,13 +80,16 @@ private:
   void getBankNames(Mantid::API::IPeaksWorkspace_sptr pws);
 
   /// Private function for calibrating T0
-  void optimizeT0(Mantid::API::IPeaksWorkspace_sptr pws);
+  void optimizeT0(Mantid::API::IPeaksWorkspace_sptr pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
 
   /// Private function for calibrating L1
-  void optimizeL1(Mantid::API::IPeaksWorkspace_sptr pws);
+  void optimizeL1(Mantid::API::IPeaksWorkspace_sptr pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
 
   /// Private function for calibrating banks
-  void optimizeBanks(Mantid::API::IPeaksWorkspace_sptr pws);
+  void optimizeBanks(Mantid::API::IPeaksWorkspace_sptr pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
+
+  /// Private function for fine tunning sample position
+  void optimizeSamplePos(Mantid::API::IPeaksWorkspace_sptr pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
 
   /// Helper function for selecting peaks based on given bank name
   Mantid::API::IPeaksWorkspace_sptr selectPeaksByBankName(Mantid::API::IPeaksWorkspace_sptr pws,
@@ -92,17 +99,14 @@ private:
   /// integer HKL
   Mantid::API::MatrixWorkspace_sptr getIdealQSampleAsHistogram1D(Mantid::API::IPeaksWorkspace_sptr pws);
 
-  /// Helper functions for adjusting T0 for all peaks
-  void adjustT0(double dT0, Mantid::API::IPeaksWorkspace_sptr &pws);
-
   /// Helper functions for adjusting components
-  void adjustComponent(double dx, double dy, double dz, double rvx, double rvy, double rvz, double rang,
-                       std::string cmptName, Mantid::API::IPeaksWorkspace_sptr &pws);
+  void adjustComponent(double dx, double dy, double dz, double drx, double dry, double drz, std::string cmptName,
+                       Mantid::API::IPeaksWorkspace_sptr &pws);
 
   /// Generate a Table workspace to store the calibration results
   Mantid::API::ITableWorkspace_sptr generateCalibrationTable(std::shared_ptr<Geometry::Instrument> &instrument);
 
-  /// Save to xml file for Mantid to load
+  /// Save to xml file for Mantid to load by manual crafting
   void saveXmlFile(const std::string &FileName, boost::container::flat_set<std::string> &AllBankNames,
                    std::shared_ptr<Geometry::Instrument> &instrument);
 
@@ -113,19 +117,19 @@ private:
   /// Save the calibration table to a CSV file
   void saveCalibrationTable(const std::string &FileName, Mantid::API::ITableWorkspace_sptr &tws);
 
+  /// Profile related functions
+  void profileL1(Mantid::API::IPeaksWorkspace_sptr &pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
+  void profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
+  void profileT0(Mantid::API::IPeaksWorkspace_sptr &pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
+  void profileL1T0(Mantid::API::IPeaksWorkspace_sptr &pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
+
   /// unique vars for a given instance of calibration
   double m_a, m_b, m_c, m_alpha, m_beta, m_gamma;
   double m_T0 = 0.0;
-  double m_tolerance_translation = 1e-4; // meters
-  double m_tolerance_rotation = 1e-3;    // degree
-  // The following bounds are set based on information provided by the
-  // CORELLI team
-  double m_bank_translation_bounds = 5e-2;  // meter
-  double m_bank_rotation_bounds = 5.0;      // degree
-  double m_source_translation_bounds = 0.1; // meter
   bool LOGCHILDALG{true};
   const int MINIMUM_PEAKS_PER_BANK{6};
   const double PI{3.1415926535897932384626433832795028841971693993751058209};
+  static constexpr double Tolerance = std::numeric_limits<double>::epsilon();
 
   // Column names and types
   const std::string calibrationTableColumnNames[8] = {"ComponentName",    "Xposition",        "Yposition",

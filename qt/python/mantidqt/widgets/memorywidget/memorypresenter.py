@@ -56,7 +56,7 @@ class MemoryPresenter(object):
         """
         if self.update_allowed:
             mem_used_percent, mem_used, mem_avail = get_memory_info()
-            self.view.set_value(mem_used_percent, mem_used, mem_avail)
+            self.view.invoke_set_value(mem_used_percent, mem_used, mem_avail)
 
     def cancel_memory_update(self):
         """

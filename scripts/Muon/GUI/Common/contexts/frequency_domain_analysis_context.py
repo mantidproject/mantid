@@ -29,6 +29,14 @@ class FrequencyDomainAnalysisContext(MuonContext):
     def default_fitting_plot_range(self):
         return self._freq_plotting_context.default_xlims
 
+    @property
+    def default_end_x(self):
+        return self._freq_plotting_context.default_xlims[1]
+
+    @property
+    def guess_workspace_prefix(self):
+        return "__frequency_domain_analysis_fitting_guess"
+
     def get_workspace_names_for_FFT_analysis(self, use_raw=True):
         groups_and_pairs = ','.join(self.group_pair_context.selected_groups_and_pairs)
         workspace_options = self.get_names_of_time_domain_workspaces_to_fit(
@@ -36,10 +44,10 @@ class FrequencyDomainAnalysisContext(MuonContext):
         return workspace_options
 
     def get_names_of_workspaces_to_fit(self, runs='', group_and_pair='',
-                                       phasequad=False, rebin=False, freq="None"):
+                                       phasequad=False, rebin=False):
 
         return self.get_names_of_frequency_domain_workspaces_to_fit(
-            runs=runs, group_and_pair=group_and_pair, frequency_type=freq)
+            runs=runs, group_and_pair=group_and_pair, frequency_type=self._frequency_context.plot_type)
 
     def get_names_of_frequency_domain_workspaces_to_fit(
             self, runs='', group_and_pair='', frequency_type="None"):

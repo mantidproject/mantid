@@ -200,7 +200,7 @@ set(TEST_FILES
     PredictFractionalPeaksTest.h
     PredictPeaksTest.h
     PredictSatellitePeaksTest.h
-    # SCDCalibratePanels2Test.h
+    SCDCalibratePanels2Test.h
     SCDCalibratePanelsTest.h
     SaveHKLTest.h
     SaveIsawPeaksTest.h

@@ -53,7 +53,9 @@ def adjust_calibration(calibration_runs, instrument, offset_file_name, grouping_
                                                            input_batching=INPUT_BATCHING.Summed)
 
     input_ws = input_ws_list[0]
-    input_ws = mantid.AlignDetectors(InputWorkspace=input_ws, CalibrationFile=original_cal)
+    mantid.ApplyDiffCal(InstrumentWorkspace=input_ws, CalibrationFile=original_cal)
+    input_ws = mantid.ConvertUnits(InputWorkspace=input_ws, Target="dSpacing")
+    mantid.ApplyDiffCal(InstrumentWorkspace=input_ws, ClearCalibration=True)
     offset_file = os.path.join(calibration_dir, offset_file_name)
     focused = _calibration_processing(calibration_dir, calibration_runs, cross_correlate_params, get_det_offset_params,
                                       grouping_file_name, input_ws, instrument, offset_file, rebin_1_params,

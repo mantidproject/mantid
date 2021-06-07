@@ -32,6 +32,7 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
     regionSelectionClicked = Signal(bool)
     nonOrthogonalClicked = Signal(bool)
     peaksOverlayClicked = Signal(bool)
+    zoomPanClicked = Signal(bool)
     zoomPanFinished = Signal()
 
     toolitems = (
@@ -86,6 +87,14 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
 
         # Location of a press event
         self._pressed_xy = None
+
+    def zoom(self, *args):
+        super().zoom(*args)
+        self.zoomPanClicked.emit(bool(self.mode))
+
+    def pan(self, *args):
+        super().pan(*args)
+        self.zoomPanClicked.emit(bool(self.mode))
 
     def press(self, event):
         """
