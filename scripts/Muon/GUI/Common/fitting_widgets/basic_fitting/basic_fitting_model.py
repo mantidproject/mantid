@@ -21,6 +21,7 @@ import math
 import re
 from typing import List, NamedTuple
 
+COVARIANCE_MATRIX_WS_NAME_APPENDAGE = "_NormalisedCovarianceMatrix"
 DEFAULT_CHI_SQUARED = 0.0
 DEFAULT_FIT_STATUS = None
 DEFAULT_SINGLE_FIT_FUNCTION = None
@@ -668,7 +669,8 @@ class BasicFittingModel:
         table_name, table_directory = create_parameter_table_name(input_workspace, self.function_name)
 
         self._add_workspace_to_ADS(output_workspace, workspace_name, workspace_directory)
-        self._add_workspace_to_ADS(covariance_matrix, workspace_name + '_CovarianceMatrix', table_directory)
+        self._add_workspace_to_ADS(covariance_matrix, workspace_name + COVARIANCE_MATRIX_WS_NAME_APPENDAGE,
+                                   table_directory)
 
         return workspace_name, table_name, table_directory
 

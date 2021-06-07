@@ -12,7 +12,8 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (create_fitted_workspace
                                                          create_parameter_table_name,
                                                          get_run_numbers_as_string_from_workspace_name)
 from Muon.GUI.Common.contexts.muon_context import MuonContext
-from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
+from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import (BasicFittingModel,
+                                                                               COVARIANCE_MATRIX_WS_NAME_APPENDAGE)
 from Muon.GUI.Common.utilities.algorithm_utils import run_simultaneous_Fit
 
 
@@ -353,7 +354,8 @@ class GeneralFittingModel(BasicFittingModel):
 
         self._add_workspace_to_ADS(output_workspace, workspace_names, "")
         workspace_names = self._rename_members_of_fitted_workspace_group(input_workspace_names, workspace_names)
-        self._add_workspace_to_ADS(covariance_matrix, workspace_names[0] + "_CovarianceMatrix", table_directory)
+        self._add_workspace_to_ADS(covariance_matrix, workspace_names[0] + COVARIANCE_MATRIX_WS_NAME_APPENDAGE,
+                                   table_directory)
 
         return workspace_names, table_name, table_directory
 
