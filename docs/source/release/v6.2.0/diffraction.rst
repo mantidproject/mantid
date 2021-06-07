@@ -21,6 +21,7 @@ Improvements
 
 Bugfixes
 ########
+- fix d-spacing calculation when parabolic model is selected.
 
 Engineering Diffraction
 -----------------------
