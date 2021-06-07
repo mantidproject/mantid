@@ -21,7 +21,7 @@
     </parameter>
 
     <parameter name="logbook_default_parameters" type="string">
-      <value val="wavelength:/entry0/D7/monochromator/wavelength:f,
+      <value val="proposal_number:/entry0/user/proposal:s,
 		  experiment_identifier:/entry0/experiment_identifier:s,
 		  start_time:/entry0/start_time:s,
 		  end_time:/entry0/end_time:s,
