@@ -13,7 +13,7 @@ from Engineering.gui.engineering_diffraction.tabs.common import vanadium_correct
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from Engineering.EnggUtils import create_custom_grouping_workspace
 from mantid.simpleapi import logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE, \
-    Load, NormaliseByCurrent, Divide, DiffractionFocussing, RebinToWorkspace, CloneWorkspace, DeleteWorkspaces, \
+    Load, NormaliseByCurrent, Divide, DiffractionFocussing, RebinToWorkspace, CloneWorkspace, DeleteWorkspace, \
     ConvertUnits, ReplaceSpecialValues, ApplyDiffCal, RenameWorkspace
 
 SAMPLE_RUN_WORKSPACE_NAME = "engggui_focusing_input_ws"
@@ -101,17 +101,16 @@ class FocusModel(object):
                         region_calib = "engggui_calibration_bank_2"
                     # need to clone these workspaces as they're altered in each run of focus
                     sample_ws_clone = CloneWorkspace(sample_workspace)
-                    curves_ws_clone = CloneWorkspace(curves_workspace)
                     success = self._run_focus(sample_ws_clone, tof_output_name, integration_workspace,
-                                              curves_ws_clone, df_kwarg, full_calib_workspace, region_calib)
+                                              curves_workspace, df_kwarg, full_calib_workspace, region_calib)
                     if success:
                         workspaces_for_run.append(tof_output_name)
                         # Save the output to the file system.
                         self._save_output(instrument, sample_path, name, tof_output_name, rb_num)
                         self._save_output(instrument, sample_path, name, dspacing_output_name, rb_num)
-                    DeleteWorkspaces([sample_ws_clone, curves_ws_clone])
                 output_workspaces.append(workspaces_for_run)
                 self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
+                DeleteWorkspace(sample_workspace)
 
         # Plot the output
         if plot_output:
@@ -132,19 +131,25 @@ class FocusModel(object):
             logger.warning(f"Skipping focus of run {input_workspace.name()} because it has invalid proton charge.")
             return False
         input_workspace /= vanadium_integration_ws
+        # replace nans created in sensitivity correction
         ReplaceSpecialValues(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, NaNValue=0,
                              InfinityValue=0)
         ApplyDiffCal(InstrumentWorkspace=input_workspace, CalibrationWorkspace=full_calib)
-        ws_d = ConvertUnits(InputWorkspace=input_workspace, Target='dSpacing')
-        focused_sample = DiffractionFocussing(InputWorkspace=ws_d, **df_kwarg)
-        curves_rebinned = RebinToWorkspace(WorkspaceToRebin=vanadium_curves_ws, WorkspaceToMatch=focused_sample)
-        normalised = Divide(LHSWorkspace=focused_sample, RHSWorkspace=curves_rebinned,
-                            AllowDifferentNumberSpectra=True)
-        ApplyDiffCal(InstrumentWorkspace=normalised, CalibrationWorkspace=region_calib)
+        ConvertUnits(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, Target='dSpacing')
+        # rename workspace prior to focussing to avoid errors later
         dspacing_output_name = tof_output_name + "_dSpacing"
-        RenameWorkspace(InputWorkspace=normalised, OutputWorkspace=dspacing_output_name)
-        ConvertUnits(InputWorkspace=normalised, OutputWorkspace=tof_output_name, Target='TOF')
-        DeleteWorkspaces([curves_rebinned, focused_sample, ws_d])
+        RenameWorkspace(input_workspace, dspacing_output_name)
+        # focus over specified region of interest
+        DiffractionFocussing(InputWorkspace=input_workspace, OutputWorkspace=dspacing_output_name,
+                             **df_kwarg)
+        curves_rebinned = RebinToWorkspace(WorkspaceToRebin=vanadium_curves_ws, WorkspaceToMatch=dspacing_output_name)
+        Divide(LHSWorkspace=dspacing_output_name, RHSWorkspace=curves_rebinned, OutputWorkspace=dspacing_output_name,
+               AllowDifferentNumberSpectra=True) # 1 spectra
+        # apply calibration from specified region of interest
+        ApplyDiffCal(InstrumentWorkspace=dspacing_output_name, CalibrationWorkspace=region_calib)
+        # output in both dSpacing and TOF
+        ConvertUnits(InputWorkspace=dspacing_output_name, OutputWorkspace=tof_output_name, Target='TOF')
+        DeleteWorkspace(curves_rebinned)
         return True
 
     @staticmethod
