@@ -86,7 +86,7 @@ public:
   virtual void addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX,
                                   double endX) = 0;
 
-  [[nodiscard]] virtual void openAddWorkspaceDialog() = 0;
+  virtual void openAddWorkspaceDialog() = 0;
   [[nodiscard]] virtual std::vector<Mantid::API::MatrixWorkspace_const_sptr> getDialogWorkspaces() = 0;
   [[nodiscard]] virtual std::vector<WorkspaceIndex> getDialogWorkspaceIndices() const = 0;
 

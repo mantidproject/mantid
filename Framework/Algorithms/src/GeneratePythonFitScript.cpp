@@ -17,8 +17,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StartsWithValidator.h"
 
-#include <boost/algorithm/string/detail/classification.hpp>
-#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <fstream>
 
@@ -76,7 +75,7 @@ std::string constructInputDictionary(std::vector<std::string> const &inputWorksp
 
 std::vector<std::string> splitStringBy(std::string const &str, std::string const &delimiter) {
   std::vector<std::string> subStrings;
-  boost::algorithm::split(subStrings, str, boost::algorithm::is_any_of(delimiter));
+  boost::split(subStrings, str, boost::is_any_of(delimiter));
   subStrings.erase(std::remove_if(subStrings.begin(), subStrings.end(),
                                   [](std::string const &subString) { return subString.empty(); }),
                    subStrings.end());

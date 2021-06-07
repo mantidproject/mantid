@@ -74,7 +74,7 @@ public:
   void addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX,
                           double endX) override;
 
-  [[nodiscard]] void openAddWorkspaceDialog() override;
+  void openAddWorkspaceDialog() override;
   [[nodiscard]] std::vector<Mantid::API::MatrixWorkspace_const_sptr> getDialogWorkspaces() override;
   [[nodiscard]] std::vector<WorkspaceIndex> getDialogWorkspaceIndices() const override;
 
