@@ -167,7 +167,8 @@ class AsyncTaskQtAdaptor(AsyncTask):
     def _wrap_signal(signal: pyqtSignal, slot: Optional[Callable]) -> Optional[Callable]:
         """
         Wraps a given signal so that the thread calls emit rather than the target directly.
-        This allows us to complete the slot on the target, rather than the
+        This allows us to complete the slot on the target, rather than trying
+        to invoke across threads causing Qt to assert / segfault
         """
         if not slot:
             return None
