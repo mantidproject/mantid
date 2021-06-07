@@ -245,10 +245,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self._status_and_tool_height = tbs_height + sbs.height()
         height = cs.height() + self._status_and_tool_height
         # get window width from toolbar/canvas width
-        if cs.width() > ts.width():
-            width = cs.width()
-        else:
-            width = ts.width()
+        width = max(cs.width(), ts.width())
         self.window.resize(width, height)
 
         self.fit_browser = FitPropertyBrowser(canvas, ToolbarStateManager(self.toolbar))
