@@ -218,6 +218,9 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
                                         bkgdFunction, true, EstimatePeakWidth::Observation, EMPTY_DBL(), 0.0);
     if (result != PeakFitResult::GOOD) {
       g_log.debug() << "bad result for observing peak parameters, using default peak height and loc\n";
+    } else {
+      peakHeight = peakFunction->height();
+      peakLoc = peakFunction->centre();
     }
   } else {
     g_log.debug() << "range size is zero in estimatePeakParameters, using default peak height and loc\n";
@@ -237,7 +240,8 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
     throw;
   }
 
-  // fit_alg->setProperty("Function", fun);
+  auto fun = createFunction(peakHeight, peakLoc);
+  fit_alg->setProperty("Function", fun);
 
   fit_alg->setProperty("InputWorkspace", inputW);
   fit_alg->setProperty<int>("WorkspaceIndex",
