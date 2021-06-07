@@ -34,5 +34,5 @@ generate_mantid_export_header(Json FALSE)
 mtd_install_targets(TARGETS
                     Json
                     INSTALL_DIRS
-                    ${PLUGINS_DIR}
-                    ${WORKBENCH_PLUGINS_DIR})
+                    ${LIB_DIR}
+                    ${WORKBENCH_LIB_DIR})
