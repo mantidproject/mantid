@@ -182,22 +182,25 @@ public:
     m_presenter->notifyPresenter(ViewEvent::RemoveDomainClicked);
   }
 
-  void test_that_a_add_domain_event_will_attempt_to_add_a_domain_in_the_view_and_model() {
+  void test_that_a_add_domain_event_will_attempt_to_open_the_add_workspace_dialog() {
+    EXPECT_CALL(*m_view, openAddWorkspaceDialog()).Times(1);
+    m_presenter->notifyPresenter(ViewEvent::AddDomainClicked);
+  }
+
+  void test_that_a_add_domain_accepted_event_will_attempt_to_add_a_domain_in_the_view_and_model() {
     auto const workspaces = std::vector<Mantid::API::MatrixWorkspace_const_sptr>{m_workspace};
     auto const workspaceIndices = std::vector<WorkspaceIndex>{m_wsIndex};
 
-    ON_CALL(*m_view, openAddWorkspaceDialog()).WillByDefault(Return(true));
     ON_CALL(*m_view, getDialogWorkspaces()).WillByDefault(Return(workspaces));
     ON_CALL(*m_view, getDialogWorkspaceIndices()).WillByDefault(Return(workspaceIndices));
 
-    EXPECT_CALL(*m_view, openAddWorkspaceDialog()).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*m_view, getDialogWorkspaces()).Times(1).WillOnce(Return(workspaces));
     EXPECT_CALL(*m_view, getDialogWorkspaceIndices()).Times(1).WillOnce(Return(workspaceIndices));
 
     EXPECT_CALL(*m_view, addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX)).Times(1);
     EXPECT_CALL(*m_model, addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX)).Times(1);
 
-    m_presenter->notifyPresenter(ViewEvent::AddDomainClicked);
+    m_presenter->notifyPresenter(ViewEvent::AddDomainAccepted);
   }
 
   void test_that_changing_a_start_x_will_update_its_value_in_the_model_when_the_x_value_is_valid() {

@@ -246,14 +246,14 @@ public:
   void test_that_getDialogWorkspaces_returns_the_expected_workspace_selected_in_the_AddWorkspaceDialog() {
     openFitScriptGeneratorWidget();
 
+    m_view->openAddWorkspaceDialog();
     auto dialog = m_view->addWorkspaceDialog();
     auto combobox = dialog->workspaceNameComboBox();
     auto lineedit = dialog->workspaceIndiceLineEdit();
-    dialog->show();
 
     combobox->setCurrentIndex(4);
     lineedit->setText("0-2");
-    dialog->accept();
+    dialog->handleOKClicked();
 
     auto const workspaces = m_view->getDialogWorkspaces();
     TS_ASSERT_EQUALS(workspaces.size(), 1);
@@ -265,14 +265,14 @@ public:
   test_that_getDialogWorkspaces_returns_the_expected_workspaces_when_a_workspace_group_is_selected_in_the_AddWorkspaceDialog() {
     openFitScriptGeneratorWidget();
 
+    m_view->openAddWorkspaceDialog();
     auto dialog = m_view->addWorkspaceDialog();
     auto combobox = dialog->workspaceNameComboBox();
     auto lineedit = dialog->workspaceIndiceLineEdit();
-    dialog->show();
 
     combobox->setCurrentIndex(0);
     lineedit->setText("0-2");
-    dialog->accept();
+    dialog->handleOKClicked();
 
     auto const workspaces = m_view->getDialogWorkspaces();
     TS_ASSERT_EQUALS(workspaces.size(), 3);
@@ -285,14 +285,14 @@ public:
   void test_that_getDialogWorkspaceIndices_returns_the_expected_workspace_index_selected_in_the_AddWorkspaceDialog() {
     openFitScriptGeneratorWidget();
 
+    m_view->openAddWorkspaceDialog();
     auto dialog = m_view->addWorkspaceDialog();
     auto combobox = dialog->workspaceNameComboBox();
     auto lineedit = dialog->workspaceIndiceLineEdit();
-    dialog->show();
 
     combobox->setCurrentIndex(0);
     lineedit->setText("1");
-    dialog->accept();
+    dialog->handleOKClicked();
 
     auto const workspaceIndices = m_view->getDialogWorkspaceIndices();
     TS_ASSERT_EQUALS(workspaceIndices.size(), 1);
@@ -303,14 +303,14 @@ public:
   test_that_getDialogWorkspaceIndices_returns_the_expected_range_of_workspace_indices_selected_in_the_AddWorkspaceDialog() {
     openFitScriptGeneratorWidget();
 
+    m_view->openAddWorkspaceDialog();
     auto dialog = m_view->addWorkspaceDialog();
     auto combobox = dialog->workspaceNameComboBox();
     auto lineedit = dialog->workspaceIndiceLineEdit();
-    dialog->show();
 
     combobox->setCurrentIndex(0);
     lineedit->setText("0-2");
-    dialog->accept();
+    dialog->handleOKClicked();
 
     auto const workspaceIndices = m_view->getDialogWorkspaceIndices();
     TS_ASSERT_EQUALS(workspaceIndices.size(), 3);

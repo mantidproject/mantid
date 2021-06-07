@@ -83,7 +83,7 @@ public:
   MOCK_METHOD4(addWorkspaceDomain,
                void(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX, double endX));
 
-  MOCK_METHOD0(openAddWorkspaceDialog, bool());
+  MOCK_METHOD0(openAddWorkspaceDialog, void());
   MOCK_METHOD0(getDialogWorkspaces, std::vector<Mantid::API::MatrixWorkspace_const_sptr>());
   MOCK_CONST_METHOD0(getDialogWorkspaceIndices, std::vector<WorkspaceIndex>());
 

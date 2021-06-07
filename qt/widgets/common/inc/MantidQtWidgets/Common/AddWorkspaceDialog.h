@@ -42,11 +42,13 @@ signals:
   void closeDialog();
   void okClicked(bool close);
 
+public slots:
+  void handleCancelClicked();
+  void handleOKClicked();
+
 private slots:
   void workspaceNameChanged(const QString & /*wsName*/);
   void selectAllSpectra(int state);
-  void handleCancelClicked();
-  void handleOKClicked();
 
 private:
   void addWorkspacesFromGroup(std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces,
