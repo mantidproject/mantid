@@ -8,31 +8,22 @@ import argparse
 import os
 import pprint
 import re
-import site
 import sys
+from pathlib import Path
 
-# Regular expression to extract the Qt version tag
 QT_TAG_RE = re.compile(r'Qt_\d+_\d+_\d+')
 
 
-class PyQtConfig:
-    """Inspects the installed PyQt version and extracts
-    information about it.
-    """
+class PyQtConfig(object):
+    version_hex = None
+    version_str = None
+    qt_tag = None
+    sip_dir = None
+    sip_flags = None
+    pyuic_path = None
 
-    version_hex: str
-    version_str: str
-    qt_tag: str
-    sip_dir: str
-    sip_flags: str
-    pyuic_path: str
-
-    def __init__(self, major_version):
-        """Inspects the named PyQt package given the major version number
-        :param major_version: The major version number of the library
-        """
-        pyqt_name = f'PyQt{major_version}'
-        qtcore = __import__(f'{pyqt_name}.QtCore', globals(), locals(), ['QtCore'], 0)
+    def __init__(self, name):
+        qtcore = __import__(name + '.QtCore', globals(), locals(), ['QtCore'], 0)
         self.version_hex = qtcore.PYQT_VERSION
         self.version_str = qtcore.PYQT_VERSION_STR
         self.sip_flags = qtcore.PYQT_CONFIGURATION['sip_flags']
@@ -40,15 +31,23 @@ class PyQtConfig:
         # This is based on QScintilla's configure.py, and only works for the
         # default case where installation paths have not been changed in PyQt's
         # configuration process.
-        if sys.platform == 'win32':
-            self.sip_dir = os.path.join(sys.prefix, 'share', 'sip', pyqt_name)
+        conda_activated, conda_env = find_conda_env()
+        if conda_env:
+            self.sip_dir = os.path.join(conda_env, "share", "sip", name)
+        elif sys.platform == 'win32':
+            if sys.version_info > (3,):
+                self.sip_dir = os.path.join(sys.prefix, 'share', 'sip', name)
+            else:
+                self.sip_dir = os.path.join(sys.prefix, 'sip', name)
         else:
             qt_maj_version = self.version_str[0]
             if sys.platform == 'darwin':
                 prefix = '/usr/local/opt'  # brew Cellar
                 possible_sip_dirs = []
-                if qt_maj_version == '5':
-                    possible_sip_dirs.append(os.path.join(site.getsitepackages()[0], 'PyQt5', 'bindings'))
+                if qt_maj_version == '4':
+                    possible_sip_dirs.append(os.path.join('pyqt@4', 'share', 'sip'))
+                    possible_sip_dirs.append(os.path.join('mantid-pyqt@4', 'share', 'sip'))
+                elif qt_maj_version == '5':
                     possible_sip_dirs.append(os.path.join('pyqt', 'share', 'sip', 'Qt5'))
                     possible_sip_dirs.append(os.path.join('mantid-pyqt5', 'share', 'sip', 'Qt5'))
                 else:
@@ -56,20 +55,23 @@ class PyQtConfig:
                                        "Please update FindPyQt accordingly.".format(self.version_str[0]))
             else:
                 prefix = os.path.join(sys.prefix, 'share')
-                possible_sip_dirs = (f'python{sys.version_info.major}{sys.version_info.minor}-sip/{pyqt_name}',
-                                     f'python{sys.version_info.major}-sip/{pyqt_name}', f'sip/{pyqt_name}')
-            for pyqt_sip_dir in possible_sip_dirs:
-                if not os.path.isabs(pyqt_sip_dir):
-                    pyqt_sip_dir = os.path.join(prefix, pyqt_sip_dir)
+                possible_sip_dirs = (
+                    'python{}{}-sip/{}'.format(sys.version_info.major, sys.version_info.minor, name),
+                    'python{}-sip/{}'.format(sys.version_info.major, name),
+                    'sip/{}'.format(name)
+                )
+            for sip_dir in possible_sip_dirs:
+                pyqt_sip_dir = os.path.join(prefix, sip_dir)
                 if os.path.exists(pyqt_sip_dir):
                     self.sip_dir = pyqt_sip_dir
                     break
             if self.sip_dir is None:
                 possible_sip_dirs = list(map(lambda p: os.path.join(prefix, p), possible_sip_dirs))
-                raise RuntimeError(f"Unable to find {pyqt_name}.\n" + f"Tried following locations: {pprint.pformat(possible_sip_dirs)}")
+                raise RuntimeError("Unable to find {}. "
+                                   "Tried following locations: {}".format(name, pprint.pformat(possible_sip_dirs)))
 
         # Assume uic script is in uic submodule
-        uic = __import__(pyqt_name + '.uic', globals(), locals(), ['uic'], 0)
+        uic = __import__(name + '.uic', globals(), locals(), ['uic'], 0)
         self.pyuic_path = os.path.join(os.path.dirname(uic.__file__), 'pyuic.py')
 
     def _get_qt_tag(self, sip_flags):
@@ -94,7 +96,8 @@ class PyQtConfig:
 def main():
     # parse command line
     args = get_options()
-    print(PyQtConfig(major_version=args.version))
+
+    print(PyQtConfig('PyQt%d' % args.version))
     return 0
 
 
@@ -102,6 +105,12 @@ def get_options():
     parser = argparse.ArgumentParser(description='Extract PyQt config information')
     parser.add_argument('version', type=int, help="PyQt major version")
     return parser.parse_args()
+
+
+def find_conda_env():
+    if os.environ['CONDA_PREFIX']:
+        return True, os.environ['CONDA_PREFIX']
+    return False, None
 
 
 if __name__ == "__main__":
