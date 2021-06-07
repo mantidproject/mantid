@@ -210,7 +210,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
                 self.actions()[i + 1].setVisible(enabled)
                 break
 
-    def set_buttons_visiblity(self, fig):
+    def set_buttons_visibility(self, fig):
         if figure_type(fig) not in [FigureType.Line, FigureType.Errorbar] or len(fig.get_axes()) > 1:
             self.set_fit_enabled(False)
 
