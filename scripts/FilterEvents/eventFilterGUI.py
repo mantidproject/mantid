@@ -926,6 +926,7 @@ class MainWindow(QMainWindow):
         if self.ui.lineEdit_timeInterval.text() != "":
             interval = float(self.ui.lineEdit_timeInterval.text())
             kwargs["TimeInterval"] = interval
+        kwargs["useReverseLogarithmic"] = self.ui.useReverseLogarithmic.isChecked()
 
         splitwsname = str(self._dataWS) + "_splitters"
         splitinfowsname = str(self._dataWS) + "_info"
