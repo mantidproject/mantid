@@ -16,7 +16,7 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, Fi
                         Progress, PropertyMode, WorkspaceProperty)
 from mantid.kernel import (Direction, FloatArrayProperty, IntArrayBoundedValidator, IntArrayProperty,
                            IntBoundedValidator, Property, StringListValidator)
-from mantid.utils.path import run_exists
+from mantid.utils.path import run_file
 import numpy as np
 
 # standard
@@ -235,7 +235,7 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         # Check files for RunNumbers exist
         for run_number in self.getProperty('RunNumbers').value:
-            if not run_exists(run_number, instrument='SNAP'):
+            if run_file(run_number, instrument='SNAP') is None:
                 issues['RunNumbers'] = f'Events file not found for run {run_number}'
                 break
 
@@ -243,7 +243,7 @@ class SNAPReduce(DataProcessorAlgorithm):
         background_property = self.getProperty('Background')
         if not background_property.isDefault:
             run_number = background_property.value
-            if not run_exists(run_number, instrument='SNAP'):
+            if run_file(run_number, instrument='SNAP') is None:
                 issues['RunNumbers'] = f'Events file not found for run {run_number}'
 
         # cross check masking
