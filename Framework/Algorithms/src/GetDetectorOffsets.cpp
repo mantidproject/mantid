@@ -73,10 +73,11 @@ std::map<std::string, std::string> GetDetectorOffsets::validateInputs() {
   std::map<std::string, std::string> result;
 
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  const auto unit = inputWS->getAxis(0)->unit()->unitID();
+  const auto unit = inputWS->getAxis(0)->unit()->caption();
   const auto unitErrorMsg =
-      "GetDetectorOffsets only supports input workspaces with units 'Bins of Shift' or 'dSpacing'";
-  if (unit != "Bins of Shift" && unit != "dSpacing") {
+      "GetDetectorOffsets only supports input workspaces with units 'Bins of Shift' or 'd-Spacing', your unit was : " +
+      unit;
+  if (unit != "Bins of Shift" && unit != "d-Spacing") {
     result["InputWorkspace"] = unitErrorMsg;
   }
   return result;
