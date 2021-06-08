@@ -418,6 +418,11 @@ class SNAPReduce(DataProcessorAlgorithm):
         return wkspname, unfocussed
 
     def PyExec(self):
+
+        if self.getProperty('EnableConfigurator') is True:
+            self._create_and_save_configuration()
+            return  # do not carry out the reduction
+
         in_Runs = self.getProperty("RunNumbers").value
         progress = Progress(self, 0., .25, 3)
         finalUnits = self.getPropertyValue("FinalUnits")
@@ -591,6 +596,9 @@ class SNAPReduce(DataProcessorAlgorithm):
             wkspNames = [background, unfocussedBkgd]
             for (propName, wkspName) in zip(propNames, wkspNames):
                 self._exportWorkspace(propName, wkspName)
+
+    def _create_and_save_configuration(self):
+        pass
 
 
 AlgorithmFactory.subscribe(SNAPReduce)
