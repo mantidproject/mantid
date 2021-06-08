@@ -19,10 +19,9 @@ def main(argv):
         Main entry point
 
         Args:
-        argv (list): List of strings giving command line arguments The full absolulte path to the file to wrap is mandatory.
-
+        argv (list): List of strings giving command line arguments The full absolute path to the file to wrap is
+        mandatory.
     """
-
     argv.reverse()
     to_wrap = argv[0]
     if not os.path.exists(to_wrap):
