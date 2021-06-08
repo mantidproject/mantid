@@ -199,7 +199,6 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
   double peakHeight = *it;
   double peakLoc = inputW->x(s)[it - yValues.begin()];
 
-  // auto fun = createFunction(peakHeight, peakLoc);
   IFunction_sptr fun_ptr = createFunction(peakHeight, peakLoc);
 
   // Try to observe the peak height and location
@@ -210,8 +209,7 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
   // observe parameters if we found a peak range, otherwise use defaults
   if (start_index != stop_index) {
     // create a background function
-    auto bkgdFunction = std::dynamic_pointer_cast<IBackgroundFunction>(
-        API::FunctionFactory::Instance().createFunction("LinearBackground"));
+    auto bkgdFunction = std::dynamic_pointer_cast<IBackgroundFunction>(fun_ptr->getFunction(0));
     auto peakFunction = std::dynamic_pointer_cast<IPeakFunction>(fun_ptr->getFunction(1));
 
     int result = estimatePeakParameters(histogram, std::pair<size_t, size_t>(start_index, stop_index), peakFunction,
@@ -250,6 +248,7 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
   fit_alg->setProperty("EndX", m_Xmax);
   fit_alg->setProperty("MaxIterations", 100);
 
+  fun_ptr = createFunction(peakHeight, peakLoc);
   fit_alg->setProperty("Function", fun_ptr);
   fit_alg->executeAsChildAlg();
   std::string fitStatus = fit_alg->getProperty("OutputStatus");
