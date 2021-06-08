@@ -15,23 +15,29 @@ Then for every MD event, a polarization angle correction is applied as below.
 
 1. If the MDEvent is in Q-sample frame, convert it to Q-lab by
    :math:`Q_{lab} = R \times Q_{sample}`
-   where R is goniometer rotation matrix.
+   where :math:`R` is goniometer rotation matrix.
+
 
 2. Calculate the horizontal plane angle between momentum transfer and direct beam
-
-    :math:`\gamma = tan^{-1}((Q_{lab})_x, (Q_{lab})_z)`
+   :math:`\gamma = \tan^{-1}(Q_{lab,x}, Q_{lab,z})`
 
 3. Calculate the Scharpf angle as
    :math:`\alpha = \gamma - P_a`
    , where :math:`P_a` is the polarization angle
 
-4. Correction factor :math:`F` is equal to :math:`1 / cos(2\alpha)` if :math:`abs(cos(2\alpha))` is greater than precision
+4. Correction factor :math:`F` is equal to :math:`1 / \cos(2\alpha)` if :math:`|\cos(2\alpha)|`
+   is greater than precision, else it is zero.
 
 5. Apply correction to each MDEvent as
 
-   :math:`I = I \times F`
 
-   :math:`Err^2 = Err^2 \times F^2`
+.. math::
+
+    I &= I \times F
+
+    Err^2 &= Err^2 \times F^2
+
+
 
 Inputs
 ======
