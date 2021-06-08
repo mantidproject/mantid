@@ -16,7 +16,7 @@ from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, Dif
     EnggEstimateFocussedBackground, ApplyDiffCal
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file, default_ceria_expected_peaks, \
     create_custom_grouping_workspace, create_spectrum_list_from_string, load_relevant_pdcal_outputs,\
-    generate_tof_fit_workspace
+    generate_tof_fit_dictionary
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
@@ -69,6 +69,7 @@ class CalibrationModel(object):
                                                                  full_calib)
         vanadium_corrections.handle_van_curves(van_curves, vanadium_path, instrument, rb_num)
         if plot_output:
+            plot_dicts = list()
             for i in range(len(cal_params)):
                 if spectrum_numbers:
                     bank_name = "Cropped"
@@ -76,13 +77,13 @@ class CalibrationModel(object):
                     bank_name = "bank_" + str(i + 1)
                 else:
                     bank_name = bank
-                generate_tof_fit_workspace(bank_name)
+                plot_dicts.append(generate_tof_fit_dictionary(bank_name))
             if bank is None and spectrum_numbers is None:
-                self._plot_tof_fit(["bank_1", "bank_2"])
+                self._plot_tof_fit(plot_dicts, ["bank_1", "bank_2"])
             elif spectrum_numbers is None:
-                self._plot_tof_fit([bank])
+                self._plot_tof_fit(plot_dicts, [bank])
             else:
-                self._plot_tof_fit(["Cropped"])
+                self._plot_tof_fit(plot_dicts, ["Cropped"])
         difa = [row['difa'] for row in cal_params]
         difc = [row['difc'] for row in cal_params]
         tzero = [row['tzero'] for row in cal_params]
@@ -153,41 +154,44 @@ class CalibrationModel(object):
         for row in params_table:
             workspace.addRow(row)
 
-    def _plot_tof_fit(self, regions):
-        n_workspaces = len(regions)
-        bank_ws_names = [f"engggui_tof_peaks_{region}" for region in regions]
-        residuals_ws_names = [f"{ws}_residuals" for ws in bank_ws_names]
-        bank_workspaces = [Ads.retrieve(ws_name) for ws_name in bank_ws_names]
-        residuals_workspaces = [Ads.retrieve(ws_name) for ws_name in residuals_ws_names]
+    def _plot_tof_fit(self, plot_dicts: list, regions: list) -> None:
+        """
+        Plot fitted tof peaks against calculated tof peaks to show quality of calibration. Residuals also plotted.
+        :param regions: list of string names of regions of interest calibrated
+        :param plot_dicts: list of dictionaries containing data to plot, see EnggUtils.generate_tof_fit_dictionary
+        :return: None
+        """
+        n_plots = len(regions)
 
         # Create plot
         fig = plt.figure()
-        gs = gridspec.GridSpec(2, n_workspaces)
-        bank_axes = [fig.add_subplot(gs[0, n], projection="mantid") for n in range(n_workspaces)]
-        residuals_axes = [fig.add_subplot(gs[1, n], projection="mantid") for n in range(n_workspaces)]
+        gs = gridspec.GridSpec(2, n_plots)
+        bank_axes = [fig.add_subplot(gs[0, n], projection="mantid") for n in range(n_plots)]
+        residuals_axes = [fig.add_subplot(gs[1, n], projection="mantid") for n in range(n_plots)]
 
-        for ax, ws, bank in zip(bank_axes, bank_workspaces, regions):
-            self._add_plot_to_axes(ax, ws, bank)
-        for ax, ws in zip(residuals_axes, residuals_workspaces):
-            self._add_residuals_to_axes(ax, ws)
+        for ax, plot_dict, bank in zip(bank_axes, plot_dicts, regions):
+            self._add_plot_to_axes(ax, plot_dict, bank)
+        for ax, plot_dict in zip(residuals_axes, plot_dicts):
+            self._add_residuals_to_axes(ax, plot_dict)
         fig.tight_layout()
         fig.show()
 
     @staticmethod
-    def _add_plot_to_axes(ax, ws, bank):
-        ax.plot(ws, wkspIndex=1, linestyle="-", marker="None", color='r', label="TOF Quadratic Fit")
-        ax.errorbar(ws, wkspIndex=0, capsize=2, marker=".", color='b', label="Peaks Fitted", ls="None")
+    def _add_plot_to_axes(ax, plot_dict, bank):
+        ax.errorbar(plot_dict['x'], plot_dict['y'], yerr=plot_dict['e'], capsize=2, marker=".", color='b',
+                    label="Peaks Fitted", ls="None")
+        ax.plot(plot_dict['x'], plot_dict['y2'], linestyle="-", marker="None", color='r', label="TOF Quadratic Fit")
         ax.set_title("Engg Gui TOF Peaks " + str(bank))
         ax.legend()
         ax.set_xlabel("")  # hide here as set automatically
-        ax.set_ylabel("Fitted Peaks Centre(TOF, \u03BCs)")
+        ax.set_ylabel("Fitted Peaks Centre (TOF, \u03BCs)")
 
     @staticmethod
-    def _add_residuals_to_axes(ax, ws):
-        ax.errorbar(ws, color='b', marker='.', wkspIndex=0, capsize=2, ls="None")
+    def _add_residuals_to_axes(ax, plot_dict):
+        ax.errorbar(plot_dict['x'], plot_dict['r'], yerr=plot_dict['e'], color='b', marker='.', capsize=2, ls="None")
         ax.axhline(color='r')
         ax.set_xlabel("Expected Peaks Centre(dSpacing, A)")
-        ax.set_ylabel("Residuals \u03BCs")
+        ax.set_ylabel("Residuals (TOF, \u03BCs)")
 
     @staticmethod
     def run_calibration(ceria_ws,

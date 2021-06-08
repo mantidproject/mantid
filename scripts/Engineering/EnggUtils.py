@@ -53,11 +53,17 @@ def get_diffractometer_constants_from_workspace(ws):
     return diff_consts
 
 
-def generate_tof_fit_workspace(bank, cal_name=None, output_prefix="engggui_tof_peaks_"):
-
+def generate_tof_fit_dictionary(bank, cal_name=None) -> dict:
+    """
+    Generate a dictionary of data to plot showing the results of the calibration
+    :param bank: Name of the bank, None if not a single bank calibration
+    :param cal_name: Name of the region of interest of the calibration
+    :return: dict, keys: x = expected peaks (dSpacing), y = fitted peaks (TOF), e = y error data,
+                         y2 = calculated peaks (TOF), r = residuals (y - y2)
+    """
     if not (bank or cal_name):
-        generate_tof_fit_workspace("bank_1")
-        generate_tof_fit_workspace("bank_2")
+        generate_tof_fit_dictionary("bank_1")
+        generate_tof_fit_dictionary("bank_2")
     if bank[-1:] == '1':  # bank_1
         diag_ws_name = "diag_bank_1"
     elif bank[-1:] == '2':
@@ -80,29 +86,16 @@ def generate_tof_fit_workspace(bank, cal_name=None, output_prefix="engggui_tof_p
     fitted_tof_peaks_y = []
     tof_peaks_error_e = []
     calculated_tof_peaks_y2 = []
+    residuals = []
     for irow in range(0, fitparam_ws.rowCount()):
         expected_d_peaks_x.append(expected_dspacing_peaks[-(irow + 1)])
         fitted_tof_peaks_y.append(fitparam_ws.cell(irow, 5))
         tof_peaks_error_e.append(fiterror_ws.cell(irow, 5))
         calculated_tof_peaks_y2.append(convert_single_value_dSpacing_to_TOF(expected_d_peaks_x[irow], fitted_ws))
+        residuals.append(fitted_tof_peaks_y[irow] - calculated_tof_peaks_y2[irow])
 
-    ws1 = mantid.CreateWorkspace(DataX=expected_d_peaks_x,
-                                 DataY=fitted_tof_peaks_y,
-                                 DataE=tof_peaks_error_e,
-                                 UnitX="Expected Peaks Centre (dSpacing A)",
-                                 YUnitLabel="Fitted Peaks Centre(TOF, us)")
-    ws2 = mantid.CreateWorkspace(DataX=expected_d_peaks_x, DataY=calculated_tof_peaks_y2)
-    residuals_ws = ws1 - ws2
-
-    output_ws = output_prefix + bank
-    residuals_ws_name = output_ws + "_residuals"
-    if ADS.doesExist(output_ws):
-        mantid.DeleteWorkspace(output_ws)
-
-    mantid.AppendSpectra(ws1, ws2, OutputWorkspace=output_ws)
-    mantid.RenameWorkspace(residuals_ws, residuals_ws_name)
-    mantid.DeleteWorkspace(ws1)
-    mantid.DeleteWorkspace(ws2)
+    return {'x': expected_d_peaks_x, 'y': fitted_tof_peaks_y, 'e': tof_peaks_error_e, 'y2': calculated_tof_peaks_y2,
+            'r': residuals}
 
 
 def convert_single_value_dSpacing_to_TOF(d, diff_consts_ws):
