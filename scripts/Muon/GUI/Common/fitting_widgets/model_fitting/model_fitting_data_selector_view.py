@@ -39,6 +39,10 @@ class ModelFittingDataSelectorView(ui_form, base_widget):
         """Connect the slot for when the selected Y changes."""
         self.y_selector.currentIndexChanged.connect(slot)
 
+    def add_results_table_name(self, results_table_name: str) -> None:
+        """Add a results table to the results table combo box."""
+        self.result_table_selector.add_dataset_name(results_table_name)
+
     def update_result_table_names(self, table_names: list) -> None:
         """Update the data in the parameter display combo box."""
         self.result_table_selector.update_dataset_name_combo_box(table_names)

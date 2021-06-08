@@ -62,7 +62,7 @@ class ResultsTabPresenter(QObject):
 
     @Slot()
     def _notify_results_table_created(self):
-        self.results_table_created_notifier.notify_subscribers()
+        self.results_table_created_notifier.notify_subscribers(self.model.results_table_name())
 
     def on_function_selection_changed(self):
         """React to the change in function selection"""

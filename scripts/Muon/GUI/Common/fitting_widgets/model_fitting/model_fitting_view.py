@@ -38,6 +38,10 @@ class ModelFittingView(BasicFittingView):
         """Connect the slot for when the selected Y changes."""
         self.model_fitting_data_selector.set_slot_for_selected_y_changed(slot)
 
+    def add_results_table_name(self, results_table_name: str) -> None:
+        """Add a results table to the results table combo box."""
+        self.model_fitting_data_selector.add_results_table_name(results_table_name)
+
     def update_result_table_names(self, table_names: list) -> None:
         """Update the data in the results table combo box."""
         self.model_fitting_data_selector.update_result_table_names(table_names)

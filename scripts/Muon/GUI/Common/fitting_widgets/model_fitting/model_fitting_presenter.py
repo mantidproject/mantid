@@ -4,6 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
+
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_presenter import BasicFittingPresenter
 from Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_model import ModelFittingModel
 from Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_view import ModelFittingView
@@ -22,13 +24,19 @@ class ModelFittingPresenter(BasicFittingPresenter):
 
         self.parameter_combination_thread_success = True
 
+        self.results_table_created_observer = GenericObserverWithArgPassing(self.handle_new_results_table_created)
+
         self.view.set_slot_for_results_table_changed(self.handle_results_table_changed)
         self.view.set_slot_for_selected_x_changed(self.handle_selected_x_and_y_changed)
         self.view.set_slot_for_selected_y_changed(self.handle_selected_x_and_y_changed)
 
-    def initialize_model_options(self) -> None:
-        """Returns the fitting options to be used when initializing the model."""
-        super().initialize_model_options()
+    def handle_new_results_table_created(self, new_results_table_name: str) -> None:
+        """Handles when a new results table is created and added to the results context."""
+        if new_results_table_name not in self.model.result_table_names:
+            self.model.result_table_names = self.model.result_table_names + [new_results_table_name]
+            self.view.add_results_table_name(new_results_table_name)
+        elif self.model.current_result_table_name == new_results_table_name:
+            self.handle_results_table_changed()
 
     def handle_results_table_changed(self) -> None:
         """Handles when the selected results table has changed, and discovers the possible X's and Y's."""
