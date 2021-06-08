@@ -15,7 +15,6 @@ from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calcu
     estimate_group_asymmetry_data, run_pre_processing
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
 from Muon.GUI.Common.utilities.algorithm_utils import run_PhaseQuad, split_phasequad, rebin_ws, apply_deadtime, calculate_diff_data
-from Muon.GUI.Common.muon_base_pair import MuonBasePair
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
@@ -224,18 +223,7 @@ class MuonContext(object):
         if(self._do_rebin()):
             self._calculate_pairs(rebin=True)
 
-    def _update_phasequads(self, rebin):
-        # lets remove the phasequad pairs
-        to_rm = []
-        for pair in self._group_pair_context.pairs:
-            if not isinstance(
-                    pair, MuonPair) and isinstance(
-                    pair, MuonBasePair):
-                to_rm.append(pair)
-        # this is to force a reset of phasequads
-        for pair in to_rm:
-            self.group_pair_context.remove_pair_from_selected_pairs(pair.name)
-        # lets recalculate the phasequads
+    def _update_phasequads(self, rebin=False):
         for phasequad in self.group_pair_context.phasequads:
             self.calculate_phasequads(phasequad.name, phasequad)
 
@@ -324,7 +312,7 @@ class MuonContext(object):
 
     def _calculate_phasequads(self, name, phasequad_obj, rebin):
         for run in self._data_context.current_runs:
-            if self._data_context.num_periods(run) >1:
+            if self._data_context.num_periods(run) > 1:
                 raise ValueError("Cannot support multiple periods")
 
             ws_list = self.calculate_phasequad(phasequad_obj, run, rebin)

@@ -144,16 +144,16 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
     def test_handle_calculation_started_and_handle_calculation_ended_called_correctly(self):
         self.presenter.handle_phase_table_calculation_started = mock.MagicMock()
-        self.presenter.handle_calculation_success = mock.MagicMock()
-        self.presenter.handle_calculation_error = mock.MagicMock()
+        self.presenter.handle_phase_table_calculation_success = mock.MagicMock()
+        self.presenter.handle_phase_table_calculation_error = mock.MagicMock()
         self.presenter.calculate_phase_table = mock.MagicMock()
 
         self.presenter.handle_calculate_phase_table_clicked()
         self.wait_for_thread(self.presenter.calculation_thread)
 
         self.presenter.handle_phase_table_calculation_started.assert_called_once_with()
-        self.presenter.handle_calculation_success.assert_called_once_with()
-        self.presenter.handle_calculation_error.assert_not_called()
+        self.presenter.handle_phase_table_calculation_success.assert_called_once_with()
+        self.presenter.handle_phase_table_calculation_error.assert_not_called()
         self.presenter.calculate_phase_table.assert_called_once_with()
 
     @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.MuonWorkspaceWrapper')
@@ -214,22 +214,27 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
     def test_handle_add_phasequad_button_no_name(self):
         self.view.set_phase_table_combo_box(["Table"])
-        self.view.enter_pair_name = mock.Mock(return_value = None)
-        self.presenter.create_phase_quad_calculation_thread = mock.MagicMock()
+        self.view.enter_phasequad_name = mock.Mock(return_value=None)
+        self.presenter.create_phasequad_calculation_thread = mock.MagicMock()
 
         self.presenter.handle_add_phasequad_button_clicked()
-        self.assertEqual(self.presenter.create_phase_quad_calculation_thread.call_count, 0)
+        self.assertEqual(self.presenter.create_phasequad_calculation_thread.call_count, 0)
 
     def test_handle_add_phasequad_button(self):
         self.view.set_phase_table_combo_box(["Table"])
-        self.presenter.validate_pair_name = mock.Mock(return_value=True)
-        self.view.enter_pair_name = mock.Mock(return_value = "test")
-        self.presenter.create_phase_quad_calculation_thread = mock.MagicMock()
+        self.presenter.validate_phasequad_name = mock.Mock(return_value=True)
+        self.view.enter_phasequad_name = mock.Mock(return_value="test")
+        self.presenter.create_phasequad_calculation_thread = mock.MagicMock()
 
         self.presenter.handle_add_phasequad_button_clicked()
-        self.assertEqual(self.presenter.create_phase_quad_calculation_thread.call_count, 1)
+        self.assertEqual(self.presenter.create_phasequad_calculation_thread.call_count, 1)
 
     def test_phasequad_success(self):
+        self.context.group_pair_context.add_pair_to_selected_pairs = mock.Mock()
+        self.presenter.selected_phasequad_changed_notifier = mock.Mock()
+        self.presenter.calculation_finished_notifier = mock.Mock()
+        self.presenter.handle_thread_calculation_success = mock.Mock()
+
         self.context.group_pair_context.add_pair_to_selected_pairs = mock.Mock()
         self.presenter.selected_phasequad_changed_notifier.notify_subscribers = mock.Mock()
         self.presenter._phasequad_obj = MuonPhasequad("test", "table")
@@ -237,8 +242,9 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         self.context.group_pair_context.add_pair_to_selected_pairs.assert_any_call("test_Re_")
         self.context.group_pair_context.add_pair_to_selected_pairs.assert_any_call("test_Im_")
-        self.presenter.selected_phasequad_changed_notifier.notify_subscribers.assert_any_call({"is_added":True, "name":"test_Re_"})
-        self.presenter.selected_phasequad_changed_notifier.notify_subscribers.assert_any_call({"is_added":True, "name":"test_Im_"})
+        self.presenter.selected_phasequad_changed_notifier.notify_subscribers.assert_not_called()
+        self.presenter.calculation_finished_notifier.notify_subscribers.assert_called_once_with()
+        self.presenter.handle_thread_calculation_success.assert_called_once_with()
 
     def test_handle_first_good_data_too_small(self):
         self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
@@ -308,7 +314,8 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         self.view.warning_popup.assert_not_called()
 
-    def test_remove_phase_quad_button(self):
+    def test_remove_phasequad_button(self):
+        return
         phasequad = MuonPhasequad("test", "table")
         self.view.num_rows = mock.Mock(return_value=1)
         self.view.get_table_item_text = mock.Mock(return_value="test")
