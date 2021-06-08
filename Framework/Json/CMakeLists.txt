@@ -27,7 +27,8 @@ endif()
 set_property(TARGET Json PROPERTY FOLDER "MantidFramework")
 
 # Auto-generate exports header
-target_include_directories(Json PUBLIC ${CMAKE_BINARY_DIR}/Framework/Json SYSTEM PRIVATE ${JSONCPP_INCLUDE_DIR})
+target_include_directories(Json PUBLIC ${CMAKE_BINARY_DIR}/Framework/Json)
+target_include_directories(Json SYSTEM PRIVATE ${JSONCPP_INCLUDE_DIR})
 generate_mantid_export_header(Json FALSE)
 
 # Installation settings
