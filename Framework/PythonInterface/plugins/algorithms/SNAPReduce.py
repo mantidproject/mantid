@@ -5,17 +5,23 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,no-init,too-many-lines
-from mantid.kernel import Direction, FloatArrayProperty, IntArrayBoundedValidator, \
-    IntArrayProperty, Property, StringListValidator
-from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, \
-    MultipleFileProperty, Progress, PropertyMode, WorkspaceProperty
 from mantid.simpleapi import AlignAndFocusPowder, AlignAndFocusPowderFromFiles, CloneWorkspace, \
     ConvertUnits, CreateGroupingWorkspace, DeleteWorkspace, Divide, EditInstrumentGeometry, \
     GetIPTS, Load, LoadDiffCal, LoadEventNexus, LoadMask, LoadIsawDetCal, LoadNexusProcessed, \
     Minus, NormaliseByCurrent, PreprocessDetectorsToMD, Rebin, ReplaceSpecialValues, SaveAscii, \
     SaveFocusedXYE, SaveGSS, SaveNexusProcessed, mtd
-import os
+
+# 3rd party
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, MultipleFileProperty,
+                        Progress, PropertyMode, WorkspaceProperty)
+from mantid.kernel import (Direction, FloatArrayProperty, IntArrayBoundedValidator, IntArrayProperty,
+                           IntBoundedValidator, Property, StringListValidator)
+from mantid.utils.path import run_exists
 import numpy as np
+
+# standard
+import os
+from pathlib import Path
 
 
 class SNAPReduce(DataProcessorAlgorithm):
@@ -169,13 +175,15 @@ class SNAPReduce(DataProcessorAlgorithm):
                                                Direction.Input, PropertyMode.Optional),
                              "The workspace containing the normalization data.")
 
-        self.declareProperty("PeakClippingWindowSize", 10,
-                             "Read live data - requires a saved run in the current "
-                             + "IPTS with the same Instrumnet configuration")
+        validator_peak_clipping = IntBoundedValidator(lower=4, upper=15)
+        self.declareProperty(name="PeakClippingWindowSize", defaultValue=10, validator=validator_peak_clipping,
+                             doc = "Read live data - requires a saved run in the current IPTS with the same "
+                                   "instrument configuration")
 
-        self.declareProperty("SmoothingRange", 10,
-                             "Read live data - requires a saved run in the "
-                             + "current IPTS with the same Instrumnet configuration")
+        validator_smoothing_range = IntBoundedValidator(lower=1, upper=20)
+        self.declareProperty(name="SmoothingRange", defaultValue=10, validator=validator_smoothing_range,
+                             doc="Read live data - requires a saved run in the current IPTS with the same "
+                                 "instrument configuration")
 
         grouping = ["All", "Column", "Banks", "Modules", "2_4 Grouping"]
         self.declareProperty("GroupDetectorsBy", grouping[0], StringListValidator(grouping),
@@ -214,24 +222,54 @@ class SNAPReduce(DataProcessorAlgorithm):
         property_names = ['EnableConfigurator']
         [self.setPropertyGroup(name, 'Autoreduction Configurator') for name in property_names]
 
-    def validateInputs(self):
+    def validateInputs(self):  # noqa: C901  ignore "too complex" warning
         issues = dict()
+
+        def _check_file(property_name):
+            r"""Checks the extension and existence of a file name passed on as a property"""
+            file_name = self.getProperty(property_name).value
+            if len(file_name) <= 0:
+                issues[property_name] = f'{property_name} requires a file'
+            elif not Path(file_name).exists():
+                issues[property_name] = f'{property_name} {file_name} not found'
+
+        # Check files for RunNumbers exist
+        for run_number in self.getProperty('RunNumbers').value:
+            if not run_exists(run_number, instrument='SNAP'):
+                issues['RunNumbers'] = f'Events file not found for run {run_number}'
+                break
+
+        # Check file for background run number exists, if background is passed on
+        background_property = self.getProperty('Background')
+        if not background_property.isDefault:
+            run_number = background_property.value
+            if not run_exists(run_number, instrument='SNAP'):
+                issues['RunNumbers'] = f'Events file not found for run {run_number}'
 
         # cross check masking
         masking = self.getProperty("Masking").value
         if masking in ("None", "Horizontal", "Vertical"):
             pass
         elif masking in ("Custom - xml masking file"):
-            filename = self.getProperty("MaskingFilename").value
-            if len(filename) <= 0:
-                issues[
-                    "MaskingFilename"] = "Masking=\"%s\" requires a filename" % masking
+            _check_file('MaskingFilename')
         elif masking == "Masking Workspace":
             mask_workspace = self.getPropertyValue("MaskingWorkspace")
             if mask_workspace is None or len(mask_workspace) <= 0:
                 issues["MaskingWorkspace"] = "Must supply masking workspace"
         else:
             raise ValueError("Masking value \"%s\" not supported" % masking)
+
+        # Check calibration file exists if passed on
+        cal_type_to_file = {'Calibration File': 'CalibrationFilename',
+                            'DetCal File': 'DetCalFilename'}
+        calibration_type = self.getProperty('Calibration').value
+        if calibration_type in cal_type_to_file:
+            _check_file(cal_type_to_file.get(calibration_type))
+
+        # Check binning low < x < high
+        low, step, high = self.getProperty('Binning')
+        if low >= high:
+            issues['Binning'] = f'Binning triad must be Low, Step, High with Low < High'
 
         # cross check normalization
         normalization = self.getProperty("Normalization").value
@@ -242,10 +280,7 @@ class SNAPReduce(DataProcessorAlgorithm):
             if norm_workspace is None:
                 issues['NormalizationWorkspace'] = 'Cannot be unset'
         elif normalization == "From Processed Nexus":
-            filename = self.getProperty("NormalizationFilename").value
-            if len(filename) <= 0:
-                issues["NormalizationFilename"] = "Normalization=\"%s\" requires a filename" \
-                                                  % normalization
+            _check_file('NormalizationFilename')
         else:
             raise ValueError("Normalization value \"%s\" not supported" % normalization)
 
