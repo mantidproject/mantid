@@ -53,7 +53,7 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
   loadInst->initialize();
   loadInst->setPropertyValue("Filename", "unit_testing/MINITOPAZ_Definition.xml");
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", retVal);
-  loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
+  loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
   loadInst->execute();
   delete loadInst;
   // Populate the instrument parameters in this workspace - this works around
