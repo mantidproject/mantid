@@ -14,6 +14,9 @@ Concepts
 
 Algorithms
 ----------
+Bugfixes
+############
+GetEiV2 algorithm has been rarely failing on noisy functions with strange error message "Workspace contains Inf or NaN" despite no Inf or NaN-s were actually present in the data. The actual reason for the failure was the denominator of some function, which measures the half-width of the peak may become zero. The solution fixes the issue with zero values in denominator, but still returns unreliable result for noisy function.
 
 Improvements
 ############
