@@ -104,13 +104,6 @@ class MantidAxes(Axes):
         self.waterfall_x_offset = 0
         self.waterfall_y_offset = 0
 
-    def clear(self):
-        """
-        Override matplotlib.axes clear method.
-        """
-        super().clear()
-        self.tracked_workspaces = dict()
-
     def add_artist_correctly(self, artist):
         """
         Add an artist via the correct function.
